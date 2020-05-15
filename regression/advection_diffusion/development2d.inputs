@@ -73,6 +73,7 @@ cdr_gdnv.mass_redist          = false                   # Mass-weighted redistri
 cdr_gdnv.limit_slopes         = true                    # Use slope-limiters for godunov
 cdr_gdnv.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 cdr_gdnv.extrap_source        = false                   # Flag for including source term for time-extrapolation
+cdr_gdnv.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo            
 cdr_gdnv.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
 cdr_gdnv.gmg_verbosity        = -1                      # GMG verbosity
 cdr_gdnv.gmg_pre_smooth       = 6                       # Number of relaxations in GMG downsweep

@@ -24,7 +24,7 @@ amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 't
 amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 amr_mesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr_mesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
-amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
+amr_mesh.ebcf            = false        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
 # DRIVER OPTIONS
@@ -71,8 +71,9 @@ ito_solver.plt_vars            = phi vel dco   # Currently available are 'phi', 
 ito_solver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
 ito_solver.seed                = 0             # Seed for RNG
 ito_solver.max_diffusion_hop   = 1             # Maximum length of diffusion hop, relative to cell
+ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo			
+ito_solver.normal_max          = 2.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
 ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
-ito_solver.normal_max          = 2.0           # Maximum value (absolute) that can be drawn from the exponential distribution. 
 ito_solver.deposition          = cic           # 'ngp' = nearest grid point
                                                # 'cic' = cloud-in-cell
                                                # 'tsc' = triangle-shaped-cloud
@@ -114,14 +115,14 @@ brownian_walker.blob_amplitude = 1.0      # Blob amplitude
 brownian_walker.blob_radius    = 0.25     # Blob radius
 brownian_walker.blob_center    = 0 0.25   # Blob center
 brownian_walker.seed           = 0        # RNG seed
-brownian_walker.num_particles  = 100000   # Number of initial particles
-brownian_walker.max_drift_hop  = 2.0      # Maximum number of cells to move for advection hop
+brownian_walker.num_particles  = 10000   # Number of initial particles
+brownian_walker.max_drift_hop  = 4.0      # Maximum number of cells to move for advection hop
 brownian_walker.max_diffu_hop  = 2.0      # Maximum number of cells to move for diffusion hop
 
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-brownian_walker.diffco         = 1.00     # Diffusion coefficient
+brownian_walker.diffco         = 0.01     # Diffusion coefficient
 brownian_walker.omega          = 1.0     # Rotation velocity
 
 # Cell tagging stuff
