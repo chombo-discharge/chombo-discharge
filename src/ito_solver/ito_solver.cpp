@@ -47,6 +47,7 @@ void ito_solver::parse_options(){
   this->parse_bisect_step();
   this->parse_pvr_buffer();
   this->parse_diffusion_hop();
+  this->parse_conservation();
 }
 
 void ito_solver::parse_rng(){
@@ -168,6 +169,17 @@ void ito_solver::parse_diffusion_hop(){
   ParmParse pp(m_class_name.c_str());
 
   pp.get("max_diffusion_hop", m_max_diffusion_hop);
+}
+
+void ito_solver::parse_conservation(){
+  CH_TIME("ito_solver::parse_conservation");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_conservation" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+
+  pp.get("blend_conservation", m_blend_conservation);
 }
 
 Vector<std::string> ito_solver::get_plotvar_names() const {
@@ -416,6 +428,7 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   m_particles.regrid(       grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   m_eb_particles.regrid(    grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   m_domain_particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_source_particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
 }
 
 void ito_solver::set_species(RefCountedPtr<ito_species>& a_species){
@@ -463,6 +476,7 @@ void ito_solver::allocate_internals(){
   m_amr->allocate(m_particles,        m_pvr_buffer);
   m_amr->allocate(m_eb_particles,     m_pvr_buffer);
   m_amr->allocate(m_domain_particles, m_pvr_buffer);
+  m_amr->allocate(m_source_particles, m_pvr_buffer);
 
 
 #if 0 // Experimental code for getting the number of particles per cell
@@ -573,7 +587,7 @@ void ito_solver::deposit_particles(EBAMRCellData&                    a_state,
   this->deposit_kappaConservative(a_state, a_particles, a_deposition); // a_state contains only weights, i.e. not divided by kappa
   this->deposit_nonConservative(m_depositionNC, a_state);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
   this->deposit_hybrid(a_state, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
-  this->increment_redist(m_massDiff);                                 // Increment level redistribution register
+  this->increment_redist(m_massDiff);                                  // Increment level redistribution register
 
   // Do the redistribution magic
   const bool ebcf = m_amr->get_ebcf();
@@ -657,9 +671,14 @@ void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAM
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_nonConservative" << endl;
   }
-  
-  irreg_amr_stencil<noncons_div>& stencils = m_amr->get_noncons_div_stencils(m_phase);
-  stencils.apply(a_depositionNC, a_depositionKappaC);
+
+  if(m_blend_conservation){
+    irreg_amr_stencil<noncons_div>& stencils = m_amr->get_noncons_div_stencils(m_phase);
+    stencils.apply(a_depositionNC, a_depositionKappaC);
+  }
+  else{
+    data_ops::set_value(a_depositionNC, 0.0);
+  }
 }
 
 void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_diff, const EBAMRIVData& a_depositionNC){
@@ -684,7 +703,7 @@ void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mas
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
       const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+      const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
@@ -692,8 +711,11 @@ void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mas
 	const Real dc       = divH(vof, comp);
 	const Real dnc      = divNC(vof, comp);
 
-	divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
-	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa. 
+	// Note that if dc - kappa*dnc can be negative, i.e. we may end up STEALING mass
+	// from other cells. This is why there is a flag m_blend_conservation which always
+	// gives positive definite results. 
+	divH(vof, comp)   = dc + (1.0-kappa)*dnc;        // On output, contains hybrid divergence
+	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa.
       }
     }
   }

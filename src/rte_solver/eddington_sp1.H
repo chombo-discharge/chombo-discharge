@@ -64,7 +64,7 @@ public:
   /*!
     @brief Cache state
   */
-  virtual void cache_state();
+  virtual void pre_regrid(const int a_base, const int a_old_finest_level);
 
   /*!
     @brief Deallocate internal storage

@@ -33,3 +33,31 @@ where the first argument is the level-set function and the second argument is re
 
 dielectric
 ----------
+
+The :ref:`Chap:dielectric` class describes a electrode, this class is lightweight and consists only of a tuple that holds a level-set function and the permittivity.
+The constructors are
+
+.. code-block:: c++
+   
+  dielectric(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
+  dielectric(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos);
+
+where the first argument is the level-set function and the second argument sets a constant permittivity (first constructor) or a variable permittivity (second constructor).
+
+How ``computational_geometry`` works
+------------------------------------
+
+When geometries are created, the ``computational_geometry`` class will first create the level-set functions that describe two possible material phases (gas and solid) and then compute the cut cell moments.
+
+It is possible to retrieve the level-set functions for each phase, as well as the the electrodes and dielectrics.
+This functionality is provided by:
+
+.. code-block:: c++
+
+   const Vector<dielectric>& get_dielectrics() const;
+   const Vector<electrode>& get_electrodes() const;
+
+   const RefCountedPtr<BaseIF>& get_gas_if() const;
+   const RefCountedPtr<BaseIF>& get_sol_if() const;
+
+

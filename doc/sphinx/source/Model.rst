@@ -1,14 +1,14 @@
 .. _Chap:Model:
 
-The ``PlasmaC`` model
-=====================
+The ``PlasmaC`` code
+====================
 
 This chapter discusses the overall ``PlasmaC`` model, including the spatial decomposition and a summary of supported solvers.
 
 Main functionality
 ------------------
 
-In this section we summarize how components in ``PlasmaC`` are connected, such that users may understand more readily how the code is designed, and how it can be extended.
+In this section we summarize how components in ``PlasmaC`` are connected, such that users may understand more readily how the code is designed. 
 
 There are four major components `PlasmaC`:
 
@@ -16,14 +16,16 @@ There are four major components `PlasmaC`:
    This functionality is encapsulated by :ref:`Chap:computational_geometry`. 
 2. An AMR mesh which contains the grids, grid generation routines, and functionality for handling data coarsening and refinement.
    This functionality is encapsulated by :ref:`Chap:amr_mesh`.
+   The ``amr_mesh`` class acts as a centralized repository for grid generation, performing AMR operations like filling ghost cells, allocating data over the AMR hierarchy and so on.
+   ``amr_mesh`` is a standalone class - it has no view over the rest of ``PlasmaC``. 
 3. A time stepper which advances the equations of motion (whatever they are).
-   The :ref:`Chap:time_stepper` class is abstract.
-   In order to actually use ``PlasmaC`` for anything the user must either write his own derived :ref:`Chap:time_stepper` class,
-   or use one of the provided physics modules. 
+   This class has been made abstract with a public interface that is used by the ``driver`` class (see below). 
+   In order to actually use ``PlasmaC`` for anything the user must either write his own derived :ref:`Chap:time_stepper` class, or use one of the pre-defined physics modules.
+   The ``time_stepper`` is purposefully quite general so that the whole ``PlasmaC`` framework can be set up to solve completely new sets of equations without affecting the rest of the framework. 
 4. A cell tagger which flags cells for refinement and coarsening.
-   This functionality is encapsulated by the :ref:`Chap:cell_tagger` class. 
+   This functionality is encapsulated by the :ref:`Chap:cell_tagger` class and it, too, is abstract. 
 
-Instantiations of the above four classes are fed into the :ref:`Chap:driver` class which contains the functionality for running a simulation.
+Instantiations of the above four classes are fed into the :ref:`Chap:driver` class which contains calling functions for generation the geometry, having the time integrator to perform and time step, performing, I/O, setting checkpoint/restart and so on. 
 The reason for the above division of labor is that we have wanted to segregate responsibilities in order to increase flexibility.
 For that reason, the computational geometry does not have any view of the actual AMR grids; it only contains the level-set functions and some meta-information (such as the permittivity of a dielectric).
 Likewise, the :ref:`Chap:amr_mesh` class only acts a centralized repository of useful functions for AMR simulations.
@@ -31,28 +33,53 @@ These functions include algorithms for generating AMR grids, allocating data acr
 
 All the physics is encapsulated by the :ref:`Chap:time_stepper` class. 
 This class will have direct ownership of all the solvers and the functions required to advance them over a time step.
-Instantiations of the class will also contain the routines for setting up a simulation, e.g. instantiating solvers, setting up boundary conditions. 
+Instantiations of the class will also contain the routines for setting up a simulation, e.g. instantiating solvers, setting up boundary conditions.
+Typically, implementation new physics consists of writing a new ``time_stepper`` class that allocates the relevant solvers, and then implement the time integration algorithms that advances them. 
 
 The :ref:`Chap:driver` class is only responsible for *running* a simulation.
 This class will call for regrids at certain intervals, call the :ref:`Chap:time_stepper` for writing plot and checkpoint data, and call for the :ref:`Chap:time_stepper` to advance the equations of motion.
-In order to understand how ``PlasmaC`` runs a simulation, it will be useful to first understand how :ref:`Chap:driver` works. 
+In order to understand how ``PlasmaC`` runs a simulation, it will be useful to first understand how :ref:`Chap:driver` works.
+
+Solvers
+_______
+
+Various solvers are implemented in ``PlasmaC``, see :ref:`Chap:SupportedSolvers`.
+All solvers are designed to run through the ``time_stepper`` class.
+Therefore, in order to run only a single solver (e.g. advection-diffusion or Poisson), one must have a ``time_stepper`` implementation that allocates the appropriate solver, sets it up, and runs it.
+Currently, there are separate physics modules for each type of solver such that users may see how they are set up and run.
+These are located in :file:`/physics/`.
+
+The solvers may be abstract or non-abstract.
+All solvers that are *not* abstract are supplemented by an options file that contain all the possible run-time configurations that can be made to the solver.
+Such options can include multigrid parameters, how to handle particle deposition with refinement boundaries, slope limiters, etc.
+For example, all numerical solvers have independent adjustment of output.
+The input parameters for each solver class is included in a separate file named :file:`<solver>.options` that resides in the same folder as the solver.
+For example, the input parameters for the default Poisson solver defined in :file:`/src/poisson/poisson_multifluid_gmg.H` is contained in a file :file:`/src/poisson/poisson_multifluid_gmg.options`.
 
 Simulation inputs
 _________________
 
-``PlasmaC`` simulations take their input from a single simulation file, possibly appended with overriding options on the command line.
+``PlasmaC`` simulations take their input from a single simulation input file, possibly appended with overriding options on the command line.
 Simulations may consist of several hundred possible switches for altering the behavior of a simulation, and physics models in ``PlasmaC`` are therefore equipped with Python setup tools that collect all such options in a single file.
-Generally, these input parameters are fetched from the dependencies of each class or module in a simulation.
-For example, all numerical solvers have independent adjustment of output.
-The input parameters for each solver class is appended in a separate file named :file:`<solver>.options`.
-For example, the input parameters for the default Poisson solver defined in :file:`/src/poisson/poisson_multifluid_gmg.H` is contained in a file :file:`/src/poisson/poisson_multifluid_gmg.options`.
-This means that any time a user wishes to use such a solver, he may fetch all the input options *for that class* directly from the supplementary options file.
+Generally, these input parameters are fetched from the options file of each class that is used in a simulation.
+Simulation options usually consist of a prefix, a suffix, and a configuration value.
+For example, the configuration options that adjusts the number of time steps that will be run in a simulation is
+
+.. code-block:: bash
+
+   driver.max_steps = 100
+
+
 
 Simulation outputs
 __________________
 
 Mesh data from ``PlasmaC`` simulations is by default written to HDF5 files.
-Users that wish to write or output other types of data must supply code themselves. 
+Users that wish to write or output other types of data must supply code themselves.
+
+In addition to plot files, MPI ranks can output information to separate files so that the simulation progress can be tracked.
+See :ref:`Chap:Control` for details. 
+This is also useful for debugging purposes. 
    
 .. _Chap:SpatialDiscretization:
 

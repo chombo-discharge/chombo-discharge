@@ -54,13 +54,14 @@ If you do not have HDF5 installed, you may do the following:
 
 2. Download HDF5 (version 1.8 or newer) and install it for parallel execution
 
-      .. code-block:: c++
+   .. code-block:: c++
 		
-		      ./configure --prefix=/usr/local/hdf5 --enable-production --enable-fortran --enable-parallel
-		      make
-		      make install
+		   ./configure --prefix=/usr/local/hdf5_parallel --enable-production --enable-fortran --enable-parallel
+		   make
+		   make install
 
-   This will install HDF5 in /usr/local/hdf5.
+   This will install HDF5 in /usr/local/hdf5_parallel.
+   You may need to install both parallel and serial versions of HDF5. 
 
    .. _Chap:Environment:
 

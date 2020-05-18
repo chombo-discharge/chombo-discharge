@@ -29,6 +29,7 @@ void cdr_muscl::parse_options(){
   parse_slopelim();     // Parses slope limiter settings
   parse_plot_vars();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+  parse_conservation();  // Nonlinear divergence blending
 }
 
 void cdr_muscl::parse_slopelim(){

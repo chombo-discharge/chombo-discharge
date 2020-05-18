@@ -3,6 +3,33 @@
 Understanding particle data
 ===========================
 
+particle_container
+------------------
+
+The ``particle_container<T>`` is a container class that holds particles on an AMR hierarchy, inclusive of information on how to distribute them to grids and remap them.
+Under the hood, it uses the Chombo structure ``ParticleData<T>`` which holds the particles on each level, and also the mapping structure ``ParticleValidRegion`` which dictates on which patch the particles belong.
+To obtain the particles on one AMR level, the user will call something like
+
+.. code-block:: c++
+
+   particle_container<T> particleContainer(...);
+   
+   ParticleData<T>& levelParticles = particleContainer[lvl];
+
+The indexing operator ``[int]`` yields the particles on one level.
+
+Allocating particles
+--------------------
+
+``amr_mesh`` has a very simple function for allocating a ``particle_container``:
+
+.. code-block:: c++
+
+   template <typename T> void allocate(particle_container<T>& a_container, const int a_buffer);
+
+which will allocate a ``particle_container`` with a buffer zone on refined grid levels.
+This buffer zone adjusts where on the fine levels the particles can live. 
+
 ParticleData
 ------------
 
@@ -15,7 +42,7 @@ On each grid level, particles live in templated data holders
 
 where ``T`` is the particle type.
 Although ``ParticleData<T>`` can be thought of as a ``LevelData<T>``, it actually inherits ``LayoutData<ListBox<T> >``.
-However, ``ParticleData<T>`` has routines for communicating particles with MPI.
+However, ``ParticleData<T>`` still has routines for communicating particles with MPI.
 
 On each patch, the particles are stored in a ``ListBox<T>``.
 This class essentially consists of the domain box for the patch which holds the particles, and the particles themselves which are stored in a list ``List<T>``.
@@ -42,7 +69,7 @@ There are routines for allocating a particle data holder in ``amr_mesh``, which 
 This will simply create the ``ParticleData<T>`` object on all the AMR levels (without any particles). 
 
 Iterating over particles
-________________________
+------------------------
 
 In order to iterate over particles, you will use an iterator without random access:
 
@@ -68,6 +95,7 @@ ParticleValidRegion
 The ``ParticleValidRegion`` (PVR) allows particles to be transferred to coarser grid levels if they are within a specified number of grid cells from the refinement boundary.
 A compelling reason to do this is that if the particle lives on the refinement boundary, its deposition cloud will hang over the refinement boundary and into the ghost cells.
 So, it is useful to keep the particles on the grid in such a way that the deposition and interpolation kernels are entirel contained within the grid.
+Another reason is that it might be useful to keep the deposition kernel on a specific AMR level for a number of time steps to reduce the number of times the particles must be moved across AMR levels. 
 
 .. figure:: figures/pvr.png
    :width: 480px
@@ -98,13 +126,19 @@ The figure below shows some typical cases.
    Three cases of particle remapping. Here, the green particle stays on the fine level but needs to change MPI ownership.
    The red particle moves from the coarse level and to the fine level and needs to change both ownership and will also be deposited on the fine AMR level.
    The blue particle has moved to a different patch on the fine level but falls outside the fine level PVR must therefore be transferred to the coarse level.
+   
+``particle_container`` has a function that will remap particles over the *whole* AMR hierarchy, including all three cases outlined above.
+In addition, the class has one particle for remapping only one one level;
 
-Generally, remapping is done by first remapping particles on the level, and then transferring particles to coarser or finer grid level depending on whether or not they fall inside or outside the PVR.    
+.. code-block::
+
+   void remap();                       // Remap everything
+   void levelRemap(const int a_level); // Remap only one level
 
 Outcasts
 ________
 
-After particles have moved, ``ParticleData<T>`` has a method for locally gathering particles that are no longer in the correct grid patch, and another method for distributed the particles to the correct grid patch.
+After particles have moved, ``ParticleData<T>`` has a method for locally gathering particles that are no longer in the correct grid patch, and another method for distributing the particles to the correct grids. 
 This is done as follows
 
 .. code-block:: c++
@@ -114,15 +148,9 @@ This is done as follows
    PD.gatherOutcast();
    PD.remapOutcast();
 
-We remark that
+We remark that this concerns remapping on one single level.
+This means that:
 
 1. Some particles may remain in the outcast list
 2. The remapping does not respect the PVR on each level.
 
-Two-level transfer
-__________________
-
-
-
-Limitations
------------

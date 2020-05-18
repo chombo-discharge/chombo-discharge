@@ -75,6 +75,18 @@ void mc_photo::parse_options(){
   this->parse_pvr_buffer();
   this->parse_plot_vars();
   this->parse_stationary();
+  this->parse_conservation();
+}
+
+void mc_photo::parse_conservation(){
+  CH_TIME("mc_photo::parse_conservation");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_conservation" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+
+  pp.get("blend_conservation", m_blend_conservation);
 }
 
 void mc_photo::parse_rng(){
@@ -369,6 +381,7 @@ void mc_photo::allocate_internals(){
   m_amr->allocate(m_bulk_photons,   m_pvr_buffer);
   m_amr->allocate(m_eb_photons,     m_pvr_buffer);
   m_amr->allocate(m_domain_photons, m_pvr_buffer);
+  m_amr->allocate(m_source_photons, m_pvr_buffer);
 }
 
 void mc_photo::pre_regrid(const int a_base, const int a_old_finest_level){
@@ -377,7 +390,8 @@ void mc_photo::pre_regrid(const int a_base, const int a_old_finest_level){
     pout() << m_name + "::pre_grid" << endl;
   }
 
-  m_photons.pre_regrid(a_base); // TLDR: This moves photons from levels > a_base to a_base
+  m_photons.pre_regrid(a_base);      // TLDR: This moves photons from levels > a_base to a_base
+  m_bulk_photons.pre_regrid(a_base); // TLDR: This moves photons from levels > a_base to a_base
 }
 
 void mc_photo::deallocate_internals(){
@@ -385,12 +399,13 @@ void mc_photo::deallocate_internals(){
   if(m_verbosity > 5){ 
     pout() << m_name + "::deallocate_internals" << endl;
   }
-  
-  m_amr->deallocate(m_state);
-  m_amr->deallocate(m_source);
-  m_amr->deallocate(m_scratch);
-  m_amr->deallocate(m_depositionNC);
-  m_amr->deallocate(m_massDiff);
+
+  // Don't deallocate, instead, reallocate. 
+  // m_amr->deallocate(m_state);
+  // m_amr->deallocate(m_source);
+  // m_amr->deallocate(m_scratch);
+  // m_amr->deallocate(m_depositionNC);
+  // m_amr->deallocate(m_massDiff);
 }
 
 void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
@@ -413,8 +428,10 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
   const Vector<int>& ref_rat             = m_amr->get_ref_rat();
 
   m_photons.regrid(       grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_bulk_photons.regrid(  grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   m_eb_photons.regrid(    grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   m_domain_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_source_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
 
   // Deposit
   this->deposit_photons();
@@ -866,9 +883,14 @@ void mc_photo::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRC
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_nonConservative" << endl;
   }
-  
-  irreg_amr_stencil<noncons_div>& stencils = m_amr->get_noncons_div_stencils(m_phase);
-  stencils.apply(a_depositionNC, a_depositionKappaC);
+
+  if(m_blend_conservation){
+    irreg_amr_stencil<noncons_div>& stencils = m_amr->get_noncons_div_stencils(m_phase);
+    stencils.apply(a_depositionNC, a_depositionKappaC);
+  }
+  else{
+    data_ops::set_value(a_depositionNC, 0.0);
+  }
 }
 
 void mc_photo::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_diff, const EBAMRIVData& a_depositionNC){
@@ -901,6 +923,9 @@ void mc_photo::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_
 	const Real dc       = divH(vof, comp);
 	const Real dnc      = divNC(vof, comp);
 
+	// Note that if dc - kappa*dnc can be negative, i.e. we may end up STEALING mass
+	// from other cells. This is why there is a flag m_blend_conservation which always
+	// gives positive definite results. 
 	divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
 	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa. 
       }
@@ -1450,6 +1475,15 @@ particle_container<photon>& mc_photo::get_domain_photons(){
   }
 
   return m_domain_photons;
+}
+
+particle_container<photon>& mc_photo::get_source_photons(){
+  CH_TIME("mc_photo::get_source_photons");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_source_photons" << endl;
+  }
+
+  return m_source_photons;
 }
 
 bool mc_photo::domain_bc_intersection(const RealVect& a_oldPos,

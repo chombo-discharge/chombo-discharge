@@ -8,6 +8,44 @@ Internally, :ref:`Chap:amr_mesh` contains a bunch of operators that are useful a
 
 :ref:`Chap:amr_mesh` is an integral part of `PlasmaC`, and users will never have the need to modify it unless they are implementing something entirely new. The behavior of :ref:`Chap:amr_mesh` is modified through it's available input parameters, listed below:
 
+Main functionality
+------------------
+
+There are two main functionalities in ``amr_mesh``:
+
+1. Building grid hierarchies, and providing geometric information
+2. Providing AMR operators.
+
+In practice, users will not interact directly with this functionality, it is called by ``driver`` at the appropriate stages of regrids.
+
+The AMR operators are, for example, coarsening operators, interpolation operators, ghost cell interpolators etc.
+To save some regrid time, we don't always build every AMR operator that we might ever need, but have solvers *register* the ones that they specifically need.
+
+Registering operators
+---------------------
+
+To register an operator, one must call a public member function of ``amr_mesh``:
+
+.. code-block:: c++
+
+   void register_operator(const std::string a_operator, const phase::which_phase a_phase);
+
+where the string identifier is the name of the operator and ``a_phase`` is the phase on which the operator will live.
+Currently, the following operators are supported:
+
+1. *eb_gradient* for allocating stencils for computing the cell-centered gradient. 
+2. *eb_irreg_interp* for allocating interpolation stencils in irregular cells, e.g. interpolation to centroids or boundary centroids. 
+3. *eb_coar_ave* for conservative coarsening of data. 
+4. *eb_quad_cfi* for quadratic filling of ghost cells. 
+5. *eb_fill_patch* for linear interpolation of ghost cells. 
+6. *eb_pwl_interp* for piecewise linear interpolation during e.g. regrids. 
+7. *eb_flux_reg* for holding fluxes on refinement boundaries. 
+8. *eb_redist* for holding redistribution objects (for e.g. particle deposition or divergence computatoins). 
+9. *eb_copier* for adding the contents in ghost cells to the valid region on the same AMR level. 
+10. *eb_ghostcloud* for adding the contents in ghost cells on the refinement boundary to the coarser AMR level. 
+11. *eb_non_cons_div* for computing stencils for doing the non-conservative divergence. 
+
+
 Class options
 -------------
 

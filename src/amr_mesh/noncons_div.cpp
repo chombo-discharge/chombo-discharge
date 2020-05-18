@@ -54,7 +54,7 @@ void noncons_div::build_stencil(VoFStencil&              a_sten,
       const Real iweight   = a_ebisbox.volFrac(ivof);
 
       norm += iweight;
-      a_sten.add(ivof, 1.0);
+      a_sten.add(ivof, iweight);
     }
   }
 

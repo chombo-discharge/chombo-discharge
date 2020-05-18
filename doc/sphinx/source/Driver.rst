@@ -18,6 +18,7 @@ Observe that the ``driver`` class does not *require* an instance of :ref:`Chap:c
 If users decide to omit a cell tagger, regridding functionality is completely turned off and only the initially generated grids will be used.
 
 The usage of the ``driver`` class is primarily object construction with dependency injection of the geometry, the physics (i.e. ``time_stepper``), the ``amr_mesh`` instance, and possibly a cell tagger.
+The driver class will automatically retrieve run-time options from the input script during object creation. 
 Usually, only a single routine is used:
 
 .. code-block:: c++
@@ -34,16 +35,16 @@ If a simulation starts from the first time step, the ``driver`` class will perfo
 
 1. Ask ``computational_geometry`` to generate the cut-cell moments.
 2. Collect all the cut-cells and ask ``amr_mesh`` to set up an initial grid where all the cut-cells are refined.
-   It is possible to remove some of the cut-cell refinement flags through the auxiliary class ``geo_coarsener``.
+   It is possible to restrict the maximum level that can be generated from the geometric tags, or remove some of the cut-cell refinement flags through the auxiliary class ``geo_coarsener``.
 3. Ask the ``time_stepper`` to set up all the relevant solvers and fill them with initial data.
-4. Perform the number of regrids that the user asks for.
+4. Perform the number of initial regrids that the user asks for.
 
-Step 3 will differ significantly depending on the physics that is solved for.
+Step 3 will differ significantly depending on the physics that is solved for. 
 
 How simulations are restarted
 -----------------------------
 
-If a simulation *does not start* the first time step, the ``driver`` class will perform the following major steps within ``setup_and_run()``.
+If a simulation *does not start* from the first time step, the ``driver`` class will perform the following major steps within ``setup_and_run()``.
 
 1. Ask ``computational_geometry`` to generate the cut-cell moments.
 2. Read a checkpoint file that contains the grids and all the data that have been checkpointed by the solvers. 
@@ -51,6 +52,8 @@ If a simulation *does not start* the first time step, the ``driver`` class will 
    This functionality has been included because not all data in every solver needs to be checkpointed.
    For example, an electric field solver only needs to write the electric potential to the checkpoint file because the electric field is simply obtained by taking the gradient.
 4. Perform the number of initial regrids that the user asks for.
+
+Again, step 3 will differ significantly depending on the physics that is solved for. 
 
 How simulations are run
 -----------------------
@@ -82,6 +85,10 @@ In essence, the algorithm looks like this:
       }
    }
 
+None of the current physics modules use subcycling in time, but this *is* possible by having an implementation class of ``time_stepper`` that subcycles.
+The biggest caveat is that the recursive type of regridding that is performed by subcycled algorithms is not yet supported.
+It is possible to modify ``driver`` such that this is supported, but this has not been a priority.  
+
 How regrids are performed
 -------------------------
 
@@ -89,9 +96,9 @@ Regrids are called by the ``driver`` class and occur as follows in ``driver::reg
 
 1. Ask ``cell_tagger`` to generate tags for grid refinement and coarsening.
 2. The ``time_stepper`` class stores data that is subject to regrids.
-   This data various between the type of solvers.
+   How this happens depends on the solver that is run. 
    For grid-based solvers, e.g. CDR solvers, the scalar :math:`\phi` is copied into a scratch space.
-   The reason for this backup is that :math:`\phi` will be allocated on the *new* AMR grids, but we must still have access to the previously defined data in order to interpolate to the new grids.
+   The reason for this backup is that during the regrid :math:`\phi` will be allocated on the *new* AMR grids, but we must still have access to the previously defined data in order to interpolate to the new grids.
 3. If necessary, ``time_stepper`` can deallocate unecessary storage.
    Implementing a deallocation function for ``time_stepper``-derived classes is not a requirement, but can in certain cases be useful, for example when using the Berger-Rigoutsous algorithm at large scale.
 4. The ``amr_mesh`` class generates the new grids and defines new AMR operators.
@@ -126,7 +133,3 @@ Class options
 Various class options are available for adjusting the behavior of the ``driver`` class.
 
 .. literalinclude:: links/driver.options
-
-We now discuss some of these options
-
-* ``verbosity`` describes 

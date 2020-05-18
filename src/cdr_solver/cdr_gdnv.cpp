@@ -38,6 +38,7 @@ void cdr_gdnv::parse_options(){
   parse_gmg_settings();  // Parses solver parameters for geometric multigrid
   parse_extrap_source(); // Parse source term extrapolation for time-centering advective comps
   parse_rng_seed();      // Get a seed
+  parse_conservation();  // Nonlinear divergence blending
 }
 
 void cdr_gdnv::parse_slopelim(){

@@ -251,10 +251,10 @@ void eddington_sp1::allocate_wall_bc(){
   }
 }
 
-void eddington_sp1::cache_state(){
-  CH_TIME("eddington_sp1::cache_state");
+void eddington_sp1::pre_regrid(const int a_base, const int a_old_finest_level){
+  CH_TIME("eddington_sp1::pre_regrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::cache_state" << endl;
+    pout() << m_name + "::pre_regrid" << endl;
   }
 
   const int ncomp = 1;

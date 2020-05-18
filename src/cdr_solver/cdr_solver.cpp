@@ -1331,8 +1331,13 @@ void cdr_solver::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCe
     pout() << m_name + "::nonconservative_divergence" << endl;
   }
 
-  irreg_amr_stencil<noncons_div>& stencils = m_amr->get_noncons_div_stencils(m_phase);
-  stencils.apply(a_div_nc, a_divG);
+  if(m_blend_conservation){
+    irreg_amr_stencil<noncons_div>& stencils = m_amr->get_noncons_div_stencils(m_phase);
+    stencils.apply(a_div_nc, a_divG);
+  }
+  else{
+    data_ops::set_value(a_div_nc, 0.0);
+  }
 }
 
 void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
@@ -2199,6 +2204,17 @@ void cdr_solver::parse_domain_bc(){
   else{
     MayDay::Abort("cdr_solver::parse_domain_bc - unknown BC requested");
   }
+}
+
+void cdr_solver::parse_conservation(){
+  CH_TIME("cdr_solver::parse_conservation");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_conservation" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+
+  pp.get("blend_conservation", m_blend_conservation);
 }
 
 void cdr_solver::parse_plot_vars(){

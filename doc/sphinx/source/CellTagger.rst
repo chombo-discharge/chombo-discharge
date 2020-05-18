@@ -21,7 +21,9 @@ When the regrid routine enters, the ``cell_tagger`` will be asked to generate th
    bool tag_cells(EBAMRTags& a_tags) = 0;
 
 If the user wants to implement a new refinement routine, he will do so by writing a new derived class from ``cell_tagger``.
-The user may see the tutorials chapter for first steps on how to do so. 
+The ``cell_tagger`` parent class is a stand-alone class - it does not have a view of ``amr_mesh``, ``driver``, or ``time_stepper``.
+Since refinement is intended to be quite general, the user is responsible for providing ``cell_tagger`` with the appropriate depedencies.
+For example, for streamer simulations we often use the electric field when tagging grid cells, in which case the user should supply either a reference to the electric field, the potential, the Poisson solver, or the plasma physics object. 
 
 Restrict tagging
 ----------------

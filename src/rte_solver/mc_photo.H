@@ -226,6 +226,11 @@ public:
     @brief Get domain photons
   */
   virtual particle_container<photon>& get_domain_photons();
+
+  /*!
+    @brief Get source photons
+  */
+  virtual particle_container<photon>& get_source_photons();
   
 protected:
 
@@ -241,6 +246,11 @@ protected:
     per_vol  = 2,
     per_s    = 3,
   };
+
+  /*!
+    @brief Flag for blending the deposition clouds with the nonconservative divergence
+  */
+  bool m_blend_conservation;
 
   /*!
     @brief If true, the NUMBER of of photons will be deposited in each cell
@@ -363,14 +373,19 @@ protected:
   particle_container<photon> m_bulk_photons;
 
   /*!
-    @brief This is a particle container which acts as scratch space when you want to add particles through the EB
+    @brief This is a particle container for photons that crossed EBs. It is filled during the advance step. 
   */
   particle_container<photon> m_eb_photons;
 
   /*!
-    @brief This is a particle container which acts as scratch space when you want to add particles through the EB
+    @brief This is a particle container for photons that crossed boundaries. It is filled during the advance step. 
   */
   particle_container<photon> m_domain_photons;
+
+    /*!
+    @brief This is a particle container that can be used to add photons directly. 
+  */
+  particle_container<photon> m_source_photons;
 
   /*!
     @brief Domain boundary conditions
@@ -455,6 +470,11 @@ protected:
     @brief Parse RNG options
   */
   void parse_rng();
+
+  /*!
+    @brief Parse the conservation
+  */
+  void parse_conservation();
 
   /*!
     @brief Parse pseudophotons

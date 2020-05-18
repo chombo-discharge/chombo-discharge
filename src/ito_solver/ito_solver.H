@@ -190,17 +190,17 @@ public:
   */
   virtual particle_container<ito_particle>& get_particles();
 
-    /*!
+  /*!
     @brief Get the particle container
   */
   virtual particle_container<ito_particle>& get_eb_particles();
 
-    /*!
+  /*!
     @brief Get the particle container
   */
   virtual particle_container<ito_particle>& get_domain_particles();
 
-    /*!
+  /*!
     @brief Get the particle container
   */
   virtual particle_container<ito_particle>& get_source_particles();
@@ -424,6 +424,11 @@ protected:
   Real m_hop_eps;
 
   /*!
+    @brief Flag for blending the deposition clouds with the nonconservative divergence
+  */
+  bool m_blend_conservation;
+
+  /*!
     @brief Solver is diffusive
   */
   bool m_diffusive;
@@ -542,6 +547,11 @@ protected:
     @brief Parse diffusion hop
   */
   void parse_diffusion_hop();
+
+  /*!
+    @brief Parse the conservation
+  */
+  void parse_conservation();
 
   /*!
     @brief This computes the "conservative" deposition, multiplied by kappa

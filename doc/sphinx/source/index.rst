@@ -6,7 +6,7 @@
 **This is an alpha release of PlasmaC. Development is still in progress, and various bugs may or may not be present. User interfaces can and will change.**
 
 Welcome to `PlasmaC`'s user documentation!
-============================================
+******************************************
 	      
 `PlasmaC` is a modular and scalable computer code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries.
 `PlasmaC` evolves deterministic or fluctuating equations of hydrodynamics and features
@@ -33,6 +33,8 @@ As `PlasmaC` evolves, so will these interfaces.
 We aim for (but cannot guarantee) backward compatibility such that existing `PlasmaC` models can be run on future versions. 
 This documentation is the user documentation `PlasmaC`. There is a separate :doxy:`Doxygen API <index>` that can be compiled together with the source code.
 
+.. _Chap:Introduction:
+
 Introduction
 ************
 
@@ -42,15 +44,17 @@ Introduction
 
    GettingStarted
    Model
-
+   Basics
    Driver
    AmrMesh
    ComputationalGeometry
    TimeStepper
    CellTagger
 
-Using ``PlasmaC``
-*****************
+.. _Chap:UsingPlasmaC:
+
+Using PlasmaC
+*************
 
 .. toctree::
    :maxdepth: 4
@@ -61,19 +65,24 @@ Using ``PlasmaC``
    Control
    Visualization	        
 
+   
+.. _Chap:SupportedSolvers:
 
-Supported solvers
+Supported Solvers
 *****************
 
 .. toctree::
    :maxdepth: 4
    :caption: Supported solvers
-	     
+
    CDR
    Poisson
    RTE
    Sigma
    Ito
+
+
+.. _Chap:ImplementedModels:
 
 Implemented models
 ******************
@@ -86,6 +95,9 @@ Implemented models
    AdvectionDiffusionModel
    BrownianWalkerModel
    MinimalPlasmaModel
+   
+
+.. _Chap:Tutorial:
 
 Tutorial
 ********
@@ -95,6 +107,12 @@ Tutorial
    :caption: Tutorial
 
    Tutorial
+   
+
+.. _Chap:References:
+
+References
+**********
 
 .. toctree::
    :maxdepth: 4

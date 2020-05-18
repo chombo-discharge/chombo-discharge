@@ -566,6 +566,11 @@ protected:
   Real m_dt;
 
   /*!
+    @brief Flag for blending the deposition clouds with the nonconservative divergence
+  */
+  bool m_blend_conservation;
+
+  /*!
     @brief Also solve for diffusion
   */
   bool m_diffusive;
@@ -789,7 +794,12 @@ protected:
     /*!
     @brief Parse plot mode
   */
-  virtual void parse_plotmode();    
+  virtual void parse_plotmode();
+
+  /*!
+    @brief Parse the conservation
+  */
+  virtual void parse_conservation();
 };
 
 #endif
