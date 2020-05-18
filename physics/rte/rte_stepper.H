@@ -15,7 +15,7 @@ namespace physics {
   namespace rte {
 
     /*!
-      @brief Class that just solves the rte equation
+      @brief Class that just solves the rte equation using the rte_solver advance method
     */
     template <class T>
     class rte_stepper : public time_stepper {

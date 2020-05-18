@@ -144,7 +144,6 @@ This is done as follows
 .. code-block:: c++
 
    // Assume PD is a ParticleData<T> object
-
    PD.gatherOutcast();
    PD.remapOutcast();
 
@@ -154,3 +153,4 @@ This means that:
 1. Some particles may remain in the outcast list
 2. The remapping does not respect the PVR on each level.
 
+This is the actual calls in ``levelRemap(const int a_level)``. 

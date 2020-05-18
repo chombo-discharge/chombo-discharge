@@ -207,7 +207,7 @@ In order to handle this case, we support another redistribution step in the cut 
 
 .. code-block:: c++
 		
-   void redistribute_negative(EBAMRCellData& a_phi)
+   void redistribute_negative(EBAMRCellData& a_phi);
 
 Note that this *will* give give an :math:`\mathcal{O}(1)` error in the solution.
 The alternative of maintaining non-negative densities through mass injection introduces the same error, but also has the side-effect of being non-conservative. 
