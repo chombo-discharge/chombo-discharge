@@ -198,7 +198,7 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
     data_ops::incr(state, m_k1, -0.5*a_dt);
     data_ops::incr(state, m_k2, -0.5*a_dt); // Done with deterministic update.
 
-    m_solver->make_non_negative(state);
+    //m_solver->make_non_negative(state);
 
     // Add random diffusion flux. This is equivalent to a 1st order. Godunov splitting
     if(m_fhd){

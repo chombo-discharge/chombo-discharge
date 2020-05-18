@@ -288,6 +288,11 @@ public:
   virtual void set_plot_variables();
 
   /*!
+    @brief Reset redistribution weights
+  */
+  virtual void reset_redist_weights(const EBAMRCellData& a_state);
+
+  /*!
     @brief Get solver name
   */
   virtual std::string get_name();
@@ -566,7 +571,12 @@ protected:
   Real m_dt;
 
   /*!
-    @brief Flag for blending the deposition clouds with the nonconservative divergence
+    @brief Flag for mass-weighted redistribution
+  */
+  bool m_redist_mass_weighted;
+
+  /*!
+    @brief Flag for blending the hybrid divergence
   */
   bool m_blend_conservation;
 

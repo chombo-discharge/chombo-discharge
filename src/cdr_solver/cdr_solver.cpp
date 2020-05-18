@@ -1066,6 +1066,40 @@ void cdr_solver::hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
   }
 }
 
+void cdr_solver::reset_redist_weights(const EBAMRCellData& a_state){
+  CH_TIME("cdr_solver::reset_redist_weights");
+  if(m_verbosity > 5){
+    pout() << m_name + "::reset_redist_weights" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    EBLevelRedist& redist = *m_amr->get_level_redist(m_phase)[lvl];
+    redist.resetWeights(*a_state[lvl], comp);
+
+    if(m_amr->get_ebcf()){
+      const bool has_coar = lvl > 0;
+      const bool has_fine = lvl < finest_level;
+
+      if(has_coar){
+	EBFineToCoarRedist& fine2coar = *m_amr->get_fine_to_coar_redist(m_phase)[lvl];
+	fine2coar.resetWeights(*a_state[lvl], comp);
+      }
+      if(has_fine){
+	EBCoarToCoarRedist& coar2coar = *m_amr->get_coar_to_coar_redist(m_phase)[lvl];
+	EBCoarToFineRedist& coar2fine = *m_amr->get_coar_to_fine_redist(m_phase)[lvl];
+
+	coar2coar.resetWeights(*a_state[lvl], comp);
+	coar2fine.resetWeights(*a_state[lvl], comp);
+      }
+    }
+
+  }
+}
+
 void cdr_solver::hyperbolic_redistribution(EBAMRCellData& a_divF, const EBAMRIVData&   a_mass_diff) {
   CH_TIME("cdr_solver::hyberbolic_redistribution");
   if(m_verbosity > 5){
@@ -2214,7 +2248,8 @@ void cdr_solver::parse_conservation(){
 
   ParmParse pp(m_class_name.c_str());
 
-  pp.get("blend_conservation", m_blend_conservation);
+  pp.get("redist_mass_weighted", m_redist_mass_weighted);
+  pp.get("blend_conservation",   m_blend_conservation);
 }
 
 void cdr_solver::parse_plot_vars(){

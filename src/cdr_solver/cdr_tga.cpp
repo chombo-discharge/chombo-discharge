@@ -417,10 +417,17 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, EBAMRCellData& a_state, const 
   const int comp  = 0;
   const int ncomp = 1;
 
+
+
+
   // Fill ghost cells
   m_amr->interp_ghost_pwl(a_state, m_phase);
 
   if(m_mobile || m_diffusive){
+
+    if(m_redist_mass_weighted){
+      this->reset_redist_weights(a_state);
+    }
 
     // We will let m_scratchFluxOne hold the total flux = advection + diffusion fluxes
     data_ops::set_value(m_scratchFluxOne, 0.0);
@@ -466,11 +473,15 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, EBAMRCellData& a_state, const 
     pout() << m_name + "::compute_divF(divF, state)" << endl;
   }
 
-  // Fill ghost cells
-  m_amr->interp_ghost_pwl(a_state,     m_phase);
-  m_amr->interp_ghost_pwl(m_velo_cell, m_phase);
-
   if(m_mobile){
+
+    // Fill ghost cells
+    m_amr->interp_ghost_pwl(a_state,     m_phase);
+    m_amr->interp_ghost_pwl(m_velo_cell, m_phase);
+
+    if(m_redist_mass_weighted){
+      this->reset_redist_weights(a_state);
+    }
     this->average_velo_to_faces();
     this->advect_to_faces(m_face_states, a_state, a_extrap_dt);          // Face extrapolation to cell-centered faces
     this->compute_flux(m_scratchFluxOne, m_velo_face, m_face_states, m_domainflux);  // Compute face-centered fluxes
@@ -503,11 +514,15 @@ void cdr_tga::compute_divD(EBAMRCellData& a_divD, EBAMRCellData& a_state, const 
     pout() << m_name + "::compute_divD" << endl;
   }
 
-  // Fill ghost cells
-  m_amr->interp_ghost_pwl(a_state, m_phase);
-
   if(m_diffusive){
     const int ncomp = 1;
+
+    // Fill ghost cells
+    m_amr->interp_ghost_pwl(a_state, m_phase);
+
+    if(m_redist_mass_weighted){
+      this->reset_redist_weights(a_state);
+    }
 
     this->compute_diffusion_flux(m_scratchFluxOne, a_state);  // Compute the face-centered diffusion flux
 
