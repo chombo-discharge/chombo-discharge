@@ -83,6 +83,7 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   // Ok we're ready to go. 
   m_step          = 0;
   m_time          = 0.0;
+  m_dt            = 0.0;
 }
 
 driver::~driver(){
@@ -2057,6 +2058,7 @@ void driver::write_plot_file(){
     pout() << "driver::write_plot_file - writing plot file..." << endl;
   }
   Real t_write = -MPI_Wtime();
+
   writeEBHDF5(fname, 
 	      m_amr->get_grids(),
 	      output_ptr,
