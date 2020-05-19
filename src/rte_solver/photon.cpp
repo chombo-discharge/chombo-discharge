@@ -20,26 +20,23 @@ photon::photon(const RealVect& a_position, const RealVect& a_velocity, const Rea
 }
 
 void photon::define(const RealVect& a_position, const RealVect& a_velocity, const Real& a_kappa, const Real a_mass){
-  set_position(a_position);
-  set_velocity(a_velocity);
-  set_kappa(a_kappa);
-  set_mass(a_mass);
+  setPosition(a_position);
+  setVelocity(a_velocity);
+  setKappa(a_kappa);
+  setMass(a_mass);
 }
 
 // Set get functions
-void photon::set_kappa(const Real a_kappa)           { m_kappa    = a_kappa;    }
-void photon::set_mass(const Real a_mass)             { m_mass   = a_mass;   }
-void photon::set_position(const RealVect& a_position){ m_position = a_position; }
-void photon::set_velocity(const RealVect& a_velocity){ m_velocity = a_velocity; }
+void photon::setKappa(const Real a_kappa)           { m_kappa    = a_kappa;    }
+void photon::setMass(const Real a_mass)             { m_mass   = a_mass;   }
+void photon::setVelocity(const RealVect& a_velocity){ m_velocity = a_velocity; }
 
 Real&     photon::mass()    { return m_mass;   }
 Real&     photon::kappa()   { return m_kappa;    }
-RealVect& photon::position(){ return m_position; }
 RealVect& photon::velocity(){ return m_velocity; }
 
 const Real&     photon::kappa()    const{ return m_kappa;    }
 const Real&     photon::mass()     const{ return m_mass;   }
-const RealVect& photon::position() const{ return m_position; }
 const RealVect& photon::velocity() const{ return m_velocity; }
 
 // Comparison functions

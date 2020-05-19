@@ -50,9 +50,55 @@ where ``phi`` is the resulting potential that was computing with the space charg
 
 Currently, only one field solver is implemented and this solver uses a geometric multigrid method for solving for the potential.
 The solver supports three phases: electrodes, gas, and dielectric.
+
+Boundary conditions
+-------------------
+
 Domain boundary conditions for the solver must be set by the user through an input script, whereas the boundary conditions on internal surfaces are Dirichlet by default.
+Note that on multifluid-boundaries the Dirichlet boundary condition is enforced by the conventional matching boundary condition that follows from Gauss` law.
 
-Setting up the solver
----------------------
+Tuning multigrid performance
+----------------------------
 
-In order to set up the solver, one must provide the
+The Poisson equation is currently solved with a geometric multigrid method (GMG). 
+Various switches are enabled that adjust the performance of GMG, and these are listed below
+
+.. code-block:: bash
+
+   # ====================================================================================================
+   # POISSON_MULTIFLUID_GMG_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
+   # ====================================================================================================
+   poisson_multifluid_gmg.bc_x_low  = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live"
+   poisson_multifluid_gmg.bc_x_high = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live"
+   poisson_multifluid_gmg.bc_y_low  = dirichlet_ground  # BC type. "neumann", "dirichlet_ground", "dirichlet_live"
+   poisson_multifluid_gmg.bc_y_high = dirichlet_live    # BC type. "neumann", "dirichlet_ground", "dirichlet_live"
+   poisson_multifluid_gmg.bc_z_low  = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live"
+   poisson_multifluid_gmg.bc_z_high = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live"
+   poisson_multifluid_gmg.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+
+   poisson_multifluid_gmg.auto_tune         = false     # Do some auto-tuning
+   poisson_multifluid_gmg.gmg_verbosity     = -1        # GMG verbosity
+   poisson_multifluid_gmg.gmg_pre_smooth    = 12        # Number of relaxations in downsweep
+   poisson_multifluid_gmg.gmg_post_smooth   = 12        # Number of relaxations in upsweep
+   poisson_multifluid_gmg.gmg_bott_smooth   = 12        # NUmber of relaxations before dropping to bottom solver
+   poisson_multifluid_gmg.gmg_min_iter      = 5         # Minimum number of iterations
+   poisson_multifluid_gmg.gmg_max_iter      = 32        # Maximum number of iterations
+   poisson_multifluid_gmg.gmg_tolerance     = 1.E-10    # Residue tolerance
+   poisson_multifluid_gmg.gmg_hang          = 0.2       # Solver hang
+   poisson_multifluid_gmg.gmg_bottom_drop   = 4         # Bottom drop
+   poisson_multifluid_gmg.gmg_bc_order      = 2         # Boundary condition order for multigrid
+   poisson_multifluid_gmg.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+   poisson_multifluid_gmg.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
+   poisson_multifluid_gmg.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now
+   poisson_multifluid_gmg.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
+
+Adjusting output
+----------------
+
+The user may plot the potential, the space charge, the electric, and the GMG residue as follows:
+
+.. code-block:: bash
+
+   poisson_multifluid_gmg.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+
+   

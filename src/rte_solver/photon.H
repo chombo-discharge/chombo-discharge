@@ -28,20 +28,16 @@ public:
 
   void define(const RealVect& a_position, const RealVect& a_velocity, const Real& a_kappa, const Real a_mass = 1.0);
 
-  void set_kappa(const Real a_kappa);
-  void set_mass(const Real a_mass);
-  void set_position(const RealVect& a_position);
-  void set_velocity(const RealVect& a_velocity);
-
+  void setKappa(const Real a_kappa);
+  void setMass(const Real a_mass);
+  void setVelocity(const RealVect& a_velocity);
 
   Real&     mass();
   Real&     kappa();
-  RealVect& position();
   RealVect& velocity();
 
   const Real&     kappa()    const;
   const Real&     mass()   const;
-  const RealVect& position() const ;
   const RealVect& velocity() const;
 
   virtual bool operator==(const photon& a_p) const;

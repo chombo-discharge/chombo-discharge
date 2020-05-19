@@ -329,6 +329,10 @@ void cdr_solver::inject_ebflux(EBAMRCellData& a_phi, const EBAMRIVData& a_ebG, c
 
   MayDay::Warning("cdr_solver::inject_ebflux - routine has not been wetted!");
 
+  if(m_redist_mass_weighted){
+    this->reset_redist_weights(a_phi);
+  }
+
   this->conservative_divergence_eb(m_scratch, a_ebG);         // Compute conservative divergence, but only EB
   this->nonconservative_divergence(m_divG_nc, m_scratch);     // Blend with volume fraction
   this->hybrid_divergence(m_scratch, m_mass_diff, m_divG_nc); // Hybrid divergence

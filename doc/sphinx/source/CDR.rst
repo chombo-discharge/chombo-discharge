@@ -39,7 +39,7 @@ Currently, we mostly use the implementation given in :file:`/src/cdr_solver/cdr_
 The alternative implementation in :file:`/src/cdr_muscl.H(cpp)` contains a MUSCL implementation with van Leer slope limiting (i.e. much the same as the Chombo code). 
 
 Using cdr_solver
-________________
+----------------
 
 The ``cdr_solver`` is intended to be used in a method-of-lines context where the user will
 
@@ -68,10 +68,33 @@ This would typically look something like this:
    compute_divF(....)
 
 More complete code is given in the physics module for advection-diffusion problems in :file:`/physics/advection_diffusion/advection_diffusion_stepper`.
-This code is also part of a regression test found in :file:`/regression/advection_diffusion`. 
+This code is also part of a regression test found in :file:`/regression/advection_diffusion`.
 
-Getting data
-____________
+Setting up the solver
+---------------------
+
+To set up the ``cdr_solver``, the following commands are usually included in ``time_stepper::setup_solvers()``:
+
+.. code-block:: c++
+
+   // Assume m_solver and m_species are pointers to a cdr_solver and cdr_species
+   m_solver  = RefCountedPtr<cdr_solver>  (new my_cdr_solver());
+   m_species = RefCountedPtr<cdr_species> (new my_cdr_species());
+
+   // Solver setup
+   m_solver->set_verbosity(10);
+   m_solver->set_species(m_species);
+   m_solver->parse_options();
+   m_solver->set_phase(phase::gas);
+   m_solver->set_amr(m_amr);
+   m_solver->set_computational_geometry(m_compgeom);
+   m_solver->sanity_check();
+   m_solver->allocate_internals();
+
+To see an example, the advection-diffusion code in :file:`/physics/advection_diffusion/advection_diffusion_stepper` shows how to set up the solver. 
+
+Filling the solver
+------------------
 
 In order to obtain mesh data from the ``cdr_solver``, the user should use the following public member functions:
 
@@ -84,8 +107,22 @@ In order to obtain mesh data from the ``cdr_solver``, the user should use the fo
    EBAMRIVData& get_ebflux();         // Returns flux at EB
    EBAMRIFData& get_domainflux();     // Returns flux at domain boundaries
 
+To set the drift velocities, the user will fill the *cell-centered* velocities.
+Interpolation to face-centered transport fluxes are done by ``cdr_solver`` when needed.
+
+The general way of setting the velocity is to get a direct handle to the velocity data:
+
+.. code-block:: c++
+
+   cdr_solver solver(...);
+   
+   EBAMRCellData& velo_cell = solver.get_velo_cell();
+
+Then, ``velo_cell`` can be filled with the cell-centered velocity.
+The same procedure goes for the source terms, diffusion coefficients, boundary conditions and so on. 
+
 Adjusting output
-________________
+----------------
 
 It is possible to adjust solver output when plotting data.
 This is done through the input file for the class that you're using (e.g. :file:`/src/cdr_solver/cdr_gdnv.options`):
@@ -106,12 +143,15 @@ E.g. if you only want to plot the cell-centered states you would do:
 cdr_species
 -----------
 
-The ``cdr_species`` class is a supporting class that passes information and initial conditions into ``cdr_solver`` instances. 
+The ``cdr_species`` class is a supporting class that passes information and initial conditions into ``cdr_solver`` instances.
+
+Discretization details
+----------------------
 
 .. _Chap:ExplicitDivergence:   
 
 Computing explicit divergences
-------------------------------
+______________________________
 
 Computing explicit divergences for equations like
 
@@ -197,25 +237,29 @@ These additional complicated are taken care of inside ``a_divG``, but are not di
 .. _Chap:NonNegative:
       
 Maintaining non-negative densities
-----------------------------------
+__________________________________
 
 Although the redistribution functionality is conservative, the cut-cells represent boundaries that make the evolution non-monotone.
-In particular, explicit discretization of divergences in cut-cells do not necessarily lead to non-negative densities in the cut cells themselves.
-In some cases, negative values of :math:`\phi` are non-physical and the lack of non-negativeness can lead to serious numerical issues.
+In particular, the redistribution process does not guarantee monotonicity.
+In some cases, negative values of :math:`\phi` are non-physical and the lack of non-negativeness can lead to numerical issues.
 
-In order to handle this case, we support another redistribution step in the cut cells that redistributes mass from regular cells and into the cut cells in order to maintain non-negative densities.
+The ``cdr_solver`` has an option to use mass-weighted redistribution in order to redistribute mass in the neighborhood of the cut cells.
+To turn this one, one must use e.g. ``cdr_gdnv.redist_mass_weighted = true`` in the input script.
+The default is false, in which case the redistribution uses volume-weighted redistribution. 
+
+As a last effort, we support another redistribution step in the cut cells that redistributes mass from regular cells and into the cut cells in order to maintain non-negative densities.
 
 .. code-block:: c++
 		
    void redistribute_negative(EBAMRCellData& a_phi);
 
-Note that this *will* give give an :math:`\mathcal{O}(1)` error in the solution.
-The alternative of maintaining non-negative densities through mass injection introduces the same error, but also has the side-effect of being non-conservative. 
+Note that this *will* give give an :math:`\mathcal{O}(1)` error in the solution and so it is not a very attractive solution. 
+The alternative of maintaining non-negative densities through mass injection introduces the same error, but in addition to adding a :math:`\mathcal{O}(1)` error into the solution, this also has the side-effect of being non-conservative. 
 
 .. _Chap:ExplicitAdvection:
 
 Explicit advection
-------------------
+__________________
 
 Scalar advective updates follows the computation of the explicit divergence discussed in :ref:`Chap:ExplicitDivergence`.
 The face-centered fluxes :math:`\mathbf{G} = \phi\mathbf{v}` are computed by instantiation classes for the convection-diffusion-reaction solvers.
@@ -236,12 +280,11 @@ For example, in order to perform an advective advance over a time step :math:`\D
    // a valid convection-diffusion reaction solver with defined velocities. 
    solver->compute_divF(divF, phi, 0.0); // Computes divF
    data_ops:incr(phi, divF, -dt);        // makes phi -> phi - dt*divF
-   solver->redistribute_negative(phi);	 // Redist negative mass in cut cells
 
 .. _Chap:ExplicitDiffusion:
    
 Explicit diffusion
-------------------
+__________________
 
 Explicit diffusion is performed in much the same way as implicit advection, with the exception that the general flux :math:`\mathbf{G} = D\nabla\phi` is computed by using centered differences on face centers.
 The function signature for explicit diffusion is
@@ -258,12 +301,11 @@ and we increment in the same way as for explicit advection:
    // a valid convection-diffusion reaction solver with defined diffusion coefficients
    solver->compute_divD(divD, phi); // Computes divD
    data_ops:incr(phi, divD, dt);    // makes phi -> phi + dt*divD
-   solver->redistribute_negative(phi);  // Redist negative mass in cut cells
 
 .. _Chap:ExplicitAdvectionDiffusion:
    
 Explicit advection-diffusion
-----------------------------
+____________________________
 
 There is also functionality for aggregating explicit advection and diffusion advances.
 The reason for this is that the cut-cell overhead is only applied once on the combined flux :math:`\phi\mathbf{v} - D\nabla\phi` rather than on the individual fluxes.
@@ -284,7 +326,6 @@ For example, in order to perform an advective advance over a time step :math:`\D
    // diffusion coefficients
    solver->compute_divJ(divJ, phi, 0.0); // Computes divF
    data_ops:incr(phi, divJ, -dt);        // makes phi -> phi - dt*divJ
-   solver->redistribute_negative(phi);	 // Redist negative mass in cut cells
 
 Often, time integrators have the option of using implicit or explicit diffusion.
 If the time-evolution is non-split (i.e. not using a Strang or Godunov splitting), the integrators will often call ``compute_divJ`` rather separately calling ``compute_divF`` and ``compute_divD``.
@@ -297,14 +338,13 @@ If you had a split-step Godunov method, the above procedure for a forward Euler 
 
    solver->compute_divD(divD, phi);      // Computes divD = div(D*nabla(phi))
    data_ops:incr(phi, divD, dt);         // makes phi -> phi + dt*divD
-   solver->redistribute_negative(phi);	 // Redist negative mass in cut cells
 
 However, the cut-cell redistribution dance (flux interpolation, hybrid divergence, and redistribution) would be performed twice. 
 
 .. _Chap:ImplicitDiffusion:
 
 Implicit diffusion
-------------------
+__________________
 
 Occasionally, the use of implicit diffusion is necessary.
 The convection-diffusion-reaction solvers support two basic diffusion solves:
@@ -335,7 +375,7 @@ For example, performing a split step Godunov method for advection-diffusion is a
 
    
 Adding a stochastic flux
-------------------------
+________________________
 
 It is possible to add a stochastic flux through the public member functions of ``cdr_solver`` in the odd case that one wants to use fluctuating hydrodynamics (FHD).
 This is done by calling a function that computes the term :math:`\sqrt{2D\phi}\mathbf{Z}`:
@@ -353,9 +393,11 @@ In the above function, ``a_ransource`` can be used directly in a MOL context, e.
 
    solver->compute_divF(divF, phi, 0.0); // Computes divF = div(n*phi)
    data_ops:incr(phi, divF, -dt);        // makes phi -> phi - dt*divF
-   solver->redistribute_negative(phi);	 // Redist negative mass in cut cells
 
    solver->GWN_diffusion_source(ransource, phi); // Compute stochastic flux
    data_ops::copy(phiOld, phi);                  // phiOld = phi - dt*divF
    data_ops::incr(phiOld, ransource, a_dt);      // phiOld = phi - dt*divF + dt*sqrt(2D*phi)Z
    solver->advance_euler(phi, phiOld, dt);       // Backward Euler diffusion solve
+
+
+

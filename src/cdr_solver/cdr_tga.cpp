@@ -417,9 +417,6 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, EBAMRCellData& a_state, const 
   const int comp  = 0;
   const int ncomp = 1;
 
-
-
-
   // Fill ghost cells
   m_amr->interp_ghost_pwl(a_state, m_phase);
 

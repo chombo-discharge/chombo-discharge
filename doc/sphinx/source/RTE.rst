@@ -3,7 +3,9 @@
 Radiative transfer
 ==================
 
-Radiative transfer is supported in the diffusion (i.e. Eddington or Helmholtz) approximation and with Monte Carlo sampling of discrete photons. The solvers share a common interface but since diffusion RTE is deterministic and discrete Monte Carlo photons are stochastic, not all temporal integration methods will support both. The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach currently only solves for instantaneous photon transport. However, it would be straightforward to include transient photons. 
+Radiative transfer is supported in the diffusion (i.e. Eddington or Helmholtz) approximation and with Monte Carlo sampling of discrete photons.
+The solvers share a common interface but since diffusion RTE is deterministic and discrete Monte Carlo photons are stochastic, not all temporal integration methods will support both.
+The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or ''stationary'' transport. 
 
 Diffusion approximation
 -----------------------
@@ -14,26 +16,74 @@ In the diffusion approximation, the radiative transport equation is
 
       \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},
 
-which is called the Eddington approximation. The radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`. We do not currently support flux-limited diffusion radiative transfer. In the stationary case this yields a Helmholtz equation
+which is called the Eddington approximation. The radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`.
+We do not currently support flux-limited diffusion radiative transfer.
+In the stationary case this yields a Helmholtz equation
 
 .. math::
 
    \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},
 
-which is solved by a geometric multigrid method. The default boundary conditions are of the Robin type. For fully transient radiative transport, we offer discretizations based on the backward Euler and TGA schemes as discussed above. 
+which is solved by a geometric multigrid method. The default boundary conditions are of the Robin type.
+For fully transient radiative transport, we offer discretizations based on the backward Euler and TGA schemes. 
 
 Monte Carlo methods
 -------------------
 
-All types of moment-closed radiative transfer equations contain nonphysical artifacts (which may or may not be acceptable). For example, in the diffusion approximation the radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`, implying that photons can leak around boundaries. I.e. the diffusion approximation does not correctly describe shadows. It is possible to go beyond the diffusion approximation by also solving for higher-order moments like the radiative flux. While such methods can describe shadows, they contain other nonphysical features.
+All types of moment-closed radiative transfer equations contain nonphysical artifacts (which may or may not be acceptable).
+For example, in the diffusion approximation the radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`, implying that photons can leak around boundaries.
+I.e. the diffusion approximation does not correctly describe shadows.
+It is possible to go beyond the diffusion approximation by also solving for higher-order moments like the radiative flux.
+While such methods can describe shadows, they contain other nonphysical features.
 
 .. figure:: figures/rte_comp.png
    :width: 720px
    :align: center
 
-   Qualitative comparison between predictions made with a diffusion RTE solver and a Monte Carlo RTE solver. Left: Source term: Middle: Solution computed in the diffusion approximation with homogeneous Robin boundary conditions. Right: Solution computed with a Monte Carlo method. 
+   Qualitative comparison between predictions made with a diffusion RTE solver and a Monte Carlo RTE solver.
+   Left: Source term.
+   Middle: Solution computed in the diffusion approximation with homogeneous Robin boundary conditions.
+   Right: Solution computed with a Monte Carlo method. 
 
-Monte Carlo methods are offered as an alternative to the diffusion approximation. Currently, we have a fully developed stationary Monte Carlo method and a transient method (which tracks photons in time) is also under development. Neither method currently includes scattering, although this would be comparatively straightforward to incorporate. As with the diffusion approximation, we do not include interaction with the plasma state in the time-of-flight of the photon. That is, we do not support e.g. scattering of a photon off electron densities. The reason for this design choice is that the velocity of a photon is much greater than the velocity of an electron, and we would have to rebin discrete photons in parallel several thousand times for each fluid advance. Thus, once a photon is created, it is invisible for the remaining solvers until it is absorbed at a point in the mesh.
+Both ''stationary'' and transient Monte Carlo methods are offered as an alternative to the diffusion approximation. 
+
+photon particle
+_______________
+
+The Îto particle is a computational particle class in `PlasmaC` which can be used together with the particle tools in `Chombo`.
+The following data fields are implemented in the particle:
+
+.. code-block:: c++
+   
+   RealVect m_position;
+   RealVect m_velocity;
+   Real m_mass;
+   Real m_kappa;
+
+To obtain the fields, the user will call
+
+.. code-block:: c++
+
+   RealVect& position();
+   RealVect& velocity();
+   Real& mass();
+   Real& diffusion();
+
+
+All functions also have ``const`` versions.
+Note that the field ``m_mass`` is the same as the *weight* of the computational particle.
+The following functions are used to set the various properties:
+
+.. code-block:: c++
+
+   setPosition(const RealVect a_pos);
+   setVelocity(const RealVect a_vel);
+   setMass(const Real a_mass);
+   setDiffusion(const Real a_diffusion;
+
+Interaction with boundaries
+___________________________
+
 
 Stationary Monte Carlo
 ______________________
@@ -50,7 +100,6 @@ The stationary Monte Carlo method proceeds as follows.
 
 5. Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell).
       
-
 The Monte Carlo methods use computational particles for advancing the photons in exactly the same way a Particle-In-Cell method would use them for advancing electrons. Although a computational photon would normally live on the finest grid level that overlaps its position, this is not practical for all particle deposition kernels. For example, for cloud-in-cell deposition schemes it is useful to have the restrict the interpolation kernels to the grid level where the particle lives. In Chombo-speak, we therefore use a buffer region that extends some cells from a refinement boundary where the photons are not allowed to live. Instead, photons in that buffer region are transferred to a coarser level, and their deposition clouds are first interpolated to the fine level before deposition on the fine level happens. Selecting a deposition scheme and adjusting the buffer region is done through an input script associated with the solver. 
    
 Transient Monte Carlo
