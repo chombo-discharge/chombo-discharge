@@ -302,6 +302,11 @@ public:
   virtual void define_eblevelgrid(const int a_lmin);
 
   /*!
+    @brief Define vof iterators
+  */
+  virtual void define_vofiter(const int a_lmin);
+
+  /*!
     @brief Interpolate ghost vectors
   */
   virtual void interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase);
@@ -659,6 +664,11 @@ public:
   virtual Vector<EBISLayout>& get_ebisl(phase::which_phase a_phase);
 
   /*!
+    @brief Get the vof iterator
+  */
+  virtual Vector<RefCountedPtr<LayoutData<VoFIterator> > > get_vofit(phase::which_phase a_phase);
+
+  /*!
     @brief Get neighbor boxes
   */
   virtual Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors();
@@ -976,6 +986,11 @@ protected:
     @brief EBIS layout. One for each phase.
   */
   Vector<Vector<EBISLayout> > m_ebisl;
+
+  /*!
+    @brief VoF iterators
+  */
+  Vector<Vector<RefCountedPtr<LayoutData<VoFIterator> > > > m_vofiter;
 
   /*!
     @brief Copier

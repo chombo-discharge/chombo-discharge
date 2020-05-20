@@ -378,7 +378,8 @@ void cdr_solver::conservative_divergence_eb(EBAMRCellData& a_consdiv, const EBAM
       const BaseIVFAB<Real>& flx = (*a_ebflux[lvl])[dit()];
 
       divG.setVal(0.0);
-      for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+      VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
+      for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real area     = ebisbox.bndryArea(vof);
 
@@ -413,7 +414,8 @@ void cdr_solver::compute_divG_irreg(LevelData<EBCellFAB>&              a_divG,
     EBCellFAB& divG               = a_divG[dit()];
     const BaseIVFAB<Real>& ebflux = a_ebflux[dit()];
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const Real area     = ebisbox.bndryArea(vof);
 
@@ -744,7 +746,8 @@ void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<E
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       divJ(vof, comp) = 0.0;
     }
@@ -889,8 +892,8 @@ void cdr_solver::initial_data_distribution(){
       }
 
       // Irreg and multicells
-      const IntVectSet& irreg = ebisbox.getIrregIVS(box);
-      for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+      VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
+      for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real kappa    = ebisbox.volFrac(vof);
 	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->get_dx()[lvl]*RealVect::Unit, origin);
@@ -1050,7 +1053,8 @@ void cdr_solver::hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const Real kappa    = ebisbox.volFrac(vof);
       const Real dc       = divH(vof, comp);
@@ -1976,7 +1980,9 @@ Real cdr_solver::compute_cfl_dt(){
 			      CHF_CONST_REAL(dx),
 			      CHF_BOX(box),
 			      CHF_REAL(min_dt));
-	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+
+	VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
+	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
 	
 	  Real vel = 0.0;
@@ -2063,7 +2069,9 @@ Real cdr_solver::compute_diffusive_dt(){
 
 	// Irregular faces
 	const BaseIVFAB<Real>& diffco = (*m_diffco_eb[lvl])[dit()];
-	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+
+	VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
+	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex vof = vofit();
 	  const Real thisdt = dx*dx/(2*SpaceDim*diffco(vof, comp));
 
@@ -2120,8 +2128,9 @@ Real cdr_solver::compute_source_dt(const Real a_max, const Real a_tolerance){
 		       CHF_CONST_REAL(a_tolerance),
 		       CHF_CONST_REAL(a_max),
 		       CHF_BOX(box));
-	  
-	for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+
+	VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
+	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex vof = vofit();
 
 	  const Real phi = state(vof, comp);
@@ -2335,8 +2344,9 @@ void cdr_solver::make_non_negative(EBAMRCellData& a_phi){
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const Box box = dbl.get(dit());
       const IntVectSet ivs = ebisbox.getIrregIVS(box);
-	
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+
+      VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
+      for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real kappa = ebisbox.volFrac(vof);
 	const Real phi = state(vof, comp);

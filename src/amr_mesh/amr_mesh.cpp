@@ -691,6 +691,7 @@ void amr_mesh::build_domains(){
 
   m_eblg.resize(phase::num_phases);
   m_ebisl.resize(phase::num_phases);
+  m_vofiter.resize(phase::num_phases);
   m_coarave.resize(phase::num_phases);
   m_quadcfi.resize(phase::num_phases);
   m_flux_reg.resize(phase::num_phases);
@@ -712,6 +713,7 @@ void amr_mesh::build_domains(){
   m_eblg[phase::gas].resize(nlevels);
   m_ebisl[phase::gas].resize(nlevels);
   m_coarave[phase::gas].resize(nlevels);
+  m_vofiter[phase::gas].resize(nlevels);
   m_quadcfi[phase::gas].resize(nlevels);
   m_flux_reg[phase::gas].resize(nlevels);
   m_old_quadcfi[phase::gas].resize(nlevels);
@@ -731,6 +733,7 @@ void amr_mesh::build_domains(){
   m_coarave[phase::solid].resize(nlevels);
   m_quadcfi[phase::solid].resize(nlevels);
   m_flux_reg[phase::solid].resize(nlevels);
+  m_vofiter[phase::solid].resize(nlevels);
   m_old_quadcfi[phase::solid].resize(nlevels);
   m_level_redist[phase::solid].resize(nlevels);
   m_pwl_fillpatch[phase::solid].resize(nlevels);
@@ -773,6 +776,7 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
   this->build_grids(tags, a_lmin, a_lmax, a_hardcap);
   this->define_neighbors(a_lmin);
   this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
+  this->define_vofiter(a_lmin);
   this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
   if(!m_has_mg_stuff){ // Define MG stuff
     this->define_mg_stuff();
@@ -812,6 +816,7 @@ void amr_mesh::regrid_amr(const Vector<IntVectSet>& a_tags,
   this->build_grids(tags, a_lmin, a_lmax, a_hardcap);
   this->define_neighbors(a_lmin);
   this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
+  this->define_vofiter(a_lmin);
   this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
   if(!m_has_mg_stuff){ // Define MG stuff
     this->define_mg_stuff();
@@ -1378,6 +1383,47 @@ void amr_mesh::define_eblevelgrid(const int a_lmin){
 	m_eblg[phase::solid][lvl]->setMaxCoarseningRatio(m_ref_ratios[lvl-1], ebis_sol);
       }
       m_ebisl[phase::solid][lvl] = m_eblg[phase::solid][lvl]->getEBISL();
+    }
+  }
+}
+
+void amr_mesh::define_vofiter(const int a_lmin){
+  CH_TIME("amr_mesh::define_vofiter");
+  if(m_verbosity > 2){
+    pout() << "amr_mesh::define_vofiter" << endl;
+  }
+
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
+    if(!ebis_gas.isNull()){
+      m_vofiter[phase::gas][lvl] = RefCountedPtr<LayoutData<VoFIterator> > (new LayoutData<VoFIterator> (m_grids[lvl]));
+
+      for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
+	VoFIterator& vofit = (*m_vofiter[phase::gas][lvl])[dit()];
+
+	const Box& box         = m_grids[lvl].get(dit());
+	const EBISBox& ebisbox = m_ebisl[phase::gas][lvl][dit()];
+	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+
+	vofit.define(irreg, ebgraph);
+      }
+    }
+    if(!ebis_sol.isNull()){
+      m_vofiter[phase::solid][lvl] = RefCountedPtr<LayoutData<VoFIterator> > (new LayoutData<VoFIterator> (m_grids[lvl]));
+
+      for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
+	VoFIterator& vofit = (*m_vofiter[phase::solid][lvl])[dit()];
+
+	const Box& box         = m_grids[lvl].get(dit());
+	const EBISBox& ebisbox = m_ebisl[phase::solid][lvl][dit()];
+	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+
+	vofit.define(irreg, ebgraph);
+      }
     }
   }
 }
@@ -2866,6 +2912,10 @@ Vector<ProblemDomain>& amr_mesh::get_mg_domains(){
 
 Vector<EBISLayout>& amr_mesh::get_ebisl(phase::which_phase a_phase){
   return m_ebisl[a_phase];
+}
+
+Vector<RefCountedPtr<LayoutData<VoFIterator> > > amr_mesh::get_vofit(phase::which_phase a_phase){
+  return m_vofiter[a_phase];
 }
 
 Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& amr_mesh::get_neighbors(){

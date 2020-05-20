@@ -82,6 +82,7 @@ void cdr_gdnv::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCell
   }
 
   // Fix up boundary velocities to ensure no influx. This is (probably) the easiest way to handle this for cdr_gdnv
+#if 0
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& domain  = m_amr->get_domains()[lvl];
@@ -124,6 +125,7 @@ void cdr_gdnv::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCell
       }
     }
   }
+#endif
 }
 
 void cdr_gdnv::allocate_internals(){
