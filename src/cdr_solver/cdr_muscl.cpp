@@ -93,9 +93,9 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
       EBCellFAB deltaC(ebisbox, grown_box, SpaceDim); // Cell-centered slopes
       deltaC.setVal(0.0);
       if(m_slopelim){
-	this->compute_slopes(deltaC, state, box, domain);
+	this->compute_slopes(deltaC, state, box, domain, lvl, dit());
       }
-      this->upwind(face_state, deltaC, state, velo, domain, box);
+      this->upwind(face_state, deltaC, state, velo, domain, box, lvl, dit());
     }
 
     this->compute_bndry_outflow(*a_face_state[lvl], lvl);
@@ -113,7 +113,9 @@ void cdr_muscl::allocate_internals(){
 void cdr_muscl::compute_slopes(EBCellFAB&           a_deltaC,
 			       const EBCellFAB&     a_state,
 			       const Box&           a_box,
-			       const ProblemDomain& a_domain){
+			       const ProblemDomain& a_domain,
+			       const int            a_level,
+			       const DataIndex&     a_dit){
   CH_TIME("cdr_muscl::compute_slopes");
   if(m_verbosity > 99){
     pout() << m_name + "::compute_slopes" << endl;
@@ -144,7 +146,7 @@ void cdr_muscl::compute_slopes(EBCellFAB&           a_deltaC,
   const IntVectSet irreg_ivs = ebisbox.getIrregIVS(a_box);
   const EBGraph& ebgraph     = ebisbox.getEBGraph();
   VoFIterator vofit(irreg_ivs, ebgraph);
-    
+  
   for (int dir = 0; dir < SpaceDim; dir++){
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
@@ -234,7 +236,9 @@ void cdr_muscl::upwind(EBFluxFAB&           a_face_states,
 		       const EBCellFAB&     a_state,
 		       const EBFluxFAB&     a_velo,
 		       const ProblemDomain& a_domain,
-		       const Box&           a_box){
+		       const Box&           a_box,
+		       const int&           a_level,
+		       const DataIndex&     a_dit){
   CH_TIME("cdr_muscl::upwind");
   if(m_verbosity > 99){
     pout() << m_name + "::upwind" << endl;

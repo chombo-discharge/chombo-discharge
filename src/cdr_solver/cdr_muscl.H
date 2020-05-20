@@ -69,7 +69,12 @@ protected:
   /*!
     @brief Compute slopes
   */
-  virtual void compute_slopes(EBCellFAB& a_deltaC, const EBCellFAB& a_state, const Box& a_box, const ProblemDomain& a_domain);
+  virtual void compute_slopes(EBCellFAB&           a_deltaC,
+			      const EBCellFAB&     a_state,
+			      const Box&           a_box,
+			      const ProblemDomain& a_domain,
+			      const int            a_level,
+			      const DataIndex&     a_dit);
 
   /*!
     @brief Compute outflow fluxes at the boundary
@@ -84,7 +89,9 @@ protected:
 		      const EBCellFAB&     a_state,
 		      const EBFluxFAB&     a_velo,
 		      const ProblemDomain& a_domain,
-		      const Box&           a_box);
+		      const Box&           a_box,
+		      const int&           a_level,
+		      const DataIndex&     a_dit);
 
   virtual void parse_slopelim();     // Parses slope limiter settings
 };

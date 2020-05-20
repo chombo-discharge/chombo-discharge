@@ -371,10 +371,7 @@ void cdr_solver::conservative_divergence_eb(EBAMRCellData& a_consdiv, const EBAM
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       EBCellFAB& divG            = (*a_consdiv[lvl])[dit()];
-      const Box box              = dbl.get(dit());
       const EBISBox& ebisbox     = ebisl[dit()];
-      const EBGraph& ebgraph     = ebisbox.getEBGraph();
-      const IntVectSet irreg     = ebisbox.getIrregIVS(box);
       const BaseIVFAB<Real>& flx = (*a_ebflux[lvl])[dit()];
 
       divG.setVal(0.0);
@@ -408,8 +405,6 @@ void cdr_solver::compute_divG_irreg(LevelData<EBCellFAB>&              a_divG,
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box          = dbl.get(dit());
     const EBISBox& ebisbox = ebisl[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
     EBCellFAB& divG               = a_divG[dit()];
     const BaseIVFAB<Real>& ebflux = a_ebflux[dit()];
@@ -741,11 +736,6 @@ void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<E
       }
     }
 
-    // Reset irregular cells - these contain bogus values and will be set elsewhere. 
-    const EBISBox& ebisbox = divJ.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-
     VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
@@ -875,8 +865,6 @@ void cdr_solver::initial_data_distribution(){
       const EBCellFAB& scratch = (*m_scratch[lvl])[dit()];
       const Box box            = m_state[lvl]->disjointBoxLayout().get(dit());
       const EBISBox& ebisbox   = state.getEBISBox();
-      const EBGraph& ebgraph   = ebisbox.getEBGraph();
-
 
       BaseFab<Real>& reg_state   = state.getSingleValuedFAB();
       const BaseFab<Real>& reg_scratch = scratch.getSingleValuedFAB();
@@ -1050,8 +1038,6 @@ void cdr_solver::hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
 
     const Box box          = dbl.get(dit());
     const EBISBox& ebisbox = ebisl[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
     VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
@@ -1942,9 +1928,6 @@ Real cdr_solver::compute_cfl_dt(){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const EBCellFAB& velo  = (*m_velo_cell[lvl])[dit()];
 	const Box box          = dbl.get(dit());
-	const EBISBox& ebisbox = ebisl[dit()];
-	const EBGraph& ebgraph = ebisbox.getEBGraph();
-	const IntVectSet ivs(ebisbox.getIrregIVS(box));
 
 #if 0 // I think this is wrong, the CFL should be dx/(|vx| + |vy| + |vz|)
 	int fab_type;
@@ -2038,11 +2021,6 @@ Real cdr_solver::compute_diffusive_dt(){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const EBCellFAB& velo     = (*m_velo_cell[lvl])[dit()];
 	const Box box             = dbl.get(dit());
-	const EBISBox& ebisbox    = ebisl[dit()];
-	const EBGraph& ebgraph    = ebisbox.getEBGraph();
-	const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
-	FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
-	const IntVectSet norm_ivs(box);
 
 	// Regular faces
 	for (int dir = 0; dir < SpaceDim; dir++){
@@ -2056,15 +2034,6 @@ Real cdr_solver::compute_diffusive_dt(){
 			    CHF_CONST_REAL(dx),
 			    CHF_BOX(facebox),
 			    CHF_REAL(min_dt));
-
-#if 0 // Old code
-	  for (FaceIterator faceit(norm_ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
-	    const FaceIndex& face = faceit();
-	    const Real thisdt = dx*dx/(2*SpaceDim*diffco(face, comp));
-
-	    min_dt = Min(thisdt, min_dt);
-	  }
-#endif
 	}
 
 	// Irregular faces
@@ -2114,9 +2083,6 @@ Real cdr_solver::compute_source_dt(const Real a_max, const Real a_tolerance){
 	const EBCellFAB& state  = (*m_state[lvl])[dit()];
 	const EBCellFAB& source = (*m_source[lvl])[dit()];
 	const Box box           = dbl.get(dit());
-	const EBISBox& ebisbox  = ebisl[dit()];
-	const EBGraph& ebgraph  = ebisbox.getEBGraph();
-	const IntVectSet ivs(box);
 
 	const BaseFab<Real>& state_fab  = state.getSingleValuedFAB();
 	const BaseFab<Real>& source_fab = source.getSingleValuedFAB();
@@ -2338,12 +2304,11 @@ void cdr_solver::make_non_negative(EBAMRCellData& a_phi){
   
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      EBCellFAB& state = (*a_phi[lvl])[dit()];
+    for (DataIterator dit    = dbl.dataIterator(); dit.ok(); ++dit){
+      EBCellFAB& state       = (*a_phi[lvl])[dit()];
       const EBISBox& ebisbox = state.getEBISBox();
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const Box box = dbl.get(dit());
-      const IntVectSet ivs = ebisbox.getIrregIVS(box);
+      const Box box          = dbl.get(dit());
+
 
       VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
       for (vofit.reset(); vofit.ok(); ++vofit){
