@@ -2,7 +2,7 @@
   @file   time_stepper.H
   @brief  Declaration of an abstract class for integrating the equations of motion
   @author Robert Marskar
-  @data   March 2020
+  @date   March 2020
 */
 
 #ifndef _TIME_STEPPER_
