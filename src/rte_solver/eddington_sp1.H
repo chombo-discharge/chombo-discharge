@@ -361,7 +361,6 @@ protected:
   virtual void parse_stationary();   // Parse stationary solver
   virtual void parse_plot_vars();    // Parses plot variables
   virtual void parse_gmg_settings(); // Parses solver parameters for geometric multigrid
-  virtual void parse_rng();          // Parse RNG stuff
   virtual void parse_reflection();   // Parse reflection coefficient
 };
 #endif

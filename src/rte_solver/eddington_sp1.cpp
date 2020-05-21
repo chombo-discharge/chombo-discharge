@@ -44,7 +44,6 @@ void eddington_sp1::parse_options(){
   parse_stationary();   // Parse stationary solver
   parse_plot_vars();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
-  parse_rng();          // Parse RNG stuff
 }
 
 void eddington_sp1::parse_domain_bc(){
@@ -201,27 +200,6 @@ void eddington_sp1::parse_gmg_settings(){
   // No lower than 2. 
   if(m_bottom_drop < 2){
     m_bottom_drop = 2;
-  }
-}
-
-void eddington_sp1::parse_rng(){
-  CH_TIME("eddington_sp1::parse_rng");
-  if(m_verbosity > 5){
-    pout() << m_name + "::parse_rng" << endl;
-  }
-
-  ParmParse pp(m_class_name.c_str());
-
-  std::string str = "false";
-  pp.get("stochastic_photons", str);
-  m_stochastic_photons = (str == "true") ? true : false;
-  pp.get("seed", m_seed);
-
-  if(m_stochastic_photons){
-    if(m_seed < 0){
-      m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-    }
-    m_rng = new std::mt19937_64(m_seed);
   }
 }
 
@@ -438,28 +416,6 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
 
     // We solve onto res, copy back to state
     data_ops::copy(a_state, m_resid);
-  }
-
-  if(m_stochastic_photons){
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-      const Real dx = m_amr->get_dx()[lvl];
-      const int comp = 0;
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const EBISBox& ebisbox = m_amr->get_ebisl(m_phase)[lvl][dit()];
-	const EBGraph& ebgraph = ebisbox.getEBGraph();
-	const Box& box         = dbl.get(dit());
-
-	EBCellFAB& state = (*a_state[lvl])[dit()];
-	for (VoFIterator vofit(IntVectSet(box), ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-	  const Real vol  = pow(dx, SpaceDim);
-	  const Real mean = state(vof, comp)*vol;
-	  std::poisson_distribution<int> dist(mean);
-	  state(vof,0) = dist(*m_rng)/vol;
-	}
-      }
-    }
   }
 
   m_amr->average_down(a_state, m_phase);
