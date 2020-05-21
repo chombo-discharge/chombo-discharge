@@ -702,7 +702,8 @@ void mc_photo::generate_photons(particle_container<photon>& a_photons, const EBA
 	}
 
 	// Irregular and multicells
-	for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+	VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
+	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
 	  const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, prob_lo);
 	  const Real kappa    = ebisbox.volFrac(vof);
@@ -917,7 +918,8 @@ void mc_photo::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
+      for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real kappa    = ebisbox.volFrac(vof);
 	const Real dc       = divH(vof, comp);

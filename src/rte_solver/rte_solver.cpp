@@ -310,5 +310,3 @@ EBAMRFluxData& rte_solver::get_kappa(){
 EBAMRIVData& rte_solver::get_kappa_eb(){
   return m_kappa_eb;
 }
-
-
