@@ -699,13 +699,10 @@ void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mas
       EBCellFAB& divH               = (*a_depositionH[lvl])[dit()];  // On input, this contains kappa*depositionWeights
       BaseIVFAB<Real>& deltaM       = (*a_mass_diff[lvl])[dit()];
       const BaseIVFAB<Real>& divNC  = (*a_depositionNC[lvl])[dit()]; 
+      const EBISBox& ebisbox        = ebisl[dit()];
 
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
-
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
+      for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real kappa    = ebisbox.volFrac(vof);
 	const Real dc       = divH(vof, comp);
