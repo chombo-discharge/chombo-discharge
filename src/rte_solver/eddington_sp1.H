@@ -322,22 +322,9 @@ protected:
 				   BaseIVFAB<Real>& a_bco_irreg,
 				   const Box        a_cellbox,
 				   const RealVect   a_origin,
-				   const Real       a_dx);
-
-  /*!
-    @brief Set a-coefficient
-  */
-  virtual void set_aco(EBCellFAB& a_aco, const RealVect a_origin, const Real a_dx);
-
-  /*!
-    @brief Set a-coefficient
-  */
-  virtual void set_bco_face(EBFluxFAB& a_bco, const RealVect a_origin, const Real a_dx);
-
-    /*!
-    @brief Set a-coefficient
-  */
-  virtual void set_bco_eb(BaseIVFAB<Real>& a_bco, const RealVect a_origin, const Real a_dx);
+				   const Real       a_dx,
+				   const int        a_lvl,
+				   const DataIndex& a_dit);
 
   /*!
     @brief Set the operator factory

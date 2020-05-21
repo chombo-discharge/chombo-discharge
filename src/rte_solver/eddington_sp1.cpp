@@ -514,8 +514,6 @@ void eddington_sp1::set_aco_and_bco(){
     pout() << m_name + "::set_aco_and_bco" << endl;
   }
 
-#define USE_NEW_ACO_AND_BCO 1
-
   // This loop fills aco with kappa and bco_irreg with 1./kappa
   if(m_rte_species->constant_kappa()){
     const Real kap = m_rte_species->get_kappa(RealVect::Zero);
@@ -533,23 +531,15 @@ void eddington_sp1::set_aco_and_bco(){
       LevelData<BaseIVFAB<Real> >& bco_irr = *m_bco_irreg[lvl];
 
       for (DataIterator dit = aco.dataIterator(); dit.ok(); ++dit){
-#if USE_NEW_ACO_AND_BCO
 	const Box box = (m_amr->get_grids()[lvl]).get(dit());
-	this->set_aco_and_bco_box(aco[dit()], bco_irr[dit()], box, origin, dx);
-#else // Old way
-	this->set_aco(aco[dit()],        origin, dx);   // Set aco = kappa
-	this->set_bco_face(bco[dit()],   origin, dx);   // Set bco = 1./kappa
-	this->set_bco_eb(bco_irr[dit()], origin, dx);   // Set bco = 1./kappa
-#endif
+	this->set_aco_and_bco_box(aco[dit()], bco_irr[dit()], box, origin, dx, lvl, dit());
       }
     }
 
-#if USE_NEW_ACO_AND_BCO // New way of doing this. This saves us a LOT of calls to rte_species->get_kappa
     m_amr->average_down(m_aco, m_phase);
     m_amr->interp_ghost(m_aco, m_phase);
     data_ops::average_cell_to_face_allcomps(m_bco, m_aco, m_amr->get_domains()); // Average aco onto face
     data_ops::invert(m_bco); // Make m_bco = 1./kappa
-#endif
   }
 
 #if eddington_sp1_feature // Different scaling for the RTE
@@ -567,7 +557,9 @@ void eddington_sp1::set_aco_and_bco_box(EBCellFAB&       a_aco,
 					BaseIVFAB<Real>& a_bco,
 					const Box        a_box,
 					const RealVect   a_origin,
-					const Real       a_dx){
+					const Real       a_dx,
+					const int        a_lvl,
+					const DataIndex& a_dit){
   CH_TIME("eddington_sp1::set_aco_and_bco_box");
   if(m_verbosity > 10){
     pout() << m_name + "::set_aco_and_bco_box" << endl;
@@ -588,83 +580,16 @@ void eddington_sp1::set_aco_and_bco_box(EBCellFAB&       a_aco,
     aco_fab(iv, comp) = m_rte_species->get_kappa(pos);
   }
 
-  // Regular bco
 
   // Irregular stuff
-  const IntVectSet irreg = ebisbox.getIrregIVS(a_box);
-  for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+  VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[a_dit];
+  for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
 
     const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
     const Real tmp = m_rte_species->get_kappa(pos);
     a_aco(vof, comp) = tmp;
     a_bco(vof, comp) = 1./tmp;
-  }
-}
-
-void eddington_sp1::set_aco(EBCellFAB& a_aco, const RealVect a_origin, const Real a_dx){
-  CH_TIME("eddington_sp1::set_aco");
-  if(m_verbosity > 10){
-    pout() << m_name + "::set_aco" << endl;
-  }
-
-  const int comp = 0;
-
-  const IntVectSet ivs(a_aco.getRegion());
-  const EBISBox& ebisbox = a_aco.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-  
-  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-    const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
-
-    a_aco(vof, comp) = m_rte_species->get_kappa(pos);
-  }
-}
-
-void eddington_sp1::set_bco_face(EBFluxFAB& a_bco, const RealVect a_origin, const Real a_dx){
-  CH_TIME("eddington_sp1::set_bco_face");
-  if(m_verbosity > 10){
-    pout() << m_name + "::set_bco_face" << endl;
-  }
-
-  const int comp         = 0;
-  const IntVectSet ivs   = IntVectSet(a_bco.getRegion());
-  const EBISBox& ebisbox = a_bco.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-  FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
-  
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (FaceIterator faceit(ivs, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
-      const FaceIndex& face  = faceit();
-      const IntVect iv       = face.gridIndex(Side::Lo);
-      const RealVect pos     = a_origin + a_dx*RealVect(iv) + 0.5*a_dx*RealVect(BASISV(dir));
-
-      const Real kappa = m_rte_species->get_kappa(pos);
-      
-      a_bco[dir](face, comp) = 1./kappa;
-    }
-  }
-}
-
-void eddington_sp1::set_bco_eb(BaseIVFAB<Real>&          a_bco,
-			       const RealVect           a_origin,
-			       const Real               a_dx){
-  CH_TIME("eddington_sp1::set_bco_eb");
-  if(m_verbosity > 10){
-    pout() << m_name + "::set_bco_eb" << endl;
-  }
-  
-  const int comp         = 0;
-  const IntVectSet ivs   = a_bco.getIVS();
-  const EBGraph& ebgraph = a_bco.getEBGraph();
-
-  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-    const RealVect pos  = EBArith::getVofLocation(vof, a_dx, a_origin); // This is strictly speaking not on the boundary...
-
-    const Real kappa = m_rte_species->get_kappa(pos);
-    a_bco(vof, comp) = 1./kappa;
   }
 }
 
