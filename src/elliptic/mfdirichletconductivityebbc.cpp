@@ -78,6 +78,9 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
   m_matching_weights.define(dbl);
   m_irreg_stencils.define(dbl);
   m_matching_stencils.define(dbl);
+  m_vofit_irreg.define(dbl);
+  m_vofit_diri.define(dbl);
+  m_vofit_matching.define(dbl);
 
   const LayoutData<MFInterfaceFAB<VoFStencil> >& jumpstens = m_jumpbc->get_stencils();
   const LayoutData<MFInterfaceFAB<Real> >& jumpweights     = m_jumpbc->get_weights();
@@ -89,6 +92,10 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     const EBISBox& ebisbox  = m_ebisl[dit()];
     const EBGraph& ebgraph  = ebisbox.getEBGraph();
     const IntVectSet& cfivs = a_cfivs[dit()];
+
+    VoFIterator& vofit_irreg    = m_vofit_irreg[dit()];
+    VoFIterator& vofit_diri     = m_vofit_diri[dit()];
+    VoFIterator& vofit_matching = m_vofit_matching[dit()];
     
     IntVectSet irreg_ivs;  // All irregular cells
     IntVectSet diri_ivs;   // Pure dirichlet cells (i.e. non-matched irregular cells)
@@ -103,9 +110,13 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     m_irreg_weights[dit()].define(irreg_ivs,  ebgraph, num_comps);
     m_irreg_stencils[dit()].define(irreg_ivs, ebgraph, num_comps);
 
+    vofit_irreg.define(irreg_ivs, ebgraph);
+    vofit_diri.define(diri_ivs, ebgraph);
+    vofit_matching.define(match_ivs, ebgraph);
+
     // Build stencils for pure Dirichlet type irreg cells
-    for (VoFIterator vofit(irreg_ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof   = vofit();
+    for (vofit_irreg.reset(); vofit_irreg.ok(); ++vofit_irreg){
+      const VolIndex& vof   = vofit_irreg();
 
       Real& cur_weight        = m_irreg_weights[dit()](vof, comp);
       VoFStencil& cur_stencil = m_irreg_stencils[dit()](vof, comp);
@@ -130,8 +141,9 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     const MFInterfaceFAB<VoFStencil>& avgStens = m_jumpbc->get_avgStencils()[dit()];
     const MFInterfaceFAB<Real>& avgWeights     = m_jumpbc->get_avgWeights()[dit()];
     const MFInterfaceFAB<Real>& avgBco         = m_jumpbc->get_avgBco()[dit()];
-    for (VoFIterator vofit(match_ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+
+    for (vofit_matching.reset(); vofit_matching.ok(); ++vofit_matching){
+      const VolIndex& vof = vofit_matching();
       const VolIndex vof0(vof.gridIndex(), 0); // Multi-cell averages stored on first component
 
       // Everything that comes from jump_bc is from vof0, as it should!!!
@@ -178,8 +190,8 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     }
 
     // Scale stencils appropriately. They should be scaled by beta*bco*area_frac*a_factor
-    for (VoFIterator vofit(irreg_ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof   = vofit();
+    for (vofit_irreg.reset(); vofit_irreg.ok(); ++vofit_irreg){
+      const VolIndex& vof   = vofit_irreg();
       const Real& area_frac = ebisbox.bndryArea(vof);
       const Real factor     = m_beta*(*m_bcoe)[dit()](vof, comp)*area_frac*a_factor;
       
@@ -315,8 +327,9 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
   const MFInterfaceFAB<Real>& homog  = m_jumpbc->get_homog()[a_dit];
 
   // Multi-fluid cells
-  for (VoFIterator vofit(m_ivs[a_dit], ebisbox.getEBGraph()); vofit.ok(); ++vofit){
-    const VolIndex& vof   = vofit();
+  VoFIterator& vofit_matching = m_vofit_matching[a_dit];
+  for (vofit_matching.reset(); vofit_matching.ok(); ++vofit_matching){
+    const VolIndex& vof   = vofit_matching();
     const Real weight     = m_irreg_weights[a_dit](vof, comp);
     const Real beta       = m_beta;
     const Real bco        = (*m_bcoe)[a_dit](vof, comp);
@@ -343,12 +356,10 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
   // Pure Dirichlet irregular cells
   if(!a_useHomogeneous){
     const EBISBox& ebisbox = a_lphi.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const Box& box         = m_ebisl.getDisjointLayout()[a_dit];
-    IntVectSet ivs   = ebisbox.getIrregIVS(box) - m_ivs[a_dit];
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    VoFIterator& vofit_diri = m_vofit_diri[a_dit];
+    for (vofit_diri.reset(); vofit_diri.ok(); ++vofit_diri){
+      const VolIndex& vof = vofit_diri();
 
       const Real& value      = (*m_data)[a_dit](vof, comp);
       const Real& beta       = m_beta;

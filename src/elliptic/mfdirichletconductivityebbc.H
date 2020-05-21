@@ -169,6 +169,21 @@ protected:
   LayoutData<BaseIVFAB<VoFStencil> > m_matching_stencils;
 
   /*!
+    @brief Iterator for electrode dirichlet 
+  */
+  LayoutData<VoFIterator> m_vofit_diri;
+
+  /*!
+    @brief Iterator for matching cells
+  */
+  LayoutData<VoFIterator> m_vofit_matching;
+
+  /*!
+    @brief Iterator for matching cells
+  */
+  LayoutData<VoFIterator> m_vofit_irreg;
+
+  /*!
     @brief Flux to be smooshed into applyEBFlux for multi-fluid cells
   */
   LevelData<BaseIVFAB<Real> >* m_dphidn;
