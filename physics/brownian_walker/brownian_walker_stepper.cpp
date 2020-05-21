@@ -18,6 +18,8 @@ using namespace physics::brownian_walker;
 brownian_walker_stepper::brownian_walker_stepper(){
   ParmParse pp("brownian_walker");
 
+  m_phase = phase::gas;
+  
   pp.get("diffco",        m_diffco);
   pp.get("omega",         m_omega);
   pp.get("verbosity",     m_verbosity);
@@ -61,8 +63,8 @@ void brownian_walker_stepper::set_velocity(){
   }
 
   EBAMRCellData& vel = m_solver->get_velo_cell();
-  m_amr->average_down(vel, phase::gas);
-  m_amr->interp_ghost(vel, phase::gas);
+  m_amr->average_down(vel, m_phase);
+  m_amr->interp_ghost(vel, m_phase);
 }
 
 void brownian_walker_stepper::set_velocity(const int a_level){
@@ -96,7 +98,9 @@ void brownian_walker_stepper::set_velocity(const int a_level){
     // Irregular and multicells
     const EBISBox& ebisbox = vel.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
-    for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+
+    VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_level])[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
 
       const VolIndex vof = vofit();
       const IntVect iv   = vof.gridIndex();
@@ -241,7 +245,7 @@ void brownian_walker_stepper::setup_solvers() {
   m_solver->set_amr(m_amr);
   m_solver->set_species(m_species);
   m_solver->set_amr(m_amr);
-  m_solver->set_phase(phase::gas);
+  m_solver->set_phase(m_phase);
   m_solver->set_computational_geometry(m_compgeom);
   m_solver->allocate_internals(); // Allocate some internal storage
 }

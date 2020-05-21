@@ -4,6 +4,7 @@
 # This class does an expcliti AMR advection-diffusion simulation of a super-Gaussian blob with
 # wall flow BCs.
 # ====================================================================================================
+advection_diffusion.verbosity      = -1      # Verbosity
 advection_diffusion.blob_amplitude = 1.0     # Blob amplitude
 advection_diffusion.blob_radius    = 0.1     # Blob radius
 advection_diffusion.blob_center    = 0 0     # Blob center

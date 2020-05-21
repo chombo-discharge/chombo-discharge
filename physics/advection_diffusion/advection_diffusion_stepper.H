@@ -54,6 +54,8 @@ namespace physics {
 
     protected:
 
+      phase::which_phase m_phase;
+
       // CDR solver & species
       RefCountedPtr<cdr_solver>  m_solver;
       RefCountedPtr<cdr_species> m_species;
@@ -68,6 +70,9 @@ namespace physics {
 
       // Integrator (yes, I'm too lazy to write an enum for holding this)
       int m_integrator;
+
+      // Verbosity
+      int m_verbosity;
 
       void set_velocity();
       void set_velocity(const int a_level);

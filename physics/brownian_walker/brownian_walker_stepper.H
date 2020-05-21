@@ -53,6 +53,11 @@ namespace physics {
 
     protected:
 
+      /*!
+	@brief Phase
+      */
+      phase::which_phase m_phase;
+
       // Ito solver & species
       RefCountedPtr<ito_solver>  m_solver;
       RefCountedPtr<ito_species> m_species;
