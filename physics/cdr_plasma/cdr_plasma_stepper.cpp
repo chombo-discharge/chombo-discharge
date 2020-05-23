@@ -890,7 +890,6 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
   Vector<Real>     photon_densities(num_photons, 0.);
 
   VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[a_dit];
-  //  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof       = vofit();
     const Real kappa          = ebisbox.volFrac(vof);
@@ -1209,7 +1208,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&
 
     // Irregular cells
     compute_cdr_diffco_cell_irreg(diffco, cdr_densities, E, dbl.get(dit()), m_amr->get_dx()[a_lvl],
-				  interp_stencils[a_lvl][dit()], a_time);
+				  interp_stencils[a_lvl][dit()], a_time, a_lvl, dit());
 
 
   }
@@ -1467,7 +1466,9 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&      
 						       const Box                    a_box,
 						       const Real                   a_dx,
 						       const BaseIVFAB<VoFStencil>& a_interp_stencils,
-						       const Real&                  a_time){
+						       const Real&                  a_time,
+						       const int                    a_lvl,
+						       const DataIndex&             a_dit){
   CH_TIME("cdr_plasma_stepper::compute_cdr_diffco_cell_irreg");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::compute_cdr_diffco_cell_irreg" << endl;
@@ -1485,7 +1486,8 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&      
   RealVect         pos, E;
   Vector<Real>     cdr_densities(num_species);
 
-  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
+  VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[a_dit];
+  for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
       
     const RealVect pos = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, origin);
@@ -1528,8 +1530,6 @@ void cdr_plasma_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_dif
 
   Vector<LevelData<BaseIVFAB<Real> >* > diffco(num_species);
   Vector<LevelData<BaseIVFAB<Real> >* > cdr_densities(num_species);
-
-
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
 
@@ -1573,8 +1573,9 @@ void cdr_plasma_stepper::compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> 
     const EBGraph& ebgraph   = ebisbox.getEBGraph();
     const IntVectSet ivs     = ebisbox.getIrregIVS(box);
     const BaseIVFAB<Real>& E = a_E[dit()];
-      
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+
+    VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const RealVect cntr = ebisbox.bndryCentroid(vof);
       const RealVect e    = RealVect(D_DECL(E(vof,0), E(vof,1), E(vof,2)));
@@ -2124,7 +2125,7 @@ void cdr_plasma_stepper::compute_cdr_velocities(Vector<LevelData<EBCellFAB> *>& 
 #else
     compute_cdr_velocities_reg(vel,   phi, a_E[dit()], dbl.get(dit()), a_time, dx);
 #endif
-    compute_cdr_velocities_irreg(vel, phi, a_E[dit()], dbl.get(dit()), a_time, dx);
+    compute_cdr_velocities_irreg(vel, phi, a_E[dit()], dbl.get(dit()), a_time, dx, a_lvl, dit());
   }
 }
 
@@ -2377,7 +2378,9 @@ void cdr_plasma_stepper::compute_cdr_velocities_irreg(Vector<EBCellFAB*>&       
 						      const EBCellFAB&          a_E,
 						      const Box&                a_box,
 						      const Real&               a_time,
-						      const Real&               a_dx){
+						      const Real&               a_dx,
+						      const int                 a_lvl,
+						      const DataIndex&          a_dit){
   CH_TIME("cdr_plasma_stepper::compute_cdr_velocities_irreg");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::compute_cdr_velocities_irreg" << endl;
@@ -2388,7 +2391,8 @@ void cdr_plasma_stepper::compute_cdr_velocities_irreg(Vector<EBCellFAB*>&       
   const EBGraph& ebgraph = ebisbox.getEBGraph();
   const RealVect origin  = m_amr->get_prob_lo();
 
-  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
+  VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[a_dit];
+  for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
     const RealVect e    = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
     const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, origin);
@@ -3316,7 +3320,8 @@ void cdr_plasma_stepper::project_flux(LevelData<BaseIVFAB<Real> >&       a_proje
     BaseIVFAB<Real>& proj_flux  = a_projected_flux[dit()];
     const BaseIVFAB<Real>& flux = a_flux[dit()];
 
-    for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+    VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof     = vofit();
       const RealVect& normal  = ebisbox.normal(vof);
       const RealVect vec_flux = RealVect(D_DECL(flux(vof,0), flux(vof,1), flux(vof,2)));
@@ -4093,7 +4098,8 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
       dt_fab /= j_magnitude;
 
       // Now do the irregular cells
-      for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+      VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
+      for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const RealVect ee = RealVect(D_DECL(e(vof, 0), e(vof, 1), e(vof, 2)));
 	const RealVect jj = RealVect(D_DECL(j(vof, 0), j(vof, 1), j(vof, 2)));

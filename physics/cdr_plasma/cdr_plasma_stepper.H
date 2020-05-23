@@ -384,7 +384,9 @@ namespace physics {
 						 const Box                    a_box,
 						 const Real                   a_dx,
 						 const BaseIVFAB<VoFStencil>& a_interp_stencils,
-						 const Real&                  a_time);
+						 const Real&                  a_time,
+						 const int                    a_lvl,
+						 const DataIndex&             a_dit);
   
       /*!
 	@brief Compute diffusion coefficients. Level version. 
@@ -530,7 +532,9 @@ namespace physics {
 						const EBCellFAB&          a_E,
 						const Box&                a_box,
 						const Real&               a_time,
-						const Real&               a_dx);
+						const Real&               a_dx,
+						const int                 a_lvl,
+						const DataIndex&          a_dit);
 
       /*!
 	@brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
