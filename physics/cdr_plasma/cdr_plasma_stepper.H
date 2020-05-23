@@ -224,7 +224,9 @@ namespace physics {
 						  const Real&                  a_time,
 						  const Real&                  a_dt,
 						  const Real&                  a_dx,
-						  const Box&                   a_box);
+						  const Box&                   a_box,
+						  const int                    a_lvl,
+						  const DataIndex&             a_dit);
 
       /*!
 	@brief Compute reaction network sources. Irregular patch version.
@@ -240,7 +242,9 @@ namespace physics {
 							 const Real&                  a_time,
 							 const Real&                  a_dt,
 							 const Real&                  a_dx,
-							 const Box&                   a_box);
+							 const Box&                   a_box,
+							 const int                    a_lvl,
+							 const DataIndex&             a_dit);
 
       virtual void advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>&          a_particle_sources,
 							Vector<EBCellFAB*>&          a_photon_sources,
@@ -252,7 +256,9 @@ namespace physics {
 							const Real&                  a_time,
 							const Real&                  a_dt,
 							const Real&                  a_dx,
-							const Box&                   a_box);
+							const Box&                   a_box,
+							const int                    a_lvl,
+							const DataIndex&             a_dit);
 
 
       /*!
@@ -908,6 +914,11 @@ namespace physics {
       virtual void parse_fast_poisson();
       virtual void parse_fast_rte();
       virtual void parse_source_comp();
+
+      /*!
+	@brief Plasma phase
+      */
+      phase::which_phase m_phase;
 
       /*!
 	@brief Time stepper class name

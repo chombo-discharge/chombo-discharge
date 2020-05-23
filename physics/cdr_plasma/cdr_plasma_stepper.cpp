@@ -29,6 +29,7 @@ cdr_plasma_stepper::cdr_plasma_stepper(){
   m_class_name = "cdr_plasma_stepper";
   m_verbosity  = -1;
   m_solver_verbosity = -1;
+  m_phase = phase::gas;
 
   m_subcycle = false;
 
@@ -48,9 +49,7 @@ void cdr_plasma_stepper::register_operators(){
   m_cdr->register_operators();
   m_poisson->register_operators();
   m_rte->register_operators();
-#if 0
   m_sigma->register_operators();
-#endif
 }
 
 cdr_plasma_stepper::~cdr_plasma_stepper(){
@@ -368,7 +367,9 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
 				   a_time,
 				   a_dt,
 				   dx,
-				   dbl.get(dit()));
+				   dbl.get(dit()),
+				   a_lvl,
+				   dit());
   }
 }
 
@@ -815,7 +816,9 @@ void cdr_plasma_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&     
 							const Real&                  a_time,
 							const Real&                  a_dt,
 							const Real&                  a_dx,
-							const Box&                   a_box){
+							const Box&                   a_box,
+							const int                    a_lvl,
+							const DataIndex&             a_dit){
   if(m_interp_sources){
     advance_reaction_network_irreg_interp(a_particle_sources,
 					  a_photon_sources,
@@ -828,7 +831,9 @@ void cdr_plasma_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&     
 					  a_time,
 					  a_dt,
 					  a_dx,
-					  a_box);
+					  a_box,
+					  a_lvl,
+					  a_dit);
   }
   else{
     advance_reaction_network_irreg_kappa(a_particle_sources,
@@ -841,7 +846,9 @@ void cdr_plasma_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&     
 					 a_time,
 					 a_dt,
 					 a_dx,
-					 a_box);
+					 a_box,
+					 a_lvl,
+					 a_dit);
   }
 }
 
@@ -856,7 +863,9 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
 							       const Real&                  a_time,
 							       const Real&                  a_dt,
 							       const Real&                  a_dx,
-							       const Box&                   a_box){
+							       const Box&                   a_box,
+							       const int                    a_lvl,
+							       const DataIndex&             a_dit){
   CH_TIME("cdr_plasma_stepper::advance_reaction_network_irreg_interp(patch)");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::advance_reaction_network_irreg_interp(patch)" << endl;
@@ -880,7 +889,9 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
   Vector<RealVect> particle_gradients(num_species, RealVect::Zero);
   Vector<Real>     photon_densities(num_photons, 0.);
 
-  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
+  VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[a_dit];
+  //  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
+  for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof       = vofit();
     const Real kappa          = ebisbox.volFrac(vof);
     const VoFStencil& stencil = a_interp_stencils(vof, 0);
@@ -990,7 +1001,9 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
 							      const Real&                  a_time,
 							      const Real&                  a_dt,
 							      const Real&                  a_dx,
-							      const Box&                   a_box){
+							      const Box&                   a_box,
+							      const int                    a_lvl,
+							      const DataIndex&             a_dit){
   CH_TIME("cdr_plasma_stepper::advance_reaction_network_irreg_kappa(patch)");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::advance_reaction_network_irreg_kappa(patch)" << endl;
@@ -1014,7 +1027,8 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
   Vector<RealVect> particle_gradients(num_species);
   Vector<Real>     photon_densities(num_photons);
 
-  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
+  VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_lvl])[a_dit];
+  for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof       = vofit();
     const Real kappa          = ebisbox.volFrac(vof);
     const VoFStencil& stencil = a_interp_stencils(vof, 0);
