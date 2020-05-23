@@ -23,7 +23,6 @@ regression_rules = "regression_rules.py"
 # --------------------------------------------------
 parser = argparse.ArgumentParser()
 parser.add_argument('-compile', '--compile',  help="Compile executables", action='store_true')
-parser.add_argument('-build_procs',           help="Number of processors to use for compiling compiling", type=int, default=1)
 parser.add_argument('--benchmark',            help="Generate benchmark files only", action='store_true')
 parser.add_argument('-tests',                 help="Run one or more regression tests", nargs='+', required=False)
 parser.add_argument('--silent',               help="Turn off unnecessary output", action='store_true')
@@ -179,7 +178,7 @@ for test in config.sections():
         run_suite = True
         if args.compile:
             compile_code = compile_test(silent=args.silent,
-                                        build_procs=args.build_procs,
+                                        build_procs=cores,
                                         dim=dim,
                                         clean=args.clean,
                                         main = str(config[str(test)]['exec']))
