@@ -86,7 +86,7 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # algorithm and one would use mc_photo.source_type = deterministic. For CFD models one would probably
 # work with a volumetric rate, in which one could draw the number of photons from a Poisson distribution. 
 # ====================================================================================================
-mc_photo.stationary         = false         # Stationary solver or not
+mc_photo.instantaneous      = false         # Instantaneous transport or not
 mc_photo.max_photons        = -1            # Maximum no. generated in a cell (<= 0 yields physical photons)
 mc_photo.blend_conservation = false         # Switch for blending with the nonconservative divergence
 mc_photo.pvr_buffer         = 0             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 

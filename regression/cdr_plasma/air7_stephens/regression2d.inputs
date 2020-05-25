@@ -144,7 +144,7 @@ cdr_gdnv.gmg_relax_type       = gsrb                    # Relaxation type. 'jaco
 # algorithm and one would use mc_photo.source_type = deterministic. For CFD models one would probably
 # work with a volumetric rate, in which one could draw the number of photons from a Poisson distribution. 
 # ====================================================================================================
-mc_photo.stationary       = true             # Maximum no. generated in a cell (<= 0 yields physical photons)
+mc_photo.instantaneous     = true             # Maximum no. generated in a cell (<= 0 yields physical photons)
 mc_photo.max_photons       = 1             # Maximum no. generated in a cell (<= 0 yields physical photons)
 mc_photo.blend_conservation = false         # Switch for blending with the nonconservative divergence	
 mc_photo.pvr_buffer        = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
