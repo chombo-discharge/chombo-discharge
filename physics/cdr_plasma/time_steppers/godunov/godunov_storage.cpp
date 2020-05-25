@@ -30,6 +30,7 @@ void godunov::cdr_storage::allocate_storage(){
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
   m_amr->allocate(m_scratch2, m_phase, m_ncomp);
   m_amr->allocate(m_scratch3, m_phase, m_ncomp);
+  m_amr->allocate(m_cellExtr, m_phase, m_ncomp);
   m_amr->allocate(m_gradient, m_phase, SpaceDim);
 
   m_amr->allocate(m_scratchIVs,  m_phase, m_ncomp);
@@ -50,6 +51,7 @@ void godunov::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_scratch2);
   m_amr->deallocate(m_scratch3);
+  m_amr->deallocate(m_cellExtr);
   m_amr->deallocate(m_gradient);
 
   m_amr->deallocate(m_scratchIVs);

@@ -28,6 +28,7 @@ namespace physics::cdr_plasma {
     EBAMRCellData& get_scratch()  { return m_scratch;    }
     EBAMRCellData& get_scratch2() { return m_scratch2;   }
     EBAMRCellData& get_scratch3() { return m_scratch3;   }
+    EBAMRCellData& get_extrap()   { return m_cellExtr;  }
     EBAMRCellData& get_gradient() { return m_gradient;   }
 
     EBAMRIVData& get_eb_scratch1(){ return m_scratchIVs; }
@@ -51,6 +52,7 @@ namespace physics::cdr_plasma {
     EBAMRCellData m_scratch;  // Scratch data
     EBAMRCellData m_scratch2; // Scratch data
     EBAMRCellData m_scratch3; // Scratch data
+    EBAMRCellData m_cellExtr; // Scratch data
     EBAMRCellData m_gradient; // Storage for holding gradient
 
     EBAMRIVData m_scratchIVs; // Scratch data

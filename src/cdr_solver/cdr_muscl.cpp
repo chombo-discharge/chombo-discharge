@@ -30,6 +30,8 @@ void cdr_muscl::parse_options(){
   parse_plot_vars();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
   parse_conservation();  // Nonlinear divergence blending
+
+  m_extrap_source = false; // This class can't extrapolate with source term (yet)
 }
 
 void cdr_muscl::parse_slopelim(){

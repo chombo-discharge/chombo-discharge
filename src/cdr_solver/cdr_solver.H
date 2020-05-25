@@ -346,6 +346,11 @@ public:
     @brief Mobile or not
   */
   virtual bool is_mobile();
+
+  /*!
+    @brief Check if we can extrapolate
+  */
+  virtual bool extrap_source() const;
   
   /*!
     @brief Get the internal state
@@ -589,6 +594,11 @@ protected:
     @brief Also solve for advection/convection
   */
   bool m_mobile;
+  
+  /*!
+    @brief Turn on/off source terms when time-extrapolating
+  */
+  bool m_extrap_source;
 
   /*!
     @brief Output state
@@ -810,6 +820,11 @@ protected:
     @brief Parse the conservation
   */
   virtual void parse_conservation();
+
+  /*!
+    ®brief Parse source term stuff
+  */
+  virtual void parse_extrap_source();
 };
 
 #endif

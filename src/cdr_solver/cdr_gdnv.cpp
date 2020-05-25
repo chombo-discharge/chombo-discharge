@@ -49,14 +49,6 @@ void cdr_gdnv::parse_slopelim(){
   m_slopelim = (str == "true") ? true : false;
 }
 
-void cdr_gdnv::parse_extrap_source(){
-  ParmParse pp(m_class_name.c_str());
-
-  std::string str;
-  pp.get("extrap_source", str);
-  m_extrap_source = (str == "true") ? true : false;
-}
-
 int cdr_gdnv::query_ghost() const {
   return 3;
 }
@@ -193,10 +185,9 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
     }
 #endif
 
-    data_ops::incr(m_scratch, m_source, 1.0);
+    data_ops::copy(m_scratch, m_source);
     m_amr->average_down(m_scratch, m_phase);
     m_amr->interp_ghost_pwl(m_scratch, m_phase);
-
   }
   else{
     data_ops::set_value(m_scratch, 0.0);

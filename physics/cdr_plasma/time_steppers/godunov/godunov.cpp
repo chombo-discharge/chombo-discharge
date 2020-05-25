@@ -247,6 +247,7 @@ Real godunov::advance(const Real a_dt){
   t0 = MPI_Wtime();
   godunov::compute_E_into_scratch();       // Compute the electric field
   godunov::compute_cdr_gradients();        // Compute cdr gradients
+  godunov::extrap_source(a_dt);            // If we used advective extrapolation, BCs are more work. 
   godunov::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
   godunov::compute_cdr_eb_fluxes();        // Extrapolate cell-centered fluxes to EB centroids
   godunov::compute_cdr_domain_states();    // Extrapolate cell-centered states to domain edges
@@ -273,7 +274,7 @@ Real godunov::advance(const Real a_dt){
   t_filE = t1-t0;
 
   t0 = MPI_Wtime();
-  //  godunov::compute_cdr_gradients();        // Recompute the cdr gradients, they changed after the transport step. 
+  //  godunov::compute_cdr_gradients();        // I'm not doing this. Gradients don't change that much. 
   godunov::compute_reaction_network(a_dt); // Advance the reaction network. Put the result in solvers
   t1 = MPI_Wtime();
   t_reac = t1-t0;
@@ -444,8 +445,7 @@ void godunov::compute_cdr_eb_states(){
     pout() << "godunov::compute_cdr_eb_states" << endl;
   }
 
-  Vector<EBAMRCellData*> cdr_states = m_cdr->get_states();
-  
+  Vector<EBAMRCellData*> cdr_states;
   Vector<EBAMRIVData*>   eb_gradients;
   Vector<EBAMRIVData*>   eb_states;
   Vector<EBAMRCellData*> cdr_gradients;
@@ -454,6 +454,7 @@ void godunov::compute_cdr_eb_states(){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
+    cdr_states.push_back(&(storage->get_extrap()));
     eb_states.push_back(&(storage->get_eb_state()));
     eb_gradients.push_back(&(storage->get_eb_grad()));
     cdr_gradients.push_back(&(storage->get_gradient())); // Should already have been computed
@@ -482,8 +483,7 @@ void godunov::compute_cdr_eb_fluxes(){
     pout() << "godunov::compute_cdr_eb_fluxes()";
   }
 
-  Vector<EBAMRCellData*> states = m_cdr->get_states();
-
+  Vector<EBAMRCellData*> states;
   Vector<EBAMRIVData*> cdr_fluxes;
   Vector<EBAMRIVData*> extrap_cdr_fluxes;
   Vector<EBAMRIVData*> extrap_cdr_densities;
@@ -500,7 +500,9 @@ void godunov::compute_cdr_eb_fluxes(){
     EBAMRIVData& velo_eb = storage->get_eb_velo();
     EBAMRIVData& flux_eb = storage->get_eb_flux();
     EBAMRIVData& grad_eb = storage->get_eb_grad();
+    EBAMRCellData& state = storage->get_extrap();
 
+    states.push_back(&state);
     extrap_cdr_densities.push_back(&dens_eb);  // Computed in compute_cdr_eb_states
     extrap_cdr_velocities.push_back(&velo_eb); // Not yet computed
     extrap_cdr_fluxes.push_back(&flux_eb);     // Not yet computed
@@ -548,7 +550,7 @@ void godunov::compute_cdr_domain_states(){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
-    cdr_states.push_back(&(solver->get_state()));
+    cdr_states.push_back(&(storage->get_extrap()));
     domain_states.push_back(&(storage->get_domain_state()));
     domain_gradients.push_back(&(storage->get_domain_grad()));
     cdr_gradients.push_back(&(storage->get_gradient())); // Should already be computed
@@ -579,8 +581,7 @@ void godunov::compute_cdr_domain_fluxes(){
     pout() << "godunov::compute_cdr_domain_fluxes()" << endl;
   }
 
-  Vector<EBAMRCellData*> states = m_cdr->get_states();
-
+  Vector<EBAMRCellData*> states;
   Vector<EBAMRIFData*>   cdr_fluxes;
   Vector<EBAMRIFData*>   extrap_cdr_fluxes;
   Vector<EBAMRIFData*>   extrap_cdr_densities;
@@ -601,7 +602,9 @@ void godunov::compute_cdr_domain_fluxes(){
     EBAMRIFData& flux_domain = storage->get_domain_flux();
     EBAMRIFData& grad_domain = storage->get_domain_grad();
     EBAMRCellData& gradient  = storage->get_gradient();
+    EBAMRCellData& state     = storage->get_extrap();
 
+    states.push_back(&state);
     extrap_cdr_densities.push_back(&dens_domain);  // Has not been computed
     extrap_cdr_velocities.push_back(&velo_domain); // Has not been computed
     extrap_cdr_fluxes.push_back(&flux_domain);     // Has not been computed
@@ -751,7 +754,7 @@ void godunov::advance_transport_euler(const Real a_dt){
       EBAMRCellData& scratch2 = storage->get_scratch2();
 
       // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-      const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
+      const Real extrap_dt = (m_extrap_advect && solver->extrap_source()) ? a_dt : 0.0;
       if(!m_implicit_diffusion){
 	solver->compute_divJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
       }
@@ -845,7 +848,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
     data_ops::copy(k1, phi);
 
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-    const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
+    const Real extrap_dt = (m_extrap_advect && solver->extrap_source()) ? a_dt : 0.0;
     if(!m_implicit_diffusion){
       solver->compute_divJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
     }
@@ -906,7 +909,10 @@ void godunov::advance_transport_rk2(const Real a_dt){
   }
   godunov::compute_cdr_velo(m_time + a_dt);
   godunov::compute_cdr_diffco(m_time + a_dt);
+  godunov::post_step();
+  
   godunov::compute_cdr_gradients();        // Recompute cdr gradients after reaction advance (these might have changed)
+  godunov::extrap_source(a_dt);            // BCs are more work with advective extrapolation
   godunov::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
   godunov::compute_cdr_eb_fluxes();        // Extrapolate cell-centered fluxes to EB centroids
   godunov::compute_cdr_domain_states();    // Extrapolate cell-centered states to domain edges
@@ -1088,5 +1094,30 @@ void godunov::post_step(){
 
     m_amr->average_down(solver->get_state(), m_cdr->get_phase());
     m_amr->interp_ghost(solver->get_state(), m_cdr->get_phase());
+  }
+}
+
+void godunov::extrap_source(const Real a_dt){
+  CH_TIME("godunov::extrap_source");
+  if(m_verbosity > 5){
+    pout() << "godunov::extrap_source" << endl;
+  }
+
+  // TLDR: If we extrapolate the advective derivative and include the source term in the extrapolation,
+  //       the boundary conditions should be computed from phi + 0.5*source*dt rather than just phi.
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
+
+    const EBAMRCellData& state  = solver->get_state();
+    const EBAMRCellData& source = solver->get_source();
+
+    EBAMRCellData& extrap = storage->get_extrap();
+
+    data_ops::copy(extrap, state);
+    if(m_extrap_advect && solver->extrap_source()) {
+      data_ops::incr(extrap, source, 0.5*a_dt);
+    }
   }
 }

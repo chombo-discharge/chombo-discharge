@@ -16,9 +16,6 @@
 #include <EBArith.H>
 #include <EBAlias.H>
 
-
-#define USE_NONCONS_DIV 0
-
 cdr_solver::cdr_solver(){
   m_name       = "cdr_solver";
   m_class_name = "cdr_solver";
@@ -1046,16 +1043,10 @@ void cdr_solver::hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
       const Real dc       = divH(vof, comp);
       const Real dnc      = divNC(vof, comp);
 
-#if USE_NONCONS_DIV
-      divH(vof,comp) = dnc;
-      deltaM(vof, comp) = 0.0;
-#else // Actual code
-      divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
-      deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);
-#endif
-
       // Note to self: deltaM = (1-kappa)*(dc - kappa*dnc) because dc was not divided by kappa,
       // which it would be otherwise. 
+      divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
+      deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);
     }
   }
 }
@@ -2153,6 +2144,10 @@ Real cdr_solver::compute_charge(){
   return Q;
 }
 
+bool cdr_solver::extrap_source() const {
+  return m_extrap_source;
+}
+
 bool cdr_solver::is_diffusive(){
   return m_diffusive;
 }
@@ -2217,6 +2212,19 @@ void cdr_solver::parse_domain_bc(){
   else{
     MayDay::Abort("cdr_solver::parse_domain_bc - unknown BC requested");
   }
+}
+
+void cdr_solver::parse_extrap_source(){
+  CH_TIME("cdr_solver::parse_extrap_source");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_extrap_source" << endl;
+  }
+  
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("extrap_source", str);
+  m_extrap_source = (str == "true") ? true : false;
 }
 
 void cdr_solver::parse_conservation(){
