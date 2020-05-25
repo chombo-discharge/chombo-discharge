@@ -194,6 +194,7 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
 #endif
 
     data_ops::incr(m_scratch, m_source, 1.0);
+    m_amr->average_down(m_scratch, m_phase);
     m_amr->interp_ghost_pwl(m_scratch, m_phase);
 
   }

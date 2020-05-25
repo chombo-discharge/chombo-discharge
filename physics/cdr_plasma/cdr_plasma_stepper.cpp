@@ -236,6 +236,7 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
 			     lvl);
   }
 
+#if 0 // R.M. May/2020: This is not a good place to do this kind of averaging and interpolating. If need it, do it elsewhere.
   // Average down species
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
@@ -248,6 +249,7 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
     const int idx = solver_it.get_solver();
     m_amr->average_down(*a_photon_sources[idx], m_cdr->get_phase());
   }
+#endif
 }
 
 void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >&       a_particle_sources,

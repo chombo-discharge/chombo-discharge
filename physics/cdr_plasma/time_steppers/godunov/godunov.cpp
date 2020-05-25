@@ -212,7 +212,10 @@ Real godunov::advance(const Real a_dt){
     pout() << "godunov::advance" << endl;
   }
 
-  // INFO: Solvers should have been filled with velocities and diffusion coefficients. We must still do:
+  // INFO: When we enter here, the cdr_solver have updated ghost cells (either linear or quadratic) and should have been
+  // filled with velocities and diffusion coefficients.
+  // 
+  // We must still do:
   // 1. Compute E
   // 2. Extrapolate everything to the EB
   // 3. Compute fluxes at the EB and domain
@@ -232,6 +235,7 @@ Real godunov::advance(const Real a_dt){
   Real t_filE = 0.0;
   Real t_filV = 0.0;
   Real t_filD = 0.0;
+  Real t_post = 0.0;
   Real t_tot  = 0.0;
 
   Real t0, t1;
@@ -269,7 +273,7 @@ Real godunov::advance(const Real a_dt){
   t_filE = t1-t0;
 
   t0 = MPI_Wtime();
-  godunov::compute_cdr_gradients();        // Recompute the cdr gradients, they changed after the transport step. 
+  //  godunov::compute_cdr_gradients();        // Recompute the cdr gradients, they changed after the transport step. 
   godunov::compute_reaction_network(a_dt); // Advance the reaction network. Put the result in solvers
   t1 = MPI_Wtime();
   t_reac = t1-t0;
@@ -281,6 +285,12 @@ Real godunov::advance(const Real a_dt){
   }
   t1 = MPI_Wtime();
   t_rte = t1-t0;
+
+  // Post step
+  t0 = MPI_Wtime();
+  godunov::post_step();
+  t1 = MPI_Wtime();
+  t_post = t1 - t0;
   
   // Update velocities and diffusion coefficients. We don't do sources here.
   t0 = MPI_Wtime();
@@ -302,6 +312,7 @@ Real godunov::advance(const Real a_dt){
 	   << "RTE adv.  = " << 100.*t_rte/t_tot << "%" << endl
 	   << "Poisson   = " << 100.*t_pois/t_tot << "%" << endl
 	   << "Ecomp     = " << 100.*t_filE/t_tot << "%" << endl
+      	   << "post      = " << 100.*t_post/t_tot << "%" << endl
 	   << "Vel       = " << 100.*t_filV/t_tot << "%" << endl
 	   << "Dco       = " << 100.*t_filD/t_tot << "%" << endl
 	   << "TOTAL = " << t_tot << "seconds" << endl;
@@ -681,12 +692,12 @@ void godunov::compute_reaction_network(const Real a_dt){
     const EBAMRCellData& src = solver->get_source();
 
     data_ops::incr(phi, src, a_dt);
+    if(m_floor){
+      //      solver->make_non_negative(phi);
+      data_ops::floor(phi, 0.0);
+    }
 
-    m_amr->average_down(phi, m_cdr->get_phase());
-    m_amr->interp_ghost(phi, m_cdr->get_phase());
-
-    solver->make_non_negative(phi);
-
+#if 0
     if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
       if(m_debug){
 	const Real mass_before = solver->compute_mass();
@@ -698,8 +709,10 @@ void godunov::compute_reaction_network(const Real a_dt){
       }
       else{
 	data_ops::floor(phi, 0.0);
+
       }
     }
+#endif
   }
 }
 
@@ -1064,3 +1077,16 @@ void godunov::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 #endif
 }
 
+void godunov::post_step(){
+  CH_TIME("godunov::post_step");
+  if(m_verbosity > 5){
+    pout() << "godunov::post_step" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver> solver = solver_it();
+
+    m_amr->average_down(solver->get_state(), m_cdr->get_phase());
+    m_amr->interp_ghost(solver->get_state(), m_cdr->get_phase());
+  }
+}

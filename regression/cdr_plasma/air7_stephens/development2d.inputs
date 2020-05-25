@@ -11,7 +11,7 @@ amr_mesh.lo_corner       = -1E-2 -1E-2 # Low corner of problem domain
 amr_mesh.hi_corner       =  1E-2  1E-2 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64 # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 5           # Maximum amr depth
+amr_mesh.max_amr_depth   = 6           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -41,11 +41,11 @@ driver.geometry_scan_level             = 0             # Geometry scan level for
 driver.recursive_regrid                = false         # Recursive regrids
 driver.plot_interval                   = 5            # Plot interval
 driver.regrid_interval                 = 5             # Regrid interval
-driver.checkpoint_interval             = -1            # Checkpoint interval
+driver.checkpoint_interval             = 5             # Checkpoint interval
 driver.initial_regrids                 = 4             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 1.0           # Stop time
-driver.max_steps                       = 1             # Maximum number of steps
+driver.max_steps                       = 100            # Maximum number of steps
 driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
 driver.write_memory                    = false         # Write MPI memory report 
@@ -104,7 +104,7 @@ cdr_gdnv.limit_slopes         = true                    # Use slope-limiters for
 cdr_gdnv.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 cdr_gdnv.extrap_source        = true                    # Flag for including source term for time-extrapolation
 cdr_gdnv.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo
-cdr_gdnv.redist_mass_weighted = false                   # Mass weighted redistribution or not
+cdr_gdnv.redist_mass_weighted = true                    # Mass weighted redistribution or not
 cdr_gdnv.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
 cdr_gdnv.gmg_verbosity        = -1                      # GMG verbosity
 cdr_gdnv.gmg_pre_smooth       = 6                       # Number of relaxations in GMG downsweep
@@ -119,7 +119,6 @@ cdr_gdnv.gmg_bottom_solver    = bicgstab                # Bottom solver type. Va
 cdr_gdnv.gmg_bottom_relax     = 8                       # Number of relaxations in bottom solve ('simple' solver only)
 cdr_gdnv.gmg_cycle            = vcycle                  # Cycle type. Only 'vcycle' supported for now
 cdr_gdnv.gmg_relax_type       = gsrb                    # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
-
 
 # ====================================================================================================
 # MC_PHOTO CLASS OPTIONS
@@ -144,7 +143,9 @@ cdr_gdnv.gmg_relax_type       = gsrb                    # Relaxation type. 'jaco
 # algorithm and one would use mc_photo.source_type = deterministic. For CFD models one would probably
 # work with a volumetric rate, in which one could draw the number of photons from a Poisson distribution. 
 # ====================================================================================================
+mc_photo.stationary       = true             # Maximum no. generated in a cell (<= 0 yields physical photons)
 mc_photo.max_photons       = 1             # Maximum no. generated in a cell (<= 0 yields physical photons)
+mc_photo.blend_conservation = false         # Switch for blending with the nonconservative divergence	
 mc_photo.pvr_buffer        = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
 mc_photo.random_kappa      = true          # Randomize absorption length (taken from photon implementation)
 mc_photo.plt_vars          = phi src       # Available are 'phi' and 'src'
@@ -168,7 +169,6 @@ mc_photo.deposition        = cic           # 'ngp' = nearest grid point
                                            # 'cic' = cloud-in-cell
                                            # 'tsc' = triangle-shaped-cloud
                                            # 'w4'  = 3rd order interpolation
-
 
 
 # ====================================================================================================
@@ -209,9 +209,10 @@ godunov.relax_time       = 1.0       # Relaxation time constant
 godunov.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
 godunov.fast_rte         = 1         # Solve RTE every this time steps. Mostly for debugging. 
 godunov.source_comp      = interp    # Interpolated 'interp' or cell-average 'cell_ave' for source computations
-godunov.extrap_advect    = false      # Use time-extrapolation capabilities (if they exist) in the cdr_solver
+godunov.extrap_advect    = true      # Use time-extrapolation capabilities (if they exist) in the cdr_solver
 godunov.floor_cdr        = true      # Floor CDR solvers to avoid negative densities
-godunov.debug            = true      # Turn on debugging messages. Also monitors mass if it was injected into the system. 
+godunov.debug            = true      # Turn on debugging messages. Also monitors mass if it was injected into the system.
+godunov.fhd              = false     # Turn on if you want a stochastic diffusion flux
 
 
 # ====================================================================================================
@@ -274,7 +275,7 @@ air7_stephens.dielectric_quantum_efficiency = 1.E-6             # SEE on dielect
 # Exitation efficiencies, photoionization efficiences, quenching pressure, radiative lifetimes,
 # and predissociation lifetime, and absorption lengths. These are pressure independent.
 # ----------------------------------------------------------------------------------------------------
-air7_stephens.photoi_factor        = 0.0       # Correction factor photoionization
+air7_stephens.photoi_factor        = 1.0       # Correction factor photoionization
 
 air7_stephens.c4v0_exc_rep         = 0.8       # Relative excitation probability
 air7_stephens.c4v1_exc_rep         = 0.034     # Relative excitation probability
