@@ -248,6 +248,11 @@ protected:
   };
 
   /*!
+    @brief Instantaneous transport or not
+  */
+  bool m_instantaneous;
+
+  /*!
     @brief Flag for blending the deposition clouds with the nonconservative divergence
   */
   bool m_blend_conservation;
@@ -489,7 +494,7 @@ protected:
   /*!
     @brief Parse whether stationary or not
   */
-  void parse_stationary();
+  void parse_instantaneous();
 
   /*!
     @brief Parse source type

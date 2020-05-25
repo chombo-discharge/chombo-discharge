@@ -26,6 +26,8 @@
 mc_photo::mc_photo(){
   m_name       = "mc_photo";
   m_class_name = "mc_photo";
+
+  m_stationary = false;
 }
 
 mc_photo::~mc_photo(){
@@ -39,13 +41,13 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   }
 
   // If stationary, do a safety cleanout first. Then generate new photons
-  if(m_stationary){
+  if(m_instantaneous){
     this->clear(m_photons);
   }
   this->generate_photons(m_photons, a_source, a_dt);
 
   // Advance stationary or transient
-  if(m_stationary){
+  if(m_instantaneous){
     this->advance_photons_stationary(m_bulk_photons, m_eb_photons, m_domain_photons, m_photons);
   }
   else{
@@ -74,7 +76,7 @@ void mc_photo::parse_options(){
   this->parse_domain_bc();
   this->parse_pvr_buffer();
   this->parse_plot_vars();
-  this->parse_stationary();
+  this->parse_instantaneous();
   this->parse_conservation();
 }
 
@@ -109,15 +111,15 @@ void mc_photo::parse_rng(){
   m_udist11 = new uniform_real_distribution<Real>(-1.0, 1.0);
 }
 
-void mc_photo::parse_stationary(){
-  CH_TIME("mc_photo::parse_stationary");
+void mc_photo::parse_instantaneous(){
+  CH_TIME("mc_photo::parse_instantaneous");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_stationary" << endl;
+    pout() << m_name + "::parse_instantaneous" << endl;
   }
   
   ParmParse pp(m_class_name.c_str());
 
-  pp.get("stationary", m_stationary);
+  pp.get("instantaneous", m_instantaneous);
 }
 
 void mc_photo::parse_pseudophotons(){
@@ -1420,26 +1422,26 @@ void mc_photo::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
 
   if(m_plot_phi) {
-    this->write_data(a_output, a_comp, m_state,  true);
+    this->write_data(a_output, a_comp, m_state,  false);
   }
   if(m_plot_src) {
     this->write_data(a_output, a_comp, m_source, false);
   }
   if(m_plot_phot){
     this->deposit_photons(m_scratch, m_photons.get_particles(), m_plot_deposition);
-    this->write_data(a_output, a_comp, m_scratch,  true);
+    this->write_data(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_bulk_phot){
     this->deposit_photons(m_scratch, m_bulk_photons.get_particles(), m_plot_deposition);
-    this->write_data(a_output, a_comp, m_scratch,  true);
+    this->write_data(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_eb_phot){
     this->deposit_photons(m_scratch, m_eb_photons.get_particles(), m_plot_deposition);
-    this->write_data(a_output, a_comp, m_scratch,  true);
+    this->write_data(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_dom_phot){
     this->deposit_photons(m_scratch, m_domain_photons.get_particles(), m_plot_deposition);
-    this->write_data(a_output, a_comp, m_scratch,  true);
+    this->write_data(a_output, a_comp, m_scratch,  false);
   }
 }
 
