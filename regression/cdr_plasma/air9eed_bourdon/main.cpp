@@ -51,8 +51,8 @@ int main(int argc, char* argv[]){
 
   // Create solver factories
   auto poi_fact = new poisson_factory<poisson_multifluid_gmg>();
-  auto cdr_fact = new cdr_factory<cdr_gdnv>();
-  auto rte_fact = new rte_factory<eddington_sp1>();
+  auto cdr_fact = new cdr_factory<cdr_solver, cdr_gdnv>();
+  auto rte_fact = new rte_factory<rte_solver, eddington_sp1>();
 
   // Instantiate solvers
   auto poi = poi_fact->new_solver();
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]){
   timestepper->set_rte(rte);
 
   // Set potential 
-timestepper->set_potential(potential_curve);
+  timestepper->set_potential(potential_curve);
 
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));

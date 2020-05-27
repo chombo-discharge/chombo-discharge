@@ -13,6 +13,7 @@
  /*!
   @brief Iterator class for cdr_layout
 */
+template <class T>
 class cdr_iterator {
 public:
   
@@ -24,12 +25,12 @@ public:
   /*!
     @brief Full constructor
   */
-  cdr_iterator(cdr_layout& a_layout, const species_iteration::which_species a_mode = species_iteration::all);
+  cdr_iterator(cdr_layout<T>& a_layout, const species_iteration::which_species a_mode = species_iteration::all);
 
   /*!
     @brief Full constructor, allows iteration through data
   */
-  cdr_iterator(cdr_layout& a_layout, Vector<EBAMRCellData*> a_data);
+  cdr_iterator(cdr_layout<T>& a_layout, Vector<EBAMRCellData*> a_data);
 
   /*!
     @brief Destructor
@@ -64,7 +65,7 @@ public:
   /*!
     @brief Get solver
   */
-  virtual RefCountedPtr<cdr_solver>& operator() ();
+  virtual RefCountedPtr<T>& operator() ();
 
   /*!
     @brief Get current ion
@@ -101,7 +102,7 @@ protected:
   /*!
     @brief Ion solvers
   */
-  Vector<RefCountedPtr<cdr_solver> > m_solvers;
+  Vector<RefCountedPtr<T> > m_solvers;
 
   /*!
     @brief Ions
@@ -114,5 +115,7 @@ protected:
   Vector<EBAMRCellData*> m_celldata;
 
 };
+
+#include "cdr_iteratorI.H"
 
 #endif

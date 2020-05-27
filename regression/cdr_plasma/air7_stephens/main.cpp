@@ -51,8 +51,8 @@ int main(int argc, char* argv[]){
 
   // Create solver factories
   auto poi_fact = new poisson_factory<poisson_multifluid_gmg>();
-  auto cdr_fact = new cdr_factory<cdr_gdnv>();
-  auto rte_fact = new rte_factory<mc_photo>();
+  auto cdr_fact = new cdr_factory<cdr_solver, cdr_gdnv>();
+  auto rte_fact = new rte_factory<rte_solver, mc_photo>();
 
   // Instantiate solvers
   auto poi = poi_fact->new_solver();

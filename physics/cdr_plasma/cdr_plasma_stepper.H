@@ -805,7 +805,7 @@ namespace physics {
       /*!
 	@brief Set the cdr layout
       */
-      virtual void set_cdr(RefCountedPtr<cdr_layout>& a_cdr);
+      virtual void set_cdr(RefCountedPtr<cdr_layout<cdr_solver> >& a_cdr);
 
       /*!
 	@brief Set the Poisson solver
@@ -815,7 +815,7 @@ namespace physics {
       /*!
 	@brief Set the RTE layout
       */
-      virtual void set_rte(RefCountedPtr<rte_layout>& a_rte);
+      virtual void set_rte(RefCountedPtr<rte_layout<rte_solver> >& a_rte);
 
       /*!
 	@brief General RTE advance routine
@@ -887,7 +887,7 @@ namespace physics {
       /*!
 	@brief Get cdr solvers
       */
-      virtual RefCountedPtr<cdr_layout>& get_cdr();
+      virtual RefCountedPtr<cdr_layout<cdr_solver> >& get_cdr();
 
       /*!
 	@brief Get cdr solvers
@@ -897,7 +897,7 @@ namespace physics {
       /*!
 	@brief Get cdr solvers
       */
-      virtual RefCountedPtr<rte_layout>& get_rte();
+      virtual RefCountedPtr<rte_layout<rte_solver>>& get_rte();
 
       /*!
 	@brief Get sigma solver
@@ -942,12 +942,12 @@ namespace physics {
       /*!
 	@brief CDR solvers
       */
-      RefCountedPtr<cdr_layout> m_cdr;
+      RefCountedPtr<cdr_layout<cdr_solver> > m_cdr;
 
       /*!
 	@brief Radiative transfer solvers
       */
-      RefCountedPtr<rte_layout> m_rte;
+      RefCountedPtr<rte_layout<rte_solver>> m_rte;
 
       /*!
 	@brief Poisson solver

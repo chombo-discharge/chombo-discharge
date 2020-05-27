@@ -10,11 +10,13 @@
 
 #include "rte_solver.H"
 
+template <class T>
 class rte_iterator;
 
 /*!
   @brief Class for holding a set of rte_solvers. 
 */
+template <class T>
 class rte_layout {
 public:
 
@@ -31,12 +33,12 @@ public:
   /*!
     @brief Get iterator
   */
-  virtual rte_iterator iterator();
+  virtual rte_iterator<T> iterator();
 
   /*!
     @brief Add solver
   */
-  virtual void add_solver(RefCountedPtr<rte_solver> a_solver);
+  virtual void add_solver(RefCountedPtr<T> a_solver);
 
   /*!
     @brief Parse options
@@ -143,7 +145,7 @@ public:
   /*!
     @brief Get solvers
   */
-  virtual Vector<RefCountedPtr<rte_solver> >& get_solvers();
+  virtual Vector<RefCountedPtr<T> >& get_solvers();
 
   /*!
     @brief Get species
@@ -165,7 +167,7 @@ protected:
   /*!
     @brief Solvers
   */
-  Vector<RefCountedPtr<rte_solver> > m_solvers;
+  Vector<RefCountedPtr<T> > m_solvers;
 
   /*!
     @brief Species
@@ -183,12 +185,12 @@ protected:
   @details Factory class is very simple; since we don't want to template rte_layout2 we use a factory to instantiate solvers of 
   any rte_solver inherited class, and then return a layout with the casted classes. That's about it. 
 */
-template <class T>
+template <class T, class S>
 class rte_factory {
 public:
   rte_factory();
   ~rte_factory();
-  RefCountedPtr<rte_layout> new_layout(const Vector<RefCountedPtr<rte_species> >& a_species) const;
+  RefCountedPtr<rte_layout<T> > new_layout(const Vector<RefCountedPtr<rte_species> >& a_species) const;
 };
 
 #endif

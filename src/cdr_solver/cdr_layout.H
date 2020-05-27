@@ -10,11 +10,13 @@
 
 #include "cdr_solver.H"
 
+template <class T>
 class cdr_iterator;
 
 /*!
   @brief Class for holding a set of cdr_solvers. 
 */
+template <class T>
 class cdr_layout {
 public:
 
@@ -38,7 +40,7 @@ public:
   /*!
     @brief Get the iterator
   */
-  virtual cdr_iterator iterator();
+  virtual cdr_iterator<T> iterator();
 
   /*!
     @brief Parse class options
@@ -48,7 +50,7 @@ public:
   /*!
     @brief Add solver
   */
-  virtual void add_solver(RefCountedPtr<cdr_solver> a_solver);
+  virtual void add_solver(RefCountedPtr<T> a_solver);
 
   /*!
     @brief Allocate internal storage for solvers
@@ -199,7 +201,7 @@ public:
   /*!
     @brief Get solvers
   */
-  virtual Vector<RefCountedPtr<cdr_solver> >& get_solvers();
+  virtual Vector<RefCountedPtr<T> >& get_solvers();
 
   /*!
     @brief Get species
@@ -284,12 +286,12 @@ protected:
   @details Factory class is very simple; since we don't want to template cdr_layout2 we use a factory to instantiate solvers of 
   any cdr_solver inherited class, and then return a layout with the casted classes. That's about it. 
 */
-template <class T>
+template <class T, class S>
 class cdr_factory {
 public:
   cdr_factory();
   ~cdr_factory();
-  RefCountedPtr<cdr_layout> new_layout(const Vector<RefCountedPtr<cdr_species> > a_species) const;
+  RefCountedPtr<cdr_layout<T> > new_layout(const Vector<RefCountedPtr<cdr_species> > a_species) const;
 };
 
 #endif

@@ -71,8 +71,8 @@ namespace physics::cdr_plasma {
     whichTransport m_whichTransport;
 
     // Get functions for storage
-    RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
-    RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
+    RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator<cdr_solver>& a_solverit);
+    RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator<rte_solver>& a_solverit);
 
     Real restrict_dt();
 

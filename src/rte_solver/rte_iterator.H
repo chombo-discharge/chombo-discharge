@@ -13,6 +13,7 @@
 /*!
   @brief Iterator class for rte_layout
 */
+template <class T>
 class rte_iterator {
 public:  
   /*!
@@ -26,7 +27,7 @@ public:
   /*!
     @brief Full constructor
   */
-  rte_iterator(rte_layout& a_layout){
+  rte_iterator(rte_layout<T>& a_layout){
     CH_TIME("rte_iterator::rte_iterator");
     
     m_solvers  = a_layout.get_solvers();
@@ -87,7 +88,7 @@ public:
   /*!
     @brief Get solver
   */
-  virtual RefCountedPtr<rte_solver>& operator() () {
+  virtual RefCountedPtr<T>& operator() () {
     CH_assert(m_defined == true);
     CH_assert(m_isolver < m_num);
     return m_solvers[m_isolver];
@@ -122,7 +123,7 @@ protected:
   /*!
     @brief Ion solvers
   */
-  Vector<RefCountedPtr<rte_solver> > m_solvers;
+  Vector<RefCountedPtr<T> > m_solvers;
 
   /*!
     @brief Ions

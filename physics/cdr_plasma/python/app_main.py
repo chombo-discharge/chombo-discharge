@@ -91,8 +91,8 @@ def write_template(args):
 
     mainf.write("  // Create solver factories\n")
     mainf.write("  auto poi_fact = new poisson_factory<" + args.poisson_solver + ">();\n")
-    mainf.write("  auto cdr_fact = new cdr_factory<" + args.cdr_solver + ">();\n")
-    mainf.write("  auto rte_fact = new rte_factory<" + args.rte_solver + ">();\n")
+    mainf.write("  auto cdr_fact = new cdr_factory<cdr_solver, " + args.cdr_solver + ">();\n")
+    mainf.write("  auto rte_fact = new rte_factory<rte_solver, " + args.rte_solver + ">();\n")
     mainf.write("\n")
     
     mainf.write("  // Instantiate solvers\n")
