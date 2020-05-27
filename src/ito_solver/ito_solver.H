@@ -148,7 +148,7 @@ public:
   /*!
     @brief Set the species
   */
-  virtual void set_species(RefCountedPtr<ito_species>& a_species);
+  virtual void set_species(RefCountedPtr<ito_species> a_species);
 
   /*!
     @brief Cache the particles

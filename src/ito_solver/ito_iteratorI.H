@@ -5,16 +5,20 @@
   @date   May 2020
 */
 
+#ifndef _ITO_ITERATORI_H_
+#define _ITO_ITERATORI_H_
+
 #include "ito_iterator.H"
 
-ito_iterator::ito_iterator(){
-  CH_TIME("ito_iterator::ito_iterator");
+template <class T>
+ito_iterator<T>::ito_iterator(){
+  CH_TIME("ito_iterator<T>::ito_iterator<T>");
   m_defined = false;
 }
 
-
-ito_iterator::ito_iterator(ito_layout& a_layout, const species_iteration::which_species a_mode){
-  CH_TIME("ito_iterator::ito_iterator");
+template <class T>
+ito_iterator<T>::ito_iterator(ito_layout<T>& a_layout, const species_iteration::which_species a_mode){
+  CH_TIME("ito_iterator<T>::ito_iterator<T>");
     
   m_solvers  = a_layout.get_solvers();
   m_species  = a_layout.get_species();
@@ -25,30 +29,36 @@ ito_iterator::ito_iterator(ito_layout& a_layout, const species_iteration::which_
   reset();
 }
 
-ito_iterator::~ito_iterator(){
+template <class T>
+ito_iterator<T>::~ito_iterator<T>(){
 
 }
 
-int ito_iterator::num_solvers(){
+template <class T>
+int ito_iterator<T>::num_solvers(){
   CH_assert(m_defined);
   return m_num;
 }
 
-int ito_iterator::get_solver() const {
+template <class T>
+int ito_iterator<T>::get_solver() const {
   CH_assert(m_defined);
   return m_isolver;
 }
 
-void ito_iterator::reset(){
+template <class T>
+void ito_iterator<T>::reset(){
   CH_assert(m_defined);
   m_isolver = 0;
 }
 
-bool ito_iterator::ok(){
+template <class T>
+bool ito_iterator<T>::ok(){
   return (m_isolver < m_num);
 }
 
-void ito_iterator::operator++(){
+template <class T>
+void ito_iterator<T>::operator++(){
   CH_assert(m_defined);
 
   if(m_mode == species_iteration::all){
@@ -89,15 +99,18 @@ void ito_iterator::operator++(){
   }
 }
 
-RefCountedPtr<ito_solver>& ito_iterator::operator() () {
+template <class T>
+RefCountedPtr<T>& ito_iterator<T>::operator() () {
   CH_assert(m_defined == true);
   CH_assert(m_isolver < m_num);
   return m_solvers[m_isolver];
 }
 
-RefCountedPtr<ito_species>& ito_iterator::get_species() {
+template <class T>
+RefCountedPtr<ito_species>& ito_iterator<T>::get_species() {
   CH_assert(m_defined == true);
   CH_assert(m_isolver < m_num);
   return m_species[m_isolver];
 }
 
+#endif

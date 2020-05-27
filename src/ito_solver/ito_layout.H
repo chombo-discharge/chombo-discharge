@@ -10,11 +10,13 @@
 
 #include "ito_solver.H"
 
+template <class T>
 class ito_iterator;
 
 /*!
   @brief Class for holding a set of ito_solvers
 */
+template <class T>
 class ito_layout{
 public:
 
@@ -41,7 +43,7 @@ public:
   /*!
     @brief Return iterator. The iterator is a simple random access object
   */
-  virtual ito_iterator iterator(const species_iteration::which_species a_mode = species_iteration::all);
+  virtual ito_iterator<T> iterator(const species_iteration::which_species a_mode = species_iteration::all);
 
   /*!
     @brief Define function
@@ -59,11 +61,11 @@ public:
   virtual void allocate_internals();
 
   /*!
-    @brief Deallocate internals for all solvers
+    @brief Add solver
   */
-  virtual void deallocate_internals();
+  virtual void add_solver(RefCountedPtr<T> a_solver);
 
-    /*!
+  /*!
     @brief Cache states before regrid step
   */
   virtual void pre_regrid(const int a_lbase, const int a_finest_level);
@@ -110,11 +112,6 @@ public:
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
-    @brief Convenience function. All solvers write plot files
-  */
-  virtual void write_plot_file();
-
-  /*!
     @brief Get largest possible time step for advection part
   */
   virtual Real compute_min_drift_dt(const Real a_maxCellsToMove);
@@ -127,7 +124,7 @@ public:
   /*!
     @brief Get solvers
   */
-  virtual Vector<RefCountedPtr<ito_solver> >& get_solvers();
+  virtual Vector<RefCountedPtr<T> >& get_solvers();
 
   /*!
     @brief Get species
@@ -159,7 +156,7 @@ protected:
   /*!
     @brief Solvers
   */
-  Vector<RefCountedPtr<ito_solver> > m_solvers;
+  Vector<RefCountedPtr<T> > m_solvers;
 
   /*!
     @brief Species
@@ -183,5 +180,17 @@ protected:
   
 };
 
+/*!
+  @brief Factory class for ito_layout
+*/
+template <class T, class S>
+class ito_factory {
+public:
+  ito_factory();
+  ~ito_factory();
+  RefCountedPtr<ito_layout<T> > new_layout(const Vector<RefCountedPtr<ito_species> > a_species) const;
+};
+
+#include "ito_layoutI.H"
 
 #endif

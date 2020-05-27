@@ -13,6 +13,7 @@
 /*!
   @brief Iterator class for ito_layout
 */
+template <class T>
 class ito_iterator {
 public:
   
@@ -24,7 +25,7 @@ public:
   /*!
     @brief Full constructor
   */
-  ito_iterator(ito_layout& a_layout, const species_iteration::which_species a_mode = species_iteration::all);
+  ito_iterator(ito_layout<T>& a_layout, const species_iteration::which_species a_mode = species_iteration::all);
 
   /*!
     @brief Destructor
@@ -59,7 +60,7 @@ public:
   /*!
     @brief Get solver
   */
-  virtual RefCountedPtr<ito_solver>& operator() ();
+  virtual RefCountedPtr<T>& operator() ();
 
   /*!
     @brief Get current ion
@@ -91,7 +92,7 @@ protected:
   /*!
     @brief Ion solvers
   */
-  Vector<RefCountedPtr<ito_solver> > m_solvers;
+  Vector<RefCountedPtr<T> > m_solvers;
 
   /*!
     @brief Ions
@@ -99,5 +100,7 @@ protected:
   Vector<RefCountedPtr<ito_species> > m_species;
 
 };
+
+#include "ito_iteratorI.H"
 
 #endif

@@ -431,7 +431,7 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   m_source_particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
 }
 
-void ito_solver::set_species(RefCountedPtr<ito_species>& a_species){
+void ito_solver::set_species(RefCountedPtr<ito_species> a_species){
   CH_TIME("ito_solver::set_species");
   if(m_verbosity > 5){
     pout() << m_name + "::set_species" << endl;
