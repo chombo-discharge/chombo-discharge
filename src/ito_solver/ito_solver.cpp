@@ -893,7 +893,7 @@ void ito_solver::add_particles(ListBox<ito_particle>& a_part, const int a_lvl, c
   }
 
   ListBox<ito_particle>& my_particles = m_particles[a_lvl][a_dit];
-  
+
   if(a_destructive){
     my_particles.addItemsDestructive(a_part.listItems());
   }

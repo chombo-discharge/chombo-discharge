@@ -275,7 +275,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
     const EBISLayout& ebisl = m_amr->get_ebisl(m_solver->get_phase())[lvl];
 
-    if(m_solver->is_mobile()){
+    if(m_solver->is_mobile() || m_solver->is_diffusive()){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	// Create a copy. 
 	List<ito_particle>& particleList = particles[dit()].listItems();
@@ -288,17 +288,19 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
 
 	// Half Euler step and evaluate velocity at half step
-	for (lit.rewind(); lit; ++lit){ 
-	  ito_particle& p = particleList[lit];
-	  p.position() += 0.5*p.velocity()*a_dt;
-	}
-	m_solver->interpolate_velocities(lvl, dit());
+	if(m_solver->is_mobile()){
+	  for (lit.rewind(); lit; ++lit){ 
+	    ito_particle& p = particleList[lit];
+	    p.position() += 0.5*p.velocity()*a_dt;
+	  }
+	  m_solver->interpolate_velocities(lvl, dit());
 
-	// Final stage
-	for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
-	  ito_particle& p    = particleList[lit];
-	  ito_particle& oldP = particleCopy[litC];
-	  p.position() = oldP.position() + p.velocity()*a_dt;
+	  // Final stage
+	  for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
+	    ito_particle& p    = particleList[lit];
+	    ito_particle& oldP = particleCopy[litC];
+	    p.position() = oldP.position() + p.velocity()*a_dt;
+	  }
 	}
 
 	// Add a diffusion hop
