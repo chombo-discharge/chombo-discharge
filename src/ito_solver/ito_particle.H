@@ -3,7 +3,6 @@
   @brief  Declaration of a particle class for Ito diffusion
   @author Robert Marskar
   @date   April 2020
-  @todo   When we have re-written MeshInterp, we should get rid of the setAcceleration stuff
 */
 
 #ifndef _ITO_PARTICLE_
@@ -49,6 +48,21 @@ public:
 	      const Real      a_diffusion = 0.0);
 
   /*!
+    @brief Set the old position
+  */
+  void setOldPosition(const RealVect a_oldPosition);
+
+  /*!
+    @brief Get the old position
+  */
+  RealVect& oldPosition();
+
+  /*!
+    @brief Old position
+  */
+  const RealVect& oldPosition() const;
+
+  /*!
     @brief Set particle mass
   */
   void setMass(const Real a_mass);
@@ -87,13 +101,6 @@ public:
     @brief Set the velocity
   */
   void setVelocity(const Real& a_velocity, const int a_dir);
-
-  /*!
-    @brief This is a fucking hack that sets the velocity 
-  */
-  void setAcceleration(const RealVect& a_velocity){
-    setVelocity(a_velocity);
-  }
 
   /*!
     @brief Get reference velocity field
@@ -153,6 +160,7 @@ protected:
   Real     m_mass;
   RealVect m_velocity;
   Real     m_diffusion;
+  RealVect m_oldPosition;
 };
 
 std::ostream & operator<<(std::ostream& ostr, const ito_particle& p);

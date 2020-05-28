@@ -53,9 +53,7 @@ namespace physics {
 
     protected:
 
-      /*!
-	@brief Phase
-      */
+      // Phase
       phase::which_phase m_phase;
 
       // Ito solver & species

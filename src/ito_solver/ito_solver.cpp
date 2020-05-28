@@ -1009,11 +1009,13 @@ void ito_solver::interpolate_velocities(){
     pout() << m_name + "::interpolate_velocities" << endl;
   }
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+  if(m_mobile){
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      this->interpolate_velocities(lvl, dit());
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	this->interpolate_velocities(lvl, dit());
+      }
     }
   }
 }
@@ -1024,17 +1026,19 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
     pout() << m_name + "::interpolate_velocities" << endl;
   }
 
-  const EBCellFAB& velo_cell = (*m_velo_cell[a_lvl])[a_dit];
-  const EBISBox& ebisbox     = velo_cell.getEBISBox();
-  const FArrayBox& vel_fab   = velo_cell.getFArrayBox();
-  const RealVect dx          = m_amr->get_dx()[a_lvl]*RealVect::Unit;
-  const RealVect origin      = m_amr->get_prob_lo();
-  const Box box              = m_amr->get_grids()[a_lvl][a_dit];
+  if(m_mobile){
+    const EBCellFAB& velo_cell = (*m_velo_cell[a_lvl])[a_dit];
+    const EBISBox& ebisbox     = velo_cell.getEBISBox();
+    const FArrayBox& vel_fab   = velo_cell.getFArrayBox();
+    const RealVect dx          = m_amr->get_dx()[a_lvl]*RealVect::Unit;
+    const RealVect origin      = m_amr->get_prob_lo();
+    const Box box              = m_amr->get_grids()[a_lvl][a_dit];
 
-  List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
+    List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
 
-  EBParticleInterp meshInterp(box, ebisbox, dx, origin);
-  meshInterp.interpolateVelocity(particleList, vel_fab, m_deposition);
+    EBParticleInterp meshInterp(box, ebisbox, dx, origin);
+    meshInterp.interpolateVelocity(particleList, vel_fab, m_deposition);
+  }
 }
 
 void ito_solver::interpolate_diffusion(){
@@ -1043,11 +1047,13 @@ void ito_solver::interpolate_diffusion(){
     pout() << m_name + "::interpolate_diffusion" << endl;
   }
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+  if(m_diffusive){
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      this->interpolate_diffusion(lvl, dit());
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	this->interpolate_diffusion(lvl, dit());
+      }
     }
   }
 }
@@ -1058,17 +1064,19 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
     pout() << m_name + "::interpolate_diffusion" << endl;
   }
 
-  const EBCellFAB& dco_cell   = (*m_diffco_cell[a_lvl])[a_dit];
-  const EBISBox& ebisbox     = dco_cell.getEBISBox();
-  const FArrayBox& dco_fab   = dco_cell.getFArrayBox();
-  const RealVect dx          = m_amr->get_dx()[a_lvl]*RealVect::Unit;
-  const RealVect origin      = m_amr->get_prob_lo();
-  const Box box              = m_amr->get_grids()[a_lvl][a_dit];
+  if(m_diffusive){
+    const EBCellFAB& dco_cell   = (*m_diffco_cell[a_lvl])[a_dit];
+    const EBISBox& ebisbox     = dco_cell.getEBISBox();
+    const FArrayBox& dco_fab   = dco_cell.getFArrayBox();
+    const RealVect dx          = m_amr->get_dx()[a_lvl]*RealVect::Unit;
+    const RealVect origin      = m_amr->get_prob_lo();
+    const Box box              = m_amr->get_grids()[a_lvl][a_dit];
 
-  List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
+    List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
 
-  EBParticleInterp meshInterp(box, ebisbox,dx, origin);
-  meshInterp.interpolateDiffusion(particleList, dco_fab, m_deposition);
+    EBParticleInterp meshInterp(box, ebisbox,dx, origin);
+    meshInterp.interpolateDiffusion(particleList, dco_fab, m_deposition);
+  }
 }
 
 Real ito_solver::sign(const Real& a) const{
@@ -1300,7 +1308,7 @@ Real ito_solver::compute_diffusion_dt(const int a_lvl, const DataIndex& a_dit, c
   for (lit.rewind(); lit; ++lit){
     const ito_particle& p = particleList[lit];
     
-    const Real thisDt = a_dx[0]/(sqrt(2.0*p.diffusion()));
+    const Real thisDt = a_dx[0]*a_dx[0]/(2.0*p.diffusion());
     
     dt = Min(dt, thisDt);
   }

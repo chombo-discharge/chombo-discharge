@@ -188,7 +188,7 @@ void particle_container<P>::remap(){
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     const bool has_coar = lvl > 0;
 
-        // Rebin this level
+    // Rebin this level
     m_particles[lvl]->gatherOutcast();
     m_particles[lvl]->remapOutcast();
 
@@ -201,11 +201,11 @@ void particle_container<P>::remap(){
 			    m_ref_rat[lvl],
 			    false, 
 			    m_prob_lo);
+
+      // Remap new outcasts
+      m_particles[lvl]->remapOutcast();
     }
 
-    // Rebin this level
-    m_particles[lvl]->gatherOutcast();
-    m_particles[lvl]->remapOutcast();
 
     // Transfer finer-level particles
     if(has_coar){
@@ -216,6 +216,7 @@ void particle_container<P>::remap(){
 			    1,
 			    true,
 			    m_prob_lo);
+      m_particles[lvl-1]->gatherOutcast();
       m_particles[lvl-1]->remapOutcast();
     }
   }
@@ -224,9 +225,7 @@ void particle_container<P>::remap(){
   // do collect those, too
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     if(m_particles[lvl]->numOutcast() > 0){
-#if 0 //
-      if(procID() == 0) std::cout << "particle_container<P>::remap - outcast list not empty" << std::endl;
-#endif
+      //      if(procID() == 0) std::cout << "particle_container<P>::remap - outcast list not empty" << std::endl;
       this->remap_lost_particles();
       break;
     }

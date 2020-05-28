@@ -164,7 +164,6 @@ void brownian_walker_stepper::compute_dt(Real& a_dt, time_code::which_code& a_ti
     pout() << "brownian_walker_stepper::compute_dt" << endl;
   }
   
-  //  MayDay::Warning("brownian_walker_stepper::compute_dt - not implemented yet");
   m_solver->interpolate_velocities();
   m_solver->interpolate_diffusion();
 
@@ -307,11 +306,10 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	  for (lit.rewind(); lit; ++lit){ 
 	    ito_particle& p = particleList[lit];
 	    const RealVect ran = m_solver->random_gaussian();
-	    const RealVect hop = ran*sqrt(2.0*p.diffusion())*a_dt;
+	    const RealVect hop = ran*sqrt(2.0*p.diffusion()*a_dt);
 	    p.position() += hop;
 	  }
 	}
-
 	
 	// Do particle bounceback on the EB
 	const EBISBox& ebisbox = ebisl[dit()];
