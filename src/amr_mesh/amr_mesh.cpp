@@ -700,6 +700,7 @@ void amr_mesh::build_domains(){
   m_concentration_redist.resize(phase::num_phases);
   m_pwl_fillpatch.resize(phase::num_phases);
   m_pwl_interp.resize(phase::num_phases);
+  m_ebmg_interp.resize(phase::num_phases);
   m_centroid_interp.resize(phase::num_phases);
   m_noncons_div.resize(phase::num_phases);
   m_eb_centroid_interp.resize(phase::num_phases);
@@ -719,6 +720,7 @@ void amr_mesh::build_domains(){
   m_old_quadcfi[phase::gas].resize(nlevels);
   m_pwl_fillpatch[phase::gas].resize(nlevels);
   m_pwl_interp[phase::gas].resize(nlevels);
+  m_ebmg_interp[phase::gas].resize(nlevels);
   m_level_redist[phase::gas].resize(nlevels);
   m_coar_to_fine_redist[phase::gas].resize(nlevels);
   m_coar_to_coar_redist[phase::gas].resize(nlevels);
@@ -738,6 +740,7 @@ void amr_mesh::build_domains(){
   m_level_redist[phase::solid].resize(nlevels);
   m_pwl_fillpatch[phase::solid].resize(nlevels);
   m_pwl_interp[phase::solid].resize(nlevels);
+  m_ebmg_interp[phase::solid].resize(nlevels);
   m_coar_to_fine_redist[phase::solid].resize(nlevels);
   m_coar_to_coar_redist[phase::solid].resize(nlevels);
   m_fine_to_coar_redist[phase::solid].resize(nlevels);
@@ -788,6 +791,7 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
   this->define_eb_quad_cfi(a_lmin);             // Define nwoebquadcfinterp on both phases.
   this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
   this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
+  this->define_ebmg_interp(a_lmin);             // Define interpolator used for e.g. multigrid (or piecewise constant)
   this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
   this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
   this->define_gradsten(a_lmin);  // Make stencils for computing gradients
@@ -832,6 +836,7 @@ void amr_mesh::regrid_operators(const int a_lmin,
   this->define_eb_quad_cfi(a_lmin);             // Define nwoebquadcfinterp on both phases.
   this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
   this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
+  this->define_ebmg_interp(a_lmin);             // Define interpolator used for e.g. multigrid (or piecewise constant)
   this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
   this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
   this->define_gradsten(a_lmin);                // Make stencils for computing gradients
@@ -1670,6 +1675,56 @@ void amr_mesh::define_ebpwl_interp(const int a_lmin){
 												m_ref_ratios[lvl-1],
 												comps,
 												ebis_sol));
+	}
+      }
+    }
+  }
+}
+
+void amr_mesh::define_ebmg_interp(const int a_lmin){
+  CH_TIME("amr_mesh::define_ebmg_interp");
+  if(m_verbosity > 2){
+    pout() << "amr_mesh::define_ebmg_interp" << endl;
+  }
+
+  const int ncomps    = 1;
+
+  // Should these be input somehow?
+  const int radius    = 1;
+  const IntVect ghost = m_num_ghost*IntVect::Unit;
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
+
+    const bool has_coar = lvl > 0;
+
+    if(has_coar){
+      if(!ebis_gas.isNull()){
+	if(this->query_operator(s_eb_mg_interp, phase::gas)){
+	  m_ebmg_interp[phase::gas][lvl] = RefCountedPtr<EBMGInterp> (new EBMGInterp(m_grids[lvl],
+										     m_grids[lvl-1],
+										     m_ebisl[phase::gas][lvl],
+										     m_ebisl[phase::gas][lvl-1],
+										     m_domains[lvl-1],
+										     m_ref_ratios[lvl-1],
+										     ncomps,
+										     ebis_gas,
+										     m_num_ghost*IntVect::Unit));
+	}
+      }
+      if(!ebis_sol.isNull()){
+	if(this->query_operator(s_eb_pwl_interp, phase::solid)){
+	  m_ebmg_interp[phase::solid][lvl] = RefCountedPtr<EBMGInterp> (new EBMGInterp(m_grids[lvl],
+										       m_grids[lvl-1],
+										       m_ebisl[phase::solid][lvl],
+										       m_ebisl[phase::solid][lvl-1],
+										       m_domains[lvl-1],
+										       m_ref_ratios[lvl-1],
+										       ncomps,
+										       ebis_sol,
+										       m_num_ghost*IntVect::Unit));
 	}
       }
     }
@@ -2962,6 +3017,10 @@ Vector<RefCountedPtr<EBPWLFineInterp> >& amr_mesh::get_eb_pwl_interp(phase::whic
   return m_pwl_interp[a_phase];
 }
 
+Vector<RefCountedPtr<EBMGInterp> >& amr_mesh::get_eb_mg_interp(phase::which_phase a_phase){
+  return m_ebmg_interp[a_phase];
+}
+
 Vector<RefCountedPtr<EBFluxRegister> >&  amr_mesh::get_flux_reg(phase::which_phase a_phase){
   CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase. 
   return m_flux_reg[a_phase];
@@ -3074,7 +3133,8 @@ void amr_mesh::register_operator(const std::string a_operator, const phase::whic
        a_operator.compare(s_eb_copier)       == 0 ||
        a_operator.compare(s_eb_ghostcloud)   == 0 ||
        a_operator.compare(s_eb_gradient)     == 0 ||
-       a_operator.compare(s_eb_irreg_interp) == 0)){
+       a_operator.compare(s_eb_irreg_interp) == 0 ||
+       a_operator.compare(s_eb_mg_interp)    == 0)){
 
     const std::string str = "amr_mesh::register_operator - unknown operator '" + a_operator + "' requested";
     MayDay::Abort(str.c_str());

@@ -250,7 +250,7 @@ void ito_solver::register_operators(){
   else{
     m_amr->register_operator(s_eb_coar_ave,     m_phase);
     m_amr->register_operator(s_eb_fill_patch,   m_phase);
-    m_amr->register_operator(s_eb_pwl_interp,   m_phase);
+    m_amr->register_operator(s_eb_mg_interp,    m_phase);
     m_amr->register_operator(s_eb_redist,       m_phase);
     m_amr->register_operator(s_eb_copier,       m_phase);
     m_amr->register_operator(s_eb_ghostcloud,   m_phase);
@@ -634,8 +634,8 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&                    a_s
 
     // 1. If we have a coarser level whose cloud extends beneath this level, interpolate that result here first. 
     if(has_coar && m_pvr_buffer > 0){
-      RefCountedPtr<EBPWLFineInterp>& interp = m_amr->get_eb_pwl_interp(m_phase)[lvl];
-      interp->interpolate(*a_state[lvl], *m_scratch[lvl-1], interv);
+      RefCountedPtr<EBMGInterp>& interp = m_amr->get_eb_mg_interp(m_phase)[lvl];
+      interp->pwcInterp(*a_state[lvl], *m_scratch[lvl-1], interv);
     }
     
     // 2. Deposit this levels particles. Note that this will deposit into ghost cells, which must later
