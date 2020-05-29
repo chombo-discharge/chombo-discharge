@@ -1360,36 +1360,28 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_
     pout() << m_name + "make_superparticles(int, level, patch)" << endl;
   }
 
-  // SAFETY factor for rounding physical particles downwards, since particle mass is strictly speaking a floating point. 
-  const Real SAFETY = 1.E-6;
-
   // These are the particles on this patch
-  ListBox<ito_particle>& particles      = m_particles[a_level][a_dit];
-  const int numCompParticles = particles.numItems();
-  
-  if(numCompParticles > 0){
-    int numPhysParticles = 0;
+  ListBox<ito_particle>& boxParticles = m_particles[a_level][a_dit];
+  List<ito_particle>& particles = boxParticles.listItems();
 
+  if(boxParticles.numItems() > 0){
+
+    // 1. Make the particles into point masses
     std::vector<point_mass> points;
-    ListIterator<ito_particle> lit(particles.listItems());
+    ListIterator<ito_particle> lit(particles);
     for (lit.rewind(); lit; ++lit){
       const ito_particle& p = lit();
-      numPhysParticles += (int) (p.mass() + SAFETY);
-
       points.push_back(point_mass(p.position(), p.mass()));
     }
 
-    const Real W0 = numPhysParticles/a_particlesPerPatch;
 
-    // 1. Build the BVH tree
+    // 2. Build the BVH tree and get the leaves of the tree
     bvh_tree<point_mass> tree(points);
     tree.build_tree(a_particlesPerPatch);
-
-    // 2. Get the leaves. Each leaf becomes a new superparticle. 
     std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
 
     // 3. Clear the original particles
-    particles.listItems().clear();
+    particles.clear();
 
     // 4. Iterate through the leaves. Each leaf becomes a new superparticle
     for (int i = 0; i < leaves.size(); i++){
@@ -1397,13 +1389,7 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_
 
       ito_particle p(pointMass.m_mass, pointMass.m_pos);
 
-      particles.addItem(p);
+      boxParticles.addItem(p);
     }
-
-    
-
-    // std::cout << procID() << "\t" << numPhysParticles << std::endl;
   }
-
-  //  std::cout << particles.numItems() << std::endl;
 }
