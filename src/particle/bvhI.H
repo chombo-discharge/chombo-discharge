@@ -48,6 +48,16 @@ void bvh_node<T>::set_data(const std::vector<T>& a_data){
 }
 
 template <class T>
+std::vector<T>& bvh_node<T>::get_data(){
+  return m_data;
+}
+
+template <class T>
+const std::vector<T>& bvh_node<T>::get_data() const{
+  return m_data;
+}
+
+template <class T>
 void bvh_node<T>::sort(const int a_dir){
   MayDay::Abort("bvh_node::sort - not implemented");
 }
@@ -64,6 +74,8 @@ bvh_tree<T>::bvh_tree(std::vector<T>& a_data){
   m_root = std::make_shared<bvh_node<T> >();
   m_root->set_leaf(true);
   m_root->set_data(a_data);
+
+  m_nodes.push_back(m_root);
 }
 
 template <class T>
@@ -76,9 +88,20 @@ std::vector<std::shared_ptr<bvh_node<T> > >& bvh_tree<T>::get_leaves(){
 }
 
 template <class T>
+std::vector<std::shared_ptr<bvh_node<T> > >& bvh_tree<T>::get_nodes(){
+  return m_nodes;
+}
+
+template <class T>
 void bvh_tree<T>::build_tree(const int a_numLeaves){
 
-  MayDay::Abort("bvh_tree<T>::build_tree - not implmemented");
+  for (int i = 0; i < m_nodes.size(); i++){
+    if(m_nodes[i]->is_leaf()){
+      m_leaves.push_back(m_nodes[i]);
+    }
+  }
+  
+  //  MayDay::Abort("bvh_tree<T>::build_tree - not implmemented");
 }
 
 

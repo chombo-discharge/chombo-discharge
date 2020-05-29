@@ -1381,13 +1381,42 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_
 
     const Real W0 = numPhysParticles/a_particlesPerPatch;
 
-
+    // 1. Build the BVH tree
     bvh_tree<point_mass> tree(points);
-
     tree.build_tree(a_particlesPerPatch);
+
+    // 2. Get the leaves. Each leaf becomes a new superparticle. 
+    std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
+
+    // 3. Clear the original particles
+    particles.listItems().clear();
+
+    // 4. Iterate through the leaves. Each leaf becomes a new superparticle
+    for (int i = 0; i < leaves.size(); i++){
+      const std::vector<point_mass>& data = leaves[i]->get_data();
+
+      RealVect pos = RealVect::Zero;
+      Real mass    = 0.;
+
+      for (int j = 0; j < data.size(); j++){
+	const Real m     = data[j].m_mass;
+	const RealVect p = data[j].m_pos;
+
+	mass += m;
+	pos  += m*p;
+      }
+      pos = pos/mass;
+
+      ito_particle p(mass, pos);
+
+      std::cout << "adding particle with pos = " << pos << std::endl;
+      particles.addItem(p);
+    }
 
     
 
     // std::cout << procID() << "\t" << numPhysParticles << std::endl;
   }
+
+  //  std::cout << particles.numItems() << std::endl;
 }
