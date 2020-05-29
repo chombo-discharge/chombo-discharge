@@ -59,6 +59,11 @@ void bvh_node<T>::split_data(){
 
 template <class T>
 bvh_tree<T>::bvh_tree(std::vector<T>& a_data){
+
+  // Make the root node
+  m_root = std::make_shared<bvh_node<T> >();
+  m_root->set_leaf(true);
+  m_root->set_data(a_data);
 }
 
 template <class T>
@@ -66,12 +71,16 @@ bvh_tree<T>::~bvh_tree(){
 }
 
 template <class T>
-void bvh_tree<T>::build_tree(const int a_numLeaves){
-}
-
-template <class T>
 std::vector<std::shared_ptr<bvh_node<T> > >& bvh_tree<T>::get_leaves(){
   return m_leaves;
 }
+
+template <class T>
+void bvh_tree<T>::build_tree(const int a_numLeaves){
+
+  MayDay::Abort("bvh_tree<T>::build_tree - not implmemented");
+}
+
+
 
 #endif
