@@ -8,10 +8,12 @@
 #include "brownian_walker_stepper.H"
 #include "brownian_walker_species.H"
 
+
 #include "poly.H"
 
 #include <ParmParse.H>
 #include <PolyGeom.H>
+#include <BinFab.H>
 
 using namespace physics::brownian_walker;
 
@@ -266,8 +268,8 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
   const int finest_level = m_amr->get_finest_level();
   const RealVect origin  = m_amr->get_prob_lo();
-
-  
+  m_solver->remap();
+  particle_container<ito_particle>& allParticles = m_solver->get_particles();
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RealVect dx                      = m_amr->get_dx()[lvl]*RealVect::Unit;
     const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
@@ -277,6 +279,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
     if(m_solver->is_mobile() || m_solver->is_diffusive()){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
 	// Create a copy. 
 	List<ito_particle>& particleList = particles[dit()].listItems();
 	List<ito_particle>  particleCopy = List<ito_particle>(particleList);
@@ -285,7 +288,6 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	// in the constructor. So, we need one for velocities and one for the copy
 	ListIterator<ito_particle> lit(particleList);
 	ListIterator<ito_particle> litC(particleCopy);
-
 
 	// Half Euler step and evaluate velocity at half step
 	if(m_solver->is_mobile()){
@@ -359,9 +361,12 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
     }
   }
 
-  m_solver->remap();
 
-  // Deposit particles
+
+  // Remap and deposit particles
+  m_solver->remap();
+  m_solver->make_superparticles(32);
+
   m_solver->deposit_particles();
 
   return a_dt;

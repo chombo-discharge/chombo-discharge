@@ -244,6 +244,21 @@ public:
     @brief Interpolate velocities
   */
   virtual void interpolate_diffusion(const int a_level, const DataIndex& a_dit);
+  
+  /*!
+    @brief Make superparticles
+  */
+  virtual void make_superparticles(const int a_particlesPerPatch);
+
+  /*!
+    @brief Make superparticles on specified level
+  */
+  virtual void make_superparticles(const int a_particlesPerPatch, const int a_level);
+
+  /*!
+    @brief Make superparticles on specified level and patch
+  */
+  virtual void make_superparticles(const int a_particlesPerPatch, const int a_level, const DataIndex a_dit);
 
   /*!
     @brief Remap all particles

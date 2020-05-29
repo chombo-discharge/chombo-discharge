@@ -11,6 +11,8 @@
 #include "units.H"
 #include "EBGhostCloud.H"
 #include "ito_layout.H"
+#include "point_mass.H"
+#include "bvh.H"
 
 #include <EBArith.H>
 #include <ParmParse.H>
@@ -23,8 +25,6 @@
 ito_solver::ito_solver(){
   m_name       = "ito_solver";
   m_class_name = "ito_solver";
-
-  EBGhostCloud cloud;
 }
 
 ito_solver::~ito_solver(){
@@ -1327,4 +1327,65 @@ void ito_solver::remap(){
 
 phase::which_phase ito_solver::get_phase() const{
   return m_phase;
+}
+
+
+void ito_solver::make_superparticles(const int a_particlesPerPatch){
+  CH_TIME("ito_solver::make_superparticles(int)");
+  if(m_verbosity > 5){
+    pout() << m_name + "make_superparticles(int)" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    this->make_superparticles(a_particlesPerPatch, lvl);
+  }
+}
+
+void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_level){
+  CH_TIME("ito_solver::make_superparticles(int, level)");
+  if(m_verbosity > 5){
+    pout() << m_name + "make_superparticles(int, level)" << endl;
+  }
+  
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    this->make_superparticles(a_particlesPerPatch, a_level, dit());
+  }
+}
+
+void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_level, const DataIndex a_dit){
+  CH_TIME("ito_solver::make_superparticles(int, level, patch)");
+  if(m_verbosity > 5){
+    pout() << m_name + "make_superparticles(int, level, patch)" << endl;
+  }
+
+  // SAFETY factor for rounding physical particles downwards, since particle mass is strictly speaking a floating point. 
+  const Real SAFETY = 1.E-6;
+
+  // These are the particles on this patch
+  ListBox<ito_particle>& particles      = m_particles[a_level][a_dit];
+  const int numCompParticles = particles.numItems();
+  
+  if(numCompParticles > 0){
+    int numPhysParticles = 0;
+
+    std::vector<point_mass> points;
+    ListIterator<ito_particle> lit(particles.listItems());
+    for (lit.rewind(); lit; ++lit){
+      const ito_particle& p = lit();
+      numPhysParticles += (int) (p.mass() + SAFETY);
+
+      points.push_back(point_mass(p.position(), p.mass()));
+    }
+
+    const Real W0 = numPhysParticles/a_particlesPerPatch;
+
+
+    bvh_tree<point_mass> tree(points);
+
+    tree.build_tree(a_particlesPerPatch);
+
+    // std::cout << procID() << "\t" << numPhysParticles << std::endl;
+  }
 }
