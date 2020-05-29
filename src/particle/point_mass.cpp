@@ -16,6 +16,23 @@ point_mass::point_mass(const RealVect a_pos, const Real a_mass){
   m_mass = a_mass;
 }
 
+point_mass::point_mass(const std::vector<point_mass>& a_point_masses){
+  m_pos  = RealVect::Zero;
+  m_mass = 0.0;
+
+  for (int i = 0; i < a_point_masses.size(); i++){
+    const RealVect& p = a_point_masses[i].m_pos;
+    const Real& m     = a_point_masses[i].m_mass;
+    
+    m_mass += m;
+    m_pos  += m*p;
+  }
+
+  if(m_mass > 0.0){
+    m_pos = m_pos/m_mass;
+  }
+}
+
 point_mass::~point_mass(){
 
 }

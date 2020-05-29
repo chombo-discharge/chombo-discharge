@@ -17,6 +17,7 @@ class point_mass{
 public:
   point_mass();
   point_mass(const RealVect a_pos, const Real a_mass);
+  point_mass(const std::vector<point_mass>& a_point_masses);
   ~point_mass();
   
   RealVect m_pos;   // Position of this point_mass

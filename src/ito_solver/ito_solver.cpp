@@ -1393,23 +1393,10 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_
 
     // 4. Iterate through the leaves. Each leaf becomes a new superparticle
     for (int i = 0; i < leaves.size(); i++){
-      const std::vector<point_mass>& data = leaves[i]->get_data();
+      point_mass pointMass(leaves[i]->get_data());
 
-      RealVect pos = RealVect::Zero;
-      Real mass    = 0.;
+      ito_particle p(pointMass.m_mass, pointMass.m_pos);
 
-      for (int j = 0; j < data.size(); j++){
-	const Real m     = data[j].m_mass;
-	const RealVect p = data[j].m_pos;
-
-	mass += m;
-	pos  += m*p;
-      }
-      pos = pos/mass;
-
-      ito_particle p(mass, pos);
-
-      std::cout << "adding particle with pos = " << pos << std::endl;
       particles.addItem(p);
     }
 
