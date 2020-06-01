@@ -1362,21 +1362,19 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_
 
   // These are the particles on this patch
   ListBox<ito_particle>& boxParticles = m_particles[a_level][a_dit];
-  List<ito_particle>& particles = boxParticles.listItems();
+  List<ito_particle>& particles       = boxParticles.listItems();
 
   if(boxParticles.numItems() > 0){
 
     // 1. Make the particles into point masses
-    std::vector<point_mass> points;
-    ListIterator<ito_particle> lit(particles);
-    for (lit.rewind(); lit; ++lit){
+    std::vector<point_mass> pointMasses;
+    for (ListIterator<ito_particle> lit(particles); lit; ++lit){
       const ito_particle& p = lit();
-      points.push_back(point_mass(p.position(), p.mass()));
+      pointMasses.push_back(point_mass(p.position(), p.mass()));
     }
 
-
     // 2. Build the BVH tree and get the leaves of the tree
-    bvh_tree<point_mass> tree(points);
+    bvh_tree<point_mass> tree(pointMasses);
     tree.build_tree(a_particlesPerPatch);
     std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
 

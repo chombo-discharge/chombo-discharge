@@ -36,3 +36,19 @@ point_mass::point_mass(const std::vector<point_mass>& a_point_masses){
 point_mass::~point_mass(){
 
 }
+
+const RealVect& point_mass::pos() const{
+  return m_pos;
+}
+
+const Real& point_mass::mass() const{
+  return m_mass;
+}
+
+Real point_mass::operator[](int a_dir) const{
+  return m_pos[a_dir];
+}
+
+bool point_mass::can_split() const {
+  return m_mass*(1.0 + 1.E-6) >= 2.0;
+}
