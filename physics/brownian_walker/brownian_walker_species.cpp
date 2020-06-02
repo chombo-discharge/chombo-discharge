@@ -57,7 +57,7 @@ void brownian_walker_species::draw_initial_particles(){
   // Now make the particles
   m_initial_particles.clear();
   for (int i = 0; i < particlesPerRank[procID()]; i++){
-    const Real weight  = 3.0;
+    const Real weight  = 1.0;
     const RealVect pos = m_blob_center + m_blob_radius*random_gaussian();
     m_initial_particles.add(ito_particle(weight, pos));
   }

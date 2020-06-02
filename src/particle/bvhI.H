@@ -8,6 +8,8 @@
 #ifndef _BVHI_H_
 #define _BVHI_H_
 
+#define DEBUG 0
+
 template <class T>
 bvh_node<T>::bvh_node(){
 }
@@ -49,8 +51,31 @@ void bvh_node<T>::set_data(const std::vector<T>& a_data){
   m_mass = 0.0;
   
   for (auto v : m_data){
+#if DEBUG // Debug
+    if(v.mass() < 0.0){
+      std::cout << v.mass() << std::endl;
+    }
+    else if(v.mass() > 1.E4){
+      std::cout << v.mass() << std::endl;
+    }
+#endif
     m_mass += v.mass();
   }
+}
+
+template <class T>
+std::shared_ptr<bvh_node<T> > bvh_node<T>::get_left(){
+  return m_left;
+}
+
+template <class T>
+std::shared_ptr<bvh_node<T> > bvh_node<T>::get_right(){
+  return m_right;
+}
+
+template <class T>
+std::shared_ptr<bvh_node<T> > bvh_node<T>::get_parent(){
+  return m_parent;
 }
 
 template <class T>
@@ -70,6 +95,14 @@ bool bvh_node<T>::can_split() const {
     if(m_data.size() > 1 || m_data[0].can_split()){
       ret = true;
     }
+#if DEBUG
+    else{
+      std::cout << "data size = " << m_data.size() << "\t mass = " << m_data[0].mass() << std::endl;
+    }
+#endif
+  }
+  else{
+    MayDay::Abort("doesn't have data - shouldn't happen!");
   }
 
   return ret;
@@ -84,6 +117,11 @@ template <class T>
 void bvh_node<T>::split(const int a_dir){
 
   // 0. If we made it in here, we KNOW that we can split.
+#if DEBUG // Debug
+  if(m_mass < 0.0){
+    MayDay::Abort("should not get negative mass!");
+  }
+#endif
   
   // 1. Sort data. Use a lambda for comparing. God I love C++11. 
   std::sort(std::begin(m_data), std::end(m_data), [a_dir](const T& p1, const T& p2){return p1[a_dir] < p2[a_dir];});
@@ -93,6 +131,8 @@ void bvh_node<T>::split(const int a_dir){
   Real mass_left  = 0.0;
   Real mass_right = m_mass;
   int splitIndex = -1;
+
+
   for (int i = 0; i < m_data.size(); i++){
     mass_left  += m_data[i].mass();
     mass_right -= m_data[i].mass();
@@ -104,15 +144,20 @@ void bvh_node<T>::split(const int a_dir){
     }
   }
 
+
   // 3. Everything to the left of splitIndex goes into left data; everything to the right of splitIndex goes into the right data
   std::vector<T> leftData;
   std::vector<T> rightData;
+  mass_left = 0.0;
+  mass_right = 0.0;
   for (int i = 0; i < m_data.size(); i++){
     if(i < splitIndex){
       leftData.push_back(m_data[i]);
+      mass_left += m_data[i].mass();
     }
     else if (i > splitIndex){
       rightData.push_back(m_data[i]);
+      mass_right += m_data[i].mass();
     }
   }
 
@@ -120,27 +165,63 @@ void bvh_node<T>::split(const int a_dir){
   //    is a superparticle; in this case we divide the weights as best we can and then assign them to the left/right halves
   if(m_data[splitIndex].can_split()){
     const Real m  = m_data[splitIndex].mass();
-    const int  N  = (int) m*(1.0 + 1.E-6);
-    const int  NR = N/2;
-    const int  NL = N - NR;
+    const long long  N  = llround(m*(1.0 + 1.E-6));
+    const long long  NR = N/2;
+    const long long  NL = N - NR;
+
+    if(m < 0.0){
+      MayDay::Abort("got negative mass 2");
+    }
+    if(NL < 0.0){
+      std::cout << m << "\t" << N << "\t" << NR << "\t" << NL << "\t" << m_data.size() << "\t idx = " << splitIndex << std::endl;
+      MayDay::Abort("got negative NL");
+    }
 
     const RealVect& pos  = m_data[splitIndex].pos();
-    const Real massLeft  = m*NL;
-    const Real massRight = m*NR;
+    const Real massLeft  = (m/N)*NL;
+    const Real massRight = (m/N)*NR;
+
+    if(massLeft < 0.0){
+      std::cout << "massLeft = " << massLeft << std::endl;
+      MayDay::Abort("stop left");
+    }
+    if(massRight < 0.0){
+      std::cout << "massRight = " << massRight << std::endl;
+      MayDay::Abort("stop right");
+    }
 
     leftData.push_back(T(pos, massLeft));
     rightData.push_back(T(pos, massRight));
+  }
+  else{
+    if(mass_left <= mass_right){
+      leftData.push_back(m_data[splitIndex]);
+    }
+    else{
+      rightData.push_back(m_data[splitIndex]);
+    }
   }
 
   // 5. We have the data, we can make the new leaves now.
   auto left = std::make_shared<bvh_node<T> >();
   auto righ = std::make_shared<bvh_node<T> >();
 
-  left->set_data(leftData);
-  righ->set_data(leftData);
+#if DEBUG // Debug
+  if(!(rightData.size() > 0)) {
+    std::cout << "bad right data size = " << m_data.size() << "\t mass = " << m_mass << "\t idx = " << splitIndex << std::endl;
+    MayDay::Abort("right data size must be > 0");
+  }
+  if(!(leftData.size()  > 0)) {
+    std::cout << "bad left data size = " << m_data.size() << "\t mass = " << m_mass << "\t idx = " << splitIndex << std::endl;
+    MayDay::Abort("left data size must be > 0");
+  }
+#endif
 
-  left->set_parent(std::shared_ptr<bvh_node<T> >(this));
-  righ->set_parent(std::shared_ptr<bvh_node<T> >(this));
+  left->set_data(leftData);
+  righ->set_data(rightData);
+
+  left->set_parent(this->shared_from_this());
+  righ->set_parent(this->shared_from_this());
 
   // This is no longer a leaf node. Set the pointers and clear data. 
   this->set_left(left);
@@ -148,8 +229,6 @@ void bvh_node<T>::split(const int a_dir){
   this->set_leaf(false);
   m_mass = 0.;
   m_data.clear();
-
-  MayDay::Abort("bvh_node::split - not implemented");
 }
 
 template <class T>
@@ -180,34 +259,69 @@ std::vector<std::shared_ptr<bvh_node<T> > >& bvh_tree<T>::get_nodes(){
 
 template <class T>
 void bvh_tree<T>::build_tree(const int a_numLeaves){
-
   int splitDir = 0;
 
-  bool keepSplitting = true;
+  bool keepSplitting = m_leaves.size() < a_numLeaves;
+  
   while(keepSplitting){
 
-    // Sort leaves by their mass, and then split them
-    std::sort(std::begin(m_leaves), std::end(m_leaves), [](const bvh_node<T>& n1, const bvh_node<T>& n2){
-	return n1.mass() < n2.mass();});
+    std::vector<std::shared_ptr<bvh_node<T> > > new_leaves;
+    bool can_split = false;
+    
+    // All leaves are split.
+    // TODO: Maybe we always should sort and split. 
+    if(2*m_leaves.size() <= a_numLeaves){ 
+      for(auto v : m_leaves){
+	if(v->can_split()){
+	  can_split = true;
+	  v->split(splitDir);
 
-    // Split all the leaves into new ones.
-    for(auto v : m_leaves){
-      if(v->can_split()){
-	v->split(splitDir);
+	  new_leaves.push_back(v->get_left());
+	  new_leaves.push_back(v->get_right());
+	}
+	else{
+	  new_leaves.push_back(v);
+	}
       }
     }
-    keepSplitting = false;
-  }
+    else{
+      // Sort the leaves by their mass. We will split the ones with the largest masses.
+      std::sort(std::begin(m_leaves), std::end(m_leaves),
+		[](const std::shared_ptr<bvh_node<T> >& n1,
+		   const std::shared_ptr<bvh_node<T> >& n2){
+		  return n1->mass() < n2->mass();
+		});
 
-  
-  // Build all the leaves. This is a stupid way of doing it but stupid is what I need right now. 
-  for (int i = 0; i < m_nodes.size(); i++){
-    if(m_nodes[i]->is_leaf()){
-      m_leaves.push_back(m_nodes[i]);
+      int leavesNeeded = a_numLeaves - m_leaves.size();
+      for(int i = 0; i < m_leaves.size(); i++){
+	const int leavesLeft = m_leaves.size() - i;
+	if(m_leaves[i]->can_split() && leavesNeeded > 0){ // Only split if we actually need more leaves. 
+	  can_split = true;
+	  
+	  m_leaves[i]->split(splitDir);
+	  new_leaves.push_back(m_leaves[i]->get_left());
+	  new_leaves.push_back(m_leaves[i]->get_right());
+
+	  leavesNeeded -= 1; // We only get one extra leaf when we split. 
+	}
+	else{
+	  new_leaves.push_back(m_leaves[i]);
+	}
+      }
     }
+
+    splitDir = (splitDir + 1) % SpaceDim; // New splitting coordinate
+    m_leaves = new_leaves;                // New leaves.
+
+    // Did we end up in a convergent situation? OK, then exit. 
+    if(m_leaves.size() >= a_numLeaves){
+      keepSplitting = false;
+    }
+    if(!can_split){
+      keepSplitting = false;
+    }
+    
   }
-  
-  //  MayDay::Abort("bvh_tree<T>::build_tree - not implmemented");
 }
 
 

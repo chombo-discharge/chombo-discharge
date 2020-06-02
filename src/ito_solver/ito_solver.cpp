@@ -1354,7 +1354,7 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_
   }
 }
 
-void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_level, const DataIndex a_dit){
+void ito_solver::make_superparticles(const int a_particlesPerCell, const int a_level, const DataIndex a_dit){
   CH_TIME("ito_solver::make_superparticles(int, level, patch)");
   if(m_verbosity > 5){
     pout() << m_name + "make_superparticles(int, level, patch)" << endl;
@@ -1362,32 +1362,48 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_
 
   // These are the particles on this patch
   ListBox<ito_particle>& boxParticles = m_particles[a_level][a_dit];
-  List<ito_particle>& particles       = boxParticles.listItems();
 
   if(boxParticles.numItems() > 0){
 
-    // 1. Make the particles into point masses
-    std::vector<point_mass> pointMasses;
-    for (ListIterator<ito_particle> lit(particles); lit; ++lit){
-      const ito_particle& p = lit();
-      pointMasses.push_back(point_mass(p.position(), p.mass()));
+    BinFab<ito_particle> cellParticles;
+    m_particles.get_cell_particles(cellParticles, a_level, a_dit);
+
+    const Box box = m_amr->get_grids()[a_level].get(a_dit);
+    for (BoxIterator bit(box); bit.ok(); ++bit){
+      const IntVect iv = bit();
+      List<ito_particle>& particles = cellParticles(iv, 0);
+
+      if(particles.length() > 0){
+	std::vector<point_mass> pointMasses;
+	for (ListIterator<ito_particle> lit(particles); lit; ++lit){
+	  const ito_particle& p = lit();
+	  pointMasses.push_back(point_mass(p.position(), p.mass()));
+	}
+
+	// 2. Build the BVH tree and get the leaves of the tree
+	bvh_tree<point_mass> tree(pointMasses);
+	tree.build_tree(a_particlesPerCell);
+	std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
+#if 1 // Debug
+	if(leaves.size() > a_particlesPerCell){ 
+	  std::cout << "ppc = " << a_particlesPerCell << "\t leaves = " << leaves.size() << std::endl;
+	  MayDay::Abort("ito_solver::make_superparticles - getting more particles than I asked for");
+	}
+#endif
+
+	// 3. Clear particles in this cell and add new ones.
+	particles.clear();
+	for (int i = 0; i < leaves.size(); i++){
+	  point_mass pointMass(leaves[i]->get_data());
+	  ito_particle p(pointMass.mass(), pointMass.pos());
+	  cellParticles.addItem(p, iv);
+	}
+      }
     }
 
-    // 2. Build the BVH tree and get the leaves of the tree
-    bvh_tree<point_mass> tree(pointMasses);
-    tree.build_tree(a_particlesPerPatch);
-    std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
-
-    // 3. Clear the original particles
-    particles.clear();
-
-    // 4. Iterate through the leaves. Each leaf becomes a new superparticle
-    for (int i = 0; i < leaves.size(); i++){
-      point_mass pointMass(leaves[i]->get_data());
-
-      ito_particle p(pointMass.m_mass, pointMass.m_pos);
-
-      boxParticles.addItem(p);
-    }
+    // Clear old particles and add new ones. 
+    boxParticles.listItems().clear();
+    m_particles.add_particles(cellParticles, a_level, a_dit);
   }
+
 }

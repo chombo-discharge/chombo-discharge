@@ -15,7 +15,7 @@
   @brief Class the describes a single kd-tree node.
 */
 template <class T>
-class bvh_node {
+class bvh_node : public std::enable_shared_from_this<bvh_node<T> > {
 public:
 
   bvh_node();
@@ -37,9 +37,9 @@ public:
 
   inline Real mass() const;
 
-  const std::shared_ptr<T> get_parent() const;
-  const std::shared_ptr<T> get_left() const;
-  const std::shared_ptr<T> get_right() const;
+  std::shared_ptr<bvh_node<T> > get_parent();
+  std::shared_ptr<bvh_node<T> > get_left();
+  std::shared_ptr<bvh_node<T> > get_right();
 
 protected:
 

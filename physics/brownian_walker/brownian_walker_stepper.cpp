@@ -22,9 +22,10 @@ brownian_walker_stepper::brownian_walker_stepper(){
 
   m_phase = phase::gas;
   
-  pp.get("diffco",        m_diffco);
-  pp.get("omega",         m_omega);
-  pp.get("verbosity",     m_verbosity);
+  pp.get("diffco",         m_diffco);
+  pp.get("omega",          m_omega);
+  pp.get("verbosity",      m_verbosity);
+  pp.get("ppc",            m_ppc);
   
   pp.get("max_diffu_hop", m_max_diffu_hop);
   pp.get("max_drift_hop", m_max_drift_hop);
@@ -45,6 +46,9 @@ void brownian_walker_stepper::initial_data(){
   }
   
   m_solver->initial_data();
+  if(m_ppc > 0){
+    m_solver->make_superparticles(m_ppc);
+  }
 
   if(m_solver->is_diffusive()){
     m_solver->set_diffco(m_diffco);
@@ -270,6 +274,8 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
   const RealVect origin  = m_amr->get_prob_lo();
   m_solver->remap();
   particle_container<ito_particle>& allParticles = m_solver->get_particles();
+
+  const Real kernel_start = MPI_Wtime();
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RealVect dx                      = m_amr->get_dx()[lvl]*RealVect::Unit;
     const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
@@ -360,12 +366,23 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
       }
     }
   }
+  const Real kernel_stop = MPI_Wtime();
 
 
 
   // Remap and deposit particles
   m_solver->remap();
-  m_solver->make_superparticles(32);
+
+  // Make superparticles
+  const Real super_start = MPI_Wtime();
+  if(m_ppc > 0){
+    m_solver->make_superparticles(m_ppc);
+  }
+  const Real super_stop = MPI_Wtime();
+
+  const Real tKernel = kernel_stop - kernel_start;
+  const Real tSuper  = super_stop - super_start;
+  pout() << "kernel = " << tKernel << "\t super = " << tSuper << "\t supercost = " << tSuper/tKernel << endl;
 
   m_solver->deposit_particles();
 
@@ -384,5 +401,9 @@ void brownian_walker_stepper::regrid(const int a_lmin, const int a_old_finest_le
   }
   if(m_solver->is_mobile()){
     this->set_velocity();
+  }
+
+  if(m_ppc > 0){
+    m_solver->make_superparticles(m_ppc);
   }
 }

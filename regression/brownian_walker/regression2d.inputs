@@ -122,6 +122,7 @@ brownian_walker.seed           = 0       # RNG seed
 brownian_walker.num_particles  = 100000 # Number of initial particles
 brownian_walker.max_drift_hop  = 1.0     # Maximum number of cells to move for advection hop
 brownian_walker.max_diffu_hop  = 1.0     # Maximum number of cells to move for diffusion hop
+brownian_walker.ppc            = 32      # Target particles per patch
 
 # Velocity, diffusion, and CFL
 # ----------------------------
