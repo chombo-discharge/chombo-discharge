@@ -73,6 +73,7 @@ ito_solver.seed                = 0             # Seed for RNG
 ito_solver.max_diffusion_hop   = 1             # Maximum length of diffusion hop, relative to cell
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo			
 ito_solver.normal_max          = 99.0          # Maximum value (absolute) that can be drawn from the exponential distribution.
+ito_solver.superparticles      = patch         # Make super-particles on a per-cell basis
 ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
 ito_solver.deposition          = cic           # 'ngp' = nearest grid point
                                                # 'cic' = cloud-in-cell
@@ -116,6 +117,7 @@ brownian_walker.blob_radius    = 0.25     # Blob radius
 brownian_walker.blob_center    = 0 0.5    # Blob center
 brownian_walker.seed           = 0        # RNG seed
 brownian_walker.num_particles  = 1000000  # Number of initial particles
+
 brownian_walker.max_drift_hop  = 1.0      # Maximum number of cells to move for advection hop
 brownian_walker.max_diffu_hop  = 2.0      # Maximum number of cells to move for diffusion hop
 brownian_walker.ppc            = 64      # Target particles per patch

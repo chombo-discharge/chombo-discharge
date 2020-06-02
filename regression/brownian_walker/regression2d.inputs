@@ -74,6 +74,7 @@ ito_solver.normal_max          = 1.E99         # Max normal
 ito_solver.max_diffusion_hop   = 1             # Maximum length of diffusion hop, relative to cell
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo			
 ito_solver.normal_max          = 1E6           # Maximum value (absolute) that can be drawn from the exponential distribution.
+ito_solver.superparticles      = cell          # Make super-particles on a per-cell basis
 ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
 ito_solver.deposition          = cic           # 'ngp' = nearest grid point
                                                # 'cic' = cloud-in-cell
