@@ -7,8 +7,6 @@
 
 #include "brownian_walker_stepper.H"
 #include "brownian_walker_species.H"
-
-
 #include "poly.H"
 
 #include <ParmParse.H>
@@ -26,9 +24,7 @@ brownian_walker_stepper::brownian_walker_stepper(){
   pp.get("omega",          m_omega);
   pp.get("verbosity",      m_verbosity);
   pp.get("ppc",            m_ppc);
-  
-  pp.get("max_diffu_hop", m_max_diffu_hop);
-  pp.get("max_drift_hop", m_max_drift_hop);
+  pp.get("max_cells_hop",  m_max_cells_hop);
 }
 
 brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver) : brownian_walker_stepper() {
@@ -144,6 +140,18 @@ void brownian_walker_stepper::post_checkpoint_setup() {
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::post_checkpoint_setup" << endl;
   }
+
+  m_solver->remap();
+  if(m_ppc > 0){
+    m_solver->make_superparticles(m_ppc);
+  }
+
+  if(m_solver->is_diffusive()){
+    m_solver->set_diffco(m_diffco);
+  }
+  if(m_solver->is_mobile()){
+    this->set_velocity();
+  }
 }
 
 int brownian_walker_stepper::get_num_plot_vars() const {
@@ -173,22 +181,7 @@ void brownian_walker_stepper::compute_dt(Real& a_dt, time_code::which_code& a_ti
   m_solver->interpolate_velocities();
   m_solver->interpolate_diffusion();
 
-  Real drift_dt = 1.E99;
-  Real diffu_dt = 1.E99;
-  if(m_solver->is_mobile()){
-    drift_dt = m_solver->compute_min_drift_dt(m_max_drift_hop);
-  }
-  if(m_solver->is_diffusive()){
-    diffu_dt = m_solver->compute_min_diffusion_dt(m_max_diffu_hop);
-  }
-
-  a_dt = 1./(1./drift_dt + 1./diffu_dt);
-
-#if 0 // Debug
-  if(procID() == 0){
-    std::cout << "drift dt = " << drift_dt << "\t diffusion_dt = " << diffu_dt << "\t a_dt = " << a_dt << std::endl;
-  }
-#endif
+  a_dt = m_solver->compute_dt(m_max_cells_hop);
 }
 
 void brownian_walker_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
@@ -275,7 +268,6 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
   m_solver->remap();
   particle_container<ito_particle>& allParticles = m_solver->get_particles();
 
-  const Real kernel_start = MPI_Wtime();
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RealVect dx                      = m_amr->get_dx()[lvl]*RealVect::Unit;
     const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
@@ -366,24 +358,9 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
       }
     }
   }
-  const Real kernel_stop = MPI_Wtime();
-
-
 
   // Remap and deposit particles
   m_solver->remap();
-
-  // Make superparticles
-  const Real super_start = MPI_Wtime();
-  if(m_ppc > 0){
-    m_solver->make_superparticles(m_ppc);
-  }
-  const Real super_stop = MPI_Wtime();
-
-  const Real tKernel = kernel_stop - kernel_start;
-  const Real tSuper  = super_stop - super_start;
-  pout() << "kernel = " << tKernel << "\t super = " << tSuper << "\t supercost = " << tSuper/tKernel << endl;
-
   m_solver->deposit_particles();
 
   return a_dt;

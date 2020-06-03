@@ -15,6 +15,11 @@ bvh_node<T>::bvh_node(){
 }
 
 template <class T>
+bvh_node<T>::~bvh_node(){
+  m_data.resize(0);
+}
+
+template <class T>
 bvh_node<T>::bvh_node(std::shared_ptr<bvh_node<T> > a_parent){
   this->set_parent(a_parent);
 }
@@ -51,14 +56,6 @@ void bvh_node<T>::set_data(const std::vector<T>& a_data){
   m_mass = 0.0;
   
   for (auto v : m_data){
-#if DEBUG // Debug
-    if(v.mass() < 0.0){
-      std::cout << v.mass() << std::endl;
-    }
-    else if(v.mass() > 1.E4){
-      std::cout << v.mass() << std::endl;
-    }
-#endif
     m_mass += v.mass();
   }
 }
@@ -95,14 +92,6 @@ bool bvh_node<T>::can_split() const {
     if(m_data.size() > 1 || m_data[0].can_split()){
       ret = true;
     }
-#if DEBUG
-    else{
-      std::cout << "data size = " << m_data.size() << "\t mass = " << m_data[0].mass() << std::endl;
-    }
-#endif
-  }
-  else{
-    MayDay::Abort("doesn't have data - shouldn't happen!");
   }
 
   return ret;
@@ -177,10 +166,11 @@ void bvh_node<T>::split(const int a_dir){
       MayDay::Abort("got negative NL");
     }
 
-    const RealVect& pos  = m_data[splitIndex].pos();
+
     const Real massLeft  = (m/N)*NL;
     const Real massRight = (m/N)*NR;
 
+#if DEBUG 
     if(massLeft < 0.0){
       std::cout << "massLeft = " << massLeft << std::endl;
       MayDay::Abort("stop left");
@@ -189,7 +179,10 @@ void bvh_node<T>::split(const int a_dir){
       std::cout << "massRight = " << massRight << std::endl;
       MayDay::Abort("stop right");
     }
+#endif
 
+    // Divided particle
+    const RealVect& pos  = m_data[splitIndex].pos();
     leftData.push_back(T(pos, massLeft));
     rightData.push_back(T(pos, massRight));
   }
@@ -202,10 +195,6 @@ void bvh_node<T>::split(const int a_dir){
     }
   }
 
-  // 5. We have the data, we can make the new leaves now.
-  auto left = std::make_shared<bvh_node<T> >();
-  auto righ = std::make_shared<bvh_node<T> >();
-
 #if DEBUG // Debug
   if(!(rightData.size() > 0)) {
     std::cout << "bad right data size = " << m_data.size() << "\t mass = " << m_mass << "\t idx = " << splitIndex << std::endl;
@@ -217,11 +206,18 @@ void bvh_node<T>::split(const int a_dir){
   }
 #endif
 
+  // 5. We have the data, we can make the new leaves now.
+  auto left = std::make_shared<bvh_node<T> >();
+  auto righ = std::make_shared<bvh_node<T> >();
+
   left->set_data(leftData);
   righ->set_data(rightData);
 
-  left->set_parent(this->shared_from_this());
-  righ->set_parent(this->shared_from_this());
+  // left->set_parent(this->shared_from_this());
+  // righ->set_parent(this->shared_from_this());
+
+  left->set_leaf(true);
+  righ->set_leaf(true);
 
   // This is no longer a leaf node. Set the pointers and clear data. 
   this->set_left(left);
@@ -239,22 +235,18 @@ bvh_tree<T>::bvh_tree(std::vector<T>& a_data){
   m_root->set_leaf(true);
   m_root->set_data(a_data);
 
-  m_nodes.push_back(m_root);
+  m_leaves.resize(0);
   m_leaves.push_back(m_root);
 }
 
 template <class T>
 bvh_tree<T>::~bvh_tree(){
+  m_leaves.resize(0);
 }
 
 template <class T>
 std::vector<std::shared_ptr<bvh_node<T> > >& bvh_tree<T>::get_leaves(){
   return m_leaves;
-}
-
-template <class T>
-std::vector<std::shared_ptr<bvh_node<T> > >& bvh_tree<T>::get_nodes(){
-  return m_nodes;
 }
 
 template <class T>
@@ -268,45 +260,27 @@ void bvh_tree<T>::build_tree(const int a_numLeaves){
     std::vector<std::shared_ptr<bvh_node<T> > > new_leaves;
     bool can_split = false;
     
-    // All leaves are split.
-    // TODO: Maybe we always should sort and split. 
-    if(2*m_leaves.size() <= a_numLeaves){ 
-      for(auto v : m_leaves){
-	if(v->can_split()){
-	  can_split = true;
-	  v->split(splitDir);
+    // Sort the leaves by their mass. We will split the ones with the largest masses.
+    std::sort(std::begin(m_leaves), std::end(m_leaves),
+	      [](const std::shared_ptr<bvh_node<T> >& n1,
+		 const std::shared_ptr<bvh_node<T> >& n2){
+		return n1->mass() < n2->mass();
+	      });
 
-	  new_leaves.push_back(v->get_left());
-	  new_leaves.push_back(v->get_right());
-	}
-	else{
-	  new_leaves.push_back(v);
-	}
-      }
-    }
-    else{
-      // Sort the leaves by their mass. We will split the ones with the largest masses.
-      std::sort(std::begin(m_leaves), std::end(m_leaves),
-		[](const std::shared_ptr<bvh_node<T> >& n1,
-		   const std::shared_ptr<bvh_node<T> >& n2){
-		  return n1->mass() < n2->mass();
-		});
-
-      int leavesNeeded = a_numLeaves - m_leaves.size();
-      for(int i = 0; i < m_leaves.size(); i++){
-	const int leavesLeft = m_leaves.size() - i;
-	if(m_leaves[i]->can_split() && leavesNeeded > 0){ // Only split if we actually need more leaves. 
-	  can_split = true;
+    int leavesNeeded = a_numLeaves - m_leaves.size();
+    for(int i = 0; i < m_leaves.size(); i++){
+      const int leavesLeft = m_leaves.size() - i;
+      if(m_leaves[i]->can_split() && leavesNeeded > 0){ // Only split if we actually need more leaves. 
+	can_split = true;
 	  
-	  m_leaves[i]->split(splitDir);
-	  new_leaves.push_back(m_leaves[i]->get_left());
-	  new_leaves.push_back(m_leaves[i]->get_right());
+	m_leaves[i]->split(splitDir);
+	new_leaves.push_back(m_leaves[i]->get_left());
+	new_leaves.push_back(m_leaves[i]->get_right());
 
-	  leavesNeeded -= 1; // We only get one extra leaf when we split. 
-	}
-	else{
-	  new_leaves.push_back(m_leaves[i]);
-	}
+	leavesNeeded -= 1; // We only get one extra leaf when we split. 
+      }
+      else{
+	new_leaves.push_back(m_leaves[i]);
       }
     }
 
@@ -320,10 +294,7 @@ void bvh_tree<T>::build_tree(const int a_numLeaves){
     if(!can_split){
       keepSplitting = false;
     }
-    
   }
 }
-
-
 
 #endif

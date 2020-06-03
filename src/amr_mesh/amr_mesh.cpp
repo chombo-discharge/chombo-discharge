@@ -2614,6 +2614,7 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
   this->define_neighbors(a_lmin);    
   this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
   this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
+  this->define_vofiter(a_lmin);      // Define vof iterators
   if(!m_has_mg_stuff){
     this->define_mg_stuff();
     m_has_mg_stuff = true;

@@ -602,7 +602,6 @@ void ito_solver::deposit_particles(EBAMRCellData&                    a_state,
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_particles" << endl;
   }
-
            
   this->deposit_kappaConservative(a_state, a_particles, a_deposition); // a_state contains only weights, i.e. not divided by kappa
   this->deposit_nonConservative(m_depositionNC, a_state);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
@@ -653,7 +652,7 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&                    a_s
     const bool has_fine = (lvl < finest_level);
 
     // 1. If we have a coarser level whose cloud extends beneath this level, interpolate that result here first. 
-    if(has_coar && m_pvr_buffer > 0){
+    if(has_coar){
       RefCountedPtr<EBMGInterp>& interp = m_amr->get_eb_mg_interp(m_phase)[lvl];
       interp->pwcInterp(*a_state[lvl], *m_scratch[lvl-1], interv);
     }
@@ -709,6 +708,7 @@ void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mas
 
   const int comp  = 0;
   const int ncomp = 1;
+
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -1140,10 +1140,124 @@ RealVect ito_solver::random_direction(){
 #endif
 }
 
-Real ito_solver::compute_min_drift_dt(const Real a_maxCellsToMove) const{
-  CH_TIME("ito_solver::compute_drift_dt(allAMRlevels, maxCellsToMove)");
+Real ito_solver::compute_dt(const Real a_maxCellsToMove) const {
+  CH_TIME("ito_solver::compute_dt(allAMRlevels, maxCellsToMove)");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_drift_dt(allAMRlevels, maxCellsToMove)" << endl;
+    pout() << m_name + "::compute_dt(allAMRlevels, maxCellsToMove)" << endl;
+  }
+
+  Real dt = 1.E99;
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const Real levelDt = this->compute_dt(a_maxCellsToMove, lvl);
+    dt = Min(dt, levelDt);
+  }
+
+  return dt;
+}
+
+Real ito_solver::compute_dt(const Real a_maxCellsToMove, const int a_lvl) const{
+  CH_TIME("ito_solver::compute_dt(maxCellsToMove, lvl)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_dt(maxCellsToMove, lvl)" << endl;
+  }
+
+  Real dt = 1.E99;
+  
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const Real dx = m_amr->get_dx()[a_lvl];
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Real boxDt = this->compute_dt(a_maxCellsToMove, a_lvl, dit(), dx);
+    dt = Min(dt, boxDt);
+  }
+
+#ifdef CH_MPI
+    Real tmp = 1.;
+    int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    if(result != MPI_SUCCESS){
+      MayDay::Error("ito_solver::compute_dt(lvl) - communication error on norm");
+    }
+    dt = tmp;
+#endif  
+
+  return dt;
+}
+  
+
+Real ito_solver::compute_dt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex a_dit, const Real a_dx) const{
+  CH_TIME("ito_solver::compute_dt(maxCellsToMove, lvl, dit, dx)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_dt(maxCellsToMove, lvl, dit, dx)" << endl;
+  }
+
+  Real dt = 1.E99;
+
+  const Real dMax  = a_maxCellsToMove*a_dx;
+  const Real dMax2 = dMax*dMax;
+  const Real W0    = m_normal_max;
+  const Real W02   = m_normal_max*m_normal_max;
+
+  const List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
+  ListIterator<ito_particle> lit(particleList);
+
+  if(m_mobile && !m_diffusive){
+    for (lit.rewind(); lit; ++lit){
+      const ito_particle& p = particleList[lit];
+      const RealVect& v = p.velocity();
+
+      const int maxDir = v.maxDir(true);
+      const Real thisDt = dMax/Abs(v[maxDir]);
+
+      dt = Min(dt, thisDt);
+    }
+  }
+  else if(!m_mobile && m_diffusive){
+    for (lit.rewind(); lit; ++lit){
+      const ito_particle& p = particleList[lit];
+      
+      const Real thisDt = dMax2/(2.0*p.diffusion()*W02);
+      dt = Min(dt, thisDt);
+    }
+  }
+  else if(m_mobile && m_diffusive){
+    for (lit.rewind(); lit; ++lit){
+      const ito_particle& p = particleList[lit];
+      
+      const RealVect& v = p.velocity();
+      const int maxDir = v.maxDir(true);
+      const Real vMax  = Abs(v[maxDir]);
+      const Real D     = p.diffusion();
+
+      
+      if(vMax > 0.0){
+	const Real a = vMax;
+	const Real b = W0*sqrt(2.0*D);
+	const Real c = dMax;
+	
+	const Real A = a*a;
+	const Real B = -(b*b + 2*a*c);
+	const Real C = c*c;
+
+	const Real thisDt = (-B - sqrt(B*B - 4.*A*C))/(2.*A);
+	dt = Min(dt, thisDt);
+      }
+      else{
+	if(D > 0.0){
+	  const Real thisDt = dMax2/(2.0*D*W02);
+	  dt = Min(dt, thisDt);
+	}
+      }
+    }
+  }
+
+  return dt;
+
+}
+
+Real ito_solver::compute_min_drift_dt(const Real a_maxCellsToMove) const{
+  CH_TIME("ito_solver::compute_min_drift_dt(allAMRlevels, maxCellsToMove)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_min_drift_dt(allAMRlevels, maxCellsToMove)" << endl;
   }
 
   Vector<Real> dt = this->compute_drift_dt(a_maxCellsToMove);
@@ -1261,9 +1375,12 @@ Vector<Real> ito_solver::compute_diffusion_dt(const Real a_maxCellsToHop) const{
     pout() << m_name + "::compute_min_diffusion_dt(maxCellsToHop)" << endl;
   }
 
+  const Real factor  = a_maxCellsToHop/m_normal_max;
+  const Real factor2 = factor*factor;
+  
   Vector<Real> dt = this->compute_diffusion_dt();
   for (int lvl = 0; lvl < dt.size(); lvl++){
-    dt[lvl] = dt[lvl]*a_maxCellsToHop;
+    dt[lvl] = dt[lvl]*factor2;
   }
 
   return dt;
@@ -1353,7 +1470,7 @@ phase::which_phase ito_solver::get_phase() const{
 void ito_solver::make_superparticles(const int a_particlesPerPatch){
   CH_TIME("ito_solver::make_superparticles(int)");
   if(m_verbosity > 5){
-    pout() << m_name + "make_superparticles(int)" << endl;
+    pout() << m_name + "::make_superparticles(int)" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -1364,7 +1481,7 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch){
 void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_level){
   CH_TIME("ito_solver::make_superparticles(int, level)");
   if(m_verbosity > 5){
-    pout() << m_name + "make_superparticles(int, level)" << endl;
+    pout() << m_name + "::make_superparticles(int, level)" << endl;
   }
   
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
@@ -1377,7 +1494,7 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_
 void ito_solver::make_superparticles(const int a_particlesPerCell, const int a_level, const DataIndex a_dit){
   CH_TIME("ito_solver::make_superparticles(int, level, patch)");
   if(m_verbosity > 5){
-    pout() << m_name + "make_superparticles(int, level, patch)" << endl;
+    pout() << m_name + "::make_superparticles(int, level, patch)" << endl;
   }
 
   if(m_superPatch){
@@ -1391,7 +1508,7 @@ void ito_solver::make_superparticles(const int a_particlesPerCell, const int a_l
 void ito_solver::make_superparticlesPerPatch(const int a_particlesPerCell, const int a_level, const DataIndex a_dit){
   CH_TIME("ito_solver::make_superparticlesPerPatch(int, level, patch)");
   if(m_verbosity > 5){
-    pout() << m_name + "make_superparticlesPerPatch(int, level, patch)" << endl;
+    pout() << m_name + "::make_superparticlesPerPatch(int, level, patch)" << endl;
   }
   
   ListBox<ito_particle>& boxParticles = m_particles[a_level][a_dit];
@@ -1423,9 +1540,9 @@ void ito_solver::make_superparticlesPerPatch(const int a_particlesPerCell, const
 }
 
 void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const int a_level, const DataIndex a_dit){
-  CH_TIME("ito_solver::make_superparticlesPerPatch(int, level, patch)");
+  CH_TIME("ito_solver::make_superparticlesPerCell(int, level, patch)");
   if(m_verbosity > 5){
-    pout() << m_name + "make_superparticlesPerPatch(int, level, patch)" << endl;
+    pout() << m_name + "::make_superparticlesPerCell(int, level, patch)" << endl;
   }
   
   // These are the particles on this patch
@@ -1451,7 +1568,7 @@ void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const 
 	// 2. Build the BVH tree and get the leaves of the tree
 	bvh_tree<point_mass> tree(pointMasses);
 	tree.build_tree(a_particlesPerCell);
-	std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
+	const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
 
 	// 3. Clear particles in this cell and add new ones.
 	particles.clear();

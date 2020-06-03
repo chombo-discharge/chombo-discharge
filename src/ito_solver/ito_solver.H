@@ -288,6 +288,21 @@ public:
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
+  Real compute_dt(const Real a_maxCellsToMove) const;
+
+  /*!
+    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+  */
+  Real compute_dt(const Real a_maxCellsToMove, const int a_lvl) const;
+
+  /*!
+    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+  */
+  Real compute_dt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
+
+  /*!
+    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+  */
   Real compute_min_drift_dt(const Real a_maxCellsToMove) const;
 
   /*!

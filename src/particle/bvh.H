@@ -20,6 +20,7 @@ public:
 
   bvh_node();
   bvh_node(std::shared_ptr<bvh_node<T> > a_parent);
+  ~bvh_node();
 
   inline bool can_split() const;
   inline bool is_leaf() const;
@@ -70,17 +71,13 @@ public:
 
   void build_tree(const int a_numLeaves); // Desired number of leaves
 
-  std::vector<std::shared_ptr<bvh_node<T> > >& get_nodes(); 
   std::vector<std::shared_ptr<bvh_node<T> > >& get_leaves(); 
   
 protected:
 
   std::shared_ptr<bvh_node<T> > m_root; // Root node
 
-  std::vector<std::shared_ptr<bvh_node<T> > > m_nodes;
   std::vector<std::shared_ptr<bvh_node<T> > > m_leaves;
-
-  int m_depth;
 };
 
 #include "bvhI.H"
