@@ -5,8 +5,8 @@ amr_mesh.lo_corner       = -1 -1 -1    # Low corner
 amr_mesh.hi_corner       =  1  1  1    # High corner
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 1           # Maximum amr depth
-amr_mesh.max_sim_depth   = 1           # Maximum simulation depth
+amr_mesh.max_amr_depth   = 2           # Maximum amr depth
+amr_mesh.max_sim_depth   = 2           # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
 amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
@@ -72,7 +72,8 @@ ito_solver.bisect_step         = 1.E-4         # Bisection step length for inter
 ito_solver.seed                = 0             # Seed for RNG
 ito_solver.max_diffusion_hop   = 1             # Maximum length of diffusion hop, relative to cell
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo			
-ito_solver.normal_max          = 99.0          # Maximum value (absolute) that can be drawn from the exponential distribution.
+ito_solver.normal_max          = 3.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
+ito_solver.superparticles      = cell          # Make super-particles on a per-cell basis. Valid are 'cell' and 'patch'.
 ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
 ito_solver.deposition          = cic           # 'ngp' = nearest grid point
                                                # 'cic' = cloud-in-cell
@@ -112,18 +113,18 @@ brownian_walker.verbosity      = -1       # Verbosity
 brownian_walker.diffusion      = true     # Turn on/off diffusion
 brownian_walker.advection      = true     # Turn on/off advection
 brownian_walker.blob_amplitude = 1.0      # Blob amplitude
-brownian_walker.blob_radius    = 0.25     # Blob radius
-brownian_walker.blob_center    = 0 0.5 0  # Blob center
+brownian_walker.blob_radius    = 0.5      # Blob radius
+brownian_walker.blob_center    = 0 0.25 0 # Blob center
 brownian_walker.seed           = 0        # RNG seed
-brownian_walker.num_particles  = 10000    # Number of initial particles
-brownian_walker.max_drift_hop  = 1.0      # Maximum number of cells to move for advection hop
-brownian_walker.max_diffu_hop  = 2.0      # Maximum number of cells to move for diffusion hop
+brownian_walker.num_particles  = 1000000  # Number of initial particles
+brownian_walker.max_cells_hop  = 1.0      # Maximum cells to move in one time step
+brownian_walker.ppc            = 32       # Target particles per cell
 
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-brownian_walker.diffco         = 0.01     # Diffusion coefficient
-brownian_walker.omega          = 1.0     # Rotation velocity
+brownian_walker.diffco         = 0.0001   # Diffusion coefficient
+brownian_walker.omega          = 1.0      # Rotation velocity
 
 # Cell tagging stuff
 # ------------------
