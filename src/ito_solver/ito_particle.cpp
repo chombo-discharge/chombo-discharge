@@ -35,6 +35,19 @@ void ito_particle::define(const Real      a_mass,
   setDiffusion(a_diffusion);
 }
 
+void ito_particle::setOldPosition(const RealVect a_oldPosition){
+  m_oldPosition = a_oldPosition;
+}
+
+RealVect& ito_particle::oldPosition(){
+  return m_oldPosition;
+}
+
+
+const RealVect& ito_particle::oldPosition() const{
+  return m_oldPosition;
+}
+
 void ito_particle::setMass(const Real a_mass){
   m_mass = a_mass;
 }
@@ -95,7 +108,7 @@ bool ito_particle::operator!=(const ito_particle& a_p) const{
 }
 
 int ito_particle::size() const{
-  return ( BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + sizeof(m_diffusion));
+  return ( BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + sizeof(m_diffusion) + sizeof(m_oldPosition));
 }
 
 void ito_particle::linearOut(void* buf) const{
@@ -113,6 +126,13 @@ void ito_particle::linearOut(void* buf) const{
 	   *buffer++ = m_velocity[3];,
 	   *buffer++ = m_velocity[4];,
 	   *buffer++ = m_velocity[5];);
+
+  D_TERM6( *buffer++ = m_oldPosition[0];,
+	   *buffer++ = m_oldPosition[1];,
+	   *buffer++ = m_oldPosition[2];,
+	   *buffer++ = m_oldPosition[3];,
+	   *buffer++ = m_oldPosition[4];,
+	   *buffer++ = m_oldPosition[5];);
 
   *buffer++ = m_diffusion;
   *buffer   = m_mass;
@@ -133,6 +153,13 @@ void ito_particle::linearIn(void* buf){
 	   m_velocity[3] = *buffer++;,
 	   m_velocity[4] = *buffer++;,
 	   m_velocity[5] = *buffer++;);
+
+  D_TERM6( m_oldPosition[0] = *buffer++;,
+	   m_oldPosition[1] = *buffer++;,
+	   m_oldPosition[2] = *buffer++;,
+	   m_oldPosition[3] = *buffer++;,
+	   m_oldPosition[4] = *buffer++;,
+	   m_oldPosition[5] = *buffer++;);
 
   m_diffusion = *buffer++;
   m_mass = *buffer;

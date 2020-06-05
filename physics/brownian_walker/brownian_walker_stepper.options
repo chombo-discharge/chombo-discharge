@@ -12,8 +12,8 @@ brownian_walker.blob_radius    = 0.1     # Blob radius
 brownian_walker.blob_center    = 0 0     # Blob center
 brownian_walker.seed           = 0       # RNG seed
 brownian_walker.num_particles  = 100     # Number of initial particles
-brownian_walker.max_drift_hop  = 0.5     # Maximum number of cells to move for advection hop
-brownian_walker.max_diffu_hop  = 0.5     # Maximum number of cells to move for diffusion hop
+brownian_walker.max_cells_hop  = 1.0     # Maximum cells to move in one time step
+brownian_walker.ppc            = -1      # Particles per cell. <= 0 turns off superparticles
 
 
 # Velocity, diffusion, and CFL

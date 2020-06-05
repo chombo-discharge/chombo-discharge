@@ -53,9 +53,7 @@ namespace physics {
 
     protected:
 
-      /*!
-	@brief Phase
-      */
+      // Phase
       phase::which_phase m_phase;
 
       // Ito solver & species
@@ -66,9 +64,11 @@ namespace physics {
       Real m_diffco;
       Real m_omega;
 
+      // Particles per cell
+      int m_ppc;
+
       // Maximum hops and stuff like that
-      Real m_max_drift_hop;
-      Real m_max_diffu_hop;
+      Real m_max_cells_hop;
 
       void set_velocity();
       void set_velocity(const int a_level);

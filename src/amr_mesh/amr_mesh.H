@@ -30,6 +30,7 @@
 #include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
 #include <EBCoarToFineRedist.H>
+#include <EBMGInterp.H>
 #include <EBCoarToCoarRedist.H>
 #include <EBFineToCoarRedist.H>
 #include <EBPWLFineInterp.H>
@@ -42,6 +43,7 @@ static const std::string s_eb_coar_ave     = "eb_coar_ave";
 static const std::string s_eb_quad_cfi     = "eb_quad_cfi";
 static const std::string s_eb_fill_patch   = "eb_fill_patch";
 static const std::string s_eb_pwl_interp   = "eb_pwl_interp";
+static const std::string s_eb_mg_interp    = "eb_mg_interp";
 static const std::string s_eb_flux_reg     = "eb_flux_reg";
 static const std::string s_eb_redist       = "eb_redist";
 static const std::string s_eb_copier       = "eb_copier";
@@ -703,6 +705,11 @@ public:
   */
   virtual Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp(phase::which_phase a_phase);
 
+    /*!
+    @brief Get interpolator 
+  */
+  virtual Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp(phase::which_phase a_phase);
+
   /*!
     @brief Get flux register
   */
@@ -1031,6 +1038,11 @@ protected:
     @brief Piecewise linear interpolation 
   */
   Vector<Vector<RefCountedPtr<EBPWLFineInterp> > > m_pwl_interp;
+
+  /*!
+    @brief Interpolator written for multigrid, but typically used for piecewise constant interpolation
+  */
+  Vector<Vector<RefCountedPtr<EBMGInterp> > > m_ebmg_interp;
   
   /*!
     @brief Flux register
@@ -1146,6 +1158,11 @@ protected:
     @brief Define interpolator for regridding
   */
   virtual void define_ebpwl_interp(const int a_lmin);
+
+  /*!
+    @brief Define interpolator for multigrid
+  */
+  virtual void define_ebmg_interp(const int a_lmin);
 
   /*!
     @brief Define redistribution operators

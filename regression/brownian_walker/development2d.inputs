@@ -5,8 +5,8 @@ amr_mesh.lo_corner       = -1 -1
 amr_mesh.hi_corner       =  1 1 
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64       # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 2           # Maximum amr depth
-amr_mesh.max_sim_depth   = 2           # Maximum simulation depth
+amr_mesh.max_amr_depth   = 3           # Maximum amr depth
+amr_mesh.max_sim_depth   = 3           # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
 amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
@@ -38,8 +38,8 @@ driver.regrid_interval                 = 5             # Regrid interval
 driver.checkpoint_interval             = 5             # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
-driver.stop_time                       = 40.0          # Stop time
-driver.max_steps                       = 400           # Maximum number of steps
+driver.stop_time                       = 2.5          # Stop time
+driver.max_steps                       = 150           # Maximum number of steps
 driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
 driver.write_memory                    = false         # Write MPI memory report 
@@ -47,13 +47,13 @@ driver.write_ebis                      = false         # Write geometry to an HD
 driver.read_ebis                       = false         # Read EBIS when restarting a simulation
 driver.output_directory                = ./            # Output directory
 driver.grow_tags                       = 0             # Grow tagged by this in every direction
-driver.output_names                    = simulation    # Simulation output names
+driver.output_names                    = development   # Simulation output names
 driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
 driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
 driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
 driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
-driver.allow_coarsening                = true          # Allows removal of grid levels according to cell_tagger
+driver.allow_coarsening                = false         # Allows removal of grid levels according to cell_tagger
 driver.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -72,7 +72,8 @@ ito_solver.bisect_step         = 1.E-4         # Bisection step length for inter
 ito_solver.seed                = 0             # Seed for RNG
 ito_solver.max_diffusion_hop   = 1             # Maximum length of diffusion hop, relative to cell
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo			
-ito_solver.normal_max          = 2.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
+ito_solver.normal_max          = 3.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
+ito_solver.superparticles      = cell          # Make super-particles on a per-cell basis
 ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
 ito_solver.deposition          = cic           # 'ngp' = nearest grid point
                                                # 'cic' = cloud-in-cell
@@ -112,21 +113,22 @@ brownian_walker.verbosity      = -1       # Verbosity
 brownian_walker.diffusion      = true     # Turn on/off diffusion
 brownian_walker.advection      = true     # Turn on/off advection
 brownian_walker.blob_amplitude = 1.0      # Blob amplitude
-brownian_walker.blob_radius    = 0.25     # Blob radius
+brownian_walker.blob_radius    = 0.5      # Blob radius
 brownian_walker.blob_center    = 0 0.25   # Blob center
 brownian_walker.seed           = 0        # RNG seed
-brownian_walker.num_particles  = 10000   # Number of initial particles
-brownian_walker.max_drift_hop  = 4.0      # Maximum number of cells to move for advection hop
-brownian_walker.max_diffu_hop  = 2.0      # Maximum number of cells to move for diffusion hop
+brownian_walker.num_particles  = 1000000  # Number of initial particles
+brownian_walker.max_cells_hop  = 1.0      # Maximum cells to move in one time step
+brownian_walker.ppc            = 128      # Target particles per cell
 
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-brownian_walker.diffco         = 0.01     # Diffusion coefficient
-brownian_walker.omega          = 1.0     # Rotation velocity
+brownian_walker.diffco         = 0.0001   # Diffusion coefficient
+brownian_walker.omega          = 1.0      # Rotation velocity
 
 # Cell tagging stuff
 # ------------------
 brownian_walker.refine_curv = 0.1          # Refine if curvature exceeds this
 brownian_walker.refine_magn = 1E-2         # Only tag if magnitude eceeds this
 brownian_walker.buffer      = 0            # Grow tagged cells     
+p

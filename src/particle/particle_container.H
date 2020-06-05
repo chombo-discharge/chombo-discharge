@@ -12,6 +12,7 @@
 #include <ParticleData.H>
 #include <ParticleValidRegion.H>
 #include <BinItem.H>
+#include <BinFab.H>
 #include <ProblemDomain.H>
 #include <DisjointBoxLayout.H>
 
@@ -104,6 +105,16 @@ public:
   const ParticleData<P>& operator[](const int a_level) const;
 
   /*!
+    @brief Get particles and sort them by cell
+  */
+  void get_cell_particles(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit) const;
+
+  /*!
+    @brief Get particles and sort them by cell
+  */
+  void get_cell_particles_destructive(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit);
+
+  /*!
     @brief Add particles to container
   */
   void add_particles(const List<P>& a_particles);
@@ -112,6 +123,16 @@ public:
     @brief Add particles to container destructively
   */
   void add_particles_destructive(List<P>& a_particles);
+
+  /*!
+    @brief Add particles to a certain level and patch
+  */
+  void add_particles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
+
+  /*!
+    @brief Add particles to a certain level and patch
+  */
+  void add_particles_destructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
 
   /*!
     @brief Remap over the entire AMR hierarchy

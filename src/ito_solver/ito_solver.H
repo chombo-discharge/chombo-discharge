@@ -244,6 +244,31 @@ public:
     @brief Interpolate velocities
   */
   virtual void interpolate_diffusion(const int a_level, const DataIndex& a_dit);
+  
+  /*!
+    @brief Make superparticles
+  */
+  virtual void make_superparticles(const int a_particlesPerPatch);
+
+  /*!
+    @brief Make superparticles on specified level
+  */
+  virtual void make_superparticles(const int a_particlesPerPatch, const int a_level);
+
+  /*!
+    @brief Make superparticles on specified level and patch
+  */
+  virtual void make_superparticles(const int a_particlesPerPatch, const int a_level, const DataIndex a_dit);
+
+  /*!
+    @brief Make superparticles on specified level and patch
+  */
+  virtual void make_superparticlesPerPatch(const int a_particlesPerCell, const int a_level, const DataIndex a_dit);
+
+  /*!
+    @brief Make superparticles on specified level and patch
+  */
+  virtual void make_superparticlesPerCell(const int a_particlesPerCell, const int a_level, const DataIndex a_dit);
 
   /*!
     @brief Remap all particles
@@ -259,6 +284,21 @@ public:
     @brief Random direction
   */
   RealVect random_direction();
+
+  /*!
+    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+  */
+  Real compute_dt(const Real a_maxCellsToMove) const;
+
+  /*!
+    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+  */
+  Real compute_dt(const Real a_maxCellsToMove, const int a_lvl) const;
+
+  /*!
+    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+  */
+  Real compute_dt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
@@ -424,6 +464,11 @@ protected:
   Real m_hop_eps;
 
   /*!
+    @brief Superparticles per patch or not
+  */
+  bool m_superPatch;
+
+  /*!
     @brief Flag for blending the deposition clouds with the nonconservative divergence
   */
   bool m_blend_conservation;
@@ -517,6 +562,11 @@ protected:
     @brief Particle cache
   */
   particle_container<ito_particle> m_source_particles;
+
+  /*!
+    @brief Parse superparticles
+  */
+  void parse_superparticles();
   
   /*!
     @brief Parse RNG options

@@ -7,11 +7,11 @@
 
 #include "brownian_walker_stepper.H"
 #include "brownian_walker_species.H"
-
 #include "poly.H"
 
 #include <ParmParse.H>
 #include <PolyGeom.H>
+#include <BinFab.H>
 
 using namespace physics::brownian_walker;
 
@@ -20,12 +20,11 @@ brownian_walker_stepper::brownian_walker_stepper(){
 
   m_phase = phase::gas;
   
-  pp.get("diffco",        m_diffco);
-  pp.get("omega",         m_omega);
-  pp.get("verbosity",     m_verbosity);
-  
-  pp.get("max_diffu_hop", m_max_diffu_hop);
-  pp.get("max_drift_hop", m_max_drift_hop);
+  pp.get("diffco",         m_diffco);
+  pp.get("omega",          m_omega);
+  pp.get("verbosity",      m_verbosity);
+  pp.get("ppc",            m_ppc);
+  pp.get("max_cells_hop",  m_max_cells_hop);
 }
 
 brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver) : brownian_walker_stepper() {
@@ -43,6 +42,9 @@ void brownian_walker_stepper::initial_data(){
   }
   
   m_solver->initial_data();
+  if(m_ppc > 0){
+    m_solver->make_superparticles(m_ppc);
+  }
 
   if(m_solver->is_diffusive()){
     m_solver->set_diffco(m_diffco);
@@ -138,6 +140,18 @@ void brownian_walker_stepper::post_checkpoint_setup() {
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::post_checkpoint_setup" << endl;
   }
+
+  m_solver->remap();
+  if(m_ppc > 0){
+    m_solver->make_superparticles(m_ppc);
+  }
+
+  if(m_solver->is_diffusive()){
+    m_solver->set_diffco(m_diffco);
+  }
+  if(m_solver->is_mobile()){
+    this->set_velocity();
+  }
 }
 
 int brownian_walker_stepper::get_num_plot_vars() const {
@@ -164,26 +178,10 @@ void brownian_walker_stepper::compute_dt(Real& a_dt, time_code::which_code& a_ti
     pout() << "brownian_walker_stepper::compute_dt" << endl;
   }
   
-  //  MayDay::Warning("brownian_walker_stepper::compute_dt - not implemented yet");
   m_solver->interpolate_velocities();
   m_solver->interpolate_diffusion();
 
-  Real drift_dt = 1.E99;
-  Real diffu_dt = 1.E99;
-  if(m_solver->is_mobile()){
-    drift_dt = m_solver->compute_min_drift_dt(m_max_drift_hop);
-  }
-  if(m_solver->is_diffusive()){
-    diffu_dt = m_solver->compute_min_diffusion_dt(m_max_diffu_hop);
-  }
-
-  a_dt = 1./(1./drift_dt + 1./diffu_dt);
-
-#if 0 // Debug
-  if(procID() == 0){
-    std::cout << "drift dt = " << drift_dt << "\t diffusion_dt = " << diffu_dt << "\t a_dt = " << a_dt << std::endl;
-  }
-#endif
+  a_dt = m_solver->compute_dt(m_max_cells_hop);
 }
 
 void brownian_walker_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
@@ -267,8 +265,9 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
   const int finest_level = m_amr->get_finest_level();
   const RealVect origin  = m_amr->get_prob_lo();
+  m_solver->remap();
+  particle_container<ito_particle>& allParticles = m_solver->get_particles();
 
-  
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RealVect dx                      = m_amr->get_dx()[lvl]*RealVect::Unit;
     const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
@@ -276,8 +275,9 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
     const EBISLayout& ebisl = m_amr->get_ebisl(m_solver->get_phase())[lvl];
 
-    if(m_solver->is_mobile()){
+    if(m_solver->is_mobile() || m_solver->is_diffusive()){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
 	// Create a copy. 
 	List<ito_particle>& particleList = particles[dit()].listItems();
 	List<ito_particle>  particleCopy = List<ito_particle>(particleList);
@@ -287,19 +287,20 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	ListIterator<ito_particle> lit(particleList);
 	ListIterator<ito_particle> litC(particleCopy);
 
-
 	// Half Euler step and evaluate velocity at half step
-	for (lit.rewind(); lit; ++lit){ 
-	  ito_particle& p = particleList[lit];
-	  p.position() += 0.5*p.velocity()*a_dt;
-	}
-	m_solver->interpolate_velocities(lvl, dit());
+	if(m_solver->is_mobile()){
+	  for (lit.rewind(); lit; ++lit){ 
+	    ito_particle& p = particleList[lit];
+	    p.position() += 0.5*p.velocity()*a_dt;
+	  }
+	  m_solver->interpolate_velocities(lvl, dit());
 
-	// Final stage
-	for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
-	  ito_particle& p    = particleList[lit];
-	  ito_particle& oldP = particleCopy[litC];
-	  p.position() = oldP.position() + p.velocity()*a_dt;
+	  // Final stage
+	  for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
+	    ito_particle& p    = particleList[lit];
+	    ito_particle& oldP = particleCopy[litC];
+	    p.position() = oldP.position() + p.velocity()*a_dt;
+	  }
 	}
 
 	// Add a diffusion hop
@@ -307,11 +308,10 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	  for (lit.rewind(); lit; ++lit){ 
 	    ito_particle& p = particleList[lit];
 	    const RealVect ran = m_solver->random_gaussian();
-	    const RealVect hop = ran*sqrt(2.0*p.diffusion())*a_dt;
+	    const RealVect hop = ran*sqrt(2.0*p.diffusion()*a_dt);
 	    p.position() += hop;
 	  }
 	}
-
 	
 	// Do particle bounceback on the EB
 	const EBISBox& ebisbox = ebisl[dit()];
@@ -359,9 +359,8 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
     }
   }
 
+  // Remap and deposit particles
   m_solver->remap();
-
-  // Deposit particles
   m_solver->deposit_particles();
 
   return a_dt;
@@ -379,5 +378,9 @@ void brownian_walker_stepper::regrid(const int a_lmin, const int a_old_finest_le
   }
   if(m_solver->is_mobile()){
     this->set_velocity();
+  }
+
+  if(m_ppc > 0){
+    m_solver->make_superparticles(m_ppc);
   }
 }

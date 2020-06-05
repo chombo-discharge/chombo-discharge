@@ -5,6 +5,11 @@
   @date   April 2020
 */
 
+#ifndef _PARTICLE_CONTAINERI_H_
+#define _PARTICLE_CONTAINERI_H_
+
+#include "particle_containerI.H"
+
 template <class P>
 particle_container<P>::particle_container(){
   m_is_defined = false;
@@ -120,6 +125,22 @@ const ParticleData<P>& particle_container<P>::operator[](const int a_level) cons
 }
 
 template <class P>
+void particle_container<P>::get_cell_particles(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit) const {
+  CH_assert(m_is_defined);
+
+  cellParticles.define(m_grids[a_lvl].get(a_dit),  m_dx[a_lvl], m_prob_lo);
+  cellParticles.addItems((*m_particles[a_lvl])[a_dit].listItems());
+}
+
+template <class P>
+void particle_container<P>::get_cell_particles_destructive(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit){
+  CH_assert(m_is_defined);
+
+  cellParticles.define(m_grids[a_lvl].get(a_dit),  m_dx[a_lvl], m_prob_lo);
+  cellParticles.addItemsDestructive((*m_particles[a_lvl])[a_dit].listItems());
+}
+
+template <class P>
 void particle_container<P>::add_particles(const List<P>& a_particles){
   CH_assert(m_is_defined);
   
@@ -166,6 +187,42 @@ void particle_container<P>::add_particles_destructive(List<P>& a_particles){
 }
 
 template <class P>
+void particle_container<P>::add_particles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit){
+  CH_assert(m_is_defined);
+  CH_assert(m_grids[a_lvl].get(a_dit) == a_particles.getRegion());
+
+  const int comp = 0;
+  
+  ListBox<P>& boxParticles = (*m_particles[a_lvl])[a_dit];
+
+  const Box box = m_grids[a_lvl].get(a_dit);
+  for (BoxIterator bit(box); bit.ok(); ++bit){
+    const IntVect iv = bit();
+    const List<P>& cellParticles = a_particles(iv, comp);
+
+    boxParticles.addItems(cellParticles);
+  }
+}
+
+template <class P>
+void particle_container<P>::add_particles_destructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit){
+  CH_assert(m_is_defined);
+  CH_assert(m_grids[a_lvl].get(a_dit) == a_particles.getRegion());
+
+  const int comp = 0;
+  
+  ListBox<P>& boxParticles = (*m_particles[a_lvl])[a_dit];
+
+  const Box box = m_grids[a_lvl].get(a_dit);
+  for (BoxIterator bit(box); bit.ok(); ++bit){
+    const IntVect iv = bit();
+    List<P>& cellParticles = a_particles(iv, comp);
+
+    boxParticles.addItemsDestructive(cellParticles);
+  }
+}
+
+template <class P>
 void particle_container<P>::cache_particles(particle_container<P>& a_otherContainer){
   CH_assert(m_is_defined);
   
@@ -188,7 +245,7 @@ void particle_container<P>::remap(){
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     const bool has_coar = lvl > 0;
 
-        // Rebin this level
+    // Rebin this level
     m_particles[lvl]->gatherOutcast();
     m_particles[lvl]->remapOutcast();
 
@@ -201,11 +258,11 @@ void particle_container<P>::remap(){
 			    m_ref_rat[lvl],
 			    false, 
 			    m_prob_lo);
+
+      // Remap new outcasts
+      m_particles[lvl]->remapOutcast();
     }
 
-    // Rebin this level
-    m_particles[lvl]->gatherOutcast();
-    m_particles[lvl]->remapOutcast();
 
     // Transfer finer-level particles
     if(has_coar){
@@ -216,6 +273,7 @@ void particle_container<P>::remap(){
 			    1,
 			    true,
 			    m_prob_lo);
+      m_particles[lvl-1]->gatherOutcast();
       m_particles[lvl-1]->remapOutcast();
     }
   }
@@ -224,9 +282,7 @@ void particle_container<P>::remap(){
   // do collect those, too
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     if(m_particles[lvl]->numOutcast() > 0){
-#if 0 //
-      if(procID() == 0) std::cout << "particle_container<P>::remap - outcast list not empty" << std::endl;
-#endif
+      //      if(procID() == 0) std::cout << "particle_container<P>::remap - outcast list not empty" << std::endl;
       this->remap_lost_particles();
       break;
     }
@@ -343,3 +399,6 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     m_particles[lvl]->remapOutcast();
   }
 }
+
+
+#endif

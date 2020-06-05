@@ -1,10 +1,10 @@
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-amr_mesh.lo_corner       = -1 -1
-amr_mesh.hi_corner       =  1 1 
+amr_mesh.lo_corner       = -1 -1 -1    # Low corner
+amr_mesh.hi_corner       =  1  1  1    # High corner
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 128 128     # Number of cells on coarsest domain
+amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
 amr_mesh.max_amr_depth   = 2           # Maximum amr depth
 amr_mesh.max_sim_depth   = 2           # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
@@ -24,7 +24,7 @@ amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 't
 amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 amr_mesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr_mesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
-amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
+amr_mesh.ebcf            = false        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
 # DRIVER OPTIONS
@@ -35,10 +35,10 @@ driver.geometry_scan_level             = 0             # Geometry scan level for
 driver.recursive_regrid                = false         # Recursive regrids
 driver.plot_interval                   = 5             # Plot interval
 driver.regrid_interval                 = 5             # Regrid interval
-driver.checkpoint_interval             = -1            # Checkpoint interval
+driver.checkpoint_interval             = 5             # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
-driver.stop_time                       = 3.0           # Stop time
+driver.stop_time                       = 40.0          # Stop time
 driver.max_steps                       = 100           # Maximum number of steps
 driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
@@ -47,7 +47,7 @@ driver.write_ebis                      = false         # Write geometry to an HD
 driver.read_ebis                       = false         # Read EBIS when restarting a simulation
 driver.output_directory                = ./            # Output directory
 driver.grow_tags                       = 0             # Grow tagged by this in every direction
-driver.output_names                    = simulation    # Simulation output names
+driver.output_names                    = development   # Simulation output names
 driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
 driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
@@ -66,13 +66,12 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
-ito_solver.pvr_buffer          = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
+ito_solver.pvr_buffer          = 4             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
 ito_solver.plt_vars            = phi vel dco   # Currently available are 'phi', 'vel', and 'dco'
 ito_solver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
 ito_solver.seed                = 0             # Seed for RNG
-ito_solver.normal_max          = 1.E99         # Max normal
 ito_solver.max_diffusion_hop   = 1             # Maximum length of diffusion hop, relative to cell
-ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
+ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo			
 ito_solver.normal_max          = 3.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
 ito_solver.superparticles      = cell          # Make super-particles on a per-cell basis. Valid are 'cell' and 'patch'.
 ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
@@ -80,16 +79,13 @@ ito_solver.deposition          = cic           # 'ngp' = nearest grid point
                                                # 'cic' = cloud-in-cell
                                                # 'tsc' = triangle-shaped-cloud
                                                # 'w4'  = 3rd order interpolation
-                                               # 'cic' = cloud-in-cell
-                                               # 'tsc' = triangle-shaped-cloud
-                                               # 'w4'  = 3rd order interpolation
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-geo_coarsener.box1_lo     = -1 -0.1         # Remove irregular cell tags 
-geo_coarsener.box1_hi     =  1 2         # between these two corners
+geo_coarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
+geo_coarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
+geo_coarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
 geo_coarsener.box1_lvl    = 0            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 
@@ -101,10 +97,10 @@ rod_sphere.turn_off_electrode        = true             # Turn on/off electrode
 rod_sphere.turn_off_dielectric       = false            # Turn on/off dielectric
 rod_sphere.electrode_live            = true             # Live electrode or not
 rod_sphere.electrode_radius          = 0.05             # Electrode inner radius
-rod_sphere.electrode_center1         = 0 0.5            # Center 1
-rod_sphere.electrode_center2         = 0 2.0            # Center 2. 
+rod_sphere.electrode_center1         = 0 0.0 0.5        # Center 1
+rod_sphere.electrode_center2         = 0 0.0 2.0        # Center 2. 
 rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
-rod_sphere.dielectric_center         = 0.0 0            # Dielectric center
+rod_sphere.dielectric_center         = 0 0 0            # Dielectric center
 rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
 
 # ====================================================================================================
@@ -113,21 +109,22 @@ rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
 # This class does an expclit AMR advection-diffusion simulation of Brownian walker particles drawn
 # from a Gaussian distribution. 
 # ====================================================================================================
-brownian_walker.verbosity      = -1      # Verbosity
-brownian_walker.diffusion      = true    # Turn on/off diffusion
-brownian_walker.advection      = true    # Turn on/off advection
-brownian_walker.blob_amplitude = 1.0     # Blob amplitude
-brownian_walker.blob_radius    = 0.5     # Blob radius
-brownian_walker.blob_center    = 0 0.25  # Blob center
-brownian_walker.seed           = 0       # RNG seed
-brownian_walker.num_particles  = 100000 # Number of initial particles
+brownian_walker.verbosity      = -1       # Verbosity
+brownian_walker.diffusion      = true     # Turn on/off diffusion
+brownian_walker.advection      = true     # Turn on/off advection
+brownian_walker.blob_amplitude = 1.0      # Blob amplitude
+brownian_walker.blob_radius    = 0.5      # Blob radius
+brownian_walker.blob_center    = 0 0.25 0 # Blob center
+brownian_walker.seed           = 0        # RNG seed
+brownian_walker.num_particles  = 1000000  # Number of initial particles
 brownian_walker.max_cells_hop  = 1.0      # Maximum cells to move in one time step
 brownian_walker.ppc            = 32       # Target particles per cell
 
+
 # Velocity, diffusion, and CFL
 # ----------------------------
-brownian_walker.diffco         = 0.10     # Diffusion coefficient
-brownian_walker.omega          = 1.0     # Rotation velocity
+brownian_walker.diffco         = 0.0001   # Diffusion coefficient
+brownian_walker.omega          = 1.0      # Rotation velocity
 
 # Cell tagging stuff
 # ------------------
