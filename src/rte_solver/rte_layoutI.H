@@ -251,7 +251,7 @@ void rte_layout<T>::advance(const Real a_dt){
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->advance(a_dt);
+    solver->advance(a_dt, solver->get_state(), solver->get_source());
   }
 }
 

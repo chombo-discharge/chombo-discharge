@@ -193,4 +193,6 @@ public:
   RefCountedPtr<rte_layout<T> > new_layout(const Vector<RefCountedPtr<rte_species> >& a_species) const;
 };
 
+#include "rte_layoutI.H"
+
 #endif
