@@ -1,0 +1,5 @@
+bvh.seed       = 0
+bvh.ppc        = 64
+bvh.num_points = 1000
+bvh.min_weight = 1
+bvh.max_weight = 1000
