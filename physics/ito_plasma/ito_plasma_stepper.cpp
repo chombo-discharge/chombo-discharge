@@ -6,6 +6,7 @@
 */
 
 #include "ito_plasma_stepper.H"
+#include "data_ops.H"
 
 using namespace physics::ito_plasma;
 
@@ -398,6 +399,12 @@ void ito_plasma_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_po
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_E(mfamrcell, mfamrcell" << endl;
   }
+
+  m_amr->compute_gradient(a_E, a_potential);
+  data_ops::scale(a_E, -1.0);
+
+  m_amr->average_down(a_E);
+  m_amr->interp_ghost(a_E);
 }
 
 void ito_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase){
@@ -405,6 +412,8 @@ void ito_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase 
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_E(ebamrcell, phase" << endl;
   }
+
+  this->compute_E(a_E, a_phase, m_poisson->get_state());
 }
 
 void ito_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
@@ -412,12 +421,57 @@ void ito_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase 
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_E(ebamrcell, phase mfamrcell" << endl;
   }
+
+  EBAMRCellData pot_gas;
+  m_amr->allocate_ptr(pot_gas);
+  m_amr->alias(pot_gas, a_phase, a_potential);
+
+  m_amr->compute_gradient(a_E, pot_gas, a_phase);
+  data_ops::scale(a_E, -1.0);
+
+  m_amr->average_down(a_E, a_phase);
+  m_amr->interp_ghost(a_E, a_phase);
 }
 
 void ito_plasma_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
   CH_TIME("ito_plasma_stepper::compute_E(ebamrflux, phase, mfamrcell)");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_E(ebamrflux, phase mfamrcell" << endl;
+  }
+
+  CH_assert(a_E_face[0]->nComp() == SpaceDim);
+  CH_assert(a_E_cell[0]->nComp() == SpaceDim);
+
+  const int finest_level = m_amr->get_finest_level();
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(a_phase)[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBCellFAB& E_cell = (*a_E_cell[lvl])[dit()];
+      const EBISBox& ebisbox  = ebisl[dit()];
+      const EBGraph& ebgraph  = ebisbox.getEBGraph();
+      const Box& box          = dbl.get(dit());
+      
+      for (int dir = 0; dir < SpaceDim; dir++){
+      	EBFaceFAB& E_face = (*a_E_face[lvl])[dit()][dir];
+	E_face.setVal(0.0);
+
+      	EBLevelDataOps::averageCellToFace(E_face,
+      					  E_cell,
+      					  ebgraph,
+      					  box,
+      					  0,
+      					  dir,
+      					  domain,
+      					  dir,
+      					  dir);
+      }
+
+    }
+    a_E_face[lvl]->exchange();
   }
 }
 
@@ -426,4 +480,10 @@ void ito_plasma_stepper::compute_E(EBAMRIVData& a_E_eb,  const phase::which_phas
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_E(ebamriv, phase ebamrcell " << endl;
   }
+
+  CH_assert(a_E_eb[0]->nComp()   == SpaceDim);
+  CH_assert(a_E_cell[0]->nComp() == SpaceDim);
+
+  const irreg_amr_stencil<eb_centroid_interp>& interp_stencil = m_amr->get_eb_centroid_interp_stencils(a_phase);
+  interp_stencil.apply(a_E_eb, a_E_cell);
 }
