@@ -21,7 +21,12 @@ namespace physics {
       ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_physics);
       ~ito_plasma_godunov();
 
+      // Advance routines
       Real advance(const Real a_dt) override;
+
+      // Setup routines
+      void parse_options() override;
+      void allocate_internals() override;
     };
   }
 }

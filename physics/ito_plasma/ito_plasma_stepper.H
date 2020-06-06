@@ -22,15 +22,26 @@ namespace physics {
     class ito_plasma_stepper : public time_stepper {
     public:
 
+      static Real s_constant_one(const RealVect a_pos);
+
       // Ctor and dtor
       ito_plasma_stepper();
       ito_plasma_stepper(RefCountedPtr<ito_plasma_physics>& a_physics);
       ~ito_plasma_stepper();
 
       // Setup routines
+      virtual void parse_options() = 0;
+      virtual void allocate_internals() = 0;
       void setup_solvers() override;
       void initial_data() override;
       void post_checkpoint_setup() override;
+      void setup_ito();
+      void setup_poisson();
+      void setup_rte();
+      void setup_sigma();
+      void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
+      void set_poisson_wall_func(Real (*a_func)(const RealVect a_pos));
+      
   
       // IO routines
       void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
@@ -111,6 +122,36 @@ namespace physics {
 	@brief Potential curve
       */
       Real (*m_potential)(const Real a_time);
+
+            /*!
+	@brief Function pointer for Poisson BC on domain walls
+      */
+      Real (*m_wall_func_x_lo)(const RealVect a_pos);
+
+      /*!
+	@brief Function pointer for Poisson BC on domain walls
+      */
+      Real (*m_wall_func_x_hi)(const RealVect a_pos);
+
+      /*!
+	@brief Function pointer for Poisson BC on domain walls
+      */
+      Real (*m_wall_func_y_lo)(const RealVect a_pos);
+
+      /*!
+	@brief Function pointer for Poisson BC on domain walls
+      */
+      Real (*m_wall_func_y_hi)(const RealVect a_pos);
+
+      /*!
+	@brief Function pointer for Poisson BC on domain walls
+      */
+      Real (*m_wall_func_z_lo)(const RealVect a_pos);
+
+      /*!
+	@brief Function pointer for Poisson BC on domain walls
+      */
+      Real (*m_wall_func_z_hi)(const RealVect a_pos);
     };
   }
 };

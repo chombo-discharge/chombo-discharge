@@ -33,7 +33,7 @@ int main(int argc, char* argv[]){
   // Get potential from input script 
   std::string basename; 
   {
-     ParmParse pp("ito_test");
+     ParmParse pp("air2");
      pp.get("potential", g_potential);
      pp.get("basename",  basename);
      setPoutBaseName(basename);
