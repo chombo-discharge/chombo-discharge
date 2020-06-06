@@ -175,6 +175,7 @@ void ito_plasma_stepper::initial_data(){
     pout() << "ito_plasma_stepper::initial_data" << endl;
   }
 
+  MayDay::Warning("ito_plasma_stepper::initial_data - not implemented");
   m_ito->initial_data();
   m_rte->initial_data();
 
@@ -266,8 +267,6 @@ void ito_plasma_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::st
   if(SpaceDim == 3){
     a_plotvar_names.push_back("z-J");
   }
-
-
 }
 
 void ito_plasma_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
@@ -275,6 +274,15 @@ void ito_plasma_stepper::synchronize_solver_times(const int a_step, const Real a
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::synchronize_solver_times" << endl;
   }
+
+  m_step = a_step;
+  m_time = a_time;
+  m_dt   = a_dt;
+
+  m_ito->set_time(a_step,     a_time, a_dt);
+  m_poisson->set_time(a_step, a_time, a_dt);
+  m_rte->set_time(a_step,     a_time, a_dt);
+  m_sigma->set_time(a_step,   a_time, a_dt);
 }
 
 void ito_plasma_stepper::print_step_report(){
@@ -303,11 +311,16 @@ void ito_plasma_stepper::register_operators(){
   m_sigma->register_operators();
 }
   
-void ito_plasma_stepper::pre_regrid(const int a_lmin, const int a_old_finest_level){
+void ito_plasma_stepper::pre_regrid(const int a_lbase, const int a_old_finest_level){
   CH_TIME("ito_plasma_stepper::pre_regrid");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::pre_regrid" << endl;
   }
+
+  m_ito->pre_regrid(a_lbase,     a_old_finest_level);
+  m_poisson->pre_regrid(a_lbase, a_old_finest_level);
+  m_rte->pre_regrid(a_lbase,     a_old_finest_level);
+  m_sigma->pre_regrid(a_lbase,   a_old_finest_level);
 }
 
 void ito_plasma_stepper::deallocate(){
@@ -315,6 +328,8 @@ void ito_plasma_stepper::deallocate(){
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::deallocate" << endl;
   }
+
+  MayDay::Warning("ito_plasma_stepper::deallocate - not implemented");
 }
 
 void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
@@ -322,6 +337,8 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, 
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::regrid" << endl;
   }
+
+  MayDay::Warning("ito_plasma_stepper::regrid - not implemented");
 }
 
 int  ito_plasma_stepper::get_num_plot_vars() const {
