@@ -59,6 +59,13 @@ namespace physics {
 	return m_rte_species.size();
       }
 
+      /*!
+	@brief Set initial surface charge. Override if you want.
+      */
+      virtual Real initial_sigma(const Real a_time, const RealVect a_pos){
+	return 0.0;
+      }
+
     protected:
 
       Vector<RefCountedPtr<ito_species> > m_ito_species;

@@ -34,6 +34,7 @@ namespace physics {
       virtual void allocate_internals() = 0;
       void setup_solvers() override;
       void initial_data() override;
+      void initial_sigma();
       void post_checkpoint_setup() override;
       void setup_ito();
       void setup_poisson();
@@ -41,7 +42,6 @@ namespace physics {
       void setup_sigma();
       void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
       void set_poisson_wall_func(Real (*a_func)(const RealVect a_pos));
-      
   
       // IO routines
       void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
@@ -73,12 +73,25 @@ namespace physics {
       // Get routines
       Real get_time() const;
 
-      // E-field computations
+      // Poisson and related routines
       void compute_E(MFAMRCellData& a_E,      const MFAMRCellData& a_potential);
       void compute_E(EBAMRCellData& a_E,      const phase::which_phase a_phase);
       void compute_E(EBAMRCellData& a_E,      const phase::which_phase a_phase, const MFAMRCellData& a_potential);
       void compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
       void compute_E(EBAMRIVData& a_E_eb,     const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
+      
+      void compute_rho();
+      void compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase);
+      void compute_rho(MFAMRCellData&                                     a_rho,
+		       const Vector<particle_container<ito_particle>* >&  a_densities,
+		       const centering::which_center                      a_centering);
+      
+      bool solve_poisson();
+      bool solve_poisson(MFAMRCellData&                                   a_potential,
+			 MFAMRCellData&                                   a_rhs,
+			 const Vector<particle_container<ito_particle>* > a_densities,
+			 const EBAMRIVData&                               a_sigma,
+			 const centering::which_center                    a_centering);
 
     protected:
 

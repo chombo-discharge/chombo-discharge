@@ -178,9 +178,48 @@ void ito_plasma_stepper::initial_data(){
   MayDay::Warning("ito_plasma_stepper::initial_data - not implemented");
   m_ito->initial_data();
   m_rte->initial_data();
-
+  this->initial_sigma();
+  
   // Solve Poisson equation
   //  this->solve_poisson();
+}
+
+void ito_plasma_stepper::initial_sigma(){
+  CH_TIME("ito_plasma_stepper::initial_sigma");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::initial_sigma" << endl;
+  }
+
+  const RealVect origin  = m_amr->get_prob_lo();
+  const int finest_level = m_amr->get_finest_level();
+
+  EBAMRIVData& sigma = m_sigma->get_state();
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      BaseIVFAB<Real>& state = (*sigma[lvl])[dit()];
+
+      const EBISBox& ebisbox = ebisl[dit()];
+      const IntVectSet& ivs  = state.getIVS();
+      const EBGraph& ebgraph = state.getEBGraph();
+      
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const RealVect pos  = origin + vof.gridIndex()*dx + ebisbox.bndryCentroid(vof)*dx;
+	
+	for (int comp = 0; comp < state.nComp(); comp++){
+	  state(vof, comp) = m_physics->initial_sigma(m_time, pos);
+	}
+      }
+    }
+  }
+
+  m_amr->average_down(sigma, phase::gas);
+  m_sigma->reset_cells(sigma);
 }
 
 void ito_plasma_stepper::post_checkpoint_setup(){
