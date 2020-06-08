@@ -25,6 +25,11 @@ namespace physics {
 	@brief Compute Townsend ionization length
       */
       Real compute_alpha(const RealVect a_E) const override;
+
+      Vector<RealVect> compute_ito_velocities(const Real         a_time,
+					      const RealVect     a_pos,
+					      const RealVect     a_E,
+					      const Vector<Real> a_cdr_densities) const override;
     };
   }
 }

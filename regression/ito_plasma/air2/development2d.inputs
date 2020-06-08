@@ -1,0 +1,228 @@
+# ====================================================================================================
+# POTENTIAL CURVE
+# ====================================================================================================
+air2.potential = 10E3
+air2.basename  = pout
+
+# ====================================================================================================
+# AMR_MESH OPTIONS
+# ====================================================================================================
+amr_mesh.lo_corner       = -1E-2 -1E-2 # Low corner of problem domain
+amr_mesh.hi_corner       =  1E-2  1E-2 # High corner of problem domain
+amr_mesh.verbosity       = -1          # Controls verbosity. 
+amr_mesh.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
+amr_mesh.max_amr_depth   = 0           # Maximum amr depth
+amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
+amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
+amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
+amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
+amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
+amr_mesh.buffer_size     = 2           # Number of cells between grid levels
+amr_mesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+amr_mesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
+amr_mesh.max_box_size    = 16          # Maximum allowed box size
+amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
+amr_mesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
+amr_mesh.num_ghost       = 3           # Number of ghost cells. Default is 3
+amr_mesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
+amr_mesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
+amr_mesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
+amr_mesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
+amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
+
+# ====================================================================================================
+# DRIVER OPTIONS
+# ====================================================================================================
+driver.verbosity                       = 2             # Engine verbosity
+driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
+driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
+driver.recursive_regrid                = false         # Recursive regrids
+driver.plot_interval                   = 10            # Plot interval
+driver.regrid_interval                 = 10            # Regrid interval
+driver.checkpoint_interval             = 10            # Checkpoint interval
+driver.initial_regrids                 = 0             # Number of initial regrids
+driver.start_time                      = 0             # Start time (fresh simulations only)
+driver.stop_time                       = 1.0           # Stop time
+driver.max_steps                       = 100           # Maximum number of steps
+driver.geometry_only                   = false         # Special option that ONLY plots the geometry
+driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+driver.write_memory                    = false         # Write MPI memory report 
+driver.write_ebis                      = false         # Write geometry to an HDF5 file
+driver.read_ebis                       = false         # Read EBIS when restarting a simulation
+driver.output_directory                = ./            # Output directory
+driver.grow_tags                       = 0             # Grow tagged by this in every direction
+driver.output_names                    = simulation    # Simulation output names
+driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
+driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
+driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
+driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
+driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
+driver.allow_coarsening                = true          # Allows removal of grid levels according to cell_tagger
+driver.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
+driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
+driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+driver.refine_electrode_gas_interface  = -1            # Refine electrode-gas interfaces. -1 => ----"-----
+driver.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
+driver.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
+driver.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----
+
+
+# ====================================================================================================
+# POISSON_MULTIFLUID_GMG_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
+# ====================================================================================================
+poisson_multifluid_gmg.bc_x_low  = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_x_high = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_y_low  = dirichlet_ground  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_y_high = dirichlet_live    # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+
+poisson_multifluid_gmg.auto_tune         = false     # Do some auto-tuning
+poisson_multifluid_gmg.gmg_verbosity     = -1        # GMG verbosity
+poisson_multifluid_gmg.gmg_pre_smooth    = 12        # Number of relaxations in downsweep
+poisson_multifluid_gmg.gmg_post_smooth   = 12        # Number of relaxations in upsweep
+poisson_multifluid_gmg.gmg_bott_smooth   = 12        # NUmber of relaxations before dropping to bottom solver
+poisson_multifluid_gmg.gmg_min_iter      = 5         # Minimum number of iterations
+poisson_multifluid_gmg.gmg_max_iter      = 32        # Maximum number of iterations
+poisson_multifluid_gmg.gmg_tolerance     = 1.E-10    # Residue tolerance
+poisson_multifluid_gmg.gmg_hang          = 0.2       # Solver hang
+poisson_multifluid_gmg.gmg_bottom_drop   = 4         # Bottom drop
+poisson_multifluid_gmg.gmg_bc_order      = 2         # Boundary condition order for multigrid
+poisson_multifluid_gmg.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+poisson_multifluid_gmg.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
+poisson_multifluid_gmg.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now
+poisson_multifluid_gmg.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
+
+# ====================================================================================================
+# ITO_SOLVER CLASS OPTIONS
+# ====================================================================================================
+ito_solver.pvr_buffer          = 4             # Buffer for PVR. 
+ito_solver.plt_vars            = phi vel dco   # Currently available are 'phi', 'vel', and 'dco'
+ito_solver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
+ito_solver.seed                = 0             # Seed for RNG
+ito_solver.max_diffusion_hop   = 2.0           # Maximum diffusion hop length (in units of dx)
+ito_solver.normal_max          = 3.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
+ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
+ito_solver.superparticles      = cell          # Make super-particles on a per-cell basis. Valid are 'cell' and 'patch'. 
+ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
+ito_solver.deposition          = cic           # 'ngp' = nearest grid point
+                                               # 'cic' = cloud-in-cell
+                                               # 'tsc' = triangle-shaped-cloud
+                                               # 'w4'  = 3rd order interpolation
+
+# ====================================================================================================
+# MC_PHOTO CLASS OPTIONS
+#
+# The mc_photo class is intended as a flexible RTE solver that may interface into several descriptions.
+# Because of that we allow several deposition types, e.g. cloud-in-cell if one wants to compute photoionization
+# profiles with less noise. If one wants the photoionization profile (which is what gets passed around
+# in the time_stepper framework) to contain just the number of photons in a cell, one would use
+# deposition_type = num. This is useful for SSA type algorithms. 
+#
+# Since the photoproduction source term is filled externally, and the filling of this depends on the
+# CFD/FHD description, mc_photo.source_type species what the solver will expect when drawing photons.
+# For example, if one species 'volume_rate', mc_photo will interpret the internal data so as to contain
+# a rate per unit volume. The number of photons produced in a volume will then be S*dx^3*dt. If you
+# filled the source term with just the number of photons that will be produced in a cell, you should
+# use source_type = number.
+#
+# The photogeneration mechanism can be done stochastically or determinsitically. How this is interpreted
+# depends on how you implemented your source terms through the plasma_kinetics interface (or equivalent).
+# This design makes sense for FHD models because the number of photons produced in a cell can be
+# computed directly, e.g. with SSA algorithms. In this way the stochasticity is provided by the SSA
+# algorithm and one would use mc_photo.source_type = deterministic. For CFD models one would probably
+# work with a volumetric rate, in which one could draw the number of photons from a Poisson distribution. 
+# ====================================================================================================
+mc_photo.instantaneous      = true          # Instantaneous transport or not
+mc_photo.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
+mc_photo.blend_conservation = false         # Switch for blending with the nonconservative divergence
+mc_photo.pvr_buffer         = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
+mc_photo.random_kappa       = true          # Randomize absorption length (taken from photon implementation)
+mc_photo.plt_vars           = phi src phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot'
+mc_photo.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 
+mc_photo.bisect_step        = 1.E-4         # Bisection step length for intersection tests
+mc_photo.seed               = 0             # Seed for RNG
+mc_photo.bc_x_low           = outflow       # Boundary condition. 'outflow', 'symmetry', or 'wall'
+mc_photo.bc_x_high          = outflow       # Boundary condition
+mc_photo.bc_y_low           = outflow       # Boundary condition
+mc_photo.bc_y_high          = outflow       # Boundary condition
+mc_photo.bc_z_low           = outflow       # Boundary condition
+mc_photo.bc_z_high          = outflow       # Boundary condition
+mc_photo.poiss_exp_swap     = 100           # Swap out Poisson with exponential distribution above this mean
+mc_photo.photon_generation  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
+mc_photo.source_type        = number        # 'number'       = Source term contains the number of photons produced
+                                            # 'volume'       = Source terms contains the number of photons produced per unit volume
+                                            # 'volume_rate'  = Source terms contains the volumetric rate
+                                            # 'rate'         = Source terms contains the rate
+mc_photo.deposition         = cic           # 'ngp'  = nearest grid point
+                                            # 'num'  = # of photons per cell
+                                            # 'cic'  = cloud-in-cell
+                                            # 'tsc'  = triangle-shaped-cloud
+                                            # 'w4'   = 3rd order interpolation
+
+
+
+# ====================================================================================================
+# GEO_COARSENER CLASS OPTIONS
+# ====================================================================================================
+geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
+geo_coarsener.box1_lo     = -1 -1        # Remove irregular cell tags 
+geo_coarsener.box1_hi     =  1  1E-3     # between these two corners
+geo_coarsener.box1_lvl    = 0            # up to this level
+geo_coarsener.box1_inv    = false        # Remove except inside box (true)
+
+# ====================================================================================================
+# ROD_SPHERE CLASS OPTIONS
+# ====================================================================================================
+rod_sphere.eps0                      = 1                # Background permittivity
+rod_sphere.turn_off_electrode        = false            # Turn on/off electrode
+rod_sphere.turn_off_dielectric       = true             # Turn on/off dielectric
+rod_sphere.electrode_live            = true             # Live electrode or not
+rod_sphere.electrode_radius          = 500.E-6          # Electrode inner radius
+rod_sphere.electrode_center1         = 0  0             # Center 1
+rod_sphere.electrode_center2         = 0  1             # Center 2. 
+rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
+rod_sphere.dielectric_center         = 0 -5E-3          # Dielectric center
+rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
+
+
+# ==================================================================================================== 
+# ITO_PLASMA_GODUNOV CLASS OPTIONS
+# ==================================================================================================== 
+ito_plasma_godunov.verbosity   = -1            # Verbosity
+
+# ====================================================================================================
+# ITO_PLASMA_AIR2 CLASS OPTIONS
+# ====================================================================================================
+ito_plasma_air2.gas_temperature    = 300                      # Gas temperature
+ito_plasma_air2.gas_pressure       = 1.0                      # Gas pressure
+
+ito_plasma_air2.initial_ionization  = 1.E10                   # Initial uniform ionization
+ito_plasma_air2.seed_density        = 1.E18                   # Initial seed density
+ito_plasma_air2.seed_radius         = 250.E-6                 # Seed radius
+ito_plasma_air2.seed_position       = 0. 0. 0.                # Seed position	
+
+ito_plasma_air2.electrode_townsend2           = 1.E-4         # 2nd Townsend coeff on electrode
+ito_plasma_air2.dielectric_townsend2          = 1.E-4         # 2nd Townsend coeff on dielectric
+ito_plasma_air2.electrode_quantum_efficiency  = 1.E-4         # Quantum efficiency on electrode
+ito_plasma_air2.dielectric_quantum_efficiency = 1.E-4         # Quantum efficiency on electrode
+
+ito_plasma_air2.quenching_pressure         = 0.03947          # Photoionization quenching
+ito_plasma_air2.photoionization_efficiency = 0.1              # Photoionization efficiency
+ito_plasma_air2.excitation_efficiency      = 0.6              # Photoionization excitation efficiency
+
+# ====================================================================================================
+# ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS
+# ====================================================================================================
+ito_plasma_streamer_tagger.verbosity         = -1           # Verbosity
+ito_plasma_streamer_tagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
+ito_plasma_streamer_tagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
+ito_plasma_streamer_tagger.box1_hi           = 0.0 0.0 0.0  # these two corners
+ito_plasma_streamer_tagger.buffer            = 0            # Grow tagged cells
+
+ito_plasma_streamer_tagger.refine_curvature  = 10.0         # Curvature refinement
+ito_plasma_streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	
+ito_plasma_streamer_tagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
+ito_plasma_streamer_tagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
+ito_plasma_streamer_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth

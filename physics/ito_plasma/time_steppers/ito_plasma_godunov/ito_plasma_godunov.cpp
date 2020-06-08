@@ -35,6 +35,8 @@ void ito_plasma_godunov::parse_options() {
   }
 
   ParmParse pp(m_name.c_str());
+
+  pp.get("verbosity", m_verbosity);
 }
 
 void ito_plasma_godunov::allocate_internals(){

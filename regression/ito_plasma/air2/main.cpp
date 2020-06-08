@@ -65,7 +65,7 @@ int main(int argc, char* argv[]){
   timestepper->set_rte(rte);
 
   // Set potential 
-timestepper->set_potential(potential_curve);
+  timestepper->set_potential(potential_curve);
 
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));

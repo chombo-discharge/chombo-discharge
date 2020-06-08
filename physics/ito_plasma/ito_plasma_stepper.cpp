@@ -80,7 +80,7 @@ void ito_plasma_stepper::setup_poisson(){
   m_poisson->parse_options();
   m_poisson->set_amr(m_amr);
   m_poisson->set_computational_geometry(m_compgeom);
-
+#if 0
   m_poisson->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
   m_poisson->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
   m_poisson->set_poisson_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
@@ -88,6 +88,7 @@ void ito_plasma_stepper::setup_poisson(){
 #if CH_SPACEDIM==3
   m_poisson->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
   m_poisson->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
+#endif
 #endif
   m_poisson->set_potential(m_potential); // Needs to happen AFTER set_poisson_wall_func
 
@@ -176,7 +177,6 @@ void ito_plasma_stepper::initial_data(){
     pout() << "ito_plasma_stepper::initial_data" << endl;
   }
 
-  MayDay::Warning("ito_plasma_stepper::initial_data - not implemented");
   m_ito->initial_data();
   m_rte->initial_data();
   this->initial_sigma();
@@ -638,7 +638,7 @@ void ito_plasma_stepper::compute_ito_velocities(){
 
   EBAMRCellData E;
   m_amr->allocate_ptr(E);
-  m_amr->alias(E, m_ito->get_phase(), m_poisson->get_E());
+  m_amr->alias(E, m_phase, m_poisson->get_E());
 
   Vector<EBAMRCellData*> velocities = m_ito->get_velocities();
   Vector<EBAMRCellData*> densities  = m_ito->get_densities();
@@ -751,8 +751,7 @@ void ito_plasma_stepper::compute_ito_velocities(Vector<EBCellFAB*>&       a_velo
     }
 
     // Call ito_physics and compute velocities for each particle species
-    Vector<RealVect> velocities(3);// = m_physics->compute_cdr_velocities(e, pos, time);
-
+    Vector<RealVect> velocities = m_physics->compute_ito_velocities(a_time, pos, e, densities);
     // Put velocities where they belong
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<ito_solver>& solver = solver_it();
@@ -780,7 +779,7 @@ void ito_plasma_stepper::compute_ito_velocities(Vector<EBCellFAB*>&       a_velo
     }
     
     // Compute velocities
-    Vector<RealVect> velocities(3);
+    Vector<RealVect> velocities = m_physics->compute_ito_velocities(a_time, pos, e, densities);
 
     // Put velocities in the appropriate place. 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){

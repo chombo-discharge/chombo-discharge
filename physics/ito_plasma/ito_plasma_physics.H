@@ -66,6 +66,14 @@ namespace physics {
 	return 0.0;
       }
 
+      /*!
+	@brief Compute ito velocities
+      */
+      virtual Vector<RealVect> compute_ito_velocities(const Real         a_time,
+						      const RealVect     a_pos,
+						      const RealVect     a_E,
+						      const Vector<Real> a_cdr_densities) const = 0;
+
     protected:
 
       Vector<RefCountedPtr<ito_species> > m_ito_species;
