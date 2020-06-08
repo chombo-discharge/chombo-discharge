@@ -92,6 +92,26 @@ namespace physics {
 			 const Vector<particle_container<ito_particle>* > a_particles,
 			 const EBAMRIVData&                               a_sigma);
 
+
+      // Routines for computing velocities
+      void compute_ito_velocities();
+      void compute_ito_velocities(Vector<EBAMRCellData*>&       a_velo,
+				  const Vector<EBAMRCellData*>& a_densities,
+				  const EBAMRCellData&          a_E,
+				  const Real                    a_time);
+      void compute_ito_velocities(Vector<LevelData<EBCellFAB>* >&       a_velo,
+				  const Vector<LevelData<EBCellFAB>* >& a_densities,
+				  const LevelData<EBCellFAB>&           a_E,
+				  const int                             a_level,
+				  const Real                            a_time);
+      void compute_ito_velocities(Vector<EBCellFAB*>&       a_velo,
+				  const Vector<EBCellFAB*>& a_densities,
+				  const EBCellFAB&          a_E,
+				  const int                 a_level,
+				  const DataIndex           a_dit,
+				  const Box                 a_box,
+				  const Real                a_time);
+
     protected:
 
       /*!

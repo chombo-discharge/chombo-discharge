@@ -998,6 +998,15 @@ particle_container<ito_particle>& ito_solver::get_source_particles(){
   return m_domain_particles;
 }
 
+EBAMRCellData& ito_solver::get_state(){
+  CH_TIME("ito_solver::get_state");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_state" << endl;
+  }
+
+  return m_state;
+}
+
 EBAMRCellData& ito_solver::get_velo_cell(){
   CH_TIME("ito_solver::get_velo_cell");
   if(m_verbosity > 5){

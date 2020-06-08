@@ -57,6 +57,13 @@ void ito_layout<T>::add_solver(RefCountedPtr<T> a_solver){
 }
 
 template <class T>
+void ito_layout<T>::interpolate_velocities(){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->interpolate_velocities();
+  }
+}
+
+template <class T>
 void ito_layout<T>::pre_regrid(const int a_lbase, const int a_finest_level){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
     iter()->pre_regrid(a_lbase, a_finest_level);
@@ -151,6 +158,36 @@ Vector<RefCountedPtr<T> >& ito_layout<T>::get_solvers(){
 template <class T>
 Vector<RefCountedPtr<ito_species> >& ito_layout<T>::get_species(){
   return m_species;
+}
+
+template <class T>
+Vector<EBAMRCellData*> ito_layout<T>::get_velocities(){
+  Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    ret[iter.get_solver()] = &(iter()->get_velo_cell());
+  }
+
+  return ret;
+}
+
+template <class T>
+Vector<EBAMRCellData*> ito_layout<T>::get_densities(){
+  Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    ret[iter.get_solver()] = &(iter()->get_state());
+  }
+
+  return ret;
+}
+
+template <class T>
+Vector<EBAMRCellData*> ito_layout<T>::get_diffusion(){
+  Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    ret[iter.get_solver()] = &(iter()->get_diffco_cell());
+  }
+
+  return ret;
 }
 
 template <class T>

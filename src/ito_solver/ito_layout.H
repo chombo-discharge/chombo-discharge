@@ -76,6 +76,11 @@ public:
   virtual void initial_data();
 
   /*!
+    @brief Interpolate velocities
+  */
+  virtual void interpolate_velocities();
+
+  /*!
     @brief Regrid method. 
   */
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
@@ -130,6 +135,21 @@ public:
     @brief Get species
   */
   virtual Vector<RefCountedPtr<ito_species> >& get_species();
+
+  /*!
+    @brief Get all velocities
+  */
+  virtual Vector<EBAMRCellData*> get_velocities();
+
+  /*!
+    @brief Get all densities
+  */
+  virtual Vector<EBAMRCellData*> get_densities();
+
+  /*!
+    @brief Get all diffusion coefficients
+  */
+  virtual Vector<EBAMRCellData*> get_diffusion();
 
   /*!
     @brief Get all particles

@@ -214,6 +214,11 @@ public:
   virtual RefCountedPtr<ito_species>& get_species();
 
   /*!
+    @brief Get state
+  */
+  virtual EBAMRCellData& get_state();
+
+  /*!
     @brief Get cell-centered velocity
   */
   virtual EBAMRCellData& get_velo_cell();
