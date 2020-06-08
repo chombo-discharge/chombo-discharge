@@ -79,11 +79,14 @@ public:
   /*!
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
+  virtual void deposit_particles(EBAMRCellData& a_state, const AMRParticles<ito_particle>& a_particles);
+
+  /*!
+    @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
+  */
   virtual void deposit_particles(EBAMRCellData&                    a_state,
 				 const AMRParticles<ito_particle>& a_particles,
 				 const DepositionType::Which       a_deposition);
-
-
 
   /*!
     @brief Deposit the total weight of the particles in the grid cells
@@ -204,6 +207,11 @@ public:
     @brief Get the particle container
   */
   virtual particle_container<ito_particle>& get_source_particles();
+
+  /*!
+    @brief Get the species
+  */
+  virtual RefCountedPtr<ito_species>& get_species();
 
   /*!
     @brief Get cell-centered velocity

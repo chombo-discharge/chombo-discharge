@@ -35,6 +35,10 @@ std::string ito_solver::get_name(){
   return m_name;
 }
 
+RefCountedPtr<ito_species>& ito_solver::get_species(){
+  return m_species;
+}
+
 void ito_solver::parse_options(){
   CH_TIME("ito_solver::parse_options");
   if(m_verbosity > 5){
@@ -593,6 +597,15 @@ void ito_solver::deposit_particles(){
     pout() << m_name + "::deposit_particles" << endl;
   }
   this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
+}
+
+void ito_solver::deposit_particles(EBAMRCellData& a_state, const AMRParticles<ito_particle>& a_particles){
+  CH_TIME("ito_solver::deposit_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_particles" << endl;
+  }
+
+    this->deposit_particles(a_state, a_particles, m_deposition);
 }
 
 void ito_solver::deposit_particles(EBAMRCellData&                    a_state,

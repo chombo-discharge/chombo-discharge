@@ -7,6 +7,7 @@
 
 #include "ito_plasma_stepper.H"
 #include "data_ops.H"
+#include "units.H"
 
 using namespace physics::ito_plasma;
 
@@ -49,7 +50,6 @@ void ito_plasma_stepper::setup_solvers(){
   this->setup_poisson();
   this->setup_rte();
   this->setup_sigma();
-
 
   // Allocate internal stuff
   this->allocate_internals();
@@ -181,7 +181,7 @@ void ito_plasma_stepper::initial_data(){
   this->initial_sigma();
   
   // Solve Poisson equation
-  //  this->solve_poisson();
+  this->solve_poisson();
 }
 
 void ito_plasma_stepper::initial_sigma(){
@@ -534,7 +534,7 @@ void ito_plasma_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_p
 void ito_plasma_stepper::compute_E(EBAMRIVData& a_E_eb,  const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
   CH_TIME("ito_plasma_stepper::compute_E(ebamriv, phase, ebamrcell)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_E(ebamriv, phase ebamrcell " << endl;
+    pout() << "ito_plasma_stepper::compute_E(ebamriv, phase ebamrcell)" << endl;
   }
 
   CH_assert(a_E_eb[0]->nComp()   == SpaceDim);
@@ -542,4 +542,84 @@ void ito_plasma_stepper::compute_E(EBAMRIVData& a_E_eb,  const phase::which_phas
 
   const irreg_amr_stencil<eb_centroid_interp>& interp_stencil = m_amr->get_eb_centroid_interp_stencils(a_phase);
   interp_stencil.apply(a_E_eb, a_E_cell);
+}
+
+void ito_plasma_stepper::compute_rho(){
+  CH_TIME("ito_plasma_stepper::compute_rho()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_rho()" << endl;
+  }
+  
+  this->compute_rho(m_poisson->get_source(), m_ito->get_particles());
+}
+
+void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<particle_container<ito_particle>* >& a_particles){
+  CH_TIME("ito_plasma_stepper::compute_rho(rho, particles)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_rho(rho, particles)" << endl;
+  }
+
+  // Reset
+  data_ops::set_value(a_rho, 0.0);
+
+  // Make alias
+  EBAMRCellData rhoPhase;
+  m_amr->allocate_ptr(rhoPhase);
+  m_amr->alias(rhoPhase, m_phase, a_rho);
+
+  // Allocate some scratch memory for this.
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_phase, 1);
+
+  // Do each level
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    for (auto solver_it = m_ito->iterator(species_iteration::charged); solver_it.ok(); ++solver_it){
+      const RefCountedPtr<ito_solver>& solver   = solver_it();
+      const RefCountedPtr<ito_species>& species = solver->get_species();
+      const int idx = solver_it.get_solver();
+      
+      data_ops::set_value(scratch, 0.0);
+      solver->deposit_particles(scratch, a_particles[idx]->get_particles());
+      data_ops::incr(rhoPhase, scratch, species->get_charge());
+    }
+  }
+
+  data_ops::scale(rhoPhase, units::s_Qe);
+
+  m_amr->average_down(a_rho);
+  m_amr->interp_ghost(a_rho);
+}
+
+bool ito_plasma_stepper::solve_poisson(){
+  CH_TIME("ito_plasma_stepper::solve_poisson()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::solve_poisson()" << endl;
+  }
+
+  this->compute_rho(); // This computes rho onto m_poisson->get_source()
+  const bool converged = m_poisson->solve(m_poisson->get_state(),
+					  m_poisson->get_source(),
+					  m_sigma->get_state(),
+					  false);
+
+  return converged;
+}
+
+bool ito_plasma_stepper::solve_poisson(MFAMRCellData&                                   a_potential,
+				       MFAMRCellData&                                   a_rho,
+				       const Vector<particle_container<ito_particle>* > a_particles,
+				       const EBAMRIVData&                               a_sigma){
+  CH_TIME("ito_plasma_stepper::solve_poisson(phi, rho, particles, sigma)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::solve_poisson(phi, rho, particles, sigma)" << endl;
+  }
+
+  this->compute_rho(a_rho, a_particles);
+
+  const bool converged = m_poisson->solve(a_potential,
+					  a_rho,
+					  a_sigma,
+					  false);
+
+  return converged;
 }

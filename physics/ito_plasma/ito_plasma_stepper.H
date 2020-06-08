@@ -73,25 +73,24 @@ namespace physics {
       // Get routines
       Real get_time() const;
 
-      // Poisson and related routines
+      // E-field computations
       void compute_E(MFAMRCellData& a_E,      const MFAMRCellData& a_potential);
       void compute_E(EBAMRCellData& a_E,      const phase::which_phase a_phase);
       void compute_E(EBAMRCellData& a_E,      const phase::which_phase a_phase, const MFAMRCellData& a_potential);
       void compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
       void compute_E(EBAMRIVData& a_E_eb,     const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
       
+      // Compute rho routines
       void compute_rho();
       void compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase);
-      void compute_rho(MFAMRCellData&                                     a_rho,
-		       const Vector<particle_container<ito_particle>* >&  a_densities,
-		       const centering::which_center                      a_centering);
-      
+      void compute_rho(MFAMRCellData& a_rho, const Vector<particle_container<ito_particle>* >&  a_particles);
+
+      // Poisson-solving routines
       bool solve_poisson();
       bool solve_poisson(MFAMRCellData&                                   a_potential,
 			 MFAMRCellData&                                   a_rhs,
-			 const Vector<particle_container<ito_particle>* > a_densities,
-			 const EBAMRIVData&                               a_sigma,
-			 const centering::which_center                    a_centering);
+			 const Vector<particle_container<ito_particle>* > a_particles,
+			 const EBAMRIVData&                               a_sigma);
 
     protected:
 
