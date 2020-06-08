@@ -145,6 +145,7 @@ void brownian_walker_stepper::post_checkpoint_setup() {
   if(m_ppc > 0){
     m_solver->make_superparticles(m_ppc);
   }
+  m_solver->deposit_particles();
 
   if(m_solver->is_diffusive()){
     m_solver->set_diffco(m_diffco);

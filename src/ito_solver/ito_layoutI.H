@@ -134,6 +134,20 @@ void ito_layout<T>::make_superparticles(const int a_ppc){
 }
 
 template <class T>
+void ito_layout<T>::deposit_particles(){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->deposit_particles();
+  }
+}
+
+template <class T>
+void ito_layout<T>::remap(){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->remap();
+  }
+}
+
+template <class T>
 Real ito_layout<T>::compute_dt(const Real a_maxCellsToMove){
   Real minDt = 1.E99;
 

@@ -81,7 +81,7 @@ namespace physics {
       // Compute rho routines
       void compute_rho();
       void compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase);
-      void compute_rho(MFAMRCellData& a_rho, const Vector<particle_container<ito_particle>* >&  a_particles);
+      void compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities);
 
       // Poisson-solving routines
       bool solve_poisson();

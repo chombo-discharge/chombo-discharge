@@ -76,6 +76,16 @@ public:
   virtual void initial_data();
 
   /*!
+    @brief All solvers deposit their particles
+  */
+  virtual void deposit_particles();
+
+  /*!
+    @brief All solvers remap. 
+  */
+  virtual void remap();
+
+  /*!
     @brief Interpolate velocities
   */
   virtual void interpolate_velocities();

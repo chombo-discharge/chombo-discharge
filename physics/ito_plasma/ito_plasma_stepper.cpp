@@ -119,7 +119,7 @@ void ito_plasma_stepper::initial_data(){
     pout() << "ito_plasma_stepper::initial_data" << endl;
   }
 
-  m_ito->initial_data();
+  m_ito->initial_data(); // This deposits, of course. 
   m_rte->initial_data();
   this->initial_sigma();
 
@@ -529,13 +529,13 @@ void ito_plasma_stepper::compute_rho(){
     pout() << "ito_plasma_stepper::compute_rho()" << endl;
   }
   
-  this->compute_rho(m_poisson->get_source(), m_ito->get_particles());
+  this->compute_rho(m_poisson->get_source(), m_ito->get_densities());
 }
 
-void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<particle_container<ito_particle>* >& a_particles){
-  CH_TIME("ito_plasma_stepper::compute_rho(rho, particles)");
+void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities){
+  CH_TIME("ito_plasma_stepper::compute_rho(rho, densities)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_rho(rho, particles)" << endl;
+    pout() << "ito_plasma_stepper::compute_rho(rho, densities)" << endl;
   }
 
   // Reset
@@ -546,20 +546,13 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<particle
   m_amr->allocate_ptr(rhoPhase);
   m_amr->alias(rhoPhase, m_phase, a_rho);
 
-  // Allocate some scratch memory for this.
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_phase, 1);
-
   // Increment each solver
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<ito_solver>& solver   = solver_it();
     const RefCountedPtr<ito_species>& species = solver->get_species();
-    const int idx = solver_it.get_solver();
 
     if(species->get_charge() != 0){
-      data_ops::set_value(scratch, 0.0);
-      solver->deposit_particles(scratch, a_particles[idx]->get_particles());
-      data_ops::incr(rhoPhase, scratch, species->get_charge());
+      data_ops::incr(rhoPhase, solver->get_state(), species->get_charge());
     }
   }
 
