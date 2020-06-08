@@ -27,6 +27,11 @@ namespace physics {
       // Setup routines
       void parse_options() override;
       void allocate_internals() override;
+
+    protected:
+
+      void advect_particles(const Real a_dt);
+      void diffuse_particles(const Real a_dt);
     };
   }
 }

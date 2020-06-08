@@ -95,6 +95,12 @@ public:
 
   /*!
     @brief Remove particles that are inside the EB
+    @details Calls the other version with m_particles
+  */
+  virtual void remove_eb_particles();
+
+  /*!
+    @brief Remove particles that are inside the EB
   */
   virtual void remove_eb_particles(particle_container<ito_particle>& a_particles);
 

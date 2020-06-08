@@ -318,61 +318,23 @@ void ito_solver::initial_data(){
 
   // Add particles, remove the ones that are inside the EB, and then depsit
   m_particles.add_particles(m_species->get_initial_particles()); 
-  this->remove_eb_particles(m_particles);                        
+  this->remove_eb_particles();
   this->deposit_particles(m_state, m_particles.get_particles(), m_deposition); 
-  
-#if 0 // Experimental code. Compute the number of particles in each box for load balancing purposes
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    Vector<Box> oldBoxes(0);
-    Vector<int> oldLoads(0);
-    int numParticlesThisProc = 0;
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box thisBox = dbl.get(dit());
-      const int numPart = m_particles[lvl][dit()].numItems();
+}
 
-      oldBoxes.push_back(thisBox);
-      oldLoads.push_back(numPart);
-
-      numParticlesThisProc += numPart;
-    }
-    //    pout() << "on level = " << lvl << "\t num particles = " << numParticlesThisProc << endl;
-
-
-    // Gather boxes and loads
-    load_balance::gather_boxes(oldBoxes);
-    load_balance::gather_loads(oldLoads);
-
-
-    Vector<Box> newBoxes = oldBoxes;
-    Vector<int> newLoads = oldLoads;
-
-    mortonOrdering(oldBoxes);
-    for (int i = 0; i < newBoxes.size(); i++){
-      for (int j = 0; j < oldBoxes.size(); j++){
-	if(newBoxes[i] == oldBoxes[j]){
-	  newLoads[i] = oldLoads[j];
-	}
-      }
-    }
-
-    Vector<int> procs;
-    load_balance::load_balance_boxes(procs, newLoads, newBoxes);
-
-    if(procID() == 0) std::cout << "\nnew load balancing: " << std::endl;
-    for (int i = 0; i < newLoads.size(); i++){
-      if(procID() == 0){
-	std::cout << "box = " << newBoxes[i] << "\t load = " << newLoads[i] << "\t proc = " << procs[i] << std::endl;
-      }
-    }
+void ito_solver::remove_eb_particles(){
+  CH_TIME("ito_solver::remove_eb_particles()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::remove_eb_particles()" << endl;
   }
-#endif
+
+  this->remove_eb_particles(m_particles);
 }
 
 void ito_solver::remove_eb_particles(particle_container<ito_particle>& a_particles){
-  CH_TIME("ito_solver::remove_eb_particles");
+  CH_TIME("ito_solver::remove_eb_particles(particles)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_eb_particles" << endl;
+    pout() << m_name + "::remove_eb_particles(particles)" << endl;
   }
 
   RefCountedPtr<BaseIF> func;

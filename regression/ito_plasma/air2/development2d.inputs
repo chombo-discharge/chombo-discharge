@@ -203,7 +203,7 @@ ito_plasma_air2.gas_pressure       = 1.0                      # Gas pressure
 ito_plasma_air2.blob_radius    = 250E-6                      # Blob radius
 ito_plasma_air2.blob_center    = 0 0                          # Blob center
 ito_plasma_air2.seed           = 0                            # RNG seed
-ito_plasma_air2.num_particles  = 10000                       # Number of initial particles
+ito_plasma_air2.num_particles  = 1000000                       # Number of initial particles
 
 ito_plasma_air2.electrode_townsend2           = 1.E-4         # 2nd Townsend coeff on electrode
 ito_plasma_air2.dielectric_townsend2          = 1.E-4         # 2nd Townsend coeff on dielectric
