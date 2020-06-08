@@ -131,76 +131,20 @@ namespace physics {
 
     protected:
 
-      /*!
-	@brief Class name
-      */
       std::string m_name;
-
-      /*!
-	@brief Phase
-      */
       phase::which_phase m_phase;
       
 
-      /*!
-	@brief Physics
-      */
       RefCountedPtr<ito_plasma_physics> m_physics;
-
-      /*!
-	@brief Ito solvers
-      */
       RefCountedPtr<ito_layout<ito_solver> > m_ito;
-
-      /*!
-	@brief Radiative transfer solvers
-      */
       RefCountedPtr<rte_layout<mc_photo> > m_rte;
-
-      /*!
-	@brief Poisson solver
-      */
       RefCountedPtr<poisson_solver> m_poisson;
-
-      /*!
-	@brief Surface charge solver
-      */
       RefCountedPtr<sigma_solver> m_sigma;
 
-      /*!
-	@brief Potential curve
-      */
       Real (*m_potential)(const Real a_time);
 
-      /*!
-	@brief Function pointer for Poisson BC on domain walls
-      */
-      Real (*m_wall_func_x_lo)(const RealVect a_pos);
-
-      /*!
-	@brief Function pointer for Poisson BC on domain walls
-      */
-      Real (*m_wall_func_x_hi)(const RealVect a_pos);
-
-      /*!
-	@brief Function pointer for Poisson BC on domain walls
-      */
-      Real (*m_wall_func_y_lo)(const RealVect a_pos);
-
-      /*!
-	@brief Function pointer for Poisson BC on domain walls
-      */
-      Real (*m_wall_func_y_hi)(const RealVect a_pos);
-
-      /*!
-	@brief Function pointer for Poisson BC on domain walls
-      */
-      Real (*m_wall_func_z_lo)(const RealVect a_pos);
-
-      /*!
-	@brief Function pointer for Poisson BC on domain walls
-      */
-      Real (*m_wall_func_z_hi)(const RealVect a_pos);
+      int m_ppc;
+      Real m_max_cells_hop;
     };
   }
 };

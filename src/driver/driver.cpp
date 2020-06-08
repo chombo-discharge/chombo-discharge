@@ -868,6 +868,7 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	last_step = true;
       }
 
+
       // Time stepper advances solutions
       m_wallclock1 = MPI_Wtime();
       const Real actual_dt = m_timestepper->advance(m_dt);
@@ -880,6 +881,9 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
       m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);
 
       if(Abs(m_time - a_end_time) < m_dt*1.E-5){
+	last_step = true;
+      }
+      if(m_step == m_max_steps){
 	last_step = true;
       }
 

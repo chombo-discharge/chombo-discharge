@@ -1114,14 +1114,6 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
 
     EBParticleInterp meshInterp(box, ebisbox,dx, origin);
     meshInterp.interpolateDiffusion(particleList, dco_fab, m_deposition);
-
-    ListIterator<ito_particle> lit(particleList);
-
-    // Do scaling. 
-    for (lit.rewind(); lit; ++lit){
-      ito_particle& p = particleList[lit];
-      p.diffusion() = sqrt(2.0*p.diffusion());
-    }
   }
 }
 

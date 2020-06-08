@@ -16,12 +16,12 @@ ito_plasma_stepper::ito_plasma_stepper(){
   m_verbosity = -1;
   m_name      = "ito_plasma_stepper";
   m_phase     = phase::gas;
+
+  m_dt   = 0.0;
+  m_time = 0.0;
 }
 
-ito_plasma_stepper::ito_plasma_stepper(RefCountedPtr<ito_plasma_physics>& a_physics){
-  m_verbosity = -1;
-  m_name      = "ito_plasma_stepper";
-  m_phase     = phase::gas;
+ito_plasma_stepper::ito_plasma_stepper(RefCountedPtr<ito_plasma_physics>& a_physics) : ito_plasma_stepper(){
   m_physics   = a_physics;
 }
 
@@ -122,10 +122,11 @@ void ito_plasma_stepper::initial_data(){
   m_ito->initial_data();
   m_rte->initial_data();
   this->initial_sigma();
+
+  m_ito->make_superparticles(m_ppc);
   
   // Solve Poisson equation and compute the E-field
   this->solve_poisson();
-  m_poisson->compute_E();
 
   // Fill solvers with velocities and diffusion coefficients
   this->compute_ito_velocities();
@@ -175,6 +176,15 @@ void ito_plasma_stepper::post_checkpoint_setup(){
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::post_checkpoint_setup" << endl;
   }
+
+  // Recompute 
+  this->solve_poisson();
+  this->allocate_internals();
+
+  m_ito->make_superparticles(m_ppc);
+  
+  this->compute_ito_velocities();
+  this->compute_ito_diffusion();
 }
 
 void ito_plasma_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const {
@@ -284,6 +294,9 @@ void ito_plasma_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecod
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_dt" << endl;
   }
+
+  a_dt = m_ito->compute_dt(m_max_cells_hop);
+  a_timecode = time_code::cfl;
 }
 
 void ito_plasma_stepper::register_operators(){
@@ -316,7 +329,7 @@ void ito_plasma_stepper::deallocate(){
     pout() << "ito_plasma_stepper::deallocate" << endl;
   }
 
-  MayDay::Warning("ito_plasma_stepper::deallocate - not implemented");
+  // Don't deallocate anything. 
 }
 
 void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
@@ -325,7 +338,25 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, 
     pout() << "ito_plasma_stepper::regrid" << endl;
   }
 
-  MayDay::Warning("ito_plasma_stepper::regrid - not implemented");
+  // Allocate new memory
+  this->allocate_internals();
+
+  // Regrid solvers
+  m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
+
+  const bool converged = this->solve_poisson();
+  if(!converged){
+    MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
+  }
+
+  // Compute new velocities and diffusion coefficients
+  m_ito->make_superparticles(m_ppc);
+  this->compute_ito_velocities();
+  this->compute_ito_diffusion();
+
 }
 
 int  ito_plasma_stepper::get_num_plot_vars() const {
@@ -550,6 +581,8 @@ bool ito_plasma_stepper::solve_poisson(){
 					  m_sigma->get_state(),
 					  false);
 
+  m_poisson->compute_E();
+    
   return converged;
 }
 
@@ -568,7 +601,8 @@ bool ito_plasma_stepper::solve_poisson(MFAMRCellData&                           
 					  a_rho,
 					  a_sigma,
 					  false);
-
+  m_poisson->compute_E();
+  
   return converged;
 }
 
@@ -577,7 +611,7 @@ void ito_plasma_stepper::compute_ito_velocities(){
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_ito_velocities()" << endl;
   }
-
+  
   EBAMRCellData E;
   m_amr->allocate_ptr(E);
   m_amr->alias(E, m_phase, m_poisson->get_E());
@@ -789,10 +823,10 @@ void ito_plasma_stepper::compute_ito_diffusion(Vector<EBAMRCellData*>&       a_d
     RefCountedPtr<ito_solver>& solver = solver_it();
 
     if(solver->is_diffusive()){
-      // m_amr->average_down(*a_diffco[idx], m_phase);
-      // m_amr->interp_ghost(*a_diffco[idx], m_phase);
+      m_amr->average_down(*a_diffco[idx], m_phase);
+      m_amr->interp_ghost(*a_diffco[idx], m_phase);
 
-      //solver->interpolate_diffusion();
+      solver->interpolate_diffusion();
     }
   }
 }

@@ -117,6 +117,16 @@ public:
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
+    @brief Make superparticles
+  */
+  virtual void make_superparticles(const int a_ppc);
+
+  /*!
+    @brief Compute dt
+  */
+  virtual Real compute_dt(const Real a_maxCellsToMove);
+
+  /*!
     @brief Get largest possible time step for advection part
   */
   virtual Real compute_min_drift_dt(const Real a_maxCellsToMove);

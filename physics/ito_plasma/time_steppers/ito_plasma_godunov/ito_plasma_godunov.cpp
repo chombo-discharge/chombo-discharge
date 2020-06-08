@@ -36,7 +36,9 @@ void ito_plasma_godunov::parse_options() {
 
   ParmParse pp(m_name.c_str());
 
-  pp.get("verbosity", m_verbosity);
+  pp.get("verbosity",     m_verbosity);
+  pp.get("ppc",           m_ppc);
+  pp.get("max_cells_hop", m_max_cells_hop);
 }
 
 void ito_plasma_godunov::allocate_internals(){

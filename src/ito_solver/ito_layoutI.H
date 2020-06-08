@@ -127,6 +127,25 @@ void ito_layout<T>::set_time(const int a_step, const Real a_time, const Real a_d
 }
 
 template <class T>
+void ito_layout<T>::make_superparticles(const int a_ppc){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->make_superparticles(a_ppc);
+  }
+}
+
+template <class T>
+Real ito_layout<T>::compute_dt(const Real a_maxCellsToMove){
+  Real minDt = 1.E99;
+
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    const Real thisDt = iter()->compute_dt(a_maxCellsToMove);
+    minDt = Min(minDt, thisDt);
+  }
+  
+  return minDt;
+}
+
+template <class T>
 Real ito_layout<T>::compute_min_drift_dt(const Real a_maxCellsToMove){
   Real minDt = 1.E99;
 
