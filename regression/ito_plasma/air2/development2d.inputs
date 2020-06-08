@@ -59,7 +59,7 @@ driver.max_chk_depth                   = -1            # Restrict chechkpoint de
 driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
 driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
 driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
-driver.allow_coarsening                = true          # Allows removal of grid levels according to cell_tagger
+driver.allow_coarsening                = false         # Allows removal of grid levels according to cell_tagger
 driver.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -167,8 +167,8 @@ mc_photo.deposition         = cic           # 'ngp'  = nearest grid point
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
 geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-geo_coarsener.box1_lo     = -1 -1        # Remove irregular cell tags 
-geo_coarsener.box1_hi     =  1  1E-3     # between these two corners
+geo_coarsener.box1_lo     = -1  1E-3     # Remove irregular cell tags 
+geo_coarsener.box1_hi     =  1  1        # between these two corners
 geo_coarsener.box1_lvl    = 0            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 
@@ -191,6 +191,7 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ==================================================================================================== 
 ito_plasma_godunov.verbosity   = -1            # Verbosity
+ito_plasma_godunov.ppc         = 64            # Particles per cell
 
 # ====================================================================================================
 # ITO_PLASMA_AIR2 CLASS OPTIONS
@@ -198,10 +199,10 @@ ito_plasma_godunov.verbosity   = -1            # Verbosity
 ito_plasma_air2.gas_temperature    = 300                      # Gas temperature
 ito_plasma_air2.gas_pressure       = 1.0                      # Gas pressure
 
-ito_plasma_air2.initial_ionization  = 1.E10                   # Initial uniform ionization
-ito_plasma_air2.seed_density        = 1.E18                   # Initial seed density
-ito_plasma_air2.seed_radius         = 250.E-6                 # Seed radius
-ito_plasma_air2.seed_position       = 0. 0. 0.                # Seed position	
+ito_plasma_air2.blob_radius    = 250E-6                      # Blob radius
+ito_plasma_air2.blob_center    = 0 0                          # Blob center
+ito_plasma_air2.seed           = 0                            # RNG seed
+ito_plasma_air2.num_particles  = 10000                       # Number of initial particles
 
 ito_plasma_air2.electrode_townsend2           = 1.E-4         # 2nd Townsend coeff on electrode
 ito_plasma_air2.dielectric_townsend2          = 1.E-4         # 2nd Townsend coeff on dielectric

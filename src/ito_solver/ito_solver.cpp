@@ -472,6 +472,7 @@ void ito_solver::allocate_internals(){
   if(m_verbosity > 5){
     pout() << m_name + "::allocate_internals" << endl;
   }
+  
   const int ncomp = 1;
 
   m_amr->allocate(m_state,        m_phase, ncomp);
@@ -848,6 +849,7 @@ void ito_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
   const int finest_level = m_amr->get_finest_level();
   const Interval interv(comp, comp);
 
+
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx       = m_amr->get_dx()[lvl];
     const bool has_coar = lvl > 0;
@@ -856,7 +858,6 @@ void ito_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
     RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_phase)[lvl];
     RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_phase)[lvl];
     RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_phase)[lvl];
-    
     if(has_coar){
       fine2coar_redist->redistribute(*a_state[lvl-1], interv);
       fine2coar_redist->setToZero();
@@ -873,9 +874,9 @@ void ito_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
 }
 
 void ito_solver::deposit_weights(EBAMRCellData& a_state, const AMRParticles<ito_particle>& a_particles){
-  CH_TIME("ito_solver::is_mobile");
+  CH_TIME("ito_solver::deposit_weights");
   if(m_verbosity > 5){
-    pout() << m_name + "::is_mobile" << endl;
+    pout() << m_name + "::deposit_weights" << endl;
   }
 
   this->deposit_particles(a_state, a_particles, DepositionType::NGP);
@@ -937,9 +938,6 @@ void ito_solver::add_particles(ListBox<ito_particle>& a_part, const int a_lvl, c
 
 bool ito_solver::is_mobile() const{
   CH_TIME("ito_solver::is_mobile");
-  if(m_verbosity > 5){
-    pout() << m_name + "::is_mobile" << endl;
-  }
   
   return m_mobile;
 }
@@ -947,9 +945,7 @@ bool ito_solver::is_mobile() const{
 
 bool ito_solver::is_diffusive() const{
   CH_TIME("ito_solver::is_diffusive");
-  if(m_verbosity > 5){
-    pout() << m_name + "::is_diffusive" << endl;
-  }
+  
   return m_diffusive;
 }
 
@@ -1118,6 +1114,14 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
 
     EBParticleInterp meshInterp(box, ebisbox,dx, origin);
     meshInterp.interpolateDiffusion(particleList, dco_fab, m_deposition);
+
+    ListIterator<ito_particle> lit(particleList);
+
+    // Do scaling. 
+    for (lit.rewind(); lit; ++lit){
+      ito_particle& p = particleList[lit];
+      p.diffusion() = sqrt(2.0*p.diffusion());
+    }
   }
 }
 

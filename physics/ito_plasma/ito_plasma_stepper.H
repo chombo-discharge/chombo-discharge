@@ -40,8 +40,6 @@ namespace physics {
       void setup_poisson();
       void setup_rte();
       void setup_sigma();
-      void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
-      void set_poisson_wall_func(Real (*a_func)(const RealVect a_pos));
   
       // IO routines
       void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
@@ -112,6 +110,25 @@ namespace physics {
 				  const Box                 a_box,
 				  const Real                a_time);
 
+      // Routines for computing diffusion coefficients
+      void compute_ito_diffusion();
+      void compute_ito_diffusion(Vector<EBAMRCellData*>&       a_diffco,
+				 const Vector<EBAMRCellData*>& a_densities,
+				 const EBAMRCellData&          a_E,
+				 const Real                    a_time);
+      void compute_ito_diffusion(Vector<LevelData<EBCellFAB>* >&       a_diffco,
+				 const Vector<LevelData<EBCellFAB>* >& a_densities,
+				 const LevelData<EBCellFAB>&           a_E,
+				 const int                             a_level,
+				 const Real                            a_time);
+      void compute_ito_diffusion(Vector<EBCellFAB*>&       a_diffco,
+				 const Vector<EBCellFAB*>& a_densities,
+				 const EBCellFAB&          a_E,
+				 const int                 a_level,
+				 const DataIndex           a_dit,
+				 const Box                 a_box,
+				 const Real                a_time);
+
     protected:
 
       /*!
@@ -155,7 +172,7 @@ namespace physics {
       */
       Real (*m_potential)(const Real a_time);
 
-            /*!
+      /*!
 	@brief Function pointer for Poisson BC on domain walls
       */
       Real (*m_wall_func_x_lo)(const RealVect a_pos);

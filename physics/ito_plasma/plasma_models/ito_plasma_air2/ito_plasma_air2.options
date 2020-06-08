@@ -4,10 +4,10 @@
 ito_plasma_air2.gas_temperature    = 300                      # Gas temperature
 ito_plasma_air2.gas_pressure       = 1.0                      # Gas pressure
 
-ito_plasma_air2.initial_ionization  = 1.E10                   # Initial uniform ionization
-ito_plasma_air2.seed_density        = 1.E18                   # Initial seed density
-ito_plasma_air2.seed_radius         = 250.E-6                 # Seed radius
-ito_plasma_air2.seed_position       = 0. 0. 0.                # Seed position	
+ito_plasma_air2.blob_radius    = 0.1                          # Blob radius
+ito_plasma_air2.blob_center    = 0 0                          # Blob center
+ito_plasma_air2.seed           = 0                            # RNG seed
+ito_plasma_air2.num_particles  = 100                          # Number of initial particles
 
 ito_plasma_air2.electrode_townsend2           = 1.E-4         # 2nd Townsend coeff on electrode
 ito_plasma_air2.dielectric_townsend2          = 1.E-4         # 2nd Townsend coeff on dielectric

@@ -74,6 +74,14 @@ namespace physics {
 						      const RealVect     a_E,
 						      const Vector<Real> a_cdr_densities) const = 0;
 
+      /*!
+	@brief Compute diffusion coefficients
+      */
+      virtual Vector<Real> compute_ito_diffusion(const Real         a_time,
+						 const RealVect     a_pos,
+						 const RealVect     a_E,
+						 const Vector<Real> a_cdr_densities) const = 0;
+
     protected:
 
       Vector<RefCountedPtr<ito_species> > m_ito_species;

@@ -12,10 +12,6 @@
 
 using namespace physics::ito_plasma;
 
-Real ito_plasma_stepper::s_constant_one(const RealVect a_pos){
-  return 1.0;
-}
-
 ito_plasma_stepper::ito_plasma_stepper(){
   m_verbosity = -1;
   m_name      = "ito_plasma_stepper";
@@ -23,7 +19,10 @@ ito_plasma_stepper::ito_plasma_stepper(){
 }
 
 ito_plasma_stepper::ito_plasma_stepper(RefCountedPtr<ito_plasma_physics>& a_physics){
-  m_physics = a_physics;
+  m_verbosity = -1;
+  m_name      = "ito_plasma_stepper";
+  m_phase     = phase::gas;
+  m_physics   = a_physics;
 }
 
 ito_plasma_stepper::~ito_plasma_stepper(){
@@ -80,16 +79,6 @@ void ito_plasma_stepper::setup_poisson(){
   m_poisson->parse_options();
   m_poisson->set_amr(m_amr);
   m_poisson->set_computational_geometry(m_compgeom);
-#if 0
-  m_poisson->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
-  m_poisson->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
-  m_poisson->set_poisson_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
-  m_poisson->set_poisson_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
-#if CH_SPACEDIM==3
-  m_poisson->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
-  m_poisson->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
-#endif
-#endif
   m_poisson->set_potential(m_potential); // Needs to happen AFTER set_poisson_wall_func
 
   m_poisson->sanity_check();
@@ -124,53 +113,6 @@ void ito_plasma_stepper::setup_sigma(){
   m_sigma->allocate_internals();
 }
 
-void ito_plasma_stepper::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("ito_plasma_stepper::set_poisson_wall_func(dir, side, func)");
-  if(m_verbosity > 4){
-    pout() << "ito_plasma_stepper::set_poisson_wall_func(dir, side, func)" << endl;
-  }
-
-  if(a_dir == 0){
-    if(a_side == Side::Lo){
-      m_wall_func_x_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_x_hi = a_func;
-    }
-  }
-  else if(a_dir == 1){
-    if(a_side == Side::Lo){
-      m_wall_func_y_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_y_hi = a_func;
-    }
-  }
-#if CH_SPACEDIM==3
-  else if(a_dir == 2){
-    if(a_side == Side::Lo){
-      m_wall_func_z_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_z_hi = a_func;
-    }
-  }
-#endif
-}
-
-void ito_plasma_stepper::set_poisson_wall_func(Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("ito_plasma_stepper::set_poisson_wall_func(func)");
-  if(m_verbosity > 4){
-    pout() << "ito_plasma_stepper::set_poisson_wall_func(func)" << endl;
-  }
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      this->set_poisson_wall_func(dir, sit(), a_func);
-    }
-  }
-}
-
 void ito_plasma_stepper::initial_data(){
   CH_TIME("ito_plasma_stepper::initial_data");
   if(m_verbosity > 5){
@@ -187,7 +129,7 @@ void ito_plasma_stepper::initial_data(){
 
   // Fill solvers with velocities and diffusion coefficients
   this->compute_ito_velocities();
-  //  this->compute_ito_diffusion();
+  this->compute_ito_diffusion();
 }
 
 void ito_plasma_stepper::initial_sigma(){
@@ -577,20 +519,20 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<particle
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_phase, 1);
 
-  // Do each level
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    for (auto solver_it = m_ito->iterator(species_iteration::charged); solver_it.ok(); ++solver_it){
-      const RefCountedPtr<ito_solver>& solver   = solver_it();
-      const RefCountedPtr<ito_species>& species = solver->get_species();
-      const int idx = solver_it.get_solver();
-      
+  // Increment each solver
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<ito_solver>& solver   = solver_it();
+    const RefCountedPtr<ito_species>& species = solver->get_species();
+    const int idx = solver_it.get_solver();
+
+    if(species->get_charge() != 0){
       data_ops::set_value(scratch, 0.0);
       solver->deposit_particles(scratch, a_particles[idx]->get_particles());
       data_ops::incr(rhoPhase, scratch, species->get_charge());
     }
   }
 
-  data_ops::scale(rhoPhase, units::s_Qe);
+  data_ops::scale(a_rho, units::s_Qe);
 
   m_amr->average_down(a_rho);
   m_amr->interp_ghost(a_rho);
@@ -642,6 +584,7 @@ void ito_plasma_stepper::compute_ito_velocities(){
 
   Vector<EBAMRCellData*> velocities = m_ito->get_velocities();
   Vector<EBAMRCellData*> densities  = m_ito->get_densities();
+
   this->compute_ito_velocities(velocities, densities, E, m_time);
 }
 
@@ -654,20 +597,16 @@ void ito_plasma_stepper::compute_ito_velocities(Vector<EBAMRCellData*>&       a_
     pout() << "ito_plasma_stepper::compute_ito_velocities(velo, E, time)" << endl;
   }
 
+  const int num_ito_species = m_physics->get_num_ito_species();
+  
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
 
-    Vector<LevelData<EBCellFAB>* > velocities;
-    Vector<LevelData<EBCellFAB>* > densities;
+    Vector<LevelData<EBCellFAB>* > velocities(num_ito_species);
+    Vector<LevelData<EBCellFAB>* > densities(num_ito_species);
+    
     for (int idx = 0; idx < a_velo.size(); idx++){
-
-      EBAMRCellData& amrVelo  = *a_velo[idx];
-      EBAMRCellData& amrState = *a_densities[idx];
-	
-      LevelData<EBCellFAB>& levelVelo  = *amrVelo[lvl];
-      LevelData<EBCellFAB>& levelState = *amrState[lvl];
-      
-      velocities.push_back(&levelVelo);
-      densities.push_back(&levelState);
+      velocities[idx] = (*a_velo[idx])[lvl];
+      densities[idx]  = (*a_densities[idx])[lvl];
     }
 
     this->compute_ito_velocities(velocities, densities, *a_E[lvl], lvl, a_time);
@@ -679,10 +618,8 @@ void ito_plasma_stepper::compute_ito_velocities(Vector<EBAMRCellData*>&       a_
     RefCountedPtr<ito_solver>& solver = solver_it();
 
     if(solver->is_mobile()){
-      EBAMRCellData& velo = *a_velo[idx];
-
-      m_amr->average_down(velo, m_ito->get_phase());
-      m_amr->interp_ghost_pwl(velo, m_ito->get_phase());
+      m_amr->average_down(*a_velo[idx], m_phase);
+      m_amr->interp_ghost(*a_velo[idx], m_phase);
 
       solver->interpolate_velocities();
     }
@@ -699,21 +636,23 @@ void ito_plasma_stepper::compute_ito_velocities(Vector<LevelData<EBCellFAB>* >& 
     pout() << "ito_plasma_stepper::compute_ito_velocities(velo, E, level, time)" << endl;
   }
 
+  const int num_ito_species = m_physics->get_num_ito_species();
+
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box = dbl.get(dit());
 
-    Vector<EBCellFAB*> velocities;
-    Vector<EBCellFAB*> densities;
+    Vector<EBCellFAB*> velocities(num_ito_species);
+    Vector<EBCellFAB*> densities(num_ito_species);;
     
-    for (int idx = 0; idx < a_velo.size(); idx++){
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
 
-      EBCellFAB& boxVelo  = (*a_velo[idx])[dit()];
-      EBCellFAB& boxState = (*a_densities[idx])[dit()];
-      
-      velocities.push_back(&boxVelo);
-      densities.push_back(&boxState);
+      if(solver_it()->is_mobile()){
+	velocities[idx] = &(*a_velo[idx])[dit()];
+      }
+      densities[idx] = &(*a_densities[idx])[dit()];
     }
 
     this->compute_ito_velocities(velocities, densities, a_E[dit()], a_level, dit(), box, a_time);
@@ -752,6 +691,7 @@ void ito_plasma_stepper::compute_ito_velocities(Vector<EBCellFAB*>&       a_velo
 
     // Call ito_physics and compute velocities for each particle species
     Vector<RealVect> velocities = m_physics->compute_ito_velocities(a_time, pos, e, densities);
+    
     // Put velocities where they belong
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<ito_solver>& solver = solver_it();
@@ -770,7 +710,7 @@ void ito_plasma_stepper::compute_ito_velocities(Vector<EBCellFAB*>&       a_velo
     const VolIndex& vof = vofit();
     const RealVect e    = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
     const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, prob_lo);
-
+    
     // Get densities
     Vector<Real> densities;
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -781,7 +721,7 @@ void ito_plasma_stepper::compute_ito_velocities(Vector<EBCellFAB*>&       a_velo
     // Compute velocities
     Vector<RealVect> velocities = m_physics->compute_ito_velocities(a_time, pos, e, densities);
 
-    // Put velocities in the appropriate place. 
+    // Put velocities in the appropriate place.
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       if(solver_it()->is_mobile()){
 	const int idx = solver_it.get_solver();
@@ -803,3 +743,167 @@ void ito_plasma_stepper::compute_ito_velocities(Vector<EBCellFAB*>&       a_velo
   }
 }
 
+void ito_plasma_stepper::compute_ito_diffusion(){
+  CH_TIME("ito_plasma_stepper::compute_ito_diffusion()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_ito_diffusion()" << endl;
+  }
+
+  EBAMRCellData E;
+  m_amr->allocate_ptr(E);
+  m_amr->alias(E, m_phase, m_poisson->get_E());
+
+  Vector<EBAMRCellData*> diffusion = m_ito->get_diffusion();
+  Vector<EBAMRCellData*> densities = m_ito->get_densities();
+
+  this->compute_ito_diffusion(diffusion, densities, E, m_time);
+}
+
+void ito_plasma_stepper::compute_ito_diffusion(Vector<EBAMRCellData*>&       a_diffco,
+						const Vector<EBAMRCellData*>& a_densities,
+						const EBAMRCellData&          a_E,
+						const Real                    a_time){
+  CH_TIME("ito_plasma_stepper::compute_ito_diffusion(velo, E, time)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_ito_diffusion(velo, E, time)" << endl;
+  }
+
+  const int num_ito_species = m_physics->get_num_ito_species();
+  
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+
+    Vector<LevelData<EBCellFAB>* > diffusion(num_ito_species);
+    Vector<LevelData<EBCellFAB>* > densities(num_ito_species);
+    
+    for (int idx = 0; idx < a_diffco.size(); idx++){
+      diffusion[idx] = (*a_diffco[idx])[lvl];
+      densities[idx] = (*a_densities[idx])[lvl];
+    }
+
+    this->compute_ito_diffusion(diffusion, densities, *a_E[lvl], lvl, a_time);
+  }
+
+  // Average down, interpolate ghost cells, and then interpolate to particle positions
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    RefCountedPtr<ito_solver>& solver = solver_it();
+
+    if(solver->is_diffusive()){
+      // m_amr->average_down(*a_diffco[idx], m_phase);
+      // m_amr->interp_ghost(*a_diffco[idx], m_phase);
+
+      //solver->interpolate_diffusion();
+    }
+  }
+}
+
+void ito_plasma_stepper::compute_ito_diffusion(Vector<LevelData<EBCellFAB>* >&       a_diffco,
+					       const Vector<LevelData<EBCellFAB>* >& a_densities,
+					       const LevelData<EBCellFAB>&           a_E,
+					       const int                             a_level,
+					       const Real                            a_time){
+  CH_TIME("ito_plasma_stepper::compute_ito_diffusion(velo, E, level, time)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_ito_diffusion(velo, E, level, time)" << endl;
+  }
+
+  const int num_ito_species = m_physics->get_num_ito_species();
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box box = dbl.get(dit());
+
+    Vector<EBCellFAB*> diffusion(num_ito_species);
+    Vector<EBCellFAB*> densities(num_ito_species);;
+    
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+
+      if(solver_it()->is_diffusive()){
+	diffusion[idx] = &(*a_diffco[idx])[dit()];
+      }
+      densities[idx] = &(*a_densities[idx])[dit()];
+    }
+
+    this->compute_ito_diffusion(diffusion, densities, a_E[dit()], a_level, dit(), box, a_time);
+  }
+}
+
+void ito_plasma_stepper::compute_ito_diffusion(Vector<EBCellFAB*>&       a_diffco,
+					       const Vector<EBCellFAB*>& a_densities,
+					       const EBCellFAB&          a_E,
+					       const int                 a_level,
+					       const DataIndex           a_dit,
+					       const Box                 a_box,
+					       const Real                a_time){
+  CH_TIME("ito_plasma_stepper::compute_ito_diffusion(velo, E, level, dit, time)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_ito_diffusion(velo, E, level, dit, time)" << endl;
+  }
+
+  const int comp         = 0;
+  const Real dx          = m_amr->get_dx()[a_level];
+  const RealVect prob_lo = m_amr->get_prob_lo();
+  const BaseFab<Real>& E = a_E.getSingleValuedFAB();
+
+  // Do regular cells
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv   = bit();
+    const RealVect pos = m_amr->get_prob_lo() + dx*(RealVect(iv) + 0.5*RealVect::Unit);
+    const RealVect e   = RealVect(D_DECL(E(iv,0), E(iv, 1), E(iv, 2)));
+
+    // Make grid densities
+    Vector<Real> densities;
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      densities.push_back((*a_densities[idx]).getSingleValuedFAB()(iv, comp));
+    }
+
+    // Call ito_physics and compute diffusion for each particle species
+    Vector<Real> diffusion = m_physics->compute_ito_diffusion(a_time, pos, e, densities);
+    
+    // Put diffusion where they belong
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<ito_solver>& solver = solver_it();
+      if(solver->is_diffusive()){
+	const int idx = solver_it.get_solver();
+	(*a_diffco[idx]).getSingleValuedFAB()(iv, comp) = diffusion[idx];
+      }
+    }
+  }
+
+  // Do irregular cells
+  VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_level])[a_dit];
+  for (vofit.reset(); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+    const RealVect e    = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
+    const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, prob_lo);
+    
+    // Get densities
+    Vector<Real> densities;
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      densities.push_back((*a_densities[idx])(vof, comp));
+    }
+    
+    // Compute diffusion
+    Vector<Real> diffusion = m_physics->compute_ito_diffusion(a_time, pos, e, densities);
+
+    // Put diffusion in the appropriate place.
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      if(solver_it()->is_diffusive()){
+	const int idx = solver_it.get_solver();
+	(*a_diffco[idx])(vof, comp) = diffusion[idx];
+      }
+    }
+  }
+
+  // Covered is bogus.
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    if(solver_it()->is_diffusive()){
+      const int idx = solver_it.get_solver();
+      a_diffco[idx]->setCoveredCellVal(0.0, comp);
+    }
+  }
+}
