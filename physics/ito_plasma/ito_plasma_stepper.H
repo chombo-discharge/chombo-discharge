@@ -85,10 +85,10 @@ namespace physics {
 
       // Poisson-solving routines
       bool solve_poisson();
-      bool solve_poisson(MFAMRCellData&                                   a_potential,
-			 MFAMRCellData&                                   a_rhs,
-			 const Vector<particle_container<ito_particle>* > a_particles,
-			 const EBAMRIVData&                               a_sigma);
+      bool solve_poisson(MFAMRCellData&                 a_potential,
+			 MFAMRCellData&                 a_rhs,
+			 const Vector<EBAMRCellData* >& a_densities,
+			 const EBAMRIVData&             a_sigma);
 
 
       // Routines for computing velocities

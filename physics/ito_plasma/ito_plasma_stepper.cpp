@@ -579,16 +579,16 @@ bool ito_plasma_stepper::solve_poisson(){
   return converged;
 }
 
-bool ito_plasma_stepper::solve_poisson(MFAMRCellData&                                   a_potential,
-				       MFAMRCellData&                                   a_rho,
-				       const Vector<particle_container<ito_particle>* > a_particles,
-				       const EBAMRIVData&                               a_sigma){
-  CH_TIME("ito_plasma_stepper::solve_poisson(phi, rho, particles, sigma)");
+bool ito_plasma_stepper::solve_poisson(MFAMRCellData&                a_potential,
+				       MFAMRCellData&                a_rho,
+				       const Vector<EBAMRCellData*>& a_densities,
+				       const EBAMRIVData&            a_sigma){
+  CH_TIME("ito_plasma_stepper::solve_poisson(phi, rho, densities, sigma)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::solve_poisson(phi, rho, particles, sigma)" << endl;
+    pout() << "ito_plasma_stepper::solve_poisson(phi, rho, densities, sigma)" << endl;
   }
 
-  this->compute_rho(a_rho, a_particles);
+  this->compute_rho(a_rho, a_densities);
 
   const bool converged = m_poisson->solve(a_potential,
 					  a_rho,
