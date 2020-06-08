@@ -63,6 +63,7 @@ namespace physics {
       data_ops::set_value(sigma, m_init_sigma);
 
       const bool converged = m_poisson->solve(state, rho, sigma);
+      m_poisson->compute_E();
 
       if(!converged){
 	MayDay::Warning("poisson_stepper<T>::advance - did not converge");

@@ -43,6 +43,28 @@ bool poisson_solver::solve(MFAMRCellData& a_state, const bool a_zerophi){
   this->solve(a_state, m_source, a_zerophi);
 }
 
+void poisson_solver::compute_E(){
+  CH_TIME("poisson_solver::compute_E()");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::compute_E()" << endl;
+  }
+
+  this->compute_E(m_E, m_state);
+}
+
+void poisson_solver::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
+  CH_TIME("poisson_solver::compute_E(mfamrcell, mfamrcell)");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::compute_E(mfamrcell, mfamrcell)" << endl;
+  }
+
+  m_amr->compute_gradient(a_E, a_potential);
+  data_ops::scale(a_E, -1.0);
+
+  m_amr->average_down(a_E);
+  m_amr->interp_ghost(a_E);
+}
+
 void poisson_solver::allocate_internals(){
   CH_TIME("poisson_solver::allocate_internals");
   if(m_verbosity > 5){
@@ -50,16 +72,18 @@ void poisson_solver::allocate_internals(){
   }
 
   const int ncomp = 1;
-  
+
   m_amr->allocate(m_state,  ncomp, query_ghost());
   m_amr->allocate(m_source, ncomp, query_ghost());
   m_amr->allocate(m_resid,  ncomp, query_ghost());
   m_amr->allocate(m_sigma,  phase::gas, ncomp, query_ghost());
+  m_amr->allocate(m_E,      SpaceDim, query_ghost());
 
   data_ops::set_value(m_state,  0.0);
   data_ops::set_value(m_source, 0.0);
   data_ops::set_value(m_sigma,  0.0);
   data_ops::set_value(m_resid,  0.0);
+  data_ops::set_value(m_E,  0.0);
 }
 
 void poisson_solver::allocate_wall_bc(){
@@ -246,8 +270,6 @@ void poisson_solver::regrid(const int a_lmin, const int a_old_finest, const int 
   const Interval interv(comp, comp);
 
   this->allocate_internals();
-
-
   
   for (int i = 0; i < phase::num_phases; i++){
     phase::which_phase cur_phase;    
@@ -284,6 +306,9 @@ void poisson_solver::regrid(const int a_lmin, const int a_old_finest, const int 
       }
     }
   }
+
+  // Now recompute E
+  this->compute_E();
 }
 
 void poisson_solver::sanity_check(){
@@ -597,11 +622,8 @@ void poisson_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
   if(m_plot_res) write_mfdata(a_output, a_comp, m_resid,  false);
   if(m_plot_E) {
-    MFAMRCellData E;
-    m_amr->allocate(E, SpaceDim);
-    m_amr->compute_gradient(E, m_state);
-    data_ops::scale(E, -1.0);
-    write_mfdata(a_output, a_comp, E, true);
+    this->compute_E();
+    write_mfdata(a_output, a_comp, m_E, true);
   }
 }
 
@@ -742,6 +764,10 @@ wall_bc& poisson_solver::get_wall_bc(const int a_dir, Side::LoHiSide a_side) con
 
 MFAMRCellData& poisson_solver::get_state(){
   return m_state;
+}
+
+MFAMRCellData& poisson_solver::get_E(){
+  return m_E;
 }
 
 MFAMRCellData& poisson_solver::get_source(){

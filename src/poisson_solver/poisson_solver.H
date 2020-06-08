@@ -51,6 +51,15 @@ public:
 		     const EBAMRIVData&   a_sigma,
 		     const bool           a_zerophi = false) = 0;
 
+  /*!
+    @brief Cell-centered E-field computation
+  */
+  virtual void compute_E();
+
+  /*!
+    @brief Cell-centered E-field computation
+  */
+  virtual void compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
   
   /*!
     @brief Parse options
@@ -218,6 +227,16 @@ public:
   MFAMRCellData& get_state();
 
   /*!
+    @brief Get electric field
+  */
+  MFAMRCellData& get_E();
+
+  /*!
+    @brief Get E-field on specific phase
+  */
+  EBAMRCellData& get_E(const phase::which_phase a_phase);
+
+  /*!
     @brief Get multifluid source
   */
   MFAMRCellData& get_source();
@@ -263,9 +282,24 @@ protected:
   MFAMRCellData m_state;
 
   /*!
+    @brief E-field
+  */
+  MFAMRCellData m_E;
+
+  /*!
     @brief State data 
   */
   MFAMRCellData m_source;
+
+  /*!
+    @brief Gas-side E-field
+  */
+  EBAMRCellData m_E_gas;
+
+  /*!
+    @brief Solid-side E-field
+  */
+  EBAMRCellData m_E_sol;
 
   /*!
     @brief Surface source
