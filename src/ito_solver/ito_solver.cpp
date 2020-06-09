@@ -321,6 +321,12 @@ void ito_solver::initial_data(){
   m_particles.add_particles(m_species->get_initial_particles()); 
   this->remove_eb_particles();
   this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
+
+#if 0 // Test code
+  Vector<Box> boxes;
+  Vector<int> loads;
+  this->compute_loads(boxes, loads, 1);
+#endif
 }
 
 void ito_solver::compute_loads(Vector<Box>& a_boxes, Vector<int>& a_loads, const int a_level){
@@ -330,47 +336,33 @@ void ito_solver::compute_loads(Vector<Box>& a_boxes, Vector<int>& a_loads, const
   }
 
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
-  
-  a_boxes.resize(0);
-  a_loads.resize(0);
 
-  // Compute #particles in current boxes
+  a_boxes = dbl.boxArray();
+  a_loads.resize(dbl.size(),0);
+  
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Box thisBox = dbl.get(dit());
     const int numPart = m_particles[a_level][dit()].numItems();
-
-    a_boxes.push_back(thisBox);
-    a_loads.push_back(numPart);
+    a_loads[dit().intCode()] = numPart;
   }
 
-  // MPI gather boxes and loads. 
-  load_balance::gather_boxes_and_loads(a_boxes, a_loads);
+  // Gather loads globally
+#ifdef CH_MPI
+  int count = a_loads.size();
+  Vector<int> tmp(count);
+  MPI_Allreduce(&(a_loads[0]),&(tmp[0]), count, MPI_INT, MPI_SUM, Chombo_MPI::comm);
+  a_loads = tmp;
+#endif
 
+#if 0 // Debug. Load balance and do output
+  Vector<int> procs;
+  load_balance::load_balance_boxes(procs, a_loads, a_boxes);
 
-#if 0 // Some output
-
-  Vector<Box> newBoxes = oldBoxes;
-  Vector<int> newLoads = oldLoads;
-
-  // Sort boxes
-  mortonOrdering(oldBoxes);
-  for (int i = 0; i < newBoxes.size(); i++){
-    for (int j = 0; j < oldBoxes.size(); j++){
-      if(newBoxes[i] == oldBoxes[j]){
-	newLoads[i] = oldLoads[j];
-      }
+  if(procID() == 0) std::cout << "\nnew load balancing: " << std::endl;
+  for (int i = 0; i < a_loads.size(); i++){
+    if(procID() == 0){
+      std::cout << "box = " << a_boxes[i] << "\t load = " << a_loads[i] << "\t proc = " << procs[i] << std::endl;
     }
   }
-  
-    Vector<int> procs;
-    load_balance::load_balance_boxes(procs, newLoads, newBoxes);
-
-    if(procID() == 0) std::cout << "\nnew load balancing: " << std::endl;
-    for (int i = 0; i < newLoads.size(); i++){
-      if(procID() == 0){
-	std::cout << "box = " << newBoxes[i] << "\t load = " << newLoads[i] << "\t proc = " << procs[i] << std::endl;
-      }
-    }
 #endif
 }
 

@@ -235,3 +235,11 @@ void load_balance::load_balance_boxes(Vector<int>&       a_procs,
 
   LoadBalance(a_procs, loads, a_boxes);
 }
+
+void load_balance::load_balance_boxes(Vector<int>&                      a_procs,
+				      const Vector<unsigned long long>& a_loads,
+				      const Vector<Box>&                a_boxes){
+
+  UnLongLongLoadBalance(a_procs, a_loads, a_boxes);
+}
+  

@@ -32,6 +32,14 @@ public:
   static void load_balance_boxes(Vector<int>&       a_procs,
 				 const Vector<int>& a_loads,
 				 const Vector<Box>& a_boxes);
+
+  /*!
+    @brief Convenience function. 
+    @details This just calls Chombo code. 
+  */
+  static void load_balance_boxes(Vector<int>&                      a_procs,
+				 const Vector<unsigned long long>& a_loads,
+				 const Vector<Box>&                a_boxes);
   
   /*!
     @brief Gather boxes
