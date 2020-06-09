@@ -50,7 +50,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     pout() << m_name + "::advance" << endl;
   }
 
-  // Transport kernel
+  // Transport kernel for particles and photons. 
   this->advect_particles(a_dt);
   this->diffuse_particles(a_dt);
   this->intersect_particles(a_dt);
@@ -63,7 +63,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   this->solve_poisson();
 
   // Chemistry kernel.
-  //  this->advance_reaction_network(a_dt);
+  this->advance_reaction_network(a_dt);
 
   // Prepare next step
   this->compute_ito_velocities();

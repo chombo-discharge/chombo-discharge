@@ -157,6 +157,10 @@ namespace physics {
 				    const Real                          a_dx,
 				    const Real                          a_dt);
 
+      // Routines for advancing photons
+
+      // Routines for BC
+
 
     protected:
 
