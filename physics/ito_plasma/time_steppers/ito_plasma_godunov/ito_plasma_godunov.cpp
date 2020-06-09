@@ -44,24 +44,31 @@ void ito_plasma_godunov::allocate_internals(){
   }
 }
 
-
 Real ito_plasma_godunov::advance(const Real a_dt) {
   CH_TIME("ito_plasma_godunov::advance");
   if(m_verbosity > 5){
     pout() << m_name + "::advance" << endl;
   }
 
+  // Transport kernel
   this->advect_particles(a_dt);
   this->diffuse_particles(a_dt);
+  this->intersect_particles(a_dt);
 
-  // Remap and deposit particles on mesh
+  // Remap and deposit. 
   m_ito->remap();
   m_ito->deposit_particles();
 
   // Compute the electric field, recompute velocities and diffusion coefficients
   this->solve_poisson();
+
+  // Chemistry kernel.
+  //  this->advance_reaction_network(a_dt);
+
+  // Prepare next step
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
+  
   return a_dt;
 }
 
@@ -134,5 +141,18 @@ void ito_plasma_godunov::diffuse_particles(const Real a_dt){
 	}
       }
     }
+  }
+}
+
+void ito_plasma_godunov::intersect_particles(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::intersect_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::intersect_particles" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+
+    solver->intersect_particles();
   }
 }

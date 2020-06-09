@@ -9,6 +9,7 @@
 #include "data_ops.H"
 #include "units.H"
 #include "poly.H"
+#include "particle_ops.H"
 
 #include <time.h>
 #include <chrono>
@@ -1151,10 +1152,10 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
 
 	  // Do intersection tests
 	  if(checkDom){
-	    contact_domain = this->domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
+	    contact_domain = particle_ops::domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
 	  }
 	  if(checkEB){
-	    contact_eb = this->eb_bc_intersection(impfunc, oldPos, newPos, pathLen, eb_s);
+	    contact_eb = particle_ops::eb_bc_intersection(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
 	  }
 
 	  // Move the photon to the data holder where it belongs. 
@@ -1308,10 +1309,10 @@ void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_phot
 
 	// Check absorption on EBs and domain
 	if(checkEB){
-	  absorbed_eb = this->eb_bc_intersection(impfunc, oldPos, newPos, pathLen, eb_s);
+	  absorbed_eb = particle_ops::eb_bc_intersection(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
 	}
 	if(checkDom){
-	  absorbed_domain = this->domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
+	  absorbed_domain = particle_ops::domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
 	  dom_s = (absorbed_domain) ? Max(0.0, dom_s - SAFETY) : dom_s;
 	}
 
@@ -1488,73 +1489,4 @@ particle_container<photon>& mc_photo::get_source_photons(){
   }
 
   return m_source_photons;
-}
-
-bool mc_photo::domain_bc_intersection(const RealVect& a_oldPos,
-				      const RealVect& a_newPos,
-				      const RealVect& a_path,
-				      const RealVect& a_prob_lo,
-				      const RealVect& a_prob_hi,
-				      Real&           a_s){
-
-  // TLDR: This code does a boundary intersection test and returns where on the interval [oldPos, newPos] the intersection
-  //       happened.
-
-  a_s = 1.E99;
-  bool retval = false;
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      const Side::LoHiSide side = sit();
-      const RealVect wallPoint  = (side == Side::Lo) ? a_prob_lo : a_prob_hi; // A point on the domain side
-      const RealVect n0         = sign(side)*RealVect(BASISV(dir));           // Normal vector pointing OUT of the domain
-      const Real norm_path      = PolyGeom::dot(n0, a_path);                  // Component relative to wall
-
-      if(norm_path > 0.0){ 
-	const Real s = PolyGeom::dot(wallPoint-a_oldPos, n0)/norm_path;  
-	if(s >= 0.0 && s <= 1.0){
-	  retval        = true;
-	  if(s < a_s){
-	    a_s = s;
-	  }
-	}
-      }
-    }
-  }
-
-  return retval;
-}
-
-bool mc_photo::eb_bc_intersection(const RefCountedPtr<BaseIF>& a_impfunc,
-				  const RealVect&              a_oldPos,
-				  const RealVect&              a_newPos,
-				  const Real&                  a_pathLen,
-				  Real&                        a_s){
-
-  bool retval = false;
-  
-  const int nsteps      = ceil(a_pathLen/m_bisect_step);
-  const RealVect dxStep = (a_newPos - a_oldPos)/nsteps;
-	    
-  // Check each interval
-  RealVect cur_pos  = a_oldPos;
-  for (int istep = 0; istep < nsteps; istep++){
-    const Real fa = a_impfunc->value(cur_pos);
-    const Real fb = a_impfunc->value(cur_pos + dxStep);
-    
-    if(fa*fb <= 0.0){ 
-      // We happen to know that f(pos+dxStep) > 0.0 and f(pos) < 0.0 so we must now compute the precise location
-      // where the photon crossed the EB. For that we use a Brent root finder on the interval [pos, pos+dxStep].
-      const RealVect xcol = poly::brent_root_finder(a_impfunc, cur_pos, cur_pos + dxStep);
-      a_s = (xcol - a_oldPos).vectorLength()/a_pathLen;
-      retval = true;
-      
-      break;
-    }
-    else{ // Move to next interval
-      cur_pos += dxStep;
-    }
-  }
-
-  return retval;
 }

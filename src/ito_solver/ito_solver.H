@@ -105,6 +105,11 @@ public:
   virtual void remove_eb_particles(particle_container<ito_particle>& a_particles);
 
   /*!
+    @brief Do boundary intersection tests
+  */
+  virtual void intersect_particles();
+
+  /*!
     @brief Get number of plot variables
   */
   virtual int get_num_plotvars() const;
