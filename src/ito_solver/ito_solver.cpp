@@ -566,18 +566,6 @@ void ito_solver::allocate_internals(){
   m_amr->allocate(m_eb_particles,     m_pvr_buffer);
   m_amr->allocate(m_domain_particles, m_pvr_buffer);
   m_amr->allocate(m_source_particles, m_pvr_buffer);
-
-
-#if 0 // Experimental code for getting the number of particles per cell
-  Vector<LevelData<BaseEBCellFAB<int> >* > m_ppc(1 + m_amr->get_finest_level());
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl = m_amr->get_ebisl(m_phase)[lvl];
-
-    BaseEBCellFactory<int> fact(ebisl);
-    m_ppc[lvl] = new LevelData<BaseEBCellFAB<int> >(dbl, 1, 3*IntVect::Unit, fact);
-  }
-#endif
 }
 
 void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {

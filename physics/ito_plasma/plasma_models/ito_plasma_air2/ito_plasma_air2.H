@@ -58,8 +58,6 @@ namespace physics {
 
       int m_electron_idx;
       int m_positive_idx;
-
-      
     };
 
     
