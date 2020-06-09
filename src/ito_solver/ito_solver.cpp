@@ -320,7 +320,58 @@ void ito_solver::initial_data(){
   // Add particles, remove the ones that are inside the EB, and then depsit
   m_particles.add_particles(m_species->get_initial_particles()); 
   this->remove_eb_particles();
-  this->deposit_particles(m_state, m_particles.get_particles(), m_deposition); 
+  this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
+}
+
+void ito_solver::compute_loads(Vector<Box>& a_boxes, Vector<int>& a_loads, const int a_level){
+  CH_TIME("ito_solver::compute_loads");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_loads" << endl;
+  }
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
+  
+  a_boxes.resize(0);
+  a_loads.resize(0);
+
+  // Compute #particles in current boxes
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box thisBox = dbl.get(dit());
+    const int numPart = m_particles[a_level][dit()].numItems();
+
+    a_boxes.push_back(thisBox);
+    a_loads.push_back(numPart);
+  }
+
+  // MPI gather boxes and loads. 
+  load_balance::gather_boxes_and_loads(a_boxes, a_loads);
+
+
+#if 0 // Some output
+
+  Vector<Box> newBoxes = oldBoxes;
+  Vector<int> newLoads = oldLoads;
+
+  // Sort boxes
+  mortonOrdering(oldBoxes);
+  for (int i = 0; i < newBoxes.size(); i++){
+    for (int j = 0; j < oldBoxes.size(); j++){
+      if(newBoxes[i] == oldBoxes[j]){
+	newLoads[i] = oldLoads[j];
+      }
+    }
+  }
+  
+    Vector<int> procs;
+    load_balance::load_balance_boxes(procs, newLoads, newBoxes);
+
+    if(procID() == 0) std::cout << "\nnew load balancing: " << std::endl;
+    for (int i = 0; i < newLoads.size(); i++){
+      if(procID() == 0){
+	std::cout << "box = " << newBoxes[i] << "\t load = " << newLoads[i] << "\t proc = " << procs[i] << std::endl;
+      }
+    }
+#endif
 }
 
 void ito_solver::remove_eb_particles(){

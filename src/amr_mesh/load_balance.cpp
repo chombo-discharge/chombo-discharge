@@ -215,6 +215,11 @@ void load_balance::gather_loads(Vector<int>& a_loads){
   delete send_buffer;
 }
 
+void load_balance::gather_boxes_and_loads(Vector<Box>& a_boxes, Vector<int>& a_loads){
+  load_balance::gather_boxes(a_boxes);
+  load_balance::gather_loads(a_loads);
+}
+
 void load_balance::load_balance_boxes(Vector<int>&       a_procs,
 				      const Vector<int>& a_loads,
 				      const Vector<Box>& a_boxes){

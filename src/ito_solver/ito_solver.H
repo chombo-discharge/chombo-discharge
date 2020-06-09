@@ -110,6 +110,11 @@ public:
   virtual void intersect_particles();
 
   /*!
+    @brief Compute particle load on specific levle
+  */
+  virtual void compute_loads(Vector<Box>& a_boxes, Vector<int>& a_loads, const int a_level);
+
+  /*!
     @brief Get number of plot variables
   */
   virtual int get_num_plotvars() const;

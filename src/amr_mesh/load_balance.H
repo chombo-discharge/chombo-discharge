@@ -49,6 +49,11 @@ public:
   static void gather_loads(Vector<int>& a_loads);
 
   /*!
+    @brief Gather boxes and loads
+  */
+  static void gather_boxes_and_loads(Vector<Box>& a_boxes, Vector<int>& a_loads);
+
+  /*!
     @brief Conventional load balancing
   */
   static void balance_volume(Vector<int>& a_procs, const Vector<Box>& a_boxes);
