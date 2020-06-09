@@ -345,6 +345,56 @@ Vector<EBAMRCellData*> rte_layout<T>::get_states(){
   return states;
 }
 
+template <class T>
+Vector<particle_container<photon>* > rte_layout<T>::get_photons(){
+  Vector<particle_container<photon>* > ret(m_solvers.size(), nullptr);
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret[iter.get_solver()] = &(iter()->get_photons());
+  }
+  
+  return ret;
+}
+
+template <class T>
+Vector<particle_container<photon>* > rte_layout<T>::get_bulk_photons(){
+  Vector<particle_container<photon>* > ret(m_solvers.size(), nullptr);
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret[iter.get_solver()] = &(iter()->get_bulk_photons());
+  }
+  
+  return ret;
+}
+
+template <class T>
+Vector<particle_container<photon>* > rte_layout<T>::get_eb_photons(){
+  Vector<particle_container<photon>* > ret(m_solvers.size(), nullptr);
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret[iter.get_solver()] = &(iter()->get_eb_photons());
+  }
+  
+  return ret;
+}
+
+template <class T>
+Vector<particle_container<photon>* > rte_layout<T>::get_domain_photons(){
+  Vector<particle_container<photon>* > ret(m_solvers.size(), nullptr);
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret[iter.get_solver()] = &(iter()->get_domain_photons());
+  }
+  
+  return ret;
+}
+
+template <class T>
+Vector<particle_container<photon>* > rte_layout<T>::get_source_photons(){
+  Vector<particle_container<photon>* > ret(m_solvers.size(), nullptr);
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret[iter.get_solver()] = &(iter()->get_source_photons());
+  }
+  
+  return ret;
+}
+
 template <class T, class S>
 rte_factory<T, S>::rte_factory(){
 }

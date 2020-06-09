@@ -129,6 +129,35 @@ namespace physics {
 				 const Box                 a_box,
 				 const Real                a_time);
 
+      // Routines for chemistry advances
+      void advance_reaction_network(const Real a_dt);
+      void advance_reaction_network(Vector<particle_container<ito_particle>* >& a_particles,
+				    Vector<particle_container<photon>* >&       a_photons,
+				    Vector<particle_container<photon>* >&       a_newPhotons,
+				    const Real                                  a_dt);
+      void advance_reaction_network(Vector<ParticleData<ito_particle>* >& a_particles,
+				    Vector<ParticleData<photon>* >&       a_photons,
+				    Vector<ParticleData<photon>* >&       a_newPhotons,
+				    const int                             a_lvl,
+				    const Real                            a_dt);
+      void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
+				    Vector<List<photon>* >&       a_photons,
+				    Vector<List<photon>* >&       a_newPhotons,
+				    const int                     a_lvl,
+				    const DataIndex               a_dit,
+				    const Box                     a_box,
+				    const Real                    a_dx,
+				    const Real                    a_dt);
+      void advance_reaction_network(std::vector<BinFab<ito_particle> >& a_particles,
+				    std::vector<BinFab<photon> >&       a_photons,
+				    std::vector<BinFab<photon> >&       a_newPhotons,
+				    const int                           a_lvl,
+				    const DataIndex                     a_dit,
+				    const Box                           a_box,
+				    const Real                          a_dx,
+				    const Real                          a_dt);
+
+
     protected:
 
       std::string m_name;

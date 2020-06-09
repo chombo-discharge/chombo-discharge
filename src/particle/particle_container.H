@@ -135,6 +135,16 @@ public:
   void add_particles_destructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
 
   /*!
+    @brief Add particles from other container to this one
+  */
+  void add_particles(const particle_container<P>& a_otherContainer);
+
+  /*!
+    @brief Add particles from other container to this one.
+  */
+  void add_particles_destructive(const particle_container<P>& a_otherContainer);
+
+  /*!
     @brief Remap over the entire AMR hierarchy
   */
   void remap();

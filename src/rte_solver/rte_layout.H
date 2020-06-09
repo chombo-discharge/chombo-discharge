@@ -162,6 +162,31 @@ public:
   */
   virtual Vector<EBAMRCellData*> get_states();
 
+  /*!
+    @brief Get particles
+  */
+  virtual Vector<particle_container<photon>* > get_photons();
+
+    /*!
+    @brief Get particles
+  */
+  virtual Vector<particle_container<photon>* > get_bulk_photons();
+
+  /*!
+    @brief Get particles
+  */
+  virtual Vector<particle_container<photon>* > get_eb_photons();
+
+  /*!
+    @brief Get particles
+  */
+  virtual Vector<particle_container<photon>* > get_domain_photons();
+
+  /*!
+    @brief Get particles
+  */
+  virtual Vector<particle_container<photon>* > get_source_photons();
+
 protected:
 
   /*!

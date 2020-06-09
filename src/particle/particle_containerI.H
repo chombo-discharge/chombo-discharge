@@ -223,6 +223,36 @@ void particle_container<P>::add_particles_destructive(BinFab<P>& a_particles, co
 }
 
 template <class P>
+void particle_container<P>::add_particles(const particle_container<P>& a_otherContainer){
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+      ListBox<P>& myParticles          = (*m_particles[lvl])[dit()];
+      const ListBox<P>& otherParticles = (*a_otherContainer[lvl])[dit()];
+
+      myParticles.addItems(otherParticles);
+    }
+  }
+}
+
+template <class P>
+void particle_container<P>::add_particles_destructive(const particle_container<P>& a_otherContainer){
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+      ListBox<P>& myParticles    = (*m_particles[lvl])[dit()];
+      ListBox<P>& otherParticles = (*a_otherContainer[lvl])[dit()];
+
+      myParticles.addItemsDestructive(otherParticles);
+    }
+  }
+}
+
+template <class P>
 void particle_container<P>::cache_particles(particle_container<P>& a_otherContainer){
   CH_assert(m_is_defined);
   

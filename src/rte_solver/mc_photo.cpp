@@ -41,6 +41,10 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
     pout() << m_name + "::advance" << endl;
   }
 
+  // Note: This routine is for fluid-ish methods. Pure particle methods will fill m_source_photons and use
+  //       a different approach. If you find yourself calling this routine with a pure particle method, you're probably
+  //       doing something wrong. 
+
   // If stationary, do a safety cleanout first. Then generate new photons
   if(m_instantaneous){
     this->clear(m_photons);
