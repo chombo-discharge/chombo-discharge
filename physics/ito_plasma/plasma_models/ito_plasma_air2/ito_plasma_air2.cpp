@@ -164,6 +164,24 @@ Vector<Real> ito_plasma_air2::compute_ito_diffusion(const Real         a_time,
   return D;
 }
 
+void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
+					       Vector<List<photon>* >&       a_photons,
+					       Vector<List<photon>* >&       a_newPhotons,
+					       const RealVect                a_E,           
+					       const RealVect                a_pos,
+					       const Real                    a_dx,
+					       const Real                    a_kappa, 
+					       const Real                    a_dt) const {
+
+  // Add a photon that propagates along -y. This is development code!
+  List<photon>& srcPhotons = *a_newPhotons[m_photonZ_idx];
+  const RealVect v = units::s_c0*RealVect(0.0, -1.0);
+  srcPhotons.clear();
+  srcPhotons.add(photon(a_pos, v, m_rte_species[m_photonZ_idx]->get_kappa(a_pos), 1.0));
+
+  return;
+}
+
 Real ito_plasma_air2::excitation_rates(const Real a_E) const{
   const Real Etd = a_E/(m_N*units::s_Td);
 

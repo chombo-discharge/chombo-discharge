@@ -11,9 +11,12 @@
 #include <RealVect.H>
 #include <RefCountedPtr.H>
 #include <LoHiSide.H>
+#include <List.H>
 
 #include "ito_species.H"
 #include "rte_species.H"
+#include "photon.H"
+#include "ito_particle.H"
 
 namespace physics {
   namespace ito_plasma {
@@ -81,6 +84,18 @@ namespace physics {
 						 const RealVect     a_pos,
 						 const RealVect     a_E,
 						 const Vector<Real> a_cdr_densities) const = 0;
+
+      /*!
+	@brief Reaction network advance
+      */
+      virtual void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
+					    Vector<List<photon>* >&       a_photons,
+					    Vector<List<photon>* >&       a_newPhotons,
+					    const RealVect                a_E,           
+					    const RealVect                a_pos,
+					    const Real                    a_dx,
+					    const Real                    a_kappa, 
+					    const Real                    a_dt) const = 0;
 
     protected:
 

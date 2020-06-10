@@ -54,8 +54,6 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   this->advect_particles(a_dt);
   this->diffuse_particles(a_dt);
   this->intersect_particles(a_dt);
-
-  // Remap and deposit. 
   m_ito->remap();
   m_ito->deposit_particles();
 

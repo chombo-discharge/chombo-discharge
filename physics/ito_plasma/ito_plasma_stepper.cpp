@@ -957,12 +957,18 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
     new_photons[solver_it.get_solver()] = &(solver_it()->get_source_photons());
   }
 
-  this->advance_reaction_network(particles, bulk_photons, new_photons, a_dt);
+  // Make alias
+  EBAMRCellData E;
+  m_amr->allocate_ptr(E);
+  m_amr->alias(E, m_phase, m_poisson->get_E());
+
+  this->advance_reaction_network(particles, bulk_photons, new_photons, E, a_dt);
 }
 
 void ito_plasma_stepper::advance_reaction_network(Vector<particle_container<ito_particle>* >& a_particles,
 						  Vector<particle_container<photon>* >&       a_photons,
 						  Vector<particle_container<photon>* >&       a_newPhotons,
+						  const EBAMRCellData&                        a_E,
 						  const Real                                  a_dt){
   CH_TIME("ito_plasma_stepper::advance_reaction_network(container x3, a_dt)");
   if(m_verbosity > 5){
@@ -988,13 +994,14 @@ void ito_plasma_stepper::advance_reaction_network(Vector<particle_container<ito_
       newPhotons[idx] = &(*a_newPhotons[idx])[lvl];
     }
 
-    this->advance_reaction_network(particles, photons, newPhotons, lvl, a_dt);
+    this->advance_reaction_network(particles, photons, newPhotons, *a_E[lvl], lvl, a_dt);
   }
 }
 
 void ito_plasma_stepper::advance_reaction_network(Vector<ParticleData<ito_particle>* >& a_particles,
 						  Vector<ParticleData<photon>* >&       a_photons,
 						  Vector<ParticleData<photon>* >&       a_newPhotons,
+						  const LevelData<EBCellFAB>&           a_E,
 						  const int                             a_lvl,
 						  const Real                            a_dt){
   CH_TIME("ito_plasma_stepper::advance_reaction_network(ParticleData x3, lvl, a_dt)");
@@ -1025,13 +1032,14 @@ void ito_plasma_stepper::advance_reaction_network(Vector<ParticleData<ito_partic
       newPhotons[idx] = &(*a_newPhotons[idx])[dit()].listItems();
     }
 
-    this->advance_reaction_network(particles, photons, newPhotons, a_lvl, dit(), dbl.get(dit()), dx, a_dt);
+    this->advance_reaction_network(particles, photons, newPhotons, a_E[dit()], a_lvl, dit(), dbl.get(dit()), dx, a_dt);
   }
 }
 
 void ito_plasma_stepper::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
 						  Vector<List<photon>* >&       a_photons,
 						  Vector<List<photon>* >&       a_newPhotons,
+						  const EBCellFAB&              a_E,
 						  const int                     a_lvl,
 						  const DataIndex               a_dit,
 						  const Box                     a_box,
@@ -1070,18 +1078,18 @@ void ito_plasma_stepper::advance_reaction_network(Vector<List<ito_particle>* >& 
     binPhotons[idx].define(a_box, dx, prob_lo);
     binNewPhotons[idx].define(a_box, dx, prob_lo);
 
-    binPhotons[idx].addItemsDestructive(*a_photons[idx]);
+    binPhotons[idx].addItems(*a_photons[idx]); // These shouldn't change. 
   }
 
   // Call stuff that does cell-by-cell advancement. 
-  this->advance_reaction_network(binParticles, binPhotons, binNewPhotons, a_lvl, a_dit, a_box, a_dx, a_dt);
+  this->advance_reaction_network(binParticles, binPhotons, binNewPhotons, a_E, a_lvl, a_dit, a_box, a_dx, a_dt);
 
   // The BinFab must now be transferred to the various list.
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     
     List<ito_particle>& listParticles = *a_particles[idx];
-
+    
     for (BoxIterator bit(a_box); bit.ok(); ++bit){
       List<ito_particle>& bp = binParticles[idx](bit(), comp);
       listParticles.catenate(bp);
@@ -1104,6 +1112,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<List<ito_particle>* >& 
 void ito_plasma_stepper::advance_reaction_network(std::vector<BinFab<ito_particle> >& a_particles,
 						  std::vector<BinFab<photon> >&       a_photons,
 						  std::vector<BinFab<photon> >&       a_newPhotons,
+						  const EBCellFAB&                    a_E,
 						  const int                           a_lvl,
 						  const DataIndex                     a_dit,
 						  const Box                           a_box,
@@ -1125,12 +1134,16 @@ void ito_plasma_stepper::advance_reaction_network(std::vector<BinFab<ito_particl
   const EBISBox& ebisbox = m_amr->get_ebisl(m_phase)[a_lvl][a_dit];
   const EBISBox& ebgraph = m_amr->get_ebisl(m_phase)[a_lvl][a_dit];
 
-    // Regular cells
+  const BaseFab<Real>& Efab = a_E.getSingleValuedFAB();
+
+  // Regular cells
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
-
+    
     if(ebisbox.isRegular(iv)){
+      const Real kappa   = 1.0;
       const RealVect pos = prob_lo + a_dx*(RealVect(iv) + 0.5*RealVect::Unit);
+      const RealVect e   = RealVect(D_DECL(Efab(iv, 0), Efab(iv, 1), Efab(iv, 2)));
       
       Vector<List<ito_particle>* > particles(num_ito_species);
       Vector<List<photon>* >       photons(num_rte_species);
@@ -1154,7 +1167,7 @@ void ito_plasma_stepper::advance_reaction_network(std::vector<BinFab<ito_particl
       }
       
       // Call physics
-      // m_physics->advance_reaction_network(....);
+      m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, a_dx, kappa, a_dt);
     }
   }
 
@@ -1164,6 +1177,8 @@ void ito_plasma_stepper::advance_reaction_network(std::vector<BinFab<ito_particl
     const VolIndex vof = vofit();
     const IntVect iv   = vof.gridIndex();
     const RealVect pos = EBArith::getVofLocation(vof, dx*RealVect::Unit, prob_lo);
+    const Real kappa   = ebisbox.volFrac(vof);
+    const RealVect e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
 
     Vector<List<ito_particle>* > particles(num_ito_species);
     Vector<List<photon>* >       photons(num_rte_species);
@@ -1187,9 +1202,8 @@ void ito_plasma_stepper::advance_reaction_network(std::vector<BinFab<ito_particl
     }
 
     // Call physics.
-    //    m_physics->advance_reaction_network(....);
+    m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, a_dx, kappa, a_dt);
   }
-
 }
 
 void ito_plasma_stepper::advance_photons(const Real a_dt){
