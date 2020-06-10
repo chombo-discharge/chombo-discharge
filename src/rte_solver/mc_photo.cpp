@@ -41,15 +41,19 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
     pout() << m_name + "::advance" << endl;
   }
 
-  // Note: This routine is for fluid-ish methods. Pure particle methods will fill m_source_photons and use
-  //       a different approach. If you find yourself calling this routine with a pure particle method, you're probably
-  //       doing something wrong. 
+  // Note: This routine does an on-the-fly generation of photons based on the contents in a_source. Pure particle methods
+  //       will probably fill m_source_photons themselves, and this routine will probably not be used with a pure particle
+  //       method. If you find yourself calling this routine with a pure particle method, you're probably something wrong. 
 
   // If stationary, do a safety cleanout first. Then generate new photons
   if(m_instantaneous){
     this->clear(m_photons);
   }
-  this->generate_photons(m_photons, a_source, a_dt);
+
+  // Generate new photons and add them to m_photons
+  this->clear(m_source_photons);
+  this->generate_photons(m_source_photons, a_source, a_dt);
+  m_photons.add_particles(m_source_photons);
 
   // Advance stationary or transient
   if(m_instantaneous){
@@ -64,6 +68,10 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   this->deposit_photons(a_state, m_bulk_photons, m_deposition);
   
   return true;
+}
+
+bool mc_photo::is_instantaneous(){
+  return m_instantaneous;
 }
 
 void mc_photo::parse_options(){
@@ -1185,7 +1193,7 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
     }
   }
 
-  // Remap and clear. 
+  // Remap and clear.
   a_bulk_photons.remap();
   a_eb_photons.remap();
   a_domain_photons.remap();

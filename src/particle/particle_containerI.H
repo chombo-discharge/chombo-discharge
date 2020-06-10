@@ -230,9 +230,9 @@ void particle_container<P>::add_particles(const particle_container<P>& a_otherCo
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
       ListBox<P>& myParticles          = (*m_particles[lvl])[dit()];
-      const ListBox<P>& otherParticles = (*a_otherContainer[lvl])[dit()];
+      const ListBox<P>& otherParticles = a_otherContainer[lvl][dit()];
 
-      myParticles.addItems(otherParticles);
+      myParticles.addItems(otherParticles.listItems());
     }
   }
 }
@@ -245,9 +245,9 @@ void particle_container<P>::add_particles_destructive(const particle_container<P
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
       ListBox<P>& myParticles    = (*m_particles[lvl])[dit()];
-      ListBox<P>& otherParticles = (*a_otherContainer[lvl])[dit()];
+      ListBox<P>& otherParticles = a_otherContainer[lvl][dit()];
 
-      myParticles.addItemsDestructive(otherParticles);
+      myParticles.addItemsDestructive(otherParticles.listItems());
     }
   }
 }

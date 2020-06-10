@@ -42,6 +42,11 @@ public:
   virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false);
 
   /*!
+    @brief Instantaneous solver or not
+  */
+  virtual bool is_instantaneous();
+
+  /*!
     @brief Generate photons
   */
   virtual void generate_photons(particle_container<photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);

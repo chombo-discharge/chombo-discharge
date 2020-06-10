@@ -940,10 +940,22 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::advance_reaction_network(a_dt)" << endl;
   }
+
+  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_rte_species = m_physics->get_num_rte_species();
   
-  Vector<particle_container<ito_particle>* > particles     = m_ito->get_particles();         // Current particles. 
-  Vector<particle_container<photon>* > bulk_photons        = m_rte->get_bulk_photons();      // Photons absorbed on mesh
-  Vector<particle_container<photon>* > new_photons         = m_rte->get_source_photons();    // Produced photons go here.
+  Vector<particle_container<ito_particle>* > particles(num_ito_species);  // Current particles. 
+  Vector<particle_container<photon>* > bulk_photons(num_rte_species);     // Photons absorbed on mesh
+  Vector<particle_container<photon>* > new_photons(num_rte_species);      // Produced photons go here.
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    particles[solver_it.get_solver()] = &(solver_it()->get_particles());
+  }
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    bulk_photons[solver_it.get_solver()] = &(solver_it()->get_bulk_photons());
+    new_photons[solver_it.get_solver()] = &(solver_it()->get_source_photons());
+  }
 
   this->advance_reaction_network(particles, bulk_photons, new_photons, a_dt);
 }
@@ -1178,4 +1190,41 @@ void ito_plasma_stepper::advance_reaction_network(std::vector<BinFab<ito_particl
     //    m_physics->advance_reaction_network(....);
   }
 
+}
+
+void ito_plasma_stepper::advance_photons(const Real a_dt){
+  CH_TIME("ito_plasma_stepper::advance_photons(a_dt)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::advance_advance_photons(a_dt)" << endl;
+  }
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<mc_photo>& solver = solver_it();
+    
+    // Add source photons and move the photons
+    particle_container<photon>& photons        = solver->get_photons();
+    particle_container<photon>& bulkPhotons    = solver->get_bulk_photons();
+    particle_container<photon>& ebPhotons      = solver->get_eb_photons();
+    particle_container<photon>& domainPhotons  = solver->get_domain_photons();
+    particle_container<photon>& sourcePhotons  = solver->get_source_photons();
+
+    if(solver->is_instantaneous()){
+      solver->clear(photons);
+
+      // Add source photons
+      photons.add_particles(sourcePhotons);
+      solver->clear(sourcePhotons);
+
+      // Instantaneous advance
+      solver->advance_photons_stationary(bulkPhotons, ebPhotons, domainPhotons, photons);
+    }
+    else{
+      // Add source photons
+      photons.add_particles(sourcePhotons);
+      solver->clear(sourcePhotons);
+
+      // Stationary advance
+      solver->advance_photons_transient(bulkPhotons, ebPhotons, domainPhotons, photons, a_dt);
+    }
+  }
 }

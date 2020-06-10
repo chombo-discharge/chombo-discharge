@@ -59,6 +59,9 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   m_ito->remap();
   m_ito->deposit_particles();
 
+  // Move photons
+  this->advance_photons(a_dt);
+
   // Compute the electric field, recompute velocities and diffusion coefficients
   this->solve_poisson();
 

@@ -24,6 +24,7 @@ namespace physics {
 
       class electron;
       class positive;
+      class photonZ;
       
       ito_plasma_air2();
       ~ito_plasma_air2();
@@ -43,21 +44,36 @@ namespace physics {
     protected:
 
       // Stuff for initial conditions
-      Real     m_blob_radius;
-      int      m_num_particles;
-      RealVect m_blob_center;
-
+      Real m_blob_radius;
+      int m_num_particles;
       int m_seed;
+      RealVect m_blob_center;
       std::mt19937_64 m_rng;
       std::uniform_real_distribution<Real> m_udist11;
       std::normal_distribution<Real> m_gauss;
 
+      // Indices for species
+      int m_electron_idx;
+      int m_positive_idx;
+      int m_photonZ_idx;
+
+      // Pressure, neutral number density etc
+      Real m_N;      
+      Real m_p;      
+      Real m_pq;     
+      Real m_T;      
+      Real m_O2frac; 
+      Real m_N2frac; 
+      Real m_pO2;    
+      Real m_photoi_factor; 
+
+      // Functions for drawing initial particles
       void draw_initial_particles();
       RealVect random_gaussian();
       RealVect random_direction();
 
-      int m_electron_idx;
-      int m_positive_idx;
+      Real excitation_rates(const Real a_E) const;
+      Real sergey_factor(const Real a_O2frac) const;
     };
 
     
@@ -73,7 +89,24 @@ namespace physics {
       ~positive();
     };
 
-    
+    class ito_plasma_air2::photonZ : public rte_species {
+    public:
+      photonZ();
+      ~photonZ();
+
+      Real get_kappa(const RealVect a_pos) const override;
+      
+    protected:
+      Real m_pO2;
+      Real m_f1;
+      Real m_f2;
+      Real m_K1;
+      Real m_K2;
+
+      Real m_seed;
+      std::mt19937_64* m_rng; 
+      std::uniform_real_distribution<Real>* m_udist01;
+    };
   }
 }
 #endif
