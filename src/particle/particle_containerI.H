@@ -430,5 +430,20 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   }
 }
 
+template <class P>
+void particle_container<P>::discard_invalid_particles(){
+  
+  // Move particles to the outcast list on the fine level. Then discard that list. 
+  for (int lvl = 1; lvl <= m_finest_level; lvl++){
+    collectValidParticles(m_particles[lvl]->outcast(),
+			  *m_particles[lvl-1],
+			  m_pvr[lvl]->mask(),
+			  m_dx[lvl],
+			  m_ref_rat[lvl-1],
+			  false,
+			  m_prob_lo);
+    (m_particles[lvl]->outcast()).clear();
+  }
+}
 
 #endif

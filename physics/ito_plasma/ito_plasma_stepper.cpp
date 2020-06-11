@@ -996,6 +996,16 @@ void ito_plasma_stepper::advance_reaction_network(Vector<particle_container<ito_
 
     this->advance_reaction_network(particles, photons, newPhotons, *a_E[lvl], lvl, a_dt);
   }
+
+  // Discard shit that is under the PVR
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    a_particles[solver_it.get_solver()]->discard_invalid_particles();
+  }
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    a_photons[solver_it.get_solver()]->discard_invalid_particles();
+    a_newPhotons[solver_it.get_solver()]->discard_invalid_particles();
+  }
 }
 
 void ito_plasma_stepper::advance_reaction_network(Vector<ParticleData<ito_particle>* >& a_particles,

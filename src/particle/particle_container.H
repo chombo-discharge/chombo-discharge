@@ -165,6 +165,11 @@ public:
   */
   void cache_particles(particle_container<P>& a_otherContainer);
 
+  /*!
+    @brief Discard particles that are under a PVR level
+  */
+  void discard_invalid_particles();
+
 protected:
 
   Vector<DisjointBoxLayout> m_grids;
