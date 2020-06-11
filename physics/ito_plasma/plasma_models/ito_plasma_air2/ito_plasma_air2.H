@@ -31,6 +31,8 @@ namespace physics {
 
       Real compute_alpha(const RealVect a_E) const override;
 
+      Real compute_eta(const RealVect a_E) const;
+
       Vector<RealVect> compute_ito_velocities(const Real         a_time,
 					      const RealVect     a_pos,
 					      const RealVect     a_E,
@@ -74,15 +76,43 @@ namespace physics {
       Real m_O2frac; 
       Real m_N2frac; 
       Real m_pO2;    
-      Real m_photoi_factor; 
+      Real m_photoi_factor;
+      Real m_tau_switch;
+      Real m_poisson_switch;
 
       // Functions for drawing initial particles
       void draw_initial_particles();
       RealVect random_gaussian();
       RealVect random_direction() const;
 
+      // Zheleznyak photoionization rates
       Real excitation_rates(const Real a_E) const;
       Real sergey_factor(const Real a_O2frac) const;
+
+      // Electron velocity
+      RealVect compute_electron_velocity(const RealVect a_E) const;
+
+      // Tau-leaping algorithm
+      void advance_reaction_network_tau(Vector<List<ito_particle>* >& a_particles,
+					Vector<List<photon>* >&       a_photons,
+					Vector<List<photon>* >&       a_newPhotons,
+					const RealVect                a_E,           
+					const RealVect                a_pos,
+					const Real                    a_dx,
+					const Real                    a_kappa, 
+					const Real                    a_dt) const;
+
+      void advance_reaction_network_ssa(Vector<List<ito_particle>* >& a_particles,
+					Vector<List<photon>* >&       a_photons,
+					Vector<List<photon>* >&       a_newPhotons,
+					const RealVect                a_E,           
+					const RealVect                a_pos,
+					const Real                    a_dx,
+					const Real                    a_kappa, 
+					const Real                    a_dt) const;
+
+      // Poisson reactions for tau-leaping
+      int poisson_reaction(const Real a_propensity, const Real a_dt) const;
     };
 
     

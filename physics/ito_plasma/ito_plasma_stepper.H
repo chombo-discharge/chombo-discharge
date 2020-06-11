@@ -164,9 +164,6 @@ namespace physics {
       // Routines for advancing photons
       void advance_photons(const Real a_dt);
 
-      // Routines for BC
-
-
     protected:
 
       std::string m_name;

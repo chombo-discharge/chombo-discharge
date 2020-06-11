@@ -270,7 +270,7 @@ void poisson_solver::regrid(const int a_lmin, const int a_old_finest, const int 
   const Interval interv(comp, comp);
 
   this->allocate_internals();
-  
+
   for (int i = 0; i < phase::num_phases; i++){
     phase::which_phase cur_phase;    
     if(i == 0){

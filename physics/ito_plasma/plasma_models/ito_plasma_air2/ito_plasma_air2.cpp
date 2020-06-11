@@ -25,9 +25,11 @@ ito_plasma_air2::ito_plasma_air2(){
   pp.getarr("blob_center",    v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
   pp.get   ("num_particles",  m_num_particles);
 
-  // Photostuff
+  // Reaction stuff
   pp.get("quenching_pressure", m_pq);
   pp.get("photoi_factor",      m_photoi_factor);
+  pp.get("tau_switch",         m_tau_switch);
+  pp.get("poisson_switch",     m_poisson_switch);
 
   // Standard air. 
   m_p = 1.0;
@@ -134,7 +136,15 @@ RealVect ito_plasma_air2::random_direction() const {
 }
 
 Real ito_plasma_air2::compute_alpha(const RealVect a_E) const {
-  return 0.0;
+  Real E = a_E.vectorLength();
+
+  const Real alpha = (1.1944E6 + 4.3666E26/(E*E*E))*exp(-2.73E7/E);
+  
+  return alpha;
+}
+
+Real ito_plasma_air2::compute_eta(const RealVect a_E) const {
+  return 340.75;
 }
 
 Vector<RealVect> ito_plasma_air2::compute_ito_velocities(const Real         a_time,
@@ -143,13 +153,17 @@ Vector<RealVect> ito_plasma_air2::compute_ito_velocities(const Real         a_ti
 							 const Vector<Real> a_cdr_densities) const {
   
   Vector<RealVect> velo(m_num_ito_species, RealVect::Zero);
+
+  velo[m_electron_idx] = this->compute_electron_velocity(a_E);
   
+  return velo;
+}
+
+RealVect ito_plasma_air2::compute_electron_velocity(const RealVect a_E) const {
   const Real E = a_E.vectorLength();
   const Real mu = 2.3987*pow(E, -0.26);
 
-  velo[m_electron_idx] = -mu*a_E;
-  
-  return velo;
+  return -mu*a_E;
 }
 
 Vector<Real> ito_plasma_air2::compute_ito_diffusion(const Real         a_time,
@@ -172,14 +186,78 @@ void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_p
 					       const Real                    a_dx,
 					       const Real                    a_kappa, 
 					       const Real                    a_dt) const {
+  return;
+  Real num_electrons = 0;
+  for (ListIterator<ito_particle> lit(*a_particles[m_electron_idx]); lit.ok(); ++lit){
+    num_electrons += lit().mass();
+  }
 
-  // Add a photon that propagates along -y. This is development code!
+  if(num_electrons > m_tau_switch){
+    this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_pos, a_dx, a_kappa, a_dt);
+  }
+  else{
+    this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_pos, a_dx, a_kappa, a_dt);
+  }
+  
+   // Add a photon that propagates along -y. This is development code!
   List<photon>& srcPhotons = *a_newPhotons[m_photonZ_idx];
   const RealVect v = units::s_c0*random_direction();
   srcPhotons.clear();
   srcPhotons.add(photon(a_pos, v, m_rte_species[m_photonZ_idx]->get_kappa(a_pos), 1.0));
 
   return;
+}
+
+void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >& a_particles,
+						   Vector<List<photon>* >&       a_photons,
+						   Vector<List<photon>* >&       a_newPhotons,
+						   const RealVect                a_E,           
+						   const RealVect                a_pos,
+						   const Real                    a_dx,
+						   const Real                    a_kappa, 
+						   const Real                    a_dt) const{
+  const Real volume = pow(a_dx, SpaceDim)*a_kappa;
+
+  Real num_electrons = 0;
+  for (ListIterator<ito_particle> lit(*a_particles[m_electron_idx]); lit.ok(); ++lit){
+    num_electrons += lit().mass();
+  }
+
+  const Real alpha = this->compute_alpha(a_E);
+  const Real velo  = this->compute_electron_velocity(a_E).vectorLength();
+  const Real ionizationProp = alpha*velo*num_electrons;
+
+  const int num_ionizations = this->poisson_reaction(ionizationProp, a_dt);
+
+  // Add electron-ion pairs
+  a_particles[m_electron_idx]->add(ito_particle(num_ionizations, a_pos));
+  a_particles[m_positive_idx]->add(ito_particle(num_ionizations, a_pos));
+}
+
+void ito_plasma_air2::advance_reaction_network_ssa(Vector<List<ito_particle>* >& a_particles,
+						   Vector<List<photon>* >&       a_photons,
+						   Vector<List<photon>* >&       a_newPhotons,
+						   const RealVect                a_E,           
+						   const RealVect                a_pos,
+						   const Real                    a_dx,
+						   const Real                    a_kappa, 
+						   const Real                    a_dt) const{
+}
+
+int ito_plasma_air2::poisson_reaction(const Real a_propensity, const Real a_dt) const{
+  int value = 0;
+  const Real mean = a_propensity*a_dt;
+
+  if(mean < m_poisson_switch){
+    std::poisson_distribution<int> dist(mean);
+    value = dist(m_rng);
+  }
+  else{
+    std::normal_distribution<double> dist(mean, sqrt(mean));
+    value = dist(m_rng);
+  }
+
+  return value;
 }
 
 Real ito_plasma_air2::excitation_rates(const Real a_E) const{

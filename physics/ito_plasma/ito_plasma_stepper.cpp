@@ -352,8 +352,10 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, 
     MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
   }
 
-  // Compute new velocities and diffusion coefficients
+  // Make superparticles. 
   m_ito->make_superparticles(m_ppc);
+
+  // Compute new velocities and diffusion coefficients
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
 

@@ -38,9 +38,9 @@ void ito_plasma_godunov::parse_options() {
 }
 
 void ito_plasma_godunov::allocate_internals(){
-  CH_TIME("ito_plasma_godunov::parse_options");
+  CH_TIME("ito_plasma_godunov::allocate_internals");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_options" << endl;
+    pout() << m_name + "::allocate_internals" << endl;
   }
 }
 
@@ -65,6 +65,9 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 
   // Chemistry kernel.
   this->advance_reaction_network(a_dt);
+
+  // Make superparticles
+  //  m_ito->make_superparticles(m_ppc);
 
   // Prepare next step
   this->compute_ito_velocities();

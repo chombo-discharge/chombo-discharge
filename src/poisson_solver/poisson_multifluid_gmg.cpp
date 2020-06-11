@@ -222,7 +222,7 @@ void poisson_multifluid_gmg::allocate_internals(){
   poisson_solver::allocate_internals();
 
   const int ncomp = 1;
-  
+
   m_amr->allocate(m_zero, ncomp);
   m_amr->allocate(m_scaled_source, ncomp);
   m_amr->allocate(m_scaled_sigma, phase::gas, ncomp);
@@ -483,6 +483,8 @@ void poisson_multifluid_gmg::register_operators(){
     m_amr->register_operator(s_eb_coar_ave,     phase::solid);
     m_amr->register_operator(s_eb_fill_patch,   phase::gas);
     m_amr->register_operator(s_eb_fill_patch,   phase::solid);
+    m_amr->register_operator(s_eb_pwl_interp,   phase::gas);
+    m_amr->register_operator(s_eb_pwl_interp,   phase::solid);
     m_amr->register_operator(s_eb_quad_cfi,     phase::gas);
     m_amr->register_operator(s_eb_quad_cfi,     phase::solid);
     m_amr->register_operator(s_eb_irreg_interp, phase::gas);
