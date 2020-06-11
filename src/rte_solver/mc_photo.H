@@ -282,6 +282,11 @@ protected:
   */
   bool m_plot_bulk_phot;
 
+    /*!
+    @brief Check if source_bulk_photons should be plotted
+  */
+  bool m_plot_src_phot;
+
   /*!
     @brief Check if m_eb_photons should be plotted
   */

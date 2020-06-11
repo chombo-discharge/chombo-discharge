@@ -65,7 +65,7 @@ namespace physics {
       /*!
 	@brief Set initial surface charge. Override if you want.
       */
-      virtual Real initial_sigma(const Real a_time, const RealVect a_pos){
+      virtual Real initial_sigma(const Real a_time, const RealVect a_pos) const {
 	return 0.0;
       }
 

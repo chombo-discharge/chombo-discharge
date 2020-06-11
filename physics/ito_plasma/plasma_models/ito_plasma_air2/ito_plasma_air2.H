@@ -57,9 +57,9 @@ namespace physics {
       int m_num_particles;
       int m_seed;
       RealVect m_blob_center;
-      std::mt19937_64 m_rng;
-      std::uniform_real_distribution<Real> m_udist11;
-      std::normal_distribution<Real> m_gauss;
+      mutable std::mt19937_64 m_rng;
+      mutable std::uniform_real_distribution<Real> m_udist11;
+      mutable std::normal_distribution<Real> m_gauss;
 
       // Indices for species
       int m_electron_idx;
@@ -79,7 +79,7 @@ namespace physics {
       // Functions for drawing initial particles
       void draw_initial_particles();
       RealVect random_gaussian();
-      RealVect random_direction();
+      RealVect random_direction() const;
 
       Real excitation_rates(const Real a_E) const;
       Real sergey_factor(const Real a_O2frac) const;

@@ -102,7 +102,7 @@ RealVect ito_plasma_air2::random_gaussian(){
   return rad*random_direction();
 }
 
-RealVect ito_plasma_air2::random_direction(){
+RealVect ito_plasma_air2::random_direction() const {
   const Real EPS = 1.E-8;
 #if CH_SPACEDIM==2
   Real x1 = 2.0;
@@ -155,7 +155,7 @@ Vector<RealVect> ito_plasma_air2::compute_ito_velocities(const Real         a_ti
 Vector<Real> ito_plasma_air2::compute_ito_diffusion(const Real         a_time,
 						    const RealVect     a_pos,
 						    const RealVect     a_E,
-						    const Vector<Real> a_cdr_densities) const{
+						    const Vector<Real> a_cdr_densities) const {
 
   Vector<Real> D(m_num_ito_species, 0.0);
 
@@ -175,7 +175,7 @@ void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_p
 
   // Add a photon that propagates along -y. This is development code!
   List<photon>& srcPhotons = *a_newPhotons[m_photonZ_idx];
-  const RealVect v = units::s_c0*RealVect(0.0, -1.0);
+  const RealVect v = units::s_c0*random_direction();
   srcPhotons.clear();
   srcPhotons.add(photon(a_pos, v, m_rte_species[m_photonZ_idx]->get_kappa(a_pos), 1.0));
 

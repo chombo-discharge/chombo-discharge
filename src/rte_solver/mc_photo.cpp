@@ -331,6 +331,7 @@ void mc_photo::parse_plot_vars(){
   m_plot_bulk_phot = false;
   m_plot_eb_phot   = false;
   m_plot_dom_phot  = false;
+  m_plot_src_phot  = false;
 
   ParmParse pp(m_class_name.c_str());
   const int num = pp.countval("plt_vars");
@@ -338,12 +339,13 @@ void mc_photo::parse_plot_vars(){
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++){
-    if(     str[i] == "phi")       m_plot_phi = true;
-    else if(str[i] == "src")       m_plot_src = true;
-    else if(str[i] == "phot")      m_plot_phot = true;
+    if(     str[i] == "phi")       m_plot_phi       = true;
+    else if(str[i] == "src")       m_plot_src       = true;
+    else if(str[i] == "phot")      m_plot_phot      = true;
     else if(str[i] == "bulk_phot") m_plot_bulk_phot = true;
-    else if(str[i] == "eb_phot")   m_plot_eb_phot = true;
-    else if(str[i] == "dom_phot")  m_plot_dom_phot = true;
+    else if(str[i] == "eb_phot")   m_plot_eb_phot   = true;
+    else if(str[i] == "dom_phot")  m_plot_dom_phot  = true;
+    else if(str[i] == "src_phot")  m_plot_src_phot  = true;
   }
 }
 
@@ -552,6 +554,7 @@ Vector<std::string> mc_photo::get_plotvar_names() const {
   if(m_plot_bulk_phot) names.push_back(m_name + " bulk_photons");
   if(m_plot_eb_phot)   names.push_back(m_name + " eb_photons");
   if(m_plot_dom_phot)  names.push_back(m_name + " domain_photons");
+  if(m_plot_src_phot)  names.push_back(m_name + " source_photons");
 
   return names;
 }
@@ -570,6 +573,7 @@ int mc_photo::get_num_plotvars() const{
   if(m_plot_bulk_phot) num_output = num_output + 1;
   if(m_plot_eb_phot)   num_output = num_output + 1;
   if(m_plot_dom_phot)  num_output = num_output + 1;
+  if(m_plot_src_phot)  num_output = num_output + 1;
 
   return num_output;
 }
@@ -1454,6 +1458,10 @@ void mc_photo::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
   if(m_plot_dom_phot){
     this->deposit_photons(m_scratch, m_domain_photons.get_particles(), m_plot_deposition);
+    this->write_data(a_output, a_comp, m_scratch,  false);
+  }
+  if(m_plot_src_phot){
+    this->deposit_photons(m_scratch, m_source_photons.get_particles(), m_plot_deposition);
     this->write_data(a_output, a_comp, m_scratch,  false);
   }
 }
