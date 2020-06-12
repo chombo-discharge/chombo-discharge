@@ -365,14 +365,16 @@ void particle_container<P>::levelRemap(const int a_lvl){
 }
 
 template <class P>
-void particle_container<P>::pre_regrid(const int a_base){
+void particle_container<P>::pre_regrid(const int a_lmin){
   CH_assert(m_is_defined);
 
-  // TLDR: This code moves all the particles above level a_base onto level a_base and remaps them there.
+  // TLDR: This code moves all the particles on level l >= a_lmin onto a_lmin-1 and remaps them there. 
   //       The outcast lists should be empty at the end of this call
 
-  ParticleData<P>& baseParticles = (*m_particles[a_base]);
-  for (int lvl = a_base+1; lvl <= m_finest_level; lvl++){
+  const int base = Max(0, a_lmin-1);
+  
+  ParticleData<P>& baseParticles = (*m_particles[base]);
+  for (int lvl = base+1; lvl <= m_finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_grids[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

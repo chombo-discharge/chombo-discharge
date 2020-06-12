@@ -401,14 +401,14 @@ void mc_photo::allocate_internals(){
   m_amr->allocate(m_source_photons, m_pvr_buffer);
 }
 
-void mc_photo::pre_regrid(const int a_base, const int a_old_finest_level){
+void mc_photo::pre_regrid(const int a_lmin, const int a_old_finest_level){
   CH_TIME("mc_photo::pre_regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::pre_grid" << endl;
   }
 
-  m_photons.pre_regrid(a_base);      // TLDR: This moves photons from levels > a_base to a_base
-  m_bulk_photons.pre_regrid(a_base); // TLDR: This moves photons from levels > a_base to a_base
+  m_photons.pre_regrid(a_lmin);      // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_bulk_photons.pre_regrid(a_lmin); // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
 }
 
 void mc_photo::deallocate_internals(){

@@ -1698,3 +1698,23 @@ void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const 
     m_particles.add_particles(cellParticles, a_level, a_dit);
   }
 }
+
+void ito_solver::clear(particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::clear(particle_container)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::clear(particle_container)" << endl;
+  }
+
+  this->clear(a_particles.get_particles());
+}
+
+void ito_solver::clear(AMRParticles<ito_particle>& a_particles){
+  CH_TIME("ito_solver::clear");
+  if(m_verbosity > 5){
+    pout() << m_name + "::clear" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    a_particles[lvl]->clear();
+  }
+}

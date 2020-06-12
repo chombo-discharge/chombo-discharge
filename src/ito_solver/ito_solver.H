@@ -72,6 +72,16 @@ public:
   virtual void allocate_internals();
 
   /*!
+    @brief Empty particle container
+  */
+  virtual void clear(particle_container<ito_particle>& a_particles);
+
+  /*!
+    @brief Empty particle container
+  */
+  virtual void clear(AMRParticles<ito_particle>& a_particles);
+
+  /*!
     @brief Deposit particles
   */
   virtual void deposit_particles();

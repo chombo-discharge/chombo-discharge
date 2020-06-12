@@ -30,6 +30,8 @@ namespace physics {
 
     protected:
 
+      int m_merge_interval; // How often to merge superparticles
+
       void advect_particles(const Real a_dt);
       void diffuse_particles(const Real a_dt);
       void intersect_particles(const Real a_dt);

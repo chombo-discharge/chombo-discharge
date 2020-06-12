@@ -24,6 +24,7 @@ ito_plasma_air2::ito_plasma_air2(){
   pp.get   ("blob_radius",    m_blob_radius);
   pp.getarr("blob_center",    v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
   pp.get   ("num_particles",  m_num_particles);
+  pp.get   ("react_ppc",      m_ppc);
 
   // Reaction stuff
   pp.get("quenching_pressure", m_pq);
@@ -135,6 +136,16 @@ RealVect ito_plasma_air2::random_direction() const {
 #endif
 }
 
+RealVect ito_plasma_air2::random_position(const RealVect a_cellCenter, const Real a_dx) const{
+
+  RealVect ret = a_cellCenter;
+  for (int i = 0; i < SpaceDim; i++){
+    ret[i] += 0.5*m_udist11(m_rng)*a_dx;
+  }
+
+  return ret;
+}
+
 Real ito_plasma_air2::compute_alpha(const RealVect a_E) const {
   Real E = a_E.vectorLength();
 
@@ -186,7 +197,6 @@ void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_p
 					       const Real                    a_dx,
 					       const Real                    a_kappa, 
 					       const Real                    a_dt) const {
-  return;
   Real num_electrons = 0;
   for (ListIterator<ito_particle> lit(*a_particles[m_electron_idx]); lit.ok(); ++lit){
     num_electrons += lit().mass();
@@ -229,9 +239,19 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 
   const int num_ionizations = this->poisson_reaction(ionizationProp, a_dt);
 
-  // Add electron-ion pairs
-  a_particles[m_electron_idx]->add(ito_particle(num_ionizations, a_pos));
-  a_particles[m_positive_idx]->add(ito_particle(num_ionizations, a_pos));
+  const int num_comp_particles = num_ionizations/m_ppc; // Whole stuff
+  const int remainder = num_ionizations % m_ppc; // Rest of the weight goes to last particle
+
+  for (int i = 0; i < m_ppc; i++){
+    const RealVect p = this->random_position(a_pos, a_dx);
+    a_particles[m_electron_idx]->add(ito_particle(1.0*num_comp_particles, p));
+    a_particles[m_positive_idx]->add(ito_particle(1.0*num_ionizations, p));
+  }
+  
+  // Last particle
+  const RealVect p = this->random_position(a_pos, a_dx);
+  a_particles[m_electron_idx]->add(ito_particle(1.0*remainder, p));
+  a_particles[m_positive_idx]->add(ito_particle(1.0*remainder, p));
 }
 
 void ito_plasma_air2::advance_reaction_network_ssa(Vector<List<ito_particle>* >& a_particles,

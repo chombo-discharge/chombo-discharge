@@ -10,6 +10,7 @@ ito_plasma_air2.num_particles  = 100                          # Number of initia
 # Reaction stuff
 ito_plasma_air2.tau_switch     = -1                           # Switch from SSA to tau when reaching this many particles
 ito_plasma_air2.poisson_switch = 100                          # When to approximate Poisson by normal distribution
+ito_plasma_air2.react_ppc      = 64                           # Maximum number of particles to produce in reaction step
 
 # SEE parameters
 ito_plasma_air2.electrode_townsend2           = 1.E-4         # 2nd Townsend coeff on electrode

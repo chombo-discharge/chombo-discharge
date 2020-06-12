@@ -9,6 +9,8 @@
 
 #include <ParmParse.H>
 
+#define DEBUG 1
+
 using namespace physics::ito_plasma;
 
 ito_plasma_godunov::ito_plasma_godunov(){
@@ -32,9 +34,10 @@ void ito_plasma_godunov::parse_options() {
 
   ParmParse pp(m_name.c_str());
 
-  pp.get("verbosity",     m_verbosity);
-  pp.get("ppc",           m_ppc);
-  pp.get("max_cells_hop", m_max_cells_hop);
+  pp.get("verbosity",      m_verbosity);
+  pp.get("ppc",            m_ppc);
+  pp.get("max_cells_hop",  m_max_cells_hop);
+  pp.get("merge_interval", m_merge_interval);
 }
 
 void ito_plasma_godunov::allocate_internals(){
@@ -50,28 +53,109 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     pout() << m_name + "::advance" << endl;
   }
 
-  // Transport kernel for particles and photons. 
+  Real t_total = -MPI_Wtime();
+  
+  Real t_advect = 0.0;
+  Real t_diffuse = 0.0;
+  Real t_isect = 0.0;
+  Real t_remap = 0.0;
+  Real t_deposit = 0.0;
+  Real t_photons = 0.0;
+  Real t_poisson = 0.0;
+  Real t_chemistry = 0.0;
+  Real t_super = 0.0;
+  Real t_clear = 0.0;
+  Real t_velo = 0.0;
+  Real t_diffu = 0.0;
+    
+
+  // Transport kernel for particles and photons.
+  t_advect -= MPI_Wtime();
   this->advect_particles(a_dt);
+  t_advect += MPI_Wtime();
+  t_diffuse -= MPI_Wtime();
   this->diffuse_particles(a_dt);
+  t_diffuse += MPI_Wtime();
+  t_isect -= MPI_Wtime();
   this->intersect_particles(a_dt);
+  t_isect += MPI_Wtime();
+  t_remap -= MPI_Wtime();
   m_ito->remap();
+  t_remap += MPI_Wtime();
+  t_deposit -= MPI_Wtime();
   m_ito->deposit_particles();
+  t_deposit += MPI_Wtime();
 
   // Move photons
+  t_photons -= MPI_Wtime();
   this->advance_photons(a_dt);
+  t_photons += MPI_Wtime();
 
   // Compute the electric field, recompute velocities and diffusion coefficients
+  t_poisson -= MPI_Wtime();
   this->solve_poisson();
+  t_poisson += MPI_Wtime();
 
   // Chemistry kernel.
+  t_chemistry -= MPI_Wtime();
   this->advance_reaction_network(a_dt);
+  t_chemistry += MPI_Wtime();
 
   // Make superparticles
-  //  m_ito->make_superparticles(m_ppc);
+  t_super -= MPI_Wtime();
+  if(m_step % m_merge_interval == 0){
+    m_ito->make_superparticles(m_ppc);
+  }
+  t_super += MPI_Wtime();
+
+  // Clear other data holders
+  t_clear -= MPI_Wtime();
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->clear(solver_it()->get_eb_particles());
+    solver_it()->clear(solver_it()->get_domain_particles());
+  }
+  t_clear += MPI_Wtime();
 
   // Prepare next step
+  t_velo -= MPI_Wtime();
   this->compute_ito_velocities();
+  t_velo += MPI_Wtime();
+  t_diffu -= MPI_Wtime();
   this->compute_ito_diffusion();
+  t_diffu += MPI_Wtime();
+
+  t_total += MPI_Wtime();
+  
+#if DEBUG
+  t_advect    *= 100./t_total;
+  t_diffuse   *= 100./t_total;
+  t_isect     *= 100./t_total;
+  t_remap     *= 100./t_total;
+  t_deposit   *= 100./t_total;
+  t_photons   *= 100./t_total;
+  t_poisson   *= 100./t_total;
+  t_chemistry *= 100./t_total;
+  t_super     *= 100./t_total;
+  t_clear     *= 100./t_total;
+  t_velo      *= 100./t_total;
+  t_diffu     *= 100./t_total;
+  pout() << "total time = " << t_total << "\n"
+	 << "advect = " << t_advect << "%\n"
+    	 << "diffuse = " << t_diffuse << "%\n"
+	 << "isect = " << t_isect << "%\n"
+    	 << "remap = " << t_remap << "%\n"
+	 << "deposit = " << t_deposit << "%\n"
+    	 << "photons = " << t_photons << "%\n"
+	 << "poisson = " << t_poisson << "%\n"
+    	 << "chemistry = " << t_chemistry << "%\n"
+	 << "super = " << t_super << "%\n"
+	 << "clear = " << t_clear << "%\n"
+    	 << "velo = " << t_velo << "%\n"
+	 << "diffu = " << t_diffu << "%\n"
+	 << endl;
+#endif
+
+
   
   return a_dt;
 }

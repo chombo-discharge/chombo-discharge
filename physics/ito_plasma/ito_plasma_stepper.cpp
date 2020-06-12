@@ -311,16 +311,16 @@ void ito_plasma_stepper::register_operators(){
   m_sigma->register_operators();
 }
   
-void ito_plasma_stepper::pre_regrid(const int a_lbase, const int a_old_finest_level){
+void ito_plasma_stepper::pre_regrid(const int a_lmin, const int a_old_finest_level){
   CH_TIME("ito_plasma_stepper::pre_regrid");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::pre_regrid" << endl;
   }
 
-  m_ito->pre_regrid(a_lbase,     a_old_finest_level);
-  m_poisson->pre_regrid(a_lbase, a_old_finest_level);
-  m_rte->pre_regrid(a_lbase,     a_old_finest_level);
-  m_sigma->pre_regrid(a_lbase,   a_old_finest_level);
+  m_ito->pre_regrid(a_lmin,     a_old_finest_level);
+  m_poisson->pre_regrid(a_lmin, a_old_finest_level);
+  m_rte->pre_regrid(a_lmin,     a_old_finest_level);
+  m_sigma->pre_regrid(a_lmin,   a_old_finest_level);
 }
 
 void ito_plasma_stepper::deallocate(){
@@ -352,13 +352,9 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, 
     MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
   }
 
-  // Make superparticles. 
-  m_ito->make_superparticles(m_ppc);
-
   // Compute new velocities and diffusion coefficients
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
-
 }
 
 int  ito_plasma_stepper::get_num_plot_vars() const {

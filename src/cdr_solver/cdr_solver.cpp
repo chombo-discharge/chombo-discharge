@@ -194,7 +194,7 @@ void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCe
   }
 }
 
-void cdr_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
+void cdr_solver::pre_regrid(const int a_lmin, const int a_old_finest_level){
   CH_TIME("cdr_solver::pre_regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::pre_regrid" << endl;

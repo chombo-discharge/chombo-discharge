@@ -68,6 +68,10 @@ namespace physics {
       int m_positive_idx;
       int m_photonZ_idx;
 
+      // PPC for reactions
+      int m_ppc;
+      
+
       // Pressure, neutral number density etc
       Real m_N;      
       Real m_p;      
@@ -84,6 +88,7 @@ namespace physics {
       void draw_initial_particles();
       RealVect random_gaussian();
       RealVect random_direction() const;
+      RealVect random_position(const RealVect a_cellCenter, const Real a_dx) const;
 
       // Zheleznyak photoionization rates
       Real excitation_rates(const Real a_E) const;

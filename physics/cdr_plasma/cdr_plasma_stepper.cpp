@@ -2421,17 +2421,17 @@ void cdr_plasma_stepper::compute_cdr_velocities_irreg(Vector<EBCellFAB*>&       
   }
 }
 
-void cdr_plasma_stepper::pre_regrid(const int a_lbase, const int a_finest_level){
+void cdr_plasma_stepper::pre_regrid(const int a_lmin, const int a_finest_level){
   CH_TIME("cdr_plasma_stepper::pre_regrid");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::pre_regrid" << endl;
   }
 
   // Solvers do pre-regridding shit. 
-  m_cdr->pre_regrid(a_lbase, a_finest_level);
-  m_poisson->pre_regrid(a_lbase, a_finest_level);
-  m_rte->pre_regrid(a_lbase, a_finest_level);
-  m_sigma->pre_regrid(a_lbase, a_finest_level);
+  m_cdr->pre_regrid(a_lmin, a_finest_level);
+  m_poisson->pre_regrid(a_lmin, a_finest_level);
+  m_rte->pre_regrid(a_lmin, a_finest_level);
+  m_sigma->pre_regrid(a_lmin, a_finest_level);
 }
 
 void cdr_plasma_stepper::pre_regrid_internals(const int a_lbase, const int a_finest_level){
