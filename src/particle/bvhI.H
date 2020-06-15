@@ -141,7 +141,7 @@ void bvh_node<T>::split(const int a_dir){
   for (int i = 0; i < dataSize; i++){
     const Real mass = m_data[i].mass();
     if(mass_left < mass_right){
-      leftData.push_back(m_data[i]);
+      leftData.emplace_back(m_data[i]);
       mass_left  += mass;
       mass_right -= mass;
     }
@@ -154,7 +154,7 @@ void bvh_node<T>::split(const int a_dir){
   // Add the right particles
   mass_right = 0.0;
   for (int i = splitIndex+1; i < dataSize; i++){
-    rightData.push_back(m_data[i]);
+    rightData.emplace_back(m_data[i]);
     mass_right += m_data[i].mass();
   }
 
@@ -191,19 +191,19 @@ void bvh_node<T>::split(const int a_dir){
     // Split the divided particle between left and right data
     const RealVect pos  = splitMass.pos();
     
-    leftData.push_back(T(pos, massLeft));
-    rightData.push_back(T(pos, massRight));
+    leftData.emplace_back(T(pos, massLeft));
+    rightData.emplace_back(T(pos, massRight));
 
     mass_left  += massLeft;
     mass_right += massRight;
   }
   else{
     if(mass_left <= mass_right){
-      leftData.push_back(splitMass);
+      leftData.emplace_back(splitMass);
       mass_left  += splitMass.mass();
     }
     else{
-      rightData.push_back(splitMass);
+      rightData.emplace_back(splitMass);
       mass_right  += splitMass.mass();
     }
   }
@@ -249,7 +249,7 @@ bvh_tree<T>::bvh_tree(std::vector<T>& a_data, const Real a_mass){
   m_root->set_data(a_data, a_mass);
 
   m_leaves.resize(0);
-  m_leaves.push_back(m_root);
+  m_leaves.emplace_back(m_root);
 }
 
 template <class T>
@@ -301,13 +301,13 @@ void bvh_tree<T>::build_tree(const int a_numLeaves){
 	can_split = true;
 	  
 	m_leaves[i]->split(splitDir);
-	new_leaves.push_back(m_leaves[i]->get_left());
-	new_leaves.push_back(m_leaves[i]->get_right());
+	new_leaves.emplace_back(m_leaves[i]->get_left());
+	new_leaves.emplace_back(m_leaves[i]->get_right());
 
 	leavesNeeded -= 1; // We only get one extra leaf when we split. 
       }
       else{
-	new_leaves.push_back(m_leaves[i]);
+	new_leaves.emplace_back(m_leaves[i]);
       }
     }
 #if DEBUG

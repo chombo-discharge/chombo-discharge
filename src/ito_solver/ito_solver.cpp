@@ -1674,6 +1674,7 @@ void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const 
       List<ito_particle>& particles = cellParticles(iv, 0);
 
       if(particles.length() > 0){
+#if 0 // Original code
 	std::vector<point_mass> pointMasses;
 	Real mass = 0.0;
 	for (ListIterator<ito_particle> lit(particles); lit; ++lit){
@@ -1694,6 +1695,24 @@ void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const 
 	  ito_particle p(pointMass.mass(), pointMass.pos());
 	  cellParticles.addItem(p, iv);
 	}
+#else // Basic merging
+
+	const RealVect probLo = m_amr->get_prob_lo();
+	const Real dx = m_amr->get_dx()[a_level];
+
+	Real mass = 0.0;
+	RealVect pos = probLo + (RealVect(iv) + 0.5*RealVect::Unit)*dx;
+	for (ListIterator<ito_particle> lit(particles); lit; ++lit){
+	  mass += lit().mass();
+	}
+	mass = mass/a_particlesPerCell;
+
+	particles.clear();
+	ito_particle p(mass, pos);
+	for (int i = 0; i < a_particlesPerCell; i++){
+	  cellParticles.addItem(p, iv);
+	}
+#endif
       }
     }
 
