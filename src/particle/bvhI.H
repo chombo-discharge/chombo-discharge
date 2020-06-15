@@ -8,6 +8,12 @@
 #ifndef _BVHI_H_
 #define _BVHI_H_
 
+#include <chrono>
+#include <ctime>
+#include <ratio>
+
+using namespace std::chrono;
+
 #define DEBUG 0
 
 template <class T>
@@ -108,7 +114,7 @@ void bvh_node<T>::split(const int a_dir){
 #endif
   
   // 1. Sort data. Use a lambda for comparing. God I love C++11.
-  std::sort(std::begin(m_data), std::end(m_data), [a_dir](const T& p1, const T& p2){return p1[a_dir] < p2[a_dir];});
+  //  std::sort(std::begin(m_data), std::end(m_data), [a_dir](const T& p1, const T& p2){return p1[a_dir] < p2[a_dir];});
 
   // 2. Add left and right particles but don't add the particle on the median yet. 
   std::vector<T> leftData;
@@ -144,7 +150,7 @@ void bvh_node<T>::split(const int a_dir){
   // 4. If we can split up the median point into several ones, we do it. This would be the case if the median point
   //    is a superparticle; in this case we divide the weights as best we can and then assign them to the left/right halves
   const T splitMass = m_data[splitIndex];
-  if(false){//splitMass.can_split()){
+  if(splitMass.can_split()){
     const Real m  = splitMass.mass();
     const int  N  = round(m*(1.0 + 1.E-6));
     const int  NR = N/2;
@@ -253,6 +259,15 @@ void bvh_tree<T>::build_tree(const int a_numLeaves){
   int splitDir = 0;
 
   bool keepSplitting = m_leaves.size() < a_numLeaves;
+
+#if DEBUG
+  const int numParts = m_leaves[0]->get_data().size();
+  duration<double> tSort(0.0);//   = duration_cast<duration<double> >(0.0);
+  duration<double> tSplit(0.0);//   = duration_cast<duration<double> >(0.0);
+  duration<double> tAssign(0.0);//   = duration_cast<duration<double> >(0.0);
+  duration<double> tTotal(0.0);//   = duration_cast<duration<double> >(0.0);
+  auto t0 = std::chrono::high_resolution_clock::now();
+#endif
   
   while(keepSplitting){
 
@@ -260,11 +275,17 @@ void bvh_tree<T>::build_tree(const int a_numLeaves){
     bool can_split = false;
     
     // Sort the leaves by their mass. We will split the ones with the largest masses.
+#if DEBUG
+    auto t1 = std::chrono::high_resolution_clock::now();
+#endif
     std::sort(std::begin(m_leaves), std::end(m_leaves),
     	      [](const std::shared_ptr<bvh_node<T> >& n1,
     		 const std::shared_ptr<bvh_node<T> >& n2){
     		return n1->mass() < n2->mass();
     	      });
+#if DEBUG
+    auto t2 = std::chrono::high_resolution_clock::now();
+#endif
 
     int leavesNeeded = a_numLeaves - m_leaves.size();
     for(int i = 0; i < m_leaves.size(); i++){
@@ -281,6 +302,9 @@ void bvh_tree<T>::build_tree(const int a_numLeaves){
 	new_leaves.push_back(m_leaves[i]);
       }
     }
+#if DEBUG
+    auto t3 = std::chrono::high_resolution_clock::now();
+#endif
 
     splitDir = (splitDir + 1) % SpaceDim; // New splitting coordinate
     m_leaves = new_leaves;                // New leaves.
@@ -292,7 +316,29 @@ void bvh_tree<T>::build_tree(const int a_numLeaves){
     if(!can_split){
       keepSplitting = false;
     }
+
+#if DEBUG
+    auto t4 = std::chrono::high_resolution_clock::now();
+    
+    tSort   += duration_cast<duration<double> > (t2-t1);
+    tSplit  += duration_cast<duration<double> > (t3-t2);
+    tAssign += duration_cast<duration<double> > (t4-t3);
+#endif
+
   }
+
+#if DEBUG
+  auto tf = std::chrono::high_resolution_clock::now();
+  tTotal += duration_cast<duration<double> >(tf-t0);
+
+  pout() << "sort time = "   << 100.*tSort.count()/tTotal.count() << "%" << endl
+	 << "split time = "  << 100.*tSplit.count()/tTotal.count() << "%" << endl
+	 << "assign time = " << 100.*tAssign.count()/tTotal.count() << "%" << endl
+    	 << "Total time = " << tTotal.count() << endl
+	 << "Particles = " << numParts << endl
+	 << "Time per part = " << tTotal.count()/numParts << endl
+	 << endl;
+#endif
 }
 
 #endif
