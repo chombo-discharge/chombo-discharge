@@ -50,15 +50,9 @@ void bvh_node<T>::set_right(std::shared_ptr<bvh_node<T> > a_right){
 }
 
 template <class T>
-void bvh_node<T>::set_data(const std::vector<T>& a_data){
-  m_data.resize(a_data.size());
-
-  m_mass = 0.0;
-  
-  for (int i = 0; i < m_data.size(); i++){
-    m_data[i] = a_data[i];
-    m_mass += m_data[i].mass();
-  }
+void bvh_node<T>::set_data(const std::vector<T>& a_data, const Real a_mass){
+  m_data = a_data;
+  m_mass = a_mass;
 }
 
 template <class T>
@@ -113,37 +107,23 @@ void bvh_node<T>::split(const int a_dir){
   }
 #endif
   
-  // 1. Sort data. Use a lambda for comparing. God I love C++11. 
+  // 1. Sort data. Use a lambda for comparing. God I love C++11.
   std::sort(std::begin(m_data), std::end(m_data), [a_dir](const T& p1, const T& p2){return p1[a_dir] < p2[a_dir];});
 
-  // 2. Find the median. Keep track of the total mass in the leaves. We want to balance the masses
-  //    as best as we can. The left leaf will always have an equal or slightly bigger mass than the right leaf. 
-  Real mass_left  = 0.0;
-  Real mass_right = m_mass;
-  int splitIndex = -1;
-
-#if 0
-  for (int i = 0; i < m_data.size(); i++){
-    mass_left  += m_data[i].mass();
-    mass_right -= m_data[i].mass();
-
-    // We found the point where we should split. 
-    if(mass_left > mass_right){
-      splitIndex = i;
-      break;
-    }
-  }
-#endif
-
-
-  // 3. Everything to the left of splitIndex goes into left data; everything to the right of splitIndex goes into the right data
+  // 2. Add left and right particles but don't add the particle on the median yet. 
   std::vector<T> leftData;
   std::vector<T> rightData;
-  mass_left = 0.0;
-  mass_right = m_mass;
-  for (int i = 0; i < m_data.size(); i++){
+  
+  Real mass_left = 0.0;
+  Real mass_right = m_mass;
+
+  int splitIndex = -1;
+  const int dataSize = m_data.size();
+
+  // Left particles, keep track of total mass. 
+  for (int i = 0; i < dataSize; i++){
     const Real mass = m_data[i].mass();
-    if(mass_left + mass < mass_right){
+    if(mass_left < mass_right){
       leftData.push_back(m_data[i]);
       mass_left  += mass;
       mass_right -= mass;
@@ -156,18 +136,22 @@ void bvh_node<T>::split(const int a_dir){
 
   // Add the right particles
   mass_right = 0.0;
-  for (int i = splitIndex+1; i < m_data.size(); i++){
+  for (int i = splitIndex+1; i < dataSize; i++){
     rightData.push_back(m_data[i]);
     mass_right += m_data[i].mass();
   }
 
   // 4. If we can split up the median point into several ones, we do it. This would be the case if the median point
   //    is a superparticle; in this case we divide the weights as best we can and then assign them to the left/right halves
-  if(m_data[splitIndex].can_split()){
-    const Real m  = m_data[splitIndex].mass();
+  const T splitMass = m_data[splitIndex];
+  if(false){//splitMass.can_split()){
+    const Real m  = splitMass.mass();
     const int  N  = round(m*(1.0 + 1.E-6));
     const int  NR = N/2;
     const int  NL = N - NR;
+
+    const Real massLeft  = (m/N)*NL;
+    const Real massRight = (m/N)*NR;
 
 #if DEBUG
     if(m < 0.0){
@@ -177,13 +161,6 @@ void bvh_node<T>::split(const int a_dir){
       std::cout << m << "\t" << N << "\t" << NR << "\t" << NL << "\t" << m_data.size() << "\t idx = " << splitIndex << std::endl;
       MayDay::Abort("got negative NL");
     }
-#endif
-
-
-    const Real massLeft  = (m/N)*NL;
-    const Real massRight = (m/N)*NR;
-
-#if DEBUG 
     if(massLeft < 0.0){
       std::cout << "massLeft = " << massLeft << std::endl;
       MayDay::Abort("stop left");
@@ -194,17 +171,23 @@ void bvh_node<T>::split(const int a_dir){
     }
 #endif
 
-    // Divided particle
-    const RealVect& pos  = m_data[splitIndex].pos();
+    // Split the divided particle between left and right data
+    const RealVect pos  = splitMass.pos();
+    
     leftData.push_back(T(pos, massLeft));
     rightData.push_back(T(pos, massRight));
+
+    mass_left  += massLeft;
+    mass_right += massRight;
   }
   else{
     if(mass_left <= mass_right){
-      leftData.push_back(m_data[splitIndex]);
+      leftData.push_back(splitMass);
+      mass_left  += splitMass.mass();
     }
     else{
-      rightData.push_back(m_data[splitIndex]);
+      rightData.push_back(splitMass);
+      mass_right  += splitMass.mass();
     }
   }
 
@@ -223,8 +206,8 @@ void bvh_node<T>::split(const int a_dir){
   auto left = std::make_shared<bvh_node<T> >();
   auto righ = std::make_shared<bvh_node<T> >();
 
-  left->set_data(leftData);
-  righ->set_data(rightData);
+  left->set_data(leftData, mass_left);
+  righ->set_data(rightData, mass_right);
 
 #if 0 // This breaks. Don't know why. 
   left->set_parent(this->shared_from_this());
@@ -243,12 +226,13 @@ void bvh_node<T>::split(const int a_dir){
 }
 
 template <class T>
-bvh_tree<T>::bvh_tree(std::vector<T>& a_data){
+bvh_tree<T>::bvh_tree(std::vector<T>& a_data, const Real a_mass){
 
   // Make the root node
   m_root = std::make_shared<bvh_node<T> >();
   m_root->set_leaf(true);
-  m_root->set_data(a_data);
+  
+  m_root->set_data(a_data, a_mass);
 
   m_leaves.resize(0);
   m_leaves.push_back(m_root);
@@ -284,7 +268,6 @@ void bvh_tree<T>::build_tree(const int a_numLeaves){
 
     int leavesNeeded = a_numLeaves - m_leaves.size();
     for(int i = 0; i < m_leaves.size(); i++){
-      const int leavesLeft = m_leaves.size() - i;
       if(m_leaves[i]->can_split() && leavesNeeded > 0){ // Only split if we actually need more leaves. 
 	can_split = true;
 	  

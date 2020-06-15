@@ -15,7 +15,7 @@
   @brief Class the describes a single kd-tree node.
 */
 template <class T>
-class bvh_node : public std::enable_shared_from_this<bvh_node<T> > {
+class bvh_node {// : public std::enable_shared_from_this<bvh_node<T> > {
 public:
 
   bvh_node();
@@ -29,18 +29,18 @@ public:
   inline void set_parent(std::shared_ptr<bvh_node<T> > a_parent);
   inline void set_left(std::shared_ptr<bvh_node<T> > a_left);
   inline void set_right(std::shared_ptr<bvh_node<T> > a_right);
-  inline void set_data(const std::vector<T>& a_data);
+  inline void set_data(const std::vector<T>& a_data, const Real a_mass);
   inline void sort(const int a_dir);
   inline void split(const int a_dir);
 
-  std::vector<T>& get_data();
-  const std::vector<T>& get_data() const;
+  inline std::vector<T>& get_data();
+  inline const std::vector<T>& get_data() const;
 
   inline Real mass() const;
 
-  std::shared_ptr<bvh_node<T> > get_parent();
-  std::shared_ptr<bvh_node<T> > get_left();
-  std::shared_ptr<bvh_node<T> > get_right();
+  inline std::shared_ptr<bvh_node<T> > get_parent();
+  inline std::shared_ptr<bvh_node<T> > get_left();
+  inline std::shared_ptr<bvh_node<T> > get_right();
 
 protected:
 
@@ -66,12 +66,12 @@ public:
 
   bvh_tree() = delete;
   
-  bvh_tree(std::vector<T>& a_points);
+  bvh_tree(std::vector<T>& a_points, const Real a_mass);
   ~bvh_tree();
 
-  void build_tree(const int a_numLeaves); // Desired number of leaves
+  inline void build_tree(const int a_numLeaves); // Desired number of leaves
 
-  std::vector<std::shared_ptr<bvh_node<T> > >& get_leaves(); 
+  inline std::vector<std::shared_ptr<bvh_node<T> > >& get_leaves(); 
   
 protected:
 

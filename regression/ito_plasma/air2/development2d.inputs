@@ -192,7 +192,7 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1           # Verbosity
 ito_plasma_godunov.max_cells_hop  = 1.0          # Maximum cells to move in one time step
-ito_plasma_godunov.ppc            = 128           # Superparticle number of cells
+ito_plasma_godunov.ppc            = 64          # Superparticle number of cells
 ito_plasma_godunov.merge_interval = 1            # How often to make superparticles
 
 # ====================================================================================================
@@ -206,7 +206,7 @@ ito_plasma_air2.num_particles  = 1000000                      # Number of initia
 # Reaction stuff
 ito_plasma_air2.tau_switch     = -1                           # Switch from SSA to tau when reaching this many particles
 ito_plasma_air2.poisson_switch = 100                          # When to approximate Poisson by normal distribution
-ito_plasma_air2.react_ppc      = 16                           # Maximum number of particles to produce in reaction step	
+ito_plasma_air2.react_ppc      = 32                           # Maximum number of particles to produce in reaction step	
 
 # ----------------------------------------------------------------------------------------------------
 # SEE parameters
