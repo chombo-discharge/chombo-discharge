@@ -1663,7 +1663,7 @@ void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const 
   // These are the particles on this patch
   ListBox<ito_particle>& boxParticles = m_particles[a_level][a_dit];
 
-  if(boxParticles.numItems() > 0){
+  if(boxParticles.numItems() > a_particlesPerCell){
 
     BinFab<ito_particle> cellParticles;
     m_particles.get_cell_particles(cellParticles, a_level, a_dit);

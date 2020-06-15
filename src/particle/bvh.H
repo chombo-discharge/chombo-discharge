@@ -19,17 +19,18 @@ class bvh_node {// : public std::enable_shared_from_this<bvh_node<T> > {
 public:
 
   bvh_node();
-  bvh_node(std::shared_ptr<bvh_node<T> > a_parent);
+  bvh_node(std::shared_ptr<bvh_node<T> >& a_parent);
   ~bvh_node();
 
   inline bool can_split() const;
   inline bool is_leaf() const;
 
   inline void set_leaf(const bool a_leaf);
-  inline void set_parent(std::shared_ptr<bvh_node<T> > a_parent);
-  inline void set_left(std::shared_ptr<bvh_node<T> > a_left);
-  inline void set_right(std::shared_ptr<bvh_node<T> > a_right);
+  inline void set_parent(std::shared_ptr<bvh_node<T> >& a_parent);
+  inline void set_left(std::shared_ptr<bvh_node<T> >& a_left);
+  inline void set_right(std::shared_ptr<bvh_node<T> >& a_right);
   inline void set_data(const std::vector<T>& a_data, const Real a_mass);
+  inline void set_mass(const Real a_mass);
   inline void sort(const int a_dir);
   inline void split(const int a_dir);
 
@@ -38,9 +39,9 @@ public:
 
   inline Real mass() const;
 
-  inline std::shared_ptr<bvh_node<T> > get_parent();
-  inline std::shared_ptr<bvh_node<T> > get_left();
-  inline std::shared_ptr<bvh_node<T> > get_right();
+  inline std::shared_ptr<bvh_node<T> >& get_parent();
+  inline std::shared_ptr<bvh_node<T> >& get_left();
+  inline std::shared_ptr<bvh_node<T> >& get_right();
 
 protected:
 

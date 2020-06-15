@@ -26,7 +26,7 @@ bvh_node<T>::~bvh_node(){
 }
 
 template <class T>
-bvh_node<T>::bvh_node(std::shared_ptr<bvh_node<T> > a_parent){
+bvh_node<T>::bvh_node(std::shared_ptr<bvh_node<T> >& a_parent){
   this->set_parent(a_parent);
 }
 
@@ -41,17 +41,17 @@ void bvh_node<T>::set_leaf(const bool a_leaf){
 }
 
 template <class T>
-void bvh_node<T>::set_parent(std::shared_ptr<bvh_node<T> > a_parent){
+void bvh_node<T>::set_parent(std::shared_ptr<bvh_node<T> >& a_parent){
   m_parent = a_parent;
 }
 
 template <class T>
-void bvh_node<T>::set_left(std::shared_ptr<bvh_node<T> > a_left){
+void bvh_node<T>::set_left(std::shared_ptr<bvh_node<T> >& a_left){
   m_left = a_left;
 }
 
 template <class T>
-void bvh_node<T>::set_right(std::shared_ptr<bvh_node<T> > a_right){
+void bvh_node<T>::set_right(std::shared_ptr<bvh_node<T> >& a_right){
   m_right = a_right;
 }
 
@@ -62,17 +62,22 @@ void bvh_node<T>::set_data(const std::vector<T>& a_data, const Real a_mass){
 }
 
 template <class T>
-std::shared_ptr<bvh_node<T> > bvh_node<T>::get_left(){
+void bvh_node<T>::set_mass(const Real a_mass){
+  m_mass = a_mass;
+}
+
+template <class T>
+std::shared_ptr<bvh_node<T> >& bvh_node<T>::get_left(){
   return m_left;
 }
 
 template <class T>
-std::shared_ptr<bvh_node<T> > bvh_node<T>::get_right(){
+std::shared_ptr<bvh_node<T> >& bvh_node<T>::get_right(){
   return m_right;
 }
 
 template <class T>
-std::shared_ptr<bvh_node<T> > bvh_node<T>::get_parent(){
+std::shared_ptr<bvh_node<T> >& bvh_node<T>::get_parent(){
   return m_parent;
 }
 
@@ -114,11 +119,17 @@ void bvh_node<T>::split(const int a_dir){
 #endif
   
   // 1. Sort data. Use a lambda for comparing. God I love C++11.
-  //  std::sort(std::begin(m_data), std::end(m_data), [a_dir](const T& p1, const T& p2){return p1[a_dir] < p2[a_dir];});
+  std::sort(std::begin(m_data), std::end(m_data), [a_dir](const T& p1, const T& p2){return p1[a_dir] < p2[a_dir];});
 
-  // 2. Add left and right particles but don't add the particle on the median yet. 
-  std::vector<T> leftData;
-  std::vector<T> rightData;
+  // 2. Make leaves and get hooks for date
+  auto left = std::make_shared<bvh_node<T> >();
+  auto righ = std::make_shared<bvh_node<T> >();
+
+  std::vector<T>& leftData = left->get_data();
+  std::vector<T>& rightData = righ->get_data();
+
+  leftData.resize(0);
+  rightData.resize(0);
   
   Real mass_left = 0.0;
   Real mass_right = m_mass;
@@ -147,8 +158,8 @@ void bvh_node<T>::split(const int a_dir){
     mass_right += m_data[i].mass();
   }
 
-  // 4. If we can split up the median point into several ones, we do it. This would be the case if the median point
-  //    is a superparticle; in this case we divide the weights as best we can and then assign them to the left/right halves
+  // If we can split up the median point into several ones, we do it. This would be the case if the median point
+  // is a superparticle; in this case we divide the weights as best we can and then assign them to the left/right halves
   const T splitMass = m_data[splitIndex];
   if(splitMass.can_split()){
     const Real m  = splitMass.mass();
@@ -208,12 +219,8 @@ void bvh_node<T>::split(const int a_dir){
   }
 #endif
 
-  // 5. We have the data, we can make the new leaves now.
-  auto left = std::make_shared<bvh_node<T> >();
-  auto righ = std::make_shared<bvh_node<T> >();
-
-  left->set_data(leftData, mass_left);
-  righ->set_data(rightData, mass_right);
+  left->set_mass(mass_left);
+  righ->set_mass(mass_right);
 
 #if 0 // This breaks. Don't know why. 
   left->set_parent(this->shared_from_this());
@@ -227,6 +234,7 @@ void bvh_node<T>::split(const int a_dir){
   this->set_left(left);
   this->set_right(righ);
   this->set_leaf(false);
+  
   m_mass = 0.;
   m_data.clear();
 }
@@ -307,7 +315,12 @@ void bvh_tree<T>::build_tree(const int a_numLeaves){
 #endif
 
     splitDir = (splitDir + 1) % SpaceDim; // New splitting coordinate
-    m_leaves = new_leaves;                // New leaves.
+
+    // New leaves
+    m_leaves.resize(new_leaves.size());
+    for (int i = 0; i < new_leaves.size(); i++){
+      m_leaves[i] = new_leaves[i];
+    }
 
     // Did we end up in a convergent situation? OK, then exit. 
     if(m_leaves.size() >= a_numLeaves){
