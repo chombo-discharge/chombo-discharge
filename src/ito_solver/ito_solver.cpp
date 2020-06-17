@@ -1707,11 +1707,21 @@ void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const 
 
       // 3. Clear particles in this cell and add new ones.
       particles.clear();
+      Real massAfter = 0.0;
       for (int i = 0; i < leaves.size(); i++){
 	point_mass pointMass(leaves[i]->get_data());
 	ito_particle p(pointMass.mass(), pointMass.pos());
-	particles.append(p);
+	massAfter += leaves[i]->mass();
+	cellParticles.addItem(p,iv);
       }
+
+#if 0 // Debug
+      const Real massDiff = massAfter - mass;
+      if(Abs(massDiff) > 0.0){
+	std::cout << mass - massAfter << std::endl;
+	MayDay::Abort("ito_particle::make_superparticles - logic bust");
+      }
+#endif
     }
   }
 }

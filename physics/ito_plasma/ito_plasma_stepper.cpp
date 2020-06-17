@@ -1055,6 +1055,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<LayoutData<BinFab<ito_p
   const int num_rte_species = m_physics->get_num_rte_species();
 
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const Real dx = m_amr->get_dx()[a_lvl];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box = dbl.get(dit());
@@ -1073,13 +1074,11 @@ void ito_plasma_stepper::advance_reaction_network(Vector<LayoutData<BinFab<ito_p
       photons[idx]    = &((*a_photons[idx])[dit()]);
       newPhotons[idx] = &((*a_newPhotons[idx])[dit()]);
     }
+
+    this->advance_reaction_network(particles, photons, newPhotons, a_E[dit()], a_lvl, dit(), box, dx, a_dt);
   }
 }
 
-
-
-
-#if 0
 void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >& a_particles,
 						  Vector<BinFab<photon>* >&       a_photons,
 						  Vector<BinFab<photon>* >&       a_newPhotons,
@@ -1176,7 +1175,6 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
     m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, a_dx, kappa, a_dt);
   }
 }
-#endif
 
 void ito_plasma_stepper::advance_photons(const Real a_dt){
   CH_TIME("ito_plasma_stepper::advance_photons(a_dt)");

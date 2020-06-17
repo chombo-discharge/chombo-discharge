@@ -149,7 +149,6 @@ namespace physics {
 				    const int                                    a_lvl,
 				    const Real                                   a_dt);
 
-#if 0
       void advance_reaction_network(Vector<BinFab<ito_particle>* >& a_particles,
 				    Vector<BinFab<photon>* >&       a_photons,
 				    Vector<BinFab<photon>* >&       a_newPhotons,
@@ -159,7 +158,6 @@ namespace physics {
 				    const Box                       a_box,
 				    const Real                      a_dx,
 				    const Real                      a_dt);
-#endif
 
       // Routines for advancing photons
       void advance_photons(const Real a_dt);

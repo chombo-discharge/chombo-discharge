@@ -131,7 +131,7 @@ void bvh_node<T>::split(const int a_dir){
   leftData.resize(0);
   rightData.resize(0);
   
-  Real mass_left = 0.0;
+  Real mass_left  = 0.0;
   Real mass_right = m_mass;
 
   int splitIndex = -1;
@@ -140,7 +140,7 @@ void bvh_node<T>::split(const int a_dir){
   // Left particles, keep track of total mass. 
   for (int i = 0; i < dataSize; i++){
     const Real mass = m_data[i].mass();
-    if(mass_left < mass_right){
+    if(mass_left + mass < mass_right){
       leftData.emplace_back(m_data[i]);
       mass_left  += mass;
       mass_right -= mass;
@@ -161,7 +161,7 @@ void bvh_node<T>::split(const int a_dir){
   // If we can split up the median point into several ones, we do it. This would be the case if the median point
   // is a superparticle; in this case we divide the weights as best we can and then assign them to the left/right halves
   const T splitMass = m_data[splitIndex];
-  if(splitMass.can_split()){
+  if(false){//splitMass.can_split()){
     const Real m  = splitMass.mass();
     const int  N  = round(m*(1.0 + 1.E-6));
     const int  NR = N/2;
@@ -200,11 +200,11 @@ void bvh_node<T>::split(const int a_dir){
   else{
     if(mass_left <= mass_right){
       leftData.emplace_back(splitMass);
-      mass_left  += splitMass.mass();
+      mass_left += splitMass.mass();
     }
     else{
       rightData.emplace_back(splitMass);
-      mass_right  += splitMass.mass();
+      mass_right += splitMass.mass();
     }
   }
 
@@ -227,14 +227,13 @@ void bvh_node<T>::split(const int a_dir){
   righ->set_parent(this->shared_from_this());
 #endif
 
-
   // Update who is leaf
   m_left->set_leaf(true);
   m_right->set_leaf(true);
   this->set_leaf(false);
   
-  //  m_mass = 0.;
-  //  m_data.clear();
+   m_mass = 0.;
+   m_data.clear();
 }
 
 template <class T>

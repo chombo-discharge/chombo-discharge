@@ -110,9 +110,10 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   this->advance_reaction_network(a_dt);
   t_chemistry += MPI_Wtime();
 
+
   // Make superparticles
   t_super -= MPI_Wtime();
-  if((m_step+1) % m_merge_interval == 0){
+  if((m_step+1) % m_merge_interval == 0 && m_merge_interval > 0){
     m_ito->make_superparticles(m_ppc);
   }
   t_super += MPI_Wtime();
