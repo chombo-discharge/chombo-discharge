@@ -62,8 +62,10 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   Real t_deposit = 0.0;
   Real t_photons = 0.0;
   Real t_poisson = 0.0;
+  Real t_cellBin = 0.0;
   Real t_chemistry = 0.0;
   Real t_super = 0.0;
+  Real t_patchBin = 0.0;
   Real t_clear = 0.0;
   Real t_velo = 0.0;
   Real t_diffu = 0.0;
@@ -97,7 +99,11 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   t_poisson += MPI_Wtime();
 
   // Sort the particles per cell
+  t_cellBin -= MPI_Wtime();
   m_ito->sort_particles_by_cell();
+  this->sort_bulk_photons_by_cell();
+  this->sort_source_photons_by_cell();
+  t_cellBin += MPI_Wtime();
 
   // Chemistry kernel.
   t_chemistry -= MPI_Wtime();
@@ -112,9 +118,13 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   t_super += MPI_Wtime();
 
   // Sort particles per patch
+  t_patchBin -= MPI_Wtime();
   m_ito->sort_particles_by_patch();
+  this->sort_bulk_photons_by_patch();
+  this->sort_source_photons_by_patch();
+  t_patchBin += MPI_Wtime();
 
-  // Clear other data holders
+  // Clear other data holders for now. BC comes later
   t_clear -= MPI_Wtime();
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->clear(solver_it()->get_eb_particles());
@@ -153,8 +163,10 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 	 << "deposit = " << t_deposit << "%\n"
     	 << "photons = " << t_photons << "%\n"
 	 << "poisson = " << t_poisson << "%\n"
+	 << "cell bin = " << t_cellBin << "%\n"
     	 << "chemistry = " << t_chemistry << "%\n"
 	 << "super = " << t_super << "%\n"
+    	 << "patch bin = " << t_patchBin << "%\n"
 	 << "clear = " << t_clear << "%\n"
     	 << "velo = " << t_velo << "%\n"
 	 << "diffu = " << t_diffu << "%\n"

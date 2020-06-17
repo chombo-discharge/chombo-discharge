@@ -18,8 +18,11 @@
 
 template <class P>
 using AMRParticles     = Vector<RefCountedPtr<ParticleData<P> > >;
-using AMRPVR           = Vector<RefCountedPtr<ParticleValidRegion> >;
+
+template <class P>
 using AMRCellParticles = Vector<RefCountedPtr<LayoutData<BinFab<P> > > >;
+
+using AMRPVR           = Vector<RefCountedPtr<ParticleValidRegion> >;
 using EBAMRPPC         = Vector<RefCountedPtr<BaseEBCellFAB<int> > >;
 
 /*!
@@ -104,6 +107,26 @@ public:
     @brief Get data on a level
   */
   const ParticleData<P>& operator[](const int a_level) const;
+
+  /*!
+    @brief Get cell particles
+  */
+  AMRCellParticles<P>& get_cell_particles();
+
+  /*!
+    @brief Get cell particles, const version. 
+  */
+  const AMRCellParticles<P>& get_cell_particles() const;
+  
+  /*!
+    @brief Get cell particles
+  */
+  LayoutData<BinFab<P> >& get_cell_particles(const int a_level);
+
+  /*!
+    @brief Get cell particles, const version. 
+  */
+  const LayoutData<BinFab<P> >& get_cell_particles(const int a_level) const;
 
   /*!
     @brief Get cell particles
@@ -207,7 +230,7 @@ protected:
 
   AMRParticles<P> m_particles;
   AMRPVR m_pvr;
-  AMRCellParticles m_cell_particles;
+  AMRCellParticles<P> m_cell_particles;
 
   void setup_pvr(const int a_base, const int a_finest_level);
   void setup_particle_data(const int a_base, const int a_finest_level);

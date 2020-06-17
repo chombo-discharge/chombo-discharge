@@ -940,7 +940,6 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::advance_reaction_network(a_dt)" << endl;
   }
-
   const int num_ito_species = m_physics->get_num_ito_species();
   const int num_rte_species = m_physics->get_num_rte_species();
   
@@ -978,26 +977,25 @@ void ito_plasma_stepper::advance_reaction_network(Vector<particle_container<ito_
   const int num_ito_species = m_physics->get_num_ito_species();
   const int num_rte_species = m_physics->get_num_rte_species();
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    Vector<ParticleData<ito_particle>* > particles(num_ito_species);
-    Vector<ParticleData<photon>* >       photons(num_rte_species);
-    Vector<ParticleData<photon>* >       newPhotons(num_rte_species);
+  Vector<AMRCellParticles<ito_particle>* > particles(num_ito_species);
+  Vector<AMRCellParticles<photon>* >       photons(num_ito_species);
+  Vector<AMRCellParticles<photon>* >       newPhotons(num_ito_species);
 
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      particles[idx] = &(*a_particles[idx])[lvl];
-    }
-
-    for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      photons[idx] = &(*a_photons[idx])[lvl];
-      newPhotons[idx] = &(*a_newPhotons[idx])[lvl];
-    }
-
-    this->advance_reaction_network(particles, photons, newPhotons, *a_E[lvl], lvl, a_dt);
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    particles[idx] = &(a_particles[idx]->get_cell_particles());
   }
 
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    photons[idx]    = &(a_photons[idx]->get_cell_particles());
+    newPhotons[idx] = &(a_newPhotons[idx]->get_cell_particles());
+  }
+
+  this->advance_reaction_network(particles, photons, newPhotons, a_E, a_dt);
+
   // Discard shit that is under the PVR
+#if 0
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     a_particles[solver_it.get_solver()]->discard_invalid_particles();
   }
@@ -1006,128 +1004,91 @@ void ito_plasma_stepper::advance_reaction_network(Vector<particle_container<ito_
     a_photons[solver_it.get_solver()]->discard_invalid_particles();
     a_newPhotons[solver_it.get_solver()]->discard_invalid_particles();
   }
+#endif
 }
 
-void ito_plasma_stepper::advance_reaction_network(Vector<ParticleData<ito_particle>* >& a_particles,
-						  Vector<ParticleData<photon>* >&       a_photons,
-						  Vector<ParticleData<photon>* >&       a_newPhotons,
-						  const LevelData<EBCellFAB>&           a_E,
-						  const int                             a_lvl,
-						  const Real                            a_dt){
-  CH_TIME("ito_plasma_stepper::advance_reaction_network(ParticleData x3, lvl, a_dt)");
+void ito_plasma_stepper::advance_reaction_network(Vector<AMRCellParticles<ito_particle>* >& a_particles,
+						  Vector<AMRCellParticles<photon>* >&       a_photons,
+						  Vector<AMRCellParticles<photon>* >&       a_newPhotons,
+						  const EBAMRCellData&                      a_E,
+						  const Real                                a_dt){
+  CH_TIME("ito_plasma_stepper::advance_reaction_network(AMRCellParticles x3, lvl, a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advance_reaction_network(ParticleData x3, lvl, a_dt)" << endl;
+    pout() << "ito_plasma_stepper::advance_reaction_network(AMRCellParticles x3, lvl, a_dt)" << endl;
+  }
+
+  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_rte_species = m_physics->get_num_rte_species();
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    Vector<LayoutData<BinFab<ito_particle> >* > particles(num_ito_species);
+    Vector<LayoutData<BinFab<photon> >* >       photons(num_rte_species);
+    Vector<LayoutData<BinFab<photon> >* >       newPhotons(num_rte_species);
+
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      particles[idx] = &(*(*a_particles[idx])[lvl]);
+    }
+
+    for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      photons[idx]    = &(*(*a_photons[idx])[lvl]);
+      newPhotons[idx] = &(*(*a_newPhotons[idx])[lvl]);
+    }
+    
+    this->advance_reaction_network(particles, photons, newPhotons, *a_E[lvl], lvl, a_dt);
+  }
+}
+
+void ito_plasma_stepper::advance_reaction_network(Vector<LayoutData<BinFab<ito_particle> >* >& a_particles,
+						  Vector<LayoutData<BinFab<photon> >* >&       a_photons,
+						  Vector<LayoutData<BinFab<photon> >* >&       a_newPhotons,
+						  const LevelData<EBCellFAB>&                  a_E,
+						  const int                                    a_lvl,
+						  const Real                                   a_dt){
+  CH_TIME("ito_plasma_stepper::advance_reaction_network(LayoutData<BinFab> x3, lvl, dit, box, a_dt)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::advance_reaction_network(LayoutData<BinFab> x3, lvl, dit, box, a_dt)" << endl;
   }
 
   const int num_ito_species = m_physics->get_num_ito_species();
   const int num_rte_species = m_physics->get_num_rte_species();
 
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
-  const Real dx = m_amr->get_dx()[a_lvl];                
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box box = dbl.get(dit());
 
-    Vector<List<ito_particle>* > particles(num_ito_species);
-    Vector<List<photon>* >       photons(num_rte_species);
-    Vector<List<photon>* >       newPhotons(num_rte_species);
+    Vector<BinFab<ito_particle>* > particles(num_ito_species);
+    Vector<BinFab<photon>* > photons(num_rte_species);;
+    Vector<BinFab<photon>* > newPhotons(num_rte_species);
 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
-      particles[idx] = &(*a_particles[idx])[dit()].listItems();
+      particles[idx] = &((*a_particles[idx])[dit()]);
     }
 
     for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
-      photons[idx] = &(*a_photons[idx])[dit()].listItems();
-      newPhotons[idx] = &(*a_newPhotons[idx])[dit()].listItems();
-    }
-
-    this->advance_reaction_network(particles, photons, newPhotons, a_E[dit()], a_lvl, dit(), dbl.get(dit()), dx, a_dt);
-  }
-}
-
-void ito_plasma_stepper::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-						  Vector<List<photon>* >&       a_photons,
-						  Vector<List<photon>* >&       a_newPhotons,
-						  const EBCellFAB&              a_E,
-						  const int                     a_lvl,
-						  const DataIndex               a_dit,
-						  const Box                     a_box,
-						  const Real                    a_dx,
-						  const Real                    a_dt){
-  CH_TIME("ito_plasma_stepper::advance_reaction_network(List x3, lvl, dit, box, a_dt)");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advance_reaction_network(List x3, lvl, dit, box, a_dt)" << endl;
-  }
-
-  // TLDR: This code takes the particle on a grid patch and orders them on a cell-by-cell basis. It then calls
-  //       a routine that advances the reaction network per cell, and then puts the particles back where they belong.
-
-  const int comp = 0;
-
-  const int num_ito_species = m_physics->get_num_ito_species();
-  const int num_rte_species = m_physics->get_num_rte_species();
-
-  const RealVect prob_lo = m_amr->get_prob_lo();
-  const RealVect dx      = a_dx*RealVect::Unit;
-
-
-  // Must make BinFab to get particles on a cell-by-cell basis. 
-  std::vector<BinFab<ito_particle> > binParticles(num_ito_species);
-  std::vector<BinFab<photon> >       binPhotons(num_rte_species);
-  std::vector<BinFab<photon> >       binNewPhotons(num_rte_species);
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    binParticles[idx].define(a_box, dx, prob_lo);
-    binParticles[idx].addItemsDestructive(*a_particles[idx]);
-  }
-
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    binPhotons[idx].define(a_box, dx, prob_lo);
-    binNewPhotons[idx].define(a_box, dx, prob_lo);
-
-    binPhotons[idx].addItems(*a_photons[idx]); // These shouldn't change. 
-  }
-
-  // Call stuff that does cell-by-cell advancement. 
-  this->advance_reaction_network(binParticles, binPhotons, binNewPhotons, a_E, a_lvl, a_dit, a_box, a_dx, a_dt);
-
-  // The BinFab must now be transferred to the various list.
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    
-    List<ito_particle>& listParticles = *a_particles[idx];
-    
-    for (BoxIterator bit(a_box); bit.ok(); ++bit){
-      List<ito_particle>& bp = binParticles[idx](bit(), comp);
-      listParticles.catenate(bp);
-    }
-  }
-
-  // The BinFab must now be transferred to the various list.
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    
-    List<photon>& listNewPhotons = *a_newPhotons[idx];
-
-    for (BoxIterator bit(a_box); bit.ok(); ++bit){
-      List<photon>& bp = binNewPhotons[idx](bit(), comp);
-      listNewPhotons.catenate(bp);
+      photons[idx]    = &((*a_photons[idx])[dit()]);
+      newPhotons[idx] = &((*a_newPhotons[idx])[dit()]);
     }
   }
 }
 
-void ito_plasma_stepper::advance_reaction_network(std::vector<BinFab<ito_particle> >& a_particles,
-						  std::vector<BinFab<photon> >&       a_photons,
-						  std::vector<BinFab<photon> >&       a_newPhotons,
-						  const EBCellFAB&                    a_E,
-						  const int                           a_lvl,
-						  const DataIndex                     a_dit,
-						  const Box                           a_box,
-						  const Real                          a_dx,
-						  const Real                          a_dt){
+
+
+
+#if 0
+void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >& a_particles,
+						  Vector<BinFab<photon>* >&       a_photons,
+						  Vector<BinFab<photon>* >&       a_newPhotons,
+						  const EBCellFAB&                a_E,
+						  const int                       a_lvl,
+						  const DataIndex                 a_dit,
+						  const Box                       a_box,
+						  const Real                      a_dx,
+						  const Real                      a_dt){
   CH_TIME("ito_plasma_stepper::advance_reaction_network(BinFab x3, lvl, dit, box, a_dt)");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::advance_reaction_network(BinFab x3, lvl, dit, box, a_dt)" << endl;
@@ -1162,15 +1123,15 @@ void ito_plasma_stepper::advance_reaction_network(std::vector<BinFab<ito_particl
       for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.get_solver();
       
-	List<ito_particle>& bp = a_particles[idx](iv, comp);
+	List<ito_particle>& bp = (*a_particles[idx])(iv, comp);
 	particles[idx] = &bp;
       }
 
       for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.get_solver();
       
-	List<photon>& bp    = a_photons[idx](iv, comp);
-	List<photon>& bpNew = a_newPhotons[idx](iv, comp);
+	List<photon>& bp    = (*a_photons[idx])(iv, comp);
+	List<photon>& bpNew = (*a_newPhotons[idx])(iv, comp);
       
 	photons[idx]    = &bp;
 	newPhotons[idx] = &bpNew;
@@ -1197,15 +1158,15 @@ void ito_plasma_stepper::advance_reaction_network(std::vector<BinFab<ito_particl
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
       
-      List<ito_particle>& bp = a_particles[idx](iv, comp);
+      List<ito_particle>& bp = (*a_particles[idx])(iv, comp);
       particles[idx] = &bp;
     }
 
     for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
       
-      List<photon>& bp    = a_photons[idx](iv, comp);
-      List<photon>& bpNew = a_newPhotons[idx](iv, comp);
+      List<photon>& bp    = (*a_photons[idx])(iv, comp);
+      List<photon>& bpNew = (*a_newPhotons[idx])(iv, comp);
       
       photons[idx]    = &bp;
       newPhotons[idx] = &bpNew;
@@ -1215,6 +1176,7 @@ void ito_plasma_stepper::advance_reaction_network(std::vector<BinFab<ito_particl
     m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, a_dx, kappa, a_dt);
   }
 }
+#endif
 
 void ito_plasma_stepper::advance_photons(const Real a_dt){
   CH_TIME("ito_plasma_stepper::advance_photons(a_dt)");
@@ -1251,4 +1213,115 @@ void ito_plasma_stepper::advance_photons(const Real a_dt){
       solver->advance_photons_transient(bulkPhotons, ebPhotons, domainPhotons, photons, a_dt);
     }
   }
+}
+
+void ito_plasma_stepper::sort_photons_by_cell(){
+  CH_TIME("ito_plasma_stepper::sort_photons_by_cell()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::sort_photons_by_cell()" << endl;
+  }
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->sort_photons_by_cell();
+  }
+}
+
+void ito_plasma_stepper::sort_photons_by_patch(){
+  CH_TIME("ito_plasma_stepper::sort_photons_by_patch()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::sort_photons_by_patch()" << endl;
+  }
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->sort_photons_by_patch();
+  }
+}
+
+void ito_plasma_stepper::sort_source_photons_by_cell(){
+  CH_TIME("ito_plasma_stepper::sort_source_photons_by_cell()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::sort_source_photons_by_cell()" << endl;
+  }
+  
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->sort_source_photons_by_cell();
+  }
+}
+
+void ito_plasma_stepper::sort_source_photons_by_patch(){
+  CH_TIME("ito_plasma_stepper::sort_source_photons_by_patch()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::sort_source_photons_by_patch()" << endl;
+  }
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->sort_source_photons_by_patch();
+  }
+}
+
+void ito_plasma_stepper::sort_bulk_photons_by_cell(){
+  CH_TIME("ito_plasma_stepper::sort_bulk_photons_by_cell()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::sort_bulk_photons_by_cell()" << endl;
+  }
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->sort_bulk_photons_by_cell();
+  }
+}
+
+void ito_plasma_stepper::sort_bulk_photons_by_patch(){
+  CH_TIME("ito_plasma_stepper::sort_bulk_photons_by_patch()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::sort_bulk_photons_by_patch()" << endl;
+  }
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->sort_bulk_photons_by_patch();
+  }
+}
+
+void ito_plasma_stepper::sort_eb_photons_by_cell(){
+  CH_TIME("ito_plasma_stepper::sort_eb_photons_by_cell()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::sort_eb_photons_by_cell()" << endl;
+  }
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->sort_eb_photons_by_cell();
+  }
+}
+
+void ito_plasma_stepper::sort_eb_photons_by_patch(){
+  CH_TIME("ito_plasma_stepper::sort_eb_photons_by_patch()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::sort_eb_photons_by_patch()" << endl;
+  }
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->sort_eb_photons_by_patch();
+  }
+}
+
+void ito_plasma_stepper::sort_domain_photons_by_cell(){
+  CH_TIME("ito_plasma_stepper::sort_domain_photons_by_cell()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::sort_domain_photons_by_cell()" << endl;
+  }
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->sort_domain_photons_by_cell();
+  }
+}
+
+void ito_plasma_stepper::sort_domain_photons_by_patch(){
+  CH_TIME("ito_plasma_stepper::sort_domain_photons_by_patch()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::sort_domain_photons_by_patch()" << endl;
+  }
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->sort_domain_photons_by_patch();
+  }
+
 }

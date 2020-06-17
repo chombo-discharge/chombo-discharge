@@ -454,6 +454,96 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
   this->deposit_photons();
 }
 
+void mc_photo::sort_photons_by_cell(){
+  CH_TIME("mc_photo::sort_photons_by_cell()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sort_photons_by_cell()" << endl;
+  }
+
+  m_photons.sort_particles_by_cell();
+}
+
+void mc_photo::sort_photons_by_patch(){
+  CH_TIME("mc_photo::sort_photons_by_patch()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sort_photons_by_patch()" << endl;
+  }
+
+  m_photons.sort_particles_by_patch();
+}
+
+void mc_photo::sort_bulk_photons_by_cell(){
+  CH_TIME("mc_photo::sort_bulk_photons_by_cell()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sort_bulk_photons_by_cell()" << endl;
+  }
+
+  m_bulk_photons.sort_particles_by_cell();
+}
+
+void mc_photo::sort_bulk_photons_by_patch(){
+  CH_TIME("mc_photo::sort_bulk_photons_by_patch()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sort_bulk_photons_by_patch()" << endl;
+  }
+
+  m_bulk_photons.sort_particles_by_patch();
+}
+
+void mc_photo::sort_source_photons_by_cell(){
+  CH_TIME("mc_photo::sort_source_photons_by_cell()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sort_source_photons_by_cell()" << endl;
+  }
+
+  m_source_photons.sort_particles_by_cell();
+}
+
+void mc_photo::sort_source_photons_by_patch(){
+  CH_TIME("mc_photo::sort_source_photons_by_patch()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sort_source_photons_by_patch()" << endl;
+  }
+
+  m_source_photons.sort_particles_by_patch();
+}
+
+void mc_photo::sort_domain_photons_by_cell(){
+  CH_TIME("mc_photo::sort_domain_photons_by_cell()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sort_domain_photons_by_cell()" << endl;
+  }
+
+  m_domain_photons.sort_particles_by_cell();
+}
+
+void mc_photo::sort_domain_photons_by_patch(){
+  CH_TIME("mc_photo::sort_domain_photons_by_patch()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sort_domain_photons_by_patch()" << endl;
+  }
+
+  m_domain_photons.sort_particles_by_patch();
+}
+
+void mc_photo::sort_eb_photons_by_cell(){
+  CH_TIME("mc_photo::sort_eb_photons_by_cell()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sort_eb_photons_by_cell()" << endl;
+  }
+
+  m_eb_photons.sort_particles_by_cell();
+}
+
+void mc_photo::sort_eb_photons_by_patch(){
+  CH_TIME("mc_photo::sort_eb_photons_by_patch()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sort_eb_photons_by_patch()" << endl;
+  }
+
+  m_eb_photons.sort_particles_by_patch();
+}
+
 void mc_photo::register_operators(){
   CH_TIME("mc_photo::register_operators");
   if(m_verbosity > 5){

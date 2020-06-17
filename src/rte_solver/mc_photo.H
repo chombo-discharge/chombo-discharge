@@ -101,6 +101,56 @@ public:
 			       const DepositionType::Which& a_deposition);
 
   /*!
+    @brief Sort the m_photons container by cell
+  */
+  virtual void sort_photons_by_cell();
+
+  /*!
+    @brief Sort the m_photons container by cell
+  */
+  virtual void sort_photons_by_patch();
+
+  /*!
+    @brief Sort the m_bulk_photons container by cell
+  */
+  virtual void sort_bulk_photons_by_cell();
+
+  /*!
+    @brief Sort the m_bulk_photons container by cell
+  */
+  virtual void sort_bulk_photons_by_patch();
+
+  /*!
+    @brief Sort the m_source_photons container by cell
+  */
+  virtual void sort_source_photons_by_cell();
+
+  /*!
+    @brief Sort the m_source_photons container by cell
+  */
+  virtual void sort_source_photons_by_patch();
+
+  /*!
+    @brief Sort the m_source_photons container by cell
+  */
+  virtual void sort_eb_photons_by_cell();
+
+  /*!
+    @brief Sort the m_source_photons container by cell
+  */
+  virtual void sort_eb_photons_by_patch();
+
+  /*!
+    @brief Sort the m_source_photons container by cell
+  */
+  virtual void sort_domain_photons_by_cell();
+
+  /*!
+    @brief Sort the m_source_photons container by cell
+  */
+  virtual void sort_domain_photons_by_patch();
+
+  /*!
     Parse options
   */
   virtual void parse_options();

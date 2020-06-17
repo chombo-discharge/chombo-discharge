@@ -131,38 +131,51 @@ namespace physics {
 
       // Routines for chemistry advances
       void advance_reaction_network(const Real a_dt);
+
       void advance_reaction_network(Vector<particle_container<ito_particle>* >& a_particles,
 				    Vector<particle_container<photon>* >&       a_photons,
 				    Vector<particle_container<photon>* >&       a_newPhotons,
 				    const EBAMRCellData&                        a_E,
 				    const Real                                  a_dt);
-      void advance_reaction_network(Vector<ParticleData<ito_particle>* >& a_particles,
-				    Vector<ParticleData<photon>* >&       a_photons,
-				    Vector<ParticleData<photon>* >&       a_newPhotons,
-				    const LevelData<EBCellFAB>&           a_E,
-				    const int                             a_lvl,
-				    const Real                            a_dt);
-      void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-				    Vector<List<photon>* >&       a_photons,
-				    Vector<List<photon>* >&       a_newPhotons,
-				    const EBCellFAB&              a_E,
-				    const int                     a_lvl,
-				    const DataIndex               a_dit,
-				    const Box                     a_box,
-				    const Real                    a_dx,
-				    const Real                    a_dt);
-      void advance_reaction_network(std::vector<BinFab<ito_particle> >& a_particles,
-				    std::vector<BinFab<photon> >&       a_photons,
-				    std::vector<BinFab<photon> >&       a_newPhotons,
-				    const EBCellFAB&                    a_E,
-				    const int                           a_lvl,
-				    const DataIndex                     a_dit,
-				    const Box                           a_box,
-				    const Real                          a_dx,
-				    const Real                          a_dt);
+      void advance_reaction_network(Vector<AMRCellParticles<ito_particle>* >& a_particles,
+				    Vector<AMRCellParticles<photon>* >&       a_photons,
+				    Vector<AMRCellParticles<photon>* >&       a_newPhotons,
+				    const EBAMRCellData&                      a_E,
+				    const Real                                a_dt);
+      void advance_reaction_network(Vector<LayoutData<BinFab<ito_particle> >* >& a_particles,
+				    Vector<LayoutData<BinFab<photon> >* >&       a_photons,
+				    Vector<LayoutData<BinFab<photon> >* >&       a_newPhotons,
+				    const LevelData<EBCellFAB>&                  a_E,
+				    const int                                    a_lvl,
+				    const Real                                   a_dt);
+
+#if 0
+      void advance_reaction_network(Vector<BinFab<ito_particle>* >& a_particles,
+				    Vector<BinFab<photon>* >&       a_photons,
+				    Vector<BinFab<photon>* >&       a_newPhotons,
+				    const EBCellFAB&                a_E,
+				    const int                       a_lvl,
+				    const DataIndex                 a_dit,
+				    const Box                       a_box,
+				    const Real                      a_dx,
+				    const Real                      a_dt);
+#endif
 
       // Routines for advancing photons
       void advance_photons(const Real a_dt);
+
+      // Routines for sorting particles. These routines are here because rte_layout is general for rte_solver, and I'm too
+      // lazy to write an mc_photo_layout. So here you go. 
+      void sort_photons_by_cell();
+      void sort_photons_by_patch();
+      void sort_source_photons_by_cell();
+      void sort_source_photons_by_patch();
+      void sort_bulk_photons_by_cell();
+      void sort_bulk_photons_by_patch();
+      void sort_eb_photons_by_cell();
+      void sort_eb_photons_by_patch();
+      void sort_domain_photons_by_cell();
+      void sort_domain_photons_by_patch();
 
     protected:
 

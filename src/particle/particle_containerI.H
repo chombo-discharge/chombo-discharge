@@ -132,6 +132,30 @@ const ParticleData<P>& particle_container<P>::operator[](const int a_level) cons
 }
 
 template <class P>
+AMRCellParticles<P>& particle_container<P>::get_cell_particles(){
+  if(!m_cell_sorted) MayDay::Abort("particle_container<P>::get_cell_particles()- particles are not sorted by cell!");
+  return m_cell_particles;
+}
+
+template <class P>
+const AMRCellParticles<P>& particle_container<P>::get_cell_particles() const{
+  if(!m_cell_sorted) MayDay::Abort("particle_container<P>::get_cell_particles()- particles are not sorted by cell!");
+  return m_cell_particles;
+}
+  
+template <class P>
+LayoutData<BinFab<P> >& particle_container<P>::get_cell_particles(const int a_level){
+  if(!m_cell_sorted) MayDay::Abort("particle_container<P>::get_cell_particles(level)- particles are not sorted by cell!");
+  return *m_cell_particles[a_level];
+}
+
+template <class P>
+const LayoutData<BinFab<P> >& particle_container<P>::get_cell_particles(const int a_level) const{
+  if(!m_cell_sorted) MayDay::Abort("particle_container<P>::get_cell_particles(level)- particles are not sorted by cell!");
+  return *m_cell_particles[a_level];
+}
+
+template <class P>
 void particle_container<P>::get_cell_particles(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit) const {
   CH_assert(m_is_defined);
   if(!m_cell_sorted) MayDay::Abort("particle_container<P>::get_cell_particles - particles are not sorted by cell!");
