@@ -1663,18 +1663,17 @@ void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const 
   // These are the particles on this patch
   ListBox<ito_particle>& boxParticles = m_particles[a_level][a_dit];
 
-  if(boxParticles.numItems() > a_particlesPerCell){
+  if(true){//boxParticles.numItems() > a_particlesPerCell){
 
     BinFab<ito_particle> cellParticles;
     m_particles.get_cell_particles(cellParticles, a_level, a_dit);
-
     const Box box = m_amr->get_grids()[a_level].get(a_dit);
     for (BoxIterator bit(box); bit.ok(); ++bit){
       const IntVect iv = bit();
       List<ito_particle>& particles = cellParticles(iv, 0);
 
       if(particles.length() > 0){
-#if 0 // Original code
+#if 1 // Original code
 	std::vector<point_mass> pointMasses;
 	Real mass = 0.0;
 	for (ListIterator<ito_particle> lit(particles); lit; ++lit){

@@ -40,16 +40,19 @@ int main(int argc, char* argv[]){
 
   // Create initial particles
   std::vector<point_mass> inputParticles(0);
+  Real Mass = 0.0;
   for (int i = 0; i < num_points; i++){
     const RealVect pos = RealVect(D_DECL(ranFloat(rng), ranFloat(rng), ranFloat(rng)));
     const Real mass    = 1.0*ranInt(rng);
 
     inputParticles.push_back(point_mass(pos, mass));
+    Mass += mass;
   }
 
 
   // Do particle merging/splitting
-  bvh_tree<point_mass> tree(inputParticles);
+  const Real t0 = MPI_Wtime();
+  bvh_tree<point_mass> tree(inputParticles, Mass);
   tree.build_tree(ppc);
 
   // Create output particles
@@ -60,6 +63,8 @@ int main(int argc, char* argv[]){
 
     outputParticles.push_back(newParticle);
   }
+  const Real t1 = MPI_Wtime();
+  std::cout << "time per input particle = " << (t1-t0)/num_points << std::endl;
 
   // Write input and output particles
   ofstream inputPar, outputPar;

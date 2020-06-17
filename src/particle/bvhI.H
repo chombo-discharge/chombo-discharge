@@ -122,11 +122,11 @@ void bvh_node<T>::split(const int a_dir){
   std::sort(std::begin(m_data), std::end(m_data), [a_dir](const T& p1, const T& p2){return p1[a_dir] < p2[a_dir];});
 
   // 2. Make leaves and get hooks for date
-  auto left = std::make_shared<bvh_node<T> >();
-  auto righ = std::make_shared<bvh_node<T> >();
+  m_left  = std::make_shared<bvh_node<T> >();
+  m_right = std::make_shared<bvh_node<T> >();
 
-  std::vector<T>& leftData = left->get_data();
-  std::vector<T>& rightData = righ->get_data();
+  std::vector<T>& leftData  = m_left->get_data();
+  std::vector<T>& rightData = m_right->get_data();
 
   leftData.resize(0);
   rightData.resize(0);
@@ -219,24 +219,22 @@ void bvh_node<T>::split(const int a_dir){
   }
 #endif
 
-  left->set_mass(mass_left);
-  righ->set_mass(mass_right);
+  m_left->set_mass(mass_left);
+  m_right->set_mass(mass_right);
 
 #if 0 // This breaks. Don't know why. 
   left->set_parent(this->shared_from_this());
   righ->set_parent(this->shared_from_this());
 #endif
 
-  left->set_leaf(true);
-  righ->set_leaf(true);
 
-  // This is no longer a leaf node. Set the pointers and clear data. 
-  this->set_left(left);
-  this->set_right(righ);
+  // Update who is leaf
+  m_left->set_leaf(true);
+  m_right->set_leaf(true);
   this->set_leaf(false);
   
-  m_mass = 0.;
-  m_data.clear();
+  //  m_mass = 0.;
+  //  m_data.clear();
 }
 
 template <class T>
@@ -342,7 +340,7 @@ void bvh_tree<T>::build_tree(const int a_numLeaves){
 
 #if DEBUG
   auto tf = std::chrono::high_resolution_clock::now();
-  tTotal += duration_cast<duration<double> >(tf-t0);
+  tTotal = duration_cast<duration<double> >(tf-t0);
 
   pout() << "sort time = "   << 100.*tSort.count()/tTotal.count() << "%" << endl
 	 << "split time = "  << 100.*tSplit.count()/tTotal.count() << "%" << endl

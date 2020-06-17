@@ -1432,16 +1432,24 @@ void driver::setup_geometry_only(){
     EBIndexSpace::s_useMemoryLoadBalance = false;
   }
 
+  const Real t0 = MPI_Wtime();
   m_compgeom->build_geometries(m_amr->get_finest_domain(),
 			       m_amr->get_prob_lo(),
 			       m_amr->get_finest_dx(),
 			       m_amr->get_max_ebis_box_size());
+  const Real t1 = MPI_Wtime();
+  if(procID() == 0) std::cout << "geotime = " << t1 - t0 << std::endl;
+
+
+
   if(m_write_ebis){
     this->write_ebis();
   }
   if(m_write_memory){
     this->write_memory_usage();
   }
+
+  return;
 
   this->get_geom_tags();       // Get geometric tags.
 
@@ -1463,7 +1471,9 @@ void driver::setup_geometry_only(){
   }
 
   //  this->write_memory_usage();
-  this->write_geometry();                             // Write geometry only
+  if(m_plot_interval > 0){
+    this->write_geometry();                             // Write geometry only
+  }
 }
 
 void driver::setup_fresh(const int a_init_regrids){
