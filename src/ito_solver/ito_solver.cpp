@@ -1579,13 +1579,30 @@ phase::which_phase ito_solver::get_phase() const{
   return m_phase;
 }
 
+void ito_solver::sort_particles_by_cell(){
+  CH_TIME("ito_solver::sort_particles_by_cell()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sort_particles_by_cell()" << endl;
+  }
+
+  m_particles.sort_particles_by_cell();
+}
+
+void ito_solver::sort_particles_by_patch(){
+  CH_TIME("ito_solver::sort_particles_by_patch()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sort_particles_by_patch()" << endl;
+  }
+
+  m_particles.sort_particles_by_patch();
+}
 
 void ito_solver::make_superparticles(const int a_particlesPerPatch){
   CH_TIME("ito_solver::make_superparticles(int)");
   if(m_verbosity > 5){
     pout() << m_name + "::make_superparticles(int)" << endl;
   }
-
+  
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     this->make_superparticles(a_particlesPerPatch, lvl);
   }
@@ -1659,65 +1676,43 @@ void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const 
   if(m_verbosity > 5){
     pout() << m_name + "::make_superparticlesPerCell(int, level, patch)" << endl;
   }
-  
-  // These are the particles on this patch
-  ListBox<ito_particle>& boxParticles = m_particles[a_level][a_dit];
 
-  if(true){//boxParticles.numItems() > a_particlesPerCell){
+  const int comp = 0;
 
-    BinFab<ito_particle> cellParticles;
-    m_particles.get_cell_particles(cellParticles, a_level, a_dit);
-    const Box box = m_amr->get_grids()[a_level].get(a_dit);
-    for (BoxIterator bit(box); bit.ok(); ++bit){
-      const IntVect iv = bit();
-      List<ito_particle>& particles = cellParticles(iv, 0);
+  // This are the particles in the box we're currently looking at. 
+  BinFab<ito_particle>& cellParticles = m_particles.get_cell_particles(a_level, a_dit);
 
-      if(particles.length() > 0){
-#if 1 // Original code
-	std::vector<point_mass> pointMasses;
-	Real mass = 0.0;
-	for (ListIterator<ito_particle> lit(particles); lit; ++lit){
-	  const ito_particle& p = lit();
-	  pointMasses.push_back(point_mass(p.position(), p.mass()));
-	  mass += p.mass();
-	}
+  const Box box = m_amr->get_grids()[a_level].get(a_dit);
 
-	// 2. Build the BVH tree and get the leaves of the tree
-	bvh_tree<point_mass> tree(pointMasses, mass);
-	tree.build_tree(a_particlesPerCell);
-	const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
+  // Iterate over particles
+  for (BoxIterator bit(box); bit.ok(); ++bit){
+    const IntVect iv = bit();
+    List<ito_particle>& particles = cellParticles(iv, comp);
 
-	// 3. Clear particles in this cell and add new ones.
-	particles.clear();
-	for (int i = 0; i < leaves.size(); i++){
-	  point_mass pointMass(leaves[i]->get_data());
-	  ito_particle p(pointMass.mass(), pointMass.pos());
-	  cellParticles.addItem(p, iv);
-	}
-#else // Basic merging
+    if(particles.length() > 0){
 
-	const RealVect probLo = m_amr->get_prob_lo();
-	const Real dx = m_amr->get_dx()[a_level];
+      // Make particles into point masses
+      std::vector<point_mass> pointMasses;
+      Real mass = 0.0;
+      for (ListIterator<ito_particle> lit(particles); lit; ++lit){
+	const ito_particle& p = lit();
+	pointMasses.push_back(point_mass(p.position(), p.mass()));
+	mass += p.mass();
+      }
 
-	Real mass = 0.0;
-	RealVect pos = probLo + (RealVect(iv) + 0.5*RealVect::Unit)*dx;
-	for (ListIterator<ito_particle> lit(particles); lit; ++lit){
-	  mass += lit().mass();
-	}
-	mass = mass/a_particlesPerCell;
+      // 2. Build the BVH tree and get the leaves of the tree
+      bvh_tree<point_mass> tree(pointMasses, mass);
+      tree.build_tree(a_particlesPerCell);
+      const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
 
-	particles.clear();
-	ito_particle p(mass, pos);
-	for (int i = 0; i < a_particlesPerCell; i++){
-	  cellParticles.addItem(p, iv);
-	}
-#endif
+      // 3. Clear particles in this cell and add new ones.
+      particles.clear();
+      for (int i = 0; i < leaves.size(); i++){
+	point_mass pointMass(leaves[i]->get_data());
+	ito_particle p(pointMass.mass(), pointMass.pos());
+	particles.append(p);
       }
     }
-
-    // Clear old particles and add new ones.
-    boxParticles.listItems().clear();
-    m_particles.add_particles(cellParticles, a_level, a_dit);
   }
 }
 

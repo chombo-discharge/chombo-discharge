@@ -127,6 +127,20 @@ void ito_layout<T>::set_time(const int a_step, const Real a_time, const Real a_d
 }
 
 template <class T>
+void ito_layout<T>::sort_particles_by_cell(){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->sort_particles_by_cell();
+  }
+}
+
+template <class T>
+void ito_layout<T>::sort_particles_by_patch(){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->sort_particles_by_patch();
+  }
+}
+
+template <class T>
 void ito_layout<T>::make_superparticles(const int a_ppc){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
     iter()->make_superparticles(a_ppc);

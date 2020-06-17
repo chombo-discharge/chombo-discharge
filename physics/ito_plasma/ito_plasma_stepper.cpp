@@ -123,7 +123,9 @@ void ito_plasma_stepper::initial_data(){
   m_rte->initial_data();
   this->initial_sigma();
 
+  m_ito->sort_particles_by_cell();
   m_ito->make_superparticles(m_ppc);
+  m_ito->sort_particles_by_patch();
   
   // Solve Poisson equation and compute the E-field
   this->solve_poisson();

@@ -96,6 +96,9 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   this->solve_poisson();
   t_poisson += MPI_Wtime();
 
+  // Sort the particles per cell
+  m_ito->sort_particles_by_cell();
+
   // Chemistry kernel.
   t_chemistry -= MPI_Wtime();
   this->advance_reaction_network(a_dt);
@@ -107,6 +110,9 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     m_ito->make_superparticles(m_ppc);
   }
   t_super += MPI_Wtime();
+
+  // Sort particles per patch
+  m_ito->sort_particles_by_patch();
 
   // Clear other data holders
   t_clear -= MPI_Wtime();

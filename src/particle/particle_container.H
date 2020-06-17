@@ -17,9 +17,10 @@
 #include <DisjointBoxLayout.H>
 
 template <class P>
-using AMRParticles = Vector<RefCountedPtr<ParticleData<P> > >;
-using AMRPVR       = Vector<RefCountedPtr<ParticleValidRegion> >;
-using EBAMRPPC     = Vector<RefCountedPtr<BaseEBCellFAB<int> > >;
+using AMRParticles     = Vector<RefCountedPtr<ParticleData<P> > >;
+using AMRPVR           = Vector<RefCountedPtr<ParticleValidRegion> >;
+using AMRCellParticles = Vector<RefCountedPtr<LayoutData<BinFab<P> > > >;
+using EBAMRPPC         = Vector<RefCountedPtr<BaseEBCellFAB<int> > >;
 
 /*!
   @brief Templated class for holding particles on an AMR hierarchy with particle remapping
@@ -105,6 +106,16 @@ public:
   const ParticleData<P>& operator[](const int a_level) const;
 
   /*!
+    @brief Get cell particles
+  */
+  BinFab<P>& get_cell_particles(const int a_level, const DataIndex a_dit);
+
+  /*!
+    @brief Get cell particles, const version. 
+  */
+  const BinFab<P>& get_cell_particles(const int a_level, const DataIndex a_dit) const;
+
+  /*!
     @brief Get particles and sort them by cell
   */
   void get_cell_particles(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit) const;
@@ -113,6 +124,16 @@ public:
     @brief Get particles and sort them by cell
   */
   void get_cell_particles_destructive(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit);
+
+  /*!
+    @brief Sort particles by cell
+  */
+  void sort_particles_by_cell();
+
+  /*!
+    @brief Sort particles by cell
+  */
+  void sort_particles_by_patch();
 
   /*!
     @brief Add particles to container
@@ -182,9 +203,11 @@ protected:
   int m_finest_level;
 
   bool m_is_defined;
+  bool m_cell_sorted;
 
   AMRParticles<P> m_particles;
   AMRPVR m_pvr;
+  AMRCellParticles m_cell_particles;
 
   void setup_pvr(const int a_base, const int a_finest_level);
   void setup_particle_data(const int a_base, const int a_finest_level);

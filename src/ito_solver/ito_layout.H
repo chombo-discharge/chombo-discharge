@@ -125,6 +125,16 @@ public:
     @brief Set time
   */
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
+  
+  /*!
+    @brief Sort the m_particles container by cell
+  */
+  virtual void sort_particles_by_cell();
+
+  /*!
+    @brief Sort the m_particles container by cell
+  */
+  virtual void sort_particles_by_patch();
 
   /*!
     @brief Make superparticles

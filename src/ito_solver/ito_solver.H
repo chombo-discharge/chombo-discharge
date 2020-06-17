@@ -283,6 +283,16 @@ public:
     @brief Interpolate velocities
   */
   virtual void interpolate_diffusion(const int a_level, const DataIndex& a_dit);
+
+  /*!
+    @brief Sort the m_particles container by cell
+  */
+  virtual void sort_particles_by_cell();
+
+  /*!
+    @brief Sort the m_particles container by cell
+  */
+  virtual void sort_particles_by_patch();
   
   /*!
     @brief Make superparticles
