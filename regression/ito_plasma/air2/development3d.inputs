@@ -1,17 +1,17 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-air2.potential = 50E3
+air2.potential = 2E3
 air2.basename  = pout
 
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-amr_mesh.lo_corner       = -1E-2 -1E-2 # Low corner of problem domain
-amr_mesh.hi_corner       =  1E-2  1E-2 # High corner of problem domain
+amr_mesh.lo_corner       = -1E-3 -1E-3 -1E-3 # Low corner of problem domain
+amr_mesh.hi_corner       =  1E-3  1E-3  1E-3 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 6           # Maximum amr depth
+amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
+amr_mesh.max_amr_depth   = 4           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -19,8 +19,8 @@ amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 amr_mesh.buffer_size     = 2           # Number of cells between grid levels
 amr_mesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-amr_mesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
-amr_mesh.max_box_size    = 16          # Maximum allowed box size
+amr_mesh.blocking_factor = 8           # Default blocking factor (16 in 3D)
+amr_mesh.max_box_size    = 8           # Maximum allowed box size
 amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
 amr_mesh.ref_rat         = 2 2 2 2 2 2 2 # Refinement ratios
 amr_mesh.num_ghost       = 3           # Number of ghost cells. Default is 3
@@ -39,9 +39,9 @@ driver.verbosity                       = 3             # Engine verbosity
 driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
-driver.plot_interval                   = 1             # Plot interval
+driver.plot_interval                   = 5             # Plot interval
 driver.regrid_interval                 = 5             # Regrid interval
-driver.checkpoint_interval             = 10            # Checkpoint interval
+driver.checkpoint_interval             = 25            # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 1.0           # Stop time
@@ -74,8 +74,10 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 poisson_multifluid_gmg.bc_x_low  = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
 poisson_multifluid_gmg.bc_x_high = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-poisson_multifluid_gmg.bc_y_low  = dirichlet_ground  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-poisson_multifluid_gmg.bc_y_high = dirichlet_live    # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_y_low  = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_y_high = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_z_low  = dirichlet_ground  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_z_high = dirichlet_live    # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
 poisson_multifluid_gmg.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 
 poisson_multifluid_gmg.auto_tune         = false     # Do some auto-tuning
@@ -102,7 +104,7 @@ ito_solver.plt_vars            = phi vel dco   # Currently available are 'phi', 
 ito_solver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
 ito_solver.seed                = 0             # Seed for RNG
 ito_solver.max_diffusion_hop   = 2.0           # Maximum diffusion hop length (in units of dx)
-ito_solver.normal_max          = 3.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
+ito_solver.normal_max          = 2.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ito_solver.superparticles      = cell          # Make super-particles on a per-cell basis. Valid are 'cell' and 'patch'. 
 ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
@@ -167,8 +169,8 @@ mc_photo.deposition         = cic           # 'ngp'  = nearest grid point
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
 geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-geo_coarsener.box1_lo     = -1  500E-6     # Remove irregular cell tags 
-geo_coarsener.box1_hi     =  1  1        # between these two corners
+geo_coarsener.box1_lo     = -1  -1 50E-6     # Remove irregular cell tags 
+geo_coarsener.box1_hi     =  1  1  1      # between these two corners
 geo_coarsener.box1_lvl    = 0            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 
@@ -179,11 +181,11 @@ rod_sphere.eps0                      = 1                # Background permittivit
 rod_sphere.turn_off_electrode        = false            # Turn on/off electrode
 rod_sphere.turn_off_dielectric       = true             # Turn on/off dielectric
 rod_sphere.electrode_live            = true             # Live electrode or not
-rod_sphere.electrode_radius          = 500.E-6          # Electrode inner radius
-rod_sphere.electrode_center1         = 0  0             # Center 1
-rod_sphere.electrode_center2         = 0  1             # Center 2. 
+rod_sphere.electrode_radius          = 50.E-6          # Electrode inner radius
+rod_sphere.electrode_center1         = 0 0 0             # Center 1
+rod_sphere.electrode_center2         = 0 0 1             # Center 2. 
 rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
-rod_sphere.dielectric_center         = 0 -5E-3          # Dielectric center
+rod_sphere.dielectric_center         = 0 0 -5E-3          # Dielectric center
 rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 
 
@@ -191,22 +193,22 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1           # Verbosity
-ito_plasma_godunov.max_cells_hop  = 1.0          # Maximum cells to move in one time step
-ito_plasma_godunov.ppc            = 32           # Superparticle number of cells
-ito_plasma_godunov.merge_interval = 2            # How often to make superparticles
+ito_plasma_godunov.max_cells_hop  = 0.5          # Maximum cells to move in one time step
+ito_plasma_godunov.ppc            = 16           # Superparticle number of cells
+ito_plasma_godunov.merge_interval = 1           # How often to make superparticles
 
 # ====================================================================================================
 # ITO_PLASMA_AIR2 CLASS OPTIONS
 # ====================================================================================================
-ito_plasma_air2.blob_radius    = 250E-6                       # Blob radius
-ito_plasma_air2.blob_center    = 0 0                          # Blob center
-ito_plasma_air2.seed           = 0                            # RNG seed
-ito_plasma_air2.num_particles  = 1000000                      # Number of initial particles
+ito_plasma_air2.blob_radius    = 150E-6                       # Blob radius
+ito_plasma_air2.blob_center    = 0 0 0                       # Blob center
+ito_plasma_air2.seed           = 0                          # RNG seed
+ito_plasma_air2.num_particles  = 100000                          # Number of initial particles
 
 # Reaction stuff
 ito_plasma_air2.tau_switch     = -1                           # Switch from SSA to tau when reaching this many particles
-ito_plasma_air2.poisson_switch = 100                          # When to approximate Poisson by normal distribution
-ito_plasma_air2.react_ppc      = 32                          # Maximum number of particles to produce in reaction step	
+ito_plasma_air2.poisson_switch = 50                          # When to approximate Poisson by normal distribution
+ito_plasma_air2.react_ppc      = 16                          # Maximum number of particles to produce in reaction step	
 
 # ----------------------------------------------------------------------------------------------------
 # SEE parameters

@@ -72,6 +72,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     
 
   // Transport kernel for particles and photons.
+  MPI_Barrier(Chombo_MPI::comm);
   t_advect -= MPI_Wtime();
   this->advect_particles(a_dt);
   t_advect += MPI_Wtime();
@@ -86,59 +87,78 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   t_remap += MPI_Wtime();
   t_deposit -= MPI_Wtime();
   m_ito->deposit_particles();
+  MPI_Barrier(Chombo_MPI::comm);
   t_deposit += MPI_Wtime();
 
+
   // Move photons
+  MPI_Barrier(Chombo_MPI::comm);
   t_photons -= MPI_Wtime();
   this->advance_photons(a_dt);
+  MPI_Barrier(Chombo_MPI::comm);
   t_photons += MPI_Wtime();
 
   // Compute the electric field, recompute velocities and diffusion coefficients
+  MPI_Barrier(Chombo_MPI::comm);
   t_poisson -= MPI_Wtime();
   this->solve_poisson();
+  MPI_Barrier(Chombo_MPI::comm);
   t_poisson += MPI_Wtime();
 
   // Sort the particles per cell
+  MPI_Barrier(Chombo_MPI::comm);
   t_cellBin -= MPI_Wtime();
   m_ito->sort_particles_by_cell();
   this->sort_bulk_photons_by_cell();
   this->sort_source_photons_by_cell();
+  MPI_Barrier(Chombo_MPI::comm);
   t_cellBin += MPI_Wtime();
 
   // Chemistry kernel.
+  MPI_Barrier(Chombo_MPI::comm);
   t_chemistry -= MPI_Wtime();
   this->advance_reaction_network(a_dt);
+  MPI_Barrier(Chombo_MPI::comm);
   t_chemistry += MPI_Wtime();
 
 
   // Make superparticles
+  MPI_Barrier(Chombo_MPI::comm);
   t_super -= MPI_Wtime();
   if((m_step+1) % m_merge_interval == 0 && m_merge_interval > 0){
     m_ito->make_superparticles(m_ppc);
   }
+  MPI_Barrier(Chombo_MPI::comm);
   t_super += MPI_Wtime();
 
   // Sort particles per patch
+  MPI_Barrier(Chombo_MPI::comm);
   t_patchBin -= MPI_Wtime();
   m_ito->sort_particles_by_patch();
   this->sort_bulk_photons_by_patch();
   this->sort_source_photons_by_patch();
+  MPI_Barrier(Chombo_MPI::comm);
   t_patchBin += MPI_Wtime();
 
   // Clear other data holders for now. BC comes later
+  MPI_Barrier(Chombo_MPI::comm);
   t_clear -= MPI_Wtime();
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->clear(solver_it()->get_eb_particles());
     solver_it()->clear(solver_it()->get_domain_particles());
   }
+  MPI_Barrier(Chombo_MPI::comm);
   t_clear += MPI_Wtime();
 
   // Prepare next step
+  MPI_Barrier(Chombo_MPI::comm);
   t_velo -= MPI_Wtime();
   this->compute_ito_velocities();
+  MPI_Barrier(Chombo_MPI::comm);
   t_velo += MPI_Wtime();
   t_diffu -= MPI_Wtime();
   this->compute_ito_diffusion();
+  MPI_Barrier(Chombo_MPI::comm);
   t_diffu += MPI_Wtime();
 
   t_total += MPI_Wtime();

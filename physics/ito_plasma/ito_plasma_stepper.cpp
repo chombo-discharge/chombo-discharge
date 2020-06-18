@@ -183,7 +183,7 @@ void ito_plasma_stepper::post_checkpoint_setup(){
   this->solve_poisson();
   this->allocate_internals();
 
-  m_ito->make_superparticles(m_ppc);
+  //  m_ito->make_superparticles(m_ppc);
   
   this->compute_ito_velocities();
   this->compute_ito_diffusion();

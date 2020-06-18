@@ -690,6 +690,11 @@ protected:
   void coarse_fine_redistribution(EBAMRCellData& a_state);
 
   /*!
+    @brief Superparticle merging with BVH trees
+  */
+  void bvh_merge(List<ito_particle>& a_particles, const int a_particlesPerCell);
+  
+  /*!
     @brief Sign function
   */
   inline Real sign(const Real& a) const;

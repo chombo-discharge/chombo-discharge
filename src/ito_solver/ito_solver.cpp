@@ -13,6 +13,7 @@
 #include "ito_layout.H"
 #include "point_mass.H"
 #include "bvh.H"
+#include "random_merge.H"
 #include "particle_ops.H"
 
 #include <EBArith.H>
@@ -1678,51 +1679,44 @@ void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const 
   }
 
   const int comp = 0;
+  const Box box  = m_amr->get_grids()[a_level].get(a_dit);
 
   // This are the particles in the box we're currently looking at. 
   BinFab<ito_particle>& cellParticles = m_particles.get_cell_particles(a_level, a_dit);
 
-  const Box box = m_amr->get_grids()[a_level].get(a_dit);
-
   // Iterate over particles
   for (BoxIterator bit(box); bit.ok(); ++bit){
-    const IntVect iv = bit();
-    List<ito_particle>& particles = cellParticles(iv, comp);
+    List<ito_particle>& particles = cellParticles(bit(), comp);
 
     if(particles.length() > 0){
-
-      // Make particles into point masses
-      std::vector<point_mass> pointMasses;
-      Real mass = 0.0;
-      for (ListIterator<ito_particle> lit(particles); lit; ++lit){
-	const ito_particle& p = lit();
-	pointMasses.push_back(point_mass(p.position(), p.mass()));
-	mass += p.mass();
-      }
-
-      // 2. Build the BVH tree and get the leaves of the tree
-      bvh_tree<point_mass> tree(pointMasses, mass);
-      tree.build_tree(a_particlesPerCell);
-      const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
-
-      // 3. Clear particles in this cell and add new ones.
-      particles.clear();
-      Real massAfter = 0.0;
-      for (int i = 0; i < leaves.size(); i++){
-	point_mass pointMass(leaves[i]->get_data());
-	ito_particle p(pointMass.mass(), pointMass.pos());
-	massAfter += leaves[i]->mass();
-	cellParticles.addItem(p,iv);
-      }
-
-#if 0 // Debug
-      const Real massDiff = massAfter - mass;
-      if(Abs(massDiff) > 0.0){
-	std::cout << mass - massAfter << std::endl;
-	MayDay::Abort("ito_particle::make_superparticles - logic bust");
-      }
-#endif
+      this->bvh_merge(particles, a_particlesPerCell);
     }
+  }
+}
+
+void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particlesPerCell){
+  CH_TIME("ito_solver::bvh_merge");
+  
+  // 1. Make particles into point masses
+  std::vector<point_mass> pointMasses;
+  Real mass = 0.0;
+  for (ListIterator<ito_particle> lit(a_particles); lit; ++lit){
+    const ito_particle& p = lit();
+    pointMasses.push_back(point_mass(p.position(), p.mass()));
+    mass += p.mass();
+  }
+
+  // 2. Build the BVH tree and get the leaves of the tree
+  bvh_tree<point_mass> tree(pointMasses, mass);
+  tree.build_tree(a_particlesPerCell);
+  const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
+
+  // 3. Clear particles in this cell and add new ones.
+  a_particles.clear();
+  for (int i = 0; i < leaves.size(); i++){
+    point_mass pointMass(leaves[i]->get_data());
+    ito_particle p(pointMass.mass(), pointMass.pos());
+    a_particles.append(p);
   }
 }
 
