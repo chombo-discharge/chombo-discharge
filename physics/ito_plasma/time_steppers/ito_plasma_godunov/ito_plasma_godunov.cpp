@@ -90,6 +90,13 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   t_deposit += MPI_Wtime();
 
+  // Remove particles that leaked into EBs
+#if 1 // Write this in a better format, please!
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->remove_eb_particles();
+  }
+#endif
+
 
   // Move photons
   MPI_Barrier(Chombo_MPI::comm);
@@ -120,7 +127,6 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   this->advance_reaction_network(a_dt);
   MPI_Barrier(Chombo_MPI::comm);
   t_chemistry += MPI_Wtime();
-
 
   // Make superparticles
   MPI_Barrier(Chombo_MPI::comm);

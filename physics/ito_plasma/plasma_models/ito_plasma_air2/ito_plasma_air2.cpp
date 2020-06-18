@@ -237,38 +237,49 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 
   const Real E       = a_E.vectorLength();
   const Real alpha   = this->compute_alpha(a_E);
+  const Real eta     = this->compute_eta(a_E);
   const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
   const Real xfactor = excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
   
   const Real ionizationProp = alpha*velo*num_electrons;
+  const Real recombProp     = eta*velo*num_electrons;
   const Real photoexcProp   = alpha*velo*num_electrons*xfactor;
 
   const int num_ionizations = this->poisson_reaction(ionizationProp, a_dt);
+  const int num_recomb      = this->poisson_reaction(recombProp, a_dt);
   const int num_photoexc    = this->poisson_reaction(photoexcProp, a_dt);
 
   const int num_comp_particles = num_ionizations/m_ppc;   // Whole stuff
   const int remainder          = num_ionizations % m_ppc; // Rest of the weight goes to last particle
 
 
-  // Impact ionization
+  // New particles
   for (int i = 0; i < m_ppc; i++){
     const RealVect p = this->random_position(a_pos, a_dx);
     a_particles[m_electron_idx]->add(ito_particle(1.0*num_comp_particles, p));
-    a_particles[m_positive_idx]->add(ito_particle(1.0*num_ionizations, p));
+    a_particles[m_positive_idx]->add(ito_particle(1.0*num_comp_particles, p));
   }
   const RealVect p = this->random_position(a_pos, a_dx);
   a_particles[m_electron_idx]->add(ito_particle(1.0*remainder, p));
   a_particles[m_positive_idx]->add(ito_particle(1.0*remainder, p));
 
-#if 1 // Photons or no photons. 
   // Photogeneration
   a_newPhotons[m_photonZ_idx]->clear();
-  for (int i = 0; i < num_photoexc; i++){
-    const RealVect p = this->random_position(a_pos, a_dx);
-    const RealVect v = units::s_c0*random_direction();
+#if CH_SPACEDIM==2
+  //  for (int i = 0; i < num_photoexc; i++){
+    const RealVect P = this->random_position(a_pos, a_dx);
+    const RealVect V = units::s_c0*random_direction();
 
-    a_newPhotons[m_photonZ_idx]->add(photon(a_pos, v, m_rte_species[m_photonZ_idx]->get_kappa(p), 1.0));
-  }
+    a_newPhotons[m_photonZ_idx]->add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), num_photoexc));
+    //  }
+#else
+    for (int i = 0; i < num_photoexc; i++){
+      const RealVect P = this->random_position(a_pos, a_dx);
+      const RealVect V = units::s_c0*random_direction();
+
+      a_newPhotons[m_photonZ_idx]->add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), 1.0));
+    }
+#endif
 
   // Photoionization
   for (ListIterator<photon> lit(*a_photons[m_photonZ_idx]); lit.ok(); ++lit){
@@ -278,7 +289,6 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
     a_particles[m_electron_idx]->add(ito_particle(1.0, pos));
     a_particles[m_positive_idx]->add(ito_particle(1.0, pos));
   }
-#endif
 }
 
 void ito_plasma_air2::advance_reaction_network_ssa(Vector<List<ito_particle>* >& a_particles,
