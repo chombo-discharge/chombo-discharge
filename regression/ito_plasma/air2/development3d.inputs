@@ -169,7 +169,7 @@ mc_photo.deposition         = cic           # 'ngp'  = nearest grid point
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
 geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-geo_coarsener.box1_lo     = -1  -1 50E-6     # Remove irregular cell tags 
+geo_coarsener.box1_lo     = -1  -1 100E-6     # Remove irregular cell tags 
 geo_coarsener.box1_hi     =  1  1  1      # between these two corners
 geo_coarsener.box1_lvl    = 0            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
@@ -181,7 +181,7 @@ rod_sphere.eps0                      = 1                # Background permittivit
 rod_sphere.turn_off_electrode        = false            # Turn on/off electrode
 rod_sphere.turn_off_dielectric       = true             # Turn on/off dielectric
 rod_sphere.electrode_live            = true             # Live electrode or not
-rod_sphere.electrode_radius          = 50.E-6          # Electrode inner radius
+rod_sphere.electrode_radius          = 100.E-6          # Electrode inner radius
 rod_sphere.electrode_center1         = 0 0 0             # Center 1
 rod_sphere.electrode_center2         = 0 0 1             # Center 2. 
 rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
@@ -193,7 +193,7 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1           # Verbosity
-ito_plasma_godunov.max_cells_hop  = 0.5          # Maximum cells to move in one time step
+ito_plasma_godunov.max_cells_hop  = 2.0          # Maximum cells to move in one time step
 ito_plasma_godunov.ppc            = 16           # Superparticle number of cells
 ito_plasma_godunov.merge_interval = 1           # How often to make superparticles
 

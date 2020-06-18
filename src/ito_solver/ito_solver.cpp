@@ -13,7 +13,6 @@
 #include "ito_layout.H"
 #include "point_mass.H"
 #include "bvh.H"
-#include "random_merge.H"
 #include "particle_ops.H"
 
 #include <EBArith.H>
