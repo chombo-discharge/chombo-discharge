@@ -72,6 +72,12 @@ int main(int argc, char* argv[]){
   inputPar.open ("input_particles.dat");
   outputPar.open ("output_particles.dat");
 
+#if CH_SPACEDIM==2
+    inputPar << "x" << "\t" << "y" << "\t" << "color" << "\n";
+#else
+    inputPar << "x" << "\t" << "y" << "\t" << "z" << "\t" << "color" << "\n";
+#endif
+
   for (const auto& p : inputParticles){
     const Real m        = p.mass();
     const RealVect& pos = p.pos();
@@ -82,6 +88,11 @@ int main(int argc, char* argv[]){
 #endif
   }
 
+#if CH_SPACEDIM==2
+  outputPar << "x" << "\t" << "y" << "\t" << "color" << "\n";
+#else
+  outputPar << "x" << "\t" << "y" << "\t" << "z" << "\t" << "color" << "\n";
+#endif
   for (const auto& p : outputParticles){
     const Real m        = p.mass();
     const RealVect& pos = p.pos();

@@ -1,17 +1,17 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-air2.potential = 1E3
+air2.potential = 3E3
 air2.basename  = pout
 
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-amr_mesh.lo_corner       = -500E-6 -500E-6 -500E-6 # Low corner of problem domain
-amr_mesh.hi_corner       =  0.5E-3  0.5E-3  0.5E-3 # High corner of problem domain
+amr_mesh.lo_corner       = -1E-3 -1E-3 -1E-3 # Low corner of problem domain
+amr_mesh.hi_corner       =  1E-3  1E-3  1E-3 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 3           # Maximum amr depth
+amr_mesh.max_amr_depth   = 4           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -40,12 +40,12 @@ driver.geometry_generation             = plasmac       # Grid generation method,
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
 driver.plot_interval                   = 5             # Plot interval
-driver.regrid_interval                 = -1             # Regrid interval
+driver.regrid_interval                 = 5             # Regrid interval
 driver.checkpoint_interval             = 25            # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 1.0           # Stop time
-driver.max_steps                       = 5             # Maximum number of steps
+driver.max_steps                       = 250             # Maximum number of steps
 driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
 driver.write_memory                    = false         # Write MPI memory report 
@@ -193,9 +193,9 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1           # Verbosity
-ito_plasma_godunov.max_cells_hop  = 0.5          # Maximum cells to move in one time step
-ito_plasma_godunov.ppc            = 64           # Superparticle number of cells
-ito_plasma_godunov.merge_interval = 2           # How often to make superparticles
+ito_plasma_godunov.max_cells_hop  = 2.0          # Maximum cells to move in one time step
+ito_plasma_godunov.ppc            = 16           # Superparticle number of cells
+ito_plasma_godunov.merge_interval = 1           # How often to make superparticles
 
 # ====================================================================================================
 # ITO_PLASMA_AIR2 CLASS OPTIONS
@@ -208,7 +208,7 @@ ito_plasma_air2.num_particles  = 1000000                          # Number of in
 # Reaction stuff
 ito_plasma_air2.tau_switch     = -1                           # Switch from SSA to tau when reaching this many particles
 ito_plasma_air2.poisson_switch = 50                          # When to approximate Poisson by normal distribution
-ito_plasma_air2.react_ppc      = 32                          # Maximum number of particles to produce in reaction step	
+ito_plasma_air2.react_ppc      = 16                          # Maximum number of particles to produce in reaction step	
 
 # ----------------------------------------------------------------------------------------------------
 # SEE parameters
@@ -241,6 +241,6 @@ ito_plasma_streamer_tagger.buffer            = 0            # Grow tagged cells
 
 ito_plasma_streamer_tagger.refine_curvature  = 10.0         # Curvature refinement
 ito_plasma_streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	
-ito_plasma_streamer_tagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
+ito_plasma_streamer_tagger.refine_alpha      = 0.5          # Set alpha refinement. Lower  => More mesh
 ito_plasma_streamer_tagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
 ito_plasma_streamer_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth
