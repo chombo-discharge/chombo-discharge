@@ -136,12 +136,6 @@ void bvh_node<T>::split(const int a_dir){
   Real mass_left  = 0.0;
   Real mass_right = m_mass - m_data[0].mass();
 
-#if DEBUG
-  for (int i = 0; i < m_data.size(); i++){
-    if(m_data[i].mass() != m_data[i].mass()) MayDay::Abort("something is wrong with input data");
-  }
-#endif
-
   // Left particles, keep track of total mass. 
   for (int i = 1; i < m_data.size(); i++){
     const Real m1 = m_data[i-1].mass();
@@ -164,12 +158,6 @@ void bvh_node<T>::split(const int a_dir){
     mass_right += m_data[i].mass();
   }
 
-#if DEBUG
-  if(mass_left > mass_right) MayDay::Abort("bvh_node<T>::split() - masses are wrong");
-  if(splitIndex >= m_data.size())MayDay::Abort("bvh_node<T>::split() - index is wrong");
-  if(mass_right != mass_right) MayDay::Abort("bvh_node<T>::split() - right mass is wrong");
-#endif
-
 
   // If we can split up the median point into several ones, we do it. This would be the case if the median point
   // is a superparticle; in this case we divide the weights as best we can and then assign them to the left/right halves
@@ -184,18 +172,17 @@ void bvh_node<T>::split(const int a_dir){
       leftData.emplace_back(T(p, mass));
     }
     else { // Distribute mass as best we can
-
       Real massLeft  = massDiff;
       Real massRight = 0.0;
       Real massRem   = mass - massDiff;
 
-      if(massRem > 1E-6){
-	const int N  = round(massRem*(1.0 + 1.E-6));
+      const int N  = round(massRem*(1.0 + 1.E-6));
+      if(N > 0){ 
 	const int NR = N/2;
 	const int NL = N - NR;
 
-	massLeft  += (mass/N)*NL;
-	massRight += (mass/N)*NR;
+	massLeft  += (massRem/N)*NL;
+	massRight += (massRem/N)*NR;
       }
 
       if(massLeft > 0.0){
@@ -207,31 +194,6 @@ void bvh_node<T>::split(const int a_dir){
 	rightData.emplace_back(T(p, massRight));
 	mass_right += massRight;
       }
-
-#if DEBUG
-      if(massRem < 0.0) MayDay::Abort("something is wrong with massDiff");
-      if(massDiff < 0.0) MayDay::Abort("something is wrong with massDiff");
-
-      if(mass < 0.0){
-	MayDay::Abort("got negative mass 2");
-      }
-      if(NL < 0.0){
-	std::cout << mass << std::endl;
-	std::cout << mass_left << std::endl;
-	std::cout << mass_right << std::endl;
-	std::cout << massDiff << std::endl;
-	std::cout << mass << "\t" << N << "\t" << NR << "\t" << NL << "\t" << m_data.size() << "\t idx = " << splitIndex << std::endl;
-	MayDay::Abort("got negative NL");
-      }
-      if(massLeft < 0.0){
-	std::cout << "massLeft = " << massLeft << std::endl;
-	MayDay::Abort("stop left");
-      }
-      if(massRight < 0.0){
-	std::cout << "massRight = " << massRight << std::endl;
-	MayDay::Abort("stop right");
-      }
-#endif
     }
   }
   else{
@@ -245,19 +207,6 @@ void bvh_node<T>::split(const int a_dir){
       mass_right += splitMass.mass();
     }
   }
-
-  if(Abs(m_mass - (mass_left + mass_right)) > 1.E-4) MayDay::Abort("broke mass");
-
-#if DEBUG // Debug
-  if(!(rightData.size() > 0)) {
-    std::cout << "bad right data size = " << m_data.size() << "\t mass = " << m_mass << "\t idx = " << splitIndex << std::endl;
-    MayDay::Abort("right data size must be > 0");
-  }
-  if(!(leftData.size()  > 0)) {
-    std::cout << "bad left data size = " << m_data.size() << "\t mass = " << m_mass << "\t idx = " << splitIndex << std::endl;
-    MayDay::Abort("left data size must be > 0");
-  }
-#endif
 
   m_left->set_mass(mass_left);
   m_right->set_mass(mass_right);
