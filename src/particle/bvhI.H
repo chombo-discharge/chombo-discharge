@@ -138,26 +138,24 @@ void bvh_node<T>::split(const int a_dir){
 
   // Left particles, keep track of total mass. 
   for (int i = 1; i < m_data.size(); i++){
-    const Real m1 = m_data[i-1].mass();
-    const Real m2 = m_data[i].mass();
-    if(mass_left + m1 < mass_right - m2){ // This is equivalent to shifting the median. The previous median goes into the left
+    const Real m1 = m_data[i-1].mass(); // This is the previous median. 
+    const Real m2 = m_data[i].mass();   // This is, maybe, our new median. 
+    
+    if(mass_left + m1 < mass_right){ // This is equivalent to shifting the median. The previous median goes into the left
       leftData.emplace_back(m_data[i-1]); // list and the median is shifted to the 
       mass_left  += m1;
-      mass_right -= m2;
+      mass_right = m_mass - mass_left - m2;
+      splitIndex = i;
     }
     else{
-      splitIndex = i-1; // Don't add anything else
       break;
     }
   }
 
   // Add the right particles
-  mass_right = 0.0;
   for (int i = splitIndex+1; i < m_data.size(); i++){
     rightData.emplace_back(m_data[i]);
-    mass_right += m_data[i].mass();
   }
-
 
   // If we can split up the median point into several ones, we do it. This would be the case if the median point
   // is a superparticle; in this case we divide the weights as best we can and then assign them to the left/right halves
