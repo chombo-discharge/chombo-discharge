@@ -177,14 +177,14 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 rod_sphere.eps0                      = 1                # Background permittivity
 rod_sphere.turn_off_electrode        = false            # Turn on/off electrode
-rod_sphere.turn_off_dielectric       = true             # Turn on/off dielectric
+rod_sphere.turn_off_dielectric       = false            # Turn on/off dielectric
 rod_sphere.electrode_live            = true             # Live electrode or not
 rod_sphere.electrode_radius          = 100.E-6          # Electrode inner radius
 rod_sphere.electrode_center1         = 0  0             # Center 1
 rod_sphere.electrode_center2         = 0  1             # Center 2. 
 rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
-rod_sphere.dielectric_center         = 0 -5E-3          # Dielectric center
-rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
+rod_sphere.dielectric_center         = 0 -250E-6          # Dielectric center
+rod_sphere.dielectric_radius         = 100.E-6              # Dielectric radius
 
 
 # ==================================================================================================== 

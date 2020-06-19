@@ -41,7 +41,7 @@ int main(int argc, char* argv[]){
   // Create initial particles
   std::vector<point_mass> inputParticles(0);
   Real Mass = 0.0;
-  for (int i = 0; i < num_points; i++){
+  while(inputParticles.size() < num_points){
     const RealVect pos = RealVect(D_DECL(ranFloat(rng), ranFloat(rng), ranFloat(rng)));
     const Real mass    = 1.0*ranInt(rng);
 
@@ -50,6 +50,17 @@ int main(int argc, char* argv[]){
       Mass += mass;
     }
   }
+
+#if 0
+  const RealVect bigPos1 = RealVect(D_DECL(0.25, 0.25, .5));
+  const RealVect bigPos2 = RealVect(D_DECL(0.5, 0.5, .5));
+  const RealVect bigPos3 = RealVect(D_DECL(0.75, 0.75, .5));
+  const Real bigMass = 1000.;
+  Mass += 3*bigMass;
+  inputParticles.push_back(point_mass(bigPos1, bigMass));
+  inputParticles.push_back(point_mass(bigPos2, bigMass));
+  inputParticles.push_back(point_mass(bigPos3, bigMass));
+#endif
 
 
   // Do particle merging/splitting
