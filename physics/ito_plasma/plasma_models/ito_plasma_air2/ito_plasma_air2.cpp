@@ -241,7 +241,7 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
   const Real xfactor = excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
   
-  const Real ionizationProp = alpha*velo*num_electrons;
+  const Real ionizationProp = (alpha-eta)*velo*num_electrons;
   const Real recombProp     = eta*velo*num_electrons;
   const Real photoexcProp   = alpha*velo*num_electrons*xfactor;
 
@@ -252,16 +252,28 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   const int num_comp_particles = num_ionizations/m_ppc;   // Whole stuff
   const int remainder          = num_ionizations % m_ppc; // Rest of the weight goes to last particle
 
-
-  // New particles
+  // Ionization
   for (int i = 0; i < m_ppc; i++){
-    const RealVect p = this->random_position(a_pos, a_dx);
+    RealVect p;
+    if(a_kappa < 1.0){ // Hack for irregular cells
+      a_pos; 
+    }
+    else{
+      p = this->random_position(a_pos, a_dx);
+    }
     a_particles[m_electron_idx]->add(ito_particle(1.0*num_comp_particles, p));
     a_particles[m_positive_idx]->add(ito_particle(1.0*num_comp_particles, p));
   }
-  const RealVect p = this->random_position(a_pos, a_dx);
+  RealVect p;
+  if(a_kappa < 1.0){
+    p = a_pos;
+  }
+  else{
+    p = this->random_position(a_pos, a_dx);
+  }
   a_particles[m_electron_idx]->add(ito_particle(1.0*remainder, p));
   a_particles[m_positive_idx]->add(ito_particle(1.0*remainder, p));
+
 
   // Photogeneration
   a_newPhotons[m_photonZ_idx]->clear();
