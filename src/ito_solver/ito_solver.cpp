@@ -1844,13 +1844,20 @@ void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const 
 
   // This are the particles in the box we're currently looking at. 
   BinFab<ito_particle>& cellParticles = m_particles.get_cell_particles(a_level, a_dit);
+  const EBISBox& ebisbox = m_amr->get_ebisl(m_phase)[a_level][a_dit];
 
   // Iterate over particles
   for (BoxIterator bit(box); bit.ok(); ++bit){
     List<ito_particle>& particles = cellParticles(bit(), comp);
 
+    int ppc = a_particlesPerCell;
+    const IntVect iv = bit();
+    if(ebisbox.isIrregular(iv)){
+      const Real kappa = ebisbox.volFrac(VolIndex(iv,0));
+      ppc = floor(kappa*(a_particlesPerCell+1));
+    }
     if(particles.length() > 0){
-      this->bvh_merge(particles, a_particlesPerCell);
+      this->bvh_merge(particles, ppc);
     }
   }
 }

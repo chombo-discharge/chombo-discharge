@@ -1,17 +1,17 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-air2.potential = 8E3
+air2.potential = 20E3
 air2.basename  = pout
 
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-amr_mesh.lo_corner       = -1E-3 -1E-3 # Low corner of problem domain
-amr_mesh.hi_corner       =  1E-3  1E-3 # High corner of problem domain
+amr_mesh.lo_corner       = -1E-2 -1E-2 # Low corner of problem domain
+amr_mesh.hi_corner       =  1E-2  1E-2 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 4           # Maximum amr depth
+amr_mesh.coarsest_domain = 128 128 128 # of cells on coarsest domain
+amr_mesh.max_amr_depth   = 6           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -85,7 +85,7 @@ poisson_multifluid_gmg.gmg_post_smooth   = 12        # Number of relaxations in 
 poisson_multifluid_gmg.gmg_bott_smooth   = 12        # NUmber of relaxations before dropping to bottom solver
 poisson_multifluid_gmg.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid_gmg.gmg_max_iter      = 32        # Maximum number of iterations
-poisson_multifluid_gmg.gmg_tolerance     = 1.E-10    # Residue tolerance
+poisson_multifluid_gmg.gmg_tolerance     = 1.E-12    # Residue tolerance
 poisson_multifluid_gmg.gmg_hang          = 0.2       # Solver hang
 poisson_multifluid_gmg.gmg_bottom_drop   = 4         # Bottom drop
 poisson_multifluid_gmg.gmg_bc_order      = 2         # Boundary condition order for multigrid
@@ -169,7 +169,7 @@ mc_photo.deposition         = cic           # 'ngp'  = nearest grid point
 geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
 geo_coarsener.box1_lo     = -1  100E-6     # Remove irregular cell tags 
 geo_coarsener.box1_hi     =  1  1        # between these two corners
-geo_coarsener.box1_lvl    = 0            # up to this level
+geo_coarsener.box1_lvl    = 3            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
@@ -191,14 +191,14 @@ rod_sphere.dielectric_radius         = 100.E-6              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1           # Verbosity
-ito_plasma_godunov.max_cells_hop  = 2.0          # Maximum cells to move in one time step
+ito_plasma_godunov.max_cells_hop  = 0.5          # Maximum cells to move in one time step
 ito_plasma_godunov.ppc            = 16           # Superparticle number of cells
-ito_plasma_godunov.merge_interval = 5            # How often to make superparticles
+ito_plasma_godunov.merge_interval = 1            # How often to make superparticles
 
 # ====================================================================================================
 # ITO_PLASMA_AIR2 CLASS OPTIONS
 # ====================================================================================================
-ito_plasma_air2.blob_radius    = 50E-6                       # Blob radius
+ito_plasma_air2.blob_radius    = 250E-6                       # Blob radius
 ito_plasma_air2.blob_center    = 0 0                          # Blob center
 ito_plasma_air2.seed           = 0                            # RNG seed
 ito_plasma_air2.num_particles  = 100000                         # Number of initial particles

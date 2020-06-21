@@ -228,6 +228,8 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 						   const Real                    a_dx,
 						   const Real                    a_kappa, 
 						   const Real                    a_dt) const{
+  const Real volume = pow(a_dx, SpaceDim)*a_kappa;
+
   Real num_electrons = 0;
   for (ListIterator<ito_particle> lit(*a_particles[m_electron_idx]); lit.ok(); ++lit){
     num_electrons += lit().mass();
@@ -239,7 +241,7 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
   const Real xfactor = excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
   
-  const Real ionizationProp = (alpha-eta)*velo*num_electrons;
+  const Real ionizationProp = alpha*velo*num_electrons;
   const Real recombProp     = eta*velo*num_electrons;
   const Real photoexcProp   = alpha*velo*num_electrons*xfactor;
 
@@ -250,28 +252,16 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   const int num_comp_particles = num_ionizations/m_ppc;   // Whole stuff
   const int remainder          = num_ionizations % m_ppc; // Rest of the weight goes to last particle
 
-  // Ionization
+
+  // New particles
   for (int i = 0; i < m_ppc; i++){
-    RealVect p;
-    if(a_kappa < 1.0){ // Hack for irregular cells
-      a_pos; 
-    }
-    else{
-      p = this->random_position(a_pos, a_dx);
-    }
+    const RealVect p = this->random_position(a_pos, a_dx);
     a_particles[m_electron_idx]->add(ito_particle(1.0*num_comp_particles, p));
     a_particles[m_positive_idx]->add(ito_particle(1.0*num_comp_particles, p));
   }
-  RealVect p;
-  if(a_kappa < 1.0){
-    p = a_pos;
-  }
-  else{
-    p = this->random_position(a_pos, a_dx);
-  }
+  const RealVect p = this->random_position(a_pos, a_dx);
   a_particles[m_electron_idx]->add(ito_particle(1.0*remainder, p));
   a_particles[m_positive_idx]->add(ito_particle(1.0*remainder, p));
-
 
   // Photogeneration
   a_newPhotons[m_photonZ_idx]->clear();
@@ -295,10 +285,9 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   for (ListIterator<photon> lit(*a_photons[m_photonZ_idx]); lit.ok(); ++lit){
     const photon& phot = lit();
     const RealVect pos = phot.position();
-
     
-    a_particles[m_electron_idx]->add(ito_particle(phot.mass(), pos));
-    a_particles[m_positive_idx]->add(ito_particle(phot.mass(), pos));
+    a_particles[m_electron_idx]->add(ito_particle(1.0, pos));
+    a_particles[m_positive_idx]->add(ito_particle(1.0, pos));
   }
 }
 
