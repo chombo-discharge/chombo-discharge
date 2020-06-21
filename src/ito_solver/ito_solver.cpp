@@ -86,6 +86,10 @@ void ito_solver::parse_plot_vars(){
   m_plot_phi = false;
   m_plot_vel = false;
   m_plot_dco = false;
+  m_plot_particles        = false;
+  m_plot_eb_particles     = false;
+  m_plot_domain_particles = false;
+  m_plot_source_particles = false;
 
   ParmParse pp(m_class_name.c_str());
   const int num = pp.countval("plt_vars");
@@ -93,9 +97,13 @@ void ito_solver::parse_plot_vars(){
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++){
-    if(     str[i] == "phi") m_plot_phi = true;
-    else if(str[i] == "vel") m_plot_vel = true;
-    else if(str[i] == "dco") m_plot_dco = true;
+    if(     str[i] == "phi")      m_plot_phi = true;
+    else if(str[i] == "vel")      m_plot_vel = true;
+    else if(str[i] == "dco")      m_plot_dco = true;
+    else if(str[i] == "part")     m_plot_particles        = true;
+    else if(str[i] == "eb_part")  m_plot_eb_particles     = true;
+    else if(str[i] == "dom_part") m_plot_domain_particles = true;
+    else if(str[i] == "src_part") m_plot_source_particles = true;
   }
 }
 
@@ -227,6 +235,10 @@ Vector<std::string> ito_solver::get_plotvar_names() const {
       names.push_back("z-Velocity " + m_name);
     }
   }
+  if(m_plot_particles)         names.push_back(m_name + " particles");
+  if(m_plot_eb_particles)      names.push_back(m_name + " eb_particles");
+  if(m_plot_domain_particles)  names.push_back(m_name + " domain_particles");
+  if(m_plot_source_particles)  names.push_back(m_name + " source_particles");
 
   return names;
 }
@@ -242,6 +254,10 @@ int ito_solver::get_num_plotvars() const {
   if(m_plot_phi)                num_plotvars += 1;
   if(m_plot_dco && m_diffusive) num_plotvars += 1;
   if(m_plot_vel && m_mobile)    num_plotvars += SpaceDim;
+  if(m_plot_particles)          num_plotvars = num_plotvars + 1;
+  if(m_plot_eb_particles)       num_plotvars = num_plotvars + 1;
+  if(m_plot_domain_particles)   num_plotvars = num_plotvars + 1;
+  if(m_plot_source_particles)   num_plotvars = num_plotvars + 1;
 
   return num_plotvars;
 }
@@ -685,6 +701,57 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 
     a_comp += ncomp;
   }
+
+  if(m_plot_particles){
+    this->deposit_particles(m_scratch, m_particles.get_particles(), m_plot_deposition);
+    this->write_data(a_output, a_comp, m_scratch,  false);
+  }
+  if(m_plot_eb_particles){
+    this->deposit_particles(m_scratch, m_eb_particles.get_particles(), m_plot_deposition);
+    this->write_data(a_output, a_comp, m_scratch,  false);
+  }
+  if(m_plot_domain_particles){
+    this->deposit_particles(m_scratch, m_domain_particles.get_particles(), m_plot_deposition);
+    this->write_data(a_output, a_comp, m_scratch,  false);
+  }
+  if(m_plot_source_particles){
+    this->deposit_particles(m_scratch, m_source_particles.get_particles(), m_plot_deposition);
+    this->write_data(a_output, a_comp, m_scratch,  false);
+  }
+}
+
+void ito_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp){
+  CH_TIME("ito_solver::write_data");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_data" << endl;
+  }
+
+  const int comp = 0;
+  const int ncomp = a_data[0]->nComp();
+
+  const Interval src_interv(0, ncomp-1);
+  const Interval dst_interv(a_comp, a_comp + ncomp - 1);
+
+  // Copy data onto scratch
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_phase, ncomp);
+  data_ops::copy(scratch, a_data);
+
+  // Interp if we should
+  if(a_interp){
+    m_amr->interpolate_to_centroids(scratch, phase::gas);
+  }
+
+  m_amr->average_down(scratch, m_phase);
+  m_amr->interp_ghost(scratch, m_phase);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+  }
+
+  data_ops::set_covered_value(a_output, a_comp, 0.0);
+
+  a_comp += ncomp;
 }
 
 void ito_solver::deposit_particles(){
@@ -1253,25 +1320,25 @@ RealVect ito_solver::random_direction(){
 #endif
 }
 
-Real ito_solver::compute_dt(const Real a_maxCellsToMove) const {
-  CH_TIME("ito_solver::compute_dt(allAMRlevels, maxCellsToMove)");
+Real ito_solver::compute_dt() const {
+  CH_TIME("ito_solver::compute_dt(allAMRlevels)");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_dt(allAMRlevels, maxCellsToMove)" << endl;
+    pout() << m_name + "::compute_dt(allAMRlevels)" << endl;
   }
 
   Real dt = 1.E99;
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const Real levelDt = this->compute_dt(a_maxCellsToMove, lvl);
+    const Real levelDt = this->compute_dt(lvl);
     dt = Min(dt, levelDt);
   }
 
   return dt;
 }
 
-Real ito_solver::compute_dt(const Real a_maxCellsToMove, const int a_lvl) const{
-  CH_TIME("ito_solver::compute_dt(maxCellsToMove, lvl)");
+Real ito_solver::compute_dt(const int a_lvl) const{
+  CH_TIME("ito_solver::compute_dt(lvl)");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_dt(maxCellsToMove, lvl)" << endl;
+    pout() << m_name + "::compute_dt(lvl)" << endl;
   }
 
   Real dt = 1.E99;
@@ -1280,7 +1347,7 @@ Real ito_solver::compute_dt(const Real a_maxCellsToMove, const int a_lvl) const{
   const Real dx = m_amr->get_dx()[a_lvl];
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Real boxDt = this->compute_dt(a_maxCellsToMove, a_lvl, dit(), dx);
+    const Real boxDt = this->compute_dt(a_lvl, dit(), dx);
     dt = Min(dt, boxDt);
   }
 
@@ -1297,10 +1364,105 @@ Real ito_solver::compute_dt(const Real a_maxCellsToMove, const int a_lvl) const{
 }
   
 
-Real ito_solver::compute_dt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex a_dit, const Real a_dx) const{
+Real ito_solver::compute_dt(const int a_lvl, const DataIndex a_dit, const Real a_dx) const{
   CH_TIME("ito_solver::compute_dt(maxCellsToMove, lvl, dit, dx)");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_dt(maxCellsToMove, lvl, dit, dx)" << endl;
+  }
+
+  Real dt = 1.E99;
+
+  const List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
+  ListIterator<ito_particle> lit(particleList);
+
+  if(m_mobile && !m_diffusive){
+    for (lit.rewind(); lit; ++lit){
+      const ito_particle& p = particleList[lit];
+      const RealVect& v = p.velocity();
+
+      const int maxDir = v.maxDir(true);
+      const Real thisDt = a_dx/Abs(v[maxDir]);
+
+      dt = Min(dt, thisDt);
+    }
+  }
+  else if(!m_mobile && m_diffusive){
+    for (lit.rewind(); lit; ++lit){
+      const ito_particle& p = particleList[lit];
+      
+      const Real thisDt = a_dx*a_dx/(2.0*p.diffusion());
+      dt = Min(dt, thisDt);
+    }
+  }
+  else if(m_mobile && m_diffusive){
+    for (lit.rewind(); lit; ++lit){
+      const ito_particle& p = particleList[lit];
+      
+      const RealVect& v = p.velocity();
+      const int maxDir = v.maxDir(true);
+      const Real vMax  = Abs(v[maxDir]);
+      const Real D     = p.diffusion();
+
+      const Real dtAdvect = a_dx/vMax;
+      const Real dtDiffus = a_dx*a_dx/(2.0*p.diffusion());
+
+      const Real thisDt = 1./(1./dtAdvect + 1./dtDiffus);
+      dt = Min(dt, thisDt);
+    }
+  }
+
+  return dt;
+
+}
+
+Real ito_solver::compute_min_dt(const Real a_maxCellsToMove) const {
+  CH_TIME("ito_solver::compute_min_dt(allAMRlevels, maxCellsToMove)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_min_dt(allAMRlevels, maxCellsToMove)" << endl;
+  }
+
+  Real dt = 1.E99;
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const Real levelDt = this->compute_min_dt(a_maxCellsToMove, lvl);
+    dt = Min(dt, levelDt);
+  }
+
+  return dt;
+}
+
+Real ito_solver::compute_min_dt(const Real a_maxCellsToMove, const int a_lvl) const{
+  CH_TIME("ito_solver::compute_min_dt(maxCellsToMove, lvl)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_min_dt(maxCellsToMove, lvl)" << endl;
+  }
+
+  Real dt = 1.E99;
+  
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const Real dx = m_amr->get_dx()[a_lvl];
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Real boxDt = this->compute_min_dt(a_maxCellsToMove, a_lvl, dit(), dx);
+    dt = Min(dt, boxDt);
+  }
+
+#ifdef CH_MPI
+    Real tmp = 1.;
+    int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    if(result != MPI_SUCCESS){
+      MayDay::Error("ito_solver::compute_dt(lvl) - communication error on norm");
+    }
+    dt = tmp;
+#endif  
+
+  return dt;
+}
+  
+
+Real ito_solver::compute_min_dt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex a_dit, const Real a_dx) const{
+  CH_TIME("ito_solver::compute_min_dt(maxCellsToMove, lvl, dit, dx)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_min_dt(maxCellsToMove, lvl, dit, dx)" << endl;
   }
 
   Real dt = 1.E99;

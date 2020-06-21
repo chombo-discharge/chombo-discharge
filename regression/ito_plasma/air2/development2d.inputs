@@ -103,7 +103,7 @@ ito_solver.bisect_step         = 1.E-4         # Bisection step length for inter
 ito_solver.seed                = 0             # Seed for RNG
 ito_solver.max_diffusion_hop   = 0.2           # Maximum diffusion hop length (in units of dx)
 ito_solver.normal_max          = 3.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
-ito_solver.blend_conservation  = true         # Turn on/off blending with nonconservative divergenceo
+ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ito_solver.superparticles      = cell          # Make super-particles on a per-cell basis. Valid are 'cell' and 'patch'. 
 ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
 ito_solver.deposition          = cic           # 'ngp' = nearest grid point
@@ -201,7 +201,7 @@ ito_plasma_godunov.merge_interval = 1            # How often to make superpartic
 ito_plasma_air2.blob_radius    = 50E-6                       # Blob radius
 ito_plasma_air2.blob_center    = 0 0                          # Blob center
 ito_plasma_air2.seed           = 0                            # RNG seed
-ito_plasma_air2.num_particles  = 1000000                      # Number of initial particles
+ito_plasma_air2.num_particles  = 100000                         # Number of initial particles
 
 # Reaction stuff
 ito_plasma_air2.tau_switch     = -1                           # Switch from SSA to tau when reaching this many particles
@@ -220,7 +220,7 @@ ito_plasma_air2.dielectric_quantum_efficiency = 1.E-4         # Quantum efficien
 # Zheleznyak stuff. 
 # ----------------------------------------------------------------------------------------------------
 ito_plasma_air2.quenching_pressure         = 0.03947          # Quenching pressure for photo-emission (atm)
-ito_plasma_air2.photoi_factor              = 1.0              # Photoionization factor
+ito_plasma_air2.photoi_factor              = 1.E-4              # Photoionization factor
 ito_plasma_air2.photoi_seed                = 0                # RNG seed
 ito_plasma_air2.photoi_f1                  = 2.925E15         # Lower frequency
 ito_plasma_air2.photoi_f2                  = 3.059E15         # High frequency

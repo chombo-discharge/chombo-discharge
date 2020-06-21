@@ -105,12 +105,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   t_photons += MPI_Wtime();
 
-  // Compute the electric field, recompute velocities and diffusion coefficients
-  MPI_Barrier(Chombo_MPI::comm);
-  t_poisson -= MPI_Wtime();
-  this->solve_poisson();
-  MPI_Barrier(Chombo_MPI::comm);
-  t_poisson += MPI_Wtime();
+
 
   // Sort the particles per cell
   MPI_Barrier(Chombo_MPI::comm);
@@ -145,6 +140,13 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   this->sort_source_photons_by_patch();
   MPI_Barrier(Chombo_MPI::comm);
   t_patchBin += MPI_Wtime();
+
+  // Compute the electric field, recompute velocities and diffusion coefficients
+  MPI_Barrier(Chombo_MPI::comm);
+  t_poisson -= MPI_Wtime();
+  this->solve_poisson();
+  MPI_Barrier(Chombo_MPI::comm);
+  t_poisson += MPI_Wtime();
 
   // Clear other data holders for now. BC comes later
   MPI_Barrier(Chombo_MPI::comm);

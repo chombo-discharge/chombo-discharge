@@ -228,8 +228,6 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 						   const Real                    a_dx,
 						   const Real                    a_kappa, 
 						   const Real                    a_dt) const{
-  const Real volume = pow(a_dx, SpaceDim)*a_kappa;
-
   Real num_electrons = 0;
   for (ListIterator<ito_particle> lit(*a_particles[m_electron_idx]); lit.ok(); ++lit){
     num_electrons += lit().mass();
@@ -297,9 +295,10 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   for (ListIterator<photon> lit(*a_photons[m_photonZ_idx]); lit.ok(); ++lit){
     const photon& phot = lit();
     const RealVect pos = phot.position();
+
     
-    a_particles[m_electron_idx]->add(ito_particle(1.0, pos));
-    a_particles[m_positive_idx]->add(ito_particle(1.0, pos));
+    a_particles[m_electron_idx]->add(ito_particle(phot.mass(), pos));
+    a_particles[m_positive_idx]->add(ito_particle(phot.mass(), pos));
   }
 }
 

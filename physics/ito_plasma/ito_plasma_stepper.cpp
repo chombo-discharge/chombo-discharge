@@ -297,7 +297,8 @@ void ito_plasma_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecod
     pout() << "ito_plasma_stepper::compute_dt" << endl;
   }
 
-  a_dt = m_ito->compute_dt(m_max_cells_hop);
+  a_dt = m_ito->compute_dt();
+  a_dt = a_dt*m_max_cells_hop;
   a_timecode = time_code::cfl;
 }
 

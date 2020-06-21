@@ -165,6 +165,11 @@ public:
   virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
 
   /*!
+    @brief Write data to output. Convenience function. 
+  */
+  virtual void write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
+
+  /*!
     @brief Write checkpoint data into handle
   */
   virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const;
@@ -335,19 +340,34 @@ public:
   RealVect random_direction();
 
   /*!
+    @brief Compute min dt
+  */
+  Real compute_dt() const;
+
+    /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
-  Real compute_dt(const Real a_maxCellsToMove) const;
+  Real compute_dt(const int a_lvl) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
-  Real compute_dt(const Real a_maxCellsToMove, const int a_lvl) const;
+  Real compute_dt(const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
+
+    /*!
+    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+  */
+  Real compute_min_dt(const Real a_maxCellsToMove) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
-  Real compute_dt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
+  Real compute_min_dt(const Real a_maxCellsToMove, const int a_lvl) const;
+
+  /*!
+    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+  */
+  Real compute_min_dt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
@@ -403,7 +423,6 @@ public:
     @brief Return phase
   */
   phase::which_phase get_phase() const;
-
   
 protected:
 
@@ -546,6 +565,26 @@ protected:
     @brief Output state
   */
   bool m_plot_dco;
+
+  /*!
+    @brief Plot particles
+  */
+  bool m_plot_particles;
+
+  /*!
+    @brief Plot EB particles
+  */
+  bool m_plot_eb_particles;
+
+  /*!
+    @brief Plot domain particles
+  */
+  bool m_plot_domain_particles;
+
+    /*!
+    @brief Plot domain particles
+  */
+  bool m_plot_source_particles;
 
   /*!
     @brief Mass/charge deposition type

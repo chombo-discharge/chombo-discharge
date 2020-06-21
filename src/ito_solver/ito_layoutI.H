@@ -162,11 +162,23 @@ void ito_layout<T>::remap(){
 }
 
 template <class T>
-Real ito_layout<T>::compute_dt(const Real a_maxCellsToMove){
+Real ito_layout<T>::compute_dt(){
   Real minDt = 1.E99;
 
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    const Real thisDt = iter()->compute_dt(a_maxCellsToMove);
+    const Real thisDt = iter()->compute_dt();
+    minDt = Min(minDt, thisDt);
+  }
+  
+  return minDt;
+}
+
+template <class T>
+Real ito_layout<T>::compute_min_dt(const Real a_maxCellsToMove){
+  Real minDt = 1.E99;
+
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    const Real thisDt = iter()->compute_min_dt(a_maxCellsToMove);
     minDt = Min(minDt, thisDt);
   }
   

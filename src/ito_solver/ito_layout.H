@@ -144,7 +144,12 @@ public:
   /*!
     @brief Compute dt
   */
-  virtual Real compute_dt(const Real a_maxCellsToMove);
+  virtual Real compute_dt();
+
+  /*!
+    @brief Compute dt
+  */
+  virtual Real compute_min_dt(const Real a_maxCellsToMove);
 
   /*!
     @brief Get largest possible time step for advection part
