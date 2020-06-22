@@ -310,9 +310,13 @@ void ito_plasma_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecod
     pout() << "ito_plasma_stepper::compute_dt" << endl;
   }
 
+  
   a_dt = m_ito->compute_dt();
   a_dt = a_dt*m_max_cells_hop;
   a_timecode = time_code::cfl;
+
+  Real relaxDt = this->compute_relaxation_time();
+  if(procID() == 0) std::cout << relaxDt << std::endl;
 }
 
 void ito_plasma_stepper::register_operators(){
@@ -470,7 +474,7 @@ void ito_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase 
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_E(ebamrcell, phase mfamrcell" << endl;
   }
-
+  
   EBAMRCellData pot_gas;
   m_amr->allocate_ptr(pot_gas);
   m_amr->alias(pot_gas, a_phase, a_potential);
@@ -594,6 +598,8 @@ void ito_plasma_stepper::compute_J(EBAMRCellData& a_J, const Real a_dt){
 
   m_amr->average_down(a_J, m_phase);
   m_amr->interp_ghost(a_J, m_phase);
+
+  m_amr->interpolate_to_centroids(a_J, m_phase);
 }
 
 void ito_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_level, const Real a_dt){
@@ -639,11 +645,7 @@ void ito_plasma_stepper::compute_J(EBCellFAB& a_J, const int a_level, const Data
 	const VolIndex vof(iv, vofId);
 
 	const Real weight = p.mass();
-#if 0 // This is how it should be, but why doesn't it work...?
 	const RealVect v  = (p.position() - p.oldPosition())/a_dt;
-#else // Intermediate code
-	const RealVect v = p.velocity();
-#endif
 
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  a_J(vof, dir) += units::s_Qe*weight*v[dir]*idV;
@@ -695,9 +697,11 @@ Real ito_plasma_stepper::compute_relaxation_time(const int a_level, const DataIn
     pout() << "ito_plasma_stepper::compute_relaxation_time(level, dit)" << endl;
   }
 
-  MayDay::Abort("ito_plasma_stepper::compute_relaxation_time - routine is not finished");
+  const int comp    = 0;
+  const Real SAFETY = 1.E-10;
 
-  Real dt = 1.E99;
+  const Box box = m_amr->get_grids()[a_level].get(a_dit);
+  const EBISBox& ebisbox = m_amr->get_ebisl(m_phase)[a_level][a_dit];
 
   // Get a handle to the E-field
   EBAMRCellData amrE;
@@ -707,14 +711,23 @@ Real ito_plasma_stepper::compute_relaxation_time(const int a_level, const DataIn
   const EBCellFAB& E = (*amrE[a_level])[a_dit];
   const EBCellFAB& J = (*m_J[a_level])[a_dit];
 
-  const FArrayBox& Efab = E.getFArrayBox();
-  const FArrayBox& Jfab = J.getFArrayBox();
+  EBCellFAB dt(ebisbox, box, 1);
+  EBCellFAB e_magnitude(ebisbox, box, 1);
+  EBCellFAB j_magnitude(ebisbox, box, 1);
 
-  const Box box = m_amr->get_grids()[a_level].get(a_dit);
-  const EBISBox& ebisbox = m_amr->get_ebisl(m_phase)[a_level][a_dit];
+  e_magnitude.setVal(0.0);
+  j_magnitude.setVal(0.0);
 
-  //  for (BoxIterator bit = 
-  return dt;
+  data_ops::vector_length(e_magnitude, E, box);
+  data_ops::vector_length(j_magnitude, J, box);
+  j_magnitude += SAFETY;
+
+  dt.setVal(units::s_eps0);
+  dt *= e_magnitude;
+  dt /= j_magnitude;
+  
+
+  return dt.min(comp);
 }
 
 bool ito_plasma_stepper::solve_poisson(){

@@ -35,6 +35,7 @@ namespace physics {
       void advect_particles(const Real a_dt);
       void diffuse_particles(const Real a_dt);
       void intersect_particles(const Real a_dt);
+      void rewind_particles();
     };
   }
 }

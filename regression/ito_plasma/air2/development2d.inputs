@@ -191,7 +191,7 @@ rod_sphere.dielectric_radius         = 100.E-6              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1           # Verbosity
-ito_plasma_godunov.max_cells_hop  = 1.0          # Maximum cells to move in one time step
+ito_plasma_godunov.max_cells_hop  = 1.0          # Ma	ximum cells to move in one time step
 ito_plasma_godunov.ppc            = 16           # Superparticle number of cells
 ito_plasma_godunov.merge_interval = 1            # How often to make superparticles
 
@@ -239,6 +239,6 @@ ito_plasma_streamer_tagger.buffer            = 0            # Grow tagged cells
 
 ito_plasma_streamer_tagger.refine_curvature  = 10.0         # Curvature refinement
 ito_plasma_streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	
-ito_plasma_streamer_tagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
+ito_plasma_streamer_tagger.refine_alpha      = 0.5          # Set alpha refinement. Lower  => More mesh
 ito_plasma_streamer_tagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
 ito_plasma_streamer_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth

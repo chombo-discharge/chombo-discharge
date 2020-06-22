@@ -1376,26 +1376,29 @@ Real ito_solver::compute_dt(const int a_lvl, const DataIndex a_dit, const Real a
   ListIterator<ito_particle> lit(particleList);
 
   if(m_mobile && !m_diffusive){
-    for (lit.rewind(); lit; ++lit){
+    for (lit.rewind(); lit.ok(); ++lit){
       const ito_particle& p = particleList[lit];
       const RealVect& v = p.velocity();
 
-      const int maxDir = v.maxDir(true);
-      const Real thisDt = a_dx/Abs(v[maxDir]);
+      const int maxDir  = v.maxDir(true);
+      const Real vMax   = Abs(v[maxDir]);
+      const Real thisDt = (vMax > 0.0) ? a_dx/vMax : 1.E99;
 
       dt = Min(dt, thisDt);
     }
   }
   else if(!m_mobile && m_diffusive){
-    for (lit.rewind(); lit; ++lit){
+    for (lit.rewind(); lit.ok(); ++lit){
       const ito_particle& p = particleList[lit];
-      
-      const Real thisDt = a_dx*a_dx/(2.0*p.diffusion());
+
+      const Real D      = p.diffusion();
+      const Real thisDt = (D > 0.0) ? a_dx*a_dx/(2.0*D) : 1.E99;
+
       dt = Min(dt, thisDt);
     }
   }
   else if(m_mobile && m_diffusive){
-    for (lit.rewind(); lit; ++lit){
+    for (lit.rewind(); lit.ok(); ++lit){
       const ito_particle& p = particleList[lit];
       
       const RealVect& v = p.velocity();
@@ -1403,16 +1406,16 @@ Real ito_solver::compute_dt(const int a_lvl, const DataIndex a_dit, const Real a
       const Real vMax  = Abs(v[maxDir]);
       const Real D     = p.diffusion();
 
-      const Real dtAdvect = a_dx/vMax;
-      const Real dtDiffus = a_dx*a_dx/(2.0*p.diffusion());
+      const Real dtAdvect = (vMax > 0.0) ? a_dx/vMax         : 1.E99;
+      const Real dtDiffus = (D > 0.0)    ? a_dx*a_dx/(2.0*D) : 1.E99;
 
       const Real thisDt = 1./(1./dtAdvect + 1./dtDiffus);
+      
       dt = Min(dt, thisDt);
     }
   }
 
   return dt;
-
 }
 
 Real ito_solver::compute_min_dt(const Real a_maxCellsToMove) const {
