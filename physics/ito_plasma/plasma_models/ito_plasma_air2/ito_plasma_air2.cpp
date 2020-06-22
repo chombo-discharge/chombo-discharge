@@ -140,7 +140,7 @@ RealVect ito_plasma_air2::random_position(const RealVect a_cellCenter, const Rea
 
   RealVect ret = a_cellCenter;
   for (int i = 0; i < SpaceDim; i++){
-    ret[i] += 0.0*m_udist11(m_rng)*a_dx;
+    ret[i] += 0.5*m_udist11(m_rng)*a_dx;
   }
 
   return ret;
@@ -286,8 +286,8 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
     const photon& phot = lit();
     const RealVect pos = phot.position();
 
-    a_particles[m_electron_idx]->add(ito_particle(phot.mass(), pos));
-    a_particles[m_positive_idx]->add(ito_particle(phot.mass(), pos));
+    //    a_particles[m_electron_idx]->add(ito_particle(phot.mass(), pos));
+    //    a_particles[m_positive_idx]->add(ito_particle(phot.mass(), pos));
     // a_particles[m_electron_idx]->add(ito_particle(1.0, pos));
     // a_particles[m_positive_idx]->add(ito_particle(1.0, pos)); 
   }
