@@ -256,13 +256,7 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   // New particles
   if(alpha > eta){
     for (int i = 0; i < m_ppc; i++){
-      RealVect p;
-      if(a_kappa < 1.0){
-	p = a_pos;
-      }
-      else{
-	p = this->random_position(a_pos, a_dx);
-      }
+      const RealVect p = (a_kappa < 1.0) ? a_pos : this->random_position(a_pos, a_dx);
       a_particles[m_electron_idx]->add(ito_particle(1.0*num_comp_particles, p));
       a_particles[m_positive_idx]->add(ito_particle(1.0*num_comp_particles, p));
     }
@@ -274,19 +268,17 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   // Photogeneration
   a_newPhotons[m_photonZ_idx]->clear();
 #if CH_SPACEDIM==2
-  //  for (int i = 0; i < num_photoexc; i++){
-  const RealVect P = a_pos;//this->random_position(a_pos, a_dx);
+  const RealVect P = this->random_position(a_pos, a_dx);
+  const RealVect V = units::s_c0*random_direction();
+    
+  a_newPhotons[m_photonZ_idx]->add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), num_photoexc));
+#else
+  for (int i = 0; i < num_photoexc; i++){
+    const RealVect P = this->random_position(a_pos, a_dx);
     const RealVect V = units::s_c0*random_direction();
 
-    a_newPhotons[m_photonZ_idx]->add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), num_photoexc));
-    //  }
-#else
-    for (int i = 0; i < num_photoexc; i++){
-      const RealVect P = this->random_position(a_pos, a_dx);
-      const RealVect V = units::s_c0*random_direction();
-
-      a_newPhotons[m_photonZ_idx]->add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), 1.0));
-    }
+    a_newPhotons[m_photonZ_idx]->add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), 1.0));
+  }
 #endif
 
   // Photoionization
@@ -294,10 +286,10 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
     const photon& phot = lit();
     const RealVect pos = phot.position();
 
-    // a_particles[m_electron_idx]->add(ito_particle(phot.mass(), pos));
-    // a_particles[m_positive_idx]->add(ito_particle(phot.mass(), pos));
-    a_particles[m_electron_idx]->add(ito_particle(1.0, pos));
-    a_particles[m_positive_idx]->add(ito_particle(1.0, pos)); 
+    a_particles[m_electron_idx]->add(ito_particle(phot.mass(), pos));
+    a_particles[m_positive_idx]->add(ito_particle(phot.mass(), pos));
+    // a_particles[m_electron_idx]->add(ito_particle(1.0, pos));
+    // a_particles[m_positive_idx]->add(ito_particle(1.0, pos)); 
   }
 }
 

@@ -315,8 +315,10 @@ void ito_plasma_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecod
   a_dt = a_dt*m_max_cells_hop;
   a_timecode = time_code::cfl;
 
+#if 1
   Real relaxDt = this->compute_relaxation_time();
-  if(procID() == 0) std::cout << relaxDt << std::endl;
+  if(procID() == 0) std::cout << "ito_plasma_stepper::compute_d - relax dt = " << relaxDt << std::endl;
+#endif
 }
 
 void ito_plasma_stepper::register_operators(){
