@@ -20,11 +20,12 @@ ito_plasma_air2::ito_plasma_air2(){
   Vector<Real> v;
   
   // Stuff for initial particles
-  pp.get   ("seed",           m_seed);
-  pp.get   ("blob_radius",    m_blob_radius);
+  pp.get   ("seed",            m_seed);
+  pp.get   ("blob_radius",     m_blob_radius);
+  pp.get   ("num_particles",   m_num_particles);
+  pp.get   ("particle_weight", m_particle_weight);
+  pp.get   ("react_ppc",       m_ppc);
   pp.getarr("blob_center",    v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
-  pp.get   ("num_particles",  m_num_particles);
-  pp.get   ("react_ppc",      m_ppc);
 
   // Reaction stuff
   pp.get("quenching_pressure", m_pq);
@@ -91,11 +92,10 @@ void ito_plasma_air2::draw_initial_particles(){
 
   // Now make the particles
   for (int i = 0; i < particlesPerRank[procID()]; i++){
-    const Real weight  = 1.0;
     const RealVect pos = m_blob_center + random_gaussian();
     
-    electrons.add(ito_particle(weight, pos));
-    positives.add(ito_particle(weight, pos));
+    electrons.add(ito_particle(m_particle_weight, pos));
+    positives.add(ito_particle(m_particle_weight, pos));
   }
 }
 

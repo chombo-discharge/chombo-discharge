@@ -83,6 +83,11 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   // Move photons
   this->advance_photons(a_dt);
 
+#if 1 // Have to put it here right now because particle merging is not OK. 
+  // Compute J. 
+  this->compute_J(m_J, a_dt);
+#endif
+
   // Sort the particles per cell
   m_ito->sort_particles_by_cell();
   this->sort_bulk_photons_by_cell();
@@ -111,8 +116,10 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
 
+#if 0 // This is where it belongs
   // Compute J. 
   this->compute_J(m_J, a_dt);
+#endif
   
   return a_dt;
 }
