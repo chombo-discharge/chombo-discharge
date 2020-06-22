@@ -45,6 +45,8 @@ void ito_plasma_godunov::allocate_internals(){
   if(m_verbosity > 5){
     pout() << m_name + "::allocate_internals" << endl;
   }
+
+  m_amr->allocate(m_J, phase::gas, SpaceDim);
 }
 
 Real ito_plasma_godunov::advance(const Real a_dt) {
@@ -208,7 +210,8 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 	 << endl;
 #endif
 
-
+  // Compute J
+  this->compute_J(m_J, a_dt);
   
   return a_dt;
 }

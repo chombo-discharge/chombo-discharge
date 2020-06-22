@@ -258,14 +258,27 @@ void ito_plasma_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::st
   }
 
   // Write the current to the output
-#if 0 // Activate when implemented
   this->write_J(a_output, a_icomp);
-#endif
   a_plotvar_names.push_back("x-J");
   a_plotvar_names.push_back("y-J");
   if(SpaceDim == 3){
     a_plotvar_names.push_back("z-J");
   }
+}
+
+void ito_plasma_stepper::write_J(EBAMRCellData& a_output, int& a_icomp) const{
+  CH_TIME("ito_plasma_stepper::write_J");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::write_J" << endl;
+  }
+
+  const Interval src_interv(0, SpaceDim-1);
+  const Interval dst_interv(a_icomp, a_icomp + SpaceDim -1);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    m_J[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+  }
+  a_icomp += SpaceDim;
 }
 
 void ito_plasma_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
@@ -561,6 +574,147 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
 
   m_amr->average_down(a_rho);
   m_amr->interp_ghost(a_rho);
+}
+
+void ito_plasma_stepper::compute_J(EBAMRCellData& a_J, const Real a_dt){
+  CH_TIME("ito_plasma_stepper::compute_J(J)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_J(J)" << endl;
+  }
+
+  data_ops::set_value(a_J, 0.0);
+  
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    if(lvl > 0){ 
+      RefCountedPtr<EBMGInterp>& interp = m_amr->get_eb_mg_interp(m_phase)[lvl];
+      interp->pwcInterp(*a_J[lvl], *m_J[lvl-1], Interval(0, SpaceDim-1));
+    }
+    this->compute_J(*a_J[lvl], lvl, a_dt);
+  }
+
+  m_amr->average_down(a_J, m_phase);
+  m_amr->interp_ghost(a_J, m_phase);
+}
+
+void ito_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_level, const Real a_dt){
+  CH_TIME("ito_plasma_stepper::compute_J(J, level)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_J(J, level)" << endl;
+  }
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box& box = dbl.get(dit());
+
+    // Add current on present level. 
+    this->compute_J(a_J[dit()], a_level, dit(), box, a_dt);
+  }
+}
+
+void ito_plasma_stepper::compute_J(EBCellFAB& a_J, const int a_level, const DataIndex a_dit, const Box& a_box, const Real a_dt){
+  CH_TIME("ito_plasma_stepper::compute_J(J, level, dit)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_J(J, level, dit)" << endl;
+  }
+
+  const int vofId = 0;
+  const RealVect prob_lo = m_amr->get_prob_lo();
+  const RealVect dx = m_amr->get_dx()[a_level]*RealVect::Unit;
+  const Real idV = 1./pow(m_amr->get_dx()[a_level], SpaceDim);
+
+  // TLDR: This code computes q*(Xnew - Xold)/dt for all charged particles
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<ito_solver>& solver   = solver_it();
+    const RefCountedPtr<ito_species>& species = solver->get_species();
+
+    if(solver->is_mobile() || solver->is_diffusive() && species->get_charge() != 0){
+      const List<ito_particle>& particles = solver->get_particles()[a_level][a_dit].listItems();
+      
+      for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
+	const ito_particle& p = lit();
+	const RealVect rv = (p.position() - prob_lo)/dx;
+	const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
+
+	const VolIndex vof(iv, vofId);
+
+	const Real weight = p.mass();
+#if 0 // This is how it should be, but why doesn't it work...?
+	const RealVect v  = (p.position() - p.oldPosition())/a_dt;
+#else // Intermediate code
+	const RealVect v = p.velocity();
+#endif
+
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  a_J(vof, dir) += units::s_Qe*weight*v[dir]*idV;
+	}
+      }
+    }
+  }
+}
+
+Real ito_plasma_stepper::compute_relaxation_time(){
+  CH_TIME("ito_plasma_stepper::compute_relaxation_time()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_relaxation_time()" << endl;
+  }
+
+  Real dt = 1.E99;
+  
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const Real thisDt = this->compute_relaxation_time(lvl);
+
+    dt = Min(dt, thisDt);
+  }
+
+  return dt;
+}
+
+Real ito_plasma_stepper::compute_relaxation_time(const int a_level){
+  CH_TIME("ito_plasma_stepper::compute_relaxation_time(level)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_relaxation_time(level)" << endl;
+  }
+
+  Real dt = 1.E99;
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Real thisDt = this->compute_relaxation_time(a_level, dit());
+
+    dt = Min(dt, thisDt);
+  }
+
+  return dt;
+}
+
+Real ito_plasma_stepper::compute_relaxation_time(const int a_level, const DataIndex a_dit){
+  CH_TIME("ito_plasma_stepper::compute_relaxation_time(level, dit)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_relaxation_time(level, dit)" << endl;
+  }
+
+  MayDay::Abort("ito_plasma_stepper::compute_relaxation_time - routine is not finished");
+
+  Real dt = 1.E99;
+
+  // Get a handle to the E-field
+  EBAMRCellData amrE;
+  m_amr->allocate_ptr(amrE);
+  m_amr->alias(amrE, m_phase, m_poisson->get_E());
+  
+  const EBCellFAB& E = (*amrE[a_level])[a_dit];
+  const EBCellFAB& J = (*m_J[a_level])[a_dit];
+
+  const FArrayBox& Efab = E.getFArrayBox();
+  const FArrayBox& Jfab = J.getFArrayBox();
+
+  const Box box = m_amr->get_grids()[a_level].get(a_dit);
+  const EBISBox& ebisbox = m_amr->get_ebisl(m_phase)[a_level][a_dit];
+
+  //  for (BoxIterator bit = 
+  return dt;
 }
 
 bool ito_plasma_stepper::solve_poisson(){
