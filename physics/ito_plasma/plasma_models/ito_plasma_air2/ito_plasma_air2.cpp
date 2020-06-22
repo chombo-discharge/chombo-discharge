@@ -140,7 +140,7 @@ RealVect ito_plasma_air2::random_position(const RealVect a_cellCenter, const Rea
 
   RealVect ret = a_cellCenter;
   for (int i = 0; i < SpaceDim; i++){
-    ret[i] += 0.5*m_udist11(m_rng)*a_dx;
+    ret[i] += 0.0*m_udist11(m_rng)*a_dx;
   }
 
   return ret;
@@ -254,14 +254,22 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 
 
   // New particles
-  for (int i = 0; i < m_ppc; i++){
-    const RealVect p = this->random_position(a_pos, a_dx);
-    a_particles[m_electron_idx]->add(ito_particle(1.0*num_comp_particles, p));
-    a_particles[m_positive_idx]->add(ito_particle(1.0*num_comp_particles, p));
+  if(alpha > eta){
+    for (int i = 0; i < m_ppc; i++){
+      RealVect p;
+      if(a_kappa < 1.0){
+	p = a_pos;
+      }
+      else{
+	p = this->random_position(a_pos, a_dx);
+      }
+      a_particles[m_electron_idx]->add(ito_particle(1.0*num_comp_particles, p));
+      a_particles[m_positive_idx]->add(ito_particle(1.0*num_comp_particles, p));
+    }
+    const RealVect p = a_kappa > 0 ? a_pos : this->random_position(a_pos, a_dx);
+    a_particles[m_electron_idx]->add(ito_particle(1.0*remainder, p));
+    a_particles[m_positive_idx]->add(ito_particle(1.0*remainder, p));
   }
-  const RealVect p = this->random_position(a_pos, a_dx);
-  a_particles[m_electron_idx]->add(ito_particle(1.0*remainder, p));
-  a_particles[m_positive_idx]->add(ito_particle(1.0*remainder, p));
 
   // Photogeneration
   a_newPhotons[m_photonZ_idx]->clear();
@@ -285,7 +293,9 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   for (ListIterator<photon> lit(*a_photons[m_photonZ_idx]); lit.ok(); ++lit){
     const photon& phot = lit();
     const RealVect pos = phot.position();
-    
+
+    // a_particles[m_electron_idx]->add(ito_particle(phot.mass(), pos));
+    // a_particles[m_positive_idx]->add(ito_particle(phot.mass(), pos));
     a_particles[m_electron_idx]->add(ito_particle(1.0, pos));
     a_particles[m_positive_idx]->add(ito_particle(1.0, pos));
   }

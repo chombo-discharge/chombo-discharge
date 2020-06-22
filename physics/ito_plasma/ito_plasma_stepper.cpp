@@ -1301,7 +1301,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex vof = vofit();
     const IntVect iv   = vof.gridIndex();
-    const RealVect pos = EBArith::getVofLocation(vof, dx*RealVect::Unit, prob_lo);
+    const RealVect pos = prob_lo + (RealVect(iv) + 0.5*RealVect::Unit + ebisbox.centroid(vof))*dx;
     const Real kappa   = ebisbox.volFrac(vof);
     const RealVect e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
 
