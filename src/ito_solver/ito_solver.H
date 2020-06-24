@@ -15,6 +15,8 @@
 #include "ito_particle.H"
 #include "EBParticleInterp.H"
 #include "particle_container.H"
+#include "bvh.H"
+#include "point_mass.H"
 
 #include <Particle.H>
 #include <ParticleData.H>
@@ -30,6 +32,7 @@
 */
 class ito_solver {
 public:
+
 
   /*!
     @brief Default ctor
@@ -425,6 +428,11 @@ public:
   phase::which_phase get_phase() const;
   
 protected:
+
+  /*!
+    @brief Boundary volume hierarchy merging tree
+  */
+  bvh_tree<point_mass> m_tree;
 
   /*!
     @brief Computational geometry. 

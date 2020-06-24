@@ -20,6 +20,11 @@ public:
   point_mass(const std::vector<point_mass>& a_point_masses);
   ~point_mass();
 
+  inline void define(const RealVect& a_pos, const Real& a_mass){
+    m_mass = a_mass;
+    m_pos  = a_pos;
+  }
+  
   inline Real& operator[](int a_dir) {
     return m_pos[a_dir];
   }

@@ -64,9 +64,11 @@ int main(int argc, char* argv[]){
 
 
   // Do particle merging/splitting
-  const Real t0 = MPI_Wtime();
+
   bvh_tree<point_mass> tree(inputParticles, Mass);
+  const Real t0 = MPI_Wtime();
   tree.build_tree(ppc);
+  const Real t1 = MPI_Wtime();
 
   // Create output particles
   std::vector<point_mass> outputParticles(0);
@@ -76,7 +78,7 @@ int main(int argc, char* argv[]){
 
     outputParticles.push_back(newParticle);
   }
-  const Real t1 = MPI_Wtime();
+
   std::cout << "time per input particle = " << (t1-t0)/num_points << std::endl;
 
   // Write input and output particles

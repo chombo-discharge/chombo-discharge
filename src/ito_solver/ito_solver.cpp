@@ -11,8 +11,8 @@
 #include "units.H"
 #include "EBGhostCloud.H"
 #include "ito_layout.H"
-#include "point_mass.H"
-#include "bvh.H"
+
+
 #include "particle_ops.H"
 
 #include <EBArith.H>
@@ -1906,12 +1906,14 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
   const int numPart = a_particles.length();
 #endif
   
-  std::vector<point_mass> pointMasses;
+  std::vector<point_mass> pointMasses(a_particles.length());
+  int i = 0;
   Real mass = 0.0;
   for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
     const ito_particle& p = lit();
-    pointMasses.push_back(point_mass(p.position(), p.mass()));
+    pointMasses[i].define(p.position(), p.mass());
     mass += p.mass();
+    i++;
   }
   
 #if ITO_DEBUG
@@ -1919,9 +1921,16 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
 #endif
 
   // 2. Build the BVH tree and get the leaves of the tree
+#if 0 // Original code
   bvh_tree<point_mass> tree(pointMasses, mass);
   tree.build_tree(a_particlesPerCell);
   const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
+#else
+  m_tree.define(pointMasses, mass);
+  m_tree.build_tree(a_particlesPerCell);
+  const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = m_tree.get_leaves();
+#endif
+
 
 #if ITO_DEBUG
   auto t3 = std::chrono::high_resolution_clock::now();
@@ -1929,11 +1938,11 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
 
 
   // 3. Clear particles in this cell and add new ones.
-   a_particles.clear();
+  a_particles.clear();
   for (int i = 0; i < leaves.size(); i++){
     point_mass pointMass(leaves[i]->get_data());
     ito_particle p(pointMass.mass(), pointMass.pos());
-    a_particles.append(p);
+    a_particles.add(p);
   }
 
 #if ITO_DEBUG

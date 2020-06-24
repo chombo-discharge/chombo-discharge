@@ -37,13 +37,13 @@ public:
   inline std::vector<T>& get_data();
   inline const std::vector<T>& get_data() const;
 
-  inline Real mass() const;
+  inline Real& mass() const;
 
   inline std::shared_ptr<bvh_node<T> >& get_parent();
   inline std::shared_ptr<bvh_node<T> >& get_left();
   inline std::shared_ptr<bvh_node<T> >& get_right();
 
-protected:
+  //protected:
 
   std::shared_ptr<bvh_node<T> > m_parent;
   std::shared_ptr<bvh_node<T> > m_left;
@@ -65,20 +65,21 @@ template <class T>
 class bvh_tree {
 public:
 
-  bvh_tree() = delete;
+  bvh_tree();
   
   bvh_tree(std::vector<T>& a_points, const Real a_mass);
   ~bvh_tree();
 
   inline void build_tree(const int a_numLeaves); // Desired number of leaves
-
-  inline std::vector<std::shared_ptr<bvh_node<T> > >& get_leaves(); 
+  inline std::vector<std::shared_ptr<bvh_node<T> > >& get_leaves();
+  inline void define(std::vector<T>& a_points, const Real a_mass);
   
 protected:
 
   std::shared_ptr<bvh_node<T> > m_root; // Root node
 
   std::vector<std::shared_ptr<bvh_node<T> > > m_leaves;
+  std::vector<std::shared_ptr<bvh_node<T> > > m_new_leaves;
 };
 
 #include "bvhI.H"
