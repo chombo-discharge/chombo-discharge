@@ -14,11 +14,12 @@
 
 using namespace std::chrono;
 
+#define BVH_RESERVE_SIZE 2048
 #define BVH_DEBUG 0
 
 template <class T>
 bvh_node<T>::bvh_node(){
-  m_data.reserve(1024);
+  m_data.reserve(BVH_RESERVE_SIZE);
 }
 
 template <class T>
@@ -151,39 +152,26 @@ void bvh_node<T>::split(const int a_dir){
   std::vector<T>& leftData  = m_left->get_data();
   std::vector<T>& rightData = m_right->get_data();
 
-#if 0
-  leftData.resize(splitIndex);
-  rightData.resize(data_size - splitIndex - 1);
-  
-  for (int i = 0; i < splitIndex; i++){
-    leftData[i] = m_data[i];
-  }
- 
-  for (int i = splitIndex+1; i < data_size; i++){
-    rightData[i-(splitIndex+1)] = m_data[i];
-  }
-#else
   leftData.assign(m_data.begin(), m_data.begin() + splitIndex);
   rightData.assign(m_data.begin() + splitIndex + 1, m_data.end());
-#endif
   
   // If we can split up the median point into several ones, we do it. This would be the case if the median point
   // is a superparticle; in this case we divide the weights as best we can and then assign them to the left/right halves
   const T& splitMass = m_data[splitIndex];
   if(splitMass.can_split()){
     const RealVect& p   = splitMass.pos();
-    const Real& mass    = splitMass.mass();
-    const Real massDiff = mass_right - mass_left;
+    const Real& mass    = splitMass.mass();       // Always positive
+    const Real massDiff = mass_right - mass_left; // Not necessarily positive
 
     // This hook is for when we don't have enough mass to distribute to the two parts. 
     if(mass <= Abs(massDiff)){ 
       if(massDiff > 0){ // Goes into left
 	mass_left += mass; 
-	leftData.push_back(T(p, mass));
+	leftData.emplace_back(T(p, mass));
       }
       else{
 	mass_right += mass; // Goes into right
-	rightData.push_back(T(p, mass));
+	rightData.emplace_back(T(p, mass));
       }
     }
     else {
@@ -204,15 +192,29 @@ void bvh_node<T>::split(const int a_dir){
 	massRight += (massRem/N)*NR;
       }
 
+#if ITO_DEBUG
       if(massLeft > 0.0){
-	leftData.push_back(T(p, massLeft));
+#endif
+	leftData.emplace_back(T(p, massLeft));
 	mass_left  += massLeft;
+#if ITO_DEBUG
       }
+      else{
+	MayDay::Abort("bvh_node<T>::split - logic bust");
+      }
+#endif
 
+#if ITO_DEBUG
       if(massRight > 0.0){
-	rightData.push_back(T(p, massRight));
+#endif
+	rightData.emplace_back(T(p, massRight));
 	mass_right += massRight;
+#if ITO_DEBUG
       }
+      else{
+	MayDay::Abort("bvh_node<T>::split - logic bust");
+      }
+#endif
 
 #if ITO_DEBUG
       if(massLeft <= 0.0) MayDay::Abort("bvh_node<T>::split - should not get negative left mass");
@@ -223,17 +225,16 @@ void bvh_node<T>::split(const int a_dir){
   else{
     //    We should be able to simplify this since it always goes into the left mass(?)
     //    if(mass_left <= mass_right){
-      leftData.push_back(splitMass);
+      leftData.emplace_back(splitMass);
       mass_left += splitMass.mass();
-#if 0
-    }
-    else{
-      MayDay::Abort("wtf");
-      rightData.push_back(splitMass);
-      mass_right += splitMass.mass();
-    }
-#endif
+    // }
+    // else{
+    //   MayDay::Abort("wtf");
+    //   rightData.emplace_back(splitMass);
+    //   mass_right += splitMass.mass();
+    // }
   }
+
 
 #if BVH_DEBUG // Make sure we don't break mass
   if(Abs(m_mass - (mass_left + mass_right)) > 1.E-6) MayDay::Abort("bvh_node::split - broke mass");
@@ -256,8 +257,8 @@ void bvh_node<T>::split(const int a_dir){
 
 template <class T>
 bvh_tree<T>::bvh_tree(){
-  m_leaves.reserve(1024);
-  m_new_leaves.reserve(1024);
+  m_leaves.reserve(BVH_RESERVE_SIZE);
+  m_new_leaves.reserve(BVH_RESERVE_SIZE);
 }
 
 template <class T>

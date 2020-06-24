@@ -23,7 +23,7 @@
 
 #include <chrono>
 
-#define ITO_DEBUG 1
+#define ITO_DEBUG 0
 
 #if ITO_DEBUG
 int numPar;
