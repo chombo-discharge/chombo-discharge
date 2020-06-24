@@ -286,11 +286,12 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
     const photon& phot = lit();
     const RealVect pos = phot.position();
 
-    //    a_particles[m_electron_idx]->add(ito_particle(phot.mass(), pos));
-    //    a_particles[m_positive_idx]->add(ito_particle(phot.mass(), pos));
+    a_particles[m_electron_idx]->add(ito_particle(phot.mass(), pos));
+    a_particles[m_positive_idx]->add(ito_particle(phot.mass(), pos));
     // a_particles[m_electron_idx]->add(ito_particle(1.0, pos));
     // a_particles[m_positive_idx]->add(ito_particle(1.0, pos)); 
   }
+
 }
 
 void ito_plasma_air2::advance_reaction_network_ssa(Vector<List<ito_particle>* >& a_particles,

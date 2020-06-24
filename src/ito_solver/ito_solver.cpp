@@ -23,6 +23,17 @@
 
 #include <chrono>
 
+#define ITO_DEBUG 1
+
+#if ITO_DEBUG
+int numPar;
+duration<double> tIni;//   = duration_cast<duration<double> >(0.0);
+duration<double> tBvh;//   = duration_cast<duration<double> >(0.0);
+duration<double> tPar;//   = duration_cast<duration<double> >(0.0);
+duration<double> tTot;//   = duration_cast<duration<double> >(0.0);
+duration<double> tAll;//   = duration_cast<duration<double> >(0.0);
+#endif
+
 ito_solver::ito_solver(){
   m_name       = "ito_solver";
   m_class_name = "ito_solver";
@@ -1767,10 +1778,17 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch){
   if(m_verbosity > 5){
     pout() << m_name + "::make_superparticles(int)" << endl;
   }
+#if ITO_DEBUG
+  tAll = duration<double>(0.0);
+#endif
   
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     this->make_superparticles(a_particlesPerPatch, lvl);
   }
+
+#if ITO_DEBUG
+  //  pout() << "superparticle merging total time = " << tAll.count() << endl;
+#endif
 }
 
 void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_level){
@@ -1778,7 +1796,7 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_
   if(m_verbosity > 5){
     pout() << m_name + "::make_superparticles(int, level)" << endl;
   }
-  
+
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1842,6 +1860,14 @@ void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const 
     pout() << m_name + "::make_superparticlesPerCell(int, level, patch)" << endl;
   }
 
+#if ITO_DEBUG
+  numPar = 0;
+  tIni = duration<double>(0.0);
+  tBvh = duration<double>(0.0);
+  tPar = duration<double>(0.0);
+  tTot = duration<double>(0.0);
+#endif
+  
   const int comp = 0;
   const Box box  = m_amr->get_grids()[a_level].get(a_dit);
 
@@ -1851,44 +1877,74 @@ void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const 
 
   // Iterate over particles
   for (BoxIterator bit(box); bit.ok(); ++bit){
-    List<ito_particle>& particles = cellParticles(bit(), comp);
-
-    int ppc = a_particlesPerCell;
     const IntVect iv = bit();
-    if(ebisbox.isIrregular(iv)){
-      const Real kappa = ebisbox.volFrac(VolIndex(iv,0));
-      ppc = floor(kappa*(a_particlesPerCell+1));
-    }
-    if(particles.length() > 0){
-      this->bvh_merge(particles, ppc);
-    }
+  
+      List<ito_particle>& particles = cellParticles(iv, comp);
+      if(particles.length() > 0){
+	this->bvh_merge(particles, a_particlesPerCell);
+      }
   }
+
+#if ITO_DEBUG
+  pout() << "ini time  = " << 100.*tIni.count()/tTot.count() << "%" << endl
+  	 << "bvh time  = " << 100.*tBvh.count()/tTot.count() << "%" << endl
+  	 << "par time  = " << 100.*tPar.count()/tTot.count() << "%" << endl
+    	 << "particles = " << numPar << endl
+  	 << "time/par  = " << tTot.count()/numPar << endl
+    	 << "Tot time  = " << tTot.count() << endl
+  	 << endl;
+
+  tAll += tTot;
+#endif
 }
 
 void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particlesPerCell){
   CH_TIME("ito_solver::bvh_merge");
+
+#if ITO_DEBUG
+  auto t1 = std::chrono::high_resolution_clock::now();
+  const int numPart = a_particles.length();
+#endif
   
-  // 1. Make particles into point masses
   std::vector<point_mass> pointMasses;
   Real mass = 0.0;
-  for (ListIterator<ito_particle> lit(a_particles); lit; ++lit){
+  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
     const ito_particle& p = lit();
     pointMasses.push_back(point_mass(p.position(), p.mass()));
     mass += p.mass();
   }
+  
+#if ITO_DEBUG
+  auto t2 = std::chrono::high_resolution_clock::now();
+#endif
 
   // 2. Build the BVH tree and get the leaves of the tree
   bvh_tree<point_mass> tree(pointMasses, mass);
   tree.build_tree(a_particlesPerCell);
   const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
 
+#if ITO_DEBUG
+  auto t3 = std::chrono::high_resolution_clock::now();
+#endif
+
+
   // 3. Clear particles in this cell and add new ones.
-  a_particles.clear();
+   a_particles.clear();
   for (int i = 0; i < leaves.size(); i++){
     point_mass pointMass(leaves[i]->get_data());
     ito_particle p(pointMass.mass(), pointMass.pos());
     a_particles.append(p);
   }
+
+#if ITO_DEBUG
+  auto t4 = std::chrono::high_resolution_clock::now();
+
+  numPar += numPart;
+  tIni += duration_cast<duration<double> > (t2-t1);
+  tBvh += duration_cast<duration<double> > (t3-t2);
+  tPar += duration_cast<duration<double> > (t4-t3);
+  tTot += duration_cast<duration<double> > (t4-t1);
+#endif
 }
 
 void ito_solver::clear(particle_container<ito_particle>& a_particles){
