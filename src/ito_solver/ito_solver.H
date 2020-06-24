@@ -318,16 +318,6 @@ public:
   virtual void make_superparticles(const int a_particlesPerPatch, const int a_level, const DataIndex a_dit);
 
   /*!
-    @brief Make superparticles on specified level and patch
-  */
-  virtual void make_superparticlesPerPatch(const int a_particlesPerCell, const int a_level, const DataIndex a_dit);
-
-  /*!
-    @brief Make superparticles on specified level and patch
-  */
-  virtual void make_superparticlesPerCell(const int a_particlesPerCell, const int a_level, const DataIndex a_dit);
-
-  /*!
     @brief Remap all particles
   */
   void remap();
@@ -538,11 +528,6 @@ protected:
     @brief Epsilon-parameter for diffusion hopping
   */
   Real m_hop_eps;
-
-  /*!
-    @brief Superparticles per patch or not
-  */
-  bool m_superPatch;
 
   /*!
     @brief Flag for blending the deposition clouds with the nonconservative divergence

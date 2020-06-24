@@ -64,7 +64,6 @@ void ito_solver::parse_options(){
   this->parse_pvr_buffer();
   this->parse_diffusion_hop();
   this->parse_conservation();
-  this->parse_superparticles();
 }
 
 void ito_solver::parse_rng(){
@@ -115,25 +114,6 @@ void ito_solver::parse_plot_vars(){
     else if(str[i] == "eb_part")  m_plot_eb_particles     = true;
     else if(str[i] == "dom_part") m_plot_domain_particles = true;
     else if(str[i] == "src_part") m_plot_source_particles = true;
-  }
-}
-
-void ito_solver::parse_superparticles(){
-  CH_TIME("ito_solver::parse_superparticles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::parse_superparticles" << endl;
-  }
-
-  ParmParse pp(m_class_name.c_str());
-  std::string str;
-  
-  pp.get("superparticles", str);
-
-  if(str == "cell"){
-    m_superPatch = false;
-  }
-  else if(str == "patch"){
-    m_superPatch = true;
   }
 }
 
@@ -1787,7 +1767,7 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch){
   }
 
 #if ITO_DEBUG
-  //  pout() << "superparticle merging total time = " << tAll.count() << endl;
+  pout() << "superparticle merging total time = " << tAll.count() << endl;
 #endif
 }
 
@@ -1808,56 +1788,6 @@ void ito_solver::make_superparticles(const int a_particlesPerCell, const int a_l
   CH_TIME("ito_solver::make_superparticles(int, level, patch)");
   if(m_verbosity > 5){
     pout() << m_name + "::make_superparticles(int, level, patch)" << endl;
-  }
-
-  if(m_superPatch){
-    this->make_superparticlesPerPatch(a_particlesPerCell, a_level, a_dit);
-  }
-  else{
-    this->make_superparticlesPerCell(a_particlesPerCell, a_level, a_dit);
-  }
-}
-
-void ito_solver::make_superparticlesPerPatch(const int a_particlesPerCell, const int a_level, const DataIndex a_dit){
-  CH_TIME("ito_solver::make_superparticlesPerPatch(int, level, patch)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::make_superparticlesPerPatch(int, level, patch)" << endl;
-  }
-
-  ListBox<ito_particle>& boxParticles = m_particles[a_level][a_dit];
-  List<ito_particle>& particles = boxParticles.listItems();
-
-  const Box box = boxParticles.box();
-  const int numPerPatch = a_particlesPerCell*box.numPts();
-  if(boxParticles.numItems() > 0){
-
-    Real mass = 0.0;
-    std::vector<point_mass> pointMasses;
-    for (ListIterator<ito_particle> lit(particles); lit; ++lit){
-      const ito_particle& p = lit();
-      pointMasses.push_back(point_mass(p.position(), p.mass()));
-      mass += p.mass();
-    }
-
-    // 2. Build the BVH tree and get the leaves of the tree
-    bvh_tree<point_mass> tree(pointMasses, mass);
-    tree.build_tree(numPerPatch);
-    std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
-
-    // 3. Clear particles in this cell and add new ones.
-    particles.clear();
-    for (int i = 0; i < leaves.size(); i++){
-      point_mass pointMass(leaves[i]->get_data());
-      ito_particle p(pointMass.mass(), pointMass.pos());
-      boxParticles.addItem(p);
-    }
-  }
-}
-
-void ito_solver::make_superparticlesPerCell(const int a_particlesPerCell, const int a_level, const DataIndex a_dit){
-  CH_TIME("ito_solver::make_superparticlesPerCell(int, level, patch)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::make_superparticlesPerCell(int, level, patch)" << endl;
   }
 
 #if ITO_DEBUG

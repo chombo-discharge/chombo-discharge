@@ -130,12 +130,12 @@ void bvh_node<T>::split(const int a_dir){
   Real mass_left  = 0.0;
   Real mass_right = m_mass - m_data[0].mass();
 
-  for (unsigned int i = 1; i < data_size; i++){
+  for (int i = 1; i < data_size; i++){
     const Real& m1 = m_data[splitIndex].mass(); // This is the previous median. 
     const Real& m2 = m_data[splitIndex+1].mass();   // This is, maybe, our new median.
 
-    if(mass_left + m1 < mass_right){ // This is equivalent to shifting the median. The previous median goes into the left
-      mass_left  += m1;
+    if(mass_left + m1 < mass_right){ // This is equivalent to shifting the median. 
+      mass_left  += m1;              
       mass_right = m_mass - mass_left - m2; // Total mass - left mass - median mass
       
       splitIndex++;
