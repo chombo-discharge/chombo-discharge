@@ -57,7 +57,9 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 
   // ---------- BEGIN END ---------
   this->advect_particles(a_dt);
-  this->diffuse_particles(a_dt);
+  for (int k = 0; k < 30; k++){
+  this->diffuse_particles(a_dt/30);
+  }
   
   m_ito->remap();
   m_ito->deposit_particles();
@@ -72,7 +74,9 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   this->compute_ito_diffusion();
 
   this->advect_particles(a_dt);
-  this->diffuse_particles(a_dt);
+  for (int k = 0; k < 30; k++){
+  this->diffuse_particles(a_dt/30);
+  }
   m_ito->remap();
   this->intersect_particles(a_dt);
   
