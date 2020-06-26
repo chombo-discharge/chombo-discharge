@@ -30,12 +30,19 @@ namespace physics {
 
     protected:
 
+      EBAMRCellData m_scratch1;
+      EBAMRCellData m_scratch2;
+      EBAMRCellData m_conduct_cell;
+      EBAMRFluxData m_conduct_face;
+
       int m_merge_interval; // How often to merge superparticles
 
       void advect_particles(const Real a_dt);
       void diffuse_particles(const Real a_dt);
       void intersect_particles(const Real a_dt);
       void rewind_particles();
+      void compute_conductivity();
+      void setup_semi_implicit_poisson(const Real a_dt);
     };
   }
 }

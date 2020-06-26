@@ -6,6 +6,9 @@
 */
 
 #include "ito_plasma_godunov.H"
+#include "data_ops.H"
+#include "units.H"
+#include "poisson_multifluid_gmg.H"
 
 #include <ParmParse.H>
 
@@ -46,7 +49,12 @@ void ito_plasma_godunov::allocate_internals(){
     pout() << m_name + "::allocate_internals" << endl;
   }
 
-  m_amr->allocate(m_J, phase::gas, SpaceDim);
+  m_amr->allocate(m_J,            m_phase, SpaceDim);
+  m_amr->allocate(m_scratch1,     m_phase, SpaceDim);
+  m_amr->allocate(m_scratch2,     m_phase, SpaceDim);
+  m_amr->allocate(m_conduct_cell, m_phase, SpaceDim);
+  m_amr->allocate(m_conduct_face, m_phase, SpaceDim);
+  
 }
 
 Real ito_plasma_godunov::advance(const Real a_dt) {
@@ -57,9 +65,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 
   // ---------- BEGIN END ---------
   this->advect_particles(a_dt);
-  for (int k = 0; k < 30; k++){
-  this->diffuse_particles(a_dt/30);
-  }
+  this->diffuse_particles(a_dt);
   
   m_ito->remap();
   m_ito->deposit_particles();
@@ -74,9 +80,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   this->compute_ito_diffusion();
 
   this->advect_particles(a_dt);
-  for (int k = 0; k < 30; k++){
-  this->diffuse_particles(a_dt/30);
-  }
+  this->diffuse_particles(a_dt);
   m_ito->remap();
   this->intersect_particles(a_dt);
   
@@ -240,4 +244,77 @@ void ito_plasma_godunov::intersect_particles(const Real a_dt){
 
     solver->intersect_particles();
   }
+}
+
+void ito_plasma_godunov::compute_conductivity(){
+  CH_TIME("ito_plasma_godunov::compute_conductivity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_conductivity" << endl;
+  }
+
+  // Get handle to E gas-side E
+  EBAMRCellData Egas;
+  m_amr->allocate_ptr(Egas);
+  m_amr->alias(Egas, m_phase, m_poisson->get_E());
+
+  // Compute |E| and reset conductivity
+  data_ops::vector_length(m_scratch1, Egas);
+  data_ops::set_value(m_conduct_cell, 0.0);
+  
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<ito_solver>& solver   = solver_it();
+    const RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int q = species->get_charge();
+    
+    if(solver->is_mobile() &&  q != 0){
+
+      const EBAMRCellData& velo  = solver->get_velo_cell();
+      const EBAMRCellData& state = solver->get_state();
+
+      data_ops::vector_length(m_scratch2, velo);
+      data_ops::divide_scalar(m_scratch2, m_scratch1);
+      data_ops::multiply(m_scratch2, state);
+      data_ops::incr(m_conduct_cell, m_scratch2, Abs(q));
+    }
+  }
+
+  m_amr->average_down(m_conduct_cell, m_phase);
+  m_amr->interp_ghost_pwl(m_conduct_cell, m_phase);
+
+  // This code does averaging from cell to face. 
+  data_ops::average_cell_to_face_allcomps(m_conduct_face, m_conduct_cell, m_amr->get_domains());
+}
+
+void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::setup_semi_implicit_poisson");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setup_semi_implicit_poisson" << endl;
+  }
+
+  poisson_multifluid_gmg* poisson = (poisson_multifluid_gmg*) (&(*m_poisson));
+
+    // Set coefficients as usual
+  poisson->set_coefficients();
+
+  // Get bco and increment with mobilities
+  MFAMRFluxData& bco   = poisson->get_bco();
+  MFAMRIVData& bco_irr = poisson->get_bco_irreg();
+  
+  EBAMRFluxData bco_gas;
+  EBAMRIVData   bco_irr_gas;
+  
+  m_amr->allocate_ptr(bco_gas);
+  m_amr->allocate_ptr(bco_irr_gas);
+  
+  m_amr->alias(bco_gas,     phase::gas, bco);
+  m_amr->alias(bco_irr_gas, phase::gas, bco_irr);
+
+  // Increment with conductivity
+  data_ops::incr(bco_gas, m_conduct_face, a_dt/(units::s_eps0));
+
+  // Set up the multigrid solver
+  poisson->setup_operator_factory();
+  poisson->setup_solver();
+  poisson->set_needs_setup(false);
 }
