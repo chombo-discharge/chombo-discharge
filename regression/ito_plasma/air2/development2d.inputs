@@ -80,12 +80,12 @@ poisson_multifluid_gmg.plt_vars  = phi rho E res     # Plot variables. Possible 
 
 poisson_multifluid_gmg.auto_tune         = false     # Do some auto-tuning
 poisson_multifluid_gmg.gmg_verbosity     = 10        # GMG verbosity
-poisson_multifluid_gmg.gmg_pre_smooth    = 12        # Number of relaxations in downsweep
-poisson_multifluid_gmg.gmg_post_smooth   = 12        # Number of relaxations in upsweep
-poisson_multifluid_gmg.gmg_bott_smooth   = 12        # NUmber of relaxations before dropping to bottom solver
+poisson_multifluid_gmg.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
+poisson_multifluid_gmg.gmg_post_smooth   = 16        # Number of relaxations in upsweep
+poisson_multifluid_gmg.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
 poisson_multifluid_gmg.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid_gmg.gmg_max_iter      = 32        # Maximum number of iterations
-poisson_multifluid_gmg.gmg_tolerance     = 1.E-12    # Residue tolerance
+poisson_multifluid_gmg.gmg_tolerance     = 1.E-10    # Residue tolerance
 poisson_multifluid_gmg.gmg_hang          = 0.2       # Solver hang
 poisson_multifluid_gmg.gmg_bottom_drop   = 4         # Bottom drop
 poisson_multifluid_gmg.gmg_bc_order      = 2         # Boundary condition order for multigrid
@@ -189,11 +189,13 @@ rod_sphere.dielectric_radius         = 100.E-6              # Dielectric radius
 # ==================================================================================================== 
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
-ito_plasma_godunov.verbosity      = -1           # Verbosity
-ito_plasma_godunov.max_cells_hop  = 1.0          # Maximum cells to move in one time step
+ito_plasma_godunov.verbosity      = -1            # Verbosity
+ito_plasma_godunov.max_cells_hop  = 3.0           # Maximum cells to move in one time step
 ito_plasma_godunov.ppc            = 256           # Superparticle number of cells
-ito_plasma_godunov.merge_interval = 1            # How often to make superparticles
-ito_plasma_godunov.regrid_super   = false        # Make superparticles after regrid or not
+ito_plasma_godunov.merge_interval = 5             # How often to make superparticles
+ito_plasma_godunov.relax_factor   = 0.5           # Factor in front of relaxation time	
+ito_plasma_godunov.regrid_super   = false         # Make superparticles after regrid or not
+ito_plasma_godunov.algorithm      = semi_implicit # 'euler', 'predictor_corrector', or 'semi_implicit'	
 
 # ====================================================================================================
 # ITO_PLASMA_AIR2 CLASS OPTIONS
@@ -207,7 +209,7 @@ ito_plasma_air2.particle_weight = 1                            # Initial weights
 # Reaction stuff
 ito_plasma_air2.tau_switch     = -1                           # Switch from SSA to tau when reaching this many particles
 ito_plasma_air2.poisson_switch = 100                          # When to approximate Poisson by normal distribution
-ito_plasma_air2.react_ppc      = 64                          # Maximum number of particles to produce in reaction step	
+ito_plasma_air2.react_ppc      = 16                          # Maximum number of particles to produce in reaction step	
 
 # ----------------------------------------------------------------------------------------------------
 # SEE parameters

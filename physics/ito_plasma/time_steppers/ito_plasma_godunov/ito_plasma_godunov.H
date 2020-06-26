@@ -23,12 +23,22 @@ namespace physics {
 
       // Advance routines
       Real advance(const Real a_dt) override;
+      void compute_dt(Real& a_dt, time_code::which_code& a_timecode) override;
 
       // Setup routines
       void parse_options() override;
       void allocate_internals() override;
 
+      // Regrid routines
+      void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
+
     protected:
+
+      enum which_algorithm {
+	euler = 0,
+	predictor_corrector = 1,
+	semi_implicit = 2,
+      };
 
       EBAMRCellData m_scratch1;
       EBAMRCellData m_scratch2;
@@ -36,15 +46,31 @@ namespace physics {
       EBAMRFluxData m_conduct_face;
       EBAMRIVData   m_conduct_eb;
 
+      bool m_use_old_dt;
+      
+      Real m_relax_factor; // Factor for relaxation time
+
+      which_algorithm m_algorithm;
+
       int m_merge_interval; // How often to merge superparticles
 
-      void advect_particles(const Real a_dt);
-      void advect_particles2(const Real a_dt);
-      void diffuse_particles(const Real a_dt);
+      // Global routines
       void intersect_particles(const Real a_dt);
+      void set_old_positions();
       void rewind_particles();
+      void diffuse_particles_euler(const Real a_dt);
+      void advect_particles_euler(const Real a_dt);
+      void advect_particles_rk2(const Real a_dt);      
+
+      // Specific routines for semi-implicit Euler
       void compute_conductivity();
       void setup_semi_implicit_poisson(const Real a_dt);
+
+      // Particle advance + Poisson solve routines. 
+      void advance_particles_euler(const Real a_dt);
+      void advance_particles_pc(const Real a_dt);
+      void advance_particles_si(const Real a_dt);
+
     };
   }
 }

@@ -50,16 +50,15 @@ namespace physics {
   
       // Advance routines
       virtual Real advance(const Real a_dt) = 0;
-      void compute_dt(Real& a_dt, time_code::which_code& a_timecode) override;
+      virtual void compute_dt(Real& a_dt, time_code::which_code& a_timecode) override;
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
       void print_step_report() override;
 
       // New regrid routines
       void register_operators() override; 
       void deallocate() override;
-      void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
+      virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
-      void post_regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
 
       // Internal routines
       void set_verbosity(const int a_verbosity);
@@ -204,6 +203,7 @@ namespace physics {
       bool m_regrid_superparticles;
       int m_ppc;
       Real m_max_cells_hop;
+      Real m_dt_relax;
 
       // Storage for current density
       EBAMRCellData m_J;

@@ -311,16 +311,11 @@ void ito_plasma_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecod
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_dt" << endl;
   }
-
   
   a_dt = m_ito->compute_dt();
   a_dt = a_dt*m_max_cells_hop;
   a_timecode = time_code::cfl;
-
-#if 1
-  Real relaxDt = this->compute_relaxation_time();
-  if(procID() == 0) std::cout << "ito_plasma_stepper::compute_d - relax dt = " << relaxDt << std::endl;
-#endif
+  
 }
 
 void ito_plasma_stepper::register_operators(){
@@ -385,13 +380,6 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, 
   // Compute new velocities and diffusion coefficients
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
-}
-
-void ito_plasma_stepper::post_regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
-  CH_TIME("ito_plasma_stepper::post_regrid");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::post_regrid" << endl;
-  }
 }
 
 int  ito_plasma_stepper::get_num_plot_vars() const {
@@ -705,6 +693,15 @@ Real ito_plasma_stepper::compute_relaxation_time(const int a_level){
     dt = Min(dt, thisDt);
   }
 
+#ifdef CH_MPI
+  Real tmp = dt;
+  int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("cdr_solver::compute_cfl_dt() - communication error on norm");
+  }
+  dt = tmp;
+#endif
+
   return dt;
 }
 
@@ -743,7 +740,6 @@ Real ito_plasma_stepper::compute_relaxation_time(const int a_level, const DataIn
   dt *= e_magnitude;
   dt /= j_magnitude;
   
-
   return dt.min(comp);
 }
 
