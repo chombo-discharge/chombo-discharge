@@ -19,6 +19,8 @@ ito_plasma_stepper::ito_plasma_stepper(){
 
   m_dt   = 0.0;
   m_time = 0.0;
+
+  m_regrid_superparticles = false;
 }
 
 ito_plasma_stepper::ito_plasma_stepper(RefCountedPtr<ito_plasma_physics>& a_physics) : ito_plasma_stepper(){
@@ -374,9 +376,22 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, 
     MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
   }
 
+  if(m_regrid_superparticles){
+    m_ito->sort_particles_by_cell();
+    m_ito->make_superparticles(m_ppc);
+    m_ito->sort_particles_by_patch();
+  }
+
   // Compute new velocities and diffusion coefficients
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
+}
+
+void ito_plasma_stepper::post_regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
+  CH_TIME("ito_plasma_stepper::post_regrid");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::post_regrid" << endl;
+  }
 }
 
 int  ito_plasma_stepper::get_num_plot_vars() const {

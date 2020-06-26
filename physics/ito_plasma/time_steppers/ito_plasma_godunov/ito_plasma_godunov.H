@@ -34,10 +34,12 @@ namespace physics {
       EBAMRCellData m_scratch2;
       EBAMRCellData m_conduct_cell;
       EBAMRFluxData m_conduct_face;
+      EBAMRIVData   m_conduct_eb;
 
       int m_merge_interval; // How often to merge superparticles
 
       void advect_particles(const Real a_dt);
+      void advect_particles2(const Real a_dt);
       void diffuse_particles(const Real a_dt);
       void intersect_particles(const Real a_dt);
       void rewind_particles();

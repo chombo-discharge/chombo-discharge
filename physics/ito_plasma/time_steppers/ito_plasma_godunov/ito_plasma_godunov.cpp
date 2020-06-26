@@ -41,6 +41,7 @@ void ito_plasma_godunov::parse_options() {
   pp.get("ppc",            m_ppc);
   pp.get("max_cells_hop",  m_max_cells_hop);
   pp.get("merge_interval", m_merge_interval);
+  pp.get("regrid_super",   m_regrid_superparticles);
 }
 
 void ito_plasma_godunov::allocate_internals(){
@@ -50,10 +51,11 @@ void ito_plasma_godunov::allocate_internals(){
   }
 
   m_amr->allocate(m_J,            m_phase, SpaceDim);
-  m_amr->allocate(m_scratch1,     m_phase, SpaceDim);
-  m_amr->allocate(m_scratch2,     m_phase, SpaceDim);
-  m_amr->allocate(m_conduct_cell, m_phase, SpaceDim);
-  m_amr->allocate(m_conduct_face, m_phase, SpaceDim);
+  m_amr->allocate(m_scratch1,     m_phase, 1);
+  m_amr->allocate(m_scratch2,     m_phase, 1);
+  m_amr->allocate(m_conduct_cell, m_phase, 1);
+  m_amr->allocate(m_conduct_face, m_phase, 1);
+  m_amr->allocate(m_conduct_eb,   m_phase, 1);
   
 }
 
@@ -63,6 +65,29 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     pout() << m_name + "::advance" << endl;
   }
 
+#if 1
+  this->compute_conductivity();
+  this->setup_semi_implicit_poisson(a_dt);
+
+  // Diffuse particles
+  this->diffuse_particles(a_dt);
+
+  // Remap and deposit
+  m_ito->remap();
+  m_ito->deposit_particles();
+
+  // Now compute the electric field
+  this->solve_poisson();
+
+  // Compute new ito velocities and advect the particles
+  this->compute_ito_velocities();
+  this->advect_particles2(a_dt);
+
+  // Remap, intersect, and redeposit
+  m_ito->remap();
+  this->intersect_particles(a_dt);
+  m_ito->deposit_particles();
+#else // Original code
   // ---------- BEGIN END ---------
   this->advect_particles(a_dt);
   this->diffuse_particles(a_dt);
@@ -87,11 +112,12 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   m_ito->deposit_particles();
   this->solve_poisson();
   // ---------- CORRECTOR END ---------
+#endif
 
   // Move photons
   this->advance_photons(a_dt);
 
-#if 1 // Have to put it here right now because particle merging is not OK. 
+#if 1 // Have to put it here right now....
   // Compute J. 
   this->compute_J(m_J, a_dt);
 #endif
@@ -164,6 +190,37 @@ void ito_plasma_godunov::advect_particles(const Real a_dt){
 	  for (lit.rewind(); lit; ++lit){
 	    ito_particle& p = particleList[lit];
 	    p.position() = p.oldPosition() + p.velocity()*a_dt;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::advect_particles2(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advect_particles2");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advect_particles2" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    if(solver->is_mobile()){
+      
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  // First step
+	  for (lit.rewind(); lit; ++lit){
+	    ito_particle& p = particleList[lit];
+	    p.oldPosition() = p.position();
+	    p.position() += p.velocity()*a_dt;
 	  }
 	}
       }
@@ -284,6 +341,12 @@ void ito_plasma_godunov::compute_conductivity(){
 
   // This code does averaging from cell to face. 
   data_ops::average_cell_to_face_allcomps(m_conduct_face, m_conduct_cell, m_amr->get_domains());
+
+  // This code computes the conductivity on the EB
+  const irreg_amr_stencil<eb_centroid_interp>& ebsten = m_amr->get_eb_centroid_interp_stencils(m_phase);
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    ebsten.apply(m_conduct_eb, m_conduct_cell, lvl);
+  }
 }
 
 void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
@@ -294,7 +357,7 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
 
   poisson_multifluid_gmg* poisson = (poisson_multifluid_gmg*) (&(*m_poisson));
 
-    // Set coefficients as usual
+  // Set coefficients as usual
   poisson->set_coefficients();
 
   // Get bco and increment with mobilities
@@ -311,7 +374,8 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
   m_amr->alias(bco_irr_gas, phase::gas, bco_irr);
 
   // Increment with conductivity
-  data_ops::incr(bco_gas, m_conduct_face, a_dt/(units::s_eps0));
+  data_ops::incr(bco_gas,     m_conduct_face, units::s_Qe*a_dt/(units::s_eps0));
+  data_ops::incr(bco_irr_gas, m_conduct_eb,   units::s_Qe*a_dt/(units::s_eps0));
 
   // Set up the multigrid solver
   poisson->setup_operator_factory();

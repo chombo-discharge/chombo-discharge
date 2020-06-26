@@ -56,9 +56,10 @@ namespace physics {
 
       // New regrid routines
       void register_operators() override; 
-      void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       void deallocate() override;
+      void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+      void post_regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
 
       // Internal routines
       void set_verbosity(const int a_verbosity);
@@ -200,6 +201,7 @@ namespace physics {
 
       Real (*m_potential)(const Real a_time);
 
+      bool m_regrid_superparticles;
       int m_ppc;
       Real m_max_cells_hop;
 

@@ -173,7 +173,7 @@ Vector<RealVect> ito_plasma_air2::compute_ito_velocities(const Real         a_ti
 RealVect ito_plasma_air2::compute_electron_velocity(const RealVect a_E) const {
   const Real E = a_E.vectorLength();
   const Real mu = 2.3987*pow(E, -0.26);
-
+  
   return -mu*a_E;
 }
 
