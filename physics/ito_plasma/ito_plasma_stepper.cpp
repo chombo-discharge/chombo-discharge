@@ -366,15 +366,15 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, 
   m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
   m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
 
-  const bool converged = this->solve_poisson();
-  if(!converged){
-    MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
-  }
-
   if(m_regrid_superparticles){
     m_ito->sort_particles_by_cell();
     m_ito->make_superparticles(m_ppc);
     m_ito->sort_particles_by_patch();
+  }
+
+  const bool converged = this->solve_poisson();
+  if(!converged){
+    MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
   }
 
   // Compute new velocities and diffusion coefficients
