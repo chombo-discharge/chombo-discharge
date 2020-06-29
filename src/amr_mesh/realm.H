@@ -61,13 +61,11 @@ public:
   ~realm();
 
   // Define function
-  void define(const int a_finest_level,
-	      const phase::which_phase a_phase,
-	      const Vector<DisjointBoxLayout>& a_grids,
+  void define(const Vector<DisjointBoxLayout>& a_grids,
 	      const Vector<ProblemDomain>& a_domains,
 	      const Vector<int>& a_ref_rat,
 	      const Vector<Real>& a_dx,
-	      const int a_mg_coarsen,
+	      const int a_finest_level,
 	      const int a_ebghost,
 	      const int a_num_ghost,
 	      const int a_redist_rad,
@@ -77,11 +75,9 @@ public:
 	      const RefCountedPtr<EBIndexSpace>& a_ebis);
 
   // Base and operator regrid
+  void set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
   void regrid_base(const int a_lmin, const int a_lmax, const int a_hardcap);
   void regrid_operators(const int a_lmin, const int a_lmax, const int a_regsize);
-
-  // Get phase
-  phase::which_phase get_phase();
 
   // Register and query operator
   void register_operator(const std::string a_operator);
@@ -102,24 +98,19 @@ protected:
   Vector<Real> m_dx;
   Vector<int> m_ref_ratios;
 
-  phase::which_phase m_phase;
-
   RefCountedPtr<EBIndexSpace> m_ebis;
 
   std::map<std::string, bool> m_operator_map; // Map that holds operators
 
-  // AMR grids and MG grids
+  // AMR grids
   Vector<DisjointBoxLayout> m_grids;
-  Vector<DisjointBoxLayout> m_mg_grids;
 
-  // Domains and MG domains
+  // Domains
   Vector<ProblemDomain> m_domains;
-  Vector<ProblemDomain> m_mg_domains;
 
   // EB stuff
   Vector<EBISLayout> m_ebisl;
   Vector<RefCountedPtr<EBLevelGrid> > m_eblg;
-  Vector<RefCountedPtr<EBLevelGrid> > m_mg_eblg;
 
   // Neighbors
   Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > > m_neighbors;

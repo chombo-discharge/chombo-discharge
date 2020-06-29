@@ -9,6 +9,7 @@
 #include "EBFastFineToCoarRedist.H"
 #include "EBFastCoarToFineRedist.H"
 #include "EBFastCoarToCoarRedist.H"
+#include "load_balance.H"
 
 #include <EBArith.H>
 
@@ -22,13 +23,11 @@ realm::~realm(){
 
 }
 
-void realm::define(const int a_finest_level,
-		   const phase::which_phase a_phase,
-		   const Vector<DisjointBoxLayout>& a_grids,
+void realm::define(const Vector<DisjointBoxLayout>& a_grids,
 		   const Vector<ProblemDomain>& a_domains,
 		   const Vector<int>& a_ref_rat,
 		   const Vector<Real>& a_dx,
-		   const int a_mg_coarsen,
+		   const int a_finest_level,
 		   const int a_ebghost,
 		   const int a_num_ghost,
 		   const int a_redist_rad,
@@ -38,12 +37,10 @@ void realm::define(const int a_finest_level,
 		   const RefCountedPtr<EBIndexSpace>& a_ebis){
 
   m_finest_level = a_finest_level;
-  m_phase = a_phase;
   m_grids = a_grids;
   m_domains = a_domains;
   m_ref_ratios = a_ref_rat;
   m_dx = a_dx;
-  m_mg_coarsen = a_mg_coarsen;
   m_ebis = a_ebis;
   m_ebcf = a_ebcf;
   m_ebghost = a_ebghost;
@@ -55,11 +52,27 @@ void realm::define(const int a_finest_level,
   m_defined = true;
 }
 
+void realm::set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level){
+  CH_TIME("realm::set_grids");
+  if(m_verbosity > 5){
+    pout() << "realm::set_grids" << endl;
+  }
+  
+  m_grids = a_grids;
+  m_finest_level = a_finest_level;
+}
+
 void realm::regrid_base(const int a_lmin, const int a_lmax, const int a_hardcap){
   CH_TIME("realm::regrid_base");
   if(m_verbosity > 5){
     pout() << "realm::regrid_base" << endl;
   }
+
+  this->define_neighbors(a_lmin);
+  this->define_eblevelgrid(a_lmin);
+  this->define_vofiter(a_lmin);
+
+  // Missing MG grids...
 }
 
 void realm::regrid_operators(const int a_lmin, const int a_lmax, const int a_regsize){
@@ -67,15 +80,19 @@ void realm::regrid_operators(const int a_lmin, const int a_lmax, const int a_reg
   if(m_verbosity > 5){
     pout() << "realm::regrid_operators" << endl;
   }
-}
 
-phase::which_phase realm::get_phase(){
-  CH_TIME("realm::get_phase");
-  if(m_verbosity > 5){
-    pout() << "realm::get_phase" << endl;
-  }
-  
-  return m_phase;
+  this->define_eb_coar_ave(a_lmin);             // Define ebcoarseaverage on both phases
+  this->define_eb_quad_cfi(a_lmin);             // Define nwoebquadcfinterp on both phases.
+  this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
+  this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
+  this->define_ebmg_interp(a_lmin);             // Define interpolator used for e.g. multigrid (or piecewise constant)
+  this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
+  this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
+  this->define_gradsten(a_lmin);                // Make stencils for computing gradients
+  this->define_irreg_sten();                    // Make stencils for doing interpolation to centroids
+  this->define_noncons_sten();                  // Make stencils for nonconservative averaging
+  this->define_copier(a_lmin);                  // Make stencils for copier
+  this->define_ghostcloud(a_lmin);              // Make stencils for ghost clouds with particle depositions
 }
 
 void realm::register_operator(const std::string a_operator){
