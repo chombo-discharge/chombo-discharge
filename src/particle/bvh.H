@@ -37,7 +37,7 @@ public:
   inline std::vector<T>& get_data();
   inline const std::vector<T>& get_data() const;
 
-  inline Real& mass() const;
+  inline Real mass() const;
 
   inline std::shared_ptr<bvh_node<T> >& get_parent();
   inline std::shared_ptr<bvh_node<T> >& get_left();

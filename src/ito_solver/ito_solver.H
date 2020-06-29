@@ -133,6 +133,26 @@ public:
   virtual int get_num_plotvars() const;
 
   /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_particles(const bool a_local) const;
+
+  /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_eb_particles(const bool a_local) const;
+
+  /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_domain_particles(const bool a_local) const;
+
+  /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_source_particles(const bool a_local) const;
+
+  /*!
     @brief Register operators
   */
   virtual void register_operators();

@@ -253,6 +253,78 @@ int ito_solver::get_num_plotvars() const {
   return num_plotvars;
 }
 
+size_t ito_solver::get_num_particles(const bool a_local) const{
+  CH_TIME("ito_solver::get_num_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_num_particles" << endl;
+  }
+
+  size_t N;
+  
+  if(a_local){
+    N = m_particles.get_num_valid_local();
+  }
+  else{
+    N = m_particles.get_num_valid_global();
+  }
+
+  return N;
+}
+
+size_t ito_solver::get_num_eb_particles(const bool a_local) const{
+  CH_TIME("ito_solver::get_num_eb_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_num_eb_particles" << endl;
+  }
+
+  size_t N;
+  
+  if(a_local){
+    N = m_eb_particles.get_num_valid_local();
+  }
+  else{
+    N = m_eb_particles.get_num_valid_global();
+  }
+
+  return N;
+}
+
+size_t ito_solver::get_num_domain_particles(const bool a_local) const{
+  CH_TIME("ito_solver::get_num_domain_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_num_domain_particles" << endl;
+  }
+
+  size_t N;
+  
+  if(a_local){
+    N = m_domain_particles.get_num_valid_local();
+  }
+  else{
+    N = m_domain_particles.get_num_valid_global();
+  }
+
+  return N;
+}
+
+size_t ito_solver::get_num_source_particles(const bool a_local) const{
+  CH_TIME("ito_solver::get_num_source_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_num_source_particles" << endl;
+  }
+
+  size_t N;
+  
+  if(a_local){
+    N = m_source_particles.get_num_valid_local();
+  }
+  else{
+    N = m_source_particles.get_num_valid_global();
+  }
+
+  return N;
+}
+
 void ito_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
   CH_TIME("ito_solver::set_computational_geometry");
   if(m_verbosity > 5){

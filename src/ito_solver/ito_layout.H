@@ -162,6 +162,26 @@ public:
   virtual Real compute_min_diffusion_dt(const Real a_maxCellsToMove);
 
   /*!
+    @brief Get number of particles
+  */
+  virtual size_t get_num_particles(const bool a_local);
+
+  /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_eb_particles(const bool a_local);
+
+  /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_domain_particles(const bool a_local);
+
+  /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_source_particles(const bool a_local);
+
+  /*!
     @brief Get solvers
   */
   virtual Vector<RefCountedPtr<T> >& get_solvers();

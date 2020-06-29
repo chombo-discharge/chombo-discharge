@@ -106,7 +106,7 @@ bool bvh_node<T>::can_split() const {
 }
 
 template <class T>
-Real& bvh_node<T>::mass() const {
+Real bvh_node<T>::mass() const {
   return m_mass;
 }
 

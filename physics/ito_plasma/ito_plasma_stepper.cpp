@@ -304,6 +304,27 @@ void ito_plasma_stepper::print_step_report(){
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::print_step_report" << endl;
   }
+
+  const Real Emax = this->compute_Emax(m_phase);
+  
+  const size_t l_particles         = m_ito->get_num_particles(true);
+  const size_t g_particles        = m_ito->get_num_particles(false);
+  
+  const size_t l_eb_particles      = m_ito->get_num_eb_particles(true);
+  const size_t g_eb_particles     = m_ito->get_num_eb_particles(false);
+  
+  const size_t l_domain_particles  = m_ito->get_num_domain_particles(true);
+  const size_t g_domain_particles = m_ito->get_num_domain_particles(false);
+
+  const size_t l_source_particles  = m_ito->get_num_source_particles(true);
+  const size_t g_source_particles = m_ito->get_num_source_particles(false);
+
+
+  pout() << "                                   Emax      = " << Emax << endl
+	 << "                                   #part     = " << l_particles << " (" << g_particles << ")" << endl
+	 << "                                   #eb part  = " << l_eb_particles << " (" << g_eb_particles << ")" << endl
+	 << "                                   #dom part = " << l_domain_particles << " (" << g_domain_particles << ")" << endl
+    	 << "                                   #src part = " << l_source_particles << " (" << g_source_particles << ")" << endl;
 }
 
 void ito_plasma_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
@@ -441,6 +462,29 @@ void ito_plasma_stepper::set_potential(Real (*a_potential)(const Real a_time)){
   }
 
   m_potential = a_potential;
+}
+
+Real ito_plasma_stepper::compute_Emax(const phase::which_phase a_phase) {
+  CH_TIME("ito_plasma_stepper::compute_Emax");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_Emax" << endl;
+  }
+
+  // Get a handle to the E-field
+  EBAMRCellData Ephase;
+  m_amr->allocate_ptr(Ephase);
+  m_amr->alias(Ephase, m_phase, m_poisson->get_E());
+
+  // Interpolate to centroids
+  EBAMRCellData E;
+  m_amr->allocate(E, m_phase, SpaceDim);
+  data_ops::copy(E, Ephase);
+  m_amr->interpolate_to_centroids(E, m_phase);
+
+  Real max, min;
+  data_ops::get_max_min_norm(max, min, E);
+
+  return max;
 }
 
 Real ito_plasma_stepper::get_time() const{

@@ -162,6 +162,46 @@ void ito_layout<T>::remap(){
 }
 
 template <class T>
+size_t ito_layout<T>::get_num_particles(const bool a_local) {
+  size_t ret = 0;
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret += iter()->get_num_particles(a_local);
+  }
+
+  return ret;
+}
+
+template <class T>
+size_t ito_layout<T>::get_num_eb_particles(const bool a_local) {
+  size_t ret = 0;
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret += iter()->get_num_eb_particles(a_local);
+  }
+
+  return ret;
+}
+
+template <class T>
+size_t ito_layout<T>::get_num_domain_particles(const bool a_local) {
+  size_t ret = 0;
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret += iter()->get_num_domain_particles(a_local);
+  }
+
+  return ret;
+}
+
+template <class T>
+size_t ito_layout<T>::get_num_source_particles(const bool a_local) {
+  size_t ret = 0;
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret += iter()->get_num_source_particles(a_local);
+  }
+
+  return ret;
+}
+
+template <class T>
 Real ito_layout<T>::compute_dt(){
   Real minDt = 1.E99;
 

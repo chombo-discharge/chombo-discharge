@@ -71,6 +71,7 @@ namespace physics {
 
       // Get routines
       Real get_time() const;
+      Real compute_Emax(const phase::which_phase a_phase);
 
       // E-field computations
       void compute_E(MFAMRCellData& a_E,      const MFAMRCellData& a_potential);

@@ -556,4 +556,48 @@ void particle_container<P>::discard_invalid_particles(){
   }
 }
 
+template <class P>
+size_t particle_container<P>::get_num_valid_local() const {
+  size_t n = 0;
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    n += m_particles[lvl]->numValidLocal();
+  }
+
+  return n;
+}
+
+template <class P>
+size_t particle_container<P>::get_num_valid_global() const {
+  size_t n = 0;
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    n += m_particles[lvl]->numValid();
+  }
+
+  return n;
+}
+
+template <class P>
+size_t particle_container<P>::get_num_outcast_local() const {
+  size_t n = 0;
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    n += m_particles[lvl]->numOutcastLocal();
+  }
+
+  return n;
+}
+
+template <class P>
+size_t particle_container<P>::get_num_outcast_global() const {
+  size_t n = 0;
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    n += m_particles[lvl]->numOutcast();
+  }
+
+  return n;
+}
+
 #endif

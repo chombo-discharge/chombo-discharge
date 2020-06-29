@@ -214,6 +214,26 @@ public:
   */
   void discard_invalid_particles();
 
+  /*!
+    @brief Get local number of particles
+  */
+  size_t get_num_valid_local() const;
+
+  /*!
+    @brief Get global number of particles
+  */
+  size_t get_num_valid_global() const;
+
+  /*!
+    @brief Get local number of particles
+  */
+  size_t get_num_outcast_local() const;
+
+  /*!
+    @brief Get global number of particles
+  */
+  size_t get_num_outcast_global() const;
+
 protected:
 
   Vector<DisjointBoxLayout> m_grids;
