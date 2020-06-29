@@ -56,6 +56,7 @@ namespace physics {
 
       // Stuff for initial conditions
       Real m_blob_radius;
+      Real m_particle_weight;
       int m_num_particles;
       int m_seed;
       RealVect m_blob_center;

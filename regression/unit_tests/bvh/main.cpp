@@ -40,17 +40,35 @@ int main(int argc, char* argv[]){
 
   // Create initial particles
   std::vector<point_mass> inputParticles(0);
-  for (int i = 0; i < num_points; i++){
+  Real Mass = 0.0;
+  while(inputParticles.size() < num_points){
     const RealVect pos = RealVect(D_DECL(ranFloat(rng), ranFloat(rng), ranFloat(rng)));
     const Real mass    = 1.0*ranInt(rng);
 
-    inputParticles.push_back(point_mass(pos, mass));
+    if(pos[1] < pos[0]+0.25){
+      inputParticles.push_back(point_mass(pos, mass));
+      Mass += mass;
+    }
   }
+
+#if 0
+  const RealVect bigPos1 = RealVect(D_DECL(0.25, 0.25, .5));
+  const RealVect bigPos2 = RealVect(D_DECL(0.5, 0.5, .5));
+  const RealVect bigPos3 = RealVect(D_DECL(0.75, 0.75, .5));
+  const Real bigMass = 1000.;
+  Mass += 3*bigMass;
+  inputParticles.push_back(point_mass(bigPos1, bigMass));
+  inputParticles.push_back(point_mass(bigPos2, bigMass));
+  inputParticles.push_back(point_mass(bigPos3, bigMass));
+#endif
 
 
   // Do particle merging/splitting
-  bvh_tree<point_mass> tree(inputParticles);
+
+  bvh_tree<point_mass> tree(inputParticles, Mass);
+  const Real t0 = MPI_Wtime();
   tree.build_tree(ppc);
+  const Real t1 = MPI_Wtime();
 
   // Create output particles
   std::vector<point_mass> outputParticles(0);
@@ -61,11 +79,19 @@ int main(int argc, char* argv[]){
     outputParticles.push_back(newParticle);
   }
 
+  std::cout << "time per input particle = " << (t1-t0)/num_points << std::endl;
+
   // Write input and output particles
   ofstream inputPar, outputPar;
   
   inputPar.open ("input_particles.dat");
   outputPar.open ("output_particles.dat");
+
+#if CH_SPACEDIM==2
+    inputPar << "x" << "\t" << "y" << "\t" << "color" << "\n";
+#else
+    inputPar << "x" << "\t" << "y" << "\t" << "z" << "\t" << "color" << "\n";
+#endif
 
   for (const auto& p : inputParticles){
     const Real m        = p.mass();
@@ -77,6 +103,11 @@ int main(int argc, char* argv[]){
 #endif
   }
 
+#if CH_SPACEDIM==2
+  outputPar << "x" << "\t" << "y" << "\t" << "color" << "\n";
+#else
+  outputPar << "x" << "\t" << "y" << "\t" << "z" << "\t" << "color" << "\n";
+#endif
   for (const auto& p : outputParticles){
     const Real m        = p.mass();
     const RealVect& pos = p.pos();

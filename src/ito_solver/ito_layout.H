@@ -125,6 +125,16 @@ public:
     @brief Set time
   */
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
+  
+  /*!
+    @brief Sort the m_particles container by cell
+  */
+  virtual void sort_particles_by_cell();
+
+  /*!
+    @brief Sort the m_particles container by cell
+  */
+  virtual void sort_particles_by_patch();
 
   /*!
     @brief Make superparticles
@@ -134,7 +144,12 @@ public:
   /*!
     @brief Compute dt
   */
-  virtual Real compute_dt(const Real a_maxCellsToMove);
+  virtual Real compute_dt();
+
+  /*!
+    @brief Compute dt
+  */
+  virtual Real compute_min_dt(const Real a_maxCellsToMove);
 
   /*!
     @brief Get largest possible time step for advection part
@@ -145,6 +160,26 @@ public:
     @brief Get largest possible time step for diffusion part
   */
   virtual Real compute_min_diffusion_dt(const Real a_maxCellsToMove);
+
+  /*!
+    @brief Get number of particles
+  */
+  virtual size_t get_num_particles(const bool a_local);
+
+  /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_eb_particles(const bool a_local);
+
+  /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_domain_particles(const bool a_local);
+
+  /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_source_particles(const bool a_local);
 
   /*!
     @brief Get solvers

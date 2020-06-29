@@ -1709,7 +1709,7 @@ void amr_mesh::define_ebmg_interp(const int a_lmin){
 										     m_ebisl[phase::gas][lvl-1],
 										     m_domains[lvl-1],
 										     m_ref_ratios[lvl-1],
-										     ncomps,
+										     SpaceDim,
 										     ebis_gas,
 										     m_num_ghost*IntVect::Unit));
 	}
@@ -1722,7 +1722,7 @@ void amr_mesh::define_ebmg_interp(const int a_lmin){
 										       m_ebisl[phase::solid][lvl-1],
 										       m_domains[lvl-1],
 										       m_ref_ratios[lvl-1],
-										       ncomps,
+										       SpaceDim,
 										       ebis_sol,
 										       m_num_ghost*IntVect::Unit));
 	}

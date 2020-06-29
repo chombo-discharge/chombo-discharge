@@ -15,6 +15,8 @@
 #include "ito_particle.H"
 #include "EBParticleInterp.H"
 #include "particle_container.H"
+#include "bvh.H"
+#include "point_mass.H"
 
 #include <Particle.H>
 #include <ParticleData.H>
@@ -30,6 +32,7 @@
 */
 class ito_solver {
 public:
+
 
   /*!
     @brief Default ctor
@@ -130,6 +133,26 @@ public:
   virtual int get_num_plotvars() const;
 
   /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_particles(const bool a_local) const;
+
+  /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_eb_particles(const bool a_local) const;
+
+  /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_domain_particles(const bool a_local) const;
+
+  /*!
+    @brief Get number of particles in m_particles
+  */
+  virtual size_t get_num_source_particles(const bool a_local) const;
+
+  /*!
     @brief Register operators
   */
   virtual void register_operators();
@@ -163,6 +186,11 @@ public:
     @brief Write plot data
   */
   virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+
+  /*!
+    @brief Write data to output. Convenience function. 
+  */
+  virtual void write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
 
   /*!
     @brief Write checkpoint data into handle
@@ -283,6 +311,16 @@ public:
     @brief Interpolate velocities
   */
   virtual void interpolate_diffusion(const int a_level, const DataIndex& a_dit);
+
+  /*!
+    @brief Sort the m_particles container by cell
+  */
+  virtual void sort_particles_by_cell();
+
+  /*!
+    @brief Sort the m_particles container by cell
+  */
+  virtual void sort_particles_by_patch();
   
   /*!
     @brief Make superparticles
@@ -300,16 +338,6 @@ public:
   virtual void make_superparticles(const int a_particlesPerPatch, const int a_level, const DataIndex a_dit);
 
   /*!
-    @brief Make superparticles on specified level and patch
-  */
-  virtual void make_superparticlesPerPatch(const int a_particlesPerCell, const int a_level, const DataIndex a_dit);
-
-  /*!
-    @brief Make superparticles on specified level and patch
-  */
-  virtual void make_superparticlesPerCell(const int a_particlesPerCell, const int a_level, const DataIndex a_dit);
-
-  /*!
     @brief Remap all particles
   */
   void remap();
@@ -325,19 +353,34 @@ public:
   RealVect random_direction();
 
   /*!
+    @brief Compute min dt
+  */
+  Real compute_dt() const;
+
+    /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
-  Real compute_dt(const Real a_maxCellsToMove) const;
+  Real compute_dt(const int a_lvl) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
-  Real compute_dt(const Real a_maxCellsToMove, const int a_lvl) const;
+  Real compute_dt(const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
+
+    /*!
+    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+  */
+  Real compute_min_dt(const Real a_maxCellsToMove) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
-  Real compute_dt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
+  Real compute_min_dt(const Real a_maxCellsToMove, const int a_lvl) const;
+
+  /*!
+    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+  */
+  Real compute_min_dt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
@@ -393,9 +436,13 @@ public:
     @brief Return phase
   */
   phase::which_phase get_phase() const;
-
   
 protected:
+
+  /*!
+    @brief Boundary volume hierarchy merging tree
+  */
+  bvh_tree<point_mass> m_tree;
 
   /*!
     @brief Computational geometry. 
@@ -503,11 +550,6 @@ protected:
   Real m_hop_eps;
 
   /*!
-    @brief Superparticles per patch or not
-  */
-  bool m_superPatch;
-
-  /*!
     @brief Flag for blending the deposition clouds with the nonconservative divergence
   */
   bool m_blend_conservation;
@@ -536,6 +578,26 @@ protected:
     @brief Output state
   */
   bool m_plot_dco;
+
+  /*!
+    @brief Plot particles
+  */
+  bool m_plot_particles;
+
+  /*!
+    @brief Plot EB particles
+  */
+  bool m_plot_eb_particles;
+
+  /*!
+    @brief Plot domain particles
+  */
+  bool m_plot_domain_particles;
+
+    /*!
+    @brief Plot domain particles
+  */
+  bool m_plot_source_particles;
 
   /*!
     @brief Mass/charge deposition type
@@ -679,6 +741,11 @@ protected:
   */
   void coarse_fine_redistribution(EBAMRCellData& a_state);
 
+  /*!
+    @brief Superparticle merging with BVH trees
+  */
+  void bvh_merge(List<ito_particle>& a_particles, const int a_particlesPerCell);
+  
   /*!
     @brief Sign function
   */

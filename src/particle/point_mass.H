@@ -20,10 +20,38 @@ public:
   point_mass(const std::vector<point_mass>& a_point_masses);
   ~point_mass();
 
-  Real operator[](int a_dir) const;
-  const RealVect& pos() const;
-  const Real& mass() const;
-  bool can_split() const;
+  inline void define(const RealVect& a_pos, const Real& a_mass){
+    m_mass = a_mass;
+    m_pos  = a_pos;
+  }
+  
+  inline Real& operator[](int a_dir) {
+    return m_pos[a_dir];
+  }
+
+  inline const Real& operator[](int a_dir) const {
+    return m_pos[a_dir];
+  }
+
+  inline RealVect& pos(){
+    return m_pos;
+  }
+  
+  inline const RealVect& pos() const{
+    return m_pos;
+  }
+
+  inline Real& mass(){
+    return m_mass;
+  }
+  
+  inline const Real& mass() const{
+    return m_mass;
+  }
+  
+  inline bool can_split() const {
+    return m_mass*(1.0 + 1.E-6) >= 2.0;
+  }
   
   RealVect m_pos;   // Position of this point_mass
   Real     m_mass;  // How many points does this this point_mass represent

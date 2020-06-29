@@ -83,6 +83,8 @@ bool dcel_mesh::sanity_check() const {
       }
     }
   }
+
+  return true;
 }
 
 void dcel_mesh::define(Vector<RefCountedPtr<dcel_poly> >& a_polygons,

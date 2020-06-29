@@ -69,7 +69,7 @@ profile_plane_if::~profile_plane_if(){
 
 
 Real profile_plane_if::value(const RealVect& a_pos) const{
-  m_baseif->value(a_pos);
+  return m_baseif->value(a_pos);
 }
 
 BaseIF* profile_plane_if::newImplicitFunction() const{

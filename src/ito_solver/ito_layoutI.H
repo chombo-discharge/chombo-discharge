@@ -127,6 +127,20 @@ void ito_layout<T>::set_time(const int a_step, const Real a_time, const Real a_d
 }
 
 template <class T>
+void ito_layout<T>::sort_particles_by_cell(){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->sort_particles_by_cell();
+  }
+}
+
+template <class T>
+void ito_layout<T>::sort_particles_by_patch(){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->sort_particles_by_patch();
+  }
+}
+
+template <class T>
 void ito_layout<T>::make_superparticles(const int a_ppc){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
     iter()->make_superparticles(a_ppc);
@@ -148,11 +162,63 @@ void ito_layout<T>::remap(){
 }
 
 template <class T>
-Real ito_layout<T>::compute_dt(const Real a_maxCellsToMove){
+size_t ito_layout<T>::get_num_particles(const bool a_local) {
+  size_t ret = 0;
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret += iter()->get_num_particles(a_local);
+  }
+
+  return ret;
+}
+
+template <class T>
+size_t ito_layout<T>::get_num_eb_particles(const bool a_local) {
+  size_t ret = 0;
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret += iter()->get_num_eb_particles(a_local);
+  }
+
+  return ret;
+}
+
+template <class T>
+size_t ito_layout<T>::get_num_domain_particles(const bool a_local) {
+  size_t ret = 0;
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret += iter()->get_num_domain_particles(a_local);
+  }
+
+  return ret;
+}
+
+template <class T>
+size_t ito_layout<T>::get_num_source_particles(const bool a_local) {
+  size_t ret = 0;
+  for (auto iter = this->iterator(); iter.ok(); ++iter){
+    ret += iter()->get_num_source_particles(a_local);
+  }
+
+  return ret;
+}
+
+template <class T>
+Real ito_layout<T>::compute_dt(){
   Real minDt = 1.E99;
 
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    const Real thisDt = iter()->compute_dt(a_maxCellsToMove);
+    const Real thisDt = iter()->compute_dt();
+    minDt = Min(minDt, thisDt);
+  }
+  
+  return minDt;
+}
+
+template <class T>
+Real ito_layout<T>::compute_min_dt(const Real a_maxCellsToMove){
+  Real minDt = 1.E99;
+
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    const Real thisDt = iter()->compute_min_dt(a_maxCellsToMove);
     minDt = Min(minDt, thisDt);
   }
   

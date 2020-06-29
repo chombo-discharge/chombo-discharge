@@ -45,18 +45,19 @@ namespace physics {
       void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
       void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
       void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
+      void write_J(EBAMRCellData& a_output, int& a_icomp) const;
       int  get_num_plot_vars() const override;
   
       // Advance routines
       virtual Real advance(const Real a_dt) = 0;
-      void compute_dt(Real& a_dt, time_code::which_code& a_timecode) override;
+      virtual void compute_dt(Real& a_dt, time_code::which_code& a_timecode) override;
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
       void print_step_report() override;
 
       // New regrid routines
       void register_operators() override; 
-      void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       void deallocate() override;
+      virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
 
       // Internal routines
@@ -70,6 +71,7 @@ namespace physics {
 
       // Get routines
       Real get_time() const;
+      Real compute_Emax(const phase::which_phase a_phase);
 
       // E-field computations
       void compute_E(MFAMRCellData& a_E,      const MFAMRCellData& a_potential);
@@ -82,6 +84,16 @@ namespace physics {
       void compute_rho();
       void compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase);
       void compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities);
+
+      // Compute J routines
+      void compute_J(EBAMRCellData& a_J, const Real a_dt);
+      void compute_J(LevelData<EBCellFAB>& a_J, const int a_level, const Real a_dt);
+      void compute_J(EBCellFAB& a_J, const int a_level, const DataIndex a_dit, const Box& a_box, const Real a_dt);
+
+      // Relaxation time
+      Real compute_relaxation_time();
+      Real compute_relaxation_time(const int a_level);
+      Real compute_relaxation_time(const int a_level, const DataIndex a_dit);
 
       // Poisson-solving routines
       bool solve_poisson();
@@ -131,38 +143,49 @@ namespace physics {
 
       // Routines for chemistry advances
       void advance_reaction_network(const Real a_dt);
+
       void advance_reaction_network(Vector<particle_container<ito_particle>* >& a_particles,
 				    Vector<particle_container<photon>* >&       a_photons,
 				    Vector<particle_container<photon>* >&       a_newPhotons,
 				    const EBAMRCellData&                        a_E,
 				    const Real                                  a_dt);
-      void advance_reaction_network(Vector<ParticleData<ito_particle>* >& a_particles,
-				    Vector<ParticleData<photon>* >&       a_photons,
-				    Vector<ParticleData<photon>* >&       a_newPhotons,
-				    const LevelData<EBCellFAB>&           a_E,
-				    const int                             a_lvl,
-				    const Real                            a_dt);
-      void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-				    Vector<List<photon>* >&       a_photons,
-				    Vector<List<photon>* >&       a_newPhotons,
-				    const EBCellFAB&              a_E,
-				    const int                     a_lvl,
-				    const DataIndex               a_dit,
-				    const Box                     a_box,
-				    const Real                    a_dx,
-				    const Real                    a_dt);
-      void advance_reaction_network(std::vector<BinFab<ito_particle> >& a_particles,
-				    std::vector<BinFab<photon> >&       a_photons,
-				    std::vector<BinFab<photon> >&       a_newPhotons,
-				    const EBCellFAB&                    a_E,
-				    const int                           a_lvl,
-				    const DataIndex                     a_dit,
-				    const Box                           a_box,
-				    const Real                          a_dx,
-				    const Real                          a_dt);
+      void advance_reaction_network(Vector<AMRCellParticles<ito_particle>* >& a_particles,
+				    Vector<AMRCellParticles<photon>* >&       a_photons,
+				    Vector<AMRCellParticles<photon>* >&       a_newPhotons,
+				    const EBAMRCellData&                      a_E,
+				    const Real                                a_dt);
+      void advance_reaction_network(Vector<LayoutData<BinFab<ito_particle> >* >& a_particles,
+				    Vector<LayoutData<BinFab<photon> >* >&       a_photons,
+				    Vector<LayoutData<BinFab<photon> >* >&       a_newPhotons,
+				    const LevelData<EBCellFAB>&                  a_E,
+				    const int                                    a_lvl,
+				    const Real                                   a_dt);
+
+      void advance_reaction_network(Vector<BinFab<ito_particle>* >& a_particles,
+				    Vector<BinFab<photon>* >&       a_photons,
+				    Vector<BinFab<photon>* >&       a_newPhotons,
+				    const EBCellFAB&                a_E,
+				    const int                       a_lvl,
+				    const DataIndex                 a_dit,
+				    const Box                       a_box,
+				    const Real                      a_dx,
+				    const Real                      a_dt);
 
       // Routines for advancing photons
       void advance_photons(const Real a_dt);
+
+      // Routines for sorting particles. These routines are here because rte_layout is general for rte_solver, and I'm too
+      // lazy to write an mc_photo_layout. So here you go. 
+      void sort_photons_by_cell();
+      void sort_photons_by_patch();
+      void sort_source_photons_by_cell();
+      void sort_source_photons_by_patch();
+      void sort_bulk_photons_by_cell();
+      void sort_bulk_photons_by_patch();
+      void sort_eb_photons_by_cell();
+      void sort_eb_photons_by_patch();
+      void sort_domain_photons_by_cell();
+      void sort_domain_photons_by_patch();
 
     protected:
 
@@ -178,8 +201,13 @@ namespace physics {
 
       Real (*m_potential)(const Real a_time);
 
+      bool m_regrid_superparticles;
       int m_ppc;
       Real m_max_cells_hop;
+      Real m_dt_relax;
+
+      // Storage for current density
+      EBAMRCellData m_J;
     };
   }
 };

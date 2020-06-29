@@ -174,20 +174,28 @@ void DomainFluxIFFAB::copy(const Box& Rfrom,
 
 BaseIFFAB<Real>& DomainFluxIFFAB::operator()(const int a_dir, const Side::LoHiSide a_side){
   CH_assert(m_isDefined);
+
+  BaseIFFAB<Real>* ptr;
   if(a_side == Side::Lo){
-    return *m_flux_lo[a_dir];
+    ptr = m_flux_lo[a_dir];
   }
   else if(a_side == Side::Hi){
-    return *m_flux_hi[a_dir];
+    ptr = m_flux_hi[a_dir];
   }
+
+  return *ptr;
 }
 
 const BaseIFFAB<Real>& DomainFluxIFFAB::operator()(const int a_dir, const Side::LoHiSide a_side) const {
   CH_assert(m_isDefined);
+
+  BaseIFFAB<Real>* ptr;
   if(a_side == Side::Lo){
-    return *m_flux_lo[a_dir];
+    ptr = m_flux_lo[a_dir];
   }
   else if(a_side == Side::Hi){
-    return *m_flux_hi[a_dir];
+    ptr = m_flux_hi[a_dir];
   }
+
+  return *ptr;
 }

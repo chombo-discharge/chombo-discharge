@@ -43,7 +43,9 @@ void brownian_walker_stepper::initial_data(){
   
   m_solver->initial_data();
   if(m_ppc > 0){
+    m_solver->sort_particles_by_cell();
     m_solver->make_superparticles(m_ppc);
+    m_solver->sort_particles_by_patch();
   }
 
   if(m_solver->is_diffusive()){
@@ -143,7 +145,9 @@ void brownian_walker_stepper::post_checkpoint_setup() {
 
   m_solver->remap();
   if(m_ppc > 0){
+    m_solver->sort_particles_by_cell();
     m_solver->make_superparticles(m_ppc);
+    m_solver->sort_particles_by_patch();
   }
   m_solver->deposit_particles();
 
@@ -205,6 +209,11 @@ void brownian_walker_stepper::print_step_report() {
   }
 
   // Do nothing
+  const size_t local_particles  = m_solver->get_num_particles(true);
+  const size_t global_particles = m_solver->get_num_particles(false);
+
+  pout() << "                                   #part = " << local_particles << " (" << global_particles << ")" << endl;
+  
 }
 
 bool brownian_walker_stepper::need_to_regrid() {
@@ -382,6 +391,8 @@ void brownian_walker_stepper::regrid(const int a_lmin, const int a_old_finest_le
   }
 
   if(m_ppc > 0){
+    m_solver->sort_particles_by_cell();
     m_solver->make_superparticles(m_ppc);
+    m_solver->sort_particles_by_patch();
   }
 }

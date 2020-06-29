@@ -17,9 +17,13 @@
 #include <DisjointBoxLayout.H>
 
 template <class P>
-using AMRParticles = Vector<RefCountedPtr<ParticleData<P> > >;
-using AMRPVR       = Vector<RefCountedPtr<ParticleValidRegion> >;
-using EBAMRPPC     = Vector<RefCountedPtr<BaseEBCellFAB<int> > >;
+using AMRParticles     = Vector<RefCountedPtr<ParticleData<P> > >;
+
+template <class P>
+using AMRCellParticles = Vector<RefCountedPtr<LayoutData<BinFab<P> > > >;
+
+using AMRPVR           = Vector<RefCountedPtr<ParticleValidRegion> >;
+using EBAMRPPC         = Vector<RefCountedPtr<BaseEBCellFAB<int> > >;
 
 /*!
   @brief Templated class for holding particles on an AMR hierarchy with particle remapping
@@ -105,6 +109,36 @@ public:
   const ParticleData<P>& operator[](const int a_level) const;
 
   /*!
+    @brief Get cell particles
+  */
+  AMRCellParticles<P>& get_cell_particles();
+
+  /*!
+    @brief Get cell particles, const version. 
+  */
+  const AMRCellParticles<P>& get_cell_particles() const;
+  
+  /*!
+    @brief Get cell particles
+  */
+  LayoutData<BinFab<P> >& get_cell_particles(const int a_level);
+
+  /*!
+    @brief Get cell particles, const version. 
+  */
+  const LayoutData<BinFab<P> >& get_cell_particles(const int a_level) const;
+
+  /*!
+    @brief Get cell particles
+  */
+  BinFab<P>& get_cell_particles(const int a_level, const DataIndex a_dit);
+
+  /*!
+    @brief Get cell particles, const version. 
+  */
+  const BinFab<P>& get_cell_particles(const int a_level, const DataIndex a_dit) const;
+
+  /*!
     @brief Get particles and sort them by cell
   */
   void get_cell_particles(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit) const;
@@ -113,6 +147,16 @@ public:
     @brief Get particles and sort them by cell
   */
   void get_cell_particles_destructive(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit);
+
+  /*!
+    @brief Sort particles by cell
+  */
+  void sort_particles_by_cell();
+
+  /*!
+    @brief Sort particles by cell
+  */
+  void sort_particles_by_patch();
 
   /*!
     @brief Add particles to container
@@ -170,21 +214,44 @@ public:
   */
   void discard_invalid_particles();
 
+  /*!
+    @brief Get local number of particles
+  */
+  size_t get_num_valid_local() const;
+
+  /*!
+    @brief Get global number of particles
+  */
+  size_t get_num_valid_global() const;
+
+  /*!
+    @brief Get local number of particles
+  */
+  size_t get_num_outcast_local() const;
+
+  /*!
+    @brief Get global number of particles
+  */
+  size_t get_num_outcast_global() const;
+
 protected:
 
   Vector<DisjointBoxLayout> m_grids;
   Vector<ProblemDomain> m_domains;
   Vector<RealVect> m_dx;
   Vector<int> m_ref_rat;
+  Vector<List<P> > m_cache_particles;
   RealVect m_prob_lo;
   int m_blocking_factor;
   int m_buffer;
   int m_finest_level;
 
   bool m_is_defined;
+  bool m_cell_sorted;
 
   AMRParticles<P> m_particles;
   AMRPVR m_pvr;
+  AMRCellParticles<P> m_cell_particles;
 
   void setup_pvr(const int a_base, const int a_finest_level);
   void setup_particle_data(const int a_base, const int a_finest_level);
