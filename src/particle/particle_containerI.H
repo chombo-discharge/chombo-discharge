@@ -10,8 +10,6 @@
 
 #include "particle_containerI.H"
 
-#define OLD_REGRID 0
-
 template <class P>
 particle_container<P>::particle_container(){
   m_is_defined  = false;
@@ -482,24 +480,6 @@ void particle_container<P>::pre_regrid(const int a_lmin){
 
   const int base = Max(0, a_lmin-1);
 
-#if OLD_REGRID // Original code
-  ParticleData<P>& baseParticles = (*m_particles[base]);
-  for (int lvl = base+1; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_grids[lvl];
-    
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      ListBox<P>& p = (*m_particles[lvl])[dit()];
-      
-      for (ListIterator<P> li(p.listItems()); li.ok(); ){
-	baseParticles.outcast().transfer(li);
-      }
-    }
-  }
-
-  // Now remap
-  baseParticles.remapOutcast();
-
-#else
   // Fill cache particles on each level
   m_cache_particles.resize(1 + m_finest_level);
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -512,7 +492,6 @@ void particle_container<P>::pre_regrid(const int a_lmin){
       p.clear();
     }
   }
-#endif
 }
 
 template <class P>
@@ -538,26 +517,7 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   this->setup_pvr(a_lmin, m_finest_level);
   this->setup_particle_data(a_lmin, m_finest_level);
 
-#if OLD_REGRID // Original code
-  // Now move particles that are on a_base up to their finest levels if they fit in the PVR
-  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
-    const bool has_coar = lvl > 0;
-    
-    if(has_coar){
-      collectValidParticles(m_particles[lvl]->outcast(),
-			    *m_particles[lvl-1],
-			    m_pvr[lvl]->mask(),
-			    m_dx[lvl],
-			    m_ref_rat[lvl],
-			    false, 
-			    m_prob_lo);
-    }
 
-    // Rebin this level
-    m_particles[lvl]->gatherOutcast();
-    m_particles[lvl]->remapOutcast();
-  }
-#else
 
   const int oldFinestLevel = m_cache_particles.size() - 1;
   
@@ -584,7 +544,9 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 
   // Now do remap
   this->remap();
-#endif
+
+
+  m_cache_particles.resize(0);
 }
 
 template <class P>
