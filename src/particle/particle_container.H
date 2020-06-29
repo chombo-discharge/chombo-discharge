@@ -240,6 +240,7 @@ protected:
   Vector<ProblemDomain> m_domains;
   Vector<RealVect> m_dx;
   Vector<int> m_ref_rat;
+  Vector<List<P> > m_cache_particles;
   RealVect m_prob_lo;
   int m_blocking_factor;
   int m_buffer;

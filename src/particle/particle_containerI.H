@@ -10,6 +10,8 @@
 
 #include "particle_containerI.H"
 
+#define OLD_REGRID 0
+
 template <class P>
 particle_container<P>::particle_container(){
   m_is_defined  = false;
@@ -479,7 +481,8 @@ void particle_container<P>::pre_regrid(const int a_lmin){
   //       The outcast lists should be empty at the end of this call
 
   const int base = Max(0, a_lmin-1);
-  
+
+#if OLD_REGRID // Original code
   ParticleData<P>& baseParticles = (*m_particles[base]);
   for (int lvl = base+1; lvl <= m_finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_grids[lvl];
@@ -495,6 +498,21 @@ void particle_container<P>::pre_regrid(const int a_lmin){
 
   // Now remap
   baseParticles.remapOutcast();
+
+#else
+  // Fill cache particles on each level
+  m_cache_particles.resize(1 + m_finest_level);
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    m_cache_particles[lvl].clear();
+    
+    for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
+      List<P>& p = (*m_particles[lvl])[dit()].listItems();
+
+      m_cache_particles[lvl].catenate(p);
+      p.clear();
+    }
+  }
+#endif
 }
 
 template <class P>
@@ -520,6 +538,7 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   this->setup_pvr(a_lmin, m_finest_level);
   this->setup_particle_data(a_lmin, m_finest_level);
 
+#if OLD_REGRID // Original code
   // Now move particles that are on a_base up to their finest levels if they fit in the PVR
   for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     const bool has_coar = lvl > 0;
@@ -538,6 +557,34 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     m_particles[lvl]->gatherOutcast();
     m_particles[lvl]->remapOutcast();
   }
+#else
+
+  const int oldFinestLevel = m_cache_particles.size() - 1;
+  
+  // If a level was removed, put the particles on the new finest level
+  if(m_finest_level < oldFinestLevel){
+    List<P>& cacheFinest = m_cache_particles[m_finest_level];
+    for (int lvl = m_finest_level + 1; lvl <= oldFinestLevel; lvl++){
+      List<P>& p = m_cache_particles[lvl];
+
+      cacheFinest.catenate(p);
+      p.clear();
+    }
+  }
+
+  //  for (int lvl = 0; lvl <= a_newFinestLevel; lvl++){
+  for (int lvl = 0; lvl <= oldFinestLevel; lvl++){
+    List<P>& outcast = m_particles[lvl]->outcast();
+
+    outcast.catenate(m_cache_particles[lvl]);
+    m_cache_particles[lvl].clear();
+
+    m_particles[lvl]->remapOutcast();
+  }
+
+  // Now do remap
+  this->remap();
+#endif
 }
 
 template <class P>
