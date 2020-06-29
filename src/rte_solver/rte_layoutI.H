@@ -294,11 +294,14 @@ phase::which_phase rte_layout<T>::get_phase(){
   if(m_verbosity > 5){
     pout() << "rte_layout<T>::get_phase" << endl;
   }
-  
- for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+
+  phase::which_phase p;
+  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
    RefCountedPtr<T>& solver = solver_it();
-   return solver->get_phase();
+   p = solver->get_phase();
  }
+
+  return p;
 }
 
 template <class T>

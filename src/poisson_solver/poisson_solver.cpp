@@ -36,11 +36,11 @@ poisson_solver::~poisson_solver(){
 }
 
 bool poisson_solver::solve(const bool a_zerophi) {
-  this->solve(m_state, m_source, a_zerophi);
+  return this->solve(m_state, m_source, a_zerophi);
 }
 
 bool poisson_solver::solve(MFAMRCellData& a_state, const bool a_zerophi){
-  this->solve(a_state, m_source, a_zerophi);
+  return this->solve(a_state, m_source, a_zerophi);
 }
 
 void poisson_solver::compute_E(){
