@@ -8,6 +8,8 @@
 #ifndef _AMR_MESH_
 #define _AMR_MESH_
 
+#include "realm.H"
+
 #include "type_definitions.H"
 #include "computational_geometry.H"
 #include "mfis.H"
@@ -35,20 +37,6 @@
 #include <EBFineToCoarRedist.H>
 #include <EBPWLFineInterp.H>
 #include <ProblemDomain.H>
-
-// These are operator that can be defined.
-static const std::string s_eb_gradient     = "eb_gradient";
-static const std::string s_eb_irreg_interp = "eb_irreg_interp";
-static const std::string s_eb_coar_ave     = "eb_coar_ave";
-static const std::string s_eb_quad_cfi     = "eb_quad_cfi";
-static const std::string s_eb_fill_patch   = "eb_fill_patch";
-static const std::string s_eb_pwl_interp   = "eb_pwl_interp";
-static const std::string s_eb_mg_interp    = "eb_mg_interp";
-static const std::string s_eb_flux_reg     = "eb_flux_reg";
-static const std::string s_eb_redist       = "eb_redist";
-static const std::string s_eb_copier       = "eb_copier";
-static const std::string s_eb_ghostcloud   = "eb_ghostcloud";
-static const std::string s_eb_noncons_div  = "eb_non_cons_div";
 
 /*!
   @brief Class for handling spatial operations for streamer equations.
