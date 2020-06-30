@@ -15,6 +15,8 @@
 #include "DomainFluxIFFABFactory.H"
 #include "TiledMeshRefine.H"
 
+#include "mf_realm.H"
+
 #include <BRMeshRefine.H>
 #include <EBEllipticLoadBalance.H>
 #include <EBLevelDataOps.H>
@@ -51,14 +53,8 @@ amr_mesh::amr_mesh(){
   parse_load_balance();
   parse_domain();
   parse_ghost_interpolation();
-#if 1 // new code
   parse_centroid_stencils();
   parse_eb_stencils();
-#else // Old code
-  this->set_irreg_sten_order(1);
-  this->set_irreg_sten_radius(1);
-  this->set_irreg_sten_type(stencil_type::taylor);
-#endif
 
 
   m_finest_level = 0;
@@ -82,6 +78,10 @@ amr_mesh::amr_mesh(){
   this->register_operator(s_eb_gradient,     phase::solid);
   this->register_operator(s_eb_irreg_interp, phase::gas);
   this->register_operator(s_eb_irreg_interp, phase::solid);
+
+  // Register fluid realm. 
+  this->register_realm("fluid", phase::gas);
+  this->register_realm("fluid", phase::solid);
 }
 
 amr_mesh::~amr_mesh(){
@@ -772,38 +772,12 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
     pout() << "amr_mesh::regrid" << endl;
   }
 
-#if 0 // Old code
-  Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
 
-  // This is stuff that always gets done
-  this->build_grids(tags, a_lmin, a_lmax, a_hardcap);
-  this->define_neighbors(a_lmin);
-  this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
-  this->define_vofiter(a_lmin);
-  this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
-  if(!m_has_mg_stuff){ // Define MG stuff
-    this->define_mg_stuff();
-    m_has_mg_stuff = true; // Only needs to be done ONCE per run. 
-  }
 
-  // Now allocate operators
-  this->define_eb_coar_ave(a_lmin);             // Define ebcoarseaverage on both phases
-  this->define_eb_quad_cfi(a_lmin);             // Define nwoebquadcfinterp on both phases.
-  this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
-  this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
-  this->define_ebmg_interp(a_lmin);             // Define interpolator used for e.g. multigrid (or piecewise constant)
-  this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
-  this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
-  this->define_gradsten(a_lmin);  // Make stencils for computing gradients
-  this->define_irreg_sten();      // Make stencils for doing interpolation to centroids
-  this->define_noncons_sten();    // Make stencils for nonconservative averaging
-  this->define_copier(a_lmin);
-  this->define_ghostcloud(a_lmin);
-#else // New code
   this->regrid_amr(a_tags, a_lmin, a_lmax, a_hardcap);
   this->regrid_operators(a_lmin, a_lmax, a_regsize);
-#endif
 }
+
 
 void amr_mesh::regrid_amr(const Vector<IntVectSet>& a_tags,
 			  const int a_lmin,
@@ -826,6 +800,12 @@ void amr_mesh::regrid_amr(const Vector<IntVectSet>& a_tags,
     this->define_mg_stuff();
     m_has_mg_stuff = true; // Only needs to be done ONCE per run. 
   }
+
+  // Iterator through maps and do the usual bullshit.
+  this->define_realms();
+  for (auto& r : m_realms){
+    r.second->regrid_base(a_lmin, a_lmax, a_hardcap);
+  }
 }
 
 void amr_mesh::regrid_operators(const int a_lmin,
@@ -844,6 +824,10 @@ void amr_mesh::regrid_operators(const int a_lmin,
   this->define_noncons_sten();                  // Make stencils for nonconservative averaging
   this->define_copier(a_lmin);                  // Make stencils for copier
   this->define_ghostcloud(a_lmin);              // Make stencils for ghost clouds with particle depositions
+
+  for (auto r : m_realms){
+    //    r.second->regrid_operators(a_lmin, a_lmax, a_regsize);
+  }
 }
 
 void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap){
@@ -3078,7 +3062,7 @@ Vector<RefCountedPtr<Copier> >& amr_mesh::get_reverse_copier(phase::which_phase 
 }
 
 Vector<Box> amr_mesh::make_tiles(const Box a_box, const IntVect a_tilesize){
-
+  MayDay::Abort("amr_mesh::make_Tiles - stop, where is this code used...?");
   // Modify the input tilesize to something sensible
   IntVect tilesize = a_tilesize;
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -3150,6 +3134,56 @@ bool amr_mesh::query_operator(const std::string a_operator, const phase::which_p
   if(m_verbosity > 5){
     pout() << "amr_mesh::query_operator" << endl;
   }
-  
+
   return m_operator_map[std::make_pair(a_operator, a_phase)];
+}
+
+realm& amr_mesh::get_realm(const std::string a_realm, const phase::which_phase a_phase){
+  CH_TIME("amr_mesh::get_realm");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::get_realm" << endl;
+  }
+  
+  return *m_realms[std::make_pair(a_realm, a_phase)];
+}
+
+void amr_mesh::register_realm(const std::string a_realm, const phase::which_phase a_phase){
+  CH_TIME("amr_mesh::register_realm");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::register_realm" << endl;
+  }
+  
+  if(m_realms.find(std::make_pair(a_realm, a_phase)) == m_realms.end()){
+    RefCountedPtr<realm> newRealm = RefCountedPtr<realm> (new realm());
+    m_realms.emplace(std::make_pair(a_realm, a_phase), newRealm);
+  }
+}
+
+void amr_mesh::define_realms(){
+  CH_TIME("amr_mesh::define_realms");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::define_realms" << endl;
+  }
+
+  for (auto& r : m_realms){
+
+    const phase::which_phase phase = (r.first).second;
+    
+    const RefCountedPtr<EBIndexSpace> ebis = m_mfis->get_ebis(phase);
+
+    if(!ebis.isNull()){
+      r.second->define(m_grids,
+		       m_domains,
+		       m_ref_ratios,
+		       m_dx,
+		       m_finest_level,
+		       m_ebghost,
+		       m_num_ghost,
+		       m_redist_rad,
+		       m_centroid_stencil,
+		       m_eb_stencil,
+		       m_ebcf,
+		       ebis);
+    }
+  }
 }

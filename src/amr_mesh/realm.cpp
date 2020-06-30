@@ -17,6 +17,10 @@
 realm::realm(){
   m_defined = false;
   m_verbosity = -1;
+
+  // Always do this shit. 
+  this->register_operator(s_eb_gradient);
+  this->register_operator(s_eb_irreg_interp);
 }
 
 realm::~realm(){
@@ -36,20 +40,22 @@ void realm::define(const Vector<DisjointBoxLayout>& a_grids,
 		   const bool a_ebcf,
 		   const RefCountedPtr<EBIndexSpace>& a_ebis){
 
-  m_finest_level = a_finest_level;
-  m_grids = a_grids;
-  m_domains = a_domains;
-  m_ref_ratios = a_ref_rat;
-  m_dx = a_dx;
-  m_ebis = a_ebis;
-  m_ebcf = a_ebcf;
-  m_ebghost = a_ebghost;
-  m_num_ghost = a_num_ghost;
-  m_redist_rad = a_redist_rad;
-  m_centroid_stencil = a_centroid_stencil;
-  m_eb_stencil = a_eb_stencil;
+  if(!a_ebis.isNull()){
+    m_finest_level = a_finest_level;
+    m_grids = a_grids;
+    m_domains = a_domains;
+    m_ref_ratios = a_ref_rat;
+    m_dx = a_dx;
+    m_ebis = a_ebis;
+    m_ebcf = a_ebcf;
+    m_ebghost = a_ebghost;
+    m_num_ghost = a_num_ghost;
+    m_redist_rad = a_redist_rad;
+    m_centroid_stencil = a_centroid_stencil;
+    m_eb_stencil = a_eb_stencil;
 
-  m_defined = true;
+    m_defined = true;
+  }
 }
 
 void realm::set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level){
@@ -57,9 +63,11 @@ void realm::set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_fine
   if(m_verbosity > 5){
     pout() << "realm::set_grids" << endl;
   }
-  
-  m_grids = a_grids;
-  m_finest_level = a_finest_level;
+
+  if(m_defined){
+    m_grids = a_grids;
+    m_finest_level = a_finest_level;
+  }
 }
 
 void realm::regrid_base(const int a_lmin, const int a_lmax, const int a_hardcap){
@@ -68,11 +76,11 @@ void realm::regrid_base(const int a_lmin, const int a_lmax, const int a_hardcap)
     pout() << "realm::regrid_base" << endl;
   }
 
-  this->define_neighbors(a_lmin);
-  this->define_eblevelgrid(a_lmin);
-  this->define_vofiter(a_lmin);
-
-  // Missing MG grids...
+  if(m_defined){
+    this->define_neighbors(a_lmin);
+    this->define_eblevelgrid(a_lmin);
+    this->define_vofiter(a_lmin);
+  }
 }
 
 void realm::regrid_operators(const int a_lmin, const int a_lmax, const int a_regsize){
@@ -81,18 +89,20 @@ void realm::regrid_operators(const int a_lmin, const int a_lmax, const int a_reg
     pout() << "realm::regrid_operators" << endl;
   }
 
-  this->define_eb_coar_ave(a_lmin);             // Define ebcoarseaverage on both phases
-  this->define_eb_quad_cfi(a_lmin);             // Define nwoebquadcfinterp on both phases.
-  this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
-  this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
-  this->define_ebmg_interp(a_lmin);             // Define interpolator used for e.g. multigrid (or piecewise constant)
-  this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
-  this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
-  this->define_gradsten(a_lmin);                // Make stencils for computing gradients
-  this->define_irreg_sten();                    // Make stencils for doing interpolation to centroids
-  this->define_noncons_sten();                  // Make stencils for nonconservative averaging
-  this->define_copier(a_lmin);                  // Make stencils for copier
-  this->define_ghostcloud(a_lmin);              // Make stencils for ghost clouds with particle depositions
+  if(m_defined){
+    this->define_eb_coar_ave(a_lmin);             // Define ebcoarseaverage on both phases
+    this->define_eb_quad_cfi(a_lmin);             // Define nwoebquadcfinterp on both phases.
+    this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
+    this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
+    this->define_ebmg_interp(a_lmin);             // Define interpolator used for e.g. multigrid (or piecewise constant)
+    this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
+    this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
+    this->define_gradsten(a_lmin);                // Make stencils for computing gradients
+    this->define_irreg_sten();                    // Make stencils for doing interpolation to centroids
+    this->define_noncons_sten();                  // Make stencils for nonconservative averaging
+    this->define_copier(a_lmin);                  // Make stencils for copier
+    this->define_ghostcloud(a_lmin);              // Make stencils for ghost clouds with particle depositions
+  }
 }
 
 void realm::register_operator(const std::string a_operator){
@@ -100,7 +110,7 @@ void realm::register_operator(const std::string a_operator){
   if(m_verbosity > 5){
     pout() << "realm::register_operator" << endl;
   }
-  
+
   // These are the supported operators - issue an error if we ask for something that is not supported. 
   if(!(a_operator.compare(s_eb_coar_ave)     == 0 ||
        a_operator.compare(s_eb_quad_cfi)     == 0 ||
@@ -128,8 +138,17 @@ bool realm::query_operator(const std::string a_operator){
   if(m_verbosity > 5){
     pout() << "realm::query_operator" << endl;
   }
-  
-  return m_operator_map[a_operator];
+
+  bool ret = false;
+  if(m_defined){
+    m_defined = true;
+    
+    if(m_operator_map.find(a_operator) == m_operator_map.end()){
+      ret = false;
+    }
+  }
+
+  return ret;
 }
   
 
@@ -707,4 +726,142 @@ void realm::define_noncons_sten(){
 					  m_redist_rad,
 					  m_centroid_stencil));  // Dummy argumement
   }
+}
+
+const RefCountedPtr<EBIndexSpace>& realm::get_ebis() {
+  return m_ebis;
+}
+
+const Vector<int>& realm::get_ref_rat() {
+  return m_ref_ratios;
+}
+
+const Vector<Real>& realm::get_dx() {
+  return m_dx;
+}
+
+const Vector<DisjointBoxLayout>& realm::get_grids() {
+  return m_grids;
+}
+
+const Vector<ProblemDomain>& realm::get_domains() {
+  return m_domains;
+}
+
+const Vector<EBISLayout>& realm::get_ebisl() {
+  return m_ebisl;
+}
+
+const Vector<RefCountedPtr<EBLevelGrid> >& realm::get_eblg() {
+  return m_eblg;
+}
+
+const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& realm::get_neighbors() {
+  return m_neighbors;
+}
+const Vector<RefCountedPtr<LayoutData<VoFIterator> > >& realm::get_vofit() {
+  return m_vofiter;
+}
+
+const irreg_amr_stencil<centroid_interp>& realm::get_centroid_interp_stencils() {
+  return *m_centroid_interp;
+}
+
+const irreg_amr_stencil<eb_centroid_interp>& realm::get_eb_centroid_interp_stencils() {
+  return *m_eb_centroid_interp;
+}
+
+const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& realm::get_gradsten(){
+  return m_gradsten;
+}
+
+// Throw errors if the operator does not exist
+
+const irreg_amr_stencil<noncons_div>& realm::get_noncons_div_stencils() {
+  if(!this->query_operator(s_eb_noncons_div)) MayDay::Abort("realm::get_non_cons_div_stencils - operator not registered!");
+  
+  return *m_noncons_div;
+}
+Vector<RefCountedPtr<ebcoarseaverage> >& realm::get_coarave() {
+  if(!this->query_operator(s_eb_coar_ave)) MayDay::Abort("realm::get_coarave - operator not registered!");
+  
+  return m_coarave;
+}
+
+Vector<RefCountedPtr<EBGhostCloud> >& realm::get_ghostcloud() {
+  if(!this->query_operator(s_eb_ghostcloud)) MayDay::Abort("realm::get_ghostcloud - operator not registered!");
+  
+  return m_ghostclouds;
+}
+
+Vector<RefCountedPtr<nwoebquadcfinterp> >& realm::get_quadcfi() {
+  if(!this->query_operator(s_eb_quad_cfi)) MayDay::Abort("realm::get_quadcfi - operator not registered!");
+  
+  return m_quadcfi;
+}
+
+Vector<RefCountedPtr<EBQuadCFInterp> >& realm::get_old_quadcfi() {
+  if(!this->query_operator(s_eb_quad_cfi)) MayDay::Abort("realm::get_old_quadcfi - operator not registered!");
+  
+  return m_old_quadcfi;
+}
+
+Vector<RefCountedPtr<AggEBPWLFillPatch> >& realm::get_fillpatch() {
+  if(!this->query_operator(s_eb_fill_patch)) MayDay::Abort("realm::get_fillpatch - operator not registered!");
+  
+  return m_pwl_fillpatch;
+}
+
+Vector<RefCountedPtr<EBPWLFineInterp> >& realm::get_eb_pwl_interp() {
+  if(!this->query_operator(s_eb_pwl_interp)) MayDay::Abort("realm::get_eb_pwl_interp - operator not registered!");
+  
+  return m_pwl_interp;
+}
+
+Vector<RefCountedPtr<EBMGInterp> >& realm::get_eb_mg_interp() {
+  if(!this->query_operator(s_eb_mg_interp)) MayDay::Abort("realm::get_eb_mg_interp - operator not registered!");
+  
+  return m_ebmg_interp;
+}
+
+Vector<RefCountedPtr<EBFluxRegister> >&  realm::get_flux_reg() {
+  if(!this->query_operator(s_eb_flux_reg)) MayDay::Abort("realm::get_flux_reg - operator not registered!");
+
+  return m_flux_reg;
+}
+
+Vector<RefCountedPtr<EBLevelRedist> >&  realm::get_level_redist() {
+  if(!this->query_operator(s_eb_redist)) MayDay::Abort("realm::get_level_redist - operator not registered!");
+
+  return m_level_redist;
+}
+
+Vector<RefCountedPtr<EBCoarToFineRedist> >&  realm::get_coar_to_fine_redist() {
+  if(!this->query_operator(s_eb_redist)) MayDay::Abort("realm::get_coar_to_fine_redist - operator not registered!");
+
+  return m_coar_to_fine_redist;
+}
+
+Vector<RefCountedPtr<EBCoarToCoarRedist> >&  realm::get_coar_to_coar_redist() {
+  if(!this->query_operator(s_eb_redist)) MayDay::Abort("realm::get_coar_to_coar - operator not registered!");
+
+  return m_coar_to_coar_redist;
+}
+
+Vector<RefCountedPtr<EBFineToCoarRedist> >&  realm::get_fine_to_coar_redist() {
+  if(!this->query_operator(s_eb_redist)) MayDay::Abort("realm::get_fine_to_coar_redist - operator not registered!");
+
+  return m_fine_to_coar_redist;
+}
+
+Vector<RefCountedPtr<Copier> >& realm::get_copier() {
+  if(!this->query_operator(s_eb_copier)) MayDay::Abort("realm::get_copier - operator not registered!");
+
+  return m_copier;
+}
+
+Vector<RefCountedPtr<Copier> >& realm::get_reverse_copier() {
+  if(!this->query_operator(s_eb_copier)) MayDay::Abort("realm::get_reverse_copier - operator not registered!");
+  
+  return m_reverse_copier;
 }

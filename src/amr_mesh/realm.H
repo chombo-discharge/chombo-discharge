@@ -82,9 +82,41 @@ public:
   // Register and query operator
   void register_operator(const std::string a_operator);
   bool query_operator(const std::string a_operator);
+
+  // Get functions for stuff that should always be const
+  const RefCountedPtr<EBIndexSpace>& get_ebis();
+  const Vector<int>& get_ref_rat();
+  const Vector<Real>& get_dx();
+  const Vector<DisjointBoxLayout>& get_grids();
+  const Vector<ProblemDomain>& get_domains();
+  const Vector<EBISLayout>& get_ebisl();
+  const Vector<RefCountedPtr<EBLevelGrid> >& get_eblg();
+  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors();
+  const Vector<RefCountedPtr<LayoutData<VoFIterator> > >& get_vofit();
+  const irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils();
+  const irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils();
+  const irreg_amr_stencil<noncons_div>& get_noncons_div_stencils();
+  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten();
+
+  // This stuff has buffers, so not always const...
+  Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave();
+  Vector<RefCountedPtr<EBGhostCloud> >& get_ghostcloud();
+  Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi();
+  Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi();
+  Vector<RefCountedPtr<AggEBPWLFillPatch> >& get_fillpatch();
+  Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp();
+  Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp();
+  Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg();
+  Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist();
+  Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist();
+  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist();
+  Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist();
+  Vector<RefCountedPtr<Copier> >& get_copier();
+  Vector<RefCountedPtr<Copier> >& get_reverse_copier();
   
 protected:
 
+  bool m_empty;
   bool m_defined;
   bool m_ebcf;
   int m_finest_level;
@@ -135,7 +167,6 @@ protected:
   Vector<RefCountedPtr<EBCoarToFineRedist> > m_coar_to_fine_redist;
   Vector<RefCountedPtr<EBCoarToCoarRedist> > m_coar_to_coar_redist;
   Vector<RefCountedPtr<EBFineToCoarRedist> > m_fine_to_coar_redist;
-  Vector<RefCountedPtr<EBLevelConcentrationRedist> > m_concentration_redist;
 
   // Various stencils for irregular cells
   RefCountedPtr<irreg_amr_stencil<centroid_interp> > m_centroid_interp;

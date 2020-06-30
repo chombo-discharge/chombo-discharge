@@ -96,6 +96,16 @@ public:
   virtual void register_operator(const std::string a_operator, const phase::which_phase a_phase);
 
   /*!
+    @brief Query operator
+  */
+  virtual realm& get_realm(const std::string a_realm, const phase::which_phase a_phase);
+
+  /*!
+    @brief Register an operator
+  */
+  virtual void register_realm(const std::string a_realm, const phase::which_phase a_phase);
+
+  /*!
     @brief Alias an entire hierarchy of data. 
   */
   virtual void alias(EBAMRCellData&           a_data,
@@ -769,6 +779,14 @@ protected:
     tiled             = 1,
   };
 
+  /*!
+    @brief Realms
+  */
+  std::map<std::pair<std::string, phase::which_phase>, RefCountedPtr<realm> > m_realms;
+
+  /*!
+    @brief Grid generation method
+  */
   grid_generation m_gridgen;
 
   /*!
@@ -1187,6 +1205,11 @@ protected:
     @brief Define operator for copying ghost clouds
   */
   virtual void define_ghostcloud(const int a_lmin);
+
+  /*!
+    @brief Define all realms
+  */
+  virtual void define_realms();
 };
 
 #include "amr_meshI.H"
