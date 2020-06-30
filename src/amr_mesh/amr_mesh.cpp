@@ -147,9 +147,8 @@ void amr_mesh::allocate(AMRPVR& a_pvr, const int a_buffer){
   a_pvr.resize(1 + m_finest_level);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const Real dx                = m_dx[lvl];
-    const DisjointBoxLayout& dbl = m_grids[lvl];
-    const ProblemDomain& dom     = m_domains[lvl];
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
+    const ProblemDomain& dom     = m_realm->get_domains()[lvl];
 
     const bool has_coar = lvl > 0;
 
@@ -174,10 +173,13 @@ void amr_mesh::allocate(EBAMRCellData& a_data, const phase::which_phase a_phase,
   a_data.resize(1 + m_finest_level);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    EBCellFactory fact(m_ebisl[a_phase][lvl]);
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_realm->get_ebisl(a_phase)[lvl];
+    
+    EBCellFactory fact(ebisl);
 
     a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> >
-      (new LevelData<EBCellFAB>(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
+      (new LevelData<EBCellFAB>(dbl, a_ncomp, ghost*IntVect::Unit, fact));
 
     EBLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
@@ -196,10 +198,13 @@ void amr_mesh::allocate(EBAMRFluxData& a_data, const phase::which_phase a_phase,
   a_data.resize(1 + m_finest_level);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    EBFluxFactory fact(m_ebisl[a_phase][lvl]);
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_realm->get_ebisl(a_phase)[lvl];
+
+    EBFluxFactory fact(ebisl);
 
     a_data[lvl] = RefCountedPtr<LevelData<EBFluxFAB> >
-      (new LevelData<EBFluxFAB>(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
+      (new LevelData<EBFluxFAB>(dbl, a_ncomp, ghost*IntVect::Unit, fact));
 
     EBLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
@@ -216,20 +221,23 @@ void amr_mesh::allocate(EBAMRIVData& a_data, const phase::which_phase a_phase, c
   a_data.resize(1 + m_finest_level);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-
-    LayoutData<IntVectSet> irreg_sets(m_grids[lvl]);
-    for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
-      Box box = m_grids[lvl].get(dit());
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_realm->get_ebisl(a_phase)[lvl];
+    const ProblemDomain& domain  = m_realm->get_domains()[lvl];
+    
+    LayoutData<IntVectSet> irreg_sets(dbl);
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      Box box = dbl.get(dit());
       box.grow(ghost);
-      box &= m_domains[lvl];
+      box &= domain;
 
-      irreg_sets[dit()] = m_ebisl[a_phase][lvl][dit()].getIrregIVS(box);
+      irreg_sets[dit()] = ebisl[dit()].getIrregIVS(box);
     }
 
-    BaseIVFactory<Real> fact(m_ebisl[a_phase][lvl], irreg_sets);
+    BaseIVFactory<Real> fact(ebisl, irreg_sets);
 
     a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
-      (new LevelData<BaseIVFAB<Real> >(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
+      (new LevelData<BaseIVFAB<Real> >(dbl, a_ncomp, ghost*IntVect::Unit, fact));
 
     EBLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
@@ -246,11 +254,14 @@ void amr_mesh::allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, c
   a_data.resize(1 + m_finest_level);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-
-    DomainFluxIFFABFactory fact(m_ebisl[a_phase][lvl],m_domains[lvl]);
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_realm->get_ebisl(a_phase)[lvl];
+    const ProblemDomain& domain  = m_realm->get_domains()[lvl];
+    
+    DomainFluxIFFABFactory fact(ebisl, domain);
 
     a_data[lvl] = RefCountedPtr<LevelData<DomainFluxIFFAB> >
-      (new LevelData<DomainFluxIFFAB>(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
+      (new LevelData<DomainFluxIFFAB>(dbl, a_ncomp, ghost*IntVect::Unit, fact));
   }
 }
 
@@ -263,9 +274,10 @@ void amr_mesh::allocate(EBAMRBool& a_data, const int a_ncomp, const int a_ghost)
   a_data.resize(1 + m_finest_level);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
+    
     a_data[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > >
-      (new LevelData<BaseFab<bool> >(m_grids[lvl], a_ncomp, a_ghost*IntVect::Unit));
+      (new LevelData<BaseFab<bool> >(dbl, a_ncomp, a_ghost*IntVect::Unit));
   }
 }
 
