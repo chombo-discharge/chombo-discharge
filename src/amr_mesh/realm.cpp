@@ -16,7 +16,7 @@
 
 realm::realm(){
   m_defined = false;
-  m_verbosity = -1;
+  m_verbosity = 10;
 
   // Always do this shit. 
   this->register_operator(s_eb_gradient);
@@ -40,20 +40,20 @@ void realm::define(const Vector<DisjointBoxLayout>& a_grids,
 		   const bool a_ebcf,
 		   const RefCountedPtr<EBIndexSpace>& a_ebis){
 
-  if(!a_ebis.isNull()){
-    m_finest_level = a_finest_level;
-    m_grids = a_grids;
-    m_domains = a_domains;
-    m_ref_ratios = a_ref_rat;
-    m_dx = a_dx;
-    m_ebis = a_ebis;
-    m_ebcf = a_ebcf;
-    m_ebghost = a_ebghost;
-    m_num_ghost = a_num_ghost;
-    m_redist_rad = a_redist_rad;
-    m_centroid_stencil = a_centroid_stencil;
-    m_eb_stencil = a_eb_stencil;
-
+  m_ebis = a_ebis;
+  m_finest_level = a_finest_level;
+  m_grids = a_grids;
+  m_domains = a_domains;
+  m_ref_ratios = a_ref_rat;
+  m_dx = a_dx;
+  m_ebcf = a_ebcf;
+  m_ebghost = a_ebghost;
+  m_num_ghost = a_num_ghost;
+  m_redist_rad = a_redist_rad;
+  m_centroid_stencil = a_centroid_stencil;
+  m_eb_stencil = a_eb_stencil;
+  
+  if(!m_ebis.isNull()){
     m_defined = true;
   }
 }
@@ -70,7 +70,7 @@ void realm::set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_fine
   }
 }
 
-void realm::regrid_base(const int a_lmin, const int a_lmax, const int a_hardcap){
+void realm::regrid_base(const int a_lmin){
   CH_TIME("realm::regrid_base");
   if(m_verbosity > 5){
     pout() << "realm::regrid_base" << endl;
@@ -125,7 +125,7 @@ void realm::register_operator(const std::string a_operator){
        a_operator.compare(s_eb_irreg_interp) == 0 ||
        a_operator.compare(s_eb_mg_interp)    == 0)){
 
-    const std::string str = "amr_mesh::register_operator - unknown operator '" + a_operator + "' requested";
+    const std::string str = "realm::register_operator - unknown operator '" + a_operator + "' requested";
     MayDay::Abort(str.c_str());
   }
      
@@ -234,10 +234,10 @@ void realm::define_eb_coar_ave(const int a_lmin){
   }
 
   const bool do_this_operator = this->query_operator(s_eb_coar_ave);
+
+  m_coarave.resize(1 + m_finest_level);
   
   if(do_this_operator){
-
-    m_coarave.resize(1 + m_finest_level);
     
     const int comps = SpaceDim;
 
@@ -266,11 +266,11 @@ void realm::define_eb_quad_cfi(const int a_lmin){
   }
 
   const bool do_this_operator = this->query_operator(s_eb_quad_cfi);
+
+  m_quadcfi.resize(1 + m_finest_level);
+  m_old_quadcfi.resize(1 + m_finest_level);
   
   if(do_this_operator){
-
-    m_quadcfi.resize(1 + m_finest_level);
-    m_old_quadcfi.resize(1 + m_finest_level);
 
     const int ncomps = SpaceDim;
 
@@ -315,9 +315,10 @@ void realm::define_fillpatch(const int a_lmin){
   }
 
   const bool do_this_operator = this->query_operator(s_eb_fill_patch);
+
+  m_pwl_fillpatch.resize(1 + m_finest_level);
   
   if(do_this_operator){
-    m_pwl_fillpatch.resize(1 + m_finest_level);
     
     const int comps     = SpaceDim;
 
@@ -350,15 +351,17 @@ void realm::define_fillpatch(const int a_lmin){
 
 
 void realm::define_ebpwl_interp(const int a_lmin){
-  CH_TIME("amr_mesh::define_ebpwl_interp");
+  CH_TIME("realm::define_ebpwl_interp");
   if(m_verbosity > 2){
-    pout() << "amr_mesh::define_ebpwl_interp" << endl;
+    pout() << "realm::define_ebpwl_interp" << endl;
   }
 
   const bool do_this_operator = this->query_operator(s_eb_pwl_interp);
 
+  m_pwl_interp.resize(1 + m_finest_level);
+
   if(do_this_operator){
-    m_pwl_interp.resize(1 + m_finest_level);
+
 	
     const int comps     = SpaceDim;
 
@@ -392,8 +395,10 @@ void realm::define_ebmg_interp(const int a_lmin){
 
   const bool do_this_operator = this->query_operator(s_eb_mg_interp);
 
+  m_ebmg_interp.resize(1 + m_finest_level);
+
   if(do_this_operator){
-    m_ebmg_interp.resize(1 + m_finest_level);
+
     
     const int ncomps    = 1;
 
@@ -429,8 +434,9 @@ void realm::define_flux_reg(const int a_lmin, const int a_regsize){
 
   const bool do_this_operator = this->query_operator(s_eb_flux_reg);
 
+  m_flux_reg.resize(1 + m_finest_level);
+
   if(do_this_operator){
-    m_flux_reg.resize(1 + m_finest_level);
     
     const int comps = a_regsize;
     
@@ -470,11 +476,12 @@ void realm::define_redist_oper(const int a_lmin, const int a_regsize){
 
   const bool do_this_operator = this->query_operator(s_eb_redist);
 
+  m_level_redist.resize(1 + m_finest_level);
+  m_fine_to_coar_redist.resize(1 + m_finest_level);
+  m_coar_to_coar_redist.resize(1 + m_finest_level);
+  m_coar_to_fine_redist.resize(1 + m_finest_level);
+
   if(do_this_operator){
-    m_level_redist.resize(1 + m_finest_level);
-    m_fine_to_coar_redist.resize(1 + m_finest_level);
-    m_coar_to_coar_redist.resize(1 + m_finest_level);
-    m_coar_to_fine_redist.resize(1 + m_finest_level);
     
     const int comps = a_regsize;
 
@@ -555,8 +562,10 @@ void realm::define_gradsten(const int a_lmin){
 
   const bool do_this_operator = this->query_operator(s_eb_gradient);
 
+  m_gradsten.resize(1 + m_finest_level);
+
   if(do_this_operator){
-    m_gradsten.resize(1 + m_finest_level);
+
     
     for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
       const DisjointBoxLayout& dbl = m_grids[lvl];
@@ -616,9 +625,10 @@ void realm::define_copier(const int a_lmin){
 
   const bool do_this_operator = this->query_operator(s_eb_copier);
 
+  m_copier.resize(1 + m_finest_level);
+  m_reverse_copier.resize(1 + m_finest_level);
+
   if(do_this_operator){
-    m_copier.resize(1 + m_finest_level);
-    m_reverse_copier.resize(1 + m_finest_level);
     
     for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
       m_copier[lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
@@ -646,9 +656,9 @@ void realm::define_ghostcloud(const int a_lmin){
 
   const bool do_this_operator = this->query_operator(s_eb_copier);
 
-  if(do_this_operator){
-    m_ghostclouds.resize(1 + m_finest_level);
+  m_ghostclouds.resize(1 + m_finest_level);
 
+  if(do_this_operator){
     for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
       const bool has_coar = lvl > 0;
 

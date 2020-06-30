@@ -76,7 +76,7 @@ public:
 
   // Base and operator regrid
   void set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
-  void regrid_base(const int a_lmin, const int a_lmax, const int a_hardcap);
+  void regrid_base(const int a_lmin);
   void regrid_operators(const int a_lmin, const int a_lmax, const int a_regsize);
 
   // Register and query operator

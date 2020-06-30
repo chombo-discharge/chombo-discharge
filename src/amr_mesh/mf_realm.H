@@ -38,7 +38,7 @@ public:
 
   // Base and operator regrid
   void set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
-  void regrid_base(const int a_lmin, const int a_lmax, const int a_hardcap);
+  void regrid_base(const int a_lmin);
   void regrid_operators(const int a_lmin, const int a_lmax, const int a_regsize);
 
   // Register and query operator
@@ -64,6 +64,7 @@ public:
   const irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(const phase::which_phase a_phase);
   const irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(const phase::which_phase a_phase);
   const irreg_amr_stencil<noncons_div>& get_noncons_div_stencils(const phase::which_phase a_phase);
+  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten(const phase::which_phase a_phase);
 
   // Get functions for stuff that are specific to phase, but is not necessarily const
   Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave(const phase::which_phase a_phase);

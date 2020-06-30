@@ -12,8 +12,13 @@ mf_realm::mf_realm(){
   m_verbosity = 10; 
 
   // Just empty points until define() is called
+#if 0 // Original code
   m_realms[phase::gas]   = RefCountedPtr<realm> (new realm());
   m_realms[phase::solid] = RefCountedPtr<realm> (new realm());
+#else
+  m_realms.emplace(phase::gas,   RefCountedPtr<realm> (new realm()));
+  m_realms.emplace(phase::solid, RefCountedPtr<realm> (new realm()));
+#endif
 }
 
 mf_realm::~mf_realm(){
@@ -37,25 +42,24 @@ void mf_realm::define(const Vector<DisjointBoxLayout>& a_grids,
     pout() << "mf_realm::define" << endl;
   }
 
+
+
   m_ref_ratios = a_ref_rat;
   m_dx = a_dx;
   m_grids = a_grids;
   m_domains = a_domains;
+
   m_mfis = a_mfis;
   m_finest_level = a_finest_level;
-
+  
   const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  if(!ebis_gas.isNull()){
-    m_realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, a_finest_level, a_ebghost, a_num_ghost, a_redist_rad,
-				 a_centroid_stencil, a_eb_stencil, a_ebcf, ebis_gas);
-  }
+  m_realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, a_finest_level, a_ebghost, a_num_ghost, a_redist_rad,
+			       a_centroid_stencil, a_eb_stencil, a_ebcf, ebis_gas);
 
-  if(!ebis_sol.isNull()){
-    m_realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, a_finest_level, a_ebghost, a_num_ghost, a_redist_rad,
-				   a_centroid_stencil, a_eb_stencil, a_ebcf, ebis_sol);
-  }
+  m_realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, a_finest_level, a_ebghost, a_num_ghost, a_redist_rad,
+				 a_centroid_stencil, a_eb_stencil, a_ebcf, ebis_sol);
 }
 
 void mf_realm::set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level){
@@ -69,15 +73,16 @@ void mf_realm::set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_f
   }
 }
 
-void mf_realm::regrid_base(const int a_lmin, const int a_lmax, const int a_hardcap){
+void mf_realm::regrid_base(const int a_lmin){
   CH_TIME("mf_realm::regrid_base");
   if(m_verbosity > 5){
     pout() << "mf_realm::regrid_base" << endl;
   }
   
   for (auto& r : m_realms){
-    r.second->regrid_base(a_lmin, a_lmax, a_hardcap);
+    r.second->regrid_base(a_lmin);
   }
+  this->define_mflevelgrid(a_lmin);
 }
 
 void mf_realm::regrid_operators(const int a_lmin, const int a_lmax, const int a_regsize){
@@ -85,7 +90,7 @@ void mf_realm::regrid_operators(const int a_lmin, const int a_lmax, const int a_
   if(m_verbosity > 5){
     pout() << "mf_realm::regrid_operators" << endl;
   }
-  
+
   for (auto& r : m_realms){
     r.second->regrid_operators(a_lmin, a_lmax, a_regsize);
   }
@@ -188,6 +193,10 @@ const irreg_amr_stencil<eb_centroid_interp>& mf_realm::get_eb_centroid_interp_st
 
 const irreg_amr_stencil<noncons_div>& mf_realm::get_noncons_div_stencils(const phase::which_phase a_phase) {
   return m_realms[a_phase]->get_noncons_div_stencils();
+}
+
+const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& mf_realm::get_gradsten(const phase::which_phase a_phase){
+  return m_realms[a_phase]->get_gradsten();
 }
 
 
