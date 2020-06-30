@@ -15,8 +15,6 @@
 #include "DomainFluxIFFABFactory.H"
 #include "TiledMeshRefine.H"
 
-#include "mf_realm.H"
-
 #include <BRMeshRefine.H>
 #include <EBEllipticLoadBalance.H>
 #include <EBLevelDataOps.H>
@@ -79,9 +77,6 @@ amr_mesh::amr_mesh(){
   this->register_operator(s_eb_irreg_interp, phase::gas);
   this->register_operator(s_eb_irreg_interp, phase::solid);
 
-  // Register fluid realm. 
-  this->register_realm("fluid", phase::gas);
-  this->register_realm("fluid", phase::solid);
 }
 
 amr_mesh::~amr_mesh(){
@@ -800,12 +795,6 @@ void amr_mesh::regrid_amr(const Vector<IntVectSet>& a_tags,
     this->define_mg_stuff();
     m_has_mg_stuff = true; // Only needs to be done ONCE per run. 
   }
-
-  // Iterator through maps and do the usual bullshit.
-  this->define_realms();
-  for (auto& r : m_realms){
-    r.second->regrid_base(a_lmin, a_lmax, a_hardcap);
-  }
 }
 
 void amr_mesh::regrid_operators(const int a_lmin,
@@ -825,9 +814,6 @@ void amr_mesh::regrid_operators(const int a_lmin,
   this->define_copier(a_lmin);                  // Make stencils for copier
   this->define_ghostcloud(a_lmin);              // Make stencils for ghost clouds with particle depositions
 
-  for (auto r : m_realms){
-    //    r.second->regrid_operators(a_lmin, a_lmax, a_regsize);
-  }
 }
 
 void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap){
@@ -3136,54 +3122,4 @@ bool amr_mesh::query_operator(const std::string a_operator, const phase::which_p
   }
 
   return m_operator_map[std::make_pair(a_operator, a_phase)];
-}
-
-realm& amr_mesh::get_realm(const std::string a_realm, const phase::which_phase a_phase){
-  CH_TIME("amr_mesh::get_realm");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::get_realm" << endl;
-  }
-  
-  return *m_realms[std::make_pair(a_realm, a_phase)];
-}
-
-void amr_mesh::register_realm(const std::string a_realm, const phase::which_phase a_phase){
-  CH_TIME("amr_mesh::register_realm");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::register_realm" << endl;
-  }
-  
-  if(m_realms.find(std::make_pair(a_realm, a_phase)) == m_realms.end()){
-    RefCountedPtr<realm> newRealm = RefCountedPtr<realm> (new realm());
-    m_realms.emplace(std::make_pair(a_realm, a_phase), newRealm);
-  }
-}
-
-void amr_mesh::define_realms(){
-  CH_TIME("amr_mesh::define_realms");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::define_realms" << endl;
-  }
-
-  for (auto& r : m_realms){
-
-    const phase::which_phase phase = (r.first).second;
-    
-    const RefCountedPtr<EBIndexSpace> ebis = m_mfis->get_ebis(phase);
-
-    if(!ebis.isNull()){
-      r.second->define(m_grids,
-		       m_domains,
-		       m_ref_ratios,
-		       m_dx,
-		       m_finest_level,
-		       m_ebghost,
-		       m_num_ghost,
-		       m_redist_rad,
-		       m_centroid_stencil,
-		       m_eb_stencil,
-		       m_ebcf,
-		       ebis);
-    }
-  }
 }
