@@ -362,25 +362,26 @@ void amr_mesh::allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghos
 
   a_data.resize(1 + m_finest_level);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_realm->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_realm->get_ebis(phase::solid);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
+    
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, a_ncomp);
 
-    ebisl[phase::gas]   = this->get_ebisl(phase::gas)[lvl];
+    ebisl[phase::gas]   = m_realm->get_ebisl(phase::gas)[lvl];
     if(!ebis_sol.isNull()){
-      ebisl[phase::solid] = this->get_ebisl(phase::solid)[lvl];
+      ebisl[phase::solid] = m_realm->get_ebisl(phase::solid)[lvl];
     }
     
     MFBaseIVFABFactory factory(ebisl, comps);
 
     a_data[lvl] = RefCountedPtr<LevelData<MFBaseIVFAB> >
-      (new LevelData<MFBaseIVFAB>(m_grids[lvl], ignored, ghost*IntVect::Unit, factory));
+      (new LevelData<MFBaseIVFAB>(dbl, ignored, ghost*IntVect::Unit, factory));
   }
 }
-
 
 void amr_mesh::reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin){
   CH_TIME("amr_mesh::reallocate(cell)");
