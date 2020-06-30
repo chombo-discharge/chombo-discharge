@@ -71,6 +71,8 @@ amr_mesh::amr_mesh(){
   m_ref_ratios.push_back(2);
 #endif
 
+  m_realm = RefCountedPtr<mf_realm> (new mf_realm());
+
   // Always do this stuff. 
   this->register_operator(s_eb_gradient,     phase::gas);
   this->register_operator(s_eb_gradient,     phase::solid);
@@ -767,8 +769,6 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
     pout() << "amr_mesh::regrid" << endl;
   }
 
-
-
   this->regrid_amr(a_tags, a_lmin, a_lmax, a_hardcap);
   this->regrid_operators(a_lmin, a_lmax, a_regsize);
 }
@@ -795,6 +795,9 @@ void amr_mesh::regrid_amr(const Vector<IntVectSet>& a_tags,
     this->define_mg_stuff();
     m_has_mg_stuff = true; // Only needs to be done ONCE per run. 
   }
+
+  this->define_realms();
+  m_realm->regrid_base(a_lmin);
 }
 
 void amr_mesh::regrid_operators(const int a_lmin,
@@ -814,6 +817,7 @@ void amr_mesh::regrid_operators(const int a_lmin,
   this->define_copier(a_lmin);                  // Make stencils for copier
   this->define_ghostcloud(a_lmin);              // Make stencils for ghost clouds with particle depositions
 
+  m_realm->regrid_operators(a_lmin, a_lmax, a_regsize);
 }
 
 void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap){
@@ -2603,6 +2607,9 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
   this->define_ghostcloud(a_lmin);              
 #endif
 
+  this->define_realms();
+  m_realm->regrid_base(a_lmin);
+
 }
 
 void amr_mesh::parse_max_box_size(){
@@ -3113,6 +3120,8 @@ void amr_mesh::register_operator(const std::string a_operator, const phase::whic
      
 
   m_operator_map.emplace(std::make_pair(a_operator, a_phase), true);
+
+  m_realm->register_operator(a_operator, a_phase);
 }
 
 bool amr_mesh::query_operator(const std::string a_operator, const phase::which_phase a_phase) {
@@ -3122,4 +3131,14 @@ bool amr_mesh::query_operator(const std::string a_operator, const phase::which_p
   }
 
   return m_operator_map[std::make_pair(a_operator, a_phase)];
+}
+
+void amr_mesh::define_realms(){
+  CH_TIME("amr_mesh::define_realms");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::define_realms" << endl;
+  }
+
+  m_realm->define(m_grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
+		  m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
 }

@@ -768,6 +768,8 @@ protected:
     tiled             = 1,
   };
 
+  RefCountedPtr<mf_realm> m_realm;
+
   /*!
     @brief Grid generation method
   */
@@ -1189,6 +1191,11 @@ protected:
     @brief Define operator for copying ghost clouds
   */
   virtual void define_ghostcloud(const int a_lmin);
+
+  /*!
+    @brief Define realms
+  */
+  virtual void define_realms();
 };
 
 #include "amr_meshI.H"
