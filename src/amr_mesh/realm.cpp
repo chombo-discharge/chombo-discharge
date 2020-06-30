@@ -140,6 +140,7 @@ void realm::define_eblevelgrid(const int a_lmin){
   }
 
   m_eblg.resize(1 + m_finest_level);
+  m_ebisl.resize(1 + m_finest_level);
 
   for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     m_eblg[lvl]  = RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_grids[lvl], m_domains[lvl], m_ebghost, &(*m_ebis)));
