@@ -397,10 +397,13 @@ void amr_mesh::reallocate(EBAMRCellData& a_data, const phase::which_phase a_phas
   const int lmin = Max(0, a_lmin+1);
   
   for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
-    EBCellFactory fact(m_ebisl[a_phase][lvl]);
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_realm->get_ebisl(a_phase)[lvl];
+    
+    EBCellFactory fact(ebisl);
 
     a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> >
-      (new LevelData<EBCellFAB>(m_grids[lvl], ncomp, ghost, fact));
+      (new LevelData<EBCellFAB>(dbl, ncomp, ghost, fact));
 
     EBLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
@@ -420,9 +423,12 @@ void amr_mesh::reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phas
   const int lmin = Max(0, a_lmin+1);
   
   for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
-    EBFluxFactory fact(m_ebisl[a_phase][lvl]);
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_realm->get_ebisl(a_phase)[lvl];
+    
+    EBFluxFactory fact(ebisl);
 
-    a_data[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>(m_grids[lvl], ncomp, ghost, fact));
+    a_data[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>(dbl, ncomp, ghost, fact));
 
     EBLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
@@ -442,20 +448,23 @@ void amr_mesh::reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase,
   const int lmin = Max(0, a_lmin+1);
 
   for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
-
-    LayoutData<IntVectSet> irreg_sets(m_grids[lvl]);
-    for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
-      Box box = m_grids[lvl].get(dit());
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_realm->get_ebisl(a_phase)[lvl];
+    const ProblemDomain& domain  = m_realm->get_domains()[lvl];
+    
+    LayoutData<IntVectSet> irreg_sets(dbl);
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      Box box = dbl.get(dit());
       box.grow(ghost);
-      box &= m_domains[lvl];
+      box &= domain;
 
-      irreg_sets[dit()] = m_ebisl[a_phase][lvl][dit()].getIrregIVS(box);
+      irreg_sets[dit()] = ebisl[dit()].getIrregIVS(box);
     }
 
-    BaseIVFactory<Real> fact(m_ebisl[a_phase][lvl], irreg_sets);
+    BaseIVFactory<Real> fact(ebisl, irreg_sets);
 
     a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
-      (new LevelData<BaseIVFAB<Real> >(m_grids[lvl], ncomp, ghost, fact));
+      (new LevelData<BaseIVFAB<Real> >(dbl, ncomp, ghost, fact));
 
     EBLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
@@ -475,11 +484,14 @@ void amr_mesh::reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase,
   const int lmin = Max(0, a_lmin+1);
 
   for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
-
-    DomainFluxIFFABFactory fact(m_ebisl[a_phase][lvl],m_domains[lvl]);
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_realm->get_ebisl(a_phase)[lvl];
+    const ProblemDomain& domain  = m_realm->get_domains()[lvl];
+    
+    DomainFluxIFFABFactory fact(ebisl, domain);
 
     a_data[lvl] = RefCountedPtr<LevelData<DomainFluxIFFAB> >
-      (new LevelData<DomainFluxIFFAB>(m_grids[lvl], ncomp, ghost, fact));
+      (new LevelData<DomainFluxIFFAB>(dbl, ncomp, ghost, fact));
   }
 }
 
@@ -497,9 +509,10 @@ void amr_mesh::reallocate(EBAMRBool& a_data, const int a_ncomp, const int a_lmin
   const int lmin = Max(0, a_lmin+1);
 
   for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
 
     a_data[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > >
-      (new LevelData<BaseFab<bool> >(m_grids[lvl], ncomp, ghost));
+      (new LevelData<BaseFab<bool> >(dbl, ncomp, ghost));
   }
 }
 
