@@ -941,11 +941,6 @@ protected:
   bool m_has_grids;
 
   /*!
-    @brief Has MG stuff or not
-  */
-  bool m_has_mg_stuff;
-
-  /*!
     @brief Grids
   */
   Vector<DisjointBoxLayout> m_grids;

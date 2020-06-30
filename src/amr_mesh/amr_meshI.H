@@ -55,24 +55,26 @@ template<typename T > void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<
   a_particles.resize(1 + m_finest_level);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    a_particles[lvl] = RefCountedPtr<ParticleData<T> > (new ParticleData<T>(m_grids[lvl],
-									    m_domains[lvl],
+    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
+    const ProblemDomain& domain  = m_realm->get_domains()[lvl];
+    const Real dx = m_realm->get_dx()[lvl];
+    a_particles[lvl] = RefCountedPtr<ParticleData<T> > (new ParticleData<T>(dbl,
+									    domain,
 									    m_blocking_factor,
-									    m_dx[lvl]*RealVect::Unit,
+									    dx*RealVect::Unit,
 									    m_prob_lo));
   }
 }
-
 
 template <typename T>
 void amr_mesh::allocate(particle_container<T>& a_container, const int a_pvr_buffer){
   if(m_max_box_size != m_blocking_factor){
     MayDay::Abort("amr_mesh::allocate(particle_container<T>) - only constant box sizes are supported for particle methods");
   }
-  a_container.define(m_grids,
-		     m_domains,
-		     m_dx,
-		     m_ref_ratios,
+  a_container.define(m_realm->get_grids(),
+		     m_realm->get_domains(),
+		     m_realm->get_dx(),
+		     m_realm->get_ref_rat(),
 		     m_prob_lo,
 		     m_blocking_factor,
 		     m_finest_level,
