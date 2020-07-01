@@ -726,12 +726,9 @@ void amr_mesh::build_domains(){
   m_eblg.resize(phase::num_phases);
   m_ebisl.resize(phase::num_phases);
   m_vofiter.resize(phase::num_phases);
-  m_quadcfi.resize(phase::num_phases);
   m_flux_reg.resize(phase::num_phases);
-  m_old_quadcfi.resize(phase::num_phases);
   m_level_redist.resize(phase::num_phases);
   m_concentration_redist.resize(phase::num_phases);
-  m_pwl_fillpatch.resize(phase::num_phases);
   m_pwl_interp.resize(phase::num_phases);
   m_ebmg_interp.resize(phase::num_phases);
   m_centroid_interp.resize(phase::num_phases);
@@ -747,10 +744,7 @@ void amr_mesh::build_domains(){
   m_eblg[phase::gas].resize(nlevels);
   m_ebisl[phase::gas].resize(nlevels);
   m_vofiter[phase::gas].resize(nlevels);
-  m_quadcfi[phase::gas].resize(nlevels);
   m_flux_reg[phase::gas].resize(nlevels);
-  m_old_quadcfi[phase::gas].resize(nlevels);
-  m_pwl_fillpatch[phase::gas].resize(nlevels);
   m_pwl_interp[phase::gas].resize(nlevels);
   m_ebmg_interp[phase::gas].resize(nlevels);
   m_level_redist[phase::gas].resize(nlevels);
@@ -764,12 +758,9 @@ void amr_mesh::build_domains(){
 
   m_eblg[phase::solid].resize(nlevels);
   m_ebisl[phase::solid].resize(nlevels);
-  m_quadcfi[phase::solid].resize(nlevels);
   m_flux_reg[phase::solid].resize(nlevels);
   m_vofiter[phase::solid].resize(nlevels);
-  m_old_quadcfi[phase::solid].resize(nlevels);
   m_level_redist[phase::solid].resize(nlevels);
-  m_pwl_fillpatch[phase::solid].resize(nlevels);
   m_pwl_interp[phase::solid].resize(nlevels);
   m_ebmg_interp[phase::solid].resize(nlevels);
   m_coar_to_fine_redist[phase::solid].resize(nlevels);
@@ -833,8 +824,6 @@ void amr_mesh::regrid_operators(const int a_lmin,
 				const int a_lmax,
 				const int a_regsize){
   // Now allocate operators
-  this->define_eb_quad_cfi(a_lmin);             // Define nwoebquadcfinterp on both phases.
-  this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
   this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
   this->define_ebmg_interp(a_lmin);             // Define interpolator used for e.g. multigrid (or piecewise constant)
   this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
@@ -1339,139 +1328,6 @@ void amr_mesh::define_mflevelgrid(const int a_lmin){
     }
 
     m_mflg[lvl] = RefCountedPtr<MFLevelGrid> (new MFLevelGrid(m_mfis, eblgs));
-  }
-}
-
-void amr_mesh::define_eb_quad_cfi(const int a_lmin){
-  CH_TIME("amr_mesh::define_eb_quad_cfi");
-  if(m_verbosity > 2){
-    pout() << "amr_mesh::define_eb_quad_cfi" << endl;
-  }
-
-
-    
-  const int comps = SpaceDim;
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
-
-  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
-
-    const bool has_coar = lvl > 0;
-
-    if(has_coar){
-      if(!ebis_gas.isNull()){
-	if(this->query_operator(s_eb_quad_cfi, phase::gas)){
-	  const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
-
-	    m_quadcfi[phase::gas][lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
-												 m_grids[lvl-1],
-												 m_ebisl[phase::gas][lvl],
-												 m_ebisl[phase::gas][lvl-1],
-												 m_domains[lvl-1],
-												 m_ref_ratios[lvl-1],
-												 comps,
-												 m_dx[lvl],
-												 m_num_ghost,
-												 cfivs,
-												 ebis_gas));
-
-	  m_old_quadcfi[phase::gas][lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
-											     m_grids[lvl-1],
-											     m_ebisl[phase::gas][lvl],
-											     m_ebisl[phase::gas][lvl-1],
-											     m_domains[lvl-1],
-											     m_ref_ratios[lvl-1],
-											     1,
-											     cfivs,
-											     ebis_gas));
-	}
-      }
-      if(!ebis_sol.isNull()){
-	if(this->query_operator(s_eb_quad_cfi, phase::solid)){
-	  LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
-	    m_quadcfi[phase::solid][lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
-												   m_grids[lvl-1],
-												   m_ebisl[phase::solid][lvl],
-												   m_ebisl[phase::solid][lvl-1],
-												   m_domains[lvl-1],
-												   m_ref_ratios[lvl-1],
-												   comps,
-												   m_dx[lvl],
-												   m_num_ghost,
-												   cfivs,
-												   ebis_sol));
-	
-	  m_old_quadcfi[phase::solid][lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
-											       m_grids[lvl-1],
-											       m_ebisl[phase::solid][lvl],
-											       m_ebisl[phase::solid][lvl-1],
-											       m_domains[lvl-1],
-											       m_ref_ratios[lvl-1],
-											       1,
-											       cfivs,
-											       ebis_sol));
-	}
-      }
-    }
-  }
-}
-
-void amr_mesh::define_fillpatch(const int a_lmin){
-  CH_TIME("amr_mesh::define_fillpatch");
-  if(m_verbosity > 2){
-    pout() << "amr_mesh::define_fillpatch" << endl;
-  }
-
-
-  const int comps     = SpaceDim;
-
-  // Should these be input somehow?
-  const int radius    = 1;
-  const IntVect ghost = m_num_ghost*IntVect::Unit;
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
-
-  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
-
-    const bool has_coar = lvl > 0;
-
-    if(has_coar){
-      if(!ebis_gas.isNull()){
-	if(this->query_operator(s_eb_fill_patch, phase::gas)){
-	  const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
-	  m_pwl_fillpatch[phase::gas][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
-												     m_grids[lvl-1],
-												     m_ebisl[phase::gas][lvl],
-												     m_ebisl[phase::gas][lvl-1],
-												     m_domains[lvl-1],
-												     m_ref_ratios[lvl-1],
-												     comps,
-												     radius,
-												     ghost,
-												     !m_ebcf,
-												     ebis_gas));
-	}
-      }
-      if(!ebis_sol.isNull()){
-	if(this->query_operator(s_eb_fill_patch, phase::solid)){
-	  const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
-	  m_pwl_fillpatch[phase::solid][lvl] = RefCountedPtr<AggEBPWLFillPatch>
-	    (new AggEBPWLFillPatch(m_grids[lvl],
-				   m_grids[lvl-1],
-				   m_ebisl[phase::solid][lvl],
-				   m_ebisl[phase::solid][lvl-1],
-				   m_domains[lvl-1],
-				   m_ref_ratios[lvl-1],
-				   comps,
-				   radius,
-				   ghost,
-				   !m_ebcf,
-				   ebis_sol));
-	}
-      }
-    }
   }
 }
 
@@ -2202,9 +2058,9 @@ void amr_mesh::average_down(EBAMRIVData& a_data, phase::which_phase a_phase){
 }
 
 void amr_mesh::conservative_average(EBAMRIVData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::conservative_average");
+  CH_TIME("amr_mesh::conservative_average(ebamriv, phase)");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::conservative_average" << endl;
+    pout() << "amr_mesh::conservative_average(ebamriv, phase)" << endl;
   }
 
   for (int lvl = m_finest_level; lvl > 0; lvl--){
@@ -2223,9 +2079,9 @@ void amr_mesh::conservative_average(EBAMRIVData& a_data, phase::which_phase a_ph
 }
 
 void amr_mesh::interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::interp_ghost(eb)");
+  CH_TIME("amr_mesh::interp_ghost(ebamrcell, phase)");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::interp_ghost(eb)" << endl;
+    pout() << "amr_mesh::interp_ghost(ebamrcell, phase)" << endl;
   }
 
   if(m_interp_type == ghost_interpolation::pwl){
@@ -2240,46 +2096,43 @@ void amr_mesh::interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase){
 }
 
 void amr_mesh::interp_ghost(MFAMRCellData& a_data){
-  CH_TIME("amr_mesh::interp_ghost(mf)");
+  CH_TIME("amr_mesh::interp_ghost(mfamrcell)");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::interp_ghost(mf)" << endl;
+    pout() << "amr_mesh::interp_ghost(mfamrcell)" << endl;
   }
-  
+
+  // Do aliasing
   EBAMRCellData alias_g(1 + m_finest_level);
   EBAMRCellData alias_s(1 + m_finest_level);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_realm->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_realm->get_ebis(phase::solid);
   
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     alias_g[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
     alias_s[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
       
-    mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
-    if(!ebis_sol.isNull()){
-      mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
-    }
+    if(!ebis_gas.isNull()) mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
+    if(!ebis_sol.isNull()) mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
   }
 
-  this->interp_ghost(alias_g, phase::gas);
-  if(!ebis_sol.isNull()){
-    this->interp_ghost(alias_s, phase::solid);
-  }
+  if(!ebis_gas.isNull()) this->interp_ghost(alias_g, phase::gas);
+  if(!ebis_sol.isNull()) this->interp_ghost(alias_s, phase::solid);
 }
 
 void amr_mesh::interp_ghost_quad(EBAMRCellData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::interp_ghost(quad)");
+  CH_TIME("amr_mesh::interp_ghost_quad(ebamrcell, phase)");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::interp_ghost(quad)" << endl;
+    pout() << "amr_mesh::interp_ghost_quad(ebamrcell_phase)" << endl;
   }
 
   for (int lvl = m_finest_level; lvl > 0; lvl--){
     const int ncomps = a_data[lvl]->nComp();
     const Interval interv(0, ncomps -1);
 
-    CH_assert(a_data[lvl]->ghostVect() == m_num_ghost*IntVect::Unit);
+    nwoebquadcfinterp& quadcfi = *m_realm->get_quadcfi(a_phase)[lvl];
 
-    m_quadcfi[a_phase][lvl]->coarseFineInterp(*a_data[lvl], *a_data[lvl-1], 0, 0, ncomps);
+    quadcfi.coarseFineInterp(*a_data[lvl], *a_data[lvl-1], 0, 0, ncomps);
   }
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -2288,23 +2141,23 @@ void amr_mesh::interp_ghost_quad(EBAMRCellData& a_data, phase::which_phase a_pha
 }
 
 void amr_mesh::interp_ghost_pwl(EBAMRCellData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::interp_ghost(pwl)");
+  CH_TIME("amr_mesh::interp_ghost_pwl(ebamrcell, phase)");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::interp_ghost(pwl)" << endl;
+    pout() << "amr_mesh::interp_ghost_pwl(ebamrcell, phase)" << endl;
   }
   
   for (int lvl = m_finest_level; lvl > 0; lvl--){
     const int ncomps = a_data[lvl]->nComp();
     const Interval interv(0, ncomps -1);
 
-    CH_assert(a_data[lvl]->ghostVect() == m_num_ghost*IntVect::Unit);
-
-    m_pwl_fillpatch[a_phase][lvl]->interpolate(*a_data[lvl], *a_data[lvl-1], *a_data[lvl-1], 0.0, 0.0, 0.0, interv);
+    AggEBPWLFillPatch& fillpatch = *m_realm->get_fillpatch(a_phase)[lvl];
+    
+    fillpatch.interpolate(*a_data[lvl], *a_data[lvl-1], *a_data[lvl-1], 0.0, 0.0, 0.0, interv);
   }
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     a_data[lvl]->exchange();
-  }  
+  }
 }
 
 void amr_mesh::interpolate_to_centroids(EBAMRCellData& a_data, phase::which_phase a_phase){
@@ -2450,18 +2303,6 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
   this->define_vofiter(a_lmin);      // Define vof iterators
   this->define_mg_stuff();
 
-#if 0  // Done after the operator shit
-  this->define_eb_coar_ave(a_lmin); 
-  this->define_eb_quad_cfi(a_lmin); 
-  this->define_fillpatch(a_lmin);   
-  this->define_ebpwl_interp(a_lmin);
-  this->define_flux_reg(a_lmin,a_regsize);    
-  this->define_redist_oper(a_lmin, a_regsize);
-  this->define_gradsten(a_lmin);
-  this->define_irreg_sten();            
-  this->define_copier(a_lmin);                
-  this->define_ghostcloud(a_lmin);              
-#endif
 
   this->define_realms();
   m_realm->regrid_base(a_lmin);
@@ -2836,15 +2677,15 @@ Vector<RefCountedPtr<EBGhostCloud> >& amr_mesh::get_ghostcloud(phase::which_phas
 }
 
 Vector<RefCountedPtr<nwoebquadcfinterp> >& amr_mesh::get_quadcfi(phase::which_phase a_phase){
-  return m_quadcfi[a_phase];
+  return m_realm->get_quadcfi(a_phase);
 }
 
 Vector<RefCountedPtr<EBQuadCFInterp> >& amr_mesh::get_old_quadcfi(phase::which_phase a_phase){
-  return m_old_quadcfi[a_phase];
+  return m_realm->get_old_quadcfi(a_phase);
 }
 
 Vector<RefCountedPtr<AggEBPWLFillPatch> >& amr_mesh::get_fillpatch(phase::which_phase a_phase){
-  return m_pwl_fillpatch[a_phase];
+  return m_realm->get_fillpatch(a_phase);
 }
 
 Vector<RefCountedPtr<EBPWLFineInterp> >& amr_mesh::get_eb_pwl_interp(phase::which_phase a_phase){

@@ -25,7 +25,6 @@
 #include "mf_realm.H"
 
 #include <DisjointBoxLayout.H>
-#include <AggEBPWLFillPatch.H>
 #include <ebcoarseaverage.H>
 #include <EBFluxRegister.H>
 #include <EBFluxRegister.H>
@@ -992,24 +991,9 @@ protected:
   Vector<Vector<RefCountedPtr<Copier> > > m_reverse_copier;
 
   /*!
-    @brief QuadCFInterp. One for each phase
-  */
-  Vector<Vector<RefCountedPtr<nwoebquadcfinterp> > > m_quadcfi;
-
-  /*!
     @brief Ghost cloud interpolation stuff. By default only allocated for the gas phase
   */
   Vector<Vector<RefCountedPtr<EBGhostCloud> > > m_ghostclouds;
-
-  /*!
-    @brief Old type quadcfi. Needed for EBConductivtyOps
-  */
-  Vector<Vector<RefCountedPtr<EBQuadCFInterp> > > m_old_quadcfi;
-
-  /*!
-    @brief Patcher for piecewise linear interpolation (one ghost cell layer only)
-  */
-  Vector<Vector<RefCountedPtr<AggEBPWLFillPatch> > > m_pwl_fillpatch;
 
   /*!
     @brief Piecewise linear interpolation 
@@ -1105,16 +1089,6 @@ protected:
     Define MFLevelGrid
   */
   virtual void define_mflevelgrid(const int a_lmin);
-
-  /*!
-    @brief Define nwoebquadcfinterp
-  */
-  virtual void define_eb_quad_cfi(const int a_lmin);
-
-  /*!
-    @brief Define operators for piecewise linear interpolation of ghost cells
-  */
-  virtual void define_fillpatch(const int a_lmin);
 
   /*!
     @brief Define interpolator for regridding
