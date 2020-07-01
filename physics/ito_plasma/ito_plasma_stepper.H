@@ -33,6 +33,7 @@ namespace physics {
       virtual void parse_options() = 0;
       virtual void allocate_internals() = 0;
       void setup_solvers() override;
+      void allocate() override;
       void initial_data() override;
       void initial_sigma();
       void post_checkpoint_setup() override;

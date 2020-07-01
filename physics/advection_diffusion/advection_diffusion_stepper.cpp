@@ -44,23 +44,23 @@ void advection_diffusion_stepper::setup_solvers(){
   m_solver->set_amr(m_amr);
   m_solver->set_computational_geometry(m_compgeom);
   m_solver->sanity_check();
-  m_solver->allocate_internals(); // Moved to initial_data because GMG requires an operator, but they are registered later
-
-
+  
   if(!m_solver->is_mobile() && !m_solver->is_diffusive()){
     MayDay::Abort("advection_diffusion_stepper::setup_solvers - can't turn off both advection AND diffusion");
   }
-
-  // Allocate memory for RK steps
-  m_amr->allocate(m_tmp, m_phase, 1);
-  m_amr->allocate(m_k1,  m_phase, 1);
-  m_amr->allocate(m_k2,  m_phase, 1);
 }
 
 void advection_diffusion_stepper::register_operators(){
   m_solver->register_operators();
 }
 
+void advection_diffusion_stepper::allocate() {
+  m_solver->allocate_internals();
+
+  m_amr->allocate(m_tmp, m_phase, 1);
+  m_amr->allocate(m_k1,  m_phase, 1);
+  m_amr->allocate(m_k2,  m_phase, 1);
+}
 
 void advection_diffusion_stepper::initial_data(){
   m_solver->initial_data();       // Fill initial through the cdr species

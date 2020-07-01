@@ -24,6 +24,7 @@ public:
 
   // Setup routines
   virtual void setup_solvers() = 0;
+  virtual void allocate() = 0;
   virtual void initial_data() = 0;
   virtual void post_checkpoint_setup() = 0;
   virtual int get_redistribution_regsize() const;

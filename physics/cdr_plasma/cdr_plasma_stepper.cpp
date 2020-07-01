@@ -3734,7 +3734,14 @@ void cdr_plasma_stepper::setup_cdr(){
   m_cdr->set_computational_geometry(m_compgeom);
   m_cdr->set_phase(phase::gas);
   m_cdr->sanity_check();
+  //  m_cdr->allocate_internals();
+}
+
+void cdr_plasma_stepper::allocate() {
   m_cdr->allocate_internals();
+  m_poisson->allocate_internals();
+  m_rte->allocate_internals();
+  m_sigma->allocate_internals();
 }
 
 void cdr_plasma_stepper::setup_poisson(){
@@ -3759,7 +3766,7 @@ void cdr_plasma_stepper::setup_poisson(){
   m_poisson->set_potential(m_potential); // Needs to happen AFTER set_poisson_wall_func
 
   m_poisson->sanity_check();
-  m_poisson->allocate_internals();
+  //  m_poisson->allocate_internals();
 }
 
 void cdr_plasma_stepper::setup_rte(){
@@ -3774,7 +3781,7 @@ void cdr_plasma_stepper::setup_rte(){
   m_rte->set_amr(m_amr);
   m_rte->set_computational_geometry(m_compgeom);
   m_rte->sanity_check();
-  m_rte->allocate_internals();
+  //  m_rte->allocate_internals();
 }
 
 void cdr_plasma_stepper::setup_sigma(){
@@ -3787,7 +3794,7 @@ void cdr_plasma_stepper::setup_sigma(){
   m_sigma->set_amr(m_amr);
   m_sigma->set_verbosity(m_solver_verbosity);
   m_sigma->set_computational_geometry(m_compgeom);
-  m_sigma->allocate_internals();
+  //  m_sigma->allocate_internals();
 }
 
 void cdr_plasma_stepper::solver_dump(){

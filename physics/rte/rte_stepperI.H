@@ -42,6 +42,10 @@ namespace physics {
       m_solver->set_phase(phase::gas);
       m_solver->set_amr(m_amr);
       m_solver->set_computational_geometry(m_compgeom);
+    }
+
+    template <typename T>
+    void rte_stepper<T>::allocate() {
       m_solver->allocate_internals();
     }
 

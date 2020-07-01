@@ -255,7 +255,7 @@ void brownian_walker_stepper::setup_solvers() {
   m_solver->set_amr(m_amr);
   m_solver->set_phase(m_phase);
   m_solver->set_computational_geometry(m_compgeom);
-  m_solver->allocate_internals(); // Allocate some internal storage
+
 }
 
 void brownian_walker_stepper::register_operators() {
@@ -265,6 +265,10 @@ void brownian_walker_stepper::register_operators() {
   }
 
   m_solver->register_operators();
+}
+
+void brownian_walker_stepper::allocate() {
+  m_solver->allocate_internals(); // Allocate some internal storage
 }
 
 Real brownian_walker_stepper::advance(const Real a_dt) {

@@ -68,7 +68,6 @@ void ito_plasma_stepper::setup_ito(){
   m_ito->set_amr(m_amr);
   m_ito->set_phase(m_phase);
   m_ito->set_computational_geometry(m_compgeom);
-  m_ito->allocate_internals(); // Allocate some internal storage
 }
 
 void ito_plasma_stepper::setup_poisson(){
@@ -84,7 +83,6 @@ void ito_plasma_stepper::setup_poisson(){
   m_poisson->set_potential(m_potential); // Needs to happen AFTER set_poisson_wall_func
 
   m_poisson->sanity_check();
-  m_poisson->allocate_internals();
 }
 
 void ito_plasma_stepper::setup_rte(){
@@ -99,7 +97,6 @@ void ito_plasma_stepper::setup_rte(){
   m_rte->set_amr(m_amr);
   m_rte->set_computational_geometry(m_compgeom);
   m_rte->sanity_check();
-  m_rte->allocate_internals();
 }
 
 void ito_plasma_stepper::setup_sigma(){
@@ -112,6 +109,17 @@ void ito_plasma_stepper::setup_sigma(){
   m_sigma->set_amr(m_amr);
   m_sigma->set_verbosity(m_verbosity);
   m_sigma->set_computational_geometry(m_compgeom);
+}
+
+void ito_plasma_stepper::allocate() {
+  CH_TIME("ito_plasma_stepper::allocate");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::allocate" << endl;
+  }
+
+  m_ito->allocate_internals();
+  m_rte->allocate_internals();
+  m_poisson->allocate_internals();
   m_sigma->allocate_internals();
 }
 

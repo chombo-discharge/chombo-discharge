@@ -33,7 +33,6 @@ namespace physics {
       m_poisson->parse_options();
       m_poisson->set_amr(m_amr);
       m_poisson->set_computational_geometry(m_compgeom);
-      m_poisson->allocate_internals();
       m_poisson->set_potential(s_potential_one);
 
       // Setup sigma
@@ -41,12 +40,18 @@ namespace physics {
       m_sigma->set_verbosity(verb);
       m_sigma->set_amr(m_amr);
       m_sigma->set_computational_geometry(m_compgeom);
-      m_sigma->allocate_internals();
+
     }
 
     template <class T>
     void poisson_stepper<T>::register_operators(){
       m_poisson->register_operators();
+    }
+
+    template <class T>
+    void poisson_stepper<T>::allocate() {
+      m_poisson->allocate_internals();
+      m_sigma->allocate_internals();
     }
 
     template <class T>

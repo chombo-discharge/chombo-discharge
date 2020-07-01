@@ -568,6 +568,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   m_timestepper->setup_solvers();
   m_timestepper->register_operators();
   m_amr->regrid_operators(base_level, finest_level, regsize);
+  m_timestepper->allocate();
 
   // Allocate internal stuff (e.g. space for tags)
   this->allocate_internals();
@@ -1540,6 +1541,7 @@ void driver::setup_fresh(const int a_init_regrids){
   m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);  // Sync solver times
   m_timestepper->register_operators();
   m_amr->regrid_operators(lmin, lmax, regsize);
+  m_timestepper->allocate();
 
   // Fill solves with initial data
   m_timestepper->initial_data();                                  // Fill solvers with initial data

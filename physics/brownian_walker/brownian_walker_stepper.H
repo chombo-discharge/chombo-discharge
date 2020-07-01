@@ -26,6 +26,7 @@ namespace physics {
 
       // Setup routines
       void initial_data() override;
+      void allocate() override;
 
       // IO routines
       void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;

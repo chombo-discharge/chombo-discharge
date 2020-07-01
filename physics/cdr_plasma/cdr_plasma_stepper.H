@@ -43,8 +43,9 @@ namespace physics {
       virtual void post_checkpoint_setup();
       virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
       virtual void set_poisson_wall_func(Real (*a_func)(const RealVect a_pos));
-      virtual void print_step_report();
-      virtual void register_operators();
+      virtual void print_step_report() override;
+      virtual void register_operators() override;
+      virtual void allocate() override;
 
       /*!
 	@brief Constructor
