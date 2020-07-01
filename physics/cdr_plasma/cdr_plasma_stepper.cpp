@@ -3241,6 +3241,7 @@ void cdr_plasma_stepper::initial_data(){
     pout() << "cdr_plasma_stepper::initial_data" << endl;
   }
 
+
   m_cdr->initial_data();        // Initial data comes in through cdr_species, in this case supplied by physics
   if(!m_rte->is_stationary()){
     m_rte->initial_data();

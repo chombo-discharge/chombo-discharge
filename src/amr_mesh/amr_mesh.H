@@ -654,7 +654,7 @@ public:
   /*!
     @brief Get neighbor boxes
   */
-  virtual Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors();
+  virtual Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors(phase::which_phase a_phase);
 
   /*!
     @brief Get the coarsening utility
@@ -686,7 +686,7 @@ public:
   */
   virtual Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp(phase::which_phase a_phase);
 
-    /*!
+  /*!
     @brief Get interpolator 
   */
   virtual Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp(phase::which_phase a_phase);
@@ -994,16 +994,6 @@ protected:
     @brief Ghost cloud interpolation stuff. By default only allocated for the gas phase
   */
   Vector<Vector<RefCountedPtr<EBGhostCloud> > > m_ghostclouds;
-
-  /*!
-    @brief Piecewise linear interpolation 
-  */
-  Vector<Vector<RefCountedPtr<EBPWLFineInterp> > > m_pwl_interp;
-
-  /*!
-    @brief Interpolator written for multigrid, but typically used for piecewise constant interpolation
-  */
-  Vector<Vector<RefCountedPtr<EBMGInterp> > > m_ebmg_interp;
   
   /*!
     @brief Flux register
@@ -1089,16 +1079,6 @@ protected:
     Define MFLevelGrid
   */
   virtual void define_mflevelgrid(const int a_lmin);
-
-  /*!
-    @brief Define interpolator for regridding
-  */
-  virtual void define_ebpwl_interp(const int a_lmin);
-
-  /*!
-    @brief Define interpolator for multigrid
-  */
-  virtual void define_ebmg_interp(const int a_lmin);
 
   /*!
     @brief Define redistribution operators

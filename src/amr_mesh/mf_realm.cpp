@@ -142,23 +142,23 @@ realm& mf_realm::get_realm(const phase::which_phase a_phase){
   return *m_realms[a_phase];
 }
 
-const Vector<int>& mf_realm::get_ref_rat() {
+Vector<int>& mf_realm::get_ref_rat() {
   return m_ref_ratios;
 }
 
-const Vector<Real>& mf_realm::get_dx() {
+Vector<Real>& mf_realm::get_dx() {
   return m_dx;
 }
 
-const Vector<DisjointBoxLayout>& mf_realm::get_grids() {
+Vector<DisjointBoxLayout>& mf_realm::get_grids() {
   return m_grids;
 }
 
-const Vector<ProblemDomain>& mf_realm::get_domains() {
+Vector<ProblemDomain>& mf_realm::get_domains() {
   return m_domains;
 }
 
-const Vector<RefCountedPtr<MFLevelGrid> >& mf_realm::get_mflg(){
+Vector<RefCountedPtr<MFLevelGrid> >& mf_realm::get_mflg(){
   return m_mflg;
 }
 
@@ -167,35 +167,35 @@ const RefCountedPtr<EBIndexSpace>& mf_realm::get_ebis(const phase::which_phase a
   return m_realms[a_phase]->get_ebis();
 }
 
-const Vector<EBISLayout>& mf_realm::get_ebisl(const phase::which_phase a_phase) {
+Vector<EBISLayout>& mf_realm::get_ebisl(const phase::which_phase a_phase) {
   return m_realms[a_phase]->get_ebisl();
 }
 
-const Vector<RefCountedPtr<EBLevelGrid> >& mf_realm::get_eblg(const phase::which_phase a_phase) {
+Vector<RefCountedPtr<EBLevelGrid> >& mf_realm::get_eblg(const phase::which_phase a_phase) {
   return m_realms[a_phase]->get_eblg();
 }
 
-const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& mf_realm::get_neighbors(const phase::which_phase a_phase) {
+Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& mf_realm::get_neighbors(const phase::which_phase a_phase) {
   return m_realms[a_phase]->get_neighbors();
 }
 
-const Vector<RefCountedPtr<LayoutData<VoFIterator> > >& mf_realm::get_vofit(const phase::which_phase a_phase) {
+Vector<RefCountedPtr<LayoutData<VoFIterator> > >& mf_realm::get_vofit(const phase::which_phase a_phase) {
   return m_realms[a_phase]->get_vofit();
 }
 
-const irreg_amr_stencil<centroid_interp>& mf_realm::get_centroid_interp_stencils(const phase::which_phase a_phase) {
+irreg_amr_stencil<centroid_interp>& mf_realm::get_centroid_interp_stencils(const phase::which_phase a_phase) {
   return m_realms[a_phase]->get_centroid_interp_stencils();
 }
 
-const irreg_amr_stencil<eb_centroid_interp>& mf_realm::get_eb_centroid_interp_stencils(const phase::which_phase a_phase) {
+irreg_amr_stencil<eb_centroid_interp>& mf_realm::get_eb_centroid_interp_stencils(const phase::which_phase a_phase) {
   return m_realms[a_phase]->get_eb_centroid_interp_stencils();
 }
 
-const irreg_amr_stencil<noncons_div>& mf_realm::get_noncons_div_stencils(const phase::which_phase a_phase) {
+irreg_amr_stencil<noncons_div>& mf_realm::get_noncons_div_stencils(const phase::which_phase a_phase) {
   return m_realms[a_phase]->get_noncons_div_stencils();
 }
 
-const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& mf_realm::get_gradsten(const phase::which_phase a_phase){
+Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& mf_realm::get_gradsten(const phase::which_phase a_phase){
   return m_realms[a_phase]->get_gradsten();
 }
 

@@ -77,8 +77,8 @@ void realm::regrid_base(const int a_lmin){
   }
 
   if(m_defined){
-    this->define_neighbors(a_lmin);
     this->define_eblevelgrid(a_lmin);
+    this->define_neighbors(a_lmin);
     this->define_vofiter(a_lmin);
   }
 }
@@ -743,53 +743,53 @@ const RefCountedPtr<EBIndexSpace>& realm::get_ebis() {
   return m_ebis;
 }
 
-const Vector<int>& realm::get_ref_rat() {
+Vector<int>& realm::get_ref_rat() {
   return m_ref_ratios;
 }
 
-const Vector<Real>& realm::get_dx() {
+Vector<Real>& realm::get_dx() {
   return m_dx;
 }
 
-const Vector<DisjointBoxLayout>& realm::get_grids() {
+Vector<DisjointBoxLayout>& realm::get_grids() {
   return m_grids;
 }
 
-const Vector<ProblemDomain>& realm::get_domains() {
+Vector<ProblemDomain>& realm::get_domains() {
   return m_domains;
 }
 
-const Vector<EBISLayout>& realm::get_ebisl() {
+Vector<EBISLayout>& realm::get_ebisl() {
   return m_ebisl;
 }
 
-const Vector<RefCountedPtr<EBLevelGrid> >& realm::get_eblg() {
+Vector<RefCountedPtr<EBLevelGrid> >& realm::get_eblg() {
   return m_eblg;
 }
 
-const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& realm::get_neighbors() {
+Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& realm::get_neighbors() {
   return m_neighbors;
 }
-const Vector<RefCountedPtr<LayoutData<VoFIterator> > >& realm::get_vofit() {
+Vector<RefCountedPtr<LayoutData<VoFIterator> > >& realm::get_vofit() {
   return m_vofiter;
 }
 
-const irreg_amr_stencil<centroid_interp>& realm::get_centroid_interp_stencils() {
+irreg_amr_stencil<centroid_interp>& realm::get_centroid_interp_stencils() {
   return *m_centroid_interp;
 }
 
-const irreg_amr_stencil<eb_centroid_interp>& realm::get_eb_centroid_interp_stencils() {
+irreg_amr_stencil<eb_centroid_interp>& realm::get_eb_centroid_interp_stencils() {
   return *m_eb_centroid_interp;
 }
 
-const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& realm::get_gradsten(){
+Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& realm::get_gradsten(){
   if(!this->query_operator(s_eb_gradient)) MayDay::Abort("realm::get_gradsten - operator not registered!");
   return m_gradsten;
 }
 
 // Throw errors if the operator does not exist
 
-const irreg_amr_stencil<noncons_div>& realm::get_noncons_div_stencils() {
+irreg_amr_stencil<noncons_div>& realm::get_noncons_div_stencils() {
   if(!this->query_operator(s_eb_noncons_div)) MayDay::Abort("realm::get_non_cons_div_stencils - operator not registered!");
   
   return *m_noncons_div;

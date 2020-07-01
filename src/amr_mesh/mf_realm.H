@@ -49,22 +49,22 @@ public:
   realm& get_realm(const phase::which_phase a_phase);
 
   // Get functions for neutral stuff
-  const Vector<int>& get_ref_rat();
-  const Vector<Real>& get_dx();
-  const Vector<DisjointBoxLayout>& get_grids();
-  const Vector<ProblemDomain>& get_domains();
-  const Vector<RefCountedPtr<MFLevelGrid> >& get_mflg();
+  Vector<int>& get_ref_rat();
+  Vector<Real>& get_dx();
+  Vector<DisjointBoxLayout>& get_grids();
+  Vector<ProblemDomain>& get_domains();
+  Vector<RefCountedPtr<MFLevelGrid> >& get_mflg();
 
-  // Get functions for stuff that should always be const but is specific to phase
+  
   const RefCountedPtr<EBIndexSpace>& get_ebis(const phase::which_phase a_phase);
-  const Vector<EBISLayout>& get_ebisl(const phase::which_phase a_phase);
-  const Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(const phase::which_phase a_phase);
-  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors(const phase::which_phase a_phase);
-  const Vector<RefCountedPtr<LayoutData<VoFIterator> > >& get_vofit(const phase::which_phase a_phase);
-  const irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(const phase::which_phase a_phase);
-  const irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(const phase::which_phase a_phase);
-  const irreg_amr_stencil<noncons_div>& get_noncons_div_stencils(const phase::which_phase a_phase);
-  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten(const phase::which_phase a_phase);
+  Vector<EBISLayout>& get_ebisl(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& get_vofit(const phase::which_phase a_phase);
+  irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(const phase::which_phase a_phase);
+  irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(const phase::which_phase a_phase);
+  irreg_amr_stencil<noncons_div>& get_noncons_div_stencils(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten(const phase::which_phase a_phase);
 
   // Get functions for stuff that are specific to phase, but is not necessarily const
   Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave(const phase::which_phase a_phase);

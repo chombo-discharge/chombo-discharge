@@ -83,22 +83,21 @@ public:
   void register_operator(const std::string a_operator);
   bool query_operator(const std::string a_operator);
 
-  // Get functions for stuff that should always be const
+  // Get functions
   const RefCountedPtr<EBIndexSpace>& get_ebis();
-  const Vector<int>& get_ref_rat();
-  const Vector<Real>& get_dx();
-  const Vector<DisjointBoxLayout>& get_grids();
-  const Vector<ProblemDomain>& get_domains();
-  const Vector<EBISLayout>& get_ebisl();
-  const Vector<RefCountedPtr<EBLevelGrid> >& get_eblg();
-  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors();
-  const Vector<RefCountedPtr<LayoutData<VoFIterator> > >& get_vofit();
-  const irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils();
-  const irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils();
-  const irreg_amr_stencil<noncons_div>& get_noncons_div_stencils();
-  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten();
+  Vector<int>& get_ref_rat();
+  Vector<Real>& get_dx();
+  Vector<DisjointBoxLayout>& get_grids();
+  Vector<ProblemDomain>& get_domains();
+  Vector<EBISLayout>& get_ebisl();
+  Vector<RefCountedPtr<EBLevelGrid> >& get_eblg();
+  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors();
+  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& get_vofit();
+  irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils();
+  irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils();
+  irreg_amr_stencil<noncons_div>& get_noncons_div_stencils();
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten();
 
-  // This stuff has buffers, so not always const...
   Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave();
   Vector<RefCountedPtr<EBGhostCloud> >& get_ghostcloud();
   Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi();

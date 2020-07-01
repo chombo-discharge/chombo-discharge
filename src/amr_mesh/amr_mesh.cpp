@@ -729,8 +729,6 @@ void amr_mesh::build_domains(){
   m_flux_reg.resize(phase::num_phases);
   m_level_redist.resize(phase::num_phases);
   m_concentration_redist.resize(phase::num_phases);
-  m_pwl_interp.resize(phase::num_phases);
-  m_ebmg_interp.resize(phase::num_phases);
   m_centroid_interp.resize(phase::num_phases);
   m_noncons_div.resize(phase::num_phases);
   m_eb_centroid_interp.resize(phase::num_phases);
@@ -745,8 +743,6 @@ void amr_mesh::build_domains(){
   m_ebisl[phase::gas].resize(nlevels);
   m_vofiter[phase::gas].resize(nlevels);
   m_flux_reg[phase::gas].resize(nlevels);
-  m_pwl_interp[phase::gas].resize(nlevels);
-  m_ebmg_interp[phase::gas].resize(nlevels);
   m_level_redist[phase::gas].resize(nlevels);
   m_coar_to_fine_redist[phase::gas].resize(nlevels);
   m_coar_to_coar_redist[phase::gas].resize(nlevels);
@@ -761,8 +757,6 @@ void amr_mesh::build_domains(){
   m_flux_reg[phase::solid].resize(nlevels);
   m_vofiter[phase::solid].resize(nlevels);
   m_level_redist[phase::solid].resize(nlevels);
-  m_pwl_interp[phase::solid].resize(nlevels);
-  m_ebmg_interp[phase::solid].resize(nlevels);
   m_coar_to_fine_redist[phase::solid].resize(nlevels);
   m_coar_to_coar_redist[phase::solid].resize(nlevels);
   m_fine_to_coar_redist[phase::solid].resize(nlevels);
@@ -824,8 +818,6 @@ void amr_mesh::regrid_operators(const int a_lmin,
 				const int a_lmax,
 				const int a_regsize){
   // Now allocate operators
-  this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
-  this->define_ebmg_interp(a_lmin);             // Define interpolator used for e.g. multigrid (or piecewise constant)
   this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
   this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
   this->define_irreg_sten();                    // Make stencils for doing interpolation to centroids
@@ -1328,104 +1320,6 @@ void amr_mesh::define_mflevelgrid(const int a_lmin){
     }
 
     m_mflg[lvl] = RefCountedPtr<MFLevelGrid> (new MFLevelGrid(m_mfis, eblgs));
-  }
-}
-
-void amr_mesh::define_ebpwl_interp(const int a_lmin){
-  CH_TIME("amr_mesh::define_ebpwl_interp");
-  if(m_verbosity > 2){
-    pout() << "amr_mesh::define_ebpwl_interp" << endl;
-  }
-
-  const int comps     = SpaceDim;
-
-  // Should these be input somehow?
-  const int radius    = 1;
-  const IntVect ghost = m_num_ghost*IntVect::Unit;
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
-
-  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
-
-    const bool has_coar = lvl > 0;
-
-    if(has_coar){
-      if(!ebis_gas.isNull()){
-	if(this->query_operator(s_eb_pwl_interp, phase::gas)){
-	  m_pwl_interp[phase::gas][lvl] = RefCountedPtr<EBPWLFineInterp> (new EBPWLFineInterp(m_grids[lvl],
-											      m_grids[lvl-1],
-											      m_ebisl[phase::gas][lvl],
-											      m_ebisl[phase::gas][lvl-1],
-											      m_domains[lvl-1],
-											      m_ref_ratios[lvl-1],
-											      comps,
-											      ebis_gas));
-	}
-      }
-      if(!ebis_sol.isNull()){
-	if(this->query_operator(s_eb_pwl_interp, phase::solid)){
-	  m_pwl_interp[phase::solid][lvl] = RefCountedPtr<EBPWLFineInterp> (new EBPWLFineInterp(m_grids[lvl],
-												m_grids[lvl-1],
-												m_ebisl[phase::solid][lvl],
-												m_ebisl[phase::solid][lvl-1],
-												m_domains[lvl-1],
-												m_ref_ratios[lvl-1],
-												comps,
-												ebis_sol));
-	}
-      }
-    }
-  }
-}
-
-void amr_mesh::define_ebmg_interp(const int a_lmin){
-  CH_TIME("amr_mesh::define_ebmg_interp");
-  if(m_verbosity > 2){
-    pout() << "amr_mesh::define_ebmg_interp" << endl;
-  }
-
-  const int ncomps    = 1;
-
-  // Should these be input somehow?
-  const int radius    = 1;
-  const IntVect ghost = m_num_ghost*IntVect::Unit;
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
-
-  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
-
-    const bool has_coar = lvl > 0;
-
-    if(has_coar){
-      if(!ebis_gas.isNull()){
-	if(this->query_operator(s_eb_mg_interp, phase::gas)){
-	  m_ebmg_interp[phase::gas][lvl] = RefCountedPtr<EBMGInterp> (new EBMGInterp(m_grids[lvl],
-										     m_grids[lvl-1],
-										     m_ebisl[phase::gas][lvl],
-										     m_ebisl[phase::gas][lvl-1],
-										     m_domains[lvl-1],
-										     m_ref_ratios[lvl-1],
-										     SpaceDim,
-										     ebis_gas,
-										     m_num_ghost*IntVect::Unit));
-	}
-      }
-      if(!ebis_sol.isNull()){
-	if(this->query_operator(s_eb_pwl_interp, phase::solid)){
-	  m_ebmg_interp[phase::solid][lvl] = RefCountedPtr<EBMGInterp> (new EBMGInterp(m_grids[lvl],
-										       m_grids[lvl-1],
-										       m_ebisl[phase::solid][lvl],
-										       m_ebisl[phase::solid][lvl-1],
-										       m_domains[lvl-1],
-										       m_ref_ratios[lvl-1],
-										       SpaceDim,
-										       ebis_sol,
-										       m_num_ghost*IntVect::Unit));
-	}
-      }
-    }
   }
 }
 
@@ -2161,7 +2055,8 @@ void amr_mesh::interp_ghost_pwl(EBAMRCellData& a_data, phase::which_phase a_phas
 }
 
 void amr_mesh::interpolate_to_centroids(EBAMRCellData& a_data, phase::which_phase a_phase){
-  m_centroid_interp[a_phase]->apply(a_data);
+  irreg_amr_stencil<centroid_interp>& stencil = m_realm->get_centroid_interp_stencils(a_phase);
+  stencil.apply(a_data);
 }
 
 void amr_mesh::parse_verbosity(){
@@ -2571,6 +2466,18 @@ int amr_mesh::get_max_ebis_box_size(){
   return m_max_ebis_box_size;
 }
 
+int amr_mesh::get_refinement_ratio(const int a_level1, const int a_level2){
+  int coarLevel = Min(a_level1, a_level2);
+  int fineLevel = Max(a_level1, a_level2);
+
+  int ref = 1;
+  for (int lvl = coarLevel; lvl < fineLevel; lvl++){
+    ref = ref*m_ref_ratios[lvl];
+  }
+
+  return ref;
+}
+
 ProblemDomain amr_mesh::get_finest_domain(){
   return m_domains[m_max_amr_depth];
 }
@@ -2585,18 +2492,6 @@ Vector<Real>& amr_mesh::get_dx(){
 
 Vector<int>& amr_mesh::get_ref_rat(){
   return m_ref_ratios;
-}
-
-int amr_mesh::get_refinement_ratio(const int a_level1, const int a_level2){
-  int coarLevel = Min(a_level1, a_level2);
-  int fineLevel = Max(a_level1, a_level2);
-
-  int ref = 1;
-  for (int lvl = coarLevel; lvl < fineLevel; lvl++){
-    ref = ref*m_ref_ratios[lvl];
-  }
-
-  return ref;
 }
 
 Vector<IntVectSet> amr_mesh::get_irreg_tags() const {
@@ -2624,48 +2519,48 @@ Vector<IntVectSet> amr_mesh::get_irreg_tags() const {
   return tags;
 }
 
-Vector<DisjointBoxLayout>& amr_mesh::get_grids(){
-  return m_grids;
-}
-
 Vector<DisjointBoxLayout>& amr_mesh::get_mg_grids(){
   return m_mg_grids;
-}
-
-Vector<ProblemDomain>& amr_mesh::get_domains(){
-  return m_domains;
-}
-
-Vector<ProblemDomain>& amr_mesh::get_mg_domains(){
-  return m_mg_domains;
-}
-
-Vector<EBISLayout>& amr_mesh::get_ebisl(phase::which_phase a_phase){
-  return m_ebisl[a_phase];
-}
-
-Vector<RefCountedPtr<LayoutData<VoFIterator> > > amr_mesh::get_vofit(phase::which_phase a_phase){
-  return m_vofiter[a_phase];
-}
-
-Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& amr_mesh::get_neighbors(){
-  return m_neighbors;
-}
-
-Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(phase::which_phase a_phase){
-  return m_eblg[a_phase];
 }
 
 Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_mg_eblg(phase::which_phase a_phase){
   return m_mg_eblg[a_phase];
 }
 
-Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mflg(){
-  return m_mflg;
-}
-
 Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mg_mflg(){
   return m_mg_mflg;
+}
+
+Vector<ProblemDomain>& amr_mesh::get_mg_domains(){
+  return m_mg_domains;
+}
+
+Vector<ProblemDomain>& amr_mesh::get_domains(){
+  return m_domains;
+}
+
+Vector<DisjointBoxLayout>& amr_mesh::get_grids(){
+  return m_realm->get_grids();
+}
+
+Vector<EBISLayout>& amr_mesh::get_ebisl(phase::which_phase a_phase){
+  return m_realm->get_ebisl(a_phase);
+}
+
+Vector<RefCountedPtr<LayoutData<VoFIterator> > > amr_mesh::get_vofit(phase::which_phase a_phase){
+  return m_realm->get_vofit(a_phase);
+}
+
+Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& amr_mesh::get_neighbors(phase::which_phase a_phase){
+  return m_realm->get_neighbors(a_phase);
+}
+
+Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(phase::which_phase a_phase){
+  return m_realm->get_eblg(a_phase);
+}
+
+Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mflg(){
+  return m_realm->get_mflg();
 }
 
 Vector<RefCountedPtr<ebcoarseaverage> >& amr_mesh::get_coarave(phase::which_phase a_phase){
@@ -2673,7 +2568,7 @@ Vector<RefCountedPtr<ebcoarseaverage> >& amr_mesh::get_coarave(phase::which_phas
 }
 
 Vector<RefCountedPtr<EBGhostCloud> >& amr_mesh::get_ghostcloud(phase::which_phase a_phase){
-  return m_ghostclouds[a_phase];
+  return m_realm->get_ghostcloud(a_phase);
 }
 
 Vector<RefCountedPtr<nwoebquadcfinterp> >& amr_mesh::get_quadcfi(phase::which_phase a_phase){
@@ -2689,66 +2584,58 @@ Vector<RefCountedPtr<AggEBPWLFillPatch> >& amr_mesh::get_fillpatch(phase::which_
 }
 
 Vector<RefCountedPtr<EBPWLFineInterp> >& amr_mesh::get_eb_pwl_interp(phase::which_phase a_phase){
-  return m_pwl_interp[a_phase];
+  return m_realm->get_eb_pwl_interp(a_phase);
 }
 
 Vector<RefCountedPtr<EBMGInterp> >& amr_mesh::get_eb_mg_interp(phase::which_phase a_phase){
-  return m_ebmg_interp[a_phase];
+  return m_realm->get_eb_mg_interp(a_phase);
 }
 
 Vector<RefCountedPtr<EBFluxRegister> >&  amr_mesh::get_flux_reg(phase::which_phase a_phase){
-  CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase. 
-  return m_flux_reg[a_phase];
+  return m_realm->get_flux_reg(a_phase);
 }
 
 Vector<RefCountedPtr<EBLevelRedist> >& amr_mesh::get_level_redist(phase::which_phase a_phase){
-  CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase. 
-  return m_level_redist[a_phase];
+  return m_realm->get_level_redist(a_phase);
 }
 
 Vector<RefCountedPtr<EBCoarToFineRedist> >&  amr_mesh::get_coar_to_fine_redist(phase::which_phase a_phase){
-  CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase.
-
-  return m_coar_to_fine_redist[a_phase];;
+  return m_realm->get_coar_to_fine_redist(a_phase);
 }
 
 Vector<RefCountedPtr<EBCoarToCoarRedist> >&  amr_mesh::get_coar_to_coar_redist(phase::which_phase a_phase){
-  CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase.
-
-  return m_coar_to_coar_redist[a_phase];;
+  return m_realm->get_coar_to_coar_redist(a_phase);
 }
 
 Vector<RefCountedPtr<EBFineToCoarRedist> >&  amr_mesh::get_fine_to_coar_redist(phase::which_phase a_phase){
-  CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase.
-
-  return m_fine_to_coar_redist[a_phase];;
+  return m_realm->get_fine_to_coar_redist(a_phase);
 }
 
 Vector<RefCountedPtr<EBLevelConcentrationRedist> >& amr_mesh::get_concentration_redist(phase::which_phase a_phase){
-  CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase. 
+  CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase.
   return m_concentration_redist[a_phase];
 }
 
 irreg_amr_stencil<centroid_interp>& amr_mesh::get_centroid_interp_stencils(phase::which_phase a_phase){
-  return *m_centroid_interp[a_phase];
+  return m_realm->get_centroid_interp_stencils(a_phase);
 }
 
 irreg_amr_stencil<eb_centroid_interp>& amr_mesh::get_eb_centroid_interp_stencils(phase::which_phase a_phase){
-  return *m_eb_centroid_interp[a_phase];
+  return m_realm->get_eb_centroid_interp_stencils(a_phase);
 }
 
 irreg_amr_stencil<noncons_div>& amr_mesh::get_noncons_div_stencils(phase::which_phase a_phase){
-  return *m_noncons_div[a_phase];
+  return m_realm->get_noncons_div_stencils(a_phase);
 }
 
 
 Vector<RefCountedPtr<Copier> >& amr_mesh::get_copier(phase::which_phase a_phase){
-  return m_copier[a_phase];
+  return m_realm->get_copier(a_phase);
 }
 
 
 Vector<RefCountedPtr<Copier> >& amr_mesh::get_reverse_copier(phase::which_phase a_phase){
-  return m_reverse_copier[a_phase];
+  return m_realm->get_reverse_copier(a_phase);
 }
 
 Vector<Box> amr_mesh::make_tiles(const Box a_box, const IntVect a_tilesize){

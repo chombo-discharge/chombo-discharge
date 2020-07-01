@@ -44,7 +44,8 @@ void advection_diffusion_stepper::setup_solvers(){
   m_solver->set_amr(m_amr);
   m_solver->set_computational_geometry(m_compgeom);
   m_solver->sanity_check();
-  m_solver->allocate_internals();
+  m_solver->allocate_internals(); // Moved to initial_data because GMG requires an operator, but they are registered later
+
 
   if(!m_solver->is_mobile() && !m_solver->is_diffusive()){
     MayDay::Abort("advection_diffusion_stepper::setup_solvers - can't turn off both advection AND diffusion");
@@ -58,7 +59,6 @@ void advection_diffusion_stepper::setup_solvers(){
 
 void advection_diffusion_stepper::register_operators(){
   m_solver->register_operators();
-  m_amr->register_operator(s_eb_gradient, m_phase);
 }
 
 

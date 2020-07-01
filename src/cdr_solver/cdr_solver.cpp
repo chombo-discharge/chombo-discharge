@@ -1448,9 +1448,9 @@ void cdr_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
 }
 
 void cdr_solver::register_operators(){
-  CH_TIME("cdr_solver::set_amr");
+  CH_TIME("cdr_solver::register_operators");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_amr" << endl;
+    pout() << m_name + "::register_operators" << endl;
   }
 
   if(m_amr.isNull()){
