@@ -115,11 +115,6 @@ public:
   virtual void fill_GWN(EBAMRFluxData& a_noise, const Real a_mean);
 
   /*!
-    @brief Make a_phi non-negative by redistributing mass in the vicinity of the cut cells
-  */
-  virtual void make_non_negative(EBAMRCellData& a_phi);
-
-  /*!
     @brief Average velocities to faces
   */
   virtual void average_velo_to_faces();

@@ -2295,46 +2295,6 @@ void cdr_solver::define_interpolant(){
   }
 }
 
-void cdr_solver::make_non_negative(EBAMRCellData& a_phi){
-  CH_TIME("cdr_solver::make_non_negative");
-  if(m_verbosity > 5){
-    pout() << m_name + "::make_non_negative" << endl;
-  }
-
-  // TLDR: This function injects mass into cut-cells where the state is negative, and removes mass from neighboring
-  //       regular cells. This is essentially like flooring, with the exception that total mass is conserved. Very useful
-  //       stuff for cut-cells where non-negativity can not be guaranteed. 
-
-  const int comp  = 0;
-  const int ncomp = 1;
-
-  data_ops::set_value(m_mass_diff, 0.0);
-  
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    for (DataIterator dit    = dbl.dataIterator(); dit.ok(); ++dit){
-      EBCellFAB& state       = (*a_phi[lvl])[dit()];
-      const EBISBox& ebisbox = state.getEBISBox();
-      const Box box          = dbl.get(dit());
-
-
-      VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
-      for (vofit.reset(); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const Real kappa = ebisbox.volFrac(vof);
-	const Real phi = state(vof, comp);
-	if(phi < 0.0){
-	  state(vof,comp) = 0.0;
-	  (*m_mass_diff[lvl])[dit()](vof,comp) = kappa*phi;
-	}
-      }
-    }
-  }
-
-  this->increment_concentration_redist(m_mass_diff);
-  this->concentration_redistribution(a_phi, m_mass_diff);
-}
-
 void cdr_solver::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states){
   CH_TIME("cdr_solver::GWN_diffusion_source");
   if(m_verbosity > 5){

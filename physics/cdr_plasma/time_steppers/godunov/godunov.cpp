@@ -696,7 +696,6 @@ void godunov::compute_reaction_network(const Real a_dt){
 
     data_ops::incr(phi, src, a_dt);
     if(m_floor){
-      //      solver->make_non_negative(phi);
       data_ops::floor(phi, 0.0);
     }
 
@@ -771,8 +770,6 @@ void godunov::advance_transport_euler(const Real a_dt){
 	data_ops::incr(phi, scratch2, a_dt);
       }
 
-      solver->make_non_negative(phi);
-
       if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
 	if(m_debug){
 	  const Real mass_before = solver->compute_mass();
@@ -799,8 +796,6 @@ void godunov::advance_transport_euler(const Real a_dt){
 	  data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
 	  data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
 	  solver->advance_euler(phi, scratch, scratch2, a_dt);
-
-	  solver->make_non_negative(phi);
 
 	  if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
 	    if(m_debug){
@@ -858,11 +853,11 @@ void godunov::advance_transport_rk2(const Real a_dt){
     data_ops::scale(scratch, -1.0);     // scratch = -[div(F/J)]
     data_ops::scale(scratch, a_dt);     // scratch = [-div(F/J)]*dt
     data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J)
-    
-    solver->make_non_negative(phi);
 
     // This is the implicit diffusion code. If we enter this routine then phi = phi^k - dt*div(F) + dt*R
     if(m_implicit_diffusion){
+      data_ops::floor(phi, 0.0);
+      
       // Solve implicit diffusion equation. This looks weird but we're solving
       //
       // phi^(k+1) = phi^k - dt*div(F) + dt*R + dt*div(D*div(phi^k+1))
@@ -875,9 +870,10 @@ void godunov::advance_transport_rk2(const Real a_dt){
 	data_ops::copy(scratch, phi);       // Make scratch = phiOld - dt*div(F/J)
 	data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
 	solver->advance_euler(phi, scratch, scratch2, a_dt);
-	solver->make_non_negative(phi);
       }
     }
+
+    data_ops::floor(phi, 0.0);
 
     m_amr->average_down(phi, m_cdr->get_phase());
     m_amr->interp_ghost(phi, m_cdr->get_phase());
@@ -962,7 +958,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
       }
     }
 
-    solver->make_non_negative(phi);
+    data_ops::floor(phi, 0.0);
 
     m_amr->average_down(phi, m_cdr->get_phase());
     m_amr->interp_ghost(phi, m_cdr->get_phase());
