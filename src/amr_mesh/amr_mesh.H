@@ -279,11 +279,6 @@ public:
     @brief Define the MG stuff
   */
   virtual void define_mg_stuff();
-
-  /*!
-    @brief Define stencils for gradients
-  */
-  virtual void define_gradsten(const int a_lmin);
   
   /*!
     @brief Define EBLevelGrid
@@ -1095,16 +1090,6 @@ protected:
     @brief EBLevelgrids for the multigrid pre-coarsening
   */
   Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
-
-  /*!
-    @brief Gradient stencils at irregular cells
-  */
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradsten_gas;
-
-  /*!
-    @brief Gradient stencils at irregular cells
-  */
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradsten_sol;
 
   /*!
     @brief Non-conservative stencils

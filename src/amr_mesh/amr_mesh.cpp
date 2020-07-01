@@ -786,9 +786,6 @@ void amr_mesh::build_domains(){
   m_dx[0] = (m_prob_hi[0] - m_prob_lo[0])/m_num_cells[0];
   m_domains[0] = ProblemDomain(IntVect::Zero, m_num_cells - IntVect::Unit);
 
-  m_gradsten_gas.resize(nlevels);
-  m_gradsten_sol.resize(nlevels);
-
   for (int lvl = 1; lvl <= m_max_amr_depth; lvl++){
     m_dx[lvl]      = m_dx[lvl-1]/m_ref_ratios[lvl-1];
     m_domains[lvl] = m_domains[lvl-1];
@@ -846,7 +843,6 @@ void amr_mesh::regrid_operators(const int a_lmin,
   this->define_ebmg_interp(a_lmin);             // Define interpolator used for e.g. multigrid (or piecewise constant)
   this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
   this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
-  this->define_gradsten(a_lmin);                // Make stencils for computing gradients
   this->define_irreg_sten();                    // Make stencils for doing interpolation to centroids
   this->define_noncons_sten();                  // Make stencils for nonconservative averaging
   this->define_copier(a_lmin);                  // Make stencils for copier
@@ -1219,113 +1215,6 @@ void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& 
     }
     else if(iphase == 1){
       this->compute_gradient(alias_grad, alias_phi, phase::solid);
-    }
-  }
-}
-
-void amr_mesh::define_gradsten(const int a_lmin){
-  CH_TIME("amr_mesh::define_gradsten");
-  if(m_verbosity > 2){
-    pout() << "amr_mesh::define_gradsten" << endl;
-  }
-
-  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
-
-  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_grids[lvl];
-    const ProblemDomain& domain  = m_domains[lvl];
-    const Real dx                = m_dx[lvl];
-    
-    if(!ebis_gas.isNull()){
-      if(this->query_operator(s_eb_gradient, phase::gas)){
-	m_gradsten_gas[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
-
-	const EBISLayout& ebisl = m_ebisl[phase::gas][lvl];
-
-	LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	  const Box box          = dbl.get(dit());
-	  const EBISBox& ebisbox = ebisl[dit()];
-	  const EBGraph& ebgraph = ebisbox.getEBGraph();
-
-	
-	  IntVectSet ivs   = ebisbox.getIrregIVS(box);
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    Box lo_box, hi_box;
-	    int has_lo, has_hi;
-
-	    EBArith::loHi(lo_box, has_lo, hi_box, has_hi, domain, box, dir);
-
-	    if(has_lo){
-	      ivs |= IntVectSet(lo_box);
-	    }
-	    if(has_hi){
-	      ivs |= IntVectSet(hi_box);
-	    }
-	  }
-
-	  BaseIVFAB<VoFStencil>& vofstencils = (*m_gradsten_gas[lvl])[dit()];
-	  vofstencils.define(ivs, ebgraph, 1);
-
-	  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	    const VolIndex& vof = vofit();
-
-	    VoFStencil& sten = vofstencils(vof, 0);
-	    sten.clear();
-	    for (int dir = 0; dir < SpaceDim; dir++){
-	      VoFStencil dirsten;
-	      EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, &cfivs[dit()], dir);
-	      sten += dirsten;
-	    }
-	  }
-	}
-      }
-    }
-    
-    if(!ebis_sol.isNull()){
-      if(this->query_operator(s_eb_gradient, phase::solid)){
-	m_gradsten_sol[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
-
-	const EBISLayout& ebisl = m_ebisl[phase::solid][lvl];
-
-	LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	  const Box box          = dbl.get(dit());
-	  const EBISBox& ebisbox = ebisl[dit()];
-	  const EBGraph& ebgraph = ebisbox.getEBGraph();
-
-	  IntVectSet ivs   = ebisbox.getIrregIVS(box);
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    Box lo_box, hi_box;
-	    int has_lo, has_hi;
-
-	    EBArith::loHi(lo_box, has_lo, hi_box, has_hi, domain, box, dir);
-
-	    if(has_lo){
-	      ivs |= IntVectSet(lo_box);
-	    }
-	    if(has_hi){
-	      ivs |= IntVectSet(hi_box);
-	    }
-	  }
-
-	  BaseIVFAB<VoFStencil>& vofstencils = (*m_gradsten_sol[lvl])[dit()];
-	  vofstencils.define(ivs, ebgraph, 1);
-
-	  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	    const VolIndex& vof = vofit();
-
-	    VoFStencil& sten = vofstencils(vof, 0);
-	    sten.clear();
-	    for (int dir = 0; dir < SpaceDim; dir++){
-	      VoFStencil dirsten;
-	      EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, &cfivs[dit()], dir);
-	      sten += dirsten;
-	    }
-	  }
-	}
-      }
     }
   }
 }
@@ -2243,18 +2132,18 @@ void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
   if(m_verbosity > 3){
     pout() << "amr_mesh::average_down(ebcell)" << endl;
   }
-  const RefCountedPtr<EBIndexSpace>& ebis = m_mfis->get_ebis(a_phase);
+  
+  for (int lvl = m_finest_level; lvl > 0; lvl--){
+    ebcoarseaverage& aveOp = *m_realm->get_coarave(a_phase)[lvl];
+      
+    const int ncomps = a_data[lvl]->nComp();
+    const Interval interv (0, ncomps-1);
 
-  if(!ebis.isNull()){
-    for (int lvl = m_finest_level; lvl > 0; lvl--){
-      const int ncomps = a_data[lvl]->nComp();
-      const Interval interv (0, ncomps-1);
-
-      m_coarave[a_phase][lvl]->average(*a_data[lvl-1], *a_data[lvl], interv);
-    }
-    for (int lvl = 0; lvl <= m_finest_level; lvl++){
-      a_data[lvl]->exchange();
-    }
+    aveOp.average(*a_data[lvl-1], *a_data[lvl], interv);
+  }
+    
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    a_data[lvl]->exchange();
   }
 }
 
