@@ -16,7 +16,7 @@
 
 realm::realm(){
   m_defined = false;
-  m_verbosity = 10;
+  m_verbosity = -1;
 
   // Always do this shit. 
   this->register_operator(s_eb_gradient);

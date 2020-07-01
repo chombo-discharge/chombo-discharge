@@ -9,7 +9,7 @@
 
 mf_realm::mf_realm(){
   m_defined = false;
-  m_verbosity = 10; 
+  m_verbosity = -1;
 
   // Just empty points until define() is called
 #if 0 // Original code

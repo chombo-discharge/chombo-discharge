@@ -226,7 +226,7 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
       m_solver->advance_euler(state, m_k2, m_k1, a_dt);
     }
 
-    m_solver->make_non_negative(state);
+    //    m_solver->make_non_negative(state);
 
     m_amr->average_down(state, m_phase);
     m_amr->average_down(state, m_phase);

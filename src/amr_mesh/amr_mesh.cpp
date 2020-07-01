@@ -803,10 +803,12 @@ void amr_mesh::regrid_amr(const Vector<IntVectSet>& a_tags,
 
   // This is stuff that always gets done
   this->build_grids(tags, a_lmin, a_lmax, a_hardcap);
+#if 0
   this->define_neighbors(a_lmin);
   this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
   this->define_vofiter(a_lmin);
   this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
+#endif
 
   this->define_realms();
   m_realm->regrid_base(a_lmin);
@@ -818,12 +820,14 @@ void amr_mesh::regrid_operators(const int a_lmin,
 				const int a_lmax,
 				const int a_regsize){
   // Now allocate operators
+#if 0
   this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
   this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
   this->define_irreg_sten();                    // Make stencils for doing interpolation to centroids
   this->define_noncons_sten();                  // Make stencils for nonconservative averaging
   this->define_copier(a_lmin);                  // Make stencils for copier
   this->define_ghostcloud(a_lmin);              // Make stencils for ghost clouds with particle depositions
+#endif
 
   m_realm->regrid_operators(a_lmin, a_lmax, a_regsize);
 }
@@ -2192,15 +2196,20 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
   m_has_grids = true;
 
   const int a_lmin = 0;
+
+#if 0
   this->define_neighbors(a_lmin);    
   this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
   this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
   this->define_vofiter(a_lmin);      // Define vof iterators
-  this->define_mg_stuff();
+#endif
+
 
 
   this->define_realms();
   m_realm->regrid_base(a_lmin);
+
+  this->define_mg_stuff();
 
 }
 
