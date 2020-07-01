@@ -109,7 +109,7 @@ void realm::register_operator(const std::string a_operator){
   CH_TIME("realm::register_operator");
   if(m_verbosity > 5){
     pout() << "realm::register_operator" << endl;
-  }
+ } 
 
   // These are the supported operators - issue an error if we ask for something that is not supported. 
   if(!(a_operator.compare(s_eb_coar_ave)     == 0 ||
@@ -128,9 +128,10 @@ void realm::register_operator(const std::string a_operator){
     const std::string str = "realm::register_operator - unknown operator '" + a_operator + "' requested";
     MayDay::Abort(str.c_str());
   }
-     
 
-  m_operator_map.emplace(a_operator, true);
+  if(!this->query_operator(a_operator)){
+    m_operator_map.emplace(a_operator, true);
+  }
 }
 
 bool realm::query_operator(const std::string a_operator){
@@ -139,9 +140,11 @@ bool realm::query_operator(const std::string a_operator){
     pout() << "realm::query_operator" << endl;
   }
 
+  //  return m_operator_map[a_operator];
+
   bool ret = false;
   if(m_defined){
-    m_defined = true;
+    ret = true;
     
     if(m_operator_map.find(a_operator) == m_operator_map.end()){
       ret = false;
@@ -565,8 +568,6 @@ void realm::define_gradsten(const int a_lmin){
   m_gradsten.resize(1 + m_finest_level);
 
   if(do_this_operator){
-
-    
     for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
       const DisjointBoxLayout& dbl = m_grids[lvl];
       const ProblemDomain& domain  = m_domains[lvl];
@@ -782,6 +783,7 @@ const irreg_amr_stencil<eb_centroid_interp>& realm::get_eb_centroid_interp_stenc
 }
 
 const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& realm::get_gradsten(){
+  if(!this->query_operator(s_eb_gradient)) MayDay::Abort("realm::get_gradsten - operator not registered!");
   return m_gradsten;
 }
 

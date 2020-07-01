@@ -1097,9 +1097,9 @@ void amr_mesh::compute_gradient(LevelData<EBCellFAB>& a_gradient,
   const int comp  = 0;
   const int ncomp = 1;
     
-  const Real& dx = m_dx[a_lvl];
-  const DisjointBoxLayout& dbl = m_grids[a_lvl]; // Doing this since I assume everything is defined over m_grids
-  const ProblemDomain& domain  = m_domains[a_lvl];
+  const Real& dx = m_realm->get_dx()[a_lvl];
+  const DisjointBoxLayout& dbl = m_realm->get_grids()[a_lvl]; // Doing this since I assume everything is defined over m_grids
+  const ProblemDomain& domain  = m_realm->get_domains()[a_lvl];
 
   LayoutData<IntVectSet> cfivs;
   EBArith::defineCFIVS(cfivs, dbl, domain);
@@ -1157,30 +1157,23 @@ void amr_mesh::compute_gradient(LevelData<EBCellFAB>& a_gradient,
       }
     }
 #else // New code
-    BaseIVFAB<VoFStencil>* grad_stencils;
-    if(a_phase == phase::gas){
-      grad_stencils = &((*m_gradsten_gas[a_lvl])[dit()]);
-    }
-    else if(a_phase == phase::solid){
-      grad_stencils = &((*m_gradsten_sol[a_lvl])[dit()]);
-    }
+    BaseIVFAB<VoFStencil>& grad_stencils = (*m_realm->get_gradsten(a_phase)[a_lvl])[dit()];
 
-
-    for (VoFIterator vofit(grad_stencils->getIVS(), ebgraph); vofit.ok(); ++vofit){
+    for (VoFIterator vofit(grad_stencils.getIVS(), ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof    = vofit();
-      const VoFStencil& sten = (*grad_stencils)(vof, 0);
+      const VoFStencil& sten = grad_stencils(vof, 0);
 
 
       for (int dir = 0; dir < SpaceDim; dir++){
-	grad(vof, dir) = 0.0;
+    	grad(vof, dir) = 0.0;
       }
 
       for (int i = 0; i < sten.size(); i++){
-	const VolIndex& ivof = sten.vof(i);
-	const Real& iweight  = sten.weight(i);
-	const int ivar       = sten.variable(i);
+    	const VolIndex& ivof = sten.vof(i);
+    	const Real& iweight  = sten.weight(i);
+    	const int ivar       = sten.variable(i);
 
-	grad(vof, ivar) += phi(ivof, comp)*iweight;
+    	grad(vof, ivar) += phi(ivof, comp)*iweight;
       }
     }
 #endif

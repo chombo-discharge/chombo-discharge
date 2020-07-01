@@ -199,7 +199,6 @@ const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& mf_realm::get
   return m_realms[a_phase]->get_gradsten();
 }
 
-
 Vector<RefCountedPtr<ebcoarseaverage> >& mf_realm::get_coarave(const phase::which_phase a_phase){
   return m_realms[a_phase]->get_coarave();
 }
