@@ -992,11 +992,6 @@ protected:
   Vector<Vector<RefCountedPtr<Copier> > > m_reverse_copier;
 
   /*!
-    @brief ebcoarseaverage. One for each phase. 
-  */
-  Vector<Vector<RefCountedPtr<ebcoarseaverage> > > m_coarave;
-
-  /*!
     @brief QuadCFInterp. One for each phase
   */
   Vector<Vector<RefCountedPtr<nwoebquadcfinterp> > > m_quadcfi;
@@ -1110,11 +1105,6 @@ protected:
     Define MFLevelGrid
   */
   virtual void define_mflevelgrid(const int a_lmin);
-
-  /*!
-    @brief Define ebcoarseaverage
-  */
-  virtual void define_eb_coar_ave(const int a_lmin);
 
   /*!
     @brief Define nwoebquadcfinterp

@@ -726,7 +726,6 @@ void amr_mesh::build_domains(){
   m_eblg.resize(phase::num_phases);
   m_ebisl.resize(phase::num_phases);
   m_vofiter.resize(phase::num_phases);
-  m_coarave.resize(phase::num_phases);
   m_quadcfi.resize(phase::num_phases);
   m_flux_reg.resize(phase::num_phases);
   m_old_quadcfi.resize(phase::num_phases);
@@ -747,7 +746,6 @@ void amr_mesh::build_domains(){
 
   m_eblg[phase::gas].resize(nlevels);
   m_ebisl[phase::gas].resize(nlevels);
-  m_coarave[phase::gas].resize(nlevels);
   m_vofiter[phase::gas].resize(nlevels);
   m_quadcfi[phase::gas].resize(nlevels);
   m_flux_reg[phase::gas].resize(nlevels);
@@ -766,7 +764,6 @@ void amr_mesh::build_domains(){
 
   m_eblg[phase::solid].resize(nlevels);
   m_ebisl[phase::solid].resize(nlevels);
-  m_coarave[phase::solid].resize(nlevels);
   m_quadcfi[phase::solid].resize(nlevels);
   m_flux_reg[phase::solid].resize(nlevels);
   m_vofiter[phase::solid].resize(nlevels);
@@ -836,7 +833,6 @@ void amr_mesh::regrid_operators(const int a_lmin,
 				const int a_lmax,
 				const int a_regsize){
   // Now allocate operators
-  this->define_eb_coar_ave(a_lmin);             // Define ebcoarseaverage on both phases
   this->define_eb_quad_cfi(a_lmin);             // Define nwoebquadcfinterp on both phases.
   this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
   this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
@@ -1343,51 +1339,6 @@ void amr_mesh::define_mflevelgrid(const int a_lmin){
     }
 
     m_mflg[lvl] = RefCountedPtr<MFLevelGrid> (new MFLevelGrid(m_mfis, eblgs));
-  }
-}
-
-void amr_mesh::define_eb_coar_ave(const int a_lmin){
-  CH_TIME("amr_mesh::define_eb_coar_ave");
-  if(m_verbosity > 2){
-    pout() << "amr_mesh::define_eb_coar_ave" << endl;
-  }
-
-  const int comps = SpaceDim;
-
-  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
-
-  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
-
-    const bool has_coar = lvl > 0;
-
-    if(has_coar){
-      if(!ebis_gas.isNull()){
-	if(this->query_operator(s_eb_coar_ave, phase::gas)){
-	  m_coarave[phase::gas][lvl] = RefCountedPtr<ebcoarseaverage> (new ebcoarseaverage(m_grids[lvl],
-											   m_grids[lvl-1],
-											   m_ebisl[phase::gas][lvl],
-											   m_ebisl[phase::gas][lvl-1],
-											   m_domains[lvl-1],
-											   m_ref_ratios[lvl-1],
-											   comps,
-											   &(*ebis_gas)));
-	}
-      }
-
-      if(!ebis_sol.isNull()){
-	if(this->query_operator(s_eb_coar_ave, phase::solid)){
-	  m_coarave[phase::solid][lvl] = RefCountedPtr<ebcoarseaverage> (new ebcoarseaverage(m_grids[lvl],
-											     m_grids[lvl-1],
-											     m_ebisl[phase::solid][lvl],
-											     m_ebisl[phase::solid][lvl-1],
-											     m_domains[lvl-1],
-											     m_ref_ratios[lvl-1],
-											     comps,
-											     ebis_sol));
-	}
-      }
-    }
   }
 }
 
@@ -2128,9 +2079,9 @@ void amr_mesh::define_ghostcloud(const int a_lmin){
 }
 
 void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::average_down");
+  CH_TIME("amr_mesh::average_down(ebamrcell, phase");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(ebcell)" << endl;
+    pout() << "amr_mesh::average_down(ebamrcell, phase)" << endl;
   }
   
   for (int lvl = m_finest_level; lvl > 0; lvl--){
@@ -2148,91 +2099,82 @@ void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
 }
 
 void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase, const int a_lvl){
-  CH_TIME("amr_mesh::average_down");
+  CH_TIME("amr_mesh::average_down(ebamrcelldata, phase, level");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(ebcell, level)" << endl;
+    pout() << "amr_mesh::average_down(ebamrcelldata, phase, level)" << endl;
   }
   
-  const RefCountedPtr<EBIndexSpace>& ebis = m_mfis->get_ebis(a_phase);
+  const int ncomps = a_data[a_lvl]->nComp();
+  const Interval interv (0, ncomps-1);
 
-  if(!ebis.isNull()){
-      const int ncomps = a_data[a_lvl]->nComp();
-      const Interval interv (0, ncomps-1);
+  ebcoarseaverage& aveOp = *m_realm->get_coarave(a_phase)[a_lvl+1];
 
-      m_coarave[a_phase][a_lvl+1]->average(*a_data[a_lvl], *a_data[a_lvl+1], interv);
-  }
+  aveOp.average(*a_data[a_lvl], *a_data[a_lvl+1], interv);
 
   a_data[a_lvl]->exchange();
 }
 
 void amr_mesh::average_down(MFAMRFluxData& a_data){
-  CH_TIME("amr_mesh::average_down");
+  CH_TIME("amr_mesh::average_down(mfflux)");
   if(m_verbosity > 3){
     pout() << "amr_mesh::average_down(mfflux)" << endl;
   }
 
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_realm->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_realm->get_ebis(phase::solid);
+
+  // Alias the data to regular EBFluxFABs
   EBAMRFluxData alias_g(1 + m_finest_level);
   EBAMRFluxData alias_s(1 + m_finest_level);
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
-
+    
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     alias_g[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>());
     alias_s[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>());
       
-    mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
-    if(!ebis_sol.isNull()){
-      mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
-    }
+    if(!ebis_gas.isNull()) mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
+    if(!ebis_sol.isNull()) mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
   }
 
-  this->average_down(alias_g, phase::gas);
-  if(!ebis_sol.isNull()){
-    this->average_down(alias_s, phase::solid);
-  }
+  if(!ebis_gas.isNull()) this->average_down(alias_g, phase::gas);
+  if(!ebis_sol.isNull()) this->average_down(alias_s, phase::solid);
 }
 
 void amr_mesh::average_down(MFAMRCellData& a_data){
-  CH_TIME("amr_mesh::average_down");
+  CH_TIME("amr_mesh::average_down(mfamrcell)");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(mfcell)" << endl;
+    pout() << "amr_mesh::average_down(mfamrcell)" << endl;
   }
+
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_realm->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_realm->get_ebis(phase::solid);
   
   EBAMRCellData alias_g(1 + m_finest_level);
   EBAMRCellData alias_s(1 + m_finest_level);
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     alias_g[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
     alias_s[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
       
-    mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
-    if(!ebis_sol.isNull()){
-      mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
-    }
+    if(!ebis_gas.isNull()) mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
+    if(!ebis_sol.isNull()) mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
   }
 
-  this->average_down(alias_g, phase::gas);
-  if(!ebis_sol.isNull()){
-    this->average_down(alias_s, phase::solid);
-  }
+  if(!ebis_gas.isNull()) this->average_down(alias_g, phase::gas);
+  if(!ebis_sol.isNull()) this->average_down(alias_s, phase::solid);
 }
 
 void amr_mesh::average_down(EBAMRFluxData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::average_down");
+  CH_TIME("amr_mesh::average_down(ebamrflux, phase");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(face)" << endl;
+    pout() << "amr_mesh::average_down(ebamrflux, phase)" << endl;
   }
 
   for (int lvl = m_finest_level; lvl > 0; lvl--){
     const int ncomps = a_data[lvl]->nComp();
     const Interval interv (0, ncomps-1);
 
-    m_coarave[a_phase][lvl]->average(*a_data[lvl-1], *a_data[lvl], interv);
-
+    ebcoarseaverage& aveOp = *m_realm->get_coarave(a_phase)[lvl];
+    aveOp.average(*a_data[lvl-1], *a_data[lvl], interv);
   }
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -2241,23 +2183,22 @@ void amr_mesh::average_down(EBAMRFluxData& a_data, phase::which_phase a_phase){
 }
 
 void amr_mesh::average_down(EBAMRIVData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::average_down");
+  CH_TIME("amr_mesh::average_down(ebamriv, phase)");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(iv)" << endl;
+    pout() << "amr_mesh::average_down(ebamriv, phase)" << endl;
   }
 
   for (int lvl = m_finest_level; lvl > 0; lvl--){
     const int ncomps = a_data[lvl]->nComp();
     const Interval interv (0, ncomps-1);
 
-    m_coarave[a_phase][lvl]->average(*a_data[lvl-1], *a_data[lvl], interv);
-
+    ebcoarseaverage& aveOp = *m_realm->get_coarave(a_phase)[lvl];
+    aveOp.average(*a_data[lvl-1], *a_data[lvl], interv);
   }
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     a_data[lvl]->exchange();
   }
-
 }
 
 void amr_mesh::conservative_average(EBAMRIVData& a_data, phase::which_phase a_phase){
@@ -2270,8 +2211,9 @@ void amr_mesh::conservative_average(EBAMRIVData& a_data, phase::which_phase a_ph
     const int ncomps = a_data[lvl]->nComp();
     const Interval interv (0, ncomps-1);
 
-    m_coarave[a_phase][lvl]->conservative_average(*a_data[lvl-1], *a_data[lvl], interv);
-
+    ebcoarseaverage& aveOp = *m_realm->get_coarave(a_phase)[lvl];
+    
+    aveOp.conservative_average(*a_data[lvl-1], *a_data[lvl], interv);
   }
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -2886,7 +2828,7 @@ Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mg_mflg(){
 }
 
 Vector<RefCountedPtr<ebcoarseaverage> >& amr_mesh::get_coarave(phase::which_phase a_phase){
-  return m_coarave[a_phase];
+  return m_realm->get_coarave(a_phase);
 }
 
 Vector<RefCountedPtr<EBGhostCloud> >& amr_mesh::get_ghostcloud(phase::which_phase a_phase){
