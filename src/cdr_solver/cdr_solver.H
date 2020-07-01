@@ -747,11 +747,6 @@ protected:
   virtual void hyperbolic_redistribution(EBAMRCellData& a_del_vel_rho, const EBAMRIVData&   a_mass_diff);
 
   /*!
-    @brief Mass injection from regular cells into cut cells in order to avoid negative densities. Preserves mass. 
-  */
-  virtual void concentration_redistribution(EBAMRCellData& a_phi, const EBAMRIVData&   a_mass_diff);
-
-  /*!
     @brief Increment redistribution flux registers
   */
   virtual void increment_redist_flux();
@@ -760,11 +755,6 @@ protected:
     @brief Increment redistribution objects with mass to be redistributed
   */
   virtual void increment_redist(const EBAMRIVData& a_mass_diff);
-
-  /*!
-    @brief Increment redistribution register to ensure non-negative densities in cut cells
-  */
-  virtual void increment_concentration_redist(const EBAMRIVData& a_mass_diff);
 
   /*!
     @brief Do coarse-fine redistribution

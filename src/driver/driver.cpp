@@ -1464,8 +1464,8 @@ void driver::setup_geometry_only(){
   const int a_lmin = 0;
   const int a_lmax = m_geom_tag_depth;
   m_amr->build_grids(tags, a_lmin, a_lmax);//m_geom_tag_depth);
-  m_amr->define_eblevelgrid(a_lmin);
-  //  m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
+  //  m_amr->define_eblevelgrid(a_lmin);
+  m_amr->regrid(m_geom_tags, a_lmin, a_lmax);       // Regrid using geometric tags for now
 
   if(m_verbosity > 0){
     this->grid_report();

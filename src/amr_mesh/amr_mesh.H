@@ -278,16 +278,6 @@ public:
     @brief Define the MG stuff
   */
   virtual void define_mg_stuff();
-  
-  /*!
-    @brief Define EBLevelGrid
-  */
-  virtual void define_eblevelgrid(const int a_lmin);
-
-  /*!
-    @brief Define vof iterators
-  */
-  virtual void define_vofiter(const int a_lmin);
 
   /*!
     @brief Interpolate ghost vectors
@@ -626,7 +616,7 @@ public:
   */
   virtual Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(phase::which_phase a_phase);
 
-    /*!
+  /*!
     @brief Get the pre-coarsened EBLevelGrid 
   */
   virtual Vector<RefCountedPtr<EBLevelGrid> >& get_mg_eblg(phase::which_phase a_phase);
@@ -715,11 +705,6 @@ public:
     @brief Get coar-to-coar redistribution
   */
   virtual Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(phase::which_phase a_phase);
-
-  /*!
-    @brief Get concentration redisitribution object
-  */
-  virtual Vector<RefCountedPtr<EBLevelConcentrationRedist> >& get_concentration_redist(phase::which_phase a_phase);
 
   /*!
     @brief Get interpolation stencils
@@ -945,12 +930,6 @@ protected:
   Vector<ProblemDomain> m_domains;
 
   /*!
-    @brief Neighbor boxes. 
-    @details m_neighbors[lvl][lit()] contains all boxes that border this box. 
-  */
-  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > > m_neighbors;
-
-  /*!
     @brief AMR resolutions
   */
   Vector<int> m_ref_ratios;
@@ -959,86 +938,6 @@ protected:
     @brief Level resolutions
   */
   Vector<Real> m_dx;
-
-  /*!
-    @brief EBLevel grids. One for each phase.
-  */
-  Vector<Vector<RefCountedPtr<EBLevelGrid> > > m_eblg;
-
-  /*!
-    @brief MFLevelGrid objects. Cheap objects, and useful for getting interface region between EBIS'
-  */
-  Vector<RefCountedPtr<MFLevelGrid> > m_mflg;
-
-  /*!
-    @brief EBIS layout. One for each phase.
-  */
-  Vector<Vector<EBISLayout> > m_ebisl;
-
-  /*!
-    @brief VoF iterators
-  */
-  Vector<Vector<RefCountedPtr<LayoutData<VoFIterator> > > > m_vofiter;
-
-  /*!
-    @brief Copier
-  */
-  Vector<Vector<RefCountedPtr<Copier> > > m_copier;
-
-  /*!
-    @brief Reverse copier
-  */
-  Vector<Vector<RefCountedPtr<Copier> > > m_reverse_copier;
-
-  /*!
-    @brief Ghost cloud interpolation stuff. By default only allocated for the gas phase
-  */
-  Vector<Vector<RefCountedPtr<EBGhostCloud> > > m_ghostclouds;
-  
-  /*!
-    @brief Flux register
-  */
-  Vector<Vector<RefCountedPtr<EBFluxRegister> > > m_flux_reg;
-
-  /*!
-    @brief Level redistribution
-  */
-  Vector<Vector<RefCountedPtr<EBLevelRedist> > > m_level_redist;
-
-  /*!
-    @brief Coarse to fine redistribution
-  */
-  Vector<Vector<RefCountedPtr<EBCoarToFineRedist> > > m_coar_to_fine_redist;
-
-  /*!
-    @brief Coarse to coarse redistribution
-  */
-  Vector<Vector<RefCountedPtr<EBCoarToCoarRedist> > > m_coar_to_coar_redist;
-  
-  /*!
-    @brief Fine to coarse redistribution
-  */
-  Vector<Vector<RefCountedPtr<EBFineToCoarRedist> > > m_fine_to_coar_redist;
-
-  /*!
-    @brief Redistribution objects for ensuring non-negative densities in cut cells
-  */
-  Vector<Vector<RefCountedPtr<EBLevelConcentrationRedist> > > m_concentration_redist;
-
-  /*!
-    @brief Interpolation stencil for interpolating to cell centroid
-  */
-  Vector<RefCountedPtr<irreg_amr_stencil<centroid_interp> > > m_centroid_interp;
-
-  /*!
-    @brief Interpolation stencil for interpolating to boundary centroid
-  */
-  Vector<RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> > > m_eb_centroid_interp;
-
-  /*!
-    @brief Stencils that can do the nonconservative divergence average
-  */
-  Vector<RefCountedPtr<irreg_amr_stencil<noncons_div> > > m_noncons_div;
 
   /*!
     @brief Grids for multigrid pre-coarsening
@@ -1061,60 +960,9 @@ protected:
   Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
 
   /*!
-    @brief Non-conservative stencils
-  */
-  Vector<Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > > m_stencils_nc;
-
-  /*!
-    @brief Map for holding the operators
-  */
-  std::map<std::pair<std::string, phase::which_phase>, bool> m_operator_map;
-
-  /*!
     @brief Load balance grids
   */
   virtual void loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& a_boxes);
-
-  /*!
-    Define MFLevelGrid
-  */
-  virtual void define_mflevelgrid(const int a_lmin);
-
-  /*!
-    @brief Define redistribution operators
-  */
-  virtual void define_redist_oper(const int a_lmin, const int a_regsize);
-    
-  /*!
-    @brief Define neighbor boxes
-  */
-  virtual void define_neighbors(const int a_lmin);
-
-  /*!
-    @brief Define flux registers
-  */
-  virtual void define_flux_reg(const int a_lmin, const int a_regsize);
-
-  /*!
-    @brief Define irregular stencils
-    @note This routine shouldn't need to define over all AMR levels, but performance-wise this might be negligible
-  */
-  virtual void define_irreg_sten();
-
-  /*!
-    @brief Define stencils for the nonconservative divergence 
-  */
-  virtual void define_noncons_sten();
-
-  /*!
-    @brief Define copiers
-  */
-  virtual void define_copier(const int a_lmin);
-
-  /*!
-    @brief Define operator for copying ghost clouds
-  */
-  virtual void define_ghostcloud(const int a_lmin);
 
   /*!
     @brief Define realms
