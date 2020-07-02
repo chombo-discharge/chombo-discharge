@@ -64,7 +64,7 @@ amr_mesh::amr_mesh(){
   m_ref_ratios.push_back(2);
 #endif
 
-  m_realm = RefCountedPtr<mf_realm> (new mf_realm());
+  //  m_realm = RefCountedPtr<mf_realm> (new mf_realm());
 
 }
 
@@ -2006,6 +2006,14 @@ void amr_mesh::register_realm(const std::string a_realm){
   CH_TIME("amr_mesh::register_realm");
   if(m_verbosity > 5){
     pout() << "amr_mesh::register_realm" << endl;
+  }
+
+  if(m_realms.find(a_realm) == m_realms.end()){
+    m_realms.emplace(a_realm, RefCountedPtr<mf_realm> (new mf_realm()));
+
+#if 1 // Code that makes shit run...
+    m_realm = m_realms[a_realm];
+#endif
   }
 }
 

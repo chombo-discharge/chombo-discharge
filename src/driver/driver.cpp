@@ -84,6 +84,9 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   m_step          = 0;
   m_time          = 0.0;
   m_dt            = 0.0;
+
+  // Register a realm
+  m_amr->register_realm("fluid");
 }
 
 driver::~driver(){

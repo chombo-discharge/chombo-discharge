@@ -763,6 +763,11 @@ protected:
   RefCountedPtr<mf_realm> m_realm;
 
   /*!
+    @brief These are all the realms
+  */
+  std::map<std::string, RefCountedPtr<mf_realm> > m_realms;
+
+  /*!
     @brief Grid generation method
   */
   grid_generation m_gridgen;
