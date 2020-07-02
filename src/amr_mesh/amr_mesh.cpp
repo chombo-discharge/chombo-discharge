@@ -745,9 +745,9 @@ void amr_mesh::regrid_amr(const Vector<IntVectSet>& a_tags,
 			  const int a_lmin,
 			  const int a_lmax,
 			  const int a_hardcap){
-  CH_TIME("amr_mesh::regrid_amr");
+  CH_TIME("amr_mesh::regrid_amr(tags, level, level, hardcap)");
   if(m_verbosity > 1){
-    pout() << "amr_mesh::regrid_amr" << endl;
+    pout() << "amr_mesh::regrid_amr(tags, level, level, hardcap)" << endl;
   }
   
   Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
@@ -756,6 +756,25 @@ void amr_mesh::regrid_amr(const Vector<IntVectSet>& a_tags,
   this->build_grids(tags, a_lmin, a_lmax, a_hardcap);
 
   // Define realms with the new grids and redo the realm stuff
+  this->define_realms();
+  m_realm->regrid_base(a_lmin);
+
+  this->define_mg_stuff();
+}
+
+
+void amr_mesh::regrid_amr(const Vector<Vector<int> >& a_procs, const Vector<Vector<Box> >& a_boxes, const int a_lmin){
+  CH_TIME("amr_mesh::regrid_amr(procs, boxes, level)");
+  if(m_verbosity > 1){
+    pout() << "amr_mesh::regrid_amr(procs, boxes, level)" << endl;
+  }
+  
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
+    m_grids[lvl] = DisjointBoxLayout();
+    m_grids[lvl].define(a_boxes[lvl], a_procs[lvl], m_domains[lvl]);
+    m_grids[lvl].close(); 
+  }
+
   this->define_realms();
   m_realm->regrid_base(a_lmin);
 

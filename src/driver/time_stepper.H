@@ -29,6 +29,9 @@ public:
   virtual void post_checkpoint_setup() = 0;
   virtual int get_redistribution_regsize() const;
 
+  // Load balancing. 
+  virtual void load_balance(Vector<int>& a_procs, Vector<Box>& a_boxes, const DisjointBoxLayout& a_dbl, const int a_level);
+
   // IO routines
   virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const = 0;
   virtual void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) = 0;

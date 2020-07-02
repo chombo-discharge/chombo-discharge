@@ -647,12 +647,23 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
 
   // Regrid AMR. Only levels [lmin, lmax] are allowed to change. 
   const int old_finest_level = m_amr->get_finest_level();
-  const int regsize = m_timestepper->get_redistribution_regsize();
-  m_amr->regrid(tags, a_lmin, a_lmax, regsize, old_finest_level + 1);
+  m_amr->regrid_amr(tags, a_lmin, a_lmax);
   const int new_finest_level = m_amr->get_finest_level();
+
+  // Load balance the AMR levels
+  Vector<Vector<int> > procs(1 + new_finest_level);
+  Vector<Vector<Box> > boxes(1 + new_finest_level);
+  for (int lvl = a_lmin; lvl <= new_finest_level; lvl++){
+    DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    m_timestepper->load_balance(procs[lvl], boxes[lvl], dbl, lvl);
+  }
+  m_amr->regrid_amr(procs, boxes, a_lmin);
+
+  // Regrid the operators
+  const int regsize = m_timestepper->get_redistribution_regsize();
+  m_amr->regrid_operators(a_lmin, a_lmax, regsize);
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
-  
   // Regrid driver, timestepper, and celltagger
   this->regrid_internals(old_finest_level, new_finest_level);          // Regrid internals for driver
   m_timestepper->regrid(a_lmin, old_finest_level, new_finest_level);   // Regrid solvers
@@ -799,7 +810,7 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	  // on levels (l-1);
 	  int lmin, lmax;
 	  if(!m_recursive_regrid){
-	    lmin = 1; // level = 0 never changes
+	    lmin = 1; // level = 0 never changes(?)
 	    lmax = m_amr->get_finest_level();
 	  }
 	  else{

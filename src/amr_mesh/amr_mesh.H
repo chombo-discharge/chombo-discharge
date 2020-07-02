@@ -399,10 +399,7 @@ public:
   */
   virtual void set_finest_level(const int a_finest_level);
 
-  /*!
-    @brief Set grids on level
-  */
-  virtual void set_grids(Vector<Vector<Box> >& boxes, const int a_regsize=1);
+
 
   /*!
     @brief Set the maximum box size
@@ -470,12 +467,23 @@ public:
 		      const int a_hardcap=123456);
 
   /*!
-    @brief Regrid AMR
+    @brief Regrid AMR. This builds the grids and sets them. 
   */
   virtual void regrid_amr(const Vector<IntVectSet>& a_tags,
 			  const int a_lmin,
 			  const int a_lmax,
 			  const int a_hardcap=123456);
+
+  /*!
+    @brief Regrid AMR. This takes a set of grids. 
+  */
+  virtual void regrid_amr(const Vector<Vector<int> >& a_procs, const Vector<Vector<Box> >& a_boxes, const int a_lmin);
+
+  /*!
+    @brief Set grids on level
+  */
+  virtual void set_grids(Vector<Vector<Box> >& boxes, const int a_regsize=1);
+
 
   /*!
     @brief Regrid AMR operators
