@@ -672,10 +672,11 @@ void amr_mesh::parse_domain(){
 
 void amr_mesh::parse_load_balance(){
 
+#if 0
   std::string balance;
   ParmParse pp("amr_mesh");
   pp.get("load_balance", balance);
-
+  
   if(balance == "volume"){
     m_which_balance = load_balance::volume;
   }
@@ -685,6 +686,9 @@ void amr_mesh::parse_load_balance(){
   else{
     MayDay::Abort("amr_mesh::parse_load_balance - unknown load balance requested");
   }
+#else
+  m_which_balance = load_balance::volume;
+#endif
 }
 
 void amr_mesh::parse_ghost_interpolation(){
