@@ -30,7 +30,7 @@ public:
   virtual int get_redistribution_regsize() const;
 
   // Load balancing. 
-  virtual void load_balance(Vector<Vector<int> >&            a_procs,
+  virtual bool load_balance(Vector<Vector<int> >&            a_procs,
 			    Vector<Vector<Box> >&            a_boxes,
 			    const Vector<DisjointBoxLayout>& a_grids,
 			    const int                        a_lmin,

@@ -25,6 +25,7 @@ brownian_walker_stepper::brownian_walker_stepper(){
   pp.get("verbosity",      m_verbosity);
   pp.get("ppc",            m_ppc);
   pp.get("max_cells_hop",  m_max_cells_hop);
+  pp.get("load_balance",   m_load_balance);
 }
 
 brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver) : brownian_walker_stepper() {
@@ -71,7 +72,7 @@ void brownian_walker_stepper::set_velocity(){
   m_amr->interp_ghost(vel, m_phase);
 }
 
-void brownian_walker_stepper::load_balance(Vector<Vector<int> >&            a_procs,
+bool brownian_walker_stepper::load_balance(Vector<Vector<int> >&            a_procs,
 					   Vector<Vector<Box> >&            a_boxes,
 					   const Vector<DisjointBoxLayout>& a_grids,
 					   const int                        a_lmin,
@@ -81,41 +82,45 @@ void brownian_walker_stepper::load_balance(Vector<Vector<int> >&            a_pr
     pout() << "brownian_walker_stepper::load_balance" << endl;
   }
 
-#if 0 // Default load balancing
-  time_stepper::load_balance(a_procs, a_boxes, a_grids, a_lmin, a_finest_level);
-#else
-  particle_container<ito_particle>& particles = m_solver->get_particles();
+  bool ret = false;
   
-  particles.regrid(a_grids, m_amr->get_domains(), m_amr->get_dx(), m_amr->get_ref_rat(), a_lmin, a_finest_level);
-
-  a_procs.resize(1 + a_finest_level);
-  a_boxes.resize(1 + a_finest_level);
+  if(m_load_balance){
+    particle_container<ito_particle>& particles = m_solver->get_particles();
   
-  // Compute loads on each level
-  for (int lvl = 0; lvl < a_lmin; lvl++){
-    a_procs[lvl] = a_grids[lvl].procIDs();
-    a_boxes[lvl] = a_grids[lvl].boxArray();
-  }
+    particles.regrid(a_grids, m_amr->get_domains(), m_amr->get_dx(), m_amr->get_ref_rat(), a_lmin, a_finest_level);
 
-  for (int lvl = a_lmin; lvl <= a_finest_level; lvl++){
-    Vector<long int> loads;
-    a_boxes[lvl] = a_grids[lvl].boxArray();
+    a_procs.resize(1 + a_finest_level);
+    a_boxes.resize(1 + a_finest_level);
+  
+    // Compute loads on each level
+    for (int lvl = 0; lvl < a_lmin; lvl++){
+      a_procs[lvl] = a_grids[lvl].procIDs();
+      a_boxes[lvl] = a_grids[lvl].boxArray();
+    }
+
+    for (int lvl = a_lmin; lvl <= a_finest_level; lvl++){
+      Vector<long int> loads;
+      a_boxes[lvl] = a_grids[lvl].boxArray();
     
-    m_solver->compute_loads(loads, a_grids[lvl], lvl);
+      m_solver->compute_loads(loads, a_grids[lvl], lvl);
 
 #ifdef CH_MPI
-    int count = loads.size();
-    Vector<long int> tmp(count);
-    MPI_Allreduce(&(loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-    loads = tmp;
+      int count = loads.size();
+      Vector<long int> tmp(count);
+      MPI_Allreduce(&(loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+      loads = tmp;
 #endif
 
-    LoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
+      LoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
+    }
+
+    // Put particles back
+    particles.pre_regrid(a_lmin);
+
+    ret = true;
   }
 
-  // Put particles back
-  particles.pre_regrid(a_lmin);
-#endif
+  return ret;
 }
 
 void brownian_walker_stepper::set_velocity(const int a_level){
@@ -374,7 +379,6 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	  }
 	}
 
-#if 0
 	// Do particle bounceback on the EB
 	const EBISBox& ebisbox = ebisl[dit()];
 	if(!ebisbox.isAllRegular() || !ebisbox.isAllCovered()){ 
@@ -417,7 +421,6 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	    }
 	  }
 	}
-#endif
       }
     }
   }

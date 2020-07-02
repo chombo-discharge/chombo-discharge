@@ -653,8 +653,10 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   // Load balance the AMR levels
   Vector<Vector<int> > procs;
   Vector<Vector<Box> > boxes;
-  m_timestepper->load_balance(procs, boxes, m_amr->get_grids(), a_lmin, new_finest_level);
-  m_amr->regrid_amr(procs, boxes, a_lmin);
+  const bool got_new_grids = m_timestepper->load_balance(procs, boxes, m_amr->get_grids(), a_lmin, new_finest_level);
+  if(got_new_grids){
+    m_amr->regrid_amr(procs, boxes, a_lmin);
+  }
 
 
   // Regrid the operators

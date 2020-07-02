@@ -29,7 +29,7 @@ namespace physics {
       void allocate() override;
 
       // Load balancing
-      void load_balance(Vector<Vector<int> >&            a_procs,
+      bool load_balance(Vector<Vector<int> >&            a_procs,
 			Vector<Vector<Box> >&            a_boxes,
 			const Vector<DisjointBoxLayout>& a_grids,
 			const int                        a_lmin,
@@ -63,6 +63,9 @@ namespace physics {
 
       // Phase
       phase::which_phase m_phase;
+
+      // Load balance or not
+      bool m_load_balance;
 
       // Ito solver & species
       RefCountedPtr<ito_solver>  m_solver;

@@ -14,6 +14,7 @@ brownian_walker.seed           = 0       # RNG seed
 brownian_walker.num_particles  = 100     # Number of initial particles
 brownian_walker.max_cells_hop  = 1.0     # Maximum cells to move in one time step
 brownian_walker.ppc            = -1      # Particles per cell. <= 0 turns off superparticles
+brownian_walker.load_balance   = true    # Turn on/off particle load balancing
 
 
 # Velocity, diffusion, and CFL

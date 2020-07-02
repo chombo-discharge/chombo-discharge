@@ -34,8 +34,8 @@ driver.geometry_generation             = plasmac       # Grid generation method,
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
 driver.plot_interval                   = 5             # Plot interval
-driver.regrid_interval                 = 5             # Regrid interval
-driver.checkpoint_interval             = 5             # Checkpoint interval
+driver.regrid_interval                 = 10             # Regrid interval
+driver.checkpoint_interval             = 10             # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 2.5          # Stop time
@@ -117,8 +117,9 @@ brownian_walker.blob_radius    = 0.15      # Blob radius
 brownian_walker.blob_center    = 0 0.25   # Blob center
 brownian_walker.seed           = 0        # RNG seed
 brownian_walker.num_particles  = 10000000  # Number of initial particles
-brownian_walker.max_cells_hop  = 0.2      # Maximum cells to move in one time step
+brownian_walker.max_cells_hop  = 2.0      # Maximum cells to move in one time step
 brownian_walker.ppc            = 256      # Target particles per cell
+brownian_walker.load_balance   = false    # Turn on/off particle load balancing	
 
 
 # Velocity, diffusion, and CFL

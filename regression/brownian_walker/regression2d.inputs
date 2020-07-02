@@ -120,9 +120,10 @@ brownian_walker.blob_amplitude = 1.0     # Blob amplitude
 brownian_walker.blob_radius    = 0.5     # Blob radius
 brownian_walker.blob_center    = 0 0.25  # Blob center
 brownian_walker.seed           = 0       # RNG seed
-brownian_walker.num_particles  = 100000 # Number of initial particles
-brownian_walker.max_cells_hop  = 1.0      # Maximum cells to move in one time step
-brownian_walker.ppc            = 32       # Target particles per cell
+brownian_walker.num_particles  = 100000  # Number of initial particles
+brownian_walker.max_cells_hop  = 1.0     # Maximum cells to move in one time step
+brownian_walker.ppc            = 32      # Target particles per cell
+brownian_walker.load_balance   = false   # Turn on/off particle load balancing	
 
 # Velocity, diffusion, and CFL
 # ----------------------------

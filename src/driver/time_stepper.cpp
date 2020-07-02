@@ -44,7 +44,7 @@ int time_stepper::get_redistribution_regsize() const {
   return 1;
 }
 
-void time_stepper::load_balance(Vector<Vector<int> >&             a_procs,
+bool time_stepper::load_balance(Vector<Vector<int> >&             a_procs,
 				Vector<Vector<Box> >&             a_boxes,
 				const Vector<DisjointBoxLayout>&  a_grids,
 				const int                         a_lmin,
@@ -84,4 +84,6 @@ void time_stepper::load_balance(Vector<Vector<int> >&             a_procs,
     a_boxes[lvl] = a_grids[lvl].boxArray();
     a_procs[lvl] = a_grids[lvl].procIDs();
   }
+
+  return false;
 }
