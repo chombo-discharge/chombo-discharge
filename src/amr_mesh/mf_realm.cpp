@@ -12,13 +12,8 @@ mf_realm::mf_realm(){
   m_verbosity = -1;
 
   // Just empty points until define() is called
-#if 0 // Original code
-  m_realms[phase::gas]   = RefCountedPtr<realm> (new realm());
-  m_realms[phase::solid] = RefCountedPtr<realm> (new realm());
-#else
   m_realms.emplace(phase::gas,   RefCountedPtr<realm> (new realm()));
   m_realms.emplace(phase::solid, RefCountedPtr<realm> (new realm()));
-#endif
 }
 
 mf_realm::~mf_realm(){

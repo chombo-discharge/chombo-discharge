@@ -66,12 +66,6 @@ amr_mesh::amr_mesh(){
 
   m_realm = RefCountedPtr<mf_realm> (new mf_realm());
 
-  // Always do this stuff. 
-  this->register_operator(s_eb_gradient,     phase::gas);
-  this->register_operator(s_eb_gradient,     phase::solid);
-  this->register_operator(s_eb_irreg_interp, phase::gas);
-  this->register_operator(s_eb_irreg_interp, phase::solid);
-
 }
 
 amr_mesh::~amr_mesh(){
@@ -2006,6 +2000,13 @@ Vector<Box> amr_mesh::make_tiles(const Box a_box, const IntVect a_tilesize){
 #endif
 
   return tiles;
+}
+
+void amr_mesh::register_realm(const std::string a_realm){
+  CH_TIME("amr_mesh::register_realm");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::register_realm" << endl;
+  }
 }
 
 void amr_mesh::register_operator(const std::string a_operator, const phase::which_phase a_phase){

@@ -94,6 +94,11 @@ public:
   virtual void register_operator(const std::string a_operator, const phase::which_phase a_phase);
 
   /*!
+    @brief Register a new realm
+  */
+  virtual void register_realm(const std::string a_realm);
+
+  /*!
     @brief Alias an entire hierarchy of data. 
   */
   virtual void alias(EBAMRCellData&           a_data,
