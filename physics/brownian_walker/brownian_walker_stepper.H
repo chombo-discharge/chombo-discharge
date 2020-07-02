@@ -28,6 +28,13 @@ namespace physics {
       void initial_data() override;
       void allocate() override;
 
+      // Load balancing
+      void load_balance(Vector<Vector<int> >&            a_procs,
+			Vector<Vector<Box> >&            a_boxes,
+			const Vector<DisjointBoxLayout>& a_grids,
+			const int                        a_lmin,
+			const int                        a_finest_level);
+
       // IO routines
       void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
       void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;

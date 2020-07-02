@@ -651,13 +651,11 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   const int new_finest_level = m_amr->get_finest_level();
 
   // Load balance the AMR levels
-  Vector<Vector<int> > procs(1 + new_finest_level);
-  Vector<Vector<Box> > boxes(1 + new_finest_level);
-  for (int lvl = a_lmin; lvl <= new_finest_level; lvl++){
-    DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    m_timestepper->load_balance(procs[lvl], boxes[lvl], dbl, lvl);
-  }
+  Vector<Vector<int> > procs;
+  Vector<Vector<Box> > boxes;
+  m_timestepper->load_balance(procs, boxes, m_amr->get_grids(), a_lmin, new_finest_level);
   m_amr->regrid_amr(procs, boxes, a_lmin);
+
 
   // Regrid the operators
   const int regsize = m_timestepper->get_redistribution_regsize();

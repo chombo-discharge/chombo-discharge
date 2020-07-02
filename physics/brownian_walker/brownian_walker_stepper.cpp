@@ -71,6 +71,53 @@ void brownian_walker_stepper::set_velocity(){
   m_amr->interp_ghost(vel, m_phase);
 }
 
+void brownian_walker_stepper::load_balance(Vector<Vector<int> >&            a_procs,
+					   Vector<Vector<Box> >&            a_boxes,
+					   const Vector<DisjointBoxLayout>& a_grids,
+					   const int                        a_lmin,
+					   const int                        a_finest_level){
+  CH_TIME("brownian_walker_stepper::load_balance");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::load_balance" << endl;
+  }
+
+#if 0 // Default load balancing
+  time_stepper::load_balance(a_procs, a_boxes, a_grids, a_lmin, a_finest_level);
+#else
+  particle_container<ito_particle>& particles = m_solver->get_particles();
+  
+  particles.regrid(a_grids, m_amr->get_domains(), m_amr->get_dx(), m_amr->get_ref_rat(), a_lmin, a_finest_level);
+
+  a_procs.resize(1 + a_finest_level);
+  a_boxes.resize(1 + a_finest_level);
+  
+  // Compute loads on each level
+  for (int lvl = 0; lvl < a_lmin; lvl++){
+    a_procs[lvl] = a_grids[lvl].procIDs();
+    a_boxes[lvl] = a_grids[lvl].boxArray();
+  }
+
+  for (int lvl = a_lmin; lvl <= a_finest_level; lvl++){
+    Vector<long int> loads;
+    a_boxes[lvl] = a_grids[lvl].boxArray();
+    
+    m_solver->compute_loads(loads, a_grids[lvl], lvl);
+
+#ifdef CH_MPI
+    int count = loads.size();
+    Vector<long int> tmp(count);
+    MPI_Allreduce(&(loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+    loads = tmp;
+#endif
+
+    LoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
+  }
+
+  // Put particles back
+  particles.pre_regrid(a_lmin);
+#endif
+}
+
 void brownian_walker_stepper::set_velocity(const int a_level){
   CH_TIME("brownian_walker_stepper::set_velocity(level)");
   if(m_verbosity > 5){
@@ -279,11 +326,11 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
   const int finest_level = m_amr->get_finest_level();
   const RealVect origin  = m_amr->get_prob_lo();
-  m_solver->remap();
-  particle_container<ito_particle>& allParticles = m_solver->get_particles();
+  
+  //  m_solver->remap();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const RealVect dx                      = m_amr->get_dx()[lvl]*RealVect::Unit;
+    const RealVect dx                     = m_amr->get_dx()[lvl]*RealVect::Unit;
     const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
     ParticleData<ito_particle>& particles = m_solver->get_particles()[lvl];
 
@@ -326,7 +373,8 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	    p.position() += hop;
 	  }
 	}
-	
+
+#if 0
 	// Do particle bounceback on the EB
 	const EBISBox& ebisbox = ebisl[dit()];
 	if(!ebisbox.isAllRegular() || !ebisbox.isAllCovered()){ 
@@ -369,6 +417,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	    }
 	  }
 	}
+#endif
       }
     }
   }

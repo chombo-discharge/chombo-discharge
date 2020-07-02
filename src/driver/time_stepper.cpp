@@ -44,15 +44,17 @@ int time_stepper::get_redistribution_regsize() const {
   return 1;
 }
 
-void time_stepper::load_balance(Vector<int>& a_procs,
-				Vector<Box>& a_boxes,
-				const DisjointBoxLayout& a_dbl,
-				const int a_level){
+void time_stepper::load_balance(Vector<Vector<int> >&             a_procs,
+				Vector<Vector<Box> >&             a_boxes,
+				const Vector<DisjointBoxLayout>&  a_grids,
+				const int                         a_lmin,
+				const int                         a_finest_level){
   CH_TIME("time_stepper::load_balance");
   if(m_verbosity > 5){
     pout() << "time_stepper::load_balance" << endl;
   }
 
+#if 0
   Vector<long int> a_loads;
   a_boxes = a_dbl.boxArray();
   a_loads.resize(a_dbl.size(), 0);
@@ -73,4 +75,13 @@ void time_stepper::load_balance(Vector<int>& a_procs,
 
   // Load balance
   LoadBalance(a_procs, a_loads, a_boxes);
+#endif
+
+  a_procs.resize(1 + a_finest_level);
+  a_boxes.resize(1 + a_finest_level);
+
+  for (int lvl = 0; lvl <= a_finest_level; lvl++){
+    a_boxes[lvl] = a_grids[lvl].boxArray();
+    a_procs[lvl] = a_grids[lvl].procIDs();
+  }
 }

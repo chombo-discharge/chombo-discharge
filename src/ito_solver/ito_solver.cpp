@@ -408,18 +408,15 @@ void ito_solver::initial_data(){
 #endif
 }
 
-void ito_solver::compute_loads(Vector<Box>& a_boxes, Vector<int>& a_loads, const int a_level){
+void ito_solver::compute_loads(Vector<long int>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level){
   CH_TIME("ito_solver::compute_loads");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_loads" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
-
-  a_boxes = dbl.boxArray();
-  a_loads.resize(dbl.size(),0);
+  a_loads.resize(a_dbl.size(),0);
   
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+  for (DataIterator dit = a_dbl.dataIterator(); dit.ok(); ++dit){
     const int numPart = m_particles[a_level][dit()].numItems();
     a_loads[dit().intCode()] = numPart;
   }
@@ -427,21 +424,9 @@ void ito_solver::compute_loads(Vector<Box>& a_boxes, Vector<int>& a_loads, const
   // Gather loads globally
 #ifdef CH_MPI
   int count = a_loads.size();
-  Vector<int> tmp(count);
-  MPI_Allreduce(&(a_loads[0]),&(tmp[0]), count, MPI_INT, MPI_SUM, Chombo_MPI::comm);
+  Vector<long int> tmp(count);
+  MPI_Allreduce(&(a_loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
   a_loads = tmp;
-#endif
-
-#if 0 // Debug. Load balance and do output
-  Vector<int> procs;
-  load_balance::load_balance_boxes(procs, a_loads, a_boxes);
-
-  if(procID() == 0) std::cout << "\nnew load balancing: " << std::endl;
-  for (int i = 0; i < a_loads.size(); i++){
-    if(procID() == 0){
-      std::cout << "box = " << a_boxes[i] << "\t load = " << a_loads[i] << "\t proc = " << procs[i] << std::endl;
-    }
-  }
 #endif
 }
 
