@@ -40,7 +40,7 @@ public:
 
   // realm copy function
   template <class T>
-  static void copy(Vector<RefCountedPtr<LevelData<T> > >& a_dst, const Vector<RefCountedPtr<LevelData<T> > >& src);
+  static void copy(Vector<RefCountedPtr<LevelData<T> > >& a_dst, const Vector<RefCountedPtr<LevelData<T> > >& a_src);
 
   // Base and operator regrid
   void set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);

@@ -9,6 +9,15 @@
 
 const std::string realm::primal = "primal";
 
+template <class T>
+void realm::copy(Vector<RefCountedPtr<LevelData<T> > >& a_dst, const Vector<RefCountedPtr<LevelData<T> > >& a_src){
+  for (int lvl = 0; lvl < a_dst.size(); lvl++){
+    if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
+      a_src[lvl]->copyTo(a_dst[lvl]);
+    }
+  }
+}
+
 realm::realm(){
   m_defined = false;
   m_verbosity = -1;
