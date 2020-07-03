@@ -18,6 +18,7 @@
 class realm {
 public:
 
+  // Identifier for default realm
   const static std::string primal;
 
   // ctor, dtor
