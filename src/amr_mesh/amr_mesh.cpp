@@ -30,7 +30,6 @@ amr_mesh::amr_mesh(){
   parse_max_simulation_depth();
   parse_refine_all_depth();
   parse_ebcf();
-  parse_mg_coarsen();
   parse_refinement_ratio();
   parse_blocking_factor();
   parse_max_box_size();
@@ -756,8 +755,6 @@ void amr_mesh::regrid_amr(const Vector<IntVectSet>& a_tags,
   // Define realms with the new grids and redo the realm stuff
   this->define_realms();
   m_realm->regrid_base(a_lmin);
-
-  this->define_mg_stuff();
 }
 
 
@@ -775,8 +772,6 @@ void amr_mesh::regrid_amr(const Vector<Vector<int> >& a_procs, const Vector<Vect
 
   this->define_realms();
   m_realm->regrid_base(a_lmin);
-
-  this->define_mg_stuff();
 }
 
 void amr_mesh::regrid_operators(const int a_lmin,
@@ -904,91 +899,6 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
   }
 
   m_has_grids = true;
-}
-
-void amr_mesh::define_mg_stuff(){
-  CH_TIME("amr_mesh::define_mg_stuff");
-  if(m_verbosity > 2){
-    pout() << "amr_mesh::define_mg_stuff" << endl;
-  }
-
-  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_realm->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_realm->get_ebis(phase::solid);
-
-  const int coar_ref = 2;
-
-  // Redo these
-  m_mg_domains.resize(0);
-  m_mg_grids.resize(0);
-  m_mg_mflg.resize(0);
-  
-  m_mg_eblg.resize(phase::num_phases);
-
-  m_mg_eblg[phase::gas].resize(0);
-  m_mg_eblg[phase::solid].resize(0);
-
-  int num_coar       = 0;
-  bool has_coar      = true;
-  ProblemDomain fine = m_domains[0];
-
-  // Coarsen problem domains and create grids
-  while(num_coar < m_mg_coarsen || !has_coar){
-
-    // Check if we can coarsen
-    const ProblemDomain coar = fine.coarsen(coar_ref);
-    const Box coar_box       = coar.domainBox();
-    for (int dir = 0; dir < SpaceDim; dir++){
-      if(coar_box.size()[dir] < m_max_box_size || coar_box.size()[dir]%m_max_box_size != 0){
-	has_coar = false;
-      }
-    }
-
-    if(has_coar){
-      // Split the domain into pieces, then order and load balance them
-      Vector<Box> boxes;
-      Vector<int> proc_assign;
-      domainSplit(coar, boxes, m_max_box_size, m_blocking_factor);
-      mortonOrdering(boxes);
-      load_balance::balance_volume(proc_assign, boxes);
-
-      // Add problem domain and grid
-      m_mg_domains.push_back(coar);
-      m_mg_grids.push_back(DisjointBoxLayout(boxes, proc_assign, coar));
-
-      // Define the EBLevelGrids
-      const int idx = m_mg_grids.size() - 1; // Last element added
-      if(!ebis_gas.isNull()){
-	m_mg_eblg[phase::gas].push_back(RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_mg_grids[idx],
-										    m_mg_domains[idx],
-										    m_ebghost,
-										    ebis_gas)));
-      }
-      if(!ebis_sol.isNull()){
-	m_mg_eblg[phase::solid].push_back(RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_mg_grids[idx],
-										      m_mg_domains[idx],
-										      m_ebghost,
-										      ebis_sol)));
-      }
-
-      // Define the MFLevelGrid object
-      Vector<EBLevelGrid> eblgs;
-      if(!ebis_gas.isNull()){
-	eblgs.push_back(*m_mg_eblg[phase::gas][idx]);
-      }
-      if(!ebis_sol.isNull()){
-	eblgs.push_back(*m_mg_eblg[phase::solid][idx]);
-      }
-      m_mg_mflg.push_back(RefCountedPtr<MFLevelGrid> (new MFLevelGrid(m_mfis, eblgs)));
-      
-
-      // Next iterate
-      fine = coar;
-      num_coar++;
-    }
-    else{
-      break;
-    }
-  }
 }
 
 void amr_mesh::loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& a_boxes){
@@ -1402,19 +1312,6 @@ void amr_mesh::parse_coarsest_num_cells(){
   m_num_cells = IntVect(D_DECL(cells[0], cells[1], cells[2]));
 }
 
-void amr_mesh::parse_mg_coarsen(){
-
-  ParmParse pp("amr_mesh");
-  int depth;
-  pp.get("mg_coarsen", depth);
-  if(depth >= 0){
-    m_mg_coarsen = depth;
-  }
-  else{
-    m_mg_coarsen = 0;
-  }
-}
-
 void amr_mesh::parse_max_amr_depth(){
 
   ParmParse pp("amr_mesh");
@@ -1529,8 +1426,6 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
 
   this->define_realms();
   m_realm->regrid_base(a_lmin);
-
-  this->define_mg_stuff();
 
 }
 
@@ -1851,22 +1746,6 @@ Vector<IntVectSet> amr_mesh::get_irreg_tags() const {
   }
 
   return tags;
-}
-
-Vector<DisjointBoxLayout>& amr_mesh::get_mg_grids(){
-  return m_mg_grids;
-}
-
-Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_mg_eblg(phase::which_phase a_phase){
-  return m_mg_eblg[a_phase];
-}
-
-Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mg_mflg(){
-  return m_mg_mflg;
-}
-
-Vector<ProblemDomain>& amr_mesh::get_mg_domains(){
-  return m_mg_domains;
 }
 
 Vector<ProblemDomain>& amr_mesh::get_domains(){

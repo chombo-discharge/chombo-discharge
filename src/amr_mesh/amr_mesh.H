@@ -285,11 +285,6 @@ public:
   virtual void build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap = -1);
 
   /*!
-    @brief Define the MG stuff
-  */
-  virtual void define_mg_stuff();
-
-  /*!
     @brief Interpolate ghost vectors
   */
   virtual void interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase);
@@ -353,11 +348,6 @@ public:
     @brief Set coarsest level box; this is the coarsest domain (well, except for lower levels GMG)
   */
   virtual void parse_coarsest_num_cells();
-
-  /*!
-    @brief Set multigrid coarsening
-  */
-  virtual void parse_mg_coarsen();
 
   /*!
     @brief Maximum AMR depth
@@ -625,19 +615,9 @@ public:
   virtual Vector<DisjointBoxLayout>& get_grids(const std::string a_realm);
 
   /*!
-    @brief Get pre-coarsened MG grids
-  */
-  virtual Vector<DisjointBoxLayout>& get_mg_grids();
-
-  /*!
     @brief Get domains
   */
   virtual Vector<ProblemDomain>& get_domains();
-
-    /*!
-    @brief Get pre-coarsened MG domains
-  */
-  virtual Vector<ProblemDomain>& get_mg_domains();
 
   /*!
     @brief Get the EBLevelGrid 
@@ -645,19 +625,9 @@ public:
   virtual Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(phase::which_phase a_phase);
 
   /*!
-    @brief Get the pre-coarsened EBLevelGrid 
-  */
-  virtual Vector<RefCountedPtr<EBLevelGrid> >& get_mg_eblg(phase::which_phase a_phase);
-
-  /*!
     @brief Get the EBLevelGrid 
   */
   virtual Vector<RefCountedPtr<MFLevelGrid> >& get_mflg();
-
-    /*!
-    @brief Get the pre-coarsened MFLevelGrids
-  */
-  virtual Vector<RefCountedPtr<MFLevelGrid> >& get_mg_mflg();
 
   /*!
     @brief Get the EBISLayouts
@@ -893,11 +863,6 @@ protected:
   int m_blocking_factor;
 
   /*!
-    @brief Pre-coarsening of multigrid levels
-  */
-  int m_mg_coarsen;
-
-  /*!
     @brief Number of ghost cells to use for eb stuff
   */
   int m_ebghost;
@@ -971,26 +936,6 @@ protected:
     @brief Level resolutions
   */
   Vector<Real> m_dx;
-
-  /*!
-    @brief Grids for multigrid pre-coarsening
-  */
-  Vector<DisjointBoxLayout> m_mg_grids;
-
-  /*!
-    @brief Problem domains for multigrid pre-coarsening
-  */
-  Vector<ProblemDomain> m_mg_domains;
-
-  /*!
-    @brief EBLevelgrids for the multigrid pre-coarsening
-  */
-  Vector<Vector<RefCountedPtr<EBLevelGrid> > > m_mg_eblg;
-
-  /*!
-    @brief EBLevelgrids for the multigrid pre-coarsening
-  */
-  Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
 
   /*!
     @brief Load balance grids
