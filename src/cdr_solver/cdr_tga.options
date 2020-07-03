@@ -2,6 +2,7 @@
 # CDR_TGA CLASS OPTIONS
 # ====================================================================================================
 cdr_tga.gmg_verbosity      = -1        # GMG verbosity
+cdr_tga.gmg_coarsen        = 4         # Precoarsening of multigrid levels
 cdr_tga.gmg_pre_smooth     = 3         # Number of relaxations in downsweep
 cdr_tga.gmg_post_smooth    = 3         # Number of relaxations in upsweep
 cdr_tga.gmg_bott_smooth    = 3         # NUmber of relaxations before dropping to bottom solver

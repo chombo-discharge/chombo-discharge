@@ -179,9 +179,19 @@ protected:
   EBSimpleSolver m_simple_solver;
 
   /*!
+    @brief MG levelsgrids
+  */
+  Vector<EBLevelGrid> m_mg_levelgrids;
+
+  /*!
     @brief Verbosity for geometric multigrid
   */
   int m_gmg_verbosity;
+
+  /*!
+    @brief Pre-coarsening of GMG levels
+  */
+  int m_gmg_coarsen;
 
   /*!
     @brief Number of smoothings before averaging
@@ -229,6 +239,11 @@ protected:
   bool m_use_tga;
 
   /*!
+    @brief Has deeper MG levels or not
+  */
+  bool m_has_mg_stuff;
+
+  /*!
     @brief 
   */
   Real m_gmg_eps;
@@ -247,6 +262,11 @@ protected:
     @brief Set up geometric multigrid
   */
   virtual void setup_gmg();
+
+  /*!
+    @brief Define the GMG levels
+  */
+  virtual void define_mg_levels();
 
   /*!
     @brief Setup the operator factory
