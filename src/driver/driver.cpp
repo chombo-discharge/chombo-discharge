@@ -85,7 +85,9 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   m_time          = 0.0;
   m_dt            = 0.0;
 
-  m_amr->register_realm(realm::primal);
+  // Always register this realm. 
+  m_realm = realm::primal;
+  m_amr->register_realm(m_realm);
 }
 
 driver::~driver(){
