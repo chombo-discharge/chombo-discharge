@@ -84,9 +84,6 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   m_step          = 0;
   m_time          = 0.0;
   m_dt            = 0.0;
-
-  // Register a realm
-  m_amr->register_realm("base_realm");
 }
 
 driver::~driver(){
@@ -656,7 +653,7 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   // Load balance the AMR levels
   Vector<Vector<int> > procs;
   Vector<Vector<Box> > boxes;
-  const bool got_new_grids = m_timestepper->load_balance(procs, boxes, m_amr->get_grids("base_realm"), a_lmin, new_finest_level);
+  const bool got_new_grids = m_timestepper->load_balance(procs, boxes, m_amr->get_grids("fluid"), a_lmin, new_finest_level);
   if(got_new_grids){
     m_amr->regrid_amr(procs, boxes, a_lmin);
   }
@@ -1522,6 +1519,10 @@ void driver::setup_fresh(const int a_init_regrids){
     m_compgeom->build_geo_from_files(path_gas, path_sol);
   }
 
+  // Register realms
+  m_timestepper->set_amr(m_amr);
+  m_timestepper->register_realms();
+
   // Get geometry tags
   this->get_geom_tags();
   
@@ -1543,7 +1544,7 @@ void driver::setup_fresh(const int a_init_regrids){
   }
 
   // Provide time_stepper with amr and geometry
-  m_timestepper->set_amr(m_amr);
+
   m_timestepper->set_computational_geometry(m_compgeom);       // Set computational geometry
 
   // time_stepper setup
@@ -1600,6 +1601,7 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
   this->get_geom_tags();       // Get geometric tags.
 
   m_timestepper->set_amr(m_amr);                         // Set amr
+  m_timestepper->register_realms();                      // Register realms
   m_timestepper->set_computational_geometry(m_compgeom); // Set computational geometry
 
   // Read checkpoint file

@@ -29,7 +29,9 @@ public:
   virtual void post_checkpoint_setup() = 0;
   virtual int get_redistribution_regsize() const;
 
-  // Load balancing. 
+  // Registration routines
+  virtual void register_realms() {m_amr->register_realm("fluid"); }
+  virtual void register_operators() = 0; 
   virtual bool load_balance(Vector<Vector<int> >&            a_procs,
 			    Vector<Vector<Box> >&            a_boxes,
 			    const Vector<DisjointBoxLayout>& a_grids,
@@ -48,21 +50,14 @@ public:
   virtual void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) = 0;
   virtual void print_step_report() = 0;
 
-  // New regrid routines
+  // Regrid routines
   virtual bool need_to_regrid();
-  virtual void register_operators() = 0; 
   virtual void deallocate() = 0;
   virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) = 0;
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
 
-  /*!
-    @brief Set amr
-  */
+  // Set routines
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
-
-  /*!
-    @brief Set the physical domain
-  */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
 
 protected:
