@@ -178,6 +178,16 @@ protected:
   bool m_needs_setup;
 
   /*!
+    @brief
+  */
+  bool m_has_mg_stuff;
+
+  /*!
+    @brief Number of coarsening levels for multigrid
+  */
+  int m_mg_coarsen;
+
+  /*!
     @brief Verbosity for geometric multigrid
   */
   int m_gmg_verbosity;
@@ -328,6 +338,26 @@ protected:
   Vector<RefCountedPtr<BaseBCFuncEval> > m_wall_bcfunc;
 
   /*!
+    @brief Coarsened MG grids
+  */
+  Vector<DisjointBoxLayout> m_mg_grids;
+
+  /*!
+    @brief Coarsened problem domains
+  */
+  Vector<ProblemDomain> m_mg_domains;
+
+  /*!
+    @brief Coarsened EBLevelGrids
+  */
+  Vector<Vector<RefCountedPtr<EBLevelGrid> > > m_mg_eblg;
+
+  /*!
+    @brief EBLevelgrids for the multigrid pre-coarsening
+  */
+  Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
+
+  /*!
     @brief Set up the geometric multigrid solver 
   */
   virtual void setup_gmg();
@@ -363,6 +393,9 @@ protected:
   virtual void parse_domain_bc();    // Parse domain boundary conditions
   virtual void parse_plot_vars();    // Parse plot variables
   virtual void parse_gmg_settings(); // Parse geometric multigrid settings
+
+  // Define mg levels
+  virtual void define_mg_levels();
 
 };
 #endif

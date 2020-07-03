@@ -1776,6 +1776,10 @@ int amr_mesh::get_num_ghost(){
   return m_num_ghost;
 }
 
+int amr_mesh::get_eb_ghost(){
+  return m_ebghost;
+}
+
 int amr_mesh::get_redist_rad(){
   return m_redist_rad;
 }
@@ -1870,6 +1874,14 @@ Vector<ProblemDomain>& amr_mesh::get_domains(){
 }
 
 Vector<DisjointBoxLayout>& amr_mesh::get_grids(){
+  return m_grids;
+}
+
+Vector<DisjointBoxLayout>& amr_mesh::get_grids(const std::string a_realm){
+  if(!this->query_realm(a_realm)) {
+    std::string str = "amr_mesh::get_grids - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
   return m_realm->get_grids();
 }
 
@@ -2002,13 +2014,28 @@ Vector<Box> amr_mesh::make_tiles(const Box a_box, const IntVect a_tilesize){
   return tiles;
 }
 
+bool amr_mesh::query_realm(const std::string a_realm){
+  CH_TIME("amr_mesh::query_realm");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::query_realm" << endl;
+  }
+
+  bool ret = true;
+  
+  if(m_realms.find(a_realm) == m_realms.end()){
+    ret = false;
+  }
+
+  return ret;
+}
+
 void amr_mesh::register_realm(const std::string a_realm){
   CH_TIME("amr_mesh::register_realm");
   if(m_verbosity > 5){
     pout() << "amr_mesh::register_realm" << endl;
   }
 
-  if(m_realms.find(a_realm) == m_realms.end()){
+  if(!this->query_realm(a_realm)){
     m_realms.emplace(a_realm, RefCountedPtr<mf_realm> (new mf_realm()));
 
 #if 1 // Code that makes shit run...

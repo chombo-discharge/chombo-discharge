@@ -86,7 +86,7 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   m_dt            = 0.0;
 
   // Register a realm
-  m_amr->register_realm("fluid");
+  m_amr->register_realm("base_realm");
 }
 
 driver::~driver(){
@@ -656,7 +656,7 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   // Load balance the AMR levels
   Vector<Vector<int> > procs;
   Vector<Vector<Box> > boxes;
-  const bool got_new_grids = m_timestepper->load_balance(procs, boxes, m_amr->get_grids(), a_lmin, new_finest_level);
+  const bool got_new_grids = m_timestepper->load_balance(procs, boxes, m_amr->get_grids("base_realm"), a_lmin, new_finest_level);
   if(got_new_grids){
     m_amr->regrid_amr(procs, boxes, a_lmin);
   }

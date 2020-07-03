@@ -94,6 +94,11 @@ public:
   virtual void register_operator(const std::string a_operator, const phase::which_phase a_phase);
 
   /*!
+    @brief Query if a realm exists
+  */
+  virtual bool query_realm(const std::string a_realm);
+
+  /*!
     @brief Register a new realm
   */
   virtual void register_realm(const std::string a_realm);
@@ -560,6 +565,11 @@ public:
   virtual int get_num_ghost();
 
   /*!
+    @brief Get number of ghost cells used for EB
+  */
+  virtual int get_eb_ghost();
+
+  /*!
     @brief Get redistribution radius
   */
   virtual int get_redist_rad();
@@ -608,6 +618,11 @@ public:
     @brief Get the grids
   */
   virtual Vector<DisjointBoxLayout>& get_grids();
+
+  /*!
+    @brief Get the grids
+  */
+  virtual Vector<DisjointBoxLayout>& get_grids(const std::string a_realm);
 
   /*!
     @brief Get pre-coarsened MG grids

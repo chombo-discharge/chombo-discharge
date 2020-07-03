@@ -22,11 +22,13 @@
 #include <DirichletConductivityDomainBC.H>
 #include <DirichletConductivityEBBC.H>
 #include <ParmParse.H>
+#include <BRMeshRefine.H>
 
 #define POISSON_MF_GMG_TIMER 0
 
 poisson_multifluid_gmg::poisson_multifluid_gmg(){
   m_needs_setup = true;
+  m_has_mg_stuff = false;
   m_class_name  = "poisson_multifluid_gmg";
 }
 
@@ -156,6 +158,7 @@ void poisson_multifluid_gmg::parse_gmg_settings(){
 
   std::string str;
 
+  pp.get("gmg_coarsen",     m_mg_coarsen);
   pp.get("gmg_verbosity",   m_gmg_verbosity);
   pp.get("gmg_pre_smooth",  m_gmg_pre_smooth);
   pp.get("gmg_post_smooth", m_gmg_post_smooth);
@@ -747,12 +750,102 @@ void poisson_multifluid_gmg::set_eb_perm(BaseIVFAB<Real>&          a_perm,
   }
 }
 
+void poisson_multifluid_gmg::define_mg_levels(){
+  CH_TIME("poisson_multifluid_gmg::define_mg_level");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::define_mg_levels" << endl;
+  }
+
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  const int coar_ref = 2;
+  
+  m_mg_domains.resize(0);
+  m_mg_grids.resize(0);
+  m_mg_mflg.resize(0);
+  
+  m_mg_eblg.resize(phase::num_phases);
+
+  m_mg_eblg[phase::gas].resize(0);
+  m_mg_eblg[phase::solid].resize(0);
+
+  // Get some stuff from amr_mesh on how to decompose the levels
+  const Vector<ProblemDomain>& domains = m_amr->get_domains();
+  const int max_box_size               = m_amr->get_max_box_size();
+  const int blocking_factor            = m_amr->get_blocking_factor();
+  const int num_ebghost                = m_amr->get_eb_ghost();
+
+  int num_coar       = 0;
+  bool has_coar      = true;
+  ProblemDomain fine = domains[0];
+
+  // Coarsen problem domains and create grids
+  while(num_coar < m_mg_coarsen || !has_coar){
+
+    // Check if we can coarsen
+    const ProblemDomain coar = fine.coarsen(coar_ref);
+    const Box coar_box       = coar.domainBox();
+    for (int dir = 0; dir < SpaceDim; dir++){
+      if(coar_box.size()[dir] < max_box_size || coar_box.size()[dir]%max_box_size != 0){
+	has_coar = false;
+      }
+    }
+
+    if(has_coar){
+      // Split the domain into pieces, then order and load balance them
+      Vector<Box> boxes;
+      Vector<int> proc_assign;
+      domainSplit(coar, boxes, max_box_size, blocking_factor);
+      mortonOrdering(boxes);
+      load_balance::balance_volume(proc_assign, boxes);
+
+      // Add problem domain and grid
+      m_mg_domains.push_back(coar);
+      m_mg_grids.push_back(DisjointBoxLayout(boxes, proc_assign, coar));
+
+      // Define the EBLevelGrids
+      const int idx = m_mg_grids.size() - 1; // Last element added
+      if(!ebis_gas.isNull()){
+	m_mg_eblg[phase::gas].push_back(RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_mg_grids[idx],
+										    m_mg_domains[idx],
+										    num_ebghost,
+										    ebis_gas)));
+      }
+      if(!ebis_sol.isNull()){
+	m_mg_eblg[phase::solid].push_back(RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_mg_grids[idx],
+										      m_mg_domains[idx],
+										      num_ebghost,
+										      ebis_sol)));
+      }
+
+      // Define the MFLevelGrid object
+      Vector<EBLevelGrid> eblgs;
+      if(!ebis_gas.isNull()) eblgs.push_back(*m_mg_eblg[phase::gas][idx]);
+      if(!ebis_sol.isNull()) eblgs.push_back(*m_mg_eblg[phase::solid][idx]);
+      
+      m_mg_mflg.push_back(RefCountedPtr<MFLevelGrid> (new MFLevelGrid(m_mfis, eblgs)));
+
+      // Next iterate
+      fine = coar;
+      num_coar++;
+    }
+    else{
+      break;
+    }
+  }
+}
+
 void poisson_multifluid_gmg::setup_gmg(){
   CH_TIME("poisson_multifluid_gmg::setup_gmg");
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::setup_gmg" << endl;
   }
 
+  //  if(!m_has_mg_stuff){
+    this->define_mg_levels();     // Define MG levels. These don't change during regrids so we only need to set them once. 
+    //    m_has_mg_stuff = true;
+    //  }
   this->set_coefficients();       // Set coefficients
   this->setup_operator_factory(); // Set the operator factory
   this->setup_solver();           // Set up the AMR multigrid solver
@@ -774,8 +867,8 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   const Vector<Real>& dx                 = m_amr->get_dx();
   const RealVect& origin                 = m_amr->get_prob_lo();
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
 
   // This stuff is needed for the operator factory
   Vector<MFLevelGrid>    mflg(1 + finest_level);
@@ -784,25 +877,14 @@ void poisson_multifluid_gmg::setup_operator_factory(){
     Vector<EBLevelGrid>                    eblg_phases(nphases);
     Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(nphases);
 
-    eblg_phases[phase::gas]   = *(m_amr->get_eblg(phase::gas)[lvl]);
-    if(!ebis_sol.isNull()){
-      eblg_phases[phase::solid] = *(m_amr->get_eblg(phase::solid)[lvl]);
-    }
+    if(!ebis_gas.isNull()) eblg_phases[phase::gas]   = *(m_amr->get_eblg(phase::gas)[lvl]);
+    if(!ebis_sol.isNull()) eblg_phases[phase::solid] = *(m_amr->get_eblg(phase::solid)[lvl]);
 
-    quadcfi_phases[phase::gas]   = (m_amr->get_old_quadcfi(phase::gas)[lvl]);
-    if(!ebis_sol.isNull()){
-      quadcfi_phases[phase::solid] = (m_amr->get_old_quadcfi(phase::solid)[lvl]);
-    }
+    if(!ebis_gas.isNull()) quadcfi_phases[phase::gas]   = (m_amr->get_old_quadcfi(phase::gas)[lvl]);
+    if(!ebis_sol.isNull()) quadcfi_phases[phase::solid] = (m_amr->get_old_quadcfi(phase::solid)[lvl]);
     
     mflg[lvl].define(m_mfis, eblg_phases);
     mfquadcfi[lvl].define(quadcfi_phases);
-  }
-
-  // Pre-coarsened MG levels
-  Vector<MFLevelGrid> mg_levelgrids;
-  const Vector<RefCountedPtr<MFLevelGrid> >& mg_mflg = m_amr->get_mg_mflg();
-  for (int lvl = 0; lvl < mg_mflg.size(); lvl++){
-    mg_levelgrids.push_back(*mg_mflg[lvl]);
   }
 
   // Appropriate coefficients for poisson equation
@@ -814,9 +896,6 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   const IntVect ghost_phi = this->query_ghost()*IntVect::Unit;
   const IntVect ghost_rhs = this->query_ghost()*IntVect::Unit;
 
-  // Potential function
-
-
   conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
   RefCountedPtr<dirichlet_func> pot = RefCountedPtr<dirichlet_func> (new dirichlet_func(m_potential,
 											s_constant_one,
@@ -826,11 +905,18 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   bcfact->set_potentials(m_wall_bcfunc);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 
+  Vector<MFLevelGrid> mg_levelgrids;
+  for (int lvl = 0; lvl < m_mg_mflg.size(); lvl++){
+    mg_levelgrids.push_back(*m_mg_mflg[lvl]);
+  }
+  
+
 
   // Set the length scale for the Poisson equation. This is equivalent to solving the Poisson equation
   // on the domain [-1,1] in the x-direction
   m_length_scale = 2./(domains[0].size(0)*dx[0]);
 
+  // Create factory and set potential
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
 										 mflg,
 										 mfquadcfi,
@@ -916,7 +1002,6 @@ void poisson_multifluid_gmg::setup_solver(){
 
   // Init solver
   m_gmg_solver.init(phi, rhs, finest_level, 0);
-
 }
 
 MFAMRCellData& poisson_multifluid_gmg::get_aco(){
