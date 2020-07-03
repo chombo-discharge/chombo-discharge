@@ -1,6 +1,6 @@
 /*!
   @file   realm.H
-  @brief  Declaration of the realm class
+  @brief  Multi-fluid realms
   @author Robert Marskar
   @date   July 2020
 */
@@ -8,53 +8,17 @@
 #ifndef _REALM_H_
 #define _REALM_H_
 
-#include "type_definitions.H"
-#include "computational_geometry.H"
+#include "phase_realm.H"
 #include "mfis.H"
-#include "irreg_amr_stencil.H"
-#include "load_balance.H"
-#include "nwoebquadcfinterp.H"
 #include "MFLevelGrid.H"
-#include "ebcoarseaverage.H"
-#include "DomainFluxIFFAB.H"
-#include "DomainFluxIFFABFactory.H"
-#include "EBLevelConcentrationRedist.H"
-#include "particle_container.H"
-#include "EBGhostCloud.H"
-#include "noncons_div.H"
-
-#include <DisjointBoxLayout.H>
-#include <AggEBPWLFillPatch.H>
-#include <ebcoarseaverage.H>
-#include <EBFluxRegister.H>
-#include <EBFluxRegister.H>
-#include <EBLevelRedist.H>
-#include <EBCoarToFineRedist.H>
-#include <EBMGInterp.H>
-#include <EBCoarToCoarRedist.H>
-#include <EBFineToCoarRedist.H>
-#include <EBPWLFineInterp.H>
-#include <ProblemDomain.H>
-
-// These are operator that can be defined.
-static const std::string s_eb_gradient     = "eb_gradient";
-static const std::string s_eb_irreg_interp = "eb_irreg_interp";
-static const std::string s_eb_coar_ave     = "eb_coar_ave";
-static const std::string s_eb_quad_cfi     = "eb_quad_cfi";
-static const std::string s_eb_fill_patch   = "eb_fill_patch";
-static const std::string s_eb_pwl_interp   = "eb_pwl_interp";
-static const std::string s_eb_mg_interp    = "eb_mg_interp";
-static const std::string s_eb_flux_reg     = "eb_flux_reg";
-static const std::string s_eb_redist       = "eb_redist";
-static const std::string s_eb_copier       = "eb_copier";
-static const std::string s_eb_ghostcloud   = "eb_ghostcloud";
-static const std::string s_eb_noncons_div  = "eb_non_cons_div";
 
 /*!
-  @brief Class that holds important things for an AMR realm. I.e. grids, operators, etc. 
+  @brief Class for holding multifluid realms, which are the realms that we actually use. 
 */
 class realm {
 public:
+
+  const static std::string primal;
 
   // ctor, dtor
   realm();
@@ -69,10 +33,14 @@ public:
 	      const int a_ebghost,
 	      const int a_num_ghost,
 	      const int a_redist_rad,
+	      const bool a_ebcf,
 	      const stencil_type::which_type a_centroid_stencil,
 	      const stencil_type::which_type a_eb_stencil,
-	      const bool a_ebcf,
-	      const RefCountedPtr<EBIndexSpace>& a_ebis);
+	      const RefCountedPtr<mfis>& a_mfis);
+
+  // realm copy function
+  template <class T>
+  static void copy(Vector<RefCountedPtr<LevelData<T> > >& a_dst, const Vector<RefCountedPtr<LevelData<T> > >& src);
 
   // Base and operator regrid
   void set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
@@ -80,117 +48,61 @@ public:
   void regrid_operators(const int a_lmin, const int a_lmax, const int a_regsize);
 
   // Register and query operator
-  void register_operator(const std::string a_operator);
-  bool query_operator(const std::string a_operator);
+  void register_operator(const std::string a_operator, const phase::which_phase a_phase);
+  bool query_operator(const std::string a_operator, phase::which_phase a_phase);
 
-  // Get functions
-  const RefCountedPtr<EBIndexSpace>& get_ebis();
+  // Get functions for neutral stuff
   Vector<int>& get_ref_rat();
   Vector<Real>& get_dx();
   Vector<DisjointBoxLayout>& get_grids();
   Vector<ProblemDomain>& get_domains();
-  Vector<EBISLayout>& get_ebisl();
-  Vector<RefCountedPtr<EBLevelGrid> >& get_eblg();
-  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors();
-  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& get_vofit();
-  irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils();
-  irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils();
-  irreg_amr_stencil<noncons_div>& get_noncons_div_stencils();
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten();
+  Vector<RefCountedPtr<MFLevelGrid> >& get_mflg();
+  
+  const RefCountedPtr<EBIndexSpace>& get_ebis(const phase::which_phase a_phase);
+  Vector<EBISLayout>& get_ebisl(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& get_vofit(const phase::which_phase a_phase);
+  irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(const phase::which_phase a_phase);
+  irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(const phase::which_phase a_phase);
+  irreg_amr_stencil<noncons_div>& get_noncons_div_stencils(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten(const phase::which_phase a_phase);
 
-  Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave();
-  Vector<RefCountedPtr<EBGhostCloud> >& get_ghostcloud();
-  Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi();
-  Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi();
-  Vector<RefCountedPtr<AggEBPWLFillPatch> >& get_fillpatch();
-  Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp();
-  Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp();
-  Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg();
-  Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist();
-  Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist();
-  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist();
-  Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist();
-  Vector<RefCountedPtr<Copier> >& get_copier();
-  Vector<RefCountedPtr<Copier> >& get_reverse_copier();
+  // Get functions for stuff that are specific to phase, but is not necessarily const
+  Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBGhostCloud> >& get_ghostcloud(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<AggEBPWLFillPatch> >& get_fillpatch(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<Copier> >& get_copier(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<Copier> >& get_reverse_copier(const phase::which_phase a_phase);
   
 protected:
 
-  bool m_empty;
   bool m_defined;
-  bool m_ebcf;
-  int m_finest_level;
-  int m_mg_coarsen;
   int m_verbosity;
-  int m_ebghost;
-  int m_num_ghost;
-  int m_redist_rad;
-  stencil_type::which_type m_centroid_stencil;
-  stencil_type::which_type m_eb_stencil;
+  int m_finest_level;
+
   Vector<Real> m_dx;
   Vector<int> m_ref_ratios;
-
-  RefCountedPtr<EBIndexSpace> m_ebis;
-
-  std::map<std::string, bool> m_operator_map; // Map that holds operators
-
-  // AMR grids
   Vector<DisjointBoxLayout> m_grids;
-
-  // Domains
   Vector<ProblemDomain> m_domains;
-
-  // EB stuff
-  Vector<EBISLayout> m_ebisl;
-  Vector<RefCountedPtr<EBLevelGrid> > m_eblg;
-
-  // Neighbors
-  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > > m_neighbors;
-
-  // Iterator for vofs
-  Vector<RefCountedPtr<LayoutData<VoFIterator> > > m_vofiter;
-
-  // Copiers
-  Vector<RefCountedPtr<Copier> > m_copier;
-  Vector<RefCountedPtr<Copier> > m_reverse_copier;
-
-  // Various operators
-  Vector<RefCountedPtr<ebcoarseaverage> > m_coarave;
-  Vector<RefCountedPtr<nwoebquadcfinterp> > m_quadcfi;
-  Vector<RefCountedPtr<EBGhostCloud> > m_ghostclouds;
-  Vector<RefCountedPtr<EBQuadCFInterp> > m_old_quadcfi;
-  Vector<RefCountedPtr<AggEBPWLFillPatch> > m_pwl_fillpatch;
-  Vector<RefCountedPtr<EBPWLFineInterp> > m_pwl_interp;
-  Vector<RefCountedPtr<EBMGInterp> > m_ebmg_interp;
-  Vector<RefCountedPtr<EBFluxRegister> > m_flux_reg;
-  Vector<RefCountedPtr<EBLevelRedist> > m_level_redist;
-  Vector<RefCountedPtr<EBCoarToFineRedist> > m_coar_to_fine_redist;
-  Vector<RefCountedPtr<EBCoarToCoarRedist> > m_coar_to_coar_redist;
-  Vector<RefCountedPtr<EBFineToCoarRedist> > m_fine_to_coar_redist;
-
-  // Various stencils for irregular cells
-  RefCountedPtr<irreg_amr_stencil<centroid_interp> > m_centroid_interp;
-  RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> > m_eb_centroid_interp;
-  RefCountedPtr<irreg_amr_stencil<noncons_div> > m_noncons_div;
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradsten;
-
-  // Base defines
-  void define_eblevelgrid(const int a_lmin);
-  void define_vofiter(const int a_lmin);
-  void define_neighbors(const int a_lmin);
+  Vector<RefCountedPtr<MFLevelGrid> > m_mflg;
+  RefCountedPtr<mfis> m_mfis;
   
-  // Operator defines
-  void define_eb_coar_ave(const int a_lmin);                       // Conservative coarsening
-  void define_eb_quad_cfi(const int a_lmin);                       // Quadratic ghost cell interpolation
-  void define_fillpatch(const int a_lmin);                         // Define operator for ghost cell interpolation
-  void define_ebpwl_interp(const int a_lmin);                      // Define interpolator for piecewise interpolation
-  void define_ebmg_interp(const int a_lmin);                       // Define interpolator used for e.g. multigrid
-  void define_flux_reg(const int a_lmin, const int a_regsize);     // Define flux register
-  void define_redist_oper(const int a_lmin, const int a_regsize);  // Define redistribution (phase::gas only)
-  void define_gradsten(const int a_lmin);                          // Make stencils for computing gradients
-  void define_copier(const int a_lmin);                            // Make stencils for copier
-  void define_ghostcloud(const int a_lmin);                        // Make stencils for ghost clouds with particle depositions
-  void define_irreg_sten();                                        // Make stencils for doing interpolation to centroids
-  void define_noncons_sten();                                      // Make stencils for nonconservative averaging
-};
+  std::map<phase::which_phase, RefCountedPtr<phase_realm> > m_realms;
 
+  void define_mflevelgrid(const int a_lmin);
+
+  // Get realm
+  phase_realm& get_realm(const phase::which_phase a_phase);
+  
+};
 #endif

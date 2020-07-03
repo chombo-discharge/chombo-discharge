@@ -30,7 +30,7 @@ public:
   virtual int get_redistribution_regsize() const;
 
   // Registration routines
-  virtual void register_realms() {m_amr->register_realm("fluid"); }
+  virtual void register_realms() {}
   virtual void register_operators() = 0; 
 
 

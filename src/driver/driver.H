@@ -185,6 +185,11 @@ protected:
   memory_report_mode::which_mode m_memory_mode;
 
   /*!
+    @brief
+  */
+  std::string m_realm;
+
+  /*!
     @brief Geometry generation method
   */
   std::string m_geometry_generation;

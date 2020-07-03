@@ -1915,7 +1915,7 @@ void amr_mesh::register_realm(const std::string a_realm){
   }
 
   if(!this->query_realm(a_realm)){
-    m_realms.emplace(a_realm, RefCountedPtr<mf_realm> (new mf_realm()));
+    m_realms.emplace(a_realm, RefCountedPtr<realm> (new realm()));
 
 #if 1 // Code that makes shit run...
     m_realm = m_realms[a_realm];

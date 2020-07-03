@@ -84,6 +84,8 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   m_step          = 0;
   m_time          = 0.0;
   m_dt            = 0.0;
+
+  m_amr->register_realm(realm::primal);
 }
 
 driver::~driver(){
@@ -1525,6 +1527,9 @@ void driver::setup_fresh(const int a_init_regrids){
   // Register realms
   m_timestepper->set_amr(m_amr);
   m_timestepper->register_realms();
+
+  m_realm = m_amr->get_realms()[0];
+
 
   // Get geometry tags
   this->get_geom_tags();

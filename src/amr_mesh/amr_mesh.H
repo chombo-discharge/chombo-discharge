@@ -22,7 +22,7 @@
 #include "particle_container.H"
 #include "EBGhostCloud.H"
 #include "noncons_div.H"
-#include "mf_realm.H"
+#include "realm.H"
 
 #include <DisjointBoxLayout.H>
 #include <ebcoarseaverage.H>
@@ -757,12 +757,12 @@ protected:
     tiled             = 1,
   };
 
-  RefCountedPtr<mf_realm> m_realm;
+  RefCountedPtr<realm> m_realm;
 
   /*!
     @brief These are all the realms
   */
-  std::map<std::string, RefCountedPtr<mf_realm> > m_realms;
+  std::map<std::string, RefCountedPtr<realm> > m_realms;
 
   /*!
     @brief Grid generation method
