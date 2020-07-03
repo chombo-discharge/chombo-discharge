@@ -134,6 +134,7 @@ eddington_sp1.use_tga             = false     # Use TGA for integration
 eddington_sp1.plt_vars            = phi src   # Plot variables. Available are 'phi' and 'src'
 eddington_sp1.gmg_verbosity       = -1        # GMG verbosity
 eddington_sp1.gmg_pre_smooth      = 8         # Number of relaxations in downsweep
+eddington_sp1.gmg_coarsen         = 4         # Precoarsening of multigrid levels
 eddington_sp1.gmg_post_smooth     = 8         # Number of relaxations in upsweep
 eddington_sp1.gmg_bott_smooth     = 8         # NUmber of relaxations before dropping to bottom solver
 eddington_sp1.gmg_min_iter        = 5         # Minimum number of iterations

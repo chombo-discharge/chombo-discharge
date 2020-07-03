@@ -13,6 +13,7 @@
 
 #include <ParmParse.H>
 #include <EBAMRIO.H>
+#include <BRMeshRefine.H>
 
 #include <chrono>
 #include <time.h>
@@ -25,6 +26,7 @@ eddington_sp1::eddington_sp1() : rte_solver() {
 
   m_verbosity  = -1;
   m_needs_setup = true;
+  m_has_mg_stuff = false;
 }
 
 eddington_sp1::~eddington_sp1(){
@@ -431,6 +433,11 @@ void eddington_sp1::setup_gmg(){
   if(m_verbosity > 5){
     pout() << m_name + "::setup_gmg" << endl;
   }
+
+  if(!m_has_mg_stuff){
+    this->define_mg_levels();
+    m_has_mg_stuff = true;
+  }
   
   this->set_coefficients();       // Set coefficients, kappa, aco, bco
   this->setup_operator_factory(); // Set the operator factory
@@ -549,6 +556,72 @@ void eddington_sp1::set_aco_and_bco_box(EBCellFAB&       a_aco,
   }
 }
 
+void eddington_sp1::define_mg_levels(){
+  CH_TIME("eddington_sp1::define_mg_levels");
+  if(m_verbosity > 5){
+    pout() << m_name + "::define_mg_levels" << endl;
+  }
+
+  const int coar_ref = 2;
+
+  Vector<ProblemDomain> m_mg_domains(0);
+  Vector<DisjointBoxLayout> m_mg_grids(0);
+  
+  m_mg_domains.resize(0);
+  m_mg_grids.resize(0);
+  m_mg_levelgrids.resize(0);
+
+  // Get some stuff from amr_mesh on how to decompose the levels
+  const Vector<ProblemDomain>& domains = m_amr->get_domains();
+  const int max_box_size               = m_amr->get_max_box_size();
+  const int blocking_factor            = m_amr->get_blocking_factor();
+  const int num_ebghost                = m_amr->get_eb_ghost();
+
+  int num_coar       = 0;
+  bool has_coar      = true;
+  ProblemDomain fine = domains[0];
+
+  // Coarsen problem domains and create grids
+  while(num_coar < m_gmg_coarsen || !has_coar){
+
+    // Check if we can coarsen
+    const ProblemDomain coar = fine.coarsen(coar_ref);
+    const Box coar_box       = coar.domainBox();
+    for (int dir = 0; dir < SpaceDim; dir++){
+      if(coar_box.size()[dir] < max_box_size || coar_box.size()[dir]%max_box_size != 0){
+	has_coar = false;
+      }
+    }
+
+    if(has_coar){
+      // Split the domain into pieces, then order and load balance them
+      Vector<Box> boxes;
+      Vector<int> proc_assign;
+      domainSplit(coar, boxes, max_box_size, blocking_factor);
+      mortonOrdering(boxes);
+      load_balance::balance_volume(proc_assign, boxes);
+
+      // Add problem domain and grid
+      m_mg_domains.push_back(coar);
+      m_mg_grids.push_back(DisjointBoxLayout(boxes, proc_assign, coar));
+
+      // Define the EBLevelGrids
+      const int idx = m_mg_grids.size() - 1; // Last element added
+      m_mg_levelgrids.push_back(EBLevelGrid(m_mg_grids[idx],
+					    m_mg_domains[idx],
+					    num_ebghost,
+					    m_ebis));
+
+      // Next iterate
+      fine = coar;
+      num_coar++;
+    }
+    else{
+      break;
+    }
+  }
+}
+
 void eddington_sp1::setup_operator_factory(){
   CH_TIME("eddington_sp1::setup_operator_factory");
   if(m_verbosity > 5){
@@ -571,11 +644,13 @@ void eddington_sp1::setup_operator_factory(){
     levelgrids.push_back(*(m_amr->get_eblg(m_phase)[lvl])); // amr_mesh uses RefCounted levelgrids. EBConductivityOp does not. 
   }
 
+#if 0
   Vector<EBLevelGrid> mg_levelgrids;
   Vector<RefCountedPtr<EBLevelGrid> >& mg_eblg = m_amr->get_mg_eblg(m_phase);
   for (int lvl = 0; lvl < mg_eblg.size(); lvl++){
     mg_levelgrids.push_back(*mg_eblg[lvl]);
   }
+#endif
 
   // Appropriate coefficients. 
   const Real alpha =  1.0;
@@ -619,7 +694,7 @@ void eddington_sp1::setup_operator_factory(){
 										 m_gmg_relax_type,
 										 m_bottom_drop,
 										 -1,
-										 mg_levelgrids));
+										 m_mg_levelgrids));
 }
 
 void eddington_sp1::setup_multigrid(){

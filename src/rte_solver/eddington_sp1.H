@@ -146,6 +146,11 @@ protected:
   bool m_needs_setup;
 
   /*!
+    @brief Has deeper MG levels or not
+  */
+  bool m_has_mg_stuff;
+
+  /*!
     @brief Use tga for transient solevs
   */
   bool m_use_tga;
@@ -159,6 +164,11 @@ protected:
     @brief Verbosity for geometric multigrid
   */
   int m_gmg_verbosity;
+
+  /*!
+    @brief Precoarsening for multigrid
+  */
+  int m_gmg_coarsen;
 
   /*!
     @brief Number of smoothings before averaging
@@ -276,6 +286,11 @@ protected:
   Vector<RefCountedPtr<wall_bc> > m_wallbc;
 
   /*!
+    @brief MG levelsgrids
+  */
+  Vector<EBLevelGrid> m_mg_levelgrids;
+
+  /*!
     @brief multi-fluid simple solver
   */
   EBSimpleSolver m_simple_solver;
@@ -326,6 +341,11 @@ protected:
 				   const int        a_lvl,
 				   const DataIndex& a_dit);
 
+  /*!
+    @brief Define the GMG levels
+  */
+  virtual void define_mg_levels();
+  
   /*!
     @brief Set the operator factory
   */
