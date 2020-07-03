@@ -734,6 +734,18 @@ public:
   */
   virtual Vector<Box> make_tiles(const Box a_box, const IntVect a_tilesize);
 
+  /*!
+    @brief Define a realm
+  */
+  virtual void regrid_realm(const std::string a_realm,
+			    const Vector<Vector<int> >& a_procs,
+			    const Vector<Vector<Box> >& a_boxes,
+			    const int a_lmin);
+
+  /*!
+    @brief Get the name of all realms
+  */
+  virtual std::vector<std::string> get_realms() const;
   
 protected:
 

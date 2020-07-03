@@ -650,12 +650,15 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   m_amr->regrid_amr(tags, a_lmin, a_lmax);
   const int new_finest_level = m_amr->get_finest_level();
 
-  // Load balance the AMR levels
-  Vector<Vector<int> > procs;
-  Vector<Vector<Box> > boxes;
-  const bool got_new_grids = m_timestepper->load_balance(procs, boxes, m_amr->get_grids("fluid"), a_lmin, new_finest_level);
-  if(got_new_grids){
-    m_amr->regrid_amr(procs, boxes, a_lmin);
+  // Load balance and regrid the various realms
+  const std::vector<std::string> realms = m_amr->get_realms();
+  for (auto str : realms){
+    Vector<Vector<int> > procs;
+    Vector<Vector<Box> > boxes;
+    const bool got_new_grids = m_timestepper->load_balance(procs, boxes, str, m_amr->get_grids(), a_lmin, new_finest_level);
+    if(got_new_grids){
+      m_amr->regrid_realm(str, procs, boxes, a_lmin);
+    }
   }
 
 

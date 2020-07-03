@@ -46,6 +46,7 @@ int time_stepper::get_redistribution_regsize() const {
 
 bool time_stepper::load_balance(Vector<Vector<int> >&             a_procs,
 				Vector<Vector<Box> >&             a_boxes,
+				const std::string                 a_realm,              
 				const Vector<DisjointBoxLayout>&  a_grids,
 				const int                         a_lmin,
 				const int                         a_finest_level){

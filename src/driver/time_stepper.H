@@ -32,11 +32,7 @@ public:
   // Registration routines
   virtual void register_realms() {m_amr->register_realm("fluid"); }
   virtual void register_operators() = 0; 
-  virtual bool load_balance(Vector<Vector<int> >&            a_procs,
-			    Vector<Vector<Box> >&            a_boxes,
-			    const Vector<DisjointBoxLayout>& a_grids,
-			    const int                        a_lmin,
-			    const int                        a_finest_level);
+
 
   // IO routines
   virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const = 0;
@@ -51,10 +47,16 @@ public:
   virtual void print_step_report() = 0;
 
   // Regrid routines
-  virtual bool need_to_regrid();
   virtual void deallocate() = 0;
   virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) = 0;
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
+  virtual bool need_to_regrid();
+  virtual bool load_balance(Vector<Vector<int> >&            a_procs,
+			    Vector<Vector<Box> >&            a_boxes,
+			    const std::string                a_realm,
+			    const Vector<DisjointBoxLayout>& a_grids,
+			    const int                        a_lmin,
+			    const int                        a_finest_level);
 
   // Set routines
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);

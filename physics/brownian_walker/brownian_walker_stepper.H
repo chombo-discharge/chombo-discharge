@@ -31,9 +31,10 @@ namespace physics {
       // Load balancing
       bool load_balance(Vector<Vector<int> >&            a_procs,
 			Vector<Vector<Box> >&            a_boxes,
+			const std::string                a_realm,
 			const Vector<DisjointBoxLayout>& a_grids,
 			const int                        a_lmin,
-			const int                        a_finest_level);
+			const int                        a_finest_level) override;
 
       // IO routines
       void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;

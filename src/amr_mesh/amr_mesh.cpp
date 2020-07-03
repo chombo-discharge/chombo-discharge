@@ -1961,11 +1961,59 @@ bool amr_mesh::query_operator(const std::string a_operator, const phase::which_p
 }
 
 void amr_mesh::define_realms(){
-  CH_TIME("amr_mesh::define_realms");
+  CH_TIME("amr_mesh::define_realms()");
   if(m_verbosity > 5){
-    pout() << "amr_mesh::define_realms" << endl;
+    pout() << "amr_mesh::define_realms()" << endl;
   }
 
-  m_realm->define(m_grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
-		  m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
+  for (auto& r : m_realms){
+    r.second->define(m_grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
+			    m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
+  }
+}
+
+void amr_mesh::regrid_realm(const std::string           a_realm,
+			    const Vector<Vector<int> >& a_procs,
+			    const Vector<Vector<Box> >& a_boxes,
+			    const int                   a_lmin){
+  CH_TIME("amr_mesh::regrid_realm(procs, boxes, level)");
+  if(m_verbosity > 1){
+    pout() << "amr_mesh::regrid_realm(procs, boxes, level)" << endl;
+  }
+
+  if(!this->query_realm(a_realm)) {
+    std::string str = "amr_mesh::define_realm - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  // Make the dbl
+  Vector<DisjointBoxLayout> grids(1 + m_finest_level);
+  for (int lvl = 0; lvl < a_lmin; lvl++){
+    grids[lvl] = m_grids[lvl];
+  }
+  
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
+    grids[lvl] = DisjointBoxLayout();
+    grids[lvl].define(a_boxes[lvl], a_procs[lvl], m_domains[lvl]);
+    grids[lvl].close(); 
+  }
+
+  m_realms[a_realm]->define(grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
+			    m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
+
+  m_realms[a_realm]->regrid_base(a_lmin);
+
+#if 1 // This is a hack which we should get rid of when all allocators and operator fetching is complete. 
+  m_grids = m_realms[a_realm]->get_grids();
+#endif
+}
+
+std::vector<std::string> amr_mesh::get_realms() const {
+  std::vector<std::string> realms;
+
+  for (const auto& r : m_realms){
+    realms.push_back(r.first);
+  }
+
+  return realms;
 }
