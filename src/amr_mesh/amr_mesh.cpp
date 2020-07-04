@@ -1057,10 +1057,80 @@ void amr_mesh::compute_gradient(LevelData<EBCellFAB>& a_gradient,
   }
 }
 
-void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& a_phi, const phase::which_phase a_phase){
-  CH_TIME("amr_mesh::compute_gradient(ebamrcell)");
+void amr_mesh::compute_gradient(LevelData<EBCellFAB>&       a_gradient,
+				const LevelData<EBCellFAB>& a_phi,
+				const std::string           a_realm,
+				const phase::which_phase    a_phase,
+				const int                   a_lvl){
+  CH_TIME("amr_mesh::compute_gradient(grad, phi, realm, phase, lvl)");
   if(m_verbosity > 5){
-    pout() << "amr_mesh::compute_gradient(ebamrcell)" << endl;
+    pout() << "amr_mesh::compute_gradient(grad, phi, realm, phase,lvl)" << endl;
+  }
+
+  CH_assert(a_phi.nComp()      == 1);
+  CH_assert(a_gradient.nComp() == SpaceDim);
+
+  if(!this->query_realm(a_realm)) {
+    std::string str = "amr_mesh::compute_gradient(grad, phi, realm, phase, lvl) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+    
+  const int comp  = 0;
+  const int ncomp = 1;
+    
+  const Real& dx = m_realm->get_dx()[a_lvl];
+  const DisjointBoxLayout& dbl = m_realms[a_realm]->get_grids()[a_lvl];
+  const ProblemDomain& domain  = m_realms[a_realm]->get_domains()[a_lvl];
+
+  LayoutData<IntVectSet> cfivs;
+  EBArith::defineCFIVS(cfivs, dbl, domain);
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& grad        = a_gradient[dit()];
+    const EBCellFAB& phi   = a_phi[dit()];
+    const EBISBox& ebisbox = phi.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const Box& region      = dbl.get(dit());
+
+    // For interior cells we do our old friend centered differences. God I hate Chombo Fortran.
+    const BaseFab<Real>& phi_fab = phi.getSingleValuedFAB();
+    BaseFab<Real>& grad_fab  = grad.getSingleValuedFAB();
+    FORT_GRADIENT(CHF_FRA(grad_fab),
+		  CHF_CONST_FRA1(phi_fab, comp),
+		  CHF_CONST_REAL(dx),
+		  CHF_BOX(region));
+
+    BaseIVFAB<VoFStencil>& grad_stencils = (*m_realms[a_realm]->get_gradsten(a_phase)[a_lvl])[dit()];
+
+    for (VoFIterator vofit(grad_stencils.getIVS(), ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof    = vofit();
+      const VoFStencil& sten = grad_stencils(vof, 0);
+
+
+      for (int dir = 0; dir < SpaceDim; dir++){
+    	grad(vof, dir) = 0.0;
+      }
+
+      for (int i = 0; i < sten.size(); i++){
+    	const VolIndex& ivof = sten.vof(i);
+    	const Real& iweight  = sten.weight(i);
+    	const int ivar       = sten.variable(i);
+
+    	grad(vof, ivar) += phi(ivof, comp)*iweight;
+      }
+    }
+
+    // Set covered to zero
+    for (int dir= 0; dir < SpaceDim; dir++){
+      grad.setCoveredCellVal(0.0, dir);
+    }
+  }
+}
+
+void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& a_phi, const phase::which_phase a_phase){
+  CH_TIME("amr_mesh::compute_gradient(grad, phi, phase)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::compute_gradient(grad, phi, phase)" << endl;
   }
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -1068,10 +1138,24 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
   }
 }
 
-void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi){
-  CH_TIME("amr_mesh::compute_gradient(mfamrcell)");
+void amr_mesh::compute_gradient(EBAMRCellData&           a_gradient,
+				const EBAMRCellData&     a_phi,
+				const std::string        a_realm,  
+				const phase::which_phase a_phase){
+  CH_TIME("amr_mesh::compute_gradient(grad, phi, realm, phase)");
   if(m_verbosity > 5){
-    pout() << "amr_mesh::compute_gradient(mfamrcell)" << endl;
+    pout() << "amr_mesh::compute_gradient(grad, phi, realm, phase)" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    this->compute_gradient(*a_gradient[lvl], *a_phi[lvl], a_realm, a_phase, lvl);
+  }
+}
+
+void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi){
+  CH_TIME("amr_mesh::compute_gradient(mf grad, mf phi)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::compute_gradient(mf grad, mf phi)" << endl;
   }
 
   for (int iphase = 0; iphase < m_mfis->num_phases(); iphase++){
@@ -1091,6 +1175,33 @@ void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& 
     }
     else if(iphase == 1){
       this->compute_gradient(alias_grad, alias_phi, phase::solid);
+    }
+  }
+}
+
+void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm){
+  CH_TIME("amr_mesh::compute_gradient(mf grad, mf phi, realm)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::compute_gradient(mf grad, mf phi, realm)" << endl;
+  }
+
+  for (int iphase = 0; iphase < m_mfis->num_phases(); iphase++){
+    EBAMRCellData alias_grad(1 + m_finest_level);
+    EBAMRCellData alias_phi(1 + m_finest_level);
+
+    for (int lvl = 0; lvl <= m_finest_level; lvl++){
+      alias_grad[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+      alias_phi[lvl]  = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+      
+      mfalias::aliasMF(*alias_grad[lvl], iphase, *a_gradient[lvl]);
+      mfalias::aliasMF(*alias_phi[lvl],  iphase, *a_phi[lvl]);
+    }
+
+    if(iphase == 0){
+      this->compute_gradient(alias_grad, alias_phi, a_realm, phase::gas);
+    }
+    else if(iphase == 1){
+      this->compute_gradient(alias_grad, alias_phi, a_realm, phase::solid);
     }
   }
 }

@@ -70,13 +70,25 @@ public:
 
   /*!
     @brief Template class for generic allocation of particles
+    @todo Remove
   */
-  template <typename T > void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles);
+  template <typename T> void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles);
+
+    /*!
+    @brief Template class for generic allocation of particles
+  */
+  template <typename T > void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_realm);
+
+  /*!
+    @brief Allocate a particle container
+    @todo Remove
+  */
+  template <typename T> void allocate(particle_container<T>& a_container, const int a_buffer);
 
   /*!
     @brief Allocate a particle container
   */
-  template <typename T> void allocate(particle_container<T>& a_container, const int a_buffer);
+  template <typename T> void allocate(particle_container<T>& a_container, const int a_buffer, const std::string a_realm);
 
   /*!
     @brief Allocate pointer but not memory
@@ -128,6 +140,7 @@ public:
 
   /*!
     @brief Compute gradient on level
+    @todo Remove
   */
   virtual void compute_gradient(LevelData<EBCellFAB>& a_gradient,
 				const LevelData<EBCellFAB>& a_phi,
@@ -135,9 +148,19 @@ public:
 				const int a_lvl);
 
   /*!
+    @brief Compute gradient on level
+  */
+  virtual void compute_gradient(LevelData<EBCellFAB>&       a_gradient,
+				const LevelData<EBCellFAB>& a_phi,
+				const std::string           a_realm,
+				const phase::which_phase    a_phase,
+				const int                   a_lvl);
+
+  /*!
     @brief Compute cell-centered gradient. 
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
+    @todo Remove
   */
   virtual void compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& a_phi, const phase::which_phase a_phase);
 
@@ -146,7 +169,25 @@ public:
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
   */
+  virtual void compute_gradient(EBAMRCellData&           a_gradient,
+				const EBAMRCellData&     a_phi,
+				const std::string        a_realm,  
+				const phase::which_phase a_phase);
+
+  /*!
+    @brief Compute cell-centered gradient. 
+    @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
+    nor are ghost cells updated. 
+    @todo Remove
+  */
   virtual void compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi);
+
+  /*!
+    @brief Compute cell-centered gradient. 
+    @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
+    nor are ghost cells updated. 
+  */
+  virtual void compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm);
 
   /*!
     @brief Allocate particle valid regions
