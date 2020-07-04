@@ -191,11 +191,18 @@ public:
 
   /*!
     @brief Allocate particle valid regions
+    @todo Remove
   */
   virtual void allocate(AMRPVR& a_pvr, const int a_buffer);
 
+    /*!
+    @brief Allocate particle valid regions
+  */
+  virtual void allocate(AMRPVR& a_pvr, const std::string a_realm, const int a_buffer);
+
   /*!
     @brief Allocate a data holder. 
+    @todo Remove
   */
   virtual void allocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
