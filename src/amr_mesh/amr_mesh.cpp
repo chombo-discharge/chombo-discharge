@@ -171,6 +171,38 @@ void amr_mesh::allocate(EBAMRCellData& a_data, const phase::which_phase a_phase,
   }
 }
 
+void amr_mesh::allocate(EBAMRCellData&           a_data,
+			const std::string        a_realm,
+			const phase::which_phase a_phase,
+			const int                a_ncomp,
+			const int                a_ghost){
+  CH_TIME("amr_mesh::allocate(ebamrcell, realm, phase, comp, ghost)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate(ebamrcell, realm, phase, comp, ghost)" << endl;
+  }
+
+  if(!this->query_realm(a_realm)) {
+    std::string str = "amr_mesh::allocate(ebamcell, realm, phase, comp, ghost) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  const int ghost = (a_ghost == -1) ? m_num_ghost : a_ghost;
+
+  a_data.resize(1 + m_finest_level);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_realms[a_realm]->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_realms[a_realm]->get_ebisl(a_phase)[lvl];
+    
+    EBCellFactory fact(ebisl);
+
+    a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> >
+      (new LevelData<EBCellFAB>(dbl, a_ncomp, ghost*IntVect::Unit, fact));
+
+    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
+  }
+}
+
 
 
 void amr_mesh::allocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
@@ -1764,93 +1796,186 @@ Vector<DisjointBoxLayout>& amr_mesh::get_grids(const std::string a_realm){
   return m_realm->get_grids();
 }
 
-Vector<EBISLayout>& amr_mesh::get_ebisl(phase::which_phase a_phase){
+Vector<EBISLayout>& amr_mesh::get_ebisl(const phase::which_phase a_phase){ // Remove
   return m_realm->get_ebisl(a_phase);
 }
 
-Vector<RefCountedPtr<LayoutData<VoFIterator> > > amr_mesh::get_vofit(phase::which_phase a_phase){
+Vector<EBISLayout>& amr_mesh::get_ebisl(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_ebisl(a_phase);
+}
+
+Vector<RefCountedPtr<LayoutData<VoFIterator> > > amr_mesh::get_vofit(const phase::which_phase a_phase){ 
   return m_realm->get_vofit(a_phase);
 }
 
-Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& amr_mesh::get_neighbors(phase::which_phase a_phase){
+Vector<RefCountedPtr<LayoutData<VoFIterator> > > amr_mesh::get_vofit(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_vofit(a_phase);
+}
+
+Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& amr_mesh::get_neighbors(const phase::which_phase a_phase){
   return m_realm->get_neighbors(a_phase);
 }
 
-Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(phase::which_phase a_phase){
+Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& amr_mesh::get_neighbors(const std::string a_realm,
+										   const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_neighbors(a_phase);
+}
+
+Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(const phase::which_phase a_phase){ // To be removed
   return m_realm->get_eblg(a_phase);
+}
+
+Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_eblg(a_phase);
 }
 
 Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mflg(){
   return m_realm->get_mflg();
 }
 
+Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mflg(const std::string a_realm){
+  return m_realms[a_realm]->get_mflg();
+}
+
 Vector<RefCountedPtr<ebcoarseaverage> >& amr_mesh::get_coarave(phase::which_phase a_phase){
   return m_realm->get_coarave(a_phase);
 }
 
-Vector<RefCountedPtr<EBGhostCloud> >& amr_mesh::get_ghostcloud(phase::which_phase a_phase){
+Vector<RefCountedPtr<ebcoarseaverage> >& amr_mesh::get_coarave(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_coarave(a_phase);
+}
+
+Vector<RefCountedPtr<EBGhostCloud> >& amr_mesh::get_ghostcloud(const phase::which_phase a_phase){
   return m_realm->get_ghostcloud(a_phase);
 }
 
-Vector<RefCountedPtr<nwoebquadcfinterp> >& amr_mesh::get_quadcfi(phase::which_phase a_phase){
+Vector<RefCountedPtr<EBGhostCloud> >& amr_mesh::get_ghostcloud(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_ghostcloud(a_phase);
+}
+
+Vector<RefCountedPtr<nwoebquadcfinterp> >& amr_mesh::get_quadcfi(const phase::which_phase a_phase){
   return m_realm->get_quadcfi(a_phase);
 }
 
-Vector<RefCountedPtr<EBQuadCFInterp> >& amr_mesh::get_old_quadcfi(phase::which_phase a_phase){
+Vector<RefCountedPtr<nwoebquadcfinterp> >& amr_mesh::get_quadcfi(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_quadcfi(a_phase);
+}
+
+Vector<RefCountedPtr<EBQuadCFInterp> >& amr_mesh::get_old_quadcfi(const phase::which_phase a_phase){
   return m_realm->get_old_quadcfi(a_phase);
 }
 
-Vector<RefCountedPtr<AggEBPWLFillPatch> >& amr_mesh::get_fillpatch(phase::which_phase a_phase){
+Vector<RefCountedPtr<EBQuadCFInterp> >& amr_mesh::get_old_quadcfi(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_old_quadcfi(a_phase);
+}
+
+Vector<RefCountedPtr<AggEBPWLFillPatch> >& amr_mesh::get_fillpatch(const phase::which_phase a_phase){
   return m_realm->get_fillpatch(a_phase);
 }
 
-Vector<RefCountedPtr<EBPWLFineInterp> >& amr_mesh::get_eb_pwl_interp(phase::which_phase a_phase){
+Vector<RefCountedPtr<AggEBPWLFillPatch> >& amr_mesh::get_fillpatch(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_fillpatch(a_phase);
+}
+
+Vector<RefCountedPtr<EBPWLFineInterp> >& amr_mesh::get_eb_pwl_interp(const phase::which_phase a_phase){
   return m_realm->get_eb_pwl_interp(a_phase);
 }
 
-Vector<RefCountedPtr<EBMGInterp> >& amr_mesh::get_eb_mg_interp(phase::which_phase a_phase){
+Vector<RefCountedPtr<EBPWLFineInterp> >& amr_mesh::get_eb_pwl_interp(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_eb_pwl_interp(a_phase);
+}
+
+Vector<RefCountedPtr<EBMGInterp> >& amr_mesh::get_eb_mg_interp(const phase::which_phase a_phase){
   return m_realm->get_eb_mg_interp(a_phase);
 }
 
-Vector<RefCountedPtr<EBFluxRegister> >&  amr_mesh::get_flux_reg(phase::which_phase a_phase){
+Vector<RefCountedPtr<EBMGInterp> >& amr_mesh::get_eb_mg_interp(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_eb_mg_interp(a_phase);
+}
+
+Vector<RefCountedPtr<EBFluxRegister> >&  amr_mesh::get_flux_reg(const phase::which_phase a_phase){
   return m_realm->get_flux_reg(a_phase);
 }
 
-Vector<RefCountedPtr<EBLevelRedist> >& amr_mesh::get_level_redist(phase::which_phase a_phase){
+Vector<RefCountedPtr<EBFluxRegister> >&  amr_mesh::get_flux_reg(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_flux_reg(a_phase);
+}
+
+Vector<RefCountedPtr<EBLevelRedist> >& amr_mesh::get_level_redist(const phase::which_phase a_phase){
   return m_realm->get_level_redist(a_phase);
 }
 
-Vector<RefCountedPtr<EBCoarToFineRedist> >&  amr_mesh::get_coar_to_fine_redist(phase::which_phase a_phase){
+Vector<RefCountedPtr<EBLevelRedist> >& amr_mesh::get_level_redist(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_level_redist(a_phase);
+}
+
+Vector<RefCountedPtr<EBCoarToFineRedist> >&  amr_mesh::get_coar_to_fine_redist(const phase::which_phase a_phase){
   return m_realm->get_coar_to_fine_redist(a_phase);
 }
 
-Vector<RefCountedPtr<EBCoarToCoarRedist> >&  amr_mesh::get_coar_to_coar_redist(phase::which_phase a_phase){
+Vector<RefCountedPtr<EBCoarToFineRedist> >&  amr_mesh::get_coar_to_fine_redist(const std::string        a_realm,
+									       const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_coar_to_fine_redist(a_phase);
+}
+
+Vector<RefCountedPtr<EBCoarToCoarRedist> >&  amr_mesh::get_coar_to_coar_redist(const phase::which_phase a_phase){
   return m_realm->get_coar_to_coar_redist(a_phase);
 }
 
-Vector<RefCountedPtr<EBFineToCoarRedist> >&  amr_mesh::get_fine_to_coar_redist(phase::which_phase a_phase){
+Vector<RefCountedPtr<EBCoarToCoarRedist> >&  amr_mesh::get_coar_to_coar_redist(const std::string        a_realm,
+									       const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_coar_to_coar_redist(a_phase);
+}
+
+Vector<RefCountedPtr<EBFineToCoarRedist> >&  amr_mesh::get_fine_to_coar_redist(const phase::which_phase a_phase){
   return m_realm->get_fine_to_coar_redist(a_phase);
 }
 
-irreg_amr_stencil<centroid_interp>& amr_mesh::get_centroid_interp_stencils(phase::which_phase a_phase){
+Vector<RefCountedPtr<EBFineToCoarRedist> >&  amr_mesh::get_fine_to_coar_redist(const std::string        a_realm,
+									       const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_fine_to_coar_redist(a_phase);
+}
+
+irreg_amr_stencil<centroid_interp>& amr_mesh::get_centroid_interp_stencils(const phase::which_phase a_phase){
   return m_realm->get_centroid_interp_stencils(a_phase);
 }
 
-irreg_amr_stencil<eb_centroid_interp>& amr_mesh::get_eb_centroid_interp_stencils(phase::which_phase a_phase){
+irreg_amr_stencil<centroid_interp>& amr_mesh::get_centroid_interp_stencils(const std::string        a_realm,
+									   const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_centroid_interp_stencils(a_phase);
+}
+
+irreg_amr_stencil<eb_centroid_interp>& amr_mesh::get_eb_centroid_interp_stencils(const phase::which_phase a_phase){
   return m_realm->get_eb_centroid_interp_stencils(a_phase);
 }
 
-irreg_amr_stencil<noncons_div>& amr_mesh::get_noncons_div_stencils(phase::which_phase a_phase){
+irreg_amr_stencil<eb_centroid_interp>& amr_mesh::get_eb_centroid_interp_stencils(const std::string        a_realm,
+										 const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_eb_centroid_interp_stencils(a_phase);
+}
+
+irreg_amr_stencil<noncons_div>& amr_mesh::get_noncons_div_stencils(const phase::which_phase a_phase){
   return m_realm->get_noncons_div_stencils(a_phase);
 }
 
-Vector<RefCountedPtr<Copier> >& amr_mesh::get_copier(phase::which_phase a_phase){
+irreg_amr_stencil<noncons_div>& amr_mesh::get_noncons_div_stencils(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_noncons_div_stencils(a_phase);
+}
+
+Vector<RefCountedPtr<Copier> >& amr_mesh::get_copier(const phase::which_phase a_phase){
   return m_realm->get_copier(a_phase);
 }
 
+Vector<RefCountedPtr<Copier> >& amr_mesh::get_copier(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_copier(a_phase);
+}
 
-Vector<RefCountedPtr<Copier> >& amr_mesh::get_reverse_copier(phase::which_phase a_phase){
+Vector<RefCountedPtr<Copier> >& amr_mesh::get_reverse_copier(const phase::which_phase a_phase){
   return m_realm->get_reverse_copier(a_phase);
+}
+
+Vector<RefCountedPtr<Copier> >& amr_mesh::get_reverse_copier(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_reverse_copier(a_phase);
 }
 
 Vector<Box> amr_mesh::make_tiles(const Box a_box, const IntVect a_tilesize){
