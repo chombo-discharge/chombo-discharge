@@ -308,7 +308,17 @@ public:
   /*!
     @brief Reallocate data. 
   */
+  virtual void reallocate(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lmin);
+
+  /*!
+    @brief Reallocate data. 
+  */
   virtual void reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_lmin);
+
+  /*!
+    @brief Reallocate data. 
+  */
+  virtual void reallocate(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
@@ -316,9 +326,19 @@ public:
   virtual void reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
+    @brief Reallocate data.
+  */
+  virtual void reallocate(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lmin);
+
+  /*!
     @brief Reallocate data above a_base
   */
   virtual void reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_lmin);
+
+    /*!
+    @brief Reallocate data above a_base
+  */
+  virtual void reallocate(EBAMRIFData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
@@ -328,12 +348,27 @@ public:
   /*!
     @brief Reallocate data above a_base
   */
+  virtual void reallocate(EBAMRBool& a_data, const std::string a_realm, const int a_ncomp, const int a_lmin);
+
+  /*!
+    @brief Reallocate data above a_base
+  */
   virtual void reallocate(MFAMRCellData& a_data, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
+  virtual void reallocate(MFAMRCellData& a_data, const std::string a_realm, const int a_lmin);
+
+  /*!
+    @brief Reallocate data above a_base
+  */
   virtual void reallocate(MFAMRFluxData& a_data, const int a_lmin);
+
+  /*!
+    @brief Reallocate data above a_base
+  */
+  virtual void reallocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_lmin);
   
   /*!
     @brief Reallocate data above a_base
@@ -341,10 +376,17 @@ public:
   virtual void reallocate(MFAMRIVData& a_data, const int a_lmin);
 
   /*!
-    @brief Allocate a data holder over the intersecting regions of the mfis
-    @note This routines _allocates_, so if a_data is not empty you're leaking memory
+    @brief Reallocate data above a_base
   */
-  virtual void allocate_interface(EBAMRIVData& a_data, phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
+  virtual void reallocate(MFAMRIVData& a_data, const std::string a_realm, const int a_lmin);
+
+  /*!
+    @brief Allocate a data holder over the intersecting regions of the mfis
+  */
+  virtual void allocate_interface(EBAMRIVData&             a_data,
+				  const phase::which_phase a_phase,
+				  const int                a_ncomp,
+				  const int                a_ghost = -1);
 
   /*!
     @brief Average down both phases
