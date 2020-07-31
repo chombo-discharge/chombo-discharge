@@ -221,9 +221,27 @@ public:
   virtual void allocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
+    @brief Allocate a data holder over a specific realm
+  */
+  virtual void allocate(EBAMRFluxData&           a_data,
+			const std::string        a_realm,
+			const phase::which_phase a_phase,
+			const int                a_ncomp,
+			const int                a_ghost = -1);
+
+  /*!
     @brief Allocate a data holder. 
   */
   virtual void allocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
+
+    /*!
+    @brief Allocate a data holder over a specific realm
+  */
+  virtual void allocate(EBAMRIVData&             a_data,
+			const std::string        a_realm,
+			const phase::which_phase a_phase,
+			const int                a_ncomp,
+			const int                a_ghost = -1);
 
   /*!
     @brief Allocate a data holder. 
@@ -231,9 +249,23 @@ public:
   virtual void allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
-    @Allocate Boolean data
+    @brief Allocate a data holder over a specific realm
+  */
+  virtual void allocate(EBAMRIFData&             a_data,
+			const std::string        a_realm,
+			const phase::which_phase a_phase,
+			const int                a_ncomp,
+			const int                a_ghost = -1);
+
+  /*!
+    @brief Allocate Boolean data
   */
   virtual void allocate(EBAMRBool& a_data, const int a_ncomp, const int a_ghost);
+
+  /*!
+    @brief Allocate Boolean data over a specific realm
+  */
+  virtual void allocate(EBAMRBool& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost);
 
   /*!
     @brief Allocate a data holder. 
@@ -241,17 +273,30 @@ public:
   */
   virtual void allocate(MFAMRCellData& a_data, const int a_ncomp, const int a_ghost = -1);
 
+    /*!
+    @brief Allocate a data holder over a specific realm
+  */
+  virtual void allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
+
   /*!
     @brief Allocate a data holder. 
-    @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
   virtual void allocate(MFAMRFluxData& a_data, const int a_ncomp, const int a_ghost = -1);
+
+  /*!
+    @brief Allocate a data holder over a specific realm.
+  */
+  virtual void allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
   
   /*!
     @brief Allocate a data holder. 
-    @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
   virtual void allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghost = -1);
+
+    /*!
+    @brief Allocate a data holder over a specific realm
+  */
+  virtual void allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
   
   /*!
     @brief Reallocate data. 
