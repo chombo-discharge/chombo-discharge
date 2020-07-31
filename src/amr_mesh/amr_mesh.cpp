@@ -126,30 +126,7 @@ void amr_mesh::allocate(AMRPVR& a_pvr, const int a_buffer){
     pout() << "amr_mesh::allocate(AMR PVR)" << endl;
   }
 
-#if 1
   this->allocate(a_pvr, realm::primal, a_buffer);
-#else // Old code
-  if(m_max_box_size != m_blocking_factor){
-    MayDay::Abort("amr_mesh::allocate(particles) - only constant box sizes supported for particle methods");
-  }
-  
-  a_pvr.resize(1 + m_finest_level);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
-    const ProblemDomain& dom     = m_realm->get_domains()[lvl];
-
-    const bool has_coar = lvl > 0;
-
-    if(!has_coar){
-      a_pvr[lvl] = RefCountedPtr<ParticleValidRegion> (new ParticleValidRegion(dbl, NULL, 1, 0));
-    }
-    else{
-      const int ref_ratio = m_ref_ratios[lvl-1];
-      a_pvr[lvl] = RefCountedPtr<ParticleValidRegion> (new ParticleValidRegion(dbl, a_pvr[lvl-1]->mask(), ref_ratio, a_buffer));
-    }
-  }
-#endif
 }
 
 void amr_mesh::allocate(AMRPVR& a_pvr, const std::string a_realm, const int a_buffer){
@@ -191,25 +168,7 @@ void amr_mesh::allocate(EBAMRCellData& a_data, const phase::which_phase a_phase,
     pout() << "amr_mesh::allocate(cell)" << endl;
   }
 
-#if 1 // New code
   this->allocate(a_data, realm::primal, a_phase, a_ncomp, a_ghost);
-#else // Old code
-  const int ghost = (a_ghost == -1) ? m_num_ghost : a_ghost;
-
-  a_data.resize(1 + m_finest_level);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_realm->get_ebisl(a_phase)[lvl];
-    
-    EBCellFactory fact(ebisl);
-
-    a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> >
-      (new LevelData<EBCellFAB>(dbl, a_ncomp, ghost*IntVect::Unit, fact));
-
-    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
-  }
-#endif
 }
 
 void amr_mesh::allocate(EBAMRCellData&           a_data,
@@ -250,21 +209,7 @@ void amr_mesh::allocate(EBAMRFluxData& a_data, const phase::which_phase a_phase,
     pout() << "amr_mesh::allocate(flux)" << endl;
   }
 
-  const int ghost = (a_ghost == -1) ? m_num_ghost : a_ghost;
-
-  a_data.resize(1 + m_finest_level);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_realm->get_ebisl(a_phase)[lvl];
-
-    EBFluxFactory fact(ebisl);
-
-    a_data[lvl] = RefCountedPtr<LevelData<EBFluxFAB> >
-      (new LevelData<EBFluxFAB>(dbl, a_ncomp, ghost*IntVect::Unit, fact));
-
-    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
-  }
+  this->allocate(a_data, realm::primal, a_phase, a_ncomp, a_ghost);
 }
 
 void amr_mesh::allocate(EBAMRFluxData&           a_data,
@@ -305,31 +250,7 @@ void amr_mesh::allocate(EBAMRIVData& a_data, const phase::which_phase a_phase, c
     pout() << "amr_mesh::allocate(baseiv)" << endl;
   }
 
-  const int ghost = (a_ghost == -1) ? m_num_ghost : a_ghost;
-
-  a_data.resize(1 + m_finest_level);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_realm->get_ebisl(a_phase)[lvl];
-    const ProblemDomain& domain  = m_realm->get_domains()[lvl];
-    
-    LayoutData<IntVectSet> irreg_sets(dbl);
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      Box box = dbl.get(dit());
-      box.grow(ghost);
-      box &= domain;
-
-      irreg_sets[dit()] = ebisl[dit()].getIrregIVS(box);
-    }
-
-    BaseIVFactory<Real> fact(ebisl, irreg_sets);
-
-    a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
-      (new LevelData<BaseIVFAB<Real> >(dbl, a_ncomp, ghost*IntVect::Unit, fact));
-
-    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
-  }
+  this->allocate(a_data, realm::primal, a_phase, a_ncomp, a_ghost);
 }
 
 void amr_mesh::allocate(EBAMRIVData&             a_data,
@@ -380,20 +301,7 @@ void amr_mesh::allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, c
     pout() << "amr_mesh::allocate(EBAMRIFData)" << endl;
   }
 
-  const int ghost = (a_ghost == -1) ? m_num_ghost : a_ghost;
-
-  a_data.resize(1 + m_finest_level);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_realm->get_ebisl(a_phase)[lvl];
-    const ProblemDomain& domain  = m_realm->get_domains()[lvl];
-    
-    DomainFluxIFFABFactory fact(ebisl, domain);
-
-    a_data[lvl] = RefCountedPtr<LevelData<DomainFluxIFFAB> >
-      (new LevelData<DomainFluxIFFAB>(dbl, a_ncomp, ghost*IntVect::Unit, fact));
-  }
+  this->allocate(a_data, realm::primal, a_phase, a_ncomp, a_ghost);
 }
 
 void amr_mesh::allocate(EBAMRIFData&             a_data,
@@ -433,14 +341,8 @@ void amr_mesh::allocate(EBAMRBool& a_data, const int a_ncomp, const int a_ghost)
     pout() << "amr_mesh::allocate(EBAMRBool)" << endl;
   }
 
-  a_data.resize(1 + m_finest_level);
+  this->allocate(a_data, realm::primal, a_ncomp, a_ghost);
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
-    
-    a_data[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > >
-      (new LevelData<BaseFab<bool> >(dbl, a_ncomp, a_ghost*IntVect::Unit));
-  }
 }
 
 void amr_mesh::allocate(EBAMRBool& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost){
@@ -470,33 +372,7 @@ void amr_mesh::allocate(MFAMRCellData& a_data, const int a_ncomp, const int a_gh
     pout() << "amr_mesh::allocate(mf cell)" << endl;
   }
 
-  const int ghost   = (a_ghost == -1) ? m_num_ghost : a_ghost;
-  const int ignored = a_ncomp;
-  const int nphases = m_mfis->num_phases();
-
-  a_data.resize(1 + m_finest_level);
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_realm->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_realm->get_ebis(phase::solid);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
-    
-    Vector<EBISLayout> ebisl(nphases);
-    Vector<int>        comps(nphases, a_ncomp);
-
-    ebisl[phase::gas]   = m_realm->get_ebisl(phase::gas)[lvl];
-    if(!ebis_sol.isNull()){ // Single phase
-      ebisl[phase::solid] = m_realm->get_ebisl(phase::solid)[lvl];
-    }
-    
-    MFCellFactory factory(ebisl, comps);
-
-    a_data[lvl] = RefCountedPtr<LevelData<MFCellFAB> >
-      (new LevelData<MFCellFAB>(dbl, ignored, ghost*IntVect::Unit, factory));
-
-    MFLevelDataOps::setVal(*a_data[lvl], 0.0);
-  }
+  this->allocate(a_data, realm::primal, a_ncomp, a_ghost);
   
 }
 
@@ -544,31 +420,7 @@ void amr_mesh::allocate(MFAMRFluxData& a_data, const int a_ncomp, const int a_gh
     pout() << "amr_mesh::allocate(mf flux)" << endl;
   }
 
-  const int ghost   = (a_ghost == -1) ? m_num_ghost : a_ghost;
-  const int ignored = a_ncomp;
-  const int nphases = m_mfis->num_phases();
-
-  a_data.resize(1 + m_finest_level);
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_realm->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_realm->get_ebis(phase::solid);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
-    
-    Vector<EBISLayout> ebisl(nphases);
-    Vector<int>        comps(nphases, a_ncomp);
-
-    ebisl[phase::gas]   = m_realm->get_ebisl(phase::gas)[lvl];
-    if(!ebis_sol.isNull()){
-      ebisl[phase::solid] = m_realm->get_ebisl(phase::solid)[lvl];
-    }
-    
-    MFFluxFactory factory(ebisl, comps);
-
-    a_data[lvl] = RefCountedPtr<LevelData<MFFluxFAB> >
-      (new LevelData<MFFluxFAB>(dbl, ignored, ghost*IntVect::Unit, factory));
-  }
+  this->allocate(a_data, realm::primal, a_ncomp, a_ghost);
 }
 
 void amr_mesh::allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost){
@@ -613,29 +465,7 @@ void amr_mesh::allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghos
     pout() << "amr_mesh::allocate(mf baseivfab)" << endl;
   }
 
-  const int ghost   = (a_ghost == -1) ? m_num_ghost : a_ghost;
-  const int ignored = a_ncomp;
-  const int nphases = m_mfis->num_phases();
-
-  a_data.resize(1 + m_finest_level);
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_realm->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_realm->get_ebis(phase::solid);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
-    
-    Vector<EBISLayout> ebisl(nphases);
-    Vector<int>        comps(nphases, a_ncomp);
-
-    if(!ebis_gas.isNull()) ebisl[phase::gas]   = m_realm->get_ebisl(phase::gas)[lvl];
-    if(!ebis_sol.isNull()) ebisl[phase::solid] = m_realm->get_ebisl(phase::solid)[lvl];
-    
-    MFBaseIVFABFactory factory(ebisl, comps);
-
-    a_data[lvl] = RefCountedPtr<LevelData<MFBaseIVFAB> >
-      (new LevelData<MFBaseIVFAB>(dbl, ignored, ghost*IntVect::Unit, factory));
-  }
+  this->allocate(a_data, realm::primal, a_ncomp, a_ghost);
 }
 
 void amr_mesh::allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost){
