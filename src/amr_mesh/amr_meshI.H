@@ -48,22 +48,7 @@ template<typename T> void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<T
     pout() << "amr_mesh::allocate(AMR ParticleData)" << endl;
   }
 
-  if(m_max_box_size != m_blocking_factor){
-    MayDay::Abort("amr_mesh::allocate(photons) - only constant box sizes supported for particle methods");
-  }
-  
-  a_particles.resize(1 + m_finest_level);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_realm->get_grids()[lvl];
-    const ProblemDomain& domain  = m_realm->get_domains()[lvl];
-    const Real dx = m_realm->get_dx()[lvl];
-    a_particles[lvl] = RefCountedPtr<ParticleData<T> > (new ParticleData<T>(dbl,
-									    domain,
-									    m_blocking_factor,
-									    dx*RealVect::Unit,
-									    m_prob_lo));
-  }
+  this->allocate(a_particles, realm::primal);
 }
 
 template <typename T> void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_realm){
@@ -101,19 +86,8 @@ template <typename T> void amr_mesh::allocate(particle_container<T>& a_container
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(container, buffer)" << endl;
   }
-  
-  if(m_max_box_size != m_blocking_factor){
-    MayDay::Abort("amr_mesh::allocate(particle_container<T>) - only constant box sizes are supported for particle methods");
-  }
-  
-  a_container.define(m_realm->get_grids(),
-		     m_realm->get_domains(),
-		     m_realm->get_dx(),
-		     m_realm->get_ref_rat(),
-		     m_prob_lo,
-		     m_blocking_factor,
-		     m_finest_level,
-		     a_pvr_buffer);
+
+  this->allocate(a_container, a_pvr_buffer, realm::primal);
 }
 
 template <typename T> void amr_mesh::allocate(particle_container<T>& a_container, const int a_buffer, const std::string a_realm){

@@ -104,7 +104,7 @@ public:
   /*!
     @brief Register an operator over a realm
   */
-  virtual void register_operator(const std::string a_realm, const std::string a_operator, const phase::which_phase a_phase);
+  virtual void register_operator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Query if a realm exists
@@ -383,38 +383,80 @@ public:
 
   /*!
     @brief Average down both phases
+    @todo Remove
   */
   virtual void average_down(MFAMRCellData& a_data);
 
   /*!
+    @brief Average down both phases on specific realm
+  */
+  virtual void average_down(MFAMRCellData& a_data, const std::string a_realm);
+
+  /*!
     @brief Average down
+    @todo Remove
   */
   virtual void average_down(EBAMRCellData& a_data, phase::which_phase a_phase);
 
   /*!
+    @brief Average down on specific realm
+  */
+  virtual void average_down(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+
+  /*!
     @brief Average down level
+    @todo Remove
   */
   virtual void average_down(EBAMRCellData& a_data, phase::which_phase a_phase, const int a_lvl);
 
+    /*!
+    @brief Average down level
+  */
+  virtual void average_down(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lvl);
+
   /*!
     @brief Average down both phases
+    @todo Remove
   */
   virtual void average_down(MFAMRFluxData& a_data);
 
   /*!
-    @brief Average down
+    @brief Average down both phases on specific realm
   */
-  virtual void average_down(EBAMRFluxData& a_data, phase::which_phase a_phase);
+  virtual void average_down(MFAMRFluxData& a_data, const std::string a_realm);
 
   /*!
     @brief Average down
+    @todo Remove
+  */
+  virtual void average_down(EBAMRFluxData& a_data, phase::which_phase a_phase);
+
+    /*!
+    @brief Average down on specific realm
+  */
+  virtual void average_down(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+
+  /*!
+    @brief Average down
+    @todo Remove
   */
   virtual void average_down(EBAMRIVData& a_data, phase::which_phase a_phase);
 
   /*!
+    @brief Average down on realm
+  */
+  virtual void average_down(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+
+  /*!
     @brief Average down
+    @todo Remove
   */
   virtual void conservative_average(EBAMRIVData& a_data, phase::which_phase a_phase);
+
+  /*!
+    @brief Average down on realm
+  */
+  virtual void conservative_average(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Build new grids. This also load balances. 
@@ -423,28 +465,58 @@ public:
 
   /*!
     @brief Interpolate ghost vectors
+    @todo Remove
   */
   virtual void interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase);
 
   /*!
+    @brief Interpolate ghost vectors over a realm
+  */
+  virtual void interp_ghost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+
+  /*!
     @brief Interpolate ghost cells
+    @todo Remove
   */
   virtual void interp_ghost(MFAMRCellData& a_data);
 
   /*!
+    @brief Interpolate ghost cells over a realm
+  */
+  virtual void interp_ghost(MFAMRCellData& a_data, const std::string a_realm);
+
+  /*!
     @brief Fill ghost cells using quadratic interpolation
+    @todo Remove
   */
   virtual void interp_ghost_quad(EBAMRCellData& a_data, phase::which_phase a_phase);
 
   /*!
+    @brief Fill ghost cells using quadratic interpolation
+  */
+  virtual void interp_ghost_quad(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+
+  /*!
     @brief Fill ghost cells using piecewise linear interpolation
+    @todo Remove
   */
   virtual void interp_ghost_pwl(EBAMRCellData& a_data, phase::which_phase a_phase);
 
   /*!
+    @brief Fill ghost cells using piecewise linear interpolation. Specific realm. 
+  */
+  virtual void interp_ghost_pwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+
+  /*!
     @brief Interpolate data to centroids
+    @todo Remove
   */
   virtual void interpolate_to_centroids(EBAMRCellData& a_data, phase::which_phase a_phase);
+
+  /*!
+    @brief Interpolate data to centroids on realm
+  */
+  virtual void interpolate_to_centroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
   
   /*!
     @brief Set mfis
@@ -1032,8 +1104,6 @@ protected:
     berger_rigoustous = 0,
     tiled             = 1,
   };
-
-  RefCountedPtr<realm> m_realm;
 
   /*!
     @brief These are all the realms
