@@ -343,12 +343,12 @@ public:
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(EBAMRBool& a_data, const int a_ncomp, const int a_lmin);
+  virtual void reallocate(EBAMRBool& a_data, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(EBAMRBool& a_data, const std::string a_realm, const int a_ncomp, const int a_lmin);
+  virtual void reallocate(EBAMRBool& a_data, const std::string a_realm, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
@@ -379,14 +379,6 @@ public:
     @brief Reallocate data above a_base
   */
   virtual void reallocate(MFAMRIVData& a_data, const std::string a_realm, const int a_lmin);
-
-  /*!
-    @brief Allocate a data holder over the intersecting regions of the mfis
-  */
-  virtual void allocate_interface(EBAMRIVData&             a_data,
-				  const phase::which_phase a_phase,
-				  const int                a_ncomp,
-				  const int                a_ghost = -1);
 
   /*!
     @brief Average down both phases
