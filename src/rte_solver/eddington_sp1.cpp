@@ -154,6 +154,7 @@ void eddington_sp1::parse_gmg_settings(){
   std::string str;
 
   pp.get("gmg_verbosity",   m_gmg_verbosity);
+  pp.get("gmg_coarsen",     m_gmg_coarsen);
   pp.get("gmg_pre_smooth",  m_gmg_pre_smooth);
   pp.get("gmg_post_smooth", m_gmg_post_smooth);
   pp.get("gmg_bott_smooth", m_gmg_bot_smooth);
