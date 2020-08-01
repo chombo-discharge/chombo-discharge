@@ -683,7 +683,7 @@ void eddington_sp1::setup_operator_factory(){
 										 quadcfi,
 										 alpha,
 										 beta,
-										 m_aco,
+										 m_aco.data(),
 										 m_bco,
 										 m_bco_irreg,
 										 dx[0],
@@ -929,7 +929,7 @@ void eddington_sp1::write_plot_file(){
   this->compute_flux(flux, m_state);
 
   // Allocate output storage
-  Vector<RefCountedPtr<LevelData<EBCellFAB> > > output;
+  EBAMRCellData output;
   m_amr->allocate(output, m_phase, ncomps, 1);
 
 

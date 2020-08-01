@@ -29,6 +29,10 @@ template<typename T> void amr_mesh::deallocate(Vector<RefCountedPtr<T> >& a_data
   }
 }
 
+template<typename T> void amr_mesh::deallocate(EBAMRData<T>& a_data){
+  return this->deallocate(a_data.data());
+}
+
 template<typename T> void amr_mesh::alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data){
   CH_TIME("amr_mesh::alias");
   if(m_verbosity > 5){
@@ -40,6 +44,10 @@ template<typename T> void amr_mesh::alias(Vector<T*>& a_alias, const Vector<RefC
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     a_alias[lvl] = &(*a_data[lvl]);
   }
+}
+
+template<typename T, typename S> void amr_mesh::alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data){
+  return this->alias(a_alias, a_data.data());
 }
 
 template<typename T> void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles){
@@ -115,7 +123,7 @@ template <typename T> void amr_mesh::allocate(particle_container<T>& a_container
 		     a_buffer);
 }
 
-template<typename T > void amr_mesh::allocate_ptr(Vector<RefCountedPtr<T> >& a_data){
+template <typename T> void amr_mesh::allocate_ptr(Vector<RefCountedPtr<T> >& a_data){
   CH_TIME("amr_mesh::allocate_ptr");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate_ptr" << endl;
@@ -125,4 +133,8 @@ template<typename T > void amr_mesh::allocate_ptr(Vector<RefCountedPtr<T> >& a_d
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     a_data[lvl] = RefCountedPtr<T> (new T());
   }
+}
+
+template <typename T> void amr_mesh::allocate_ptr(EBAMRData<T>& a_data){
+  return this->allocate_ptr(a_data.data());
 }

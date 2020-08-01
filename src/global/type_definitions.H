@@ -198,12 +198,74 @@ namespace memory_report_mode {
 typedef Vector<RefCountedPtr<LevelData<MFCellFAB> > >        MFAMRCellData;
 typedef Vector<RefCountedPtr<LevelData<MFFluxFAB> > >        MFAMRFluxData;
 typedef Vector<RefCountedPtr<LevelData<MFBaseIVFAB> > >      MFAMRIVData;
-typedef Vector<RefCountedPtr<LevelData<EBCellFAB> > >        EBAMRCellData;
+//typedef Vector<RefCountedPtr<LevelData<EBCellFAB> > >        EBAMRCellData;
 typedef Vector<RefCountedPtr<LevelData<EBFluxFAB> > >        EBAMRFluxData;
 typedef Vector<RefCountedPtr<LevelData<EBFaceFAB> > >        EBAMRFaceData;
 typedef Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > > EBAMRIVData;
 typedef Vector<RefCountedPtr<LevelData<DomainFluxIFFAB > > > EBAMRIFData;
 typedef Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >   EBAMRBool;
 typedef Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > > EBAMRTags;
+
+/*!
+  @brief Default class for holding LevelData<T> data across an EBAMR realm
+*/ 
+template <typename T>
+class EBAMRData {
+public:
+
+  EBAMRData(){
+  }
+
+  EBAMRData(const int a_size){
+    m_data.resize(a_size);
+  }
+
+  RefCountedPtr<LevelData<T> >& operator[](int a_level){
+    return m_data[a_level];
+  }
+
+  const RefCountedPtr<LevelData<T> >& operator[](int a_level) const {
+    return m_data[a_level];
+  }
+
+  void resize(const int a_size){
+    m_data.resize(a_size);
+  }
+
+  int size() {
+    return m_data.size();
+  }
+
+  const int size() const {
+    return m_data.size();
+  }
+
+  Vector<RefCountedPtr<LevelData<T> > >& data(){
+    return m_data;
+  }
+
+  const Vector<RefCountedPtr<LevelData<T> > >& data() const {
+    return m_data;
+  }
+  
+protected:
+
+  Vector<RefCountedPtr<LevelData<T> > > m_data;
+};
+
+class EBAMRCellData : public EBAMRData<EBCellFAB> {
+public:
+
+  EBAMRCellData(){
+  }
+
+  EBAMRCellData(const int a_size){
+    m_data.resize(a_size);
+  }
+
+  ~EBAMRCellData(){
+
+  }
+};
 
 #endif

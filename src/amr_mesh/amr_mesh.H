@@ -64,9 +64,19 @@ public:
   template<typename T> void deallocate(Vector<RefCountedPtr<T> >& a_data);
 
   /*!
+    @brief Deallocate data
+  */
+  template<typename T> void deallocate(EBAMRData<T>& a_data);
+
+  /*!
     @brief Turn smart-pointer data structure into regular-pointer data structure
   */
   template<typename T> void alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data);
+
+  /*!
+    @brief Turn smart-pointer data structure into regular-pointer data structure
+  */
+  template<typename T, typename S> void alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data);
 
   /*!
     @brief Template class for generic allocation of particles
@@ -94,6 +104,11 @@ public:
     @brief Allocate pointer but not memory
   */
   template <typename T> void allocate_ptr(Vector<RefCountedPtr<T> >& a_data);
+
+  /*!
+    @brief Allocate pointer but not memory
+  */
+  template <typename T> void allocate_ptr(EBAMRData<T>& a_data);
 
   /*!
     @brief Register an operator
