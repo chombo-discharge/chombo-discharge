@@ -96,14 +96,15 @@ public:
   template <typename T> void allocate_ptr(Vector<RefCountedPtr<T> >& a_data);
 
   /*!
-    @brief Query operator
-  */
-  virtual bool query_operator(const std::string a_operator, const phase::which_phase a_phase);
-
-  /*!
     @brief Register an operator
+    @todo Remove
   */
   virtual void register_operator(const std::string a_operator, const phase::which_phase a_phase);
+
+  /*!
+    @brief Register an operator over a realm
+  */
+  virtual void register_operator(const std::string a_realm, const std::string a_operator, const phase::which_phase a_phase);
 
   /*!
     @brief Query if a realm exists
@@ -534,8 +535,6 @@ public:
     @brief Set the finest level
   */
   virtual void set_finest_level(const int a_finest_level);
-
-
 
   /*!
     @brief Set the maximum box size

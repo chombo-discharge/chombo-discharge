@@ -2363,13 +2363,18 @@ void amr_mesh::register_operator(const std::string a_operator, const phase::whic
   m_realm->register_operator(a_operator, a_phase);
 }
 
-bool amr_mesh::query_operator(const std::string a_operator, const phase::which_phase a_phase) {
-  CH_TIME("amr_mesh::query_operator");
+void amr_mesh::register_operator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase){
+  CH_TIME("amr_mesh::register_operator(operator, realm, phase)");
   if(m_verbosity > 5){
-    pout() << "amr_mesh::query_operator" << endl;
+    pout() << "amr_mesh::register_operator(operator, realm, phase)" << endl;
   }
 
-  return m_realm->query_operator(a_operator, a_phase);
+  if(!this->query_realm(a_realm)) {
+    std::string str = "amr_mesh::define_realm - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  m_realms[a_realm]->register_operator(a_operator, a_phase);
 }
 
 void amr_mesh::define_realms(){
