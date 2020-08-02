@@ -506,7 +506,7 @@ void driver::grid_report(){
   pout() << endl;
 }
 
-void driver::memory_report(const memory_report_mode::which_mode a_mode){
+void driver::memory_report(const memory_report_mode a_mode){
 #ifdef CH_USE_MEMORY_TRACKING
   CH_TIME("driver::grid_report");
   if(m_verbosity > 5){
