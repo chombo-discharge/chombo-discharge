@@ -20,6 +20,17 @@
 
 #include <RealVect.H>
 
+/*!
+  @brief Namespace for various centerings. Should probably get rid of this. 
+*/
+// namespace centering {
+//   enum which_center {
+//     cell_center   = 0,
+//     cell_centroid = 1,
+//     eb_centroid   = 2,
+//   };
+// };
+
 namespace physics {
   namespace cdr_plasma {
   
@@ -27,6 +38,17 @@ namespace physics {
       @brief Abstract class for evolving plasma equations in time
     */
     class cdr_plasma_stepper : public time_stepper {
+    protected:
+
+      /*!
+	@brief Just a silly namespace for centering stuff...
+      */
+      enum class centering {
+	cell_center,
+	cell_centroid,
+	eb_centroid,
+      };
+      
     public:
 
       /*!
@@ -121,7 +143,7 @@ namespace physics {
 				 MFAMRCellData&                a_rhs,
 				 const Vector<EBAMRCellData*>  a_densities,
 				 const EBAMRIVData&            a_sigma,
-				 const centering::which_center a_centering);
+				 const centering               a_centering);
 
       /*!
 	@brief Advance the reaction network. 
@@ -597,7 +619,7 @@ namespace physics {
       */
       virtual void compute_rho(MFAMRCellData&                 a_rho,
 			       const Vector<EBAMRCellData*>&  a_densities,
-			       const centering::which_center  a_centering);
+			       const centering                a_centering);
 
 
   
@@ -828,7 +850,7 @@ namespace physics {
 			     const EBAMRCellData&          a_E,
 			     const Real                    a_time,
 			     const Real                    a_dt,
-			     const centering::which_center a_centering);
+			     const centering               a_centering);
 
       /*!
 	@brief Synchronize solver times
@@ -906,6 +928,8 @@ namespace physics {
       virtual RefCountedPtr<sigma_solver>& get_sigma();
   
     protected:
+
+
 
       // Various parsing functions that are common to many derived classes
       virtual void parse_verbosity();

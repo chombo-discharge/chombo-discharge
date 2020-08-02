@@ -60,16 +60,7 @@ namespace ghost_interpolation {
   };
 };
 
-/*!
-  @brief Namespace for various centerings
-*/
-namespace centering {
-  enum which_center {
-    cell_center   = 0,
-    cell_centroid = 1,
-    eb_centroid   = 2,
-  };
-};
+
 
 
 

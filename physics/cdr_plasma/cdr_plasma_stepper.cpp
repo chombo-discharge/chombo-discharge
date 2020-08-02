@@ -87,7 +87,7 @@ bool cdr_plasma_stepper::solve_poisson(MFAMRCellData&                a_potential
 				       MFAMRCellData&                a_rhs,
 				       const Vector<EBAMRCellData*>  a_densities,
 				       const EBAMRIVData&            a_sigma,
-				       const centering::which_center a_centering){
+				       const centering               a_centering){
   CH_TIME("cdr_plasma_stepper::solve_poisson(full)");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::solve_poisson(full)" << endl;
@@ -2991,7 +2991,7 @@ void cdr_plasma_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_ph
 
 void cdr_plasma_stepper::compute_rho(MFAMRCellData&                 a_rho,
 				     const Vector<EBAMRCellData*>&  a_densities,
-				     const centering::which_center  a_centering){
+				     const centering                a_centering){
   CH_TIME("cdr_plasma_stepper::compute_rho(mfamrcell, vec(ebamrcell))");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::compute_rho(mfamrcell, vec(ebamrcell))" << endl;
@@ -3833,7 +3833,7 @@ void cdr_plasma_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
 				   const EBAMRCellData&          a_E,
 				   const Real                    a_time,
 				   const Real                    a_dt,
-				   const centering::which_center a_centering){
+				   const centering               a_centering){
   CH_TIME("cdr_plasma_stepper::solve_rte(full)");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::solve_rte(full)" << endl;
