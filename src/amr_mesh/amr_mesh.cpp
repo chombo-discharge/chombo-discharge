@@ -1997,7 +1997,7 @@ void amr_mesh::parse_eb_stencils(){
   }
 }
 
-void amr_mesh::set_irreg_sten_type(const stencil_type::which_type a_type){
+void amr_mesh::set_irreg_sten_type(const stencil_type a_type){
   CH_TIME("amr_mesh::set_irreg_sten_type");
   m_stencil_type = a_type;
 

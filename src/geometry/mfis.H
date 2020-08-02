@@ -16,6 +16,18 @@
 #include <MFIndexSpace.H>
 
 /*!
+  @brief phase names
+*/
+namespace phase {
+  const int num_phases = 2;
+  
+  enum which_phase {
+    gas   = 0,
+    solid = 1
+  };
+};
+
+/*!
   @brief Two-fluid index space
 */
 class mfis {

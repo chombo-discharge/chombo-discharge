@@ -39,7 +39,7 @@ public:
 		     const Real&                    a_dx,
 		     const int                      a_order,
 		     const int                      a_radius,
-		     const stencil_type::which_type a_type);
+		     const stencil_type             a_type);
 
   /*!
     @brief Destructor

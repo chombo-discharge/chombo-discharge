@@ -24,7 +24,7 @@ eb_centroid_interp::eb_centroid_interp(const DisjointBoxLayout&       a_dbl,
 				       const Real&                    a_dx,
 				       const int                      a_order,
 				       const int                      a_radius,
-				       const stencil_type::which_type a_type) : irreg_stencil(){
+				       const stencil_type             a_type) : irreg_stencil(){
 
   CH_TIME("eb_centroid_interp::eb_centroid_interp");
 

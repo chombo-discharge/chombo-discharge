@@ -23,7 +23,7 @@ template<class T> irreg_amr_stencil<T>::irreg_amr_stencil(const Vector<DisjointB
 							  const int                        a_finestLevel,
 							  const int                        a_order,
 							  const int                        a_radius,
-							  const stencil_type::which_type   a_type){
+							  const stencil_type               a_type){
   CH_TIME("irreg_amr_stencil::irreg_amr_stencil");
   
   this->define(a_grids, a_ebisl, a_domains, a_dx, a_finestLevel, a_order, a_radius, a_type);
@@ -41,7 +41,7 @@ template<class T> void irreg_amr_stencil<T>::define(const Vector<DisjointBoxLayo
 						    const int                        a_finestLevel,
 						    const int                        a_order,
 						    const int                        a_radius,
-						    const stencil_type::which_type   a_type){
+						    const stencil_type               a_type){
   CH_TIME("irreg_amr_stencil::define");
 
   m_finest_level = a_finestLevel;

@@ -23,6 +23,7 @@
 #include <BinItem.H>
 
 #include "DomainFluxIFFAB.H"
+#include "MFBaseIVFAB.H"
 
 /*!
   @brief Default class for holding LevelData<T> data across an EBAMR realm

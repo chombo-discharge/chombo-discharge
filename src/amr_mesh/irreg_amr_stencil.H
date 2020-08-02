@@ -8,6 +8,7 @@
 #ifndef _IRREG_AMR_STENCIL_
 #define _IRREG_AMR_STENCIL_
 
+#include "EBAMRData.H"
 #include "irreg_stencil.H"
 #include "type_definitions.H"
 
@@ -33,7 +34,7 @@ public:
 		    const int                        a_finest_level,
 		    const int                        a_order,
 		    const int                        a_radius,
-		    const stencil_type::which_type   a_type);
+		    const stencil_type               a_type);
 
   /*!
     @brief Destructor
@@ -51,7 +52,7 @@ public:
 		      const int                        a_finest_level,
 		      const int                        a_order,
 		      const int                        a_radius,
-		      const stencil_type::which_type   a_type);
+		      const stencil_type               a_type);
 
   /*!
     @brief Apply the stencils to an existing data holder. 
@@ -212,7 +213,7 @@ protected:
   /*!
     @brief Stencil type
   */
-  stencil_type::which_type m_stencil_type;
+  stencil_type m_stencil_type;
 };
 
 #include "irreg_amr_stencilI.H"

@@ -25,7 +25,7 @@ irreg_stencil::irreg_stencil(const DisjointBoxLayout&       a_dbl,
 			     const Real&                    a_dx,
 			     const int                      a_order,
 			     const int                      a_radius,
-			     const stencil_type::which_type a_type){
+			     const stencil_type             a_type){
 
   this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius, a_type);
 }
@@ -37,7 +37,7 @@ void irreg_stencil::define(const DisjointBoxLayout&       a_dbl,
 			   const Real&                    a_dx,
 			   const int                      a_order,
 			   const int                      a_radius,
-			   const stencil_type::which_type a_type){
+			   const stencil_type             a_type){
 
   m_dbl    = a_dbl;
   m_ebisl  = a_ebisl;

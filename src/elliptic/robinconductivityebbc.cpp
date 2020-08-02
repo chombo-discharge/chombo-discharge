@@ -157,7 +157,7 @@ bool robinconductivityebbc::get_lsq_sten(VoFStencil&          a_stencil,
   return found_stencil;
 }
 
-void robinconductivityebbc::set_type(const stencil_type::which_type a_type){
+void robinconductivityebbc::set_type(const stencil_type a_type){
   if(a_type == stencil_type::taylor || a_type == stencil_type::lsq){
     m_type = a_type;
   }

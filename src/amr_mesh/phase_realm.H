@@ -69,8 +69,8 @@ public:
 	      const int a_ebghost,
 	      const int a_num_ghost,
 	      const int a_redist_rad,
-	      const stencil_type::which_type a_centroid_stencil,
-	      const stencil_type::which_type a_eb_stencil,
+	      const stencil_type a_centroid_stencil,
+	      const stencil_type a_eb_stencil,
 	      const bool a_ebcf,
 	      const RefCountedPtr<EBIndexSpace>& a_ebis);
 
@@ -124,8 +124,8 @@ protected:
   int m_ebghost;
   int m_num_ghost;
   int m_redist_rad;
-  stencil_type::which_type m_centroid_stencil;
-  stencil_type::which_type m_eb_stencil;
+  stencil_type m_centroid_stencil;
+  stencil_type m_eb_stencil;
   Vector<Real> m_dx;
   Vector<int> m_ref_ratios;
 

@@ -8,6 +8,7 @@
 #ifndef _ROBINCONDUCTIVITYDOMAINBCFACTORY_
 #define _ROBINCONDUCTIVITYDOMAINBCFACTORY_
 
+#include "EBAMRData.H"
 #include "type_definitions.H"
 #include "robin_coef.H"
 #include "robinconductivitydomainbc.H"

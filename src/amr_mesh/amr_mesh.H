@@ -8,6 +8,7 @@
 #ifndef _AMR_MESH_
 #define _AMR_MESH_
 
+#include "EBAMRData.H"
 #include "type_definitions.H"
 #include "computational_geometry.H"
 #include "mfis.H"
@@ -23,6 +24,7 @@
 #include "EBGhostCloud.H"
 #include "noncons_div.H"
 #include "realm.H"
+
 
 #include <DisjointBoxLayout.H>
 #include <ebcoarseaverage.H>
@@ -666,7 +668,7 @@ public:
   /*!
     @brief Set preferred stencil type
   */
-  virtual void set_irreg_sten_type(const stencil_type::which_type a_type);
+  virtual void set_irreg_sten_type(const stencil_type a_type);
 
   /*!
     @brief Set irregular stencil order
@@ -1143,17 +1145,17 @@ protected:
   /*!
     @brief Stencil type
   */
-  stencil_type::which_type m_stencil_type;
+  stencil_type m_stencil_type;
 
   /*!
     @brief Stencil type for centroid interpolation
   */
-  stencil_type::which_type m_centroid_stencil;
+  stencil_type m_centroid_stencil;
 
   /*!
     @brief Stencil type for EB interpolation
   */
-  stencil_type::which_type m_eb_stencil;
+  stencil_type m_eb_stencil;
 
   /*!
     @brief Interpolation type

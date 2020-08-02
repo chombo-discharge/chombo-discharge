@@ -26,19 +26,7 @@
 #include "MFBaseIVFAB.H"
 #include "photon.H"
 
-#include "EBAMRData.H"
 
-/*!
-  @brief phase names
-*/
-namespace phase {
-  const int num_phases = 2;
-  
-  enum which_phase {
-    gas   = 0,
-    solid = 1
-  };
-};
 
 /*!
   @brief Relaxation types for multigrid
@@ -59,19 +47,6 @@ namespace amrmg {
     full   = 0,
     vcycle = 1,
     fcycle = 2,
-  };
-};
-
-/*!
-  @brief Stencil types
-*/
-namespace stencil_type {
-  enum which_type {
-    linear = 0,
-    taylor = 1,
-    ray    = 2,
-    lsq    = 3,
-    pwl    = 4,
   };
 };
 

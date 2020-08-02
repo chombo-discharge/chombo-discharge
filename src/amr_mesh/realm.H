@@ -35,8 +35,8 @@ public:
 	      const int a_num_ghost,
 	      const int a_redist_rad,
 	      const bool a_ebcf,
-	      const stencil_type::which_type a_centroid_stencil,
-	      const stencil_type::which_type a_eb_stencil,
+	      const stencil_type a_centroid_stencil,
+	      const stencil_type a_eb_stencil,
 	      const RefCountedPtr<mfis>& a_mfis);
 
   // realm copy function

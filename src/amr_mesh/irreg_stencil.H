@@ -19,6 +19,17 @@
 #include <LayoutData.H>
 
 /*!
+  @brief Stencil types
+*/
+enum class stencil_type {
+  linear,
+  taylor,
+  ray,
+  lsq,
+  pwl
+};
+
+/*!
   @brief Class for holding stencils on irregular cells over a single AMR level
 */
 class irreg_stencil {
@@ -38,7 +49,7 @@ public:
 		const Real&                    a_dx,
 		const int                      a_order,
 		const int                      a_radius,
-		const stencil_type::which_type a_type);
+		const stencil_type             a_type);
 
   /*!
     @brief Destructor
@@ -54,7 +65,7 @@ public:
 		      const Real&                    a_dx,
 		      const int                      a_order,
 		      const int                      a_radius,
-		      const stencil_type::which_type a_type);
+		      const stencil_type             a_type);
 
   /*!
     @brief Get the stencils over a single box
@@ -107,7 +118,7 @@ protected:
   /*!
     @brief Stencil type
   */
-  stencil_type::which_type m_stencil_type;
+  stencil_type m_stencil_type;
 
   /*!
     @brief Domain
