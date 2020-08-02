@@ -30,7 +30,7 @@ template<typename T> void amr_mesh::deallocate(Vector<RefCountedPtr<T> >& a_data
 }
 
 template<typename T> void amr_mesh::deallocate(EBAMRData<T>& a_data){
-  return this->deallocate(a_data.data());
+  return this->deallocate(a_data.get_data());
 }
 
 template<typename T> void amr_mesh::alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data){
@@ -47,7 +47,7 @@ template<typename T> void amr_mesh::alias(Vector<T*>& a_alias, const Vector<RefC
 }
 
 template<typename T, typename S> void amr_mesh::alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data){
-  return this->alias(a_alias, a_data.data());
+  return this->alias(a_alias, a_data.get_data());
 }
 
 template<typename T> void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles){
@@ -136,5 +136,5 @@ template <typename T> void amr_mesh::allocate_ptr(Vector<RefCountedPtr<T> >& a_d
 }
 
 template <typename T> void amr_mesh::allocate_ptr(EBAMRData<T>& a_data){
-  return this->allocate_ptr(a_data.data());
+  return this->allocate_ptr(a_data.get_data());
 }

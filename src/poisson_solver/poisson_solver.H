@@ -14,6 +14,17 @@
 #include "wall_bc.H"
 
 /*!
+  @brief Potential types on domain edges (faces). 
+*/
+namespace potential {
+  enum ground_live {
+    ground = 0,
+    live   = 1,
+    mapped = 2, // Not currently supported. But it will. 
+  };
+};
+
+/*!
   @brief Abstract Poisson solver class. Boundary conditions are passed through this class. 
 */
 class poisson_solver {

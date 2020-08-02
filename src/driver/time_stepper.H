@@ -13,6 +13,22 @@
 #include "mfis.H"
 
 /*!
+  @brief Time code for output
+*/
+namespace time_code {
+  enum which_code {
+    cfl             = 0,
+    diffusion       = 1,
+    source          = 2,
+    relaxation_time = 3,
+    restricted      = 4,
+    hardcap         = 5,
+    error           = 6,
+    adv_diffusion   = 7,
+  };
+};
+
+/*!
   @brief Abstract class for performing time stepping
 */
 class time_stepper {

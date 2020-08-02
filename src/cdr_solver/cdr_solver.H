@@ -18,6 +18,18 @@
 #include <chrono>
 
 /*!
+  @brief Boundary condition types for the CDR solvers
+*/
+namespace cdr_bc {
+  enum which_bc {
+    external = 0,
+    wall     = 1,
+    outflow  = 2,
+    extrap   = 3,
+  };
+};
+
+/*!
   @brief Abstract class for cdr-equations. This is (almost) a whole solver. 
 */
 class cdr_solver {

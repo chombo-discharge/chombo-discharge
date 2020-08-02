@@ -21,6 +21,17 @@
 #include <fstream>
 
 /*!
+  @brief Enum class for describing how memory is reported. Not really used by anyone except driver
+*/
+namespace memory_report_mode {
+  enum which_mode {
+    overall   = 0,
+    unfreed   = 1,
+    allocated = 2,
+  };
+};
+
+/*!
   @brief Main class for time/space advancement of streamer equations. This class runs a timestepper and controls input/output, 
   regrid intervals etc. 
 */
@@ -130,6 +141,15 @@ public:
 protected:
 
   /*!
+    @brief Memory report mode enum
+  */
+  enum class memory_report {
+    overall,
+    unfreed,
+    allocated
+  };
+
+  /*!
     @brief Constructor
   */
   driver();
@@ -168,16 +188,6 @@ protected:
     @brief Time code
   */
   time_code::which_code m_timecode;
-
-  /*!
-    @brief Output mode
-  */
-  output_mode::which_mode m_output_mode;
-
-  /*!
-    @brief Restart mode
-  */
-  restart_mode::which_mode m_restart_mode;
 
   /*!
     @brief Memory report mode

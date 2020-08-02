@@ -49,13 +49,18 @@ const int EBAMRData<T>::size() const {
 }
 
 template <typename T>
-Vector<RefCountedPtr<LevelData<T> > >& EBAMRData<T>::data(){
+Vector<RefCountedPtr<LevelData<T> > >& EBAMRData<T>::get_data(){
   return m_data;
 }
 
 template <typename T>
-const Vector<RefCountedPtr<LevelData<T> > >& EBAMRData<T>::data() const {
+const Vector<RefCountedPtr<LevelData<T> > >& EBAMRData<T>::get_data() const {
   return m_data;
+}
+
+template <typename T>
+void EBAMRData<T>::push_back(RefCountedPtr<LevelData<T> >& a_levelData){
+  m_data.push_back(a_levelData);
 }
 
 template <typename T>
@@ -84,6 +89,28 @@ void EBAMRData<T>::copy(const EBAMRData<T>& a_other){
     }
   }
 }
+
+// Explicit templates
+template class EBAMRData<MFCellFAB>;
+template class EBAMRData<MFFluxFAB>;
+template class EBAMRData<MFBaseIVFAB>;
+template class EBAMRData<EBCellFAB>;
+template class EBAMRData<EBFluxFAB>;
+template class EBAMRData<EBFaceFAB>;
+template class EBAMRData<BaseIVFAB<Real> >;
+template class EBAMRData<DomainFluxIFFAB>;
+template class EBAMRData<BaseFab<bool> >;
+
+// Typedefs for simple typing.
+typedef EBAMRData<MFCellFAB>        MFAMRCellData;
+typedef EBAMRData<MFFluxFAB>        MFAMRFluxData;
+typedef EBAMRData<MFBaseIVFAB>      MFAMRIVData;
+typedef EBAMRData<EBCellFAB>        EBAMRCellData;
+typedef EBAMRData<EBFluxFAB>        EBAMRFluxData;
+typedef EBAMRData<EBFaceFAB>        EBAMRFaceData;
+typedef EBAMRData<BaseIVFAB<Real> > EBAMRIVData;
+typedef EBAMRData<DomainFluxIFFAB>  EBAMRIFData;
+typedef EBAMRData<BaseFab<bool> >   EBAMRBool;
 
 #endif
 

@@ -14,6 +14,8 @@
 #include "amr_mesh.H"
 #include "real_box.H"
 
+using EBAMRTags = Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > >;
+
 /*!
   @brief Abstract class for tagging cells across an AMR hierarchy
 */
