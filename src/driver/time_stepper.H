@@ -15,6 +15,7 @@
 /*!
   @brief Time code for output
 */
+#if 0 // Orignal code
 namespace time_code {
   enum which_code {
     cfl             = 0,
@@ -27,6 +28,18 @@ namespace time_code {
     adv_diffusion   = 7,
   };
 };
+#else
+enum class time_code {
+  cfl,
+  diffusion,
+  source,
+  relaxation_time,
+  restricted,
+  hardcap,
+  error,
+  adv_diffusion
+};
+#endif
 
 /*!
   @brief Abstract class for performing time stepping
@@ -57,7 +70,7 @@ public:
   virtual int  get_num_plot_vars() const = 0;
 
   // Advance routines
-  virtual void compute_dt(Real& a_dt, time_code::which_code& a_timecode) = 0;
+  virtual void compute_dt(Real& a_dt, time_code& a_timecode) = 0;
   virtual Real advance(const Real a_dt) = 0;
   virtual void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) = 0;
   virtual void print_step_report() = 0;
@@ -103,7 +116,7 @@ protected:
   /*!
     @brief Time code for
   */
-  time_code::which_code m_timecode;
+  time_code m_timecode;
 
   /*!
     @brief AMR

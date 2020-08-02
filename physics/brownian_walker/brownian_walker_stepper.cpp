@@ -230,7 +230,7 @@ void brownian_walker_stepper::write_plot_data(EBAMRCellData& a_output, Vector<st
   m_solver->write_plot_data(a_output, a_icomp);
 }
 
-void brownian_walker_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode) {
+void brownian_walker_stepper::compute_dt(Real& a_dt, time_code& a_timecode) {
   CH_TIME("brownian_walker_stepper::compute_dt");
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::compute_dt" << endl;

@@ -335,7 +335,7 @@ void ito_plasma_stepper::print_step_report(){
     	 << "                                   #src part = " << l_source_particles << " (" << g_source_particles << ")" << endl;
 }
 
-void ito_plasma_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
+void ito_plasma_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
   CH_TIME("ito_plasma_stepper::compute_dt");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_dt" << endl;

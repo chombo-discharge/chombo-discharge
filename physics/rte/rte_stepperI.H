@@ -83,7 +83,7 @@ namespace physics {
     }
 
     template <typename T>
-    void rte_stepper<T>::compute_dt(Real& a_dt, time_code::which_code& a_timecode) {
+    void rte_stepper<T>::compute_dt(Real& a_dt, time_code& a_timecode) {
       a_dt = 1.E-10;
     }
 

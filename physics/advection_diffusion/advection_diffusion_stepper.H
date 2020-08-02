@@ -36,7 +36,7 @@ namespace physics {
       void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
 
       // Advance routines
-      void compute_dt(Real& a_dt, time_code::which_code& a_timecode) override;
+      void compute_dt(Real& a_dt, time_code& a_timecode) override;
 
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
       void print_step_report() override;

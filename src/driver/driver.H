@@ -176,7 +176,7 @@ protected:
   /*!
     @brief Time code
   */
-  time_code::which_code m_timecode;
+  time_code m_timecode;
 
   /*!
     @brief Memory report mode

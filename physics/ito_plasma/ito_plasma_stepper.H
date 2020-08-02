@@ -51,7 +51,7 @@ namespace physics {
   
       // Advance routines
       virtual Real advance(const Real a_dt) = 0;
-      virtual void compute_dt(Real& a_dt, time_code::which_code& a_timecode) override;
+      virtual void compute_dt(Real& a_dt, time_code& a_timecode) override;
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
       void print_step_report() override;
 

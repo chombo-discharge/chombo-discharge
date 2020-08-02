@@ -120,7 +120,7 @@ namespace physics::cdr_plasma {
     Vector<Real> m_tm;
     Vector<Real> m_dtm;
 
-    time_code::which_code m_timecode;
+    time_code m_timecode;
 
     std::string m_which_nodes;
 
@@ -202,7 +202,7 @@ namespace physics::cdr_plasma {
     void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
     void compute_cdr_velo(const Real a_time);
     void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
-    void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
+    void compute_dt(Real& a_dt, time_code& a_timecode);
     void compute_sigma_flux();
 
     //

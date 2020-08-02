@@ -1018,7 +1018,7 @@ void godunov::compute_cdr_diffco(const Real a_time){
   cdr_plasma_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
 }
 
-void godunov::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
+void godunov::compute_dt(Real& a_dt, time_code& a_timecode){
   CH_TIME("godunov::compute_dt");
   if(m_verbosity > 5){
     pout() << "godunov::compute_dt" << endl;

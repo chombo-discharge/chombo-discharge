@@ -159,7 +159,7 @@ void advection_diffusion_stepper::write_plot_data(EBAMRCellData&       a_output,
   m_solver->write_plot_data(a_output, a_icomp);
 }
 
-void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
+void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
   Real cfl_dt;
   Real diff_dt;
 

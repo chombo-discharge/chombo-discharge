@@ -2539,7 +2539,7 @@ void cdr_plasma_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, co
   }
 }
 
-void cdr_plasma_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
+void cdr_plasma_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
   CH_TIME("cdr_plasma_stepper::compute_dt");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::compute_dt" << endl;

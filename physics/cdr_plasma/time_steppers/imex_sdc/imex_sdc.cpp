@@ -1162,7 +1162,7 @@ void imex_sdc::adaptive_report(const Real a_first_dt, const Real a_dt, const Rea
   pout() << "\n";
 }
 
-void imex_sdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
+void imex_sdc::compute_dt(Real& a_dt, time_code& a_timecode){
   CH_TIME("imex_sdc::compute_dt");
   if(m_verbosity > 5){
     pout() << "imex_sdc::compute_dt" << endl;
