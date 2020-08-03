@@ -638,7 +638,6 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
       tags[i].compact();
     }
   }
-
   // Store things that need to be regridded
   this->cache_tags(m_tags);              // Cache m_tags because after regrid, ownership will change
   m_timestepper->pre_regrid(a_lmin, m_amr->get_finest_level());
@@ -677,7 +676,11 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   if(a_use_initial_data){
     m_timestepper->initial_data();
   }
-  m_celltagger->regrid();                                              // Regrid cell tagger
+
+  // Regrid cell tagger if we have one. 
+  if(!m_celltagger.isNull()){
+    m_celltagger->regrid();             
+  }
 
   const Real solver_regrid = MPI_Wtime(); // Timer
 
@@ -1944,7 +1947,7 @@ bool driver::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){
   for (int lvl = 0; lvl <= finest_level; lvl++){
     num_local_tags[lvl] = a_all_tags[lvl].numPts();
   }
-
+  
   return got_new_tags;
 }
 

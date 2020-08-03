@@ -226,9 +226,9 @@ void poisson_multifluid_gmg::allocate_internals(){
 
   const int ncomp = 1;
 
-  m_amr->allocate(m_zero, m_realm, ncomp);
+  m_amr->allocate(m_zero,          m_realm, ncomp);
   m_amr->allocate(m_scaled_source, m_realm, ncomp);
-  m_amr->allocate(m_scaled_sigma, m_realm, phase::gas, ncomp);
+  m_amr->allocate(m_scaled_sigma,  m_realm, phase::gas, ncomp);
 
   data_ops::set_value(m_zero, 0.0);
 }
@@ -332,8 +332,8 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   m_gmg_solver.revert(phi, rhs, finest_level, 0);
 
-  m_amr->average_down(a_state);
-  m_amr->interp_ghost(a_state);
+  m_amr->average_down(a_state, m_realm);
+  m_amr->interp_ghost(a_state, m_realm);
 
   const Real t5 = MPI_Wtime();
 
@@ -348,10 +348,6 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   pout() << "revert/avg: " << 100.*(t5-t4)/T << "%" << endl;
   pout() << "Total time: " << T << endl;
 #endif
-
-  
-  
-
 
   return converged;
 }
@@ -482,16 +478,16 @@ void poisson_multifluid_gmg::register_operators(){
     MayDay::Abort("poisson_multifluid_gmg::register_operators - need to set amr_mesh!");
   }
   else{
-    m_amr->register_operator(s_eb_coar_ave,     phase::gas);
-    m_amr->register_operator(s_eb_coar_ave,     phase::solid);
-    m_amr->register_operator(s_eb_fill_patch,   phase::gas);
-    m_amr->register_operator(s_eb_fill_patch,   phase::solid);
-    m_amr->register_operator(s_eb_pwl_interp,   phase::gas);
-    m_amr->register_operator(s_eb_pwl_interp,   phase::solid);
-    m_amr->register_operator(s_eb_quad_cfi,     phase::gas);
-    m_amr->register_operator(s_eb_quad_cfi,     phase::solid);
-    m_amr->register_operator(s_eb_irreg_interp, phase::gas);
-    m_amr->register_operator(s_eb_irreg_interp, phase::solid);
+    m_amr->register_operator(s_eb_coar_ave,     m_realm, phase::gas);
+    m_amr->register_operator(s_eb_coar_ave,     m_realm, phase::solid);
+    m_amr->register_operator(s_eb_fill_patch,   m_realm, phase::gas);
+    m_amr->register_operator(s_eb_fill_patch,   m_realm, phase::solid);
+    m_amr->register_operator(s_eb_pwl_interp,   m_realm, phase::gas);
+    m_amr->register_operator(s_eb_pwl_interp,   m_realm, phase::solid);
+    m_amr->register_operator(s_eb_quad_cfi,     m_realm, phase::gas);
+    m_amr->register_operator(s_eb_quad_cfi,     m_realm, phase::solid);
+    m_amr->register_operator(s_eb_irreg_interp, m_realm, phase::gas);
+    m_amr->register_operator(s_eb_irreg_interp, m_realm, phase::solid);
   }
 }
 
@@ -628,7 +624,7 @@ void poisson_multifluid_gmg::set_permittivities(const Vector<dielectric>& a_diel
     const int finest_level = m_amr->get_finest_level();
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
       
       LevelData<EBFluxFAB> bco;
       LevelData<BaseIVFAB<Real> > bco_irreg;
@@ -861,7 +857,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 
   const int nphases                      = m_mfis->num_phases();
   const int finest_level                 = m_amr->get_finest_level();
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
   const Vector<int>& refinement_ratios   = m_amr->get_ref_rat();
   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
   const Vector<Real>& dx                 = m_amr->get_dx();
@@ -877,11 +873,11 @@ void poisson_multifluid_gmg::setup_operator_factory(){
     Vector<EBLevelGrid>                    eblg_phases(nphases);
     Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(nphases);
 
-    if(!ebis_gas.isNull()) eblg_phases[phase::gas]   = *(m_amr->get_eblg(phase::gas)[lvl]);
-    if(!ebis_sol.isNull()) eblg_phases[phase::solid] = *(m_amr->get_eblg(phase::solid)[lvl]);
+    if(!ebis_gas.isNull()) eblg_phases[phase::gas]   = *(m_amr->get_eblg(m_realm, phase::gas)[lvl]);
+    if(!ebis_sol.isNull()) eblg_phases[phase::solid] = *(m_amr->get_eblg(m_realm, phase::solid)[lvl]);
 
-    if(!ebis_gas.isNull()) quadcfi_phases[phase::gas]   = (m_amr->get_old_quadcfi(phase::gas)[lvl]);
-    if(!ebis_sol.isNull()) quadcfi_phases[phase::solid] = (m_amr->get_old_quadcfi(phase::solid)[lvl]);
+    if(!ebis_gas.isNull()) quadcfi_phases[phase::gas]   = (m_amr->get_old_quadcfi(m_realm, phase::gas)[lvl]);
+    if(!ebis_sol.isNull()) quadcfi_phases[phase::solid] = (m_amr->get_old_quadcfi(m_realm, phase::solid)[lvl]);
     
     mflg[lvl].define(m_mfis, eblg_phases);
     mfquadcfi[lvl].define(quadcfi_phases);
