@@ -199,6 +199,8 @@ void amr_mesh::allocate(EBAMRCellData&           a_data,
 
     EBLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
+
+  a_data.set_realm(a_realm);
 }
 
 void amr_mesh::allocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
@@ -240,6 +242,8 @@ void amr_mesh::allocate(EBAMRFluxData&           a_data,
 
     EBLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
+
+  a_data.set_realm(a_realm);
 }
 
 void amr_mesh::allocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
@@ -291,6 +295,8 @@ void amr_mesh::allocate(EBAMRIVData&             a_data,
 
     EBLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
+
+  a_data.set_realm(a_realm);
 }
 
 void amr_mesh::allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
@@ -331,6 +337,8 @@ void amr_mesh::allocate(EBAMRIFData&             a_data,
     a_data[lvl] = RefCountedPtr<LevelData<DomainFluxIFFAB> >
       (new LevelData<DomainFluxIFFAB>(dbl, a_ncomp, ghost*IntVect::Unit, fact));
   }
+
+  a_data.set_realm(a_realm);
 }
 
 void amr_mesh::allocate(EBAMRBool& a_data, const int a_ncomp, const int a_ghost){
@@ -362,6 +370,8 @@ void amr_mesh::allocate(EBAMRBool& a_data, const std::string a_realm, const int 
     a_data[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > >
       (new LevelData<BaseFab<bool> >(dbl, a_ncomp, a_ghost*IntVect::Unit));
   }
+
+  a_data.set_realm(a_realm);
 }
 
 void amr_mesh::allocate(MFAMRCellData& a_data, const int a_ncomp, const int a_ghost){
@@ -410,6 +420,8 @@ void amr_mesh::allocate(MFAMRCellData& a_data, const std::string a_realm, const 
 
     MFLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
+
+  a_data.set_realm(a_realm);
 }
 
 void amr_mesh::allocate(MFAMRFluxData& a_data, const int a_ncomp, const int a_ghost){
@@ -455,6 +467,8 @@ void amr_mesh::allocate(MFAMRFluxData& a_data, const std::string a_realm, const 
     a_data[lvl] = RefCountedPtr<LevelData<MFFluxFAB> >
       (new LevelData<MFFluxFAB>(dbl, ignored, ghost*IntVect::Unit, factory));
   }
+
+  a_data.set_realm(a_realm);
 }
   
 void amr_mesh::allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghost){
@@ -500,22 +514,17 @@ void amr_mesh::allocate(MFAMRIVData& a_data, const std::string a_realm, const in
     a_data[lvl] = RefCountedPtr<LevelData<MFBaseIVFAB> >
       (new LevelData<MFBaseIVFAB>(dbl, ignored, ghost*IntVect::Unit, factory));
   }
+
+  a_data.set_realm(a_realm);
 }
 
 void amr_mesh::reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin){
-  CH_TIME("amr_mesh::reallocate(cell)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::reallocate(cell)" << endl;
-  }
-
-  this->reallocate(a_data, realm::primal, a_phase, a_lmin);
-}
-
-void amr_mesh::reallocate(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lmin){
   CH_TIME("amr_mesh::reallocate(ebamrcell, realm, phase, lmin)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::reallocate(ebamrcell, realm, phase, lmin)" << endl;
   }
+
+  const std::string a_realm = a_data.get_realm();
 
   if(!this->query_realm(a_realm)) {
     std::string str = "amr_mesh::allocate(ebamrcell, realm, phase, lmin) - could not find realm '" + a_realm + "'";
@@ -543,19 +552,12 @@ void amr_mesh::reallocate(EBAMRCellData& a_data, const std::string a_realm, cons
 }
 
 void amr_mesh::reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_lmin){
-  CH_TIME("amr_mesh::reallocate(ebamrflux)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::reallocate(ebamrflux)" << endl;
-  }
-
-  this->reallocate(a_data, realm::primal, a_phase, a_lmin);
-}
-
-void amr_mesh::reallocate(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lmin){
   CH_TIME("amr_mesh::reallocate(ebamrflux, realm, phase, lmin)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::reallocate(ebamrflux, realm, phase, lmin)" << endl;
   }
+
+  const std::string a_realm = a_data.get_realm();
 
   if(!this->query_realm(a_realm)) {
     std::string str = "amr_mesh::reallocate(ebamrflux, realm, phase, lmin) - could not find realm '" + a_realm + "'";
@@ -582,19 +584,12 @@ void amr_mesh::reallocate(EBAMRFluxData& a_data, const std::string a_realm, cons
 }
 
 void amr_mesh::reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin){
-  CH_TIME("amr_mesh::allocate(baseiv)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(baseiv)" << endl;
-  }
-
-  this->reallocate(a_data, realm::primal, a_phase, a_lmin);
-}
-
-void amr_mesh::reallocate(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lmin){
   CH_TIME("amr_mesh::allocate(ebamriv, realm, phase, lmin)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(ebamriv, realm, phase, lmin)" << endl;
   }
+
+  const std::string a_realm = a_data.get_realm();
 
   if(!this->query_realm(a_realm)) {
     std::string str = "amr_mesh::reallocate(ebamriv, realm, phase, lmin) - could not find realm '" + a_realm + "'";
@@ -632,19 +627,12 @@ void amr_mesh::reallocate(EBAMRIVData& a_data, const std::string a_realm, const 
 }
 
 void amr_mesh::reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_lmin){
-  CH_TIME("amr_mesh::reallocate(EBAMRIFData)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::reallocate(EBAMRIFData)" << endl;
-  }
-
-  this->reallocate(a_data, realm::primal, a_phase, a_lmin);
-}
-
-void amr_mesh::reallocate(EBAMRIFData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lmin){
   CH_TIME("amr_mesh::reallocate(ebamrifdata, realm, phase, lmin)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::reallocate(ebamrifdata, realm, phase, lmin)" << endl;
   }
+
+  const std::string a_realm = a_data.get_realm(); 
 
   if(!this->query_realm(a_realm)) {
     std::string str = "amr_mesh::reallocate(ebamrif, realm, phase, lmin) - could not find realm '" + a_realm + "'";
@@ -668,23 +656,15 @@ void amr_mesh::reallocate(EBAMRIFData& a_data, const std::string a_realm, const 
     a_data[lvl] = RefCountedPtr<LevelData<DomainFluxIFFAB> >
       (new LevelData<DomainFluxIFFAB>(dbl, ncomp, ghost, fact));
   }
-
 }
 
 void amr_mesh::reallocate(EBAMRBool& a_data, const int a_lmin){
-  CH_TIME("amr_mesh::reallocate(EBAMRBool)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::reallocate(EBAMRBool)" << endl;
-  }
-
-  this->reallocate(a_data, realm::primal, a_lmin);
-}
-
-void amr_mesh::reallocate(EBAMRBool& a_data, const std::string a_realm, const int a_lmin){
   CH_TIME("amr_mesh::reallocate(ebamrbool, realm, lmin)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::reallocate(ebamrbool, realm, lmin)" << endl;
   }
+
+  const std::string a_realm = a_data.get_realm();
 
   if(!this->query_realm(a_realm)) {
     std::string str = "amr_mesh::reallocate(ebamrbool, realm, lmin) - could not find realm '" + a_realm + "'";
@@ -707,19 +687,12 @@ void amr_mesh::reallocate(EBAMRBool& a_data, const std::string a_realm, const in
 }
 
 void amr_mesh::reallocate(MFAMRCellData& a_data, const int a_lmin){
-  CH_TIME("amr_mesh::reallocate(mf cell)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::reallocate(mf cell)" << endl;
-  }
-
-  this->reallocate(a_data, realm::primal, a_lmin);
-}
-
-void amr_mesh::reallocate(MFAMRCellData& a_data, const std::string a_realm, const int a_lmin){
   CH_TIME("amr_mesh::reallocate(mfamrcell, realm, lmin)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::reallocate(mfamrcell, realm, lmin)" << endl;
   }
+
+  const std::string a_realm = a_data.get_realm();
 
   if(!this->query_realm(a_realm)) {
     std::string str = "amr_mesh::reallocate(mfamrcell, realm, lmin) - could not find realm '" + a_realm + "'";
@@ -755,19 +728,12 @@ void amr_mesh::reallocate(MFAMRCellData& a_data, const std::string a_realm, cons
 }
 
 void amr_mesh::reallocate(MFAMRFluxData& a_data, const int a_lmin){
-  CH_TIME("amr_mesh::allocate(mf flux)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(mf flux)" << endl;
-  }
-
-  this->reallocate(a_data, realm::primal, a_lmin);
-}
-
-void amr_mesh::reallocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_lmin){
   CH_TIME("amr_mesh::allocate(mfamrflux, realm, lmin)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(mfamrflux, realm, lmin)" << endl;
   }
+
+  const std::string a_realm = a_data.get_realm(); 
 
   if(!this->query_realm(a_realm)) {
     std::string str = "amr_mesh::reallocate(mfamrflux, realm, lmin) - could not find realm '" + a_realm + "'";
@@ -803,19 +769,12 @@ void amr_mesh::reallocate(MFAMRFluxData& a_data, const std::string a_realm, cons
 }
 
 void amr_mesh::reallocate(MFAMRIVData& a_data, const int a_lmin){
-  CH_TIME("amr_mesh::allocate(mf baseivfab)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(mf baseivfab)" << endl;
-  }
-
-  this->reallocate(a_data, realm::primal, a_lmin);
-}
-
-void amr_mesh::reallocate(MFAMRIVData& a_data, const std::string a_realm, const int a_lmin){
   CH_TIME("amr_mesh::allocate(mfamrivdata, realm, lmin)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(mfamrivdata, realm, lmin)" << endl;
   }
+
+  const std::string a_realm = a_data.get_realm();
 
   if(!this->query_realm(a_realm)) {
     std::string str = "amr_mesh::reallocate(mfamrivdata, realm, lmin) - could not find realm '" + a_realm + "'";

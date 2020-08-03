@@ -29,6 +29,8 @@ Real poisson_solver::s_constant_one(const RealVect a_pos){
 poisson_solver::poisson_solver(){
   m_class_name = "poisson_solver";
   this->set_verbosity(-1);
+
+  m_realm = realm::primal;
 }
 
 poisson_solver::~poisson_solver(){
@@ -73,11 +75,11 @@ void poisson_solver::allocate_internals(){
 
   const int ncomp = 1;
 
-  m_amr->allocate(m_state,  ncomp, query_ghost());
-  m_amr->allocate(m_source, ncomp, query_ghost());
-  m_amr->allocate(m_resid,  ncomp, query_ghost());
-  m_amr->allocate(m_sigma,  phase::gas, ncomp, query_ghost());
-  m_amr->allocate(m_E,      SpaceDim, query_ghost());
+  m_amr->allocate(m_state,  m_realm, ncomp, query_ghost());
+  m_amr->allocate(m_source, m_realm, ncomp, query_ghost());
+  m_amr->allocate(m_resid,  m_realm, ncomp, query_ghost());
+  m_amr->allocate(m_sigma,  m_realm, phase::gas, ncomp, query_ghost());
+  m_amr->allocate(m_E,      m_realm, SpaceDim, query_ghost());
 
   data_ops::set_value(m_state,  0.0);
   data_ops::set_value(m_source, 0.0);
@@ -106,7 +108,7 @@ void poisson_solver::pre_regrid(const int a_lbase, const int a_old_finest_level)
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
   
-  m_amr->allocate(m_cache, ncomp);
+  m_amr->allocate(m_cache, m_realm, ncomp);
   for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
     m_state[lvl]->localCopyTo(*m_cache[lvl]);
   }
@@ -184,8 +186,8 @@ Real poisson_solver::compute_U(const MFAMRCellData& a_E){
   }
 
   MFAMRCellData D, EdotD;   
-  m_amr->allocate(D, SpaceDim);
-  m_amr->allocate(EdotD, 1);
+  m_amr->allocate(D, m_realm, SpaceDim);
+  m_amr->allocate(EdotD, m_realm, 1);
   this->compute_D(D, a_E);
   data_ops::dot_prod(EdotD, D, a_E);
 
@@ -222,9 +224,9 @@ Real poisson_solver::compute_capacitance(){
   MFAMRCellData phi, source;
   EBAMRIVData sigma;
 
-  m_amr->allocate(phi, 1);
-  m_amr->allocate(source, 1);
-  m_amr->allocate(sigma, phase::gas, 1);
+  m_amr->allocate(phi,    m_realm, 1);
+  m_amr->allocate(source, m_realm, 1);
+  m_amr->allocate(sigma,  m_realm, phase::gas, 1);
 
   data_ops::set_value(phi,    0.0);
   data_ops::set_value(source, 0.0);
@@ -234,7 +236,7 @@ Real poisson_solver::compute_capacitance(){
 
   // Solve and compute energy density
   MFAMRCellData E;
-  m_amr->allocate(E, SpaceDim);
+  m_amr->allocate(E, m_realm, SpaceDim);
   m_amr->compute_gradient(E, phi); // -E
   const Real U = this->compute_U(E); // Energy density
 
@@ -444,9 +446,31 @@ void poisson_solver::set_verbosity(const int a_verbosity){
 }
 
 void poisson_solver::set_time(const int a_step, const Real a_time, const Real a_dt) {
+  CH_TIME("poisson_solver::set_time");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_time" << endl;
+  }
+  
   m_step = a_step;
   m_time = a_time;
   m_dt   = a_dt;
+}
+
+void poisson_solver::set_realm(const std::string a_realm){
+  CH_TIME("poisson_solver::set_realm");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_realm" << endl;
+  }  
+  m_realm = a_realm;
+}
+
+const std::string poisson_solver::get_realm() const{
+  CH_TIME("poisson_solver::get_realm");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::get_realm" << endl;
+  }
+  
+  return m_realm;
 }
 
 void poisson_solver::set_covered_potential(EBAMRCellData& a_phi, const int a_comp, const Real a_time){
@@ -540,7 +564,7 @@ void poisson_solver::write_plot_file(){
 
   // Allocate storage for output
   EBAMRCellData output;
-  m_amr->allocate(output, phase::gas, ncomps);
+  m_amr->allocate(output, m_realm, phase::gas, ncomps);
 
   // Copy internal data to be plotted over to 'output'
   int icomp = 0;
@@ -645,7 +669,7 @@ void poisson_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MF
 
   // Allocate some scratch data that we can use
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, phase::gas, ncomp);
+  m_amr->allocate(scratch, m_realm, phase::gas, ncomp);
 
   //
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){

@@ -49,7 +49,8 @@ public:
 		     const RealVect&                  a_prob_lo,
 		     const int                        a_blocking_factor,
 		     const int                        a_finest_level,
-		     const int                        a_pvr_buffer);
+		     const int                        a_pvr_buffer,
+		     const std::string                a_realm);
 
   /*!
     @brief Destructor
@@ -66,7 +67,8 @@ public:
 	      const RealVect&                  a_prob_lo,
 	      const int                        a_blocking_factor,
 	      const int                        a_finest_level,
-	      const int                        a_pvr_buffer);
+	      const int                        a_pvr_buffer,
+	      const std::string                a_realm);
 
   /*!
     @brief Regrid function. a_base is the coarsest grid level which did NOT change
@@ -82,6 +84,11 @@ public:
     @brief Cache particles in a pre-regrid form. a_base is the coarsest grid level which will NOT change
   */
   void pre_regrid(const int a_base);
+
+  /*!
+    @brief Get the realm
+  */
+  const std::string get_realm() const;
 
   /*!
     @brief Get all particles on all levels
@@ -248,6 +255,8 @@ protected:
 
   bool m_is_defined;
   bool m_cell_sorted;
+
+  std::string m_realm;
 
   AMRParticles<P> m_particles;
   AMRPVR m_pvr;

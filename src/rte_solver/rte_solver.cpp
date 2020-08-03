@@ -23,6 +23,10 @@ std::string rte_solver::get_name(){
   return m_name;
 }
 
+const std::string rte_solver::get_realm() const {
+  return m_realm;
+}
+
 Vector<std::string> rte_solver::get_plotvar_names() const {
   CH_TIME("rte_solver::get_plotvar_names");
   if(m_verbosity > 5){
@@ -61,6 +65,15 @@ bool rte_solver::advance(const Real a_dt, EBAMRCellData& a_state, const bool a_z
   const bool converged = this->advance(a_dt, a_state, m_source, a_zerophi);
 
   return converged;
+}
+
+void rte_solver::set_realm(const std::string a_realm){
+  CH_TIME("rte_solver::set_realm");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_realm" << endl;
+  }
+
+  m_realm = a_realm;
 }
 
 void rte_solver::set_rte_species(const RefCountedPtr<rte_species> a_rte_species){

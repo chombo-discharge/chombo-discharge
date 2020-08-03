@@ -120,7 +120,8 @@ template <typename T> void amr_mesh::allocate(particle_container<T>& a_container
 		     m_prob_lo,
 		     m_blocking_factor,
 		     m_finest_level,
-		     a_buffer);
+		     a_buffer,
+		     a_realm);
 }
 
 template <typename T> void amr_mesh::allocate_ptr(Vector<RefCountedPtr<T> >& a_data){

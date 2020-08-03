@@ -226,9 +226,9 @@ void poisson_multifluid_gmg::allocate_internals(){
 
   const int ncomp = 1;
 
-  m_amr->allocate(m_zero, ncomp);
-  m_amr->allocate(m_scaled_source, ncomp);
-  m_amr->allocate(m_scaled_sigma, phase::gas, ncomp);
+  m_amr->allocate(m_zero, m_realm, ncomp);
+  m_amr->allocate(m_scaled_source, m_realm, ncomp);
+  m_amr->allocate(m_scaled_sigma, m_realm, phase::gas, ncomp);
 
   data_ops::set_value(m_zero, 0.0);
 }
@@ -605,9 +605,9 @@ void poisson_multifluid_gmg::set_coefficients(){
   const int ghosts = 1;
   const Real eps0  = m_compgeom->get_eps0();
   
-  m_amr->allocate(m_aco,       ncomps, ghosts);
-  m_amr->allocate(m_bco,       ncomps, ghosts);
-  m_amr->allocate(m_bco_irreg, ncomps, ghosts);
+  m_amr->allocate(m_aco,       m_realm, ncomps, ghosts);
+  m_amr->allocate(m_bco,       m_realm, ncomps, ghosts);
+  m_amr->allocate(m_bco_irreg, m_realm, ncomps, ghosts);
 
   data_ops::set_value(m_aco,       0.0);  // Always zero for poisson equation, but that is done from alpha. 
   data_ops::set_value(m_bco,       eps0); // Will override this later
@@ -1012,8 +1012,8 @@ void poisson_multifluid_gmg::setup_solver(){
   // Dummies for init
   const int ncomp = 1;
   MFAMRCellData dummy1, dummy2;
-  m_amr->allocate(dummy1, ncomp);
-  m_amr->allocate(dummy2, ncomp);
+  m_amr->allocate(dummy1, m_realm, ncomp);
+  m_amr->allocate(dummy2, m_realm, ncomp);
   data_ops::set_value(dummy1, 0.0);
   data_ops::set_value(dummy2, 0.0);
 

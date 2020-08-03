@@ -49,6 +49,11 @@ namespace physics {
     }
 
     template <class T>
+    void poisson_stepper<T>::register_realms(){
+      // Do nothing. 
+    }
+
+    template <class T>
     void poisson_stepper<T>::allocate() {
       m_poisson->allocate_internals();
       m_sigma->allocate_internals();

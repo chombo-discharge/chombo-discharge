@@ -324,18 +324,11 @@ public:
     @brief Allocate a data holder over a specific realm
   */
   virtual void allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
-  
-  /*!
-    @brief Reallocate data. 
-    @details This does not touch levels below or equal to a_base. If a_base is < 0, everything is reallocated. 
-    Size of ghost vectors and components is maintained. 
-  */
-  virtual void reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data. 
   */
-  virtual void reallocate(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lmin);
+  virtual void reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data. 
@@ -343,29 +336,14 @@ public:
   virtual void reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
-    @brief Reallocate data. 
-  */
-  virtual void reallocate(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lmin);
-
-  /*!
     @brief Reallocate data above a_base
   */
   virtual void reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
-    @brief Reallocate data.
-  */
-  virtual void reallocate(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lmin);
-
-  /*!
     @brief Reallocate data above a_base
   */
   virtual void reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_lmin);
-
-    /*!
-    @brief Reallocate data above a_base
-  */
-  virtual void reallocate(EBAMRIFData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
@@ -375,37 +353,17 @@ public:
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(EBAMRBool& a_data, const std::string a_realm, const int a_lmin);
-
-  /*!
-    @brief Reallocate data above a_base
-  */
   virtual void reallocate(MFAMRCellData& a_data, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(MFAMRCellData& a_data, const std::string a_realm, const int a_lmin);
-
-  /*!
-    @brief Reallocate data above a_base
-  */
   virtual void reallocate(MFAMRFluxData& a_data, const int a_lmin);
-
-  /*!
-    @brief Reallocate data above a_base
-  */
-  virtual void reallocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_lmin);
   
   /*!
     @brief Reallocate data above a_base
   */
   virtual void reallocate(MFAMRIVData& a_data, const int a_lmin);
-
-  /*!
-    @brief Reallocate data above a_base
-  */
-  virtual void reallocate(MFAMRIVData& a_data, const std::string a_realm, const int a_lmin);
 
   /*!
     @brief Average down both phases
@@ -1113,8 +1071,6 @@ public:
     @brief Build tiles from a box
   */
   virtual Vector<Box> make_tiles(const Box a_box, const IntVect a_tilesize);
-
-
 
   /*!
     @brief Get the name of all realms

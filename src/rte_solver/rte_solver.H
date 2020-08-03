@@ -34,6 +34,11 @@ public:
   virtual std::string get_name();
 
   /*!
+    @brief Get realm
+  */
+  virtual const std::string get_realm() const;
+
+  /*!
     @brief Parse options
   */
   virtual void parse_options() = 0;
@@ -57,6 +62,11 @@ public:
     @brief Advance RTE onto isotropic state a_state
   */
   virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false) = 0;
+
+  /*!
+    @brief Set realm
+  */
+  virtual void set_realm(const std::string a_realm);
 
   /*!
     @brief Set the photon group
@@ -239,6 +249,11 @@ public:
   virtual EBAMRIVData& get_kappa_eb();
   
 protected:
+
+  /*!
+    @brief Realm
+  */
+  std::string m_realm;
 
   /*!
     @brief Phase 

@@ -47,12 +47,17 @@ namespace physics {
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
       void print_step_report() override {};
 
+      // Registration routines
+      void register_realms() override;
+      void register_operators() override;
+
       // Regrid routines
       bool need_to_regrid() override {return false;}
-      void register_operators() override;
+
       void pre_regrid(const int a_lbase, const int a_finest_level) override;
       void deallocate() override;
       void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+      
 
     protected:
 

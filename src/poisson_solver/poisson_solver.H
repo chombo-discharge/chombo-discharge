@@ -27,8 +27,14 @@ public:
     mapped // Not supported yet...?
   };
 
+  /*!
+    @brief Potential of one...
+  */
   static Real s_potential_one(const Real a_time);
 
+  /*!
+    @brief Factor of one....
+  */
   static Real s_constant_one(const RealVect a_pos);
 
   /*!
@@ -170,6 +176,11 @@ public:
   virtual void sanity_check();
 
   /*!
+    @brief Set realm
+  */
+  virtual void set_realm(const std::string a_realm);
+
+  /*!
     @brief Get current time
   */
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
@@ -228,6 +239,11 @@ public:
     @brief Get Poisson BC at specified domain wall
   */
   virtual wall_bc& get_wall_bc(const int a_dir, Side::LoHiSide a_side) const;
+
+  /*!
+    @brief Get the realm
+  */
+  const std::string get_realm() const;
   
   /*!
     @brief Get multifluid state
@@ -257,8 +273,14 @@ public:
   
 protected:
 
-
-
+  /*!
+    @brief Realm
+  */
+  std::string m_realm;
+  
+  /*!
+    @brief Class name
+  */
   std::string m_class_name;
 
   /*!

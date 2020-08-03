@@ -154,7 +154,7 @@ void driver::cache_tags(const EBAMRTags& a_tags){
   const int finest_level  = m_amr->get_finest_level();
   const int ghost         = 0;
 
-  m_amr->allocate(m_cached_tags, ncomp, ghost);
+  m_amr->allocate(m_cached_tags, m_realm, ncomp, ghost);
   m_cached_tags.resize(1+finest_level);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -1992,7 +1992,7 @@ void driver::write_geometry(){
   }
 
   EBAMRCellData output;
-  m_amr->allocate(output, phase::gas, 1);
+  m_amr->allocate(output, m_realm, phase::gas, 1);
   data_ops::set_value(output, 0.0);
   Vector<std::string> names(1, "dummy_data");
 
@@ -2055,7 +2055,7 @@ void driver::write_plot_file(){
   ncomp += this->get_num_plot_vars();
 
   // Allocate storage
-  m_amr->allocate(output, phase::gas, ncomp);
+  m_amr->allocate(output, m_realm, phase::gas, ncomp);
   data_ops::set_value(output, 0.0);
 
   // Assemble data
@@ -2140,7 +2140,7 @@ void driver::write_tags(EBAMRCellData& a_output, int& a_comp){
   
   // Alloc some temporary storage
   EBAMRCellData tags;
-  m_amr->allocate(tags, phase::gas, 1);
+  m_amr->allocate(tags, m_realm, phase::gas, 1);
   data_ops::set_value(tags, 0.0);
     
   // Set tagged cells = 1
@@ -2181,7 +2181,7 @@ void driver::write_ranks(EBAMRCellData& a_output, int& a_comp){
   }
 
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, phase::gas, 1);
+  m_amr->allocate(scratch, m_realm, phase::gas, 1);
 
   const Real rank = 1.0*procID();
   data_ops::set_value(scratch, rank);

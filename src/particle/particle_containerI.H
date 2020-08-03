@@ -24,9 +24,10 @@ particle_container<P>::particle_container(const Vector<DisjointBoxLayout>& a_gri
 					  const RealVect&                  a_prob_lo,
 					  const int                        a_blocking_factor,
 					  const int                        a_finest_level,
-					  const int                        a_pvr_buffer){
+					  const int                        a_pvr_buffer,
+					  const std::string                a_realm){
 
-  this->define(a_grids, a_domains, a_dx, a_ref_rat, a_prob_lo, a_blocking_factor, a_finest_level, a_pvr_buffer);
+  this->define(a_grids, a_domains, a_dx, a_ref_rat, a_prob_lo, a_blocking_factor, a_finest_level, a_pvr_buffer, a_realm);
 }
 
 template <class P>
@@ -42,14 +43,17 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
 				   const RealVect&                  a_prob_lo,
 				   const int                        a_blocking_factor,
 				   const int                        a_finest_level,
-				   const int                        a_pvr_buffer){
+				   const int                        a_pvr_buffer,
+				   const std::string                a_realm){
   m_grids        = a_grids;
   m_domains      = a_domains;
   m_ref_rat      = a_ref_rat;
   m_prob_lo      = a_prob_lo;
   m_finest_level = a_finest_level;
   m_buffer       = a_pvr_buffer;
+  m_realm        = a_realm;
   m_blocking_factor = a_blocking_factor;
+
 
   m_dx.resize(1 + m_finest_level);
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -96,6 +100,11 @@ void particle_container<P>::setup_particle_data(const int a_base, const int a_fi
 
     m_cell_particles[lvl] = RefCountedPtr<LayoutData<BinFab<P> > > (new LayoutData<BinFab<P> >(m_grids[lvl]));
   }
+}
+
+template <class P>
+const std::string particle_container<P>::get_realm() const {
+  return m_realm;
 }
 
 template <class P>
