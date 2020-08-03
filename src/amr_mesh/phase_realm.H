@@ -8,7 +8,6 @@
 #ifndef _PHASE_REALM_H_
 #define _PHASE_REALM_H_
 
-#include "type_definitions.H"
 #include "computational_geometry.H"
 #include "mfis.H"
 #include "irreg_amr_stencil.H"

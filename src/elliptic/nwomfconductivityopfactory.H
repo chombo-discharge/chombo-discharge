@@ -8,7 +8,6 @@
 #ifndef _NWOMFCONDUCTIVITYOPFACTORY_
 #define _NWOMFCONDUCTIVITYOPFACTORY_
 
-#include "type_definitions.H"
 #include "nwomfconductivityop.H"
 #include "mfis.H"
 #include "mfalias.H"

@@ -5,7 +5,6 @@
   @date Nov. 2017
 */
 
-#include "type_definitions.H"
 #include "eb_centroid_interp.H"
 #include "stencil_ops.H"
 

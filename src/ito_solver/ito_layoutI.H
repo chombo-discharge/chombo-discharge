@@ -28,8 +28,8 @@ ito_layout<T>::~ito_layout(){
 }
 
 template <class T>
-ito_iterator<T> ito_layout<T>::iterator(const species_iteration::which_species a_mode){
-  return ito_iterator<T>(*this, a_mode);
+ito_iterator<T> ito_layout<T>::iterator(){
+  return ito_iterator<T>(*this);
 }
 
 template <class T>

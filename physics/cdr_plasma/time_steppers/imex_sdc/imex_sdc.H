@@ -8,7 +8,6 @@
 #ifndef _IMEX_SDC_
 #define _IMEX_SDC_
 
-#include "type_definitions.H"
 #include "amr_mesh.H"
 #include "cdr_plasma_stepper.H"
 #include "cdr_iterator.H"

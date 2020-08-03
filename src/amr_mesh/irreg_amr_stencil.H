@@ -10,7 +10,6 @@
 
 #include "EBAMRData.H"
 #include "irreg_stencil.H"
-#include "type_definitions.H"
 
 /*!
   @brief Class for holding stencils on irregular cells over an entire AMR hierarchy

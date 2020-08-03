@@ -12,6 +12,7 @@
 #include "MFLevelGrid.H"
 #include "MFInterfaceFAB.H"
 #include "MFBaseIVFAB.H"
+#include "MFCellFAB.H"
 
 
 #include <Stencils.H>

@@ -5,7 +5,6 @@
   @date Nov. 2017
 */
 
-#include "type_definitions.H"
 #include "irreg_stencil.H"
 
 #include <EBArith.H>

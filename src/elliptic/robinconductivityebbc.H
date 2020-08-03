@@ -8,7 +8,6 @@
 #ifndef _ROBINCONDUCTIVITYEBBC_
 #define _ROBINCONDUCTIVITYEBBC_
 
-#include "type_definitions.H"
 #include "irreg_stencil.H"
 #include "robin_coef.H"
 

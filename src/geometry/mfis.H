@@ -5,10 +5,8 @@
   @date   Nov. 2017
 */
 
-#ifndef _mfindexspace_
-#define _mfindexspace_
-
-#include "type_definitions.H"
+#ifndef _MFIS_H_
+#define _MFIS_H_
 
 #include <GeometryService.H>
 #include <EBIndexSpace.H>

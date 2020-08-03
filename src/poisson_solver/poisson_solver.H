@@ -8,7 +8,6 @@
 #ifndef _POISSON_SOLVER_
 #define _POISSON_SOLVER_
 
-#include "type_definitions.H"
 #include "computational_geometry.H"
 #include "amr_mesh.H"
 #include "wall_bc.H"

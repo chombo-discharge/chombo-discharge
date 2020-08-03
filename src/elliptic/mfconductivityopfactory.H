@@ -8,7 +8,6 @@
 #ifndef _MFCONDUCTIVITYOPFACTORY_
 #define _MFCONDUCTIVITYOPFACTORY_
 
-#include "type_definitions.H"
 #include "mfconductivityop.H"
 #include "mfis.H"
 #include "mfalias.H"

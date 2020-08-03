@@ -8,7 +8,6 @@
 #ifndef _SDC_
 #define _SDC_
 
-#include "type_definitions.H"
 #include "amr_mesh.H"
 #include "time_stepper.H"
 #include "cdr_iterator.H"

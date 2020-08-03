@@ -8,7 +8,6 @@
 #ifndef _NWOMFCONDUCTIVITYOP_
 #define _NWOMFCONDUCTIVITYOP_
 
-#include "type_definitions.H"
 #include "mfis.H"
 #include "jump_bc.H"
 #include "MFLevelGrid.H"

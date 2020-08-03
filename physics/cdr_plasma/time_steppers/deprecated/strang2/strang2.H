@@ -8,7 +8,6 @@
 #ifndef _STRANG2_
 #define _STRANG2_
 
-#include "type_definitions.H"
 #include "amr_mesh.H"
 #include "time_stepper.H"
 #include "cdr_iterator.H"

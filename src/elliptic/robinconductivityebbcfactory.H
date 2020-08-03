@@ -8,7 +8,6 @@
 #ifndef _ROBINCONDUCTIVITYEBBCFACTORY_
 #define _ROBINCONDUCTIVITYEBBCFACTORY_
 
-#include "type_definitions.H"
 #include "EBAMRData.H"
 #include "irreg_stencil.H"
 #include "robinconductivityebbc.H"

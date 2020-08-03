@@ -9,7 +9,6 @@
 #ifndef _CELL_TAGGER_
 #define _CELL_TAGGER_
 
-#include "type_definitions.H"
 #include "computational_geometry.H"
 #include "amr_mesh.H"
 #include "real_box.H"

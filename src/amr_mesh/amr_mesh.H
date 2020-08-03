@@ -9,7 +9,6 @@
 #define _AMR_MESH_
 
 #include "EBAMRData.H"
-#include "type_definitions.H"
 #include "computational_geometry.H"
 #include "mfis.H"
 #include "irreg_amr_stencil.H"

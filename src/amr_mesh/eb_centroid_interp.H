@@ -9,7 +9,6 @@
 #ifndef _EB_CENTROID_INTERP_
 #define _EB_CENTROID_INTERP_
 
-#include "type_definitions.H"
 #include "irreg_stencil.H"
 
 /*!

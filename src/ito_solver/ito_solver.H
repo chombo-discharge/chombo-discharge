@@ -9,7 +9,6 @@
 #define _ITO_SOLVER_
 
 #include "amr_mesh.H"
-#include "type_definitions.H"
 #include "computational_geometry.H"
 #include "ito_species.H"
 #include "ito_particle.H"

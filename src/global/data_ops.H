@@ -8,7 +8,6 @@
 #ifndef _data_ops_
 #define _data_ops_
 
-#include "type_definitions.H"
 #include "EBAMRData.H"
 #include "MFInterfaceFAB.H"
 

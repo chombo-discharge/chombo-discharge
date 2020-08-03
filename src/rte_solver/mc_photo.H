@@ -12,6 +12,7 @@
 #include "EBParticleInterp.H"
 #include "particle_container.H"
 #include "wall_bc.H"
+#include "photon.H"
 
 #include <Particle.H>
 #include <ParticleData.H>

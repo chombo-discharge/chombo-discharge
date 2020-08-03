@@ -8,7 +8,6 @@
 #ifndef _PIC_SOLVER_
 #define _PIC_SOLVER_
 
-#include "type_definitions.H"
 #include "computational_geometry.H"
 #include "amr_mesh.H"
 #include "physical_domain.H"

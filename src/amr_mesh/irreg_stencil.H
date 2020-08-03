@@ -9,8 +9,6 @@
 #ifndef _IRREG_STENCIL_
 #define _IRREG_STENCIL_
 
-#include "type_definitions.H"
-
 #include <DisjointBoxLayout.H>
 #include <EBISLayout.H>
 #include <BaseIVFAB.H>

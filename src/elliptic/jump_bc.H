@@ -9,6 +9,7 @@
 #define _JUMP_BC_
 
 #include "mfis.H"
+#include "MFCellFAB.H"
 #include "MFLevelGrid.H"
 #include "MFInterfaceFAB.H"
 #include "MFBaseIVFAB.H"

@@ -8,13 +8,12 @@
 #ifndef _WALL_BC_
 #define _WALL_BC_
 
-#include "type_definitions.H"
-
 #include <LoHiSide.H>
 #include <RealVect.H>
 
 /*!
   @brief Types of wall boundary conditions for various solvers. I hate this structure. 
+  @todo This should be moved somewhere else and wall_bc should be a separate file. Maybe we should call it poisson_domain_bc.
 */
 namespace wallbc {
   enum which_bc {

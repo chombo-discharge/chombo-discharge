@@ -8,7 +8,6 @@
 #ifndef _MFCONDUCTIVITYOP_
 #define _MFCONDUCTIVITYOP_
 
-#include "type_definitions.H"
 #include "mfis.H"
 #include "jump_bc.H"
 #include "MFLevelGrid.H"

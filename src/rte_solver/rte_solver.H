@@ -8,7 +8,6 @@
 #ifndef _RTE_SOLVER_
 #define _RTE_SOLVER_
 
-#include "type_definitions.H"
 #include "computational_geometry.H"
 #include "amr_mesh.H"
 #include "rte_species.H"

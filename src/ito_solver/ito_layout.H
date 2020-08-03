@@ -43,7 +43,7 @@ public:
   /*!
     @brief Return iterator. The iterator is a simple random access object
   */
-  virtual ito_iterator<T> iterator(const species_iteration::which_species a_mode = species_iteration::all);
+  virtual ito_iterator<T> iterator();
 
   /*!
     @brief Define function
