@@ -14,6 +14,23 @@
 #include <RealVect.H>
 
 /*!
+  @brief Types of wall boundary conditions for various solvers. I hate this structure. 
+*/
+namespace wallbc {
+  enum which_bc {
+    dirichlet     = 0,
+    dirichlet_map = 1,
+    neumann       = 2,
+    neumann_map   = 3,
+    robin         = 4,
+    robin_map     = 5,
+    outflow       = 6,
+    symmetry      = 7,
+    wall          = 8,
+  };
+};
+
+/*!
   @brief Indexing class of BCs on domain edges. Very lightweight stuff.
 */
 class wall_bc {
