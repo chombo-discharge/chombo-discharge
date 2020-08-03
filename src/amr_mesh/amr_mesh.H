@@ -43,6 +43,16 @@
   @details This class handles most (if not all) spatial operations. Examples are grid generation, coarsening of data, interpolation of data, memory allocations etc. 
 */
 class amr_mesh {
+protected:
+  
+  /*!
+    @brief Silly enum for default ghost interpolation
+  */
+  enum class ghost_interpolation {
+    pwl,
+    quad,
+  };
+  
 public:
 
   /*!
@@ -1160,7 +1170,7 @@ protected:
   /*!
     @brief Interpolation type
   */
-  ghost_interpolation::which_type m_interp_type;
+  ghost_interpolation m_interp_type;
 
   /*!
     @brief Coarsest box where we compute

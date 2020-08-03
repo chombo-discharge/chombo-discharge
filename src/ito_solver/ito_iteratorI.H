@@ -17,7 +17,7 @@ ito_iterator<T>::ito_iterator(){
 }
 
 template <class T>
-ito_iterator<T>::ito_iterator(ito_layout<T>& a_layout, const species_iteration::which_species a_mode){
+ito_iterator<T>::ito_iterator(ito_layout<T>& a_layout, const species_iteration a_mode){
   CH_TIME("ito_iterator<T>::ito_iterator<T>");
     
   m_solvers  = a_layout.get_solvers();

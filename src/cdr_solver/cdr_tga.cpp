@@ -228,16 +228,16 @@ void cdr_tga::set_tga(const bool a_use_tga){
   }
 }
 
-void cdr_tga::set_gmg_solver_parameters(relax::which_relax a_relax_type,
-					amrmg::which_mg    a_gmg_type,      
-					const int          a_verbosity,          
-					const int          a_pre_smooth,         
-					const int          a_post_smooth,       
-					const int          a_bot_smooth,         
-					const int          a_max_iter,
-					const int          a_min_iter,
-					const Real         a_eps,               
-					const Real         a_hang){
+void cdr_tga::set_gmg_solver_parameters(relax      a_relax_type,
+					amrmg      a_gmg_type,      
+					const int  a_verbosity,          
+					const int  a_pre_smooth,         
+					const int  a_post_smooth,       
+					const int  a_bot_smooth,         
+					const int  a_max_iter,
+					const int  a_min_iter,
+					const Real a_eps,               
+					const Real a_hang){
   CH_TIME("cdr_tga::set_gmg_solver_parameters");
   if(m_verbosity > 5){
     pout() << m_name + "::set_gmg_solver_parameters" << endl;
@@ -255,6 +255,8 @@ void cdr_tga::set_gmg_solver_parameters(relax::which_relax a_relax_type,
   m_gmg_hang        = a_hang;
 
   ParmParse pp("cdr_tga");
+  std::string str;
+
 
   pp.get("gmg_verbosity",   m_gmg_verbosity);
   pp.get("gmg_pre_smooth",  m_gmg_pre_smooth);
@@ -264,6 +266,36 @@ void cdr_tga::set_gmg_solver_parameters(relax::which_relax a_relax_type,
   pp.get("gmg_min_iter",    m_gmg_min_iter);
   pp.get("gmg_tolerance",   m_gmg_eps);
   pp.get("gmg_hang",        m_gmg_hang);
+
+  // Get the relaxation type
+  pp.get("gmg_relax",        str);
+  if(str == "jacobi"){
+    m_gmg_relax_type = relax::jacobi;
+  }
+  else if(str == "gauss_seidel"){
+    m_gmg_relax_type = relax::gauss_seidel;
+  }
+  else if(str == "gsrb"){
+    m_gmg_relax_type = relax::gsrb_fast;
+  }
+  else{
+    MayDay::Abort("cdr_tga::set_gmg_solver_parameters - unknown relaxation method requested");
+  }
+
+  // Get the MG cycle
+  pp.get("gmg_cycle",        str);
+  if(str == "full"){
+    m_gmg_type = amrmg::full;
+  }
+  else if(str == "vvcycle"){
+    m_gmg_type = amrmg::vcycle;
+  }
+  else if(str == "fcycle"){
+    m_gmg_type = amrmg::fcycle;
+  }
+  else{
+    MayDay::Abort("cdr_tga::set_gmg_solver_parameters - unknown MG cycle method requested");
+  }
 }
 
 void cdr_tga::setup_gmg(){
@@ -382,6 +414,20 @@ void cdr_tga::setup_operator_factory(){
 
   domfact->setValue(0.0);
   ebfact->setValue(0.0);
+
+  // Set the relaxation type
+  int relax_type = 0;
+  if(m_gmg_relax_type == relax::jacobi){
+    relax_type = 0;
+  }
+  else if(m_gmg_relax_type == relax::gauss_seidel){
+    relax_type = 1;
+  }
+  else if(m_gmg_relax_type == relax::gsrb_fast){
+    relax_type = 2;
+  }
+
+      
   
   // Create operator factory.
   data_ops::set_value(m_aco, 1.0); // We're usually solving (1 - dt*nabla^2)*phi^(k+1) = phi^k + dt*S^k so aco=1
@@ -399,7 +445,7 @@ void cdr_tga::setup_operator_factory(){
 										 ebfact,
 										 ghost*IntVect::Unit,
 										 ghost*IntVect::Unit,
-										 m_gmg_relax_type,
+										 relax_type,
 										 m_bottom_drop,
 										 -1,
 										 m_mg_levelgrids));
@@ -427,10 +473,23 @@ void cdr_tga::setup_multigrid(){
   m_gmg_solver->m_imin = m_gmg_min_iter;
   m_gmg_solver->m_verbosity = m_gmg_verbosity;
   m_gmg_solver->define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
+
+  // Make m_gmg_type into an int for multigrid
+  int gmg_type;
+  if(m_gmg_type == amrmg::full){
+    gmg_type = 0;
+  }
+  else if(m_gmg_type == amrmg::vcycle){
+    gmg_type = 1;
+  }
+  else if(m_gmg_type == amrmg::fcycle){
+    gmg_type = 2;
+  }
+  
   m_gmg_solver->setSolverParameters(m_gmg_pre_smooth,
 				    m_gmg_post_smooth,
 				    m_gmg_bot_smooth,
-				    m_gmg_type,
+				    gmg_type,
 				    m_gmg_max_iter,
 				    m_gmg_eps,
 				    m_gmg_hang,

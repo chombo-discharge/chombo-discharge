@@ -550,16 +550,16 @@ void poisson_multifluid_gmg::set_bottom_drop(const int a_bottom_drop){
   }
 }
 
-void poisson_multifluid_gmg::set_gmg_solver_parameters(relax::which_relax a_relax_type,
-						       amrmg::which_mg    a_gmg_type,      
-						       const int          a_verbosity,          
-						       const int          a_pre_smooth,         
-						       const int          a_post_smooth,       
-						       const int          a_bot_smooth,         
-						       const int          a_max_iter,
-						       const int          a_min_iter,
-						       const Real         a_eps,               
-						       const Real         a_hang){
+void poisson_multifluid_gmg::set_gmg_solver_parameters(relax      a_relax_type,
+						       amrmg      a_gmg_type,      
+						       const int  a_verbosity,          
+						       const int  a_pre_smooth,         
+						       const int  a_post_smooth,       
+						       const int  a_bot_smooth,         
+						       const int  a_max_iter,
+						       const int  a_min_iter,
+						       const Real a_eps,               
+						       const Real a_hang){
   CH_TIME("poisson_multifluid_gmg::set_gmg_solver_parameters");
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::set_gmg_solver_parameters" << endl;
@@ -916,6 +916,17 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   // on the domain [-1,1] in the x-direction
   m_length_scale = 2./(domains[0].size(0)*dx[0]);
 
+  int relax_type;
+  if(m_gmg_relax_type == relax::jacobi){
+    relax_type = 0;
+  }
+  else if(m_gmg_relax_type == relax::gauss_seidel){
+    relax_type = 1;
+  }
+  else if(m_gmg_relax_type == relax::gsrb_fast){
+    relax_type = 2;
+  }
+
   // Create factory and set potential
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
 										 mflg,
@@ -934,7 +945,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 										 ghost_phi,
 										 ghost_rhs,
 										 m_bc_order,
-										 m_gmg_relax_type,
+										 relax_type,
 										 m_bottom_drop,
 										 1 + finest_level,
 										 mg_levelgrids));
@@ -973,12 +984,23 @@ void poisson_multifluid_gmg::setup_solver(){
     botsolver = &m_gmres;
   }
 
+  int gmg_type;
+  if(m_gmg_type == amrmg::full){
+    gmg_type = 0;
+  }
+  else if(m_gmg_type == amrmg::vcycle){
+    gmg_type = 1;
+  }
+  else if(m_gmg_type == amrmg::fcycle){
+    gmg_type = 2;
+  }
+
 
   m_gmg_solver.define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
   m_gmg_solver.setSolverParameters(m_gmg_pre_smooth,
 				   m_gmg_post_smooth,
 				   m_gmg_bot_smooth,
-				   m_gmg_type,
+				   gmg_type,
 				   m_gmg_max_iter,
 				   m_gmg_eps,
 				   m_gmg_hang,

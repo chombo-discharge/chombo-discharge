@@ -14,21 +14,19 @@
 #include "wall_bc.H"
 
 /*!
-  @brief Potential types on domain edges (faces). 
-*/
-namespace potential {
-  enum ground_live {
-    ground = 0,
-    live   = 1,
-    mapped = 2, // Not currently supported. But it will. 
-  };
-};
-
-/*!
   @brief Abstract Poisson solver class. Boundary conditions are passed through this class. 
 */
 class poisson_solver {
 public:
+
+  /*!
+    @brief Silly enum for describing the potential at domain faces
+  */
+  enum class potential {
+    ground,
+    live,
+    mapped // Not supported yet...?
+  };
 
   static Real s_potential_one(const Real a_time);
 
@@ -125,7 +123,7 @@ public:
   /*!
     @brief Set const value Dirichlet wall BC
   */
-  virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential::ground_live a_live);
+  virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential a_live);
 
   /*!
     @brief Set constant value Neumann wall BC
@@ -259,6 +257,8 @@ public:
 
   
 protected:
+
+
 
   std::string m_class_name;
 

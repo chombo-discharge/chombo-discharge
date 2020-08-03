@@ -17,7 +17,7 @@ cdr_iterator<T>::cdr_iterator(){
 }
 
 template <class T>
-cdr_iterator<T>::cdr_iterator(cdr_layout<T>& a_layout, const species_iteration::which_species a_mode){
+cdr_iterator<T>::cdr_iterator(cdr_layout<T>& a_layout, const species_iteration a_mode){
   CH_TIME("cdr_iterator<T>::cdr_iterator");
     
   m_solvers  = a_layout.get_solvers();
@@ -86,19 +86,19 @@ void cdr_iterator<T>::operator++(){
       const RefCountedPtr<T>& solver            = m_solvers[isolver];
       const RefCountedPtr<cdr_species>& species = m_species[isolver];
       
-      if(m_mode = species_iteration::charged){
+      if(m_mode == species_iteration::charged){
 	if(species->get_charge() != 0){
 	  m_isolver = isolver;
 	  break;
 	}
       }
-      else if(m_mode = species_iteration::negative){
+      else if(m_mode == species_iteration::negative){
 	if(species->get_charge() < 0){
 	  m_isolver = isolver;
 	  break;
 	}
       }
-      else if(m_mode = species_iteration::positive){
+      else if(m_mode == species_iteration::positive){
 	if(species->get_charge() > 0){
 	  m_isolver = isolver;
 	  break;

@@ -678,6 +678,18 @@ void eddington_sp1::setup_operator_factory(){
   m_ebfact->set_coefs(m_robinco);
   m_ebfact->set_type(stencil_type::lsq);
 
+  //  Make relaxation type into int code
+  int relax_type = 0;
+  if(m_gmg_relax_type == relax::jacobi){
+    relax_type = 0;
+  }
+  else if(m_gmg_relax_type == relax::gauss_seidel){
+    relax_type = 1;
+  }
+  else if(m_gmg_relax_type == relax::gsrb_fast){
+    relax_type = 2;
+  }
+
   // Create operator factory.
   m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
 										 quadcfi,
@@ -692,7 +704,7 @@ void eddington_sp1::setup_operator_factory(){
 										 m_ebfact,
 										 ghost*IntVect::Unit,
 										 ghost*IntVect::Unit,
-										 m_gmg_relax_type,
+										 relax_type,
 										 m_bottom_drop,
 										 -1,
 										 m_mg_levelgrids));
@@ -717,12 +729,24 @@ void eddington_sp1::setup_multigrid(){
     botsolver = &m_bicgstab;
   }
 
+    // Make m_gmg_type into an int for multigrid
+  int gmg_type;
+  if(m_gmg_type == amrmg::full){
+    gmg_type = 0;
+  }
+  else if(m_gmg_type == amrmg::vcycle){
+    gmg_type = 1;
+  }
+  else if(m_gmg_type == amrmg::fcycle){
+    gmg_type = 2;
+  }
+
   m_gmg_solver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
   m_gmg_solver->define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
   m_gmg_solver->setSolverParameters(m_gmg_pre_smooth,
 				    m_gmg_post_smooth,
 				    m_gmg_bot_smooth,
-				    m_gmg_type,
+				    gmg_type,
 				    m_gmg_max_iter,
 				    m_gmg_eps,
 				    m_gmg_hang,

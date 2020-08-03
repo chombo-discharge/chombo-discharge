@@ -25,6 +25,26 @@
   @brief Extension class of cdr_solver that uses ebconductivityop for diffusion part. Can also solve for stochastic diffusion
 */
 class cdr_tga : public cdr_solver {
+protected:
+
+  /*!
+    @brief Silly enum for switching between relaxation methods.
+  */
+  enum class relax{
+    jacobi,
+    gauss_seidel,
+    gsrb_fast
+  };
+
+  /*!
+    @brief Silly enum for switching between multigrid cycling
+  */
+  enum class amrmg{
+    full,
+    vcycle,
+    fcycle,
+  };
+  
 public:
 
   /*!
@@ -68,16 +88,16 @@ public:
   /*!
     @brief Set implicit diffusion solver solver parameters. These are normally good for this class. 
   */
-  virtual void set_gmg_solver_parameters(relax::which_relax a_relax_type = relax::gsrb_fast,
-					 amrmg::which_mg a_gmg_type      = amrmg::vcycle,
-					 const int a_verbosity           = 10,
-					 const int a_pre_smooth          = 2,
-					 const int a_post_smooth         = 2,
-					 const int a_bot_smooth          = 2,
-					 const int a_max_iter            = 16,
-					 const int a_min_iter            = 5,
-					 const Real a_eps                = 1.E-8,
-					 const Real a_hang               = 0.2);
+  virtual void set_gmg_solver_parameters(relax      a_relax_type  = relax::gsrb_fast,
+					 amrmg      a_gmg_type    = amrmg::vcycle,
+					 const int  a_verbosity   = 10,
+					 const int  a_pre_smooth  = 2,
+					 const int  a_post_smooth = 2,
+					 const int  a_bot_smooth  = 2,
+					 const int  a_max_iter    = 16,
+					 const int  a_min_iter    = 5,
+					 const Real a_eps         = 1.E-8,
+					 const Real a_hang        = 0.2);
 
   /*!
     @brief Set the bottom solver.  
@@ -141,12 +161,12 @@ protected:
   /*!
     @brief Relaxation type for gmg
   */
-  relax::which_relax m_gmg_relax_type;
+  relax m_gmg_relax_type;
 
   /*!
     @brief GMG multigrid type
   */
-  amrmg::which_mg m_gmg_type;
+  amrmg m_gmg_type;
   
   /*!
     @brief Geometric multigrid solver

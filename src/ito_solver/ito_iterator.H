@@ -16,6 +16,17 @@
 template <class T>
 class ito_iterator {
 public:
+
+  /*!
+    @brief Silly enum for iterating through selected species
+  */
+  enum class species_iteration{
+    all,
+    charged,
+    negative,
+    positive,
+    neutral
+  };
   
   /*!
     @brief Empty constructor
@@ -25,7 +36,7 @@ public:
   /*!
     @brief Full constructor
   */
-  ito_iterator(ito_layout<T>& a_layout, const species_iteration::which_species a_mode = species_iteration::all);
+  ito_iterator(ito_layout<T>& a_layout, const species_iteration a_mode = species_iteration::all);
 
   /*!
     @brief Destructor
@@ -72,7 +83,7 @@ protected:
   /*!
     @brief Which species to iterate over
   */
-  species_iteration::which_species m_mode;
+  species_iteration m_mode;
   
   /*!
     @brief 

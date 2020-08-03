@@ -358,7 +358,7 @@ void poisson_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   m_amr = a_amr;
 }
 
-void poisson_solver::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential::ground_live a_live){
+void poisson_solver::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential a_live){
   CH_TIME("poisson_solver::set_dirichlet_wall_bc");
   if(m_verbosity > 5){
     pout() << "poisson_solver::set_dirichlet_wall_bc" << endl;
@@ -366,7 +366,12 @@ void poisson_solver::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_sid
 
   const int idx = wall_bc::map_bc(a_dir, a_side);
   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::dirichlet));
-  m_wallbc[idx]->set_live(a_live);
+  if(a_live == potential::live){
+    m_wallbc[idx]->set_live(true);
+  }
+  else{
+    m_wallbc[idx]->set_live(false);
+  }
 }
 
 void poisson_solver::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){

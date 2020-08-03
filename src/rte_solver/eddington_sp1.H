@@ -29,6 +29,26 @@
   @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. Also includes stochastically drawn photons. 
 */
 class eddington_sp1 : public rte_solver {
+protected:
+
+  /*!
+    @brief Silly enum for switching between relaxation methods.
+  */
+  enum class relax{
+    jacobi,
+    gauss_seidel,
+    gsrb_fast
+  };
+
+  /*!
+    @brief Silly enum for switching between multigrid cycling
+  */
+  enum class amrmg{
+    full,
+    vcycle,
+    fcycle,
+  };
+  
 public:
 
   /*!
@@ -133,12 +153,12 @@ protected:
   /*!
     @brief Relaxation type for gmg
   */
-  relax::which_relax m_gmg_relax_type;
+  relax m_gmg_relax_type;
 
   /*!
     @brief GMG multigrid type
   */
-  amrmg::which_mg m_gmg_type;
+  amrmg m_gmg_type;
 
   /*!
     @brief Needs setup

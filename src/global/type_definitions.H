@@ -26,44 +26,6 @@
 #include "MFBaseIVFAB.H"
 #include "photon.H"
 
-
-
-/*!
-  @brief Relaxation types for multigrid
-*/
-namespace relax {
-  enum which_relax {
-    jacobi       = 0,
-    gauss_seidel = 1,
-    gsrb_fast    = 2,
-  };
-};
-
-/*!
-  @brief Multigrid cycle types
-*/
-namespace amrmg {
-  enum which_mg {
-    full   = 0,
-    vcycle = 1,
-    fcycle = 2,
-  };
-};
-
-/*!
-  @brief Ghost cell interpolation methods
-*/
-namespace ghost_interpolation {
-  enum which_type {
-    pwl  = 0,
-    quad = 1,
-  };
-};
-
-
-
-
-
 /*!
   @brief Types of wall boundary conditions for Poisson equation
 */
@@ -80,23 +42,5 @@ namespace wallbc {
     wall          = 8,
   };
 };
-
-/*!
-  @brief Species iterator. So that we can iterate over all cdr equations, or a subset of them
-*/
-namespace species_iteration {
-  enum which_species {
-    all      = 0,
-    charged  = 1,
-    negative = 2,
-    positive = 3,
-    neutral  = 4,
-  };
-};
-    
-
-
-//typedef Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > > EBAMRTags;
-
 
 #endif
