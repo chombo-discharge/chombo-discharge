@@ -123,6 +123,7 @@ rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
 # wall flow BCs.
 # ====================================================================================================
 advection_diffusion.verbosity      = -1      # Verbosity
+advection_diffusion.realm          = primal  # Realm
 advection_diffusion.blob_amplitude = 1.0     # Blob amplitude
 advection_diffusion.blob_radius    = 0.05    # Blob radius
 advection_diffusion.blob_center    = 0 0.25  # Blob center

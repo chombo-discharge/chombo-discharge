@@ -27,7 +27,8 @@ namespace physics {
     poisson_stepper<T>::poisson_stepper(){
       m_verbosity = -1;
 
-      m_realm = realm::primal;
+      ParmParse pp("poisson_stepper");
+      pp.get("realm", m_realm);
 
     }
 
@@ -68,7 +69,7 @@ namespace physics {
 
     template <class T>
     void poisson_stepper<T>::register_realms(){
-      // Do nothing. 
+      m_amr->register_realm(m_realm);
     }
 
     template <class T>

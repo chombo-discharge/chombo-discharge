@@ -16,17 +16,15 @@ using namespace physics::advection_diffusion;
 advection_diffusion_stepper::advection_diffusion_stepper(){
   ParmParse pp("advection_diffusion");
 
-  m_realm = realm::primal;
   m_phase = phase::gas;
 
+  pp.get("realm",      m_realm);
   pp.get("verbosity",  m_verbosity); 
   pp.get("fhd",        m_fhd); 
   pp.get("diffco",     m_diffco);
   pp.get("omega",      m_omega);
   pp.get("cfl",        m_cfl);
   pp.get("integrator", m_integrator);
-
-
 }
 
 advection_diffusion_stepper::advection_diffusion_stepper(RefCountedPtr<cdr_solver>& a_solver) : advection_diffusion_stepper() {
@@ -68,9 +66,9 @@ void advection_diffusion_stepper::register_operators(){
 void advection_diffusion_stepper::allocate() {
   m_solver->allocate_internals();
 
-  m_amr->allocate(m_tmp, m_phase, 1);
-  m_amr->allocate(m_k1,  m_phase, 1);
-  m_amr->allocate(m_k2,  m_phase, 1);
+  m_amr->allocate(m_tmp, m_realm, m_phase, 1);
+  m_amr->allocate(m_k1,  m_realm, m_phase, 1);
+  m_amr->allocate(m_k2,  m_realm, m_phase, 1);
 }
 
 void advection_diffusion_stepper::initial_data(){
@@ -85,6 +83,7 @@ void advection_diffusion_stepper::initial_data(){
   if(m_solver->is_mobile()){
     this->set_velocity();
   }
+
 }
 
 void advection_diffusion_stepper::set_velocity(){
@@ -94,14 +93,14 @@ void advection_diffusion_stepper::set_velocity(){
   }
 
   EBAMRCellData& vel = m_solver->get_velo_cell();
-  m_amr->average_down(vel, m_phase);
-  m_amr->interp_ghost(vel, m_phase);
+  m_amr->average_down(vel, m_realm, m_phase);
+  m_amr->interp_ghost(vel, m_realm, m_phase);
 }
 
 void advection_diffusion_stepper::set_velocity(const int a_level){
   // TLDR: This code goes down to each cell on grid level a_level and sets the velocity to omega*r
     
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box = dbl.get(dit());
 
@@ -123,7 +122,7 @@ void advection_diffusion_stepper::set_velocity(const int a_level){
     }
 
     // Irregular and multicells
-    VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_level])[dit()];
+    VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[a_level])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
 
       const VolIndex vof = vofit();
@@ -219,13 +218,13 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
       data_ops::incr(state, m_k1, a_dt);
     }
   
-    m_amr->average_down(state, m_phase);
-    m_amr->interp_ghost(state, m_phase);
+    m_amr->average_down(state, m_realm, m_phase);
+    m_amr->interp_ghost(state, m_realm, m_phase);
   }
   else if(m_integrator == 1){
     m_solver->compute_divF(m_k1, state, a_dt);
     data_ops::incr(state, m_k1, -a_dt);
-    m_amr->average_down(state, m_phase);
+    m_amr->average_down(state, m_realm, m_phase);
 
     if(m_solver->is_diffusive()){
       data_ops::copy(m_k2, state); // Now holds phiOld - dt*div(F)
@@ -237,10 +236,8 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
       m_solver->advance_euler(state, m_k2, m_k1, a_dt);
     }
 
-    //    m_solver->make_non_negative(state);
-
-    m_amr->average_down(state, m_phase);
-    m_amr->average_down(state, m_phase);
+    m_amr->average_down(state, m_realm, m_phase);
+    m_amr->average_down(state, m_realm, m_phase);
   }
   else{
     MayDay::Abort("advection_diffusion_stepper - unknown integrator requested");
@@ -289,9 +286,9 @@ void advection_diffusion_stepper::regrid(const int a_lmin, const int a_old_fines
 
 
   // Allocate memory for RK steps
-  m_amr->allocate(m_tmp, m_phase, 1);
-  m_amr->allocate(m_k1,  m_phase, 1);
-  m_amr->allocate(m_k2,  m_phase, 1);
+  m_amr->allocate(m_tmp, m_realm, m_phase, 1);
+  m_amr->allocate(m_k1,  m_realm, m_phase, 1);
+  m_amr->allocate(m_k2,  m_realm, m_phase, 1);
 }
 
 void advection_diffusion_stepper::post_regrid() {

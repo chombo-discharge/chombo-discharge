@@ -1427,14 +1427,16 @@ void cdr_solver::register_operators(){
     MayDay::Abort("cdr_solver::register_operators - need to set amr_mesh!");
   }
   else{
-    m_amr->register_operator(s_eb_coar_ave,     m_phase);
-    m_amr->register_operator(s_eb_quad_cfi,     m_phase);
-    m_amr->register_operator(s_eb_fill_patch,   m_phase);
-    m_amr->register_operator(s_eb_pwl_interp,   m_phase);
-    m_amr->register_operator(s_eb_flux_reg,     m_phase);
-    m_amr->register_operator(s_eb_redist,       m_phase);
-    m_amr->register_operator(s_eb_irreg_interp, m_phase);
-    m_amr->register_operator(s_eb_noncons_div,  m_phase);
+    m_amr->register_operator(s_eb_coar_ave,     m_realm, m_phase);
+    m_amr->register_operator(s_eb_quad_cfi,     m_realm, m_phase);
+    m_amr->register_operator(s_eb_fill_patch,   m_realm, m_phase);
+    m_amr->register_operator(s_eb_pwl_interp,   m_realm, m_phase);
+    m_amr->register_operator(s_eb_flux_reg,     m_realm, m_phase);
+    m_amr->register_operator(s_eb_redist,       m_realm, m_phase);
+    m_amr->register_operator(s_eb_irreg_interp, m_realm, m_phase);
+    m_amr->register_operator(s_eb_noncons_div,  m_realm, m_phase);
+
+
   }
 }
 
@@ -1460,9 +1462,9 @@ void cdr_solver::set_computational_geometry(const RefCountedPtr<computational_ge
 }
 
 void cdr_solver::set_diffco(const EBAMRFluxData& a_diffco, const EBAMRIVData& a_diffco_eb){
-  CH_TIME("cdr_solver::set_diffco");
+  CH_TIME("cdr_solver::set_diffco(ebamrflux, ebamriv)");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_diffco" << endl;
+    pout() << m_name + "::set_diffco(ebamrflux, ebamriv)" << endl;
   }
 
   const int finest_level = m_amr->get_finest_level();
@@ -1477,9 +1479,9 @@ void cdr_solver::set_diffco(const EBAMRFluxData& a_diffco, const EBAMRIVData& a_
 }
 
 void cdr_solver::set_diffco(const Real a_diffco){
-  CH_TIME("cdr_solver::set_diffco");
+  CH_TIME("cdr_solver::set_diffco(real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_diffco" << endl;
+    pout() << m_name + "::set_diffco(real)" << endl;
   }
 
   const int finest_level = m_amr->get_finest_level();
@@ -1493,6 +1495,8 @@ void cdr_solver::set_diffco(const Real a_diffco){
 
   m_amr->average_down(m_diffco,    m_realm, m_phase);
   m_amr->average_down(m_diffco_eb, m_realm, m_phase);
+
+  pout() << "done" << endl;
 }
 
 void cdr_solver::set_ebflux(const EBAMRIVData& a_ebflux){

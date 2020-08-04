@@ -119,6 +119,7 @@ rod_sphere.dielectric_radius         = 0.1              # Dielectric radius
 # POISSON_STEPPER CLASS OPTIONS
 # ====================================================================================================
 poisson_stepper.verbosity    = -1              # Verbosity
+poisson_stepper.realm        = primal          # Primal realm		
 poisson_stepper.load_balance = true            # Load balance or not	
 poisson_stepper.init_rho     = 0.0             # Space charge density
 poisson_stepper.init_sigma   = 1E-10           # Surface charge density
