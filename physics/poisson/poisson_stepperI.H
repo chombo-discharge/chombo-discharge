@@ -65,12 +65,20 @@ namespace physics {
       pp.get("init_rho",   m_init_rho);
       pp.get("init_sigma", m_init_sigma);
 
-      MFAMRCellData& state = m_poisson->get_state();
-      MFAMRCellData& rho = m_poisson->get_source();
-      EBAMRIVData& sigma = m_sigma->get_state();
-  
+      MFAMRCellData& state = m_poisson->get_state();  
+      MFAMRCellData& rho   = m_poisson->get_source();
+      EBAMRIVData& sigma   = m_sigma->get_state();
+
+      data_ops::set_value(state, 0.0);
       data_ops::set_value(rho,   m_init_rho);
       data_ops::set_value(sigma, m_init_sigma);
+    }
+
+    template <class T>
+    void poisson_stepper<T>::solve_poisson(){
+      MFAMRCellData& state = m_poisson->get_state();  
+      MFAMRCellData& rho   = m_poisson->get_source();
+      EBAMRIVData& sigma   = m_sigma->get_state();
 
       const bool converged = m_poisson->solve(state, rho, sigma);
       m_poisson->compute_E();
@@ -78,6 +86,16 @@ namespace physics {
       if(!converged){
 	MayDay::Warning("poisson_stepper<T>::advance - did not converge");
       }
+    }
+    
+    template <class T>
+    void poisson_stepper<T>::post_initialize() {
+      this->solve_poisson();
+    }
+
+    template <class T>
+    void poisson_stepper<T>::post_regrid(){
+      this->solve_poisson();
     }
 
     template<class T>
@@ -131,7 +149,8 @@ namespace physics {
       m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
       m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
 
-      m_poisson->solve();
+      // No solve here. That is done in post_regrid for this class. 
+      //      m_poisson->solve();
     }
   }
 }

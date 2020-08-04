@@ -55,11 +55,12 @@ public:
   virtual void setup_solvers() = 0;
   virtual void allocate() = 0;
   virtual void initial_data() = 0;
+  virtual void post_initialize() = 0;
   virtual void post_checkpoint_setup() = 0;
   virtual int get_redistribution_regsize() const;
 
   // Registration routines
-  virtual void register_realms() {}
+  virtual void register_realms() = 0;
   virtual void register_operators() = 0; 
 
 
@@ -86,6 +87,7 @@ public:
 			    const Vector<DisjointBoxLayout>& a_grids,
 			    const int                        a_lmin,
 			    const int                        a_finest_level);
+  virtual void post_regrid() = 0;
 
   // Set routines
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);

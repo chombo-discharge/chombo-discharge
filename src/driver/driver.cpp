@@ -623,7 +623,7 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
 
   const bool got_new_tags = this->tag_cells(tags, m_tags); // Tag cells
 
-  if(!got_new_tags){
+  if(false){//!got_new_tags){
     if(a_use_initial_data){
       m_timestepper->initial_data();
     }
@@ -681,6 +681,9 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   if(!m_celltagger.isNull()){
     m_celltagger->regrid();             
   }
+
+  // If it wants to, time_stepper can do a post_regrid operation. 
+  m_timestepper->post_regrid();
 
   const Real solver_regrid = MPI_Wtime(); // Timer
 
@@ -1569,6 +1572,7 @@ void driver::setup_fresh(const int a_init_regrids){
 
   // Fill solves with initial data
   m_timestepper->initial_data();                                  // Fill solvers with initial data
+  m_timestepper->post_initialize();
 
   // cell_tagger
   if(!m_celltagger.isNull()){
