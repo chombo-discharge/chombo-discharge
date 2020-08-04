@@ -69,6 +69,15 @@ public:
 			const LevelData<MFCellFAB>&        a_phi,
 			const bool                         a_homogeneous);
 
+    /*!
+    @brief Match the boundary condition
+  */
+  virtual void match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
+			const LevelData<BaseIVFAB<Real> >& a_jump,
+			const LevelData<MFCellFAB>&        a_phi,
+			DataIterator&                      a_dit,
+			const bool                         a_homogeneous);
+
   /*!
     @brief Compute dphidn for all phases
   */

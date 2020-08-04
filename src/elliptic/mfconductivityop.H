@@ -96,6 +96,11 @@ public:
   virtual void update_bc(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneous);
 
   /*!
+    @brief Update boundary conditions before relaxation
+  */
+  virtual void update_bc(const LevelData<MFCellFAB>& a_phi, DataIterator& a_dit, const bool a_homogeneous);
+
+  /*!
     @brief Reset for TGA
   */
   virtual void setAlphaAndBeta(const Real& a_alpha, const Real& a_beta);
@@ -140,6 +145,14 @@ public:
   */
   virtual void applyOp(LevelData<MFCellFAB>&        a_lhs,
 		       const LevelData<MFCellFAB>&  a_phi,
+		       bool                         a_homogeneous = false);
+
+  /*!
+    @brief Apply operator
+  */
+  virtual void applyOp(LevelData<MFCellFAB>&        a_lhs,
+		       const LevelData<MFCellFAB>&  a_phi,
+		       DataIterator&                a_dit,
 		       bool                         a_homogeneous = false);
   
   /*!
@@ -340,6 +353,11 @@ public:
     @brief Set BC from matching criteria
   */
   virtual void set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneous);
+
+  /*!
+    @brief Set BC from matching criteria
+  */
+  virtual void set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, DataIterator& a_dit, const bool a_homogeneous);
 
 
   /*!

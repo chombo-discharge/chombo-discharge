@@ -219,6 +219,19 @@ class ebconductivityop: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
                        const bool&                       a_homogeneousCFBC,
 		       const bool&                       a_doexchange = true);
 
+  ///
+  /**
+     This function assumes that coarse-fine boundary condtions have
+     been dealt with.
+  */
+  virtual void applyOp(LevelData<EBCellFAB>&             a_opPhi,
+                       const LevelData<EBCellFAB>&       a_phi,
+                       const LevelData<EBCellFAB>* const a_phiCoarse,
+                       const bool&                       a_homogeneousPhysBC,
+                       const bool&                       a_homogeneousCFBC,
+		       DataIterator&                     a_dit,
+		       const bool&                       a_doexchange = true);
+
   /// virtual function called by LevelTGA
   virtual void applyOpNoBoundary(LevelData<EBCellFAB>&        a_opPhi,
                                  const LevelData<EBCellFAB>&  a_phi);

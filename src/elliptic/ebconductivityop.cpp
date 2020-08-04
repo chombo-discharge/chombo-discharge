@@ -1060,42 +1060,50 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
         const bool&                              a_homogeneousCFBC,
 	const bool&                              a_doexchange)
 {
+  DataIterator dit = a_lhs.dataIterator();
+  this->applyOp(a_lhs, a_phi, a_phiCoar, a_homogeneousPhysBC, a_homogeneousCFBC, dit, a_doexchange);
+}
+
+void
+ebconductivityop::
+applyOp(LevelData<EBCellFAB>&                    a_lhs,
+        const LevelData<EBCellFAB>&              a_phi,
+        const LevelData<EBCellFAB>* const        a_phiCoar,
+        const bool&                              a_homogeneousPhysBC,
+        const bool&                              a_homogeneousCFBC,
+	DataIterator&                            a_dit,
+	const bool&                              a_doexchange)
+{
   CH_TIME("ebco::applyOp");
   LevelData<EBCellFAB>& phi = const_cast<LevelData<EBCellFAB>&>(a_phi);
   if (m_hasCoar && (!s_turnOffBCs))
     {
       applyCFBCs(phi, a_phiCoar, a_homogeneousCFBC);
     }
-#if 0 // Original code - why was this here in the first place?!?!?!?!?
-  if(true){////a_doexchange){
-#else
   if(a_doexchange){
-#endif
     phi.exchange(phi.interval());
   }
 
   EBLevelDataOps::setToZero(a_lhs);
   incr( a_lhs, a_phi, m_alpha); //this multiplies by alpha
-  DataIterator dit = m_eblg.getDBL().dataIterator(); 
-  int nbox = dit.size();
-#pragma omp parallel for
-  for(int mybox=0; mybox<nbox; mybox++)
+  
+  for (a_dit.reset(); a_dit.ok(); ++a_dit){
     {
-      EBCellFAB      & phi = (EBCellFAB&)(a_phi[dit[mybox]]);
+      EBCellFAB      & phi = (EBCellFAB&)(a_phi[a_dit()]);
       const EBISBox& ebisbox = phi.getEBISBox();
 
       if(!ebisbox.isAllCovered()){
-	a_lhs[dit[mybox]].mult((*m_acoef)[dit[mybox]], 0, 0, 1);
+	a_lhs[a_dit()].mult((*m_acoef)[a_dit()], 0, 0, 1);
 
 	Box loBox[SpaceDim],hiBox[SpaceDim];
 	int hasLo[SpaceDim],hasHi[SpaceDim];
 
-	EBCellFAB      & lph = a_lhs[dit[mybox]];
+	EBCellFAB      & lph = a_lhs[a_dit()];
 	//phi.setCoveredCellVal(0.0, 0);
 
 	const BaseFab<Real>  & phiFAB = phi.getSingleValuedFAB();
 	BaseFab<Real>        & lphFAB = lph.getSingleValuedFAB();
-	Box dblBox = m_eblg.getDBL()[dit[mybox]];
+	Box dblBox = m_eblg.getDBL()[a_dit()];
 	int nComps = 1;
 	Box curPhiBox = phiFAB.box();
 
@@ -1108,20 +1116,21 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
 				  lphFAB,
 				  phiFAB,
 				  a_homogeneousPhysBC,
-				  dit[mybox]);
+				  a_dit());
 	  }
 	else
 	  {
 	    //the all dirs code is wrong for no bcs = true
 	    for (int idir = 0; idir < SpaceDim; idir++)
 	      {
-		incrOpRegularDir(a_lhs[dit[mybox]], a_phi[dit[mybox]], a_homogeneousPhysBC, idir, dit[mybox]);
+		incrOpRegularDir(a_lhs[a_dit()], a_phi[a_dit()], a_homogeneousPhysBC, idir, a_dit());
 	      }
 	  }
 
-	applyOpIrregular(a_lhs[dit[mybox]], a_phi[dit[mybox]], a_homogeneousPhysBC, dit[mybox]);
+	applyOpIrregular(a_lhs[a_dit()], a_phi[a_dit()], a_homogeneousPhysBC, a_dit());
       }
     }
+  }
 }
 //-----------------------------------------------------------------------
 void

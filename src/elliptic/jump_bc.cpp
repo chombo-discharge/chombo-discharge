@@ -330,8 +330,19 @@ void jump_bc::build_stencils(){
 		       const bool                         a_homogeneous){
   CH_TIME("jump_bc::match_bc(1)");
 
-  for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
-    this->match_bc(a_phibc[dit()], a_jump[dit()], a_phi[dit()], dit());
+  DataIterator dit = a_phibc.dataIterator();
+  this->match_bc(a_phibc, a_jump, a_phi, dit, a_homogeneous);
+}
+
+ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
+			const LevelData<BaseIVFAB<Real> >& a_jump,
+			const LevelData<MFCellFAB>&        a_phi,
+			DataIterator&                      a_dit,
+			const bool                         a_homogeneous){
+  CH_TIME("jump_bc::match_bc(1)");
+
+  for (a_dit.reset(); a_dit.ok(); ++a_dit){
+    this->match_bc(a_phibc[a_dit()], a_jump[a_dit()], a_phi[a_dit()], a_dit());
   }
 }
 

@@ -199,11 +199,9 @@ namespace physics {
 	TimedDataIterator dit = a_grids[lvl].timedDataIterator();
 	dit.clearTime();
 	dit.enableTime();
-	for (dit.reset(); dit.ok(); ++dit){
-	  (*dummy1[lvl])[dit()].setVal(lvl);
-	}
+
 	for (int k = 0; k < 100; k++){
-	  oper->applyOp(*dummy1[lvl], *dummy2[lvl], true);
+	  oper->applyOp(*dummy1[lvl], *dummy2[lvl], dit, true);
 	}
 	dit.disableTime();
 	dit.mergeTime();

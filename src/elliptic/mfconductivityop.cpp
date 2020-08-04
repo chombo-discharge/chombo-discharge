@@ -273,6 +273,12 @@ void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a
 #endif
 }
 
+void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, DataIterator& a_dit, const bool a_homogeneous){
+  LevelData<MFCellFAB>* phi = const_cast<LevelData<MFCellFAB>* > (&a_phi);
+  phi->exchange();
+  this->set_bc_from_matching(a_phi, a_dit, a_homogeneous);
+}
+
 void mfconductivityop::set_bc_from_levelset(){
   CH_TIME("mfconductivityop::set_bc_from_levelset");
 #if verb
@@ -323,6 +329,11 @@ void mfconductivityop::set_bc_from_levelset(){
 }
 
 void mfconductivityop::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneous){
+  DataIterator dit = a_phi.dataIterator();
+  this->set_bc_from_matching(a_phi, dit, a_homogeneous);
+}
+
+void mfconductivityop::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, DataIterator& a_dit, const bool a_homogeneous){
   CH_TIME("mfconductivityop::set_bc_from_matching");
 #if verb
   pout() << "mfconductivityop::set_bc_from_matching"<< endl;
@@ -330,7 +341,7 @@ void mfconductivityop::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, c
 
   if(m_multifluid){
     for (int iphase = 0; iphase <= 1; iphase++){
-      m_jumpbc->match_bc(*m_dirival[iphase], *m_jump, a_phi, a_homogeneous);
+      m_jumpbc->match_bc(*m_dirival[iphase], *m_jump, a_phi, a_dit, a_homogeneous);
     }
   }
 
@@ -439,13 +450,27 @@ void mfconductivityop::applyOp(LevelData<MFCellFAB>&        a_lhs,
   pout() << "mfconductivityop::applyop"<< endl;
 #endif
 
-  this->update_bc(a_phi, a_homogeneous);
+  DataIterator dit = a_lhs.dataIterator();
+  this->applyOp(a_lhs, a_phi, dit, a_homogeneous);
+
+}
+
+void mfconductivityop::applyOp(LevelData<MFCellFAB>&        a_lhs,
+			       const LevelData<MFCellFAB>&  a_phi,
+			       DataIterator&                a_dit,
+			       bool                         a_homogeneous){
+  CH_TIME("mfconductivityop::applyOp");
+#if verb
+  pout() << "mfconductivityop::applyop"<< endl;
+#endif
+
+  this->update_bc(a_phi, a_dit, a_homogeneous);
 
   for (int i=0; i < m_phases; i++){
     mfalias::aliasMF(*m_alias[0], i, a_lhs);
     mfalias::aliasMF(*m_alias[1], i, a_phi);
     
-    m_ebops[i]->applyOp(*m_alias[0], *m_alias[1], NULL, a_homogeneous, true);
+    m_ebops[i]->applyOp(*m_alias[0], *m_alias[1], NULL, a_homogeneous, true, a_dit);
   }
 }
 
