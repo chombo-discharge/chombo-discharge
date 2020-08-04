@@ -45,13 +45,13 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
 				   const int                        a_finest_level,
 				   const int                        a_pvr_buffer,
 				   const std::string                a_realm){
-  m_grids        = a_grids;
-  m_domains      = a_domains;
-  m_ref_rat      = a_ref_rat;
-  m_prob_lo      = a_prob_lo;
-  m_finest_level = a_finest_level;
-  m_buffer       = a_pvr_buffer;
-  m_realm        = a_realm;
+  m_grids           = a_grids;
+  m_domains         = a_domains;
+  m_ref_rat         = a_ref_rat;
+  m_prob_lo         = a_prob_lo;
+  m_finest_level    = a_finest_level;
+  m_buffer          = a_pvr_buffer;
+  m_realm           = a_realm;
   m_blocking_factor = a_blocking_factor;
 
 
@@ -526,8 +526,6 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   this->setup_pvr(a_lmin, m_finest_level);
   this->setup_particle_data(a_lmin, m_finest_level);
 
-
-
   const int oldFinestLevel = m_cache_particles.size() - 1;
   
   // If a level was removed, put the particles on the new finest level
@@ -541,8 +539,8 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     }
   }
 
-  //  for (int lvl = 0; lvl <= a_newFinestLevel; lvl++){
-  for (int lvl = 0; lvl <= oldFinestLevel; lvl++){
+  for (int lvl = 0; lvl <= a_newFinestLevel; lvl++){
+    //  for (int lvl = 0; lvl <= oldFinestLevel; lvl++){
     List<P>& outcast = m_particles[lvl]->outcast();
 
     outcast.catenate(m_cache_particles[lvl]);
@@ -553,7 +551,6 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 
   // Now do remap
   this->remap();
-
 
   m_cache_particles.resize(0);
 }

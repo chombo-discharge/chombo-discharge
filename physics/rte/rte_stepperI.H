@@ -22,6 +22,7 @@ namespace physics {
       Vector<Real> v;
 
       pp.get   ("verbosity",      m_verbosity);
+      pp.get   ("realm",          m_realm);
       pp.get   ("blob_amplitude", m_blob_amplitude);
       pp.get   ("blob_radius",    m_blob_radius);
       pp.getarr("blob_center",    v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
@@ -42,6 +43,7 @@ namespace physics {
       m_solver->set_phase(phase::gas);
       m_solver->set_amr(m_amr);
       m_solver->set_computational_geometry(m_compgeom);
+      m_solver->set_realm(m_realm);
     }
 
     template <typename T>
@@ -54,6 +56,10 @@ namespace physics {
       m_solver->initial_data();
 
       this->set_gaussian_source();
+    }
+
+    template <typename T>
+    void rte_stepper<T>::post_initialize(){
     }
 
     template <typename T>
@@ -112,6 +118,11 @@ namespace physics {
     }
 
     template <typename T>
+    void rte_stepper<T>::register_realms() {
+      m_amr->register_realm(m_realm);
+    }
+
+    template <typename T>
     void rte_stepper<T>::register_operators() {
       m_solver->register_operators();
     }
@@ -135,6 +146,10 @@ namespace physics {
     }
 
     template <typename T>
+    void rte_stepper<T>::post_regrid(){
+    }
+
+    template <typename T>
     void rte_stepper<T>::set_gaussian_source(){
 
       EBAMRCellData& source = m_solver->get_source();
@@ -142,8 +157,8 @@ namespace physics {
 
       //
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-	const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[lvl];
+	const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+	const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[lvl];
 	const Real dx                = m_amr->get_dx()[lvl];
 
 

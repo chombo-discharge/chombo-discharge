@@ -181,8 +181,8 @@ void rte_solver::set_source(const EBAMRCellData& a_source){
     a_source[lvl]->localCopyTo(*m_source[lvl]);
   }
 
-  m_amr->average_down(m_source, m_phase);
-  m_amr->interp_ghost(m_source, m_phase);
+  m_amr->average_down(m_source, m_realm, m_phase);
+  m_amr->interp_ghost(m_source, m_realm, m_phase);
 }
 
 void rte_solver::set_source(const Real a_source){
@@ -199,8 +199,8 @@ void rte_solver::set_source(const Real a_source){
     }
   }
 
-  m_amr->average_down(m_source, m_phase);
-  m_amr->interp_ghost(m_source, m_phase);
+  m_amr->average_down(m_source, m_realm, m_phase);
+  m_amr->interp_ghost(m_source, m_realm, m_phase);
 }
 
 void rte_solver::set_plot_variables(){
@@ -270,19 +270,24 @@ void rte_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
 
   // Copy data onto scratch
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_phase, ncomp);
+  m_amr->allocate(scratch, m_realm, m_phase, ncomp);
   data_ops::copy(scratch, a_data);
 
   // Interp if we should
   if(a_interp){
-    m_amr->interpolate_to_centroids(scratch, phase::gas);
+    m_amr->interpolate_to_centroids(scratch, m_realm, phase::gas);
   }
 
-  m_amr->average_down(scratch, m_phase);
-  m_amr->interp_ghost(scratch, m_phase);
+  m_amr->average_down(scratch, m_realm, m_phase);
+  m_amr->interp_ghost(scratch, m_realm, m_phase);
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+    if(a_output.get_realm() == m_realm){
+      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+    }
+    else{
+      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+    }
   }
 
   data_ops::set_covered_value(a_output, a_comp, 0.0);

@@ -585,9 +585,9 @@ void amr_mesh::reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phas
 }
 
 void amr_mesh::reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin){
-  CH_TIME("amr_mesh::allocate(ebamriv, realm, phase, lmin)");
+  CH_TIME("amr_mesh::reallocate(ebamriv, realm, phase, lmin)");
   if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(ebamriv, realm, phase, lmin)" << endl;
+    pout() << "amr_mesh::reallocate(ebamriv, realm, phase, lmin)" << endl;
   }
 
   const std::string a_realm = a_data.get_realm();

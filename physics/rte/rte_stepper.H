@@ -28,6 +28,7 @@ namespace physics {
       void setup_solvers() override;
       void initial_data() override;
       void allocate() override;
+      void post_initialize() override;
 
       // IO routines
       void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
@@ -42,14 +43,20 @@ namespace physics {
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
       void print_step_report() override;
 
+      // Registration routines
+      void register_realms() override;
+      void register_operators() override;
+
       // Regrid routines
       bool need_to_regrid() override;
-      void register_operators() override;
       void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       void deallocate() override;
       void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+      void post_regrid() override;
 
     protected:
+
+      std::string m_realm;
 
       // Solver and species
       RefCountedPtr<rte_solver>  m_solver;
