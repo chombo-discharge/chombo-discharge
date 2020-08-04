@@ -56,6 +56,12 @@ namespace physics {
       bool need_to_regrid() override {return false;}
       void pre_regrid(const int a_lbase, const int a_finest_level) override;
       void deallocate() override;
+      bool load_balance(Vector<Vector<int> >&            a_procs,
+			Vector<Vector<Box> >&            a_boxes,
+			const std::string                a_realm,
+			const Vector<DisjointBoxLayout>& a_grids,
+			const int                        a_lmin,
+			const int                        a_finest_level) override;
       void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
       void post_regrid() override;
 

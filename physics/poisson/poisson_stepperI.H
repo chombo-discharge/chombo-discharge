@@ -152,5 +152,16 @@ namespace physics {
       // No solve here. That is done in post_regrid for this class. 
       //      m_poisson->solve();
     }
+
+    template <class T>
+    bool poisson_stepper<T>::load_balance(Vector<Vector<int> >&            a_procs,
+					  Vector<Vector<Box> >&            a_boxes,
+					  const std::string                a_realm,
+					  const Vector<DisjointBoxLayout>& a_grids,
+					  const int                        a_lmin,
+					  const int                        a_finest_level){
+
+      return false;
+    }
   }
 }
