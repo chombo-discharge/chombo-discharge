@@ -15,10 +15,19 @@ sigma_solver::sigma_solver(){
   this->set_verbosity(-1);
   this->set_phase(phase::gas);
   this->set_plot_variables();
+  this->set_realm(realm::primal);
 }
 
 sigma_solver::~sigma_solver(){
 
+}
+
+const std::string sigma_solver::get_realm() const {
+  return m_realm;
+}
+
+void sigma_solver::set_realm(const std::string a_realm){
+  m_realm = a_realm;
 }
 
 void sigma_solver::allocate_internals(){
@@ -30,8 +39,8 @@ void sigma_solver::allocate_internals(){
   const int comp  = 0;
   const int ncomp = 1;
   
-  m_amr->allocate(m_state, m_phase, ncomp);
-  m_amr->allocate(m_flux,  m_phase, ncomp);
+  m_amr->allocate(m_state, m_realm, m_phase, ncomp);
+  m_amr->allocate(m_flux,  m_realm, m_phase, ncomp);
 }
 
 void sigma_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
@@ -43,7 +52,7 @@ void sigma_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
   
-  m_amr->allocate(m_cache, m_phase, ncomp);
+  m_amr->allocate(m_cache, m_realm, m_phase, ncomp);
 
   for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
     m_state[lvl]->localCopyTo(*m_cache[lvl]);
@@ -92,10 +101,10 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
 
   // These levels have changed
   for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
-    const DisjointBoxLayout& fine_grid = m_amr->get_grids()[lvl];
+    const DisjointBoxLayout& fine_grid = m_amr->get_grids(m_realm)[lvl];
     const ProblemDomain& fine_domain   = m_amr->get_domains()[lvl];
     const ProblemDomain& coar_domain   = m_amr->get_domains()[lvl-1];
-    const EBISLayout& fine_ebisl       = m_amr->get_ebisl(m_phase)[lvl];
+    const EBISLayout& fine_ebisl       = m_amr->get_ebisl(m_realm, m_phase)[lvl];
     const int nref                     = m_amr->get_ref_rat()[lvl-1];
     
     // Fill a coarsened grid and a coarsened ebisl
@@ -171,7 +180,7 @@ void sigma_solver::register_operators(){
     MayDay::Abort("sigma_solver::register_operators - need to set amr_mesh!");
   }
   else{
-    m_amr->register_operator(s_eb_coar_ave,     m_phase);
+    m_amr->register_operator(s_eb_coar_ave, m_realm, m_phase);
   }
 }
 
@@ -184,9 +193,9 @@ void sigma_solver::reset_cells(EBAMRIVData& a_data){
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
     const Real dx                = m_amr->get_dx()[lvl];
-    const MFLevelGrid& mflg      = *m_amr->get_mflg()[lvl];
+    const MFLevelGrid& mflg      = *m_amr->get_mflg(m_realm)[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
@@ -292,8 +301,8 @@ void sigma_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_leve
     pout() << "sigma_solver::write_checkpoint_level" << endl;
   }
 
-  EBCellFactory fact(m_amr->get_ebisl(phase::gas)[a_level]);
-  LevelData<EBCellFAB> scratch(m_amr->get_grids()[a_level], 1, 3*IntVect::Unit, fact);
+  EBCellFactory fact(m_amr->get_ebisl(m_realm, phase::gas)[a_level]);
+  LevelData<EBCellFAB> scratch(m_amr->get_grids(m_realm)[a_level], 1, 3*IntVect::Unit, fact);
   data_ops::set_value(scratch, 0.0);
   data_ops::incr(scratch, *m_state[a_level], 1.0);
 
@@ -307,8 +316,8 @@ void sigma_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level
     pout() << "sigma_solver::read_checkpoint_level" << endl;
   }
 
-  const EBISLayout& ebisl = m_amr->get_ebisl(phase::gas)[a_level];
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
+  const EBISLayout& ebisl = m_amr->get_ebisl(m_realm, phase::gas)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
   
   EBCellFactory fact(ebisl);
   LevelData<EBCellFAB> scratch(dbl, 1, 3*IntVect::Unit, fact);
@@ -328,7 +337,7 @@ void sigma_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 
 
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_phase, 1);
+  m_amr->allocate(scratch, m_realm, m_phase, 1);
 
 
   // Write sigma
@@ -387,13 +396,13 @@ Real sigma_solver::compute_charge(){
     pout() << "sigma_solver::compute_charge" << endl;
   }
 
-  m_amr->average_down(m_state, m_phase);
+  m_amr->average_down(m_state, m_realm, m_phase);
 
   Real charge = 0.0;
 
   const int comp               = 0;
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[0];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[0];
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[0];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[0];
   const Real dx                = m_amr->get_dx()[0];
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

@@ -83,6 +83,7 @@ void amr_mesh::alias(EBAMRCellData&           a_data,
   for (int lvl = 0; lvl <= a_finest_level; lvl++){
     mfalias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
   }
+
 }
 
 void amr_mesh::alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata){
@@ -2462,13 +2463,14 @@ void amr_mesh::regrid_realm(const std::string           a_realm,
   // Make the dbl
   Vector<DisjointBoxLayout> grids(1 + m_finest_level);
   for (int lvl = 0; lvl < a_lmin; lvl++){
-    grids[lvl] = m_grids[lvl];
+    grids[lvl] = this->get_grids(a_realm)[lvl];
   }
   
   for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     grids[lvl] = DisjointBoxLayout();
     grids[lvl].define(a_boxes[lvl], a_procs[lvl], m_domains[lvl]);
-    grids[lvl].close(); 
+    grids[lvl].close();
+    //    std::cout << a_procs[lvl] << std::endl;
   }
 
   m_realms[a_realm]->define(grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,

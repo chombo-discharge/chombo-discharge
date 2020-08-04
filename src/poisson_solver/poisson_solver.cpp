@@ -60,11 +60,11 @@ void poisson_solver::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potent
     pout() << "poisson_solver::compute_E(mfamrcell, mfamrcell)" << endl;
   }
 
-  m_amr->compute_gradient(a_E, a_potential);
+  m_amr->compute_gradient(a_E, a_potential, m_realm);
   data_ops::scale(a_E, -1.0);
 
-  m_amr->average_down(a_E);
-  m_amr->interp_ghost(a_E);
+  m_amr->average_down(a_E, m_realm);
+  m_amr->interp_ghost(a_E, m_realm);
 }
 
 void poisson_solver::allocate_internals(){
@@ -145,7 +145,7 @@ void poisson_solver::compute_D(MFAMRCellData& a_D, const MFAMRCellData& a_E){
       if(dielectrics.size() > 0){
 	const RealVect dx            = m_amr->get_dx()[lvl]*RealVect::Unit;
 	const RealVect origin        = m_amr->get_prob_lo();
-	const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+	const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	  EBCellFAB& dg = D_gas[dit()];
@@ -198,14 +198,14 @@ Real poisson_solver::compute_U(const MFAMRCellData& a_E){
   EBAMRCellData data_g;
   m_amr->allocate_ptr(data_g);
   m_amr->alias(data_g, phase::gas, EdotD);
-  m_amr->average_down(data_g, phase::gas);
+  m_amr->average_down(data_g, m_realm, phase::gas);
   data_ops::norm(U_g, *data_g[0], m_amr->get_domains()[0], 1);
 
   if(m_mfis->num_phases() > 1){
     EBAMRCellData data_s;
     m_amr->allocate_ptr(data_s);
     m_amr->alias(data_s, phase::solid, EdotD);
-    m_amr->average_down(data_s, phase::solid);
+    m_amr->average_down(data_s, m_realm, phase::solid);
     data_ops::norm(U_s, *data_s[0], m_amr->get_domains()[0], 1);
   }
 
@@ -294,16 +294,17 @@ void poisson_solver::regrid(const int a_lmin, const int a_old_finest, const int 
       m_amr->alias(state_phase,   cur_phase, m_state);
       m_amr->alias(scratch_phase, cur_phase, m_cache, Min(a_old_finest, a_new_finest));
 
-      Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(cur_phase);
+
+      Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_realm, cur_phase);
 
       // These levels have not changed
       for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
-	scratch_phase[lvl]->copyTo(*state_phase[lvl]); // Base level should never change, but ownership might
+	//	scratch_phase[lvl]->copyTo(*state_phase[lvl]); // Base level should never change, but ownership might
       }
       for (int lvl = a_lmin; lvl <= a_new_finest; lvl++){
 	interpolator[lvl]->interpolate(*state_phase[lvl], *state_phase[lvl-1], interv);
 	if(lvl <= a_old_finest){
-	  scratch_phase[lvl]->copyTo(*state_phase[lvl]);
+	  //	  scratch_phase[lvl]->copyTo(*state_phase[lvl]);
 	}
       }
     }
@@ -485,9 +486,9 @@ void poisson_solver::set_covered_potential(EBAMRCellData& a_phi, const int a_com
   if(electrodes.size() > 0){
     const int finest_level = m_amr->get_finest_level();
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-      const EBISLayout& ebisl_gas  = m_amr->get_ebisl(phase::gas)[lvl];
-      const EBISLayout& ebisl_sol  = m_amr->get_ebisl(phase::solid)[lvl];
+      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+      const EBISLayout& ebisl_gas  = m_amr->get_ebisl(m_realm, phase::gas)[lvl];
+      const EBISLayout& ebisl_sol  = m_amr->get_ebisl(m_realm, phase::solid)[lvl];
       const Real dx                = m_amr->get_dx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -581,7 +582,7 @@ void poisson_solver::write_plot_file(){
   Vector<Real> covered_values(ncomps, 0.0);
   string fname(file_char);
   writeEBHDF5(fname,
-	      m_amr->get_grids(),
+	      m_amr->get_grids(m_realm),
 	      output_ptr,
 	      names,
 	      m_amr->get_domains()[0].domainBox(),
@@ -725,10 +726,10 @@ void poisson_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MF
   }
 
   // Average down shit and interpolate to centroids
-  m_amr->average_down(scratch, phase::gas);
-  m_amr->interp_ghost(scratch, phase::gas);
+  m_amr->average_down(scratch, m_realm, phase::gas);
+  m_amr->interp_ghost(scratch, m_realm, phase::gas);
   if(a_interp){
-    m_amr->interpolate_to_centroids(scratch, phase::gas);
+    m_amr->interpolate_to_centroids(scratch, m_realm, phase::gas);
   }
 
   const Interval src_interv(0, ncomp-1);

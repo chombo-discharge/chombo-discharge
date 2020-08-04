@@ -28,6 +28,16 @@ public:
   ~sigma_solver();
 
   /*!
+    @brief Get the realm
+  */
+  const std::string get_realm() const;
+
+  /*!
+    @brief Set the realm
+  */
+  virtual void set_realm(const std::string a_realm); 
+
+  /*!
     @brief Allocate internal storage
   */
   virtual void allocate_internals();
@@ -144,6 +154,11 @@ public:
   virtual EBAMRIVData& get_flux();
   
 protected:
+
+  /*!
+    @brief Realm
+  */
+  std::string m_realm;
 
   /*!
     @brief Index spaces

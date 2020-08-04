@@ -6,7 +6,9 @@
 */
 
 #include "poisson_stepper.H"
+
 #include <ParmParse.H>
+#include <EBEllipticLoadBalance.H>
 
 namespace physics {
   namespace poisson {
@@ -53,6 +55,7 @@ namespace physics {
       m_sigma->set_verbosity(verb);
       m_sigma->set_amr(m_amr);
       m_sigma->set_computational_geometry(m_compgeom);
+      m_sigma->set_realm(m_realm);
 
     }
 
@@ -93,12 +96,21 @@ namespace physics {
       MFAMRCellData& rho   = m_poisson->get_source();
       EBAMRIVData& sigma   = m_sigma->get_state();
 
+      const Real t0 = MPI_Wtime();
       const bool converged = m_poisson->solve(state, rho, sigma);
+      const Real t1 = MPI_Wtime();
+      if(procID() == 0){
+	std::cout << t1 - t0 << std::endl;
+      }
       m_poisson->compute_E();
 
       if(!converged){
 	MayDay::Warning("poisson_stepper<T>::advance - did not converge");
       }
+
+
+
+
     }
     
     template <class T>
@@ -173,7 +185,8 @@ namespace physics {
 					  const Vector<DisjointBoxLayout>& a_grids,
 					  const int                        a_lmin,
 					  const int                        a_finest_level){
-
+      a_procs.resize(1+a_finest_level);
+      a_boxes.resize(1+a_finest_level);
 
       poisson_multifluid_gmg* solver = (poisson_multifluid_gmg*) (&(*m_poisson));
 
@@ -191,7 +204,7 @@ namespace physics {
 
       RefCountedPtr<mfconductivityopfactory>& factory = solver->get_opfact();
 
-      for (int lvl = 0; lvl <= a_finest_level; lvl++){
+      for (int lvl = 1; lvl <= a_finest_level; lvl++){
 	// Make an operator
 	auto oper = RefCountedPtr<mfconductivityop> ((mfconductivityop*) factory->MGnewOp(domains[lvl], 0, false));
 
@@ -200,21 +213,29 @@ namespace physics {
 	dit.clearTime();
 	dit.enableTime();
 
-	for (int k = 0; k < 100; k++){
+	for (int k = 0; k < 10; k++){
 	  oper->applyOp(*dummy1[lvl], *dummy2[lvl], dit, true);
 	}
 	dit.disableTime();
 	dit.mergeTime();
 
-	auto loads = dit.getTime();
+	// Now do the load balancing
+	Vector<unsigned long long> loads = dit.getTime();
+	a_boxes[lvl] = dit.getBoxes();
+	UnLongLongLoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
 
-	// Print loads
-	for (int i = 0; i < loads.size(); i++){
-	  if(procID() == 0) std::cout << loads[i] << std::endl;
+#if 0 // Debug
+	a_procs[lvl].resize(a_boxes[lvl].size(), 0);
+	for (int ibox = 0; ibox < a_procs[lvl].size(); ibox++){
+	  a_procs[lvl][ibox] = 0;
 	}
+	a_procs[lvl][0] = 1;
+
+	if(procID() == 0) std::cout << a_procs[lvl] << std::endl;
+#endif
       }
       
-      return false;
+      return true;
     }
   }
 }

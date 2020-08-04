@@ -134,7 +134,7 @@ void driver::allocate_internals(){
   m_tags.resize(1 + finest_level);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
     m_tags[lvl] = RefCountedPtr<LayoutData<DenseIntVectSet> > (new LayoutData<DenseIntVectSet>(dbl));
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -399,7 +399,7 @@ void driver::grid_report(){
   pout() << endl;
 
   const int finest_level                 = m_amr->get_finest_level();
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
   const Vector<Real> dx                  = m_amr->get_dx();
 
@@ -2105,7 +2105,7 @@ void driver::write_plot_file(){
   Real t_write = -MPI_Wtime();
 
   writeEBHDF5(fname, 
-	      m_amr->get_grids(),
+	      m_amr->get_grids(m_realm),
 	      output_ptr,
 	      names, 
 	      m_amr->get_domains()[0],
