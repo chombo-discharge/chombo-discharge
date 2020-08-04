@@ -736,7 +736,12 @@ void poisson_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MF
   const Interval dst_interv(a_comp, a_comp + ncomp - 1);
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+    if(m_realm == a_output.get_realm()){
+      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+    }
+    else{
+      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+    }
   }
 
   a_comp += ncomp;

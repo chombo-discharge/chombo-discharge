@@ -151,6 +151,11 @@ public:
   virtual void sanity_check();
 
   /*!
+    @brief Set the realm
+  */
+  virtual void set_realm(const std::string a_realm);
+
+  /*!
     @brief Set species
   */
   virtual void set_species(const RefCountedPtr<cdr_species> a_species);
@@ -297,6 +302,11 @@ public:
     @brief Reset redistribution weights
   */
   virtual void reset_redist_weights(const EBAMRCellData& a_state);
+
+  /*!
+    @brief Get the realm
+  */
+  virtual const std::string get_realm() const;
 
   /*!
     @brief Get solver name
@@ -465,6 +475,11 @@ protected:
     @brief Class name. 
   */
   std::string m_class_name;
+
+  /*!
+    @brief Realm
+  */
+  std::string m_realm;
 
   /*!
     @brief State data (i.e. the ion density)

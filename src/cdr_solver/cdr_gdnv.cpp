@@ -75,9 +75,9 @@ void cdr_gdnv::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCell
 
   // Fix up boundary velocities to ensure no influx. This is (probably) the easiest way to handle this for cdr_gdnv
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
     const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
       EBFluxFAB& velo = (*a_velo_face[lvl])[dit()];
@@ -131,8 +131,8 @@ void cdr_gdnv::allocate_internals(){
   }
 
   if(m_mobile){
-    const Vector<RefCountedPtr<EBLevelGrid> >& eblgs = m_amr->get_eblg(m_phase);
-    const Vector<DisjointBoxLayout>& grids           = m_amr->get_grids();
+    const Vector<RefCountedPtr<EBLevelGrid> >& eblgs = m_amr->get_eblg(m_realm, m_phase);
+    const Vector<DisjointBoxLayout>& grids           = m_amr->get_grids(m_realm);
     const Vector<int>& ref_ratios                    = m_amr->get_ref_rat();
     const Vector<Real>& dx                           = m_amr->get_dx();
     const int finest_level                           = m_amr->get_finest_level();
@@ -181,13 +181,13 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
       m_gmg_solver->computeAMROperator(scratchAlias, stateAlias, finest_level, 0, false);
 
       // computeAMROperator fucks my ghost cells. 
-      m_amr->interp_ghost_pwl(const_cast<EBAMRCellData&> (a_state), m_phase);
+      m_amr->interp_ghost_pwl(const_cast<EBAMRCellData&> (a_state), m_realm, m_phase);
     }
 #endif
 
     data_ops::copy(m_scratch, m_source);
-    m_amr->average_down(m_scratch, m_phase);
-    m_amr->interp_ghost_pwl(m_scratch, m_phase);
+    m_amr->average_down(m_scratch,     m_realm, m_phase);
+    m_amr->interp_ghost_pwl(m_scratch, m_realm, m_phase);
   }
   else{
     data_ops::set_value(m_scratch, 0.0);
@@ -195,10 +195,10 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
 
   // Extrapolate face-centered state on every level
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl = m_amr->get_ebisl(m_phase)[lvl];
-    const ProblemDomain& domain = m_amr->get_domains()[lvl];
-    const Real dx = m_amr->get_dx()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
 
     for (DataIterator dit = dbl.dataIterator();dit.ok(); ++dit){
 

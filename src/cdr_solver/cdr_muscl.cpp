@@ -68,18 +68,18 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
 
   // Need to overwrite ghost cells, so I do that here.
   EBAMRCellData copy_state; 
-  m_amr->allocate(copy_state, m_phase, ncomp);
+  m_amr->allocate(copy_state, m_realm, m_phase, ncomp);
   data_ops::set_value(copy_state, 0.0);
   data_ops::incr(copy_state, a_state, 1.0);
 
-  m_amr->average_down(copy_state, m_phase);
-  m_amr->interp_ghost_pwl(copy_state, m_phase);
+  m_amr->average_down(copy_state,     m_realm, m_phase);
+  m_amr->interp_ghost_pwl(copy_state, m_realm, m_phase);
 
   data_ops::set_value(a_face_state, 0.0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
     const ProblemDomain& domain  = m_amr->get_domains()[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -316,9 +316,9 @@ void cdr_muscl::compute_bndry_outflow(LevelData<EBFluxFAB>&       a_flux,
   const int comp  = 0;
   const int ncomp = 1;
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_lvl];
   const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[a_lvl];
   const Real dx                = m_amr->get_dx()[a_lvl];
   const Real zero              = 0.0;
 

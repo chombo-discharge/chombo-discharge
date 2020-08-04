@@ -43,6 +43,16 @@ public:
   virtual cdr_iterator<T> iterator();
 
   /*!
+    @brief Get the realm
+  */
+  virtual const std::string get_realm() const;
+
+  /*!
+    @brief Set
+  */
+  virtual void set_realm(const std::string a_realm);
+
+  /*!
     @brief Parse class options
   */
   virtual void parse_options();
@@ -249,6 +259,11 @@ public:
   virtual bool get_mass_redist();
 
 protected:
+
+  /*!
+    @brief Realm
+  */
+  std::string m_realm;
 
   /*!
     @brief Solvers

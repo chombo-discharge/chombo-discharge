@@ -15,7 +15,8 @@ using namespace physics::advection_diffusion;
 
 advection_diffusion_stepper::advection_diffusion_stepper(){
   ParmParse pp("advection_diffusion");
-  
+
+  m_realm = realm::primal;
   m_phase = phase::gas;
 
   pp.get("verbosity",  m_verbosity); 
@@ -24,6 +25,8 @@ advection_diffusion_stepper::advection_diffusion_stepper(){
   pp.get("omega",      m_omega);
   pp.get("cfl",        m_cfl);
   pp.get("integrator", m_integrator);
+
+
 }
 
 advection_diffusion_stepper::advection_diffusion_stepper(RefCountedPtr<cdr_solver>& a_solver) : advection_diffusion_stepper() {
@@ -44,10 +47,18 @@ void advection_diffusion_stepper::setup_solvers(){
   m_solver->set_amr(m_amr);
   m_solver->set_computational_geometry(m_compgeom);
   m_solver->sanity_check();
+  m_solver->set_realm(m_realm);
   
   if(!m_solver->is_mobile() && !m_solver->is_diffusive()){
     MayDay::Abort("advection_diffusion_stepper::setup_solvers - can't turn off both advection AND diffusion");
   }
+}
+
+void advection_diffusion_stepper::post_initialize() {
+}
+
+void advection_diffusion_stepper::register_realms() {
+  m_amr->register_realm(m_realm);
 }
 
 void advection_diffusion_stepper::register_operators(){
@@ -281,4 +292,7 @@ void advection_diffusion_stepper::regrid(const int a_lmin, const int a_old_fines
   m_amr->allocate(m_tmp, m_phase, 1);
   m_amr->allocate(m_k1,  m_phase, 1);
   m_amr->allocate(m_k2,  m_phase, 1);
+}
+
+void advection_diffusion_stepper::post_regrid() {
 }
