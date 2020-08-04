@@ -25,8 +25,8 @@ namespace physics {
       static Real s_constant_one(const RealVect a_pos);
       static Real s_potential_one(const Real a_time);
 
-      poisson_stepper(){m_verbosity = -1;}
-      ~poisson_stepper(){}
+      poisson_stepper();
+      ~poisson_stepper();
 
       // Stuff below here is derived from time_stepper.
       // ----------------------------------------------
@@ -73,6 +73,8 @@ namespace physics {
 
       RefCountedPtr<poisson_solver> m_poisson;
       RefCountedPtr<sigma_solver>   m_sigma;
+
+      std::string m_realm;
 
       Real m_init_rho;
       Real m_init_sigma;

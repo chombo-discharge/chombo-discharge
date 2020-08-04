@@ -47,6 +47,10 @@ protected:
   
 public:
 
+  RefCountedPtr<mfconductivityopfactory>& get_opfact(){
+    return m_opfact;
+  }
+
   /*!
     @brief Constructor
   */

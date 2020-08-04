@@ -22,6 +22,18 @@ namespace physics {
     }
 
     template <class T>
+    poisson_stepper<T>::poisson_stepper(){
+      m_verbosity = -1;
+
+      m_realm = realm::primal;
+    }
+
+    template <class T>
+    poisson_stepper<T>::~poisson_stepper(){
+
+    }
+
+    template <class T>
     void poisson_stepper<T>::setup_solvers(){
       int verb;
       ParmParse pp("poisson_stepper");
@@ -34,6 +46,7 @@ namespace physics {
       m_poisson->set_amr(m_amr);
       m_poisson->set_computational_geometry(m_compgeom);
       m_poisson->set_potential(s_potential_one);
+      m_poisson->set_realm(m_realm);
 
       // Setup sigma
       m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
@@ -161,6 +174,48 @@ namespace physics {
 					  const int                        a_lmin,
 					  const int                        a_finest_level){
 
+
+      poisson_multifluid_gmg* solver = (poisson_multifluid_gmg*) (&(*m_poisson));
+
+      MFAMRCellData dummy1, dummy2;
+
+      m_amr->allocate(dummy1, m_realm, 1);
+      m_amr->allocate(dummy2, m_realm, 1);
+
+      Vector<ProblemDomain> domains = m_amr->get_domains();
+
+      // We need to make amr_mesh restore some operators that we need
+      m_amr->regrid_operators(a_lmin, a_finest_level, 1);
+
+      solver->setup_operator_factory();
+
+      RefCountedPtr<mfconductivityopfactory>& factory = solver->get_opfact();
+
+      for (int lvl = 0; lvl <= a_finest_level; lvl++){
+	// Make an operator
+	auto oper = RefCountedPtr<mfconductivityop> ((mfconductivityop*) factory->MGnewOp(domains[lvl], 0, false));
+
+	//	if(procID() == 0) std::cout << "applying op on level = " << lvl << std::endl;
+	TimedDataIterator dit = a_grids[lvl].timedDataIterator();
+	dit.clearTime();
+	dit.enableTime();
+	for (dit.reset(); dit.ok(); ++dit){
+	  (*dummy1[lvl])[dit()].setVal(lvl);
+	}
+	for (int k = 0; k < 100; k++){
+	  oper->applyOp(*dummy1[lvl], *dummy2[lvl], true);
+	}
+	dit.disableTime();
+	dit.mergeTime();
+
+	auto loads = dit.getTime();
+
+	// Print loads
+	for (int i = 0; i < loads.size(); i++){
+	  if(procID() == 0) std::cout << loads[i] << std::endl;
+	}
+      }
+      
       return false;
     }
   }

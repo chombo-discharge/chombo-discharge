@@ -905,8 +905,6 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   for (int lvl = 0; lvl < m_mg_mflg.size(); lvl++){
     mg_levelgrids.push_back(*m_mg_mflg[lvl]);
   }
-  
-
 
   // Set the length scale for the Poisson equation. This is equivalent to solving the Poisson equation
   // on the domain [-1,1] in the x-direction
