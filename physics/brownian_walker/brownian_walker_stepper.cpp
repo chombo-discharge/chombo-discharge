@@ -19,7 +19,8 @@ brownian_walker_stepper::brownian_walker_stepper(){
   ParmParse pp("brownian_walker");
 
   m_phase = phase::gas;
-  
+
+  pp.get("realm",          m_realm);
   pp.get("diffco",         m_diffco);
   pp.get("omega",          m_omega);
   pp.get("verbosity",      m_verbosity);
@@ -57,6 +58,13 @@ void brownian_walker_stepper::initial_data(){
   }
 }
 
+void brownian_walker_stepper::post_initialize(){
+  CH_TIME("brownian_walker_stepper::post_initialize");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::post_initialize" << endl;
+  }
+}
+
 void brownian_walker_stepper::set_velocity(){
   CH_TIME("brownian_walker_stepper::set_velocity");
   if(m_verbosity > 5){
@@ -68,8 +76,8 @@ void brownian_walker_stepper::set_velocity(){
   }
 
   EBAMRCellData& vel = m_solver->get_velo_cell();
-  m_amr->average_down(vel, m_phase);
-  m_amr->interp_ghost(vel, m_phase);
+  m_amr->average_down(vel, m_realm, m_phase);
+  m_amr->interp_ghost(vel, m_realm, m_phase);
 }
 
 bool brownian_walker_stepper::load_balance(Vector<Vector<int> >&            a_procs,
@@ -131,7 +139,7 @@ void brownian_walker_stepper::set_velocity(const int a_level){
   }
 
   // TLDR: This code goes down to each cell on grid level a_level and sets the velocity to omega*r
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box = dbl.get(dit());
 
@@ -156,7 +164,7 @@ void brownian_walker_stepper::set_velocity(const int a_level){
     const EBISBox& ebisbox = vel.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-    VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[a_level])[dit()];
+    VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[a_level])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
 
       const VolIndex vof = vofit();
@@ -239,7 +247,7 @@ void brownian_walker_stepper::compute_dt(Real& a_dt, time_code& a_timecode) {
   m_solver->interpolate_velocities();
   m_solver->interpolate_diffusion();
 
-  a_dt = m_solver->compute_dt(m_max_cells_hop);
+  a_dt = m_max_cells_hop*m_solver->compute_dt();
 }
 
 void brownian_walker_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
@@ -305,10 +313,18 @@ void brownian_walker_stepper::setup_solvers() {
   m_solver->parse_options();
   m_solver->set_amr(m_amr);
   m_solver->set_species(m_species);
-  m_solver->set_amr(m_amr);
   m_solver->set_phase(m_phase);
   m_solver->set_computational_geometry(m_compgeom);
+  m_solver->set_realm(m_realm);
+}
 
+void brownian_walker_stepper::register_realms() {
+  CH_TIME("brownian_walker_stepper::register_realms");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::register_realms" << endl;
+  }
+
+  m_amr->register_realm(m_realm);
 }
 
 void brownian_walker_stepper::register_operators() {
@@ -337,10 +353,10 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RealVect dx                     = m_amr->get_dx()[lvl]*RealVect::Unit;
-    const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
+    const DisjointBoxLayout& dbl          = m_amr->get_grids(m_realm)[lvl];
     ParticleData<ito_particle>& particles = m_solver->get_particles()[lvl];
 
-    const EBISLayout& ebisl = m_amr->get_ebisl(m_solver->get_phase())[lvl];
+    const EBISLayout& ebisl = m_amr->get_ebisl(m_realm, m_solver->get_phase())[lvl];
 
     if(m_solver->is_mobile() || m_solver->is_diffusive()){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -451,5 +467,12 @@ void brownian_walker_stepper::regrid(const int a_lmin, const int a_old_finest_le
     m_solver->sort_particles_by_cell();
     m_solver->make_superparticles(m_ppc);
     m_solver->sort_particles_by_patch();
+  }
+}
+
+void brownian_walker_stepper::post_regrid(){
+  CH_TIME("brownian_walker_stepper::post_regrid");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::post_regrid" << endl;
   }
 }

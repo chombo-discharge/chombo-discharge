@@ -27,6 +27,7 @@ namespace physics {
       // Setup routines
       void initial_data() override;
       void allocate() override;
+      void post_initialize() override;
 
       // Load balancing
       bool load_balance(Vector<Vector<int> >&            a_procs,
@@ -48,10 +49,14 @@ namespace physics {
 
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
       void print_step_report() override;
+      
+      // Registration routines
+      void register_operators() override;
+      void register_realms() override;
 
       // Regrid routines
       bool need_to_regrid() override;
-      void register_operators() override;
+
       void pre_regrid(const int a_lbase, const int a_old_finest_level) override;
       void deallocate() override;
 
@@ -59,8 +64,12 @@ namespace physics {
       void setup_solvers() override;
       Real advance(const Real a_dt) override;
       void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+      void post_regrid() override;
 
     protected:
+
+      // Realm
+      std::string m_realm; 
 
       // Phase
       phase::which_phase m_phase;

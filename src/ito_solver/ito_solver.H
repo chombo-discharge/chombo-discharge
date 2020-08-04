@@ -49,6 +49,16 @@ public:
   virtual std::string get_name();
 
   /*!
+    @brief Get realm
+  */
+  virtual const std::string get_realm() const;
+
+  /*!
+    @brief Set realm
+  */
+  virtual void set_realm(const std::string a_realm);
+
+  /*!
     @brief Parse options
   */
   virtual void parse_options();
@@ -437,6 +447,11 @@ public:
   phase::which_phase get_phase() const;
   
 protected:
+
+  /*!
+    @brief Realm
+  */
+  std::string m_realm;
 
   /*!
     @brief Boundary volume hierarchy merging tree

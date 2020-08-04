@@ -158,7 +158,7 @@ void driver::cache_tags(const EBAMRTags& a_tags){
   m_cached_tags.resize(1+finest_level);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
 
     // Copy tags onto boolean mask
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -726,7 +726,7 @@ void driver::regrid_internals(const int a_old_finest_level, const int a_new_fine
 
   // Copy cached tags back over to m_tags
   for (int lvl = 0; lvl <= Min(a_old_finest_level, a_new_finest_level); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
 
     // Copy mask
     LevelData<BaseFab<bool> > tmp;
@@ -1557,9 +1557,6 @@ void driver::setup_fresh(const int a_init_regrids){
   m_timestepper->set_amr(m_amr);
   m_timestepper->register_realms();
 
-  m_realm = m_amr->get_realms()[0];
-
-
   // Get geometry tags
   this->get_geom_tags();
   
@@ -1758,7 +1755,7 @@ void driver::step_report(const Real a_start_time, const Real a_end_time, const i
 
   // Get the total number of poitns across all levels
   const int finest_level                 = m_amr->get_finest_level();
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
   const Vector<Real>& dx                 = m_amr->get_dx();
   long long totalPoints = 0;
@@ -1888,7 +1885,7 @@ int driver::get_finest_tag_level(const EBAMRTags& a_cell_tags) const{
 
   int finest_tag_level = -1;
   for (int lvl = 0; lvl < a_cell_tags.size(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const DenseIntVectSet& tags = (*a_cell_tags[lvl])[dit()];
@@ -1941,7 +1938,7 @@ bool driver::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){
   }
 
   // Add geometric tags.
-  int tag_level = get_finest_tag_level(a_cell_tags);
+  int tag_level = this->get_finest_tag_level(a_cell_tags);
   if(m_allow_coarsen){
     for (int lvl = 0; lvl <= finest_level; lvl++){
       if(lvl <= tag_level){
@@ -1972,7 +1969,7 @@ bool driver::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){
   for (int lvl = 0; lvl <= finest_level; lvl++){
     num_local_tags[lvl] = a_all_tags[lvl].numPts();
   }
-  
+
   return got_new_tags;
 }
 
@@ -2025,7 +2022,7 @@ void driver::write_geometry(){
   Vector<std::string> names(1, "dummy_data");
 
   const int finest_level                 = m_amr->get_finest_level();
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
   const Vector<Real>& dx                 = m_amr->get_dx();
   const Vector<int>& ref_rat             = m_amr->get_ref_rat();
@@ -2173,8 +2170,8 @@ void driver::write_tags(EBAMRCellData& a_output, int& a_comp){
     
   // Set tagged cells = 1
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const DenseIntVectSet& ivs = (*m_tags[lvl])[dit()];
@@ -2261,7 +2258,7 @@ void driver::write_checkpoint_file(){
     handle_out.setGroupToLevel(lvl);
 
     // write amr grids
-    write(handle_out, m_amr->get_grids()[lvl]); // write AMR grids
+    write(handle_out, m_amr->get_grids(m_realm)[lvl]); // write AMR grids
 
     // time stepper checkpoints data
     m_timestepper->write_checkpoint_data(handle_out, lvl); 
@@ -2286,13 +2283,13 @@ void driver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   }
 
   // Create some scratch data = 0 which can grok
-  EBCellFactory fact(m_amr->get_ebisl(phase::gas)[a_level]);
+  EBCellFactory fact(m_amr->get_ebisl(m_realm, phase::gas)[a_level]);
   LevelData<EBCellFAB> scratch(m_amr->get_grids()[a_level], 1, 3*IntVect::Unit, fact);
   data_ops::set_value(scratch, 0.0);
 
   // Set tags = 1
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[a_level];
     
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box = dbl.get(dit());
@@ -2319,8 +2316,8 @@ void driver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
     pout() << "driver::read_checkpoint_level" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[a_level];
 
   // Some scratch data we can use
   EBCellFactory fact(ebisl);

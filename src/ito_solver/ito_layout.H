@@ -46,6 +46,16 @@ public:
   virtual ito_iterator<T> iterator();
 
   /*!
+    @brief Get realm
+  */
+  virtual const std::string get_realm() const;
+
+  /*!
+    @brief Set realm
+  */
+  virtual void set_realm(const std::string a_realm);
+
+  /*!
     @brief Define function
   */
   virtual void define(const Vector<RefCountedPtr<ito_species> >& a_species);
@@ -228,6 +238,11 @@ public:
 
 protected:
 
+  /*!
+    @brief Realm
+  */
+  std::string m_realm;
+  
   /*!
     @brief Solvers
   */
