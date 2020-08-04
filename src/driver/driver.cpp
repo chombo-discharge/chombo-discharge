@@ -439,21 +439,7 @@ void driver::grid_report(){
   //  ReportUnfreedMemory(pout());
 #endif
 
-  
-  // Get loads and boxes
-  this->get_loads_and_boxes(myPoints,
-			    myPointsGhosts,
-			    myBoxes,
-			    totPoints,
-			    totPointsGhosts,
-			    totBoxes,
-			    my_level_boxes,
-			    total_level_boxes,
-			    my_level_points,
-			    total_level_points,
-			    finest_level,
-			    grids);
-
+  // Some stuff
   const ProblemDomain coarsest_domain = m_amr->get_domains()[0];
   const ProblemDomain finest_domain   = m_amr->get_domains()[finest_level];
   const Box finestBox   = finest_domain.domainBox();
@@ -464,8 +450,24 @@ void driver::grid_report(){
     ref_rat[lvl] = refRat[lvl];
   }
 
-  // Write a report
-  
+  // Get boxes for each realm
+  const std::vector<std::string> realms = m_amr->get_realms();
+  for (auto str : realms){
+    this->get_loads_and_boxes(myPoints,
+			      myPointsGhosts,
+			      myBoxes,
+			      totPoints,
+			      totPointsGhosts,
+			      totBoxes,
+			      my_level_boxes,
+			      total_level_boxes,
+			      my_level_points,
+			      total_level_points,
+			      finest_level,
+			      m_amr->get_grids(str));
+  }
+
+  // Begin writing a report. 
   pout() << "-----------------------------------------------------------------------" << endl
 	 << "driver::Grid report - timestep = " << m_step << endl
 	 << "\t\t\t        Finest level           = " << finest_level << endl
@@ -486,12 +488,31 @@ void driver::grid_report(){
 	 << "\t\t\t        Finest dx              = " << dx[finest_level] << endl
     	 << "\t\t\t        Total number boxes     = " << totBoxes << endl
     	 << "\t\t\t        Total number of cells  = " << totPoints << " (" << totPointsGhosts << ")" << endl
-	 << "\t\t\t        Proc. # of cells       = " << myPoints << " (" << myPointsGhosts << ")" << endl
-	 << "\t\t\t        Proc. # of boxes       = " << myBoxes << endl
-	 << "\t\t\t        Total # of boxes (lvl) = " << total_level_boxes << endl
-    	 << "\t\t\t        Proc. # of boxes (lvl) = " << my_level_boxes << endl
-    	 << "\t\t\t        Total # of cells (lvl) = " << total_level_points << endl
-	 << "\t\t\t        Proc. # of cells (lvl) = " << my_level_points << endl
+    	 << "\t\t\t        Total # of boxes (lvl) = " << total_level_boxes << endl
+	 << "\t\t\t        Total # of cells (lvl) = " << total_level_points << endl;
+
+  // Do a local report for each realm
+  for (auto str : realms){
+    this->get_loads_and_boxes(myPoints,
+			      myPointsGhosts,
+			      myBoxes,
+			      totPoints,
+			      totPointsGhosts,
+			      totBoxes,
+			      my_level_boxes,
+			      total_level_boxes,
+			      my_level_points,
+			      total_level_points,
+			      finest_level,
+			      m_amr->get_grids(str));
+    pout() << "\t\t\t        Realm = " << str << endl
+         << "\t\t\t\t        Proc. # of cells       = " << myPoints << " (" << myPointsGhosts << ")" << endl
+	 << "\t\t\t\t        Proc. # of boxes       = " << myBoxes << endl
+    	 << "\t\t\t\t        Proc. # of boxes (lvl) = " << my_level_boxes << endl
+	 << "\t\t\t\t        Proc. # of cells (lvl) = " << my_level_points << endl;
+      }
+  
+  pout()
 #ifdef CH_USE_MEMORY_TRACKING
 	 << "\t\t\t        Unfreed memory        = " << curMem/BytesPerMB << " (MB)" << endl
     	 << "\t\t\t        Peak memory usage     = " << peakMem/BytesPerMB << " (MB)" << endl

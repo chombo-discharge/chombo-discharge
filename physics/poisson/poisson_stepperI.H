@@ -28,6 +28,7 @@ namespace physics {
       m_verbosity = -1;
 
       m_realm = realm::primal;
+
     }
 
     template <class T>
@@ -40,7 +41,8 @@ namespace physics {
       int verb;
       ParmParse pp("poisson_stepper");
       pp.get("verbosity", verb);
-
+      pp.get("load_balance", m_load_balance);
+      
       // Poisson setup
       m_poisson = RefCountedPtr<poisson_solver> (new T());
       m_poisson->set_verbosity(verb);
@@ -107,10 +109,6 @@ namespace physics {
       if(!converged){
 	MayDay::Warning("poisson_stepper<T>::advance - did not converge");
       }
-
-
-
-
     }
     
     template <class T>
@@ -185,57 +183,71 @@ namespace physics {
 					  const Vector<DisjointBoxLayout>& a_grids,
 					  const int                        a_lmin,
 					  const int                        a_finest_level){
-      a_procs.resize(1+a_finest_level);
-      a_boxes.resize(1+a_finest_level);
+      bool ret = false;
+      
+      if(m_load_balance){
+	a_procs.resize(1+a_finest_level);
+	a_boxes.resize(1+a_finest_level);
 
-      poisson_multifluid_gmg* solver = (poisson_multifluid_gmg*) (&(*m_poisson));
+	poisson_multifluid_gmg* solver = (poisson_multifluid_gmg*) (&(*m_poisson));
 
-      MFAMRCellData dummy1, dummy2;
+	MFAMRCellData dummy1, dummy2;
 
-      m_amr->allocate(dummy1, m_realm, 1);
-      m_amr->allocate(dummy2, m_realm, 1);
+	m_amr->allocate(dummy1, m_realm, 1);
+	m_amr->allocate(dummy2, m_realm, 1);
 
-      Vector<ProblemDomain> domains = m_amr->get_domains();
+	Vector<ProblemDomain> domains = m_amr->get_domains();
 
-      // We need to make amr_mesh restore some operators that we need
-      m_amr->regrid_operators(a_lmin, a_finest_level, 1);
+	// We need to make amr_mesh restore some operators that we need. This is overkill because we only need
+	// operators for ghost cell interpolation.... 
+	m_amr->regrid_operators(a_lmin, a_finest_level, 1);
 
-      solver->setup_operator_factory();
+	// Set up the operator factor and fetch it. 
+	solver->setup_operator_factory();
+	RefCountedPtr<mfconductivityopfactory>& factory = solver->get_opfact();
 
-      RefCountedPtr<mfconductivityopfactory>& factory = solver->get_opfact();
+	// Go through each level and load balance. 
+	for (int lvl = 0; lvl <= a_finest_level; lvl++){
+	  // Make an operator
+	  auto oper = RefCountedPtr<mfconductivityop> ((mfconductivityop*) factory->MGnewOp(domains[lvl], 0, false));
 
-      for (int lvl = 1; lvl <= a_finest_level; lvl++){
-	// Make an operator
-	auto oper = RefCountedPtr<mfconductivityop> ((mfconductivityop*) factory->MGnewOp(domains[lvl], 0, false));
+	  // Reset time
+	  TimedDataIterator dit = a_grids[lvl].timedDataIterator();
+	  dit.clearTime();
+	  dit.enableTime();
 
-	//	if(procID() == 0) std::cout << "applying op on level = " << lvl << std::endl;
-	TimedDataIterator dit = a_grids[lvl].timedDataIterator();
-	dit.clearTime();
-	dit.enableTime();
+	  // Do some relaxations on each level. This includes BCs.
+	  for (int k = 0; k < 50; k++){
+	    oper->applyOp(*dummy1[lvl], *dummy2[lvl], dit, true);
+	  }
 
-	for (int k = 0; k < 10; k++){
-	  oper->applyOp(*dummy1[lvl], *dummy2[lvl], dit, true);
-	}
-	dit.disableTime();
-	dit.mergeTime();
+	  // Merge times
+	  dit.disableTime();
+	  dit.mergeTime();
 
-	// Now do the load balancing
-	Vector<unsigned long long> loads = dit.getTime();
-	a_boxes[lvl] = dit.getBoxes();
-	UnLongLongLoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
+	  // Now do the load balancing
+	  Vector<unsigned long long> loads = dit.getTime();
+	  a_boxes[lvl] = dit.getBoxes();
+	  UnLongLongLoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
+
+	  ret = true;
 
 #if 0 // Debug
-	a_procs[lvl].resize(a_boxes[lvl].size(), 0);
-	for (int ibox = 0; ibox < a_procs[lvl].size(); ibox++){
-	  a_procs[lvl][ibox] = 0;
-	}
-	a_procs[lvl][0] = 1;
+	  a_procs[lvl].resize(a_boxes[lvl].size(), 0);
+	  for (int ibox = 0; ibox < a_procs[lvl].size(); ibox++){
+	    a_procs[lvl][ibox] = 0;
+	  }
+	  a_procs[lvl][0] = 1;
 
-	if(procID() == 0) std::cout << a_procs[lvl] << std::endl;
+	  if(procID() == 0) std::cout << a_procs[lvl] << std::endl;
 #endif
+	}
+      }
+      else{
+	ret = false;
       }
       
-      return true;
+      return ret;
     }
   }
 }
