@@ -28,6 +28,20 @@ rte_iterator<T> rte_layout<T>::iterator(){
 }
 
 template <class T>
+const std::string rte_layout<T>::get_realm() const{
+  return m_realm;
+}
+
+template <class T>
+void rte_layout<T>::set_realm(const std::string a_realm){
+  m_realm = a_realm;
+
+  for (auto solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->set_realm(m_realm);
+  }
+}
+
+template <class T>
 void rte_layout<T>::add_solver(RefCountedPtr<T> a_solver){
   m_solvers.push_back(a_solver);
 }

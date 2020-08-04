@@ -1,0 +1,148 @@
+# ====================================================================================================
+# AMR_MESH OPTIONS
+# ====================================================================================================
+amr_mesh.lo_corner       = -1 -1 -1    # Low corner of problem domain
+amr_mesh.hi_corner       =  1  1  1    # High corner of problem domain
+amr_mesh.verbosity       = -1          # Controls verbosity. 
+amr_mesh.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
+amr_mesh.max_amr_depth   = 1           # Maximum amr depth
+amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
+amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
+amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
+amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
+amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
+amr_mesh.buffer_size     = 2           # Number of cells between grid levels
+amr_mesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+amr_mesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
+amr_mesh.max_box_size    = 16          # Maximum allowed box size
+amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
+amr_mesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
+amr_mesh.num_ghost       = 3           # Number of ghost cells. Default is 3
+amr_mesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
+amr_mesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
+amr_mesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
+amr_mesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
+amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
+
+# ====================================================================================================
+# DRIVER OPTIONS
+# ====================================================================================================
+driver.verbosity                       = 2             # Engine verbosity
+driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
+driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
+driver.recursive_regrid                = false         # Recursive regrids
+driver.plot_interval                   = 5             # Plot interval
+driver.regrid_interval                 = 5             # Regrid interval
+driver.checkpoint_interval             = 5             # Checkpoint interval
+driver.initial_regrids                 = 0             # Number of initial regrids
+driver.start_time                      = 0             # Start time (fresh simulations only)
+driver.stop_time                       = 1.0           # Stop time
+driver.max_steps                       = 100           # Maximum number of steps
+driver.geometry_only                   = false         # Special option that ONLY plots the geometry
+driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+driver.write_memory                    = false         # Write MPI memory report 
+driver.write_ebis                      = false         # Write geometry to an HDF5 file
+driver.read_ebis                       = false         # Read EBIS when restarting a simulation
+driver.output_directory                = ./            # Output directory
+driver.grow_tags                       = 0             # Grow tagged by this in every direction
+driver.output_names                    = simulation    # Simulation output names
+driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
+driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
+driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
+driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
+driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
+driver.allow_coarsening                = true          # Allows removal of grid levels according to cell_tagger
+driver.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
+driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
+driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+driver.refine_electrode_gas_interface  = -1            # Refine electrode-gas interfaces. -1 => ----"-----
+driver.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
+driver.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
+driver.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----
+
+
+# ====================================================================================================
+# MC_PHOTO CLASS OPTIONS
+#
+# The mc_photo class is intended as a flexible RTE solver that may interface into several descriptions.
+# Because of that we allow several deposition types, e.g. cloud-in-cell if one wants to compute photoionization
+# profiles with less noise. If one wants the photoionization profile (which is what gets passed around
+# in the time_stepper framework) to contain just the number of photons in a cell, one would use
+# deposition_type = num. This is useful for SSA type algorithms. 
+#
+# Since the photoproduction source term is filled externally, and the filling of this depends on the
+# CFD/FHD description, mc_photo.source_type species what the solver will expect when drawing photons.
+# For example, if one species 'volume_rate', mc_photo will interpret the internal data so as to contain
+# a rate per unit volume. The number of photons produced in a volume will then be S*dx^3*dt. If you
+# filled the source term with just the number of photons that will be produced in a cell, you should
+# use source_type = number.
+#
+# The photogeneration mechanism can be done stochastically or determinsitically. How this is interpreted
+# depends on how you implemented your source terms through the plasma_kinetics interface (or equivalent).
+# This design makes sense for FHD models because the number of photons produced in a cell can be
+# computed directly, e.g. with SSA algorithms. In this way the stochasticity is provided by the SSA
+# algorithm and one would use mc_photo.source_type = deterministic. For CFD models one would probably
+# work with a volumetric rate, in which one could draw the number of photons from a Poisson distribution. 
+# ====================================================================================================
+mc_photo.instantaneous      = false         # Instantaneous transport or not
+mc_photo.max_photons        = -1            # Maximum no. generated in a cell (<= 0 yields physical photons)
+mc_photo.blend_conservation = false         # Switch for blending with the nonconservative divergence
+mc_photo.pvr_buffer         = 0             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
+mc_photo.random_kappa       = false         # Randomize absorption length (taken from photon implementation)
+mc_photo.plt_vars           = phi src phot       # Available are 'phi' and 'src'
+mc_photo.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 
+mc_photo.bisect_step        = 1.E-2         # Bisection step length for intersection tests
+mc_photo.seed               = 0             # Seed for RNG
+mc_photo.bc_x_low           = outflow       # Boundary condition. 'outflow', 'symmetry', or 'wall'
+mc_photo.bc_x_high          = outflow       # Boundary condition
+mc_photo.bc_y_low           = outflow       # Boundary condition
+mc_photo.bc_y_high          = outflow       # Boundary condition
+mc_photo.bc_z_low           = outflow       # Boundary condition
+mc_photo.bc_z_high          = outflow       # Boundary condition
+mc_photo.poiss_exp_swap     = 100           # Swap out Poisson with exponential distribution above this mean
+mc_photo.photon_generation  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
+mc_photo.source_type        = number        # 'number'      = Source term contains the number of photons produced
+                                            # 'volume'      = Source terms contains the number of photons produced per unit volume
+                                            # 'volume_rate' = Source terms contains the volumetric rate
+                                            # 'rate'        = Source terms contains the rate
+mc_photo.deposition         = cic           # 'ngp' = nearest grid point
+                                            # 'num' = # of photons per cell
+                                            # 'cic' = cloud-in-cell
+                                            # 'tsc' = triangle-shaped-cloud
+                                            # 'w4'  = 3rd order interpolation
+
+
+# ====================================================================================================
+# GEO_COARSENER CLASS OPTIONS
+# ====================================================================================================
+geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
+geo_coarsener.box1_lo     = -1 -1 -0.1         # Remove irregular cell tags 
+geo_coarsener.box1_hi     =  1 1 2         # between these two corners
+geo_coarsener.box1_lvl    = 0            # up to this level
+geo_coarsener.box1_inv    = false        # Remove except inside box (true)
+
+# ====================================================================================================
+# ROD_SPHERE CLASS OPTIONS
+# ====================================================================================================
+rod_sphere.eps0                      = 1                # Background permittivity
+rod_sphere.turn_off_electrode        = true             # Turn on/off electrode
+rod_sphere.turn_off_dielectric       = false            # Turn on/off dielectric
+rod_sphere.electrode_live            = true             # Live electrode or not
+rod_sphere.electrode_radius          = 0.05             # Electrode inner radius
+rod_sphere.electrode_center1         = 0 0 0.5          # Center 1
+rod_sphere.electrode_center2         = 0 0 2.0          # Center 2. 
+rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
+rod_sphere.dielectric_center         = 0 0 0            # Dielectric center
+rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
+
+# ====================================================================================================
+# RTE_STEPPER CLASS OPTIONS
+# ====================================================================================================
+rte_stepper.verbosity      = -1      # Verbosity
+rte_stepper.realm          = primal  # Realm 
+rte_stepper.kappa          = 0.1     # Inverse absorption coefficient
+rte_stepper.blob_amplitude = 1E2     # Blob amplitude
+rte_stepper.blob_radius    = 0.05    # Blob radius
+rte_stepper.blob_center    = 0.5 0.5 0.5 # Blob center

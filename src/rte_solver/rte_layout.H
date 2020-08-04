@@ -36,6 +36,16 @@ public:
   virtual rte_iterator<T> iterator();
 
   /*!
+    @brief Get realm
+  */
+  virtual const std::string get_realm() const;
+
+  /*!
+    @brief Set realm
+  */
+  virtual void set_realm(const std::string a_realm);
+
+  /*!
     @brief Add solver
   */
   virtual void add_solver(RefCountedPtr<T> a_solver);
@@ -163,6 +173,11 @@ public:
   virtual Vector<EBAMRCellData*> get_states();
 
 protected:
+
+  /*!
+    @brief Realm
+  */
+  std::string m_realm; 
 
   /*!
     @brief Solvers

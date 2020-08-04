@@ -407,8 +407,11 @@ void mc_photo::pre_regrid(const int a_lmin, const int a_old_finest_level){
     pout() << m_name + "::pre_grid" << endl;
   }
 
-  m_photons.pre_regrid(a_lmin);      // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_bulk_photons.pre_regrid(a_lmin); // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_photons.pre_regrid(a_lmin);         // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_bulk_photons.pre_regrid(a_lmin);    // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_eb_photons.pre_regrid(a_lmin);      // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_domain_photons.pre_regrid(a_lmin);  // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_source_photons.pre_regrid(a_lmin);  // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
 }
 
 void mc_photo::deallocate_internals(){
@@ -438,21 +441,17 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
   m_amr->reallocate(m_depositionNC, m_phase, a_lmin);
   m_amr->reallocate(m_massDiff,     m_phase, a_lmin);
 
-  pout() << "done with the first stuff" << endl;
-
   // Particle data regrids
   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
   const Vector<Real>& dx                 = m_amr->get_dx();
   const Vector<int>& ref_rat             = m_amr->get_ref_rat();
 
-  pout() << "doing regrid" << endl;
   m_photons.regrid(       grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  // m_bulk_photons.regrid(  grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  // m_eb_photons.regrid(    grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  // m_domain_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  // m_source_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  pout() << "done doing regrid" << endl;
+  m_bulk_photons.regrid(  grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_eb_photons.regrid(    grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_domain_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_source_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
 
   // Deposit
   this->deposit_photons();
