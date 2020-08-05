@@ -3890,7 +3890,7 @@ Real cdr_plasma_stepper::compute_electrode_current(){
 
   // Need to copy onto temporary storage because 
   EBAMRIVData charge_flux;
-  m_amr->allocate(charge_flux, m_cdr->get_phase(), 1);
+  m_amr->allocate(charge_flux, m_realm, m_cdr->get_phase(), 1);
   data_ops::set_value(charge_flux, 0.0);
   
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -3938,7 +3938,7 @@ Real cdr_plasma_stepper::compute_dielectric_current(){
 
   // Need to copy onto temporary storage because 
   EBAMRIVData charge_flux;
-  m_amr->allocate(charge_flux, m_cdr->get_phase(), 1);
+  m_amr->allocate(charge_flux, m_realm, m_cdr->get_phase(), 1);
   data_ops::set_value(charge_flux, 0.0);
   
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -3988,7 +3988,7 @@ Real cdr_plasma_stepper::compute_domain_current(){
 
   // Need to copy onto temporary storage because 
   EBAMRIFData charge_flux;
-  m_amr->allocate(charge_flux, m_cdr->get_phase(), 1);
+  m_amr->allocate(charge_flux, m_realm, m_cdr->get_phase(), 1);
   data_ops::set_value(charge_flux, 0.0);
   
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){

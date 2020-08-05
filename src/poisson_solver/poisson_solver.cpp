@@ -237,7 +237,7 @@ Real poisson_solver::compute_capacitance(){
   // Solve and compute energy density
   MFAMRCellData E;
   m_amr->allocate(E, m_realm, SpaceDim);
-  m_amr->compute_gradient(E, phi); // -E
+  m_amr->compute_gradient(E, phi, m_realm); // -E
   const Real U = this->compute_U(E); // Energy density
 
   // U = 0.5*CV^2

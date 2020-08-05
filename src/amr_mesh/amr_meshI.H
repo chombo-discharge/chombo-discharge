@@ -50,15 +50,6 @@ template<typename T, typename S> void amr_mesh::alias(Vector<T*>& a_alias, const
   return this->alias(a_alias, a_data.get_data());
 }
 
-template<typename T> void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles){
-  CH_TIME("amr_mesh::allocate(AMR ParticleData)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(AMR ParticleData)" << endl;
-  }
-
-  this->allocate(a_particles, realm::primal);
-}
-
 template <typename T> void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_realm){
   CH_TIME("amr_mesh::allocate(particle_data, realm)");
   if(m_verbosity > 5){
@@ -86,16 +77,6 @@ template <typename T> void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<
 									    dx*RealVect::Unit,
 									    m_prob_lo));
   }
-}
-																
-
-template <typename T> void amr_mesh::allocate(particle_container<T>& a_container, const int a_pvr_buffer){
-  CH_TIME("amr_mesh::allocate(container, buffer)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(container, buffer)" << endl;
-  }
-
-  this->allocate(a_container, a_pvr_buffer, realm::primal);
 }
 
 template <typename T> void amr_mesh::allocate(particle_container<T>& a_container, const int a_buffer, const std::string a_realm){

@@ -91,20 +91,8 @@ public:
 
   /*!
     @brief Template class for generic allocation of particles
-    @todo Remove
-  */
-  template <typename T> void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles);
-
-    /*!
-    @brief Template class for generic allocation of particles
   */
   template <typename T > void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_realm);
-
-  /*!
-    @brief Allocate a particle container
-    @todo Remove
-  */
-  template <typename T> void allocate(particle_container<T>& a_container, const int a_buffer);
 
   /*!
     @brief Allocate a particle container
@@ -167,31 +155,13 @@ public:
 
   /*!
     @brief Compute gradient on level
-    @todo Remove
-  */
-  virtual void compute_gradient(LevelData<EBCellFAB>& a_gradient,
-				const LevelData<EBCellFAB>& a_phi,
-				const phase::which_phase a_phase,
-				const int a_lvl);
-
-  /*!
-    @brief Compute gradient on level
   */
   virtual void compute_gradient(LevelData<EBCellFAB>&       a_gradient,
 				const LevelData<EBCellFAB>& a_phi,
 				const std::string           a_realm,
 				const phase::which_phase    a_phase,
 				const int                   a_lvl);
-
   /*!
-    @brief Compute cell-centered gradient. 
-    @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
-    nor are ghost cells updated. 
-    @todo Remove
-  */
-  virtual void compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& a_phi, const phase::which_phase a_phase);
-
-    /*!
     @brief Compute cell-centered gradient. 
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
@@ -205,33 +175,13 @@ public:
     @brief Compute cell-centered gradient. 
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
-    @todo Remove
-  */
-  virtual void compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi);
-
-  /*!
-    @brief Compute cell-centered gradient. 
-    @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
-    nor are ghost cells updated. 
   */
   virtual void compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm);
 
   /*!
     @brief Allocate particle valid regions
-    @todo Remove
-  */
-  virtual void allocate(AMRPVR& a_pvr, const int a_buffer);
-
-    /*!
-    @brief Allocate particle valid regions
   */
   virtual void allocate(AMRPVR& a_pvr, const std::string a_realm, const int a_buffer);
-
-  /*!
-    @brief Allocate a data holder. 
-    @todo Remove
-  */
-  virtual void allocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Allocate a data holder over a specific realm
@@ -243,11 +193,6 @@ public:
 			const int                a_ghost = -1);
 
   /*!
-    @brief Allocate a data holder. 
-  */
-  virtual void allocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
-
-  /*!
     @brief Allocate a data holder over a specific realm
   */
   virtual void allocate(EBAMRFluxData&           a_data,
@@ -257,11 +202,6 @@ public:
 			const int                a_ghost = -1);
 
   /*!
-    @brief Allocate a data holder. 
-  */
-  virtual void allocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
-
-    /*!
     @brief Allocate a data holder over a specific realm
   */
   virtual void allocate(EBAMRIVData&             a_data,
@@ -269,11 +209,6 @@ public:
 			const phase::which_phase a_phase,
 			const int                a_ncomp,
 			const int                a_ghost = -1);
-
-  /*!
-    @brief Allocate a data holder. 
-  */
-  virtual void allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Allocate a data holder over a specific realm
@@ -285,42 +220,21 @@ public:
 			const int                a_ghost = -1);
 
   /*!
-    @brief Allocate Boolean data
-  */
-  virtual void allocate(EBAMRBool& a_data, const int a_ncomp, const int a_ghost);
-
-  /*!
     @brief Allocate Boolean data over a specific realm
   */
   virtual void allocate(EBAMRBool& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost);
-
+  
   /*!
-    @brief Allocate a data holder. 
-    @note This routines _allocates_, so if a_data is not empty you're leaking memory
-  */
-  virtual void allocate(MFAMRCellData& a_data, const int a_ncomp, const int a_ghost = -1);
-
-    /*!
     @brief Allocate a data holder over a specific realm
   */
   virtual void allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
 
   /*!
-    @brief Allocate a data holder. 
-  */
-  virtual void allocate(MFAMRFluxData& a_data, const int a_ncomp, const int a_ghost = -1);
-
-  /*!
     @brief Allocate a data holder over a specific realm.
   */
   virtual void allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
-  
-  /*!
-    @brief Allocate a data holder. 
-  */
-  virtual void allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghost = -1);
 
-    /*!
+  /*!
     @brief Allocate a data holder over a specific realm
   */
   virtual void allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);

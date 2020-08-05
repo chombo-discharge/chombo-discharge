@@ -119,17 +119,6 @@ void amr_mesh::alias(EBAMRIVData& a_data, const phase::which_phase a_phase, cons
   }
 }
 
-void amr_mesh::allocate(AMRPVR& a_pvr, const int a_buffer){
-  CH_TIME("amr_mesh::allocate(AMR PVR)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(AMR PVR)" << endl;
-  }
-
-  MayDay::Abort("amr_mesh::allocate(amrpvr, buffer) - shouldn't happen");
-
-  this->allocate(a_pvr, realm::primal, a_buffer);
-}
-
 void amr_mesh::allocate(AMRPVR& a_pvr, const std::string a_realm, const int a_buffer){
   CH_TIME("amr_mesh::allocate(PVR, realm, buffer)");
   if(m_verbosity > 5){
@@ -161,16 +150,6 @@ void amr_mesh::allocate(AMRPVR& a_pvr, const std::string a_realm, const int a_bu
       a_pvr[lvl] = RefCountedPtr<ParticleValidRegion> (new ParticleValidRegion(dbl, a_pvr[lvl-1]->mask(), ref_ratio, a_buffer));
     }
   }
-}
-
-void amr_mesh::allocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
-  CH_TIME("amr_mesh::allocate(ebamrcell, phase, ncomp, ghost)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(ebamrcell, phase, ncomp, ghost)" << endl;
-  }
-  MayDay::Abort("amr_mesh::allocate(ebamrcell, phase, ncomp, ghost) - shouldn't happen");
-
-  this->allocate(a_data, realm::primal, a_phase, a_ncomp, a_ghost);
 }
 
 void amr_mesh::allocate(EBAMRCellData&           a_data,
@@ -207,15 +186,6 @@ void amr_mesh::allocate(EBAMRCellData&           a_data,
   a_data.set_realm(a_realm);
 }
 
-void amr_mesh::allocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
-  CH_TIME("amr_mesh::allocate(flux)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(flux)" << endl;
-  }
-
-  this->allocate(a_data, realm::primal, a_phase, a_ncomp, a_ghost);
-}
-
 void amr_mesh::allocate(EBAMRFluxData&           a_data,
 			const std::string        a_realm,
 			const phase::which_phase a_phase,
@@ -248,15 +218,6 @@ void amr_mesh::allocate(EBAMRFluxData&           a_data,
   }
 
   a_data.set_realm(a_realm);
-}
-
-void amr_mesh::allocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
-  CH_TIME("amr_mesh::allocate(baseiv)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(baseiv)" << endl;
-  }
-
-  this->allocate(a_data, realm::primal, a_phase, a_ncomp, a_ghost);
 }
 
 void amr_mesh::allocate(EBAMRIVData&             a_data,
@@ -303,15 +264,6 @@ void amr_mesh::allocate(EBAMRIVData&             a_data,
   a_data.set_realm(a_realm);
 }
 
-void amr_mesh::allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
-  CH_TIME("amr_mesh::allocate(EBAMRIFData)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(EBAMRIFData)" << endl;
-  }
-
-  this->allocate(a_data, realm::primal, a_phase, a_ncomp, a_ghost);
-}
-
 void amr_mesh::allocate(EBAMRIFData&             a_data,
 			const std::string        a_realm,
 			const phase::which_phase a_phase,
@@ -345,16 +297,6 @@ void amr_mesh::allocate(EBAMRIFData&             a_data,
   a_data.set_realm(a_realm);
 }
 
-void amr_mesh::allocate(EBAMRBool& a_data, const int a_ncomp, const int a_ghost){
-  CH_TIME("amr_mesh::allocate(EBAMRBool)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(EBAMRBool)" << endl;
-  }
-
-  this->allocate(a_data, realm::primal, a_ncomp, a_ghost);
-
-}
-
 void amr_mesh::allocate(EBAMRBool& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost){
   CH_TIME("amr_mesh::allocate(ebamrbool, realm, comp, ghost)");
   if(m_verbosity > 5){
@@ -376,16 +318,6 @@ void amr_mesh::allocate(EBAMRBool& a_data, const std::string a_realm, const int 
   }
 
   a_data.set_realm(a_realm);
-}
-
-void amr_mesh::allocate(MFAMRCellData& a_data, const int a_ncomp, const int a_ghost){
-  CH_TIME("amr_mesh::allocate(mf cell)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(mf cell)" << endl;
-  }
-
-  this->allocate(a_data, realm::primal, a_ncomp, a_ghost);
-  
 }
 
 void amr_mesh::allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost){
@@ -428,15 +360,6 @@ void amr_mesh::allocate(MFAMRCellData& a_data, const std::string a_realm, const 
   a_data.set_realm(a_realm);
 }
 
-void amr_mesh::allocate(MFAMRFluxData& a_data, const int a_ncomp, const int a_ghost){
-  CH_TIME("amr_mesh::allocate(mf flux)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(mf flux)" << endl;
-  }
-
-  this->allocate(a_data, realm::primal, a_ncomp, a_ghost);
-}
-
 void amr_mesh::allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost){
   CH_TIME("amr_mesh::allocate(mfamrflux, realm, comp, ghost)");
   if(m_verbosity > 5){
@@ -473,15 +396,6 @@ void amr_mesh::allocate(MFAMRFluxData& a_data, const std::string a_realm, const 
   }
 
   a_data.set_realm(a_realm);
-}
-  
-void amr_mesh::allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghost){
-  CH_TIME("amr_mesh::allocate(mf baseivfab)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(mf baseivfab)" << endl;
-  }
-
-  this->allocate(a_data, realm::primal, a_ncomp, a_ghost);
 }
 
 void amr_mesh::allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost){
@@ -1110,18 +1024,6 @@ void amr_mesh::loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& 
   }
 }
 
-void amr_mesh::compute_gradient(LevelData<EBCellFAB>& a_gradient,
-				const LevelData<EBCellFAB>& a_phi,
-				const phase::which_phase a_phase,
-				const int a_lvl){
-  CH_TIME("amr_mesh::compute_gradient(level)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::compute_gradient(level)" << endl;
-  }
-
-  this->compute_gradient(a_gradient, a_phi, realm::primal, a_phase, a_lvl);
-}
-
 void amr_mesh::compute_gradient(LevelData<EBCellFAB>&       a_gradient,
 				const LevelData<EBCellFAB>& a_phi,
 				const std::string           a_realm,
@@ -1192,17 +1094,6 @@ void amr_mesh::compute_gradient(LevelData<EBCellFAB>&       a_gradient,
   }
 }
 
-void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& a_phi, const phase::which_phase a_phase){
-  CH_TIME("amr_mesh::compute_gradient(grad, phi, phase)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::compute_gradient(grad, phi, phase)" << endl;
-  }
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    compute_gradient(*a_gradient[lvl], *a_phi[lvl], a_phase, lvl);
-  }
-}
-
 void amr_mesh::compute_gradient(EBAMRCellData&           a_gradient,
 				const EBAMRCellData&     a_phi,
 				const std::string        a_realm,  
@@ -1214,33 +1105,6 @@ void amr_mesh::compute_gradient(EBAMRCellData&           a_gradient,
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     this->compute_gradient(*a_gradient[lvl], *a_phi[lvl], a_realm, a_phase, lvl);
-  }
-}
-
-void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi){
-  CH_TIME("amr_mesh::compute_gradient(mf grad, mf phi)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::compute_gradient(mf grad, mf phi)" << endl;
-  }
-
-  for (int iphase = 0; iphase < m_mfis->num_phases(); iphase++){
-    EBAMRCellData alias_grad(1 + m_finest_level);
-    EBAMRCellData alias_phi(1 + m_finest_level);
-
-    for (int lvl = 0; lvl <= m_finest_level; lvl++){
-      alias_grad[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
-      alias_phi[lvl]  = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
-      
-      mfalias::aliasMF(*alias_grad[lvl], iphase, *a_gradient[lvl]);
-      mfalias::aliasMF(*alias_phi[lvl],  iphase, *a_phi[lvl]);
-    }
-
-    if(iphase == 0){
-      this->compute_gradient(alias_grad, alias_phi, phase::gas);
-    }
-    else if(iphase == 1){
-      this->compute_gradient(alias_grad, alias_phi, phase::solid);
-    }
   }
 }
 
