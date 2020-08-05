@@ -57,8 +57,8 @@ void cdr_plasma_field_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_gra
   data_ops::vector_length(m_scratch, a_E);
   m_amr->compute_gradient(a_grad_E, m_scratch, m_realm, phase::gas);
 
-  m_amr->average_down(a_grad_E, m_phase);
-  m_amr->interp_ghost(a_grad_E, m_phase);
+  m_amr->average_down(a_grad_E, m_realm, m_phase);
+  m_amr->interp_ghost(a_grad_E, m_realm, m_phase);
   
   // Interpolate to centroids
   m_amr->interpolate_to_centroids(a_E,      m_realm, m_phase);

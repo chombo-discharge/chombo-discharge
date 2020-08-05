@@ -1135,15 +1135,6 @@ void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& 
   }
 }
 
-void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::average_down(ebamrcell, phase");
-  if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(ebamrcell, phase)" << endl;
-  }
-
-  this->average_down(a_data, realm::primal, a_phase);
-}
-
 void amr_mesh::average_down(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase){
   CH_TIME("amr_mesh::average_down(ebamrcell, realm, phase");
   if(m_verbosity > 3){
@@ -1169,15 +1160,6 @@ void amr_mesh::average_down(EBAMRCellData& a_data, const std::string a_realm, co
   }
 }
 
-void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase, const int a_lvl){
-  CH_TIME("amr_mesh::average_down(ebamrcelldata, phase, level");
-  if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(ebamrcelldata, phase, level)" << endl;
-  }
-
-  this->average_down(a_data, realm::primal, a_phase, a_lvl);
-}
-
 void amr_mesh::average_down(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lvl){
   CH_TIME("amr_mesh::average_down(ebamrcelldata, realm, phase, level");
   if(m_verbosity > 3){
@@ -1197,15 +1179,6 @@ void amr_mesh::average_down(EBAMRCellData& a_data, const std::string a_realm, co
   aveOp.average(*a_data[a_lvl], *a_data[a_lvl+1], interv);
 
   a_data[a_lvl]->exchange();
-}
-
-void amr_mesh::average_down(MFAMRFluxData& a_data){
-  CH_TIME("amr_mesh::average_down(mfflux)");
-  if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(mfflux)" << endl;
-  }
-
-  this->average_down(a_data, realm::primal);
 }
 
 void amr_mesh::average_down(MFAMRFluxData& a_data, const std::string a_realm){
@@ -1238,15 +1211,6 @@ void amr_mesh::average_down(MFAMRFluxData& a_data, const std::string a_realm){
   if(!ebis_sol.isNull()) this->average_down(alias_s, a_realm, phase::solid);
 }
 
-void amr_mesh::average_down(MFAMRCellData& a_data){
-  CH_TIME("amr_mesh::average_down(mfamrcell)");
-  if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(mfamrcell)" << endl;
-  }
-
-  this->average_down(a_data, realm::primal);
-}
-
 void amr_mesh::average_down(MFAMRCellData& a_data, const std::string a_realm){
   CH_TIME("amr_mesh::average_down(mfamrcell, realm)");
   if(m_verbosity > 3){
@@ -1276,15 +1240,6 @@ void amr_mesh::average_down(MFAMRCellData& a_data, const std::string a_realm){
   if(!ebis_sol.isNull()) this->average_down(alias_s, a_realm, phase::solid);
 }
 
-void amr_mesh::average_down(EBAMRFluxData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::average_down(ebamrflux, phase");
-  if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(ebamrflux, phase)" << endl;
-  }
-
-  this->average_down(a_data, realm::primal, a_phase);
-}
-
 void amr_mesh::average_down(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase){
   CH_TIME("amr_mesh::average_down(ebamrflux, realm, phase");
   if(m_verbosity > 3){
@@ -1309,15 +1264,6 @@ void amr_mesh::average_down(EBAMRFluxData& a_data, const std::string a_realm, co
   }
 }
 
-void amr_mesh::average_down(EBAMRIVData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::average_down(ebamriv, phase)");
-  if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(ebamriv, phase)" << endl;
-  }
-
-  this->average_down(a_data, realm::primal, a_phase);
-}
-
 void amr_mesh::average_down(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase){
   CH_TIME("amr_mesh::average_down(ebamriv, realm, phase)");
   if(m_verbosity > 3){
@@ -1340,15 +1286,6 @@ void amr_mesh::average_down(EBAMRIVData& a_data, const std::string a_realm, cons
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     a_data[lvl]->exchange();
   }
-}
-
-void amr_mesh::conservative_average(EBAMRIVData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::conservative_average(ebamriv, phase)");
-  if(m_verbosity > 3){
-    pout() << "amr_mesh::conservative_average(ebamriv, phase)" << endl;
-  }
-
-  this->conservative_average(a_data, realm::primal, a_phase);
 }
 
 void amr_mesh::conservative_average(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase){
@@ -1376,23 +1313,6 @@ void amr_mesh::conservative_average(EBAMRIVData& a_data, const std::string a_rea
   }
 }
 
-void amr_mesh::interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::interp_ghost(ebamrcell, phase)");
-  if(m_verbosity > 3){
-    pout() << "amr_mesh::interp_ghost(ebamrcell, phase)" << endl;
-  }
-
-  if(m_interp_type == ghost_interpolation::pwl){
-    this->interp_ghost_pwl(a_data, a_phase);
-  }
-  else if(m_interp_type == ghost_interpolation::quad){
-    this->interp_ghost_quad(a_data, a_phase);
-  }
-  else{
-    MayDay::Abort("amr_mesh::interp_ghost - unsupported interpolation type requested");
-  }
-}
-
 void amr_mesh::interp_ghost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase){
   CH_TIME("amr_mesh::interp_ghost(ebamrcell, realm, phase)");
   if(m_verbosity > 3){
@@ -1413,15 +1333,6 @@ void amr_mesh::interp_ghost(EBAMRCellData& a_data, const std::string a_realm, co
   else{
     MayDay::Abort("amr_mesh::interp_ghost - unsupported interpolation type requested");
   }
-}
-
-void amr_mesh::interp_ghost(MFAMRCellData& a_data){
-  CH_TIME("amr_mesh::interp_ghost(mfamrcell)");
-  if(m_verbosity > 3){
-    pout() << "amr_mesh::interp_ghost(mfamrcell)" << endl;
-  }
-
-  this->interp_ghost(a_data, realm::primal);
 }
 
 void amr_mesh::interp_ghost(MFAMRCellData& a_data, const std::string a_realm){
@@ -1454,15 +1365,6 @@ void amr_mesh::interp_ghost(MFAMRCellData& a_data, const std::string a_realm){
   if(!ebis_sol.isNull()) this->interp_ghost(alias_s, a_realm, phase::solid);
 }
 
-void amr_mesh::interp_ghost_quad(EBAMRCellData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::interp_ghost_quad(ebamrcell, phase)");
-  if(m_verbosity > 3){
-    pout() << "amr_mesh::interp_ghost_quad(ebamrcell_phase)" << endl;
-  }
-
-  this->interp_ghost_quad(a_data, realm::primal, a_phase);
-}
-
 void amr_mesh::interp_ghost_quad(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase){
   CH_TIME("amr_mesh::interp_ghost_quad(ebamrcell, realm, phase)");
   if(m_verbosity > 3){
@@ -1488,15 +1390,6 @@ void amr_mesh::interp_ghost_quad(EBAMRCellData& a_data, const std::string a_real
   }
 }
 
-void amr_mesh::interp_ghost_pwl(EBAMRCellData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::interp_ghost_pwl(ebamrcell, phase)");
-  if(m_verbosity > 3){
-    pout() << "amr_mesh::interp_ghost_pwl(ebamrcell, phase)" << endl;
-  }
-
-  this->interp_ghost_pwl(a_data, realm::primal, a_phase);
-}
-
 void amr_mesh::interp_ghost_pwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase){
   CH_TIME("amr_mesh::interp_ghost_pwl(ebamrcell, realm, phase)");
   if(m_verbosity > 3){
@@ -1520,10 +1413,6 @@ void amr_mesh::interp_ghost_pwl(EBAMRCellData& a_data, const std::string a_realm
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     a_data[lvl]->exchange();
   }
-}
-
-void amr_mesh::interpolate_to_centroids(EBAMRCellData& a_data, phase::which_phase a_phase){
-  this->interpolate_to_centroids(a_data, realm::primal, a_phase);
 }
 
 void amr_mesh::interpolate_to_centroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase){
@@ -2012,24 +1901,12 @@ Vector<DisjointBoxLayout>& amr_mesh::get_grids(const std::string a_realm){
   return m_realms[a_realm]->get_grids();
 }
 
-Vector<EBISLayout>& amr_mesh::get_ebisl(const phase::which_phase a_phase){ // Remove
-  return this->get_ebisl(realm::primal, a_phase);
-}
-
 Vector<EBISLayout>& amr_mesh::get_ebisl(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_ebisl(a_phase);
 }
 
-Vector<RefCountedPtr<LayoutData<VoFIterator> > > amr_mesh::get_vofit(const phase::which_phase a_phase){
-  return this->get_vofit(realm::primal, a_phase);
-}
-
 Vector<RefCountedPtr<LayoutData<VoFIterator> > > amr_mesh::get_vofit(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_vofit(a_phase);
-}
-
-Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& amr_mesh::get_neighbors(const phase::which_phase a_phase){
-  return this->get_neighbors(realm::primal, a_phase);
 }
 
 Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& amr_mesh::get_neighbors(const std::string a_realm,
@@ -2037,96 +1914,48 @@ Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& amr_mesh::get_neighbo
   return m_realms[a_realm]->get_neighbors(a_phase);
 }
 
-Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(const phase::which_phase a_phase){ // To be removed
-  return this->get_eblg(realm::primal, a_phase);
-}
-
 Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_eblg(a_phase);
-}
-
-Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mflg(){
-  return this->get_mflg(realm::primal);
 }
 
 Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mflg(const std::string a_realm){
   return m_realms[a_realm]->get_mflg();
 }
 
-Vector<RefCountedPtr<ebcoarseaverage> >& amr_mesh::get_coarave(phase::which_phase a_phase){
-  return this->get_coarave(realm::primal, a_phase);
-}
-
 Vector<RefCountedPtr<ebcoarseaverage> >& amr_mesh::get_coarave(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_coarave(a_phase);
-}
-
-Vector<RefCountedPtr<EBGhostCloud> >& amr_mesh::get_ghostcloud(const phase::which_phase a_phase){
-  return this->get_ghostcloud(realm::primal, a_phase);
 }
 
 Vector<RefCountedPtr<EBGhostCloud> >& amr_mesh::get_ghostcloud(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_ghostcloud(a_phase);
 }
 
-Vector<RefCountedPtr<nwoebquadcfinterp> >& amr_mesh::get_quadcfi(const phase::which_phase a_phase){
-  return this->get_quadcfi(realm::primal, a_phase);
-}
-
 Vector<RefCountedPtr<nwoebquadcfinterp> >& amr_mesh::get_quadcfi(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_quadcfi(a_phase);
-}
-
-Vector<RefCountedPtr<EBQuadCFInterp> >& amr_mesh::get_old_quadcfi(const phase::which_phase a_phase){
-  return this->get_old_quadcfi(realm::primal, a_phase);
 }
 
 Vector<RefCountedPtr<EBQuadCFInterp> >& amr_mesh::get_old_quadcfi(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_old_quadcfi(a_phase);
 }
 
-Vector<RefCountedPtr<AggEBPWLFillPatch> >& amr_mesh::get_fillpatch(const phase::which_phase a_phase){
-  return this->get_fillpatch(realm::primal, a_phase);
-}
-
 Vector<RefCountedPtr<AggEBPWLFillPatch> >& amr_mesh::get_fillpatch(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_fillpatch(a_phase);
-}
-
-Vector<RefCountedPtr<EBPWLFineInterp> >& amr_mesh::get_eb_pwl_interp(const phase::which_phase a_phase){
-  return this->get_eb_pwl_interp(realm::primal, a_phase);
 }
 
 Vector<RefCountedPtr<EBPWLFineInterp> >& amr_mesh::get_eb_pwl_interp(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_eb_pwl_interp(a_phase);
 }
 
-Vector<RefCountedPtr<EBMGInterp> >& amr_mesh::get_eb_mg_interp(const phase::which_phase a_phase){
-  return this->get_eb_mg_interp(realm::primal, a_phase);
-}
-
 Vector<RefCountedPtr<EBMGInterp> >& amr_mesh::get_eb_mg_interp(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_eb_mg_interp(a_phase);
-}
-
-Vector<RefCountedPtr<EBFluxRegister> >&  amr_mesh::get_flux_reg(const phase::which_phase a_phase){
-  return this->get_flux_reg(realm::primal, a_phase);
 }
 
 Vector<RefCountedPtr<EBFluxRegister> >&  amr_mesh::get_flux_reg(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_flux_reg(a_phase);
 }
 
-Vector<RefCountedPtr<EBLevelRedist> >& amr_mesh::get_level_redist(const phase::which_phase a_phase){
-  return this->get_level_redist(realm::primal, a_phase);
-}
-
 Vector<RefCountedPtr<EBLevelRedist> >& amr_mesh::get_level_redist(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_level_redist(a_phase);
-}
-
-Vector<RefCountedPtr<EBCoarToFineRedist> >&  amr_mesh::get_coar_to_fine_redist(const phase::which_phase a_phase){
-  return this->get_coar_to_fine_redist(realm::primal, a_phase);
 }
 
 Vector<RefCountedPtr<EBCoarToFineRedist> >&  amr_mesh::get_coar_to_fine_redist(const std::string        a_realm,
@@ -2134,17 +1963,9 @@ Vector<RefCountedPtr<EBCoarToFineRedist> >&  amr_mesh::get_coar_to_fine_redist(c
   return m_realms[a_realm]->get_coar_to_fine_redist(a_phase);
 }
 
-Vector<RefCountedPtr<EBCoarToCoarRedist> >&  amr_mesh::get_coar_to_coar_redist(const phase::which_phase a_phase){
-  return this->get_coar_to_coar_redist(realm::primal, a_phase);
-}
-
 Vector<RefCountedPtr<EBCoarToCoarRedist> >&  amr_mesh::get_coar_to_coar_redist(const std::string        a_realm,
 									       const phase::which_phase a_phase){
   return m_realms[a_realm]->get_coar_to_coar_redist(a_phase);
-}
-
-Vector<RefCountedPtr<EBFineToCoarRedist> >&  amr_mesh::get_fine_to_coar_redist(const phase::which_phase a_phase){
-  return this->get_fine_to_coar_redist(realm::primal, a_phase);
 }
 
 Vector<RefCountedPtr<EBFineToCoarRedist> >&  amr_mesh::get_fine_to_coar_redist(const std::string        a_realm,
@@ -2152,17 +1973,9 @@ Vector<RefCountedPtr<EBFineToCoarRedist> >&  amr_mesh::get_fine_to_coar_redist(c
   return m_realms[a_realm]->get_fine_to_coar_redist(a_phase);
 }
 
-irreg_amr_stencil<centroid_interp>& amr_mesh::get_centroid_interp_stencils(const phase::which_phase a_phase){
-  return this->get_centroid_interp_stencils(realm::primal, a_phase);
-}
-
 irreg_amr_stencil<centroid_interp>& amr_mesh::get_centroid_interp_stencils(const std::string        a_realm,
 									   const phase::which_phase a_phase){
   return m_realms[a_realm]->get_centroid_interp_stencils(a_phase);
-}
-
-irreg_amr_stencil<eb_centroid_interp>& amr_mesh::get_eb_centroid_interp_stencils(const phase::which_phase a_phase){
-  return this->get_eb_centroid_interp_stencils(realm::primal, a_phase);
 }
 
 irreg_amr_stencil<eb_centroid_interp>& amr_mesh::get_eb_centroid_interp_stencils(const std::string        a_realm,
@@ -2170,24 +1983,12 @@ irreg_amr_stencil<eb_centroid_interp>& amr_mesh::get_eb_centroid_interp_stencils
   return m_realms[a_realm]->get_eb_centroid_interp_stencils(a_phase);
 }
 
-irreg_amr_stencil<noncons_div>& amr_mesh::get_noncons_div_stencils(const phase::which_phase a_phase){
-  return this->get_noncons_div_stencils(realm::primal, a_phase);
-}
-
 irreg_amr_stencil<noncons_div>& amr_mesh::get_noncons_div_stencils(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_noncons_div_stencils(a_phase);
 }
 
-Vector<RefCountedPtr<Copier> >& amr_mesh::get_copier(const phase::which_phase a_phase){
-  return this->get_copier(realm::primal, a_phase);
-}
-
 Vector<RefCountedPtr<Copier> >& amr_mesh::get_copier(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_copier(a_phase);
-}
-
-Vector<RefCountedPtr<Copier> >& amr_mesh::get_reverse_copier(const phase::which_phase a_phase){
-  return this->get_reverse_copier(realm::primal, a_phase);
 }
 
 Vector<RefCountedPtr<Copier> >& amr_mesh::get_reverse_copier(const std::string a_realm, const phase::which_phase a_phase){
@@ -2258,33 +2059,6 @@ void amr_mesh::register_realm(const std::string a_realm){
   if(!this->query_realm(a_realm)){
     m_realms.emplace(a_realm, RefCountedPtr<realm> (new realm()));
   }
-}
-
-void amr_mesh::register_operator(const std::string a_operator, const phase::which_phase a_phase){
-  CH_TIME("amr_mesh::register_operator");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::register_operator" << endl;
-  }
-
-  // These are the supported operators - issue an error if we ask for something that is not supported. 
-  if(!(a_operator.compare(s_eb_coar_ave)     == 0 ||
-       a_operator.compare(s_eb_quad_cfi)     == 0 ||
-       a_operator.compare(s_eb_fill_patch)   == 0 ||
-       a_operator.compare(s_eb_pwl_interp)   == 0 ||
-       a_operator.compare(s_eb_flux_reg)     == 0 ||
-       a_operator.compare(s_eb_redist)       == 0 ||
-       a_operator.compare(s_eb_noncons_div)  == 0 ||
-       a_operator.compare(s_eb_copier)       == 0 ||
-       a_operator.compare(s_eb_ghostcloud)   == 0 ||
-       a_operator.compare(s_eb_gradient)     == 0 ||
-       a_operator.compare(s_eb_irreg_interp) == 0 ||
-       a_operator.compare(s_eb_mg_interp)    == 0)){
-
-    const std::string str = "amr_mesh::register_operator - unknown operator '" + a_operator + "' requested";
-    MayDay::Abort(str.c_str());
-  }
-     
-  this->register_operator(a_operator, realm::primal, a_phase);
 }
 
 void amr_mesh::register_operator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase){

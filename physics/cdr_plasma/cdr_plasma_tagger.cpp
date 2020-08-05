@@ -141,8 +141,8 @@ bool cdr_plasma_tagger::tag_cells(EBAMRTags& a_tags){
     compute_tracers();
     
     for (int lvl = 0; lvl <= finest_tag_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm,m_phase)[lvl];
       const Real dx                = m_amr->get_dx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

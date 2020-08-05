@@ -110,12 +110,6 @@ public:
   template <typename T> void allocate_ptr(EBAMRData<T>& a_data);
 
   /*!
-    @brief Register an operator
-    @todo Remove
-  */
-  virtual void register_operator(const std::string a_operator, const phase::which_phase a_phase);
-
-  /*!
     @brief Register an operator over a realm
   */
   virtual void register_operator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase);
@@ -280,21 +274,9 @@ public:
   virtual void reallocate(MFAMRIVData& a_data, const int a_lmin);
 
   /*!
-    @brief Average down both phases
-    @todo Remove
-  */
-  virtual void average_down(MFAMRCellData& a_data);
-
-  /*!
     @brief Average down both phases on specific realm
   */
   virtual void average_down(MFAMRCellData& a_data, const std::string a_realm);
-
-  /*!
-    @brief Average down
-    @todo Remove
-  */
-  virtual void average_down(EBAMRCellData& a_data, phase::which_phase a_phase);
 
   /*!
     @brief Average down on specific realm
@@ -303,31 +285,13 @@ public:
 
   /*!
     @brief Average down level
-    @todo Remove
-  */
-  virtual void average_down(EBAMRCellData& a_data, phase::which_phase a_phase, const int a_lvl);
-
-    /*!
-    @brief Average down level
   */
   virtual void average_down(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lvl);
-
-  /*!
-    @brief Average down both phases
-    @todo Remove
-  */
-  virtual void average_down(MFAMRFluxData& a_data);
 
   /*!
     @brief Average down both phases on specific realm
   */
   virtual void average_down(MFAMRFluxData& a_data, const std::string a_realm);
-
-  /*!
-    @brief Average down
-    @todo Remove
-  */
-  virtual void average_down(EBAMRFluxData& a_data, phase::which_phase a_phase);
 
     /*!
     @brief Average down on specific realm
@@ -335,21 +299,9 @@ public:
   virtual void average_down(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Average down
-    @todo Remove
-  */
-  virtual void average_down(EBAMRIVData& a_data, phase::which_phase a_phase);
-
-  /*!
     @brief Average down on realm
   */
   virtual void average_down(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Average down
-    @todo Remove
-  */
-  virtual void conservative_average(EBAMRIVData& a_data, phase::which_phase a_phase);
 
   /*!
     @brief Average down on realm
@@ -362,21 +314,9 @@ public:
   virtual void build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap = -1);
 
   /*!
-    @brief Interpolate ghost vectors
-    @todo Remove
-  */
-  virtual void interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase);
-
-  /*!
     @brief Interpolate ghost vectors over a realm
   */
   virtual void interp_ghost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Interpolate ghost cells
-    @todo Remove
-  */
-  virtual void interp_ghost(MFAMRCellData& a_data);
 
   /*!
     @brief Interpolate ghost cells over a realm
@@ -385,31 +325,13 @@ public:
 
   /*!
     @brief Fill ghost cells using quadratic interpolation
-    @todo Remove
-  */
-  virtual void interp_ghost_quad(EBAMRCellData& a_data, phase::which_phase a_phase);
-
-  /*!
-    @brief Fill ghost cells using quadratic interpolation
   */
   virtual void interp_ghost_quad(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Fill ghost cells using piecewise linear interpolation
-    @todo Remove
-  */
-  virtual void interp_ghost_pwl(EBAMRCellData& a_data, phase::which_phase a_phase);
 
   /*!
     @brief Fill ghost cells using piecewise linear interpolation. Specific realm. 
   */
   virtual void interp_ghost_pwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Interpolate data to centroids
-    @todo Remove
-  */
-  virtual void interpolate_to_centroids(EBAMRCellData& a_data, phase::which_phase a_phase);
 
   /*!
     @brief Interpolate data to centroids on realm
@@ -735,20 +657,8 @@ public:
 
   /*!
     @brief Get the EBLevelGrid 
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(const phase::which_phase a_phase);
-
-    /*!
-    @brief Get the EBLevelGrid 
   */
   virtual Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Get the EBISLayouts
-    @todo Remove
-  */
-  virtual Vector<EBISLayout>& get_ebisl(const phase::which_phase a_phase);
   
   /*!
     @brief Get the EBISLayouts
@@ -757,31 +667,13 @@ public:
 
   /*!
     @brief Get the EBLevelGrid 
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<MFLevelGrid> >& get_mflg();
-
-  /*!
-    @brief Get the EBLevelGrid 
   */
   virtual Vector<RefCountedPtr<MFLevelGrid> >& get_mflg(const std::string a_realm);
 
   /*!
     @brief Get the vof iterator
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<LayoutData<VoFIterator> > > get_vofit(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get the vof iterator
   */
   virtual Vector<RefCountedPtr<LayoutData<VoFIterator> > > get_vofit(const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Get neighbor boxes
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors(const phase::which_phase a_phase);
 
   /*!
     @brief Get neighbor boxes
@@ -791,20 +683,8 @@ public:
 
   /*!
     @brief Get the coarsening utility
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get the coarsening utility
   */
   virtual Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave(const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Get the ghost cloud particle magic
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<EBGhostCloud> >& get_ghostcloud(const phase::which_phase a_phase);
 
   /*!
     @brief Get the ghost cloud particle magic
@@ -813,20 +693,8 @@ public:
 
   /*!
     @brief Get the ghost cell interpolation utility
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get the ghost cell interpolation utility
   */
   virtual Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi(const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Get the old interpolation utility (needed for EBConductivityOps)
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi(const phase::which_phase a_phase);
 
   /*!
     @brief Get the old interpolation utility (needed for EBConductivityOps)
@@ -835,20 +703,8 @@ public:
 
   /*!
     @brief Get piecewise linear ghost cell interpolator
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<AggEBPWLFillPatch> >& get_fillpatch(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get piecewise linear ghost cell interpolator
   */
   virtual Vector<RefCountedPtr<AggEBPWLFillPatch> >& get_fillpatch(const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Get interpolator 
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp(const phase::which_phase a_phase);
 
   /*!
     @brief Get interpolator 
@@ -857,20 +713,8 @@ public:
 
   /*!
     @brief Get interpolator 
-    @todo Remvoe
-  */
-  virtual Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get interpolator 
   */
   virtual Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp(const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Get flux register
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg(const phase::which_phase a_phase);
 
   /*!
     @brief Get flux register
@@ -879,34 +723,16 @@ public:
 
   /*!
     @brief Get redistribution
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get redistribution
   */
   virtual Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist(const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Get coar-to-fine redistribution
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist(const phase::which_phase a_phase);
 
   /*!
     @brief Get coar-to-fine redistribution
   */
   virtual Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist(const std::string        a_realm,
 									       const phase::which_phase a_phase);
-
+  
   /*!
-    @brief Get coar-to-coar redistribution
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist(const phase::which_phase a_phase);
-
-    /*!
     @brief Get coar-to-coar redistribution
   */
   virtual Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist(const std::string        a_realm,
@@ -914,33 +740,15 @@ public:
 
   /*!
     @brief Get coar-to-coar redistribution
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(const phase::which_phase a_phase);
-
-    /*!
-    @brief Get coar-to-coar redistribution
   */
   virtual Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(const std::string        a_realm,
 									       const phase::which_phase a_phase);
-
-  /*!
-    @brief Get interpolation stencils
-    @todo Remove
-  */
-  virtual irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(const phase::which_phase a_phase);
-
+  
   /*!
     @brief Get interpolation stencils
   */
   virtual irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(const std::string a_realm,
 									   const phase::which_phase a_phase);
-
-  /*!
-    @brief Get interpolation stencils
-    @todo Remove
-  */
-  virtual irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(const phase::which_phase a_phase);
 
   /*!
     @brief Get interpolation stencils
@@ -950,20 +758,8 @@ public:
 
   /*!
     @brief Get Nonconservative divergence stencils
-    @todo Remove
-  */
-  virtual irreg_amr_stencil<noncons_div>& get_noncons_div_stencils(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get Nonconservative divergence stencils
   */
   virtual irreg_amr_stencil<noncons_div>& get_noncons_div_stencils(const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Get copier
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<Copier> >& get_copier(const phase::which_phase a_phase);
 
   /*!
     @brief Get copier
@@ -971,12 +767,6 @@ public:
   virtual Vector<RefCountedPtr<Copier> >& get_copier(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Get reverse copier
-    @todo Remove
-  */
-  virtual Vector<RefCountedPtr<Copier> >& get_reverse_copier(const phase::which_phase a_phase);
-
-    /*!
     @brief Get reverse copier
   */
   virtual Vector<RefCountedPtr<Copier> >& get_reverse_copier(const std::string a_realm, const phase::which_phase a_phase);

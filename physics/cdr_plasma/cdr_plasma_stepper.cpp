@@ -1652,7 +1652,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
   const EBISLayout& ebisl       = m_amr->get_ebisl(m_realm, m_cdr->get_phase())[a_lvl];
   const ProblemDomain& domain   = m_amr->get_domains()[a_lvl];
   const Real dx                 = m_amr->get_dx()[a_lvl];
-  const MFLevelGrid& mflg       = *(m_amr->get_mflg()[a_lvl]);
+  const MFLevelGrid& mflg       = *(m_amr->get_mflg(m_realm)[a_lvl]);
   const RealVect origin         = m_amr->get_prob_lo();
 
   // Patch loop
@@ -3902,18 +3902,18 @@ Real cdr_plasma_stepper::compute_electrode_current(){
   }
 
   this->reset_dielectric_cells(charge_flux);
-  m_amr->conservative_average(charge_flux, m_cdr->get_phase());
+  m_amr->conservative_average(charge_flux, m_realm, m_cdr->get_phase());
 
   const int compute_lvl = 0;
   Real sum = 0.0;
   const Real dx = m_amr->get_dx()[compute_lvl];
-  for (DataIterator dit = m_amr->get_grids()[compute_lvl].dataIterator(); dit.ok(); ++dit){
+  for (DataIterator dit = m_amr->get_grids(m_realm)[compute_lvl].dataIterator(); dit.ok(); ++dit){
     const BaseIVFAB<Real>& flx = (*charge_flux[compute_lvl])[dit()];
 
-    const IntVectSet ivs = flx.getIVS() & m_amr->get_grids()[compute_lvl].get(dit());
+    const IntVectSet ivs = flx.getIVS() & m_amr->get_grids(m_realm)[compute_lvl].get(dit());
     for (VoFIterator vofit(ivs, flx.getEBGraph()); vofit.ok(); ++vofit){
       const VolIndex& vof   = vofit();
-      const Real& bndryFrac = m_amr->get_ebisl(m_cdr->get_phase())[compute_lvl][dit()].bndryArea(vof);
+      const Real& bndryFrac = m_amr->get_ebisl(m_realm, m_cdr->get_phase())[compute_lvl][dit()].bndryArea(vof);
       const Real& flux = flx(vof, 0);
       sum += flux*bndryFrac;
     }
@@ -3950,18 +3950,18 @@ Real cdr_plasma_stepper::compute_dielectric_current(){
   }
 
   m_sigma->reset_cells(charge_flux);
-  m_amr->conservative_average(charge_flux, m_cdr->get_phase());
+  m_amr->conservative_average(charge_flux, m_realm, m_cdr->get_phase());
 
   const int compute_lvl = 0;
   Real sum = 0.0;
   const Real dx = m_amr->get_dx()[compute_lvl];
-  for (DataIterator dit = m_amr->get_grids()[compute_lvl].dataIterator(); dit.ok(); ++dit){
+  for (DataIterator dit = m_amr->get_grids(m_realm)[compute_lvl].dataIterator(); dit.ok(); ++dit){
     const BaseIVFAB<Real>& flx = (*charge_flux[compute_lvl])[dit()];
 
-    const IntVectSet ivs = flx.getIVS() & m_amr->get_grids()[compute_lvl].get(dit());
+    const IntVectSet ivs = flx.getIVS() & m_amr->get_grids(m_realm)[compute_lvl].get(dit());
     for (VoFIterator vofit(ivs, flx.getEBGraph()); vofit.ok(); ++vofit){
       const VolIndex& vof   = vofit();
-      const Real& bndryFrac = m_amr->get_ebisl(m_cdr->get_phase())[compute_lvl][dit()].bndryArea(vof);
+      const Real& bndryFrac = m_amr->get_ebisl(m_realm, m_cdr->get_phase())[compute_lvl][dit()].bndryArea(vof);
       const Real& flux = flx(vof, 0);
       sum += flux*bndryFrac;
     }
@@ -4002,7 +4002,7 @@ Real cdr_plasma_stepper::compute_domain_current(){
   const int compute_lvl = 0;
   Real sum = 0.0;
   const Real dx = m_amr->get_dx()[compute_lvl];
-  for (DataIterator dit = m_amr->get_grids()[compute_lvl].dataIterator(); dit.ok(); ++dit){
+  for (DataIterator dit = m_amr->get_grids(m_realm)[compute_lvl].dataIterator(); dit.ok(); ++dit){
     const DomainFluxIFFAB& flux = (*charge_flux[compute_lvl])[dit()];
 
     for (int dir = 0; dir < SpaceDim; dir++){
@@ -4093,8 +4093,8 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
   const int finest_relax_level = finest_level;
   
   for (int lvl = 0; lvl <= finest_relax_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_cdr->get_phase())[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box& box         = dbl.get(dit());
@@ -4122,7 +4122,7 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
       dt_fab /= j_magnitude;
 
       // Now do the irregular cells
-      VoFIterator& vofit = (*m_amr->get_vofit(m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
       for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const RealVect ee = RealVect(D_DECL(e(vof, 0), e(vof, 1), e(vof, 2)));
