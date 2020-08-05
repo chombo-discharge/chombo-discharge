@@ -21,16 +21,8 @@
 #include <RealVect.H>
 
 /*!
-  @brief Namespace for various centerings. Should probably get rid of this. 
+  @brief Namespace for cdr plasma physics
 */
-// namespace centering {
-//   enum which_center {
-//     cell_center   = 0,
-//     cell_centroid = 1,
-//     eb_centroid   = 2,
-//   };
-// };
-
 namespace physics {
   namespace cdr_plasma {
   
@@ -68,6 +60,9 @@ namespace physics {
       virtual void print_step_report() override;
       virtual void register_operators() override;
       virtual void allocate() override;
+      virtual void post_initialize() override;
+      virtual void register_realms() override;
+      virtual void post_regrid() override;
 
       /*!
 	@brief Constructor
@@ -928,6 +923,11 @@ namespace physics {
       virtual RefCountedPtr<sigma_solver>& get_sigma();
   
     protected:
+
+      /*!
+	@brief Realm
+      */
+      std::string m_realm;
 
 
 

@@ -39,7 +39,7 @@ cdr_iterator<T> cdr_layout<T>::iterator() {
 }
 
 template <class T>
-std::string cdr_layout<T>::get_realm() const{
+const std::string cdr_layout<T>::get_realm() const{
   return m_realm;
 }
 
