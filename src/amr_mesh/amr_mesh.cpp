@@ -125,6 +125,8 @@ void amr_mesh::allocate(AMRPVR& a_pvr, const int a_buffer){
     pout() << "amr_mesh::allocate(AMR PVR)" << endl;
   }
 
+  MayDay::Abort("amr_mesh::allocate(amrpvr, buffer) - shouldn't happen");
+
   this->allocate(a_pvr, realm::primal, a_buffer);
 }
 
@@ -162,10 +164,11 @@ void amr_mesh::allocate(AMRPVR& a_pvr, const std::string a_realm, const int a_bu
 }
 
 void amr_mesh::allocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
-  CH_TIME("amr_mesh::allocate(cell)");
+  CH_TIME("amr_mesh::allocate(ebamrcell, phase, ncomp, ghost)");
   if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(cell)" << endl;
+    pout() << "amr_mesh::allocate(ebamrcell, phase, ncomp, ghost)" << endl;
   }
+  MayDay::Abort("amr_mesh::allocate(ebamrcell, phase, ncomp, ghost) - shouldn't happen");
 
   this->allocate(a_data, realm::primal, a_phase, a_ncomp, a_ghost);
 }

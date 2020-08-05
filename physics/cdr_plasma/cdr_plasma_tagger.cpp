@@ -50,6 +50,7 @@ void cdr_plasma_tagger::define(const RefCountedPtr<cdr_plasma_physics>&     a_ph
   m_timestepper = a_timestepper;
   m_amr         = a_amr;
   m_compgeom    = a_compgeom;
+  m_realm       = realm::primal;
 }
 
 void cdr_plasma_tagger::regrid(){
@@ -62,8 +63,8 @@ void cdr_plasma_tagger::regrid(){
     m_tracer.resize(m_num_tracers);
     m_grad_tracer.resize(m_num_tracers);
     for (int i = 0; i < m_num_tracers; i++){
-      m_amr->allocate(m_tracer[i],      m_phase, 1);
-      m_amr->allocate(m_grad_tracer[i], m_phase, SpaceDim);
+      m_amr->allocate(m_tracer[i],      m_realm, m_phase, 1);
+      m_amr->allocate(m_grad_tracer[i], m_realm, m_phase, SpaceDim);
     }
   }
 }

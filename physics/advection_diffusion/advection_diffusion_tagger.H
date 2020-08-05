@@ -30,6 +30,8 @@ namespace physics {
       bool tag_cells(EBAMRTags& a_tags);
 
     protected:
+      std::string m_realm;
+      
       RefCountedPtr<cdr_solver> m_solver;
       RefCountedPtr<amr_mesh>   m_amr;
 

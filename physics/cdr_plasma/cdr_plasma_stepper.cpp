@@ -3831,7 +3831,7 @@ void cdr_plasma_stepper::solve_rte(const Real a_dt){
   const phase::which_phase rte_phase = m_rte->get_phase();
 
   EBAMRCellData E;
-  m_amr->allocate(E, rte_phase, SpaceDim);
+  m_amr->allocate(E, m_realm, rte_phase, SpaceDim);
   this->compute_E(E, rte_phase, m_poisson->get_state());
 
   Vector<EBAMRCellData*> states     = m_rte->get_states();
@@ -4040,16 +4040,16 @@ Real cdr_plasma_stepper::compute_ohmic_induction_current(){
   Real current = 0.0;
 
   EBAMRCellData J, E, JdotE;
-  m_amr->allocate(J, m_cdr->get_phase(), SpaceDim);
-  m_amr->allocate(E, m_cdr->get_phase(), SpaceDim);
-  m_amr->allocate(JdotE, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(J,     m_realm, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(E,     m_realm, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(JdotE, m_realm, m_cdr->get_phase(), SpaceDim);
 
   this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
   this->compute_J(J);
 
   // Compute J.dot.E 
   data_ops::dot_prod(JdotE, J,E);
-  m_amr->average_down(JdotE, m_cdr->get_phase());
+  m_amr->average_down(JdotE, m_realm, m_cdr->get_phase());
 
   // Only compue on coarsest level
   const int coar = 0;
@@ -4072,9 +4072,9 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
 
   Real t1 = MPI_Wtime();
   EBAMRCellData E, J, dt;
-  m_amr->allocate(E,  m_cdr->get_phase(), SpaceDim);
-  m_amr->allocate(J,  m_cdr->get_phase(), SpaceDim);
-  m_amr->allocate(dt, m_cdr->get_phase(), 1);
+  m_amr->allocate(E,  m_realm, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(J,  m_realm, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(dt, m_realm, m_cdr->get_phase(), 1);
 
   data_ops::set_value(dt, 1.234567E89);
 
@@ -4283,7 +4283,7 @@ void cdr_plasma_stepper::write_J(EBAMRCellData& a_output, int& a_icomp) const{
 
   // Allocates storage and computes J
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, phase::gas, SpaceDim);
+  m_amr->allocate(scratch, m_realm, phase::gas, SpaceDim);
   this->compute_J(scratch);
 
   const Interval src_interv(0, SpaceDim-1);
