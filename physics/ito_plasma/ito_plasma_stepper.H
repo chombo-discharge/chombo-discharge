@@ -37,6 +37,8 @@ namespace physics {
       void initial_data() override;
       void initial_sigma();
       void post_checkpoint_setup() override;
+      void post_initialize() override;
+      
       void setup_ito();
       void setup_poisson();
       void setup_rte();
@@ -55,11 +57,22 @@ namespace physics {
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
       void print_step_report() override;
 
+      // Registration routines
+      void register_realms() override;
+      void register_operators() override;
+      
       // New regrid routines
-      void register_operators() override; 
       void deallocate() override;
       virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+      void post_regrid() override;
+      bool load_balance(Vector<Vector<int> >&            a_procs,
+			Vector<Vector<Box> >&            a_boxes,
+			const std::string                a_realm,
+			const Vector<DisjointBoxLayout>& a_grids,
+			const int                        a_lmin,
+			const int                        a_finest_level) override;
+
 
       // Internal routines
       void set_verbosity(const int a_verbosity);
@@ -190,6 +203,8 @@ namespace physics {
 
     protected:
 
+      std::string m_fluid_realm;     // Realm for Poisson and sigma solver. Defaults to realm::primal
+      std::string m_particle_realm;  // Realm for particles. Defaults to realm::primal
       std::string m_name;
       phase::which_phase m_phase;
       
@@ -203,12 +218,19 @@ namespace physics {
       Real (*m_potential)(const Real a_time);
 
       bool m_regrid_superparticles;
+      bool m_load_balance;
+      
       int m_ppc;
       Real m_max_cells_hop;
       Real m_dt_relax;
 
-      // Storage for current density
+      // Storage for current density. This is defined over the particle realm. 
       EBAMRCellData m_J;
+      EBAMRCellData m_fluid_scratch1;    // Scratch storage on the fluid realm with 1 component
+      EBAMRCellData m_fluid_scratchD;    // Scratch storage on the fluid realm with SpaceDim components
+
+      EBAMRCellData m_particle_scratch1; // Scratch storage on the particle realm with 1 component
+      EBAMRCellData m_particle_scratchD; // Scratch storage on the particle realm with SpaceDim components
     };
   }
 };

@@ -68,16 +68,21 @@ void ito_plasma_godunov::allocate_internals(){
     pout() << m_name + "::allocate_internals" << endl;
   }
 
-  m_amr->allocate(m_J,            m_phase, SpaceDim);
-  m_amr->allocate(m_scratch1,     m_phase, 1);
-  m_amr->allocate(m_scratch2,     m_phase, 1);
-  m_amr->allocate(m_conduct_cell, m_phase, 1);
-  m_amr->allocate(m_conduct_face, m_phase, 1);
-  m_amr->allocate(m_conduct_eb,   m_phase, 1);
+  m_amr->allocate(m_fluid_scratch1,    m_fluid_realm, m_phase, 1);
+  m_amr->allocate(m_fluid_scratchD,    m_fluid_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_particle_scratch1, m_particle_realm, m_phase, 1);
+  m_amr->allocate(m_particle_scratchD, m_particle_realm, m_phase, SpaceDim);
+
+  m_amr->allocate(m_J,            m_fluid_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_scratch1,     m_fluid_realm, m_phase, 1);
+  m_amr->allocate(m_scratch2,     m_fluid_realm, m_phase, 1);
+  m_amr->allocate(m_conduct_cell, m_fluid_realm, m_phase, 1);
+  m_amr->allocate(m_conduct_face, m_fluid_realm, m_phase, 1);
+  m_amr->allocate(m_conduct_eb,   m_fluid_realm, m_phase, 1);
   
 }
 
-void ito_plasma_godunov::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
+void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
   CH_TIME("ito_plasma_godunov::compute_dt");
   if(m_verbosity > 5){
     pout() << "ito_plasma_godunov::compute_dt" << endl;
@@ -263,7 +268,7 @@ void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
     if(solver->is_mobile()){
       
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
 	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -294,7 +299,7 @@ void ito_plasma_godunov::advect_particles_rk2(const Real a_dt){
     if(solver->is_mobile()){
       
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
 	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -335,7 +340,7 @@ void ito_plasma_godunov::diffuse_particles_euler(const Real a_dt){
     
     if(solver->is_diffusive()){
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
 	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -367,7 +372,7 @@ void ito_plasma_godunov::set_old_positions(){
     
     if(solver->is_diffusive()){
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
 	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -396,7 +401,7 @@ void ito_plasma_godunov::rewind_particles(){
     
     if(solver->is_diffusive()){
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
 	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -451,24 +456,28 @@ void ito_plasma_godunov::compute_conductivity(){
     
     if(solver->is_mobile() &&  q != 0){
 
+      // These things are defined on the particle realm. Copy them to the fluid realm. 
       const EBAMRCellData& velo  = solver->get_velo_cell();
       const EBAMRCellData& state = solver->get_state();
 
-      data_ops::vector_length(m_scratch2, velo);
-      data_ops::divide_scalar(m_scratch2, m_scratch1);
-      data_ops::multiply(m_scratch2, state);
-      data_ops::incr(m_conduct_cell, m_scratch2, Abs(q));
+      m_particle_scratch1.copy(state);
+      m_particle_scratchD.copy(velo);
+
+      data_ops::vector_length(m_scratch2, m_particle_scratchD);   // m_scratch2     = |v|
+      data_ops::divide_scalar(m_scratch2, m_scratch1);            // m_scratch2     = |v|/|E| = mu
+      data_ops::multiply(m_scratch2,      m_particle_scratch1);   // m_scratch2     = mu*phi
+      data_ops::incr(m_conduct_cell,      m_scratch2, Abs(q));    // m_conduct_cell = mu*phi*q
     }
   }
 
-  m_amr->average_down(m_conduct_cell, m_phase);
-  m_amr->interp_ghost_pwl(m_conduct_cell, m_phase);
+  m_amr->average_down(m_conduct_cell,     m_fluid_realm, m_phase);
+  m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
 
   // This code does averaging from cell to face. 
   data_ops::average_cell_to_face_allcomps(m_conduct_face, m_conduct_cell, m_amr->get_domains());
 
   // This code computes the conductivity on the EB
-  const irreg_amr_stencil<eb_centroid_interp>& ebsten = m_amr->get_eb_centroid_interp_stencils(m_phase);
+  const irreg_amr_stencil<eb_centroid_interp>& ebsten = m_amr->get_eb_centroid_interp_stencils(m_fluid_realm, m_phase);
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     ebsten.apply(m_conduct_eb, m_conduct_cell, lvl);
   }

@@ -95,6 +95,14 @@ namespace physics {
 
     protected:
 
+      /*!
+	@brief Realm
+      */
+      std::string m_realm;
+
+      /*!
+	@brief Phase
+      */
       phase::which_phase m_phase;
   
       /*!

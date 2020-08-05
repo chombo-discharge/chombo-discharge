@@ -23,7 +23,7 @@ namespace physics {
 
       // Advance routines
       Real advance(const Real a_dt) override;
-      void compute_dt(Real& a_dt, time_code::which_code& a_timecode) override;
+      void compute_dt(Real& a_dt, time_code& a_timecode) override;
 
       // Setup routines
       void parse_options() override;
@@ -40,6 +40,7 @@ namespace physics {
 	semi_implicit = 2,
       };
 
+      // These are things that are used to compute the conductivity. 
       EBAMRCellData m_scratch1;
       EBAMRCellData m_scratch2;
       EBAMRCellData m_conduct_cell;

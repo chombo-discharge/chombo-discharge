@@ -24,6 +24,7 @@ ito_plasma_tagger::ito_plasma_tagger(){
 
   m_name  = "ito_plasma_tagger";
   m_phase = phase::gas;
+  m_realm = realm::primal;
 }
 
 ito_plasma_tagger::ito_plasma_tagger(const RefCountedPtr<ito_plasma_physics>&     a_physics,
@@ -62,8 +63,8 @@ void ito_plasma_tagger::regrid(){
     m_tracer.resize(m_num_tracers);
     m_grad_tracer.resize(m_num_tracers);
     for (int i = 0; i < m_num_tracers; i++){
-      m_amr->allocate(m_tracer[i],      m_phase, 1);
-      m_amr->allocate(m_grad_tracer[i], m_phase, SpaceDim);
+      m_amr->allocate(m_tracer[i],      m_realm, m_phase, 1);
+      m_amr->allocate(m_grad_tracer[i], m_realm, m_phase, SpaceDim);
     }
   }
 }
@@ -140,8 +141,8 @@ bool ito_plasma_tagger::tag_cells(EBAMRTags& a_tags){
     compute_tracers();
     
     for (int lvl = 0; lvl <= finest_tag_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
       const Real dx                = m_amr->get_dx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
