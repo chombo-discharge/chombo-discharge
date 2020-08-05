@@ -1,0 +1,194 @@
+/home/robertm/Projects/plasmac/Chombo/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
+/home/robertm/Projects/plasmac/Chombo/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
+/home/robertm/Projects/plasmac/Chombo/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
+/home/robertm/Projects/plasmac/Chombo/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:10:1: error: invalid use of template-name ‘cdr_iterator’ without an argument list
+ cdr_iterator::cdr_iterator(){
+ ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:10:1: note: class template argument deduction is only available with -std=c++1z or -std=gnu++1z
+In file included from /home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.H:11:0,
+                 from /home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:8:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layout.H:14:7: note: ‘template<class T> class cdr_iterator’ declared here
+ class cdr_iterator;
+       ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:16:1: error: invalid use of template-name ‘cdr_iterator’ without an argument list
+ cdr_iterator::cdr_iterator(cdr_layout& a_layout, const species_iteration::which_species a_mode){
+ ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:16:1: note: class template argument deduction is only available with -std=c++1z or -std=gnu++1z
+In file included from /home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.H:11:0,
+                 from /home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:8:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layout.H:14:7: note: ‘template<class T> class cdr_iterator’ declared here
+ class cdr_iterator;
+       ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:28:1: error: invalid use of template-name ‘cdr_iterator’ without an argument list
+ cdr_iterator::cdr_iterator(cdr_layout& a_layout, Vector<EBAMRCellData*> a_data){
+ ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:28:1: note: class template argument deduction is only available with -std=c++1z or -std=gnu++1z
+In file included from /home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.H:11:0,
+                 from /home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:8:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layout.H:14:7: note: ‘template<class T> class cdr_iterator’ declared here
+ class cdr_iterator;
+       ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:42:1: error: invalid use of template-name ‘cdr_iterator’ without an argument list
+ cdr_iterator::~cdr_iterator(){
+ ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:42:1: note: class template argument deduction is only available with -std=c++1z or -std=gnu++1z
+In file included from /home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.H:11:0,
+                 from /home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:8:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layout.H:14:7: note: ‘template<class T> class cdr_iterator’ declared here
+ class cdr_iterator;
+       ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:46:5: error: ‘template<class T> class cdr_iterator’ used without template parameters
+ int cdr_iterator::num_solvers(){
+     ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp: In function ‘int num_solvers()’:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:48:10: error: ‘m_num’ was not declared in this scope
+   return m_num;
+          ^~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:48:10: note: suggested alternative: ‘enum’
+   return m_num;
+          ^~~~~
+          enum
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp: At global scope:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:51:5: error: ‘template<class T> class cdr_iterator’ used without template parameters
+ int cdr_iterator::get_solver() const {
+     ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:51:32: error: non-member function ‘int get_solver()’ cannot have cv-qualifier
+ int cdr_iterator::get_solver() const {
+                                ^~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp: In function ‘int get_solver()’:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:53:10: error: ‘m_isolver’ was not declared in this scope
+   return m_isolver;
+          ^~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:53:10: note: suggested alternative: ‘get_solver’
+   return m_isolver;
+          ^~~~~~~~~
+          get_solver
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp: At global scope:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:56:6: error: ‘template<class T> class cdr_iterator’ used without template parameters
+ void cdr_iterator::reset(){
+      ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp: In function ‘void reset()’:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:58:3: error: ‘m_isolver’ was not declared in this scope
+   m_isolver = 0;
+   ^~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:58:3: note: suggested alternative: ‘get_solver’
+   m_isolver = 0;
+   ^~~~~~~~~
+   get_solver
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp: At global scope:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:61:6: error: ‘template<class T> class cdr_iterator’ used without template parameters
+ bool cdr_iterator::ok(){
+      ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp: In function ‘bool ok()’:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:62:11: error: ‘m_isolver’ was not declared in this scope
+   return (m_isolver < m_num);
+           ^~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:62:11: note: suggested alternative: ‘get_solver’
+   return (m_isolver < m_num);
+           ^~~~~~~~~
+           get_solver
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:62:23: error: ‘m_num’ was not declared in this scope
+   return (m_isolver < m_num);
+                       ^~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:62:23: note: suggested alternative: ‘enum’
+   return (m_isolver < m_num);
+                       ^~~~~
+                       enum
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp: At global scope:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:65:6: error: ‘template<class T> class cdr_iterator’ used without template parameters
+ void cdr_iterator::operator++(){
+      ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:65:31: error: ‘void operator++()’ must have an argument of class or enumerated type
+ void cdr_iterator::operator++(){
+                               ^
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:100:28: error: ‘template<class T> class cdr_iterator’ used without template parameters
+ RefCountedPtr<cdr_solver>& cdr_iterator::operator() () {
+                            ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:100:54: error: ‘RefCountedPtr<cdr_solver>& operator()()’ must be a nonstatic member function
+ RefCountedPtr<cdr_solver>& cdr_iterator::operator() () {
+                                                      ^
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:106:29: error: ‘template<class T> class cdr_iterator’ used without template parameters
+ RefCountedPtr<cdr_species>& cdr_iterator::get_species() {
+                             ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp: In function ‘RefCountedPtr<cdr_species>& get_species()’:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:109:10: error: ‘m_species’ was not declared in this scope
+   return m_species[m_isolver];
+          ^~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:109:10: note: suggested alternative: ‘get_species’
+   return m_species[m_isolver];
+          ^~~~~~~~~
+          get_species
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:109:20: error: ‘m_isolver’ was not declared in this scope
+   return m_species[m_isolver];
+                    ^~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:109:20: note: suggested alternative: ‘get_solver’
+   return m_species[m_isolver];
+                    ^~~~~~~~~
+                    get_solver
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp: At global scope:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:112:16: error: ‘template<class T> class cdr_iterator’ used without template parameters
+ EBAMRCellData& cdr_iterator::get_data() {
+                ^~~~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp: In function ‘EBAMRCellData& get_data()’:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:115:11: error: ‘m_celldata’ was not declared in this scope
+   return *m_celldata[m_isolver];
+           ^~~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:115:11: note: suggested alternative: ‘get_data’
+   return *m_celldata[m_isolver];
+           ^~~~~~~~~~
+           get_data
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:115:22: error: ‘m_isolver’ was not declared in this scope
+   return *m_celldata[m_isolver];
+                      ^~~~~~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_iterator.cpp:115:22: note: suggested alternative: ‘get_solver’
+   return *m_celldata[m_isolver];
+                      ^~~~~~~~~
+                      get_solver
+In file included from main.cpp:5:0:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H: In member function ‘virtual cdr_iterator<T> cdr_layout<T>::iterator()’:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H:37:22: error: missing template arguments before ‘(’ token
+   return cdr_iterator(*this);
+                      ^
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H: At global scope:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H:41:6: error: prototype for ‘void cdr_layout<T>::add_solver(RefCountedPtr<cdr_solver>)’ does not match any in class ‘cdr_layout<T>’
+ void cdr_layout<T>::add_solver(RefCountedPtr<cdr_solver> a_solver){
+      ^~~~~~~~~~~~~
+In file included from /home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H:11:0,
+                 from main.cpp:5:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layout.H:53:16: error: candidate is: virtual void cdr_layout<T>::add_solver(RefCountedPtr<S, RCPPointerPolicy>)
+   virtual void add_solver(RefCountedPtr<T> a_solver);
+                ^~~~~~~~~~
+In file included from main.cpp:5:0:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H: In member function ‘virtual Real cdr_layout<T>::compute_total_charge()’:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H:433:12: error: ‘units’ has not been declared
+     Q += N*units::s_Qe;
+            ^~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H: In member function ‘virtual Vector<double> cdr_layout<T>::compute_charge()’:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H:467:47: error: ‘units’ has not been declared
+     charge.push_back(solver->compute_charge()*units::s_Qe);
+                                               ^~~~~
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H: At global scope:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H:491:37: error: prototype for ‘Vector<RefCountedPtr<cdr_solver> >& cdr_layout<T>::get_solvers()’ does not match any in class ‘cdr_layout<T>’
+ Vector<RefCountedPtr<cdr_solver> >& cdr_layout<T>::get_solvers(){
+                                     ^~~~~~~~~~~~~
+In file included from /home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H:11:0,
+                 from main.cpp:5:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layout.H:204:38: error: candidate is: virtual Vector<RefCountedPtr<S, RCPPointerPolicy> >& cdr_layout<T>::get_solvers()
+   virtual Vector<RefCountedPtr<T> >& get_solvers();
+                                      ^~~~~~~~~~~
+In file included from main.cpp:5:0:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H: In member function ‘RefCountedPtr<cdr_layout<T> > cdr_factory<T, S>::new_layout(Vector<RefCountedPtr<cdr_species> >) const’:
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H:638:44: error: expected primary-expression before ‘(’ token
+   auto cdr = RefCountedPtr<cdr_layout<T> > (new cdr_layout(a_species));
+                                            ^
+/home/robertm/Projects/plasmac/src/cdr_solver/cdr_layoutI.H:638:49: error: expected type-specifier before ‘cdr_layout’
+   auto cdr = RefCountedPtr<cdr_layout<T> > (new cdr_layout(a_species));
+                                                 ^~~~~~~~~~
+/home/robertm/Projects/plasmac/Chombo/lib/mk/Make.rules:468: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/cdr_iterator.o' failed
+make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/cdr_iterator.o] Error 1
+make[1]: *** Waiting for unfinished jobs....
+/home/robertm/Projects/plasmac/Chombo/lib/mk/Make.rules:468: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/main.o' failed
+make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/main.o] Error 1
+/home/robertm/Projects/plasmac/Chombo/lib/mk/Make.rules:393: recipe for target 'main' failed
+make: *** [main] Error 2

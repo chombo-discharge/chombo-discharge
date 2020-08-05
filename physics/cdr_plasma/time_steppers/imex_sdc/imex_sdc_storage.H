@@ -19,7 +19,10 @@ namespace physics::cdr_plasma {
   public:
 
     cdr_storage();
-    cdr_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+    cdr_storage(const RefCountedPtr<amr_mesh>& a_amr,
+		const std::string              a_realm,
+		const phase::which_phase       a_phase,
+		const int m_ncomp);
     ~cdr_storage();
 
     void allocate_storage(const int a_p);
@@ -53,6 +56,7 @@ namespace physics::cdr_plasma {
   
   protected:
 
+    std::string m_realm;
     RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
     phase::which_phase m_phase;    // on this phase
     int m_ncomp;                   // with this many components
@@ -89,7 +93,10 @@ namespace physics::cdr_plasma {
   public:
 
     poisson_storage();
-    poisson_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+    poisson_storage(const RefCountedPtr<amr_mesh>& a_amr,
+		    const std::string              a_realm,
+		    const phase::which_phase       a_phase,
+		    const int                      a_ncomp);
     ~poisson_storage();
 
     void allocate_storage(const int a_p);
@@ -103,6 +110,7 @@ namespace physics::cdr_plasma {
 
   protected:
 
+    std::string m_realm;
     RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
     phase::which_phase m_phase;    // on this phase
     int m_ncomp;                   // with this many components
@@ -119,7 +127,10 @@ namespace physics::cdr_plasma {
   public:
 
     rte_storage();
-    rte_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+    rte_storage(const RefCountedPtr<amr_mesh>& a_amr,
+		const std::string              a_realm,
+		const phase::which_phase       a_phase,
+		const int                      a_ncomp);
     ~rte_storage();
 
     void allocate_storage(const int a_p);
@@ -131,6 +142,7 @@ namespace physics::cdr_plasma {
 
   protected:
 
+    std::string m_realm;
     RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
     phase::which_phase m_phase;    // on this phase
     int m_ncomp;                   // with this many components
@@ -145,7 +157,10 @@ namespace physics::cdr_plasma {
   public:
 
     sigma_storage();
-    sigma_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+    sigma_storage(const RefCountedPtr<amr_mesh>& a_amr,
+		  const std::string              a_realm,
+		  const phase::which_phase       a_phase,
+		  const int                      a_ncomp);
     ~sigma_storage();
   
     void allocate_storage(const int a_p);
@@ -158,9 +173,9 @@ namespace physics::cdr_plasma {
     Vector<EBAMRIVData>& get_Fnew(){  return m_Fnew; }
     Vector<EBAMRIVData>& get_Fold(){  return m_Fold; }
 
-  
   protected:
-
+    
+    std::string m_realm;
     RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
     phase::which_phase m_phase;    // on this phase
     int m_ncomp;                   // with this many components
