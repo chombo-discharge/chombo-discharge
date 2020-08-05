@@ -19,12 +19,18 @@ using namespace physics::ito_plasma;
 ito_plasma_godunov::ito_plasma_godunov(){
   m_name = "ito_plasma_godunov";
   m_use_old_dt = false;
+
+  ParmParse pp("ito_plasma_godunov");
+  pp.get("particle_realm", m_particle_realm);
 }
 
 ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_physics){
   m_name    = "ito_plasma_godunov";
   m_physics = a_physics;
   m_use_old_dt = false;
+
+  ParmParse pp("ito_plasma_godunov");
+  pp.get("particle_realm", m_particle_realm);
 }
 
 ito_plasma_godunov::~ito_plasma_godunov(){
@@ -47,6 +53,7 @@ void ito_plasma_godunov::parse_options() {
   pp.get("relax_factor",   m_relax_factor);
   pp.get("regrid_super",   m_regrid_superparticles);
   pp.get("algorithm",      str);
+  pp.get("load_balance",   m_load_balance);
 
   if(str == "euler"){
     m_algorithm = which_algorithm::euler;
@@ -68,8 +75,9 @@ void ito_plasma_godunov::allocate_internals(){
     pout() << m_name + "::allocate_internals" << endl;
   }
 
-  m_amr->allocate(m_fluid_scratch1,    m_fluid_realm, m_phase, 1);
-  m_amr->allocate(m_fluid_scratchD,    m_fluid_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_fluid_scratch1,    m_fluid_realm,    m_phase, 1);
+  m_amr->allocate(m_fluid_scratchD,    m_fluid_realm,    m_phase, SpaceDim);
+  
   m_amr->allocate(m_particle_scratch1, m_particle_realm, m_phase, 1);
   m_amr->allocate(m_particle_scratchD, m_particle_realm, m_phase, SpaceDim);
 
@@ -460,13 +468,13 @@ void ito_plasma_godunov::compute_conductivity(){
       const EBAMRCellData& velo  = solver->get_velo_cell();
       const EBAMRCellData& state = solver->get_state();
 
-      m_particle_scratch1.copy(state);
-      m_particle_scratchD.copy(velo);
+      m_fluid_scratch1.copy(state);
+      m_fluid_scratchD.copy(velo);
 
-      data_ops::vector_length(m_scratch2, m_particle_scratchD);   // m_scratch2     = |v|
-      data_ops::divide_scalar(m_scratch2, m_scratch1);            // m_scratch2     = |v|/|E| = mu
-      data_ops::multiply(m_scratch2,      m_particle_scratch1);   // m_scratch2     = mu*phi
-      data_ops::incr(m_conduct_cell,      m_scratch2, Abs(q));    // m_conduct_cell = mu*phi*q
+      data_ops::vector_length(m_scratch2, m_fluid_scratchD);   // m_scratch2     = |v|
+      data_ops::divide_scalar(m_scratch2, m_scratch1);         // m_scratch2     = |v|/|E| = mu
+      data_ops::multiply(m_scratch2,      m_fluid_scratch1);   // m_scratch2     = mu*phi
+      data_ops::incr(m_conduct_cell,      m_scratch2, Abs(q)); // m_conduct_cell = mu*phi*q
     }
   }
 

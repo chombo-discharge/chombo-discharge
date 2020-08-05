@@ -23,7 +23,7 @@ ito_plasma_stepper::ito_plasma_stepper(){
   m_regrid_superparticles = false;
 
   m_fluid_realm    = realm::primal;
-  m_particle_realm = "yo_realm";
+  m_particle_realm = realm::primal;
 }
 
 ito_plasma_stepper::ito_plasma_stepper(RefCountedPtr<ito_plasma_physics>& a_physics) : ito_plasma_stepper(){
@@ -917,7 +917,7 @@ void ito_plasma_stepper::compute_ito_velocities(Vector<EBAMRCellData*>&       a_
       densities[idx]  = (*a_densities[idx])[lvl];
     }
 
-    this->compute_ito_velocities(velocities, densities, *a_E[lvl], lvl, a_time);
+    this->compute_ito_velocities(velocities, densities, *m_particle_scratchD[lvl], lvl, a_time);
   }
 
   // Average down, interpolate ghost cells, and then interpolate to particle positions
@@ -1093,7 +1093,7 @@ void ito_plasma_stepper::compute_ito_diffusion(Vector<EBAMRCellData*>&       a_d
       densities[idx] = (*a_densities[idx])[lvl];
     }
 
-    this->compute_ito_diffusion(diffusion, densities, *a_E[lvl], lvl, a_time);
+    this->compute_ito_diffusion(diffusion, densities, *m_particle_scratchD[lvl], lvl, a_time);
   }
 
   // Average down, interpolate ghost cells, and then interpolate to particle positions
@@ -1283,7 +1283,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<particle_container<ito_
     newPhotons[idx] = &(a_newPhotons[idx]->get_cell_particles());
   }
 
-  this->advance_reaction_network(particles, photons, newPhotons, a_E, a_dt);
+  this->advance_reaction_network(particles, photons, newPhotons, m_particle_scratchD, a_dt);
 
   // Discard shit that is under the PVR
 #if 0
@@ -1626,14 +1626,35 @@ bool ito_plasma_stepper::load_balance(Vector<Vector<int> >&            a_procs,
     pout() << "ito_plasma_stepper_stepper::load_balance" << endl;
   }
 
+  bool ret;
 
-  return false;
+  if(!m_load_balance){
+    ret = false;
+  }
+  else{
+    if(a_realm == m_particle_realm){
+      ret = this->load_balance_particle_realm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finest_level);
+    }
+    else{
+      ret = false;
+    }
+  }
 
-#if 0
+  return ret;
+}
+
+bool ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
+						     Vector<Vector<Box> >&            a_boxes,
+						     const std::string                a_realm,
+						     const Vector<DisjointBoxLayout>& a_grids,
+						     const int                        a_lmin,
+						     const int                        a_finest_level){
+  
   bool ret = false;
   
   if(m_load_balance){
-    particle_container<ito_particle>& particles = m_solver->get_particles();
+    RefCountedPtr<ito_solver>& solver           = m_ito->get_solvers()[0];
+    particle_container<ito_particle>& particles = solver->get_particles();
   
     particles.regrid(a_grids, m_amr->get_domains(), m_amr->get_dx(), m_amr->get_ref_rat(), a_lmin, a_finest_level);
 
@@ -1650,7 +1671,7 @@ bool ito_plasma_stepper::load_balance(Vector<Vector<int> >&            a_procs,
       Vector<long int> loads;
       a_boxes[lvl] = a_grids[lvl].boxArray();
     
-      m_solver->compute_loads(loads, a_grids[lvl], lvl);
+      solver->compute_loads(loads, a_grids[lvl], lvl);
 
 #ifdef CH_MPI
       int count = loads.size();
@@ -1669,5 +1690,4 @@ bool ito_plasma_stepper::load_balance(Vector<Vector<int> >&            a_procs,
   }
 
   return ret;
-#endif
 }

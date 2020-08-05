@@ -231,6 +231,13 @@ namespace physics {
 
       EBAMRCellData m_particle_scratch1; // Scratch storage on the particle realm with 1 component
       EBAMRCellData m_particle_scratchD; // Scratch storage on the particle realm with SpaceDim components
+
+      bool load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
+				       Vector<Vector<Box> >&            a_boxes,
+				       const std::string                a_realm,
+				       const Vector<DisjointBoxLayout>& a_grids,
+				       const int                        a_lmin,
+				       const int                        a_finest_level);
     };
   }
 };
