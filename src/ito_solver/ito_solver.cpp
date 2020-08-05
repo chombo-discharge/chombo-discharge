@@ -708,7 +708,6 @@ void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   // Read particles. Should be implemented
   std::string str = m_name + "_particles";
   readParticlesFromHDF(a_handle, m_particles[a_level], str);
-
 }
 
 void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){

@@ -591,6 +591,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   
   // Instantiate solvers and register operators
   m_timestepper->setup_solvers();
+  m_timestepper->register_realms();
   m_timestepper->register_operators();
   m_amr->regrid_operators(base_level, finest_level, regsize);
   m_timestepper->allocate();
@@ -2284,7 +2285,7 @@ void driver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level){
 
   // Create some scratch data = 0 which can grok
   EBCellFactory fact(m_amr->get_ebisl(m_realm, phase::gas)[a_level]);
-  LevelData<EBCellFAB> scratch(m_amr->get_grids()[a_level], 1, 3*IntVect::Unit, fact);
+  LevelData<EBCellFAB> scratch(m_amr->get_grids(m_realm)[a_level], 1, 3*IntVect::Unit, fact);
   data_ops::set_value(scratch, 0.0);
 
   // Set tags = 1
