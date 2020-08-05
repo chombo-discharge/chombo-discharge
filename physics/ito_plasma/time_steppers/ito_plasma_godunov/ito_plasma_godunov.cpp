@@ -175,6 +175,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->clear(solver_it()->get_eb_particles());
     solver_it()->clear(solver_it()->get_domain_particles());
+    solver_it()->remove_eb_particles();
   }
 
   // Prepare next step
