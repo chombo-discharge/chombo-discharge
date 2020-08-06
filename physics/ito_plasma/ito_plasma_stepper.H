@@ -157,7 +157,6 @@ namespace physics {
 
       // Routines for chemistry advances
       void advance_reaction_network(const Real a_dt);
-
       void advance_reaction_network(Vector<particle_container<ito_particle>* >& a_particles,
 				    Vector<particle_container<photon>* >&       a_photons,
 				    Vector<particle_container<photon>* >&       a_newPhotons,
