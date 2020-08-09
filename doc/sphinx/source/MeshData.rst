@@ -3,27 +3,27 @@
 Understanding mesh data
 =======================
 
-Most datastructures in `PlasmaC` are typedef'ed datastructures from Chombo, although a few new ones are also included.
-For mesh data, the most central datastructure is the ``EBAMRCellFAB``, which holds cell-centered data across an AMR hierarchy which may or may not include embedded boundaries.
+Mesh datastructures in ``PlasmaC`` are derived from a class ``EBAMRData<T>`` which holds a typename ``T`` at every box at every level in the AMR hierarchy.
+Internally, the data is stored as a ``Vector<RefCountedPtr<LevelData<T> > >`` and the user may fetch the data through ``EBAMRData<T>::get_data()``.
+Here, the ``Vector`` holds a set of data on each AMR level; the data is allocated with a smart pointer called ``RefCountedPtr`` which points to a ``LevelData`` template structure, see :ref:`Chap:Basics`. 
 
-This class is typedef'ed as
+The reason for having class encapsulation of mesh data is due to :ref:`Chap:realm`, so that we can only keep track on which realm the mesh data is defined.
+Users will not have to interact with ``EBAMRData<T>`` directly, but will do so primarily through ``amr_mesh``.
+``amr_mesh`` has functionality for defining most ``EBAMRData<T>`` types on one of the realms, and ``EBAMRData<T>`` itself it typically not used anywhere elsewhere within ``PlasmaC``.
 
-.. code-block:: c++
-
-   typedef Vector<RefCountedPtr<LevelData<EBCellFAB> > >
-
-where the ``Vector`` holds a set of data on each AMR level; the data is allocated with a smart pointer called ``RefCountedPtr`` which points to a ``LevelData`` template structure, see :ref:`Chap:Basics`. 
-Other important datastructures are typedef'ed in much the same way as the cell-centered data:
+A number of explicit template specifications also exist, and these are outlined below: 
 
 .. code-block:: c++
 
-   typedef Vector<RefCountedPtr<LevelData<EBCellFAB> > >        EBAMRCellData; // Cell-centered EBAMR data
-   typedef Vector<RefCountedPtr<LevelData<EBFluxFAB> > >        EBAMRFluxData; // Face-centered EBAMR data
-   typedef Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > > EBAMRIVData;   // Irregular cell EBAMR data
-   typedef Vector<RefCountedPtr<LevelData<DomainFluxIFFAB > > > EBAMRIFData;   // Irregular face EBAMR data
-   typedef Vector<RefCountedPtr<LevelData<MFCellFAB> > >        MFAMRCellData; // Like EBAMRCellData, but for two phases
-   typedef Vector<RefCountedPtr<LevelData<MFFluxFAB> > >        MFAMRFluxData; // Like EBAMRFluxData, but for two phases
-   typedef Vector<RefCountedPtr<LevelData<MFBaseIVFAB> > >      MFAMRIVData;   // Like EBAMRIVData, but for two phases
+   typedef EBAMRData<MFCellFAB>        MFAMRCellData;  // Cell-centered multifluid data
+   typedef EBAMRData<MFFluxFAB>        MFAMRFluxData;  // Face-centered multifluid data
+   typedef EBAMRData<MFBaseIVFAB>      MFAMRIVData;    // Irregular face multifluid data
+   typedef EBAMRData<EBCellFAB>        EBAMRCellData;  // Cell-centered single-phase data
+   typedef EBAMRData<EBFluxFAB>        EBAMRFluxData;  // Face-centered data in all coordinate direction
+   typedef EBAMRData<EBFaceFAB>        EBAMRFaceData;  // Face-centered in a single coordinate direction
+   typedef EBAMRData<BaseIVFAB<Real> > EBAMRIVData;    // Data on irregular data centroids
+   typedef EBAMRData<DomainFluxIFFAB>  EBAMRIFData;    // Data on domain phases
+   typedef EBAMRData<BaseFab<bool> >   EBAMRBool;      // For holding bool at every cell
 
 There are many more data structures in place, but the above data structures are the most commonly used ones.
 Here, ``EBAMRFluxData`` is precisely like ``EBAMRCellData``, except that the data is stored on *cell faces* rather than cell centers.

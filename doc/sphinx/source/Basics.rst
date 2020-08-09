@@ -3,7 +3,8 @@
 Chombo basics
 =============
 
-This documentation uses class names from Chombo, and the most relevant Chombo data structures are summarized here.
+To fully understand this documentation the user must be familiar with Chombo.
+This documentation uses class names from Chombo and the most relevant Chombo data structures are summarized here.
 What follows is a *very* brief introduction to these data structures, for in-depth explanations please see the Chombo manual. 
 
 Real
@@ -60,7 +61,7 @@ Data therefore needs to live on more complex data structures than simple arrays.
 The ``EBCellFAB`` has two data structures: An ``FArrayBox`` that holds the data on the cell centers, and is supported by a graph that additionally holds data in cells that are multiply cut.
 The ``FArrayBox`` is essentially a Fortran array that can be passed to Fortran for performance reasons.
 Doing arithmetic with ``EBCellFAB`` usually requires one to iterate over all the cell in the ``FArrayBox``, and then to iterate over the *irregular cells* (i.e. cut-cells) later.
-The ``VofIterator``can iterate over only the cut-cells in a ``Box``.
+The ``VofIterator`` can iterate over any number cells, but is typically used only to iterate over the cut-cells in a ``Box``.
 Typically, code for doing anything with the ``EBCellFAB`` looks like this:
 
 .. code-block:: c++

@@ -9,7 +9,6 @@ Welcome to `PlasmaC`'s user documentation!
 ******************************************
 	      
 `PlasmaC` is a modular and scalable computer code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries.
-`PlasmaC` evolves deterministic or fluctuating equations of hydrodynamics and features
 
 * Electrostatics with support for electrodes and dielectrics
 * Radiative transport as a diffusion or Monte Carlo process
@@ -18,6 +17,7 @@ Welcome to `PlasmaC`'s user documentation!
 * Parallel I/O with HDF5
 * Sensible and simple-to-use physics interfaces
 * Various time integration schemes
+* Dual-grid simulations with separate fluid and particle grids. 
 
 Numerical solvers are designed to run on their own, but are best used through physics interfaces.
 
@@ -45,25 +45,34 @@ Introduction
    GettingStarted
    Model
    Basics
-   Driver
-   AmrMesh
-   ComputationalGeometry
-   TimeStepper
-   CellTagger
-
+   
 .. _Chap:UsingPlasmaC:
 
-Using PlasmaC
-*************
+Understanding PlasmaC
+*********************
 
 .. toctree::
    :maxdepth: 4
    :caption: Using PlasmaC
 
+   Realm
    MeshData
    ParticleData
    Control
-   Visualization	        
+   Visualization
+
+PlasmaC design
+**************
+
+.. toctree::
+   :maxdepth: 4
+   :caption: PlasmaC design
+
+   Driver
+   AmrMesh
+   ComputationalGeometry
+   TimeStepper
+   CellTagger	     
 
    
 .. _Chap:SupportedSolvers:
@@ -75,6 +84,7 @@ Supported Solvers
    :maxdepth: 4
    :caption: Supported solvers
 
+   Solver
    CDR
    Poisson
    RTE

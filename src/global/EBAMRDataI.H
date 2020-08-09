@@ -91,26 +91,26 @@ void EBAMRData<T>::copy(const EBAMRData<T>& a_other){
 }
 
 // Explicit templates
-template class EBAMRData<MFCellFAB>;
-template class EBAMRData<MFFluxFAB>;
-template class EBAMRData<MFBaseIVFAB>;
-template class EBAMRData<EBCellFAB>;
-template class EBAMRData<EBFluxFAB>;
-template class EBAMRData<EBFaceFAB>;
+template class EBAMRData<MFCellFAB>;         
+template class EBAMRData<MFFluxFAB>;         
+template class EBAMRData<MFBaseIVFAB>;       
+template class EBAMRData<EBCellFAB>;         // Cell-centered single-phase data
+template class EBAMRData<EBFluxFAB>;         // Face-centered single-phase data
+template class EBAMRData<EBFaceFAB>;           
 template class EBAMRData<BaseIVFAB<Real> >;
 template class EBAMRData<DomainFluxIFFAB>;
 template class EBAMRData<BaseFab<bool> >;
 
 // Typedefs for simple typing.
-typedef EBAMRData<MFCellFAB>        MFAMRCellData;
-typedef EBAMRData<MFFluxFAB>        MFAMRFluxData;
-typedef EBAMRData<MFBaseIVFAB>      MFAMRIVData;
-typedef EBAMRData<EBCellFAB>        EBAMRCellData;
-typedef EBAMRData<EBFluxFAB>        EBAMRFluxData;
-typedef EBAMRData<EBFaceFAB>        EBAMRFaceData;
-typedef EBAMRData<BaseIVFAB<Real> > EBAMRIVData;
-typedef EBAMRData<DomainFluxIFFAB>  EBAMRIFData;
-typedef EBAMRData<BaseFab<bool> >   EBAMRBool;
+typedef EBAMRData<MFCellFAB>        MFAMRCellData;  // Cell-centered multifluid data
+typedef EBAMRData<MFFluxFAB>        MFAMRFluxData;  // Face-centered multifluid data
+typedef EBAMRData<MFBaseIVFAB>      MFAMRIVData;    // Irregular face multifluid data
+typedef EBAMRData<EBCellFAB>        EBAMRCellData;  // Cell-centered single-phase data
+typedef EBAMRData<EBFluxFAB>        EBAMRFluxData;  // Face-centered data in all coordinate direction
+typedef EBAMRData<EBFaceFAB>        EBAMRFaceData;  // Face-centered in a single coordinate direction
+typedef EBAMRData<BaseIVFAB<Real> > EBAMRIVData;    // Data on irregular data centroids
+typedef EBAMRData<DomainFluxIFFAB>  EBAMRIFData;    // Data on domain phases
+typedef EBAMRData<BaseFab<bool> >   EBAMRBool;      // For holding bool at every cell
 
 #endif
 

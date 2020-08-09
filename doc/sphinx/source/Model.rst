@@ -3,10 +3,24 @@
 The ``PlasmaC`` code
 ====================
 
-This chapter discusses the overall ``PlasmaC`` model, including the spatial decomposition and a summary of supported solvers.
+The ``PlasmaC`` code is a loosely coupled code targeted at solving plasma problems. 
+The code uses an embedded boundary (EB) adaptive mesh refinement (AMR) formalism where the grids frequently change and are adapted to the solution as simulations progress.
+By design, the ``PlasmaC`` does not subcycle and all the grids are advanced using the same time step.
+``PlasmaC`` also supports the concept of a :ref:`Chap:Realm`, which in short means that ``PlasmaC`` supports using one set of grids for Eulerian solvers and a different set of grids for Lagrangian solvers. 
+
+The core functionality is centered around a set of solvers, for example a Poisson solver and a convection-diffusion-reaction solver, and then using the built-in solver functionality to advance the equations of motion.
+This is done through a class ``time_stepper``, which is an abstract class that advances the equations of motion within the ``PlasmaC`` framework.
+The ``time_stepper`` can instantiate an arbitrary number of solvers, and allows developers to use a fairly high-level description of their problem.
+For example, all *solvers* have functions like ``write_plot_data(...)`` that the user may use within the ``time_stepper`` output routines.
+
+Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into ``PlasmaC`` and still use the EBAMR formalism, ``PlasmaC`` also provide some physics modules for describing various types of problems.
+These modules reside in :file:`/physics` and they are intended to both be problem-solving physics modules, and as well acting like benchmarks, regression tests, and examples for extension to new types of physics modules in the future. 
+
 
 Main functionality
 ------------------
+
+The main functionality in ``PlasmaC`` is centered around the concept of a :ref:`Chap:solver`. 
 
 In this section we summarize how components in ``PlasmaC`` are connected, such that users may understand more readily how the code is designed. 
 
@@ -34,10 +48,12 @@ These functions include algorithms for generating AMR grids, allocating data acr
 All the physics is encapsulated by the :ref:`Chap:time_stepper` class. 
 This class will have direct ownership of all the solvers and the functions required to advance them over a time step.
 Instantiations of the class will also contain the routines for setting up a simulation, e.g. instantiating solvers, setting up boundary conditions.
-Typically, implementation new physics consists of writing a new ``time_stepper`` class that allocates the relevant solvers, and then implement the time integration algorithms that advances them. 
+Typically, implementation new physics consists of writing a new ``time_stepper`` class that allocates the relevant solvers, and then implement the time integration algorithms that advances them.
+The folder :file:`/physics` contains implementation of a few different physics modules.
+Since problems within a physics module tend to be conceptually similar, all of these modules also have a Python setup script so that users can quickly set up new types of problems within the same module. 
 
-The :ref:`Chap:driver` class is only responsible for *running* a simulation.
-This class will call for regrids at certain intervals, call the :ref:`Chap:time_stepper` for writing plot and checkpoint data, and call for the :ref:`Chap:time_stepper` to advance the equations of motion.
+The :ref:`Chap:driver` class is only responsible for *running* a simulation, and it uses ``time_stepper`` to do so.
+The :ref:`Chap:driver` class will call for regrids at certain intervals, call the :ref:`Chap:time_stepper` for writing plot and checkpoint data, and also call for the :ref:`Chap:time_stepper` to advance the equations of motion through a function ``advance(...)``. 
 In order to understand how ``PlasmaC`` runs a simulation, it will be useful to first understand how :ref:`Chap:driver` works.
 
 Solvers
@@ -144,22 +160,14 @@ Geometry generation for ``PlasmaC`` follows that of Chombo. In Chombo, the geome
 
 In `Chombo`, geometry generation is done by first constructing a set of boxes that covers the finest AMR level.
 If the function intersects one of these boxes, the box will allocate a *graph* that describes the connectivity of the volume-of-fluid indices in the entire box.
-The box is allocated in full, so using a smaller box will reduce the memory consumption, but since ghost cells are used there is a limitation to how much one can reduce the memory.
-Chombo uses sparse storage for the EB mesh information; graphs are only stored in boxes that intersect with the implicit function.
-There should be no graphs in boxes that are all-covered or all-regular. 
+The geometric data in the box is allocated sparsely so that memory consumption due to EB information storage is typically not very high. 
+In general, there should be no graphs in boxes that are all-covered or all-regular. 
 
-Even with sparse storage of the graph information, the memory overhead associated with the EB graph is not negligible.
-Memory consumption generally depends on the complexity of the geometry, and arbitrarily fine grids with cut-cell geometries are not possible.
-Consider for example a cubic domain of :math:`(16384)^3` cells which is decomposed into :math:`(32)^3` cell size patches.
-This yields :math:`(512)^3` possible patches in total.
-Now consider that this domain is cut in half by a plane with normal vector :math:`\mathbf{n} = \hat{\mathbf{x}}`.
-This surface will require allocation of :math:`512\times512\times 1` patches for the geometry.
-If each patch is padded with 4 ghost cells, this yields :math:`512^2\times(40)^3 \approx 1.6\times 10^{10}` cells.
-Inside each cell we must store volume fractions, area fractions, cell centroids positions and so one.
-Although the surface is simple, the required memory easily ranges in the terabyte range. 
-
-The default load-balancing for geometry generation in `Chombo` is an even division of the uniform finest-level grid among all the available.
-This is a reasonable approach for porous media where the cut-cells distribute evenly through the computational domain, but the approach is not scalable to large domain sizes. 
+When EB information is first generated across the AMR hierarchy, one begins by computing the information on the finest grid level.
+From there, coarser levels are generated through *coarsening* of the fine-information data. 
+The default load-balancing for geometry generation in `Chombo` is an even division of the grid level among the ranks. 
+This is a reasonable approach for porous media where the cut-cells distribute evenly through the computational domain.
+However, most geometries consists of a small 2D surface in 3D space and the default Chombo approach wastes a lot of time looking for cut-cells where they don't exist. 
 
 To achieve scalable geometry generation, we have changed how `Chombo` generates the geometry generation on the various levels.
 Our new approach first generates a map on a *coarse* level which is specified by the user.
