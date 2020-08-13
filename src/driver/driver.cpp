@@ -390,6 +390,28 @@ void driver::get_loads_and_boxes(long long& a_myPoints,
   }
 }
 
+const std::string driver::number_fmt(const long long n, char sep) const {
+    stringstream fmt;
+    fmt << n;
+    string s = fmt.str();
+    s.reserve(s.length() + s.length() / 3);
+
+    for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j)
+        if (i != 0 && j % 3 == 0)
+            s.insert(i++, 1, sep);
+
+    return s;
+}
+
+const Vector<std::string> driver::number_fmt(const Vector<long long> a_number, char a_sep) const{
+  Vector<std::string> ret(a_number.size());
+  for (int i = 0; i < a_number.size(); i++){
+    ret[i] = number_fmt(a_number[i], a_sep) + " ";
+  }
+
+  return ret;
+}
+
 void driver::grid_report(){
   CH_TIME("driver::grid_report");
   if(m_verbosity > 5){
@@ -445,7 +467,7 @@ void driver::grid_report(){
   const Box finestBox   = finest_domain.domainBox();
   const Box coarsestBox = coarsest_domain.domainBox();
   Vector<int> refRat = m_amr->get_ref_rat();
-  Vector<int> ref_rat(1 + finest_level);
+  Vector<int> ref_rat(finest_level);
   for (int lvl = 0; lvl < finest_level; lvl++){
     ref_rat[lvl] = refRat[lvl];
   }
@@ -486,10 +508,11 @@ void driver::grid_report(){
 	 << "\t\t\t        Refinement ratios      = " << ref_rat << endl
     	 << "\t\t\t        Grid sparsity          = " << 1.0*totPoints/uniformPoints << endl
 	 << "\t\t\t        Finest dx              = " << dx[finest_level] << endl
-    	 << "\t\t\t        Total number boxes     = " << totBoxes << endl
-    	 << "\t\t\t        Total number of cells  = " << totPoints << " (" << totPointsGhosts << ")" << endl
-    	 << "\t\t\t        Total # of boxes (lvl) = " << total_level_boxes << endl
-	 << "\t\t\t        Total # of cells (lvl) = " << total_level_points << endl;
+    	 << "\t\t\t        Total number boxes     = " << number_fmt(totBoxes) << endl
+    	 << "\t\t\t        Number of valid cells  = " << number_fmt(totPoints) << endl
+	 << "\t\t\t        Including ghost cells  = " << number_fmt(totPointsGhosts)  << endl
+    	 << "\t\t\t        Total # of boxes (lvl) = " << number_fmt(total_level_boxes) << endl
+	 << "\t\t\t        Total # of cells (lvl) = " << number_fmt(total_level_points) << endl;
 
   // Do a local report for each realm
   for (auto str : realms){
@@ -506,10 +529,11 @@ void driver::grid_report(){
 			      finest_level,
 			      m_amr->get_grids(str));
     pout() << "\t\t\t        Realm = " << str << endl
-         << "\t\t\t\t        Proc. # of cells       = " << myPoints << " (" << myPointsGhosts << ")" << endl
-	 << "\t\t\t\t        Proc. # of boxes       = " << myBoxes << endl
-    	 << "\t\t\t\t        Proc. # of boxes (lvl) = " << my_level_boxes << endl
-	 << "\t\t\t\t        Proc. # of cells (lvl) = " << my_level_points << endl;
+	   << "\t\t\t\t        Proc. # of valid cells = " << number_fmt(myPoints) << endl
+	   << "\t\t\t\t        Including ghost cells  = " << number_fmt(myPointsGhosts) << endl
+	   << "\t\t\t\t        Proc. # of boxes       = " << number_fmt(myBoxes) << endl
+	   << "\t\t\t\t        Proc. # of boxes (lvl) = " << number_fmt(my_level_boxes) << endl
+	   << "\t\t\t\t        Proc. # of cells (lvl) = " << number_fmt(my_level_points) << endl;
       }
   
   pout()

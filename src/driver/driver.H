@@ -497,6 +497,16 @@ protected:
   virtual void grid_report();
 
   /*!
+    @brief Number formatting game. This just prints the number 123456 as 123,456
+  */
+  virtual const std::string number_fmt(const long long a_number, char a_sep = ',') const;
+
+  /*!
+    @brief Number formatting game. This just prints the number 123456 as 123,456
+  */
+  virtual const Vector<std::string> number_fmt(const Vector<long long> a_number, char a_sep = ',') const;
+
+  /*!
     @brief Memory report
   */
   virtual void memory_report(const memory_report_mode a_mode);
