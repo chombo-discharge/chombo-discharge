@@ -918,7 +918,7 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
     if(!m_has_grids){
 
       for (int lvl = 1; lvl <= top_level; lvl++){
-#if 1
+#if 0 // This won't work because when m_domains is huge we can get a gazillion boxes. 
 	domainSplit(m_domains[lvl], old_boxes[lvl], m_max_box_size, m_blocking_factor);
 #else
 	old_boxes[lvl].resize(0);
@@ -1505,7 +1505,12 @@ void amr_mesh::parse_refinement_ratio(){
   Vector<int> ratios;
   ratios.resize(pp.countval("ref_rat"));
   pp.getarr("ref_rat", ratios, 0, ratios.size());
-      
+
+  // Pad with 2 if user didn't supply enough
+  while(ratios.size() < m_max_amr_depth){
+    ratios.push_back(2);
+  }
+  
   m_ref_ratios = ratios;
 }
 

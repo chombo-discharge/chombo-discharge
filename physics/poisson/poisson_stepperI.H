@@ -102,9 +102,9 @@ namespace physics {
       const Real t0 = MPI_Wtime();
       const bool converged = m_poisson->solve(state, rho, sigma);
       const Real t1 = MPI_Wtime();
-      if(procID() == 0){
-	std::cout << t1 - t0 << std::endl;
-      }
+      // if(procID() == 0){
+      // 	std::cout << t1 - t0 << std::endl;
+      // }
       m_poisson->compute_E();
 
       if(!converged){
