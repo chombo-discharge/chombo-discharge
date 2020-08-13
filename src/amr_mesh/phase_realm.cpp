@@ -95,7 +95,8 @@ void phase_realm::regrid_operators(const int a_lmin, const int a_lmax, const int
     this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
     this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
     this->define_ebmg_interp(a_lmin);             // Define interpolator used for e.g. multigrid (or piecewise constant)
-    this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
+    this->define_flux_reg(a_lmin,a_regsize);      // Define flux register
+    this->define_eb_fast_fr(a_lmin,a_regsize);    // Define EBFastFR register
     this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
     this->define_gradsten(a_lmin);                // Make stencils for computing gradients
     this->define_irreg_sten();                    // Make stencils for doing interpolation to centroids
@@ -441,7 +442,6 @@ void phase_realm::define_eb_fast_fr(const int a_lmin, const int a_regsize){
   m_eb_fast_fr.resize(1 + m_finest_level);
 
   if(do_this_operator){
-    
     const int comps = a_regsize;
     
     for (int lvl = Max(0,a_lmin-1); lvl <= m_finest_level; lvl++){

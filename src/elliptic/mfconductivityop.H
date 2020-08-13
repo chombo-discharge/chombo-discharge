@@ -53,7 +53,6 @@ public:
 		      const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
 		      const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_bco_irreg,
 		      const MFQuadCFInterp&                         a_quadcfi,
-		      //		      const MFFastFluxReg&                          a_fastFR,
 		      const MFLevelGrid&                            a_mflg_fine,
 		      const MFLevelGrid&                            a_mflg,
 		      const MFLevelGrid&                            a_mflg_coar,

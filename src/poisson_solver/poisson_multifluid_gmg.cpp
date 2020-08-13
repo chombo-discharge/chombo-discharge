@@ -871,18 +871,24 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   // This stuff is needed for the operator factory
   Vector<MFLevelGrid>    mflg(1 + finest_level);
   Vector<MFQuadCFInterp> mfquadcfi(1 + finest_level);
+  Vector<MFFastFluxReg>  mffluxreg(1 + finest_level);
   for (int lvl = 0; lvl <= finest_level; lvl++){
     Vector<EBLevelGrid>                    eblg_phases(nphases);
     Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(nphases);
+    Vector<RefCountedPtr<EBFastFR> >       fluxreg_phases(nphases);
 
     if(!ebis_gas.isNull()) eblg_phases[phase::gas]   = *(m_amr->get_eblg(m_realm, phase::gas)[lvl]);
     if(!ebis_sol.isNull()) eblg_phases[phase::solid] = *(m_amr->get_eblg(m_realm, phase::solid)[lvl]);
 
     if(!ebis_gas.isNull()) quadcfi_phases[phase::gas]   = (m_amr->get_old_quadcfi(m_realm, phase::gas)[lvl]);
     if(!ebis_sol.isNull()) quadcfi_phases[phase::solid] = (m_amr->get_old_quadcfi(m_realm, phase::solid)[lvl]);
+
+    if(!ebis_gas.isNull()) fluxreg_phases[phase::gas]   = (m_amr->get_eb_fast_fr(m_realm, phase::gas)[lvl]);
+    //    if(!ebis_sol.isNull()) fluxreg_phases[phase::solid] = (m_amr->get_eb_fast_fr(m_realm, phase::solid)[lvl]);
     
     mflg[lvl].define(m_mfis, eblg_phases);
     mfquadcfi[lvl].define(quadcfi_phases);
+    mffluxreg[lvl].define(fluxreg_phases);
   }
 
   // Appropriate coefficients for poisson equation
@@ -927,6 +933,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
 										 mflg,
 										 mfquadcfi,
+										 mffluxreg,
 										 refinement_ratios,
 										 grids,
 										 m_aco,

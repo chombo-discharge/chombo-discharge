@@ -47,6 +47,7 @@ public:
   mfconductivityopfactory(const RefCountedPtr<mfis>&                a_mfis,
 			  const Vector<MFLevelGrid>&                a_mflg,
 			  const Vector<MFQuadCFInterp>&             a_mfquadcfi,
+			  const Vector<MFFastFluxReg>&              a_mffluxreg,
 			  const Vector<int>&                        a_ref_rat,
 			  const Vector<DisjointBoxLayout>&          a_grids,
 			  const MFAMRCellData&                      a_aco,
