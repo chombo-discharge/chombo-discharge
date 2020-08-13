@@ -117,6 +117,7 @@ void phase_realm::register_operator(const std::string a_operator){
        a_operator.compare(s_eb_fill_patch)   == 0 ||
        a_operator.compare(s_eb_pwl_interp)   == 0 ||
        a_operator.compare(s_eb_flux_reg)     == 0 ||
+       a_operator.compare(s_eb_fast_fr)      == 0 ||
        a_operator.compare(s_eb_redist)       == 0 ||
        a_operator.compare(s_eb_noncons_div)  == 0 ||
        a_operator.compare(s_eb_copier)       == 0 ||
@@ -429,6 +430,35 @@ void phase_realm::define_ebmg_interp(const int a_lmin){
   }
 }
 
+void phase_realm::define_eb_fast_fr(const int a_lmin, const int a_regsize){
+  CH_TIME("phase_realm::define_eb_fast_fr");
+  if(m_verbosity > 2){
+    pout() << "phase_realm::define_eb_fast_fr" << endl;
+  }
+
+  const bool do_this_operator = this->query_operator(s_eb_fast_fr);
+
+  m_eb_fast_fr.resize(1 + m_finest_level);
+
+  if(do_this_operator){
+    
+    const int comps = a_regsize;
+    
+    for (int lvl = Max(0,a_lmin-1); lvl <= m_finest_level; lvl++){
+
+      const bool has_fine = lvl < m_finest_level;
+
+
+      if(has_fine){
+	m_eb_fast_fr[lvl] = RefCountedPtr<EBFastFR> (new EBFastFR(*m_eblg[lvl+1],
+								  *m_eblg[lvl],
+								  m_ref_ratios[lvl],
+								  comps));
+      }
+    }
+  }
+}
+
 void phase_realm::define_flux_reg(const int a_lmin, const int a_regsize){
   CH_TIME("phase_realm::define_flux_reg");
   if(m_verbosity > 2){
@@ -461,7 +491,6 @@ void phase_realm::define_flux_reg(const int a_lmin, const int a_regsize){
     }
   }
 }
-
 
 void phase_realm::define_redist_oper(const int a_lmin, const int a_regsize){
   CH_TIME("phase_realm::define_redist_oper");
@@ -840,6 +869,12 @@ Vector<RefCountedPtr<EBFluxRegister> >&  phase_realm::get_flux_reg() {
   if(!this->query_operator(s_eb_flux_reg)) MayDay::Abort("phase_realm::get_flux_reg - operator not registered!");
 
   return m_flux_reg;
+}
+
+Vector<RefCountedPtr<EBFastFR> >&  phase_realm::get_eb_fast_fr() {
+  if(!this->query_operator(s_eb_fast_fr)) MayDay::Abort("phase_realm::get_eb_fast_fr - operator not registered!");
+
+  return m_eb_fast_fr;
 }
 
 Vector<RefCountedPtr<EBLevelRedist> >&  phase_realm::get_level_redist() {
