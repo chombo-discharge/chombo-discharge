@@ -11,7 +11,6 @@
 #include "phase_realm.H"
 #include "mfis.H"
 #include "MFLevelGrid.H"
-#include "MFFastFR.H"
 
 /*!
   @brief Class for holding multifluid realms, which are the realms that we actually use. 

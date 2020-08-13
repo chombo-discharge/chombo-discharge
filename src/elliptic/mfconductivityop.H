@@ -13,6 +13,7 @@
 #include "MFLevelGrid.H"
 #include "electrode.H"
 #include "MFQuadCFInterp.H"
+#include "MFFastFluxReg.H"
 #include "ebconductivityop.H"
 #include "mfdirichletconductivityebbc.H"
 
@@ -52,6 +53,7 @@ public:
 		      const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
 		      const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_bco_irreg,
 		      const MFQuadCFInterp&                         a_quadcfi,
+		      //		      const MFFastFluxReg&                          a_fastFR,
 		      const MFLevelGrid&                            a_mflg_fine,
 		      const MFLevelGrid&                            a_mflg,
 		      const MFLevelGrid&                            a_mflg_coar,

@@ -488,6 +488,8 @@ void poisson_multifluid_gmg::register_operators(){
     m_amr->register_operator(s_eb_quad_cfi,     m_realm, phase::solid);
     m_amr->register_operator(s_eb_irreg_interp, m_realm, phase::gas);
     m_amr->register_operator(s_eb_irreg_interp, m_realm, phase::solid);
+    m_amr->register_operator(s_eb_fast_fr,      m_realm, phase::gas);
+    m_amr->register_operator(s_eb_fast_fr,      m_realm, phase::solid);
   }
 }
 

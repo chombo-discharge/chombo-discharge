@@ -1,41 +1,41 @@
 /*!
-  @file   MFFastFR.H
-  @brief  Wrapper class for holding multifluid EBFastFR's
+  @file   MFFastFluxReg.H
+  @brief  Wrapper class for holding multifluid EBFastFluxReg
   @author Robert Marskar
   @date   Aug. 2020
   @todo   Segregate implementation file. 
 */
 
-#ifndef _MFFASTFR_H_
-#define _MFFASTFR_H_
+#ifndef _MFFastFluxReg_H_
+#define _MFFastFluxReg_H_
 
 #include <RefCountedPtr.H>
-#include <MFFastFR.H>
+#include <EBFastFR.H>
 
 /*!
   @brief Class for filling ghost cells alà EBFastFR for multiphase
 */
-class MFFastFR {
+class MFFastFluxReg {
 public:
 
   /*!
     @brief Constructor
   */
-  MFFastFR(){
+  MFFastFluxReg(){
 
   }
 
   /*!
     @brief Destructor
   */
-  ~MFFastFR(){
+  ~MFFastFluxReg(){
 
   }
 
   /*!
     @brief Full constructor. Calls define
   */
-  MFFastFR(const Vector<RefCountedPtr<EBFastFR> >& a_fastfr){
+  MFFastFluxReg(const Vector<RefCountedPtr<EBFastFR> >& a_fastfr){
     this->define(a_fastfr);
   }
 
