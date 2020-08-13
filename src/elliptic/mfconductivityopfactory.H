@@ -225,6 +225,11 @@ protected:
   Vector<MFQuadCFInterp> m_mfquadcfi;
 
   /*!
+    @brief Interpolation utilities
+  */
+  Vector<MFFastFluxReg> m_mffluxreg;
+
+  /*!
     @brief Refinement ratios
   */
   Vector<int> m_ref_rat;

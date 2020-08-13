@@ -42,6 +42,7 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
   m_mfis       = a_mfis;
   m_mflg       = a_mflg;
   m_mfquadcfi  = a_mfquadcfi;
+  m_mffluxreg  = a_mffluxreg;
   m_aco        = a_aco;
   m_bco        = a_bco;
   m_bco_irreg  = a_bco_irreg;
