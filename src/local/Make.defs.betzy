@@ -104,16 +104,16 @@ makefiles+=Make.defs.local
 ## Override the default values here
 
 ## Configuration variables
-DIM           = 2
+DIM           = 3
 DEBUG         = FALSE
 OPT           = HIGH
 #PRECISION     =
 #PROFILE       =
-CXX           = icpc
-FC            = ifort
+CXX           = g++
+FC            = gfortran
 MPI           = TRUE
 ## Note: don't set the MPICXX variable if you don't have MPI installed
-MPICXX        = mpiicpc
+MPICXX        = mpicxx
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
@@ -122,11 +122,11 @@ MPICXX        = mpiicpc
 USE_EB        = TRUE
 #USE_CCSE      =
 USE_HDF       = TRUE
-HDFINCFLAGS   = -I/cluster/software/HDF5/1.10.5-iimpi-2019b/include
-HDFLIBFLAGS   = -L/cluster/software/HDF5/1.10.5-iimpi-2019b/lib -lhdf5 -lz
+HDFINCFLAGS   = -I/cluster/software/HDF5/1.10.6-gompi-2020a/include
+HDFLIBFLAGS   = -L/cluster/software/HDF5/1.10.6-gompi-2020a/lib -lhdf5 -lz
 ## Note: don't set the HDFMPI* variables if you don't have parallel HDF installed
-HDFMPIINCFLAGS= -I/cluster/software/HDF5/1.10.5-iimpi-2019b/include
-HDFMPILIBFLAGS= -L/cluster/software/HDF5/1.10.5-iimpi-2019b/lib -lhdf5 -lz
+HDFMPIINCFLAGS= -I/cluster/software/HDF5/1.10.6-gompi-2020a/include
+HDFMPILIBFLAGS= -L/cluster/software/HDF5/1.10.6-gompi-2020a/lib -lhdf5 -lz
 USE_MF        = TRUE
 #USE_MT        =
 #USE_SETVAL    =

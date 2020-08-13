@@ -2,8 +2,7 @@
 #SBATCH --account=nn9453k
 #SBATCH --job-name=poisson2d
 #SBATCH --time=0-00:05:00
-#SBATCH --qos=devel
-#SBATCH --nodes=1
+#SBATCH --nodes=4
 #SBATCH --ntasks-per-node=128
 
 ## Safety settings, I don't know why this is recommended in the documentation but fine
@@ -12,8 +11,8 @@ set -o nounset
 
 ## Software modules
 module restore system
-module load intel/2019b
-module load HDF5/1.10.5-iimpi-2019b
+module load gompi/2020a
+module load HDF5/1.10.6-gompi-2020a
 
 # Program to run and input script
 executable=main2d.Linux.64.mpiicpc.ifort.OPTHIGH.MPI.ex
