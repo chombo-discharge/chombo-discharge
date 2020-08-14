@@ -606,6 +606,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump;
 
   MFQuadCFInterp quadcfi;
+  MFFastFluxReg fluxreg;
   
   MFLevelGrid mflg_fine;
   MFLevelGrid mflg;
@@ -655,6 +656,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
     bco_irreg = m_bco_irreg[ref];
     jump      = m_jump[ref];
     quadcfi   = m_mfquadcfi[ref];
+    fluxreg   = m_mffluxreg[ref];
     mflg      = m_mflg[ref];
     domain    = m_domains[ref];
     layout_changed = m_layout_changed[ref];
@@ -724,7 +726,8 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
 	       aco,              // Set to m_aco[ref] (for AMR) or m_aco_mg[ref][img] for MG
 	       bco,              // Set to m_bco[ref] (for AMR) or m_bco_mg[ref][img] for MG
 	       bco_irreg,        // Set to m_bco_irreg[ref] (for AMR) or m_bco_irreg_mg[ref][img] for MG
-	       quadcfi,          // Set to m_mfquadcfi[ref] (for AMR). Undefined for MG. 
+	       quadcfi,          // Set to m_mfquadcfi[ref] (for AMR). Undefined for MG.
+	       fluxreg,          // Set to m_mffluxref[ref] (for AMR). NULL for MG. 
 	       mflg_fine,        // Undefined. 
 	       mflg,             // Set to m_mflg[ref] (for AMR) or m_mflg_mg[ref][img] (for MG)
 	       mflg_coar,        // Undefined.
@@ -798,6 +801,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump = m_jump[ref];
 
   MFQuadCFInterp quadcfi = m_mfquadcfi[ref];
+  MFFastFluxReg fluxreg  = m_mffluxreg[ref];
   
   MFLevelGrid mflg_fine;
   MFLevelGrid mflg = m_mflg[ref];
@@ -874,6 +878,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
 	       bco,
 	       bco_irreg,
 	       quadcfi,
+	       fluxreg,
 	       mflg_fine,
 	       mflg,
 	       mflg_coar,

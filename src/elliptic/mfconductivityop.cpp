@@ -44,7 +44,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 			      const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
 			      const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_bco_irreg,
 			      const MFQuadCFInterp&                         a_quadcfi,
-			      //			      const MFFastFluxReg&                          a_fluxreg,
+			      const MFFastFluxReg&                          a_fluxreg,
 			      const MFLevelGrid&                            a_mflg_fine,
 			      const MFLevelGrid&                            a_mflg,
 			      const MFLevelGrid&                            a_mflg_coar,
@@ -130,11 +130,16 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
     }
 
 
+    RefCountedPtr<EBFastFR> fastFR;
     RefCountedPtr<EBQuadCFInterp> quadcfi;
     if(a_has_coar){
       quadcfi = a_quadcfi.get_quadcfi_ptr(iphase);
       CH_assert(!quadcfi.isNull());
     }
+    if(a_has_fine){
+      fastFR = a_fluxreg.get_fastfr_ptr(iphase);
+    }
+
 
     // Coefficients
     m_acoeffs[iphase]     = RefCountedPtr<LevelData<EBCellFAB> >        (new LevelData<EBCellFAB>());
@@ -195,6 +200,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 									    eblg_coar,
 									    eblg_mg,
 									    quadcfi,
+									    fastFR,
 									    dbc,
 									    ebbc,
 									    a_dx,

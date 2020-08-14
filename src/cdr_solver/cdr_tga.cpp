@@ -395,7 +395,9 @@ void cdr_tga::setup_operator_factory(){
   const Vector<Real>& dx                 = m_amr->get_dx();
   const RealVect& origin                 = m_amr->get_prob_lo();
   const Vector<EBISLayout>& ebisl        = m_amr->get_ebisl(m_realm, m_phase);
+  
   const Vector<RefCountedPtr<EBQuadCFInterp> >& quadcfi  = m_amr->get_old_quadcfi(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBFastFR> >& fastFR  = m_amr->get_eb_fast_fr(m_realm, m_phase);
 
   Vector<EBLevelGrid> levelgrids;
   for (int lvl = 0; lvl <= finest_level; lvl++){ 
@@ -434,6 +436,7 @@ void cdr_tga::setup_operator_factory(){
   data_ops::set_value(m_diffco_eb, 0.0);
   m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
 										 quadcfi,
+										 fastFR,
 										 alpha,
 										 beta,
 										 m_aco.get_data(),

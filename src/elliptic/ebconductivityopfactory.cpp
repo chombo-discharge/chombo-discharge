@@ -75,6 +75,7 @@ int ebconductivityopfactory::refToFiner(const ProblemDomain& a_domain) const {
 
 ebconductivityopfactory:: ebconductivityopfactory(const Vector<EBLevelGrid>&                                  a_eblgs,
 						  const Vector<RefCountedPtr<EBQuadCFInterp> >&               a_quadCFI,
+						  const Vector<RefCountedPtr<EBFastFR> >&                     a_fastFR,
 						  const Real&                                                 a_alpha,
 						  const Real&                                                 a_beta,
 						  const Vector<RefCountedPtr<LevelData<EBCellFAB> > >&        a_acoef,
@@ -94,6 +95,7 @@ ebconductivityopfactory:: ebconductivityopfactory(const Vector<EBLevelGrid>&    
   m_dataBased = false;
   m_relaxType = a_relaxType;
   m_quadCFI = a_quadCFI;
+  m_fastFR        = a_fastFR;
   m_ghostCellsRhs = a_ghostCellsRhs;
   m_ghostCellsPhi = a_ghostCellsPhi;
   m_acoef         = a_acoef;
@@ -239,6 +241,7 @@ ebconductivityop* ebconductivityopfactory::MGnewOp(const ProblemDomain& a_domain
   EBLevelGrid eblgMGLevel;
   EBLevelGrid eblgCoarMG;
   RefCountedPtr<EBQuadCFInterp> quadCFI; //only defined if on an amr level
+  RefCountedPtr<EBFastFR> fastFR;
   Real dxCoar = 1.0;
   dxCoar *= -1.0;
   //  int refToDepth = 1;
@@ -319,7 +322,7 @@ ebconductivityop* ebconductivityopfactory::MGnewOp(const ProblemDomain& a_domain
   //
   ebconductivityop* newOp = NULL;
   // Time-independent A coefficient.
-  newOp = new ebconductivityop(EBLevelGrid(), eblgMGLevel, EBLevelGrid(), eblgCoarMG, quadCFI,
+  newOp = new ebconductivityop(EBLevelGrid(), eblgMGLevel, EBLevelGrid(), eblgCoarMG, quadCFI, fastFR,
                                dombc, ebbc, dxMGLevel, dxCoar, bogRef, bogRef, hasFine, hasCoar,
                                hasCoarMGObjects, layoutChanged, m_alpha, m_beta,
                                acoef, bcoef, bcoefIrreg, m_ghostCellsPhi, m_ghostCellsRhs, m_relaxType);
@@ -383,7 +386,7 @@ ebconductivityop* ebconductivityopfactory::AMRnewOp(const ProblemDomain& a_domai
 
   ebconductivityop* newOp = NULL;
 
-  newOp = new ebconductivityop(eblgFine, eblgMGLevel, eblgCoar, eblgCoarMG, m_quadCFI[ref],
+  newOp = new ebconductivityop(eblgFine, eblgMGLevel, eblgCoar, eblgCoarMG, m_quadCFI[ref], m_fastFR[ref],
                                dombc, ebbc,  dxMGLevel,dxCoar, refToFiner, refToCoarser,
                                hasFine, hasCoar, hasCoarMGObjects,  layoutChanged,
                                m_alpha, m_beta, m_acoef[ref], m_bcoef[ref], m_bcoefIrreg[ref],

@@ -44,6 +44,7 @@ ebconductivityop(const EBLevelGrid &                                  a_eblgFine
                  const EBLevelGrid &                                  a_eblgCoar,
                  const EBLevelGrid &                                  a_eblgCoarMG,
                  const RefCountedPtr<EBQuadCFInterp>&                 a_quadCFI,
+		 const RefCountedPtr<EBFastFR>&                       a_fastFR,
                  const RefCountedPtr<ConductivityBaseDomainBC>&       a_domainBC,
                  const RefCountedPtr<ConductivityBaseEBBC>&           a_ebBC,
                  const Real    &                                      a_dx,
@@ -99,7 +100,6 @@ ebconductivityop(const EBLevelGrid &                                  a_eblgFine
     m_vofIterDomHi(),
     m_loCFIVS(),
     m_hiCFIVS(),
-    m_fastFR(),
     m_hasMGObjects(a_hasMGObjects),
     m_layoutChanged(a_layoutChanged),
     m_ebAverageMG(),
@@ -111,6 +111,8 @@ ebconductivityop(const EBLevelGrid &                                  a_eblgFine
 {
   CH_TIME("ebconductivityop::ConductivityOp");
   int ncomp = 1;
+
+  m_ext_fastFR = a_fastFR;
 
   if (m_hasFine)
     {
@@ -198,7 +200,6 @@ ebconductivityop(const EBLevelGrid &                                  a_eblgFine
 
   //define stencils for the operator
   defineStencils();
-
 }
 //-----------------------------------------------------------------------
 ebconductivityop::
@@ -691,11 +692,18 @@ defineStencils()
 
   if (m_hasFine)
     {
-
       int ncomp = 1;
-      m_fastFR.define(m_eblgFine, m_eblg, m_refToFine, ncomp, s_forceNoEBCF);
-      m_hasEBCF = m_fastFR.hasEBCF();
+      if(m_ext_fastFR.isNull()){
+	m_fastFR = RefCountedPtr<EBFastFR> (new EBFastFR(m_eblgFine, m_eblg, m_refToFine, ncomp, s_forceNoEBCF));
+      }
+      else{
+	m_fastFR = m_ext_fastFR;
+      }
+      m_hasEBCF = m_fastFR->hasEBCF();
     }
+  else{
+    m_fastFR = RefCountedPtr<EBFastFR>();
+  }
    defineEBCFStencils();
    defineColorStencils(sideBoxLo, sideBoxHi);
 }
@@ -830,7 +838,7 @@ defineEBCFStencils()
               //coarse fine stuff is between me and next finer level
               //fine stuff lives over m_eblgfine
               //coar stuff lives over m_eblg
-              int index = m_fastFR.index(idir, sit());
+              int index = m_fastFR->index(idir, sit());
               m_stencilCoar[index].define(m_eblg.getDBL());
               m_faceitCoar [index].define(m_eblg.getDBL());
 
@@ -842,7 +850,7 @@ defineEBCFStencils()
                 {
                   Vector<FaceIndex>& facesEBCFCoar =  m_faceitCoar[index][dit[mybox]];
                   Vector<VoFStencil>& stencEBCFCoar= m_stencilCoar[index][dit[mybox]];
-                  Vector<VoFIterator>& vofitlist = m_fastFR.getVoFItCoar(dit[mybox], idir, sit());
+                  Vector<VoFIterator>& vofitlist = m_fastFR->getVoFItCoar(dit[mybox], idir, sit());
                   //first build up the list of the faces
                   for (int ivofit = 0; ivofit < vofitlist.size(); ivofit++)
                     {
@@ -2382,13 +2390,13 @@ reflux(LevelData<EBCellFAB>& a_residual,
   Interval interv(0,0);
 
   CH_START(t2);
-  m_fastFR.setToZero();
+  m_fastFR->setToZero();
   CH_STOP(t2);
   CH_START(t3);
 #if verb
   pout() << "ebconductivityop::reflux - increment coar" << endl;
 #endif
-  incrementFRCoar(m_fastFR, a_phiFine, a_phi);
+  incrementFRCoar(*m_fastFR, a_phiFine, a_phi);
 #if verb
   pout() << "ebconductivityop::reflux - done increment coar" << endl;
 #endif
@@ -2398,7 +2406,7 @@ reflux(LevelData<EBCellFAB>& a_residual,
 #if verb
   pout() << "ebconductivityop::reflux - increment fine" << endl;
 #endif
-  incrementFRFine(m_fastFR, a_phiFine, a_phi, a_finerOp);
+  incrementFRFine(*m_fastFR, a_phiFine, a_phi, a_finerOp);
 #if verb
   pout() << "ebconductivityop::reflux - done increment fine" << endl;
 #endif
@@ -2409,7 +2417,7 @@ reflux(LevelData<EBCellFAB>& a_residual,
 #if verb
   pout() << "ebconductivityop::refluxing" << endl;
 #endif
-  m_fastFR.reflux(a_residual, interv, scale);
+  m_fastFR->reflux(a_residual, interv, scale);
 
 #if verb
   pout() << "ebconductivityop::reflux - done reflux" << endl;

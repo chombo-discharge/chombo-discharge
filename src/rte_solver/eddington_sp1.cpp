@@ -637,7 +637,9 @@ void eddington_sp1::setup_operator_factory(){
   const Vector<Real>& dx                 = m_amr->get_dx();
   const RealVect& origin                 = m_amr->get_prob_lo();
   const Vector<EBISLayout>& ebisl        = m_amr->get_ebisl(m_realm, m_phase);
+  
   const Vector<RefCountedPtr<EBQuadCFInterp> >& quadcfi  = m_amr->get_old_quadcfi(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBFastFR> >& fastFR         = m_amr->get_eb_fast_fr(m_realm, m_phase);
 
   Vector<EBLevelGrid> levelgrids;
 
@@ -693,6 +695,7 @@ void eddington_sp1::setup_operator_factory(){
   // Create operator factory.
   m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
 										 quadcfi,
+										 fastFR,
 										 alpha,
 										 beta,
 										 m_aco.get_data(),
