@@ -22,6 +22,7 @@
 #include "EBGhostCloud.H"
 #include "noncons_div.H"
 #include "EBFasterFR.H"
+#include "EBFastFluxRegister.H"
 
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
