@@ -10,6 +10,7 @@
 #include "EBFastCoarToFineRedist.H"
 #include "EBFastCoarToCoarRedist.H"
 #include "load_balance.H"
+#include "EBFasterFR.H"
 
 #include <EBArith.H>
 
@@ -450,10 +451,10 @@ void phase_realm::define_eb_fast_fr(const int a_lmin, const int a_regsize){
 
 
       if(has_fine){
-	m_eb_fast_fr[lvl] = RefCountedPtr<EBFastFR> (new EBFastFR(*m_eblg[lvl+1],
-								  *m_eblg[lvl],
-								  m_ref_ratios[lvl],
-								  comps));
+	m_eb_fast_fr[lvl] = RefCountedPtr<EBFastFR> (new EBFasterFR(*m_eblg[lvl+1],
+								    *m_eblg[lvl],
+								    m_ref_ratios[lvl],
+								    comps));
       }
     }
   }
