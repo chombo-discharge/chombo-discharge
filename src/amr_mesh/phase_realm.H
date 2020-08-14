@@ -21,7 +21,6 @@
 #include "particle_container.H"
 #include "EBGhostCloud.H"
 #include "noncons_div.H"
-#include "EBFasterFR.H"
 #include "EBFastFluxRegister.H"
 
 #include <DisjointBoxLayout.H>
@@ -50,7 +49,6 @@ static const std::string s_eb_redist       = "eb_redist";
 static const std::string s_eb_copier       = "eb_copier";
 static const std::string s_eb_ghostcloud   = "eb_ghostcloud";
 static const std::string s_eb_noncons_div  = "eb_non_cons_div";
-static const std::string s_eb_fast_fr      = "eb_fast_fr";
 
 /*!
   @brief Class that holds important things for an AMR phase_realm. I.e. grids, operators, etc. 
@@ -108,7 +106,6 @@ public:
   Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp();
   Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp();
   Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg();
-  Vector<RefCountedPtr<EBFasterFR> >&  get_eb_fast_fr();
   Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist();
   Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist();
   Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist();
@@ -165,7 +162,6 @@ protected:
   Vector<RefCountedPtr<EBPWLFineInterp> > m_pwl_interp;
   Vector<RefCountedPtr<EBMGInterp> > m_ebmg_interp;
   Vector<RefCountedPtr<EBFluxRegister> > m_flux_reg;
-  Vector<RefCountedPtr<EBFasterFR> > m_eb_fast_fr;
   Vector<RefCountedPtr<EBLevelRedist> > m_level_redist;
   Vector<RefCountedPtr<EBCoarToFineRedist> > m_coar_to_fine_redist;
   Vector<RefCountedPtr<EBCoarToCoarRedist> > m_coar_to_coar_redist;
@@ -189,7 +185,6 @@ protected:
   void define_ebpwl_interp(const int a_lmin);                      // Define interpolator for piecewise interpolation
   void define_ebmg_interp(const int a_lmin);                       // Define interpolator used for e.g. multigrid
   void define_flux_reg(const int a_lmin, const int a_regsize);     // Define flux register
-  void define_eb_fast_fr(const int a_lmin, const int a_regsize);   // Define EBFastFR
   void define_redist_oper(const int a_lmin, const int a_regsize);  // Define redistribution (phase::gas only)
   void define_gradsten(const int a_lmin);                          // Make stencils for computing gradients
   void define_copier(const int a_lmin);                            // Make stencils for copier

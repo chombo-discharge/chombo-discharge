@@ -721,11 +721,6 @@ public:
   */
   virtual Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg(const std::string a_realm, const phase::which_phase a_phase);
 
-    /*!
-    @brief Get flux register
-  */
-  virtual Vector<RefCountedPtr<EBFasterFR> >&  get_eb_fast_fr(const std::string a_realm, const phase::which_phase a_phase);
-
   /*!
     @brief Get redistribution
   */
