@@ -11,8 +11,6 @@
 #ifndef _ebconductivityopfactory_h_
 #define _ebconductivityopfactory_h_
 
-#include "EBFasterFR.H"
-
 #include "REAL.H"
 #include "Box.H"
 #include "FArrayBox.H"
@@ -51,7 +49,7 @@ public:
   //! A and B coefficients.
   ebconductivityopfactory(const Vector<EBLevelGrid>&                                  a_eblgs,
                           const Vector<RefCountedPtr<EBQuadCFInterp> >&               a_quadCFI,
-			  const Vector<RefCountedPtr<EBFasterFR> >&                   a_fastFR,
+			  const Vector<RefCountedPtr<EBFluxRegister> >&               a_fastFR,
                           const Real&                                                 a_alpha,
                           const Real                                         &        a_beta,
                           const Vector<RefCountedPtr<LevelData<EBCellFAB> > >&        a_acoef,
@@ -161,7 +159,7 @@ protected:
   int                                                  m_botdrop;
   Vector<EBLevelGrid>                                  m_eblgs;
   Vector<RefCountedPtr<EBQuadCFInterp> >               m_quadCFI;
-  Vector<RefCountedPtr<EBFasterFR> >                   m_fastFR;
+  Vector<RefCountedPtr<EBFluxRegister> >               m_fastFR;
   Real                                                 m_alpha;
   Real                                                 m_beta;
 

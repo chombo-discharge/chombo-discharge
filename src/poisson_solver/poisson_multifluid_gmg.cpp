@@ -488,8 +488,8 @@ void poisson_multifluid_gmg::register_operators(){
     m_amr->register_operator(s_eb_quad_cfi,     m_realm, phase::solid);
     m_amr->register_operator(s_eb_irreg_interp, m_realm, phase::gas);
     m_amr->register_operator(s_eb_irreg_interp, m_realm, phase::solid);
-    m_amr->register_operator(s_eb_fast_fr,      m_realm, phase::gas);
-    m_amr->register_operator(s_eb_fast_fr,      m_realm, phase::solid);
+    m_amr->register_operator(s_eb_flux_reg,     m_realm, phase::gas);
+    m_amr->register_operator(s_eb_flux_reg,     m_realm, phase::solid);
   }
 }
 
@@ -875,7 +875,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   for (int lvl = 0; lvl <= finest_level; lvl++){
     Vector<EBLevelGrid>                    eblg_phases(nphases);
     Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(nphases);
-    Vector<RefCountedPtr<EBFasterFR> >     fluxreg_phases(nphases);
+    Vector<RefCountedPtr<EBFluxRegister> > fluxreg_phases(nphases);
 
     if(!ebis_gas.isNull()) eblg_phases[phase::gas]   = *(m_amr->get_eblg(m_realm, phase::gas)[lvl]);
     if(!ebis_sol.isNull()) eblg_phases[phase::solid] = *(m_amr->get_eblg(m_realm, phase::solid)[lvl]);
@@ -883,8 +883,8 @@ void poisson_multifluid_gmg::setup_operator_factory(){
     if(!ebis_gas.isNull()) quadcfi_phases[phase::gas]   = (m_amr->get_old_quadcfi(m_realm, phase::gas)[lvl]);
     if(!ebis_sol.isNull()) quadcfi_phases[phase::solid] = (m_amr->get_old_quadcfi(m_realm, phase::solid)[lvl]);
 
-    if(!ebis_gas.isNull()) fluxreg_phases[phase::gas]   = (m_amr->get_eb_fast_fr(m_realm, phase::gas)[lvl]);
-    //    if(!ebis_sol.isNull()) fluxreg_phases[phase::solid] = (m_amr->get_eb_fast_fr(m_realm, phase::solid)[lvl]);
+    if(!ebis_gas.isNull()) fluxreg_phases[phase::gas]   = (m_amr->get_flux_reg(m_realm, phase::gas)[lvl]);
+    if(!ebis_sol.isNull()) fluxreg_phases[phase::solid] = (m_amr->get_flux_reg(m_realm, phase::solid)[lvl]);
     
     mflg[lvl].define(m_mfis, eblg_phases);
     mfquadcfi[lvl].define(quadcfi_phases);

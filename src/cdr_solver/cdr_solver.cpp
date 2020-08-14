@@ -1429,15 +1429,12 @@ void cdr_solver::register_operators(){
   else{
     m_amr->register_operator(s_eb_coar_ave,     m_realm, m_phase);
     m_amr->register_operator(s_eb_quad_cfi,     m_realm, m_phase);
-    m_amr->register_operator(s_eb_fast_fr,      m_realm, m_phase);
     m_amr->register_operator(s_eb_fill_patch,   m_realm, m_phase);
     m_amr->register_operator(s_eb_pwl_interp,   m_realm, m_phase);
     m_amr->register_operator(s_eb_flux_reg,     m_realm, m_phase);
     m_amr->register_operator(s_eb_redist,       m_realm, m_phase);
     m_amr->register_operator(s_eb_irreg_interp, m_realm, m_phase);
     m_amr->register_operator(s_eb_noncons_div,  m_realm, m_phase);
-
-
   }
 }
 

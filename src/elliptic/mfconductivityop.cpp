@@ -130,7 +130,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
     }
 
 
-    RefCountedPtr<EBFasterFR> fastFR;
+    RefCountedPtr<EBFluxRegister> fastFR;
     RefCountedPtr<EBQuadCFInterp> quadcfi;
     if(a_has_coar){
       quadcfi = a_quadcfi.get_quadcfi_ptr(iphase);

@@ -11,6 +11,7 @@
 #include "LoadBalance.H"
 #include "EBArith.H"
 #include "EBAMRPoissonOp.H"
+#include "EBFastFluxRegister.H"
 
 #include "ebconductivityop.H"
 #include "EBQuadCFInterp.H"
@@ -44,7 +45,7 @@ ebconductivityop(const EBLevelGrid &                                  a_eblgFine
                  const EBLevelGrid &                                  a_eblgCoar,
                  const EBLevelGrid &                                  a_eblgCoarMG,
                  const RefCountedPtr<EBQuadCFInterp>&                 a_quadCFI,
-		 const RefCountedPtr<EBFasterFR>&                     a_fastFR,
+		 const RefCountedPtr<EBFluxRegister>&                 a_fastFR,
                  const RefCountedPtr<ConductivityBaseDomainBC>&       a_domainBC,
                  const RefCountedPtr<ConductivityBaseEBBC>&           a_ebBC,
                  const Real    &                                      a_dx,
@@ -694,7 +695,7 @@ defineStencils()
     {
       int ncomp = 1;
       if(m_ext_fastFR.isNull()){
-	m_fastFR = RefCountedPtr<EBFasterFR> (new EBFasterFR(m_eblgFine, m_eblg, m_refToFine, ncomp, s_forceNoEBCF));
+	m_fastFR = RefCountedPtr<EBFluxRegister> (new EBFastFluxRegister(m_eblgFine, m_eblg, m_refToFine, ncomp, s_forceNoEBCF));
       }
       else{
 	m_fastFR = m_ext_fastFR;
@@ -702,7 +703,7 @@ defineStencils()
       m_hasEBCF = m_fastFR->hasEBCF();
     }
   else{
-    m_fastFR = RefCountedPtr<EBFasterFR>();
+    m_fastFR = RefCountedPtr<EBFluxRegister>();
   }
    defineEBCFStencils();
    defineColorStencils(sideBoxLo, sideBoxHi);
@@ -2428,7 +2429,7 @@ reflux(LevelData<EBCellFAB>& a_residual,
 //-----------------------------------------------------------------------
 void
 ebconductivityop::
-incrementFRCoar(EBFastFR&             a_fluxReg,
+incrementFRCoar(EBFluxRegister&             a_fluxReg,
                 const LevelData<EBCellFAB>& a_phiFine,
                 const LevelData<EBCellFAB>& a_phi)
 {
@@ -2668,7 +2669,7 @@ getFluxRegOnly(EBFaceFAB&                    a_fluxCentroid,
 //-----------------------------------------------------------------------
 void
 ebconductivityop::
-incrementFRFine(EBFastFR&             a_fluxReg,
+incrementFRFine(EBFluxRegister&             a_fluxReg,
                 const LevelData<EBCellFAB>& a_phiFine,
                 const LevelData<EBCellFAB>& a_phi,
                 AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)

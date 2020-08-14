@@ -10,7 +10,7 @@
 #define _MFFastFluxReg_H_
 
 #include <RefCountedPtr.H>
-#include <EBFasterFR.H>
+#include <EBFluxRegister.H>
 
 /*!
   @brief Class for filling ghost cells alà EBFasterFR for multiphase
@@ -35,35 +35,35 @@ public:
   /*!
     @brief Full constructor. Calls define
   */
-  MFFastFluxReg(const Vector<RefCountedPtr<EBFasterFR> >& a_fastfr){
+  MFFastFluxReg(const Vector<RefCountedPtr<EBFluxRegister> >& a_fastfr){
     this->define(a_fastfr);
   }
 
   /*!
     @brief Define function
   */
-  void define(const Vector<RefCountedPtr<EBFasterFR> >& a_fastfr){
+  void define(const Vector<RefCountedPtr<EBFluxRegister> >& a_fastfr){
     m_fastfr = a_fastfr;
   }
 
   /*!
     @brief Get interpolation utility
   */
-  const RefCountedPtr<EBFasterFR>& get_fastfr_ptr(const int a_phase) const {
+  const RefCountedPtr<EBFluxRegister>& get_fastfr_ptr(const int a_phase) const {
     return m_fastfr[a_phase];
   }
 
   /*!
     @brief get interpolation utility for phase
   */
-  EBFasterFR& get_fastfr(const int a_phase) {
+  EBFluxRegister& get_fastfr(const int a_phase) {
     return *m_fastfr[a_phase];
   }
 
   /*!
     @brief get interpolation utility for phase
   */
-  const EBFasterFR& get_fastfr(const int a_phase) const {
+  const EBFluxRegister& get_fastfr(const int a_phase) const {
     return *m_fastfr[a_phase];
   }
   
@@ -73,7 +73,7 @@ protected:
   /*!
     @brief Interpolation for each phase. 
   */
-  Vector<RefCountedPtr<EBFasterFR> > m_fastfr;
+  Vector<RefCountedPtr<EBFluxRegister> > m_fastfr;
   
 };
 

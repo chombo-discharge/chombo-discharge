@@ -43,7 +43,6 @@
 #include "ConductivityBaseDomainBC.H"
 #include "NamespaceHeader.H"
 
-#include "EBFasterFR.H"
 
 
 #if CH_SPACEDIM==2
@@ -96,7 +95,7 @@ class ebconductivityop: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
                    const EBLevelGrid &                                  a_eblgCoar,
                    const EBLevelGrid &                                  a_eblgCoarMG,
                    const RefCountedPtr<EBQuadCFInterp>&                 a_quadCFI,
-		   const RefCountedPtr<EBFasterFR>&                     a_fastFR,
+		   const RefCountedPtr<EBFluxRegister>&                 a_fastFR,
                    const RefCountedPtr<ConductivityBaseDomainBC>&       a_domainBC,
                    const RefCountedPtr<ConductivityBaseEBBC>&           a_ebBC,
                    const Real    &                                      a_dx,
@@ -564,7 +563,7 @@ protected:
   const IntVect                   m_ghostCellsRHS;
 
   RefCountedPtr<EBQuadCFInterp>   m_quadCFIWithCoar;
-  RefCountedPtr<EBFastFR>         m_ext_fastFR;
+  RefCountedPtr<EBFluxRegister>   m_ext_fastFR;
 
   EBLevelGrid                     m_eblg;
   EBLevelGrid                     m_eblgFine;
@@ -630,7 +629,7 @@ protected:
   LayoutData<CFIVS> m_hiCFIVS[SpaceDim];
 
   //flux register with finer level
-  RefCountedPtr<EBFasterFR>       m_fastFR;
+  RefCountedPtr<EBFluxRegister>       m_fastFR;
   //special mg objects for when we do not have
   //a coarser level or when the refinement to coarse
   //is greater than two
@@ -648,11 +647,11 @@ protected:
 
 private:
 
-  void incrementFRCoar(EBFastFR&                   a_fluxReg,
+  void incrementFRCoar(EBFluxRegister&             a_fluxReg,
                        const LevelData<EBCellFAB>& a_phiFine,
                        const LevelData<EBCellFAB>& a_phi);
 
-  void incrementFRFine(EBFastFR&                   a_fluxReg,
+  void incrementFRFine(EBFluxRegister&             a_fluxReg,
                        const LevelData<EBCellFAB>& a_phiFine,
                        const LevelData<EBCellFAB>& a_phi,
                        AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp);
