@@ -872,7 +872,7 @@ Vector<RefCountedPtr<EBFluxRegister> >&  phase_realm::get_flux_reg() {
   return m_flux_reg;
 }
 
-Vector<RefCountedPtr<EBFastFR> >&  phase_realm::get_eb_fast_fr() {
+Vector<RefCountedPtr<EBFasterFR> >&  phase_realm::get_eb_fast_fr() {
   if(!this->query_operator(s_eb_fast_fr)) MayDay::Abort("phase_realm::get_eb_fast_fr - operator not registered!");
 
   return m_eb_fast_fr;

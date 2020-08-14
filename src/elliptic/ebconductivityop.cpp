@@ -44,7 +44,7 @@ ebconductivityop(const EBLevelGrid &                                  a_eblgFine
                  const EBLevelGrid &                                  a_eblgCoar,
                  const EBLevelGrid &                                  a_eblgCoarMG,
                  const RefCountedPtr<EBQuadCFInterp>&                 a_quadCFI,
-		 const RefCountedPtr<EBFastFR>&                       a_fastFR,
+		 const RefCountedPtr<EBFasterFR>&                     a_fastFR,
                  const RefCountedPtr<ConductivityBaseDomainBC>&       a_domainBC,
                  const RefCountedPtr<ConductivityBaseEBBC>&           a_ebBC,
                  const Real    &                                      a_dx,
@@ -694,7 +694,7 @@ defineStencils()
     {
       int ncomp = 1;
       if(m_ext_fastFR.isNull()){
-	m_fastFR = RefCountedPtr<EBFastFR> (new EBFastFR(m_eblgFine, m_eblg, m_refToFine, ncomp, s_forceNoEBCF));
+	m_fastFR = RefCountedPtr<EBFasterFR> (new EBFasterFR(m_eblgFine, m_eblg, m_refToFine, ncomp, s_forceNoEBCF));
       }
       else{
 	m_fastFR = m_ext_fastFR;
@@ -702,7 +702,7 @@ defineStencils()
       m_hasEBCF = m_fastFR->hasEBCF();
     }
   else{
-    m_fastFR = RefCountedPtr<EBFastFR>();
+    m_fastFR = RefCountedPtr<EBFasterFR>();
   }
    defineEBCFStencils();
    defineColorStencils(sideBoxLo, sideBoxHi);

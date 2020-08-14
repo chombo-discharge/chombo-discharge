@@ -237,7 +237,7 @@ Vector<RefCountedPtr<EBFluxRegister> >&  realm::get_flux_reg(const phase::which_
   return m_realms[a_phase]->get_flux_reg();
 }
 
-Vector<RefCountedPtr<EBFastFR> >& realm::get_eb_fast_fr(const phase::which_phase a_phase){
+Vector<RefCountedPtr<EBFasterFR> >& realm::get_eb_fast_fr(const phase::which_phase a_phase){
   return m_realms[a_phase]->get_eb_fast_fr();
 }
 

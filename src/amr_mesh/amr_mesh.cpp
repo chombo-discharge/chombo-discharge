@@ -1959,7 +1959,7 @@ Vector<RefCountedPtr<EBFluxRegister> >&  amr_mesh::get_flux_reg(const std::strin
   return m_realms[a_realm]->get_flux_reg(a_phase);
 }
 
-Vector<RefCountedPtr<EBFastFR> >& amr_mesh::get_eb_fast_fr(const std::string a_realm, const phase::which_phase a_phase){
+Vector<RefCountedPtr<EBFasterFR> >& amr_mesh::get_eb_fast_fr(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_eb_fast_fr(a_phase);
 }
 

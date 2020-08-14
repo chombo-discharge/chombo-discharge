@@ -639,7 +639,7 @@ void eddington_sp1::setup_operator_factory(){
   const Vector<EBISLayout>& ebisl        = m_amr->get_ebisl(m_realm, m_phase);
   
   const Vector<RefCountedPtr<EBQuadCFInterp> >& quadcfi  = m_amr->get_old_quadcfi(m_realm, m_phase);
-  const Vector<RefCountedPtr<EBFastFR> >& fastFR         = m_amr->get_eb_fast_fr(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBFasterFR> >& fastFR       = m_amr->get_eb_fast_fr(m_realm, m_phase);
 
   Vector<EBLevelGrid> levelgrids;
 

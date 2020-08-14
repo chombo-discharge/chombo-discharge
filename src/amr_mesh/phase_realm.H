@@ -21,6 +21,7 @@
 #include "particle_container.H"
 #include "EBGhostCloud.H"
 #include "noncons_div.H"
+#include "EBFasterFR.H"
 
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
@@ -106,7 +107,7 @@ public:
   Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp();
   Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp();
   Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg();
-  Vector<RefCountedPtr<EBFastFR> >&  get_eb_fast_fr();
+  Vector<RefCountedPtr<EBFasterFR> >&  get_eb_fast_fr();
   Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist();
   Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist();
   Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist();
@@ -163,7 +164,7 @@ protected:
   Vector<RefCountedPtr<EBPWLFineInterp> > m_pwl_interp;
   Vector<RefCountedPtr<EBMGInterp> > m_ebmg_interp;
   Vector<RefCountedPtr<EBFluxRegister> > m_flux_reg;
-  Vector<RefCountedPtr<EBFastFR> > m_eb_fast_fr;
+  Vector<RefCountedPtr<EBFasterFR> > m_eb_fast_fr;
   Vector<RefCountedPtr<EBLevelRedist> > m_level_redist;
   Vector<RefCountedPtr<EBCoarToFineRedist> > m_coar_to_fine_redist;
   Vector<RefCountedPtr<EBCoarToCoarRedist> > m_coar_to_coar_redist;

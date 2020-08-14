@@ -875,7 +875,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   for (int lvl = 0; lvl <= finest_level; lvl++){
     Vector<EBLevelGrid>                    eblg_phases(nphases);
     Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(nphases);
-    Vector<RefCountedPtr<EBFastFR> >       fluxreg_phases(nphases);
+    Vector<RefCountedPtr<EBFasterFR> >     fluxreg_phases(nphases);
 
     if(!ebis_gas.isNull()) eblg_phases[phase::gas]   = *(m_amr->get_eblg(m_realm, phase::gas)[lvl]);
     if(!ebis_sol.isNull()) eblg_phases[phase::solid] = *(m_amr->get_eblg(m_realm, phase::solid)[lvl]);

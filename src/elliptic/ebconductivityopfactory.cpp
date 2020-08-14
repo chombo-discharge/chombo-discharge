@@ -75,7 +75,7 @@ int ebconductivityopfactory::refToFiner(const ProblemDomain& a_domain) const {
 
 ebconductivityopfactory:: ebconductivityopfactory(const Vector<EBLevelGrid>&                                  a_eblgs,
 						  const Vector<RefCountedPtr<EBQuadCFInterp> >&               a_quadCFI,
-						  const Vector<RefCountedPtr<EBFastFR> >&                     a_fastFR,
+						  const Vector<RefCountedPtr<EBFasterFR> >&                   a_fastFR,
 						  const Real&                                                 a_alpha,
 						  const Real&                                                 a_beta,
 						  const Vector<RefCountedPtr<LevelData<EBCellFAB> > >&        a_acoef,
@@ -241,7 +241,7 @@ ebconductivityop* ebconductivityopfactory::MGnewOp(const ProblemDomain& a_domain
   EBLevelGrid eblgMGLevel;
   EBLevelGrid eblgCoarMG;
   RefCountedPtr<EBQuadCFInterp> quadCFI; //only defined if on an amr level
-  RefCountedPtr<EBFastFR> fastFR;
+  RefCountedPtr<EBFasterFR> fastFR;
   Real dxCoar = 1.0;
   dxCoar *= -1.0;
   //  int refToDepth = 1;
