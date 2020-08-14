@@ -61,6 +61,14 @@ protected:
 		      const int&               a_idir,
 		      const Side::LoHiSide&    a_sd);
 
+  /*!
+    @brief Define masks
+  */
+  void defineMasks();
+
+  BoxLayoutData<FArrayBox> m_coFiMask[2*SpaceDim];
+  LevelData<FArrayBox> m_coarMask[2*SpaceDim];
+
 private:
   
   void operator= (const EBFasterFR& out){
