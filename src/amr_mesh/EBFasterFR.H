@@ -12,8 +12,9 @@
 
 /*!
   @brief Class that optimizes some EB-related operations of EBFastFR
+  @details This class provides a much-need optimization to EBFastFR which was painfully in the defineSetsAndIterators
+  routine. 
 */
-
 class EBFasterFR : public EBFastFR {
 public:
   
@@ -69,7 +70,7 @@ protected:
   /*!
     @bnrief This is a mask for describing which coar cells boarder the CFIVS
   */
-  LevelData<FArrayBox> m_coarMask[2*SpaceDim];
+  LayoutData<IntVectSet> m_coarCFIVS[2*SpaceDim];
 
 private:
   

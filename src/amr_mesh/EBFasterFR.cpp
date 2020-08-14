@@ -8,6 +8,9 @@
 #include "EBFasterFR.H"
 #include "NeighborIterator.H"
 
+#define USE_FAST_EBFR 0
+
+
 EBFasterFR::EBFasterFR(){
 
 }
@@ -37,22 +40,15 @@ void EBFasterFR::define(const EBLevelGrid&       a_eblgFine,
   m_nComp    = a_nvar;
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
-  if (!m_eblgFine.coarsenable(a_refRat))
-    {
-      MayDay::Error("EBFastFR::define: dbl not coarsenable by refrat");
-    }
+  if (!m_eblgFine.coarsenable(a_refRat)){
+    MayDay::Error("EBFasterFR::define: dbl not coarsenable by refrat");
+  }
 
   coarsen(m_eblgCoFi, a_eblgFine, a_refRat);
   m_eblgCoFi.getEBISL().setMaxRefinementRatio(a_refRat, m_eblgCoFi.getEBIS());
   m_reverseCopier.ghostDefine(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(),m_eblgCoar.getDomain(),IntVect::Unit);
 
-#if (CH_SPACEDIM == 2)
-  m_nrefdmo = m_refRat;
-#elif (CH_SPACEDIM == 3)
-  m_nrefdmo = m_refRat*m_refRat;
-#else
-  bogus spacedim;
-#endif
+  m_nrefdmo = pow(m_refRat, SpaceDim-1);;
 
   m_levelFluxReg = new LevelFluxRegister();
 
@@ -61,26 +57,27 @@ void EBFasterFR::define(const EBLevelGrid&       a_eblgFine,
                          a_eblgCoar.getDBL(),
                          a_eblgFine.getDomain(),
                          a_refRat, a_nvar);
-  if (a_forceNoEBCF)
-    {
-      m_hasEBCF = false;
-    }
-  else
-    {
-      m_hasEBCF = computeHasEBCF();
-    }
+  if (a_forceNoEBCF){
+    m_hasEBCF = false;
+  }
+  else{
+    m_hasEBCF = computeHasEBCF();
+  }
 
   //if no EBCF--nothing happens here but calls to level flux register
-  if (m_hasEBCF)
-    {
-      defineMasks();
-      fastDefineSetsAndIterators();
-      defineBuffers();
-    }
+  if (m_hasEBCF){
+#if USE_FAST_EBFR
+    defineMasks();
+    fastDefineSetsAndIterators();
+#else
+    defineSetsAndIterators();
+#endif
+    defineBuffers();
+  }
+  
   //set all registers to zero to start.
   setToZero();
   m_isDefined = true;
-  //  pout() << "leaving define" << endl;
 }
 
 void EBFasterFR::fastDefineSetsAndIterators(){
@@ -88,7 +85,8 @@ void EBFasterFR::fastDefineSetsAndIterators(){
   
   for (int idir = 0; idir < SpaceDim; idir++){
     for (SideIterator sit; sit.ok(); ++sit){
-      int iindex = index(idir, sit());
+      const int iindex = index(idir, sit());
+      
       m_setsCoFi[iindex].define(m_eblgCoFi.getDBL());
       m_vofiCoFi[iindex].define(m_eblgCoFi.getDBL());
 
@@ -115,25 +113,15 @@ void EBFasterFR::fastDefineSetsAndIterators(){
       m_vofiCoar[iindex].define(m_eblgCoar.getDBL());
 
       for (DataIterator dit = m_eblgCoar.getDBL().dataIterator(); dit.ok(); ++dit){
-	const Box& boxCoar = m_eblgCoar.getDBL()[dit()];
-	IntVectSet irregIVS = m_eblgCoar.getEBISL()[dit()].getIrregIVS(boxCoar);
+	const Box& boxCoar        = m_eblgCoar.getDBL()[dit()];
+	const IntVectSet irregIVS = m_eblgCoar.getEBISL()[dit()].getIrregIVS(boxCoar);
 	Vector<IntVectSet>  cfIVSVec;
-	int iindex = index(idir, sit());
-#if 0 // original code
-	getCFIVSSubset(cfIVSVec, boxCoar, m_eblgCoFi.getDBL(), idir, sit());
-#else
-	IntVectSet myIVS = IntVectSet();
-	FArrayBox& coarMask = m_coarMask[iindex][dit()];
-	for (BoxIterator bit(boxCoar); bit.ok(); ++bit){
-	  if(coarMask(bit()) > 0.0){
-	    myIVS |= bit();
-	  }
-	}
 	cfIVSVec.resize(0);
-	if(!myIVS.isEmpty()){
-	  cfIVSVec.push_back(myIVS);
-	}
-#endif
+
+	// Add CFIVS identification from mask. 
+	const IntVectSet& myIVS = m_coarCFIVS[iindex][dit()];
+	if(!myIVS.isEmpty()) cfIVSVec.push_back(myIVS);
+
 	const EBGraph& ebgraphCoar =  m_eblgCoar.getEBISL()[dit()].getEBGraph();
 	(m_setsCoar[iindex])[dit()].resize(cfIVSVec.size());
 	(m_vofiCoar[iindex])[dit()].resize(cfIVSVec.size());
@@ -188,8 +176,10 @@ void EBFasterFR::defineMasks(){
       const int iindex = index(idir, sit());
 
       // Define the coar mask in this direction.
-      LevelData<FArrayBox>& coarMask = m_coarMask[iindex];
+      LevelData<FArrayBox> coarMask;
+      LayoutData<IntVectSet>& coarCFIVS = m_coarCFIVS[iindex];
       coarMask.define(gridsCoar, ncomp, IntVect::Zero);
+      coarCFIVS.define(gridsCoar);
 
       // Coar mask is 0, we will copy from the coFiMask and into this one. 
       for (DataIterator dit = gridsCoar.dataIterator(); dit.ok(); ++dit){
@@ -220,70 +210,16 @@ void EBFasterFR::defineMasks(){
       // Copy CoFi mask to coarse level. But this only copies valid cells, *sigh*
       coFiMask.addTo(Interval(0,0), coarMask, Interval(0,0), m_eblgCoar.getDomain());
 
-#if 0 // Dummy check
+      // Go through the mask and set the CFIVS
       for (DataIterator dit = gridsCoar.dataIterator(); dit.ok(); ++dit){
-	const FArrayBox& coarBoxMask = coarMask[dit()];
-	const Box bx = gridsCoar[dit()];
+	const Box coarBox = gridsCoar[dit()];
+	IntVectSet& cfivs = coarCFIVS[dit()];
 
-	for (BoxIterator bit(bx); bit.ok(); ++bit){
-	  const IntVect iv = bit();
-	  if(coarBoxMask(iv, 0) > 0.0){
-	    std::cout << "hoozah" << std::endl;
-	  }
+	cfivs.makeEmpty();
+	for (BoxIterator bit(coarBox); bit.ok(); ++bit){
+	  if(coarMask[dit()](bit(), icomp) > 0.0) cfivs |= bit();
 	}
       }
-#endif
-    }
-  }
-}
-
-void EBFasterFR::getCFIVSSubset(Vector<IntVectSet>&      a_cfivsCoFi,
-				const Box&               a_subreCoar,
-				const DisjointBoxLayout& a_layouCoFi,
-				const int&               a_idir,
-				const Side::LoHiSide&    a_sd){
-
-  a_cfivsCoFi.resize(0);
-  for (LayoutIterator lito = a_layouCoFi.layoutIterator(); lito.ok(); ++lito){
-    const Box& gridCoFiO = a_layouCoFi[lito()];
-    //the - 1 is due to the adjacent cell box thing
-    if (gridCoFiO.bigEnd(0) < a_subreCoar.smallEnd(0) - 1 ){
-      //can skip rest cuz we haven't gotten to something interesting
-      continue;
-    }
-
-    Box cfboxCoFi = adjCellBox(gridCoFiO, a_idir, a_sd, 1);
-
-    //only want the cells within the input subregion
-    cfboxCoFi &= a_subreCoar;
-
-    IntVectSet ivsCoFi(cfboxCoFi);
-    for (LayoutIterator liti = a_layouCoFi.layoutIterator(); liti.ok(); ++liti){
-      const Box& gridCoFiI = a_layouCoFi[liti()];
-      if (gridCoFiI.bigEnd(0) < cfboxCoFi.smallEnd(0)){
-	//can skip rest cuz we haven't gotten to something interesting
-	continue;
-      }
-
-      //remove from the set boxes that overlap on the own grid
-      //(fine-fine interface points)
-      ivsCoFi -= gridCoFiI;
-
-      if ((gridCoFiI.smallEnd(0) > cfboxCoFi.bigEnd(0)) || ivsCoFi.isEmpty()){
-	//can break out of loop, since we know that the smallEnd
-	// of all the remaining boxes are lexigraphically beyond this ghosted box.
-	break;
-      }
-    }
-    if (!ivsCoFi.isEmpty()){
-      a_cfivsCoFi.push_back(ivsCoFi);
-    }
-
-    //the + 1 is due to the adjacent cell box thing
-    if (gridCoFiO.smallEnd(0) > a_subreCoar.bigEnd(0) + 1 ){
-      //can break out of loop, since we know that the smallEnd
-      // of all the remaining boxes are lexigraphically beyond this ghosted box.
-      break;
     }
   }
 }
