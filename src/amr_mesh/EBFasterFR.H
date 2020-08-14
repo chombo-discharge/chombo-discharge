@@ -45,6 +45,22 @@ public:
 	      const int&               a_nvar,
 	      const bool               a_forceNoEBCF = false);
 
+protected:
+
+  /*!
+    @brief Mucho faster version than the one in EBFastFR
+  */
+  void fastDefineSetsAndIterators();
+
+  /*!
+    @brief Get faster CFIVS stuff
+  */
+  void getCFIVSSubset(Vector<IntVectSet>&      a_cfivsCoFi,
+		      const Box&               a_subreCoar,
+		      const DisjointBoxLayout& a_layouCoFi,
+		      const int&               a_idir,
+		      const Side::LoHiSide&    a_sd);
+
 private:
   
   void operator= (const EBFasterFR& out){
