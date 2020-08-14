@@ -119,7 +119,21 @@ void EBFasterFR::fastDefineSetsAndIterators(){
 	IntVectSet irregIVS = m_eblgCoar.getEBISL()[dit()].getIrregIVS(boxCoar);
 	Vector<IntVectSet>  cfIVSVec;
 	int iindex = index(idir, sit());
+#if 0 // original code
 	getCFIVSSubset(cfIVSVec, boxCoar, m_eblgCoFi.getDBL(), idir, sit());
+#else
+	IntVectSet myIVS = IntVectSet();
+	FArrayBox& coarMask = m_coarMask[iindex][dit()];
+	for (BoxIterator bit(boxCoar); bit.ok(); ++bit){
+	  if(coarMask(bit()) > 0.0){
+	    myIVS |= bit();
+	  }
+	}
+	cfIVSVec.resize(0);
+	if(!myIVS.isEmpty()){
+	  cfIVSVec.push_back(myIVS);
+	}
+#endif
 	const EBGraph& ebgraphCoar =  m_eblgCoar.getEBISL()[dit()].getEBGraph();
 	(m_setsCoar[iindex])[dit()].resize(cfIVSVec.size());
 	(m_vofiCoar[iindex])[dit()].resize(cfIVSVec.size());
@@ -139,6 +153,12 @@ void EBFasterFR::fastDefineSetsAndIterators(){
 
 void EBFasterFR::defineMasks(){
   CH_TIME("EBFasterFR::defineMasks");
+
+  // TLDR: This code computes the coarse cells (i.e. mask) on the outside of the CFIVS on the coarse grid.
+  //       We do this by using a mask on the CoFi grid. The boxes on that grid are grown by 1 cell in each direction
+  //       and we make a BoxLayout<FArrayBox> that holds a value of 1 outside the CFIVS and 0 elsewhere. We set the
+  //       mask on the coarse grid to 0, and then add the CoFi BoxLayout to the coarse grid. What we end up with is
+  //       a LevelData<FArrayBox> which is 0 on all cells except the cells that are on the coarse side of the CFIVS. 
 
   const int icomp = 0;
   const int ncomp = 1;

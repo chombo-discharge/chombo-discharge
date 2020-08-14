@@ -66,7 +66,9 @@ protected:
   */
   void defineMasks();
 
-  BoxLayoutData<FArrayBox> m_coFiMask[2*SpaceDim];
+  /*!
+    @bnrief This is a mask for describing which coar cells boarder the CFIVS
+  */
   LevelData<FArrayBox> m_coarMask[2*SpaceDim];
 
 private:
