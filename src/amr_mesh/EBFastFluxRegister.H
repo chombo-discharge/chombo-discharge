@@ -9,6 +9,7 @@
 #define _EBFastFluxRegister_H_
 
 #include "EBFasterFR.H"
+#include "EBFluxRegister.H"
 
 class EBCoarToFineRedist;
 class EBCoarToCoarRedist;
@@ -16,7 +17,7 @@ class EBCoarToCoarRedist;
 /*!
   @brief Class that does refluxing and interaction with redistribution classes. 
 */
-class EBFastFluxRegister : public EBFasterFR {
+class EBFastFluxRegister : public EBFluxRegister, EBFasterFR {
 public:
 
   
@@ -57,6 +58,7 @@ public:
 	      const EBIndexSpace*      ebisPtr,
 	      const bool               a_forceNoEBCF = false);
 
+#if 0
   /*!
     @brief Increments the register with data from coarseFlux, multiplied by scale.
     Increment coarse buffer with the area-weighted sum
@@ -213,9 +215,7 @@ public:
     @brief Check if object is defined or not
   */
   bool isDefined() const;
-
-protected:
-
+#endif
 
 private:
 

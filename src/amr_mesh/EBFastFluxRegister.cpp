@@ -25,8 +25,6 @@ using std::endl;
 #include "NamespaceHeader.H"
 #include "CH_Timer.H"
 
-IntVect ivdebugfr(D_DECL(18, 6, 0));
-
 EBFastFluxRegister::EBFastFluxRegister(){
 
 }
@@ -64,6 +62,7 @@ void EBFastFluxRegister::define(const DisjointBoxLayout& a_gridsFine,
   EBFasterFR::define(eblgFine, eblgCoar, a_nref, a_nvar, a_forceNoEBCF);
 }
 
+#if 0
 void EBFastFluxRegister::incrementCoarseIrregular(const BaseIFFAB<Real>& a_coarFlux,
 						  const Real&            a_scale,
 						  const DataIndex&       a_coarDatInd,
@@ -256,3 +255,4 @@ bool EBFastFluxRegister::copyBIFFToEBFF(EBFaceFAB&             a_dst,
   }
   return (hasCells);
 }
+#endif

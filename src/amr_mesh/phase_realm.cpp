@@ -11,6 +11,7 @@
 #include "EBFastCoarToCoarRedist.H"
 #include "load_balance.H"
 #include "EBFasterFR.H"
+#include "EBFastFluxRegister.H"
 
 #include <EBArith.H>
 
@@ -480,7 +481,7 @@ void phase_realm::define_flux_reg(const int a_lmin, const int a_regsize){
 
 
       if(has_fine){
-	m_flux_reg[lvl] = RefCountedPtr<EBFluxRegister> (new EBFluxRegister(m_grids[lvl+1],
+	m_flux_reg[lvl] = RefCountedPtr<EBFluxRegister> (new EBFastFluxRegister(m_grids[lvl+1],
 									    m_grids[lvl],
 									    m_ebisl[lvl+1],
 									    m_ebisl[lvl],
