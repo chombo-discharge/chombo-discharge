@@ -5,12 +5,9 @@ def write_template(args):
     app_dir = args.plasmac_home + "/" + args.base_dir + "/" + args.app_name
     make_filename = app_dir + "/GNUmakefile"
     makef = open(make_filename, "w")
-    makef.write("# Chombo and chombo-streamer directories \n")
-    makef.write("PLASMAC_HOME := " + args.plasmac_home + "\n")
-    makef.write("CHOMBO_HOME   := " + args.plasmac_home + "/Chombo/lib\n")
     
     # Make rules
-    makef.write("\n")
+    makef.write("export CHOMBO_HOME=$(PLASMAC_HOME)/Chombo/lib\n")
     makef.write("include $(CHOMBO_HOME)/mk/Make.defs")
     makef.write("\n")
 
