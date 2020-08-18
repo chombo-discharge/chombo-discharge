@@ -105,47 +105,6 @@ RealVect ito_plasma_air2::random_gaussian(){
   return rad*random_direction();
 }
 
-RealVect ito_plasma_air2::random_direction() const {
-  const Real EPS = 1.E-8;
-#if CH_SPACEDIM==2
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1*x1 + x2*x2;
-  while(r >= 1.0 || r < EPS){
-    x1 = m_udist11(m_rng);
-    x2 = m_udist11(m_rng);
-    r  = x1*x1 + x2*x2;
-  }
-
-  return RealVect(x1,x2)/sqrt(r);
-#elif CH_SPACEDIM==3
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1*x1 + x2*x2;
-  while(r >= 1.0 || r < EPS){
-    x1 = m_udist11(m_rng);
-    x2 = m_udist11(m_rng);
-    r  = x1*x1 + x2*x2;
-  }
-
-  const Real x = 2*x1*sqrt(1-r);
-  const Real y = 2*x2*sqrt(1-r);
-  const Real z = 1 - 2*r;
-
-  return RealVect(x,y,z);
-#endif
-}
-
-RealVect ito_plasma_air2::random_position(const RealVect a_cellCenter, const Real a_dx) const{
-
-  RealVect ret = a_cellCenter;
-  for (int i = 0; i < SpaceDim; i++){
-    ret[i] += 0.5*m_udist11(m_rng)*a_dx;
-  }
-
-  return ret;
-}
-
 Real ito_plasma_air2::compute_alpha(const RealVect a_E) const {
   Real E = a_E.vectorLength();
 
@@ -192,8 +151,10 @@ Vector<Real> ito_plasma_air2::compute_ito_diffusion(const Real         a_time,
 void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
 					       Vector<List<photon>* >&       a_photons,
 					       Vector<List<photon>* >&       a_newPhotons,
-					       const RealVect                a_E,           
-					       const RealVect                a_pos,
+					       const RealVect                a_E,
+					       const RealVect                a_cellPos,
+					       const RealVect                a_bndryCentroid,
+					       const RealVect                a_bndryNormal,
 					       const RealVect                a_lo,
 					       const RealVect                a_hi,
 					       const Real                    a_dx,
@@ -205,28 +166,24 @@ void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_p
   }
 
   if(num_electrons > m_tau_switch){
-    this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_pos, a_dx, a_kappa, a_dt);
+    this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_cellPos, a_bndryCentroid, a_bndryNormal,
+				       a_lo, a_hi, a_dx, a_kappa, a_dt);
   }
   else{
-    this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_pos, a_dx, a_kappa, a_dt);
+    this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_cellPos, a_bndryCentroid, a_bndryNormal,
+				       a_lo, a_hi, a_dx, a_kappa, a_dt);
   }
-
-#if 0
-   // Add a photon that propagates along -y. This is development code!
-  List<photon>& srcPhotons = *a_newPhotons[m_photonZ_idx];
-  const RealVect v = units::s_c0*random_direction();
-  srcPhotons.clear();
-  srcPhotons.add(photon(a_pos, v, m_rte_species[m_photonZ_idx]->get_kappa(a_pos), 1.0));
-#endif
-
-  return;
 }
 
 void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >& a_particles,
 						   Vector<List<photon>* >&       a_photons,
 						   Vector<List<photon>* >&       a_newPhotons,
-						   const RealVect                a_E,           
+						   const RealVect                a_E,
 						   const RealVect                a_pos,
+						   const RealVect                a_bndryCentroid,
+						   const RealVect                a_bndryNormal,
+						   const RealVect                a_lo,
+						   const RealVect                a_hi,
 						   const Real                    a_dx,
 						   const Real                    a_kappa, 
 						   const Real                    a_dt) const{
@@ -258,11 +215,12 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   // New particles
   if(alpha > eta){
     for (int i = 0; i < m_ppc; i++){
-      const RealVect p = (a_kappa < 1.0) ? a_pos : this->random_position(a_pos, a_dx);
+      const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+      
       a_particles[m_electron_idx]->add(ito_particle(1.0*num_comp_particles, p));
       a_particles[m_positive_idx]->add(ito_particle(1.0*num_comp_particles, p));
     }
-    const RealVect p = a_kappa < 1.0 ? a_pos : this->random_position(a_pos, a_dx);
+    const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     a_particles[m_electron_idx]->add(ito_particle(1.0*remainder, p));
     a_particles[m_positive_idx]->add(ito_particle(1.0*remainder, p));
   }
@@ -270,13 +228,13 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   // Photogeneration
   a_newPhotons[m_photonZ_idx]->clear();
 #if CH_SPACEDIM==2
-  const RealVect P = this->random_position(a_pos, a_dx);
+  const RealVect P = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
   const RealVect V = units::s_c0*random_direction();
     
   a_newPhotons[m_photonZ_idx]->add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), num_photoexc));
 #else
   for (int i = 0; i < num_photoexc; i++){
-    const RealVect P = this->random_position(a_pos, a_dx);
+    const RealVect P = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const RealVect V = units::s_c0*random_direction();
 
     a_newPhotons[m_photonZ_idx]->add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), 1.0));
@@ -296,15 +254,19 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 
 }
 
-void ito_plasma_air2::advance_reaction_network_ssa(Vector<List<ito_particle>* >& a_particles,
-						   Vector<List<photon>* >&       a_photons,
-						   Vector<List<photon>* >&       a_newPhotons,
-						   const RealVect                a_E,           
-						   const RealVect                a_pos,
-						   const Real                    a_dx,
-						   const Real                    a_kappa, 
-						   const Real                    a_dt) const{
-}
+  void ito_plasma_air2::advance_reaction_network_ssa(Vector<List<ito_particle>* >& a_particles,
+						     Vector<List<photon>* >&       a_photons,
+						     Vector<List<photon>* >&       a_newPhotons,
+						     const RealVect                a_E,           
+						     const RealVect                a_cellPos,
+						     const RealVect                a_bndryCentroid,
+						     const RealVect                a_bndryNormal,
+						     const RealVect                a_lo,
+						     const RealVect                a_hi,
+						     const Real                    a_dx,
+						     const Real                    a_kappa, 
+						     const Real                    a_dt) const {
+  }
 
 int ito_plasma_air2::poisson_reaction(const Real a_propensity, const Real a_dt) const{
   int value = 0;

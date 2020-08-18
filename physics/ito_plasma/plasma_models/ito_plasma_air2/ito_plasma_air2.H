@@ -48,6 +48,8 @@ namespace physics {
 				    Vector<List<photon>* >&       a_newPhotons,
 				    const RealVect                a_E,           
 				    const RealVect                a_pos,
+				    const RealVect                a_bndryCentroid,
+				    const RealVect                a_normal,
 				    const RealVect                a_lo,
 				    const RealVect                a_hi,
 				    const Real                    a_dx,
@@ -60,10 +62,10 @@ namespace physics {
       Real m_blob_radius;
       Real m_particle_weight;
       int m_num_particles;
-      int m_seed;
+      //      int m_seed;
       RealVect m_blob_center;
-      mutable std::mt19937_64 m_rng;
-      mutable std::uniform_real_distribution<Real> m_udist11;
+      //      mutable std::mt19937_64 m_rng;
+      //      mutable std::uniform_real_distribution<Real> m_udist11;
       mutable std::normal_distribution<Real> m_gauss;
 
       // Indices for species
@@ -90,8 +92,6 @@ namespace physics {
       // Functions for drawing initial particles
       void draw_initial_particles();
       RealVect random_gaussian();
-      RealVect random_direction() const;
-      RealVect random_position(const RealVect a_cellCenter, const Real a_dx) const;
 
       // Zheleznyak photoionization rates
       Real excitation_rates(const Real a_E) const;
@@ -105,7 +105,11 @@ namespace physics {
 					Vector<List<photon>* >&       a_photons,
 					Vector<List<photon>* >&       a_newPhotons,
 					const RealVect                a_E,           
-					const RealVect                a_pos,
+					const RealVect                a_cellPos,
+					const RealVect                a_bndryCentroid,
+					const RealVect                a_bndryNormal,
+					const RealVect                a_lo,
+					const RealVect                a_hi,
 					const Real                    a_dx,
 					const Real                    a_kappa, 
 					const Real                    a_dt) const;
@@ -114,7 +118,11 @@ namespace physics {
 					Vector<List<photon>* >&       a_photons,
 					Vector<List<photon>* >&       a_newPhotons,
 					const RealVect                a_E,           
-					const RealVect                a_pos,
+					const RealVect                a_cellPos,
+					const RealVect                a_bndryCentroid,
+					const RealVect                a_bndryNormal,
+					const RealVect                a_lo,
+					const RealVect                a_hi,
 					const Real                    a_dx,
 					const Real                    a_kappa, 
 					const Real                    a_dt) const;

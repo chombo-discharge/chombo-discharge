@@ -1429,11 +1429,14 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
 	newPhotons[idx] = &bpNew;
       }
 
+      // Dummy stuff for regular cells
       const RealVect lo = -0.5*RealVect::Unit;
       const RealVect hi =  0.5*RealVect::Unit;
+      const RealVect n  = RealVect::Zero;
+      const RealVect c  = RealVect::Zero;
       
       // Call physics
-      m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, lo, hi, a_dx, kappa, a_dt);
+      m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, c, n, lo, hi, a_dx, kappa, a_dt);
     }
   }
 
@@ -1442,7 +1445,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex vof = vofit();
     const IntVect iv   = vof.gridIndex();
-    const RealVect pos = prob_lo + (RealVect(iv) + 0.5*RealVect::Unit + ebisbox.centroid(vof))*dx;
+    const RealVect pos = prob_lo + (RealVect(iv) + 0.5*RealVect::Unit);
     const Real kappa   = ebisbox.volFrac(vof);
     const RealVect e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
     const RealVect n   = ebisbox.normal(vof);
@@ -1478,7 +1481,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
     }
 
     // Call physics.
-    m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, lo, hi, a_dx, kappa, a_dt);
+    m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, ebc, n, lo, hi, a_dx, kappa, a_dt);
   }
 }
 
@@ -1763,8 +1766,6 @@ void ito_plasma_stepper::compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, c
       }
     }
   }
-
-  pout() << a_lo << "\t" << a_hi << endl;
 }
 
 bool ito_plasma_stepper::allCornersInsideEB(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid){

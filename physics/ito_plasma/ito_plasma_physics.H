@@ -13,6 +13,9 @@
 #include <LoHiSide.H>
 #include <List.H>
 
+#include <chrono>
+#include <random>
+
 #include "ito_species.H"
 #include "rte_species.H"
 #include "photon.H"
@@ -26,8 +29,16 @@ namespace physics {
     */
     class ito_plasma_physics {
     public:
-      ito_plasma_physics(){}
-      ~ito_plasma_physics(){}
+      
+      /*!
+	@brief Ctor. Does nothing.
+      */
+      ito_plasma_physics();
+
+      /*!
+	@brief Dtor. Does nothing. 
+      */
+      ~ito_plasma_physics();
 
       /*!
 	@brief Compute Townsend ionization length
@@ -37,37 +48,27 @@ namespace physics {
       /*!
 	@brief Get all species
       */
-      const Vector<RefCountedPtr<ito_species> >& get_ito_species() const { 
-	return m_ito_species; 
-      }
+      const Vector<RefCountedPtr<ito_species> >& get_ito_species() const;
 
       /*!
 	@brief Get all photons
       */
-      const Vector<RefCountedPtr<rte_species> >& get_rte_species() const {
-	return m_rte_species;
-      }
+      const Vector<RefCountedPtr<rte_species> >& get_rte_species() const;
 
       /*!
 	@brief Return number of ion equations
       */
-      int get_num_ito_species() const{
-	return m_ito_species.size();
-      }
+      int get_num_ito_species() const;
 
       /*!
 	@brief Return number of RTE equations
       */
-      int get_num_rte_species() const {
-	return m_rte_species.size();
-      }
+      int get_num_rte_species() const;
 
       /*!
-	@brief Set initial surface charge. Override if you want.
+	@brief Set initial surface charge. Default is 0, override if you want.
       */
-      virtual Real initial_sigma(const Real a_time, const RealVect a_pos) const {
-	return 0.0;
-      }
+      virtual Real initial_sigma(const Real a_time, const RealVect a_pos) const;
 
       /*!
 	@brief Compute ito velocities
@@ -92,7 +93,9 @@ namespace physics {
 					    Vector<List<photon>* >&       a_photons,
 					    Vector<List<photon>* >&       a_newPhotons,
 					    const RealVect                a_E,           
-					    const RealVect                a_pos,
+					    const RealVect                a_cellPos,
+					    const RealVect                a_bndryCentroid,
+					    const RealVect                a_bndryNormal,
 					    const RealVect                a_lo,
 					    const RealVect                a_hi,
 					    const Real                    a_dx,
@@ -101,11 +104,46 @@ namespace physics {
       
     protected:
 
+      int m_seed;
+      mutable std::mt19937_64 m_rng;
+      mutable std::uniform_real_distribution<Real> m_udist11;
+
       Vector<RefCountedPtr<ito_species> > m_ito_species;
       Vector<RefCountedPtr<rte_species> > m_rte_species;
 
       int m_num_ito_species;
       int m_num_rte_species;
+
+      /*!
+	@brief Draw a valid random position somewhere in a cell
+      */
+      RealVect random_position(const RealVect a_pos,
+			       const RealVect a_lo,
+			       const RealVect a_hi,
+			       const RealVect a_bndryCentroid,
+			       const RealVect a_normal,
+			       const Real     a_dx,
+			       const Real     a_kappa) const;
+
+      /*!
+	@brief Draw a random position somewhere in the cube (a_lo, a_hi) such that the position is
+	(pos-bndryCentroid).dotProduct.a_normal > 0, i.e. inside the valid region. 
+      */
+      RealVect random_position(const RealVect a_lo,
+			       const RealVect a_hi,
+			       const RealVect a_bndryCentroid,
+			       const RealVect a_normal) const;
+
+      /*!
+	@brief Return a random position in the cube (a_lo, a_hi);
+      */
+      RealVect random_position(const RealVect a_lo, const RealVect a_hi) const;
+
+
+      /*!
+	@brief Draw a random direction in space
+      */
+      RealVect random_direction() const;
     };
   }
 }
