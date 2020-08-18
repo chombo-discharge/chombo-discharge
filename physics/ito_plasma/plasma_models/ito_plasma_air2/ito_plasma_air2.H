@@ -62,10 +62,7 @@ namespace physics {
       Real m_blob_radius;
       Real m_particle_weight;
       int m_num_particles;
-      //      int m_seed;
       RealVect m_blob_center;
-      //      mutable std::mt19937_64 m_rng;
-      //      mutable std::uniform_real_distribution<Real> m_udist11;
       mutable std::normal_distribution<Real> m_gauss;
 
       // Indices for species
@@ -91,7 +88,6 @@ namespace physics {
 
       // Functions for drawing initial particles
       void draw_initial_particles();
-      RealVect random_gaussian();
 
       // Zheleznyak photoionization rates
       Real excitation_rates(const Real a_E) const;

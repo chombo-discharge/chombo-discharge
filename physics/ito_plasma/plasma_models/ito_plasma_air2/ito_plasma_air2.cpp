@@ -92,17 +92,11 @@ void ito_plasma_air2::draw_initial_particles(){
 
   // Now make the particles
   for (int i = 0; i < particlesPerRank[procID()]; i++){
-    const RealVect pos = m_blob_center + random_gaussian();
+    const RealVect pos = m_blob_center + m_gauss(m_rng)*random_direction();
     
     electrons.add(ito_particle(m_particle_weight, pos));
     positives.add(ito_particle(m_particle_weight, pos));
   }
-}
-
-RealVect ito_plasma_air2::random_gaussian(){
-
-  const Real rad = m_gauss(m_rng);
-  return rad*random_direction();
 }
 
 Real ito_plasma_air2::compute_alpha(const RealVect a_E) const {
