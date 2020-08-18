@@ -1,7 +1,7 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-air2.potential = 2.0E3
+air2.potential = 1.5E3
 air2.basename  = pout
 
 # ====================================================================================================
@@ -11,7 +11,7 @@ amr_mesh.lo_corner       = -500E-6 -500E-6 -500E-6 # Low corner of problem domai
 amr_mesh.hi_corner       =  500E-6  500E-6  500E-6 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 32 32 32    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 4           # Maximum amr depth
+amr_mesh.max_amr_depth   = 3           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -19,8 +19,8 @@ amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 amr_mesh.buffer_size     = 2           # Number of cells between grid levels
 amr_mesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-amr_mesh.blocking_factor = 8           # Default blocking factor (16 in 3D)
-amr_mesh.max_box_size    = 8           # Maximum allowed box size
+amr_mesh.blocking_factor = 16           # Default blocking factor (16 in 3D)
+amr_mesh.max_box_size    = 16           # Maximum allowed box size
 amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
 amr_mesh.ref_rat         = 2 2 2 2 2 2 2 # Refinement ratios
 amr_mesh.num_ghost       = 3           # Number of ghost cells. Default is 3

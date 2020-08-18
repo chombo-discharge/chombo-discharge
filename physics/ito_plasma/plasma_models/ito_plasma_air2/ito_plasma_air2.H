@@ -91,6 +91,7 @@ namespace physics {
       // Zheleznyak photoionization rates
       Real excitation_rates(const Real a_E) const;
       Real sergey_factor(const Real a_O2frac) const;
+      Real photo_rate(const Real a_E) const;
 
       // Electron velocity
       RealVect compute_electron_velocity(const RealVect a_E) const;
@@ -121,6 +122,21 @@ namespace physics {
 					const Real                    a_dx,
 					const Real                    a_kappa, 
 					const Real                    a_dt) const;
+
+      // Add a_num_photons to the list. Photon position is random. 
+      void add_photons(List< photon>& a_photons,
+		       const int      a_num_photons,
+		       const RealVect a_pos,
+		       const RealVect a_lo,
+		       const RealVect a_hi,
+		       const RealVect a_bndryCentroid,
+		       const RealVect a_bndryNormal,
+		       const Real     a_dx,
+		       const Real     a_kappa) const;
+      
+      void add_photoionization(List<ito_particle>& a_electrons,
+			       List<ito_particle>& a_positive,
+			       List<photon>&       a_photons) const;
 
       // Poisson reactions for tau-leaping
       int poisson_reaction(const Real a_propensity, const Real a_dt) const;
@@ -159,4 +175,5 @@ namespace physics {
     };
   }
 }
+
 #endif

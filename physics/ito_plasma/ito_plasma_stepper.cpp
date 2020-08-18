@@ -1736,15 +1736,15 @@ void ito_plasma_stepper::compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, c
       const int otherDir2 = (dir + 2) % SpaceDim;
       corners[0] = plane_point - 0.5*RealVect(BASISV(otherDir1)) - 0.5*RealVect(BASISV(otherDir2));
       corners[1] = plane_point - 0.5*RealVect(BASISV(otherDir1)) + 0.5*RealVect(BASISV(otherDir2));
-      corners[1] = plane_point + 0.5*RealVect(BASISV(otherDir1)) - 0.5*RealVect(BASISV(otherDir2));
-      corners[1] = plane_point + 0.5*RealVect(BASISV(otherDir1)) + 0.5*RealVect(BASISV(otherDir2));
+      corners[2] = plane_point + 0.5*RealVect(BASISV(otherDir1)) - 0.5*RealVect(BASISV(otherDir2));
+      corners[3] = plane_point + 0.5*RealVect(BASISV(otherDir1)) + 0.5*RealVect(BASISV(otherDir2));
 #endif
 
       // Shift corners in direction plane_normal with length base_shift. Keep track of the total
       // displacement of the plane. 
-
       RealVect shift_vector = RealVect::Zero;
       bool allInside = allCornersInsideEB(corners, a_normal, a_centroid);
+
       while(allInside){
 
 	// Shift the corners

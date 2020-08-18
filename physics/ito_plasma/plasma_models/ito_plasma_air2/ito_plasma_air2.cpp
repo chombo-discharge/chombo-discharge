@@ -183,32 +183,34 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 						   const Real                    a_dx,
 						   const Real                    a_kappa, 
 						   const Real                    a_dt) const{
-  const Real volume = pow(a_dx, SpaceDim)*a_kappa;
 
+  // Compute number of electrons
   Real num_electrons = 0;
   for (ListIterator<ito_particle> lit(*a_particles[m_electron_idx]); lit.ok(); ++lit){
     num_electrons += lit().mass();
   }
 
+  // Some parameters
   const Real E       = a_E.vectorLength();
   const Real alpha   = this->compute_alpha(a_E);
   const Real eta     = this->compute_eta(a_E);
   const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
   const Real xfactor = excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
-  
+
+  // Propensity functions
   const Real ionizationProp = alpha*velo*num_electrons;
   const Real recombProp     = eta*velo*num_electrons;
   const Real photoexcProp   = alpha*velo*num_electrons*xfactor;
+  const Real totalProp      = ionizationProp + recombProp + photoexcProp;
 
+  // Number of firings in each reaction channel
   const int num_ionizations = this->poisson_reaction(ionizationProp, a_dt);
   const int num_recomb      = this->poisson_reaction(recombProp, a_dt);
   const int num_photoexc    = this->poisson_reaction(photoexcProp, a_dt);
 
+  // Particle generation
   const int num_comp_particles = num_ionizations/m_ppc;   // Whole stuff
   const int remainder          = num_ionizations % m_ppc; // Rest of the weight goes to last particle
-
-
-  // New particles
   if(alpha > eta){
     for (int i = 0; i < m_ppc; i++){
       const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
@@ -221,48 +223,67 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
     a_particles[m_positive_idx]->add(ito_particle(1.0*remainder, p));
   }
 
-  // Photogeneration
-  a_newPhotons[m_photonZ_idx]->clear();
+
+  // Photogeneration and photoionization
+  this->add_photons(*a_newPhotons[m_photonZ_idx], num_photoexc, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  this->add_photoionization(*a_particles[m_electron_idx], *a_particles[m_positive_idx], *a_photons[m_photonZ_idx]);
+}
+
+
+void ito_plasma_air2::add_photons(List<photon>&  a_photons,
+				  const int      a_num_photons,
+				  const RealVect a_pos,
+				  const RealVect a_lo,
+				  const RealVect a_hi,
+				  const RealVect a_bndryCentroid,
+				  const RealVect a_bndryNormal,
+				  const Real     a_dx,
+				  const Real     a_kappa) const {
+  a_photons.clear();
+
+  // TLDR: 2D code only generates one photon. 
 #if CH_SPACEDIM==2
   const RealVect P = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
   const RealVect V = units::s_c0*random_direction();
     
-  a_newPhotons[m_photonZ_idx]->add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), num_photoexc));
+  a_photons.add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), num_photoexc));
 #else
-  for (int i = 0; i < num_photoexc; i++){
+  for (int i = 0; i < a_num_photons; i++){
     const RealVect P = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const RealVect V = units::s_c0*random_direction();
 
-    a_newPhotons[m_photonZ_idx]->add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), 1.0));
+    a_photons.add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), 1.0));
   }
 #endif
-
-  // Photoionization
-  for (ListIterator<photon> lit(*a_photons[m_photonZ_idx]); lit.ok(); ++lit){
-    const photon& phot = lit();
-    const RealVect pos = phot.position();
-
-    a_particles[m_electron_idx]->add(ito_particle(phot.mass(), pos));
-    a_particles[m_positive_idx]->add(ito_particle(phot.mass(), pos));
-    // a_particles[m_electron_idx]->add(ito_particle(1.0, pos));
-    // a_particles[m_positive_idx]->add(ito_particle(1.0, pos)); 
-  }
-
 }
 
-  void ito_plasma_air2::advance_reaction_network_ssa(Vector<List<ito_particle>* >& a_particles,
-						     Vector<List<photon>* >&       a_photons,
-						     Vector<List<photon>* >&       a_newPhotons,
-						     const RealVect                a_E,           
-						     const RealVect                a_cellPos,
-						     const RealVect                a_bndryCentroid,
-						     const RealVect                a_bndryNormal,
-						     const RealVect                a_lo,
-						     const RealVect                a_hi,
-						     const Real                    a_dx,
-						     const Real                    a_kappa, 
-						     const Real                    a_dt) const {
+void ito_plasma_air2::add_photoionization(List<ito_particle>& a_electrons,
+					  List<ito_particle>& a_positive,
+					  List<photon>&       a_photons) const {
+  
+  for (ListIterator<photon> lit(a_photons); lit.ok(); ++lit){
+    const photon& phot  = lit();
+    const RealVect pos  = phot.position();
+    const Real mass     = phot.mass();
+
+    a_electrons.add(ito_particle(mass, pos));
+    a_positive.add(ito_particle(mass,  pos));
   }
+}
+
+void ito_plasma_air2::advance_reaction_network_ssa(Vector<List<ito_particle>* >& a_particles,
+						   Vector<List<photon>* >&       a_photons,
+						   Vector<List<photon>* >&       a_newPhotons,
+						   const RealVect                a_E,           
+						   const RealVect                a_cellPos,
+						   const RealVect                a_bndryCentroid,
+						   const RealVect                a_bndryNormal,
+						   const RealVect                a_lo,
+						   const RealVect                a_hi,
+						   const Real                    a_dx,
+						   const Real                    a_kappa, 
+						   const Real                    a_dt) const {
+}
 
 int ito_plasma_air2::poisson_reaction(const Real a_propensity, const Real a_dt) const{
   int value = 0;
@@ -293,6 +314,10 @@ Real ito_plasma_air2::excitation_rates(const Real a_E) const{
 
 Real ito_plasma_air2::sergey_factor(const Real a_O2frac) const{
   return 3E-2 + 0.4*pow(a_O2frac, 0.6);
+}
+
+Real ito_plasma_air2::photo_rate(const Real a_E) const {
+  return excitation_rates(a_E)*sergey_factor(m_O2frac)*m_photoi_factor;
 }
 
 ito_plasma_air2::electron::electron(){
