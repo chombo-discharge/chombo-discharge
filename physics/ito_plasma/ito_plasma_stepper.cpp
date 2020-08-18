@@ -8,7 +8,9 @@
 #include "ito_plasma_stepper.H"
 #include "data_ops.H"
 #include "units.H"
-#include "EBArith.H"
+
+#include <EBArith.H>
+#include <PolyGeom.H>
 
 using namespace physics::ito_plasma;
 
@@ -180,7 +182,7 @@ void ito_plasma_stepper::initial_sigma(){
       
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
-	const RealVect pos  = origin + vof.gridIndex()*dx + ebisbox.bndryCentroid(vof)*dx;
+	const RealVect pos  = origin + vof.gridIndex()*dx + 0.5*ebisbox.bndryCentroid(vof)*dx;
 	
 	for (int comp = 0; comp < state.nComp(); comp++){
 	  state(vof, comp) = m_physics->initial_sigma(m_time, pos);
@@ -1426,9 +1428,12 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
 	photons[idx]    = &bp;
 	newPhotons[idx] = &bpNew;
       }
+
+      const RealVect lo = -0.5*RealVect::Unit;
+      const RealVect hi =  0.5*RealVect::Unit;
       
       // Call physics
-      m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, a_dx, kappa, a_dt);
+      m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, lo, hi, a_dx, kappa, a_dt);
     }
   }
 
@@ -1440,6 +1445,16 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
     const RealVect pos = prob_lo + (RealVect(iv) + 0.5*RealVect::Unit + ebisbox.centroid(vof))*dx;
     const Real kappa   = ebisbox.volFrac(vof);
     const RealVect e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
+    const RealVect n   = ebisbox.normal(vof);
+    const RealVect ebc = ebisbox.bndryCentroid(vof);
+
+
+    // Compute a small box that encloses the cut-cell volume
+    RealVect lo = -0.5*RealVect::Unit;
+    RealVect hi =  0.5*RealVect::Unit;
+    if(kappa < 1.0){
+      this->compute_min_valid_box(lo, hi, n, ebc);
+    }
 
     Vector<List<ito_particle>* > particles(num_ito_species);
     Vector<List<photon>* >       photons(num_rte_species);
@@ -1463,7 +1478,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
     }
 
     // Call physics.
-    m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, a_dx, kappa, a_dt);
+    m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, lo, hi, a_dx, kappa, a_dt);
   }
 }
 
@@ -1690,4 +1705,83 @@ bool ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
   }
 
   return ret;
+}
+
+void ito_plasma_stepper::compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid){
+  CH_TIME("ito_plasma_stepper::compute_min_valid_box");
+
+  const int num_segments = 10;
+
+  // Default values
+  a_lo = -0.5*RealVect::Unit;
+  a_hi =  0.5*RealVect::Unit;
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const RealVect plane_normal = -RealVect(BASISV(dir))*sign(sit()); // Direction of the plane that we will "push"
+      const RealVect plane_point  = RealVect::Zero - 0.5*plane_normal;      // Center point on plane
+      const RealVect base_shift   = plane_normal/num_segments;
+
+#if CH_SPACEDIM == 2
+      Vector<RealVect> corners(2);
+      const int otherDir = (dir + 1) % SpaceDim;
+      corners[0] = plane_point - 0.5*RealVect(BASISV(otherDir));
+      corners[1] = plane_point + 0.5*RealVect(BASISV(otherDir));
+#elif CH_SPACEDIM == 3
+      Vector<RealVect> corners(4);
+      const int otherDir1 = (dir + 1) % SpaceDim;
+      const int otherDir2 = (dir + 2) % SpaceDim;
+      corners[0] = plane_point - 0.5*RealVect(BASISV(otherDir1)) - 0.5*RealVect(BASISV(otherDir2));
+      corners[1] = plane_point - 0.5*RealVect(BASISV(otherDir1)) + 0.5*RealVect(BASISV(otherDir2));
+      corners[1] = plane_point + 0.5*RealVect(BASISV(otherDir1)) - 0.5*RealVect(BASISV(otherDir2));
+      corners[1] = plane_point + 0.5*RealVect(BASISV(otherDir1)) + 0.5*RealVect(BASISV(otherDir2));
+#endif
+
+      // Shift corners in direction plane_normal with length base_shift. Keep track of the total
+      // displacement of the plane. 
+
+      RealVect shift_vector = RealVect::Zero;
+      bool allInside = allCornersInsideEB(corners, a_normal, a_centroid);
+      while(allInside){
+
+	// Shift the corners
+	shiftCorners(corners, base_shift);
+	shift_vector += base_shift;
+
+	// Check if shifted corners are inside EB
+	allInside = allCornersInsideEB(corners, a_normal, a_centroid);
+
+	// If they are, we can change some components of a_lo
+	if(allInside) {
+	  if(sit() == Side::Lo){
+	    a_lo[dir] = -0.5 + shift_vector[dir]; 
+	  }
+	  else if(sit() == Side::Hi){
+	    a_hi[dir] = 0.5 + shift_vector[dir];
+	  }
+	}
+      }
+    }
+  }
+
+  pout() << a_lo << "\t" << a_hi << endl;
+}
+
+bool ito_plasma_stepper::allCornersInsideEB(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid){
+  bool ret = true;
+
+  // If any point it outside the EB, i.e. inside the domain boundary, return false. 
+  for (int i = 0; i < a_corners.size(); i++){
+    if(PolyGeom::dot((a_corners[i]-a_centroid), a_normal) > 0.0){
+      ret = false;
+    }
+  }
+
+  return ret;
+}
+
+void ito_plasma_stepper::shiftCorners(Vector<RealVect>& a_corners, const RealVect& a_distance){
+  for(int i = 0; i < a_corners.size(); i++){
+    a_corners[i] += a_distance;
+  }
 }

@@ -200,6 +200,11 @@ namespace physics {
       void sort_domain_photons_by_cell();
       void sort_domain_photons_by_patch();
 
+      // Compute
+      void compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid);
+      bool allCornersInsideEB(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid);
+      void shiftCorners(Vector<RealVect>& a_corners, const RealVect& a_distance);
+
     protected:
 
       std::string m_fluid_realm;     // Realm for Poisson and sigma solver. Defaults to realm::primal
@@ -230,6 +235,7 @@ namespace physics {
 
       EBAMRCellData m_particle_scratch1; // Scratch storage on the particle realm with 1 component
       EBAMRCellData m_particle_scratchD; // Scratch storage on the particle realm with SpaceDim components
+
 
       bool load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
 				       Vector<Vector<Box> >&            a_boxes,

@@ -48,6 +48,8 @@ namespace physics {
 				    Vector<List<photon>* >&       a_newPhotons,
 				    const RealVect                a_E,           
 				    const RealVect                a_pos,
+				    const RealVect                a_lo,
+				    const RealVect                a_hi,
 				    const Real                    a_dx,
 				    const Real                    a_kappa, 
 				    const Real                    a_dt) const override;
