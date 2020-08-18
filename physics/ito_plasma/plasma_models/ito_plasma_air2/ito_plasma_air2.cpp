@@ -56,6 +56,11 @@ ito_plasma_air2::ito_plasma_air2(){
   m_ito_species[m_positive_idx] = RefCountedPtr<ito_species> (new positive());
   m_rte_species[m_photonZ_idx]  = RefCountedPtr<rte_species> (new photonZ());
 
+  // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
+  m_seed += procID();
+
+  m_rng     = std::mt19937_64(m_seed);
+  m_udist11 = std::uniform_real_distribution<Real>(-1., 1.);
 
   this->draw_initial_particles();
 }
@@ -66,13 +71,10 @@ ito_plasma_air2::~ito_plasma_air2(){
 
 void ito_plasma_air2::draw_initial_particles(){
 
-  // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
-  m_seed += procID();
-
   // Set up the RNG
-  m_rng     = std::mt19937_64(m_seed);
-  m_gauss   = std::normal_distribution<Real>(0.0, m_blob_radius);
-  m_udist11 = std::uniform_real_distribution<Real>(-1., 1.);
+  std::normal_distribution<Real> gauss(0.0, m_blob_radius);
+  //  m_gauss   = std::normal_distribution<Real>(0.0, m_blob_radius);
+
 
   // Each MPI process draws the desired number of particles from a distribution
   const int quotient  = m_num_particles/numProc();
@@ -92,7 +94,7 @@ void ito_plasma_air2::draw_initial_particles(){
 
   // Now make the particles
   for (int i = 0; i < particlesPerRank[procID()]; i++){
-    const RealVect pos = m_blob_center + m_gauss(m_rng)*random_direction();
+    const RealVect pos = m_blob_center + gauss(m_rng)*random_direction();
     
     electrons.add(ito_particle(m_particle_weight, pos));
     positives.add(ito_particle(m_particle_weight, pos));

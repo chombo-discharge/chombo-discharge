@@ -63,7 +63,6 @@ namespace physics {
       Real m_particle_weight;
       int m_num_particles;
       RealVect m_blob_center;
-      mutable std::normal_distribution<Real> m_gauss;
 
       // Indices for species
       int m_electron_idx;
