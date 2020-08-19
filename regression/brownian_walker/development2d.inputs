@@ -75,8 +75,8 @@ ito_solver.redistribute        = true          # Turn on/off redistribution.
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo			
 ito_solver.normal_max          = 3.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
 ito_solver.superparticles      = cell          # Make super-particles on a per-cell basis
-ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
-ito_solver.deposition          = cic           # 'ngp' = nearest grid point
+ito_solver.plot_deposition     = ngp           # Cloud-in-cell for plotting particles.
+ito_solver.deposition          = ngp           # 'ngp' = nearest grid point
                                                # 'cic' = cloud-in-cell
                                                # 'tsc' = triangle-shaped-cloud
                                                # 'w4'  = 3rd order interpolation

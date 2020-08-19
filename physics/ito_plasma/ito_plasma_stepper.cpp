@@ -546,6 +546,7 @@ void ito_plasma_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_po
 
   m_amr->average_down(a_E, m_fluid_realm);
   m_amr->interp_ghost(a_E, m_fluid_realm);
+
 }
 
 void ito_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase){
@@ -907,6 +908,10 @@ void ito_plasma_stepper::compute_ito_velocities(Vector<EBAMRCellData*>&       a_
   m_amr->average_down(m_particle_scratchD, m_particle_realm, m_phase);
   m_amr->interp_ghost(m_particle_scratchD, m_particle_realm, m_phase);
 
+#if 0 // Remove
+  m_amr->interpolate_to_centroids(m_particle_scratchD, m_particle_realm, m_phase);
+#endif
+
   const int num_ito_species = m_physics->get_num_ito_species();
   
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -1266,6 +1271,10 @@ void ito_plasma_stepper::advance_reaction_network(Vector<particle_container<ito_
   m_particle_scratchD.copy(a_E);
   m_amr->average_down(m_particle_scratchD, m_particle_realm, m_phase);
   m_amr->interp_ghost(m_particle_scratchD, m_particle_realm, m_phase);
+
+#if 0 // Remove
+  m_amr->interpolate_to_centroids(m_particle_scratchD, m_particle_realm, m_phase);
+#endif
 
   const int num_ito_species = m_physics->get_num_ito_species();
   const int num_rte_species = m_physics->get_num_rte_species();
