@@ -79,6 +79,7 @@ poisson_multifluid_gmg.bc_y_high = dirichlet_live    # BC type. "neumann", "diri
 poisson_multifluid_gmg.bc_z_low  = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
 poisson_multifluid_gmg.bc_z_high = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
 poisson_multifluid_gmg.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+poisson_multifluid_gmg.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)	
 
 poisson_multifluid_gmg.auto_tune         = false     # Do some auto-tuning
 poisson_multifluid_gmg.gmg_coarsen       = 4         # Number of coarsenings to use before level aggregation

@@ -149,6 +149,7 @@ void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_p
 					       Vector<List<photon>* >&       a_newPhotons,
 					       const RealVect                a_E,
 					       const RealVect                a_cellPos,
+					       const RealVect                a_centroid,
 					       const RealVect                a_bndryCentroid,
 					       const RealVect                a_bndryNormal,
 					       const RealVect                a_lo,
@@ -162,12 +163,12 @@ void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_p
   }
 
   if(num_electrons > m_tau_switch){
-    this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_cellPos, a_bndryCentroid, a_bndryNormal,
-				       a_lo, a_hi, a_dx, a_kappa, a_dt);
+    this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_cellPos, a_centroid,
+				       a_bndryCentroid, a_bndryNormal, a_lo, a_hi, a_dx, a_kappa, a_dt);
   }
   else{
-    this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_cellPos, a_bndryCentroid, a_bndryNormal,
-				       a_lo, a_hi, a_dx, a_kappa, a_dt);
+    this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_cellPos, a_centroid,
+				       a_bndryCentroid, a_bndryNormal, a_lo, a_hi, a_dx, a_kappa, a_dt);
   }
 }
 
@@ -176,6 +177,7 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 						   Vector<List<photon>* >&       a_newPhotons,
 						   const RealVect                a_E,
 						   const RealVect                a_pos,
+						   const RealVect                a_centroid,
 						   const RealVect                a_bndryCentroid,
 						   const RealVect                a_bndryNormal,
 						   const RealVect                a_lo,
@@ -208,19 +210,27 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   const int num_recomb      = this->poisson_reaction(recombProp, a_dt);
   const int num_photoexc    = this->poisson_reaction(photoexcProp, a_dt);
 
+#if 0
+  if(num_ionizations > 128){
+    std::cout << num_ionizations << std::endl;
+  }
+#endif
+  //  return;
+
   // Particle generation
   const int num_comp_particles = num_ionizations/m_ppc;   // Whole stuff
   const int remainder          = num_ionizations % m_ppc; // Rest of the weight goes to last particle
   if(alpha > eta){
-    for (int i = 0; i < m_ppc; i++){
+    for (int i = 0; i < num_ionizations; i++){
       const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+      //      const RealVect p = a_pos + a_centroid*a_dx;
       
-      a_particles[m_electron_idx]->add(ito_particle(1.0*num_comp_particles, p));
-      a_particles[m_positive_idx]->add(ito_particle(1.0*num_comp_particles, p));
+      a_particles[m_electron_idx]->add(ito_particle(1.0, p));
+      a_particles[m_positive_idx]->add(ito_particle(1.0, p));
     }
-    const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-    a_particles[m_electron_idx]->add(ito_particle(1.0*remainder, p));
-    a_particles[m_positive_idx]->add(ito_particle(1.0*remainder, p));
+    // const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    // a_particles[m_electron_idx]->add(ito_particle(1.0*remainder, p));
+    // a_particles[m_positive_idx]->add(ito_particle(1.0*remainder, p));
   }
 
 
@@ -276,6 +286,7 @@ void ito_plasma_air2::advance_reaction_network_ssa(Vector<List<ito_particle>* >&
 						   Vector<List<photon>* >&       a_newPhotons,
 						   const RealVect                a_E,           
 						   const RealVect                a_cellPos,
+						   const RealVect                a_centroid,
 						   const RealVect                a_bndryCentroid,
 						   const RealVect                a_bndryNormal,
 						   const RealVect                a_lo,

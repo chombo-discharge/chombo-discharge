@@ -71,6 +71,7 @@ void ito_solver::parse_options(){
   this->parse_bisect_step();
   this->parse_pvr_buffer();
   this->parse_diffusion_hop();
+  this->parse_redistribution();
   this->parse_conservation();
 }
 
@@ -201,6 +202,17 @@ void ito_solver::parse_diffusion_hop(){
   ParmParse pp(m_class_name.c_str());
 
   pp.get("max_diffusion_hop", m_max_diffusion_hop);
+}
+
+void ito_solver::parse_redistribution(){
+  CH_TIME("ito_solver::parse_redistribution");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_redistribution" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+
+  pp.get("redistribute", m_redistribute);
 }
 
 void ito_solver::parse_conservation(){
@@ -855,19 +867,21 @@ void ito_solver::deposit_particles(EBAMRCellData&                    a_state,
   }
            
   this->deposit_kappaConservative(a_state, a_particles, a_deposition); // a_state contains only weights, i.e. not divided by kappa
-  this->deposit_nonConservative(m_depositionNC, a_state);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
-  this->deposit_hybrid(a_state, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
-  this->increment_redist(m_massDiff);                                  // Increment level redistribution register
+  if(m_redistribute){
+    this->deposit_nonConservative(m_depositionNC, a_state);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
+    this->deposit_hybrid(a_state, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
+    this->increment_redist(m_massDiff);                                  // Increment level redistribution register
 
-  // Do the redistribution magic
-  const bool ebcf = m_amr->get_ebcf();
-  if(ebcf){ // Mucho stuff to do here...
-    this->coarse_fine_increment(m_massDiff);       // Compute C2F, F2C, and C2C mass transfers
-    this->level_redistribution(a_state);           // Level redistribution. Weights is a dummy parameter
-    this->coarse_fine_redistribution(a_state);     // Do the coarse-fine redistribution
-  }
-  else{ // Very simple, redistribute this level.
-    this->level_redistribution(a_state);
+    // Do the redistribution magic
+    const bool ebcf = m_amr->get_ebcf();
+    if(ebcf){ // Mucho stuff to do here...
+      this->coarse_fine_increment(m_massDiff);       // Compute C2F, F2C, and C2C mass transfers
+      this->level_redistribution(a_state);           // Level redistribution. Weights is a dummy parameter
+      this->coarse_fine_redistribution(a_state);     // Do the coarse-fine redistribution
+    }
+    else{ // Very simple, redistribute this level.
+      this->level_redistribution(a_state);
+    }
   }
 
   // Average down and interpolate

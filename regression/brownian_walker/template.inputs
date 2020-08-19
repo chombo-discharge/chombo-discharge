@@ -70,6 +70,7 @@ ito_solver.pvr_buffer        = 1             # Buffer for PVR. Prevents clouds f
 ito_solver.plt_vars          = phi           # Currently available is 'phi' only
 ito_solver.bisect_step       = 1.E-4         # Bisection step length for intersection tests
 ito_solver.seed              = 0             # Seed for RNG
+ito_solver.redistribute        = true          # Turn on/off redistribution. 
 ito_solver.plot_deposition   = cic           # Cloud-in-cell for plotting particles. 
 ito_solver.deposition        = cic           # 'ngp' = nearest grid point
                                              # 'cic' = cloud-in-cell

@@ -94,6 +94,7 @@ namespace physics {
 					    Vector<List<photon>* >&       a_newPhotons,
 					    const RealVect                a_E,           
 					    const RealVect                a_cellPos,
+					    const RealVect                a_centroidPos,
 					    const RealVect                a_bndryCentroid,
 					    const RealVect                a_bndryNormal,
 					    const RealVect                a_lo,

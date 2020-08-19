@@ -256,9 +256,13 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   // Now compute the electric field
   this->solve_poisson();
 
-  // Compute new ito velocities and advect the particles
+  // We have field at k+1 but particles have been diffused. Put them back to X^k positions and compute
+  // velocities with E^(k+1)
+  this->swap_particle_positions();
   this->compute_ito_velocities();
-  this->advect_particles_euler(a_dt);
+  
+  // Compute new ito velocities and advect the particles
+  this->advect_particles_si(a_dt);
 
   // Remap, intersect, and redeposit
   m_ito->remap();
@@ -288,8 +292,43 @@ void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
 	  // First step
 	  for (lit.rewind(); lit; ++lit){
 	    ito_particle& p = particleList[lit];
+
+	    // Update positions. 
 	    p.oldPosition() = p.position();
 	    p.position() += p.velocity()*a_dt;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::advect_particles_si(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advect_particles_si");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advect_particles_si" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    if(solver->is_mobile()){
+      
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  // First step
+	  for (lit.rewind(); lit; ++lit){
+	    ito_particle& p = particleList[lit];
+
+	    // Add diffusion hop again. The position after the diffusion hop is oldPosition(). Go there,
+	    // then advect. 
+	    p.position() = p.oldPosition() + p.velocity()*a_dt;
 	  }
 	}
       }
@@ -336,8 +375,6 @@ void ito_plasma_godunov::advect_particles_rk2(const Real a_dt){
   }
 }
 
-
-
 void ito_plasma_godunov::diffuse_particles_euler(const Real a_dt){
   CH_TIME("ito_plasma_godunov::diffuse_particles_euler");
   if(m_verbosity > 5){
@@ -362,6 +399,8 @@ void ito_plasma_godunov::diffuse_particles_euler(const Real a_dt){
 	    ito_particle& p = particleList[lit];
 	    const RealVect ran = solver->random_gaussian();
 	    const RealVect hop = ran*sqrt(2.0*p.diffusion()*a_dt);
+
+	    p.oldPosition() = p.position();
 	    p.position() += hop;
 	  }
 	}
@@ -422,6 +461,39 @@ void ito_plasma_godunov::rewind_particles(){
 	  for (lit.rewind(); lit; ++lit){
 	    ito_particle& p = particleList[lit];
 	    p.position() = p.oldPosition();
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::swap_particle_positions(){
+  CH_TIME("ito_plasma_godunov::swap_particle_positions");
+  if(m_verbosity > 5){
+    pout() << m_name + "::swap_particle_positions" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    
+    if(solver->is_diffusive()){
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  // Diffusion hop.
+	  for (lit.rewind(); lit; ++lit){
+	    ito_particle& p = particleList[lit];
+	    const RealVect tmp = p.position();
+	    
+	    p.position()    = p.oldPosition();
+	    p.oldPosition() = p.position();
 	  }
 	}
       }

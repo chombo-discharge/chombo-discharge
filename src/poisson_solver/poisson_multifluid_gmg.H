@@ -197,6 +197,11 @@ protected:
   static Real s_constant_one(const RealVect a_pos);
 
   /*!
+    @brief Scale by kappa or not
+  */
+  bool m_kappa_source;
+
+  /*!
     @brief Needs setup
   */
   bool m_needs_setup;
@@ -417,6 +422,7 @@ protected:
   virtual void parse_domain_bc();    // Parse domain boundary conditions
   virtual void parse_plot_vars();    // Parse plot variables
   virtual void parse_gmg_settings(); // Parse geometric multigrid settings
+  virtual void parse_kappa_source(); // Parse source scaling
 
   // Define mg levels
   virtual void define_mg_levels();

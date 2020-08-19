@@ -564,6 +564,11 @@ protected:
   Real m_hop_eps;
 
   /*!
+    @brief Redistribute or not
+  */
+  bool m_redistribute;
+
+  /*!
     @brief Flag for blending the deposition clouds with the nonconservative divergence
   */
   bool m_blend_conservation;
@@ -712,6 +717,11 @@ protected:
     @brief Parse diffusion hop
   */
   void parse_diffusion_hop();
+
+  /*!
+    @brief Parse the conservation
+  */
+  void parse_redistribution();
 
   /*!
     @brief Parse the conservation

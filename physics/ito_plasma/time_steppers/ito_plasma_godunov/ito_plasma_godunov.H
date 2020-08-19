@@ -58,6 +58,7 @@ namespace physics {
       // Global routines
       void intersect_particles(const Real a_dt);
       void set_old_positions();
+
       void rewind_particles();
       void diffuse_particles_euler(const Real a_dt);
       void advect_particles_euler(const Real a_dt);
@@ -65,9 +66,11 @@ namespace physics {
 
       // Specific routines for semi-implicit Euler
       void compute_conductivity();
+      void swap_particle_positions();
       void setup_semi_implicit_poisson(const Real a_dt);
+      void advect_particles_si(const Real a_dt);
 
-      // Particle advance + Poisson solve routines. 
+      // Particle advancement routines. 
       void advance_particles_euler(const Real a_dt);
       void advance_particles_pc(const Real a_dt);
       void advance_particles_si(const Real a_dt);

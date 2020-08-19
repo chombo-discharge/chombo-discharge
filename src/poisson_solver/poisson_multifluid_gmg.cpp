@@ -46,6 +46,15 @@ void poisson_multifluid_gmg::parse_options(){
   parse_domain_bc();
   parse_plot_vars();
   parse_gmg_settings();
+  parse_kappa_source();
+}
+
+void poisson_multifluid_gmg::parse_kappa_source(){
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("kappa_source", m_kappa_source);
+
 }
 
 void poisson_multifluid_gmg::parse_autotune(){
@@ -272,7 +281,10 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   data_ops::copy(m_scaled_source, a_source);
   data_ops::scale(m_scaled_source, 1./(units::s_eps0));
   data_ops::scale(m_scaled_source, 1./(m_length_scale*m_length_scale));
-  data_ops::kappa_scale(m_scaled_source);
+
+  if(m_kappa_source){ // Scale source by kappa
+    data_ops::kappa_scale(m_scaled_source);
+  }
 
   // Do the scaled surface charge
   data_ops::copy(m_scaled_sigma, a_sigma);

@@ -1436,7 +1436,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
       const RealVect c  = RealVect::Zero;
       
       // Call physics
-      m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, c, n, lo, hi, a_dx, kappa, a_dt);
+      m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, c, c, n, lo, hi, a_dx, kappa, a_dt);
     }
   }
 
@@ -1446,6 +1446,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
     const VolIndex vof = vofit();
     const IntVect iv   = vof.gridIndex();
     const RealVect pos = prob_lo + (RealVect(iv) + 0.5*RealVect::Unit);
+    const RealVect cen = ebisbox.centroid(vof);
     const Real kappa   = ebisbox.volFrac(vof);
     const RealVect e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
     const RealVect n   = ebisbox.normal(vof);
@@ -1481,7 +1482,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
     }
 
     // Call physics.
-    m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, ebc, n, lo, hi, a_dx, kappa, a_dt);
+    m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, cen, ebc, n, lo, hi, a_dx, kappa, a_dt);
   }
 }
 
