@@ -1272,7 +1272,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<particle_container<ito_
   m_amr->average_down(m_particle_scratchD, m_particle_realm, m_phase);
   m_amr->interp_ghost(m_particle_scratchD, m_particle_realm, m_phase);
 
-#if 0 // Remove
+#if 1 // Remove
   m_amr->interpolate_to_centroids(m_particle_scratchD, m_particle_realm, m_phase);
 #endif
 
@@ -1454,7 +1454,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex vof = vofit();
     const IntVect iv   = vof.gridIndex();
-    const RealVect pos = prob_lo + (RealVect(iv) + 0.5*RealVect::Unit);
+    const RealVect pos = prob_lo + a_dx*(RealVect(iv) + 0.5*RealVect::Unit);
     const RealVect cen = ebisbox.centroid(vof);
     const Real kappa   = ebisbox.volFrac(vof);
     const RealVect e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));

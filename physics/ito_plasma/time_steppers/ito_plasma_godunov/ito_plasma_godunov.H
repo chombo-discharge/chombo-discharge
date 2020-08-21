@@ -31,13 +31,14 @@ namespace physics {
 
       // Regrid routines
       void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
+      void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
 
     protected:
 
-      enum which_algorithm {
-	euler = 0,
-	predictor_corrector = 1,
-	semi_implicit = 2,
+      enum class which_algorithm {
+	euler, 
+	predictor_corrector,
+	semi_implicit,
       };
 
       // These are things that are used to compute the conductivity. 

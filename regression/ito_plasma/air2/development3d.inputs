@@ -11,7 +11,7 @@ amr_mesh.lo_corner       = -2E-3 -2E-3 -2E-3 # Low corner of problem domain
 amr_mesh.hi_corner       =  2E-3  2E-3  2E-3 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 32 32 32    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 4           # Maximum amr depth
+amr_mesh.max_amr_depth   = 3           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -30,7 +30,7 @@ amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 't
 amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 amr_mesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr_mesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
-amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
+amr_mesh.ebcf            = false        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
 # DRIVER OPTIONS
@@ -79,11 +79,11 @@ poisson_multifluid_gmg.bc_y_high = neumann           # BC type. "neumann", "diri
 poisson_multifluid_gmg.bc_z_low  = dirichlet_ground  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
 poisson_multifluid_gmg.bc_z_high = dirichlet_live    # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
 poisson_multifluid_gmg.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
-poisson_multifluid_gmg.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)
+poisson_multifluid_gmg.kappa_source = true           # Volume weighted space charge density or not (depends on algorithm)
 
 poisson_multifluid_gmg.auto_tune         = false     # Do some auto-tuning
 poisson_multifluid_gmg.gmg_coarsen       = 4         # Number of coarsenings to use before level aggregation
-poisson_multifluid_gmg.gmg_verbosity     = -1        # GMG verbosity
+poisson_multifluid_gmg.gmg_verbosity     = 10        # GMG verbosity
 poisson_multifluid_gmg.gmg_pre_smooth    = 12        # Number of relaxations in downsweep
 poisson_multifluid_gmg.gmg_post_smooth   = 12        # Number of relaxations in upsweep
 poisson_multifluid_gmg.gmg_bott_smooth   = 12        # NUmber of relaxations before dropping to bottom solver
@@ -171,7 +171,7 @@ mc_photo.deposition         = cic           # 'ngp'  = nearest grid point
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
+geo_coarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
 geo_coarsener.box1_lo     = -1  -1 200E-6     # Remove irregular cell tags 
 geo_coarsener.box1_hi     =  1  1  1      # between these two corners
 geo_coarsener.box1_lvl    = 1            # up to this level
@@ -195,12 +195,12 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ==================================================================================================== 
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
-ito_plasma_godunov.verbosity      = -1           # Verbosity
-ito_plasma_godunov.particle_realm = particle        # Particle realm. Default is primal
+ito_plasma_godunov.verbosity      = -1            # Verbosity
+ito_plasma_godunov.particle_realm = primal        # Particle realm. Default is primal
 ito_plasma_godunov.load_balance   = true          # Load balance or not
-ito_plasma_godunov.max_cells_hop  = 2.0          # Maximum cells to move in one time step
-ito_plasma_godunov.ppc            = 16           # Superparticle number of cells
-ito_plasma_godunov.merge_interval = 1           # How often to make superparticles
+ito_plasma_godunov.max_cells_hop  = 2.0           # Maximum cells to move in one time step
+ito_plasma_godunov.ppc            = 16            # Superparticle number of cells
+ito_plasma_godunov.merge_interval = 1             # How often to make superparticles
 ito_plasma_godunov.relax_factor   = 0.5           # Factor in front of relaxation time	
 ito_plasma_godunov.regrid_super   = false         # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = semi_implicit # 'euler', 'predictor_corrector', or 'semi_implicit'	
@@ -217,7 +217,7 @@ ito_plasma_air2.particle_weight= 1
 # Reaction stuff
 ito_plasma_air2.tau_switch     = -1                           # Switch from SSA to tau when reaching this many particles
 ito_plasma_air2.poisson_switch = 50                          # When to approximate Poisson by normal distribution
-ito_plasma_air2.react_ppc      = 16                          # Maximum number of particles to produce in reaction step	
+ito_plasma_air2.react_ppc      = 1                          # Maximum number of particles to produce in reaction step	
 
 # ----------------------------------------------------------------------------------------------------
 # SEE parameters

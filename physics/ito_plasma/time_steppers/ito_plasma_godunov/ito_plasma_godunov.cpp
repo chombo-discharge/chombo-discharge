@@ -129,6 +129,24 @@ void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_lev
   }
 }
 
+void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
+  CH_TIME("ito_plasma_godunov::regrid");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_godunov::regrid" << endl;
+  }
+
+  ito_plasma_stepper::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+
+  // Allocate new memory
+  // this->allocate_internals();
+
+  // // Regrid solvers
+  // m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  // m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  // m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  // m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
+}
+
 Real ito_plasma_godunov::advance(const Real a_dt) {
   CH_TIME("ito_plasma_godunov::advance");
   if(m_verbosity > 5){
