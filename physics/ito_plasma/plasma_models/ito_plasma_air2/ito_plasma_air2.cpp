@@ -238,7 +238,7 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 
 
   // Photogeneration and photoionization
-  // this->add_photons(*a_newPhotons[m_photonZ_idx], num_photoexc, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  this->add_photons(*a_newPhotons[m_photonZ_idx], num_photoexc, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
   // this->add_photoionization(*a_particles[m_electron_idx], *a_particles[m_positive_idx], *a_photons[m_photonZ_idx]);
 }
 
