@@ -1,17 +1,17 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-air2.potential = 6E3
+air2.potential = 10E3
 air2.basename  = pout
 
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-amr_mesh.lo_corner       = -2E-3 -2E-3 -2E-3 # Low corner of problem domain
-amr_mesh.hi_corner       =  2E-3  2E-3  2E-3 # High corner of problem domain
+amr_mesh.lo_corner       = -5E-3 -5E-3 -5E-3 # Low corner of problem domain
+amr_mesh.hi_corner       =  5E-3  5E-3  5E-3 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 32 32 32    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 3           # Maximum amr depth
+amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
+amr_mesh.max_amr_depth   = 0           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -30,7 +30,7 @@ amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 't
 amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 amr_mesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr_mesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
-amr_mesh.ebcf            = false        # If you have EBCF crossing, this must be true. 
+amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
 # DRIVER OPTIONS
@@ -39,9 +39,9 @@ driver.verbosity                       = 3             # Engine verbosity
 driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
-driver.plot_interval                   = 5             # Plot interval
-driver.regrid_interval                 = 10             # Regrid interval
-driver.checkpoint_interval             = 25            # Checkpoint interval
+driver.plot_interval                   = 1             # Plot interval
+driver.regrid_interval                 = 5             # Regrid interval
+driver.checkpoint_interval             = 5            # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 1.0           # Stop time
@@ -82,11 +82,11 @@ poisson_multifluid_gmg.plt_vars  = phi rho E res     # Plot variables. Possible 
 poisson_multifluid_gmg.kappa_source = true           # Volume weighted space charge density or not (depends on algorithm)
 
 poisson_multifluid_gmg.auto_tune         = false     # Do some auto-tuning
-poisson_multifluid_gmg.gmg_coarsen       = 4         # Number of coarsenings to use before level aggregation
+poisson_multifluid_gmg.gmg_coarsen       = 1         # Number of coarsenings to use before level aggregation
 poisson_multifluid_gmg.gmg_verbosity     = 10        # GMG verbosity
-poisson_multifluid_gmg.gmg_pre_smooth    = 12        # Number of relaxations in downsweep
-poisson_multifluid_gmg.gmg_post_smooth   = 12        # Number of relaxations in upsweep
-poisson_multifluid_gmg.gmg_bott_smooth   = 12        # NUmber of relaxations before dropping to bottom solver
+poisson_multifluid_gmg.gmg_pre_smooth    = 24        # Number of relaxations in downsweep
+poisson_multifluid_gmg.gmg_post_smooth   = 24        # Number of relaxations in upsweep
+poisson_multifluid_gmg.gmg_bott_smooth   = 24        # NUmber of relaxations before dropping to bottom solver
 poisson_multifluid_gmg.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid_gmg.gmg_max_iter      = 32        # Maximum number of iterations
 poisson_multifluid_gmg.gmg_tolerance     = 1.E-10    # Residue tolerance
@@ -94,7 +94,7 @@ poisson_multifluid_gmg.gmg_hang          = 0.2       # Solver hang
 poisson_multifluid_gmg.gmg_bottom_drop   = 4         # Bottom drop
 poisson_multifluid_gmg.gmg_bc_order      = 2         # Boundary condition order for multigrid
 poisson_multifluid_gmg.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
-poisson_multifluid_gmg.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
+poisson_multifluid_gmg.gmg_bottom_relax  = 24        # Number of relaxations in bottom solve ('simple' solver only)
 poisson_multifluid_gmg.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now
 poisson_multifluid_gmg.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
 
@@ -171,10 +171,10 @@ mc_photo.deposition         = cic           # 'ngp'  = nearest grid point
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-geo_coarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
+geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
 geo_coarsener.box1_lo     = -1  -1 200E-6     # Remove irregular cell tags 
 geo_coarsener.box1_hi     =  1  1  1      # between these two corners
-geo_coarsener.box1_lvl    = 1            # up to this level
+geo_coarsener.box1_lvl    = 2            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
@@ -184,7 +184,7 @@ rod_sphere.eps0                      = 1                # Background permittivit
 rod_sphere.turn_off_electrode        = false            # Turn on/off electrode
 rod_sphere.turn_off_dielectric       = true             # Turn on/off dielectric
 rod_sphere.electrode_live            = true             # Live electrode or not
-rod_sphere.electrode_radius          = 150.E-6          # Electrode inner radius
+rod_sphere.electrode_radius          = 200.E-6          # Electrode inner radius
 rod_sphere.electrode_center1         = 0 0 0             # Center 1
 rod_sphere.electrode_center2         = 0 0 1             # Center 2. 
 rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
@@ -196,11 +196,11 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1            # Verbosity
-ito_plasma_godunov.particle_realm = primal        # Particle realm. Default is primal
+ito_plasma_godunov.particle_realm = particle        # Particle realm. Default is primal
 ito_plasma_godunov.load_balance   = true          # Load balance or not
-ito_plasma_godunov.max_cells_hop  = 2.0           # Maximum cells to move in one time step
-ito_plasma_godunov.ppc            = 16            # Superparticle number of cells
-ito_plasma_godunov.merge_interval = 5             # How often to make superparticles
+ito_plasma_godunov.max_cells_hop  = 0.5           # Maximum cells to move in one time step
+ito_plasma_godunov.ppc            = 32            # Superparticle number of cells
+ito_plasma_godunov.merge_interval = 1             # How often to make superparticles
 ito_plasma_godunov.relax_factor   = 0.5           # Factor in front of relaxation time	
 ito_plasma_godunov.regrid_super   = false         # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = semi_implicit # 'euler', 'predictor_corrector', or 'semi_implicit'	
@@ -217,7 +217,7 @@ ito_plasma_air2.particle_weight= 1
 # Reaction stuff
 ito_plasma_air2.tau_switch     = -1                           # Switch from SSA to tau when reaching this many particles
 ito_plasma_air2.poisson_switch = 50                          # When to approximate Poisson by normal distribution
-ito_plasma_air2.react_ppc      = 1                          # Maximum number of particles to produce in reaction step	
+ito_plasma_air2.react_ppc      = 32                          # Maximum number of particles to produce in reaction step	
 
 # ----------------------------------------------------------------------------------------------------
 # SEE parameters
@@ -243,13 +243,13 @@ ito_plasma_air2.photoi_K2                  = 1.5              # Converted to (mP
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_streamer_tagger.verbosity         = -1           # Verbosity
-ito_plasma_streamer_tagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
-ito_plasma_streamer_tagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
-ito_plasma_streamer_tagger.box1_hi           = 0.0 0.0 0.0  # these two corners
-ito_plasma_streamer_tagger.buffer            = 0            # Grow tagged cells
+ito_plasma_streamer_tagger.num_boxes         = 1            # Number of allowed tag boxes (0 = tags allowe everywhere)
+ito_plasma_streamer_tagger.box1_lo           = -1 -1 -1
+ito_plasma_streamer_tagger.box1_hi           = 1 1 100E-6
+ito_plasma_streamer_tagger.buffer            = 8            # Grow tagged cells
 
 ito_plasma_streamer_tagger.refine_curvature  = 10.0         # Curvature refinement
 ito_plasma_streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	
 ito_plasma_streamer_tagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
-ito_plasma_streamer_tagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
-ito_plasma_streamer_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth
+ito_plasma_streamer_tagger.coarsen_alpha     = 10.0         # Set alpha coarsening. Higher => Less mesh
+ito_plasma_streamer_tagger.max_coarsen_lvl   = 3            # Set max coarsening depth

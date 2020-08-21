@@ -428,12 +428,16 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, 
     m_ito->sort_particles_by_patch();
   }
 
+  // Redeposit particles
+  m_ito->deposit_particles();
+
+  // Recompute the electric field
   const bool converged = this->solve_poisson();
   if(!converged){
     MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
   }
 
-  // Compute new velocities and diffusion coefficients
+  // Recompute new velocities and diffusion coefficients
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
 }

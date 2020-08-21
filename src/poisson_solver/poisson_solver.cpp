@@ -299,12 +299,12 @@ void poisson_solver::regrid(const int a_lmin, const int a_old_finest, const int 
 
       // These levels have not changed
       for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
-	//	scratch_phase[lvl]->copyTo(*state_phase[lvl]); // Base level should never change, but ownership might
+	scratch_phase[lvl]->copyTo(*state_phase[lvl]); // Base level should never change, but ownership might
       }
       for (int lvl = a_lmin; lvl <= a_new_finest; lvl++){
 	interpolator[lvl]->interpolate(*state_phase[lvl], *state_phase[lvl-1], interv);
 	if(lvl <= a_old_finest){
-	  //	  scratch_phase[lvl]->copyTo(*state_phase[lvl]);
+	  scratch_phase[lvl]->copyTo(*state_phase[lvl]);
 	}
       }
     }

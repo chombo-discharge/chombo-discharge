@@ -197,7 +197,7 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   const Real alpha   = this->compute_alpha(a_E);
   const Real eta     = this->compute_eta(a_E);
   const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
-  const Real xfactor = excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
+  const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
 
   // Propensity functions
   const Real ionizationProp = alpha*velo*num_electrons;
@@ -209,39 +209,32 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   const int num_ionizations = this->poisson_reaction(ionizationProp, a_dt);
   const int num_recomb      = this->poisson_reaction(recombProp, a_dt);
   const int num_photoexc    = this->poisson_reaction(photoexcProp, a_dt);
-
-  // Particle generation
-  const int num_comp_particles = num_ionizations/m_ppc;   // Whole stuff
-  const int remainder          = num_ionizations % m_ppc; // Rest of the weight goes to last particle
-  if(alpha > eta){
-    if(num_ionizations < m_ppc){
-      for (int i = 0; i < num_ionizations; i++){
-	const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  
+  if(num_ionizations < m_ppc){
+    for (int i = 0; i < num_ionizations; i++){
+      const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
       
-	a_particles[m_electron_idx]->add(ito_particle(1.0, p));
-	a_particles[m_positive_idx]->add(ito_particle(1.0, p));
-      }
+      a_particles[m_electron_idx]->add(ito_particle(1.0, p));
+      a_particles[m_positive_idx]->add(ito_particle(1.0, p));
     }
-    else{
-      const int avgWeight = floor(num_ionizations/m_ppc);
-      for (int i = 0; i < m_ppc; i++){
-	const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  }
+  else{
+    const int avgWeight = floor(num_ionizations/m_ppc);
+    for (int i = 0; i < m_ppc; i++){
+      const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
       
-	a_particles[m_electron_idx]->add(ito_particle(avgWeight, p));
-	a_particles[m_positive_idx]->add(ito_particle(avgWeight, p));
-      }
+      a_particles[m_electron_idx]->add(ito_particle(avgWeight, p));
+      a_particles[m_positive_idx]->add(ito_particle(avgWeight, p));
     }
+  }
     // const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     // a_particles[m_electron_idx]->add(ito_particle(1.0*remainder, p));
     // a_particles[m_positive_idx]->add(ito_particle(1.0*remainder, p));
-  }
-
 
   // Photogeneration and photoionization
   this->add_photons(*a_newPhotons[m_photonZ_idx], num_photoexc, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-  // this->add_photoionization(*a_particles[m_electron_idx], *a_particles[m_positive_idx], *a_photons[m_photonZ_idx]);
+  this->add_photoionization(*a_particles[m_electron_idx], *a_particles[m_positive_idx], *a_photons[m_photonZ_idx]);
 }
-
 
 void ito_plasma_air2::add_photons(List<photon>&  a_photons,
 				  const int      a_num_photons,
