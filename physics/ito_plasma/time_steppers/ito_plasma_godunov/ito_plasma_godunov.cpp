@@ -54,6 +54,8 @@ void ito_plasma_godunov::parse_options() {
   pp.get("regrid_super",   m_regrid_superparticles);
   pp.get("algorithm",      str);
   pp.get("load_balance",   m_load_balance);
+  pp.get("min_dt",         m_min_dt);
+  pp.get("max_dt",         m_max_dt);
 
   if(str == "euler"){
     m_algorithm = which_algorithm::euler;
@@ -110,6 +112,16 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
   else if(m_algorithm == which_algorithm::semi_implicit && m_use_old_dt == true){
     a_dt = m_dt;
     m_use_old_dt = false;
+  }
+
+  if(a_dt < m_min_dt){
+    a_dt = m_min_dt;
+    a_timecode = time_code::hardcap;
+  }
+
+  if(a_dt > m_max_dt){
+    a_dt = m_max_dt;
+    a_timecode = time_code::hardcap;
   }
 
 #if 1
@@ -582,8 +594,9 @@ void ito_plasma_godunov::compute_conductivity(){
   // This code does averaging from cell to face. 
   data_ops::average_cell_to_face_allcomps(m_conduct_face, m_conduct_cell, m_amr->get_domains());
 
-  // This code computes the conductivity on the EB
-  const irreg_amr_stencil<eb_centroid_interp>& ebsten = m_amr->get_eb_centroid_interp_stencils(m_fluid_realm, m_phase);
+  // This code extrapolates the conductivity to the EB. This should actually be the EB centroid but since the stencils
+  // for EB extrapolation can be a bit nasty (e.g. negative weights), we do the centroid instead and take that as an approximation. 
+  const irreg_amr_stencil<centroid_interp>& ebsten = m_amr->get_centroid_interp_stencils(m_fluid_realm, m_phase);
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     ebsten.apply(m_conduct_eb, m_conduct_cell, lvl);
   }

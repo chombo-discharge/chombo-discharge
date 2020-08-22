@@ -227,6 +227,8 @@ namespace physics {
       int m_ppc;
       Real m_max_cells_hop;
       Real m_dt_relax;
+      Real m_min_dt;
+      Real m_max_dt;
 
       // Storage for current density. This is defined over the particle realm. 
       EBAMRCellData m_J;

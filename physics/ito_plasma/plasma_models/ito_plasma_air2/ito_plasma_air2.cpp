@@ -247,26 +247,38 @@ void ito_plasma_air2::add_photons(List<photon>&  a_photons,
 				  const Real     a_kappa) const {
   a_photons.clear();
 
-  // TLDR: 2D code only generates one photon. 
-#if CH_SPACEDIM==2
-  const RealVect P = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-  const RealVect V = units::s_c0*random_direction();
-    
-  a_photons.add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), num_photoexc));
-#else
-  for (int i = 0; i < a_num_photons; i++){
+  int weight;
+  int num;
+  int remainder;
+  if(a_num_photons <= m_ppc){ // Physical photons
+    weight    = 1;
+    num       = a_num_photons + 1; // Because loop does - 1
+    remainder = 0;
+  }
+  else{ // Superphotons
+    num       = m_ppc;
+    weight    = a_num_photons/m_ppc;
+    remainder = a_num_photons % m_ppc;
+  }
+  
+  for (int i = 0; i < num - 1; i++){
     const RealVect P = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const RealVect V = units::s_c0*random_direction();
-
-    a_photons.add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), 1.0));
+      
+    a_photons.add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), weight));
   }
-#endif
+
+  // If we used superphotons the last photon gets some extra oomph. 
+  if(remainder > 0){
+    const RealVect P = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect V = units::s_c0*random_direction();
+    a_photons.add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), weight + remainder));
+  }
 }
 
 void ito_plasma_air2::add_photoionization(List<ito_particle>& a_electrons,
 					  List<ito_particle>& a_positive,
 					  List<photon>&       a_photons) const {
-  
   for (ListIterator<photon> lit(a_photons); lit.ok(); ++lit){
     const photon& phot  = lit();
     const RealVect pos  = phot.position();
