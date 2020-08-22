@@ -51,6 +51,7 @@ namespace physics {
       bool m_use_old_dt;
       
       Real m_relax_factor; // Factor for relaxation time
+      Real m_avg_cfl;      // Average CFL number
 
       which_algorithm m_algorithm;
 

@@ -22,6 +22,8 @@ ito_plasma_godunov::ito_plasma_godunov(){
 
   ParmParse pp("ito_plasma_godunov");
   pp.get("particle_realm", m_particle_realm);
+
+  m_avg_cfl = 0.0;
 }
 
 ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_physics){
@@ -31,6 +33,8 @@ ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_phys
 
   ParmParse pp("ito_plasma_godunov");
   pp.get("particle_realm", m_particle_realm);
+
+  m_avg_cfl = 0.0;
 }
 
 ito_plasma_godunov::~ito_plasma_godunov(){
@@ -124,8 +128,15 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
     a_timecode = time_code::hardcap;
   }
 
-#if 1
-  if(procID() == 0) std::cout << "dt = " << a_dt << "\t relax dt = " << m_dt_relax << "\t factor = " << a_dt/m_dt_relax << std::endl;
+#if 1 // Debug code
+  const Real dtCFL = m_ito->compute_dt();
+  m_avg_cfl += a_dt/dtCFL;
+  if(procID() == 0) std::cout << "dt = " << a_dt
+			      << "\t relax dt = " << m_dt_relax
+			      << "\t factor = " << a_dt/m_dt_relax
+			      << "\t CFL = " << a_dt/dtCFL
+			      << "\t avgCFL = " << m_avg_cfl/(1+m_step)
+			      << std::endl;
 #endif
 }
 void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_level){

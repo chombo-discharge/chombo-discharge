@@ -47,7 +47,7 @@
         </Object>
         <Object name="Information">
             <Field name="x" type="int">4</Field>
-            <Field name="y" type="int">524</Field>
+            <Field name="y" type="int">499</Field>
             <Field name="width" type="int">996</Field>
             <Field name="height" type="int">386</Field>
             <Field name="visible" type="bool">false</Field>
@@ -72,7 +72,7 @@
         <Object name="MainWin">
             <Field name="x" type="int">0</Field>
             <Field name="y" type="int">0</Field>
-            <Field name="width" type="int">398</Field>
+            <Field name="width" type="int">447</Field>
             <Field name="height" type="int">1015</Field>
             <Field name="SPLITTER_VALUES_V2" type="floatVector">0 0.7627119 0.2327684 </Field>
         </Object>
