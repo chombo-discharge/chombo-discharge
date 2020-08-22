@@ -30,7 +30,7 @@ amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 't
 amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 amr_mesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr_mesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
-amr_mesh.ebcf            = false        # If you have EBCF crossing, this must be true. 
+amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
 # DRIVER OPTIONS
@@ -171,7 +171,7 @@ mc_photo.deposition         = cic           # 'ngp'  = nearest grid point
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-geo_coarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
+geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
 geo_coarsener.box1_lo     = -1  -1 500E-6     # Remove irregular cell tags 
 geo_coarsener.box1_hi     =  1  1  1      # between these two corners
 geo_coarsener.box1_lvl    = 2            # up to this level

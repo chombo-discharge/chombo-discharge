@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<Object name="VisIt">
+    <Field name="Version" type="string">3.1.0</Field>
+    <Object name="GUI">
+        <Object name="FileServerList">
+            <Field name="path" type="string">/home/robertm/Projects/plasmac/regression/ito_plasma/air2/plt</Field>
+            <Field name="filter" type="string">*</Field>
+            <Field name="useCurrentDir" type="bool">true</Field>
+            <Field name="automaticFileGrouping" type="bool">true</Field>
+            <Field name="smartFileGrouping" type="bool">true</Field>
+            <Field name="showDotFiles" type="bool">false</Field>
+            <Object name="recentpaths">
+                <Field name="localhost" type="stringVector">"/home/robertm/Projects/plasmac/regression/ito_plasma/air2" "/home/robertm/Projects/plasmac/regression/ito_plasma/air2/plt" </Field>
+            </Object>
+        </Object>
+        <Object name="AppearanceAttributes">
+            <Field name="useSystemDefault" type="bool">true</Field>
+            <Field name="background" type="string">#c0c0c0</Field>
+            <Field name="foreground" type="string">#000000</Field>
+            <Field name="fontName" type="string">Helvetica,12,-1,5,50,0,0,0,0,0</Field>
+            <Field name="style" type="string">gtk</Field>
+            <Field name="orientation" type="int">0</Field>
+            <Field name="defaultForeground" type="string">#000000</Field>
+            <Field name="defaultBackground" type="string">#efefef</Field>
+            <Field name="defaultFontName" type="string">"Sans Serif,9,-1,5,50,0,0,0,0,0"</Field>
+            <Field name="defaultStyle" type="string">Fusion</Field>
+            <Field name="defaultOrientation" type="int">0</Field>
+        </Object>
+        <Object name="Annotation">
+            <Field name="x" type="int">692</Field>
+            <Field name="y" type="int">103</Field>
+            <Field name="width" type="int">517</Field>
+            <Field name="height" type="int">782</Field>
+            <Field name="visible" type="bool">false</Field>
+            <Field name="posted" type="bool">false</Field>
+            <Field name="activeTab" type="int">5</Field>
+        </Object>
+        <Field name="postWhenShown" type="bool">false</Field>
+        <Object name="Color tables">
+            <Field name="x" type="int">1603</Field>
+            <Field name="y" type="int">0</Field>
+            <Field name="width" type="int">603</Field>
+            <Field name="height" type="int">1080</Field>
+            <Field name="visible" type="bool">false</Field>
+            <Field name="posted" type="bool">false</Field>
+            <Field name="currentColorTable" type="string">hot</Field>
+        </Object>
+        <Object name="Information">
+            <Field name="x" type="int">4</Field>
+            <Field name="y" type="int">524</Field>
+            <Field name="width" type="int">996</Field>
+            <Field name="height" type="int">386</Field>
+            <Field name="visible" type="bool">false</Field>
+        </Object>
+        <Object name="Set save options">
+            <Field name="x" type="int">745</Field>
+            <Field name="y" type="int">123</Field>
+            <Field name="width" type="int">411</Field>
+            <Field name="height" type="int">792</Field>
+            <Field name="visible" type="bool">true</Field>
+            <Field name="posted" type="bool">false</Field>
+        </Object>
+        <Object name="View">
+            <Field name="x" type="int">767</Field>
+            <Field name="y" type="int">200</Field>
+            <Field name="width" type="int">495</Field>
+            <Field name="height" type="int">587</Field>
+            <Field name="visible" type="bool">false</Field>
+            <Field name="posted" type="bool">false</Field>
+            <Field name="activeTab" type="int">0</Field>
+        </Object>
+        <Object name="MainWin">
+            <Field name="x" type="int">0</Field>
+            <Field name="y" type="int">0</Field>
+            <Field name="width" type="int">398</Field>
+            <Field name="height" type="int">1015</Field>
+            <Field name="SPLITTER_VALUES_V2" type="floatVector">0 0.7627119 0.2327684 </Field>
+        </Object>
+        <Object name="Boundary plot attributes">
+            <Field name="x" type="int">1419</Field>
+            <Field name="y" type="int">12</Field>
+            <Field name="width" type="int">501</Field>
+            <Field name="height" type="int">978</Field>
+            <Field name="visible" type="bool">false</Field>
+            <Field name="posted" type="bool">false</Field>
+        </Object>
+        <Object name="Mesh plot attributes">
+            <Field name="x" type="int">723</Field>
+            <Field name="y" type="int">214</Field>
+            <Field name="width" type="int">454</Field>
+            <Field name="height" type="int">559</Field>
+            <Field name="visible" type="bool">false</Field>
+            <Field name="posted" type="bool">false</Field>
+        </Object>
+        <Object name="Pseudocolor plot attributes">
+            <Field name="x" type="int">2054</Field>
+            <Field name="y" type="int">282</Field>
+            <Field name="width" type="int">882</Field>
+            <Field name="height" type="int">798</Field>
+            <Field name="visible" type="bool">false</Field>
+            <Field name="posted" type="bool">false</Field>
+        </Object>
+        <Object name="Subset plot attributes">
+            <Field name="x" type="int">752</Field>
+            <Field name="y" type="int">134</Field>
+            <Field name="width" type="int">397</Field>
+            <Field name="height" type="int">720</Field>
+            <Field name="visible" type="bool">false</Field>
+            <Field name="posted" type="bool">false</Field>
+        </Object>
+        <Object name="Isosurface operator attributes">
+            <Field name="x" type="int">2311</Field>
+            <Field name="y" type="int">751</Field>
+            <Field name="width" type="int">939</Field>
+            <Field name="height" type="int">329</Field>
+            <Field name="visible" type="bool">false</Field>
+            <Field name="posted" type="bool">false</Field>
+        </Object>
+        <Object name="Slice operator attributes">
+            <Field name="x" type="int">1543</Field>
+            <Field name="y" type="int">373</Field>
+            <Field name="width" type="int">722</Field>
+            <Field name="height" type="int">707</Field>
+            <Field name="visible" type="bool">false</Field>
+            <Field name="posted" type="bool">false</Field>
+        </Object>
+        <Field name="plotDatabases" type="stringVector">"localhost:/home/robertm/Projects/plasmac/regression/ito_plasma/air2/plt/simulation.step*.3d.hdf5 database" </Field>
+        <Object name="TimeFormat">
+            <Field name="displayMode" type="string">Cycles</Field>
+            <Field name="precision" type="int">5</Field>
+        </Object>
+        <Field name="showSelectedFiles" type="bool">false</Field>
+        <Field name="allowFileSelectionChange" type="bool">true</Field>
+        <Field name="enableWarningMessagePopups" type="bool">true</Field>
+    </Object>
+</Object>
