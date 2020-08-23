@@ -1,6 +1,7 @@
 *.ex
 *.hdf5
 *.MPI
+*.session*
 **/Make.defs.local
 /doc/html/*.html
 /doc/html/**

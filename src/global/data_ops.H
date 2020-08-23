@@ -163,6 +163,10 @@ public:
   static void multiply(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs);
 
   static void multiply(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs);
+
+  static void multiply(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs);
+
+  static void multiply(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs);
   
   static void multiply_scalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 

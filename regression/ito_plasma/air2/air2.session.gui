@@ -27,17 +27,17 @@
             <Field name="defaultOrientation" type="int">0</Field>
         </Object>
         <Object name="Annotation">
-            <Field name="x" type="int">692</Field>
+            <Field name="x" type="int">2612</Field>
             <Field name="y" type="int">103</Field>
             <Field name="width" type="int">517</Field>
             <Field name="height" type="int">782</Field>
             <Field name="visible" type="bool">false</Field>
             <Field name="posted" type="bool">false</Field>
-            <Field name="activeTab" type="int">5</Field>
+            <Field name="activeTab" type="int">0</Field>
         </Object>
         <Field name="postWhenShown" type="bool">false</Field>
         <Object name="Color tables">
-            <Field name="x" type="int">1603</Field>
+            <Field name="x" type="int">1607</Field>
             <Field name="y" type="int">0</Field>
             <Field name="width" type="int">603</Field>
             <Field name="height" type="int">1080</Field>
@@ -46,54 +46,45 @@
             <Field name="currentColorTable" type="string">hot</Field>
         </Object>
         <Object name="Information">
-            <Field name="x" type="int">4</Field>
-            <Field name="y" type="int">499</Field>
+            <Field name="x" type="int">8</Field>
+            <Field name="y" type="int">525</Field>
             <Field name="width" type="int">996</Field>
             <Field name="height" type="int">386</Field>
             <Field name="visible" type="bool">false</Field>
         </Object>
         <Object name="Set save options">
-            <Field name="x" type="int">745</Field>
-            <Field name="y" type="int">123</Field>
+            <Field name="x" type="int">749</Field>
+            <Field name="y" type="int">99</Field>
             <Field name="width" type="int">411</Field>
             <Field name="height" type="int">792</Field>
-            <Field name="visible" type="bool">true</Field>
-            <Field name="posted" type="bool">false</Field>
-        </Object>
-        <Object name="View">
-            <Field name="x" type="int">767</Field>
-            <Field name="y" type="int">200</Field>
-            <Field name="width" type="int">495</Field>
-            <Field name="height" type="int">587</Field>
             <Field name="visible" type="bool">false</Field>
             <Field name="posted" type="bool">false</Field>
-            <Field name="activeTab" type="int">0</Field>
         </Object>
         <Object name="MainWin">
-            <Field name="x" type="int">0</Field>
-            <Field name="y" type="int">0</Field>
-            <Field name="width" type="int">447</Field>
+            <Field name="x" type="int">1941</Field>
+            <Field name="y" type="int">2</Field>
+            <Field name="width" type="int">398</Field>
             <Field name="height" type="int">1015</Field>
             <Field name="SPLITTER_VALUES_V2" type="floatVector">0 0.7627119 0.2327684 </Field>
         </Object>
         <Object name="Boundary plot attributes">
-            <Field name="x" type="int">1419</Field>
-            <Field name="y" type="int">12</Field>
+            <Field name="x" type="int">1423</Field>
+            <Field name="y" type="int">38</Field>
             <Field name="width" type="int">501</Field>
             <Field name="height" type="int">978</Field>
             <Field name="visible" type="bool">false</Field>
             <Field name="posted" type="bool">false</Field>
         </Object>
         <Object name="Mesh plot attributes">
-            <Field name="x" type="int">723</Field>
-            <Field name="y" type="int">214</Field>
+            <Field name="x" type="int">727</Field>
+            <Field name="y" type="int">240</Field>
             <Field name="width" type="int">454</Field>
             <Field name="height" type="int">559</Field>
             <Field name="visible" type="bool">false</Field>
             <Field name="posted" type="bool">false</Field>
         </Object>
         <Object name="Pseudocolor plot attributes">
-            <Field name="x" type="int">2054</Field>
+            <Field name="x" type="int">2058</Field>
             <Field name="y" type="int">282</Field>
             <Field name="width" type="int">882</Field>
             <Field name="height" type="int">798</Field>
@@ -101,15 +92,15 @@
             <Field name="posted" type="bool">false</Field>
         </Object>
         <Object name="Subset plot attributes">
-            <Field name="x" type="int">752</Field>
-            <Field name="y" type="int">134</Field>
+            <Field name="x" type="int">756</Field>
+            <Field name="y" type="int">160</Field>
             <Field name="width" type="int">397</Field>
             <Field name="height" type="int">720</Field>
             <Field name="visible" type="bool">false</Field>
             <Field name="posted" type="bool">false</Field>
         </Object>
         <Object name="Isosurface operator attributes">
-            <Field name="x" type="int">2311</Field>
+            <Field name="x" type="int">2315</Field>
             <Field name="y" type="int">751</Field>
             <Field name="width" type="int">939</Field>
             <Field name="height" type="int">329</Field>
@@ -117,7 +108,7 @@
             <Field name="posted" type="bool">false</Field>
         </Object>
         <Object name="Slice operator attributes">
-            <Field name="x" type="int">1543</Field>
+            <Field name="x" type="int">1547</Field>
             <Field name="y" type="int">373</Field>
             <Field name="width" type="int">722</Field>
             <Field name="height" type="int">707</Field>

@@ -615,9 +615,9 @@ void poisson_multifluid_gmg::set_coefficients(){
   const int ghosts = 1;
   const Real eps0  = m_compgeom->get_eps0();
   
-  m_amr->allocate(m_aco,       m_realm, ncomps, ghosts);
-  m_amr->allocate(m_bco,       m_realm, ncomps, ghosts);
-  m_amr->allocate(m_bco_irreg, m_realm, ncomps, ghosts);
+  m_amr->allocate(m_aco,       m_realm, ncomps);
+  m_amr->allocate(m_bco,       m_realm, ncomps);
+  m_amr->allocate(m_bco_irreg, m_realm, ncomps);
 
   data_ops::set_value(m_aco,       0.0);  // Always zero for poisson equation, but that is done from alpha. 
   data_ops::set_value(m_bco,       eps0); // Will override this later

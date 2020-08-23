@@ -84,8 +84,8 @@ void ito_plasma_godunov::allocate_internals(){
   m_amr->allocate(m_fluid_scratch1,    m_fluid_realm,    m_phase, 1);
   m_amr->allocate(m_fluid_scratchD,    m_fluid_realm,    m_phase, SpaceDim);
   
-  m_amr->allocate(m_particle_scratch1, m_particle_realm, m_phase, 1);
-  m_amr->allocate(m_particle_scratchD, m_particle_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_particle_scratch1,  m_particle_realm, m_phase, 1);
+  m_amr->allocate(m_particle_scratchD,  m_particle_realm, m_phase, SpaceDim);
 
   m_amr->allocate(m_J,            m_fluid_realm, m_phase, SpaceDim);
   m_amr->allocate(m_scratch1,     m_fluid_realm, m_phase, 1);
@@ -93,6 +93,7 @@ void ito_plasma_godunov::allocate_internals(){
   m_amr->allocate(m_conduct_cell, m_fluid_realm, m_phase, 1);
   m_amr->allocate(m_conduct_face, m_fluid_realm, m_phase, 1);
   m_amr->allocate(m_conduct_eb,   m_fluid_realm, m_phase, 1);
+  m_amr->allocate(m_scratch_eb,   m_fluid_realm, m_phase, 1);
   
 }
 
@@ -599,6 +600,9 @@ void ito_plasma_godunov::compute_conductivity(){
     }
   }
 
+  // Scale by unit charge
+  data_ops::scale(m_conduct_cell, units::s_Qe);
+
   m_amr->average_down(m_conduct_cell,     m_fluid_realm, m_phase);
   m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
 
@@ -606,16 +610,17 @@ void ito_plasma_godunov::compute_conductivity(){
   data_ops::average_cell_to_face_allcomps(m_conduct_face, m_conduct_cell, m_amr->get_domains());
 
   // This code extrapolates the conductivity to the EB. This should actually be the EB centroid but since the stencils
-  // for EB extrapolation can be a bit nasty (e.g. negative weights), we do the centroid instead and take that as an approximation. 
+  // for EB extrapolation can be a bit nasty (e.g. negative weights), we do the centroid instead and take that as an approximation.
+#if 1
   const irreg_amr_stencil<centroid_interp>& ebsten = m_amr->get_centroid_interp_stencils(m_fluid_realm, m_phase);
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     ebsten.apply(m_conduct_eb, m_conduct_cell, lvl);
   }
-
-#if 1
+#else
   data_ops::set_value(m_conduct_eb, 0.0);
   data_ops::incr(m_conduct_eb, m_conduct_cell, 1.0);
 #endif
+
 }
 
 void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
@@ -642,9 +647,20 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
   m_amr->alias(bco_gas,     phase::gas, bco);
   m_amr->alias(bco_irr_gas, phase::gas, bco_irr);
 
-  // Increment with conductivity
-  data_ops::incr(bco_gas,     m_conduct_face, units::s_Qe*a_dt/(units::s_eps0));
-  data_ops::incr(bco_irr_gas, m_conduct_eb,   units::s_Qe*a_dt/(units::s_eps0));
+#if 0 // Original code, assumes eps = 1 in the gas
+  data_ops::incr(bco_gas,     m_conduct_face, a_dt/(units::s_eps0));
+  data_ops::incr(bco_irr_gas, m_conduct_eb,   a_dt/(units::s_eps0));
+#else
+
+  data_ops::scale(m_conduct_face, a_dt/units::s_eps0);
+  data_ops::scale(m_conduct_eb,   a_dt/units::s_eps0);
+
+  data_ops::multiply(m_conduct_face, bco_gas);
+  data_ops::multiply(m_conduct_eb,   bco_irr_gas);
+
+  data_ops::incr(bco_gas,     m_conduct_face, 1.0);
+  data_ops::incr(bco_irr_gas, m_conduct_eb,   1.0);
+#endif
 
   // Set up the multigrid solver
   poisson->setup_operator_factory();

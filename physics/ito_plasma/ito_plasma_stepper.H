@@ -232,11 +232,11 @@ namespace physics {
 
       // Storage for current density. This is defined over the particle realm. 
       EBAMRCellData m_J;
-      EBAMRCellData m_fluid_scratch1;    // Scratch storage on the fluid realm with 1 component
-      EBAMRCellData m_fluid_scratchD;    // Scratch storage on the fluid realm with SpaceDim components
+      EBAMRCellData m_fluid_scratch1;     // Scratch storage on the fluid realm with 1 component
+      EBAMRCellData m_fluid_scratchD;     // Scratch storage on the fluid realm with SpaceDim components
 
-      EBAMRCellData m_particle_scratch1; // Scratch storage on the particle realm with 1 component
-      EBAMRCellData m_particle_scratchD; // Scratch storage on the particle realm with SpaceDim components
+      EBAMRCellData m_particle_scratch1;  // Scratch storage on the particle realm with 1 component
+      EBAMRCellData m_particle_scratchD;  // Scratch storage on the particle realm with SpaceDim components
 
 
       bool load_balance_particle_realm(Vector<Vector<int> >&            a_procs,

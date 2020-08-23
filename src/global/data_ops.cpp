@@ -1148,6 +1148,31 @@ void data_ops::multiply(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>&
   }
 }
 
+void data_ops::multiply(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::multiply(*a_lhs[lvl], *a_rhs[lvl]);
+  }
+}
+
+void data_ops::multiply(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs){
+  const int ncomp = a_lhs.nComp();
+
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    BaseIVFAB<Real>& lhs       = a_lhs[dit()];
+    const BaseIVFAB<Real>& rhs = a_rhs[dit()];
+    const EBGraph& ebgraph     = lhs.getEBGraph();
+    const IntVectSet& ivs      = lhs.getIVS() & rhs.getIVS();
+
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      for (int comp = 0; comp < ncomp; comp++){
+	lhs(vof, comp) *= rhs(vof, comp);
+      }
+    }
+  }
+}
+
 void data_ops::multiply_scalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::multiply_scalar(*a_lhs[lvl], *a_rhs[lvl]);

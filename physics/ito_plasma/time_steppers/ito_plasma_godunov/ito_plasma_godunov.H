@@ -47,6 +47,7 @@ namespace physics {
       EBAMRCellData m_conduct_cell;
       EBAMRFluxData m_conduct_face;
       EBAMRIVData   m_conduct_eb;
+      EBAMRIVData   m_scratch_eb;
 
       bool m_use_old_dt;
       
