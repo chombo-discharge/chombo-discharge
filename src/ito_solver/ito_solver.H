@@ -32,7 +32,6 @@
 class ito_solver {
 public:
 
-
   /*!
     @brief Default ctor
   */
@@ -647,11 +646,6 @@ protected:
     @brief Diffusion-centerer field used for interpolating diffusion coefficients
   */
   EBAMRCellData m_diffco_cell;
-
-  /*!
-    @brief Number of particles per cell (note, this is in terms of the WEIGHT of the particles)
-  */
-  EBAMRCellData m_ppc;
 
   /*!
     @brief Scratch storage for holding the non-conservative deposition

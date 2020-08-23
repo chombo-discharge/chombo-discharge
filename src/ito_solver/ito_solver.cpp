@@ -679,7 +679,7 @@ void ito_solver::allocate_internals(){
     m_amr->allocate_ptr(m_velo_cell);
   }
 
-  // Only allocate memory if we actually a diffusion solver
+  // Only allocate memory if we actually have a diffusion solver
   if(m_diffusive){
     m_amr->allocate(m_diffco_cell, m_realm, m_phase, 1);
   }
