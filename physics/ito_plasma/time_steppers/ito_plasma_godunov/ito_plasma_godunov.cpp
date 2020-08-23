@@ -599,7 +599,7 @@ void ito_plasma_godunov::compute_conductivity(){
   }
 
   // Scale by unit charge
-  data_ops::scale(m_conduct_cell, units::s_Qe;)
+  data_ops::scale(m_conduct_cell, units::s_Qe);
 
   m_amr->average_down(m_conduct_cell,     m_fluid_realm, m_phase);
   m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
