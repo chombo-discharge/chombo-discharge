@@ -268,4 +268,14 @@ inline void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_pa
   }
 }
 
+inline Vector<int> ito_plasma_physics::get_particle_count(const Vector<List<ito_particle>* >& a_particles){
+  Vector<int> ret(a_particles.size());
+
+  for (int i = 0; i < a_particles.size(); i++){
+    ret[i] = a_particles[i]->length();
+  }
+
+  return ret;
+}
+
 #endif

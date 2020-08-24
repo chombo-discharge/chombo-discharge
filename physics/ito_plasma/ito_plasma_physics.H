@@ -234,6 +234,11 @@ namespace physics {
 					  const RealVect      a_blobCenter,
 					  const Real          a_blobRadius,
 					  const Real          a_weights);
+
+      /*!
+	@brief Get the particle count
+      */
+      inline Vector<int> get_particle_count(const Vector<List<ito_particle>* >& a_particles);
     };
 
     /*!
