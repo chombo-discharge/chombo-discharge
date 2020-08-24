@@ -13,6 +13,10 @@
 using namespace physics::ito_plasma;
 
 ito_plasma_physics::ito_plasma_physics(){
+
+  // Initialize RNGs
+  m_udist11 = std::uniform_real_distribution<Real>(-1., 1.);
+  m_udist01 = std::uniform_real_distribution<Real>(0., 1.);
 }
 
 ito_plasma_physics::~ito_plasma_physics(){

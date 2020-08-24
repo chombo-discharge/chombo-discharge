@@ -23,9 +23,9 @@ namespace physics {
     public:
 
       /*!
-	@brief Not allowed because I want a clean interface. 
+	@brief Allow, but you need full ctor to do anything. 
       */
-      ito_reaction() = delete;
+      ito_reaction() = default;
 
       /*!
 	@brief Full Ctor, includes possible photons. 

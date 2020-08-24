@@ -18,9 +18,6 @@ ito_plasma_air2::ito_plasma_air2(){
 
   ParmParse pp("ito_plasma_air2");
   Vector<Real> v;
-
-  ito_reaction r1({0,1}, {0,1}, {0,0,0});
-  
   
   // Stuff for initial particles
   pp.get   ("seed",            m_seed);
@@ -61,13 +58,16 @@ ito_plasma_air2::ito_plasma_air2(){
 
   // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
   m_seed += procID();
+  m_rng   = std::mt19937_64(m_seed);
 
-  m_rng     = std::mt19937_64(m_seed);
-  m_udist11 = std::uniform_real_distribution<Real>(-1., 1.);
 
   List<ito_particle>& electrons = m_ito_species[m_electron_idx]->get_initial_particles();
   List<ito_particle>& positives = m_ito_species[m_positive_idx]->get_initial_particles();
   this->draw_gaussian_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight);
+
+
+  // m_Reactions.emplace("impact_ionization", ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
+  // m_Reactions.emplace("photo_excitation",  ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
 }
 
 ito_plasma_air2::~ito_plasma_air2(){
@@ -155,6 +155,8 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
     num_electrons += lit().mass();
   }
 
+  Vector<int> particle_count = this->get_particle_count(a_particles);
+
   // Some parameters
   const Real E       = a_E.vectorLength();
   const Real alpha   = this->compute_alpha(a_E);
@@ -179,7 +181,7 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   // Add electron-ion pairs
   this->add_particles(electrons, num_ionizations, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
   this->add_particles(posIons,   num_ionizations, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-  
+
   // Photogeneration and photoionization
   this->add_photons(*a_newPhotons[m_photonZ_idx], *m_rte_species[m_photonZ_idx], num_photoexc, a_pos, a_lo, a_hi,
 		    a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);

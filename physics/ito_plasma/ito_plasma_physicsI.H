@@ -19,13 +19,13 @@ inline RealVect ito_plasma_physics::random_position(const RealVect a_pos,
 						    const RealVect a_lo,
 						    const RealVect a_hi,
 						    const RealVect a_bndryCentroid,
-						    const RealVect a_normal,
+						    const RealVect a_bndryNormal,
 						    const Real     a_dx,
 						    const Real     a_kappa) const {
 
   RealVect pos;
   if(a_kappa < 1.0){ // Rejection sampling. 
-    pos = this->random_position(a_lo, a_hi, a_bndryCentroid, a_normal);
+    pos = this->random_position(a_lo, a_hi, a_bndryCentroid, a_bndryNormal);
   }
   else{ // Regular cell. Get a position. 
     pos = this->random_position(a_lo, a_hi);
@@ -39,14 +39,14 @@ inline RealVect ito_plasma_physics::random_position(const RealVect a_pos,
 inline RealVect ito_plasma_physics::random_position(const RealVect a_lo,
 						    const RealVect a_hi,
 						    const RealVect a_bndryCentroid,
-						    const RealVect a_normal) const {
+						    const RealVect a_bndryNormal) const {
 
   RealVect pos = this->random_position(a_lo, a_hi);
-  bool valid   = PolyGeom::dot(pos-a_bndryCentroid, a_normal) >= 0.0;
+  bool valid   = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
 
   while(!valid){
     pos    = this->random_position(a_lo, a_hi);
-    valid = PolyGeom::dot(pos-a_bndryCentroid, a_normal) > 0.0;
+    valid = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
   }
 
   return pos;
@@ -122,11 +122,13 @@ inline void ito_plasma_physics::generate_particles(List<ito_particle>& a_particl
   }
   else if(a_numNewParticles < 0){ // Need to remove mass
     this->remove_particles(a_particles, -a_numNewParticles, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-
   }
 }
 
-inline void ito_plasma_physics::compute_particle_weights(int& a_weight, int& a_num, int& a_remainder, const int a_numNewParticles) const {
+inline void ito_plasma_physics::compute_particle_weights(int&      a_weight,
+							 int&      a_num,
+							 int&      a_remainder,
+							 const int a_numNewParticles) const {
   if(a_numNewParticles <= m_ppc){  
     a_weight    = 1;
     a_num       = a_numNewParticles; 
@@ -150,7 +152,7 @@ inline void ito_plasma_physics::add_particles(List<ito_particle>& a_particles,
 					      const Real          a_kappa) const {
   int weight, num, remainder;
   this->compute_particle_weights(weight, num, remainder, a_numNewParticles);
-  
+
   for (int i = 0; i < num; i++){
     const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     a_particles.add(ito_particle(weight, p));
@@ -268,7 +270,7 @@ inline void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_pa
   }
 }
 
-inline Vector<int> ito_plasma_physics::get_particle_count(const Vector<List<ito_particle>* >& a_particles){
+inline Vector<int> ito_plasma_physics::get_particle_count(const Vector<List<ito_particle>* >& a_particles) const {
   Vector<int> ret(a_particles.size());
 
   for (int i = 0; i < a_particles.size(); i++){
@@ -278,20 +280,22 @@ inline Vector<int> ito_plasma_physics::get_particle_count(const Vector<List<ito_
   return ret;
 }
 
-inline void ito_plasma_physics::tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt){
+inline void ito_plasma_physics::tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const {
 
-  for (const auto& r : m_reactions){
-    const int num_reactions = this->poisson_reaction(r.propensity(a_particles), a_dt);
+  for (const auto& r : m_Reactions){
+    const int num_reactions = this->poisson_reaction(r.second.propensity(a_particles), a_dt);
 
-    r.jump_state(a_particles, a_newPhotons, num_reactions);
+    r.second.jump_state(a_particles, a_newPhotons, num_reactions);
   }
 }
 
-inline void ito_plasma_physics::ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt){
+inline void ito_plasma_physics::ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const {
 
   Real t   = 0.0;
   Real tau = 0.0;
   Real A   = 0.0;
+  Real u1  = 0.0;
+  Real u2  = 0.0;
   int  r   = 0;
 
   const int N = m_reactions.size();
@@ -308,8 +312,8 @@ inline void ito_plasma_physics::ssa_step(Vector<int>& a_particles, Vector<int>& 
       A   += a[i];
     }
 
-    const Real u1 = m_udist01(m_rng);
-    const Real u2 = m_udist01(m_rng);
+    u1 = m_udist01(m_rng);
+    u2 = m_udist01(m_rng);
 
     // Time to next reaction
     tau = log(1./u1)/A;
@@ -318,6 +322,7 @@ inline void ito_plasma_physics::ssa_step(Vector<int>& a_particles, Vector<int>& 
     // Ok, time to react
     if(t <= a_dt){
 
+      r = 0;
       for (int i = 1; i < N; i++){
 	if(a[i-1] <= u2*A && u2*A < a[i]){
 	  r = i;

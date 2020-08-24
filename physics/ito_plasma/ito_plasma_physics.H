@@ -123,6 +123,9 @@ namespace physics {
 
       std::vector<ito_reaction> m_reactions;
 
+      std::map<std::string, ito_reaction> m_Reactions;
+
+
       /*!
 	@brief Draw a valid random position somewhere in a cell
       */
@@ -242,17 +245,17 @@ namespace physics {
       /*!
 	@brief Get the particle count
       */
-      inline Vector<int> get_particle_count(const Vector<List<ito_particle>* >& a_particles);
+      inline Vector<int> get_particle_count(const Vector<List<ito_particle>* >& a_particles) const;
 
       /*!
 	@brief Performing a tau-leaping step
       */
-      inline void tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt);
+      inline void tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const;
 
       /*!
 	@brief Performing an SSA step
       */
-      inline void ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt);
+      inline void ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const;
     };
   }
 }
