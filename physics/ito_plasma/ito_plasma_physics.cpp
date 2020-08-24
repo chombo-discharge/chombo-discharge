@@ -115,3 +115,86 @@ RealVect ito_plasma_physics::random_direction() const {
   return RealVect(x,y,z);
 #endif
 }
+
+bool ito_plasma_physics::valid_advance(const Vector<List<ito_particle>* >& a_particles,
+				       const Vector<int>&                  a_newParticles) const {
+  bool ret = true;
+  for (int i = 0; i < a_particles.size(); i++){
+    if(a_particles[i]->length() + a_newParticles[i] < 0){
+      ret = false;
+      break;
+    }
+  }
+
+  return ret;
+}
+
+void ito_plasma_physics::generate_particles(List<ito_particle>& a_particles,
+					    const int           a_numNewParticles,
+					    const RealVect      a_pos,
+					    const RealVect      a_lo,
+					    const RealVect      a_hi,
+					    const RealVect      a_bndryCentroid,
+					    const RealVect      a_bndryNormal,
+					    const Real          a_dx,
+					    const Real          a_kappa) const {
+
+  if(a_numNewParticles > 0){ // We will add at most m_ppc particles
+    this->add_particles(a_particles, a_numNewParticles, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  }
+  else if(a_numNewParticles < 0){ // Need to remove mass
+    this->remove_particles(a_particles, -a_numNewParticles, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
+  }
+}
+
+void ito_plasma_physics::compute_particle_weights(int& a_weight, int& a_num, int& a_remainder, const int a_numNewParticles) const {
+  if(a_numNewParticles <= m_ppc){  
+    a_weight    = 1;
+    a_num       = a_numNewParticles; 
+    a_remainder = 0;
+  }
+  else{ // Add superparticles
+    a_weight    = a_numNewParticles/m_ppc;
+    a_remainder = a_numNewParticles%m_ppc;
+    a_num       = (a_remainder == 0) ? m_ppc : m_ppc - 1;
+  }
+}
+
+void ito_plasma_physics::add_particles(List<ito_particle>& a_particles,
+				       const int           a_numNewParticles,
+				       const RealVect      a_pos,
+				       const RealVect      a_lo,
+				       const RealVect      a_hi,
+				       const RealVect      a_bndryCentroid,
+				       const RealVect      a_bndryNormal,
+				       const Real          a_dx,
+				       const Real          a_kappa) const {
+  int weight, num, remainder;
+  this->compute_particle_weights(weight, num, remainder, a_numNewParticles);
+  
+  for (int i = 0; i < num; i++){
+    const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    a_particles.add(ito_particle(weight, p));
+  }
+
+  if(remainder > 0){ // Rest of weight in case we got superparticles
+    const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    a_particles.add(ito_particle(weight + remainder, p));
+  }
+}
+
+void ito_plasma_physics::remove_particles(List<ito_particle>& a_particles,
+					  const int           a_numParticlesToRemove,
+					  const RealVect      a_pos,
+					  const RealVect      a_lo,
+					  const RealVect      a_hi,
+					  const RealVect      a_bndryCentroid,
+					  const RealVect      a_normal,
+					  const Real          a_dx,
+					  const Real          a_kappa) const {
+  MayDay::Abort("ito_plasma_physics::remove_particles - not implemented");
+}
+
+
+

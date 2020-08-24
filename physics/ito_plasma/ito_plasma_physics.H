@@ -102,6 +102,7 @@ namespace physics {
 					    const Real                    a_dx,
 					    const Real                    a_kappa, 
 					    const Real                    a_dt) const = 0;
+
       
     protected:
 
@@ -114,6 +115,7 @@ namespace physics {
 
       int m_num_ito_species;
       int m_num_rte_species;
+      int m_ppc;
 
       /*!
 	@brief Draw a valid random position somewhere in a cell
@@ -140,11 +142,61 @@ namespace physics {
       */
       RealVect random_position(const RealVect a_lo, const RealVect a_hi) const;
 
-
       /*!
 	@brief Draw a random direction in space
       */
       RealVect random_direction() const;
+
+      /*!
+	@brief Check if advance is valid. This returns false if there is a negative number of particles in the cell
+      */
+      bool valid_advance(const Vector<List<ito_particle>* >& a_particles,
+			 const Vector<int>&                  a_newParticles) const;
+
+      /*!
+	@brief Add particles
+      */
+      void generate_particles(List<ito_particle>& a_particles,
+			      const int           a_numNewParticles,
+			      const RealVect      a_pos,
+			      const RealVect      a_lo,
+			      const RealVect      a_hi,
+			      const RealVect      a_bndryCentroid,
+			      const RealVect      a_normal,
+			      const Real          a_dx,
+			      const Real          a_kappa) const;
+
+      /*!
+	@brief Add particles
+      */
+      void add_particles(List<ito_particle>& a_particles,
+			 const int           a_numNewParticles,
+			 const RealVect      a_pos,
+			 const RealVect      a_lo,
+			 const RealVect      a_hi,
+			 const RealVect      a_bndryCentroid,
+			 const RealVect      a_bndryNormal,
+			 const Real          a_dx,
+			 const Real          a_kappa) const;
+
+      /*!
+	@brief Remove particles
+      */
+      void remove_particles(List<ito_particle>& a_particles,
+			    const int           a_numParticlesToRemove,
+			    const RealVect      a_pos,
+			    const RealVect      a_lo,
+			    const RealVect      a_hi,
+			    const RealVect      a_bndryCentroid,
+			    const RealVect      a_normal,
+			    const Real          a_dx,
+			    const Real          a_kappa) const;
+
+      /*!
+	@brief Compute particle weights for superparticles
+      */
+      void compute_particle_weights(int& a_weight, int& a_num, int& remainder, const int a_numNewParticles) const;
+
     };
   }
 }

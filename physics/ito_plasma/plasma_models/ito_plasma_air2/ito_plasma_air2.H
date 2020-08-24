@@ -70,9 +70,6 @@ namespace physics {
       int m_positive_idx;
       int m_photonZ_idx;
 
-      // PPC for reactions
-      int m_ppc;
-      
 
       // Pressure, neutral number density etc
       Real m_N;      
