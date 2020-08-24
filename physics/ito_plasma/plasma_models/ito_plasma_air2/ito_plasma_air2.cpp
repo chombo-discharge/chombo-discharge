@@ -209,84 +209,20 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   const int num_ionizations = this->poisson_reaction(ionizationProp, a_dt);
   const int num_recomb      = this->poisson_reaction(recombProp, a_dt);
   const int num_photoexc    = this->poisson_reaction(photoexcProp, a_dt);
-  
-  if(num_ionizations < m_ppc){
-    for (int i = 0; i < num_ionizations; i++){
-      const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-      
-      a_particles[m_electron_idx]->add(ito_particle(1.0, p));
-      a_particles[m_positive_idx]->add(ito_particle(1.0, p));
-    }
-  }
-  else{
-    const int avgWeight = floor(num_ionizations/m_ppc);
-    for (int i = 0; i < m_ppc; i++){
-      const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-      
-      a_particles[m_electron_idx]->add(ito_particle(avgWeight, p));
-      a_particles[m_positive_idx]->add(ito_particle(avgWeight, p));
-    }
-  }
-    // const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-    // a_particles[m_electron_idx]->add(ito_particle(1.0*remainder, p));
-    // a_particles[m_positive_idx]->add(ito_particle(1.0*remainder, p));
 
+  List<ito_particle>& electrons = *a_particles[m_electron_idx];
+  List<ito_particle>& posIons   = *a_particles[m_positive_idx];
+  
+  // Add electron-ion pairs
+  this->add_particles(electrons, num_ionizations, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  this->add_particles(posIons,   num_ionizations, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  
   // Photogeneration and photoionization
-  this->add_photons(*a_newPhotons[m_photonZ_idx], num_photoexc, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  this->add_photons(*a_newPhotons[m_photonZ_idx], *m_rte_species[m_photonZ_idx], num_photoexc, a_pos, a_lo, a_hi,
+		    a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
+  // Photionization
   this->add_photoionization(*a_particles[m_electron_idx], *a_particles[m_positive_idx], *a_photons[m_photonZ_idx]);
-}
-
-void ito_plasma_air2::add_photons(List<photon>&  a_photons,
-				  const int      a_num_photons,
-				  const RealVect a_pos,
-				  const RealVect a_lo,
-				  const RealVect a_hi,
-				  const RealVect a_bndryCentroid,
-				  const RealVect a_bndryNormal,
-				  const Real     a_dx,
-				  const Real     a_kappa) const {
-  a_photons.clear();
-
-  int weight;
-  int num;
-  int remainder;
-  if(a_num_photons <= m_ppc){ // Physical photons
-    weight    = 1;
-    num       = a_num_photons + 1; // Because loop does - 1
-    remainder = 0;
-  }
-  else{ // Superphotons
-    num       = m_ppc;
-    weight    = a_num_photons/m_ppc;
-    remainder = a_num_photons % m_ppc;
-  }
-  
-  for (int i = 0; i < num - 1; i++){
-    const RealVect P = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-    const RealVect V = units::s_c0*random_direction();
-      
-    a_photons.add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), weight));
-  }
-
-  // If we used superphotons the last photon gets some extra oomph. 
-  if(remainder > 0){
-    const RealVect P = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-    const RealVect V = units::s_c0*random_direction();
-    a_photons.add(photon(a_pos, V, m_rte_species[m_photonZ_idx]->get_kappa(P), weight + remainder));
-  }
-}
-
-void ito_plasma_air2::add_photoionization(List<ito_particle>& a_electrons,
-					  List<ito_particle>& a_positive,
-					  List<photon>&       a_photons) const {
-  for (ListIterator<photon> lit(a_photons); lit.ok(); ++lit){
-    const photon& phot  = lit();
-    const RealVect pos  = phot.position();
-    const Real mass     = phot.mass();
-
-    a_electrons.add(ito_particle(mass, pos));
-    a_positive.add(ito_particle(mass,  pos));
-  }
 }
 
 void ito_plasma_air2::advance_reaction_network_ssa(Vector<List<ito_particle>* >& a_particles,
@@ -302,22 +238,6 @@ void ito_plasma_air2::advance_reaction_network_ssa(Vector<List<ito_particle>* >&
 						   const Real                    a_dx,
 						   const Real                    a_kappa, 
 						   const Real                    a_dt) const {
-}
-
-int ito_plasma_air2::poisson_reaction(const Real a_propensity, const Real a_dt) const{
-  int value = 0;
-  const Real mean = a_propensity*a_dt;
-
-  if(mean < m_poisson_switch){
-    std::poisson_distribution<int> dist(mean);
-    value = dist(m_rng);
-  }
-  else{
-    std::normal_distribution<double> dist(mean, sqrt(mean));
-    value = dist(m_rng);
-  }
-
-  return Max(0,value);
 }
 
 Real ito_plasma_air2::excitation_rates(const Real a_E) const{

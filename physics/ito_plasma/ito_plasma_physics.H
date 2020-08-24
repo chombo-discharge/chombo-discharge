@@ -116,6 +116,7 @@ namespace physics {
       int m_num_ito_species;
       int m_num_rte_species;
       int m_ppc;
+      int m_poisson_switch;
 
       /*!
 	@brief Draw a valid random position somewhere in a cell
@@ -193,9 +194,35 @@ namespace physics {
 			    const Real          a_kappa) const;
 
       /*!
+	@brief Add photoionization for specific transition
+      */
+      void add_photoionization(List<ito_particle>& a_electrons,
+			       List<ito_particle>& a_positive,
+			       const List<photon>& a_photons) const;
+
+      /*!
+	@brief Add photons
+      */
+      void add_photons(List<photon>&      a_photons,
+		       const rte_species& a_species,
+		       const int          a_num_photons,
+		       const RealVect     a_pos,
+		       const RealVect     a_lo,
+		       const RealVect     a_hi,
+		       const RealVect     a_bndryCentroid,
+		       const RealVect     a_bndryNormal,
+		       const Real         a_dx,
+		       const Real         a_kappa) const;
+
+      /*!
 	@brief Compute particle weights for superparticles
       */
       void compute_particle_weights(int& a_weight, int& a_num, int& remainder, const int a_numNewParticles) const;
+
+      /*!
+	@brief Poisson reaction
+      */
+      int poisson_reaction(const Real a_propensity, const Real a_dt) const;
 
     };
   }

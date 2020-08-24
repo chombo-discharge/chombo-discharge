@@ -81,7 +81,6 @@ namespace physics {
       Real m_pO2;    
       Real m_photoi_factor;
       Real m_tau_switch;
-      Real m_poisson_switch;
 
       // Functions for drawing initial particles
       void draw_initial_particles();
@@ -124,22 +123,19 @@ namespace physics {
 					const Real                    a_dt) const;
 
       // Add a_num_photons to the list. Photon position is random. 
-      void add_photons(List< photon>& a_photons,
-		       const int      a_num_photons,
-		       const RealVect a_pos,
-		       const RealVect a_lo,
-		       const RealVect a_hi,
-		       const RealVect a_bndryCentroid,
-		       const RealVect a_bndryNormal,
-		       const Real     a_dx,
-		       const Real     a_kappa) const;
+      // void add_photons(List< photon>& a_photons,
+      // 		       const int      a_num_photons,
+      // 		       const RealVect a_pos,
+      // 		       const RealVect a_lo,
+      // 		       const RealVect a_hi,
+      // 		       const RealVect a_bndryCentroid,
+      // 		       const RealVect a_bndryNormal,
+      // 		       const Real     a_dx,
+      // 		       const Real     a_kappa) const;
       
-      void add_photoionization(List<ito_particle>& a_electrons,
-			       List<ito_particle>& a_positive,
-			       List<photon>&       a_photons) const;
-
-      // Poisson reactions for tau-leaping
-      int poisson_reaction(const Real a_propensity, const Real a_dt) const;
+      // void add_photoionization(List<ito_particle>& a_electrons,
+      // 			       List<ito_particle>& a_positive,
+      // 			       List<photon>&       a_photons) const;
     };
 
     

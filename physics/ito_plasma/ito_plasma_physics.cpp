@@ -6,6 +6,7 @@
 */
 
 #include "ito_plasma_physics.H"
+#include "units.H"
 
 #include <PolyGeom.H>
 
@@ -196,5 +197,64 @@ void ito_plasma_physics::remove_particles(List<ito_particle>& a_particles,
   MayDay::Abort("ito_plasma_physics::remove_particles - not implemented");
 }
 
+void ito_plasma_physics::add_photons(List<photon>&      a_photons,
+				     const rte_species& a_species,
+				     const int          a_num_photons,
+				     const RealVect     a_pos,
+				     const RealVect     a_lo,
+				     const RealVect     a_hi,
+				     const RealVect     a_bndryCentroid,
+				     const RealVect     a_bndryNormal,
+				     const Real         a_dx,
+				     const Real         a_kappa) const {
+  a_photons.clear();
 
+  int weight, num, remainder;
+  this->compute_particle_weights(weight, num, remainder, a_num_photons);
+  
+  for (int i = 0; i < num; i++){
+    const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect v = units::s_c0*random_direction();
+      
+    a_photons.add(photon(a_pos, v, a_species.get_kappa(p), weight));
+  }
+
+  // If we used superphotons the last photon gets some extra oomph. 
+  if(remainder > 0){
+    const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect v = units::s_c0*random_direction();
+    a_photons.add(photon(a_pos, v, a_species.get_kappa(p), weight + remainder));
+  }
+}
+
+void ito_plasma_physics::add_photoionization(List<ito_particle>& a_electrons,
+					     List<ito_particle>& a_positive,
+					     const List<photon>& a_photons) const {
+  
+  for (ListIterator<photon> lit(a_photons); lit.ok(); ++lit){
+    const photon& phot  = lit();
+    const RealVect pos  = phot.position();
+    const Real mass     = phot.mass();
+
+    a_electrons.add(ito_particle(mass, pos));
+    a_positive.add(ito_particle(mass,  pos));
+  }
+}
+
+int ito_plasma_physics::poisson_reaction(const Real a_propensity, const Real a_dt) const{
+  
+  int value = 0;
+  const Real mean = a_propensity*a_dt;
+
+  if(mean < m_poisson_switch){
+    std::poisson_distribution<int> dist(mean);
+    value = dist(m_rng);
+  }
+  else{
+    std::normal_distribution<double> dist(mean, sqrt(mean));
+    value = dist(m_rng);
+  }
+
+  return Max(0,value);
+}
 
