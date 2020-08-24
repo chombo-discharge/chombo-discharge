@@ -18,6 +18,8 @@ ito_plasma_air2::ito_plasma_air2(){
 
   ParmParse pp("ito_plasma_air2");
   Vector<Real> v;
+
+  reaction r1({0,1}, {0,1}, {0,0,0});
   
   // Stuff for initial particles
   pp.get   ("seed",            m_seed);

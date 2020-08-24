@@ -252,6 +252,47 @@ namespace physics {
 	       const Vector<int>& a_photon_products){
 	this->define_reaction(a_reactants, a_particle_products, a_photon_products);
       }
+
+      /*!
+	@brief Better, alternative ctor
+      */
+      reaction(const std::initializer_list<int> a_reactants,
+	       const std::initializer_list<int> a_particle_products,
+	       const std::initializer_list<int> a_photon_products){
+	m_reactants.resize(0);
+	m_particle_products.resize(0);
+	m_photon_products.resize(0);
+
+	for (const auto& r : a_reactants){
+	  m_reactants.push_back(r);
+	}
+
+	for (const auto& r : a_particle_products){
+	  m_particle_products.push_back(r);
+	}
+
+	for (const auto& r : a_photon_products){
+	  m_photon_products.push_back(r);
+	}
+      }
+
+      /*!
+	@brief Partial ctor. No photons generated. 
+      */
+      reaction(const std::initializer_list<int> a_reactants,
+	       const std::initializer_list<int> a_particle_products){
+	m_reactants.resize(0);
+	m_particle_products.resize(0);
+	m_photon_products.resize(0);
+
+	for (const auto& r : a_reactants){
+	  m_reactants.push_back(r);
+	}
+
+	for (const auto& r : a_particle_products){
+	  m_particle_products.push_back(r);
+	}
+      }
       
       ~reaction (){}
 
