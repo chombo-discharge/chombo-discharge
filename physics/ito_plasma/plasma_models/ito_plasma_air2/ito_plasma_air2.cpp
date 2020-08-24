@@ -119,7 +119,7 @@ Vector<Real> ito_plasma_air2::compute_ito_diffusion(const Real         a_time,
   return D;
 }
 
-void ito_plasma_air2::update_reaction_rates(const RealVect a_E) const{
+void ito_plasma_air2::update_reaction_rates(const RealVect a_E, const Real a_dx, const Real a_kappa) const{
 
   // Compute the reaction rates. 
   const Real E       = a_E.vectorLength();
@@ -132,37 +132,37 @@ void ito_plasma_air2::update_reaction_rates(const RealVect a_E) const{
   m_reactions["photo_excitation"].rate()  = alpha*velo*xfactor;
 }
 
-void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-					       Vector<List<photon>* >&       a_photons,
-					       Vector<List<photon>* >&       a_newPhotons,
-					       const RealVect                a_E,
-					       const RealVect                a_pos,
-					       const RealVect                a_centroid,
-					       const RealVect                a_bndryCentroid,
-					       const RealVect                a_bndryNormal,
-					       const RealVect                a_lo,
-					       const RealVect                a_hi,
-					       const Real                    a_dx,
-					       const Real                    a_kappa, 
-					       const Real                    a_dt) const {
+// void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
+// 					       Vector<List<photon>* >&       a_photons,
+// 					       Vector<List<photon>* >&       a_newPhotons,
+// 					       const RealVect                a_E,
+// 					       const RealVect                a_pos,
+// 					       const RealVect                a_centroid,
+// 					       const RealVect                a_bndryCentroid,
+// 					       const RealVect                a_bndryNormal,
+// 					       const RealVect                a_lo,
+// 					       const RealVect                a_hi,
+// 					       const Real                    a_dx,
+// 					       const Real                    a_kappa, 
+// 					       const Real                    a_dt) const {
 
 
-  this->update_reaction_rates(a_E);
+//   this->update_reaction_rates(a_E, a_dx, a_kappa);
   
-  // Get counts. 
-  Vector<int> newPhotonCount   = Vector<int>(m_num_rte_species, 0);
-  Vector<int> oldParticleCount = this->get_particle_count(a_particles);
-  Vector<int> newParticleCount = oldParticleCount;
+//   // Get counts. 
+//   Vector<int> newPhotonCount   = Vector<int>(m_num_rte_species, 0);
+//   Vector<int> oldParticleCount = this->get_particle_count(a_particles);
+//   Vector<int> newParticleCount = oldParticleCount;
 
-  // Do a tau-leaping step
-  this->tau_leap(newParticleCount, newPhotonCount, a_dt); 
+//   // Do a tau-leaping step
+//   this->tau_leap(newParticleCount, newPhotonCount, a_dt); 
 
-  // Reconcile everything. 
-  this->reconcile_particles(a_particles, newParticleCount, oldParticleCount, a_pos, a_lo, a_hi, a_bndryCentroid,
-			    a_bndryNormal, a_dx, a_kappa);
-  this->reconcile_photons(a_newPhotons, newPhotonCount, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-  this->reconcile_photoionization(a_particles, a_photons);
-}
+//   // Reconcile everything. 
+//   this->reconcile_particles(a_particles, newParticleCount, oldParticleCount, a_pos, a_lo, a_hi, a_bndryCentroid,
+// 			    a_bndryNormal, a_dx, a_kappa);
+//   this->reconcile_photons(a_newPhotons, newPhotonCount, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+//   this->reconcile_photoionization(a_particles, a_photons);
+// }
 
 Real ito_plasma_air2::excitation_rates(const Real a_E) const{
   const Real Etd = a_E/(m_N*units::s_Td);

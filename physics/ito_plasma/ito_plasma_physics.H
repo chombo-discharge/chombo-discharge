@@ -91,24 +91,24 @@ namespace physics {
       /*!
 	@brief Update reaction rates
       */
-      virtual void update_reaction_rates(const RealVect a_E) const = 0;
+      virtual void update_reaction_rates(const RealVect a_E, const Real a_dx, const Real a_kappa) const = 0;
       
       /*!
 	@brief Reaction network advance
       */
-      virtual void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-					    Vector<List<photon>* >&       a_photons,
-					    Vector<List<photon>* >&       a_newPhotons,
-					    const RealVect                a_E,           
-					    const RealVect                a_cellPos,
-					    const RealVect                a_centroidPos,
-					    const RealVect                a_bndryCentroid,
-					    const RealVect                a_bndryNormal,
-					    const RealVect                a_lo,
-					    const RealVect                a_hi,
-					    const Real                    a_dx,
-					    const Real                    a_kappa, 
-					    const Real                    a_dt) const = 0;
+      inline void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
+					   Vector<List<photon>* >&       a_photons,
+					   Vector<List<photon>* >&       a_newPhotons,
+					   const RealVect                a_E,           
+					   const RealVect                a_cellPos,
+					   const RealVect                a_centroidPos,
+					   const RealVect                a_bndryCentroid,
+					   const RealVect                a_bndryNormal,
+					   const RealVect                a_lo,
+					   const RealVect                a_hi,
+					   const Real                    a_dx,
+					   const Real                    a_kappa, 
+					   const Real                    a_dt);
 
       
     protected:
@@ -304,6 +304,11 @@ namespace physics {
 	@brief Performing an SSA step
       */
       inline void ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const;
+
+      /*!
+	@brief Perform hybrid advance
+      */
+      inline void hybrid_advance(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt);
     };
   }
 }

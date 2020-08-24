@@ -400,4 +400,50 @@ inline void ito_plasma_physics::ssa_step(Vector<int>& a_particles, Vector<int>& 
   }
 }
 
+inline void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
+							 Vector<List<photon>* >&       a_photons,
+							 Vector<List<photon>* >&       a_newPhotons,
+							 const RealVect                a_E,           
+							 const RealVect                a_pos,
+							 const RealVect                a_centroidPos,
+							 const RealVect                a_bndryCentroid,
+							 const RealVect                a_bndryNormal,
+							 const RealVect                a_lo,
+							 const RealVect                a_hi,
+							 const Real                    a_dx,
+							 const Real                    a_kappa, 
+							 const Real                    a_dt){
+  this->update_reaction_rates(a_E, a_dx, a_kappa);
+
+  // Get particle counts. 
+  Vector<int> newPhotonCount   = Vector<int>(m_num_rte_species, 0);
+  Vector<int> oldParticleCount = this->get_particle_count(a_particles);
+  Vector<int> newParticleCount = oldParticleCount;
+
+  // Do a tau-leaping step
+  this->tau_leap(newParticleCount, newPhotonCount, a_dt); 
+
+  // Reconcile particles
+  this->reconcile_particles(a_particles,
+			    newParticleCount,
+			    oldParticleCount,
+			    a_pos,
+			    a_lo,
+			    a_hi,
+			    a_bndryCentroid,
+			    a_bndryNormal,
+			    a_dx,
+			    a_kappa);
+
+  // Generate new photons
+  this->reconcile_photons(a_newPhotons, newPhotonCount, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
+  // Run photo-reactions
+  this->reconcile_photoionization(a_particles, a_photons);
+}
+
+inline void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt){
+  this->tau_leap(a_particles, a_newPhotons, a_dt);
+}
+
 #endif

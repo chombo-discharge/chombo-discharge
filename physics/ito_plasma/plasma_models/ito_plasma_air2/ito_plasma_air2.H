@@ -43,21 +43,7 @@ namespace physics {
 					 const RealVect     a_E,
 					 const Vector<Real> a_cdr_densities) const override;
 
-      void update_reaction_rates(const RealVect a_E) const override;
-
-      void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-				    Vector<List<photon>* >&       a_photons,
-				    Vector<List<photon>* >&       a_newPhotons,
-				    const RealVect                a_E,           
-				    const RealVect                a_pos,
-				    const RealVect                a_centroid,
-				    const RealVect                a_bndryCentroid,
-				    const RealVect                a_normal,
-				    const RealVect                a_lo,
-				    const RealVect                a_hi,
-				    const Real                    a_dx,
-				    const Real                    a_kappa, 
-				    const Real                    a_dt) const override;
+      void update_reaction_rates(const RealVect a_E, const Real a_dx, const Real a_kappa) const override;
 
     protected:
 
