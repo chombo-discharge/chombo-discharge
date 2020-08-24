@@ -109,21 +109,41 @@ inline bool ito_plasma_physics::valid_advance(const Vector<List<ito_particle>* >
   return ret;
 }
 
-inline void ito_plasma_physics::generate_particles(List<ito_particle>& a_particles,
-						   const int           a_numNewParticles,
-						   const RealVect      a_pos,
-						   const RealVect      a_lo,
-						   const RealVect      a_hi,
-						   const RealVect      a_bndryCentroid,
-						   const RealVect      a_bndryNormal,
-						   const Real          a_dx,
-						   const Real          a_kappa) const {
+inline void ito_plasma_physics::reconcile_particles(Vector<List<ito_particle>* >& a_particles,
+						    const Vector<int>&            a_newNumParticles,
+						    const Vector<int>&            a_oldNumParticles,
+						    const RealVect                a_pos,
+						    const RealVect                a_lo,
+						    const RealVect                a_hi,
+						    const RealVect                a_bndryCentroid,
+						    const RealVect                a_bndryNormal,
+						    const Real                    a_dx,
+						    const Real                    a_kappa) const{
 
-  if(a_numNewParticles > 0){ // We will add at most m_ppc particles
-    this->add_particles(a_particles, a_numNewParticles, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  for (int i = 0; i < a_particles.size(); i++){
+    this->reconcile_particles(*a_particles[i], a_newNumParticles[i], a_oldNumParticles[i], a_pos, a_lo, a_hi, a_bndryCentroid,
+			      a_bndryNormal, a_dx, a_kappa);
   }
-  else if(a_numNewParticles < 0){ // Need to remove mass
-    this->remove_particles(a_particles, -a_numNewParticles, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+}
+
+inline void ito_plasma_physics::reconcile_particles(List<ito_particle>& a_particles,
+						    const int           a_newNumParticles,
+						    const int           a_oldNumParticles,
+						    const RealVect      a_pos,
+						    const RealVect      a_lo,
+						    const RealVect      a_hi,
+						    const RealVect      a_bndryCentroid,
+						    const RealVect      a_bndryNormal,
+						    const Real          a_dx,
+						    const Real          a_kappa) const {
+
+  const int diff = a_newNumParticles - a_oldNumParticles;
+
+  if(diff > 0){ // Need to add 'diff' mass.
+    this->add_particles(a_particles, diff, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  }
+  else if(diff < 0){ // Need to remove 'diff' mass.
+    this->remove_particles(a_particles, -diff, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
   }
 }
 
@@ -175,19 +195,37 @@ inline void ito_plasma_physics::remove_particles(List<ito_particle>& a_particles
 						 const RealVect      a_normal,
 						 const Real          a_dx,
 						 const Real          a_kappa) const {
-  MayDay::Abort("ito_plasma_physics::remove_particles - not implemented");
+  //  MayDay::Warning("ito_plasma_physics::remove_particles - not implemented");
 }
 
-inline void ito_plasma_physics::add_photons(List<photon>&      a_photons,
-					    const rte_species& a_species,
-					    const int          a_num_photons,
-					    const RealVect     a_pos,
-					    const RealVect     a_lo,
-					    const RealVect     a_hi,
-					    const RealVect     a_bndryCentroid,
-					    const RealVect     a_bndryNormal,
-					    const Real         a_dx,
-					    const Real         a_kappa) const {
+void ito_plasma_physics::reconcile_photons(Vector<List<photon>* >& a_newPhotons,
+					   const Vector<int>&      a_numNewPhotons,
+					   const RealVect          a_pos,
+					   const RealVect          a_lo,
+					   const RealVect          a_hi,
+					   const RealVect          a_bndryCentroid,
+					   const RealVect          a_bndryNormal,
+					   const Real              a_dx,
+					   const Real              a_kappa) const {
+
+  for (int i = 0; i < a_newPhotons.size(); i++){
+    if(a_numNewPhotons[i] > 0){
+      this->reconcile_photons(*a_newPhotons[i], *m_rte_species[i], a_numNewPhotons[i], a_pos, a_lo, a_hi,
+			      a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    }
+  }
+}
+
+inline void ito_plasma_physics::reconcile_photons(List<photon>&      a_photons,
+						  const rte_species& a_species,
+						  const int          a_num_photons,
+						  const RealVect     a_pos,
+						  const RealVect     a_lo,
+						  const RealVect     a_hi,
+						  const RealVect     a_bndryCentroid,
+						  const RealVect     a_bndryNormal,
+						  const Real         a_dx,
+						  const Real         a_kappa) const {
   a_photons.clear();
 
   int weight, num, remainder;
@@ -273,10 +311,20 @@ inline void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_pa
 }
 
 inline Vector<int> ito_plasma_physics::get_particle_count(const Vector<List<ito_particle>* >& a_particles) const {
-  Vector<int> ret(a_particles.size());
+  Vector<int> ret(a_particles.size(), 0);
 
   for (int i = 0; i < a_particles.size(); i++){
-    ret[i] = a_particles[i]->length();
+    ret[i] = this->get_particle_count(*a_particles[i]);
+  }
+
+  return ret;
+}
+
+inline int ito_plasma_physics::get_particle_count(const List<ito_particle>& a_particles) const {
+  int ret = 0;
+
+  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
+    ret += round(lit().mass());
   }
 
   return ret;
@@ -284,8 +332,10 @@ inline Vector<int> ito_plasma_physics::get_particle_count(const Vector<List<ito_
 
 inline void ito_plasma_physics::tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const {
 
+  const Vector<int> particles  = a_particles; // Because propensities should not change. 
+  
   for (const auto& r : m_reactions){
-    const int num_reactions = this->poisson_reaction(r.second.propensity(a_particles), a_dt);
+    const int num_reactions = this->poisson_reaction(r.second.propensity(particles), a_dt);
 
     r.second.jump_state(a_particles, a_newPhotons, num_reactions);
   }

@@ -66,7 +66,6 @@ ito_plasma_air2::ito_plasma_air2(){
 
   m_reactions.clear();
   m_reactions.emplace("impact_ionization", ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
-  m_reactions.emplace("recombination",     ito_reaction({m_electron_idx, m_positive_idx}, {}));
   m_reactions.emplace("photo_excitation",  ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
 }
 
@@ -149,14 +148,6 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 						   const Real                    a_kappa, 
 						   const Real                    a_dt) const{
 
-
-
-  Vector<int> photon_count(m_num_rte_species, 0);
-  Vector<int> particle_count = this->get_particle_count(a_particles);
-
-  const int Xe = particle_count[m_electron_idx];
-  const int Xp = particle_count[m_positive_idx];
-
   // Compute the reaction rates. 
   const Real E       = a_E.vectorLength();
   const Real alpha   = this->compute_alpha(a_E);
@@ -166,11 +157,27 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 
   m_reactions["impact_ionization"].rate() = alpha*velo;
   m_reactions["photo_excitation"].rate()  = alpha*velo*xfactor;
-  m_reactions["recombination"].rate()     = eta*velo;
+
+  // Get counts. 
+  Vector<int> newPhotonCount   = Vector<int>(m_num_rte_species, 0);
+  Vector<int> oldParticleCount = this->get_particle_count(a_particles);
+  Vector<int> newParticleCount = oldParticleCount;
 
   // Do a tau-leaping step
-  this->tau_leap(particle_count, photon_count, a_dt);
+  this->tau_leap(newParticleCount, newPhotonCount, a_dt); 
 
+  // Reconcile the number of particles of photons. This code adjusts a_particles so that we get the new particle count
+  this->reconcile_particles(a_particles, newParticleCount, oldParticleCount, a_pos, a_lo, a_hi, a_bndryCentroid,
+			    a_bndryNormal, a_dx, a_kappa);
+
+  // Reconcile photons
+  this->reconcile_photons(a_photons, newPhotonCount, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
+  // Photoionization. This code needs to change. 
+  this->add_photoionization(*a_particles[m_electron_idx], *a_particles[m_positive_idx], *a_photons[m_photonZ_idx]);
+  
+  return;
+#if 0
   // ==================================================
   // OLD CODE BELOW HERE
   // ==================================================
@@ -200,11 +207,12 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
   this->add_particles(posIons,   num_ionizations, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
   // Photogeneration and photoionization
-  this->add_photons(*a_newPhotons[m_photonZ_idx], *m_rte_species[m_photonZ_idx], num_photoexc, a_pos, a_lo, a_hi,
+  this->reconcile_photons(*a_newPhotons[m_photonZ_idx], *m_rte_species[m_photonZ_idx], num_photoexc, a_pos, a_lo, a_hi,
 		    a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
   // Photionization
   this->add_photoionization(*a_particles[m_electron_idx], *a_particles[m_positive_idx], *a_photons[m_photonZ_idx]);
+#endif
 }
 
 Real ito_plasma_air2::excitation_rates(const Real a_E) const{

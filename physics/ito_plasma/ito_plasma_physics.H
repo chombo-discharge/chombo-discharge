@@ -161,17 +161,31 @@ namespace physics {
 				const Vector<int>&                  a_newParticles) const;
 
       /*!
-	@brief Add particles
+	@brief Reconcile the number of particles
       */
-      inline void generate_particles(List<ito_particle>& a_particles,
-				     const int           a_numNewParticles,
-				     const RealVect      a_pos,
-				     const RealVect      a_lo,
-				     const RealVect      a_hi,
-				     const RealVect      a_bndryCentroid,
-				     const RealVect      a_normal,
-				     const Real          a_dx,
-				     const Real          a_kappa) const;
+      inline void reconcile_particles(Vector<List<ito_particle>* >& a_particles,
+				      const Vector<int>&            a_newNumParticles,
+				      const Vector<int>&            a_oldNumParticles,
+				      const RealVect                a_pos,
+				      const RealVect                a_lo,
+				      const RealVect                a_hi,
+				      const RealVect                a_bndryCentroid,
+				      const RealVect                a_bndryNormal,
+				      const Real                    a_dx,
+				      const Real                    a_kappa) const;
+      /*!
+	@brief Reconcile number of particles
+      */
+      inline void reconcile_particles(List<ito_particle>& a_particles,
+				      const int           a_numNewParticles,
+				      const int           a_oldNewParticles,
+				      const RealVect      a_pos,
+				      const RealVect      a_lo,
+				      const RealVect      a_hi,
+				      const RealVect      a_bndryCentroid,
+				      const RealVect      a_normal,
+				      const Real          a_dx,
+				      const Real          a_kappa) const;
 
       /*!
 	@brief Add particles
@@ -200,25 +214,50 @@ namespace physics {
 				   const Real          a_kappa) const;
 
       /*!
+	@brief Reconcile the number of particles
+      */
+      inline void reconcile_photons(Vector<List<photon>* >& a_newPhotons,
+				    const Vector<int>&      a_numNewPhotons,
+				    const RealVect          a_pos,
+				    const RealVect          a_lo,
+				    const RealVect          a_hi,
+				    const RealVect          a_bndryCentroid,
+				    const RealVect          a_bndryNormal,
+				    const Real              a_dx,
+				    const Real              a_kappa) const;
+      /*!
+	@brief Reconcile number of particles
+      */
+      inline void reconcile_photons(List<photon>&  a_newPhotons,
+				    const int      a_numNewPhotons,
+				    const RealVect a_pos,
+				    const RealVect a_lo,
+				    const RealVect a_hi,
+				    const RealVect a_bndryCentroid,
+				    const RealVect a_normal,
+				    const Real     a_dx,
+				    const Real     a_kappa) const;
+
+      /*!
+	@brief Add photons
+      */
+      inline void reconcile_photons(List<photon>&      a_photons,
+				    const rte_species& a_species,
+				    const int          a_num_photons,
+				    const RealVect     a_pos,
+				    const RealVect     a_lo,
+				    const RealVect     a_hi,
+				    const RealVect     a_bndryCentroid,
+				    const RealVect     a_bndryNormal,
+				    const Real         a_dx,
+				    const Real         a_kappa) const;
+
+      /*!
 	@brief Add photoionization for specific transition
       */
       inline void add_photoionization(List<ito_particle>& a_particles1,
 				      List<ito_particle>& a_particles2,
 				      const List<photon>& a_photons) const;
-
-      /*!
-	@brief Add photons
-      */
-      inline void add_photons(List<photon>&      a_photons,
-			      const rte_species& a_species,
-			      const int          a_num_photons,
-			      const RealVect     a_pos,
-			      const RealVect     a_lo,
-			      const RealVect     a_hi,
-			      const RealVect     a_bndryCentroid,
-			      const RealVect     a_bndryNormal,
-			      const Real         a_dx,
-			      const Real         a_kappa) const;
 
       /*!
 	@brief Compute particle weights for superparticles
@@ -244,6 +283,11 @@ namespace physics {
 	@brief Get the particle count
       */
       inline Vector<int> get_particle_count(const Vector<List<ito_particle>* >& a_particles) const;
+
+      /*!
+	@brief Get the particle count
+      */
+      inline int get_particle_count(const List<ito_particle>& a_particles) const;
 
       /*!
 	@brief Performing a tau-leaping step
