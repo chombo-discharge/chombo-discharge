@@ -278,4 +278,56 @@ inline Vector<int> ito_plasma_physics::get_particle_count(const Vector<List<ito_
   return ret;
 }
 
+inline void ito_plasma_physics::tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt){
+
+  for (const auto& r : m_reactions){
+    const int num_reactions = this->poisson_reaction(r.propensity(a_particles), a_dt);
+
+    r.jump_state(a_particles, a_newPhotons, num_reactions);
+  }
+}
+
+inline void ito_plasma_physics::ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt){
+
+  Real t   = 0.0;
+  Real tau = 0.0;
+  Real A   = 0.0;
+  int  r   = 0;
+
+  const int N = m_reactions.size();
+
+  std::vector<Real> a(N, 0.0);
+
+
+  while(t <= a_dt && N > 0){
+
+    // Compute rates
+    A = 0.0;
+    for (int i = 0; i < N; i++){
+      a[i] = m_reactions[i].propensity(a_particles);
+      A   += a[i];
+    }
+
+    const Real u1 = m_udist01(m_rng);
+    const Real u2 = m_udist01(m_rng);
+
+    // Time to next reaction
+    tau = log(1./u1)/A;
+    t  += a_dt;
+
+    // Ok, time to react
+    if(t <= a_dt){
+
+      for (int i = 1; i < N; i++){
+	if(a[i-1] <= u2*A && u2*A < a[i]){
+	  r = i;
+	  break;
+	}
+      }
+
+      m_reactions[r].jump_state(a_particles, a_newPhotons, 1);
+    }
+  }
+}
+
 #endif

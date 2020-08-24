@@ -109,6 +109,7 @@ namespace physics {
 
       int m_seed;
       mutable std::mt19937_64 m_rng;
+      mutable std::uniform_real_distribution<Real> m_udist01;
       mutable std::uniform_real_distribution<Real> m_udist11;
 
       Vector<RefCountedPtr<ito_species> > m_ito_species;
@@ -119,6 +120,8 @@ namespace physics {
       int m_ppc;
       int m_poisson_switch;
       int m_init_weights;
+
+      std::vector<ito_reaction> m_reactions;
 
       /*!
 	@brief Draw a valid random position somewhere in a cell
@@ -240,6 +243,16 @@ namespace physics {
 	@brief Get the particle count
       */
       inline Vector<int> get_particle_count(const Vector<List<ito_particle>* >& a_particles);
+
+      /*!
+	@brief Performing a tau-leaping step
+      */
+      inline void tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt);
+
+      /*!
+	@brief Performing an SSA step
+      */
+      inline void ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt);
     };
   }
 }
