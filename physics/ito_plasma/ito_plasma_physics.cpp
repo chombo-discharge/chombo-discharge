@@ -17,6 +17,9 @@ ito_plasma_physics::ito_plasma_physics(){
   // Initialize RNGs
   m_udist11 = std::uniform_real_distribution<Real>(-1., 1.);
   m_udist01 = std::uniform_real_distribution<Real>(0., 1.);
+
+  m_reactions.clear();
+  m_photo_reactions.clear();
 }
 
 ito_plasma_physics::~ito_plasma_physics(){

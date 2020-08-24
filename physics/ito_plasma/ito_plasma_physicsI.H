@@ -246,17 +246,23 @@ inline void ito_plasma_physics::reconcile_photons(List<photon>&      a_photons,
   }
 }
 
-inline void ito_plasma_physics::add_photoionization(List<ito_particle>& a_particles1,
-						    List<ito_particle>& a_particles2,
-						    const List<photon>& a_photons) const {
-  
-  for (ListIterator<photon> lit(a_photons); lit.ok(); ++lit){
-    const photon& phot  = lit();
-    const RealVect pos  = phot.position();
-    const Real mass     = phot.mass();
+inline void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
+							   const Vector<List<photon>* >& a_photons) const {
+  for (const auto& r : m_photo_reactions){
 
-    a_particles1.add(ito_particle(mass, pos));
-    a_particles2.add(ito_particle(mass, pos));
+    // Source and targets
+    const int& src                  = r.second.source();
+    const std::vector<int>& targets = r.second.targets();
+
+    for (ListIterator<photon> lit(*a_photons[src]); lit.ok(); ++lit){
+      const photon& phot  = lit();
+      const RealVect pos  = phot.position();
+      const Real mass     = phot.mass();
+
+      for (const auto& t : targets){
+	a_particles[t]->add(ito_particle(mass, pos));
+      }
+    }
   }
 }
 

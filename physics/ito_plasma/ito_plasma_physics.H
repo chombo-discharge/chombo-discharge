@@ -21,6 +21,7 @@
 #include "photon.H"
 #include "ito_particle.H"
 #include "ito_reaction.H"
+#include "photo_reaction.H"
 
 namespace physics {
   namespace ito_plasma {
@@ -122,7 +123,8 @@ namespace physics {
       int m_init_weights;
 
       // These are all the reactions
-      mutable std::map<std::string, ito_reaction> m_reactions;
+      mutable std::map<std::string, ito_reaction>   m_reactions;
+      mutable std::map<std::string, photo_reaction> m_photo_reactions;
 
       /*!
 	@brief Draw a valid random position somewhere in a cell
@@ -253,11 +255,10 @@ namespace physics {
 				    const Real         a_kappa) const;
 
       /*!
-	@brief Add photoionization for specific transition
+	@brief Reconcile photoionization mechanism
       */
-      inline void add_photoionization(List<ito_particle>& a_particles1,
-				      List<ito_particle>& a_particles2,
-				      const List<photon>& a_photons) const;
+      inline void reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
+					    const Vector<List<photon>* >& a_photons) const;
 
       /*!
 	@brief Compute particle weights for superparticles

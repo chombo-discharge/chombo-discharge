@@ -89,35 +89,6 @@ namespace physics {
 
       // Electron velocity
       RealVect compute_electron_velocity(const RealVect a_E) const;
-
-      // Tau-leaping algorithm
-      void advance_reaction_network_tau(Vector<List<ito_particle>* >& a_particles,
-					Vector<List<photon>* >&       a_photons,
-					Vector<List<photon>* >&       a_newPhotons,
-					const RealVect                a_E,           
-					const RealVect                a_cellPos,
-					const RealVect                a_centroid,
-					const RealVect                a_bndryCentroid,
-					const RealVect                a_bndryNormal,
-					const RealVect                a_lo,
-					const RealVect                a_hi,
-					const Real                    a_dx,
-					const Real                    a_kappa, 
-					const Real                    a_dt) const;
-
-      void advance_reaction_network_ssa(Vector<List<ito_particle>* >& a_particles,
-					Vector<List<photon>* >&       a_photons,
-					Vector<List<photon>* >&       a_newPhotons,
-					const RealVect                a_E,           
-					const RealVect                a_cellPos,
-					const RealVect                a_centroid,
-					const RealVect                a_bndryCentroid,
-					const RealVect                a_bndryNormal,
-					const RealVect                a_lo,
-					const RealVect                a_hi,
-					const Real                    a_dx,
-					const Real                    a_kappa, 
-					const Real                    a_dt) const;
     };
 
     
