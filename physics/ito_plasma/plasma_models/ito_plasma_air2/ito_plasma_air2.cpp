@@ -119,6 +119,19 @@ Vector<Real> ito_plasma_air2::compute_ito_diffusion(const Real         a_time,
   return D;
 }
 
+void ito_plasma_air2::update_reaction_rates(const RealVect a_E) const{
+
+  // Compute the reaction rates. 
+  const Real E       = a_E.vectorLength();
+  const Real alpha   = this->compute_alpha(a_E);
+  const Real eta     = this->compute_eta(a_E);
+  const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
+  const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
+
+  m_reactions["impact_ionization"].rate() = alpha*velo;
+  m_reactions["photo_excitation"].rate()  = alpha*velo*xfactor;
+}
+
 void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
 					       Vector<List<photon>* >&       a_photons,
 					       Vector<List<photon>* >&       a_newPhotons,
@@ -133,16 +146,9 @@ void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_p
 					       const Real                    a_kappa, 
 					       const Real                    a_dt) const {
 
-  // Compute the reaction rates. 
-  const Real E       = a_E.vectorLength();
-  const Real alpha   = this->compute_alpha(a_E);
-  const Real eta     = this->compute_eta(a_E);
-  const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
-  const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
 
-  m_reactions["impact_ionization"].rate() = alpha*velo;
-  m_reactions["photo_excitation"].rate()  = alpha*velo*xfactor;
-
+  this->update_reaction_rates(a_E);
+  
   // Get counts. 
   Vector<int> newPhotonCount   = Vector<int>(m_num_rte_species, 0);
   Vector<int> oldParticleCount = this->get_particle_count(a_particles);

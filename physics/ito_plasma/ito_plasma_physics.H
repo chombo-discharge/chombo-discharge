@@ -89,6 +89,11 @@ namespace physics {
 						 const Vector<Real> a_cdr_densities) const = 0;
 
       /*!
+	@brief Update reaction rates
+      */
+      virtual void update_reaction_rates(const RealVect a_E) const = 0;
+      
+      /*!
 	@brief Reaction network advance
       */
       virtual void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
