@@ -117,114 +117,223 @@ namespace physics {
       int m_num_rte_species;
       int m_ppc;
       int m_poisson_switch;
+      int m_init_weights;
 
       /*!
 	@brief Draw a valid random position somewhere in a cell
       */
-      RealVect random_position(const RealVect a_pos,
-			       const RealVect a_lo,
-			       const RealVect a_hi,
-			       const RealVect a_bndryCentroid,
-			       const RealVect a_normal,
-			       const Real     a_dx,
-			       const Real     a_kappa) const;
+      inline RealVect random_position(const RealVect a_pos,
+				      const RealVect a_lo,
+				      const RealVect a_hi,
+				      const RealVect a_bndryCentroid,
+				      const RealVect a_normal,
+				      const Real     a_dx,
+				      const Real     a_kappa) const;
 
       /*!
 	@brief Draw a random position somewhere in the cube (a_lo, a_hi) such that the position is
 	(pos-bndryCentroid).dotProduct.a_normal > 0, i.e. inside the valid region. 
       */
-      RealVect random_position(const RealVect a_lo,
-			       const RealVect a_hi,
-			       const RealVect a_bndryCentroid,
-			       const RealVect a_normal) const;
+      inline RealVect random_position(const RealVect a_lo,
+				      const RealVect a_hi,
+				      const RealVect a_bndryCentroid,
+				      const RealVect a_normal) const;
 
       /*!
 	@brief Return a random position in the cube (a_lo, a_hi);
       */
-      RealVect random_position(const RealVect a_lo, const RealVect a_hi) const;
+      inline RealVect random_position(const RealVect a_lo, const RealVect a_hi) const;
 
       /*!
 	@brief Draw a random direction in space
       */
-      RealVect random_direction() const;
+      inline RealVect random_direction() const;
 
       /*!
 	@brief Check if advance is valid. This returns false if there is a negative number of particles in the cell
       */
-      bool valid_advance(const Vector<List<ito_particle>* >& a_particles,
-			 const Vector<int>&                  a_newParticles) const;
+      inline bool valid_advance(const Vector<List<ito_particle>* >& a_particles,
+				const Vector<int>&                  a_newParticles) const;
 
       /*!
 	@brief Add particles
       */
-      void generate_particles(List<ito_particle>& a_particles,
-			      const int           a_numNewParticles,
-			      const RealVect      a_pos,
-			      const RealVect      a_lo,
-			      const RealVect      a_hi,
-			      const RealVect      a_bndryCentroid,
-			      const RealVect      a_normal,
-			      const Real          a_dx,
-			      const Real          a_kappa) const;
+      inline void generate_particles(List<ito_particle>& a_particles,
+				     const int           a_numNewParticles,
+				     const RealVect      a_pos,
+				     const RealVect      a_lo,
+				     const RealVect      a_hi,
+				     const RealVect      a_bndryCentroid,
+				     const RealVect      a_normal,
+				     const Real          a_dx,
+				     const Real          a_kappa) const;
 
       /*!
 	@brief Add particles
       */
-      void add_particles(List<ito_particle>& a_particles,
-			 const int           a_numNewParticles,
-			 const RealVect      a_pos,
-			 const RealVect      a_lo,
-			 const RealVect      a_hi,
-			 const RealVect      a_bndryCentroid,
-			 const RealVect      a_bndryNormal,
-			 const Real          a_dx,
-			 const Real          a_kappa) const;
+      inline void add_particles(List<ito_particle>& a_particles,
+				const int           a_numNewParticles,
+				const RealVect      a_pos,
+				const RealVect      a_lo,
+				const RealVect      a_hi,
+				const RealVect      a_bndryCentroid,
+				const RealVect      a_bndryNormal,
+				const Real          a_dx,
+				const Real          a_kappa) const;
 
       /*!
 	@brief Remove particles
       */
-      void remove_particles(List<ito_particle>& a_particles,
-			    const int           a_numParticlesToRemove,
-			    const RealVect      a_pos,
-			    const RealVect      a_lo,
-			    const RealVect      a_hi,
-			    const RealVect      a_bndryCentroid,
-			    const RealVect      a_normal,
-			    const Real          a_dx,
-			    const Real          a_kappa) const;
+      inline void remove_particles(List<ito_particle>& a_particles,
+				   const int           a_numParticlesToRemove,
+				   const RealVect      a_pos,
+				   const RealVect      a_lo,
+				   const RealVect      a_hi,
+				   const RealVect      a_bndryCentroid,
+				   const RealVect      a_normal,
+				   const Real          a_dx,
+				   const Real          a_kappa) const;
 
       /*!
 	@brief Add photoionization for specific transition
       */
-      void add_photoionization(List<ito_particle>& a_electrons,
-			       List<ito_particle>& a_positive,
-			       const List<photon>& a_photons) const;
+      inline void add_photoionization(List<ito_particle>& a_particles1,
+				      List<ito_particle>& a_particles2,
+				      const List<photon>& a_photons) const;
 
       /*!
 	@brief Add photons
       */
-      void add_photons(List<photon>&      a_photons,
-		       const rte_species& a_species,
-		       const int          a_num_photons,
-		       const RealVect     a_pos,
-		       const RealVect     a_lo,
-		       const RealVect     a_hi,
-		       const RealVect     a_bndryCentroid,
-		       const RealVect     a_bndryNormal,
-		       const Real         a_dx,
-		       const Real         a_kappa) const;
+      inline void add_photons(List<photon>&      a_photons,
+			      const rte_species& a_species,
+			      const int          a_num_photons,
+			      const RealVect     a_pos,
+			      const RealVect     a_lo,
+			      const RealVect     a_hi,
+			      const RealVect     a_bndryCentroid,
+			      const RealVect     a_bndryNormal,
+			      const Real         a_dx,
+			      const Real         a_kappa) const;
 
       /*!
 	@brief Compute particle weights for superparticles
       */
-      void compute_particle_weights(int& a_weight, int& a_num, int& remainder, const int a_numNewParticles) const;
+      inline void compute_particle_weights(int& a_weight, int& a_num, int& remainder, const int a_numNewParticles) const;
 
       /*!
 	@brief Poisson reaction
       */
-      int poisson_reaction(const Real a_propensity, const Real a_dt) const;
+      inline int poisson_reaction(const Real a_propensity, const Real a_dt) const;
 
+      /*!
+	@brief Draw Gaussian distributed particles
+      */
+      inline void draw_gaussian_particles(List<ito_particle>& a_particles1,
+					  List<ito_particle>& a_particles2,
+					  const int           a_numParticles,
+					  const RealVect      a_blobCenter,
+					  const Real          a_blobRadius,
+					  const Real          a_weights);
+    };
+
+    /*!
+      @brief Reaction class for ito_plasma_physics
+    */
+    class reaction {
+    public:
+
+      reaction () = delete;
+
+      /*!
+	@brief Full Ctor. This is the only one you will need. 
+      */
+      reaction(const Vector<int>& a_reactants,
+	       const Vector<int>& a_particle_products,
+	       const Vector<int>& a_photon_products){
+	this->define_reaction(a_reactants, a_particle_products, a_photon_products);
+      }
+      
+      ~reaction (){}
+
+      inline Real& rate() const {
+	return m_rate;
+      }
+
+      /*!
+	@brief Note that 
+      */
+      inline Real propensity(const Vector<int>& a_particles) const {
+	Real a = m_rate;
+
+	// Make a local copy of the particles
+	Vector<int> particles = a_particles;
+
+	// Iterate
+	for (int i = 0; i < m_reactants.size(); i++){
+	  const int reactant = m_reactants[i];
+	  
+	  a *= particles[reactant];
+	  particles[reactant]--;
+	}
+
+	return Max(0.0, a);
+      }
+
+      /*!
+	@brief Get the reactants
+      */
+      inline const Vector<int>& get_reactants() const {
+	return m_reactants;
+      }
+
+      /*!
+	@brief Get the particle products
+      */
+      inline const Vector<int>& get_particle_products() const {
+	return m_particle_products;
+      }
+
+      /*!
+	@brief Get the photon products
+      */
+      inline const Vector<int>& get_photon_products() const {
+	return m_photon_products;
+      }
+
+      /*!
+	@brief Define function
+      */
+      inline void define_reaction(const Vector<int>& a_reactants,
+				  const Vector<int>& a_particle_products,
+				  const Vector<int>& a_photon_products){
+	this->set_reactants(a_reactants);
+	this->set_particle_products(a_particle_products);
+	this->set_photon_products(a_photon_products);
+      }
+      
+    protected:
+
+      mutable Real m_rate;
+
+      Vector<int> m_reactants;
+      Vector<int> m_particle_products;
+      Vector<int> m_photon_products;
+
+      inline void set_reactants(const Vector<int>& a_reactants){
+	m_reactants = a_reactants;
+      }
+
+      inline void set_particle_products(const Vector<int>& a_particle_products){
+	m_particle_products = a_particle_products;
+      }
+
+      inline void set_photon_products(const Vector<int>& a_photon_products){
+	m_photon_products = a_photon_products;
+      }
     };
   }
 }
+
+#include "ito_plasma_physicsI.H"
+
 #endif

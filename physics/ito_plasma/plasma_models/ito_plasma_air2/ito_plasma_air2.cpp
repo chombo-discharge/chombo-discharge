@@ -25,7 +25,7 @@ ito_plasma_air2::ito_plasma_air2(){
   pp.get   ("num_particles",   m_num_particles);
   pp.get   ("particle_weight", m_particle_weight);
   pp.get   ("react_ppc",       m_ppc);
-  pp.getarr("blob_center",    v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
+  pp.getarr("blob_center",     v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
 
   // Reaction stuff
   pp.get("quenching_pressure", m_pq);
@@ -62,43 +62,13 @@ ito_plasma_air2::ito_plasma_air2(){
   m_rng     = std::mt19937_64(m_seed);
   m_udist11 = std::uniform_real_distribution<Real>(-1., 1.);
 
-  this->draw_initial_particles();
+  List<ito_particle>& electrons = m_ito_species[m_electron_idx]->get_initial_particles();
+  List<ito_particle>& positives = m_ito_species[m_positive_idx]->get_initial_particles();
+  this->draw_gaussian_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight);
 }
 
 ito_plasma_air2::~ito_plasma_air2(){
 
-}
-
-void ito_plasma_air2::draw_initial_particles(){
-
-  // Set up the RNG
-  std::normal_distribution<Real> gauss(0.0, m_blob_radius);
-  //  m_gauss   = std::normal_distribution<Real>(0.0, m_blob_radius);
-
-
-  // Each MPI process draws the desired number of particles from a distribution
-  const int quotient  = m_num_particles/numProc();
-  const int remainder = m_num_particles % numProc();
-  
-  Vector<int> particlesPerRank(numProc(), quotient);
-  
-  for (int i = 0; i < remainder; i++){ 
-    particlesPerRank[i] += 1;
-  }
-
-  List<ito_particle>& electrons = m_ito_species[m_electron_idx]->get_initial_particles();
-  List<ito_particle>& positives = m_ito_species[m_positive_idx]->get_initial_particles();
-
-  electrons.clear();
-  positives.clear();
-
-  // Now make the particles
-  for (int i = 0; i < particlesPerRank[procID()]; i++){
-    const RealVect pos = m_blob_center + gauss(m_rng)*random_direction();
-    
-    electrons.add(ito_particle(m_particle_weight, pos));
-    positives.add(ito_particle(m_particle_weight, pos));
-  }
 }
 
 Real ito_plasma_air2::compute_alpha(const RealVect a_E) const {
@@ -157,19 +127,9 @@ void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_p
 					       const Real                    a_dx,
 					       const Real                    a_kappa, 
 					       const Real                    a_dt) const {
-  Real num_electrons = 0;
-  for (ListIterator<ito_particle> lit(*a_particles[m_electron_idx]); lit.ok(); ++lit){
-    num_electrons += lit().mass();
-  }
 
-  if(num_electrons > m_tau_switch){
-    this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_cellPos, a_centroid,
-				       a_bndryCentroid, a_bndryNormal, a_lo, a_hi, a_dx, a_kappa, a_dt);
-  }
-  else{
-    this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_cellPos, a_centroid,
-				       a_bndryCentroid, a_bndryNormal, a_lo, a_hi, a_dx, a_kappa, a_dt);
-  }
+  this->advance_reaction_network_tau(a_particles, a_photons, a_newPhotons, a_E, a_cellPos, a_centroid,
+				     a_bndryCentroid, a_bndryNormal, a_lo, a_hi, a_dx, a_kappa, a_dt);
 }
 
 void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >& a_particles,
@@ -223,21 +183,6 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 
   // Photionization
   this->add_photoionization(*a_particles[m_electron_idx], *a_particles[m_positive_idx], *a_photons[m_photonZ_idx]);
-}
-
-void ito_plasma_air2::advance_reaction_network_ssa(Vector<List<ito_particle>* >& a_particles,
-						   Vector<List<photon>* >&       a_photons,
-						   Vector<List<photon>* >&       a_newPhotons,
-						   const RealVect                a_E,           
-						   const RealVect                a_cellPos,
-						   const RealVect                a_centroid,
-						   const RealVect                a_bndryCentroid,
-						   const RealVect                a_bndryNormal,
-						   const RealVect                a_lo,
-						   const RealVect                a_hi,
-						   const Real                    a_dx,
-						   const Real                    a_kappa, 
-						   const Real                    a_dt) const {
 }
 
 Real ito_plasma_air2::excitation_rates(const Real a_E) const{
