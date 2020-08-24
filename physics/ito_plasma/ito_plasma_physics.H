@@ -121,10 +121,8 @@ namespace physics {
       int m_poisson_switch;
       int m_init_weights;
 
-      std::vector<ito_reaction> m_reactions;
-
-      std::map<std::string, ito_reaction> m_Reactions;
-
+      // These are all the reactions
+      mutable std::map<std::string, ito_reaction> m_reactions;
 
       /*!
 	@brief Draw a valid random position somewhere in a cell

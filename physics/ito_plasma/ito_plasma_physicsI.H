@@ -11,6 +11,8 @@
 #include "ito_plasma_physics.H"
 #include "units.H"
 
+#include <memory>
+
 #include <PolyGeom.H>
 
 using namespace physics::ito_plasma;
@@ -282,7 +284,7 @@ inline Vector<int> ito_plasma_physics::get_particle_count(const Vector<List<ito_
 
 inline void ito_plasma_physics::tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const {
 
-  for (const auto& r : m_Reactions){
+  for (const auto& r : m_reactions){
     const int num_reactions = this->poisson_reaction(r.second.propensity(a_particles), a_dt);
 
     r.second.jump_state(a_particles, a_newPhotons, num_reactions);
@@ -300,15 +302,22 @@ inline void ito_plasma_physics::ssa_step(Vector<int>& a_particles, Vector<int>& 
 
   const int N = m_reactions.size();
 
-  std::vector<Real> a(N, 0.0);
 
+  // A bit nasty, but we need a data structure with random access for evaluating stuff like
+  // a_(r-1) <= u2*A < a_r. So, take the internal map and put it into a vector. 
+  std::vector<std::shared_ptr<ito_reaction> > reactions;
+  for (const auto& r : m_reactions){
+    reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+  }
+
+  std::vector<Real> a(N, 0.0);
 
   while(t <= a_dt && N > 0){
 
     // Compute rates
     A = 0.0;
     for (int i = 0; i < N; i++){
-      a[i] = m_reactions[i].propensity(a_particles);
+      a[i] = reactions[i]->propensity(a_particles);
       A   += a[i];
     }
 
@@ -330,7 +339,7 @@ inline void ito_plasma_physics::ssa_step(Vector<int>& a_particles, Vector<int>& 
 	}
       }
 
-      m_reactions[r].jump_state(a_particles, a_newPhotons, 1);
+      reactions[r]->jump_state(a_particles, a_newPhotons, 1);
     }
   }
 }

@@ -60,14 +60,14 @@ ito_plasma_air2::ito_plasma_air2(){
   m_seed += procID();
   m_rng   = std::mt19937_64(m_seed);
 
-
   List<ito_particle>& electrons = m_ito_species[m_electron_idx]->get_initial_particles();
   List<ito_particle>& positives = m_ito_species[m_positive_idx]->get_initial_particles();
   this->draw_gaussian_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight);
 
-
-  // m_Reactions.emplace("impact_ionization", ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
-  // m_Reactions.emplace("photo_excitation",  ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
+  m_reactions.clear();
+  m_reactions.emplace("impact_ionization", ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
+  m_reactions.emplace("recombination",     ito_reaction({m_electron_idx, m_positive_idx}, {}));
+  m_reactions.emplace("photo_excitation",  ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
 }
 
 ito_plasma_air2::~ito_plasma_air2(){
@@ -149,20 +149,37 @@ void ito_plasma_air2::advance_reaction_network_tau(Vector<List<ito_particle>* >&
 						   const Real                    a_kappa, 
 						   const Real                    a_dt) const{
 
-  // Compute number of electrons
-  Real num_electrons = 0;
-  for (ListIterator<ito_particle> lit(*a_particles[m_electron_idx]); lit.ok(); ++lit){
-    num_electrons += lit().mass();
-  }
 
+
+  Vector<int> photon_count(m_num_rte_species, 0);
   Vector<int> particle_count = this->get_particle_count(a_particles);
 
-  // Some parameters
+  const int Xe = particle_count[m_electron_idx];
+  const int Xp = particle_count[m_positive_idx];
+
+  // Compute the reaction rates. 
   const Real E       = a_E.vectorLength();
   const Real alpha   = this->compute_alpha(a_E);
   const Real eta     = this->compute_eta(a_E);
   const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
+
+  m_reactions["impact_ionization"].rate() = alpha*velo;
+  m_reactions["photo_excitation"].rate()  = alpha*velo*xfactor;
+  m_reactions["recombination"].rate()     = eta*velo;
+
+  // Do a tau-leaping step
+  this->tau_leap(particle_count, photon_count, a_dt);
+
+  // ==================================================
+  // OLD CODE BELOW HERE
+  // ==================================================
+
+  // Compute number of electrons
+  Real num_electrons = 0;
+  for (ListIterator<ito_particle> lit(*a_particles[m_electron_idx]); lit.ok(); ++lit){
+    num_electrons += lit().mass();
+  }
 
   // Propensity functions
   const Real ionizationProp = alpha*velo*num_electrons;
