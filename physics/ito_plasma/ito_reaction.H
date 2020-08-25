@@ -35,7 +35,7 @@ namespace physics {
 		   const std::initializer_list<int> a_photon_products) : m_reactants(a_reactants),
 									 m_particle_products(a_particle_products),
 									 m_photon_products(a_photon_products){
-
+	this->compute_state_change();
       }
 
       /*!
@@ -45,7 +45,7 @@ namespace physics {
 		   const std::initializer_list<int> a_particle_products) : m_reactants(a_reactants),
 									   m_particle_products(a_particle_products),
 									   m_photon_products(0) {
-
+	this->compute_state_change();
       }
 
       /*!
@@ -74,6 +74,16 @@ namespace physics {
 	@brief Get propensity function.
       */
       inline Real propensity(const Vector<int>& a_particles) const;
+
+      /*!
+	@brief Get the state change. You need to iterate through this map. 
+      */
+      inline const std::map<int, int>& get_state_change() const;
+
+      /*!
+	@brief Get the state change for a particular species
+      */
+      inline const int get_state_change(const int a_idx) const;
       
     protected:
 
@@ -83,6 +93,14 @@ namespace physics {
       std::vector<int> m_reactants;         // Particle reactants
       std::vector<int> m_particle_products; // Particle products
       std::vector<int> m_photon_products;   // Photon products
+
+      std::map<int, int> m_stateChange; // Mutable because we need to iterate through it. 
+
+      /*!
+	@brief Compute the state change
+      */
+      inline void compute_state_change();
+      
     };
   }
 }

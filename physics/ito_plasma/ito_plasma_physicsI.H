@@ -11,7 +11,7 @@
 #include "ito_plasma_physics.H"
 #include "units.H"
 
-#include <memory>
+#include <algorithm>
 
 #include <PolyGeom.H>
 
@@ -444,6 +444,70 @@ inline void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particl
 
 inline void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt){
   this->tau_leap(a_particles, a_newPhotons, a_dt);
+}
+
+inline ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<int>& a_particles) const{
+
+  std::vector<std::shared_ptr<ito_reaction> > criticalReactions;    // Maybe these should be maps, too?
+  std::vector<std::shared_ptr<ito_reaction> > nonCriticalReactions; // Maybe these should be maps, too?
+  
+  for (const auto& r : m_reactions){
+
+    const std::map<int, int>& stateChange = r.second.get_state_change();
+
+
+
+    // Cheap trick for setting to largest representable integer
+    unsigned int Lj = (unsigned int)~0;
+    bool consuming  = false;
+
+    // Check how many times reaction r can fire before consuming all its species
+    for (const auto& s: stateChange){
+
+      const int reactant = s.first;
+      const int nuIJ     = s.second;
+
+      if(nuIJ < 0){
+	consuming = true;
+	const unsigned int b = (a_particles[reactant] + std::abs(nuIJ) - 1)/std::abs(nuIJ); // Upwards division of Xi/|nuIJ|
+	Lj = std::min(Lj, b);
+      }
+    }
+
+    // Check if reaction is a critical reaction
+    bool crit = false;
+    if(Lj < m_Ncrit && consuming){
+      crit = true;
+    }
+
+    // Move reactions to where they should be
+    if(crit){
+      criticalReactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+    }
+    else{
+      nonCriticalReactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+    }
+  }
+
+  // Return the critical and non-critical reactions
+  ReactionTypes ret = ReactionTypes();
+  ret.first  = criticalReactions;
+  ret.second = nonCriticalReactions;
+
+  return ret;
+}
+inline Real ito_plasma_physics::get_critical_step(const Vector<int>&                                 a_particles,
+						  const std::vector<std::shared_ptr<ito_reaction> >& a_critical_reactions) const {
+
+  Real A   = 0.0;
+  for (const auto& r : a_critical_reactions){
+    A += r->propensity(a_particles);
+  }
+
+  const Real u1 = m_udist01(m_rng);
+  const Real dt = log(1./u1)/A;
+
+  return dt;
 }
 
 #endif

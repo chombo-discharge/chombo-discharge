@@ -15,6 +15,7 @@
 
 #include <chrono>
 #include <random>
+#include <memory>
 
 #include "ito_species.H"
 #include "rte_species.H"
@@ -25,6 +26,9 @@
 
 namespace physics {
   namespace ito_plasma {
+
+    // Ease up on the typing.
+    using ReactionTypes = std::pair<std::vector<std::shared_ptr<ito_reaction> >, std::vector<std::shared_ptr<ito_reaction> > >;
 
     /*!
       @brief Abstract clas for specifying plasma kinetics
@@ -126,6 +130,7 @@ namespace physics {
       int m_ppc;
       int m_poisson_switch;
       int m_init_weights;
+      int m_Ncrit;            
 
       // These are all the reactions
       mutable std::map<std::string, ito_reaction>   m_reactions;
@@ -309,6 +314,18 @@ namespace physics {
 	@brief Perform hybrid advance
       */
       inline void hybrid_advance(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt);
+
+      /*!
+	@brief Get critical and non-critical reactions
+      */
+      inline ReactionTypes get_critical_reactions(const Vector<int>& a_particles) const;
+
+      /*!
+	@brief Get the time to the next critical reaction. 
+      */
+      inline Real get_critical_step(const Vector<int>&                                 a_particles,
+				    const std::vector<std::shared_ptr<ito_reaction> >& a_critical_reactions) const;
+      
     };
   }
 }

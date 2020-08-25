@@ -55,4 +55,43 @@ inline Real ito_reaction::propensity(const Vector<int>& a_particles) const {
   return Max(0.0, a);
 }
 
+inline void ito_reaction::compute_state_change() {
+
+  // Consumed species
+  for (const auto& r : m_reactants){
+    if(m_stateChange.find(r) == m_stateChange.end()){
+      m_stateChange.emplace(r, -1);
+    }
+    else{
+      m_stateChange[r]--;
+    }
+  }
+
+  // Produced species
+  for (const auto& r : m_particle_products){
+    if(m_stateChange.find(r) == m_stateChange.end()){
+      m_stateChange.emplace(r, +1);
+    }
+    else{
+      m_stateChange[r]++;
+    }
+  }
+}
+
+inline const std::map<int, int>& ito_reaction::get_state_change() const{
+  return m_stateChange;
+}
+
+const int ito_reaction::get_state_change(const int a_idx) const{
+  int ret = 0;
+  
+  if(m_stateChange.find(a_idx) != m_stateChange.end()){
+    //    ret = m_stateChange[a_idx]; // Stupid non-const version of []. Get a grip STL!
+    ret = m_stateChange.at(a_idx);
+  }
+
+  return ret;
+}
+  
+
 #endif
