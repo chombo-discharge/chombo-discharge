@@ -188,11 +188,11 @@ namespace physics {
       RealVect random_direction() const;
 
       /*!
-	@brief Check if advance is valid. This returns false if there is a negative number of particles in the cell
+	@brief Returns true if all particle numbers are >= 0
       */
       inline
-      bool valid_advance(const Vector<List<ito_particle>* >& a_particles,
-			 const Vector<int>&                  a_newParticles) const;
+      bool valid_state(const Vector<int>& a_particles) const;
+
 
       /*!
 	@brief Reconcile the number of particles

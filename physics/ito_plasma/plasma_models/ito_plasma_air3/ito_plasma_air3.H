@@ -41,19 +41,7 @@ namespace physics {
 					 const RealVect     a_E,
 					 const Vector<Real> a_cdr_densities) const override;
 
-      void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-				    Vector<List<photon>* >&       a_photons,
-				    Vector<List<photon>* >&       a_newPhotons,
-				    const RealVect                a_E,           
-				    const RealVect                a_pos,
-				    const RealVect                a_centroid,
-				    const RealVect                a_bndryCentroid,
-				    const RealVect                a_normal,
-				    const RealVect                a_lo,
-				    const RealVect                a_hi,
-				    const Real                    a_dx,
-				    const Real                    a_kappa, 
-				    const Real                    a_dt) const override;
+      void update_reaction_rates(const RealVect a_E, const Real a_dx, const Real a_kappa) const override;
 
     protected:
 
@@ -94,39 +82,6 @@ namespace physics {
 
       // Electron velocity
       RealVect compute_electron_velocity(const RealVect a_E) const;
-
-      // Tau-leaping algorithm
-      void advance_reaction_network_tau(Vector<List<ito_particle>* >& a_particles,
-					Vector<List<photon>* >&       a_photons,
-					Vector<List<photon>* >&       a_newPhotons,
-					const RealVect                a_E,           
-					const RealVect                a_cellPos,
-					const RealVect                a_centroid,
-					const RealVect                a_bndryCentroid,
-					const RealVect                a_bndryNormal,
-					const RealVect                a_lo,
-					const RealVect                a_hi,
-					const Real                    a_dx,
-					const Real                    a_kappa, 
-					const Real                    a_dt) const;
-
-      // Add a_num_photons to the list. Photon position is random. 
-      void add_photons(List< photon>& a_photons,
-		       const int      a_num_photons,
-		       const RealVect a_pos,
-		       const RealVect a_lo,
-		       const RealVect a_hi,
-		       const RealVect a_bndryCentroid,
-		       const RealVect a_bndryNormal,
-		       const Real     a_dx,
-		       const Real     a_kappa) const;
-      
-      void add_photoionization(List<ito_particle>& a_electrons,
-			       List<ito_particle>& a_positive,
-			       List<photon>&       a_photons) const;
-
-      // Poisson reactions for tau-leaping
-      int poisson_reaction(const Real a_propensity, const Real a_dt) const;
     };
 
     
