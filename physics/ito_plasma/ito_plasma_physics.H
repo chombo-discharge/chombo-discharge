@@ -28,6 +28,7 @@ namespace physics {
   namespace ito_plasma {
 
     // Ease up on the typing.
+    using ReactionPtrs  = std::vector<std::shared_ptr<ito_reaction> >;
     using ReactionTypes = std::pair<std::vector<std::shared_ptr<ito_reaction> >, std::vector<std::shared_ptr<ito_reaction> > >;
 
     /*!
@@ -130,7 +131,9 @@ namespace physics {
       int m_ppc;
       int m_poisson_switch;
       int m_init_weights;
-      int m_Ncrit;            
+      int m_Ncrit;
+
+      Real m_eps;
 
       // These are all the reactions
       mutable std::map<std::string, ito_reaction>   m_reactions;
@@ -323,8 +326,15 @@ namespace physics {
       /*!
 	@brief Get the time to the next critical reaction. 
       */
-      inline Real get_critical_step(const Vector<int>&                                 a_particles,
-				    const std::vector<std::shared_ptr<ito_reaction> >& a_critical_reactions) const;
+      inline Real get_critical_step(const Vector<int>&  a_particles,
+				    const ReactionPtrs& a_critical_reactions) const;
+
+      /*!
+	@brief Get the time to the next critical reaction. 
+      */
+      inline Real get_non_critical_step(const Vector<int>&  a_particles,
+					const ReactionPtrs& a_non_critical_reactions) const;
+
       
     };
   }

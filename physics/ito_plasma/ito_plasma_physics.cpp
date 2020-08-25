@@ -20,6 +20,9 @@ ito_plasma_physics::ito_plasma_physics(){
 
   m_reactions.clear();
   m_photo_reactions.clear();
+
+  m_Ncrit = 25;
+  m_eps   = 0.03;
 }
 
 ito_plasma_physics::~ito_plasma_physics(){

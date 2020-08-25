@@ -12,6 +12,7 @@
 #include "units.H"
 
 #include <algorithm>
+#include <unordered_set> 
 
 #include <PolyGeom.H>
 
@@ -458,7 +459,7 @@ inline ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<int
 
 
     // Cheap trick for setting to largest representable integer
-    unsigned int Lj = (unsigned int)~0;
+    int Lj           = std::numeric_limits<int>::max();
     bool consuming  = false;
 
     // Check how many times reaction r can fire before consuming all its species
@@ -469,7 +470,7 @@ inline ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<int
 
       if(nuIJ < 0){
 	consuming = true;
-	const unsigned int b = (a_particles[reactant] + std::abs(nuIJ) - 1)/std::abs(nuIJ); // Upwards division of Xi/|nuIJ|
+	const int b = (a_particles[reactant] + std::abs(nuIJ) - 1)/std::abs(nuIJ); // Upwards division of Xi/|nuIJ|
 	Lj = std::min(Lj, b);
       }
     }
@@ -496,9 +497,12 @@ inline ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<int
 
   return ret;
 }
-inline Real ito_plasma_physics::get_critical_step(const Vector<int>&                                 a_particles,
-						  const std::vector<std::shared_ptr<ito_reaction> >& a_critical_reactions) const {
 
+inline Real ito_plasma_physics::get_critical_step(const Vector<int>&  a_particles,
+						  const ReactionPtrs& a_critical_reactions) const {
+						 
+  // TLDR: a_critical_reaction is a vector under the hood.
+  
   Real A   = 0.0;
   for (const auto& r : a_critical_reactions){
     A += r->propensity(a_particles);
@@ -509,5 +513,62 @@ inline Real ito_plasma_physics::get_critical_step(const Vector<int>&            
 
   return dt;
 }
+
+inline Real ito_plasma_physics::get_non_critical_step(const Vector<int>&  a_particles,
+						      const ReactionPtrs& a_non_critical_reactions) const {
+						 
+  // TLDR: a_non_critical_reaction is a vector under the hood.
+  
+  Real dt = std::numeric_limits<Real>::max();
+
+  const int M = a_non_critical_reactions.size();
+
+  if(M > 0){
+
+    // 1. Compute propensities of all reactions. It is possible for propensities to be zero. 
+    Vector<Real> propensities(M);
+    for (int j = 0; j < M; j++){
+      propensities[j] = a_non_critical_reactions[j]->propensity(a_particles);
+    }
+
+    // 2. Get the list of all reactants
+    std::unordered_set<int> allReactants;
+    for (const auto& reaction : a_non_critical_reactions){
+
+      const auto& cur_reactants = reaction->get_reactants();
+      for (const auto& l : cur_reactants){
+	allReactants.insert(l); 
+      }
+    }
+
+    // 3. Iterate through all reactants and compute deviations
+    for (const auto& reactant : allReactants){
+
+      Real mu    = 0.0;
+      Real sigma = 0.0;
+
+      constexpr int gi = 1; // Set gi to 1 for now, should think about this later. 
+      
+      // Go through all the reactions and compute mu_i for the current reactant
+      for (int j = 0; j < M; j++){
+
+	const int muIJ = a_non_critical_reactions[j]->get_state_change(reactant);
+
+	mu    += muIJ * propensities[j];        
+	sigma += muIJ * muIJ * propensities[j];
+      }
+
+      const Real dt1 = std::max(m_eps*a_particles[reactant]/gi, 1.)/mu;
+      const Real dt2 = std::max(m_eps*a_particles[reactant]/gi, 1.)/sigma;
+
+      dt = std::min(dt, std::min(dt1, dt2));
+    }
+	   
+  }
+
+
+  return dt;
+}
+
 
 #endif

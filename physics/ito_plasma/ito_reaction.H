@@ -58,41 +58,71 @@ namespace physics {
       /*!
 	@brief Allows a state to jump with N reactions
       */
-      inline void jump_state(Vector<int>& a_particles, const int a_num_reactions) const;
+      inline
+      void jump_state(Vector<int>& a_particles, const int a_num_reactions) const;
 
       /*!
 	@brief Allows a state to jump with N reactions. Includes generation of photons. 
       */
-      inline void jump_state(Vector<int>& a_particles, Vector<int>& a_photons, const int a_num_reactions) const;
+      inline
+      void jump_state(Vector<int>& a_particles, Vector<int>& a_photons, const int a_num_reactions) const;
 
       /*!
 	@brief Return a modifiable version of the reaction rate.
       */
-      inline Real& rate() const;
+      inline
+      Real& rate() const;
 
       /*!
 	@brief Get propensity function.
       */
-      inline Real propensity(const Vector<int>& a_particles) const;
+      inline
+      Real propensity(const Vector<int>& a_particles) const;
+
+      /*!
+	@brief Get gi
+      */
+      inline
+      int get_gi(const Vector<int>& a_particles) const;
+
+      /*!
+	@brief Get reactants
+      */
+      inline
+      const std::list<int>& get_reactants() const;
+
+      /*!
+	@brief Get reactants
+      */
+      inline
+      const std::list<int>& get_particle_products() const;
+
+      /*!
+	@brief Get reactants
+      */
+      inline
+      const std::list<int>& get_photon_products() const;
 
       /*!
 	@brief Get the state change. You need to iterate through this map. 
       */
-      inline const std::map<int, int>& get_state_change() const;
+      inline
+      const std::map<int, int>& get_state_change() const;
 
       /*!
 	@brief Get the state change for a particular species
       */
-      inline const int get_state_change(const int a_idx) const;
+      inline
+      const int get_state_change(const int a_idx) const;
       
     protected:
 
       // Reaction rate, mutable because I want ito_reaction to be a const object, but reaction rate may need to change
       mutable Real m_rate;
 
-      std::vector<int> m_reactants;         // Particle reactants
-      std::vector<int> m_particle_products; // Particle products
-      std::vector<int> m_photon_products;   // Photon products
+      std::list<int> m_reactants;         // Particle reactants
+      std::list<int> m_particle_products; // Particle products
+      std::list<int> m_photon_products;   // Photon products
 
       std::map<int, int> m_stateChange; // Mutable because we need to iterate through it. 
 

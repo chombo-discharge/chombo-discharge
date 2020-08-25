@@ -12,7 +12,8 @@
 
 using namespace physics::ito_plasma;
 
-inline void ito_reaction::jump_state(Vector<int>& a_particles,
+inline
+void ito_reaction::jump_state(Vector<int>& a_particles,
 				     const int    a_num_reactions) const {
   for (const auto& r : m_reactants){
     a_particles[r] -= a_num_reactions;
@@ -23,7 +24,8 @@ inline void ito_reaction::jump_state(Vector<int>& a_particles,
   }
 }
 
-inline void ito_reaction::jump_state(Vector<int>& a_particles,
+inline
+void ito_reaction::jump_state(Vector<int>& a_particles,
 				     Vector<int>& a_photons,
 				     const int    a_num_reactions) const {
 
@@ -34,28 +36,52 @@ inline void ito_reaction::jump_state(Vector<int>& a_particles,
   }
 }
 
-inline Real& ito_reaction::rate() const {
+inline
+Real& ito_reaction::rate() const {
   return m_rate;
 }
 
-inline Real ito_reaction::propensity(const Vector<int>& a_particles) const {
+inline
+Real ito_reaction::propensity(const Vector<int>& a_particles) const {
   Real a = m_rate;
 
   // Make a local copy of the particles
   Vector<int> particles = a_particles;
 
   // Iterate over reactants, if a reactant appears twice the propensity function is X*(X-1)
-  for (int i = 0; i < m_reactants.size(); i++){
-    const int reactant = m_reactants[i];
+  for (const auto& r : m_reactants){
+    //  for (int i = 0; i < m_reactants.size(); i++){ // Old vector stuff.
+    //    const int reactant = m_reactants[i];
 	  
-    a *= particles[reactant];
-    particles[reactant]--;
+    a *= particles[r];
+    particles[r]--;
   }
 
   return Max(0.0, a);
 }
 
-inline void ito_reaction::compute_state_change() {
+inline
+int ito_reaction::get_gi(const Vector<int>& a_particles) const{
+  return 1; // For simplicity
+}
+
+inline
+const std::list<int>& ito_reaction::get_reactants() const{
+  return m_reactants;
+}
+
+inline
+const std::list<int>& ito_reaction::get_particle_products() const{
+  return m_particle_products;
+}
+
+inline
+const std::list<int>& ito_reaction::get_photon_products() const{
+  return m_photon_products;
+}
+
+inline
+void ito_reaction::compute_state_change() {
 
   // Consumed species
   for (const auto& r : m_reactants){
@@ -78,10 +104,12 @@ inline void ito_reaction::compute_state_change() {
   }
 }
 
-inline const std::map<int, int>& ito_reaction::get_state_change() const{
+inline
+const std::map<int, int>& ito_reaction::get_state_change() const{
   return m_stateChange;
 }
 
+inline
 const int ito_reaction::get_state_change(const int a_idx) const{
   int ret = 0;
   
