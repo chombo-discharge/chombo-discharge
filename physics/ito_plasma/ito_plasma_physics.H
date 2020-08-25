@@ -99,21 +99,22 @@ namespace physics {
       virtual void update_reaction_rates(const RealVect a_E, const Real a_dx, const Real a_kappa) const = 0;
       
       /*!
-	@brief Reaction network advance
+	@brief Reaction network advance. Trying to inline for performance....
       */
-      inline void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-					   Vector<List<photon>* >&       a_photons,
-					   Vector<List<photon>* >&       a_newPhotons,
-					   const RealVect                a_E,           
-					   const RealVect                a_cellPos,
-					   const RealVect                a_centroidPos,
-					   const RealVect                a_bndryCentroid,
-					   const RealVect                a_bndryNormal,
-					   const RealVect                a_lo,
-					   const RealVect                a_hi,
-					   const Real                    a_dx,
-					   const Real                    a_kappa, 
-					   const Real                    a_dt);
+      inline
+      void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
+				    Vector<List<photon>* >&       a_photons,
+				    Vector<List<photon>* >&       a_newPhotons,
+				    const RealVect                a_E,           
+				    const RealVect                a_cellPos,
+				    const RealVect                a_centroidPos,
+				    const RealVect                a_bndryCentroid,
+				    const RealVect                a_bndryNormal,
+				    const RealVect                a_lo,
+				    const RealVect                a_hi,
+				    const Real                    a_dx,
+				    const Real                    a_kappa, 
+				    const Real                    a_dt);
 
       
     protected:
@@ -142,200 +143,244 @@ namespace physics {
       /*!
 	@brief Draw a valid random position somewhere in a cell
       */
-      inline RealVect random_position(const RealVect a_pos,
-				      const RealVect a_lo,
-				      const RealVect a_hi,
-				      const RealVect a_bndryCentroid,
-				      const RealVect a_normal,
-				      const Real     a_dx,
-				      const Real     a_kappa) const;
+      inline
+      RealVect random_position(const RealVect a_pos,
+			       const RealVect a_lo,
+			       const RealVect a_hi,
+			       const RealVect a_bndryCentroid,
+			       const RealVect a_normal,
+			       const Real     a_dx,
+			       const Real     a_kappa) const;
 
       /*!
 	@brief Draw a random position somewhere in the cube (a_lo, a_hi) such that the position is
 	(pos-bndryCentroid).dotProduct.a_normal > 0, i.e. inside the valid region. 
       */
-      inline RealVect random_position(const RealVect a_lo,
-				      const RealVect a_hi,
-				      const RealVect a_bndryCentroid,
-				      const RealVect a_normal) const;
+      inline
+      RealVect random_position(const RealVect a_lo,
+			       const RealVect a_hi,
+			       const RealVect a_bndryCentroid,
+			       const RealVect a_normal) const;
 
       /*!
 	@brief Return a random position in the cube (a_lo, a_hi);
       */
-      inline RealVect random_position(const RealVect a_lo, const RealVect a_hi) const;
+      inline
+      RealVect random_position(const RealVect a_lo, const RealVect a_hi) const;
 
       /*!
 	@brief Draw a random direction in space
       */
-      inline RealVect random_direction() const;
+      inline
+      RealVect random_direction() const;
 
       /*!
 	@brief Check if advance is valid. This returns false if there is a negative number of particles in the cell
       */
-      inline bool valid_advance(const Vector<List<ito_particle>* >& a_particles,
-				const Vector<int>&                  a_newParticles) const;
+      inline
+      bool valid_advance(const Vector<List<ito_particle>* >& a_particles,
+			 const Vector<int>&                  a_newParticles) const;
 
       /*!
 	@brief Reconcile the number of particles
       */
-      inline void reconcile_particles(Vector<List<ito_particle>* >& a_particles,
-				      const Vector<int>&            a_newNumParticles,
-				      const Vector<int>&            a_oldNumParticles,
-				      const RealVect                a_pos,
-				      const RealVect                a_lo,
-				      const RealVect                a_hi,
-				      const RealVect                a_bndryCentroid,
-				      const RealVect                a_bndryNormal,
-				      const Real                    a_dx,
-				      const Real                    a_kappa) const;
+      inline
+      void reconcile_particles(Vector<List<ito_particle>* >& a_particles,
+			       const Vector<int>&            a_newNumParticles,
+			       const Vector<int>&            a_oldNumParticles,
+			       const RealVect                a_pos,
+			       const RealVect                a_lo,
+			       const RealVect                a_hi,
+			       const RealVect                a_bndryCentroid,
+			       const RealVect                a_bndryNormal,
+			       const Real                    a_dx,
+			       const Real                    a_kappa) const;
       /*!
 	@brief Reconcile number of particles
       */
-      inline void reconcile_particles(List<ito_particle>& a_particles,
-				      const int           a_numNewParticles,
-				      const int           a_oldNewParticles,
-				      const RealVect      a_pos,
-				      const RealVect      a_lo,
-				      const RealVect      a_hi,
-				      const RealVect      a_bndryCentroid,
-				      const RealVect      a_normal,
-				      const Real          a_dx,
-				      const Real          a_kappa) const;
+      inline
+      void reconcile_particles(List<ito_particle>& a_particles,
+			       const int           a_numNewParticles,
+			       const int           a_oldNewParticles,
+			       const RealVect      a_pos,
+			       const RealVect      a_lo,
+			       const RealVect      a_hi,
+			       const RealVect      a_bndryCentroid,
+			       const RealVect      a_normal,
+			       const Real          a_dx,
+			       const Real          a_kappa) const;
 
       /*!
 	@brief Add particles
       */
-      inline void add_particles(List<ito_particle>& a_particles,
-				const int           a_numNewParticles,
-				const RealVect      a_pos,
-				const RealVect      a_lo,
-				const RealVect      a_hi,
-				const RealVect      a_bndryCentroid,
-				const RealVect      a_bndryNormal,
-				const Real          a_dx,
-				const Real          a_kappa) const;
+      inline
+      void add_particles(List<ito_particle>& a_particles,
+			 const int           a_numNewParticles,
+			 const RealVect      a_pos,
+			 const RealVect      a_lo,
+			 const RealVect      a_hi,
+			 const RealVect      a_bndryCentroid,
+			 const RealVect      a_bndryNormal,
+			 const Real          a_dx,
+			 const Real          a_kappa) const;
 
       /*!
 	@brief Remove particles
       */
-      inline void remove_particles(List<ito_particle>& a_particles,
-				   const int           a_numParticlesToRemove,
-				   const RealVect      a_pos,
-				   const RealVect      a_lo,
-				   const RealVect      a_hi,
-				   const RealVect      a_bndryCentroid,
-				   const RealVect      a_normal,
-				   const Real          a_dx,
-				   const Real          a_kappa) const;
+      inline
+      void remove_particles(List<ito_particle>& a_particles,
+			    const int           a_numParticlesToRemove,
+			    const RealVect      a_pos,
+			    const RealVect      a_lo,
+			    const RealVect      a_hi,
+			    const RealVect      a_bndryCentroid,
+			    const RealVect      a_normal,
+			    const Real          a_dx,
+			    const Real          a_kappa) const;
 
       /*!
 	@brief Reconcile the number of particles
       */
-      inline void reconcile_photons(Vector<List<photon>* >& a_newPhotons,
-				    const Vector<int>&      a_numNewPhotons,
-				    const RealVect          a_pos,
-				    const RealVect          a_lo,
-				    const RealVect          a_hi,
-				    const RealVect          a_bndryCentroid,
-				    const RealVect          a_bndryNormal,
-				    const Real              a_dx,
-				    const Real              a_kappa) const;
+      inline
+      void reconcile_photons(Vector<List<photon>* >& a_newPhotons,
+			     const Vector<int>&      a_numNewPhotons,
+			     const RealVect          a_pos,
+			     const RealVect          a_lo,
+			     const RealVect          a_hi,
+			     const RealVect          a_bndryCentroid,
+			     const RealVect          a_bndryNormal,
+			     const Real              a_dx,
+			     const Real              a_kappa) const;
       /*!
 	@brief Reconcile number of particles
       */
-      inline void reconcile_photons(List<photon>&  a_newPhotons,
-				    const int      a_numNewPhotons,
-				    const RealVect a_pos,
-				    const RealVect a_lo,
-				    const RealVect a_hi,
-				    const RealVect a_bndryCentroid,
-				    const RealVect a_normal,
-				    const Real     a_dx,
-				    const Real     a_kappa) const;
+      inline
+      void reconcile_photons(List<photon>&  a_newPhotons,
+			     const int      a_numNewPhotons,
+			     const RealVect a_pos,
+			     const RealVect a_lo,
+			     const RealVect a_hi,
+			     const RealVect a_bndryCentroid,
+			     const RealVect a_normal,
+			     const Real     a_dx,
+			     const Real     a_kappa) const;
 
       /*!
 	@brief Add photons
       */
-      inline void reconcile_photons(List<photon>&      a_photons,
-				    const rte_species& a_species,
-				    const int          a_num_photons,
-				    const RealVect     a_pos,
-				    const RealVect     a_lo,
-				    const RealVect     a_hi,
-				    const RealVect     a_bndryCentroid,
-				    const RealVect     a_bndryNormal,
-				    const Real         a_dx,
-				    const Real         a_kappa) const;
+      inline
+      void reconcile_photons(List<photon>&      a_photons,
+			     const rte_species& a_species,
+			     const int          a_num_photons,
+			     const RealVect     a_pos,
+			     const RealVect     a_lo,
+			     const RealVect     a_hi,
+			     const RealVect     a_bndryCentroid,
+			     const RealVect     a_bndryNormal,
+			     const Real         a_dx,
+			     const Real         a_kappa) const;
 
       /*!
 	@brief Reconcile photoionization mechanism
       */
-      inline void reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
-					    const Vector<List<photon>* >& a_photons) const;
+      inline
+      void reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
+				     const Vector<List<photon>* >& a_photons) const;
 
       /*!
 	@brief Compute particle weights for superparticles
       */
-      inline void compute_particle_weights(int& a_weight, int& a_num, int& remainder, const int a_numNewParticles) const;
+      inline
+      void compute_particle_weights(int& a_weight, int& a_num, int& remainder, const int a_numNewParticles) const;
 
       /*!
 	@brief Poisson reaction
       */
-      inline int poisson_reaction(const Real a_propensity, const Real a_dt) const;
+      inline
+      int poisson_reaction(const Real a_propensity, const Real a_dt) const;
 
       /*!
 	@brief Draw Gaussian distributed particles
       */
-      inline void draw_gaussian_particles(List<ito_particle>& a_particles1,
-					  List<ito_particle>& a_particles2,
-					  const int           a_numParticles,
-					  const RealVect      a_blobCenter,
-					  const Real          a_blobRadius,
-					  const Real          a_weights);
+      inline
+      void draw_gaussian_particles(List<ito_particle>& a_particles1,
+				   List<ito_particle>& a_particles2,
+				   const int           a_numParticles,
+				   const RealVect      a_blobCenter,
+				   const Real          a_blobRadius,
+				   const Real          a_weights);
 
       /*!
 	@brief Get the particle count
       */
-      inline Vector<int> get_particle_count(const Vector<List<ito_particle>* >& a_particles) const;
+      inline
+      Vector<int> get_particle_count(const Vector<List<ito_particle>* >& a_particles) const;
 
       /*!
 	@brief Get the particle count
       */
-      inline int get_particle_count(const List<ito_particle>& a_particles) const;
+      inline
+      int get_particle_count(const List<ito_particle>& a_particles) const;
 
       /*!
 	@brief Performing a tau-leaping step
       */
-      inline void tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const;
+      inline
+      void tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const;
 
       /*!
-	@brief Performing an SSA step
+	@brief Performing a single SSA step using ALL reactions
       */
-      inline void ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const;
+      inline
+      void ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const;
 
       /*!
 	@brief Perform hybrid advance
       */
-      inline void hybrid_advance(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt);
+      inline
+      void hybrid_advance(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt);
 
       /*!
 	@brief Get critical and non-critical reactions
       */
-      inline ReactionTypes get_critical_reactions(const Vector<int>& a_particles) const;
+      inline
+      ReactionTypes get_critical_reactions(const Vector<int>& a_particles) const;
 
       /*!
 	@brief Get the time to the next critical reaction. 
       */
-      inline Real get_critical_step(const Vector<int>&  a_particles,
-				    const ReactionPtrs& a_critical_reactions) const;
+      inline
+      Real get_critical_step(const Vector<int>&  a_particles,
+			     const ReactionPtrs& a_critical_reactions) const;
 
       /*!
 	@brief Get the time to the next critical reaction. 
       */
-      inline Real get_non_critical_step(const Vector<int>&  a_particles,
-					const ReactionPtrs& a_non_critical_reactions) const;
+      inline
+      Real get_non_critical_step(const Vector<int>&  a_particles,
+				 const ReactionPtrs& a_non_critical_reactions) const;
 
-      
+      /*!
+	@brief Compute total propensity
+      */
+      inline
+      Real total_propensity(const Vector<int>& a_particles) const;
+
+      /*!
+	@brief Critical propensity function
+      */
+      inline
+      Real critical_propensity(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const;
+
+      /*!
+	@brief Performing a single SSA step using a subset of reactions. 
+      */
+      inline
+      void ssa_step(Vector<int>&             a_particles,
+		    Vector<int>&             a_newPhotons,
+		    const ReactionPtrs&      a_critical_reactions,
+		    const std::vector<Real>& a_propensities,
+		    const Real               a_A) const;
     };
   }
 }

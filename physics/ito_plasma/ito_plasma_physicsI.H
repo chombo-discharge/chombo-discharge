@@ -18,13 +18,14 @@
 
 using namespace physics::ito_plasma;
 
-inline RealVect ito_plasma_physics::random_position(const RealVect a_pos,
-						    const RealVect a_lo,
-						    const RealVect a_hi,
-						    const RealVect a_bndryCentroid,
-						    const RealVect a_bndryNormal,
-						    const Real     a_dx,
-						    const Real     a_kappa) const {
+inline
+RealVect ito_plasma_physics::random_position(const RealVect a_pos,
+					     const RealVect a_lo,
+					     const RealVect a_hi,
+					     const RealVect a_bndryCentroid,
+					     const RealVect a_bndryNormal,
+					     const Real     a_dx,
+					     const Real     a_kappa) const {
 
   RealVect pos;
   if(a_kappa < 1.0){ // Rejection sampling. 
@@ -39,10 +40,11 @@ inline RealVect ito_plasma_physics::random_position(const RealVect a_pos,
   return pos;
 }
 
-inline RealVect ito_plasma_physics::random_position(const RealVect a_lo,
-						    const RealVect a_hi,
-						    const RealVect a_bndryCentroid,
-						    const RealVect a_bndryNormal) const {
+inline
+RealVect ito_plasma_physics::random_position(const RealVect a_lo,
+					     const RealVect a_hi,
+					     const RealVect a_bndryCentroid,
+					     const RealVect a_bndryNormal) const {
 
   RealVect pos = this->random_position(a_lo, a_hi);
   bool valid   = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
@@ -55,7 +57,8 @@ inline RealVect ito_plasma_physics::random_position(const RealVect a_lo,
   return pos;
 }
 
-inline RealVect ito_plasma_physics::random_position(const RealVect a_lo, const RealVect a_hi) const {
+inline
+RealVect ito_plasma_physics::random_position(const RealVect a_lo, const RealVect a_hi) const {
 
   RealVect pos = RealVect::Unit;
 
@@ -66,7 +69,8 @@ inline RealVect ito_plasma_physics::random_position(const RealVect a_lo, const R
   return pos;
 }
 
-inline RealVect ito_plasma_physics::random_direction() const {
+inline
+RealVect ito_plasma_physics::random_direction() const {
   const Real EPS = 1.E-8;
 #if CH_SPACEDIM==2
   Real x1 = 2.0;
@@ -97,8 +101,9 @@ inline RealVect ito_plasma_physics::random_direction() const {
 #endif
 }
 
-inline bool ito_plasma_physics::valid_advance(const Vector<List<ito_particle>* >& a_particles,
-					      const Vector<int>&                  a_newParticles) const {
+inline
+bool ito_plasma_physics::valid_advance(const Vector<List<ito_particle>* >& a_particles,
+				       const Vector<int>&                  a_newParticles) const {
   bool ret = true;
   for (int i = 0; i < a_particles.size(); i++){
     if(a_particles[i]->length() + a_newParticles[i] < 0){
@@ -110,16 +115,17 @@ inline bool ito_plasma_physics::valid_advance(const Vector<List<ito_particle>* >
   return ret;
 }
 
-inline void ito_plasma_physics::reconcile_particles(Vector<List<ito_particle>* >& a_particles,
-						    const Vector<int>&            a_newNumParticles,
-						    const Vector<int>&            a_oldNumParticles,
-						    const RealVect                a_pos,
-						    const RealVect                a_lo,
-						    const RealVect                a_hi,
-						    const RealVect                a_bndryCentroid,
-						    const RealVect                a_bndryNormal,
-						    const Real                    a_dx,
-						    const Real                    a_kappa) const{
+inline
+void ito_plasma_physics::reconcile_particles(Vector<List<ito_particle>* >& a_particles,
+					     const Vector<int>&            a_newNumParticles,
+					     const Vector<int>&            a_oldNumParticles,
+					     const RealVect                a_pos,
+					     const RealVect                a_lo,
+					     const RealVect                a_hi,
+					     const RealVect                a_bndryCentroid,
+					     const RealVect                a_bndryNormal,
+					     const Real                    a_dx,
+					     const Real                    a_kappa) const{
 
   for (int i = 0; i < a_particles.size(); i++){
     this->reconcile_particles(*a_particles[i], a_newNumParticles[i], a_oldNumParticles[i], a_pos, a_lo, a_hi, a_bndryCentroid,
@@ -127,16 +133,17 @@ inline void ito_plasma_physics::reconcile_particles(Vector<List<ito_particle>* >
   }
 }
 
-inline void ito_plasma_physics::reconcile_particles(List<ito_particle>& a_particles,
-						    const int           a_newNumParticles,
-						    const int           a_oldNumParticles,
-						    const RealVect      a_pos,
-						    const RealVect      a_lo,
-						    const RealVect      a_hi,
-						    const RealVect      a_bndryCentroid,
-						    const RealVect      a_bndryNormal,
-						    const Real          a_dx,
-						    const Real          a_kappa) const {
+inline
+void ito_plasma_physics::reconcile_particles(List<ito_particle>& a_particles,
+					     const int           a_newNumParticles,
+					     const int           a_oldNumParticles,
+					     const RealVect      a_pos,
+					     const RealVect      a_lo,
+					     const RealVect      a_hi,
+					     const RealVect      a_bndryCentroid,
+					     const RealVect      a_bndryNormal,
+					     const Real          a_dx,
+					     const Real          a_kappa) const {
 
   const int diff = a_newNumParticles - a_oldNumParticles;
 
@@ -148,10 +155,11 @@ inline void ito_plasma_physics::reconcile_particles(List<ito_particle>& a_partic
   }
 }
 
-inline void ito_plasma_physics::compute_particle_weights(int&      a_weight,
-							 int&      a_num,
-							 int&      a_remainder,
-							 const int a_numNewParticles) const {
+inline
+void ito_plasma_physics::compute_particle_weights(int&      a_weight,
+						  int&      a_num,
+						  int&      a_remainder,
+						  const int a_numNewParticles) const {
   if(a_numNewParticles <= m_ppc){  
     a_weight    = 1;
     a_num       = a_numNewParticles; 
@@ -164,15 +172,16 @@ inline void ito_plasma_physics::compute_particle_weights(int&      a_weight,
   }
 }
 
-inline void ito_plasma_physics::add_particles(List<ito_particle>& a_particles,
-					      const int           a_numNewParticles,
-					      const RealVect      a_pos,
-					      const RealVect      a_lo,
-					      const RealVect      a_hi,
-					      const RealVect      a_bndryCentroid,
-					      const RealVect      a_bndryNormal,
-					      const Real          a_dx,
-					      const Real          a_kappa) const {
+inline
+void ito_plasma_physics::add_particles(List<ito_particle>& a_particles,
+				       const int           a_numNewParticles,
+				       const RealVect      a_pos,
+				       const RealVect      a_lo,
+				       const RealVect      a_hi,
+				       const RealVect      a_bndryCentroid,
+				       const RealVect      a_bndryNormal,
+				       const Real          a_dx,
+				       const Real          a_kappa) const {
   int weight, num, remainder;
   this->compute_particle_weights(weight, num, remainder, a_numNewParticles);
 
@@ -187,15 +196,16 @@ inline void ito_plasma_physics::add_particles(List<ito_particle>& a_particles,
   }
 }
 
-inline void ito_plasma_physics::remove_particles(List<ito_particle>& a_particles,
-						 const int           a_numParticlesToRemove,
-						 const RealVect      a_pos,
-						 const RealVect      a_lo,
-						 const RealVect      a_hi,
-						 const RealVect      a_bndryCentroid,
-						 const RealVect      a_normal,
-						 const Real          a_dx,
-						 const Real          a_kappa) const {
+inline
+void ito_plasma_physics::remove_particles(List<ito_particle>& a_particles,
+					  const int           a_numParticlesToRemove,
+					  const RealVect      a_pos,
+					  const RealVect      a_lo,
+					  const RealVect      a_hi,
+					  const RealVect      a_bndryCentroid,
+					  const RealVect      a_normal,
+					  const Real          a_dx,
+					  const Real          a_kappa) const {
   //  MayDay::Warning("ito_plasma_physics::remove_particles - not implemented");
 }
 
@@ -217,16 +227,17 @@ void ito_plasma_physics::reconcile_photons(Vector<List<photon>* >& a_newPhotons,
   }
 }
 
-inline void ito_plasma_physics::reconcile_photons(List<photon>&      a_photons,
-						  const rte_species& a_species,
-						  const int          a_num_photons,
-						  const RealVect     a_pos,
-						  const RealVect     a_lo,
-						  const RealVect     a_hi,
-						  const RealVect     a_bndryCentroid,
-						  const RealVect     a_bndryNormal,
-						  const Real         a_dx,
-						  const Real         a_kappa) const {
+inline
+void ito_plasma_physics::reconcile_photons(List<photon>&      a_photons,
+					   const rte_species& a_species,
+					   const int          a_num_photons,
+					   const RealVect     a_pos,
+					   const RealVect     a_lo,
+					   const RealVect     a_hi,
+					   const RealVect     a_bndryCentroid,
+					   const RealVect     a_bndryNormal,
+					   const Real         a_dx,
+					   const Real         a_kappa) const {
   a_photons.clear();
 
   int weight, num, remainder;
@@ -247,8 +258,9 @@ inline void ito_plasma_physics::reconcile_photons(List<photon>&      a_photons,
   }
 }
 
-inline void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
-							   const Vector<List<photon>* >& a_photons) const {
+inline
+void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
+						   const Vector<List<photon>* >& a_photons) const {
   for (const auto& r : m_photo_reactions){
 
     // Source and targets
@@ -267,7 +279,8 @@ inline void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_partic
   }
 }
 
-inline int ito_plasma_physics::poisson_reaction(const Real a_propensity, const Real a_dt) const{
+inline
+int ito_plasma_physics::poisson_reaction(const Real a_propensity, const Real a_dt) const{
   
   int value = 0;
   const Real mean = a_propensity*a_dt;
@@ -284,12 +297,13 @@ inline int ito_plasma_physics::poisson_reaction(const Real a_propensity, const R
   return Max(0,value);
 }
 
-inline void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_particles1,
-							List<ito_particle>& a_particles2,
-							const int           a_numParticles,
-							const RealVect      a_blobCenter,
-							const Real          a_blobRadius,
-							const Real          a_weight){
+inline
+void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_particles1,
+						 List<ito_particle>& a_particles2,
+						 const int           a_numParticles,
+						 const RealVect      a_blobCenter,
+						 const Real          a_blobRadius,
+						 const Real          a_weight){
 
   // Set up the Gaussian RNG
   std::normal_distribution<Real> gauss(0.0, a_blobRadius);
@@ -317,7 +331,8 @@ inline void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_pa
   }
 }
 
-inline Vector<int> ito_plasma_physics::get_particle_count(const Vector<List<ito_particle>* >& a_particles) const {
+inline
+Vector<int> ito_plasma_physics::get_particle_count(const Vector<List<ito_particle>* >& a_particles) const {
   Vector<int> ret(a_particles.size(), 0);
 
   for (int i = 0; i < a_particles.size(); i++){
@@ -327,7 +342,8 @@ inline Vector<int> ito_plasma_physics::get_particle_count(const Vector<List<ito_
   return ret;
 }
 
-inline int ito_plasma_physics::get_particle_count(const List<ito_particle>& a_particles) const {
+inline
+int ito_plasma_physics::get_particle_count(const List<ito_particle>& a_particles) const {
   int ret = 0;
 
   for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
@@ -337,7 +353,8 @@ inline int ito_plasma_physics::get_particle_count(const List<ito_particle>& a_pa
   return ret;
 }
 
-inline void ito_plasma_physics::tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const {
+inline
+void ito_plasma_physics::tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const {
 
   const Vector<int> particles  = a_particles; // Because propensities should not change. 
   
@@ -348,7 +365,8 @@ inline void ito_plasma_physics::tau_leap(Vector<int>& a_particles, Vector<int>& 
   }
 }
 
-inline void ito_plasma_physics::ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const {
+inline
+void ito_plasma_physics::ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const {
 
   Real t   = 0.0;
   Real tau = 0.0;
@@ -401,19 +419,20 @@ inline void ito_plasma_physics::ssa_step(Vector<int>& a_particles, Vector<int>& 
   }
 }
 
-inline void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-							 Vector<List<photon>* >&       a_photons,
-							 Vector<List<photon>* >&       a_newPhotons,
-							 const RealVect                a_E,           
-							 const RealVect                a_pos,
-							 const RealVect                a_centroidPos,
-							 const RealVect                a_bndryCentroid,
-							 const RealVect                a_bndryNormal,
-							 const RealVect                a_lo,
-							 const RealVect                a_hi,
-							 const Real                    a_dx,
-							 const Real                    a_kappa, 
-							 const Real                    a_dt){
+inline
+void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
+						  Vector<List<photon>* >&       a_photons,
+						  Vector<List<photon>* >&       a_newPhotons,
+						  const RealVect                a_E,           
+						  const RealVect                a_pos,
+						  const RealVect                a_centroidPos,
+						  const RealVect                a_bndryCentroid,
+						  const RealVect                a_bndryNormal,
+						  const RealVect                a_lo,
+						  const RealVect                a_hi,
+						  const Real                    a_dx,
+						  const Real                    a_kappa, 
+						  const Real                    a_dt){
   this->update_reaction_rates(a_E, a_dx, a_kappa);
 
   // Get particle counts. 
@@ -443,11 +462,13 @@ inline void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particl
   this->reconcile_photoionization(a_particles, a_photons);
 }
 
-inline void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt){
+inline
+void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt){
   this->tau_leap(a_particles, a_newPhotons, a_dt);
 }
 
-inline ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<int>& a_particles) const{
+inline
+ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<int>& a_particles) const{
 
   std::vector<std::shared_ptr<ito_reaction> > criticalReactions;    // Maybe these should be maps, too?
   std::vector<std::shared_ptr<ito_reaction> > nonCriticalReactions; // Maybe these should be maps, too?
@@ -498,8 +519,9 @@ inline ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<int
   return ret;
 }
 
-inline Real ito_plasma_physics::get_critical_step(const Vector<int>&  a_particles,
-						  const ReactionPtrs& a_critical_reactions) const {
+inline
+Real ito_plasma_physics::get_critical_step(const Vector<int>&  a_particles,
+					   const ReactionPtrs& a_critical_reactions) const {
 						 
   // TLDR: a_critical_reaction is a vector under the hood.
   
@@ -514,8 +536,9 @@ inline Real ito_plasma_physics::get_critical_step(const Vector<int>&  a_particle
   return dt;
 }
 
-inline Real ito_plasma_physics::get_non_critical_step(const Vector<int>&  a_particles,
-						      const ReactionPtrs& a_non_critical_reactions) const {
+inline
+Real ito_plasma_physics::get_non_critical_step(const Vector<int>&  a_particles,
+					       const ReactionPtrs& a_non_critical_reactions) const {
 						 
   // TLDR: a_non_critical_reaction is a vector under the hood.
   
@@ -558,17 +581,66 @@ inline Real ito_plasma_physics::get_non_critical_step(const Vector<int>&  a_part
 	sigma += muIJ * muIJ * propensities[j];
       }
 
-      const Real dt1 = std::max(m_eps*a_particles[reactant]/gi, 1.)/mu;
-      const Real dt2 = std::max(m_eps*a_particles[reactant]/gi, 1.)/sigma;
+      Real dt1 = std::numeric_limits<Real>::max();
+      Real dt2 = std::numeric_limits<Real>::max();
+
+      if(mu    != 0.0) dt1 = std::max(m_eps*a_particles[reactant]/gi, 1.)/mu;
+      if(sigma != 0.0) dt2 = std::max(m_eps*a_particles[reactant]/gi, 1.)/sigma;
 
       dt = std::min(dt, std::min(dt1, dt2));
     }
-	   
   }
 
 
   return dt;
 }
 
+inline
+Real ito_plasma_physics::total_propensity(const Vector<int>& a_particles) const{
+
+  Real A = 0.0;
+  for (const auto& r : m_reactions){
+    A += r.second.propensity(a_particles);
+  }
+
+  return A;
+}
+
+
+inline
+Real ito_plasma_physics::critical_propensity(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const{
+
+  Real A = 0.0;
+  for (const auto& r : a_critical_reactions){
+    A += r->propensity(a_particles);
+  }
+
+  return A;
+}
+
+inline
+void ito_plasma_physics::ssa_step(Vector<int>&             a_particles,
+				  Vector<int>&             a_newPhotons,
+				  const ReactionPtrs&      a_critical_reactions,
+				  const std::vector<Real>& a_propensities,
+				  const Real               a_A) const {
+
+
+  const Real u2 = m_udist01(m_rng);
+
+  // Compute propensities
+  const int M = a_critical_reactions.size();
+
+  int r = 0;
+  for (int i = 1; i < M; i++){
+    if(a_propensities[i-1] <= u2*a_A && u2*a_A < a_propensities[i]){
+      r = i;
+      break;
+    }
+  }
+
+  a_critical_reactions[r]->jump_state(a_particles, a_newPhotons, 1);
+
+}
 
 #endif
