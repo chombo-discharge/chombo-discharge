@@ -21,8 +21,11 @@ ito_plasma_physics::ito_plasma_physics(){
   m_reactions.clear();
   m_photo_reactions.clear();
 
-  m_Ncrit = 25;
-  m_eps   = 0.03;
+  // Default parameters for hybrid algorithm. 
+  m_Ncrit  = 25;
+  m_eps    = 0.03;
+  m_NSSA   = 50;
+  m_SSAlim = 0.1;
 }
 
 ito_plasma_physics::~ito_plasma_physics(){
@@ -47,6 +50,3 @@ int ito_plasma_physics::get_num_rte_species() const {
 Real ito_plasma_physics::initial_sigma(const Real a_time, const RealVect a_pos) const {
   return 0.0;
 }
-
-
-

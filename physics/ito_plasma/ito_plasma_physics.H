@@ -134,12 +134,24 @@ namespace physics {
       int m_poisson_switch;
       int m_init_weights;
       int m_Ncrit;
+      int m_NSSA;
 
+      Real m_SSAlim;
       Real m_eps;
 
       // These are all the reactions
       std::map<std::string, ito_reaction> m_reactions; 
       mutable std::map<std::string, photo_reaction> m_photo_reactions;
+
+      /*!
+	@brief Add a reaction
+      */
+      void add_reaction(const std::string, const ito_reaction& a_reaction);
+
+      /*!
+	@brief Add a photo reaction
+      */
+      void add_photo_reaction(const std::string, const photo_reaction& a_reaction);
 
       /*!
 	@brief Draw a valid random position somewhere in a cell
@@ -385,8 +397,8 @@ namespace physics {
       inline
       void ssa_step(Vector<int>&             a_particles,
 		    Vector<int>&             a_newPhotons,
-		    const ReactionPtrs&      a_reactions,
 		    const std::deque<Real>&  a_propensities,
+		    const ReactionPtrs&      a_reactions,
 		    const Real               a_A) const;
 
 
@@ -406,8 +418,8 @@ namespace physics {
       */
       inline void tau_step(Vector<int>&             a_particles,
 			   Vector<int>&             a_newPhotons,
-			   const ReactionPtrs&      a_reactions,
 			   const std::deque<Real>&  a_propensities,
+			   const ReactionPtrs&      a_reactions,
 			   const Real               a_dt) const;
 
 

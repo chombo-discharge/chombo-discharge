@@ -374,8 +374,8 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   Vector<int> oldParticleCount = this->get_particle_count(a_particles);
   Vector<int> newParticleCount = oldParticleCount;
 
-  // Do a tau-leaping step
-  this->tau_leap(newParticleCount, newPhotonCount, a_dt); 
+  // Use hybrid advance code
+  this->hybrid_advance(newParticleCount, newPhotonCount, a_dt); 
 
   // Reconcile particles
   this->reconcile_particles(a_particles,
@@ -594,11 +594,9 @@ std::deque<Real> ito_plasma_physics::propensities(const Vector<int>&  a_particle
 inline
 void ito_plasma_physics::ssa_step(Vector<int>&             a_particles,
 				  Vector<int>&             a_newPhotons,
-				  const ReactionPtrs&      a_reactions,
 				  const std::deque<Real>&  a_propensities,
+				  const ReactionPtrs&      a_reactions,
 				  const Real               a_A) const {
-
-
   const Real u2 = m_udist01(m_rng);
   const int M = a_reactions.size();
   
@@ -628,14 +626,14 @@ void ito_plasma_physics::ssa_step(Vector<int>&             a_particles,
     reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
   }
 
-  this->ssa_step(a_particles, a_newPhotons, reactions, a_propensities, a_totalPropensity);
+  this->ssa_step(a_particles, a_newPhotons, a_propensities, reactions, a_totalPropensity);
 }
 
 inline
 void ito_plasma_physics::tau_step(Vector<int>&             a_particles,
 				  Vector<int>&             a_newPhotons,
-				  const ReactionPtrs&      a_reactions,
 				  const std::deque<Real>&  a_propensities,
+				  const ReactionPtrs&      a_reactions,
 				  const Real               a_dt) const {
 
   Vector<int> particles = a_particles;
@@ -658,7 +656,7 @@ void ito_plasma_physics::tau_step(Vector<int>&             a_particles,
     reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
   }
 
-  this->tau_step(a_particles, a_newPhotons, reactions, a_propensities, a_dt);
+  this->tau_step(a_particles, a_newPhotons, a_propensities, reactions, a_dt);
 }
 
 inline
@@ -670,13 +668,70 @@ void ito_plasma_physics::tau_leap(Vector<int>& a_particles, Vector<int>& a_newPh
 
 inline
 void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt){
-#if 1 // Tau-leap code. No time step, no nothing.
-  this->tau_leap(a_particles, a_newPhotons, a_dt);
-#else // Time to slay this beast. 
 
-#endif
+  // TODO: We must still check that the tau-steps are valid, i.e. that they don't give negative numbers. 
+  
+  Real curTime = 0.0;
 
+  while(curTime <= a_dt){
 
+    // Get critical and non-critical reactions. 
+    ReactionTypes rTypes = this->get_critical_reactions(a_particles);
+
+    ReactionPtrs criticalReactions    = rTypes.first;
+    ReactionPtrs nonCriticalReactions = rTypes.second;
+
+    // Compute time steps for critical and non-critical reactions
+    const Real dtCrit    = this->get_critical_step(a_particles,     criticalReactions);
+    const Real dtNonCrit = this->get_non_critical_step(a_particles, nonCriticalReactions);
+
+    const Real curDt = std::min(a_dt, std::min(dtCrit, dtNonCrit));
+
+    // Compute the propensity function
+    const Real A = this->propensity(a_particles);
+
+    // How will we advance?
+    if(dtNonCrit < dtCrit){  // No critical reactions fire. Advance only noncritical reactions. 
+      if(A*curDt < m_SSAlim){      // Perform some SSA reactions. 
+
+	for (int i = 0; i < m_NSSA; i++){
+
+	  const std::deque<Real> propensities = this->propensities(a_particles); // Propensity function
+
+	  // Draw time to next step
+	  const Real u1     = m_udist01(m_rng);
+	  const Real dtNext = log(1./u1)/A;
+
+	  curTime += dtNext;
+	  if(curTime <= a_dt){ // Do reaction
+	    this->ssa_step(a_particles, a_newPhotons, propensities, A);
+	  }
+	  else{
+	    break;
+	  }
+	}
+      }
+      else{ // Perform tau-leaping with no-critical reactions only
+	const std::deque<Real> propensities = this->propensities(a_particles); // Propensity functions, advance curDt. 
+	
+	this->tau_step(a_particles, a_newPhotons, propensities, nonCriticalReactions, curDt);
+
+	curTime += curDt;
+      }
+    } 
+    else{ // Some critical reactions fired. Advance those
+
+      const std::deque<Real> propensities = this->propensities(a_particles); // Propensity functions
+
+      // SSA for critical reactions
+      this->ssa_step(a_particles, a_newPhotons, propensities, criticalReactions, A);
+
+      // Tau-leaping for non-critical reactions
+      this->tau_step(a_particles, a_newPhotons, propensities, nonCriticalReactions, curDt);
+
+      curTime += curDt;
+    }
+  }
 }
 
 #endif
