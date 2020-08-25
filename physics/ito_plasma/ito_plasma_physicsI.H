@@ -686,11 +686,13 @@ void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a
 
     bool valid = false;
     while(!valid){
+
+      Vector<int> particles = a_particles;
       
       const Real curDt = std::min(a_dt, std::min(dtCrit, dtNonCrit));
 
       // Compute the propensity function
-      const Real A = this->propensity(a_particles);
+      const Real A = this->propensity(particles);
 
       // How will we advance?
       if(dtNonCrit < dtCrit){  // No critical reactions fire. Advance only noncritical reactions. 
@@ -698,7 +700,7 @@ void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a
 
 	  for (int i = 0; i < m_NSSA; i++){
 
-	    const std::deque<Real> propensities = this->propensities(a_particles); // Propensity function
+	    const std::deque<Real> propensities = this->propensities(particles); // Propensity function
 
 	    // Draw time to next step
 	    const Real u1     = m_udist01(m_rng);
@@ -706,8 +708,9 @@ void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a
 
 	    valid    = true;
 	    curTime += dtNext;
-	    if(curTime <= a_dt){ // Do reaction
-	      this->ssa_step(a_particles, a_newPhotons, propensities, A);
+	    if(curTime <= a_dt){ // Do reaction. Always valid. 
+	      this->ssa_step(particles, a_newPhotons, propensities, A);
+	      a_particles = particles;
 	    }
 	    else{
 	      break;
@@ -715,14 +718,15 @@ void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a
 	  }
 	}
 	else{ // Perform tau-leaping with no-critical reactions only
-	  const std::deque<Real> propensities = this->propensities(a_particles); // Propensity functions, advance curDt. 
+	  const std::deque<Real> propensities = this->propensities(particles); // Propensity functions, advance curDt. 
 	
-	  this->tau_step(a_particles, a_newPhotons, propensities, nonCriticalReactions, curDt);
+	  this->tau_step(particles, a_newPhotons, propensities, nonCriticalReactions, curDt);
 
-	  valid = this->valid_state(a_particles);
+	  valid = this->valid_state(particles);
 
 	  if(valid){
 	    curTime += curDt;
+	    a_particles = particles;
 	  }
 	  else{
 	    dtNonCrit = dtNonCrit*0.5;
@@ -732,18 +736,19 @@ void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a
       } 
       else{ // One critical reaction fired. Advance that reaction and use tau-leaping for the rest. 
 
-	const std::deque<Real> propensities = this->propensities(a_particles); // Propensity functions
+	const std::deque<Real> propensities = this->propensities(particles); // Propensity functions
 
 	// SSA for critical reactions
-	this->ssa_step(a_particles, a_newPhotons, propensities, criticalReactions, A);
+	this->ssa_step(particles, a_newPhotons, propensities, criticalReactions, A);
 
 	// Tau-leaping for non-critical reactions
-	this->tau_step(a_particles, a_newPhotons, propensities, nonCriticalReactions, curDt);
+	this->tau_step(particles, a_newPhotons, propensities, nonCriticalReactions, curDt);
 
-	valid = this->valid_state(a_particles);
+	valid = this->valid_state(particles);
 
 	if(valid){
 	  curTime += curDt;
+	  a_particles = particles;
 	}
 	else{
 	  dtNonCrit = dtNonCrit * 0.5;
