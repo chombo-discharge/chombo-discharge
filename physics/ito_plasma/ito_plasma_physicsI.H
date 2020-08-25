@@ -354,18 +354,6 @@ int ito_plasma_physics::get_particle_count(const List<ito_particle>& a_particles
 }
 
 inline
-void ito_plasma_physics::tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const {
-
-  const Vector<int> particles  = a_particles; // Because propensities should not change. 
-  
-  for (const auto& r : m_reactions){
-    const int num_reactions = this->poisson_reaction(r.second.propensity(particles), a_dt);
-
-    r.second.jump_state(a_particles, a_newPhotons, num_reactions);
-  }
-}
-
-inline
 void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
 						  Vector<List<photon>* >&       a_photons,
 						  Vector<List<photon>* >&       a_newPhotons,
@@ -408,10 +396,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   this->reconcile_photoionization(a_particles, a_photons);
 }
 
-inline
-void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt){
-  this->tau_leap(a_particles, a_newPhotons, a_dt);
-}
+
 
 inline
 ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<int>& a_particles) const{
@@ -556,7 +541,7 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<int>&  a_particles,
 }
 
 inline
-Real ito_plasma_physics::total_propensity(const Vector<int>& a_particles) const{
+Real ito_plasma_physics::propensity(const Vector<int>& a_particles) const{
 
   Real A = 0.0;
   for (const auto& r : m_reactions){
@@ -568,10 +553,10 @@ Real ito_plasma_physics::total_propensity(const Vector<int>& a_particles) const{
 
 
 inline
-Real ito_plasma_physics::critical_propensity(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const{
+Real ito_plasma_physics::propensity(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const{
 
   Real A = 0.0;
-  std::deque<Real> propensities = this->critical_propensities(a_particles, a_critical_reactions);
+  std::deque<Real> propensities = this->propensities(a_particles, a_critical_reactions);
   
   for (const auto& p : propensities){
     A += p;
@@ -581,9 +566,19 @@ Real ito_plasma_physics::critical_propensity(const Vector<int>& a_particles, con
 }
 
 inline
-std::deque<Real> ito_plasma_physics::critical_propensities(const Vector<int>&  a_particles,
-							   const ReactionPtrs& a_critical_reactions) const{
+std::deque<Real> ito_plasma_physics::propensities(const Vector<int>& a_particles) const {
+  std::deque<Real> propensities;
+  
+  for (const auto& r : m_reactions){
+    const Real p = r.second.propensity(a_particles);
+    propensities.emplace_back(p);
+  }
 
+  return propensities;
+}
+
+inline
+std::deque<Real> ito_plasma_physics::propensities(const Vector<int>&  a_particles, const ReactionPtrs& a_critical_reactions) const{
   std::deque<Real> propensities;
 
   for (const auto& r : a_critical_reactions){
@@ -599,15 +594,15 @@ std::deque<Real> ito_plasma_physics::critical_propensities(const Vector<int>&  a
 inline
 void ito_plasma_physics::ssa_step(Vector<int>&             a_particles,
 				  Vector<int>&             a_newPhotons,
-				  const ReactionPtrs&      a_critical_reactions,
+				  const ReactionPtrs&      a_reactions,
 				  const std::deque<Real>&  a_propensities,
 				  const Real               a_A) const {
 
 
   const Real u2 = m_udist01(m_rng);
-  const int M = a_critical_reactions.size();
+  const int M = a_reactions.size();
   
-  if(a_critical_reactions.size() > 0){
+  if(a_reactions.size() > 0){
     int r = 0;
 
     for (int i = 1; i < M; i++){
@@ -617,7 +612,7 @@ void ito_plasma_physics::ssa_step(Vector<int>&             a_particles,
       }
     }
 
-    a_critical_reactions[r]->jump_state(a_particles, a_newPhotons, 1);
+    a_reactions[r]->jump_state(a_particles, a_newPhotons, 1);
   }
 }
 
@@ -627,26 +622,24 @@ void ito_plasma_physics::ssa_step(Vector<int>&             a_particles,
 				  const std::deque<Real>&  a_propensities,
 				  const Real               a_totalPropensity) const {
   
-  // A bit nasty, but we need a data structure with random access for evaluating stuff like
-  // a_(r-1) <= u2*A < a_r. So, take the internal map and put it into a vector. 
+  // Map the map onto a deque. 
   std::deque<std::shared_ptr<ito_reaction> > reactions;
   for (const auto& r : m_reactions){
     reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
   }
 
   this->ssa_step(a_particles, a_newPhotons, reactions, a_propensities, a_totalPropensity);
-
 }
 
 inline
 void ito_plasma_physics::tau_step(Vector<int>&             a_particles,
 				  Vector<int>&             a_newPhotons,
-				  const ReactionPtrs&      a_non_critical_reactions,
+				  const ReactionPtrs&      a_reactions,
 				  const std::deque<Real>&  a_propensities,
 				  const Real               a_dt) const {
 
   Vector<int> particles = a_particles;
-  for (const auto& r : a_non_critical_reactions){
+  for (const auto& r : a_reactions){
     const int num_reactions = this->poisson_reaction(r->propensity(particles), a_dt);
 
     r->jump_state(a_particles, a_newPhotons, num_reactions);
@@ -658,14 +651,32 @@ void ito_plasma_physics::tau_step(Vector<int>&             a_particles,
 				  Vector<int>&             a_newPhotons,
 				  const std::deque<Real>&  a_propensities,
 				  const Real               a_dt) const {
-  // A bit nasty, but we need a data structure with random access for evaluating stuff like
-  // a_(r-1) <= u2*A < a_r. So, take the internal map and put it into a vector. 
+
+  // Map the map onto a deque
   std::deque<std::shared_ptr<ito_reaction> > reactions;
   for (const auto& r : m_reactions){
     reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
   }
 
   this->tau_step(a_particles, a_newPhotons, reactions, a_propensities, a_dt);
+}
+
+inline
+void ito_plasma_physics::tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const {
+  std::deque<Real> propensities = this->propensities(a_particles);
+  this->tau_step(a_particles, a_newPhotons, propensities, a_dt);
+  
+}
+
+inline
+void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt){
+#if 1 // Tau-leap code. No time step, no nothing.
+  this->tau_leap(a_particles, a_newPhotons, a_dt);
+#else // Time to slay this beast. 
+
+#endif
+
+
 }
 
 #endif

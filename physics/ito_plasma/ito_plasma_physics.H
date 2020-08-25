@@ -138,7 +138,7 @@ namespace physics {
       Real m_eps;
 
       // These are all the reactions
-      std::map<std::string, ito_reaction>   m_reactions; // SHould it be mutable...????
+      std::map<std::string, ito_reaction> m_reactions; 
       mutable std::map<std::string, photo_reaction> m_photo_reactions;
 
       /*!
@@ -356,24 +356,28 @@ namespace physics {
 				 const ReactionPtrs& a_non_critical_reactions) const;
 
       /*!
-	@brief Compute total propensity
+	@brief Compute the total propensity
       */
       inline
-      Real total_propensity(const Vector<int>& a_particles) const;
-
+      Real propensity(const Vector<int>& a_particles) const;
 
       /*!
-	@brief Critical propensity function
+	@brief Compute total propensity for a subset
       */
       inline
-      Real critical_propensity(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const;
+      Real propensity(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const;
+
+      /*!
+	@brief Computes all propensities
+      */
+      inline
+      std::deque<Real> propensities(const Vector<int>& a_particles) const;
 
       /*!
 	@brief Compute critical propensities
       */
       inline
-      std::deque<Real> critical_propensities(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const;
-
+      std::deque<Real> propensities(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const;
 
       /*!
 	@brief Performing a single SSA step using a subset of reactions. 
@@ -381,7 +385,7 @@ namespace physics {
       inline
       void ssa_step(Vector<int>&             a_particles,
 		    Vector<int>&             a_newPhotons,
-		    const ReactionPtrs&      a_critical_reactions,
+		    const ReactionPtrs&      a_reactions,
 		    const std::deque<Real>&  a_propensities,
 		    const Real               a_A) const;
 
@@ -402,7 +406,7 @@ namespace physics {
       */
       inline void tau_step(Vector<int>&             a_particles,
 			   Vector<int>&             a_newPhotons,
-			   const ReactionPtrs&      a_non_critical_reactions,
+			   const ReactionPtrs&      a_reactions,
 			   const std::deque<Real>&  a_propensities,
 			   const Real               a_dt) const;
 
