@@ -665,7 +665,6 @@ void ito_plasma_physics::ssa_step(Vector<int>&             a_particles,
 				  Vector<int>&             a_newPhotons,
 				  const std::vector<Real>& a_propensities,
 				  const Real               a_totalPropensity) const {
-
   
   // A bit nasty, but we need a data structure with random access for evaluating stuff like
   // a_(r-1) <= u2*A < a_r. So, take the internal map and put it into a vector. 
@@ -676,6 +675,37 @@ void ito_plasma_physics::ssa_step(Vector<int>&             a_particles,
 
   this->ssa_step(a_particles, a_newPhotons, reactions, a_propensities, a_totalPropensity);
 
+}
+
+inline
+void ito_plasma_physics::tau_step(Vector<int>&             a_particles,
+				  Vector<int>&             a_newPhotons,
+				  const ReactionPtrs&      a_non_critical_reactions,
+				  const std::vector<Real>& a_propensities,
+				  const Real               a_dt) const {
+
+  Vector<int> particles = a_particles;
+  for (const auto& r : a_non_critical_reactions){
+    const int num_reactions = this->poisson_reaction(r->propensity(particles), a_dt);
+
+    r->jump_state(a_particles, a_newPhotons, num_reactions);
+  }
+}
+
+
+inline
+void ito_plasma_physics::tau_step(Vector<int>&             a_particles,
+				  Vector<int>&             a_newPhotons,
+				  const std::vector<Real>& a_propensities,
+				  const Real               a_dt) const {
+  // A bit nasty, but we need a data structure with random access for evaluating stuff like
+  // a_(r-1) <= u2*A < a_r. So, take the internal map and put it into a vector. 
+  std::vector<std::shared_ptr<ito_reaction> > reactions;
+  for (const auto& r : m_reactions){
+    reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+  }
+
+  this->tau_step(a_particles, a_newPhotons, reactions, a_propensities, a_dt);
 }
 
 #endif

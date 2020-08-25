@@ -396,6 +396,23 @@ namespace physics {
 		    Vector<int>&             a_newPhotons,
 		    const std::vector<Real>& a_propensities,
 		    const Real               a_A) const;
+
+      /*!
+	@brief Perform tau-leaping with a subsect of reactions
+      */
+      inline void tau_step(Vector<int>&             a_particles,
+			   Vector<int>&             a_newPhotons,
+			   const ReactionPtrs&      a_non_critical_reactions,
+			   const std::vector<Real>& a_propensities,
+			   const Real               a_dt) const;
+
+      /*!
+	@brief Perform tau-leaping with a subsect of reactions
+      */
+      inline void tau_step(Vector<int>&             a_particles,
+			   Vector<int>&             a_newPhotons,
+			   const std::vector<Real>& a_propensities,
+			   const Real               a_dt) const;
     };
   }
 }
