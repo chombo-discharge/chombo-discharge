@@ -373,12 +373,27 @@ namespace physics {
       Real critical_propensity(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const;
 
       /*!
+	@brief Compute critical propensities
+      */
+      inline
+      std::vector<Real> critical_propensities(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const;
+
+      /*!
 	@brief Performing a single SSA step using a subset of reactions. 
       */
       inline
       void ssa_step(Vector<int>&             a_particles,
 		    Vector<int>&             a_newPhotons,
 		    const ReactionPtrs&      a_critical_reactions,
+		    const std::vector<Real>& a_propensities,
+		    const Real               a_A) const;
+
+      /*!
+	@brief Performing a single SSA step using all reactions. 
+      */
+      inline
+      void ssa_step(Vector<int>&             a_particles,
+		    Vector<int>&             a_newPhotons,
 		    const std::vector<Real>& a_propensities,
 		    const Real               a_A) const;
     };

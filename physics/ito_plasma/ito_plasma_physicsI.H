@@ -611,11 +611,28 @@ inline
 Real ito_plasma_physics::critical_propensity(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const{
 
   Real A = 0.0;
-  for (const auto& r : a_critical_reactions){
-    A += r->propensity(a_particles);
+  std::vector<Real> propensities = this->critical_propensities(a_particles, a_critical_reactions);
+  
+  for (const auto& p : propensities){
+    A += p;
   }
 
   return A;
+}
+
+inline
+std::vector<Real> ito_plasma_physics::critical_propensities(const Vector<int>&  a_particles,
+							    const ReactionPtrs& a_critical_reactions) const{
+
+  const int M = a_critical_reactions.size();
+  
+  std::vector<Real> propensities(M, 0.0);
+
+  for (int j = 0; j < M; j++){
+    propensities[j] = a_critical_reactions[j]->propensity(a_particles);
+  }
+
+  return propensities;
 }
 
 inline
@@ -640,6 +657,24 @@ void ito_plasma_physics::ssa_step(Vector<int>&             a_particles,
   }
 
   a_critical_reactions[r]->jump_state(a_particles, a_newPhotons, 1);
+
+}
+
+inline
+void ito_plasma_physics::ssa_step(Vector<int>&             a_particles,
+				  Vector<int>&             a_newPhotons,
+				  const std::vector<Real>& a_propensities,
+				  const Real               a_totalPropensity) const {
+
+  
+  // A bit nasty, but we need a data structure with random access for evaluating stuff like
+  // a_(r-1) <= u2*A < a_r. So, take the internal map and put it into a vector. 
+  std::vector<std::shared_ptr<ito_reaction> > reactions;
+  for (const auto& r : m_reactions){
+    reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+  }
+
+  this->ssa_step(a_particles, a_newPhotons, reactions, a_propensities, a_totalPropensity);
 
 }
 
