@@ -16,6 +16,7 @@
 #include <chrono>
 #include <random>
 #include <memory>
+#include <deque>
 
 #include "ito_species.H"
 #include "rte_species.H"
@@ -28,8 +29,8 @@ namespace physics {
   namespace ito_plasma {
 
     // Ease up on the typing.
-    using ReactionPtrs  = std::vector<std::shared_ptr<ito_reaction> >;
-    using ReactionTypes = std::pair<std::vector<std::shared_ptr<ito_reaction> >, std::vector<std::shared_ptr<ito_reaction> > >;
+    using ReactionPtrs  = std::deque<std::shared_ptr<ito_reaction> >;
+    using ReactionTypes = std::pair<ReactionPtrs, ReactionPtrs>;
 
     /*!
       @brief Abstract clas for specifying plasma kinetics
@@ -137,7 +138,7 @@ namespace physics {
       Real m_eps;
 
       // These are all the reactions
-      mutable std::map<std::string, ito_reaction>   m_reactions;
+      mutable std::map<std::string, ito_reaction>   m_reactions; // SHould it be mutable...????
       mutable std::map<std::string, photo_reaction> m_photo_reactions;
 
       /*!
@@ -323,16 +324,10 @@ namespace physics {
       int get_particle_count(const List<ito_particle>& a_particles) const;
 
       /*!
-	@brief Performing a tau-leaping step
+	@brief Performing a tau-leaping step. Mostly while we wait for hybrid...
       */
       inline
       void tau_leap(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const;
-
-      /*!
-	@brief Performing a single SSA step using ALL reactions
-      */
-      inline
-      void ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const;
 
       /*!
 	@brief Perform hybrid advance
@@ -366,6 +361,7 @@ namespace physics {
       inline
       Real total_propensity(const Vector<int>& a_particles) const;
 
+
       /*!
 	@brief Critical propensity function
       */
@@ -376,7 +372,8 @@ namespace physics {
 	@brief Compute critical propensities
       */
       inline
-      std::vector<Real> critical_propensities(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const;
+      std::deque<Real> critical_propensities(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const;
+
 
       /*!
 	@brief Performing a single SSA step using a subset of reactions. 
@@ -385,8 +382,10 @@ namespace physics {
       void ssa_step(Vector<int>&             a_particles,
 		    Vector<int>&             a_newPhotons,
 		    const ReactionPtrs&      a_critical_reactions,
-		    const std::vector<Real>& a_propensities,
+		    const std::deque<Real>&  a_propensities,
 		    const Real               a_A) const;
+
+
 
       /*!
 	@brief Performing a single SSA step using all reactions. 
@@ -394,8 +393,9 @@ namespace physics {
       inline
       void ssa_step(Vector<int>&             a_particles,
 		    Vector<int>&             a_newPhotons,
-		    const std::vector<Real>& a_propensities,
+		    const std::deque<Real>&  a_propensities,
 		    const Real               a_A) const;
+
 
       /*!
 	@brief Perform tau-leaping with a subsect of reactions
@@ -403,15 +403,16 @@ namespace physics {
       inline void tau_step(Vector<int>&             a_particles,
 			   Vector<int>&             a_newPhotons,
 			   const ReactionPtrs&      a_non_critical_reactions,
-			   const std::vector<Real>& a_propensities,
+			   const std::deque<Real>&  a_propensities,
 			   const Real               a_dt) const;
+
 
       /*!
 	@brief Perform tau-leaping with a subsect of reactions
       */
       inline void tau_step(Vector<int>&             a_particles,
 			   Vector<int>&             a_newPhotons,
-			   const std::vector<Real>& a_propensities,
+			   const std::deque<Real>&  a_propensities,
 			   const Real               a_dt) const;
     };
   }

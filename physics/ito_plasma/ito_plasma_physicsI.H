@@ -366,60 +366,6 @@ void ito_plasma_physics::tau_leap(Vector<int>& a_particles, Vector<int>& a_newPh
 }
 
 inline
-void ito_plasma_physics::ssa_step(Vector<int>& a_particles, Vector<int>& a_newPhotons, const Real a_dt) const {
-
-  Real t   = 0.0;
-  Real tau = 0.0;
-  Real A   = 0.0;
-  Real u1  = 0.0;
-  Real u2  = 0.0;
-  int  r   = 0;
-
-  const int N = m_reactions.size();
-
-
-  // A bit nasty, but we need a data structure with random access for evaluating stuff like
-  // a_(r-1) <= u2*A < a_r. So, take the internal map and put it into a vector. 
-  std::vector<std::shared_ptr<ito_reaction> > reactions;
-  for (const auto& r : m_reactions){
-    reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
-  }
-
-  std::vector<Real> a(N, 0.0);
-
-  while(t <= a_dt && N > 0){
-
-    // Compute rates
-    A = 0.0;
-    for (int i = 0; i < N; i++){
-      a[i] = reactions[i]->propensity(a_particles);
-      A   += a[i];
-    }
-
-    u1 = m_udist01(m_rng);
-    u2 = m_udist01(m_rng);
-
-    // Time to next reaction
-    tau = log(1./u1)/A;
-    t  += a_dt;
-
-    // Ok, time to react
-    if(t <= a_dt){
-
-      r = 0;
-      for (int i = 1; i < N; i++){
-	if(a[i-1] <= u2*A && u2*A < a[i]){
-	  r = i;
-	  break;
-	}
-      }
-
-      reactions[r]->jump_state(a_particles, a_newPhotons, 1);
-    }
-  }
-}
-
-inline
 void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
 						  Vector<List<photon>* >&       a_photons,
 						  Vector<List<photon>* >&       a_newPhotons,
@@ -470,14 +416,12 @@ void ito_plasma_physics::hybrid_advance(Vector<int>& a_particles, Vector<int>& a
 inline
 ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<int>& a_particles) const{
 
-  std::vector<std::shared_ptr<ito_reaction> > criticalReactions;    // Maybe these should be maps, too?
-  std::vector<std::shared_ptr<ito_reaction> > nonCriticalReactions; // Maybe these should be maps, too?
+  ReactionPtrs criticalReactions;    // Maybe these should be maps, too?
+  ReactionPtrs nonCriticalReactions; // Maybe these should be maps, too?
   
   for (const auto& r : m_reactions){
 
     const std::map<int, int>& stateChange = r.second.get_state_change();
-
-
 
     // Cheap trick for setting to largest representable integer
     int Lj           = std::numeric_limits<int>::max();
@@ -544,15 +488,28 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<int>&  a_particles,
   
   Real dt = std::numeric_limits<Real>::max();
 
-  const int M = a_non_critical_reactions.size();
+  //  const int M = a_non_critical_reactions.size();
 
-  if(M > 0){
+  //  if(M > 0){
+  if(a_non_critical_reactions.size() > 0) {
 
-    // 1. Compute propensities of all reactions. It is possible for propensities to be zero. 
-    Vector<Real> propensities(M);
-    for (int j = 0; j < M; j++){
-      propensities[j] = a_non_critical_reactions[j]->propensity(a_particles);
+
+    std::deque<Real> propensities;
+    for (const auto& r : a_non_critical_reactions){
+      const Real p = r->propensity(a_particles);
+
+      propensities.emplace_back(p);
     }
+
+    // 1. Compute propensities of all reactions. It is possible for propensities to be zero. Order matters,
+    //    so use a deque
+    std::deque<std::pair<Real, std::shared_ptr<ito_reaction> > > reactions;
+    for(const auto& r : a_non_critical_reactions){
+      const Real p = r->propensity(a_particles);
+
+      reactions.emplace_back(std::pair<Real, std::shared_ptr<ito_reaction> >(p, r));
+    }
+      
 
     // 2. Get the list of all reactants
     std::unordered_set<int> allReactants;
@@ -564,6 +521,7 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<int>&  a_particles,
       }
     }
 
+
     // 3. Iterate through all reactants and compute deviations
     for (const auto& reactant : allReactants){
 
@@ -571,14 +529,15 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<int>&  a_particles,
       Real sigma = 0.0;
 
       constexpr int gi = 1; // Set gi to 1 for now, should think about this later. 
-      
-      // Go through all the reactions and compute mu_i for the current reactant
-      for (int j = 0; j < M; j++){
 
-	const int muIJ = a_non_critical_reactions[j]->get_state_change(reactant);
+      for (const auto& R : reactions){
+	const Real& ap        = R.first;     // Propensity
+	const ito_reaction& r = *(R.second); // Reaction object
+	const int muIJ        = r.get_state_change(reactant);
 
-	mu    += muIJ * propensities[j];        
-	sigma += muIJ * muIJ * propensities[j];
+	mu    += muIJ * ap;
+	sigma += muIJ * muIJ * ap;
+
       }
 
       Real dt1 = std::numeric_limits<Real>::max();
@@ -589,6 +548,7 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<int>&  a_particles,
 
       dt = std::min(dt, std::min(dt1, dt2));
     }
+
   }
 
 
@@ -611,7 +571,7 @@ inline
 Real ito_plasma_physics::critical_propensity(const Vector<int>& a_particles, const ReactionPtrs& a_critical_reactions) const{
 
   Real A = 0.0;
-  std::vector<Real> propensities = this->critical_propensities(a_particles, a_critical_reactions);
+  std::deque<Real> propensities = this->critical_propensities(a_particles, a_critical_reactions);
   
   for (const auto& p : propensities){
     A += p;
@@ -621,54 +581,55 @@ Real ito_plasma_physics::critical_propensity(const Vector<int>& a_particles, con
 }
 
 inline
-std::vector<Real> ito_plasma_physics::critical_propensities(const Vector<int>&  a_particles,
-							    const ReactionPtrs& a_critical_reactions) const{
+std::deque<Real> ito_plasma_physics::critical_propensities(const Vector<int>&  a_particles,
+							   const ReactionPtrs& a_critical_reactions) const{
 
-  const int M = a_critical_reactions.size();
-  
-  std::vector<Real> propensities(M, 0.0);
+  std::deque<Real> propensities;
 
-  for (int j = 0; j < M; j++){
-    propensities[j] = a_critical_reactions[j]->propensity(a_particles);
+  for (const auto& r : a_critical_reactions){
+    const Real p = r->propensity(a_particles);
+    propensities.emplace_back(p);
   }
 
   return propensities;
 }
 
+
+
 inline
 void ito_plasma_physics::ssa_step(Vector<int>&             a_particles,
 				  Vector<int>&             a_newPhotons,
 				  const ReactionPtrs&      a_critical_reactions,
-				  const std::vector<Real>& a_propensities,
+				  const std::deque<Real>&  a_propensities,
 				  const Real               a_A) const {
 
 
   const Real u2 = m_udist01(m_rng);
-
-  // Compute propensities
   const int M = a_critical_reactions.size();
+  
+  if(a_critical_reactions.size() > 0){
+    int r = 0;
 
-  int r = 0;
-  for (int i = 1; i < M; i++){
-    if(a_propensities[i-1] <= u2*a_A && u2*a_A < a_propensities[i]){
-      r = i;
-      break;
+    for (int i = 1; i < M; i++){
+      if(a_propensities[i-1] <= u2*a_A && u2*a_A < a_propensities[i]){
+	r = i;
+	break;
+      }
     }
+
+    a_critical_reactions[r]->jump_state(a_particles, a_newPhotons, 1);
   }
-
-  a_critical_reactions[r]->jump_state(a_particles, a_newPhotons, 1);
-
 }
 
 inline
 void ito_plasma_physics::ssa_step(Vector<int>&             a_particles,
 				  Vector<int>&             a_newPhotons,
-				  const std::vector<Real>& a_propensities,
+				  const std::deque<Real>&  a_propensities,
 				  const Real               a_totalPropensity) const {
   
   // A bit nasty, but we need a data structure with random access for evaluating stuff like
   // a_(r-1) <= u2*A < a_r. So, take the internal map and put it into a vector. 
-  std::vector<std::shared_ptr<ito_reaction> > reactions;
+  std::deque<std::shared_ptr<ito_reaction> > reactions;
   for (const auto& r : m_reactions){
     reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
   }
@@ -681,7 +642,7 @@ inline
 void ito_plasma_physics::tau_step(Vector<int>&             a_particles,
 				  Vector<int>&             a_newPhotons,
 				  const ReactionPtrs&      a_non_critical_reactions,
-				  const std::vector<Real>& a_propensities,
+				  const std::deque<Real>&  a_propensities,
 				  const Real               a_dt) const {
 
   Vector<int> particles = a_particles;
@@ -692,15 +653,14 @@ void ito_plasma_physics::tau_step(Vector<int>&             a_particles,
   }
 }
 
-
 inline
 void ito_plasma_physics::tau_step(Vector<int>&             a_particles,
 				  Vector<int>&             a_newPhotons,
-				  const std::vector<Real>& a_propensities,
+				  const std::deque<Real>&  a_propensities,
 				  const Real               a_dt) const {
   // A bit nasty, but we need a data structure with random access for evaluating stuff like
   // a_(r-1) <= u2*A < a_r. So, take the internal map and put it into a vector. 
-  std::vector<std::shared_ptr<ito_reaction> > reactions;
+  std::deque<std::shared_ptr<ito_reaction> > reactions;
   for (const auto& r : m_reactions){
     reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
   }
