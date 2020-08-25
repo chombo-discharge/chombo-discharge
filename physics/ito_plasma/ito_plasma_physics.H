@@ -138,7 +138,7 @@ namespace physics {
       Real m_eps;
 
       // These are all the reactions
-      mutable std::map<std::string, ito_reaction>   m_reactions; // SHould it be mutable...????
+      std::map<std::string, ito_reaction>   m_reactions; // SHould it be mutable...????
       mutable std::map<std::string, photo_reaction> m_photo_reactions;
 
       /*!

@@ -128,8 +128,8 @@ void ito_plasma_air2::update_reaction_rates(const RealVect a_E, const Real a_dx,
   const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
 
-  m_reactions["impact_ionization"].rate() = alpha*velo;
-  m_reactions["photo_excitation"].rate()  = alpha*velo*xfactor;
+  m_reactions.at("impact_ionization").rate() = alpha*velo;
+  m_reactions.at("photo_excitation").rate()  = alpha*velo*xfactor;
 }
 
 // void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
