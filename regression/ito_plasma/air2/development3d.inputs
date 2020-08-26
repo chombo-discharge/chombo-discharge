@@ -196,8 +196,8 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1            # Verbosity
-ito_plasma_godunov.min_dt         = 1.E-10           # Minimum dt
-ito_plasma_godunov.max_dt         = 1.E-10           # Maximum dt
+ito_plasma_godunov.min_dt         = 1.E-11           # Minimum dt
+ito_plasma_godunov.max_dt         = 1.E-11           # Maximum dt
 ito_plasma_godunov.particle_realm = fluid        # Particle realm. Default is primal
 ito_plasma_godunov.load_balance   = false          # Load balance or not
 ito_plasma_godunov.max_cells_hop  = 1.0          # Maximum cells to move in one time step
@@ -225,7 +225,7 @@ ito_plasma_air2.Ncrit          = 25             # How many firings away from a n
 ito_plasma_air2.prop_eps       = 1.0            # Maximum relative change in propensity function
 ito_plasma_air2.NSSA           = 100            # How many SSA steps to run when tau-leaping is inefficient
 ito_plasma_air2.SSAlim         = 0.1            # When to enter SSA instead of tau-leaping
-ito_plasma_air2.algorithm      = tau            # 'tau', 'ssa', or 'hybrid'
+ito_plasma_air2.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'
 
 # Zheleznyak stuff.
 ito_plasma_air2.quenching_pressure = 0.03947    # Quenching pressure for photo-emission (atm)

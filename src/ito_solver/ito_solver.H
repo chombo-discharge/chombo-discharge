@@ -143,6 +143,16 @@ public:
   virtual void update_invalid_particles();
 
   /*!
+    @brief This copies (non-destructively) m_invalid_particles to m_particles. 
+  */
+  virtual void copy_invalid_particles_to_particles();
+
+  /*!
+    @brief This moves (destructively) m_invalid_particles to m_particles. 
+  */
+  virtual void move_invalid_particles_to_particles();
+
+  /*!
     @brief Compute particle load on specific levle
   */
   virtual void compute_loads(Vector<long int>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level);

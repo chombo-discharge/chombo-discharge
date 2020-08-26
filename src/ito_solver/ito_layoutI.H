@@ -160,6 +160,26 @@ void ito_layout<T>::make_superparticles(const int a_ppc){
     iter()->make_superparticles(a_ppc);
   }
 }
+template <class T>
+void ito_layout<T>::update_invalid_particles(){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->update_invalid_particles();
+  }
+}
+
+template <class T>
+void ito_layout<T>::copy_invalid_particles_to_particles(){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->copy_invalid_particles_to_particles();
+  }
+}
+
+template <class T>
+void ito_layout<T>::move_invalid_particles_to_particles(){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->move_invalid_particles_to_particles();
+  }
+}
 
 template <class T>
 void ito_layout<T>::deposit_particles(){

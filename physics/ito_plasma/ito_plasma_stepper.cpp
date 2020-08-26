@@ -201,11 +201,10 @@ void ito_plasma_stepper::post_checkpoint_setup(){
     pout() << "ito_plasma_stepper::post_checkpoint_setup" << endl;
   }
 
-  // Recompute 
+  // Recompute poisson
   this->solve_poisson();
   this->allocate_internals();
 
-  //  m_ito->make_superparticles(m_ppc);
   
   this->compute_ito_velocities();
   this->compute_ito_diffusion();

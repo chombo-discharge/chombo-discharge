@@ -562,6 +562,24 @@ void ito_solver::update_invalid_particles(const particle_container<ito_particle>
   }  
 }
 
+void ito_solver::copy_invalid_particles_to_particles(){
+  CH_TIME("ito_solver::copy_invalid_particles_to_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::copy_invalid_particles_to_particles" << endl;
+  }
+
+  m_particles.add_particles(m_invalid_particles);
+}
+
+void ito_solver::move_invalid_particles_to_particles(){
+  CH_TIME("ito_solver::move_invalid_particles_to_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::move_invalid_particles_to_particles" << endl;
+  }
+
+  m_particles.add_particles_destructive(m_invalid_particles);
+}
+
 void ito_solver::intersect_particles(){
   CH_TIME("ito_solver::intersect_particles");
   if(m_verbosity > 5){
@@ -762,9 +780,12 @@ void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level)
 
   write(a_handle, *m_state[a_level], m_name);
 
-  // Write particles. Must be implemented.
+  // Write particles. 
   std::string str = m_name + "_particles";
   writeParticlesToHDF(a_handle, m_particles[a_level], str);
+
+  const std::string str2 = m_name + "_invalid_particles";
+  writeParticlesToHDF(a_handle, m_invalid_particles[a_level], str2);
 }
 
 void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
@@ -776,9 +797,12 @@ void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   // Read state vector
   read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
 
-  // Read particles. Should be implemented
-  std::string str = m_name + "_particles";
+  // Read particles. 
+  const std::string str = m_name + "_particles";
   readParticlesFromHDF(a_handle, m_particles[a_level], str);
+
+  const std::string str2 = m_name + "_invalid_particles";
+  readParticlesFromHDF(a_handle, m_invalid_particles[a_level], str);
 }
 
 void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
