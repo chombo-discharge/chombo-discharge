@@ -608,7 +608,7 @@ void ito_plasma_physics::ssa_step(Vector<unsigned long long>& a_particles,
 				  const ReactionPtrs&         a_reactions,
 				  const Real                  a_A) const {
   const Real u2 = m_udist01(m_rng);
-  const int M = a_reactions.size();
+  const int M   = a_reactions.size();
   
   if(a_reactions.size() > 0){
     int r = 0;
@@ -703,12 +703,12 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 	// Compute the total propensity function in case it is faster to run SSA steps
 	const Real A = this->propensity(a_particles);
 	
-	if(A*curDt < m_SSAlim){ // Tau-leaping is inefficient, do some SSA. 
+	if(A*curDt < m_SSAlim){ // Tau-leaping is inefficient, do some SSA on the whole reaction set. 
 	  for (int i = 0; i < m_NSSA; i++){
 
-	    const std::deque<Real> propensities = this->propensities(a_particles); // Propensity functions
+	    const std::deque<Real> propensities = this->propensities(a_particles);
 
-	    // Draw time to next step
+	    // Draw time to next reaction. 
 	    const Real u1     = m_udist01(m_rng);
 	    const Real dtNext = log(1./u1)/A;
 
@@ -728,9 +728,9 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 	  Vector<unsigned long long> particles = a_particles;
 	  Vector<unsigned long long> photons   = a_newPhotons;
       
-	  const std::deque<Real> propensities = this->propensities(particles); // Propensity functions, advance curDt. 
+	  const std::deque<Real> propensitiesNC = this->propensities(particles, nonCriticalReactions);
 	
-	  this->tau_step(particles, photons, propensities, nonCriticalReactions, curDt);
+	  this->tau_step(particles, photons, propensitiesNC, nonCriticalReactions, curDt);
 
 	  // Make sure step was valid
 	  valid = this->valid_state(particles);
@@ -746,19 +746,20 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 	}
       } 
       else{ // One critical reaction fired. Advance that reaction and use tau-leaping for the rest.
-
 	// Need a copy in case step is rejected
 	Vector<unsigned long long> particles = a_particles;
 	Vector<unsigned long long> photons   = a_newPhotons;
 
-	const std::deque<Real> propensities = this->propensities(particles); // Propensity functions
+	const std::deque<Real> propensitiesC  = this->propensities(particles, criticalReactions);
+	const std::deque<Real> propensitiesNC = this->propensities(particles, nonCriticalReactions);
+	
 	const Real Ac = this->propensity(particles, criticalReactions);
 
 	// SSA for critical reactions
-	this->ssa_step(particles, photons, propensities, criticalReactions, Ac);
+	this->ssa_step(particles, photons, propensitiesC, criticalReactions, Ac);
 
 	// Tau-leaping for non-critical reactions
-	this->tau_step(particles, photons, propensities, nonCriticalReactions, curDt);
+	this->tau_step(particles, photons, propensitiesNC, nonCriticalReactions, curDt);
 
 	valid = this->valid_state(particles);
 
@@ -787,9 +788,50 @@ void ito_plasma_physics::advance_tau(Vector<unsigned long long>& a_particles,
 inline
 void ito_plasma_physics::advance_ssa(Vector<unsigned long long>& a_particles,
 				     Vector<unsigned long long>& a_newPhotons,
-				     const Real                  a_dt) const{
+				     const Real                  a_dt) const {
+  if(m_reactions.size() > 0){
+    Real curDt = 0.0;
 
-  MayDay::Abort("ito_plasma_physics::advance_ssa - not implemented");
+    std::deque<std::shared_ptr<ito_reaction> > reactions;
+    for (const auto& r : m_reactions){
+      reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+    }
+
+    const int M  = reactions.size();
+
+    Real u1;
+    Real u2;
+    Real A;
+    Real dt;
+
+    int r;
+
+    while(curDt <= a_dt){
+
+      A  = this->propensity(a_particles);
+      u1 = m_udist01(m_rng);
+      dt = log(1./u1)/A;
+
+      curDt += dt;
+
+      if(curDt <= a_dt){
+
+	const std::deque<Real> propensities = this->propensities(a_particles);
+    
+	u2 = m_udist01(m_rng);
+
+	r = 0;
+	for (int i = 1; i < M; i++){
+	  if(propensities[i-1] <= u2*A && u2*A < propensities[i]){
+	    r = i;
+	    break;
+	  }
+	}
+
+	reactions[r]->jump_state(a_particles, a_newPhotons, 1);
+      }
+    }
+  }
 }
 
 #endif
