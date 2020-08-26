@@ -1297,7 +1297,8 @@ void ito_plasma_stepper::advance_reaction_network(Vector<particle_container<ito_
     photons[idx]    = &(a_photons[idx]->get_cell_particles());
     newPhotons[idx] = &(a_newPhotons[idx]->get_cell_particles());
   }
-
+				
+  //Advance reaction network
   this->advance_reaction_network(particles, photons, newPhotons, m_particle_scratchD, a_dt);
 
   // Discard shit that is under the PVR
@@ -1447,8 +1448,11 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
       const RealVect hi =  0.5*RealVect::Unit;
       const RealVect n  = RealVect::Zero;
       const RealVect c  = RealVect::Zero;
+
+      // Update reaction rates
+      m_physics->update_reaction_rates(e, a_dx, kappa);
       
-      // Call physics
+      // Advance reactions
       m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, c, c, n, lo, hi, a_dx, kappa, a_dt);
     }
   }
@@ -1494,7 +1498,10 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
       newPhotons[idx] = &bpNew;
     }
 
-    // Call physics.
+    // Update reaction rates
+    m_physics->update_reaction_rates(e, a_dx, kappa);
+
+    // Advance reactions
     m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, cen, ebc, n, lo, hi, a_dx, kappa, a_dt);
   }
 }

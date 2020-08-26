@@ -9,6 +9,7 @@
 #define _ITO_PLASMA_AIR3_
 
 #include "ito_plasma_physics.H"
+#include "lookup_table.H"
 
 namespace physics {
   namespace ito_plasma{

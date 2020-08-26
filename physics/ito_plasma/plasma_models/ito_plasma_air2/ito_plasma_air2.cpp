@@ -24,14 +24,20 @@ ito_plasma_air2::ito_plasma_air2(){
   pp.get   ("blob_radius",     m_blob_radius);
   pp.get   ("num_particles",   m_num_particles);
   pp.get   ("particle_weight", m_particle_weight);
-  pp.get   ("react_ppc",       m_ppc);
   pp.getarr("blob_center",     v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  // Reaction stuff
+  // Photostuff
   pp.get("quenching_pressure", m_pq);
   pp.get("photoi_factor",      m_photoi_factor);
-  pp.get("tau_switch",         m_tau_switch);
-  pp.get("poisson_switch",     m_poisson_switch);
+
+  // Algorithm stuff
+  pp.get("react_ppc",      m_ppc);
+  pp.get("tau_switch",     m_tau_switch);
+  pp.get("poisson_switch", m_poisson_switch);
+  pp.get("Ncrit",          m_Ncrit);
+  pp.get("prop_eps",       m_eps);
+  pp.get("NSSA",           m_NSSA);
+  pp.get("SSAlim",         m_SSAlim);
 
   // Standard air. 
   m_p = 1.0;
@@ -66,10 +72,10 @@ ito_plasma_air2::ito_plasma_air2(){
 
   // Particle-particle reactions
   m_reactions.emplace("impact_ionization", ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
-  m_reactions.emplace("photo_excitation",  ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
+  //  m_reactions.emplace("photo_excitation",  ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
 
   // Photo-reactions
-  m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}));
+  //  m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}));
 }
 
 ito_plasma_air2::~ito_plasma_air2(){
@@ -129,7 +135,7 @@ void ito_plasma_air2::update_reaction_rates(const RealVect a_E, const Real a_dx,
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
 
   m_reactions.at("impact_ionization").rate() = alpha*velo;
-  m_reactions.at("photo_excitation").rate()  = alpha*velo*xfactor;
+  //  m_reactions.at("photo_excitation").rate()  = alpha*velo*xfactor;
 }
 
 // void ito_plasma_air2::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,

@@ -13,23 +13,42 @@
 using namespace physics::ito_plasma;
 
 inline
-void ito_reaction::jump_state(Vector<int>& a_particles,
-				     const int    a_num_reactions) const {
+void ito_reaction::jump_state(Vector<unsigned long long>& a_particles,
+			      const unsigned long long    a_num_reactions) const {
+#if 1
+  if(a_num_reactions < 0) {
+    MayDay::Abort("ito_reaction::jump_state - can't have negative number of reactions!");
+  }
+  for (int i = 0; i < a_particles.size(); i++){
+    if(a_particles[i] < 0){
+      MayDay::Abort("ito_reaction::jump_state can't have negative particles on the way in");
+    }
+  }
+#endif
+  
   for (const auto& r : m_reactants){
     a_particles[r] -= a_num_reactions;
   }
 
   for (const auto& r : m_particle_products){
-    a_particles[r] += a_num_reactions;;
+    a_particles[r] += a_num_reactions;
   }
+
+#if 1
+  for (int i = 0; i < a_particles.size(); i++){
+    if(a_particles[i] < 0){
+      MayDay::Abort("ito_reaction::jump_state can't have negative particles on the way out");
+    }
+  }
+#endif
 }
 
 inline
-void ito_reaction::jump_state(Vector<int>& a_particles,
-				     Vector<int>& a_photons,
-				     const int    a_num_reactions) const {
+void ito_reaction::jump_state(Vector<unsigned long long>& a_particles,
+			      Vector<unsigned long long>& a_photons,
+			      const unsigned long long    a_num_reactions) const {
 
-  jump_state(a_particles, a_num_reactions);
+  this->jump_state(a_particles, a_num_reactions);
 
   for (const auto& r : m_photon_products){
     a_photons[r] += a_num_reactions;;
@@ -42,11 +61,11 @@ Real& ito_reaction::rate() const {
 }
 
 inline
-Real ito_reaction::propensity(const Vector<int>& a_particles) const {
+Real ito_reaction::propensity(const Vector<unsigned long long>& a_particles) const {
   Real a = m_rate;
 
   // Make a local copy of the particles
-  Vector<int> particles = a_particles;
+  Vector<unsigned long long> particles = a_particles;
 
   // Iterate over reactants, if a reactant appears twice the propensity function is X*(X-1)
   for (const auto& r : m_reactants){
@@ -61,7 +80,7 @@ Real ito_reaction::propensity(const Vector<int>& a_particles) const {
 }
 
 inline
-int ito_reaction::get_gi(const Vector<int>& a_particles) const{
+int ito_reaction::get_gi(const Vector<unsigned long long>& a_particles) const{
   return 1; // For simplicity
 }
 
@@ -114,7 +133,6 @@ const int ito_reaction::get_state_change(const int a_idx) const{
   int ret = 0;
   
   if(m_stateChange.find(a_idx) != m_stateChange.end()){
-    //    ret = m_stateChange[a_idx]; // Stupid non-const version of []. Get a grip STL!
     ret = m_stateChange.at(a_idx);
   }
 

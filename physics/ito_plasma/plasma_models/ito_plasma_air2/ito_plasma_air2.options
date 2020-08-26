@@ -2,27 +2,26 @@
 # ITO_PLASMA_AIR2 CLASS OPTIONS
 # ====================================================================================================
 # Initial data
-ito_plasma_air2.blob_radius    = 0.1                          # Blob radius
-ito_plasma_air2.blob_center    = 0 0                          # Blob center
-ito_plasma_air2.seed           = 0                            # RNG seed
-ito_plasma_air2.num_particles  = 100                          # Number of initial particles
+ito_plasma_air2.blob_radius     = 0.1           # Blob radius
+ito_plasma_air2.blob_center     = 0 0 0         # Blob center
+ito_plasma_air2.seed            = 0             # RNG seed
+ito_plasma_air2.num_particles   = 100           # Number of initial particles
+ito_plasma_air2.particle_weight = 1             # Initial particle weights
 
 # Reaction stuff
-ito_plasma_air2.tau_switch     = -1                           # Switch from SSA to tau when reaching this many particles
-ito_plasma_air2.poisson_switch = 100                          # When to approximate Poisson by normal distribution
-ito_plasma_air2.react_ppc      = 64                           # Maximum number of particles to produce in reaction step
-
-# SEE parameters
-ito_plasma_air2.electrode_townsend2           = 1.E-4         # 2nd Townsend coeff on electrode
-ito_plasma_air2.dielectric_townsend2          = 1.E-4         # 2nd Townsend coeff on dielectric
-ito_plasma_air2.electrode_quantum_efficiency  = 1.E-4         # Quantum efficiency on electrode
-ito_plasma_air2.dielectric_quantum_efficiency = 1.E-4         # Quantum efficiency on electrode
+ito_plasma_air2.react_ppc      = 64             # Maximum number of particles to produce in reaction step	
+ito_plasma_air2.tau_switch     = -1             # Switch from SSA to tau when reaching this many particles
+ito_plasma_air2.poisson_switch = 100            # When to approximate Poisson by normal distribution
+ito_plasma_air2.Ncrit          = 25             # How many firings away from a negative particle number?
+ito_plasma_air2.prop_eps       = 1              # Maximum relative change in propensity function
+ito_plasma_air2.NSSA           = 100            # How many SSA steps to run when tau-leaping is inefficient
+ito_plasma_air2.SSAlim         = 0.1            # When to enter SSA instead of tau-leaping
 
 # Zheleznyak stuff.
-ito_plasma_air2.quenching_pressure         = 0.03947          # Quenching pressure for photo-emission (atm)
-ito_plasma_air2.photoi_factor              = 1.0              # Photoionization factor
-ito_plasma_air2.photoi_seed                = 0                # RNG seed
-ito_plasma_air2.photoi_f1                  = 2.925E15         # Lower frequency
-ito_plasma_air2.photoi_f2                  = 3.059E15         # High frequency
-ito_plasma_air2.photoi_K1                  = 2.65E-2          # Converted to (mPa)^-1
-ito_plasma_air2.photoi_K2                  = 1.5              # Converted to (mPa)^-1
+ito_plasma_air2.quenching_pressure = 0.03947    # Quenching pressure for photo-emission (atm)
+ito_plasma_air2.photoi_factor      = 1.0        # Photoionization factor
+ito_plasma_air2.photoi_seed        = 0          # RNG seed
+ito_plasma_air2.photoi_f1          = 2.925E15   # Lower frequency
+ito_plasma_air2.photoi_f2          = 3.059E15   # High frequency
+ito_plasma_air2.photoi_K1          = 2.65E-2    # Converted to (mPa)^-1
+ito_plasma_air2.photoi_K2          = 1.5        # Converted to (mPa)^-1

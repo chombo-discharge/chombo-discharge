@@ -22,10 +22,11 @@ ito_plasma_physics::ito_plasma_physics(){
   m_photo_reactions.clear();
 
   // Default parameters for hybrid algorithm. 
-  m_Ncrit  = 25;
-  m_eps    = 0.03;
-  m_NSSA   = 50;
-  m_SSAlim = 0.1;
+  m_Ncrit     = 25;
+  m_eps       = 1.0;
+  m_NSSA      = 100;
+  m_SSAlim    = 0.1;
+  m_algorithm = algorithm::hybrid;
 }
 
 ito_plasma_physics::~ito_plasma_physics(){
