@@ -265,8 +265,8 @@ void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >&
   for (const auto& r : m_photo_reactions){
 
     // Source and targets
-    const int& src                  = r.second.source();
-    const std::vector<int>& targets = r.second.targets();
+    const int& src                 = r.second.source();
+    const std::deque<int>& targets = r.second.targets();
 
     for (ListIterator<photon> lit(*a_photons[src]); lit.ok(); ++lit){
       const photon& phot  = lit();
@@ -786,7 +786,7 @@ void ito_plasma_physics::advance_ssa(Vector<unsigned long long>& a_particles,
 				     Vector<unsigned long long>& a_newPhotons,
 				     const Real                  a_dt) const{
 
-  
+  MayDay::Abort("ito_plasma_physics::advance_ssa - not implemented");
 }
 
 #endif

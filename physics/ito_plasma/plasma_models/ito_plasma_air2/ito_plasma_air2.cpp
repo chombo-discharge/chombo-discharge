@@ -31,6 +31,7 @@ ito_plasma_air2::ito_plasma_air2(){
   pp.get("photoi_factor",      m_photoi_factor);
 
   // Algorithm stuff
+  std::string str;
   pp.get("react_ppc",      m_ppc);
   pp.get("tau_switch",     m_tau_switch);
   pp.get("poisson_switch", m_poisson_switch);
@@ -38,6 +39,20 @@ ito_plasma_air2::ito_plasma_air2(){
   pp.get("prop_eps",       m_eps);
   pp.get("NSSA",           m_NSSA);
   pp.get("SSAlim",         m_SSAlim);
+  pp.get("algorithm",      str);
+  if(str == "hybrid"){
+    m_algorithm = algorithm::hybrid;
+  }
+  else if(str == "tau"){
+    m_algorithm = algorithm::tau;
+  }
+  else if(str == "ssa"){
+    m_algorithm = algorithm::ssa;
+  }
+  else{
+    MayDay::Abort("ito_plasma_air2::ito_plasma_air2 - unknown algorithm requested");
+  }
+
 
   // Standard air. 
   m_p = 1.0;

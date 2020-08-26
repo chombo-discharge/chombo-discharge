@@ -16,7 +16,7 @@ inline const int& photo_reaction::source() const {
   return m_source;
 }
 
-inline const std::vector<int>& photo_reaction::targets() const {
+inline const std::deque<int>& photo_reaction::targets() const {
   return m_targets;
 }
 

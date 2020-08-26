@@ -52,12 +52,12 @@ namespace physics {
       /*!
 	@brief Get the photon targets
       */
-      inline const std::vector<int>& targets() const;
+      inline const std::deque<int>& targets() const;
 
     protected:
 
       int m_source;  // Source
-      std::vector<int> m_targets; // Targets
+      std::deque<int> m_targets; // Targets
     };
   }
 }
