@@ -106,7 +106,9 @@ bool ito_plasma_physics::valid_state(const Vector<unsigned long long>& a_particl
   bool ret = true;
   for (int i = 0; i < a_particles.size(); i++){
     if(a_particles[i] < 0){
+#if 1
       MayDay::Abort("got negative particles... how?");
+#endif
       ret = false;
       break;
     }
@@ -695,12 +697,13 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
       
       const Real curDt = std::min(a_dt-curTime, std::min(dtCrit, dtNonCrit));
 
-      // Compute the propensity function
-      const Real A = this->propensity(a_particles);
-
       // How will we advance?
-      if(dtNonCrit < dtCrit){  // No critical reactions fire. Advance only noncritical reactions. 
-	if(A*curDt < m_SSAlim){      // Tau-leaping is inefficient, do some SSA. 
+      if(dtNonCrit < dtCrit){ // No critical reactions fire. Advance only noncritical reactions.
+
+	// Compute the total propensity function in case it is faster to run SSA steps
+	const Real A = this->propensity(a_particles);
+	
+	if(A*curDt < m_SSAlim){ // Tau-leaping is inefficient, do some SSA. 
 	  for (int i = 0; i < m_NSSA; i++){
 
 	    const std::deque<Real> propensities = this->propensities(a_particles); // Propensity functions
@@ -711,12 +714,11 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 
 	    valid    = true;
 	    curTime += dtNext;
-	    if(curTime <= a_dt){ // Do reaction. Always valid. 
+	    if(curTime <= a_dt){ // Ok, we are inside [0, a_dt] and we can do the reaction. 
 	      this->ssa_step(a_particles, a_newPhotons, propensities, A);
-
 	    }
 	    else{
-	      break;
+	      break; // No need to perform the rest. 
 	    }
 	  }
 	}
@@ -750,9 +752,10 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 	Vector<unsigned long long> photons   = a_newPhotons;
 
 	const std::deque<Real> propensities = this->propensities(particles); // Propensity functions
+	const Real Ac = this->propensity(particles, criticalReactions);
 
 	// SSA for critical reactions
-	this->ssa_step(particles, photons, propensities, criticalReactions, A);
+	this->ssa_step(particles, photons, propensities, criticalReactions, Ac);
 
 	// Tau-leaping for non-critical reactions
 	this->tau_step(particles, photons, propensities, nonCriticalReactions, curDt);
