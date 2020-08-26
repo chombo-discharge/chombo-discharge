@@ -313,8 +313,10 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
 
   // Remap, intersect, and redeposit
   m_ito->remap();
-  this->intersect_particles(a_dt);
+  //  this->intersect_particles(a_dt); // SHould this really be AFTER deposit_particles?
   m_ito->deposit_particles();
+  this->intersect_particles(a_dt); // After deposition because particles in EB have clouds that stick out of it. 
+  //  this->intersect_particles(a_dt);
 }
 
 void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
@@ -556,7 +558,6 @@ void ito_plasma_godunov::intersect_particles(const Real a_dt){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
-
     solver->intersect_particles();
   }
 }
