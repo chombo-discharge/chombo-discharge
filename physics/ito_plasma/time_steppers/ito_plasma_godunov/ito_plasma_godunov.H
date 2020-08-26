@@ -31,13 +31,11 @@ namespace physics {
 
       // Regrid routines
       void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
-      void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
 
     protected:
 
       enum class which_algorithm {
 	euler, 
-	predictor_corrector,
 	semi_implicit,
       };
 
@@ -60,11 +58,9 @@ namespace physics {
       // Global routines
       void intersect_particles(const Real a_dt);
       void set_old_positions();
-
       void rewind_particles();
       void diffuse_particles_euler(const Real a_dt);
       void advect_particles_euler(const Real a_dt);
-      void advect_particles_rk2(const Real a_dt);      
 
       // Specific routines for semi-implicit Euler
       void compute_conductivity();
@@ -74,7 +70,6 @@ namespace physics {
 
       // Particle advancement routines. 
       void advance_particles_euler(const Real a_dt);
-      void advance_particles_pc(const Real a_dt);
       void advance_particles_si(const Real a_dt);
 
     };

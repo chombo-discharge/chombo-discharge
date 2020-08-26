@@ -64,9 +64,6 @@ void ito_plasma_godunov::parse_options() {
   if(str == "euler"){
     m_algorithm = which_algorithm::euler;
   }
-  else if(str == "predictor_corrector"){
-    m_algorithm = which_algorithm::predictor_corrector;
-  }
   else if(str == "semi_implicit"){
     m_algorithm = which_algorithm::semi_implicit;
   }
@@ -151,31 +148,6 @@ void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_lev
   }
 }
 
-void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
-  CH_TIME("ito_plasma_godunov::regrid");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::regrid" << endl;
-  }
-
-  // Commenting this out until we can figure out why we have to recompute the electric field during regrids
-  if(false){//m_algorithm == which_algorithm::semi_implicit){ 
-
-    this->allocate_internals();
-
-    // Regrid solvers
-    m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
-    m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
-    m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
-    m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
-
-    // Deposit particles
-    m_ito->deposit_particles();
-  }
-  else{
-    ito_plasma_stepper::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
-  }
-}
-
 Real ito_plasma_godunov::advance(const Real a_dt) {
   CH_TIME("ito_plasma_godunov::advance");
   if(m_verbosity > 5){
@@ -185,9 +157,6 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   // Particle algorithms
   if(m_algorithm == which_algorithm::euler){
     this->advance_particles_euler(a_dt);
-  }
-  else if(m_algorithm == which_algorithm::predictor_corrector){
-    this->advance_particles_pc(a_dt);
   }
   else if(m_algorithm == which_algorithm::semi_implicit){
     this->advance_particles_si(a_dt);
@@ -248,39 +217,6 @@ void ito_plasma_godunov::advance_particles_euler(const Real a_dt){
   this->solve_poisson();
 }
 
-void ito_plasma_godunov::advance_particles_pc(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_pc");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_pc" << endl;
-  }
-
-  // ---------- PREDICTOR BEGIN -------
-  this->set_old_positions();
-  this->advect_particles_rk2(a_dt);
-  this->diffuse_particles_euler(a_dt);
-  
-  m_ito->remap();
-  m_ito->deposit_particles();
-  this->solve_poisson();
-  // ---------- PREDICTOR END ---------
-
-  // ---------- CORRECTOR BEGIN ---------
-  this->rewind_particles();
-  m_ito->remap();
-  
-  this->compute_ito_velocities();
-  this->compute_ito_diffusion();
-
-  this->advect_particles_rk2(a_dt);
-  this->diffuse_particles_euler(a_dt);
-  m_ito->remap();
-  this->intersect_particles(a_dt);
-  
-  m_ito->deposit_particles();
-  this->solve_poisson();
-  // ---------- CORRECTOR END ---------
-}
-
 void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   CH_TIME("ito_plasma_godunov::advance_particles_si");
   if(m_verbosity > 5){
@@ -313,10 +249,8 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
 
   // Remap, intersect, and redeposit
   m_ito->remap();
-  //  this->intersect_particles(a_dt); // SHould this really be AFTER deposit_particles?
   m_ito->deposit_particles();
   this->intersect_particles(a_dt); // After deposition because particles in EB have clouds that stick out of it. 
-  //  this->intersect_particles(a_dt);
 }
 
 void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
@@ -558,7 +492,7 @@ void ito_plasma_godunov::intersect_particles(const Real a_dt){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
-    solver->intersect_particles();
+     solver->intersect_particles();
   }
 }
 
