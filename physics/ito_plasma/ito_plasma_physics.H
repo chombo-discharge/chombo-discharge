@@ -243,29 +243,29 @@ namespace physics {
 	@brief Add particles
       */
       inline
-      void add_particles(List<ito_particle>&      a_particles,
-			 const unsigned long long a_numNewParticles,
-			 const RealVect           a_pos,
-			 const RealVect           a_lo,
-			 const RealVect           a_hi,
-			 const RealVect           a_bndryCentroid,
-			 const RealVect           a_bndryNormal,
-			 const Real               a_dx,
-			 const Real               a_kappa) const;
+      void add_particles(List<ito_particle>& a_particles,
+			 const unsigned long long     a_numParticlesToAdd,
+			 const RealVect      a_pos,
+			 const RealVect      a_lo,
+			 const RealVect      a_hi,
+			 const RealVect      a_bndryCentroid,
+			 const RealVect      a_bndryNormal,
+			 const Real          a_dx,
+			 const Real          a_kappa) const;
 
       /*!
 	@brief Remove particles
       */
       inline
-      void remove_particles(List<ito_particle>&      a_particles,
-			    const unsigned long long a_numParticlesToRemove,
-			    const RealVect           a_pos,
-			    const RealVect           a_lo,
-			    const RealVect           a_hi,
-			    const RealVect           a_bndryCentroid,
-			    const RealVect           a_normal,
-			    const Real               a_dx,
-			    const Real               a_kappa) const;
+      void remove_particles(List<ito_particle>& a_particles,
+			    const long long     a_numParticlesToRemove,
+			    const RealVect      a_pos,
+			    const RealVect      a_lo,
+			    const RealVect      a_hi,
+			    const RealVect      a_bndryCentroid,
+			    const RealVect      a_normal,
+			    const Real          a_dx,
+			    const Real          a_kappa) const;
 
       /*!
 	@brief Reconcile the number of particles

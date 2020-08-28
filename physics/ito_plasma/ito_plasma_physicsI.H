@@ -106,9 +106,6 @@ bool ito_plasma_physics::valid_state(const Vector<unsigned long long>& a_particl
   bool ret = true;
   for (int i = 0; i < a_particles.size(); i++){
     if(a_particles[i] < 0){
-#if 1
-      MayDay::Abort("got negative particles... how?");
-#endif
       ret = false;
       break;
     }
@@ -147,13 +144,15 @@ void ito_plasma_physics::reconcile_particles(List<ito_particle>&      a_particle
 					     const Real               a_dx,
 					     const Real               a_kappa) const {
 
-  const unsigned long long diff = a_newNumParticles - a_oldNumParticles;
+  const long long diff = a_newNumParticles - a_oldNumParticles;
 
   if(diff > 0){ // Need to add 'diff' mass.
-    this->add_particles(a_particles, diff, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const unsigned long long Diff = (unsigned long long) (diff);
+    this->add_particles(a_particles, Diff, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
   }
   else if(diff < 0){ // Need to remove 'diff' mass.
-    this->remove_particles(a_particles, -diff, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const unsigned long long Diff = (unsigned long long) (diff);
+    this->remove_particles(a_particles, -Diff, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
   }
 }
 
@@ -165,8 +164,8 @@ void ito_plasma_physics::compute_particle_weights(unsigned long long&      a_wei
 
   if(a_numNewParticles <= m_ppc){  
     a_weight    = 1;
-    a_num       = a_numNewParticles; 
     a_remainder = 0;
+    a_num       = a_numNewParticles; 
   }
   else{ // Add superparticles
     a_weight    = a_numNewParticles/m_ppc;
@@ -176,15 +175,15 @@ void ito_plasma_physics::compute_particle_weights(unsigned long long&      a_wei
 }
 
 inline
-void ito_plasma_physics::add_particles(List<ito_particle>&      a_particles,
+void ito_plasma_physics::add_particles(List<ito_particle>& a_particles,
 				       const unsigned long long a_numNewParticles,
-				       const RealVect           a_pos,
-				       const RealVect           a_lo,
-				       const RealVect           a_hi,
-				       const RealVect           a_bndryCentroid,
-				       const RealVect           a_bndryNormal,
-				       const Real               a_dx,
-				       const Real               a_kappa) const {
+				       const RealVect      a_pos,
+				       const RealVect      a_lo,
+				       const RealVect      a_hi,
+				       const RealVect      a_bndryCentroid,
+				       const RealVect      a_bndryNormal,
+				       const Real          a_dx,
+				       const Real          a_kappa) const {
   unsigned long long weight, num, remainder;
   this->compute_particle_weights(weight, num, remainder, a_numNewParticles);
 
@@ -200,15 +199,15 @@ void ito_plasma_physics::add_particles(List<ito_particle>&      a_particles,
 }
 
 inline
-void ito_plasma_physics::remove_particles(List<ito_particle>&      a_particles,
-					  const unsigned long long a_numParticlesToRemove,
-					  const RealVect           a_pos,
-					  const RealVect           a_lo,
-					  const RealVect           a_hi,
-					  const RealVect           a_bndryCentroid,
-					  const RealVect           a_normal,
-					  const Real               a_dx,
-					  const Real               a_kappa) const {
+void ito_plasma_physics::remove_particles(List<ito_particle>& a_particles,
+					  const long long     a_numParticlesToRemove,
+					  const RealVect      a_pos,
+					  const RealVect      a_lo,
+					  const RealVect      a_hi,
+					  const RealVect      a_bndryCentroid,
+					  const RealVect      a_normal,
+					  const Real          a_dx,
+					  const Real          a_kappa) const {
   //  MayDay::Warning("ito_plasma_physics::remove_particles - not implemented");
 }
 
@@ -462,14 +461,17 @@ Real ito_plasma_physics::get_critical_step(const Vector<unsigned long long>& a_p
 					   const ReactionPtrs&               a_critical_reactions) const {
 						 
   // TLDR: a_critical_reaction is a vector under the hood.
+  Real dt = std::numeric_limits<Real>::max();
   
-  Real A   = 0.0;
-  for (const auto& r : a_critical_reactions){
-    A += r->propensity(a_particles);
+  if(a_critical_reactions.size() > 0){
+    Real A   = 0.0;
+    for (const auto& r : a_critical_reactions){
+      A += r->propensity(a_particles);
+    }
+    
+    const Real u1 = m_udist01(m_rng);
+    dt = log(1./u1)/A;
   }
-
-  const Real u1 = m_udist01(m_rng);
-  const Real dt = log(1./u1)/A;
 
   return dt;
 }
@@ -525,9 +527,9 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<unsigned long long>&
       constexpr int gi = 1; // Set gi to 1 for now, should think about this later. 
 
       for (const auto& R : reactions){
-	const Real& ap        = R.first;     // Propensity
-	const ito_reaction& r = *(R.second); // Reaction object
-	const int muIJ        = r.get_state_change(reactant);
+	const Real& ap        = R.first;     // Reaction propensity.
+	const ito_reaction& r = *(R.second); // Reaction. 
+	const int muIJ        = r.get_state_change(reactant); // State change of reactant due to current reaction
 
 	mu    += muIJ * ap;
 	sigma += muIJ * muIJ * ap;
@@ -537,8 +539,13 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<unsigned long long>&
       Real dt1 = std::numeric_limits<Real>::max();
       Real dt2 = std::numeric_limits<Real>::max();
 
-      if(mu    != 0.0) dt1 = std::max(m_eps*a_particles[reactant]/gi, 1.)/mu;
-      if(sigma != 0.0) dt2 = std::max(m_eps*a_particles[reactant]/gi, 1.)/sigma;
+      if(mu != 0.0) {
+	dt1 = std::max(m_eps*a_particles[reactant]/gi, 1.)/std::abs(mu);
+      }
+      if(sigma != 0.0) {
+	const Real f = std::max(m_eps*a_particles[reactant]/gi,1.0);
+	dt2 = f*f/std::abs(sigma);
+      }
 
       dt = std::min(dt, std::min(dt1, dt2));
     }
@@ -669,7 +676,62 @@ void ito_plasma_physics::tau_step(Vector<unsigned long long>& a_particles,
   this->tau_step(a_particles, a_newPhotons, a_propensities, reactions, a_dt);
 }
 
+inline
+void ito_plasma_physics::advance_ssa(Vector<unsigned long long>& a_particles,
+				     Vector<unsigned long long>& a_newPhotons,
+				     const Real                  a_dt) const {
+  if(m_reactions.size() > 0){
+    Real curDt = 0.0;
 
+    std::deque<std::shared_ptr<ito_reaction> > reactions;
+    for (const auto& r : m_reactions){
+      reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+    }
+
+    const int M  = reactions.size();
+
+    Real u1;
+    Real u2;
+    Real A;
+    Real dt;
+
+    int r;
+
+    while(curDt <= a_dt){
+
+      A  = this->propensity(a_particles);
+      u1 = m_udist01(m_rng);
+      dt = log(1./u1)/A;
+
+      curDt += dt;
+
+      if(curDt <= a_dt){
+
+	const std::deque<Real> propensities = this->propensities(a_particles);
+    
+	u2 = m_udist01(m_rng);
+
+	r = 0;
+	for (int i = 1; i < M; i++){
+	  if(propensities[i-1] <= u2*A && u2*A < propensities[i]){
+	    r = i;
+	    break;
+	  }
+	}
+
+	reactions[r]->jump_state(a_particles, a_newPhotons, 1);
+      }
+    }
+  }
+}
+
+inline
+void ito_plasma_physics::advance_tau(Vector<unsigned long long>& a_particles,
+				     Vector<unsigned long long>& a_newPhotons,
+				     const Real                  a_dt) const {
+  std::deque<Real> propensities = this->propensities(a_particles);
+  this->tau_step(a_particles, a_newPhotons, propensities, a_dt);
+}
 
 inline
 void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
@@ -696,7 +758,6 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
     while(!valid){ 
       
       const Real curDt = std::min(a_dt-curTime, std::min(dtCrit, dtNonCrit));
-
       // How will we advance?
       if(dtNonCrit < dtCrit){ // No critical reactions fire. Advance only noncritical reactions.
 
@@ -772,63 +833,6 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 	  dtNonCrit = dtNonCrit * 0.5;
 	  continue;
 	}
-      }
-    }
-  }
-}
-
-inline
-void ito_plasma_physics::advance_tau(Vector<unsigned long long>& a_particles,
-				     Vector<unsigned long long>& a_newPhotons,
-				     const Real                  a_dt) const {
-  std::deque<Real> propensities = this->propensities(a_particles);
-  this->tau_step(a_particles, a_newPhotons, propensities, a_dt);
-}
-
-inline
-void ito_plasma_physics::advance_ssa(Vector<unsigned long long>& a_particles,
-				     Vector<unsigned long long>& a_newPhotons,
-				     const Real                  a_dt) const {
-  if(m_reactions.size() > 0){
-    Real curDt = 0.0;
-
-    std::deque<std::shared_ptr<ito_reaction> > reactions;
-    for (const auto& r : m_reactions){
-      reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
-    }
-
-    const int M  = reactions.size();
-
-    Real u1;
-    Real u2;
-    Real A;
-    Real dt;
-
-    int r;
-
-    while(curDt <= a_dt){
-
-      A  = this->propensity(a_particles);
-      u1 = m_udist01(m_rng);
-      dt = log(1./u1)/A;
-
-      curDt += dt;
-
-      if(curDt <= a_dt){
-
-	const std::deque<Real> propensities = this->propensities(a_particles);
-    
-	u2 = m_udist01(m_rng);
-
-	r = 0;
-	for (int i = 1; i < M; i++){
-	  if(propensities[i-1] <= u2*A && u2*A < propensities[i]){
-	    r = i;
-	    break;
-	  }
-	}
-
-	reactions[r]->jump_state(a_particles, a_newPhotons, 1);
       }
     }
   }

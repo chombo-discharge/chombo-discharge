@@ -46,14 +46,6 @@ namespace physics {
 
     protected:
 
-      // Lookup tables for reactions
-      lookup_table m_mobility;  // Holds mobility
-      lookup_table m_diffusion; // Holds diffusion coefficient
-      lookup_table m_alpha;     // Impact ionization
-      lookup_table m_eta;       // Electron attachment
-      lookup_table m_Te;        // Electron temperature
-      int m_uniform_entries;    // Number of points to use in lookup table
-
       // Stuff for initial conditions
       Real m_blob_radius;
       Real m_particle_weight;
@@ -65,9 +57,6 @@ namespace physics {
       int m_positive_idx;
       int m_negative_idx;
       int m_photonZ_idx;
-
-      // PPC for reactions
-      int m_ppc;
 
       // Pressure, neutral number density etc
       Real m_N;      

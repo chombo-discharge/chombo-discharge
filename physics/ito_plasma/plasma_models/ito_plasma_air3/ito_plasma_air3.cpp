@@ -13,7 +13,7 @@
 using namespace physics::ito_plasma;
 
 ito_plasma_air3::ito_plasma_air3(){
-  m_num_ito_species = 2;
+  m_num_ito_species = 3;
   m_num_rte_species = 1;
 
   ParmParse pp("ito_plasma_air3");
@@ -24,14 +24,34 @@ ito_plasma_air3::ito_plasma_air3(){
   pp.get   ("blob_radius",     m_blob_radius);
   pp.get   ("num_particles",   m_num_particles);
   pp.get   ("particle_weight", m_particle_weight);
-  pp.get   ("react_ppc",       m_ppc);
   pp.getarr("blob_center",     v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  // Reaction stuff
+  // Photostuff
   pp.get("quenching_pressure", m_pq);
   pp.get("photoi_factor",      m_photoi_factor);
-  pp.get("tau_switch",         m_tau_switch);
-  pp.get("poisson_switch",     m_poisson_switch);
+
+  // Algorithm stuff
+  std::string str;
+  pp.get("react_ppc",      m_ppc);
+  pp.get("tau_switch",     m_tau_switch);
+  pp.get("poisson_switch", m_poisson_switch);
+  pp.get("Ncrit",          m_Ncrit);
+  pp.get("prop_eps",       m_eps);
+  pp.get("NSSA",           m_NSSA);
+  pp.get("SSAlim",         m_SSAlim);
+  pp.get("algorithm",      str);
+  if(str == "hybrid"){
+    m_algorithm = algorithm::hybrid;
+  }
+  else if(str == "tau"){
+    m_algorithm = algorithm::tau;
+  }
+  else if(str == "ssa"){
+    m_algorithm = algorithm::ssa;
+  }
+  else{
+    MayDay::Abort("ito_plasma_air2::ito_plasma_air3 - unknown algorithm requested");
+  }
 
   // Standard air. 
   m_p = 1.0;
@@ -70,16 +90,18 @@ ito_plasma_air3::ito_plasma_air3(){
 
   // Particle-particle reactions
   m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
-  m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
-  m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
-  m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
+  //  m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
+  //  m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
+  //  m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
   m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
 
   // Photo-reactions
   m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}));
 
-  // Read reaction tables. This also makes them "uniform". 
+  // Read reaction tables. This also makes them "uniform".
   this->read_tables();
+
+  std::cout << m_ppc << std::endl;
 }
 
 ito_plasma_air3::~ito_plasma_air3(){
@@ -96,17 +118,18 @@ void ito_plasma_air3::read_tables(){
 
   // Need to scale tables. First column is in Td and second in /N
   m_tables["mobility"].scale_x(m_N*units::s_Td);
-  m_tables["mobility"].scale_y(1./M_N);
+  m_tables["mobility"].scale_y(1./m_N);
 
   m_tables["diffco"].scale_x(m_N*units::s_Td);
-  m_tables["diffco"].scale_y(1./M_N);
+  m_tables["diffco"].scale_y(1./m_N);
 
   m_tables["alpha"].scale_x(m_N*units::s_Td);
-  m_tables["alpha"].scale_y(1./M_N);
+  m_tables["alpha"].scale_y(m_N);
 
   m_tables["eta"].scale_x(m_N*units::s_Td);
-  m_tables["eta"].scale_y(1./M_N);
+  m_tables["eta"].scale_y(m_N);
 
+  m_tables["Te"].swap_xy();
   m_tables["Te"].scale_x(m_N*units::s_Td);
   m_tables["Te"].scale_y(2.0*units::s_Qe/(3.0*units::s_kb));
 }
@@ -123,13 +146,13 @@ Vector<RealVect> ito_plasma_air3::compute_ito_velocities(const Real         a_ti
 							 const RealVect     a_E,
 							 const Vector<Real> a_cdr_densities) const {
   Vector<RealVect> velo(m_num_ito_species, RealVect::Zero);
-  velo[m_electron_idx] = this->compute_electron_velocity();
+  velo[m_electron_idx] = this->compute_electron_velocity(a_E);
   
   return velo;
 }
 
 RealVect ito_plasma_air3::compute_electron_velocity(const RealVect a_E) const {
-  return -m_tables.at("mobility").get_entry(a_E.vectorLength)*a_E;
+  return -m_tables.at("mobility").get_entry(a_E.vectorLength())*a_E;
 }
 
 Vector<Real> ito_plasma_air3::compute_ito_diffusion(const Real         a_time,
@@ -137,7 +160,7 @@ Vector<Real> ito_plasma_air3::compute_ito_diffusion(const Real         a_time,
 						    const RealVect     a_E,
 						    const Vector<Real> a_cdr_densities) const {
   Vector<Real> D(m_num_ito_species, 0.0);
-  D[m_electron_idx] = m_tables["diffco"].get_entry(a_E.vectorLength());
+  D[m_electron_idx] = m_tables.at("diffco").get_entry(a_E.vectorLength());
   
   return D;
 }
@@ -150,10 +173,12 @@ void ito_plasma_air3::update_reaction_rates(const RealVect a_E, const Real a_dx,
   const Real eta     = m_tables.at("eta").get_entry(E);
   const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
-
-  m_reactions.at("impact_ionization").rate() = alpha*velo;
-  m_reactions.at("attachment").rate()        = eta*velo;
-  m_reactions.at("photo_excitation").rate()  = alpha*velo*xfactor;
+  
+  m_reactions.at("impact_ionization").rate()      = alpha*velo;
+  //  m_reactions.at("electron_attachment").rate()    = eta*velo;
+  //  m_reactions.at("electron_recombination").rate() = 0.;
+  //  m_reactions.at("ion_recombination").rate()      = 0.;
+  m_reactions.at("photo_excitation").rate()       = alpha*velo*xfactor;
 }
 
 Real ito_plasma_air3::excitation_rates(const Real a_E) const{

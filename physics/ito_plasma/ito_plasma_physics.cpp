@@ -24,6 +24,9 @@ ito_plasma_physics::ito_plasma_physics(){
   m_reactions.clear();
   m_photo_reactions.clear();
 
+  // Default
+  m_ppc = 8;
+
   // Default parameters for hybrid algorithm. 
   m_Ncrit     = 25;
   m_eps       = 1.0;
