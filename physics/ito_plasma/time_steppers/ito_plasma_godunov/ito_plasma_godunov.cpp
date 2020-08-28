@@ -20,6 +20,8 @@ ito_plasma_godunov::ito_plasma_godunov(){
   m_name = "ito_plasma_godunov";
   m_use_old_dt = false;
 
+  m_dt_relax = 1.E99;
+
   ParmParse pp("ito_plasma_godunov");
   pp.get("particle_realm", m_particle_realm);
 
@@ -30,6 +32,8 @@ ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_phys
   m_name    = "ito_plasma_godunov";
   m_physics = a_physics;
   m_use_old_dt = false;
+
+  m_dt_relax = 1.E99;
 
   ParmParse pp("ito_plasma_godunov");
   pp.get("particle_realm", m_particle_realm);
@@ -63,9 +67,6 @@ void ito_plasma_godunov::parse_options() {
 
   if(str == "euler"){
     m_algorithm = which_algorithm::euler;
-  }
-  else if(str == "predictor_corrector"){
-    m_algorithm = which_algorithm::predictor_corrector;
   }
   else if(str == "semi_implicit"){
     m_algorithm = which_algorithm::semi_implicit;
@@ -105,7 +106,7 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
   a_dt = a_dt*m_max_cells_hop;
   a_timecode = time_code::cfl;
 
-  if(m_algorithm == which_algorithm::euler || m_algorithm == which_algorithm::predictor_corrector){
+  if(m_algorithm == which_algorithm::euler){
     const Real dtRelax = m_relax_factor*m_dt_relax;
     if(dtRelax < a_dt){
       a_dt = dtRelax;
@@ -113,9 +114,10 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
     }
   }
   else if(m_algorithm == which_algorithm::semi_implicit && m_use_old_dt == true){
-    a_dt = m_dt;
-    m_use_old_dt = false;
+    // a_dt = m_dt;
+    // m_use_old_dt = false;
   }
+
 
   if(a_dt < m_min_dt){
     a_dt = m_min_dt;
@@ -127,7 +129,7 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
     a_timecode = time_code::hardcap;
   }
 
-#if 1 // Debug code
+#if 0 // Debug code
   const Real dtCFL = m_ito->compute_dt();
   m_avg_cfl += a_dt/dtCFL;
   if(procID() == 0) std::cout << "dt = " << a_dt
@@ -157,7 +159,6 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
     pout() << "ito_plasma_godunov::regrid" << endl;
   }
 
-  // Commenting this out until we can figure out why we have to recompute the electric field during regrids
   if(false){//m_algorithm == which_algorithm::semi_implicit){ 
 
     this->allocate_internals();
@@ -186,16 +187,13 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   if(m_algorithm == which_algorithm::euler){
     this->advance_particles_euler(a_dt);
   }
-  else if(m_algorithm == which_algorithm::predictor_corrector){
-    this->advance_particles_pc(a_dt);
-  }
   else if(m_algorithm == which_algorithm::semi_implicit){
     this->advance_particles_si(a_dt);
   }
 
   // Compute current and relaxation time.
   this->compute_J(m_J, a_dt);
-  m_dt_relax = this->compute_relaxation_time();
+  m_dt_relax = this->compute_relaxation_time(); // This is for the restricting the next step. 
 
   // Move photons
   this->advance_photons(a_dt);
@@ -246,39 +244,6 @@ void ito_plasma_godunov::advance_particles_euler(const Real a_dt){
   m_ito->deposit_particles();
   this->intersect_particles(a_dt);
   this->solve_poisson();
-}
-
-void ito_plasma_godunov::advance_particles_pc(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_pc");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_pc" << endl;
-  }
-
-  // ---------- PREDICTOR BEGIN -------
-  this->set_old_positions();
-  this->advect_particles_rk2(a_dt);
-  this->diffuse_particles_euler(a_dt);
-  
-  m_ito->remap();
-  m_ito->deposit_particles();
-  this->solve_poisson();
-  // ---------- PREDICTOR END ---------
-
-  // ---------- CORRECTOR BEGIN ---------
-  this->rewind_particles();
-  m_ito->remap();
-  
-  this->compute_ito_velocities();
-  this->compute_ito_diffusion();
-
-  this->advect_particles_rk2(a_dt);
-  this->diffuse_particles_euler(a_dt);
-  m_ito->remap();
-  this->intersect_particles(a_dt);
-  
-  m_ito->deposit_particles();
-  this->solve_poisson();
-  // ---------- CORRECTOR END ---------
 }
 
 void ito_plasma_godunov::advance_particles_si(const Real a_dt){
@@ -375,45 +340,6 @@ void ito_plasma_godunov::advect_particles_si(const Real a_dt){
 
 	    // Add diffusion hop again. The position after the diffusion hop is oldPosition(). Go there,
 	    // then advect. 
-	    p.position() = p.oldPosition() + p.velocity()*a_dt;
-	  }
-	}
-      }
-    }
-  }
-}
-
-void ito_plasma_godunov::advect_particles_rk2(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advect_particles_rk2");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advect_particles_rk2" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-    if(solver->is_mobile()){
-      
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
-
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
-
-	  // First step
-	  for (lit.rewind(); lit; ++lit){
-	    ito_particle& p = particleList[lit];
-	    p.oldPosition() = p.position();
-	    p.position() += 0.5*p.velocity()*a_dt;
-	  }
-	  // Interpolate velocities
-	  solver->interpolate_velocities(lvl, dit());
-
-	  // Second step
-	  for (lit.rewind(); lit; ++lit){
-	    ito_particle& p = particleList[lit];
 	    p.position() = p.oldPosition() + p.velocity()*a_dt;
 	  }
 	}

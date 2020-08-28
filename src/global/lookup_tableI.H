@@ -38,6 +38,8 @@ void lookup_table::scale_x(const Real& a_scale){
   for (int i = 0; i < m_x.size(); i++){
     m_x[i] *= a_scale;
   }
+
+  m_dx *= a_scale;
 }
 
 inline
@@ -92,7 +94,6 @@ void lookup_table::operator=(const lookup_table& a_table){
 
 inline
 Real lookup_table::get_entry(const Real a_x) const {
-
   Real value;
   if(m_num_entries == 1){
     value = m_y[0];

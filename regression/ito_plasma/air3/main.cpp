@@ -69,7 +69,31 @@ timestepper->set_potential(potential_curve);
 
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
+#if 1 // Original code
   engine->setup_and_run();
+#else
+  const RealVect E = 1.E7*RealVect(BASISV(0));
+  physics->update_reaction_rates(E, 1.0, 1.0);
+
+  int num = 600;
+  Real avg = 0.0;
+  for (int i = 0; i < num; i++){
+    Vector<unsigned long long> particles(3);
+    Vector<unsigned long long> photons(1);
+
+    particles[0] = 1;
+    particles[1] = 0;
+    particles[2] = 0;
+
+    physics->advance_particles(particles, photons, 1.E-10);
+
+    avg += 1.0*particles[0];
+//    std::cout << particles << std::endl;
+  }
+  avg = avg/num;
+  //  std::cout << avg << std::endl;
+
+#endif
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

@@ -423,10 +423,18 @@ namespace physics {
 			   const Real                   a_dt) const;
 
       /*!
+	@brief Advance particles
+      */
+      inline
+      void advance_particles(Vector<unsigned long long>& a_particles,
+			     Vector<unsigned long long>& a_newPhotons,
+			     const Real                  a_dt) const;
+
+      /*!
 	@brief Perform hybrid advance
       */
       inline
-      void advance_hybrid(Vector<unsigned long long>& a_particles, Vector<unsigned long long>& a_newPhotons, const Real a_dt);
+      void advance_hybrid(Vector<unsigned long long>& a_particles, Vector<unsigned long long>& a_newPhotons, const Real a_dt) const;
 
       /*!
 	@brief Performing a tau-leaping step. Mostly while we wait for hybrid...

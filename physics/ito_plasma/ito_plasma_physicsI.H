@@ -376,16 +376,8 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   Vector<unsigned long long> oldParticleCount = this->get_particle_count(a_particles);
   Vector<unsigned long long> newParticleCount = oldParticleCount;
 
-  // Which algorithm?
-  if(m_algorithm == algorithm::ssa){
-    this->advance_ssa(newParticleCount, newPhotonCount, a_dt); 
-  }
-  else if(m_algorithm == algorithm::tau){
-    this->advance_tau(newParticleCount, newPhotonCount, a_dt); 
-  }
-  else if(m_algorithm == algorithm::hybrid){
-    this->advance_hybrid(newParticleCount, newPhotonCount, a_dt);
-  }
+  // Number advance
+  this->advance_particles(newParticleCount, newPhotonCount, a_dt);
 
   // Reconcile particles
   this->reconcile_particles(a_particles,
@@ -426,7 +418,6 @@ ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<unsigned l
 
       const int reactant = s.first;
       const int nuIJ     = s.second;
-
 
       if(nuIJ < 0){
 	consuming = true;
@@ -469,7 +460,7 @@ Real ito_plasma_physics::get_critical_step(const Vector<unsigned long long>& a_p
   Real dt = std::numeric_limits<Real>::max();
   
   if(a_critical_reactions.size() > 0){
-    Real A   = 0.0;
+    Real A = 0.0;
     for (const auto& r : a_critical_reactions){
       A += r->propensity(a_particles);
     }
@@ -619,6 +610,8 @@ void ito_plasma_physics::ssa_step(Vector<unsigned long long>& a_particles,
   const Real u2 = m_udist01(m_rng);
   const int M   = a_reactions.size();
   
+  constexpr unsigned long long one = 1;
+  
   if(a_reactions.size() > 0){
     int r = 0;
 
@@ -629,7 +622,7 @@ void ito_plasma_physics::ssa_step(Vector<unsigned long long>& a_particles,
       }
     }
 
-    a_reactions[r]->jump_state(a_particles, a_newPhotons, 1);
+    a_reactions[r]->jump_state(a_particles, a_newPhotons, one);
   }
 }
 
@@ -657,8 +650,8 @@ void ito_plasma_physics::tau_step(Vector<unsigned long long>& a_particles,
   
   const Vector<unsigned long long> particles = a_particles;
   for (const auto& r : a_reactions){
-    const int num_reactions = this->poisson_reaction(r->propensity(particles), a_dt);
-
+    const unsigned long long num_reactions = this->poisson_reaction(r->propensity(particles), a_dt);
+    
     r->jump_state(a_particles, a_newPhotons, num_reactions);
   }
 }
@@ -682,6 +675,7 @@ inline
 void ito_plasma_physics::advance_ssa(Vector<unsigned long long>& a_particles,
 				     Vector<unsigned long long>& a_newPhotons,
 				     const Real                  a_dt) const {
+  constexpr unsigned long long one = 1;
   if(m_reactions.size() > 0){
     Real curDt = 0.0;
 
@@ -721,7 +715,7 @@ void ito_plasma_physics::advance_ssa(Vector<unsigned long long>& a_particles,
 	  }
 	}
 
-	reactions[r]->jump_state(a_particles, a_newPhotons, 1);
+	reactions[r]->jump_state(a_particles, a_newPhotons, one);
       }
     }
   }
@@ -738,7 +732,7 @@ void ito_plasma_physics::advance_tau(Vector<unsigned long long>& a_particles,
 inline
 void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 					Vector<unsigned long long>& a_newPhotons,
-					const Real                  a_dt){
+					const Real                  a_dt) const {
 
   Real curTime = 0.0;
 
@@ -763,7 +757,7 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
       if(dtNonCrit < dtCrit || criticalReactions.size() == 0){ // No critical reactions fire. Advance only noncritical reactions.
 
 	// Compute the total propensity function in case it is faster to run SSA steps
-	const Real A = this->propensity(a_particles);
+	Real A = this->propensity(a_particles);
 	
 	if(A*curDt < m_SSAlim){ // Tau-leaping is inefficient, do some SSA on the whole reaction set. 
 	  for (int i = 0; i < m_NSSA; i++){
@@ -778,6 +772,8 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 	    curTime += dtNext;
 	    if(curTime <= a_dt){ // Ok, we are inside [0, a_dt] and we can do the reaction. 
 	      this->ssa_step(a_particles, a_newPhotons, propensities, A);
+
+	      A = this->propensity(a_particles); // Recompute propensities
 	    }
 	    else{
 	      break; // No need to perform the rest. 
@@ -785,7 +781,6 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 	  }
 	}
 	else{ // Perform tau-leaping with no-critical reactions only
-
 	  // Need a copy in case step is rejected
 	  Vector<unsigned long long> particles = a_particles;
 	  Vector<unsigned long long> photons   = a_newPhotons;
@@ -836,6 +831,23 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 	}
       }
     }
+  }
+}
+
+inline
+void ito_plasma_physics::advance_particles(Vector<unsigned long long>& a_particles,
+					   Vector<unsigned long long>& a_newPhotons,
+					   const Real a_dt) const {
+
+  // Which algorithm?
+  if(m_algorithm == algorithm::ssa){
+    this->advance_ssa(a_particles, a_newPhotons, a_dt); 
+  }
+  else if(m_algorithm == algorithm::tau){
+    this->advance_tau(a_particles, a_newPhotons, a_dt); 
+  }
+  else if(m_algorithm == algorithm::hybrid){
+    this->advance_hybrid(a_particles, a_newPhotons, a_dt); 
   }
 }
 

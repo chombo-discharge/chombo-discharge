@@ -37,7 +37,6 @@ namespace physics {
 
       enum class which_algorithm {
 	euler, 
-	predictor_corrector,
 	semi_implicit,
       };
 
@@ -64,7 +63,6 @@ namespace physics {
       void rewind_particles();
       void diffuse_particles_euler(const Real a_dt);
       void advect_particles_euler(const Real a_dt);
-      void advect_particles_rk2(const Real a_dt);      
 
       // Specific routines for semi-implicit Euler
       void compute_conductivity();
@@ -74,7 +72,6 @@ namespace physics {
 
       // Particle advancement routines. 
       void advance_particles_euler(const Real a_dt);
-      void advance_particles_pc(const Real a_dt);
       void advance_particles_si(const Real a_dt);
 
     };

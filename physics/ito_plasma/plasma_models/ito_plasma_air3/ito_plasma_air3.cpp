@@ -49,7 +49,12 @@ ito_plasma_air3::ito_plasma_air3(){
     m_algorithm = algorithm::ssa;
   }
   else{
-    MayDay::Abort("ito_plasma_air2::ito_plasma_air3 - unknown algorithm requested");
+    MayDay::Abort("ito_plasma_air3::ito_plasma_air3 - unknown algorithm requested");
+  }
+
+  // Random seed
+  if(m_seed < 0) {
+    m_seed = std::chrono::system_clock::now().time_since_epoch().count();
   }
 
   // Standard air. 
@@ -174,7 +179,6 @@ void ito_plasma_air3::update_reaction_rates(const RealVect a_E, const Real a_dx,
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
   const Real bpn     = 2E-13*sqrt(300/m_T)/dV;
   const Real bpe     = 1.138E-11*pow(Te, -0.7)/dV;
-
   
   m_reactions.at("impact_ionization").rate()      = alpha*velo;
   m_reactions.at("electron_attachment").rate()    = eta*velo;

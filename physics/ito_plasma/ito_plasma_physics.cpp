@@ -84,13 +84,13 @@ void ito_plasma_physics::read_file(lookup_table& a_table, const std::string a_fi
 
     std::istringstream iss(line);
 
-   const bool skipline = (line.at(0) == '#') || (line.length() == 0);
-   if(!skipline){
-     if (!(iss >> x >> y)) {
-       continue;
-     }
-     a_table.add_entry(x, y);
-   }
+    const bool skipline = (line.at(0) == '#') || (line.length() == 0);
+    if(!skipline){
+      if (!(iss >> x >> y)) {
+	continue;
+      }
+      a_table.add_entry(x, y);
+    }
   }
   infile.close();
 }
