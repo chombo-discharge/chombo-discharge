@@ -90,8 +90,8 @@ ito_plasma_air3::ito_plasma_air3(){
   // Particle-particle reactions
   m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
   m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
-  //  m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
-  //  m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
+  m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
+  m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
   m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
 
   // Photo-reactions
@@ -165,18 +165,21 @@ Vector<Real> ito_plasma_air3::compute_ito_diffusion(const Real         a_time,
 void ito_plasma_air3::update_reaction_rates(const RealVect a_E, const Real a_dx, const Real a_kappa) const{
 
   // Compute the reaction rates.
-  const Real dV      = pow(a_dx, SpaceDim)*a_kappa;
+  const Real dV      = pow(a_dx, SpaceDim);//*a_kappa;
   const Real E       = a_E.vectorLength();
   const Real alpha   = m_tables.at("alpha").get_entry(E);
   const Real eta     = m_tables.at("eta").get_entry(E);
+  const Real Te      = m_tables.at("Te").get_entry(E);
   const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
   const Real bpn     = 2E-13*sqrt(300/m_T)/dV;
+  const Real bpe     = 1.138E-11*pow(Te, -0.7)/dV;
+
   
   m_reactions.at("impact_ionization").rate()      = alpha*velo;
   m_reactions.at("electron_attachment").rate()    = eta*velo;
-  //  m_reactions.at("electron_recombination").rate() = 0.;
-  //  m_reactions.at("ion_recombination").rate()      = bpn;
+  m_reactions.at("electron_recombination").rate() = bpe;
+  m_reactions.at("ion_recombination").rate()      = bpn;
   m_reactions.at("photo_excitation").rate()       = alpha*velo*xfactor;
 }
 
