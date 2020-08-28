@@ -46,6 +46,14 @@ namespace physics {
 
     protected:
 
+      // Lookup tables for reactions
+      lookup_table m_mobility;  // Holds mobility
+      lookup_table m_diffusion; // Holds diffusion coefficient
+      lookup_table m_alpha;     // Impact ionization
+      lookup_table m_eta;       // Electron attachment
+      lookup_table m_Te;        // Electron temperature
+      int m_uniform_entries;    // Number of points to use in lookup table
+
       // Stuff for initial conditions
       Real m_blob_radius;
       Real m_particle_weight;
@@ -83,6 +91,10 @@ namespace physics {
 
       // Electron velocity
       RealVect compute_electron_velocity(const RealVect a_E) const;
+
+      // Read file into table
+      void read_file(lookup_table& a_table, const std::string a_file);
+      void read_all_files();
     };
 
     

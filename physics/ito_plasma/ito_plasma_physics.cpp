@@ -10,6 +10,9 @@
 
 #include <PolyGeom.H>
 
+#include <fstream>
+#include <sstream>
+
 using namespace physics::ito_plasma;
 
 ito_plasma_physics::ito_plasma_physics(){
@@ -27,6 +30,9 @@ ito_plasma_physics::ito_plasma_physics(){
   m_NSSA      = 100;
   m_SSAlim    = 0.1;
   m_algorithm = algorithm::hybrid;
+
+  // Default parameter for lookup tables
+  m_table_entries = 100;
 }
 
 ito_plasma_physics::~ito_plasma_physics(){
@@ -50,4 +56,38 @@ int ito_plasma_physics::get_num_rte_species() const {
 
 Real ito_plasma_physics::initial_sigma(const Real a_time, const RealVect a_pos) const {
   return 0.0;
+}
+
+void ito_plasma_physics::add_table(const std::string a_table_name, const std::string a_file){
+
+  lookup_table table;
+
+  this->read_file(table, a_file);        // Read file
+  table.make_uniform(m_table_entries);   // Make table into a unifom table
+  m_tables.emplace(a_table_name, table); // Add table
+}
+
+void ito_plasma_physics::read_file(lookup_table& a_table, const std::string a_file){
+
+  Real x, y;
+  
+  std::ifstream infile(a_file);
+  std::string line;
+
+  while (std::getline(infile, line)){
+
+    // Trim string
+    trim(line);
+
+    std::istringstream iss(line);
+
+   const bool skipline = (line.at(0) == '#') || (line.length() == 0);
+   if(!skipline){
+     if (!(iss >> x >> y)) {
+       continue;
+     }
+     a_table.add_entry(x, y);
+   }
+  }
+  infile.close();
 }
