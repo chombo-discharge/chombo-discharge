@@ -134,7 +134,7 @@ void ito_plasma_air3::read_tables(){
 Real ito_plasma_air3::compute_alpha(const RealVect a_E) const {
   const Real E = a_E.vectorLength();
 
-  return m_tables.at("mobility").get_entry(E);
+  return m_tables.at("alpha").get_entry(E);
 }
 
 
