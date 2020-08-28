@@ -5,13 +5,10 @@
   @date Sept. 2016
 */
 
-#ifndef _LOOKUPTABLE_
-#define _LOOKUPTABLE_
+#ifndef _LOOKUPTABLE_H_
+#define _LOOKUPTABLE_H_
 
-#include <Vector.H>
 #include <RealVect.H>
-#include <ParmParse.H>
-
 
 /*!
   @brief Class for looking up and interpolation (x,y) data. 
@@ -37,61 +34,73 @@ public:
   /*!
     @brief Make the table into a uniform table with the number of entries
   */
-  virtual void make_uniform(const int a_entries);
+  inline
+  void make_uniform(const int a_entries);
 
   /*!
     @brief Scale x values
   */
-  virtual void scale_x(const Real& a_scale);
+  inline
+  void scale_x(const Real& a_scale);
 
   /*!
     @brief Scale y values
   */
-  virtual void scale_y(const Real& a_scale);
+  inline
+  void scale_y(const Real& a_scale);
   
   /*!
     @brief Add entry
   */
-  virtual void add_entry(const Real& a_x, const Real& a_y);
+  inline
+  void add_entry(const Real& a_x, const Real& a_y);
 
   /*!
     @brief Add other table. 
   */
-  virtual void add_table(const lookup_table& a_otherTable, const Real a_scale);
+  inline
+  void add_table(const lookup_table& a_otherTable, const Real a_scale);
 
   /*!
     @brief Dump table to pout()
   */
-  virtual void dump_table();
+  inline
+  void dump_table() const ;
 
   /*!
     @brief Get entry
   */
-  virtual Real get_entry(const Real a_x) const;
+  inline
+  Real get_entry(const Real a_x) const;
 
   /*!
     @brief Direct lookup, assumes non-uniform ordering. Performance killer. 
-  */ 
-  virtual Real direct_lookup(const Real a_x) const;
+  */
+  inline
+  Real direct_lookup(const Real a_x) const;
 
   /*!
     @brief Swap x and y vectors
   */
-  virtual void swap_xy();
+  inline
+  void swap_xy();
 
   /*!
     @brief Add a table to this one
   */
+  inline
   void operator+=(const lookup_table& a_table);
 
   /*!
     @brief Subtract a table from this one
   */
+  inline
   void operator-=(const lookup_table& a_table);
 
   /*!
     @brief Assignment operator
   */
+  inline
   void operator=(const lookup_table& a_table);
 
 protected:
@@ -109,12 +118,14 @@ protected:
   /*!
     @brief Towsend field
   */
-  Vector<Real> m_x;
+  std::vector<Real> m_x;
 
   /*!
     @brief Rate coefficient
   */
-  Vector<Real> m_y;
+  std::vector<Real> m_y;
 };
+
+#include "lookup_tableI.H"
 
 #endif
