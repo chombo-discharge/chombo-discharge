@@ -418,8 +418,7 @@ ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<unsigned l
 
     const std::map<int, int>& stateChange = r.second.get_state_change();
 
-    // Cheap trick for setting to largest representable integer
-    long long Lj          = std::numeric_limits<long long>::max();
+    long long Lj    = std::numeric_limits<long long>::max();
     bool consuming  = false;
 
     // Check how many times reaction r can fire before consuming all its species
@@ -431,12 +430,9 @@ ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<unsigned l
 
       if(nuIJ < 0){
 	consuming = true;
-#if 0 // Original code
-	const int b = (a_particles[reactant] + std::abs(nuIJ) - 1)/std::abs(nuIJ); // Upwards division of Xi/|nuIJ|
-#else // Debug code
+	
 	const long long s = (long long) std::abs(nuIJ);
-	const long long b = (long long) a_particles[reactant]/s;
-#endif
+	const long long b = (long long) (a_particles[reactant] + s-1)/s;
 	
 	Lj = std::min(Lj, b);
       }
