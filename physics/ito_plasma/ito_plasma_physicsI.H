@@ -738,7 +738,7 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
   // TODO: We must still check that the tau-steps are valid, i.e. that they don't give negative numbers. 
   Real curTime = 0.0;
 
-  while(curTime <= a_dt){
+  while(curTime < a_dt){
 
     // Get critical and non-critical reactions. 
     ReactionTypes rTypes = this->get_critical_reactions(a_particles);
@@ -754,6 +754,7 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
     while(!valid){ 
       
       const Real curDt = std::min(a_dt-curTime, std::min(dtCrit, dtNonCrit));
+	    
       // How will we advance?
       if(dtNonCrit < dtCrit || criticalReactions.size() == 0){ // No critical reactions fire. Advance only noncritical reactions.
 
@@ -803,6 +804,7 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 	}
       } 
       else{ // One critical reaction fired. Advance that reaction and use tau-leaping for the rest.
+	MayDay::Abort("shouldn't be here, there are no critical reactions!!!!");
 	// Need a copy in case step is rejected
 	Vector<unsigned long long> particles = a_particles;
 	Vector<unsigned long long> photons   = a_newPhotons;
