@@ -411,13 +411,15 @@ ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<unsigned l
 
   ReactionPtrs criticalReactions;    // std::deque<shared_ptr<ito_reaction> > under the hood
   ReactionPtrs nonCriticalReactions; // std::deque<shared_ptr<ito_reaction> > under the hood
+
+  const long long Ncrit = (long long) m_Ncrit; // Need long long version of this because because a_particles is long long
   
   for (const auto& r : m_reactions){
 
     const std::map<int, int>& stateChange = r.second.get_state_change();
 
     // Cheap trick for setting to largest representable integer
-    int Lj           = std::numeric_limits<int>::max();
+    long long Lj          = std::numeric_limits<long long>::max();
     bool consuming  = false;
 
     // Check how many times reaction r can fire before consuming all its species
@@ -426,16 +428,23 @@ ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<unsigned l
       const int reactant = s.first;
       const int nuIJ     = s.second;
 
+
       if(nuIJ < 0){
 	consuming = true;
+#if 0 // Original code
 	const int b = (a_particles[reactant] + std::abs(nuIJ) - 1)/std::abs(nuIJ); // Upwards division of Xi/|nuIJ|
+#else // Debug code
+	const long long s = (long long) std::abs(nuIJ);
+	const long long b = (long long) a_particles[reactant]/s;
+#endif
+	
 	Lj = std::min(Lj, b);
       }
     }
 
     // Check if reaction is a critical reaction
     bool crit = false;
-    if(Lj < m_Ncrit && consuming){
+    if(Lj < Ncrit && consuming){
       crit = true;
     }
 
@@ -735,7 +744,6 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 					Vector<unsigned long long>& a_newPhotons,
 					const Real                  a_dt){
 
-  // TODO: We must still check that the tau-steps are valid, i.e. that they don't give negative numbers. 
   Real curTime = 0.0;
 
   while(curTime < a_dt){
@@ -804,7 +812,6 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 	}
       } 
       else{ // One critical reaction fired. Advance that reaction and use tau-leaping for the rest.
-	MayDay::Abort("shouldn't be here, there are no critical reactions!!!!");
 	// Need a copy in case step is rejected
 	Vector<unsigned long long> particles = a_particles;
 	Vector<unsigned long long> photons   = a_newPhotons;

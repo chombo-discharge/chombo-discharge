@@ -58,6 +58,7 @@ namespace physics {
       int m_negative_idx;
       int m_photonZ_idx;
 
+
       // Pressure, neutral number density etc
       Real m_N;      
       Real m_p;      
