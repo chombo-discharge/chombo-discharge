@@ -93,8 +93,7 @@ namespace physics {
       RealVect compute_electron_velocity(const RealVect a_E) const;
 
       // Read file into table
-      void read_file(lookup_table& a_table, const std::string a_file);
-      void read_all_files();
+      void read_tables();
     };
 
     

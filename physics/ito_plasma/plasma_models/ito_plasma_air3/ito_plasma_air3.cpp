@@ -77,51 +77,67 @@ ito_plasma_air3::ito_plasma_air3(){
 
   // Photo-reactions
   m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}));
+
+  // Read reaction tables. This also makes them "uniform". 
+  this->read_tables();
 }
 
 ito_plasma_air3::~ito_plasma_air3(){
 
 }
 
+void ito_plasma_air3::read_tables(){
+
+  this->add_table("mobility", "mobility.dat");
+  this->add_table("diffco",   "diffusion.dat");
+  this->add_table("alpha",    "alpha.dat");
+  this->add_table("eta",      "eta.dat");
+  this->add_table("Te",       "energy.dat");
+
+  // Need to scale tables. First column is in Td and second in /N
+  m_tables["mobility"].scale_x(m_N*units::s_Td);
+  m_tables["mobility"].scale_y(1./M_N);
+
+  m_tables["diffco"].scale_x(m_N*units::s_Td);
+  m_tables["diffco"].scale_y(1./M_N);
+
+  m_tables["alpha"].scale_x(m_N*units::s_Td);
+  m_tables["alpha"].scale_y(1./M_N);
+
+  m_tables["eta"].scale_x(m_N*units::s_Td);
+  m_tables["eta"].scale_y(1./M_N);
+
+  m_tables["Te"].scale_x(m_N*units::s_Td);
+  m_tables["Te"].scale_y(2.0*units::s_Qe/(3.0*units::s_kb));
+}
+
 Real ito_plasma_air3::compute_alpha(const RealVect a_E) const {
-  Real E = a_E.vectorLength();
+  const Real E = a_E.vectorLength();
 
-  const Real alpha = (1.1944E6 + 4.3666E26/(E*E*E))*exp(-2.73E7/E);
-  
-  return alpha;
+  return m_tables.at("mobility").get_entry(E);
 }
 
-Real ito_plasma_air3::compute_eta(const RealVect a_E) const {
-  return 340.75;
-}
 
 Vector<RealVect> ito_plasma_air3::compute_ito_velocities(const Real         a_time,
 							 const RealVect     a_pos,
 							 const RealVect     a_E,
 							 const Vector<Real> a_cdr_densities) const {
-  
   Vector<RealVect> velo(m_num_ito_species, RealVect::Zero);
-
-  velo[m_electron_idx] = this->compute_electron_velocity(a_E);
+  velo[m_electron_idx] = this->compute_electron_velocity();
   
   return velo;
 }
 
 RealVect ito_plasma_air3::compute_electron_velocity(const RealVect a_E) const {
-  const Real E = a_E.vectorLength();
-  const Real mu = 2.3987*pow(E, -0.26);
-  
-  return -mu*a_E;
+  return -m_tables.at("mobility").get_entry(a_E.vectorLength)*a_E;
 }
 
 Vector<Real> ito_plasma_air3::compute_ito_diffusion(const Real         a_time,
 						    const RealVect     a_pos,
 						    const RealVect     a_E,
 						    const Vector<Real> a_cdr_densities) const {
-
   Vector<Real> D(m_num_ito_species, 0.0);
-
-  D[m_electron_idx] = 4.3628E-3*pow(a_E.vectorLength(), 0.22);
+  D[m_electron_idx] = m_tables["diffco"].get_entry(a_E.vectorLength());
   
   return D;
 }
@@ -130,46 +146,15 @@ void ito_plasma_air3::update_reaction_rates(const RealVect a_E, const Real a_dx,
 
   // Compute the reaction rates. 
   const Real E       = a_E.vectorLength();
-  const Real alpha   = this->compute_alpha(a_E);
-  const Real eta     = this->compute_eta(a_E);
+  const Real alpha   = m_tables.at("alpha").get_entry(E);
+  const Real eta     = m_tables.at("eta").get_entry(E);
   const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
 
   m_reactions.at("impact_ionization").rate() = alpha*velo;
+  m_reactions.at("attachment").rate()        = eta*velo;
   m_reactions.at("photo_excitation").rate()  = alpha*velo*xfactor;
 }
-
-// void ito_plasma_air3::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-// 					       Vector<List<photon>* >&       a_photons,
-// 					       Vector<List<photon>* >&       a_newPhotons,
-// 					       const RealVect                a_E,
-// 					       const RealVect                a_pos,
-// 					       const RealVect                a_centroid,
-// 					       const RealVect                a_bndryCentroid,
-// 					       const RealVect                a_bndryNormal,
-// 					       const RealVect                a_lo,
-// 					       const RealVect                a_hi,
-// 					       const Real                    a_dx,
-// 					       const Real                    a_kappa, 
-// 					       const Real                    a_dt) const {
-
-
-//   this->update_reaction_rates(a_E, a_dx, a_kappa);
-  
-//   // Get counts. 
-//   Vector<int> newPhotonCount   = Vector<int>(m_num_rte_species, 0);
-//   Vector<int> oldParticleCount = this->get_particle_count(a_particles);
-//   Vector<int> newParticleCount = oldParticleCount;
-
-//   // Do a tau-leaping step
-//   this->tau_leap(newParticleCount, newPhotonCount, a_dt); 
-
-//   // Reconcile everything. 
-//   this->reconcile_particles(a_particles, newParticleCount, oldParticleCount, a_pos, a_lo, a_hi, a_bndryCentroid,
-// 			    a_bndryNormal, a_dx, a_kappa);
-//   this->reconcile_photons(a_newPhotons, newPhotonCount, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-//   this->reconcile_photoionization(a_particles, a_photons);
-// }
 
 Real ito_plasma_air3::excitation_rates(const Real a_E) const{
   const Real Etd = a_E/(m_N*units::s_Td);
