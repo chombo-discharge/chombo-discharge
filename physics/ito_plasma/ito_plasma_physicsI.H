@@ -402,7 +402,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   // Generate new photons
   this->reconcile_photons(a_newPhotons, newPhotonCount, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
-  // Run photo-reactions
+  // Run photo-reactions and increment the number of particles as needed
   this->reconcile_photoionization(a_particles, a_photons);
 }
 
@@ -484,9 +484,6 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<unsigned long long>&
   
   Real dt = std::numeric_limits<Real>::max();
 
-  //  const int M = a_non_critical_reactions.size();
-
-  //  if(M > 0){
   if(a_non_critical_reactions.size() > 0) {
 
 
@@ -739,7 +736,6 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
 					const Real                  a_dt){
 
   // TODO: We must still check that the tau-steps are valid, i.e. that they don't give negative numbers. 
-  
   Real curTime = 0.0;
 
   while(curTime <= a_dt){
@@ -759,7 +755,7 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
       
       const Real curDt = std::min(a_dt-curTime, std::min(dtCrit, dtNonCrit));
       // How will we advance?
-      if(dtNonCrit < dtCrit){ // No critical reactions fire. Advance only noncritical reactions.
+      if(dtNonCrit < dtCrit || criticalReactions.size() == 0){ // No critical reactions fire. Advance only noncritical reactions.
 
 	// Compute the total propensity function in case it is faster to run SSA steps
 	const Real A = this->propensity(a_particles);

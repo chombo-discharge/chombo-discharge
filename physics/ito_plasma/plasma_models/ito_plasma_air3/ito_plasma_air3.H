@@ -67,8 +67,6 @@ namespace physics {
       Real m_N2frac; 
       Real m_pO2;    
       Real m_photoi_factor;
-      Real m_tau_switch;
-      Real m_poisson_switch;
 
       // Functions for drawing initial particles
       void draw_initial_particles();
