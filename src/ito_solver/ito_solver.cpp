@@ -505,81 +505,6 @@ void ito_solver::remove_eb_particles(particle_container<ito_particle>& a_particl
   }
 }
 
-void ito_solver::update_invalid_particles(){
-  CH_TIME("ito_solver::update_invalid_particles()");
-  if(m_verbosity > 5){
-    pout() << m_name + "::update_invalid_particles()" << endl;
-  }
-  this->update_invalid_particles(m_particles);
-}
-
-void ito_solver::update_invalid_particles(const particle_container<ito_particle>& a_particles){
-  CH_TIME("ito_solver::update_invalid_particles(particles)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::update_invalid_particles(particles)" << endl;
-  }
-
-  RefCountedPtr<BaseIF> func;
-  if(m_phase == phase::gas){
-    func = m_compgeom->get_gas_if();
-  }
-  else{
-    func = m_compgeom->get_sol_if();
-  }
-
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBISBox& ebisbox = ebisl[dit()];
-
-      List<ito_particle>& invalid_particles = m_invalid_particles[lvl][dit()].listItems();
-      const List<ito_particle>& particles   = a_particles[lvl][dit()].listItems();
-
-      // Clear the initial list
-      invalid_particles.clear();
-
-      // Different logic for different box types
-      if(ebisbox.isAllCovered()){ // Box is all covered, copy ALL the particles
-	invalid_particles = particles;
-      }
-      else if(ebisbox.isAllRegular()){ // Box is regular, don't copy any particles
-      }
-      else{ // May have irregular cells
-
-	// Go through all the particles and check if they are inside the EB. If they are, moved them to invalid_particles
-	for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
-	  const ito_particle& p = particles[lit];
-
-	  const Real f = func->value(p.position());
-	  if(f <= 0.0){
-	    invalid_particles.append(p);
-	  }
-	}
-      }
-    }
-  }  
-}
-
-void ito_solver::copy_invalid_particles_to_particles(){
-  CH_TIME("ito_solver::copy_invalid_particles_to_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::copy_invalid_particles_to_particles" << endl;
-  }
-
-  m_particles.add_particles(m_invalid_particles);
-}
-
-void ito_solver::move_invalid_particles_to_particles(){
-  CH_TIME("ito_solver::move_invalid_particles_to_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::move_invalid_particles_to_particles" << endl;
-  }
-
-  m_particles.add_particles_destructive(m_invalid_particles);
-}
-
 void ito_solver::intersect_particles(){
   CH_TIME("ito_solver::intersect_particles");
   if(m_verbosity > 5){
@@ -719,7 +644,7 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   m_eb_particles.regrid(     grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   m_domain_particles.regrid( grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   m_source_particles.regrid( grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_invalid_particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_scratch_particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
 }
 
 void ito_solver::set_species(RefCountedPtr<ito_species> a_species){
@@ -769,7 +694,7 @@ void ito_solver::allocate_internals(){
   m_amr->allocate(m_eb_particles,      m_pvr_buffer, m_realm);
   m_amr->allocate(m_domain_particles,  m_pvr_buffer, m_realm);
   m_amr->allocate(m_source_particles,  m_pvr_buffer, m_realm);
-  m_amr->allocate(m_invalid_particles, m_pvr_buffer, m_realm);
+  m_amr->allocate(m_scratch_particles, m_pvr_buffer, m_realm);
 }
 
 void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
@@ -783,9 +708,6 @@ void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level)
   // Write particles. 
   std::string str = m_name + "_particles";
   writeParticlesToHDF(a_handle, m_particles[a_level], str);
-
-  const std::string str2 = m_name + "_invalid_particles";
-  writeParticlesToHDF(a_handle, m_invalid_particles[a_level], str2);
 }
 
 void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
@@ -800,9 +722,6 @@ void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   // Read particles. 
   const std::string str = m_name + "_particles";
   readParticlesFromHDF(a_handle, m_particles[a_level], str);
-
-  const std::string str2 = m_name + "_invalid_particles";
-  readParticlesFromHDF(a_handle, m_invalid_particles[a_level], str);
 }
 
 void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
@@ -1293,7 +1212,7 @@ void ito_solver::pre_regrid(const int a_base, const int a_old_finest_level){
   m_eb_particles.pre_regrid(a_base);
   m_domain_particles.pre_regrid(a_base);
   m_source_particles.pre_regrid(a_base);
-  m_invalid_particles.pre_regrid(a_base);
+  m_scratch_particles.pre_regrid(a_base);
 }
 
 particle_container<ito_particle>& ito_solver::get_particles(){
@@ -1332,13 +1251,13 @@ particle_container<ito_particle>& ito_solver::get_source_particles(){
   return m_source_particles;
 }
 
-particle_container<ito_particle>& ito_solver::get_invalid_particles(){
-  CH_TIME("ito_solver::get_invalid_particles");
+particle_container<ito_particle>& ito_solver::get_scratch_particles(){
+  CH_TIME("ito_solver::get_scratch_particles");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_invalid_particles" << endl;
+    pout() << m_name + "::get_scratch_particles" << endl;
   }
 
-  return m_invalid_particles;
+  return m_scratch_particles;
 }
 
 EBAMRCellData& ito_solver::get_state(){

@@ -131,28 +131,6 @@ public:
   virtual void intersect_particles();
 
   /*!
-    @brief Function for copying all particles that were inside the EB to m_invalid_particles. This will discard the original
-           invalid particles
-  */
-  virtual void update_invalid_particles(const particle_container<ito_particle>& a_particles);
-
-  /*!
-    @brief Function for copying all particles that were inside the EB to m_invalid_particles. This will discard the original
-    invalid particles
-  */
-  virtual void update_invalid_particles();
-
-  /*!
-    @brief This copies (non-destructively) m_invalid_particles to m_particles. 
-  */
-  virtual void copy_invalid_particles_to_particles();
-
-  /*!
-    @brief This moves (destructively) m_invalid_particles to m_particles. 
-  */
-  virtual void move_invalid_particles_to_particles();
-
-  /*!
     @brief Compute particle load on specific levle
   */
   virtual void compute_loads(Vector<long int>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level);
@@ -295,7 +273,7 @@ public:
   /*!
     @brief Get the particle container
   */
-  virtual particle_container<ito_particle>& get_invalid_particles();
+  virtual particle_container<ito_particle>& get_scratch_particles();
 
   /*!
     @brief Get the species
@@ -707,7 +685,7 @@ protected:
   /*!
     @brief Data holder for copying particles that are INSIDE the EB
   */
-  particle_container<ito_particle> m_invalid_particles;
+  particle_container<ito_particle> m_scratch_particles;
 
   /*!
     @brief Parse superparticles

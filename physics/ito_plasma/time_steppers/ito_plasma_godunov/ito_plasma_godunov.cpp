@@ -195,14 +195,14 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
   m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
 
-  // Strange but true thing. The semi_implicit algorithm needs particles that ended up inside the EB to deposit
-  // their charge on the mesh. These were copied to a separate container earlier, and are now put back in the ito particles
+  // Semi-implicit method needs to recompute the field using the particles BEFORE the advective update. Otherwise,
+  // expect trouble. 
   if(m_algorithm == which_algorithm::semi_implicit){
-    //    m_ito->move_invalid_particles_to_particles();
+    this->deposit_scratch_particles();
   }
-
-  // Redeposit particles
-  m_ito->deposit_particles();
+  else{
+    m_ito->deposit_particles();
+  }
 
   // Recompute the electric field
   const bool converged = this->solve_poisson();
@@ -213,6 +213,34 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   // Recompute new velocities and diffusion coefficients
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
+}
+
+void ito_plasma_godunov::copy_particles_to_scratch(){
+  CH_TIME("ito_plasma_godunov::copy_particles_to_scratch");
+  if(m_verbosity > 5){
+    pout() << m_name + "::copy_particles_to_scratch" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+
+    particle_container<ito_particle>& scratch         = solver->get_scratch_particles();
+    const particle_container<ito_particle>& particles = solver->get_particles();
+
+    solver->clear(scratch);
+    scratch.add_particles(particles);
+  }
+}
+
+void ito_plasma_godunov::deposit_scratch_particles(){
+  CH_TIME("ito_plasma_godunov::deposit_scratch_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_scratch_particles" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->deposit_particles(solver_it()->get_state(), solver_it()->get_scratch_particles().get_particles());
+  }
 }
 
 Real ito_plasma_godunov::advance(const Real a_dt) {
@@ -314,16 +342,13 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   // Compute new ito velocities and advect the particles
   this->advect_particles_si(a_dt);
 
-  // Remap, redeposit, store invalid particles, and intersect particles.
-  // This is subtle, because the semi-implicit advance takes into account clouds from particles on the
-  // "wrong" side of the EB. After deposition, we put those particles in m_invalid_particles in the ito_solver
-  // BEFORE intersecting particles and removing the particles inside the geometries. The reason is that after
-  // regrid we must recompute the mesh density, but in that case we have discarded some very important particles
-  // and these must be put back as densities on the mesh after the regrid. The same logic applies when restarting....
+  // Need to store these before every regrid
+  this->copy_particles_to_scratch();
+
+  // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
   m_ito->remap();
-  m_ito->deposit_particles();
-  //  m_ito->update_invalid_particles(); // This copies particles that are inside the EB to a separate data holder. 
   this->intersect_particles(a_dt);   // This moves particles that bumped into the EB into data holders for parsing BCs. 
+  m_ito->deposit_particles();
 }
 
 void ito_plasma_godunov::advect_particles_euler(const Real a_dt){

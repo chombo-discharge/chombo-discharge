@@ -152,21 +152,6 @@ public:
   virtual void make_superparticles(const int a_ppc);
 
   /*!
-    @brief Update the invalid particles
-  */
-  virtual void update_invalid_particles();
-
-  /*!
-    @brief This copies (non-destructively) m_invalid_particles to m_particles. 
-  */
-  virtual void copy_invalid_particles_to_particles();
-
-  /*!
-    @brief This moves (destructively) m_invalid_particles to m_particles. 
-  */
-  virtual void move_invalid_particles_to_particles();
-
-  /*!
     @brief Compute dt
   */
   virtual Real compute_dt();

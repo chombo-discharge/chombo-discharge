@@ -69,6 +69,8 @@ namespace physics {
       void swap_particle_positions();
       void setup_semi_implicit_poisson(const Real a_dt);
       void advect_particles_si(const Real a_dt);
+      void copy_particles_to_scratch();
+      void deposit_scratch_particles();
 
       // Particle advancement routines. 
       void advance_particles_euler(const Real a_dt);
