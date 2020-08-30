@@ -322,7 +322,7 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   // and these must be put back as densities on the mesh after the regrid. The same logic applies when restarting....
   m_ito->remap();
   m_ito->deposit_particles();
-  m_ito->update_invalid_particles(); // This copies particles that are inside the EB to a separate data holder. 
+  //  m_ito->update_invalid_particles(); // This copies particles that are inside the EB to a separate data holder. 
   this->intersect_particles(a_dt);   // This moves particles that bumped into the EB into data holders for parsing BCs. 
 }
 
