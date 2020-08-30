@@ -186,8 +186,6 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
     pout() << "ito_plasma_godunov::regrid" << endl;
   }
 
-  if(m_algorithm == which_algorithm::semi_implicit){ 
-
   // Allocate new memory
   this->allocate_internals();
 
