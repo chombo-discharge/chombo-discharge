@@ -96,6 +96,32 @@ void ito_plasma_godunov::allocate_internals(){
   m_amr->allocate(m_conduct_eb,   m_fluid_realm, m_phase, 1);
 }
 
+void ito_plasma_godunov::post_checkpoint_setup() {
+  CH_TIME("ito_plasma_godunov::post_checkpoint_setup");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_godunov::post_checkpoint_setup" << endl;
+  }
+
+  if(m_algorithm == which_algorithm::euler){ // Default method is just fine. 
+
+  }
+  else if(m_algorithm == which_algorithm::semi_implicit) {
+    // Strange but true thing. The semi_implicit algorithm needs particles that ended up inside the EB to deposit
+    // their charge on the mesh. These were copied to a separate container earlier which was checkpointed. We move
+    // those back to the solvers and redeposit on the mesh. 
+    //    m_ito->move_invalid_particles_to_particles();
+    m_ito->deposit_particles();
+    
+    // Recompute poisson
+    this->solve_poisson();
+    this->allocate_internals();
+
+  
+    this->compute_ito_velocities();
+    this->compute_ito_diffusion();
+  }
+}
+
 void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
   CH_TIME("ito_plasma_godunov::compute_dt");
   if(m_verbosity > 5){
@@ -140,6 +166,7 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
 			      << std::endl;
 #endif
 }
+
 void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_level){
   CH_TIME("ito_plasma_godunov::pre_regrid");
   if(m_verbosity > 5){
@@ -153,28 +180,41 @@ void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_lev
   }
 }
 
-void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
   CH_TIME("ito_plasma_godunov::regrid");
   if(m_verbosity > 5){
     pout() << "ito_plasma_godunov::regrid" << endl;
   }
 
-  if(false){//m_algorithm == which_algorithm::semi_implicit){ 
+  if(m_algorithm == which_algorithm::semi_implicit){ 
 
-    this->allocate_internals();
+  // Allocate new memory
+  this->allocate_internals();
 
-    // Regrid solvers
-    m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
-    m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
-    m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
-    m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
+  // Regrid solvers
+  m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
 
-    // Deposit particles
-    m_ito->deposit_particles();
+  // Strange but true thing. The semi_implicit algorithm needs particles that ended up inside the EB to deposit
+  // their charge on the mesh. These were copied to a separate container earlier, and are now put back in the ito particles
+  if(m_algorithm == which_algorithm::semi_implicit){
+    //    m_ito->move_invalid_particles_to_particles();
   }
-  else{
-    ito_plasma_stepper::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+
+  // Redeposit particles
+  m_ito->deposit_particles();
+
+  // Recompute the electric field
+  const bool converged = this->solve_poisson();
+  if(!converged){
+    MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
   }
+
+  // Recompute new velocities and diffusion coefficients
+  this->compute_ito_velocities();
+  this->compute_ito_diffusion();
 }
 
 Real ito_plasma_godunov::advance(const Real a_dt) {
@@ -276,10 +316,16 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   // Compute new ito velocities and advect the particles
   this->advect_particles_si(a_dt);
 
-  // Remap, intersect, and redeposit
+  // Remap, redeposit, store invalid particles, and intersect particles.
+  // This is subtle, because the semi-implicit advance takes into account clouds from particles on the
+  // "wrong" side of the EB. After deposition, we put those particles in m_invalid_particles in the ito_solver
+  // BEFORE intersecting particles and removing the particles inside the geometries. The reason is that after
+  // regrid we must recompute the mesh density, but in that case we have discarded some very important particles
+  // and these must be put back as densities on the mesh after the regrid. The same logic applies when restarting....
   m_ito->remap();
-  this->intersect_particles(a_dt);
   m_ito->deposit_particles();
+  m_ito->update_invalid_particles(); // This copies particles that are inside the EB to a separate data holder. 
+  this->intersect_particles(a_dt);   // This moves particles that bumped into the EB into data holders for parsing BCs. 
 }
 
 void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
@@ -482,8 +528,7 @@ void ito_plasma_godunov::intersect_particles(const Real a_dt){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
-
-    solver->intersect_particles();
+     solver->intersect_particles();
   }
 }
 

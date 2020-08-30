@@ -191,9 +191,9 @@ public:
   void add_particles(const particle_container<P>& a_otherContainer);
 
   /*!
-    @brief Add particles from other container to this one.
+    @brief Add particles from other container to this one. This destroys the particles in the other container. 
   */
-  void add_particles_destructive(const particle_container<P>& a_otherContainer);
+  void add_particles_destructive(particle_container<P>& a_otherContainer);
 
   /*!
     @brief Remap over the entire AMR hierarchy

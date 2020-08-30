@@ -32,12 +32,12 @@ namespace physics {
       // Setup routines
       virtual void parse_options() = 0;
       virtual void allocate_internals() = 0;
-      void setup_solvers() override;
-      void allocate() override;
-      void initial_data() override;
-      void initial_sigma();
-      void post_checkpoint_setup() override;
-      void post_initialize() override;
+      virtual void setup_solvers() override;
+      virtual void allocate() override;
+      virtual void initial_data() override;
+      virtual void initial_sigma();
+      virtual void post_checkpoint_setup() override;
+      virtual void post_initialize() override;
       
       void setup_ito();
       void setup_poisson();

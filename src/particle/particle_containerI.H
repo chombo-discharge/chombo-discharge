@@ -347,7 +347,7 @@ void particle_container<P>::add_particles(const particle_container<P>& a_otherCo
 }
 
 template <class P>
-void particle_container<P>::add_particles_destructive(const particle_container<P>& a_otherContainer){
+void particle_container<P>::add_particles_destructive(particle_container<P>& a_otherContainer){
   if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_grids[lvl];

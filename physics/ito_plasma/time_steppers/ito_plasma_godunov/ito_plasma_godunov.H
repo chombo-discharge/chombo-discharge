@@ -28,6 +28,7 @@ namespace physics {
       // Setup routines
       void parse_options() override;
       void allocate_internals() override;
+      void post_checkpoint_setup() override;
 
       // Regrid routines
       void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
@@ -59,7 +60,6 @@ namespace physics {
       // Global routines
       void intersect_particles(const Real a_dt);
       void set_old_positions();
-
       void rewind_particles();
       void diffuse_particles_euler(const Real a_dt);
       void advect_particles_euler(const Real a_dt);
