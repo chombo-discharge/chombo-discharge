@@ -96,6 +96,52 @@ void ito_plasma_godunov::allocate_internals(){
   m_amr->allocate(m_conduct_eb,   m_fluid_realm, m_phase, 1);
 }
 
+int ito_plasma_godunov::get_num_plot_vars() const {
+  CH_TIME("ito_plasma_godunov::get_num_plot_vars");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_godunov::get_num_plot_vars" << endl;
+  }
+
+  int ncomp = ito_plasma_stepper::get_num_plot_vars();
+
+  ncomp++; // Add conductivity
+
+  return ncomp;
+}
+
+void ito_plasma_godunov::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
+  CH_TIME("ito_plasma_godunov::write_conductivity");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_godunov::write_conductivity" << endl;
+  }
+
+  ito_plasma_stepper::write_plot_data(a_output, a_plotvar_names, a_icomp);
+
+  // Do conductivity
+  this->write_conductivity(a_output, a_icomp);
+  a_plotvar_names.push_back("conductivity");
+}
+
+void ito_plasma_godunov::write_conductivity(EBAMRCellData& a_output, int& a_icomp) const {
+  CH_TIME("ito_plasma_stepper::write_conductivity");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::write_conductivity" << endl;
+  }
+
+  const Interval src_interv(0, 0);
+  const Interval dst_interv(a_icomp, a_icomp);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    if(m_conduct_cell.get_realm() == a_output.get_realm()){
+      m_conduct_cell[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+    }
+    else {
+      m_conduct_cell[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+    }
+  }
+  a_icomp += 1;
+}
+
 void ito_plasma_godunov::post_checkpoint_setup() {
   CH_TIME("ito_plasma_godunov::post_checkpoint_setup");
   if(m_verbosity > 5){

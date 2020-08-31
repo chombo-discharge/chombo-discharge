@@ -47,7 +47,7 @@ namespace physics {
       // IO routines
       void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
       void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
-      void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
+      virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
       void write_J(EBAMRCellData& a_output, int& a_icomp) const;
       int  get_num_plot_vars() const override;
   

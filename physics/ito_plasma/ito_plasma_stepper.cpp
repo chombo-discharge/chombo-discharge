@@ -445,7 +445,7 @@ void ito_plasma_stepper::post_regrid(){
 
 }
 
-int  ito_plasma_stepper::get_num_plot_vars() const {
+int ito_plasma_stepper::get_num_plot_vars() const {
   CH_TIME("ito_plasma_stepper::get_num_plot_vars");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::get_num_plot_vars" << endl;
