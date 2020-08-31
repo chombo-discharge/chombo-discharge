@@ -221,8 +221,17 @@ void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_lev
 
   ito_plasma_stepper::pre_regrid(a_lmin, a_old_finest_level);
 
+  // I don't know what this does. 
   if(m_algorithm == which_algorithm::semi_implicit){
     m_use_old_dt = true;
+
+    // Copy conductivity to scratch storage
+    const int ncomp        = 1;
+    const int finest_level = m_amr->get_finest_level();
+    m_amr->allocate(m_cache,  m_fluid_realm, m_phase, ncomp);
+    for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+      m_conduct_cell[lvl]->localCopyTo(*m_cache[lvl]);
+    }
   }
 }
 
@@ -230,6 +239,20 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   CH_TIME("ito_plasma_godunov::regrid");
   if(m_verbosity > 5){
     pout() << "ito_plasma_godunov::regrid" << endl;
+  }
+
+  if(m_algorithm == which_algorithm::euler){
+    ito_plasma_stepper::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  }
+  else{
+    this->regrid_si(a_lmin, a_old_finest_level, a_new_finest_level);
+  }
+}
+
+void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
+  CH_TIME("ito_plasma_godunov::regrid_si");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_godunov::regrid_si" << endl;
   }
 
   // Allocate new memory
@@ -241,16 +264,15 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
   m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
 
-  // Semi-implicit method needs to recompute the field using the particles BEFORE the advective update. Otherwise,
-  // expect trouble. 
-  if(m_algorithm == which_algorithm::semi_implicit){
-    this->deposit_scratch_particles();
-  }
-  else{
-    m_ito->deposit_particles();
-  }
+  // Recompute the conductivity
+  this->regrid_conductivity(a_lmin, a_old_finest_level, a_new_finest_level);
+  this->compute_face_conductivity();
 
-  // Recompute the electric field
+  // Set up semi-implicit poisson again, with particles after diffusion jump (the rho^\dagger)
+  this->setup_semi_implicit_poisson(m_prevDt);
+  this->deposit_scratch_particles();
+  
+  // Compute the electric field
   const bool converged = this->solve_poisson();
   if(!converged){
     MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
@@ -259,6 +281,31 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   // Recompute new velocities and diffusion coefficients
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
+}
+
+void ito_plasma_godunov::regrid_conductivity(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+  CH_TIME("ito_plasma_godunov::regrid_conductivity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::regrid_conductivity" << endl;
+  }
+  
+  const Interval interv(0,0);
+    
+  // Regrid the conductivity
+  Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_fluid_realm, m_phase);
+
+  // These levels have not changed
+  for (int lvl = 0; lvl <= Max(0,a_lmin-1); lvl++){
+    m_cache[lvl]->copyTo(*m_conduct_cell[lvl]); // Base level should never change, but ownership can.
+  }
+
+  // These levels have changed
+  for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
+    interpolator[lvl]->interpolate(*m_conduct_cell[lvl], *m_conduct_cell[lvl-1], interv);
+    if(lvl <= Min(a_old_finest_level, a_new_finest_level)){
+      m_cache[lvl]->copyTo(*m_conduct_cell[lvl]);
+    }
+  }
 }
 
 void ito_plasma_godunov::copy_particles_to_scratch(){
@@ -301,6 +348,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   }
   else if(m_algorithm == which_algorithm::semi_implicit){
     this->advance_particles_si(a_dt);
+    m_prevDt = a_dt;
   }
 
   // Compute current and relaxation time.
@@ -376,25 +424,22 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   // Remap and deposit
   m_ito->remap();
   m_ito->deposit_particles();
+  this->copy_particles_to_scratch(); // Need to store these before every regrid
 
   // Now compute the electric field
   this->solve_poisson();
 
   // We have field at k+1 but particles have been diffused. Put them back to X^k positions and compute
-  // velocities with E^(k+1)
+  // velocities with E^(k+1). Then move them. 
   this->swap_particle_positions();
   this->compute_ito_velocities();
-  
-  // Compute new ito velocities and advect the particles
   this->advect_particles_si(a_dt);
-
-  // Need to store these before every regrid
-  this->copy_particles_to_scratch();
 
   // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
   m_ito->remap();
-  this->intersect_particles(a_dt);   // This moves particles that bumped into the EB into data holders for parsing BCs. 
+
   m_ito->deposit_particles();
+  this->intersect_particles(a_dt);   // This moves particles that bumped into the EB into data holders for parsing BCs. 
 }
 
 void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
@@ -644,6 +689,17 @@ void ito_plasma_godunov::compute_conductivity(){
   m_amr->average_down(m_conduct_cell,     m_fluid_realm, m_phase);
   m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
 
+
+  // Now do the faces
+  this->compute_face_conductivity();
+}
+
+void ito_plasma_godunov::compute_face_conductivity(){
+  CH_TIME("ito_plasma_godunov::compute_face_conductivity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_face_conductivity" << endl;
+  }
+
   // This code does averaging from cell to face. 
   data_ops::average_cell_to_face_allcomps(m_conduct_face, m_conduct_cell, m_amr->get_domains());
 
@@ -658,7 +714,6 @@ void ito_plasma_godunov::compute_conductivity(){
   data_ops::set_value(m_conduct_eb, 0.0);
   data_ops::incr(m_conduct_eb, m_conduct_cell, 1.0);
 #endif
-
 }
 
 void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){

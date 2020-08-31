@@ -38,6 +38,8 @@ namespace physics {
       // Regrid routines
       void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+      void regrid_si(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+      void regrid_conductivity(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
 
     protected:
 
@@ -50,6 +52,7 @@ namespace physics {
       EBAMRCellData m_scratch1;
       EBAMRCellData m_scratch2;
       EBAMRCellData m_conduct_cell;
+      EBAMRCellData m_cache; // Used to store the cell-centered conductivity
       EBAMRFluxData m_conduct_face;
       EBAMRIVData   m_conduct_eb;
 
@@ -57,6 +60,7 @@ namespace physics {
       
       Real m_relax_factor; // Factor for relaxation time
       Real m_avg_cfl;      // Average CFL number
+      Real m_prevDt;
 
       which_algorithm m_algorithm;
 
@@ -71,6 +75,7 @@ namespace physics {
 
       // Specific routines for semi-implicit Euler
       void compute_conductivity();
+      void compute_face_conductivity();
       void swap_particle_positions();
       void setup_semi_implicit_poisson(const Real a_dt);
       void advect_particles_si(const Real a_dt);
