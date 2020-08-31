@@ -412,19 +412,30 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
     pout() << m_name + "::advance_particles_si" << endl;
   }
 
+  // First, advect the current particles out of the domain. Then remove the EB particles and revert the particles
   this->set_old_positions();
+  this->diffuse_particles_euler(a_dt); // Perform the diffusion jump
+  this->advect_particles_euler(a_dt);  // Advect the particles
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->remove_eb_particles(); // Remove EB particles
+  }
+  this->rewind_particles(); // Rewind the particles
+  m_ito->deposit_particles(); // We have now taken out some particles through the EB, hopefully this enforces BCs...
 
-  // Compute conductivity and setup poissonp
+  // Compute conductivity and setup poisson
   this->compute_conductivity();
   this->setup_semi_implicit_poisson(a_dt);
 
-  // Diffuse particles
+  // Diffuse the particles now
   this->diffuse_particles_euler(a_dt);
+
+  // Store particles. These are the ones we need when we redo the semi-implicit Poisson solve during regrids. 
+  this->copy_particles_to_scratch(); 
 
   // Remap and deposit
   m_ito->remap();
   m_ito->deposit_particles();
-  this->copy_particles_to_scratch(); // Need to store these before every regrid
+
 
   // Now compute the electric field
   this->solve_poisson();
@@ -466,7 +477,7 @@ void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
 	    ito_particle& p = particleList[lit];
 
 	    // Update positions. 
-	    p.oldPosition() = p.position();
+	    //	    p.oldPosition() = p.position();
 	    p.position() += p.velocity()*a_dt;
 	  }
 	}
@@ -533,7 +544,7 @@ void ito_plasma_godunov::diffuse_particles_euler(const Real a_dt){
 	    const RealVect ran = solver->random_gaussian();
 	    const RealVect hop = ran*sqrt(2.0*p.diffusion()*a_dt);
 
-	    p.oldPosition() = p.position();
+	    //	    p.oldPosition() = p.position();
 	    p.position() += hop;
 	  }
 	}
