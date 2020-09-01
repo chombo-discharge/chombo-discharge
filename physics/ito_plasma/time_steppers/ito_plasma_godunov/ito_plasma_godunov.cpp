@@ -828,6 +828,9 @@ void ito_plasma_godunov::compute_conductivity(){
   m_amr->average_down(m_conduct_cell,     m_fluid_realm, m_phase);
   m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
 
+  // See if this helps...
+  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
+
 
   // Now do the faces
   this->compute_face_conductivity();

@@ -1093,7 +1093,7 @@ void ito_plasma_stepper::compute_ito_diffusion(Vector<EBAMRCellData*>&       a_d
   m_amr->average_down(m_particle_scratchD, m_particle_realm, m_phase);
   m_amr->interp_ghost(m_particle_scratchD, m_particle_realm, m_phase);
 
-  m_amr->interpolate_to_centroids(rhoPhase, m_fluid_realm, m_phase);
+  m_amr->interpolate_to_centroids(m_particle_scratchD, m_fluid_realm, m_phase);
 
   const int num_ito_species = m_physics->get_num_ito_species();
   
