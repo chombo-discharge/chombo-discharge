@@ -433,6 +433,8 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 
   if(m_profile){
     pout() << endl
+      	   << "ito_plasma_godunov::advance breakdown:" << endl
+	   << "======================================" << endl
 	   << "particle time = " << particle_time << "%" << endl
 	   << "relax time    = " << relax_time << "%" << endl
 	   << "photon time   = " << photon_time << "%" << endl
@@ -470,47 +472,113 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
     pout() << m_name + "::advance_particles_si" << endl;
   }
 
+  Real time_old     = 0.0;
+  Real time_setup   = 0.0;
+  Real time_diffuse = 0.0;
+  Real time_copy    = 0.0;
+  Real time_remap   = 0.0;
+  Real time_deposit = 0.0;
+  Real time_solve   = 0.0;
+  Real time_swap    = 0.0;
+  Real time_velo    = 0.0;
+  Real time_advect  = 0.0;
+  Real time_isect   = 0.0;
+  Real time_total   = 0.0;
+
+  time_total = -MPI_Wtime();
+
   // First, advect the current particles out of the domain. Then remove the EB particles and revert the particles
+  time_old = -MPI_Wtime();
   this->set_old_positions();
-#if 0
-  this->diffuse_particles_euler(a_dt); // Perform the diffusion jump
-  this->advect_particles_euler(a_dt);  // Advect the particles
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->remove_eb_particles(); // Remove EB particles
-  }
-  this->rewind_particles(); // Rewind the particles
-  m_ito->deposit_particles(); // We have now taken out some particles through the EB, hopefully this enforces BCs...
-#endif
+  time_old += MPI_Wtime();
 
   // Compute conductivity and setup poisson
+  time_setup = -MPI_Wtime();
   this->compute_conductivity();
   this->setup_semi_implicit_poisson(a_dt);
+  time_setup += MPI_Wtime();
 
   // Diffuse the particles now
+  time_diffuse = -MPI_Wtime();
   this->diffuse_particles_euler(a_dt);
+  time_diffuse += MPI_Wtime();
 
-  // Store particles. These are the ones we need when we redo the semi-implicit Poisson solve during regrids. 
-  this->copy_particles_to_scratch(); 
+  // Store particles. These are the ones we need when we redo the semi-implicit Poisson solve during regrids.
+  time_copy = -MPI_Wtime();
+  this->copy_particles_to_scratch();
+  time_copy += MPI_Wtime();
 
   // Remap and deposit
+  time_remap = -MPI_Wtime();
   m_ito->remap();
+  time_remap += MPI_Wtime();
+  time_deposit -= MPI_Wtime();
   m_ito->deposit_particles();
+  time_deposit += MPI_Wtime();
 
 
   // Now compute the electric field
+  time_solve -= MPI_Wtime();
   this->solve_poisson();
-
+  time_solve += MPI_Wtime();
   // We have field at k+1 but particles have been diffused. Put them back to X^k positions and compute
-  // velocities with E^(k+1). Then move them. 
+  // velocities with E^(k+1). Then move them.
+  time_swap -= MPI_Wtime();
   this->swap_particle_positions();
+  time_swap += MPI_Wtime();
+  time_velo -= MPI_Wtime();
   this->compute_ito_velocities();
+  time_velo += MPI_Wtime();
+  time_advect -= MPI_Wtime();
   this->advect_particles_si(a_dt);
-
+  time_advect += MPI_Wtime();
+  
   // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
+  time_remap -= MPI_Wtime();
   m_ito->remap();
+  time_remap += MPI_Wtime();
 
+  time_deposit -= MPI_Wtime();
   m_ito->deposit_particles();
-  this->intersect_particles(a_dt);   // This moves particles that bumped into the EB into data holders for parsing BCs. 
+  time_deposit += MPI_Wtime();
+
+  time_isect -= MPI_Wtime();
+  this->intersect_particles(a_dt);   // This moves particles that bumped into the EB into data holders for parsing BCs.
+  time_isect += MPI_Wtime();
+
+  time_total += MPI_Wtime();
+
+  time_old     *= 100./time_total;
+  time_setup   *= 100./time_total;
+  time_diffuse *= 100./time_total;
+  time_copy    *= 100./time_total;
+  time_remap   *= 100./time_total;
+  time_deposit *= 100./time_total;
+  time_solve   *= 100./time_total;
+  time_swap    *= 100./time_total;
+  time_velo    *= 100./time_total;
+  time_advect  *= 100./time_total;
+  time_isect   *= 100./time_total;
+
+  if(m_profile){
+    pout() << endl
+	   << "ito_plasma_godunov::advance_particles_si breakdown:" << endl
+	   << "===================================================" << endl
+	   << "set old pos   = " << time_old << "%" << endl
+	   << "poisson setup = " << time_setup << "%" << endl
+	   << "diffuse part  = " << time_diffuse << "%" << endl
+	   << "copy part     = " << time_copy << "%" << endl
+	   << "remap time    = " << time_remap << "%" << endl
+	   << "deposit time  = " << time_deposit << "%" << endl
+	   << "poisson solve = " << time_solve << "%" << endl
+	   << "swap time     = " << time_swap << "%" << endl
+      	   << "velo time     = " << time_velo << "%" << endl
+	   << "advect time   = " << time_advect << "%" << endl
+      	   << "isect time    = " << time_isect << "%" << endl
+	   << "total time    = " << time_total << " (seconds)" << endl
+	   << endl;
+  }
+
 }
 
 void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
