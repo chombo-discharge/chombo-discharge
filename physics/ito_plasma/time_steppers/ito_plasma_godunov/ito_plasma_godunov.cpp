@@ -352,7 +352,8 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   Real super_time    = 0.0;
   Real reaction_time = 0.0;
   Real clear_time    = 0.0;
-  Real next_time     = 0.0;
+  Real velo_time     = 0.0;
+  Real diff_time     = 0.0;
 
   Real total_time    = -MPI_Wtime();
 
@@ -414,10 +415,13 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   clear_time += MPI_Wtime();
 
   // Prepare next step
-  next_time = -MPI_Wtime();
+  velo_time = -MPI_Wtime();
   this->compute_ito_velocities();
+  velo_time += MPI_Wtime();
+  diff_time -= MPI_Wtime();
   this->compute_ito_diffusion();
-  next_time += MPI_Wtime();
+  diff_time += MPI_Wtime();
+
 
   total_time += MPI_Wtime();
 
@@ -429,7 +433,8 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   super_time    *= 100./total_time;
   reaction_time *= 100./total_time;
   clear_time    *= 100./total_time;
-  next_time     *= 100./total_time;
+  velo_time     *= 100./total_time;
+  diff_time     *= 100./total_time;
 
   if(m_profile){
     pout() << endl
@@ -442,7 +447,8 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 	   << "super time    = " << super_time << "%" << endl
 	   << "reaction time = " << reaction_time << "%" << endl
 	   << "clear time    = " << clear_time << "%" << endl
-	   << "next time     = " << next_time << "%" << endl
+	   << "velo time     = " << velo_time << "%" << endl
+      	   << "diff time     = " << diff_time << "%" << endl
 	   << "total time    = " << total_time << " (seconds)" << endl
 	   << endl;
   }
