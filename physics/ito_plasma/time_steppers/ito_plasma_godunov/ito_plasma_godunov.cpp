@@ -509,11 +509,6 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   this->diffuse_particles_euler(a_dt);
   time_diffuse += MPI_Wtime();
 
-  // Store particles. These are the ones we need when we redo the semi-implicit Poisson solve during regrids.
-  time_copy = -MPI_Wtime();
-  this->copy_particles_to_scratch();
-  time_copy += MPI_Wtime();
-
   // Remap and deposit
   time_remap = -MPI_Wtime();
   m_ito->remap();
@@ -522,15 +517,19 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   m_ito->deposit_particles();
   time_deposit += MPI_Wtime();
 
+  // Store particles. These are the ones we need when we redo the semi-implicit Poisson solve during regrids.
+  time_copy = -MPI_Wtime();
+  this->copy_particles_to_scratch();
+  time_copy += MPI_Wtime();
 
   // Now compute the electric field
   time_solve -= MPI_Wtime();
   this->solve_poisson();
   time_solve += MPI_Wtime();
   // We have field at k+1 but particles have been diffused. Put them back to X^k positions and compute
-  // velocities with E^(k+1). Then move them.
+  // velocities with E^(k+1). Then perform the advective step. NOTE: After this you can't rewind the particles!!!
   time_swap -= MPI_Wtime();
-  this->swap_particle_positions();
+  this->swap_particle_positions(); // After this, oldPosition() holds X^\dagger, and position() holds X^k. 
   time_swap += MPI_Wtime();
   time_velo -= MPI_Wtime();
   this->compute_ito_velocities();
@@ -771,7 +770,7 @@ void ito_plasma_godunov::swap_particle_positions(){
 	    const RealVect tmp = p.position();
 	    
 	    p.position()    = p.oldPosition();
-	    p.oldPosition() = p.position();
+	    p.oldPosition() = tmp;
 	  }
 	}
       }
