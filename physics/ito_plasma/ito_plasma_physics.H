@@ -209,6 +209,13 @@ namespace physics {
       inline
       bool valid_state(const Vector<unsigned long long>& a_particles) const;
 
+      /*!
+	@brief Check charge conservation in a cell
+      */
+      inline
+      void check_charge_conservation(const Vector<unsigned long long>& a_oldNumParticles,
+				     const Vector<unsigned long long>& a_newNumParticles) const;
+
 
       /*!
 	@brief Reconcile the number of particles

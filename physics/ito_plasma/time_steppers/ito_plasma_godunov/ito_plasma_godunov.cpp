@@ -414,6 +414,7 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
 
   // First, advect the current particles out of the domain. Then remove the EB particles and revert the particles
   this->set_old_positions();
+#if 0
   this->diffuse_particles_euler(a_dt); // Perform the diffusion jump
   this->advect_particles_euler(a_dt);  // Advect the particles
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -421,6 +422,7 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   }
   this->rewind_particles(); // Rewind the particles
   m_ito->deposit_particles(); // We have now taken out some particles through the EB, hopefully this enforces BCs...
+#endif
 
   // Compute conductivity and setup poisson
   this->compute_conductivity();

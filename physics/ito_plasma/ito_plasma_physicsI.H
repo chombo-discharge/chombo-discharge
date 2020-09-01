@@ -115,6 +115,28 @@ bool ito_plasma_physics::valid_state(const Vector<unsigned long long>& a_particl
 }
 
 inline
+void ito_plasma_physics::check_charge_conservation(const Vector<unsigned long long>& a_oldNumParticles,
+						   const Vector<unsigned long long>& a_newNumParticles) const {
+  constexpr long long zero = 0;
+  
+  long long charge_before = 0;
+  long long charge_after = 0;
+
+  for (int i = 0; i < a_oldNumParticles.size(); i++){
+    const int q = m_ito_species[i]->get_charge();
+
+    charge_before += a_oldNumParticles[i]*q;
+    charge_after  += a_newNumParticles[i]*q;
+  }
+
+  const long long diff = charge_before - charge_after;
+
+  if(diff != zero){
+    MayDay::Abort("ito_plasma_physics::check_charge_conservation() - charge is not conserved!");
+  }
+}
+
+inline
 void ito_plasma_physics::reconcile_particles(Vector<List<ito_particle>* >&     a_particles,
 					     const Vector<unsigned long long>& a_newNumParticles,
 					     const Vector<unsigned long long>& a_oldNumParticles,
@@ -396,6 +418,9 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
 
   // Run photo-reactions and increment the number of particles as needed
   this->reconcile_photoionization(a_particles, a_photons);
+
+  // Check charge conservation
+  this->check_charge_conservation(oldParticleCount, newParticleCount);
 }
 
 inline

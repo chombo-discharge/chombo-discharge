@@ -676,6 +676,9 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
 
   m_amr->average_down(a_rho, m_fluid_realm);
   m_amr->interp_ghost(a_rho, m_fluid_realm);
+
+  // Interpolate to centroids
+  m_amr->interpolate_to_centroids(rhoPhase, m_fluid_realm, m_phase);
 }
 
 void ito_plasma_stepper::compute_J(EBAMRCellData& a_J, const Real a_dt){
