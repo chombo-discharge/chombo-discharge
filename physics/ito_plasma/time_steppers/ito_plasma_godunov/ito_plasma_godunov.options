@@ -12,3 +12,4 @@ ito_plasma_godunov.merge_interval = 5             # How often to make superparti
 ito_plasma_godunov.relax_factor   = 0.5           # Factor in front of relaxation time
 ito_plasma_godunov.regrid_super   = false         # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = semi_implicit # 'euler', 'predictor_corrector', or 'semi_implicit'
+ito_plasma_godunov.profile        = true          # Profile advance or not

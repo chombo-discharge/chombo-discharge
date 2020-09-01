@@ -24,6 +24,7 @@ ito_plasma_godunov::ito_plasma_godunov(){
 
   ParmParse pp("ito_plasma_godunov");
   pp.get("particle_realm", m_particle_realm);
+  pp.get("profile", m_profile);
 
   m_avg_cfl = 0.0;
 }
@@ -37,6 +38,7 @@ ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_phys
 
   ParmParse pp("ito_plasma_godunov");
   pp.get("particle_realm", m_particle_realm);
+  pp.get("profile", m_profile);
 
   m_avg_cfl = 0.0;
 }
@@ -342,7 +344,20 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     pout() << m_name + "::advance" << endl;
   }
 
+
+  Real particle_time = 0.0;
+  Real relax_time    = 0.0;
+  Real photon_time   = 0.0;
+  Real sort_time     = 0.0;
+  Real super_time    = 0.0;
+  Real reaction_time = 0.0;
+  Real clear_time    = 0.0;
+  Real next_time     = 0.0;
+
+  Real total_time    = -MPI_Wtime();
+
   // Particle algorithms
+  particle_time = -MPI_Wtime();
   if(m_algorithm == which_algorithm::euler){
     this->advance_particles_euler(a_dt);
   }
@@ -350,42 +365,85 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     this->advance_particles_si(a_dt);
     m_prevDt = a_dt;
   }
+  particle_time += MPI_Wtime();
 
   // Compute current and relaxation time.
+  relax_time = -MPI_Wtime();
   this->compute_J(m_J, a_dt);
-  m_dt_relax = this->compute_relaxation_time(); // This is for the restricting the next step. 
+  m_dt_relax = this->compute_relaxation_time(); // This is for the restricting the next step.
+  relax_time += MPI_Wtime();
 
   // Move photons
+  photon_time = -MPI_Wtime();
   this->advance_photons(a_dt);
+  photon_time += MPI_Wtime();
 
   // Sort the particles and photons per cell so we can call reaction algorithms
+  sort_time = -MPI_Wtime();
   m_ito->sort_particles_by_cell();
   this->sort_bulk_photons_by_cell();
   this->sort_source_photons_by_cell();
+  sort_time += MPI_Wtime();
 
   // Chemistry kernel.
+  reaction_time = -MPI_Wtime();
   this->advance_reaction_network(a_dt);
+  reaction_time += MPI_Wtime();
 
   // Make superparticles
+  super_time = -MPI_Wtime();
   if((m_step+1) % m_merge_interval == 0 && m_merge_interval > 0){
     m_ito->make_superparticles(m_ppc);
   }
+  super_time += MPI_Wtime();
 
-  // Sort particles per patch. 
+  // Sort particles per patch.
+  sort_time -= MPI_Wtime();
   m_ito->sort_particles_by_patch();
   this->sort_bulk_photons_by_patch();
   this->sort_source_photons_by_patch();
+  sort_time += MPI_Wtime();
 
   // Clear other data holders for now. BC comes later
+  clear_time = -MPI_Wtime();
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->clear(solver_it()->get_eb_particles());
     solver_it()->clear(solver_it()->get_domain_particles());
     solver_it()->remove_eb_particles();
   }
+  clear_time += MPI_Wtime();
 
   // Prepare next step
+  next_time = -MPI_Wtime();
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
+  next_time += MPI_Wtime();
+
+  total_time += MPI_Wtime();
+
+  // Convert to %
+  particle_time *= 100./total_time;
+  relax_time    *= 100./total_time;
+  photon_time   *= 100./total_time;
+  sort_time     *= 100./total_time;
+  super_time    *= 100./total_time;
+  reaction_time *= 100./total_time;
+  clear_time    *= 100./total_time;
+  next_time     *= 100./total_time;
+
+  if(m_profile){
+    pout() << endl
+	   << "particle time = " << particle_time << "%" << endl
+	   << "relax time    = " << relax_time << "%" << endl
+	   << "photon time   = " << photon_time << "%" << endl
+	   << "sort time     = " << sort_time << "%" << endl
+	   << "super time    = " << super_time << "%" << endl
+	   << "reaction time = " << reaction_time << "%" << endl
+	   << "clear time    = " << clear_time << "%" << endl
+	   << "next time     = " << next_time << "%" << endl
+	   << "total time    = " << total_time << " (seconds)" << endl
+	   << endl;
+  }
   
   return a_dt;
 }
