@@ -403,12 +403,11 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   this->sort_source_photons_by_patch();
   sort_time += MPI_Wtime();
 
-  // Clear other data holders for now. BC comes later
+  // Clear other data holders for now. BC comes later...
   clear_time = -MPI_Wtime();
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->clear(solver_it()->get_eb_particles());
     solver_it()->clear(solver_it()->get_domain_particles());
-    solver_it()->remove_eb_particles();
   }
   clear_time += MPI_Wtime();
 
@@ -419,6 +418,8 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   diff_time -= MPI_Wtime();
   this->compute_ito_diffusion();
   diff_time += MPI_Wtime();
+
+  m_ito->deposit_particles();
 
 
   total_time += MPI_Wtime();
@@ -527,7 +528,10 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   // We have field at k+1 but particles have been diffused. Put them back to X^k positions and compute
   // velocities with E^(k+1). Then perform the advective step. NOTE: After this you can't rewind the particles!!!
   time_swap -= MPI_Wtime();
-  this->swap_particle_positions(); // After this, oldPosition() holds X^\dagger, and position() holds X^k. 
+  this->swap_particle_positions(); // After this, oldPosition() holds X^\dagger, and position() holds X^k.
+  time_remap -= MPI_Wtime();
+  m_ito->remap();
+  time_remap += MPI_Wtime();
   time_swap += MPI_Wtime();
   time_velo -= MPI_Wtime();
   this->compute_ito_velocities();
@@ -541,13 +545,17 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   m_ito->remap();
   time_remap += MPI_Wtime();
 
+  // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
+  time_isect -= MPI_Wtime();
+  this->intersect_particles(a_dt);
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->remove_eb_particles();
+  }
+  time_isect += MPI_Wtime();
+
   time_deposit -= MPI_Wtime();
   m_ito->deposit_particles();
   time_deposit += MPI_Wtime();
-
-  time_isect -= MPI_Wtime();
-  this->intersect_particles(a_dt);   // This moves particles that bumped into the EB into data holders for parsing BCs.
-  time_isect += MPI_Wtime();
 
   time_total += MPI_Wtime();
 
@@ -639,9 +647,10 @@ void ito_plasma_godunov::advect_particles_si(const Real a_dt){
 	  for (lit.rewind(); lit; ++lit){
 	    ito_particle& p = particleList[lit];
 
-	    // Add diffusion hop again. The position after the diffusion hop is oldPosition(). Go there,
-	    // then advect. 
-	    p.position() = p.oldPosition() + p.velocity()*a_dt;
+	    // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
+	    const RealVect Xk = p.position();
+	    p.position()      = p.oldPosition() + p.velocity()*a_dt;
+	    p.oldPosition()   = Xk;
 	  }
 	}
       }
@@ -797,7 +806,7 @@ void ito_plasma_godunov::compute_conductivity(){
   m_amr->allocate_ptr(Egas);
   m_amr->alias(Egas, m_phase, m_poisson->get_E());
 
-#if 1 // test code
+#if 0 // test code
   data_ops::copy(m_fluid_scratchD, Egas);
   m_amr->interpolate_to_centroids(m_fluid_scratchD, m_fluid_realm, m_phase);
   data_ops::vector_length(m_scratch1, m_fluid_scratchD);
@@ -837,7 +846,7 @@ void ito_plasma_godunov::compute_conductivity(){
   m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
 
   // See if this helps...
-  //  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
+  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
 
 
   // Now do the faces
