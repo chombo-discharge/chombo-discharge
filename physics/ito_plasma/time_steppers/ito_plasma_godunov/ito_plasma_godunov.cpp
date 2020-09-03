@@ -12,8 +12,6 @@
 
 #include <ParmParse.H>
 
-#define DEBUG 1
-
 using namespace physics::ito_plasma;
 
 ito_plasma_godunov::ito_plasma_godunov(){
@@ -610,7 +608,6 @@ void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
 	    ito_particle& p = particleList[lit];
 
 	    // Update positions. 
-	    //	    p.oldPosition() = p.position();
 	    p.position() += p.velocity()*a_dt;
 	  }
 	}
@@ -677,7 +674,6 @@ void ito_plasma_godunov::diffuse_particles_euler(const Real a_dt){
 	    const RealVect ran = solver->random_gaussian();
 	    const RealVect hop = ran*sqrt(2.0*p.diffusion()*a_dt);
 
-	    //	    p.oldPosition() = p.position();
 	    p.position() += hop;
 	  }
 	}
@@ -801,8 +797,15 @@ void ito_plasma_godunov::compute_conductivity(){
   m_amr->allocate_ptr(Egas);
   m_amr->alias(Egas, m_phase, m_poisson->get_E());
 
+#if 1 // test code
+  data_ops::copy(m_fluid_scratchD, Egas);
+  m_amr->interpolate_to_centroids(m_fluid_scratchD, m_fluid_realm, m_phase);
+  data_ops::vector_length(m_scratch1, m_fluid_scratchD);
+#else
+
   // Compute |E| and reset conductivity
   data_ops::vector_length(m_scratch1, Egas);
+#endif
   data_ops::set_value(m_conduct_cell, 0.0);
   
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -834,7 +837,7 @@ void ito_plasma_godunov::compute_conductivity(){
   m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
 
   // See if this helps...
-  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
+  //  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
 
 
   // Now do the faces
