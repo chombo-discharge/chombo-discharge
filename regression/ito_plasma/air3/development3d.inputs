@@ -195,8 +195,8 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1            # Verbosity
-ito_plasma_godunov.min_dt         = 5.E-11        # Minimum dt
-ito_plasma_godunov.max_dt         = 5.E-11        # Maximum dt
+ito_plasma_godunov.min_dt         = 1.E-11        # Minimum dt
+ito_plasma_godunov.max_dt         = 1.E-11        # Maximum dt
 ito_plasma_godunov.particle_realm = primal        # Particle realm. Default is primal
 ito_plasma_godunov.load_balance   = false         # Load balance or not
 ito_plasma_godunov.max_cells_hop  = 1.0           # Maximum cells to move in one time step

@@ -16,6 +16,8 @@
 
 #include <PolyGeom.H>
 
+#define ITO_PLASMA_PHYSICS_DEBUG 0
+
 using namespace physics::ito_plasma;
 
 inline
@@ -137,6 +139,23 @@ void ito_plasma_physics::check_charge_conservation(const Vector<unsigned long lo
 }
 
 inline
+long long ito_plasma_physics::compute_charge(const Vector<List<ito_particle>* >& a_particles) const {
+
+  long long ret = 0;
+  for (int i = 0; i < a_particles.size(); i++){
+    const long long q = (long long) m_ito_species[i]->get_charge();
+    
+    for (ListIterator<ito_particle> lit(*a_particles[i]); lit.ok(); ++lit){
+      const long long w = (long long) round(lit().mass());
+
+      ret += w*q;
+    }
+  }
+
+  return ret;
+}
+
+inline
 void ito_plasma_physics::reconcile_particles(Vector<List<ito_particle>* >&     a_particles,
 					     const Vector<unsigned long long>& a_newNumParticles,
 					     const Vector<unsigned long long>& a_oldNumParticles,
@@ -166,15 +185,18 @@ void ito_plasma_physics::reconcile_particles(List<ito_particle>&      a_particle
 					     const Real               a_dx,
 					     const Real               a_kappa) const {
 
-  const long long diff = a_newNumParticles - a_oldNumParticles;
+  const long long newNum = (long long) a_newNumParticles;
+  const long long oldNum = (long long) a_oldNumParticles;
+  
+  const long long diff = newNum - oldNum;
 
   if(diff > 0){ // Need to add 'diff' mass.
     const unsigned long long Diff = (unsigned long long) (diff);
     this->add_particles(a_particles, Diff, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
   }
   else if(diff < 0){ // Need to remove 'diff' mass.
-    const unsigned long long Diff = (unsigned long long) (diff);
-    this->remove_particles(a_particles, -Diff, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const unsigned long long Diff = (unsigned long long) (-diff);
+    this->remove_particles(a_particles, Diff);
   }
 }
 
@@ -193,44 +215,186 @@ void ito_plasma_physics::compute_particle_weights(unsigned long long&      a_wei
     a_weight    = a_numNewParticles/m_ppc;
     a_remainder = a_numNewParticles%m_ppc;
     a_num       = (a_remainder == 0) ? m_ppc : m_ppc - 1;
+
   }
 }
 
 inline
-void ito_plasma_physics::add_particles(List<ito_particle>& a_particles,
+void ito_plasma_physics::add_particles(List<ito_particle>&      a_particles,
 				       const unsigned long long a_numNewParticles,
-				       const RealVect      a_pos,
-				       const RealVect      a_lo,
-				       const RealVect      a_hi,
-				       const RealVect      a_bndryCentroid,
-				       const RealVect      a_bndryNormal,
-				       const Real          a_dx,
-				       const Real          a_kappa) const {
+				       const RealVect           a_pos,
+				       const RealVect           a_lo,
+				       const RealVect           a_hi,
+				       const RealVect           a_bndryCentroid,
+				       const RealVect           a_bndryNormal,
+				       const Real               a_dx,
+				       const Real               a_kappa) const {
   unsigned long long weight, num, remainder;
+
+  constexpr unsigned long long zero = 0;
+  
   this->compute_particle_weights(weight, num, remainder, a_numNewParticles);
 
   for (int i = 0; i < num; i++){
     const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-    a_particles.add(ito_particle(weight, p));
+    const Real w     = (Real) weight;
+    a_particles.add(ito_particle(w, p));
   }
 
-  if(remainder > 0){ // Rest of weight in case we got superparticles
+  if(remainder > zero){ // Rest of weight in case we got superparticles
     const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-    a_particles.add(ito_particle(weight + remainder, p));
+    const Real w     = (Real) (weight + remainder);
+    a_particles.add(ito_particle(w, p));
   }
 }
 
 inline
-void ito_plasma_physics::remove_particles(List<ito_particle>& a_particles,
-					  const long long     a_numParticlesToRemove,
-					  const RealVect      a_pos,
-					  const RealVect      a_lo,
-					  const RealVect      a_hi,
-					  const RealVect      a_bndryCentroid,
-					  const RealVect      a_normal,
-					  const Real          a_dx,
-					  const Real          a_kappa) const {
-  //  MayDay::Warning("ito_plasma_physics::remove_particles - not implemented");
+void ito_plasma_physics::remove_particles(List<ito_particle>&      a_particles,
+					  const unsigned long long a_numParticlesToRemove) const {
+
+#if ITO_PLASMA_PHYSICS_DEBUG // Debug
+  this->sanity_check(a_particles);
+
+  const unsigned long long weightBefore = this->get_total_weight(a_particles);
+#endif
+
+  constexpr unsigned long long zero = 0;
+  
+  ListIterator<ito_particle> lit(a_particles);
+  Vector<unsigned long long> particleWeights(a_particles.length());
+  
+  unsigned long long minWeight  = std::numeric_limits<unsigned long long>::max();
+  unsigned long long numRemoved = zero;
+
+  // Compute weights and trim all particle weights down to the minimum weight. We shouldn't have weight = 0 when we
+  // get here...
+  this->compute_weights(lit, particleWeights, minWeight);                             // Computes weights
+  this->trim_weights(numRemoved, particleWeights, a_numParticlesToRemove, minWeight); // Remove weight down to minWeight
+  this->remove_weights(particleWeights, a_numParticlesToRemove - numRemoved);         // Uniformly removes rest of mass
+  this->reconcile_weights(a_particles, particleWeights);                              // Reconcile particle weights
+
+#if ITO_PLASMA_PHYSICS_DEBUG // Debug
+  this->sanity_check(a_particles);
+  const unsigned long long weightAfter = this->get_total_weight(a_particles);
+
+  if(weightBefore - weightAfter != a_numParticlesToRemove){
+    std::cout << "weight before = " << weightBefore << std::endl;
+    std::cout << "weight after  = " << weightAfter << std::endl;
+    std::cout << "Should remove = " << a_numParticlesToRemove << std::endl;
+    std::cout << "numRemoved    = " << numRemoved << std::endl;
+    
+    MayDay::Abort("ito_plasma_physics::remove_particles - incorrect mass removed");
+  }
+#endif
+}
+
+inline
+void ito_plasma_physics::sanity_check(const List<ito_particle>& a_particles) const{
+
+  ListIterator<ito_particle> lit(a_particles);
+  
+  for (lit.begin(); lit.ok(); ++lit){
+    const long long w = (long long) round(lit().mass());
+
+    if(w < 1) MayDay::Abort("ito_plasma_physics::sanity_check - can't have w < 1!!!!");
+  }
+}
+
+inline
+unsigned long long ito_plasma_physics::get_total_weight(const List<ito_particle>& a_particles) const {
+
+  unsigned long long ret = 0;
+  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
+    const unsigned long long w = (unsigned long long) round(lit().mass());
+
+    ret += w;
+  }
+
+  return ret;
+}
+
+inline
+void ito_plasma_physics::compute_weights(ListIterator<ito_particle>& a_lit,
+					 Vector<unsigned long long>& a_particleWeights,
+					 unsigned long long&         a_minWeight) const {
+  int i = 0;
+  for (a_lit.begin(); a_lit.ok(); ++a_lit, ++i){
+    a_particleWeights[i] = (unsigned long long) round(a_lit().mass());
+    a_minWeight = std::min(a_particleWeights[i], a_minWeight);
+  }
+}
+
+inline
+void ito_plasma_physics::trim_weights(unsigned long long&         a_numRemoved,
+				      Vector<unsigned long long>& a_particleWeights,
+				      const unsigned long long    a_numParticlesToRemove,
+				      const unsigned long long    a_minWeight) const{
+  constexpr unsigned long long zero = 0;
+  
+  for (int i = 0; i < a_particleWeights.size(); i++){
+    const unsigned long long diff1 = a_particleWeights[i]   - a_minWeight;  // Should always be > 0
+    const unsigned long long diff2 = a_numParticlesToRemove - a_numRemoved; // Should always be > 0
+    
+    const unsigned long long r = std::max(zero, std::min(diff1, diff2));
+
+    a_particleWeights[i] -= r;
+    a_numRemoved         += r;
+  }
+}
+
+inline
+void ito_plasma_physics::remove_weights(Vector<unsigned long long>& a_particleWeights,
+					const unsigned long long a_numParticlesToRemove) const {
+
+  constexpr unsigned long long zero = 0;
+
+  if(a_numParticlesToRemove > zero){
+    const unsigned long long numCompParticles = (unsigned long long) a_particleWeights.size();
+    const unsigned long long weight           = a_numParticlesToRemove/numCompParticles;
+    const unsigned long long remainder        = a_numParticlesToRemove%numCompParticles; 
+
+    // Remove weight from each particle. 
+    if(weight > zero){
+      for (int i = 0; i < a_particleWeights.size(); i++){
+	a_particleWeights[i] -= weight;
+      }
+    }
+
+    // Remove the remainder by cycling through the particles. 
+    if(remainder > zero){
+      unsigned long long W = zero;
+      for (int i = 0; i < a_particleWeights.size(); i++){
+	const unsigned long long w = std::min(a_particleWeights[i], remainder-W);
+	
+	a_particleWeights[i] -= w;
+	W += w;
+	
+	if(W == remainder) { // OK, we have removed the remainder. Break out. 
+	  break;
+	}
+      }
+    }
+  }
+}
+
+inline
+void ito_plasma_physics::reconcile_weights(List<ito_particle>&               a_particles,
+					   const Vector<unsigned long long>& a_particleWeights) const {
+
+  constexpr unsigned long long zero = 0;  
+
+  List<ito_particle> copyParticles(a_particles);
+  a_particles.clear();
+
+  int i = 0;
+  for (ListIterator<ito_particle> lit(copyParticles); lit.ok(); ++lit, ++i){
+    ito_particle& p = lit();
+
+    if(a_particleWeights[i] > zero){
+      p.mass() = (Real) a_particleWeights[i];
+      a_particles.add(p);
+    }
+  }
 }
 
 void ito_plasma_physics::reconcile_photons(Vector<List<photon>* >&           a_newPhotons,
@@ -398,6 +562,10 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   Vector<unsigned long long> oldParticleCount = this->get_particle_count(a_particles);
   Vector<unsigned long long> newParticleCount = oldParticleCount;
 
+#if ITO_PLASMA_PHYSICS_DEBUG
+  const long long Qbefore = this->compute_charge(a_particles);
+#endif
+
   // Number advance
   this->advance_particles(newParticleCount, newPhotonCount, a_dt);
 
@@ -419,8 +587,18 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   // Run photo-reactions and increment the number of particles as needed
   this->reconcile_photoionization(a_particles, a_photons);
 
-  // Check charge conservation
+#if ITO_PLASMA_PHYSICS_DEBUG // Debug code
   this->check_charge_conservation(oldParticleCount, newParticleCount);
+
+  const long long Qafter = this->compute_charge(a_particles);
+
+  constexpr long long zero = 0;
+  if(Qbefore - Qafter != zero){
+    std::cout << "Qbefore = " << Qbefore << std::endl;
+    std::cout << "Qafter  = " << Qafter << std::endl;
+    MayDay::Abort("ito_plasma_physics::advance_reaction_network(...) - charge is not conserved!!!");
+  }
+#endif
 }
 
 inline

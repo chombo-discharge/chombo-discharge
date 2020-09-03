@@ -216,6 +216,12 @@ namespace physics {
       void check_charge_conservation(const Vector<unsigned long long>& a_oldNumParticles,
 				     const Vector<unsigned long long>& a_newNumParticles) const;
 
+      /*!
+	@brief Compute total charge in a cell
+      */
+      inline
+      long long compute_charge(const Vector<List<ito_particle>* >& a_particles) const;
+
 
       /*!
 	@brief Reconcile the number of particles
@@ -250,29 +256,62 @@ namespace physics {
 	@brief Add particles
       */
       inline
-      void add_particles(List<ito_particle>& a_particles,
-			 const unsigned long long     a_numParticlesToAdd,
-			 const RealVect      a_pos,
-			 const RealVect      a_lo,
-			 const RealVect      a_hi,
-			 const RealVect      a_bndryCentroid,
-			 const RealVect      a_bndryNormal,
-			 const Real          a_dx,
-			 const Real          a_kappa) const;
+      void add_particles(List<ito_particle>&      a_particles,
+			 const unsigned long long a_numParticlesToAdd,
+			 const RealVect           a_pos,
+			 const RealVect           a_lo,
+			 const RealVect           a_hi,
+			 const RealVect           a_bndryCentroid,
+			 const RealVect           a_bndryNormal,
+			 const Real               a_dx,
+			 const Real               a_kappa) const;
 
       /*!
 	@brief Remove particles
       */
       inline
-      void remove_particles(List<ito_particle>& a_particles,
-			    const long long     a_numParticlesToRemove,
-			    const RealVect      a_pos,
-			    const RealVect      a_lo,
-			    const RealVect      a_hi,
-			    const RealVect      a_bndryCentroid,
-			    const RealVect      a_normal,
-			    const Real          a_dx,
-			    const Real          a_kappa) const;
+      void remove_particles(List<ito_particle>&  a_particles, const unsigned long long a_numParticlesToRemove) const;
+
+      /*!
+	@brief Check that all weights are > 0
+      */
+      inline
+      void sanity_check(const List<ito_particle>& a_lit) const;
+
+      /*!
+	@brief Check that all weights are > 0
+      */
+      inline
+      unsigned long long get_total_weight(const List<ito_particle>& a_lit) const;
+      
+      /*!
+	@brief Compute particle weights
+      */
+      inline
+      void compute_weights(ListIterator<ito_particle>& a_lit,
+			   Vector<unsigned long long>& a_particleWeights,
+			   unsigned long long&         a_minWeight) const;
+
+      /*!
+	@brief Trim particle weights down to a_minWeight
+      */
+      inline
+      void trim_weights(unsigned long long&         a_numRemoved,
+			Vector<unsigned long long>& a_particleWeights,
+			const unsigned long long    a_numParticlesToRemove,
+			const unsigned long long    a_minWeight) const;
+
+      /*!
+	@brief Remove particle weight down to a_numParticlesToRemove
+      */
+      inline
+      void remove_weights(Vector<unsigned long long>& a_particleWeights, const unsigned long long a_numParticlesToRemove) const;
+
+      /*!
+	@brief Remove particle weight down to a_numParticlesToRemove
+      */
+      inline
+      void reconcile_weights(List<ito_particle>& a_particles, const Vector<unsigned long long>& a_particleWeights) const;
 
       /*!
 	@brief Reconcile the number of particles
