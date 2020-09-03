@@ -33,68 +33,70 @@ bvh_node<T>::bvh_node(std::shared_ptr<bvh_node<T> >& a_parent){
 }
 
 template <class T>
-bool bvh_node<T>::is_leaf() const{
+inline bool bvh_node<T>::is_leaf() const{
   return m_leaf;
 }
 
 template <class T>
-void bvh_node<T>::set_leaf(const bool a_leaf){
+inline void bvh_node<T>::set_leaf(const bool a_leaf){
   m_leaf = a_leaf;
 }
 
 template <class T>
-void bvh_node<T>::set_parent(std::shared_ptr<bvh_node<T> >& a_parent){
+inline void bvh_node<T>::set_parent(std::shared_ptr<bvh_node<T> >& a_parent){
   m_parent = a_parent;
 }
 
 template <class T>
-void bvh_node<T>::set_left(std::shared_ptr<bvh_node<T> >& a_left){
+inline void bvh_node<T>::set_left(std::shared_ptr<bvh_node<T> >& a_left){
   m_left = a_left;
 }
 
 template <class T>
-void bvh_node<T>::set_right(std::shared_ptr<bvh_node<T> >& a_right){
+inline void bvh_node<T>::set_right(std::shared_ptr<bvh_node<T> >& a_right){
   m_right = a_right;
 }
 
 template <class T>
-void bvh_node<T>::set_data(const std::vector<T>& a_data, const Real a_mass){
+inline void bvh_node<T>::set_data(const std::vector<T>& a_data, const Real a_mass){
   m_data = a_data;
   m_mass = a_mass;
 }
 
 template <class T>
-void bvh_node<T>::set_mass(const Real a_mass){
+inline void bvh_node<T>::set_mass(const Real a_mass){
   m_mass = a_mass;
 }
 
 template <class T>
-std::shared_ptr<bvh_node<T> >& bvh_node<T>::get_left(){
+inline std::shared_ptr<bvh_node<T> >& bvh_node<T>::get_left(){
   return m_left;
 }
 
 template <class T>
-std::shared_ptr<bvh_node<T> >& bvh_node<T>::get_right(){
+inline std::shared_ptr<bvh_node<T> >& bvh_node<T>::get_right(){
   return m_right;
 }
 
+
 template <class T>
-std::shared_ptr<bvh_node<T> >& bvh_node<T>::get_parent(){
+inline std::shared_ptr<bvh_node<T> >& bvh_node<T>::get_parent(){
   return m_parent;
 }
 
+
 template <class T>
-std::vector<T>& bvh_node<T>::get_data(){
+inline std::vector<T>& bvh_node<T>::get_data(){
   return m_data;
 }
 
 template <class T>
-const std::vector<T>& bvh_node<T>::get_data() const{
+inline const std::vector<T>& bvh_node<T>::get_data() const{
   return m_data;
 }
 
 template <class T>
-bool bvh_node<T>::can_split() const {
+inline bool bvh_node<T>::can_split() const {
   bool ret = false;
   if(m_data.size() > 0){
     if(m_data.size() > 1 || m_data[0].can_split()){
@@ -106,12 +108,12 @@ bool bvh_node<T>::can_split() const {
 }
 
 template <class T>
-Real bvh_node<T>::mass() const {
+inline Real bvh_node<T>::mass() const {
   return m_mass;
 }
 
 template <class T>
-void bvh_node<T>::split(const int a_dir){
+inline void bvh_node<T>::split(const int a_dir){
 
   // 0. If we made it in here, we KNOW that we can split.
 #if BVH_DEBUG // Debug
@@ -272,7 +274,7 @@ bvh_tree<T>::~bvh_tree(){
 }
 
 template <class T>
-void bvh_tree<T>::define(std::vector<T>& a_data, const Real a_mass){
+inline void bvh_tree<T>::define(std::vector<T>& a_data, const Real a_mass){
 
   // Make the root node
   if(!m_root) m_root = std::make_shared<bvh_node<T> >();
@@ -285,12 +287,12 @@ void bvh_tree<T>::define(std::vector<T>& a_data, const Real a_mass){
 }
 
 template <class T>
-std::vector<std::shared_ptr<bvh_node<T> > >& bvh_tree<T>::get_leaves(){
+inline std::vector<std::shared_ptr<bvh_node<T> > >& bvh_tree<T>::get_leaves(){
   return m_leaves;
 }
 
 template <class T>
-void bvh_tree<T>::build_tree(const int a_numLeaves){
+inline void bvh_tree<T>::build_tree(const int a_numLeaves){
 
   bool keepSplitting = a_numLeaves > 1;
 
