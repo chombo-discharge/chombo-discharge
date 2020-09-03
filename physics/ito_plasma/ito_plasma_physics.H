@@ -364,6 +364,12 @@ namespace physics {
       unsigned long long poisson_reaction(const Real a_propensity, const Real a_dt) const;
 
       /*!
+	@brief Compute particles to draw per rank
+      */
+      inline
+      int compute_particles_per_rank(const int a_numParticles) const;
+
+      /*!
 	@brief Draw Gaussian distributed particles
       */
       inline
@@ -372,7 +378,29 @@ namespace physics {
 				   const int           a_numParticles,
 				   const RealVect      a_blobCenter,
 				   const Real          a_blobRadius,
-				   const Real          a_weights);
+				   const Real          a_weight);
+
+      /*!
+	@brief Draw sphere particles
+      */
+      inline
+      void draw_sphere_particles(List<ito_particle>& a_particles1,
+				 List<ito_particle>& a_particles2,
+				 const int           a_numParticles,
+				 const RealVect      a_blobCenter,
+				 const Real          a_blobRadius,
+				 const Real          a_weight);
+
+      /*!
+	@brief Draw particles in a box
+      */
+      inline
+      void draw_box_particles(List<ito_particle>& a_particles1,
+			      List<ito_particle>& a_particles2,
+			      const int           a_numParticles,
+			      const RealVect      a_boxLo,
+			      const RealVect      a_boxHi,
+			      const Real          a_weight);
 
       /*!
 	@brief Get the particle count

@@ -89,8 +89,13 @@ ito_plasma_air3::ito_plasma_air3(){
   List<ito_particle>& electrons = m_ito_species[m_electron_idx]->get_initial_particles();
   List<ito_particle>& positives = m_ito_species[m_positive_idx]->get_initial_particles();
   List<ito_particle>& negatives = m_ito_species[m_negative_idx]->get_initial_particles();
-  this->draw_gaussian_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight);
+
+  electrons.clear();
+  positives.clear();
   negatives.clear();
+  
+  this->draw_sphere_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight);
+
 
   // Particle-particle reactions
   m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));

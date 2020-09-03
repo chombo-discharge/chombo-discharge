@@ -487,6 +487,20 @@ unsigned long long ito_plasma_physics::poisson_reaction(const Real a_propensity,
 }
 
 inline
+int ito_plasma_physics::compute_particles_per_rank(const int a_numParticles) const {
+  const int quotient  = a_numParticles/numProc();
+  const int remainder = a_numParticles % numProc();
+  
+  Vector<int> particlesPerRank(numProc(), quotient);
+  
+  for (int i = 0; i < remainder; i++){ 
+    particlesPerRank[i] += 1;
+  }
+
+  return particlesPerRank[procID()];
+}
+
+inline
 void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_particles1,
 						 List<ito_particle>& a_particles2,
 						 const int           a_numParticles,
@@ -497,24 +511,63 @@ void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_particles
   // Set up the Gaussian RNG
   std::normal_distribution<Real> gauss(0.0, a_blobRadius);
 
-
-  // Each MPI process draws the desired number of particles from a distribution
-  const int quotient  = a_numParticles/numProc();
-  const int remainder = a_numParticles % numProc();
-  
-  Vector<int> particlesPerRank(numProc(), quotient);
-  
-  for (int i = 0; i < remainder; i++){ 
-    particlesPerRank[i] += 1;
-  }
-
-  a_particles1.clear();
-  a_particles2.clear();
+  const int myNumParticles = this->compute_particles_per_rank(a_numParticles);
 
   // Now make the particles
-  for (int i = 0; i < particlesPerRank[procID()]; i++){
+  for (int i = 0; i < myNumParticles; i++){
     const RealVect pos = a_blobCenter + gauss(m_rng)*random_direction();
     
+    a_particles1.add(ito_particle(a_weight, pos));
+    a_particles2.add(ito_particle(a_weight, pos));
+  }
+}
+
+inline
+void ito_plasma_physics::draw_sphere_particles(List<ito_particle>& a_particles1,
+					       List<ito_particle>& a_particles2,
+					       const int           a_numParticles,
+					       const RealVect      a_blobCenter,
+					       const Real          a_blobRadius,
+					       const Real          a_weight){
+
+  const int myNumParticles = this->compute_particles_per_rank(a_numParticles);
+
+  // Now make the particles
+  for (int i = 0; i < myNumParticles; i++){
+    bool accept  = false;
+    RealVect pos = RealVect::Zero;
+    
+    while(!accept){
+      for (int d = 0; d < SpaceDim; d++){
+	pos[d] = m_udist11(m_rng);
+      }
+      
+      if(pos.vectorLength() <= 1.0){
+	accept = true;
+	pos = pos*a_blobRadius + a_blobCenter;
+      }
+    }
+    
+    // Add the particle
+    a_particles1.add(ito_particle(a_weight, pos));
+    a_particles2.add(ito_particle(a_weight, pos));
+  }
+}
+
+inline
+void ito_plasma_physics::draw_box_particles(List<ito_particle>& a_particles1,
+					    List<ito_particle>& a_particles2,
+					    const int           a_numParticles,
+					    const RealVect      a_boxLo,
+					    const RealVect      a_boxHi,
+					    const Real          a_weight) {
+
+  const int myNumParticles = this->compute_particles_per_rank(a_numParticles);
+
+  const RealVect diff = a_boxHi - a_boxLo;
+  for (int i = 0; i < myNumParticles; i++){
+    const RealVect pos = a_boxLo + m_udist01(m_rng)*diff;
+
     a_particles1.add(ito_particle(a_weight, pos));
     a_particles2.add(ito_particle(a_weight, pos));
   }
