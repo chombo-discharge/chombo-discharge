@@ -1667,6 +1667,22 @@ Vector<Real> ito_solver::compute_drift_dt(const Real a_maxCellsToMove) const {
 
 }
 
+Real ito_solver::compute_advective_dt() const {
+  CH_TIME("ito_solver::compute_advective_dt");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_advective_dt()" << endl;
+  }
+  
+  Real minDt = 1.E99;
+  const Vector<Real> levelDts = this->compute_drift_dt();
+
+  for (int lvl = 0; lvl < levelDts.size(); lvl++){
+    minDt = Min(levelDts[lvl], minDt);
+  }
+
+  return minDt;
+}
+
 Vector<Real> ito_solver::compute_drift_dt() const {
   CH_TIME("ito_solver::compute_drift_dt(amr)");
   if(m_verbosity > 5){
@@ -1675,7 +1691,7 @@ Vector<Real> ito_solver::compute_drift_dt() const {
 
   const int finest_level = m_amr->get_finest_level();
 
-  Vector<Real> dt(1 + finest_level, 1.2345E6);
+  Vector<Real> dt(1 + finest_level, 1.2345E67);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     dt[lvl] = this->compute_drift_dt(lvl);
@@ -1722,15 +1738,18 @@ Real ito_solver::compute_drift_dt(const int a_lvl, const DataIndex& a_dit, const
   ListIterator<ito_particle> lit(particleList);
 
   Real dt = 1.E99;
+
+  if(m_mobile){
   
-  for (lit.rewind(); lit; ++lit){
-    const ito_particle& p = particleList[lit];
-    const RealVect& v = p.velocity();
+    for (lit.rewind(); lit; ++lit){
+      const ito_particle& p = particleList[lit];
+      const RealVect& v = p.velocity();
 
-    const int maxDir = v.maxDir(true);
-    const Real thisDt = a_dx[maxDir]/Abs(v[maxDir]);
+      const int maxDir = v.maxDir(true);
+      const Real thisDt = a_dx[maxDir]/Abs(v[maxDir]);
 
-    dt = Min(dt, thisDt);
+      dt = Min(dt, thisDt);
+    }
   }
 
   return dt;
@@ -1766,6 +1785,22 @@ Vector<Real> ito_solver::compute_diffusion_dt(const Real a_maxCellsToHop) const{
   }
 
   return dt;
+}
+
+Real ito_solver::compute_diffusive_dt() const {
+  CH_TIME("ito_solver::compute_diffusive_dt");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_diffusive_dt" << endl;
+  }
+
+  Real minDt = 1.E99;
+  const Vector<Real> levelDts = this->compute_diffusion_dt();
+
+  for (int lvl = 0; lvl < levelDts.size(); lvl++){
+    minDt = Min(levelDts[lvl], minDt);
+  }
+
+  return minDt;
 }
 
 Vector<Real> ito_solver::compute_diffusion_dt() const{
@@ -1823,13 +1858,16 @@ Real ito_solver::compute_diffusion_dt(const int a_lvl, const DataIndex& a_dit, c
   ListIterator<ito_particle> lit(particleList);
 
   Real dt = 1.E99;
+
+  if(m_diffusive){
   
-  for (lit.rewind(); lit; ++lit){
-    const ito_particle& p = particleList[lit];
+    for (lit.rewind(); lit; ++lit){
+      const ito_particle& p = particleList[lit];
     
-    const Real thisDt = a_dx[0]*a_dx[0]/(2.0*p.diffusion());
+      const Real thisDt = a_dx[0]*a_dx[0]/(2.0*p.diffusion());
     
-    dt = Min(dt, thisDt);
+      dt = Min(dt, thisDt);
+    }
   }
 
   return dt;

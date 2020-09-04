@@ -14,19 +14,6 @@
 
 using namespace physics::ito_plasma;
 
-ito_plasma_godunov::ito_plasma_godunov(){
-  m_name = "ito_plasma_godunov";
-  m_use_old_dt = false;
-
-  m_dt_relax = 1.E99;
-
-  ParmParse pp("ito_plasma_godunov");
-  pp.get("particle_realm", m_particle_realm);
-  pp.get("profile", m_profile);
-
-  m_avg_cfl = 0.0;
-}
-
 ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_physics){
   m_name    = "ito_plasma_godunov";
   m_physics = a_physics;
@@ -73,6 +60,20 @@ void ito_plasma_godunov::parse_options() {
   }
   else{
     MayDay::Abort("ito_plasma_godunov::parse_options - unknown algorithm requested");
+  }
+
+  pp.get("which_dt", str);
+  if(str == "advection"){
+    m_whichDt = which_dt::advection;
+  }
+  else if(str == "diffusion"){
+    m_whichDt = which_dt::diffusion;
+  }
+  else if(str == "advection_diffusion"){
+    m_whichDt = which_dt::advection_diffusion;
+  }
+  else{
+    MayDay::Abort("ito_plasma_godunov::parse_options - unknown 'which_dt' requested");
   }
 }
 
@@ -174,7 +175,16 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
     pout() << "ito_plasma_godunov::compute_dt" << endl;
   }
   
-  a_dt = m_ito->compute_dt();
+  if(m_whichDt == which_dt::advection){
+    a_dt = m_ito->compute_advective_dt();
+  }
+  else if(m_whichDt == which_dt::diffusion){
+    a_dt = m_ito->compute_diffusive_dt();
+  }
+  else if(m_whichDt == which_dt::advection_diffusion){
+    a_dt = m_ito->compute_dt();
+  }
+    
   a_dt = a_dt*m_max_cells_hop;
   a_timecode = time_code::cfl;
 
@@ -231,79 +241,6 @@ void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_lev
     m_amr->allocate(m_cache,  m_fluid_realm, m_phase, ncomp);
     for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
       m_conduct_cell[lvl]->localCopyTo(*m_cache[lvl]);
-    }
-  }
-}
-
-void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
-  CH_TIME("ito_plasma_godunov::regrid");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::regrid" << endl;
-  }
-
-  if(m_algorithm == which_algorithm::euler){
-    ito_plasma_stepper::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
-  }
-  else{
-    this->regrid_si(a_lmin, a_old_finest_level, a_new_finest_level);
-  }
-}
-
-void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
-  CH_TIME("ito_plasma_godunov::regrid_si");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::regrid_si" << endl;
-  }
-
-  // Allocate new memory
-  this->allocate_internals();
-
-  // Regrid solvers
-  m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
-  m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
-  m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
-  m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
-
-  // Recompute the conductivity
-  this->regrid_conductivity(a_lmin, a_old_finest_level, a_new_finest_level);
-  this->compute_face_conductivity();
-
-  // Set up semi-implicit poisson again, with particles after diffusion jump (the rho^\dagger)
-  this->setup_semi_implicit_poisson(m_prevDt);
-  this->deposit_scratch_particles();
-  
-  // Compute the electric field
-  const bool converged = this->solve_poisson();
-  if(!converged){
-    MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
-  }
-
-  // Recompute new velocities and diffusion coefficients
-  this->compute_ito_velocities();
-  this->compute_ito_diffusion();
-}
-
-void ito_plasma_godunov::regrid_conductivity(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
-  CH_TIME("ito_plasma_godunov::regrid_conductivity");
-  if(m_verbosity > 5){
-    pout() << m_name + "::regrid_conductivity" << endl;
-  }
-  
-  const Interval interv(0,0);
-    
-  // Regrid the conductivity
-  Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_fluid_realm, m_phase);
-
-  // These levels have not changed
-  for (int lvl = 0; lvl <= Max(0,a_lmin-1); lvl++){
-    m_cache[lvl]->copyTo(*m_conduct_cell[lvl]); // Base level should never change, but ownership can.
-  }
-
-  // These levels have changed
-  for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
-    interpolator[lvl]->interpolate(*m_conduct_cell[lvl], *m_conduct_cell[lvl-1], interv);
-    if(lvl <= Min(a_old_finest_level, a_new_finest_level)){
-      m_cache[lvl]->copyTo(*m_conduct_cell[lvl]);
     }
   }
 }
@@ -480,7 +417,6 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   Real time_old     = 0.0;
   Real time_setup   = 0.0;
   Real time_diffuse = 0.0;
-  Real time_copy    = 0.0;
   Real time_remap   = 0.0;
   Real time_deposit = 0.0;
   Real time_solve   = 0.0;
@@ -515,11 +451,6 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   time_deposit -= MPI_Wtime();
   m_ito->deposit_particles();
   time_deposit += MPI_Wtime();
-
-  // Store particles. These are the ones we need when we redo the semi-implicit Poisson solve during regrids.
-  time_copy = -MPI_Wtime();
-  this->copy_particles_to_scratch();
-  time_copy += MPI_Wtime();
 
   // Now compute the electric field
   time_solve -= MPI_Wtime();
@@ -562,7 +493,6 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   time_old     *= 100./time_total;
   time_setup   *= 100./time_total;
   time_diffuse *= 100./time_total;
-  time_copy    *= 100./time_total;
   time_remap   *= 100./time_total;
   time_deposit *= 100./time_total;
   time_solve   *= 100./time_total;
@@ -578,7 +508,6 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
 	   << "set old pos   = " << time_old << "%" << endl
 	   << "poisson setup = " << time_setup << "%" << endl
 	   << "diffuse part  = " << time_diffuse << "%" << endl
-	   << "copy part     = " << time_copy << "%" << endl
 	   << "remap time    = " << time_remap << "%" << endl
 	   << "deposit time  = " << time_deposit << "%" << endl
 	   << "poisson solve = " << time_solve << "%" << endl

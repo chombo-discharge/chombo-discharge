@@ -157,6 +157,11 @@ public:
   virtual Real compute_dt();
 
   /*!
+    @brief Compute the classical advection time step
+  */
+  virtual Real compute_advective_dt();
+
+  /*!
     @brief Compute dt
   */
   virtual Real compute_min_dt(const Real a_maxCellsToMove);
@@ -170,6 +175,11 @@ public:
     @brief Get largest possible time step for diffusion part
   */
   virtual Real compute_min_diffusion_dt(const Real a_maxCellsToMove);
+
+  /*!
+    @brief Compute the classical diffusive time step
+  */
+  virtual Real compute_diffusive_dt();
 
   /*!
     @brief Get number of particles

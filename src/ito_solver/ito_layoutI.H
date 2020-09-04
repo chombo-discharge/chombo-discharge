@@ -228,6 +228,18 @@ Real ito_layout<T>::compute_dt(){
 }
 
 template <class T>
+Real ito_layout<T>::compute_advective_dt(){
+  Real minDt = 1.E99;
+
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    const Real thisDt = iter()->compute_advective_dt();
+    minDt = Min(minDt, thisDt);
+  }
+  
+  return minDt;
+}
+
+template <class T>
 Real ito_layout<T>::compute_min_dt(const Real a_maxCellsToMove){
   Real minDt = 1.E99;
 
@@ -257,6 +269,18 @@ Real ito_layout<T>::compute_min_diffusion_dt(const Real a_maxCellsToMove){
 
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
     const Real thisDt = iter()->compute_min_diffusion_dt(a_maxCellsToMove);
+    minDt = Min(minDt, thisDt);
+  }
+  
+  return minDt;
+}
+
+template <class T>
+Real ito_layout<T>::compute_diffusive_dt() {
+  Real minDt = 1.E99;
+
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    const Real thisDt = iter()->compute_diffusive_dt();
     minDt = Min(minDt, thisDt);
   }
   

@@ -17,7 +17,7 @@ namespace physics {
     public:
 
       // Ctor and dtor
-      ito_plasma_godunov();
+      ito_plasma_godunov() = delete;
       ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_physics);
       ~ito_plasma_godunov();
 
@@ -37,15 +37,18 @@ namespace physics {
 
       // Regrid routines
       void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
-      void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
-      void regrid_si(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
-      void regrid_conductivity(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
 
     protected:
 
       enum class which_algorithm {
 	euler, 
 	semi_implicit,
+      };
+
+      enum class which_dt {
+	advection,
+	diffusion,
+	advection_diffusion
       };
 
       // These are things that are used to compute the conductivity. 
@@ -64,6 +67,7 @@ namespace physics {
       Real m_prevDt;
 
       which_algorithm m_algorithm;
+      which_dt        m_whichDt;
 
       int m_merge_interval; // How often to merge superparticles
 

@@ -401,6 +401,11 @@ public:
   Real compute_min_drift_dt(const Real a_maxCellsToMove) const;
 
   /*!
+    @brief Compute advection time step
+  */
+  Real compute_advective_dt() const;
+
+  /*!
     @brief Compute the drift dt. This returns (dx/dt)*a_maxCellsToMove
   */
   Vector<Real> compute_drift_dt(const Real a_maxCellsToMove) const;
@@ -429,6 +434,11 @@ public:
     @brief Compute diffusion dt as dx*maxCellsToMove/(sqrt(2D)*eps) on all levels
   */
   Vector<Real> compute_diffusion_dt(const Real a_maxCellsToMove) const;
+
+  /*!
+    @brief Compute the diffusive dt
+  */
+  Real compute_diffusive_dt() const;
   
   /*!
     @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on all levels
