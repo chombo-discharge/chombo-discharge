@@ -417,36 +417,37 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   this->diffuse_particles_euler(a_dt);
   time_diffuse += MPI_Wtime();
 
-  // Remap and deposit
+  // Remap and deposit, only need to do this for diffusive solvers. 
   time_remap = -MPI_Wtime();
-  m_ito->remap();
+  this->remap_diffusive_particles(); 
   time_remap += MPI_Wtime();
   time_deposit -= MPI_Wtime();
-  m_ito->deposit_particles();
+  //  m_ito->deposit_particles();
+  this->deposit_diffusive_particles();
   time_deposit += MPI_Wtime();
 
   // Now compute the electric field
   time_solve -= MPI_Wtime();
   this->solve_poisson();
   time_solve += MPI_Wtime();
-  // We have field at k+1 but particles have been diffused. Put them back to X^k positions and compute
-  // velocities with E^(k+1). Then perform the advective step. NOTE: After this you can't rewind the particles!!!
+  // We have field at k+1 but particles have been diffused. The ones that are diffusive AND mobile are put back to X^k positions
+  // and then we compute velocities with E^(k+1). 
   time_swap -= MPI_Wtime();
-  this->swap_particle_positions(); // After this, oldPosition() holds X^\dagger, and position() holds X^k.
+  this->swap_particle_positions();   // After this, oldPosition() holds X^\dagger, and position() holds X^k. 
   time_remap -= MPI_Wtime();
-  m_ito->remap();
+  this->remap_diffusive_particles(); // Only need to do this for the ones that were diffusive
   time_remap += MPI_Wtime();
   time_swap += MPI_Wtime();
   time_velo -= MPI_Wtime();
   this->compute_ito_velocities();
   time_velo += MPI_Wtime();
   time_advect -= MPI_Wtime();
-  this->advect_particles_si(a_dt);
+  this->advect_particles_si(a_dt);  // This 
   time_advect += MPI_Wtime();
   
   // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
   time_remap -= MPI_Wtime();
-  m_ito->remap();
+  this->remap_mobile_or_diffusive_particles();
   time_remap += MPI_Wtime();
 
   // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
@@ -458,7 +459,7 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   time_isect += MPI_Wtime();
 
   time_deposit -= MPI_Wtime();
-  m_ito->deposit_particles();
+  this->deposit_mobile_or_diffusive_particles();
   time_deposit += MPI_Wtime();
 
   time_total += MPI_Wtime();
@@ -660,8 +661,12 @@ void ito_plasma_godunov::swap_particle_positions(){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
-    
-    if(solver->is_diffusive()){
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+
+    // No need to do this if solver is only mobile because the diffusion step didn't change the position.
+    // Likewise, if the solver is only diffusive then advect_particles_si routine won't trigger so no need for that either. 
+    if(mobile && diffusive){ 
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
 	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
@@ -693,7 +698,13 @@ void ito_plasma_godunov::intersect_particles(const Real a_dt){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
-     solver->intersect_particles();
+
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+
+    if(mobile || diffusive){
+      solver->intersect_particles();
+    }
   }
 }
 
@@ -708,15 +719,8 @@ void ito_plasma_godunov::compute_conductivity(){
   m_amr->allocate_ptr(Egas);
   m_amr->alias(Egas, m_phase, m_poisson->get_E());
 
-#if 0 // test code
-  data_ops::copy(m_fluid_scratchD, Egas);
-  m_amr->interpolate_to_centroids(m_fluid_scratchD, m_fluid_realm, m_phase);
-  data_ops::vector_length(m_scratch1, m_fluid_scratchD);
-#else
-
   // Compute |E| and reset conductivity
   data_ops::vector_length(m_scratch1, Egas);
-#endif
   data_ops::set_value(m_conduct_cell, 0.0);
   
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){

@@ -120,12 +120,14 @@ namespace physics {
       void deposit_particles();
       void deposit_mobile_particles();
       void deposit_diffusive_particles();
+      void deposit_mobile_or_diffusive_particles();
       void deposit_stationary_particles();
 
       // Remap routines
       void remap_particles();
       void remap_mobile_particles();
       void remap_diffusive_particles();
+      void remap_mobile_or_diffusive_particles();
 
 
       // Routines for computing velocities
