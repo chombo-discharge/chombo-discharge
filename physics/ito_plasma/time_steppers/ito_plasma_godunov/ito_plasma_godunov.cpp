@@ -17,7 +17,6 @@ using namespace physics::ito_plasma;
 ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_physics){
   m_name    = "ito_plasma_godunov";
   m_physics = a_physics;
-  m_use_old_dt = false;
 
   m_dt_relax = 1.E99;
 
@@ -188,6 +187,7 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
   a_dt = a_dt*m_max_cells_hop;
   a_timecode = time_code::cfl;
 
+  // Euler needs to limit by relaxation time
   if(m_algorithm == which_algorithm::euler){
     const Real dtRelax = m_relax_factor*m_dt_relax;
     if(dtRelax < a_dt){
@@ -195,11 +195,6 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
       a_timecode = time_code::relaxation_time;
     }
   }
-  else if(m_algorithm == which_algorithm::semi_implicit && m_use_old_dt == true){
-    // a_dt = m_dt;
-    // m_use_old_dt = false;
-  }
-
 
   if(a_dt < m_min_dt){
     a_dt = m_min_dt;
@@ -221,28 +216,6 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
 			      << "\t avgCFL = " << m_avg_cfl/(1+m_step)
 			      << std::endl;
 #endif
-}
-
-void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_level){
-  CH_TIME("ito_plasma_godunov::pre_regrid");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::pre_regrid" << endl;
-  }
-
-  ito_plasma_stepper::pre_regrid(a_lmin, a_old_finest_level);
-
-  // I don't know what this does. 
-  if(m_algorithm == which_algorithm::semi_implicit){
-    m_use_old_dt = true;
-
-    // Copy conductivity to scratch storage
-    const int ncomp        = 1;
-    const int finest_level = m_amr->get_finest_level();
-    m_amr->allocate(m_cache,  m_fluid_realm, m_phase, ncomp);
-    for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
-      m_conduct_cell[lvl]->localCopyTo(*m_cache[lvl]);
-    }
-  }
 }
 
 void ito_plasma_godunov::copy_particles_to_scratch(){

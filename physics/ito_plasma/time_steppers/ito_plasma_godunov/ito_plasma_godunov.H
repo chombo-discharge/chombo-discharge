@@ -35,9 +35,6 @@ namespace physics {
       void allocate_internals() override;
       void post_checkpoint_setup() override;
 
-      // Regrid routines
-      void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
-
     protected:
 
       enum class which_algorithm {
@@ -59,7 +56,6 @@ namespace physics {
       EBAMRFluxData m_conduct_face;
       EBAMRIVData   m_conduct_eb;
 
-      bool m_use_old_dt;
       bool m_profile;
       
       Real m_relax_factor; // Factor for relaxation time
