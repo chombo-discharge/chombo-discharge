@@ -1007,10 +1007,11 @@ void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
     bool valid = false;
     while(!valid){ 
       
-      const Real curDt = std::min(a_dt-curTime, std::min(dtCrit, dtNonCrit));
+      const Real curDt   = std::min(a_dt-curTime, std::min(dtCrit, dtNonCrit));
+      const bool nonCrit = dtNonCrit < dtCrit || criticalReactions.size() == 0 || dtCrit < (a_dt-curTime);
 	    
       // How will we advance?
-      if(dtNonCrit < dtCrit || criticalReactions.size() == 0){ // No critical reactions fire. Advance only noncritical reactions.
+      if(nonCrit){// No critical reactions fire. Advance only noncritical reactions.
 
 	// Compute the total propensity function in case it is faster to run SSA steps
 	Real A = this->propensity(a_particles);
