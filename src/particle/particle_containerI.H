@@ -10,8 +10,6 @@
 
 #include "particle_containerI.H"
 
-#define NEW_REGRID 1
-
 template <class P>
 particle_container<P>::particle_container(){
   m_is_defined  = false;
@@ -476,7 +474,7 @@ void particle_container<P>::levelRemap(){
 
 template <class P>
 void particle_container<P>::levelRemap(const int a_lvl){
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("particle_container<P>::levelRemap(particle_container<P>) - particles are sorted by cell!");
   m_particles[a_lvl]->gatherOutcast();
   m_particles[a_lvl]->remapOutcast();
 }
@@ -484,12 +482,8 @@ void particle_container<P>::levelRemap(const int a_lvl){
 template <class P>
 void particle_container<P>::pre_regrid(const int a_lmin){
   CH_assert(m_is_defined);
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
-
-  // TLDR: This code moves all the particles on level l >= a_lmin onto a_lmin-1 and remaps them there. 
-  //       The outcast lists should be empty at the end of this call
-
-#if NEW_REGRID
+  if(m_cell_sorted) MayDay::Abort("particle_container<P>::pre_regrid(particle_container<P>) - particles are sorted by cell!");
+  
   m_cacheParticles.resize(1 + m_finest_level);
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     m_cacheParticles[lvl] = RefCountedPtr<ParticleData<P> > (new ParticleData<P>(m_grids[lvl],
@@ -507,20 +501,6 @@ void particle_container<P>::pre_regrid(const int a_lmin){
       myParticles.clear();
     }
   }
-#else
-  // Fill cache particles on each level
-  m_cache_particles.resize(1 + m_finest_level);
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    m_cache_particles[lvl].clear();
-    
-    for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
-      List<P>& p = (*m_particles[lvl])[dit()].listItems();
-
-      m_cache_particles[lvl].catenate(p);
-      p.clear();
-    }
-  }
-#endif
 }
 
 template <class P>
@@ -548,8 +528,6 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 
   const int oldFinestLevel = m_cache_particles.size() - 1;
 
-#if NEW_REGRID
-
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++){
     const BoxLayout& oldGrids = m_cacheParticles[lvl]->getBoxes();
 
@@ -563,29 +541,6 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 
     m_particles[lvl]->remapOutcast();
   }
-
-#else
-  // If a level was removed, put the particles on the new finest level
-  if(m_finest_level < oldFinestLevel){
-    List<P>& cacheFinest = m_cache_particles[m_finest_level];
-    for (int lvl = m_finest_level + 1; lvl <= oldFinestLevel; lvl++){
-      List<P>& p = m_cache_particles[lvl];
-
-      cacheFinest.catenate(p);
-      p.clear();
-    }
-  }
-
-  for (int lvl = 0; lvl <= a_newFinestLevel; lvl++){
-    //  for (int lvl = 0; lvl <= oldFinestLevel; lvl++){
-    List<P>& outcast = m_particles[lvl]->outcast();
-
-    outcast.catenate(m_cache_particles[lvl]);
-    m_cache_particles[lvl].clear();
-
-    m_particles[lvl]->remapOutcast();
-  }
-#endif
 
   // Now do remap
   this->remap();
