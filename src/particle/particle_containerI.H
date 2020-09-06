@@ -510,7 +510,7 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 				   const Vector<int>&               a_ref_rat,
 				   const int                        a_lmin,
 				   const int                        a_newFinestLevel){
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("particle_container<P>::regrid(...) - particles are sorted by cell!");
 
   // Update this stuff
   m_grids        = a_grids;
