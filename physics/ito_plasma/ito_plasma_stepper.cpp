@@ -1007,7 +1007,7 @@ void ito_plasma_stepper::remap_mobile_or_diffusive_particles(){
     const bool diffusive = solver->is_diffusive();
     
     if(mobile || diffusive){
-      solver->deposit_particles();
+      solver->remap();
     }
   }
 }
