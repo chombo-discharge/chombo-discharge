@@ -669,7 +669,6 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
 
   const bool got_new_tags = this->tag_cells(tags, m_tags); // Tag cells
 
-  overallMemoryUsage();
   if(!got_new_tags){
     if(a_use_initial_data){
       m_timestepper->initial_data();
