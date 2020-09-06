@@ -686,17 +686,13 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
     }
   }
 
-  pout() << "Before pre_regrid()" << endl;   overallMemoryUsage();
-
   // Store things that need to be regridded
   this->cache_tags(m_tags);              // Cache m_tags because after regrid, ownership will change
   m_timestepper->pre_regrid(a_lmin, m_amr->get_finest_level());
 
   // Deallocate unnecessary storage
-  pout() << "Before deallocate()" << endl;   overallMemoryUsage();
   this->deallocate_internals();          // Deallocate internal storage for driver
   m_timestepper->deallocate();           // Deallocate storage for time_stepper
-  pout() << "after deallocate()" << endl;   overallMemoryUsage();
   
   const Real cell_tags = MPI_Wtime();    // Timer
 
@@ -704,7 +700,6 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   const int old_finest_level = m_amr->get_finest_level();
   m_amr->regrid_amr(tags, a_lmin, a_lmax);
   const int new_finest_level = m_amr->get_finest_level();
-  pout() << "after regrid_amr()" << endl;   overallMemoryUsage();
 
   // Load balance and regrid the various realms
   const std::vector<std::string> realms = m_amr->get_realms();
@@ -716,14 +711,12 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
       m_amr->regrid_realm(str, procs, boxes, a_lmin);
     }
   }
-  pout() << "after regrid realm()" << endl;   overallMemoryUsage();
 
 
   // Regrid the operators
   const int regsize = m_timestepper->get_redistribution_regsize();
   m_amr->regrid_operators(a_lmin, a_lmax, regsize);
   const Real base_regrid = MPI_Wtime(); // Base regrid time
-  pout() << "after regrid operators()" << endl;   overallMemoryUsage();
 
   // Regrid driver, timestepper, and celltagger
   this->regrid_internals(old_finest_level, new_finest_level);          // Regrid internals for driver
@@ -731,17 +724,14 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   if(a_use_initial_data){
     m_timestepper->initial_data();
   }
-  pout() << "after timestepper regrid()" << endl;   overallMemoryUsage();
 
   // Regrid cell tagger if we have one. 
   if(!m_celltagger.isNull()){
     m_celltagger->regrid();             
   }
-  pout() << "after regrid cell tagger()" << endl;   overallMemoryUsage();
 
   // If it wants to, time_stepper can do a post_regrid operation. 
   m_timestepper->post_regrid();
-  pout() << "after post regrid()" << endl;   overallMemoryUsage();
 
   const Real solver_regrid = MPI_Wtime(); // Timer
 
