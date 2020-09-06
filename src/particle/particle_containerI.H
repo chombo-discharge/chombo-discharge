@@ -504,6 +504,7 @@ void particle_container<P>::pre_regrid(const int a_lmin){
 
       cacheParticles.clear();
       cacheParticles.catenate(myParticles);
+      myParticles.clear();
     }
   }
 #else
