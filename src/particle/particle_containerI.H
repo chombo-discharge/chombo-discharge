@@ -492,14 +492,13 @@ void particle_container<P>::pre_regrid(const int a_lmin){
 										 m_dx[lvl]*RealVect::Unit,
 										 m_prob_lo));
 
-    for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
-      List<P>& cacheParticles = (*m_cacheParticles[lvl])[dit()].listItems();
-      List<P>& myParticles = (*m_particles[lvl])[dit()].listItems();
-
-      cacheParticles.clear();
-      cacheParticles.catenate(myParticles);
-      myParticles.clear();
-    }
+    collectValidParticles(*m_cacheParticles[lvl],
+			  *m_particles[lvl],
+			  m_pvr[lvl]->mask(),
+			  m_dx[lvl],
+			  1,
+			  false, 
+			  m_prob_lo);
   }
 }
 
@@ -529,17 +528,25 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   const int oldFinestLevel = m_cache_particles.size() - 1;
 
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++){
-    const BoxLayout& oldGrids = m_cacheParticles[lvl]->getBoxes();
 
-    List<P>& outcast = m_particles[lvl]->outcast();
+    collectValidParticles(*m_particles[lvl],
+			  *m_cacheParticles[lvl],
+			  m_pvr[lvl]->mask(),
+			  m_dx[lvl],
+			  1,
+			  false, 
+			  m_prob_lo);
+    // const BoxLayout& oldGrids = m_cacheParticles[lvl]->getBoxes();
+
+    // List<P>& outcast = m_particles[lvl]->outcast();
     
-    for (DataIterator dit(oldGrids); dit.ok(); ++dit){
-      List<P>& cacheParticles = (*m_cacheParticles[lvl])[dit()].listItems();
-      outcast.catenate(cacheParticles);
-      cacheParticles.clear();
-    }
+    // for (DataIterator dit(oldGrids); dit.ok(); ++dit){
+    //   List<P>& cacheParticles = (*m_cacheParticles[lvl])[dit()].listItems();
+    //   outcast.catenate(cacheParticles);
+    //   cacheParticles.clear();
+    // }
 
-    m_particles[lvl]->remapOutcast();
+    // m_particles[lvl]->remapOutcast();
   }
 
   // Now do remap
