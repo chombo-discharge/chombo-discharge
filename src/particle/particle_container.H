@@ -261,7 +261,6 @@ protected:
   AMRParticles<P> m_particles;
   AMRPVR m_pvr;
   AMRCellParticles<P> m_cell_particles;
-  AMRParticles<P> m_cacheParticles;
 
   void setup_pvr(const int a_base, const int a_finest_level);
   void setup_particle_data(const int a_base, const int a_finest_level);

@@ -474,7 +474,7 @@ void particle_container<P>::levelRemap(){
 
 template <class P>
 void particle_container<P>::levelRemap(const int a_lvl){
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::levelRemap(particle_container<P>) - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
   m_particles[a_lvl]->gatherOutcast();
   m_particles[a_lvl]->remapOutcast();
 }
@@ -482,23 +482,26 @@ void particle_container<P>::levelRemap(const int a_lvl){
 template <class P>
 void particle_container<P>::pre_regrid(const int a_lmin){
   CH_assert(m_is_defined);
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::pre_regrid(particle_container<P>) - particles are sorted by cell!");
-  
-  m_cacheParticles.resize(1 + m_finest_level);
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    m_cacheParticles[lvl] = RefCountedPtr<ParticleData<P> > (new ParticleData<P>(m_grids[lvl],
-										 m_domains[lvl],
-										 m_blocking_factor,
-										 m_dx[lvl]*RealVect::Unit,
-										 m_prob_lo));
+  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
 
-    collectValidParticles(*m_cacheParticles[lvl],
-			  *m_particles[lvl],
-			  m_pvr[lvl]->mask(),
-			  m_dx[lvl],
-			  1,
-			  false, 
-			  m_prob_lo);
+  size_t valid = get_num_valid_global();
+  size_t outca = get_num_outcast_global();
+  if(procID() == 0){
+    std::cout << "BEFORE:" << std::endl;
+    std::cout << "valid = " << valid << "\t outcasts = " << outca << std::endl;
+  }
+
+  // Fill cache particles on each level
+  m_cache_particles.resize(1 + m_finest_level);
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    m_cache_particles[lvl].clear();
+    
+    for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
+      List<P>& p = (*m_particles[lvl])[dit()].listItems();
+
+      m_cache_particles[lvl].catenate(p);
+      p.clear();
+    }
   }
 }
 
@@ -510,6 +513,8 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 				   const int                        a_lmin,
 				   const int                        a_newFinestLevel){
   if(m_cell_sorted) MayDay::Abort("particle_container<P>::regrid(...) - particles are sorted by cell!");
+
+
 
   // Update this stuff
   m_grids        = a_grids;
@@ -527,33 +532,51 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 
   const int oldFinestLevel = m_cache_particles.size() - 1;
 
-  for (int lvl = 0; lvl <= a_newFinestLevel; lvl++){
+  // If a level was removed, put the particles on the new finest level
+  if(m_finest_level < oldFinestLevel){
+    List<P>& cacheFinest = m_cache_particles[m_finest_level];
+    for (int lvl = m_finest_level + 1; lvl <= oldFinestLevel; lvl++){
+      List<P>& p = m_cache_particles[lvl];
 
-    collectValidParticles(*m_particles[lvl],
-			  *m_cacheParticles[lvl],
-			  m_pvr[lvl]->mask(),
-			  m_dx[lvl],
-			  1,
-			  false, 
-			  m_prob_lo);
-
-    const BoxLayout& oldGrids = m_cacheParticles[lvl]->getBoxes();
-
-    List<P>& outcast = m_particles[lvl]->outcast();
-    
-    for (DataIterator dit(oldGrids); dit.ok(); ++dit){
-      List<P>& cacheParticles = (*m_cacheParticles[lvl])[dit()].listItems();
-      outcast.catenate(cacheParticles);
-      cacheParticles.clear();
+      cacheFinest.catenate(p);
+      p.clear();
     }
+  }
+
+  for (int lvl = 0; lvl <= a_newFinestLevel; lvl++){
+    //  for (int lvl = 0; lvl <= oldFinestLevel; lvl++){
+    List<P>& outcast = m_particles[lvl]->outcast();
+
+    outcast.catenate(m_cache_particles[lvl]);
+    m_cache_particles[lvl].clear();
 
     m_particles[lvl]->remapOutcast();
   }
 
-  // Now do remap
+  // If grids were removed the fine particle outcast list is definitely not empty. Transfer fine particles
+  // to the outcast list below and remap the coarse level again. Some of these particles may be outside the
+  // coar level PVR, but that is taken care of later. 
+  for (int lvl = a_newFinestLevel; lvl > 0; lvl--){
+    List<P>& fineParticles = m_particles[lvl]->outcast();
+    List<P>& coarParticles = m_particles[lvl-1]->outcast();
+
+    coarParticles.catenate(fineParticles);
+    fineParticles.clear();
+
+    m_particles[lvl-1]->remapOutcast();
+  }
+
+  // Now do remap so that the PVR is respected. 
   this->remap();
 
   m_cache_particles.resize(0);
+
+  size_t valid = get_num_valid_global();
+  size_t outca = get_num_outcast_global();
+  if(procID() == 0){
+    std::cout << "AFTER:" << std::endl;
+    std::cout << "valid = " << valid << "\t outcasts = " << outca << std::endl;
+  }
 }
 
 template <class P>
