@@ -536,17 +536,18 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 			  1,
 			  false, 
 			  m_prob_lo);
-    // const BoxLayout& oldGrids = m_cacheParticles[lvl]->getBoxes();
 
-    // List<P>& outcast = m_particles[lvl]->outcast();
+    const BoxLayout& oldGrids = m_cacheParticles[lvl]->getBoxes();
+
+    List<P>& outcast = m_particles[lvl]->outcast();
     
-    // for (DataIterator dit(oldGrids); dit.ok(); ++dit){
-    //   List<P>& cacheParticles = (*m_cacheParticles[lvl])[dit()].listItems();
-    //   outcast.catenate(cacheParticles);
-    //   cacheParticles.clear();
-    // }
+    for (DataIterator dit(oldGrids); dit.ok(); ++dit){
+      List<P>& cacheParticles = (*m_cacheParticles[lvl])[dit()].listItems();
+      outcast.catenate(cacheParticles);
+      cacheParticles.clear();
+    }
 
-    // m_particles[lvl]->remapOutcast();
+    m_particles[lvl]->remapOutcast();
   }
 
   // Now do remap
