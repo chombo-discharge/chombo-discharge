@@ -788,5 +788,20 @@ protected:
     @brief Sign function
   */
   inline Real sign(const Real& a) const;
+
+  /*!
+    @brief Compute the minimum bounding box for a cut-cell
+  */
+  void compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid);
+
+  /*!
+    @brief Check if all corners are inside the EB
+  */
+  bool all_corners_inside_eb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid);
+
+  /*!
+    @brief Shift corners
+  */
+  void shift_corners(Vector<RealVect>& a_corners, const RealVect& a_distance);
 };
 #endif

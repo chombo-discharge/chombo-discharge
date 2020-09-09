@@ -2056,3 +2056,93 @@ void ito_solver::clear(AMRParticles<ito_particle>& a_particles){
     a_particles[lvl]->clear();
   }
 }
+
+void ito_solver::compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid){
+  CH_TIME("ito_solver::compute_min_valid_box(RealVect, RealVect, RealVect, RealVect)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_min_valid_box(RealVect, RealVect, RealVect, RealVect)" << endl;
+  }
+
+  const int num_segments = 10;
+
+  // Default values
+  a_lo = -0.5*RealVect::Unit;
+  a_hi =  0.5*RealVect::Unit;
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const RealVect plane_normal = -RealVect(BASISV(dir))*sign(sit()); // Direction of the plane that we will "push"
+      const RealVect plane_point  = RealVect::Zero - 0.5*plane_normal;      // Center point on plane
+      const RealVect base_shift   = plane_normal/num_segments;
+
+#if CH_SPACEDIM == 2
+      Vector<RealVect> corners(2);
+      const int otherDir = (dir + 1) % SpaceDim;
+      corners[0] = plane_point - 0.5*RealVect(BASISV(otherDir));
+      corners[1] = plane_point + 0.5*RealVect(BASISV(otherDir));
+#elif CH_SPACEDIM == 3
+      Vector<RealVect> corners(4);
+      const int otherDir1 = (dir + 1) % SpaceDim;
+      const int otherDir2 = (dir + 2) % SpaceDim;
+      corners[0] = plane_point - 0.5*RealVect(BASISV(otherDir1)) - 0.5*RealVect(BASISV(otherDir2));
+      corners[1] = plane_point - 0.5*RealVect(BASISV(otherDir1)) + 0.5*RealVect(BASISV(otherDir2));
+      corners[2] = plane_point + 0.5*RealVect(BASISV(otherDir1)) - 0.5*RealVect(BASISV(otherDir2));
+      corners[3] = plane_point + 0.5*RealVect(BASISV(otherDir1)) + 0.5*RealVect(BASISV(otherDir2));
+#endif
+
+      // Shift corners in direction plane_normal with length base_shift. Keep track of the total
+      // displacement of the plane. 
+      RealVect shift_vector = RealVect::Zero;
+      bool allInside = this->all_corners_inside_eb(corners, a_normal, a_centroid);
+
+      while(allInside){
+
+	// Shift the corners
+	this->shift_corners(corners, base_shift);
+	shift_vector += base_shift;
+
+	// Check if shifted corners are inside EB
+	allInside = this->all_corners_inside_eb(corners, a_normal, a_centroid);
+
+	// If they are, we can change some components of a_lo
+	if(allInside) {
+	  if(sit() == Side::Lo){
+	    a_lo[dir] = -0.5 + shift_vector[dir]; 
+	  }
+	  else if(sit() == Side::Hi){
+	    a_hi[dir] = 0.5 + shift_vector[dir];
+	  }
+	}
+      }
+    }
+  }
+}
+
+bool ito_solver::all_corners_inside_eb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid){
+  CH_TIME("ito_solver::all_corners_inside_eb(Vector<RealVect>, RealVect, RealVect)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::all_corners_inside_eb(Vector<RealVect>, RealVect, RealVect)" << endl;
+  }
+  
+  bool ret = true;
+
+  // If any point it outside the EB, i.e. inside the domain boundary, return false. 
+  for (int i = 0; i < a_corners.size(); i++){
+    if(PolyGeom::dot((a_corners[i]-a_centroid), a_normal) > 0.0){
+      ret = false;
+    }
+  }
+
+  return ret;
+}
+
+void ito_solver::shift_corners(Vector<RealVect>& a_corners, const RealVect& a_distance){
+  CH_TIME("ito_solver::shift_corners(Vector<RealVect>, RealVect)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::shift_corners(Vector<RealVect>, RealVect)" << endl;
+  }
+  
+  for(int i = 0; i < a_corners.size(); i++){
+    a_corners[i] += a_distance;
+  }
+}
