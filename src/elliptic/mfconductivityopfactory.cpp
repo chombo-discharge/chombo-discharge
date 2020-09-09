@@ -21,6 +21,7 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
 						 const MFAMRIVData&                        a_bco_irreg,
 						 const Real&                               a_alpha,
 						 const Real&                               a_beta,
+						 const Real&                               a_lengthScale,
 						 const Real&                               a_coarsest_dx,
 						 const ProblemDomain&                      a_coarsest_domain,
 						 const RefCountedPtr<BaseDomainBCFactory>& a_dombc,
@@ -56,6 +57,7 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
   m_origin     = a_origin;
   m_ebbc_order = a_order_ebbc;
   m_mg_mflg    = a_mg_mflg;
+  m_lengthScale = a_lengthScale;
     
   m_domains.resize(m_num_levels);
   m_dx.resize(m_num_levels);
@@ -743,6 +745,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
 	       ebbc_order,       // Set to m_ebbc_order
 	       ghost_phi,        // Set to m_ghost_phi
 	       ghost_rhs,        // Set to m_ghost_rhs
+	       m_lengthScale,    // Length scale
 	       dx,               // Set to m_dx[ref] (for AMR) or m_dx[ref]*icoar (for MG)
 	       dx_coar,          // Set to m_dx[ref-1] (for AMR). Undefined for MG
 	       alpha,            // Set to m_alpha
@@ -894,6 +897,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
 	       ebbc_order,
 	       ghost_phi,
 	       ghost_rhs,
+	       m_lengthScale,    
 	       dx,
 	       dx_coar,
 	       alpha,

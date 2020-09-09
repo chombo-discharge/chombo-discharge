@@ -953,6 +953,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 										 m_bco_irreg,
 										 alpha,
 										 beta,
+										 m_length_scale,
 										 dx[0]*m_length_scale,
 										 domains[0],
 										 domfact,

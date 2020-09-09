@@ -69,6 +69,7 @@ public:
 		      const int&                                    a_order_ebbc,
 		      const IntVect&                                a_ghost_phi,
 		      const IntVect&                                a_ghost_rhs,
+		      const Real&                                   a_lengthScale,
 		      const Real&                                   a_dx,
 		      const Real&                                   a_dx_coar,
 		      const Real&                                   a_alpha,
@@ -380,6 +381,11 @@ public:
 
 
 protected:
+
+  /*!
+    @brief Length scale
+  */
+  Real m_lengthScale;
 
   /*!
     @brief Index spaces

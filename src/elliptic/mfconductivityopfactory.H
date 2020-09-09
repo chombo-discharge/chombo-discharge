@@ -55,6 +55,7 @@ public:
 			  const MFAMRIVData&                        a_bco_irreg,
 			  const Real&                               a_alpha,
 			  const Real&                               a_beta,
+			  const Real&                               a_lengthScale,
 			  const Real&                               a_coarsest_dx,
 			  const ProblemDomain&                      a_coarsest_domain,
 			  const RefCountedPtr<BaseDomainBCFactory>& a_dombc,
@@ -173,6 +174,11 @@ public:
   virtual int refToFiner(const ProblemDomain& a_domain) const;
 
 protected:
+
+  /*!
+    @brief Length scale
+  */
+  Real m_lengthScale;
 
   /*!
     @brief Index spaces

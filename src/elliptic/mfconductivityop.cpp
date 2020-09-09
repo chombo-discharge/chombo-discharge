@@ -60,6 +60,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 			      const int&                                    a_order_ebbc,
 			      const IntVect&                                a_ghost_phi,
 			      const IntVect&                                a_ghost_rhs,
+			      const Real&                                   a_lengthScale,
 			      const Real&                                   a_dx,
 			      const Real&                                   a_dx_coar,
 			      const Real&                                   a_alpha,
@@ -89,6 +90,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
   m_dx = a_dx;
   m_dirival.resize(num_phases);
   m_multifluid = m_mfis->num_phases() > 1;
+  m_lengthScale = a_lengthScale;
 
   if(a_has_mg){
     m_mflg_coar_mg = a_mflg_coar_mg;
@@ -295,6 +297,8 @@ void mfconductivityop::set_bc_from_levelset(){
   //  std::cout << *m_time << std::endl;
 
   const int comp = 0;
+
+  const Real physDx = m_dx/m_lengthScale;
   
   for (int iphase = 0; iphase < m_phases; iphase++){
     LevelData<BaseIVFAB<Real> >& val = *m_dirival[iphase];
@@ -305,7 +309,7 @@ void mfconductivityop::set_bc_from_levelset(){
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
-	const RealVect pos  = EBArith::getVofLocation(vof, m_dx, m_origin);
+	const RealVect pos  = EBArith::getVofLocation(vof, physDx, m_origin);
 
 	if(m_electrodes.size() > 0){
 	  int  func = 0;
