@@ -246,6 +246,18 @@ public:
 
   static void vector_length2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
 
+  static void compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid);
+  
+  static bool all_corners_inside_eb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid);
+
+  static void shift_corners(Vector<RealVect>& a_corners, const RealVect& a_distance);
+
+  static void compute_particle_weights(unsigned long long&      a_weight,
+				       unsigned long long&      a_num,
+				       unsigned long long&      a_remainder,
+				       const unsigned long long a_numPhysicalParticles,
+				       const int                a_ppc);
+
 };
 
 #include "data_opsI.H"

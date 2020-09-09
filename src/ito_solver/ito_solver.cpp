@@ -237,6 +237,7 @@ void ito_solver::parse_checkpointing(){
 
   std::string str;
   pp.get("checkpointing", str);
+  pp.get("ppc_restart", m_ppc_restart);
   if(str == "particles"){
     m_checkpointing = which_checkpoint::particles;
   }
@@ -800,13 +801,8 @@ void ito_solver::restart_particles(LevelData<EBCellFAB>& a_num_particles, const 
     pout() << m_name + "::restart_particles" << endl;
   }
 
-  ParmParse pp("ito_solver");
-  int ppc_restart;
-  pp.get("ppc_restart", ppc_restart);
-
   const Real dx          = m_amr->get_dx()[a_level];
   const RealVect prob_lo = m_amr->get_prob_lo();
-
 
   const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
 
@@ -826,7 +822,7 @@ void ito_solver::restart_particles(LevelData<EBCellFAB>& a_num_particles, const 
 	// Compute weights and remainder
 	const unsigned long long numParticles = (unsigned long long) round(ppc(bit()));
 	unsigned long long w, N, r;
-	this->compute_particle_weights(w, N, r, numParticles, ppc_restart);
+	data_ops::compute_particle_weights(w, N, r, numParticles, m_ppc_restart);
 
 	const RealVect minLo = -0.5*RealVect::Unit;
 	const RealVect minHi =  0.5*RealVect::Unit;
@@ -868,13 +864,13 @@ void ito_solver::restart_particles(LevelData<EBCellFAB>& a_num_particles, const 
       RealVect minLo = -0.5*RealVect::Unit;
       RealVect minHi =  0.5*RealVect::Unit;
       if(kappa < 1.0){
-	this->compute_min_valid_box(minLo, minHi, norm, cent);
+	data_ops::compute_min_valid_box(minLo, minHi, norm, cent);
       }
 
       // Compute weights and remainder
       const unsigned long long numParticles = (unsigned long long) round(ppc(iv));
       unsigned long long w, N, r;
-      this->compute_particle_weights(w, N, r, numParticles, ppc_restart);
+      data_ops::compute_particle_weights(w, N, r, numParticles, m_ppc_restart);
 
       // Now add N partices. If r > 0 we add another one with weight w + r
       for (unsigned long long i = 0; i < N; i++){
@@ -893,8 +889,6 @@ void ito_solver::restart_particles(LevelData<EBCellFAB>& a_num_particles, const 
     }
   }
 }
-
-
 
 void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   CH_TIME("ito_solver::write_plot_data");
@@ -2229,118 +2223,7 @@ void ito_solver::clear(AMRParticles<ito_particle>& a_particles){
   }
 }
 
-void ito_solver::compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid){
-  CH_TIME("ito_solver::compute_min_valid_box(RealVect, RealVect, RealVect, RealVect)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::compute_min_valid_box(RealVect, RealVect, RealVect, RealVect)" << endl;
-  }
 
-  const int num_segments = 10;
-
-  // Default values
-  a_lo = -0.5*RealVect::Unit;
-  a_hi =  0.5*RealVect::Unit;
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      const RealVect plane_normal = (sit() == Side::Lo) ? BASISREALV(dir) : -BASISREALV(dir);
-      const RealVect plane_point  = RealVect::Zero - 0.5*plane_normal;      // Center point on plane
-      const RealVect base_shift   = plane_normal/(1.0*num_segments);
-
-#if CH_SPACEDIM == 2
-      Vector<RealVect> corners(2);
-      const int otherDir = (dir + 1) % SpaceDim;
-      corners[0] = plane_point - 0.5*RealVect(BASISV(otherDir));
-      corners[1] = plane_point + 0.5*RealVect(BASISV(otherDir));
-#elif CH_SPACEDIM == 3
-      Vector<RealVect> corners(4);
-      const int otherDir1 = (dir + 1) % SpaceDim;
-      const int otherDir2 = (dir + 2) % SpaceDim;
-      corners[0] = plane_point - 0.5*RealVect(BASISV(otherDir1)) - 0.5*RealVect(BASISV(otherDir2));
-      corners[1] = plane_point - 0.5*RealVect(BASISV(otherDir1)) + 0.5*RealVect(BASISV(otherDir2));
-      corners[2] = plane_point + 0.5*RealVect(BASISV(otherDir1)) - 0.5*RealVect(BASISV(otherDir2));
-      corners[3] = plane_point + 0.5*RealVect(BASISV(otherDir1)) + 0.5*RealVect(BASISV(otherDir2));
-#endif
-
-      // Shift corners in direction plane_normal with length base_shift. Keep track of the total
-      // displacement of the plane. 
-      RealVect shift_vector = RealVect::Zero;
-      bool allInside = this->all_corners_inside_eb(corners, a_normal, a_centroid);
-
-      while(allInside){
-
-	// Shift the corners
-	this->shift_corners(corners, base_shift);
-	shift_vector += base_shift;
-
-	// Check if shifted corners are inside EB
-	allInside = this->all_corners_inside_eb(corners, a_normal, a_centroid);
-
-	// If they are, we can change some components of a_lo
-	if(allInside) {
-	  if(sit() == Side::Lo){
-	    a_lo[dir] = -0.5 + shift_vector[dir]; 
-	  }
-	  else if(sit() == Side::Hi){
-	    a_hi[dir] = 0.5 + shift_vector[dir];
-	  }
-	}
-      }
-    }
-  }
-}
-
-bool ito_solver::all_corners_inside_eb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid){
-  CH_TIME("ito_solver::all_corners_inside_eb(Vector<RealVect>, RealVect, RealVect)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::all_corners_inside_eb(Vector<RealVect>, RealVect, RealVect)" << endl;
-  }
-  
-  bool ret = true;
-
-  // If any point it outside the EB, i.e. inside the domain boundary, return false. 
-  for (int i = 0; i < a_corners.size(); i++){
-    if(PolyGeom::dot((a_corners[i]-a_centroid), a_normal) > 0.0){
-      ret = false;
-    }
-  }
-
-  return ret;
-}
-
-void ito_solver::shift_corners(Vector<RealVect>& a_corners, const RealVect& a_distance){
-  CH_TIME("ito_solver::shift_corners(Vector<RealVect>, RealVect)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::shift_corners(Vector<RealVect>, RealVect)" << endl;
-  }
-  
-  for(int i = 0; i < a_corners.size(); i++){
-    a_corners[i] += a_distance;
-  }
-}
-
-void ito_solver::compute_particle_weights(unsigned long long&      a_weight,
-					  unsigned long long&      a_num,
-					  unsigned long long&      a_remainder,
-					  const unsigned long long a_numPhysicalParticles,
-					  const int                a_ppc) const {
-  CH_TIME("ito_solver::compute_particle_weights(...)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::compute_particle_weights(...)" << endl;
-  }
-
-  if(a_numPhysicalParticles <= a_ppc){  
-    a_weight    = 1;
-    a_remainder = 0;
-    a_num       = a_numPhysicalParticles; 
-  }
-  else{ // Add superparticles
-    a_weight    = a_numPhysicalParticles/a_ppc;
-    a_remainder = a_numPhysicalParticles%a_ppc;
-    a_num       = (a_remainder == 0) ? a_ppc : a_ppc - 1;
-
-  }
-}
 
 RealVect ito_solver::random_position(const RealVect a_pos,
 				     const RealVect a_lo,

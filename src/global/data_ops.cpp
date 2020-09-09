@@ -12,6 +12,7 @@
 #include "MFLevelDataOps.H"
 #include "CCProjectorF_F.H"
 #include "EBLevelDataOpsF_F.H"
+#include "PolyGeom.H"
 
 void data_ops::average_cell_to_face(EBAMRFluxData&               a_facedata,
 				    const EBAMRCellData&         a_celldata,
@@ -993,8 +994,8 @@ void data_ops::gen_laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCel
     // Regular stuff
     for (int comp = 0; comp < ncomp; comp++){
       FORT_GEN_LAPLACIAN(CHF_FRA1(lapl_fab, comp),
-		     CHF_CONST_FRA1(data_fab, comp),
-		     CHF_BOX(box));
+			 CHF_CONST_FRA1(data_fab, comp),
+			 CHF_BOX(box));
     }
     
 
@@ -1511,5 +1512,98 @@ void data_ops::vector_length2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Bo
     for (int i = 0; i < ncomp; i++){
       a_lhs(vof, comp) += a_rhs(vof, i)*a_rhs(vof, i);
     }
+  }
+}
+
+void data_ops::compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid){
+  const int num_segments = 10;
+
+  // Default values
+  a_lo = -0.5*RealVect::Unit;
+  a_hi =  0.5*RealVect::Unit;
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const RealVect plane_normal = (sit() == Side::Lo) ? BASISREALV(dir) : -BASISREALV(dir);
+      const RealVect plane_point  = RealVect::Zero - 0.5*plane_normal;      // Center point on plane
+      const RealVect base_shift   = plane_normal/(1.0*num_segments);
+
+#if CH_SPACEDIM == 2
+      Vector<RealVect> corners(2);
+      const int otherDir = (dir + 1) % SpaceDim;
+      corners[0] = plane_point - 0.5*RealVect(BASISV(otherDir));
+      corners[1] = plane_point + 0.5*RealVect(BASISV(otherDir));
+#elif CH_SPACEDIM == 3
+      Vector<RealVect> corners(4);
+      const int otherDir1 = (dir + 1) % SpaceDim;
+      const int otherDir2 = (dir + 2) % SpaceDim;
+      corners[0] = plane_point - 0.5*RealVect(BASISV(otherDir1)) - 0.5*RealVect(BASISV(otherDir2));
+      corners[1] = plane_point - 0.5*RealVect(BASISV(otherDir1)) + 0.5*RealVect(BASISV(otherDir2));
+      corners[2] = plane_point + 0.5*RealVect(BASISV(otherDir1)) - 0.5*RealVect(BASISV(otherDir2));
+      corners[3] = plane_point + 0.5*RealVect(BASISV(otherDir1)) + 0.5*RealVect(BASISV(otherDir2));
+#endif
+
+      // Shift corners in direction plane_normal with length base_shift. Keep track of the total
+      // displacement of the plane. 
+      RealVect shift_vector = RealVect::Zero;
+      bool allInside = data_ops::all_corners_inside_eb(corners, a_normal, a_centroid);
+
+      while(allInside){
+
+	// Shift the corners
+	data_ops::shift_corners(corners, base_shift);
+	shift_vector += base_shift;
+
+	// Check if shifted corners are inside EB
+	allInside = data_ops::all_corners_inside_eb(corners, a_normal, a_centroid);
+
+	// If they are, we can change some components of a_lo
+	if(allInside) {
+	  if(sit() == Side::Lo){
+	    a_lo[dir] = -0.5 + shift_vector[dir]; 
+	  }
+	  else if(sit() == Side::Hi){
+	    a_hi[dir] = 0.5 + shift_vector[dir];
+	  }
+	}
+      }
+    }
+  }
+}
+
+bool data_ops::all_corners_inside_eb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid){
+  bool ret = true;
+
+  // If any point it outside the EB, i.e. inside the domain boundary, return false. 
+  for (int i = 0; i < a_corners.size(); i++){
+    if(PolyGeom::dot((a_corners[i]-a_centroid), a_normal) > 0.0){
+      ret = false;
+    }
+  }
+
+  return ret;
+}
+
+void data_ops::shift_corners(Vector<RealVect>& a_corners, const RealVect& a_distance){
+  for(int i = 0; i < a_corners.size(); i++){
+    a_corners[i] += a_distance;
+  }
+}
+
+void data_ops::compute_particle_weights(unsigned long long&      a_weight,
+					unsigned long long&      a_num,
+					unsigned long long&      a_remainder,
+					const unsigned long long a_numPhysicalParticles,
+					const int                a_ppc) {
+
+  if(a_numPhysicalParticles <= a_ppc){  
+    a_weight    = 1;
+    a_remainder = 0;
+    a_num       = a_numPhysicalParticles; 
+  }
+  else{ // Add superparticles
+    a_weight    = a_numPhysicalParticles/a_ppc;
+    a_remainder = a_numPhysicalParticles%a_ppc;
+    a_num       = (a_remainder == 0) ? a_ppc : a_ppc - 1;
   }
 }

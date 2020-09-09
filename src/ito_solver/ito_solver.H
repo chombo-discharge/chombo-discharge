@@ -476,6 +476,11 @@ protected:
   which_checkpoint m_checkpointing;
 
   /*!
+    @brief Get number of particles used for restarting
+  */
+  int m_ppc_restart;
+
+  /*!
     @brief Realm
   */
   std::string m_realm;
@@ -807,29 +812,7 @@ protected:
   */
   inline Real sign(const Real& a) const;
 
-  /*!
-    @brief Compute the minimum bounding box for a cut-cell
-  */
-  void compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid);
 
-  /*!
-    @brief Check if all corners are inside the EB
-  */
-  bool all_corners_inside_eb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid);
-
-  /*!
-    @brief Shift corners
-  */
-  void shift_corners(Vector<RealVect>& a_corners, const RealVect& a_distance);
-
-  /*!
-    @brief Compute particle weights for superparticles
-  */
-  void compute_particle_weights(unsigned long long&      a_weight,
-				unsigned long long&      a_num,
-				unsigned long long&      a_remainder,
-				const unsigned long long a_numPhysicalParticles,
-				const int                a_ppc) const;
 
   /*!
     @brief Restart particles
