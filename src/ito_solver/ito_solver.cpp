@@ -73,6 +73,7 @@ void ito_solver::parse_options(){
   this->parse_diffusion_hop();
   this->parse_redistribution();
   this->parse_conservation();
+  this->parse_checkpointing();
 }
 
 void ito_solver::parse_rng(){
@@ -224,6 +225,27 @@ void ito_solver::parse_conservation(){
   ParmParse pp(m_class_name.c_str());
 
   pp.get("blend_conservation", m_blend_conservation);
+}
+
+void ito_solver::parse_checkpointing(){
+  CH_TIME("ito_solver::parse_checkpointing");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_checkpointing" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("checkpointing", str);
+  if(str == "particles"){
+    m_checkpointing = which_checkpoint::particles;
+  }
+  else if(str == "numbers"){
+    m_checkpointing = which_checkpoint::numbers;
+  }
+  else{
+    MayDay::Abort("ito_solver::parse_checkpointing - unknown checkpointing method requested");
+  }
 }
 
 Vector<std::string> ito_solver::get_plotvar_names() const {
@@ -705,9 +727,44 @@ void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level)
 
   write(a_handle, *m_state[a_level], m_name);
 
-  // Write particles. 
-  std::string str = m_name + "_particles";
-  writeParticlesToHDF(a_handle, m_particles[a_level], str);
+  // Write particles.
+  const std::string str = m_name + "_particles";
+  if(m_checkpointing == which_checkpoint::particles){
+    writeParticlesToHDF(a_handle, m_particles[a_level], str);
+  }
+  else{ // In this case we need to write the number of physical particles in a grid cell. 
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[a_level];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+
+    const int comp     = 0;
+    const int ncomp    = 1;
+    const RealVect dx  = m_amr->get_dx()[a_level]*RealVect::Unit;
+    const RealVect plo = m_amr->get_prob_lo();
+    const IntVect ghos = IntVect::Zero;
+
+    // Make something that can hold the particle numbers (stored as a Real)
+    EBCellFactory fact(ebisl);
+    LevelData<EBCellFAB> particleNumbers(dbl, ncomp, ghos, fact);
+    EBLevelDataOps::setVal(particleNumbers, 0.0);
+
+    // Now go through the grid and add the number of particles in each cell
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      BaseFab<Real>& pNum = particleNumbers[dit()].getSingleValuedFAB(); // No multivalued cells please. 
+
+      // Get cell particles
+      BinFab<ito_particle> pCel(dbl.get(dit()), dx, plo);
+      pCel.addItems(m_particles[a_level][dit()].listItems());
+				 
+      for (BoxIterator bit(dbl.get(dit())); bit.ok(); ++bit){
+	pNum(bit(), comp) = 0.0;
+	for (ListIterator<ito_particle> lit(pCel(bit(), comp)); lit.ok(); ++lit){
+	  pNum(bit()) += lit().mass();
+	}
+      }
+    }
+
+    write(a_handle, particleNumbers, str);
+  }
 }
 
 void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
@@ -719,10 +776,125 @@ void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   // Read state vector
   read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
 
-  // Read particles. 
+  // Read particles.
   const std::string str = m_name + "_particles";
-  readParticlesFromHDF(a_handle, m_particles[a_level], str);
+  if(m_checkpointing == which_checkpoint::particles){
+    readParticlesFromHDF(a_handle, m_particles[a_level], str);
+  }
+  else{
+
+    // Read particles per cell
+    EBAMRCellData ppc;
+    m_amr->allocate(ppc, m_realm, m_phase, 1, 0);
+    read<EBCellFAB>(a_handle, *ppc[a_level], str, m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
+    
+    // Restart particles
+    this->restart_particles(*ppc[a_level], a_level);
+  }
+    
 }
+
+void ito_solver::restart_particles(LevelData<EBCellFAB>& a_num_particles, const int a_level){
+  CH_TIME("ito_solver::restart_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::restart_particles" << endl;
+  }
+
+  ParmParse pp("ito_solver");
+  int ppc_restart;
+  pp.get("ppc_restart", ppc_restart);
+
+  const Real dx          = m_amr->get_dx()[a_level];
+  const RealVect prob_lo = m_amr->get_prob_lo();
+
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box& box           = dbl.get(dit());
+    const EBISBox& ebisbox   = m_amr->get_ebisl(m_realm, m_phase)[a_level][dit()];
+    const BaseFab<Real>& ppc = a_num_particles[dit()].getSingleValuedFAB();
+
+    // Clear just to be safe
+    List<ito_particle>& myParticles = m_particles[a_level][dit()].listItems();
+    myParticles.clear();
+
+    // Do regular cells
+    for (BoxIterator bit(box); bit.ok(); ++bit){
+      if(ebisbox.isRegular(bit())){
+
+	// Compute weights and remainder
+	const unsigned long long numParticles = (unsigned long long) round(ppc(bit()));
+	unsigned long long w, N, r;
+	this->compute_particle_weights(w, N, r, numParticles, ppc_restart);
+
+	const RealVect minLo = -0.5*RealVect::Unit;
+	const RealVect minHi =  0.5*RealVect::Unit;
+	const RealVect norma = RealVect::Zero;
+	const RealVect centr = RealVect::Zero;
+	const RealVect pos   = prob_lo + (RealVect(bit()) + 0.5*RealVect::Unit)*dx;
+	const Real kappa     = 1.0;
+
+
+	// Now add N partices. If r > 0 we add another one with weight w + r
+	for (unsigned long long i = 0; i < N; i++){
+	  const RealVect particlePosition = this->random_position(pos, minLo, minHi, centr, norma, dx, kappa);
+	  const Real particleWeight       = (Real) w;
+	  
+	  myParticles.add(ito_particle(particleWeight, particlePosition));
+	}
+
+	if(r > 0){
+	  const RealVect particlePosition = this->random_position(pos, minLo, minHi, centr, norma, dx, kappa);
+	  const Real particleWeight       = (Real) (w+r);
+
+	  myParticles.add(ito_particle(particleWeight, particlePosition));
+	}
+      }
+    }
+
+    // Do irregular cells
+    VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[a_level])[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      const IntVect iv    = vof.gridIndex();
+      const RealVect cent = ebisbox.bndryCentroid(vof);
+      const RealVect norm = ebisbox.normal(vof);
+      const RealVect pos  = prob_lo + dx*(RealVect(iv) + 0.5*RealVect::Unit);
+      const Real kappa    = ebisbox.volFrac(vof);
+
+
+      // Compute a small box that encloses the cut-cell volume
+      RealVect minLo = -0.5*RealVect::Unit;
+      RealVect minHi =  0.5*RealVect::Unit;
+      if(kappa < 1.0){
+	this->compute_min_valid_box(minLo, minHi, norm, cent);
+      }
+
+      // Compute weights and remainder
+      const unsigned long long numParticles = (unsigned long long) round(ppc(iv));
+      unsigned long long w, N, r;
+      this->compute_particle_weights(w, N, r, numParticles, ppc_restart);
+
+      // Now add N partices. If r > 0 we add another one with weight w + r
+      for (unsigned long long i = 0; i < N; i++){
+	const RealVect particlePosition = this->random_position(pos, minLo, minHi, cent, norm, dx, kappa);
+	const Real particleWeight       = (Real) w;
+	  
+	myParticles.add(ito_particle(particleWeight, particlePosition));
+      }
+
+      if(r > 0){
+	const RealVect particlePosition = this->random_position(pos, minLo, minHi, cent, norm, dx, kappa);
+	const Real particleWeight       = (Real) (w+r);
+
+	myParticles.add(ito_particle(particleWeight, particlePosition));
+      }
+    }
+  }
+}
+
+
 
 void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   CH_TIME("ito_solver::write_plot_data");
@@ -2071,9 +2243,9 @@ void ito_solver::compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const Rea
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
-      const RealVect plane_normal = -RealVect(BASISV(dir))*sign(sit()); // Direction of the plane that we will "push"
+      const RealVect plane_normal = (sit() == Side::Lo) ? BASISREALV(dir) : -BASISREALV(dir);
       const RealVect plane_point  = RealVect::Zero - 0.5*plane_normal;      // Center point on plane
-      const RealVect base_shift   = plane_normal/num_segments;
+      const RealVect base_shift   = plane_normal/(1.0*num_segments);
 
 #if CH_SPACEDIM == 2
       Vector<RealVect> corners(2);
@@ -2168,4 +2340,51 @@ void ito_solver::compute_particle_weights(unsigned long long&      a_weight,
     a_num       = (a_remainder == 0) ? a_ppc : a_ppc - 1;
 
   }
+}
+
+RealVect ito_solver::random_position(const RealVect a_pos,
+				     const RealVect a_lo,
+				     const RealVect a_hi,
+				     const RealVect a_bndryCentroid,
+				     const RealVect a_bndryNormal,
+				     const Real     a_dx,
+				     const Real     a_kappa) {
+
+  RealVect pos;
+  if(a_kappa < 1.0){ // Rejection sampling. 
+    pos = this->random_position(a_lo, a_hi, a_bndryCentroid, a_bndryNormal);
+  }
+  else{ // Regular cell. Get a position. 
+    pos = this->random_position(a_lo, a_hi);
+  }
+
+  pos = a_pos + pos*a_dx;
+
+  return pos;
+}
+
+RealVect ito_solver::random_position(const RealVect a_lo,
+				     const RealVect a_hi,
+				     const RealVect a_bndryCentroid,
+				     const RealVect a_bndryNormal) {
+  RealVect pos = this->random_position(a_lo, a_hi);
+  bool valid   = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
+
+  while(!valid){
+    pos    = this->random_position(a_lo, a_hi);
+    valid = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
+  }
+
+  return pos;
+}
+
+RealVect ito_solver::random_position(const RealVect a_lo, const RealVect a_hi) {
+
+  RealVect pos = RealVect::Unit;
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    pos[dir] = a_lo[dir] + 0.5*(1.0 + m_udist11(m_rng))*(a_hi[dir] - a_lo[dir]);
+  }
+
+  return pos;
 }

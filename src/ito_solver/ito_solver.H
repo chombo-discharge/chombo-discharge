@@ -462,6 +462,19 @@ public:
   
 protected:
 
+  /*! 
+    @brief How to checkpoint files
+  */
+  enum class which_checkpoint {
+    particles,
+    numbers
+  };
+
+  /*!
+    @brief How to checkpoint files. particles => write particles to HDF5. numbers => write numbers to HDF5
+  */
+  which_checkpoint m_checkpointing;
+
   /*!
     @brief Realm
   */
@@ -743,6 +756,11 @@ protected:
   void parse_conservation();
 
   /*!
+    @brief Parse checkpointing method
+  */
+  void parse_checkpointing();
+
+  /*!
     @brief This computes the "conservative" deposition, multiplied by kappa
   */
   void deposit_kappaConservative(EBAMRCellData&                    a_state,
@@ -812,5 +830,34 @@ protected:
 				unsigned long long&      a_remainder,
 				const unsigned long long a_numPhysicalParticles,
 				const int                a_ppc) const;
+
+  /*!
+    @brief Restart particles
+  */
+  void restart_particles(LevelData<EBCellFAB>& a_num_particles, const int a_level);
+
+  /*!
+    @brief Draw a valid random position somewhere in a cell
+  */
+  RealVect random_position(const RealVect a_pos,
+			   const RealVect a_lo,
+			   const RealVect a_hi,
+			   const RealVect a_bndryCentroid,
+			   const RealVect a_normal,
+			   const Real     a_dx,
+			   const Real     a_kappa);
+
+  /*!
+    @brief Draw a random position somewhere in a cell
+  */
+  RealVect random_position(const RealVect a_lo,
+			   const RealVect a_hi,
+			   const RealVect a_bndryCentroid,
+			   const RealVect a_normal);
+
+  /*!
+    @brief Return a random position in the cube (a_lo, a_hi);
+  */
+  RealVect random_position(const RealVect a_lo, const RealVect a_hi);
 };
 #endif
