@@ -803,5 +803,14 @@ protected:
     @brief Shift corners
   */
   void shift_corners(Vector<RealVect>& a_corners, const RealVect& a_distance);
+
+  /*!
+    @brief Compute particle weights for superparticles
+  */
+  void compute_particle_weights(unsigned long long&      a_weight,
+				unsigned long long&      a_num,
+				unsigned long long&      a_remainder,
+				const unsigned long long a_numPhysicalParticles,
+				const int                a_ppc) const;
 };
 #endif

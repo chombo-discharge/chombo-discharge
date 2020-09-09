@@ -2146,3 +2146,26 @@ void ito_solver::shift_corners(Vector<RealVect>& a_corners, const RealVect& a_di
     a_corners[i] += a_distance;
   }
 }
+
+void ito_solver::compute_particle_weights(unsigned long long&      a_weight,
+					  unsigned long long&      a_num,
+					  unsigned long long&      a_remainder,
+					  const unsigned long long a_numPhysicalParticles,
+					  const int                a_ppc) const {
+  CH_TIME("ito_solver::compute_particle_weights(...)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_particle_weights(...)" << endl;
+  }
+
+  if(a_numPhysicalParticles <= a_ppc){  
+    a_weight    = 1;
+    a_remainder = 0;
+    a_num       = a_numPhysicalParticles; 
+  }
+  else{ // Add superparticles
+    a_weight    = a_numPhysicalParticles/a_ppc;
+    a_remainder = a_numPhysicalParticles%a_ppc;
+    a_num       = (a_remainder == 0) ? a_ppc : a_ppc - 1;
+
+  }
+}
