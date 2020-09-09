@@ -484,13 +484,6 @@ void particle_container<P>::pre_regrid(const int a_lmin){
   CH_assert(m_is_defined);
   if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
 
-  size_t valid = get_num_valid_global();
-  size_t outca = get_num_outcast_global();
-  if(procID() == 0){
-    std::cout << "BEFORE:" << std::endl;
-    std::cout << "valid = " << valid << "\t outcasts = " << outca << std::endl;
-  }
-
   // Fill cache particles on each level
   m_cache_particles.resize(1 + m_finest_level);
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -570,13 +563,6 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   this->remap();
 
   m_cache_particles.resize(0);
-
-  size_t valid = get_num_valid_global();
-  size_t outca = get_num_outcast_global();
-  if(procID() == 0){
-    std::cout << "AFTER:" << std::endl;
-    std::cout << "valid = " << valid << "\t outcasts = " << outca << std::endl;
-  }
 }
 
 template <class P>
