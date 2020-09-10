@@ -107,7 +107,7 @@ ito_solver.max_diffusion_hop   = 2.0           # Maximum diffusion hop length (i
 ito_solver.normal_max          = 3.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
 ito_solver.redistribute        = true          # Turn on/off redistribution. 
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
-ito_solver.checkpointing       = numbers       # Use particle numbers for writing/reading checkpoint files
+ito_solver.checkpointing       = particles     # 'particles' or 'numbers' 		  
 ito_solver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
 ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
 ito_solver.deposition          = cic           # 'ngp' = nearest grid point
