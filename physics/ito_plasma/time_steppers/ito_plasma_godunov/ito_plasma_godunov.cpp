@@ -218,6 +218,99 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
 #endif
 }
 
+void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_level){
+  CH_TIME("ito_plasma_godunov::pre_regrid");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_godunov::pre_regrid" << endl;
+  }
+
+  ito_plasma_stepper::pre_regrid(a_lmin, a_old_finest_level);
+
+  if(m_algorithm == which_algorithm::semi_implicit){
+
+    // Copy conductivity to scratch storage
+    const int ncomp        = 1;
+    const int finest_level = m_amr->get_finest_level();
+    m_amr->allocate(m_cache,  m_fluid_realm, m_phase, ncomp);
+    for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+      m_conduct_cell[lvl]->localCopyTo(*m_cache[lvl]);
+    }
+  }
+}
+
+void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
+  CH_TIME("ito_plasma_godunov::regrid");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_godunov::regrid" << endl;
+  }
+
+  if(m_algorithm == which_algorithm::euler){
+    ito_plasma_stepper::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  }
+  else{
+    this->regrid_si(a_lmin, a_old_finest_level, a_new_finest_level);
+  }
+}
+
+void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
+  CH_TIME("ito_plasma_godunov::regrid_si");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_godunov::regrid_si" << endl;
+  }
+
+  // Allocate new memory
+  this->allocate_internals();
+
+  // Regrid solvers
+  m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
+
+  // Recompute the conductivity
+  this->regrid_conductivity(a_lmin, a_old_finest_level, a_new_finest_level);
+  this->compute_face_conductivity();
+
+  // Set up semi-implicit poisson again, with particles after diffusion jump (the rho^\dagger)
+  this->setup_semi_implicit_poisson(m_prevDt);
+  this->deposit_scratch_particles();
+  
+  // Compute the electric field
+  const bool converged = this->solve_poisson();
+  if(!converged){
+    MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
+  }
+
+  // Recompute new velocities and diffusion coefficients
+  this->compute_ito_velocities();
+  this->compute_ito_diffusion();
+}
+
+void ito_plasma_godunov::regrid_conductivity(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+  CH_TIME("ito_plasma_godunov::regrid_conductivity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::regrid_conductivity" << endl;
+  }
+  
+  const Interval interv(0,0);
+    
+  // Regrid the conductivity
+  Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_fluid_realm, m_phase);
+
+  // These levels have not changed
+  for (int lvl = 0; lvl <= Max(0,a_lmin-1); lvl++){
+    m_cache[lvl]->copyTo(*m_conduct_cell[lvl]); // Base level should never change, but ownership can.
+  }
+
+  // These levels have changed
+  for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
+    interpolator[lvl]->interpolate(*m_conduct_cell[lvl], *m_conduct_cell[lvl-1], interv);
+    if(lvl <= Min(a_old_finest_level, a_new_finest_level)){
+      m_cache[lvl]->copyTo(*m_conduct_cell[lvl]);
+    }
+  }
+}
+
 void ito_plasma_godunov::copy_particles_to_scratch(){
   CH_TIME("ito_plasma_godunov::copy_particles_to_scratch");
   if(m_verbosity > 5){
@@ -425,6 +518,9 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   //  m_ito->deposit_particles();
   this->deposit_diffusive_particles();
   time_deposit += MPI_Wtime();
+
+  // Copy particles to scratch
+  this->copy_particles_to_scratch();
 
   // Now compute the electric field
   time_solve -= MPI_Wtime();
