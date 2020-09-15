@@ -940,6 +940,7 @@ void SpreadingCopier::define(const BoxLayout& a_level,
         } // end if any of the "From" boxes were outside the domain
       
     } // end if we need to do anything for periodicity
+  sort();
 }
 
 void SpreadingCopier::reverse()
@@ -961,6 +962,7 @@ void SpreadingCopier::reverse()
       m_toMotionPlan[i]->reverse();
     }
   m_fromMotionPlan.swap(m_toMotionPlan);
+  
 }
 
 int SpreadingCopier::print() const

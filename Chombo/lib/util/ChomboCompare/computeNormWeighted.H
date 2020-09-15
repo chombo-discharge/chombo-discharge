@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _COMPUTE_NORM_WEIGHTED_H_
-#define _COMPUTE_NORM_WEIGHTED_H_
+#ifndef _COMPUTENORMWEIGHTED_H_
+#define _COMPUTENORMWEIGHTED_H_
 
 #include "REAL.H"
 #include "Vector.H"

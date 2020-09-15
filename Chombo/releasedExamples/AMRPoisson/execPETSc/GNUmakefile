@@ -5,7 +5,7 @@ makefiles += releasedExamples_AMRPoisson_execPETSc
 
 ## Define the variables needed by Make.example
 USE_PETSC=TRUE
-USE_MPI=TRUE
+MPI=TRUE
 
 # the base name(s) of the application(s) in this directory
 ebase = testPetscCompGrid testPetscSolver

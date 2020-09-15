@@ -35,10 +35,16 @@
 ###           to echo commands that _aren't_ echoed by default
 ###    QUIET  controls verbosity; default is "", change to "@" to disable
 ###           echo of commands that _are_ echoed by default
-###    NODEPNDS controls building dependency files; default is unset, change
-###              to anything to skip building the .d files [NOTE: this is
-###              dangerous and should probably only be used when doing
-###              'clean' or 'realclean' targets.]
+###    NODEPENDS (or NODEP for short) controls building dependency files;
+###                default is unset, change to anything to skip building the .d ###                files [NOTE: this is dangerous and should probably only be
+###                used when doing 'clean' or 'realclean' targets.]
+###    OUTPUT      This can be used with applicaton makefiles that load
+###                Make.examples.  Default is to build an executable.  If
+###                OUTPUT=LIB is specified, the make system will instead link
+###                the application into a library (and store it in the same
+###                place as standard Chombo libraries).  CH_MAKE_LIB is defined
+###                when OUTPUT=LIB is specified and the developer should use
+###                this to strip symbol 'main' from the application.
 ###
 ### There are several other variables that control how programs are executed
 ### by the various "run*" targets.  They are:
@@ -140,6 +146,12 @@ export PETSC_DIR
 export PETSC_ARCH
 export OPENMPCC
 export OPENMPFC
+export USE_PROTO
+
+ifeq ($(USE_PROTO),TRUE)
+ XTRACPPFLAGS += -I$(PROTO_HOME)/include -DDIM=$(DIM) -DUSE_PROTO=1
+endif
+
 
 ## First, set some local variables
 ##  config       is the configuration identification string used in filenames
@@ -174,19 +186,28 @@ CSHELLCMD=/bin/csh -f -c
 # The .BL_F prefix is for CCSE .F files.
 src_wildcard := *.cpp *.F90 *.f90 *.ChF *.F *.f *.BL_F 
 
-# names of libraries and executables depend on the configuration string
-# only one of these will be defined for any particular GNUmakefile
-_lib_config  := $(CHOMBO_HOME)/lib$(lbase)$(config).a#  #library to build
-# the patsubst here has the nice benefit of removing any trailing spaces 
-# which may have crept into ebase (which prevents a class of _really_ hard
-# to find make problems
-_app_configs := $(patsubst %,%$(config).ex,$(ebase))#   #one or more apps to build
+# if OUTPUT=LIB, this is an application that needs to be compiled into a library
+ifeq ($(OUTPUT),LIB)
+  _lib_config  := $(CHOMBO_HOME)/lib$(ebase)$(config).a#
+  _app_configs := $(_lib_config)
+else
+  # names of libraries and executables depend on the configuration string
+  # only one of these will be defined for any particular GNUmakefile
+  _lib_config  := $(CHOMBO_HOME)/lib$(lbase)$(config).a#  #library to build
+  # the patsubst here has the nice benefit of removing any trailing spaces
+  # which may have crept into ebase (which prevents a class of _really_ hard
+  # to find make problems
+  _app_configs := $(patsubst %,%$(config).ex,$(ebase))#   #one or more apps to build
+endif
 
 # These variables list the object and dependency files. 
 # The AUTONAME=FALSE case is only when $ebase is set by Make.examples.
 ifeq ($(AUTONAME),FALSE)
   # examples make their own dependencies and objects
-  _other_app_objects = $(objects)
+  _other_app_objects := $(objects)
+  ifeq ($(OUTPUT),LIB)
+    _other_app_objects += $(ebaseobject)
+  endif
 else
   # libs,tests only use code in the current directory:
   # if there is one executable, it uses all the other code files,
@@ -196,6 +217,9 @@ else
   depends := $(patsubst %,d/$(config)/%.d,$(basename $(objects)))
   ifeq ($(words $(ebase)),1)
     _other_app_objects := $(addprefix o/$(config)/,$(filter-out $(ebase).o,$(objects)))
+  else
+    # For the case of libraries
+    _other_app_objects := $(addprefix o/$(config)/,$(objects))
   endif
 endif
 
@@ -246,11 +270,12 @@ $(subst cubin,,$(subst fatbin,-DCH_FATBIN,$(CUBIN)))\
 $(subst FALSE,,$(subst TRUE,-DCH_USE_SETVAL,$(USE_SETVAL)))\
 $(subst FALSE,,$(subst TRUE,-DCH_USE_COMPLEX,$(USE_COMPLEX)))\
 $(subst FALSE,,$(subst TRUE,-DCH_NAMESPACE,$(NAMESPACE)))\
-$(subst FALSE,,$(subst TRUE, -DCH_USE_EB,$(USE_EB)))\
+$(subst FALSE,,$(subst TRUE,-DCH_USE_EB,$(USE_EB)))\
 $(subst FALSE,,$(subst TRUE,-DCH_MULTIDIM,$(MULTIDIM)))\
 $(subst FALSE,,$(subst TRUE,-DCH_USE_MEMORY_TRACKING,$(USE_MT)))\
 $(subst FALSE,,$(subst TRUE,-DCH_COUNT_FLOPS,$(COUNT_FLOPS)))\
 $(subst FALSE,-DCH_NTIMER,$(subst TRUE,,$(USE_TIMER)))\
+$(filter -DCXXSTD=%,$(subst 14,-DCXXSTD=14,$(subst 17,-DCXXSTD=17,$(CXXSTD))))\
 $(subst FALSE,,$(subst TRUE,-DCH_USE_64,$(USE_64)))\
 $(subst DOUBLE,-DCH_USE_DOUBLE,$(subst FLOAT,-DCH_USE_FLOAT,$(PRECISION)))\
 $(subst FALSE,,$(subst TRUE,-DCH_USE_HDF5 $(subst FALSE,$(HDFINCFLAGS),$(subst TRUE,$(HDFMPIINCFLAGS),$(MPI))),$(USE_HDF)))\
@@ -260,6 +285,7 @@ $(subst FALSE,,$(subst TRUE, -DCH_PAPI $(PAPIINCFLAGS),$(USE_PAPI)))\
 $(subst FALSE,,$(subst TRUE, -DCH_USE_PETSC $(petscincflags),$(USE_PETSC)))\
 $(subst FALSE,,$(subst TRUE, -DCH_USE_LAPACK $(lapackincflags),$(USE_LAPACK)))\
 $(subst FALSE,,$(subst TRUE, -DCH_USE_PYTHON ,$(USE_PYTHON)))\
+$(subst EXEC,,$(subst LIB,-DCH_MAKE_LIB,$(OUTPUT)))\
 $(cppcallsfort) $(libincludes) 
 
 CXXFLAGS := \
@@ -276,7 +302,8 @@ FFLAGS := \
 $(subst FALSE,,$(subst TRUE,$(fdbgflags),$(DEBUG)))\
 $(subst FALSE,,$(subst TRUE,$(foptflags),$(subst HIGH,$(foptflags),$(OPT))))\
 $(fcomflags)\
-$(subst FALSE,,$(subst TRUE,$(fprofflags),$(PROFILE)))
+$(subst FALSE,,$(subst TRUE,$(fprofflags),$(PROFILE)))\
+$(subst FALSE,,$(subst TRUE,-DCH_MPI,$(MPI)))
 
 LDFLAGS := \
 $(subst FALSE,,$(subst TRUE,$(lddbgflags),$(DEBUG)))\
@@ -389,8 +416,15 @@ $(MULTIDIM_INCLUDE_DIR) : $(CHOMBO_HOME)/include
 # only the object file that matches the generic name.  This target is intended to
 # be used only from the command line.
 ifdef ebase
+  ifeq ($(OUTPUT),LIB)
+$(ebase): $(CHOMBO_HOME)/mk/.check.$(config)
+	+$(ECHO)$(MAKE) $@$(_lib_config)
+$(ebaseobject): d/$(config)/.lib_output
+  else
 $(ebase): $(CHOMBO_HOME)/mk/.check.$(config)
 	+$(ECHO)$(MAKE) $@$(config).ex
+$(ebaseobject): d/$(config)/.exe_output
+  endif
 endif
 
 # Executables are dependent on libraries and objects.  If the library doesn't exist
@@ -439,7 +473,7 @@ endif
 #				static (.a) library in XTRALIBS, the object files are 
 #				extracted from the library and dumped into the target archive.
 #			  -JNJ
-$(_lib_config): $(XTRALIBS) $(addprefix o/$(config)/,$(objects))
+$(_lib_config): $(XTRALIBS) $(_other_app_objects)
 	$(QUIET)$(CH_AR) $@ $?
 	$(QUIET)$(RANLIB) $@
 	$(ECHO)if [ ! "$(XTRALIBS)" = "" ]; then \
@@ -448,6 +482,21 @@ $(_lib_config): $(XTRALIBS) $(addprefix o/$(config)/,$(objects))
 	$(QUIET)rm -rf xtraobjs; \
 	$(QUIET)$(RANLIB) $@; \
 	$(QUIET)fi
+
+##
+## These rules support linking an application into an executable or a library.
+## They force recompilation of the 'ebase' source file where it is assumed
+## symbol main is added or removed depending on the whether -DCH_MAKE_LIB is
+## defined.  Executables are produced by default.  'make OUTPUT=LIB' forces
+## library.
+##
+.PRECIOUS: d/$(config)/.lib_output d/$(config)/.exe_output
+d/$(config)/.lib_output: d/$(config)/.dummy
+	@touch d/$(config)/.lib_output
+	@$(RM) d/$(config)/.exe_output
+d/$(config)/.exe_output: d/$(config)/.dummy
+	@touch d/$(config)/.exe_output
+	@$(RM) d/$(config)/.lib_output
 
 ##
 ## The next group of rules compile code
@@ -702,5 +751,7 @@ $(CHOMBO_HOME)/mk/Make.defs.local:
 ## files depend on the .dummy file so that the d/$config
 ## subdirectory is created before any mkdepend commands are run.
 ifndef NODEPENDS
+ifndef NODEP
 -include $(depends)
+endif
 endif

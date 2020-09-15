@@ -72,7 +72,9 @@ Real FArrayBox::norm(const Box& a_subbox,
   Real* tmp = 0;
   int tmplen = 0;
   Real nrm = 0;
+#ifdef CH_COUNT_FLOPS      
   unsigned long long int np=a_subbox.numPts()*a_numcomp;
+#endif
   if (a_p == 0)
     {
       // here begins a normed fab function piece
@@ -273,7 +275,7 @@ Real FArrayBox::dotProduct(const FArrayBox& a_fab2, const Box& a_box) const
       dot += thisR * a_fab2R;
     } EndForTX
 
-#ifdef CH_COUNT_FLOPS      	
+#ifdef CH_COUNT_FLOPS           
   ch_flops()+=a_box.numPts()*2*numcomp;
 #endif
   return dot;

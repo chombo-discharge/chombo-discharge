@@ -55,7 +55,14 @@ public:
                          const Box&           a_ghostRegion,
                          const ProblemDomain& a_domain,
                          const RealVect&      a_origin,
-                         const Real&          a_dx) const;
+                         const Real&          a_dx,
+                         const DataIndex&     a_di) const;
+
+  ///this does return higher order moments (not really but since everything is regular...)
+  virtual bool generatesHigherOrderMoments() const
+    {
+      return true; 
+    }
 };
 #include "NamespaceFooter.H"
 #endif

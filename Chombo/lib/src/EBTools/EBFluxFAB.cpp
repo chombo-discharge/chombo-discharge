@@ -13,6 +13,7 @@
 #include "EBFluxFAB.H"
 #include "NamespaceHeader.H"
 
+bool EBFluxFAB::s_verbose = false;
 void
 EBFluxFAB::
 clone(const EBFluxFAB& a_input)
@@ -40,11 +41,24 @@ EBFluxFAB::
 size(const Box& R, const Interval& comps) const
 {
   int retval = 0;
+  int dirsize[SpaceDim];
   for (int idir = 0; idir < SpaceDim; idir++)
     {
-      retval += m_fluxes[idir]->size(R, comps);
-    }
+      m_fluxes[idir]->m_verbose = s_verbose;
+      dirsize[idir] = m_fluxes[idir]->size(R, comps);
+      m_fluxes[idir]->m_verbose = false;
 
+      retval += dirsize[idir];
+    }
+  if(s_verbose)
+  {
+    pout() << "EBFLuxFAB sizes = sum( " ;
+    for (int idir = 0; idir < SpaceDim; idir++)
+    {
+      pout() << dirsize[idir] << " ";
+    }
+    pout() << ") = " << retval << " for box " << R << endl;
+  }
   return retval;
 }
 

@@ -24,18 +24,19 @@ int makeEBISL(EBISLayout& a_ebisl,
 }
 /***************/
 /***************/
-ParmParse pp;
 
 int
 makeLayout(DisjointBoxLayout& a_dbl,
            const Box& a_domain, int a_maxsize=0)
 {
+  ParmParse ppGeom("geom");
+
   int eekflag= 0;
   int ipieces;
   ipieces = Max(ipieces, 1);
   int maxsize = a_maxsize;
   if (maxsize == 0)
-    pp.get("maxboxsize",maxsize);
+    ppGeom.get("maxboxsize",maxsize);
 
   Vector<Box> vbox(1, a_domain);
   domainSplit(a_domain, vbox,  maxsize);
@@ -58,13 +59,11 @@ makeLayout(DisjointBoxLayout& a_dbl,
 /**********/
 int makeGeometry(Box& a_domain, Real& a_dx, Box& coveredBox)
 {
-  const char* in_file = "slab.inputs";
-  //parse input file
-  pp.define(0,NULL,NULL,in_file);
 
+  ParmParse ppGeom("geom");
 
   vector<int> n_cell(SpaceDim);
-  pp.getarr("n_cell",n_cell,0,SpaceDim);
+  ppGeom.getarr("n_cell",n_cell,0,SpaceDim);
 
   CH_assert(n_cell.size() == SpaceDim);
   IntVect lo = IntVect::Zero;
@@ -84,14 +83,14 @@ int makeGeometry(Box& a_domain, Real& a_dx, Box& coveredBox)
 
   vector<Real> prob_lo(SpaceDim, 0.0);
   vector<Real> prob_hi(SpaceDim, 1.0);
-  pp.getarr("prob_lo",prob_lo,0,SpaceDim);
-  pp.getarr("prob_hi",prob_hi,0,SpaceDim);
+  ppGeom.getarr("prob_lo",prob_lo,0,SpaceDim);
+  ppGeom.getarr("prob_hi",prob_hi,0,SpaceDim);
   a_dx = (prob_hi[0]-prob_lo[0])/n_cell[0];
 
   vector<int> slab_lo(SpaceDim);
-  pp.getarr("slab_lo",slab_lo,0,SpaceDim);
+  ppGeom.getarr("slab_lo",slab_lo,0,SpaceDim);
   vector<int> slab_hi(SpaceDim);
-  pp.getarr("slab_hi",slab_hi,0,SpaceDim);
+  ppGeom.getarr("slab_hi",slab_hi,0,SpaceDim);
   for (int idir = 0; idir < SpaceDim; idir++)
     {
       lo[idir] = slab_lo[idir];

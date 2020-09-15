@@ -1,3 +1,4 @@
+#ifdef CH_LANG_CC
 /*
  *      _______              __
  *     / ___/ /  ___  __ _  / /  ___
@@ -5,6 +6,7 @@
  *    \___/_//_/\___/_/_/_/_.__/\___/
  *    Please refer to Copyright.txt, in Chombo's root directory.
  */
+#endif
 
 #include "CH_Counters.H"
 #include <cstddef>
@@ -46,6 +48,19 @@ bool countersAdded = true;
 unsigned long long int spTicks;
 double spTime;
 
+void streamDump(std::ostream& os)
+{
+  const unsigned long long int GB = 1<<30;
+  
+  unsigned int trials = MAXTRIALS;
+  for(unsigned int i=0 ; i<SAMPLES ; i++)
+    {
+      os<<memorySize[i]<<" "<< memorySize[i]*trials*spTicks/((GB*kernelTicks[i])*spTime)<<"\n";
+      
+      if(trials>MINTRIALS) trials-=2;
+    }
+}
+
 void CountersInit()
 {
 
@@ -59,7 +74,8 @@ void CountersInit()
 
   FORTRAN_BASENAME(FLOPINIT,flopinit)() ;
 
-  return;
+
+  /*  
   // measure bandwidth 
   spTicks=ch_ticks();
   spTime = TimerGetTimeStampWC();
@@ -88,7 +104,7 @@ void CountersInit()
 #pragma omp single
     {
       tcount=omp_get_num_threads();
-      std::cout<<"OMP THREADS "<< tcount <<std::endl;
+      pout() <<"OMP THREADS "<< tcount <<std::endl;
     }
 #endif
 
@@ -143,15 +159,18 @@ void CountersInit()
   for(int i=0; i<SAMPLES; i++)
     {
       kernelTicks[i]/=tcount;
-      //pout()<<"\n memorySize:"<<memorySize[i]<<" kernelTicks:"<<kernelTicks[i];
+      //   pout()<<"\n memorySize:"<<memorySize[i]<<" kernelTicks:"<<kernelTicks[i];
     }
-  //pout()<<std::endl;
+ 
+ 
 
   free(A);  free(B); free(C);
   
   spTicks = ch_ticks() - spTicks;
   spTime  = TimerGetTimeStampWC() - spTime;
-  
+  streamDump(pout());
+  pout()<<std::endl;
+  */
   
 #ifdef CH_PAPI
 
@@ -164,12 +183,12 @@ void CountersInit()
 
   cacheLevels = hwinfo->mem_hierarchy.levels;
 
-  //printf("%d cache levels \n", cacheLevels);
+  printf("%d cache levels \n", cacheLevels);
   for(int i=0; i<cacheLevels; i++)
    {
       cacheSize[i]=hwinfo->mem_hierarchy.level[i].cache[0].size;
       lineSize[i]=hwinfo->mem_hierarchy.level[i].cache[0].line_size;
-      //  printf("  L%d size %d line_size %d \n",i+1, cacheSize[i], lineSize[i]);
+      printf("  L%d size %d line_size %d \n",i+1, cacheSize[i], lineSize[i]);
    }
     
 
@@ -186,16 +205,4 @@ void CountersInit()
 #endif
 }
 
-void streamDump(std::ostream& os)
-{
-  const unsigned long long int GB = 1<<30;
-  
-  unsigned int trials = MAXTRIALS;
-  for(unsigned int i=0 ; i<SAMPLES ; i++)
-    {
-      os<<memorySize[i]<<" "<< memorySize[i]*trials*spTicks/((GB*kernelTicks[i])*spTime)<<"\n";
-      
-      if(trials>MINTRIALS) trials-=2;
-    }
-}
 #include "BaseNamespaceFooter.H"

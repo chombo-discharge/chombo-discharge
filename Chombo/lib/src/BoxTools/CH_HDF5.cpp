@@ -16,7 +16,7 @@
 #include "parstream.H"
 #include "NamespaceHeader.H"
 using std::ostream;
-using std::cout;
+//using std::cout;
 using std::endl;
 using std::cerr;
 
@@ -169,7 +169,7 @@ int write(HDF5Handle& a_handle, const BoxLayout& a_layout, const std::string& na
   H5Eset_auto(efunc, edata);
   
   hid_t boxdataset   = H5Dcreate(a_handle.groupID(), name.c_str(),  
-				 a_handle.box_id,
+                                 a_handle.box_id,
                                  boxdataspace, H5P_DEFAULT);
 #else
   H5Eget_auto2(H5E_DEFAULT,&efunc, &edata);
@@ -179,9 +179,9 @@ int write(HDF5Handle& a_handle, const BoxLayout& a_layout, const std::string& na
   H5Eset_auto2(H5E_DEFAULT,efunc, edata);
 
   hid_t boxdataset   = H5Dcreate2(a_handle.groupID(), name.c_str(),  
-				  a_handle.box_id,
-				  boxdataspace, H5P_DEFAULT,
-				  H5P_DEFAULT,H5P_DEFAULT);
+                                  a_handle.box_id,
+                                  boxdataspace, H5P_DEFAULT,
+                                  H5P_DEFAULT,H5P_DEFAULT);
 #endif
   if (boxdataset < 0) return boxdataset;
 
@@ -260,7 +260,7 @@ int read(HDF5Handle& a_handle, Vector<Box>& boxes, const std::string& name)
   hid_t  boxdataset = H5Dopen(a_handle.groupID(), name.c_str());
 #else
   hid_t  boxdataset = H5Dopen2(a_handle.groupID(), name.c_str(), 
-			       H5P_DEFAULT);
+                               H5P_DEFAULT);
 #endif
   if (boxdataset < 0) return boxdataset;
   hid_t boxdataspace =  H5Dget_space(boxdataset);
@@ -709,7 +709,7 @@ int HDF5Handle::open(
     group = H5Gcreate(m_fileID, a_globalGroupName, 0);
 #else
     group = H5Gcreate2(m_fileID, a_globalGroupName, H5P_DEFAULT,
-		       H5P_DEFAULT,H5P_DEFAULT);
+                       H5P_DEFAULT,H5P_DEFAULT);
 #endif
     info.m_int["SpaceDim"] = SpaceDim;
     info.m_real["testReal"] = 0.0;
@@ -828,7 +828,7 @@ int HDF5Handle::setGroup(const std::string& group)
       H5Eset_auto2(H5E_DEFAULT, efunc, edata); //turn error messaging back on.
       //open failed, go to group creation
       m_currentGroupID = H5Gcreate2(m_fileID, group.c_str(),H5P_DEFAULT, 
-				    H5P_DEFAULT,H5P_DEFAULT);
+                                    H5P_DEFAULT,H5P_DEFAULT);
     }
   H5Eset_auto2(H5E_DEFAULT, efunc, edata); //turn error messaging back on.
   // DFM (11/14/15) -- if new group is invalid, put things back the 
@@ -962,20 +962,20 @@ int HDF5HeaderData::writeToLocation(hid_t loc_id) const
       p!= mapName.end(); ++p)                                             \
     {                                                                     \
       hid_t aid  = H5Screate(H5S_SCALAR);                                 \
-      H5Eset_auto2(H5E_DEFAULT, NULL, NULL);				\
+      H5Eset_auto2(H5E_DEFAULT, NULL, NULL);                            \
       hid_t attr = H5Acreate2(loc_id, p->first.c_str(), H5Ttype,           \
-			      aid, H5P_DEFAULT, H5P_DEFAULT);			\
+                              aid, H5P_DEFAULT, H5P_DEFAULT);                   \
       if (attr < 0)                                                        \
         {                                                                 \
           H5Adelete(loc_id, p->first.c_str());                            \
           attr = H5Acreate2(loc_id, p->first.c_str(), H5Ttype,             \
-			    aid, H5P_DEFAULT, H5P_DEFAULT);			          if (attr < 0)                                                    \
+                            aid, H5P_DEFAULT, H5P_DEFAULT);                               if (attr < 0)                                                    \
             {                                                             \
               sprintf(messg," Problem writing attribute %s",p->first.c_str());  \
               MayDay::Warning(messg);                                     \
             }                                                             \
         }                                                                 \
-      H5Eset_auto2(H5E_DEFAULT, efunc, edata);				\
+      H5Eset_auto2(H5E_DEFAULT, efunc, edata);                          \
       Ttype tmp = p->second;                                              \
       ret = H5Awrite(attr, H5Ttype, &tmp);                                \
       if (ret < 0) return ret;                                             \
@@ -1011,7 +1011,7 @@ int HDF5HeaderData::writeToLocation(hid_t loc_id) const
 #else
       H5Eset_auto2(H5E_DEFAULT,NULL, NULL);
       hid_t attr = H5Acreate2(loc_id, p->first.c_str(), s_type,
-			      aid, H5P_DEFAULT, H5P_DEFAULT);
+                              aid, H5P_DEFAULT, H5P_DEFAULT);
 #endif
       if (attr < 0)
         {
@@ -1021,7 +1021,7 @@ int HDF5HeaderData::writeToLocation(hid_t loc_id) const
                            aid, H5P_DEFAULT);
 #else
           attr = H5Acreate2(loc_id, p->first.c_str(), s_type,
-			    aid, H5P_DEFAULT,H5P_DEFAULT);
+                            aid, H5P_DEFAULT,H5P_DEFAULT);
 #endif
           if (attr < 0)
             {
@@ -1258,7 +1258,7 @@ void createData(hid_t& a_dataset,
   H5Eset_auto2(H5E_DEFAULT,efunc, edata);
   a_dataspace = H5Screate_simple(1, flatdims, NULL);
   a_dataset   = H5Dcreate2(handle.groupID(), name.c_str(),  type,
-			   a_dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                           a_dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 #endif
 
 }
@@ -1281,7 +1281,7 @@ ostream& operator<<(ostream& os, const HDF5HeaderData& data)
 
 void HDF5HeaderData::dump() const
 {
-  std::cout<<*this<<std::endl;
+  pout()<<*this<<std::endl;
 }
 
 #include "NamespaceFooter.H"

@@ -83,7 +83,7 @@ getParticleIBC()
 
 void
 getAMRLevelPICFactory(RefCountedPtr<AMRLevelPICFactory>&  a_fact,
-		      ZeldovichIBC* a_ibc)
+                      ZeldovichIBC* a_ibc)
 {
   ParmParse pp;
   Real cfl = 0.4;
@@ -120,11 +120,11 @@ getAMRLevelPICFactory(RefCountedPtr<AMRLevelPICFactory>&  a_fact,
 
   a_fact = RefCountedPtr<AMRLevelPICFactory>
     (new AMRLevelPICFactory(a_ibc, 
-			    cfl, 
-			    domainLength, 
-			    maxGridSize,
-			    poissonInterpType,
-			    refineThresh));
+                            cfl, 
+                            domainLength, 
+                            maxGridSize,
+                            poissonInterpType,
+                            refineThresh));
 
 }
 

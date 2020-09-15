@@ -198,28 +198,6 @@ template<int N> struct Pow<N,1>
 //-------------------------------------------------------------------
 
 //-------------------------------------------------------------------
-/**
-  Arbitrarily deep nested loop.
-  Example: This code will print all the integers from 0 to B^N-1, in base B:
-
-  template<int N> struct BaseRep
-  {
-    void operator()( int* index )
-    {
-      for ( int i=N-1; i>=0; --i ) std::cout << index[i];
-      std::cout << '\n';
-    }
-  };
-
-  main()
-  {
-  #define N 4
-  #define B 3
-    int index[N];
-    BaseRep<N> op;
-    Metaprograms::NestedLoop< N,BaseRep<N> >()( index, 0, B, op );
-  }
-*/
 template<int N, class OP> struct NestedLoop
 {
   void operator()( int * index, int lo, int hi, OP& op ) const

@@ -1190,11 +1190,11 @@ applyOpRegularAllDirs(Box * a_loBox,
   for (int comp = 0; comp<a_nComps; comp++)
     {
 
-      FORT_REGGET1DLAPLACIAN_INPLACE(CHF_FRA1(a_curOpPhiFAB,comp),
-                                     CHF_CONST_FRA1(a_curPhiFAB,comp),
-                                     CHF_CONST_REAL(a_beta),
-                                     CHF_CONST_REALVECT(m_dx),
-                                     CHF_BOX(a_curDblBox));
+      FORT_REGINCRLAPLACIAN_INPLACE(CHF_FRA1(a_curOpPhiFAB,comp),
+                                    CHF_CONST_FRA1(a_curPhiFAB,comp),
+                                    CHF_CONST_REAL(a_beta),
+                                    CHF_CONST_REALVECT(m_dx),
+                                    CHF_BOX(a_curDblBox));
     }
 }
 

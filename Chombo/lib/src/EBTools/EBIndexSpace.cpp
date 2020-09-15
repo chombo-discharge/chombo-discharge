@@ -235,7 +235,7 @@ void EBIndexSpace::define(EBISLevel * a_level0,
       pout() << "  Generating level " << ilev << endl;
       domLevel.coarsen(2);
       m_domainLevel[ilev] = domLevel;
-      m_ebisLevel[ilev] = new EBISLevel(*m_ebisLevel[ilev-1], dummy, this);
+      m_ebisLevel[ilev] = new EBISLevel(*m_ebisLevel[ilev-1], dummy, a_nCellMax);
       m_ebisLevel[ilev]->clearMultiBoundaries();
       m_ebisLevel[ilev]->printGraphSummary("    ");
     }
@@ -260,8 +260,29 @@ void EBIndexSpace::define(const ProblemDomain    & a_domain,
   pout() << "EBIndexSpace::define - From domain" << endl;
 
   pout() << "  Building finest level..." << endl;
+  if (a_nCellMax > 0)
+    {
+      m_nCellMax = a_nCellMax;
+    }
+  else
+    {
+      if (SpaceDim == 2)
+        {
+          m_nCellMax = 32;
+        }
+      else
+        {
+          m_nCellMax = 32;
+        }
+    }
 
-  buildFirstLevel(a_domain, a_origin, a_dx, a_geoserver, a_nCellMax, a_maxCoarsenings);
+  int cellMax = a_nCellMax;
+  if((cellMax < 0) && (m_nCellMax > 0))
+    {
+      // user did not specify a max box size so pull it from member
+      cellMax = m_nCellMax;
+    }
+  buildFirstLevel(a_domain, a_origin, a_dx, a_geoserver, cellMax, a_maxCoarsenings);
   m_ebisLevel[0]->clearMultiBoundaries();
 
 #ifdef CH_MPI
@@ -279,7 +300,7 @@ void EBIndexSpace::define(const ProblemDomain    & a_domain,
     {
       pout() << "  Building level " << level << "..." << endl;
       n->clearMultiBoundaries();
-      n=buildNextLevel(a_geoserver);
+      n=buildNextLevel(a_geoserver, cellMax);
 
       if (n)
         {
@@ -558,22 +579,8 @@ EBISLevel* EBIndexSpace::buildFirstLevel(const ProblemDomain&   a_domain,
   CH_TIME("EBIndexSpace::buildFirstLevel");
   clear();
   m_isDefined = true;
+  CH_assert(a_nCellMax > 0);
 
-  if (a_nCellMax > 0)
-    {
-      m_nCellMax = a_nCellMax;
-    }
-  else
-    {
-      if (SpaceDim == 2)
-        {
-          m_nCellMax = 32;
-        }
-      else
-        {
-          m_nCellMax = 32;
-        }
-    }
   m_nlevels = 1;
   bool canref = (a_domain == refine(coarsen(a_domain,2), 2));
 
@@ -608,8 +615,7 @@ EBISLevel* EBIndexSpace::buildFirstLevel(const ProblemDomain&   a_domain,
                                  a_origin,
                                  a_dx,
                                  a_geoserver,
-                                 this,
-                                 m_distributedData,
+                                 m_nCellMax,
                                  a_fixRegularNextToMultiValued);
   m_domainLevel[0] = domLevel;
   return m_ebisLevel[0];
@@ -632,8 +638,10 @@ void EBIndexSpace::resetLevels(int nLevel)
 }
 
 EBISLevel* EBIndexSpace::buildNextLevel(const GeometryService & a_geoserver,
+                                        int                     a_nCellMax,
                                         bool                    a_fixRegularNextToMultiValued)
 {
+  CH_TIME("buildNextLevel");
   int ilev=0;
   for ( ; ilev <m_ebisLevel.size(); ++ilev)
     {
@@ -642,23 +650,15 @@ EBISLevel* EBIndexSpace::buildNextLevel(const GeometryService & a_geoserver,
   if (ilev == m_ebisLevel.size()) return NULL;
 
   {
-    string* leak = new string("EBIndexSpace::buildNextLevel_EBISLevel_");
-    char levelString[100];
-    sprintf(levelString,"%d",ilev);
-
-    *leak += levelString;
-
-    CH_TIME(leak->c_str());
-
+ 
     m_domainLevel[ilev] = m_domainLevel[ilev-1];
     m_domainLevel[ilev].coarsen(2);
     m_ebisLevel[ilev] = new EBISLevel(*m_ebisLevel[ilev-1],
                                       a_geoserver,
-                                      this,
-                                      m_distributedData,
+                                      a_nCellMax,
                                       a_fixRegularNextToMultiValued);
 
-    delete leak;
+ 
   }
 
   return m_ebisLevel[ilev];

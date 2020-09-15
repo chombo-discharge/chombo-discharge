@@ -170,6 +170,12 @@ int UnLongLongLoadBalance(Vector<int>&                      a_procAssignments,
                           const int                         a_numProc = numProc());
 
 ///
+/* Even simpler load balance scheme that just dices vector to give as close to the same number
+of boxes to each rank.  
+*/
+int basicLoadBalance(Vector<int>& a_procAssignments, int numBoxes, int a_numProc = numProc());
+
+///
 int
 LoadBalance(Vector<int>& procAssignments
             ,Real&                 effRatio

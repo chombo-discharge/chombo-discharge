@@ -50,11 +50,25 @@ IVSFAB<T>::~IVSFAB()
 /******************/
 template <class T> inline
 IVSFAB<T>::IVSFAB(const IntVectSet& a_ivsin,
-                  const int&        a_nvarin):m_dataPtr(0), m_nComp(a_nvarin), m_nIvs(0),
-                                              m_loVect(IntVect::Zero), 
-                                              m_hiVect(IntVect::Unit),
-                                              m_ivmap(a_ivsin.minBox(), a_nvarin),m_ivs(a_ivsin)
+                  const int&        a_nvarin)
+{
+  define( a_ivsin, a_nvarin );
+}
+
+
+/******************/
+template<class T> inline
+void IVSFAB<T>::define(const IntVectSet& a_ivsin,
+                       const int& a_nvarin )
 { 
+  m_dataPtr = NULL;
+  m_nComp = a_nvarin;
+  m_nIvs = 0;
+  m_loVect = IntVect::Zero;
+  m_hiVect = IntVect::Unit;
+  m_ivmap.define( a_ivsin.minBox(), a_nvarin );
+  m_ivs = a_ivsin;
+
   CH_assert(a_nvarin > 0);
   if (!a_ivsin.isEmpty())
     {
@@ -348,7 +362,7 @@ int IVSFAB<T>::size(const Box& a_region,
     }
   }
   retval += SpaceDim*sizeof(int)*numberThings; // for intvects
-  retval += 2*SpaceDim*sizeof(int); // box
+  retval += 2*SpaceDim*sizeof(Real); // box done as reals for some reason
   return retval;
 }
 ////////////////////
@@ -391,6 +405,12 @@ void IVSFAB<T>::linearOut(void* a_buf,
       cptr += m_dataPtr[iloc].linearSize();
     }
   }
+if( cptr - ((char*)a_buf) != size(a_region,a_comps) ) {
+  pout() << "    region " << a_region << endl;
+  pout() << "    comps " << a_comps.begin() << " to " << a_comps.end() << endl;
+  pout() << "    size " << size(a_region,a_comps) << endl;
+  pout() << "    ptrdiff  " << (cptr - ((char*)a_buf)) << endl;
+}
   CH_assert( cptr - ((char*)a_buf) == size(a_region,a_comps) );
 }
 

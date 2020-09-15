@@ -21,12 +21,11 @@
 #include "parstream.H"
 
 #ifdef MPI
-#include <mpi.h>
+#include "mpi.h"
 #endif
-
 #include "NamespaceHeader.H"
 
-using std::cout;
+
 using std::cerr;
 using std::ifstream;
 using namespace std;
@@ -214,29 +213,21 @@ void readABRfile(Vector<Vector<Box> >&      a_amrBoxes,
       while (!readyForBoxes)
       {
         getNextValidLine(ifs, sline);
-        //cout << sline << "\n";
 
         if (parseLine(sline, sversion0, version, bversion))
         {
-          //cout << " version = " << version << "\n";
         } else if (parseLine(sline, sversion1, version, bversion))
         {
-          //cout << " version = " << version << "\n";
         } else if (parseLine(sline, snlevels, nlevels, bnlevels))
         {
-          //cout << " nlevels = " << nlevels << "\n";
         } else if (parseLine(sline, scellcentering, cellcentering, bcellcentering))
         {
-          //cout << " cellcentering = " << cellcentering << "\n";
         } else if (parseLine(sline, sntimesteps, ntimesteps, bntimesteps))
         {
-          //cout << " ntimesteps = " << ntimesteps << "\n";
         } else if (parseLine(sline, snprocs, nprocs, bnprocs))
         {
-          //cout << " nprocs = " << nprocs << "\n";
         } else if (parseLine(sline, slevel0BoundingBox, level0BoundingBox, blevel0BoundingBox))
         {
-          //cout << " level0BoundingBox = " << level0BoundingBox << "\n";
           stringstream ist1;
           ist1 << level0BoundingBox.smallEnd() << " " << level0BoundingBox.bigEnd();
           saveL0domain = ist1.str();
@@ -256,9 +247,6 @@ void readABRfile(Vector<Vector<Box> >&      a_amrBoxes,
           //{
           //  sprintf(cc, " %d", refratio[ilev]);
           //  saverefratio += cc;
-          //  cout << refratio[ilev] << " (" << saverefratio << ")" <<"\n";
-          //}
-          //cout << " refratio = " << saverefratio << "\n";
         }
         else
         {
@@ -268,7 +256,6 @@ void readABRfile(Vector<Vector<Box> >&      a_amrBoxes,
 
         readyForBoxes = (bversion && bnlevels && brefratio && blevel0BoundingBox
                          && bcellcentering && bnprocs && bntimesteps);
-        //cout << " readyForBoxes=" << readyForBoxes << "\n";
       }
 
       stringstream ist1;
@@ -322,7 +309,6 @@ void readABRfile(Vector<Vector<Box> >&      a_amrBoxes,
           while (getNextValidLine(ifs, sline))
           {
 
-            //cout << " nob line sline =" << sline << "\n";
             if (parseLine(sline, snboxes, nboxes, bnboxes))
             {
               pout() << "Nboxes on level " << ilev << " = " << nboxes << "\n";
@@ -331,7 +317,6 @@ void readABRfile(Vector<Vector<Box> >&      a_amrBoxes,
           }
           //CH_assert(nboxes > 0);  //???
 
-          //cout << "ilev=" << ilev << " nboxes=" << nboxes << "\n";
           a_amrBoxes[ilev].resize(nboxes);
           a_amrRanks[ilev].resize(nboxes);
 
@@ -340,13 +325,10 @@ void readABRfile(Vector<Vector<Box> >&      a_amrBoxes,
           int ibox=0;
           while (ibox < nboxes)
           {
-            //cout << "ibox=" << ibox << "\n";
 
             getNextValidLine(ifs, sline);
-            //cout << "box line sline=" << sline << "\n";
 
             int npl = determineNumberBoxesOnLine(sline);
-            //cout << " npl=" << npl << "\n";
 
             // first weak attempt at ensuring data is in correct format for stream parsing
             CH_assert(countChar(sline, "(") == countChar(sline, ")"));
@@ -360,13 +342,11 @@ void readABRfile(Vector<Vector<Box> >&      a_amrBoxes,
               ist >> bigend;
 
               Box tb(smallend, bigend);
-              //cout << "box tb=" << tb << "\n";
 
               int rank;
               while (char ch = ist.get()) if (ch=='[') break;
               ist >> rank;
               while (char ch = ist.get()) if (ch==']') break;
-              //cout << "rank=" << rank << "\n";
 
               if (rank > maxRankFromFile) maxRankFromFile=rank;
 
@@ -412,13 +392,13 @@ void readABRfile(Vector<Vector<Box> >&      a_amrBoxes,
   {
     // Otherwise, don't need to broadcast
     //pout() << " broadcast nlevels & nprocs, etc" << "\n";
-    broadcast(nlevels, 0);
-    broadcast(nprocs, 0);
+    broadcast(nlevels, uniqueProc(SerialTask::compute));
+    broadcast(nprocs, uniqueProc(SerialTask::compute));
 
-    broadcast(a_refinementRatio, 0);
-    broadcast(cellcentering, 0);
-    broadcast(a_baseLevelBoundingBox, 0);
-    broadcast(ntimesteps, 0);
+    broadcast(a_refinementRatio, uniqueProc(SerialTask::compute));
+    broadcast(cellcentering, uniqueProc(SerialTask::compute));
+    broadcast(a_baseLevelBoundingBox, uniqueProc(SerialTask::compute));
+    broadcast(ntimesteps, uniqueProc(SerialTask::compute));
 
     a_amrBoxes.resize(nlevels);
     a_amrRanks.resize(nlevels);
@@ -426,22 +406,16 @@ void readABRfile(Vector<Vector<Box> >&      a_amrBoxes,
     for (int ilev=0; ilev < nlevels; ilev++)
       {
         int nboxes;
-        if (procID() == 0)
+        if (procID() == uniqueProc(SerialTask::compute))
         {
           nboxes = a_amrBoxes[ilev].size();
         }
-        broadcast(nboxes, 0);
+        broadcast(nboxes, uniqueProc(SerialTask::compute));
         a_amrBoxes[ilev].resize(nboxes);
         a_amrRanks[ilev].resize(nboxes);
 
-        broadcast(a_amrBoxes[ilev], 0);
-        broadcast(a_amrRanks[ilev], 0);
-
-        //for (int b=0; b<a_amrBoxes[ilev].size(); b++)
-        //{
-        //  broadcast(a_amrBoxes[ilev][b], 0);
-        //  broadcast(a_amrRanks[ilev][b], 0);
-        //}
+        broadcast(a_amrBoxes[ilev], uniqueProc(SerialTask::compute));
+        broadcast(a_amrRanks[ilev], uniqueProc(SerialTask::compute));
       }
   }
 #endif
@@ -466,7 +440,6 @@ int determineNumberBoxesOnLine(const string sline)
   }
   //CH_assert(nc%2 == 0);
   //CH_assert(npl > 0);
-  //cout << " npl=" << npl << "\n";
   return npl;
 }
 
@@ -481,7 +454,6 @@ bool getNextValidLine(std::ifstream& ifs, string& sline)
     }
     else
     {
-      //cout << "getNextValidLine=(" << sline << ")" << "\n";
       break;
     }
     //if EOF FAIL?
@@ -511,14 +483,12 @@ int countChar(const string s, const char* c)
   string::size_type st=0;
   while ( (st = s.find(c[0], st)) != string::npos )
   {
-    //cout << " st=" << st << "\n";
     st++;  // so we don't find same one again?
     nc++;
     //if (nc > 10) break;
   }
   //CH_assert(nc > 0);
   //nc /= 2;
-  //cout << "nc = " << nc << "\n";
   return nc;
 }
 
@@ -528,10 +498,8 @@ bool parseLine(string s, const string key, float& value, bool& flag)
   int i1;
   if ( (i1 = s.find(key)) >= 0)
   {
-    //cout << "Found key:" << key << " @ position" << i1 << "\n";
     s.replace(i1, key.size(), "");
     value = atof(s.c_str());
-    //cout << " left with " << " (" << s << ") value = " << value << "\n";
     checkForDuplicateKey(flag, key);
     flag = true;
     return true;
@@ -548,10 +516,9 @@ bool parseLine(string s, const string key, int& value, bool& flag)
   int i1;
   if ( (i1 = s.find(key)) >= 0)
   {
-    //cout << "Found key:" << key << " @ position" << i1 << "\n";
+
     s.replace(i1, key.size(), "");
     value = atoi(s.c_str());
-    //cout << " left with " << " (" << s << ") value = " << value << "\n";
     checkForDuplicateKey(flag, key);
     flag = true;
     return true;
@@ -568,7 +535,6 @@ bool parseLine(string s, const string key, Box& value, bool& flag)
   int i1;
   if ( (i1 = s.find(key)) >= 0)
   {
-    //cout << "Found key:" << key << " @ position" << i1 << "\n";
     s.replace(i1, key.size(), "");
     istringstream ist(s);
     IntVect smallend, bigend;
@@ -576,7 +542,6 @@ bool parseLine(string s, const string key, Box& value, bool& flag)
     ist >> bigend;
     Box tb(smallend, bigend);
     value = tb;
-    //cout << " left with " << " (" << s << ") value = " << value << "\n";
     checkForDuplicateKey(flag, key);
     flag = true;
     return true;
@@ -599,7 +564,6 @@ bool parseMultiValueLine(string s, const string key, vector<int>& value, const i
   int i1;
   if ( (i1 = s.find(key)) >= 0)
   {
-    //cout << "Found key:" << key << " @ position" << i1 << "\n";
     s.replace(i1, key.size(), "");
 
     // needs much more work!
@@ -621,9 +585,7 @@ bool parseMultiValueLine(string s, const string key, vector<int>& value, const i
     for (int ilev=0; ilev<nvalues; ilev++)
     {
       value[ilev] = atoi(vst[ilev].c_str());
-      //cout << "ilev= " << ilev << " value=" << value[ilev] << "\n";
     }
-    //cout << " left with " << " (" << s << ") value = " << value << "\n";
     checkForDuplicateKey(flag, key);
     flag = true;
     return true;

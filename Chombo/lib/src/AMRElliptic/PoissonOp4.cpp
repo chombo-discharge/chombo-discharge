@@ -10,12 +10,12 @@
 
 #include "AMRPoissonOpF_F.H"
 #include "PoissonOp4.H"
-#include "PoissonOp4F_F.H"
+#include "NewPoissonOp4F_F.H"
 #include "NamespaceHeader.H"
 
 void PoissonOp4::define(const RealVect& a_dx,
-			const ProblemDomain& a_domain,
-			BCFunc a_bc)
+                        const ProblemDomain& a_domain,
+                        BCFunc a_bc)
 {
   m_bc     = a_bc;
   m_domain = a_domain;
@@ -23,9 +23,9 @@ void PoissonOp4::define(const RealVect& a_dx,
 }
 
 void PoissonOp4::residual(LevelData<FArrayBox>& a_lhs, 
-			  const LevelData<FArrayBox>& a_phi,
-			  const LevelData<FArrayBox>& a_rhs, 
-			  bool a_homogeneous)
+                          const LevelData<FArrayBox>& a_phi,
+                          const LevelData<FArrayBox>& a_rhs, 
+                          bool a_homogeneous)
 {
   applyOp(a_lhs, a_phi, a_homogeneous);
   m_levelOps.scale(a_lhs, -1.0);
@@ -37,7 +37,7 @@ void PoissonOp4::residual(LevelData<FArrayBox>& a_lhs,
 // (diagonization of L -- A is the matrix version of L)
 // then smooths with a couple of passes of levelGSRB
 void PoissonOp4::preCond(LevelData<FArrayBox>& a_phi, 
-			 const LevelData<FArrayBox>& a_rhs)
+                         const LevelData<FArrayBox>& a_rhs)
 {
   
 // diagonal term of this operator is 4/h/h in 2D, 6/h/h in 3D,
@@ -60,8 +60,8 @@ void PoissonOp4::preCond(LevelData<FArrayBox>& a_phi,
 }
 
 void PoissonOp4::applyOp(LevelData<FArrayBox>& a_lhs, 
-			 const LevelData<FArrayBox>& a_phi,
-			 bool a_homogeneous )
+                         const LevelData<FArrayBox>& a_phi,
+                         bool a_homogeneous )
 {
 
   LevelData<FArrayBox>& phi = (LevelData<FArrayBox>&)a_phi;
@@ -90,21 +90,21 @@ void PoissonOp4::applyOp(LevelData<FArrayBox>& a_lhs,
 #pragma omp for
     for (int ibox=0;ibox<nbox; ibox++)
       {
-	const Box& region = dbl[dit[ibox]];
+        const Box& region = dbl[dit[ibox]];
 
-	FORT_OPERATORLAP4(CHF_FRA(a_lhs[dit[ibox]]),
-			  CHF_CONST_FRA(phi[dit[ibox]]),
-			  CHF_BOX(region),
-			  CHF_CONST_REAL(dx),
-			  CHF_CONST_REAL(alpha),
-			  CHF_CONST_REAL(beta));
+        FORT_OPERATORLAP4(CHF_FRA(a_lhs[dit[ibox]]),
+                          CHF_CONST_FRA(phi[dit[ibox]]),
+                          CHF_BOX(region),
+                          CHF_CONST_REAL(dx),
+                          CHF_CONST_REAL(alpha),
+                          CHF_CONST_REAL(beta));
       }
   }//end pragma
 }
 
 void PoissonOp4::createCoarsened(LevelData<FArrayBox>& a_lhs,
-				 const LevelData<FArrayBox>& a_rhs,
-				 const int& a_refRat)
+                                 const LevelData<FArrayBox>& a_rhs,
+                                 const int& a_refRat)
 {
   int ncomp = a_rhs.nComp();
   IntVect ghostVect = a_rhs.ghostVect();
@@ -129,39 +129,39 @@ void PoissonOp4::createCoarsened(LevelData<FArrayBox>& a_lhs,
 }
 
 void PoissonOp4::create(LevelData<FArrayBox>& a_lhs, 
-			const LevelData<FArrayBox>& a_rhs)
+                        const LevelData<FArrayBox>& a_rhs)
 {
   m_levelOps.create(a_lhs, a_rhs);
 }
 
 void PoissonOp4::assign(LevelData<FArrayBox>& a_lhs, 
-			const LevelData<FArrayBox>& a_rhs)
+                        const LevelData<FArrayBox>& a_rhs)
 {
   m_levelOps.assign(a_lhs, a_rhs);
 }
 
 Real PoissonOp4::dotProduct(const LevelData<FArrayBox>& a_1, 
-			    const LevelData<FArrayBox>& a_2)
+                            const LevelData<FArrayBox>& a_2)
 {
   return m_levelOps.dotProduct(a_1, a_2);
 }
 
 void PoissonOp4::incr(LevelData<FArrayBox>& a_lhs, 
-		      const LevelData<FArrayBox>& a_x, 
-		      Real a_scale)
+                      const LevelData<FArrayBox>& a_x, 
+                      Real a_scale)
 {
   m_levelOps.incr(a_lhs, a_x, a_scale);
 }
 
 void PoissonOp4::axby(LevelData<FArrayBox>& a_lhs, 
-		      const LevelData<FArrayBox>& a_x,
-		      const LevelData<FArrayBox>& a_y, Real a_a, Real a_b)
+                      const LevelData<FArrayBox>& a_x,
+                      const LevelData<FArrayBox>& a_y, Real a_a, Real a_b)
 {
   m_levelOps.axby(a_lhs, a_x, a_y, a_a, a_b);
 }
 
 void PoissonOp4::scale(LevelData<FArrayBox>& a_lhs, 
-		       const Real& a_scale)
+                       const Real& a_scale)
 {
   m_levelOps.scale(a_lhs, a_scale);
 }
@@ -177,8 +177,8 @@ Real PoissonOp4::norm(const LevelData<FArrayBox>& a_x, int a_ord)
 }
 
 void PoissonOp4::relax(LevelData<FArrayBox>& a_e,
-		       const LevelData<FArrayBox>& a_residual,
-		       int a_iterations)
+                       const LevelData<FArrayBox>& a_residual,
+                       int a_iterations)
 {
   for (int i=0; i<a_iterations; i++)
   {
@@ -187,8 +187,8 @@ void PoissonOp4::relax(LevelData<FArrayBox>& a_e,
 }
 
 void PoissonOp4::createCoarser(LevelData<FArrayBox>& a_coarse,
-			       const LevelData<FArrayBox>& a_fine,
-			       bool ghosted)
+                               const LevelData<FArrayBox>& a_fine,
+                               bool ghosted)
 {
   IntVect ghost = a_fine.ghostVect();
   CH_assert(a_fine.disjointBoxLayout().coarsenable(2));
@@ -198,8 +198,8 @@ void PoissonOp4::createCoarser(LevelData<FArrayBox>& a_coarse,
 }
 
 void PoissonOp4::restrictResidual(LevelData<FArrayBox>& a_resCoarse,
-				  LevelData<FArrayBox>& a_phiFine,
-				  const LevelData<FArrayBox>& a_rhsFine)
+                                  LevelData<FArrayBox>& a_phiFine,
+                                  const LevelData<FArrayBox>& a_rhsFine)
 {
 
   a_phiFine.exchange();
@@ -212,8 +212,8 @@ void PoissonOp4::restrictResidual(LevelData<FArrayBox>& a_resCoarse,
 #pragma omp for 
     for(int ibox = 0; ibox < nbox; ibox++)
       {
-	FArrayBox& phi = a_phiFine[dit[ibox]];
-	m_bc(phi, dblFine[dit[ibox]], m_domain, m_dx[0], true);
+        FArrayBox& phi = a_phiFine[dit[ibox]];
+        m_bc(phi, dblFine[dit[ibox]], m_domain, m_dx[0], true);
       }
   }//end pragma
 
@@ -223,29 +223,29 @@ void PoissonOp4::restrictResidual(LevelData<FArrayBox>& a_resCoarse,
 #pragma omp for 
     for(int ibox = 0; ibox < nbox; ibox++)
       {
-	FArrayBox&       phi = a_phiFine[dit[ibox]];
-	const FArrayBox& rhs = a_rhsFine[dit[ibox]];
-	FArrayBox&       res = a_resCoarse[dit[ibox]];
-	
-	Box region = dblFine[dit[ibox]];
-	const IntVect& iv = region.smallEnd();
-	IntVect civ = coarsen(iv, 2);
-	
-	res.setVal(0.0);
+        FArrayBox&       phi = a_phiFine[dit[ibox]];
+        const FArrayBox& rhs = a_rhsFine[dit[ibox]];
+        FArrayBox&       res = a_resCoarse[dit[ibox]];
+        
+        Box region = dblFine[dit[ibox]];
+        const IntVect& iv = region.smallEnd();
+        IntVect civ = coarsen(iv, 2);
+        
+        res.setVal(0.0);
 
-	FORT_RESTRICTRES4(CHF_FRA_SHIFT(res, civ),
-			  CHF_CONST_FRA_SHIFT(phi, iv),
-			  CHF_CONST_FRA_SHIFT(rhs, iv),
-			  CHF_CONST_REAL(alpha),
-			  CHF_CONST_REAL(beta),
-			  CHF_BOX_SHIFT(region, iv),
-			  CHF_CONST_REAL(m_dx[0]));
+        FORT_RESTRICTRES4(CHF_FRA_SHIFT(res, civ),
+                          CHF_CONST_FRA_SHIFT(phi, iv),
+                          CHF_CONST_FRA_SHIFT(rhs, iv),
+                          CHF_CONST_REAL(alpha),
+                          CHF_CONST_REAL(beta),
+                          CHF_BOX_SHIFT(region, iv),
+                          CHF_CONST_REAL(m_dx[0]));
       }
   }//end pragma
 }
 
 void PoissonOp4::prolongIncrement(LevelData<FArrayBox>& a_phiThisLevel,
-				  const LevelData<FArrayBox>& a_correctCoarse)
+                                  const LevelData<FArrayBox>& a_correctCoarse)
 {
 
   DisjointBoxLayout dbl = a_phiThisLevel.disjointBoxLayout();
@@ -258,23 +258,23 @@ void PoissonOp4::prolongIncrement(LevelData<FArrayBox>& a_phiThisLevel,
 #pragma omp for 
     for(int ibox = 0; ibox < nbox; ibox++)
       {
-	FArrayBox& phi =  a_phiThisLevel[dit[ibox]];
-	const FArrayBox& coarse = a_correctCoarse[dit[ibox]];
-	Box region = dbl[dit[ibox]];
-	const IntVect& iv = region.smallEnd();
-	IntVect civ=coarsen(iv, 2);
-	
-	FORT_PROLONG(CHF_FRA_SHIFT(phi, iv),
-		     CHF_CONST_FRA_SHIFT(coarse, civ),
-		     CHF_BOX_SHIFT(region, iv),
-		     CHF_CONST_INT(mgref));
+        FArrayBox& phi =  a_phiThisLevel[dit[ibox]];
+        const FArrayBox& coarse = a_correctCoarse[dit[ibox]];
+        Box region = dbl[dit[ibox]];
+        const IntVect& iv = region.smallEnd();
+        IntVect civ=coarsen(iv, 2);
+        
+        FORT_PROLONG(CHF_FRA_SHIFT(phi, iv),
+                     CHF_CONST_FRA_SHIFT(coarse, civ),
+                     CHF_BOX_SHIFT(region, iv),
+                     CHF_CONST_INT(mgref));
       }
   }//end pragma
 }
 
 /***/
 void PoissonOp4::levelGSRB(LevelData<FArrayBox>& a_phi,
-			   const LevelData<FArrayBox>& a_rhs)
+                           const LevelData<FArrayBox>& a_rhs)
 {
   CH_assert(a_phi.isDefined());
   CH_assert(a_rhs.isDefined());
@@ -298,22 +298,22 @@ void PoissonOp4::levelGSRB(LevelData<FArrayBox>& a_phi,
 #pragma omp parallel
       {
 #pragma omp for 
-	for (int ibox=0; ibox < nbox; ibox++)
-	  {
-	    const Box& region = dbl[dit[ibox]];
-	    FArrayBox& phiFab = a_phi[dit[ibox]];
-	    
-	    if (whichPass==0)
-	      m_bc( phiFab, region, m_domain, m_dx[0], true );
-	    else
-	      m_bc(tmp[dit[ibox]],  region, m_domain,  m_dx[0], true);
-	    FORT_GSRBLAPLACIAN4(CHF_FRA(phiFab),
-				CHF_CONST_FRA(a_rhs[dit[ibox]]),
-				CHF_BOX(region),
-				CHF_CONST_REAL(m_dx[0]),
-				CHF_FRA(tmp[dit[ibox]]),
-				CHF_CONST_INT(whichPass));
-	  } // end loop through grids
+        for (int ibox=0; ibox < nbox; ibox++)
+          {
+            const Box& region = dbl[dit[ibox]];
+            FArrayBox& phiFab = a_phi[dit[ibox]];
+            
+            if (whichPass==0)
+              m_bc( phiFab, region, m_domain, m_dx[0], true );
+            else
+              m_bc(tmp[dit[ibox]],  region, m_domain,  m_dx[0], true);
+            FORT_GSRBLAPLACIAN4(CHF_FRA(phiFab),
+                                CHF_CONST_FRA(a_rhs[dit[ibox]]),
+                                CHF_BOX(region),
+                                CHF_CONST_REAL(m_dx[0]),
+                                CHF_FRA(tmp[dit[ibox]]),
+                                CHF_CONST_INT(whichPass));
+          } // end loop through grids
       }//end pragma
     } // end loop through red-black
 }
@@ -339,8 +339,8 @@ void PoissonOp4Factory::define(const RealVect& a_dx,  BCFunc a_bc)
 }
 
 PoissonOp4* PoissonOp4Factory::MGnewOp(const ProblemDomain& a_FineindexSpace,
-				       int   a_depth,
-				       bool  a_homoOnly)
+                                       int   a_depth,
+                                       bool  a_homoOnly)
 {
   CH_assert(a_depth >= 0 );
   CH_assert(m_bc != NULL);

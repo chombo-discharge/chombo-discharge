@@ -95,6 +95,13 @@ public:
   {
   }
 
+  ///this does return higher order moments.
+  virtual bool generatesHigherOrderMoments() const
+    {
+      return true; 
+    }
+
+  ///
   /**
      Return true if every cell in region is regular at the
      refinement described by dx.
@@ -134,14 +141,14 @@ public:
   /**
      Define the internals of the input ebisRegion.
   */
-  virtual void fillGraph(BaseFab<int>        & a_regIrregCovered,
-                         Vector<IrregNode>   & a_nodes,
-                         const Box           & a_validRegion,
-                         const Box           & a_ghostRegion,
-                         const ProblemDomain & a_domain,
-                         const RealVect      & a_origin,
-                         const Real          & a_dx) const;
-
+  virtual void fillGraph(BaseFab<int>&        a_regIrregCovered,
+                         Vector<IrregNode>&   a_nodes,
+                         const Box&           a_validRegion,
+                         const Box&           a_ghostRegion,
+                         const ProblemDomain& a_domain,
+                         const RealVect&      a_origin,
+                         const Real&          a_dx,
+                         const DataIndex&     a_di ) const;
   /**
    */
   void
@@ -186,7 +193,21 @@ public:
   }
 
 private:
+  void
+  fixRegularCellsNextToCovered(Vector<IrregNode>   & a_nodes, 
+                               BaseFab<int>        & a_regIrregCovered,
+                               const Box           & a_validRegion,
+                               const Box           & a_domain,
+                               const IntVect       & a_iv,
+                               const Real          & a_dx) const;
+  void
+  getFullNodeWithCoveredFace(IrregNode            & a_newNode, 
+                             const BaseFab<int>   & a_regIrregCovered,
+                             const IntVect        & a_iv,
+                             const Real           & a_dx,
+                             const Box            & a_domain) const;
 
+  
   RefCountedPtr<WGSRefinementCriterion> m_refCrit;
   
   Real                m_threshold;

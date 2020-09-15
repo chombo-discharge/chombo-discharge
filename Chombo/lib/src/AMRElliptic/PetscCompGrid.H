@@ -38,9 +38,9 @@ public:
 
   //! Base class constructor. Called by all subclass constructors.
   PetscCompGrid(int a_dof) : m_gid0(0),m_mat(0),m_Pmat(0),m_CFStencilRad(2),m_writeMatlab(false),
-			     m_averageFineSolutionToCoarse(true),m_verbose(0),m_dof(a_dof),
-			     m_num_extra_nnz(0),m_repartition(PETSC_FALSE),
-			     m_patch_size(0),m_from_petscscat(0)
+                             m_averageFineSolutionToCoarse(true),m_verbose(0),m_dof(a_dof),
+                             m_num_extra_nnz(0),m_repartition(PETSC_FALSE),
+                             m_patch_size(0),m_from_petscscat(0)
   {
 #if defined(PETSC_USE_LOG)
     PetscLogEventRegister("createMatrix",PETSC_VIEWER_CLASSID,&m_event0);

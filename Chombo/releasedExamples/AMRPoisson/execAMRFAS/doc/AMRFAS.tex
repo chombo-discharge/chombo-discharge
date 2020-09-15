@@ -1,0 +1,182 @@
+\documentclass[10pt]{article}
+
+\usepackage[round]{natbib}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{amsmath}
+\usepackage{mathrsfs}
+\usepackage{listings}
+
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+\title{FAS Multigrid in Chombo}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This is an application with illustrates the use of the AMR Full Approximation Scheme (FAS) multigrid solver for nonlinear problems within Chombo \citep{Chombo}. 
+
+Here, we first describe the nonlinear problem that the code solves (\cref{sec:problem}). In \cref{sec:options} we describe some of options available in the application, and in \cref{sec:tests} we demonstrate the accuracy of the code. Finally, in \cref{sec:algorithm}, we describe how we implement the algorithm on an AMR hierarchy.
+
+\section{Example problem}
+\label{sec:problem}
+We follow \cite{Henson2002} and consider the nonlinear problem
+\begin{align}
+- \nabla^2 u + \gamma \, u e^u = f,
+\end{align}
+where $\gamma$ is a constant, $f$ is some forcing term and $u$ is the solution we wish to obtain. The domain is a 2D unit square ($0<x<1, 0<y<1$), and boundary conditions are given by $u=0$ on all sides. 
+
+The size of $\gamma$ determines the strength of the nonlinearity; when $\gamma=0$ the problem reduces to solving a Poisson equation. We choose the forcing $f$ such that the problem has an analytic solution, allowing us to determine the accuracy of our numerical scheme.
+
+The example code contains two difference problems. The problem which will be solver is determined by the \texttt{main.problem} parameter in the inputs file, which should be set to either $0$ for the `exact' problem (\cref{sec:exact})or $1$ for the `inexact' problem' (\cref{sec:inexact}).
+
+\subsection{Exact}
+\label{sec:exact}
+Taking 
+\begin{align}
+u=(x-x^2)(y-y^2),
+\end{align}
+the forcing term becomes
+\begin{align}
+f = 2 \left[ (x-x^2) + (y-y^2) \right] + \gamma (x-x^2)(y-y^2) e^{(x-x^2)(y-y^2)}.
+\end{align}
+As \cite{Henson2002} note, the solution here is a second order polynomial so there is no discretization error with our second order scheme. Hence, we refer to this test case as `exact'.
+
+
+\subsection{Inexact}
+\label{sec:inexact}
+Choosing 
+\begin{align}
+u=(x^2-x^3) \sin (3 \pi y),
+\end{align}
+the forcing term becomes
+\begin{align}
+f = \left\{ \left[9 \pi^2 + \gamma e^{(x^2-x^3) \sin (3 \pi y)} \right] (x^2 - x^3) +6x -2 \right\} \sin (3 \pi y),
+\end{align}
+which will now have a notable discretization error.
+
+\section{Options}
+\label{sec:options}
+The \texttt{inputs} file controls various aspects of the application.
+
+\subsection{Grids}
+When \texttt{grids}.\texttt{max\char`_level} is greater than $0$, the grid hierarchy is determined by refining all cells where
+\begin{align}
+\text{max}(\nabla f) \Delta x > \texttt{grids}.\texttt{refine}\char`_\texttt{threshold}.
+\end{align}
+Alternatively, you can specify the desired grids by setting \texttt{grids.read\char`_in\char`_grids=true} and using the format introduced at the end of the inputs file.
+
+
+\section{Tests}
+\label{sec:tests}
+The python script \texttt{runTests.py} executes a convergence test on a fixed AMR hierarchy of grids and prints the results. A typical output for $\gamma=100$ and the `exact' test problem looks like
+\begin{verbatim}
+==================================
+Convergence test
+----------------------------------
+Nx   | Max err  | L1       | L2       | Rate  || Runtime (s)  | Rate 
+16   | 1.67e-04 | 5.60e-05 | 7.28e-05 | 0.000 ||   0.103      | 0.000
+32   | 5.11e-05 | 1.45e-05 | 1.92e-05 | 1.634 ||   0.066      | 0.159
+64   | 1.40e-05 | 3.66e-06 | 4.88e-06 | 1.825 ||   0.086      | 0.330
+128  | 3.66e-06 | 9.18e-07 | 1.23e-06 | 1.913 ||   0.219      | 0.633
+256  | 9.34e-07 | 2.30e-07 | 3.07e-07 | 1.959 ||   0.656      | 0.748
+512  | 2.36e-07 | 5.74e-08 | 7.67e-08 | 1.979 ||   2.555      | 0.974
+1024 | 5.93e-08 | 1.44e-08 | 1.92e-08 | 1.990 ||  11.466      | 1.122
+==================================
+\end{verbatim}
+The convergence of the error $\epsilon$ between successive computations, $i$, is calculated as
+\begin{align}
+r_N = \frac{\epsilon(N_x^i)/ \epsilon(N_x^{i-1})}{N_x^i / N_x^{i-1}}.
+\end{align}
+The ratio between successive runtimes $\tau$ is scaled with the number of grid cells
+\begin{align}
+r_t = \frac{\tau(N_x^i) / \tau(N_x^{i-1})}{N_x^i / (N_x^{i-1})^2}.
+\end{align}
+
+
+
+\section{FAS Multigrid algorithm}
+\label{sec:algorithm}
+The FAS approach to geometric multigrid is a well established method for dealing with nonlinear problems - see e.g. \cite{Briggs2000, Henson2002} for a detailed introduction. The application of this method to an AMR hierarchy requires some care, as noted by \cite{Martin1996, Martin1998} for linear multigrid problems. Here we describe the AMR FAS algorithm used in Chombo, as originally written by Mark Adams, following the format introduced in the Chombo Design document.
+
+We wish to solve the equation
+\begin{align}
+N^{comp} \psi^{comp} = \rho^{comp},
+\end{align}
+on an AMR hierarchy $\{ \Omega \}_{l=0}^{l_max}$. The algorithm (\cref{alg:AMRFAS}) proceeds in two stages. First we solve down to the coarsest AMR level, then the problem on this level is solved by standard FAS multigrid \texttt{FASVCycle}, before completing the AMR portion of the algorithm. In the psuedocode descriptions, the restriction $R$ and interpolation $I$ operators are as described in \cite{Chombo}. $N^{nf}(\psi^\ell, \psi^{\ell-1})$ is a two-level discretization of the nonlinear operator, whilst $N^\ell(\psi^\ell)$ is a single-level discretization. The crucial difference is that the two-level version includes a reflux correction.
+
+Note that the \texttt{relax} procedure in both \texttt{AMRFASVCycle} and \texttt{FASVCycle} requires a coarse-fine boundary condition. During FAS multigrid it is the actual solution, not the error, which is smoothed, so boundary conditions are not simply $\psi=0$. A box on an initially refined level $\ell+1$ with a coarse-fine interface will retain its coarse-fine interface throughout the algorithm, so a boundary condition must be specified for smoothing steps. This boundary condition comes from level $\ell$, which must be appropriately coarsened. The ability to coarsen this boundary condition places a limit on the maximum depth of \texttt{FASVCycle}.
+
+\begin{algorithm}
+\caption{AMR FAS algorithm. In \texttt{relax}, $\lambda$ is the relaxation parameter for a Gauss-Seidel scheme. Note that bottom solver in FASVCycle is simply relaxation.}\label{alg:AMRFAS}
+\begin{algorithmic}[1]
+\State Residual $ = \rho - N(\psi)$
+\While {$||\text{Residual}|| > \epsilon ||\rho||$}
+\State AMRFASVCycle($\ell^{max}$)
+\State Residual $ = \rho - N(\psi)$
+\EndWhile
+
+\Procedure{AMRFASVCycle}{level $\ell$}
+\If {$\ell = \ell^{max}$} $r^\ell= \rho^\ell$ \EndIf
+\If {$\ell > 0$}
+\State relax($\psi^\ell$, $\psi^{\ell-1}$, $r^l$)
+\State $r^{\ell-1} = R(r^\ell) - N^{nf}(\psi^\ell, \psi^{\ell-1})$ on $\Omega^{\ell-1}$
+
+\State $r^{\ell-1} = R(r^\ell - N^{nf}(\psi^\ell, \psi^{\ell-1}))$ on $\mathcal{C}(\Omega^{\ell})$
+
+\State $r^{\ell-1} = r^{\ell-1} + N^{\ell-1}(R(\psi^{\ell}))$ on $\mathcal{C}(\Omega^{\ell})$
+
+\State $\psi^{\ell, save} = \psi^\ell$ on $\Omega^ell$
+
+\State AMRFASVCycle($\ell-1$)
+
+\State $\psi^{\ell, corr} = I(\psi^{\ell-1}) - \psi^{\ell, save}$ on $\Omega^ell$
+
+\State $\psi^{\ell} = \psi^\ell + \psi^{\ell, corr}$ on $\Omega^ell$
+
+\State relax($\psi^\ell$, $\psi^{\ell-1}$, $r^l$)
+ 
+\Else
+\State FASVCycle($\psi^0, r^0$)
+\EndIf
+\EndProcedure
+
+\Procedure{FASVCycle}{$\psi^\ell$, $r^l$}
+\State $\psi^{\ell, save} = \psi^\ell$
+\If {$\ell = \ell^\text{max depth}$}
+\State relax($\psi^\ell$, $\psi^{\ell-1}$, $r^\ell$)
+\Else
+%\State $\psi^{\ell, save} = \psi^\ell$
+\State relax($\psi^\ell$, $\psi_{valid}^{\ell-1}$, $r^\ell$)
+\State $r^{\ell-1} = R(r^\ell - N^\ell(\psi^\ell) + N^{\ell-1}(R(\psi^\ell))$
+\State FASVCycle($R(\psi^{\ell})$, $r^{\ell-1}$)
+\State $\psi^\ell = \psi^\ell + I(e^{\ell-1})$
+\State relax($\psi^\ell$, $\psi_{valid}^{\ell-1}$, $r^\ell$)
+%\State $e^\ell = \psi^\ell - \psi^{\ell, save}$
+\EndIf
+\State $e^\ell = \psi^\ell - \psi^{\ell, save}$
+\EndProcedure
+
+
+\Procedure{relax}{$\psi^\ell$, $\psi^{\ell-1}$, $r^l$}
+\State Fill $\psi^\ell$ BCs using quadratic interpolation with $\psi^{\ell-1}$
+\State $\psi^\ell = \psi^\ell + \lambda (N^{nf}(\psi^\ell, \psi^{\ell-1}) - r^\ell)$ on $\Omega^\ell$
+\EndProcedure
+
+
+
+
+\end{algorithmic}
+\end{algorithm}
+
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

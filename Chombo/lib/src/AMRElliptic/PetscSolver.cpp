@@ -130,28 +130,26 @@ void PetscSolverViscousTensor<LevelData<FArrayBox> >::define( LinearOp<LevelData
   // for now, have to duplicate code for each instance since there's no inheritance relationship between the two
   if (nwo_op)
     {
-      //cout << "new VT" << endl;
       m_dxCrse = nwo_op->dxCrse();
       
       // as a start, grab eta, lamdba, and A
       define( nwo_op->getAlpha(), nwo_op->getBeta(), 
-	      &(*nwo_op->getACoef()),
-	      &(*nwo_op->getEta()),
-	      &(*nwo_op->getLambda()));
+              &(*nwo_op->getACoef()),
+              &(*nwo_op->getEta()),
+              &(*nwo_op->getLambda()));
 
     }
   else
     {
       // old-style ViscousTensorOp
-      //cout << "Old VT" << endl;
       ViscousTensorOp *op = dynamic_cast<ViscousTensorOp*>( a_operator );  CH_assert(op);
       m_dxCrse = op->dxCrse();
       
       // as a start, grab eta, lamdba, and A
       define( op->getAlpha(), op->getBeta(), 
-	      &(*op->getACoef()),
-	      &(*op->getEta()),
-	      &(*op->getLambda()));
+              &(*op->getACoef()),
+              &(*op->getEta()),
+              &(*op->getLambda()));
 
     }
 }

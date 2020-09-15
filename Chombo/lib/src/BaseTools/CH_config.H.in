@@ -44,16 +44,25 @@
 // 'CHDEF_SYSTEM_X86VECEXT_CPU_BITS' and 'CHDEF_SYSTEM_X86VECEXT_COMPILER_BITS'.
 // The former indicates what the CPU supports and the latter which extensions
 // have intrinsics defined that work with the compiler/system
-#define CHDEF_BIT_SSE    (1 << 0)
-#define CHDEF_BIT_SSE2   (1 << 1)
-#define CHDEF_BIT_SSE3   (1 << 2)
-#define CHDEF_BIT_SSSE3  (1 << 3)
-#define CHDEF_BIT_SSE4D1 (1 << 4)
-#define CHDEF_BIT_SSE4D2 (1 << 5)
-#define CHDEF_BIT_SSE4A  (1 << 6)
-#define CHDEF_BIT_AVX    (1 << 7)
-#define CHDEF_BIT_FMA    (1 << 8)
-#define CHDEF_BIT_AVX2   (1 << 9)
+#define CHDEF_BIT_SSE        (1 <<  0)
+#define CHDEF_BIT_SSE2       (1 <<  1)
+#define CHDEF_BIT_SSE3       (1 <<  2)
+#define CHDEF_BIT_SSSE3      (1 <<  3)
+#define CHDEF_BIT_SSE4D1     (1 <<  4)
+#define CHDEF_BIT_SSE4D2     (1 <<  5)
+#define CHDEF_BIT_SSE4A      (1 <<  6)
+#define CHDEF_BIT_AVX        (1 <<  7)
+#define CHDEF_BIT_FMA        (1 <<  8)
+#define CHDEF_BIT_AVX2       (1 <<  9)
+#define CHDEF_BIT_TSXHLE     (1 << 10)  /* Unsupported */
+#define CHDEF_BIT_TSXRTM     (1 << 11)  /* Unsupported */
+#define CHDEF_BIT_AVX512F    (1 << 12)  /* AVX512 foundation */
+#define CHDEF_BIT_AVX512CD   (1 << 13)  /* Unsupported */
+#define CHDEF_BIT_AVX512CD   (1 << 13)  /* Unsupported */
+#define CHDEF_BIT_AVX512DQ   (1 << 14)  /* Unsupported */
+#define CHDEF_BIT_AVX512BW   (1 << 15)  /* Unsupported */
+#define CHDEF_BIT_AVX512FMA  (1 << 16)  /* Unsupported */
+#define CHDEF_BIT_AVX512VBMI (1 << 17)  /* Unsupported */
 #define CHDEF_SYSTEM_X86VECEXT_CPU_BITS 0
 #define CHDEF_SYSTEM_X86VECEXT_COMPILER_BITS 0
 
@@ -69,6 +78,7 @@
 #undef CHDEF_SYSTEM_X86VECEXT_AVX_H
 #undef CHDEF_SYSTEM_X86VECEXT_FMA_H
 #undef CHDEF_SYSTEM_X86VECEXT_AVX2_H
+#undef CHDEF_SYSTEM_X86VECEXT_AVX512F_H
 // This header, if defined, can be used generally for all extensions supported
 // by Intel (basically everything except sse4a).  It's usually <immintrin.h>.
 #undef CHDEF_SYSTEM_X86VECEXT_INTEL_H

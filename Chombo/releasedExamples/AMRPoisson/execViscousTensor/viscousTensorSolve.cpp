@@ -804,6 +804,9 @@ setupSolver(AMRMultiGrid<LevelData<FArrayBox> >& a_amrSolver,
   Real alpha =0.0;
   Real beta = 1.0;
 
+  ppSolver.query("alpha", alpha);
+  ppSolver.query("beta", beta);
+  
   Vector<RefCountedPtr<LevelData<FluxBox> > > vectEta;
   Vector<RefCountedPtr<LevelData<FluxBox> > > vectLambda;
   Vector<RefCountedPtr<LevelData<FArrayBox> > > vectACoef;

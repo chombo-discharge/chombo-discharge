@@ -27,6 +27,12 @@ public:
   virtual int whichBC(int                  a_idir,
                       Side::LoHiSide       a_side);
 
+  bool isDirichletDom(const VolIndex&   a_ivof,
+                      const VolIndex&   a_jvof,
+                      const EBCellFAB&  a_phi) const
+  {
+    return false;
+  }
 
   virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux,
                            const BaseFab<Real>&  a_phi,

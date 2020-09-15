@@ -39,6 +39,29 @@ using std::cerr;
 #include "memusage.H"
 #include "memtrack.H"
 
+  //----------------
+void setPhi(LevelData<EBCellFAB>& a_phi,
+            const EBLevelGrid  & a_eblg,
+            const Real         & a_dx)
+
+{
+  static const Real pi = 4.0*atan(1.0);
+  for(DataIterator dit = a_eblg.getDBL().dataIterator(); dit.ok(); ++dit)
+  {
+    const Box    & grid = a_eblg.getDBL()[dit()];
+    const EBISBox& ebis = a_eblg.getEBISL()[dit()];
+    a_phi[dit()].setVal(0.);
+    IntVectSet ivs(grid);
+    for(VoFIterator vofit(ivs, ebis.getEBGraph()); vofit.ok(); ++vofit)
+    {
+      const IntVect& iv = vofit().gridIndex();
+      Real x = a_dx*(iv[0]+0.5);
+      Real y = a_dx*(iv[1]+0.5);
+      Real val = sin(pi*x)*sin(pi*y);
+      a_phi[dit()](vofit(), 0) = val;
+    }
+  }
+}
 /********/
 void solve(const PoissonParameters&  a_params)
 {
@@ -52,6 +75,8 @@ void solve(const PoissonParameters&  a_params)
   Vector<LevelData<EBCellFAB>* > phi(a_params.numLevels);
   Vector<LevelData<EBCellFAB>* > rhs(a_params.numLevels);
   ParmParse pp;
+  RealVect dxLev = a_params.coarsestDx;
+  ProblemDomain domLev = a_params.coarsestDomain;
   for (int ilev = 0; ilev < a_params.numLevels; ilev++)
     {
       EBCellFactory factory(ebisl[ilev]);
@@ -60,7 +85,13 @@ void solve(const PoissonParameters&  a_params)
 
       //for now just set phi to zero and rhs to -1.
       EBLevelDataOps::setVal(*phi[ilev], 0.0);
+      //setTrigPhi(*phi[ilev], dxLev, a_params);
+      //EBLevelDataOps::setVal(*phi[ilev], 0.0);
+      EBLevelGrid eblg(grids[ilev], ebisl[ilev], domLev);
+      setPhi(*phi[ilev], eblg, dxLev[0]);
       EBLevelDataOps::setVal(*rhs[ilev], 1.0);
+      dxLev /=      a_params.refRatio[ilev];
+      domLev.refine(a_params.refRatio[ilev]);
     }
 
   //create the solver
@@ -85,8 +116,8 @@ void solve(const PoissonParameters&  a_params)
   pout() << "solving " << endl;
   //solve the equation
   solver.init(phi, rhs, a_params.maxLevel, 0);
-
-  solver.solveNoInit(phi, rhs, a_params.maxLevel, 0);
+  bool zeroPhi = false;
+  solver.solveNoInit(phi, rhs, a_params.maxLevel, 0, zeroPhi);
 
   //  dumpEBLevel(phi[0]);
 

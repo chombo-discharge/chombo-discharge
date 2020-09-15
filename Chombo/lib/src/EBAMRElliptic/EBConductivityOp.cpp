@@ -32,6 +32,8 @@
 //IntVect EBConductivityOp::s_ivDebug = IntVect(D_DECL(111, 124, 3));
 bool EBConductivityOp::s_turnOffBCs = false; //REALLY needs to default to false
 bool EBConductivityOp::s_forceNoEBCF = false; //REALLY needs to default to false
+int EBConductivityOp::s_numComps = 1;
+int EBConductivityOp::s_whichComp = 0;
 
 //-----------------------------------------------------------------------
 EBConductivityOp::
@@ -256,7 +258,8 @@ Real
 EBConductivityOp::
 getSafety()
 {
-  Real safety = 1.0;
+  Real safety = 0.5;//Jacobi
+  if(m_relaxType == 1 || m_relaxType == 2) safety = 1.0;//GSRB
   return safety;
 }
 //-----------------------------------------------------------------------
@@ -517,12 +520,14 @@ defineStencils()
   // create vofstencils for applyOp and
 
   Real fakeBeta = 1;
-  m_domainBC->setCoef(m_eblg,   fakeBeta ,      m_bcoef   );
-  m_ebBC->setCoef(    m_eblg,   fakeBeta ,      m_bcoIrreg);
+  ConductivityBaseDomainBC* cast_domainBC = dynamic_cast<ConductivityBaseDomainBC*>(&(*m_domainBC));
+  ConductivityBaseEBBC* cast_ebBC = dynamic_cast<ConductivityBaseEBBC*>(&(*m_ebBC));
+  cast_domainBC->setCoef(m_eblg,   fakeBeta ,      m_bcoef   );
+  cast_ebBC->setCoef(    m_eblg,   fakeBeta ,      m_bcoIrreg);
 
   Real dxScale = 1.0/m_dx;
-  m_ebBC->define((*m_eblg.getCFIVS()), dxScale); //has to happen AFTER coefs are set
-  LayoutData<BaseIVFAB<VoFStencil> >* fluxStencil = m_ebBC->getFluxStencil(0);
+  cast_ebBC->define((*m_eblg.getCFIVS()), dxScale); //has to happen AFTER coefs are set
+  LayoutData<BaseIVFAB<VoFStencil> >* fluxStencil = cast_ebBC->getFluxStencil(0);
 
   m_vofIterIrreg.define(     m_eblg.getDBL()); // vofiterator cache
   m_vofIterMulti.define(     m_eblg.getDBL()); // vofiterator cache
@@ -959,6 +964,8 @@ applyDomainFlux(Box * a_loBox,
               FArrayBox loFaceFlux(a_loBox[idir],a_nComps);
               int side = -1;
               Real time = 0;
+              ConductivityBaseDomainBC* cast_domainBC = dynamic_cast<ConductivityBaseDomainBC*>(&(*m_domainBC));
+              cast_domainBC->setCoef(m_eblg,   m_beta ,      m_bcoef   );
               m_domainBC->getFaceFlux(loFaceFlux,a_phiFAB,RealVect::Zero,m_dx*RealVect::Unit,idir,Side::Lo,a_dit,time,a_homogeneousPhysBC);
 
               BaseFab<Real>& bc = ((*m_bcoef)[a_dit][idir].getSingleValuedFAB());
@@ -1384,8 +1391,7 @@ norm(const LevelData<EBCellFAB>& a_rhs,
          }
        maxNorm = tmp;
 #endif
-//  Real volume=1.;
-//  EBLevelDataOps::gatherBroadCast(maxNorm, volume, 0);
+
  CH_STOP(t1);
 
  return maxNorm;
@@ -1458,6 +1464,10 @@ relax(LevelData<EBCellFAB>&       a_phi,
   else if (m_relaxType == 2)
     {
       relaxGSRBFast(a_phi, a_rhs, a_iterations);
+    }
+  else if (m_relaxType == 999)
+    {
+        //no relax
     }
   else
     {

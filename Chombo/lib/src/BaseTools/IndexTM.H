@@ -485,6 +485,32 @@ public:
 
   /*@}*/
 
+  ///
+  T integer_factorial(int n) const
+  {
+    CH_assert(n >= 0);
+    T retval;
+    if(n== 1 || n== 0)
+      {
+        retval = 1;
+      }
+    else
+      {
+        retval = integer_factorial(n-1)*n;
+      }
+    return retval;
+  }
+  
+  ///
+  T factorial() const
+  {
+    int retval = 1;
+    for(int idir = 0; idir < N; idir++)
+      {
+        retval *= integer_factorial(m_vect[idir]);
+      }
+    return retval;
+  }
 protected:
   IndexTM(const char*);// used to build Zero and Unit static members
 

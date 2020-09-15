@@ -1,0 +1,71 @@
+# Chombo make.defs file based on
+# OSX High Sierra default compiler clang-1000.11.45.5
+# gfortran 8.1.0
+# OpenMPI 4.0.0 in /usr/local/openmpi4
+# hdf5-1.10.4 in /usr/local/hdf5-ompi
+# zlib 1.2.11 from Macports in /opt/local/lib
+# Modify paths below and name for fortran compiler FC if your locations and/or
+#  mpi fortran compiler names are different.
+#
+# Copy this file to:
+#
+#    Chombo/lib/mk/Make.defs.local
+#
+#
+#
+# Use this file to set Chombo makefile variables for the local
+# installation.  To set variables for just a single computer
+# create a file named:
+#
+#    Chombo/lib/mk/local/Make.defs.<hostname>
+#
+# where <hostname> is the value of `uname -n` (or `hostname`, if uname doesn't work)
+
+# The default values for the main variables here are in:
+#
+#    Chombo/lib/mk/Make.defs.defaults
+
+# This file is include'd from Make.defs after:
+#    Make.defs.defaults
+# and before:
+#    Make.defs.<hostname> Make.defs.config Make.rules
+
+makefiles+=Make.defs.local
+
+################################################################
+
+#begin  -- dont change this line
+
+## Override the default values here
+
+CXX           = clang++ #mpicxx  #clang++
+FC            = mpifort
+MPI           = TRUE
+MCP_DIR       = /usr/local/openmpi4/lib
+## Note: don't set the MPICXX variable if you don't have MPI installed
+MPICXX        = mpicxx
+Z_DIR	      = /opt/local/lib
+
+CPP           = cpp #  $(CXX) -E
+CH_CPP 	      = $(CXX) -E
+USE_64        = TRUE
+USE_HDF       = TRUE
+HDF5_DIR      = /usr/local/hdf5-ompi
+HDFINCFLAGS   = -I$(HDF5_DIR)/include # -DH5_USE_16_API
+HDFLIBFLAGS   = -L$(HDF5_DIR)/lib -lhdf5 -L$(Z_DIR) -lz
+## Note: don't set the HDFMPI* variables if you don't have parallel HDF installed
+HDFMPIINCFLAGS= -I$(HDF5_DIR)/include # -DH5_USE_16_API
+HDFMPILIBFLAGS= -L$(HDF5_DIR)/lib -lhdf5 -L$(Z_DIR) -lz
+#USE_MF        =
+USE_MT        = TRUE
+
+foptflags     += -O3
+cxxoptflags += -O2 -w
+
+flibflags     += -L/usr/local/lib -lgfortran 
+lddbgflags    = -L$(MCP_DIR) 
+ldoptflags    = -L$(MCP_DIR) 
+
+LAPACKLIBS = -framework ACCELERATE
+
+#end  -- dont change this line

@@ -34,6 +34,15 @@ void CellToEdge(const FArrayBox& a_cellData, const int a_cellComp,
                 FArrayBox& a_edgeData, const int a_edgeComp,
                 const int a_dir);
 
+#ifdef USE_PROTO
+void ProtoCellToEdgePatch(BaseFab<Real>      & a_edgeData, 
+                          const int          & a_edgeComp,
+                          const BaseFab<Real>& a_cellData, 
+                          const int          & a_cellComp, 
+                          const Box          & a_edgeBox, 
+                          const int          & a_idir);
+
+#endif
 #include "NamespaceFooter.H"
 
 #endif

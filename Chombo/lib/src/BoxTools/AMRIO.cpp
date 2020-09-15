@@ -1156,7 +1156,12 @@ writeFABname(const FArrayBox      * a_dataPtr,
 
   const FArrayBox& data = *a_dataPtr;
 
+#ifdef CH_MPI
+  HDF5Handle handle(a_filename, HDF5Handle::CREATE);
+#else
   HDF5Handle handle(a_filename, HDF5Handle::CREATE_SERIAL);
+#endif
+
   HDF5HeaderData header;
 
   int numlevels= 1;
@@ -1341,7 +1346,12 @@ writeVectorLevelName(const Vector<LevelData<FArrayBox>*>* a_dataPtr,
     return;
   }
 
+#ifdef CH_MPI
+  HDF5Handle handle(a_filename, HDF5Handle::CREATE);
+#else
   HDF5Handle handle(a_filename, HDF5Handle::CREATE_SERIAL);
+#endif
+
   HDF5HeaderData header;
 
   int numlevels = a_dataPtr->size();

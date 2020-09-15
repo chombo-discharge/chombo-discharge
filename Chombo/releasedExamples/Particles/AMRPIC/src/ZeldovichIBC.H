@@ -1,3 +1,13 @@
+#ifdef CH_LANG_CC
+/*
+ *      _______              __
+ *     / ___/ /  ___  __ _  / /  ___
+ *    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+ *    \___/_//_/\___/_/_/_/_.__/\___/
+ *    Please refer to Copyright.txt, in Chombo's root directory.
+ */
+#endif
+
 #ifndef _ZELDOVICHIBC_H_
 #define _ZELDOVICHIBC_H_
 
@@ -37,26 +47,26 @@ public:
 
   /// Full constructor
   ZeldovichIBC(const ProblemDomain& a_domain,
-	       const Real& a_dx,
-	       const RealVect& a_offset,
-	       const Real& a_initialA,
-	       const Real& a_collapseA,
-	       const Real& a_partPerCell,
-	       const Real& a_wavenum,
-	       const Cosmology& a_cosmology);
+               const Real& a_dx,
+               const RealVect& a_offset,
+               const Real& a_initialA,
+               const Real& a_collapseA,
+               const Real& a_partPerCell,
+               const Real& a_wavenum,
+               const Cosmology& a_cosmology);
     
   /// Destructor
   ~ZeldovichIBC() {}
 
   /// Full constructor
   void define(const ProblemDomain& a_domain,
-	      const Real& a_dx,
-	      const RealVect& a_offset,
-	      const Real& a_initialA,
-	      const Real& a_collapseA,
-	      const Real& a_partPerCell,
-	      const Real& a_wavenum,
-	      const Cosmology& a_cosmology);
+              const Real& a_dx,
+              const RealVect& a_offset,
+              const Real& a_initialA,
+              const Real& a_collapseA,
+              const Real& a_partPerCell,
+              const Real& a_wavenum,
+              const Cosmology& a_cosmology);
   
   /// Set up initial conditions for particles
   void initialize(ParticleData<Particle>& a_DM);

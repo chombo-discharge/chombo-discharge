@@ -108,6 +108,15 @@ code.  The XTRA*FLAGS variables should be used whenever possible.  In
 particular, the CPPFLAGS variable should not be altered unless you really
 know what you're doing.
 
+XTRA*FLAGS variables are typically assigned to with += meaning they are defined
+as recursively expanded (use of += before definition makes them of the
+recursively expanded flavor).  This means you can append to the variables
+anywhere and make should do the right thing.  There are some peculiarities.  If
++= is used before the variable is expanded (such as in Make.defs.local), you
+will often see duplicate entries of what was appended.  If += is used after the
+variable is expanded (such as in an application GNUmakefile) you will see only
+one entry of what was appended.
+
 LDFLAGS and XTRALDFLAGS are added at the beginning of the linker
 command, before object files and libraries.  LIBFLAGS and XTRALIBFLAGS
 are placed after the object files, with XTRALIBFLAGS before LIBFLAGS.

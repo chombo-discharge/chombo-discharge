@@ -1,0 +1,51 @@
+# Richardson Extrapolation
+
+# Single grid information
+
+# This is the refinement ratio between the grids, not within the AMR
+re.ref_ratio = 2
+
+# Expected order of accuracy
+re.order_accuracy = 4
+
+# Location of the single level files
+re.file_folder_single = ../files/trigshear/single_level
+
+
+# Single grid information
+
+re.coarse_file_single = coarse.2d.hdf5
+re.medium_file_single = medium.2d.hdf5
+re.fine_file_single = fine.2d.hdf5
+re.postfine_file_single = postfine.2d.hdf5
+
+
+# AMR grid information
+
+# If AMR isn't being used, make the following false
+re.amr_bool = false
+
+# The number of levels the AMR solutions use
+# 0 means one level, 1 means two levels etc.
+re.num_levels = 0
+
+# IMPORTANT NOTE: the most finest level of the fine grid 
+# AMR solution must have the same number of grid points 
+# as the fine grid on the single level
+
+# Location of the amr level files
+re.file_folder_amr = ../files/trigshear/two_level
+
+re.coarse_file_amr = coarse.3d.hdf5
+re.medium_file_amr = medium.3d.hdf5
+re.fine_file_amr = fine.3d.hdf5
+
+
+# Set location to save the output data (error plots, convergence rates etc.)
+re.output_file = ../files/trigshear/output
+
+# This is the number of the variable to be used in RE. Check VisIt file to
+# confirm which variable is at which location
+re.comp = 0
+re.verbosity = 1
+

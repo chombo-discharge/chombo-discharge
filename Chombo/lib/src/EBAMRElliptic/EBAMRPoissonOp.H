@@ -90,6 +90,23 @@ public:
   }
 #endif
 
+#ifdef CH_USE_PETSC
+  ///Fill a_petsc_mat with a matrix that describes the operator stencil
+  int getPetscMatrix(Mat& a_petsc_mat);
+
+  ///put the real components into comp 0, the imaginary ones into comp 1
+  int getLevelDataFromPetscVector(LevelData<EBCellFAB>& a_data, const Vec& a_petsc_vec_real, const Vec& a_petsc_vec_imag );
+
+  ///
+  /**
+     get the matrix indicies associated with every point on the level
+     Not really going to work if level does not cover the domain
+  */
+  static int getMatrixIndexingLD(LevelData<BaseEBCellFAB<int> >&  a_gids, int & a_data,
+                                 const EBLevelGrid&               a_eblg,
+                                 const IntVect    &               a_ghostCellsPhi,
+                                 const bool       &               a_hasCoar);
+#endif
   static void
   getAggregatedLayout(DisjointBoxLayout           & a_dblCoar,
                       const ProblemDomain         & a_domainCoar,
@@ -475,6 +492,19 @@ EBAMRPoissonOp(const EBLevelGrid &                  a_eblgFine,
                            const int&                  a_icolor,
                            const bool&                 a_homogeneousPhysBC);
 
+  ///apply domainflux in multivariable mode
+  void
+  mvApplyDomainFlux(BaseFab<Real> & a_phiFAB,
+                    const Box&       a_grid,
+                    const DataIndex& a_dit);
+  /***/
+  ///for taking the multi-variable laplacian (think source term in viscous flow)
+  /// evaluates beta*laplacian (with inhomogeneous bcs).
+  /***/
+  void 
+  mvBetaLaplacianGrid(EBCellFAB         &              a_lph,
+                      const EBCellFAB   &              a_phi,
+                      const DataIndex   &              a_dit);
   ///
   /**
      this is the linearop function.  CFBC is set to homogeneous.  phic is null
@@ -700,9 +730,8 @@ EBAMRPoissonOp(const EBLevelGrid &                  a_eblgFine,
 
   //for debugging other operators
   void slowGSRBColor(LevelData<EBCellFAB>&       a_phi,
-                     const LevelData<EBCellFAB>& a_lph,
-                     const LevelData<EBCellFAB>& a_rhs,
-                     const IntVect&              a_color);
+                     const LevelData<EBCellFAB>& a_res,
+                     int a_iredblack);
 
   //for debugging other operators
   void levelSlowRelax(LevelData<EBCellFAB>&       a_phi,

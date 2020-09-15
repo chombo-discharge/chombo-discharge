@@ -116,6 +116,27 @@ public:
     return *m_aCoef;
   }
 
+  /// For TGA
+  virtual void diagonalScale(LevelData<FArrayBox>& a_rhs,
+                             bool a_kappaWeighted)
+  {
+    DisjointBoxLayout grids = a_rhs.disjointBoxLayout();
+    for (DataIterator dit = grids.dataIterator(); dit.ok(); ++dit)
+      {
+        a_rhs[dit()].mult((*m_aCoef)[dit()]);
+      }
+  }
+  /// For TGA
+  virtual void divideByIdentityCoef(LevelData<FArrayBox>& a_rhs)
+  {
+    DisjointBoxLayout grids = a_rhs.disjointBoxLayout();
+    for (DataIterator dit = grids.dataIterator(); dit.ok(); ++dit)
+      {
+        a_rhs[dit()].divide((*m_aCoef)[dit()]);
+      }
+  }
+
+
   //! Sets up a model that modifies b coefficient data when the operator's
   //! time is set.
   //! \param a_bCoefInterpolator A CoefficientInterpolator that will be used

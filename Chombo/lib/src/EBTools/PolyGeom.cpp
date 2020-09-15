@@ -646,17 +646,20 @@ PolyGeom::computeAlpha(const Real& a_volFrac,
     {
       if (funcLo*funcHi > 0.0)
         {
-          pout() << "Volume fraction: " << a_volFrac << endl;
-          pout() << "Normal: " << a_normal << endl;
-          pout() << "Alpha: min: " << alphaMin
-                      << ", mid: " << alphaMid
-                      << ", max: " << alphaMax
-                      << endl;
-          pout() << "Func: lo: " << funcLo
-                     << ", hi: " << funcHi
-                     << endl;
-          pout() << "Tolerance: " << s_tolerance << endl;
-          MayDay::Error("computeAlpha (bisection iteration): root not bracketed");
+          //this function is only used for silly EB i/o stuff.
+          //no need to kill the world over this
+          return alphaLo;
+//          pout() << "Volume fraction: " << a_volFrac << endl;
+//          pout() << "Normal: " << a_normal << endl;
+//          pout() << "Alpha: min: " << alphaMin
+//                      << ", mid: " << alphaMid
+//                      << ", max: " << alphaMax
+//                      << endl;
+//          pout() << "Func: lo: " << funcLo
+//                     << ", hi: " << funcHi
+//                     << endl;
+//          pout() << "Tolerance: " << s_tolerance << endl;
+//          MayDay::Error("computeAlpha (bisection iteration): root not bracketed");
         }
       Real err = Abs(alphaHi-alphaLo);
       Real funcMid = computeVolume(alphaMid, a_normal)  - a_volFrac;
@@ -682,15 +685,21 @@ PolyGeom::computeAlpha(const Real& a_volFrac,
           err = Abs(alphaMid - alphaOld);
         }
       if ((alphaMid < alphaMin) || alphaMid > alphaMax)
-        MayDay::Error("bisectiter: solution out of bounds");
+      {
+          //this function is only used for silly EB i/o stuff.
+          //no need to kill the world over this
+        return alphaMid;
+      }
       retval = alphaMid;
 
       /*
         if bisection did not converge,
         Houston, we have a problem
+          //this function is only used for silly EB i/o stuff.
+          //no need to kill the world over this
       */
-      if (iteration >= itermax)
-        MayDay::Error("bisectiter: did not converge!");
+//      if (iteration >= itermax)
+//        MayDay::Error("bisectiter: did not converge!");
     }
 
   return retval;

@@ -300,6 +300,12 @@ void
 writeEBLevelname(const LevelData<EBCellFAB>* a_dataPtr,
                  const char*                 a_filename);
 
+
+///saner programmatic interface
+void
+writeEBLevelName(const LevelData<EBCellFAB>& a_data,
+                 const std::string &         a_filename);
+
 ///
 /** Write a plotfile using writeEBHDF5.  Useful for debugging.  *a_dataPtr is
     written to a file named EBAMR.hdf5.
@@ -493,6 +499,13 @@ writeFaceCentered(HDF5Handle& a_handle,
                   int a_direction,
                   const LevelData<EBFaceFAB>* a_data,
                   Interval interval = Interval());
+
+void
+metaDataEBFile(HDF5Handle     & a_handle,
+               int            & a_numLevels,
+               Vector<int>    & a_refRatios,
+               ProblemDomain  & a_coarseDomain,
+               IntVect        & a_ghost);
 
 void
 readCellCentered(HDF5Handle& a_handle,

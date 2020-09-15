@@ -51,7 +51,7 @@ case $host in
     fi
     AC_MSG_RESULT([$ch_str_cxxmake])
     if test "x$ch_str_cxxmake" = "xunknown"; then
-      AC_MSG_WARN([Unknown compiler: testing of x86 hardware may fail simply because the right flags are not being used]);
+      AC_MSG_WARN([Unknown compiler: testing of x86 hardware may fail simply because the right flags are not being used])
     fi
   ;;
   *    )
@@ -163,6 +163,14 @@ ch_str_sse4a_h=unknown
 ch_str_avx_h=unknown
 ch_str_fma_h=unknown
 ch_str_avx2_h=unknown
+ch_str_tsxhle_h=unknown
+ch_str_tsxrtm_h=unknown
+ch_str_avx512f_h=unknown
+ch_str_avx512cd_h=unknown
+ch_str_avx512dq_h=unknown
+ch_str_avx512bw_h=unknown
+ch_str_avx512fma_h=unknown
+ch_str_avx512vbmi_h=unknown
 ch_str_intelvec_h=unknown
 # Vector operators are tested for sse, sse2, avx, and avx2
 ch_stat_vecopp=unknown
@@ -186,18 +194,26 @@ case $host_cpu in
 unsigned volatile res = 0;
 std::string str("");
 __asm__ __volatile__ ("cpuid" : "=c"(cx), "=d"(dx) : "a"(0x1));
-if (dx & (1 << 25)) { res |= (1 << 0); str += "sse"; }
-if (dx & (1 << 26)) { res |= (1 << 1); str += " sse2"; }
-if (cx & (1 <<  0)) { res |= (1 << 2); str += " sse3"; }
-if (cx & (1 <<  9)) { res |= (1 << 3); str += " ssse3"; }
-if (cx & (1 << 19)) { res |= (1 << 4); str += " sse4.1"; }
-if (cx & (1 << 20)) { res |= (1 << 5); str += " sse4.2"; }
-if (cx & (1 << 28)) { res |= (1 << 7); str += " avx1"; }
-if (cx & (1 << 12)) { res |= (1 << 8); str += " fma"; }
+if (dx & (1 << 25)) { res |= (1 <<  0); str += "sse"; }
+if (dx & (1 << 26)) { res |= (1 <<  1); str += " sse2"; }
+if (cx & (1 <<  0)) { res |= (1 <<  2); str += " sse3"; }
+if (cx & (1 <<  9)) { res |= (1 <<  3); str += " ssse3"; }
+if (cx & (1 << 19)) { res |= (1 <<  4); str += " sse4.1"; }
+if (cx & (1 << 20)) { res |= (1 <<  5); str += " sse4.2"; }
+if (cx & (1 << 28)) { res |= (1 <<  7); str += " avx1"; }
+if (cx & (1 << 12)) { res |= (1 <<  8); str += " fma"; }
 __asm__ __volatile__ ("cpuid" : "=c"(cx) : "a"(0x80000001));
-if (cx & (1 <<  6)) { res |= (1 << 6); str += " sse4a"; }
+if (cx & (1 <<  6)) { res |= (1 <<  6); str += " sse4a"; }
 __asm__ __volatile__ ("cpuid" : "=b"(bx) : "a"(0x7), "c"(0x0));
-if (bx & (1 <<  5)) { res |= (1 << 9); str += " avx2"; }
+if (bx & (1 <<  5)) { res |= (1 <<  9); str += " avx2"; }
+if (bx & (1 <<  4)) { res |= (1 << 10); str += " tsxhle"; }
+if (bx & (1 << 11)) { res |= (1 << 11); str += " tsxrtm"; }
+if (bx & (1 << 16)) { res |= (1 << 12); str += " avx512f"; }
+if (bx & (1 << 28)) { res |= (1 << 13); str += " avx512cd"; }
+if (bx & (1 << 17)) { res |= (1 << 14); str += " avx512dq"; }
+if (bx & (1 << 30)) { res |= (1 << 15); str += " avx512bw"; }
+if (bx & (1 << 21)) { res |= (1 << 16); str += " avx512fma"; }
+if (bx & (1 <<  1)) { res |= (1 << 17); str += " avx512vbmi"; }
 std::ofstream ofile("conftest.data");
 ofile << str << " featurebits=" << res;
 ofile.close();]])],
@@ -214,6 +230,14 @@ ofile.close();]])],
       ch_str_have_cpuavx1=`expr "x$ch_str_veccpu_feature" : 'x.*\(avx1\) '`
       ch_str_have_cpufma=`expr "x$ch_str_veccpu_feature" : 'x.*\(fma\) '`
       ch_str_have_cpuavx2=`expr "x$ch_str_veccpu_feature" : 'x.*\(avx2\) '`
+      ch_str_have_cputsxhle=`expr "x$ch_str_veccpu_feature" : 'x.*\(tsxhle\) '`
+      ch_str_have_cputsxrtm=`expr "x$ch_str_veccpu_feature" : 'x.*\(tsxrtm\) '`
+      ch_str_have_cpuavx512f=`expr "x$ch_str_veccpu_feature" : 'x.*\(avx512f\) '`
+      ch_str_have_cpuavx512cd=`expr "x$ch_str_veccpu_feature" : 'x.*\(avx512cd\) '`
+      ch_str_have_cpuavx512dq=`expr "x$ch_str_veccpu_feature" : 'x.*\(avx512dq\) '`
+      ch_str_have_cpuavx512bw=`expr "x$ch_str_veccpu_feature" : 'x.*\(avx512bw\) '`
+      ch_str_have_cpuavx512fma=`expr "x$ch_str_veccpu_feature" : 'x.*\(avx512fma\) '`
+      ch_str_have_cpuavx512vbmi=`expr "x$ch_str_veccpu_feature" : 'x.*\(avx512vbmi\) '`
       [ch_int_veccpu_featurebits=`expr "x$ch_str_veccpu_feature" : 'x.*featurebits=\([0-9]*\)'`]
 #DBG      echo "$ch_str_have_cpusse x $ch_str_have_cpusse2 x $ch_str_have_cpusse3 x $ch_str_have_cpussse3 x $ch_str_have_cpusse4d1 x $ch_str_have_cpusse4d2 x $ch_str_have_cpusse4a x $ch_str_have_cpuavx1 x $ch_str_have_cpufma x $ch_str_have_cpuavx2 x $ch_int_veccpu_featurebits"
       ch_str_veccpu_feature=`expr "x$ch_str_veccpu_feature" : 'x\(.*\) featurebits=.*'`
@@ -447,15 +471,15 @@ ofile.close();]])],
       fi
 #DBG      echo "Values: $ch_str_veccxx_feature $ch_int_veccxx_featurebits $ch_str_avx_h $ch_str_intelvec_h"
 
-#--FMA (unvalidated)
+#--FMA
 
       case $ch_str_cxxmake in
         portland) CXXFLAGS="-Mvect=sse" ;;
-        *       ) CXXFLAGS="-mfma" ;;  #?? CHECKME
+        *       ) CXXFLAGS="-mfma" ;;
       esac
       if test "x$ch_str_have_cpufma" = "xfma"; then
         AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-[[#include <immintrin.h>  // FMA]],  #?? CHECKME
+[[#include <immintrin.h>  // FMA]],
 [[__m256d test_v4df = _mm256_fmadd_pd(_mm256_set1_pd(2.), _mm256_set1_pd(3.),
                                     _mm256_setr_pd(1., 2., 3., 4.));]])],
                           [ch_str_fma_h="immintrin.h"])
@@ -466,17 +490,17 @@ ofile.close();]])],
           ch_str_intelvec_h="immintrin.h"
         fi
       fi
-#DBG      echo "Values: $ch_str_veccxx_feature $ch_int_veccxx_featurebits $ch_str_avx_h $ch_str_intelvec_h"
+#DBG      echo "Values: $ch_str_veccxx_feature $ch_int_veccxx_featurebits $ch_str_fma_h $ch_str_intelvec_h"
 
-#--AVX2 (unvalidated)
+#--AVX2
 
       case $ch_str_cxxmake in
         portland) CXXFLAGS="-Mvect=sse" ;;
-        *       ) CXXFLAGS="-mavx2" ;;  #?? CHECKME
+        *       ) CXXFLAGS="-mavx2" ;;
       esac
       if test "x$ch_str_have_cpuavx2" = "xavx2"; then
         AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-[[#include <immintrin.h>  // AVX2]],  #?? CHECKME
+[[#include <immintrin.h>  // AVX2]],
 [[__m256i test_v8si =
   _mm256_set1_epi32(1) + _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 8);]])],
                           [ch_str_avx2_h="immintrin.h"])
@@ -488,7 +512,7 @@ ofile.close();]])],
           # Vector ops do not work
           ch_stat_vecopp="no"
           AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-[[#include <immintrin.h>  // AVX2]],  #?? CHECKME
+[[#include <immintrin.h>  // AVX2]],
 [[__m256i test_v8si = _mm256_add_epi32(
   _mm256_set1_epi32(1), _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 8));]])],
                             [ch_str_avx2_h="immintrin.h"])
@@ -500,7 +524,82 @@ ofile.close();]])],
           ch_str_intelvec_h="immintrin.h"
         fi
       fi
-#DBG      echo "Values: $ch_str_veccxx_feature $ch_int_veccxx_featurebits $ch_str_avx_h $ch_str_intelvec_h"
+#DBG      echo "Values: $ch_str_veccxx_feature $ch_int_veccxx_featurebits $ch_str_avx2_h $ch_str_intelvec_h"
+
+#--TSX HLE
+
+      if test "x$ch_str_have_cputsxhle" = "xtsxhle"; then
+        AC_MSG_WARN([The CPU supports TSX-HLE but the compiler has not been tested to see if it supports this feature])
+      fi
+
+#--TSX RTM
+
+      if test "x$ch_str_have_cputsxrtm" = "xtsxrtm"; then
+        AC_MSG_WARN([The CPU supports TSX-RTM but the compiler has not been tested to see if it supports this feature])
+      fi
+
+#--AVX512F foundation (unvalidated)
+
+      case $ch_str_cxxmake in
+        portland) CXXFLAGS="-Mvect=sse" ;;
+        *       ) CXXFLAGS="-mavx512f" ;;
+      esac
+      if test "x$ch_str_have_cpuavx512f" = "xavx512f"; then
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+[[#include <zmmintrin.h>  // AVX512F]],
+[[__m512d test_v8df = _mm512_set1_pd(1.) + _mm512_setr_pd(1., 2., 3., 4., 5., 6., 7., 8.);]])],
+                          [ch_str_avx512f_h="zmmintrin.h"])
+        if test "x$ch_str_avx512f_h" = "xzmmintrin.h"; then
+          if test "x$ch_stat_vecopp" != "xno"; then
+            ch_stat_vecopp="yes"
+          fi
+        else
+          # Vector ops do not work
+          ch_stat_vecopp="no"
+          AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+[[#include <zmmintrin.h>  // AVX512F]],
+[[__m512d test_v8df = _mm512_add_pd(_mm512_set1_pd(1.),
+                                  _mm512_setr_pd(1., 2., 3., 4., 5., 6., 7., 8.));]])],
+                            [ch_str_avx512f_h="zmmintrin.h"])
+        fi
+        if test "x$ch_str_avx512f_h" = "xzmmintrin.h"; then
+          ch_str_veccxx_feature="$ch_str_veccxx_feature avx512f"
+          ch_int_veccxx_featurebits=`expr "$ch_int_veccxx_featurebits" + '4096'`
+          # ch_str_intelvec_h="zmmintrin.h" Is this general??
+        fi
+      fi
+#DBG      echo "Values: $ch_str_veccxx_feature $ch_int_veccxx_featurebits $ch_str_avx512f_h $ch_str_intelvec_h"
+
+
+#--AVX512CD
+
+      if test "x$ch_str_have_cpuavx512cd" = "xavx512cd"; then
+        AC_MSG_WARN([The CPU supports avx512cd but the compiler has not been tested to see if it supports this feature])
+      fi
+
+#--AVX512DQ
+
+      if test "x$ch_str_have_cpuavx512dq" = "xavx512dq"; then
+        AC_MSG_WARN([The CPU supports avx512dq but the compiler has not been tested to see if it supports this feature])
+      fi
+
+#--AVX512BW
+
+      if test "x$ch_str_have_cpuavx512bw" = "xavx512bw"; then
+        AC_MSG_WARN([The CPU supports avx512bw but the compiler has not been tested to see if it supports this feature])
+      fi
+
+#--AVX512FMA
+
+      if test "x$ch_str_have_cpuavx512fma" = "xavx512fma"; then
+        AC_MSG_WARN([The CPU supports avx512fma but the compiler has not been tested to see if it supports this feature])
+      fi
+
+#--AVX512VBMI
+
+      if test "x$ch_str_have_cpuavx512vbmi" = "xavx512vbmi"; then
+        AC_MSG_WARN([The CPU supports avx512vbmi but the compiler has not been tested to see if it supports this feature])
+      fi
     fi
 
 # Reset flags we changed
@@ -553,6 +652,9 @@ ofile.close();]])],
     fi
     if test "x$ch_str_avx2_h" != "xunknown"; then
       AC_DEFINE_UNQUOTED([CHDEF_SYSTEM_X86VECEXT_AVX2_H], [<$ch_str_avx2_h>])
+    fi
+    if test "x$ch_str_avx512f_h" != "xunknown"; then
+      AC_DEFINE_UNQUOTED([CHDEF_SYSTEM_X86VECEXT_AVX512F_H], [<$ch_str_avx512f_h>])
     fi
     if test "x$ch_str_intelvec_h" != "xunknown"; then
       AC_DEFINE_UNQUOTED([CHDEF_SYSTEM_X86VECEXT_INTEL_H], [<$ch_str_intelvec_h>])

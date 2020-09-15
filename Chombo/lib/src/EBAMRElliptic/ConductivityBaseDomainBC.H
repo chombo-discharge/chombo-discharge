@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _ConductivityBASEDOMAINBC_H_
-#define _ConductivityBASEDOMAINBC_H_
+#ifndef _CONDUCTIVITYBASEDOMAINBC_H_
+#define _CONDUCTIVITYBASEDOMAINBC_H_
 
 #include "LoHiSide.H"
 #include "RealVect.H"

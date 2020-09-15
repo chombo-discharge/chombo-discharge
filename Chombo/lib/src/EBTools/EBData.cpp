@@ -27,6 +27,7 @@ BoundaryData::BoundaryData()
   m_bndryCentroid(RealVect::Zero),
   m_bndryPhase(-1)
 {
+  m_volIndex = VolIndex(IntVect::Zero, 0);
 }
 
 VolData::VolData()
@@ -576,7 +577,8 @@ computeNormalsAndBoundaryAreas(const EBGraph& a_graph,
                                const Box&     a_validRegion)
 {
   EBISBox ebisBox;
-  ebisBox.define(a_graph, *this);
+  DataIndex dummydit;
+  ebisBox.define(a_graph, *this, dummydit);
   BaseIVFAB<VolData>& volData = m_implem->getVolData();
   if (a_graph.hasIrregular())
     {

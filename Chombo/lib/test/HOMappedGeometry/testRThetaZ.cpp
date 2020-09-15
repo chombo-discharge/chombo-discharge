@@ -35,7 +35,7 @@ static bool writeN11 = false;
 
 
 #ifdef CH_USE_DOUBLE
-static Real precision = 1.0e-15;
+static Real precision = 2.0e-15;
 #else
 static Real precision = 1.0e-7;
 #endif

@@ -19,8 +19,7 @@
 /**
    this can be overridden at compile time (compile time of the LIBRARY!!!)
 */
-
-#define CH_EBIS_ORDER  1
+#define CH_EBIS_ORDER  2
 
 
 

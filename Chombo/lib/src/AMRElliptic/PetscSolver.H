@@ -53,7 +53,7 @@ public:
 #ifdef CH_USE_PETSC
   virtual void setFunctionAndJacobian( PetscErrorCode (*f)(SNES,Vec,Vec,void*),
 #if PETSC_VERSION_GE(3,5,0)
-				       PetscErrorCode (*j)(SNES,Vec,Mat,Mat,void*)
+                                       PetscErrorCode (*j)(SNES,Vec,Mat,Mat,void*)
 #else
                                        PetscErrorCode (*j)(SNES,Vec,Mat*,Mat*,MatStructure*,void*)
 #endif

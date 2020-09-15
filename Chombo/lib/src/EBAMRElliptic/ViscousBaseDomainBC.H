@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _ViscousBASEDOMAINBC_H_
-#define _ViscousBASEDOMAINBC_H_
+#ifndef _VISCOUSBASEDOMAINBC_H_
+#define _VISCOUSBASEDOMAINBC_H_
 
 #include "LoHiSide.H"
 #include "RealVect.H"

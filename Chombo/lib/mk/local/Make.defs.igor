@@ -1,15 +1,21 @@
 #it is prounouced eye-gore
 makefiles+=local/Make.defs.igor
+PROTO_HOME=/home/graves/_proto/proto
+USE_PROTO=FALSE
+OPENMPCC=FALSE
 USE_HDF=TRUE
-USE_MF=TRUE
+USE_MF=FALSE
 USE_EB=TRUE
 USE_64=TRUE
 CXX=g++
 CPP=cpp
 FC=gfortran
 HDFINCFLAGS   = -I/home/graves/_hdf5/include
-HDFLIBFLAGS   = -L/home/graves/_hdf5/lib -lhdf5 -lhdf5_hl -ldl -lz
+HDFLIBFLAGS   = -L/home/graves/_hdf5/lib -lhdf5 -lhdf5_hl -ldl 
 HDFMPIINCFLAGS= -I/home/graves/_hdf5/include
-HDFMPILIBFLAGS= -L/home/graves/_hdf5/lib -lhdf5 -lhdf5_hl -ldl -lz
+HDFMPILIBFLAGS= -L/home/graves/_hdf5/lib -lhdf5 -lhdf5_hl -ldl 
 
 
+ifeq ($(USE_PROTO),TRUE)
+ XTRACPPFLAGS += -I$(PROTO_HOME)/include -DDIM=$(DIM) -DUSE_PROTO=1 -DPR_TURN_OFF_TIMERS=1
+endif

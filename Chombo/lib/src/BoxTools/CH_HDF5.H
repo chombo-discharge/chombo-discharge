@@ -20,7 +20,7 @@ using std::cout;
 using std::endl;
 
 #ifdef CH_MPI
-#include <mpi.h>
+#include "mpi.h"
 #endif
 
 #include "LevelData.H"
@@ -1116,10 +1116,10 @@ int write(HDF5Handle& a_handle, const BoxLayoutData<T>& a_data,
                                       types[i],
                                       dataspace[i], H5P_DEFAULT);
 #else
-	dataset[i]        = H5Dcreate2(a_handle.groupID(), dataname,
-				       types[i],
-				       dataspace[i], H5P_DEFAULT,
-				       H5P_DEFAULT, H5P_DEFAULT);
+        dataset[i]        = H5Dcreate2(a_handle.groupID(), dataname,
+                                       types[i],
+                                       dataspace[i], H5P_DEFAULT,
+                                       H5P_DEFAULT, H5P_DEFAULT);
 #endif
       }
       CH_assert(dataset[i] >= 0);
@@ -1151,12 +1151,12 @@ int write(HDF5Handle& a_handle, const BoxLayoutData<T>& a_data,
 #ifdef H516
         offsetData  =   H5Dcreate(a_handle.groupID(), dataname,
                                   H5T_NATIVE_LLONG, offsetspace, 
-				  H5P_DEFAULT);
+                                  H5P_DEFAULT);
 #else
-	offsetData  =   H5Dcreate2(a_handle.groupID(), dataname,
-				   H5T_NATIVE_LLONG, offsetspace, 
-				   H5P_DEFAULT,
-				   H5P_DEFAULT,H5P_DEFAULT);
+        offsetData  =   H5Dcreate2(a_handle.groupID(), dataname,
+                                   H5T_NATIVE_LLONG, offsetspace, 
+                                   H5P_DEFAULT,
+                                   H5P_DEFAULT,H5P_DEFAULT);
 #endif
         CH_assert(offsetData >= 0);
       }

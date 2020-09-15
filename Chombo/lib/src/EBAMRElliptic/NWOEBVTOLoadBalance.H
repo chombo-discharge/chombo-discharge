@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _NWOEBVTOLoadBalance_H_
-#define _NWOEBVTOLoadBalance_H_
+#ifndef _NWOEBVTOLOADBALANCE_H_
+#define _NWOEBVTOLOADBALANCE_H_
 
 #include "Box.H"
 #include "ProblemDomain.H"

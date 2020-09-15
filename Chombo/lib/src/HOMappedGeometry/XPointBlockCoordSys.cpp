@@ -53,13 +53,13 @@ XPointBlockCoordSys::XPointBlockCoordSys( const RealVect&          a_origin,
     }
 
 #ifdef PLOT_INVERSE_POINTS
-   char file_name[80];
+   char file_name[160];
    sprintf(file_name, "Block%d_%d", m_block_type, procID());
    m_ipt_file[m_block_type] = fopen(file_name, "w");
 
    if (procID()==0) {
 
-     char file_name2[80];
+     char file_name2[160];
      sprintf(file_name2, "Pts%d", m_block_type);
      FILE *fptr = fopen(file_name2, "w");
 

@@ -319,12 +319,13 @@ public:
    */
   void setToAllCovered();
 
-  /// define from scratch using irregular graph
-  void
-  define(const BaseFab<int>&      a_regIrregCovered,
-         const Vector<IrregNode>& a_irregGraph,
-         const Box&               a_validRegion,
-         const ProblemDomain&     a_domain);
+  // /// define from scratch using irregular graph
+  //dtg--- i don't think this one exists
+  // void
+  // define(const BaseFab<int>&      a_regIrregCovered,
+  //        const Vector<IrregNode>& a_irregGraph,
+  //        const Box&               a_validRegion,
+  //        const ProblemDomain&     a_domain);
 
   ///
   /**
@@ -339,7 +340,8 @@ public:
   /// define from scratch using a graph and an ebdata
   void
   define(const EBGraph&  a_graph,
-         const EBData&   a_data);
+         const EBData&   a_data,
+         const DataIndex & a_dit);
 
   ///pointer copy
   EBISBox& operator=(const EBISBox& ebiin);
@@ -350,6 +352,11 @@ public:
   ///pointer comparison
   bool operator==(const EBISBox& ebiin);
 
+  DataIndex dataIndex() const
+  {
+    return m_dit;
+  }
+  
 private:
 
   ///this is already a ref-counted object
@@ -358,6 +365,7 @@ private:
   ///this is already a ref-counted objecto
   EBData   m_data;
 
+  DataIndex m_dit;
 };
 
 

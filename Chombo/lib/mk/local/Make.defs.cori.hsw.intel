@@ -27,7 +27,7 @@ endif
 
 #XTRALDFLAGS += -Wl,-zmuldefs
 XTRALDFLAGS += -Wl,-zmuldefs, -Wl, -Bstatic -Wl,--start-group \
-/opt/intel/compilers_and_libraries_2017.2.174/linux/mkl/lib/intel64/libmkl_blacs_intelmpi_ilp64.a
+$(INTEL_PATH)/linux/mkl/lib/intel64/libmkl_blacs_intelmpi_ilp64.a
 \
 #syslibflags = -mkl
 

@@ -33,13 +33,18 @@ correctly when running in parallel. */
 #  define CH_assert(cond) (void)0
 #endif
 
+/*  removing this form of static_assert since it does not follow the
+std::static_assert specification and users can now use real static_assert
+*/
 /** Compile-time assertion */
 /** (renamed this temp variable as static_assert will become a keyword -- and likely have same functionality) */
+/*
 template<bool> struct diy_static_assert;
 template<> struct diy_static_assert<true>
 {
 };
-#define STATIC_ASSERT( a ) diy_static_assert<a>()
+*/
+//#define STATIC_ASSERT( a ) diy_static_assert<a>()
 
 #endif /*CH_LANG_CC*/
 

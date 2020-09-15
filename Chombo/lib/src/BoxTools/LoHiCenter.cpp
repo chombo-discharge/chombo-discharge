@@ -19,7 +19,9 @@
 
    Inputs:
    * a_dir is the direction of the 3-point stencil;
-   * a_inBox is the cell-centered box on which we have data;
+   * a_inBox is the cell-centered box on which we are to compute a
+     stencil (2-point or 3-point), expanded by 1 in a_dir direction,
+     and not intersected with the domain;
    * a_domain is the problem domain.
 
    Output boxes are all cell-centered subboxes of a_inBox and
@@ -32,6 +34,9 @@
    The boxes a_loBox and a_hiBox will be at most 1 cell wide;
    here the 2-point stencil consists of a cell from this box and
    the neighboring cell from a_centerBox in direction a_dir.
+
+   a_entireBox will be a_inBox with one layer of cells removed
+   from both sides in dimension a_dir.
 
    Output flags:
    * a_hasLo:  1 or 0, according to whether a_loBox is defined or not;
@@ -47,54 +52,31 @@ void loHiCenter(Box&                 a_loBox,
                 const ProblemDomain& a_domain,
                 const int&           a_dir)
 {
-  // Make a copy of the input box which can be modified
-  Box inBox = a_inBox;
-  inBox &= a_domain;
+  // A copy of a_inBox, but with any parts outside of a_domain removed.
+  Box inDomainBox = a_inBox;
+  inDomainBox &= a_domain;
 
-  // The centered difference box is always one smaller in a_dir,
-  // because a_inBox is the box where we have data.
-  a_centerBox = inBox;
+  // Away from domain boundaries, the centered-difference box simply
+  // gets us back to the box we started with before growing it by 1.
+  // If a_inBox extends outside the domain, that means the box we
+  // started with goes to a domain boundary, so the centered-difference box
+  // is 1 away from that boundary (recall inDomainBox = a_inBox & a_domain).
+  a_centerBox = inDomainBox;
   a_centerBox.grow(a_dir,-1);
 
-  // The union of all the output boxes starts off equal to the centered
+  // The union of all the output boxes starts off equal to the centered-
   // difference portion on the input box (intersected with the domain)
   a_entireBox = a_centerBox;
 
-  { // Check high side.
-    // See if this chops off the high side of the input box.
-    Box tmp = inBox;
-    tmp.shift(a_dir,1);
-    tmp &= a_domain;
-    tmp.shift(a_dir,-1);
-
-    // If so, set up the high, one-sided difference box, a_hiBox, and expand
-    // the entire box to include it
-    if (tmp != inBox)
-      {
-        a_hasHi = 1;
-        a_hiBox = adjCellHi(tmp, a_dir);
-        a_entireBox.growHi(a_dir,1);
-      }
-    else
-      {
-        a_hasHi = 0;
-        a_hiBox = Box();
-      }
-  }
-
   { // Check low side.
-    // See if this chops off the low side of the input box.
-    Box tmp = inBox;
-    tmp.shift(a_dir,-1);
-    tmp &= a_domain;
-    tmp.shift(a_dir,1);
-
-    // If so, set up the low, one-sided difference box, a_loBox, and expand
-    // the entire box to include it
-    if (tmp != inBox)
+    // Did intersecting with a_domain change the small end of a_inBox?
+    // (If this dimension has periodic boundary condition, then no.)
+    if (a_inBox.smallEnd(a_dir) < inDomainBox.smallEnd(a_dir))
       {
+        // If so, set up the low, one-sided difference box, a_loBox,
+        // and expand a_entireBox to include it.
         a_hasLo = 1;
-        a_loBox = adjCellLo(tmp,a_dir);
+        a_loBox = adjCellLo(a_centerBox, a_dir, 1);
         a_entireBox.growLo(a_dir,1);
       }
     else
@@ -104,12 +86,31 @@ void loHiCenter(Box&                 a_loBox,
       }
   }
 
+  { // Check high side.
+    // Did intersecting with a_domain change the big end of a_inBox?
+    // (If this dimension has periodic boundary condition, then no.)
+    if (a_inBox.bigEnd(a_dir) > inDomainBox.bigEnd(a_dir))
+      {
+        // If so, set up the high, one-sided difference box, a_hiBox,
+        // and expand a_entireBox to include it
+        a_hasHi = 1;
+        a_hiBox = adjCellHi(a_centerBox, a_dir, 1);
+        a_entireBox.growHi(a_dir,1);
+      }
+    else
+      {
+        a_hasHi = 0;
+        a_hiBox = Box();
+      }
+  }
+
   // Make some simple sanity checks
   CH_assert(a_entireBox.contains(a_centerBox));
 
   if (a_hasLo == 1)
     {
       CH_assert(a_entireBox.contains(a_loBox));
+      
     }
 
   if (a_hasHi == 1)

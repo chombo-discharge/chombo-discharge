@@ -36,7 +36,10 @@ sub strip72 {
     s/^\t/      /;
     # look for Fortran comment lines being with "C", "c" or "*" or "!"
     # or empty continuation lines and don't output them
-    next if ( m/^[c\*]/i || m/^\s*!/ || m/^.....[^0]\s*$/ );
+    my $match1 = chr(33).chr(36)."OMP";
+    my $match2 = chr(33).chr(36)."omp";
+    next if ( m/^[c\*]/i || (m/^\s*!/ && !(/\Q$match1\E/) && !(/\Q$match2\E/)) || m/^.....[^0]\s*$/ );
+
     # break the line into 72 character pieces with continuations
     # [NOTE: some of the `substr' calls will generate Perl warnings.]
     $out = substr($_,0,72) ;

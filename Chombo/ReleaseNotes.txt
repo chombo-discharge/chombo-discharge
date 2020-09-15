@@ -1,7 +1,7 @@
-Release Notes for Chombo version 3.2             March 2014
+Release Notes for Chombo version 3.2           March 2014 (patch 6, April 2019)
 
-You can contact the Chombo development team at <chombo@hpcrdm.lbl.gov> and
-the Chombo users e-mail group at <chombousers@hpcrd.lbl.gov>
+You can contact the Chombo development team at <chombo@lbl.gov> and
+the Chombo users e-mail group at <chombousers@lbl.gov>
 
 - We have implemented interfaces to the PETSc solver library
   (http://www.mcs.anl.gov/petsc/) which generate matrices for discretizations
@@ -108,7 +108,7 @@ Changes of note:
 
 Release Notes for Chombo version 2.0             May 2007
 
-You can contact the Chombo development team at <chombo@hpcrdm.lbl.gov>
+You can contact the Chombo development team at <chombo@lbl.gov>
 
 This is a major release of the core Chombo libraries.
 
@@ -146,7 +146,7 @@ changes of note:
 
 Release Notes for Chombo version 1.5             April 2006
 
-You can contact the Chombo development team at <chombo@hpcrdm.lbl.gov>
+You can contact the Chombo development team at <chombo@lbl.gov>
 
 This is a development release of Chombo.  It is a work-in-progress provided
 to ANAG collaborators and early adopters of new Chombo functionality.

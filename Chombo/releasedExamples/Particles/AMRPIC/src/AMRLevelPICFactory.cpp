@@ -31,11 +31,11 @@ AMRLevelPICFactory::
 
 AMRLevelPICFactory::
 AMRLevelPICFactory(const ZeldovichIBC*         a_ibc,
-		   const Real&                 a_cfl,
-		   const Real&                 a_domainLength,
-		   const int&                  a_maxGridSize,
-		   const InterpType&           a_poissonInterpType,
-		   const Real&                 a_refineThresh)
+                   const Real&                 a_cfl,
+                   const Real&                 a_domainLength,
+                   const int&                  a_maxGridSize,
+                   const InterpType&           a_poissonInterpType,
+                   const Real&                 a_refineThresh)
 {
 
   m_ibc = a_ibc->new_zeldovichIBC();
@@ -52,11 +52,11 @@ AMRLevel* AMRLevelPICFactory::new_amrlevel() const
 {
   // Create a new AMRLevelPIC
   AMRLevelPIC* amrPartPtr = new AMRLevelPIC(m_ibc,
-					    m_cfl,
-					    m_domainLength,
-					    m_maxGridSize,
-					    m_poissonInterpType,
-					    m_refineThresh);
+                                            m_cfl,
+                                            m_domainLength,
+                                            m_maxGridSize,
+                                            m_poissonInterpType,
+                                            m_refineThresh);
 
   // Return it
   return (static_cast <AMRLevel*> (amrPartPtr));

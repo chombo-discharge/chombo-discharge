@@ -157,6 +157,14 @@ public:
 
   ///
   static void setVerbose(bool a_verbose);
+
+  ///
+  /**
+     Define a null-constructed IVSFAB
+  */
+  void define(const IntVectSet& a_region,
+            const int&        a_nvarin);
+
 private:
   void
   setDefaultValues();

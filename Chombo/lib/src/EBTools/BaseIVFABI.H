@@ -74,7 +74,9 @@ BaseIVFAB<T>::BaseIVFAB(const IntVectSet& a_ivsin,
   define(a_ivsin, a_ebgraph, a_nvarin);
 }
 /******************/
+#if defined(__ICC) || defined(__INTEL_COMPILER)
 #pragma intel optimization_level 0 
+#endif
 template <class T> inline
 void
 BaseIVFAB<T>::define(const IntVectSet& a_ivsin,

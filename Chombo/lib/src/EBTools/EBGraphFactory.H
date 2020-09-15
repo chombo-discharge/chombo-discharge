@@ -43,6 +43,11 @@ public:
    */
   virtual ~EBGraphFactory();
 
+  //return true if copy and construction are thread safe
+  virtual bool threadSafe() const
+  {
+    return false;
+  }
 private:
   EBGraphFactory()
   {

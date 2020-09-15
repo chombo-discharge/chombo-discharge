@@ -17,8 +17,8 @@
 using std::complex;
 
 #include "REAL.H"
-
 #include "BaseNamespaceHeader.H"
+using std::complex;
 
 /// Complex numbers suitable for use in FABs
 /** Chombo has its own complex number class so it can:

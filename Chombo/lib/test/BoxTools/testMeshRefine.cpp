@@ -35,7 +35,7 @@ using std::sqrt;
 #include <iostream>
 using std::endl;
 #ifdef CH_MPI
-#include <mpi.h>
+#include "mpi.h"
 #endif
 
 #include "BRMeshRefine.H"

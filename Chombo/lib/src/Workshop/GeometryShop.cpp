@@ -69,6 +69,20 @@ GeometryShop::~GeometryShop()
   delete(m_implicitFunction);
 }
 
+void GeometryShop::makeGrids( const ProblemDomain&      a_domain,
+                              DisjointBoxLayout&        a_grids,
+                              const int&                a_maxGridSize,
+                              const int&                a_maxIrregGridSize )
+{
+
+  if(m_implicitFunction==NULL) MayDay::Error("GeometryShop needs an implicit function to check makeGrids");
+
+  // it is OK if m_implicitFunction ignores maxGridSize and a_maxIrregGridSize. They are settings
+  // used to help control how EBIndexSpace decides on it's own guess for grids.  They are passed in here
+  // if a user wants to control these parameters through their ParmParse file and their IF knows what
+  // to do with that suggestion.  The conditions are not enforced anywhere.
+  m_implicitFunction->makeGrids(a_domain, a_grids, a_maxGridSize, a_maxIrregGridSize);
+}
 bool GeometryShop::twoEdgeIntersections(edgeMo a_edges[4])const
 {
   bool retval;
@@ -559,7 +573,8 @@ GeometryShop::fillGraph(BaseFab<int>        & a_regIrregCovered,
                         const Box           & a_ghostRegion,
                         const ProblemDomain & a_domain,
                         const RealVect      & a_origin,
-                        const Real          & a_dx) const
+                        const Real          & a_dx,
+                        const DataIndex     & a_di) const
 {
   CH_TIMERS("GeometryShop::fillGraph");
   CH_TIMER("part1",p1);

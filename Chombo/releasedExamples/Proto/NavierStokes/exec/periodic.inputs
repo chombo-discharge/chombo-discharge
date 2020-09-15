@@ -1,0 +1,22 @@
+#grid size (nx = ny=nz)
+nx              = 128
+#max grid size in domain decomposition
+max_grid        = 32
+#number of times to iterate to get initial pressure
+pressure_iterations = 1
+#maximum number of time steps
+max_step        = 27
+max_time = 1.0
+#length of each domain side 
+domain_size = 1.0
+#how often to output files (make negative to turn off output
+output_interval = 1
+#viscosity
+viscosity = 0.001
+
+#location of vortex center
+vortex_center = 0.5
+#radius of vortex
+vortex_radius = 0.25
+#Courant number
+cfl = 0.25

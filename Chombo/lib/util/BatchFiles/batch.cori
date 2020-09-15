@@ -21,6 +21,6 @@ tasksPerNode=$((32/$OMP_NUM_THREADS))
 uname -a
 date 
 
-srun --ntasks=$tasks --ntasks-per-node=$tasksPerNode --cpus-per-task=$OMP_NUM_THREADS -m block:block $PROGNAME $PROGARGS
+srun --ntasks=$tasks --ntasks-per-node=$tasksPerNode --cpus-per-task=$((2 * $OMP_NUM_THREADS)) -m block:block $PROGNAME $PROGARGS
 
 date

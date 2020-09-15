@@ -117,12 +117,21 @@ class MGLevelOp : public LinearOp<T>, public MGLevelOpObserver<T>
 
   ///
   /**
-     Use your relaxtion operator to remove the high frequency wave numbers from
+     Use your relaxation operator to remove the high frequency wave numbers from
      the correction so that it may be averaged to a coarser refinement.
      A point relaxtion scheme, for example takes the form
      a_correction -= lambda*(L(a_correction) - a_residual).
    */
   virtual void relax(T& a_correction, const T& a_residual, int a_iterations) = 0 ;
+
+  /// specialized no-fine relax function, useful for full-multigrid schemes, defaults to regular relax
+  /**
+     Necessary to implement FAS correctly
+  */
+  virtual void relaxNF(T& a_phi, const T* a_phiCoarse, const T& a_rhs, int a_iterations)
+  {
+          this->relax(a_phi, a_rhs, a_iterations);
+  }
 
   ///
   /**
@@ -130,6 +139,18 @@ class MGLevelOp : public LinearOp<T>, public MGLevelOpObserver<T>
      a_resCoarse[2h] = I[h->2h] (rhsFine[h] - L[h](phiFine[h])
   */
   virtual void restrictResidual(T& a_resCoarse, T& a_phiFine, const T& a_rhsFine) = 0;
+
+  /// full-multigrid version of restrictResidual, useful for FAS-type schemes. Defaults to standard restriction 
+  virtual void restrictResidual(T& a_resCoarse, T& a_phiFine, const T* a_phiCoarse, const T& a_rhsFine, bool homogeneous)
+  {
+          restrictResidual(a_resCoarse, a_phiFine, a_rhsFine);
+  }
+
+  /// simple restriction function
+  virtual void restrictR(T& a_phiCoarse, const T& a_phiFine)
+  {
+
+  }
 
   ///
   /**
@@ -151,6 +172,21 @@ class MGLevelOp : public LinearOp<T>, public MGLevelOpObserver<T>
       m_coarseningFactors.push_back(-1);
       a_observer->setObservee(this);
     }
+  }
+
+  /// Apply an operator
+  /** 
+      useful for full-multigrid/FAS types of algorithms
+  */
+  virtual void applyOpMg(T& a_lhs, T& a_phi, T* a_phiCoarse, bool a_homogeneous)
+  {
+
+  }
+
+  // For use by full-multigrid schemes if we have a coarser level. Just do standard residual by default.
+  virtual void residualNF(T& a_lhs, T& a_phi, const T* a_phiCoarse, const T& a_rhs, bool a_homogeneous = false)
+  {
+          this->residual(a_lhs, a_phi, a_rhs, a_homogeneous);
   }
 
   //! Removes the given observer from the operator's list of observers. This

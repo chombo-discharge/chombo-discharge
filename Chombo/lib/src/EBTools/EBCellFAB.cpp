@@ -187,6 +187,7 @@ EBCellFAB& EBCellFAB::plus(const EBCellFAB& a_src,
 
 void EBCellFAB::clone(const EBCellFAB& a_arg)
 {
+  CH_TIME("EBCellFAB::clone");
   define(a_arg.m_ebisBox, a_arg.getRegion(), a_arg.nComp());
   copy(a_arg);
 }
@@ -208,6 +209,7 @@ EBCellFAB::minus(const EBCellFAB& a_src,
                  int a_destcomp,
                  int a_numcomp)
 {
+  CH_TIME("EBCellFAB::minus");
   CH_assert(isDefined());
   CH_assert(a_src.isDefined());
   // Dan G. feels strongly that the assert below should NOT be commented out
@@ -284,6 +286,7 @@ EBCellFAB::mult(const EBCellFAB& a_src,
                 int a_destcomp,
                 int a_numcomp)
 {
+  CH_TIME("EBCellFAB::mult");
   CH_assert(isDefined());
   CH_assert(a_src.isDefined());
   // Dan G. feels strongly that the assert below should NOT be commented out
@@ -370,6 +373,7 @@ EBCellFAB::divide(const EBCellFAB& a_src,
                   int a_numcomp)
 {
 
+  CH_TIME("EBCellFAB::divide");
   CH_assert(isDefined());
   CH_assert(a_src.isDefined());
   // Dan G. feels strongly that the assert below should NOT be commented out
@@ -432,6 +436,7 @@ EBCellFAB::divide(const EBCellFAB& a_src,
 EBCellFAB&
 EBCellFAB::operator+=(const Real& a_src)
 {
+  CH_TIME("EBCellFAB::operator+=");
   CH_assert(isDefined());
   FORT_ADDFABR(CHF_FRA(m_regFAB),
                CHF_CONST_REAL(a_src),
@@ -465,6 +470,7 @@ EBCellFAB::operator+=(const Real& a_src)
 EBCellFAB&
 EBCellFAB::operator-=(const Real& a_src)
 {
+  CH_TIME("EBCellFAB::operator-=");
   CH_assert(isDefined());
   FORT_SUBTRACTFABR(CHF_FRA(m_regFAB),
                     CHF_CONST_REAL(a_src),
@@ -483,6 +489,7 @@ EBCellFAB::operator-=(const Real& a_src)
 EBCellFAB&
 EBCellFAB::operator*=(const Real& a_src)
 {
+  CH_TIME("EBCellFAB::operator*=");
   CH_assert(isDefined());
   FORT_MULTIPLYFABR(CHF_FRA(m_regFAB),
                     CHF_CONST_REAL(a_src),
@@ -508,6 +515,7 @@ EBCellFAB::mult(Real a_src)
 
 EBCellFAB& EBCellFAB::mult(Real a_value, int a_startcomp, int a_numcomp)
 {
+  CH_TIME("EBCellFAB::multcomp");
   Real* l = m_irrFAB.dataPtr(a_startcomp);
   int nvof = m_irrFAB.numVoFs();
   for (int i=0; i<a_numcomp*nvof; i++)
@@ -521,6 +529,7 @@ void EBCellFAB::setCoveredCellVal(const Real&    a_val,
                                  const int&  a_comp,
                                  const bool& a_doMulti)
 {
+  CH_TIME("EBCellFAB::setCoveredCellVal");
   //BaseEBCellFAB<Real>::setCoveredCellVal(a_val, a_comp, a_doMulti);
   
   if(a_doMulti)
@@ -551,6 +560,7 @@ void EBCellFAB::setCoveredCellVal(const Real&    a_val,
 EBCellFAB&
 EBCellFAB::operator/=(const Real& a_src)
 {
+  CH_TIME("EBCellFAB::operator/=");
   CH_assert(isDefined());
   FORT_DIVIDEFABR(CHF_FRA(m_regFAB),
                   CHF_CONST_REAL(a_src),
@@ -569,6 +579,7 @@ EBCellFAB::operator/=(const Real& a_src)
 EBCellFAB&
 EBCellFAB::plus(const EBCellFAB& a_src, Real a_scale)
 {
+  CH_TIME("EBCellFAB::plusScale");
   CH_assert(isDefined());
   CH_assert(a_src.isDefined());
   // Dan G. feels strongly that the assert below should NOT be commented out
@@ -605,6 +616,7 @@ EBCellFAB&
 EBCellFAB::axby(const EBCellFAB& a_X, const EBCellFAB& a_Y,
                 const Real& a_A, const Real& a_B)
 {
+  CH_TIME("EBCellFAB::axby");
   CH_assert(isDefined());
   CH_assert(a_X.isDefined());
   CH_assert(a_Y.isDefined());
@@ -802,6 +814,7 @@ EBCellFAB::axby(const EBCellFAB& a_X, const EBCellFAB& a_Y,
 Real
 EBCellFAB::max(int a_comp) const
 {
+  CH_TIME("EBCellFAB::max");
   CH_assert(isDefined());
   Real val = -DBL_MAX;
 
@@ -822,6 +835,7 @@ EBCellFAB::max(int a_comp) const
 Real
 EBCellFAB::min(int a_comp) const
 {
+  CH_TIME("EBCellFAB::min");
   CH_assert(isDefined());
   Real val = DBL_MAX;
 
@@ -856,6 +870,7 @@ EBCellFAB::norm(const Box& a_subbox,
                 int        a_comp,
                 int        a_numComp) const
 {
+  CH_TIME("EBCellFAB::norm");
   CH_assert(a_numComp == 1);
   return EBArith::norm(*this, a_subbox, m_ebisBox, a_comp, a_power);
 }

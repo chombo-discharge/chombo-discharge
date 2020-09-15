@@ -80,6 +80,9 @@ public:
   ~DisjointBoxLayout()
   {}
 
+  // for flop counts
+  unsigned long long int numPointsThisProc() const;
+
   ///
   /** Define this DisjointBoxLayout from a Vector of Boxes.  This is a
       wrapper for a call to BoxLayout::define, required because

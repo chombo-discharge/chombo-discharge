@@ -36,7 +36,7 @@ inline unsigned long long  getPeakTDC()
 #else
 inline unsigned long long  getPeakTDC()
 {
-  MayDay::Error("calling memory function when none is available");
+  //MayDay::Error("calling memory function when none is available");
   return 0;
 }
 #endif

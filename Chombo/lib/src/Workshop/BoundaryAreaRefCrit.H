@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _BoundaryAreaRefCrit_H___
-#define _BoundaryAreaRefCrit_H___
+#ifndef _BOUNDARYAREAREFCRIT_H_
+#define _BOUNDARYAREAREFCRIT_H_
 
 #include "WrappedGShop.H"
 #include "RealVect.H"

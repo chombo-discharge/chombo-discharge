@@ -1,3 +1,0 @@
-if SMALLBUILD_AM
-CPP_FILES = BndryRegister.cpp CoordSys.cpp FabSet.cpp Geometry.cpp RealBox.cpp 
-endif SMALLBUILD_AM

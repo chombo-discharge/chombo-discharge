@@ -52,6 +52,8 @@ sub StripComProc::StripComments
     my @tmplines = <FIN>;  ## slurp mode
     my (@outbuf, $ibuf);
     my $openquote = 0;  ## =1 if a string was started on a previous line
+    my $matchf = chr(33).chr(36)."OMP";
+    my $matchs = chr(33).chr(36)."omp";    
     while (@tmplines) 
     {
         $ibuf = shift(@tmplines);
@@ -60,7 +62,8 @@ sub StripComProc::StripComments
         {
             next;
         }
-        elsif($ibuf =~ m/^\s*\!/)
+	## avoid strip line with !$omp to add openmp
+	elsif($ibuf =~ m/^\s*\!/ && !($ibuf =~ (/\Q$matchf\E/)) && !($ibuf =~ (/\Q$matchs\E/)))
         {
             next;
         }
@@ -77,8 +80,10 @@ sub StripComProc::StripComments
         {
             # strip trailing comments that start with "!"
             # but watch out for "!" in strings
-            ( $ibuf,$openquote ) = &StripComProc::stripTrailingComment( $ibuf,$openquote,$debug );
-            if($ibuf =~ m/^[ \d]{5}/)
+	    ( $ibuf,$openquote ) = &StripComProc::stripTrailingComment( $ibuf,$openquote,$debug );
+	    
+	    ## avoid modification line with !$omp to add openmp
+	    if($ibuf =~ m/^[ \d]{5}/ && !($ibuf =~ /\Q$matchf\E/) && !($ibuf =~ /\Q$matchs\E/))
             {   # right-justify statement label in first 5 columns;
             # this wont detect invalid code and probably wont handle 
                 # tab-formatted code correctly, but that isn't standard anyway.
@@ -94,13 +99,14 @@ sub StripComProc::StripComments
                         --$j ;
                     }
                 }
-                push @outbuf,join("",@label);
-            }
+		push @outbuf,join("",@label);
+	    }
             else
             {
                 push @outbuf,$ibuf;
             }
-        }
+	}
+	
     }
     print FOUT @outbuf;
     
@@ -118,6 +124,11 @@ sub StripComProc::stripTrailingComment
 {
     use strict;
     my ($ibuf ,$openquote ,$debug ) = @_;
+    ## avoid strip line with !$omp to add openmp
+    my $matchf = chr(33).chr(36)."OMP";
+    my $matchs = chr(33).chr(36)."omp";
+    if(!($ibuf =~ /\Q$matchf\E/) && !($ibuf =~ /\Q$matchs\E/))
+    {
     # remove and save any line terminators
     $ibuf =~ s/[\n\r]*$// ;
     my $lineterm = $& ;
@@ -189,6 +200,7 @@ sub StripComProc::stripTrailingComment
         $ibuf .= " !\' work around gnu cpp v3.3 bug" ;
     }
     if( $lineterm ){ $ibuf .= $lineterm ; }
+    }
     return ( $ibuf , $openquote );
 }
 

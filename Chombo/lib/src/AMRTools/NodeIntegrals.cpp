@@ -19,7 +19,7 @@
 #include "NodeDotProdF_F.H"
 #include "NamespaceHeader.H"
 
-using std::cout;
+
 using std::cerr;
 using std::endl;
 

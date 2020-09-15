@@ -12,6 +12,7 @@
 #define _BASEIFFABI_H_
 #include "MayDay.H"
 #include "FaceIterator.H"
+#include "DebugOut.H"
 #include <typeinfo>
 #include "NamespaceHeader.H"
 
@@ -33,8 +34,13 @@ bool
 BaseIFFAB<T>::useThisFace(const Box& a_toBox,
                           const FaceIndex& a_face) const
 {
-  return ((a_toBox.contains(a_face.gridIndex(Side::Lo)))  ||
-          (a_toBox.contains(a_face.gridIndex(Side::Hi))));
+  bool retval= ((a_toBox.contains(a_face.gridIndex(Side::Lo)))  ||
+                (a_toBox.contains(a_face.gridIndex(Side::Hi))));
+  if(s_verbose)
+  {
+    pout() << "usethisface: face = " << a_face << ", a_region = " << a_toBox << endl;
+  }
+  return retval;
 }
 
 //this box growing obfuscation is because
@@ -100,7 +106,9 @@ BaseIFFAB<T>::BaseIFFAB(const IntVectSet& a_ivsin,
 template <class T> Arena* BaseIFFAB<T>::s_Arena = NULL;
 
 /******************/
+#if defined(__ICC) || defined(__INTEL_COMPILER)
 #pragma intel optimization_level 0
+#endif
 template <class T> inline
 void
 BaseIFFAB<T>::define(const IntVectSet& a_ivsin,
@@ -507,15 +515,18 @@ int BaseIFFAB<T>::size(const Box& a_region,
 
   //account for list of faces
   int facesize = linearListSize(faces);
-
+  if(s_verbose)
+    pout() << "baseiffab facesize = " << facesize << endl;
   //add for each data pt
   int datasize = 0;
+  int iused = 0;
   for (int iface = 0; iface < faces.size(); iface++)
     {
       //this makes sure that the grow done in getBoxAndIVS does
       //not add faces outside the surrounding nodes of the region
       if (useThisFace(a_region, faces[iface]))
         {
+          iused++;
           for (int icomp = a_comps.begin(); icomp <= a_comps.end(); icomp++)
             {
               const T& dataPt = (*this)(faces[iface], icomp);
@@ -525,6 +536,11 @@ int BaseIFFAB<T>::size(const Box& a_region,
         }
     }
 
+  if(s_verbose)
+    pout() << "baseiffab datasize = " << datasize << endl;
+  if(s_verbose)
+    pout() << "baseiffab iused = " << iused << endl;
+
   int retval = facesize + datasize;
 
   if (s_verbose)
@@ -533,9 +549,9 @@ int BaseIFFAB<T>::size(const Box& a_region,
       pout() << "BaseIFFAB size() for region " << m_ebgraph.getRegion() << std::endl;
       pout() << " a_comps  = ("   << a_comps.begin() << "," << a_comps.end()  << "),"
              << " a_region = "   << a_region << " subIVS = ";
-      // dumpIVS(&subIVS);
+      //::dumpIVS(&subIVS);
       pout() << "m_ivs = ";
-      // dumpIVS(&m_ivs);
+      //::dumpIVS(&m_ivs);
       pout() << "size = " << retval << std::endl;
       pout() << "###############" << std::endl;
     }

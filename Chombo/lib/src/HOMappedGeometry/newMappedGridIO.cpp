@@ -245,7 +245,7 @@ WriteMappedAMRHierarchyHDF5(const string& a_fileRoot,
   Vector<string> compNames(nComp);
   for (int n=0; n<nComp; n++)
     {
-      char labelChSt[80];
+      char labelChSt[160];
       sprintf(labelChSt, "component_%d", n);
       string label(labelChSt);
       compNames[n] = label;
@@ -303,7 +303,7 @@ WriteAnisotropicMappedAMRHierarchyHDF5(
     const int& a_numLevels)
 {
   // first, write out data to "regular" hdf5 file:
-  char iter_str[80];
+  char iter_str[160];
 
   sprintf(iter_str, "%s%dd.hdf5", a_fileRoot.c_str(), SpaceDim);
   string dataFileName(iter_str);
@@ -446,7 +446,7 @@ WriteAnisotropicMappedAMRHierarchyHDF5(
   Vector<string> compNames(nComp);
   for (int n=0; n<nComp; n++)
     {
-      char labelChSt[80];
+      char labelChSt[160];
       sprintf(labelChSt, "component_%d", n);
       string label(labelChSt);
       compNames[n] = label;
@@ -567,7 +567,7 @@ WriteMappedAMRHierarchyHDF5(const string& a_fileRoot,
                             const int& a_numLevels)
 {
   // first, write out data to "regular" hdf5 file:
-  char iter_str[80];
+  char iter_str[160];
 
   sprintf(iter_str, "%s%dd.hdf5", a_fileRoot.c_str(), SpaceDim);
   string dataFileName(iter_str);
@@ -714,7 +714,7 @@ WriteAnisotropicMappedAMRHierarchyHDF5(
     const int& a_numLevels)
 {
   // first, write out data to "regular" hdf5 file:
-  char iter_str[80];
+  char iter_str[160];
 
   sprintf(iter_str, "%s%dd.hdf5", a_fileRoot.c_str(), SpaceDim);
   string dataFileName(iter_str);
@@ -861,7 +861,7 @@ WriteMappedAMRHierarchyHDF5(const string& a_fileRoot,
   Vector<string> compNames(nComp);
   for (int n=0; n<nComp; n++)
     {
-      char labelChSt[80];
+      char labelChSt[160];
       sprintf(labelChSt, "component_%d", n);
       string label(labelChSt);
       compNames[n] = label;
@@ -920,7 +920,7 @@ WriteAnisotropicMappedAMRHierarchyHDF5(
   Vector<string> compNames(nComp);
   for (int n=0; n<nComp; n++)
     {
-      char labelChSt[80];
+      char labelChSt[160];
       sprintf(labelChSt, "component_%d", n);
       string label(labelChSt);
       compNames[n] = label;

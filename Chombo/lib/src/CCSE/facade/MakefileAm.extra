@@ -1,3 +1,0 @@
-if SMALLBUILD_AM
-CPP_FILES = ccseFacade.cpp chomboFacade.cpp
-endif SMALLBUILD_AM

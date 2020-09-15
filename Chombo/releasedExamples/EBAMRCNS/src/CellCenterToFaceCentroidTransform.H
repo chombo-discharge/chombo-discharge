@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _CellCenterToFaceCentroidTransform_H_
-#define _CellCenterToFaceCentroidTransform_H_
+#ifndef _CELLCENTERTOFACECENTROIDTRANSFORM_H_
+#define _CELLCENTERTOFACECENTROIDTRANSFORM_H_
 
 #include "Stencils.H"
 #include "EBIndexSpace.H"

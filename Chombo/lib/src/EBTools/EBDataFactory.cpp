@@ -13,13 +13,7 @@
 #include "EBDataFactory.H"
 #include "NamespaceHeader.H"
 
-EBDataFactory::EBDataFactory()
-{
-}
 
-EBDataFactory::~EBDataFactory()
-{
-}
 
 EBData*
 EBDataFactory::create(const Box& box, int ncomps,

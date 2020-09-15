@@ -17,11 +17,12 @@
 
 #include "NamespaceHeader.H"
 
+void computeFaceReductionWeights(LevelData<FluxBox>& a_weights);
 /// Class to do summing operation in the context of CopyTo
 /**
-    This class will perform a summing operation of the data in src
-    in the summingDir direction(s), multiplying by the scale, and placing
-    the sum in the corresponding location in dest
+   This class will perform a summing operation of the data in src
+   in the summingDir direction(s), multiplying by the scale, and placing
+   the sum in the corresponding location in dest
 */
 
 class SumOp : public LDOperator<FArrayBox>
@@ -58,37 +59,56 @@ public:
 // take the cowardly path of just commenting it out to revisit if it
 // becomes a needed member of the Chombo family
 
-#if 0
-class FaceSumOp : public LDOperator<FluxBox>
+
+class FaceSumOp: public LDOperator<FluxBox>
 {
 public:
-  Real scale;
-  int m_summingDir;
+
   FaceSumOp();
+  FaceSumOp(const int& a_summingDir);
+  
+  virtual ~FaceSumOp()
+  {
+  }
+  
+  void setDir  (const int& a_sumDir);
+  void setScale(const Real& a_scale );
+  
+  void op(FluxBox       & dataTo     ,
+          const Box     & RegionFrom ,
+          const Interval& Cdest      ,
+          const Box     & RegionTo   ,
+          const FluxBox & src        ,
+          const Interval& Csrc       ) const;
 
-  FaceSumOp(int a_summingDir);
 
-  virtual void linearOut(const FluxBox& arg, void* buf, const Box& R,
-                         const Interval& comps) const;
 
-  virtual void linearIn(FluxBox& arg,  void* buf, const Box& R,
-                        const Interval& comps) const;
-  void op(FluxBox& dest,
-          const Box& RegionFrom,
-          const Interval& Cdest,
-          const Box& RegionTo,
-          const FluxBox& src,
-          const Interval& Csrc) const;
+  virtual void linearIn(FluxBox       & a_arg  ,  
+                        void*           a_buf  , 
+                        const Box     & a_R    ,
+                        const Interval& a_comps) const;
 
+
+  virtual void linearOut(const FluxBox & a_arg  ,         
+                         void*           a_buf  , 
+                         const Box     & a_R    ,
+                         const Interval& a_comps) const;
+  
+  int size(const FluxBox & a_fluxBox,
+           const Box     & a_bx     , 
+           const Interval& a_comps  ) const;
+
+
+  Real m_scale     ;
+  int  m_summingDir;
+  
 };
-
-#endif
 
 /// Class to do spreading operation in the context of CopyTo
 /**
-    This class will perform a spreading operation of the data in src
-    along the summingDir direction(s), multiplying by the scale, and placing
-    the src values in the corresponding locations in dest.
+   This class will perform a spreading operation of the data in src
+   along the summingDir direction(s), multiplying by the scale, and placing
+   the src values in the corresponding locations in dest.
 */
 
 class SpreadingOp : public LDOperator<FArrayBox>
@@ -124,9 +144,9 @@ public:
 
 /// Class to do spreading operation in the context of CopyTo
 /**
-    This class will perform a spreading operation of the data in src
-    along the summingDir direction(s), multiplying by the scale, and placing
-    the src values in the corresponding locations in dest.
+   This class will perform a spreading operation of the data in src
+   along the summingDir direction(s), multiplying by the scale, and placing
+   the src values in the corresponding locations in dest.
 */
 
 class FaceSpreadingOp : public LDOperator<FluxBox>

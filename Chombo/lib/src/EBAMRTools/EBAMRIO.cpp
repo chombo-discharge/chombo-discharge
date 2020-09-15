@@ -188,7 +188,7 @@ writeEBHDF5(const string& a_filename,
 
           for (int icomp = 0; icomp < ebcellfab1.nComp(); icomp++)
             {
-	      //              ebcellfab1.setCoveredCellVal(0.0, icomp);
+              ebcellfab1.setCoveredCellVal(0.0, icomp);
             }
           const EBISBox& ebisbox = ebcellfab1.getEBISBox();
           FArrayBox& currentFab = fabData[dit()];
@@ -346,7 +346,7 @@ writeEBHDF5(const string& a_filename,
                       currentFab(iv,indexDist) = -dist;
                     }
                 }
-	    }
+            }
           if (a_phase2 != NULL)
             {
               const LevelData<EBCellFAB>& ebcfData2 = *(*a_phase2)[ilev];
@@ -701,26 +701,26 @@ void multiFaceValues(const EBFaceFAB* a_face,
     }
   else
     {
-      cout<<" Third argument must be 0 for low side or 1 for high side";
+      pout()<<" Third argument must be 0 for low side or 1 for high side";
       return;
     }
   int numFaces = problemFaces.size();
-  cout << "In index ("<<iv[0]<<","<<iv[1]<<"), there are "<<numFaces;
-  cout <<" faces on the "<<a_side<<" side, in the "<<a_face->direction()<<" direction"<<endl;
+  pout() << "In index ("<<iv[0]<<","<<iv[1]<<"), there are "<<numFaces;
+  pout() <<" faces on the "<<a_side<<" side, in the "<<a_face->direction()<<" direction"<<endl;
 
   Vector<Real> faceValue(a_face->nComp());
   for (int iFace = 0; iFace<numFaces; ++iFace)
     {
-      cout<< "faceFab["<<iFace<<",*) = (";
+      pout()<< "faceFab["<<iFace<<",*) = (";
       for (int ivar = 0;ivar <a_face->nComp() ; ++ivar)
         {
           if (ivar > 0)
             {
-              cout <<", ";
+              pout() <<", ";
             }
-          cout<<(*a_face)(problemFaces[iFace],ivar);
+          pout()<<(*a_face)(problemFaces[iFace],ivar);
         }
-      cout <<")"<<endl;
+      pout() <<")"<<endl;
     }
 }
 void multiCellValues(const EBCellFAB* a_ebCellFab,
@@ -734,22 +734,22 @@ void multiCellValues(const EBCellFAB* a_ebCellFab,
   Vector< VolIndex> vofs = ebisBox.getVoFs(iv);
 
   int numVofs = vofs.size();
-  cout << "In index ("<<iv[0]<<","<<iv[1]<<"), there are "<<numVofs;
-  cout <<" vofs."<<endl;
+  pout() << "In index ("<<iv[0]<<","<<iv[1]<<"), there are "<<numVofs;
+  pout() <<" vofs."<<endl;
 
   Vector<Real> vofValue(a_ebCellFab->nComp());
   for (int iVof = 0; iVof<numVofs; ++iVof)
     {
-      cout<< "ebCellFab["<<vofs[iVof].cellIndex()<<",*) = (";
+      pout()<< "ebCellFab["<<vofs[iVof].cellIndex()<<",*) = (";
       for (int ivar = 0;ivar <a_ebCellFab->nComp() ; ++ivar)
         {
           if (ivar > 0)
             {
-              cout <<", ";
+              pout() <<", ";
             }
-          cout<<(*a_ebCellFab)(vofs[iVof],ivar);
+          pout()<<(*a_ebCellFab)(vofs[iVof],ivar);
         }
-      cout <<")"<<endl;
+      pout() <<")"<<endl;
     }
 }
 
@@ -993,6 +993,12 @@ browseEBLevel(const LevelData<EBCellFAB>* a_dataPtr)
   BrowseFile(fname);
 }
 
+void
+writeEBLevelName(const LevelData<EBCellFAB>& a_data,
+                 const std::string &          a_filename)
+{
+  writeEBLevelname(&a_data, a_filename.c_str());
+}
 void
 writeEBLevelname(const LevelData<EBCellFAB>* a_dataPtr,
                  const char*                 a_filename)
@@ -2006,6 +2012,24 @@ writeCellCentered(HDF5Handle& a_handle,
 }
 
 void
+metaDataEBFile(HDF5Handle     & a_handle,
+               int            & a_numLevels,
+               Vector<int>    & a_refRatios,
+               ProblemDomain  & a_coarseDomain,
+               IntVect        & a_ghost)
+{
+  a_handle.setGroup("/Chombo_global");
+  HDF5HeaderData header;
+  header.readFromFile(a_handle);
+  a_ghost = header.m_intvect["Ghost"];
+  a_coarseDomain = header.m_box["ProblemDomain"];
+  a_numLevels  = header.m_int["NumLevels"];
+  a_refRatios.resize(a_numLevels);
+  read(a_handle, "RefRatios", a_refRatios, H5T_NATIVE_INT);
+
+}
+
+void
 readCellCentered(HDF5Handle& a_handle,
                  int a_level,
                  const EBIndexSpace* eb,
@@ -2484,7 +2508,7 @@ writeEBHDF5(const string& a_filename,
                   //     currentFab(iv,indexDist) = -dist;
                   //   }
                 }
-	    }
+            }
           if (a_phase2 != NULL)
             {
               const LevelData<EBCellFAB>& ebcfData2 = *(*a_phase2)[ilev];
@@ -2549,11 +2573,11 @@ writeEBHDF5(const string& a_filename,
       // needed
       if (ilev < a_numLevels-1)
       {
-	  for (int i = 0; i < SpaceDim; i++)
-	  {
-	      vectDx[i] /= a_vectRatios[ilev][i];
-	  }
-	
+          for (int i = 0; i < SpaceDim; i++)
+          {
+              vectDx[i] /= a_vectRatios[ilev][i];
+          }
+        
       }
     } //end loop over levels
 

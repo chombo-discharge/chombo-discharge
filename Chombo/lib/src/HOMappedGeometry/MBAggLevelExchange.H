@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _MBAggLevelExchange__H_
-#define _MBAggLevelExchange__H_
+#ifndef _MBAGGLEVELEXCHANGE_H_
+#define _MBAGGLEVELEXCHANGE_H_
 
 #include "MultiBlockLevelGeom.H"
 #include "IVSFAB.H"

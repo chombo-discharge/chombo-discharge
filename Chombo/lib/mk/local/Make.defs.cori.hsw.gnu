@@ -9,7 +9,7 @@ FC=ftn
 MPICXX=CC
 USE_64=TRUE
 
-CH_CPP=$(CXX) -E -P -C
+CH_CPP=$(CXX) -E -P
 
 RUN = srun -n 2 ./#
 
@@ -31,3 +31,8 @@ HDFLIBFLAGS=   -L$(HDF5_DIR)/lib     $(HDF_POST_LINK_OPTS)  -lhdf5 -lz
 HDFMPILIBFLAGS=-L$(HDF5_DIR)/lib     $(HDF_POST_LINK_OPTS)  -lhdf5 -lz
 HDFINCFLAGS=   -I$(HDF5_DIR)/include $(HDF_INCLUDE_OPTS) 
 HDFMPIINCFLAGS=-I$(HDF5_DIR)/include $(HDF_INCLUDE_OPTS)
+
+# NERSC defines its FFTW environment in an odd way...
+ifeq ($(USE_FFTW),TRUE)
+  FFTWDIR = $(FFTW_INC)/..
+endif

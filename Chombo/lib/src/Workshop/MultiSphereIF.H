@@ -13,11 +13,196 @@
 
 #include "MayDay.H"
 #include "RealVect.H"
+#include "RefCountedPtr.H"
 
 #include "BaseIF.H"
 #include "ComplementIF.H"
 
 #include "NamespaceHeader.H"
+
+class RealBox
+{
+public:
+  RealBox()
+  {
+    m_lo = -RealVect::Unit;
+    m_hi =  RealVect::Zero;
+  };
+
+  RealBox(const RealVect& a_lo,
+          const RealVect& a_hi)
+  {
+    m_lo = a_lo;
+    m_hi = a_hi;
+  };
+
+  void operator=(const RealBox& a_realBox)
+  {
+    m_lo = a_realBox.m_lo;
+    m_hi = a_realBox.m_hi;
+  };
+
+  virtual ~RealBox()
+  {
+  };
+
+  virtual void define(const RealVect& a_lo,
+                      const RealVect& a_hi)
+  {
+    m_lo = a_lo;
+    m_hi = a_hi;
+  };
+
+  bool contains(const RealVect& a_point)
+  {
+    bool inside = true;
+
+    for (int idir = 0; idir < SpaceDim; idir++)
+    {
+      if (a_point[idir] < m_lo[idir] || a_point[idir] > m_hi[idir])
+      {
+        inside = false;
+        break;
+      }
+    }
+
+    return inside;
+  };
+
+  RealVect size() const
+  {
+    return (m_hi - m_lo);
+  };
+
+  const RealVect& getLo() const
+  {
+    return m_lo;
+  };
+
+  RealVect getLo()
+  {
+    return m_lo;
+  };
+
+  const RealVect& getHi() const
+  {
+    return m_hi;
+  };
+
+  RealVect getHi()
+  {
+    return m_hi;
+  };
+
+  void setLo(const RealVect& a_lo)
+  {
+    m_lo = a_lo;
+  };
+
+  void setHi(const RealVect& a_hi)
+  {
+    m_hi = a_hi;
+  };
+
+protected:
+  RealVect m_lo;
+  RealVect m_hi;
+};
+
+class SphereTree
+{
+public:
+  SphereTree(const RealBox&          a_bbox,
+             const Vector<Real>&     a_radii,
+             const Vector<RealVect>& a_centers);
+
+  virtual ~SphereTree()
+  {
+    if (m_left != NULL) {
+      delete m_left;
+    }
+
+    if (m_right != NULL) {
+      delete m_right;
+    }
+  };
+
+  const SphereTree& findNode(const RealVect& a_point) const
+  {
+    if (m_numSpheres != 0)
+    {
+      return *this;
+    }
+    else if (m_left->m_bbox.contains(a_point))
+    {
+      return m_left->findNode(a_point);
+    }
+    else if (m_right->m_bbox.contains(a_point))
+    {
+      return m_right->findNode(a_point);
+    }
+    else
+    {
+      pout() << "SphereTree::findNode - " << a_point
+             << " not contained in " << m_bbox.getLo()
+             << " - " << m_bbox.getHi()
+             << endl;
+
+      MayDay::Error("SphereTree::findNode - Couldn't find a node containing the given point");
+    }
+  };
+
+  const int& getNumSpheres() const
+  {
+    return m_numSpheres;
+  };
+
+  int getNumSpheres()
+  {
+    return m_numSpheres;
+  };
+
+  const Vector<Real>& getRadii() const
+  {
+    return m_radii;
+  };
+
+  Vector<Real> getRadii()
+  {
+    return m_radii;
+  };
+
+  const Vector<RealVect>& getCenters() const
+  {
+    return m_centers;
+  };
+
+  Vector<RealVect> getCenters()
+  {
+    return m_centers;
+  };
+
+protected:
+  RealBox          m_bbox;
+
+  int              m_numSpheres;
+  Vector<Real>     m_radii;
+  Vector<RealVect> m_centers;
+
+  SphereTree*      m_left;
+  SphereTree*      m_right;
+
+private:
+  SphereTree()
+  {
+    MayDay::Abort("SphereTree uses strong construction");
+  }
+
+  void operator=(const SphereTree& a_inputIF)
+  {
+    MayDay::Abort("SphereTree doesn't allow assignment");
+  }
+};
 
 ///
 /**
@@ -35,27 +220,20 @@ public:
                 const Vector<RealVect>& a_centers,
                 const bool&             a_inside);
 
-  /// Copy constructor
-  MultiSphereIF(const MultiSphereIF& a_inputIF);
+  MultiSphereIF(const int&                a_numSpheres,
+                const bool&               a_inside,
+                const RealBox&            a_bbox,
+                RefCountedPtr<SphereTree> a_sphereTree);
 
   /// Destructor
   virtual ~MultiSphereIF();
 
   ///
   /**
-      Return the parameter information
+      Return the value of the function at a_point.
    */
-  virtual void GetParams(Vector<Real>&     a_radii,
-                         Vector<RealVect>& a_centers,
-                         bool&             a_inside) const;
-
-  ///
-  /**
-      Set the parameter information
-   */
-  virtual void SetParams(const Vector<Real>&     a_radii,
-                         const Vector<RealVect>& a_centers,
-                         const bool&             a_inside);
+  virtual Real value(const IndexTM<int,GLOBALDIM> & a_partialDerivative,
+                     const IndexTM<Real,GLOBALDIM>& a_point) const;
 
   ///
   /**
@@ -65,25 +243,26 @@ public:
 
   virtual BaseIF* newImplicitFunction() const;
 
-  virtual bool fastIntersection(const RealVect& a_low, const RealVect& a_high) const
-  {return false;}
-
-  virtual GeometryService::InOut InsideOutside(const RealVect& a_low, const RealVect& a_high) const;
-
-  Real value(const IndexTM<int,GLOBALDIM> & a_partialDerivative,
-             const IndexTM<Real,GLOBALDIM>& a_point) const;
 protected:
+  void partitionSpace(const Vector<Real>&     a_radii,
+                      const Vector<RealVect>& a_centers);
+
   int              m_numSpheres;  // number of spheres
-  Vector<Real>     m_radii;       // radi
-  Vector<RealVect> m_centers;     // centers
   bool             m_inside;      // inside flag
 
-  ComplementIF*    m_multiSphere; // the IF object for the spheres
+  RealBox          m_bbox;
+
+  RefCountedPtr<SphereTree> m_sphereTree;
 
 private:
   MultiSphereIF()
   {
     MayDay::Abort("MultiSphereIF uses strong construction");
+  }
+
+  MultiSphereIF(const MultiSphereIF& a_inputIF)
+  {
+    MayDay::Abort("MultiSphereIF doesn't allow copy construction");
   }
 
   void operator=(const MultiSphereIF& a_inputIF)

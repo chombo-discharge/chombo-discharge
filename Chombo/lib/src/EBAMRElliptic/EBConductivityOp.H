@@ -147,6 +147,12 @@ class EBConductivityOp: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
   //only weights by kappa.  time and tga have their demands.
   virtual void kappaScale(LevelData<EBCellFAB> & a_rhs);
 
+  ///returns m_dx, such function is required by some LinearSolvers
+  Real dx() const
+  {
+    return m_dx;
+  }
+
   ///
   /** a_residual = a_rhs - L(a_phiFine, a_phi)   no coaser AMR level*/
   void AMRResidualNC(LevelData<EBCellFAB>&       a_residual,
@@ -464,6 +470,41 @@ class EBConductivityOp: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
   }
   ///do not call this one unless you really know what you are doing
   void defineStencils();
+
+    //adding suplementary methods for petsc solver
+  void getAlphaDiagWeight(LayoutData<BaseIVFAB<Real> > const*& a_alphaDiagWeight)
+  {
+    a_alphaDiagWeight = &m_alphaDiagWeight;
+  }
+
+  void getAlphaBeta(Real& a_alpha, Real& a_beta)
+  {
+    a_alpha = m_alpha;
+    a_beta  = m_beta;
+  }
+  const RefCountedPtr<BaseDomainBC> getDomainBC()
+  {
+      return m_domainBC;
+  }
+
+  const RefCountedPtr<LevelData<EBCellFAB> > getAScalingCoefficients()
+  {
+      return m_acoef;
+  }
+
+  const  RefCountedPtr<LevelData<EBFluxFAB> > getBScalingCoefficients()
+  {
+      return m_bcoef;
+  }
+    
+  void getEBBCFluxStencil(LayoutData<BaseIVFAB<VoFStencil> > const*& a_ebbcFluxStencil)  
+  {
+      a_ebbcFluxStencil = m_ebBC->getFluxStencil(0);
+  }
+
+  static int                      s_numComps;
+  static int                      s_whichComp;
+
 protected:
   void incrOpRegularAllDirs(Box * a_loBox,
                             Box * a_hiBox,
@@ -544,8 +585,10 @@ protected:
   EBLevelGrid                     m_eblgCoarMG;
   EBLevelGrid                     m_eblgCoarsenedFine;
 
-  RefCountedPtr<ConductivityBaseDomainBC>     m_domainBC;
-  RefCountedPtr<ConductivityBaseEBBC>         m_ebBC;
+  // RefCountedPtr<ConductivityBaseDomainBC>     m_domainBC;
+  // RefCountedPtr<ConductivityBaseEBBC>         m_ebBC;
+  RefCountedPtr<BaseDomainBC>     m_domainBC;
+  RefCountedPtr<BaseEBBC>         m_ebBC;
 
   Real                            m_dxFine;
   Real                            m_dx;

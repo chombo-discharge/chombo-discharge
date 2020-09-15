@@ -20,7 +20,7 @@
 #include <cmath>
 #include <cstdio>
 #include <string>
-
+#include "ParmParse.H"
 #include "NamespaceHeader.H"
 
 bool EBLevelMACProjector::s_verbose  = false;
@@ -103,6 +103,8 @@ EBLevelMACProjector(const DisjointBoxLayout&                        a_grids,
 
   int numPreCondIters = 4;
   int mgRelaxType = 1;
+  ParmParse pp;
+  pp.query("mg_relax_type", mgRelaxType);
   Vector<EBLevelGrid> gridsVec(1, EBLevelGrid(m_grids, m_ebisl, m_domain));
   Vector<int> refRat(1,2);
   Real alpha = 0.0;

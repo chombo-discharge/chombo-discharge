@@ -38,6 +38,17 @@ public:
                            const bool&           a_useHomogeneous);
 
 
+  virtual void getHigherOrderFaceFlux(BaseFab<Real>&        a_faceFlux,
+                                      const BaseFab<Real>&  a_phi,
+                                      const RealVect&       a_probLo,
+                                      const RealVect&       a_dx,
+                                      const int&            a_idir,
+                                      const Side::LoHiSide& a_side,
+                                      const DataIndex&      a_dit,
+                                      const Real&           a_time,
+                                      const bool&           a_useHomogeneous);
+
+
   virtual bool isDirichletDom(const VolIndex&   a_ivof,
                               const VolIndex&   a_jvof,
                               const EBCellFAB&  a_phi)

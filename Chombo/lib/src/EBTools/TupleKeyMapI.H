@@ -13,6 +13,7 @@
 
 #include <map>
 #include <iostream>
+#include "parstream.H"
 #include "NamespaceHeader.H"
 
 #define Tuple2 std::pair<T1,     T2>
@@ -125,7 +126,7 @@ void
 TupleKeyMap<TupleArgTypes,ValueT>::report() const
 {
 #ifndef NDEBUG
-  std::cout << "TupleKeyMap::report(): unique arg combinations: "
+  pout() << "TupleKeyMap::report(): unique arg combinations: "
             << m_rep.size() << std::endl;
 #endif
 }

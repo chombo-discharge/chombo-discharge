@@ -91,7 +91,7 @@ WriteMappedAMRHierarchyHDF5(const string& a_fileRoot,
                             const int& a_numLevels)
 {
   // first, write out data to "regular" hdf5 file:
-  //char iter_str[80];
+  //char iter_str[160];
   std::vector<char> iter_str(a_fileRoot.size()+25);
   sprintf(&(iter_str[0]), "%s%dd.hdf5", a_fileRoot.c_str(), SpaceDim);
   string dataFileName(&(iter_str[0]));
@@ -230,7 +230,7 @@ WriteMappedAMRHierarchyHDF5(const string& a_fileRoot,
   Vector<string> compNames(nComp);
   for (int n=0; n<nComp; n++)
     {
-      char labelChSt[80];
+      char labelChSt[160];
       sprintf(labelChSt, "component_%d", n);
       string label(labelChSt);
       compNames[n] = label;

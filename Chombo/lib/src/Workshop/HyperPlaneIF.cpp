@@ -24,10 +24,21 @@
 HyperPlaneIF::HyperPlaneIF(const IndexTM<Real,GLOBALDIM> & a_normal,
                            const IndexTM<Real,GLOBALDIM> & a_point,
                            const bool                    & a_normalIn)
- :m_normal(a_normal),
-  m_point(a_point),
+ :m_point(a_point),
   m_normalIn(a_normalIn)
 {
+  Real norm = 0.0;
+  for (int idir=0 ; idir < GLOBALDIM ; idir++)
+  {
+    norm += a_normal[idir] * a_normal[idir];
+  }
+
+  m_normal = a_normal;
+
+  if (norm > 0.0)
+  {
+    m_normal /= sqrt(norm);
+  }
 }
 
 HyperPlaneIF::HyperPlaneIF(const HyperPlaneIF& a_inputIF)
@@ -114,16 +125,19 @@ IndexTM<Real,GLOBALDIM> HyperPlaneIF::normal(const IndexTM<Real,GLOBALDIM>& a_po
 
   Real norm = 0.0;
   for (int idir=0 ; idir < GLOBALDIM ; idir++)
-    {
-      norm += m_normal[idir] * m_normal[idir];
-    }
+  {
+    norm += m_normal[idir] * m_normal[idir];
+  }
 
-  normal /= sqrt(norm);
+  if (norm > 0.0)
+  {
+    normal /= sqrt(norm);
+  }
 
   if (m_normalIn)
-    {
-      normal = -normal;
-    }
+  {
+    normal = -normal;
+  }
 
   return normal;
 }

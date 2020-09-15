@@ -61,7 +61,7 @@ getAdvectionVelocityFunction(AdvectionVelocityFunction& a_velFunc)
 
 void
 getAMRLevelTracerFactory(RefCountedPtr<AMRLevelTracerFactory>&  a_fact,
-			 AdvectionVelocityFunction a_advFunc)
+                         AdvectionVelocityFunction a_advFunc)
 {
   ParmParse pp;
   Real cfl = 0.4;

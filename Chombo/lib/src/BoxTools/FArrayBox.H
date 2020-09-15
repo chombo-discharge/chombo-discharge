@@ -62,6 +62,20 @@ public:
             int        a_ncomp,
             Real*      a_alias);
 
+  #ifdef USE_PROTO
+  template<unsigned int C>
+  FArrayBox(const Proto::BoxData<Real, C>& a_bd)
+  : BaseFab<Real>(a_bd)
+  {
+  }
+ 
+  template<unsigned int C>
+  FArrayBox(const Proto::BoxData<Real, C>& a_bd, Proto::Point a_center)
+  : BaseFab<Real>(a_bd, a_center)
+  {
+  }
+  #endif
+
   FArrayBox(const Box& a_box,
             int        a_ncomp);
   ///

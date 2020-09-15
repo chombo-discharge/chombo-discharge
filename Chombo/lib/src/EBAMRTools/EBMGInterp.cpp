@@ -318,6 +318,7 @@ defineConstantStencil(const DataIndex       & a_dit,
       //weight is one because there is only one vof to the stencil
       //and we are doing piecewise constant interpolation
       //for the copy stencil the weight is one because it is a copy
+
       interpStencil.add(coarVoF, 1.0);
     }
 

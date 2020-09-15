@@ -163,7 +163,7 @@ setNormalizedStuff(const Real& a_dx)
 
   for (int idir = 0; idir < SpaceDim; ++idir)
     {
-      if(volume > 0.);
+      if(volume > 0.)
       {
         ///volume centroid
         m_volCentroid[idir] = m_volumeMoments[BASISV_TM<int,SpaceDim>(idir)];

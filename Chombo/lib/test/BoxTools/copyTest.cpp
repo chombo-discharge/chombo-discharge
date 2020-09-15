@@ -18,6 +18,10 @@
 #include "BoxIterator.H"
 #include "LayoutIterator.H"
 #include "CH_Attach.H"
+#include "LoadBalance.H"
+#include "AMRIO.H"
+#include <chrono>
+#include <ctime>
 #include "UsingNamespace.H"
 
 /// Global variables for test output:
@@ -37,6 +41,8 @@ parseTestOptions( int argc ,char* argv[] ) ;
  */
 extern int
 copyTest(void);
+
+extern int exchangeFixedSize(IntVect origin, IntVect fixedBoxSize, IntVect domainExtent);
 
 /// Code:
 int
@@ -61,6 +67,14 @@ main(int argc, char* argv[])
       passed = false;
     }
 
+  icode = exchangeFixedSize(IntVect::Zero, 16*IntVect::Unit, 128*IntVect::Unit);
+
+  IntVect fixed=16*IntVect::Unit;
+  fixed[0] = 4;
+  IntVect extent = 250*IntVect::Unit;
+  extent[0] = 130;
+  icode = exchangeFixedSize(-45*IntVect::Unit, fixed, extent);
+  
   if (passed)
     {
       pout() << indent << pgmname
@@ -242,6 +256,106 @@ copyTest()
   return(icode);
 }
 
+int exchangeFixedSize(IntVect origin, IntVect fixedBoxSize, IntVect domainExtent)
+{
+  if(CH_SPACEDIM > 3)
+    {
+      pout()<< "This test only works in dimension 1, 2 or 3 at the moment\n";
+      return 0;
+    }
+  IntVect thickness1=domainExtent/20;
+  IntVect thickness2 = 3*thickness1;
+  thickness2[0] = 2;
+  IntVect center = domainExtent/3;
+  Vector<Box> boxes;
+  IntVect corigin = origin/fixedBoxSize;
+  origin = corigin*fixedBoxSize;
+  
+  boxes.reserve(domainExtent.product());
+  BoxIterator bit(Box(corigin, corigin+domainExtent-IntVect::Unit));
+
+  for(bit.begin(); bit.ok(); ++bit)
+    {
+      IntVect i = bit()-corigin-center;
+      if(absolute(i)<thickness1 || absolute(i) < thickness2)
+        {
+          boxes.push_back(refine(Box(bit(),bit()),fixedBoxSize));
+        }
+    }
+  pout()<< "created "<<boxes.size()<<" Boxes for fixed-size test\n";
+  ProblemDomain domain(Box(corigin*fixedBoxSize, (corigin+domainExtent)*fixedBoxSize));
+  pout()<<domain<<"\n";
+  Vector<int> procs;
+  boxes.sort();
+  basicLoadBalance(procs, boxes.size());
+  DisjointBoxLayout dbl(boxes, procs, domain);
+  DataIterator   dit = dbl.dataIterator();
+  
+  LevelData<BaseFab<uint8_t> > oldway(dbl, 1, 3*fixedBoxSize);
+  LevelData<BaseFab<uint8_t> > newway(dbl, 1, 3*fixedBoxSize);
+
+ 
+  for(dit.begin(); dit.ok(); ++dit)
+    {
+      auto& m1 = oldway[dit];
+      auto& m2 = newway[dit];
+      m1.setVal(0);
+      m2.setVal(0);
+      for(BoxIterator bit(dbl[dit]); bit.ok(); ++bit)
+        {
+          m1(bit(),0)={(uint8_t)(bit().product() & 0xFF)};
+          m2(bit(),0)={(uint8_t)(bit().product() & 0xFF)};
+        }
+    }
+  
+  LayoutIterator lit = dbl.layoutIterator();
+  LMap map;
+  //map.max_load_factor(10);
+  auto t1=std::chrono::system_clock::now();
+  for(lit.begin(); lit.ok(); ++lit)
+    {
+      uint64_t h = dbl[lit].smallEnd().hash(origin, fixedBoxSize);
+      CH_assert(map.find(h) == map.end()); // this is a unique hash, no collisions
+      map.emplace(h, lit());
+    }
+  auto tm = std::chrono::system_clock::now()-t1;
+  pout()<<"\ntime to build LMap: "<<tm.count();
+  pout()<< "\nsize = " << map.size();
+  pout() << "\nbucket_count = " << map.bucket_count();
+  pout() << "\nload_factor = " << map.load_factor();
+  pout() << "\nmax_load_factor = " << map.max_load_factor() << std::endl;
+  Copier copier1, copier2;
+  auto s1 = std::chrono::system_clock::now();
+  copier2.defineFixedBoxSize(dbl, map, 3*fixedBoxSize, domain);
+  auto s2 = std::chrono::system_clock::now();
+  copier1.define(dbl, dbl, domain, 3*fixedBoxSize, true, IntVect::Zero);
+  auto s3 = std::chrono::system_clock::now();
+
+  pout()<<" old way Copier define "<<(s3-s2).count()<<"\n";
+  pout()<<" new way Copier define "<<(s2-s1).count()<<"\n";
+  
+  oldway.exchange(copier1);
+  newway.exchange(copier2);
+  bool pass = true;
+  int b = 0;
+  for(dit.begin(); dit.ok(); ++b, ++dit)
+    {
+      auto m1 = oldway[dit].dataPtr();
+      auto m2 = newway[dit].dataPtr();
+      for(int i=0; i<fixedBoxSize.product(); ++i)
+        {
+          if(m1[i] != m2[i])
+            {
+              pass=false;
+              pout()<<"box "<<b<<"  missed value: "<<m1[i]<<" "<<m2[i]<<std::endl;
+              break;
+            }
+        }
+    }
+  if(!pass) return 1;
+  
+  return 0;
+}
 ///
 // Parse the standard test options (-v -q) out of the command line.
 // Stop parsing when a non-option argument is found.

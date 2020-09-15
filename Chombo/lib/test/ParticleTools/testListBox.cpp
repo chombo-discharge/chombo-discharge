@@ -129,8 +129,8 @@ main(int argc ,char *argv[] )
           }
         }
 
-	// to count the number of bytes that get written out, we count backwards from the
-	// last end of the buffer, stopping at the last non-@ character.
+        // to count the number of bytes that get written out, we count backwards from the
+        // last end of the buffer, stopping at the last non-@ character.
         int at ,at2;
         for ( at=NB-1  ; at>=0  ; --at  )
         {
@@ -149,19 +149,19 @@ main(int argc ,char *argv[] )
           }
         }
 
-	// That worked, unless the last byte written out is '@' when interpreted as a char.
-	// To handle that case we must also use a second char array with a different token.
+        // That worked, unless the last byte written out is '@' when interpreted as a char.
+        // To handle that case we must also use a second char array with a different token.
         char *test = new char[NB];
         char *test2 = new char[NB];
 
         for ( int i=0 ; i<NB ; ++i )
         {
           test[i] = '?';
-	  test2[i] = '?';
+          test2[i] = '?';
         }
 
         thisListBox.linearOut( test ,thisListBox.box());
-        thatListBox.linearOut( test2, thisListBox.box()) ;	
+        thatListBox.linearOut( test2, thisListBox.box()) ;      
 
         int bt ,bt2;
         for ( bt=NB-1  ; bt>=0  ; --bt  )
@@ -181,9 +181,9 @@ main(int argc ,char *argv[] )
           }
         }
 
-	// the last character can't be both '@' and '?', so we use the largest.
-	int outsize = max(at + 1, bt + 1);
-	int outsize2 = max(at2 + 1, bt2 + 1);
+        // the last character can't be both '@' and '?', so we use the largest.
+        int outsize = max(at + 1, bt + 1);
+        int outsize2 = max(at2 + 1, bt2 + 1);
 
         if ( outsize != bfsize )
         {

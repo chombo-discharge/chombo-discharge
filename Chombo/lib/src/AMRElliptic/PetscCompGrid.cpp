@@ -186,16 +186,16 @@ PetscCompGrid::clean()
             }   
         }
        if (m_Pmat) 
-	 {
-	   MatDestroy(&m_Pmat);
-	   m_Pmat = 0;
-	 }
+         {
+           MatDestroy(&m_Pmat);
+           m_Pmat = 0;
+         }
        if (m_from_petscscat) 
-	 {
-	   VecScatterDestroy(&m_from_petscscat);
-	   VecDestroy(&m_origvec);
-	   CH_assert(!m_from_petscscat);
-	 }
+         {
+           VecScatterDestroy(&m_from_petscscat);
+           VecDestroy(&m_origvec);
+           CH_assert(!m_from_petscscat);
+         }
     }
   m_patch_size = 0;
   m_gid0 = 0;
@@ -241,9 +241,9 @@ PetscCompGrid::setCFCoverMaps( int a_nlev )
       refine(refinedCrsDBL,cdbl,refRatio);
       //
       if (getGhostVect()[0]>refRatio)
-	{
-	  MayDay::Error("PetscCompGrid::define getGhostVect>refRatio - not setup for this");
-	}
+        {
+          MayDay::Error("PetscCompGrid::define getGhostVect>refRatio - not setup for this");
+        }
       // ghost cells for fine support governed by CF radius (12=nr*nr(rad+1), could use 1 with nesting radius==4 maybe
       const IntVect nFineProcGhosts = refRatio*refRatio*(m_CFStencilRad+1)*IntVect::Unit;
       pl = new LevelData<BaseFab<PetscInt> >(refinedCrsDBL,1,nFineProcGhosts); 
@@ -257,19 +257,19 @@ PetscCompGrid::setCFCoverMaps( int a_nlev )
       Copier pcopier(fdbl,refinedCrsDBL,nFineProcGhosts);
       m_GIDs[ilev]->copyTo(inter,*m_fineCoverGIDs[ilev],inter,pcopier);
       if (m_verbose>3) 
-	{
+        {
           pout() << "PetscCompGrid::define: m_fineCoverGIDs["<< ilev-1 <<"] boxes: " << endl; 
-	  for (DataIterator dit = cdbl.dataIterator(); dit.ok(); ++dit)
-	    {
-	      BaseFab<PetscInt>& gidfab = (*pl)[dit];
+          for (DataIterator dit = cdbl.dataIterator(); dit.ok(); ++dit)
+            {
+              BaseFab<PetscInt>& gidfab = (*pl)[dit];
               if (m_verbose>5)
                 {
                   pout() << "PetscCompGrid::define: refined box="
                          << gidfab.box() 
                          << ", coarse box = " << m_grids[ilev-1][dit] << endl;
                 }
-	    }
-	}
+            }
+        }
     }
 }
 
@@ -302,7 +302,7 @@ PetscCompGrid::define( const ProblemDomain &a_cdomain,
   if (m_verbose>5) 
     {
       pout() << "PetscCompGrid::define: a_numLevels=" << a_numLevels << ", numLevs=" << 
-	numLevs << ", a_ibase=" << a_ibase << endl; 
+        numLevs << ", a_ibase=" << a_ibase << endl; 
     }
   if (numLevs>1)
     {
@@ -347,10 +347,10 @@ PetscCompGrid::define( const ProblemDomain &a_cdomain,
           dx /= a_refRatios[ilev];
         }
       if (m_verbose>5) 
-	{
-	  pout() << "PetscCompGrid::define: level=" << ilev << ", " << 
-	    m_grids[ii].size() << " patches" << endl; 
-	}
+        {
+          pout() << "PetscCompGrid::define: level=" << ilev << ", " << 
+            m_grids[ii].size() << " patches" << endl; 
+        }
     }
 
   // iterate over uncovered cells, count real cells and patches
@@ -360,7 +360,7 @@ PetscCompGrid::define( const ProblemDomain &a_cdomain,
       const DisjointBoxLayout& dbl = m_grids[ilev];
       // 3 is a hack for treb (?); refRat*(rad+1) happens at corners (not clear def of "radius")
       IntVect nProcessGhost = (ilev==0) ? /*getGhostVect()*/ 3*IntVect::Unit : 
-	m_refRatios[ilev-1]*(m_CFStencilRad+1)*IntVect::Unit;
+        m_refRatios[ilev-1]*(m_CFStencilRad+1)*IntVect::Unit;
       m_GIDs[ilev] = RefCountedPtr<LevelData<BaseFab<PetscInt> > >
         (new LevelData<BaseFab<PetscInt> >(dbl,1,nProcessGhost));
       // set gids == GHOST
@@ -394,26 +394,26 @@ PetscCompGrid::define( const ProblemDomain &a_cdomain,
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit)
         {
           BaseFab<PetscInt>& gidfab = (*m_GIDs[ilev])[dit]; // make explicit that we modify this
-	  addExtraCovered(FINE_COVERED,ilev,dit(),gidfab);
-	}
+          addExtraCovered(FINE_COVERED,ilev,dit(),gidfab);
+        }
       // count
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit)
         {
           Box region = dbl[dit]; // no ghosts
           BaseFab<PetscInt>& gidfab = (*m_GIDs[ilev])[dit];
-	  int nreal = 0; // count real
+          int nreal = 0; // count real
           for (BoxIterator bit(region); bit.ok(); ++bit)
             {
               const IntVect& iv = bit(); 
               if (gidfab(iv,0) == GHOST){ nreal++; my0s[0]++; }// not covered, so real
             }
-	  if (m_repartition && nreal) 
-	    {
-	      my0s[1]++; 
-	      if (!nblockpts) nblockpts = nreal;
-	      else if (nblockpts != nreal) MayDay::Error("PetscCompGrid::define block size changed -- must use a 'tree' grid");
-	    }
-	}
+          if (m_repartition && nreal) 
+            {
+              my0s[1]++; 
+              if (!nblockpts) nblockpts = nreal;
+              else if (nblockpts != nreal) MayDay::Error("PetscCompGrid::define block size changed -- must use a 'tree' grid");
+            }
+        }
     } // levels
   if (nblockpts) 
     {
@@ -449,7 +449,7 @@ PetscCompGrid::define( const ProblemDomain &a_cdomain,
             {
               const IntVect& iv = bit(); 
               if (gidfab(iv,0) == GHOST) gidfab(iv,0) = gid++; // not covered, so real
-	      else CH_assert(gidfab(iv,0) == FINE_COVERED);   // fine covered
+              else CH_assert(gidfab(iv,0) == FINE_COVERED);   // fine covered
             }
         }
       m_GIDs[ilev]->exchange(); // this has to be virtualized for COGENT (or does it ignore block patch ghosts?)
@@ -530,13 +530,13 @@ PetscCompGrid::createMatrix(int a_makePmat/*=0*/)
         { 
           BaseFab<PetscInt>& gidfab = (*m_GIDs[ilev])[dit];
           Box region = dbl[dit];
-	  int nreal = 0;
+          int nreal = 0;
           for (BoxIterator bit(region); bit.ok(); ++bit)
             {
               const IntVect& iv = bit();
               if (gidfab(iv,0) >= 0) // not covered
                 { 
-		  nreal++;
+                  nreal++;
                   // doit 
                   StencilTensor &sten2 = stenVect[idx];
                   createOpStencil(iv,ilev,dit(),sten2); // get raw stencil from app
@@ -546,13 +546,13 @@ PetscCompGrid::createMatrix(int a_makePmat/*=0*/)
                     }
                   if (ilev != 0) // test is just for speed
                     {
-		      InterpToCoarse(iv,ilev,dit(),sten2);
+                      InterpToCoarse(iv,ilev,dit(),sten2);
                     }
                   if (ilev != nGrids-1) // test is just for speed
                     {
                       InterpToFine(iv,ilev,dit(),sten2);
                     }
-		  // COGENT -- add function to transform block patch ghosts
+                  // COGENT -- add function to transform block patch ghosts
 
                   // collect prealloc sizes
                   o_nnz[idx*m_dof] = d_nnz[idx*m_dof] = sten2.size();
@@ -560,7 +560,7 @@ PetscCompGrid::createMatrix(int a_makePmat/*=0*/)
                   d_nnz[idx*m_dof] += m_num_extra_nnz;
                   o_nnz[idx*m_dof] += m_num_extra_nnz;
                   if (d_nnz[idx*m_dof]>nloc) d_nnz[idx*m_dof] = nloc;
-		  if (o_nnz[idx*m_dof]>(nglob-nloc)) o_nnz[idx*m_dof]=(nglob-nloc);
+                  if (o_nnz[idx*m_dof]>(nglob-nloc)) o_nnz[idx*m_dof]=(nglob-nloc);
                   d_nnz[idx*m_dof] *= m_dof;
                   o_nnz[idx*m_dof] *= m_dof;
                   for (int i=1; i<m_dof; ++i) 
@@ -569,51 +569,51 @@ PetscCompGrid::createMatrix(int a_makePmat/*=0*/)
                       o_nnz[idx*m_dof+i] = o_nnz[idx*m_dof];
                     }
                   idx++;
-		  // make graph for repartitioning
-		  if (m_repartition)
-		    {
-		      BaseFab<PetscInt>& this_gidfabJ = (*m_GIDs[ilev])[dit()];
-		      StencilTensor::const_iterator end = sten2.end(); 
-		      for (StencilTensor::const_iterator it = sten2.begin(); it != end; ++it) 
-			{
-			  const IndexML &ivJ = it->first;
-			  int jLevel = ivJ.level();
-			  BaseFab<PetscInt>& gidfabJ = (jLevel==ilev) ? this_gidfabJ : 
-			    (jLevel==ilev+1) ? (*m_fineCoverGIDs[ilev+1])[dit()] : 
-			    (*m_crsSupportGIDs[ilev-1])[dit()];
-			  
-			  if (!gidfabJ.box().contains(ivJ.iv())){
-			    pout() << "ERROR row  " << IndexML(iv,ilev) << ", this box:" << 
-			      m_grids[ilev][dit()] << ", fine box (failure): " << gidfabJ.box() << 
-			      " failed to find "<< ivJ << endl;
-			    MayDay::Error("PetscCompGrid::createMatrix failed to find cell");
-			  }
+                  // make graph for repartitioning
+                  if (m_repartition)
+                    {
+                      BaseFab<PetscInt>& this_gidfabJ = (*m_GIDs[ilev])[dit()];
+                      StencilTensor::const_iterator end = sten2.end(); 
+                      for (StencilTensor::const_iterator it = sten2.begin(); it != end; ++it) 
+                        {
+                          const IndexML &ivJ = it->first;
+                          int jLevel = ivJ.level();
+                          BaseFab<PetscInt>& gidfabJ = (jLevel==ilev) ? this_gidfabJ : 
+                            (jLevel==ilev+1) ? (*m_fineCoverGIDs[ilev+1])[dit()] : 
+                            (*m_crsSupportGIDs[ilev-1])[dit()];
+                          
+                          if (!gidfabJ.box().contains(ivJ.iv())){
+                            pout() << "ERROR row  " << IndexML(iv,ilev) << ", this box:" << 
+                              m_grids[ilev][dit()] << ", fine box (failure): " << gidfabJ.box() << 
+                              " failed to find "<< ivJ << endl;
+                            MayDay::Error("PetscCompGrid::createMatrix failed to find cell");
+                          }
 
-			  PetscInt gidj = gidfabJ(ivJ.iv(),0)*m_dof;
-			  if (gidj<0) 
-			    {
-			      pout() << "\tFAILED TO FIND iv=" << ivJ << "\t gidj type:" << (GID_type)gidj << "\tiLevel=" << ilev << "\tiv=" << iv << endl;
-			      MayDay::Error("PetscCompGrid::createMatrix failed to find gid");
-			    }
-			  else if (gidj < m_gid0 || gidj >= mygidnext) // off proc value
-			    {
-			      StencilTensor &sten = patchStencil[patchidx]; // add to this row
-			      // find patch that has this gidj
-			      IntVect iv = ivJ.iv();
-			      iv.coarsen(m_patch_size);          // get into block space
-			      StencilTensorValue &v0 = sten[IndexML(iv,ivJ.level())]; // will create if not there
-			      if (v0.value(0,0)==0.0) v0.setValue((Real)(gidj/nblockpts+1)); // put global index into stencil -- one based
-			      else CH_assert((PetscInt)v0.value(0,0)==(gidj/nblockpts)+1);
-			    }
-			}		      
-		    } // repart
+                          PetscInt gidj = gidfabJ(ivJ.iv(),0)*m_dof;
+                          if (gidj<0) 
+                            {
+                              pout() << "\tFAILED TO FIND iv=" << ivJ << "\t gidj type:" << (GID_type)gidj << "\tiLevel=" << ilev << "\tiv=" << iv << endl;
+                              MayDay::Error("PetscCompGrid::createMatrix failed to find gid");
+                            }
+                          else if (gidj < m_gid0 || gidj >= mygidnext) // off proc value
+                            {
+                              StencilTensor &sten = patchStencil[patchidx]; // add to this row
+                              // find patch that has this gidj
+                              IntVect iv = ivJ.iv();
+                              iv.coarsen(m_patch_size);          // get into block space
+                              StencilTensorValue &v0 = sten[IndexML(iv,ivJ.level())]; // will create if not there
+                              if (v0.value(0,0)==0.0) v0.setValue((Real)(gidj/nblockpts+1)); // put global index into stencil -- one based
+                              else CH_assert((PetscInt)v0.value(0,0)==(gidj/nblockpts)+1);
+                            }
+                        }                     
+                    } // repart
                 } // real cell 
             } // box
-	  if (nreal && m_repartition)
-	    {
-	      if (m_verbose>2) pout() << patchidx << "\tPetscCompGrid::createMatrix num graph edges for repartitioning : " <<  patchStencil[patchidx].size() << endl;
-	      patchidx++;
-	    }
+          if (nreal && m_repartition)
+            {
+              if (m_verbose>2) pout() << patchidx << "\tPetscCompGrid::createMatrix num graph edges for repartitioning : " <<  patchStencil[patchidx].size() << endl;
+              patchidx++;
+            }
         } // level
 
       if (m_verbose>1) 
@@ -623,16 +623,16 @@ PetscCompGrid::createMatrix(int a_makePmat/*=0*/)
 #ifdef CH_MPI
               MPI_Comm wcomm = Chombo_MPI::comm;
               PetscInt n = max_size;
-	      MPI_Datatype mtype;
-	      PetscDataTypeToMPIDataType(PETSC_INT,&mtype);
+              MPI_Datatype mtype;
+              PetscDataTypeToMPIDataType(PETSC_INT,&mtype);
               ierr = MPI_Allreduce(&n, &max_size, 1, mtype, MPI_MAX, wcomm);CHKERRQ(ierr);
 #endif
-	    }
-	  pout() << "\t PetscCompGrid::createMatrix level " << ilev+1 << 
-	    "/" << nGrids << ". domain " << m_domains[ilev] 
-		 << ". max. stencil size: " 
-		 << max_size << endl;
-	}
+            }
+          pout() << "\t PetscCompGrid::createMatrix level " << ilev+1 << 
+            "/" << nGrids << ". domain " << m_domains[ilev] 
+                 << ". max. stencil size: " 
+                 << max_size << endl;
+        }
     } // grids
   CH_assert(idx==nloc);  
   if (m_verbose>0 && m_repartition)
@@ -751,14 +751,14 @@ PetscCompGrid::permuteDataAndMaps(Vector<StencilTensor> &patchStencil)
     ierr = MatMPIAIJSetPreallocation(graph,250,0,150,0);CHKERRQ(ierr);
     for (PetscInt ii=0,gidi=m_patchid0;ii<m_nlocrealpatches;ii++,gidi++)
       {
-	StencilTensor &sten = patchStencil[ii]; // add to this row
-	StencilTensor::const_iterator end = sten.end(); 
-	for (StencilTensor::const_iterator it = sten.begin(); it != end; ++it) 
-	  {
-	    //const IndexML &ivJ = it->first;
-	    PetscInt gidj = (PetscInt)it->second.value(0,0) - 1; // zero based
-	    ierr = MatSetValues(graph,1,&gidi,1,&gidj,&v,INSERT_VALUES);CHKERRQ(ierr);
-	  }
+        StencilTensor &sten = patchStencil[ii]; // add to this row
+        StencilTensor::const_iterator end = sten.end(); 
+        for (StencilTensor::const_iterator it = sten.begin(); it != end; ++it) 
+          {
+            //const IndexML &ivJ = it->first;
+            PetscInt gidj = (PetscInt)it->second.value(0,0) - 1; // zero based
+            ierr = MatSetValues(graph,1,&gidi,1,&gidj,&v,INSERT_VALUES);CHKERRQ(ierr);
+          }
       }
     ierr = MatAssemblyBegin(graph,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
     ierr = MatAssemblyEnd(graph,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr); 
@@ -768,7 +768,7 @@ PetscCompGrid::permuteDataAndMaps(Vector<StencilTensor> &patchStencil)
     ierr = MatAXPY(graph,1.0,graph_new,DIFFERENT_NONZERO_PATTERN);
     MatDestroy(&graph_new);
   }
-  if (false) {	  
+  if (false) {    
     PetscViewer viewer;
     char suffix[30] = "G0.m";
     ierr = PetscViewerASCIIOpen(Chombo_MPI::comm,suffix,&viewer);CHKERRQ(ierr);
@@ -784,9 +784,9 @@ PetscCompGrid::permuteDataAndMaps(Vector<StencilTensor> &patchStencil)
     PetscMPIInt     rank;
     PetscInt       *counts;
 
-    ierr = MPI_Comm_rank(Chombo_MPI::comm, &rank);CHKERRQ(ierr);	
+    ierr = MPI_Comm_rank(Chombo_MPI::comm, &rank);CHKERRQ(ierr);        
     ierr = MatPartitioningCreate(Chombo_MPI::comm, &mpart);CHKERRQ(ierr);
-    ierr = MatPartitioningSetAdjacency(mpart,graph);CHKERRQ(ierr);	
+    ierr = MatPartitioningSetAdjacency(mpart,graph);CHKERRQ(ierr);      
     ierr = MatPartitioningSetFromOptions(mpart);CHKERRQ(ierr);
     ierr = MatPartitioningSetNParts(mpart,nprocs);CHKERRQ(ierr);
     ierr = MatPartitioningApply(mpart, &proc_is);CHKERRQ(ierr);
@@ -806,7 +806,7 @@ PetscCompGrid::permuteDataAndMaps(Vector<StencilTensor> &patchStencil)
     ierr = ISSort(old_new_patchids);CHKERRQ(ierr); /* is this needed? */
     // MatGetSubMatrix -- not needed
     ierr = MatGetSubMatrix(graph, old_new_patchids, old_new_patchids, MAT_INITIAL_MATRIX, &graph_new);CHKERRQ(ierr);
-    if (false) {	  
+    if (false) {          
       PetscViewer viewer;
       char suffix[30] = "G2.m";
       ierr = PetscViewerASCIIOpen(Chombo_MPI::comm,suffix,&viewer);CHKERRQ(ierr);
@@ -825,8 +825,8 @@ PetscCompGrid::permuteDataAndMaps(Vector<StencilTensor> &patchStencil)
     ierr = ISGetIndices(old_new_patchids, &idx);CHKERRQ(ierr);
     for (ii=0,jj=0; ii<npatch_new; ii++) 
       {
-	PetscInt geq = idx[ii]*nblockpts*m_dof; // equation
-	for (int kk=0; kk<nblockpts*m_dof; kk++, jj++, geq++) tidx[jj] = geq;
+        PetscInt geq = idx[ii]*nblockpts*m_dof; // equation
+        for (int kk=0; kk<nblockpts*m_dof; kk++, jj++, geq++) tidx[jj] = geq;
       }
     CH_assert(jj==nloc_new*m_dof);
     ierr = ISRestoreIndices(old_new_patchids, &idx);CHKERRQ(ierr);
@@ -873,7 +873,7 @@ static bool s_check_row_sum = false;
 
 void 
 PetscCompGrid::applyBCs( IntVect a_iv, int a_ilev, const DataIndex &a_dummy, Box a_dombox, 
-			 StencilTensor &a_sten )
+                         StencilTensor &a_sten )
 {
   CH_TIME("PetscCompGrid::applyBCs");
   int nSources = -1;
@@ -914,49 +914,49 @@ PetscCompGrid::applyBCs( IntVect a_iv, int a_ilev, const DataIndex &a_dummy, Box
           for (int dir=0;dir<CH_SPACEDIM;++dir)
             {
               if (jiv[dir] < a_dombox.smallEnd(dir) || jiv[dir] > a_dombox.bigEnd(dir)) 
-		{
-		  // have a BC, get coefs on demand
-		  if (nSources == -1) { 
-		    IntVect ghostVect = getGhostVect();
-		    RefCountedPtr<BCFunction> bc = m_bc.getBCFunction();
-		    ConstDiriBC *mybc = dynamic_cast<ConstDiriBC*>(&(*bc));
-		    if (mybc)
-		      {
-			CH_assert(mybc->nGhosts()==ghostVect);
-			nSources = mybc->nSources();
-			new_vals.resize(ghostVect[0]);
-			for (int i = 0 ; i < ghostVect[0]; i++)
-			  {
-			    new_vals[i].resize(nSources); 
-			    for (int j = 0 ; j < nSources; j++ )
-			      {
-				new_vals[i][j].second.define(1); // have to define because it can be a tensor now, yuck
-				new_vals[i][j].second.setValue(mybc->getCoef(j,i));
-				new_vals[i][j].first.setLevel(a_ilev);
-			      }
-			  }
-		      }
-		    else
-		      {
-			CH_assert(ghostVect[0]==1); 
-			Real denom=2.;   new_vals.resize(1); new_vals[0].resize(2);
-			new_vals[0][0].second.define(1);           new_vals[0][1].second.define(1); // have to define because it can be a tensor now, yuck
-			new_vals[0][0].second.setValue(-5./denom); new_vals[0][1].second.setValue(1./denom);
-			new_vals[0][0].first.setLevel(a_ilev);     new_vals[0][1].first.setLevel(a_ilev);
-		      }		    
-		    // for debugging -- neumann
-		    if (s_check_row_sum)
-		      {
-			new_vals.resize(ghostVect[0]);
-			for (int idx=0;idx<ghostVect[0];idx++)
-			  {
-			    new_vals[idx].resize(1);
-			    new_vals[idx][0].second.setValue(1.);
-			  }
-			nSources = 1;
-		      }
-		  } // init coefs
-		  
+                {
+                  // have a BC, get coefs on demand
+                  if (nSources == -1) { 
+                    IntVect ghostVect = getGhostVect();
+                    RefCountedPtr<BCFunction> bc = m_bc.getBCFunction();
+                    ConstDiriBC *mybc = dynamic_cast<ConstDiriBC*>(&(*bc));
+                    if (mybc)
+                      {
+                        CH_assert(mybc->nGhosts()==ghostVect);
+                        nSources = mybc->nSources();
+                        new_vals.resize(ghostVect[0]);
+                        for (int i = 0 ; i < ghostVect[0]; i++)
+                          {
+                            new_vals[i].resize(nSources); 
+                            for (int j = 0 ; j < nSources; j++ )
+                              {
+                                new_vals[i][j].second.define(1); // have to define because it can be a tensor now, yuck
+                                new_vals[i][j].second.setValue(mybc->getCoef(j,i));
+                                new_vals[i][j].first.setLevel(a_ilev);
+                              }
+                          }
+                      }
+                    else
+                      {
+                        CH_assert(ghostVect[0]==1); 
+                        Real denom=2.;   new_vals.resize(1); new_vals[0].resize(2);
+                        new_vals[0][0].second.define(1);           new_vals[0][1].second.define(1); // have to define because it can be a tensor now, yuck
+                        new_vals[0][0].second.setValue(-5./denom); new_vals[0][1].second.setValue(1./denom);
+                        new_vals[0][0].first.setLevel(a_ilev);     new_vals[0][1].first.setLevel(a_ilev);
+                      }             
+                    // for debugging -- neumann
+                    if (s_check_row_sum)
+                      {
+                        new_vals.resize(ghostVect[0]);
+                        for (int idx=0;idx<ghostVect[0];idx++)
+                          {
+                            new_vals[idx].resize(1);
+                            new_vals[idx][0].second.setValue(1.);
+                          }
+                        nSources = 1;
+                      }
+                  } // init coefs
+                  
                   IndexML kill(jiv,a_ilev);
                   int isign = 1;
                   if (jiv[dir] < a_dombox.smallEnd(dir)) isign = -1;
@@ -1074,11 +1074,11 @@ PetscCompGrid::InterpToCoarse(IntVect a_iv,int a_ilev,const DataIndex &a_di, Ste
       IntVect civ = mlivJ.iv();
       if (mlivJ.level()==a_ilev-1 && supgidfab(civ,0)<0)
         {
-	  if (supgidfab(civ,0)!=FINE_COVERED) {
-	    pout() << "    ERROR row " << IndexML(a_iv,a_ilev) << ", column " << mlivJ << ", type = " << supgidfab(civ,0) << endl;
-	    pout() << "   Use nesting radius >= 3!!!" << endl;
-	    CH_assert(supgidfab(civ,0) == FINE_COVERED);
-	  }
+          if (supgidfab(civ,0)!=FINE_COVERED) {
+            pout() << "    ERROR row " << IndexML(a_iv,a_ilev) << ", column " << mlivJ << ", type = " << supgidfab(civ,0) << endl;
+            pout() << "   Use nesting radius >= 3!!!" << endl;
+            CH_assert(supgidfab(civ,0) == FINE_COVERED);
+          }
           Real fineInterp = 1./(Real)nfine;
           const IntVect fivBase = civ*nref; // fine box low end to interp to
           Box fbox(IntVect::Zero,(nref-1)*IntVect::Unit); fbox.shift(fivBase);
@@ -1172,12 +1172,12 @@ PetscCompGrid::AddStencilToMat(IntVect a_iv, int a_ilev,const DataIndex &a_di, S
         (*m_crsSupportGIDs[iLevel-1])[a_di];
                   
       if (!gidfabJ.box().contains(ivJ.iv())){
-      	pout() << "ERROR row  " << IndexML(a_iv,a_ilev) << ", this box:" << 
-      	  m_grids[a_ilev][a_di] << ", fine box (failure): " << gidfabJ.box() << 
-      	  " failed to find "<< ivJ << endl;
-      	jj=0;
-      	for (StencilTensor::const_iterator it2 = a_sten.begin(); it2 != end; ++it2) pout()<<++jj<<") j="<<it2->first<<endl;
-      	MayDay::Error("PetscCompGrid::AddStencilToMat failed to find cell");
+        pout() << "ERROR row  " << IndexML(a_iv,a_ilev) << ", this box:" << 
+          m_grids[a_ilev][a_di] << ", fine box (failure): " << gidfabJ.box() << 
+          " failed to find "<< ivJ << endl;
+        jj=0;
+        for (StencilTensor::const_iterator it2 = a_sten.begin(); it2 != end; ++it2) pout()<<++jj<<") j="<<it2->first<<endl;
+        MayDay::Error("PetscCompGrid::AddStencilToMat failed to find cell");
       }
 
       PetscInt gidj = gidfabJ(ivJ.iv(),0)*m_dof;
@@ -1194,8 +1194,8 @@ PetscCompGrid::AddStencilToMat(IntVect a_iv, int a_ilev,const DataIndex &a_di, S
           for (int nj=0;nj<m_dof;nj++) 
             {
               double tt = vv[ni*m_dof + nj];
-	      if (tt!=tt) MayDay::Error("PetscCompGrid::AddStencilToMat found a NaN");
-	      if (abs(tt)>1.e300)  MayDay::Error("PetscCompGrid::AddStencilToMat found a BigNum");
+              if (tt!=tt) MayDay::Error("PetscCompGrid::AddStencilToMat found a NaN");
+              if (abs(tt)>1.e300)  MayDay::Error("PetscCompGrid::AddStencilToMat found a BigNum");
               vals[ni*ncols + jj*m_dof + nj] = tt;
               summ += tt;
               abssum += Abs(tt);
@@ -1203,7 +1203,7 @@ PetscCompGrid::AddStencilToMat(IntVect a_iv, int a_ilev,const DataIndex &a_di, S
             }
         }
     }
-  
+
   ierr = MatSetValues(a_mat,m_dof,vidx,ncols,cols,vals,ADD_VALUES);CHKERRQ(ierr);
   if (m_num_extra_nnz) 
     {
@@ -1284,8 +1284,8 @@ PetscCompGrid::putChomboInPetsc(const Vector<LevelData<FArrayBox> * > &a_rhs, Ve
           const BaseFab<PetscInt>& gidfab = (*m_GIDs[ilev])[dit];
           const FArrayBox& phiFAB = (*a_rhs[ilev])[dit];
           idx = nc*region.numPts();
-	  PetscMalloc1(idx, &idxj);
-	  PetscMalloc1(idx, &vals);
+          PetscMalloc1(idx, &idxj);
+          PetscMalloc1(idx, &vals);
           idx = 0;
           for (BoxIterator bit(region); bit.ok(); ++bit)
             {
@@ -1366,11 +1366,11 @@ PetscCompGrid::putPetscInChombo(Vec a_x, Vector<LevelData<FArrayBox> * > &a_phi)
   if (m_averageFineSolutionToCoarse)
     {
       for (int lev = a_phi.size() -1; lev > 0; lev--)
-	{
-	  CoarseAverage avg(a_phi[lev]->disjointBoxLayout(),a_phi[lev-1]->disjointBoxLayout(),
-			    a_phi[lev]->nComp(),m_refRatios[lev-1]);
-	  avg.averageToCoarse(*a_phi[lev-1], *a_phi[lev]);
-	}
+        {
+          CoarseAverage avg(a_phi[lev]->disjointBoxLayout(),a_phi[lev-1]->disjointBoxLayout(),
+                            a_phi[lev]->nComp(),m_refRatios[lev-1]);
+          avg.averageToCoarse(*a_phi[lev-1], *a_phi[lev]);
+        }
     }
   
   ierr = VecRestoreArrayRead(xx,&avec);CHKERRQ(ierr);

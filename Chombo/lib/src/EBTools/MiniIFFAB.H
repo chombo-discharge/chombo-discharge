@@ -54,6 +54,33 @@ public:
             const int& a_nvarin);
 
   ///
+  /**
+     Constructor to define miniIFFAB over all faces in an intvectset.
+     Calls full define function.
+   */
+  MiniIFFAB(const IntVectSet& a_ivs,
+            const EBGraph& a_ebgraph,
+            const int& a_direction,
+            const int& a_nvarin);
+
+  ///
+  /**
+     Define function for all faces in an intvectset..
+   */
+
+  void define(const IntVectSet& a_ivs,
+              const EBGraph& a_ebgraph,
+              const int& a_direction,
+              const int& a_nvarin);
+
+  ///
+  /**
+
+     This aliased MiniIFFAB will have a_comps.size() components, starting at zero.
+  */
+  MiniIFFAB(const Interval& a_comps,
+            MiniIFFAB<T>&   a_original);
+  ///
   ~MiniIFFAB();
 
   ///
@@ -195,7 +222,7 @@ protected:
   int m_nFaces;
   int m_nComp;
   int m_direction;
-
+  bool m_aliased = false;
   bool    m_isDefined;
 private:
   //we disallow copy construction and assigment for data holders

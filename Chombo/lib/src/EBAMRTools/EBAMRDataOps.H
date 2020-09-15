@@ -518,6 +518,13 @@ public:
                    const Real& a_scale);
 
 
+  ///
+  /**
+   */
+  static void incr(Vector<LevelData<EBFluxFAB>* >& a_lhs,
+                   const Vector<LevelData<EBFluxFAB>* >&   a_rhs,
+                   const Real& a_scale);
+
 
   ///
   /**
@@ -752,6 +759,15 @@ public:
   static  Real sum(const Vector<LevelData<EBCellFAB>* >& a_data,
                    const Vector<DisjointBoxLayout>&      a_grids,
                    const Vector<EBISLayout>&             a_ebisl,
+                   const Vector<int> &                   a_refRat,
+                   int   a_comp,
+                   bool  a_mutiplyByKappa);
+
+  ///
+  /**
+   */
+  static  Real sum(const Vector<LevelData<EBCellFAB>* >& a_data,
+                   const Vector<EBLevelGrid>&            a_eblg,
                    const Vector<int> &                   a_refRat,
                    int   a_comp,
                    bool  a_mutiplyByKappa);

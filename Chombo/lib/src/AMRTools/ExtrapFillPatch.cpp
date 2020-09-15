@@ -257,22 +257,4 @@ ExtrapFillPatch::fillExtrap(
   }
 }
 
-/*
-void
-ExtrapFillPatch::printIntVectSets() const
-{
-  DataIterator lit = m_lo_extrap[0].boxLayout().dataIterator();
-  for (lit.begin(); lit.ok(); ++lit)
-  {
-    cout << "grid " << lit().intCode() << ": " << endl;
-    for (int dir = 0; dir < SpaceDim; ++dir)
-    {
-      cout << "lo extrap [" << dir << "]: " << endl;
-      cout << m_lo_extrap[dir][lit()] << endl;
-      cout << "hi extrap [" << dir << "]: " << endl;
-      cout << m_hi_extrap[dir][lit()] << endl;
-    }
-  }
-}
-*/
 #include "NamespaceFooter.H"

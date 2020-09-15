@@ -123,10 +123,8 @@ public:
             const RealVect        & a_origin,
             const Real            & a_dx,
             const GeometryService & a_geoserver,
-            const EBIndexSpace    * const a_ebisPtr               = Chombo_EBIS::instance(),
-            const bool            & a_distributedData             = false,
-            const bool            & a_fixRegularNextToMultiValued = true,
-            const int             & a_level = 0);
+            int                     a_nCellMax,
+            const bool            & a_fixRegularNextToMultiValued = true);
 
   ///
   /**
@@ -137,8 +135,7 @@ public:
    */
   EBISLevel(EBISLevel             & a_finerLevel,
             const GeometryService & a_geoserver,
-            const EBIndexSpace    * const a_ebisPtr               = Chombo_EBIS::instance(),
-            const bool            & a_distributedData             = false,
+            int                     a_nCellMax,
             const bool            & a_fixRegularNextToMultiValued = true);
 
   void checkGraph() const;
@@ -223,12 +220,6 @@ private:
   RealVect m_origin;
 
   ///
-  const GeometryService* m_geoserver;
-
-  ///
-  bool m_distributedData;
-
-  ///
   Real m_dx;
 
   ///
@@ -256,17 +247,8 @@ private:
                      const DisjointBoxLayout        &     a_grids,
                      const ProblemDomain            &     a_domain,
                      const RealVect                 &     a_origin,
-                     const Real                     &     a_dx,
-                     const bool                     &     a_distributedData);
+                     const Real                     &     a_dx);
 
-  static void
-  simplifyGraphFromGeo(LevelData<EBGraph>             &     a_graph,
-		       const GeometryService          &     a_geoserver,
-		       const DisjointBoxLayout        &     a_grids,
-		       const ProblemDomain            &     a_domain,
-		       const RealVect                 &     a_origin,
-		       const Real                     &     a_dx);
-  
   //make grids for this level.
   static void makeBoxes(Vector<Box>&                a_boxes,
                         Vector<unsigned long long>& a_loads,
@@ -275,8 +257,7 @@ private:
                         const GeometryService&      a_geoserver,
                         const RealVect&             a_origin,
                         const Real&                 a_dx,
-                        const int                   a_ncellmax,
-                        const EBIndexSpace* const   a_ebisPtr);
+                        const int                   a_ncellmax);
 
   static 
   void makeLoads(Vector<unsigned long long>& a_loads,
@@ -286,8 +267,7 @@ private:
                  const GeometryService&      a_geoserver,
                  const RealVect&             a_origin,
                  const Real&                 a_dx,
-                 const int                   a_ncellmax,
-                 const EBIndexSpace* const   a_ebisPtr);
+                 const int                   a_ncellmax);
 
   static void makeBoxes(std::list<Box>&        a_boxes,
                         const Box&             a_region,

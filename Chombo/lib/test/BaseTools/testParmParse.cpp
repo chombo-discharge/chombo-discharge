@@ -83,7 +83,7 @@
 #include "parstream.H"
 #include "ParmParse.H"
 #ifdef CH_MPI
-#include <mpi.h>
+#include "mpi.h"
 #endif
 #include "UsingBaseNamespace.H"
 

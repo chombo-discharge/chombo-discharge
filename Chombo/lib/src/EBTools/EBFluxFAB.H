@@ -26,7 +26,7 @@ class EBFluxFAB
 {
 
 public:
-
+  static bool s_verbose;
  ///
   /**
      This stuff required by LevelData in parallel:

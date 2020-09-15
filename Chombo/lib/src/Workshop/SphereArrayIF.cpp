@@ -34,7 +34,7 @@ SphereArrayIF::SphereArrayIF(const SphereArrayIF& a_inputIF)
   m_spacing     = a_inputIF.m_spacing;
   for (int idir = 0; idir < SpaceDim; idir++)
     {
-      if (m_spacing[idir] < 2.5*m_radius)
+      if (m_spacing[idir] < 2.25*m_radius)
         {
           MayDay::Abort("SphereArrayIF: spheres too close");
         }
@@ -91,59 +91,5 @@ BaseIF* SphereArrayIF::newImplicitFunction() const
   return static_cast<BaseIF*>(spherePtr);
 }
 
-GeometryService::InOut SphereArrayIF::InsideOutside(const RealVect& a_low,
-                                                    const RealVect& a_high) const
-{
-  RealVect lo(a_low);
-  RealVect hi(a_high);
-
-
-  lo-=m_firstCenter;
-  hi-=m_firstCenter;
-
-  // first, find nearst spheres to hi and lo
-  IntVect nearestLo, nearestHi;
-  bool differByTwo = true;
-  for (int i=0; i<CH_SPACEDIM; ++i)
-    {
-      nearestLo[i] = (int)(lo[i]/m_spacing[i]);
-      nearestHi[i] = (int)(hi[i]/m_spacing[i]);
-      if ( nearestHi[i] - nearestLo[i] <= 1 ) differByTwo = false;
-    }
-  if (differByTwo)
-    {
-      return GeometryService::Irregular;
-    }
-
-  nearestLo-=IntVect::Unit;
-  nearestHi+=IntVect::Unit;
-  Box near(nearestLo, nearestHi);
-  BoxIterator n(near);
-
-  for (n.reset(); n.ok(); ++n)
-  {
-    Real dmin = 0;
-    Real dmax = 0;
-    Real ai, bi, a, b, c;
-    for (int i=0; i<CH_SPACEDIM; ++i)
-      {
-        c = n()[i]*m_spacing[i];
-        ai= c-lo[i];
-        bi= c-hi[i];
-        a = ai*ai;
-        b = bi*bi;
-        dmax = dmax + Max(a,b);
-        if (c<lo[i] || c> hi[i]) dmin = dmin + Min(a,b);
-      }
-    if (dmax < m_radius2)
-      {
-        return GeometryService::Covered;
-      }
-    if (dmin <= m_radius2 && dmax >= m_radius2) return GeometryService::Irregular;
-  }
-
-  return GeometryService::Regular;
-
-}
 
 #include "NamespaceFooter.H"

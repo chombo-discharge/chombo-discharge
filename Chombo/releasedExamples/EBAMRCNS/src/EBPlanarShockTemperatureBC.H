@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _EBPlanarShockTemperatureBC_H_
-#define _EBPlanarShockTemperatureBC_H_
+#ifndef _EBPLANARSHOCKTEMPERATUREBC_H_
+#define _EBPLANARSHOCKTEMPERATUREBC_H_
 
 #include "RefCountedPtr.H"
 #include "ConductivityBaseDomainBC.H"

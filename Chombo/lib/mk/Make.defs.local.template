@@ -37,11 +37,16 @@ makefiles+=Make.defs.local
 #  MPI          :(TRUE,FALSE) compile for parallel if TRUE, else serial
 #  OPENMPCC     : TRUE for threading with OpenMP, FALSE without OpenMP
 #  MPICXX       : command to compile/link C++ code in parallel
+#  ROSE         : (TRUE,FALSE) preprocess with Rose-based translator
+#  GPU          : (TRUE,FALSE) compile CUDA kernels
 #  OBJMODEL     : special config for non-default compiler mode
 #  XTRACONFIG   : user-defined special config
 
 # Variables for optional features that don't affect filenames:
 
+#  CXXSTD          : Chombo default is C++11.  Set to 14 for C++14, etc.  This
+#                    should not be changed unless you want to experiment with
+#                    different C++ standards.  Only the default is supported.
 #  USE_64          : if TRUE, use 64bit pointers on systems where 32bits is the default
 #  USE_COMPLEX     : if TRUE, enable the 'Complex' type
 #                    (default is TRUE, disable only if compiler doesn't allow it)
@@ -117,6 +122,7 @@ makefiles+=Make.defs.local
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
+#CXXSTD        = 11
 #USE_64        =
 #USE_COMPLEX   =
 #USE_EB        =
@@ -136,6 +142,16 @@ makefiles+=Make.defs.local
 #LD            =
 #PERL          =
 #RANLIB        =
+#ROSE          =
+#ROSECC        =
+#ROSEINCFLAGS  =
+#ROSELIBFLAGS  =
+## Note: don't set the CUDA variables if you are not using a CUDA GPU
+#GPU           =
+#NVCC          =
+#NVCCFLAGS     =
+#PTXASFLAGS    =
+#CUBIN         =
 #cppdbgflags   =
 #cppoptflags   =
 #cxxcppflags   =

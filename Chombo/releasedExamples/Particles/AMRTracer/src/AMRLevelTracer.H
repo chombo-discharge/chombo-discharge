@@ -45,9 +45,9 @@ public:
 
   /// Full constructor. Arguments are same as in define()
   AMRLevelTracer(AdvectionVelocityFunction a_advFunc,
-		 const Real& a_cfl,
-		 const Real& a_domainLength,
-		 const int& a_maxBoxSize)
+                 const Real& a_cfl,
+                 const Real& a_domainLength,
+                 const int& a_maxBoxSize)
   {
     define(a_advFunc, a_cfl, a_domainLength, a_maxBoxSize);
   }

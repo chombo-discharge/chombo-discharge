@@ -3177,7 +3177,7 @@ void
 EBAMRNoSubcycle::writePlotFile()
 {
   ParmParse pp;
-  bool use_sparse_plot_file = true;
+  bool use_sparse_plot_file = false;
   pp.query( "use_sparse_plot_file", use_sparse_plot_file);
   if(use_sparse_plot_file)
     {

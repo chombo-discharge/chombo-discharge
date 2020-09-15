@@ -41,7 +41,7 @@ public:
   EBCellFAB(const EBISBox& a_ebisBox,
             const Box& a_region, int a_nVar);
 
-  
+  ///aliasing constructor
   EBCellFAB(const Interval&   a_comps,
             EBCellFAB& a_original):BaseEBCellFAB<Real>(a_comps, a_original){ ;}
   

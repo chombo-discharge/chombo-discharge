@@ -1,5 +1,0 @@
-EXTRA_DIST += BLMpi.w
-
-if SMALLBUILD_AM
-CPP_FILES = Arena.cpp BArena.cpp BLMpi.cpp BLProfiler.cpp BLThread.cpp BLWorkQueue.cpp BaseFab.cpp Box.cpp BoxArray.cpp BoxDomain.cpp BoxLib.cpp BoxList.cpp CArena.cpp DistributionMapping.cpp FArrayBox.cpp FPC.cpp FabArray.cpp FabConv.cpp IndexType.cpp IntVect.cpp MultiFab.cpp Orientation.cpp ParallelDescriptor.cpp ParmParse.cpp UseCount.cpp Utility.cpp VisMF.cpp 
-endif SMALLBUILD_AM

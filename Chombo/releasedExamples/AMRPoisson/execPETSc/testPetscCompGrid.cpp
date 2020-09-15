@@ -305,7 +305,7 @@ PetscErrorCode setupGrids( Vector<int> &a_refratios,  // out
 #ifdef CH_MPI
           MPI_Allreduce( &max_, &thresh, 1, MPI_DOUBLE, MPI_MAX, PETSC_COMM_WORLD );
 #else
-	  thresh = max_;
+          thresh = max_;
 #endif
           // set thresh
           thresh /= 2.; 
@@ -504,9 +504,9 @@ PetscErrorCode go(int nGrids, int &status)
         ierr = petscop.putChomboInPetsc(rhs2,b); CHKERRQ(ierr);
         ierr = KSPCreate(PETSC_COMM_WORLD, &ksp); CHKERRQ(ierr);
 #if PETSC_VERSION_GE(3,5,0)
-	ierr = KSPSetOperators(ksp, A, A); CHKERRQ(ierr);
+        ierr = KSPSetOperators(ksp, A, A); CHKERRQ(ierr);
 #else
-	ierr = KSPSetOperators(ksp, A, A, DIFFERENT_NONZERO_PATTERN); CHKERRQ(ierr);
+        ierr = KSPSetOperators(ksp, A, A, DIFFERENT_NONZERO_PATTERN); CHKERRQ(ierr);
 #endif
         ierr = KSPSetFromOptions(ksp); CHKERRQ(ierr);
         ierr = KSPSolve(ksp, b, x); CHKERRQ(ierr);

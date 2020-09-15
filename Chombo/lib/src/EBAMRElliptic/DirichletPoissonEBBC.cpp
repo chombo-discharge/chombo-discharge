@@ -335,7 +335,7 @@ void DirichletPoissonEBBC::getFirstOrderStencil(VoFStencil&     a_stencil,
 {
   CH_TIME("DirichletPoissonEBBC::getFirstOrderStencil1");
   RealVect normal   = a_ebisBox.normal(  a_vof);
-  RealVect centroid = a_ebisBox.centroid(a_vof);
+  RealVect centroid = a_ebisBox.bndryCentroid(a_vof);
   if (s_useQuadrantBasedStencil)
     {
       EBArith::getLeastSquaresGradSten(a_stencil, a_weight, a_vof, a_ebisBox, a_dx, m_domain, 0);

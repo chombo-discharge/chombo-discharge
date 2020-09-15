@@ -2882,6 +2882,10 @@ public:
   */
   /*explicit*/ ParmParse (const char* prefix = 0);
 
+  ///got sick of typing c_str()
+  ParmParse(const std::string& a_string);
+
+
   /** The destructor.  The internal static table will only be deleted
     if there are no other ParmParse objects in existence.
   */

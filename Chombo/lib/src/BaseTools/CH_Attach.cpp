@@ -16,6 +16,12 @@
 #include <csignal>
 #endif
 
+
+#ifdef CH_Darwin
+# define _Atomic
+#include <libproc.h>
+#endif
+
 #include "SPMD.H"
 #include "CH_Attach.H"
 #include "parstream.H"
@@ -35,22 +41,29 @@ void DebugCont()
   ret = write(pfds[1], "OK", 3);
 }
 
+#ifndef CH_NTIMER
 extern const char* currentTimer();
+#else
+const char* currentTimer(){ static const char* rtn="empty"; return rtn;}
+#endif
 
 void AttachDebugger(int a_sig)
 {
+#ifndef CH_NTIMER
   pout()<<"current Timer " <<currentTimer()<<"\n";
+#endif
+
 #ifndef CH_DISABLE_SIGNALS
   if (alreadyAttached) return;
 
   alreadyAttached = true;
-  char buf[1024];
+  char buf[1200];
   char* display;
   FILE *f;
   int proc = getpid();
   char title[1024];
 
-  char binaryName[201];
+  char binaryName[1025];
   memset(binaryName, 0, 201); // readlink doesn't insert NULL at end
 
   char linkName[1024];
@@ -58,23 +71,15 @@ void AttachDebugger(int a_sig)
 #ifdef CH_Linux   // note that a machine can be Linux, but not support /proc (Catamount)
   // voodoo specific to linux /proc system to get the full name of the binary file
   sprintf(linkName,"/proc/%d/exe",proc);
-
-  ssize_t s = readlink(linkName, binaryName, 200);
+  ssize_t s = readlink(linkName, binaryName, 1024);
 #else
-  // you will need to execute a 'load FILENAME' command once in gdb to let
-  // it debug proper symbols.
-
-  ssize_t s = 0;
+  ssize_t s = proc_pidpath (proc, binaryName, 1024);
+  std::cout<<"s: "<<s<<"\n";
+  std::cout<<binaryName<<std::endl;
+  
 #endif
 
   int a = 50; // used for title of emacs window
-
-  if (s > 150)
-  {
-    //filename too darn big
-    signal(a_sig, SIG_DFL);
-    raise(a_sig);
-  }
 
   if (s < a)
   {
@@ -106,8 +111,10 @@ void AttachDebugger(int a_sig)
 #if useemacs
         sprintf(buf,"emacs -geometry 80x27 -title %s -display %s --eval '(progn (gdb \" gdb -i=mi -q -f %s --pid %d\") )'",
                 title, display, binaryName, proc);
+        //sprintf(buf,"emacs -geometry 80x27 -title %s -display %s --eval '(progn (lldb \" lldb -p %d\") )'",
+        //title, display, proc);
 #else
-        sprintf(buf,"xterm -e \"gdb -q -f %s --pid %d\" ", binaryName, proc);
+        sprintf(buf,"xterm -bg white -fg black -fa Monospace -fs 14 -e \"gdb -q -f %s --pid %d\" ", binaryName, proc);
 #endif
         printf("%s\n",buf);
         f = popen(buf,"w");
@@ -172,12 +179,15 @@ void mpierrorfunction(MPI_Comm* a_comm, int* a_error, ...)
 {
   char string[MPI_MAX_ERROR_STRING];
   int resultlen;
-  pout()<< "current Timer "<<currentTimer()<<"\n";
+#ifndef CH_NTIMER
+  pout() << "current Timer " << currentTimer() << endl;
+#endif
+
   MPI_Error_string(*a_error, string, &resultlen);
-  pout() << string << "\n";
+  pout() << string << endl;
   //printf("%s\n",string);
 
-  MayDay::Error("Chomb MPI Error handler called \n");
+  MayDay::Error("Chombo MPI Error handler called \n");
 
 }
 

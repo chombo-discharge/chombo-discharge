@@ -16,7 +16,6 @@
 #include <cstring>
 #include "SPACE.H"
 using std::cin;
-using std::cout;
 using std::cerr;
 using std::setw;
 using std::setprecision;

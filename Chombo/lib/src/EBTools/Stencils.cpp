@@ -11,6 +11,7 @@
 #include "Stencils.H"
 #include "EBCellFAB.H"
 #include "EBFaceFAB.H"
+#include <iomanip>
 #include "NamespaceHeader.H"
 Real applyVoFStencil(const VoFStencil& a_sten, const EBCellFAB& a_fab, const int& a_comp)
 {
@@ -46,6 +47,106 @@ shift(const IntVect& a_shift)
       VolIndex& vof = vofs[ivof];
       vof.shift(a_shift);
     }
+}
+void 
+VoFStencil::
+getExponentAndMantissa(Real& a_mantissa, int& a_exp, Real a_input) const
+{
+  if(a_input == 0) //have to check because we are taking a log
+  {
+    a_exp = 0;
+    a_mantissa = 0.0;
+  }
+  else
+  {
+   a_exp      = (std::log10(std::fabs(a_input) ) );
+   a_mantissa = a_input * pow(10 , -(a_exp));    
+  }
+}
+///
+void 
+VoFStencil::
+poutFortranRelative(const IntVect& a_startIV, const string& a_prefix, const Real& a_scaling) const
+{
+
+  std::ios::fmtflags origFlags = (pout()).flags();
+  int origWidth = (pout()).width();
+  int origPrecision = (pout()).precision();
+  pout() << "! fortran output of relative stencil for " << a_prefix << endl;
+  
+  if(SpaceDim==2)
+  {
+    pout() << "      lphi(i,j) = " << endl;
+  }
+  else
+  {
+    pout() << "       lphi(i,j,k) = " << endl;
+  }
+
+  for(int ivof = 0; ivof < this->size(); ivof++)
+    {
+      IntVect reliv   =    vofs[ivof].gridIndex() - a_startIV;
+      int idebug = 0;
+      if(reliv == IntVect::Zero)
+      {
+        idebug = 1;
+      }
+      Real wgt = weights[ivof];  
+      wgt *= a_scaling;
+      Real mantissa;
+      int  exponent;
+      getExponentAndMantissa(mantissa, exponent, wgt);
+
+      //continuation character 
+      pout() << setprecision(16)
+               << setiosflags(ios::fixed);
+      pout() << "     &  ";
+      pout() << mantissa << "D" << exponent << "*";
+      pout() << "phi(" ;
+      for(int idir = 0; idir < SpaceDim; idir++)
+      {
+        if(idir == 0)
+        {
+          pout() << "i";
+        }
+        else if(idir==1)
+        {
+          pout() << "j";
+        }
+        else 
+        {
+          pout() << "k";
+        }
+        if(reliv[idir] > 0)
+        {
+          pout() << "+";
+        }
+        if(reliv[idir] != 0)  
+        {
+          pout() << reliv[idir];
+        }
+
+        if(idir < (SpaceDim-1))
+        {
+          pout() << ",";
+        }
+        else
+        {
+          pout() << ")";
+        }
+      }
+          
+      if(ivof < (this->size()-1 ))
+        {
+          pout() << " + ";
+        }
+      pout() << endl;
+    }
+  //avoid side effects
+  pout() << resetiosflags(ios::showpoint | ios::scientific);
+  pout().flags(origFlags);
+  pout().width(origWidth);
+  pout().precision(origPrecision);
 }
 
 ///

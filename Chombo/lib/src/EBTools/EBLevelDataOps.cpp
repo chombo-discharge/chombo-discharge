@@ -27,6 +27,18 @@
 #include "CH_Timer.H"
 #include "NamespaceHeader.H"
 
+void 
+EBLevelDataOps::
+plus(LevelData<EBCellFAB>       & a_dst,
+     const LevelData<EBCellFAB> & a_src,
+     int srccomp, int dstcomp, int numcomp)
+{
+  const DisjointBoxLayout & dbl = a_dst.disjointBoxLayout();
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit)
+    {
+      a_dst[dit()].plus(a_src[dit()], srccomp, dstcomp, numcomp);
+    }
+}
 void
 EBLevelDataOps::checkData(const LevelData<EBFluxFAB>&a_data, const string& label)
 {

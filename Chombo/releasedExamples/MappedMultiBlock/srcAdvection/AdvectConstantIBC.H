@@ -1,4 +1,3 @@
-
 #ifdef CH_LANG_CC
 /*
  *      _______              __

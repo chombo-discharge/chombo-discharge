@@ -1,15 +1,15 @@
 #ifdef CH_LANG_CC
 /*
-*      _______              __
-*     / ___/ /  ___  __ _  / /  ___
-*    / /__/ _ \/ _ \/  V \/ _ \/ _ \
-*    \___/_//_/\___/_/_/_/_.__/\___/
-*    Please refer to Copyright.txt, in Chombo's root directory.
-*/
+ *      _______              __
+ *     / ___/ /  ___  __ _  / /  ___
+ *    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+ *    \___/_//_/\___/_/_/_/_.__/\___/
+ *    Please refer to Copyright.txt, in Chombo's root directory.
+ */
 #endif
 
-#ifndef _EBPatch_Polytropic_Factory_H_
-#define _EBPatch_Polytropic_Factory_H_
+#ifndef _EBPATCHPOLYTROPICFACTORY_H_
+#define _EBPATCHPOLYTROPICFACTORY_H_
 
 #include "EBPatchPolytropic.H"
 #include "EBPatchGodunovFactory.H"

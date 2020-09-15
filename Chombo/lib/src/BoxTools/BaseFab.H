@@ -21,7 +21,12 @@
 #include "Arena.H"
 #include "Interval.H"
 #include "REAL.H"
+#include "ShapeArray.H"
 #include "NamespaceHeader.H"
+
+#ifdef USE_PROTO
+#include "Proto.H"
+#endif
 
 struct SliceSpec;
 
@@ -142,6 +147,38 @@ public:
   BaseFab(const Interval& a_comps,
           BaseFab<T>&     a_original);
 
+#ifdef USE_PROTO
+    template <unsigned int C>
+    void define(Proto::BoxData<T,C,1,1>&   a_original);
+
+    template<unsigned int C>
+    operator Proto::BoxData<T,C>()
+    {
+        Proto::BoxData<T,C> bd;
+        bd.define(this->dataPtr(0), this->box(), C);
+        return bd;
+    }   
+    
+    template<unsigned int C>
+    operator const Proto::BoxData<T,C>() const
+    {
+        Proto::BoxData<T,C> bd;
+        bd.define(this->dataPtr(0), this->box(), C);
+        return bd;
+    }
+    
+    template <unsigned int C>
+    inline BaseFab(const Proto::BoxData<T,C>& a_bd, const Proto::Point a_center = Proto::Point::Zeros())
+    {
+        m_domain = Box(a_bd.box().low(), a_bd.box().high(), a_center);
+        m_nvar = C;
+        m_numpts = a_bd.box().size();
+        m_truesize = a_bd.size();
+        m_dptr    = const_cast<T*>(a_bd.data(a_bd.box().low()));
+        m_aliased = true;
+    }
+#endif
+
   /// move constructor
   BaseFab(BaseFab<T>&& a_in) noexcept;
   ///
@@ -235,6 +272,20 @@ public:
                   int            a_N);
 
   T& operator () (const IntVect& a_p);
+
+#if CXXSTD>=14
+  /**
+     Begins C-style multi-dimensional array indexing.  E.g., fab[c][k][j][i].
+     The m_mdarray only stores a pointer to the data so while this function
+     is const (the pointer does not change), it ultimately returns a modifiable
+     lvalue
+   */
+  auto operator[](const int a_idx) const noexcept
+    {
+      CH_assert(isUsable());
+      return m_mdarray[a_idx];
+    }
+#endif
 
   /**
      Returns a conatant reference to the Nth component value defined at
@@ -530,6 +581,11 @@ public:
   ///
   bool isAliased() const;
 
+  /**
+     The BaseFab is defined and the number of elements is > 0
+   */
+  bool isUsable() const;
+
   ///regression test
   static int test();
 
@@ -578,8 +634,12 @@ protected:
   long m_numpts;   // Cached number of points in FAB.
   long m_truesize; // m_nvar * m_numpts that was allocated on heap
                    //   (only if m_aliased == false).
-  T*   m_dptr;     // The data pointer.
+  T* __restrict  m_dptr;     // The data pointer.
   bool m_aliased;  // The BaseFab is not allocated memory, but is an alias. bvs
+#if CXXSTD>=14
+  shape::ShapeArray<T, SpaceDim + 1, int> m_mdarray;
+                   // Reshapes m_dptr into a multidimensional array
+#endif
 
 private:
   //

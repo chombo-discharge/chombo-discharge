@@ -1,7 +1,7 @@
 #solver stuff
 #1 gsrb, 0 point jacobi	
-mg_relax_type  = 2
-mg_num_smooths = 4
+mg_relax_type  = 1
+mg_num_smooths = 16
 mg_hang        = 1.0e-13
 mg_eps         = 1.0e-11
 mg_iter_max    = 100
@@ -13,17 +13,17 @@ mg_num_cycles = 1
 #    1 = Dirichlet with value 
 eb_bc_type     = 1
 domain_bc_type = 1
-order_ebbc     = 2
+order_ebbc     = 1
 
 
 #values for when bcs are value
-domain_bc_value = 1.0
+domain_bc_value = 0.0
 eb_bc_value     = 0.0
 #coefficient of the identity term
-alpha = 1.
+alpha = 0.
 
 #coefficient of laplacian
-beta = -1.
+beta = 1.
 
 ###GRID STUFF
 max_level    = 0
@@ -36,7 +36,7 @@ n_cells      = 128 128 128
 block_factor = 8
 fill_ratio   = 0.7
 buffer_size  = 2
-max_grid_size = 16
+max_grid_size =1024
 
 ##GEOMETRY STUFF
 domain_length = 1.0 1.0 1.0
@@ -44,9 +44,9 @@ domain_length = 1.0 1.0 1.0
 
 # 5 sphere
  which_geom = 16
- first_sphere_center = 0.11 0.11 0.11
- sphere_radius  = 0.1
- sphere_spacing = 0.15 0.15 0.15
+ first_sphere_center = 0.0 0.2 0.0
+ sphere_radius  = 0.13
+ sphere_spacing = 0.3 0.3 0.3
 
 
 #auto gen ghost

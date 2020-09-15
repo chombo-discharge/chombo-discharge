@@ -30,7 +30,7 @@
 #include <iostream>
 #include <vector>
 #ifdef CH_MPI
-#include <mpi.h>
+#include "mpi.h"
 #endif
 
 #include "IndexTM.H"
@@ -46,14 +46,14 @@ namespace CodimensionBoundary
 /** Homegrown templatized Box class we'll need until such time as Chombo
  *  offers one.
 */
-template<int DIM> class Bocks
+template<int ARGDIM> class Bocks
 {
   public:
     Bocks()
     {
     }
 
-    Bocks( IndexTM<int,DIM> const & lo, IndexTM<int,DIM> const & hi )
+    Bocks( IndexTM<int,ARGDIM> const & lo, IndexTM<int,ARGDIM> const & hi )
       :
       m_smallEnd(lo),
       m_bigEnd(hi)
@@ -81,11 +81,11 @@ template<int DIM> class Bocks
 
     bool isDegenerate() const
     {
-        for ( int d=0;d<DIM;++d ) if ( m_smallEnd[d] == m_bigEnd[d] ) return true;
+        for ( int d=0;d<ARGDIM;++d ) if ( m_smallEnd[d] == m_bigEnd[d] ) return true;
         return false;
     }
 
-    bool lexLT( Bocks<DIM> const & that ) const
+    bool lexLT( Bocks<ARGDIM> const & that ) const
     {
         if     ( this->smallEnd().lexLT( that.smallEnd() ) ) return true;
         else if ( that.smallEnd().lexLT( this->smallEnd() ) ) return false;
@@ -99,29 +99,29 @@ template<int DIM> class Bocks
         return Box( IntVect(smallEnd().dataPtr()), IntVect(bigEnd().dataPtr()) );
     }
 
-    IndexTM<int,DIM> const & smallEnd() const
+    IndexTM<int,ARGDIM> const & smallEnd() const
     {
       return m_smallEnd;
     }
 
-    IndexTM<int,DIM> const & bigEnd() const
+    IndexTM<int,ARGDIM> const & bigEnd() const
     {
       return m_bigEnd;
     }
 
-    IndexTM<int,DIM> & smallEnd()
+    IndexTM<int,ARGDIM> & smallEnd()
     {
       return m_smallEnd;
     }
 
-    IndexTM<int,DIM> & bigEnd()
+    IndexTM<int,ARGDIM> & bigEnd()
     {
       return m_bigEnd;
     }
 
   private:
-    IndexTM<int,DIM> m_smallEnd;
-    IndexTM<int,DIM> m_bigEnd;
+    IndexTM<int,ARGDIM> m_smallEnd;
+    IndexTM<int,ARGDIM> m_bigEnd;
 };
 
 
@@ -141,8 +141,8 @@ struct InputParams
 };
 
 
-template<int DIM> std::ostream&
-operator<<( std::ostream & out, Bocks<DIM> const & bocks )
+template<int ARGDIM> std::ostream&
+operator<<( std::ostream & out, Bocks<ARGDIM> const & bocks )
 {
     out << "[" << bocks.smallEnd() << " " << bocks.bigEnd() << "]";
     if ( bocks.isDegenerate() ) out << " (degenerate))";
@@ -168,24 +168,24 @@ operator<<( std::ostream & out, std::vector<T> const & v )
  *  diagonal.  Return an equivalent Box whose corners are at the canonical
  *  points.
 */
-template<int DIM> Bocks<DIM>
-canonicalizeCorners( IndexTM<int,DIM> const & lo, IndexTM<int,DIM> const & hi )
+template<int ARGDIM> Bocks<ARGDIM>
+canonicalizeCorners( IndexTM<int,ARGDIM> const & lo, IndexTM<int,ARGDIM> const & hi )
 {
-    IndexTM<int,DIM> goodLo, goodHi;
-    for ( int i=0;i<DIM;++i )
+    IndexTM<int,ARGDIM> goodLo, goodHi;
+    for ( int i=0;i<ARGDIM;++i )
     {
         goodLo[i] = std::min( lo[i], hi[i] );
         goodHi[i] = std::max( lo[i], hi[i] );
     }
-    return Bocks<DIM>( goodLo, goodHi );
+    return Bocks<ARGDIM>( goodLo, goodHi );
 }
 
 
-template<int DIM> double intvectDistance( IndexTM<int,DIM> const & iv1,
-                                          IndexTM<int,DIM> const & iv2 )
+template<int ARGDIM> double intvectDistance( IndexTM<int,ARGDIM> const & iv1,
+                                          IndexTM<int,ARGDIM> const & iv2 )
 {
     double ss(0.0);
-    for ( int i=0;i<DIM;++i )
+    for ( int i=0;i<ARGDIM;++i )
     {
       int diff=iv1[i] - iv2[i]; //should run faster, compiler can pipeline
       ss += diff*diff;
@@ -198,11 +198,11 @@ template<int DIM> double intvectDistance( IndexTM<int,DIM> const & iv1,
  *  The algorithm is very inefficient; it looks at all pairs of points taking
  *  one from the first box and another from the second.
  */
-template<int DIM> Bocks<DIM>
-interboxBox( Bocks<DIM> const & a_box1, Bocks<DIM> const & a_box2 )
+template<int ARGDIM> Bocks<ARGDIM>
+interboxBox( Bocks<ARGDIM> const & a_box1, Bocks<ARGDIM> const & a_box2 )
 {
-    int box1_coords[2][DIM], box2_coords[2][DIM];
-    for ( int d=0;d<DIM;++d )
+    int box1_coords[2][ARGDIM], box2_coords[2][ARGDIM];
+    for ( int d=0;d<ARGDIM;++d )
     {
         box1_coords[0][d] = a_box1.smallEnd()[d];
         box1_coords[1][d] = a_box1.bigEnd()[d];
@@ -211,12 +211,12 @@ interboxBox( Bocks<DIM> const & a_box1, Bocks<DIM> const & a_box2 )
     }
 
     double smallestDistance( 1E100 );
-    Bocks<DIM> result;
-    int idim = 1<<DIM;  // should be same as pow(2,DIM)
+    Bocks<ARGDIM> result;
+    int idim = 1<<ARGDIM;  // should be same as pow(2,ARGDIM)
     for ( int n=0; n<idim; ++n )
     {
-        IndexTM<int,DIM> lo;
-        for ( int d=DIM-1; d>=0; --d )
+        IndexTM<int,ARGDIM> lo;
+        for ( int d=ARGDIM-1; d>=0; --d )
         {
             int i = (n >> d) %2;
             lo[d] = box1_coords[i][d];
@@ -224,15 +224,15 @@ interboxBox( Bocks<DIM> const & a_box1, Bocks<DIM> const & a_box2 )
 
         for ( int m=0; m<idim; ++m )
         {
-            IndexTM<int,DIM> hi;
-            for ( int d=DIM-1; d>=0; --d )
+            IndexTM<int,ARGDIM> hi;
+            for ( int d=ARGDIM-1; d>=0; --d )
             {
                 int i = (m >> d) %2;
                 hi[d] = box2_coords[i][d];
             }
 
             bool kittyCorner( true );
-            for ( int d=0;d<DIM;++d )
+            for ( int d=0;d<ARGDIM;++d )
             {
                 if ( a_box1.smallEnd()[d] != a_box1.bigEnd()[d] )
                 {   // Condition handles degenerate boxes when ghost=0
@@ -244,7 +244,7 @@ interboxBox( Bocks<DIM> const & a_box1, Bocks<DIM> const & a_box2 )
                 double distance( intvectDistance( lo, hi ) );
                 if ( distance < smallestDistance )
                 {
-                    result = Bocks<DIM>( canonicalizeCorners(lo,hi) );
+                    result = Bocks<ARGDIM>( canonicalizeCorners(lo,hi) );
                     smallestDistance = distance;
                 }
             }
@@ -254,23 +254,23 @@ interboxBox( Bocks<DIM> const & a_box1, Bocks<DIM> const & a_box2 )
 }
 
 
-/** This is really codimBoxes() for the case of codim==DIM. */
-template<int DIM>
-std::vector< Bocks<DIM> > nodeBoxes( Bocks<DIM> const & a_box,
-                                     IndexTM<int,DIM> const & a_ghosts )
+/** This is really codimBoxes() for the case of codim==ARGDIM. */
+template<int ARGDIM>
+std::vector< Bocks<ARGDIM> > nodeBoxes( Bocks<ARGDIM> const & a_box,
+                                     IndexTM<int,ARGDIM> const & a_ghosts )
 {
-    std::vector< Bocks<DIM> > result;
+    std::vector< Bocks<ARGDIM> > result;
 
-    IndexTM<int,DIM> cornerCoords[2]; // [0]==lo, [1]==hi
+    IndexTM<int,ARGDIM> cornerCoords[2]; // [0]==lo, [1]==hi
     cornerCoords[0] = a_box.smallEnd();
     cornerCoords[1] = a_box.bigEnd();
 
-    int idim = 1<<DIM;  // should be same as pow(2,DIM)
+    int idim = 1<<ARGDIM;  // should be same as pow(2,ARGDIM)
     for ( int n=0; n<idim; ++n )
     {
-        IndexTM<int,DIM> loCorner, hiCorner;
+        IndexTM<int,ARGDIM> loCorner, hiCorner;
 
-        for ( int d=DIM-1; d>=0; --d )
+        for ( int d=ARGDIM-1; d>=0; --d )
         {
             int i = (n >> d) % 2;
             loCorner[d] = cornerCoords[i][d] + (2*i - 1)*a_ghosts[d];
@@ -284,24 +284,24 @@ std::vector< Bocks<DIM> > nodeBoxes( Bocks<DIM> const & a_box,
         result.push_back( canonicalizeCorners(loCorner,hiCorner) );
     }
 
-    std::sort( result.begin(), result.end(), std::mem_fun_ref(&Bocks<DIM>::lexLT) );
+    std::sort( result.begin(), result.end(), std::mem_fun_ref(&Bocks<ARGDIM>::lexLT) );
     return result;
 }
 
 
-template<int DIM>
-std::vector< Bocks<DIM> > codimBoxes( Bocks<DIM> const & a_box,
-                                      IndexTM<int,DIM> a_ghosts,
+template<int ARGDIM>
+std::vector< Bocks<ARGDIM> > codimBoxes( Bocks<ARGDIM> const & a_box,
+                                      IndexTM<int,ARGDIM> a_ghosts,
                                       int codim )
 {
-    if ( DIM == codim )
+    if ( ARGDIM == codim )
     {
         return nodeBoxes( a_box, a_ghosts );
     }
 
-    std::vector< Bocks<DIM> > result;
-    std::vector< Bocks<DIM> > bookends(
-        codimBoxes<DIM>(a_box,a_ghosts,codim+1));
+    std::vector< Bocks<ARGDIM> > result;
+    std::vector< Bocks<ARGDIM> > bookends(
+        codimBoxes<ARGDIM>(a_box,a_ghosts,codim+1));
     // If we're after edges here, then the bookends are nodes.  If we're after
     // faces, the bookends are edges.
 
@@ -314,15 +314,15 @@ std::vector< Bocks<DIM> > codimBoxes( Bocks<DIM> const & a_box,
         for ( unsigned j=i+1; j<bookends.size(); ++j )
         {
             int alignments(0);
-            for ( int m=0;m<DIM;++m )
+            for ( int m=0;m<ARGDIM;++m )
             {
                 alignments +=
                   bookends[i].smallEnd()[m] == bookends[j].smallEnd()[m];
             }
-            if ( ( alignments == (DIM-1) )
+            if ( ( alignments == (ARGDIM-1) )
             &&  (!(bookends[i].isDegenerate() ^ bookends[j].isDegenerate())) )
             {
-                Bocks<DIM> box( interboxBox( bookends[i], bookends[j] ) );
+                Bocks<ARGDIM> box( interboxBox( bookends[i], bookends[j] ) );
                 if ( std::find( result.begin(), result.end(), box )
                     == result.end() )
                 {
@@ -332,7 +332,7 @@ std::vector< Bocks<DIM> > codimBoxes( Bocks<DIM> const & a_box,
         }
     }
 
-    std::sort( result.begin(), result.end(), std::mem_fun_ref(&Bocks<DIM>::lexLT) );
+    std::sort( result.begin(), result.end(), std::mem_fun_ref(&Bocks<ARGDIM>::lexLT) );
     return result;
 }
 
@@ -376,33 +376,33 @@ Vector<Box> getBoundaryBoxes( const Box& a_box,
 }
 
 
-template<int DIM> void templatizedMain( const InputParams& a_inputs )
+template<int ARGDIM> void templatizedMain( const InputParams& a_inputs )
 {
     int buf1[] =
     {
       1,1,1,1,1,1
     };
-    IndexTM<int,DIM> iv1( buf1 );
+    IndexTM<int,ARGDIM> iv1( buf1 );
 
     int buf2[] =
     {
       3,4,5,6,7,8
     };
-    IndexTM<int,DIM> iv2( buf2 );
+    IndexTM<int,ARGDIM> iv2( buf2 );
 
-    Bocks<DIM> box( iv1, iv2 );
+    Bocks<ARGDIM> box( iv1, iv2 );
     if ( a_inputs.verbose )
     {
       pout() << "Bocks: " << box << " (node-centered convention)\n";
     }
 
-    std::vector< IndexTM<int,DIM> > ghosts_visited;
+    std::vector< IndexTM<int,ARGDIM> > ghosts_visited;
 
-    for ( int degeneracy_order=1; degeneracy_order<=DIM; ++degeneracy_order )
+    for ( int degeneracy_order=1; degeneracy_order<=ARGDIM; ++degeneracy_order )
     {
         for ( int g=0; g<2; ++g )  // Number of ghost cells in the x-direction.
         {
-            IndexTM<int,DIM> ghosts( IndexTM<int,DIM>::Unit );
+            IndexTM<int,ARGDIM> ghosts( IndexTM<int,ARGDIM>::Unit );
             for ( int d=0;d<degeneracy_order;++d )
             {
                 ghosts[d] = g;
@@ -423,24 +423,24 @@ template<int DIM> void templatizedMain( const InputParams& a_inputs )
               pout() << "ghosts=" << ghosts << '\n';
             }
 
-            for ( int codim=DIM; codim>0; --codim )
+            for ( int codim=ARGDIM; codim>0; --codim )
             {
-                std::vector< Bocks<DIM> > boundary( codimBoxes<DIM>( box, ghosts,
+                std::vector< Bocks<ARGDIM> > boundary( codimBoxes<ARGDIM>( box, ghosts,
                                                                      codim ) );
                 boundary.erase(
                     std::remove_if ( boundary.begin(), boundary.end(),
-                                    std::mem_fun_ref(&Bocks<DIM>::isDegenerate) ),
+                                    std::mem_fun_ref(&Bocks<ARGDIM>::isDegenerate) ),
                     boundary.end() );
                 std::string boundary_name( "Boundary" );
-                if ( codim == DIM )
+                if ( codim == ARGDIM )
                 {
                     boundary_name = "Nodes";
                 } else
-                if ( codim == DIM-1 )
+                if ( codim == ARGDIM-1 )
                 {
                     boundary_name = "Edges";
                 } else
-                if ( codim == DIM-2 )
+                if ( codim == ARGDIM-2 )
                 {
                     boundary_name = "Faces";
                 }

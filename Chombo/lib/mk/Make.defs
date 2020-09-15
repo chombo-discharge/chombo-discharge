@@ -202,6 +202,9 @@ else
 endif
 
 # GNU compilers
+ifeq ($(cxxname),g++-5)
+  include $(CHOMBO_HOME)/mk/compiler/Make.defs.GNU
+endif
 ifeq ($(cxxname),g++)
   include $(CHOMBO_HOME)/mk/compiler/Make.defs.GNU
 else
@@ -266,8 +269,11 @@ ifeq ($(cxxname),Apple)
   cxxname:=clang++
 endif 
 
-# Apple clang++ compiler
-ifeq ($(cxxname),clang++)
+# Apple clang++ compiler (note: in Linux, the ++ may be stripped from --version)
+ifeq ($(findstring clang,$(cxxname)),clang)
+  include $(CHOMBO_HOME)/mk/compiler/Make.defs.clang++
+endif
+ifeq ($(cxxname),clang)
   include $(CHOMBO_HOME)/mk/compiler/Make.defs.clang++
 endif
 ## Finally, set the compiler variables to the defaults if they aren't set.

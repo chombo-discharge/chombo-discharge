@@ -17,13 +17,14 @@ using std::cin;
 DataFileIF::DataFileIF(const DataFileIF::DataType& a_dataType,
                        const Real&                 a_value,
                        const bool&                 a_inside,
-                       const bool&                 a_useCubicInterp)
+                       const bool&                 a_useCubicInterp,
+                       const DataFileIF::DataSize& a_dataSize)
 {
   // Read an entire header from "cin" - see .H file
   ReadFullHeader(m_num,m_spacing,m_origin,cin);
 
   // Read all the data from "cin"
-  ReadData(m_noDataValue,cin,a_dataType,m_num);
+  ReadData(m_noDataValue,cin,a_dataType,a_dataSize,m_num);
 
   // Save some state
   m_value = a_value;
@@ -38,7 +39,8 @@ DataFileIF::DataFileIF(const char* const           a_filename,
                        const DataFileIF::DataType& a_dataType,
                        const Real&                 a_value,
                        const bool&                 a_inside,
-                       const bool&                 a_useCubicInterp)
+                       const bool&                 a_useCubicInterp,
+                       const DataFileIF::DataSize& a_dataSize)
 {
   ifstream curFile;
 
@@ -49,7 +51,7 @@ DataFileIF::DataFileIF(const char* const           a_filename,
   ReadFullHeader(m_num,m_spacing,m_origin,curFile);
 
   // Read all the data from the file
-  ReadData(m_noDataValue,curFile,a_dataType,m_num);
+  ReadData(m_noDataValue,curFile,a_dataType,a_dataSize,m_num);
 
   // Close the named file
   CloseFile(curFile);
@@ -68,7 +70,8 @@ DataFileIF::DataFileIF(const DataFileIF::DataType& a_dataType,
                        const RealVect&             a_origin,
                        const Real&                 a_value,
                        const bool&                 a_inside,
-                       const bool&                 a_useCubicInterp)
+                       const bool&                 a_useCubicInterp,
+                       const DataFileIF::DataSize& a_dataSize)
 {
   // Read an dimension of the data from "cin" - see .H file
   ReadMinHeader(m_num,cin);
@@ -78,7 +81,7 @@ DataFileIF::DataFileIF(const DataFileIF::DataType& a_dataType,
   m_origin = a_origin;
 
   // Read all the data from "cin"
-  ReadData(m_noDataValue,cin,a_dataType,m_num);
+  ReadData(m_noDataValue,cin,a_dataType,a_dataSize,m_num);
 
   // Save some state
   m_value = a_value;
@@ -95,7 +98,8 @@ DataFileIF::DataFileIF(const char* const           a_filename,
                        const RealVect&             a_origin,
                        const Real&                 a_value,
                        const bool&                 a_inside,
-                       const bool&                 a_useCubicInterp)
+                       const bool&                 a_useCubicInterp,
+                       const DataFileIF::DataSize& a_dataSize)
 {
   ifstream curFile;
 
@@ -110,7 +114,7 @@ DataFileIF::DataFileIF(const char* const           a_filename,
   m_origin = a_origin;
 
   // Read all the data from the file
-  ReadData(m_noDataValue,curFile,a_dataType,m_num);
+  ReadData(m_noDataValue,curFile,a_dataType,a_dataSize,m_num);
 
   // Close the named file
   CloseFile(curFile);
@@ -130,7 +134,8 @@ DataFileIF::DataFileIF(const DataFileIF::DataType& a_dataType,
                        const RealVect&             a_origin,
                        const Real&                 a_value,
                        const bool&                 a_inside,
-                       const bool&                 a_useCubicInterp)
+                       const bool&                 a_useCubicInterp,
+                       const DataFileIF::DataSize& a_dataSize)
 {
   // Save the "header information"
   m_num = a_num;
@@ -138,7 +143,7 @@ DataFileIF::DataFileIF(const DataFileIF::DataType& a_dataType,
   m_origin = a_origin;
 
   // Read all the data from "cin"
-  ReadData(m_noDataValue,cin,a_dataType,m_num);
+  ReadData(m_noDataValue,cin,a_dataType,a_dataSize,m_num);
 
   // Save some state
   m_value = a_value;
@@ -156,7 +161,8 @@ DataFileIF::DataFileIF(const char* const           a_filename,
                        const RealVect&             a_origin,
                        const Real&                 a_value,
                        const bool&                 a_inside,
-                       const bool&                 a_useCubicInterp)
+                       const bool&                 a_useCubicInterp,
+                       const DataFileIF::DataSize& a_dataSize)
 {
   ifstream curFile;
 
@@ -169,7 +175,7 @@ DataFileIF::DataFileIF(const char* const           a_filename,
   m_origin = a_origin;
 
   // Read all the data from the file
-  ReadData(m_noDataValue,curFile,a_dataType,m_num);
+  ReadData(m_noDataValue,curFile,a_dataType,a_dataSize,m_num);
 
   // Close the named file
   CloseFile(curFile);
@@ -186,8 +192,8 @@ DataFileIF::DataFileIF(const char* const           a_filename,
 DataFileIF::DataFileIF(const DataFileIF& a_inputIF)
 {
   // Save a refcounted pointer to the data
-  m_ascii_data  = a_inputIF.m_ascii_data;
-  m_binary_data = a_inputIF.m_binary_data;
+  m_real_data   = a_inputIF.m_real_data;
+  m_char_data   = a_inputIF.m_char_data;
   m_noDataValue = a_inputIF.m_noDataValue;
 
   // Copy all the other data
@@ -204,8 +210,8 @@ DataFileIF::DataFileIF(const DataFileIF& a_inputIF)
   MakeCorners();
 }
 
-DataFileIF::DataFileIF(const RefCountedPtr<FArrayBox>               a_ascii_data,
-                       const RefCountedPtr<BaseFab<unsigned char> > a_binary_data,
+DataFileIF::DataFileIF(const RefCountedPtr<FArrayBox>               a_real_data,
+                       const RefCountedPtr<BaseFab<unsigned char> > a_char_data,
                        const Real&                                  a_noDataValue,
                        const IntVect&                               a_num,
                        const RealVect&                              a_spacing,
@@ -215,8 +221,8 @@ DataFileIF::DataFileIF(const RefCountedPtr<FArrayBox>               a_ascii_data
                        const bool&                                  a_useCubicInterp)
 {
   // Save a refcounted pointer to the data
-  m_ascii_data  = a_ascii_data;
-  m_binary_data = a_binary_data;
+  m_real_data   = a_real_data;
+  m_char_data   = a_char_data;
   m_noDataValue = a_noDataValue;
 
   // Copy all the other data
@@ -302,13 +308,13 @@ Real DataFileIF::value(const IndexTM<int,GLOBALDIM> & a_partialDerivative,
 
   // The box of the stored data
   Box dataBox;
-  if (m_ascii_data != NULL)
+  if (m_real_data != NULL)
   {
-    dataBox = m_ascii_data->box();
+    dataBox = m_real_data->box();
   }
   else
   {
-    dataBox = m_binary_data->box();
+    dataBox = m_char_data->box();
   }
 
   // The index in the data corresponding to a_point
@@ -400,13 +406,13 @@ Real DataFileIF::value(const IndexTM<int,GLOBALDIM> & a_partialDerivative,
         if (dataBox.contains(curIV))
         {
           // If so, get the current data value
-          if (m_ascii_data != NULL)
+          if (m_real_data != NULL)
           {
-            curValue = (*m_ascii_data)(curIV,comp);
+            curValue = (*m_real_data)(curIV,comp);
           }
           else
           {
-            curValue = (*m_binary_data)(curIV,comp);
+            curValue = (*m_char_data)(curIV,comp);
           }
         }
         else
@@ -495,13 +501,13 @@ Real DataFileIF::value(const IndexTM<int,GLOBALDIM> & a_partialDerivative,
         if (dataBox.contains(curIV))
         {
           // If so, get the current data value
-          if (m_ascii_data != NULL)
+          if (m_real_data != NULL)
           {
-            curValue = (*m_ascii_data)(curIV,comp);
+            curValue = (*m_real_data)(curIV,comp);
           }
           else
           {
-            curValue = (*m_binary_data)(curIV,comp);
+            curValue = (*m_char_data)(curIV,comp);
           }
         }
         else
@@ -539,8 +545,8 @@ Real DataFileIF::value(const IndexTM<int,GLOBALDIM> & a_partialDerivative,
 
 BaseIF* DataFileIF::newImplicitFunction() const
 {
-  DataFileIF* dataFilePtr = new DataFileIF(m_ascii_data,
-                                           m_binary_data,
+  DataFileIF* dataFilePtr = new DataFileIF(m_real_data,
+                                           m_char_data,
                                            m_noDataValue,
                                            m_num,
                                            m_spacing,
@@ -685,6 +691,7 @@ void DataFileIF::ReadFullHeader(IntVect& a_num,
 void DataFileIF::ReadData(Real&                       a_maxValue,
                           istream&                    a_file,
                           const DataFileIF::DataType& a_dataType,
+                          DataFileIF::DataSize        a_dataSize,
                           const IntVect&              a_num)
 {
   // Maximum index IntVect
@@ -694,14 +701,42 @@ void DataFileIF::ReadData(Real&                       a_maxValue,
   // Box where the data is defined
   Box dataBox(IntVect::Zero,a_max);
 
+  if (a_dataSize == DataFileIF::InvalidSize)
+  {
+    if (a_dataType == DataFileIF::ASCII)
+    {
+      a_dataSize = DataFileIF::RealSize;
+    }
+    else if (a_dataType == DataFileIF::Binary)
+    {
+      a_dataSize = DataFileIF::CharSize;
+    }
+    else
+    {
+      // Unknown data - an error
+      MayDay::Abort("Unknow data type specified for data file");
+    }
+  }
+
+  // The data has one component
+  if (a_dataSize == DataFileIF::RealSize)
+  {
+    RefCountedPtr<FArrayBox> data(new FArrayBox(dataBox,1));
+
+    m_real_data = data;
+    m_char_data = RefCountedPtr<BaseFab<unsigned char> >(NULL);
+  }
+  else
+  {
+    RefCountedPtr<BaseFab<unsigned char> > data(new BaseFab<unsigned char>(dataBox,1));
+
+    m_real_data = RefCountedPtr<FArrayBox>(NULL);
+    m_char_data = data;
+  }
+
   // Check data type to be read
   if (a_dataType == DataFileIF::ASCII)
   {
-    // ASCII data - read the data one entry at a time
-
-    // The data has one component
-    RefCountedPtr<FArrayBox> data(new FArrayBox(dataBox,1));
-
     // Start all loop counters at zero
     IntVect state(IntVect::Zero);
     int comp = 0;
@@ -714,22 +749,17 @@ void DataFileIF::ReadData(Real&                       a_maxValue,
     {
       Real curInput;
 
-      if (a_dataType == DataFileIF::ASCII)
+      // Read the next ASCII value and store the data
+      a_file >> curInput;
+
+      if (m_real_data != NULL)
       {
-        // Read the next ASCII value and store the data
-        a_file >> curInput;
+        (*m_real_data)(state,comp) = curInput;
       }
       else
-      if (a_dataType == DataFileIF::Binary)
       {
-        // Read the next binary byte and store the data
-        unsigned char curChar;
-        a_file.read((char *)(&curChar),1);
-
-        curInput = curChar;
+        (*m_char_data)(state,comp) = curInput;
       }
-
-      (*data)(state,comp) = curInput;
 
       // Update the maximum data value
       if (first || a_maxValue < curInput)
@@ -761,17 +791,11 @@ void DataFileIF::ReadData(Real&                       a_maxValue,
         }
       }
     }
-
-    m_ascii_data = data;
-    m_binary_data = RefCountedPtr<BaseFab<unsigned char> >(NULL);
   }
   else if (a_dataType == DataFileIF::Binary)
   {
     // Binary data - read the data one entry at a time
 
-    // The data has one component
-    RefCountedPtr<BaseFab<unsigned char> > data(new BaseFab<unsigned char>(dataBox,1));
-
     // Start all loop counters at zero
     IntVect state(IntVect::Zero);
     int comp = 0;
@@ -784,22 +808,22 @@ void DataFileIF::ReadData(Real&                       a_maxValue,
     {
       Real curInput;
 
-      if (a_dataType == DataFileIF::ASCII)
+      // Read the next binary byte and store the data
+      if (m_real_data != NULL)
       {
-        // Read the next ASCII value and store the data
-        a_file >> curInput;
+        a_file.read((char *)(&curInput),sizeof(curInput));
+
+        (*m_real_data)(state,comp) = curInput;
       }
       else
-      if (a_dataType == DataFileIF::Binary)
       {
-        // Read the next binary byte and store the data
         unsigned char curChar;
-        a_file.read((char *)(&curChar),1);
+        a_file.read((char *)(&curChar),sizeof(curChar));
+
+        (*m_char_data)(state,comp) = curChar;
 
         curInput = curChar;
       }
-
-      (*data)(state,comp) = curInput;
 
       // Update the maximum data value
       if (first || a_maxValue < curInput)
@@ -831,9 +855,6 @@ void DataFileIF::ReadData(Real&                       a_maxValue,
         }
       }
     }
-
-    m_ascii_data = RefCountedPtr<FArrayBox>(NULL);
-    m_binary_data = data;
   }
   else
   {

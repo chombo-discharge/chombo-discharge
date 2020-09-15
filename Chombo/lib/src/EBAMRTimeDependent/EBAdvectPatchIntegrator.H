@@ -149,6 +149,24 @@ public:
                  const Real&                      a_time,
                  const Real&                      a_dt);
 
+
+  void
+  mvExtrapolateBCG(EBFluxFAB                                      &  a_flux,
+                   const EBCellFAB                                &  a_consState,
+                   const EBFluxFAB                                &  a_advectionVel,
+                   const EBCellFAB                                &  a_normalVel,
+                   const EBCellFAB                                &  a_source,
+                   const Vector<RefCountedPtr<EBPhysIBCFactory> > &  a_allAdvectBC,
+                   const DataIndex                                &  a_dit,
+                   const Real                                     &  a_time,
+                   const Real                                     &  a_dt,
+                   const int                                      &  a_doingVel);
+
+  void
+  kappaDivergenceFlux(EBCellFAB&       a_kappaDivF,
+                      const EBFluxFAB& a_centroidFlux,
+                      const Box&       a_validBox);
+
   ///here are a couple of awful hooks necessary to get the minutiae of the algorithm correct
   static void setCurComp(int a_curComp)
   {

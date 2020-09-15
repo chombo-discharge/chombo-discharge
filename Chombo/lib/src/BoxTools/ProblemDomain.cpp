@@ -15,10 +15,17 @@
 
 using std::istream;
 using std::ws;
+
 ShiftIterator::ShiftIterator(const bool* a_isPeriodic)
 {
   m_index = 0;
   computeShifts(a_isPeriodic);
+}
+
+ShiftIterator::ShiftIterator(const bool* a_isPeriodic, const IntVect& a_numWraps)
+{
+  m_index = 0;
+  computeShifts(a_isPeriodic, a_numWraps);
 }
 
 ShiftIterator::~ShiftIterator()
@@ -29,6 +36,14 @@ ShiftIterator::~ShiftIterator()
 void
 ShiftIterator::computeShifts(const bool* a_isPeriodic)
 {
+  IntVect numWraps = IntVect::Unit;
+  computeShifts(a_isPeriodic, numWraps);
+}
+
+
+void
+ShiftIterator::computeShifts(const bool* a_isPeriodic, const IntVect& a_numWraps)
+{  
   m_shift_vectors.resize(0);
 
   // handle no directions are periodic
@@ -51,12 +66,12 @@ ShiftIterator::computeShifts(const bool* a_isPeriodic)
     {
       // loop over all possible shifts in this case (including corners)
       D_TERM6(
-              for (int xVect=-1; xVect<2; xVect++),
-              for (int yVect=-1; yVect<2; yVect++),
-              for (int zVect=-1; zVect<2; zVect++),
-              for (int uVect=-1; uVect<2; uVect++),
-              for (int vVect=-1; vVect<2; vVect++),
-              for (int wVect=-1; wVect<2; wVect++) )
+              for (int xVect=-a_numWraps[0]; xVect<=a_numWraps[0]; xVect++),
+              for (int yVect=-a_numWraps[1]; yVect<=a_numWraps[1]; yVect++),
+              for (int zVect=-a_numWraps[2]; zVect<=a_numWraps[2]; zVect++),
+              for (int uVect=-a_numWraps[3]; uVect<=a_numWraps[3]; uVect++),
+              for (int vVect=-a_numWraps[4]; vVect<=a_numWraps[4]; vVect++),
+              for (int wVect=-a_numWraps[5]; wVect<=a_numWraps[5]; wVect++) )
         {
           IntVect shiftVect(D_DECL6(xVect,yVect,zVect,
                                     uVect,vVect,wVect));
@@ -73,12 +88,12 @@ ShiftIterator::computeShifts(const bool* a_isPeriodic)
     {
       // i think this should work
       // this is designed to filter out non-periodic directions
-      D_TERM6(int xMult = (a_isPeriodic[0]?1:0);,
-              int yMult = (a_isPeriodic[1]?1:0);,
-              int zMult = (a_isPeriodic[2]?1:0);,
-              int uMult = (a_isPeriodic[3]?1:0);,
-              int vMult = (a_isPeriodic[4]?1:0);,
-              int wMult = (a_isPeriodic[5]?1:0););
+      D_TERM6(int xMult = (a_isPeriodic[0]?a_numWraps[0]:0);,
+              int yMult = (a_isPeriodic[1]?a_numWraps[1]:0);,
+              int zMult = (a_isPeriodic[2]?a_numWraps[2]:0);,
+              int uMult = (a_isPeriodic[3]?a_numWraps[3]:0);,
+              int vMult = (a_isPeriodic[4]?a_numWraps[4]:0);,
+              int wMult = (a_isPeriodic[5]?a_numWraps[5]:0););
 
       // in non-periodic dirctions, shift vector component should
       // always be 0
@@ -221,7 +236,6 @@ ProblemDomain::intersects(const Box& a_box) const
   IntVect hi(m_domainBox.bigEnd());
   low.max(a_box.smallEnd());
   hi.min(a_box.bigEnd());
-  return low <= hi;
 
   return (D_TERM6((m_isPeriodic[0]
                    || (low[0] <= hi[0])), &&
@@ -247,7 +261,6 @@ ProblemDomain::intersectsNotEmpty(const Box& a_box) const
   IntVect hi(m_domainBox.bigEnd());
   low.max(a_box.smallEnd());
   hi.min(a_box.bigEnd());
-  return low <= hi;
 
   return (D_TERM6((m_isPeriodic[0]
                    || (low[0] <= hi[0])), &&
@@ -537,10 +550,14 @@ operator>> (istream& is, ProblemDomain& a_probdomain)
     }
 
   else
-    MayDay::Error("operator>>(istream&,ProblemDomain&): expected \',\'");
+    {
+      MayDay::Error("operator>>(istream&,ProblemDomain&): expected \',\'");
+    }
 
   if (is.fail())
-    MayDay::Error("operator>>(istream&,ProblemDomain&) failed");
+    {
+      MayDay::Error("operator>>(istream&,ProblemDomain&) failed");
+    }
 
     return is;
 }

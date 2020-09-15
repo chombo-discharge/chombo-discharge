@@ -29,6 +29,7 @@
 ##  CXXFLAGS        options for compiling C++ code
 ##  FFLAGS          options for compiling Fortran code
 ##  LDFLAGS         options for linking
+##  CXXSTD          chombo default is C++11.  Set to 14 for C++14, etc.
 ##  USE_64          if TRUE, use 64bit pointers on systems where 32bits is the default
 ##  USE_COMPLEX     if TRUE, enable the 'Complex' type
 ##                   (default is TRUE, disable only if compiler doesn't allow it)
@@ -99,8 +100,10 @@ CXXFLAGS?=
 CHFFLAGS?=
 FFLAGS?=
 LDFLAGS?=
+OUTPUT?=EXEC
 
 # Chombo optional features
+CXXSTD?=11#          # C++ 11 standard
 USE_64?=TRUE#        #64bit pointers
 USE_MT?=TRUE#         #memory tracking
 # USE_SETVAL?=TRUE#     #initialize FAB data
@@ -116,6 +119,7 @@ HDFMPIINCFLAGS?=
 HDFMPILIBFLAGS?=
 
 USE_PETSC?=FALSE 
+USE_PROTO?=FALSE 
 
 USE_LAPACK?=TRUE
 

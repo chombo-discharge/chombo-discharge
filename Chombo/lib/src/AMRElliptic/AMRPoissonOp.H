@@ -65,7 +65,8 @@ public:
               const ProblemDomain&       a_domain,
               BCHolder                   a_bc,
               const Copier&              a_exchange,
-              const CFRegion&            a_cfregion);
+              const CFRegion&            a_cfregion,
+              const int                  a_nComp = 1);
 
   /** full define function for AMRLevelOp with finer levels, but no coarser */
   void define(const DisjointBoxLayout&   a_grids,
@@ -76,11 +77,13 @@ public:
               const ProblemDomain&       a_domain,
               BCHolder                   a_bc,
               const Copier&              a_exchange,
-              const CFRegion&            a_cfregion);
+              const CFRegion&            a_cfregion,
+              const int                  a_nComp = 1);
 
   ///
   /**
      define function for AMRLevelOp which has no finer AMR level
+     Jamie Parkinson added a_numComp parameter so that we define CF interp objects correctly
   */
   void define(const DisjointBoxLayout&   a_grids,
               const DisjointBoxLayout&   a_baseBAPtr,
@@ -89,7 +92,8 @@ public:
               const ProblemDomain&       a_domain,
               BCHolder                   a_bc,
               const Copier&              a_exchange,
-              const CFRegion&            a_cfregion);
+              const CFRegion&            a_cfregion,
+              int                        a_numComp=1);
 
   ///
   /**
@@ -126,6 +130,15 @@ public:
                         const LevelData<FArrayBox>& a_phi,
                         const LevelData<FArrayBox>& a_rhs,
                         bool                        a_homogeneous = false);
+
+  /// Residual which uses coarse-level boundary conditions, but ignores finer levels
+  /** useful for full-multigrid types of schemes
+   */
+  virtual void residualNF(LevelData<FArrayBox>& a_lhs,
+                          LevelData<FArrayBox>& a_phi,
+                          const LevelData<FArrayBox>* a_phiCoarse,
+                          const LevelData<FArrayBox>& a_rhs,
+                          bool a_homogeneous = false);
 
  /// despite what you might think, the "I" here means "Ignore the coarse-fine boundary"
   virtual void residualI(LevelData<FArrayBox>&       a_lhs,
@@ -209,6 +222,14 @@ public:
   virtual void relax(LevelData<FArrayBox>&       a_e,
                      const LevelData<FArrayBox>& a_residual,
                      int                         a_iterations);
+
+  /// Do CF interpolation then relax as normal
+  /** useful for full-multigrid/FAS schemes
+   */
+  virtual void relaxNF(LevelData<FArrayBox>& a_phi,
+                       const LevelData<FArrayBox>* a_phiCoarse,
+                       const LevelData<FArrayBox>& a_rhs,
+                       int a_iterations);
 
   virtual void createCoarser(LevelData<FArrayBox>&       a_coarse,
                              const LevelData<FArrayBox>& a_fine,

@@ -14,7 +14,7 @@ using std::pow;
 #include "BoxLayoutData.H"
 #include "FluxBox.H"
 #ifdef CH_MPI
-#include <mpi.h>
+#include "mpi.h"
 #endif
 #include "NamespaceHeader.H"
 
@@ -55,6 +55,27 @@ Real norm(const BoxLayoutData<FArrayBox>& a_layout,
           norm += a_layout[it()].norm(validRegion[it()],
                                       1,
                                       interval.begin(),
+                                      interval.size());
+        }
+#     ifdef CH_MPI
+      Real recv;
+      int result = MPI_Allreduce(&norm, &recv, 1, MPI_CH_REAL,
+                                 MPI_SUM, Chombo_MPI::comm);
+      if (result != MPI_SUCCESS)
+      {
+        //bark!!!
+        MayDay::Error("sorry, but I had a communcation error on norm");
+      }
+      norm = recv;
+#     endif
+    }
+
+  else if (p == -3) //  sum norm
+    {
+      cout << "taking sum of boxlayoutdata" << endl;
+      for (;it.ok(); ++it)
+        {
+          norm += a_layout[it()].sum (interval.begin(),
                                       interval.size());
         }
 #     ifdef CH_MPI
@@ -172,6 +193,29 @@ FABAliasFlBxDataFactory::create(const Box&       a_box,
   CH_assert(a_ncomps = m_interval.size());
   FluxBox& origFlBx = m_origPointer->operator[](a_dataInd);
   return new FArrayBox(m_interval, origFlBx[m_dir]);
+}
+
+//--FaceFabDataFactory
+
+FaceFabDataFactory::FaceFabDataFactory(const int a_dir)
+  :
+  m_dir(a_dir)
+{
+}
+
+void FaceFabDataFactory::define(const int a_dir)
+{
+  m_dir = a_dir;
+}
+
+FArrayBox* FaceFabDataFactory::create(const Box      & a_box   ,
+                                      int              a_nComps,
+                                      const DataIndex& a_dataInd) const
+{
+  Box edgeBoxDir(surroundingNodes(a_box, m_dir));
+  FArrayBox* faceBox = new FArrayBox(edgeBoxDir, a_nComps);
+  
+  return faceBox;
 }
 
 #include "NamespaceFooter.H"
