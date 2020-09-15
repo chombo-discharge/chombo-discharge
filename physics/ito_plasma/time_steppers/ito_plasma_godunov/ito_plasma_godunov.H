@@ -46,6 +46,8 @@ namespace physics {
       enum class which_algorithm {
 	euler, 
 	semi_implicit,
+	split_semi_implicit,
+	split_pc,
       };
 
       enum class which_dt {
@@ -92,6 +94,7 @@ namespace physics {
       // Particle advancement routines. 
       void advance_particles_euler(const Real a_dt);
       void advance_particles_si(const Real a_dt);
+      void advance_particles_split_si(const Real a_dt);
 
     };
   }
