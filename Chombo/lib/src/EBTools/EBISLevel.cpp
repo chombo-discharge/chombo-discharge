@@ -457,6 +457,7 @@ void EBISLevel::simplifyGraphFromGeo(LevelData<EBGraph>             & a_graph,
 				     const Real                     & a_dx)
 {
   CH_TIME("EBISLevel::simplifyGraphFromGeo");
+
   //define the graph stuff
   for (DataIterator dit = a_grids.dataIterator(); dit.ok(); ++dit)
     {
@@ -851,9 +852,10 @@ void EBISLevel::coarsenVoFs(EBISLevel& a_fineEBIS)
   EBGraphFactory ebgraphfactFine(a_fineEBIS.m_domain);
   LevelData<EBGraph> fineFromCoarEBGraph(fineFromCoarDBL,1, IntVect::Unit, ebgraphfactFine);
 
-  // Simplify graph from geoserver if possible. Won't work because of coarsening. 
-  if(s_distributedData){ 
-    //    simplifyGraphFromGeo(fineFromCoarEBGraph, *m_geoserver, fineFromCoarDBL, a_fineEBIS.m_domain, m_origin, 0.5*m_dx);
+  // Simplify graph from geoserver if possible. In this case we need to iterate through the coarse level in
+  // order to simplify the graph on the fine level. So, need to pass in m_domain, m_oigin, and m_dx to simplifyGraphFromGeo
+  if(s_distributedData){
+    simplifyGraphFromGeo(fineFromCoarEBGraph, *m_geoserver, fineFromCoarDBL, m_domain, m_origin, m_dx);
   }
 
   Interval interv(0,0);
@@ -916,7 +918,7 @@ void EBISLevel::fixFineToCoarse(EBISLevel& a_fineEBIS)
   Interval interv(0,0);
 
   if(s_distributedData){ // Won't work because of coarsening
-    //    simplifyGraphFromGeo(coarFromFineEBGraph, *m_geoserver, coarFromFineDBL, m_domain, m_origin, m_dx);
+    simplifyGraphFromGeo(coarFromFineEBGraph, *m_geoserver, coarFromFineDBL, a_fineEBIS.m_domain, m_origin, a_fineEBIS.m_dx);
   }
   m_graph.copyTo(interv, coarFromFineEBGraph, interv);
 
@@ -948,7 +950,7 @@ void EBISLevel::coarsenFaces(EBISLevel& a_fineEBIS)
   Interval interv(0,0);
   
   if(s_distributedData){ // Won't work because this looks up the fine domain DBL
-    //    simplifyGraphFromGeo(fineEBGraphGhostLD, *m_geoserver, fineFromCoarDBL, a_fineEBIS.m_domain, m_origin, 0.5*m_dx);
+    simplifyGraphFromGeo(fineEBGraphGhostLD, *m_geoserver, fineFromCoarDBL, m_domain, m_origin, m_dx);
   }
   a_fineEBIS.m_graph.copyTo(interv, fineEBGraphGhostLD, interv);
   LevelData<EBGraph> coarEBGraphGhostLD(m_grids,        1,  IntVect::Unit, ebgraphfactcoar);

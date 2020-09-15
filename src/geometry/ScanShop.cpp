@@ -391,29 +391,34 @@ GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
   // A strang but true thing. This function is used in EBISLevel::simplifyGraphFromGeo and that function can send in a_domain
   // and a_dx on different levels....
   ProblemDomain domain;
-  if(a_dx < m_dx[whichLevel]){
+  if(a_dx < m_dx[whichLevel] && whichLevel > 0){
     domain = m_domains[whichLevel-1];
+
+    MayDay::Abort("ScanShop::InsideOutside - shouldn't happen...");
   }
 
-  if(foundLevel){
-    if(m_hasThisLevel[whichLevel]){
-      const LevelData<BoxType>& map = (*m_boxMaps[whichLevel]);
-      const BoxType& boxType        = map[a_dit];
+  GeometryService::InOut ret;
+
+  if(foundLevel && m_hasThisLevel[whichLevel]){
+    const LevelData<BoxType>& map = (*m_boxMaps[whichLevel]);
+    const BoxType& boxType        = map[a_dit];
     
-      if(boxType.isRegular()){
-	return GeometryService::Regular;
-      }
-      else if(boxType.isCovered()){
-	return GeometryService::Covered;
-      }
-      else{
-	return GeometryService::Irregular;
-	//      return GeometryService::InsideOutside(a_region, domain, a_origin, a_dx, a_dit);
-      }
+    if(boxType.isRegular()){
+      ret = GeometryService::Regular;
+    }
+    else if(boxType.isCovered()){
+      ret = GeometryService::Covered;
+    }
+    else{
+      ret= GeometryService::Irregular;
+      //      return GeometryService::InsideOutside(a_region, domain, a_origin, a_dx, a_dit);
     }
   }
+  else{
+    ret = GeometryService::InsideOutside(a_region, domain, a_origin, a_dx, a_dit);
+  }
 
-  return GeometryService::InsideOutside(a_region, domain, a_origin, a_dx, a_dit);
+  return ret;
 }
 
 void ScanShop::printNumBoxesLevel(const int a_level){
