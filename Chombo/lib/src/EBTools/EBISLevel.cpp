@@ -36,6 +36,7 @@
 EBIndexSpace* Chombo_EBIS::s_instance = NULL;
 bool          Chombo_EBIS::s_aliased  = false;
 int EBISLevel::s_ebislGhost = 6;
+bool EBISLevel::s_distributedData = false;
 EBIndexSpace* Chombo_EBIS::instance()
 {
   if ((!s_aliased) && (s_instance == NULL))
@@ -448,6 +449,37 @@ EBISLevel::defineGraphFromGeo(LevelData<EBGraph>             & a_graph,
     }
 }
 
+void EBISLevel::simplifyGraphFromGeo(LevelData<EBGraph>             & a_graph,
+				     const GeometryService          & a_geoserver,
+				     const DisjointBoxLayout        & a_grids,
+				     const ProblemDomain            & a_domain,
+				     const RealVect                 & a_origin,
+				     const Real                     & a_dx)
+{
+  CH_TIME("EBISLevel::simplifyGraphFromGeo");
+  //define the graph stuff
+  for (DataIterator dit = a_grids.dataIterator(); dit.ok(); ++dit)
+    {
+      Box region = a_grids.get(dit());
+      region.grow(1);
+      Box ghostRegion = grow(region,1);
+      ghostRegion &= a_domain;
+      region &= a_domain;
+
+      EBGraph& ebgraph = a_graph[dit()];
+      GeometryService::InOut inout = a_geoserver.InsideOutside(region, a_domain, a_origin, a_dx, dit());
+
+      if (inout == GeometryService::Regular)
+        {
+          ebgraph.setToAllRegular();
+        }
+      else if (inout == GeometryService::Covered)
+        {
+          ebgraph.setToAllCovered();
+        }
+    }
+}
+
 EBISLevel::EBISLevel(const ProblemDomain   & a_domain,
                      const RealVect        & a_origin,
                      const Real            & a_dx,
@@ -470,38 +502,42 @@ EBISLevel::EBISLevel(const ProblemDomain   & a_domain,
 
   m_level = 0;
 
+  m_geoserver = &a_geoserver;
+
   Vector<Box> vbox;
   Vector<unsigned long long> irregCount;
 
-  {
-    CH_TIME("EBISLevel::EBISLevel_makeboxes");
-    makeBoxes(vbox,
-            irregCount,
-            a_domain.domainBox(),
-            a_domain,
-            a_geoserver,
-            a_origin,
-            a_dx,
-            a_nCellMax);
+  if(!s_distributedData){
+    {
+      CH_TIME("EBISLevel::EBISLevel_makeboxes");
+      makeBoxes(vbox,
+		irregCount,
+		a_domain.domainBox(),
+		a_domain,
+		a_geoserver,
+		a_origin,
+		a_dx,
+		a_nCellMax);
+    }
+
+    // pout()<<vbox<<"\n\n";
+    //load balance the boxes
+    Vector<int> procAssign;
+    //UnLongLongLoadBalance(procAssign, irregCount, vbox);
+    basicLoadBalance(procAssign, vbox.size());
+    //   pout()<<irregCount<<std::endl;
+    //   pout()<<procAssign<<std::endl;
+    pout() << "before defining grids" << endl;
+    m_grids.define(vbox, procAssign,a_domain);//this should use a_domain for periodic
+    pout() << "after defining grids" << endl;
   }
+  else
+    {
+      CH_TIME("EBISLevel::EBISLevel_makegrids");
+      // permit the geometry service to construct a layout, or accept an already defined layout from EBIndexSpace
 
-  // pout()<<vbox<<"\n\n";
-  //load balance the boxes
-  Vector<int> procAssign;
-  //UnLongLongLoadBalance(procAssign, irregCount, vbox);
-  basicLoadBalance(procAssign, vbox.size());
-  //   pout()<<irregCount<<std::endl;
-  //   pout()<<procAssign<<std::endl;
-  pout() << "before defining grids" << endl;
-  m_grids.define(vbox, procAssign,a_domain);//this should use a_domain for periodic
-  pout() << "after defining grids" << endl;
-
-  {
-    CH_TIME("EBISLevel::EBISLevel_makegrids");
-    // permit the geometry service to construct a layout, or accept an already defined layout from EBIndexSpace
-
-    (const_cast<GeometryService*>(&a_geoserver))->makeGrids(a_domain, m_grids, a_nCellMax, 15);
-  }
+      (const_cast<GeometryService*>(&a_geoserver))->makeGrids(a_domain, m_grids, a_nCellMax, 15);
+    }
 
   RealVect dx2D;
   for (int i = 0; i < SpaceDim; i++)

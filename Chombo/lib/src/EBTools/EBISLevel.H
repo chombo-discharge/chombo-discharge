@@ -85,6 +85,7 @@ class EBISLevel
 {
 public:
   static int s_ebislGhost;
+  static bool s_distributedData;
   void dumpDebug(const string& a_string);
 
   void coarsenVoFs(EBISLevel& a_fineEBIS);
@@ -219,6 +220,11 @@ private:
   ///
   RealVect m_origin;
 
+    ///
+  const GeometryService* m_geoserver;
+
+
+
   ///
   Real m_dx;
 
@@ -239,7 +245,6 @@ private:
   static Real s_tolerance;
   static bool s_verbose;
 
-
   static void
   defineGraphFromGeo(LevelData<EBGraph>             &     a_graph,
                      LayoutData<Vector<IrregNode> > &     a_allNodes,
@@ -248,6 +253,14 @@ private:
                      const ProblemDomain            &     a_domain,
                      const RealVect                 &     a_origin,
                      const Real                     &     a_dx);
+
+  static void
+  simplifyGraphFromGeo(LevelData<EBGraph>             &     a_graph,
+		       const GeometryService          &     a_geoserver,
+		       const DisjointBoxLayout        &     a_grids,
+		       const ProblemDomain            &     a_domain,
+		       const RealVect                 &     a_origin,
+		       const Real                     &     a_dx);
 
   //make grids for this level.
   static void makeBoxes(Vector<Box>&                a_boxes,
