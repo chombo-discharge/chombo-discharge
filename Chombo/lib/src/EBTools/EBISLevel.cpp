@@ -415,7 +415,7 @@ EBISLevel::defineGraphFromGeo(LevelData<EBGraph>             & a_graph,
 
       EBGraph& ebgraph = a_graph[dit()];
       GeometryService::InOut inout;
-  
+
       inout = a_geoserver.InsideOutside(region, a_domain, a_origin, a_dx, dit());
   
       if (inout == GeometryService::Regular)
@@ -586,6 +586,10 @@ void EBISLevel::fixRegularNextToMultiValued()
   LevelData<EBGraph> oldGhostGraph(m_grids, 1, 2*IntVect::Unit, graphfact);
   Interval interv(0,0);
 
+  if(s_distributedData){
+    this->simplifyGraphFromGeo(oldGhostGraph, *m_geoserver, m_grids, m_domain, m_origin, m_dx);
+  }
+
   m_graph.copyTo(interv, oldGhostGraph, interv);
 
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit)
@@ -601,6 +605,10 @@ void EBISLevel::fixRegularNextToMultiValued()
   EBDataFactory datafact;
   LevelData<EBGraph> newGhostGraph(m_grids, 1, 2*IntVect::Unit, graphfact);
   LevelData<EBData>  newGhostData(m_grids, 1, IntVect::Unit, datafact);
+
+  if(s_distributedData){ 
+    simplifyGraphFromGeo(newGhostGraph, *m_geoserver, m_grids, m_domain, m_origin, m_dx);
+  }
 
   m_graph.copyTo(interv, newGhostGraph, interv);
 
@@ -843,6 +851,11 @@ void EBISLevel::coarsenVoFs(EBISLevel& a_fineEBIS)
   EBGraphFactory ebgraphfactFine(a_fineEBIS.m_domain);
   LevelData<EBGraph> fineFromCoarEBGraph(fineFromCoarDBL,1, IntVect::Unit, ebgraphfactFine);
 
+  // Simplify graph from geoserver if possible
+  if(s_distributedData){ 
+    //simplifyGraphFromGeo(fineFromCoarEBGraph, *m_geoserver, fineFromCoarDBL, a_fineEBIS.m_domain, m_origin, 0.5*m_dx);
+  }
+
   Interval interv(0,0);
   a_fineEBIS.m_graph.copyTo(interv, fineFromCoarEBGraph, interv);
 
@@ -856,6 +869,11 @@ void EBISLevel::coarsenVoFs(EBISLevel& a_fineEBIS)
 
   EBGraphFactory ebgraphfactCoar(m_domain);
   LevelData<EBGraph> coarGhostEBGraph(m_grids,1, IntVect::Unit, ebgraphfactCoar);
+
+  if(s_distributedData){
+    simplifyGraphFromGeo(coarGhostEBGraph, *m_geoserver, m_grids, m_domain, m_origin, m_dx);
+  }
+    
   m_graph.copyTo(interv, coarGhostEBGraph, interv);
 
   //dumpDebug(string("EBIS::coarsenVoFs"));
@@ -896,6 +914,7 @@ void EBISLevel::fixFineToCoarse(EBISLevel& a_fineEBIS)
   EBGraphFactory ebgraphfact(m_domain);
   LevelData<EBGraph> coarFromFineEBGraph(coarFromFineDBL,1, IntVect::Zero, ebgraphfact);
   Interval interv(0,0);
+
   m_graph.copyTo(interv, coarFromFineEBGraph, interv);
 
   for (DataIterator dit = a_fineEBIS.m_grids.dataIterator(); dit.ok(); ++dit)
@@ -978,30 +997,33 @@ EBISLevel::EBISLevel(EBISLevel             & a_fineEBIS,
   m_tolerance = 2.*a_fineEBIS.m_tolerance;
   m_origin = a_fineEBIS.m_origin;
 
+  m_geoserver = &a_geoserver;
+
   m_level = a_fineEBIS.m_level + 1;
 
  
 //  pout() << "before make boxes" << endl;
-  Vector<Box> vbox;
-  Vector<unsigned long long> irregCount;
-  {
-    CH_TIME("EBISLevel::EBISLevel_fineEBIS_makeboxes 2");
-    makeBoxes(vbox, irregCount, m_domain.domainBox(), m_domain, a_geoserver,
-              m_origin, m_dx, a_nCellMax);
+  if(!s_distributedData){
+    Vector<Box> vbox;
+    Vector<unsigned long long> irregCount;
+    {
+      CH_TIME("EBISLevel::EBISLevel_fineEBIS_makeboxes 2");
+      makeBoxes(vbox, irregCount, m_domain.domainBox(), m_domain, a_geoserver,
+		m_origin, m_dx, a_nCellMax);
+    }
+
+    //pout()<<vbox<<"\n\n";
+    //load balance the boxes
+    Vector<int> procAssign;
+    //UnLongLongLoadBalance(procAssign, irregCount, vbox);
+    basicLoadBalance(procAssign, vbox.size());
+    //pout()<<procAssign<<std::endl;
+    //define the layout.  this includes the domain and box stuff
+    m_grids.define(vbox, procAssign);//this should use m_domain for periodic
   }
-
-  //pout()<<vbox<<"\n\n";
-  //load balance the boxes
-  Vector<int> procAssign;
-  //UnLongLongLoadBalance(procAssign, irregCount, vbox);
-  basicLoadBalance(procAssign, vbox.size());
-  //pout()<<procAssign<<std::endl;
-  //define the layout.  this includes the domain and box stuff
-  m_grids.define(vbox, procAssign);//this should use m_domain for periodic
-
-   
- 
-  (const_cast<GeometryService*>(&a_geoserver))->makeGrids(m_domain, m_grids, a_nCellMax, 15);
+  else {
+    (const_cast<GeometryService*>(&a_geoserver))->makeGrids(m_domain, m_grids, a_nCellMax, 15);
+  }
   
 
   EBGraphFactory ebgraphfact(m_domain);
