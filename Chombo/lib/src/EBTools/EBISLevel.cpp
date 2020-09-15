@@ -587,7 +587,7 @@ void EBISLevel::fixRegularNextToMultiValued()
   Interval interv(0,0);
 
   if(s_distributedData){
-    this->simplifyGraphFromGeo(oldGhostGraph, *m_geoserver, m_grids, m_domain, m_origin, m_dx);
+    //    this->simplifyGraphFromGeo(oldGhostGraph, *m_geoserver, m_grids, m_domain, m_origin, m_dx);
   }
 
   m_graph.copyTo(interv, oldGhostGraph, interv);
@@ -851,9 +851,9 @@ void EBISLevel::coarsenVoFs(EBISLevel& a_fineEBIS)
   EBGraphFactory ebgraphfactFine(a_fineEBIS.m_domain);
   LevelData<EBGraph> fineFromCoarEBGraph(fineFromCoarDBL,1, IntVect::Unit, ebgraphfactFine);
 
-  // Simplify graph from geoserver if possible
+  // Simplify graph from geoserver if possible. Won't work because of coarsening. 
   if(s_distributedData){ 
-    //simplifyGraphFromGeo(fineFromCoarEBGraph, *m_geoserver, fineFromCoarDBL, a_fineEBIS.m_domain, m_origin, 0.5*m_dx);
+    //    simplifyGraphFromGeo(fineFromCoarEBGraph, *m_geoserver, fineFromCoarDBL, a_fineEBIS.m_domain, m_origin, 0.5*m_dx);
   }
 
   Interval interv(0,0);
@@ -915,6 +915,9 @@ void EBISLevel::fixFineToCoarse(EBISLevel& a_fineEBIS)
   LevelData<EBGraph> coarFromFineEBGraph(coarFromFineDBL,1, IntVect::Zero, ebgraphfact);
   Interval interv(0,0);
 
+  if(s_distributedData){ // Won't work because of coarsening...
+    //    simplifyGraphFromGeo(coarFromFineEBGraph, *m_geoserver, coarFromFineDBL, m_domain, m_origin, m_dx);
+  }
   m_graph.copyTo(interv, coarFromFineEBGraph, interv);
 
   for (DataIterator dit = a_fineEBIS.m_grids.dataIterator(); dit.ok(); ++dit)
@@ -943,8 +946,17 @@ void EBISLevel::coarsenFaces(EBISLevel& a_fineEBIS)
   EBGraphFactory ebgraphfactcoar(m_domain);
   LevelData<EBGraph> fineEBGraphGhostLD(fineFromCoarDBL,1,3*IntVect::Unit, ebgraphfactfine);
   Interval interv(0,0);
+  
+  if(s_distributedData){ // Won't work because this looks up the fine domain DBL
+    //    simplifyGraphFromGeo(fineEBGraphGhostLD, *m_geoserver, fineFromCoarDBL, a_fineEBIS.m_domain, m_origin, 0.5*m_dx);
+  }
   a_fineEBIS.m_graph.copyTo(interv, fineEBGraphGhostLD, interv);
   LevelData<EBGraph> coarEBGraphGhostLD(m_grids,        1,  IntVect::Unit, ebgraphfactcoar);
+
+  if(s_distributedData){  // Should work because ScanShop->m_grids = m_grids
+    simplifyGraphFromGeo(coarEBGraphGhostLD, *m_geoserver, m_grids, m_domain, m_origin, m_dx);
+  }
+  
   m_graph.copyTo(           interv, coarEBGraphGhostLD, interv);
 
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit)
@@ -956,6 +968,10 @@ void EBISLevel::coarsenFaces(EBISLevel& a_fineEBIS)
     }
   //redefine coarebghostgraphld so i can use the faces for the ebdata
   coarEBGraphGhostLD.define(m_grids, 1,  IntVect::Unit, ebgraphfactcoar);
+
+  if(s_distributedData){  // Should work because everything is on this level. 
+    simplifyGraphFromGeo(coarEBGraphGhostLD, *m_geoserver, m_grids, m_domain, m_origin, m_dx);
+  }
   m_graph.copyTo(interv, coarEBGraphGhostLD, interv);
 
   EBDataFactory ebdatafact;
