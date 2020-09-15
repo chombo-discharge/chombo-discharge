@@ -398,7 +398,7 @@ GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
   if(foundLevel){
     if(m_hasThisLevel[whichLevel]){
       const LevelData<BoxType>& map = (*m_boxMaps[whichLevel]);
-      const BoxType& boxType       = map[a_dit];
+      const BoxType& boxType        = map[a_dit];
     
       if(boxType.isRegular()){
 	return GeometryService::Regular;

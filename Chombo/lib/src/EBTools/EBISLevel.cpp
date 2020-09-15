@@ -915,7 +915,7 @@ void EBISLevel::fixFineToCoarse(EBISLevel& a_fineEBIS)
   LevelData<EBGraph> coarFromFineEBGraph(coarFromFineDBL,1, IntVect::Zero, ebgraphfact);
   Interval interv(0,0);
 
-  if(s_distributedData){ // Won't work because of coarsening...
+  if(s_distributedData){ // Won't work because of coarsening
     //    simplifyGraphFromGeo(coarFromFineEBGraph, *m_geoserver, coarFromFineDBL, m_domain, m_origin, m_dx);
   }
   m_graph.copyTo(interv, coarFromFineEBGraph, interv);
