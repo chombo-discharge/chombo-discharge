@@ -587,7 +587,7 @@ void EBISLevel::fixRegularNextToMultiValued()
   Interval interv(0,0);
 
   if(s_distributedData){
-    //    this->simplifyGraphFromGeo(oldGhostGraph, *m_geoserver, m_grids, m_domain, m_origin, m_dx);
+    this->simplifyGraphFromGeo(oldGhostGraph, *m_geoserver, m_grids, m_domain, m_origin, m_dx);
   }
 
   m_graph.copyTo(interv, oldGhostGraph, interv);
