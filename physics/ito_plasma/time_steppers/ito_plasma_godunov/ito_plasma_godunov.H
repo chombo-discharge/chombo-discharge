@@ -91,11 +91,14 @@ namespace physics {
       void copy_particles_to_scratch();
       void deposit_scratch_particles();
 
+      // Standard poisson setup
+      void setup_standard_poisson();
+
       // Particle advancement routines. 
       void advance_particles_euler(const Real a_dt);
       void advance_particles_si(const Real a_dt);
       void advance_particles_split_si(const Real a_dt);
-
+      void advance_particles_split_pc(const Real a_dt);
     };
   }
 }

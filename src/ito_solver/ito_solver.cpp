@@ -847,7 +847,7 @@ void ito_solver::restart_particles(LevelData<EBCellFAB>& a_num_particles, const 
       if(ebisbox.isRegular(bit())){
 
 	// Compute weights and remainder
-	const unsigned long long numParticles = (unsigned long long) round(ppc(bit()));
+	const unsigned long long numParticles = (unsigned long long) llround(ppc(bit()));
 	unsigned long long w, N, r;
 	data_ops::compute_particle_weights(w, N, r, numParticles, m_ppc_restart);
 
@@ -895,7 +895,7 @@ void ito_solver::restart_particles(LevelData<EBCellFAB>& a_num_particles, const 
       }
 
       // Compute weights and remainder
-      const unsigned long long numParticles = (unsigned long long) round(ppc(iv));
+      const unsigned long long numParticles = (unsigned long long) llround(ppc(iv));
       unsigned long long w, N, r;
       data_ops::compute_particle_weights(w, N, r, numParticles, m_ppc_restart);
 

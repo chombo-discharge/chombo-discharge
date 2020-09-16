@@ -146,7 +146,7 @@ long long ito_plasma_physics::compute_charge(const Vector<List<ito_particle>* >&
     const long long q = (long long) m_ito_species[i]->get_charge();
     
     for (ListIterator<ito_particle> lit(*a_particles[i]); lit.ok(); ++lit){
-      const long long w = (long long) round(lit().mass());
+      const long long w = llround(lit().mass());
 
       ret += w*q;
     }
@@ -294,7 +294,7 @@ void ito_plasma_physics::sanity_check(const List<ito_particle>& a_particles) con
   ListIterator<ito_particle> lit(a_particles);
   
   for (lit.begin(); lit.ok(); ++lit){
-    const long long w = (long long) round(lit().mass());
+    const long long w = llround(lit().mass());
 
     if(w < 1) MayDay::Abort("ito_plasma_physics::sanity_check - can't have w < 1!!!!");
   }
@@ -305,7 +305,7 @@ unsigned long long ito_plasma_physics::get_total_weight(const List<ito_particle>
 
   unsigned long long ret = 0;
   for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
-    const unsigned long long w = (unsigned long long) round(lit().mass());
+    const unsigned long long w = (unsigned long long) llround(lit().mass());
 
     ret += w;
   }
@@ -319,7 +319,7 @@ void ito_plasma_physics::compute_weights(ListIterator<ito_particle>& a_lit,
 					 unsigned long long&         a_minWeight) const {
   int i = 0;
   for (a_lit.begin(); a_lit.ok(); ++a_lit, ++i){
-    a_particleWeights[i] = (unsigned long long) round(a_lit().mass());
+    a_particleWeights[i] = (unsigned long long) llround(a_lit().mass());
     a_minWeight = std::min(a_particleWeights[i], a_minWeight);
   }
 }
@@ -470,7 +470,7 @@ void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >&
 inline
 unsigned long long ito_plasma_physics::poisson_reaction(const Real a_propensity, const Real a_dt) const{
 
-  unsigned long long zero  = 0;
+  constexpr unsigned long long zero  = 0;
   unsigned long long value = 0;
   const Real mean = a_propensity*a_dt;
 
@@ -480,7 +480,7 @@ unsigned long long ito_plasma_physics::poisson_reaction(const Real a_propensity,
   }
   else{
     std::normal_distribution<double> dist(mean, sqrt(mean));
-    value = (unsigned long long) round(dist(m_rng));
+    value = (unsigned long long) llround(dist(m_rng));
   }
 
   return Max(zero,value);
@@ -589,7 +589,7 @@ unsigned long long ito_plasma_physics::get_particle_count(const List<ito_particl
   unsigned long long ret = 0;
 
   for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
-    ret += (unsigned long long) round(lit().mass());
+    ret += (unsigned long long) llround(lit().mass());
   }
 
   return ret;
@@ -629,7 +629,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   			    a_pos,
   			    a_lo,
   			    a_hi,
-  			    a_bndryCentroid,
+			    a_bndryCentroid,
   			    a_bndryNormal,
   			    a_dx,
   			    a_kappa);

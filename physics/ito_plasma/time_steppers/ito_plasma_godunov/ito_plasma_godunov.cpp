@@ -373,6 +373,13 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     this->advance_particles_si(a_dt);
     m_prevDt = a_dt;
   }
+  else if(m_algorithm == which_algorithm::split_semi_implicit){
+    this->advance_particles_split_si(a_dt);
+    m_prevDt = a_dt;
+  }
+  else if(m_algorithm == which_algorithm::split_pc){
+    this->advance_particles_split_pc(a_dt);
+  }
   particle_time += MPI_Wtime();
 
   // Compute current and relaxation time.
@@ -474,9 +481,14 @@ void ito_plasma_godunov::advance_particles_euler(const Real a_dt){
   this->advect_particles_euler(a_dt);
   this->diffuse_particles_euler(a_dt);
   
+  this->intersect_particles(a_dt);
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->remove_eb_particles();
+  }
+
   m_ito->remap();
   m_ito->deposit_particles();
-  this->intersect_particles(a_dt);
+
   this->solve_poisson();
 }
 
@@ -603,36 +615,41 @@ void ito_plasma_godunov::advance_particles_split_si(const Real a_dt){
     pout() << m_name + "::advance_particles_split_si" << endl;
   }
 
-  // Set old positions
+  // Set old positions and diffuse particles. 
   this->set_old_positions();
-
-  // Compute conductivity and setup poisson
-  this->compute_conductivity();
-  this->setup_semi_implicit_poisson(a_dt);
-
-  // Diffuse the particles now
   this->diffuse_particles_euler(a_dt);
+  
+  // Do intersection test and remove EB particles. These particles are removed from the simulation. 
+  this->intersect_particles(a_dt);
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->remove_eb_particles();
+  }
 
-  // Remap and deposit, only need to do this for diffusive solvers. 
-  this->remap_diffusive_particles(); 
+  // Remap and deposit diffusive particles
+  this->remap_diffusive_particles();
   this->deposit_diffusive_particles();
 
-  // Copy particles to scratch
-  this->copy_particles_to_scratch();
-
-  // Now compute the electric field
+  // Explicit update of the electric field. Then recompute the advective velocities. 
+  this->setup_standard_poisson();
   this->solve_poisson();
-  
-  // We have field at k+1 but particles have been diffused. The ones that are diffusive AND mobile are put back to X^k positions
-  // and then we compute velocities with E^(k+1). 
-  this->swap_particle_positions();   // After this, oldPosition() holds X^\dagger, and position() holds X^k. 
-  this->remap_diffusive_particles(); // Only need to do this for the ones that were diffusive
+
+  // Recompute advective velocities. This is necessary because
+  // we want the mobility at E^k
   this->compute_ito_velocities();
 
-  this->advect_particles_si(a_dt);  // This 
+  // Compute conductivity and solve semi-implicit Poisson
+  this->compute_conductivity();
+  this->setup_semi_implicit_poisson(a_dt);
+  this->solve_poisson();
+  
+  // We have field at k+1 and can now compute the velocities at E^(k+1) and move the particles
+  // and then we compute velocities with E^(k+1).
+  this->set_old_positions();
+  this->compute_ito_velocities();
+  this->advect_particles_euler(a_dt);  
   
   // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
-  this->remap_mobile_or_diffusive_particles();
+  this->remap_mobile_particles();
 
   // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   this->intersect_particles(a_dt);
@@ -641,9 +658,69 @@ void ito_plasma_godunov::advance_particles_split_si(const Real a_dt){
   }
 
   // Do final deposition. This is mostly for computing the current density. 
-  this->deposit_mobile_or_diffusive_particles();
+  this->deposit_mobile_particles();
+}
 
+void ito_plasma_godunov::advance_particles_split_pc(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advance_particles_split_pc");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_particles_split_pc" << endl;
+  }
 
+    // Set old positions and diffuse particles. 
+  this->set_old_positions();
+  this->diffuse_particles_euler(a_dt);
+  
+  // Do intersection test and remove EB particles. These particles are removed from the simulation. 
+  this->intersect_particles(a_dt);
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->remove_eb_particles();
+  }
+
+  // Remap and deposit diffusive particles
+  this->remap_diffusive_particles();
+  this->deposit_diffusive_particles();
+
+  // Explicit update of the electric field. Then recompute the advective velocities. 
+  this->setup_standard_poisson();
+  this->solve_poisson();
+
+  // PREDICTOR-CORRECTOR BEGINS HERE
+  this->set_old_positions();
+  this->copy_particles_to_scratch();
+
+  const int NPC = 10;
+  for (int ipc =0; ipc < NPC; ipc++){
+    // Recompute advective velocities. This is necessary because
+    // we want the mobility at E^k
+    this->compute_ito_velocities();
+    this->advect_particles_euler(a_dt);
+
+    // Remove particles that went through EB
+    this->intersect_particles(a_dt);
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      solver_it()->remove_eb_particles();
+    }
+
+    m_ito->remap();
+    m_ito->deposit_particles();
+
+    // Solve Poisson. 
+    this->solve_poisson();
+
+    // Put particles back. 
+    if(ipc < NPC - 1){
+      for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+	RefCountedPtr<ito_solver>& solver = solver_it();
+
+	const particle_container<ito_particle>& scratch         = solver->get_scratch_particles();
+	particle_container<ito_particle>& particles = solver->get_particles();
+
+	solver->clear(particles);
+	particles.add_particles(scratch);
+      }
+    }
+  }
 }
 
 void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
@@ -870,8 +947,12 @@ void ito_plasma_godunov::compute_conductivity(){
   m_amr->allocate_ptr(Egas);
   m_amr->alias(Egas, m_phase, m_poisson->get_E());
 
+  // Shoud be on centroid
+  m_fluid_scratchD.copy(Egas);
+  m_amr->interpolate_to_centroids(m_fluid_scratchD, m_fluid_realm, m_phase);
+
   // Compute |E| and reset conductivity
-  data_ops::vector_length(m_scratch1, Egas);
+  data_ops::vector_length(m_scratch1, m_fluid_scratchD);
   data_ops::set_value(m_conduct_cell, 0.0);
   
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -902,8 +983,8 @@ void ito_plasma_godunov::compute_conductivity(){
   m_amr->average_down(m_conduct_cell,     m_fluid_realm, m_phase);
   m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
 
-  // See if this helps...
-  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
+  // See if this helps...?
+  //  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
 
 
   // Now do the faces
@@ -964,6 +1045,23 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
 
   data_ops::incr(bco_gas,     m_conduct_face, 1.0);
   data_ops::incr(bco_irr_gas, m_conduct_eb,   1.0);
+
+  // Set up the multigrid solver
+  poisson->setup_operator_factory();
+  poisson->setup_solver();
+  poisson->set_needs_setup(false);
+}
+
+void ito_plasma_godunov::setup_standard_poisson(){
+  CH_TIME("ito_plasma_godunov::setup_standard_poisson");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setup_standard_poisson" << endl;
+  }
+
+  poisson_multifluid_gmg* poisson = (poisson_multifluid_gmg*) (&(*m_poisson));
+
+  // Set coefficients as usual
+  poisson->set_coefficients();
 
   // Set up the multigrid solver
   poisson->setup_operator_factory();
