@@ -81,7 +81,8 @@ MultiSlabService::fillGraph(BaseFab<int>&      a_regIrregCovered,
                             const Box&         a_ghostRegion,
                             const ProblemDomain&         a_domain,
                             const RealVect&    a_origin,
-                            const Real&        a_dx) const
+                            const Real&        a_dx,
+                            const DataIndex&   a_di) const
 {
   IntVectSet grownCovIVS = grow(m_coveredRegion, 1);
   IntVectSet ghostRegionIVS(a_ghostRegion);

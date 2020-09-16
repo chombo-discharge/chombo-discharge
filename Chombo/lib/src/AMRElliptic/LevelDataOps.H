@@ -148,10 +148,10 @@ void LevelDataOps<T>::mDotProduct(const LevelData<T>& a_1, const int a_sz, const
       DataIterator dit=dbl.dataIterator(); int ompsize=dit.size();
 #pragma omp parallel for reduction (+:val)
       for(int i=0; i<ompsize; i++)
-	{
-	  const DataIndex& d = dit[i];
-	  val += a_1[d].dotProduct(a_2[d], dbl.get(d));
-	}
+        {
+          const DataIndex& d = dit[i];
+          val += a_1[d].dotProduct(a_2[d], dbl.get(d));
+        }
       a_mdots[ii] = val;
     }
 
@@ -239,14 +239,14 @@ void LevelDataOps<T>:: copyToZero( LevelData<T>& a_lhs, const Copier& a_copier)
 #pragma omp for nowait
     for (int i=0; i<ccount; i++)
       {
-	const MotionItem& item = cit[i];
-	a_lhs[item.toIndex].setVal(0, item.toRegion, 0, nComp);
+        const MotionItem& item = cit[i];
+        a_lhs[item.toIndex].setVal(0, item.toRegion, 0, nComp);
       }
 #pragma omp for nowait
     for (int i=0; i<tcount; i++)
       {
-	const MotionItem& item = tit[i];
-	a_lhs[item.toIndex].setVal(0, item.toRegion, 0, nComp);
+        const MotionItem& item = tit[i];
+        a_lhs[item.toIndex].setVal(0, item.toRegion, 0, nComp);
       }
   }
 }

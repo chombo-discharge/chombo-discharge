@@ -15,7 +15,15 @@
 #include "Pool.H"
 #include "Vector.H"
 #include "ProblemDomain.H"
+#include <unordered_map>
+#include <cstdint>
+#include "SPMD.H"
+
 #include "NamespaceHeader.H"
+
+
+typedef std::unordered_map<uint64_t, LayoutIndex> LMap;
+
 
 class CopyIterator;
 
@@ -44,6 +52,10 @@ public:
              const Box&       a_toRegion);
   void reverse();
 
+  bool operator==(const MotionItem& rhs)
+  { return fromIndex == rhs.fromIndex && toIndex == rhs.toIndex &&
+      fromRegion == rhs.fromRegion && toRegion == rhs.toRegion &&
+      procID == rhs.procID;}
 };
 
 class CopierBuffer
@@ -103,7 +115,13 @@ public:
 #endif
   mutable std::vector<bufEntry> m_fromMe;
   mutable std::vector<bufEntry> m_toMe;
+  mutable std::vector<std::vector<bufEntry> > m_toMeUnpack;
 
+#ifdef CH_MPI
+  mutable Vector<MPI_Request>  m_sendRequests,  m_receiveRequests;
+  mutable Vector<MPI_Status>   m_receiveStatus, m_sendStatus;
+#endif
+  mutable int numSends, numReceives;
 
 protected:
 
@@ -203,8 +221,21 @@ public:
   ///  alternative version of define for exchange copiers that uses new optimized neighborIterator
   virtual void exchangeDefine(const DisjointBoxLayout& a_grids,
                               const IntVect& a_ghost,
-	                      bool a_includeSelf=false);
+                              bool a_includeSelf=false);
+  
+  void defineFixedBoxSize(const DisjointBoxLayout& a_src,
+                          const LMap&  a_lmap,
+                          const IntVect&  a_ghost,
+                          const ProblemDomain& a_domain,
+                          bool  a_includeSelf=false,
+                          bool  a_reverse=false);
 
+  void defineFixedSizeNodesCollect(const DisjointBoxLayout& a_layout,
+                                   const LMap&  a_lmap,
+                                   const IntVect& a_ghostSrc,
+                                   const IntVect& a_ghostDst,
+                                   const ProblemDomain& a_domain);
+  
   /// performs the computation necessary for moving from ghost+valid cells to all valid cells in a_dest
   /** instead of copying from the valid of a_src to the valid+ghost of a_dest,
       this routine defines a Copier that moves data from the ghost+valid region
@@ -265,6 +296,11 @@ public:
   **/
   void coarsen(int a_refRatio);
 
+  ///
+  /*  check equality of two Copiers.  Full check of every MotionItem
+   */
+  bool operator==(const Copier& rhs) const;
+  
   int print() const;
 
   bool bufferAllocated() const;
@@ -279,11 +315,13 @@ public:
 
   CopierBuffer  m_buffers;
 
+  std::vector<IndexTM<int,2> >  m_range;
 protected:
 
   friend class CopyIterator;
 
-  Vector<MotionItem*> m_localMotionPlan;
+
+  Vector<MotionItem*>   m_localMotionPlan;
   Vector<MotionItem*> m_fromMotionPlan;
   Vector<MotionItem*> m_toMotionPlan;
 

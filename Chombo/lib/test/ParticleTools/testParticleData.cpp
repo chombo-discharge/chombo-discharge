@@ -89,11 +89,11 @@ main(int argc ,char *argv[] )
     int numOutCast;
     if (domainDimension == maxBoxSize)
       {
-	numOutCast = 0;
+        numOutCast = 0;
       }
     else
       {
-	numOutCast = (domainDimension / maxBoxSize) * pow( (double) domainDimension, SpaceDim-1);
+        numOutCast = (domainDimension / maxBoxSize) * pow( (double) domainDimension, SpaceDim-1);
       }
 
     Real dx = 1.0 / domainDimension;
@@ -115,10 +115,10 @@ main(int argc ,char *argv[] )
 
       ParticleData<BinItem> levelParticles;
       levelParticles.define(grids,
-			    probDomain,
-			    maxBoxSize,
-			    meshSpacing,
-			    origin);
+                            probDomain,
+                            maxBoxSize,
+                            meshSpacing,
+                            origin);
 
       if (verbose)
       {
@@ -211,7 +211,7 @@ main(int argc ,char *argv[] )
           }
         }
 
-	levelParticles.remapOutcast();
+        levelParticles.remapOutcast();
 
       if (verbose)
       {

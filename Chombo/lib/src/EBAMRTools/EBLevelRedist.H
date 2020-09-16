@@ -19,9 +19,11 @@
 #include "DisjointBoxLayout.H"
 #include "EBISLayout.H"
 #include "EBCellFAB.H"
+#include "EBLevelGrid.H"
 #include "Interval.H"
 #include "Stencils.H"
 #include "BaseIVFAB.H"
+#include "IrregFAB.H"
 #include "RedistStencil.H"
 #include "NamespaceHeader.H"
 
@@ -67,6 +69,26 @@ public:
               int a_redistRad = 1,
               bool a_do2DStencil = false);
 
+  EBLevelRedist(const EBLevelGrid& a_eblg,
+                const int& a_ncomp,
+                int a_redistRad = 1,
+                bool a_do2DStencil = false)
+  {
+    define(a_eblg, a_ncomp, a_redistRad, a_do2DStencil);
+  }
+
+  void define(const EBLevelGrid& a_eblg,
+              const int& a_ncomp,
+              int a_redistRad = 1,
+              bool a_do2DStencil = false)
+
+  {
+    define(a_eblg.getDBL(),
+           a_eblg.getEBISL(),
+           a_eblg.getDomain(),
+           a_ncomp, a_redistRad, a_do2DStencil);
+  }
+  
   ///
   /**
      Modify the weights in the stencil by multiplying by
@@ -87,6 +109,15 @@ public:
                  const DataIndex& datInd,
                  const Interval& variables);
 
+  void increment(const LevelData<IrregFAB >& a_dm, 
+                 const Interval& a_variables)
+  {
+    for(DataIterator dit = a_dm.dataIterator(); dit.ok(); ++dit)
+    {
+      const BaseIVFAB<Real>& dmfab = static_cast<const BaseIVFAB<Real>& >(a_dm[dit()]);
+      increment(dmfab, dit(), a_variables);
+    }
+  }
   ///
   /**
      Redistribute the data contained in the internal buffers. \\

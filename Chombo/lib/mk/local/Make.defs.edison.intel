@@ -14,6 +14,8 @@ CH_CPP=$(CXX) -E -P -C
 
 RUN = srun -n 2 ./#
 
+ifeq ($(PE_ENV),INTEL)
+
 cxxoptflags += -O2 -fast -no-ipo -std=c++11
 #cxxoptflags += -O2 -no-ipo  ## -fast disabled for linking Vtune
 foptflags += -O2
@@ -28,6 +30,24 @@ endif
 
 XTRALDFLAGS += -Wl,-zmuldefs
 #syslibflags = -mkl
+
+else
+
+ifeq ($(PE_ENV),GNU)
+
+CH_CPP=$(CXX) -E -P 
+XTRACONFIG=.GNU
+cxxoptflags += -shared -fPIC
+foptflags += -shared -fPIC
+ldoptflags += -dynamic
+cxxoptflags += -march=ivybridge -O2 -mavx -ftree-vectorize -ffast-math -funroll-loops
+foptflags += -march=ivybridge -O2 -mavx -ftree-vectorize -ffast-math -funroll-loops
+
+else #if not GNU or intel, then complain
+$(ECHO) "UNKNOWN PROGRAMMING ENVIRONMENT!"
+endif
+
+endif #end if GNU
 
 USE_HDF=TRUE
 #HDF5_DIR = $(CRAY_HDF5_DIR)/INTEL/140

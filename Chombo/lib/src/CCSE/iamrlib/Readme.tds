@@ -1,2 +1,0 @@
-I've introduced only the cpp files that correspond to .o files that,
-in the ccse build, get linked into mglib/est/macprojTest.cpp.

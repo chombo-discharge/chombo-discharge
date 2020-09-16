@@ -31,20 +31,31 @@ public:
   /**
       Creates an undefined EBData.
   */
-  virtual EBData* create(const Box& a_box, int a_ncomps,
-                          const DataIndex& a_datInd) const;
+  virtual EBData* create(const Box      & a_box, 
+                         int              a_ncomps,
+                         const DataIndex& a_datInd) const;
 
   ///
   /**
    */
-  EBDataFactory();
+  EBDataFactory()
+    {
+    }
 
   ///
   /**
    */
-  virtual ~EBDataFactory();
+  virtual ~EBDataFactory()
+    {
+    }
 
+  ///return true if copy and construction are thread safe--NOT TRUE HERE
+  virtual bool threadSafe() const
+  {
+    return false;
+  }
 private:
+
 };
 #include "NamespaceFooter.H"
 #endif

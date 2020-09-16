@@ -108,10 +108,10 @@ main(int argc ,char *argv[] )
       DisjointBoxLayout crseGrids(crseBoxes, procAssign, crseDomain); 
 
       ParticleData<BinItem> crseParticles(crseGrids, 
-					  crseDomain,
-					  maxBoxSize,
-					  crseMeshSpacing,
-					  origin);
+                                          crseDomain,
+                                          maxBoxSize,
+                                          crseMeshSpacing,
+                                          origin);
 
       ParticleValidRegion crseValidRegion(crseGrids, NULL, 1, 0);
 
@@ -134,10 +134,10 @@ main(int argc ,char *argv[] )
       DisjointBoxLayout fineGrids(fineBoxes, procAssign, fineDomain);
 
       ParticleData<BinItem> fineParticles(fineGrids,
-					  fineDomain,
-					  maxBoxSize,
-					  fineMeshSpacing,
-					  origin);
+                                          fineDomain,
+                                          maxBoxSize,
+                                          fineMeshSpacing,
+                                          origin);
 
       ParticleValidRegion fineValidRegion(fineGrids, crseValidRegion.mask(), RefRatio, n_buffer_cells);
 
@@ -276,7 +276,7 @@ main(int argc ,char *argv[] )
     }
 
     if ( fineParticles.numOutcast() != expectedNumTransfer || 
-	 crseParticles.numOutcast() != expectedNumTransfer)
+         crseParticles.numOutcast() != expectedNumTransfer)
     {
       status++;
       if (verbose)

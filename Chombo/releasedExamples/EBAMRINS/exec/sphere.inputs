@@ -1,4 +1,4 @@
-max_step  	      = 1
+max_step  	      = 10
 max_time              = 100.0
 
 mg_relax_type  = 2

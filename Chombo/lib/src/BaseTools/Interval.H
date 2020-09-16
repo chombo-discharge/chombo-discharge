@@ -89,6 +89,8 @@ struct Interval
     return ( (m_begin == p.m_begin) && (m_end == p.m_end));
   }
 
+  friend std::ostream& operator<< (std::ostream&   os,
+                                   const Interval& dit);
 private:
   int m_begin, m_end;
 };

@@ -52,6 +52,7 @@ all-multidim: $(CHOMBO_HOME)/src/BoxTools/BoxTools_ExternC_Mangler.H
 	while [ $${iDim} -le $(MAXDIM) ]; \
 	do \
 	  echo "DIM = $${iDim} -- stepping into sub-make in $(MULTIDIM_MAKEFILE)"; \
+	  echo "compileOptions = $${compileOptions}"; \
 	  $(MAKE) -f $(MULTIDIM_MAKEFILE) lib $${compileOptions} NAMESPACE=TRUE MULTIDIM=TRUE DIM=$${iDim}; \
 	  \
 	  dimFlags="$${dimFlags} USE_$${iDim}D=TRUE"; \
@@ -72,7 +73,7 @@ all-multidim: $(CHOMBO_HOME)/src/BoxTools/BoxTools_ExternC_Mangler.H
 all-multidim-nolibs: 
 	mdebase=$(ebase); \
 	\
-	compileOptions="mdebase=$${mdebase} "; \
+	compileOptions="mdebase=$${mdebase} $${compileOptions} "; \
 	compileOptions="USE_MT=FALSE $${compileOptions}"; \
 	\
 	dimflags=""; \

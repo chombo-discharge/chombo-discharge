@@ -209,7 +209,7 @@ FineInterpFace::interpGridData(BaseFab<Real>& a_fine,
   // this is designed to accomodate the Chombo max-dimension of 6
 #define MAXDIM 6
   BaseFab<Real> slopes[MAXDIM] ={{b,num_comp},{b,num_comp},{b,num_comp},{b,num_comp},
-	{b,num_comp},{b,num_comp}};
+        {b,num_comp},{b,num_comp}};
 
 
   // this is a trick to make domain face-centered while still

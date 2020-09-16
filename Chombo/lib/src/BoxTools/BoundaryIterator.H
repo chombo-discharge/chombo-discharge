@@ -180,10 +180,10 @@ void BoundaryIterator::next()
       m_sdir++;
       if(m_sdir > 2*CH_SPACEDIM) return;
       else
-	{
-	  m_current.define(m_box[m_sdir]);
-	  m_current.begin();
-	}
+        {
+          m_current.define(m_box[m_sdir]);
+          m_current.begin();
+        }
     }
 }
 

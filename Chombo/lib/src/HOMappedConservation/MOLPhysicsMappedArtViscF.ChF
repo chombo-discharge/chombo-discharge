@@ -234,7 +234,7 @@ c-----gradient directions are summed
             integer iRow
 
             real_t NFace(0:CH_SPACEDIM-1, 0:CH_SPACEDIM-1)
-            real_t gradVelFaceAll(0:CH_SPACEDIM, 0:CH_SPACEDIM-1)
+            real_t gradVelFaceAll(0:CH_SPACEDIM-1, 0:CH_SPACEDIM-1)
 
             do iRow = 0, CH_SPACEDIM-1
                temp = temp + CHF_DTERM[
@@ -341,7 +341,7 @@ c                   as (gradient direction, conserved variable) using
 c                   Fortran ordering.  The components are contiguous.
 c  U             => Conservative state in the cells
 c  divVel        => Divergence of the velocity on the faces
-c  c             => Sound speed in the cells
+c  c             => Local minimum sound speed squared in the cells
 c  J             => Metrics Jacobian in the cells
 c  dx            => Approx. physical space distance between cell
 c                   centers in direction 'dir', stored on faces.
@@ -535,7 +535,7 @@ c-----Artificial viscosity parameter
          function nuFace()
          real_t nuFace
          nuFace = dxFace*faceDivVel*
-     &      min(((dxFace*faceDivVel)**2)/(beta*(minc**2)), one)
+     &      min(((dxFace*faceDivVel)**2)/(beta*minc), one)
          end function
 
       end
@@ -558,7 +558,7 @@ c                   Fortran ordering.  The components are contiguous.
 c                   This is a cell centered quantity.
 c  unitNormals   => Face-centered unit normals for boFaceBox
 c  divVel        => Divergence of the velocity on the faces
-c  c             => Sound speed on the *faces*
+c  c             => Local minimum sound speed squared on the *faces*
 c  J             => Metrics Jacobian on the *faces*
 c  alpha         => Art. Visc. coefficient
 c  beta          => Art. Visc. coefficient
@@ -663,7 +663,7 @@ c-----Artificial viscosity parameter
          function nuFace()
          real_t nuFace
          nuFace = dxFace*faceDivVel*
-     &      min(((dxFace*faceDivVel)**2)/(beta*(minc**2)), one)
+     &      min(((dxFace*faceDivVel)**2)/(beta*minc), one)
          end function
 
       end

@@ -186,7 +186,7 @@ relax(EBCellFAB              & a_phi,
         }
     }
   //the /ncolor is because this does one color at a time
-  int ncolor = D_TERM(2, *2, *2);
+//  int ncolor = D_TERM(2, *2, *2);
   //ch_flops()+=(9*m_ebstencil.size())/ncolor;
 }
 

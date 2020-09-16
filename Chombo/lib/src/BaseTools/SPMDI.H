@@ -92,9 +92,9 @@ gather(Vector<T>& a_outVec, const T& a_input, int a_dest)
         }
       recdBuf = mallocMT(itotsize);
       if (recdBuf == NULL)
-	{
-	  MayDay::Error("out of memory in gather 2");
-	}
+        {
+          MayDay::Error("out of memory in gather 2");
+        }
     }
 
   //gather data

@@ -103,7 +103,7 @@ public:
 
   static void overallMemoryUsage(long long& a_currentTotal,
                                  long long& a_peak);
-  static std::vector<void (*)()> s_memtrackAtExit;	
+  static std::vector<void (*)()> s_memtrackAtExit;      
 };
 
 // =========== end user functions.===================================

@@ -12,8 +12,10 @@
 #include <omp.h>
 #endif
 
-#ifndef _CH_Thread_H_
-#define _CH_Thread_H_
+#ifndef _CH_THREAD_H_
+#define _CH_THREAD_H_
+
+#include "BaseNamespaceHeader.H"
 
 //returns true if we are on thread 0 (or if not threaded)
 extern bool onThread0();
@@ -21,5 +23,5 @@ extern bool onThread0();
 //returns the value of OMP_NUM_THREADS (or 1 if not threaded)
 extern int  getMaxThreads();
 
-
+#include "BaseNamespaceFooter.H"
 #endif

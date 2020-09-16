@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _LAPACKMatrix_H_
-#define _LAPACKMatrix_H_
+#ifndef _LAPACKMATRIX_H_
+#define _LAPACKMATRIX_H_
 
 #include "REAL.H"
 #include "LoHiSide.H"
@@ -29,6 +29,19 @@ public:
   ///  main constructor.  Matrix of Chombo Real type.  values are unintitialized
   LAPACKMatrix(int a_nrow, int a_ncol):m_nrow(a_nrow),m_ncol(a_ncol),m_data(new Real[a_nrow*a_ncol]){}
 
+  ///
+  void define(int nrow, int ncol)
+    {
+      m_nrow = nrow;
+      m_ncol = ncol;
+      if(m_data != nullptr) 
+      {
+        delete m_data;
+      }
+      m_data =new Real[m_nrow*m_ncol];
+    }
+
+
   ///  alias constructor.  Use a_data as m_data, does not delete it in destructor
   LAPACKMatrix( int a_nrow, int a_ncol, Real* a_data)
     :m_nrow(a_nrow),m_ncol(a_ncol),m_data(a_data),m_alias(true) {;}
@@ -45,7 +58,10 @@ public:
   {a_input.m_data=nullptr;}
 
 
-
+  void clear()
+    {
+      define(0, 0);
+    }
 
   ///return sqrt(sum of squares of all values)
   Real normLTwo() const;

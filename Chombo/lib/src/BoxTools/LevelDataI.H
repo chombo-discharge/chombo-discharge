@@ -46,10 +46,7 @@ LevelData<T>::LevelData(const DisjointBoxLayout& dp, int comps, const IntVect& g
                         const DataFactory<T>& a_factory)
   : m_disjointBoxLayout(dp), m_ghost(ghost)
 {
-#ifdef CH_MPI
-  this->numSends = 0;
-  this->numReceives = 0;
-#endif
+
   this->m_boxLayout = dp;
   this->m_comps = comps;
   this->m_isdefined = true;
@@ -63,6 +60,9 @@ LevelData<T>::LevelData(const DisjointBoxLayout& dp, int comps, const IntVect& g
     {
       MayDay::Error("non-disjoint DisjointBoxLayout: LevelData<T>::LevelData(const DisjointBoxLayout& dp, int comps)");
     }
+
+  this->m_threadSafe = a_factory.threadSafe();
+  //this->m_threadSafe = false;
 
   Interval interval(0, comps-1);
   this->allocateGhostVector(a_factory, ghost);
@@ -99,6 +99,9 @@ void LevelData<T>::define(const DisjointBoxLayout& dp, int comps, const IntVect&
   this->m_comps = comps;
   this->m_boxLayout = dp;
 
+  this->m_threadSafe = a_factory.threadSafe();
+  //this->m_threadSafe = false;
+
   m_disjointBoxLayout = dp;
   m_ghost = ghost;
   //no need for exchange copier if no ghost
@@ -131,6 +134,9 @@ void LevelData<T>::define(const LevelData<T>& da,  const DataFactory<T> & a_fact
   m_disjointBoxLayout = da.m_disjointBoxLayout;
   this->m_boxLayout  = da.m_disjointBoxLayout;
   this->m_comps     = da.m_comps;
+  this->m_threadSafe = a_factory.threadSafe();
+  //this->m_threadSafe = false;
+
   m_ghost     = da.m_ghost;
 
   //no need for exchange copier if no ghost
@@ -148,13 +154,19 @@ template<class T>
 void LevelData<T>::define(const LevelData<T>& da, const Interval& comps,
                           const DataFactory<T>& a_factory)
 {
+#ifdef USE_PROTO
+  PR_TIME("Chombo::LevelData::define");
+#else
   CH_TIME("LevelData<T>::define(LevelData<T>,comps,factory)");
+#endif
   // clear exchange copier if it's already been defined
   if (this->m_isdefined)
     {
       m_exchangeCopier.clear();
     }
   this->m_isdefined = true;
+  this->m_threadSafe = a_factory.threadSafe();
+  //this->m_threadSafe = false;
   if (this == &da)
   {
     MayDay::Error(" LevelData<T>::define(const LevelData<T>& da, const Interval& comps) called with 'this'");
@@ -191,19 +203,30 @@ void LevelData<T>::copyTo(const Interval& srcComps,
                           BoxLayoutData<T>& dest,
                           const Interval& destComps) const
 {
+#ifdef USE_PROTO
+  PR_TIME("Chombo::LevelData::copyTo");
+#else
   CH_TIME("copyTo");
+#endif
   if ((BoxLayoutData<T>*)this == &dest) return;
-
+  
   if (this->boxLayout() == dest.boxLayout())
     {
+#ifdef USE_PROTO
+      PR_TIME("Chombo::LevelData::copyTo::local");
+#else
       CH_TIME("local copy");
+#endif
       // parallel direct copy here, no communication issues
-      for (DataIterator it(this->dataIterator()); it.ok(); ++it)
+      DataIterator it = this->dataIterator();
+      int nbox = it.size();
+#pragma omp parallel for if(this->m_threadSafe)
+      for (int ibox = 0; ibox < nbox; ibox++)
         {
-          dest[it()].copy(this->box(it()),
+          dest[it[ibox]].copy(this->box(it[ibox]),
                           destComps,
-                          this->box(it()),
-                          this->operator[](it()),
+                          this->box(it[ibox]),
+                          this->operator[](it[ibox]),
                           srcComps);
         }
       return;
@@ -217,24 +240,31 @@ template<class T>
 void LevelData<T>::localCopyTo(const Interval& srcComps,
                                LevelData<T>& dest,
                                const Interval& destComps) const
-{ CH_TIME("localCopyTo");
+{
+#ifdef USE_PROTO
+  PR_TIME("Chombo::LevelData::localCopyTo");
+#else
+  CH_TIME("LevelData::localCopyTo");
+#endif
   if ((BoxLayoutData<T>*)this == &dest) return;
 
   if(this->disjointBoxLayout() == dest.disjointBoxLayout())
     {
-      // parallel direct copy here, no communication issues
-      for (DataIterator it(this->dataIterator()); it.ok(); ++it)
+      DataIterator it = this->dataIterator();
+      int nbox = it.size();
+#pragma omp parallel for if(this->m_threadSafe)
+      for (int ibox = 0; ibox < nbox; ibox++)
         {
-          Box srcBox = this->box(it());
-          Box dstBox = this->box(it());
+          Box srcBox = this->box(it[ibox]);
+          Box dstBox = this->box(it[ibox]);
           srcBox.grow(this->ghostVect());
           dstBox.grow(dest.ghostVect());
           Box minBox = srcBox;
           minBox &= dstBox;
-          dest[it()].copy(minBox,
+          dest[it[ibox]].copy(minBox,
                           destComps,
                           minBox,
-                          this->operator[](it()),
+                          this->operator[](it[ibox]),
                           srcComps);
         }
     }
@@ -278,12 +308,15 @@ void LevelData<T>::copyTo(const Interval& srcComps,
   if (this->boxLayout() == dest.boxLayout()  && dest.ghostVect() == IntVect::Zero)
     {
       // parallel direct copy here, no communication issues
-      for (DataIterator it(this->dataIterator()); it.ok(); ++it)
+      DataIterator it = this->dataIterator();
+      int nbox = it.size();
+#pragma omp parallel for if(this->m_threadSafe)
+      for (int ibox = 0; ibox < nbox; ibox++)
         {
-          dest[it()].copy(this->box(it()),
+          dest[it[ibox]].copy(this->box(it[ibox]),
                           destComps,
-                          this->box(it()),
-                          this->operator[](it()),
+                          this->box(it[ibox]),
+                          this->operator[](it[ibox]),
                           srcComps);
         }
       return;
@@ -311,7 +344,11 @@ void LevelData<T>::copyTo(const Interval& srcComps,
                           const Copier& copier,
                           const LDOperator<T>& a_op) const
 {
+#ifdef USE_PROTO
+  PR_TIME("Chombo::LevelData::copyTo");
+#else
   CH_TIME("copyTo");
+#endif
 #ifdef CH_MPI
   {
 //    CH_TIME("MPI_Barrier copyTo");
@@ -342,7 +379,11 @@ void LevelData<T>::copyTo(const Interval& srcComps,
                           const Copier& copier,
                           const LDOperator<T>& a_op) const
 {
-  CH_TIME("copyTo");
+#ifdef USE_PROTO
+  PR_TIME("Chombo::LevelData::copyTo");
+#else
+  CH_TIME("LevelData::copyTo");
+#endif
 #ifdef CH_MPI
   {
 //    CH_TIME("MPI_Barrier copyTo");
@@ -368,7 +409,11 @@ void LevelData<T>::copyTo(LevelData<T>& dest,
 template<class T>
 void LevelData<T>::exchange(const Interval& comps)
 {
-  CH_TIME("exchange+copier");
+#ifdef USE_PROTO
+  PR_TIME("Chombo::LevelData::exchange (exchange + copier)");
+#else
+  CH_TIME("LevelData::exchange (exchange + copier)");
+#endif
   // later on we can code this part as a direct algorithm
   // by copying and pasting the code from the Copier::define code
   // for now, just do the easy to debug approach.
@@ -376,11 +421,19 @@ void LevelData<T>::exchange(const Interval& comps)
     {
       if(!m_exchangeCopier.isDefined())
         {
-          CH_TIME("defining_copier");
+#ifdef USE_PROTO
+            PR_TIME("Chombo::LevelData::exchange (defining copier)");
+#else
+            CH_TIME("LevelData::exchange (defining copier)");
+#endif
           m_exchangeCopier.define(m_disjointBoxLayout, m_disjointBoxLayout, m_ghost, true);
         }
         {
-          CH_TIME("actual_exchange");
+#ifdef USE_PROTO
+            PR_TIME("Chombo::LevelData::exchange (actual exchange)");
+#else
+            CH_TIME("LevelData::exchange (actual exchange)");
+#endif
           exchange(comps, m_exchangeCopier);
         }
     }
@@ -404,10 +457,14 @@ void LevelData<T>::exchange(void)
 //-----------------------------------------------------------------------
 template<class T>
 void LevelData<T>::exchange(const Interval& comps,
-			    const Copier& copier,
-			    const LDOperator<T>& a_op)
+                            const Copier& copier,
+                            const LDOperator<T>& a_op)
 {
+#ifdef USE_PROTO
+  PR_TIME("Chombo::LevelData::exchange");
+#else 
   CH_TIME("exchange");
+#endif
 #ifdef CH_MPI
   {
 //    CH_TIME("MPI_Barrier exchange");
@@ -432,7 +489,7 @@ void LevelData<T>::exchangeNoOverlap(const Copier& copier)
 {
   CH_TIME("exchangeNoOverlap");
   this->makeItSoBegin(this->interval(), *this, *this, this->interval(), copier);
-  this->makeItSoEnd(*this, this->interval());
+  this->makeItSoEnd(this->interval());
   this->makeItSoLocalCopy(this->interval(), *this, *this, this->interval(), copier);
 }
 //-----------------------------------------------------------------------
@@ -452,7 +509,7 @@ template<class T>
 void LevelData<T>::exchangeEnd()
 {
   CH_TIME("exchangeEnd");
-  this->makeItSoEnd(*this, this->interval());
+  this->makeItSoEnd(this->interval());
 }
 //-----------------------------------------------------------------------
 
@@ -493,10 +550,14 @@ void LevelData<T>::define(const BoxLayoutData<T>& da, const Interval& comps,
 template<class T>
 void LevelData<T>::apply( void (*a_Function)(const Box& box, int comps, T& t) )
 {
-  for (DataIterator it(this->dataIterator()); it.ok(); ++it)
-    {
-      a_Function(m_disjointBoxLayout.get(it()), this->m_comps, *(this->m_vector[it().datInd()]));
-    }
+  DataIterator it = this->dataIterator();
+  int nbox = it.size();
+#pragma omp parallel for
+  for (int ibox = 0; ibox < nbox; ibox++)
+  {
+
+    a_Function(m_disjointBoxLayout.get(it[ibox]), this->m_comps, *(this->m_vector[it[ibox].datInd()]));
+  }
 }
 //-----------------------------------------------------------------------
 
@@ -504,11 +565,14 @@ void LevelData<T>::apply( void (*a_Function)(const Box& box, int comps, T& t) )
 template<class T>
 void LevelData<T>::apply( const ApplyFunctor & f )
 {
-  for (DataIterator it(this->dataIterator()); it.ok(); ++it)
-    {
+  DataIterator it = this->dataIterator();
+  int nbox = it.size();
+#pragma omp parallel for
+  for (int ibox = 0; ibox < nbox; ibox++)
+  {
       //     unsigned int index = this->m_boxLayout.lindex(it());
-      f(m_disjointBoxLayout.get(it()), this->m_comps, *(this->m_vector[it().datInd()]));
-    }
+    f(m_disjointBoxLayout.get(it[ibox]), this->m_comps, *(this->m_vector[it[ibox].datInd()]));
+  }
 }
 //-----------------------------------------------------------------------
 

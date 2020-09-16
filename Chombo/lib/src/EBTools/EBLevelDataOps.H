@@ -80,6 +80,10 @@ public:
   static void  checkData(const LevelData<EBFluxFAB>&a_data, const string& label);
 
   ///
+  static void plus(LevelData<EBCellFAB>       & a_dst,
+                   const LevelData<EBCellFAB> & a_src,
+                   int srccomp, int dstcomp, int numcomp);
+  ///
   /**
      straightforward average from cells to faces over components faceval = half(hival + loval).
      at domain boundaries, just use cell centered value.  nothing crazy

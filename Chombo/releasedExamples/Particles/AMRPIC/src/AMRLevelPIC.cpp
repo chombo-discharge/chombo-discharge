@@ -273,7 +273,7 @@ postTimeStep()
 
       // now take the particles that have left the fine level and put them on the crse
       collectValidParticles(amrPartCoarserPtr->m_PNew.outcast(), m_PNew, 
-			    m_PVR.mask(), m_meshSpacing, 1, true);
+                            m_PVR.mask(), m_meshSpacing, 1, true);
 
       // finally, remap outcasts on both levels
       m_PNew.remapOutcast();
@@ -418,11 +418,11 @@ regrid(const Vector<Box>& a_newGrids)
 
   // Define old and new particle data structures
   m_PNew.define(m_grids, m_problem_domain, m_maxBoxSize, 
-		m_meshSpacing, m_origin);
+                m_meshSpacing, m_origin);
   m_POld.define(m_grids, m_problem_domain, m_maxBoxSize, 
-		m_meshSpacing, m_origin);
+                m_meshSpacing, m_origin);
   m_jointParticle.define(m_grids, m_problem_domain, m_maxBoxSize, 
-			 m_meshSpacing, m_origin);
+                         m_meshSpacing, m_origin);
 
   // Define old and new mesh data structures
   m_rhs.define(m_grids, 1, m_numForceGhost*IntVect::Unit);
@@ -596,11 +596,11 @@ initialGrid(const Vector<Box>& a_newGrids)
 
   // Define old and new particle data structures
   m_PNew.define(m_grids, m_problem_domain, m_maxBoxSize, 
-		m_meshSpacing, m_origin);
+                m_meshSpacing, m_origin);
   m_POld.define(m_grids, m_problem_domain, m_maxBoxSize, 
-		m_meshSpacing, m_origin);
+                m_meshSpacing, m_origin);
   m_jointParticle.define(m_grids, m_problem_domain, m_maxBoxSize, 
-			 m_meshSpacing, m_origin);
+                         m_meshSpacing, m_origin);
 
   // Define old and new mesh data structures
   m_rhs.define(m_grids, 1, m_numForceGhost*IntVect::Unit);

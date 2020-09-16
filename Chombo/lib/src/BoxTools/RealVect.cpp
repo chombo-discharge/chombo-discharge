@@ -348,4 +348,33 @@ void linearOut(void* const a_outBuf, const RealVect& a_inputT)
   memcpy(bob, from + RealVect::io_offset, SpaceDim*sizeof(Real));
 }
 
+//Vector<RealVect>  specialization
+template < > int linearSize(const Vector<RealVect>& a_input)
+{
+  return linearListSize(a_input);
+}
+template < > void linearIn(Vector<RealVect>& a_outputT, const void* const inBuf)
+{
+  linearListIn(a_outputT, inBuf);
+}
+template < > void linearOut(void* const a_outBuf, const Vector<RealVect>& a_inputT)
+{
+  linearListOut(a_outBuf, a_inputT);
+}
+
+//Vector<Vector<RealVect> >  specialization
+template < > int linearSize(const Vector<Vector<RealVect> >& a_input)
+{
+  return linearListSize(a_input);
+}
+template < > void linearIn(Vector<Vector<RealVect> >& a_outputT, const void* const inBuf)
+{
+  linearListIn(a_outputT, inBuf);
+}
+template < > void linearOut(void* const a_outBuf, const Vector<Vector<RealVect> >& a_inputT)
+{
+  linearListOut(a_outBuf, a_inputT);
+}
+
+
 #include "BaseNamespaceFooter.H"

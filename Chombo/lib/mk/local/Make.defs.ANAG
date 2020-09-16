@@ -215,3 +215,14 @@ ifeq ($(USE_PETSC),TRUE)
   endif
 
 endif
+
+####
+ifneq ($(ANAG_OPENMPI_DIR),)
+  XTRACPPFLAGS += $(ANAG_OPENMPI_INC)
+  XTRALDFLAGS  += $(ANAG_OPENMPI_LIB) -lmpi
+endif
+
+ifeq ($(USE_PROTO),TRUE)
+ XTRACPPFLAGS += -I$(PROTO_HOME)/include -DDIM=$(DIM) -DUSE_PROTO=1 -DPR_TURN_OFF_TIMERS=1
+endif
+

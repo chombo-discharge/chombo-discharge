@@ -1,0 +1,53 @@
+#domain size
+nx=       64
+#max number of time steps
+max_step =    50
+#maximum time
+max_time =    1.0
+#number of cuda streams (if used)
+nstream=  8
+#max grid size in domain decomposition
+maxGrid=  128
+cfl = 0.5
+# center of the sphere
+geom_cen = 0.5
+# center of the blob
+#blob_cen = 0.3
+blob_cen = 0.3
+# radius of the sphere
+geom_rad = 0.455
+# radius of the blob
+blob_rad = 0.05
+
+#mag of biggest velo
+max_vel_mag = 1.0
+#radial locaiton of biggest velo
+max_vel_rad = 0.25
+
+#negative to turn off output
+output_interval = 1
+
+#value in hdf5 file of  covered data
+covered_value = -0.125
+
+
+## -1 all reg, 1 regular, 2 sphere
+#all regular geometry
+#which_geom = -1
+
+#
+##sphere
+#which_geom = 0 
+##radius of the sphere
+#geom_rad = 0.455
+## center of the sphere
+#geom_cen = 0.5
+#
+##plane 
+which_geom = 1 
+## normal to plane
+geom_normal =  -0.17360277766   0.984815757178  0.0 
+## starting point of plane
+which_velo = -1
+which_scal = -1
+geom_start_pt = 0.0 0.25 0.0

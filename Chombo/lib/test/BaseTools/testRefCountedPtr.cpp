@@ -17,7 +17,7 @@
 #include "Vector.H"
 #include "CH_Timer.H"
 #ifdef CH_MPI
-#include <mpi.h>
+#include "mpi.h"
 #endif
 
 #ifdef _OPENMP

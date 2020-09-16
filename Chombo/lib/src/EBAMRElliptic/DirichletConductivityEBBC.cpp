@@ -13,6 +13,9 @@
 #include "DirichletConductivityEBBC.H"
 #include "EBStencil.H"
 #include "NamespaceHeader.H"
+
+int DirichletConductivityEBBC::s_velComp = 0;
+
 void
 DirichletConductivityEBBC::
 define(const LayoutData<IntVectSet>& a_cfivs,
@@ -118,13 +121,13 @@ applyEBFlux(EBCellFAB&                    a_lphi,
         {
 //          if ((*m_data)[a_dit].getIVS().contains(vof.gridIndex()))
 //             {
-//               value = (*m_data)[a_dit](vof, 0);
+//               value = (*m_data)[a_dit](vof, s_velComp);
 //             }
 //          else
 //            {
 //              value = 0.;
 //            }
-          value = (*m_data)[a_dit](vof, 0);
+          value = (*m_data)[a_dit](vof, s_velComp);
 
         }
       else if (m_bc.m_isFunction)

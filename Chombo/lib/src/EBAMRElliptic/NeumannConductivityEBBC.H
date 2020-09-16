@@ -66,6 +66,8 @@ public:
   ///
   virtual void setFunction(RefCountedPtr<BaseBCValue> a_flux);
 
+  static int s_comp;
+
 private:
   NeumannPoissonEBBC m_bc;
 };

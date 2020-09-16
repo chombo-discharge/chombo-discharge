@@ -184,18 +184,18 @@ EBCoarseAverage::average(LevelData<EBCellFAB>& a_coarData,
                          const Interval& a_variables)
 {
   CH_TIME("EBCoarseAverage::average(LD<EBCellFAB>)");
-  Interval fineInterv, coarInterv;
+  int ncomp = a_variables.end() + 1;
   LevelData<EBCellFAB> coarFiData;
   LevelData<EBCellFAB> fineBuffer;
   CH_assert(isDefined());
   {
     CH_TIME("buffer allocation");
     EBCellFactory  factCoFi(m_eblgCoFi.getEBISL());
-    coarFiData.define(  m_eblgCoFi.getDBL(), m_nComp, IntVect::Zero, factCoFi);
+    coarFiData.define(  m_eblgCoFi.getDBL(), ncomp, IntVect::Zero, factCoFi);
     if (m_useFineBuffer)
       {
         EBCellFactory    factFine(m_eblgFine.getEBISL());
-        fineBuffer.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, factFine);
+        fineBuffer.define(m_eblgFine.getDBL(), ncomp, IntVect::Zero, factFine);
       }
   }
 
@@ -212,26 +212,23 @@ EBCoarseAverage::average(LevelData<EBCellFAB>& a_coarData,
         const EBCellFAB* fineFAB = NULL;
         if (m_useFineBuffer)
           {
-            fineInterv = Interval(0, a_variables.size()-1);
             fineFAB = &fineBuffer[dit()];
           }
         else
           {
-            fineInterv = a_variables;
             fineFAB = &a_fineData[dit()];
           }
 
-        coarInterv = Interval(0, a_variables.size()-1);
         averageFAB(coarFiData[dit()],
                    *fineFAB,
                    dit(),
-                   fineInterv,
-                   coarInterv);
+                   a_variables,
+                   a_variables);
       }
   }
   {
     CH_TIME("copy_coar");
-    coarFiData.copyTo(coarInterv, a_coarData, fineInterv);
+    coarFiData.copyTo(a_variables, a_coarData, a_variables);
   }
 }
 /************************************/
@@ -241,18 +238,19 @@ EBCoarseAverage::average(LevelData<EBFluxFAB>&       a_coarData,
                          const Interval& a_variables)
 {
   CH_TIME("EBCoarseAverage::average(LD<EBFluxFAB>)");
-  Interval fineInterv, coarInterv;
+
   LevelData<EBFluxFAB> coarFiData;
   LevelData<EBFluxFAB> fineBuffer;
+  int ncomp = a_variables.end() + 1;
   CH_assert(isDefined());
   {
     CH_TIME("buffer allocation");
     EBFluxFactory factCoFi(m_eblgCoFi.getEBISL());
-    coarFiData.define(  m_eblgCoFi.getDBL(), m_nComp, IntVect::Zero, factCoFi);
+    coarFiData.define(  m_eblgCoFi.getDBL(), ncomp, IntVect::Zero, factCoFi);
     if (m_useFineBuffer)
       {
         EBFluxFactory    factFine(m_eblgFine.getEBISL());
-        fineBuffer.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, factFine);
+        fineBuffer.define(m_eblgFine.getDBL(), ncomp, IntVect::Zero, factFine);
       }
   }
 
@@ -267,35 +265,38 @@ EBCoarseAverage::average(LevelData<EBFluxFAB>&       a_coarData,
     for (DataIterator dit = m_eblgFine.getDBL().dataIterator(); dit.ok(); ++dit)
       {
         const EBFluxFAB* fineFABPtr = NULL;
-        CH_assert(a_variables.size() <= m_nComp);
         if (m_useFineBuffer)
           {
-            fineInterv = Interval(0, a_variables.size()-1);
             fineFABPtr = &fineBuffer[dit()];
           }
         else
           {
-            fineInterv = a_variables;
             fineFABPtr = &a_fineData[dit()];
           }
         EBFluxFAB&       cofiFAB = coarFiData[dit()];
         const EBFluxFAB& fineFAB = *fineFABPtr;
         for (int idir = 0; idir < SpaceDim; idir++)
           {
-            coarInterv = Interval(0, a_variables.size()-1);
             averageFAB(cofiFAB[idir],
                        fineFAB[idir],
                        dit(),
-                       fineInterv,
-                       coarInterv,
+                       a_variables,
+                       a_variables,
                        idir);
 
           }
       }
   }
   {
-    CH_TIME("copy_coar");
-    coarFiData.copyTo(coarInterv, a_coarData, fineInterv);
+//    CH_TIME("copy_coar");
+//    pout() << "before final copy in ebcoarseaverage of flux fabs" << endl;
+//    pout() << " coar grids = " << a_coarData.disjointBoxLayout() << endl;
+//    pout() << " cofi grids = " << coarFiData.disjointBoxLayout() << endl;
+//    EBFluxFAB::s_verbose = true;
+//    coarFiData.s_verbosity = 1;
+    coarFiData.copyTo(a_variables, a_coarData, a_variables);
+//    coarFiData.s_verbosity = 0;
+//    EBFluxFAB::s_verbose = false;
   }
 }
 /************************************/
@@ -308,16 +309,16 @@ EBCoarseAverage::average(LevelData<BaseIVFAB<Real> >&        a_coarData,
   LevelData<BaseIVFAB<Real> > coarFiData;
   LevelData<BaseIVFAB<Real> > fineBuffer;
   CH_assert(a_variables.begin() == 0);
-  CH_assert(a_variables.size() <= m_nComp);
   CH_assert(isDefined());
+  int ncomp = a_variables.end() + 1;
   {
     CH_TIME("buffer allocation");
     BaseIVFactory<Real> factCoFi(m_eblgCoFi.getEBISL(), m_irregSetsCoFi);
-    coarFiData.define(m_eblgCoFi.getDBL(), m_nComp, IntVect::Zero, factCoFi);
+    coarFiData.define(m_eblgCoFi.getDBL(), ncomp, IntVect::Zero, factCoFi);
     if (m_useFineBuffer)
       {
         BaseIVFactory<Real> factFine(m_eblgFine.getEBISL(), m_irregSetsFine);
-        coarFiData.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, factFine);
+        coarFiData.define(m_eblgFine.getDBL(), ncomp, IntVect::Zero, factFine);
       }
   }
 
@@ -354,6 +355,7 @@ EBCoarseAverage::average(LevelData<BaseIVFAB<Real> >&        a_coarData,
   {
     CH_TIME("copy_coar");
     coarFiData.copyTo(a_variables, a_coarData, a_variables);
+    barrier();
   }
 }
 /************************************/

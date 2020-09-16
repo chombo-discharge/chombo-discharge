@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _MomentumTGA_H_
-#define _MomentumTGA_H_
+#ifndef _MOMENTUMTGA_H_
+#define _MOMENTUMTGA_H_
 
 #include <iostream>
 #include <math.h>

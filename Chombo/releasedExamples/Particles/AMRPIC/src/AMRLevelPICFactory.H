@@ -26,11 +26,11 @@ public:
 
   /// Constructor
   AMRLevelPICFactory(const ZeldovichIBC* a_ibc,
-		     const Real&         a_cfl,
-		     const Real&         a_domainLength,
-		     const int&          a_maxGridSize,
-		     const InterpType&   a_poissonInterpType,
-		     const Real&         a_refineThresh);
+                     const Real&         a_cfl,
+                     const Real&         a_domainLength,
+                     const int&          a_maxGridSize,
+                     const InterpType&   a_poissonInterpType,
+                     const Real&         a_refineThresh);
 
 
   /// Destructor

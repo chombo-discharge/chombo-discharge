@@ -342,11 +342,12 @@ void VCAMRPoissonOp2::reflux(const LevelData<FArrayBox>&        a_phiFine,
                             AMRLevelOp<LevelData<FArrayBox> >* a_finerOp)
 {
   CH_TIMERS("VCAMRPoissonOp2::reflux");
+  CH_TIMER("VCAMRPoissonOp2::reflux::incrementCoarse", t2);
+  CH_TIMER("VCAMRPoissonOp2::reflux::incrementFine", t3);
 
   m_levfluxreg.setToZero();
   Interval interv(0,a_phi.nComp()-1);
 
-  CH_TIMER("VCAMRPoissonOp2::reflux::incrementCoarse", t2);
   CH_START(t2);
 
   DataIterator dit = a_phi.dataIterator();
@@ -387,7 +388,6 @@ void VCAMRPoissonOp2::reflux(const LevelData<FArrayBox>&        a_phiFine,
   IntVect phiGhost = phiFineRef.ghostVect();
   int ncomps = a_phiFine.nComp();
 
-  CH_TIMER("VCAMRPoissonOp2::reflux::incrementFine", t3);
   CH_START(t3);
 
   DataIterator ditf = a_phiFine.dataIterator();
@@ -564,7 +564,6 @@ void VCAMRPoissonOp2::levelGSRB(LevelData<FArrayBox>&       a_phi,
   // do first red, then black passes
   for (int whichPass = 0; whichPass <= 1; whichPass++)
     {
-      CH_TIMERS("VCAMRPoissonOp2::levelGSRB::Compute");
 
       // fill in intersection of ghostcells and a_phi's boxes
       {
@@ -1079,6 +1078,22 @@ AMRLevelOp<LevelData<FArrayBox> >* VCAMRPoissonOp2Factory::AMRnewOp(const Proble
   VCAMRPoissonOp2* newOp = new VCAMRPoissonOp2;
   Real dxCrse = -1.0;
 
+  // Need to know how many components we're solving for
+  int nComp = 1;
+
+  // Find number of comps from m_bCoef, which should be defined on at least one level
+  for (int lev = 0; lev <m_bCoef.size(); lev++)
+  {
+    if (m_bCoef[lev] != NULL)
+    {
+      nComp = m_bCoef[lev]->nComp();
+      break;
+    }
+
+    // Should never reach this point
+    CH_assert("VCAMRPoissonOp2Factory::AMRnewOp - m_bCoef not defined");
+  }
+
   int ref;
 
   for (ref = 0; ref< m_domains.size(); ref++)
@@ -1107,19 +1122,21 @@ AMRLevelOp<LevelData<FArrayBox> >* VCAMRPoissonOp2Factory::AMRnewOp(const Proble
           newOp->define(m_boxes[0],  m_boxes[1], m_dx[0],
                         dummyRat, refToFiner,
                         a_indexSpace, m_bc,
-                        m_exchangeCopiers[0], m_cfregion[0]);
-        }
+                        m_exchangeCopiers[0], m_cfregion[0],
+                        nComp);
     }
+  }
   else if (ref ==  m_domains.size()-1)
-    {
-      dxCrse = m_dx[ref-1];
+  {
+    dxCrse = m_dx[ref-1];
 
-      // finest AMR level
-      newOp->define(m_boxes[ref], m_boxes[ref-1], m_dx[ref],
-                    m_refRatios[ref-1],
-                    a_indexSpace, m_bc,
-                    m_exchangeCopiers[ref], m_cfregion[ref]);
-    }
+    // finest AMR level
+    newOp->define(m_boxes[ref], m_boxes[ref-1], m_dx[ref],
+                  m_refRatios[ref-1],
+                  a_indexSpace, m_bc,
+                  m_exchangeCopiers[ref], m_cfregion[ref],
+                  nComp);
+  }
   else if ( ref == m_domains.size())
     {
       MayDay::Abort("Did not find a domain to match AMRnewOp(const ProblemDomain& a_indexSpace)");
@@ -1130,11 +1147,12 @@ AMRLevelOp<LevelData<FArrayBox> >* VCAMRPoissonOp2Factory::AMRnewOp(const Proble
       dxCrse = m_dx[ref-1];
 
       // intermediate AMR level, full define
-      newOp->define(m_boxes[ref], m_boxes[ref+1], m_boxes[ref-1], m_dx[ref],
-                    m_refRatios[ref-1], m_refRatios[ref],
-                    a_indexSpace, m_bc,
-                    m_exchangeCopiers[ref], m_cfregion[ref]);
-    }
+    newOp->define(m_boxes[ref], m_boxes[ref+1], m_boxes[ref-1], m_dx[ref],
+                  m_refRatios[ref-1], m_refRatios[ref],
+                  a_indexSpace, m_bc,
+                  m_exchangeCopiers[ref], m_cfregion[ref],
+                  nComp);
+  }
 
   newOp->m_alpha = m_alpha;
   newOp->m_beta  = m_beta;
@@ -1142,7 +1160,10 @@ AMRLevelOp<LevelData<FArrayBox> >* VCAMRPoissonOp2Factory::AMRnewOp(const Proble
   newOp->m_aCoef = m_aCoef[ref];
   newOp->m_bCoef = m_bCoef[ref];
 
-  newOp->computeLambda();
+  if (newOp->m_aCoef != NULL)
+  {
+    newOp->computeLambda();
+  }
 
   newOp->m_dxCrse = dxCrse;
 

@@ -152,6 +152,16 @@ int reductionTest()
 
         data.copyTo(data.interval(), reducedData, reducedData.interval(),
                     reduceCopier, op);
+#if 0
+        
+        // face data
+        FaceSumOp faceOp(transverseDir);
+        faceOp.scale = dx;
+
+        faceData.copyTo(faceData.interval(), reducedFaceData, reducedFaceData.interval(),
+                    reduceCopier, faceOp);
+
+#endif
 
         // check values
         Real exactVal = domainBox.size(transverseDir)*dx;

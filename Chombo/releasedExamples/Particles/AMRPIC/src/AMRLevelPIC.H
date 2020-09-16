@@ -63,11 +63,11 @@ public:
 
 /// Full constructor. Arguments are same as in define()
 AMRLevelPIC(const ZeldovichIBC* a_ibc,
-	    const Real&         a_cfl,
-	    const Real&         a_domainLength,
-	    const int&          a_maxBoxSize,
-	    const InterpType&   a_poissonInterpType,
-	    const Real&         a_refineThresh)
+            const Real&         a_cfl,
+            const Real&         a_domainLength,
+            const int&          a_maxBoxSize,
+            const InterpType&   a_poissonInterpType,
+            const Real&         a_refineThresh)
   {
     
     m_patchParticle = NULL;
@@ -84,29 +84,29 @@ AMRLevelPIC(const ZeldovichIBC* a_ibc,
   
 /// Defines this AMRLevelPIC
 void define(const ZeldovichIBC* a_ibc,
-	    const Real&         a_cfl,
-	    const Real&         a_domainLength,
-	    const int&          a_maxBoxSize,
-	    const InterpType&   a_poissonInterpType,
-	    const Real&         a_refineThresh);
+            const Real&         a_cfl,
+            const Real&         a_domainLength,
+            const int&          a_maxBoxSize,
+            const InterpType&   a_poissonInterpType,
+            const Real&         a_refineThresh);
 
 /// Destructor
 virtual ~AMRLevelPIC();
 
 /// Never called: historical
 virtual void define(AMRLevel*  a_coarserLevelPtr,
-		    const Box& a_problemDomain,
-		    int        a_level,
-		    int        a_refRatio)
+                    const Box& a_problemDomain,
+                    int        a_level,
+                    int        a_refRatio)
 {
   MayDay::Error("never called--historical");
 }
 
 /// Define new AMRLevelPIC from coarser
 virtual void define(AMRLevel*            a_coarserLevelPtr,
-		    const ProblemDomain& a_problemDomain,
-		    int                  a_level,
-		    int                  a_refRatio);
+                    const ProblemDomain& a_problemDomain,
+                    int                  a_level,
+                    int                  a_refRatio);
 
 /// Advance by one timestep
 virtual Real advance();
@@ -205,22 +205,22 @@ LevelData<FArrayBox>* getPoissonRhs(const Real& a_time);
 
 /// compute a force from a potential
 void computeForce(LevelData<FArrayBox>& a_force,
-		  LevelData<FArrayBox>& a_phi,
-		  const Real&           a_time);
+                  LevelData<FArrayBox>& a_phi,
+                  const Real&           a_time);
 
 /// actually solve Poisson's equation. If a_isLevelSolve is true, 
 /// then this will only do this level. If it is false, it will do
 /// this and all finder levels.
 void ellipticSolver(const int  a_baseLevel,
-		    const bool a_isLevelSolve);
+                    const bool a_isLevelSolve);
 
 /// This generates the RHS for Poisson's equations from the particles
 /// on this level. It also includes a contribution for particles on 
 /// coarser levels whose clouds hang over this level's grids. 
 void makePoissonRhs(LevelData<FArrayBox>&          a_rhs,
-		    const ParticleData<Particle>&  a_P,
-		    const ParticleData<JointParticle>& a_jointP,
-		    const Real&                    a_time);
+                    const ParticleData<Particle>&  a_P,
+                    const ParticleData<JointParticle>& a_jointP,
+                    const Real&                    a_time);
 
 // Returns a pointer to the AMR Level Hierarchy
 Vector<AMRLevelPIC*> getAMRHierarchy();

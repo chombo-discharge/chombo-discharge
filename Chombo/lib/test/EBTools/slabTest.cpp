@@ -47,6 +47,9 @@ main(int argc, char** argv)
 #endif
   //begin scoping trick
   {
+    const char* in_file = "slab.inputs";
+    //parse input file
+    ParmParse pp(0,NULL,NULL,in_file);      
 
     int eekflag = 0;
     //define the geometry object.

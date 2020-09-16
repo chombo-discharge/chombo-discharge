@@ -61,10 +61,22 @@ public:
    */
   enum DataType
   {
-    Invalid = -1,
-    ASCII   =  0,
-    Binary      ,
+    InvalidType = -1,
+    ASCII       =  0,
+    Binary          ,
     NUMDATATYPES
+  };
+
+  ///
+  /**
+      Size of data being read
+   */
+  enum DataSize
+  {
+    InvalidSize = -1,
+    CharSize    =  0,
+    RealSize        ,
+    NUMDATASIZES
   };
 
   ///
@@ -78,7 +90,8 @@ public:
   DataFileIF(const DataFileIF::DataType& a_dataType,
              const Real&                 a_value,
              const bool&                 a_inside,
-             const bool&                 a_useCubicInterp = false);
+             const bool&                 a_useCubicInterp = false,
+             const DataFileIF::DataSize& a_dataSize = DataFileIF::InvalidSize);
 
   ///
   /**
@@ -92,7 +105,8 @@ public:
              const DataFileIF::DataType& a_dataType,
              const Real&                 a_value,
              const bool&                 a_inside,
-             const bool&                 a_useCubicInterp = false);
+             const bool&                 a_useCubicInterp = false,
+             const DataFileIF::DataSize& a_dataSize = DataFileIF::InvalidSize);
 
   ///
   /**
@@ -108,7 +122,8 @@ public:
              const RealVect&             a_origin,
              const Real&                 a_value,
              const bool&                 a_inside,
-             const bool&                 a_useCubicInterp = false);
+             const bool&                 a_useCubicInterp = false,
+             const DataFileIF::DataSize& a_dataSize = DataFileIF::InvalidSize);
 
   ///
   /**
@@ -125,7 +140,8 @@ public:
              const RealVect&             a_origin,
              const Real&                 a_value,
              const bool&                 a_inside,
-             const bool&                 a_useCubicInterp = false);
+             const bool&                 a_useCubicInterp = false,
+             const DataFileIF::DataSize& a_dataSize = DataFileIF::InvalidSize);
 
   ///
   /**
@@ -142,7 +158,8 @@ public:
              const RealVect&             a_origin,
              const Real&                 a_value,
              const bool&                 a_inside,
-             const bool&                 a_useCubicInterp = false);
+             const bool&                 a_useCubicInterp = false,
+             const DataFileIF::DataSize& a_dataSize = DataFileIF::InvalidSize);
 
   ///
   /**
@@ -160,7 +177,8 @@ public:
              const RealVect&             a_origin,
              const Real&                 a_value,
              const bool&                 a_inside,
-             const bool&                 a_useCubicInterp = false);
+             const bool&                 a_useCubicInterp = false,
+             const DataFileIF::DataSize& a_dataSize = DataFileIF::InvalidSize);
 
   /// Copy constructor
   DataFileIF(const DataFileIF& a_inputIF);
@@ -170,15 +188,15 @@ public:
       This is used by the factory (see below) to create a new object.  All
       objects created in this way share a refcounted pointer to their data.
 
-      Constructor specifying a refcounted pointer to the data (a_ascii_data
-      or a_binary_data), the no data value (a_noDataValue), the spacing
+      Constructor specifying a refcounted pointer to the data (a_real_data
+      or a_char_data), the no data value (a_noDataValue), the spacing
       (a_spacing), the physical origin (a_origin), the number of grid points
       in each direction (a_num), a level set value (a_value), and whether
       inside the domain is where data is less than the level set value
       (a_inside).
    */
-  DataFileIF(const RefCountedPtr<FArrayBox>               a_ascii_data,
-             const RefCountedPtr<BaseFab<unsigned char> > a_binary_data,
+  DataFileIF(const RefCountedPtr<FArrayBox>               a_real_data,
+             const RefCountedPtr<BaseFab<unsigned char> > a_char_data,
              const Real&                                  a_noDataValue,
              const IntVect&                               a_num,
              const RealVect&                              a_spacing,
@@ -244,14 +262,14 @@ public:
     a_origin = m_origin;
   }
 
-  RefCountedPtr<FArrayBox> GetAsciiData(void)
+  RefCountedPtr<FArrayBox> GetRealData(void)
   {
-    return m_ascii_data;
+    return m_real_data;
   }
 
-  RefCountedPtr<BaseFab<unsigned char> > GetBinaryData(void)
+  RefCountedPtr<BaseFab<unsigned char> > GetCharData(void)
   {
-    return m_binary_data;
+    return m_char_data;
   }
 
 protected:
@@ -271,6 +289,7 @@ protected:
   void ReadData(Real&                       a_maxValue,
                 istream&                    a_file,
                 const DataFileIF::DataType& a_dataType,
+                DataFileIF::DataSize        a_dataSize,
                 const IntVect&              a_num);
 
   void MakeCorners(void);
@@ -284,8 +303,8 @@ protected:
   bool     m_inside;    // inside less than flag
 
   // the data - copies all share this
-  RefCountedPtr<FArrayBox>               m_ascii_data;  // ASCII data stored as Real
-  RefCountedPtr<BaseFab<unsigned char> > m_binary_data; // binary data stored as unsigned char's
+  RefCountedPtr<FArrayBox>               m_real_data; // Real data stored as Real
+  RefCountedPtr<BaseFab<unsigned char> > m_char_data; // Char data stored as unsigned char's
 
   Real m_noDataValue;   // no data value
 

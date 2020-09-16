@@ -150,16 +150,16 @@ StencilTensorValue::apply(StencilTensorValue &a_scale, StencilTensorValue &a_nod
   } else {
     for (int i=0;i<m_dof;i++) {
       for (int j=0;j<m_dof;j++) {
-	m_val[i*m_dof + j] = 0.;
-	for (int k=0;k<m_dof;k++) {
-	  m_val[i*m_dof + j] += a_scale.m_val[i*m_dof + k]*a_node.m_val[k*m_dof + j];
-	  if (m_val[i*m_dof + j] != m_val[i*m_dof + j]) {
-	    pout() << "StencilTensorValue:apply have a Nan: index:" <<i<<","<<j<<","<<k<<".  m_dof="<< m_dof<< std::endl;
-	    pout() << "\t\t scale is Nan:" << (a_scale.m_val[i*m_dof + k] != a_scale.m_val[i*m_dof + k]) << std::endl;
-	    pout() << "\t\t node is Nan:" << (a_node.m_val[k*m_dof + j] != a_node.m_val[k*m_dof + j]) << std::endl;
-	    MayDay::Error("PetscCompGrid::AddStencilToMatit->second.getVals(0,0) is a NaN");
-	  }
-	}
+        m_val[i*m_dof + j] = 0.;
+        for (int k=0;k<m_dof;k++) {
+          m_val[i*m_dof + j] += a_scale.m_val[i*m_dof + k]*a_node.m_val[k*m_dof + j];
+          if (m_val[i*m_dof + j] != m_val[i*m_dof + j]) {
+            pout() << "StencilTensorValue:apply have a Nan: index:" <<i<<","<<j<<","<<k<<".  m_dof="<< m_dof<< std::endl;
+            pout() << "\t\t scale is Nan:" << (a_scale.m_val[i*m_dof + k] != a_scale.m_val[i*m_dof + k]) << std::endl;
+            pout() << "\t\t node is Nan:" << (a_node.m_val[k*m_dof + j] != a_node.m_val[k*m_dof + j]) << std::endl;
+            MayDay::Error("PetscCompGrid::AddStencilToMatit->second.getVals(0,0) is a NaN");
+          }
+        }
       }
     }
   }

@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _SMOOTHABSOLUTEVALUEIF_H_
-#define _SMOOTHABSOLUTEVALUEIF_H_
+#ifndef _SMOOTHABSOLUTEVALUE_H_
+#define _SMOOTHABSOLUTEVALUE_H_
 
 #include "MayDay.H"
 #include "RealVect.H"

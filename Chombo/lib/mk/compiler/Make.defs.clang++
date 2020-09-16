@@ -15,18 +15,26 @@
 
 makefiles+=local/Make.defs.clang++
 
-defcxxdbgflags = -std=c++11 -g -Wall -Wno-overloaded-virtual -Wno-sign-compare
-#defcxxoptflags = -std=c++11 -O3 -march=native -Rpass-analysis=loop-vectorize -Wno-sign-compare
-defcxxoptflags = -std=c++11 -O3 -ffast-math -march=native -Rpass=loop-vectorize -Wno-sign-compare
+ifeq ($(CXXSTD),11)
+  defcxxcomflags := -std=c++11
+else ifeq ($(CXXSTD),14)
+  defcxxcomflags := -std=c++14
+else ifeq ($(CXXSTD),17)
+  defcxxcomflags := -std=c++17
+else
+  defcxxcomflags := -std=c++11
+endif
+defcxxcomflags += -march=native -Wno-long-long -Wno-sign-compare -Wno-deprecated -Wno-unused-local-typedefs -Wno-overloaded-virtual
 
 ifeq ($(OPENMPCC),TRUE)
-  defcxxdbgflags+= -fopenmp
-  defcxxoptflags+= -fopenmp
+  defcxxcomflags += -fopenmp
 else
-  defcxxdbgflags+= -Wno-unknown-pragmas
-  defcxxoptflags+= -Wno-unknown-pragmas
+  defcxxcomflags += -Wno-unknown-pragmas
 endif
 
+defcxxdbgflags = -g -pedantic -Wall
+#defcxxoptflags = -O3 -ffast-math -Rpass-analysis=loop-vectorize
+defcxxoptflags = -O3 -ffast-math -Rpass=loop-vectorize
 
 CH_CPP = cpp -E -P 
 
@@ -44,4 +52,3 @@ else
   defoptflags = -O2 -march=native
 #  I don't know what library flag you need if this is gfortran
 endif
-

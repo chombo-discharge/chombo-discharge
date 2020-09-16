@@ -67,6 +67,42 @@ define(const Box&        a_box,
 }
 /******************/
 template <class T> inline
+MiniIFFAB<T>::
+MiniIFFAB(const IntVectSet&     a_ivs,
+          const EBGraph& a_ebgraph,
+          const int&     a_direction,
+          const int&     a_nvarin)
+{
+  setDefaultValues();
+  define(a_ivs, a_ebgraph, a_direction, a_nvarin);
+}
+/******************/
+template <class T> inline
+void
+MiniIFFAB<T>::
+define(const IntVectSet& a_ivs,
+       const EBGraph& a_ebgraph,
+       const int& a_direction,
+       const int& a_nvarin)
+{
+  clear();
+  m_isDefined = true;
+  CH_assert(a_nvarin > 0);
+  CH_assert((a_direction >= 0) && (a_direction < SpaceDim));
+
+  m_direction = a_direction;
+  m_ebgraph = a_ebgraph;
+  m_nComp = a_nvarin;
+  m_box = a_ivs.minBox();
+
+  FaceIterator faceit(a_ivs, a_ebgraph, a_direction, FaceStop::SurroundingWithBoundary);
+  m_faces = faceit.getVector();
+  m_nFaces = m_faces.size();
+
+  m_data = new T[m_nComp*m_nFaces];
+}
+/******************/
+template <class T> inline
 void
 MiniIFFAB<T>::
 setVal(const T& a_value)
@@ -166,13 +202,26 @@ getIndex(const FaceIndex& a_face, const int& a_comp) const
   return retval;
 
 }
+template <class T> inline
+MiniIFFAB<T>::MiniIFFAB(const Interval& a_comps,
+                        MiniIFFAB<T>&   a_original)
+  :m_data(a_original.dataPtr(a_comps.begin())),
+   m_faces(a_original.m_faces),
+   m_nFaces(a_original.m_nFaces),
+   m_nComp(a_comps.size()),
+   m_direction(a_original.m_direction),
+   m_aliased(true),
+   m_isDefined(a_original.m_isDefined)
+{ 
+}
+
 /*********/
 template <class T> inline
 void
 MiniIFFAB<T>::
 clear()
 {
-  if (m_data != NULL)
+  if ((m_data != NULL)&&(!m_aliased))
     {
       delete[] m_data;
       m_data = NULL;

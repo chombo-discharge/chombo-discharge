@@ -43,7 +43,15 @@ makefiles+=compiler/Make.defs.GNU
 
 ################################################################
 
-_gppversion := $(subst ., ,$(shell $(CXX) -dumpversion))
+# From GCC v7 and greater the command g++ -dumpversion only returns the major 
+# version number (e.g. 7) rather than the full version number including minor
+# number and patch level (e.g. 7.1.0) as in older versions. This causes some
+# undefined environment variables in the Chombo makefiles which then result in
+# errors when checking the compiler version is new enough. The new command is
+# g++ -dumpfullversion but the old flag is kept for backward compatibility.
+# (Thanks to the GRChombo folks at Cambridge for contributing this fix)
+
+_gppversion := $(subst ., ,$(shell $(CXX) -dumpfullversion  -dumpversion))
 _gppmajorver:= $(word 1,$(_gppversion))
 _gppminorver:= $(word 2,$(_gppversion))
 
@@ -52,10 +60,19 @@ _gppminorver:= $(word 2,$(_gppversion))
   # HDF5 uses `long long', so disable warnings about it.
   # `-Wno-sign-compare' turns off warnings about comparing signed and unsigned int -
   #   this is a meaningful warning, but it appears way too often in our code.
-  # -Wno-unused-local-typedefs turns off a set of annoying "typedef locally 
-  #defined but not used warnings in RefCountedPtr.H
+  # `-Wno-unused-local-typedefs' turns off a set of annoying "typedef locally 
+  # defined but not used warnings in RefCountedPtr.H
 
-_cxxbaseflags := -std=c++11 -Wno-unused-but-set-variable -Wno-long-long -Wno-sign-compare -Wno-deprecated -ftemplate-depth-55  -Wno-unused-local-typedefs -Wno-literal-suffix
+ifeq ($(CXXSTD),11)
+  _cxxbaseflags := -std=c++11
+else ifeq ($(CXXSTD),14)
+  _cxxbaseflags := -std=c++14
+else ifeq ($(CXXSTD),17)
+  _cxxbaseflags := -std=c++17
+else
+  _cxxbaseflags := -std=c++11
+endif
+_cxxbaseflags += -march=native -Wno-unused-but-set-variable -Wno-long-long -Wno-sign-compare -Wno-deprecated -ftemplate-depth-99 -Wno-unused-local-typedefs -Wno-literal-suffix
 
   # g++ v3.4.0 started objecting to some uses of HOFFSET()
   # TJL - Changed moving from csh to sh...
@@ -76,9 +93,9 @@ else
   _cxxbaseflags += -Wno-unknown-pragmas
 endif
 
-defcxxcomflags := -march=native $(_cxxbaseflags)
-defcxxoptflags := $(defcxxcomflags) -O3
-defcxxdbgflags := $(defcxxcomflags) -g -pedantic -Wall
+defcxxcomflags := $(_cxxbaseflags)
+defcxxoptflags := -O3
+defcxxdbgflags := -g -pedantic -Wall
 
   ##  # together so force the preprocessor to use the Fortran compiler
 ifeq ($(system),Darwin)
@@ -99,7 +116,7 @@ endif
 
 ################################################################
 
-_g77version := $(subst ., ,$(shell $(FC) -dumpspecs | awk '/^\*version:/{getline;print $$1}'))
+_g77version := $(subst ., ,$(shell $(FC) -dumpversion))
 _g77majorver:= $(word 1,$(_g77version))
 _g77minorver:= $(word 2,$(_g77version))
 
@@ -124,6 +141,7 @@ ifeq ($(USE_64),TRUE)
 endif
 
 ifeq ($(OPENMPCC),TRUE)
+  deffcomflags  += -fopenmp
   defflibflags  += -lgfortran -lm -lgomp
 else
   defflibflags  += -lgfortran -lm 

@@ -17,6 +17,7 @@
 // Test 3: single level, loads from Brian's HDF test code
 
 #include <limits.h>
+#include "BRMeshRefine.H"
 
 #include <iostream>
 
@@ -35,6 +36,7 @@ int
 testLB3(void);
 int
 testLB4(void);
+int testLB5(void);
 
 using std::endl;
 
@@ -95,6 +97,12 @@ main(int argc ,char* argv[])
     stat_all = status ;
   }
 
+  status = testLB5();
+
+  if ( status == 0 )
+  {
+    if ( verbose ) pout() << indent << pgmname << " passed test 5." << endl ;
+  }
   status = testLB4();
 
   if ( status == 0 )
@@ -314,6 +322,31 @@ testLB2()
     }
 
   return status ;
+}
+
+int testLB5()
+{
+  Box domain(IntVect::Zero, 8*31*IntVect::Unit);
+  Vector<Box> grids;
+  Vector<int> procs;
+  Real eff_ratio;
+  domainSplit(domain, grids, 8);
+  Vector<long long> loads(grids.size(), 8*8);
+  int status = basicLoadBalance( procs, grids.size(), 32 );
+  int target = ipow<CH_SPACEDIM>(32)/32;
+  int s=0;
+  int p0=0;
+  for(int i=1; i<grids.size(); i++)
+    {
+      int p=procs[i];
+      if(p!=p0)
+        {
+          if(i-s != target) std::cout<<"error in target:"<<i-s<<"\n";
+          s=i;
+          p0=p;
+        }
+    }
+  return status;
 }
 
 int

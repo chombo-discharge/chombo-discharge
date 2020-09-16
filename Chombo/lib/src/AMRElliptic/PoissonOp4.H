@@ -42,41 +42,41 @@ public:
               BCFunc a_bc);
 
   virtual void createCoarsened(LevelData<FArrayBox>& a_lhs,
-			       const LevelData<FArrayBox>& a_rhs,
-			       const int& a_refRat);
+                               const LevelData<FArrayBox>& a_rhs,
+                               const int& a_refRat);
 
   virtual void residual(LevelData<FArrayBox>& a_lhs,
-			const LevelData<FArrayBox>& a_phi,
-			const LevelData<FArrayBox>& a_rhs,
-			bool a_homogeneous = false);
+                        const LevelData<FArrayBox>& a_phi,
+                        const LevelData<FArrayBox>& a_rhs,
+                        bool a_homogeneous = false);
 
   virtual void preCond(LevelData<FArrayBox>& a_correction,
-		       const LevelData<FArrayBox>& a_residual);
+                       const LevelData<FArrayBox>& a_residual);
 
   virtual void applyOp(LevelData<FArrayBox>& a_lhs,
-		       const LevelData<FArrayBox>& a_phi,
-		       bool a_homogeneous = false);
+                       const LevelData<FArrayBox>& a_phi,
+                       bool a_homogeneous = false);
 
   virtual void create(LevelData<FArrayBox>& a_lhs,
-		      const LevelData<FArrayBox>& a_rhs);
+                      const LevelData<FArrayBox>& a_rhs);
 
   virtual void assign(LevelData<FArrayBox>& a_lhs,
-		      const LevelData<FArrayBox>& a_rhs) ;
+                      const LevelData<FArrayBox>& a_rhs) ;
 
   virtual Real dotProduct(const LevelData<FArrayBox>& a_1,
                           const LevelData<FArrayBox>& a_2) ;
 
   virtual void incr(LevelData<FArrayBox>& a_lhs,
-		    const LevelData<FArrayBox>& a_x,
-		    Real a_scale) ;
+                    const LevelData<FArrayBox>& a_x,
+                    Real a_scale) ;
 
   virtual void axby(LevelData<FArrayBox>& a_lhs, 
-		    const LevelData<FArrayBox>& a_x,
-		    const LevelData<FArrayBox>& a_y,
-		    Real a, Real b) ;
+                    const LevelData<FArrayBox>& a_x,
+                    const LevelData<FArrayBox>& a_y,
+                    Real a, Real b) ;
 
   virtual void scale(LevelData<FArrayBox>& a_lhs, 
-		     const Real& a_scale) ;
+                     const Real& a_scale) ;
 
   virtual Real norm(const LevelData<FArrayBox>& a_x, int a_ord);
 
@@ -124,7 +124,7 @@ protected:
   DisjointBoxLayout       m_coarsenedMGrids;
   
   void levelGSRB(LevelData<FArrayBox>& a_e,  
-		 const LevelData<FArrayBox>& a_residual);
+                 const LevelData<FArrayBox>& a_residual);
 
 };
 
@@ -143,8 +143,8 @@ public:
   }
 
   virtual PoissonOp4* MGnewOp(const ProblemDomain& a_FineindexSpace,
-				     int   a_depth,
-				     bool  a_homoOnly = true);
+                                     int   a_depth,
+                                     bool  a_homoOnly = true);
 
   virtual void MGreclaim(PoissonOp4* a_reclaim);
 

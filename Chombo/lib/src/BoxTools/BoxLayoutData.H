@@ -44,6 +44,12 @@ public:
   {
     return true;
   }
+
+  //return true if copy and construction are thread safe
+  virtual bool threadSafe() const
+  {
+    return true;
+  }
 };
 
 /// Factory object to data members of a BoxLayoutData container
@@ -103,6 +109,11 @@ public:
       for calling operator 'delete' on this pointer is passed to the user. */
   virtual T* create(const Box& box, int ncomps, const DataIndex& a_datInd) const;
 
+  //return true if copy and construction are thread safe
+  virtual bool threadSafe() const
+  {
+    return m_origPointer->threadSafe();
+  }
 protected:
   BoxLayoutData<T>* m_origPointer;
   Interval          m_interval;
@@ -133,6 +144,29 @@ protected:
   int                     m_dir;
 };
 
+//new code
+//--For aliasing a LevelData<FArrayBox> to a LevelData<FluxBox>
+
+class FaceFabDataFactory : public DataFactory<FArrayBox>
+{
+public:
+  virtual ~FaceFabDataFactory()
+  {}
+
+  FaceFabDataFactory(const int a_dir);
+
+  void define(const int a_dir);
+
+  /** creates a new 'T' object and returns a pointer to it.  Responsiblitly
+      for calling operator 'delete' on this pointer is passed to the user. */
+  virtual FArrayBox* create(const Box      & a_box   ,
+                            int              a_ncomps,
+                            const DataIndex& a_datInd) const;
+protected:
+  int                     m_dir;
+};
+
+///new code
 template<class T> class LevelData;
 
 template <class T>
@@ -143,7 +177,6 @@ public:
   virtual ~LDOperator()
   {
   }
-
   virtual int size(const T& arg, const Box& b, const Interval& comps) const
   {
     return arg.size(b, comps);
@@ -158,6 +191,16 @@ public:
   {
     arg.linearIn(buf, R, comps);
   }
+
+  ///this boolean only has to do with whether the op(...) function is thread safe
+  /**
+     If you want to declare a class more generally thread-unsafe, use the data factory 
+     threadSafe interface.
+   */
+  virtual bool threadSafe() const
+    {
+      return true;
+    }
   virtual void op(T& dest,
           const Box& RegionFrom,
           const Interval& Cdest,
@@ -255,6 +298,10 @@ public:
   /// overridden and throws an error.
   virtual void define(const BoxLayout& boxes);
 
+  virtual bool threadSafe() const
+  {
+    return m_threadSafe;
+  }
   ///
   int nComp() const
   {
@@ -312,6 +359,22 @@ public:
              const ProblemDomain& a_domain,
              const Copier& a_copier) const;
 
+
+   /**
+     Special version of generalCopyTo that performs increment-on-intersection of
+     the destination instead of replacement.  This version of addTo allows for split-phase
+     communication, where you call addToBegin on the source, then addToEnd on 
+     the destination.  This version *requires* the user to use a prebuilt Copier and ensure
+     it's lifetime lives past the call to addToEnd (I have my buffers in the Copier)
+  */
+  void addToBegin(const Interval& a_srcComps,
+                  BoxLayoutData<T>& a_dest,
+                  const Interval& a_destComps,
+                  const Copier& a_copier) const;
+
+  /// you call this on the destination BoxLayoutData, not the source.
+  void addToEnd(const Interval& a_destComps);
+  
     ///
   /* User writes a function with the signature:
 
@@ -334,10 +397,11 @@ public:
 
   virtual void clear() ;
 
-  static int s_verbosity;
+  int s_verbosity = 0;
 
 protected:
   int             m_comps;
+  bool            m_threadSafe;
   bool            m_isdefined;
 
   friend class LevelData<T>;
@@ -370,9 +434,8 @@ protected:
                 const Copier&       a_copier,
                 const LDOperator<T>& a_op = LDOperator<T>()) const;
   void makeItSoEnd(
-                BoxLayoutData<T>&   a_dest,
                 const Interval&     a_destComps,
-                const LDOperator<T>& a_op = LDOperator<T>()) const;
+                const LDOperator<T>& a_op = LDOperator<T>());
 
   //========================================================================
   //
@@ -397,9 +460,9 @@ protected:
 
   void postReceivesToMe() const ;
 
-  void unpackReceivesToMe(BoxLayoutData<T>& a_dest,
+  void unpackReceivesToMe(
                           const Interval&   a_destComps,
-                          const LDOperator<T>& a_op) const ;
+                          const LDOperator<T>& a_op) ;
 
   void unpackReceivesToMe_append(LayoutData<Vector<RefCountedPtr<T> > >& a_dest,
                                  const Interval&   a_destComps,
@@ -421,12 +484,13 @@ protected:
 #ifndef DOXYGEN
 
 #endif
+  // objects moved into Copier
 //   mutable std::vector<bufEntry> m_fromMe;
 //   mutable std::vector<bufEntry> m_toMe;
 
-  mutable Vector<MPI_Request>  m_sendRequests,  m_receiveRequests;
-  mutable Vector<MPI_Status>   m_receiveStatus, m_sendStatus;
-  mutable int numSends, numReceives;
+  // mutable Vector<MPI_Request>  m_sendRequests,  m_receiveRequests;
+  // mutable Vector<MPI_Status>   m_receiveStatus, m_sendStatus;
+  // mutable int numSends, numReceives;
 #endif
 
 };

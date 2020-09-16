@@ -227,6 +227,9 @@ public:
 
   /// Set whether to use high-order limiter.
   void highOrderLimiter(bool a_highOrderLimiter);
+  
+  /// query whether we're using the high-order limiter
+  bool useHighOrderLimiter() const {return m_highOrderLimiter;}
 
   /**@}*/
 

@@ -149,6 +149,7 @@
                         iv[Indexer::ixIV(4)], \
                         iv[Indexer::ixIV(5)])
 
+/* These sizes are in CHArray_fwd.H
 namespace ArSp  // CHArray support
 {
 
@@ -157,9 +158,11 @@ namespace ArSp  // CHArray support
 // sizes by division by at least 1 stride.
 
 typedef int      IIx_t;               ///< Type of int for an index.  Must be
-                                      ///< signed to allow for lower bounds != 0
+                                      ///< signed to allow for lower bounds
+                                      ///< != 0
 typedef unsigned USz_t;               ///< Type of unsigned int for a size
 }
+ */
 
 /* This enum had to be put in CHArray_fwd.H because it is used for default
  * template parameters.  Repeated here for informational purposes
@@ -679,6 +682,10 @@ public:
         IxData::ixLowerBound() + size/IxData::m_ixStride - 1 :
         m_ixNext.ixUpperBound(IxData::m_ixStride, dim);
     }
+  IIx_t ixTotalOffset() const
+    {
+      return m_ixNext.ixTotalOffset();
+    }
 
   unsigned ixIV(const unsigned i) const
     {
@@ -735,6 +742,10 @@ public:
     {
       return IxData::ixLowerBound() + size - 1;
     }
+  IIx_t ixTotalOffset() const
+    {
+      return IxData::ixTotalOffset();
+    }
 
   unsigned ixIV(const unsigned i) const
     {
@@ -788,6 +799,10 @@ public:
   IIx_t ixUpperBound(const USz_t size, const unsigned dim) const
     {
       return ixDimSize(size, dim) - 1;
+    }
+  IIx_t ixTotalOffset() const
+    {
+      return 0;
     }
 
   unsigned ixIV(const unsigned i) const
@@ -968,6 +983,10 @@ public:
         IxData::ixLowerBound() + size/IxData::m_ixStride - 1 :
         m_ixNext.ixUpperBound(IxData::m_ixStride, dim);
     }
+  IIx_t ixTotalOffset() const
+    {
+      return m_ixNext.ixTotalOffset();
+    }
 
   unsigned ixIV(const unsigned i) const
     {
@@ -1023,6 +1042,10 @@ public:
     {
       return IxData::ixLowerBound() + size - 1;
     }
+  IIx_t ixTotalOffset() const
+    {
+      return IxData::ixTotalOffset();
+    }
 
   unsigned ixIV(const unsigned i) const
     {
@@ -1076,6 +1099,10 @@ public:
   IIx_t ixUpperBound(const USz_t size, const unsigned dim) const
     {
       return ixDimSize(size, dim) - 1;
+    }
+  IIx_t ixTotalOffset() const
+    {
+      return 0;
     }
 
   unsigned ixIV(const unsigned i) const
@@ -1257,6 +1284,7 @@ class CHArray : private ArSp::ArTr<Rank, ArConf>::IndexerT
 {
   typedef typename ArSp::ArTr<Rank, ArConf>::DimT DimT;
   typedef typename ArSp::ArTr<Rank, ArConf>::IndexerT Indexer;
+  typedef T value_type;               ///< Type of element
 public:
 
   ///  Default constructor
@@ -1722,6 +1750,12 @@ public:
       return m_arrayImpl.data + size();
     }
 
+  /// Rank of the array
+  static constexpr unsigned rank() noexcept
+    {
+      return Rank;
+    }
+
   ///  Overall size of the array
   ArSp::USz_t size() const
     {
@@ -1750,6 +1784,13 @@ public:
       CH_assert(isUsable());
       CH_assert(dim < Rank);
       return Indexer::ixUpperBound(size(), dim+1);
+    }
+
+  ///  Offset from non-zero lower bound
+  ArSp::IIx_t totalOffset() const
+    {
+      CH_assert(isUsable());
+      return Indexer::ixTotalOffset();
     }
 
   ///  Memory has been allocated
@@ -1882,6 +1923,57 @@ public:
     {
       delete[] p;
     }
+};
+
+/*--------------------------------------------------------------------*/
+///  Allocator for an array of vectors contiguous in memory
+/**  Useful for allocating an array of vectors which can be easily
+ *   passed to Fortran, etc.
+ *
+ *   Example - 1D Array of 2 size 3 vectors                  \verbatim
+ *
+ *     CHArray<CHVector, 1, ArZeroRow, ArSp::ArrayOfVectorAlloc> AV;
+ *     AV.getAllocator().define(3);
+ *     AV.define(2);
+ *     AV(0) = 1.1;
+ *     AV(1) = 1.9;
+ *     std::cout << AV << std::endl;
+ *                                                        \endverbatim
+ *//*-----------------------------------------------------------------*/
+
+class ArrayOfVectorAlloc
+{
+  public:
+  ArrayOfVectorAlloc()
+    : defined(false)
+    { }
+  void define(const USz_t a_n)
+    {
+      n = a_n;
+      defined = true;
+    }
+  CHVector* allocate(const USz_t size)
+    {
+      CH_assert(defined);
+      CHVector *const V = new(std::nothrow) CHVector[size];
+      CH_assert(V != 0);
+      vectorData = new(std::nothrow) Real[size*n];
+      CH_assert(vectorData != 0);
+      for (USz_t i = 0; i != size; ++i)
+        {
+          V[i].define(vectorData + i*n, n);
+        }
+      return V;
+    }
+  void deallocate(CHVector *p, const USz_t size)
+    {
+      delete[] p;
+      delete[] vectorData;
+    }
+private:
+  Real *vectorData;
+  USz_t n;
+  bool defined;
 };
 
 /*--------------------------------------------------------------------*/

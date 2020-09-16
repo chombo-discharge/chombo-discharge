@@ -1,0 +1,38 @@
+#!/bin/csh -f
+set exedir="`dirname $0`"
+if ($#argv < 2) then
+  echo "Usage:  chdiff file1 file2 [2d|3d|4d]"
+  exit 1
+endif
+set temp=$1:r
+if ($#argv < 3) then
+  set dim=$temp:e
+else
+  set dim=$3
+endif
+set dim=`echo "$dim"                                          \
+         | tr '[A-Z]' '[a-z]'                                 \
+         | awk '/^[0-9][0-9]*$/  { printf("%dd",$0); next; }  \
+                /^[0-9][0-9]*d$/ { print $0;         next; }'`
+while ("$dim" != "2d" && "$dim" != "3d" && "$dim" != "4d")
+  echo -n "Dimension? "
+  set dim=`echo "$<"                                            \
+           | tr '[A-Z]' '[a-z]'                                 \
+           | awk '/^[0-9][0-9]*$/  { printf("%dd",$0); next; }  \
+                  /^[0-9][0-9]*d$/ { print $0;         next; }'`
+end
+set compare=(~dmartin/code/Chombo/lib/util/ChomboCompare/compare$dim.*.ex)
+if ($#compare > 1) then
+  echo "Multiple 'compare's found, using $compare[1]"
+endif
+set tmp=/tmp/chdiff$$
+set file1=$1
+set file2=$2
+sed -e "s@EXACTROOT@$file1@" -e "s@COMPUTEDROOT@$file2@" \
+  < ~dmartin/bin/chdiff.template                         \
+  > $tmp
+$compare[1] $tmp
+if ($status == 0) then
+  /bin/rm -f $tmp
+endif
+exit 0

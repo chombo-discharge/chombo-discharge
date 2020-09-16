@@ -1,0 +1,66 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+
+c ----------------------------------------------------------------------
+c  Solve for the RE solution
+c
+c  box               => Box defining where to compute the source
+c  orda              => Expected order of accuracy
+c  refrat            => Refinement between solutions
+c  fab               => Data on the coarse mesh
+c  fabinterp         => Interpolated data from the finer mesh
+c  fabsolve          <= FAB containing the RE solution
+c ----------------------------------------------------------------------
+
+      subroutine RESOLVE(
+     &     CHF_BOX[box],
+     &     CHF_CONST_INT[orda],
+     &     CHF_CONST_INT[refrat],
+     &     CHF_CONST_FRA1[fab],
+     &     CHF_CONST_FRA1[fabinterp],
+     &     CHF_FRA1[fabsolve])
+
+      integer CHF_AUTODECL[i]
+      real_t csol, fsol, tfac, fac
+
+      fac = refrat**orda
+      tfac = one/(fac-one)
+      CHF_AUTOMULTIDO[box;i]
+      csol = fab(CHF_AUTOIX[i])
+      fsol = fabinterp(CHF_AUTOIX[i])
+      fabsolve(CHF_AUTOIX[i]) = tfac*(fac*fsol-csol)
+      CHF_ENDDO
+      return
+      end
+
+c ----------------------------------------------------------------------
+c  Solve for the error on the mesh
+c
+c  box               => Box defining where to compute the source
+c  fab               => FAB containing the current data
+c  fabsolve          => FAB containing the RE solution
+c  difffab           <= FAB for the error
+c ----------------------------------------------------------------------
+
+      subroutine DIFFSOLVE(
+     &     CHF_BOX[box],
+     &     CHF_CONST_FRA1[fab],
+     &     CHF_CONST_FRA1[fabsolve],
+     &     CHF_FRA1[difffab])
+
+      integer CHF_AUTODECL[i]
+      real_t fsol, csol
+
+      CHF_AUTOMULTIDO[box;i]
+      fsol = fab(CHF_AUTOIX[i])
+      csol = fabsolve(CHF_AUTOIX[i])
+      difffab(CHF_AUTOIX[i]) = abs(fsol - csol)
+      CHF_ENDDO
+      return
+      end

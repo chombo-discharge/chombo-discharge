@@ -2,7 +2,7 @@ C      _______              __
 C     / ___/ /  ___  __ _  / /  ___
 C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
 C    \___/_//_/\___/_/_/_/_.__/\___/
-C    Please refer to Copyright.txt, in Chombo's root directory.
+C    Please refer to Copyright.txt, in the Chombo root directory.
 
 #include "REAL.H"
 #include "CONSTANTS.H"

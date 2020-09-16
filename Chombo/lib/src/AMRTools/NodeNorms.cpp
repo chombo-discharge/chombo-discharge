@@ -24,7 +24,7 @@
 #include "NodeDotProdF_F.H"
 #include "NamespaceHeader.H"
 
-using std::cout;
+
 using std::cerr;
 using std::endl;
 
@@ -121,7 +121,7 @@ norm(const BoxLayoutData<NodeFArrayBox>& a_layout,
       Real thisNfabNorm = norm(thisNfab, a_dx, thisBox, a_p,
                                a_interval.begin(), a_interval.size());
       if (a_verbose)
-        cout << a_p << "norm(" << thisBox << ") = " << thisNfabNorm << endl;
+        pout() << a_p << "norm(" << thisBox << ") = " << thisNfabNorm << endl;
 
       if (a_p == 1)
         {
@@ -200,7 +200,7 @@ norm(const BoxLayoutData<NodeFArrayBox>& a_layout,
         }
 
       if (a_verbose)
-        cout << a_p << "norm(" << thisBox << ") = " << thisNfabNorm << endl;
+        pout() << a_p << "norm(" << thisBox << ") = " << thisNfabNorm << endl;
 
       if (a_p == 1)
         {
@@ -267,7 +267,7 @@ maxnorm(const BoxLayoutData<NodeFArrayBox>& a_layout,
       Real thisNfabNorm =
         maxnorm(dataMasked, thisBox, a_interval.begin(), a_interval.size());
       if (a_verbose)
-        cout << "maxnorm(" << thisBox << ") = " << thisNfabNorm << endl;
+        pout() << "maxnorm(" << thisBox << ") = " << thisNfabNorm << endl;
        normTotal = Max(normTotal, thisNfabNorm);
     }
 # ifdef CH_MPI
@@ -302,7 +302,7 @@ maxnorm(const BoxLayoutData<NodeFArrayBox>& a_layout,
       Real thisNfabNorm =
         maxnorm(thisNfab, thisBox, a_interval.begin(), a_interval.size());
       if (a_verbose)
-        cout << "maxnorm(" << thisBox << ") = " << thisNfabNorm << endl;
+        pout() << "maxnorm(" << thisBox << ") = " << thisNfabNorm << endl;
       normTotal = Max(normTotal, thisNfabNorm);
     }
 # ifdef CH_MPI

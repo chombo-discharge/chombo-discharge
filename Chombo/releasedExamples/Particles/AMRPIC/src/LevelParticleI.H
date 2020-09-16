@@ -76,12 +76,12 @@ Real LevelParticle::step(ParticleData<P>&                a_levP,
       gather(allDts, dtNew, srcProc);
       
       if( procID() == srcProc)
-	{
-	  for(int ivec = 0; ivec < numProc(); ivec++)
-	    {
-	      globalMin = Min(globalMin, allDts[ivec]);
-	    }	  
-	}
+        {
+          for(int ivec = 0; ivec < numProc(); ivec++)
+            {
+              globalMin = Min(globalMin, allDts[ivec]);
+            }     
+        }
       
       broadcast(globalMin, srcProc);
       dtNew = globalMin;
@@ -173,12 +173,12 @@ Real LevelParticle::getMaxPartSpeed(const ParticleData<P>& a_levP,
       gather(allSpeeds, maxSpeed, srcProc);
       
       if( procID() == srcProc)
-	{
-	  for(int ivec = 0; ivec < numProc(); ivec++)
-	    {
-	      globalMax = Max(globalMax, allSpeeds[ivec]);
-	    }	  
-	}
+        {
+          for(int ivec = 0; ivec < numProc(); ivec++)
+            {
+              globalMax = Max(globalMax, allSpeeds[ivec]);
+            }     
+        }
       
       broadcast(globalMax, srcProc);
       maxSpeed = globalMax;

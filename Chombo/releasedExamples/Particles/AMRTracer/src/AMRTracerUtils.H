@@ -38,7 +38,7 @@ getAdvectionVelocityFunction(AdvectionVelocityFunction& a_velFunc);
  */
 extern void
 getAMRLevelTracerFactory(RefCountedPtr<AMRLevelTracerFactory>&  a_fact,
-			 AdvectionVelocityFunction a_advFunc);
+                         AdvectionVelocityFunction a_advFunc);
 
 ///
 /**
@@ -60,7 +60,7 @@ defineAMR(AMR&                                          a_amr,
  */
 extern void
 setupAMRForFixedHierarchyRun(AMR& a_amr,
-			     const Vector<Vector<Box> >& a_hierarchy);
+                             const Vector<Vector<Box> >& a_hierarchy);
 
 /****/
 

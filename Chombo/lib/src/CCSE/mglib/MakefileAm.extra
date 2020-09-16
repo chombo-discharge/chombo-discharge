@@ -1,3 +1,0 @@
-if SMALLBUILD_AM
-CPP_FILES = ABecLaplacian.cpp BndryData.cpp CGSolver.cpp InterpBndryData.cpp Laplacian.cpp LinOp.cpp Mask.cpp MultiGrid.cpp 
-endif SMALLBUILD_AM

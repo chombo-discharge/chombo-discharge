@@ -11,34 +11,34 @@ eta_eps = 0.1
 #iprob == 1, cubic rhs within r<rno, zero outside        
 #iprob == 2, wacky sine function thing
 iprob              = 2   
-domain_length      = 1.0 1.0 1.0
+grids.domain_size      = 1.0 1.0 1.0
 #number of times to solve (for benchmarking)    
-iterations          = 1
-refine_threshold = 0.85
+main.iterations          = 1
+grids.refine_threshold = 0.85
 buffer_size =1
 #coefficient of rhs
 rhono              = 0.9
 #radius input to rhs 
 rno                = 0.5    
-num_smooth = 32
-num_mg     = 1
-max_iterations = 100
-tolerance  = 1.0e-12
-norm_thresh  = 1.0e-13
-hang       = 1.0e-10
-block_factor = 8
-alpha = 1.0
-beta= -0.1
+solver.num_smooth = 32
+solver.num_mg     = 1
+solver.max_iterations = 100
+solver.tolerance  = 1.0e-12
+solver.norm_thresh  = 1.0e-13
+solver.hang       = 1.0e-10
+
+#solver.alpha = 1.0
+#solver.beta = -0.1
+
 #bcs for faces 
 #4==periodic
 #5==reflective slip
 #6==no slip
-#7==trig diri for resisivity
+#7==trig diri for resisivit
 # Sine frequency multipliers to use
 # for when bcs are trig
 trig = 2.0  2.0  2.0  
 
-periodic           = 0 0 0
 bc_lo              = 6 6 6
 bc_hi              = 6 6 6
 
@@ -49,25 +49,24 @@ bc_hi              = 6 6 6
 bc_value = 0.0  
 
 # maximum level number
-max_level          = 1
-#max_level          = 0       
+grids.max_level          = 1
+#grids.max_level          = 0       
 # maximum linear size of boxes
-max_grid_size         = 16
-#max_grid_size         = 1024
+grids.max_box_size         = 16
+#grids.max_box_size         = 1024
+grids.block_factor = 8
+grids.fillRatio         = 0.5     #fill ratio for meshrefine
+grids.is_periodic           = 0 0 0
+
 # refinement ratio
-#ref_ratio          = 4 4 4 4 4 4 4    
-ref_ratio          = 2 2 2 2 2 2 2 2  
-#ref_ratio          = 2 4 4 4 4 
+#grids.ref_ratio          = 4 4 4 4 4 4 4    
+grids.ref_ratio          = 2 2 2 2 2 2 2 2  
+#grids.ref_ratio          = 2 4 4 4 4 
 # num. cells in base grid dirs
-n_cells             =  8 8 8
-#n_cells             = 16 16 16 
-#n_cells             = 32 32 32
-n_cells             =  128 128 128
-prob_lo            = 0.0 0.0 0.0 # coords. of lower left. 
-prob_hi            = 1.0 1.0 1.0 # coords. of upper right.
-lbase              = 0          #lbase for solves
-verbose            = 1          #if this is == 1, verbose is true
-fill_ratio         = 0.5     #fill ratio for meshrefine
-use_eb_grids       = false
-prolong_type       = 1 # 0 = piecewise-constant (default), 1 = linear interp
+grids.num_cells             =  8 8 8
+#grids.num_cells             = 16 16 16 
+#grids.num_cells             = 32 32 32
+grids.num_cells             =  128 128 128
+main.verbosity            = 2          #if this is == 1, verbose is true
+
 

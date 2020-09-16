@@ -460,7 +460,46 @@ c     so no whacky face-to-cell shifting here
         end
 
 
-      subroutine regget1dlaplacian_inplace(
+      subroutine mvoperatorlap(
+     &     chf_fra[lph],
+     &     chf_const_fra[phi],
+     &     chf_const_real[beta],
+     &     chf_const_int[ncomps],
+     &     chf_const_realvect[dx],
+     &     chf_box[box])
+
+      integer chf_ddecl[i;j;k], icomp
+      real_t laplphi, chf_ddecl[dx0;dx1;dx2]
+
+      chf_dterm[dx0 = beta/(dx(0) * dx(0));
+                dx1 = beta/(dx(1) * dx(1));
+                dx2 = beta/(dx(2) * dx(2));]
+
+      do icomp = 0, ncomps-1                
+      chf_multido[box;i;j;k]
+
+      laplphi = CHF_DTERM[
+     &     (    phi(chf_ix[i+1;j  ;k  ], icomp)
+     &     +    phi(chf_ix[i-1;j  ;k  ], icomp)
+     $     -two*phi(chf_ix[i  ;j  ;k  ], icomp))*dx0 ;
+     $     +(   phi(chf_ix[i  ;j+1;k  ], icomp)
+     &     +    phi(chf_ix[i  ;j-1;k  ], icomp)
+     $     -two*phi(chf_ix[i  ;j  ;k  ], icomp))*dx1 ;
+     $     +(   phi(chf_ix[i  ;j  ;k+1], icomp)
+     &     +    phi(chf_ix[i  ;j  ;k-1], icomp)
+     $     -two*phi(chf_ix[i  ;j  ;k  ], icomp))*dx2 ]
+
+      lph(chf_ix[i;j;k],icomp) =  laplphi
+
+      chf_enddo
+      enddo
+      ch_flops=ch_flops+ncomps*CHF_POINTS[box]*(4*CH_SPACEDIM + 1)
+      return
+      end
+
+
+
+      subroutine regincrlaplacian_inplace(
      &     chf_fra1[opphidir],
      &     chf_const_fra1[phi],
      &     chf_const_real[beta],
@@ -494,7 +533,6 @@ c     opphidir comes in holding alpha*phi
       ch_flops=ch_flops+CHF_POINTS[box]*(4*CH_SPACEDIM + 1)
       return
       end
-
 cccccccccccccccc
 
       subroutine regget1dlaplacian(

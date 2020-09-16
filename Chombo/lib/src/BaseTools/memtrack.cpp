@@ -26,7 +26,6 @@
 #include <cstring>
 #include <cstdio>
 using std::list;
-using std::cout;
 using std::endl;
 using std::string;
 #ifndef CH_DISABLE_SIGNALS
@@ -87,12 +86,12 @@ void dumpmemoryatexit()
   // lst::iterator  L;
   // for (i = vectorIncr_->begin(); i != vectorIncr_->end(); i++)
   // {
-  //   cout << i->first << "  ";
+  //   pout() << i->first << "  ";
   //   for (L = i->second->begin(); L != i->second->end(); L++)
   //   {
-  //     cout << " " << *L;
+  //     pout() << " " << *L;
   //   }
-  //   cout<<"\n";
+  //   pout()<<"\n";
   // }
 
   UnfreedMemory();
@@ -668,7 +667,7 @@ void RemoveTrack(void* a_addr,
             MayDay::Error("memory allocated with malloc-family returned using DELETE");
           }
         }
-	ch_memcount-=(*c)->size;
+        ch_memcount-=(*c)->size;
         // At least one compiler/OS/HDF5-version combination was
         // causing segfault in the memory-tracking (MT) code.
         // Normally, one might just turn off MT at compile-time via

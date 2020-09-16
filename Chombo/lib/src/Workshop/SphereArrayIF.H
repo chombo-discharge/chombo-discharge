@@ -53,10 +53,7 @@ public:
 
   virtual bool fastIntersection(const RealVect& a_low,
                                 const RealVect& a_high) const
-  {return true;}
-
-  virtual GeometryService::InOut InsideOutside(const RealVect& a_low,
-                                               const RealVect& a_high) const;
+  {return false;}
 
 protected:
   Real      m_radius;

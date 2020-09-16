@@ -258,9 +258,6 @@ protected:
   // Has this object been defined
   bool m_isDefined;
 
-  // Use a high-order limiter?  (default false)
-  bool m_highOrderLimiter;
-
 private:
 
   // Disallowed for all the usual reasons

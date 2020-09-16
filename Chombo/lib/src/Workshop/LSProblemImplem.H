@@ -180,11 +180,11 @@ template<int dim> void LSProblem<dim>::computeBounds(const IndexTM<Real,dim>   &
           // Note that we already have integral(mono) from previous steps
           IvDim whichMono;
           // Real valAtWhichMono=LARGEREALVAL;
-          for (typename CutCellMoments<dim>::PthMoment::const_iterator it = a_ccm.m_moments.begin();
-              it != a_ccm.m_moments.end();++it)
+          for (typename CutCellMoments<dim>::PthMoment::const_iterator it2 = a_ccm.m_moments.begin();
+              it2 != a_ccm.m_moments.end();++it2)
             {
-              IvDim mono = it->first;
-              Real val = it->second;
+              IvDim mono = it2->first;
+              Real val = it2->second;
               Real maxMono = 0.0;
               Real minMono = 0.0;
               monoMaxMin(maxMono,minMono,mono,a_ccm.m_IFData);

@@ -442,7 +442,7 @@ advectToFacesBCG(EBFluxFAB&                         a_extrapState,
                  const DataIndex&                   a_dit)
 {
   CH_TIME("EBAdvectLevelIntegrator::advectToFacesBCG(fluxfab)");
-  IntVectSet cfivs; //not used here.  only used in flux interpolation
+  //IntVectSet cfivs; //not used here.  only used in flux interpolation
 
   m_ebPatchAdvect[a_dit]->setVelocities(a_normalVel, a_advectionVel);
 

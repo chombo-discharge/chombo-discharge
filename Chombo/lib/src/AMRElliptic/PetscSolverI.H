@@ -280,18 +280,18 @@ int PetscSolver<T>::setup_solver( const T& a_phi )
       // Add values to A
       ierr = formMatrix( m_mat, &a_phi ); CHKERRQ(ierr);
       {
-	char str[256];
-	strcpy (str,"-");
-	strcat (str,m_prestring);
+        char str[256];
+        strcpy (str,"-");
+        strcat (str,m_prestring);
 #if PETSC_VERSION_GE(3,6,0)
-	strcat (str,"pc_gamg_square_graph 20");
+        strcat (str,"pc_gamg_square_graph 20");
 #else
-	strcat (str,"pc_gamg_square_graph true");
+        strcat (str,"pc_gamg_square_graph true");
 #endif
 #if PETSC_VERSION_GE(3,7,0)
-	ierr = PetscOptionsInsertString(PETSC_NULL,str);CHKERRQ(ierr);
+        ierr = PetscOptionsInsertString(PETSC_NULL,str);CHKERRQ(ierr);
 #else
-	ierr = PetscOptionsInsertString(str);CHKERRQ(ierr);
+        ierr = PetscOptionsInsertString(str);CHKERRQ(ierr);
 #endif
       }
 
@@ -330,7 +330,7 @@ int PetscSolver<T>::setup_solver( const T& a_phi )
               ierr = KSPMonitorSet(m_ksp,ksp_monitor_pout,PETSC_NULL,PETSC_NULL); CHKERRQ(ierr);
             }
 #if PETSC_VERSION_GE(3,5,0)
-	  ierr = KSPSetOperators(m_ksp,m_mat,m_mat);CHKERRQ(ierr);
+          ierr = KSPSetOperators(m_ksp,m_mat,m_mat);CHKERRQ(ierr);
 #else
           ierr = KSPSetOperators(m_ksp,m_mat,m_mat,SAME_NONZERO_PATTERN);CHKERRQ(ierr);
 #endif

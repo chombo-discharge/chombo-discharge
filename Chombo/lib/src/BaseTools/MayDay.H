@@ -29,12 +29,12 @@ public:
 
   static bool s_debugSpew;
   /// Print out message to cerr and exit with the specified exit code.
-  static void Error(const char * const a_msg = m_nullString, int m_exitCode = CH_DEFAULT_ERROR_CODE);
+  [[noreturn]] static  void Error(const char * const a_msg = m_nullString, int m_exitCode = CH_DEFAULT_ERROR_CODE);
 
   /// Print out message to cerr and exit via abort() (if serial) or MPI_Abort() (if parallel).
   /** The exit code depends on the compiler and MPI implementation.
    */
-  static void Abort(const char * const a_msg = m_nullString);
+  [[noreturn]] static void Abort(const char * const a_msg = m_nullString);
 
   /// Print out message to cerr and continue
   static void Warning(const char * const a_msg = m_nullString);

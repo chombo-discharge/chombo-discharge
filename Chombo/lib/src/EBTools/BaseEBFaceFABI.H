@@ -17,6 +17,20 @@
 #include "NamespaceHeader.H"
 
 /**********************/
+template <class T>
+BaseEBFaceFAB<T>::BaseEBFaceFAB(const Interval& a_interval, BaseEBFaceFAB<T>& a_original)
+:m_irrFAB(a_interval,a_original.m_irrFAB),
+ m_regFAB(a_interval,a_original.m_regFAB),
+ m_nComp(a_interval.size()),
+ m_iDir(a_original.m_iDir),
+ m_regionFace(a_original.m_regionFace),
+ m_region(a_original.m_region),
+ m_isDefined(a_original.m_isDefined),
+ m_ebisBox(a_original.m_ebisBox)
+{
+  if(!m_isDefined) MayDay::Error("Calling alias constructor on undefined BaseEBFaceFAB.  Probably an earlier error");
+
+}
 /**********************/
 template <class T>
 void
@@ -65,8 +79,16 @@ BaseEBFaceFAB<T>::size(const Box& R, const Interval& comps) const
 {
 
   Box RFace = surroundingNodes(R, m_iDir);
-  int retval = m_regFAB.size(RFace, comps);
-  retval    += m_irrFAB.size(R,     comps);
+  int regsize = m_regFAB.size(RFace, comps);
+  int irrsize = m_irrFAB.size(R,     comps);
+  int retval = regsize + irrsize;
+
+  if(m_verbose) 
+  {
+    pout()  <<"baseebfacefab R = " << R << ", RFace = " << RFace << ", comps = " << comps;
+    pout() << ", regbox = " << m_regFAB.box() << ", regsize = " << regsize << ", irrsize = " << irrsize << ", total = " << retval << endl;
+  }
+  
   return retval;
 }
 

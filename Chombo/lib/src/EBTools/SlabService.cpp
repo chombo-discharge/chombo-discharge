@@ -77,7 +77,8 @@ SlabService::fillGraph(BaseFab<int>&      a_regIrregCovered,
                        const Box&         a_ghostRegion,
                        const ProblemDomain&         a_domain,
                        const RealVect&    a_origin,
-                       const Real&        a_dx) const
+                       const Real&        a_dx,
+                       const DataIndex&   a_di) const
 {
   Box grownCovBox = grow(m_coveredRegion, 1);
   grownCovBox &= a_ghostRegion;

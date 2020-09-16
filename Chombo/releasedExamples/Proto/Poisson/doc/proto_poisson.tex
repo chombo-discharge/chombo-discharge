@@ -1,0 +1,96 @@
+\documentclass[12pt,a4paper]{article}
+\title{Chombo/Proto Poisson example }
+\date{}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+
+Given a charge distribution $\rho$, and a field $\phi$
+the spatial Helmoltz equation is given by
+\begin{equation}
+(\alpha I + \beta \nabla) \phi = \rho.
+\end{equation}
+where $\alpha$ and $\beta$ are constants.
+The Chombo Proto example solves the spatial Helmholtz equation in two
+or three dimensions using geometric multigrid with standard V-cycles.
+
+We present the performance for a single level calculation on a single
+node of a Cori Haswell node.    The boundary conditions are periodic
+and the charge distribution has compact support of $r = 0.2$.  
+Further parameters are as follows.
+\begin{itemize}
+\item Identity coefficient, $\alpha = 1$.
+\item Laplacian coefficient, $\beta  = -0.1$.
+\item Number of smoothings per relaxation, $n_{s} = 4$.
+\item Grid dimensions = $512^3$.
+\item Domain size $L_x=L_y=L_z =1$.
+\end{itemize}
+
+All calculations are done with a varying number of threads, keeping
+the number of computational units constant.   If $N_t$ is the number
+of OpenMP threads and $N_m$ is the number of MPI processes, for all
+calculations, $N_t N_m = 32$.  Floating point rates are calculated as
+a post-processing step.
+
+\end{abstract}
+
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c||c|c|} \hline
+$N_t$ & $N_m$ & $T_{vcycle}$  & $F_{resid}$  \\
+\hline 
+1  &  32 &    1.223  & 78.1 GFlop \\ 
+2  &  16 &    2.450  & 39.0 GFlop \\ 
+4  &  8  &    2.480  & 30.6 GFlop \\ 
+8  &  4  &    2.334  & 18.4 GFlop \\ 
+16 &  2  &    2.695  & 10.5 GFlop \\
+32 &  1  &    2.361  &  6.5 MFlop \\
+\hline 
+\end{tabular}
+\end{center}
+\caption{AMRPoisson performance.  } 
+\label{fig::solut2dl0}
+\end{table}
+
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c||c|c|} \hline
+$N_t$ & $N_m$ & $T_{vcycle}$ & $F_{resid}$ \\
+\hline 
+1  &  32 &    3.89   & 20.1 GFlop\\ 
+2  &  16 &    6.53   & 12.7 GFlop\\ 
+4  &  8  &    6.47   & 12.6 GFlop\\ 
+8  &  4  &    6.27   & 12.6 GFlop\\ 
+16 &  2  &    6.00   & 12.6 GFlop\\
+32 &  1  &    5.85   & 12.7 GFlop\\
+\hline 
+\end{tabular}
+\end{center}
+\caption{7 point stencil proto performance.  Same stencil as AMRPoisson} 
+\label{fig::solut2dl0}
+\end{table}
+
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c||c|c|} \hline
+$N_t$ & $N_m$ & $T_{vcycle}$  & $F_{resid}$\\
+\hline 
+1  &  32 &    12.4 &  22.9 GFlop\\ 
+2  &  16 &    20.7 &  14.7 GFlop\\ 
+4  &  8  &    20.7 &  14.4 GFlop\\ 
+8  &  4  &    19.7 &  14.7 GFlop\\ 
+16 &  2  &    18.8 &  14.9 GFlop\\
+32 &  1  &    18.6 &  14.9 GFlop\\
+\hline 
+\end{tabular}
+\end{center}
+\caption{27 point stencil proto performance.  } 
+\label{fig::solut2dl0}
+\end{table}
+
+
+\end{document}

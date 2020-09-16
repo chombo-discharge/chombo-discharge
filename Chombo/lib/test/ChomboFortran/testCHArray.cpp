@@ -29,7 +29,7 @@ using std::endl;
 #include "BoxIterator.H"
 #include "CHArray.H"
 #ifdef CH_MPI
-#include <mpi.h>
+#include "mpi.h"
 #endif
 #include "UsingNamespace.H"
 

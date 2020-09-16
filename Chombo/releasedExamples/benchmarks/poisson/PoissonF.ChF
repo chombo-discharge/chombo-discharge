@@ -1,0 +1,43 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+
+#include "CONSTANTS.H"
+      subroutine simplestlaplacian(
+     &     chf_fra1[opphidir],
+     &     chf_const_fra1[phi],
+     &     chf_const_real[alpha],
+     &     chf_const_real[beta],
+     &     chf_const_realvect[dx],
+     &     chf_box[box])
+
+      integer chf_ddecl[i;j;k]
+      real_t laplphi, chf_ddecl[dx0;dx1;dx2]
+
+      chf_dterm[dx0 = beta/(dx(0) * dx(0));
+                dx1 = beta/(dx(1) * dx(1));
+                dx2 = beta/(dx(2) * dx(2));]
+
+      chf_omp_multido[box;i;j;k]
+
+      laplphi = CHF_DTERM[
+     &     (    phi(chf_ix[i+1;j  ;k  ])
+     &     +    phi(chf_ix[i-1;j  ;k  ])
+     $     -two*phi(chf_ix[i  ;j  ;k  ]))*dx0 ;
+     $     +(   phi(chf_ix[i  ;j+1;k  ])
+     &     +    phi(chf_ix[i  ;j-1;k  ])
+     $     -two*phi(chf_ix[i  ;j  ;k  ]))*dx1 ;
+     $     +(   phi(chf_ix[i  ;j  ;k+1])
+     &     +    phi(chf_ix[i  ;j  ;k-1])
+     $     -two*phi(chf_ix[i  ;j  ;k  ]))*dx2 ]
+
+c     opphidir comes in holding alpha*phi
+      opphidir(chf_ix[i;j;k]) =  alpha*phi(CHF_IX[i;j;k]) + laplphi
+
+      chf_enddo
+      ch_flops=ch_flops+CHF_POINTS[box]*(5*CH_SPACEDIM + 1)
+      return
+      end

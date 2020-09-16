@@ -678,6 +678,7 @@ void refine_bl(BoxLayout& output, const BoxLayout& input, int refinement)
 }
 
 void mortonOrdering(Vector<Box>& a_boxes);
+void serialMortonOrdering(Vector<Box>& a_boxes);
 
 //========================================================
 

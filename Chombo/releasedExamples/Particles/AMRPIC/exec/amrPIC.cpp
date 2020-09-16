@@ -26,8 +26,8 @@
 
 /***************/
 void amrPM(const Real& a_stopTime,
-	   const int&  a_nstop,
-	   const Vector<int>& a_refRat)
+           const int&  a_nstop,
+           const Vector<int>& a_refRat)
 {
   // read inputs
   ParmParse pp;

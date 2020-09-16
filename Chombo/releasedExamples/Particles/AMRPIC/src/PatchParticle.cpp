@@ -75,8 +75,8 @@ void PatchParticle::setMeshInterp(const InterpType& a_poissonInterpType)
     }
 
   m_meshInterp = static_cast<MeshInterp* > (new MeshInterp(m_domain.domainBox(),
-							   RealVect(D_DECL(m_dx, m_dx, m_dx)),
-							   m_origin));
+                                                           RealVect(D_DECL(m_dx, m_dx, m_dx)),
+                                                           m_origin));
   
   m_isMeshInterpSet = true;
 }

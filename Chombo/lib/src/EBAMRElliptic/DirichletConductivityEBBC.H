@@ -88,6 +88,8 @@ public:
                          const pair<int,Real>*         a_cacheHint=0 );
 
 
+  static int s_velComp;
+
 private:
   DirichletPoissonEBBC m_bc;
   LayoutData<BaseIVFAB<VoFStencil> > m_fluxStencil;

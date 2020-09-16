@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstring>
+#include "parstream.H"
 using namespace std;
 
 #include "MayDay.H"
@@ -63,7 +64,7 @@ static void write_to_stderr_without_buffering (const char * const a_str)
   }
 }
 
-bool maydayabortFlag = false; //used by registerDebugger, that is listening for SIGABORT
+bool maydayabortFlag = true; //used by registerDebugger, that is listening for SIGABORT
 
 void MayDay::Error(const char * const a_msg, int exit_code)
 {
@@ -73,12 +74,14 @@ void MayDay::Error(const char * const a_msg, int exit_code)
   MPI_Abort(MPI_COMM_WORLD ,exit_code);
   // this shouldn't return, but if it does, exit serially
 #endif
+  pout()<<std::endl;
   exit(exit_code);
 }
 
 void MayDay::Abort(const char * const a_msg)
 {
   write_to_stderr_without_buffering(a_msg);
+  pout()<<std::endl;
   if (maydayabortFlag) abort();
 #ifdef CH_MPI
   MPI_Abort(MPI_COMM_WORLD ,CH_DEFAULT_ERROR_CODE);

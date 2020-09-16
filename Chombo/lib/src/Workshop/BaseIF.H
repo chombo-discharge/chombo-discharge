@@ -222,6 +222,23 @@ public:
     MayDay::Abort("Print function not implemented");
   };
 
+    ///
+  /**
+     An Implicit Function has three options for implementing this function
+     1) do nothing, allow the empty base implementation to remain in place as a null-op
+     2) take the makeGrids call as a directive: Here are the grids EBIndexSpace is wanting to use, configure
+         yourself accordingly to make this efficient for you.  
+     3) discard the DisjointBoxLayout EBIndexSpace would like and insert your own implementation of layout
+        EBIndexSpace will faithfully use a_grids returned from this function, including it's load balance. 
+  */
+  virtual void makeGrids( const ProblemDomain&      a_domain,
+                          DisjointBoxLayout&        a_grids,
+                          const int&                a_maxGridSize,
+                          const int&                a_maxIrregGridSize )
+  {
+    //default operation: Implicit Function and EBIndexSpace do not know about each other's data layout.
+  }
+  
   static void corners(const Box& a_region, const RealVect& a_origin, const Real& a_dx,
                       RealVect& a_lo, RealVect& a_hi)
   {

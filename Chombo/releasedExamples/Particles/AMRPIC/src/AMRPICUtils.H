@@ -38,7 +38,7 @@ getParticleIBC();
  */
 extern void
 getAMRLevelPICFactory(RefCountedPtr<AMRLevelPICFactory>&  a_fact,
-		      ZeldovichIBC* a_ibc);
+                      ZeldovichIBC* a_ibc);
 
 ///
 /**
@@ -60,7 +60,7 @@ defineAMR(AMR&                                 a_amr,
  */
 extern void
 setupAMRForFixedHierarchyRun(AMR& a_amr,
-			     const Vector<Vector<Box> >& a_hierarchy);
+                             const Vector<Vector<Box> >& a_hierarchy);
 
 /****/
 

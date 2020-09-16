@@ -187,7 +187,7 @@ public:
     int offset;
     Real weight;
     //only used when debugging
-    //VolIndex vof;
+    //  VolIndex vof;
   } typedef stencilTerm;
 
   struct
@@ -216,7 +216,7 @@ protected:
   IntVectSet m_setIrreg;
   bool       m_useInputSets;
   //only used when debugging
-  //Vector<VolIndex> m_srcVoFs;
+//  Vector<VolIndex> m_srcVoFs;
 private:
   ///
   /*

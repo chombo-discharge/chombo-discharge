@@ -156,8 +156,8 @@ public:
   /// The most general case -- can accept an arbitrary component range,
   /// a pre-built Copier object, and an arbitrary accumulation operator.
   virtual void exchange(const Interval& comps,
-			const Copier& copier,
-			const LDOperator<T>& a_op = LDOperator<T>());
+                        const Copier& copier,
+                        const LDOperator<T>& a_op = LDOperator<T>());
 
   /// asynchronous exchange start.  load and fire off messages.
   virtual void exchangeBegin(const Copier& copier);

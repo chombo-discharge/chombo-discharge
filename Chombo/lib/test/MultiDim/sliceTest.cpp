@@ -9,7 +9,7 @@
 #endif
 
 #ifdef CH_MPI
-#include <mpi.h>
+#include "mpi.h"
 #endif
 
 #include "Slicing.H.transdim"

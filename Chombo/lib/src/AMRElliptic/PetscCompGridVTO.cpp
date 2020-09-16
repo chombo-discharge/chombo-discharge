@@ -261,43 +261,43 @@ PetscCompGridVTO::applyBCs( IntVect a_iv, int a_ilev, const DataIndex &di_dummy,
             gbox.grow(1);
             inter = a_dombox & gbox;
           }while (inter.numPts()==0);
-	  if (igid!=0) MayDay::Error("PetscCompGridVTO::applyBCs layer???");
+          if (igid!=0) MayDay::Error("PetscCompGridVTO::applyBCs layer???");
           for (int dir=0;dir<CH_SPACEDIM;++dir)
             {
               if (jiv[dir] < a_dombox.smallEnd(dir) || jiv[dir] > a_dombox.bigEnd(dir))
-		{ // have a BC, get coefs on demand
-		  int iside = 1; // hi
-		  int isign = 1;
+                { // have a BC, get coefs on demand
+                  int iside = 1; // hi
+                  int isign = 1;
                   if (jiv[dir] < a_dombox.smallEnd(dir)) isign = -1;
-		  if (jiv[dir] < a_dombox.smallEnd(dir)) iside = 0; // lo
-		  if (!mybc) MayDay::Error("PetscCompGridVTO::applyBCs: wrong BC!!!!");
-		  new_vals.resize(1);
-		  new_vals[0].resize(1); 
-		  //new_vals[i][j].second.setValue(mybc->getCoef(j,i));
+                  if (jiv[dir] < a_dombox.smallEnd(dir)) iside = 0; // lo
+                  if (!mybc) MayDay::Error("PetscCompGridVTO::applyBCs: wrong BC!!!!");
+                  new_vals.resize(1);
+                  new_vals[0].resize(1); 
+                  //new_vals[i][j].second.setValue(mybc->getCoef(j,i));
                   for (int comp=0; comp<SpaceDim; comp++)
                     {
-		      new_vals[0][0].second.define(1);
+                      new_vals[0][0].second.define(1);
                       if (mybc->m_bcDiri[dir][iside][comp]) new_vals[0][0].second.setValue(comp,comp,-1.); // simple diagonal 
                       else new_vals[0][0].second.setValue(comp,comp,1.);
                     } // end loop over components
                   new_vals[0][0].first.setLevel(a_ilev);
-		  
-		  IndexML kill(jiv,a_ilev);
-		  IntVect biv = jiv;
-		  biv.shift(dir,-isign*(igid+1));                 
-		  new_vals[igid][0].first.setIV(biv);
-		  if (ideg>0 && !a_dombox.contains(biv)) // this could be a new stencil value for high order BCs
-		    {
-		      corners[ideg-1] |= biv; // send down to lower list for later removal
-		    }
-		  else CH_assert(a_dombox.contains(biv));
-		
-		  StencilProject(kill,new_vals[igid],a_sten);
-		  int nrm = a_sten.erase(kill); CH_assert(nrm==1);
-		  break;
-		} // BC
-	    } // spacedim
-	} // ghosts
+                  
+                  IndexML kill(jiv,a_ilev);
+                  IntVect biv = jiv;
+                  biv.shift(dir,-isign*(igid+1));                 
+                  new_vals[igid][0].first.setIV(biv);
+                  if (ideg>0 && !a_dombox.contains(biv)) // this could be a new stencil value for high order BCs
+                    {
+                      corners[ideg-1] |= biv; // send down to lower list for later removal
+                    }
+                  else CH_assert(a_dombox.contains(biv));
+                
+                  StencilProject(kill,new_vals[igid],a_sten);
+                  int nrm = a_sten.erase(kill); CH_assert(nrm==1);
+                  break;
+                } // BC
+            } // spacedim
+        } // ghosts
     } // degree
 }
 
@@ -315,10 +315,10 @@ CompGridVTOBC::createCoefs()
 // 
 void 
 CompGridVTOBC::operator()( FArrayBox&           a_state,
-			   const Box&           a_valid,
-			   const ProblemDomain& a_domain,
-			   Real                 a_dx,
-			   bool                 a_homogeneous)
+                           const Box&           a_valid,
+                           const ProblemDomain& a_domain,
+                           Real                 a_dx,
+                           bool                 a_homogeneous)
 {
   const Box& domainBox = a_domain.domainBox();
   for (int idir = 0; idir < SpaceDim; idir++)

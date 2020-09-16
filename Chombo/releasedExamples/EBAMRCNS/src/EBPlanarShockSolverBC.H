@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _EBPlanarShockSolverBC_H_
-#define _EBPlanarShockSolverBC_H_
+#ifndef _EBPLANARSHOCKSOLVERBC_H_
+#define _EBPLANARSHOCKSOLVERBC_H_
 
 #include "RefCountedPtr.H"
 #include "ViscousBaseDomainBC.H"

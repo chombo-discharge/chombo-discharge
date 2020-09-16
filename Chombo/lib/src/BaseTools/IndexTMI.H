@@ -481,7 +481,7 @@ template<typename T, int N> void IndexTM<T,N>::linearOut(void* a_outBuf) const
 template<typename T, int N> IndexTM<T,N>::IndexTM(T a_i)
   : GenericArithmeticable< T, IndexTM<T,N> >(this)
 {
-  STATIC_ASSERT(N == 1);
+  static_assert(N == 1,"N==1");
   m_vect[0] = a_i;
 }
 
@@ -489,7 +489,7 @@ template<typename T, int N> IndexTM<T,N>::IndexTM(T a_i,
                                                   T a_j)
   : GenericArithmeticable< T, IndexTM<T,N> >(this)
 {
-  STATIC_ASSERT(N == 2);
+  static_assert(N == 2, "N==2");
   m_vect[0] = a_i;
   m_vect[1] = a_j;
 }
@@ -499,7 +499,7 @@ template<typename T, int N> IndexTM<T,N>::IndexTM(T a_i,
                                                   T a_k)
   : GenericArithmeticable< T, IndexTM<T,N> >(this)
 {
-  STATIC_ASSERT(N == 3);
+  static_assert(N == 3, "N==3");
   m_vect[0] = a_i;
   m_vect[1] = a_j;
   m_vect[2] = a_k;
@@ -511,7 +511,7 @@ template<typename T, int N> IndexTM<T,N>::IndexTM(T a_i,
                                                   T a_l)
   : GenericArithmeticable< T, IndexTM<T,N> >(this)
 {
-  STATIC_ASSERT(N == 4);
+  static_assert(N == 4, "N==4");
   m_vect[0] = a_i;
   m_vect[1] = a_j;
   m_vect[2] = a_k;
@@ -525,7 +525,7 @@ template<typename T, int N> IndexTM<T,N>::IndexTM(T a_i,
                                                   T a_m)
   : GenericArithmeticable< T, IndexTM<T,N> >(this)
 {
-  STATIC_ASSERT(N == 5);
+  static_assert(N == 5, "N==5");
   m_vect[0] = a_i;
   m_vect[1] = a_j;
   m_vect[2] = a_k;
@@ -541,7 +541,7 @@ template<typename T, int N> IndexTM<T,N>::IndexTM(T a_i,
                                                   T a_n)
   : GenericArithmeticable< T, IndexTM<T,N> >(this)
 {
-  STATIC_ASSERT(N == 6);
+  static_assert(N == 6, "N==6");
   m_vect[0] = a_i;
   m_vect[1] = a_j;
   m_vect[2] = a_k;

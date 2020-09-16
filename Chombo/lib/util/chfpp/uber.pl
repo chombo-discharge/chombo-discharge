@@ -74,13 +74,22 @@ use ChF;
         die "problem $flag in multido processor\n";
     }
 
+###process multido statements
+    require "multido_omp.pm";
+    MultiDoProc->import();
+    unless(my $flag = &MultiDoProc::procMultiDoOMPMacros($ChF::T1File, $ChF::T2File,
+                                                         $ChF::SpaceDim, $ChF::debug))
+    {
+        die "problem $flag in multidoomp processor\n";
+    }
+
 
 
 
 ###process LBOUND macros.
     require "lboundpp.pm";
     LBoundProc->import();
-    unless(my $flag = &LBoundProc::procLBoundMacros($ChF::T1File, $ChF::T2File,
+    unless(my $flag = &LBoundProc::procLBoundMacros($ChF::T2File, $ChF::T1File,
                                                     $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in lbound processor\n";
@@ -89,7 +98,7 @@ use ChF;
 ###process UBOUND macros.
     require "uboundpp.pm";
     UboundProc->import();
-    unless(my $flag = &UboundProc::procUboundMacros($ChF::T2File, $ChF::T1File,
+    unless(my $flag = &UboundProc::procUboundMacros($ChF::T1File, $ChF::T2File,
                                                     $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in ubound processor\n";
@@ -98,7 +107,7 @@ use ChF;
 ###process NCOMP macros.
     require "ncomppp.pm";
     NcompProc->import();
-    unless(my $flag = &NcompProc::procNcompMacros($ChF::T1File, $ChF::T2File,
+    unless(my $flag = &NcompProc::procNcompMacros($ChF::T2File, $ChF::T1File,
                                                   $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in ncomp processor\n";
@@ -107,7 +116,7 @@ use ChF;
 ###process CHF_IX macros.
     require "chfixpp.pm";
     ChfixProc->import();
-    unless(my $flag = &ChfixProc::procChfixMacros($ChF::T2File, $ChF::T1File,
+    unless(my $flag = &ChfixProc::procChfixMacros($ChF::T1File, $ChF::T2File,
                                                   $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in chfix processor\n";
@@ -116,7 +125,7 @@ use ChF;
 ###process CHF_OFFSETIX macros. 
     require "chfoffsetixpp.pm";
     ChfOffsetixProc->import();
-    unless(my $flag = &ChfOffsetixProc::procChfOffsetixMacros($ChF::T1File, $ChF::T2File,
+    unless(my $flag = &ChfOffsetixProc::procChfOffsetixMacros($ChF::T2File, $ChF::T1File,
                                                               $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in chfoffsetix processor\n";
@@ -126,7 +135,7 @@ use ChF;
 ###process CHF_AUTOIX macros.
     require "chfautoixpp.pm";
     ChfAutoixProc->import();
-    unless(my $flag = &ChfAutoixProc::procChfAutoixMacros($ChF::T2File, $ChF::T1File,
+    unless(my $flag = &ChfAutoixProc::procChfAutoixMacros($ChF::T1File, $ChF::T2File,
                                                           $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in chfautoix processor\n";
@@ -136,7 +145,7 @@ use ChF;
 ###process DTERM macros.
     require "dtermpp.pm";
     DTERMProc->import();
-    unless(my $flag = &DTermProc::procDTermMacros($ChF::T1File, $ChF::T2File,
+    unless(my $flag = &DTermProc::procDTermMacros($ChF::T2File, $ChF::T1File,
                                                   $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in dterm processor\n";
@@ -146,7 +155,7 @@ use ChF;
 ###process AUTODECL macros.
     require "autodeclpp.pm";
     DDeclProc->import();
-    unless(my $flag = &AutoDeclProc::procAutoDeclMacros($ChF::T2File, $ChF::T1File,
+    unless(my $flag = &AutoDeclProc::procAutoDeclMacros($ChF::T1File, $ChF::T2File,
                                                         $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in ddecl processor\n";
@@ -155,7 +164,7 @@ use ChF;
 ###process DDECL macros.
     require "ddeclpp.pm";
     DDeclProc->import();
-    unless(my $flag = &DDeclProc::procDDeclMacros($ChF::T1File, $ChF::T2File,
+    unless(my $flag = &DDeclProc::procDDeclMacros($ChF::T2File, $ChF::T1File,
                                                   $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in ddecl processor\n";
@@ -165,7 +174,7 @@ use ChF;
 ###process DSELECT macros.
     require "dselectpp.pm";
     DSelectProc->import();
-    unless(my $flag = &DSelectProc::procDSelectMacros($ChF::T2File, $ChF::T1File,
+    unless(my $flag = &DSelectProc::procDSelectMacros($ChF::T1File, $ChF::T2File,
                                                       $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in dselect processor\n";
@@ -175,7 +184,7 @@ use ChF;
 ###process CHF_AUTOID macros.
     require "chfautoidpp.pm";
     ChfAutoidProc->import();
-    unless(my $flag = &ChfAutoidProc::procChfAutoidMacros($ChF::T1File, $ChF::T2File,
+    unless(my $flag = &ChfAutoidProc::procChfAutoidMacros($ChF::T2File, $ChF::T1File,
                                                           $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in chfautoid processor\n";
@@ -184,7 +193,7 @@ use ChF;
 ###process Points macros.
     require "pointspp.pm";
     PointsProc->import();
-    unless(my $flag = &PointsProc::procPointsMacro($ChF::T2File, $ChF::T1File,
+    unless(my $flag = &PointsProc::procPointsMacro($ChF::T1File, $ChF::T2File,
                                                     $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in Points processor\n";
@@ -193,7 +202,7 @@ use ChF;
 ###process DINVTERM macros.
     require "dinvtermpp.pm";
     DInvTermProc->import();
-    unless(my $flag = &DInvTermProc::procDInvTermMacros($ChF::T1File, $ChF::FOUTFile,
+    unless(my $flag = &DInvTermProc::procDInvTermMacros($ChF::T2File, $ChF::FOUTFile,
                                                         $ChF::SpaceDim, $ChF::debug))
     {
         die "problem $flag in dinvterm processor\n";

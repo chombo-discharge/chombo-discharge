@@ -116,6 +116,7 @@ defs:
 	@echo "HDFMPILIBFLAGS=$(HDFMPILIBFLAGS)"
 	@echo "RUN=$(RUN)"
 	@echo "RUNFLAGS=$(RUNFLAGS)"
+	@echo "CXXSTD=$(CXXSTD)"
 	@echo "USE_64=$(USE_64)"
 	@echo "USE_COMPLEX=$(USE_COMPLEX)"
 	@echo "USE_EB=$(USE_EB)"

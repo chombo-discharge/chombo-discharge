@@ -107,32 +107,32 @@ main(int argc ,char *argv[] )
       Real expectedAnswer = 1.0 / cellVolume;
 
       for (int idir = 0; idir < SpaceDim; idir++)
-	{
+        {
 
-	  
-	  if (iv[idir] == 4)
-	    {
-	      expectedAnswer *= 0.75;
-	    }
+          
+          if (iv[idir] == 4)
+            {
+              expectedAnswer *= 0.75;
+            }
 
-	  else if (iv[idir] == 5)
-	    {
-	      expectedAnswer *= 0.25;
-	    }
-	    
-	  else
-	    {
-	      expectedAnswer *= 0.0;
-	    }
-	}
-	 
+          else if (iv[idir] == 5)
+            {
+              expectedAnswer *= 0.25;
+            }
+            
+          else
+            {
+              expectedAnswer *= 0.0;
+            }
+        }
+         
       if (rho.get(iv, 0) != expectedAnswer)
-	{
-	  pout() << " fail: CIC deposited density is not correct at point " << iv << std::endl;
-	  pout() << indent << " got: " << rho.get(iv, 0) 
-		 << " expected: " << expectedAnswer << std::endl;
-	  status = 1;	      
-	}
+        {
+          pout() << " fail: CIC deposited density is not correct at point " << iv << std::endl;
+          pout() << indent << " got: " << rho.get(iv, 0) 
+                 << " expected: " << expectedAnswer << std::endl;
+          status = 1;         
+        }
 
     }
 
@@ -152,23 +152,23 @@ main(int argc ,char *argv[] )
       Real expectedAnswer = 1.0 / cellVolume;
 
       for (int idir = 0; idir < SpaceDim; idir++)
-	{
+        {
 
-	  
-	  if (iv[idir] != 4)
-	    {
-	      expectedAnswer *= 0.0;
-	    }
+          
+          if (iv[idir] != 4)
+            {
+              expectedAnswer *= 0.0;
+            }
 
-	}
-	 
+        }
+         
       if (rho.get(iv, 0) != expectedAnswer)
-	{
-	  pout() << " fail: NGP deposited density is not correct at point " << iv << std::endl;	
+        {
+          pout() << " fail: NGP deposited density is not correct at point " << iv << std::endl; 
   pout() << indent << " got: " << rho.get(iv, 0) 
-		 << " expected: " << expectedAnswer << std::endl;
-	  status = 1;	      
-	}
+                 << " expected: " << expectedAnswer << std::endl;
+          status = 1;         
+        }
 
     }
 
@@ -188,36 +188,36 @@ main(int argc ,char *argv[] )
       Real expectedAnswer = 1.0 / cellVolume;
 
       for (int idir = 0; idir < SpaceDim; idir++)
-	{
-	  if (iv[idir] == 3)
-	    {
-	      expectedAnswer *= 1.0 / 32.0;
-	    }
+        {
+          if (iv[idir] == 3)
+            {
+              expectedAnswer *= 1.0 / 32.0;
+            }
 
-	  else if (iv[idir] == 4)
-	    {
-	      expectedAnswer *= 22.0 / 32.0;
-	    }
+          else if (iv[idir] == 4)
+            {
+              expectedAnswer *= 22.0 / 32.0;
+            }
 
-	  else if (iv[idir] == 5)
-	    {
-	      expectedAnswer *= 9.0 / 32.0;
-	    }
+          else if (iv[idir] == 5)
+            {
+              expectedAnswer *= 9.0 / 32.0;
+            }
 
-	  else
-	    {
-	      expectedAnswer *= 0.0;
-	    }
+          else
+            {
+              expectedAnswer *= 0.0;
+            }
 
-	}
-	 
+        }
+         
       if (rho.get(iv, 0) != expectedAnswer)
-	{
-	  pout() << " fail: TSC deposited density is not correct at point " << iv << std::endl;
-	  pout() << indent << " got: " << rho.get(iv, 0) 
-		 << " expected: " << expectedAnswer << std::endl;
-	  status = 1;	      
-	}
+        {
+          pout() << " fail: TSC deposited density is not correct at point " << iv << std::endl;
+          pout() << indent << " got: " << rho.get(iv, 0) 
+                 << " expected: " << expectedAnswer << std::endl;
+          status = 1;         
+        }
 
     }
 
@@ -237,41 +237,41 @@ main(int argc ,char *argv[] )
       Real expectedAnswer = 1.0 / cellVolume;
 
       for (int idir = 0; idir < SpaceDim; idir++)
-	{
-	  if (iv[idir] == 3)
-	    {
-	      expectedAnswer *= (-9.0/128.0);
-	    }
+        {
+          if (iv[idir] == 3)
+            {
+              expectedAnswer *= (-9.0/128.0);
+            }
 
-	  else if (iv[idir] == 4)
-	    {
-	      expectedAnswer *= (111.0/128.0);
-	    }
+          else if (iv[idir] == 4)
+            {
+              expectedAnswer *= (111.0/128.0);
+            }
 
-	  else if (iv[idir] == 5)
-	    {
-	      expectedAnswer *= (29.0/128.0);
-	    }
+          else if (iv[idir] == 5)
+            {
+              expectedAnswer *= (29.0/128.0);
+            }
 
-	  else if (iv[idir] == 6)
-	    {
-	      expectedAnswer *= (-3.0/128.0);
-	    }
-	  
-	  else
-	    {
-	      expectedAnswer *= 0.0;
-	    }
+          else if (iv[idir] == 6)
+            {
+              expectedAnswer *= (-3.0/128.0);
+            }
+          
+          else
+            {
+              expectedAnswer *= 0.0;
+            }
 
-	}
-	 
+        }
+         
       if (rho.get(iv, 0) != expectedAnswer)
-	{
-	  pout() << " fail: W4 deposited density is not correct at point " << iv << std::endl;
-	  pout() << indent << " got: " << rho.get(iv, 0) 
-		 << " expected: " << expectedAnswer << std::endl;
-	  status = 1;	      
-	}
+        {
+          pout() << " fail: W4 deposited density is not correct at point " << iv << std::endl;
+          pout() << indent << " got: " << rho.get(iv, 0) 
+                 << " expected: " << expectedAnswer << std::endl;
+          status = 1;         
+        }
 
     }
 
@@ -281,9 +281,9 @@ main(int argc ,char *argv[] )
     {
       IntVect iv = bit();
       for (int idir = 0; idir < SpaceDim; idir++)
-	{
-	  field.set(iv, idir, iv[idir]);
-	}
+        {
+          field.set(iv, idir, iv[idir]);
+        }
     }
 
   interp = NGP;
@@ -294,12 +294,12 @@ main(int argc ,char *argv[] )
       RealVect& this_acceleration = this_particle.acceleration();
       RealVect expectedField = RealVect(D_DECL6(4.0, 4.0, 4.0, 4.0, 4.0, 4.0));
       if (this_acceleration != expectedField)
-	{
-	  pout() << " fail: NGP interpolated field is not correct" << std::endl;
-	  pout() << indent << " got: " << this_acceleration 
-		 << " expected: " << expectedField << std::endl;
-	  status = 1;	      
-	}
+        {
+          pout() << " fail: NGP interpolated field is not correct" << std::endl;
+          pout() << indent << " got: " << this_acceleration 
+                 << " expected: " << expectedField << std::endl;
+          status = 1;         
+        }
       this_particle.setAcceleration(RealVect(D_DECL6(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)));
     }
 
@@ -311,12 +311,12 @@ main(int argc ,char *argv[] )
       RealVect& this_acceleration = this_particle.acceleration();
       RealVect expectedField = RealVect(D_DECL6(4.25, 4.25, 4.25, 4.25, 4.25, 4.25));
       if (this_acceleration != expectedField)
-	{
-	  pout() << " fail: NGP interpolated field is not correct" << std::endl;
-	  pout() << indent << " got: " << this_acceleration 
-		 << " expected: " << expectedField << std::endl;
-	  status = 1;	      
-	}
+        {
+          pout() << " fail: NGP interpolated field is not correct" << std::endl;
+          pout() << indent << " got: " << this_acceleration 
+                 << " expected: " << expectedField << std::endl;
+          status = 1;         
+        }
       this_particle.setAcceleration(RealVect(D_DECL6(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)));
     }
 
@@ -329,12 +329,12 @@ main(int argc ,char *argv[] )
       RealVect& this_acceleration = this_particle.acceleration();
       RealVect expectedField = RealVect(D_DECL6(4.25, 4.25, 4.25, 4.25, 4.25, 4.25));
       if (this_acceleration != expectedField)
-	{
-	  pout() << " fail: NGP interpolated field is not correct" << std::endl;
-	  pout() << indent << " got: " << this_acceleration 
-		 << " expected: " << expectedField << std::endl;
-	  status = 1;	      
-	}
+        {
+          pout() << " fail: NGP interpolated field is not correct" << std::endl;
+          pout() << indent << " got: " << this_acceleration 
+                 << " expected: " << expectedField << std::endl;
+          status = 1;         
+        }
       this_particle.setAcceleration(RealVect(D_DECL6(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)));
     }  
 
@@ -346,19 +346,19 @@ main(int argc ,char *argv[] )
       RealVect& this_acceleration = this_particle.acceleration();
       RealVect expectedField = RealVect(D_DECL6(4.25, 4.25, 4.25, 4.25, 4.25, 4.25));
       if (this_acceleration != expectedField)
-	{
-	  pout() << " fail: NGP interpolated field is not correct" << std::endl;
-	  pout() << indent << " got: " << this_acceleration 
-		 << " expected: " << expectedField << std::endl;
-	  status = 1;	      
-	}
+        {
+          pout() << " fail: NGP interpolated field is not correct" << std::endl;
+          pout() << indent << " got: " << this_acceleration 
+                 << " expected: " << expectedField << std::endl;
+          status = 1;         
+        }
       this_particle.setAcceleration(RealVect(D_DECL6(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)));
     }  
 
   // done
   pout() << indent << pgmname << ": "
-	 << ( (status == 0) ? "passed all tests" : "failed at least one test,")
-	 << std::endl;
+         << ( (status == 0) ? "passed all tests" : "failed at least one test,")
+         << std::endl;
 
 #ifdef CH_MPI
   MPI_Finalize();

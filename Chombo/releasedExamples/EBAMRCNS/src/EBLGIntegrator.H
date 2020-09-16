@@ -1,13 +1,15 @@
 #ifdef CH_LANG_CC
 /*
-*      _______              __
-*     / ___/ /  ___  __ _  / /  ___
-*    / /__/ _ \/ _ \/  V \/ _ \/ _ \
-*    \___/_//_/\___/_/_/_/_.__/\___/
-*    Please refer to Copyright.txt, in Chombo's root directory.
-*/
+ *      _______              __
+ *     / ___/ /  ___  __ _  / /  ___
+ *    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+ *    \___/_//_/\___/_/_/_/_.__/\___/
+ *    Please refer to Copyright.txt, in Chombo's root directory.
+ */
 #endif
 
+#ifndef _EBLGINTEGRATOR_H_
+#define _EBLGINTEGRATOR_H_
 
 #if (CH_SPACEDIM == 2)
 
@@ -29,7 +31,6 @@
 #define CNUM  4
 #define FNUM  4
 
-
 #endif
 
 #if (CH_SPACEDIM == 3)
@@ -46,7 +47,6 @@
 #define QNUM  9
 #define QSLOPE 9
 
-
 #define CRHO  0
 #define CMOMX 1
 #define CMOMY 2
@@ -54,4 +54,7 @@
 #define CENG  4
 #define CNUM  5
 #define FNUM  5
+
+#endif
+
 #endif

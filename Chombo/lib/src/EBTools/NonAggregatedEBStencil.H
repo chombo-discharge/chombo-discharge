@@ -8,8 +8,8 @@
  */
 #endif
 
-#ifndef _NonAggregatedEBSTENCIL_H_
-#define _NonAggregatedEBSTENCIL_H_
+#ifndef _NONAGGREGATEDEBSTENCIL_H_
+#define _NONAGGREGATEDEBSTENCIL_H_
 
 #include "Stencils.H"
 #include "Vector.H"

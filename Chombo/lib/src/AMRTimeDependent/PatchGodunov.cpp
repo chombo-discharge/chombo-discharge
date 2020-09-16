@@ -639,7 +639,7 @@ void PatchGodunov::PPMNormalPred(FArrayBox&       a_WMinus,
   Box faceBox = a_box;
   // added by petermc, 22 Sep 2008:
   // for 4th order, need extra faces in all the directions
-  if (m_highOrderLimiter) faceBox.grow(1);
+  if (m_util.useHighOrderLimiter()) faceBox.grow(1);
   faceBox.surroundingNodes(a_dir);
   FArrayBox WFace(faceBox,numprim);
 
@@ -729,7 +729,6 @@ void PatchGodunov::PPMNormalPred(FArrayBox&       a_WMinus,
 void PatchGodunov::highOrderLimiter(bool a_highOrderLimiter)
 {
   CH_assert(m_isDefined);
-  m_highOrderLimiter = a_highOrderLimiter;
   m_util.highOrderLimiter(a_highOrderLimiter);
 }
 

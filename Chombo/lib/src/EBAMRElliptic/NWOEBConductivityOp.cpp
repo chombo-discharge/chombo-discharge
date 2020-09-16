@@ -1020,8 +1020,7 @@ norm(const LevelData<EBCellFAB>& a_rhs,
     }
   maxNorm = tmp;
 #endif
-  //  Real volume=1.;
-  //  EBLevelDataOps::gatherBroadCast(maxNorm, volume, 0);
+
   CH_STOP(t1);
 
   return maxNorm;

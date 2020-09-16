@@ -102,10 +102,10 @@ main(int argc ,char *argv[] )
     DataIterator dit(grids);
     
     ParticleData<BinItem> particles(grids,
-				    probDomain,
-				    fixedBoxSize,
-				    meshSpacing, 
-				    origin);
+                                    probDomain,
+                                    fixedBoxSize,
+                                    meshSpacing, 
+                                    origin);
 
     // put the ghost particles in a new ParticleData, with ghost "cells"  
     BoxLayout ghostGrids;
@@ -114,10 +114,10 @@ main(int argc ,char *argv[] )
     ghostGrids.closeNoSort();
 
     ParticleData<BinItem> particlesWithGhosts(ghostGrids, 
-					      probDomain,
-					      fixedBoxSize,
-					      meshSpacing,
-					      origin);
+                                              probDomain,
+                                              fixedBoxSize,
+                                              meshSpacing,
+                                              origin);
 
     initData(particles, dx, domainDimension);
 
@@ -127,28 +127,28 @@ main(int argc ,char *argv[] )
 
     for (DataIterator dit(ghostGrids); dit.ok(); ++dit)
       {
-	unsigned idx = grids.index(dit());
-	size_t numGhosts = particlesWithGhosts[dit].numItems();
-	if (verbose)
-	  {
-	    pout() << "Box " << idx << " has " << numGhosts;
-	    pout() << " particles." << endl;
-	  }
-	if (numGhosts != partPerBox)
-	  {
-	    if (verbose)
-	      {
-		pout() << "Box has wrong number of particles after ghost fill." << endl;
-	      }
-	    status += 1;
-	  }
+        unsigned idx = grids.index(dit());
+        size_t numGhosts = particlesWithGhosts[dit].numItems();
+        if (verbose)
+          {
+            pout() << "Box " << idx << " has " << numGhosts;
+            pout() << " particles." << endl;
+          }
+        if (numGhosts != partPerBox)
+          {
+            if (verbose)
+              {
+                pout() << "Box has wrong number of particles after ghost fill." << endl;
+              }
+            status += 1;
+          }
       }
   }
 
   // done
   pout() << indent << pgmname << ": "
-	 << ( (status == 0) ? "passed all tests" : "failed at least one test,")
-	 << endl;
+         << ( (status == 0) ? "passed all tests" : "failed at least one test,")
+         << endl;
 
   CH_TIMER_REPORT();
 
@@ -214,10 +214,10 @@ initData(ParticleData<BinItem>& a_data,
     BoxIterator bit(thisBox);
     for (bit.begin(); bit.ok(); ++bit)
       {
-	IntVect iv = bit();
-	RealVect position = ((RealVect)iv + 0.5)*a_dx;
-	BinItem particle(position);
-	thisList.append(particle);
+        IntVect iv = bit();
+        RealVect position = ((RealVect)iv + 0.5)*a_dx;
+        BinItem particle(position);
+        thisList.append(particle);
       }
     a_data[dit].addItemsDestructive(thisList);
   }

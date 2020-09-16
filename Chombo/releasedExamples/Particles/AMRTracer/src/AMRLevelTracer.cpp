@@ -48,9 +48,9 @@ define(AdvectionVelocityFunction a_advFunc,
 
 /********/
 void AMRLevelTracer::define(AMRLevel*            a_coarserLevelPtr,
-			    const ProblemDomain& a_problemDomain,
-			    int                  a_level,
-			    int                  a_refRatio)
+                            const ProblemDomain& a_problemDomain,
+                            int                  a_level,
+                            int                  a_refRatio)
 {
   // Call inherited define
   AMRLevel::define(a_coarserLevelPtr,
@@ -322,9 +322,9 @@ regrid(const Vector<Box>& a_newGrids)
 
   // Define old and new state data structures
   m_PNew.define(m_grids, m_problem_domain, m_maxBoxSize,
-		m_meshSpacing, m_origin);
+                m_meshSpacing, m_origin);
   m_POld.define(m_grids, m_problem_domain, m_maxBoxSize,
-		m_meshSpacing, m_origin);
+                m_meshSpacing, m_origin);
 
   // Set up data structures
   levelSetup();
@@ -383,9 +383,9 @@ initialGrid(const Vector<Box>& a_newGrids)
 
   // Define old and new state data structures
   m_PNew.define(m_grids, m_problem_domain, m_maxBoxSize,
-		m_meshSpacing, m_origin);
+                m_meshSpacing, m_origin);
   m_POld.define(m_grids, m_problem_domain, m_maxBoxSize,
-		m_meshSpacing, m_origin);
+                m_meshSpacing, m_origin);
 
   // Set up data structures
   levelSetup();

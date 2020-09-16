@@ -64,6 +64,12 @@ void define(const EBISBox&  a_ebisBox,
   EBFaceFAB& operator+=(const EBFaceFAB& a_ebfab);
 
 
+  /// aliasing constructor
+  EBFaceFAB(const Interval& a_interval, EBFaceFAB& a_original)
+    :BaseEBFaceFAB<Real>(a_interval, a_original)
+    {
+    }
+
   ///
   /**
      Both fabs need the same ebisBox and region.

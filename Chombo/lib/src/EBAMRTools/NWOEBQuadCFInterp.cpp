@@ -115,7 +115,7 @@ getStencil(VoFStencil           & a_stencil,
   VolIndex fineVoF = a_vofFine;
   Real dxFine = m_dxFine;  Real dxCoar = m_nref*m_dxFine;
   a_stencil.clear();
-  VolIndex coarVoF = a_ebisFine.coarsen(a_vofFine);
+  VolIndex coarVoF = m_ebislFine.coarsen(a_vofFine,m_nref, a_dit);
   RealVect coarLoc = EBArith::getVoFLocation(coarVoF, dxCoar, RealVect::Zero);
   RealVect fineLoc = EBArith::getVoFLocation(fineVoF, dxFine, RealVect::Zero);
   RealVect dist = fineLoc - coarLoc;

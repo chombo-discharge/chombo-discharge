@@ -18,8 +18,8 @@
 #include "IntVectSet.H"
 #include "DisjointBoxLayout.H"
 #include "LayoutIterator.H"
+#include "parstream.H"
 #include "MayDay.H"
-using std::cout;
 using std::endl;
 
 #include "PiecewiseLinearFillPatchFace.H"
@@ -778,23 +778,23 @@ PiecewiseLinearFillPatchFace::printIntVectSets() const
 
   for (int faceDir=0; faceDir<SpaceDim; faceDir++)
   {
-    cout << "face direction = " << faceDir << endl;
+    pout() << "face direction = " << faceDir << endl;
 
     DataIterator lit = m_fine_interp[faceDir].boxLayout().dataIterator();
     for (lit.begin(); lit.ok(); ++lit)
     {
-      cout << "grid " << lit().intCode() << ": " << endl;
-      cout << "fine ivs" << endl;
-      cout << m_fine_interp[faceDir][lit()] << endl;
+      pout() << "grid " << lit().intCode() << ": " << endl;
+      pout() << "fine ivs" << endl;
+      pout() << m_fine_interp[faceDir][lit()] << endl;
 
       for (int dir = 0; dir < SpaceDim; ++dir)
         {
-          cout << "coarse centered ivs [" << dir << "]: " << endl;
-          cout << m_coarse_centered_interp[dir][faceDir][lit()] << endl;
-          cout << "coarse lo ivs [" << dir << "]: " << endl;
-          cout << m_coarse_lo_interp[dir][faceDir][lit()] << endl;
-          cout << "coarse hi ivs [" << dir << "]: " << endl;
-          cout << m_coarse_hi_interp[dir][faceDir][lit()] << endl;
+          pout() << "coarse centered ivs [" << dir << "]: " << endl;
+          pout() << m_coarse_centered_interp[dir][faceDir][lit()] << endl;
+          pout() << "coarse lo ivs [" << dir << "]: " << endl;
+          pout() << m_coarse_lo_interp[dir][faceDir][lit()] << endl;
+          pout() << "coarse hi ivs [" << dir << "]: " << endl;
+          pout() << m_coarse_hi_interp[dir][faceDir][lit()] << endl;
         }
 
     }

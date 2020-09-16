@@ -73,7 +73,7 @@ EBStencil::EBStencil(const Vector<VolIndex>& a_srcVofs,
   m_lphBox = boxLph;
   m_phiBox = boxPhi;
   //debugging hook
-  //m_srcVoFs = a_srcVofs;
+  // m_srcVoFs = a_srcVofs;
   const IntVectSet& ivsPhi = a_ebisBoxPhi.getMultiCells(boxPhi);
   const IntVectSet& ivsLph = a_ebisBoxLph.getMultiCells(boxLph);
  
@@ -176,7 +176,8 @@ void EBStencil::apply(EBCellFAB& a_lofphi, const EBCellFAB& a_phi, bool a_increm
   for (int isrc = 0; isrc < m_ebstencil.size(); isrc++)
     {
       //debugging hook
-      //const VolIndex& srcVoF = m_srcVoFs[isrc];
+      //     const VolIndex& srcVoF = m_srcVoFs[isrc];
+      //end debug hook
       const ebstencil_t& ebstencil = m_ebstencil[isrc];
       Real* lphiPtr = NULL;
       if (m_destTerms[isrc].multiValued)
@@ -246,7 +247,8 @@ void EBStencil::apply(EBCellFAB&             a_lofphi,
   for (int isrc = 0; isrc < m_ebstencil.size(); isrc++)
     {
       //debugging hook
-      //const VolIndex& srcVoF = m_srcVoFs[isrc];
+     // const VolIndex& srcVoF = m_srcVoFs[isrc];
+     //end debug hook
       const ebstencil_t& ebstencil = m_ebstencil[isrc];
       Real* lphiPtr = NULL;
       const Real* sourPtr = NULL;
@@ -460,6 +462,7 @@ void EBStencil::relax(EBCellFAB&             a_phi,
     {
       //debugging hook
       //const VolIndex& srcVoF = m_srcVoFs[isrc];
+      //end debug 
       const ebstencil_t& ebstencil = m_ebstencil[isrc];
       const Real* rhsPtr = NULL;
       Real* sourPtr = NULL;

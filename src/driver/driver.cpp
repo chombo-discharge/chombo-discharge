@@ -1113,8 +1113,9 @@ void driver::parse_geometry_generation(){
   pp.get("geometry_scan_level", m_geo_scan_level);
   
 
-  if(m_geometry_generation == "plasmac"){
+  if(m_geometry_generation == "plasmac"){ // Need to activate some flags that trigger the correct code. 
     computational_geometry::s_use_new_gshop = true;
+    EBISLevel::s_distributedData            = true;
     computational_geometry::s_ScanDomain = m_amr->get_domains()[m_geo_scan_level];
   }
   else if(m_geometry_generation == "chombo"){

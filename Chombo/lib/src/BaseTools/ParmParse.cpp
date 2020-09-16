@@ -75,6 +75,18 @@ ParmParse::ParmParse (int         argc,
     define( argc, argv, prefix, parfile );
 }
 
+ParmParse::ParmParse (const std::string& a_prefix)
+{
+  const char* prefix = a_prefix.c_str();
+  if (prefix != 0)
+  {
+    thePrefix = prefix;
+  }
+  // don't count this object if there isn't another one already --
+  // just assume define() will be called later
+  if ( num_obj > 0 ) num_obj++;
+}
+
 void
 ParmParse::define (int         argc,
                    char**      argv,

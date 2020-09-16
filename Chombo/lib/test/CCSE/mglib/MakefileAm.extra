@@ -1,3 +1,0 @@
-if SMALLBUILD_AM
-bin_PROGRAMS = main
-endif SMALLBUILD_AM

@@ -1123,10 +1123,15 @@ BRMeshRefine::receiveBoxesParallel(const Interval& a_from,
 
   // pout()<<"from "<<a_from.begin()<<a_from.end()<<"\n"
   //      <<"to   "<<a_to.begin()<<a_to.end()<<"\n";
-  if(m_messageBuffer.size()<ch_count.back())
+
+
+// can get to m_messageBuffer[0] with size=0
+//  if(m_messageBuffer.size()<ch_count.back())
+  if(!m_messageBuffer.size() || m_messageBuffer.size()<ch_count.back())
     {
       m_messageBuffer.resize(ch_count.back() + P_BUFFERSIZE);
     }
+
   int* recBuffer = &(m_messageBuffer[0]);
   int* next = recBuffer;
   MPI_Status status;

@@ -44,8 +44,18 @@ enum
   CHArrayMaximumRank = 7              ///< Maximum supported rank
 };
 
-namespace ArSp
+namespace ArSp  // CHArray support
 {
+
+// An index refers to a single dimension and a size to the overall
+// size of the array.  Except for 1D arrays, indexes are smaller than
+// sizes by division by at least 1 stride.
+
+  typedef int      IIx_t;             ///< Type of int for an index.  Must be
+                                      ///< signed to allow for lower bounds !=
+                                      ///< 0
+  typedef unsigned USz_t;             ///< Type of unsigned int for a size
+
   template <typename T> class DefaultArrayAlloc;
 }
 template <typename T,

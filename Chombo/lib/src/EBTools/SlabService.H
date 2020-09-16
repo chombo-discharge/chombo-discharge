@@ -69,7 +69,8 @@ public:
                          const Box&           a_ghostRegion,
                          const ProblemDomain&           a_domain,
                          const RealVect&      a_origin,
-                         const Real&          a_dx) const;
+                         const Real&          a_dx,
+                         const DataIndex&     a_di) const;
 
 
   virtual InOut InsideOutside(const Box&           a_region,

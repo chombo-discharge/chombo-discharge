@@ -10,7 +10,7 @@ makefiles+=lib_test_Workshop
 
 ebase = divergeTest pointCoarseningTest ldBaseIFFABTest cylinderTest coarseningTest fabTestTwo   \
         impFuncTest iffabExchangeTest linearizationTest normTest \
-        rampTest sphereConvTest sphereTest eieioTest irregFABArith ebisWriteAllTest intersectionPts
+        rampTest sphereConvTest sphereTest eieioTest irregFABArith ebisWriteAllTest intersectionPts stlgeom
 
 LibNames = Workshop EBAMRTools EBTools AMRTools BoxTools
 

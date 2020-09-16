@@ -1,5 +1,0 @@
-1.4d0                       gamma
-0.5d0    0.0d0    0.2d0     x0, y0, r0:  center and radius of bubble
-.10d0                       rhoin: density in bubble
-5.0d0                       pinf:  pressure behind shock
-

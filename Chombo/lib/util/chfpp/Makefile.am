@@ -9,6 +9,7 @@ EXTRA_chfpp_DATA = Balanced.pm \
                    makeallcapspp.pm \
                    Makefile.am \
                    multidopp.pm \
+                   multidopp_omp.pm \
                    ncomppp.pm \
                    stripcompp.pm \
                    stripsharpmain.pl \

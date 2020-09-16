@@ -203,7 +203,7 @@ Real LevelGodunov::step(LevelData<FArrayBox>&       a_U,
     for(int ibox = 0; ibox < nbox; ibox++)
       {
         const DataIndex & datind = dit[ibox];
-	Box curBox = m_grids[datind];
+        Box curBox = m_grids[datind];
         m_U[dit[ibox]].setVal(0.0); // Gets rid of denormalized crap.
         m_U[dit[ibox]].copy(a_U[dit[ibox]]);
 
@@ -271,9 +271,9 @@ Real LevelGodunov::step(LevelData<FArrayBox>&       a_U,
 #pragma omp for 
     for(int ibox = 0; ibox < nbox; ibox++)
       {
-	//	CH_START(timeUpdate);
-	FArrayBox zeroSource;
-	//AD: work on this section later
+        //      CH_START(timeUpdate);
+        FArrayBox zeroSource;
+        //AD: work on this section later
       // The current box
       const Box& curBox = m_grids.get(dit[ibox]);
 
@@ -498,35 +498,35 @@ void LevelGodunov::computeWHalf(LayoutData<FluxBox>&        a_WHalf,
 #pragma omp for 
     for(int ibox = 0; ibox < nbox; ibox++)
       {      
-	// The current box
-	Box curBox = m_grids.get(dit[ibox]);
+        // The current box
+        Box curBox = m_grids.get(dit[ibox]);
 
       // The current grid of conserved variables
-	const FArrayBox& curU = U[dit[ibox]];
+        const FArrayBox& curU = U[dit[ibox]];
       
       // The current grid of primitive variables extrapolated to faces and
       // half a time step
-	FluxBox& curWHalf = a_WHalf[dit[ibox]];
+        FluxBox& curWHalf = a_WHalf[dit[ibox]];
 
-	// The current source terms if they exist
-	const FArrayBox* source = &zeroSource;
-	if (a_S.isDefined())
-	  {
-	    source = &a_S[dit[ibox]];
-	  }
-	
-	// Set the current box for the patch integrator
-	// Potentially used in boundary conditions
+        // The current source terms if they exist
+        const FArrayBox* source = &zeroSource;
+        if (a_S.isDefined())
+          {
+            source = &a_S[dit[ibox]];
+          }
+        
+        // Set the current box for the patch integrator
+        // Potentially used in boundary conditions
 
-	// Update the current grid's conserved variables, return the final
-	// fluxes used for this, and the maximum wave speed for this grid
-	m_patchGodunov[dit[ibox]].setCurrentTime(a_time);
-	m_patchGodunov[dit[ibox]].setCurrentBox(curBox);
-	m_patchGodunov[dit[ibox]].computeWHalf(curWHalf,
-					       curU,
-					       *source,
-					       a_dt,
-					       curBox);
+        // Update the current grid's conserved variables, return the final
+        // fluxes used for this, and the maximum wave speed for this grid
+        m_patchGodunov[dit[ibox]].setCurrentTime(a_time);
+        m_patchGodunov[dit[ibox]].setCurrentBox(curBox);
+        m_patchGodunov[dit[ibox]].computeWHalf(curWHalf,
+                                               curU,
+                                               *source,
+                                               a_dt,
+                                               curBox);
       }
   }
 }
@@ -565,18 +565,18 @@ Real LevelGodunov::computeUpdate(LevelData<FArrayBox>&       a_dU,
 #pragma omp for 
     for(int ibox = 0; ibox < nbox; ibox++)
       {      
-	// Beginning of loop through patches/grids.
-	// The current box
-	Box curBox = m_grids.get(dit[ibox]);
+        // Beginning of loop through patches/grids.
+        // The current box
+        Box curBox = m_grids.get(dit[ibox]);
 
       // The current grid of conserved variables changes
-	FArrayBox& curDU = a_dU[dit[ibox]];
+        FArrayBox& curDU = a_dU[dit[ibox]];
 
-	// The fluxes computed for this grid - used for refluxing and returning
-	// other face centered quantities
-	FluxBox flux;
-	flux.define(curBox,m_numFluxes);
-	flux.setVal(0.0);
+        // The fluxes computed for this grid - used for refluxing and returning
+        // other face centered quantities
+        FluxBox flux;
+        flux.define(curBox,m_numFluxes);
+        flux.setVal(0.0);
 
       // The current grid of conserved variables
       const FArrayBox& curU = a_U[dit[ibox]];
@@ -592,45 +592,45 @@ Real LevelGodunov::computeUpdate(LevelData<FArrayBox>&       a_dU,
       // fluxes used for this, and the maximum wave speed for this grid
       m_patchGodunov[dit[ibox]].setCurrentTime(a_time);
       m_patchGodunov[dit[ibox]].computeUpdate(curDU,
-					      flux,
-					      curU,
-					      curWHalf,
-					      a_dt,
-					      curBox);
+                                              flux,
+                                              curU,
+                                              curWHalf,
+                                              a_dt,
+                                              curBox);
 
-	maxWaveSpeedGrid = m_patchGodunov[dit[ibox]].getGodunovPhysicsPtr()->getMaxWaveSpeed(curU, curBox);
+        maxWaveSpeedGrid = m_patchGodunov[dit[ibox]].getGodunovPhysicsPtr()->getMaxWaveSpeed(curU, curBox);
       // Get maximum wave speed for this grid
       // AD: Any reason why this does not use the thread private variable
       // like before
       // BVS: Once every compiler is OpenMP 3.1 compliant we can change this to a reduction variable with the new max op.
 #pragma omp critical
-	{
-	  // Clamp away from zero
-	  maxWaveSpeed = Max(maxWaveSpeed,maxWaveSpeedGrid);
-	}
+        {
+          // Clamp away from zero
+          maxWaveSpeed = Max(maxWaveSpeed,maxWaveSpeedGrid);
+        }
       // Do flux register updates
-	for (int idir = 0; idir < SpaceDim; idir++)
-	  {
-	    // Increment coarse flux register between this level and the next
-	    // finer level - this level is the next coarser level with respect
-	    // to the next finer level
-	    if (m_hasFiner)
-	      {
-		a_finerFluxRegister.incrementCoarse(flux[idir],a_dt,dit[ibox],
-						    UInterval,
-						    UInterval,idir);
-	      }
-	    
-	    // Increment fine flux registers between this level and the next
-	    // coarser level - this level is the next finer level with respect
-	    // to the next coarser level
-	    if (m_hasCoarser)
-	      {
-		a_coarserFluxRegister.incrementFine(flux[idir],a_dt,dit[ibox],
-						    UInterval,
-						    UInterval,idir);
-	      }
-	  }//end loop over directions
+        for (int idir = 0; idir < SpaceDim; idir++)
+          {
+            // Increment coarse flux register between this level and the next
+            // finer level - this level is the next coarser level with respect
+            // to the next finer level
+            if (m_hasFiner)
+              {
+                a_finerFluxRegister.incrementCoarse(flux[idir],a_dt,dit[ibox],
+                                                    UInterval,
+                                                    UInterval,idir);
+              }
+            
+            // Increment fine flux registers between this level and the next
+            // coarser level - this level is the next finer level with respect
+            // to the next coarser level
+            if (m_hasCoarser)
+              {
+                a_coarserFluxRegister.incrementFine(flux[idir],a_dt,dit[ibox],
+                                                    UInterval,
+                                                    UInterval,idir);
+              }
+          }//end loop over directions
       }// end data iterator loop
   }//end omp pragma
   
@@ -640,7 +640,7 @@ Real LevelGodunov::computeUpdate(LevelData<FArrayBox>&       a_dU,
   
 #ifdef CH_MPI
   int result = MPI_Allreduce(&local_dtNew, &dtNew, 1, MPI_CH_REAL,
-			     MPI_MIN, Chombo_MPI::comm);
+                             MPI_MIN, Chombo_MPI::comm);
   if (result != MPI_SUCCESS)
     {
       MayDay::Error("LevelGodunov::step: MPI communcation error");
@@ -676,7 +676,7 @@ Real LevelGodunov::getMaxWaveSpeed(const LevelData<FArrayBox>& a_U)
     for(int ibox = 0; ibox < nbox; ibox++)
       {
         m_patchGodunov[dit[ibox]].setCurrentTime(0.0);
-	const Box& curBox = disjointBoxLayout.get(dit[ibox]);
+        const Box& curBox = disjointBoxLayout.get(dit[ibox]);
 
       // Get maximum wave speed for this grid
       Real speedOverBox = m_patchGodunov[dit[ibox]].getGodunovPhysicsPtr()->getMaxWaveSpeed(a_U[dit[ibox]], curBox);

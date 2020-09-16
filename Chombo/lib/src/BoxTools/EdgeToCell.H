@@ -17,6 +17,7 @@
 #include "LevelData.H"
 #include "FArrayBox.H"
 #include "FluxBox.H"
+#include "ProtoInterface.H"
 
 #include "NamespaceHeader.H"
 
@@ -65,6 +66,24 @@ void EdgeToCellMax(const FluxBox& a_edgeData, const int a_edgeComp,
 void EdgeToCellMax(const FluxBox& a_edgeData, const int a_edgeComp,
                    FArrayBox& a_cellData, const int a_cellComp,
                    const Box& a_cellBox, const int a_dir);
+
+#ifdef USE_PROTO
+//proto replacements for fortran routines
+void
+ProtoEdgeToCellPatch(BaseFab<Real>      & a_cellData, 
+                     const int          & a_cellComp,
+                     const BaseFab<Real>& a_edgeData, 
+                     const int          & a_edgeComp, 
+                     const Box          & a_cellBox, 
+                     const int          & a_idir);
+void
+ProtoEdgeToCellPatchMax(BaseFab<Real>      & a_cellData, 
+                        const int          & a_cellComp,
+                        const BaseFab<Real>& a_edgeData, 
+                        const int          & a_edgeComp, 
+                        const Box          & a_cellBox, 
+                        const int          & a_idir);
+#endif
 
 #include "NamespaceFooter.H"
 

@@ -76,6 +76,10 @@ template <class T> inline void Swap(T& a_a,
 //    rtn*=a;
 //  return rtn;
 //}
+template <unsigned int P>
+constexpr inline int ipow(int M) { return M*ipow<P-1>(M);}
+template<>
+constexpr inline int ipow<0>(int M) {return 1;}
 
 inline int ipow(int a, int b)
 {

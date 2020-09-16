@@ -113,10 +113,12 @@ define(const DisjointBoxLayout& a_dbl,
   m_domain = a_domain;
   m_ebisPtr = a_ebisPtr;
   m_nghost = a_numGhostEBISL;
-
+  //pout() << "eblg: filling ebis layout" << endl;
   m_ebisPtr->fillEBISLayout(m_ebisl, a_dbl, m_domain, m_nghost);
+  //pout() << "eblg: filling cfivs " << endl;
   m_cfivs = RefCountedPtr<LayoutData<IntVectSet> >(new LayoutData<IntVectSet>());
   EBArith::defineCFIVS(*m_cfivs, m_grids, m_domain);
+  //pout() << "eblg: leaving " << endl;
 }
 
 

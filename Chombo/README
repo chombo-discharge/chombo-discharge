@@ -3,8 +3,8 @@
            Applied Numerical Algorithms Group
     National Energy Research Scientific Computing Center
           Lawrence Berkeley National Laboratory
-                 chombo@anag.lbl.gov
-              http://seesar.lbl.gov/anag/chombo
+                 chombo@lbl.gov
+              http://chombo.lbl.gov
 ========================================================================
 Disclaimer/Copyright
 ========================================================================
@@ -54,11 +54,11 @@ adapt the example applications to solve scientific problems of interest.
 Feedback and questions
 ========================================================================
 
-User feedback should be directed to <chombo@anag.lbl.gov>.
+User feedback should be directed to <chombo@lbl.gov>.
 We are happy to field all questions and comments.
 
 Also, there is a Chombo users e-mail list at
-<chombousers@anag.lbl.gov>, which has been an excellent resource for
+<chombousers@lbl.gov>, which has been an excellent resource for
 sharing ideas and questions with other Chombo users, many of whom are
 quite expert users of Chombo. (The Chombo developers do follow the
 chombousers mailing list as well.)
@@ -114,7 +114,7 @@ and may not be able to build Chombo.  In particular, building templates
 is known to be a problem in some compilers (e.g. pgCC).
 
 We would like to hear about successful builds with other compiler/platforms.
-Please send email to <chombo@anag.lbl.gov>.
+Please send email to <chombo@lbl.gov>.
 
 ========================================================================
 Installation
@@ -170,7 +170,7 @@ Chombo should build with any standard-compliant implementation of MPI.
 
 The Argonne Lab version of MPI, called MPICH, is freely available from:
 
-    http://www-unix.mcs.anl.gov/mpi/mpich/
+    http://www.mpich.org
 
 Chombo has been successfully built with MPICH and the IBM, SGI
 and Cray implementations of MPI.
@@ -354,7 +354,7 @@ will compile Chombo with -O3 and name all the library files with
 the pattern: lib<name><config>.O3.a.
 
 If you continue to get errors while building or testing, send email to
-<chombo@anag.lbl.gov> with the output from running the commands 'make vars'
+<chombo@lbl.gov> with the output from running the commands 'make vars'
 and 'make all'.  If the problem happens while running the test programs,
 also include the output from 'make run'.  Also include a copy of
 Chombo/lib/mk/Make.defs.local.  It is also helpful to list the versions of

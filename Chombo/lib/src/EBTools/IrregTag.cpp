@@ -158,9 +158,9 @@ void IrregTag::write(HDF5Handle& a_handle)
                                   H5T_NATIVE_INT, dataspace, H5P_DEFAULT);
 #else
       hid_t dataset   = H5Dcreate2(a_handle.groupID(), "IrregTags",  
-				   H5T_NATIVE_INT,
-				   dataspace, H5P_DEFAULT,
-				   H5P_DEFAULT,H5P_DEFAULT);
+                                   H5T_NATIVE_INT,
+                                   dataspace, H5P_DEFAULT,
+                                   H5P_DEFAULT,H5P_DEFAULT);
 
 #endif
       hid_t memdataspace = H5Screate_simple(1, flatdims, NULL);

@@ -52,6 +52,7 @@
 #   undef EndFor
 #   undef EndForTX
 #   undef EndForPencil
+#   undef MD_CIX
 #endif
 
 #if CH_SPACEDIM == 1
@@ -71,6 +72,7 @@
 #   define EndFor EndFor1
 #   define EndForTX EndForTX1
 #   define EndForPencil EndForPencil1
+#   define MD_CIX MD_CIX1
 #   define LAST_BASEFABMACROS_H_SPACEDIM 1
 #endif
 #if CH_SPACEDIM == 2
@@ -90,6 +92,7 @@
 #   define EndFor EndFor2
 #   define EndForTX EndForTX2
 #   define EndForPencil EndForPencil2
+#   define MD_CIX MD_CIX2
 #   define LAST_BASEFABMACROS_H_SPACEDIM 2
 #endif
 #if CH_SPACEDIM == 3
@@ -109,7 +112,17 @@
 #   define EndFor EndFor3
 #   define EndForTX EndForTX3
 #   define EndForPencil EndForPencil3
+#   define MD_CIX MD_CIX3
 #   define LAST_BASEFABMACROS_H_SPACEDIM 3
+#endif
+#if CH_SPACEDIM == 4
+#   define MD_CIX MD_CIX4
+#endif
+#if CH_SPACEDIM == 5
+#   define MD_CIX MD_CIX5
+#endif
+#if CH_SPACEDIM == 6
+#   define MD_CIX MD_CIX6
 #endif
 
 #if CH_SPACEDIM > 3
@@ -2055,6 +2068,214 @@
   all the components of *this.
 */
 #define ForAllThisXC(T,x)       ForAllThisBNNXC(T,this->m_domain,0,this->nComp(),x,0)
+
+
+/*******************************************************************************
+ *
+ * MULTIDIMENSIONAL ARRAY MACROS
+ *
+ ******************************************************************************/
+
+/*--------------------------------------------------------------------*
+ *  Macro to declare a multidimensional index (used in callee)
+ *--------------------------------------------------------------------*/
+
+#define MD_DECLIX(T, x)                                                 \
+  D_DECL6(T x##0, T x##1, T x##2, T x##3, T x##4, T x##5)
+
+/*--------------------------------------------------------------------*
+ *  Macro to expand a multidimensional index (used in caller)
+ *--------------------------------------------------------------------*/
+
+#define MD_EXPANDIX(x)                                                  \
+  D_DECL6(x##0, x##1, x##2, x##3, x##4, x##5)
+
+/*--------------------------------------------------------------------*
+ *  Macro to expand into an IntVect
+ *--------------------------------------------------------------------*/
+
+#define MD_GETIV(x)                                                      \
+  IntVect(D_DECL6(x##0, x##1, x##2, x##3, x##4, x##5))
+
+/*--------------------------------------------------------------------*
+ *  Macro to generate a nested loop from a box.  The multidimensional
+ *  index has values x0, x1, x2, etc.
+ *  Example:
+ *    MD_BOXLOOP(box, i);
+ *      {
+ *        std::cout << IntVect(D_DECL(i0, i1, i2)) << std::endl;
+ *      }
+ *--------------------------------------------------------------------*/
+
+#define MD_BOXLOOP(_box, x)                                             \
+  D_INVTERM6(                                                           \
+    for (int x##0 = (_box).smallEnd(0); x##0 <= (_box).bigEnd(0); ++ x##0), \
+    for (int x##1 = (_box).smallEnd(1); x##1 <= (_box).bigEnd(1); ++ x##1), \
+    for (int x##2 = (_box).smallEnd(2); x##2 <= (_box).bigEnd(2); ++ x##2), \
+    for (int x##3 = (_box).smallEnd(3); x##3 <= (_box).bigEnd(3); ++ x##3), \
+    for (int x##4 = (_box).smallEnd(4); x##4 <= (_box).bigEnd(4); ++ x##4), \
+    for (int x##5 = (_box).smallEnd(5); x##5 <= (_box).bigEnd(5); ++ x##5))
+
+#define MD_2BOXLOOP(_boxA, x, _boxB, y)                                 \
+  D_INVTERM6(                                                           \
+    for (int x##0 = (_boxA).smallEnd(0), y##0 = (_boxB).smallEnd(0); x##0 <= (_boxA).bigEnd(0); ++ x##0, ++ y##0), \
+    for (int x##1 = (_boxA).smallEnd(1), y##1 = (_boxB).smallEnd(1); x##1 <= (_boxA).bigEnd(1); ++ x##1, ++ y##1), \
+    for (int x##2 = (_boxA).smallEnd(2), y##2 = (_boxB).smallEnd(2); x##2 <= (_boxA).bigEnd(2); ++ x##2, ++ y##2), \
+    for (int x##3 = (_boxA).smallEnd(3), y##3 = (_boxB).smallEnd(3); x##3 <= (_boxA).bigEnd(3); ++ x##3, ++ y##3), \
+    for (int x##4 = (_boxA).smallEnd(4), y##4 = (_boxB).smallEnd(4); x##4 <= (_boxA).bigEnd(4); ++ x##4, ++ y##4), \
+    for (int x##5 = (_boxA).smallEnd(5), y##5 = (_boxB).smallEnd(5); x##5 <= (_boxA).bigEnd(5); ++ x##5, ++ y##5))
+
+/*--------------------------------------------------------------------*
+ *  Macro to generate a nested loop from a box for all but first
+ *  dimension.  The multidimensional index has values x1, x2, etc.
+ *  Example:
+ *    MD_BOXLOOP_PENCIL(box, i);
+ *      {
+ *        for (int i0 = box.smallEnd(0); i0 <= box.bigEnd(0); ++i0)
+ *          {
+ *            std::cout << IntVect(D_DECL(i0, i1, i2)) << std::endl;
+ *          }
+ *      }
+ *--------------------------------------------------------------------*/
+
+#define MD_BOXLOOP_PENCIL(_box, x)                                      \
+  D_INVTERMPENCIL6(                                                     \
+    (void)0;,                                                           \
+    for (int x##1 = (_box).smallEnd(1); x##1 <= (_box).bigEnd(1); ++ x##1), \
+    for (int x##2 = (_box).smallEnd(2); x##2 <= (_box).bigEnd(2); ++ x##2), \
+    for (int x##3 = (_box).smallEnd(3); x##3 <= (_box).bigEnd(3); ++ x##3), \
+    for (int x##4 = (_box).smallEnd(4); x##4 <= (_box).bigEnd(4); ++ x##4), \
+    for (int x##5 = (_box).smallEnd(5); x##5 <= (_box).bigEnd(5); ++ x##5))
+
+#define MD_2BOXLOOP_PENCIL(_boxA, x, _boxB, y)                          \
+  D_INVTERMPENCIL6(                                                     \
+    (void)0;,                                                           \
+    for (int x##1 = (_boxA).smallEnd(1), y##1 = (_boxB).smallEnd(1); x##1 <= (_boxA).bigEnd(1); ++ x##1, ++ y##1), \
+    for (int x##2 = (_boxA).smallEnd(2), y##2 = (_boxB).smallEnd(2); x##2 <= (_boxA).bigEnd(2); ++ x##2, ++ y##2), \
+    for (int x##3 = (_boxA).smallEnd(3), y##3 = (_boxB).smallEnd(3); x##3 <= (_boxA).bigEnd(3); ++ x##3, ++ y##3), \
+    for (int x##4 = (_boxA).smallEnd(4), y##4 = (_boxB).smallEnd(4); x##4 <= (_boxA).bigEnd(4); ++ x##4, ++ y##4), \
+    for (int x##5 = (_boxA).smallEnd(5), y##5 = (_boxB).smallEnd(5); x##5 <= (_boxA).bigEnd(5); ++ x##5, ++ y##5))
+
+/*--------------------------------------------------------------------*
+ *  Macro to index an array based on a multidimensional index 'x', and
+ *  a component index
+ *  Example:
+ *    MD_BOXLOOP(box, i);
+ *      {
+ *        arrA[MD_IX(i, 0)] = arrB[MD_IX(i, 1)]
+ *      }
+ *--------------------------------------------------------------------*/
+
+#define MD_IX(x, c)                                                     \
+  (c)] D_INVTERM6([(x##0) , [(x##1)], [(x##2)],                         \
+                  [(x##3)], [(x##4)], [(x##5)])
+
+/*--------------------------------------------------------------------*
+ *  Macro to index an array based on an IntVect and a component index
+ *  Example:
+ *    IntVect iv = IntVect_unit;
+ *    arrA[MD_IV(iv, 0)] = arrB[MD_IV(iv, 1)]
+ *--------------------------------------------------------------------*/
+
+#define MD_IV(x, c)                                                     \
+  (c)] D_INVTERM6([(x)[0] , [(x)[1]], [(x)[2]],                         \
+                  [(x)[3]], [(x)[4]], [(x)[5]])
+
+/*--------------------------------------------------------------------*
+ *  Macro to index an array based on a multidimensional index 'x', and
+ *  a component index, where the component has unit stride.
+ *  Example:
+ *    MD_BOXLOOP(box, i);
+ *      {
+ *        arrA[MD_CIX(0, i)] = arrB[MD_IX(i, 1)]
+ *      }
+ *--------------------------------------------------------------------*/
+
+#if CH_SPACEDIM==1
+#define MD_CIX1(c, x)                                                   \
+  (x##0)][(c)
+#elif CH_SPACEDIM==2
+#define MD_CIX2(c, x)                                                   \
+  (x##1)][(x##0)][(c)
+#elif CH_SPACEDIM==3
+#define MD_CIX3(c, x)                                                   \
+  (x##2)][(x##1)][(x##0)][(c)
+#elif CH_SPACEDIM==4
+#define MD_CIX4(c, x)                                                   \
+  (x##3)][(x##2)][(x##1)][(x##0)][(c)
+#elif CH_SPACEDIM==5
+#define MD_CIX5(c, x)                                                   \
+  (x##4)][(x##3)][(x##2)][(x##1)][(x##0)][(c)
+#elif CH_SPACEDIM==6
+#define MD_CIX6(c, x)                                                   \
+  (x##5)][(x##4)][(x##3)][(x##2)][(x##1)][(x##0)][(c)
+#endif
+
+/*--------------------------------------------------------------------*
+ *  Macro to generate a unit vector of components pointing to a
+ *  direction.  Most often used with MD_OFFSETIX.
+ *  Example:
+ *    for (int dir = 0; dir != SpaceDim; ++dir)
+ *      {
+ *        const int MD_ID(ii, dir);
+ *        // If dir = 0, ii0 = 1, ii1 = 0, ii2 = 0.
+ *        // If dir = 1, ii0 = 0, ii1 = 1, ii2 = 0.
+ *        // etc
+ *      }
+ *--------------------------------------------------------------------*/
+
+#define MD_ID(x, _dir)                                                  \
+  D_DECL6((x##0) = ((_dir) == 0),                                       \
+          (x##1) = ((_dir) == 1),                                       \
+          (x##2) = ((_dir) == 2),                                       \
+          (x##3) = ((_dir) == 3),                                       \
+          (x##4) = ((_dir) == 4),                                       \
+          (x##5) = ((_dir) == 5))
+
+/*--------------------------------------------------------------------*
+ *  Macro to generate an offset index to an array based on a
+ *  multidimensional index 'x', operator 'op', offset index 'o', and
+ *  a component index
+ *  Example:
+ *    for (int dir = 0; dir != SpaceDim; ++dir)
+ *      {
+ *        const int MD_ID(ii, dir);
+ *        MD_BOXLOOP(box, i);
+ *          {
+ *            arrA[MD_IX(i, 0)] = arrB[MD_OFFSETIX(i,+,ii, 1)]
+ *          }
+ *      }
+ *--------------------------------------------------------------------*/
+
+#define MD_OFFSETIX(x, op, o, c)                                        \
+  (c)] D_INVTERM6([((x##0) op (o##0)) ,                                 \
+                  [((x##1) op (o##1))],                                 \
+                  [((x##2) op (o##2))],                                 \
+                  [((x##3) op (o##3))],                                 \
+                  [((x##4) op (o##4))],                                 \
+                  [((x##5) op (o##5))])
+
+/*--------------------------------------------------------------------*
+ *  Same as above but applies to an IntVect offset 'ov'.
+ *  Example:
+ *    for (int dir = 0; dir != SpaceDim; ++dir)
+ *      {
+ *        IntVect iv(IntVect::Zero);
+ *        iv[dir] = 1;
+ *        MD_BOXLOOP(box, i);
+ *          {
+ *            arrA[MD_IX(i, 0)] = arrB[MD_OFFSETIX(i,+,iv, 1)]
+ *          }
+ *      }
+ *--------------------------------------------------------------------*/
+
+#define MD_OFFSETIV(x, op, ov, c)                                      \
+  (c)] D_INVTERM6([((x##0) op ov[0]) ,                                 \
+                  [((x##1) op ov[1])],                                 \
+                  [((x##2) op ov[2])],                                 \
+                  [((x##3) op ov[3])],                                 \
+                  [((x##4) op ov[4])],                                 \
+                  [((x##5) op ov[5])])
 
 #ifdef DOXYGEN
 #undef CH_SPACEDIM

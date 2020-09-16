@@ -80,27 +80,27 @@ main(int argc ,char *argv[] )
   if (mass1 != particle1.mass())
     {
       if (verbose) 
-	{
-	  pout() << " fail: particle1 mass is not correct" << std::endl;
-	}
+        {
+          pout() << " fail: particle1 mass is not correct" << std::endl;
+        }
       status = 1;
     }
   
   if (position1 != particle1.position())
     {
       if (verbose) 
-	{
-	  pout() << " fail: particle1 position is not correct" << std::endl;
-	}
+        {
+          pout() << " fail: particle1 position is not correct" << std::endl;
+        }
       status = 1;
     }
 
   if (velocity1 != particle1.velocity())
     {
       if (verbose) 
-	{
-	  pout() << " fail: particle1 velocity is not correct" << std::endl;
-	}
+        {
+          pout() << " fail: particle1 velocity is not correct" << std::endl;
+        }
       status = 1;
     }
 
@@ -108,9 +108,9 @@ main(int argc ,char *argv[] )
   if (RealVect(D_DECL(0.0, 0.0, 0.0)) != particle1.acceleration())
     {
       if (verbose) 
-	{
-	  pout() << " fail: particle1 acceleration is not correct" << std::endl;
-	}
+        {
+          pout() << " fail: particle1 acceleration is not correct" << std::endl;
+        }
       status = 1;
     }
 
@@ -118,18 +118,18 @@ main(int argc ,char *argv[] )
   if (particle1 == particle2)
     {
       if (verbose) 
-	{
-	  pout() << " fail: particle equality operator is giving the wrong answer" << std::endl;
-	}
+        {
+          pout() << " fail: particle equality operator is giving the wrong answer" << std::endl;
+        }
       status = 1;
     }
 
   if (&particle1 == &particle2)
     {
       if (verbose) 
-	{
-	  pout() << " fail: particle equality operator is giving the wrong answer" << std::endl;
-	}
+        {
+          pout() << " fail: particle equality operator is giving the wrong answer" << std::endl;
+        }
       status = 1;
     }
 
@@ -151,9 +151,9 @@ main(int argc ,char *argv[] )
   if (particle1 != particle2)
     {
       if (verbose) 
-	{
-	  pout() << " fail: particle linearIn / linearOut operations are not working properly" << std::endl;
-	}
+        {
+          pout() << " fail: particle linearIn / linearOut operations are not working properly" << std::endl;
+        }
       status = 1;
     }
 
@@ -161,9 +161,9 @@ main(int argc ,char *argv[] )
   if (&particle1 == &particle2)
     {
       if (verbose) 
-	{
-	  pout() << " fail: particle linearIn / linearOut operations are not working properly" << std::endl;
-	}
+        {
+          pout() << " fail: particle linearIn / linearOut operations are not working properly" << std::endl;
+        }
       status = 1;
     }
 
@@ -171,9 +171,9 @@ main(int argc ,char *argv[] )
   if (particle1.size() != particle2.size())
     {
       if (verbose) 
-	{
-	  pout() << " fail: particle size is not correct" << std::endl;
-	}
+        {
+          pout() << " fail: particle size is not correct" << std::endl;
+        }
       status = 1;
     }
 
@@ -181,16 +181,16 @@ main(int argc ,char *argv[] )
   if (particle1.size() != (1 + 3*SpaceDim) * sizeof(Real))
     {
       if (verbose) 
-	{
-	  pout() << " fail: particle size is not correct" << std::endl;
-	}
+        {
+          pout() << " fail: particle size is not correct" << std::endl;
+        }
       status = 1;
     }
 
   // done
   pout() << indent << pgmname << ": "
-	 << ( (status == 0) ? "passed all tests" : "failed at least one test,")
-	 << std::endl;
+         << ( (status == 0) ? "passed all tests" : "failed at least one test,")
+         << std::endl;
 
 #ifdef CH_MPI
   MPI_Finalize();

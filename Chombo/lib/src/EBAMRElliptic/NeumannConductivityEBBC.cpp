@@ -13,6 +13,9 @@
 #include "NeumannConductivityEBBC.H"
 #include "EBStencil.H"
 #include "NamespaceHeader.H"
+
+int NeumannConductivityEBBC::s_comp = 0;
+
 /*****************/
 NeumannConductivityEBBC::NeumannConductivityEBBC(const ProblemDomain& a_domain,
                                                  const EBISLayout&    a_layout,
@@ -67,7 +70,7 @@ void NeumannConductivityEBBC::applyEBFlux(EBCellFAB&                    a_lphi,
 //            {
 //              flux = 0.;
 //            }
-               flux = (*m_data)[a_dit](vof, 0);
+               flux = (*m_data)[a_dit](vof, s_comp);
         }
       else if (m_bc.m_isFunction)
         {

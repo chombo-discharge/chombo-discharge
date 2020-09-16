@@ -25,9 +25,9 @@ public:
 
   /// Constructor
   AMRLevelTracerFactory(AdvectionVelocityFunction a_advFunc,
-			const Real& a_cfl,
-			const Real& a_domainLength,
-			const int&  a_maxGridSize);
+                        const Real& a_cfl,
+                        const Real& a_domainLength,
+                        const int&  a_maxGridSize);
 
 
   /// Destructor

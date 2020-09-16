@@ -391,9 +391,10 @@ main(int argc, char** argv)
           {
             // Fill in the layout with the geometrical info.
             EBISLayout ebisl;
- 
-            ebisPtr->fillEBISLayout(ebisl, dbl, domain, 1 );
 
+            pout() << "begin filling ebislayout" << endl;
+            ebisPtr->fillEBISLayout(ebisl, dbl, domain, 1 );
+            pout() << "end filling ebislayout" << endl;
             // Define the leveldata for my one and only level.
             DataIterator dit = dbl.dataIterator();
             for ( dit.begin(); dit.ok(); ++dit )

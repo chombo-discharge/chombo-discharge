@@ -121,7 +121,7 @@ void MBAggLevelExchange::define(const MultiBlockLevelGeom*  a_geomPtr,
         IntVect pwr = bitPower();
         if (pwr.sum() <= m_degree)
           {
-	    m_powers.push_back(pwr);
+            m_powers.push_back(pwr);
           }
       }
     // m_numTaylorCoeffs = C(m_degree + SpaceDim, SpaceDim)

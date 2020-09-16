@@ -138,7 +138,7 @@ EBISLayoutImplem::define(const ProblemDomain& a_domain,
     {
       const EBGraph& graphlocal = localGraph[dit()];
       Box graphregion=  graphlocal.getRegion();
-      m_ebisBoxes[dit()].define(localGraph[dit()], localData[dit()]);
+      m_ebisBoxes[dit()].define(localGraph[dit()], localData[dit()], dit());
     }
   }
   m_defined = true;

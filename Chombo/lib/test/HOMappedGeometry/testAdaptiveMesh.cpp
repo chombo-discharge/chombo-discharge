@@ -114,7 +114,7 @@ Real gradeFunction(const RealVect& a_x, int a_step, Real a_tolerance)
 }
 
 void tagCells(IntVectSet& a_tags, const Box& a_box, const MultiBlockCoordSys* a_coords, 
-	      Real a_tolerance, int a_step)
+              Real a_tolerance, int a_step)
 {
   int block = a_coords->whichBlock(a_box);
   const NewCoordSys* map = a_coords->getCoordSys(block);
@@ -134,9 +134,9 @@ void tagCells(IntVectSet& a_tags, const Box& a_box, const MultiBlockCoordSys* a_
       p = map->realCoord(map->centerMappedCoordinates(i));
       Real g = gradeFunction(p, a_step, a_tolerance);
       if(m>g) 
-	{
-	  a_tags|=i;
-	}
+        {
+          a_tags|=i;
+        }
     }
 }
  
@@ -365,7 +365,7 @@ void testMBMeshRefine()
       LevelData<FArrayBox>& ld = *(data[l]);
       for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) setValues(ld[dit], 0, tolerance, coords[l]);
       if(verbosity >=1)
-	pout()<<" level "<<l<<" elements:"<<dbl.numCells();
+        pout()<<" level "<<l<<" elements:"<<dbl.numCells();
     }
   if(verbosity >=1)
     pout()<<"\n";
@@ -387,43 +387,43 @@ void testMBMeshRefine()
        pout()<<"step "<<step<<" ";
 
       for(int i=0 ; i<=topLevel; i++)
-	{
-	  const DisjointBoxLayout& dbl = db[i];
-	  IntVectSet& tags = tagv[i];
-	  tags.makeEmpty();
-	  for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit)
-	    {
-	      tagCells(tags, dbl[dit], coords[i], tolerance, step);
-	    }
-	}
+        {
+          const DisjointBoxLayout& dbl = db[i];
+          IntVectSet& tags = tagv[i];
+          tags.makeEmpty();
+          for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit)
+            {
+              tagCells(tags, dbl[dit], coords[i], tolerance, step);
+            }
+        }
       
       {
-	CH_TIME("Gridding");
-	mbmr.regrid(newGrids, tagv, 0, topLevel, oldGrids);
+        CH_TIME("Gridding");
+        mbmr.regrid(newGrids, tagv, 0, topLevel, oldGrids);
       }
       db.resize(newGrids.size());
       for(int l=0; l<newGrids.size(); l++)
-	{
-	  mortonOrdering(newGrids[l]);
-	  Vector<int> procs;
-	  LoadBalance(procs, newGrids[l]);
-	  DisjointBoxLayout dbl(newGrids[l], procs);
-	  db[l] = dbl;
-	  data[l] = new LevelData<FArrayBox>(dbl, 2);
-	  LevelData<FArrayBox>& ld = *(data[l]);
-	  for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) setValues(ld[dit], step, tolerance, coords[l]);
-	  if(verbosity>=1)
-	    pout()<<" level "<<l<<" elements:"<<dbl.numCells();
-	}
+        {
+          mortonOrdering(newGrids[l]);
+          Vector<int> procs;
+          LoadBalance(procs, newGrids[l]);
+          DisjointBoxLayout dbl(newGrids[l], procs);
+          db[l] = dbl;
+          data[l] = new LevelData<FArrayBox>(dbl, 2);
+          LevelData<FArrayBox>& ld = *(data[l]);
+          for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) setValues(ld[dit], step, tolerance, coords[l]);
+          if(verbosity>=1)
+            pout()<<" level "<<l<<" elements:"<<dbl.numCells();
+        }
       if(verbosity >=1)
-	pout()<<"\n";
+        pout()<<"\n";
       sprintf(pcount, "%03i.", step);
       fname=prefix; fname.append(pcount);
       WriteMappedAMRHierarchyHDF5(fname, db, data, names, coords, levelDomainBox, 1, step, refRatios, db.size());
       for(int l=0; l<newGrids.size(); l++)
-	{
-	  delete data[l];
-	}
+        {
+          delete data[l];
+        }
     }
   
   for(int i=0; i<coords.size(); i++) delete coords[i];

@@ -1,2 +1,0 @@
-#!/bin/csh -f
-find . -name Repository -exec /bin/csh -f -c '/bin/sed -e '\''s@^[^/]*/@Chombo/@'\'' -e '\''s@^EllipticDesign$@Chombo/lib/src/EllipticDesign@'\'' {} > /tmp/fixRepo$$; /bin/mv -f /tmp/fixRepo$$ {}' \; -print

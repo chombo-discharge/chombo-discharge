@@ -96,23 +96,7 @@ Pool::~Pool()
   }
 }
 
-/// getPtr and returnPtr must be as fast as possible!
-void* Pool::getPtr()
-{
-#ifdef _OPENMP
-  return malloc(m_ptrSize_);
-#else
-  if (m_next_ == 0)
-  {
-    m_next_ = getMoreMemory();
-  }
 
-  void* result = m_next_;      // result points to first free chunk in list
-  m_next_ = *(void**)m_next_;  // point m_next_ to next free chunk in list.
-
-  return result;
-#endif
-}
 
 void Pool::returnPtr(void* ptr)
 {

@@ -18,7 +18,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #ifdef CH_MPI
-#include <mpi.h>
+#include "mpi.h"
 #endif
 
 #include "BaseNamespaceHeader.H"

@@ -118,7 +118,7 @@ template <> struct RootTr<double>
  *       const Real x0 = RootSolver::Brent(numIter, Func(), xmin, xmax);
  *       if (numIter == RootTr<Real>::maxIter)
  *         {
- *           std::cout << "Uh oh\n";
+ *           std::pout() << "Uh oh\n";
  *         }
  *     }
  *                                                                  \endverbatim
@@ -253,7 +253,7 @@ T Brent(int&           numIter,
 
   if (i >= MAXITER)
     {
-      std::cerr  << "RootSolver::Brent: exceeded maximum iterations: "
+      pout()  << "RootSolver::Brent: exceeded maximum iterations: "
                  << MAXITER << std::endl;
     }
 

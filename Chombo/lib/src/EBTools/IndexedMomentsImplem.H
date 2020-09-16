@@ -1,14 +1,16 @@
 #ifdef CH_LANG_CC
 /*
-*      _______              __
-*     / ___/ /  ___  __ _  / /  ___
-*    / /__/ _ \/ _ \/  V \/ _ \/ _ \
-*    \___/_//_/\___/_/_/_/_.__/\___/
-*    Please refer to Copyright.txt, in Chombo's root directory.
-*/
+ *      _______              __
+ *     / ___/ /  ___  __ _  / /  ___
+ *    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+ *    \___/_//_/\___/_/_/_/_.__/\___/
+ *    Please refer to Copyright.txt, in Chombo's root directory.
+ */
 #endif
-#ifndef _IndexedMomentsImplem_H_
-#define _IndexedMomentsImplem_H_
+
+#ifndef _INDEXEDMOMENTSIMPLEM_H_
+#define _INDEXEDMOMENTSIMPLEM_H_
+
 #include "MomentIterator.H"
 #include "EB_TYPEDEFS.H"
 #include "IndexTM.H"
@@ -43,6 +45,14 @@ checkMoments(IndexedMoments<Dim, ORDER> & a_moments,
              const bool                 & a_bindMoments)
 {
   MomentIterator<Dim, ORDER> momit;
+  //eb moments can mysteriously get the wrong signs
+  if(a_ebMoment && a_bindMoments)
+  {
+    if(a_moments[IndexTM<int,Dim>::Zero] < 0.)
+    {
+      a_moments *= -1.0;
+    }
+  }
   a_bogusPowers.resize(0);
   Real cellvol = 1;
   for(int idir = 0; idir < Dim; idir++)
@@ -170,12 +180,12 @@ getMoment(const     IndexTM<int, Dim>        & a_mono,
     }
   else
     {
-      std::cout << "monomial = " ;
+      pout() << "monomial = " ;
       for(int idir = 0; idir < Dim; idir++)
         {
-          std::cout << a_mono[idir] << " ";
+          pout() << a_mono[idir] << " ";
         }
-      std::cout << endl;
+      pout() << endl;
       MayDay::Abort("getMoments in IndexedMoments: moment not found in map");
     }
   return moment;

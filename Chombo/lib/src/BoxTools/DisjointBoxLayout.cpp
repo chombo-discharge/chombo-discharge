@@ -24,6 +24,20 @@ DisjointBoxLayout::DisjointBoxLayout()
 {
 }
 
+unsigned long long int 
+DisjointBoxLayout::
+numPointsThisProc() const
+{
+  const DisjointBoxLayout& dbl = *this;
+  unsigned long long retval = 0;
+  DataIterator dit = dbl.dataIterator();
+  for(int ibox = 0; ibox < dit.size(); ibox++)
+  {
+    retval += dbl[dit[ibox]].numPts();
+  }
+  return retval;
+}
+
 DisjointBoxLayout::DisjointBoxLayout(const Vector<Box>& a_boxes,
                                      const Vector<int>& a_procIDs)
   :BoxLayout(a_boxes,a_procIDs)
@@ -239,21 +253,21 @@ void DisjointBoxLayout::computeNeighbors()
         }
       //now run through periodic boxes.
       if(!m_physDomain.isEmpty() && !m_physDomain.domainBox().contains(gbox))
-	{
-	  std::list<std::pair<int, LayoutIndex> >::iterator it;
-	  for (it=periodicImages.begin(); it!=periodicImages.end(); ++it)
-	    {
-	      Box b = (*m_boxes)[(*it).second.intCode()].box;
-	      m_physDomain.shiftIt(b, (*it).first);
-	      if (gbox.intersectsNotEmpty(b))
-		{
-		  pair<int, LayoutIndex> entry(*it);
-		  //HERE
-		  entry.second = (*it).second;
-		  neighbors.push_back(entry);
-		}
-	    }
-	}
+        {
+          std::list<std::pair<int, LayoutIndex> >::iterator it;
+          for (it=periodicImages.begin(); it!=periodicImages.end(); ++it)
+            {
+              Box b = (*m_boxes)[(*it).second.intCode()].box;
+              m_physDomain.shiftIt(b, (*it).first);
+              if (gbox.intersectsNotEmpty(b))
+                {
+                  pair<int, LayoutIndex> entry(*it);
+                  //HERE
+                  entry.second = (*it).second;
+                  neighbors.push_back(entry);
+                }
+            }
+        }
     }
 }
 

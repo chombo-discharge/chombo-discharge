@@ -15,7 +15,7 @@
 #include <iostream>
 
 #ifdef CH_PAPI
-#include "papi.h"
+#include <papi.h>
 #endif
 
 #include "FortranNameMacro.H"

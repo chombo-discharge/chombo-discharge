@@ -333,9 +333,7 @@ interiorBoundaryNodes(LayoutData< Vector<IntVectSet> >& a_IVSV,
   // shares nodes with a_dest[dit].
   LayoutData<bool> destSrcIntersect(a_dest);
 
-  // cout << "interiorBoundaryNodes:  from " << a_src.size()
-  //      << " boxes to " << a_dest.size() << " boxes"
-  //      << " on " << a_domain.longside() << endl;
+
   // Define a_IVSV to have a Vector<IntVectSet> for each box of a_dest.
   a_IVSV.define(a_dest);
   for (LayoutIterator litSrc = a_src.layoutIterator(); litSrc.ok(); ++litSrc)
@@ -858,9 +856,7 @@ interiorBoundaryNodes(LayoutData< Vector<Box> >& a_IVSV,
   // shares nodes with a_dest[dit].
   LayoutData<bool> destSrcIntersect(a_dest);
 
-  // cout << "interiorBoundaryNodes:  from " << a_src.size()
-  //      << " boxes to " << a_dest.size() << " boxes"
-  //      << " on " << a_domain.longside() << endl;
+
   // Define a_IVSV to have a Vector<IntVectSet> for each box of a_dest.
   a_IVSV.define(a_dest);
   for (LayoutIterator lit = a_src.layoutIterator(); lit.ok(); ++lit)

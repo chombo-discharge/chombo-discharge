@@ -269,6 +269,9 @@ int checkEBISBox(const Box& a_gridCoar, const EBISBox& a_ebisBoxCoar, const EBIS
       volumCoar *= voluCoarCell;
       areaCritCoar *= areaCoarCell;
       Real tolerance = 1.0e-10;
+#if CH_USE_FLOAT
+      tolerance = 1.0e-3;
+#endif
       if (Abs(volumFine -volumCoar) > tolerance*volumCoar)
         {
           pout() << "volume problem in coar cell " << vofCoar.gridIndex() << endl;

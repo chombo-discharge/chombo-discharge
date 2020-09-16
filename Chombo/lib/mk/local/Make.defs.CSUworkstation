@@ -43,6 +43,7 @@ makefiles+=Make.defs.CSUworkstation
 
 # Variables for optional features that don't affect filenames:
 
+#  CXXSTD          : Default is C++03.  Set to 14 for C++14.
 #  USE_64          : if TRUE, use 64bit pointers on systems where 32bits is the default
 #  USE_COMPLEX     : if TRUE, enable the 'Complex' type
 #                    (default is TRUE, disable only if compiler doesn't allow it)
@@ -118,25 +119,21 @@ MPICXX         = mpicxx
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
+CXXSTD         = 11
 #USE_64        =
 #USE_COMPLEX   =
 USE_EB         = TRUE
 #USE_CCSE      =
 USE_HDF        = TRUE
 ifeq ($(MPI),TRUE)
-  _hdf_root=/usr/local/parallel
+  HDFINCFLAGS    = 
+  HDFLIBFLAGS    = -lhdf5 -lsz -lz
+  HDFMPIINCFLAGS = 
+  HDFMPILIBFLAGS = -lhdf5 -lsz -lz
 else
-  _hdf_root=/usr/local/serial
+  HDFINCFLAGS    = 
+  HDFLIBFLAGS    = -lhdf5 -lsz -lz
 endif
-HDFINCFLAGS   = -DH5_USE_16_API -I$(_hdf_root)/include
-HDFLIBFLAGS   = -L$(_hdf_root)/lib -lhdf5 -lsz -lz
-## Note: don't set the HDFMPI* variables if you don't have parallel HDF installed
-ifeq ($(MPI),TRUE)
-  HDFMPIINCFLAGS   = -DH5_USE_16_API -I$(_hdf_root)/include
-  HDFMPILIBFLAGS   = -L$(_hdf_root)/lib -lhdf5 -lsz -lz
-endif
-XTRALDFLAGS   += -Wl,-rpath,$(_hdf_root)/lib
-XTRACXXFLAGS   = -march=native
 #USE_MF        =
 USE_MT         = FALSE
 #USE_SETVAL    =

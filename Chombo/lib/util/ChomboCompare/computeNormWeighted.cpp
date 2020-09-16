@@ -12,7 +12,7 @@
 using std::pow;
 using std::sqrt;
 #ifdef CH_MPI
-#include <mpi.h>
+#include "mpi.h"
 #endif
 
 #include "computeNormWeighted.H"

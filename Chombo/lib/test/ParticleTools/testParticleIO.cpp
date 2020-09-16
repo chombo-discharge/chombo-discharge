@@ -96,8 +96,8 @@ main(int argc ,char *argv[] )
 
   // done
   pout() << indent << pgmname << ": "
-	 << ( (status == 0) ? "passed all tests" : "failed at least one test,")
-	 << endl;
+         << ( (status == 0) ? "passed all tests" : "failed at least one test,")
+         << endl;
 #ifdef CH_MPI
   MPI_Finalize();
 #endif
@@ -132,16 +132,16 @@ int testParticleIO()
   ListBoxFactory<P> myFactory(meshSpacing, origin);
   
   ParticleData<P> particlesBefore(grids, 
-				  probDomain,
-				  maxBoxSize,
-				  meshSpacing,
-				  origin);
+                                  probDomain,
+                                  maxBoxSize,
+                                  meshSpacing,
+                                  origin);
 
   ParticleData<P> particlesAfter(grids, 
-				  probDomain,
-				  maxBoxSize,
-				  meshSpacing,
-				  origin);
+                                  probDomain,
+                                  maxBoxSize,
+                                  meshSpacing,
+                                  origin);
   
   initData(particlesBefore, dx, domainDimension);
   
@@ -177,9 +177,9 @@ int testParticleIO()
     {
       ++status;
       if (verbose)
-	{
-	  pout() << "Fail. Lost particles during input / output." << endl;
-	}
+        {
+          pout() << "Fail. Lost particles during input / output." << endl;
+        }
     }
 
   for (dit.reset(); dit.ok(); ++dit)
@@ -188,33 +188,33 @@ int testParticleIO()
       List<P> after  = particlesAfter[dit()].listItems();
       
       if (before.length() != after.length())
-	{
-	  ++status;
-	  if (verbose)
-	    {
-	      pout() << "Fail. Box has lost particles during I/O." << endl;
-	    }
-	}
+        {
+          ++status;
+          if (verbose)
+            {
+              pout() << "Fail. Box has lost particles during I/O." << endl;
+            }
+        }
       
       else
-	{
-	  ListIterator<P> litBefore(before);
-	  ListIterator<P> litAfter(after);
-	  for (litBefore.begin(); litBefore; ++litBefore)
-	    {
-	      P& p1 = litBefore();
-	      P& p2 = litAfter();
-	      if (p1 != p2)
-		{
-		  ++status;
-		  if (verbose)
-		    {
-		      pout() << "Fail. Particle data has changed during IO." << endl;
-		    }
-		}
-	      ++litAfter;
-	    }
-	}
+        {
+          ListIterator<P> litBefore(before);
+          ListIterator<P> litAfter(after);
+          for (litBefore.begin(); litBefore; ++litBefore)
+            {
+              P& p1 = litBefore();
+              P& p2 = litAfter();
+              if (p1 != p2)
+                {
+                  ++status;
+                  if (verbose)
+                    {
+                      pout() << "Fail. Particle data has changed during IO." << endl;
+                    }
+                }
+              ++litAfter;
+            }
+        }
       
       
     }

@@ -15,7 +15,7 @@
 #include "TreeIntVectSet.H"
 #include "BoxIterator.H"
 #ifdef CH_MPI
-#include <mpi.h>
+#include "mpi.h"
 #endif
 #include "UsingNamespace.H"
 using std::endl;

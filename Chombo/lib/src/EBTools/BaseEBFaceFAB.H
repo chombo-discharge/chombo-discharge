@@ -44,6 +44,8 @@ class BaseEBFaceFAB
 {
 public:
 
+  bool m_verbose = false;
+
   /// for AggStencil
   int numDataTypes() const
   {
@@ -245,6 +247,22 @@ public:
                     const int&  a_comp,
                     const bool& a_doMulti=true);
 
+  /// aliasing copy-ish constructor.  Used when the 'alias' function is invoked on LevelData
+  /**
+     Constructs an 'aliased' BaseEBCellFab of the requested interval of the
+     argument BaseEBCellFab.  This BaseEBCellFab does not allocate any memory, but
+     sets its data pointer into the memory pointed to by the argument
+     BaseEBCellFab.  It is the users responsiblity to ensure this aliased
+     BaseEBCellFab is not used after the original BaseEBCellFab has deleted its data ptr
+     (resize, define(..) called, or destruction, etc.).
+
+     This aliased BaseEBCellFab will also generate side effects (modifying the values
+     of data in one will modify the other's data).
+
+     This aliased BaseFab will have a_comps.size() components, starting at zero.
+  */
+  BaseEBFaceFAB(const Interval&   a_comps,
+                BaseEBFaceFAB<T>& a_original);
 protected:
   ///data at faces which abut multi-valued cells
   MiniIFFAB<T> m_irrFAB;

@@ -16,9 +16,9 @@
 
 AMRLevelTracerFactory::
 AMRLevelTracerFactory(AdvectionVelocityFunction   a_advFunc,
-		      const Real&                   a_cfl,
-		      const Real&                 a_domainLength,
-		      const int&                  a_maxGridSize)
+                      const Real&                   a_cfl,
+                      const Real&                 a_domainLength,
+                      const int&                  a_maxGridSize)
 {
   m_advFunc                = a_advFunc;
   m_cfl                    = a_cfl;
@@ -31,9 +31,9 @@ AMRLevel* AMRLevelTracerFactory::new_amrlevel() const
 {
   // Create a new AMRLevelTracer
   AMRLevelTracer* amrPartPtr = new AMRLevelTracer(m_advFunc,
-						  m_cfl,
-						  m_domainLength,
-						  m_maxGridSize);
+                                                  m_cfl,
+                                                  m_domainLength,
+                                                  m_maxGridSize);
 
   // Return it
   return (static_cast <AMRLevel*> (amrPartPtr));

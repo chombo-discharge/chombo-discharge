@@ -1710,7 +1710,8 @@ bool EBAMRDataOps::checkNANINF(const Vector<LevelData<EBCellFAB>* >& a_data,
   if (dataIsNANINF)
     {
 #ifdef CH_USE_HDF5
-      char* fname = "ebamrdata.hdf5";
+      string fnamestr("ebamrdata.hdf5");
+      const char* fname = fnamestr.c_str(); 
       writeEBAMRname(&a_data, fname);
       pout() << "   bad data written to an hdf5 file: " << fname << std::endl;
 #else
@@ -1769,6 +1770,76 @@ bool EBAMRDataOps::checkNANINF(const Vector<LevelData<EBFluxFAB>* >& a_data)
     }
 
   return dataIsNANINF;
+}
+
+/////////
+void EBAMRDataOps::incr(Vector<LevelData<EBFluxFAB>* >&       a_lhs,
+                        const Vector<LevelData<EBFluxFAB>* >& a_rhs,
+                        const Real& a_scale)
+{
+  CH_TIME("EBAMRDataOps::incr(lhs,rhs,scale)");
+  int numLevels = a_lhs.size();
+  for (int ilev = 0; ilev < numLevels; ilev++)
+    {
+      
+      int ibox = 0;
+      for(DataIterator dit = a_lhs[ilev]->dataIterator(); dit.ok(); ++dit)
+        {
+          
+          const EBFluxFAB& rhsfab = (*a_rhs[ilev])[dit()];
+          EBFluxFAB&       lhsfab = (*a_lhs[ilev])[dit()];
+          EBFluxFAB incr(rhsfab.getEBISBox(), rhsfab.box(), rhsfab.nComp());
+          incr.setVal(0.);
+          incr += rhsfab;
+          for(int idir = 0; idir < SpaceDim; idir++)
+            {
+              incr[idir] *= a_scale;
+            }
+
+          lhsfab += incr;
+          ibox++;
+        }
+
+    }
+}
+
+/////////
+Real
+EBAMRDataOps::sum(const Vector<LevelData<EBCellFAB>* >& a_data,
+                  const Vector<EBLevelGrid>&            a_eblg,
+                  const Vector<int> &                   a_refRat,
+                  int   a_comp,
+                  bool  a_multiplyByKappa)
+{
+  Real retval = 0.0;
+  int maxlev = a_data.size()-1;
+
+  for (int ilev  = 0; ilev <= maxlev; ilev++)
+    {
+      //don't count stuff covered by finer levels
+      IntVectSet ivsExclude;
+      if (ilev < maxlev)
+        {
+          //put next finer grids into an IVS
+          for (LayoutIterator lit = a_eblg[ilev+1].getDBL().layoutIterator(); lit.ok(); ++lit)
+            {
+              ivsExclude |= a_eblg[ilev+1].getDBL().get(lit());
+            }
+          //coarsen back down to this level.
+          //ivs will now hold the image of the next finer level
+          ivsExclude.coarsen(a_refRat[ilev]);
+        }
+
+      Real sumLev;
+      sumLev = EBLevelDataOps::sum(*(a_data[ilev]),  
+                                   a_eblg[ilev].getDBL(),
+                                   a_eblg[ilev].getEBISL(),  
+                                   ivsExclude,
+                                   a_comp, a_multiplyByKappa);
+      retval += sumLev;
+    }
+
+  return retval;
 }
 
 #include "NamespaceFooter.H"

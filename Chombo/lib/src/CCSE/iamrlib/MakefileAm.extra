@@ -1,3 +1,0 @@
-if SMALLBUILD_AM
-CPP_FILES = MacBndry.cpp MacOperator.cpp 
-endif SMALLBUILD_AM

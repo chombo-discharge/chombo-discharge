@@ -55,8 +55,8 @@ Real PatchParticle::KDK_Pusher(ListBox<P>&     a_listBox,
 
   // interpolate the force to the particle positions
   m_meshInterp->interpolate(a_listBox.listItems(), 
-			    a_field,
-			    m_poissonInterpType);
+                            a_field,
+                            m_poissonInterpType);
 
   for (ListIterator<P> li( a_listBox.listItems() ); li; ++li)
     {
@@ -158,8 +158,8 @@ void PatchParticle::deposit(FArrayBox&        a_rho,
   CH_assert(a_rho.box().contains(a_box));
 
   m_meshInterp->deposit(a_listBox.listItems(), 
-			a_rho,
-			m_poissonInterpType);
+                        a_rho,
+                        m_poissonInterpType);
 }
 
 #include "NamespaceFooter.H"

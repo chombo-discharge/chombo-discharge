@@ -121,6 +121,12 @@ class NWOEBConductivityOp: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB
     calculateRelaxationCoefficient();
   }
 
+  //returns m_dx, such function is required by some LinearSolvers
+  Real dx() const
+  {
+    return m_dx;
+  }
+
   //only weights by kappa.  time and tga have their demands.
   virtual void kappaScale(LevelData<EBCellFAB> & a_rhs);
 
@@ -444,6 +450,37 @@ class NWOEBConductivityOp: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB
   }
   ///do not call this one unless you really know what you are doing
   void defineStencils();
+    
+    //adding suplementary methods for petsc solver
+  void getAlphaDiagWeight(LayoutData<BaseIVFAB<Real> > const*& a_alphaDiagWeight)
+  {
+    a_alphaDiagWeight = &m_alphaDiagWeight;
+  }
+
+  void getAlphaBeta(Real& a_alpha, Real& a_beta)
+  {
+    a_alpha = m_alpha;
+    a_beta  = m_beta;
+  }
+  const RefCountedPtr<BaseDomainBC> getDomainBC()
+  {
+    return m_domainBC;
+  }
+
+  const RefCountedPtr<LevelData<EBCellFAB> > getAScalingCoefficients()
+  {
+      return m_acoef;
+  }
+
+  const  RefCountedPtr<LevelData<EBFluxFAB> > getBScalingCoefficients()
+  {
+      return m_bcoef;
+  }
+    
+  void getEBBCFluxStencil(LayoutData<BaseIVFAB<VoFStencil> > const*& a_ebbcFluxStencil)  
+  {
+      a_ebbcFluxStencil = m_ebBC->getFluxStencil(0);
+  }
 protected:
 
   //relaxation coeffcient safety factor
