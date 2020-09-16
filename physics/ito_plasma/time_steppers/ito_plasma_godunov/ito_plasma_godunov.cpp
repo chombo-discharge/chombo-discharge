@@ -250,7 +250,7 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
     pout() << "ito_plasma_godunov::regrid" << endl;
   }
 
-  if(m_algorithm == which_algorithm::euler){
+  if(true){//m_algorithm == which_algorithm::euler){
     ito_plasma_stepper::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
   }
   else{
