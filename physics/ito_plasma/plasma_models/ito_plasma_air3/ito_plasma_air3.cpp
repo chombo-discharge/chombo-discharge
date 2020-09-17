@@ -147,6 +147,12 @@ Real ito_plasma_air3::compute_alpha(const RealVect a_E) const {
   return m_tables.at("alpha").get_entry(E);
 }
 
+Vector<Real> ito_plasma_air3::compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const {
+  Vector<Real> mobilities(m_num_ito_species, 0.0);
+  mobilities[m_electron_idx] = m_tables.at("mobility").get_entry(a_E.vectorLength());
+
+  return mobilities;
+}
 
 Vector<RealVect> ito_plasma_air3::compute_ito_velocities(const Real         a_time,
 							 const RealVect     a_pos,

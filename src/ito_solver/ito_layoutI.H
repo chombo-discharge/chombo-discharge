@@ -318,10 +318,30 @@ Vector<EBAMRCellData*> ito_layout<T>::get_densities(){
 }
 
 template <class T>
+Vector<EBAMRCellData*> ito_layout<T>::get_scratch(){
+  Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    ret[iter.get_solver()] = &(iter()->get_scratch());
+  }
+
+  return ret;
+}
+
+template <class T>
 Vector<EBAMRCellData*> ito_layout<T>::get_diffco_funcs(){
   Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
     ret[iter.get_solver()] = &(iter()->get_diffco_func());
+  }
+
+  return ret;
+}
+
+template <class T>
+Vector<EBAMRCellData*> ito_layout<T>::get_mobility_funcs(){
+  Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    ret[iter.get_solver()] = &(iter()->get_mobility_func());
   }
 
   return ret;

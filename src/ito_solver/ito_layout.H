@@ -222,9 +222,19 @@ public:
   virtual Vector<EBAMRCellData*> get_densities();
 
   /*!
+    @brief Get all scratch storage
+  */
+  virtual Vector<EBAMRCellData*> get_scratch();
+
+  /*!
     @brief Get all diffusion coefficients
   */
   virtual Vector<EBAMRCellData*> get_diffco_funcs();
+
+  /*!
+    @brief Get all mobility mesh functions
+  */
+  virtual Vector<EBAMRCellData*> get_mobility_funcs();
 
   /*!
     @brief Get all particles

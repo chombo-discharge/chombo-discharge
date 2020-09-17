@@ -82,6 +82,11 @@ namespace physics {
       virtual Real initial_sigma(const Real a_time, const RealVect a_pos) const;
 
       /*!
+	@brief Compute the ito mobilities in the lfa approximation
+      */
+      virtual Vector<Real> compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const = 0;
+
+      /*!
 	@brief Compute ito velocities
       */
       virtual Vector<RealVect> compute_ito_velocities(const Real         a_time,

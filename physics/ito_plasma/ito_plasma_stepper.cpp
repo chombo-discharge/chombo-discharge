@@ -1029,6 +1029,128 @@ void ito_plasma_stepper::remap_mobile_or_diffusive_particles(){
   }
 }
 
+void ito_plasma_stepper::compute_ito_mobilities_lfa(){
+  CH_TIME("ito_plasma_stepper::compute_ito_mobilities_lfa()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_ito_mobilities_lfa()" << endl;
+  }
+
+  Vector<EBAMRCellData*> meshMobilities = m_ito->get_mobility_funcs();
+  this->compute_ito_mobilities_lfa(meshMobilities, m_particle_E, m_time);
+}
+
+void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_E, const Real a_time){
+  CH_TIME("ito_plasma_stepper::compute_ito_mobilities_lfa(mobilities, E, time)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_ito_mobilities_lfa(mobilities, E, time)" << endl;
+  }
+
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+
+    Vector<LevelData<EBCellFAB>* > meshMobilities;
+    for (int i = 0; i < a_meshMobilities.size(); i++){
+      meshMobilities.push_back(&(*(*a_meshMobilities[i])[lvl]));
+    }
+    
+    this->compute_ito_mobilities_lfa(meshMobilities, *a_E[lvl], lvl, a_time);
+  }
+
+  // Average down and interpolate ghost cells. Then interpolate mobilities to particle positions. 
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    RefCountedPtr<ito_solver>& solver = solver_it();
+
+    if(solver->is_mobile()){
+      m_amr->average_down(*a_meshMobilities[idx], m_particle_realm, m_phase);
+      m_amr->interp_ghost(*a_meshMobilities[idx], m_particle_realm, m_phase);
+
+      // solver->interpolate_mobilities();
+    }
+  }
+}
+
+void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<LevelData<EBCellFAB>* >& a_meshMobilities,
+						    const LevelData<EBCellFAB>&     a_E,
+						    const int                       a_level,
+						    const Real                      a_time){
+  CH_TIME("ito_plasma_stepper::compute_ito_mobilities_lfa(mobilities, E, level, time)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_ito_mobilities_lfa(mobilities, E, level, time)" << endl;
+  }
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const EBCellFAB& E = a_E[dit()];
+    const Box bx       = dbl.get(dit());
+
+    Vector<EBCellFAB*> meshMobilities;
+    for (int i = 0; i < a_meshMobilities.size(); i++){
+      meshMobilities.push_back(&((*a_meshMobilities[i])[dit()]));
+    }
+
+    this->compute_ito_mobilities_lfa(meshMobilities, E, a_level, dit(), bx, a_time);
+  }
+}
+
+void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBCellFAB*>& a_meshMobilities,
+						    const EBCellFAB&    a_E,
+						    const int           a_level,
+						    const DataIndex     a_dit,
+						    const Box           a_box,
+						    const Real          a_time) {
+  CH_TIME("ito_plasma_stepper::compute_ito_mobilities_lfa(meshMobilities, E, level, dit, box, time)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_ito_mobilities_lfa(meshMobilities, E, level, dit, box, time)" << endl;
+  }
+
+  const int comp         = 0;
+  const Real dx          = m_amr->get_dx()[a_level];
+  const RealVect prob_lo = m_amr->get_prob_lo();
+  const BaseFab<Real>& E = a_E.getSingleValuedFAB();
+
+  // Do regular cells
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv   = bit();
+    const RealVect pos = m_amr->get_prob_lo() + dx*(RealVect(iv) + 0.5*RealVect::Unit);
+    const RealVect e   = RealVect(D_DECL(E(iv,0), E(iv, 1), E(iv, 2)));
+
+    // Call ito_physics and compute diffusion for each particle species
+    const Vector<Real> mobilities = m_physics->compute_ito_mobilities_lfa(a_time, pos, e);
+    
+    // Put mobilities in data holder
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<ito_solver>& solver = solver_it();
+      const int idx = solver_it.get_solver();
+      (*a_meshMobilities[idx]).getSingleValuedFAB()(iv, comp) = mobilities[idx];
+    }
+  }
+
+  // Do irregular cells
+  VoFIterator& vofit = (*m_amr->get_vofit(m_particle_realm, m_phase)[a_level])[a_dit];
+  for (vofit.reset(); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+    const RealVect e    = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
+    const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, prob_lo);
+    
+    // Compute diffusion
+    const Vector<Real> mobilities = m_physics->compute_ito_mobilities_lfa(a_time, pos, e);
+
+    // Put diffusion in the appropriate place.
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      (*a_meshMobilities[idx])(vof, comp) = mobilities[idx];
+    }
+  }
+
+  // Covered is bogus.
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    a_meshMobilities[idx]->setCoveredCellVal(0.0, comp);
+  }
+}
+
 void ito_plasma_stepper::compute_ito_velocities(){
   CH_TIME("ito_plasma_stepper::compute_ito_velocities()");
   if(m_verbosity > 5){

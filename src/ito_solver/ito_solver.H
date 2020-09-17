@@ -326,6 +326,16 @@ public:
   virtual EBAMRCellData& get_diffco_func();
 
   /*!
+    @brief Get scratch storage
+  */
+  virtual EBAMRCellData& get_scratch();
+
+  /*!
+    @brief Get mobility function
+  */
+  virtual EBAMRCellData& get_mobility_func();
+
+  /*!
     @brief Set diffusion coefficient
   */
   virtual void set_diffco_func(const Real a_diffco);
@@ -344,6 +354,16 @@ public:
     @brief Interpolate velocities
   */
   virtual void interpolate_velocities(const int a_level, const DataIndex& a_dit);
+
+  /*!
+    @brief Interpolate mobilities
+  */
+  virtual void interpolate_mobilities();
+
+  /*!
+    @brief Interpolate mobilities
+  */
+  virtual void interpolate_mobilities(const int a_level, const DataIndex& a_dit);
 
   /*!
     @brief Interpolate diffusion
@@ -699,6 +719,11 @@ protected:
     @brief Scratch data
   */
   EBAMRCellData m_scratch;
+
+  /*!
+    @brief Mobility function
+  */
+  EBAMRCellData m_mobility_func;
 
   /*!
     @brief Cell-centered field used for interpolating velocities

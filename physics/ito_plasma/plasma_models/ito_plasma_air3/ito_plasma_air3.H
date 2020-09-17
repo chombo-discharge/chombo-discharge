@@ -32,6 +32,8 @@ namespace physics {
 
       Real compute_eta(const RealVect a_E) const;
 
+      Vector<Real> compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const override;
+
       Vector<RealVect> compute_ito_velocities(const Real         a_time,
 					      const RealVect     a_pos,
 					      const RealVect     a_E,

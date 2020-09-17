@@ -637,10 +637,11 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   }
 
   // Reallocate mesh data
-  m_amr->reallocate(m_state,        m_phase, a_lmin);
-  m_amr->reallocate(m_scratch,      m_phase, a_lmin);
-  m_amr->reallocate(m_depositionNC, m_phase, a_lmin);
-  m_amr->reallocate(m_massDiff,     m_phase, a_lmin);
+  m_amr->reallocate(m_state,         m_phase, a_lmin);
+  m_amr->reallocate(m_scratch,       m_phase, a_lmin);
+  m_amr->reallocate(m_mobility_func, m_phase, a_lmin);
+  m_amr->reallocate(m_depositionNC,  m_phase, a_lmin);
+  m_amr->reallocate(m_massDiff,      m_phase, a_lmin);
   
   // Only allocate memory if we actually have a mobile solver
   if(m_mobile){
@@ -691,10 +692,11 @@ void ito_solver::allocate_internals(){
   
   const int ncomp = 1;
 
-  m_amr->allocate(m_state,        m_realm, m_phase, ncomp);
-  m_amr->allocate(m_scratch,      m_realm, m_phase, ncomp);
-  m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
-  m_amr->allocate(m_massDiff,     m_realm, m_phase, ncomp);
+  m_amr->allocate(m_state,         m_realm, m_phase, ncomp);
+  m_amr->allocate(m_scratch,       m_realm, m_phase, ncomp);
+  m_amr->allocate(m_mobility_func, m_realm, m_phase, ncomp);
+  m_amr->allocate(m_depositionNC,  m_realm, m_phase, ncomp);
+  m_amr->allocate(m_massDiff,      m_realm, m_phase, ncomp);
 
   // Only allocate memory for velocity if we actually have a mobile solver
   if(m_mobile){
@@ -1547,6 +1549,24 @@ EBAMRCellData& ito_solver::get_diffco_func(){
   return m_diffco_cell;
 }
 
+EBAMRCellData& ito_solver::get_scratch(){
+  CH_TIME("ito_solver::get_scratch");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_scratch" << endl;
+  }
+
+  return m_scratch;
+}
+
+EBAMRCellData& ito_solver::get_mobility_func(){
+  CH_TIME("ito_solver::get_mobility_func");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_mobility_func" << endl;
+  }
+
+  return m_mobility_func;
+}
+
 void ito_solver::set_diffco_func(const Real a_diffco){
   CH_TIME("ito_solver::set_diffco_func");
   if(m_verbosity > 5){
@@ -1609,6 +1629,43 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
       ito_particle& p = lit();
       p.velocity() *= p.mobility();
     }
+  }
+}
+
+void ito_solver::interpolate_mobilities(){
+  CH_TIME("ito_solver::interpolate_mobilities()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::interpolate_mobilities()" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      this->interpolate_mobilities(lvl, dit());
+    }
+  }
+}
+
+void ito_solver::interpolate_mobilities(const int a_lvl, const DataIndex& a_dit){
+  CH_TIME("ito_solver::interpolate_mobilities(lvl, dit)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::interpolate_mobilities(lvl, dit)" << endl;
+  }
+
+  if(m_mobile){
+    const EBCellFAB& mob_func  = (*m_mobility_func[a_lvl])[a_dit];
+    const EBISBox& ebisbox     = mob_func.getEBISBox();
+    const FArrayBox& mob_fab   = mob_func.getFArrayBox();
+    const RealVect dx          = m_amr->get_dx()[a_lvl]*RealVect::Unit;
+    const RealVect origin      = m_amr->get_prob_lo();
+    const Box box              = m_amr->get_grids(m_realm)[a_lvl][a_dit];
+
+    List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
+
+    // This interpolates the mobility as defined on the mesh onto the particle position
+    EBParticleInterp meshInterp(box, ebisbox, dx, origin);
+    meshInterp.interpolateMobility(particleList, mob_fab, m_deposition);
   }
 }
 
