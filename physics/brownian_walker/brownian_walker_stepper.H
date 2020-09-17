@@ -10,6 +10,7 @@
 
 #include "time_stepper.H"
 #include "ito_solver.H"
+#include "ito_layout.H"
 
 namespace physics {
   namespace brownian_walker {

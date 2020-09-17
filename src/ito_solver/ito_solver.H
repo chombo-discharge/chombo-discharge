@@ -106,16 +106,19 @@ public:
 
   /*!
     @brief Deposit conductivities
+    @details This deposits weight*mobility (not multiplied by charge)
   */
   virtual void deposit_conductivity();
 
   /*!
     @brief Deposit conductivities
+    @details This deposits weight*mobility (not multiplied by charge)
   */
   virtual void deposit_conductivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
 
     /*!
     @brief Deposit conductivities
+    @details This deposits weight*mobility (not multiplied by charge)
   */
   virtual void deposit_conductivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
 

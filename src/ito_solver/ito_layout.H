@@ -214,7 +214,7 @@ public:
   /*!
     @brief Get all velocity functions
   */
-  virtual Vector<EBAMRCellData*> get_velocities();
+  virtual Vector<EBAMRCellData*> get_velo_funcs();
 
   /*!
     @brief Get all densities
@@ -224,7 +224,7 @@ public:
   /*!
     @brief Get all diffusion coefficients
   */
-  virtual Vector<EBAMRCellData*> get_diffusion();
+  virtual Vector<EBAMRCellData*> get_diffco_funcs();
 
   /*!
     @brief Get all particles

@@ -298,10 +298,10 @@ Vector<RefCountedPtr<ito_species> >& ito_layout<T>::get_species(){
 }
 
 template <class T>
-Vector<EBAMRCellData*> ito_layout<T>::get_velocities(){
+Vector<EBAMRCellData*> ito_layout<T>::get_velo_funcs(){
   Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.get_solver()] = &(iter()->get_velo_cell());
+    ret[iter.get_solver()] = &(iter()->get_velo_func());
   }
 
   return ret;
@@ -318,10 +318,10 @@ Vector<EBAMRCellData*> ito_layout<T>::get_densities(){
 }
 
 template <class T>
-Vector<EBAMRCellData*> ito_layout<T>::get_diffusion(){
+Vector<EBAMRCellData*> ito_layout<T>::get_diffco_funcs(){
   Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.get_solver()] = &(iter()->get_diffco_cell());
+    ret[iter.get_solver()] = &(iter()->get_diffco_func());
   }
 
   return ret;
