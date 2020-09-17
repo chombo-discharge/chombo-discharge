@@ -153,7 +153,7 @@ void ito_plasma_stepper::initial_data(){
   this->solve_poisson();
 
   // Fill solvers with velocities and diffusion coefficients
-  this->compute_ito_velocities();
+  this->compute_ito_velocities_lfa();
   this->compute_ito_diffusion();
 }
 
@@ -206,7 +206,7 @@ void ito_plasma_stepper::post_checkpoint_setup(){
   this->allocate_internals();
 
   
-  this->compute_ito_velocities();
+  this->compute_ito_velocities_lfa();
   this->compute_ito_diffusion();
 }
 
@@ -437,7 +437,7 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, 
   }
 
   // Recompute new velocities and diffusion coefficients
-  this->compute_ito_velocities();
+  this->compute_ito_velocities_lfa();
   this->compute_ito_diffusion();
 }
 

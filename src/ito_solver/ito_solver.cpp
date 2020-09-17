@@ -1051,6 +1051,7 @@ void ito_solver::set_mass_to_conductivity(particle_container<ito_particle>& a_pa
 
       for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
 	ito_particle& p = lit();
+	p.tmp()   = p.mass();
 	p.mass() *= p.mobility();
       }
     }
@@ -1070,7 +1071,7 @@ void ito_solver::unset_mass_to_conductivity(particle_container<ito_particle>& a_
 
       for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
 	ito_particle& p = lit();
-	p.mass() /= p.mobility();
+	p.mass() = p.tmp();
       }
     }
   }

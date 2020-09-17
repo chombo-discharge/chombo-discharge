@@ -152,6 +152,16 @@ public:
   Real velocity(const int a_dir) const;
 
   /*!
+    @brief Get temporary
+  */
+  Real& tmp();
+
+  /*! 
+    @brief Const retrieve temporary
+  */
+  const Real& tmp() const;
+
+  /*!
     @brief Comparison operator
   */
   bool operator==(const ito_particle& a_p) const;
@@ -190,7 +200,8 @@ public:
   friend std::ostream & operator<<(std::ostream& ostr,const ito_particle& p);
 
 protected:
-
+  
+  Real     m_tmp; // Not communicated!
   Real     m_mass;
   Real     m_diffusion;
   Real     m_energy;

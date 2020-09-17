@@ -172,7 +172,7 @@ void ito_plasma_godunov::post_checkpoint_setup() {
     this->allocate_internals();
 
   
-    this->compute_ito_velocities();
+    this->compute_ito_velocities_lfa();
     this->compute_ito_diffusion();
   }
 }
@@ -291,7 +291,7 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
   }
 
   // Recompute new velocities and diffusion coefficients
-  this->compute_ito_velocities();
+  this->compute_ito_velocities_lfa();
   this->compute_ito_diffusion();
 }
 
@@ -432,7 +432,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 
   // Prepare next step
   velo_time = -MPI_Wtime();
-  this->compute_ito_velocities();
+  this->compute_ito_velocities_lfa();
   velo_time += MPI_Wtime();
   diff_time -= MPI_Wtime();
   this->compute_ito_diffusion();
@@ -556,7 +556,7 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   time_remap += MPI_Wtime();
   time_swap += MPI_Wtime();
   time_velo -= MPI_Wtime();
-  this->compute_ito_velocities();
+  this->compute_ito_velocities_lfa();
   time_velo += MPI_Wtime();
   time_advect -= MPI_Wtime();
   this->advect_particles_si(a_dt);  // This 
@@ -638,7 +638,7 @@ void ito_plasma_godunov::advance_particles_split_si(const Real a_dt){
 
   // Recompute advective velocities. This is necessary because
   // we want the mobility at E^k
-  this->compute_ito_velocities();
+  this->compute_ito_velocities_lfa();
 
   // Compute conductivity and solve semi-implicit Poisson
   this->compute_conductivity();
@@ -648,7 +648,7 @@ void ito_plasma_godunov::advance_particles_split_si(const Real a_dt){
   // We have field at k+1 and can now compute the velocities at E^(k+1) and move the particles
   // and then we compute velocities with E^(k+1).
   this->set_old_positions();
-  this->compute_ito_velocities();
+  this->compute_ito_velocities_lfa();
   this->advect_particles_euler(a_dt);  
   
   // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
@@ -696,7 +696,7 @@ void ito_plasma_godunov::advance_particles_split_pc(const Real a_dt){
   for (int ipc =0; ipc < NPC; ipc++){
     // Recompute advective velocities. This is necessary because
     // we want the mobility at E^k
-    this->compute_ito_velocities();
+    this->compute_ito_velocities_lfa();
     this->advect_particles_euler(a_dt);
 
     // Remove particles that went through EB

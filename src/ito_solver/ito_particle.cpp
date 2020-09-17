@@ -127,6 +127,14 @@ Real ito_particle::velocity(const int a_dir) const{
   return m_velocity[a_dir];
 }
 
+Real& ito_particle::tmp(){
+  return m_tmp;
+}
+
+const Real& ito_particle::tmp() const{
+  return m_tmp;
+}
+
 bool ito_particle::operator==(const ito_particle& a_p) const{
   return ( m_mass      == a_p.m_mass     &&
            m_position  == a_p.m_position &&
