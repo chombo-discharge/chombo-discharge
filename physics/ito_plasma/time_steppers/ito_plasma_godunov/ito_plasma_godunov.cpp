@@ -405,7 +405,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 
   // Chemistry kernel.
   reaction_time = -MPI_Wtime();
-  this->advance_reaction_network(a_dt);
+  this->advance_reaction_network_lfa(a_dt);
   reaction_time += MPI_Wtime();
 
   // Make superparticles
@@ -670,7 +670,7 @@ void ito_plasma_godunov::advance_particles_split_pc(const Real a_dt){
     pout() << m_name + "::advance_particles_split_pc" << endl;
   }
 
-    // Set old positions and diffuse particles. 
+  // Set old positions and diffuse particles. 
   this->set_old_positions();
   this->diffuse_particles_euler(a_dt);
   

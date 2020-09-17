@@ -172,34 +172,34 @@ namespace physics {
 				     const Box                 a_box,
 				     const Real                a_time);
 
-      // Routines for chemistry advances
-      void advance_reaction_network(const Real a_dt);
-      void advance_reaction_network(Vector<particle_container<ito_particle>* >& a_particles,
-				    Vector<particle_container<photon>* >&       a_photons,
-				    Vector<particle_container<photon>* >&       a_newPhotons,
-				    const EBAMRCellData&                        a_E,
-				    const Real                                  a_dt);
-      void advance_reaction_network(Vector<AMRCellParticles<ito_particle>* >& a_particles,
-				    Vector<AMRCellParticles<photon>* >&       a_photons,
-				    Vector<AMRCellParticles<photon>* >&       a_newPhotons,
-				    const EBAMRCellData&                      a_E,
-				    const Real                                a_dt);
-      void advance_reaction_network(Vector<LayoutData<BinFab<ito_particle> >* >& a_particles,
-				    Vector<LayoutData<BinFab<photon> >* >&       a_photons,
-				    Vector<LayoutData<BinFab<photon> >* >&       a_newPhotons,
-				    const LevelData<EBCellFAB>&                  a_E,
-				    const int                                    a_lvl,
-				    const Real                                   a_dt);
+      // Routines for chemistry advances in the LFA. 
+      void advance_reaction_network_lfa(const Real a_dt);
+      void advance_reaction_network_lfa(Vector<particle_container<ito_particle>* >& a_particles,
+					Vector<particle_container<photon>* >&       a_photons,
+					Vector<particle_container<photon>* >&       a_newPhotons,
+					const EBAMRCellData&                        a_E,
+					const Real                                  a_dt);
+      void advance_reaction_network_lfa(Vector<AMRCellParticles<ito_particle>* >& a_particles,
+					Vector<AMRCellParticles<photon>* >&       a_photons,
+					Vector<AMRCellParticles<photon>* >&       a_newPhotons,
+					const EBAMRCellData&                      a_E,
+					const Real                                a_dt);
+      void advance_reaction_network_lfa(Vector<LayoutData<BinFab<ito_particle> >* >& a_particles,
+					Vector<LayoutData<BinFab<photon> >* >&       a_photons,
+					Vector<LayoutData<BinFab<photon> >* >&       a_newPhotons,
+					const LevelData<EBCellFAB>&                  a_E,
+					const int                                    a_lvl,
+					const Real                                   a_dt);
 
-      void advance_reaction_network(Vector<BinFab<ito_particle>* >& a_particles,
-				    Vector<BinFab<photon>* >&       a_photons,
-				    Vector<BinFab<photon>* >&       a_newPhotons,
-				    const EBCellFAB&                a_E,
-				    const int                       a_lvl,
-				    const DataIndex                 a_dit,
-				    const Box                       a_box,
-				    const Real                      a_dx,
-				    const Real                      a_dt);
+      void advance_reaction_network_lfa(Vector<BinFab<ito_particle>* >& a_particles,
+					Vector<BinFab<photon>* >&       a_photons,
+					Vector<BinFab<photon>* >&       a_newPhotons,
+					const EBCellFAB&                a_E,
+					const int                       a_lvl,
+					const DataIndex                 a_dit,
+					const Box                       a_box,
+					const Real                      a_dx,
+					const Real                      a_dt);
 
       // Routines for advancing photons
       void advance_photons(const Real a_dt);

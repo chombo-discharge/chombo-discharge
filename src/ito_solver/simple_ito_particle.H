@@ -1,12 +1,12 @@
 /*!
-  @file   massive_particle.H
+  @file   simple_ito_particle.H
   @brief  Declaration of a particle which only holds position and mass. 
   @author Robert Marskar
   @date   Sept. 2020
 */
 
-#ifndef _MASSIVE_PARTICLE_H_
-#define _MASSIVE_PARTICLE_H_
+#ifndef _SIMPLE_ITO_PARTICLE_H_
+#define _SIMPLE_ITO_PARTICLE_H_
 
 #include <string>
 #include <typeinfo>
@@ -18,23 +18,23 @@
 /*!
   @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers
 */
-class massive_particle : public BinItem {
+class simple_ito_particle : public BinItem {
 public:
 
   /*!
     @brief Default constructor
   */
-  massive_particle();
+  simple_ito_particle();
 
   /*!
     @brief Constructor. Subsequently calls define
   */
-  massive_particle(const Real a_mass, const RealVect a_position, const Real a_energy);
+  simple_ito_particle(const Real a_mass, const RealVect a_position, const Real a_energy);
 
   /*!
     @brief Default dtor
   */
-  ~massive_particle();
+  ~simple_ito_particle();
 
   /*!
     @brief For non-default ctor
@@ -74,17 +74,17 @@ public:
   /*!
     @brief Comparison operator
   */
-  bool operator==(const massive_particle& a_p) const;
+  bool operator==(const simple_ito_particle& a_p) const;
 
   /*!
     @brief Comparison operator
   */
-  bool operator==(const massive_particle* a_p) const;
+  bool operator==(const simple_ito_particle* a_p) const;
 
   /*!
     @brief Comparison operator
   */
-  bool operator!=(const massive_particle& a_p) const;
+  bool operator!=(const simple_ito_particle& a_p) const;
 
   /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
@@ -107,7 +107,7 @@ public:
   /*!
     @brief For outputting particle
   */
-  friend std::ostream & operator<<(std::ostream& ostr,const massive_particle& p);
+  friend std::ostream & operator<<(std::ostream& ostr,const simple_ito_particle& p);
 
 protected:
 
@@ -115,6 +115,6 @@ protected:
   Real m_energy;
 };
 
-std::ostream & operator<<(std::ostream& ostr, const massive_particle& p);
+std::ostream & operator<<(std::ostream& ostr, const simple_ito_particle& p);
 
 #endif

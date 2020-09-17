@@ -5,7 +5,7 @@
   @date   April 2020
 */
 
-#include "massive_particle.H"
+#include "simple_ito_particle.H"
 #include "ito_solver.H"
 #include "data_ops.H"
 #include "EBParticleInterp.H"
@@ -734,20 +734,20 @@ void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level)
   // Write particles.
   const std::string str = m_name + "_particles";
   if(m_checkpointing == which_checkpoint::particles){
-    particle_container<massive_particle> massiveParticles;
-    m_amr->allocate(massiveParticles, m_pvr_buffer, m_realm);
+    particle_container<simple_ito_particle> simpleParticles;
+    m_amr->allocate(simpleParticles, m_pvr_buffer, m_realm);
 
-    // Make ito_particle into massive_particle. This saves a shitload of disk space. 
+    // Make ito_particle into simple_ito_particle. This saves a shitload of disk space. 
     for (DataIterator dit(m_amr->get_grids()[a_level]); dit.ok(); ++dit){
-      List<massive_particle>& other_particles = (massiveParticles[a_level])[dit()].listItems();
+      List<simple_ito_particle>& other_particles = (simpleParticles[a_level])[dit()].listItems();
       
       for (ListIterator<ito_particle> lit(m_particles[a_level][dit()].listItems()); lit.ok(); ++lit){
-	other_particles.append(massive_particle(lit().mass(), lit().position()));
+	other_particles.append(simple_ito_particle(lit().mass(), lit().position(), lit().energy()));
       }
     }
 
     // Write particles
-    writeParticlesToHDF(a_handle, massiveParticles[a_level], str);
+    writeParticlesToHDF(a_handle, simpleParticles[a_level], str);
   }
   else{ // In this case we need to write the number of physical particles in a grid cell. 
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[a_level];
@@ -797,17 +797,17 @@ void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   const std::string str = m_name + "_particles";
   if(m_checkpointing == which_checkpoint::particles){
 
-    // Get massive_particles from data file
-    Vector<RefCountedPtr<ParticleData<massive_particle> > > massiveParticles;
-    m_amr->allocate(massiveParticles, m_realm);
-    readParticlesFromHDF(a_handle, *massiveParticles[a_level], str);
+    // Get simple_ito_particles from data file
+    Vector<RefCountedPtr<ParticleData<simple_ito_particle> > > simpleParticles;
+    m_amr->allocate(simpleParticles, m_realm);
+    readParticlesFromHDF(a_handle, *simpleParticles[a_level], str);
 
-    // Make massive_particles into ito_ particles
+    // Make simple_ito_particles into ito_ particles
     for (DataIterator dit(m_amr->get_grids()[a_level]); dit.ok(); ++dit){
       List<ito_particle>& particles = m_particles[a_level][dit()].listItems();
       
-      for (ListIterator<massive_particle> lit((*massiveParticles[a_level])[dit()].listItems()); lit.ok(); ++lit){
-	particles.append(ito_particle(lit().mass(), lit().position()));
+      for (ListIterator<simple_ito_particle> lit((*simpleParticles[a_level])[dit()].listItems()); lit.ok(); ++lit){
+	particles.append(ito_particle(lit().mass(), lit().position(), RealVect::Zero, 0.0, 0.0, lit().energy()));
       }
     }
   }

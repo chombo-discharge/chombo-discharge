@@ -103,28 +103,28 @@ namespace physics {
 	@brief Reaction network advance. Trying to inline for performance....
       */
       inline
-      void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-				    Vector<List<photon>* >&       a_photons,
-				    Vector<List<photon>* >&       a_newPhotons,
-				    const RealVect                a_E,           
-				    const RealVect                a_cellPos,
-				    const RealVect                a_centroidPos,
-				    const RealVect                a_bndryCentroid,
-				    const RealVect                a_bndryNormal,
-				    const RealVect                a_lo,
-				    const RealVect                a_hi,
-				    const Real                    a_dx,
-				    const Real                    a_kappa, 
-				    const Real                    a_dt);
+      void advance_reaction_network_lfa(Vector<List<ito_particle>* >& a_particles,
+					Vector<List<photon>* >&       a_photons,
+					Vector<List<photon>* >&       a_newPhotons,
+					const RealVect                a_E,           
+					const RealVect                a_cellPos,
+					const RealVect                a_centroidPos,
+					const RealVect                a_bndryCentroid,
+					const RealVect                a_bndryNormal,
+					const RealVect                a_lo,
+					const RealVect                a_hi,
+					const Real                    a_dx,
+					const Real                    a_kappa, 
+					const Real                    a_dt);
 
       
     protected:
 
       enum class algorithm {
 	ssa,
-	tau,
-	hybrid
-      };
+	  tau,
+	  hybrid
+	  };
 
       int m_seed;
       int m_table_entries;

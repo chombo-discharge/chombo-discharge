@@ -596,19 +596,19 @@ unsigned long long ito_plasma_physics::get_particle_count(const List<ito_particl
 }
 
 inline
-void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-						  Vector<List<photon>* >&       a_photons,
-						  Vector<List<photon>* >&       a_newPhotons,
-						  const RealVect                a_E,           
-						  const RealVect                a_pos,
-						  const RealVect                a_centroidPos,
-						  const RealVect                a_bndryCentroid,
-						  const RealVect                a_bndryNormal,
-						  const RealVect                a_lo,
-						  const RealVect                a_hi,
-						  const Real                    a_dx,
-						  const Real                    a_kappa, 
-						  const Real                    a_dt){
+void ito_plasma_physics::advance_reaction_network_lfa(Vector<List<ito_particle>* >& a_particles,
+						      Vector<List<photon>* >&       a_photons,
+						      Vector<List<photon>* >&       a_newPhotons,
+						      const RealVect                a_E,           
+						      const RealVect                a_pos,
+						      const RealVect                a_centroidPos,
+						      const RealVect                a_bndryCentroid,
+						      const RealVect                a_bndryNormal,
+						      const RealVect                a_lo,
+						      const RealVect                a_hi,
+						      const Real                    a_dx,
+						      const Real                    a_kappa, 
+						      const Real                    a_dt){
   
   // Get particle counts. 
   Vector<unsigned long long> newPhotonCount   = Vector<unsigned long long>(m_num_rte_species, 0);
@@ -649,7 +649,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   if(Qbefore - Qafter != zero){
     std::cout << "Qbefore = " << Qbefore << std::endl;
     std::cout << "Qafter  = " << Qafter << std::endl;
-    MayDay::Abort("ito_plasma_physics::advance_reaction_network(...) - charge is not conserved!!!");
+    MayDay::Abort("ito_plasma_physics::advance_reaction_network_lfa(...) - charge is not conserved!!!");
   }
 #endif
 }
