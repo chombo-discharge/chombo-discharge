@@ -99,6 +99,9 @@ namespace physics {
       void compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase);
       void compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities);
 
+      // Compute conductivity routines
+      void compute_conductivity(EBAMRCellData& a_conductivity);
+
       // Compute J routines
       void compute_J(EBAMRCellData& a_J, const Real a_dt);
       void compute_J(LevelData<EBCellFAB>& a_J, const int a_level, const Real a_dt);

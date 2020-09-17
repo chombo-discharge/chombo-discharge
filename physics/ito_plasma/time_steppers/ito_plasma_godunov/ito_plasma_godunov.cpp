@@ -945,6 +945,10 @@ void ito_plasma_godunov::compute_conductivity(){
     pout() << m_name + "::compute_conductivity" << endl;
   }
 
+#if 1 // Try this shit
+  ito_plasma_stepper::compute_conductivity(m_conduct_cell);
+#else
+
   // Get handle to E gas-side E
   EBAMRCellData Egas;
   m_amr->allocate_ptr(Egas);
@@ -988,6 +992,7 @@ void ito_plasma_godunov::compute_conductivity(){
 
   // See if this helps...?
   //  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
+#endif
 
 
   // Now do the faces

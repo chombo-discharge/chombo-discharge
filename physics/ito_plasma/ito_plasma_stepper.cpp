@@ -681,6 +681,38 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
   m_amr->interpolate_to_centroids(rhoPhase, m_fluid_realm, m_phase);
 }
 
+void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity){
+  CH_TIME("ito_plasma_stepper::compute_conductivity(conductivity)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_conductivity(conductivity)" << endl;
+  }
+
+  data_ops::set_value(a_conductivity, 0.0);
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>&   solver = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int q = species->get_charge();
+
+    if(Abs(q) > 0 && solver->is_mobile()){
+      data_ops::set_value(m_particle_scratch1, 0.0);
+
+      solver->deposit_conductivity(m_particle_scratch1, solver->get_particles());
+
+      // Copy to fluid realm and add to fluid stuff
+      m_fluid_scratch1.copy(m_particle_scratch1);
+      data_ops::incr(a_conductivity, m_fluid_scratch1, Abs(q));
+    }
+  }
+
+  data_ops::scale(a_conductivity, units::s_Qe);
+
+  m_amr->average_down(a_conductivity, m_fluid_realm, m_phase);
+  m_amr->interp_ghost_pwl(a_conductivity, m_fluid_realm, m_phase);
+  m_amr->interpolate_to_centroids(a_conductivity, m_fluid_realm, m_phase);
+}
+
 void ito_plasma_stepper::compute_J(EBAMRCellData& a_J, const Real a_dt){
   CH_TIME("ito_plasma_stepper::compute_J(J)");
   if(m_verbosity > 5){
@@ -691,7 +723,6 @@ void ito_plasma_stepper::compute_J(EBAMRCellData& a_J, const Real a_dt){
   //       If the realms are different we compute on a scratch storage instead
 
   data_ops::set_value(a_J, 0.0);
-
   
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     LevelData<EBCellFAB>* data;
@@ -1374,14 +1405,10 @@ void ito_plasma_stepper::compute_ito_diffusion(){
     pout() << "ito_plasma_stepper::compute_ito_diffusion()" << endl;
   }
 
-  EBAMRCellData E;
-  m_amr->allocate_ptr(E);
-  m_amr->alias(E, m_phase, m_poisson->get_E());
-
   Vector<EBAMRCellData*> diffco_funcs = m_ito->get_diffco_funcs();
   Vector<EBAMRCellData*> densities    = m_ito->get_densities();
 
-  this->compute_ito_diffusion(diffco_funcs, densities, E, m_time);
+  this->compute_ito_diffusion(diffco_funcs, densities, m_particle_E, m_time);
 }
 
 void ito_plasma_stepper::compute_ito_diffusion(Vector<EBAMRCellData*>&        a_diffco_funcs,
@@ -1392,13 +1419,6 @@ void ito_plasma_stepper::compute_ito_diffusion(Vector<EBAMRCellData*>&        a_
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_ito_diffusion(velo, E, time)" << endl;
   }
-
-  // TLDR: The a_E that comes in is defined on the fluid realm. Copy it to the particle realm.
-  m_particle_scratchD.copy(a_E);
-  m_amr->average_down(m_particle_scratchD, m_particle_realm, m_phase);
-  m_amr->interp_ghost(m_particle_scratchD, m_particle_realm, m_phase);
-
-  m_amr->interpolate_to_centroids(m_particle_scratchD, m_fluid_realm, m_phase);
 
   const int num_ito_species = m_physics->get_num_ito_species();
   
@@ -1412,7 +1432,7 @@ void ito_plasma_stepper::compute_ito_diffusion(Vector<EBAMRCellData*>&        a_
       densities[idx]    = (*a_densities[idx])[lvl];
     }
 
-    this->compute_ito_diffusion(diffco_funcs, densities, *m_particle_scratchD[lvl], lvl, a_time);
+    this->compute_ito_diffusion(diffco_funcs, densities, *m_particle_E[lvl], lvl, a_time);
   }
 
   // Average down, interpolate ghost cells, and then interpolate to particle positions
