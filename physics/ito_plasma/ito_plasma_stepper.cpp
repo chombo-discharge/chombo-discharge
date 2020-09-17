@@ -1087,7 +1087,7 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBAMRCellData*>& a_me
       m_amr->average_down(*a_meshMobilities[idx], m_particle_realm, m_phase);
       m_amr->interp_ghost(*a_meshMobilities[idx], m_particle_realm, m_phase);
 
-      // solver->interpolate_mobilities();
+      solver->interpolate_mobilities();
     }
   }
 }
@@ -1143,7 +1143,6 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBCellFAB*>& a_meshMo
     
     // Put mobilities in data holder
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<ito_solver>& solver = solver_it();
       const int idx = solver_it.get_solver();
       (*a_meshMobilities[idx]).getSingleValuedFAB()(iv, comp) = mobilities[idx];
     }
@@ -1172,6 +1171,23 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBCellFAB*>& a_meshMo
     a_meshMobilities[idx]->setCoveredCellVal(0.0, comp);
   }
 }
+
+void ito_plasma_stepper::compute_ito_velocities_lfa(){
+  CH_TIME("ito_plasma_stepper::compute_ito_velocities_lfa()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_ito_velocities_lfa()" << endl;
+  }
+
+  this->compute_ito_mobilities_lfa(); // Computes particle mobilities
+  this->set_ito_velocity_funcs();     // Set the velocity function
+
+  // Interpolate velocities
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->interpolate_velocities(); // Interpolates v = +/- mu*E
+  }
+
+}
+
 
 void ito_plasma_stepper::compute_ito_velocities(){
   CH_TIME("ito_plasma_stepper::compute_ito_velocities()");

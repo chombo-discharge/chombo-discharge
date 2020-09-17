@@ -132,7 +132,7 @@ namespace physics {
       // This sets the velocity function for each species. This is sgn(charge)*E
       void set_ito_velocity_funcs();
 
-      // Routines for computing mobilities in the LFA
+      // Routines for computing mobilities in the LFA. This computes mesh-defined mobilities and interpolates them to the particle positions
       void compute_ito_mobilities_lfa();
       void compute_ito_mobilities_lfa(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_E, const Real a_time);
       void compute_ito_mobilities_lfa(Vector<LevelData<EBCellFAB>* >& a_meshMobilities,
@@ -145,6 +145,10 @@ namespace physics {
 				      const DataIndex     a_dit,
 				      const Box           a_box,
 				      const Real          a_time);
+
+      // Routines for computing velocities
+      void compute_ito_velocities_lfa();
+      void compute_ito_velocities_lea();
 
 
       // Routines for computing velocities.
