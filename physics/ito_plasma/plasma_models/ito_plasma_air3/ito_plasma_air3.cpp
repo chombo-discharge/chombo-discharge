@@ -154,21 +154,11 @@ Vector<Real> ito_plasma_air3::compute_ito_mobilities_lfa(const Real a_time, cons
   return mobilities;
 }
 
-Vector<RealVect> ito_plasma_air3::compute_ito_velocities(const Real         a_time,
-							 const RealVect     a_pos,
-							 const RealVect     a_E,
-							 const Vector<Real> a_cdr_densities) const {
-  Vector<RealVect> velo(m_num_ito_species, RealVect::Zero);
-  velo[m_electron_idx] = this->compute_electron_velocity(a_E);
-  
-  return velo;
-}
-
 RealVect ito_plasma_air3::compute_electron_velocity(const RealVect a_E) const {
   return -m_tables.at("mobility").get_entry(a_E.vectorLength())*a_E;
 }
 
-Vector<Real> ito_plasma_air3::compute_ito_diffusion(const Real         a_time,
+Vector<Real> ito_plasma_air3::compute_ito_diffusion_lfa(const Real         a_time,
 						    const RealVect     a_pos,
 						    const RealVect     a_E,
 						    const Vector<Real> a_cdr_densities) const {

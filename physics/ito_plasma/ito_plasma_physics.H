@@ -87,20 +87,12 @@ namespace physics {
       virtual Vector<Real> compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const = 0;
 
       /*!
-	@brief Compute ito velocities
-      */
-      virtual Vector<RealVect> compute_ito_velocities(const Real         a_time,
-						      const RealVect     a_pos,
-						      const RealVect     a_E,
-						      const Vector<Real> a_cdr_densities) const = 0;
-
-      /*!
 	@brief Compute diffusion coefficients
       */
-      virtual Vector<Real> compute_ito_diffusion(const Real         a_time,
-						 const RealVect     a_pos,
-						 const RealVect     a_E,
-						 const Vector<Real> a_cdr_densities) const = 0;
+      virtual Vector<Real> compute_ito_diffusion_lfa(const Real         a_time,
+						     const RealVect     a_pos,
+						     const RealVect     a_E,
+						     const Vector<Real> a_cdr_densities) const = 0;
 
       /*!
 	@brief Update reaction rates

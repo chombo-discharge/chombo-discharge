@@ -173,7 +173,7 @@ void ito_plasma_godunov::post_checkpoint_setup() {
 
   
     this->compute_ito_velocities_lfa();
-    this->compute_ito_diffusion();
+    this->compute_ito_diffusion_lfa();
   }
 }
 
@@ -292,7 +292,7 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
 
   // Recompute new velocities and diffusion coefficients
   this->compute_ito_velocities_lfa();
-  this->compute_ito_diffusion();
+  this->compute_ito_diffusion_lfa();
 }
 
 void ito_plasma_godunov::regrid_conductivity(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
@@ -435,7 +435,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   this->compute_ito_velocities_lfa();
   velo_time += MPI_Wtime();
   diff_time -= MPI_Wtime();
-  this->compute_ito_diffusion();
+  this->compute_ito_diffusion_lfa();
   diff_time += MPI_Wtime();
 
   m_ito->deposit_particles();

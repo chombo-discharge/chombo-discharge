@@ -135,6 +135,10 @@ namespace physics {
       // This sets the velocity function for each species. This is sgn(charge)*E
       void set_ito_velocity_funcs();
 
+      // Routines for computing velocities
+      void compute_ito_velocities_lfa();
+      void compute_ito_velocities_lea();
+
       // Routines for computing mobilities in the LFA. This computes mesh-defined mobilities and interpolates them to the particle positions
       void compute_ito_mobilities_lfa();
       void compute_ito_mobilities_lfa(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_E, const Real a_time);
@@ -149,51 +153,26 @@ namespace physics {
 				      const Box           a_box,
 				      const Real          a_time);
 
-      // Routines for computing velocities
-      void compute_ito_velocities_lfa();
-      void compute_ito_velocities_lea();
-
-
-      // Routines for computing velocities.
-      // This set of routines computes v = v(E) and then interpolates that to the particle positions. This
-      void compute_ito_velocities();
-      void compute_ito_velocities(Vector<EBAMRCellData*>&       a_velo_funcs,
-				  const Vector<EBAMRCellData*>& a_densities,
-				  const EBAMRCellData&          a_E,
-				  const Real                    a_time);
-      void compute_ito_velocities(Vector<LevelData<EBCellFAB>* >&       a_velo_funcs,
-				  const Vector<LevelData<EBCellFAB>* >& a_densities,
-				  const LevelData<EBCellFAB>&           a_E,
-				  const int                             a_level,
-				  const Real                            a_time);
-      void compute_ito_velocities(Vector<EBCellFAB*>&       a_velo,
-				  const Vector<EBCellFAB*>& a_densities,
-				  const EBCellFAB&          a_E,
-				  const int                 a_level,
-				  const DataIndex           a_dit,
-				  const Box                 a_box,
-				  const Real                a_time);
-
       // Routines for computing diffusion coefficients.
       // These routines compute the diffusion coefficients by computing D(E)
       // as a mesh variable, and then interpolating that to the particle position. 
-      void compute_ito_diffusion();
-      void compute_ito_diffusion(Vector<EBAMRCellData*>&       a_diffco,
-				 const Vector<EBAMRCellData*>& a_densities,
-				 const EBAMRCellData&          a_E,
-				 const Real                    a_time);
-      void compute_ito_diffusion(Vector<LevelData<EBCellFAB>* >&       a_diffco,
-				 const Vector<LevelData<EBCellFAB>* >& a_densities,
-				 const LevelData<EBCellFAB>&           a_E,
-				 const int                             a_level,
-				 const Real                            a_time);
-      void compute_ito_diffusion(Vector<EBCellFAB*>&       a_diffco,
-				 const Vector<EBCellFAB*>& a_densities,
-				 const EBCellFAB&          a_E,
-				 const int                 a_level,
-				 const DataIndex           a_dit,
-				 const Box                 a_box,
-				 const Real                a_time);
+      void compute_ito_diffusion_lfa();
+      void compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&       a_diffco,
+				     const Vector<EBAMRCellData*>& a_densities,
+				     const EBAMRCellData&          a_E,
+				     const Real                    a_time);
+      void compute_ito_diffusion_lfa(Vector<LevelData<EBCellFAB>* >&       a_diffco,
+				     const Vector<LevelData<EBCellFAB>* >& a_densities,
+				     const LevelData<EBCellFAB>&           a_E,
+				     const int                             a_level,
+				     const Real                            a_time);
+      void compute_ito_diffusion_lfa(Vector<EBCellFAB*>&       a_diffco,
+				     const Vector<EBCellFAB*>& a_densities,
+				     const EBCellFAB&          a_E,
+				     const int                 a_level,
+				     const DataIndex           a_dit,
+				     const Box                 a_box,
+				     const Real                a_time);
 
       // Routines for chemistry advances
       void advance_reaction_network(const Real a_dt);
