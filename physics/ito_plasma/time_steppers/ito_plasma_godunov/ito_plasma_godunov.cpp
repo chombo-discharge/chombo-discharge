@@ -93,6 +93,7 @@ void ito_plasma_godunov::allocate_internals(){
   
   m_amr->allocate(m_particle_scratch1,  m_particle_realm, m_phase, 1);
   m_amr->allocate(m_particle_scratchD,  m_particle_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_particle_E, m_particle_realm, m_phase, SpaceDim);
 
   m_amr->allocate(m_J,            m_fluid_realm, m_phase, SpaceDim);
   m_amr->allocate(m_scratch1,     m_fluid_realm, m_phase, 1);
@@ -100,6 +101,8 @@ void ito_plasma_godunov::allocate_internals(){
   m_amr->allocate(m_conduct_cell, m_fluid_realm, m_phase, 1);
   m_amr->allocate(m_conduct_face, m_fluid_realm, m_phase, 1);
   m_amr->allocate(m_conduct_eb,   m_fluid_realm, m_phase, 1);
+  m_amr->allocate(m_fluid_E,      m_fluid_realm, m_phase, SpaceDim);
+
 }
 
 int ito_plasma_godunov::get_num_plot_vars() const {
@@ -964,7 +967,7 @@ void ito_plasma_godunov::compute_conductivity(){
     if(solver->is_mobile() &&  q != 0){
 
       // These things are defined on the particle realm. Copy them to the fluid realm. 
-      const EBAMRCellData& velo  = solver->get_velo_cell();
+      const EBAMRCellData& velo  = solver->get_velo_func();
       const EBAMRCellData& state = solver->get_state();
 
       m_fluid_scratch1.copy(state);

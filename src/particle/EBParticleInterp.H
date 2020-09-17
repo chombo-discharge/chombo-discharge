@@ -71,6 +71,15 @@ public:
   void interpolateDiffusion(List<P>&              a_particleList,
 			    const FArrayBox&      a_diffusionField,
 			    DepositionType::Which a_deposition);
+
+  /*!
+    @brief Interpolate the field 
+    @details This requires that P has a member function setMobility() and that a_mobilityField has one component
+  */
+  template <class P>
+  void interpolateMobility(List<P>&              a_particleList,
+			   const FArrayBox&      a_mobilityField,
+			   DepositionType::Which a_deposition);
   
   /*!
     @brief Interpolate a velocity field

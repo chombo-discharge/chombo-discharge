@@ -129,14 +129,18 @@ namespace physics {
       void remap_diffusive_particles();
       void remap_mobile_or_diffusive_particles();
 
+      // Routines for computing mobilities in the LFA
+      void compute_ito_mobilities_lfa();
 
-      // Routines for computing velocities
+
+      // Routines for computing velocities.
+      // This set of routines computes v = v(E) and then interpolates that to the particle positions. This
       void compute_ito_velocities();
-      void compute_ito_velocities(Vector<EBAMRCellData*>&       a_velo,
+      void compute_ito_velocities(Vector<EBAMRCellData*>&       a_velo_funcs,
 				  const Vector<EBAMRCellData*>& a_densities,
 				  const EBAMRCellData&          a_E,
 				  const Real                    a_time);
-      void compute_ito_velocities(Vector<LevelData<EBCellFAB>* >&       a_velo,
+      void compute_ito_velocities(Vector<LevelData<EBCellFAB>* >&       a_velo_funcs,
 				  const Vector<LevelData<EBCellFAB>* >& a_densities,
 				  const LevelData<EBCellFAB>&           a_E,
 				  const int                             a_level,
@@ -149,7 +153,9 @@ namespace physics {
 				  const Box                 a_box,
 				  const Real                a_time);
 
-      // Routines for computing diffusion coefficients
+      // Routines for computing diffusion coefficients.
+      // These routines compute the diffusion coefficients by computing D(E)
+      // as a mesh variable, and then interpolating that to the particle position. 
       void compute_ito_diffusion();
       void compute_ito_diffusion(Vector<EBAMRCellData*>&       a_diffco,
 				 const Vector<EBAMRCellData*>& a_densities,
@@ -245,6 +251,10 @@ namespace physics {
 
       EBAMRCellData m_particle_scratch1;  // Scratch storage on the particle realm with 1 component
       EBAMRCellData m_particle_scratchD;  // Scratch storage on the particle realm with SpaceDim components
+
+      // Storage for the electric field on 
+      EBAMRCellData m_fluid_E;
+      EBAMRCellData m_particle_E;
 
 
       bool load_balance_particle_realm(Vector<Vector<int> >&            a_procs,

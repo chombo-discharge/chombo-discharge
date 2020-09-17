@@ -1538,10 +1538,10 @@ EBAMRCellData& ito_solver::get_velo_func(){
   return m_velo_func;
 }
 
-EBAMRCellData& ito_solver::get_diffco_cell(){
-  CH_TIME("ito_solver::get_diffco_cell");
+EBAMRCellData& ito_solver::get_diffco_func(){
+  CH_TIME("ito_solver::get_diffco_func");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_diffco_cell" << endl;
+    pout() << m_name + "::get_diffco_func" << endl;
   }
 
   return m_diffco_cell;

@@ -323,7 +323,7 @@ public:
   /*!
     @brief Get cell-centered velocity
   */
-  virtual EBAMRCellData& get_diffco_cell();
+  virtual EBAMRCellData& get_diffco_func();
 
   /*!
     @brief Set diffusion coefficient

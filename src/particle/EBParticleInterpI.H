@@ -42,6 +42,23 @@ void EBParticleInterp::interpolateDiffusion(List<P>&              a_particleList
     p.setDiffusion(particleDiffusion);
   }
 }
+
+template <class P>
+void EBParticleInterp::interpolateMobility(List<P>&              a_particleList,
+					   const FArrayBox&      a_mobilityField,
+					   DepositionType::Which a_interpType){
+  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+    Real particleMobility(0.0);
+    P& p = lit();
+    interpolateParticle(particleMobility,
+			a_mobilityField,
+			m_prob_lo,
+			m_dx,
+			p.position(),
+			a_interpType);
+    p.setMobility(particleMobility);
+  }
+}
   
 template <class P>
 void EBParticleInterp::interpolateVelocity(List<P>&              a_particleList,
