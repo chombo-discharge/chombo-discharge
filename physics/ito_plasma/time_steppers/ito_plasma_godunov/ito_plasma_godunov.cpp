@@ -945,55 +945,7 @@ void ito_plasma_godunov::compute_conductivity(){
     pout() << m_name + "::compute_conductivity" << endl;
   }
 
-#if 1 // Try this shit
   ito_plasma_stepper::compute_conductivity(m_conduct_cell);
-#else
-
-  // Get handle to E gas-side E
-  EBAMRCellData Egas;
-  m_amr->allocate_ptr(Egas);
-  m_amr->alias(Egas, m_phase, m_poisson->get_E());
-
-  // Shoud be on centroid
-  m_fluid_scratchD.copy(Egas);
-  m_amr->interpolate_to_centroids(m_fluid_scratchD, m_fluid_realm, m_phase);
-
-  // Compute |E| and reset conductivity
-  data_ops::vector_length(m_scratch1, m_fluid_scratchD);
-  data_ops::set_value(m_conduct_cell, 0.0);
-  
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<ito_solver>& solver   = solver_it();
-    const RefCountedPtr<ito_species>& species = solver->get_species();
-
-    const int q = species->get_charge();
-    
-    if(solver->is_mobile() &&  q != 0){
-
-      // These things are defined on the particle realm. Copy them to the fluid realm. 
-      const EBAMRCellData& velo  = solver->get_velo_func();
-      const EBAMRCellData& state = solver->get_state();
-
-      m_fluid_scratch1.copy(state);
-      m_fluid_scratchD.copy(velo);
-
-      data_ops::vector_length(m_scratch2, m_fluid_scratchD);   // m_scratch2     = |v|
-      data_ops::divide_scalar(m_scratch2, m_scratch1);         // m_scratch2     = |v|/|E| = mu
-      data_ops::multiply(m_scratch2,      m_fluid_scratch1);   // m_scratch2     = mu*phi
-      data_ops::incr(m_conduct_cell,      m_scratch2, Abs(q)); // m_conduct_cell = mu*phi*q
-    }
-  }
-
-  // Scale by unit charge
-  data_ops::scale(m_conduct_cell, units::s_Qe);
-
-  m_amr->average_down(m_conduct_cell,     m_fluid_realm, m_phase);
-  m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
-
-  // See if this helps...?
-  //  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
-#endif
-
 
   // Now do the faces
   this->compute_face_conductivity();

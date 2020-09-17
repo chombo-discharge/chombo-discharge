@@ -104,8 +104,6 @@ namespace physics {
 
       // Compute J routines
       void compute_J(EBAMRCellData& a_J, const Real a_dt);
-      void compute_J(LevelData<EBCellFAB>& a_J, const int a_level, const Real a_dt);
-      void compute_J(EBCellFAB& a_J, const int a_level, const DataIndex a_dit, const Box& a_box, const Real a_dt);
 
       // Relaxation time
       Real compute_relaxation_time();

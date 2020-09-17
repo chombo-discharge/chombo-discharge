@@ -722,86 +722,11 @@ void ito_plasma_stepper::compute_J(EBAMRCellData& a_J, const Real a_dt){
   // TLDR: a_J is defined over the fluid realm but the computation takes place on the particle realm.
   //       If the realms are different we compute on a scratch storage instead
 
-#if 1 // new way
+
   this->compute_conductivity(m_fluid_scratch1);
   data_ops::copy(a_J, m_fluid_E);
 
   data_ops::multiply_scalar(a_J, m_fluid_scratch1);
-#else // Old way
-  data_ops::set_value(a_J, 0.0);
-
-
-  
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    LevelData<EBCellFAB>* data;
-    if(lvl > 0){ 
-      RefCountedPtr<EBMGInterp>& interp = m_amr->get_eb_mg_interp(m_particle_realm, m_phase)[lvl];
-      interp->pwcInterp(*m_particle_scratchD[lvl], *m_particle_scratchD[lvl-1], Interval(0, SpaceDim-1));
-    }
-    this->compute_J(*m_particle_scratchD[lvl], lvl, a_dt);
-  }
-
-  // Particle realm to fluid realm copy
-  a_J.copy(m_particle_scratchD);
-  
-  m_amr->average_down(a_J, m_fluid_realm, m_phase);
-  m_amr->interp_ghost(a_J, m_fluid_realm, m_phase);
-
-  m_amr->interpolate_to_centroids(a_J, m_fluid_realm, m_phase);
-#endif
-}
-
-void ito_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_level, const Real a_dt){
-  CH_TIME("ito_plasma_stepper::compute_J(J, level)");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_J(J, level)" << endl;
-  }
-
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[a_level];
-
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Box& box = dbl.get(dit());
-
-    // Add current on present level. 
-    this->compute_J(a_J[dit()], a_level, dit(), box, a_dt);
-  }
-}
-
-void ito_plasma_stepper::compute_J(EBCellFAB& a_J, const int a_level, const DataIndex a_dit, const Box& a_box, const Real a_dt){
-  CH_TIME("ito_plasma_stepper::compute_J(J, level, dit)");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_J(J, level, dit)" << endl;
-  }
-
-  const int vofId = 0;
-  const RealVect prob_lo = m_amr->get_prob_lo();
-  const RealVect dx = m_amr->get_dx()[a_level]*RealVect::Unit;
-  const Real idV = 1./pow(m_amr->get_dx()[a_level], SpaceDim);
-
-  // TLDR: This code computes q*(Xnew - Xold)/dt for all charged particles
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<ito_solver>& solver   = solver_it();
-    const RefCountedPtr<ito_species>& species = solver->get_species();
-
-    if(solver->is_mobile() || solver->is_diffusive() && species->get_charge() != 0){
-      const List<ito_particle>& particles = solver->get_particles()[a_level][a_dit].listItems();
-      
-      for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
-	const ito_particle& p = lit();
-	const RealVect rv = (p.position() - prob_lo)/dx;
-	const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
-
-	const VolIndex vof(iv, vofId);
-
-	const Real weight = p.mass();
-	const RealVect v  = (p.position() - p.oldPosition())/a_dt;
-
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  a_J(vof, dir) += units::s_Qe*weight*v[dir]*idV;
-	}
-      }
-    }
-  }
 }
 
 Real ito_plasma_stepper::compute_relaxation_time(){
