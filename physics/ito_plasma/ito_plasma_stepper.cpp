@@ -1029,6 +1029,28 @@ void ito_plasma_stepper::remap_mobile_or_diffusive_particles(){
   }
 }
 
+void ito_plasma_stepper::set_ito_velocity_funcs(){
+  CH_TIME("ito_plasma_stepper::set_ito_velocity_funcs");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::set_ito_velocity_funcs";
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver   = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    if(solver->is_mobile()){
+      EBAMRCellData& velo_func = solver->get_velo_func();
+      velo_func.copy(m_particle_E);
+      
+      const int q = species->get_charge();
+      const int s = (q > 0) - (q < 0);
+      
+      data_ops::scale(velo_func, s);
+    }
+  }
+}
+
 void ito_plasma_stepper::compute_ito_mobilities_lfa(){
   CH_TIME("ito_plasma_stepper::compute_ito_mobilities_lfa()");
   if(m_verbosity > 5){
