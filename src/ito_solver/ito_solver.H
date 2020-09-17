@@ -288,7 +288,7 @@ public:
   /*!
     @brief Get cell-centered velocity
   */
-  virtual EBAMRCellData& get_velo_cell();
+  virtual EBAMRCellData& get_velo_func();
 
   /*!
     @brief Get cell-centered velocity
@@ -298,12 +298,12 @@ public:
   /*!
     @brief Set diffusion coefficient
   */
-  virtual void set_diffco(const Real a_diffco);
+  virtual void set_diffco_func(const Real a_diffco);
 
   /*!
     @brief Set velocity
   */
-  virtual void set_velocity(const RealVect a_vel);
+  virtual void set_velocity_func(const RealVect a_vel);
 
   /*!
     @brief Interpolate velocities
@@ -673,7 +673,7 @@ protected:
   /*!
     @brief Cell-centered field used for interpolating velocities
   */
-  EBAMRCellData m_velo_cell;
+  EBAMRCellData m_velo_func;
 
   /*!
     @brief Diffusion-centerer field used for interpolating diffusion coefficients

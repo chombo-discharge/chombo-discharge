@@ -51,7 +51,7 @@ void brownian_walker_stepper::initial_data(){
   }
 
   if(m_solver->is_diffusive()){
-    m_solver->set_diffco(m_diffco);
+    m_solver->set_diffco_func(m_diffco);
   }
   if(m_solver->is_mobile()){
     this->set_velocity();
@@ -75,7 +75,7 @@ void brownian_walker_stepper::set_velocity(){
     this->set_velocity(lvl);
   }
 
-  EBAMRCellData& vel = m_solver->get_velo_cell();
+  EBAMRCellData& vel = m_solver->get_velo_func();
   m_amr->average_down(vel, m_realm, m_phase);
   m_amr->interp_ghost(vel, m_realm, m_phase);
 }
@@ -143,7 +143,7 @@ void brownian_walker_stepper::set_velocity(const int a_level){
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box = dbl.get(dit());
 
-    EBCellFAB& vel = (*(m_solver->get_velo_cell())[a_level])[dit()];
+    EBCellFAB& vel = (*(m_solver->get_velo_func())[a_level])[dit()];
     BaseFab<Real>& vel_reg = vel.getSingleValuedFAB();
 
     vel.setVal(0.0);
@@ -176,6 +176,12 @@ void brownian_walker_stepper::set_velocity(const int a_level){
 
       vel(vof,0) = -r*m_omega*sin(theta);
       vel(vof,1) =  r*m_omega*cos(theta);
+    }
+
+    // Now set the mobility for all the particles
+    List<ito_particle>& particles = m_solver->get_particles()[a_level][dit()].listItems();
+    for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
+      lit().mobility() = 1.0;
     }
   }
 }
@@ -213,7 +219,7 @@ void brownian_walker_stepper::post_checkpoint_setup() {
   m_solver->deposit_particles();
 
   if(m_solver->is_diffusive()){
-    m_solver->set_diffco(m_diffco);
+    m_solver->set_diffco_func(m_diffco);
   }
   if(m_solver->is_mobile()){
     this->set_velocity();
@@ -457,7 +463,7 @@ void brownian_walker_stepper::regrid(const int a_lmin, const int a_old_finest_le
 
   m_solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
   if(m_solver->is_diffusive()){
-    m_solver->set_diffco(m_diffco);
+    m_solver->set_diffco_func(m_diffco);
   }
   if(m_solver->is_mobile()){
     this->set_velocity();

@@ -31,8 +31,10 @@ public:
   */
   ito_particle(const Real      a_mass,
 	       const RealVect& a_position,
-	       const RealVect& a_velocity = RealVect::Zero,
-	       const Real      a_diffusion = 0.0);
+	       const RealVect& a_velocity  = RealVect::Zero,
+	       const Real      a_diffusion = 0.0,
+	       const Real      a_mobility  = 1.0,
+	       const Real      a_energy    = 0.0);
 
   /*!
     @brief Default dtor
@@ -43,9 +45,11 @@ public:
     @brief For non-default ctor
   */
   void define(const Real      a_mass,
-              const RealVect& a_position,
-              const RealVect& a_velocity = RealVect::Zero,
-	      const Real      a_diffusion = 0.0);
+	      const RealVect& a_position,
+              const RealVect& a_velocity  = RealVect::Zero,
+	      const Real      a_diffusion = 0.0,
+	      const Real      a_mobility  = 1.0,
+	      const Real      a_energy    = 0.0);
 
   /*!
     @brief Set the old position
@@ -91,6 +95,36 @@ public:
     @brief Const retrieve diffusion
   */
   const Real& diffusion() const;
+
+  /*!
+    @brief Set particle mobility
+  */
+  void setMobility(const Real a_mobility);
+
+  /*!
+    @brief Get mobility
+  */
+  Real& mobility();
+
+  /*! 
+    @brief Const retrieve mobility
+  */
+  const Real& mobility() const;
+
+  /*!
+    @brief Set particle energy
+  */
+  void setEnergy(const Real a_energy);
+
+  /*!
+    @brief Get energy
+  */
+  Real& energy();
+
+  /*! 
+    @brief Const retrieve energy
+  */
+  const Real& energy() const;
 
   /*!
     @brief Set the velocity
@@ -158,8 +192,10 @@ public:
 protected:
 
   Real     m_mass;
-  RealVect m_velocity;
   Real     m_diffusion;
+  Real     m_energy;
+  Real     m_mobility;
+  RealVect m_velocity;
   RealVect m_oldPosition;
 };
 

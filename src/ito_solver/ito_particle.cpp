@@ -14,11 +14,15 @@ ito_particle::ito_particle() : BinItem(){
 ito_particle::ito_particle(const Real      a_mass,
 			   const RealVect& a_position,
 			   const RealVect& a_velocity,
-			   const Real      a_diffusion) : BinItem(a_position){
+			   const Real      a_diffusion,
+			   const Real      a_mobility,
+			   const Real      a_energy) : BinItem(a_position){
   m_mass        = a_mass;
   m_velocity    = a_velocity;
   m_diffusion   = a_diffusion;
   m_oldPosition = a_position;
+  m_mobility    = a_mobility;
+  m_energy      = a_energy;
 }
 
 ito_particle::~ito_particle(){
@@ -29,11 +33,15 @@ ito_particle::~ito_particle(){
 void ito_particle::define(const Real      a_mass,
 			  const RealVect& a_position,
 			  const RealVect& a_velocity,
-			  const Real      a_diffusion){
+			  const Real      a_diffusion,
+			  const Real      a_mobility,
+			  const Real      a_energy){
   setMass(a_mass);
   setPosition(a_position);
   setVelocity(a_velocity);
   setDiffusion(a_diffusion);
+  setMobility(a_mobility);
+  setEnergy(a_energy);
 }
 
 void ito_particle::setOldPosition(const RealVect a_oldPosition){
@@ -73,6 +81,32 @@ const Real& ito_particle::diffusion() const{
   return m_diffusion;
 }
 
+void ito_particle::setMobility(const Real a_mobility){
+  m_mobility = a_mobility;
+}
+
+
+Real& ito_particle::mobility(){
+  return m_mobility;
+}
+
+
+const Real& ito_particle::mobility() const{
+  return m_mobility;
+}
+
+void ito_particle::setEnergy(const Real a_energy){
+  m_energy = a_energy;
+}
+
+Real& ito_particle::energy(){
+  return m_energy;
+}
+
+const Real& ito_particle::energy() const{
+  return m_energy;
+}
+
 void ito_particle::setVelocity(const RealVect& a_velocity){
   m_velocity = a_velocity;
 }
@@ -109,7 +143,7 @@ bool ito_particle::operator!=(const ito_particle& a_p) const{
 }
 
 int ito_particle::size() const{
-  return ( BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + sizeof(m_diffusion) + sizeof(m_oldPosition));
+  return ( BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + sizeof(m_diffusion) + sizeof(m_oldPosition) + sizeof(m_mobility) + sizeof(m_energy));
 }
 
 void ito_particle::linearOut(void* buf) const{
@@ -136,7 +170,9 @@ void ito_particle::linearOut(void* buf) const{
 	   *buffer++ = m_oldPosition[5];);
 
   *buffer++ = m_diffusion;
-  *buffer   = m_mass;
+  *buffer++ = m_mass;
+  *buffer++ = m_mobility;
+  *buffer   = m_energy;
 }
 
 void ito_particle::linearIn(void* buf){
@@ -163,7 +199,9 @@ void ito_particle::linearIn(void* buf){
 	   m_oldPosition[5] = *buffer++;);
 
   m_diffusion = *buffer++;
-  m_mass = *buffer;
+  m_mass      = *buffer++;
+  m_mobility  = *buffer++;
+  m_energy    = *buffer;
 }
 
 std::ostream & operator<<(std::ostream& ostr, const ito_particle& p){
@@ -176,5 +214,7 @@ std::ostream & operator<<(std::ostream& ostr, const ito_particle& p){
   for ( int i=0; i<SpaceDim; ++i ){ ostr << " " << p.velocity(i); }
   ostr << " ) ";
   ostr << std::endl << " diffusion " << p.diffusion() << std::endl;
+  ostr << std::endl << " mobility " << p.mobility() << std::endl;
+  ostr << std::endl << " energy " << p.energy() << std::endl;
   return ostr;
 }

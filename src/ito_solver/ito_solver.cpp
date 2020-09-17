@@ -644,10 +644,10 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   
   // Only allocate memory if we actually have a mobile solver
   if(m_mobile){
-    m_amr->reallocate(m_velo_cell, m_phase, a_lmin);
+    m_amr->reallocate(m_velo_func, m_phase, a_lmin);
   }
   else{ 
-    m_amr->allocate_ptr(m_velo_cell);
+    m_amr->allocate_ptr(m_velo_func);
   }
 
   // Only allocate memory if we actually a diffusion solver
@@ -698,10 +698,10 @@ void ito_solver::allocate_internals(){
 
   // Only allocate memory for velocity if we actually have a mobile solver
   if(m_mobile){
-    m_amr->allocate(m_velo_cell, m_realm, m_phase, SpaceDim);
+    m_amr->allocate(m_velo_func, m_realm, m_phase, SpaceDim);
   }
   else{ 
-    m_amr->allocate_ptr(m_velo_cell);
+    m_amr->allocate_ptr(m_velo_func);
   }
 
   // Only allocate memory if we actually have a diffusion solver
@@ -965,10 +965,10 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       if(m_realm == a_output.get_realm()){
-	m_velo_cell[lvl]->localCopyTo(src, *a_output[lvl], dst);
+	m_velo_func[lvl]->localCopyTo(src, *a_output[lvl], dst);
       }
       else{
-	m_velo_cell[lvl]->copyTo(src, *a_output[lvl], dst);
+	m_velo_func[lvl]->copyTo(src, *a_output[lvl], dst);
       }
     }
 
@@ -1462,13 +1462,13 @@ EBAMRCellData& ito_solver::get_state(){
   return m_state;
 }
 
-EBAMRCellData& ito_solver::get_velo_cell(){
-  CH_TIME("ito_solver::get_velo_cell");
+EBAMRCellData& ito_solver::get_velo_func(){
+  CH_TIME("ito_solver::get_velo_func");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_velo_cell" << endl;
+    pout() << m_name + "::get_velo_func" << endl;
   }
 
-  return m_velo_cell;
+  return m_velo_func;
 }
 
 EBAMRCellData& ito_solver::get_diffco_cell(){
@@ -1480,23 +1480,23 @@ EBAMRCellData& ito_solver::get_diffco_cell(){
   return m_diffco_cell;
 }
 
-void ito_solver::set_diffco(const Real a_diffco){
-  CH_TIME("ito_solver::set_diffco");
+void ito_solver::set_diffco_func(const Real a_diffco){
+  CH_TIME("ito_solver::set_diffco_func");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_diffco" << endl;
+    pout() << m_name + "::set_diffco_func" << endl;
   }
 
   data_ops::set_value(m_diffco_cell, a_diffco);
 }
 
-void ito_solver::set_velocity(const RealVect a_vel){
-  CH_TIME("ito_solver::set_velocity");
+void ito_solver::set_velocity_func(const RealVect a_vel){
+  CH_TIME("ito_solver::set_velocity_func");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_velocity" << endl;
+    pout() << m_name + "::set_velocity_func" << endl;
   }
 
   for (int comp = 0; comp < SpaceDim; comp++){
-    data_ops::set_value(m_velo_cell, a_vel[comp], comp);
+    data_ops::set_value(m_velo_func, a_vel[comp], comp);
   }
 }
 
@@ -1524,17 +1524,24 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
   }
 
   if(m_mobile){
-    const EBCellFAB& velo_cell = (*m_velo_cell[a_lvl])[a_dit];
-    const EBISBox& ebisbox     = velo_cell.getEBISBox();
-    const FArrayBox& vel_fab   = velo_cell.getFArrayBox();
+    const EBCellFAB& velo_func = (*m_velo_func[a_lvl])[a_dit];
+    const EBISBox& ebisbox     = velo_func.getEBISBox();
+    const FArrayBox& vel_fab   = velo_func.getFArrayBox();
     const RealVect dx          = m_amr->get_dx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->get_prob_lo();
     const Box box              = m_amr->get_grids(m_realm)[a_lvl][a_dit];
 
     List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
 
+    // This interpolates the velocity function on to the particle velocities
     EBParticleInterp meshInterp(box, ebisbox, dx, origin);
     meshInterp.interpolateVelocity(particleList, vel_fab, m_deposition);
+
+    // Go through the particles and set their velocities to velo_func*mobility
+    for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
+      ito_particle& p = lit();
+      p.velocity() *= p.mobility();
+    }
   }
 }
 
