@@ -93,6 +93,33 @@ public:
   virtual void clear(AMRParticles<ito_particle>& a_particles);
 
   /*!
+    @brief Set mass to conductivity
+    @details This sets mass = mass*mobility
+  */
+  virtual void set_mass_to_conductivity(particle_container<ito_particle>& a_particles);
+
+  /*!
+    @brief Unset mass to conductivity
+    @details This sets mass = mass/mobility
+  */
+  virtual void unset_mass_to_conductivity(particle_container<ito_particle>& a_particles);
+
+  /*!
+    @brief Deposit conductivities
+  */
+  virtual void deposit_conductivity();
+
+  /*!
+    @brief Deposit conductivities
+  */
+  virtual void deposit_conductivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
+
+    /*!
+    @brief Deposit conductivities
+  */
+  virtual void deposit_conductivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
+
+  /*!
     @brief Deposit particles
   */
   virtual void deposit_particles();

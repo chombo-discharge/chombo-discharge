@@ -212,7 +212,7 @@ public:
   virtual Vector<RefCountedPtr<ito_species> >& get_species();
 
   /*!
-    @brief Get all velocities
+    @brief Get all velocity functions
   */
   virtual Vector<EBAMRCellData*> get_velocities();
 

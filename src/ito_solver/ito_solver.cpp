@@ -1036,6 +1036,73 @@ void ito_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
   a_comp += ncomp;
 }
 
+void ito_solver::set_mass_to_conductivity(particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::unset_mass_to_conductivity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::unset_mass_to_conductivity" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
+
+      for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
+	ito_particle& p = lit();
+	p.mass() *= p.mobility();
+      }
+    }
+  }
+}
+
+void ito_solver::unset_mass_to_conductivity(particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::unset_mass_to_conductivity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::unset_mass_to_conductivity" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
+
+      for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
+	ito_particle& p = lit();
+	p.mass() /= p.mobility();
+      }
+    }
+  }
+}
+
+void ito_solver::deposit_conductivity(){
+  CH_TIME("ito_solver::deposit_conductivity()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_conductivity()" << endl;
+  }
+
+  this->deposit_conductivity(m_state, m_particles);
+}
+
+void ito_solver::deposit_conductivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::deposit_conductivity(state, particles)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_conductivity(state, particles)" << endl;
+  }
+
+  this->deposit_conductivity(a_state, a_particles, m_deposition);
+}
+
+void ito_solver::deposit_conductivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition){
+  CH_TIME("ito_solver::deposit_conductivity(state, particles, deposition_type)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_conductivity(state, particles, deposition_type)" << endl;
+  }
+
+  this->set_mass_to_conductivity(a_particles);                                 // Make mass = mass*mu
+  this->deposit_particles(a_state, a_particles.get_particles(), a_deposition); // Deposit mass*mu
+  this->unset_mass_to_conductivity(a_particles);                               // Make mass = mass/mu
+}
+
 void ito_solver::deposit_particles(){
   CH_TIME("ito_solver::deposit_particles");
   if(m_verbosity > 5){
