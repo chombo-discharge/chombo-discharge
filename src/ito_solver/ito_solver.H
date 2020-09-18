@@ -104,6 +104,18 @@ public:
   */
   virtual void unset_mass_to_conductivity(particle_container<ito_particle>& a_particles);
 
+    /*!
+    @brief Set mass to diffusivity
+    @details This sets mass = mass*diffusion_coefficient
+  */
+  virtual void set_mass_to_diffusivity(particle_container<ito_particle>& a_particles);
+
+  /*!
+    @brief Unset mass to diffusivity
+    @details This sets mass = mass/diffusion_coefficient
+  */
+  virtual void unset_mass_to_diffusivity(particle_container<ito_particle>& a_particles);
+
   /*!
     @brief Deposit conductivities
     @details This deposits weight*mobility (not multiplied by charge)
@@ -121,6 +133,24 @@ public:
     @details This deposits weight*mobility (not multiplied by charge)
   */
   virtual void deposit_conductivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
+
+    /*!
+    @brief Deposit diffusivity
+    @details This deposits weight*D (not multiplied by charge)
+  */
+  virtual void deposit_diffusivity();
+
+  /*!
+    @brief Deposit diffusivities
+    @details This deposits weight*D (not multiplied by charge)
+  */
+  virtual void deposit_diffusivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
+
+    /*!
+    @brief Deposit diffusivity
+    @details This deposits weight*D (not multiplied by charge)
+  */
+  virtual void deposit_diffusivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
 
   /*!
     @brief Deposit particles
