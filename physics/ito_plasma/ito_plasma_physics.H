@@ -40,6 +40,8 @@ namespace physics {
     */
     class ito_plasma_physics {
     public:
+
+      enum class coupling {LFA, LEA };
       
       /*!
 	@brief Ctor. Does nothing.
@@ -77,6 +79,11 @@ namespace physics {
       int get_num_rte_species() const;
 
       /*!
+	@brief Get the coupling, LFA/LEA
+      */
+      coupling get_coupling() const;
+
+      /*!
 	@brief Set initial surface charge. Default is 0, override if you want.
       */
       virtual Real initial_sigma(const Real a_time, const RealVect a_pos) const;
@@ -95,7 +102,26 @@ namespace physics {
 						     const Vector<Real> a_cdr_densities) const = 0;
 
       /*!
-	@brief Update reaction rates for LFA updates
+	@brief Solve reaction network
+      */
+      inline
+      void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
+				    Vector<List<photon>* >&       a_photons,
+				    Vector<List<photon>* >&       a_newPhotons,
+				    const RealVect                a_E,           
+				    const RealVect                a_cellPos,
+				    const RealVect                a_centroidPos,
+				    const RealVect                a_bndryCentroid,
+				    const RealVect                a_bndryNormal,
+				    const RealVect                a_lo,
+				    const RealVect                a_hi,
+				    const Real                    a_dx,
+				    const Real                    a_kappa, 
+				    const Real                    a_dt);
+
+      /*!
+	@brief Update reaction rates for LFA updates. Since the rates don't change during the advance, they can
+	be set to a constant. 
       */
       virtual void update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const = 0;
       
@@ -120,16 +146,15 @@ namespace physics {
       
     protected:
 
-      enum class algorithm {
-	ssa,
-	  tau,
-	  hybrid
-	  };
+      enum class algorithm { ssa, tau, hybrid };
+
+
 
       int m_seed;
       int m_table_entries;
       
       algorithm m_algorithm;
+      coupling  m_coupling;
       
       mutable std::mt19937_64 m_rng;
       mutable std::uniform_real_distribution<Real> m_udist01;

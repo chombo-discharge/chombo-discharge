@@ -1178,9 +1178,9 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(){
 }
 
 void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&        a_diffco_funcs,
-						const Vector<EBAMRCellData*>& a_densities,
-						const EBAMRCellData&          a_E,
-						const Real                    a_time){
+						   const Vector<EBAMRCellData*>& a_densities,
+						   const EBAMRCellData&          a_E,
+						   const Real                    a_time){
   CH_TIME("ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, time)");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, time)" << endl;
@@ -1216,10 +1216,10 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&      
 }
 
 void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<LevelData<EBCellFAB>* >&       a_diffco,
-					       const Vector<LevelData<EBCellFAB>* >& a_densities,
-					       const LevelData<EBCellFAB>&           a_E,
-					       const int                             a_level,
-					       const Real                            a_time){
+						   const Vector<LevelData<EBCellFAB>* >& a_densities,
+						   const LevelData<EBCellFAB>&           a_E,
+						   const int                             a_level,
+						   const Real                            a_time){
   CH_TIME("ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, level, time)");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, level, time)" << endl;
@@ -1249,12 +1249,12 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<LevelData<EBCellFAB>* 
 }
 
 void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBCellFAB*>&       a_diffco,
-					       const Vector<EBCellFAB*>& a_densities,
-					       const EBCellFAB&          a_E,
-					       const int                 a_level,
-					       const DataIndex           a_dit,
-					       const Box                 a_box,
-					       const Real                a_time){
+						   const Vector<EBCellFAB*>& a_densities,
+						   const EBCellFAB&          a_E,
+						   const int                 a_level,
+						   const DataIndex           a_dit,
+						   const Box                 a_box,
+						   const Real                a_time){
   CH_TIME("ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, level, dit, time)");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, level, dit, time)" << endl;
@@ -1326,10 +1326,10 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBCellFAB*>&       a_d
   }
 }
 
-void ito_plasma_stepper::advance_reaction_network_lfa(const Real a_dt){
-  CH_TIME("ito_plasma_stepper::advance_reaction_network_lfa(a_dt)");
+void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
+  CH_TIME("ito_plasma_stepper::advance_reaction_network(a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advance_reaction_network_lfa(a_dt)" << endl;
+    pout() << "ito_plasma_stepper::advance_reaction_network(a_dt)" << endl;
   }
   const int num_ito_species = m_physics->get_num_ito_species();
   const int num_rte_species = m_physics->get_num_rte_species();
@@ -1347,17 +1347,17 @@ void ito_plasma_stepper::advance_reaction_network_lfa(const Real a_dt){
     new_photons[solver_it.get_solver()] = &(solver_it()->get_source_photons());
   }
 
-  this->advance_reaction_network_lfa(particles, bulk_photons, new_photons, m_particle_E, a_dt);
+  this->advance_reaction_network(particles, bulk_photons, new_photons, m_particle_E, a_dt);
 }
 
-void ito_plasma_stepper::advance_reaction_network_lfa(Vector<particle_container<ito_particle>* >& a_particles,
+void ito_plasma_stepper::advance_reaction_network(Vector<particle_container<ito_particle>* >& a_particles,
 						  Vector<particle_container<photon>* >&       a_photons,
 						  Vector<particle_container<photon>* >&       a_newPhotons,
 						  const EBAMRCellData&                        a_E,
 						  const Real                                  a_dt){
-  CH_TIME("ito_plasma_stepper::advance_reaction_network_lfa(container x3, a_dt)");
+  CH_TIME("ito_plasma_stepper::advance_reaction_network(container x3, a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advance_reaction_network_lfa(container x3, a_dt)" << endl;
+    pout() << "ito_plasma_stepper::advance_reaction_network(container x3, a_dt)" << endl;
   }
 
   const int num_ito_species = m_physics->get_num_ito_species();
@@ -1379,7 +1379,7 @@ void ito_plasma_stepper::advance_reaction_network_lfa(Vector<particle_container<
   }
 				
   //Advance reaction network
-  this->advance_reaction_network_lfa(particles, photons, newPhotons, m_particle_E, a_dt);
+  this->advance_reaction_network(particles, photons, newPhotons, m_particle_E, a_dt);
 
   // Discard shit that is under the PVR
 #if 0
@@ -1394,14 +1394,14 @@ void ito_plasma_stepper::advance_reaction_network_lfa(Vector<particle_container<
 #endif
 }
 
-void ito_plasma_stepper::advance_reaction_network_lfa(Vector<AMRCellParticles<ito_particle>* >& a_particles,
+void ito_plasma_stepper::advance_reaction_network(Vector<AMRCellParticles<ito_particle>* >& a_particles,
 						  Vector<AMRCellParticles<photon>* >&       a_photons,
 						  Vector<AMRCellParticles<photon>* >&       a_newPhotons,
 						  const EBAMRCellData&                      a_E,
 						  const Real                                a_dt){
-  CH_TIME("ito_plasma_stepper::advance_reaction_network_lfa(AMRCellParticles x3, lvl, a_dt)");
+  CH_TIME("ito_plasma_stepper::advance_reaction_network(AMRCellParticles x3, lvl, a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advance_reaction_network_lfa(AMRCellParticles x3, lvl, a_dt)" << endl;
+    pout() << "ito_plasma_stepper::advance_reaction_network(AMRCellParticles x3, lvl, a_dt)" << endl;
   }
 
   const int num_ito_species = m_physics->get_num_ito_species();
@@ -1423,19 +1423,19 @@ void ito_plasma_stepper::advance_reaction_network_lfa(Vector<AMRCellParticles<it
       newPhotons[idx] = &(*(*a_newPhotons[idx])[lvl]);
     }
     
-    this->advance_reaction_network_lfa(particles, photons, newPhotons, *a_E[lvl], lvl, a_dt);
+    this->advance_reaction_network(particles, photons, newPhotons, *a_E[lvl], lvl, a_dt);
   }
 }
 
-void ito_plasma_stepper::advance_reaction_network_lfa(Vector<LayoutData<BinFab<ito_particle> >* >& a_particles,
+void ito_plasma_stepper::advance_reaction_network(Vector<LayoutData<BinFab<ito_particle> >* >& a_particles,
 						  Vector<LayoutData<BinFab<photon> >* >&       a_photons,
 						  Vector<LayoutData<BinFab<photon> >* >&       a_newPhotons,
 						  const LevelData<EBCellFAB>&                  a_E,
 						  const int                                    a_lvl,
 						  const Real                                   a_dt){
-  CH_TIME("ito_plasma_stepper::advance_reaction_network_lfa(LayoutData<BinFab> x3, lvl, dit, box, a_dt)");
+  CH_TIME("ito_plasma_stepper::advance_reaction_network(LayoutData<BinFab> x3, lvl, dit, box, a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advance_reaction_network_lfa(LayoutData<BinFab> x3, lvl, dit, box, a_dt)" << endl;
+    pout() << "ito_plasma_stepper::advance_reaction_network(LayoutData<BinFab> x3, lvl, dit, box, a_dt)" << endl;
   }
 
   const int num_ito_species = m_physics->get_num_ito_species();
@@ -1462,11 +1462,11 @@ void ito_plasma_stepper::advance_reaction_network_lfa(Vector<LayoutData<BinFab<i
       newPhotons[idx] = &((*a_newPhotons[idx])[dit()]);
     }
 
-    this->advance_reaction_network_lfa(particles, photons, newPhotons, a_E[dit()], a_lvl, dit(), box, dx, a_dt);
+    this->advance_reaction_network(particles, photons, newPhotons, a_E[dit()], a_lvl, dit(), box, dx, a_dt);
   }
 }
 
-void ito_plasma_stepper::advance_reaction_network_lfa(Vector<BinFab<ito_particle>* >& a_particles,
+void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >& a_particles,
 						  Vector<BinFab<photon>* >&       a_photons,
 						  Vector<BinFab<photon>* >&       a_newPhotons,
 						  const EBCellFAB&                a_E,
@@ -1475,9 +1475,9 @@ void ito_plasma_stepper::advance_reaction_network_lfa(Vector<BinFab<ito_particle
 						  const Box                       a_box,
 						  const Real                      a_dx,
 						  const Real                      a_dt){
-  CH_TIME("ito_plasma_stepper::advance_reaction_network_lfa(BinFab x3, lvl, dit, box, a_dt)");
+  CH_TIME("ito_plasma_stepper::advance_reaction_network(BinFab x3, lvl, dit, box, a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advance_reaction_network_lfa(BinFab x3, lvl, dit, box, a_dt)" << endl;
+    pout() << "ito_plasma_stepper::advance_reaction_network(BinFab x3, lvl, dit, box, a_dt)" << endl;
   }
 
   const int comp = 0;
@@ -1529,11 +1529,8 @@ void ito_plasma_stepper::advance_reaction_network_lfa(Vector<BinFab<ito_particle
       const RealVect n  = RealVect::Zero;
       const RealVect c  = RealVect::Zero;
 
-      // Update reaction rates
-      m_physics->update_reaction_rates_lfa(e, a_dx, kappa);
-      
       // Advance reactions
-      m_physics->advance_reaction_network_lfa(particles, photons, newPhotons, e, pos, c, c, n, lo, hi, a_dx, kappa, a_dt);
+      m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, c, c, n, lo, hi, a_dx, kappa, a_dt);
     }
   }
 
@@ -1578,11 +1575,8 @@ void ito_plasma_stepper::advance_reaction_network_lfa(Vector<BinFab<ito_particle
       newPhotons[idx] = &bpNew;
     }
 
-    // Update reaction rates
-    m_physics->update_reaction_rates_lfa(e, a_dx, kappa);
-
     // Advance reactions
-    m_physics->advance_reaction_network_lfa(particles, photons, newPhotons, e, pos, cen, ebc, n, lo, hi, a_dx, kappa, a_dt);
+    m_physics->advance_reaction_network(particles, photons, newPhotons, e, pos, cen, ebc, n, lo, hi, a_dx, kappa, a_dt);
   }
 }
 
@@ -1735,11 +1729,11 @@ void ito_plasma_stepper::sort_domain_photons_by_patch(){
 }
 
 bool ito_plasma_stepper::load_balance(Vector<Vector<int> >&            a_procs,
-					   Vector<Vector<Box> >&            a_boxes,
-					   const std::string                a_realm,
-					   const Vector<DisjointBoxLayout>& a_grids,
-					   const int                        a_lmin,
-					   const int                        a_finest_level){
+				      Vector<Vector<Box> >&            a_boxes,
+				      const std::string                a_realm,
+				      const Vector<DisjointBoxLayout>& a_grids,
+				      const int                        a_lmin,
+				      const int                        a_finest_level){
   CH_TIME("ito_plasma_stepper::load_balance");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper_stepper::load_balance" << endl;

@@ -17,6 +17,9 @@ using namespace physics::ito_plasma;
 
 ito_plasma_physics::ito_plasma_physics(){
 
+  // Default coupling
+  m_coupling = coupling::LFA;
+
   // Initialize RNGs
   m_udist11 = std::uniform_real_distribution<Real>(-1., 1.);
   m_udist01 = std::uniform_real_distribution<Real>(0., 1.);
@@ -55,6 +58,10 @@ int ito_plasma_physics::get_num_ito_species() const{
 
 int ito_plasma_physics::get_num_rte_species() const {
   return m_rte_species.size();
+}
+
+ito_plasma_physics::coupling ito_plasma_physics::get_coupling() const {
+  return m_coupling;
 }
 
 Real ito_plasma_physics::initial_sigma(const Real a_time, const RealVect a_pos) const {
