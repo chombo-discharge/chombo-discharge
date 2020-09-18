@@ -151,6 +151,12 @@ namespace physics {
 				      const Box           a_box,
 				      const Real          a_time);
 
+      // Routines for computing mobilities in the LEA. This runs through all the particles and calls a mobility computation function,
+      // which you must implement in ito_species
+      void compute_ito_mobilities_lea();
+      void compute_ito_mobilities_lea(Vector<particle_container<ito_particle>* >& a_particles);
+      void compute_ito_mobilities_lea(Vector<ParticleData<ito_particle>* >& a_particles);
+
       // Routines for computing diffusion coefficients.
       // These routines compute the diffusion coefficients by computing D(E)
       // as a mesh variable, and then interpolating that to the particle position. 

@@ -95,9 +95,9 @@ namespace physics {
 						     const Vector<Real> a_cdr_densities) const = 0;
 
       /*!
-	@brief Update reaction rates
+	@brief Update reaction rates for LFA updates
       */
-      virtual void update_reaction_rates(const RealVect a_E, const Real a_dx, const Real a_kappa) const = 0;
+      virtual void update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const = 0;
       
       /*!
 	@brief Reaction network advance. Trying to inline for performance....

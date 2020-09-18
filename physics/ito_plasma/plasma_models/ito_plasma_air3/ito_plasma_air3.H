@@ -39,7 +39,7 @@ namespace physics {
 					     const RealVect     a_E,
 					     const Vector<Real> a_cdr_densities) const override;
 
-      void update_reaction_rates(const RealVect a_E, const Real a_dx, const Real a_kappa) const override;
+      void update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const override;
 
     protected:
 

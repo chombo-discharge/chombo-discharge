@@ -1152,7 +1152,18 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBCellFAB*>& a_meshMo
   }
 }
 
+void ito_plasma_stepper::compute_ito_mobilities_lea(){
+  CH_TIME("ito_plasma_stepper");
 
+}
+
+void ito_plasma_stepper::compute_ito_mobilities_lea(Vector<particle_container<ito_particle>* >& a_particles){
+
+}
+
+void ito_plasma_stepper::compute_ito_mobilities_lea(Vector<ParticleData<ito_particle>* >& a_particles){
+
+}
 
 void ito_plasma_stepper::compute_ito_diffusion_lfa(){
   CH_TIME("ito_plasma_stepper::compute_ito_diffusion_lfa()");
@@ -1519,7 +1530,7 @@ void ito_plasma_stepper::advance_reaction_network_lfa(Vector<BinFab<ito_particle
       const RealVect c  = RealVect::Zero;
 
       // Update reaction rates
-      m_physics->update_reaction_rates(e, a_dx, kappa);
+      m_physics->update_reaction_rates_lfa(e, a_dx, kappa);
       
       // Advance reactions
       m_physics->advance_reaction_network_lfa(particles, photons, newPhotons, e, pos, c, c, n, lo, hi, a_dx, kappa, a_dt);
@@ -1568,7 +1579,7 @@ void ito_plasma_stepper::advance_reaction_network_lfa(Vector<BinFab<ito_particle
     }
 
     // Update reaction rates
-    m_physics->update_reaction_rates(e, a_dx, kappa);
+    m_physics->update_reaction_rates_lfa(e, a_dx, kappa);
 
     // Advance reactions
     m_physics->advance_reaction_network_lfa(particles, photons, newPhotons, e, pos, cen, ebc, n, lo, hi, a_dx, kappa, a_dt);

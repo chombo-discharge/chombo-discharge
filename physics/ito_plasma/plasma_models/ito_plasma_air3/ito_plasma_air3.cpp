@@ -168,7 +168,7 @@ Vector<Real> ito_plasma_air3::compute_ito_diffusion_lfa(const Real         a_tim
   return D;
 }
 
-void ito_plasma_air3::update_reaction_rates(const RealVect a_E, const Real a_dx, const Real a_kappa) const{
+void ito_plasma_air3::update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const{
 
   // Compute the reaction rates.
   const Real dV      = pow(a_dx, SpaceDim);//*a_kappa;
