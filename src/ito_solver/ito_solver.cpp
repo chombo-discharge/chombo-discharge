@@ -1670,6 +1670,38 @@ void ito_solver::interpolate_mobilities(const int a_lvl, const DataIndex& a_dit)
   }
 }
 
+void ito_solver::update_mobilities(){
+  CH_TIME("ito_solver::update_mobilities");
+  if(m_verbosity > 5){
+    pout() << m_name + "::update_mobilities" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      this->update_mobilities(lvl, dit());
+    }
+  }
+}
+
+void ito_solver::update_mobilities(const int a_level, const DataIndex a_dit){
+  CH_TIME("ito_solver::update_mobilities(lvl, dit)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::update_mobilities(lvl, dit)" << endl;
+  }
+
+  if(m_mobile){
+    List<ito_particle>& particleList = m_particles[a_level][a_dit].listItems();
+
+    for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
+      ito_particle& p = lit();
+      
+      p.mobility() = m_species->mobility(p.energy());
+    }
+  }
+}
+
 void ito_solver::interpolate_diffusion(){
   CH_TIME("ito_solver::interpolate_diffusion");
   if(m_verbosity > 5){
@@ -1705,6 +1737,38 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
 
     EBParticleInterp meshInterp(box, ebisbox,dx, origin);
     meshInterp.interpolateDiffusion(particleList, dco_fab, m_deposition);
+  }
+}
+
+void ito_solver::update_diffusion(){
+  CH_TIME("ito_solver::update_diffusion");
+  if(m_verbosity > 5){
+    pout() << m_name + "::update_diffusion" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      this->update_diffusion(lvl, dit());
+    }
+  }
+}
+
+void ito_solver::update_diffusion(const int a_level, const DataIndex a_dit){
+  CH_TIME("ito_solver::update_diffusion(lvl, dit)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::update_diffusion(lvl, dit)" << endl;
+  }
+
+  if(m_mobile){
+    List<ito_particle>& particleList = m_particles[a_level][a_dit].listItems();
+
+    for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
+      ito_particle& p = lit();
+      
+      p.mobility() = m_species->diffusion(p.energy());
+    }
   }
 }
 

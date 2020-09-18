@@ -366,6 +366,18 @@ public:
   virtual void interpolate_mobilities(const int a_level, const DataIndex& a_dit);
 
   /*!
+    @brief Update mobilities
+    @details This calls the mobility function implemented by ito_species
+  */
+  virtual void update_mobilities();
+
+  /*!
+    @brief Update mobilities
+    @details This calls the mobility function implemented by ito_species
+  */
+  virtual void update_mobilities(const int a_level, const DataIndex a_dit);
+
+  /*!
     @brief Interpolate diffusion
   */
   virtual void interpolate_diffusion();
@@ -374,6 +386,18 @@ public:
     @brief Interpolate velocities
   */
   virtual void interpolate_diffusion(const int a_level, const DataIndex& a_dit);
+
+    /*!
+    @brief Update diffusion coefficients
+    @details This calls the diffusion function implemented by ito_species
+  */
+  virtual void update_diffusion();
+
+  /*!
+    @brief Update diffusion coefficients
+    @details This calls the diffusion function implemented by ito_species
+  */
+  virtual void update_diffusion(const int a_level, const DataIndex a_dit);
 
   /*!
     @brief Sort the m_particles container by cell

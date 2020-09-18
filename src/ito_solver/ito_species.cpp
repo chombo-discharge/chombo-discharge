@@ -42,3 +42,11 @@ bool ito_species::is_mobile() const {
 List<ito_particle>& ito_species::get_initial_particles() {
   return m_initial_particles;
 }
+
+Real ito_species::mobility(const Real a_energy) const {
+  return 0.0;
+}
+
+Real ito_species::diffusion(const Real a_energy) const {
+  return 0.0;
+}

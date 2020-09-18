@@ -153,8 +153,8 @@ void ito_plasma_stepper::initial_data(){
   this->solve_poisson();
 
   // Fill solvers with velocities and diffusion coefficients
-  this->compute_ito_velocities_lfa();
-  this->compute_ito_diffusion_lfa();
+  this->compute_ito_velocities();
+  this->compute_ito_diffusion();
 }
 
 void ito_plasma_stepper::initial_sigma(){
@@ -206,8 +206,8 @@ void ito_plasma_stepper::post_checkpoint_setup(){
   this->allocate_internals();
 
   
-  this->compute_ito_velocities_lfa();
-  this->compute_ito_diffusion_lfa();
+  this->compute_ito_velocities();
+  this->compute_ito_diffusion();
 }
 
 void ito_plasma_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const {
@@ -437,8 +437,8 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, 
   }
 
   // Recompute new velocities and diffusion coefficients
-  this->compute_ito_velocities_lfa();
-  this->compute_ito_diffusion_lfa();
+  this->compute_ito_velocities();
+  this->compute_ito_diffusion();
 }
 
 void ito_plasma_stepper::post_regrid(){
@@ -1016,18 +1016,49 @@ void ito_plasma_stepper::set_ito_velocity_funcs(){
   }
 }
 
-void ito_plasma_stepper::compute_ito_velocities_lfa(){
-  CH_TIME("ito_plasma_stepper::compute_ito_velocities_lfa()");
+void ito_plasma_stepper::compute_ito_velocities(){
+  CH_TIME("ito_plasma_stepper::compute_ito_velocities()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_velocities_lfa()" << endl;
+    pout() << "ito_plasma_stepper::compute_ito_velocities()" << endl;
   }
 
-  this->compute_ito_mobilities_lfa(); // Computes particle mobilities
-  this->set_ito_velocity_funcs();     // Set the velocity function
+  const ito_plasma_physics::coupling which_coupling = m_physics->get_coupling();
 
-  // Interpolate velocities
+  // Compute mobilities based on appropriate coupling
+  switch(which_coupling){
+  case ito_plasma_physics::coupling::LFA:
+    this->compute_ito_mobilities_lfa();
+    break;
+  case ito_plasma_physics::coupling::LEA:
+    this->compute_ito_mobilities_lea();
+    break;
+  }
+
+  // Set velocity functions
+  this->set_ito_velocity_funcs();
+
+  // Interpolate velocity function to particle position
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->interpolate_velocities(); // Interpolates v = +/- mu*E
+  }
+}
+
+void ito_plasma_stepper::compute_ito_diffusion(){
+  CH_TIME("ito_plasma_stepper::compute_ito_diffusion()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_ito_diffusion()" << endl;
+  }
+
+  const ito_plasma_physics::coupling which_coupling = m_physics->get_coupling();
+
+  // Compute mobilities based on appropriate coupling
+  switch(which_coupling){
+  case ito_plasma_physics::coupling::LFA:
+    this->compute_ito_diffusion_lfa();
+    break;
+  case ito_plasma_physics::coupling::LEA:
+    this->compute_ito_diffusion_lea();
+    break;
   }
 }
 
@@ -1154,15 +1185,14 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBCellFAB*>& a_meshMo
 
 void ito_plasma_stepper::compute_ito_mobilities_lea(){
   CH_TIME("ito_plasma_stepper");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_ito_mobilities_lea()" << endl;
+  }
 
-}
-
-void ito_plasma_stepper::compute_ito_mobilities_lea(Vector<particle_container<ito_particle>* >& a_particles){
-
-}
-
-void ito_plasma_stepper::compute_ito_mobilities_lea(Vector<ParticleData<ito_particle>* >& a_particles){
-
+  // This is really simple because the solvers do this directly...
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->update_mobilities();
+  }
 }
 
 void ito_plasma_stepper::compute_ito_diffusion_lfa(){
@@ -1323,6 +1353,18 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBCellFAB*>&       a_d
       const int idx = solver_it.get_solver();
       a_diffco[idx]->setCoveredCellVal(0.0, comp);
     }
+  }
+}
+
+void ito_plasma_stepper::compute_ito_diffusion_lea(){
+  CH_TIME("ito_plasma_stepper::compute_ito_diffusion_lea()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_ito_diffusion_lea()" << endl;
+  }
+  
+  // This is really simple because the solvers do this directly... No monkeying with interpolations or anything. 
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->update_diffusion();
   }
 }
 

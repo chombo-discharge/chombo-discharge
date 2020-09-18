@@ -22,7 +22,6 @@
 class ito_species {
 public:
 
-
   /*!
     @brief Full constructor
   */
@@ -52,6 +51,16 @@ public:
     @brief Mobile ito_species or not
   */
   bool is_mobile() const;
+
+  /*!
+    @brief Compute the mobility. This is mostly used for the LEA. 
+  */
+  virtual Real mobility(const Real a_energy) const;
+
+  /*!
+    @brief Compute the mobility. This is mostly used for the LEA.  
+  */
+  virtual Real diffusion(const Real a_energy) const;
 
   /*!
     @brief Get initial particles
