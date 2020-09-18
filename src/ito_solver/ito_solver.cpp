@@ -2317,7 +2317,7 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
   Real mass = 0.0;
   for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
     const ito_particle& p = lit();
-    pointMasses[i].define(p.position(), p.mass());
+    pointMasses[i].define(p.position(), p.mass(), p.energy());
     mass += p.mass();
     i++;
   }

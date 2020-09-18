@@ -101,7 +101,7 @@ poisson_multifluid_gmg.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi'
 # ====================================================================================================
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
-ito_solver.pvr_buffer          = 4             # Buffer for PVR. 
+ito_solver.pvr_buffer          = 2             # Buffer for PVR. 
 ito_solver.plt_vars            = phi vel dco   # Currently available are 'phi', 'vel', and 'dco'
 ito_solver.bisect_step         = 1.E-3         # Bisection step length for intersection tests
 ito_solver.seed                = -1            # Seed for RNG
@@ -204,10 +204,10 @@ ito_plasma_godunov.max_cells_hop  = 0.2           # Maximum cells to move in one
 ito_plasma_godunov.which_dt       = advection_diffusion     # 'advection', 'diffusion', 'advection_diffusion'
 ito_plasma_godunov.ppc            = 32            # Superparticle number of cells
 ito_plasma_godunov.merge_interval = 1             # How often to make superparticles
-ito_plasma_godunov.relax_factor   = 9999.5           # Factor in front of relaxation time	
+ito_plasma_godunov.relax_factor   = 9999.5        # Factor in front of relaxation time	
 ito_plasma_godunov.regrid_super   = false         # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = semi_implicit # 'euler', 'predictor_corrector', or 'semi_implicit'
-ito_plasma_godunov.profile        = false          # Profile advance or not
+ito_plasma_godunov.profile        = false         # Profile advance or not
 
 # ====================================================================================================
 # ITO_PLASMA_AIR3 CLASS OPTIONS

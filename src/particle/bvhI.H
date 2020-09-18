@@ -163,17 +163,19 @@ inline void bvh_node<T>::split(const int a_dir){
   if(splitMass.can_split()){
     const RealVect& p   = splitMass.pos();
     const Real& mass    = splitMass.mass();       // Always positive
+    const Real& energy  = splitMass.energy();     // Energy of split mass particle
     const Real massDiff = mass_right - mass_left; // Not necessarily positive
+
 
     // This hook is for when we don't have enough mass to distribute to the two parts. 
     if(mass <= Abs(massDiff)){ 
       if(massDiff > 0){ // Goes into left
 	mass_left += mass; 
-	leftData.emplace_back(T(p, mass));
+	leftData.emplace_back(T(p, mass, energy));
       }
       else{
 	mass_right += mass; // Goes into right
-	rightData.emplace_back(T(p, mass));
+	rightData.emplace_back(T(p, mass, energy));
       }
     }
     else {
@@ -183,7 +185,7 @@ inline void bvh_node<T>::split(const int a_dir){
       // particle that gives mass_left > mass_right from the left particle first, and then we reassign a larger total mass.
       Real massLeft  = massDiff;
       Real massRight = 0.0;
-      Real massRem   = mass - massDiff;   
+      Real massRem   = mass - massDiff;
 
       const int N  = round(massRem*(1.0 + 1.E-6));
       if(N > 0){ 
@@ -194,34 +196,14 @@ inline void bvh_node<T>::split(const int a_dir){
 	massRight += (massRem/N)*NR;
       }
 
-#if ITO_DEBUG
-      if(massLeft > 0.0){
-#endif
-	leftData.emplace_back(T(p, massLeft));
-	mass_left  += massLeft;
-#if ITO_DEBUG
-      }
-      else{
-	MayDay::Abort("bvh_node<T>::split - logic bust");
-      }
-#endif
+      const Real energyLeft  = energy*massLeft/mass;
+      const Real energyRight = energy*massRight/mass;
 
-#if ITO_DEBUG
-      if(massRight > 0.0){
-#endif
-	rightData.emplace_back(T(p, massRight));
-	mass_right += massRight;
-#if ITO_DEBUG
-      }
-      else{
-	MayDay::Abort("bvh_node<T>::split - logic bust");
-      }
-#endif
+      leftData.emplace_back(T(p, massLeft, energyLeft));
+      mass_left  += massLeft;
 
-#if ITO_DEBUG
-      if(massLeft <= 0.0) MayDay::Abort("bvh_node<T>::split - should not get negative left mass");
-      if(massRight <= 0.0) MayDay::Abort("bvh_node<T>::split - should not get negative right mass");
-#endif
+      rightData.emplace_back(T(p, massRight, energyRight));
+      mass_right += massRight;
     }
   }
   else{
@@ -236,7 +218,6 @@ inline void bvh_node<T>::split(const int a_dir){
     //   mass_right += splitMass.mass();
     // }
   }
-
 
 #if BVH_DEBUG // Make sure we don't break mass
   if(Abs(m_mass - (mass_left + mass_right)) > 1.E-6) MayDay::Abort("bvh_node::split - broke mass");
