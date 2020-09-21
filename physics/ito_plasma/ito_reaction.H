@@ -28,24 +28,55 @@ namespace physics {
       ito_reaction() = default;
 
       /*!
-	@brief Full Ctor, includes possible photons. 
+	@brief Full ctor. Includes photons and energies. LEA fodder. 
+      */
+      ito_reaction(const std::initializer_list<int>                   a_reactants,
+		   const std::initializer_list<int>                   a_particle_products,
+		   const std::initializer_list<int>                   a_photon_products,
+		   const std::initializer_list<std::pair<int, Real> > a_energy_jumps) : m_reactants(a_reactants),
+											m_particle_products(a_particle_products),
+											m_photon_products(a_photon_products),
+											m_energy_jumps(a_energy_jumps){
+	this->compute_state_change();
+	this->compute_energy_change();
+      }
+
+      /*!
+	@brief Full ctor. Includes energies but not photons. LEA fodder. 
+      */
+      ito_reaction(const std::initializer_list<int>                   a_reactants,
+		   const std::initializer_list<int>                   a_particle_products,
+		   const std::initializer_list<std::pair<int, Real> > a_energy_jumps) : m_reactants(a_reactants),
+											m_particle_products(a_particle_products),
+											m_photon_products(0),
+											m_energy_jumps(a_energy_jumps){
+	this->compute_state_change();
+	this->compute_energy_change();
+      }
+
+      /*!
+	@brief Full Ctor, includes possible photons but disregards energy. LFA fodder. 
       */
       ito_reaction(const std::initializer_list<int> a_reactants,
 		   const std::initializer_list<int> a_particle_products,
 		   const std::initializer_list<int> a_photon_products) : m_reactants(a_reactants),
 									 m_particle_products(a_particle_products),
-									 m_photon_products(a_photon_products){
+									 m_photon_products(a_photon_products),
+									 m_energy_jumps(0) {
 	this->compute_state_change();
+	this->compute_energy_change();
       }
 
       /*!
-	@brief Partial ctor. No photons generated. 
+	@brief Partial ctor. No photons generated and no energy. LFA fodder. 
       */
       ito_reaction(const std::initializer_list<int> a_reactants,
 		   const std::initializer_list<int> a_particle_products) : m_reactants(a_reactants),
 									   m_particle_products(a_particle_products),
-									   m_photon_products(0) {
+									   m_photon_products(0),
+									   m_energy_jumps(0){
 	this->compute_state_change();
+	this->compute_energy_change();
       }
 
       /*!
@@ -68,6 +99,12 @@ namespace physics {
       void jump_state(Vector<unsigned long long>& a_particles,
 		      Vector<unsigned long long>& a_photons,
 		      const unsigned long long    a_num_reactions) const;
+
+      /*!
+	@brief Allows the energies to jump with N reactions
+      */
+      inline
+      void jump_energy(Vector<Real>& a_energies, const unsigned long long a_num_reactions) const;
 
       /*!
 	@brief Return a modifiable version of the reaction rate.
@@ -116,22 +153,41 @@ namespace physics {
       */
       inline
       const int get_state_change(const int a_idx) const;
+
+      /*!
+	@brief Get the energy change. You need to iterate through this map. 
+      */
+      inline
+      const std::map<int, Real>& get_energy_change() const;
+
+      /*!
+	@brief Get the energy change for a particular species
+      */
+      inline
+      const Real get_energy_change(const int a_idx) const;
       
     protected:
 
       // Reaction rate, mutable because I want ito_reaction to be a const object, but reaction rate may need to change
       mutable Real m_rate;
 
-      std::list<int> m_reactants;         // Particle reactants
-      std::list<int> m_particle_products; // Particle products
-      std::list<int> m_photon_products;   // Photon products
+      std::list<int> m_reactants;                      // Particle reactants
+      std::list<int> m_particle_products;              // Particle products
+      std::list<int> m_photon_products;                // Photon products
+      std::list<std::pair<int, Real> > m_energy_jumps; // Energy changes
 
-      std::map<int, int> m_stateChange; // Mutable because we need to iterate through it. 
+      std::map<int, int>  m_stateChange;  // Change in species due to firing of one reaction. First index is species, second is change. 
+      std::map<int, Real> m_energyChange; // Change in energyk due to firing of one reaction. First index is species, second is change. 
 
       /*!
 	@brief Compute the state change
       */
       inline void compute_state_change();
+
+      /*!
+	@brief Compute the state change
+      */
+      inline void compute_energy_change();
       
     };
   }

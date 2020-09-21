@@ -10,12 +10,14 @@
 
 #include "ito_reaction.H"
 
+#define ITO_REACTION_DEBUG 0
+
 using namespace physics::ito_plasma;
 
 inline
 void ito_reaction::jump_state(Vector<unsigned long long>& a_particles,
 			      const unsigned long long    a_num_reactions) const {
-#if 1
+#if ITO_REACTION_DEBUG
   if(a_num_reactions < 0) {
     MayDay::Abort("ito_reaction::jump_state - can't have negative number of reactions!");
   }
@@ -34,7 +36,7 @@ void ito_reaction::jump_state(Vector<unsigned long long>& a_particles,
     a_particles[r] += a_num_reactions;
   }
 
-#if 1
+#if ITO_REACTION_DEBUG
   for (int i = 0; i < a_particles.size(); i++){
     if(a_particles[i] < 0){
       MayDay::Abort("ito_reaction::jump_state can't have negative particles on the way out");
@@ -52,6 +54,14 @@ void ito_reaction::jump_state(Vector<unsigned long long>& a_particles,
 
   for (const auto& r : m_photon_products){
     a_photons[r] += a_num_reactions;;
+  }
+}
+
+inline
+void ito_reaction::jump_energy(Vector<Real>& a_energies, const unsigned long long a_num_reactions) const {
+  
+  for (const auto& r : m_energy_jumps){
+    a_energies[r.first] -= r.second*a_num_reactions;
   }
 }
 
@@ -124,16 +134,41 @@ void ito_reaction::compute_state_change() {
 }
 
 inline
-const std::map<int, int>& ito_reaction::get_state_change() const{
+void ito_reaction::compute_energy_change() {
+  for (const auto& r : m_energy_jumps){
+    if(m_energyChange.find(r.first) == m_energyChange.end()){
+      m_energyChange.emplace(r.first, r.second);
+    }
+  }
+}
+
+inline
+const std::map<int, int>& ito_reaction::get_state_change() const {
   return m_stateChange;
 }
 
 inline
-const int ito_reaction::get_state_change(const int a_idx) const{
+const int ito_reaction::get_state_change(const int a_idx) const {
   int ret = 0;
   
   if(m_stateChange.find(a_idx) != m_stateChange.end()){
     ret = m_stateChange.at(a_idx);
+  }
+
+  return ret;
+}
+
+inline
+const std::map<int, Real>& ito_reaction::get_energy_change() const {
+  return m_energyChange;
+}
+
+inline
+const Real ito_reaction::get_energy_change(const int a_idx) const {
+  Real ret = 0;
+  
+  if(m_energyChange.find(a_idx) != m_energyChange.end()){
+    ret = m_energyChange.at(a_idx);
   }
 
   return ret;
