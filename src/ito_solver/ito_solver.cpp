@@ -930,7 +930,6 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     const Interval src(0, 0);
     const Interval dst(a_comp, a_comp);
 
-#if 1 // Original code 
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       if(m_realm == a_output.get_realm()){
 	m_state[lvl]->localCopyTo(src, *a_output[lvl], dst);
@@ -940,41 +939,6 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
       }
     }
     //data_ops::set_covered_value(a_output, a_comp, 0.0);
-#else // Debug code for plotting the diffusivity
-    if(m_mobile){
-    EBAMRCellData cond, diff, condE, gradDiff;
-
-    m_amr->allocate(cond,     m_realm, m_phase, 1);
-    m_amr->allocate(diff,     m_realm, m_phase, 1);
-    m_amr->allocate(condE,    m_realm, m_phase, SpaceDim);
-    m_amr->allocate(gradDiff, m_realm, m_phase, SpaceDim);
-
-    this->deposit_conductivity(cond, m_particles);
-    this->deposit_diffusivity(diff, m_particles);
-
-    // // Puts condE = mu*n*E
-    data_ops::copy(condE, m_velo_func);
-    data_ops::multiply_scalar(condE, cond);
-    
-    // // Compute gradient of diffusion term
-    m_amr->compute_gradient(gradDiff, diff, m_realm, m_phase);
-
-    // // condE = condE - gradDiff
-    data_ops::incr(condE, gradDiff, -1.0);
-
-    // // cond = dot(condE, E)
-    data_ops::dot_prod(cond, condE, m_velo_func);
-
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      if(m_realm == a_output.get_realm()){
-	cond[lvl]->localCopyTo(src, *a_output[lvl], dst);
-      }
-      else{
-	cond[lvl]->copyTo(src, *a_output[lvl], dst);
-      }
-    }
-    }
-#endif
     a_comp++;
   }
 
