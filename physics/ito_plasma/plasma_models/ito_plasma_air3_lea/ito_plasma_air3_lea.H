@@ -59,9 +59,6 @@ namespace physics {
       Real m_pO2;    
       Real m_photoi_factor;
 
-      // Functions for drawing initial particles
-      void draw_initial_particles();
-
       // Zheleznyak photoionization rates
       Real excitation_rates(const Real a_E) const;
       Real sergey_factor(const Real a_O2frac) const;
@@ -75,7 +72,7 @@ namespace physics {
     class ito_plasma_air3_lea::electron : public ito_species {
     public:
       electron() = delete;
-      electron(lookup_table a_mobility, lookup_table a_diffusion);
+      electron(const lookup_table a_mobility, const lookup_table a_diffusion);
       ~electron();
 
       Real mobility(const Real a_energy) const override;
