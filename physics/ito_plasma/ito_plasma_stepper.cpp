@@ -1663,17 +1663,13 @@ void ito_plasma_stepper::advance_reaction_network_lea(const Real a_dt){
     new_photons[solver_it.get_solver()] = &(solver_it()->get_source_photons());
   }
 
-  // Compute the energy source terms per species
-  Vector<EBAMRCellData*> sources = m_ito->get_scratch();
-  this->compute_EdotJ_source(sources);
-
-  this->advance_reaction_network_lea(particles, bulk_photons, new_photons, sources, m_particle_E, a_dt);
+  this->advance_reaction_network_lea(particles, bulk_photons, new_photons, m_energy_sources, m_particle_E, a_dt);
 }
 
 void ito_plasma_stepper::advance_reaction_network_lea(Vector<particle_container<ito_particle>* >& a_particles,
 						      Vector<particle_container<photon>* >&       a_photons,
 						      Vector<particle_container<photon>* >&       a_newPhotons,
-						      const Vector<EBAMRCellData*>&               a_sources,
+						      const Vector<EBAMRCellData>&                a_sources,
 						      const EBAMRCellData&                        a_E,
 						      const Real                                  a_dt){
   CH_TIME("ito_plasma_stepper::advance_reaction_network_lea(Vector<particle_container*> x3, Vector<EBAMRCellData*>, EBAMRCellData, Real)");
@@ -1707,7 +1703,7 @@ void ito_plasma_stepper::advance_reaction_network_lea(Vector<particle_container<
 void ito_plasma_stepper::advance_reaction_network_lea(Vector<AMRCellParticles<ito_particle>* >& a_particles,
 						      Vector<AMRCellParticles<photon>* >&       a_photons,
 						      Vector<AMRCellParticles<photon>* >&       a_newPhotons,
-						      const Vector<EBAMRCellData*>&             a_sources,
+						      const Vector<EBAMRCellData>&              a_sources,
 						      const EBAMRCellData&                      a_E,
 						      const Real                                a_dt){
   CH_TIME("ito_plasma_stepper::advance_reaction_network_lea(Vector<AMRCellParticles*> x 3, Vector<EBAMRCellData*>, EBAMRCellData, Real)");
@@ -1727,7 +1723,7 @@ void ito_plasma_stepper::advance_reaction_network_lea(Vector<AMRCellParticles<it
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
       particles[idx] = &(*(*a_particles[idx])[lvl]);
-      sources[idx]   = &(*(*a_sources[idx])[lvl]);
+      sources[idx]   = &(*(a_sources[idx])[lvl]);
     }
 
     for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -2130,10 +2126,10 @@ bool ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
   return ret;
 }
 
-void ito_plasma_stepper::compute_EdotJ_source(Vector<EBAMRCellData*>& a_source){
-  CH_TIME("ito_plasma_stepper::compute_EdotJ_source(ebamrcelldata)");
+void ito_plasma_stepper::compute_EdotJ_source(){
+  CH_TIME("ito_plasma_stepper::compute_EdotJ_source()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_EdotJ_source(ebamrcelldata)" << endl;
+    pout() << "ito_plasma_stepper::compute_EdotJ_source()" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -2143,7 +2139,7 @@ void ito_plasma_stepper::compute_EdotJ_source(Vector<EBAMRCellData*>& a_source){
     const int idx = solver_it.get_solver();
     const int q   = species->get_charge();
 
-    data_ops::set_value(*a_source[idx], 0.0);
+    data_ops::set_value(m_energy_sources[idx], 0.0);
 
     // Do mobile contribution. 
     if(q != 0 && solver->is_mobile()){
@@ -2154,7 +2150,7 @@ void ito_plasma_stepper::compute_EdotJ_source(Vector<EBAMRCellData*>& a_source){
       
       data_ops::multiply_scalar(m_particle_scratchD, m_particle_scratch1);        // m_particle_scratchD = mu*n*E
       data_ops::dot_prod(m_particle_scratch1, m_particle_E, m_particle_scratchD); // m_particle_scratch1 = mu*n*E*E
-      data_ops::incr(*a_source[idx], m_particle_scratch1, 1.0);                   // a_source[idx] += mu*n*E*E
+      data_ops::incr(m_energy_sources[idx], m_particle_scratch1, 1.0);            // a_source[idx] += mu*n*E*E
     }
 
     // Diffusive contribution
@@ -2167,11 +2163,11 @@ void ito_plasma_stepper::compute_EdotJ_source(Vector<EBAMRCellData*>& a_source){
 
       
       data_ops::dot_prod(m_particle_scratch1, m_particle_scratchD, m_particle_E); // m_particle_scratch1 = -E*grad(D*n)
-      data_ops::incr(*a_source[idx], m_particle_scratch1, 1.0);                   // a_source[idx]
+      data_ops::incr(m_energy_sources[idx], m_particle_scratch1, 1.0);            // a_source[idx]
     }
 
     if (q != 0 && (solver->is_mobile() || solver->is_diffusive())){
-      data_ops::scale(*a_source[idx], Abs(q)*units::s_Qe);
+      data_ops::scale(m_energy_sources[idx], Abs(q)*units::s_Qe);
     }
   }
 }

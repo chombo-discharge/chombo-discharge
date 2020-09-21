@@ -86,18 +86,32 @@ namespace physics {
     public:
       electron();
       ~electron();
+
+      Real mobility (const Real a_energy) const override;
+      Real diffusion(const Real a_energy) const override;
+
+    protected:
+
+      lookup_table* m_mobility;
+      lookup_table* m_diffusion;
     };
 
     class ito_plasma_air3::positive : public ito_species {
     public:
       positive();
       ~positive();
+
+      Real mobility (const Real a_energy) const override;
+      Real diffusion(const Real a_energy) const override;
     };
 
     class ito_plasma_air3::negative : public ito_species {
     public:
       negative();
       ~negative();
+
+      Real mobility (const Real a_energy) const override;
+      Real diffusion(const Real a_energy) const override;
     };
 
     class ito_plasma_air3::photonZ : public rte_species {

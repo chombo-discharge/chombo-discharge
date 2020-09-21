@@ -103,6 +103,12 @@ void ito_plasma_godunov::allocate_internals(){
   m_amr->allocate(m_conduct_eb,   m_fluid_realm, m_phase, 1);
   m_amr->allocate(m_fluid_E,      m_fluid_realm, m_phase, SpaceDim);
 
+  // Allocate for energy sources
+  m_energy_sources.resize(m_physics->get_num_ito_species());
+  for (int i = 0; i < m_energy_sources.size(); i++){
+    m_amr->allocate(m_energy_sources[i],  m_particle_realm, m_phase, 1);
+  }
+
 }
 
 int ito_plasma_godunov::get_num_plot_vars() const {
@@ -395,6 +401,12 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   photon_time = -MPI_Wtime();
   this->advance_photons(a_dt);
   photon_time += MPI_Wtime();
+
+  // If we are using the LEA, we must compute the Ohmic heating term. This must be done
+  // BEFORE sorting the particles per cell. 
+  if(m_physics->get_coupling() == ito_plasma_physics::coupling::LEA){
+    this->compute_EdotJ_source();
+  }
 
   // Sort the particles and photons per cell so we can call reaction algorithms
   sort_time = -MPI_Wtime();

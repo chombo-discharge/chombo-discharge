@@ -17,6 +17,7 @@ ito_plasma_air3.prop_eps       = 1              # Maximum relative change in pro
 ito_plasma_air3.NSSA           = 100            # How many SSA steps to run when tau-leaping is inefficient
 ito_plasma_air3.SSAlim         = 0.1            # When to enter SSA instead of tau-leaping
 ito_plasma_air3.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'
+ito_plasma_air3.coupling       = lfa            # Coupling, 'lfa' or 'lea'
 
 # Zheleznyak stuff.
 ito_plasma_air3.quenching_pressure = 0.03947    # Quenching pressure for photo-emission (atm)

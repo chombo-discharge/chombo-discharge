@@ -217,13 +217,13 @@ namespace physics {
       void advance_reaction_network_lea(Vector<particle_container<ito_particle>* >& a_particles,
 					Vector<particle_container<photon>* >&       a_photons,
 					Vector<particle_container<photon>* >&       a_newPhotons,
-					const Vector<EBAMRCellData*>&               a_sources,
+					const Vector<EBAMRCellData>&                a_sources,
 					const EBAMRCellData&                        a_E,
 					const Real                                  a_dt);
       void advance_reaction_network_lea(Vector<AMRCellParticles<ito_particle>* >& a_particles,
 					Vector<AMRCellParticles<photon>* >&       a_photons,
 					Vector<AMRCellParticles<photon>* >&       a_newPhotons,
-					const Vector<EBAMRCellData*>&             a_sources,
+					const Vector<EBAMRCellData>&              a_sources,
 					const EBAMRCellData&                      a_E,
 					const Real                                a_dt);
       void advance_reaction_network_lea(Vector<LayoutData<BinFab<ito_particle> >* >& a_particles,
@@ -262,7 +262,7 @@ namespace physics {
       void sort_domain_photons_by_patch();
 
       // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle realm. 
-      void compute_EdotJ_source(Vector<EBAMRCellData*>& a_source);
+      void compute_EdotJ_source();
 
     protected:
 
@@ -300,6 +300,9 @@ namespace physics {
       // Storage for the electric field on 
       EBAMRCellData m_fluid_E;
       EBAMRCellData m_particle_E;
+
+      // Storage for energy source terms
+      Vector<EBAMRCellData> m_energy_sources;
 
 
       bool load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
