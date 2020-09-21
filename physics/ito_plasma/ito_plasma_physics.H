@@ -106,6 +106,12 @@ namespace physics {
 	be set to a constant. 
       */
       virtual void update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const = 0;
+
+      /*!
+	@brief Update reaction rates for LFA updates. Since the rates don't change during the advance, they can
+	be set to a constant. 
+      */
+      virtual void update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const = 0;
       
       /*!
 	@brief Reaction network advance in the LFA. 

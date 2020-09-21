@@ -8,7 +8,7 @@
 #ifndef _ITO_PLASMA_AIR3_
 #define _ITO_PLASMA_AIR3_
 
-#include "ito_plasma_physics_lfa.H"
+#include "ito_plasma_physics.H"
 #include "lookup_table.H"
 
 namespace physics {
@@ -17,7 +17,7 @@ namespace physics {
     /*!
       @brief Abstract clas for specifying plasma kinetics
     */
-    class ito_plasma_air3 : public ito_plasma_physics_lfa {
+    class ito_plasma_air3 : public ito_plasma_physics {
     public:
 
       class electron;
@@ -32,7 +32,14 @@ namespace physics {
 
       Real compute_eta(const RealVect a_E) const;
 
-      void update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const override;
+      Vector<Real> compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const override;
+
+      Vector<Real> compute_ito_diffusion_lfa(const Real         a_time,
+					     const RealVect     a_pos,
+					     const RealVect     a_E,
+					     const Vector<Real> a_cdr_densities) const override;
+
+      void update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const override;
 
 
     protected:
@@ -80,27 +87,18 @@ namespace physics {
     public:
       electron();
       ~electron();
-
-      Real mobility() const override;
-      Real diffusion() const override;
     };
 
     class ito_plasma_air3::positive : public ito_species {
     public:
       positive();
       ~positive();
-
-      Real mobility()  const override {return 0.0;}
-      Real diffusion() const override {return 0.0;}
     };
 
     class ito_plasma_air3::negative : public ito_species {
     public:
       negative();
       ~negative();
-
-      Real mobility()  const override {return 0.0;}
-      Real diffusion() const override {return 0.0;}
     };
 
     class ito_plasma_air3::photonZ : public rte_species {
