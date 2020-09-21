@@ -1889,3 +1889,49 @@ bool ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
 
   return ret;
 }
+
+void ito_plasma_stepper::compute_EdotJ_source(Vector<EBAMRCellData*>& a_source){
+  CH_TIME("ito_plasma_stepper::compute_EdotJ_source(ebamrcelldata)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_EdotJ_source(ebamrcelldata)" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver   = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+    const int q   = species->get_charge();
+
+    data_ops::set_value(*a_source[idx], 0.0);
+
+    // Do mobile contribution. 
+    if(q != 0 && solver->is_mobile()){
+
+      // Drift contribution
+      solver->deposit_conductivity(m_particle_scratch1, solver->get_particles());
+      data_ops::copy(m_particle_scratchD, m_particle_E); // Could use m_particle_E or solver's m_velo_func here, but m_velo_func = +/- E (depends on q)
+      
+      data_ops::multiply_scalar(m_particle_scratchD, m_particle_scratch1);        // m_particle_scratchD = mu*n*E
+      data_ops::dot_prod(m_particle_scratch1, m_particle_E, m_particle_scratchD); // m_particle_scratch1 = mu*n*E*E
+      data_ops::incr(*a_source[idx], m_particle_scratch1, 1.0);                   // a_source[idx] += mu*n*E*E
+    }
+
+    // Diffusive contribution
+    if(q != 0 && solver->is_diffusive()){
+
+      // Compute the negative gradient of the diffusion term
+      solver->deposit_diffusivity(m_particle_scratch1, solver->get_particles());
+      m_amr->compute_gradient(m_particle_scratchD, m_particle_scratch1, m_particle_realm, m_phase);
+      data_ops::scale(m_particle_scratchD, -1.0); // scratchD = -grad(D*n)
+
+      
+      data_ops::dot_prod(m_particle_scratch1, m_particle_scratchD, m_particle_E); // m_particle_scratch1 = -E*grad(D*n)
+      data_ops::incr(*a_source[idx], m_particle_scratch1, 1.0);                   // a_source[idx]
+    }
+
+    if (q != 0 && (solver->is_mobile() || solver->is_diffusive())){
+      data_ops::scale(*a_source[idx], Abs(q)*units::s_Qe);
+    }
+  }
+}

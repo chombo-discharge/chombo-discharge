@@ -230,6 +230,9 @@ namespace physics {
       void sort_domain_photons_by_cell();
       void sort_domain_photons_by_patch();
 
+      // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle realm. 
+      void compute_EdotJ_source(Vector<EBAMRCellData*>& a_source);
+
     protected:
 
       std::string m_fluid_realm;     // Realm for Poisson and sigma solver. Defaults to realm::primal
