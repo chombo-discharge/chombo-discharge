@@ -16,6 +16,8 @@ ito_plasma_air3::ito_plasma_air3(){
   m_num_ito_species = 3;
   m_num_rte_species = 1;
 
+  m_coupling == ito_plasma_physics::coupling::LFA;
+
   ParmParse pp("ito_plasma_air3");
   Vector<Real> v;
   
@@ -39,17 +41,6 @@ ito_plasma_air3::ito_plasma_air3(){
   pp.get("NSSA",           m_NSSA);
   pp.get("SSAlim",         m_SSAlim);
   pp.get("coupling",       str);
-
-  // Get coupling
-  if(str == "lea"){
-    m_coupling = coupling::LEA;
-  }
-  else if(str == "lfa"){
-    m_coupling = coupling::LFA;
-  }
-  else{
-    MayDay::Abort("ito_plasma_air3::ito_plasma_air3 - unknown coupling requested. Only 'lea' or 'lfa' supported. ");
-  }
   
   // Get algorithm
   pp.get("algorithm",      str);
@@ -110,25 +101,17 @@ ito_plasma_air3::ito_plasma_air3(){
   
   this->draw_sphere_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight);
 
-  // Set the reactions. LFA does not need to track energy. 
-  if(m_coupling == coupling::LFA){ // LFA reactions
-    // Particle-particle reactions
-    m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
-    m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
-    m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
-    m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
-    m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
+  // Particle-particle reactions
+  m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
+  m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
+  m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
+  m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
+  m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
 
-    // Photo-reactions
-    m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}));
-  }
-  else if(m_coupling == coupling::LEA){
-
-  }
+  // Photo-reactions
+  m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}));
 
 
-
-  // Read reaction tables. This also makes them "uniform".
   this->read_tables();
 }
 
@@ -239,15 +222,6 @@ ito_plasma_air3::electron::~electron(){
 
 }
 
-Real ito_plasma_air3::electron::mobility (const Real a_energy) const {
-  return 0.0;
-}
-
-Real ito_plasma_air3::electron::diffusion(const Real a_energy) const {
-  return 0.0;
-}
-
-
 ito_plasma_air3::positive::positive(){
   m_mobile    = false;
   m_diffusive = false;
@@ -259,14 +233,6 @@ ito_plasma_air3::positive::~positive(){
 
 }
 
-Real ito_plasma_air3::positive::mobility (const Real a_energy) const {
-  return 0.0;
-}
-
-Real ito_plasma_air3::positive::diffusion(const Real a_energy) const {
-  return 0.0;
-}
-
 ito_plasma_air3::negative::negative(){
   m_mobile    = false;
   m_diffusive = false;
@@ -275,14 +241,6 @@ ito_plasma_air3::negative::negative(){
 }  
 
 ito_plasma_air3::negative::~negative(){
-}
-
-Real ito_plasma_air3::negative::mobility (const Real a_energy) const {
-  return 0.0;
-}
-
-Real ito_plasma_air3::negative::diffusion(const Real a_energy) const {
-  return 0.0;
 }
 
 ito_plasma_air3::photonZ::photonZ(){
