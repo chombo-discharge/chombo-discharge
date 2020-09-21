@@ -132,7 +132,7 @@ namespace physics {
       void advance_reaction_network_lea(Vector<List<ito_particle>* >& a_particles,
 					Vector<List<photon>* >&       a_photons,
 					Vector<List<photon>* >&       a_newPhotons,
-					const Real                    a_source,
+					const Vector<Real>&           a_sources, 
 					const RealVect                a_E,           
 					const RealVect                a_cellPos,
 					const RealVect                a_centroidPos,
