@@ -596,32 +596,6 @@ unsigned long long ito_plasma_physics::get_particle_count(const List<ito_particl
 }
 
 inline
-void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-						  Vector<List<photon>* >&       a_photons,
-						  Vector<List<photon>* >&       a_newPhotons,
-						  const RealVect                a_E,           
-						  const RealVect                a_cellPos,
-						  const RealVect                a_centroidPos,
-						  const RealVect                a_bndryCentroid,
-						  const RealVect                a_bndryNormal,
-						  const RealVect                a_lo,
-						  const RealVect                a_hi,
-						  const Real                    a_dx,
-						  const Real                    a_kappa, 
-						  const Real                    a_dt) {
-
-  switch(m_coupling){
-  case coupling::LFA:
-    this->update_reaction_rates_lfa(a_E, a_dx, a_kappa); // Rates given by E only, so they can be set to constant values before the advance
-    this->advance_reaction_network_lfa(a_particles, a_photons, a_newPhotons, a_E, a_cellPos, a_centroidPos, a_bndryCentroid,
-				       a_bndryNormal, a_lo, a_hi, a_dx, a_kappa, a_dt);
-    break;
-  case coupling::LEA:
-    MayDay::Abort("ito_plasma_stepper::advance_reaction_network - LEA coupling not (yet) implemented");
-  }
-}
-
-inline
 void ito_plasma_physics::advance_reaction_network_lfa(Vector<List<ito_particle>* >& a_particles,
 						      Vector<List<photon>* >&       a_photons,
 						      Vector<List<photon>* >&       a_newPhotons,
@@ -678,6 +652,23 @@ void ito_plasma_physics::advance_reaction_network_lfa(Vector<List<ito_particle>*
     MayDay::Abort("ito_plasma_physics::advance_reaction_network_lfa(...) - charge is not conserved!!!");
   }
 #endif
+}
+
+void ito_plasma_physics::advance_reaction_network_lea(Vector<List<ito_particle>* >& a_particles,
+						      Vector<List<photon>* >&       a_photons,
+						      Vector<List<photon>* >&       a_newPhotons,
+						      const Real                    a_source,
+						      const RealVect                a_E,           
+						      const RealVect                a_cellPos,
+						      const RealVect                a_centroidPos,
+						      const RealVect                a_bndryCentroid,
+						      const RealVect                a_bndryNormal,
+						      const RealVect                a_lo,
+						      const RealVect                a_hi,
+						      const Real                    a_dx,
+						      const Real                    a_kappa, 
+						      const Real                    a_dt){
+  MayDay::Abort("ito_plasma_physics::advance_reaction_network_lea - not implemented!");
 }
 
 inline

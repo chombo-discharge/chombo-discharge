@@ -102,36 +102,37 @@ namespace physics {
 						     const Vector<Real> a_cdr_densities) const = 0;
 
       /*!
-	@brief Solve reaction network
-      */
-      inline
-      void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-				    Vector<List<photon>* >&       a_photons,
-				    Vector<List<photon>* >&       a_newPhotons,
-				    const RealVect                a_E,           
-				    const RealVect                a_cellPos,
-				    const RealVect                a_centroidPos,
-				    const RealVect                a_bndryCentroid,
-				    const RealVect                a_bndryNormal,
-				    const RealVect                a_lo,
-				    const RealVect                a_hi,
-				    const Real                    a_dx,
-				    const Real                    a_kappa, 
-				    const Real                    a_dt);
-
-      /*!
 	@brief Update reaction rates for LFA updates. Since the rates don't change during the advance, they can
 	be set to a constant. 
       */
       virtual void update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const = 0;
       
       /*!
-	@brief Reaction network advance. Trying to inline for performance....
+	@brief Reaction network advance in the LFA. 
       */
       inline
       void advance_reaction_network_lfa(Vector<List<ito_particle>* >& a_particles,
 					Vector<List<photon>* >&       a_photons,
 					Vector<List<photon>* >&       a_newPhotons,
+					const RealVect                a_E,           
+					const RealVect                a_cellPos,
+					const RealVect                a_centroidPos,
+					const RealVect                a_bndryCentroid,
+					const RealVect                a_bndryNormal,
+					const RealVect                a_lo,
+					const RealVect                a_hi,
+					const Real                    a_dx,
+					const Real                    a_kappa, 
+					const Real                    a_dt);
+
+      /*!
+	@brief Reaction network advance in the LEA.
+      */
+      inline
+      void advance_reaction_network_lea(Vector<List<ito_particle>* >& a_particles,
+					Vector<List<photon>* >&       a_photons,
+					Vector<List<photon>* >&       a_newPhotons,
+					const Real                    a_source,
 					const RealVect                a_E,           
 					const RealVect                a_cellPos,
 					const RealVect                a_centroidPos,
