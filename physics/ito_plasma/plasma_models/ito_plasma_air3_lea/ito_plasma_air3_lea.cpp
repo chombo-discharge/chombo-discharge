@@ -16,7 +16,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_num_ito_species = 3;
   m_num_rte_species = 1;
 
-  m_coupling == ito_plasma_physics::coupling::LFA;
+  m_coupling == ito_plasma_physics::coupling::LEA;
 
   ParmParse pp("ito_plasma_air3_lea");
   Vector<Real> v;
@@ -82,7 +82,10 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_negative_idx = 2;
   m_photonZ_idx  = 0;
 
-  m_ito_species[m_electron_idx] = RefCountedPtr<ito_species> (new electron());
+  // Read transport tables
+  this->read_tables();
+
+  m_ito_species[m_electron_idx] = RefCountedPtr<ito_species> (new electron(m_tables.at("mobility"), m_tables.at("diffusion")));
   m_ito_species[m_positive_idx] = RefCountedPtr<ito_species> (new positive());
   m_ito_species[m_negative_idx] = RefCountedPtr<ito_species> (new negative());
   m_rte_species[m_photonZ_idx]  = RefCountedPtr<rte_species> (new photonZ());
@@ -110,9 +113,6 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
 
   // Photo-reactions
   m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}));
-
-
-  this->read_tables();
 }
 
 ito_plasma_air3_lea::~ito_plasma_air3_lea(){
@@ -121,66 +121,39 @@ ito_plasma_air3_lea::~ito_plasma_air3_lea(){
 
 void ito_plasma_air3_lea::read_tables(){
 
-  this->add_table("mobility", "mobility.dat");
-  this->add_table("diffco",   "diffusion.dat");
-  this->add_table("alpha",    "alpha.dat");
-  this->add_table("eta",      "eta.dat");
-  this->add_table("Te",       "energy.dat");
+  this->add_table("mobility",  "mobility.dat");
+  this->add_table("diffco",    "diffusion.dat");
+  this->add_table("alpha",     "alpha.dat");
+  this->add_table("eta",       "eta.dat");
+  this->add_table("alpha_lfa", "alpha_lfa.dat");
 
-  // Need to scale tables. First column is in Td and second in /N
-  m_tables["mobility"].scale_x(m_N*units::s_Td);
+  // Need to scale energy tables. First column is in eV
   m_tables["mobility"].scale_y(1./m_N);
-
-  m_tables["diffco"].scale_x(m_N*units::s_Td);
   m_tables["diffco"].scale_y(1./m_N);
-
-  m_tables["alpha"].scale_x(m_N*units::s_Td);
   m_tables["alpha"].scale_y(m_N);
-
-  m_tables["eta"].scale_x(m_N*units::s_Td);
   m_tables["eta"].scale_y(m_N);
 
-  m_tables["Te"].swap_xy();
-  m_tables["Te"].scale_x(m_N*units::s_Td);
-  m_tables["Te"].scale_y(2.0*units::s_Qe/(3.0*units::s_kb));
+  // LFA table for Townsed coefficient
+  m_tables["alpha_lfa"].scale_x(m_N*units::s_Td);
+  m_tables["alpha_lfa"].scale_y(m_N);
 }
 
 Real ito_plasma_air3_lea::compute_alpha(const RealVect a_E) const {
   const Real E = a_E.vectorLength();
 
-  return m_tables.at("alpha").get_entry(E);
+  return m_tables.at("alpha_lfa").get_entry(E);
 }
 
-Vector<Real> ito_plasma_air3_lea::compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const {
-  Vector<Real> mobilities(m_num_ito_species, 0.0);
-  mobilities[m_electron_idx] = m_tables.at("mobility").get_entry(a_E.vectorLength());
-
-  return mobilities;
-}
-
-RealVect ito_plasma_air3_lea::compute_electron_velocity(const RealVect a_E) const {
-  return -m_tables.at("mobility").get_entry(a_E.vectorLength())*a_E;
-}
-
-Vector<Real> ito_plasma_air3_lea::compute_ito_diffusion_lfa(const Real         a_time,
-						    const RealVect     a_pos,
-						    const RealVect     a_E,
-						    const Vector<Real> a_cdr_densities) const {
-  Vector<Real> D(m_num_ito_species, 0.0);
-  D[m_electron_idx] = m_tables.at("diffco").get_entry(a_E.vectorLength());
-  
-  return D;
-}
-
-void ito_plasma_air3_lea::update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const{
+void ito_plasma_air3_lea::update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const {
 
   // Compute the reaction rates.
   const Real dV      = pow(a_dx, SpaceDim);//*a_kappa;
   const Real E       = a_E.vectorLength();
-  const Real alpha   = m_tables.at("alpha").get_entry(E);
-  const Real eta     = m_tables.at("eta").get_entry(E);
-  const Real Te      = m_tables.at("Te").get_entry(E);
-  const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
+  const Real alpha   = m_tables.at("alpha").get_entry(a_mean_energies[m_electron_idx]);
+  const Real eta     = m_tables.at("eta").get_entry(a_mean_energies[m_electron_idx]);
+  const Real mu      = m_tables.at("mobility").get_entry(a_mean_energies[m_electron_idx]);
+  const Real velo    = mu*a_E.vectorLength();
+  const Real Te      = 2.0*a_mean_energies[m_electron_idx]/(3.0*units::s_kb);
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
   const Real bpn     = 2E-13*sqrt(300/m_T)/dV;
   const Real bpe     = 1.138E-11*pow(Te, -0.7)/dV;
@@ -211,7 +184,8 @@ Real ito_plasma_air3_lea::photo_rate(const Real a_E) const {
   return excitation_rates(a_E)*sergey_factor(m_O2frac)*m_photoi_factor;
 }
 
-ito_plasma_air3_lea::electron::electron(){
+ito_plasma_air3_lea::electron::electron(const lookup_table a_mobility, const lookup_table a_diffusion) : m_mobility(a_mobility),
+													 m_diffusion(a_diffusion) {
   m_mobile    = true;
   m_diffusive = true;
   m_name      = "electron";
@@ -220,6 +194,14 @@ ito_plasma_air3_lea::electron::electron(){
 
 ito_plasma_air3_lea::electron::~electron(){
 
+}
+
+Real ito_plasma_air3_lea::electron::mobility(const Real a_energy) const {
+  return m_mobility.get_entry(a_energy);
+}
+
+Real ito_plasma_air3_lea::electron::diffusion(const Real a_energy) const {
+  return m_diffusion.get_entry(a_energy);
 }
 
 ito_plasma_air3_lea::positive::positive(){

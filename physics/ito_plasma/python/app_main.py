@@ -18,6 +18,7 @@ def write_template(args):
                     
     # Create app directory if it does not exist
     app_dir = args.plasmac_home + "/" + args.base_dir + "/" + args.app_name
+    print(app_dir)
     if not os.path.exists(app_dir):
         os.makedirs(app_dir)
                         

@@ -80,27 +80,18 @@ namespace physics {
     public:
       electron();
       ~electron();
-
-      Real mobility() const override;
-      Real diffusion() const override;
     };
 
     class ito_plasma_air3::positive : public ito_species {
     public:
       positive();
       ~positive();
-
-      Real mobility()  const override {return 0.0;}
-      Real diffusion() const override {return 0.0;}
     };
 
     class ito_plasma_air3::negative : public ito_species {
     public:
       negative();
       ~negative();
-
-      Real mobility()  const override {return 0.0;}
-      Real diffusion() const override {return 0.0;}
     };
 
     class ito_plasma_air3::photonZ : public rte_species {

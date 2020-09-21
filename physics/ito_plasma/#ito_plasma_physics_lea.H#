@@ -46,7 +46,10 @@ namespace physics {
       /*!
 	@brief This must be overridden.
       */
-      virtual void update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const override = 0;
+      virtual void update_reaction_rates_lea(const RealVect     a_E,
+					     const Vector<Real> a_mean_energies,
+					     const Real         a_dx,
+					     const Real         a_kappa) const override = 0;
 
       // Disabled in LEA
       Vector<Real> compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const override final {

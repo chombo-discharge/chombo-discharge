@@ -1,14 +1,14 @@
 /*!
-  @file   ito_plasma_air3.H
+  @file   ito_plasma_air3_lea.H
   @brief  Simple class for 3-species air plasma
   @author Robert Marskar
   @date   June 2020
 */
 
-#ifndef _ITO_PLASMA_AIR3_
-#define _ITO_PLASMA_AIR3_
+#ifndef _ITO_PLASMA_AIR3_LEA_
+#define _ITO_PLASMA_AIR3_LEA_
 
-#include "ito_plasma_physics.H"
+#include "ito_plasma_physics_lea.H"
 #include "lookup_table.H"
 
 namespace physics {
@@ -17,7 +17,7 @@ namespace physics {
     /*!
       @brief Abstract clas for specifying plasma kinetics
     */
-    class ito_plasma_air3 : public ito_plasma_physics {
+    class ito_plasma_air3_lea : public ito_plasma_physics_lea {
     public:
 
       class electron;
@@ -25,22 +25,14 @@ namespace physics {
       class negative;
       class photonZ;
       
-      ito_plasma_air3();
-      ~ito_plasma_air3();
+      ito_plasma_air3_lea();
+      ~ito_plasma_air3_lea();
 
       Real compute_alpha(const RealVect a_E) const override;
 
       Real compute_eta(const RealVect a_E) const;
 
-      Vector<Real> compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const override;
-
-      Vector<Real> compute_ito_diffusion_lfa(const Real         a_time,
-					     const RealVect     a_pos,
-					     const RealVect     a_E,
-					     const Vector<Real> a_cdr_densities) const override;
-
-      void update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const override;
-
+      void update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const override;
 
     protected:
 
@@ -75,33 +67,38 @@ namespace physics {
       Real sergey_factor(const Real a_O2frac) const;
       Real photo_rate(const Real a_E) const;
 
-      // Electron velocity
-      RealVect compute_electron_velocity(const RealVect a_E) const;
-
       // Read file into table
       void read_tables();
     };
 
     
-    class ito_plasma_air3::electron : public ito_species {
+    class ito_plasma_air3_lea::electron : public ito_species {
     public:
-      electron();
+      electron() = delete;
+      electron(lookup_table a_mobility, lookup_table a_diffusion);
       ~electron();
+
+      Real mobility(const Real a_energy) const override;
+      Real diffusion(const Real a_energy) const override;
+
+    protected:
+      lookup_table m_mobility;
+      lookup_table m_diffusion;
     };
 
-    class ito_plasma_air3::positive : public ito_species {
+    class ito_plasma_air3_lea::positive : public ito_species {
     public:
       positive();
       ~positive();
     };
 
-    class ito_plasma_air3::negative : public ito_species {
+    class ito_plasma_air3_lea::negative : public ito_species {
     public:
       negative();
       ~negative();
     };
 
-    class ito_plasma_air3::photonZ : public rte_species {
+    class ito_plasma_air3_lea::photonZ : public rte_species {
     public:
       photonZ();
       ~photonZ();
