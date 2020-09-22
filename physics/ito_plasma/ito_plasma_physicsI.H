@@ -667,6 +667,7 @@ void ito_plasma_physics::advance_reaction_network_lfa(Vector<List<ito_particle>*
   Vector<unsigned long long> newPhotonCount   = Vector<unsigned long long>(m_num_rte_species, 0);
   Vector<unsigned long long> oldParticleCount = this->get_particle_count(a_particles);
   Vector<unsigned long long> newParticleCount = oldParticleCount;
+  Vector<Real> mean_energies(m_num_ito_species, 0.0);
 
 #if ITO_PLASMA_PHYSICS_DEBUG
   const long long Qbefore = this->compute_charge(a_particles);
@@ -692,6 +693,10 @@ void ito_plasma_physics::advance_reaction_network_lfa(Vector<List<ito_particle>*
 
   // Run photo-reactions and increment the number of particles as needed
   this->reconcile_photoionization(a_particles, a_photons);
+
+  // Set new mean energies
+  this->set_mean_particle_energy(a_particles, mean_energies);
+
 
 #if ITO_PLASMA_PHYSICS_DEBUG // Debug code
   this->check_charge_conservation(oldParticleCount, newParticleCount);
@@ -732,8 +737,7 @@ void ito_plasma_physics::advance_reaction_network_lea(Vector<List<ito_particle>*
 
   // Doa  number advance in the LEA. 
   this->advance_particles_lea(newParticleCount, newPhotonCount, mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa);
-
-#if 0
+  
   // Reconcile particles
   this->reconcile_particles(a_particles,
   			    newParticleCount,
@@ -751,7 +755,9 @@ void ito_plasma_physics::advance_reaction_network_lea(Vector<List<ito_particle>*
 
   // Run photo-reactions and increment the number of particles as needed
   this->reconcile_photoionization(a_particles, a_photons);
-#endif
+
+    // Set new mean energies
+  this->set_mean_particle_energy(a_particles, mean_energies);
 }
 
 inline
