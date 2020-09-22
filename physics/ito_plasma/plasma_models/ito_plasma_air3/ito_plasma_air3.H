@@ -32,7 +32,14 @@ namespace physics {
 
       Real compute_eta(const RealVect a_E) const;
 
-      void update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const override;
+      void update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const override;
+
+      Vector<Real> compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const override;
+
+      Vector<Real> compute_ito_diffusion_lfa(const Real         a_time,
+						     const RealVect     a_pos,
+						     const RealVect     a_E,
+						     const Vector<Real> a_cdr_densities) const override;
 
 
     protected:
