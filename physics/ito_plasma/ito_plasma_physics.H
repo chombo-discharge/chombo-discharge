@@ -500,13 +500,13 @@ namespace physics {
 				 const ReactionPtrs&                a_non_critical_reactions) const;
 
       /*!
-	@brief Compute the total propensity
+	@brief Compute the total propensity for all reactions. 
       */
       inline
       Real propensity(const Vector<unsigned long long>& a_particles) const;
 
       /*!
-	@brief Compute total propensity for a subset
+	@brief Compute total propensity for a subset of reactions. 
       */
       inline
       Real propensity(const Vector<unsigned long long>& a_particles, const ReactionPtrs& a_critical_reactions) const;
@@ -590,30 +590,30 @@ namespace physics {
       void advance_ssa(Vector<unsigned long long>& a_particles, Vector<unsigned long long>& a_newPhotons, const Real a_dt) const;
 
       /*!
-	@brief Advance particles. 
+	@brief Advance particles. If usign the LFA then a_mean_energies and a_sources are dummy arugments. 
       */
       inline
-      void advance_particles_lea(Vector<unsigned long long>& a_particles,
-				 Vector<unsigned long long>& a_newPhotons,
-				 Vector<Real>&               a_mean_energies,
-				 const Vector<Real>&         a_sources,
-				 const Real                  a_dt,
-				 const RealVect              a_E,
-				 const Real                  a_dx,
-				 const Real                  a_kappa) const;
+      void advance_particles(Vector<unsigned long long>& a_particles,
+			     Vector<unsigned long long>& a_newPhotons,
+			     Vector<Real>&               a_mean_energies,
+			     const Vector<Real>&         a_sources,
+			     const Real                  a_dt,
+			     const RealVect              a_E,
+			     const Real                  a_dx,
+			     const Real                  a_kappa) const;
 
       /*!
-	@brief New tau leaping advance
+	@brief New tau leaping advance. If using the LFA then a_mean_energies and a_sources are dummy arguments. 
       */
       inline
-      void advance_tau_lea(Vector<unsigned long long>& a_particles,
-			   Vector<unsigned long long>& a_newPhotons,
-			   Vector<Real>&               a_mean_energies,
-			   const Vector<Real>&         a_sources,
-			   const Real                  a_dt,
-			   const RealVect              a_E,
-			   const Real                  a_dx,
-			   const Real                  a_kappa) const;
+      void advance_tau(Vector<unsigned long long>& a_particles,
+		       Vector<unsigned long long>& a_newPhotons,
+		       Vector<Real>&               a_mean_energies,
+		       const Vector<Real>&         a_sources,
+		       const Real                  a_dt,
+		       const RealVect              a_E,
+		       const Real                  a_dx,
+		       const Real                  a_kappa) const;
 
 
 

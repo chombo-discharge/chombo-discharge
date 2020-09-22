@@ -736,13 +736,13 @@ void ito_plasma_physics::advance_reaction_network_lea(Vector<List<ito_particle>*
   
 
   // Doa  number advance in the LEA. 
-  this->advance_particles_lea(newParticleCount, newPhotonCount, mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa);
+  this->advance_particles(newParticleCount, newPhotonCount, mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa);
   
   // Reconcile particles
   this->reconcile_particles(a_particles,
   			    newParticleCount,
   			    oldParticleCount,
-  			    a_pos,
+  			    a_cellPos,
   			    a_lo,
   			    a_hi,
 			    a_bndryCentroid,
@@ -751,12 +751,12 @@ void ito_plasma_physics::advance_reaction_network_lea(Vector<List<ito_particle>*
   			    a_kappa);
 
   // Generate new photons
-  this->reconcile_photons(a_newPhotons, newPhotonCount, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  this->reconcile_photons(a_newPhotons, newPhotonCount, a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
   // Run photo-reactions and increment the number of particles as needed
   this->reconcile_photoionization(a_particles, a_photons);
 
-    // Set new mean energies
+  // Set new mean energies for all the particles. 
   this->set_mean_particle_energy(a_particles, mean_energies);
 }
 
@@ -960,9 +960,6 @@ std::deque<Real> ito_plasma_physics::propensities(const Vector<unsigned long lon
 
   return propensities;
 }
-
-
-
 inline
 void ito_plasma_physics::ssa_step(Vector<unsigned long long>& a_particles,
 				  Vector<unsigned long long>& a_newPhotons,
@@ -1215,19 +1212,26 @@ void ito_plasma_physics::advance_particles(Vector<unsigned long long>& a_particl
 }
 
 inline
-void ito_plasma_physics::advance_tau_lea(Vector<unsigned long long>& a_particles,
-					 Vector<unsigned long long>& a_newPhotons,
-					 Vector<Real>&               a_mean_energies,
-					 const Vector<Real>&         a_sources,
-					 const Real                  a_dt,
-					 const RealVect              a_E,
-					 const Real                  a_dx,
-					 const Real                  a_kappa) const {
+void ito_plasma_physics::advance_tau(Vector<unsigned long long>& a_particles,
+				     Vector<unsigned long long>& a_newPhotons,
+				     Vector<Real>&               a_mean_energies,
+				     const Vector<Real>&         a_sources,
+				     const Real                  a_dt,
+				     const RealVect              a_E,
+				     const Real                  a_dx,
+				     const Real                  a_kappa) const {
 
-  // Update the rate based on the mean energies, then compute the propensities. 
-  this->update_reaction_rates_lea(a_E, a_mean_energies, a_dx, a_kappa);
+  // TLDR: If using LFA, a_mean_energies and a_sources were empty when we entered this routine. 
 
-  // Need the total energy as well. 
+  // Update the rate based on the mean energies or the electric field, depending on how we use the LFA/LEA. 
+  if(m_coupling == coupling::LFA){
+    this->update_reaction_rates_lfa(a_E, a_dx, a_kappa);
+  }
+  else if(m_coupling == coupling::LEA){
+    this->update_reaction_rates_lea(a_E, a_mean_energies, a_dx, a_kappa);
+  }
+
+  // LEA needs total energy for doing the energy jump. 
   Vector<Real> energies = a_mean_energies;
   for (int i = 0; i < a_particles.size(); i++){
     energies[i] *= a_particles[i];
@@ -1238,13 +1242,15 @@ void ito_plasma_physics::advance_tau_lea(Vector<unsigned long long>& a_particles
     const unsigned long long num_reactions = this->poisson_reaction(r.second.propensity(a_particles), a_dt);
 
     // Jump state and energy
-    r.second.jump_state(a_particles, a_newPhotons, num_reactions);
-    r.second.jump_energy(energies, a_mean_energies, num_reactions);
+    r.second.jump_state(a_particles, a_newPhotons, num_reactions);    // 
+    r.second.jump_energy(energies,   a_mean_energies, num_reactions); // Not necessary for LFA, but not expensive either....
   }
 
+  // Recompute mean energies afterwards.
+  const Real dV = a_kappa*pow(a_dx, SpaceDim);
   for (int i = 0; i < a_particles.size(); i++){
     if(a_particles[i] > 0){
-      a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*a_dt)/(a_particles[i]));
+      a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*dV*a_dt)/(a_particles[i]));
     }
     else{
       a_mean_energies[i] = 0.0;
@@ -1253,20 +1259,20 @@ void ito_plasma_physics::advance_tau_lea(Vector<unsigned long long>& a_particles
 }
 
 inline
-void ito_plasma_physics::advance_particles_lea(Vector<unsigned long long>& a_particles,
-					       Vector<unsigned long long>& a_newPhotons,
-					       Vector<Real>&               a_mean_energies,
-					       const Vector<Real>&         a_sources,
-					       const Real                  a_dt,
-					       const RealVect              a_E,
-					       const Real                  a_dx,
-					       const Real                  a_kappa) const{
+void ito_plasma_physics::advance_particles(Vector<unsigned long long>& a_particles,
+					   Vector<unsigned long long>& a_newPhotons,
+					   Vector<Real>&               a_mean_energies,
+					   const Vector<Real>&         a_sources,
+					   const Real                  a_dt,
+					   const RealVect              a_E,
+					   const Real                  a_dx,
+					   const Real                  a_kappa) const{
   // Which algorithm?
   if(m_algorithm == algorithm::ssa){
     MayDay::Abort("ito_plasma_physics::advance_particles_lea - SSA not implemented");
   }
   else if(m_algorithm == algorithm::tau){
-    this->advance_tau_lea(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
+    this->advance_tau(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
   }
   else if(m_algorithm == algorithm::hybrid){
     MayDay::Abort("ito_plasma_physics::advance_particles_lea - hybrid not implemented");
