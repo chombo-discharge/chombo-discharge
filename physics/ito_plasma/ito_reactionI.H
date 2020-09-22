@@ -58,10 +58,15 @@ void ito_reaction::jump_state(Vector<unsigned long long>& a_particles,
 }
 
 inline
-void ito_reaction::jump_energy(Vector<Real>& a_energies, const unsigned long long a_num_reactions) const {
+void ito_reaction::jump_energy(Vector<Real>& a_energies, const Vector<Real>& a_mean_energies, const unsigned long long a_num_reactions) const {
   
   for (const auto& r : m_energy_jumps){
-    a_energies[r.first] -= r.second*a_num_reactions;
+    if(this->get_state_change(r.first) < 0) { // Consuming reaction, take a_mean_energies[i]
+      a_energies[r.first] -= a_mean_energies[r.first]*a_num_reactions;
+    }
+    else{
+      a_energies[r.first] -= r.second*a_num_reactions;
+    }
   }
 }
 

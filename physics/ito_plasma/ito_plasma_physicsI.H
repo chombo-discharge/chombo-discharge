@@ -289,6 +289,20 @@ void ito_plasma_physics::remove_particles(List<ito_particle>&      a_particles,
 }
 
 inline
+void ito_plasma_physics::set_mean_particle_energy(Vector<List<ito_particle>* >& a_particles, const Vector<Real> a_mean_energy) const{
+  for (int i = 0; i < a_particles.size(); i++){
+    this->set_mean_particle_energy(*a_particles[i], a_mean_energy[i]);
+  }
+}
+
+inline
+void ito_plasma_physics::set_mean_particle_energy(List<ito_particle>& a_particles, const Real a_mean_energy) const{
+  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
+    lit().energy() = a_mean_energy;
+  }
+}
+
+inline
 void ito_plasma_physics::sanity_check(const List<ito_particle>& a_particles) const{
 
   ListIterator<ito_particle> lit(a_particles);
@@ -596,6 +610,45 @@ unsigned long long ito_plasma_physics::get_particle_count(const List<ito_particl
 }
 
 inline
+Vector<Real> ito_plasma_physics::get_particle_energy(const Vector<List<ito_particle>* >& a_particles) const {
+  Vector<Real> ret(a_particles.size(), 0.0);
+
+  for (int i = 0; i < a_particles.size(); i++){
+    ret[i] = this->get_particle_energy(*a_particles[i]);
+  }
+
+  return ret;
+}
+
+inline
+Real ito_plasma_physics::get_particle_energy(const List<ito_particle>& a_particles) const {
+  Real ret = 0;
+
+  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
+    ret += lit().energy();
+  }
+
+  return ret;
+}
+
+inline
+Vector<Real> ito_plasma_physics::get_particle_mean_energy(const Vector<Real>& a_energies, const Vector<unsigned long long>& a_particle_count) const {
+  Vector<Real> ret(a_energies.size(), 0.0);
+
+  for (int i = 0; i < a_energies.size(); i++){
+    ret[i] = this->get_particle_mean_energy(a_energies[i], a_particle_count[i]);
+  }
+
+  return ret;
+}
+
+inline
+Real ito_plasma_physics::get_particle_mean_energy(const Real& a_energy, const unsigned long long& a_particle_count) const{
+  const Real ret = (a_particle_count > 0) ? a_energy/a_particle_count : 0.0;
+  return ret;
+}
+
+inline
 void ito_plasma_physics::advance_reaction_network_lfa(Vector<List<ito_particle>* >& a_particles,
 						      Vector<List<photon>* >&       a_photons,
 						      Vector<List<photon>* >&       a_newPhotons,
@@ -668,7 +721,37 @@ void ito_plasma_physics::advance_reaction_network_lea(Vector<List<ito_particle>*
 						      const Real                    a_dx,
 						      const Real                    a_kappa, 
 						      const Real                    a_dt){
-  MayDay::Abort("ito_plasma_physics::advance_reaction_network_lea - not implemented!");
+
+  // Get particle counts. 
+  Vector<unsigned long long> newPhotonCount   = Vector<unsigned long long>(m_num_rte_species, 0);
+  Vector<unsigned long long> oldParticleCount = this->get_particle_count(a_particles);
+  Vector<Real>               energies         = this->get_particle_energy(a_particles);
+  Vector<Real>               mean_energies    = this->get_particle_mean_energy(energies, oldParticleCount);
+  Vector<unsigned long long> newParticleCount = oldParticleCount;
+  
+
+  // Doa  number advance in the LEA. 
+  this->advance_particles_lea(newParticleCount, newPhotonCount, mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa);
+
+#if 0
+  // Reconcile particles
+  this->reconcile_particles(a_particles,
+  			    newParticleCount,
+  			    oldParticleCount,
+  			    a_pos,
+  			    a_lo,
+  			    a_hi,
+			    a_bndryCentroid,
+  			    a_bndryNormal,
+  			    a_dx,
+  			    a_kappa);
+
+  // Generate new photons
+  this->reconcile_photons(a_newPhotons, newPhotonCount, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
+  // Run photo-reactions and increment the number of particles as needed
+  this->reconcile_photoionization(a_particles, a_photons);
+#endif
 }
 
 inline
@@ -1122,6 +1205,65 @@ void ito_plasma_physics::advance_particles(Vector<unsigned long long>& a_particl
   }
   else if(m_algorithm == algorithm::hybrid){
     this->advance_hybrid(a_particles, a_newPhotons, a_dt); 
+  }
+}
+
+inline
+void ito_plasma_physics::advance_tau_lea(Vector<unsigned long long>& a_particles,
+					 Vector<unsigned long long>& a_newPhotons,
+					 Vector<Real>&               a_mean_energies,
+					 const Vector<Real>&         a_sources,
+					 const Real                  a_dt,
+					 const RealVect              a_E,
+					 const Real                  a_dx,
+					 const Real                  a_kappa) const {
+
+  // Update the rate based on the mean energies, then compute the propensities. 
+  this->update_reaction_rates_lea(a_E, a_mean_energies, a_dx, a_kappa);
+
+  // Need the total energy as well. 
+  Vector<Real> energies = a_mean_energies;
+  for (int i = 0; i < a_particles.size(); i++){
+    energies[i] *= a_particles[i];
+  }
+  
+  // Do a tau-step with all the reactions
+  for (const auto& r : m_reactions){
+    const unsigned long long num_reactions = this->poisson_reaction(r.second.propensity(a_particles), a_dt);
+
+    // Jump state and energy
+    r.second.jump_state(a_particles, a_newPhotons, num_reactions);
+    r.second.jump_energy(energies, a_mean_energies, num_reactions);
+  }
+
+  for (int i = 0; i < a_particles.size(); i++){
+    if(a_particles[i] > 0){
+      a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*a_dt)/(a_particles[i]));
+    }
+    else{
+      a_mean_energies[i] = 0.0;
+    }
+  }
+}
+
+inline
+void ito_plasma_physics::advance_particles_lea(Vector<unsigned long long>& a_particles,
+					       Vector<unsigned long long>& a_newPhotons,
+					       Vector<Real>&               a_mean_energies,
+					       const Vector<Real>&         a_sources,
+					       const Real                  a_dt,
+					       const RealVect              a_E,
+					       const Real                  a_dx,
+					       const Real                  a_kappa) const{
+  // Which algorithm?
+  if(m_algorithm == algorithm::ssa){
+    MayDay::Abort("ito_plasma_physics::advance_particles_lea - SSA not implemented");
+  }
+  else if(m_algorithm == algorithm::tau){
+    this->advance_tau_lea(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
+  }
+  else if(m_algorithm == algorithm::hybrid){
+    MayDay::Abort("ito_plasma_physics::advance_particles_lea - hybrid not implemented");
   }
 }
 

@@ -251,7 +251,6 @@ namespace physics {
       inline
       long long compute_charge(const Vector<List<ito_particle>* >& a_particles) const;
 
-
       /*!
 	@brief Reconcile the number of particles
       */
@@ -273,13 +272,13 @@ namespace physics {
       void reconcile_particles(List<ito_particle>&      a_particles,
 			       const unsigned long long a_numNewParticles,
 			       const unsigned long long a_oldNewParticles,
-			       const RealVect          a_pos,
-			       const RealVect          a_lo,
-			       const RealVect          a_hi,
-			       const RealVect          a_bndryCentroid,
-			       const RealVect          a_normal,
-			       const Real              a_dx,
-			       const Real              a_kappa) const;
+			       const RealVect           a_pos,
+			       const RealVect           a_lo,
+			       const RealVect           a_hi,
+			       const RealVect           a_bndryCentroid,
+			       const RealVect           a_normal,
+			       const Real               a_dx,
+			       const Real               a_kappa) const;
 
       /*!
 	@brief Add particles
@@ -300,6 +299,18 @@ namespace physics {
       */
       inline
       void remove_particles(List<ito_particle>&  a_particles, const unsigned long long a_numParticlesToRemove) const;
+
+      /*!
+	@brief Set mean particle energy
+      */
+      inline
+      void set_mean_particle_energy(Vector<List<ito_particle>* >& a_particles, const Vector<Real> a_mean_energy) const;
+
+      /*!
+	@brief Set mean particle energy
+      */
+      inline
+      void set_mean_particle_energy(List<ito_particle>& a_particles, const Real a_mean_energy) const;
 
       /*!
 	@brief Check that all weights are > 0
@@ -436,12 +447,37 @@ namespace physics {
       */
       inline
       Vector<unsigned long long> get_particle_count(const Vector<List<ito_particle>* >& a_particles) const;
-
+      
       /*!
 	@brief Get the particle count
       */
       inline
       unsigned long long get_particle_count(const List<ito_particle>& a_particles) const;
+
+      /*!
+	@brief Get the particle energies
+      */
+      inline
+      Vector<Real> get_particle_energy(const Vector<List<ito_particle>* >& a_particles) const;
+
+      /*!
+	@brief Get the particle energies
+      */
+      inline
+      Real get_particle_energy(const List<ito_particle>& a_particles) const;
+
+      /*!
+	@brief Get the mean particle energies
+      */
+      inline
+      Vector<Real> get_particle_mean_energy(const Vector<Real>& a_energies, const Vector<unsigned long long>& a_particle_count) const;
+
+      /*!
+	@brief Get the particle energies
+      */
+      inline
+      Real get_particle_mean_energy(const Real& a_energy, const unsigned long long& a_particle_count) const;
+
 
       /*!
 	@brief Get critical and non-critical reactions
@@ -510,23 +546,25 @@ namespace physics {
       /*!
 	@brief Perform tau-leaping with a subsect of reactions
       */
-      inline void tau_step(Vector<unsigned long long>& a_particles,
-			   Vector<unsigned long long>& a_newPhotons,
-			   const std::deque<Real>&     a_propensities,
-			   const ReactionPtrs&         a_reactions,
-			   const Real                  a_dt) const;
+      inline
+      void tau_step(Vector<unsigned long long>& a_particles,
+		    Vector<unsigned long long>& a_newPhotons,
+		    const std::deque<Real>&     a_propensities,
+		    const ReactionPtrs&         a_reactions,
+		    const Real                  a_dt) const;
 
 
       /*!
 	@brief Perform tau-leaping with a subsect of reactions
       */
-      inline void tau_step(Vector<unsigned long long>&  a_particles,
-			   Vector<unsigned long long>&  a_newPhotons,
-			   const std::deque<Real>&      a_propensities,
-			   const Real                   a_dt) const;
+      inline
+      void tau_step(Vector<unsigned long long>&  a_particles,
+		    Vector<unsigned long long>&  a_newPhotons,
+		    const std::deque<Real>&      a_propensities,
+		    const Real                   a_dt) const;
 
       /*!
-	@brief Advance particles
+	@brief Advance particles. 
       */
       inline
       void advance_particles(Vector<unsigned long long>& a_particles,
@@ -550,6 +588,33 @@ namespace physics {
       */
       inline
       void advance_ssa(Vector<unsigned long long>& a_particles, Vector<unsigned long long>& a_newPhotons, const Real a_dt) const;
+
+      /*!
+	@brief Advance particles. 
+      */
+      inline
+      void advance_particles_lea(Vector<unsigned long long>& a_particles,
+				 Vector<unsigned long long>& a_newPhotons,
+				 Vector<Real>&               a_mean_energies,
+				 const Vector<Real>&         a_sources,
+				 const Real                  a_dt,
+				 const RealVect              a_E,
+				 const Real                  a_dx,
+				 const Real                  a_kappa) const;
+
+      /*!
+	@brief New tau leaping advance
+      */
+      inline
+      void advance_tau_lea(Vector<unsigned long long>& a_particles,
+			   Vector<unsigned long long>& a_newPhotons,
+			   Vector<Real>&               a_mean_energies,
+			   const Vector<Real>&         a_sources,
+			   const Real                  a_dt,
+			   const RealVect              a_E,
+			   const Real                  a_dx,
+			   const Real                  a_kappa) const;
+
 
 
     private:

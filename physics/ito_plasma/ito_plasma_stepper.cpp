@@ -1591,6 +1591,9 @@ void ito_plasma_stepper::advance_reaction_network_lfa(Vector<BinFab<ito_particle
       const RealVect n  = RealVect::Zero;
       const RealVect c  = RealVect::Zero;
 
+      // Update reaction rates
+      m_physics->update_reaction_rates_lfa(e, a_dx, kappa);
+
       // Advance reactions
       m_physics->advance_reaction_network_lfa(particles, photons, newPhotons, e, pos, c, c, n, lo, hi, a_dx, kappa, a_dt);
     }
@@ -1636,6 +1639,9 @@ void ito_plasma_stepper::advance_reaction_network_lfa(Vector<BinFab<ito_particle
       photons[idx]    = &bp;
       newPhotons[idx] = &bpNew;
     }
+
+    // Update reaction rates
+    m_physics->update_reaction_rates_lfa(e, a_dx, kappa);
 
     // Advance reactions
     m_physics->advance_reaction_network_lfa(particles, photons, newPhotons, e, pos, cen, ebc, n, lo, hi, a_dx, kappa, a_dt);

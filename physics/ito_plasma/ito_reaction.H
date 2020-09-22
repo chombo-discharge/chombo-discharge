@@ -104,7 +104,7 @@ namespace physics {
 	@brief Allows the energies to jump with N reactions
       */
       inline
-      void jump_energy(Vector<Real>& a_energies, const unsigned long long a_num_reactions) const;
+      void jump_energy(Vector<Real>& a_energies, const Vector<Real>& a_mean_energies, const unsigned long long a_num_reactions) const;
 
       /*!
 	@brief Return a modifiable version of the reaction rate.
