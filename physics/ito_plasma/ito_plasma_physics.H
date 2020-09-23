@@ -641,6 +641,21 @@ namespace physics {
 		    const Real          a_dt) const;
 
       /*!
+	@brief Do a tau-step with a subset of reactions. You must update the reaction rates before entering this routine! Propensities are not
+	       recomputed with this version. 
+      */
+      inline
+      void tau_step(Vector<long long>&      a_particles,
+		    Vector<long long>&      a_newPhotons,
+		    Vector<Real>&           a_mean_energies,
+		    const Vector<Real>&     a_sources,
+		    const ReactionPtrs&     a_reactions,
+		    const std::deque<Real>& a_propensities,
+		    const Real              a_dx,
+		    const Real              a_kappa,
+		    const Real              a_dt) const;
+
+      /*!
 	@brief New tau leaping advance. If using the LFA then a_mean_energies and a_sources are dummy arguments. 
       */
       inline

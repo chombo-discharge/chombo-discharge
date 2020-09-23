@@ -16,7 +16,7 @@
 
 #include <PolyGeom.H>
 
-#define ITO_PLASMA_PHYSICS_DEBUG 1
+#define ITO_PLASMA_PHYSICS_DEBUG 0
 
 using namespace physics::ito_plasma;
 
@@ -1327,18 +1327,35 @@ void ito_plasma_physics::tau_step(Vector<long long>&  a_particles,
 				  const Real          a_kappa,
 				  const Real          a_dt) const {
 
-  // mean_energies -> total energies
+
+  // These are the propensities. 
+  const std::deque<Real> propensities = this->propensities(a_particles, a_reactions);
+
+  // Call the other version. 
+  this->tau_step(a_particles, a_newPhotons, a_mean_energies, a_sources, a_reactions, propensities, a_dx, a_kappa, a_dt);
+}
+
+inline
+void ito_plasma_physics::tau_step(Vector<long long>&      a_particles,
+				  Vector<long long>&      a_newPhotons,
+				  Vector<Real>&           a_mean_energies,
+				  const Vector<Real>&     a_sources,
+				  const ReactionPtrs&     a_reactions,
+				  const std::deque<Real>& a_propensities,
+				  const Real              a_dx,
+				  const Real              a_kappa,
+				  const Real              a_dt) const {
+
+    // mean_energies -> total energies
   Vector<Real> energies(a_mean_energies);
   for (int i = 0; i < a_particles.size(); i++){
     energies[i] *= a_particles[i];
   }
 
-  // These are the propensities. 
-  const std::deque<Real> propensities = this->propensities(a_particles, a_reactions); 
 
   // Go through list of reactions. 
   for (int i = 0; i < a_reactions.size(); i++){
-    const long long num_reactions = this->poisson_reaction(propensities[i], a_dt);
+    const long long num_reactions = this->poisson_reaction(a_propensities[i], a_dt);
 
     // Jump state and energy
     a_reactions[i]->jump_state(a_particles, a_newPhotons, num_reactions);    // 
@@ -1355,7 +1372,10 @@ void ito_plasma_physics::tau_step(Vector<long long>&  a_particles,
       a_mean_energies[i] = 0.0;
     }
   }
+  
 }
+
+  
 
 inline
 void ito_plasma_physics::tau_step(Vector<long long>&  a_particles,
@@ -1638,8 +1658,8 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>& a_particles,
 
 	    // Update reaction rates, propensities, and the total propensity. 
 	    const std::deque<Real> propensities = this->propensities(a_particles);
-	    //	    A = this->propensity(a_particles); 
-	      
+	    A = this->propensity(a_particles);
+	    
 	    // Draw time to next reaction. 
 	    const Real u1     = m_udist01(m_rng);
 	    const Real dtNext = log(1./u1)/A;
@@ -1655,9 +1675,8 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>& a_particles,
 	      break; 
 	    }
 
-	    // Update reaction rates for next SSA step. 
+	    // Update reaction rates and propensity for the next SSA step. 
 	    this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
-	    A = this->propensity(a_particles); 
 	  }
 	}
 	else{ // Perform tau-leaping with non-critical reactions only
@@ -1696,12 +1715,10 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>& a_particles,
 	const Real Ac = this->propensity(particles, criticalReactions);
 
 	// SSA for critical reactions
-	//	this->ssa_step(particles, photons, propensitiesC, criticalReactions, Ac);
 	this->ssa_step(particles, photons, mean_energies, a_sources, propensitiesC, criticalReactions, Ac, a_dx, a_kappa, curDt);
 
 	// Tau-leaping for non-critical reactions
-	//	this->tau_step(particles, photons, propensitiesNC, nonCriticalReactions, curDt);
-	this->tau_step(particles, photons, mean_energies, a_sources, nonCriticalReactions, a_dx, a_kappa, curDt);
+	this->tau_step(particles, photons, mean_energies, a_sources, nonCriticalReactions, propensitiesNC, a_dx, a_kappa, curDt);
 
 	valid = this->valid_state(particles);
 
