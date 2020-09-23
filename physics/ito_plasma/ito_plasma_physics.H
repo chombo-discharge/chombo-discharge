@@ -112,6 +112,12 @@ namespace physics {
 	be set to a constant. 
       */
       virtual void update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const = 0;
+
+      /*!
+	@brief Update reaction rates
+      */
+      inline
+      void update_reaction_rates(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const;
       
       /*!
 	@brief Reaction network advance in the LFA. 
@@ -656,6 +662,20 @@ namespace physics {
 		    const Real                  a_dt) const;
 
       /*!
+	@brief This is a version that steps with all reactions, but where the propensities have been computed in advance. 
+      */
+      inline
+      void ssa_step(Vector<unsigned long long>& a_particles,
+		    Vector<unsigned long long>& a_newPhotons,
+		    Vector<Real>&               a_mean_energies,
+		    const Vector<Real>&         a_sources,
+		    const std::deque<Real>&     a_propensities,
+		    const Real                  a_A,
+		    const Real                  a_dx,
+		    const Real                  a_kappa,
+		    const Real                  a_dt) const;
+
+      /*!
 	@brief Do an SSA-step with all reactions. You must update the reaction rates before entering this routine! This computes all propensities and
 	       then calls the other version. 
       */
@@ -691,6 +711,19 @@ namespace physics {
 		       const RealVect              a_E,
 		       const Real                  a_dx,
 		       const Real                  a_kappa) const;
+
+      /*!
+	@brief New hybrid advance. If using the LFA then a_mean_energies and a_sources are dummy arguments. 
+      */
+      inline
+      void advance_hybrid(Vector<unsigned long long>& a_particles,
+			  Vector<unsigned long long>& a_newPhotons,
+			  Vector<Real>&               a_mean_energies,
+			  const Vector<Real>&         a_sources,
+			  const Real                  a_dt,
+			  const RealVect              a_E,
+			  const Real                  a_dx,
+			  const Real                  a_kappa) const;
 
 
 

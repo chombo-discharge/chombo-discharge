@@ -1212,6 +1212,19 @@ void ito_plasma_physics::advance_particles(Vector<unsigned long long>& a_particl
 }
 
 inline
+void ito_plasma_physics::update_reaction_rates(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const {
+  
+  // Update the rate based on the mean energies or the electric field, depending on how we use the LFA/LEA. 
+  if(m_coupling == coupling::LFA){
+    this->update_reaction_rates_lfa(a_E, a_dx, a_kappa);
+  }
+  else if(m_coupling == coupling::LEA){
+    this->update_reaction_rates_lea(a_E, a_mean_energies, a_dx, a_kappa);
+  }
+  
+}
+
+inline
 void ito_plasma_physics::tau_step(Vector<unsigned long long>& a_particles,
 				  Vector<unsigned long long>& a_newPhotons,
 				  Vector<Real>&               a_mean_energies,
@@ -1275,16 +1288,10 @@ void ito_plasma_physics::advance_tau(Vector<unsigned long long>& a_particles,
 				     const Real                  a_dx,
 				     const Real                  a_kappa) const {
 
-  // TLDR: If using LFA, a_mean_energies and a_sources were empty when we entered this routine. 
+  // Update reaction rates in case we use LEA. 
+  this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
 
-  // Update the rate based on the mean energies or the electric field, depending on how we use the LFA/LEA. 
-  if(m_coupling == coupling::LFA){
-    this->update_reaction_rates_lfa(a_E, a_dx, a_kappa);
-  }
-  else if(m_coupling == coupling::LEA){
-    this->update_reaction_rates_lea(a_E, a_mean_energies, a_dx, a_kappa);
-  }
-
+  // Do a tau step
   this->tau_step(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_dx, a_kappa);
 }
 
@@ -1304,7 +1311,7 @@ void ito_plasma_physics::ssa_step(Vector<unsigned long long>& a_particles,
     reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
   }
 
-  // Copy all propensities
+  // Compute all propensities
   Real A = 0.0;
   std::deque<Real> propensities;
   for (const auto& r : reactions){
@@ -1314,6 +1321,25 @@ void ito_plasma_physics::ssa_step(Vector<unsigned long long>& a_particles,
   }
 
   this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, reactions, A, a_dx, a_kappa, a_dt);
+}
+
+inline
+void ito_plasma_physics::ssa_step(Vector<unsigned long long>& a_particles,
+				  Vector<unsigned long long>& a_newPhotons,
+				  Vector<Real>&               a_mean_energies,
+				  const Vector<Real>&         a_sources,
+				  const std::deque<Real>&     a_propensities,
+				  const Real                  a_A,
+				  const Real                  a_dx,
+				  const Real                  a_kappa,
+				  const Real                  a_dt) const {
+
+  std::deque<std::shared_ptr<ito_reaction> > reactions;
+  for (const auto& r : m_reactions){
+    reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+  }
+
+  this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, a_propensities, reactions, a_A, a_dx, a_kappa, a_dt);
 }
 
 inline
@@ -1371,6 +1397,8 @@ void ito_plasma_physics::ssa_step(Vector<unsigned long long>& a_particles,
   }
 }
 
+
+
 inline
 void ito_plasma_physics::advance_ssa(Vector<unsigned long long>& a_particles,
 				     Vector<unsigned long long>& a_newPhotons,
@@ -1401,13 +1429,8 @@ void ito_plasma_physics::advance_ssa(Vector<unsigned long long>& a_particles,
 
     while(curDt <= a_dt){
 
-      // Update the rate based on the mean energies or the electric field, depending on how we use the LFA/LEA. 
-      if(m_coupling == coupling::LFA){
-	this->update_reaction_rates_lfa(a_E, a_dx, a_kappa);
-      }
-      else if(m_coupling == coupling::LEA){
-	this->update_reaction_rates_lea(a_E, a_mean_energies, a_dx, a_kappa);
-      }
+      // Update reaction rates.
+      this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
 
       // Get all propensities and compute the total propensity. 
       const std::deque<Real> propensities = this->propensities(a_particles);
@@ -1428,8 +1451,9 @@ void ito_plasma_physics::advance_ssa(Vector<unsigned long long>& a_particles,
       if(curDt <= a_dt){ // Collision within a_dt, do an SSA step. 
 	this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, reactions, A, a_dx, a_kappa, nextDt);
       }
-      else{ // No reaction in this time interval, but we should still increment/decrement the energy with the source. 
-	this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, nextDt);
+      else{ // No reaction in this time interval, but we should still increment/decrement the energy with the source.
+	const Real dt = nextDt - (curDt - a_dt);
+	this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, dt);
       }
     }
   }
@@ -1473,6 +1497,129 @@ void ito_plasma_physics::advance_particles(Vector<unsigned long long>& a_particl
   }
   else if(m_algorithm == algorithm::hybrid){
     MayDay::Abort("ito_plasma_physics::advance_particles_lea - hybrid not implemented");
+  }
+}
+
+inline
+void ito_plasma_physics::advance_hybrid(Vector<unsigned long long>& a_particles,
+					Vector<unsigned long long>& a_newPhotons,
+					Vector<Real>&               a_mean_energies,
+					const Vector<Real>&         a_sources,
+					const Real                  a_dt,
+					const RealVect              a_E,
+					const Real                  a_dx,
+					const Real                  a_kappa) const {
+  Real curTime = 0.0;
+
+  while(curTime < a_dt){
+
+    // Update reaction rates
+    this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
+
+    // Get critical and non-critical reactions. 
+    ReactionTypes rTypes = this->get_critical_reactions(a_particles);
+
+    ReactionPtrs criticalReactions    = rTypes.first;
+    ReactionPtrs nonCriticalReactions = rTypes.second;
+
+    // Compute time steps for critical and non-critical reactions
+    Real dtCrit    = this->get_critical_step(a_particles,     criticalReactions);
+    Real dtNonCrit = this->get_non_critical_step(a_particles, nonCriticalReactions);
+
+    bool valid = false;
+    while(!valid){ 
+      
+      const Real curDt   = std::min(a_dt-curTime, std::min(dtCrit, dtNonCrit));
+      const bool nonCrit = dtNonCrit < dtCrit || criticalReactions.size() == 0 || dtCrit < (a_dt-curTime);
+	    
+      // How will we advance?
+      if(nonCrit){// No critical reactions fire. Advance only noncritical reactions.
+
+	// Compute the total propensity function in case it is faster to run SSA steps
+	Real A = this->propensity(a_particles);
+	
+	if(A*curDt < m_SSAlim){ // Tau-leaping is inefficient, do some SSA on the WHOLE reaction set. 
+	  for (int i = 0; i < m_NSSA; i++){
+
+	    // Update reaction rates, propensities, and the total propensity. 
+	    const std::deque<Real> propensities = this->propensities(a_particles);
+	    A = this->propensity(a_particles); // Recompute propensities
+	      
+	    // Draw time to next reaction. 
+	    const Real u1     = m_udist01(m_rng);
+	    const Real dtNext = log(1./u1)/A;
+
+	    valid    = true;
+	    curTime += dtNext;
+	    if(curTime <= a_dt){ // Ok, we are inside [0, a_dt] and we can do the reaction. 
+	      this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, A, a_dx, a_kappa, a_dt);
+	    }
+	    else{ // Next reaction is outside the interval, but we should still increment with the energy.
+	      const Real dt = dtNext - (curDt - a_dt);
+	      this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, dt);
+	      
+	      break; // No need to perform the rest. 
+	    }
+
+	    // Update reaction rates for next SSA step. 
+	    this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
+	  }
+	}
+	else{ // Perform tau-leaping with no-critical reactions only
+	  // Need a copy in case step is rejected
+	  Vector<unsigned long long> particles = a_particles;
+	  Vector<unsigned long long> photons   = a_newPhotons;
+	  Vector<Real> mean_energies           = a_mean_energies;
+	
+	  this->tau_step(particles, photons, mean_energies, a_sources, nonCriticalReactions, a_dx, a_kappa, curDt);
+
+	  // Make sure step was valid
+	  valid = this->valid_state(particles);
+	  if(valid){
+	    curTime        += curDt;
+	    a_particles     = particles;
+	    a_newPhotons    = photons;
+	    a_mean_energies = mean_energies;
+	  }
+	  else{
+	    dtNonCrit = dtNonCrit*0.5;
+	    continue;
+	  }
+	}
+      } 
+      else{ // One critical reaction fired. Advance that reaction and use tau-leaping for the rest.
+	// Need a copy in case step is rejected
+	Vector<unsigned long long> particles = a_particles;
+	Vector<unsigned long long> photons   = a_newPhotons;
+	Vector<Real> mean_energies           = a_mean_energies;
+
+	const std::deque<Real> propensitiesC  = this->propensities(particles, criticalReactions);
+	const std::deque<Real> propensitiesNC = this->propensities(particles, nonCriticalReactions);
+	
+	const Real Ac = this->propensity(particles, criticalReactions);
+
+	// SSA for critical reactions
+	//	this->ssa_step(particles, photons, propensitiesC, criticalReactions, Ac);
+	this->ssa_step(particles, photons, mean_energies, a_sources, propensitiesC, criticalReactions, Ac, a_dx, a_kappa, curDt);
+
+	// Tau-leaping for non-critical reactions
+	//	this->tau_step(particles, photons, propensitiesNC, nonCriticalReactions, curDt);
+	this->tau_step(particles, photons, mean_energies, a_sources, nonCriticalReactions, a_dx, a_kappa, curDt);
+
+	valid = this->valid_state(particles);
+
+	if(valid){
+	  curTime        += curDt;
+	  a_particles     = particles;
+	  a_newPhotons    = photons;
+	  a_mean_energies = mean_energies;
+	}
+	else{
+	  dtNonCrit = dtNonCrit * 0.5;
+	  continue;
+	}
+      }
+    }
   }
 }
 
