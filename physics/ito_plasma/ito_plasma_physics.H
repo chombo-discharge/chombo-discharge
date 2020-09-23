@@ -590,6 +590,44 @@ namespace physics {
       void advance_ssa(Vector<unsigned long long>& a_particles, Vector<unsigned long long>& a_newPhotons, const Real a_dt) const;
 
       /*!
+	@brief Do a tau-step with all reactions. You must update the reaction rates before entering this routine! This calls the other version. 
+      */
+      inline
+      void tau_step(Vector<unsigned long long>& a_particles,
+		    Vector<unsigned long long>& a_newPhotons,
+		    Vector<Real>&               a_mean_energies,
+		    const Vector<Real>&         a_sources,
+		    const Real                  a_dx,
+		    const Real                  a_kappa,
+		    const Real                  a_dt) const;
+
+      /*!
+	@brief Do a tau-step with a subset of reactions. You must update the reaction rates before entering this routine!
+      */
+      inline
+      void tau_step(Vector<unsigned long long>& a_particles,
+		    Vector<unsigned long long>& a_newPhotons,
+		    Vector<Real>&               a_mean_energies,
+		    const Vector<Real>&         a_sources,
+		    const ReactionPtrs&         a_reactions,
+		    const Real                  a_dx,
+		    const Real                  a_kappa,
+		    const Real                  a_dt) const;
+
+      /*!
+	@brief New tau leaping advance. If using the LFA then a_mean_energies and a_sources are dummy arguments. 
+      */
+      inline
+      void advance_tau(Vector<unsigned long long>& a_particles,
+		       Vector<unsigned long long>& a_newPhotons,
+		       Vector<Real>&               a_mean_energies,
+		       const Vector<Real>&         a_sources,
+		       const Real                  a_dt,
+		       const RealVect              a_E,
+		       const Real                  a_dx,
+		       const Real                  a_kappa) const;
+
+      /*!
 	@brief Advance particles. If usign the LFA then a_mean_energies and a_sources are dummy arugments. 
       */
       inline
@@ -603,10 +641,49 @@ namespace physics {
 			     const Real                  a_kappa) const;
 
       /*!
-	@brief New tau leaping advance. If using the LFA then a_mean_energies and a_sources are dummy arguments. 
+	@brief Do an SSA-step with a subset of reactions. You must update the reaction rates before entering this routine!
       */
       inline
-      void advance_tau(Vector<unsigned long long>& a_particles,
+      void ssa_step(Vector<unsigned long long>& a_particles,
+		    Vector<unsigned long long>& a_newPhotons,
+		    Vector<Real>&               a_mean_energies,
+		    const Vector<Real>&         a_sources,
+		    const std::deque<Real>&     a_propensities,
+		    const ReactionPtrs&         a_reactions,
+		    const Real                  a_A,
+		    const Real                  a_dx,
+		    const Real                  a_kappa,
+		    const Real                  a_dt) const;
+
+      /*!
+	@brief Do an SSA-step with all reactions. You must update the reaction rates before entering this routine! This computes all propensities and
+	       then calls the other version. 
+      */
+      inline
+      void ssa_step(Vector<unsigned long long>& a_particles,
+		    Vector<unsigned long long>& a_newPhotons,
+		    Vector<Real>&               a_mean_energies,
+		    const Vector<Real>&         a_sources,
+		    const Real                  a_dx,
+		    const Real                  a_kappa,
+		    const Real                  a_dt) const;
+
+      /*!
+	@brief Increase/decrease the mean energies with a volumetric source term
+      */
+      inline
+      void energy_step(Vector<Real>&                     a_mean_energies,
+		       const Vector<unsigned long long>& a_particles,
+		       const Vector<Real>&               a_sources,
+		       const Real                        a_dx,
+		       const Real                        a_kappa,
+		       const Real                        a_dt) const;
+
+      /*!
+	@brief New SSA advance. If using the LFA then a_mean_energies and a_sources are dummy arguments. 
+      */
+      inline
+      void advance_ssa(Vector<unsigned long long>& a_particles,
 		       Vector<unsigned long long>& a_newPhotons,
 		       Vector<Real>&               a_mean_energies,
 		       const Vector<Real>&         a_sources,

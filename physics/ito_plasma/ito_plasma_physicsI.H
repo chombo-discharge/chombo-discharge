@@ -1212,6 +1212,60 @@ void ito_plasma_physics::advance_particles(Vector<unsigned long long>& a_particl
 }
 
 inline
+void ito_plasma_physics::tau_step(Vector<unsigned long long>& a_particles,
+				  Vector<unsigned long long>& a_newPhotons,
+				  Vector<Real>&               a_mean_energies,
+				  const Vector<Real>&         a_sources,
+				  const ReactionPtrs&         a_reactions,
+				  const Real                  a_dx,
+				  const Real                  a_kappa,
+				  const Real                  a_dt) const {
+
+  // mean_energies -> total energies
+  Vector<Real> energies(a_mean_energies);
+  for (int i = 0; i < a_particles.size(); i++){
+    energies[i] *= a_particles[i];
+  }
+
+  // Do a tau step
+  for (const auto& r : a_reactions){
+    const unsigned long long num_reactions = this->poisson_reaction(r->propensity(a_particles), a_dt);
+
+    // Jump state and energy
+    r->jump_state(a_particles, a_newPhotons, num_reactions);    // 
+    r->jump_energy(energies,   a_mean_energies, num_reactions); // Not necessary for LFA, but not expensive either....
+  }
+
+  // Recompute mean energies afterwards.
+  const Real dV = a_kappa*pow(a_dx, SpaceDim);
+  for (int i = 0; i < a_particles.size(); i++){
+    if(a_particles[i] > 0){
+      a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*dV*a_dt)/(a_particles[i]));
+    }
+    else{
+      a_mean_energies[i] = 0.0;
+    }
+  }
+}
+
+inline
+void ito_plasma_physics::tau_step(Vector<unsigned long long>& a_particles,
+				  Vector<unsigned long long>& a_newPhotons,
+				  Vector<Real>&               a_mean_energies,
+				  const Vector<Real>&         a_sources,
+				  const Real                  a_dx,
+				  const Real                  a_kappa,
+				  const Real                  a_dt) const {
+
+  std::deque<std::shared_ptr<ito_reaction> > reactions;
+  for (const auto& r : m_reactions){
+    reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+  }
+
+  this->tau_step(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dx, a_kappa, a_dt);
+}
+
+inline
 void ito_plasma_physics::advance_tau(Vector<unsigned long long>& a_particles,
 				     Vector<unsigned long long>& a_newPhotons,
 				     Vector<Real>&               a_mean_energies,
@@ -1231,32 +1285,175 @@ void ito_plasma_physics::advance_tau(Vector<unsigned long long>& a_particles,
     this->update_reaction_rates_lea(a_E, a_mean_energies, a_dx, a_kappa);
   }
 
-  // LEA needs total energy for doing the energy jump. 
-  Vector<Real> energies = a_mean_energies;
-  for (int i = 0; i < a_particles.size(); i++){
-    energies[i] *= a_particles[i];
-  }
+  this->tau_step(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_dx, a_kappa);
+}
+
+
+inline
+void ito_plasma_physics::ssa_step(Vector<unsigned long long>& a_particles,
+				  Vector<unsigned long long>& a_newPhotons,
+				  Vector<Real>&               a_mean_energies,
+				  const Vector<Real>&         a_sources,
+				  const Real                  a_dx,
+				  const Real                  a_kappa,
+				  const Real                  a_dt) const {
+
   
-  // Do a tau-step with all the reactions
+  std::deque<std::shared_ptr<ito_reaction> > reactions;
   for (const auto& r : m_reactions){
-    const unsigned long long num_reactions = this->poisson_reaction(r.second.propensity(a_particles), a_dt);
+    reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+  }
+
+  // Copy all propensities
+  Real A = 0.0;
+  std::deque<Real> propensities;
+  for (const auto& r : reactions){
+    const Real a = r->propensity(a_particles);
+    propensities.emplace_back(a);
+    A += a;
+  }
+
+  this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, reactions, A, a_dx, a_kappa, a_dt);
+}
+
+inline
+void ito_plasma_physics::ssa_step(Vector<unsigned long long>& a_particles,
+				  Vector<unsigned long long>& a_newPhotons,
+				  Vector<Real>&               a_mean_energies,
+				  const Vector<Real>&         a_sources,
+				  const std::deque<Real>&     a_propensities,
+				  const ReactionPtrs&         a_reactions,
+				  const Real                  a_A,
+				  const Real                  a_dx,
+				  const Real                  a_kappa,
+				  const Real                  a_dt) const {
+
+  const int M = a_reactions.size();
+  
+  constexpr unsigned long long one = 1;
+  
+  if(M > 0){
+    
+    // Mean_energies -> total energies
+    Vector<Real> energies(a_mean_energies);
+    for (int i = 0; i < a_particles.size(); i++){
+      energies[i] *= a_particles[i];
+    }
+
+
+    // RNG. 
+    const Real u2 = m_udist01(m_rng);
+
+    // Determine the reaction type. 
+    int r = 0; 
+    for (int i = 1; i < M; i++){
+      if(a_propensities[i-1] <= u2*a_A && u2*a_A < a_propensities[i]){
+	r = i;
+	break;
+      }
+    }
 
     // Jump state and energy
-    r.second.jump_state(a_particles, a_newPhotons, num_reactions);    // 
-    r.second.jump_energy(energies,   a_mean_energies, num_reactions); // Not necessary for LFA, but not expensive either....
-  }
+    a_reactions[r]->jump_state(a_particles, a_newPhotons,    one);
+    a_reactions[r]->jump_energy(energies,   a_mean_energies, one); 
 
-  // Recompute mean energies afterwards.
+
+    // Recompute mean energies afterwards.
+    const Real dV = a_kappa*pow(a_dx, SpaceDim);
+    for (int i = 0; i < a_particles.size(); i++){
+      if(a_particles[i] > 0){
+	a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*dV*a_dt)/(a_particles[i]));
+      }
+      else{
+	a_mean_energies[i] = 0.0;
+      }
+    }
+  }
+}
+
+inline
+void ito_plasma_physics::advance_ssa(Vector<unsigned long long>& a_particles,
+				     Vector<unsigned long long>& a_newPhotons,
+				     Vector<Real>&               a_mean_energies,
+				     const Vector<Real>&         a_sources,
+				     const Real                  a_dt,
+				     const RealVect              a_E,
+				     const Real                  a_dx,
+				     const Real                  a_kappa) const {
+
+  constexpr unsigned long long one = 1;
+
+  const int M  = m_reactions.size();
+  
+  if(M > 0){
+    Real curDt = 0.0; // Simulated time within SSA
+
+    // All the reactions
+    std::deque<std::shared_ptr<ito_reaction> > reactions;
+    for (const auto& r : m_reactions){
+      reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+    }
+
+
+    Real u1;     // Uniform random number on [0,1]
+    Real A;      // Total propensity
+    Real nextDt; // Time to next collision
+
+    while(curDt <= a_dt){
+
+      // Update the rate based on the mean energies or the electric field, depending on how we use the LFA/LEA. 
+      if(m_coupling == coupling::LFA){
+	this->update_reaction_rates_lfa(a_E, a_dx, a_kappa);
+      }
+      else if(m_coupling == coupling::LEA){
+	this->update_reaction_rates_lea(a_E, a_mean_energies, a_dx, a_kappa);
+      }
+
+      // Get all propensities and compute the total propensity. 
+      const std::deque<Real> propensities = this->propensities(a_particles);
+
+      // Total propensity
+      A = 0.0;
+      for (const auto& a : propensities){
+	A += a;
+      }
+
+      // Random numebr and next collision time. 
+      u1     = m_udist01(m_rng);
+      nextDt = log(1./u1)/A;
+
+      // Time after next collision. 
+      curDt += nextDt;
+
+      if(curDt <= a_dt){ // Collision within a_dt, do an SSA step. 
+	this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, reactions, A, a_dx, a_kappa, nextDt);
+      }
+      else{ // No reaction in this time interval, but we should still increment/decrement the energy with the source. 
+	this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, nextDt);
+      }
+    }
+  }
+}
+
+inline
+void ito_plasma_physics::energy_step(Vector<Real>&                     a_mean_energies,
+				     const Vector<unsigned long long>& a_particles,
+				     const Vector<Real>&               a_sources,
+				     const Real                        a_dx,
+				     const Real                        a_kappa,
+				     const Real                        a_dt) const {
+
   const Real dV = a_kappa*pow(a_dx, SpaceDim);
   for (int i = 0; i < a_particles.size(); i++){
     if(a_particles[i] > 0){
-      a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*dV*a_dt)/(a_particles[i]));
+      a_mean_energies[i] = Max(0.0, a_mean_energies[i] + a_sources[i]*dV*a_dt/a_particles[i]);
     }
     else{
       a_mean_energies[i] = 0.0;
     }
   }
 }
+
 
 inline
 void ito_plasma_physics::advance_particles(Vector<unsigned long long>& a_particles,
@@ -1269,7 +1466,7 @@ void ito_plasma_physics::advance_particles(Vector<unsigned long long>& a_particl
 					   const Real                  a_kappa) const{
   // Which algorithm?
   if(m_algorithm == algorithm::ssa){
-    MayDay::Abort("ito_plasma_physics::advance_particles_lea - SSA not implemented");
+    this->advance_ssa(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
   }
   else if(m_algorithm == algorithm::tau){
     this->advance_tau(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
