@@ -90,21 +90,21 @@ namespace physics {
 	@brief Allows a state to jump with N reactions
       */
       inline
-      void jump_state(Vector<unsigned long long>& a_particles, const unsigned long long a_num_reactions) const;
+      void jump_state(Vector<long long>& a_particles, const long long a_num_reactions) const;
 
       /*!
 	@brief Allows a state to jump with N reactions. Includes generation of photons. 
       */
       inline
-      void jump_state(Vector<unsigned long long>& a_particles,
-		      Vector<unsigned long long>& a_photons,
-		      const unsigned long long    a_num_reactions) const;
+      void jump_state(Vector<long long>& a_particles,
+		      Vector<long long>& a_photons,
+		      const long long    a_num_reactions) const;
 
       /*!
 	@brief Allows the energies to jump with N reactions
       */
       inline
-      void jump_energy(Vector<Real>& a_energies, const Vector<Real>& a_mean_energies, const unsigned long long a_num_reactions) const;
+      void jump_energy(Vector<Real>& a_energies, const Vector<Real>& a_mean_energies, const long long a_num_reactions) const;
 
       /*!
 	@brief Return a modifiable version of the reaction rate.
@@ -116,13 +116,13 @@ namespace physics {
 	@brief Get propensity function.
       */
       inline
-      Real propensity(const Vector<unsigned long long>& a_particles) const;
+      Real propensity(const Vector<long long>& a_particles) const;
 
       /*!
 	@brief Get gi
       */
       inline
-      int get_gi(const Vector<unsigned long long>& a_particles) const;
+      int get_gi(const Vector<long long>& a_particles) const;
 
       /*!
 	@brief Get reactants

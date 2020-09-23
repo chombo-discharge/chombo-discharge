@@ -15,8 +15,8 @@
 using namespace physics::ito_plasma;
 
 inline
-void ito_reaction::jump_state(Vector<unsigned long long>& a_particles,
-			      const unsigned long long    a_num_reactions) const {
+void ito_reaction::jump_state(Vector<long long>& a_particles,
+			      const long long    a_num_reactions) const {
 #if ITO_REACTION_DEBUG
   if(a_num_reactions < 0) {
     MayDay::Abort("ito_reaction::jump_state - can't have negative number of reactions!");
@@ -46,9 +46,9 @@ void ito_reaction::jump_state(Vector<unsigned long long>& a_particles,
 }
 
 inline
-void ito_reaction::jump_state(Vector<unsigned long long>& a_particles,
-			      Vector<unsigned long long>& a_photons,
-			      const unsigned long long    a_num_reactions) const {
+void ito_reaction::jump_state(Vector<long long>& a_particles,
+			      Vector<long long>& a_photons,
+			      const long long    a_num_reactions) const {
 
   this->jump_state(a_particles, a_num_reactions);
 
@@ -58,7 +58,7 @@ void ito_reaction::jump_state(Vector<unsigned long long>& a_particles,
 }
 
 inline
-void ito_reaction::jump_energy(Vector<Real>& a_energies, const Vector<Real>& a_mean_energies, const unsigned long long a_num_reactions) const {
+void ito_reaction::jump_energy(Vector<Real>& a_energies, const Vector<Real>& a_mean_energies, const long long a_num_reactions) const {
   
   for (const auto& r : m_energy_jumps){
     if(this->get_state_change(r.first) < 0) { // Consuming reaction, take a_mean_energies[i]
@@ -76,11 +76,11 @@ Real& ito_reaction::rate() const {
 }
 
 inline
-Real ito_reaction::propensity(const Vector<unsigned long long>& a_particles) const {
+Real ito_reaction::propensity(const Vector<long long>& a_particles) const {
   Real a = m_rate;
 
   // Make a local copy of the particles
-  Vector<unsigned long long> particles = a_particles;
+  Vector<long long> particles = a_particles;
 
   // Iterate over reactants, if a reactant appears twice the propensity function is X*(X-1)
   for (const auto& r : m_reactants){
@@ -95,7 +95,7 @@ Real ito_reaction::propensity(const Vector<unsigned long long>& a_particles) con
 }
 
 inline
-int ito_reaction::get_gi(const Vector<unsigned long long>& a_particles) const{
+int ito_reaction::get_gi(const Vector<long long>& a_particles) const{
   return 1; // For simplicity
 }
 
