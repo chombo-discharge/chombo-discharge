@@ -40,7 +40,6 @@ ito_plasma_air3::ito_plasma_air3(){
   pp.get("prop_eps",       m_eps);
   pp.get("NSSA",           m_NSSA);
   pp.get("SSAlim",         m_SSAlim);
-  pp.get("coupling",       str);
   
   // Get algorithm
   pp.get("algorithm",      str);
