@@ -139,44 +139,6 @@ namespace physics {
 				    const Real                    a_kappa, 
 				    const Real                    a_dt);
       
-      /*!
-	@brief Reaction network advance in the LFA. 
-      */
-      inline
-      void advance_reaction_network_lfa(Vector<List<ito_particle>* >& a_particles,
-					Vector<List<photon>* >&       a_photons,
-					Vector<List<photon>* >&       a_newPhotons,
-					const RealVect                a_E,           
-					const RealVect                a_cellPos,
-					const RealVect                a_centroidPos,
-					const RealVect                a_bndryCentroid,
-					const RealVect                a_bndryNormal,
-					const RealVect                a_lo,
-					const RealVect                a_hi,
-					const Real                    a_dx,
-					const Real                    a_kappa, 
-					const Real                    a_dt);
-
-      /*!
-	@brief Reaction network advance in the LEA.
-      */
-      inline
-      void advance_reaction_network_lea(Vector<List<ito_particle>* >& a_particles,
-					Vector<List<photon>* >&       a_photons,
-					Vector<List<photon>* >&       a_newPhotons,
-					const Vector<Real>&           a_sources, 
-					const RealVect                a_E,           
-					const RealVect                a_cellPos,
-					const RealVect                a_centroidPos,
-					const RealVect                a_bndryCentroid,
-					const RealVect                a_bndryNormal,
-					const RealVect                a_lo,
-					const RealVect                a_hi,
-					const Real                    a_dx,
-					const Real                    a_kappa, 
-					const Real                    a_dt);
-
-      
     protected:
 
       enum class algorithm { ssa, tau, hybrid };
@@ -548,72 +510,6 @@ namespace physics {
       */
       inline
       std::deque<Real> propensities(const Vector<long long>& a_particles, const ReactionPtrs& a_critical_reactions) const;
-
-      /*!
-	@brief Performing a single SSA step using a subset of reactions. 
-      */
-      inline
-      void ssa_step(Vector<long long>&      a_particles,
-		    Vector<long long>&      a_newPhotons,
-		    const std::deque<Real>& a_propensities,
-		    const ReactionPtrs&     a_reactions,
-		    const Real              a_A) const;
-
-      /*!
-	@brief Performing a single SSA step using all reactions. 
-      */
-      inline
-      void ssa_step(Vector<long long>&      a_particles,
-		    Vector<long long>&      a_newPhotons,
-		    const std::deque<Real>& a_propensities,
-		    const Real              a_A) const;
-
-
-      /*!
-	@brief Perform tau-leaping with a subsect of reactions
-      */
-      inline
-      void tau_step(Vector<long long>&      a_particles,
-		    Vector<long long>&      a_newPhotons,
-		    const std::deque<Real>& a_propensities,
-		    const ReactionPtrs&     a_reactions,
-		    const Real              a_dt) const;
-
-
-      /*!
-	@brief Perform tau-leaping with a subsect of reactions
-      */
-      inline
-      void tau_step(Vector<long long>&      a_particles,
-		    Vector<long long>&      a_newPhotons,
-		    const std::deque<Real>& a_propensities,
-		    const Real              a_dt) const;
-
-      /*!
-	@brief Advance particles. 
-      */
-      inline
-      void advance_particles(Vector<long long>& a_particles,
-			     Vector<long long>& a_newPhotons,
-			     const Real         a_dt) const;
-
-      /*!
-	@brief Perform hybrid advance
-      */
-      inline
-      void advance_hybrid(Vector<long long>& a_particles, Vector<long long>& a_newPhotons, const Real a_dt) const;
-
-      /*!
-	@brief Performing a tau-leaping step. Mostly while we wait for hybrid...
-      */
-      inline
-      void advance_tau(Vector<long long>& a_particles, Vector<long long>& a_newPhotons, const Real a_dt) const;
-
-      /*!
-	@brief Performing a tau-leaping step. Mostly while we wait for hybrid...
-      */
-      inline
-      void advance_ssa(Vector<long long>& a_particles, Vector<long long>& a_newPhotons, const Real a_dt) const;
 
       /*!
 	@brief Do a tau-step with all reactions. You must update the reaction rates before entering this routine! This calls the other version. 
