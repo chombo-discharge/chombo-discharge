@@ -677,11 +677,11 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
     // Get particle counts. 
   Vector<long long> newPhotonCount   = Vector<long long>(m_num_rte_species, 0);
   Vector<long long> oldParticleCount = this->get_particle_count(a_particles);
-
   Vector<long long> newParticleCount = oldParticleCount;
 
+  // Energies, mean_energies, and sources. Make sure LFA gives dummy arguments. 
   Vector<Real> sources, energies, mean_energies;
-  if(m_coupling == coupling::LFA){ // Make sure LFA gives dummy arguments. Don't use the a_sources input!
+  if(m_coupling == coupling::LFA){ 
     energies.resize(m_num_ito_species, 0.0);
     mean_energies.resize(m_num_ito_species, 0.0);
     sources.resize(m_num_ito_species, 0.0);
@@ -692,8 +692,8 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
     sources       = a_sources;
   }
   
-  // Kinetic Monte-Carlo stuff.
-#if 1 // Original code
+  // This is the particle advance. 
+#if 0 // Original code
   this->update_reaction_rates(a_E, mean_energies, a_dx, a_kappa);
   this->advance_particles(newParticleCount, newPhotonCount, a_dt);
 #else // New, generalized code. 
@@ -733,7 +733,6 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
     MayDay::Abort("ito_plasma_physics::advance_reaction_network_lfa(...) - charge is not conserved!!!");
   }
 #endif
-
 }
 
 inline
@@ -1334,13 +1333,16 @@ void ito_plasma_physics::tau_step(Vector<long long>&  a_particles,
     energies[i] *= a_particles[i];
   }
 
-  // Do a tau step
-  for (const auto& r : a_reactions){
-    const long long num_reactions = this->poisson_reaction(r->propensity(a_particles), a_dt);
+  // These are the propensities. 
+  const std::deque<Real> propensities = this->propensities(a_particles, a_reactions); 
+
+  // Go through list of reactions. 
+  for (int i = 0; i < a_reactions.size(); i++){
+    const long long num_reactions = this->poisson_reaction(propensities[i], a_dt);
 
     // Jump state and energy
-    r->jump_state(a_particles, a_newPhotons, num_reactions);    // 
-    r->jump_energy(energies,   a_mean_energies, num_reactions); // Not necessary for LFA, but not expensive either....
+    a_reactions[i]->jump_state(a_particles, a_newPhotons, num_reactions);    // 
+    a_reactions[i]->jump_energy(energies,   a_mean_energies, num_reactions); // Not necessary for LFA, but not expensive either....
   }
 
   // Recompute mean energies afterwards.
@@ -1636,7 +1638,7 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>& a_particles,
 
 	    // Update reaction rates, propensities, and the total propensity. 
 	    const std::deque<Real> propensities = this->propensities(a_particles);
-	    A = this->propensity(a_particles); // Recompute propensities
+	    //	    A = this->propensity(a_particles); 
 	      
 	    // Draw time to next reaction. 
 	    const Real u1     = m_udist01(m_rng);
@@ -1644,26 +1646,28 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>& a_particles,
 
 	    valid    = true;
 	    curTime += dtNext;
-	    if(curTime <= a_dt){ // Ok, we are inside [0, a_dt] and we can do the reaction. 
-	      this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, A, a_dx, a_kappa, a_dt);
+	    if(curTime <= a_dt){ // Ok, we are inside [0, a_dt] and we can do the reaction.
+	      this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, A, a_dx, a_kappa, dtNext);
 	    }
 	    else{ // Next reaction is outside the interval, but we should still increment with the energy.
 	      const Real dt = dtNext - (curDt - a_dt);
 	      this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, dt);
-	      
-	      break; // No need to perform the rest. 
+	      break; 
 	    }
 
 	    // Update reaction rates for next SSA step. 
 	    this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
+	    A = this->propensity(a_particles); 
 	  }
 	}
-	else{ // Perform tau-leaping with no-critical reactions only
+	else{ // Perform tau-leaping with non-critical reactions only
+	  
 	  // Need a copy in case step is rejected
 	  Vector<long long> particles = a_particles;
 	  Vector<long long> photons   = a_newPhotons;
 	  Vector<Real> mean_energies  = a_mean_energies;
-	
+
+	  // Do the tau-leaping
 	  this->tau_step(particles, photons, mean_energies, a_sources, nonCriticalReactions, a_dx, a_kappa, curDt);
 
 	  // Make sure step was valid
@@ -1713,6 +1717,9 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>& a_particles,
 	}
       }
     }
+
+    // Update reaction rates for next step
+    this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
   }
 }
 
