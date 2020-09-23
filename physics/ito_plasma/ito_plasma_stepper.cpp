@@ -1377,6 +1377,7 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
   const ito_plasma_physics::coupling which_coupling = m_physics->get_coupling();
 
   // Compute mobilities based on appropriate coupling
+#if 0
   switch(which_coupling){
   case ito_plasma_physics::coupling::LFA:
     this->advance_reaction_network_lfa(a_dt);
@@ -1385,7 +1386,9 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
     this->advance_reaction_network_lea(a_dt);
     break;
   }
-
+#else
+  this->advance_reaction_network_lea(a_dt);
+#endif
 }
 
 void ito_plasma_stepper::advance_reaction_network_lfa(const Real a_dt){
@@ -1853,7 +1856,7 @@ void ito_plasma_stepper::advance_reaction_network_lea(Vector<BinFab<ito_particle
       const RealVect c  = RealVect::Zero;
 
       // Advance reactions
-      m_physics->advance_reaction_network_lea(particles, photons, newPhotons, sources, e, pos, c, c, n, lo, hi, a_dx, kappa, a_dt);
+      m_physics->advance_reaction_network(particles, photons, newPhotons, sources, e, pos, c, c, n, lo, hi, a_dx, kappa, a_dt);
     }
   }
 
@@ -1903,7 +1906,7 @@ void ito_plasma_stepper::advance_reaction_network_lea(Vector<BinFab<ito_particle
     }
 
     // Advance reactions
-    m_physics->advance_reaction_network_lea(particles, photons, newPhotons, sources, e, pos, cen, ebc, n, lo, hi, a_dx, kappa, a_dt);
+    m_physics->advance_reaction_network(particles, photons, newPhotons, sources, e, pos, cen, ebc, n, lo, hi, a_dx, kappa, a_dt);
   }
 }
 

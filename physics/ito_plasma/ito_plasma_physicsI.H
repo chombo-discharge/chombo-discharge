@@ -656,6 +656,87 @@ Real ito_plasma_physics::get_particle_mean_energy(const Real& a_energy, const lo
 }
 
 inline
+void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
+						  Vector<List<photon>* >&       a_photons,
+						  Vector<List<photon>* >&       a_newPhotons,
+						  const Vector<Real>&           a_sources, 
+						  const RealVect                a_E,           
+						  const RealVect                a_cellPos,
+						  const RealVect                a_centroidPos,
+						  const RealVect                a_bndryCentroid,
+						  const RealVect                a_bndryNormal,
+						  const RealVect                a_lo,
+						  const RealVect                a_hi,
+						  const Real                    a_dx,
+						  const Real                    a_kappa, 
+						  const Real                    a_dt) {
+#if ITO_PLASMA_PHYSICS_DEBUG
+  const long long Qbefore = this->compute_charge(a_particles);
+#endif
+
+    // Get particle counts. 
+  Vector<long long> newPhotonCount   = Vector<long long>(m_num_rte_species, 0);
+  Vector<long long> oldParticleCount = this->get_particle_count(a_particles);
+
+  Vector<long long> newParticleCount = oldParticleCount;
+
+  Vector<Real> sources, energies, mean_energies;
+  if(m_coupling == coupling::LFA){ // Make sure LFA gives dummy arguments. Don't use the a_sources input!
+    energies.resize(m_num_ito_species, 0.0);
+    mean_energies.resize(m_num_ito_species, 0.0);
+    sources.resize(m_num_ito_species, 0.0);
+  }
+  else{
+    energies      = this->get_particle_energy(a_particles);
+    mean_energies = this->get_particle_mean_energy(energies, oldParticleCount);
+    sources       = a_sources;
+  }
+  
+  // Kinetic Monte-Carlo stuff.
+#if 1 // Original code
+  this->update_reaction_rates(a_E, mean_energies, a_dx, a_kappa);
+  this->advance_particles(newParticleCount, newPhotonCount, a_dt);
+#else // New, generalized code. 
+  this->advance_particles(newParticleCount, newPhotonCount, mean_energies, sources, a_dt, a_E, a_dx, a_kappa);
+#endif
+  
+  // Reconcile particles
+  this->reconcile_particles(a_particles,
+  			    newParticleCount,
+  			    oldParticleCount,
+  			    a_cellPos,
+  			    a_lo,
+  			    a_hi,
+			    a_bndryCentroid,
+  			    a_bndryNormal,
+  			    a_dx,
+  			    a_kappa);
+
+  // Generate new photons
+  this->reconcile_photons(a_newPhotons, newPhotonCount, a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
+  // Run photo-reactions and increment the number of particles as needed
+  this->reconcile_photoionization(a_particles, a_photons);
+
+  // Set new mean energies for all the particles. 
+  this->set_mean_particle_energy(a_particles, mean_energies);
+
+#if ITO_PLASMA_PHYSICS_DEBUG // Debug code
+  this->check_charge_conservation(oldParticleCount, newParticleCount);
+
+  const long long Qafter = this->compute_charge(a_particles);
+
+  constexpr long long zero = 0;
+  if(Qbefore - Qafter != zero){
+    std::cout << "Qbefore = " << Qbefore << std::endl;
+    std::cout << "Qafter  = " << Qafter << std::endl;
+    MayDay::Abort("ito_plasma_physics::advance_reaction_network_lfa(...) - charge is not conserved!!!");
+  }
+#endif
+
+}
+
+inline
 void ito_plasma_physics::advance_reaction_network_lfa(Vector<List<ito_particle>* >& a_particles,
 						      Vector<List<photon>* >&       a_photons,
 						      Vector<List<photon>* >&       a_newPhotons,
@@ -682,7 +763,7 @@ void ito_plasma_physics::advance_reaction_network_lfa(Vector<List<ito_particle>*
 #endif
 
   // Number advance
-#if 1 // Original code
+#if 0 // Original code
   this->advance_particles(newParticleCount, newPhotonCount, a_dt);
 #else // Test code
   this->advance_particles(newParticleCount, newPhotonCount, mean_energies, sources, a_dt, a_E, a_dx, a_kappa);
@@ -743,8 +824,8 @@ void ito_plasma_physics::advance_reaction_network_lea(Vector<List<ito_particle>*
   // Get particle counts. 
   Vector<long long> newPhotonCount   = Vector<long long>(m_num_rte_species, 0);
   Vector<long long> oldParticleCount = this->get_particle_count(a_particles);
-  Vector<Real>               energies         = this->get_particle_energy(a_particles);
-  Vector<Real>               mean_energies    = this->get_particle_mean_energy(energies, oldParticleCount);
+  Vector<Real>      energies         = this->get_particle_energy(a_particles);
+  Vector<Real>      mean_energies    = this->get_particle_mean_energy(energies, oldParticleCount);
   Vector<long long> newParticleCount = oldParticleCount;
   
 
