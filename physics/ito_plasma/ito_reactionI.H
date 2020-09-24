@@ -59,7 +59,6 @@ void ito_reaction::jump_state(Vector<long long>& a_particles,
 
 inline
 void ito_reaction::jump_energy(Vector<Real>& a_energies, const Vector<Real>& a_mean_energies, const long long a_num_reactions) const {
-  
   for (const auto& r : m_energy_jumps){
     if(this->get_state_change(r.first) < 0) { // Consuming reaction, this eats a_mean_energies.  
       a_energies[r.first] -= a_mean_energies[r.first]*a_num_reactions;
@@ -87,9 +86,6 @@ Real ito_reaction::propensity(const Vector<long long>& a_particles) const {
 
   // Iterate over reactants, if a reactant appears twice the propensity function is X*(X-1)
   for (const auto& r : m_reactants){
-    //  for (int i = 0; i < m_reactants.size(); i++){ // Old vector stuff.
-    //    const int reactant = m_reactants[i];
-	  
     a *= particles[r];
     particles[r]--;
   }

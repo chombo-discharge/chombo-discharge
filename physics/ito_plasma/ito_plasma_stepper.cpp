@@ -1872,7 +1872,7 @@ void ito_plasma_stepper::compute_EdotJ_source(){
     if(q != 0 && solver->is_mobile()){
 
       // Drift contribution
-      solver->deposit_conductivity(m_particle_scratch1, solver->get_particles());
+      solver->deposit_conductivity(m_particle_scratch1, solver->get_particles()); // Deposit mu*n
       data_ops::copy(m_particle_scratchD, m_particle_E); // Could use m_particle_E or solver's m_velo_func here, but m_velo_func = +/- E (depends on q)
       
       data_ops::multiply_scalar(m_particle_scratchD, m_particle_scratch1);        // m_particle_scratchD = mu*n*E
@@ -1881,6 +1881,7 @@ void ito_plasma_stepper::compute_EdotJ_source(){
     }
 
     // Diffusive contribution
+#if 0
     if(q != 0 && solver->is_diffusive()){
 
       // Compute the negative gradient of the diffusion term
@@ -1892,7 +1893,8 @@ void ito_plasma_stepper::compute_EdotJ_source(){
       data_ops::dot_prod(m_particle_scratch1, m_particle_scratchD, m_particle_E); // m_particle_scratch1 = -E*grad(D*n)
       data_ops::incr(m_energy_sources[idx], m_particle_scratch1, 1.0);            // a_source[idx]
     }
-
+#endif
+    
     if (q != 0 && (solver->is_mobile() || solver->is_diffusive())){
       data_ops::scale(m_energy_sources[idx], Abs(q)*units::s_Qe);
     }

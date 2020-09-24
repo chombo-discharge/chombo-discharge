@@ -678,7 +678,10 @@ Real ito_plasma_physics::get_particle_energy(const List<ito_particle>& a_particl
   Real ret = 0;
 
   for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
-    ret += lit().energy();
+    const Real& m = lit().mass();
+    const Real& e = lit().energy();
+    
+    ret += m*e;
   }
 
   return ret;
@@ -720,8 +723,6 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   const long long Qbefore = this->compute_charge(a_particles);
 #endif
 
-
-
   // Get particle counts. 
   Vector<long long> newPhotonCount   = Vector<long long>(m_num_rte_species, 0);
   Vector<long long> oldParticleCount = this->get_particle_count(a_particles);
@@ -739,13 +740,13 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
     mean_energies = this->get_particle_mean_energy(energies, oldParticleCount);
     sources       = a_sources;
 
-    // a_sources is volumetric, scale it by dV
+    // // The one that comes in through ito_plasma_stepper is in Joule/dV, make it eV/cell
     const Real dV = a_kappa*pow(a_dx, SpaceDim);
-    for (int i = 0; i < sources.size(); i++){
-      sources[i] *= dV;
+    for (int i = 0; i < sources.size(); i++){ 
+      sources[i] *= dV/units::s_Qe;
     }
   }
-  
+
   // Do particle advancement
   this->advance_particles(newParticleCount, newPhotonCount, mean_energies, sources, a_dt, a_E, a_dx, a_kappa);
   
@@ -1025,11 +1026,10 @@ void ito_plasma_physics::tau_step(Vector<long long>&      a_particles,
 				  const Real              a_dx,
 				  const Real              a_kappa,
 				  const Real              a_dt) const {
-
-    // mean_energies -> total energies
-  Vector<Real> energies(a_mean_energies);
+  // mean_energies -> total energies
+  Vector<Real> energies(m_num_ito_species);
   for (int i = 0; i < a_particles.size(); i++){
-    energies[i] *= a_particles[i];
+    energies[i] = Max(0.0, a_mean_energies[i]*a_particles[i]);
   }
 
 
@@ -1044,9 +1044,11 @@ void ito_plasma_physics::tau_step(Vector<long long>&      a_particles,
 
   // Recompute mean energies afterwards.
   const Real dV = a_kappa*pow(a_dx, SpaceDim);
+
+  constexpr long long zero = 0;
   for (int i = 0; i < a_particles.size(); i++){
-    if(a_particles[i] > 0){
-      a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*a_dt)/(a_particles[i]));
+    if(a_particles[i] > zero){
+      a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*a_dt)/(1.0*a_particles[i]));
     }
     else{
       a_mean_energies[i] = 0.0;
@@ -1082,12 +1084,46 @@ void ito_plasma_physics::advance_tau(Vector<long long>&  a_particles,
 				     const RealVect      a_E,
 				     const Real          a_dx,
 				     const Real          a_kappa) const {
-
   // Update reaction rates in case we use LEA. 
   this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
 
-  // Do a tau step
-  this->tau_step(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_dx, a_kappa);
+  // Do a tau step. Use rejection sampling so we only get valid states. But don't update reaction rates. 
+  Real curTime  = 0.0;
+  Real nextDt  = a_dt;
+
+  bool valid = false;
+  while(curTime < a_dt){
+
+    // Try big step first. 
+    nextDt = a_dt - curTime;
+
+    bool valid = false;
+    while(!valid){
+
+      Vector<long long> particles = a_particles;
+      Vector<long long> photons   = a_newPhotons;
+      Vector<Real> mean_energies  = a_mean_energies;
+
+      // Do the tau-leaping
+      this->tau_step(particles, photons, mean_energies, a_sources, nextDt, a_dx, a_dt);
+
+      // Accept step if valid, else, reduce dt.
+      valid = this->valid_state(particles);
+      if(valid){
+	a_particles     = particles;
+	a_newPhotons    = photons;
+	a_mean_energies = mean_energies;
+	
+	curTime += nextDt;
+
+	// Update reaction rates in case we use LEA. 
+	this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
+      }
+      else{
+	nextDt = nextDt*0.5;
+      }
+    }
+  }
 }
 
 inline
@@ -1304,7 +1340,7 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
 					const Real          a_kappa) const {
   Real curTime = 0.0;
 
-  while(curTime < a_dt){
+  while(curTime <= a_dt){
 
     // Update reaction rates
     this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);

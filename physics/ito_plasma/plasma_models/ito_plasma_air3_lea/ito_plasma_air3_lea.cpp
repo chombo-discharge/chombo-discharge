@@ -102,13 +102,13 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   positives.clear();
   negatives.clear();
   
-  this->draw_sphere_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight, 1.0, 0.0);
+  this->draw_sphere_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight, 10.0, 0.0);
 
   // Electron loss function
-  std::pair<int, Real> impact_loss     = std::make_pair(m_electron_idx, -14.0); //  14eV per reaction of this type.
-  std::pair<int, Real> friction_loss   = std::make_pair(m_electron_idx, -1.0);  // -12eV per reaction of this type.
-  std::pair<int, Real> photo_loss      = std::make_pair(m_electron_idx, -15.0); //  15 eV per photoexcitation
-  std::pair<int, Real> photo_gain      = std::make_pair(m_electron_idx,  1.0); //  Energy of appearing photoelectrons
+  std::pair<int, Real> impact_loss     = std::make_pair(m_electron_idx, -13.0);  //  14eV per reaction of this type.
+  std::pair<int, Real> friction_loss   = std::make_pair(m_electron_idx, -2.0);   // -12eV per reaction of this type.
+  std::pair<int, Real> photo_loss      = std::make_pair(m_electron_idx,  -15.0); //  15 eV per photoexcitation
+  std::pair<int, Real> photo_gain      = std::make_pair(m_electron_idx,  2.0);   //  Energy of appearing photoelectrons
 
   // Particle-particle reactions
   m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}, {impact_loss}));
