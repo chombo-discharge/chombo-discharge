@@ -374,6 +374,8 @@ namespace physics {
       */
       inline
       void reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
+				     Vector<Real>&                 a_mean_energies,
+				     const Vector<long long>&      a_numParticles,
 				     const Vector<List<photon>* >& a_photons) const;
 
       /*!

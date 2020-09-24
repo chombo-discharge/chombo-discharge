@@ -33,7 +33,19 @@ namespace physics {
       */
       photo_reaction(const int a_source,
 		     const std::initializer_list<int> a_targets) : m_source(a_source),
-								   m_targets(a_targets) {
+								   m_targets(a_targets),
+								   m_energies(0) {
+
+      }
+
+      /*!
+	@brief Full Ctor, includes energy of generated species. 
+      */
+      photo_reaction(const int a_source,
+		     const std::initializer_list<int> a_targets,
+		     const std::initializer_list<std::pair<int, Real> > a_energies) : m_source(a_source),
+										      m_targets(a_targets),
+										      m_energies(a_energies){
 
       }
 
@@ -47,17 +59,27 @@ namespace physics {
       /*!
 	@brief Get the photon source
       */
-      inline const int& source() const;
+      inline
+      const int& source() const;
 
       /*!
 	@brief Get the photon targets
       */
-      inline const std::deque<int>& targets() const;
+      inline
+      const std::deque<int>& targets() const;
+
+      /*!
+	@brief Get the energies of the produced targets
+      */
+      inline
+      const std::deque<std::pair<int, Real> >& get_target_energies() const;
+      
 
     protected:
 
       int m_source;  // Source
       std::deque<int> m_targets; // Targets
+      std::deque<std::pair<int, Real> > m_energies;
     };
   }
 }

@@ -12,12 +12,19 @@
 
 using namespace physics::ito_plasma;
 
-inline const int& photo_reaction::source() const {
+inline
+const int& photo_reaction::source() const {
   return m_source;
 }
 
-inline const std::deque<int>& photo_reaction::targets() const {
+inline
+const std::deque<int>& photo_reaction::targets() const {
   return m_targets;
+}
+
+inline
+const std::deque<std::pair<int, Real> >& photo_reaction::get_target_energies() const{
+  return m_energies;
 }
 
 #endif

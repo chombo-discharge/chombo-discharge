@@ -469,21 +469,55 @@ void ito_plasma_physics::reconcile_photons(List<photon>&      a_photons,
 
 inline
 void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
+						   Vector<Real>&                 a_mean_energies,
+						   const Vector<long long>&      a_numParticles,
 						   const Vector<List<photon>* >& a_photons) const {
+
+  // TLDR: This routine runs through all the photoreactions. For each reaction we look up the target species (e.g. electrons, ions)
+  //       and compute the total energy for those species. We then add the photoreaction products, including the added energy, and then
+  //       we finally recompute the mean energy.
+
+  //
+  Vector<long long> newNumParticles = a_numParticles;
+  Vector<Real> energies(a_mean_energies);
+  for (int i = 0; i < energies.size(); i++){
+    energies[i] *= newNumParticles[i];
+  }
+  
   for (const auto& r : m_photo_reactions){
 
     // Source and targets
     const int& src                 = r.second.source();
     const std::deque<int>& targets = r.second.targets();
+    
+    const std::deque<std::pair<int, Real> >& target_energies = r.second.get_target_energies();
+
 
     for (ListIterator<photon> lit(*a_photons[src]); lit.ok(); ++lit){
       const photon& phot  = lit();
       const RealVect pos  = phot.position();
-      const Real mass     = phot.mass();
+      const Real mass     = phot.mass();     // Basically the number of reactions, in real format. 
 
       for (const auto& t : targets){
 	a_particles[t]->add(ito_particle(mass, pos));
       }
+
+      // Increment energies
+      for (const auto& te : target_energies){
+	const int idx = te.first;
+	const Real dE = te.second;
+	energies[idx] += mass*dE;
+      }
+    }
+  }
+
+  //
+  for (int i = 0; i < a_mean_energies.size(); i++){
+    if(a_numParticles[i] > 0){
+      a_mean_energies[i] = Max(0.0, energies[i]/newNumParticles[i]);
+    }
+    else{
+      a_mean_energies[i] = 0.0;
     }
   }
 }
@@ -713,7 +747,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   this->reconcile_photons(a_newPhotons, newPhotonCount, a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
   // Run photo-reactions and increment the number of particles as needed
-  this->reconcile_photoionization(a_particles, a_photons);
+  this->reconcile_photoionization(a_particles, mean_energies, newParticleCount, a_photons);
 
   // Set new mean energies for all the particles. 
   this->set_mean_particle_energy(a_particles, mean_energies);
