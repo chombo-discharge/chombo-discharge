@@ -492,24 +492,24 @@ void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >&
     
     const std::deque<std::pair<int, Real> >& target_energies = r.second.get_target_energies();
 
-    Real num_photo_reactions = 0.0;
     for (ListIterator<photon> lit(*a_photons[src]); lit.ok(); ++lit){
       const photon& phot  = lit();
       const RealVect pos  = phot.position();
       const Real mass     = phot.mass();     // Basically the number of reactions, in real format. 
 
+      // Increment energies and update total particles. 
       for (const auto& t : targets){
 	a_particles[t]->add(ito_particle(mass, pos));
+
+	newNumParticles[t] += llround(mass); // Now have this many particles in the cell. 
       }
 
-      num_photo_reactions += mass;
-    }
-    
-    // Increment energies
-    for (const auto& te : target_energies){
-      const int idx = te.first;
-      const Real dE = te.second;
-      energies[idx] += num_photo_reactions*dE;
+      // Increment energies
+      for (const auto& te : target_energies){
+	const int idx = te.first;
+	const Real dE = te.second;
+	energies[idx] += mass*dE;
+      }
     }
   }
 

@@ -106,7 +106,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
 
   // Electron loss function
   std::pair<int, Real> impact_loss     = std::make_pair(m_electron_idx, -13.0);  //  14eV per reaction of this type.
-  std::pair<int, Real> friction_loss   = std::make_pair(m_electron_idx, -2.0);   // -12eV per reaction of this type.
+  std::pair<int, Real> friction_loss   = std::make_pair(m_electron_idx, -1.0);   // -12eV per reaction of this type.
   std::pair<int, Real> photo_loss      = std::make_pair(m_electron_idx,  -15.0); //  15 eV per photoexcitation
   std::pair<int, Real> photo_gain      = std::make_pair(m_electron_idx,  2.0);   //  Energy of appearing photoelectrons
 
@@ -116,7 +116,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
   m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
   m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
-  m_reactions.emplace("electron_scattering",    ito_reaction({m_electron_idx}, {m_electron_idx}, {friction_loss}));
+  //  m_reactions.emplace("electron_scattering",    ito_reaction({m_electron_idx}, {m_electron_idx}, {friction_loss}));
 
   // Photo-reactions
   m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}, {photo_gain}));
@@ -173,7 +173,7 @@ void ito_plasma_air3_lea::update_reaction_rates_lea(const RealVect a_E, const Ve
   m_reactions.at("electron_recombination").rate() = bpe;
   m_reactions.at("ion_recombination").rate()      = bpn;
   m_reactions.at("photo_excitation").rate()       = alpha*velo*xfactor;
-  m_reactions.at("electron_scattering").rate()    = scat;
+  //  m_reactions.at("electron_scattering").rate()    = scat;
 }
 
 Real ito_plasma_air3_lea::excitation_rates(const Real a_E) const{
