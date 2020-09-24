@@ -71,8 +71,8 @@ namespace physics {
     
     class ito_plasma_air3_lea::electron : public ito_species {
     public:
-      electron() = delete;
-      electron(const lookup_table a_mobility, const lookup_table a_diffusion);
+      electron() = default;
+      electron(const lookup_table& a_mobility, const lookup_table& a_diffusion);
       ~electron();
 
       Real mobility(const Real a_energy) const override;

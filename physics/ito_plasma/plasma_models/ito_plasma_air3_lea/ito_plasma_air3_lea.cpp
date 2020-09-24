@@ -16,7 +16,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_num_ito_species = 3;
   m_num_rte_species = 1;
 
-  m_coupling == ito_plasma_physics::coupling::LEA;
+  m_coupling = ito_plasma_physics::coupling::LEA;
 
   ParmParse pp("ito_plasma_air3_lea");
   Vector<Real> v;
@@ -40,7 +40,6 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   pp.get("prop_eps",       m_eps);
   pp.get("NSSA",           m_NSSA);
   pp.get("SSAlim",         m_SSAlim);
-  pp.get("coupling",       str);
   
   // Get algorithm
   pp.get("algorithm",      str);
@@ -85,7 +84,8 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   // Read transport tables
   this->read_tables();
 
-  m_ito_species[m_electron_idx] = RefCountedPtr<ito_species> (new electron(m_tables.at("mobility"), m_tables.at("diffusion")));
+  // Initiate species
+  m_ito_species[m_electron_idx] = RefCountedPtr<ito_species> (new electron(m_tables.at("mobility"), m_tables.at("diffco")));
   m_ito_species[m_positive_idx] = RefCountedPtr<ito_species> (new positive());
   m_ito_species[m_negative_idx] = RefCountedPtr<ito_species> (new negative());
   m_rte_species[m_photonZ_idx]  = RefCountedPtr<rte_species> (new photonZ());
@@ -104,12 +104,18 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   
   this->draw_sphere_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight);
 
+  // Electron loss function
+  std::pair<int, Real> impact_loss     = std::make_pair(m_electron_idx, -14.0); //  14eV per reaction of this type.
+  std::pair<int, Real> friction_loss   = std::make_pair(m_electron_idx, -1.0);  // -12eV per reaction of this type.
+  std::pair<int, Real> photo_loss      = std::make_pair(m_electron_idx, -15.0); //  15 eV per photoexcitation
+
+  pout() << "adding reactions" << endl;
   // Particle-particle reactions
-  m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
+  m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}, {impact_loss}));
   m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
   m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
   m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
-  m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
+  m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}, {photo_loss}));
 
   // Photo-reactions
   m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}));
@@ -184,8 +190,8 @@ Real ito_plasma_air3_lea::photo_rate(const Real a_E) const {
   return excitation_rates(a_E)*sergey_factor(m_O2frac)*m_photoi_factor;
 }
 
-ito_plasma_air3_lea::electron::electron(const lookup_table a_mobility, const lookup_table a_diffusion) : m_mobility(a_mobility),
-													 m_diffusion(a_diffusion) {
+ito_plasma_air3_lea::electron::electron(const lookup_table& a_mobility, const lookup_table& a_diffusion) : m_mobility(a_mobility),
+													   m_diffusion(a_diffusion) {
   m_mobile    = true;
   m_diffusive = true;
   m_name      = "electron";
