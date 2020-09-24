@@ -109,8 +109,8 @@ ito_solver.redistribute        = true          # Turn on/off redistribution.
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ito_solver.checkpointing       = particles     # 'particles' or 'numbers'
 ito_solver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
-ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
-ito_solver.deposition          = cic           # 'ngp' = nearest grid point
+ito_solver.plot_deposition     = ngp           # Cloud-in-cell for plotting particles.
+ito_solver.deposition          = ngp           # 'ngp' = nearest grid point
                                                # 'cic' = cloud-in-cell
                                                # 'tsc' = triangle-shaped-cloud
                                                # 'w4'  = 3rd order interpolation

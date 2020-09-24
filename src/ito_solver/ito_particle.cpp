@@ -52,7 +52,6 @@ RealVect& ito_particle::oldPosition(){
   return m_oldPosition;
 }
 
-
 const RealVect& ito_particle::oldPosition() const{
   return m_oldPosition;
 }
@@ -89,7 +88,6 @@ void ito_particle::setMobility(const Real a_mobility){
 Real& ito_particle::mobility(){
   return m_mobility;
 }
-
 
 const Real& ito_particle::mobility() const{
   return m_mobility;

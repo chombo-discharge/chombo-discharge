@@ -61,12 +61,15 @@ inline
 void ito_reaction::jump_energy(Vector<Real>& a_energies, const Vector<Real>& a_mean_energies, const long long a_num_reactions) const {
   
   for (const auto& r : m_energy_jumps){
-    if(this->get_state_change(r.first) < 0) { // Consuming reaction, take a_mean_energies[i]
+    if(this->get_state_change(r.first) < 0) { // Consuming reaction, this eats a_mean_energies.  
       a_energies[r.first] -= a_mean_energies[r.first]*a_num_reactions;
     }
     else{
-      a_energies[r.first] -= r.second*a_num_reactions;
+      a_energies[r.first] += r.second*a_num_reactions;
     }
+
+    // Energy can not fall below zero
+    a_energies[r.first] = Max(0.0, a_energies[r.first]);
   }
 }
 

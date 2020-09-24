@@ -563,7 +563,9 @@ void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_particles
 						 const int           a_numParticles,
 						 const RealVect      a_blobCenter,
 						 const Real          a_blobRadius,
-						 const Real          a_weight){
+						 const Real          a_weight,
+						 const Real          a_energy1,
+						 const Real          a_energy2){
 
   // Set up the Gaussian RNG
   std::normal_distribution<Real> gauss(0.0, a_blobRadius);
@@ -574,8 +576,9 @@ void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_particles
   for (int i = 0; i < myNumParticles; i++){
     const RealVect pos = a_blobCenter + gauss(m_rng)*random_direction();
     
-    a_particles1.add(ito_particle(a_weight, pos));
-    a_particles2.add(ito_particle(a_weight, pos));
+    
+    a_particles1.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy1));
+    a_particles2.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy2));
   }
 }
 
@@ -585,10 +588,12 @@ void ito_plasma_physics::draw_sphere_particles(List<ito_particle>& a_particles1,
 					       const int           a_numParticles,
 					       const RealVect      a_blobCenter,
 					       const Real          a_blobRadius,
-					       const Real          a_weight){
+					       const Real          a_weight,
+					       const Real          a_energy1,
+					       const Real          a_energy2){
 
   const int myNumParticles = this->compute_particles_per_rank(a_numParticles);
-
+  
   // Now make the particles
   for (int i = 0; i < myNumParticles; i++){
     bool accept  = false;
@@ -606,9 +611,11 @@ void ito_plasma_physics::draw_sphere_particles(List<ito_particle>& a_particles1,
     }
     
     // Add the particle
-    a_particles1.add(ito_particle(a_weight, pos));
-    a_particles2.add(ito_particle(a_weight, pos));
+    a_particles1.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy1));
+    a_particles2.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy2));
   }
+
+
 }
 
 inline
@@ -617,7 +624,9 @@ void ito_plasma_physics::draw_box_particles(List<ito_particle>& a_particles1,
 					    const int           a_numParticles,
 					    const RealVect      a_boxLo,
 					    const RealVect      a_boxHi,
-					    const Real          a_weight) {
+					    const Real          a_weight,
+					    const Real          a_energy1,
+					    const Real          a_energy2) {
 
   const int myNumParticles = this->compute_particles_per_rank(a_numParticles);
 
@@ -625,8 +634,9 @@ void ito_plasma_physics::draw_box_particles(List<ito_particle>& a_particles1,
   for (int i = 0; i < myNumParticles; i++){
     const RealVect pos = a_boxLo + m_udist01(m_rng)*diff;
 
-    a_particles1.add(ito_particle(a_weight, pos));
-    a_particles2.add(ito_particle(a_weight, pos));
+
+    a_particles1.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy1));
+    a_particles2.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy2));
   }
 }
 
@@ -728,6 +738,12 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
     energies      = this->get_particle_energy(a_particles);
     mean_energies = this->get_particle_mean_energy(energies, oldParticleCount);
     sources       = a_sources;
+
+    // a_sources is volumetric, scale it by dV
+    const Real dV = a_kappa*pow(a_dx, SpaceDim);
+    for (int i = 0; i < sources.size(); i++){
+      sources[i] *= dV;
+    }
   }
   
   // Do particle advancement
@@ -1030,7 +1046,7 @@ void ito_plasma_physics::tau_step(Vector<long long>&      a_particles,
   const Real dV = a_kappa*pow(a_dx, SpaceDim);
   for (int i = 0; i < a_particles.size(); i++){
     if(a_particles[i] > 0){
-      a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*dV*a_dt)/(a_particles[i]));
+      a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*a_dt)/(a_particles[i]));
     }
     else{
       a_mean_energies[i] = 0.0;
@@ -1166,7 +1182,7 @@ void ito_plasma_physics::ssa_step(Vector<long long>&      a_particles,
     const Real dV = a_kappa*pow(a_dx, SpaceDim);
     for (int i = 0; i < a_particles.size(); i++){
       if(a_particles[i] > 0){
-	a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*dV*a_dt)/(a_particles[i]));
+	a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*a_dt)/(a_particles[i]));
       }
       else{
 	a_mean_energies[i] = 0.0;
@@ -1237,17 +1253,17 @@ void ito_plasma_physics::advance_ssa(Vector<long long>& a_particles,
 }
 
 inline
-void ito_plasma_physics::energy_step(Vector<Real>&                     a_mean_energies,
+void ito_plasma_physics::energy_step(Vector<Real>&            a_mean_energies,
 				     const Vector<long long>& a_particles,
-				     const Vector<Real>&               a_sources,
-				     const Real                        a_dx,
-				     const Real                        a_kappa,
-				     const Real                        a_dt) const {
+				     const Vector<Real>&      a_sources,
+				     const Real               a_dx,
+				     const Real               a_kappa,
+				     const Real               a_dt) const {
 
   const Real dV = a_kappa*pow(a_dx, SpaceDim);
   for (int i = 0; i < a_particles.size(); i++){
     if(a_particles[i] > 0){
-      a_mean_energies[i] = Max(0.0, a_mean_energies[i] + a_sources[i]*dV*a_dt/a_particles[i]);
+      a_mean_energies[i] = Max(0.0, a_mean_energies[i] + a_sources[i]*a_dt/a_particles[i]);
     }
     else{
       a_mean_energies[i] = 0.0;

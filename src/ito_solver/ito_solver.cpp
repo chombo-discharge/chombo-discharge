@@ -1125,9 +1125,9 @@ void ito_solver::unset_mass_to_diffusivity(particle_container<ito_particle>& a_p
 }
 
 void ito_solver::set_mass_to_energy(particle_container<ito_particle>& a_particles){
-  CH_TIME("ito_solver::unset_mass_to_energy");
+  CH_TIME("ito_solver::set_mass_to_energy");
   if(m_verbosity > 5){
-    pout() << m_name + "::unset_mass_to_energy" << endl;
+    pout() << m_name + "::set_mass_to_energy" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -1217,7 +1217,7 @@ void ito_solver::deposit_diffusivity(EBAMRCellData& a_state, particle_container<
   }
 
   this->set_mass_to_diffusivity(a_particles);                                  // Make mass = mass*D
-  this->deposit_particles(a_state, a_particles.get_particles(), a_deposition); // Deposit mass*mu
+  this->deposit_particles(a_state, a_particles.get_particles(), a_deposition); // Deposit mass*D
   this->unset_mass_to_diffusivity(a_particles);                                // Make mass = mass/D
 }
 
@@ -1227,7 +1227,7 @@ void ito_solver::deposit_energy(){
     pout() << m_name + "::deposit_energy()" << endl;
   }
 
-  this->deposit_diffusivity(m_state, m_particles);
+  this->deposit_energy(m_state, m_particles);
 }
 
 void ito_solver::deposit_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles){
@@ -1236,7 +1236,7 @@ void ito_solver::deposit_energy(EBAMRCellData& a_state, particle_container<ito_p
     pout() << m_name + "::deposit_diffusivity(state, particles)" << endl;
   }
 
-  this->deposit_diffusivity(a_state, a_particles, m_deposition);
+  this->deposit_energy(a_state, a_particles, m_deposition);
 }
 
 void ito_solver::deposit_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition){
@@ -1246,7 +1246,7 @@ void ito_solver::deposit_energy(EBAMRCellData& a_state, particle_container<ito_p
   }
 
   this->set_mass_to_energy(a_particles);                                       // Make mass = mass*E
-  this->deposit_particles(a_state, a_particles.get_particles(), a_deposition); // Deposit mass*mu
+  this->deposit_particles(a_state, a_particles.get_particles(), a_deposition); // Deposit mass*E
   this->unset_mass_to_energy(a_particles);                                     // Make mass = mass/E
 }
 
@@ -2555,7 +2555,7 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
   a_particles.clear();
   for (int i = 0; i < leaves.size(); i++){
     point_mass pointMass(leaves[i]->get_data());
-    ito_particle p(pointMass.mass(), pointMass.pos());
+    ito_particle p(pointMass.mass(), pointMass.pos(), RealVect::Zero, 0.0, 0.0, pointMass.energy()/pointMass.mass());
     a_particles.add(p);
   }
 
