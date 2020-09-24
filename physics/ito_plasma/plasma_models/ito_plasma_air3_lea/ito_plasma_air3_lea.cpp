@@ -102,13 +102,13 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   positives.clear();
   negatives.clear();
   
-  this->draw_sphere_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight, 10.0, 0.0);
+  this->draw_sphere_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight, 2.0, 0.0);
 
   // Electron loss function
   std::pair<int, Real> impact_loss     = std::make_pair(m_electron_idx, -13.0);  //  14eV per reaction of this type.
   std::pair<int, Real> friction_loss   = std::make_pair(m_electron_idx, -1.0);   // -12eV per reaction of this type.
   std::pair<int, Real> photo_loss      = std::make_pair(m_electron_idx,  -15.0); //  15 eV per photoexcitation
-  std::pair<int, Real> photo_gain      = std::make_pair(m_electron_idx,  2.0);   //  Energy of appearing photoelectrons
+  std::pair<int, Real> photo_gain      = std::make_pair(m_electron_idx,  0.0);   //  Energy of appearing photoelectrons
 
   // Particle-particle reactions
   m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}, {impact_loss}));
@@ -155,13 +155,15 @@ Real ito_plasma_air3_lea::compute_alpha(const RealVect a_E) const {
 
 void ito_plasma_air3_lea::update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const {
 
+  const Real electron_energy = a_mean_energies[m_electron_idx];
+
   // Compute the reaction rates.
   const Real dV      = pow(a_dx, SpaceDim);//*a_kappa;
   const Real E       = a_E.vectorLength();
-  const Real alpha   = m_tables.at("alpha").get_entry(a_mean_energies[m_electron_idx]);
-  const Real eta     = m_tables.at("eta").get_entry(a_mean_energies[m_electron_idx]);
-  const Real mu      = m_tables.at("mobility").get_entry(a_mean_energies[m_electron_idx]);
-  const Real scat    = m_tables.at("collision").get_entry(a_mean_energies[m_electron_idx]);
+  const Real alpha   = m_tables.at("alpha").get_entry(electron_energy);
+  const Real eta     = m_tables.at("eta").get_entry(electron_energy);
+  const Real mu      = m_tables.at("mobility").get_entry(electron_energy);
+  const Real scat    = m_tables.at("collision").get_entry(electron_energy);
   const Real velo    = mu*a_E.vectorLength();
   const Real Te      = 2.0*a_mean_energies[m_electron_idx]/(3.0*units::s_kb);
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;

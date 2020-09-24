@@ -740,12 +740,18 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
     mean_energies = this->get_particle_mean_energy(energies, oldParticleCount);
     sources       = a_sources;
 
-    // // The one that comes in through ito_plasma_stepper is in Joule/dV, make it eV/cell
+    // // The one that comes in through ito_plasma_stepper is in Joule/(dV*dt), make it eV/(cell*dt)
     const Real dV = a_kappa*pow(a_dx, SpaceDim);
     for (int i = 0; i < sources.size(); i++){ 
       sources[i] *= dV/units::s_Qe;
     }
   }
+
+#if 0 // Debug, set sources to 0
+  for (int i = 0; i < sources.size(); i++){
+    sources[i] = 0.0;
+  }
+#endif
 
   // Do particle advancement
   this->advance_particles(newParticleCount, newPhotonCount, mean_energies, sources, a_dt, a_E, a_dx, a_kappa);
