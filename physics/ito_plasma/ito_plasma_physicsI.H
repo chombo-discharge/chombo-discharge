@@ -16,7 +16,7 @@
 
 #include <PolyGeom.H>
 
-#define ITO_PLASMA_PHYSICS_DEBUG 0
+#define ITO_PLASMA_PHYSICS_DEBUG 1
 
 using namespace physics::ito_plasma;
 
