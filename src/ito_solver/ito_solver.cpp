@@ -111,6 +111,7 @@ void ito_solver::parse_plot_vars(){
   m_plot_eb_particles     = false;
   m_plot_domain_particles = false;
   m_plot_source_particles = false;
+  m_plot_energy = false;
 
   ParmParse pp(m_class_name.c_str());
   const int num = pp.countval("plt_vars");
@@ -125,6 +126,7 @@ void ito_solver::parse_plot_vars(){
     else if(str[i] == "eb_part")  m_plot_eb_particles     = true;
     else if(str[i] == "dom_part") m_plot_domain_particles = true;
     else if(str[i] == "src_part") m_plot_source_particles = true;
+    else if(str[i] == "energy")   m_plot_energy = true;
   }
 }
 
@@ -274,6 +276,7 @@ Vector<std::string> ito_solver::get_plotvar_names() const {
   if(m_plot_eb_particles)      names.push_back(m_name + " eb_particles");
   if(m_plot_domain_particles)  names.push_back(m_name + " domain_particles");
   if(m_plot_source_particles)  names.push_back(m_name + " source_particles");
+  if(m_plot_energy)            names.push_back(m_name + " energy * phi");
 
   return names;
 }
@@ -293,6 +296,7 @@ int ito_solver::get_num_plotvars() const {
   if(m_plot_eb_particles)       num_plotvars = num_plotvars + 1;
   if(m_plot_domain_particles)   num_plotvars = num_plotvars + 1;
   if(m_plot_source_particles)   num_plotvars = num_plotvars + 1;
+  if(m_plot_energy)             num_plotvars += 1;
 
   return num_plotvars;
 }
@@ -997,6 +1001,10 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     this->deposit_particles(m_scratch, m_source_particles.get_particles(), m_plot_deposition);
     this->write_data(a_output, a_comp, m_scratch,  false);
   }
+  if(m_plot_energy){
+    this->deposit_energy(m_scratch, m_particles, m_plot_deposition);
+    this->write_data(a_output, a_comp, m_scratch,  false);
+  }
 }
 
 void ito_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp){
@@ -1116,6 +1124,45 @@ void ito_solver::unset_mass_to_diffusivity(particle_container<ito_particle>& a_p
   }
 }
 
+void ito_solver::set_mass_to_energy(particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::unset_mass_to_energy");
+  if(m_verbosity > 5){
+    pout() << m_name + "::unset_mass_to_energy" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
+
+      for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
+	ito_particle& p = lit();
+	p.tmp()   = p.mass();
+	p.mass() *= p.energy();
+      }
+    }
+  }
+}
+
+void ito_solver::unset_mass_to_energy(particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::unset_mass_to_energy");
+  if(m_verbosity > 5){
+    pout() << m_name + "::unset_mass_to_energy" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
+
+      for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
+	ito_particle& p = lit();
+	p.mass() = p.tmp();
+      }
+    }
+  }
+}
+
 void ito_solver::deposit_conductivity(){
   CH_TIME("ito_solver::deposit_conductivity()");
   if(m_verbosity > 5){
@@ -1169,9 +1216,38 @@ void ito_solver::deposit_diffusivity(EBAMRCellData& a_state, particle_container<
     pout() << m_name + "::deposit_diffusivity(state, particles, deposition_type)" << endl;
   }
 
-  this->set_mass_to_diffusivity(a_particles);                                  // Make mass = mass*mu
+  this->set_mass_to_diffusivity(a_particles);                                  // Make mass = mass*D
   this->deposit_particles(a_state, a_particles.get_particles(), a_deposition); // Deposit mass*mu
-  this->unset_mass_to_diffusivity(a_particles);                                // Make mass = mass/mu
+  this->unset_mass_to_diffusivity(a_particles);                                // Make mass = mass/D
+}
+
+void ito_solver::deposit_energy(){
+  CH_TIME("ito_solver::deposit_energy()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_energy()" << endl;
+  }
+
+  this->deposit_diffusivity(m_state, m_particles);
+}
+
+void ito_solver::deposit_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::deposit_diffusivity(state, particles)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_diffusivity(state, particles)" << endl;
+  }
+
+  this->deposit_diffusivity(a_state, a_particles, m_deposition);
+}
+
+void ito_solver::deposit_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition){
+  CH_TIME("ito_solver::deposit_energy(state, particles, deposition_type)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_energy(state, particles, deposition_type)" << endl;
+  }
+
+  this->set_mass_to_energy(a_particles);                                       // Make mass = mass*E
+  this->deposit_particles(a_state, a_particles.get_particles(), a_deposition); // Deposit mass*mu
+  this->unset_mass_to_energy(a_particles);                                     // Make mass = mass/E
 }
 
 void ito_solver::deposit_particles(){
@@ -1188,7 +1264,7 @@ void ito_solver::deposit_particles(EBAMRCellData& a_state, const AMRParticles<it
     pout() << m_name + "::deposit_particles" << endl;
   }
 
-    this->deposit_particles(a_state, a_particles, m_deposition);
+  this->deposit_particles(a_state, a_particles, m_deposition);
 }
 
 void ito_solver::deposit_particles(EBAMRCellData&                    a_state,

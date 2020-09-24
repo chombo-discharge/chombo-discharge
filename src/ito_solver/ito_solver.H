@@ -104,7 +104,7 @@ public:
   */
   virtual void unset_mass_to_conductivity(particle_container<ito_particle>& a_particles);
 
-    /*!
+  /*!
     @brief Set mass to diffusivity
     @details This sets mass = mass*diffusion_coefficient
   */
@@ -115,6 +115,18 @@ public:
     @details This sets mass = mass/diffusion_coefficient
   */
   virtual void unset_mass_to_diffusivity(particle_container<ito_particle>& a_particles);
+
+    /*!
+    @brief Set mass to energy
+    @details This sets mass = mass*particle_energy
+  */
+  virtual void set_mass_to_energy(particle_container<ito_particle>& a_particles);
+
+  /*!
+    @brief Unset mass to energy
+    @details This sets mass = mass/particle_energy
+  */
+  virtual void unset_mass_to_energy(particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Deposit conductivities
@@ -134,7 +146,7 @@ public:
   */
   virtual void deposit_conductivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
 
-    /*!
+  /*!
     @brief Deposit diffusivity
     @details This deposits weight*D (not multiplied by charge)
   */
@@ -146,11 +158,29 @@ public:
   */
   virtual void deposit_diffusivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
 
-    /*!
+  /*!
     @brief Deposit diffusivity
     @details This deposits weight*D (not multiplied by charge)
   */
   virtual void deposit_diffusivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
+
+    /*!
+    @brief Deposit diffusivity
+    @details This deposits weight*energy
+  */
+  virtual void deposit_energy();
+
+  /*!
+    @brief Deposit energy
+    @details This deposits weight*energy
+  */
+  virtual void deposit_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
+
+  /*!
+    @brief Deposit energy
+    @details This deposits weight*energy
+  */
+  virtual void deposit_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
 
   /*!
     @brief Deposit particles
@@ -749,10 +779,15 @@ protected:
   */
   bool m_plot_domain_particles;
 
-    /*!
-    @brief Plot domain particles
+  /*!
+    @brief Plot source particles
   */
   bool m_plot_source_particles;
+
+  /*!
+    @brief Plot energy or not
+  */
+  bool m_plot_energy;
 
   /*!
     @brief Mass/charge deposition type
