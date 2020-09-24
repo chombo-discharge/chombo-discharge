@@ -492,7 +492,7 @@ void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >&
     
     const std::deque<std::pair<int, Real> >& target_energies = r.second.get_target_energies();
 
-
+    Real num_photo_reactions = 0.0;
     for (ListIterator<photon> lit(*a_photons[src]); lit.ok(); ++lit){
       const photon& phot  = lit();
       const RealVect pos  = phot.position();
@@ -502,16 +502,18 @@ void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >&
 	a_particles[t]->add(ito_particle(mass, pos));
       }
 
-      // Increment energies
-      for (const auto& te : target_energies){
-	const int idx = te.first;
-	const Real dE = te.second;
-	energies[idx] += mass*dE;
-      }
+      num_photo_reactions += mass;
+    }
+    
+    // Increment energies
+    for (const auto& te : target_energies){
+      const int idx = te.first;
+      const Real dE = te.second;
+      energies[idx] += num_photo_reactions*dE;
     }
   }
 
-  //
+  // Recompute the mean energies. If dE < a_mean_energies then the addition of photons lead to cooling, pretty cool :)
   for (int i = 0; i < a_mean_energies.size(); i++){
     if(a_numParticles[i] > 0){
       a_mean_energies[i] = Max(0.0, energies[i]/newNumParticles[i]);

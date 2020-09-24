@@ -111,11 +111,12 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   std::pair<int, Real> photo_gain      = std::make_pair(m_electron_idx, 3.0); //  Energy of appearing photoelectrons
 
   // Particle-particle reactions
-  m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));//, {impact_loss}));
+  m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}, {impact_loss}));
   m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
   m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
   m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
   m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
+  m_reactions.emplace("electron_scattering",    ito_reaction({m_electron_idx}, {m_electron_idx}, {friction_loss}));
 
   // Photo-reactions
   m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}, {photo_gain}));
@@ -132,12 +133,14 @@ void ito_plasma_air3_lea::read_tables(){
   this->add_table("alpha",     "alpha.dat");
   this->add_table("eta",       "eta.dat");
   this->add_table("alpha_lfa", "alpha_lfa.dat");
+  this->add_table("collision", "collision_rate.dat");
 
   // Need to scale energy tables. First column is in eV
   m_tables["mobility"].scale_y(1./m_N);
   m_tables["diffco"].scale_y(1./m_N);
   m_tables["alpha"].scale_y(m_N);
   m_tables["eta"].scale_y(m_N);
+  m_tables["collision"].scale_y(m_N);
 
   // LFA table for Townsed coefficient
   m_tables["alpha_lfa"].scale_x(m_N*units::s_Td);
@@ -158,6 +161,7 @@ void ito_plasma_air3_lea::update_reaction_rates_lea(const RealVect a_E, const Ve
   const Real alpha   = m_tables.at("alpha").get_entry(a_mean_energies[m_electron_idx]);
   const Real eta     = m_tables.at("eta").get_entry(a_mean_energies[m_electron_idx]);
   const Real mu      = m_tables.at("mobility").get_entry(a_mean_energies[m_electron_idx]);
+  const Real scat    = m_tables.at("collision").get_entry(a_mean_energies[m_electron_idx]);
   const Real velo    = mu*a_E.vectorLength();
   const Real Te      = 2.0*a_mean_energies[m_electron_idx]/(3.0*units::s_kb);
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
@@ -169,6 +173,7 @@ void ito_plasma_air3_lea::update_reaction_rates_lea(const RealVect a_E, const Ve
   m_reactions.at("electron_recombination").rate() = bpe;
   m_reactions.at("ion_recombination").rate()      = bpn;
   m_reactions.at("photo_excitation").rate()       = alpha*velo*xfactor;
+  m_reactions.at("electron_scattering").rate()    = scat;
 }
 
 Real ito_plasma_air3_lea::excitation_rates(const Real a_E) const{
