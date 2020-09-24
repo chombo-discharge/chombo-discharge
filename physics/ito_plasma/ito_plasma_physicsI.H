@@ -674,7 +674,9 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   const long long Qbefore = this->compute_charge(a_particles);
 #endif
 
-    // Get particle counts. 
+
+
+  // Get particle counts. 
   Vector<long long> newPhotonCount   = Vector<long long>(m_num_rte_species, 0);
   Vector<long long> oldParticleCount = this->get_particle_count(a_particles);
   Vector<long long> newParticleCount = oldParticleCount;
@@ -694,7 +696,6 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   
   // Do particle advancement
   this->advance_particles(newParticleCount, newPhotonCount, mean_energies, sources, a_dt, a_E, a_dx, a_kappa);
-
   
   // Reconcile particles
   this->reconcile_particles(a_particles,
@@ -955,7 +956,6 @@ void ito_plasma_physics::tau_step(Vector<long long>&  a_particles,
 				  const Real          a_kappa,
 				  const Real          a_dt) const {
 
-
   // These are the propensities. 
   const std::deque<Real> propensities = this->propensities(a_particles, a_reactions);
 
@@ -1000,7 +1000,6 @@ void ito_plasma_physics::tau_step(Vector<long long>&      a_particles,
       a_mean_energies[i] = 0.0;
     }
   }
-  
 }
 
   
@@ -1019,7 +1018,7 @@ void ito_plasma_physics::tau_step(Vector<long long>&  a_particles,
     reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
   }
 
-  this->tau_step(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dx, a_kappa, a_dt);
+  this->tau_step(a_particles, a_newPhotons, a_mean_energies, a_sources, reactions, a_dx, a_kappa, a_dt);
 }
 
 inline
@@ -1038,7 +1037,6 @@ void ito_plasma_physics::advance_tau(Vector<long long>&  a_particles,
   // Do a tau step
   this->tau_step(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_dx, a_kappa);
 }
-
 
 inline
 void ito_plasma_physics::ssa_step(Vector<long long>&  a_particles,
@@ -1223,14 +1221,14 @@ void ito_plasma_physics::energy_step(Vector<Real>&                     a_mean_en
 
 
 inline
-void ito_plasma_physics::advance_particles(Vector<long long>& a_particles,
-					   Vector<long long>& a_newPhotons,
-					   Vector<Real>&               a_mean_energies,
-					   const Vector<Real>&         a_sources,
-					   const Real                  a_dt,
-					   const RealVect              a_E,
-					   const Real                  a_dx,
-					   const Real                  a_kappa) const{
+void ito_plasma_physics::advance_particles(Vector<long long>&   a_particles,
+					   Vector<long long>&   a_newPhotons,
+					   Vector<Real>&        a_mean_energies,
+					   const Vector<Real>&  a_sources,
+					   const Real           a_dt,
+					   const RealVect       a_E,
+					   const Real           a_dx,
+					   const Real           a_kappa) const{
   // Which algorithm?
   if(m_algorithm == algorithm::ssa){
     this->advance_ssa(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
@@ -1244,14 +1242,14 @@ void ito_plasma_physics::advance_particles(Vector<long long>& a_particles,
 }
 
 inline
-void ito_plasma_physics::advance_hybrid(Vector<long long>& a_particles,
-					Vector<long long>& a_newPhotons,
-					Vector<Real>&               a_mean_energies,
-					const Vector<Real>&         a_sources,
-					const Real                  a_dt,
-					const RealVect              a_E,
-					const Real                  a_dx,
-					const Real                  a_kappa) const {
+void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
+					Vector<long long>&  a_newPhotons,
+					Vector<Real>&       a_mean_energies,
+					const Vector<Real>& a_sources,
+					const Real          a_dt,
+					const RealVect      a_E,
+					const Real          a_dx,
+					const Real          a_kappa) const {
   Real curTime = 0.0;
 
   while(curTime < a_dt){

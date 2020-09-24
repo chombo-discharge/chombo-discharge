@@ -109,13 +109,12 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   std::pair<int, Real> friction_loss   = std::make_pair(m_electron_idx, -1.0);  // -12eV per reaction of this type.
   std::pair<int, Real> photo_loss      = std::make_pair(m_electron_idx, -15.0); //  15 eV per photoexcitation
 
-  pout() << "adding reactions" << endl;
   // Particle-particle reactions
-  m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}, {impact_loss}));
+  m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));//, {impact_loss}));
   m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
   m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
   m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
-  m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}, {photo_loss}));
+  m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
 
   // Photo-reactions
   m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}));
