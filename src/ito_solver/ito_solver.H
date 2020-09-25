@@ -231,6 +231,11 @@ public:
   virtual int get_num_plotvars() const;
 
   /*!
+    @brief Get PVR buffer
+  */
+  virtual int get_pvr_buffer() const;
+
+  /*!
     @brief Get number of particles in m_particles
   */
   virtual size_t get_num_particles(const bool a_local) const;

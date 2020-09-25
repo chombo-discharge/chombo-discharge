@@ -292,6 +292,15 @@ int ito_solver::get_num_plotvars() const {
   return num_plotvars;
 }
 
+int ito_solver::get_pvr_buffer() const {
+  CH_TIME("ito_solver::get_pvr_buffer");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_pvr_buffer" << endl;
+  }
+
+  return m_pvr_buffer;
+}
+
 size_t ito_solver::get_num_particles(const bool a_local) const{
   CH_TIME("ito_solver::get_num_particles");
   if(m_verbosity > 5){

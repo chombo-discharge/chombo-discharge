@@ -9,6 +9,7 @@
 #define _ITO_PLASMA_GODUNOV_
 
 #include "ito_plasma_stepper.H"
+#include "godunov_particle.H"
 
 namespace physics {
   namespace ito_plasma {
@@ -56,6 +57,7 @@ namespace physics {
 	advection_diffusion
       };
 
+
       // These are things that are used to compute the conductivity. 
       EBAMRCellData m_scratch1;
       EBAMRCellData m_scratch2;
@@ -72,6 +74,10 @@ namespace physics {
 
       which_algorithm m_algorithm;
       which_dt        m_whichDt;
+
+      Vector<particle_container<godunov_particle>* > m_conductivity_particles; // Used to store the particle that gave the sigma^k
+      Vector<particle_container<godunov_particle>* > m_rho_dagger_particles;   // Used to store the particles that gave rho^dagger
+
 
       int m_merge_interval; // How often to merge superparticles
 
@@ -92,6 +98,8 @@ namespace physics {
       void copy_particles_to_scratch2();
       void compute_conductivity_with_scratch_particles();
       void deposit_scratch_particles2();
+      void copy_conductivity_particles();
+      void copy_rho_dagger_particles();
 
       // Standard poisson setup
       void setup_standard_poisson();

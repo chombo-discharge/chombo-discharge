@@ -104,9 +104,27 @@ void ito_plasma_godunov::allocate_internals(){
   m_amr->allocate(m_fluid_E,      m_fluid_realm, m_phase, SpaceDim);
 
   // Allocate for energy sources
-  m_energy_sources.resize(m_physics->get_num_ito_species());
+  const int num_ito_species = m_physics->get_num_ito_species();
+  m_energy_sources.resize(num_ito_species);
   for (int i = 0; i < m_energy_sources.size(); i++){
     m_amr->allocate(m_energy_sources[i],  m_particle_realm, m_phase, 1);
+  }
+
+  // Now allocate for the conductivity particles and rho^dagger particles
+  m_conductivity_particles.resize(num_ito_species);
+  m_rho_dagger_particles.resize(num_ito_species);
+  
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<ito_solver>& solver = solver_it();
+
+    const int idx        = solver_it.get_solver();
+    const int pvr_buffer = solver->get_pvr_buffer();
+
+    m_conductivity_particles[idx] = new particle_container<godunov_particle>();
+    m_rho_dagger_particles[idx]   = new particle_container<godunov_particle>();
+    
+    m_amr->allocate(*m_conductivity_particles[idx], pvr_buffer, m_particle_realm);
+    m_amr->allocate(*m_rho_dagger_particles[idx],   pvr_buffer, m_particle_realm);
   }
 
 }
@@ -326,6 +344,79 @@ void ito_plasma_godunov::regrid_conductivity(const int a_lmin, const int a_old_f
     interpolator[lvl]->interpolate(*m_conduct_cell[lvl], *m_conduct_cell[lvl-1], interv);
     if(lvl <= Min(a_old_finest_level, a_new_finest_level)){
       m_cache[lvl]->copyTo(*m_conduct_cell[lvl]);
+    }
+  }
+}
+
+void ito_plasma_godunov::copy_conductivity_particles(){
+  CH_TIME("ito_plasma_godunov::copy_conductivity_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::copy_conductivity_particles" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<ito_solver>& solver   = solver_it();
+    const RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+    const int q   = species->get_charge();
+
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const List<ito_particle>& ito_parts = solver->get_particles()[lvl][dit()].listItems();
+	List<godunov_particle>& gdnv_parts  = (*m_conductivity_particles[idx])[lvl][dit()].listItems();
+
+	gdnv_parts.clear();
+
+	if(q != 0 && solver->is_mobile()){
+	  for (ListIterator<ito_particle> lit(ito_parts); lit.ok(); ++lit){
+	    const ito_particle& p = lit();
+	    const RealVect& pos   = p.position();
+	    const Real& mass      = p.mass();
+	    const Real& mobility  = p.mobility();
+
+	    gdnv_parts.add(godunov_particle(pos, mass*mobility));
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::copy_rho_dagger_particles(){
+  CH_TIME("ito_plasma_godunov::copy_rho_dagger_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::copy_rho_dagger_particles" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<ito_solver>& solver   = solver_it();
+    const RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+    const int q   = species->get_charge();
+
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const List<ito_particle>& ito_parts = solver->get_particles()[lvl][dit()].listItems();
+	List<godunov_particle>& gdnv_parts  = (*m_rho_dagger_particles[idx])[lvl][dit()].listItems();
+
+	gdnv_parts.clear();
+
+	if(q != 0){
+	  for (ListIterator<ito_particle> lit(ito_parts); lit.ok(); ++lit){
+	    const ito_particle& p = lit();
+	    const RealVect& pos   = p.position();
+	    const Real& mass      = p.mass();
+
+	    gdnv_parts.add(godunov_particle(pos, mass));
+	  }
+	}
+      }
     }
   }
 }
