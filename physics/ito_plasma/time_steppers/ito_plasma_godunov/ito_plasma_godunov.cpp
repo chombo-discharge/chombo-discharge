@@ -304,13 +304,14 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
   m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
   m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
 
-  // Recompute the conductivity
-  this->compute_conductivity_with_scratch_particles();
-  //  this->regrid_conductivity(a_lmin, a_old_finest_level, a_new_finest_level);
+  // Recompute the conductivity with the other particles
+  this->compute_regrid_conductivity();
 
   // Set up semi-implicit poisson again, with particles after diffusion jump (the rho^\dagger)
   this->setup_semi_implicit_poisson(m_prevDt);
-  this->deposit_scratch_particles2();
+
+  // Recompute the space charge
+  this->compute_regrid_rho();
   
   // Compute the electric field
   const bool converged = this->solve_poisson();
@@ -321,6 +322,24 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
   // Recompute new velocities and diffusion coefficients
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
+}
+
+void ito_plasma_godunov::compute_regrid_conductivity(){
+  CH_TIME("ito_plasma_godunov::compute_regrid_conductivity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_regrid_conductivity" << endl;
+  }
+
+  MayDay::Abort("ito_plasma_godunov::compute_regrid_conductivity - not implemented!");
+}
+
+void ito_plasma_godunov::compute_regrid_rho(){
+  CH_TIME("ito_plasma_godunov::compute_regrid_rho");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_regrid_rho" << endl;
+  }
+
+  MayDay::Abort("ito_plasma_godunov::compute_regrid_rho - not implemented!");
 }
 
 void ito_plasma_godunov::regrid_conductivity(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
@@ -435,54 +454,6 @@ void ito_plasma_godunov::copy_particles_to_scratch(){
 
     solver->clear(scratch);
     scratch.add_particles(particles);
-  }
-}
-
-void ito_plasma_godunov::copy_particles_to_scratch2(){
-  CH_TIME("ito_plasma_godunov::copy_particles_to_scratch2");
-  if(m_verbosity > 5){
-    pout() << m_name + "::copy_particles_to_scratch2" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-
-    particle_container<ito_particle>& scratch2         = solver->get_scratch_particles2();
-    const particle_container<ito_particle>& particles = solver->get_particles();
-
-    solver->clear(scratch2);
-    scratch2.add_particles(particles);
-  }
-}
-
-void ito_plasma_godunov::compute_conductivity_with_scratch_particles(){
-  CH_TIME("ito_plasma_godunov::compute_conductivity_with_scratch_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::ito_plasma_godunov::compute_conductivity_with_scratch_particles" << endl;
-  }
-
-  Vector<particle_container<ito_particle>* > particles;
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-
-    particles.push_back(&(solver->get_scratch_particles2()));
-  }
-
-  ito_plasma_stepper::compute_conductivity(m_conduct_cell, particles);
-
-  // Now do the faces
-  this->compute_face_conductivity();
-}
-
-void ito_plasma_godunov::deposit_scratch_particles2(){
-  CH_TIME("ito_plasma_godunov::deposit_scratch_particles2");
-  if(m_verbosity > 5){
-    pout() << m_name + "::deposit_scratch_particles2" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->deposit_particles(solver_it()->get_state(), solver_it()->get_scratch_particles().get_particles());
   }
 }
 
@@ -664,8 +635,8 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   this->set_old_positions();
   time_old += MPI_Wtime();
 
-  // Need to copy particles into scratch
-  this->copy_particles_to_scratch();
+  // Need to copy the current particles because they will be used for computing the conductivity during regrids
+  this->copy_conductivity_particles();
 
   // Compute conductivity and setup poisson
   time_setup = -MPI_Wtime();
@@ -687,8 +658,8 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   this->deposit_diffusive_particles();
   time_deposit += MPI_Wtime();
 
-  // Copy particles to scratch
-  this->copy_particles_to_scratch2();
+  // Need to copy the current particles because they will be used for the space charge during regrids. 
+  this->copy_rho_dagger_particles();
 
   // Now compute the electric field
   time_solve -= MPI_Wtime();

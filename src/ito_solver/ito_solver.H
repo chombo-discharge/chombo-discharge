@@ -190,14 +190,22 @@ public:
   /*!
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
-  virtual void deposit_particles(EBAMRCellData& a_state, const AMRParticles<ito_particle>& a_particles);
+  template <class T>
+  void deposit_particles(EBAMRCellData& a_state, const AMRParticles<T>& a_particles);
+
+  /*!
+    @brief Deposit particles
+  */
+  template <class T>
+  void deposit_particles(EBAMRCellData& a_state, const particle_container<T>& a_particles);
 
   /*!
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
-  virtual void deposit_particles(EBAMRCellData&                    a_state,
-				 const AMRParticles<ito_particle>& a_particles,
-				 const DepositionType::Which       a_deposition);
+  template <class T>
+  void deposit_particles(EBAMRCellData&              a_state,
+			 const AMRParticles<T>&      a_particles,
+			 const DepositionType::Which a_deposition);
 
   /*!
     @brief Deposit the total weight of the particles in the grid cells
@@ -369,11 +377,6 @@ public:
     @brief Get the particle container
   */
   virtual particle_container<ito_particle>& get_scratch_particles();
-
-  /*!
-    @brief Get the particle container
-  */
-  virtual particle_container<ito_particle>& get_scratch_particles2();
 
   /*!
     @brief Get the species
@@ -869,11 +872,6 @@ protected:
   */
   particle_container<ito_particle> m_scratch_particles;
 
-    /*!
-    @brief Scratch particle holder.
-  */
-  particle_container<ito_particle> m_scratch_particles2;
-
   /*!
     @brief Parse superparticles
   */
@@ -927,8 +925,9 @@ protected:
   /*!
     @brief This computes the "conservative" deposition, multiplied by kappa
   */
+  template <class T>
   void deposit_kappaConservative(EBAMRCellData&                    a_state,
-				 const AMRParticles<ito_particle>& a_particles,
+				 const AMRParticles<T>& a_particles,
 				 const DepositionType::Which       a_deposition);
 
   /*!
@@ -1002,4 +1001,7 @@ protected:
   */
   RealVect random_position(const RealVect a_lo, const RealVect a_hi);
 };
+
+#include "ito_solverI.H"
+
 #endif

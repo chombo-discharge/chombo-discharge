@@ -674,7 +674,6 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   m_domain_particles.regrid( grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   m_source_particles.regrid( grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   m_scratch_particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_scratch_particles2.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
 }
 
 void ito_solver::set_species(RefCountedPtr<ito_species> a_species){
@@ -726,7 +725,6 @@ void ito_solver::allocate_internals(){
   m_amr->allocate(m_domain_particles,   m_pvr_buffer, m_realm);
   m_amr->allocate(m_source_particles,   m_pvr_buffer, m_realm);
   m_amr->allocate(m_scratch_particles,  m_pvr_buffer, m_realm);
-  m_amr->allocate(m_scratch_particles2, m_pvr_buffer, m_realm);
 }
 
 void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
@@ -1260,107 +1258,6 @@ void ito_solver::deposit_particles(){
   this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
 }
 
-void ito_solver::deposit_particles(EBAMRCellData& a_state, const AMRParticles<ito_particle>& a_particles){
-  CH_TIME("ito_solver::deposit_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::deposit_particles" << endl;
-  }
-
-  this->deposit_particles(a_state, a_particles, m_deposition);
-}
-
-void ito_solver::deposit_particles(EBAMRCellData&                    a_state,
-				   const AMRParticles<ito_particle>& a_particles,
-				   const DepositionType::Which       a_deposition){
-  CH_TIME("ito_solver::deposit_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::deposit_particles" << endl;
-  }
-           
-  this->deposit_kappaConservative(a_state, a_particles, a_deposition); // a_state contains only weights, i.e. not divided by kappa
-  if(m_redistribute){
-    this->deposit_nonConservative(m_depositionNC, a_state);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
-    this->deposit_hybrid(a_state, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
-    this->increment_redist(m_massDiff);                                  // Increment level redistribution register
-
-    // Do the redistribution magic
-    const bool ebcf = m_amr->get_ebcf();
-    if(ebcf){ // Mucho stuff to do here...
-      this->coarse_fine_increment(m_massDiff);       // Compute C2F, F2C, and C2C mass transfers
-      this->level_redistribution(a_state);           // Level redistribution. Weights is a dummy parameter
-      this->coarse_fine_redistribution(a_state);     // Do the coarse-fine redistribution
-    }
-    else{ // Very simple, redistribute this level.
-      this->level_redistribution(a_state);
-    }
-  }
-
-  // Average down and interpolate
-  m_amr->average_down(a_state, m_realm, m_phase);
-  m_amr->interp_ghost(a_state, m_realm, m_phase);
-}
-
-void ito_solver::deposit_kappaConservative(EBAMRCellData&                    a_state,
-					   const AMRParticles<ito_particle>& a_particles,
-					   const DepositionType::Which       a_deposition){
-  CH_TIME("ito_solver::deposit_kappaConservative");
-  if(m_verbosity > 5){
-    pout() << m_name + "::deposit_kappaConservative" << endl;
-  }
-
-  const int comp = 0;
-  const Interval interv(comp, comp);
-
-  const RealVect origin  = m_amr->get_prob_lo();
-  const int finest_level = m_amr->get_finest_level();
-
-  data_ops::set_value(a_state,    0.0);
-  data_ops::set_value(m_scratch,  0.0);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx                = m_amr->get_dx()[lvl];
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const ProblemDomain& dom     = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-    const RefCountedPtr<EBLevelGrid>& eblg = m_amr->get_eblg(m_realm, m_phase)[lvl];
-
-    const bool has_coar = (lvl > 0);
-    const bool has_fine = (lvl < finest_level);
-
-    // 1. If we have a coarser level whose cloud extends beneath this level, interpolate that result here first. 
-    if(has_coar){
-      RefCountedPtr<EBMGInterp>& interp = m_amr->get_eb_mg_interp(m_realm, m_phase)[lvl];
-      interp->pwcInterp(*a_state[lvl], *m_scratch[lvl-1], interv);
-    }
-    
-    // 2. Deposit this levels particles. Note that this will deposit into ghost cells, which must later
-    //    be added to neighboring patches
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
-      interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
-    }
-
-    // This code adds contributions from ghost cells into the valid region
-    const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_realm, m_phase)[lvl];
-    LDaddOp<FArrayBox> addOp;
-    LevelData<FArrayBox> aliasFAB;
-    aliasEB(aliasFAB, *a_state[lvl]);
-    aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
-
-    // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
-    //    interpolation of "hanging clouds"
-    if(has_fine && m_pvr_buffer > 0){
-      a_state[lvl]->localCopyTo(*m_scratch[lvl]);
-    }
-    else if(m_pvr_buffer <= 0 && has_coar){
-      EBGhostCloud& ghostcloud = *(m_amr->get_ghostcloud(m_realm, m_phase)[lvl]);
-      ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
-    }
-  }
-}
-
 void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC){
   CH_TIME("ito_solver::deposit_nonConservative");
   if(m_verbosity > 5){
@@ -1622,7 +1519,6 @@ void ito_solver::pre_regrid(const int a_base, const int a_old_finest_level){
   m_domain_particles.pre_regrid(a_base);
   m_source_particles.pre_regrid(a_base);
   m_scratch_particles.pre_regrid(a_base);
-  m_scratch_particles2.pre_regrid(a_base);
 }
 
 particle_container<ito_particle>& ito_solver::get_particles(){
@@ -1668,15 +1564,6 @@ particle_container<ito_particle>& ito_solver::get_scratch_particles(){
   }
 
   return m_scratch_particles;
-}
-
-particle_container<ito_particle>& ito_solver::get_scratch_particles2(){
-  CH_TIME("ito_solver::get_scratch_particles2");
-  if(m_verbosity > 5){
-    pout() << m_name + "::get_scratch_particles2" << endl;
-  }
-
-  return m_scratch_particles2;
 }
 
 EBAMRCellData& ito_solver::get_state(){

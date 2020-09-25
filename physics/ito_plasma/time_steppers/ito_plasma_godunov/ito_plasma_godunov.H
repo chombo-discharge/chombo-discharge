@@ -94,12 +94,13 @@ namespace physics {
       void swap_particle_positions();
       void setup_semi_implicit_poisson(const Real a_dt);
       void advect_particles_si(const Real a_dt);
-      void copy_particles_to_scratch();
-      void copy_particles_to_scratch2();
-      void compute_conductivity_with_scratch_particles();
-      void deposit_scratch_particles2();
+      void compute_regrid_conductivity();
+      void compute_regrid_rho();
       void copy_conductivity_particles();
       void copy_rho_dagger_particles();
+
+      //
+      void copy_particles_to_scratch();
 
       // Standard poisson setup
       void setup_standard_poisson();
