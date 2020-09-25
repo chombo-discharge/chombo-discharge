@@ -699,7 +699,7 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, con
   
   data_ops::set_value(a_conductivity, 0.0);
 
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
     RefCountedPtr<ito_species>& species = solver->get_species();
     

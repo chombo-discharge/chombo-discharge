@@ -366,6 +366,11 @@ public:
   virtual particle_container<ito_particle>& get_scratch_particles();
 
   /*!
+    @brief Get the particle container
+  */
+  virtual particle_container<ito_particle>& get_scratch_particles2();
+
+  /*!
     @brief Get the species
   */
   virtual RefCountedPtr<ito_species>& get_species();
@@ -855,9 +860,14 @@ protected:
   particle_container<ito_particle> m_source_particles;
 
   /*!
-    @brief Data holder for copying particles that are INSIDE the EB
+    @brief Scratch particle holder.
   */
   particle_container<ito_particle> m_scratch_particles;
+
+    /*!
+    @brief Scratch particle holder.
+  */
+  particle_container<ito_particle> m_scratch_particles2;
 
   /*!
     @brief Parse superparticles

@@ -665,6 +665,7 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   m_domain_particles.regrid( grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   m_source_particles.regrid( grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   m_scratch_particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_scratch_particles2.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
 }
 
 void ito_solver::set_species(RefCountedPtr<ito_species> a_species){
@@ -711,11 +712,12 @@ void ito_solver::allocate_internals(){
   
   // This allocates parallel data holders using the load balancing in amr_mesh. This might give poor
   // load balancing, but we will rectify that by rebalancing later.
-  m_amr->allocate(m_particles,         m_pvr_buffer, m_realm);
-  m_amr->allocate(m_eb_particles,      m_pvr_buffer, m_realm);
-  m_amr->allocate(m_domain_particles,  m_pvr_buffer, m_realm);
-  m_amr->allocate(m_source_particles,  m_pvr_buffer, m_realm);
-  m_amr->allocate(m_scratch_particles, m_pvr_buffer, m_realm);
+  m_amr->allocate(m_particles,          m_pvr_buffer, m_realm);
+  m_amr->allocate(m_eb_particles,       m_pvr_buffer, m_realm);
+  m_amr->allocate(m_domain_particles,   m_pvr_buffer, m_realm);
+  m_amr->allocate(m_source_particles,   m_pvr_buffer, m_realm);
+  m_amr->allocate(m_scratch_particles,  m_pvr_buffer, m_realm);
+  m_amr->allocate(m_scratch_particles2, m_pvr_buffer, m_realm);
 }
 
 void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
@@ -1611,6 +1613,7 @@ void ito_solver::pre_regrid(const int a_base, const int a_old_finest_level){
   m_domain_particles.pre_regrid(a_base);
   m_source_particles.pre_regrid(a_base);
   m_scratch_particles.pre_regrid(a_base);
+  m_scratch_particles2.pre_regrid(a_base);
 }
 
 particle_container<ito_particle>& ito_solver::get_particles(){
@@ -1656,6 +1659,15 @@ particle_container<ito_particle>& ito_solver::get_scratch_particles(){
   }
 
   return m_scratch_particles;
+}
+
+particle_container<ito_particle>& ito_solver::get_scratch_particles2(){
+  CH_TIME("ito_solver::get_scratch_particles2");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_scratch_particles2" << endl;
+  }
+
+  return m_scratch_particles2;
 }
 
 EBAMRCellData& ito_solver::get_state(){
