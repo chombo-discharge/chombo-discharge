@@ -2529,7 +2529,7 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
 
 #if ITO_DEBUG
   if(mass_before != mass_after) pout() << "ito_solver::bvh_merge failed. Mass before = " << mass_before << "\t Mass after = " << mass_after << endl;
-  if(energy_before != energy_after) pout() << "ito_solver::bvh_merge failed. Energy before = " << energy_before << "\t Energy after = " << energy_after << endl;
+  if((energy_before - energy_after) > 1.E-6) pout() << "ito_solver::bvh_merge failed. Energy before = " << energy_before << "\t Energy after = " << energy_after << endl;
 #endif
 }
 

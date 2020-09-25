@@ -112,9 +112,9 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
 
   // Particle-particle reactions
   m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}, {impact_loss}));
-  // m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
-  // m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
-  // m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
+  m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
+  m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
+  m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
   m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
   m_reactions.emplace("electron_scattering",    ito_reaction({m_electron_idx}, {m_electron_idx}, {friction_loss}));
 
@@ -173,9 +173,9 @@ void ito_plasma_air3_lea::update_reaction_rates_lea(const RealVect a_E, const Ve
   const Real bpe     = 1.138E-11*pow(Te, -0.7)/dV;
   
   m_reactions.at("impact_ionization").rate()      = alpha*velo;
-  // m_reactions.at("electron_attachment").rate()    = eta*velo;
-  // m_reactions.at("electron_recombination").rate() = bpe;
-  // m_reactions.at("ion_recombination").rate()      = bpn;
+  m_reactions.at("electron_attachment").rate()    = eta*velo;
+  m_reactions.at("electron_recombination").rate() = bpe;
+  m_reactions.at("ion_recombination").rate()      = bpn;
   m_reactions.at("photo_excitation").rate()       = alpha*velo*xfactor;
   m_reactions.at("electron_scattering").rate()    = scat;
 }

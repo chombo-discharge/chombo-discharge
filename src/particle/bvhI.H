@@ -225,7 +225,6 @@ inline void bvh_node<T>::split(const int a_dir){
       mass_left += splitMass.mass();
     }
     else{
-      //      MayDay::Abort("wtf");
       rightData.emplace_back(splitMass);
       mass_right += splitMass.mass();
     }

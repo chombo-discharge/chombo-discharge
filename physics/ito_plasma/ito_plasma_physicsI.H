@@ -304,13 +304,17 @@ void ito_plasma_physics::set_mean_particle_energy(Vector<List<ito_particle>* >& 
 
 inline
 void ito_plasma_physics::set_mean_particle_energy(List<ito_particle>& a_particles, const Real a_mean_energy) const{
-  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
-#if 1 // Original code
-    lit().energy() = a_mean_energy;
-#else // Override while working on bvh_merge
-    //    lit().mass()   = 128;
-    lit().energy() = 10.0;
+#if ITO_PLASMA_PHYSICS_DEBUG
+  if(a_mean_energy < 0.0){
+    pout() << "ito_plasma_physics::set_mean_particle_energy - energy = " << a_mean_energy << endl;
+  }
+  else if(a_mean_energy != a_mean_energy){
+    MayDay::Abort("ito_plasma_physics::set_mean_particle_energy - a_mean_energy is NaN!");
+  }
 #endif
+  
+  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
+    lit().energy() = a_mean_energy;
   }
 }
 
@@ -728,6 +732,8 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   const long long Qbefore = this->compute_charge(a_particles);
 #endif
 
+
+
   // Get particle counts. 
   Vector<long long> newPhotonCount   = Vector<long long>(m_num_rte_species, 0);
   Vector<long long> oldParticleCount = this->get_particle_count(a_particles);
@@ -751,6 +757,17 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
       sources[i] *= dV/units::s_Qe;
     }
   }
+
+#if ITO_PLASMA_PHYSICS_DEBUG
+  for (int i = 0; i < a_sources.size(); i++){
+    if(a_sources[i] != a_sources[i]){
+      MayDay::Abort("ito_plasma_physics::advance_reaction_network - got nan source!"); 
+    }
+    if(mean_energies[i] != mean_energies[i]){
+      MayDay::Abort("ito_plasma_physics::advance_reaction_network - got nan energy!"); 
+    }
+  }
+#endif
 
 #if 0 // Debug, set sources to 0
   for (int i = 0; i < sources.size(); i++){
@@ -1306,15 +1323,23 @@ void ito_plasma_physics::energy_step(Vector<Real>&            a_mean_energies,
 				     const Real               a_dx,
 				     const Real               a_kappa,
 				     const Real               a_dt) const {
+  constexpr long long zero = 0;
 
-  const Real dV = a_kappa*pow(a_dx, SpaceDim);
+  if(a_dt != a_dt) MayDay::Abort("got nan dt");
+  
   for (int i = 0; i < a_particles.size(); i++){
-    if(a_particles[i] > 0){
+    if(a_particles[i] > zero){
       a_mean_energies[i] = Max(0.0, a_mean_energies[i] + a_sources[i]*a_dt/a_particles[i]);
     }
     else{
       a_mean_energies[i] = 0.0;
     }
+
+#if ITO_PLASMA_PHYSICS_DEBUG
+    if(a_mean_energies[i] != a_mean_energies[i]){
+      MayDay::Abort("ito_plasma_physics::energy_step - got NaN energy...");
+    }
+#endif
   }
 }
 
@@ -1390,14 +1415,15 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
 	    const Real dtNext = log(1./u1)/A;
 
 	    valid    = true;
-	    curTime += dtNext;
-	    if(curTime <= a_dt){ // Ok, we are inside [0, a_dt] and we can do the reaction.
+	    //	    curTime += dtNext;
+	    if(curTime + dtNext <= a_dt){ // Ok, we are inside [0, a_dt] and we can do the reaction.
 	      this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, A, a_dx, a_kappa, dtNext);
+	      curTime += dtNext;
 	    }
 	    else{ // Next reaction is outside the interval, but we should still increment with the energy.
-	      const Real dt = dtNext - (curDt - a_dt);
-	      this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, dt);
-	      break; 
+	      this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, a_dt-curTime);
+	      curTime += dtNext;
+	      break;
 	    }
 
 	    // Update reaction rates and propensity for the next SSA step. 
