@@ -198,10 +198,10 @@ inline void bvh_node<T>::split(const int a_dir){
       Real massRight = 0.0;
       Real massRem   = mass - massDiff;
 
-      const int N  = round(massRem*(1.0 + 1.E-6));
+      const long long N  = llround(massRem);//*(1.0 + 1.E-6));
       if(N > 0){ 
-	const int NR = N/2;
-	const int NL = N - NR;
+	const long long NR = N/2;
+	const long long NL = N - NR;
 
 	massLeft  += (massRem/N)*NL;
 	massRight += (massRem/N)*NR;
@@ -342,15 +342,8 @@ inline void bvh_tree<T>::build_tree(const int a_numLeaves){
       
       if(m_leaves[i]->can_split() && leavesNeeded > 0){ // Only split if we actually need more leaves. 
 	can_split = true;
-#if 1 // Original code
-	m_leaves[i]->split(splitDir);
-#else
-	for (int k = 0; k < 10; k++){
-	  m_leaves[i]->split(splitDir);
 
-	  splitDir = (splitDir+1)%SpaceDim;
-	}
-#endif
+	m_leaves[i]->split(splitDir);
 	
 	m_new_leaves[N]   = m_leaves[i]->get_left(); 
 	m_new_leaves[N+1] = m_leaves[i]->get_right();
