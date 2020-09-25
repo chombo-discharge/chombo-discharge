@@ -310,7 +310,7 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
   // Set up semi-implicit poisson again, with particles after diffusion jump (the rho^\dagger)
   this->setup_semi_implicit_poisson(m_prevDt);
 
-  // Recompute the space charge
+  // Recompute the space charge. This deposits the m_rho_dagger particles. 
   this->compute_regrid_rho();
   
   // Compute the electric field
@@ -318,6 +318,9 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
   if(!converged){
     MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
   }
+
+  // Now let the ito solver deposit its actual particles...
+  m_ito->deposit_particles();
 
   // Recompute new velocities and diffusion coefficients
   this->compute_ito_velocities();
@@ -366,7 +369,14 @@ void ito_plasma_godunov::compute_regrid_rho(){
     pout() << m_name + "::compute_regrid_rho" << endl;
   }
 
-  MayDay::Abort("ito_plasma_godunov::compute_regrid_rho - not implemented!");
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>&   solver = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+    
+    solver->deposit_particles(solver->get_state(), *m_rho_dagger_particles[idx]); 
+  }
 }
 
 void ito_plasma_godunov::regrid_conductivity(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
