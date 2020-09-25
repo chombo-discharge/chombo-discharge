@@ -38,7 +38,7 @@ driver.geometry_generation             = plasmac       # Grid generation method,
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
 driver.plot_interval                   = 1            # Plot interval
-driver.regrid_interval                 = -1            # Regrid interval
+driver.regrid_interval                 = 10            # Regrid interval
 driver.checkpoint_interval             = -1            # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
@@ -255,6 +255,6 @@ ito_plasma_streamer_tagger.buffer            = 0            # Grow tagged cells
 
 ito_plasma_streamer_tagger.refine_curvature  = 10.0         # Curvature refinement
 ito_plasma_streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	
-ito_plasma_streamer_tagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
-ito_plasma_streamer_tagger.coarsen_alpha     = 10.0         # Set alpha coarsening. Higher => Less mesh
+ito_plasma_streamer_tagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
+ito_plasma_streamer_tagger.coarsen_alpha     = 99.0         # Set alpha coarsening. Higher => Less mesh
 ito_plasma_streamer_tagger.max_coarsen_lvl   = 3            # Set max coarsening depth

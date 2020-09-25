@@ -24,7 +24,7 @@
 
 #include <chrono>
 
-#define ITO_DEBUG 1
+#define ITO_DEBUG 0
 
 ito_solver::ito_solver(){
   m_name       = "ito_solver";
@@ -2528,7 +2528,7 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
 
 #if ITO_DEBUG
   if(mass_before != mass_after)     pout() << "ito_solver::bvh_merge failed. Mass before = "   << mass_before   << "\t Mass after = "   << mass_after << endl;
-  if(energy_before != energy_after) pout() << "ito_solver::bvh_merge failed. Energy before = " << energy_before << "\t Energy after = " << energy_after << endl;
+  if(energy_before != energy_after) pout() << "ito_solver::bvh_merge failed. Energy before/after = " << energy_before/energy_after << "\t Energy after = " << energy_after << endl;
 #endif
 }
 

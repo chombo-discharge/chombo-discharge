@@ -16,7 +16,7 @@
 
 #include <PolyGeom.H>
 
-#define ITO_PLASMA_PHYSICS_DEBUG 1
+#define ITO_PLASMA_PHYSICS_DEBUG 0
 
 using namespace physics::ito_plasma;
 
@@ -1302,15 +1302,14 @@ void ito_plasma_physics::advance_ssa(Vector<long long>& a_particles,
       u1     = m_udist01(m_rng);
       nextDt = log(1./u1)/A;
 
-      // Time after next collision. 
-      curDt += nextDt;
 
-      if(curDt <= a_dt){ // Collision within a_dt, do an SSA step. 
+      if(curDt + nextDt <= a_dt){ // Collision within a_dt, do an SSA step.
+	curDt += nextDt;
 	this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, reactions, A, a_dx, a_kappa, nextDt);
       }
       else{ // No reaction in this time interval, but we should still increment/decrement the energy with the source.
-	const Real dt = nextDt - (curDt - a_dt);
-	this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, dt);
+	curDt += nextDt;
+	this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, a_dt-curDt);
       }
     }
   }
@@ -1324,8 +1323,6 @@ void ito_plasma_physics::energy_step(Vector<Real>&            a_mean_energies,
 				     const Real               a_kappa,
 				     const Real               a_dt) const {
   constexpr long long zero = 0;
-
-  if(a_dt != a_dt) MayDay::Abort("got nan dt");
   
   for (int i = 0; i < a_particles.size(); i++){
     if(a_particles[i] > zero){
