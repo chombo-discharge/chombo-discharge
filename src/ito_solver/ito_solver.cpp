@@ -24,16 +24,7 @@
 
 #include <chrono>
 
-#define ITO_DEBUG 0
-
-#if ITO_DEBUG
-int numPar;
-duration<double> tIni;//   = duration_cast<duration<double> >(0.0);
-duration<double> tBvh;//   = duration_cast<duration<double> >(0.0);
-duration<double> tPar;//   = duration_cast<duration<double> >(0.0);
-duration<double> tTot;//   = duration_cast<duration<double> >(0.0);
-duration<double> tAll;//   = duration_cast<duration<double> >(0.0);
-#endif
+#define ITO_DEBUG 1
 
 ito_solver::ito_solver(){
   m_name       = "ito_solver";
@@ -2442,17 +2433,11 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch){
   if(m_verbosity > 5){
     pout() << m_name + "::make_superparticles(int)" << endl;
   }
-#if ITO_DEBUG
-  tAll = duration<double>(0.0);
-#endif
   
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     this->make_superparticles(a_particlesPerPatch, lvl);
   }
 
-#if ITO_DEBUG
-  pout() << "superparticle merging total time = " << tAll.count() << endl;
-#endif
 }
 
 void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_level){
@@ -2473,14 +2458,6 @@ void ito_solver::make_superparticles(const int a_particlesPerCell, const int a_l
   if(m_verbosity > 5){
     pout() << m_name + "::make_superparticles(int, level, patch)" << endl;
   }
-
-#if ITO_DEBUG
-  numPar = 0;
-  tIni = duration<double>(0.0);
-  tBvh = duration<double>(0.0);
-  tPar = duration<double>(0.0);
-  tTot = duration<double>(0.0);
-#endif
   
   const int comp = 0;
   const Box box  = m_amr->get_grids(m_realm)[a_level].get(a_dit);
@@ -2499,25 +2476,17 @@ void ito_solver::make_superparticles(const int a_particlesPerCell, const int a_l
       }
   }
 
-#if ITO_DEBUG
-  pout() << "ini time  = " << 100.*tIni.count()/tTot.count() << "%" << endl
-  	 << "bvh time  = " << 100.*tBvh.count()/tTot.count() << "%" << endl
-  	 << "par time  = " << 100.*tPar.count()/tTot.count() << "%" << endl
-    	 << "particles = " << numPar << endl
-  	 << "time/par  = " << tTot.count()/numPar << endl
-    	 << "Tot time  = " << tTot.count() << endl
-  	 << endl;
-
-  tAll += tTot;
-#endif
 }
 
 void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particlesPerCell){
   CH_TIME("ito_solver::bvh_merge");
 
 #if ITO_DEBUG
-  auto t1 = std::chrono::high_resolution_clock::now();
-  const int numPart = a_particles.length();
+  Real mass_before = 0.0;
+  Real energy_before = 0.0;
+  
+  Real mass_after = 0.0;
+  Real energy_after = 0.0;
 #endif
   
   std::vector<point_mass> pointMasses(a_particles.length());
@@ -2525,31 +2494,25 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
   Real mass = 0.0;
   for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
     const ito_particle& p = lit();
-    pointMasses[i].define(p.position(), p.mass(), p.energy());
+    //    pointMasses[i].define(p.position(), p.mass(), p.energy()); // Note, p.energy() is average energy and not total energy.
+    pointMasses[i].define(p.position(), p.mass(), p.energy()); // Note, p.energy() is average energy and not total energy.
     mass += p.mass();
     i++;
+
+#if ITO_DEBUG
+    mass_before += p.mass();
+    energy_before += p.mass()*p.energy();
+    if(p.mass() < 1.0){
+      MayDay::Abort("ito_solver::bvh_merge - bad mass!");
+    }
+#endif
   }
   
-#if ITO_DEBUG
-  auto t2 = std::chrono::high_resolution_clock::now();
-#endif
 
   // 2. Build the BVH tree and get the leaves of the tree
-#if 0 // Original code
-  bvh_tree<point_mass> tree(pointMasses, mass);
-  tree.build_tree(a_particlesPerCell);
-  const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
-#else
   m_tree.define(pointMasses, mass);
   m_tree.build_tree(a_particlesPerCell);
   const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = m_tree.get_leaves();
-#endif
-
-
-#if ITO_DEBUG
-  auto t3 = std::chrono::high_resolution_clock::now();
-#endif
-
 
   // 3. Clear particles in this cell and add new ones.
   a_particles.clear();
@@ -2557,16 +2520,16 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
     point_mass pointMass(leaves[i]->get_data());
     ito_particle p(pointMass.mass(), pointMass.pos(), RealVect::Zero, 0.0, 0.0, pointMass.energy());
     a_particles.add(p);
+
+#if ITO_DEBUG
+    mass_after += p.mass();
+    energy_after += p.mass()*p.energy();
+#endif
   }
 
 #if ITO_DEBUG
-  auto t4 = std::chrono::high_resolution_clock::now();
-
-  numPar += numPart;
-  tIni += duration_cast<duration<double> > (t2-t1);
-  tBvh += duration_cast<duration<double> > (t3-t2);
-  tPar += duration_cast<duration<double> > (t4-t3);
-  tTot += duration_cast<duration<double> > (t4-t1);
+  if(mass_before != mass_after) pout() << "ito_solver::bvh_merge failed. Mass before = " << mass_before << "\t Mass after = " << mass_after << endl;
+  if(energy_before != energy_after) pout() << "ito_solver::bvh_merge failed. Energy before = " << energy_before << "\t Energy after = " << energy_after << endl;
 #endif
 }
 

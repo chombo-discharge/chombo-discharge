@@ -305,7 +305,12 @@ void ito_plasma_physics::set_mean_particle_energy(Vector<List<ito_particle>* >& 
 inline
 void ito_plasma_physics::set_mean_particle_energy(List<ito_particle>& a_particles, const Real a_mean_energy) const{
   for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
+#if 1 // Original code
     lit().energy() = a_mean_energy;
+#else // Override while working on bvh_merge
+    //    lit().mass()   = 128;
+    lit().energy() = 10.0;
+#endif
   }
 }
 
@@ -315,9 +320,9 @@ void ito_plasma_physics::sanity_check(const List<ito_particle>& a_particles) con
   ListIterator<ito_particle> lit(a_particles);
   
   for (lit.begin(); lit.ok(); ++lit){
-    const long long w = llround(lit().mass());
+    const Real w = lit().mass();
 
-    if(w < 1) MayDay::Abort("ito_plasma_physics::sanity_check - can't have w < 1!!!!");
+    if(w < 1.0) MayDay::Abort("ito_plasma_physics::sanity_check - can't have w < 1!!!!");
   }
 }
 
@@ -1095,7 +1100,7 @@ void ito_plasma_physics::advance_tau(Vector<long long>&  a_particles,
 
   // Do a tau step. Use rejection sampling so we only get valid states. But don't update reaction rates. 
   Real curTime  = 0.0;
-  Real nextDt  = a_dt;
+  Real nextDt   = a_dt;
 
   bool valid = false;
   while(curTime < a_dt){

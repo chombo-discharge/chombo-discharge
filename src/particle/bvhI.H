@@ -15,7 +15,7 @@
 using namespace std::chrono;
 
 #define BVH_RESERVE_SIZE 2048
-#define BVH_DEBUG 0
+#define BVH_DEBUG 1
 
 template <class T>
 bvh_node<T>::bvh_node(){
@@ -104,6 +104,8 @@ inline bool bvh_node<T>::can_split() const {
     }
   }
 
+  //  return m_mass >= 2.0;
+  return m_mass >= 2.0;
   return ret;
 }
 
@@ -114,11 +116,20 @@ inline Real bvh_node<T>::mass() const {
 
 template <class T>
 inline void bvh_node<T>::split(const int a_dir){
+#if BVH_DEBUG
+  for (const auto& d : m_data){
+    if(d.mass() < 1.0) {
+      std::cout << d.mass() << std::endl;
+      MayDay::Warning("bvh_node<T>::split - how did mass be come <= 1??");
+    }
+  }
+#endif
 
   // 0. If we made it in here, we KNOW that we can split.
-#if BVH_DEBUG // Debug
-  if(m_mass < 0.0){
-    MayDay::Abort("should not get negative mass!");
+#if BVH_DEBUG // Debugging flag to see if we're doing something bad. 
+  if(m_mass <= 1.1){
+    std::cout << m_mass << std::endl;
+    MayDay::Warning("bvh_node::split - m_mass <= 1.0, splitting should not be called");
   }
 #endif
 
@@ -127,7 +138,7 @@ inline void bvh_node<T>::split(const int a_dir){
   // 1. Sort data. Use a lambda for comparing. God I love C++11.
   std::sort(std::begin(m_data), std::end(m_data), [a_dir](const T& p1, const T& p2){return p1[a_dir] < p2[a_dir];});
 
-  // Init median on i = 0
+  // Init median on i = 0. mass_left and mass_right are the masses on each side of the median mass. 
   int splitIndex  = 0;
   Real mass_left  = 0.0;
   Real mass_right = m_mass - m_data[0].mass();
@@ -162,9 +173,9 @@ inline void bvh_node<T>::split(const int a_dir){
   const T& splitMass = m_data[splitIndex];
   if(splitMass.can_split()){
     const RealVect& p   = splitMass.pos();
-    const Real& mass    = splitMass.mass();       // Always positive
-    const Real& energy  = splitMass.energy();     // Energy of split mass particle
-    const Real massDiff = mass_right - mass_left; // Not necessarily positive
+    const Real& mass    = splitMass.mass();         // Always positive
+    const Real& energy  = splitMass.energy();       // Total energy of split mass particle
+    const Real massDiff = mass_right - mass_left;   // Not necessarily positive
 
 
     // This hook is for when we don't have enough mass to distribute to the two parts. 
@@ -196,31 +207,53 @@ inline void bvh_node<T>::split(const int a_dir){
 	massRight += (massRem/N)*NR;
       }
 
-      const Real energyLeft  = energy*massLeft/mass;
-      const Real energyRight = energy*massRight/mass;
+      if(massLeft > 0.0){
+	leftData.emplace_back(T(p, massLeft, energy));
+	mass_left  += massLeft;
+      }
 
-      leftData.emplace_back(T(p, massLeft, energyLeft));
-      mass_left  += massLeft;
-
-      rightData.emplace_back(T(p, massRight, energyRight));
-      mass_right += massRight;
+      if(massRight > 0.0){
+	rightData.emplace_back(T(p, massRight, energy));
+	mass_right += massRight;
+      }
     }
   }
   else{
     //    We should be able to simplify this since it always goes into the left mass(?)
-    //    if(mass_left <= mass_right){
+    if(mass_left <= mass_right){
       leftData.emplace_back(splitMass);
       mass_left += splitMass.mass();
-    // }
-    // else{
-    //   MayDay::Abort("wtf");
-    //   rightData.emplace_back(splitMass);
-    //   mass_right += splitMass.mass();
-    // }
+    }
+    else{
+      //      MayDay::Abort("wtf");
+      rightData.emplace_back(splitMass);
+      mass_right += splitMass.mass();
+    }
   }
 
 #if BVH_DEBUG // Make sure we don't break mass
   if(Abs(m_mass - (mass_left + mass_right)) > 1.E-6) MayDay::Abort("bvh_node::split - broke mass");
+  if(mass_left <= 0.1) {
+    std::cout << m_mass << "\t" << mass_left << "\t" << mass_right << std::endl;
+    MayDay::Abort("bvh_node::split - got zero left mass");
+  }
+  if(mass_right <= 0.1) {
+    std::cout << m_mass << "\t" << mass_left << "\t" << mass_right << std::endl;
+    MayDay::Abort("bvh_node::split - got zero right mass");
+  }
+#endif
+
+#if BVH_DEBUG
+  for (const auto& l : leftData){
+    if(l.mass() <= 0.0){
+      MayDay::Abort("bvh_node::split - left data got a zero mass particle... :(");
+    }
+  }
+  for (const auto& l : rightData){
+    if(l.mass() <= 0.0){
+      MayDay::Abort("bvh_node::split - right data got a zero mass particle... :(");
+    }
+  }
 #endif
 
   m_left->set_mass(mass_left);
@@ -274,6 +307,12 @@ inline std::vector<std::shared_ptr<bvh_node<T> > >& bvh_tree<T>::get_leaves(){
 
 template <class T>
 inline void bvh_tree<T>::build_tree(const int a_numLeaves){
+  
+#if BVH_DEBUG
+  for (const auto& d : m_root->get_data()){
+    if(d.mass() < 1.0) MayDay::Abort("bvh_node<T>::build_tree - how did mass become <= 0??");
+  }
+#endif
 
   bool keepSplitting = a_numLeaves > 1;
 

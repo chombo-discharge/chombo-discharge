@@ -32,7 +32,7 @@ point_mass::point_mass(const std::vector<point_mass>& a_point_masses){
     m_energy += m*e;
   }
 
-  m_pos = m_pos/m_mass;
+  m_pos    = m_pos/m_mass;
   m_energy = m_energy/m_mass;
 }
 
