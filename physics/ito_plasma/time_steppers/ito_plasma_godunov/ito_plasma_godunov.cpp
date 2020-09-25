@@ -330,7 +330,34 @@ void ito_plasma_godunov::compute_regrid_conductivity(){
     pout() << m_name + "::compute_regrid_conductivity" << endl;
   }
 
-  MayDay::Abort("ito_plasma_godunov::compute_regrid_conductivity - not implemented!");
+  data_ops::set_value(m_conduct_cell, 0.0);
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>&   solver = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+    
+    const int idx = solver_it.get_solver();
+    const int q   = species->get_charge();
+
+    if(Abs(q) > 0 && solver->is_mobile()){
+      data_ops::set_value(m_particle_scratch1, 0.0);
+
+      solver->deposit_particles(m_particle_scratch1, *m_conductivity_particles[idx]); // This deposit mu*mass
+
+      // Copy to fluid realm and add to fluid stuff
+      m_fluid_scratch1.copy(m_particle_scratch1);
+      data_ops::incr(m_conduct_cell, m_fluid_scratch1, Abs(q));
+    }
+  }
+  
+  data_ops::scale(m_conduct_cell, units::s_Qe);
+
+  m_amr->average_down(m_conduct_cell, m_fluid_realm, m_phase);
+  m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
+  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
+
+  // Now do the faces
+  this->compute_face_conductivity();
 }
 
 void ito_plasma_godunov::compute_regrid_rho(){
