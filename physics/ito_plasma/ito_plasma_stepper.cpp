@@ -687,18 +687,29 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity){
     pout() << "ito_plasma_stepper::compute_conductivity(conductivity)" << endl;
   }
 
+  this->compute_conductivity(a_conductivity, m_ito->get_particles());
+  
+}
+
+void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, const Vector<particle_container<ito_particle>* >& a_particles){
+  CH_TIME("ito_plasma_stepper::compute_conductivity(conductivity)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_conductivity(conductivity)" << endl;
+  }
+  
   data_ops::set_value(a_conductivity, 0.0);
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
     RefCountedPtr<ito_species>& species = solver->get_species();
-
-    const int q = species->get_charge();
+    
+    const int idx = solver_it.get_solver();
+    const int q   = species->get_charge();
 
     if(Abs(q) > 0 && solver->is_mobile()){
       data_ops::set_value(m_particle_scratch1, 0.0);
 
-      solver->deposit_conductivity(m_particle_scratch1, solver->get_particles());
+      solver->deposit_conductivity(m_particle_scratch1, *a_particles[idx]);
 
       // Copy to fluid realm and add to fluid stuff
       m_fluid_scratch1.copy(m_particle_scratch1);

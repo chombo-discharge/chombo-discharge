@@ -259,7 +259,7 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
     pout() << "ito_plasma_godunov::regrid" << endl;
   }
 
-  if(true){//m_algorithm == which_algorithm::euler){
+  if(m_algorithm == which_algorithm::euler){
     ito_plasma_stepper::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
   }
   else{
@@ -272,6 +272,10 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
   if(m_verbosity > 5){
     pout() << "ito_plasma_godunov::regrid_si" << endl;
   }
+
+  // Since we have now added the mobility to ito_particles, we should just deposit the scratch particles and redo the poisson solve from the last time
+  // step before the regrid. There is no need to regrid the conductivity or any of that crap. 
+  MayDay::Abort("ito_plasma_godunov::regrid_si - stop, regrid method still WIP");
 
   // Allocate new memory
   this->allocate_internals();

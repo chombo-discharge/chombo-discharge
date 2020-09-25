@@ -101,6 +101,7 @@ namespace physics {
 
       // Compute conductivity routines
       void compute_conductivity(EBAMRCellData& a_conductivity);
+      void compute_conductivity(EBAMRCellData& a_conductivity, const Vector<particle_container<ito_particle>* >& a_particles);
 
       // Compute J routines
       void compute_J(EBAMRCellData& a_J, const Real a_dt);
