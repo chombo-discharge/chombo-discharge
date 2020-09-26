@@ -82,6 +82,37 @@ void ito_plasma_godunov::parse_options() {
   }
 }
 
+void ito_plasma_godunov::allocate(){
+  CH_TIME("ito_plasma_godunov::allocate");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_godunov::allocate" << endl;
+  }
+
+  m_ito->allocate_internals();
+  m_rte->allocate_internals();
+  m_poisson->allocate_internals();
+  m_sigma->allocate_internals();
+
+  // Now allocate for the conductivity particles and rho^dagger particles
+  const int num_ito_species = m_physics->get_num_ito_species();
+  
+  m_conductivity_particles.resize(num_ito_species);
+  m_rho_dagger_particles.resize(num_ito_species);
+  
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<ito_solver>& solver = solver_it();
+
+    const int idx        = solver_it.get_solver();
+    const int pvr_buffer = solver->get_pvr_buffer();
+
+    m_conductivity_particles[idx] = new particle_container<godunov_particle>();
+    m_rho_dagger_particles[idx]   = new particle_container<godunov_particle>();
+    
+    m_amr->allocate(*m_conductivity_particles[idx], pvr_buffer, m_particle_realm);
+    m_amr->allocate(*m_rho_dagger_particles[idx],   pvr_buffer, m_particle_realm);
+  }
+}
+
 void ito_plasma_godunov::allocate_internals(){
   CH_TIME("ito_plasma_godunov::allocate_internals");
   if(m_verbosity > 5){
@@ -109,24 +140,6 @@ void ito_plasma_godunov::allocate_internals(){
   for (int i = 0; i < m_energy_sources.size(); i++){
     m_amr->allocate(m_energy_sources[i],  m_particle_realm, m_phase, 1);
   }
-
-  // Now allocate for the conductivity particles and rho^dagger particles
-  m_conductivity_particles.resize(num_ito_species);
-  m_rho_dagger_particles.resize(num_ito_species);
-  
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<ito_solver>& solver = solver_it();
-
-    const int idx        = solver_it.get_solver();
-    const int pvr_buffer = solver->get_pvr_buffer();
-
-    m_conductivity_particles[idx] = new particle_container<godunov_particle>();
-    m_rho_dagger_particles[idx]   = new particle_container<godunov_particle>();
-    
-    m_amr->allocate(*m_conductivity_particles[idx], pvr_buffer, m_particle_realm);
-    m_amr->allocate(*m_rho_dagger_particles[idx],   pvr_buffer, m_particle_realm);
-  }
-
 }
 
 int ito_plasma_godunov::get_num_plot_vars() const {
@@ -181,14 +194,15 @@ void ito_plasma_godunov::post_checkpoint_setup() {
     pout() << "ito_plasma_godunov::post_checkpoint_setup" << endl;
   }
 
-  if(m_algorithm == which_algorithm::euler){ // Default method is just fine. 
-
+  if(true){//m_algorithm == which_algorithm::euler){ // Default method is just fine. 
+    ito_plasma_stepper::post_checkpoint_setup();
   }
   else if(m_algorithm == which_algorithm::semi_implicit) {
     // Strange but true thing. The semi_implicit algorithm needs particles that ended up inside the EB to deposit
     // their charge on the mesh. These were copied to a separate container earlier which was checkpointed. We move
     // those back to the solvers and redeposit on the mesh. 
     //    m_ito->move_invalid_particles_to_particles();
+    MayDay::Abort("ito_plasma_godunov::post_checkpoint_setup - this is about to get deprecated...");
     m_ito->deposit_particles();
     
     // Recompute poisson
@@ -268,6 +282,13 @@ void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_lev
     for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
       m_conduct_cell[lvl]->localCopyTo(*m_cache[lvl]);
     }
+
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      
+      m_conductivity_particles[idx]->pre_regrid(a_lmin);
+      m_rho_dagger_particles[idx]->pre_regrid(a_lmin);
+    }
   }
 }
 
@@ -291,18 +312,27 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
     pout() << "ito_plasma_godunov::regrid_si" << endl;
   }
 
-  // Since we have now added the mobility to ito_particles, we should just deposit the scratch particles and redo the poisson solve from the last time
-  // step before the regrid. There is no need to regrid the conductivity or any of that crap. 
-  //  MayDay::Abort("ito_plasma_godunov::regrid_si - stop, regrid method still WIP");
-
-  // Allocate new memory
-  this->allocate_internals();
-
   // Regrid solvers
   m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
   m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
   m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
   m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
+
+  // Allocate internal memory for ito_plasma_godunov now....
+  this->allocate_internals();
+
+  // We need to remap/regrid the stored particles as well. 
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_particle_realm);
+  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+  const Vector<Real>& dx                 = m_amr->get_dx();
+  const Vector<int>& ref_rat             = m_amr->get_ref_rat();
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_conductivity_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+    m_rho_dagger_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  }
+
 
   // Recompute the conductivity with the other particles
   this->compute_regrid_conductivity();
@@ -310,7 +340,7 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
   // Set up semi-implicit poisson again, with particles after diffusion jump (the rho^\dagger)
   this->setup_semi_implicit_poisson(m_prevDt);
 
-  // Recompute the space charge. This deposits the m_rho_dagger particles. 
+  // Recompute the space charge. This deposits the m_rho_dagger particles onto the states. 
   this->compute_regrid_rho();
   
   // Compute the electric field
@@ -325,6 +355,8 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
   // Recompute new velocities and diffusion coefficients
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
+
+
 }
 
 void ito_plasma_godunov::compute_regrid_conductivity(){
@@ -342,7 +374,7 @@ void ito_plasma_godunov::compute_regrid_conductivity(){
     const int idx = solver_it.get_solver();
     const int q   = species->get_charge();
 
-    if(Abs(q) > 0 && solver->is_mobile()){
+    if(q != 0 && solver->is_mobile()){
       data_ops::set_value(m_particle_scratch1, 0.0);
 
       solver->deposit_particles(m_particle_scratch1, *m_conductivity_particles[idx]); // This deposit mu*mass

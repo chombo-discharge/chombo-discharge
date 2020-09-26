@@ -32,6 +32,7 @@ namespace physics {
       void compute_dt(Real& a_dt, time_code& a_timecode) override;
 
       // Setup routines
+      void allocate() override;
       void parse_options() override;
       void allocate_internals() override;
       void post_checkpoint_setup() override;
