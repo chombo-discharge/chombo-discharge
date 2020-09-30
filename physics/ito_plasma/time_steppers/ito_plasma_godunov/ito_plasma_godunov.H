@@ -35,7 +35,6 @@ namespace physics {
       void allocate() override;
       void parse_options() override;
       void allocate_internals() override;
-      void post_checkpoint_setup() override;
 
       // Regrid routines
       void pre_regrid(const int a_lmin, const int a_old_finest_level) override;

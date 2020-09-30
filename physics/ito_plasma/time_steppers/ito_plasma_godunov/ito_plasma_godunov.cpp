@@ -188,33 +188,6 @@ void ito_plasma_godunov::write_conductivity(EBAMRCellData& a_output, int& a_icom
   a_icomp += 1;
 }
 
-void ito_plasma_godunov::post_checkpoint_setup() {
-  CH_TIME("ito_plasma_godunov::post_checkpoint_setup");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::post_checkpoint_setup" << endl;
-  }
-
-  if(true){//m_algorithm == which_algorithm::euler){ // Default method is just fine. 
-    ito_plasma_stepper::post_checkpoint_setup();
-  }
-  else if(m_algorithm == which_algorithm::semi_implicit) {
-    // Strange but true thing. The semi_implicit algorithm needs particles that ended up inside the EB to deposit
-    // their charge on the mesh. These were copied to a separate container earlier which was checkpointed. We move
-    // those back to the solvers and redeposit on the mesh. 
-    //    m_ito->move_invalid_particles_to_particles();
-    MayDay::Abort("ito_plasma_godunov::post_checkpoint_setup - this is about to get deprecated...");
-    m_ito->deposit_particles();
-    
-    // Recompute poisson
-    this->solve_poisson();
-    this->allocate_internals();
-
-  
-    this->compute_ito_velocities();
-    this->compute_ito_diffusion();
-  }
-}
-
 void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
   CH_TIME("ito_plasma_godunov::compute_dt");
   if(m_verbosity > 5){
