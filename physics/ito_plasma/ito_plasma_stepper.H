@@ -37,6 +37,7 @@ namespace physics {
       virtual void initial_data() override;
       virtual void initial_sigma();
       virtual void post_checkpoint_setup() override;
+      virtual void post_checkpoint_poisson();
       virtual void post_initialize() override;
       
       void setup_ito();

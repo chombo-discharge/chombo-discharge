@@ -8,6 +8,7 @@
 #include "ito_plasma_stepper.H"
 #include "data_ops.H"
 #include "units.H"
+#include "poisson_multifluid_gmg.H"
 
 #include <EBArith.H>
 #include <PolyGeom.H>
@@ -201,13 +202,52 @@ void ito_plasma_stepper::post_checkpoint_setup(){
     pout() << "ito_plasma_stepper::post_checkpoint_setup" << endl;
   }
 
-  // Recompute poisson
-  this->solve_poisson();
+  //this->solve_poisson();
   this->allocate_internals();
-
+  
+  this->post_checkpoint_poisson();
   
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
+}
+
+void ito_plasma_stepper::post_checkpoint_poisson(){
+  CH_TIME("ito_plasma_stepper::post_checkpoint_poisson");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::post_checkpoint_poisson" << endl;
+  }
+
+  // Do some post checkpointing stuff. 
+  m_poisson->post_checkpoint();
+  
+  // Do ghost cells and then compute E
+  MFAMRCellData& state = m_poisson->get_state();
+
+  m_amr->average_down(state, m_fluid_realm);
+  m_amr->interp_ghost(state, m_fluid_realm);
+
+  m_poisson->compute_E();    // Solver checkpoints the potential. Now compute the field.
+
+  // Interpolate the fields to centroids
+  EBAMRCellData E;
+  m_amr->allocate_ptr(E);
+  m_amr->alias(E, m_phase, m_poisson->get_E());
+  
+  // Fluid realm
+  m_fluid_E.copy(E);
+  m_amr->average_down(m_fluid_E, m_fluid_realm, m_phase);
+  m_amr->interp_ghost_pwl(m_fluid_E, m_fluid_realm, m_phase);
+  m_amr->interpolate_to_centroids(m_fluid_E, m_fluid_realm, m_phase);
+
+  // Particle realm
+  m_particle_E.copy(E);
+  m_amr->average_down(m_particle_E, m_particle_realm, m_phase);
+  m_amr->interp_ghost_pwl(m_particle_E, m_particle_realm, m_phase);
+  m_amr->interpolate_to_centroids(m_particle_E, m_fluid_realm, m_phase);
+
+  // Compute maximum E
+  // const Real Emax = this->compute_Emax(m_phase);
+  // std::cout << Emax << std::endl;
 }
 
 void ito_plasma_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const {

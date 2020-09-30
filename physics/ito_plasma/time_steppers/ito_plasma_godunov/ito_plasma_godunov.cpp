@@ -1158,6 +1158,7 @@ void ito_plasma_godunov::compute_face_conductivity(){
   data_ops::set_value(m_conduct_eb, 0.0);
   data_ops::incr(m_conduct_eb, m_conduct_cell, 1.0);
 #endif
+
 }
 
 void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){

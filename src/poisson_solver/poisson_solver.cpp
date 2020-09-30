@@ -638,6 +638,15 @@ void poisson_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_lev
   if(!ebis_sol.isNull()) read<EBCellFAB>(a_handle, state_sol, "poisson_s", m_amr->get_grids()[a_level], Interval(0,0), false);
 }
 
+void poisson_solver::post_checkpoint(){
+  CH_TIME("poisson_solver::post_checkpoint");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::post_checkpoint" << endl;
+  }
+
+  
+}
+
 void poisson_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   CH_TIME("poisson_solver::write_plot_level");
   if(m_verbosity > 5){

@@ -161,6 +161,11 @@ public:
   virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
 
   /*!
+    @brief Post checkpoint things
+  */
+  virtual void post_checkpoint();
+
+  /*!
     @brief Write output data to a_output
   */
   virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);

@@ -135,6 +135,11 @@ public:
   virtual void allocate_internals();
 
   /*!
+    @brief Post checkpoint stuff. 
+  */
+  virtual void post_checkpoint() override;
+
+  /*!
     @brief Get a-coefficient
   */
   virtual MFAMRCellData& get_aco();
@@ -425,6 +430,7 @@ protected:
   virtual void parse_kappa_source(); // Parse source scaling
 
   // Define mg levels
+public:
   virtual void define_mg_levels();
 
 };

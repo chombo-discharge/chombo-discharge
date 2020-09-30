@@ -225,6 +225,16 @@ void poisson_multifluid_gmg::parse_gmg_settings(){
   }
 }
 
+void poisson_multifluid_gmg::post_checkpoint(){
+  CH_TIME("poisson_multifluid_gmg::post_checkpoint");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::post_checkpoint" << endl;
+  }
+
+  // Define the MG levels. 
+  this->define_mg_levels();
+}
+
 void poisson_multifluid_gmg::allocate_internals(){
   CH_TIME("poisson_multifluid_gmg::allocate_internals");
   if(m_verbosity > 5){
