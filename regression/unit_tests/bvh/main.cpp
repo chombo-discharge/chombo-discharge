@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
     const Real mass    = 1.0*ranInt(rng);
 
     if(pos[1] < pos[0]+0.25){
-      inputParticles.push_back(point_mass(pos, mass));
+      inputParticles.push_back(point_mass(pos, mass, 0.0));
       Mass += mass;
     }
   }

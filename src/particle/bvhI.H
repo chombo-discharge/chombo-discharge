@@ -171,6 +171,10 @@ inline void bvh_node<T>::split(const int a_dir){
   // If we can split up the median point into several ones, we do it. This would be the case if the median point
   // is a superparticle; in this case we divide the weights as best we can and then assign them to the left/right halves
   const T& splitMass = m_data[splitIndex];
+
+#if 0 // Print direction and position
+  std::cout << splitMass.pos()[0] << "\t" << splitMass.pos()[1] << "\t" << a_dir << std::endl;
+#endif
   if(splitMass.can_split()){
     const RealVect& p   = splitMass.pos();
     const Real& mass    = splitMass.mass();         // Always positive
