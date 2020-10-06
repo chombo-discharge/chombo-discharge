@@ -70,6 +70,8 @@ void brownian_walker_stepper::set_velocity(){
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::set_velocity" << endl;
   }
+  m_solver->set_mobility(1.0);
+  
   const int finest_level = m_amr->get_finest_level();
   for (int lvl = 0; lvl <= finest_level; lvl++){
     this->set_velocity(lvl);
@@ -249,7 +251,8 @@ void brownian_walker_stepper::compute_dt(Real& a_dt, time_code& a_timecode) {
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::compute_dt" << endl;
   }
-  
+
+  m_solver->set_mobility(1.0); 
   m_solver->interpolate_velocities();
   m_solver->interpolate_diffusion();
 
@@ -382,6 +385,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	    ito_particle& p = particleList[lit];
 	    p.position() += 0.5*p.velocity()*a_dt;
 	  }
+
 	  m_solver->interpolate_velocities(lvl, dit());
 
 	  // Final stage
@@ -473,6 +477,8 @@ void brownian_walker_stepper::regrid(const int a_lmin, const int a_old_finest_le
     m_solver->sort_particles_by_cell();
     m_solver->make_superparticles(m_ppc);
     m_solver->sort_particles_by_patch();
+    
+    m_solver->set_mobility(1.0); // Superparticle algorithm only conserves mass, energy. Diffusion and mobility needs to be reset.
   }
 }
 

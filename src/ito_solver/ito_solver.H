@@ -419,6 +419,11 @@ public:
   virtual void set_velocity_func(const RealVect a_vel);
 
   /*!
+    @brief Sets constant mobility for all particles
+  */
+  virtual void set_mobility(const Real a_mobility);
+
+  /*!
     @brief Interpolate velocities
   */
   virtual void interpolate_velocities();

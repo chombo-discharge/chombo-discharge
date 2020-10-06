@@ -1631,6 +1631,25 @@ void ito_solver::set_velocity_func(const RealVect a_vel){
   }
 }
 
+void ito_solver::set_mobility(const Real a_mobility){
+  CH_TIME("ito_solver::set_mobility");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_mobility" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      List<ito_particle>& particles = m_particles[lvl][dit()].listItems();
+
+      for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
+	lit().mobility() = a_mobility;
+      }
+    }
+  }
+}
+
 void ito_solver::interpolate_velocities(){
   CH_TIME("ito_solver::interpolate_velocities");
   if(m_verbosity > 5){
@@ -1820,9 +1839,21 @@ Real ito_solver::sign(const Real& a) const{
 }
 
 RealVect ito_solver::random_gaussian() {
+#if 0 // original code, draw a distance and a random direction
   double d = m_gauss01(m_rng);
   d = sign(d)*Min(Abs(d), m_normal_max);
   return d*this->random_direction();
+#else // Actual code... draw Gaussians independently...
+  RealVect ret = RealVect::Zero;
+  for (int i = 0; i < SpaceDim; i++){
+    double d = m_gauss01(m_rng);
+    d = sign(d)*Min(Abs(d), m_normal_max);
+
+    ret[i] = d;
+  }
+
+  return ret;
+#endif
 }
 
 RealVect ito_solver::random_direction(){
