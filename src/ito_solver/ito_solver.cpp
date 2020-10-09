@@ -2197,6 +2197,8 @@ Real ito_solver::compute_drift_dt(const int a_lvl, const DataIndex& a_dit, const
     pout() << m_name + "::compute_drift_dt(level, dataindex, dx)" << endl;
   }
 
+  constexpr Real safety = 1.E-10;
+
   const List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
   ListIterator<ito_particle> lit(particleList);
 
@@ -2209,7 +2211,7 @@ Real ito_solver::compute_drift_dt(const int a_lvl, const DataIndex& a_dit, const
       const RealVect& v = p.velocity();
 
       const int maxDir = v.maxDir(true);
-      const Real thisDt = a_dx[maxDir]/Abs(v[maxDir]);
+      const Real thisDt = a_dx[maxDir]/(safety + Abs(v[maxDir]));
 
       dt = Min(dt, thisDt);
     }
@@ -2317,6 +2319,7 @@ Real ito_solver::compute_diffusion_dt(const int a_lvl, const DataIndex& a_dit, c
   if(m_verbosity > 5){
     pout() << m_name + "::compute_diffusion_dt(level, dataindex, dx)" << endl;
   }
+  
   const List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
   ListIterator<ito_particle> lit(particleList);
 

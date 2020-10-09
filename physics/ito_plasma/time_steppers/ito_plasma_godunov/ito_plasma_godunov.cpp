@@ -193,6 +193,8 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
   if(m_verbosity > 5){
     pout() << "ito_plasma_godunov::compute_dt" << endl;
   }
+
+  a_dt = 1.E99;
   
   if(m_whichDt == which_dt::advection){
     a_dt = m_ito->compute_advective_dt();
@@ -337,8 +339,6 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
   // Recompute new velocities and diffusion coefficients
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
-
-
 }
 
 void ito_plasma_godunov::compute_regrid_conductivity(){

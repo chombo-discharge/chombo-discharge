@@ -1710,9 +1710,9 @@ Real ito_plasma_stepper::compute_physics_dt() const{
     pout() << "ito_plasma_stepper::compute_physics_dt()" << endl;
   }
 
-  Real ret = this->compute_physics_dt(m_fluid_E, m_ito->get_densities());
+  const Real dt = this->compute_physics_dt(m_fluid_E, m_ito->get_densities());
 
-  return ret;
+  return dt;
 }
 
 Real ito_plasma_stepper::compute_physics_dt(const EBAMRCellData& a_E, const Vector<EBAMRCellData*> a_densities) const {
