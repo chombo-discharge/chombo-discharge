@@ -1372,7 +1372,7 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
 					const Real          a_kappa) const {
   Real curTime = 0.0;
 
-  while(curTime <= a_dt){
+  while(curTime < a_dt){
 
     // Update reaction rates
     this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
@@ -1391,40 +1391,46 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
     while(!valid){ 
       
       const Real curDt   = std::min(a_dt-curTime, std::min(dtCrit, dtNonCrit));
-      const bool nonCrit = dtNonCrit < dtCrit || criticalReactions.size() == 0 || dtCrit < (a_dt-curTime);
+      const bool nonCrit = dtNonCrit < dtCrit || criticalReactions.size() == 0 || dtCrit > (a_dt-curTime);
 	    
       // How will we advance?
-      if(nonCrit){// No critical reactions fire. Advance only noncritical reactions.
+      if(nonCrit){ // No critical reactions fire. Advance only noncritical reactions.
 
 	// Compute the total propensity function in case it is faster to run SSA steps
 	Real A = this->propensity(a_particles);
 	
-	if(A*curDt < m_SSAlim){ // Tau-leaping is inefficient, do some SSA on the WHOLE reaction set. 
-	  for (int i = 0; i < m_NSSA; i++){
-
+	if(A*curDt < m_SSAlim){ // Tau-leaping is inefficient, do some SSA on the WHOLE reaction set.
+	  
+	  Real dtSSA = 0.;
+	  int nSSA   = 0;
+	  
+	  while(dtSSA < curDt && nSSA < m_NSSA){
+	    
 	    // Update reaction rates, propensities, and the total propensity. 
 	    const std::deque<Real> propensities = this->propensities(a_particles);
 	    A = this->propensity(a_particles);
 	    
 	    // Draw time to next reaction. 
 	    const Real u1     = m_udist01(m_rng);
-	    const Real dtNext = log(1./u1)/A;
+	    const Real dtColl = log(1./u1)/A;
+	    const Real dtNext = Min(dtColl, curDt - dtSSA); // Don't exceed curDt with the next time step. 
 
-	    valid    = true;
-	    //	    curTime += dtNext;
-	    if(curTime + dtNext <= a_dt){ // Ok, we are inside [0, a_dt] and we can do the reaction.
-	      this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, A, a_dx, a_kappa, dtNext);
-	      curTime += dtNext;
+	    if(dtSSA + dtColl < curDt){ // Collision happened inside curDt
+	      this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, A, a_dx, a_kappa, dtColl);
 	    }
-	    else{ // Next reaction is outside the interval, but we should still increment with the energy.
-	      this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, a_dt-curTime);
-	      curTime += dtNext;
-	      break;
+	    else{ // Next reaction is outside curDt, but we should still increment with the energy.
+	      this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, dtNext);
 	    }
 
 	    // Update reaction rates and propensity for the next SSA step. 
 	    this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
+	    
+	    dtSSA += dtNext;
+	    nSSA  += 1;
 	  }
+
+	  valid    = true;
+	  curTime += dtSSA;
 	}
 	else{ // Perform tau-leaping with non-critical reactions only
 	  
@@ -1438,6 +1444,7 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
 
 	  // Make sure step was valid
 	  valid = this->valid_state(particles);
+	  valid = true;
 	  if(valid){
 	    curTime        += curDt;
 	    a_particles     = particles;
@@ -1455,6 +1462,7 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
 	Vector<long long> particles = a_particles;
 	Vector<long long> photons   = a_newPhotons;
 	Vector<Real> mean_energies  = a_mean_energies;
+
 
 	const std::deque<Real> propensitiesC  = this->propensities(particles, criticalReactions);
 	const std::deque<Real> propensitiesNC = this->propensities(particles, nonCriticalReactions);
