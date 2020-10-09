@@ -216,6 +216,13 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
     }
   }
 
+  // Physics-based restriction
+  const Real physicsDt = this->compute_physics_dt();
+  if(physicsDt < a_dt){
+    a_dt = physicsDt;
+    a_timecode = time_code::physics;
+  }
+
   if(a_dt < m_min_dt){
     a_dt = m_min_dt;
     a_timecode = time_code::hardcap;
@@ -225,6 +232,8 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
     a_dt = m_max_dt;
     a_timecode = time_code::hardcap;
   }
+
+  m_timecode = a_timecode;
 
 #if 0 // Debug code
   const Real dtCFL = m_ito->compute_dt();

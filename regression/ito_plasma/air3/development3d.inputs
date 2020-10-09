@@ -196,12 +196,12 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1            # Verbosity
-ito_plasma_godunov.min_dt         = 1.E-10        # Minimum dt
-ito_plasma_godunov.max_dt         = 1.E-10        # Maximum dt
+ito_plasma_godunov.min_dt         = 0.E-10        # Minimum dt
+ito_plasma_godunov.max_dt         = 1.E+10        # Maximum dt
 ito_plasma_godunov.particle_realm = primal        # Particle realm. Default is primal
 ito_plasma_godunov.load_balance   = false         # Load balance or not
 ito_plasma_godunov.max_cells_hop  = 0.2           # Maximum cells to move in one time step
-ito_plasma_godunov.which_dt       = advection_diffusion     # 'advection', 'diffusion', 'advection_diffusion'
+ito_plasma_godunov.which_dt       = advection     # 'advection', 'diffusion', 'advection_diffusion'
 ito_plasma_godunov.ppc            = 32            # Superparticle number of cells
 ito_plasma_godunov.merge_interval = 1             # How often to make superparticles
 ito_plasma_godunov.relax_factor   = 9999.5        # Factor in front of relaxation time	
@@ -220,7 +220,7 @@ ito_plasma_air3.num_particles   = 100000        # Number of initial particles
 ito_plasma_air3.particle_weight = 1             # Initial particle weights
 
 # For controlling the time step
-ito_plasma_air3.dX              = 2.0            # Maximum relative change Xnew/Xold during one time step. 
+ito_plasma_air3.dX              = 2.7           # Maximum relative change Xnew/Xold during one time step. 
 
 # Reaction stuff
 ito_plasma_air3.react_ppc      = 32             # Maximum number of particles to produce in reaction step	

@@ -371,19 +371,38 @@ void ito_plasma_stepper::print_step_report(){
 
   const Real Emax = this->compute_Emax(m_phase);
   
-  const size_t l_particles         = m_ito->get_num_particles(true);
+  const size_t l_particles        = m_ito->get_num_particles(true);
   const size_t g_particles        = m_ito->get_num_particles(false);
   
-  const size_t l_eb_particles      = m_ito->get_num_eb_particles(true);
+  const size_t l_eb_particles     = m_ito->get_num_eb_particles(true);
   const size_t g_eb_particles     = m_ito->get_num_eb_particles(false);
   
-  const size_t l_domain_particles  = m_ito->get_num_domain_particles(true);
+  const size_t l_domain_particles = m_ito->get_num_domain_particles(true);
   const size_t g_domain_particles = m_ito->get_num_domain_particles(false);
 
-  const size_t l_source_particles  = m_ito->get_num_source_particles(true);
+  const size_t l_source_particles = m_ito->get_num_source_particles(true);
   const size_t g_source_particles = m_ito->get_num_source_particles(false);
 
-
+  // How was the time step restricted
+  std::string str;
+  switch(m_timecode){
+  case time_code::physics:
+    str = "dt restricted by 'physics'";
+    break;
+  case time_code::cfl:
+    str = "dt restricted by 'cfl'";
+    break;
+  case time_code::relaxation_time:
+    str = "dt restricted by 'relaxation time'";
+    break;
+  case time_code::hardcap:
+    str = "dt restricted by 'hardcap'";
+    break;
+  default:
+    str = "dt restricted by 'unspecified'";
+    break;
+  }
+  pout() << "                                   " + str << endl;
   pout() << "                                   Emax      = " << Emax << endl
 	 << "                                   #part     = " << l_particles << " (" << g_particles << ")" << endl
 	 << "                                   #eb part  = " << l_eb_particles << " (" << g_eb_particles << ")" << endl

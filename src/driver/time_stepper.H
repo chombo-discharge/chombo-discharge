@@ -37,7 +37,8 @@ enum class time_code {
   restricted,
   hardcap,
   error,
-  adv_diffusion
+  adv_diffusion,
+  physics
 };
 #endif
 
