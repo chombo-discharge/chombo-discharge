@@ -54,6 +54,11 @@ namespace physics {
       ~ito_plasma_physics();
 
       /*!
+	@brief Compute a time step
+      */
+      virtual Real compute_dt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const = 0;
+
+      /*!
 	@brief Compute Townsend ionization length
       */
       virtual Real compute_alpha(const RealVect a_E) const = 0;

@@ -219,6 +219,9 @@ ito_plasma_air3.seed            = 0            # RNG seed, < 0 gives a random se
 ito_plasma_air3.num_particles   = 100000        # Number of initial particles
 ito_plasma_air3.particle_weight = 1             # Initial particle weights
 
+# For controlling the time step
+ito_plasma_air3.dX              = 2.0            # Maximum relative change Xnew/Xold during one time step. 
+
 # Reaction stuff
 ito_plasma_air3.react_ppc      = 32             # Maximum number of particles to produce in reaction step	
 ito_plasma_air3.tau_switch     = -1             # Switch from SSA to tau when reaching this many particles

@@ -1679,6 +1679,134 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
   }
 }
 
+Real ito_plasma_stepper::compute_physics_dt() const{
+  CH_TIME("ito_plasma_stepper::compute_physics_dt()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_physics_dt()" << endl;
+  }
+
+  Real ret = this->compute_physics_dt(m_fluid_E, m_ito->get_densities());
+
+  return ret;
+}
+
+Real ito_plasma_stepper::compute_physics_dt(const EBAMRCellData& a_E, const Vector<EBAMRCellData*> a_densities) const {
+  CH_TIME("ito_plasma_stepper::compute_physics_dt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_physics_dt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)" << endl;
+  }
+
+  const int num_ito_species = m_physics->get_num_ito_species();
+
+  Real minDt = 1.E99;
+  
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    
+    Vector<LevelData<EBCellFAB>*> densities(num_ito_species);
+    
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+
+      densities[idx] = &(*(*a_densities[idx])[lvl]);
+    }
+
+    const Real levelDt = this->compute_physics_dt(*a_E[lvl], densities, lvl);
+
+    minDt = Min(minDt, levelDt);
+  }
+
+  return minDt;
+}
+
+Real ito_plasma_stepper::compute_physics_dt(const LevelData<EBCellFAB>& a_E, const Vector<LevelData<EBCellFAB> *> a_densities, const int a_level) const {
+  CH_TIME("ito_plasma_stepper::compute_physics_dt(LevelData<EBCellFAB>, Vector<LevelData<EBCellFAB> *>, int)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_physics_dt(LevelData<EBCellFAB>, Vector<LevelData<EBCellFAB> *>, int)" << endl;
+  }
+
+  const int num_ito_species = m_physics->get_num_ito_species();
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_fluid_realm)[a_level];
+
+  Real minDt = 1.E99;
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+    Vector<EBCellFAB*> densities(num_ito_species);
+
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      
+      densities[idx] = &((*a_densities[idx])[dit()]);
+    }
+
+    const Real boxDt = this->compute_physics_dt(a_E[dit()], densities, a_level, dit(), dbl.get(dit()));
+
+    minDt = Min(minDt, boxDt);
+  }
+
+  return minDt;
+}
+
+Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<EBCellFAB*> a_densities, const int a_level, const DataIndex a_dit, const Box a_box) const {
+  CH_TIME("ito_plasma_stepper::compute_physics_dt(EBCellFAB, Vector<EBCellFAB*>, lvl, dit, box)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_physics_dt(EBCellFAB, Vector<EBCellFAB*>, lvl, dit, box)" << endl;
+  }
+
+  Real minDt = 1.E99;
+
+  const int num_ito_species = m_physics->get_num_ito_species();
+  
+  const int comp         = 0;
+  const Real dx          = m_amr->get_dx()[a_level];
+  const RealVect prob_lo = m_amr->get_prob_lo();
+  const BaseFab<Real>& E = a_E.getSingleValuedFAB();
+  const EBISBox& ebisbox = m_amr->get_ebisl(m_fluid_realm, m_phase)[a_level][a_dit];
+
+  // Do regular cells
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv   = bit();
+    const RealVect pos = m_amr->get_prob_lo() + dx*(RealVect(iv) + 0.5*RealVect::Unit);
+    const RealVect e   = RealVect(D_DECL(E(iv,0), E(iv, 1), E(iv, 2)));
+
+    if(ebisbox.isRegular(iv)){
+      Vector<Real> densities(num_ito_species);
+      for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.get_solver();
+	
+	const BaseFab<Real>& basefab = a_densities[idx]->getSingleValuedFAB();
+	densities[idx] = basefab(iv, comp);
+      }
+
+      const Real cellDt = m_physics->compute_dt(e, pos, densities);
+
+      minDt = Min(minDt, cellDt);
+    }
+  }
+
+  // Do irregular cells
+  VoFIterator& vofit = (*m_amr->get_vofit(m_particle_realm, m_phase)[a_level])[a_dit];
+  for (vofit.reset(); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+    const RealVect e    = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
+    const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, prob_lo);
+
+    Vector<Real> densities(num_ito_species);
+    
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      densities[idx] = (*a_densities[idx])(vof, comp);
+    }
+
+    const Real cellDt = m_physics->compute_dt(e, pos, densities);
+
+    minDt = Min(minDt, cellDt);
+  }
+
+  return minDt;
+}
+
 void ito_plasma_stepper::advance_photons(const Real a_dt){
   CH_TIME("ito_plasma_stepper::advance_photons(a_dt)");
   if(m_verbosity > 5){

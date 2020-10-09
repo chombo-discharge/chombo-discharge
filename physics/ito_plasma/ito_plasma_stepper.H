@@ -214,9 +214,12 @@ namespace physics {
 				    const Box                       a_box,
 				    const Real                      a_dx,
 				    const Real                      a_dt);
-      
 
-
+      // Compute dt routines
+      Real compute_physics_dt() const;
+      Real compute_physics_dt(const EBAMRCellData& a_E, const Vector<EBAMRCellData*> a_densities) const;
+      Real compute_physics_dt(const LevelData<EBCellFAB>& a_E, const Vector<LevelData<EBCellFAB> *> a_densities, const int a_level) const;
+      Real compute_physics_dt(const EBCellFAB& a_E, const Vector<EBCellFAB*> a_densities, const int a_level, const DataIndex a_dit, const Box a_box) const;
 
 
       // Routines for advancing photons
