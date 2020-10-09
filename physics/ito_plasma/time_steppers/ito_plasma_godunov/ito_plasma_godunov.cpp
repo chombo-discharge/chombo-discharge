@@ -526,7 +526,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   Real diff_time     = 0.0;
 
   Real total_time    = -MPI_Wtime();
-
+  
   // Particle algorithms
   particle_time = -MPI_Wtime();
   if(m_algorithm == which_algorithm::euler){
@@ -561,7 +561,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   if(m_physics->get_coupling() == ito_plasma_physics::coupling::LEA){
     this->compute_EdotJ_source();
   }
-
+  
   // Sort the particles and photons per cell so we can call reaction algorithms
   sort_time = -MPI_Wtime();
   m_ito->sort_particles_by_cell();
@@ -596,6 +596,9 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   }
   clear_time += MPI_Wtime();
 
+  // 
+  m_ito->deposit_particles();
+
   // Prepare next step
   velo_time = -MPI_Wtime();
   this->compute_ito_velocities();
@@ -603,9 +606,6 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   diff_time -= MPI_Wtime();
   this->compute_ito_diffusion();
   diff_time += MPI_Wtime();
-
-  m_ito->deposit_particles();
-
 
   total_time += MPI_Wtime();
 
@@ -778,7 +778,6 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
 	   << "total time    = " << time_total << " (seconds)" << endl
 	   << endl;
   }
-
 }
 
 void ito_plasma_godunov::advance_particles_split_si(const Real a_dt){
@@ -1076,9 +1075,10 @@ void ito_plasma_godunov::swap_particle_positions(){
 	  List<ito_particle>& particleList = particles[dit()].listItems();
 	  ListIterator<ito_particle> lit(particleList);
 
-	  // Diffusion hop.
 	  for (lit.rewind(); lit; ++lit){
 	    ito_particle& p = particleList[lit];
+
+	    // We have made a diffusion hop, but we need p.position() to be X^k and p.oldPosition() to be the jumped position. 
 	    const RealVect tmp = p.position();
 	    
 	    p.position()    = p.oldPosition();

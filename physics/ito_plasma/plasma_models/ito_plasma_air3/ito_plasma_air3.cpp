@@ -195,7 +195,7 @@ void ito_plasma_air3::update_reaction_rates_lfa(const RealVect a_E, const Real a
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
   const Real bpn     = 2E-13*sqrt(300/m_T)/dV;
   const Real bpe     = 1.138E-11*pow(Te, -0.7)/dV;
-  
+
   m_reactions.at("impact_ionization").rate()      = alpha*velo;
   m_reactions.at("electron_attachment").rate()    = eta*velo;
   m_reactions.at("electron_recombination").rate() = bpe;

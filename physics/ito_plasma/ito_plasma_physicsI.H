@@ -1119,7 +1119,6 @@ void ito_plasma_physics::advance_tau(Vector<long long>&  a_particles,
   Real curTime  = 0.0;
   Real nextDt   = a_dt;
 
-  bool valid = false;
   while(curTime < a_dt){
 
     // Try big step first. 
@@ -1133,7 +1132,7 @@ void ito_plasma_physics::advance_tau(Vector<long long>&  a_particles,
       Vector<Real> mean_energies  = a_mean_energies;
 
       // Do the tau-leaping
-      this->tau_step(particles, photons, mean_energies, a_sources, nextDt, a_dx, a_dt);
+      this->tau_step(particles, photons, mean_energies, a_sources, a_dx, a_kappa, nextDt);
 
       // Accept step if valid, else, reduce dt.
       valid = this->valid_state(particles);

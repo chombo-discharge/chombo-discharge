@@ -780,6 +780,8 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, con
 
   m_amr->average_down(a_conductivity, m_fluid_realm, m_phase);
   m_amr->interp_ghost_pwl(a_conductivity, m_fluid_realm, m_phase);
+
+  // See if this helps....
   m_amr->interpolate_to_centroids(a_conductivity, m_fluid_realm, m_phase);
 }
 
@@ -888,12 +890,16 @@ bool ito_plasma_stepper::solve_poisson(){
     pout() << "ito_plasma_stepper::solve_poisson()" << endl;
   }
 
-  this->compute_rho(); // This computes rho onto m_poisson->get_source()
+  // Computes rho
+  this->compute_rho();
+
+  // Solves the Poisson equation
   const bool converged = m_poisson->solve(m_poisson->get_state(),
 					  m_poisson->get_source(),
 					  m_sigma->get_state(),
 					  false);
 
+  // Computes cell-centered E onto storage in the field solver
   m_poisson->compute_E();
 
   // Code below here interpolates E to centroids on both realms
@@ -1763,6 +1769,16 @@ Real ito_plasma_stepper::compute_physics_dt(const LevelData<EBCellFAB>& a_E, con
 
     minDt = Min(minDt, boxDt);
   }
+
+  // MPI reduction....
+#ifdef CH_MPI
+  Real tmp = 1.;
+  int result = MPI_Allreduce(&minDt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("ito_plasma_stepper::compute_physics_dt(lvl) - communication error on norm");
+  }
+  minDt = tmp;
+#endif  
 
   return minDt;
 }
