@@ -44,7 +44,7 @@ driver.regrid_interval                 = 5             # Regrid interval
 driver.checkpoint_interval             = 25            # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
-driver.stop_time                       = 50.E-9         # Stop time
+driver.stop_time                       = 5.E-9         # Stop time
 driver.max_steps                       = 1000             # Maximum number of steps
 driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
@@ -107,7 +107,7 @@ ito_solver.bisect_step         = 1.E-3         # Bisection step length for inter
 ito_solver.seed                = 0            # Seed for RNG
 ito_solver.max_diffusion_hop   = 2.0           # Maximum diffusion hop length (in units of dx)
 ito_solver.normal_max          = 100.0         # Maximum value (absolute) that can be drawn from the exponential distribution.
-ito_solver.redistribute        = true          # Turn on/off redistribution. 
+ito_solver.redistribute        = false          # Turn on/off redistribution. 
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ito_solver.checkpointing       = particles     # Use particle numbers for writing/reading checkpoint files
 ito_solver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
@@ -220,16 +220,16 @@ ito_plasma_air3.num_particles   = 1000000        # Number of initial particles
 ito_plasma_air3.particle_weight = 1             # Initial particle weights
 
 # For controlling the time step
-ito_plasma_air3.dX              = 9            # Maximum relative change Xnew/Xold during one time step. 
+ito_plasma_air3.dX              = 2.7            # Maximum relative change Xnew/Xold during one time step. 
 
 # Reaction stuff
 ito_plasma_air3.react_ppc      = 32             # Maximum number of particles to produce in reaction step	
 ito_plasma_air3.tau_switch     = -1             # Switch from SSA to tau when reaching this many particles
 ito_plasma_air3.poisson_switch = 100            # When to approximate Poisson by normal distribution
 ito_plasma_air3.Ncrit          = -1             # How many firings away from a negative particle number?
-ito_plasma_air3.prop_eps       = 0.05            # Maximum relative change in propensity function
-ito_plasma_air3.NSSA           = 10            # How many SSA steps to run when tau-leaping is inefficient
-ito_plasma_air3.SSAlim         = 0.1             # When to enter SSA instead of tau-leaping
+ito_plasma_air3.prop_eps       = 1.E99          # Maximum relative change in propensity function
+ito_plasma_air3.NSSA           = 1             # How many SSA steps to run when tau-leaping is inefficient
+ito_plasma_air3.SSAlim         = -0.1            # When to enter SSA instead of tau-leaping
 ito_plasma_air3.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'
 
 # Zheleznyak stuff.
@@ -249,7 +249,7 @@ ito_plasma_streamer_tagger.verbosity         = -1           # Verbosity
 ito_plasma_streamer_tagger.num_boxes         = 1            # Number of allowed tag boxes (0 = tags allowe everywhere)
 ito_plasma_streamer_tagger.box1_lo           = -1 -1 -1
 ito_plasma_streamer_tagger.box1_hi           = 1 1 100E-6
-ito_plasma_streamer_tagger.buffer            = 8            # Grow tagged cells
+ito_plasma_streamer_tagger.buffer            = 0            # Grow tagged cells
 
 ito_plasma_streamer_tagger.refine_curvature  = 10.0         # Curvature refinement
 ito_plasma_streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	

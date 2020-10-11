@@ -915,8 +915,9 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<long long>& a_partic
     }
       
 
-    // 2. Get the list of all reactants
+    // 2. Get the list of ALL reactants
     std::unordered_set<int> allReactants;
+    //    for (const auto& reaction : m_reactions){
     for (const auto& reaction : a_non_critical_reactions){
 
       const auto& cur_reactants = reaction->get_reactants();
@@ -928,36 +929,36 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<long long>& a_partic
 
     // 3. Iterate through all reactants and compute deviations
     for (const auto& reactant : allReactants){
+      if(a_particles[reactant] > 0){
+	Real mu     = 0.0;
+	Real sigma2 = 0.0;
 
-      Real mu    = 0.0;
-      Real sigma = 0.0;
+	constexpr int gi = 1; // Set gi to 1 for now, should think about this later. 
 
-      constexpr int gi = 1; // Set gi to 1 for now, should think about this later. 
+	for (const auto& R : reactions){
+	  const Real& ap        = R.first;     // Reaction propensity.
+	  const ito_reaction& r = *(R.second); // Reaction. 
+	  const int muIJ        = r.get_state_change(reactant); // State change of reactant due to current reaction
 
-      for (const auto& R : reactions){
-	const Real& ap        = R.first;     // Reaction propensity.
-	const ito_reaction& r = *(R.second); // Reaction. 
-	const int muIJ        = r.get_state_change(reactant); // State change of reactant due to current reaction
+	  mu     += muIJ * ap;
+	  sigma2 += muIJ * muIJ * ap;
 
-	mu    += muIJ * ap;
-	sigma += muIJ * muIJ * ap;
+	}
 
+	Real dt1 = std::numeric_limits<Real>::max();
+	Real dt2 = std::numeric_limits<Real>::max();
+
+	const Real f = std::max(m_eps*a_particles[reactant]/gi, 1.0);
+	if(mu != 0.0) {
+	  dt1 = f/std::abs(mu);
+	}
+	if(sigma2 != 0.0) {
+	  dt2 = (f*f)/std::abs(sigma2);
+	}
+
+	dt = std::min(dt, std::min(dt1, dt2));
       }
-
-      Real dt1 = std::numeric_limits<Real>::max();
-      Real dt2 = std::numeric_limits<Real>::max();
-
-      if(mu != 0.0) {
-	dt1 = std::max(m_eps*a_particles[reactant]/gi, 1.)/std::abs(mu);
-      }
-      if(sigma != 0.0) {
-	const Real f = std::max(m_eps*a_particles[reactant]/gi,1.0);
-	dt2 = f*f/std::abs(sigma);
-      }
-
-      dt = std::min(dt, std::min(dt1, dt2));
     }
-
   }
 
 
@@ -1400,7 +1401,6 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
 	Real A = this->propensity(a_particles);
 	
 	if(A*curDt < m_SSAlim){ // Tau-leaping is inefficient, do some SSA on the WHOLE reaction set.
-	  
 	  Real dtSSA = 0.;
 	  int nSSA   = 0;
 	  
@@ -1444,7 +1444,6 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
 
 	  // Make sure step was valid
 	  valid = this->valid_state(particles);
-	  valid = true;
 	  if(valid){
 	    curTime        += curDt;
 	    a_particles     = particles;
