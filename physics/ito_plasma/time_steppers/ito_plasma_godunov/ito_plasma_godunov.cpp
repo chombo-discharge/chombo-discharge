@@ -333,6 +333,13 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
     MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
   }
 
+  // Regrid superparticles. 
+  if(m_regrid_superparticles){
+    m_ito->sort_particles_by_cell();
+    m_ito->make_superparticles(m_ppc);
+    m_ito->sort_particles_by_patch();
+  }
+
   // Now let the ito solver deposit its actual particles...
   m_ito->deposit_particles();
 
