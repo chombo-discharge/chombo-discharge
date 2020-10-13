@@ -50,6 +50,7 @@ void ito_plasma_godunov::parse_options() {
   pp.get("load_balance",   m_load_balance);
   pp.get("min_dt",         m_min_dt);
   pp.get("max_dt",         m_max_dt);
+  pp.get("diffu_samples",  m_diffu_samples);
 
   if(str == "euler"){
     m_algorithm = which_algorithm::euler;
@@ -79,6 +80,17 @@ void ito_plasma_godunov::parse_options() {
   }
   else{
     MayDay::Abort("ito_plasma_godunov::parse_options - unknown 'which_dt' requested");
+  }
+
+  pp.get("diffusion", str);
+  if(str == "super"){
+    m_diffusion = which_diffusion::super;
+  }
+  else if(str == "physical"){
+    m_diffusion = which_diffusion::physical;
+  }
+  else{
+    MayDay::Abort("ito_plasma_godunov::parse_options - unknown 'diffusion' requested");
   }
 }
 
@@ -939,6 +951,8 @@ void ito_plasma_godunov::advect_particles_si(const Real a_dt){
     pout() << m_name + "::advect_particles_si" << endl;
   }
 
+
+
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
     if(solver->is_mobile()){
@@ -973,6 +987,24 @@ void ito_plasma_godunov::diffuse_particles_euler(const Real a_dt){
     pout() << m_name + "::diffuse_particles_euler" << endl;
   }
 
+  switch(m_diffusion){
+  case which_diffusion::super:
+    this->diffuse_particles_super(a_dt);
+    break;
+  case which_diffusion::physical:
+    this->diffuse_particles_physical(a_dt);
+    break;
+  default:
+    MayDay::Abort("ito_plasma_godunov::diffuse_particles_euler - unknown algorithm for diffusion");
+  }
+}
+
+void ito_plasma_godunov::diffuse_particles_super(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::diffuse_particles_super");
+  if(m_verbosity > 5){
+    pout() << m_name + "::diffuse_particles_super" << endl;
+  }
+
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
     
@@ -993,6 +1025,50 @@ void ito_plasma_godunov::diffuse_particles_euler(const Real a_dt){
 	    const RealVect hop = ran*sqrt(2.0*p.diffusion()*a_dt);
 
 	    p.position() += hop;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::diffuse_particles_physical(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::diffuse_particles_physical");
+  if(m_verbosity > 5){
+    pout() << m_name + "::diffuse_particles_physical" << endl;
+  }
+
+  const long long maxSamples = (long long) m_diffu_samples;
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    
+    if(solver->is_diffusive()){
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  // Diffusion hop.
+	  for (lit.rewind(); lit.ok(); ++lit){
+	    ito_particle& p    = particleList[lit];
+	    const Real factor  = sqrt(2.0*p.diffusion()*a_dt);
+
+	    // Compute number of diffusive samples. 
+	    long long N = (long long) p.mass();
+	    N = Min(N, maxSamples);
+
+	    // Do the diffusion hop. 
+	    RealVect hop = RealVect::Zero;
+	    for (long long i = 0; i < N; i++){
+	      hop += solver->random_gaussian();
+	    }
+
+	    p.position() += hop*factor/N;
 	  }
 	}
       }

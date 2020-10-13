@@ -44,7 +44,7 @@ driver.regrid_interval                 = 5             # Regrid interval
 driver.checkpoint_interval             = 25            # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
-driver.stop_time                       = 5.E-9         # Stop time
+driver.stop_time                       = 20.E-9         # Stop time
 driver.max_steps                       = 1000             # Maximum number of steps
 driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
@@ -196,17 +196,19 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1            # Verbosity
-ito_plasma_godunov.min_dt         = 0.E-10        # Minimum dt
-ito_plasma_godunov.max_dt         = 1.E+10        # Maximum dt
+ito_plasma_godunov.min_dt         = 1.E-10        # Minimum dt
+ito_plasma_godunov.max_dt         = 1.E-10        # Maximum dt
 ito_plasma_godunov.particle_realm = primal        # Particle realm. Default is primal
 ito_plasma_godunov.load_balance   = false         # Load balance or not
 ito_plasma_godunov.max_cells_hop  = 1.0           # Maximum cells to move in one time step
 ito_plasma_godunov.which_dt       = advection     # 'advection', 'diffusion', 'advection_diffusion'
-ito_plasma_godunov.ppc            = 32            # Superparticle number of cells
+ito_plasma_godunov.ppc            = 8            # Superparticle number of cells
 ito_plasma_godunov.merge_interval = 1             # How often to make superparticles
 ito_plasma_godunov.relax_factor   = 9999.5        # Factor in front of relaxation time	
-ito_plasma_godunov.regrid_super   = false         # Make superparticles after regrid or not
+ito_plasma_godunov.regrid_super   = true          # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = semi_implicit # 'euler', 'predictor_corrector', or 'semi_implicit'
+ito_plasma_godunov.diffusion      = super      # Which diffusion update? 'physical', 'super'
+ito_plasma_godunov.diffu_samples  = 64            # Maximum number of diffusion samples when using 'physical' diffusion
 ito_plasma_godunov.profile        = false         # Profile advance or not
 
 # ====================================================================================================
@@ -223,7 +225,7 @@ ito_plasma_air3.particle_weight = 1             # Initial particle weights
 ito_plasma_air3.dX              = 2.7            # Maximum relative change Xnew/Xold during one time step. 
 
 # Reaction stuff
-ito_plasma_air3.react_ppc      = 32             # Maximum number of particles to produce in reaction step	
+ito_plasma_air3.react_ppc      = 8             # Maximum number of particles to produce in reaction step	
 ito_plasma_air3.tau_switch     = -1             # Switch from SSA to tau when reaching this many particles
 ito_plasma_air3.poisson_switch = 100            # When to approximate Poisson by normal distribution
 ito_plasma_air3.Ncrit          = -1             # How many firings away from a negative particle number?
@@ -251,8 +253,8 @@ ito_plasma_streamer_tagger.box1_lo           = -1 -1 -1
 ito_plasma_streamer_tagger.box1_hi           = 1 1 100E-6
 ito_plasma_streamer_tagger.buffer            = 0            # Grow tagged cells
 
-ito_plasma_streamer_tagger.refine_curvature  = 10.0         # Curvature refinement
-ito_plasma_streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	
+ito_plasma_streamer_tagger.refine_curvature  = 1.E99         # Curvature refinement
+ito_plasma_streamer_tagger.coarsen_curvature = 0.1          # Curvature coarsening	
 ito_plasma_streamer_tagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
-ito_plasma_streamer_tagger.coarsen_alpha     = 10.0         # Set alpha coarsening. Higher => Less mesh
-ito_plasma_streamer_tagger.max_coarsen_lvl   = 3            # Set max coarsening depth
+ito_plasma_streamer_tagger.coarsen_alpha     = 1.E99         # Set alpha coarsening. Higher => Less mesh
+ito_plasma_streamer_tagger.max_coarsen_lvl   = 2            # Set max coarsening depth
