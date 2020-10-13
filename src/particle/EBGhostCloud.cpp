@@ -47,6 +47,7 @@ void EBGhostCloud::define(const DisjointBoxLayout& a_gridsCoar,
   m_ghost      = a_ghostFine;
   m_gridsFine  = a_gridsFine;
   m_domainCoar = a_domainCoar;
+  m_domainFine = a_domainFine;
 
   // Coarsen the grids and make a BoxLayout grid
   DisjointBoxLayout dblCoFi;
@@ -57,7 +58,7 @@ void EBGhostCloud::define(const DisjointBoxLayout& a_gridsCoar,
   Vector<Box> coFiBoxes = dblCoFi.boxArray();
   Vector<int> coFiProcs = dblCoFi.procIDs();
 
-  const int ghostCoFi = (a_ghostFine + m_refRat - 1)/m_refRat;
+  const int ghostCoFi = (a_ghostFine + m_refRat - 1)/m_refRat; // Rounds upwards. 
   for (int i = 0; i < coFiBoxes.size(); i++){
     coFiBoxes[i].grow(ghostCoFi);
     coFiBoxes[i] &= a_domainCoar;
@@ -95,12 +96,11 @@ void EBGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const
     const FArrayBox& fineData = m_scratchFine[dit()].getFArrayBox();
 
     const Box coarBox         = m_gridsCoFi[dit()];
-    const Box fineBox         = fineData.box();
+    const Box fineBox         = fineData.box() & m_domainFine;
 
     const Box refbox(IntVect::Zero, (m_refRat-1)*IntVect::Unit);
 
     coFiFab.setVal(0.0);
-
     // Do all the regular cells. This also does irregular cells, but not multi-valued ones.
     // If you have a refinement boundary that also crosses a multi-valued cell, feel free to fuck off. 
     for (int comp = 0; comp < m_nComp; comp++){

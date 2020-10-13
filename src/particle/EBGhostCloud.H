@@ -57,6 +57,7 @@ protected:
   EBLevelGrid              m_eblgCoFi;
   LevelData<EBCellFAB>     m_scratchFine;
   ProblemDomain            m_domainCoar;
+  ProblemDomain            m_domainFine;
   int                      m_refRat;
   int                      m_nComp;
   int                      m_ghost;

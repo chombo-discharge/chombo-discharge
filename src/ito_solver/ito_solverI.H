@@ -132,7 +132,7 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&              a_state,
 
     // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
     //    interpolation of "hanging clouds"
-    if(has_fine && m_pvr_buffer > 0){
+    if(has_fine){
       a_state[lvl]->localCopyTo(*m_scratch[lvl]);
     }
     else if(m_pvr_buffer <= 0 && has_coar){
