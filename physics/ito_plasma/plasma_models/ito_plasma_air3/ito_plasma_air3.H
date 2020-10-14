@@ -61,6 +61,12 @@ namespace physics {
       int m_negative_idx;
       int m_photonZ_idx;
 
+      // Mobile ions or not
+      bool m_mobile_ions;
+
+      // Ion mobility
+      Real m_ion_mu;
+      Real m_ion_D;
 
       // Pressure, neutral number density etc
       Real m_N;      

@@ -31,6 +31,10 @@ ito_plasma_air3::ito_plasma_air3(){
   pp.get   ("particle_weight", m_particle_weight);
   pp.getarr("blob_center",     v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
 
+  // Mobile ions or not
+  pp.get("mobile_ions",  m_mobile_ions);
+  pp.get("ion_mobility", m_ion_mu);
+
   // Photostuff
   pp.get("quenching_pressure", m_pq);
   pp.get("photoi_factor",      m_photoi_factor);
@@ -113,6 +117,8 @@ ito_plasma_air3::ito_plasma_air3(){
   // Photo-reactions
   m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}));
 
+  // Set the ions diffusion coefficient
+  m_ion_D = m_ion_mu*units::s_kb*m_T/units::s_Qe;
 
   this->read_tables();
 }
@@ -163,7 +169,7 @@ Real ito_plasma_air3::compute_alpha(const RealVect a_E) const {
 }
 
 Vector<Real> ito_plasma_air3::compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const {
-  Vector<Real> mobilities(m_num_ito_species, 0.0);
+  Vector<Real> mobilities(m_num_ito_species, m_ion_mu);
   mobilities[m_electron_idx] = m_tables.at("mobility").get_entry(a_E.vectorLength());
 
   return mobilities;
@@ -177,7 +183,7 @@ Vector<Real> ito_plasma_air3::compute_ito_diffusion_lfa(const Real         a_tim
 						    const RealVect     a_pos,
 						    const RealVect     a_E,
 						    const Vector<Real> a_cdr_densities) const {
-  Vector<Real> D(m_num_ito_species, 0.0);
+  Vector<Real> D(m_num_ito_species, m_ion_D);
   D[m_electron_idx] = m_tables.at("diffco").get_entry(a_E.vectorLength());
   
   return D;
@@ -238,6 +244,10 @@ ito_plasma_air3::positive::positive(){
   m_diffusive = false;
   m_name      = "positive";
   m_charge    = 1;
+
+  ParmParse pp("ito_plasma_air3");
+  pp.get("mobile_ions", m_mobile);
+  pp.get("mobile_ions", m_diffusive);
 }  
 
 ito_plasma_air3::positive::~positive(){
@@ -249,6 +259,11 @@ ito_plasma_air3::negative::negative(){
   m_diffusive = false;
   m_name      = "negative";
   m_charge    = -1;
+
+  
+  ParmParse pp("ito_plasma_air3");
+  pp.get("mobile_ions", m_mobile);
+  pp.get("mobile_ions", m_diffusive);
 }  
 
 ito_plasma_air3::negative::~negative(){

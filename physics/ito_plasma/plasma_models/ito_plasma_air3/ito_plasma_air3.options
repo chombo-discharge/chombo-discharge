@@ -9,7 +9,11 @@ ito_plasma_air3.num_particles   = 100           # Number of initial particles
 ito_plasma_air3.particle_weight = 1             # Initial particle weights
 
 # For controlling the time step
-ito_plasma_air3.dX              = 2.0            # Maximum relative change Xnew/Xold during one time step. 
+ito_plasma_air3.dX              = 2.0            # Maximum relative change Xnew/Xold during one time step.
+
+# For turning on/off moving ions
+ito_plasma_air3.mobile_ions    = false          # By default, stationary ions. 
+ito_plasma_air3.ion_mobility   = 2E-4           # Turn on/off ion mobility
 
 # Reaction stuff
 ito_plasma_air3.react_ppc      = 64             # Maximum number of particles to produce in reaction step	

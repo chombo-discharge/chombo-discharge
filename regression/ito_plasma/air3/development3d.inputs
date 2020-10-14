@@ -10,8 +10,8 @@ air3.basename  = pout
 amr_mesh.lo_corner       = -2.5E-2 -2.5E-2 -4E-2 # Low corner of problem domain
 amr_mesh.hi_corner       =  2.5E-2  2.5E-2  1E-2 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 4           # Maximum amr depth
+amr_mesh.coarsest_domain = 32 32 32    # Number of cells on coarsest domain
+amr_mesh.max_amr_depth   = 5           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -202,7 +202,7 @@ ito_plasma_godunov.particle_realm = primal        # Particle realm. Default is p
 ito_plasma_godunov.load_balance   = false         # Load balance or not
 ito_plasma_godunov.max_cells_hop  = 1.0           # Maximum cells to move in one time step
 ito_plasma_godunov.which_dt       = advection     # 'advection', 'diffusion', 'advection_diffusion'
-ito_plasma_godunov.ppc            = 16             # Superparticle number of cells
+ito_plasma_godunov.ppc            = 32            # Superparticle number of cells
 ito_plasma_godunov.merge_interval = 1             # How often to make superparticles
 ito_plasma_godunov.relax_factor   = 9999.5        # Factor in front of relaxation time	
 ito_plasma_godunov.regrid_super   = true          # Make superparticles after regrid or not
@@ -215,17 +215,21 @@ ito_plasma_godunov.profile        = false         # Profile advance or not
 # ITO_PLASMA_AIR3 CLASS OPTIONS
 # ====================================================================================================
 # Initial data
-ito_plasma_air3.blob_radius     = 1E-4          # Blob radius
+ito_plasma_air3.blob_radius     = 1E-3          # Blob radius
 ito_plasma_air3.blob_center     = 0 0 0         # Blob center
 ito_plasma_air3.seed            = 0             # RNG seed, < 0 gives a random seed (for each rank)
 ito_plasma_air3.num_particles   = 10000        # Number of initial particles
 ito_plasma_air3.particle_weight = 1             # Initial particle weights
 
 # For controlling the time step
-ito_plasma_air3.dX              = 2.7            # Maximum relative change Xnew/Xold during one time step. 
+ito_plasma_air3.dX              = 2.7            # Maximum relative change Xnew/Xold during one time step.
+
+# For turning on/off moving ions
+ito_plasma_air3.mobile_ions    = true           # By default, stationary ions. 
+ito_plasma_air3.ion_mobility   = 2E-4           # Turn on/off ion mobility
 
 # Reaction stuff
-ito_plasma_air3.react_ppc      = 16             # Maximum number of particles to produce in reaction step	
+ito_plasma_air3.react_ppc      = 32             # Maximum number of particles to produce in reaction step	
 ito_plasma_air3.tau_switch     = -1             # Switch from SSA to tau when reaching this many particles
 ito_plasma_air3.poisson_switch = 100            # When to approximate Poisson by normal distribution
 ito_plasma_air3.Ncrit          = -1             # How many firings away from a negative particle number?
