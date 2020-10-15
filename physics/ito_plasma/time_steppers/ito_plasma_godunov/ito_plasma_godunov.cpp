@@ -686,117 +686,56 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
     pout() << m_name + "::advance_particles_si" << endl;
   }
 
-  Real time_old     = 0.0;
-  Real time_setup   = 0.0;
-  Real time_diffuse = 0.0;
-  Real time_remap   = 0.0;
-  Real time_deposit = 0.0;
-  Real time_solve   = 0.0;
-  Real time_swap    = 0.0;
-  Real time_velo    = 0.0;
-  Real time_advect  = 0.0;
-  Real time_isect   = 0.0;
-  Real time_total   = 0.0;
-
-  time_total = -MPI_Wtime();
-
-  // First, advect the current particles out of the domain. Then remove the EB particles and revert the particles
-  time_old = -MPI_Wtime();
+  // Set the old particle position. 
   this->set_old_positions();
-  time_old += MPI_Wtime();
 
   // Need to copy the current particles because they will be used for computing the conductivity during regrids
   this->copy_conductivity_particles();
 
   // Compute conductivity and setup poisson
-  time_setup = -MPI_Wtime();
   this->compute_conductivity();
   this->setup_semi_implicit_poisson(a_dt);
-  time_setup += MPI_Wtime();
 
   // Diffuse the particles now
-  time_diffuse = -MPI_Wtime();
   this->diffuse_particles_euler(a_dt);
-  time_diffuse += MPI_Wtime();
 
   // Remap and deposit, only need to do this for diffusive solvers. 
-  time_remap = -MPI_Wtime();
   this->remap_diffusive_particles(); 
-  time_remap += MPI_Wtime();
-  time_deposit -= MPI_Wtime();
   //  m_ito->deposit_particles();
   this->deposit_diffusive_particles();
-  time_deposit += MPI_Wtime();
+
 
   // Need to copy the current particles because they will be used for the space charge during regrids. 
   this->copy_rho_dagger_particles();
 
   // Now compute the electric field
-  time_solve -= MPI_Wtime();
   this->solve_poisson();
-  time_solve += MPI_Wtime();
+
   // We have field at k+1 but particles have been diffused. The ones that are diffusive AND mobile are put back to X^k positions
   // and then we compute velocities with E^(k+1). 
-  time_swap -= MPI_Wtime();
   this->swap_particle_positions();   // After this, oldPosition() holds X^\dagger, and position() holds X^k. 
-  time_remap -= MPI_Wtime();
   this->remap_diffusive_particles(); // Only need to do this for the ones that were diffusive
-  time_remap += MPI_Wtime();
-  time_swap += MPI_Wtime();
-  time_velo -= MPI_Wtime();
+
+  // Recompute velocities with the new electric field (don't update mobility!). Then advect particles.
+#if 0 // original code
   this->compute_ito_velocities();
-  time_velo += MPI_Wtime();
-  time_advect -= MPI_Wtime();
-  this->advect_particles_si(a_dt);  // This 
-  time_advect += MPI_Wtime();
+#else
+  this->set_ito_velocity_funcs();
+  m_ito->interpolate_velocities();
+#endif
+  this->advect_particles_si(a_dt);  
   
   // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
-  time_remap -= MPI_Wtime();
   this->remap_mobile_or_diffusive_particles();
-  time_remap += MPI_Wtime();
 
   // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
-  time_isect -= MPI_Wtime();
   this->intersect_particles(a_dt);
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->remove_eb_particles();
   }
-  time_isect += MPI_Wtime();
 
-  time_deposit -= MPI_Wtime();
+  // Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
   this->deposit_mobile_or_diffusive_particles();
-  time_deposit += MPI_Wtime();
-
-  time_total += MPI_Wtime();
-
-  time_old     *= 100./time_total;
-  time_setup   *= 100./time_total;
-  time_diffuse *= 100./time_total;
-  time_remap   *= 100./time_total;
-  time_deposit *= 100./time_total;
-  time_solve   *= 100./time_total;
-  time_swap    *= 100./time_total;
-  time_velo    *= 100./time_total;
-  time_advect  *= 100./time_total;
-  time_isect   *= 100./time_total;
-
-  if(m_profile){
-    pout() << endl
-	   << "ito_plasma_godunov::advance_particles_si breakdown:" << endl
-	   << "===================================================" << endl
-	   << "set old pos   = " << time_old << "%" << endl
-	   << "poisson setup = " << time_setup << "%" << endl
-	   << "diffuse part  = " << time_diffuse << "%" << endl
-	   << "remap time    = " << time_remap << "%" << endl
-	   << "deposit time  = " << time_deposit << "%" << endl
-	   << "poisson solve = " << time_solve << "%" << endl
-	   << "swap time     = " << time_swap << "%" << endl
-      	   << "velo time     = " << time_velo << "%" << endl
-	   << "advect time   = " << time_advect << "%" << endl
-      	   << "isect time    = " << time_isect << "%" << endl
-	   << "total time    = " << time_total << " (seconds)" << endl
-	   << endl;
-  }
 }
 
 void ito_plasma_godunov::advance_particles_split_si(const Real a_dt){
