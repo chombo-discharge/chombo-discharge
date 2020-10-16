@@ -9,6 +9,7 @@
 #define _PARTICLE_CONTAINERI_H_
 
 #include "particle_containerI.H"
+#include "NeighborIterator.H"
 
 template <class P>
 particle_container<P>::particle_container(){
@@ -28,6 +29,8 @@ particle_container<P>::particle_container(const Vector<DisjointBoxLayout>& a_gri
 					  const std::string                a_realm){
 
   this->define(a_grids, a_domains, a_dx, a_ref_rat, a_prob_lo, a_blocking_factor, a_finest_level, a_pvr_buffer, a_realm);
+
+
 }
 
 template <class P>
@@ -53,6 +56,7 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   m_buffer          = a_pvr_buffer;
   m_realm           = a_realm;
   m_blocking_factor = a_blocking_factor;
+  m_coar_buffer     = 1; // Hard code for now - this will later become a_pvr_buffer...
 
 
   m_dx.resize(1 + m_finest_level);
@@ -64,6 +68,11 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   
   this->setup_pvr(base, m_finest_level);
   this->setup_particle_data(base, m_finest_level);
+
+  //  const Real t1 = MPI_Wtime();
+  this->make_coar_masks();
+  //  const Real t2 = MPI_Wtime();
+  //  std::cout << "mask define time = " << t2-t1 << std::endl;
 
   m_is_defined = true;
 }
@@ -623,6 +632,112 @@ size_t particle_container<P>::get_num_outcast_global() const {
   }
 
   return n;
+}
+
+template <class P>
+void particle_container<P>::make_coar_masks(){
+
+  m_coar_buffer = 1;
+  
+  const int ncomp = 1;
+  
+  m_coarMask.resize(1 + m_finest_level);
+
+  for (int lvl = 0; lvl < m_finest_level; lvl++){
+
+    m_coarMask[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > > (new LevelData<BaseFab<bool> > (m_grids[lvl], ncomp, IntVect::Zero));
+
+    if(lvl < m_finest_level){
+
+      const DisjointBoxLayout& gridsCoar = m_grids[lvl];
+      const DisjointBoxLayout& gridsFine = m_grids[lvl+1];
+
+      const ProblemDomain& domainCoar = m_domains[lvl];
+      const ProblemDomain& domainFine = m_domains[lvl+1];
+
+      this->make_coar_mask(*m_coarMask[lvl],
+			   domainCoar,
+			   domainFine,
+			   gridsCoar,
+			   gridsFine,
+			   m_coar_buffer,
+			   m_ref_rat[lvl]);
+    }
+  }
+}
+
+template <class P>
+void particle_container<P>::make_coar_mask(LevelData<BaseFab<bool> >& a_coarMask,
+					   const ProblemDomain&       a_domainCoar,
+					   const ProblemDomain&       a_domainFine,
+					   const DisjointBoxLayout&   a_gridsCoar,
+					   const DisjointBoxLayout&   a_gridsFine,
+					   const int                  a_buffer,
+					   const int                  a_ref_rat){
+  
+  const int comp  = 0;
+  const int ncomp = 1;
+
+  // Coarsen the fine grid and make a mask on the coarsened fine grid
+  DisjointBoxLayout gridsCoFi;
+  coarsen(gridsCoFi, a_gridsFine, a_ref_rat);
+
+  
+  IntVectSet halo;                 // Global CFIVS - should find a better way to do this.
+  NeighborIterator nit(gridsCoFi); // Neighbor iterator
+
+  // Go through the cofi grid and set the halo to true
+  for (DataIterator dit(gridsCoFi); dit.ok(); ++dit){
+    const Box coFiBox = gridsCoFi[dit()];
+
+    // Make IntVect set consisting of only ghost cells (a_buffer) for each box. 
+    Box grownBox = grow(coFiBox, a_buffer);
+    grownBox    &= a_domainCoar;
+
+    // Subtract non-ghosted box. 
+    IntVectSet myHalo(grownBox);
+    myHalo -= coFiBox;
+
+    // Subtract non-ghosted neighboring boxes. 
+    for (nit.begin(dit()); nit.ok(); ++nit){
+      const Box neighborBox = gridsCoFi[nit()];
+      myHalo -= neighborBox;
+    }
+
+    // Add to halo. 
+    halo |= myHalo;
+  }
+
+  // Get the global cfivs
+  gatherBroadcast(halo);
+
+  // Set the mask
+  for (DataIterator dit = a_gridsCoar.dataIterator(); dit.ok(); ++dit){
+    BaseFab<bool>& mask = a_coarMask[dit()];
+
+    mask.setVal(false);
+
+    const IntVectSet curHalo = halo & a_gridsCoar[dit()];
+    for (IVSIterator ivsIt(curHalo); ivsIt.ok(); ++ivsIt){
+      mask(ivsIt(), comp) = true;
+    }
+  }
+}
+
+template <class P>
+void particle_container<P>::gatherBroadcast(IntVectSet& a_set){
+#ifdef CH_MPI
+  Vector<IntVectSet> procSet;
+  const int destProc = uniqueProc(SerialTask::compute);
+  gather(procSet, a_set, destProc);
+  a_set.makeEmpty();
+  if(procID() == destProc){
+    for (int i = 0; i < procSet.size(); i++){
+      a_set |= procSet[i];
+    }
+  }
+  broadcast(a_set, destProc);
+#endif
 }
 
 #endif

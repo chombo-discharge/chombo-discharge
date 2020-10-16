@@ -15,6 +15,7 @@
 #include <BinFab.H>
 #include <ProblemDomain.H>
 #include <DisjointBoxLayout.H>
+#include "BaseEBCellFAB.H"
 
 template <class P>
 using AMRParticles     = Vector<RefCountedPtr<ParticleData<P> > >;
@@ -24,6 +25,8 @@ using AMRCellParticles = Vector<RefCountedPtr<LayoutData<BinFab<P> > > >;
 
 using AMRPVR           = Vector<RefCountedPtr<ParticleValidRegion> >;
 using EBAMRPPC         = Vector<RefCountedPtr<BaseEBCellFAB<int> > >;
+
+
 
 /*!
   @brief Templated class for holding particles on an AMR hierarchy with particle remapping
@@ -252,6 +255,9 @@ protected:
   int m_blocking_factor;
   int m_buffer;
   int m_finest_level;
+  int m_coar_buffer;
+
+  Vector<RefCountedPtr<LevelData<BaseFab<bool> > > > m_coarMask; 
 
   bool m_is_defined;
   bool m_cell_sorted;
@@ -265,7 +271,20 @@ protected:
   void setup_pvr(const int a_base, const int a_finest_level);
   void setup_particle_data(const int a_base, const int a_finest_level);
   void remap_lost_particles();
+  void make_coar_masks();
+
+  void make_coar_mask(LevelData<BaseFab<bool> >& a_coarMask,
+		      const ProblemDomain&       a_domainCoar,
+		      const ProblemDomain&       a_domainFine,
+		      const DisjointBoxLayout&   a_gridsCoar,
+		      const DisjointBoxLayout&   a_gridsFine,
+		      const int                  a_buffer,
+		      const int                  a_ref_rat);
+
+  void gatherBroadcast(IntVectSet& a_set);
 };
+
+
 
 #include "particle_containerI.H"
 
