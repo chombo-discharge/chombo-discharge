@@ -716,10 +716,10 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   this->swap_particle_positions();   // After this, oldPosition() holds X^\dagger, and position() holds X^k. 
   this->remap_diffusive_particles(); // Only need to do this for the ones that were diffusive
 
-  // Recompute velocities with the new electric field (don't update mobility!). Then advect particles.
+  // Recompute velocities with the new electric field
 #if 0 // original code
   this->compute_ito_velocities();
-#else
+#else // This is the version that leaves the mobility intact - which is what the algorithm says. 
   this->set_ito_velocity_funcs();
   m_ito->interpolate_velocities();
 #endif

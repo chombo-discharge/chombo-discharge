@@ -16,7 +16,6 @@
 
 #include <Particle.H>
 #include <ParticleData.H>
-#include <ParticleValidRegion.H>
 #include <BinItem.H>
 
 #include <random>

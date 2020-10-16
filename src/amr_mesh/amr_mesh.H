@@ -173,11 +173,6 @@ public:
   virtual void compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm);
 
   /*!
-    @brief Allocate particle valid regions
-  */
-  virtual void allocate(AMRPVR& a_pvr, const std::string a_realm, const int a_buffer);
-
-  /*!
     @brief Allocate a data holder over a specific realm
   */
   virtual void allocate(EBAMRCellData&           a_data,

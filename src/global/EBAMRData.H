@@ -17,9 +17,6 @@
 #include <BaseIFFAB.H>
 #include <MFCellFAB.H>
 #include <MFFluxFAB.H>
-#include <Particle.H>
-#include <ParticleData.H>
-#include <ParticleValidRegion.H>
 #include <BinItem.H>
 
 #include "DomainFluxIFFAB.H"

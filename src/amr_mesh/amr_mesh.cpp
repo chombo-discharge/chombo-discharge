@@ -119,39 +119,6 @@ void amr_mesh::alias(EBAMRIVData& a_data, const phase::which_phase a_phase, cons
   }
 }
 
-void amr_mesh::allocate(AMRPVR& a_pvr, const std::string a_realm, const int a_buffer){
-  CH_TIME("amr_mesh::allocate(PVR, realm, buffer)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(PVR, realm, buffer)" << endl;
-  }
-
-  if(!this->query_realm(a_realm)) {
-    std::string str = "amr_mesh::allocate(PVR, realm, buffer) - could not find realm '" + a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  if(m_max_box_size != m_blocking_factor){
-    MayDay::Abort("amr_mesh::allocate(PVR, realm, buffer) - only constant box sizes supported for particle methods");
-  }
-  
-  a_pvr.resize(1 + m_finest_level);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_realms[a_realm]->get_grids()[lvl];
-    const ProblemDomain& dom     = m_realms[a_realm]->get_domains()[lvl];
-
-    const bool has_coar = lvl > 0;
-
-    if(!has_coar){
-      a_pvr[lvl] = RefCountedPtr<ParticleValidRegion> (new ParticleValidRegion(dbl, NULL, 1, 0));
-    }
-    else{
-      const int ref_ratio = m_ref_ratios[lvl-1];
-      a_pvr[lvl] = RefCountedPtr<ParticleValidRegion> (new ParticleValidRegion(dbl, a_pvr[lvl-1]->mask(), ref_ratio, a_buffer));
-    }
-  }
-}
-
 void amr_mesh::allocate(EBAMRCellData&           a_data,
 			const std::string        a_realm,
 			const phase::which_phase a_phase,

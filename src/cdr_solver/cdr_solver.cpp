@@ -913,6 +913,9 @@ void cdr_solver::initial_data_particles(){
     pout() << m_name + "::initial_data_particles" << endl;
   }
 
+#if 1
+  MayDay::Abort("cdr_solver::initial_data_particles - code has been removed while particles are being redesigned. ");
+#else
   const int finest_level = m_amr->get_finest_level();
   const RealVect origin  = m_amr->get_prob_lo();
   DepositionType::Which deposition  = m_species->get_deposition();
@@ -1008,6 +1011,7 @@ void cdr_solver::initial_data_particles(){
     }
 #endif
   }
+#endif
 }
 
 void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
