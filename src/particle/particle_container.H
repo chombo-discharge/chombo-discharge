@@ -360,7 +360,7 @@ protected:
     @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
            refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
   */
-  AMRCellParticles<P> m_halo_particles;
+  AMRParticles<P> m_halo_particles;
 
   /*!
     @brief Valid region for each AMR level

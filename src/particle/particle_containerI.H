@@ -97,6 +97,7 @@ void particle_container<P>::setup_pvr(const int a_base, const int a_finest_level
 template <class P>
 void particle_container<P>::setup_particle_data(const int a_base, const int a_finest_level){
   m_particles.resize(1 + a_finest_level);
+  m_halo_particles.resize(1 + a_finest_level);
   m_cell_particles.resize(1 + a_finest_level);
 
   
@@ -106,6 +107,12 @@ void particle_container<P>::setup_particle_data(const int a_base, const int a_fi
 									    m_blocking_factor,
 									    m_dx[lvl]*RealVect::Unit,
 									    m_prob_lo));
+
+    m_halo_particles[lvl] = RefCountedPtr<ParticleData<P> > (new ParticleData<P>(m_grown_grids[lvl],
+										 m_domains[lvl],
+										 m_blocking_factor,
+										 m_dx[lvl]*RealVect::Unit,
+										 m_prob_lo));
 
 
     m_cell_particles[lvl] = RefCountedPtr<LayoutData<BinFab<P> > > (new LayoutData<BinFab<P> >(m_grids[lvl]));
@@ -808,13 +815,13 @@ void particle_container<P>::copy_particles_to_halo(){
 template <class P>
 void particle_container<P>::copy_particles_to_halo(const int a_level){
 
-  m_halo_particles[a_level].clear();
+  m_halo_particles[a_level]->clear();
 
   const RealVect dx = m_dx[a_level];
 
   // 1. Transfer particles to outcast list on the m_halo_particles. 
   List<P>& outcast = m_halo_particles[a_level]->outcast();
-  
+
   for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
     const BaseFab<bool>& mask = (*m_halo[a_level])[dit()];
     const List<P>& particles  = (*m_particles[a_level])[dit()].listItems();
@@ -825,7 +832,7 @@ void particle_container<P>::copy_particles_to_halo(const int a_level){
 			      (int)floor((x[1] - m_prob_lo[1])/dx[1]),
 			      (int)floor((x[2] - m_prob_lo[2])/dx[2])));
 
-      if(mask(iv)) outcast.add(lit);
+      if(mask(iv)) outcast.add(lit());
     }
   }
 

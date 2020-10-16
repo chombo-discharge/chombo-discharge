@@ -1255,6 +1255,14 @@ void ito_solver::deposit_particles(){
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_particles" << endl;
   }
+
+#if 0 // Development code
+  //  MayDay::Warning("ito_solver::deposit_particles - development code, remember to take out this code. ");
+  m_particles.copy_particles_to_halo();
+
+  const size_t halo_global = m_particles.get_num_halo_global();
+  if(procID() == 0) std::cout << "num halo = " << halo_global << std::endl;
+#endif
   this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
 }
 
