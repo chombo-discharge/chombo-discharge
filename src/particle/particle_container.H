@@ -89,6 +89,12 @@ public:
   void pre_regrid(const int a_base);
 
   /*!
+    @brief Copy particles to halo
+  */
+  void copy_particles_to_halo();
+
+
+  /*!
     @brief Get the realm
   */
   const std::string get_realm() const;
@@ -102,6 +108,16 @@ public:
     @brief Get all particles on a level
   */
   const AMRParticles<P>& get_particles() const;
+
+  /*!
+    @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
+  */
+  AMRParticles<P>& get_halo_particles();
+
+  /*!
+    @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
+  */
+  const AMRParticles<P>& get_halo_particles() const;
 
   /*!
     @brief Get PVR
@@ -244,36 +260,148 @@ public:
   */
   size_t get_num_outcast_global() const;
 
+  /*!
+    @brief Get the number particles in the halo cells. 
+  */
+  size_t get_num_halo_local() const;
+
+    /*!
+    @brief Get the number particles in the halo cells. 
+  */
+  size_t get_num_halo_global() const;
+
 protected:
 
-  Vector<DisjointBoxLayout> m_grids;
-  Vector<ProblemDomain> m_domains;
-  Vector<RealVect> m_dx;
-  Vector<int> m_ref_rat;
-  Vector<List<P> > m_cache_particles;
-  RealVect m_prob_lo;
-  int m_blocking_factor;
+  /*!
+    @brief Realm on which the particle_container is defined
+  */
+  std::string m_realm;
+  
+  /*!
+    @brief Blocking factor, aka grid size. 
+  */
+  int m_blocking_factor;  // Blocking facto
+
+  /*!
+    @brief PVR buffer - to be deprecated...
+  */
   int m_buffer;
+
+  /*!
+    @brief Finest grid level
+  */
   int m_finest_level;
-  int m_coar_buffer;
 
-  Vector<RefCountedPtr<LevelData<BaseFab<bool> > > > m_coarMask; 
+  /*!
+    @brief Coarse side buffer. Coarse grid particles that are within this number of cells from the refinement boundary
+           can be placed on the fine level. 
+  */
+  int m_halo_buffer;
 
+  /*!
+    @brief Lower left corner of the problem domain (aka the "origin")
+  */
+  RealVect m_prob_lo;
+
+  /*!
+    @brief Check if particle container is defined
+  */
   bool m_is_defined;
+
+  /*!
+    @brief Check if particle container is "cell sorted"
+  */
   bool m_cell_sorted;
 
-  std::string m_realm;
+  /*!
+    @brief AMR grids
+  */
+  Vector<DisjointBoxLayout> m_grids;
 
+  /*!
+    @brief Version of m_grids that is grown by m_halo_buffer cells. Used for transferring particles from the coarse grid
+           to the fine grid if they are "close enough" to the refinement boundary. 
+  */
+  Vector<BoxLayout> m_grown_grids;
+
+  /*!
+    @brief Problem domains
+  */
+  Vector<ProblemDomain> m_domains;
+
+  /*!
+    @brief Resolutions on each grid level
+  */
+  Vector<RealVect> m_dx;
+
+  /*!
+    @brief Refinement ratios. Entry at index 'l' is the refinement between level 'l' and level 'l+1'
+  */
+  Vector<int> m_ref_rat;
+
+  /*!
+    @brief Cache particles. Use during pre-regrid operations, and for transferring particles between coarse and fine before
+           deposition steps. 
+  */
+  Vector<List<P> > m_cache_particles;
+
+  /*!
+    @brief Mask on the coarse level. Cells that are within m_coarse_buffer steps away from the boundary are "true". The rest
+           are false.
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool> > > > m_halo; 
+
+  /*!
+    @brief The actual particles that this particle_container represents
+  */
   AMRParticles<P> m_particles;
+
+  /*!
+    @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
+           refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
+  */
+  AMRCellParticles<P> m_halo_particles;
+
+  /*!
+    @brief Valid region for each AMR level
+  */
   AMRPVR m_pvr;
+
+  /*!
+    @brief Cell particles. 
+  */
   AMRCellParticles<P> m_cell_particles;
 
+  /*!
+    @brief Setup function for the particle valid region
+  */
   void setup_pvr(const int a_base, const int a_finest_level);
-  void setup_particle_data(const int a_base, const int a_finest_level);
-  void remap_lost_particles();
-  void make_coar_masks();
 
-  void make_coar_mask(LevelData<BaseFab<bool> >& a_coarMask,
+  /*!
+    @brief Setup function for the particle data (m_particles and m_halo_particles)
+  */
+  void setup_particle_data(const int a_base, const int a_finest_level);
+
+  /*!
+    @brief Special remapping function in case particles have moved across more than one refinement level. Used
+           for getting those particles and putting them in the correct data holder. 
+  */
+  void remap_lost_particles();
+
+  /*!
+    @brief Define function for the grown grids. 
+  */
+  void define_grown_grids();
+
+  /*!
+    @brief Define function for the coarse-level mask (m_halo_mask)
+  */
+  void define_halo_masks();
+
+  /*!
+    @brief Define function for the coarse-level mask (m_halo_mask). Level version. 
+  */
+  void define_halo_mask(LevelData<BaseFab<bool> >& a_coarMask,
 		      const ProblemDomain&       a_domainCoar,
 		      const ProblemDomain&       a_domainFine,
 		      const DisjointBoxLayout&   a_gridsCoar,
@@ -281,7 +409,18 @@ protected:
 		      const int                  a_buffer,
 		      const int                  a_ref_rat);
 
-  void gatherBroadcast(IntVectSet& a_set);
+  /*!
+    @brief Gather and broadcast function when setting up the coar mask.
+  */
+  void gather_and_broadcast(IntVectSet& a_set);
+
+  /*!
+    @brief Copy particles to halo. a_level is the coarse level. 
+  */
+  void copy_particles_to_halo(const int a_level);
+
+
+
 };
 
 

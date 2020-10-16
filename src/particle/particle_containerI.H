@@ -56,7 +56,7 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   m_buffer          = a_pvr_buffer;
   m_realm           = a_realm;
   m_blocking_factor = a_blocking_factor;
-  m_coar_buffer     = 1; // Hard code for now - this will later become a_pvr_buffer...
+  m_halo_buffer     = 1; // Hard code for now - this will later become a_pvr_buffer...
 
 
   m_dx.resize(1 + m_finest_level);
@@ -65,14 +65,12 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   }
 
   const int base = 0;
-  
-  this->setup_pvr(base, m_finest_level);
-  this->setup_particle_data(base, m_finest_level);
 
-  //  const Real t1 = MPI_Wtime();
-  this->make_coar_masks();
-  //  const Real t2 = MPI_Wtime();
-  //  std::cout << "mask define time = " << t2-t1 << std::endl;
+  // Do the define stuff. 
+  this->setup_pvr(base, m_finest_level);
+  this->define_halo_masks();
+  this->define_grown_grids();
+  this->setup_particle_data(base, m_finest_level);
 
   m_is_defined = true;
 }
@@ -100,12 +98,15 @@ template <class P>
 void particle_container<P>::setup_particle_data(const int a_base, const int a_finest_level){
   m_particles.resize(1 + a_finest_level);
   m_cell_particles.resize(1 + a_finest_level);
+
+  
   for (int lvl = a_base; lvl <= a_finest_level; lvl++){
     m_particles[lvl] = RefCountedPtr<ParticleData<P> > (new ParticleData<P>(m_grids[lvl],
 									    m_domains[lvl],
 									    m_blocking_factor,
 									    m_dx[lvl]*RealVect::Unit,
 									    m_prob_lo));
+
 
     m_cell_particles[lvl] = RefCountedPtr<LayoutData<BinFab<P> > > (new LayoutData<BinFab<P> >(m_grids[lvl]));
   }
@@ -133,6 +134,18 @@ const AMRParticles<P>& particle_container<P>::get_particles() const {
   CH_assert(m_is_defined);
   if(m_cell_sorted) MayDay::Abort("particle_container<P>::get_particles - particles are sorted by cell!");
   return m_particles;
+}
+
+template <class P>
+AMRParticles<P>& particle_container<P>::get_halo_particles(){
+  CH_assert(m_is_defined);
+  return m_halo_particles;
+}
+
+template <class P>
+const AMRParticles<P>& particle_container<P>::get_halo_particles() const {
+  CH_assert(m_is_defined);
+  return m_halo_particles;
 }
 
 template <class P>
@@ -529,9 +542,11 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     m_dx[lvl] = a_dx[lvl]*RealVect::Unit;
   }
 
+  this->define_halo_masks();
+  this->define_grown_grids();
   this->setup_pvr(a_lmin, m_finest_level);
   this->setup_particle_data(a_lmin, m_finest_level);
-
+  
   const int oldFinestLevel = m_cache_particles.size() - 1;
 
   // If a level was removed, put the particles on the new finest level
@@ -572,6 +587,23 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   this->remap();
 
   m_cache_particles.resize(0);
+}
+
+template <class P>
+void particle_container<P>::define_grown_grids(){
+  m_grown_grids.resize(1 + m_finest_level);
+  
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    Vector<Box> boxes = m_grids[lvl].boxArray();
+    Vector<int> procs = m_grids[lvl].procIDs();
+
+    for (int i = 0; i < boxes.size(); i++){
+      boxes[i].grow(m_halo_buffer);
+      boxes[i] &= m_domains[lvl];
+    }
+
+    m_grown_grids[lvl] = BoxLayout(boxes, procs);
+  }
 }
 
 template <class P>
@@ -635,17 +667,39 @@ size_t particle_container<P>::get_num_outcast_global() const {
 }
 
 template <class P>
-void particle_container<P>::make_coar_masks(){
+size_t particle_container<P>::get_num_halo_local() const {
+  size_t n = 0;
 
-  m_coar_buffer = 1;
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    n += m_halo_particles[lvl]->numValidLocal();
+  }
+
+  return n;
+}
+
+template <class P>
+size_t particle_container<P>::get_num_halo_global() const {
+  size_t n = 0;
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    n += m_halo_particles[lvl]->numValid();
+  }
+
+  return n;
+}
+
+template <class P>
+void particle_container<P>::define_halo_masks(){
+
+  m_halo_buffer = 1;
   
   const int ncomp = 1;
   
-  m_coarMask.resize(1 + m_finest_level);
+  m_halo.resize(1 + m_finest_level);
 
   for (int lvl = 0; lvl < m_finest_level; lvl++){
 
-    m_coarMask[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > > (new LevelData<BaseFab<bool> > (m_grids[lvl], ncomp, IntVect::Zero));
+    m_halo[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > > (new LevelData<BaseFab<bool> > (m_grids[lvl], ncomp, IntVect::Zero));
 
     if(lvl < m_finest_level){
 
@@ -655,25 +709,28 @@ void particle_container<P>::make_coar_masks(){
       const ProblemDomain& domainCoar = m_domains[lvl];
       const ProblemDomain& domainFine = m_domains[lvl+1];
 
-      this->make_coar_mask(*m_coarMask[lvl],
-			   domainCoar,
-			   domainFine,
-			   gridsCoar,
-			   gridsFine,
-			   m_coar_buffer,
-			   m_ref_rat[lvl]);
+      this->define_halo_mask(*m_halo[lvl],
+			     domainCoar,
+			     domainFine,
+			     gridsCoar,
+			     gridsFine,
+			     m_halo_buffer,
+			     m_ref_rat[lvl]);
     }
   }
 }
 
 template <class P>
-void particle_container<P>::make_coar_mask(LevelData<BaseFab<bool> >& a_coarMask,
-					   const ProblemDomain&       a_domainCoar,
-					   const ProblemDomain&       a_domainFine,
-					   const DisjointBoxLayout&   a_gridsCoar,
-					   const DisjointBoxLayout&   a_gridsFine,
-					   const int                  a_buffer,
-					   const int                  a_ref_rat){
+void particle_container<P>::define_halo_mask(LevelData<BaseFab<bool> >& a_coarMask,
+					     const ProblemDomain&       a_domainCoar,
+					     const ProblemDomain&       a_domainFine,
+					     const DisjointBoxLayout&   a_gridsCoar,
+					     const DisjointBoxLayout&   a_gridsFine,
+					     const int                  a_buffer,
+					     const int                  a_ref_rat){
+
+  // TLDR: This function creates a GLOBAL view of the CFIVS, a_buffer cells wide on the coarse side of the refinement boundary. If this is not performant,
+  //       there are probably better ways to do this. 
   
   const int comp  = 0;
   const int ncomp = 1;
@@ -682,7 +739,6 @@ void particle_container<P>::make_coar_mask(LevelData<BaseFab<bool> >& a_coarMask
   DisjointBoxLayout gridsCoFi;
   coarsen(gridsCoFi, a_gridsFine, a_ref_rat);
 
-  
   IntVectSet halo;                 // Global CFIVS - should find a better way to do this.
   NeighborIterator nit(gridsCoFi); // Neighbor iterator
 
@@ -709,7 +765,7 @@ void particle_container<P>::make_coar_mask(LevelData<BaseFab<bool> >& a_coarMask
   }
 
   // Get the global cfivs
-  gatherBroadcast(halo);
+  gather_and_broadcast(halo);
 
   // Set the mask
   for (DataIterator dit = a_gridsCoar.dataIterator(); dit.ok(); ++dit){
@@ -725,7 +781,7 @@ void particle_container<P>::make_coar_mask(LevelData<BaseFab<bool> >& a_coarMask
 }
 
 template <class P>
-void particle_container<P>::gatherBroadcast(IntVectSet& a_set){
+void particle_container<P>::gather_and_broadcast(IntVectSet& a_set){
 #ifdef CH_MPI
   Vector<IntVectSet> procSet;
   const int destProc = uniqueProc(SerialTask::compute);
@@ -738,6 +794,43 @@ void particle_container<P>::gatherBroadcast(IntVectSet& a_set){
   }
   broadcast(a_set, destProc);
 #endif
+}
+
+template <class P>
+void particle_container<P>::copy_particles_to_halo(){
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    if(lvl < m_finest_level){
+      this->copy_particles_to_halo(lvl);
+    }
+  }
+}
+
+template <class P>
+void particle_container<P>::copy_particles_to_halo(const int a_level){
+
+  m_halo_particles[a_level].clear();
+
+  const RealVect dx = m_dx[a_level];
+
+  // 1. Transfer particles to outcast list on the m_halo_particles. 
+  List<P>& outcast = m_halo_particles[a_level]->outcast();
+  
+  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
+    const BaseFab<bool>& mask = (*m_halo[a_level])[dit()];
+    const List<P>& particles  = (*m_particles[a_level])[dit()].listItems();
+
+    for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+      const RealVect x = lit().position();
+      const IntVect iv(D_DECL((int)floor((x[0] - m_prob_lo[0])/dx[0]),
+			      (int)floor((x[1] - m_prob_lo[1])/dx[1]),
+			      (int)floor((x[2] - m_prob_lo[2])/dx[2])));
+
+      if(mask(iv)) outcast.add(lit);
+    }
+  }
+
+  // 2. Remap the outcast list.
+  m_halo_particles[a_level]->remapOutcast();
 }
 
 #endif
