@@ -99,16 +99,24 @@ void particle_container<P>::setup_particle_data(const int a_base, const int a_fi
   m_particles.resize(1 + a_finest_level);
   m_halo_particles.resize(1 + a_finest_level);
   m_cell_particles.resize(1 + a_finest_level);
-
   
   for (int lvl = a_base; lvl <= a_finest_level; lvl++){
+    int halo_blocking_factor;
+    if(lvl > 0){
+      halo_blocking_factor = m_blocking_factor + m_ref_rat[lvl-1]*m_halo_buffer;
+    }
+    else{
+      halo_blocking_factor = m_blocking_factor;
+    }
+    
     m_particles[lvl] = RefCountedPtr<ParticleData<P> > (new ParticleData<P>(m_grids[lvl],
 									    m_domains[lvl],
 									    m_blocking_factor,
 									    m_dx[lvl]*RealVect::Unit,
 									    m_prob_lo));
 
-    m_halo_particles[lvl] = RefCountedPtr<ParticleData<P> > (new ParticleData<P>(m_grown_grids[lvl],
+
+    m_halo_particles[lvl] = RefCountedPtr<ParticleData<P> > (new ParticleData<P>(m_grids[lvl],
 										 m_domains[lvl],
 										 m_blocking_factor,
 										 m_dx[lvl]*RealVect::Unit,
@@ -604,9 +612,12 @@ void particle_container<P>::define_grown_grids(){
     Vector<Box> boxes = m_grids[lvl].boxArray();
     Vector<int> procs = m_grids[lvl].procIDs();
 
-    for (int i = 0; i < boxes.size(); i++){
-      boxes[i].grow(m_halo_buffer);
-      boxes[i] &= m_domains[lvl];
+
+    if(lvl > 0){
+      for (int i = 0; i < boxes.size(); i++){
+	boxes[i].grow(m_ref_rat[lvl-1]*m_halo_buffer);
+	//	boxes[i] &= m_domains[lvl];
+      }
     }
 
     m_grown_grids[lvl] = BoxLayout(boxes, procs);
@@ -697,8 +708,6 @@ size_t particle_container<P>::get_num_halo_global() const {
 
 template <class P>
 void particle_container<P>::define_halo_masks(){
-
-  m_halo_buffer = 1;
   
   const int ncomp = 1;
   
@@ -815,16 +824,19 @@ void particle_container<P>::copy_particles_to_halo(){
 template <class P>
 void particle_container<P>::copy_particles_to_halo(const int a_level){
 
-  m_halo_particles[a_level]->clear();
+  const int coar_level = a_level;
+  const int fine_level = a_level+1;
+  
+  m_halo_particles[coar_level]->clear();
 
-  const RealVect dx = m_dx[a_level];
+  const RealVect dx = m_dx[coar_level];
 
   // 1. Transfer particles to outcast list on the m_halo_particles. 
-  List<P>& outcast = m_halo_particles[a_level]->outcast();
-
-  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
-    const BaseFab<bool>& mask = (*m_halo[a_level])[dit()];
-    const List<P>& particles  = (*m_particles[a_level])[dit()].listItems();
+  List<P>& outcast = m_halo_particles[coar_level]->outcast();
+  
+  for (DataIterator dit = m_grids[coar_level].dataIterator(); dit.ok(); ++dit){
+    const BaseFab<bool>& mask = (*m_halo[coar_level])[dit()];
+    const List<P>& particles  = (*m_particles[coar_level])[dit()].listItems();
 
     for (ListIterator<P> lit(particles); lit.ok(); ++lit){
       const RealVect x = lit().position();
@@ -836,8 +848,21 @@ void particle_container<P>::copy_particles_to_halo(const int a_level){
     }
   }
 
+#if 0 // Debug
+  int myNumParticles = outcast.length();
+  int allNumParticles;
+  MPI_Allreduce(&myNumParticles,&allNumParticles, 1, MPI_INT, MPI_SUM, Chombo_MPI::comm);
+#endif
+
   // 2. Remap the outcast list.
-  m_halo_particles[a_level]->remapOutcast();
+  m_halo_particles[coar_level]->remapOutcast();
+
+#if 0 //
+  std::cout << "outcast sum = " << allNumParticles
+	    << "\t PD sum = " << m_halo_particles[coar_level]->numValid()
+	    << "\t PD out = " << m_halo_particles[coar_level]->numOutcast() 
+	    << std::endl;
+#endif
 }
 
 #endif
