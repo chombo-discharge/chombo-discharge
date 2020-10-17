@@ -93,6 +93,10 @@ public:
   */
   void copy_particles_to_halo();
 
+  /*!
+    @brief Frees up halo particles
+  */
+  void clear_halo_particles();
 
   /*!
     @brief Get the realm

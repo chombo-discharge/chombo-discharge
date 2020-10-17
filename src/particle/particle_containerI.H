@@ -822,21 +822,24 @@ void particle_container<P>::copy_particles_to_halo(){
 }
 
 template <class P>
+void particle_container<P>::clear_halo_particles(){
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    m_halo_particles[lvl]->clear();
+  }
+}
+
+template <class P>
 void particle_container<P>::copy_particles_to_halo(const int a_level){
-
-  const int coar_level = a_level;
-  const int fine_level = a_level+1;
   
-  m_halo_particles[coar_level]->clear();
+  m_halo_particles[a_level]->clear();
 
-  const RealVect dx = m_dx[coar_level];
+  const RealVect dx = m_dx[a_level];
 
-  // 1. Transfer particles to outcast list on the m_halo_particles. 
-  List<P>& outcast = m_halo_particles[coar_level]->outcast();
-  
-  for (DataIterator dit = m_grids[coar_level].dataIterator(); dit.ok(); ++dit){
-    const BaseFab<bool>& mask = (*m_halo[coar_level])[dit()];
-    const List<P>& particles  = (*m_particles[coar_level])[dit()].listItems();
+  // 1. Copy particles from m_particles to m_halo_particles if they lie in the halo mask. 
+  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
+    const BaseFab<bool>& mask = (*m_halo[a_level])[dit()];
+    const List<P>& particles  = (*m_particles[a_level])[dit()].listItems();
+    List<P>& halo_particles   = (*m_halo_particles[a_level])[dit()].listItems();
 
     for (ListIterator<P> lit(particles); lit.ok(); ++lit){
       const RealVect x = lit().position();
@@ -844,25 +847,9 @@ void particle_container<P>::copy_particles_to_halo(const int a_level){
 			      (int)floor((x[1] - m_prob_lo[1])/dx[1]),
 			      (int)floor((x[2] - m_prob_lo[2])/dx[2])));
 
-      if(mask(iv)) outcast.add(lit());
+      if(mask(iv)) halo_particles.add(lit());
     }
   }
-
-#if 0 // Debug
-  int myNumParticles = outcast.length();
-  int allNumParticles;
-  MPI_Allreduce(&myNumParticles,&allNumParticles, 1, MPI_INT, MPI_SUM, Chombo_MPI::comm);
-#endif
-
-  // 2. Remap the outcast list.
-  m_halo_particles[coar_level]->remapOutcast();
-
-#if 0 //
-  std::cout << "outcast sum = " << allNumParticles
-	    << "\t PD sum = " << m_halo_particles[coar_level]->numValid()
-	    << "\t PD out = " << m_halo_particles[coar_level]->numOutcast() 
-	    << std::endl;
-#endif
 }
 
 #endif

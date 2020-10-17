@@ -1258,7 +1258,6 @@ void ito_solver::deposit_particles(){
 
 #if 0 // Development code
   //  MayDay::Warning("ito_solver::deposit_particles - development code, remember to take out this code. ");
-  m_particles.remap();
   m_particles.copy_particles_to_halo();
 
   // const size_t halo_global = m_particles.get_num_halo_global();
