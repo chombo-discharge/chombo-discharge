@@ -55,31 +55,39 @@ void EBGhostCloud::define(const DisjointBoxLayout& a_gridsCoar,
   m_domainCoar = a_domainCoar;
   m_domainFine = a_domainFine;
 
-  // Coarsen the grids and make a BoxLayout grid
-  DisjointBoxLayout dblCoFi;
+  // Make coarsened/refined stuff
+  makeCoFiStuff();
+  //  makeFiCoStuff();
+
+  // Create fine scratch data. The fine data should just be a raw copy. 
+  const EBCellFactory factFine(a_eblgFine.getEBISL());
+  m_scratchFine.define(a_gridsFine, a_nComp, m_ghost*IntVect::Unit, factFine);
+
+  m_isDefined = true;
+}
+
+void EBGhostCloud::makeCoFiStuff(){
+
+  // TLDR: Coarsen the grids and make a BoxLayout data
   
-  coarsen(dblCoFi,    a_gridsFine, m_refRat);
-  coarsen(m_eblgCoFi, a_eblgFine,  m_refRat);
+  DisjointBoxLayout dblCoFi;
+  coarsen(dblCoFi, m_gridsFine, m_refRat);
   
   Vector<Box> coFiBoxes = dblCoFi.boxArray();
   Vector<int> coFiProcs = dblCoFi.procIDs();
 
-  const int ghostCoFi = (a_ghostFine + m_refRat - 1)/m_refRat; // Rounds upwards. 
+  const int ghostCoFi = (m_ghost + m_refRat - 1)/m_refRat; // Rounds upwards. 
   for (int i = 0; i < coFiBoxes.size(); i++){
     coFiBoxes[i].grow(ghostCoFi);
-    coFiBoxes[i] &= a_domainCoar;
+    coFiBoxes[i] &= m_domainCoar;
   }
   
-  // Create scratch data. The fine data should just be a raw copy. The coarse data is the coarse data. 
-  const EBCellFactory factFine(a_eblgFine.getEBISL());
-  const EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
-
-  m_scratchFine.define(a_gridsFine, a_nComp, m_ghost*IntVect::Unit, factFine);
-  
   m_gridsCoFi.define(coFiBoxes, coFiProcs);
-  m_dataCoFi.define(m_gridsCoFi, a_nComp);
+  m_dataCoFi.define(m_gridsCoFi, m_nComp);
+}
 
-  m_isDefined = true;
+void EBGhostCloud::makeFiCoStuff(){
+  MayDay::Abort("EBGhostCloud::makeFiCoStuff - not implemented!");
 }
 
 void EBGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData){
@@ -123,4 +131,8 @@ void EBGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const
   LevelData<FArrayBox> coarAlias;
   aliasEB(coarAlias, a_coarData);
   m_dataCoFi.addTo(interv, coarAlias, interv, m_domainCoar.domainBox());
+}
+
+void EBGhostCloud::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<FArrayBox>& a_fiCoData){
+  MayDay::Abort("EBGhostCloud::addFiCoDataToFine - not implemented!");
 }

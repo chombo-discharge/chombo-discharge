@@ -34,8 +34,14 @@ public:
 	       const int                a_nComp,
 	       const int                a_ghost);
 
+  /*!
+    @brief Dtor
+  */
   ~EBGhostCloud();
 
+  /*!
+    @brief Define function
+  */
   void define(const DisjointBoxLayout& a_gridsCoar,
 	      const DisjointBoxLayout& a_gridsFine,
 	      const EBLevelGrid&       a_eblgCoar,
@@ -46,7 +52,15 @@ public:
 	      const int                a_nComp,
 	      const int                a_ghost);
 
+  /*!
+    @brief Coarsen the fine-level ghost cells and add them to the coarse level
+  */
   void addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData);
+
+  /*!
+    @brief Add the ghost cells on the refined coarse level to the fine level. 
+  */
+  void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<FArrayBox>& a_fiCoData);
 
 protected:
 
@@ -76,11 +90,6 @@ protected:
     @brief Fine EBLevelGrid
   */
   EBLevelGrid m_eblgFine;
-
-  /*!
-    @brief Coarsened fine EBLevelGrid
-  */
-  EBLevelGrid m_eblgCoFi;
 
   /*!
     @brief Refined coarse EBLevelGrid
@@ -136,5 +145,15 @@ protected:
     @brief Required number of ghost cells
   */
   int m_ghost;
+
+  /*!
+    @brief Make the coarsened fine grids and data
+  */
+  void makeCoFiStuff();
+
+  /*!
+    @brief Make the refined coarse grids and data
+  */
+  void makeFiCoStuff();
 };
 #endif
