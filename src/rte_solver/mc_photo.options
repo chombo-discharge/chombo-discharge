@@ -24,7 +24,8 @@
 mc_photo.instantaneous      = true          # Instantaneous transport or not
 mc_photo.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
 mc_photo.blend_conservation = false         # Switch for blending with the nonconservative divergence
-mc_photo.pvr_buffer         = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
+mc_photo.pvr_buffer         = 0             # Buffer for PVR. 
+mc_photo.halo_buffer        = 1             # Halo region for particles. 
 mc_photo.random_kappa       = true          # Randomize absorption length (taken from photon implementation)
 mc_photo.plt_vars           = phi src phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'
 mc_photo.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 

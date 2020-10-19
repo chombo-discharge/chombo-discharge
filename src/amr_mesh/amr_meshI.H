@@ -79,7 +79,10 @@ template <typename T> void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<
   }
 }
 
-template <typename T> void amr_mesh::allocate(particle_container<T>& a_container, const int a_buffer, const std::string a_realm){
+template <typename T> void amr_mesh::allocate(particle_container<T>& a_container,
+					      const int              a_buffer,
+					      const int              a_halo,
+					      const std::string      a_realm){
   CH_TIME("amr_mesh::allocate(container, buffer, realm)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(container, buffer, realm)" << endl;
@@ -102,6 +105,7 @@ template <typename T> void amr_mesh::allocate(particle_container<T>& a_container
 		     m_blocking_factor,
 		     m_finest_level,
 		     a_buffer,
+		     a_halo,
 		     a_realm);
 }
 

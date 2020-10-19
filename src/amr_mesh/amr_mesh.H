@@ -97,7 +97,10 @@ public:
   /*!
     @brief Allocate a particle container
   */
-  template <typename T> void allocate(particle_container<T>& a_container, const int a_buffer, const std::string a_realm);
+  template <typename T> void allocate(particle_container<T>& a_container,
+				      const int              a_buffer,
+				      const int              a_halo,
+				      const std::string      a_realm);
 
   /*!
     @brief Allocate pointer but not memory

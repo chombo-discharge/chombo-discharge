@@ -316,7 +316,8 @@ void mc_photo::parse_pvr_buffer(){
   }
   
   ParmParse pp(m_class_name.c_str());
-  pp.get("pvr_buffer", m_pvr_buffer);
+  pp.get("pvr_buffer",   m_pvr_buffer);
+  pp.get("halo_buffer",  m_halo_buffer);
 }
 
 void mc_photo::parse_plot_vars(){
@@ -394,11 +395,11 @@ void mc_photo::allocate_internals(){
   m_amr->allocate(m_massDiff,     m_realm, m_phase, ncomp);
 
   // Allocate particle data holders
-  m_amr->allocate(m_photons,        m_pvr_buffer, m_realm);
-  m_amr->allocate(m_bulk_photons,   m_pvr_buffer, m_realm);
-  m_amr->allocate(m_eb_photons,     m_pvr_buffer, m_realm);
-  m_amr->allocate(m_domain_photons, m_pvr_buffer, m_realm);
-  m_amr->allocate(m_source_photons, m_pvr_buffer, m_realm);
+  m_amr->allocate(m_photons,        m_pvr_buffer, m_halo_buffer, m_realm);
+  m_amr->allocate(m_bulk_photons,   m_pvr_buffer, m_halo_buffer, m_realm);
+  m_amr->allocate(m_eb_photons,     m_pvr_buffer, m_halo_buffer, m_realm);
+  m_amr->allocate(m_domain_photons, m_pvr_buffer, m_halo_buffer, m_realm);
+  m_amr->allocate(m_source_photons, m_pvr_buffer, m_halo_buffer, m_realm);
 }
 
 void mc_photo::pre_regrid(const int a_lmin, const int a_old_finest_level){

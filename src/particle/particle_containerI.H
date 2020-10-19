@@ -26,9 +26,10 @@ particle_container<P>::particle_container(const Vector<DisjointBoxLayout>& a_gri
 					  const int                        a_blocking_factor,
 					  const int                        a_finest_level,
 					  const int                        a_pvr_buffer,
+					  const int                        a_halo,
 					  const std::string                a_realm){
 
-  this->define(a_grids, a_domains, a_dx, a_ref_rat, a_prob_lo, a_blocking_factor, a_finest_level, a_pvr_buffer, a_realm);
+  this->define(a_grids, a_domains, a_dx, a_ref_rat, a_prob_lo, a_blocking_factor, a_finest_level, a_pvr_buffer, a_halo, a_realm);
 
 
 }
@@ -47,6 +48,7 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
 				   const int                        a_blocking_factor,
 				   const int                        a_finest_level,
 				   const int                        a_pvr_buffer,
+				   const int                        a_halo_buffer,
 				   const std::string                a_realm){
   m_grids           = a_grids;
   m_domains         = a_domains;
@@ -56,7 +58,7 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   m_buffer          = a_pvr_buffer;
   m_realm           = a_realm;
   m_blocking_factor = a_blocking_factor;
-  m_halo_buffer     = 1; // Hard code for now - this will later become a_pvr_buffer...
+  m_halo_buffer     = a_halo_buffer;
 
 
   m_dx.resize(1 + m_finest_level);
@@ -69,7 +71,6 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   // Do the define stuff. 
   this->setup_pvr(base, m_finest_level);
   this->define_halo_masks();
-  this->define_grown_grids();
   this->setup_particle_data(base, m_finest_level);
 
   m_is_defined = true;
@@ -558,7 +559,6 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   }
 
   this->define_halo_masks();
-  this->define_grown_grids();
   this->setup_pvr(a_lmin, m_finest_level);
   this->setup_particle_data(a_lmin, m_finest_level);
   
@@ -602,26 +602,6 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   this->remap();
 
   m_cache_particles.resize(0);
-}
-
-template <class P>
-void particle_container<P>::define_grown_grids(){
-  m_grown_grids.resize(1 + m_finest_level);
-  
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    Vector<Box> boxes = m_grids[lvl].boxArray();
-    Vector<int> procs = m_grids[lvl].procIDs();
-
-
-    if(lvl > 0){
-      for (int i = 0; i < boxes.size(); i++){
-	boxes[i].grow(m_ref_rat[lvl-1]*m_halo_buffer);
-	//	boxes[i] &= m_domains[lvl];
-      }
-    }
-
-    m_grown_grids[lvl] = BoxLayout(boxes, procs);
-  }
 }
 
 template <class P>

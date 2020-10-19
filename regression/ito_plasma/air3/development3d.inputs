@@ -101,7 +101,8 @@ poisson_multifluid_gmg.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi'
 # ====================================================================================================
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
-ito_solver.pvr_buffer          = 0             # Buffer for PVR. 
+ito_solver.pvr_buffer          = 0             # Buffer for PVR.
+ito_solver.halo_buffer         = 1             # Halo buffer. 
 ito_solver.plt_vars            = phi vel dco mobility   # Currently available are 'phi', 'vel', and 'dco'
 ito_solver.bisect_step         = 1.E-3         # Bisection step length for intersection tests
 ito_solver.seed                = 0            # Seed for RNG
@@ -143,7 +144,8 @@ ito_solver.deposition          = cic           # 'ngp' = nearest grid point
 mc_photo.instantaneous      = true          # Instantaneous transport or not
 mc_photo.max_photons        = -1            # Maximum no. generated in a cell (< = 0 yields physical photons)
 mc_photo.blend_conservation = false         # Switch for blending with the nonconservative divergence
-mc_photo.pvr_buffer         = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
+mc_photo.pvr_buffer         = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels.
+mc_photo.halo_buffer        = 0             # Halo region for particles.      
 mc_photo.random_kappa       = true          # Randomize absorption length (taken from photon implementation)
 mc_photo.plt_vars           = bulk_phot src_phot dom_phot eb_phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot'
 mc_photo.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 

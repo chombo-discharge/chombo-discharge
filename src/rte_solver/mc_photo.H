@@ -351,22 +351,27 @@ protected:
   /*!
     @brief Number of photons per pseudophoton
   */
-  int  m_max_photons;
+  int m_max_photons;
 
   /*!
     @brief RNG seed
   */
-  int  m_seed;
+  int m_seed;
 
   /*!
     @brief Threshold for swapping Poisson and exponential distributions
   */
-  int  m_poiss_exp_swap;
+  int m_poiss_exp_swap;
 
   /*!
-    @brief PVR bufer
+    @brief PVR buffer
   */
-  int  m_pvr_buffer;
+  int m_pvr_buffer;
+
+  /*!
+    @brief Halo size for particles
+  */
+  int m_halo_buffer;
 
   /*!
     @brief Number of photons

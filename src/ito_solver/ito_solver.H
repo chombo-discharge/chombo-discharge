@@ -243,6 +243,11 @@ public:
   virtual int get_pvr_buffer() const;
 
   /*!
+    @brief Get the halo buffer
+  */
+  virtual int get_halo_buffer() const;
+
+  /*!
     @brief Get number of particles in m_particles
   */
   virtual size_t get_num_particles(const bool a_local) const;
@@ -720,6 +725,11 @@ protected:
     @brief Buffer for PVR
   */
   int m_pvr_buffer;
+
+  /*!
+    @brief Size of refinement boundary halo
+  */
+  int m_halo_buffer;
 
   /*!
     @brief Current time

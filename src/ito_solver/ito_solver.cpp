@@ -185,7 +185,8 @@ void ito_solver::parse_pvr_buffer(){
   }
 
   ParmParse pp(m_class_name.c_str());
-  pp.get("pvr_buffer", m_pvr_buffer);
+  pp.get("pvr_buffer",  m_pvr_buffer);
+  pp.get("halo_buffer", m_halo_buffer);
 }
 
 void ito_solver::parse_diffusion_hop(){
@@ -299,6 +300,15 @@ int ito_solver::get_pvr_buffer() const {
   }
 
   return m_pvr_buffer;
+}
+
+int ito_solver::get_halo_buffer() const {
+  CH_TIME("ito_solver::get_halo_buffer");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_halo_buffer" << endl;
+  }
+
+  return m_halo_buffer;
 }
 
 size_t ito_solver::get_num_particles(const bool a_local) const{
@@ -720,11 +730,11 @@ void ito_solver::allocate_internals(){
   
   // This allocates parallel data holders using the load balancing in amr_mesh. This might give poor
   // load balancing, but we will rectify that by rebalancing later.
-  m_amr->allocate(m_particles,          m_pvr_buffer, m_realm);
-  m_amr->allocate(m_eb_particles,       m_pvr_buffer, m_realm);
-  m_amr->allocate(m_domain_particles,   m_pvr_buffer, m_realm);
-  m_amr->allocate(m_source_particles,   m_pvr_buffer, m_realm);
-  m_amr->allocate(m_scratch_particles,  m_pvr_buffer, m_realm);
+  m_amr->allocate(m_particles,          m_pvr_buffer, m_halo_buffer, m_realm);
+  m_amr->allocate(m_eb_particles,       m_pvr_buffer, m_halo_buffer, m_realm);
+  m_amr->allocate(m_domain_particles,   m_pvr_buffer, m_halo_buffer, m_realm);
+  m_amr->allocate(m_source_particles,   m_pvr_buffer, m_halo_buffer, m_realm);
+  m_amr->allocate(m_scratch_particles,  m_pvr_buffer, m_halo_buffer, m_realm);
 }
 
 void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
@@ -733,13 +743,15 @@ void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level)
     pout() << m_name + "::write_checkpoint_level" << endl;
   }
 
+  const int halo = 0;
+
   write(a_handle, *m_state[a_level], m_name);
 
   // Write particles.
   const std::string str = m_name + "_particles";
   if(m_checkpointing == which_checkpoint::particles){
     particle_container<simple_ito_particle> simpleParticles;
-    m_amr->allocate(simpleParticles, m_pvr_buffer, m_realm);
+    m_amr->allocate(simpleParticles, m_pvr_buffer, halo, m_realm);
 
     // Make ito_particle into simple_ito_particle. This saves a shitload of disk space. 
     for (DataIterator dit(m_amr->get_grids()[a_level]); dit.ok(); ++dit){

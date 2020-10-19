@@ -114,14 +114,15 @@ void ito_plasma_godunov::allocate(){
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<ito_solver>& solver = solver_it();
 
-    const int idx        = solver_it.get_solver();
-    const int pvr_buffer = solver->get_pvr_buffer();
+    const int idx         = solver_it.get_solver();
+    const int pvr_buffer  = solver->get_pvr_buffer();
+    const int halo_buffer = solver->get_halo_buffer();
 
     m_conductivity_particles[idx] = new particle_container<godunov_particle>();
     m_rho_dagger_particles[idx]   = new particle_container<godunov_particle>();
     
-    m_amr->allocate(*m_conductivity_particles[idx], pvr_buffer, m_particle_realm);
-    m_amr->allocate(*m_rho_dagger_particles[idx],   pvr_buffer, m_particle_realm);
+    m_amr->allocate(*m_conductivity_particles[idx], pvr_buffer, halo_buffer, m_particle_realm);
+    m_amr->allocate(*m_rho_dagger_particles[idx],   pvr_buffer, halo_buffer, m_particle_realm);
   }
 }
 

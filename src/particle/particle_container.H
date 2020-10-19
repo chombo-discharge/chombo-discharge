@@ -24,7 +24,7 @@ template <class P>
 using AMRCellParticles = Vector<RefCountedPtr<LayoutData<BinFab<P> > > >;
 
 using AMRPVR           = Vector<RefCountedPtr<ParticleValidRegion> >;
-using EBAMRPPC         = Vector<RefCountedPtr<BaseEBCellFAB<int> > >;
+//using EBAMRPPC         = Vector<RefCountedPtr<BaseEBCellFAB<int> > >;
 
 
 
@@ -53,6 +53,7 @@ public:
 		     const int                        a_blocking_factor,
 		     const int                        a_finest_level,
 		     const int                        a_pvr_buffer,
+		     const int                        a_halo,
 		     const std::string                a_realm);
 
   /*!
@@ -71,6 +72,7 @@ public:
 	      const int                        a_blocking_factor,
 	      const int                        a_finest_level,
 	      const int                        a_pvr_buffer,
+	      const int                        a_halo_buffer,
 	      const std::string                a_realm);
 
   /*!
@@ -323,12 +325,6 @@ protected:
   Vector<DisjointBoxLayout> m_grids;
 
   /*!
-    @brief Version of m_grids that is grown by m_halo_buffer cells. Used for transferring particles from the coarse grid
-           to the fine grid if they are "close enough" to the refinement boundary. 
-  */
-  Vector<BoxLayout> m_grown_grids;
-
-  /*!
     @brief Problem domains
   */
   Vector<ProblemDomain> m_domains;
@@ -391,11 +387,6 @@ protected:
            for getting those particles and putting them in the correct data holder. 
   */
   void remap_lost_particles();
-
-  /*!
-    @brief Define function for the grown grids. 
-  */
-  void define_grown_grids();
 
   /*!
     @brief Define function for the coarse-level mask (m_halo_mask)
