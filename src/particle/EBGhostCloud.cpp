@@ -45,7 +45,13 @@ void EBGhostCloud::define(const DisjointBoxLayout& a_gridsCoar,
   m_refRat     = a_refRat;
   m_nComp      = a_nComp;
   m_ghost      = a_ghostFine;
+
+  m_gridsCoar  = a_gridsCoar;
   m_gridsFine  = a_gridsFine;
+
+  m_eblgCoar   = a_eblgCoar;
+  m_eblgFine   = a_eblgFine;
+  
   m_domainCoar = a_domainCoar;
   m_domainFine = a_domainFine;
 

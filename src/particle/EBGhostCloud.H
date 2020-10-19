@@ -50,16 +50,91 @@ public:
 
 protected:
 
-  bool                     m_isDefined;
-  BoxLayout                m_gridsCoFi;
+  /*!
+    @brief Is defined or not
+  */
+  bool m_isDefined;
+
+
+
+  /*!
+    @brief Coarse grids
+  */
+  DisjointBoxLayout m_gridsCoar;
+
+  /*!
+    @brief Fine grids
+  */
+  DisjointBoxLayout m_gridsFine;
+
+  /*!
+    @brief Coarse EBLevelGrid
+  */
+  EBLevelGrid m_eblgCoar;
+
+  /*!
+    @brief Fine EBLevelGrid
+  */
+  EBLevelGrid m_eblgFine;
+
+  /*!
+    @brief Coarsened fine EBLevelGrid
+  */
+  EBLevelGrid m_eblgCoFi;
+
+  /*!
+    @brief Refined coarse EBLevelGrid
+  */
+  EBLevelGrid m_eblgFiCo;
+
+  /*!
+    @brief Coarse domain
+  */
+  ProblemDomain m_domainCoar;
+
+  /*!
+    @brief Fine domain
+  */
+  ProblemDomain m_domainFine;
+
+  /*!
+    @brief Coarsened grids, grown by the required amount of ghost cells. 
+  */
+  BoxLayout m_gridsCoFi;
+
+  /*!
+    @brief Refined coarse grids.
+  */
+  BoxLayout m_gridsFiCo;
+
+  /*!
+    @brief Data defined on the coarsened fine grid
+  */
   BoxLayoutData<FArrayBox> m_dataCoFi;
-  DisjointBoxLayout        m_gridsFine;
-  EBLevelGrid              m_eblgCoFi;
-  LevelData<EBCellFAB>     m_scratchFine;
-  ProblemDomain            m_domainCoar;
-  ProblemDomain            m_domainFine;
-  int                      m_refRat;
-  int                      m_nComp;
-  int                      m_ghost;
+
+  /*!
+    @brief Data defined on the refined coarse grid
+  */
+  BoxLayoutData<FArrayBox> m_dataFiCo;
+
+  /*!
+    @brief Scratch storage for fine grid data
+  */
+  LevelData<EBCellFAB> m_scratchFine;
+
+  /*!
+    @brief Refinement ratio between the two levels
+  */
+  int m_refRat;
+
+  /*!
+    @brief Maximum number of components
+  */
+  int m_nComp;
+
+  /*!
+    @brief Required number of ghost cells
+  */
+  int m_ghost;
 };
 #endif
