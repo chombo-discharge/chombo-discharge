@@ -939,6 +939,24 @@ protected:
 				 const DepositionType::Which  a_deposition);
 
   /*!
+    @brief Just as deposit_kappaConservative, but using a PVR buffer where particle clouds on coarse levels are
+    interpolated to fine levels. 
+  */
+  template <class T>
+  void deposit_kappaConservativeWithPVR(EBAMRCellData&               a_state,
+					const particle_container<T>& a_particles,
+					const DepositionType::Which  a_deposition);
+
+  /*!
+    @brief Just as deposit_kappaConservative, but using halo particles when depositing particles from coarse levels to fine
+    levels
+  */
+  template <class T>
+  void deposit_kappaConservativeNoPVR(EBAMRCellData&               a_state,
+				      const particle_container<T>& a_particles,
+				      const DepositionType::Which  a_deposition);
+
+  /*!
     @brief Make the "non-conservative" kappa deposition
   */
   void deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);

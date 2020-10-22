@@ -79,6 +79,23 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&               a_state,
     pout() << m_name + "::deposit_kappaConservative" << endl;
   }
 
+  if(m_pvr_buffer > 0){
+    this->deposit_kappaConservativeWithPVR(a_state, a_particles, a_deposition);
+  }
+  else{
+    this->deposit_kappaConservativeNoPVR(a_state, a_particles, a_deposition);
+  }
+}
+
+template <class T>
+void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a_state,
+						  const particle_container<T>& a_particles,
+						  const DepositionType::Which  a_deposition){
+  CH_TIME("ito_solver::deposit_kappaConservative");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_kappaConservative" << endl;
+  }
+
   const int comp = 0;
   const Interval interv(comp, comp);
 
@@ -87,10 +104,6 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&               a_state,
 
   data_ops::set_value(a_state,    0.0);
   data_ops::set_value(m_scratch,  0.0);
-
-  if(m_pvr_buffer <= 0){
-    a_particles.copy_halo_particles();
-  }
 
   const AMRParticles<T>& particles = a_particles.get_particles();
   const AMRParticles<T>& halo_particles = a_particles.get_halo_particles();
@@ -132,36 +145,87 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&               a_state,
     if(has_fine){
       a_state[lvl]->localCopyTo(*m_scratch[lvl]);
     }
-    else if(m_pvr_buffer <= 0 && has_coar){
+  }
+}
+
+template <class T>
+void ito_solver::deposit_kappaConservativeNoPVR(EBAMRCellData&               a_state,
+						  const particle_container<T>& a_particles,
+						  const DepositionType::Which  a_deposition){
+  CH_TIME("ito_solver::deposit_kappaConservativeNoPVR");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_kappaConservativeNoPVR" << endl;
+  }
+
+  const int comp = 0;
+  const Interval interv(comp, comp);
+
+  const RealVect origin  = m_amr->get_prob_lo();
+  const int finest_level = m_amr->get_finest_level();
+
+  data_ops::set_value(a_state,    0.0);
+
+  a_particles.copy_halo_particles();
+    
+  const AMRParticles<T>& particles      = a_particles.get_particles();
+  const AMRParticles<T>& halo_particles = a_particles.get_halo_particles();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const Real dx                = m_amr->get_dx()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+
+    const bool has_coar = (lvl > 0);
+    const bool has_fine = (lvl < finest_level);
+
+    // 1. Deposit this levels particles. Note that this will deposit into ghost cells. 
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      const EBISBox& ebisbox = ebisl[dit()];
+      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
+      interp.deposit((*particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
+    }
+
+    // 2. Exchange ghost cells on this level. 
+    const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_realm, m_phase)[lvl];
+    LDaddOp<FArrayBox> addOp;
+    LevelData<FArrayBox> aliasFAB;
+    aliasEB(aliasFAB, *a_state[lvl]);
+    aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
+
+    // 3. Deposition into ghost cells across the fine boundary should end up on the coarse level. 
+    if(has_coar) {
       EBGhostCloud& ghostcloud = *(m_amr->get_ghostcloud(m_realm, m_phase)[lvl]);
       ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
     }
 
-#if 1 // Test. 
+    // 4. The particles on the coarse side of the refinement boundary should deposit onto this level.
+    //    The halo particles have been copied, and we run a special deposition procedure here to ensure
+    //    that the mass ends up on the fine level. 
     if(has_coar){
-      EBGhostCloud& ghostcloud = *(m_amr->get_ghostcloud(m_realm, m_phase)[lvl]);
+      EBGhostCloud& ghostcloud         = *(m_amr->get_ghostcloud(m_realm, m_phase)[lvl]);
       BoxLayoutData<FArrayBox>& buffer = ghostcloud.getFiCoBuffer();
-      const EBLevelGrid& eblgFiCo = ghostcloud.getEblgFiCo();
+      const EBLevelGrid& eblgFiCo      = ghostcloud.getEblgFiCo();
       
       for (DataIterator dit = buffer.dataIterator(); dit.ok(); ++dit){
 	const Box box = buffer.box(dit());
 	const EBISBox& ebisbox = eblgFiCo.getEBISL()[dit()];
 
 	buffer[dit()].setVal(0.0);
-
 	EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
 	interp.deposit((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition);
+
+	//	MayDay::Abort("ito_solver::deposit_kappaConservativeNoPVR - need the new deposition scheme now!");
       }
 
       // Add the result to the fine level. 
       ghostcloud.addFiCoDataToFine(*a_state[lvl], buffer);
     }
-#endif
   }
 
-  if(m_pvr_buffer <= 0){
-    a_particles.clear_halo_particles();
-  }
+  // Clear halo particles
+  a_particles.clear_halo_particles();
 }
 
 
