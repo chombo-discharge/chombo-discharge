@@ -793,23 +793,23 @@ void particle_container<P>::gather_and_broadcast(IntVectSet& a_set){
 }
 
 template <class P>
-void particle_container<P>::copy_particles_to_halo(){
+void particle_container<P>::copy_halo_particles() const {
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     if(lvl < m_finest_level){
-      this->copy_particles_to_halo(lvl);
+      this->copy_halo_particles(lvl);
     }
   }
 }
 
 template <class P>
-void particle_container<P>::clear_halo_particles(){
+void particle_container<P>::clear_halo_particles() const {
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     m_halo_particles[lvl]->clear();
   }
 }
 
 template <class P>
-void particle_container<P>::copy_particles_to_halo(const int a_level){
+void particle_container<P>::copy_halo_particles(const int a_level) const {
   
   m_halo_particles[a_level]->clear();
 

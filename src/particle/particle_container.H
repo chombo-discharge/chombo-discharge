@@ -93,12 +93,12 @@ public:
   /*!
     @brief Copy particles to halo
   */
-  void copy_particles_to_halo();
+  void copy_halo_particles() const;
 
   /*!
     @brief Frees up halo particles
   */
-  void clear_halo_particles();
+  void clear_halo_particles() const;
 
   /*!
     @brief Get the realm
@@ -360,7 +360,7 @@ protected:
     @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
            refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
   */
-  AMRParticles<P> m_halo_particles;
+  mutable AMRParticles<P> m_halo_particles;
 
   /*!
     @brief Valid region for each AMR level
@@ -412,10 +412,7 @@ protected:
   /*!
     @brief Copy particles to halo. a_level is the coarse level. 
   */
-  void copy_particles_to_halo(const int a_level);
-
-
-
+  void copy_halo_particles(const int a_level) const;
 };
 
 

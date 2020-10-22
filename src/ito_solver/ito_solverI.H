@@ -88,7 +88,12 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&               a_state,
   data_ops::set_value(a_state,    0.0);
   data_ops::set_value(m_scratch,  0.0);
 
+  if(m_pvr_buffer <= 0){
+    a_particles.copy_halo_particles();
+  }
+
   const AMRParticles<T>& particles = a_particles.get_particles();
+  const AMRParticles<T>& halo_particles = a_particles.get_halo_particles();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->get_dx()[lvl];
@@ -132,19 +137,30 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&               a_state,
       ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
     }
 
-#if 0 // Test. 
+#if 1 // Test. 
     if(has_coar){
       EBGhostCloud& ghostcloud = *(m_amr->get_ghostcloud(m_realm, m_phase)[lvl]);
       BoxLayoutData<FArrayBox>& buffer = ghostcloud.getFiCoBuffer();
-
+      const EBLevelGrid& eblgFiCo = ghostcloud.getEblgFiCo();
+      
       for (DataIterator dit = buffer.dataIterator(); dit.ok(); ++dit){
-      	FArrayBox& buf = buffer[dit()];
-      	buf.setVal(1.E16);
+	const Box box = buffer.box(dit());
+	const EBISBox& ebisbox = eblgFiCo.getEBISL()[dit()];
+
+	buffer[dit()].setVal(0.0);
+
+	EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
+	interp.deposit((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition);
       }
 
+      // Add the result to the fine level. 
       ghostcloud.addFiCoDataToFine(*a_state[lvl], buffer);
     }
 #endif
+  }
+
+  if(m_pvr_buffer <= 0){
+    a_particles.clear_halo_particles();
   }
 }
 

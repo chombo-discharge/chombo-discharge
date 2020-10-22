@@ -72,6 +72,11 @@ public:
   */
   const BoxLayoutData<FArrayBox>& getFiCoBuffer() const;
 
+  /*!
+    @brief Get the refined version of the coarse eblevelgrid
+  */
+  const EBLevelGrid& getEblgFiCo() const;
+
 protected:
 
   /*!

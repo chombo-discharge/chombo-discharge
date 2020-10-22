@@ -103,6 +103,11 @@ void EBGhostCloud::makeFiCoStuff(){
   // Define the grids and the data holder
   m_gridsFiCo.define(fiCoBoxes, fiCoProcs);
   m_dataFiCo.define(m_gridsFiCo, m_nComp);
+
+  // Now make the refined coarse-level EBIS
+  const EBIndexSpace* const ebisPtr = m_eblgFine.getEBIS();
+  const int nghost = 4;
+  m_eblgFiCo.define(dblFiCo, m_domainFine, 4, ebisPtr);
 }
 
 void EBGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData){
@@ -149,7 +154,7 @@ void EBGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const
 }
 
 void EBGhostCloud::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<FArrayBox>& a_fiCoData){
-  // 1. Copy the fiCoData to the scratch data holder
+
   const Interval interv(0, m_nComp-1);
   LevelData<FArrayBox> fineAlias;
   aliasEB(fineAlias, a_fineData);
@@ -162,4 +167,8 @@ const BoxLayoutData<FArrayBox>& EBGhostCloud::getFiCoBuffer() const {
 
 BoxLayoutData<FArrayBox>& EBGhostCloud::getFiCoBuffer() {
   return m_dataFiCo;
+}
+
+const EBLevelGrid& EBGhostCloud::getEblgFiCo() const {
+  return m_eblgFiCo;
 }
