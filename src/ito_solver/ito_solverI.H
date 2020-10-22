@@ -29,7 +29,7 @@
 #include <chrono>
 
 template <class T>
-void ito_solver::deposit_particles(EBAMRCellData& a_state, const AMRParticles<T>& a_particles){
+void ito_solver::deposit_particles(EBAMRCellData& a_state, const particle_container<T>& a_particles){
   CH_TIME("ito_solver::deposit_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_particles" << endl;
@@ -39,19 +39,9 @@ void ito_solver::deposit_particles(EBAMRCellData& a_state, const AMRParticles<T>
 }
 
 template <class T>
-void ito_solver::deposit_particles(EBAMRCellData& a_state, const particle_container<T>& a_particles){
-  CH_TIME("ito_solver::deposit_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::deposit_particles" << endl;
-  }
-
-  this->deposit_particles(a_state, a_particles.get_particles(), m_deposition);
-}
-
-template <class T>
-void ito_solver::deposit_particles(EBAMRCellData&              a_state,
-				   const AMRParticles<T>&      a_particles,
-				   const DepositionType::Which a_deposition){
+void ito_solver::deposit_particles(EBAMRCellData&               a_state,
+				   const particle_container<T>& a_particles,
+				   const DepositionType::Which  a_deposition){
   CH_TIME("ito_solver::deposit_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_particles" << endl;
@@ -81,9 +71,9 @@ void ito_solver::deposit_particles(EBAMRCellData&              a_state,
 }
 
 template <class T>
-void ito_solver::deposit_kappaConservative(EBAMRCellData&              a_state,
-					   const AMRParticles<T>&      a_particles,
-					   const DepositionType::Which a_deposition){
+void ito_solver::deposit_kappaConservative(EBAMRCellData&               a_state,
+					   const particle_container<T>& a_particles,
+					   const DepositionType::Which  a_deposition){
   CH_TIME("ito_solver::deposit_kappaConservative");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_kappaConservative" << endl;
@@ -97,6 +87,8 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&              a_state,
 
   data_ops::set_value(a_state,    0.0);
   data_ops::set_value(m_scratch,  0.0);
+
+  const AMRParticles<T>& particles = a_particles.get_particles();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->get_dx()[lvl];
@@ -120,7 +112,7 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&              a_state,
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
       EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
-      interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
+      interp.deposit((*particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
     // This code adds contributions from ghost cells into the valid region

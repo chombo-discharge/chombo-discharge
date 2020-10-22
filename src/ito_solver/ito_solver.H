@@ -190,26 +190,20 @@ public:
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
   template <class T>
-  void deposit_particles(EBAMRCellData& a_state, const AMRParticles<T>& a_particles);
-
-  /*!
-    @brief Deposit particles
-  */
-  template <class T>
   void deposit_particles(EBAMRCellData& a_state, const particle_container<T>& a_particles);
 
   /*!
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
   template <class T>
-  void deposit_particles(EBAMRCellData&              a_state,
-			 const AMRParticles<T>&      a_particles,
-			 const DepositionType::Which a_deposition);
+  void deposit_particles(EBAMRCellData&               a_state,
+			 const particle_container<T>& a_particles,
+			 const DepositionType::Which  a_deposition);
 
   /*!
     @brief Deposit the total weight of the particles in the grid cells
   */
-  virtual void deposit_weights(EBAMRCellData& a_weights, const AMRParticles<ito_particle>& a_particles);
+  virtual void deposit_weights(EBAMRCellData& a_weights, const particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Remove particles that are inside the EB
@@ -940,9 +934,9 @@ protected:
     @brief This computes the "conservative" deposition, multiplied by kappa
   */
   template <class T>
-  void deposit_kappaConservative(EBAMRCellData&                    a_state,
-				 const AMRParticles<T>& a_particles,
-				 const DepositionType::Which       a_deposition);
+  void deposit_kappaConservative(EBAMRCellData&               a_state,
+				 const particle_container<T>& a_particles,
+				 const DepositionType::Which  a_deposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition

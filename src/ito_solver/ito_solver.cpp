@@ -457,7 +457,7 @@ void ito_solver::initial_data(){
   // Add particles, remove the ones that are inside the EB, and then depsit
   m_particles.add_particles(m_species->get_initial_particles()); 
   this->remove_eb_particles();
-  this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
+  this->deposit_particles(m_state, m_particles, m_deposition);
 
 #if 0 // Test code
   Vector<Box> boxes;
@@ -998,19 +998,19 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
 
   if(m_plot_particles){
-    this->deposit_particles(m_scratch, m_particles.get_particles(), m_plot_deposition);
+    this->deposit_particles(m_scratch, m_particles, m_plot_deposition);
     this->write_data(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_eb_particles){
-    this->deposit_particles(m_scratch, m_eb_particles.get_particles(), m_plot_deposition);
+    this->deposit_particles(m_scratch, m_eb_particles, m_plot_deposition);
     this->write_data(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_domain_particles){
-    this->deposit_particles(m_scratch, m_domain_particles.get_particles(), m_plot_deposition);
+    this->deposit_particles(m_scratch, m_domain_particles, m_plot_deposition);
     this->write_data(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_source_particles){
-    this->deposit_particles(m_scratch, m_source_particles.get_particles(), m_plot_deposition);
+    this->deposit_particles(m_scratch, m_source_particles, m_plot_deposition);
     this->write_data(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_energy){
@@ -1200,7 +1200,7 @@ void ito_solver::deposit_conductivity(EBAMRCellData& a_state, particle_container
   }
 
   this->set_mass_to_conductivity(a_particles);                                 // Make mass = mass*mu
-  this->deposit_particles(a_state, a_particles.get_particles(), a_deposition); // Deposit mass*mu
+  this->deposit_particles(a_state, a_particles, a_deposition); // Deposit mass*mu
   this->unset_mass_to_conductivity(a_particles);                               // Make mass = mass/mu
 }
 
@@ -1229,7 +1229,7 @@ void ito_solver::deposit_diffusivity(EBAMRCellData& a_state, particle_container<
   }
 
   this->set_mass_to_diffusivity(a_particles);                                  // Make mass = mass*D
-  this->deposit_particles(a_state, a_particles.get_particles(), a_deposition); // Deposit mass*D
+  this->deposit_particles(a_state, a_particles, a_deposition); // Deposit mass*D
   this->unset_mass_to_diffusivity(a_particles);                                // Make mass = mass/D
 }
 
@@ -1258,7 +1258,7 @@ void ito_solver::deposit_energy(EBAMRCellData& a_state, particle_container<ito_p
   }
 
   this->set_mass_to_energy(a_particles);                                       // Make mass = mass*E
-  this->deposit_particles(a_state, a_particles.get_particles(), a_deposition); // Deposit mass*E
+  this->deposit_particles(a_state, a_particles, a_deposition); // Deposit mass*E
   this->unset_mass_to_energy(a_particles);                                     // Make mass = mass/E
 }
 
@@ -1268,7 +1268,7 @@ void ito_solver::deposit_particles(){
     pout() << m_name + "::deposit_particles" << endl;
   }
 
-  this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
+  this->deposit_particles(m_state, m_particles, m_deposition);
 }
 
 void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC){
@@ -1445,7 +1445,7 @@ void ito_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
   }
 }
 
-void ito_solver::deposit_weights(EBAMRCellData& a_state, const AMRParticles<ito_particle>& a_particles){
+void ito_solver::deposit_weights(EBAMRCellData& a_state, const particle_container<ito_particle>& a_particles){
   CH_TIME("ito_solver::deposit_weights");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_weights" << endl;
