@@ -62,14 +62,22 @@ public:
   */
   void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<FArrayBox>& a_fiCoData);
 
+  /*!
+    @brief Get the refined coarse buffer
+  */
+  BoxLayoutData<FArrayBox>& getFiCoBuffer();
+
+  /*!
+    @brief Get the refined coarse buffer
+  */
+  const BoxLayoutData<FArrayBox>& getFiCoBuffer() const;
+
 protected:
 
   /*!
     @brief Is defined or not
   */
   bool m_isDefined;
-
-
 
   /*!
     @brief Coarse grids

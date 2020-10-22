@@ -139,6 +139,20 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&              a_state,
       EBGhostCloud& ghostcloud = *(m_amr->get_ghostcloud(m_realm, m_phase)[lvl]);
       ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
     }
+
+#if 0 // Test. 
+    if(has_coar){
+      EBGhostCloud& ghostcloud = *(m_amr->get_ghostcloud(m_realm, m_phase)[lvl]);
+      BoxLayoutData<FArrayBox>& buffer = ghostcloud.getFiCoBuffer();
+
+      for (DataIterator dit = buffer.dataIterator(); dit.ok(); ++dit){
+      	FArrayBox& buf = buffer[dit()];
+      	buf.setVal(1.E16);
+      }
+
+      ghostcloud.addFiCoDataToFine(*a_state[lvl], buffer);
+    }
+#endif
   }
 }
 

@@ -57,7 +57,7 @@ void EBGhostCloud::define(const DisjointBoxLayout& a_gridsCoar,
 
   // Make coarsened/refined stuff
   makeCoFiStuff();
-  //  makeFiCoStuff();
+  makeFiCoStuff();
 
   // Create fine scratch data. The fine data should just be a raw copy. 
   const EBCellFactory factFine(a_eblgFine.getEBISL());
@@ -87,7 +87,22 @@ void EBGhostCloud::makeCoFiStuff(){
 }
 
 void EBGhostCloud::makeFiCoStuff(){
-  MayDay::Abort("EBGhostCloud::makeFiCoStuff - not implemented!");
+
+  DisjointBoxLayout dblFiCo;
+  refine(dblFiCo, m_gridsCoar, m_refRat);
+
+  Vector<Box> fiCoBoxes = dblFiCo.boxArray();
+  Vector<int> fiCoProcs = dblFiCo.procIDs();
+
+  const int ghostFiCo = m_ghost;
+  for (int i = 0; i < fiCoBoxes.size(); i++){
+    fiCoBoxes[i].grow(ghostFiCo);
+    fiCoBoxes[i] &= m_domainFine;
+  }
+
+  // Define the grids and the data holder
+  m_gridsFiCo.define(fiCoBoxes, fiCoProcs);
+  m_dataFiCo.define(m_gridsFiCo, m_nComp);
 }
 
 void EBGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData){
@@ -134,5 +149,17 @@ void EBGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const
 }
 
 void EBGhostCloud::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<FArrayBox>& a_fiCoData){
-  MayDay::Abort("EBGhostCloud::addFiCoDataToFine - not implemented!");
+  // 1. Copy the fiCoData to the scratch data holder
+  const Interval interv(0, m_nComp-1);
+  LevelData<FArrayBox> fineAlias;
+  aliasEB(fineAlias, a_fineData);
+  a_fiCoData.addTo(interv, fineAlias, interv, m_domainFine.domainBox());
+}
+
+const BoxLayoutData<FArrayBox>& EBGhostCloud::getFiCoBuffer() const {
+  return m_dataFiCo;
+}
+
+BoxLayoutData<FArrayBox>& EBGhostCloud::getFiCoBuffer() {
+  return m_dataFiCo;
 }
