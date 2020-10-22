@@ -216,7 +216,7 @@ void ito_solver::deposit_kappaConservativeNoPVR(EBAMRCellData&               a_s
 	EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
 	interp.deposit((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition);
 
-	//	MayDay::Abort("ito_solver::deposit_kappaConservativeNoPVR - need the new deposition scheme now!");
+	MayDay::Abort("ito_solver::deposit_kappaConservativeNoPVR - need the new deposition scheme now!");
       }
 
       // Add the result to the fine level. 
