@@ -70,6 +70,68 @@ inline void FORTRAN_NAME(inlineCIC_DEPOSIT_SCALAR, inlineCIC_DEPOSIT_SCALAR)(
 }
 #endif  // GUARDCIC_DEPOSIT_SCALAR 
 
+#ifndef GUARDCIC_DEPOSIT_SCALAR2 
+#define GUARDCIC_DEPOSIT_SCALAR2 
+// Prototype for Fortran procedure cic_deposit_scalar2 ...
+//
+void FORTRAN_NAME( CIC_DEPOSIT_SCALAR2 ,cic_deposit_scalar2 )(
+      CHFp_FRA1(rho)
+      ,CHFp_CONST_REALVECT(left_edge)
+      ,CHFp_CONST_REALVECT(dx)
+      ,CHFp_CONST_REALVECT(x)
+      ,CHFp_CONST_REAL(q) );
+
+#define FORT_CIC_DEPOSIT_SCALAR2 FORTRAN_NAME( inlineCIC_DEPOSIT_SCALAR2, inlineCIC_DEPOSIT_SCALAR2)
+#define FORTNT_CIC_DEPOSIT_SCALAR2 FORTRAN_NAME( CIC_DEPOSIT_SCALAR2, cic_deposit_scalar2)
+
+inline void FORTRAN_NAME(inlineCIC_DEPOSIT_SCALAR2, inlineCIC_DEPOSIT_SCALAR2)(
+      CHFp_FRA1(rho)
+      ,CHFp_CONST_REALVECT(left_edge)
+      ,CHFp_CONST_REALVECT(dx)
+      ,CHFp_CONST_REALVECT(x)
+      ,CHFp_CONST_REAL(q) )
+{
+ CH_TIMELEAF("FORT_CIC_DEPOSIT_SCALAR2");
+ FORTRAN_NAME( CIC_DEPOSIT_SCALAR2 ,cic_deposit_scalar2 )(
+      CHFt_FRA1(rho)
+      ,CHFt_CONST_REALVECT(left_edge)
+      ,CHFt_CONST_REALVECT(dx)
+      ,CHFt_CONST_REALVECT(x)
+      ,CHFt_CONST_REAL(q) );
+}
+#endif  // GUARDCIC_DEPOSIT_SCALAR2 
+
+#ifndef GUARDCIC_DEPOSIT_SCALAR4 
+#define GUARDCIC_DEPOSIT_SCALAR4 
+// Prototype for Fortran procedure cic_deposit_scalar4 ...
+//
+void FORTRAN_NAME( CIC_DEPOSIT_SCALAR4 ,cic_deposit_scalar4 )(
+      CHFp_FRA1(rho)
+      ,CHFp_CONST_REALVECT(left_edge)
+      ,CHFp_CONST_REALVECT(dx)
+      ,CHFp_CONST_REALVECT(x)
+      ,CHFp_CONST_REAL(q) );
+
+#define FORT_CIC_DEPOSIT_SCALAR4 FORTRAN_NAME( inlineCIC_DEPOSIT_SCALAR4, inlineCIC_DEPOSIT_SCALAR4)
+#define FORTNT_CIC_DEPOSIT_SCALAR4 FORTRAN_NAME( CIC_DEPOSIT_SCALAR4, cic_deposit_scalar4)
+
+inline void FORTRAN_NAME(inlineCIC_DEPOSIT_SCALAR4, inlineCIC_DEPOSIT_SCALAR4)(
+      CHFp_FRA1(rho)
+      ,CHFp_CONST_REALVECT(left_edge)
+      ,CHFp_CONST_REALVECT(dx)
+      ,CHFp_CONST_REALVECT(x)
+      ,CHFp_CONST_REAL(q) )
+{
+ CH_TIMELEAF("FORT_CIC_DEPOSIT_SCALAR4");
+ FORTRAN_NAME( CIC_DEPOSIT_SCALAR4 ,cic_deposit_scalar4 )(
+      CHFt_FRA1(rho)
+      ,CHFt_CONST_REALVECT(left_edge)
+      ,CHFt_CONST_REALVECT(dx)
+      ,CHFt_CONST_REALVECT(x)
+      ,CHFt_CONST_REAL(q) );
+}
+#endif  // GUARDCIC_DEPOSIT_SCALAR4 
+
 #ifndef GUARDTSC_DEPOSIT_SCALAR 
 #define GUARDTSC_DEPOSIT_SCALAR 
 // Prototype for Fortran procedure tsc_deposit_scalar ...

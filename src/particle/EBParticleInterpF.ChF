@@ -82,7 +82,167 @@ c     computing weight and assigning mass
         enddo;
       enddo]
 
-      end      
+      end
+
+c     Deposits a particle using cloud-in-cell, but with twice the cloud width. 
+c     
+c     Arguments:
+c
+c         rho:        the mesh onto which to deposit the particle
+c         left_edge:  the physical location of the left edge of the domain
+c         dx:         the mesh spacing
+c         x:          the position coordinate of the particle
+c         q:          the particle mass / charge
+c
+      subroutine cic_deposit_scalar2(
+     &                       CHF_FRA1[rho],
+     &                       CHF_CONST_REALVECT[left_edge],
+     &                       CHF_CONST_REALVECT[dx],
+     &                       CHF_CONST_REALVECT[x],
+     &                       CHF_CONST_REAL[q]) 
+
+      integer index(0:CH_SPACEDIM - 1)
+      integer idir
+      REAL_T volume, CHF_DDECL[l0;l1;l2;l3;l4;l5]
+      REAL_T particle_rho
+      REAL_T weight, CHF_DDECL[w0;w1;w2;w3;w4;w5]
+      integer CHF_DDECL[ii;jj;kk;ll;mm;nn]
+
+c     compute the cell volume and particle density on the grid
+      volume = CHF_DTERM[dx(0);*dx(1);*dx(2);*dx(3);*dx(4);*dx(5)]
+      particle_rho = q / volume
+
+c     compute the index of the cell that contains the LEFT edge of
+c     this particle cloud.
+      do idir = 0, CH_SPACEDIM - 1
+        index(idir) = floor((x(idir) - left_edge(idir) - 1.0d0*dx(idir)) / dx(idir))
+      enddo
+
+c     loop over all the cells containing this particle cloud,
+c     computing weight and assigning mass
+      CHF_DTERM[
+      do ii = index(0), index(0) + 2
+        l0 = ii*dx(0) + 0.5d0*dx(0) - x(0) + left_edge(0);
+        do jj = index(1), index(1) + 2
+          l1 = jj*dx(1) + 0.5d0*dx(1) - x(1) + left_edge(1);
+          do kk = index(2), index(2) + 2
+            l2 = kk*dx(2) + 0.5d0*dx(2) - x(2) + left_edge(2);
+            do ll = index(3), index(3) + 2
+              l3 = ll*dx(3) + 0.5d0*dx(3) - x(3) + left_edge(3);
+              do mm = index(4), index(4) + 2
+                l4 = mm*dx(4) + 0.5d0*dx(4) - x(4) + left_edge(4);
+                do nn = index(5), index(5) + 2
+                  l5 = nn*dx(5) + 0.5d0*dx(5) - x(5) + left_edge(5)]
+
+                CHF_DTERM[
+                w0 = 0.5d0;
+                w1 = 0.5d0;
+                w2 = 0.5d0;
+                w3 = 0.5d0;
+                w4 = 0.5d0;
+                w5 = 0.5d0]
+                CHF_DTERM[
+                if (abs(l0 / dx(0)) .gt. 0.5d0) w0 = 0.5d0 * (1.5d0 - abs(l0 / dx(0)));
+                if (abs(l1 / dx(1)) .gt. 0.5d0) w1 = 0.5d0 * (1.5d0 - abs(l1 / dx(1)));
+                if (abs(l2 / dx(2)) .gt. 0.5d0) w2 = 0.5d0 * (1.5d0 - abs(l2 / dx(2)));
+                if (abs(l3 / dx(3)) .gt. 0.5d0) w3 = 0.5d0 * (1.5d0 - abs(l3 / dx(3)));
+                if (abs(l4 / dx(4)) .gt. 0.5d0) w4 = 0.5d0 * (1.5d0 - abs(l4 / dx(4)));
+                if (abs(l5 / dx(5)) .gt. 0.5d0) w5 = 0.5d0 * (1.5d0 - abs(l5 / dx(5)))]
+
+            weight = CHF_DTERM[w0; *w1; *w2; *w3; *w4; *w5]
+
+            rho(CHF_IX[ii; jj; kk; ll; mm; nn]) = 
+     &      rho(CHF_IX[ii; jj; kk; ll; mm; nn]) + particle_rho * weight
+
+      CHF_DTERM[
+                enddo;
+              enddo;
+            enddo;
+          enddo;
+        enddo;
+      enddo]
+
+      end
+
+c     Deposits a particle using cloud-in-cell, but with four times the cloud width. 
+c     
+c     Arguments:
+c
+c         rho:        the mesh onto which to deposit the particle
+c         left_edge:  the physical location of the left edge of the domain
+c         dx:         the mesh spacing
+c         x:          the position coordinate of the particle
+c         q:          the particle mass / charge
+c
+      subroutine cic_deposit_scalar4(
+     &                       CHF_FRA1[rho],
+     &                       CHF_CONST_REALVECT[left_edge],
+     &                       CHF_CONST_REALVECT[dx],
+     &                       CHF_CONST_REALVECT[x],
+     &                       CHF_CONST_REAL[q]) 
+
+      integer index(0:CH_SPACEDIM - 1)
+      integer idir
+      REAL_T volume, CHF_DDECL[l0;l1;l2;l3;l4;l5]
+      REAL_T particle_rho
+      REAL_T weight, CHF_DDECL[w0;w1;w2;w3;w4;w5]
+      integer CHF_DDECL[ii;jj;kk;ll;mm;nn]
+
+c     compute the cell volume and particle density on the grid
+      volume = CHF_DTERM[dx(0);*dx(1);*dx(2);*dx(3);*dx(4);*dx(5)]
+      particle_rho = q / volume
+
+c     compute the index of the cell that contains the LEFT edge of
+c     this particle cloud.
+      do idir = 0, CH_SPACEDIM - 1
+        index(idir) = floor((x(idir) - left_edge(idir) - 2.0d0*dx(idir)) / dx(idir))
+      enddo
+
+c     loop over all the cells containing this particle cloud,
+c     computing weight and assigning mass
+      CHF_DTERM[
+      do ii = index(0), index(0) + 4
+        l0 = ii*dx(0) + 0.5d0*dx(0) - x(0) + left_edge(0);
+        do jj = index(1), index(1) + 4
+          l1 = jj*dx(1) + 0.5d0*dx(1) - x(1) + left_edge(1);
+          do kk = index(2), index(2) + 4
+            l2 = kk*dx(2) + 0.5d0*dx(2) - x(2) + left_edge(2);
+            do ll = index(3), index(3) + 4
+              l3 = ll*dx(3) + 0.5d0*dx(3) - x(3) + left_edge(3);
+              do mm = index(4), index(4) + 4
+                l4 = mm*dx(4) + 0.5d0*dx(4) - x(4) + left_edge(4);
+                do nn = index(5), index(5) + 4
+                  l5 = nn*dx(5) + 0.5d0*dx(5) - x(5) + left_edge(5)]
+
+                CHF_DTERM[
+                w0 = 0.25d0;
+                w1 = 0.25d0;
+                w2 = 0.25d0;
+                w3 = 0.25d0;
+                w4 = 0.25d0;
+                w5 = 0.25d0]
+                CHF_DTERM[
+                if (abs(l0 / dx(0)) .gt. 1.5d0) w0 = 0.25d0 * (2.5d0 - abs(l0 / dx(0)));
+                if (abs(l1 / dx(1)) .gt. 1.5d0) w1 = 0.25d0 * (2.5d0 - abs(l1 / dx(1)));
+                if (abs(l2 / dx(2)) .gt. 1.5d0) w2 = 0.25d0 * (2.5d0 - abs(l2 / dx(2)));
+                if (abs(l3 / dx(3)) .gt. 1.5d0) w3 = 0.25d0 * (2.5d0 - abs(l3 / dx(3)));
+                if (abs(l4 / dx(4)) .gt. 1.5d0) w4 = 0.25d0 * (2.5d0 - abs(l4 / dx(4)));
+                if (abs(l5 / dx(5)) .gt. 1.5d0) w5 = 0.25d0 * (2.5d0 - abs(l5 / dx(5)))]
+
+            weight = CHF_DTERM[w0; *w1; *w2; *w3; *w4; *w5]
+
+            rho(CHF_IX[ii; jj; kk; ll; mm; nn]) = 
+     &      rho(CHF_IX[ii; jj; kk; ll; mm; nn]) + particle_rho * weight
+
+      CHF_DTERM[
+                enddo;
+              enddo;
+            enddo;
+          enddo;
+        enddo;
+      enddo]
+
+      end
 
 c     Deposits a particle using triangle-shaped cloud interpolation
 c     

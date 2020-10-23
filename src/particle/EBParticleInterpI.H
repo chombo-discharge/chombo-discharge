@@ -10,19 +10,47 @@
 
 
 template <class P>
-void EBParticleInterp::deposit(const List<P>&        a_particleList,
-			       FArrayBox&            a_rho,
-			       DepositionType::Which a_interpType){
+void EBParticleInterp::deposit(const List<P>& a_particleList, FArrayBox& a_rho, DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
     const P& this_particle = lit();
     const RealVect& this_x = this_particle.position();
-    const Real& this_m = this_particle.mass();
+    const Real& this_m     = this_particle.mass();
     depositParticle(a_rho, 
 		    m_prob_lo, 
 		    m_dx, 
 		    this_x, 
 		    this_m, 
 		    a_interpType);
+  }
+}
+
+template <class P>
+void EBParticleInterp::deposit2(const List<P>& a_particleList, FArrayBox& a_rho, DepositionType::Which a_interpType){
+  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+    const P& this_particle = lit();
+    const RealVect& this_x = this_particle.position();
+    const Real& this_m     = this_particle.mass();
+    depositParticle2(a_rho, 
+		     m_prob_lo, 
+		     m_dx, 
+		     this_x, 
+		     this_m, 
+		     a_interpType);
+  }
+}
+
+template <class P>
+void EBParticleInterp::deposit4(const List<P>& a_particleList, FArrayBox& a_rho, DepositionType::Which a_interpType){
+  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+    const P& this_particle = lit();
+    const RealVect& this_x = this_particle.position();
+    const Real& this_m     = this_particle.mass();
+    depositParticle4(a_rho, 
+		     m_prob_lo, 
+		     m_dx, 
+		     this_x, 
+		     this_m, 
+		     a_interpType);
   }
 }
 

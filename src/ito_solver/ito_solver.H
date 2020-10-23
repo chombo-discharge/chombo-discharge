@@ -115,7 +115,7 @@ public:
   */
   virtual void unset_mass_to_diffusivity(particle_container<ito_particle>& a_particles);
 
-    /*!
+  /*!
     @brief Set mass to energy
     @details This sets mass = mass*particle_energy
   */
@@ -139,7 +139,7 @@ public:
   */
   virtual void deposit_conductivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
 
-    /*!
+  /*!
     @brief Deposit conductivities
     @details This deposits weight*mobility (not multiplied by charge)
   */
@@ -163,7 +163,7 @@ public:
   */
   virtual void deposit_diffusivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
 
-    /*!
+  /*!
     @brief Deposit diffusivity
     @details This deposits weight*energy
   */
@@ -463,7 +463,7 @@ public:
   */
   virtual void interpolate_diffusion(const int a_level, const DataIndex& a_dit);
 
-    /*!
+  /*!
     @brief Update diffusion coefficients
     @details This calls the diffusion function implemented by ito_species
   */
@@ -520,7 +520,7 @@ public:
   */
   Real compute_dt() const;
 
-    /*!
+  /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
   Real compute_dt(const int a_lvl) const;
@@ -530,7 +530,7 @@ public:
   */
   Real compute_dt(const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
 
-    /*!
+  /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
   Real compute_min_dt(const Real a_maxCellsToMove) const;
@@ -751,6 +751,11 @@ protected:
   Real m_hop_eps;
 
   /*!
+    @brief Use ngp when depositing halo particles or not
+  */
+  bool m_ngp_halo;
+
+  /*!
     @brief Redistribute or not
   */
   bool m_redistribute;
@@ -952,9 +957,18 @@ protected:
     levels
   */
   template <class T>
-  void deposit_kappaConservativeNoPVR(EBAMRCellData&               a_state,
-				      const particle_container<T>& a_particles,
-				      const DepositionType::Which  a_deposition);
+  void deposit_kappaConservativeNoPVR_native(EBAMRCellData&               a_state,
+					     const particle_container<T>& a_particles,
+					     const DepositionType::Which  a_deposition);
+
+  /*!
+    @brief Just as deposit_kappaConservative, but using halo particles when depositing particles from coarse levels to fine
+    levels
+  */
+  template <class T>
+  void deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&               a_state,
+					  const particle_container<T>& a_particles,
+					  const DepositionType::Which  a_deposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition

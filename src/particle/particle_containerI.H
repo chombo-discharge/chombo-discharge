@@ -711,7 +711,7 @@ void particle_container<P>::define_halo_masks(){
   
   m_halo.resize(1 + m_finest_level);
 
-  for (int lvl = 0; lvl < m_finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
 
     m_halo[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > > (new LevelData<BaseFab<bool> > (m_grids[lvl], ncomp, IntVect::Zero));
 
@@ -730,6 +730,11 @@ void particle_container<P>::define_halo_masks(){
 			     gridsFine,
 			     m_halo_buffer,
 			     m_ref_rat[lvl]);
+    }
+    else{
+      for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
+	(*m_halo[lvl])[dit()].setVal(false);
+      }
     }
   }
 }
@@ -853,9 +858,7 @@ void particle_container<P>::clear_halo_particles() const {
 template <class P>
 void particle_container<P>::copy_non_halo_particles() const {
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    if(lvl < m_finest_level){
-      this->copy_non_halo_particles(lvl);
-    }
+    this->copy_non_halo_particles(lvl);
   }
 }
 

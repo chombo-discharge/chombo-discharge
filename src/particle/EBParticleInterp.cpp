@@ -87,6 +87,94 @@ void EBParticleInterp::depositParticle(FArrayBox&       a_rho,
   }
 }
 
+void EBParticleInterp::depositParticle2(FArrayBox&       a_rho,
+					const RealVect&  a_prob_lo,
+					const RealVect&  a_dx,
+					const RealVect&  a_position,
+					const Real&      a_mass,
+					const DepositionType::Which a_interpType){
+
+  const RealVect rv = (a_position - a_prob_lo)/a_dx;
+  const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
+
+  if(m_ebisbox->isMultiValued(iv)){
+    MayDay::Abort("EBParticleInterp::depositParticle2 - multivalued cells not supported (yet)");
+  }
+
+  // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
+  if(m_ebisbox->isIrregular(iv)){
+    FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
+			    CHF_CONST_REALVECT(a_prob_lo),
+			    CHF_CONST_REALVECT(a_dx),
+			    CHF_CONST_REALVECT(a_position),
+			    CHF_CONST_REAL(a_mass));
+  }
+  else{
+    switch (a_interpType){
+    case DepositionType::NGP:
+      FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
+			      CHF_CONST_REALVECT(a_prob_lo),
+			      CHF_CONST_REALVECT(a_dx),
+			      CHF_CONST_REALVECT(a_position),
+			      CHF_CONST_REAL(a_mass));
+      break;
+    case DepositionType::CIC:
+      FORT_CIC_DEPOSIT_SCALAR2(CHF_FRA1(a_rho, 0),
+			       CHF_CONST_REALVECT(a_prob_lo),
+			       CHF_CONST_REALVECT(a_dx),
+			       CHF_CONST_REALVECT(a_position),
+			       CHF_CONST_REAL(a_mass));
+      break;
+    default:
+      MayDay::Error("Invalid interpolation type in MeshInterp::depositParticle2 - you may have to use CIC or NGP");
+    }
+  }
+}
+
+void EBParticleInterp::depositParticle4(FArrayBox&       a_rho,
+					const RealVect&  a_prob_lo,
+					const RealVect&  a_dx,
+					const RealVect&  a_position,
+					const Real&      a_mass,
+					const DepositionType::Which a_interpType){
+
+  const RealVect rv = (a_position - a_prob_lo)/a_dx;
+  const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
+
+  if(m_ebisbox->isMultiValued(iv)){
+    MayDay::Abort("EBParticleInterp::depositParticle2 - multivalued cells not supported (yet)");
+  }
+
+  // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
+  if(m_ebisbox->isIrregular(iv)){
+    FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
+			    CHF_CONST_REALVECT(a_prob_lo),
+			    CHF_CONST_REALVECT(a_dx),
+			    CHF_CONST_REALVECT(a_position),
+			    CHF_CONST_REAL(a_mass));
+  }
+  else{
+    switch (a_interpType){
+    case DepositionType::NGP:
+      FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
+			      CHF_CONST_REALVECT(a_prob_lo),
+			      CHF_CONST_REALVECT(a_dx),
+			      CHF_CONST_REALVECT(a_position),
+			      CHF_CONST_REAL(a_mass));
+      break;
+    case DepositionType::CIC:
+      FORT_CIC_DEPOSIT_SCALAR4(CHF_FRA1(a_rho, 0),
+			       CHF_CONST_REALVECT(a_prob_lo),
+			       CHF_CONST_REALVECT(a_dx),
+			       CHF_CONST_REALVECT(a_position),
+			       CHF_CONST_REAL(a_mass));
+      break;
+    default:
+      MayDay::Error("Invalid interpolation type in MeshInterp::depositParticle2 - you may have to use CIC or NGP");
+    }
+  }
+}
+
 void EBParticleInterp::interpolateParticle(Real&             a_particleField,
 					   const FArrayBox&  a_field,
 					   const RealVect&   a_prob_lo,

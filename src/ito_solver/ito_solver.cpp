@@ -187,6 +187,18 @@ void ito_solver::parse_pvr_buffer(){
   ParmParse pp(m_class_name.c_str());
   pp.get("pvr_buffer",  m_pvr_buffer);
   pp.get("halo_buffer", m_halo_buffer);
+
+  std::string str;
+  pp.get("halo_deposition", str);
+  if(str == "ngp"){
+    m_ngp_halo = true;
+  }
+  else if(str == "native"){
+    m_ngp_halo = false;
+  }
+  else{
+    MayDay::Abort("ito_solver::parse_pvr_buffer - unknown argument to 'halo_deposition'");
+  }
 }
 
 void ito_solver::parse_diffusion_hop(){
