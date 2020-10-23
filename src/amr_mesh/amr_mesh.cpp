@@ -2057,6 +2057,7 @@ void amr_mesh::define_realms(){
     r.second->define(m_grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
 			    m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
   }
+
 }
 
 void amr_mesh::regrid_realm(const std::string           a_realm,

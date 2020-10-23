@@ -10,8 +10,8 @@ air3.basename  = pout
 amr_mesh.lo_corner       = -2.5E-2 -2.5E-2 -4E-2 # Low corner of problem domain
 amr_mesh.hi_corner       =  2.5E-2  2.5E-2  1E-2 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 32 32 32    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 5           # Maximum amr depth
+amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
+amr_mesh.max_amr_depth   = 4           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -35,7 +35,7 @@ amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be
 # ====================================================================================================
 # DRIVER OPTIONS
 # ====================================================================================================
-driver.verbosity                       = 3             # Engine verbosity
+driver.verbosity                       = 10            # Engine verbosity
 driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
@@ -56,7 +56,7 @@ driver.grow_tags                       = 0             # Grow tagged by this in 
 driver.output_names                    = simulation    # Simulation output names
 driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
-driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
+driver.num_plot_ghost                  = 0             # Number of ghost cells to include in plots
 driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
 driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 driver.allow_coarsening                = false         # Allows removal of grid levels according to cell_tagger
@@ -108,7 +108,7 @@ ito_solver.bisect_step         = 1.E-3         # Bisection step length for inter
 ito_solver.seed                = 0            # Seed for RNG
 ito_solver.max_diffusion_hop   = 2.0           # Maximum diffusion hop length (in units of dx)
 ito_solver.normal_max          = 100.0         # Maximum value (absolute) that can be drawn from the exponential distribution.
-ito_solver.redistribute        = true          # Turn on/off redistribution. 
+ito_solver.redistribute        = false         # Turn on/off redistribution. 
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ito_solver.checkpointing       = particles     # Use particle numbers for writing/reading checkpoint files
 ito_solver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
