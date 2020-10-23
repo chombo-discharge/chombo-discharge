@@ -166,9 +166,11 @@ void ito_solver::deposit_kappaConservativeNoPVR(EBAMRCellData&               a_s
   data_ops::set_value(a_state,    0.0);
 
   a_particles.copy_halo_particles();
+  a_particles.copy_non_halo_particles();
     
-  const AMRParticles<T>& particles      = a_particles.get_particles();
-  const AMRParticles<T>& halo_particles = a_particles.get_halo_particles();
+  const AMRParticles<T>& particles          = a_particles.get_particles();
+  const AMRParticles<T>& halo_particles     = a_particles.get_halo_particles();
+  const AMRParticles<T>& non_halo_particles = a_particles.get_non_halo_particles();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->get_dx()[lvl];
@@ -203,7 +205,7 @@ void ito_solver::deposit_kappaConservativeNoPVR(EBAMRCellData&               a_s
     // 4. The particles on the coarse side of the refinement boundary should deposit onto this level.
     //    The halo particles have been copied, and we run a special deposition procedure here to ensure
     //    that the mass ends up on the fine level. 
-    if(has_coar){
+    if(has_coar && m_deposition != DepositionType::NGP){ // No need to do this if using an NGP scheme. 
       EBGhostCloud& ghostcloud         = *(m_amr->get_ghostcloud(m_realm, m_phase)[lvl]);
       BoxLayoutData<FArrayBox>& buffer = ghostcloud.getFiCoBuffer();
       const EBLevelGrid& eblgFiCo      = ghostcloud.getEblgFiCo();
@@ -216,7 +218,7 @@ void ito_solver::deposit_kappaConservativeNoPVR(EBAMRCellData&               a_s
 	EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
 	interp.deposit((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition);
 
-	MayDay::Abort("ito_solver::deposit_kappaConservativeNoPVR - need the new deposition scheme now!");
+	//	MayDay::Abort("ito_solver::deposit_kappaConservativeNoPVR - need the new deposition scheme now!");
       }
 
       // Add the result to the fine level. 
@@ -224,8 +226,9 @@ void ito_solver::deposit_kappaConservativeNoPVR(EBAMRCellData&               a_s
     }
   }
 
-  // Clear halo particles
+  // Clear halo and non-halo particles
   a_particles.clear_halo_particles();
+  a_particles.clear_non_halo_particles();
 }
 
 

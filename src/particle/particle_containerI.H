@@ -99,6 +99,7 @@ template <class P>
 void particle_container<P>::setup_particle_data(const int a_base, const int a_finest_level){
   m_particles.resize(1 + a_finest_level);
   m_halo_particles.resize(1 + a_finest_level);
+  m_non_halo_particles.resize(1 + a_finest_level);
   m_cell_particles.resize(1 + a_finest_level);
   
   for (int lvl = a_base; lvl <= a_finest_level; lvl++){
@@ -116,12 +117,17 @@ void particle_container<P>::setup_particle_data(const int a_base, const int a_fi
 									    m_dx[lvl]*RealVect::Unit,
 									    m_prob_lo));
 
-
     m_halo_particles[lvl] = RefCountedPtr<ParticleData<P> > (new ParticleData<P>(m_grids[lvl],
 										 m_domains[lvl],
 										 m_blocking_factor,
 										 m_dx[lvl]*RealVect::Unit,
 										 m_prob_lo));
+
+    m_non_halo_particles[lvl] = RefCountedPtr<ParticleData<P> > (new ParticleData<P>(m_grids[lvl],
+										     m_domains[lvl],
+										     m_blocking_factor,
+										     m_dx[lvl]*RealVect::Unit,
+										     m_prob_lo));
 
 
     m_cell_particles[lvl] = RefCountedPtr<LayoutData<BinFab<P> > > (new LayoutData<BinFab<P> >(m_grids[lvl]));
@@ -162,6 +168,18 @@ template <class P>
 const AMRParticles<P>& particle_container<P>::get_halo_particles() const {
   CH_assert(m_is_defined);
   return m_halo_particles;
+}
+
+template <class P>
+AMRParticles<P>& particle_container<P>::get_non_halo_particles(){
+  CH_assert(m_is_defined);
+  return m_non_halo_particles;
+}
+
+template <class P>
+const AMRParticles<P>& particle_container<P>::get_non_halo_particles() const {
+  CH_assert(m_is_defined);
+  return m_non_halo_particles;
 }
 
 template <class P>
@@ -802,13 +820,6 @@ void particle_container<P>::copy_halo_particles() const {
 }
 
 template <class P>
-void particle_container<P>::clear_halo_particles() const {
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    m_halo_particles[lvl]->clear();
-  }
-}
-
-template <class P>
 void particle_container<P>::copy_halo_particles(const int a_level) const {
   
   m_halo_particles[a_level]->clear();
@@ -829,6 +840,53 @@ void particle_container<P>::copy_halo_particles(const int a_level) const {
 
       if(mask(iv)) halo_particles.add(lit());
     }
+  }
+}
+
+template <class P>
+void particle_container<P>::clear_halo_particles() const {
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    m_halo_particles[lvl]->clear();
+  }
+}
+
+template <class P>
+void particle_container<P>::copy_non_halo_particles() const {
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    if(lvl < m_finest_level){
+      this->copy_non_halo_particles(lvl);
+    }
+  }
+}
+
+template <class P>
+void particle_container<P>::copy_non_halo_particles(const int a_level) const {
+  
+  m_non_halo_particles[a_level]->clear();
+
+  const RealVect dx = m_dx[a_level];
+
+  // 1. Copy particles from m_particles to m_non_halo_particles if they don't lie in the halo mask
+  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
+    const BaseFab<bool>& mask   = (*m_halo[a_level])[dit()];
+    const List<P>& particles    = (*m_particles[a_level])[dit()].listItems();
+    List<P>& non_halo_particles = (*m_non_halo_particles[a_level])[dit()].listItems();
+
+    for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+      const RealVect x = lit().position();
+      const IntVect iv(D_DECL((int)floor((x[0] - m_prob_lo[0])/dx[0]),
+			      (int)floor((x[1] - m_prob_lo[1])/dx[1]),
+			      (int)floor((x[2] - m_prob_lo[2])/dx[2])));
+
+      if(!mask(iv)) non_halo_particles.add(lit());
+    }
+  }
+}
+
+template <class P>
+void particle_container<P>::clear_non_halo_particles() const {
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    m_non_halo_particles[lvl]->clear();
   }
 }
 

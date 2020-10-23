@@ -96,9 +96,19 @@ public:
   void copy_halo_particles() const;
 
   /*!
+    @brief Copy non-halo particles to non-halo storage
+  */
+  void copy_non_halo_particles() const;
+
+  /*!
     @brief Frees up halo particles
   */
   void clear_halo_particles() const;
+
+    /*!
+    @brief Frees up halo particles
+  */
+  void clear_non_halo_particles() const;
 
   /*!
     @brief Get the realm
@@ -124,6 +134,16 @@ public:
     @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
   */
   const AMRParticles<P>& get_halo_particles() const;
+
+    /*!
+    @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
+  */
+  AMRParticles<P>& get_non_halo_particles();
+
+  /*!
+    @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
+  */
+  const AMRParticles<P>& get_non_halo_particles() const;
 
   /*!
     @brief Get PVR
@@ -362,6 +382,12 @@ protected:
   */
   mutable AMRParticles<P> m_halo_particles;
 
+    /*!
+    @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
+           refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
+  */
+  mutable AMRParticles<P> m_non_halo_particles;
+
   /*!
     @brief Valid region for each AMR level
   */
@@ -413,9 +439,12 @@ protected:
     @brief Copy particles to halo. a_level is the coarse level. 
   */
   void copy_halo_particles(const int a_level) const;
+
+    /*!
+    @brief Copy non-particles to non-halo data storage. a_level is the coarse level. 
+  */
+  void copy_non_halo_particles(const int a_level) const;
 };
-
-
 
 #include "particle_containerI.H"
 
