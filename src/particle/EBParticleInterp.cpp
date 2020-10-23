@@ -15,18 +15,21 @@ EBParticleInterp::EBParticleInterp(){
 EBParticleInterp::EBParticleInterp(const Box&      a_domain,
 				   const EBISBox&  a_ebisbox,
 				   const RealVect& a_dx,
-				   const RealVect& a_prob_lo){
-  this->define(a_domain, a_ebisbox, a_dx, a_prob_lo);
+				   const RealVect& a_prob_lo,
+				   const bool      a_force_irreg_ngp){
+  this->define(a_domain, a_ebisbox, a_dx, a_prob_lo, a_force_irreg_ngp);
 }
 
 void EBParticleInterp::define(const Box&      a_domain,
 			      const EBISBox&  a_ebisbox,
 			      const RealVect& a_dx,
-			      const RealVect& a_prob_lo){
+			      const RealVect& a_prob_lo,
+			      const bool      a_force_irreg_ngp){
   m_domain  = a_domain;
   m_ebisbox = &a_ebisbox;
   m_prob_lo = a_prob_lo;
   m_dx      = a_dx;
+  m_irr_ngp = a_force_irreg_ngp;
 }
 
 void EBParticleInterp::depositParticle(FArrayBox&       a_rho,
@@ -44,7 +47,7 @@ void EBParticleInterp::depositParticle(FArrayBox&       a_rho,
   }
 
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
-  if(m_ebisbox->isIrregular(iv)){
+  if(m_irr_ngp && m_ebisbox->isIrregular(iv)){
     FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
 			    CHF_CONST_REALVECT(a_prob_lo),
 			    CHF_CONST_REALVECT(a_dx),

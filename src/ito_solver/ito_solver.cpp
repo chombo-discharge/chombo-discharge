@@ -1698,6 +1698,8 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
     pout() << m_name + "::interpolate_velocities" << endl;
   }
 
+  const bool force_ngp_irreg = true;
+
   if(m_mobile){
     const EBCellFAB& velo_func = (*m_velo_func[a_lvl])[a_dit];
     const EBISBox& ebisbox     = velo_func.getEBISBox();
@@ -1709,7 +1711,7 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
     List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
 
     // This interpolates the velocity function on to the particle velocities
-    EBParticleInterp meshInterp(box, ebisbox, dx, origin);
+    EBParticleInterp meshInterp(box, ebisbox, dx, origin, force_ngp_irreg);
     meshInterp.interpolateVelocity(particleList, vel_fab, m_deposition);
 
     // Go through the particles and set their velocities to velo_func*mobility
@@ -1741,6 +1743,8 @@ void ito_solver::interpolate_mobilities(const int a_lvl, const DataIndex& a_dit)
     pout() << m_name + "::interpolate_mobilities(lvl, dit)" << endl;
   }
 
+  const bool force_ngp_irreg = true;
+
   if(m_mobile){
     const EBCellFAB& mob_func  = (*m_mobility_func[a_lvl])[a_dit];
     const EBISBox& ebisbox     = mob_func.getEBISBox();
@@ -1752,7 +1756,7 @@ void ito_solver::interpolate_mobilities(const int a_lvl, const DataIndex& a_dit)
     List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
 
     // This interpolates the mobility as defined on the mesh onto the particle position
-    EBParticleInterp meshInterp(box, ebisbox, dx, origin);
+    EBParticleInterp meshInterp(box, ebisbox, dx, origin, force_ngp_irreg);
     meshInterp.interpolateMobility(particleList, mob_fab, m_deposition);
   }
 }
@@ -1812,6 +1816,8 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
     pout() << m_name + "::interpolate_diffusion" << endl;
   }
 
+  const bool force_ngp_irreg = true;
+
   if(m_diffusive){
     const EBCellFAB& dco_cell   = (*m_diffco_cell[a_lvl])[a_dit];
     const EBISBox& ebisbox     = dco_cell.getEBISBox();
@@ -1822,7 +1828,7 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
 
     List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
 
-    EBParticleInterp meshInterp(box, ebisbox,dx, origin);
+    EBParticleInterp meshInterp(box, ebisbox,dx, origin, force_ngp_irreg);
     meshInterp.interpolateDiffusion(particleList, dco_fab, m_deposition);
   }
 }

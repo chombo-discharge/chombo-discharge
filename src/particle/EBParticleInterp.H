@@ -41,12 +41,12 @@ public:
   /*!
     @brief Full constructor
   */
-  EBParticleInterp(const Box& a_domain, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_prob_lo);
+  EBParticleInterp(const Box& a_domain, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_prob_lo, const bool a_force_irreg_ngp);
 
   /*!
     @brief Define function
   */
-  void define(const Box& a_domain, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_prob_lo);                     
+  void define(const Box& a_domain, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_prob_lo, const bool a_force_irreg_ngp);                     
 
   /*!
     @brief Deposit particle mass onto the mesh using a standard cloud width. 
@@ -161,6 +161,7 @@ protected:
   const EBISBox* m_ebisbox;
   RealVect m_dx;
   RealVect m_prob_lo;
+  bool m_irr_ngp; // Force NGP deposition in cut-cells. 
 };
 
 #include "EBParticleInterpI.H"

@@ -135,7 +135,7 @@ void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
+      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_redistribute);
       interp.deposit((*particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
@@ -190,7 +190,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
+      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_redistribute);
       interp.deposit((*particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
@@ -222,13 +222,13 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
 	const EBISBox& ebisbox = eblgFiCo.getEBISL()[dit()];
 
 	buffer[dit()].setVal(0.0);
-	EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
+	EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_redistribute);
 
 	if(refRat == 2){
 	  interp.deposit2((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition);
 	}
 	else if (refRat == 4){
-	  interp.deposit2((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition);
+	  interp.deposit4((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition);
 	}
 	else{
 	  MayDay::Abort("ito_solverI::deposit_kappaConservativeNoPVR - logic bust");
@@ -281,30 +281,30 @@ void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&              
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
+      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_redistribute);
       interp.deposit((*non_halo_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
-    // 2. Exchange ghost cells on this level. 
+    // 2. Deposition into ghost cells across the fine boundary should end up on the coarse level. 
+    if(has_coar) {
+      EBGhostCloud& ghostcloud = *(m_amr->get_ghostcloud(m_realm, m_phase)[lvl]);
+      ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
+    }
+
+    // 3. Exchange ghost cells on this level. 
     const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_realm, m_phase)[lvl];
     LDaddOp<FArrayBox> addOp;
     LevelData<FArrayBox> aliasFAB;
     aliasEB(aliasFAB, *a_state[lvl]);
     aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
 
-    // 3. Deposit particles in the halo with an NGP method
+    // 4. Deposit particles in the halo with an NGP method
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
+      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_redistribute);
       interp.deposit((*halo_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), DepositionType::NGP);
     }    
-
-    // 4. Deposition into ghost cells across the fine boundary should end up on the coarse level. 
-    if(has_coar) {
-      EBGhostCloud& ghostcloud = *(m_amr->get_ghostcloud(m_realm, m_phase)[lvl]);
-      ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
-    }
   }
 
   // Clear halo and non-halo particles
