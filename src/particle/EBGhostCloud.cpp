@@ -104,10 +104,7 @@ void EBGhostCloud::makeFiCoStuff(){
   m_gridsFiCo.define(fiCoBoxes, fiCoProcs);
   m_dataFiCo.define(m_gridsFiCo, m_nComp);
 
-  // Now make the refined coarse-level EBIS
-  const EBIndexSpace* const ebisPtr = m_eblgFine.getEBIS();
-  const int nghost = 4;
-  m_eblgFiCo.define(dblFiCo, m_domainFine, 4, ebisPtr);
+  m_eblgFiCo.define(dblFiCo, m_domainFine, ghostFiCo, m_eblgFine.getEBIS());
 }
 
 void EBGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData){
