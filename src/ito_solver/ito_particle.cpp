@@ -7,20 +7,20 @@
 
 #include "ito_particle.H"
 
-int ito_particle::s_NumRuntimeReal     = 0;
-int ito_particle::s_NumRuntimeRealVect = 0;
+int ito_particle::s_num_runtime_scalars = 0;
+int ito_particle::s_num_runtime_vectors = 0;
 
-void ito_particle::setNumRuntimeRealVariables(const int a_num){
-  s_NumRuntimeReal = a_num;
+void ito_particle::set_num_runtime_scalars(const int a_num){
+  s_num_runtime_scalars = a_num;
 }
 
-void ito_particle::setNumRuntimeRealVectVariables(const int a_num){
-  s_NumRuntimeRealVect = a_num;
+void ito_particle::set_num_runtime_vectors(const int a_num){
+  s_num_runtime_vectors = a_num;
 }
 
 ito_particle::ito_particle() : BinItem(){
 
-  resetRuntimeBuffers();
+  allocateRuntimeBuffers();
 }
 
 ito_particle::ito_particle(const ito_particle& a_other) {
@@ -32,7 +32,7 @@ ito_particle::ito_particle(const ito_particle& a_other) {
   m_mobility    = a_other.m_mobility;
   m_energy      = a_other.m_energy;
 
-  resetRuntimeBuffers();
+  allocateRuntimeBuffers();
 }
 
 ito_particle::ito_particle(const Real      a_mass,
@@ -48,32 +48,32 @@ ito_particle::ito_particle(const Real      a_mass,
   m_mobility    = a_mobility;
   m_energy      = a_energy;
 
-  resetRuntimeBuffers();
+  allocateRuntimeBuffers();
 }
 
 ito_particle::~ito_particle(){
 
-  if(m_runtimeReals != nullptr){
-    delete [] m_runtimeReals;
-    m_runtimeReals = nullptr;
+  if(m_runtimeScalars != nullptr){
+    delete [] m_runtimeScalars;
+    m_runtimeScalars = nullptr;
   }
 
-  if(m_runtimeRealVects != nullptr){
-    delete [] m_runtimeRealVects;
-    m_runtimeRealVects = nullptr;
+  if(m_runtimeVectors != nullptr){
+    delete [] m_runtimeVectors;
+    m_runtimeVectors = nullptr;
   }
 }
 
-void ito_particle::resetRuntimeBuffers(){
-  m_runtimeReals     = nullptr;
-  m_runtimeRealVects = nullptr;
+void ito_particle::allocateRuntimeBuffers(){
+  m_runtimeScalars     = nullptr;
+  m_runtimeVectors = nullptr;
   
-  if(s_NumRuntimeReal >= 0){
-    m_runtimeReals = new Real [s_NumRuntimeReal];
+  if(s_num_runtime_scalars >= 0){
+    m_runtimeScalars = new Real [s_num_runtime_scalars];
   }
 
-  if(s_NumRuntimeRealVect >= 0){
-    m_runtimeRealVects = new RealVect [s_NumRuntimeRealVect];
+  if(s_num_runtime_vectors >= 0){
+    m_runtimeVectors = new RealVect [s_num_runtime_vectors];
   }
 }
 
@@ -180,6 +180,22 @@ const Real& ito_particle::tmp() const{
   return m_tmp;
 }
 
+Real& ito_particle::runtime_scalar(const int a_num){
+  return m_runtimeScalars[a_num];
+}
+
+const Real& ito_particle::runtime_scalar(const int a_num) const{
+  return m_runtimeScalars[a_num];
+}
+
+RealVect& ito_particle::runtime_vector(const int a_num){
+  return m_runtimeVectors[a_num];
+}
+
+const RealVect& ito_particle::runtime_vector(const int a_num) const {
+  return m_runtimeVectors[a_num];
+}
+
 bool ito_particle::operator==(const ito_particle& a_p) const{
   return ( m_mass      == a_p.m_mass     &&
            m_position  == a_p.m_position &&
@@ -196,7 +212,10 @@ bool ito_particle::operator!=(const ito_particle& a_p) const{
 }
 
 int ito_particle::size() const{
-  return ( BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + sizeof(m_diffusion) + sizeof(m_oldPosition) + sizeof(m_mobility) + sizeof(m_energy));
+  const int compileSize = BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + sizeof(m_diffusion) + sizeof(m_oldPosition) + sizeof(m_mobility) + sizeof(m_energy);
+  const int runtimeSize = sizeof(*m_runtimeScalars) + sizeof(*m_runtimeVectors);
+
+  return compileSize + runtimeSize;
 }
 
 void ito_particle::linearOut(void* buf) const{
@@ -225,7 +244,21 @@ void ito_particle::linearOut(void* buf) const{
   *buffer++ = m_diffusion;
   *buffer++ = m_mass;
   *buffer++ = m_mobility;
-  *buffer   = m_energy;
+  *buffer++ = m_energy;
+
+  // Go through run-time memory
+  for (int i = 0; i < s_num_runtime_scalars; i++){
+    *buffer++ = m_runtimeScalars[i];
+  }
+
+  for (int i = 0; i < s_num_runtime_vectors; i++){
+  D_TERM6( *buffer++ = m_runtimeVectors[i][0];,
+	   *buffer++ = m_runtimeVectors[i][1];,
+	   *buffer++ = m_runtimeVectors[i][2];,
+	   *buffer++ = m_runtimeVectors[i][3];,
+	   *buffer++ = m_runtimeVectors[i][4];,
+	   *buffer++ = m_runtimeVectors[i][5];);
+  }
 }
 
 void ito_particle::linearIn(void* buf){
@@ -254,7 +287,21 @@ void ito_particle::linearIn(void* buf){
   m_diffusion = *buffer++;
   m_mass      = *buffer++;
   m_mobility  = *buffer++;
-  m_energy    = *buffer;
+  m_energy    = *buffer++;
+
+  // Go through run-time memory
+  for (int i = 0; i < s_num_runtime_scalars; i++){
+    m_runtimeScalars[i] = *buffer++;
+  }
+
+  for (int i = 0; i < s_num_runtime_vectors; i++){
+    D_TERM6( m_runtimeVectors[i][0] = *buffer++;,
+	     m_runtimeVectors[i][1] = *buffer++;,
+	     m_runtimeVectors[i][2] = *buffer++;,
+	     m_runtimeVectors[i][3] = *buffer++;,
+	     m_runtimeVectors[i][4] = *buffer++;,
+	     m_runtimeVectors[i][5] = *buffer++;);
+  }
 }
 
 std::ostream & operator<<(std::ostream& ostr, const ito_particle& p){

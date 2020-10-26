@@ -24,24 +24,23 @@ public:
   /*!
     @brief Static for defining the number of runtime Real components
   */
-  static int s_NumRuntimeReal;
+  static int s_num_runtime_scalars;
 
   /*!
     @brief Static for defining the number of runtime RealVect components
   */
-  static int s_NumRuntimeRealVect;
+  static int s_num_runtime_vectors;
 
   /*!
     @brief Set the number of run-time defined real variables
   */
-  static void setNumRuntimeRealVariables(const int a_num);
+  static void set_num_runtime_scalars(const int a_num);
 
   /*!
     @brief Set the number of run-time defined RealVect variables
   */
-  static void setNumRuntimeRealVectVariables(const int a_num);
-
-
+  static void set_num_runtime_vectors(const int a_num);
+  
   /*!
     @brief Default constructor
   */
@@ -77,10 +76,7 @@ public:
 	      const Real      a_mobility  = 1.0,
 	      const Real      a_energy    = 0.0);
 
-  /*!
-    @brief Set the run-time components
-  */
-  void resetRuntimeBuffers();
+
 
   /*!
     @brief Set the old position
@@ -193,6 +189,26 @@ public:
   const Real& tmp() const;
 
   /*!
+    @brief Get a runtime-defined variable
+  */
+  Real& runtime_scalar(const int a_num);
+
+  /*!
+    @brief Get a runtime-defined variable
+  */
+  const Real& runtime_scalar(const int a_num) const;
+
+  /*!
+    @brief Get a runtime-defined vector
+  */
+  RealVect& runtime_vector(const int a_num);
+
+  /*!
+    @brief Get a runtime-defined vector
+  */
+  const RealVect& runtime_vector(const int a_num) const;
+
+  /*!
     @brief Comparison operator
   */
   bool operator==(const ito_particle& a_p) const;
@@ -240,8 +256,13 @@ protected:
   RealVect m_velocity;
   RealVect m_oldPosition;
 
-  Real*     m_runtimeReals = nullptr;
-  RealVect* m_runtimeRealVects;
+  Real*     m_runtimeScalars;
+  RealVect* m_runtimeVectors;
+
+  /*!
+    @brief Set the run-time components
+  */
+  void allocateRuntimeBuffers();
 };
 
 std::ostream & operator<<(std::ostream& ostr, const ito_particle& p);
