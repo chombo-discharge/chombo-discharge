@@ -7,9 +7,33 @@
 
 #include "ito_particle.H"
 
-ito_particle::ito_particle() : BinItem(){
+int ito_particle::s_NumRuntimeReal     = 0;
+int ito_particle::s_NumRuntimeRealVect = 0;
+
+void ito_particle::setNumRuntimeRealVariables(const int a_num){
+  s_NumRuntimeReal = a_num;
 }
 
+void ito_particle::setNumRuntimeRealVectVariables(const int a_num){
+  s_NumRuntimeRealVect = a_num;
+}
+
+ito_particle::ito_particle() : BinItem(){
+
+  resetRuntimeBuffers();
+}
+
+ito_particle::ito_particle(const ito_particle& a_other) {
+  m_position    = a_other.m_position;
+  m_mass        = a_other.m_mass;
+  m_velocity    = a_other.m_velocity;
+  m_diffusion   = a_other.m_diffusion;
+  m_oldPosition = a_other.m_oldPosition;
+  m_mobility    = a_other.m_mobility;
+  m_energy      = a_other.m_energy;
+
+  resetRuntimeBuffers();
+}
 
 ito_particle::ito_particle(const Real      a_mass,
 			   const RealVect& a_position,
@@ -23,12 +47,35 @@ ito_particle::ito_particle(const Real      a_mass,
   m_oldPosition = a_position;
   m_mobility    = a_mobility;
   m_energy      = a_energy;
+
+  resetRuntimeBuffers();
 }
 
 ito_particle::~ito_particle(){
 
+  if(m_runtimeReals != nullptr){
+    delete [] m_runtimeReals;
+    m_runtimeReals = nullptr;
+  }
+
+  if(m_runtimeRealVects != nullptr){
+    delete [] m_runtimeRealVects;
+    m_runtimeRealVects = nullptr;
+  }
 }
 
+void ito_particle::resetRuntimeBuffers(){
+  m_runtimeReals     = nullptr;
+  m_runtimeRealVects = nullptr;
+  
+  if(s_NumRuntimeReal >= 0){
+    m_runtimeReals = new Real [s_NumRuntimeReal];
+  }
+
+  if(s_NumRuntimeRealVect >= 0){
+    m_runtimeRealVects = new RealVect [s_NumRuntimeRealVect];
+  }
+}
 
 void ito_particle::define(const Real      a_mass,
 			  const RealVect& a_position,

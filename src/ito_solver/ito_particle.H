@@ -22,6 +22,27 @@ class ito_particle : public BinItem {
 public:
 
   /*!
+    @brief Static for defining the number of runtime Real components
+  */
+  static int s_NumRuntimeReal;
+
+  /*!
+    @brief Static for defining the number of runtime RealVect components
+  */
+  static int s_NumRuntimeRealVect;
+
+  /*!
+    @brief Set the number of run-time defined real variables
+  */
+  static void setNumRuntimeRealVariables(const int a_num);
+
+  /*!
+    @brief Set the number of run-time defined RealVect variables
+  */
+  static void setNumRuntimeRealVectVariables(const int a_num);
+
+
+  /*!
     @brief Default constructor
   */
   ito_particle();
@@ -37,6 +58,11 @@ public:
 	       const Real      a_energy    = 0.0);
 
   /*!
+    @brief Copy constructor
+  */
+  ito_particle(const ito_particle& a_other);
+
+  /*!
     @brief Default dtor
   */
   virtual ~ito_particle();
@@ -50,6 +76,11 @@ public:
 	      const Real      a_diffusion = 0.0,
 	      const Real      a_mobility  = 1.0,
 	      const Real      a_energy    = 0.0);
+
+  /*!
+    @brief Set the run-time components
+  */
+  void resetRuntimeBuffers();
 
   /*!
     @brief Set the old position
@@ -208,6 +239,9 @@ protected:
   Real     m_mobility;
   RealVect m_velocity;
   RealVect m_oldPosition;
+
+  Real*     m_runtimeReals = nullptr;
+  RealVect* m_runtimeRealVects;
 };
 
 std::ostream & operator<<(std::ostream& ostr, const ito_particle& p);

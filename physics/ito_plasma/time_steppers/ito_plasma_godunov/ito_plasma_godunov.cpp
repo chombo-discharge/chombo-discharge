@@ -25,6 +25,8 @@ ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_phys
   pp.get("profile", m_profile);
 
   m_avg_cfl = 0.0;
+
+  ito_particle::setNumRuntimeRealVariables(0);
 }
 
 ito_plasma_godunov::~ito_plasma_godunov(){
