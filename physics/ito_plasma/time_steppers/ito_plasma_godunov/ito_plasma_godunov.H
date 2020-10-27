@@ -39,26 +39,22 @@ namespace physics {
       // Regrid routines
       void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
-      void regrid_si(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
-      void regrid_conductivity(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+
 
     protected:
 
+      // Switching between algorithms. 
       enum class which_algorithm {
 	euler,
 	euler_maruyama,
 	midpoint,
       };
 
+      // How to restrict dt. 
       enum class which_dt {
 	advection,
 	diffusion,
 	advection_diffusion
-      };
-
-      enum class which_diffusion {
-	physical,
-	super
       };
 
 
@@ -78,26 +74,22 @@ namespace physics {
 
       which_algorithm m_algorithm;
       which_dt        m_whichDt;
-      which_diffusion m_diffusion;
 
       Vector<particle_container<godunov_particle>* > m_conductivity_particles; // Used to store the particle that gave the sigma^k
       Vector<particle_container<godunov_particle>* > m_rho_dagger_particles;   // Used to store the particles that gave rho^dagger
 
-
       int m_merge_interval; // How often to merge superparticles
-      int m_diffu_samples;  // How many times to sample diffusion when using "physical" diffusion.
 
       // Routine for setting up extra particle storage
       void setup_runtime_storage();
 
+      // Semi-implicit regrid routine. 
+      void regrid_si(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+
       // Global routines
-      void intersect_particles(const Real a_dt);
       void set_old_positions();
       void rewind_particles();
-      void diffuse_particles_euler(const Real a_dt);
-      void diffuse_particles_super(const Real a_dt);
-      void diffuse_particles_physical(const Real a_dt);
-      void advect_particles_euler(const Real a_dt);
+      void intersect_particles(const Real a_dt);
 
       // Routines for semi-implicit Poisson solution
       void compute_conductivity();
@@ -108,37 +100,30 @@ namespace physics {
       void setup_standard_poisson();
 
       // Routines for semi-implicit regridding
-      void compute_regrid_conductivity();
-      void compute_regrid_rho();
       void copy_conductivity_particles();
       void copy_rho_dagger_particles();
+      void compute_regrid_conductivity();
+      void compute_regrid_rho();
 
-      // Specific routines for semi-implicit formulations. 
-      void swap_particle_positions();
+      // Specific routines for Euler method
+      void advance_particles_euler(const Real a_dt);
+      void advect_particles_euler(const Real a_dt);
+      void diffuse_particles_euler(const Real a_dt);
+
+      // Specific routines for Euler-Maruyama
+      void advance_particles_euler_maruyama(const Real a_dt);
       void advect_particles_euler_maruyama(const Real a_dt);
-
+      void diffuse_particles_euler_maruyama(const Real a_dt);
+      void swap_euler_maruyama();
 
       // Specific routines for midpoint integration
+      void advance_particles_midpoint(const Real a_dt);
       void diffuse_particles_midpoint1(const Real a_dt);
       void diffuse_particles_midpoint2(const Real a_dt);
       void advect_particles_midpoint1(const Real a_dt);
       void advect_particles_midpoint2(const Real a_dt);
       void swap_midpoint1();
       void swap_midpoint2();
-
-      //
-      void copy_particles_to_scratch();
-
-
-
-      // Particle advancement routines. 
-      void advance_particles_euler(const Real a_dt);
-      void advance_particles_euler_maruyama(const Real a_dt);
-      void advance_particles_midpoint(const Real a_dt);
-
-      // Deprecated routines
-      void advance_particles_split_si(const Real a_dt);
-      void advance_particles_split_pc(const Real a_dt);
     };
   }
 }

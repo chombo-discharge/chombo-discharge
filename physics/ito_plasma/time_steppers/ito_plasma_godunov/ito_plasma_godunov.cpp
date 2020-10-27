@@ -33,146 +33,6 @@ ito_plasma_godunov::~ito_plasma_godunov(){
 
 }
 
-void ito_plasma_godunov::parse_options() {
-  CH_TIME("ito_plasma_godunov::parse_options");
-  if(m_verbosity > 5){
-    pout() << m_name + "::parse_options" << endl;
-  }
-
-  ParmParse pp(m_name.c_str());
-  std::string str;
-  
-  pp.get("verbosity",      m_verbosity);
-  pp.get("ppc",            m_ppc);
-  pp.get("max_cells_hop",  m_max_cells_hop);
-  pp.get("merge_interval", m_merge_interval);
-  pp.get("relax_factor",   m_relax_factor);
-  pp.get("regrid_super",   m_regrid_superparticles);
-  pp.get("algorithm",      str);
-  pp.get("load_balance",   m_load_balance);
-  pp.get("min_dt",         m_min_dt);
-  pp.get("max_dt",         m_max_dt);
-  pp.get("diffu_samples",  m_diffu_samples);
-
-
-  if(str == "euler"){
-    m_algorithm = which_algorithm::euler;
-  }
-  else if(str == "euler_maruyama"){
-    m_algorithm = which_algorithm::euler_maruyama;
-  }
-  else if(str ==  "midpoint"){
-    m_algorithm = which_algorithm::midpoint;
-  }
-  else{
-    MayDay::Abort("ito_plasma_godunov::parse_options - unknown algorithm requested");
-  }
-
-
-  pp.get("which_dt", str);
-  if(str == "advection"){
-    m_whichDt = which_dt::advection;
-  }
-  else if(str == "diffusion"){
-    m_whichDt = which_dt::diffusion;
-  }
-  else if(str == "advection_diffusion"){
-    m_whichDt = which_dt::advection_diffusion;
-  }
-  else{
-    MayDay::Abort("ito_plasma_godunov::parse_options - unknown 'which_dt' requested");
-  }
-
-  pp.get("diffusion", str);
-  if(str == "super"){
-    m_diffusion = which_diffusion::super;
-  }
-  else if(str == "physical"){
-    m_diffusion = which_diffusion::physical;
-  }
-  else{
-    MayDay::Abort("ito_plasma_godunov::parse_options - unknown 'diffusion' requested");
-  }
-
-  this->setup_runtime_storage();
-}
-
-void ito_plasma_godunov::allocate(){
-  CH_TIME("ito_plasma_godunov::allocate");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::allocate" << endl;
-  }
-
-  m_ito->allocate_internals();
-  m_rte->allocate_internals();
-  m_poisson->allocate_internals();
-  m_sigma->allocate_internals();
-
-  // Now allocate for the conductivity particles and rho^dagger particles
-  const int num_ito_species = m_physics->get_num_ito_species();
-  
-  m_conductivity_particles.resize(num_ito_species);
-  m_rho_dagger_particles.resize(num_ito_species);
-  
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<ito_solver>& solver = solver_it();
-
-    const int idx         = solver_it.get_solver();
-    const int pvr_buffer  = solver->get_pvr_buffer();
-    const int halo_buffer = solver->get_halo_buffer();
-
-    m_conductivity_particles[idx] = new particle_container<godunov_particle>();
-    m_rho_dagger_particles[idx]   = new particle_container<godunov_particle>();
-    
-    m_amr->allocate(*m_conductivity_particles[idx], pvr_buffer, halo_buffer, m_particle_realm);
-    m_amr->allocate(*m_rho_dagger_particles[idx],   pvr_buffer, halo_buffer, m_particle_realm);
-  }
-}
-
-void ito_plasma_godunov::allocate_internals(){
-  CH_TIME("ito_plasma_godunov::allocate_internals");
-  if(m_verbosity > 5){
-    pout() << m_name + "::allocate_internals" << endl;
-  }
-
-  m_amr->allocate(m_fluid_scratch1,    m_fluid_realm,    m_phase, 1);
-  m_amr->allocate(m_fluid_scratchD,    m_fluid_realm,    m_phase, SpaceDim);
-  
-  m_amr->allocate(m_particle_scratch1,  m_particle_realm, m_phase, 1);
-  m_amr->allocate(m_particle_scratchD,  m_particle_realm, m_phase, SpaceDim);
-  m_amr->allocate(m_particle_E, m_particle_realm, m_phase, SpaceDim);
-
-  m_amr->allocate(m_J,            m_fluid_realm, m_phase, SpaceDim);
-  m_amr->allocate(m_scratch1,     m_fluid_realm, m_phase, 1);
-  m_amr->allocate(m_scratch2,     m_fluid_realm, m_phase, 1);
-  m_amr->allocate(m_conduct_cell, m_fluid_realm, m_phase, 1);
-  m_amr->allocate(m_conduct_face, m_fluid_realm, m_phase, 1);
-  m_amr->allocate(m_conduct_eb,   m_fluid_realm, m_phase, 1);
-  m_amr->allocate(m_fluid_E,      m_fluid_realm, m_phase, SpaceDim);
-
-  // Allocate for energy sources
-  const int num_ito_species = m_physics->get_num_ito_species();
-  m_energy_sources.resize(num_ito_species);
-  for (int i = 0; i < m_energy_sources.size(); i++){
-    m_amr->allocate(m_energy_sources[i],  m_particle_realm, m_phase, 1);
-  }
-}
-
-void ito_plasma_godunov::setup_runtime_storage(){
-    CH_TIME("ito_plasma_godunov::setup_runtime_storage");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setup_runtime_storage" << endl;
-  }
-
-  switch (m_algorithm){
-  case which_algorithm::midpoint:
-    ito_particle::set_num_runtime_vectors(1);
-    break;
-  default:
-    ito_particle::set_num_runtime_vectors(0);
-  }
-}
-
 int ito_plasma_godunov::get_num_plot_vars() const {
   CH_TIME("ito_plasma_godunov::get_num_plot_vars");
   if(m_verbosity > 5){
@@ -219,330 +79,117 @@ void ito_plasma_godunov::write_conductivity(EBAMRCellData& a_output, int& a_icom
   a_icomp += 1;
 }
 
-void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
-  CH_TIME("ito_plasma_godunov::compute_dt");
+void ito_plasma_godunov::allocate(){
+  CH_TIME("ito_plasma_godunov::allocate");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::compute_dt" << endl;
+    pout() << "ito_plasma_godunov::allocate" << endl;
   }
 
-  a_dt = 1.E99;
+  m_ito->allocate_internals();
+  m_rte->allocate_internals();
+  m_poisson->allocate_internals();
+  m_sigma->allocate_internals();
+
+  // Now allocate for the conductivity particles and rho^dagger particles
+  const int num_ito_species = m_physics->get_num_ito_species();
   
-  if(m_whichDt == which_dt::advection){
-    a_dt = m_ito->compute_advective_dt();
-  }
-  else if(m_whichDt == which_dt::diffusion){
-    a_dt = m_ito->compute_diffusive_dt();
-  }
-  else if(m_whichDt == which_dt::advection_diffusion){
-    a_dt = m_ito->compute_dt();
-  }
+  m_conductivity_particles.resize(num_ito_species);
+  m_rho_dagger_particles.resize(num_ito_species);
+  
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<ito_solver>& solver = solver_it();
+
+    const int idx         = solver_it.get_solver();
+    const int pvr_buffer  = solver->get_pvr_buffer();
+    const int halo_buffer = solver->get_halo_buffer();
+
+    m_conductivity_particles[idx] = new particle_container<godunov_particle>();
+    m_rho_dagger_particles[idx]   = new particle_container<godunov_particle>();
     
-  a_dt = a_dt*m_max_cells_hop;
-  a_timecode = time_code::cfl;
-
-  // Euler needs to limit by relaxation time
-  if(m_algorithm == which_algorithm::euler){
-    const Real dtRelax = m_relax_factor*m_dt_relax;
-    if(dtRelax < a_dt){
-      a_dt = dtRelax;
-      a_timecode = time_code::relaxation_time;
-    }
-  }
-
-  // Physics-based restriction
-  const Real physicsDt = this->compute_physics_dt();
-  if(physicsDt < a_dt){
-    a_dt = physicsDt;
-    a_timecode = time_code::physics;
-  }
-
-  if(a_dt < m_min_dt){
-    a_dt = m_min_dt;
-    a_timecode = time_code::hardcap;
-  }
-
-  if(a_dt > m_max_dt){
-    a_dt = m_max_dt;
-    a_timecode = time_code::hardcap;
-  }
-
-  m_timecode = a_timecode;
-
-#if 0 // Debug code
-  const Real dtCFL = m_ito->compute_dt();
-  m_avg_cfl += a_dt/dtCFL;
-  if(procID() == 0) std::cout << "dt = " << a_dt
-			      << "\t relax dt = " << m_dt_relax
-			      << "\t factor = " << a_dt/m_dt_relax
-			      << "\t CFL = " << a_dt/dtCFL
-			      << "\t avgCFL = " << m_avg_cfl/(1+m_step)
-			      << std::endl;
-#endif
-}
-
-void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_level){
-  CH_TIME("ito_plasma_godunov::pre_regrid");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::pre_regrid" << endl;
-  }
-
-  ito_plasma_stepper::pre_regrid(a_lmin, a_old_finest_level);
-
-  if(m_algorithm != which_algorithm::euler){
-
-    // Copy conductivity to scratch storage
-    const int ncomp        = 1;
-    const int finest_level = m_amr->get_finest_level();
-    m_amr->allocate(m_cache,  m_fluid_realm, m_phase, ncomp);
-    for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
-      m_conduct_cell[lvl]->localCopyTo(*m_cache[lvl]);
-    }
-
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      
-      m_conductivity_particles[idx]->pre_regrid(a_lmin);
-      m_rho_dagger_particles[idx]->pre_regrid(a_lmin);
-    }
+    m_amr->allocate(*m_conductivity_particles[idx], pvr_buffer, halo_buffer, m_particle_realm);
+    m_amr->allocate(*m_rho_dagger_particles[idx],   pvr_buffer, halo_buffer, m_particle_realm);
   }
 }
 
-void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
-  CH_TIME("ito_plasma_godunov::regrid");
+void ito_plasma_godunov::parse_options() {
+  CH_TIME("ito_plasma_godunov::parse_options");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::regrid" << endl;
+    pout() << m_name + "::parse_options" << endl;
   }
 
-  if(m_algorithm == which_algorithm::euler){
-    ito_plasma_stepper::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  ParmParse pp(m_name.c_str());
+  std::string str;
+  
+  pp.get("verbosity",      m_verbosity);
+  pp.get("ppc",            m_ppc);
+  pp.get("max_cells_hop",  m_max_cells_hop);
+  pp.get("merge_interval", m_merge_interval);
+  pp.get("relax_factor",   m_relax_factor);
+  pp.get("regrid_super",   m_regrid_superparticles);
+  pp.get("algorithm",      str);
+  pp.get("load_balance",   m_load_balance);
+  pp.get("min_dt",         m_min_dt);
+  pp.get("max_dt",         m_max_dt);
+
+
+  if(str == "euler"){
+    m_algorithm = which_algorithm::euler;
+  }
+  else if(str == "euler_maruyama"){
+    m_algorithm = which_algorithm::euler_maruyama;
+  }
+  else if(str ==  "midpoint"){
+    m_algorithm = which_algorithm::midpoint;
   }
   else{
-    this->regrid_si(a_lmin, a_old_finest_level, a_new_finest_level);
+    MayDay::Abort("ito_plasma_godunov::parse_options - unknown algorithm requested");
   }
+
+
+  pp.get("which_dt", str);
+  if(str == "advection"){
+    m_whichDt = which_dt::advection;
+  }
+  else if(str == "diffusion"){
+    m_whichDt = which_dt::diffusion;
+  }
+  else if(str == "advection_diffusion"){
+    m_whichDt = which_dt::advection_diffusion;
+  }
+  else{
+    MayDay::Abort("ito_plasma_godunov::parse_options - unknown 'which_dt' requested");
+  }
+
+  // Setup runtime storage (requirements change with algorithm)
+  this->setup_runtime_storage();
 }
 
-void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
-  CH_TIME("ito_plasma_godunov::regrid_si");
+void ito_plasma_godunov::allocate_internals(){
+  CH_TIME("ito_plasma_godunov::allocate_internals");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::regrid_si" << endl;
+    pout() << m_name + "::allocate_internals" << endl;
   }
 
-  // Regrid solvers
-  m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
-  m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
-  m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
-  m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
-
-  // Allocate internal memory for ito_plasma_godunov now....
-  this->allocate_internals();
-
-  // We need to remap/regrid the stored particles as well. 
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_particle_realm);
-  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
-  const Vector<Real>& dx                 = m_amr->get_dx();
-  const Vector<int>& ref_rat             = m_amr->get_ref_rat();
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    m_conductivity_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-    m_rho_dagger_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  }
-
-
-  // Recompute the conductivity with the other particles
-  this->compute_regrid_conductivity();
-
-  // Set up semi-implicit poisson again, with particles after diffusion jump (the rho^\dagger)
-  this->setup_semi_implicit_poisson(m_prevDt);
-
-  // Recompute the space charge. This deposits the m_rho_dagger particles onto the states. 
-  this->compute_regrid_rho();
+  m_amr->allocate(m_fluid_scratch1,    m_fluid_realm,    m_phase, 1);
+  m_amr->allocate(m_fluid_scratchD,    m_fluid_realm,    m_phase, SpaceDim);
   
-  // Compute the electric field
-  const bool converged = this->solve_poisson();
-  if(!converged){
-    MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
-  }
+  m_amr->allocate(m_particle_scratch1,  m_particle_realm, m_phase, 1);
+  m_amr->allocate(m_particle_scratchD,  m_particle_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_particle_E, m_particle_realm, m_phase, SpaceDim);
 
-  // Regrid superparticles. 
-  if(m_regrid_superparticles){
-    m_ito->sort_particles_by_cell();
-    m_ito->make_superparticles(m_ppc);
-    m_ito->sort_particles_by_patch();
-  }
+  m_amr->allocate(m_J,            m_fluid_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_scratch1,     m_fluid_realm, m_phase, 1);
+  m_amr->allocate(m_scratch2,     m_fluid_realm, m_phase, 1);
+  m_amr->allocate(m_conduct_cell, m_fluid_realm, m_phase, 1);
+  m_amr->allocate(m_conduct_face, m_fluid_realm, m_phase, 1);
+  m_amr->allocate(m_conduct_eb,   m_fluid_realm, m_phase, 1);
+  m_amr->allocate(m_fluid_E,      m_fluid_realm, m_phase, SpaceDim);
 
-  // Now let the ito solver deposit its actual particles...
-  m_ito->deposit_particles();
-
-  // Recompute new velocities and diffusion coefficients
-  this->compute_ito_velocities();
-  this->compute_ito_diffusion();
-}
-
-void ito_plasma_godunov::compute_regrid_conductivity(){
-  CH_TIME("ito_plasma_godunov::compute_regrid_conductivity");
-  if(m_verbosity > 5){
-    pout() << m_name + "::compute_regrid_conductivity" << endl;
-  }
-
-  data_ops::set_value(m_conduct_cell, 0.0);
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
-    
-    const int idx = solver_it.get_solver();
-    const int q   = species->get_charge();
-
-    if(q != 0 && solver->is_mobile()){
-      data_ops::set_value(m_particle_scratch1, 0.0);
-
-      solver->deposit_particles(m_particle_scratch1, *m_conductivity_particles[idx]); // This deposit mu*mass
-
-      // Copy to fluid realm and add to fluid stuff
-      m_fluid_scratch1.copy(m_particle_scratch1);
-      data_ops::incr(m_conduct_cell, m_fluid_scratch1, Abs(q));
-    }
-  }
-  
-  data_ops::scale(m_conduct_cell, units::s_Qe);
-
-  m_amr->average_down(m_conduct_cell, m_fluid_realm, m_phase);
-  m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
-  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
-
-  // Now do the faces
-  this->compute_face_conductivity();
-}
-
-void ito_plasma_godunov::compute_regrid_rho(){
-  CH_TIME("ito_plasma_godunov::compute_regrid_rho");
-  if(m_verbosity > 5){
-    pout() << m_name + "::compute_regrid_rho" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
-
-    const int idx = solver_it.get_solver();
-    
-    solver->deposit_particles(solver->get_state(), *m_rho_dagger_particles[idx]); 
-  }
-}
-
-void ito_plasma_godunov::regrid_conductivity(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
-  CH_TIME("ito_plasma_godunov::regrid_conductivity");
-  if(m_verbosity > 5){
-    pout() << m_name + "::regrid_conductivity" << endl;
-  }
-  
-  const Interval interv(0,0);
-    
-  // Regrid the conductivity
-  Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_fluid_realm, m_phase);
-
-  // These levels have not changed
-  for (int lvl = 0; lvl <= Max(0,a_lmin-1); lvl++){
-    m_cache[lvl]->copyTo(*m_conduct_cell[lvl]); // Base level should never change, but ownership can.
-  }
-
-  // These levels have changed
-  for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
-    interpolator[lvl]->interpolate(*m_conduct_cell[lvl], *m_conduct_cell[lvl-1], interv);
-    if(lvl <= Min(a_old_finest_level, a_new_finest_level)){
-      m_cache[lvl]->copyTo(*m_conduct_cell[lvl]);
-    }
-  }
-}
-
-void ito_plasma_godunov::copy_conductivity_particles(){
-  CH_TIME("ito_plasma_godunov::copy_conductivity_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::copy_conductivity_particles" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<ito_solver>& solver   = solver_it();
-    const RefCountedPtr<ito_species>& species = solver->get_species();
-
-    const int idx = solver_it.get_solver();
-    const int q   = species->get_charge();
-
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
-
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const List<ito_particle>& ito_parts = solver->get_particles()[lvl][dit()].listItems();
-	List<godunov_particle>& gdnv_parts  = (*m_conductivity_particles[idx])[lvl][dit()].listItems();
-
-	gdnv_parts.clear();
-
-	if(q != 0 && solver->is_mobile()){
-	  for (ListIterator<ito_particle> lit(ito_parts); lit.ok(); ++lit){
-	    const ito_particle& p = lit();
-	    const RealVect& pos   = p.position();
-	    const Real& mass      = p.mass();
-	    const Real& mobility  = p.mobility();
-
-	    gdnv_parts.add(godunov_particle(pos, mass*mobility));
-	  }
-	}
-      }
-    }
-  }
-}
-
-void ito_plasma_godunov::copy_rho_dagger_particles(){
-  CH_TIME("ito_plasma_godunov::copy_rho_dagger_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::copy_rho_dagger_particles" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<ito_solver>& solver   = solver_it();
-    const RefCountedPtr<ito_species>& species = solver->get_species();
-
-    const int idx = solver_it.get_solver();
-    const int q   = species->get_charge();
-
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
-
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const List<ito_particle>& ito_parts = solver->get_particles()[lvl][dit()].listItems();
-	List<godunov_particle>& gdnv_parts  = (*m_rho_dagger_particles[idx])[lvl][dit()].listItems();
-
-	gdnv_parts.clear();
-
-	if(q != 0){
-	  for (ListIterator<ito_particle> lit(ito_parts); lit.ok(); ++lit){
-	    const ito_particle& p = lit();
-	    const RealVect& pos   = p.position();
-	    const Real& mass      = p.mass();
-
-	    gdnv_parts.add(godunov_particle(pos, mass));
-	  }
-	}
-      }
-    }
-  }
-}
-
-void ito_plasma_godunov::copy_particles_to_scratch(){
-  CH_TIME("ito_plasma_godunov::copy_particles_to_scratch");
-  if(m_verbosity > 5){
-    pout() << m_name + "::copy_particles_to_scratch" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-
-    particle_container<ito_particle>& scratch         = solver->get_scratch_particles();
-    const particle_container<ito_particle>& particles = solver->get_particles();
-
-    solver->clear(scratch);
-    scratch.add_particles(particles);
+  // Allocate for energy sources
+  const int num_ito_species = m_physics->get_num_ito_species();
+  m_energy_sources.resize(num_ito_species);
+  for (int i = 0; i < m_energy_sources.size(); i++){
+    m_amr->allocate(m_energy_sources[i],  m_particle_realm, m_phase, 1);
   }
 }
 
@@ -677,250 +324,180 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   return a_dt;
 }
 
-void ito_plasma_godunov::advance_particles_euler(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_euler");
+void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
+  CH_TIME("ito_plasma_godunov::compute_dt");
   if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_euler" << endl;
+    pout() << "ito_plasma_godunov::compute_dt" << endl;
   }
 
-  this->set_old_positions();
-  this->advect_particles_euler(a_dt);
-  this->diffuse_particles_euler(a_dt);
+  a_dt = 1.E99;
   
-  this->intersect_particles(a_dt);
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->remove_eb_particles();
+  if(m_whichDt == which_dt::advection){
+    a_dt = m_ito->compute_advective_dt();
+  }
+  else if(m_whichDt == which_dt::diffusion){
+    a_dt = m_ito->compute_diffusive_dt();
+  }
+  else if(m_whichDt == which_dt::advection_diffusion){
+    a_dt = m_ito->compute_dt();
+  }
+    
+  a_dt = a_dt*m_max_cells_hop;
+  a_timecode = time_code::cfl;
+
+  // Euler needs to limit by relaxation time
+  if(m_algorithm == which_algorithm::euler){
+    const Real dtRelax = m_relax_factor*m_dt_relax;
+    if(dtRelax < a_dt){
+      a_dt = dtRelax;
+      a_timecode = time_code::relaxation_time;
+    }
   }
 
-  m_ito->remap();
-  m_ito->deposit_particles();
-
-  this->solve_poisson();
-}
-
-void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_euler_maruyama");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_euler_maruyama" << endl;
+  // Physics-based restriction
+  const Real physicsDt = this->compute_physics_dt();
+  if(physicsDt < a_dt){
+    a_dt = physicsDt;
+    a_timecode = time_code::physics;
   }
 
-  // Set the old particle position. 
-  this->set_old_positions();
+  if(a_dt < m_min_dt){
+    a_dt = m_min_dt;
+    a_timecode = time_code::hardcap;
+  }
 
-  // Need to copy the current particles because they will be used for computing the conductivity during regrids
-  this->copy_conductivity_particles();
+  if(a_dt > m_max_dt){
+    a_dt = m_max_dt;
+    a_timecode = time_code::hardcap;
+  }
 
-  // Compute conductivity and setup poisson
-  this->compute_conductivity();
-  this->setup_semi_implicit_poisson(a_dt);
+  m_timecode = a_timecode;
 
-  // Diffuse the particles now
-  this->diffuse_particles_euler(a_dt);
-
-  // Remap and deposit, only need to do this for diffusive solvers. 
-  this->remap_diffusive_particles(); 
-  //  m_ito->deposit_particles();
-  this->deposit_diffusive_particles();
-
-
-  // Need to copy the current particles because they will be used for the space charge during regrids. 
-  this->copy_rho_dagger_particles();
-
-  // Now compute the electric field
-  this->solve_poisson();
-
-  // We have field at k+1 but particles have been diffused. The ones that are diffusive AND mobile are put back to X^k positions
-  // and then we compute velocities with E^(k+1). 
-  this->swap_particle_positions();   // After this, oldPosition() holds X^\dagger, and position() holds X^k. 
-  this->remap_diffusive_particles(); // Only need to do this for the ones that were diffusive
-
-  // Recompute velocities with the new electric field
-#if 0 // original code
-  this->compute_ito_velocities();
-#else // This is the version that leaves the mobility intact - which is what the algorithm says. 
-  this->set_ito_velocity_funcs();
-  m_ito->interpolate_velocities();
+#if 0 // Debug code
+  const Real dtCFL = m_ito->compute_dt();
+  m_avg_cfl += a_dt/dtCFL;
+  if(procID() == 0) std::cout << "dt = " << a_dt
+			      << "\t relax dt = " << m_dt_relax
+			      << "\t factor = " << a_dt/m_dt_relax
+			      << "\t CFL = " << a_dt/dtCFL
+			      << "\t avgCFL = " << m_avg_cfl/(1+m_step)
+			      << std::endl;
 #endif
-  this->advect_particles_euler_maruyama(a_dt);  
-  
-  // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
-  this->remap_mobile_or_diffusive_particles();
-
-  // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
-  this->intersect_particles(a_dt);
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->remove_eb_particles();
-  }
-
-  // Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
-  this->deposit_mobile_or_diffusive_particles();
 }
 
 
-
-void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advect_particles_euler");
+void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_level){
+  CH_TIME("ito_plasma_godunov::pre_regrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::advect_particles_euler" << endl;
+    pout() << "ito_plasma_godunov::pre_regrid" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-    if(solver->is_mobile()){
+  ito_plasma_stepper::pre_regrid(a_lmin, a_old_finest_level);
+
+  if(m_algorithm != which_algorithm::euler){
+
+    // Copy conductivity to scratch storage
+    const int ncomp        = 1;
+    const int finest_level = m_amr->get_finest_level();
+    m_amr->allocate(m_cache,  m_fluid_realm, m_phase, ncomp);
+    for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+      m_conduct_cell[lvl]->localCopyTo(*m_cache[lvl]);
+    }
+
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
       
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
-
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
-
-	  // First step
-	  for (lit.rewind(); lit; ++lit){
-	    ito_particle& p = particleList[lit];
-
-	    // Update positions. 
-	    p.position() += p.velocity()*a_dt;
-	  }
-	}
-      }
+      m_conductivity_particles[idx]->pre_regrid(a_lmin);
+      m_rho_dagger_particles[idx]->pre_regrid(a_lmin);
     }
   }
 }
 
-void ito_plasma_godunov::advect_particles_euler_maruyama(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advect_particles_si");
+void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
+  CH_TIME("ito_plasma_godunov::regrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::advect_particles_si" << endl;
+    pout() << "ito_plasma_godunov::regrid" << endl;
   }
 
-
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-    if(solver->is_mobile()){
-      
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
-
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
-
-	  // First step
-	  for (lit.rewind(); lit; ++lit){
-	    ito_particle& p = particleList[lit];
-
-	    // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
-	    const RealVect Xk = p.position();
-	    p.position()      = p.oldPosition() + p.velocity()*a_dt;
-	    p.oldPosition()   = Xk;
-	  }
-	}
-      }
-    }
+  if(m_algorithm == which_algorithm::euler){
+    ito_plasma_stepper::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  }
+  else{
+    this->regrid_si(a_lmin, a_old_finest_level, a_new_finest_level);
   }
 }
 
-void ito_plasma_godunov::diffuse_particles_euler(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::diffuse_particles_euler");
+void ito_plasma_godunov::setup_runtime_storage(){
+    CH_TIME("ito_plasma_godunov::setup_runtime_storage");
   if(m_verbosity > 5){
-    pout() << m_name + "::diffuse_particles_euler" << endl;
+    pout() << m_name + "::setup_runtime_storage" << endl;
   }
 
-  switch(m_diffusion){
-  case which_diffusion::super:
-    this->diffuse_particles_super(a_dt);
-    break;
-  case which_diffusion::physical:
-    this->diffuse_particles_physical(a_dt);
+  switch (m_algorithm){
+  case which_algorithm::midpoint:
+    ito_particle::set_num_runtime_vectors(1);
     break;
   default:
-    MayDay::Abort("ito_plasma_godunov::diffuse_particles_euler - unknown algorithm for diffusion");
+    ito_particle::set_num_runtime_vectors(0);
   }
 }
 
-
-
-void ito_plasma_godunov::diffuse_particles_super(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::diffuse_particles_super");
+void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
+  CH_TIME("ito_plasma_godunov::regrid_si");
   if(m_verbosity > 5){
-    pout() << m_name + "::diffuse_particles_super" << endl;
+    pout() << "ito_plasma_godunov::regrid_si" << endl;
   }
+
+  // Regrid solvers
+  m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
+
+  // Allocate internal memory for ito_plasma_godunov now....
+  this->allocate_internals();
+
+  // We need to remap/regrid the stored particles as well. 
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_particle_realm);
+  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+  const Vector<Real>& dx                 = m_amr->get_dx();
+  const Vector<int>& ref_rat             = m_amr->get_ref_rat();
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-    
-    if(solver->is_diffusive()){
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
-
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
-
-	  // Diffusion hop.
-	  for (lit.rewind(); lit.ok(); ++lit){
-	    ito_particle& p = particleList[lit];
-	    const RealVect ran = solver->random_gaussian();
-	    const RealVect hop = ran*sqrt(2.0*p.diffusion()*a_dt);
-
-	    p.position() += hop;
-	  }
-	}
-      }
-    }
-  }
-}
-
-void ito_plasma_godunov::diffuse_particles_physical(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::diffuse_particles_physical");
-  if(m_verbosity > 5){
-    pout() << m_name + "::diffuse_particles_physical" << endl;
+    const int idx = solver_it.get_solver();
+    m_conductivity_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+    m_rho_dagger_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   }
 
-  const long long maxSamples = (long long) m_diffu_samples;
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-    
-    if(solver->is_diffusive()){
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+  // Recompute the conductivity with the other particles
+  this->compute_regrid_conductivity();
 
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+  // Set up semi-implicit poisson again, with particles after diffusion jump (the rho^\dagger)
+  this->setup_semi_implicit_poisson(m_prevDt);
 
-	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
-
-	  // Diffusion hop.
-	  for (lit.rewind(); lit.ok(); ++lit){
-	    ito_particle& p    = particleList[lit];
-	    const Real factor  = sqrt(2.0*p.diffusion()*a_dt);
-
-	    // Compute number of diffusive samples. 
-	    long long N = (long long) p.mass();
-	    N = Min(N, maxSamples);
-
-	    // Do the diffusion hop. 
-	    RealVect hop = RealVect::Zero;
-	    for (long long i = 0; i < N; i++){
-	      hop += solver->random_gaussian();
-	    }
-
-	    p.position() += hop*factor/N;
-	  }
-	}
-      }
-    }
+  // Recompute the space charge. This deposits the m_rho_dagger particles onto the states. 
+  this->compute_regrid_rho();
+  
+  // Compute the electric field
+  const bool converged = this->solve_poisson();
+  if(!converged){
+    MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
   }
+
+  // Regrid superparticles. 
+  if(m_regrid_superparticles){
+    m_ito->sort_particles_by_cell();
+    m_ito->make_superparticles(m_ppc);
+    m_ito->sort_particles_by_patch();
+  }
+
+  // Now let the ito solver deposit its actual particles...
+  m_ito->deposit_particles();
+
+  // Recompute new velocities and diffusion coefficients
+  this->compute_ito_velocities();
+  this->compute_ito_diffusion();
 }
 
 void ito_plasma_godunov::set_old_positions(){
@@ -975,44 +552,6 @@ void ito_plasma_godunov::rewind_particles(){
 	  for (lit.rewind(); lit; ++lit){
 	    ito_particle& p = particleList[lit];
 	    p.position() = p.oldPosition();
-	  }
-	}
-      }
-    }
-  }
-}
-
-void ito_plasma_godunov::swap_particle_positions(){
-  CH_TIME("ito_plasma_godunov::swap_particle_positions");
-  if(m_verbosity > 5){
-    pout() << m_name + "::swap_particle_positions" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
-
-    // No need to do this if solver is only mobile because the diffusion step didn't change the position.
-    // Likewise, if the solver is only diffusive then advect_particles_si routine won't trigger so no need for that either. 
-    if(mobile && diffusive){ 
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
-
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
-
-	  for (lit.rewind(); lit; ++lit){
-	    ito_particle& p = particleList[lit];
-
-	    // We have made a diffusion hop, but we need p.position() to be X^k and p.oldPosition() to be the jumped position. 
-	    const RealVect tmp = p.position();
-	    
-	    p.position()    = p.oldPosition();
-	    p.oldPosition() = tmp;
 	  }
 	}
       }
@@ -1129,48 +668,266 @@ void ito_plasma_godunov::setup_standard_poisson(){
   poisson->set_needs_setup(false);
 }
 
-// Deprecated
-void ito_plasma_godunov::advance_particles_split_si(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_split_si");
+void ito_plasma_godunov::copy_conductivity_particles(){
+  CH_TIME("ito_plasma_godunov::copy_conductivity_particles");
   if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_split_si" << endl;
+    pout() << m_name + "::copy_conductivity_particles" << endl;
   }
 
-  // Set old positions and diffuse particles. 
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<ito_solver>& solver   = solver_it();
+    const RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+    const int q   = species->get_charge();
+
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const List<ito_particle>& ito_parts = solver->get_particles()[lvl][dit()].listItems();
+	List<godunov_particle>& gdnv_parts  = (*m_conductivity_particles[idx])[lvl][dit()].listItems();
+
+	gdnv_parts.clear();
+
+	if(q != 0 && solver->is_mobile()){
+	  for (ListIterator<ito_particle> lit(ito_parts); lit.ok(); ++lit){
+	    const ito_particle& p = lit();
+	    const RealVect& pos   = p.position();
+	    const Real& mass      = p.mass();
+	    const Real& mobility  = p.mobility();
+
+	    gdnv_parts.add(godunov_particle(pos, mass*mobility));
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::copy_rho_dagger_particles(){
+  CH_TIME("ito_plasma_godunov::copy_rho_dagger_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::copy_rho_dagger_particles" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<ito_solver>& solver   = solver_it();
+    const RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+    const int q   = species->get_charge();
+
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const List<ito_particle>& ito_parts = solver->get_particles()[lvl][dit()].listItems();
+	List<godunov_particle>& gdnv_parts  = (*m_rho_dagger_particles[idx])[lvl][dit()].listItems();
+
+	gdnv_parts.clear();
+
+	if(q != 0){
+	  for (ListIterator<ito_particle> lit(ito_parts); lit.ok(); ++lit){
+	    const ito_particle& p = lit();
+	    const RealVect& pos   = p.position();
+	    const Real& mass      = p.mass();
+
+	    gdnv_parts.add(godunov_particle(pos, mass));
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::compute_regrid_conductivity(){
+  CH_TIME("ito_plasma_godunov::compute_regrid_conductivity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_regrid_conductivity" << endl;
+  }
+
+  data_ops::set_value(m_conduct_cell, 0.0);
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>&   solver = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+    
+    const int idx = solver_it.get_solver();
+    const int q   = species->get_charge();
+
+    if(q != 0 && solver->is_mobile()){
+      data_ops::set_value(m_particle_scratch1, 0.0);
+
+      solver->deposit_particles(m_particle_scratch1, *m_conductivity_particles[idx]); // This deposit mu*mass
+
+      // Copy to fluid realm and add to fluid stuff
+      m_fluid_scratch1.copy(m_particle_scratch1);
+      data_ops::incr(m_conduct_cell, m_fluid_scratch1, Abs(q));
+    }
+  }
+  
+  data_ops::scale(m_conduct_cell, units::s_Qe);
+
+  m_amr->average_down(m_conduct_cell, m_fluid_realm, m_phase);
+  m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
+  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
+
+  // Now do the faces
+  this->compute_face_conductivity();
+}
+
+void ito_plasma_godunov::compute_regrid_rho(){
+  CH_TIME("ito_plasma_godunov::compute_regrid_rho");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_regrid_rho" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>&   solver = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+    
+    solver->deposit_particles(solver->get_state(), *m_rho_dagger_particles[idx]); 
+  }
+}
+
+void ito_plasma_godunov::advance_particles_euler(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advance_particles_euler");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_particles_euler" << endl;
+  }
+
   this->set_old_positions();
+  this->advect_particles_euler(a_dt);
   this->diffuse_particles_euler(a_dt);
   
-  // Do intersection test and remove EB particles. These particles are removed from the simulation. 
   this->intersect_particles(a_dt);
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->remove_eb_particles();
   }
 
-  // Remap and deposit diffusive particles
-  this->remap_diffusive_particles();
-  this->deposit_diffusive_particles();
+  m_ito->remap();
+  m_ito->deposit_particles();
 
-  // Explicit update of the electric field. Then recompute the advective velocities. 
-  this->setup_standard_poisson();
   this->solve_poisson();
+}
 
-  // Recompute advective velocities. This is necessary because
-  // we want the mobility at E^k
-  this->compute_ito_velocities();
+void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advect_particles_euler");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advect_particles_euler" << endl;
+  }
 
-  // Compute conductivity and solve semi-implicit Poisson
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    if(solver->is_mobile()){
+      
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  // First step
+	  for (lit.rewind(); lit; ++lit){
+	    ito_particle& p = particleList[lit];
+
+	    // Update positions. 
+	    p.position() += p.velocity()*a_dt;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::diffuse_particles_euler(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::diffuse_particles_euler");
+  if(m_verbosity > 5){
+    pout() << m_name + "::diffuse_particles_euler" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    
+    if(solver->is_diffusive()){
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  // Diffusion hop.
+	  for (lit.rewind(); lit.ok(); ++lit){
+	    ito_particle& p    = particleList[lit];
+	    const Real factor  = sqrt(2.0*p.diffusion()*a_dt);
+
+	    // Do the diffusion hop. 
+	    const RealVect hop = solver->random_gaussian();
+
+	    p.position() += hop*factor;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advance_particles_euler_maruyama");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_particles_euler_maruyama" << endl;
+  }
+
+  // Set the old particle position. 
+  this->set_old_positions();
+
+  // Need to copy the current particles because they will be used for computing the conductivity during regrids
+  this->copy_conductivity_particles();
+
+  // Compute conductivity and setup poisson
   this->compute_conductivity();
   this->setup_semi_implicit_poisson(a_dt);
+
+  // Diffuse the particles now
+  this->diffuse_particles_euler(a_dt);
+
+  // Remap and deposit, only need to do this for diffusive solvers. 
+  this->remap_diffusive_particles(); 
+  //  m_ito->deposit_particles();
+  this->deposit_diffusive_particles();
+
+
+  // Need to copy the current particles because they will be used for the space charge during regrids. 
+  this->copy_rho_dagger_particles();
+
+  // Now compute the electric field
   this->solve_poisson();
-  
-  // We have field at k+1 and can now compute the velocities at E^(k+1) and move the particles
-  // and then we compute velocities with E^(k+1).
-  this->set_old_positions();
+
+  // We have field at k+1 but particles have been diffused. The ones that are diffusive AND mobile are put back to X^k positions
+  // and then we compute velocities with E^(k+1). 
+  this->swap_euler_maruyama();       // After this, oldPosition() holds X^\dagger, and position() holds X^k. 
+  this->remap_diffusive_particles(); // Only need to do this for the ones that were diffusive
+
+  // Recompute velocities with the new electric field
+#if 0 // original code
   this->compute_ito_velocities();
-  this->advect_particles_euler(a_dt);  
+#else // This is the version that leaves the mobility intact - which is what the algorithm says. 
+  this->set_ito_velocity_funcs();
+  m_ito->interpolate_velocities();
+#endif
+  this->advect_particles_euler_maruyama(a_dt);  
   
   // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
-  this->remap_mobile_particles();
+  this->remap_mobile_or_diffusive_particles();
 
   // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   this->intersect_particles(a_dt);
@@ -1178,68 +935,114 @@ void ito_plasma_godunov::advance_particles_split_si(const Real a_dt){
     solver_it()->remove_eb_particles();
   }
 
-  // Do final deposition. This is mostly for computing the current density. 
-  this->deposit_mobile_particles();
+  // Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
+  this->deposit_mobile_or_diffusive_particles();
 }
 
-// Deprecated
-void ito_plasma_godunov::advance_particles_split_pc(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_split_pc");
+void ito_plasma_godunov::advect_particles_euler_maruyama(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advect_particles_si");
   if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_split_pc" << endl;
+    pout() << m_name + "::advect_particles_si" << endl;
   }
 
-  // Set old positions and diffuse particles. 
-  this->set_old_positions();
-  this->diffuse_particles_euler(a_dt);
-  
-  // Do intersection test and remove EB particles. These particles are removed from the simulation. 
-  this->intersect_particles(a_dt);
+
+
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->remove_eb_particles();
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    if(solver->is_mobile()){
+      
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  // First step
+	  for (lit.rewind(); lit; ++lit){
+	    ito_particle& p = particleList[lit];
+
+	    // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
+	    const RealVect Xk = p.position();
+	    p.position()      = p.oldPosition() + p.velocity()*a_dt;
+	    p.oldPosition()   = Xk;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::diffuse_particles_euler_maruyama(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::diffuse_particles_euler_maruyama");
+  if(m_verbosity > 5){
+    pout() << m_name + "::diffuse_particles_euler_maruyama" << endl;
   }
 
-  // Remap and deposit diffusive particles
-  this->remap_diffusive_particles();
-  this->deposit_diffusive_particles();
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    
+    if(solver->is_diffusive()){
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
 
-  // Explicit update of the electric field. Then recompute the advective velocities. 
-  this->setup_standard_poisson();
-  this->solve_poisson();
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-  // PREDICTOR-CORRECTOR BEGINS HERE
-  this->set_old_positions();
-  this->copy_particles_to_scratch();
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
 
-  const int NPC = 10;
-  for (int ipc =0; ipc < NPC; ipc++){
-    // Recompute advective velocities. This is necessary because
-    // we want the mobility at E^k
-    this->compute_ito_velocities();
-    this->advect_particles_euler(a_dt);
+	  // Diffusion hop.
+	  for (lit.rewind(); lit.ok(); ++lit){
+	    ito_particle& p    = particleList[lit];
+	    const Real factor  = sqrt(2.0*p.diffusion()*a_dt);
 
-    // Remove particles that went through EB
-    this->intersect_particles(a_dt);
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-      solver_it()->remove_eb_particles();
+	    // Do the diffusion hop. 
+	    const RealVect hop = solver->random_gaussian();
+
+	    p.position() += hop*factor;
+	  }
+	}
+      }
     }
+  }
+}
 
-    m_ito->remap();
-    m_ito->deposit_particles();
+void ito_plasma_godunov::swap_euler_maruyama(){
+  CH_TIME("ito_plasma_godunov::swap_euler_maruyama");
+  if(m_verbosity > 5){
+    pout() << m_name + "::swap_euler_maruyama" << endl;
+  }
 
-    // Solve Poisson. 
-    this->solve_poisson();
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
 
-    // Put particles back. 
-    if(ipc < NPC - 1){
-      for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-	RefCountedPtr<ito_solver>& solver = solver_it();
+    // No need to do this if solver is only mobile because the diffusion step didn't change the position.
+    // Likewise, if the solver is only diffusive then advect_particles_si routine won't trigger so no need for that either. 
+    if(mobile && diffusive){ 
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
 
-	const particle_container<ito_particle>& scratch         = solver->get_scratch_particles();
-	particle_container<ito_particle>& particles = solver->get_particles();
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-	solver->clear(particles);
-	particles.add_particles(scratch);
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  for (lit.rewind(); lit; ++lit){
+	    ito_particle& p = particleList[lit];
+
+	    // We have made a diffusion hop, but we need p.position() to be X^k and p.oldPosition() to be the jumped position. 
+	    const RealVect tmp = p.position();
+	    
+	    p.position()    = p.oldPosition();
+	    p.oldPosition() = tmp;
+	  }
+	}
       }
     }
   }
