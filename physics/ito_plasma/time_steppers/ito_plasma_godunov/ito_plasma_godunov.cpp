@@ -54,21 +54,20 @@ void ito_plasma_godunov::parse_options() {
   pp.get("max_dt",         m_max_dt);
   pp.get("diffu_samples",  m_diffu_samples);
 
+
   if(str == "euler"){
     m_algorithm = which_algorithm::euler;
   }
-  else if(str == "semi_implicit"){
-    m_algorithm = which_algorithm::semi_implicit;
+  else if(str == "euler_maruyama"){
+    m_algorithm = which_algorithm::euler_maruyama;
   }
-  else if(str == "split_semi"){
-    m_algorithm = which_algorithm::split_semi_implicit;
-  }
-  else if(str == "split_pc"){
-    m_algorithm = which_algorithm::split_pc;
+  else if(str ==  "midpoint"){
+    m_algorithm = which_algorithm::midpoint;
   }
   else{
     MayDay::Abort("ito_plasma_godunov::parse_options - unknown algorithm requested");
   }
+
 
   pp.get("which_dt", str);
   if(str == "advection"){
@@ -272,7 +271,7 @@ void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_lev
 
   ito_plasma_stepper::pre_regrid(a_lmin, a_old_finest_level);
 
-  if(m_algorithm == which_algorithm::semi_implicit){
+  if(m_algorithm != which_algorithm::euler){
 
     // Copy conductivity to scratch storage
     const int ncomp        = 1;
@@ -551,6 +550,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   
   // Particle algorithms
   particle_time = -MPI_Wtime();
+#if 0
   if(m_algorithm == which_algorithm::euler){
     this->advance_particles_euler(a_dt);
   }
@@ -565,6 +565,21 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   else if(m_algorithm == which_algorithm::split_pc){
     this->advance_particles_split_pc(a_dt);
   }
+#else
+  switch(m_algorithm){
+  case which_algorithm::euler:
+    this->advance_particles_euler(a_dt);
+    break;
+  case which_algorithm::euler_maruyama:
+    this->advance_particles_euler_maruyama(a_dt);
+    break;
+  case which_algorithm::midpoint:
+    this->advance_particles_midpoint(a_dt);
+    break;
+  default:
+    MayDay::Abort("ito_plasma_godunov::advance - logic bust");
+  }
+#endif
   particle_time += MPI_Wtime();
 
   // Compute current and relaxation time.
@@ -683,10 +698,10 @@ void ito_plasma_godunov::advance_particles_euler(const Real a_dt){
   this->solve_poisson();
 }
 
-void ito_plasma_godunov::advance_particles_si(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_si");
+void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advance_particles_euler_maruyama");
   if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_si" << endl;
+    pout() << m_name + "::advance_particles_euler_maruyama" << endl;
   }
 
   // Set the old particle position. 
@@ -726,7 +741,7 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   this->set_ito_velocity_funcs();
   m_ito->interpolate_velocities();
 #endif
-  this->advect_particles_si(a_dt);  
+  this->advect_particles_euler_maruyama(a_dt);  
   
   // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
   this->remap_mobile_or_diffusive_particles();
@@ -741,118 +756,13 @@ void ito_plasma_godunov::advance_particles_si(const Real a_dt){
   this->deposit_mobile_or_diffusive_particles();
 }
 
-void ito_plasma_godunov::advance_particles_split_si(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_split_si");
+void ito_plasma_godunov::advance_particles_midpoint(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advance_particles_midpoint");
   if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_split_si" << endl;
+    pout() << m_name + "::advance_particles_midpoint" << endl;
   }
 
-  // Set old positions and diffuse particles. 
-  this->set_old_positions();
-  this->diffuse_particles_euler(a_dt);
-  
-  // Do intersection test and remove EB particles. These particles are removed from the simulation. 
-  this->intersect_particles(a_dt);
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->remove_eb_particles();
-  }
-
-  // Remap and deposit diffusive particles
-  this->remap_diffusive_particles();
-  this->deposit_diffusive_particles();
-
-  // Explicit update of the electric field. Then recompute the advective velocities. 
-  this->setup_standard_poisson();
-  this->solve_poisson();
-
-  // Recompute advective velocities. This is necessary because
-  // we want the mobility at E^k
-  this->compute_ito_velocities();
-
-  // Compute conductivity and solve semi-implicit Poisson
-  this->compute_conductivity();
-  this->setup_semi_implicit_poisson(a_dt);
-  this->solve_poisson();
-  
-  // We have field at k+1 and can now compute the velocities at E^(k+1) and move the particles
-  // and then we compute velocities with E^(k+1).
-  this->set_old_positions();
-  this->compute_ito_velocities();
-  this->advect_particles_euler(a_dt);  
-  
-  // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
-  this->remap_mobile_particles();
-
-  // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
-  this->intersect_particles(a_dt);
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->remove_eb_particles();
-  }
-
-  // Do final deposition. This is mostly for computing the current density. 
-  this->deposit_mobile_particles();
-}
-
-void ito_plasma_godunov::advance_particles_split_pc(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_split_pc");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_split_pc" << endl;
-  }
-
-  // Set old positions and diffuse particles. 
-  this->set_old_positions();
-  this->diffuse_particles_euler(a_dt);
-  
-  // Do intersection test and remove EB particles. These particles are removed from the simulation. 
-  this->intersect_particles(a_dt);
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->remove_eb_particles();
-  }
-
-  // Remap and deposit diffusive particles
-  this->remap_diffusive_particles();
-  this->deposit_diffusive_particles();
-
-  // Explicit update of the electric field. Then recompute the advective velocities. 
-  this->setup_standard_poisson();
-  this->solve_poisson();
-
-  // PREDICTOR-CORRECTOR BEGINS HERE
-  this->set_old_positions();
-  this->copy_particles_to_scratch();
-
-  const int NPC = 10;
-  for (int ipc =0; ipc < NPC; ipc++){
-    // Recompute advective velocities. This is necessary because
-    // we want the mobility at E^k
-    this->compute_ito_velocities();
-    this->advect_particles_euler(a_dt);
-
-    // Remove particles that went through EB
-    this->intersect_particles(a_dt);
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-      solver_it()->remove_eb_particles();
-    }
-
-    m_ito->remap();
-    m_ito->deposit_particles();
-
-    // Solve Poisson. 
-    this->solve_poisson();
-
-    // Put particles back. 
-    if(ipc < NPC - 1){
-      for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-	RefCountedPtr<ito_solver>& solver = solver_it();
-
-	const particle_container<ito_particle>& scratch         = solver->get_scratch_particles();
-	particle_container<ito_particle>& particles = solver->get_particles();
-
-	solver->clear(particles);
-	particles.add_particles(scratch);
-      }
-    }
-  }
+  MayDay::Abort("ito_plasma_godunov::advance_particles_midpoint - not implemented!");
 }
 
 void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
@@ -887,7 +797,7 @@ void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
   }
 }
 
-void ito_plasma_godunov::advect_particles_si(const Real a_dt){
+void ito_plasma_godunov::advect_particles_euler_maruyama(const Real a_dt){
   CH_TIME("ito_plasma_godunov::advect_particles_si");
   if(m_verbosity > 5){
     pout() << m_name + "::advect_particles_si" << endl;
@@ -1222,4 +1132,120 @@ void ito_plasma_godunov::setup_standard_poisson(){
   poisson->setup_operator_factory();
   poisson->setup_solver();
   poisson->set_needs_setup(false);
+}
+
+// Deprecated
+void ito_plasma_godunov::advance_particles_split_si(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advance_particles_split_si");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_particles_split_si" << endl;
+  }
+
+  // Set old positions and diffuse particles. 
+  this->set_old_positions();
+  this->diffuse_particles_euler(a_dt);
+  
+  // Do intersection test and remove EB particles. These particles are removed from the simulation. 
+  this->intersect_particles(a_dt);
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->remove_eb_particles();
+  }
+
+  // Remap and deposit diffusive particles
+  this->remap_diffusive_particles();
+  this->deposit_diffusive_particles();
+
+  // Explicit update of the electric field. Then recompute the advective velocities. 
+  this->setup_standard_poisson();
+  this->solve_poisson();
+
+  // Recompute advective velocities. This is necessary because
+  // we want the mobility at E^k
+  this->compute_ito_velocities();
+
+  // Compute conductivity and solve semi-implicit Poisson
+  this->compute_conductivity();
+  this->setup_semi_implicit_poisson(a_dt);
+  this->solve_poisson();
+  
+  // We have field at k+1 and can now compute the velocities at E^(k+1) and move the particles
+  // and then we compute velocities with E^(k+1).
+  this->set_old_positions();
+  this->compute_ito_velocities();
+  this->advect_particles_euler(a_dt);  
+  
+  // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
+  this->remap_mobile_particles();
+
+  // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
+  this->intersect_particles(a_dt);
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->remove_eb_particles();
+  }
+
+  // Do final deposition. This is mostly for computing the current density. 
+  this->deposit_mobile_particles();
+}
+
+// Deprecated
+void ito_plasma_godunov::advance_particles_split_pc(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advance_particles_split_pc");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_particles_split_pc" << endl;
+  }
+
+  // Set old positions and diffuse particles. 
+  this->set_old_positions();
+  this->diffuse_particles_euler(a_dt);
+  
+  // Do intersection test and remove EB particles. These particles are removed from the simulation. 
+  this->intersect_particles(a_dt);
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->remove_eb_particles();
+  }
+
+  // Remap and deposit diffusive particles
+  this->remap_diffusive_particles();
+  this->deposit_diffusive_particles();
+
+  // Explicit update of the electric field. Then recompute the advective velocities. 
+  this->setup_standard_poisson();
+  this->solve_poisson();
+
+  // PREDICTOR-CORRECTOR BEGINS HERE
+  this->set_old_positions();
+  this->copy_particles_to_scratch();
+
+  const int NPC = 10;
+  for (int ipc =0; ipc < NPC; ipc++){
+    // Recompute advective velocities. This is necessary because
+    // we want the mobility at E^k
+    this->compute_ito_velocities();
+    this->advect_particles_euler(a_dt);
+
+    // Remove particles that went through EB
+    this->intersect_particles(a_dt);
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      solver_it()->remove_eb_particles();
+    }
+
+    m_ito->remap();
+    m_ito->deposit_particles();
+
+    // Solve Poisson. 
+    this->solve_poisson();
+
+    // Put particles back. 
+    if(ipc < NPC - 1){
+      for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+	RefCountedPtr<ito_solver>& solver = solver_it();
+
+	const particle_container<ito_particle>& scratch         = solver->get_scratch_particles();
+	particle_container<ito_particle>& particles = solver->get_particles();
+
+	solver->clear(particles);
+	particles.add_particles(scratch);
+      }
+    }
+  }
 }

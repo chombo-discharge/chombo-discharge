@@ -45,10 +45,9 @@ namespace physics {
     protected:
 
       enum class which_algorithm {
-	euler, 
-	semi_implicit,
-	split_semi_implicit,
-	split_pc,
+	euler,
+	euler_maruyama,
+	midpoint,
       };
 
       enum class which_dt {
@@ -97,12 +96,12 @@ namespace physics {
       void diffuse_particles_physical(const Real a_dt);
       void advect_particles_euler(const Real a_dt);
 
-      // Specific routines for semi-implicit Euler
+      // Specific routines for semi-implicit formulations. 
       void compute_conductivity();
       void compute_face_conductivity();
       void swap_particle_positions();
       void setup_semi_implicit_poisson(const Real a_dt);
-      void advect_particles_si(const Real a_dt);
+      void advect_particles_euler_maruyama(const Real a_dt);
       void compute_regrid_conductivity();
       void compute_regrid_rho();
       void copy_conductivity_particles();
@@ -116,7 +115,10 @@ namespace physics {
 
       // Particle advancement routines. 
       void advance_particles_euler(const Real a_dt);
-      void advance_particles_si(const Real a_dt);
+      void advance_particles_euler_maruyama(const Real a_dt);
+      void advance_particles_midpoint(const Real a_dt);
+
+      // Deprecated routines
       void advance_particles_split_si(const Real a_dt);
       void advance_particles_split_pc(const Real a_dt);
     };

@@ -1,18 +1,18 @@
 # ==================================================================================================== 
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ==================================================================================================== 
-ito_plasma_godunov.verbosity      = -1            # Verbosity
-ito_plasma_godunov.min_dt         = 0.0           # Minimum dt
-ito_plasma_godunov.max_dt         = 1.0           # Maximum dt
-ito_plasma_godunov.particle_realm = primal        # Particle realm. Default is primal
-ito_plasma_godunov.load_balance   = true          # Load balance or not
-ito_plasma_godunov.max_cells_hop  = 1.0           # Maximum cells to move in one time step
-ito_plasma_godunov.which_dt       = advection     # 'advection', 'diffusion', or 'advection_diffusion'
-ito_plasma_godunov.ppc            = 64            # Superparticle number of cells
-ito_plasma_godunov.merge_interval = 5             # How often to make superparticles
-ito_plasma_godunov.relax_factor   = 0.5           # Factor in front of relaxation time
-ito_plasma_godunov.regrid_super   = false         # Make superparticles after regrid or not
-ito_plasma_godunov.algorithm      = semi_implicit # 'euler', 'semi_implicit', 'split_si', 'split_pc'.
-ito_plasma_godunov.diffusion      = super         # Which diffusion update? 'physical', 'super'
-ito_plasma_godunov.diffu_samples  = 64            # Maximum number of diffusion samples when using 'physical' diffusion
-ito_plasma_godunov.profile        = true          # Profile advance or not
+ito_plasma_godunov.verbosity      = -1             # Verbosity
+ito_plasma_godunov.min_dt         = 0.0            # Minimum dt
+ito_plasma_godunov.max_dt         = 1.0            # Maximum dt
+ito_plasma_godunov.particle_realm = primal         # Particle realm. Default is primal
+ito_plasma_godunov.load_balance   = true           # Load balance or not
+ito_plasma_godunov.max_cells_hop  = 1.0            # Maximum cells to move in one time step
+ito_plasma_godunov.which_dt       = advection      # 'advection', 'diffusion', or 'advection_diffusion'
+ito_plasma_godunov.ppc            = 64             # Superparticle number of cells
+ito_plasma_godunov.merge_interval = 5              # How often to make superparticles
+ito_plasma_godunov.relax_factor   = 0.5            # Factor in front of relaxation time
+ito_plasma_godunov.regrid_super   = false          # Make superparticles after regrid or not
+ito_plasma_godunov.algorithm      = euler_maruyama # 'euler_maruyama', or 'midpoint'
+ito_plasma_godunov.diffusion      = super          # Which diffusion update? 'physical', 'super'
+ito_plasma_godunov.diffu_samples  = 64             # Maximum number of diffusion samples when using 'physical' diffusion
+ito_plasma_godunov.profile        = true           # Profile advance or not
