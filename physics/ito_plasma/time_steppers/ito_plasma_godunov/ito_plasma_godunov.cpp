@@ -93,6 +93,8 @@ void ito_plasma_godunov::parse_options() {
   else{
     MayDay::Abort("ito_plasma_godunov::parse_options - unknown 'diffusion' requested");
   }
+
+  this->setup_runtime_storage();
 }
 
 void ito_plasma_godunov::allocate(){
@@ -153,6 +155,21 @@ void ito_plasma_godunov::allocate_internals(){
   m_energy_sources.resize(num_ito_species);
   for (int i = 0; i < m_energy_sources.size(); i++){
     m_amr->allocate(m_energy_sources[i],  m_particle_realm, m_phase, 1);
+  }
+}
+
+void ito_plasma_godunov::setup_runtime_storage(){
+    CH_TIME("ito_plasma_godunov::setup_runtime_storage");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setup_runtime_storage" << endl;
+  }
+
+  switch (m_algorithm){
+  case which_algorithm::midpoint:
+    ito_particle::set_num_runtime_vectors(1);
+    break;
+  default:
+    ito_particle::set_num_runtime_vectors(0);
   }
 }
 
@@ -550,22 +567,6 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   
   // Particle algorithms
   particle_time = -MPI_Wtime();
-#if 0
-  if(m_algorithm == which_algorithm::euler){
-    this->advance_particles_euler(a_dt);
-  }
-  else if(m_algorithm == which_algorithm::semi_implicit){
-    this->advance_particles_si(a_dt);
-    m_prevDt = a_dt;
-  }
-  else if(m_algorithm == which_algorithm::split_semi_implicit){
-    this->advance_particles_split_si(a_dt);
-    m_prevDt = a_dt;
-  }
-  else if(m_algorithm == which_algorithm::split_pc){
-    this->advance_particles_split_pc(a_dt);
-  }
-#else
   switch(m_algorithm){
   case which_algorithm::euler:
     this->advance_particles_euler(a_dt);
@@ -579,7 +580,6 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   default:
     MayDay::Abort("ito_plasma_godunov::advance - logic bust");
   }
-#endif
   particle_time += MPI_Wtime();
 
   // Compute current and relaxation time.
@@ -756,14 +756,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   this->deposit_mobile_or_diffusive_particles();
 }
 
-void ito_plasma_godunov::advance_particles_midpoint(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_midpoint");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_midpoint" << endl;
-  }
 
-  MayDay::Abort("ito_plasma_godunov::advance_particles_midpoint - not implemented!");
-}
 
 void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
   CH_TIME("ito_plasma_godunov::advect_particles_euler");
@@ -850,6 +843,8 @@ void ito_plasma_godunov::diffuse_particles_euler(const Real a_dt){
     MayDay::Abort("ito_plasma_godunov::diffuse_particles_euler - unknown algorithm for diffusion");
   }
 }
+
+
 
 void ito_plasma_godunov::diffuse_particles_super(const Real a_dt){
   CH_TIME("ito_plasma_godunov::diffuse_particles_super");
@@ -1245,6 +1240,300 @@ void ito_plasma_godunov::advance_particles_split_pc(const Real a_dt){
 
 	solver->clear(particles);
 	particles.add_particles(scratch);
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::advance_particles_midpoint(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advance_particles_midpoint");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_particles_midpoint" << endl;
+  }
+  // Set the old particle position. 
+  this->set_old_positions();
+
+  // Compute conductivity and setup poisson
+  this->compute_conductivity();
+  this->setup_semi_implicit_poisson(0.5*a_dt);
+
+  // X^(k+1/2) = X^k + sqrt(D^k*dt)*N
+  this->diffuse_particles_midpoint1(0.5*a_dt); // Only diffusive particles move
+
+  // Remap and deposit diffusive particles
+  this->remap_diffusive_particles(); 
+  this->deposit_diffusive_particles();
+
+  // Now compute the electric field => E^(k+1/2)
+  this->solve_poisson();
+
+  // We have field at k+1 but particles have been diffused. The ones that are diffusive AND mobile are put back to X^k positions
+  // and then we compute velocities with E^(k+1). 
+  this->swap_midpoint1();            // After this, oldPosition() holds X^\dagger, and position() holds X^k. 
+  this->remap_diffusive_particles(); // Only need to do this for the ones that were diffusive. This reverts p.position() to X^k, while p.oldPosition() is X^k+1/2
+
+  // Recompute velocities with the new electric field. Then advect the particles. 
+  this->set_ito_velocity_funcs();
+  m_ito->interpolate_velocities();
+  this->advect_particles_midpoint1(0.5*a_dt); // After this, X^(k+1/2) = p.position(), X^k = p.oldPosition(), sqrt(D*dt)*N = p.runtime_vector(0);
+
+  // =============== SECOND MIDPOINT STAGE ==================== //
+  this->copy_conductivity_particles();     // Copy particles used for conductivity computation
+  
+  this->compute_conductivity();            // Computes sigma = sigma(X^k+1/2)
+  this->setup_semi_implicit_poisson(a_dt); // Full time step this time. 
+
+  // Interpolate diffusion coefficients for all the particles
+  this->compute_ito_diffusion();                // Update D = D^(k+1/2)(X^(k+1/2))
+  this->diffuse_particles_midpoint2(0.5*a_dt);   // Diffuse over another step. Sets p.position() = X^k + sqrt(D^k*dt)*N1 + sqrt(D^k*dt)*N2, p.oldPosition() = 
+  this->remap_diffusive_particles();
+  this->deposit_diffusive_particles();
+
+  // Regrids require the particles used for computing the (semi-implicit) space charge
+  this->copy_rho_dagger_particles(); 
+
+  // Solve for E^(k+1)
+  this->solve_poisson();
+
+  // Do the complete second step. 
+  this->swap_midpoint2();                 // p.position() = X^(k+1/2). p.oldPosition() = X^k. p.runtime_vector(0) = sqrt(D^k*dt)*N^1 + sqrt(D^(k+1/2)*dt*N^2
+  this->compute_ito_velocities();         // Update V = v^(k+1)(X^(k+1/2))
+  this->advect_particles_midpoint2(a_dt); // p.position() = p.oldPosition() + dt*V^(k+1)(X^(k+1/2)) + sqrt(D^k*dt)*N^1 + sqrt(D^(k+1/2)*dt*N^2
+  
+  // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
+  this->remap_mobile_or_diffusive_particles();
+
+  // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
+  this->intersect_particles(a_dt);
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->remove_eb_particles();
+  }
+
+  // Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
+  this->deposit_mobile_or_diffusive_particles();
+}
+
+void ito_plasma_godunov::diffuse_particles_midpoint1(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::diffuse_particles_midpoint1");
+  if(m_verbosity > 5){
+    pout() << m_name + "::diffuse_particles_midpoint1" << endl;
+  }
+
+  
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    
+    if(solver->is_diffusive()){
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  // Diffusion hop.
+	  for (lit.rewind(); lit.ok(); ++lit){
+	    ito_particle& p    = particleList[lit];
+	    const Real factor  = sqrt(2.0*p.diffusion()*a_dt);
+
+	    // Do the hop, and storage the hop. 
+	    RealVect& hop = p.runtime_vector(0);
+	    hop = factor*solver->random_gaussian();
+
+	    p.position() += hop;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::diffuse_particles_midpoint2(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::diffuse_particles_midpoint2");
+  if(m_verbosity > 5){
+    pout() << m_name + "::diffuse_particles_midpoint2" << endl;
+  }
+
+  
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    
+    if(solver->is_diffusive()){
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  // Diffusion hop.
+	  for (lit.rewind(); lit.ok(); ++lit){
+	    ito_particle& p    = particleList[lit];
+
+	    // Store X^(k+1/2) on p.velocity() since that storage is not currently needed
+	    p.velocity() = p.position();
+
+	    // Increment the hop and move the friggin particle
+	    const Real factor  = sqrt(2.0*p.diffusion()*a_dt);
+	    RealVect& hop = p.runtime_vector(0);
+	    hop += factor*solver->random_gaussian();
+
+	    p.position() = p.oldPosition() + hop;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::advect_particles_midpoint1(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advect_particles_midpoint1");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advect_particles_midpoint1" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    if(solver->is_mobile()){
+      
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  // First step
+	  for (lit.rewind(); lit; ++lit){
+	    ito_particle& p = particleList[lit];
+
+	    // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
+	    const RealVect Xk  = p.position();
+	    const RealVect hop = p.runtime_vector(0);
+	    p.oldPosition()    = Xk;
+	    p.position()       = Xk + p.velocity()*a_dt + hop;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::advect_particles_midpoint2(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advect_particles_midpoint1");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advect_particles_midpoint1" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    if(solver->is_mobile()){
+      
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  // First step
+	  for (lit.rewind(); lit; ++lit){
+	    ito_particle& p = particleList[lit];
+
+	    // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
+	    const RealVect& Xk  = p.oldPosition();
+	    const RealVect& hop = p.runtime_vector(0);
+	    const RealVect& v   = p.velocity();
+	    p.position()        = Xk + v*a_dt + hop;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::swap_midpoint1(){
+  CH_TIME("ito_plasma_godunov::swap_midpoint1");
+  if(m_verbosity > 5){
+    pout() << m_name + "::swap_midpoint1" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+
+    // No need to do this if solver is only mobile because the diffusion step didn't change the position.
+    // Likewise, if the solver is only diffusive then advect_particles_si routine won't trigger so no need for that either. 
+    if(mobile && diffusive){ 
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  for (lit.rewind(); lit; ++lit){
+	    ito_particle& p = particleList[lit];
+
+	    // We have made a diffusion hop, but we need p.position() to be X^k and p.oldPosition() to be the jumped position. 
+	    const RealVect tmp = p.position();
+	    
+	    p.position()    = p.oldPosition();
+	    p.oldPosition() = tmp;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::swap_midpoint2(){
+  CH_TIME("ito_plasma_godunov::swap_midpoint1");
+  if(m_verbosity > 5){
+    pout() << m_name + "::swap_midpoint1" << endl;
+  }
+
+  // TLDR: When we enter here then p.velocity() = X^(k+1/2)
+  //                               p.oldPosition() = X^k
+  //                               p.position()    = X^k + sqrt(D*dt)*N1 + sqrt(D*dt)*N2
+  //       p.position() can be discarded, so we set p.position() to X^(k+1/2)
+
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+
+    // No need to do this if solver is only mobile because the diffusion step didn't change the position.
+    // Likewise, if the solver is only diffusive then advect_particles_si routine won't trigger so no need for that either. 
+    if(diffusive){ 
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  ListIterator<ito_particle> lit(particleList);
+
+	  for (lit.rewind(); lit; ++lit){
+	    ito_particle& p = particleList[lit];
+
+	    // We have made a diffusion hop, but we need p.position() to be X^k and p.oldPosition() to be the jumped position. 
+	    p.position() = p.velocity(); // = X^(k+1/2)
+	  }
+	}
       }
     }
   }

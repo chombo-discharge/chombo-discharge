@@ -85,7 +85,10 @@ namespace physics {
 
 
       int m_merge_interval; // How often to merge superparticles
-      int m_diffu_samples;  // How many times to sample diffusion when using "physical" diffusion. 
+      int m_diffu_samples;  // How many times to sample diffusion when using "physical" diffusion.
+
+      // Routine for setting up extra particle storage
+      void setup_runtime_storage();
 
       // Global routines
       void intersect_particles(const Real a_dt);
@@ -96,22 +99,37 @@ namespace physics {
       void diffuse_particles_physical(const Real a_dt);
       void advect_particles_euler(const Real a_dt);
 
-      // Specific routines for semi-implicit formulations. 
+      // Routines for semi-implicit Poisson solution
       void compute_conductivity();
       void compute_face_conductivity();
-      void swap_particle_positions();
       void setup_semi_implicit_poisson(const Real a_dt);
-      void advect_particles_euler_maruyama(const Real a_dt);
+
+      // Routines for standard Poisson
+      void setup_standard_poisson();
+
+      // Routines for semi-implicit regridding
       void compute_regrid_conductivity();
       void compute_regrid_rho();
       void copy_conductivity_particles();
       void copy_rho_dagger_particles();
 
+      // Specific routines for semi-implicit formulations. 
+      void swap_particle_positions();
+      void advect_particles_euler_maruyama(const Real a_dt);
+
+
+      // Specific routines for midpoint integration
+      void diffuse_particles_midpoint1(const Real a_dt);
+      void diffuse_particles_midpoint2(const Real a_dt);
+      void advect_particles_midpoint1(const Real a_dt);
+      void advect_particles_midpoint2(const Real a_dt);
+      void swap_midpoint1();
+      void swap_midpoint2();
+
       //
       void copy_particles_to_scratch();
 
-      // Standard poisson setup
-      void setup_standard_poisson();
+
 
       // Particle advancement routines. 
       void advance_particles_euler(const Real a_dt);
