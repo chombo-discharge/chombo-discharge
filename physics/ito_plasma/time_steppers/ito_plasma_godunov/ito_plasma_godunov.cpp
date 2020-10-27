@@ -1052,44 +1052,44 @@ void ito_plasma_godunov::advance_particles_midpoint(const Real a_dt){
   if(m_verbosity > 5){
     pout() << m_name + "::advance_particles_midpoint" << endl;
   }
+  
   // Set the old particle position. 
   this->set_old_positions();
 
+  // =============== FIRST MIDPOINT STAGE BEGIN ==================== //
   // Compute conductivity and setup poisson
   this->compute_conductivity();
   this->setup_semi_implicit_poisson(0.5*a_dt);
 
-  // X^(k+1/2) = X^k + sqrt(D^k*dt)*N
-  this->diffuse_particles_midpoint1(0.5*a_dt); // Only diffusive particles move
-
-  // Remap and deposit diffusive particles
+  // X^dagger = X^k + sqrt(D^k*dt)*N^1. Store on p.position(), then remap and deposit so we get the new space charge X^k + sqrt(D^k*dt)*N^1
+  this->diffuse_particles_midpoint1(0.5*a_dt); 
   this->remap_diffusive_particles(); 
   this->deposit_diffusive_particles();
 
   // Now compute the electric field => E^(k+1/2)
   this->solve_poisson();
 
-  // We have field at k+1 but particles have been diffused. The ones that are diffusive AND mobile are put back to X^k positions
-  // and then we compute velocities with E^(k+1). 
-  this->swap_midpoint1();            // After this, oldPosition() holds X^\dagger, and position() holds X^k. 
-  this->remap_diffusive_particles(); // Only need to do this for the ones that were diffusive. This reverts p.position() to X^k, while p.oldPosition() is X^k+1/2
+  // We have field at k+1/2 but particles have been diffused to X^k + sqrt(D^k*dt)*N^1. The ones that diffused need to be put back to X^k because that
+  // is where we evaluate the velocity V^(k+1/2) = v^(k+1/2)(X^k). Put p.position() = X^k and then remap
+  this->swap_midpoint1();            
+  this->remap_diffusive_particles(); 
 
-  // Recompute velocities with the new electric field. Then advect the particles. 
-  this->set_ito_velocity_funcs();
-  m_ito->interpolate_velocities();
+  // Recompute velocities with the new electric field. Then advect the particles X^(k+1/2) = X^k + v^(k+1/2)(X^k) + sqrt(D^k*dt)*N^1
+  this->compute_ito_velocities();
   this->advect_particles_midpoint1(0.5*a_dt); // After this, X^(k+1/2) = p.position(), X^k = p.oldPosition(), sqrt(D*dt)*N = p.runtime_vector(0);
+  // =============== FIRST MIDPOINT STAGE END ==================== //
 
-  // =============== SECOND MIDPOINT STAGE ==================== //
+  // =============== SECOND MIDPOINT STAGE BEGIN ==================== //
   this->copy_conductivity_particles();     // Copy particles used for conductivity computation
   
   this->compute_conductivity();            // Computes sigma = sigma(X^k+1/2)
   this->setup_semi_implicit_poisson(a_dt); // Full time step this time. 
 
-  // Interpolate diffusion coefficients for all the particles
+  // Interpolate diffusion coefficients for all the particles. This is because the second step needs sqrt(D^(k+1/2)(X^(k+1/2))*dt)*N^2
   this->compute_ito_diffusion();                // Update D = D^(k+1/2)(X^(k+1/2))
-  this->diffuse_particles_midpoint2(0.5*a_dt);   // Diffuse over another step. Sets p.position() = X^k + sqrt(D^k*dt)*N1 + sqrt(D^k*dt)*N2, p.oldPosition() = 
-  this->remap_diffusive_particles();
-  this->deposit_diffusive_particles();
+  this->diffuse_particles_midpoint2(0.5*a_dt);  // Diffuse over another step. Sets p.position() = X^k + sqrt(D^k*dt)*N1 + sqrt(D^k*dt)*N2, p.oldPosition() = X^k, and
+  this->remap_diffusive_particles();            // (weirdly) also p.velocity() = X^(k+1/2) 
+  this->deposit_diffusive_particles();          // Deposit all particles that were diffusive
 
   // Regrids require the particles used for computing the (semi-implicit) space charge
   this->copy_rho_dagger_particles(); 
@@ -1099,8 +1099,12 @@ void ito_plasma_godunov::advance_particles_midpoint(const Real a_dt){
 
   // Do the complete second step. 
   this->swap_midpoint2();                 // p.position() = X^(k+1/2). p.oldPosition() = X^k. p.runtime_vector(0) = sqrt(D^k*dt)*N^1 + sqrt(D^(k+1/2)*dt*N^2
-  this->compute_ito_velocities();         // Update V = v^(k+1)(X^(k+1/2))
-  this->advect_particles_midpoint2(a_dt); // p.position() = p.oldPosition() + dt*V^(k+1)(X^(k+1/2)) + sqrt(D^k*dt)*N^1 + sqrt(D^(k+1/2)*dt*N^2
+  this->remap_diffusive_particles();
+
+  // Recompute V^(k+1) = v^(k+1)(X^(k+1/2)). Then set X^(k+1) = X^k + dt*V^(k+1) + sqrt(D^k*dt)N^1 + sqrt(D^(k+1/2)*dt)N^2
+  this->compute_ito_velocities();         
+  this->advect_particles_midpoint2(a_dt); 
+  // =============== SECOND MIDPOINT STAGE END ==================== //
   
   // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
   this->remap_mobile_or_diffusive_particles();
@@ -1270,12 +1274,9 @@ void ito_plasma_godunov::swap_midpoint1(){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
-    const bool mobile    = solver->is_mobile();
     const bool diffusive = solver->is_diffusive();
 
-    // No need to do this if solver is only mobile because the diffusion step didn't change the position.
-    // Likewise, if the solver is only diffusive then advect_particles_si routine won't trigger so no need for that either. 
-    if(mobile && diffusive){ 
+    if(diffusive){ 
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
 	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
@@ -1287,12 +1288,7 @@ void ito_plasma_godunov::swap_midpoint1(){
 
 	  for (lit.rewind(); lit; ++lit){
 	    ito_particle& p = particleList[lit];
-
-	    // We have made a diffusion hop, but we need p.position() to be X^k and p.oldPosition() to be the jumped position. 
-	    const RealVect tmp = p.position();
-	    
-	    p.position()    = p.oldPosition();
-	    p.oldPosition() = tmp;
+	    p.position() = p.oldPosition();
 	  }
 	}
       }
