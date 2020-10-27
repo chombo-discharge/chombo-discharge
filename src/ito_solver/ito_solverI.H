@@ -68,6 +68,21 @@ void ito_solver::deposit_particles(EBAMRCellData&               a_state,
   // Average down and interpolate
   m_amr->average_down(a_state, m_realm, m_phase);
   m_amr->interp_ghost(a_state, m_realm, m_phase);
+
+#if 0 // Do a dummy conservation check
+
+  const Real num_particles = a_particles.get_weight_valid_global();
+
+  Real mass = 0.0;
+  const int base = 0;
+  const Real dx = m_amr->get_dx()[base];
+  data_ops::kappa_sum(mass, *a_state[base]);
+  mass *= pow(dx, SpaceDim);
+
+  if(procID() == 0){
+    std::cout << "particles = " << num_particles << "\t int(n*dV) = " << mass << std::endl;
+  }
+#endif
 }
 
 template <class T>

@@ -705,6 +705,39 @@ size_t particle_container<P>::get_num_halo_global() const {
 }
 
 template <class P>
+Real particle_container<P>::get_weight_valid_local() const {
+
+  Real weight = 0.0;
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
+      const List<P>& particles = (*m_particles[lvl])[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+	weight += lit().mass();
+      }
+    }
+  }
+  
+  return weight;
+}
+
+template <class P>
+Real particle_container<P>::get_weight_valid_global() const{
+
+  Real weight = this->get_weight_valid_local();
+
+#ifdef CH_MPI
+  Real tmp = weight;
+  int result = MPI_Allreduce(&tmp, &weight, 1, MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("particle_Container<P>::get_weight_valid_global - communication error!");
+  }
+#endif
+
+  return weight;
+}
+
+template <class P>
 void particle_container<P>::define_halo_masks(){
   
   const int ncomp = 1;

@@ -1010,8 +1010,6 @@ protected:
   */
   inline Real sign(const Real& a) const;
 
-
-
   /*!
     @brief Restart particles
   */

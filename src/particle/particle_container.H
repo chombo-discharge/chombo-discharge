@@ -296,6 +296,16 @@ public:
   */
   size_t get_num_halo_global() const;
 
+  /*!
+    @brief Get the total weight of all particles. Local version. 
+  */
+  Real get_weight_valid_local() const;
+
+  /*!
+    @brief Get the total weight of all particles. Global version
+  */
+  Real get_weight_valid_global() const;
+
 protected:
 
   /*!
