@@ -385,7 +385,6 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
 #endif
 }
 
-
 void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_level){
   CH_TIME("ito_plasma_godunov::pre_regrid");
   if(m_verbosity > 5){
