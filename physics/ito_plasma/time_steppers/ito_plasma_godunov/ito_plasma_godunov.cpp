@@ -1077,6 +1077,7 @@ void ito_plasma_godunov::advance_particles_midpoint(const Real a_dt){
   // Recompute velocities with the new electric field. Then advect the particles X^(k+1/2) = X^k + v^(k+1/2)(X^k) + sqrt(D^k*dt)*N^1
   this->compute_ito_velocities();
   this->advect_particles_midpoint1(0.5*a_dt); // After this, X^(k+1/2) = p.position(), X^k = p.oldPosition(), sqrt(D*dt)*N = p.runtime_vector(0);
+  this->remap_mobile_or_diffusive_particles();
   // =============== FIRST MIDPOINT STAGE END ==================== //
 
   // =============== SECOND MIDPOINT STAGE BEGIN ==================== //
@@ -1103,11 +1104,10 @@ void ito_plasma_godunov::advance_particles_midpoint(const Real a_dt){
 
   // Recompute V^(k+1) = v^(k+1)(X^(k+1/2)). Then set X^(k+1) = X^k + dt*V^(k+1) + sqrt(D^k*dt)N^1 + sqrt(D^(k+1/2)*dt)N^2
   this->compute_ito_velocities();         
-  this->advect_particles_midpoint2(a_dt); 
-  // =============== SECOND MIDPOINT STAGE END ==================== //
-  
-  // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
+  this->advect_particles_midpoint2(a_dt);
   this->remap_mobile_or_diffusive_particles();
+  // =============== SECOND MIDPOINT STAGE END ==================== //
+
 
   // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   this->intersect_particles(a_dt);
