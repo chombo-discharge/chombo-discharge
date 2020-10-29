@@ -620,6 +620,9 @@ void ito_plasma_godunov::remap_godunov_particles(Vector<particle_container<godun
     case which_particles::charged_and_mobile_or_diffusive:
       if(charged && (mobile || diffusive)) a_particles[idx]->remap();
       break;
+    case which_particles::stationary:
+      if(!mobile && !diffusive) a_particles[idx]->remap();
+      break;
     default:
       MayDay::Abort("ito_plasma_godunov::remap_godunov_particles - logic bust");
     }
@@ -663,6 +666,9 @@ void ito_plasma_godunov::deposit_godunov_particles(const Vector<particle_contain
       break;
     case which_particles::charged_and_mobile_or_diffusive:
       if(charged && (mobile || diffusive)) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      break;
+    case which_particles::stationary:
+      if(!mobile && !diffusive) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
       break;
     default:
       MayDay::Abort("ito_plasma_godunov::deposit_godunov_particles - logic bust");

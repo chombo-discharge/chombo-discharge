@@ -19,6 +19,18 @@
 namespace physics {
   namespace ito_plasma {
 
+    // Differentiation between particles. 
+    enum class which_particles {
+      all,
+      all_mobile,
+      all_diffusive,
+      charged_mobile,
+      charged_diffusive,
+      all_mobile_or_diffusive,
+      charged_and_mobile_or_diffusive,
+      stationary,
+    };
+
     class ito_plasma_stepper : public time_stepper {
     public:
 
@@ -75,6 +87,9 @@ namespace physics {
 			const int                        a_finest_level) override;
 
 
+
+
+
       // Internal routines
       void set_verbosity(const int a_verbosity);
 
@@ -127,7 +142,7 @@ namespace physics {
       void deposit_stationary_particles();
 
       // Remap routines
-      void remap_particles();
+      void remap_particles(const which_particles a_which_particles);
       void remap_mobile_particles();
       void remap_diffusive_particles();
       void remap_mobile_or_diffusive_particles();
@@ -242,6 +257,8 @@ namespace physics {
       void compute_EdotJ_source();
 
     protected:
+
+
 
       std::string m_fluid_realm;     // Realm for Poisson and sigma solver. Defaults to realm::primal
       std::string m_particle_realm;  // Realm for particles. Defaults to realm::primal

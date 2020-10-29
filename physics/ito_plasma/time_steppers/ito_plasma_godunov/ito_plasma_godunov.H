@@ -56,18 +56,6 @@ namespace physics {
 	advection_diffusion
       };
 
-      // How to deposit particles. 
-      enum class which_particles {
-	all,
-	all_mobile,
-	all_diffusive,
-	charged_mobile,
-	charged_diffusive,
-	all_mobile_or_diffusive,
-	charged_and_mobile_or_diffusive
-      };
-
-
       // These are things that are used to compute the conductivity. 
       EBAMRCellData m_scratch1;
       EBAMRCellData m_scratch2;
