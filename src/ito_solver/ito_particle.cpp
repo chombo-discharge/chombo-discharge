@@ -244,7 +244,7 @@ void ito_particle::linearOut(void* buf) const{
   *buffer++ = m_diffusion;
   *buffer++ = m_mass;
   *buffer++ = m_mobility;
-  *buffer++ = m_energy;
+
 
   // Go through run-time memory
   for (int i = 0; i < s_num_runtime_scalars; i++){
@@ -259,6 +259,8 @@ void ito_particle::linearOut(void* buf) const{
 	   *buffer++ = m_runtimeVectors[i][4];,
 	   *buffer++ = m_runtimeVectors[i][5];);
   }
+
+  *buffer = m_energy;
 }
 
 void ito_particle::linearIn(void* buf){
@@ -287,13 +289,11 @@ void ito_particle::linearIn(void* buf){
   m_diffusion = *buffer++;
   m_mass      = *buffer++;
   m_mobility  = *buffer++;
-  m_energy    = *buffer++;
 
   // Go through run-time memory
   for (int i = 0; i < s_num_runtime_scalars; i++){
     m_runtimeScalars[i] = *buffer++;
   }
-
   for (int i = 0; i < s_num_runtime_vectors; i++){
     D_TERM6( m_runtimeVectors[i][0] = *buffer++;,
 	     m_runtimeVectors[i][1] = *buffer++;,
@@ -302,6 +302,8 @@ void ito_particle::linearIn(void* buf){
 	     m_runtimeVectors[i][4] = *buffer++;,
 	     m_runtimeVectors[i][5] = *buffer++;);
   }
+
+  m_energy    = *buffer;
 }
 
 std::ostream & operator<<(std::ostream& ostr, const ito_particle& p){
