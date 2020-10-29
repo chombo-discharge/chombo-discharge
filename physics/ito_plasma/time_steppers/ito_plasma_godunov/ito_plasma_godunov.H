@@ -56,6 +56,17 @@ namespace physics {
 	advection_diffusion
       };
 
+      // How to deposit particles. 
+      enum class which_particles {
+	all,
+	all_mobile,
+	all_diffusive,
+	charged_mobile,
+	charged_diffusive,
+	all_mobile_or_diffusive,
+	charged_and_mobile_or_diffusive
+      };
+
 
       // These are things that are used to compute the conductivity. 
       EBAMRCellData m_scratch1;
@@ -90,6 +101,9 @@ namespace physics {
       void rewind_particles();
       void rewind_diffusive_particles();
       void intersect_particles(const Real a_dt);
+      void remap_godunov_particles(Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
+      void deposit_godunov_particles(const Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
+
 
       // Routines for semi-implicit Poisson solution
       void compute_conductivity();
@@ -98,6 +112,9 @@ namespace physics {
 
       // Routines for standard Poisson
       void setup_standard_poisson();
+
+      // Deposition functions for scratch particles
+
 
       // Routines for semi-implicit regridding
       void copy_conductivity_particles();

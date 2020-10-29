@@ -582,6 +582,94 @@ void ito_plasma_godunov::intersect_particles(const Real a_dt){
   }
 }
 
+void ito_plasma_godunov::remap_godunov_particles(Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which_particles){
+  CH_TIME("ito_plasma_godunov::remap_godunov_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::remap_godunov_particles" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>&   solver = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+    const bool charged   = species->get_charge() != 0;
+
+    switch(a_which_particles) {
+    case which_particles::all:
+      a_particles[idx]->remap();
+      break;
+    case which_particles::all_mobile:
+      if(mobile) a_particles[idx]->remap();
+      break;
+    case which_particles::all_diffusive:
+      if(diffusive) a_particles[idx]->remap();
+      break;
+    case which_particles::charged_mobile:
+      if(charged && mobile) a_particles[idx]->remap();
+      break;
+    case which_particles::charged_diffusive:
+      if(charged && diffusive) a_particles[idx]->remap();
+      break;
+    case which_particles::all_mobile_or_diffusive:
+      if(mobile || diffusive) a_particles[idx]->remap();
+      break;
+    case which_particles::charged_and_mobile_or_diffusive:
+      if(charged && (mobile || diffusive)) a_particles[idx]->remap();
+      break;
+    default:
+      MayDay::Abort("ito_plasma_godunov::remap_godunov_particles - logic bust");
+    }
+  }
+}
+
+void ito_plasma_godunov::deposit_godunov_particles(const Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which_particles){
+  CH_TIME("ito_plasma_godunov::deposit_godunov_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_godunov_particles" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>&   solver = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+    const bool charged   = species->get_charge() != 0;
+
+    switch(a_which_particles) {
+    case which_particles::all:
+      solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      break;
+    case which_particles::all_mobile:
+      if(mobile) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      break;
+    case which_particles::all_diffusive:
+      if(diffusive) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      break;
+    case which_particles::charged_mobile:
+      if(charged && mobile) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      break;
+    case which_particles::charged_diffusive:
+      if(charged && diffusive) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      break;
+    case which_particles::all_mobile_or_diffusive:
+      if(mobile || diffusive) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      break;
+    case which_particles::charged_and_mobile_or_diffusive:
+      if(charged && (mobile || diffusive)) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      break;
+    default:
+      MayDay::Abort("ito_plasma_godunov::deposit_godunov_particles - logic bust");
+    }
+  }
+}
+
 void ito_plasma_godunov::compute_conductivity(){
   CH_TIME("ito_plasma_godunov::compute_conductivity");
   if(m_verbosity > 5){
