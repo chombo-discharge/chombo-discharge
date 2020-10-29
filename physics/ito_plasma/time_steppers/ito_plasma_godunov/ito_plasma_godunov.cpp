@@ -505,60 +505,6 @@ void ito_plasma_godunov::set_old_positions(){
   }
 }
 
-void ito_plasma_godunov::rewind_particles(){
-  CH_TIME("ito_plasma_godunov::rewind_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::rewind_particles" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-    
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-      ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
-
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-	List<ito_particle>& particleList = particles[dit()].listItems();
-
-	for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
-	  ito_particle& p = particleList[lit];
-	  p.position() = p.oldPosition();
-	}
-      }
-    }
-  }
-}
-
-void ito_plasma_godunov::rewind_diffusive_particles(){
-  CH_TIME("ito_plasma_godunov::rewind_diffusive_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::rewind_diffusive_particles" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-
-    if(solver->is_diffusive()){
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
-
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  // Diffusion hop.
-	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
-	    ito_particle& p = particleList[lit];
-	    p.position() = p.oldPosition();
-	  }
-	}
-      }
-    }
-  }
-}
-
 void ito_plasma_godunov::intersect_particles(const Real a_dt){
   CH_TIME("ito_plasma_godunov::intersect_particles");
   if(m_verbosity > 5){

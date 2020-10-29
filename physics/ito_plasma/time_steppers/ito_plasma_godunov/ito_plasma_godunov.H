@@ -86,8 +86,6 @@ namespace physics {
 
       // Global routines
       void set_old_positions();
-      void rewind_particles();
-      void rewind_diffusive_particles();
       void intersect_particles(const Real a_dt);
       void remap_godunov_particles(Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
       void deposit_godunov_particles(const Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
