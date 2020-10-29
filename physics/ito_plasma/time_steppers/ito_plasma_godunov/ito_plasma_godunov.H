@@ -103,7 +103,7 @@ namespace physics {
 
       // Routines for semi-implicit regridding
       void copy_conductivity_particles(Vector<particle_container<godunov_particle>* >& a_conductivity_particles);
-      void copy_rho_dagger_particles();
+      void copy_rho_dagger_particles(Vector<particle_container<godunov_particle>* >& a_rho_dagger_particles);
       void compute_regrid_conductivity();
       void compute_regrid_rho();
 

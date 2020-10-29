@@ -836,7 +836,7 @@ void ito_plasma_godunov::copy_conductivity_particles(Vector<particle_container<g
   }
 }
 
-void ito_plasma_godunov::copy_rho_dagger_particles(){
+void ito_plasma_godunov::copy_rho_dagger_particles(Vector<particle_container<godunov_particle>* >& a_rho_dagger_particles){
   CH_TIME("ito_plasma_godunov::copy_rho_dagger_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::copy_rho_dagger_particles" << endl;
@@ -854,7 +854,7 @@ void ito_plasma_godunov::copy_rho_dagger_particles(){
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const List<ito_particle>& ito_parts = solver->get_particles()[lvl][dit()].listItems();
-	List<godunov_particle>& gdnv_parts  = (*m_rho_dagger_particles[idx])[lvl][dit()].listItems();
+	List<godunov_particle>& gdnv_parts  = (*a_rho_dagger_particles[idx])[lvl][dit()].listItems();
 
 	gdnv_parts.clear();
 
