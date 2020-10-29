@@ -912,9 +912,8 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   this->diffuse_particles_euler_maruyama(a_dt);
 
   // Remap and deposit, only need to do this for diffusive solvers. 
-  this->remap_diffusive_particles(); 
-  //  m_ito->deposit_particles();
-  this->deposit_diffusive_particles();
+  this->remap_particles(which_particles::all_diffusive); 
+  this->deposit_particles(which_particles::all_diffusive);
 
 
   // Need to copy the current particles because they will be used for the space charge during regrids. 
@@ -926,7 +925,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   // We have field at k+1 but particles have been diffused. The ones that are diffusive AND mobile are put back to X^k positions
   // and then we compute velocities with E^(k+1). 
   this->swap_euler_maruyama();       // After this, oldPosition() holds X^\dagger, and position() holds X^k. 
-  this->remap_diffusive_particles(); // Only need to do this for the ones that were diffusive
+  this->remap_particles(which_particles::all_diffusive); // Only need to do this for the ones that were diffusive
 
   // Recompute velocities with the new electric field
 #if 0 // original code
@@ -938,7 +937,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   this->advect_particles_euler_maruyama(a_dt);  
   
   // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
-  this->remap_mobile_or_diffusive_particles();
+  this->remap_particles(which_particles::all_mobile_or_diffusive);
 
   // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   this->intersect_particles(a_dt);
@@ -947,7 +946,8 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   }
 
   // Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
-  this->deposit_mobile_or_diffusive_particles();
+  this->deposit_particles(which_particles::all_mobile_or_diffusive);
+  //  this->deposit_mobile_or_diffusive_particles();
 }
 
 void ito_plasma_godunov::advect_particles_euler_maruyama(const Real a_dt){
@@ -992,7 +992,7 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(const Real a_dt){
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
+    RefCountedPtr<ito_solver>& solver   = solver_it();
     
     if(solver->is_diffusive()){
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){

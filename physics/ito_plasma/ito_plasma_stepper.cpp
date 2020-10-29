@@ -944,77 +944,6 @@ bool ito_plasma_stepper::solve_poisson(MFAMRCellData&                a_potential
   return converged;
 }
 
-void ito_plasma_stepper::deposit_particles(){
-  CH_TIME("ito_plasma_stepper::deposit_particles");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::deposit_particles" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->deposit_particles();
-  }
-}
-
-void ito_plasma_stepper::deposit_mobile_particles(){
-  CH_TIME("ito_plasma_stepper::deposit_mobile_particles");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::deposit_mobile_particles" << endl;
-  }
-  
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    if(solver_it()->is_mobile()){
-      solver_it()->deposit_particles();
-    }
-  }
-}
-
-void ito_plasma_stepper::deposit_diffusive_particles(){
-  CH_TIME("ito_plasma_stepper::deposit_diffusive_particles");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::deposit_diffusive_particles" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    if(solver_it()->is_diffusive()){
-      solver_it()->deposit_particles();
-    }
-  }
-}
-
-void ito_plasma_stepper::deposit_mobile_or_diffusive_particles(){
-  CH_TIME("ito_plasma_stepper::deposit_mobile_or_diffusive_particles");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::deposit_mobile_or_diffusive_particles" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
-    
-    if(mobile || diffusive){
-      solver->deposit_particles();
-    }
-  }
-}
-
-void ito_plasma_stepper::deposit_stationary_particles(){
-  CH_TIME("ito_plasma_stepper::deposit_stationary_particles");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::deposit_stationary_particles" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
-    
-    if(!mobile && !diffusive){
-      solver->deposit_particles();
-    }
-  }
-}
-
 void ito_plasma_stepper::remap_particles(const which_particles a_which_particles){
   CH_TIME("ito_plasma_stepper::remap_particles(which_particles)");
   if(m_verbosity > 5){
@@ -1057,53 +986,54 @@ void ito_plasma_stepper::remap_particles(const which_particles a_which_particles
       if(!mobile && !diffusive) solver->remap();
       break;
     default:
-      MayDay::Abort("ito_plasma_stepper::remap_particles - logic bust");
-    }
-
-  }
-}
-
-void ito_plasma_stepper::remap_mobile_particles(){
-  CH_TIME("ito_plasma_stepper::remap_mobile_particles");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::remap_mobile_particles" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-    if(solver->is_mobile()){
-      solver->remap();
+      MayDay::Abort("ito_plasma_stepper::remap_particles(which particles) - logic bust");
     }
   }
 }
 
-void ito_plasma_stepper::remap_diffusive_particles(){
-  CH_TIME("ito_plasma_stepper::remap_diffusive_particles");
+void ito_plasma_stepper::deposit_particles(const which_particles a_which_particles){
+  CH_TIME("ito_plasma_stepper::deposit_particles(which_particles)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::remap_diffusive_particles" << endl;
+    pout() << "ito_plasma_stepper::deposit_particles(which_particles)" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-    if(solver->is_diffusive()){
-      solver->remap();
-    }
-  }
-}
+    RefCountedPtr<ito_solver>&   solver = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
 
-void ito_plasma_stepper::remap_mobile_or_diffusive_particles(){
-  CH_TIME("ito_plasma_stepper::remap_mobile_or_diffusive_particles");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::remap_mobile_or_diffusive_particles" << endl;
-  }
+    const int idx = solver_it.get_solver();
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
     const bool mobile    = solver->is_mobile();
     const bool diffusive = solver->is_diffusive();
-    
-    if(mobile || diffusive){
-      solver->remap();
+    const bool charged   = species->get_charge() != 0;
+
+    switch(a_which_particles) {
+    case which_particles::all:
+      solver->deposit_particles();
+      break;
+    case which_particles::all_mobile:
+      if(mobile) solver->deposit_particles();
+      break;
+    case which_particles::all_diffusive:
+      if(diffusive) solver->deposit_particles();
+      break;
+    case which_particles::charged_mobile:
+      if(charged && mobile) solver->deposit_particles();
+      break;
+    case which_particles::charged_diffusive:
+      if(charged && diffusive) solver->deposit_particles();
+      break;
+    case which_particles::all_mobile_or_diffusive:
+      if(mobile || diffusive) solver->deposit_particles();
+      break;
+    case which_particles::charged_and_mobile_or_diffusive:
+      if(charged && (mobile || diffusive)) solver->deposit_particles();
+      break;
+    case which_particles::stationary:
+      if(!mobile && !diffusive) solver->deposit_particles();
+      break;
+    default:
+      MayDay::Abort("ito_plasma_stepper::deposit_particles(which_particles) - logic bust");
     }
   }
 }

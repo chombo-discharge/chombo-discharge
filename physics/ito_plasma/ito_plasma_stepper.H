@@ -134,18 +134,9 @@ namespace physics {
 			 const Vector<EBAMRCellData* >& a_densities,
 			 const EBAMRIVData&             a_sigma);
 
-      // Deposition routines
-      void deposit_particles();
-      void deposit_mobile_particles();
-      void deposit_diffusive_particles();
-      void deposit_mobile_or_diffusive_particles();
-      void deposit_stationary_particles();
-
-      // Remap routines
+      // Remap and deposition routines for solver subsets. 
+      void deposit_particles(const which_particles a_which_particles);
       void remap_particles(const which_particles a_which_particles);
-      void remap_mobile_particles();
-      void remap_diffusive_particles();
-      void remap_mobile_or_diffusive_particles();
 
       // This sets the velocity function for each species. This is sgn(charge)*E
       void set_ito_velocity_funcs();
