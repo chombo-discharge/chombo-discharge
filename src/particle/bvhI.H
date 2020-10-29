@@ -15,7 +15,7 @@
 using namespace std::chrono;
 
 #define BVH_RESERVE_SIZE 2048
-#define BVH_DEBUG 1
+#define BVH_DEBUG 0
 
 template <class T>
 bvh_node<T>::bvh_node(){

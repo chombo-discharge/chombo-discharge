@@ -204,6 +204,8 @@ void ito_plasma_stepper::post_checkpoint_setup(){
 
   //this->solve_poisson();
   this->allocate_internals();
+
+  m_ito->remap();
   
   this->post_checkpoint_poisson();
   
