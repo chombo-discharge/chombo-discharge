@@ -105,9 +105,9 @@ ito_solver.pvr_buffer          = 0             # Buffer for PVR.
 ito_solver.halo_buffer         = 1             # Halo buffer. 
 ito_solver.plt_vars            = phi vel dco mobility   # Currently available are 'phi', 'vel', and 'dco'
 ito_solver.bisect_step         = 1.E-3         # Bisection step length for intersection tests
-ito_solver.seed                = 0            # Seed for RNG
-ito_solver.kd_direction        = 0            # Kd-tree direction, -1 => random, 0,1,2 => first plane split in this dir
-ito_solver.max_diffusion_hop   = 2.0           # Maximum diffusion hop length (in units of dx)
+ito_solver.seed                = 0             # Seed for RNG
+ito_solver.kd_direction        = -1            # Kd-tree direction, -1 => random, 0,1,2 => first plane split in this dir
+ito_solver.max_diffusion_hop   = 99.0          # Maximum diffusion hop length (in units of dx)
 ito_solver.normal_max          = 100.0         # Maximum value (absolute) that can be drawn from the exponential distribution.
 ito_solver.redistribute        = true          # Turn on/off redistribution. 
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
@@ -206,14 +206,14 @@ ito_plasma_godunov.particle_realm = primal        # Particle realm. Default is p
 ito_plasma_godunov.load_balance   = false         # Load balance or not
 ito_plasma_godunov.max_cells_hop  = 1.0           # Maximum cells to move in one time step
 ito_plasma_godunov.which_dt       = advection     # 'advection', 'diffusion', 'advection_diffusion'
-ito_plasma_godunov.ppc            = 8             # Superparticle number of cells
+ito_plasma_godunov.ppc            = 32            # Superparticle number of cells
 ito_plasma_godunov.merge_interval = 1             # How often to make superparticles
 ito_plasma_godunov.relax_factor   = 9999.5        # Factor in front of relaxation time	
 ito_plasma_godunov.regrid_super   = true          # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = euler_maruyama      # 'euler', 'euler_maruyama', 'midpoint'
 ito_plasma_godunov.diffusion      = super         # Which diffusion update? 'physical', 'super'
 ito_plasma_godunov.diffu_samples  = 64            # Maximum number of diffusion samples when using 'physical' diffusion
-ito_plasma_godunov.profile        = false         # Profile advance or not
+ito_plasma_godunov.profile        = true          # Profile advance or not
 
 # ====================================================================================================
 # ITO_PLASMA_AIR3 CLASS OPTIONS
@@ -233,7 +233,7 @@ ito_plasma_air3.mobile_ions    = false          # By default, stationary ions.
 ito_plasma_air3.ion_mobility   = 2E-4           # Turn on/off ion mobility
 
 # Reaction stuff
-ito_plasma_air3.react_ppc      = 8              # Maximum number of particles to produce in reaction step	
+ito_plasma_air3.react_ppc      = 32              # Maximum number of particles to produce in reaction step	
 ito_plasma_air3.tau_switch     = -1             # Switch from SSA to tau when reaching this many particles
 ito_plasma_air3.poisson_switch = 100            # When to approximate Poisson by normal distribution
 ito_plasma_air3.Ncrit          = -1             # How many firings away from a negative particle number?
