@@ -92,29 +92,24 @@ namespace physics {
       void remap_godunov_particles(Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
       void deposit_godunov_particles(const Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
 
-
       // Routines for semi-implicit Poisson solution
-      void compute_conductivity();
+      void compute_conductivity(const Vector<particle_container<godunov_particle>* >& a_particles);
       void compute_face_conductivity();
       void setup_semi_implicit_poisson(const Real a_dt);
 
       // Routines for standard Poisson
       void setup_standard_poisson();
 
-      // Deposition functions for scratch particles
-
-
       // Routines for semi-implicit regridding
-      void copy_conductivity_particles();
+      void copy_conductivity_particles(Vector<particle_container<godunov_particle>* >& a_conductivity_particles);
       void copy_rho_dagger_particles();
       void compute_regrid_conductivity();
       void compute_regrid_rho();
 
       // Specific routines for Euler-Maruyama
       void advance_particles_euler_maruyama(const Real a_dt);
-      void advect_particles_euler_maruyama(const Real a_dt);
-      void diffuse_particles_euler_maruyama(const Real a_dt);
-      void swap_euler_maruyama();
+      void diffuse_particles_euler_maruyama(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void step_euler_maruyama(const Real a_dt);
 
       // Specific routines for trapezoidal integration
       void advance_particles_trapezoidal(const Real a_dt);

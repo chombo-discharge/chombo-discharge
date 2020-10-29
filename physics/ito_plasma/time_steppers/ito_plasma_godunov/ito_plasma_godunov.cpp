@@ -413,7 +413,7 @@ void ito_plasma_godunov::setup_runtime_storage(){
 
   switch (m_algorithm){
   case which_algorithm::euler_maruyama:
-    ito_particle::set_num_runtime_vectors(0);
+    ito_particle::set_num_runtime_vectors(1);
     break;
   case which_algorithm::trapezoidal:
     ito_particle::set_num_runtime_vectors(1);
@@ -676,7 +676,7 @@ void ito_plasma_godunov::deposit_godunov_particles(const Vector<particle_contain
   }
 }
 
-void ito_plasma_godunov::compute_conductivity(){
+void ito_plasma_godunov::compute_conductivity(const Vector<particle_container<godunov_particle>* >& a_particles){
   CH_TIME("ito_plasma_godunov::compute_conductivity");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_conductivity" << endl;
@@ -767,7 +767,7 @@ void ito_plasma_godunov::setup_standard_poisson(){
   poisson->set_needs_setup(false);
 }
 
-void ito_plasma_godunov::copy_conductivity_particles(){
+void ito_plasma_godunov::copy_conductivity_particles(Vector<particle_container<godunov_particle>* >& a_conductivity_particles){
   CH_TIME("ito_plasma_godunov::copy_conductivity_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::copy_conductivity_particles" << endl;
@@ -785,7 +785,7 @@ void ito_plasma_godunov::copy_conductivity_particles(){
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const List<ito_particle>& ito_parts = solver->get_particles()[lvl][dit()].listItems();
-	List<godunov_particle>& gdnv_parts  = (*m_conductivity_particles[idx])[lvl][dit()].listItems();
+	List<godunov_particle>& gdnv_parts  = (*a_conductivity_particles[idx])[lvl][dit()].listItems();
 
 	gdnv_parts.clear();
 
@@ -898,69 +898,107 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
     pout() << m_name + "::advance_particles_euler_maruyama" << endl;
   }
 
-  // Set the old particle position. 
-  this->set_old_positions();
+  // 1. Store X^k positions. 
+  this->set_old_positions();   
 
-  // Need to copy the current particles because they will be used for computing the conductivity during regrids
-  this->copy_conductivity_particles();
+  // 2. Diffuse the particles. This copies onto m_rho_dagger_particles and stores the hop on the full particles. 
+  this->diffuse_particles_euler_maruyama(m_rho_dagger_particles, a_dt);
+  this->remap_godunov_particles(m_rho_dagger_particles,   which_particles::all_diffusive); 
+  this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all_diffusive);
 
-  // Compute conductivity and setup poisson
-  this->compute_conductivity();
+  // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch. 
+  this->copy_conductivity_particles(m_conductivity_particles);
+  this->compute_conductivity(m_conductivity_particles);              
   this->setup_semi_implicit_poisson(a_dt);
-
-  // Diffuse the particles now
-  this->diffuse_particles_euler_maruyama(a_dt);
-
-  // Remap and deposit, only need to do this for diffusive solvers. 
-  this->remap_particles(which_particles::all_diffusive); 
-  this->deposit_particles(which_particles::all_diffusive);
-
-
-  // Need to copy the current particles because they will be used for the space charge during regrids. 
-  this->copy_rho_dagger_particles();
-
-  // Now compute the electric field
   this->solve_poisson();
 
-  // We have field at k+1 but particles have been diffused. The ones that are diffusive AND mobile are put back to X^k positions
-  // and then we compute velocities with E^(k+1). 
-  this->swap_euler_maruyama();       // After this, oldPosition() holds X^\dagger, and position() holds X^k. 
-  this->remap_particles(which_particles::all_diffusive); // Only need to do this for the ones that were diffusive
-
-  // Recompute velocities with the new electric field
+  // 4. Recompute velocities with the new electric field, then do the actual semi-implicit Euler-Maruyama update. 
 #if 0 // original code
   this->compute_ito_velocities();
 #else // This is the version that leaves the mobility intact - which is what the algorithm says. 
   this->set_ito_velocity_funcs();
   m_ito->interpolate_velocities();
 #endif
-  this->advect_particles_euler_maruyama(a_dt);  
-  
-  // Remap, redeposit, store invalid particles, and intersect particles. Deposition is for relaxation time computation.
+  this->step_euler_maruyama(a_dt);  
   this->remap_particles(which_particles::all_mobile_or_diffusive);
 
-  // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
+  // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   this->intersect_particles(a_dt);
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->remove_eb_particles();
   }
 
-  // Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
+  // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
   this->deposit_particles(which_particles::all_mobile_or_diffusive);
-  //  this->deposit_mobile_or_diffusive_particles();
 }
 
-void ito_plasma_godunov::advect_particles_euler_maruyama(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advect_particles_si");
+
+
+void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_container<godunov_particle>* >& a_rho_dagger,
+							  const Real a_dt){
+  CH_TIME("ito_plasma_godunov::diffuse_particles_euler_maruyama");
   if(m_verbosity > 5){
-    pout() << m_name + "::advect_particles_si" << endl;
+    pout() << m_name + "::diffuse_particles_euler_maruyama" << endl;
   }
 
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver   = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
 
+    const int idx = solver_it.get_solver();
+
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+
+    const Real f = mobile ? 1.0 : 0.0; // Multiplication factor for mobility
+    const Real g = diffusive ? 1.0 : 0.0; // Multiplication factor for diffusion
+    
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+      ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	List<ito_particle>& ito_particles  = particles[dit()].listItems();
+	List<godunov_particle>& gdnv_parts = (*a_rho_dagger[idx])[lvl][dit()].listItems();
+
+	gdnv_parts.clear();
+
+	// Store the diffusion hop, and add the godunov particles
+	for (ListIterator<ito_particle> lit(ito_particles); lit.ok(); ++lit){
+	  ito_particle& p     = lit();
+	  const Real factor   = g*sqrt(2.0*p.diffusion()*a_dt);
+	  const RealVect hop  = factor*solver->random_gaussian();
+	  const RealVect& pos = p.position();
+	  const Real& mass    = p.mass();
+
+	  // Store the diffusion hop
+	  p.runtime_vector(0) = hop;
+
+	  // Add simpler particle
+	  gdnv_parts.add(godunov_particle(pos + hop, mass));
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::step_euler_maruyama(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::step_euler_maruyama");
+  if(m_verbosity > 5){
+    pout() << m_name + "::step_euler_maruyama" << endl;
+  }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
-    if(solver->is_mobile()){
+
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+
+    const Real f = mobile    ? 1.0 : 0.0;
+    const Real g = diffusive ? 1.0 : 0.0;
+    
+    if(mobile || diffusive){
       
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
@@ -970,85 +1008,12 @@ void ito_plasma_godunov::advect_particles_euler_maruyama(const Real a_dt){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
 
-	  // First step
 	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
-	    ito_particle& p = particleList[lit];
+	    ito_particle& p = lit();
 
 	    // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
-	    const RealVect Xk = p.position();
-	    p.position()      = p.oldPosition() + p.velocity()*a_dt;
-	    p.oldPosition()   = Xk;
-	  }
-	}
-      }
-    }
-  }
-}
-
-void ito_plasma_godunov::diffuse_particles_euler_maruyama(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::diffuse_particles_euler_maruyama");
-  if(m_verbosity > 5){
-    pout() << m_name + "::diffuse_particles_euler_maruyama" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver   = solver_it();
-    
-    if(solver->is_diffusive()){
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
-
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-	  List<ito_particle>& particleList = particles[dit()].listItems();
-
-	  // Diffusion hop.
-	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
-	    ito_particle& p    = particleList[lit];
-	    const Real factor  = sqrt(2.0*p.diffusion()*a_dt);
-
-	    // Do the diffusion hop. 
-	    const RealVect hop = solver->random_gaussian();
-
-	    p.position() += hop*factor;
-	  }
-	}
-      }
-    }
-  }
-}
-
-void ito_plasma_godunov::swap_euler_maruyama(){
-  CH_TIME("ito_plasma_godunov::swap_euler_maruyama");
-  if(m_verbosity > 5){
-    pout() << m_name + "::swap_euler_maruyama" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
-
-    // No need to do this if solver is only mobile because the diffusion step didn't change the position.
-    // Likewise, if the solver is only diffusive then advect_particles_si routine won't trigger so no need for that either. 
-    if(mobile && diffusive){ 
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
-
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-	  List<ito_particle>& particleList = particles[dit()].listItems();
-
-	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
-	    ito_particle& p = particleList[lit];
-
-	    // We have made a diffusion hop, but we need p.position() to be X^k and p.oldPosition() to be the jumped position. 
-	    const RealVect tmp = p.position();
-	    
-	    p.position()    = p.oldPosition();
-	    p.oldPosition() = tmp;
+	    const RealVect hop = p.runtime_vector(0);
+	    p.position()       = p.oldPosition() + f*p.velocity()*a_dt + g*hop;
 	  }
 	}
       }
