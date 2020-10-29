@@ -453,17 +453,12 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
 
   // Recompute the conductivity with the other particles
   this->compute_regrid_conductivity();
-
-  // Set up semi-implicit poisson again, with particles after diffusion jump (the rho^\dagger)
-  this->setup_semi_implicit_poisson(m_prevDt);
-
-  // Recompute the space charge. This deposits the m_rho_dagger particles onto the states. 
   this->compute_regrid_rho();
+  this->setup_semi_implicit_poisson(m_prevDt);
   
-  // Compute the electric field
   const bool converged = this->solve_poisson();
   if(!converged){
-    MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
+    MayDay::Abort("ito_plasma_godunov::regrid - Poisson solve did not converge after regrid!!!");
   }
 
   // Regrid superparticles. 
@@ -473,7 +468,7 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
     m_ito->sort_particles_by_patch();
   }
 
-  // Now let the ito solver deposit its actual particles...
+  // Now let the ito solver deposit its actual particles... In the above it deposit m_rho_dagger_particles. 
   m_ito->deposit_particles();
 
   // Recompute new velocities and diffusion coefficients
@@ -682,10 +677,47 @@ void ito_plasma_godunov::compute_conductivity(const Vector<particle_container<go
     pout() << m_name + "::compute_conductivity" << endl;
   }
 
-  ito_plasma_stepper::compute_conductivity(m_conduct_cell);
+  this->compute_conductivity(m_conduct_cell, a_particles);
 
   // Now do the faces
   this->compute_face_conductivity();
+}
+
+void ito_plasma_godunov::compute_conductivity(EBAMRCellData& a_conductivity,
+					      const Vector<particle_container<godunov_particle>* >& a_particles){
+  CH_TIME("ito_plasma_godunov::compute_conductivity(conductivity, godunov_particle");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_conductivity(conductivity, godunov_particle)" << endl;
+  }
+
+  data_ops::set_value(a_conductivity, 0.0);
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>&   solver = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+    
+    const int idx = solver_it.get_solver();
+    const int q   = species->get_charge();
+
+    if(Abs(q) > 0 && solver->is_mobile()){
+      data_ops::set_value(m_particle_scratch1, 0.0);
+
+      solver->deposit_particles(m_particle_scratch1, *a_particles[idx]); // The particles should have "masses" = m*mu 
+
+      // Copy to fluid realm and add to fluid stuff
+      m_fluid_scratch1.copy(m_particle_scratch1);
+      data_ops::incr(a_conductivity, m_fluid_scratch1, Abs(q));
+    }
+  }
+
+  data_ops::scale(a_conductivity, units::s_Qe);
+
+  m_amr->average_down(a_conductivity, m_fluid_realm, m_phase);
+  m_amr->interp_ghost_pwl(a_conductivity, m_fluid_realm, m_phase);
+
+  // See if this helps....
+  m_amr->interpolate_to_centroids(a_conductivity, m_fluid_realm, m_phase);
+
 }
 
 void ito_plasma_godunov::compute_face_conductivity(){
@@ -846,34 +878,7 @@ void ito_plasma_godunov::compute_regrid_conductivity(){
     pout() << m_name + "::compute_regrid_conductivity" << endl;
   }
 
-  data_ops::set_value(m_conduct_cell, 0.0);
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
-    
-    const int idx = solver_it.get_solver();
-    const int q   = species->get_charge();
-
-    if(q != 0 && solver->is_mobile()){
-      data_ops::set_value(m_particle_scratch1, 0.0);
-
-      solver->deposit_particles(m_particle_scratch1, *m_conductivity_particles[idx]); // This deposit mu*mass
-
-      // Copy to fluid realm and add to fluid stuff
-      m_fluid_scratch1.copy(m_particle_scratch1);
-      data_ops::incr(m_conduct_cell, m_fluid_scratch1, Abs(q));
-    }
-  }
-  
-  data_ops::scale(m_conduct_cell, units::s_Qe);
-
-  m_amr->average_down(m_conduct_cell, m_fluid_realm, m_phase);
-  m_amr->interp_ghost_pwl(m_conduct_cell, m_fluid_realm, m_phase);
-  m_amr->interpolate_to_centroids(m_conduct_cell, m_fluid_realm, m_phase);
-
-  // Now do the faces
-  this->compute_face_conductivity();
+  this->compute_conductivity(m_conduct_cell, m_conductivity_particles);
 }
 
 void ito_plasma_godunov::compute_regrid_rho(){
@@ -907,10 +912,10 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all_diffusive);
 
   // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch. 
-  this->copy_conductivity_particles(m_conductivity_particles);
-  this->compute_conductivity(m_conductivity_particles);              
-  this->setup_semi_implicit_poisson(a_dt);
-  this->solve_poisson();
+  this->copy_conductivity_particles(m_conductivity_particles); // Sets particle "weights" = w*mu
+  this->compute_conductivity(m_conductivity_particles);        // Deposits q_e*Z*w*mu/eps0 on the mesh
+  this->setup_semi_implicit_poisson(a_dt);                     // Multigrid setup
+  this->solve_poisson();                                       // Solve the stinking equation. 
 
   // 4. Recompute velocities with the new electric field, then do the actual semi-implicit Euler-Maruyama update. 
 #if 0 // original code

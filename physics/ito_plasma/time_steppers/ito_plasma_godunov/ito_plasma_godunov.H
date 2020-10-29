@@ -94,6 +94,7 @@ namespace physics {
 
       // Routines for semi-implicit Poisson solution
       void compute_conductivity(const Vector<particle_container<godunov_particle>* >& a_particles);
+      void compute_conductivity(EBAMRCellData& a_conductivity, const Vector<particle_container<godunov_particle>* >& a_particles);
       void compute_face_conductivity();
       void setup_semi_implicit_poisson(const Real a_dt);
 
