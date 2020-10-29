@@ -57,6 +57,7 @@ void ito_solver::parse_options(){
     pout() << m_name + "::parse_options" << endl;
   }
 
+  this->parse_superparticles();
   this->parse_rng();
   this->parse_plot_vars();
   this->parse_deposition();
@@ -66,6 +67,19 @@ void ito_solver::parse_options(){
   this->parse_redistribution();
   this->parse_conservation();
   this->parse_checkpointing();
+}
+
+void ito_solver::parse_superparticles(){
+  CH_TIME("ito_solver::parse_superparticles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_superparticles" << endl;
+  }
+
+  // Seed the RNG
+  ParmParse pp(m_class_name.c_str());
+  pp.get("kd_direction", m_kd_direction);
+
+  m_kd_direction = min(m_kd_direction, SpaceDim-1);
 }
 
 void ito_solver::parse_rng(){
@@ -87,6 +101,7 @@ void ito_solver::parse_rng(){
   m_udist01 = std::uniform_real_distribution<Real>( 0.0, 1.0);
   m_udist11 = std::uniform_real_distribution<Real>(-1.0, 1.0);
   m_gauss01 = std::normal_distribution<Real>(0.0, 1.0);
+  m_udist0d = std::uniform_int_distribution<int>(0, SpaceDim-1);
 }
 
 void ito_solver::parse_plot_vars(){
@@ -2482,8 +2497,9 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
   }
   
   // 2. Build the BVH tree and get the leaves of the tree
+  const int dir = (m_kd_direction < 0) ? m_udist0d(m_rng) : m_kd_direction;
   m_tree.define(pointMasses, mass);
-  m_tree.build_tree(a_particlesPerCell);
+  m_tree.build_tree(dir, a_particlesPerCell);
   const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = m_tree.get_leaves();
 
   // 3. Clear particles in this cell and add new ones.

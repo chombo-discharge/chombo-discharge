@@ -141,6 +141,9 @@ void ito_plasma_godunov::parse_options() {
   else if(str ==  "midpoint"){
     m_algorithm = which_algorithm::midpoint;
   }
+  else if(str ==  "trapezoidal"){
+    m_algorithm = which_algorithm::trapezoidal;
+  }
   else{
     MayDay::Abort("ito_plasma_godunov::parse_options - unknown algorithm requested");
   }
@@ -223,6 +226,9 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     break;
   case which_algorithm::midpoint:
     this->advance_particles_midpoint(a_dt);
+    break;
+  case which_algorithm::trapezoidal:
+    this->advance_particles_trapezoidal(a_dt);
     break;
   default:
     MayDay::Abort("ito_plasma_godunov::advance - logic bust");
@@ -436,6 +442,9 @@ void ito_plasma_godunov::setup_runtime_storage(){
   case which_algorithm::midpoint:
     ito_particle::set_num_runtime_vectors(1);
     break;
+  case which_algorithm::trapezoidal:
+    ito_particle::set_num_runtime_vectors(2);
+    break;
   default:
     ito_particle::set_num_runtime_vectors(0);
   }
@@ -537,6 +546,32 @@ void ito_plasma_godunov::rewind_particles(){
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
     
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+      ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	List<ito_particle>& particleList = particles[dit()].listItems();
+
+	for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
+	  ito_particle& p = particleList[lit];
+	  p.position() = p.oldPosition();
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::rewind_diffusive_particles(){
+  CH_TIME("ito_plasma_godunov::rewind_diffusive_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::rewind_diffusive_particles" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+
     if(solver->is_diffusive()){
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
@@ -545,10 +580,8 @@ void ito_plasma_godunov::rewind_particles(){
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
-
 	  // Diffusion hop.
-	  for (lit.rewind(); lit; ++lit){
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
 	    ito_particle& p = particleList[lit];
 	    p.position() = p.oldPosition();
 	  }
@@ -830,10 +863,7 @@ void ito_plasma_godunov::advect_particles_euler(const Real a_dt){
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
-
-	  // First step
-	  for (lit.rewind(); lit; ++lit){
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
 	    ito_particle& p = particleList[lit];
 
 	    // Update positions. 
@@ -862,10 +892,8 @@ void ito_plasma_godunov::diffuse_particles_euler(const Real a_dt){
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
 
-	  // Diffusion hop.
-	  for (lit.rewind(); lit.ok(); ++lit){
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
 	    ito_particle& p    = particleList[lit];
 	    const Real factor  = sqrt(2.0*p.diffusion()*a_dt);
 
@@ -957,10 +985,9 @@ void ito_plasma_godunov::advect_particles_euler_maruyama(const Real a_dt){
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
 
 	  // First step
-	  for (lit.rewind(); lit; ++lit){
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
 	    ito_particle& p = particleList[lit];
 
 	    // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
@@ -991,10 +1018,9 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(const Real a_dt){
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
 
 	  // Diffusion hop.
-	  for (lit.rewind(); lit.ok(); ++lit){
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
 	    ito_particle& p    = particleList[lit];
 	    const Real factor  = sqrt(2.0*p.diffusion()*a_dt);
 
@@ -1030,9 +1056,8 @@ void ito_plasma_godunov::swap_euler_maruyama(){
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
 
-	  for (lit.rewind(); lit; ++lit){
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
 	    ito_particle& p = particleList[lit];
 
 	    // We have made a diffusion hop, but we need p.position() to be X^k and p.oldPosition() to be the jumped position. 
@@ -1137,10 +1162,9 @@ void ito_plasma_godunov::diffuse_particles_midpoint1(const Real a_dt){
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
 
 	  // Diffusion hop.
-	  for (lit.rewind(); lit.ok(); ++lit){
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
 	    ito_particle& p    = particleList[lit];
 	    const Real factor  = sqrt(2.0*p.diffusion()*a_dt);
 
@@ -1174,10 +1198,9 @@ void ito_plasma_godunov::diffuse_particles_midpoint2(const Real a_dt){
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
 
 	  // Diffusion hop.
-	  for (lit.rewind(); lit.ok(); ++lit){
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
 	    ito_particle& p    = particleList[lit];
 
 	    // Store X^(k+1/2) on p.velocity() since that storage is not currently needed
@@ -1213,10 +1236,9 @@ void ito_plasma_godunov::advect_particles_midpoint1(const Real a_dt){
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
 
 	  // First step
-	  for (lit.rewind(); lit; ++lit){
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
 	    ito_particle& p = particleList[lit];
 
 	    // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
@@ -1248,10 +1270,9 @@ void ito_plasma_godunov::advect_particles_midpoint2(const Real a_dt){
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
 
 	  // First step
-	  for (lit.rewind(); lit; ++lit){
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
 	    ito_particle& p = particleList[lit];
 
 	    // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
@@ -1284,9 +1305,8 @@ void ito_plasma_godunov::swap_midpoint1(){
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
-
-	  for (lit.rewind(); lit; ++lit){
+	  
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
 	    ito_particle& p = particleList[lit];
 	    p.position() = p.oldPosition();
 	  }
@@ -1323,13 +1343,167 @@ void ito_plasma_godunov::swap_midpoint2(){
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	  List<ito_particle>& particleList = particles[dit()].listItems();
-	  ListIterator<ito_particle> lit(particleList);
 
-	  for (lit.rewind(); lit; ++lit){
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
 	    ito_particle& p = particleList[lit];
 
 	    // We have made a diffusion hop, but we need p.position() to be X^k and p.oldPosition() to be the jumped position. 
 	    p.position() = p.velocity(); // = X^(k+1/2)
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advance_particles_trapezoidal");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_particles_trapezoidal" << endl;
+  }
+  
+  // Set the old particle position. 
+  this->set_old_positions();
+
+  // ============= EULER MARUYAMA PREDICTOR BEGIN ===============
+  // Compute conductivity and set up the Poisson equation
+  this->compute_conductivity();
+  this->setup_semi_implicit_poisson(a_dt);
+
+  // Diffuse particles, make p.position() = X^k + sqrt(2*D*dt)*N. Storage sqrt(2*D*dt)*n on runtime vector storage
+  this->diffuse_particles_trapz(a_dt);
+  this->remap_diffusive_particles();
+  this->deposit_diffusive_particles();
+
+  // Solve the Poisson equation and get the new electric field
+  this->solve_poisson();
+
+  // Swap the particle positions. Set p.position() = X^k. p.runtime_vector(0) = 0.5*a_dt*V^k(X^k) + sqrt(2*D*dt)*N
+  this->rewind_diffusive_particles();  // Could we speed this up somehow...? Maybe double down on the storage so we just can get rid of the extra remapping
+  this->remap_diffusive_particles();
+
+  // Update velocities. This sets velocities to V^(k+1) = E^(k+1)(X^k), but we have stored V^k(X^k) already. Then advect and remap the particles. This completese
+  // the Euler-Maruyama semi-implicit predictor. 
+  this->store_Vk_trapz();
+  this->compute_ito_velocities();
+  this->predictor_trapz(a_dt);
+  this->remap_mobile_or_diffusive_particles();
+  // ============= EULER MARUYAMA PREDICTOR END ===============
+
+  MayDay::Abort("ito_plasma_godunov::advance_particles_trapezoidal - not implemented");
+
+
+}
+
+void ito_plasma_godunov::diffuse_particles_trapz(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::diffuse_particles_trapz");
+  if(m_verbosity > 5){
+    pout() << m_name + "::diffuse_particles_trapz" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    
+    if(solver->is_diffusive()){
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+
+	  // Diffusion hop.
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
+	    ito_particle& p    = particleList[lit];
+
+	    RealVect& hop = p.runtime_vector(0);
+
+	    hop = sqrt(2.0*p.diffusion()*a_dt)*solver->random_gaussian();
+	    p.position() += hop;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::store_Vk_trapz(){
+  CH_TIME("ito_plasma_godunov::store_Vk_trapz");
+  if(m_verbosity > 5){
+    pout() << m_name + "::store_Vk_trapz" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+
+    // No need to do this if solver is only mobile because the diffusion step didn't change the position.
+    // Likewise, if the solver is only diffusive then advect_particles_si routine won't trigger so no need for that either. 
+    if(mobile){ 
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
+	    ito_particle& p = particleList[lit];
+
+	    // We have made a diffusion hop, but we need p.position() to be X^k and p.oldPosition() to be the jumped position.
+	    p.runtime_vector(1) = p.velocity();
+	  }
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::predictor_trapz(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::predictor_trapz");
+  if(m_verbosity > 5){
+    pout() << m_name + "::predictor_trapz" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+
+    // No need to do this if solver is only mobile because the diffusion step didn't change the position.
+    // Likewise, if the solver is only diffusive then advect_particles_si routine won't trigger so no need for that either. 
+    if(mobile){ 
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
+	    ito_particle& p = particleList[lit];
+	    p.position() += p.velocity()*a_dt;
+	  }
+	}
+      }
+
+      if(diffusive){ 
+	for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	  const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	  ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	    List<ito_particle>& particleList = particles[dit()].listItems();
+
+	    for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
+	      ito_particle& p = particleList[lit];
+	      p.position() += p.runtime_vector(0);
+	    }
 	  }
 	}
       }

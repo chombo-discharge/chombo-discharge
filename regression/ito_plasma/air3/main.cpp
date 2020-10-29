@@ -39,6 +39,7 @@ int main(int argc, char* argv[]){
      setPoutBaseName(basename);
   }
 
+
   // Set geometry and AMR 
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_sphere());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());

@@ -70,7 +70,7 @@ public:
   bvh_tree(std::vector<T>& a_points, const Real a_mass);
   ~bvh_tree();
 
-  inline void build_tree(const int a_numLeaves); // Desired number of leaves
+  inline void build_tree(const int a_firstDir, const int a_numLeaves); // Desired number of leaves
   inline std::vector<std::shared_ptr<bvh_node<T> > >& get_leaves();
   inline void define(std::vector<T>& a_points, const Real a_mass);
   

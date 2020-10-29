@@ -309,7 +309,7 @@ inline std::vector<std::shared_ptr<bvh_node<T> > >& bvh_tree<T>::get_leaves(){
 }
 
 template <class T>
-inline void bvh_tree<T>::build_tree(const int a_numLeaves){
+inline void bvh_tree<T>::build_tree(const int a_firstDir, const int a_numLeaves){
   
 #if BVH_DEBUG
   for (const auto& d : m_root->get_data()){
@@ -327,7 +327,7 @@ inline void bvh_tree<T>::build_tree(const int a_numLeaves){
   bool can_split;
   int leavesNeeded;
   int cur_size = 1;
-  int splitDir = 0;
+  int splitDir = a_firstDir;
   int N;
   
   while(keepSplitting){

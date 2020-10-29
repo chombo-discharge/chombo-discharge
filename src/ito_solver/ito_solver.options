@@ -6,8 +6,9 @@ ito_solver.halo                = 1             # Size of define halo region for 
 ito_solver.plt_vars            = phi vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy'
 ito_solver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
 ito_solver.seed                = 0             # Seed for RNG
+ito_solver.kd_direction        = -1            # Kd-tree direction, -1 => random, 0,1,2 => first plane split in this dir
 ito_solver.max_diffusion_hop   = 2.0           # Maximum diffusion hop length (in units of dx)
-ito_solver.normal_max          = 3.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
+ito_solver.normal_max          = 5.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
 ito_solver.redistribute        = true          # Turn on/off redistribution. 
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ito_solver.checkpointing       = particles     # 'particles' or 'numbers'

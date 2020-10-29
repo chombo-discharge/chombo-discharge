@@ -106,6 +106,7 @@ ito_solver.halo_buffer         = 1             # Halo buffer.
 ito_solver.plt_vars            = phi vel dco mobility   # Currently available are 'phi', 'vel', and 'dco'
 ito_solver.bisect_step         = 1.E-3         # Bisection step length for intersection tests
 ito_solver.seed                = 0            # Seed for RNG
+ito_solver.kd_direction        = -1            # Kd-tree direction, -1 => random, 0,1,2 => first plane split in this dir
 ito_solver.max_diffusion_hop   = 2.0           # Maximum diffusion hop length (in units of dx)
 ito_solver.normal_max          = 100.0         # Maximum value (absolute) that can be drawn from the exponential distribution.
 ito_solver.redistribute        = true          # Turn on/off redistribution. 
@@ -209,7 +210,7 @@ ito_plasma_godunov.ppc            = 8             # Superparticle number of cell
 ito_plasma_godunov.merge_interval = 1             # How often to make superparticles
 ito_plasma_godunov.relax_factor   = 9999.5        # Factor in front of relaxation time	
 ito_plasma_godunov.regrid_super   = true          # Make superparticles after regrid or not
-ito_plasma_godunov.algorithm      = midpoint      # 'euler', 'predictor_corrector', or 'semi_implicit', 'midpoint'
+ito_plasma_godunov.algorithm      = trapezoidal      # 'euler', 'euler_maruyama', 'midpoint'
 ito_plasma_godunov.diffusion      = super         # Which diffusion update? 'physical', 'super'
 ito_plasma_godunov.diffu_samples  = 64            # Maximum number of diffusion samples when using 'physical' diffusion
 ito_plasma_godunov.profile        = false         # Profile advance or not

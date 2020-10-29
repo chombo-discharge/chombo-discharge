@@ -65,7 +65,7 @@ ito_particle::~ito_particle(){
 }
 
 void ito_particle::allocateRuntimeBuffers(){
-  m_runtimeScalars     = nullptr;
+  m_runtimeScalars = nullptr;
   m_runtimeVectors = nullptr;
   
   if(s_num_runtime_scalars >= 0){
@@ -213,7 +213,10 @@ bool ito_particle::operator!=(const ito_particle& a_p) const{
 
 int ito_particle::size() const{
   const int compileSize = BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + sizeof(m_diffusion) + sizeof(m_oldPosition) + sizeof(m_mobility) + sizeof(m_energy);
-  const int runtimeSize = sizeof(*m_runtimeScalars) + sizeof(*m_runtimeVectors);
+  //  const int runtimeSize = sizeof(*m_runtimeScalars) + sizeof(*m_runtimeVectors);
+  const int runtimeSize = s_num_runtime_scalars*sizeof(Real) + s_num_runtime_vectors*sizeof(RealVect);
+
+  //  std::cout << s_num_runtime_vectors*sizeof(RealVect) << std::endl;
 
   return compileSize + runtimeSize;
 }

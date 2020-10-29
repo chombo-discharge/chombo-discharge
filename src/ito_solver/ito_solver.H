@@ -631,6 +631,11 @@ protected:
   int m_ppc_restart;
 
   /*!
+    @brief Splitting direction
+  */
+  int m_kd_direction;
+
+  /*!
     @brief Realm
   */
   std::string m_realm;
@@ -689,6 +694,11 @@ protected:
     @brief Gaussian distribution centered on 0, std=1
   */
   std::normal_distribution<Real> m_gauss01;
+
+  /*!
+    @brief Uniform integer distribution between [0,SpaceDim-1]
+  */
+  std::uniform_int_distribution<int> m_udist0d;
 
   /*!
     @brief Maximum exponential

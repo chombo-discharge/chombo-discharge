@@ -48,6 +48,7 @@ namespace physics {
 	euler,
 	euler_maruyama,
 	midpoint,
+	trapezoidal,
       };
 
       // How to restrict dt. 
@@ -89,6 +90,7 @@ namespace physics {
       // Global routines
       void set_old_positions();
       void rewind_particles();
+      void rewind_diffusive_particles();
       void intersect_particles(const Real a_dt);
 
       // Routines for semi-implicit Poisson solution
@@ -124,6 +126,12 @@ namespace physics {
       void advect_particles_midpoint2(const Real a_dt);
       void swap_midpoint1();
       void swap_midpoint2();
+
+      // Specific routines for trapezoidal integration
+      void advance_particles_trapezoidal(const Real a_dt);
+      void diffuse_particles_trapz(const Real a_dt);
+      void store_Vk_trapz();
+      void predictor_trapz(const Real a_dt);
     };
   }
 }
