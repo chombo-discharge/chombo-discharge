@@ -45,9 +45,7 @@ namespace physics {
 
       // Switching between algorithms. 
       enum class which_algorithm {
-	euler,
 	euler_maruyama,
-	midpoint,
 	trapezoidal,
       };
 
@@ -107,31 +105,14 @@ namespace physics {
       void compute_regrid_conductivity();
       void compute_regrid_rho();
 
-      // Specific routines for Euler method
-      void advance_particles_euler(const Real a_dt);
-      void advect_particles_euler(const Real a_dt);
-      void diffuse_particles_euler(const Real a_dt);
-
       // Specific routines for Euler-Maruyama
       void advance_particles_euler_maruyama(const Real a_dt);
       void advect_particles_euler_maruyama(const Real a_dt);
       void diffuse_particles_euler_maruyama(const Real a_dt);
       void swap_euler_maruyama();
 
-      // Specific routines for midpoint integration
-      void advance_particles_midpoint(const Real a_dt);
-      void diffuse_particles_midpoint1(const Real a_dt);
-      void diffuse_particles_midpoint2(const Real a_dt);
-      void advect_particles_midpoint1(const Real a_dt);
-      void advect_particles_midpoint2(const Real a_dt);
-      void swap_midpoint1();
-      void swap_midpoint2();
-
       // Specific routines for trapezoidal integration
       void advance_particles_trapezoidal(const Real a_dt);
-      void diffuse_particles_trapz(const Real a_dt);
-      void store_Vk_trapz();
-      void predictor_trapz(const Real a_dt);
     };
   }
 }
