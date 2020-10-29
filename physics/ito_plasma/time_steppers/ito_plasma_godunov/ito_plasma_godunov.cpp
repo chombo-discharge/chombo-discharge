@@ -918,12 +918,8 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   this->solve_poisson();                                       // Solve the stinking equation. 
 
   // 4. Recompute velocities with the new electric field, then do the actual semi-implicit Euler-Maruyama update. 
-#if 0 // original code
-  this->compute_ito_velocities();
-#else // This is the version that leaves the mobility intact - which is what the algorithm says. 
   this->set_ito_velocity_funcs();
   m_ito->interpolate_velocities();
-#endif
   this->step_euler_maruyama(a_dt);  
   this->remap_particles(which_particles::all_mobile_or_diffusive);
 

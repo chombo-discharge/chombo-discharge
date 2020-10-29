@@ -42,12 +42,14 @@ void EBParticleInterp::depositParticle(FArrayBox&       a_rho,
   const RealVect rv = (a_position - a_prob_lo)/a_dx;
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
-  if(m_ebisbox->isMultiValued(iv)){
-    MayDay::Abort("EBParticleInterp::depositParticle - multivalued cells not supported (yet)");
-  }
+  const bool multi_valued = m_ebisbox->isMultiValued(iv);
+  const bool irregular    = m_ebisbox->isIrregular(iv);
+  const bool regular      = !multi_valued && !irregular;
+
+  if(multi_valued) MayDay::Abort("EBParticleInterp::depositParticle - multivalued cells not supported (yet)");
 
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
-  if(m_irr_ngp && m_ebisbox->isIrregular(iv)){
+  if(m_irr_ngp && !regular){
     FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
 			    CHF_CONST_REALVECT(a_prob_lo),
 			    CHF_CONST_REALVECT(a_dx),
