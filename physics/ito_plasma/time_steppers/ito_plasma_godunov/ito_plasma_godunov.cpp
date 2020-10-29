@@ -1100,7 +1100,7 @@ void ito_plasma_godunov::advance_particles_midpoint(const Real a_dt){
 
   // Do the complete second step. 
   this->swap_midpoint2();                 // p.position() = X^(k+1/2). p.oldPosition() = X^k. p.runtime_vector(0) = sqrt(D^k*dt)*N^1 + sqrt(D^(k+1/2)*dt*N^2
-  this->remap_diffusive_particles();
+  this->remap_diffusive_particles();      // Remap again, so that particles end up at X^(k+1/2)
 
   // Recompute V^(k+1) = v^(k+1)(X^(k+1/2)). Then set X^(k+1) = X^k + dt*V^(k+1) + sqrt(D^k*dt)N^1 + sqrt(D^(k+1/2)*dt)N^2
   this->compute_ito_velocities();         
@@ -1297,9 +1297,9 @@ void ito_plasma_godunov::swap_midpoint1(){
 }
 
 void ito_plasma_godunov::swap_midpoint2(){
-  CH_TIME("ito_plasma_godunov::swap_midpoint1");
+  CH_TIME("ito_plasma_godunov::swap_midpoint2");
   if(m_verbosity > 5){
-    pout() << m_name + "::swap_midpoint1" << endl;
+    pout() << m_name + "::swap_midpoint2" << endl;
   }
 
   // TLDR: When we enter here then p.velocity() = X^(k+1/2)

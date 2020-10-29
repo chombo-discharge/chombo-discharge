@@ -156,8 +156,8 @@ void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a
 
 template <class T>
 void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&               a_state,
-						  const particle_container<T>& a_particles,
-						  const DepositionType::Which  a_deposition){
+						       const particle_container<T>& a_particles,
+						       const DepositionType::Which  a_deposition){
   CH_TIME("ito_solver::deposit_kappaConservativeNoPVR_native");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_kappaConservativeNoPVR_native" << endl;
@@ -246,8 +246,8 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
 
 template <class T>
 void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&               a_state,
-						  const particle_container<T>& a_particles,
-						  const DepositionType::Which  a_deposition){
+						    const particle_container<T>& a_particles,
+						    const DepositionType::Which  a_deposition){
   CH_TIME("ito_solver::deposit_kappaConservativeNoPVR_NGP");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_kappaConservativeNoPVR_NGP" << endl;

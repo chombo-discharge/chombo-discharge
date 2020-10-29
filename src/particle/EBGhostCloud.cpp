@@ -97,7 +97,6 @@ void EBGhostCloud::makeFiCoStuff(){
   const int ghostFiCo = m_ghost;
   for (int i = 0; i < fiCoBoxes.size(); i++){
     fiCoBoxes[i].grow(ghostFiCo);
-    fiCoBoxes[i] &= m_domainFine;
   }
 
   // Define the grids and the data holder
