@@ -110,8 +110,8 @@ namespace physics {
 
       // Specific routines for trapezoidal integration
       void advance_particles_trapezoidal(const Real a_dt);
-      void diffuse_particles_trapezoidal_predictor(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);
-      void diffuse_particles_trapezoidal_corrector(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void pre_trapezoidal_predictor(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void pre_trapezoidal_corrector(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);
       void trapezoidal_predictor(const Real a_dt);
       void trapezoidal_corrector(const Real a_dt);
     };
