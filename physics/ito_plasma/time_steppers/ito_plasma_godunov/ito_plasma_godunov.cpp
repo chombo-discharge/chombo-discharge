@@ -864,6 +864,12 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   this->step_euler_maruyama(a_dt);  
   this->remap_particles(which_particles::all_mobile_or_diffusive);
 
+#if 0 // Debug, check if we're getting the correct electric field -- why doesn't this work...?
+  this->deposit_particles(which_particles::all);
+  this->setup_standard_poisson();
+  this->solve_poisson();
+#endif
+
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   this->intersect_particles(a_dt);
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -872,6 +878,8 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
 
   // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
   this->deposit_particles(which_particles::all_mobile_or_diffusive);
+
+
 }
 
 void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt){
@@ -987,7 +995,7 @@ void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
   // ====== PREDICTOR END ======
 
   // ====== CORRECTOR BEGIN =====
-  this->pre_trapezoidal_corrector(m_rho_dagger_particles, a_dt);                      // Mobile or diffusive moves to X^dagger = X^k + 0.5*dt*V^k + hop
+  this->pre_trapezoidal_corrector(m_rho_dagger_particles, a_dt);                                    // Mobile or diffusive moves to X^dagger = X^k + 0.5*dt*V^k + hop
   this->remap_godunov_particles(m_rho_dagger_particles, which_particles::all_mobile_or_diffusive);  // Only need to remap particles that were mobile or diffusive
   this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all);                    // Everything needs to deposit...
 
@@ -1001,7 +1009,6 @@ void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
   this->trapezoidal_corrector(a_dt); 
   this->remap_particles(which_particles::all_mobile_or_diffusive);
   // ====== CORRECTOR END =====
-
 
   // Do particle-boundary intersection. 
   this->intersect_particles(a_dt);
@@ -1092,6 +1099,8 @@ void ito_plasma_godunov::trapezoidal_predictor(const Real a_dt){
 
 	    // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
 	    const RealVect& hop = p.runtime_vector(0);
+	    const RealVect& Vk  = p.runtime_vector(1);
+	    
 	    p.position()        = p.oldPosition() + f*p.velocity()*a_dt + g*hop;
 	  }
 	}
@@ -1134,11 +1143,12 @@ void ito_plasma_godunov::pre_trapezoidal_corrector(Vector<particle_container<god
 	  ito_particle& p     = lit();
 	  
 	  const Real& mass    = p.mass();
+	  const RealVect& Xk  = p.oldPosition();
 	  const RealVect& hop = p.runtime_vector(0);
 	  const RealVect& Vk  = p.runtime_vector(1);
 
 	  // Move particle. 
-	  const RealVect pos  = p.oldPosition() + 0.5*a_dt*Vk + hop;
+	  const RealVect pos  = Xk + 0.5*a_dt*f*Vk + g*hop;
 	  gdnv_parts.add(godunov_particle(pos, mass));
 	}
       }
@@ -1179,7 +1189,7 @@ void ito_plasma_godunov::trapezoidal_corrector(const Real a_dt){
 	    const RealVect& Vk  = p.runtime_vector(1);
 	    const RealVect& Vk1 = p.velocity();
 	    
-	    p.position() = Xk + 0.5*a_dt*f*(Vk + Vk1) + g*hop;
+	    p.position() = Xk + 0.5*f*a_dt*(Vk + Vk1) + g*hop;
 	  }
 	}
       }
