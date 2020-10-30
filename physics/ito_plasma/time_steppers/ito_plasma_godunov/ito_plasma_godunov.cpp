@@ -402,33 +402,6 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
     pout() << "ito_plasma_godunov::regrid" << endl;
   }
 
-  this->regrid_si(a_lmin, a_old_finest_level, a_new_finest_level);
-}
-
-void ito_plasma_godunov::setup_runtime_storage(){
-    CH_TIME("ito_plasma_godunov::setup_runtime_storage");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setup_runtime_storage" << endl;
-  }
-
-  switch (m_algorithm){
-  case which_algorithm::euler_maruyama:
-    ito_particle::set_num_runtime_vectors(1);
-    break;
-  case which_algorithm::trapezoidal:
-    ito_particle::set_num_runtime_vectors(1);
-    break;
-  default:
-    MayDay::Abort("ito_plasma_godunov::setup_runtime_storage - logic bust");
-  }
-}
-
-void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
-  CH_TIME("ito_plasma_godunov::regrid_si");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::regrid_si" << endl;
-  }
-
   // Regrid solvers
   m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
   m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
@@ -475,6 +448,26 @@ void ito_plasma_godunov::regrid_si(const int a_lmin, const int a_old_finest_leve
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
 }
+
+void ito_plasma_godunov::setup_runtime_storage(){
+    CH_TIME("ito_plasma_godunov::setup_runtime_storage");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setup_runtime_storage" << endl;
+  }
+
+  switch (m_algorithm){
+  case which_algorithm::euler_maruyama:
+    ito_particle::set_num_runtime_vectors(1);
+    break;
+  case which_algorithm::trapezoidal:
+    ito_particle::set_num_runtime_vectors(2); // For V^k and the diffusion hop. 
+    break;
+  default:
+    MayDay::Abort("ito_plasma_godunov::setup_runtime_storage - logic bust");
+  }
+}
+
+
 
 void ito_plasma_godunov::set_old_positions(){
   CH_TIME("ito_plasma_godunov::set_old_positions()");
@@ -849,6 +842,8 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
     pout() << m_name + "::advance_particles_euler_maruyama" << endl;
   }
 
+  m_prevDt = a_dt; // Needed for regrids. 
+
   // 1. Store X^k positions. 
   this->set_old_positions();   
 
@@ -879,10 +874,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   this->deposit_particles(which_particles::all_mobile_or_diffusive);
 }
 
-
-
-void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_container<godunov_particle>* >& a_rho_dagger,
-							  const Real a_dt){
+void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt){
   CH_TIME("ito_plasma_godunov::diffuse_particles_euler_maruyama");
   if(m_verbosity > 5){
     pout() << m_name + "::diffuse_particles_euler_maruyama" << endl;
@@ -973,7 +965,185 @@ void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
   if(m_verbosity > 5){
     pout() << m_name + "::advance_particles_trapezoidal" << endl;
   }
-  
-  MayDay::Abort("ito_plasma_godunov::advance_particles_trapezoidal - not implemented");
+
+  m_prevDt = 0.5*a_dt;  // Needed for regrids. 
+
+  this->set_old_positions();
+
+  // ====== PREDICTOR BEGIN ======
+  this->diffuse_particles_trapezoidal_predictor(m_rho_dagger_particles, a_dt);
+  this->remap_godunov_particles(m_rho_dagger_particles,   which_particles::all_diffusive); 
+  this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all_diffusive);
+
+  this->copy_conductivity_particles(m_conductivity_particles); 
+  this->compute_conductivity(m_conductivity_particles);        
+  this->setup_semi_implicit_poisson(a_dt);                     
+  this->solve_poisson();                                       
+
+  this->set_ito_velocity_funcs();
+  m_ito->interpolate_velocities();
+  this->step_euler_maruyama(a_dt); 
+  this->remap_particles(which_particles::all_mobile_or_diffusive);
+  // ====== PREDICTOR END ======
+
+  // ====== CORRECTOR BEGIN =====
+  this->diffuse_particles_trapezoidal_corrector(m_rho_dagger_particles, a_dt);
+  this->remap_godunov_particles(m_rho_dagger_particles, which_particles::all);
+  this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all);
+
+  this->copy_conductivity_particles(m_conductivity_particles); 
+  this->compute_conductivity(m_conductivity_particles);        
+  this->setup_semi_implicit_poisson(0.5*a_dt);                 
+  this->solve_poisson();                                       
+
+  this->set_ito_velocity_funcs();
+  m_ito->interpolate_velocities();
+  this->step_trapezoidal(a_dt); 
+  this->remap_particles(which_particles::all_mobile_or_diffusive);
+  // ====== CORRECTOR END =====
+
+
+  // Do particle-boundary intersection. 
+  this->intersect_particles(a_dt);
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    solver_it()->remove_eb_particles();
+  }
+
+  // Finally, deposit particles. 
+  this->deposit_particles(which_particles::all_mobile_or_diffusive);
 }
 
+void ito_plasma_godunov::diffuse_particles_trapezoidal_predictor(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt){
+  CH_TIME("ito_plasma_godunov::diffuse_particles_trapezoidal_predictor");
+  if(m_verbosity > 5){
+    pout() << m_name + "::diffuse_particles_trapezoidal_predictor" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver   = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+
+    const Real f = mobile    ? 1.0 : 0.0; // Multiplication factor for mobility
+    const Real g = diffusive ? 1.0 : 0.0; // Multiplication factor for diffusion
+    
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+      ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	List<ito_particle>& ito_particles  = particles[dit()].listItems();
+	List<godunov_particle>& gdnv_parts = (*a_rho_dagger[idx])[lvl][dit()].listItems();
+
+	gdnv_parts.clear();
+
+	// Store the diffusion hop, and add the godunov particles
+	for (ListIterator<ito_particle> lit(ito_particles); lit.ok(); ++lit){
+	  ito_particle& p     = lit();
+	  const Real factor   = sqrt(2.0*p.diffusion()*a_dt);
+	  const RealVect hop  = g*factor*solver->random_gaussian();
+	  const RealVect& pos = p.position();
+	  const Real& mass    = p.mass();
+
+	  // Store the diffusion hop and the current velocity. 
+	  p.runtime_vector(0) = hop;
+	  p.runtime_vector(1) = f*p.velocity();
+
+	  // Add simpler particle
+	  gdnv_parts.add(godunov_particle(pos + hop, mass));
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::diffuse_particles_trapezoidal_corrector(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt){
+  CH_TIME("ito_plasma_godunov::diffuse_particles_trapezoidal_corrector");
+  if(m_verbosity > 5){
+    pout() << m_name + "::diffuse_particles_trapezoidal_corrector" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver   = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+
+    const Real f = mobile    ? 1.0 : 0.0; // Multiplication factor for mobility
+    const Real g = diffusive ? 1.0 : 0.0; // Multiplication factor for diffusion
+    
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+      ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	List<ito_particle>& ito_particles  = particles[dit()].listItems();
+	List<godunov_particle>& gdnv_parts = (*a_rho_dagger[idx])[lvl][dit()].listItems();
+
+	gdnv_parts.clear();
+
+	// Store the diffusion hop, and add the godunov particles
+	for (ListIterator<ito_particle> lit(ito_particles); lit.ok(); ++lit){
+	  ito_particle& p     = lit();
+	  
+	  const Real& mass    = p.mass();
+	  const RealVect& hop = g*p.runtime_vector(0);
+	  const RealVect& Vk  = f*p.runtime_vector(1);
+
+	  // Move particle. 
+	  const RealVect pos  = p.position() + 0.5*a_dt*Vk + hop;
+	  gdnv_parts.add(godunov_particle(pos, mass));
+	}
+      }
+    }
+  }
+}
+
+void ito_plasma_godunov::step_trapezoidal(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::step_trapezoidal");
+  if(m_verbosity > 5){
+    pout() << m_name + "::step_trapezoidal" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+
+    const Real f = mobile    ? 1.0 : 0.0;
+    const Real g = diffusive ? 1.0 : 0.0;
+    
+    if(mobile || diffusive){
+      
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	  List<ito_particle>& particleList = particles[dit()].listItems();
+
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
+	    ito_particle& p = lit();
+
+	    const RealVect& hop = p.runtime_vector(0);
+	    const RealVect& Vk  = p.runtime_vector(1);
+	    const RealVect& Vk1 = p.velocity();
+	    
+	    p.position() = p.oldPosition() + 0.5*a_dt*f*(Vk + Vk1) + g*hop;
+	  }
+	}
+      }
+    }
+  }
+}

@@ -81,8 +81,6 @@ namespace physics {
       // Routine for setting up extra particle storage
       void setup_runtime_storage();
 
-      // Semi-implicit regrid routine. 
-      void regrid_si(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
 
       // Global routines
       void set_old_positions();
@@ -112,6 +110,9 @@ namespace physics {
 
       // Specific routines for trapezoidal integration
       void advance_particles_trapezoidal(const Real a_dt);
+      void diffuse_particles_trapezoidal_predictor(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void diffuse_particles_trapezoidal_corrector(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void step_trapezoidal(const Real a_dt);
     };
   }
 }
