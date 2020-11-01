@@ -45,6 +45,7 @@ namespace physics {
 
       // Switching between algorithms. 
       enum class which_algorithm {
+	implicit_euler,
 	euler_maruyama,
 	trapezoidal,
       };
@@ -108,6 +109,9 @@ namespace physics {
       void diffuse_particles_euler_maruyama(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);
       void step_euler_maruyama(const Real a_dt);
 
+      // Specific routines for implicit Euler with predictor corrector
+      void advance_particles_implicit_euler(const Real a_dt);
+      
       // Specific routines for trapezoidal integration
       void advance_particles_trapezoidal(const Real a_dt);
       void pre_trapezoidal_predictor(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);

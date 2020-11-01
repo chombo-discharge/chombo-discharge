@@ -138,6 +138,9 @@ void ito_plasma_godunov::parse_options() {
   else if(str ==  "trapezoidal"){
     m_algorithm = which_algorithm::trapezoidal;
   }
+  else if(str == "implicit_euler"){
+    m_algorithm = which_algorithm::implicit_euler;
+  }
   else{
     MayDay::Abort("ito_plasma_godunov::parse_options - unknown algorithm requested");
   }
@@ -217,6 +220,9 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     break;
   case which_algorithm::trapezoidal:
     this->advance_particles_trapezoidal(a_dt);
+    break;
+  case which_algorithm::implicit_euler:
+    this->advance_particles_implicit_euler(a_dt);
     break;
   default:
     MayDay::Abort("ito_plasma_godunov::advance - logic bust");
@@ -1195,4 +1201,13 @@ void ito_plasma_godunov::trapezoidal_corrector(const Real a_dt){
       }
     }
   }
+}
+
+void ito_plasma_godunov::advance_particles_implicit_euler(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advance_particles_implicit_euler");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_particles_implicit_euler" << endl;
+  }
+
+  MayDay::Abort("ito_plasma_godunov::advance_particles_implicit_euler - not implemented");
 }
