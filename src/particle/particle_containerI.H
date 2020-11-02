@@ -882,6 +882,13 @@ void particle_container<P>::copy_halo_particles(const int a_level) const {
 }
 
 template <class P>
+void particle_container<P>::clear_particles() {
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    m_particles[lvl]->clear();
+  }
+}
+
+template <class P>
 void particle_container<P>::clear_halo_particles() const {
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     m_halo_particles[lvl]->clear();

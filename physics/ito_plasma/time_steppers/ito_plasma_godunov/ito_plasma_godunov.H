@@ -45,7 +45,6 @@ namespace physics {
 
       // Switching between algorithms. 
       enum class which_algorithm {
-	implicit_euler,
 	euler_maruyama,
 	trapezoidal,
       };
@@ -88,10 +87,11 @@ namespace physics {
       void intersect_particles(const Real a_dt);
       void remap_godunov_particles(Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
       void deposit_godunov_particles(const Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
+      void clear_godunov_particles(const Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
 
       // Routines for semi-implicit Poisson solution
-      void compute_conductivity(const Vector<particle_container<godunov_particle>* >& a_particles);
-      void compute_conductivity(EBAMRCellData& a_conductivity, const Vector<particle_container<godunov_particle>* >& a_particles);
+      void compute_all_conductivities(const Vector<particle_container<godunov_particle>* >& a_particles);
+      void compute_cell_conductivity(EBAMRCellData& a_conductivity, const Vector<particle_container<godunov_particle>* >& a_particles);
       void compute_face_conductivity();
       void setup_semi_implicit_poisson(const Real a_dt);
 
@@ -108,9 +108,6 @@ namespace physics {
       void advance_particles_euler_maruyama(const Real a_dt);
       void diffuse_particles_euler_maruyama(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);
       void step_euler_maruyama(const Real a_dt);
-
-      // Specific routines for implicit Euler with predictor corrector
-      void advance_particles_implicit_euler(const Real a_dt);
       
       // Specific routines for trapezoidal integration
       void advance_particles_trapezoidal(const Real a_dt);

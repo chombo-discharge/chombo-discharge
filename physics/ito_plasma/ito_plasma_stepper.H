@@ -134,7 +134,7 @@ namespace physics {
 			 const Vector<EBAMRCellData* >& a_densities,
 			 const EBAMRIVData&             a_sigma);
 
-      // Remap and deposition routines for solver subsets. 
+      // Remap and deposition routines for solver subsets.
       void deposit_particles(const which_particles a_which_particles);
       void remap_particles(const which_particles a_which_particles);
 

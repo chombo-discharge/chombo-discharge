@@ -310,6 +310,9 @@ void poisson_solver::regrid(const int a_lmin, const int a_old_finest, const int 
     }
   }
 
+  m_amr->average_down(m_state, m_realm);
+  m_amr->interp_ghost(m_state, m_realm);
+
   // Now recompute E
   this->compute_E();
 }

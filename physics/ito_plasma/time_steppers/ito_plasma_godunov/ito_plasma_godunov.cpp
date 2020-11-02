@@ -138,9 +138,6 @@ void ito_plasma_godunov::parse_options() {
   else if(str ==  "trapezoidal"){
     m_algorithm = which_algorithm::trapezoidal;
   }
-  else if(str == "implicit_euler"){
-    m_algorithm = which_algorithm::implicit_euler;
-  }
   else{
     MayDay::Abort("ito_plasma_godunov::parse_options - unknown algorithm requested");
   }
@@ -220,9 +217,6 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     break;
   case which_algorithm::trapezoidal:
     this->advance_particles_trapezoidal(a_dt);
-    break;
-  case which_algorithm::implicit_euler:
-    this->advance_particles_implicit_euler(a_dt);
     break;
   default:
     MayDay::Abort("ito_plasma_godunov::advance - logic bust");
@@ -425,16 +419,15 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
+    m_rho_dagger_particles[idx]->regrid(  grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
     m_conductivity_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-    m_rho_dagger_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   }
-
-
-  // Recompute the conductivity with the other particles
+  
+  // Recompute the conductivity and space charge densities. 
   this->compute_regrid_conductivity();
   this->compute_regrid_rho();
   this->setup_semi_implicit_poisson(m_prevDt);
-  
+
   const bool converged = this->solve_poisson();
   if(!converged){
     MayDay::Abort("ito_plasma_godunov::regrid - Poisson solve did not converge after regrid!!!");
@@ -616,23 +609,69 @@ void ito_plasma_godunov::deposit_godunov_particles(const Vector<particle_contain
   }
 }
 
-void ito_plasma_godunov::compute_conductivity(const Vector<particle_container<godunov_particle>* >& a_particles){
-  CH_TIME("ito_plasma_godunov::compute_conductivity");
+void ito_plasma_godunov::clear_godunov_particles(const Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which_particles){
+  CH_TIME("ito_plasma_godunov::clear_godunov_particles");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_conductivity" << endl;
+    pout() << m_name + "::deposit_clear_particles" << endl;
   }
 
-  this->compute_conductivity(m_conduct_cell, a_particles);
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>&   solver = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+    const bool charged   = species->get_charge() != 0;
+
+    switch(a_which_particles) {
+    case which_particles::all:
+      a_particles[idx]->clear_particles();
+      break;
+    case which_particles::all_mobile:
+      if(mobile) a_particles[idx]->clear_particles();
+      break;
+    case which_particles::all_diffusive:
+      if(diffusive) a_particles[idx]->clear_particles();
+      break;
+    case which_particles::charged_mobile:
+      if(charged && mobile) a_particles[idx]->clear_particles();
+      break;
+    case which_particles::charged_diffusive:
+      if(charged && diffusive) a_particles[idx]->clear_particles();
+      break;
+    case which_particles::all_mobile_or_diffusive:
+      if(mobile || diffusive) a_particles[idx]->clear_particles();
+      break;
+    case which_particles::charged_and_mobile_or_diffusive:
+      if(charged && (mobile || diffusive)) a_particles[idx]->clear_particles();
+      break;
+    case which_particles::stationary:
+      if(!mobile && !diffusive) a_particles[idx]->clear_particles();
+      break;
+    default:
+      MayDay::Abort("ito_plasma_godunov::clear_godunov_particles - logic bust");
+    }
+  }
+}
+
+void ito_plasma_godunov::compute_all_conductivities(const Vector<particle_container<godunov_particle>* >& a_particles){
+  CH_TIME("ito_plasma_godunov::compute_all_conductivities");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_all_conductivities" << endl;
+  }
+
+  this->compute_cell_conductivity(m_conduct_cell, a_particles);
 
   // Now do the faces
   this->compute_face_conductivity();
 }
 
-void ito_plasma_godunov::compute_conductivity(EBAMRCellData& a_conductivity,
-					      const Vector<particle_container<godunov_particle>* >& a_particles){
-  CH_TIME("ito_plasma_godunov::compute_conductivity(conductivity, godunov_particle");
+void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity, const Vector<particle_container<godunov_particle>* >& a_particles){
+  CH_TIME("ito_plasma_godunov::compute_cell_conductivity(conductivity, godunov_particle");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_conductivity(conductivity, godunov_particle)" << endl;
+    pout() << m_name + "::compute_cell_conductivity(conductivity, godunov_particle)" << endl;
   }
 
   data_ops::set_value(a_conductivity, 0.0);
@@ -750,6 +789,8 @@ void ito_plasma_godunov::copy_conductivity_particles(Vector<particle_container<g
     pout() << m_name + "::copy_conductivity_particles" << endl;
   }
 
+  this->clear_godunov_particles(a_conductivity_particles, which_particles::all);
+
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<ito_solver>& solver   = solver_it();
     const RefCountedPtr<ito_species>& species = solver->get_species();
@@ -763,8 +804,6 @@ void ito_plasma_godunov::copy_conductivity_particles(Vector<particle_container<g
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const List<ito_particle>& ito_parts = solver->get_particles()[lvl][dit()].listItems();
 	List<godunov_particle>& gdnv_parts  = (*a_conductivity_particles[idx])[lvl][dit()].listItems();
-
-	gdnv_parts.clear();
 
 	if(q != 0 && solver->is_mobile()){
 	  for (ListIterator<ito_particle> lit(ito_parts); lit.ok(); ++lit){
@@ -823,7 +862,7 @@ void ito_plasma_godunov::compute_regrid_conductivity(){
     pout() << m_name + "::compute_regrid_conductivity" << endl;
   }
 
-  this->compute_conductivity(m_conduct_cell, m_conductivity_particles);
+  this->compute_all_conductivities(m_conductivity_particles);
 }
 
 void ito_plasma_godunov::compute_regrid_rho(){
@@ -832,14 +871,7 @@ void ito_plasma_godunov::compute_regrid_rho(){
     pout() << m_name + "::compute_regrid_rho" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
-
-    const int idx = solver_it.get_solver();
-    
-    solver->deposit_particles(solver->get_state(), *m_rho_dagger_particles[idx]); 
-  }
+  this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all);
 }
 
 void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
@@ -848,7 +880,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
     pout() << m_name + "::advance_particles_euler_maruyama" << endl;
   }
 
-  m_prevDt = a_dt; // Needed for regrids. 
+  m_prevDt = a_dt; // Needed for regrids.
 
   // 1. Store X^k positions. 
   this->set_old_positions();   
@@ -860,7 +892,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
 
   // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch. 
   this->copy_conductivity_particles(m_conductivity_particles); // Sets particle "weights" = w*mu
-  this->compute_conductivity(m_conductivity_particles);        // Deposits q_e*Z*w*mu/eps0 on the mesh
+  this->compute_all_conductivities(m_conductivity_particles);        // Deposits q_e*Z*w*mu/eps0 on the mesh
   this->setup_semi_implicit_poisson(a_dt);                     // Multigrid setup
   this->solve_poisson();                                       // Solve the stinking equation. 
 
@@ -884,8 +916,6 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
 
   // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
   this->deposit_particles(which_particles::all_mobile_or_diffusive);
-
-
 }
 
 void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt){
@@ -893,6 +923,8 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_contai
   if(m_verbosity > 5){
     pout() << m_name + "::diffuse_particles_euler_maruyama" << endl;
   }
+
+  this->clear_godunov_particles(a_rho_dagger, which_particles::all);
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
@@ -903,7 +935,7 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_contai
     const bool mobile    = solver->is_mobile();
     const bool diffusive = solver->is_diffusive();
 
-    const Real f = mobile ? 1.0 : 0.0; // Multiplication factor for mobility
+    const Real f = mobile    ? 1.0 : 0.0; // Multiplication factor for mobility
     const Real g = diffusive ? 1.0 : 0.0; // Multiplication factor for diffusion
     
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -914,8 +946,6 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_contai
 
 	List<ito_particle>& ito_particles  = particles[dit()].listItems();
 	List<godunov_particle>& gdnv_parts = (*a_rho_dagger[idx])[lvl][dit()].listItems();
-
-	gdnv_parts.clear();
 
 	// Store the diffusion hop, and add the godunov particles
 	for (ListIterator<ito_particle> lit(ito_particles); lit.ok(); ++lit){
@@ -990,7 +1020,7 @@ void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
   this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all);           // All copies need to deposit. 
 
   this->copy_conductivity_particles(m_conductivity_particles); 
-  this->compute_conductivity(m_conductivity_particles);        
+  this->compute_all_conductivities(m_conductivity_particles);        
   this->setup_semi_implicit_poisson(a_dt);                     
   this->solve_poisson();                                       
 
@@ -1006,7 +1036,7 @@ void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
   this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all);                    // Everything needs to deposit...
 
   this->copy_conductivity_particles(m_conductivity_particles); 
-  this->compute_conductivity(m_conductivity_particles);        
+  this->compute_all_conductivities(m_conductivity_particles);        
   this->setup_semi_implicit_poisson(0.5*a_dt);                 
   this->solve_poisson();                                       
 
@@ -1201,13 +1231,4 @@ void ito_plasma_godunov::trapezoidal_corrector(const Real a_dt){
       }
     }
   }
-}
-
-void ito_plasma_godunov::advance_particles_implicit_euler(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_implicit_euler");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_implicit_euler" << endl;
-  }
-
-  MayDay::Abort("ito_plasma_godunov::advance_particles_implicit_euler - not implemented");
 }

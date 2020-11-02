@@ -111,6 +111,11 @@ public:
   void clear_non_halo_particles() const;
 
   /*!
+    @brief Clear all particles
+  */
+  void clear_particles();
+
+  /*!
     @brief Get the realm
   */
   const std::string get_realm() const;
