@@ -11,7 +11,7 @@ amr_mesh.lo_corner       = -2.5E-2 -2.5E-2 -4E-2 # Low corner of problem domain
 amr_mesh.hi_corner       =  2.5E-2  2.5E-2  1E-2 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 3           # Maximum amr depth
+amr_mesh.max_amr_depth   = 4           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -91,7 +91,7 @@ poisson_multifluid_gmg.gmg_min_iter      = 5         # Minimum number of iterati
 poisson_multifluid_gmg.gmg_max_iter      = 32        # Maximum number of iterations
 poisson_multifluid_gmg.gmg_tolerance     = 1.E-10    # Residue tolerance
 poisson_multifluid_gmg.gmg_hang          = 0.2       # Solver hang
-poisson_multifluid_gmg.gmg_bottom_drop   = 4         # Bottom drop
+poisson_multifluid_gmg.gmg_bottom_drop   = 8         # Bottom drop
 poisson_multifluid_gmg.gmg_bc_order      = 2         # Boundary condition order for multigrid
 poisson_multifluid_gmg.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 poisson_multifluid_gmg.gmg_bottom_relax  = 24        # Number of relaxations in bottom solve ('simple' solver only)
@@ -210,7 +210,7 @@ ito_plasma_godunov.ppc            = 32             # Superparticle number of cel
 ito_plasma_godunov.merge_interval = 1              # How often to make superparticles
 ito_plasma_godunov.relax_factor   = 9999.5         # Factor in front of relaxation time	
 ito_plasma_godunov.regrid_super   = false          # Make superparticles after regrid or not
-ito_plasma_godunov.algorithm      = euler_maruyama # 'euler', 'euler_maruyama', 'midpoint'
+ito_plasma_godunov.algorithm      = true           # 'euler', 'euler_maruyama', 'midpoint'
 ito_plasma_godunov.diffusion      = super          # Which diffusion update? 'physical', 'super'
 ito_plasma_godunov.diffu_samples  = 64             # Maximum number of diffusion samples when using 'physical' diffusion
 ito_plasma_godunov.profile        = true           # Profile advance or not
@@ -233,14 +233,14 @@ ito_plasma_air3.mobile_ions    = false          # By default, stationary ions.
 ito_plasma_air3.ion_mobility   = 2E-4           # Turn on/off ion mobility
 
 # Reaction stuff
-ito_plasma_air3.react_ppc      = 32              # Maximum number of particles to produce in reaction step	
+ito_plasma_air3.react_ppc      = 32             # Maximum number of particles to produce in reaction step	
 ito_plasma_air3.tau_switch     = -1             # Switch from SSA to tau when reaching this many particles
 ito_plasma_air3.poisson_switch = 100            # When to approximate Poisson by normal distribution
 ito_plasma_air3.Ncrit          = -1             # How many firings away from a negative particle number?
 ito_plasma_air3.prop_eps       = 1.E99          # Maximum relative change in propensity function
-ito_plasma_air3.NSSA           = 1             # How many SSA steps to run when tau-leaping is inefficient
-ito_plasma_air3.SSAlim         = -0.1            # When to enter SSA instead of tau-leaping
-ito_plasma_air3.algorithm      = tau         # 'tau', 'ssa', or 'hybrid'
+ito_plasma_air3.NSSA           = 1              # How many SSA steps to run when tau-leaping is inefficient
+ito_plasma_air3.SSAlim         = -0.1           # When to enter SSA instead of tau-leaping
+ito_plasma_air3.algorithm      = tau            # 'tau', 'ssa', or 'hybrid'
 
 # Zheleznyak stuff.
 ito_plasma_air3.quenching_pressure = 0.03947    # Quenching pressure for photo-emission (atm)
