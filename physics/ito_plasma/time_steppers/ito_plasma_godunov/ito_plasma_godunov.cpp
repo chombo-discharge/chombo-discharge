@@ -880,36 +880,117 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
     pout() << m_name + "::advance_particles_euler_maruyama" << endl;
   }
 
+  Real posTime = 0.0;
+  Real diffuseTime = 0.0;
+  Real remapGdnvTime = 0.0;
+  Real depositGdnvTime = 0.0;
+  Real copyCondTime = 0.0;
+  Real condTime = 0.0;
+  Real setupTime = 0.0;
+  Real poissonTime = 0.0;
+  Real velocityTime = 0.0;
+  Real particleTime = 0.0;
+  Real remapTime = 0.0;
+  Real isectTime = 0.0;
+  Real depositTime = 0.0;
+  Real totalTime = 0.0;
+
+
+  totalTime -= MPI_Wtime();
+
   m_prevDt = a_dt; // Needed for regrids.
 
-  // 1. Store X^k positions. 
-  this->set_old_positions();   
+  // 1. Store X^k positions.
+  posTime -= MPI_Wtime();
+  this->set_old_positions();
+  posTime += MPI_Wtime();
 
-  // 2. Diffuse the particles. This copies onto m_rho_dagger_particles and stores the hop on the full particles. 
+  // 2. Diffuse the particles. This copies onto m_rho_dagger_particles and stores the hop on the full particles.
+  diffuseTime -= MPI_Wtime();
   this->diffuse_particles_euler_maruyama(m_rho_dagger_particles, a_dt);
-  this->remap_godunov_particles(m_rho_dagger_particles,   which_particles::all_diffusive); 
+  diffuseTime += MPI_Wtime();
+  remapGdnvTime -= MPI_Wtime();
+  this->remap_godunov_particles(m_rho_dagger_particles,   which_particles::all_diffusive);
+  remapGdnvTime += MPI_Wtime();
+  depositGdnvTime -= MPI_Wtime();
   this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all_diffusive);
+  depositGdnvTime += MPI_Wtime();
 
-  // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch. 
+  // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch.
+  copyCondTime -= MPI_Wtime();
   this->copy_conductivity_particles(m_conductivity_particles); // Sets particle "weights" = w*mu
+  copyCondTime += MPI_Wtime();
+  condTime -= MPI_Wtime();
   this->compute_all_conductivities(m_conductivity_particles);  // Deposits q_e*Z*w*mu on the mesh
+  condTime += MPI_Wtime();
+  setupTime -= MPI_Wtime();
   this->setup_semi_implicit_poisson(a_dt);                     // Multigrid setup
-  this->solve_poisson();                                       // Solve the stinking equation. 
+  setupTime += MPI_Wtime();
+  poissonTime -= MPI_Wtime();
+  this->solve_poisson();                                       // Solve the stinking equation.
+  poissonTime += MPI_Wtime();
 
-  // 4. Recompute velocities with the new electric field, then do the actual semi-implicit Euler-Maruyama update. 
+  // 4. Recompute velocities with the new electric field, then do the actual semi-implicit Euler-Maruyama update.
+  velocityTime -= MPI_Wtime();
   this->set_ito_velocity_funcs();
   m_ito->interpolate_velocities();
-  this->step_euler_maruyama(a_dt);  
+  velocityTime += MPI_Wtime();
+  particleTime -= MPI_Wtime();
+  this->step_euler_maruyama(a_dt);
+  particleTime += MPI_Wtime();
+  remapTime -= MPI_Wtime();
   this->remap_particles(which_particles::all_mobile_or_diffusive);
+  remapTime += MPI_Wtime();
 
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
+  isectTime -= MPI_Wtime();
   this->intersect_particles(a_dt);
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->remove_eb_particles();
   }
+  isectTime += MPI_Wtime();
 
   // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
+  depositTime -= MPI_Wtime();
   this->deposit_particles(which_particles::all_mobile_or_diffusive);
+  depositTime += MPI_Wtime();
+
+  totalTime += MPI_Wtime();
+
+  if(m_profile){
+
+    posTime *= 100./totalTime;
+    diffuseTime *= 100./totalTime;
+    remapGdnvTime *= 100./totalTime;
+    depositGdnvTime *= 100./totalTime;
+    copyCondTime *= 100./totalTime;
+    condTime *= 100./totalTime;
+    setupTime *= 100./totalTime;
+    poissonTime *= 100./totalTime;
+    velocityTime *= 100./totalTime;
+    particleTime *= 100./totalTime;
+    remapTime *= 100./totalTime;
+    isectTime *= 100./totalTime;
+    depositTime *= 100./totalTime;
+    
+    pout() << endl
+      	   << "ito_plasma_godunov::euler_maruyama breakdown:" << endl
+	   << "======================================" << endl
+	   << "posTime         = " << posTime << "%" << endl
+      	   << "diffuseTime     = " << diffuseTime << "%" << endl
+	   << "remapGdnvTime   = " << remapGdnvTime << "%" << endl
+      	   << "depositGdnvTime = " << depositGdnvTime << "%" << endl
+	   << "copyCondTime    = " << copyCondTime << "%" << endl
+      	   << "condTime        = " << condTime << "%" << endl
+	   << "setupTime       = " << setupTime << "%" << endl
+      	   << "poissonTime     = " << poissonTime << "%" << endl
+	   << "velocityTime    = " << velocityTime << "%" << endl
+      	   << "particleTime    = " << particleTime << "%" << endl
+	   << "remapTime       = " << remapTime << "%" << endl
+      	   << "isectTime       = " << isectTime << "%" << endl
+	   << "total time    = " << totalTime << " (seconds)" << endl
+	   << endl;
+  }
 }
 
 void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt){
