@@ -892,7 +892,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
 
   // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch. 
   this->copy_conductivity_particles(m_conductivity_particles); // Sets particle "weights" = w*mu
-  this->compute_all_conductivities(m_conductivity_particles);        // Deposits q_e*Z*w*mu/eps0 on the mesh
+  this->compute_all_conductivities(m_conductivity_particles);  // Deposits q_e*Z*w*mu on the mesh
   this->setup_semi_implicit_poisson(a_dt);                     // Multigrid setup
   this->solve_poisson();                                       // Solve the stinking equation. 
 
@@ -901,12 +901,6 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   m_ito->interpolate_velocities();
   this->step_euler_maruyama(a_dt);  
   this->remap_particles(which_particles::all_mobile_or_diffusive);
-
-#if 0 // Debug, check if we're getting the correct electric field -- why doesn't this work...?
-  this->deposit_particles(which_particles::all);
-  this->setup_standard_poisson();
-  this->solve_poisson();
-#endif
 
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   this->intersect_particles(a_dt);

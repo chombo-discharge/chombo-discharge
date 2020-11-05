@@ -2475,6 +2475,8 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
   
   Real mass_after = 0.0;
   Real energy_after = 0.0;
+  RealVect center_before = RealVect::Zero;
+  RealVect center_after = RealVect::Zero;
 #endif
   
   std::vector<point_mass> pointMasses(a_particles.length());
@@ -2493,6 +2495,7 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
     if(p.mass() < 1.0){
       MayDay::Abort("ito_solver::bvh_merge - bad mass!");
     }
+    center_before += p.mass()*p.position();
 #endif
   }
   
@@ -2512,10 +2515,14 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
 #if ITO_DEBUG
     mass_after += p.mass();
     energy_after += p.mass()*p.energy();
+    center_after += p.mass()*p.position();
 #endif
   }
 
 #if ITO_DEBUG
+  center_before = center_before/mass_before;
+  center_after = center_after/mass_before;
+  pout() << "ito_solver, center before = " << center_before << "\t after = " << center_after << "\t rel diff = " << (center_after - center_before).vectorLength() << endl;
   if(mass_before != mass_after)     pout() << "ito_solver::bvh_merge failed. Mass before = "   << mass_before   << "\t Mass after = "   << mass_after << endl;
   if(energy_before != energy_after) pout() << "ito_solver::bvh_merge failed. Energy before/after = " << energy_before/energy_after << "\t Energy after = " << energy_after << endl;
 #endif
@@ -2540,8 +2547,6 @@ void ito_solver::clear(AMRParticles<ito_particle>& a_particles){
     a_particles[lvl]->clear();
   }
 }
-
-
 
 RealVect ito_solver::random_position(const RealVect a_pos,
 				     const RealVect a_lo,
