@@ -556,8 +556,7 @@ void ito_solver::remove_eb_particles(particle_container<ito_particle>& a_particl
 	List<ito_particle>  particleCopy = List<ito_particle>(particles);
 	particles.clear();
 	
-	ListIterator<ito_particle> lit(particleCopy);
-	for (lit.rewind(); lit; ++lit){
+	for (ListIterator<ito_particle> lit(particleCopy); lit.ok(); ++lit){
 	  ito_particle& p = particles[lit];
 
 	  const Real f = func->value(p.position());

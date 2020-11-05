@@ -988,7 +988,8 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
       	   << "particleTime    = " << particleTime << "%" << endl
 	   << "remapTime       = " << remapTime << "%" << endl
       	   << "isectTime       = " << isectTime << "%" << endl
-	   << "total time    = " << totalTime << " (seconds)" << endl
+	   << "depositTime     = " << depositTime << "%" << endl
+	   << "total time      = " << totalTime << " (seconds)" << endl
 	   << endl;
   }
 }
