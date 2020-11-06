@@ -926,8 +926,8 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
 
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   isectTime -= MPI_Wtime();
-  this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function); // Only implicit function supported (for now)
-  this->remove_eb_particles(which_particles::all_mobile_or_diffusive, EB_representation::discrete);
+  this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function);
+  this->remove_eb_particles(which_particles::all_mobile_or_diffusive, EB_representation::discrete);         
   isectTime += MPI_Wtime();
 
   // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
