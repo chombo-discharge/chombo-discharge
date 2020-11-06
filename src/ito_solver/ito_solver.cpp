@@ -546,6 +546,7 @@ void ito_solver::remove_eb_particles(particle_container<ito_particle>& a_particl
       const EBISBox& ebisbox = ebisl[dit()];
       
       List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
+      List<ito_particle>& scratch   = m_scratch_particles[lvl][dit()].listItems();
 
       if(ebisbox.isAllCovered()){ // Box is all covered
 	particles.clear();
@@ -553,10 +554,15 @@ void ito_solver::remove_eb_particles(particle_container<ito_particle>& a_particl
       else if(ebisbox.isAllRegular()){ // Do nothing
       }
       else{
-	List<ito_particle>  particleCopy = List<ito_particle>(particles);
-	particles.clear();
+
+	// Make a local copy
+	scratch.clear();
+	for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
+	  scratch.add(lit());
+	}
 	
-	for (ListIterator<ito_particle> lit(particleCopy); lit.ok(); ++lit){
+	particles.clear();
+	for (ListIterator<ito_particle> lit(scratch); lit.ok(); ++lit){
 	  ito_particle& p = particles[lit];
 
 	  const Real f = func->value(p.position());
@@ -575,92 +581,95 @@ void ito_solver::intersect_particles(){
     pout() << m_name + "::intersect_particles" << endl;
   }
 
-  if(m_mobile || m_diffusive){
 
-    const RealVect prob_lo = m_amr->get_prob_lo();
-    const RealVect prob_hi = m_amr->get_prob_hi();
-    const Real     SAFETY  = 1.E-6;
+  const RealVect prob_lo = m_amr->get_prob_lo();
+  const RealVect prob_hi = m_amr->get_prob_hi();
+  const Real     SAFETY  = 1.E-6;
 
-    // This is the implicit function used for intersection tests
-    RefCountedPtr<BaseIF> impfunc;
-    if(m_phase == phase::gas){
-      impfunc = m_compgeom->get_gas_if();
-    }
-    else{
-      impfunc = m_compgeom->get_sol_if();
-    }
+  // This is the implicit function used for intersection tests
+  RefCountedPtr<BaseIF> impfunc;
+  if(m_phase == phase::gas){
+    impfunc = m_compgeom->get_gas_if();
+  }
+  else{
+    impfunc = m_compgeom->get_sol_if();
+  }
 
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      for (DataIterator dit = m_amr->get_grids(m_realm)[lvl]; dit.ok(); ++dit){
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    for (DataIterator dit = m_amr->get_grids(m_realm)[lvl]; dit.ok(); ++dit){
 
-	const Real     dx      = m_amr->get_dx()[lvl];
-	const EBISBox& ebisbox = m_amr->get_ebisl(m_realm, m_phase)[lvl][dit()];
+      const Real     dx      = m_amr->get_dx()[lvl];
+      const EBISBox& ebisbox = m_amr->get_ebisl(m_realm, m_phase)[lvl][dit()];
 
-	if(!ebisbox.isAllRegular()){
-	  List<ito_particle>& particles    = m_particles[lvl][dit()].listItems();
-	  List<ito_particle>& ebParticles  = m_eb_particles[lvl][dit()].listItems();
-	  List<ito_particle>& domParticles = m_domain_particles[lvl][dit()].listItems();
+      if(!ebisbox.isAllRegular()){
+	List<ito_particle>& particles        = m_particles[lvl][dit()].listItems();
+	List<ito_particle>& ebParticles      = m_eb_particles[lvl][dit()].listItems();
+	List<ito_particle>& domParticles     = m_domain_particles[lvl][dit()].listItems();
+	List<ito_particle>& scratchParticles = m_scratch_particles[lvl][dit()].listItems();
 
-	  // Make a copy to be distributed. 
-	  List<ito_particle> copyParticles(particles);
 
-	  particles.clear();
-	  ebParticles.clear();
-	  domParticles.clear();
+	// Make a copy to be distributed.
+	scratchParticles.clear();
+	for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
+	  scratchParticles.add(lit());
+	}
 
-	  for (ListIterator<ito_particle> lit(copyParticles); lit.ok(); ++lit){
-	    ito_particle& p = lit();
+	// Clear these, then refill them as appropriate. 
+	particles.clear();
+	ebParticles.clear();
+	domParticles.clear();
 
-	    const RealVect newPos  = p.position();
-	    const RealVect oldPos  = p.oldPosition();
-	    const RealVect path    = newPos - oldPos;
-	    const Real     pathLen = path.vectorLength();
+	for (ListIterator<ito_particle> lit(scratchParticles); lit.ok(); ++lit){
+	  ito_particle& p = lit();
 
-	    // Check if we should check of different types of boundary intersections. These are checp initial tests that allow
-	    // us to skip intersection tests for some photons.
-	    bool checkEB  = false;
-	    bool checkDom = false;
+	  const RealVect newPos  = p.position();
+	  const RealVect oldPos  = p.oldPosition();
+	  const RealVect path    = newPos - oldPos;
+	  const Real     pathLen = path.vectorLength();
 
-	    if(impfunc->value(oldPos) < pathLen){
-	      checkEB = true;
+	  // Check if we should check of different types of boundary intersections. These are checp initial tests that allow
+	  // us to skip intersection tests for some photons.
+	  bool checkEB  = false;
+	  bool checkDom = false;
+
+	  if(impfunc->value(oldPos) < pathLen){
+	    checkEB = true;
+	  }
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    if(newPos[dir] < prob_lo[dir] || newPos[dir] > prob_hi[dir]){
+	      checkDom = true; 
 	    }
-	    for (int dir = 0; dir < SpaceDim; dir++){
-	      if(newPos[dir] < prob_lo[dir] || newPos[dir] > prob_hi[dir]){
-		checkDom = true; 
-	      }
+	  }
+
+	  if(!checkEB & !checkDom){ // No intersection test needed. 
+	    particles.add(p);
+	  }
+	  else{ // Must do nasty intersection test. 
+	    Real dom_s = 1.E99;
+	    Real eb_s  = 1.E99;
+
+	    bool contact_domain = false;
+	    bool contact_eb     = false;
+	      
+	    if(checkDom){
+	      contact_domain = particle_ops::domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
 	    }
-
-
-	    if(!checkEB & !checkDom){ // No intersection test needed. 
+	    if(checkEB){
+	      contact_eb = particle_ops::eb_bc_intersection(impfunc, oldPos, newPos, pathLen, dx, eb_s);
+	    }
+	  
+	    // Ok, we're good. 
+	    if(!contact_eb && !contact_domain){
 	      particles.add(p);
 	    }
-	    else{ // Must do nasty intersection test. 
-	      Real dom_s = 1.E99;
-	      Real eb_s  = 1.E99;
-
-	      bool contact_domain = false;
-	      bool contact_eb     = false;
-	      
-	      if(checkDom){
-		contact_domain = particle_ops::domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
+	    else {
+	      if(eb_s < dom_s){
+		p.position() = oldPos + eb_s*path;
+		ebParticles.add(p);
 	      }
-	      if(checkEB){
-		contact_eb = particle_ops::eb_bc_intersection(impfunc, oldPos, newPos, pathLen, dx, eb_s);
-	      }
-	  
-	      // Ok, we're good. 
-	      if(!contact_eb && !contact_domain){
-		particles.add(p);
-	      }
-	      else {
-		if(eb_s < dom_s){
-		  p.position() = oldPos + eb_s*path;
-		  ebParticles.add(p);
-		}
-		else{
-		  p.position() = oldPos + Max(0.0,dom_s-SAFETY)*path;
-		  domParticles.add(p);
-		}
+	      else{
+		p.position() = oldPos + Max(0.0,dom_s-SAFETY)*path;
+		domParticles.add(p);
 	      }
 	    }
 	  }

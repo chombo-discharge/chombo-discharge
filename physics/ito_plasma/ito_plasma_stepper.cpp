@@ -991,6 +991,53 @@ void ito_plasma_stepper::intersect_particles(const Real a_dt, const which_partic
   }  
 }
 
+void ito_plasma_stepper::remove_eb_particles(const which_particles a_which_particles){
+  CH_TIME("ito_plasma_stepper::remove_eb_particles( which_particles)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::remove_eb_particles( which_particles)" << endl;
+  }
+  
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>&   solver = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+    const bool charged   = species->get_charge() != 0;
+
+    switch(a_which_particles) {
+    case which_particles::all:
+      solver->remove_eb_particles();
+      break;
+    case which_particles::all_mobile:
+      if(mobile) solver->remove_eb_particles();
+      break;
+    case which_particles::all_diffusive:
+      if(diffusive) solver->remove_eb_particles();
+      break;
+    case which_particles::charged_mobile:
+      if(charged && mobile) solver->remove_eb_particles();
+      break;
+    case which_particles::charged_diffusive:
+      if(charged && diffusive) solver->remove_eb_particles();
+      break;
+    case which_particles::all_mobile_or_diffusive:
+      if(mobile || diffusive) solver->remove_eb_particles();
+      break;
+    case which_particles::charged_and_mobile_or_diffusive:
+      if(charged && (mobile || diffusive)) solver->remove_eb_particles();
+      break;
+    case which_particles::stationary:
+      if(!mobile && !diffusive) solver->remove_eb_particles();
+      break;
+    default:
+      MayDay::Abort("ito_plasma_stepper::remove_eb_particles_particles(which particles) - logic bust");
+    }
+  }  
+}
+
 void ito_plasma_stepper::remap_particles(const which_particles a_which_particles){
   CH_TIME("ito_plasma_stepper::remap_particles(which_particles)");
   if(m_verbosity > 5){
