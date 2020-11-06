@@ -345,6 +345,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 	   << "velo time     = " << velo_time << "%" << endl
       	   << "diff time     = " << diff_time << "%" << endl
 	   << "total percent = " << percentage << endl
+	   << "imbalance     = " << 100. - percentage << endl
 	   << "total time    = " << total_time << " (seconds)" << endl
 	   << endl;
   }
