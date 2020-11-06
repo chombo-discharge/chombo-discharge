@@ -81,7 +81,6 @@ namespace physics {
       // Routine for setting up extra particle storage
       void setup_runtime_storage();
 
-
       // Global routines
       void set_old_positions();
       void remap_godunov_particles(Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);

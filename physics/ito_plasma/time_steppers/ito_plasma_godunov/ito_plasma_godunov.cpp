@@ -211,6 +211,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   Real total_time    = -MPI_Wtime();
   
   // Particle algorithms
+  MPI_Barrier(Chombo_MPI::comm);
   particle_time -= MPI_Wtime();
   switch(m_algorithm){
   case which_algorithm::euler_maruyama:
@@ -225,12 +226,14 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   particle_time += MPI_Wtime();
 
   // Compute current and relaxation time.
+  MPI_Barrier(Chombo_MPI::comm);
   relax_time = -MPI_Wtime();
   this->compute_J(m_J, a_dt);
   m_dt_relax = this->compute_relaxation_time(); // This is for the restricting the next step.
   relax_time += MPI_Wtime();
 
   // Move photons
+  MPI_Barrier(Chombo_MPI::comm);
   photon_time = -MPI_Wtime();
   this->advance_photons(a_dt);
   photon_time += MPI_Wtime();
@@ -242,6 +245,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   }
   
   // Sort the particles and photons per cell so we can call reaction algorithms
+  MPI_Barrier(Chombo_MPI::comm);
   sort_time = -MPI_Wtime();
   m_ito->sort_particles_by_cell();
   this->sort_bulk_photons_by_cell();
@@ -249,11 +253,13 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   sort_time += MPI_Wtime();
 
   // Chemistry kernel.
+  MPI_Barrier(Chombo_MPI::comm);
   reaction_time = -MPI_Wtime();
   this->advance_reaction_network(a_dt);
   reaction_time += MPI_Wtime();
 
   // Make superparticles
+  MPI_Barrier(Chombo_MPI::comm);
   super_time = -MPI_Wtime();
   if((m_step+1) % m_merge_interval == 0 && m_merge_interval > 0){
     m_ito->make_superparticles(m_ppc);
@@ -261,6 +267,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   super_time += MPI_Wtime();
 
   // Sort particles per patch.
+  MPI_Barrier(Chombo_MPI::comm);
   sort_time -= MPI_Wtime();
   m_ito->sort_particles_by_patch();
   this->sort_bulk_photons_by_patch();
@@ -268,6 +275,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   sort_time += MPI_Wtime();
 
   // Clear other data holders for now. BC comes later...
+  MPI_Barrier(Chombo_MPI::comm);
   clear_time = -MPI_Wtime();
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->clear(solver_it()->get_eb_particles());
@@ -276,14 +284,18 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   clear_time += MPI_Wtime();
 
   //
+  MPI_Barrier(Chombo_MPI::comm);
   deposit_time -= MPI_Wtime();
   m_ito->deposit_particles();
   deposit_time += MPI_Wtime();
 
   // Prepare next step
+  MPI_Barrier(Chombo_MPI::comm);
   velo_time -= MPI_Wtime();
   this->compute_ito_velocities();
   velo_time += MPI_Wtime();
+
+  MPI_Barrier(Chombo_MPI::comm);
   diff_time -= MPI_Wtime();
   this->compute_ito_diffusion();
   diff_time += MPI_Wtime();
@@ -905,54 +917,74 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   m_prevDt = a_dt; // Needed for regrids.
 
   // 1. Store X^k positions.
+  MPI_Barrier(Chombo_MPI::comm);
   posTime -= MPI_Wtime();
   this->set_old_positions();
   posTime += MPI_Wtime();
 
   // 2. Diffuse the particles. This copies onto m_rho_dagger_particles and stores the hop on the full particles.
+  MPI_Barrier(Chombo_MPI::comm);
   diffuseTime -= MPI_Wtime();
   this->diffuse_particles_euler_maruyama(m_rho_dagger_particles, a_dt);
   diffuseTime += MPI_Wtime();
+
+  MPI_Barrier(Chombo_MPI::comm);
   remapGdnvTime -= MPI_Wtime();
   this->remap_godunov_particles(m_rho_dagger_particles,   which_particles::all_diffusive);
   remapGdnvTime += MPI_Wtime();
+
+  MPI_Barrier(Chombo_MPI::comm);
   depositGdnvTime -= MPI_Wtime();
   this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all_diffusive);
   depositGdnvTime += MPI_Wtime();
 
   // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch.
+  MPI_Barrier(Chombo_MPI::comm);
   copyCondTime -= MPI_Wtime();
   this->copy_conductivity_particles(m_conductivity_particles); // Sets particle "weights" = w*mu
   copyCondTime += MPI_Wtime();
+
+  MPI_Barrier(Chombo_MPI::comm);
   condTime -= MPI_Wtime();
   this->compute_all_conductivities(m_conductivity_particles);  // Deposits q_e*Z*w*mu on the mesh
   condTime += MPI_Wtime();
+
+  MPI_Barrier(Chombo_MPI::comm);
   setupTime -= MPI_Wtime();
   this->setup_semi_implicit_poisson(a_dt);                     // Multigrid setup
   setupTime += MPI_Wtime();
+
+  MPI_Barrier(Chombo_MPI::comm);
   poissonTime -= MPI_Wtime();
   this->solve_poisson();                                       // Solve the stinking equation.
   poissonTime += MPI_Wtime();
 
   // 4. Recompute velocities with the new electric field, then do the actual semi-implicit Euler-Maruyama update.
+  MPI_Barrier(Chombo_MPI::comm);
   velocityTime -= MPI_Wtime();
   this->set_ito_velocity_funcs();
   m_ito->interpolate_velocities();
   velocityTime += MPI_Wtime();
+
+  MPI_Barrier(Chombo_MPI::comm);
   particleTime -= MPI_Wtime();
   this->step_euler_maruyama(a_dt);
   particleTime += MPI_Wtime();
+
+  MPI_Barrier(Chombo_MPI::comm);
   remapTime -= MPI_Wtime();
   this->remap_particles(which_particles::all_mobile_or_diffusive);
   remapTime += MPI_Wtime();
 
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
+  MPI_Barrier(Chombo_MPI::comm);
   isectTime -= MPI_Wtime();
   this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function);
   this->remove_eb_particles(which_particles::all_mobile_or_diffusive, EB_representation::discrete);         
   isectTime += MPI_Wtime();
 
   // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
+  MPI_Barrier(Chombo_MPI::comm);
   depositTime -= MPI_Wtime();
   this->deposit_particles(which_particles::all_mobile_or_diffusive);
   depositTime += MPI_Wtime();
