@@ -204,13 +204,14 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   Real super_time    = 0.0;
   Real reaction_time = 0.0;
   Real clear_time    = 0.0;
+  Real deposit_time  = 0.0;
   Real velo_time     = 0.0;
   Real diff_time     = 0.0;
 
   Real total_time    = -MPI_Wtime();
   
   // Particle algorithms
-  particle_time = -MPI_Wtime();
+  particle_time -= MPI_Wtime();
   switch(m_algorithm){
   case which_algorithm::euler_maruyama:
     this->advance_particles_euler_maruyama(a_dt);
@@ -274,11 +275,13 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   }
   clear_time += MPI_Wtime();
 
-  // 
+  //
+  deposit_time -= MPI_Wtime();
   m_ito->deposit_particles();
+  deposit_time += MPI_Wtime();
 
   // Prepare next step
-  velo_time = -MPI_Wtime();
+  velo_time -= MPI_Wtime();
   this->compute_ito_velocities();
   velo_time += MPI_Wtime();
   diff_time -= MPI_Wtime();
@@ -295,10 +298,27 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   super_time    *= 100./total_time;
   reaction_time *= 100./total_time;
   clear_time    *= 100./total_time;
+  deposit_time  *= 100./total_time;
   velo_time     *= 100./total_time;
   diff_time     *= 100./total_time;
 
+
+
   if(m_profile){
+
+    // Dummy-check total percentage
+    Real percentage = 0.0;
+    percentage += particle_time;
+    percentage += relax_time;
+    percentage += photon_time;
+    percentage += sort_time;
+    percentage += super_time;
+    percentage += reaction_time;
+    percentage += clear_time;
+    percentage += deposit_time;
+    percentage += velo_time;
+    percentage += diff_time;
+    
     pout() << endl
       	   << "ito_plasma_godunov::advance breakdown:" << endl
 	   << "======================================" << endl
@@ -309,8 +329,10 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 	   << "super time    = " << super_time << "%" << endl
 	   << "reaction time = " << reaction_time << "%" << endl
 	   << "clear time    = " << clear_time << "%" << endl
+      	   << "deposit time  = " << deposit_time << "%" << endl
 	   << "velo time     = " << velo_time << "%" << endl
       	   << "diff time     = " << diff_time << "%" << endl
+	   << "total percent = " << percentage << endl
 	   << "total time    = " << total_time << " (seconds)" << endl
 	   << endl;
   }
