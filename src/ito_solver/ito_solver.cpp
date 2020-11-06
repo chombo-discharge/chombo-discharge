@@ -2516,9 +2516,8 @@ void ito_solver::make_superparticles(const int a_particlesPerCell, const int a_l
     const IntVect iv = bit();
   
     List<ito_particle>& particles = cellParticles(iv, comp);
-    if(particles.length() > a_particlesPerCell){
-      this->bvh_merge(particles, a_particlesPerCell);
-    }
+    
+    this->bvh_merge(particles, a_particlesPerCell);
   }
 }
 
