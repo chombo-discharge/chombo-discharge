@@ -1007,6 +1007,20 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
     remapTime *= 100./totalTime;
     isectTime *= 100./totalTime;
     depositTime *= 100./totalTime;
+
+    Real percent = 0.0;
+    percent += posTime;
+    percent += diffuseTime;
+    percent += remapGdnvTime;
+    percent += copyCondTime;
+    percent += condTime;
+    percent += setupTime;
+    percent += poissonTime;
+    percent += velocityTime;
+    percent += particleTime;
+    percent += remapTime;
+    percent += isectTime;
+    percent += depositTime;
     
     pout() << endl
       	   << "ito_plasma_godunov::euler_maruyama breakdown:" << endl
@@ -1024,6 +1038,8 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
 	   << "remapTime       = " << remapTime << "%" << endl
       	   << "isectTime       = " << isectTime << "%" << endl
 	   << "depositTime     = " << depositTime << "%" << endl
+	   << "total percent   = " << percent << "%" << endl
+      	   << "imbalance       = " << 100. - percent << "%" << endl
 	   << "total time      = " << totalTime << " (seconds)" << endl
 	   << endl;
   }
