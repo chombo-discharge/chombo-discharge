@@ -944,10 +944,10 @@ bool ito_plasma_stepper::solve_poisson(MFAMRCellData&                a_potential
   return converged;
 }
 
-void ito_plasma_stepper::intersect_particles(const Real a_dt, const which_particles a_which_particles){
-  CH_TIME("ito_plasma_stepper::intersect_particles(dt, which_particles)");
+void ito_plasma_stepper::intersect_particles(const which_particles a_which_particles, const EB_representation a_representation){
+  CH_TIME("ito_plasma_stepper::intersect_particles(which_particles, EB_representation)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::intersect_particles(dt, which_particles)" << endl;
+    pout() << "ito_plasma_stepper::intersect_particles(which_particles, EB_representation)" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -962,31 +962,31 @@ void ito_plasma_stepper::intersect_particles(const Real a_dt, const which_partic
 
     switch(a_which_particles) {
     case which_particles::all:
-      solver->intersect_particles();
+      solver->intersect_particles(a_representation);
       break;
     case which_particles::all_mobile:
-      if(mobile) solver->intersect_particles();
+      if(mobile) solver->intersect_particles(a_representation);
       break;
     case which_particles::all_diffusive:
-      if(diffusive) solver->intersect_particles();
+      if(diffusive) solver->intersect_particles(a_representation);
       break;
     case which_particles::charged_mobile:
-      if(charged && mobile) solver->intersect_particles();
+      if(charged && mobile) solver->intersect_particles(a_representation);
       break;
     case which_particles::charged_diffusive:
-      if(charged && diffusive) solver->intersect_particles();
+      if(charged && diffusive) solver->intersect_particles(a_representation);
       break;
     case which_particles::all_mobile_or_diffusive:
-      if(mobile || diffusive) solver->intersect_particles();
+      if(mobile || diffusive) solver->intersect_particles(a_representation);
       break;
     case which_particles::charged_and_mobile_or_diffusive:
-      if(charged && (mobile || diffusive)) solver->intersect_particles();
+      if(charged && (mobile || diffusive)) solver->intersect_particles(a_representation);
       break;
     case which_particles::stationary:
-      if(!mobile && !diffusive) solver->intersect_particles();
+      if(!mobile && !diffusive) solver->intersect_particles(a_representation);
       break;
     default:
-      MayDay::Abort("ito_plasma_stepper::intersect_particles_particles(which particles) - logic bust");
+      MayDay::Abort("ito_plasma_stepper::intersect_particles_particles(which_particles, EB_representation) - logic bust");
     }
   }  
 }

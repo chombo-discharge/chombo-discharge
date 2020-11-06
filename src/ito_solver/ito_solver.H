@@ -219,7 +219,7 @@ public:
   /*!
     @brief Do boundary intersection tests
   */
-  virtual void intersect_particles();
+  virtual void intersect_particles(const EB_representation a_representation);
 
   /*!
     @brief Compute particle load on specific levle
@@ -1034,6 +1034,11 @@ protected:
     @brief Remove particles that are inside the EB using the discrete information
   */
   void remove_eb_particles_discrete(particle_container<ito_particle>& a_particles);
+
+  /*!
+    @brief Do boundary intersection tests with an implicit function
+  */
+  void intersect_particles_if();
 
   /*!
     @brief Draw a valid random position somewhere in a cell

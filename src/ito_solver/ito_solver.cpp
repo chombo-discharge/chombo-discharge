@@ -630,10 +630,25 @@ void ito_solver::remove_eb_particles_discrete(particle_container<ito_particle>& 
   }
 }
 
-void ito_solver::intersect_particles(){
-  CH_TIME("ito_solver::intersect_particles");
+void ito_solver::intersect_particles(const EB_representation a_representation){
+  CH_TIME("ito_solver::intersect_particles(EB_representation)");
   if(m_verbosity > 5){
-    pout() << m_name + "::intersect_particles" << endl;
+    pout() << m_name + "::intersect_particles(EB_representation)" << endl;
+  }
+
+  switch(a_representation){
+  case EB_representation::implicit_function:
+    this->intersect_particles_if();
+    break;
+  default:
+    MayDay::Abort("ito_solver::intersect_particles - unsupported EB representation requested");
+  }
+}
+
+void ito_solver::intersect_particles_if(){
+  CH_TIME("ito_solver::intersect_particles_if()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::intersect_particles_if()" << endl;
   }
 
 
@@ -657,24 +672,14 @@ void ito_solver::intersect_particles(){
       const EBISBox& ebisbox = m_amr->get_ebisl(m_realm, m_phase)[lvl][dit()];
 
       if(!ebisbox.isAllRegular()){
-	List<ito_particle>& particles        = m_particles[lvl][dit()].listItems();
-	List<ito_particle>& ebParticles      = m_eb_particles[lvl][dit()].listItems();
-	List<ito_particle>& domParticles     = m_domain_particles[lvl][dit()].listItems();
-	List<ito_particle>& scratchParticles = m_scratch_particles[lvl][dit()].listItems();
-
-
-	// Make a copy to be distributed.
-	scratchParticles.clear();
-	for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
-	  scratchParticles.add(lit());
-	}
-
-	// Clear these, then refill them as appropriate. 
-	particles.clear();
+	List<ito_particle>& particles    = m_particles[lvl][dit()].listItems();
+	List<ito_particle>& ebParticles  = m_eb_particles[lvl][dit()].listItems();
+	List<ito_particle>& domParticles = m_domain_particles[lvl][dit()].listItems();
+	
 	ebParticles.clear();
 	domParticles.clear();
 
-	for (ListIterator<ito_particle> lit(scratchParticles); lit.ok(); ++lit){
+	for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
 	  ito_particle& p = lit();
 
 	  const RealVect newPos  = p.position();
@@ -687,44 +692,34 @@ void ito_solver::intersect_particles(){
 	  bool checkEB  = false;
 	  bool checkDom = false;
 
-	  if(impfunc->value(oldPos) < pathLen){
+	  if(impfunc->value(oldPos) < pathLen){ // Checks distance to EB. 
 	    checkEB = true;
 	  }
 	  for (int dir = 0; dir < SpaceDim; dir++){
-	    if(newPos[dir] < prob_lo[dir] || newPos[dir] > prob_hi[dir]){
+	    if(newPos[dir] < prob_lo[dir] || newPos[dir] > prob_hi[dir]){ // Checks if we crossed a domain boundary. 
 	      checkDom = true; 
 	    }
 	  }
 
-	  if(!checkEB & !checkDom){ // No intersection test needed. 
-	    particles.add(p);
-	  }
-	  else{ // Must do nasty intersection test. 
+	  // Must do intersection test on at least one of these. 
+	  if(checkEB || checkDom){ 
 	    Real dom_s = 1.E99;
 	    Real eb_s  = 1.E99;
 
 	    bool contact_domain = false;
 	    bool contact_eb     = false;
 	      
-	    if(checkDom){
-	      contact_domain = particle_ops::domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
-	    }
-	    if(checkEB){
-	      contact_eb = particle_ops::eb_bc_intersection(impfunc, oldPos, newPos, pathLen, dx, eb_s);
-	    }
+	    if(checkDom) contact_domain = particle_ops::domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
+	    if(checkEB)  contact_eb     = particle_ops::eb_bc_intersection(impfunc, oldPos, newPos, pathLen, dx, eb_s);
 	  
-	    // Ok, we're good. 
-	    if(!contact_eb && !contact_domain){
-	      particles.add(p);
-	    }
-	    else {
-	      if(eb_s < dom_s){
+	    if(contact_eb || contact_domain){ // Particle trajectory crossed something. 
+	      if(eb_s < dom_s){ // It was the EB first. 
 		p.position() = oldPos + eb_s*path;
-		ebParticles.add(p);
+		ebParticles.transfer(lit);
 	      }
-	      else{
+	      else{ // It was the domain boundary. 
 		p.position() = oldPos + Max(0.0,dom_s-SAFETY)*path;
-		domParticles.add(p);
+		domParticles.transfer(lit);
 	      }
 	    }
 	  }
