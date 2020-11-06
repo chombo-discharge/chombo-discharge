@@ -497,24 +497,6 @@ void ito_plasma_godunov::set_old_positions(){
   }
 }
 
-void ito_plasma_godunov::intersect_particles(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::intersect_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::intersect_particles" << endl;
-  }
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<ito_solver>& solver = solver_it();
-
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
-
-    if(mobile || diffusive){
-      solver->intersect_particles();
-    }
-  }
-}
-
 void ito_plasma_godunov::remap_godunov_particles(Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which_particles){
   CH_TIME("ito_plasma_godunov::remap_godunov_particles");
   if(m_verbosity > 5){
@@ -944,9 +926,9 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
 
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   isectTime -= MPI_Wtime();
-  this->intersect_particles(a_dt);
+  this->intersect_particles(a_dt, which_particles::all_mobile_or_diffusive);
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->remove_eb_particles();
+    //    solver_it()->remove_eb_particles();
   }
   isectTime += MPI_Wtime();
 
@@ -1123,7 +1105,7 @@ void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
   // ====== CORRECTOR END =====
 
   // Do particle-boundary intersection. 
-  this->intersect_particles(a_dt);
+  this->intersect_particles(a_dt, which_particles::all_mobile_or_diffusive);
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->remove_eb_particles();
   }

@@ -84,7 +84,6 @@ namespace physics {
 
       // Global routines
       void set_old_positions();
-      void intersect_particles(const Real a_dt);
       void remap_godunov_particles(Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
       void deposit_godunov_particles(const Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
       void clear_godunov_particles(const Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);

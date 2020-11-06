@@ -87,8 +87,8 @@ namespace physics {
 			const int                        a_finest_level) override;
 
 
-
-
+      // Particle intersection routines
+      void intersect_particles(const Real a_dt, const which_particles a_which);
 
       // Internal routines
       void set_verbosity(const int a_verbosity);
