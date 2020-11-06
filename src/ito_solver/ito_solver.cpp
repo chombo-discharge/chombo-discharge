@@ -2515,18 +2515,16 @@ void ito_solver::make_superparticles(const int a_particlesPerCell, const int a_l
 
   // This are the particles in the box we're currently looking at. 
   BinFab<ito_particle>& cellParticles = m_particles.get_cell_particles(a_level, a_dit);
-  const EBISBox& ebisbox = m_amr->get_ebisl(m_realm, m_phase)[a_level][a_dit];
 
   // Iterate over particles
   for (BoxIterator bit(box); bit.ok(); ++bit){
     const IntVect iv = bit();
   
-      List<ito_particle>& particles = cellParticles(iv, comp);
-      if(particles.length() > 0){
-	this->bvh_merge(particles, a_particlesPerCell);
-      }
+    List<ito_particle>& particles = cellParticles(iv, comp);
+    if(particles.length() > a_particlesPerCell){
+      this->bvh_merge(particles, a_particlesPerCell);
+    }
   }
-
 }
 
 void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particlesPerCell){
