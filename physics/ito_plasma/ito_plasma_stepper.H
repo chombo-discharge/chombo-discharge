@@ -89,7 +89,7 @@ namespace physics {
 
       // Particle intersection routines
       void intersect_particles(const Real a_dt, const which_particles a_which);
-      void remove_eb_particles(const which_particles a_which);
+      void remove_eb_particles(const which_particles a_which, const EB_representation a_representation);
 
       // Internal routines
       void set_verbosity(const int a_verbosity);

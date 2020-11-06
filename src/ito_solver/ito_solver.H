@@ -209,12 +209,12 @@ public:
     @brief Remove particles that are inside the EB
     @details Calls the other version with m_particles
   */
-  virtual void remove_eb_particles();
+  virtual void remove_eb_particles(const EB_representation a_representation);
 
   /*!
     @brief Remove particles that are inside the EB
   */
-  virtual void remove_eb_particles(particle_container<ito_particle>& a_particles);
+  virtual void remove_eb_particles(particle_container<ito_particle>& a_particles, const EB_representation a_representation);
 
   /*!
     @brief Do boundary intersection tests
@@ -1024,6 +1024,16 @@ protected:
     @brief Restart particles
   */
   void restart_particles(LevelData<EBCellFAB>& a_num_particles, const int a_level);
+
+  /*!
+    @brief Remove particles that are inside the EB using the implicit function
+  */
+  void remove_eb_particles_if(particle_container<ito_particle>& a_particles);
+
+  /*!
+    @brief Remove particles that are inside the EB using the discrete information
+  */
+  void remove_eb_particles_discrete(particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Draw a valid random position somewhere in a cell

@@ -20,6 +20,15 @@
 #include "real_box.H"
 
 /*!
+  @brief Switch when representing embedded boundaries
+*/
+enum class EB_representation {
+  implicit_function,
+  discrete,
+  level_set
+};
+
+/*!
   @brief Abstract base class for geometries
 */
 class computational_geometry {

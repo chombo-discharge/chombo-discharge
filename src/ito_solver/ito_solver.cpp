@@ -483,7 +483,7 @@ void ito_solver::initial_data(){
 
   // Add particles, remove the ones that are inside the EB, and then depsit
   m_particles.add_particles(m_species->get_initial_particles()); 
-  this->remove_eb_particles();
+  this->remove_eb_particles(EB_representation::discrete);
   this->deposit_particles(m_state, m_particles, m_deposition);
 
 #if 0 // Test code
@@ -515,28 +515,40 @@ void ito_solver::compute_loads(Vector<long int>& a_loads, const DisjointBoxLayou
 #endif
 }
 
-void ito_solver::remove_eb_particles(){
-  CH_TIME("ito_solver::remove_eb_particles()");
+void ito_solver::remove_eb_particles(const EB_representation a_representation){
+  CH_TIME("ito_solver::remove_eb_particles(EB_representation)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_eb_particles()" << endl;
+    pout() << m_name + "::remove_eb_particles(EB_representation)" << endl;
   }
 
-  this->remove_eb_particles(m_particles);
+  this->remove_eb_particles(m_particles, a_representation);
 }
 
-void ito_solver::remove_eb_particles(particle_container<ito_particle>& a_particles){
-  CH_TIME("ito_solver::remove_eb_particles(particles)");
+void ito_solver::remove_eb_particles(particle_container<ito_particle>& a_particles, const EB_representation a_representation){
+  CH_TIME("ito_solver::remove_eb_particles(particles, EB_representation)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_eb_particles(particles)" << endl;
+    pout() << m_name + "::remove_eb_particles(particles, EB_representation)" << endl;
   }
 
-  RefCountedPtr<BaseIF> func;
-  if(m_phase == phase::gas){
-    func = m_compgeom->get_gas_if();
+  switch(a_representation){
+  case EB_representation::implicit_function:
+    this->remove_eb_particles_if(a_particles);
+    break;
+  case EB_representation::discrete:
+    this->remove_eb_particles_discrete(a_particles);
+    break;
+  default:
+    MayDay::Abort("ito_solver::remove_eb_particles - unsupported EB representation requested");
   }
-  else{
-    func = m_compgeom->get_sol_if();
+}
+
+void ito_solver::remove_eb_particles_if(particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::remove_eb_particles_if(particles)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::remove_eb_particles_if(particles)" << endl;
   }
+
+  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_compgeom->get_gas_if() : m_compgeom->get_sol_if();
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
@@ -546,7 +558,6 @@ void ito_solver::remove_eb_particles(particle_container<ito_particle>& a_particl
       const EBISBox& ebisbox = ebisl[dit()];
       
       List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
-      List<ito_particle>& scratch   = m_scratch_particles[lvl][dit()].listItems();
 
       if(ebisbox.isAllCovered()){ // Box is all covered
 	particles.clear();
@@ -555,19 +566,63 @@ void ito_solver::remove_eb_particles(particle_container<ito_particle>& a_particl
       }
       else{
 
-	// Make a local copy
-	scratch.clear();
+	// Check if particles are outside the implicit function. 
 	for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
-	  scratch.add(lit());
-	}
-	
-	particles.clear();
-	for (ListIterator<ito_particle> lit(scratch); lit.ok(); ++lit){
-	  ito_particle& p = particles[lit];
+	  ito_particle& p = lit();
 
 	  const Real f = func->value(p.position());
-	  if(f <= 0.0){
-	    particles.add(p);
+	  if(f >= 0.0) particles.remove(lit);
+	}
+      }
+    }
+  }
+}
+
+void ito_solver::remove_eb_particles_discrete(particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::remove_eb_particles_discrete(particles)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::remove_eb_particles_discrete(particles)" << endl;
+  }
+
+  const RealVect prob_lo = m_amr->get_prob_lo();
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBISBox& ebisbox = ebisl[dit()];
+      
+      List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
+
+      if(ebisbox.isAllCovered()){ // Box is all covered, remove everything. 
+	particles.clear();
+      }
+      else if(ebisbox.isAllRegular()){ // Do nothing
+      }
+      else{
+	for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
+	  ito_particle& p = lit();
+
+	  
+	  const RealVect rv  = (p.position() - prob_lo)/dx;
+	  const IntVect iv   = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
+
+
+	  if(ebisbox.isCovered(iv)){
+	    particles.remove(lit);
+	  }
+	  else if(ebisbox.isIrregular(iv)){
+	    const VolIndex vof = VolIndex(iv, 0);
+	    const RealVect xc  = ebisbox.bndryCentroid(vof);
+	    const RealVect nc  = ebisbox.normal(vof);
+
+	    const Real proj    = PolyGeom::dot(p.position() - xc, nc);
+
+	    if(proj < 0.0){
+	      particles.remove(lit);
+	    }
 	  }
 	}
       }
