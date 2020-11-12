@@ -21,7 +21,8 @@
 using namespace physics::ito_plasma;
 
 inline
-RealVect ito_plasma_physics::random_position(const RealVect a_pos,
+RealVect ito_plasma_physics::random_position(const RealVect a_cellPos,
+					     const RealVect a_centroidPos,
 					     const RealVect a_lo,
 					     const RealVect a_hi,
 					     const RealVect a_bndryCentroid,
@@ -30,14 +31,19 @@ RealVect ito_plasma_physics::random_position(const RealVect a_pos,
 					     const Real     a_kappa) const {
 
   RealVect pos;
-  if(a_kappa < 1.0){ // Rejection sampling. 
+
+  constexpr Real thresh = 1.E-2;
+  if(a_kappa < thresh){
+    pos = a_centroidPos;
+  }
+  else if(a_kappa < 1.0){ // Rejection sampling. 
     pos = this->random_position(a_lo, a_hi, a_bndryCentroid, a_bndryNormal);
   }
   else{ // Regular cell. Get a position. 
     pos = this->random_position(a_lo, a_hi);
   }
 
-  pos = a_pos + pos*a_dx;
+  pos = a_cellPos + pos*a_dx;
 
   return pos;
 }
@@ -65,7 +71,7 @@ RealVect ito_plasma_physics::random_position(const RealVect a_lo, const RealVect
   RealVect pos = RealVect::Unit;
 
   for (int dir = 0; dir < SpaceDim; dir++){
-    pos[dir] = a_lo[dir] + 0.5*(1.0 + m_udist11(m_rng))*(a_hi[dir] - a_lo[dir]);
+    pos[dir] = a_lo[dir] + m_udist01(m_rng)*(a_hi[dir] - a_lo[dir]);
   }
 
   return pos;
@@ -160,7 +166,8 @@ inline
 void ito_plasma_physics::reconcile_particles(Vector<List<ito_particle>* >& a_particles,
 					     const Vector<long long>&      a_newNumParticles,
 					     const Vector<long long>&      a_oldNumParticles,
-					     const RealVect                a_pos,
+					     const RealVect                a_cellPos,
+					     const RealVect                a_centroidPos,
 					     const RealVect                a_lo,
 					     const RealVect                a_hi,
 					     const RealVect                a_bndryCentroid,
@@ -176,7 +183,7 @@ void ito_plasma_physics::reconcile_particles(Vector<List<ito_particle>* >& a_par
 #endif
 
   for (int i = 0; i < a_particles.size(); i++){
-    this->reconcile_particles(*a_particles[i], a_newNumParticles[i], a_oldNumParticles[i], a_pos, a_lo, a_hi, a_bndryCentroid,
+    this->reconcile_particles(*a_particles[i], a_newNumParticles[i], a_oldNumParticles[i], a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid,
 			      a_bndryNormal, a_dx, a_kappa);
   }
 }
@@ -185,7 +192,8 @@ inline
 void ito_plasma_physics::reconcile_particles(List<ito_particle>& a_particles,
 					     const long long     a_newNumParticles,
 					     const long long     a_oldNumParticles,
-					     const RealVect      a_pos,
+					     const RealVect      a_cellPos,
+					     const RealVect      a_centroidPos,
 					     const RealVect      a_lo,
 					     const RealVect      a_hi,
 					     const RealVect      a_bndryCentroid,
@@ -198,7 +206,7 @@ void ito_plasma_physics::reconcile_particles(List<ito_particle>& a_particles,
 
   if(diff > zero){ // Need to add 'diff' mass.
     const long long Diff = (long long) (diff);
-    this->add_particles(a_particles, diff, a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    this->add_particles(a_particles, diff, a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
   }
   else if(diff < zero){ // Need to remove 'diff' mass.
     this->remove_particles(a_particles, -diff);
@@ -227,7 +235,8 @@ void ito_plasma_physics::compute_particle_weights(long long&      a_weight,
 inline
 void ito_plasma_physics::add_particles(List<ito_particle>& a_particles,
 				       const long long     a_numNewParticles,
-				       const RealVect      a_pos,
+				       const RealVect      a_cellPos,
+				       const RealVect      a_centroidPos,
 				       const RealVect      a_lo,
 				       const RealVect      a_hi,
 				       const RealVect      a_bndryCentroid,
@@ -241,13 +250,13 @@ void ito_plasma_physics::add_particles(List<ito_particle>& a_particles,
   this->compute_particle_weights(weight, num, remainder, a_numNewParticles);
 
   for (int i = 0; i < num; i++){
-    const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const Real w     = (Real) weight;
     a_particles.add(ito_particle(w, p));
   }
 
   if(remainder > zero){ // Rest of weight in case we got superparticles
-    const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const Real w     = (Real) (weight + remainder);
     a_particles.add(ito_particle(w, p));
   }
@@ -429,7 +438,8 @@ void ito_plasma_physics::reconcile_weights(List<ito_particle>&      a_particles,
 
 void ito_plasma_physics::reconcile_photons(Vector<List<photon>* >&  a_newPhotons,
 					   const Vector<long long>& a_numNewPhotons,
-					   const RealVect           a_pos,
+					   const RealVect           a_cellPos,
+					   const RealVect           a_centroidPos,
 					   const RealVect           a_lo,
 					   const RealVect           a_hi,
 					   const RealVect           a_bndryCentroid,
@@ -439,7 +449,7 @@ void ito_plasma_physics::reconcile_photons(Vector<List<photon>* >&  a_newPhotons
 
   for (int i = 0; i < a_newPhotons.size(); i++){
     if(a_numNewPhotons[i] > 0){
-      this->reconcile_photons(*a_newPhotons[i], *m_rte_species[i], a_numNewPhotons[i], a_pos, a_lo, a_hi,
+      this->reconcile_photons(*a_newPhotons[i], *m_rte_species[i], a_numNewPhotons[i], a_cellPos, a_centroidPos, a_lo, a_hi,
 			      a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     }
   }
@@ -449,7 +459,8 @@ inline
 void ito_plasma_physics::reconcile_photons(List<photon>&      a_photons,
 					   const rte_species& a_species,
 					   const long long    a_num_photons,
-					   const RealVect     a_pos,
+					   const RealVect     a_cellPos,
+					   const RealVect     a_centroidPos,
 					   const RealVect     a_lo,
 					   const RealVect     a_hi,
 					   const RealVect     a_bndryCentroid,
@@ -462,17 +473,17 @@ void ito_plasma_physics::reconcile_photons(List<photon>&      a_photons,
   this->compute_particle_weights(weight, num, remainder, a_num_photons);
   
   for (int i = 0; i < num; i++){
-    const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const RealVect v = units::s_c0*random_direction();
       
-    a_photons.add(photon(a_pos, v, a_species.get_kappa(p), weight));
+    a_photons.add(photon(p, v, a_species.get_kappa(p), weight));
   }
 
   // If we used superphotons the last photon gets some extra oomph. 
   if(remainder > 0){
-    const RealVect p = this->random_position(a_pos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const RealVect v = units::s_c0*random_direction();
-    a_photons.add(photon(a_pos, v, a_species.get_kappa(p), weight + remainder));
+    a_photons.add(photon(p, v, a_species.get_kappa(p), weight + remainder));
   }
 }
 
@@ -783,6 +794,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   			    newParticleCount,
   			    oldParticleCount,
   			    a_cellPos,
+			    a_centroidPos,
   			    a_lo,
   			    a_hi,
 			    a_bndryCentroid,
@@ -791,7 +803,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   			    a_kappa);
 
   // Generate new photons
-  this->reconcile_photons(a_newPhotons, newPhotonCount, a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  this->reconcile_photons(a_newPhotons, newPhotonCount, a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
   // Run photo-reactions and increment the number of particles as needed
   this->reconcile_photoionization(a_particles, mean_energies, newParticleCount, a_photons);

@@ -97,9 +97,9 @@ template <class T>
 void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a_state,
 						  const particle_container<T>& a_particles,
 						  const DepositionType::Which  a_deposition){
-  CH_TIME("ito_solver::deposit_kappaConservative");
+  CH_TIME("ito_solver::deposit_kappaConservativeWithPVR");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_kappaConservative" << endl;
+    pout() << m_name + "::deposit_kappaConservativeWithPVR" << endl;
   }
 
   const int comp = 0;

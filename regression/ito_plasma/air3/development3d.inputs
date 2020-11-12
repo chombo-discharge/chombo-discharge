@@ -7,11 +7,11 @@ air3.basename  = pout
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-amr_mesh.lo_corner       = -2.5E-2 -2.5E-2 -4E-2 # Low corner of problem domain
-amr_mesh.hi_corner       =  2.5E-2  2.5E-2  1E-2 # High corner of problem domain
+amr_mesh.lo_corner       = -1.25E-2 -1.25E-2 -1.25E-2 # Low corner of problem domain
+amr_mesh.hi_corner       =  1.25E-2  1.25E-2  1.25E-2 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 4           # Maximum amr depth
+amr_mesh.max_amr_depth   = 2           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -199,7 +199,7 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ==================================================================================================== 
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
-ito_plasma_godunov.verbosity      = -1             # Verbosity
+ito_plasma_godunov.verbosity      = 10             # Verbosity
 ito_plasma_godunov.min_dt         = 1.E-10         # Minimum dt
 ito_plasma_godunov.max_dt         = 1.E-10         # Maximum dt
 ito_plasma_godunov.particle_realm = primal         # Particle realm. Default is primal
