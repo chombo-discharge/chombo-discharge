@@ -59,6 +59,20 @@ void ito_layout<T>::parse_options(){
 }
 
 template <class T>
+void ito_layout<T>::set_pvr_buffer(const int a_buffer){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->set_pvr_buffer(a_buffer);
+  }
+}
+
+template <class T>
+void ito_layout<T>::set_halo_buffer(const int a_buffer){
+  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
+    iter()->set_halo_buffer(a_buffer);
+  }
+}
+
+template <class T>
 void ito_layout<T>::allocate_internals(){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
     iter()->allocate_internals();

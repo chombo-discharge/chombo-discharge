@@ -338,6 +338,25 @@ int ito_solver::get_halo_buffer() const {
   return m_halo_buffer;
 }
 
+void ito_solver::set_pvr_buffer(const int a_buffer) {
+  CH_TIME("ito_solver::set_pvr_buffer");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_pvr_buffer" << endl;
+  }
+
+  m_pvr_buffer = a_buffer;
+}
+
+void ito_solver::set_halo_buffer(const int a_buffer)  {
+  CH_TIME("ito_solver::set_halo_buffer");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_halo_buffer" << endl;
+  }
+
+  m_halo_buffer = a_buffer;
+}
+
+
 size_t ito_solver::get_num_particles(const bool a_local) const{
   CH_TIME("ito_solver::get_num_particles");
   if(m_verbosity > 5){

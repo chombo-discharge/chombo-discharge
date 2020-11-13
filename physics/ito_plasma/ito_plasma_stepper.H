@@ -250,14 +250,11 @@ namespace physics {
 
     protected:
 
-
-
       std::string m_fluid_realm;     // Realm for Poisson and sigma solver. Defaults to realm::primal
       std::string m_particle_realm;  // Realm for particles. Defaults to realm::primal
       std::string m_name;
       phase::which_phase m_phase;
       
-
       RefCountedPtr<ito_plasma_physics> m_physics;
       RefCountedPtr<ito_layout<ito_solver> > m_ito;
       RefCountedPtr<rte_layout<mc_photo> > m_rte;
@@ -270,6 +267,8 @@ namespace physics {
       bool m_load_balance;
       
       int m_ppc;
+      int m_halo_buffer;
+      int m_pvr_buffer;
       Real m_max_cells_hop;
       Real m_dt_relax;
       Real m_min_dt;
@@ -290,7 +289,7 @@ namespace physics {
       // Storage for energy source terms
       Vector<EBAMRCellData> m_energy_sources;
 
-
+      // Do load balancing of the particle realm. 
       bool load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
 				       Vector<Vector<Box> >&            a_boxes,
 				       const std::string                a_realm,

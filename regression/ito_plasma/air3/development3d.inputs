@@ -212,6 +212,8 @@ ito_plasma_godunov.relax_factor   = 9999.5         # Factor in front of relaxati
 ito_plasma_godunov.regrid_super   = false          # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = euler_maruyama           # 'euler', 'euler_maruyama', 'midpoint'
 ito_plasma_godunov.profile        = true           # Profile advance or not
+ito_plasma_godunov.pvr_buffer     = 0              # PVR buffer for particles (overrides ito and mc_photo)
+ito_plasma_godunov.halo_buffer    = 1              # Halo buffer for particles (overrides ito and mc_photo)
 
 # ====================================================================================================
 # ITO_PLASMA_AIR3 CLASS OPTIONS

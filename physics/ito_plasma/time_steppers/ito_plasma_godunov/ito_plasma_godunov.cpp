@@ -130,6 +130,8 @@ void ito_plasma_godunov::parse_options() {
   pp.get("load_balance",   m_load_balance);
   pp.get("min_dt",         m_min_dt);
   pp.get("max_dt",         m_max_dt);
+  pp.get("halo_buffer",    m_halo_buffer);
+  pp.get("pvr_buffer",     m_pvr_buffer);
 
 
   if(str == "euler_maruyama"){

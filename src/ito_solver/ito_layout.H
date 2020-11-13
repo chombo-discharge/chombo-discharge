@@ -66,6 +66,16 @@ public:
   virtual void parse_options();
 
   /*!
+    @brief Set PVR buffer for all solvers
+  */
+  virtual void set_pvr_buffer(const int a_buffer);
+
+  /*!
+    @brief Set the halo buffer
+  */
+  virtual void set_halo_buffer(const int a_buffer);
+
+  /*!
     @brief Allocate internals for all solvers
   */
   virtual void allocate_internals();

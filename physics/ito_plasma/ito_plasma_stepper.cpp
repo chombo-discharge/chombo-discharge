@@ -22,8 +22,11 @@ ito_plasma_stepper::ito_plasma_stepper(){
 
   m_dt   = 0.0;
   m_time = 0.0;
+  
+  m_halo_buffer = 1;
+  m_pvr_buffer  = 0;
 
-  m_regrid_superparticles = false;
+  m_regrid_superparticles = true;
 
   m_fluid_realm    = realm::primal;
   m_particle_realm = realm::primal;
@@ -61,7 +64,12 @@ void ito_plasma_stepper::setup_solvers(){
 
   // Allocate internal stuff
   this->allocate_internals();
+
+  // Set the particle buffers for the Ito solver
+  m_ito->set_halo_buffer(m_halo_buffer);
+  m_ito->set_pvr_buffer(m_pvr_buffer);
 }
+
 
 void ito_plasma_stepper::setup_ito(){
   CH_TIME("ito_plasma_stepper::setup_ito");
