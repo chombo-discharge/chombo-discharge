@@ -289,6 +289,9 @@ namespace physics {
       // Storage for energy source terms
       Vector<EBAMRCellData> m_energy_sources;
 
+      // Set the particle buffers
+      void set_particle_buffers();
+
       // Do load balancing of the particle realm. 
       bool load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
 				       Vector<Vector<Box> >&            a_boxes,

@@ -244,6 +244,26 @@ public:
   virtual Vector<std::string> get_plotvar_names() const;
 
   /*!
+    @brief Get PVR buffer
+  */
+  virtual int get_pvr_buffer() const;
+
+  /*!
+    @brief Get the halo buffer
+  */
+  virtual int get_halo_buffer() const;
+
+  /*!
+    @brief Set the PVR buffer
+  */
+  virtual void set_pvr_buffer(const int a_buffer);
+
+  /*!
+    @brief Set the halo buffer
+  */
+  virtual void set_halo_buffer(const int a_buffer);
+
+  /*!
     @brief Get number of output fields
   */
   virtual int get_num_plotvars() const;

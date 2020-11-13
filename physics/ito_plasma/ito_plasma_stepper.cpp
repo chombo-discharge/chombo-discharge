@@ -66,8 +66,8 @@ void ito_plasma_stepper::setup_solvers(){
   this->allocate_internals();
 
   // Set the particle buffers for the Ito solver
-  m_ito->set_halo_buffer(m_halo_buffer);
-  m_ito->set_pvr_buffer(m_pvr_buffer);
+  this->set_particle_buffers();
+
 }
 
 
@@ -126,6 +126,23 @@ void ito_plasma_stepper::setup_sigma(){
   m_sigma->set_verbosity(m_verbosity);
   m_sigma->set_computational_geometry(m_compgeom);
   m_sigma->set_realm(m_fluid_realm);
+}
+
+void ito_plasma_stepper::set_particle_buffers(){
+  CH_TIME("ito_plasma_stepper::set_particle_buffers");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::set_particle_buffers" << endl;
+  }
+  
+  m_ito->set_halo_buffer(m_halo_buffer);
+  m_ito->set_pvr_buffer(m_pvr_buffer);
+
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<mc_photo>& solver = solver_it();
+
+    solver->set_halo_buffer(m_halo_buffer);
+    solver->set_pvr_buffer(m_pvr_buffer);
+  }
 }
 
 void ito_plasma_stepper::allocate() {

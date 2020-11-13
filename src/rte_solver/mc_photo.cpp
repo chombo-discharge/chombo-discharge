@@ -742,6 +742,42 @@ RealVect mc_photo::random_direction3D(){
 }
 #endif
 
+int mc_photo::get_pvr_buffer() const {
+  CH_TIME("mc_photo::get_pvr_buffer");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_pvr_buffer" << endl;
+  }
+
+  return m_pvr_buffer;
+}
+
+int mc_photo::get_halo_buffer() const {
+  CH_TIME("mc_photo::get_halo_buffer");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_halo_buffer" << endl;
+  }
+
+  return m_halo_buffer;
+}
+
+void mc_photo::set_pvr_buffer(const int a_buffer) {
+  CH_TIME("mc_photo::set_pvr_buffer");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_pvr_buffer" << endl;
+  }
+
+  m_pvr_buffer = a_buffer;
+}
+
+void mc_photo::set_halo_buffer(const int a_buffer)  {
+  CH_TIME("mc_photo::set_halo_buffer");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_halo_buffer" << endl;
+  }
+
+  m_halo_buffer = a_buffer;
+}
+
 void mc_photo::generate_photons(particle_container<photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt){
   CH_TIME("mc_photo::generate_photons");
   if(m_verbosity > 5){
