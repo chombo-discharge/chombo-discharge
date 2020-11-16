@@ -893,6 +893,10 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	  if(m_verbosity > 0){
 	    this->grid_report();
 	  }
+	  if(m_write_regrid_files){
+	    this->write_regrid_file();
+	  }
+	      
 #if 0 // Debug test
 	  const Real t1 = MPI_Wtime();
 	  if(procID() == 0){
@@ -1221,7 +1225,13 @@ void driver::parse_output_directory(){
     cmd = "mkdir -p " + m_output_dir + "/mpi";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "driver::set_output_directory - master could not create proc directory" << std::endl;
+      std::cout << "driver::set_output_directory - master could not create mpi directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/regrid";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create regrid directory" << std::endl;
     }    
   }
   
@@ -1250,6 +1260,7 @@ void driver::parse_output_intervals(){
   ParmParse pp("driver");
   pp.get("plot_interval", m_plot_interval);
   pp.get("checkpoint_interval", m_chk_interval);
+  pp.get("write_regrid_files", m_write_regrid_files);
 }
 
 void driver::parse_geo_refinement(){
@@ -2093,6 +2104,32 @@ void driver::write_plot_file(){
   sprintf(file_char, "%s.step%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
   string fname(file_char);
 
+  this->write_plot_file(fname);
+
+}
+
+void driver::write_regrid_file(){
+  CH_TIME("driver::write_regrid_file");
+  if(m_verbosity > 3){
+    pout() << "driver::write_regrid_file" << endl;
+  }
+
+  // Filename
+  char file_char[1000];
+  const std::string prefix = m_output_dir + "/regrid/" + m_output_names;
+  sprintf(file_char, "%s.regrid%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
+  string fname(file_char);
+
+  this->write_plot_file(fname);
+
+}
+
+void driver::write_plot_file(const std::string a_filename){
+  CH_TIME("driver::write_plot_file");
+  if(m_verbosity > 3){
+    pout() << "driver::write_plot_file" << endl;
+  }
+
   // Output file
   EBAMRCellData output;
 
@@ -2149,7 +2186,7 @@ void driver::write_plot_file(){
   }
   Real t_write = -MPI_Wtime();
 
-  writeEBHDF5(fname, 
+  writeEBHDF5(a_filename, 
 	      m_amr->get_grids(m_realm),
 	      output_ptr,
 	      names, 

@@ -369,6 +369,11 @@ protected:
   Real m_wallclock2;
 
   /*!
+    @brief Write regrid files or not
+  */
+  bool m_write_regrid_files;
+
+  /*!
     @brief Allow grid coarsening
   */
   bool m_allow_coarsen;
@@ -584,6 +589,16 @@ protected:
     @brief Write a plot file
   */
   virtual void write_plot_file();
+
+  /*!
+    @brief Write a regrid file
+  */
+  virtual void write_regrid_file();
+
+  /*!
+    @brief Write a plot file
+  */
+  virtual void write_plot_file(const std::string a_filename);
 
   /*!
     @brief Write the memory usage to file
