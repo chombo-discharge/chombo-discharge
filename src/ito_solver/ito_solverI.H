@@ -111,7 +111,7 @@ void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a
   data_ops::set_value(a_state,    0.0);
   data_ops::set_value(m_scratch,  0.0);
 
-  const AMRParticles<T>& particles = a_particles.get_particles();
+  const AMRParticles<T>& particles      = a_particles.get_particles();
   const AMRParticles<T>& halo_particles = a_particles.get_halo_particles();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -129,7 +129,7 @@ void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a
       RefCountedPtr<EBMGInterp>& interp = m_amr->get_eb_mg_interp(m_realm, m_phase)[lvl];
       interp->pwcInterp(*a_state[lvl], *m_scratch[lvl-1], interv);
     }
-    
+
     // 2. Deposit this levels particles. Note that this will deposit into ghost cells, which must later
     //    be added to neighboring patches
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

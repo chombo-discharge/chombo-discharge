@@ -25,6 +25,7 @@ ito_plasma_stepper::ito_plasma_stepper(){
   
   m_halo_buffer = 1;
   m_pvr_buffer  = 0;
+  m_load_ppc    = 1.0;
 
   m_regrid_superparticles = true;
 
@@ -944,7 +945,7 @@ bool ito_plasma_stepper::solve_poisson(){
   m_particle_E.copy(E);
   m_amr->average_down(m_particle_E, m_particle_realm, m_phase);
   m_amr->interp_ghost_pwl(m_particle_E, m_particle_realm, m_phase);
-  m_amr->interpolate_to_centroids(m_particle_E, m_fluid_realm, m_phase);
+  m_amr->interpolate_to_centroids(m_particle_E, m_particle_realm, m_phase);
     
   return converged;
 }
@@ -1275,7 +1276,7 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<LevelData<EBCellFAB>*
     pout() << "ito_plasma_stepper::compute_ito_mobilities_lfa(mobilities, E, level, time)" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[a_level];
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const EBCellFAB& E = a_E[dit()];
@@ -1338,6 +1339,7 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBCellFAB*>& a_meshMo
       (*a_meshMobilities[idx])(vof, comp) = mobilities[idx];
     }
   }
+  
 
   // Covered is bogus.
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1797,7 +1799,9 @@ Real ito_plasma_stepper::compute_physics_dt() const{
     pout() << "ito_plasma_stepper::compute_physics_dt()" << endl;
   }
 
-  const Real dt = this->compute_physics_dt(m_fluid_E, m_ito->get_densities());
+  // TLDR: This is done on the particle realm because of the densities (which are defined on the particle realm). 
+
+  const Real dt = this->compute_physics_dt(m_particle_E, m_ito->get_densities());
 
   return dt;
 }
@@ -1807,6 +1811,8 @@ Real ito_plasma_stepper::compute_physics_dt(const EBAMRCellData& a_E, const Vect
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_physics_dt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)" << endl;
   }
+
+
 
   const int num_ito_species = m_physics->get_num_ito_species();
 
@@ -1838,7 +1844,7 @@ Real ito_plasma_stepper::compute_physics_dt(const LevelData<EBCellFAB>& a_E, con
 
   const int num_ito_species = m_physics->get_num_ito_species();
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_fluid_realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[a_level];
 
   Real minDt = 1.E99;
   
@@ -1884,7 +1890,7 @@ Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<E
   const Real dx          = m_amr->get_dx()[a_level];
   const RealVect prob_lo = m_amr->get_prob_lo();
   const BaseFab<Real>& E = a_E.getSingleValuedFAB();
-  const EBISBox& ebisbox = m_amr->get_ebisl(m_fluid_realm, m_phase)[a_level][a_dit];
+  const EBISBox& ebisbox = m_amr->get_ebisl(m_particle_realm, m_phase)[a_level][a_dit];
 
   // Do regular cells
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
@@ -2135,12 +2141,11 @@ bool ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
     
       solver->compute_loads(loads, a_grids[lvl], lvl);
 
-#ifdef CH_MPI
-      int count = loads.size();
-      Vector<long int> tmp(count);
-      MPI_Allreduce(&(loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-      loads = tmp;
-#endif
+      // Offset loads with constant estimate. 
+      for(int i = 0; i < loads.size(); i++){
+	loads[i] += lround(m_load_ppc*a_boxes[lvl][i].numPts());
+      }
+
 
       LoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
     }

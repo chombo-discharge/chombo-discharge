@@ -23,6 +23,7 @@ ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_phys
   ParmParse pp("ito_plasma_godunov");
   pp.get("particle_realm", m_particle_realm);
   pp.get("profile", m_profile);
+  pp.get("load_ppc", m_load_ppc);
 
   m_avg_cfl = 0.0;
 
@@ -174,7 +175,7 @@ void ito_plasma_godunov::allocate_internals(){
   
   m_amr->allocate(m_particle_scratch1,  m_particle_realm, m_phase, 1);
   m_amr->allocate(m_particle_scratchD,  m_particle_realm, m_phase, SpaceDim);
-  m_amr->allocate(m_particle_E, m_particle_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_particle_E,         m_particle_realm, m_phase, SpaceDim);
 
   m_amr->allocate(m_J,            m_fluid_realm, m_phase, SpaceDim);
   m_amr->allocate(m_scratch1,     m_fluid_realm, m_phase, 1);
@@ -257,7 +258,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   // Chemistry kernel.
   MPI_Barrier(Chombo_MPI::comm);
   reaction_time = -MPI_Wtime();
-  this->advance_reaction_network(a_dt);
+  //  this->advance_reaction_network(a_dt);
   reaction_time += MPI_Wtime();
 
   // Make superparticles

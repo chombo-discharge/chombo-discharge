@@ -269,6 +269,8 @@ namespace physics {
       int m_ppc;
       int m_halo_buffer;
       int m_pvr_buffer;
+      
+      Real m_load_ppc;
       Real m_max_cells_hop;
       Real m_dt_relax;
       Real m_min_dt;
