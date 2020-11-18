@@ -95,7 +95,7 @@ bool brownian_walker_stepper::load_balance(Vector<Vector<int> >&            a_pr
 
   bool ret = false;
   
-  if(m_load_balance){
+  if(m_load_balance && a_realm == m_realm){
     particle_container<ito_particle>& particles = m_solver->get_particles();
   
     particles.regrid(a_grids, m_amr->get_domains(), m_amr->get_dx(), m_amr->get_ref_rat(), a_lmin, a_finest_level);
