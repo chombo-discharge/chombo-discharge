@@ -62,6 +62,7 @@ namespace physics {
       void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
       virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
       void write_J(EBAMRCellData& a_output, int& a_icomp) const;
+      void write_num_particles_per_patch(EBAMRCellData& a_output, int& a_icomp) const;
       int  get_num_plot_vars() const override;
   
       // Advance routines
@@ -278,11 +279,11 @@ namespace physics {
 
       // Storage for current density. This is defined over the particle realm. 
       EBAMRCellData m_J;
-      EBAMRCellData m_fluid_scratch1;     // Scratch storage on the fluid realm with 1 component
-      EBAMRCellData m_fluid_scratchD;     // Scratch storage on the fluid realm with SpaceDim components
+      mutable EBAMRCellData m_fluid_scratch1;     // Scratch storage on the fluid realm with 1 component
+      mutable EBAMRCellData m_fluid_scratchD;     // Scratch storage on the fluid realm with SpaceDim components
 
-      EBAMRCellData m_particle_scratch1;  // Scratch storage on the particle realm with 1 component
-      EBAMRCellData m_particle_scratchD;  // Scratch storage on the particle realm with SpaceDim components
+      mutable EBAMRCellData m_particle_scratch1;  // Scratch storage on the particle realm with 1 component
+      mutable EBAMRCellData m_particle_scratchD;  // Scratch storage on the particle realm with SpaceDim components
 
       // Storage for the electric field on 
       EBAMRCellData m_fluid_E;
@@ -296,6 +297,7 @@ namespace physics {
 
       // Diagnostics for number of particles
       void get_particle_statistics(Real& a_avg, Real& a_sigma, size_t& a_minParticles, size_t& a_maxParticles, int& a_minRank, int& a_maxRank);
+
 
       // Do load balancing of the particle realm. 
       bool load_balance_particle_realm(Vector<Vector<int> >&            a_procs,

@@ -353,6 +353,10 @@ void ito_plasma_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::st
   if(SpaceDim == 3){
     a_plotvar_names.push_back("z-J");
   }
+
+  // Write the number of particles per patch
+  this->write_num_particles_per_patch(a_output, a_icomp);
+  a_plotvar_names.push_back("particles_per_patch");
 }
 
 void ito_plasma_stepper::write_J(EBAMRCellData& a_output, int& a_icomp) const{
@@ -373,6 +377,41 @@ void ito_plasma_stepper::write_J(EBAMRCellData& a_output, int& a_icomp) const{
     }
   }
   a_icomp += SpaceDim;
+}
+
+void ito_plasma_stepper::write_num_particles_per_patch(EBAMRCellData& a_output, int& a_icomp) const {
+  CH_TIME("ito_plasma_stepper::write_num_particles_per_patch");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::write_num_particles_per_patch" << endl;
+  }
+
+  const Interval src_interv(0, 0);
+  const Interval dst_interv(a_icomp, a_icomp);
+
+  data_ops::set_value(m_particle_scratch1, 0.0);
+  
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const particle_container<ito_particle>& particles = solver_it()->get_particles();
+
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	(*m_particle_scratch1[lvl])[dit()] += particles[lvl][dit].numItems();
+      }
+    }
+  }
+
+  // Copy to output holder
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    if(m_particle_scratch1.get_realm() == a_output.get_realm()){
+      m_particle_scratch1[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+    }
+    else {
+      m_particle_scratch1[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+    }
+  }
+  
+  a_icomp += 1;
 }
 
 void ito_plasma_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
@@ -634,6 +673,7 @@ int ito_plasma_stepper::get_num_plot_vars() const {
   ncomp += m_poisson->get_num_plotvars();
   ncomp += m_sigma->get_num_plotvars();
   ncomp += SpaceDim; // For plotting the current density
+  ncomp += 1;        // For plotting the number of particles per cell
 
   return ncomp;
 }
