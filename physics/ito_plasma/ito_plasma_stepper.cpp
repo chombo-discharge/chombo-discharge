@@ -411,6 +411,18 @@ void ito_plasma_stepper::print_step_report(){
   const size_t l_source_particles = m_ito->get_num_source_particles(true);
   const size_t g_source_particles = m_ito->get_num_source_particles(false);
 
+  Real avg;
+  Real sigma;
+  
+  int minRank;
+  int maxRank;
+  
+  size_t minParticles;
+  size_t maxParticles;
+  
+  // Compute some particle statistics
+  this->get_particle_statistics(avg, sigma, minParticles, maxParticles, minRank, maxRank);
+
   // How was the time step restricted
   std::string str;
   switch(m_timecode){
@@ -435,8 +447,77 @@ void ito_plasma_stepper::print_step_report(){
 	 << "                                   #part     = " << l_particles << " (" << g_particles << ")" << endl
 	 << "                                   #eb part  = " << l_eb_particles << " (" << g_eb_particles << ")" << endl
 	 << "                                   #dom part = " << l_domain_particles << " (" << g_domain_particles << ")" << endl
-    	 << "                                   #src part = " << l_source_particles << " (" << g_source_particles << ")" << endl;
+    	 << "                                   #src part = " << l_source_particles << " (" << g_source_particles << ")" << endl
+	 << "                                   #part min = " << minParticles << " (on rank = " << minRank << ")" << endl
+    	 << "                                   #part max = " << maxParticles << " (on rank = " << maxRank << ")" << endl
+    	 << "                                   #part avg = " << avg << endl
+	 << "                                   #part dev = " << sigma << " (" << 100.*sigma/avg << "%)" << endl;
 }
+
+void ito_plasma_stepper::get_particle_statistics(Real& a_avg, Real& a_sigma, size_t& a_minPart, size_t& a_maxPart, int& a_minRank, int& a_maxRank){
+  CH_TIME("ito_plasma_stepper::get_particle_statistics");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::get_particle_statistics" << endl;
+  }
+
+  const int srcProc = 0; 
+  const int nProc   = numProc();
+
+  const size_t numLocal = m_ito->get_num_particles(true);
+
+  // Gather on source proc
+  Vector<size_t> allCounts(nProc);
+  gather(allCounts, numLocal, srcProc);
+
+
+  // Compute and broadcast the average and the standard deviation
+  if(procID() == srcProc){
+
+    a_avg = 0.0;
+    for (int i = 0; i < nProc; i++){
+      a_avg += 1.0*allCounts[i];
+    }
+    a_avg *= 1./nProc;
+
+    a_sigma = 0.0;
+    for (int i = 0; i < nProc; i++){
+      a_sigma += std::pow(1.0*allCounts[i]-a_avg,2);
+    }
+    a_sigma = sqrt(a_sigma/nProc);
+  }
+  
+  broadcast(a_avg,   srcProc);
+  broadcast(a_sigma, srcProc);
+
+  
+  // Get the minimum/maximum number of particles
+  a_minRank = srcProc;
+  a_maxRank = srcProc;
+  
+  a_minPart = std::numeric_limits<size_t>::max();
+  a_maxPart = 0;
+
+  if(procID() == srcProc){
+    for (int i = 0; i < nProc; i++){
+      if(allCounts[i] < a_minPart){
+	a_minPart = allCounts[i];
+	a_minRank = i;
+      }
+
+      if(allCounts[i] > a_maxPart){
+	a_maxPart = allCounts[i];
+	a_maxRank = i;
+      }
+    }
+  }
+
+  broadcast(a_minRank, srcProc);
+  broadcast(a_maxRank, srcProc);
+  
+  broadcast(a_minPart, srcProc);
+  broadcast(a_maxPart, srcProc);
+}
+
 
 void ito_plasma_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
   CH_TIME("ito_plasma_stepper::compute_dt");

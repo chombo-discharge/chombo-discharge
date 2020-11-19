@@ -294,6 +294,9 @@ namespace physics {
       // Set the particle buffers
       void set_particle_buffers();
 
+      // Diagnostics for number of particles
+      void get_particle_statistics(Real& a_avg, Real& a_sigma, size_t& a_minParticles, size_t& a_maxParticles, int& a_minRank, int& a_maxRank);
+
       // Do load balancing of the particle realm. 
       bool load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
 				       Vector<Vector<Box> >&            a_boxes,

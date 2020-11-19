@@ -258,7 +258,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   // Chemistry kernel.
   MPI_Barrier(Chombo_MPI::comm);
   reaction_time = -MPI_Wtime();
-  //  this->advance_reaction_network(a_dt);
+  this->advance_reaction_network(a_dt);
   reaction_time += MPI_Wtime();
 
   // Make superparticles
