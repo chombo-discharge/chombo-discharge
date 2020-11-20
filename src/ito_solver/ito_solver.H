@@ -317,6 +317,16 @@ public:
   virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const;
 
   /*!
+    @brief Checkpoint particles
+  */
+  virtual void write_checkpoint_level_particles(HDF5Handle& a_handle, const int a_level) const;
+
+  /*!
+    @brief Checkpoint particles
+  */
+  virtual void write_checkpoint_level_fluid(HDF5Handle& a_handle, const int a_level) const;
+
+  /*!
     @brief Read checkpoint data from handle
   */
   virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);

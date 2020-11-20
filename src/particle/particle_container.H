@@ -156,6 +156,11 @@ public:
   const AMRPVR& get_pvr() const;
 
   /*!
+    @brief Get grids
+  */
+  const Vector<DisjointBoxLayout>& get_grids() const;
+
+  /*!
     @brief Get data on a level
   */
   ParticleData<P>& operator[](const int a_level);

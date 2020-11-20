@@ -847,61 +847,90 @@ void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level)
     pout() << m_name + "::write_checkpoint_level" << endl;
   }
 
-  const int halo = 0;
-
+  // Write state. 
   write(a_handle, *m_state[a_level], m_name);
 
   // Write particles.
-  const std::string str = m_name + "_particles";
   if(m_checkpointing == which_checkpoint::particles){
-    particle_container<simple_ito_particle> simpleParticles;
-    m_amr->allocate(simpleParticles, m_pvr_buffer, halo, m_realm);
-
-    // Make ito_particle into simple_ito_particle. This saves a shitload of disk space. 
-    for (DataIterator dit(m_amr->get_grids()[a_level]); dit.ok(); ++dit){
-      List<simple_ito_particle>& other_particles = (simpleParticles[a_level])[dit()].listItems();
-      
-      for (ListIterator<ito_particle> lit(m_particles[a_level][dit()].listItems()); lit.ok(); ++lit){
-	other_particles.append(simple_ito_particle(lit().mass(), lit().position(), lit().energy()));
-      }
-    }
-
-    // Write particles
-    writeParticlesToHDF(a_handle, simpleParticles[a_level], str);
+    this->write_checkpoint_level_particles(a_handle, a_level);
   }
   else{ // In this case we need to write the number of physical particles in a grid cell. 
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[a_level];
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+    this->write_checkpoint_level_fluid(a_handle, a_level);
+  }
+}
 
-    const int comp     = 0;
-    const int ncomp    = 1;
-    const RealVect dx  = m_amr->get_dx()[a_level]*RealVect::Unit;
-    const RealVect plo = m_amr->get_prob_lo();
-    const IntVect ghos = IntVect::Zero;
+void ito_solver::write_checkpoint_level_particles(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("ito_solver::write_checkpoint_level_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_checkpoint_level_particles" << endl;
+  }
 
-    // Make something that can hold the particle numbers (stored as a Real)
-    EBCellFactory fact(ebisl);
-    LevelData<EBCellFAB> particleNumbers(dbl, ncomp, ghos, fact);
-    EBLevelDataOps::setVal(particleNumbers, 0.0);
+  const int halo        = 0;
+  const std::string str = m_name + "_particles";
 
-    // Now go through the grid and add the number of particles in each cell
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      BaseFab<Real>& pNum = particleNumbers[dit()].getSingleValuedFAB(); // No multivalued cells please. 
+  particle_container<simple_ito_particle> realmParticles;
+  //  particle_container<simple_ito_particle> primalParticles;
+  
+  m_amr->allocate(realmParticles,  m_pvr_buffer, halo, m_realm);
+  //  m_amr->allocate(primalParticles, m_pvr_buffer, halo, m_realm);
 
-      // Get cell particles
-      BinFab<ito_particle> pCel(dbl.get(dit()), dx, plo);
-      pCel.addItems(m_particles[a_level][dit()].listItems());
+  // Make ito_particle into simple_ito_particle. This saves a shitload of disk space. 
+  for (DataIterator dit(m_amr->get_grids(m_realm)[a_level]); dit.ok(); ++dit){
+    List<simple_ito_particle>& other_particles = (realmParticles[a_level])[dit()].listItems();
+      
+    for (ListIterator<ito_particle> lit(m_particles[a_level][dit()].listItems()); lit.ok(); ++lit){
+      other_particles.append(simple_ito_particle(lit().mass(), lit().position(), lit().energy()));
+    }
+  }
+
+  //if(m_realm == realm::primal){
+    writeParticlesToHDF(a_handle, realmParticles[a_level], str);
+  // }
+  // else{
+  //   primalParticles.add_particles_destructive(realmParticles);
+  //   writeParticlesToHDF(a_handle, primalParticles[a_level], str);
+  // }
+}
+
+void ito_solver::write_checkpoint_level_fluid(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("ito_solver::write_checkpoint_level_fluid");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_checkpoint_level_fluid" << endl;
+  }
+
+  const std::string str = m_name + "_particles";
+
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+    
+  const int comp     = 0;
+  const int ncomp    = 1;
+  const RealVect dx  = m_amr->get_dx()[a_level]*RealVect::Unit;
+  const RealVect plo = m_amr->get_prob_lo();
+  const IntVect ghos = IntVect::Zero;
+
+  // Make something that can hold the particle numbers (stored as a Real)
+  EBCellFactory fact(ebisl);
+  LevelData<EBCellFAB> particleNumbers(dbl, ncomp, ghos, fact);
+  EBLevelDataOps::setVal(particleNumbers, 0.0);
+
+  // Now go through the grid and add the number of particles in each cell
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    BaseFab<Real>& pNum = particleNumbers[dit()].getSingleValuedFAB(); // No multivalued cells please. 
+
+    // Get cell particles
+    BinFab<ito_particle> pCel(dbl.get(dit()), dx, plo);
+    pCel.addItems(m_particles[a_level][dit()].listItems());
 				 
-      for (BoxIterator bit(dbl.get(dit())); bit.ok(); ++bit){
-	pNum(bit(), comp) = 0.0;
-	for (ListIterator<ito_particle> lit(pCel(bit(), comp)); lit.ok(); ++lit){
-	  pNum(bit()) += lit().mass();
-	}
+    for (BoxIterator bit(dbl.get(dit())); bit.ok(); ++bit){
+      pNum(bit(), comp) = 0.0;
+      for (ListIterator<ito_particle> lit(pCel(bit(), comp)); lit.ok(); ++lit){
+	pNum(bit()) += lit().mass();
       }
     }
-
-    write(a_handle, particleNumbers, str);
   }
+
+  write(a_handle, particleNumbers, str);
 }
 
 void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){

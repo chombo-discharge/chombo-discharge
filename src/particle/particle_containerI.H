@@ -145,6 +145,11 @@ const AMRPVR& particle_container<P>::get_pvr() const {
 }
 
 template <class P>
+const Vector<DisjointBoxLayout>& particle_container<P>::get_grids() const {
+  return m_grids;
+}
+
+template <class P>
 AMRParticles<P>& particle_container<P>::get_particles(){
   CH_assert(m_is_defined);
   if(m_cell_sorted) MayDay::Abort("particle_container<P>::get_particles - particles are sorted by cell!");
@@ -389,32 +394,70 @@ void particle_container<P>::add_particles_destructive(BinFab<P>& a_particles, co
 template <class P>
 void particle_container<P>::add_particles(const particle_container<P>& a_otherContainer){
   if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_grids[lvl];
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+  if(m_realm == a_otherContainer.get_realm()){
+    for (int lvl = 0; lvl <= m_finest_level; lvl++){
+      const DisjointBoxLayout& dbl = m_grids[lvl];
 
-      ListBox<P>& myParticles          = (*m_particles[lvl])[dit()];
-      const ListBox<P>& otherParticles = a_otherContainer[lvl][dit()];
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-      myParticles.addItems(otherParticles.listItems());
+	ListBox<P>& myParticles          = (*m_particles[lvl])[dit()];
+	const ListBox<P>& otherParticles = a_otherContainer[lvl][dit()];
+
+	myParticles.addItems(otherParticles.listItems());
+      }
     }
+  }
+  else{
+    for (int lvl = 0; lvl <= m_finest_level; lvl++){
+      List<P>& outcast = m_particles[lvl]->outcast();
+      outcast.clear();
+
+      const DisjointBoxLayout& dbl = a_otherContainer.get_grids()[lvl];
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const List<P>& otherParticles = a_otherContainer[lvl][dit()].listItems();
+
+	outcast.join(otherParticles);
+      }
+    }
+
+    this->remap();
   }
 }
 
 template <class P>
 void particle_container<P>::add_particles_destructive(particle_container<P>& a_otherContainer){
   if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_grids[lvl];
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+  if(m_realm == a_otherContainer.get_realm()){
+    for (int lvl = 0; lvl <= m_finest_level; lvl++){
+      const DisjointBoxLayout& dbl = m_grids[lvl];
 
-      ListBox<P>& myParticles    = (*m_particles[lvl])[dit()];
-      ListBox<P>& otherParticles = a_otherContainer[lvl][dit()];
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-      myParticles.addItemsDestructive(otherParticles.listItems());
+	ListBox<P>& myParticles    = (*m_particles[lvl])[dit()];
+	ListBox<P>& otherParticles = a_otherContainer[lvl][dit()];
+
+	myParticles.addItemsDestructive(otherParticles.listItems());
+      }
     }
+  }
+  else{
+    for (int lvl = 0; lvl <= m_finest_level; lvl++){
+      List<P>& outcast = m_particles[lvl]->outcast();
+      outcast.clear();
+
+      const DisjointBoxLayout& dbl = a_otherContainer.get_grids()[lvl];
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	List<P>& otherParticles = a_otherContainer[lvl][dit()].listItems();
+
+	outcast.catenate(otherParticles);
+
+	otherParticles.clear();
+      }
+    }
+
+    this->remap();
   }
 }
 
