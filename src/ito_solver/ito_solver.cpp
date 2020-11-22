@@ -463,8 +463,6 @@ void ito_solver::register_operators(){
     m_amr->register_operator(s_eb_copier,       m_realm, m_phase);
     m_amr->register_operator(s_eb_ghostcloud,   m_realm, m_phase);
     m_amr->register_operator(s_eb_noncons_div,  m_realm, m_phase);
-
-
   }
 }
 
@@ -1392,9 +1390,9 @@ void ito_solver::deposit_energy(EBAMRCellData& a_state, particle_container<ito_p
     pout() << m_name + "::deposit_energy(state, particles, deposition_type)" << endl;
   }
 
-  this->set_mass_to_energy(a_particles);                                       // Make mass = mass*E
+  this->set_mass_to_energy(a_particles);                       // Make mass = mass*E
   this->deposit_particles(a_state, a_particles, a_deposition); // Deposit mass*E
-  this->unset_mass_to_energy(a_particles);                                     // Make mass = mass/E
+  this->unset_mass_to_energy(a_particles);                     // Make mass = mass/E
 }
 
 void ito_solver::deposit_particles(){
@@ -1412,8 +1410,10 @@ void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAM
     pout() << m_name + "::deposit_nonConservative" << endl;
   }
 
+  const std::string cur_realm = a_depositionNC.get_realm();
+
   if(m_blend_conservation){
-    irreg_amr_stencil<noncons_div>& stencils = m_amr->get_noncons_div_stencils(m_realm, m_phase);
+    irreg_amr_stencil<noncons_div>& stencils = m_amr->get_noncons_div_stencils(cur_realm, m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else{
@@ -1427,14 +1427,16 @@ void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mas
     pout() << m_name + "::deposit_hybrid" << endl;
   }
 
+  const std::string cur_realm = a_depositionH.get_realm();
+
   const int comp  = 0;
   const int ncomp = 1;
 
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(cur_realm)[lvl];
     const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(cur_realm, m_phase)[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       EBCellFAB& divH               = (*a_depositionH[lvl])[dit()];  // On input, this contains kappa*depositionWeights
@@ -1442,7 +1444,7 @@ void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mas
       const BaseIVFAB<Real>& divNC  = (*a_depositionNC[lvl])[dit()]; 
       const EBISBox& ebisbox        = ebisl[dit()];
 
-      VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->get_vofit(cur_realm, m_phase)[lvl])[dit()];
       for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real kappa    = ebisbox.volFrac(vof);
@@ -1466,15 +1468,17 @@ void ito_solver::increment_redist(const EBAMRIVData& a_mass_diff){
     pout() << m_name + "::increment_redist" << endl;
   }
 
+  const std::string cur_realm = a_mass_diff.get_realm();
+
   const int comp  = 0;
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
   const Interval interv(comp, comp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(cur_realm)[lvl];
     
-    EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_realm, m_phase)[lvl]);
+    EBLevelRedist& level_redist = *(m_amr->get_level_redist(cur_realm, m_phase)[lvl]);
     level_redist.setToZero();
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1489,13 +1493,15 @@ void ito_solver::level_redistribution(EBAMRCellData& a_state){
     pout() << m_name + "::level_redistribution" << endl;
   }
 
+  const std::string cur_realm = a_state.get_realm();
+
   const int comp  = 0;
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
   const Interval interv(comp, comp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_realm, m_phase)[lvl]);
+    EBLevelRedist& level_redist = *(m_amr->get_level_redist(cur_realm, m_phase)[lvl]);
     level_redist.redistribute(*a_state[lvl], interv);
     level_redist.setToZero();
   }
@@ -1507,17 +1513,19 @@ void ito_solver::coarse_fine_increment(const EBAMRIVData& a_mass_diff){
     pout() << m_name + "::coarse_fine_increment" << endl;
   }
 
+  const std::string cur_realm = a_mass_diff.get_realm();
+
   const int comp  = 0;
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
   const Interval interv(0,0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(cur_realm)[lvl];
 
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(cur_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(cur_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(cur_realm, m_phase)[lvl];
 
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < 0;
@@ -1551,6 +1559,8 @@ void ito_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
     pout() << m_name + "::coarse_fine_redistribution" << endl;
   }
 
+  const std::string cur_realm = a_state.get_realm();
+
   const int comp         = 0;
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
@@ -1562,9 +1572,9 @@ void ito_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
 
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(cur_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(cur_realm, m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(cur_realm, m_phase)[lvl];
     if(has_coar){
       fine2coar_redist->redistribute(*a_state[lvl-1], interv);
       fine2coar_redist->setToZero();
