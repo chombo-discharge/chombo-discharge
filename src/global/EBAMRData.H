@@ -94,6 +94,12 @@ public:
   void copy(const EBAMRData<T>& a_other);
 
   /*!
+    @brief General copying of another object. This does a local copy if the two realms are the same. Otherwise it does
+    a communication copy. In Chombo-speak this is localCopyTo versus copyTo. 
+  */
+  void copy(const Interval a_srcInterval, const EBAMRData<T>& a_other, const Interval a_dstInterval);
+
+  /*!
     @brief Push a LevelData<T> object to the back of the data vector
   */
   void push_back(RefCountedPtr<LevelData<T> >& a_levelData);

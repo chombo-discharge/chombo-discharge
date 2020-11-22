@@ -463,6 +463,8 @@ void ito_solver::register_operators(){
     m_amr->register_operator(s_eb_copier,       m_realm, m_phase);
     m_amr->register_operator(s_eb_ghostcloud,   m_realm, m_phase);
     m_amr->register_operator(s_eb_noncons_div,  m_realm, m_phase);
+
+
   }
 }
 

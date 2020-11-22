@@ -90,6 +90,24 @@ void EBAMRData<T>::copy(const EBAMRData<T>& a_other){
   }
 }
 
+template <typename T>
+void EBAMRData<T>::copy(const Interval a_srcInterval, const EBAMRData<T>& a_other, const Interval a_dstInterval){
+
+  for (int lvl = 0; lvl < m_data.size(); lvl++){
+    RefCountedPtr<LevelData<T> >& src       = m_data[lvl];
+    const RefCountedPtr<LevelData<T> >& dst = a_other[lvl];
+    
+    if(!src.isNull() && !dst.isNull()){
+      if(m_realm == a_other.get_realm()){
+	dst->localCopyTo(a_srcInterval, *src, a_dstInterval);
+      }
+      else{
+	dst->copyTo(a_srcInterval, *src, a_dstInterval);
+      }
+    }
+  }
+}
+
 // Explicit templates
 template class EBAMRData<MFCellFAB>;         
 template class EBAMRData<MFFluxFAB>;         

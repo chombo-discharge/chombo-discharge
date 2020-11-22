@@ -2132,6 +2132,7 @@ void driver::write_plot_file(const std::string a_filename){
 
   // Output file
   EBAMRCellData output;
+  EBAMRCellData scratch;
 
   // Names for output variables  
   Vector<std::string> names(0);
@@ -2144,8 +2145,10 @@ void driver::write_plot_file(const std::string a_filename){
   ncomp += this->get_num_plot_vars();
 
   // Allocate storage
-  m_amr->allocate(output, m_realm, phase::gas, ncomp);
+  m_amr->allocate(output,  m_realm, phase::gas, ncomp);
+  m_amr->allocate(scratch, m_realm, phase::gas, 1);
   data_ops::set_value(output, 0.0);
+  data_ops::set_value(scratch, 0.0);
 
   // Assemble data
   int icomp = 0;             // Used as reference for output components
@@ -2185,6 +2188,18 @@ void driver::write_plot_file(const std::string a_filename){
     pout() << "driver::write_plot_file - writing plot file..." << endl;
   }
   Real t_write = -MPI_Wtime();
+
+  // Interpolate ghost cells
+#if 0
+  for (int icomp = 0; icomp < ncomp; icomp++){
+    const Interval intervComp(icomp, icomp);
+    const Interval intervZero(0,0);
+
+    scratch.copy(intervComp, output, intervZero);
+    m_amr->interp_ghost(scratch, m_realm, phase::gas);
+    output.copy(intervZero, scratch, intervComp);
+  }
+#endif
 
   writeEBHDF5(a_filename, 
 	      m_amr->get_grids(m_realm),
