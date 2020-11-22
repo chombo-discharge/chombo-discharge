@@ -45,6 +45,9 @@ const std::string ito_solver::get_realm() const{
 
 void ito_solver::set_realm(const std::string a_realm){
   m_realm = a_realm;
+
+  // This is for later, in case we want to move averaging/interpolating onto a different realm. 
+  m_fluid_realm = m_realm;
 }
 
 RefCountedPtr<ito_species>& ito_solver::get_species(){
@@ -459,9 +462,9 @@ void ito_solver::register_operators(){
     m_amr->register_operator(s_eb_coar_ave,     m_realm, m_phase);
     m_amr->register_operator(s_eb_fill_patch,   m_realm, m_phase);
     m_amr->register_operator(s_eb_mg_interp,    m_realm, m_phase);
-    m_amr->register_operator(s_eb_redist,       m_realm, m_phase);
     m_amr->register_operator(s_eb_copier,       m_realm, m_phase);
     m_amr->register_operator(s_eb_ghostcloud,   m_realm, m_phase);
+    m_amr->register_operator(s_eb_redist,       m_realm, m_phase);
     m_amr->register_operator(s_eb_noncons_div,  m_realm, m_phase);
   }
 }

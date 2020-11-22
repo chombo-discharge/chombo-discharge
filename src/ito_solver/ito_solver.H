@@ -661,6 +661,12 @@ protected:
   std::string m_realm;
 
   /*!
+    @brief Fluid realm
+    @note This is for later, in case we want to move redistribution and averaging/ghost cell interpolating onto a different realm. 
+  */
+  std::string m_fluid_realm;
+
+  /*!
     @brief Boundary volume hierarchy merging tree
   */
   bvh_tree<point_mass> m_tree;
