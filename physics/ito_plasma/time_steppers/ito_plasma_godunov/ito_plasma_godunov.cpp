@@ -313,50 +313,95 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 
   total_time += MPI_Wtime();
 
-  // Convert to %
-  particle_time *= 100./total_time;
-  relax_time    *= 100./total_time;
-  photon_time   *= 100./total_time;
-  sort_time     *= 100./total_time;
-  super_time    *= 100./total_time;
-  reaction_time *= 100./total_time;
-  clear_time    *= 100./total_time;
-  deposit_time  *= 100./total_time;
-  velo_time     *= 100./total_time;
-  diff_time     *= 100./total_time;
-
-
-
   if(m_profile){
 
-    // Dummy-check total percentage
-    Real percentage = 0.0;
-    percentage += particle_time;
-    percentage += relax_time;
-    percentage += photon_time;
-    percentage += sort_time;
-    percentage += super_time;
-    percentage += reaction_time;
-    percentage += clear_time;
-    percentage += deposit_time;
-    percentage += velo_time;
-    percentage += diff_time;
+    // Convert to %
+    particle_time *= 100./total_time;
+    relax_time    *= 100./total_time;
+    photon_time   *= 100./total_time;
+    sort_time     *= 100./total_time;
+    super_time    *= 100./total_time;
+    reaction_time *= 100./total_time;
+    clear_time    *= 100./total_time;
+    deposit_time  *= 100./total_time;
+    velo_time     *= 100./total_time;
+    diff_time     *= 100./total_time;
+
+    // Total percentage/imbalance
+    Real imbalance = 0.0;
+    imbalance += particle_time;
+    imbalance += relax_time;
+    imbalance += photon_time;
+    imbalance += sort_time;
+    imbalance += super_time;
+    imbalance += reaction_time;
+    imbalance += clear_time;
+    imbalance += deposit_time;
+    imbalance += velo_time;
+    imbalance += diff_time;
+    imbalance = 100. - imbalance;
+
+    Real minParticleTime, maxParticleTime;
+    Real minRelaxTime, maxRelaxTime;
+    Real minPhotonTime, maxPhotonTime;
+    Real minSortTime, maxSortTime;
+    Real minSuperTime, maxSuperTime;
+    Real minReactionTime, maxReactionTime;
+    Real minClearTime, maxClearTime;
+    Real minDepositTime, maxDepositTime;
+    Real minVeloTime, maxVeloTime;
+    Real minDiffTime, maxDiffTime;
+    Real minImbalance, maxImbalance;
+
+    MPI_Allreduce(&particle_time, &minParticleTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    MPI_Allreduce(&particle_time, &maxParticleTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+
+    MPI_Allreduce(&relax_time, &minRelaxTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    MPI_Allreduce(&relax_time, &maxRelaxTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+
+    MPI_Allreduce(&photon_time, &minPhotonTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    MPI_Allreduce(&photon_time, &maxPhotonTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+
+    MPI_Allreduce(&sort_time, &minSortTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    MPI_Allreduce(&sort_time, &maxSortTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+
+    MPI_Allreduce(&super_time, &minSuperTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    MPI_Allreduce(&super_time, &maxSuperTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+  
+    MPI_Allreduce(&reaction_time, &minReactionTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    MPI_Allreduce(&reaction_time, &maxReactionTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+
+    MPI_Allreduce(&clear_time, &minClearTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    MPI_Allreduce(&clear_time, &maxClearTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+
+    MPI_Allreduce(&deposit_time, &minDepositTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    MPI_Allreduce(&deposit_time, &maxDepositTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+
+    MPI_Allreduce(&velo_time, &minVeloTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    MPI_Allreduce(&velo_time, &maxVeloTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+
+    MPI_Allreduce(&diff_time, &minDiffTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    MPI_Allreduce(&diff_time, &maxDiffTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+
+    MPI_Allreduce(&imbalance, &minImbalance, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    MPI_Allreduce(&imbalance, &maxImbalance, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+
+
     
     pout() << endl
       	   << "ito_plasma_godunov::advance breakdown:" << endl
 	   << "======================================" << endl
-	   << "particle time = " << particle_time << "%" << endl
-	   << "relax time    = " << relax_time << "%" << endl
-	   << "photon time   = " << photon_time << "%" << endl
-	   << "sort time     = " << sort_time << "%" << endl
-	   << "super time    = " << super_time << "%" << endl
-	   << "reaction time = " << reaction_time << "%" << endl
-	   << "clear time    = " << clear_time << "%" << endl
-      	   << "deposit time  = " << deposit_time << "%" << endl
-	   << "velo time     = " << velo_time << "%" << endl
-      	   << "diff time     = " << diff_time << "%" << endl
-	   << "total percent = " << percentage << endl
-	   << "imbalance     = " << 100. - percentage << endl
+	   << "particle time = " << particle_time << "%" << " (" << minParticleTime << "/"<<  maxParticleTime << "%)" << endl
+	   << "relax time    = " << relax_time    << "%" << " (" << minRelaxTime    << "/"<<  maxRelaxTime    << "%)" << endl
+	   << "photon time   = " << photon_time   << "%" << " (" << minPhotonTime   << "/"<<  maxPhotonTime   << "%)" << endl
+	   << "sort time     = " << sort_time     << "%" << " (" << minSortTime     << "/"<<  maxSortTime     << "%)" << endl
+	   << "super time    = " << super_time    << "%" << " (" << minSuperTime    << "/"<<  maxSuperTime    << "%)" << endl
+	   << "reaction time = " << reaction_time << "%" << " (" << minReactionTime << "/"<<  maxReactionTime << "%)" << endl 
+	   << "clear time    = " << clear_time    << "%" << " (" << minClearTime    << "/"<<  maxClearTime    << "%)" << endl
+      	   << "deposit time  = " << deposit_time  << "%" << " (" << minDepositTime  << "/"<<  maxDepositTime  << "%)" << endl
+	   << "velo time     = " << velo_time     << "%" << " (" << minVeloTime     << "/"<<  maxVeloTime     << "%)" << endl
+      	   << "diff time     = " << diff_time     << "%" << " (" << minDiffTime     << "/"<<  maxDiffTime     << "%)" << endl
+	   << "imbalance     = " << imbalance     << "%" << " (" << minImbalance    << "/"<<  maxImbalance    << "%)" << endl
 	   << "total time    = " << total_time << " (seconds)" << endl
 	   << endl;
   }
@@ -724,7 +769,7 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
 
   data_ops::scale(a_conductivity, units::s_Qe);
 
-  m_amr->average_down(a_conductivity, m_fluid_realm, m_phase);
+  m_amr->average_down(a_conductivity,     m_fluid_realm, m_phase);
   m_amr->interp_ghost_pwl(a_conductivity, m_fluid_realm, m_phase);
 
   // See if this helps....
