@@ -35,7 +35,7 @@ amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be
 # ====================================================================================================
 # DRIVER OPTIONS
 # ====================================================================================================
-driver.verbosity                       = 3             # Engine verbosity
+driver.verbosity                       = 2             # Engine verbosity
 driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
@@ -205,7 +205,7 @@ ito_plasma_godunov.min_dt         = 1.E-10         # Minimum dt
 ito_plasma_godunov.max_dt         = 1.E-10         # Maximum dt
 ito_plasma_godunov.particle_realm = particle         # Particle realm. Default is primal
 ito_plasma_godunov.load_balance   = true           # Load balance or not
-ito_plasma_godunov.load_ppc       = 1.0            # Load estimate per cell (in addition to ppc)
+ito_plasma_godunov.load_ppc       = 0.0            # Load estimate per cell (in addition to ppc)
 ito_plasma_godunov.max_cells_hop  = 1.0            # Maximum cells to move in one time step
 ito_plasma_godunov.which_dt       = advection      # 'advection', 'diffusion', 'advection_diffusion'
 ito_plasma_godunov.ppc            = 32             # Superparticle number of cells

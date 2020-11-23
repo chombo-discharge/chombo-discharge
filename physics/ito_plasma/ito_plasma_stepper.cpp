@@ -68,9 +68,7 @@ void ito_plasma_stepper::setup_solvers(){
 
   // Set the particle buffers for the Ito solver
   this->set_particle_buffers();
-
 }
-
 
 void ito_plasma_stepper::setup_ito(){
   CH_TIME("ito_plasma_stepper::setup_ito");
@@ -1354,7 +1352,7 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(){
   }
 
   Vector<EBAMRCellData*> meshMobilities = m_ito->get_mobility_funcs();
-  this->compute_ito_mobilities_lfa(meshMobilities, m_particle_E, m_time);
+  this->compute_ito_mobilities_lfa(meshMobilities, m_fluid_E, m_time);
 }
 
 void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_E, const Real a_time){
@@ -1366,9 +1364,10 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBAMRCellData*>& a_me
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
 
+    // Computation is done on the fluid realm. 
     Vector<LevelData<EBCellFAB>* > meshMobilities;
     for (int i = 0; i < a_meshMobilities.size(); i++){
-      meshMobilities.push_back(&(*(*a_meshMobilities[i])[lvl]));
+      meshMobilities.push_back(&(*(m_fscratch1[i])[lvl]));
     }
     
     this->compute_ito_mobilities_lfa(meshMobilities, *a_E[lvl], lvl, a_time);
@@ -1380,8 +1379,21 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBAMRCellData*>& a_me
     RefCountedPtr<ito_solver>& solver = solver_it();
 
     if(solver->is_mobile()){
+
+      
+#if 0 // In principle, we should be able to average down and interpolate on the fluid realm and then copy directly to the particle realm.
+      // But we need to make sure that EBAMRData::copy also gets ghost cells 
+      m_amr->average_down(m_fscratch1[idx], m_fluid_realm, m_phase);
+      m_amr->interp_ghost(m_fscratch1[idx], m_fluid_realm, m_phase);
+
+      a_meshMobilities[idx]->copy(m_fscratch1[idx]);
+#else
+      // Copy to particle realm, build ghost cells and the interpolate the mobilities to particle positions. 
+      a_meshMobilities[idx]->copy(m_fscratch1[idx]);
+      
       m_amr->average_down(*a_meshMobilities[idx], m_particle_realm, m_phase);
       m_amr->interp_ghost(*a_meshMobilities[idx], m_particle_realm, m_phase);
+#endif
 
       solver->interpolate_mobilities();
     }
@@ -1397,7 +1409,7 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<LevelData<EBCellFAB>*
     pout() << "ito_plasma_stepper::compute_ito_mobilities_lfa(mobilities, E, level, time)" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_fluid_realm)[a_level];
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const EBCellFAB& E = a_E[dit()];
@@ -1445,7 +1457,7 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBCellFAB*>& a_meshMo
   }
 
   // Do irregular cells
-  VoFIterator& vofit = (*m_amr->get_vofit(m_particle_realm, m_phase)[a_level])[a_dit];
+  VoFIterator& vofit = (*m_amr->get_vofit(m_fluid_realm, m_phase)[a_level])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
     const RealVect e    = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
@@ -1493,7 +1505,7 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(){
   this->compute_ito_diffusion_lfa(diffco_funcs, densities, m_particle_E, m_time);
 }
 
-void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&        a_diffco_funcs,
+void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&       a_diffco_funcs,
 						   const Vector<EBAMRCellData*>& a_densities,
 						   const EBAMRCellData&          a_E,
 						   const Real                    a_time){
@@ -1502,19 +1514,30 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&      
     pout() << "ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, time)" << endl;
   }
 
-  const int num_ito_species = m_physics->get_num_ito_species();
-  
+  // TLDR: In this routine we make m_fscratch1 hold the diffusion coefficients on the fluid realm and m_fscratch2 hold the particle densities on the fluid realm.
+  //       This requires a couple of copies. 
+
+  // 1. Copy particle realm densities to fluid realm scratch data. 
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+
+    m_fscratch2[idx].copy(*a_densities[idx]);
+  }
+
+  // 2. Compute on each level. On the fluid realm. 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+
+    const int num_ito_species = m_physics->get_num_ito_species();
 
     Vector<LevelData<EBCellFAB>* > diffco_funcs(num_ito_species);
     Vector<LevelData<EBCellFAB>* > densities(num_ito_species);
     
     for (int idx = 0; idx < a_diffco_funcs.size(); idx++){
-      diffco_funcs[idx] = (*a_diffco_funcs[idx])[lvl];
-      densities[idx]    = (*a_densities[idx])[lvl];
+      diffco_funcs[idx] = &(*(m_fscratch1[idx])[lvl]);
+      densities[idx]    = &(*(m_fscratch2[idx])[lvl]);
     }
 
-    this->compute_ito_diffusion_lfa(diffco_funcs, densities, *m_particle_E[lvl], lvl, a_time);
+    this->compute_ito_diffusion_lfa(diffco_funcs, densities, *m_fluid_E[lvl], lvl, a_time);
   }
 
   // Average down, interpolate ghost cells, and then interpolate to particle positions
@@ -1523,8 +1546,17 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&      
     RefCountedPtr<ito_solver>& solver = solver_it();
 
     if(solver->is_diffusive()){
+
+#if 0 // In principle, we should be able to average down and interpolate ghost cells on the fluid realm, and copy the entire result over to the particle realm.
+      m_amr->average_down(m_fscratch1[idx], m_fluid_realm, m_phase);
+      m_amr->interp_ghost(m_fscratch2[idx], m_fluid_realm, m_phase);
+      a_diffco_funcs[idx]->copy(m_fluid_scratch1[idx]);
+#else // Instead, we copy to the particle realm and average down there, then interpolate. 
+      a_diffco_funcs[idx]->copy(m_fscratch1[idx]);
+      
       m_amr->average_down(*a_diffco_funcs[idx], m_particle_realm, m_phase);
       m_amr->interp_ghost(*a_diffco_funcs[idx], m_particle_realm, m_phase);
+#endif
 
       solver->interpolate_diffusion();
     }
@@ -1543,7 +1575,7 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<LevelData<EBCellFAB>* 
 
   const int num_ito_species = m_physics->get_num_ito_species();
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_fluid_realm)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box = dbl.get(dit());
@@ -1608,7 +1640,7 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBCellFAB*>&       a_d
   }
 
   // Do irregular cells
-  VoFIterator& vofit = (*m_amr->get_vofit(m_particle_realm, m_phase)[a_level])[a_dit];
+  VoFIterator& vofit = (*m_amr->get_vofit(m_fluid_realm, m_phase)[a_level])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
     const RealVect e    = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));

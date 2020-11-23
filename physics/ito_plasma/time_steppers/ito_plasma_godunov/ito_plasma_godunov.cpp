@@ -191,6 +191,14 @@ void ito_plasma_godunov::allocate_internals(){
   for (int i = 0; i < m_energy_sources.size(); i++){
     m_amr->allocate(m_energy_sources[i],  m_particle_realm, m_phase, 1);
   }
+
+  // Allocate fluid scratch storage
+  m_fscratch1.resize(num_ito_species);
+  m_fscratch2.resize(num_ito_species);
+  for (int i = 0; i < num_ito_species; i++){
+    m_amr->allocate(m_fscratch1[i], m_fluid_realm, m_phase, 1);
+    m_amr->allocate(m_fscratch2[i], m_fluid_realm, m_phase, 1);
+  }
 }
 
 Real ito_plasma_godunov::advance(const Real a_dt) {

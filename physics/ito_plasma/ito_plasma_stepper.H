@@ -285,6 +285,9 @@ namespace physics {
       mutable EBAMRCellData m_particle_scratch1;  // Scratch storage on the particle realm with 1 component
       mutable EBAMRCellData m_particle_scratchD;  // Scratch storage on the particle realm with SpaceDim components
 
+      mutable Vector<EBAMRCellData> m_fscratch1; // Scratch storage with a single component for all species. On the fluid realm. 
+      mutable Vector<EBAMRCellData> m_fscratch2; // Scratch storage with a single component for all species. On the fluid realm. 
+
       // Storage for the electric field on 
       EBAMRCellData m_fluid_E;
       EBAMRCellData m_particle_E;
