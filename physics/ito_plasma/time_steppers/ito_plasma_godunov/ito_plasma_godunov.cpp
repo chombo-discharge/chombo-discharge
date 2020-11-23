@@ -391,17 +391,17 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     pout() << endl
       	   << "ito_plasma_godunov::advance breakdown:" << endl
 	   << "======================================" << endl
-	   << "particle time = " << particle_time << "%" << " (" << minParticleTime << "/"<<  maxParticleTime << "%)" << endl
-	   << "relax time    = " << relax_time    << "%" << " (" << minRelaxTime    << "/"<<  maxRelaxTime    << "%)" << endl
-	   << "photon time   = " << photon_time   << "%" << " (" << minPhotonTime   << "/"<<  maxPhotonTime   << "%)" << endl
-	   << "sort time     = " << sort_time     << "%" << " (" << minSortTime     << "/"<<  maxSortTime     << "%)" << endl
-	   << "super time    = " << super_time    << "%" << " (" << minSuperTime    << "/"<<  maxSuperTime    << "%)" << endl
-	   << "reaction time = " << reaction_time << "%" << " (" << minReactionTime << "/"<<  maxReactionTime << "%)" << endl 
-	   << "clear time    = " << clear_time    << "%" << " (" << minClearTime    << "/"<<  maxClearTime    << "%)" << endl
-      	   << "deposit time  = " << deposit_time  << "%" << " (" << minDepositTime  << "/"<<  maxDepositTime  << "%)" << endl
-	   << "velo time     = " << velo_time     << "%" << " (" << minVeloTime     << "/"<<  maxVeloTime     << "%)" << endl
-      	   << "diff time     = " << diff_time     << "%" << " (" << minDiffTime     << "/"<<  maxDiffTime     << "%)" << endl
-	   << "imbalance     = " << imbalance     << "%" << " (" << minImbalance    << "/"<<  maxImbalance    << "%)" << endl
+	   << "particle time = " << particle_time << "%" << " \t\t min = " << minParticleTime << "%, \t\t max = " <<  maxParticleTime << "%" << endl
+	   << "relax time    = " << relax_time    << "%" << " \t\t min = " << minRelaxTime    << "%, \t\t max = " <<  maxRelaxTime    << "%" << endl
+	   << "photon time   = " << photon_time   << "%" << " \t\t min = " << minPhotonTime   << "%, \t\t max = " <<  maxPhotonTime   << "%" << endl
+	   << "sort time     = " << sort_time     << "%" << " \t\t min = " << minSortTime     << "%, \t\t max = " <<  maxSortTime     << "%" << endl
+	   << "super time    = " << super_time    << "%" << " \t\t min = " << minSuperTime    << "%, \t\t max = " <<  maxSuperTime    << "%" << endl
+	   << "reaction time = " << reaction_time << "%" << " \t\t min = " << minReactionTime << "%, \t\t max = " <<  maxReactionTime << "%" << endl 
+	   << "clear time    = " << clear_time    << "%" << " \t\t min = " << minClearTime    << "%, \t\t max = " <<  maxClearTime    << "%" << endl
+      	   << "deposit time  = " << deposit_time  << "%" << " \t\t min = " << minDepositTime  << "%, \t\t max = " <<  maxDepositTime  << "%" << endl
+	   << "velo time     = " << velo_time     << "%" << " \t\t min = " << minVeloTime     << "%, \t\t max = " <<  maxVeloTime     << "%" << endl
+      	   << "diff time     = " << diff_time     << "%" << " \t\t min = " << minDiffTime     << "%, \t\t max = " <<  maxDiffTime     << "%" << endl
+	   << "imbalance     = " << imbalance     << "%" << " \t\t min = " << minImbalance    << "%, \t\t max = " <<  maxImbalance    << "%" << endl
 	   << "total time    = " << total_time << " (seconds)" << endl
 	   << endl;
   }
