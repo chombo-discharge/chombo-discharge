@@ -2388,25 +2388,57 @@ bool ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
   bool ret = false;
   
   if(m_load_balance){
-    RefCountedPtr<ito_solver>& solver           = m_ito->get_solvers()[0];
-    particle_container<ito_particle>& particles = solver->get_particles();
-  
-    particles.regrid(a_grids, m_amr->get_domains(), m_amr->get_dx(), m_amr->get_ref_rat(), a_lmin, a_finest_level);
+    Vector<ito_solver*> Solvers;
+    Vector<particle_container<ito_particle>* > Particles;
 
+    if(m_load_balance_idx < 0){
+      for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.get_solver();
+	RefCountedPtr<ito_solver>& solver = solver_it();
+	
+	Solvers.push_back(&(*solver));
+	Particles.push_back(&(solver->get_particles()));
+      }
+    }
+    else {
+      RefCountedPtr<ito_solver>& solver           = m_ito->get_solvers()[m_load_balance_idx];
+      particle_container<ito_particle>& particles = solver->get_particles();
+
+      Solvers.push_back(&(*solver));
+      Particles.push_back(&particles);
+    }
+    
+
+    // Regrid onto new grids
+    for (int i = 0; i < Particles.size(); i++){
+      Particles[i]->regrid(a_grids, m_amr->get_domains(), m_amr->get_dx(), m_amr->get_ref_rat(), a_lmin, a_finest_level);
+    }
+
+
+    // Compute loads on each level
     a_procs.resize(1 + a_finest_level);
     a_boxes.resize(1 + a_finest_level);
   
-    // Compute loads on each level
     for (int lvl = 0; lvl < a_lmin; lvl++){
       a_procs[lvl] = a_grids[lvl].procIDs();
       a_boxes[lvl] = a_grids[lvl].boxArray();
     }
 
+
     for (int lvl = a_lmin; lvl <= a_finest_level; lvl++){
-      Vector<long int> loads;
       a_boxes[lvl] = a_grids[lvl].boxArray();
-    
-      solver->compute_loads(loads, a_grids[lvl], lvl);
+
+      Vector<long int> loads(a_boxes[lvl].size(), 0);
+
+      // Accumulate loads from each solver
+      for (int i = 0; i < Solvers.size(); i++){
+	Vector<long int> solverLoads;
+	Solvers[i]->compute_loads(solverLoads, a_grids[lvl], lvl);
+
+	for (int j = 0; j < loads.size(); j++){
+	  loads[j] += solverLoads[j];
+	}
+      }
 
       // Offset loads with constant estimate. 
       for(int i = 0; i < loads.size(); i++){
@@ -2417,8 +2449,10 @@ bool ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
       LoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
     }
 
-    // Put particles back
-    particles.pre_regrid(a_lmin);
+    // Put particles back in pre-regrid mode. 
+    for (int i = 0; i < Particles.size(); i++){
+      Particles[i]->pre_regrid(a_lmin);
+    }
 
     ret = true;
   }

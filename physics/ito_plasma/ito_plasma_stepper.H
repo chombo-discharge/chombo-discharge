@@ -270,6 +270,7 @@ namespace physics {
       int m_ppc;
       int m_halo_buffer;
       int m_pvr_buffer;
+      int m_load_balance_idx;
       
       Real m_load_ppc;
       Real m_max_cells_hop;
@@ -312,6 +313,7 @@ namespace physics {
 				       const Vector<DisjointBoxLayout>& a_grids,
 				       const int                        a_lmin,
 				       const int                        a_finest_level);
+
     };
   }
 };

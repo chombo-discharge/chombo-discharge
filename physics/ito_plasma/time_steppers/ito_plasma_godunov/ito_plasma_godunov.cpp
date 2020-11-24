@@ -129,6 +129,7 @@ void ito_plasma_godunov::parse_options() {
   pp.get("regrid_super",   m_regrid_superparticles);
   pp.get("algorithm",      str);
   pp.get("load_balance",   m_load_balance);
+  pp.get("load_index",     m_load_balance_idx);
   pp.get("min_dt",         m_min_dt);
   pp.get("max_dt",         m_max_dt);
   pp.get("halo_buffer",    m_halo_buffer);
