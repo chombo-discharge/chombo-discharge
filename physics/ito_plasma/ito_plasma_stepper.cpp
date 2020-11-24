@@ -1808,6 +1808,8 @@ void ito_plasma_stepper::compute_particles_per_cell(EBAMRCellData& a_ppc){
 
   data_ops::set_value(a_ppc, 0.0);
 
+  std::cout << a_ppc.get_realm() << std::endl;
+
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     this->compute_particles_per_cell(*a_ppc[lvl], lvl);
   }
@@ -1819,20 +1821,17 @@ void ito_plasma_stepper::compute_particles_per_cell(LevelData<EBCellFAB>& a_ppc,
     pout() << "ito_plasma_stepper::compute_particles_per_cell(ppc, lvl)" << endl;
   }
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[a_level];
 
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       
-      const Box box = dbl.get(dit());
+    const Box box = dbl[dit()];
       
-      this->compute_particles_per_cell(a_ppc[dit()], lvl, dit(), box);
-    }
+    this->compute_particles_per_cell(a_ppc[dit()], a_level, dit(), box);
   }
 }
 
-void ito_plasma_stepper::compute_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex& a_dit, const Box& a_box){
+void ito_plasma_stepper::compute_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box){
   CH_TIME("ito_plasma_stepper::compute_particles_per_cell(ppc, lvl, dit, box)");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_particles_per_cell(ppc, lvl, dit, box)" << endl;
@@ -1848,7 +1847,7 @@ void ito_plasma_stepper::compute_particles_per_cell(EBCellFAB& a_ppc, const int 
     const BinFab<ito_particle>& cellParticles         = particles.get_cell_particles(a_level, a_dit);
 
     for (BoxIterator bit(a_box); bit.ok(); ++bit){
-      const IntVect iv   = bit();
+      const IntVect iv = bit();
 
       Real num = 0.0;
 
@@ -1857,7 +1856,7 @@ void ito_plasma_stepper::compute_particles_per_cell(EBCellFAB& a_ppc, const int 
 	num += lit().mass();
       }
 
-      numFab(iv, idx) = num;
+      numFab(iv, 0) = num;
     }
   }
 }
@@ -1869,8 +1868,8 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
   }
 
 #if 1
-  this->compute_particles_per_cell(m_particle_ppc);
-  m_fluid_ppc.copy(m_particle_ppc);
+  this->compute_particles_per_cell(m_particle_scratch1);//particle_ppc);
+  //  m_fluid_ppc.copy(m_particle_ppc);
 #endif
 
   const int num_ito_species = m_physics->get_num_ito_species();

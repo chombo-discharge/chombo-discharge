@@ -194,7 +194,7 @@ namespace physics {
       // Routines for computing the number of particles per cell. This is done on the particle realm. 
       void compute_particles_per_cell(EBAMRCellData& a_ppc);
       void compute_particles_per_cell(LevelData<EBCellFAB>& a_ppc, const int a_level);
-      void compute_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex& a_dit, const Box& a_box);
+      void compute_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box);
 
       // Routines for chemistry advances. The physics module will switch between LFA and LEA.
       void advance_reaction_network(const Real a_dt);
