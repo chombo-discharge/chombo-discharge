@@ -1807,9 +1807,7 @@ void ito_plasma_stepper::compute_particles_per_cell(EBAMRCellData& a_ppc){
   }
 
   data_ops::set_value(a_ppc, 0.0);
-
-  std::cout << a_ppc.get_realm() << std::endl;
-
+  
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     this->compute_particles_per_cell(*a_ppc[lvl], lvl);
   }
@@ -1868,8 +1866,8 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
   }
 
 #if 1
-  this->compute_particles_per_cell(m_particle_scratch1);//particle_ppc);
-  //  m_fluid_ppc.copy(m_particle_ppc);
+  this->compute_particles_per_cell(m_particle_ppc);
+  m_fluid_ppc.copy(m_particle_ppc);
 #endif
 
   const int num_ito_species = m_physics->get_num_ito_species();
