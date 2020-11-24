@@ -345,7 +345,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     pout() << "ito_plasma_godunov::advance breakdown:" << endl
 	   << "======================================" << endl;
     print_timer_head();
-    print_timer_diagnostics(particle_time, "Transport (%)");
+    print_timer_diagnostics(particle_time, "Transport & Poisson (%)");
     print_timer_diagnostics(relax_time,    "Relax time (%)");
     print_timer_diagnostics(photon_time,   "Photons (%)");
     print_timer_diagnostics(sort_time,     "Sort (%)");
@@ -523,20 +523,18 @@ void ito_plasma_godunov::set_old_positions(){
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
     
-    if(solver->is_diffusive()){
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+      ParticleData<ito_particle>& particles = solver->get_particles()[lvl];
 
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-	  List<ito_particle>& particleList = particles[dit()].listItems();
+	List<ito_particle>& particleList = particles[dit()].listItems();
 
 
-	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
-	    ito_particle& p = particleList[lit];
-	    p.oldPosition() = p.position();
-	  }
+	for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
+	  ito_particle& p = particleList[lit];
+	  p.oldPosition() = p.position();
 	}
       }
     }
