@@ -200,6 +200,10 @@ void ito_plasma_godunov::allocate_internals(){
     m_amr->allocate(m_fscratch1[i], m_fluid_realm, m_phase, 1);
     m_amr->allocate(m_fscratch2[i], m_fluid_realm, m_phase, 1);
   }
+
+  // Allocate for PPC on both realm
+  m_amr->allocate(m_particle_ppc, m_particle_realm, m_phase, num_ito_species);
+  m_amr->allocate(m_fluid_ppc,    m_fluid_realm,    m_phase, num_ito_species);
 }
 
 Real ito_plasma_godunov::advance(const Real a_dt) {

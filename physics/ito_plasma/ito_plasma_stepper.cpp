@@ -1800,6 +1800,71 @@ void ito_plasma_stepper::compute_ito_diffusion_lea(){
   }
 }
 
+void ito_plasma_stepper::compute_particles_per_cell(EBAMRCellData& a_ppc){
+  CH_TIME("ito_plasma_stepper::advance_reaction_network(ppc)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::advance_reaction_network(ppc)" << endl;
+  }
+
+#if 0 // Debug
+  this->compute_particles_per_cell(m_particle_ppc);
+  m_fluid_ppc.copy(m_particle_ppc);
+#endif
+
+  data_ops::set_value(a_ppc, 0.0);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    this->compute_particles_per_cell(*a_ppc[lvl], lvl);
+  }
+}
+
+void ito_plasma_stepper::compute_particles_per_cell(LevelData<EBCellFAB>& a_ppc, const int a_level){
+  CH_TIME("ito_plasma_stepper::advance_reaction_network(ppc, lvl)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::advance_reaction_network(ppc, lvl)" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box = dbl.get(dit());
+      this->compute_particles_per_cell(a_ppc[dit()], lvl, dit(), box);
+    }
+  }
+}
+
+void ito_plasma_stepper::compute_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box){
+  CH_TIME("ito_plasma_stepper::advance_reaction_network(ppc, lvl, dit, box)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::advance_reaction_network(ppc, lvl, dit, box)" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver = solver_it();
+    const int idx                     = solver_it.get_solver();
+
+    const particle_container<ito_particle>& particles = solver->get_particles();
+    const BinFab<ito_particle>& cellParticles = (*particles.get_cell_particles()[a_level])[a_dit];
+
+    for (BoxIterator bit(a_box); bit.ok(); ++bit){
+
+      const IntVect iv   = bit();
+      const VolIndex vof = VolIndex(iv, 0);
+
+      const List<ito_particle>& listParticles = cellParticles(iv, 0);
+
+      Real num = 0.0;
+      for (ListIterator<ito_particle> lit(listParticles); lit.ok(); ++lit){
+	num += lit().mass();
+      }
+
+      a_ppc(vof, 0) = num;
+    }
+  }
+}
+
 void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
   CH_TIME("ito_plasma_stepper::advance_reaction_network(a_dt)");
   if(m_verbosity > 5){
