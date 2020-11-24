@@ -194,7 +194,7 @@ namespace physics {
       // Routines for computing the number of particles per cell. This is done on the particle realm. 
       void compute_particles_per_cell(EBAMRCellData& a_ppc);
       void compute_particles_per_cell(LevelData<EBCellFAB>& a_ppc, const int a_level);
-      void compute_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box);
+      void compute_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex& a_dit, const Box& a_box);
 
       // Routines for chemistry advances. The physics module will switch between LFA and LEA.
       void advance_reaction_network(const Real a_dt);
@@ -294,8 +294,11 @@ namespace physics {
       mutable Vector<EBAMRCellData> m_fscratch1; // Scratch storage with a single component for all species. On the fluid realm. 
       mutable Vector<EBAMRCellData> m_fscratch2; // Scratch storage with a single component for all species. On the fluid realm.
 
-      mutable EBAMRCellData m_particle_ppc; // For holding the number of particles per cell for all species. Contains compoents = number of species
-      mutable EBAMRCellData m_fluid_ppc;    // For holding the number of particles per cell for all species. Contains compoents = number of species
+      EBAMRCellData m_particle_ppc; // For holding the number of particles per cell for all species. Contains compoents = number of species
+      EBAMRCellData m_particle_ypc; // For holding the number of generated photons per cell on the particle realm.
+      
+      EBAMRCellData m_fluid_ppc;    // For holding the number of particles per cell for all species. Contains compoents = number of species
+      EBAMRCellData m_fluid_ypc;    // For holding the number of generated photons per cell on the fluid realm. 
 
       // Storage for the electric field on 
       EBAMRCellData m_fluid_E;

@@ -171,6 +171,9 @@ void ito_plasma_godunov::allocate_internals(){
     pout() << m_name + "::allocate_internals" << endl;
   }
 
+  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_rte_species = m_physics->get_num_rte_species();
+
   m_amr->allocate(m_fluid_scratch1,    m_fluid_realm,    m_phase, 1);
   m_amr->allocate(m_fluid_scratchD,    m_fluid_realm,    m_phase, SpaceDim);
   
@@ -187,7 +190,7 @@ void ito_plasma_godunov::allocate_internals(){
   m_amr->allocate(m_fluid_E,      m_fluid_realm, m_phase, SpaceDim);
 
   // Allocate for energy sources
-  const int num_ito_species = m_physics->get_num_ito_species();
+
   m_energy_sources.resize(num_ito_species);
   for (int i = 0; i < m_energy_sources.size(); i++){
     m_amr->allocate(m_energy_sources[i],  m_particle_realm, m_phase, 1);
@@ -201,9 +204,11 @@ void ito_plasma_godunov::allocate_internals(){
     m_amr->allocate(m_fscratch2[i], m_fluid_realm, m_phase, 1);
   }
 
-  // Allocate for PPC on both realm
+  // Allocate for PPC and YPC on both realm
   m_amr->allocate(m_particle_ppc, m_particle_realm, m_phase, num_ito_species);
+  m_amr->allocate(m_particle_ypc, m_particle_realm, m_phase, num_rte_species);
   m_amr->allocate(m_fluid_ppc,    m_fluid_realm,    m_phase, num_ito_species);
+  m_amr->allocate(m_fluid_ypc,    m_fluid_realm,    m_phase, num_rte_species);
 }
 
 Real ito_plasma_godunov::advance(const Real a_dt) {
