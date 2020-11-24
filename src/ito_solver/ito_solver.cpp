@@ -2001,58 +2001,7 @@ void ito_solver::update_diffusion(const int a_level, const DataIndex a_dit){
   }
 }
 
-Real ito_solver::sign(const Real& a) const{
-  return (a > 0) - (a < 0);
-}
 
-RealVect ito_solver::random_gaussian() {
-#if 0 // original code, draw a distance and a random direction
-  double d = m_gauss01(m_rng);
-  d = sign(d)*Min(Abs(d), m_normal_max);
-  return d*this->random_direction();
-#else // Actual code... draw Gaussians independently...
-  RealVect ret = RealVect::Zero;
-  for (int i = 0; i < SpaceDim; i++){
-    double d = m_gauss01(m_rng);
-    d = sign(d)*Min(Abs(d), m_normal_max);
-
-    ret[i] = d;
-  }
-
-  return ret;
-#endif
-}
-
-RealVect ito_solver::random_direction(){
-  const Real EPS = 1.E-8;
-#if CH_SPACEDIM==2
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1*x1 + x2*x2;
-  while(r >= 1.0 || r < EPS){
-    x1 = m_udist11(m_rng);
-    x2 = m_udist11(m_rng);
-    r  = x1*x1 + x2*x2;
-  }
-
-  return RealVect(x1,x2)/sqrt(r);
-#elif CH_SPACEDIM==3
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1*x1 + x2*x2;
-  while(r >= 1.0 || r < EPS){
-    x1 = m_udist11(m_rng);
-    x2 = m_udist11(m_rng);
-    r  = x1*x1 + x2*x2;
-  }
-
-  const Real x = 2*x1*sqrt(1-r);
-  const Real y = 2*x2*sqrt(1-r);
-  const Real z = 1 - 2*r;
-
-  return RealVect(x,y,z);
-#endif
-}
 
 Real ito_solver::compute_dt() const {
   CH_TIME("ito_solver::compute_dt(allAMRlevels)");

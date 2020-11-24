@@ -528,11 +528,13 @@ public:
   /*!
     @brief Random Gaussian
   */
+  inline
   RealVect random_gaussian();
 
   /*!
     @brief Random direction
   */
+  inline
   RealVect random_direction();
 
   /*!
@@ -704,7 +706,7 @@ protected:
   /*!
     @brief RNG engine
   */
-  std::mt19937_64 m_rng; 
+  std::mt19937_64 m_rng;
 
   /*!
     @brief Uniform real distribution on [0,1]
@@ -1040,11 +1042,6 @@ protected:
     @brief Superparticle merging with BVH trees
   */
   void bvh_merge(List<ito_particle>& a_particles, const int a_particlesPerCell);
-  
-  /*!
-    @brief Sign function
-  */
-  inline Real sign(const Real& a) const;
 
   /*!
     @brief Restart particles
@@ -1067,8 +1064,15 @@ protected:
   void intersect_particles_if();
 
   /*!
+    @brief Sign function
+  */
+  inline
+  Real sign(const Real& a) const;
+
+  /*!
     @brief Draw a valid random position somewhere in a cell
   */
+  inline
   RealVect random_position(const RealVect a_pos,
 			   const RealVect a_lo,
 			   const RealVect a_hi,

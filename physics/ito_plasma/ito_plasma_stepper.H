@@ -298,8 +298,11 @@ namespace physics {
       // Set the particle buffers
       void set_particle_buffers();
 
-      // Diagnostics for number of particles
+      // Diagnostics tool
       void get_particle_statistics(Real& a_avg, Real& a_sigma, size_t& a_minParticles, size_t& a_maxParticles, int& a_minRank, int& a_maxRank);
+      void print_timer_head();
+      void print_timer_diagnostics(Real& a_timer, const std::string a_prefix); // Timer should be in percentage 
+      void print_timer_tail();
 
 
       // Do load balancing of the particle realm. 

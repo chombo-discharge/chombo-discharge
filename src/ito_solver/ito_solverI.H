@@ -17,7 +17,6 @@
 #include "EBGhostCloud.H"
 #include "ito_layout.H"
 
-
 #include "particle_ops.H"
 
 #include <EBArith.H>
@@ -27,6 +26,55 @@
 #include <ParticleIO.H>
 
 #include <chrono>
+
+inline
+Real ito_solver::sign(const Real& a) const{
+  return (a > 0) - (a < 0);
+}
+
+inline
+RealVect ito_solver::random_gaussian() {
+
+  RealVect r = RealVect::Zero;
+  for (int i = 0; i < SpaceDim; i++){
+    r[i] = m_gauss01(m_rng);
+    //    r[i] = sign(r[i])*Min(Abs(r[i]), m_normal_max);
+  }
+
+  return r;
+}
+
+inline
+RealVect ito_solver::random_direction(){
+  const Real EPS = 1.E-8;
+#if CH_SPACEDIM==2
+  Real x1 = 2.0;
+  Real x2 = 2.0;
+  Real r  = x1*x1 + x2*x2;
+  while(r >= 1.0 || r < EPS){
+    x1 = m_udist11(m_rng);
+    x2 = m_udist11(m_rng);
+    r  = x1*x1 + x2*x2;
+  }
+
+  return RealVect(x1,x2)/sqrt(r);
+#elif CH_SPACEDIM==3
+  Real x1 = 2.0;
+  Real x2 = 2.0;
+  Real r  = x1*x1 + x2*x2;
+  while(r >= 1.0 || r < EPS){
+    x1 = m_udist11(m_rng);
+    x2 = m_udist11(m_rng);
+    r  = x1*x1 + x2*x2;
+  }
+
+  const Real x = 2*x1*sqrt(1-r);
+  const Real y = 2*x2*sqrt(1-r);
+  const Real z = 1 - 2*r;
+
+  return RealVect(x,y,z);
+#endif
+}
 
 template <class T>
 void ito_solver::deposit_particles(EBAMRCellData& a_state, const particle_container<T>& a_particles){

@@ -555,6 +555,120 @@ void ito_plasma_stepper::get_particle_statistics(Real& a_avg, Real& a_sigma, siz
   broadcast(a_maxPart, srcProc);
 }
 
+void ito_plasma_stepper::print_timer_diagnostics(Real& a_timer, const std::string a_prefix){
+  CH_TIME("ito_plasma_stepper::print_timer_diagnostics");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::print_timer_diagnostics" << endl;
+  }
+
+  const int srcProc = 0; 
+  const int nProc   = numProc();
+
+  const size_t numLocal = m_ito->get_num_particles(true);
+
+  // Gather all timers on source proc
+  Vector<Real> allTimers(nProc);
+  gather(allTimers, a_timer, srcProc);
+
+  Real averageTime;
+  Real sigmaTime;
+
+  Real minTime;
+  Real maxTime;
+
+  int minRank;
+  int maxRank;
+
+  // Compute and broadcast the average and the standard deviation
+  if(procID() == srcProc){
+
+    averageTime = 0.0;
+    for (int i = 0; i < nProc; i++){
+      averageTime += allTimers[i];
+    }
+    averageTime *= 1./nProc;
+
+    sigmaTime = 0.0;
+    for (int i = 0; i < nProc; i++){
+      sigmaTime += std::pow(1.0*allTimers[i]-averageTime,2);
+    }
+    sigmaTime = sqrt(sigmaTime/nProc);
+  }
+  
+  broadcast(averageTime, srcProc);
+  broadcast(sigmaTime,   srcProc);
+  
+  // Get the minimum/maximum number of particles
+  minRank = srcProc;
+  maxRank = srcProc;
+  
+  minTime = std::numeric_limits<Real>::max();
+  maxTime = 0;
+
+  if(procID() == srcProc){
+    for (int i = 0; i < nProc; i++){
+      if(allTimers[i] < minTime){
+	minTime = allTimers[i];
+	minRank = i;
+      }
+
+      if(allTimers[i] > maxTime){
+	maxTime = allTimers[i];
+	maxRank = i;
+      }
+    }
+  }
+
+  broadcast(minRank, srcProc);
+  broadcast(maxRank, srcProc);
+  
+  broadcast(minTime, srcProc);
+  broadcast(maxTime, srcProc);
+
+  // Fix formatting for the various fields
+  std::stringstream ss_locTime;
+  std::stringstream ss_minTime;
+  std::stringstream ss_maxTime;
+  std::stringstream ss_avgTime;
+  std::stringstream ss_sigTime;
+
+  ss_locTime << std::fixed << std::setprecision(2) << a_timer;
+  ss_minTime << std::fixed << std::setprecision(2) << minTime;
+  ss_maxTime << std::fixed << std::setprecision(2) << maxTime;
+  ss_avgTime << std::fixed << std::setprecision(2) << averageTime;
+  ss_sigTime << std::fixed << std::setprecision(2) << sigmaTime;
+
+
+  pout() << std::left << std::setw(25) << a_prefix
+	 << " | " << std::right << std::setw(8) << ss_locTime.str()
+    	 << " | " << std::right << std::setw(8) << ss_minTime.str()
+    	 << " | " << std::right << std::setw(8) << ss_maxTime.str()
+    	 << " | " << std::right << std::setw(8) << ss_avgTime.str()
+	 << " | " << std::right << std::setw(8) << ss_sigTime.str()
+    	 << " | " << std::right << std::setw(8) << minRank
+	 << " | " << std::right << std::setw(8) << maxRank
+    	 << " | " << endl;
+}
+
+void ito_plasma_stepper::print_timer_head(){
+  pout() << "--------------------------------------------------------------------------------------------------------"
+	 << endl
+	 << std::left << std::setw(25) << "Kernel"
+    	 << " | " << std::right << std::setw(8) << "Loc."
+    	 << " | " << std::right << std::setw(8) << "Min."
+	 << " | " << std::right << std::setw(8) << "Max."
+    	 << " | " << std::right << std::setw(8) << "Avg." 
+	 << " | " << std::right << std::setw(8) << "Dev."
+	 << " | " << std::right << std::setw(8)  << "Min rank"
+	 << " | " << std::right << std::setw(8)  << "Max rank"
+	 << " | " << endl
+  	 << "-------------------------------------------------------------------------------------------------------|"
+	 << endl;
+}
+
+void ito_plasma_stepper::print_timer_tail(){
+  pout() << "--------------------------------------------------------------------------------------------------------\n";
+}
 
 void ito_plasma_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
   CH_TIME("ito_plasma_stepper::compute_dt");

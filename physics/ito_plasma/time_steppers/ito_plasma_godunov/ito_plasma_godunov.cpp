@@ -341,69 +341,24 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     imbalance += diff_time;
     imbalance = 100. - imbalance;
 
-    Real minParticleTime, maxParticleTime;
-    Real minRelaxTime, maxRelaxTime;
-    Real minPhotonTime, maxPhotonTime;
-    Real minSortTime, maxSortTime;
-    Real minSuperTime, maxSuperTime;
-    Real minReactionTime, maxReactionTime;
-    Real minClearTime, maxClearTime;
-    Real minDepositTime, maxDepositTime;
-    Real minVeloTime, maxVeloTime;
-    Real minDiffTime, maxDiffTime;
-    Real minImbalance, maxImbalance;
-
-    MPI_Allreduce(&particle_time, &minParticleTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    MPI_Allreduce(&particle_time, &maxParticleTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-
-    MPI_Allreduce(&relax_time, &minRelaxTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    MPI_Allreduce(&relax_time, &maxRelaxTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-
-    MPI_Allreduce(&photon_time, &minPhotonTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    MPI_Allreduce(&photon_time, &maxPhotonTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-
-    MPI_Allreduce(&sort_time, &minSortTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    MPI_Allreduce(&sort_time, &maxSortTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-
-    MPI_Allreduce(&super_time, &minSuperTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    MPI_Allreduce(&super_time, &maxSuperTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-  
-    MPI_Allreduce(&reaction_time, &minReactionTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    MPI_Allreduce(&reaction_time, &maxReactionTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-
-    MPI_Allreduce(&clear_time, &minClearTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    MPI_Allreduce(&clear_time, &maxClearTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-
-    MPI_Allreduce(&deposit_time, &minDepositTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    MPI_Allreduce(&deposit_time, &maxDepositTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-
-    MPI_Allreduce(&velo_time, &minVeloTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    MPI_Allreduce(&velo_time, &maxVeloTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-
-    MPI_Allreduce(&diff_time, &minDiffTime, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    MPI_Allreduce(&diff_time, &maxDiffTime, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-
-    MPI_Allreduce(&imbalance, &minImbalance, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    MPI_Allreduce(&imbalance, &maxImbalance, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-
-
-    
-    pout() << endl
-      	   << "ito_plasma_godunov::advance breakdown:" << endl
-	   << "======================================" << endl
-	   << "particle time = " << particle_time << "%" << " \t\t min = " << minParticleTime << "%, \t\t max = " <<  maxParticleTime << "%" << endl
-	   << "relax time    = " << relax_time    << "%" << " \t\t min = " << minRelaxTime    << "%, \t\t max = " <<  maxRelaxTime    << "%" << endl
-	   << "photon time   = " << photon_time   << "%" << " \t\t min = " << minPhotonTime   << "%, \t\t max = " <<  maxPhotonTime   << "%" << endl
-	   << "sort time     = " << sort_time     << "%" << " \t\t min = " << minSortTime     << "%, \t\t max = " <<  maxSortTime     << "%" << endl
-	   << "super time    = " << super_time    << "%" << " \t\t min = " << minSuperTime    << "%, \t\t max = " <<  maxSuperTime    << "%" << endl
-	   << "reaction time = " << reaction_time << "%" << " \t\t min = " << minReactionTime << "%, \t\t max = " <<  maxReactionTime << "%" << endl 
-	   << "clear time    = " << clear_time    << "%" << " \t\t min = " << minClearTime    << "%, \t\t max = " <<  maxClearTime    << "%" << endl
-      	   << "deposit time  = " << deposit_time  << "%" << " \t\t min = " << minDepositTime  << "%, \t\t max = " <<  maxDepositTime  << "%" << endl
-	   << "velo time     = " << velo_time     << "%" << " \t\t min = " << minVeloTime     << "%, \t\t max = " <<  maxVeloTime     << "%" << endl
-      	   << "diff time     = " << diff_time     << "%" << " \t\t min = " << minDiffTime     << "%, \t\t max = " <<  maxDiffTime     << "%" << endl
-	   << "imbalance     = " << imbalance     << "%" << " \t\t min = " << minImbalance    << "%, \t\t max = " <<  maxImbalance    << "%" << endl
-	   << "total time    = " << total_time << " (seconds)" << endl
-	   << endl;
+    pout() << "\n";
+    pout() << "ito_plasma_godunov::advance breakdown:" << endl
+	   << "======================================" << endl;
+    print_timer_head();
+    print_timer_diagnostics(particle_time, "Transport (%)");
+    print_timer_diagnostics(relax_time,    "Relax time (%)");
+    print_timer_diagnostics(photon_time,   "Photons (%)");
+    print_timer_diagnostics(sort_time,     "Sort (%)");
+    print_timer_diagnostics(super_time,    "Superparticles (%)");
+    print_timer_diagnostics(reaction_time, "Reaction network (%)");
+    print_timer_diagnostics(clear_time,    "EB removal (%)");
+    print_timer_diagnostics(deposit_time,  "Deposition (%)");
+    print_timer_diagnostics(velo_time,     "Velo comp (%)");
+    print_timer_diagnostics(diff_time,     "Diff comp (%)");
+    print_timer_diagnostics(imbalance,     "Imbalance (%)");
+    print_timer_diagnostics(total_time,    "Total time (s)");
+    print_timer_tail();
+    pout() << "\n";
   }
   
   return a_dt;
@@ -1064,40 +1019,41 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
     isectTime *= 100./totalTime;
     depositTime *= 100./totalTime;
 
-    Real percent = 0.0;
-    percent += posTime;
-    percent += diffuseTime;
-    percent += remapGdnvTime;
-    percent += copyCondTime;
-    percent += condTime;
-    percent += setupTime;
-    percent += poissonTime;
-    percent += velocityTime;
-    percent += particleTime;
-    percent += remapTime;
-    percent += isectTime;
-    percent += depositTime;
-    
-    pout() << endl
-      	   << "ito_plasma_godunov::euler_maruyama breakdown:" << endl
-	   << "======================================" << endl
-	   << "posTime         = " << posTime << "%" << endl
-      	   << "diffuseTime     = " << diffuseTime << "%" << endl
-	   << "remapGdnvTime   = " << remapGdnvTime << "%" << endl
-      	   << "depositGdnvTime = " << depositGdnvTime << "%" << endl
-	   << "copyCondTime    = " << copyCondTime << "%" << endl
-      	   << "condTime        = " << condTime << "%" << endl
-	   << "setupTime       = " << setupTime << "%" << endl
-      	   << "poissonTime     = " << poissonTime << "%" << endl
-	   << "velocityTime    = " << velocityTime << "%" << endl
-      	   << "particleTime    = " << particleTime << "%" << endl
-	   << "remapTime       = " << remapTime << "%" << endl
-      	   << "isectTime       = " << isectTime << "%" << endl
-	   << "depositTime     = " << depositTime << "%" << endl
-	   << "total percent   = " << percent << "%" << endl
-      	   << "imbalance       = " << 100. - percent << "%" << endl
-	   << "total time      = " << totalTime << " (seconds)" << endl
-	   << endl;
+    Real imbalance = 0.0;
+    imbalance += posTime;
+    imbalance += diffuseTime;
+    imbalance += remapGdnvTime;
+    imbalance += copyCondTime;
+    imbalance += condTime;
+    imbalance += setupTime;
+    imbalance += poissonTime;
+    imbalance += velocityTime;
+    imbalance += particleTime;
+    imbalance += remapTime;
+    imbalance += isectTime;
+    imbalance += depositTime;
+
+    pout() << "\n";
+    pout() << "ito_plasma_godunov::euler_maruyama breakdown:" << endl
+	   << "======================================" << endl;
+    print_timer_head();
+    print_timer_diagnostics(posTime,         "Old position (%)");
+    print_timer_diagnostics(diffuseTime,     "Diffusion (%)");
+    print_timer_diagnostics(remapGdnvTime,   "Remap gdnv (%)");
+    print_timer_diagnostics(depositGdnvTime, "Deposit gdnv (%)");
+    print_timer_diagnostics(copyCondTime,    "Copy conductivity (%)");
+    print_timer_diagnostics(condTime,        "Conductity comp (%)");
+    print_timer_diagnostics(setupTime,       "Poisson setup (%)");
+    print_timer_diagnostics(poissonTime,     "Poisson solve (%)");
+    print_timer_diagnostics(velocityTime,    "Velo comp (%)");
+    print_timer_diagnostics(particleTime,    "Advect particles (%)");
+    print_timer_diagnostics(remapTime,       "Remap particles (%)");
+    print_timer_diagnostics(isectTime,       "Particle intersection (%)");
+    print_timer_diagnostics(depositTime,     "Deposition (%)");
+    print_timer_diagnostics(imbalance,       "Imbalance (%)");
+    print_timer_diagnostics(totalTime,       "Total time (s)");
+    print_timer_tail();
+    pout() << "\n";
   }
 }
 
@@ -1108,6 +1064,8 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_contai
   }
 
   this->clear_godunov_particles(a_rho_dagger, which_particles::all);
+
+  
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
@@ -1130,19 +1088,30 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_contai
 	List<ito_particle>& ito_particles  = particles[dit()].listItems();
 	List<godunov_particle>& gdnv_parts = (*a_rho_dagger[idx])[lvl][dit()].listItems();
 
-	// Store the diffusion hop, and add the godunov particles
-	for (ListIterator<ito_particle> lit(ito_particles); lit.ok(); ++lit){
-	  ito_particle& p     = lit();
-	  const Real factor   = g*sqrt(2.0*p.diffusion()*a_dt);
-	  const RealVect hop  = factor*solver->random_gaussian();
-	  const RealVect& pos = p.position();
-	  const Real& mass    = p.mass();
+	if(diffusive){
+	  for (ListIterator<ito_particle> lit(ito_particles); lit.ok(); ++lit){
+	    ito_particle& p     = lit();
+	    const Real factor   = g*sqrt(2.0*p.diffusion()*a_dt);
+	    const Real& mass    = p.mass();
+	    const RealVect& pos = p.position();
+	    RealVect& hop       = p.runtime_vector(0);
+	    hop                 = factor*solver->random_gaussian();
 
-	  // Store the diffusion hop
-	  p.runtime_vector(0) = hop;
+	    // Add simpler particle
+	    gdnv_parts.add(godunov_particle(pos + hop, mass));
+	  }
+	}
+	else{ // Splitting up diffusion and non-diffusion because I dont want to generate random numbers where they're not required...
+	  for (ListIterator<ito_particle> lit(ito_particles); lit.ok(); ++lit){
+	    ito_particle& p     = lit();
+	    const Real& mass    = p.mass();
+	    const RealVect& pos = p.position();
+	    RealVect& hop       = p.runtime_vector(0);
+	    hop                 = RealVect::Zero;
 
-	  // Add simpler particle
-	  gdnv_parts.add(godunov_particle(pos + hop, mass));
+	    // Add simpler particle
+	    gdnv_parts.add(godunov_particle(pos, mass));
+	  }
 	}
       }
     }
