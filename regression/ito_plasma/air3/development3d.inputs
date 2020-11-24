@@ -238,7 +238,7 @@ ito_plasma_air3.ion_mobility   = 2E-4           # Turn on/off ion mobility
 # Reaction stuff
 ito_plasma_air3.react_ppc      = 32             # Maximum number of particles to produce in reaction step	
 ito_plasma_air3.tau_switch     = -1             # Switch from SSA to tau when reaching this many particles
-ito_plasma_air3.poisson_switch = 100            # When to approximate Poisson by normal distribution
+ito_plasma_air3.poisson_switch = -1            # When to approximate Poisson by normal distribution
 ito_plasma_air3.Ncrit          = 5              # How many firings away from a negative particle number?
 ito_plasma_air3.prop_eps       = 1.E99          # Maximum relative change in propensity function
 ito_plasma_air3.NSSA           = 1              # How many SSA steps to run when tau-leaping is inefficient

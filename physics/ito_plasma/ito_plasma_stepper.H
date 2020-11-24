@@ -196,6 +196,25 @@ namespace physics {
       void compute_particles_per_cell(LevelData<EBCellFAB>& a_ppc, const int a_level);
       void compute_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box);
 
+      // Routines for chemistry advances. These are the new ones.
+      void advance_reaction_network_nwo(const Real a_dt);
+      void advance_reaction_network_nwo(const EBAMRCellData& a_E, const EBAMRCellData& a_energy_sources, const Real a_dt);
+      void advance_reaction_network_nwo(LevelData<EBCellFAB>&       a_ppc,
+					LevelData<EBCellFAB>&       a_ypc,
+					const LevelData<EBCellFAB>& a_E,
+					const LevelData<EBCellFAB>& a_sources,
+					const int                   a_level,
+					const Real                  a_dt);
+      void advance_reaction_network_nwo(EBCellFAB&       a_ppc,
+					EBCellFAB&       a_ypc,
+					const EBCellFAB& a_E,
+					const EBCellFAB& a_sources,
+					const int        a_level,
+					const DataIndex  a_dit,
+					const Box        a_box,
+					const Real       a_dx,
+					const Real       a_dt);
+
       // Routines for chemistry advances. The physics module will switch between LFA and LEA.
       void advance_reaction_network(const Real a_dt);
       void advance_reaction_network(Vector<particle_container<ito_particle>* >& a_particles,
@@ -227,6 +246,8 @@ namespace physics {
 				    const Box                       a_box,
 				    const Real                      a_dx,
 				    const Real                      a_dt);
+
+
 
       // Compute dt routines
       Real compute_physics_dt() const;
@@ -306,6 +327,7 @@ namespace physics {
 
       // Storage for energy source terms
       Vector<EBAMRCellData> m_energy_sources;
+      EBAMRCellData m_energy_sources_nwo;
 
       // Set the particle buffers
       void set_particle_buffers();

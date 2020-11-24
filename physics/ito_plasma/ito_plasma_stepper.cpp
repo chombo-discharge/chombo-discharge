@@ -1859,17 +1859,153 @@ void ito_plasma_stepper::compute_particles_per_cell(EBCellFAB& a_ppc, const int 
   }
 }
 
+void ito_plasma_stepper::advance_reaction_network_nwo(const Real a_dt){
+  CH_TIME("ito_plasma_stepper::advance_reaction_network_nwo(dt)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::advance_reaction_network_nwo(dt)" << endl;
+  }
+
+  this->advance_reaction_network_nwo(m_fluid_E, m_energy_sources_nwo, a_dt);
+}
+
+void ito_plasma_stepper::advance_reaction_network_nwo(const EBAMRCellData& a_E, const EBAMRCellData& a_energy_sources, const Real a_dt){
+  CH_TIME("ito_plasma_stepper::advance_reaction_network(ppc, ypc, E, sources, dt)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::advance_reaction_network(ppc, ypc, E, sources, dt)" << endl;
+  }
+
+  // 1. Compute the number of particles per cell. Set the number of photons to be generated per cell to zero. 
+  this->compute_particles_per_cell(m_particle_ppc);
+  m_fluid_ppc.copy(m_particle_ppc);
+  data_ops::set_value(m_fluid_ypc, 0.0);
+
+  // 2. Solve for the new number of particles per cell. This also obtains the number of photons to be generated in each cell. 
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    this->advance_reaction_network_nwo(*m_fluid_ppc[lvl], *m_fluid_ypc[lvl], *a_E[lvl], *a_energy_sources[lvl], lvl, a_dt);
+  }
+
+  // 3. Copy the results to the particle realm.
+  m_particle_ppc.copy(m_fluid_ppc);
+  m_particle_ypc.copy(m_fluid_ypc);
+
+  // 4. Reconcile particles on the particle realm. Not implemented (yet). 
+}
+
+
+void ito_plasma_stepper::advance_reaction_network_nwo(LevelData<EBCellFAB>&       a_ppc,
+						      LevelData<EBCellFAB>&       a_ypc,
+						      const LevelData<EBCellFAB>& a_E,
+						      const LevelData<EBCellFAB>& a_sources,
+						      const int                   a_level,
+						      const Real                  a_dt){
+  CH_TIME("ito_plasma_stepper::advance_reaction_network(ppc, ypc, E, sources, level, dt)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::advance_reaction_network(ppc, ypc, E, sources, level, dt)" << endl;
+  }
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_fluid_realm)[a_level];
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    this->advance_reaction_network_nwo(a_ppc[dit()], a_ypc[dit()], a_E[dit()], a_sources[dit()], a_level, dit(), dbl[dit()], m_amr->get_dx()[a_level], a_dt);
+  }
+}
+
+void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_ppc,
+						      EBCellFAB&       a_ypc,
+						      const EBCellFAB& a_E,
+						      const EBCellFAB& a_sources,
+						      const int        a_level,
+						      const DataIndex  a_dit,
+						      const Box        a_box,
+						      const Real       a_dx,
+						      const Real       a_dt){
+  CH_TIME("ito_plasma_stepper::advance_reaction_network_nwo(ppc, ypc, E, sources, level, dit, box, dx, dt)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::advance_reaction_network_nwo(ppc, ypc, E, sources, level, dit, box, dx, dt)" << endl;
+  }
+
+  // int N    = 0;
+  // Real t = 0.0;
+  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_rte_species = m_physics->get_num_rte_species();
+
+  const RealVect prob_lo = m_amr->get_prob_lo();
+
+  const EBISBox& ebisbox = m_amr->get_ebisl(m_fluid_realm, m_phase)[a_level][a_dit];
+  const EBISBox& ebgraph = m_amr->get_ebisl(m_fluid_realm, m_phase)[a_level][a_dit];
+
+  const BaseFab<Real>& Efab = a_E.getSingleValuedFAB();
+
+  Vector<long long> particles(num_ito_species);
+  Vector<long long> newPhotons(num_rte_species);
+  Vector<Real>      meanEnergies(num_ito_species);
+  Vector<Real>      energySources(num_ito_species);
+
+  // Regular cells
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv = bit();
+
+    if(ebisbox.isRegular(iv)){
+      const Real kappa = 1.0;
+
+      const RealVect pos = prob_lo + a_dx*(RealVect(iv) + 0.5*RealVect::Unit);
+      const RealVect e   = RealVect(D_DECL(Efab(iv, 0), Efab(iv, 1), Efab(iv, 2)));
+
+      // Initialize for this cell. 
+      for (int i = 0; i < num_ito_species; i++){
+	particles[i]     = llround(a_ppc.getSingleValuedFAB()(iv, i));
+	meanEnergies[i]  = 0.0;
+	energySources[i] = a_sources.getSingleValuedFAB()(iv, i);
+      }
+
+      for (int i = 0; i < num_rte_species; i++){
+	newPhotons[i]= 0LL;
+      }
+	   
+
+      // Physics advance. Currently protected.
+      //      m_physics->advance_particles(particles, newPhotons, meanEnergies, energySources, a_dt, e, a_dx, kappa);
+
+#if 0 // For timing the Poisson process. Gives about 100ns/number, or 300 cycles/number which sounds just about right. 
+	t -= MPI_Wtime();
+	auto blargh = 0LL;
+	for (int i = 0; i < 200; i++){
+	  blargh += m_physics->m_poisson(m_physics->m_rng);
+	}
+	t += MPI_Wtime();
+	N += 200;
+#endif
+
+      // Set result
+      for (int i = 0; i < num_ito_species; i++){
+	a_ppc.getSingleValuedFAB()(iv, i) = particles[i];
+      }
+
+      for (int i = 0; i < num_rte_species; i++){
+	a_ypc.getSingleValuedFAB()(iv, i) = newPhotons[i];
+      }
+    }
+  }
+
+  //  std::cout << t/N << std::endl;
+
+  // Irregular cells
+}
+
 void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
   CH_TIME("ito_plasma_stepper::advance_reaction_network(a_dt)");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::advance_reaction_network(a_dt)" << endl;
   }
 
-#if 1
-  this->compute_particles_per_cell(m_particle_ppc);
-  m_fluid_ppc.copy(m_particle_ppc);
-#endif
+  ParmParse pp("devel");
+  bool use_nwo;
+  pp.get("use_nwo", use_nwo);
 
+  if(use_nwo){
+    this->advance_reaction_network_nwo(a_dt);
+  }
+  else{
   const int num_ito_species = m_physics->get_num_ito_species();
   const int num_rte_species = m_physics->get_num_rte_species();
   
@@ -1887,6 +2023,7 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
   }
 
   this->advance_reaction_network(particles, bulk_photons, new_photons, m_energy_sources, m_particle_E, a_dt);
+  }
 }
 
 void ito_plasma_stepper::advance_reaction_network(Vector<particle_container<ito_particle>* >& a_particles,

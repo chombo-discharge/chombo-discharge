@@ -190,7 +190,6 @@ void ito_plasma_godunov::allocate_internals(){
   m_amr->allocate(m_fluid_E,      m_fluid_realm, m_phase, SpaceDim);
 
   // Allocate for energy sources
-
   m_energy_sources.resize(num_ito_species);
   for (int i = 0; i < m_energy_sources.size(); i++){
     m_amr->allocate(m_energy_sources[i],  m_particle_realm, m_phase, 1);
@@ -209,6 +208,8 @@ void ito_plasma_godunov::allocate_internals(){
   m_amr->allocate(m_particle_ypc, m_particle_realm, m_phase, num_rte_species);
   m_amr->allocate(m_fluid_ppc,    m_fluid_realm,    m_phase, num_ito_species);
   m_amr->allocate(m_fluid_ypc,    m_fluid_realm,    m_phase, num_rte_species);
+
+  m_amr->allocate(m_energy_sources_nwo, m_fluid_realm, m_phase, num_ito_species);
 }
 
 Real ito_plasma_godunov::advance(const Real a_dt) {
