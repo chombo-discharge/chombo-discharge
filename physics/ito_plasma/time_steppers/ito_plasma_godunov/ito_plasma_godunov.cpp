@@ -1003,11 +1003,11 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
 
   if(m_profile){
 
-    posTime *= 100./totalTime;
-    diffuseTime *= 100./totalTime;
-    remapGdnvTime *= 100./totalTime;
+    posTime         *= 100./totalTime;
+    diffuseTime     *= 100./totalTime;
+    remapGdnvTime   *= 100./totalTime;
     depositGdnvTime *= 100./totalTime;
-    copyCondTime *= 100./totalTime;
+    copyCondTime    *= 100./totalTime;
     condTime *= 100./totalTime;
     setupTime *= 100./totalTime;
     poissonTime *= 100./totalTime;
@@ -1030,6 +1030,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
     imbalance += remapTime;
     imbalance += isectTime;
     imbalance += depositTime;
+    imbalance = 100. - imbalance;
 
     pout() << "\n";
     pout() << "ito_plasma_godunov::euler_maruyama breakdown:" << endl
