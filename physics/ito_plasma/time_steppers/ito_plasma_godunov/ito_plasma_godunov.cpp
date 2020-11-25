@@ -24,6 +24,7 @@ ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_phys
   pp.get("particle_realm", m_particle_realm);
   pp.get("profile", m_profile);
   pp.get("load_ppc", m_load_ppc);
+  pp.get("nwo_reactions", m_nwo_reactions);
 
   m_avg_cfl = 0.0;
 
@@ -233,11 +234,11 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   Real deposit_time  = 0.0;
   Real velo_time     = 0.0;
   Real diff_time     = 0.0;
-
-  Real total_time    = -MPI_Wtime();
+  Real total_time    = 0.0;
   
   // Particle algorithms
   MPI_Barrier(Chombo_MPI::comm);
+  total_time     = -MPI_Wtime();
   particle_time -= MPI_Wtime();
   switch(m_algorithm){
   case which_algorithm::euler_maruyama:

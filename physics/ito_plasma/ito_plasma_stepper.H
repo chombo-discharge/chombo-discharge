@@ -319,6 +319,7 @@ namespace physics {
 
       bool m_regrid_superparticles;
       bool m_load_balance;
+      bool m_nwo_reactions; // For switching between the old and new reaction algorithms. 
       
       int m_ppc;
       int m_halo_buffer;

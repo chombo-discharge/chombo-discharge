@@ -27,6 +27,7 @@ ito_plasma_stepper::ito_plasma_stepper(){
   m_pvr_buffer  = 0;
   m_load_ppc    = 1.0;
 
+  m_nwo_reactions         = true;
   m_regrid_superparticles = true;
 
   m_fluid_realm    = realm::primal;
@@ -2297,11 +2298,7 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
     pout() << "ito_plasma_stepper::advance_reaction_network(a_dt)" << endl;
   }
 
-  ParmParse pp("devel");
-  bool use_nwo;
-  pp.get("use_nwo", use_nwo);
-
-  if(use_nwo){
+  if(m_nwo_reactions){
     this->advance_reaction_network_nwo(a_dt);
   }
   else{
@@ -2966,11 +2963,7 @@ void ito_plasma_stepper::compute_EdotJ_source(){
     pout() << "ito_plasma_stepper::compute_EdotJ_source()" << endl;
   }
 
-  ParmParse pp("devel");
-  bool use_nwo;
-  pp.get("use_nwo", use_nwo);
-
-  if(use_nwo){
+  if(m_nwo_reactions){
     this->compute_EdotJ_source_nwo();
   }
   else{

@@ -1362,7 +1362,7 @@ void ito_plasma_physics::advance_particles(Vector<long long>&   a_particles,
 					   const RealVect       a_E,
 					   const Real           a_dx,
 					   const Real           a_kappa) const{
-  // Which algorithm?
+  // // Which algorithm?
   if(m_algorithm == algorithm::ssa){
     this->advance_ssa(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
   }

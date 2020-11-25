@@ -207,6 +207,7 @@ ito_plasma_godunov.particle_realm = particle       # Particle realm. Default is 
 ito_plasma_godunov.load_balance   = true           # Load balance or not
 ito_plasma_godunov.load_index     = -1             # Which species to use for load balancing (-1 => all)
 ito_plasma_godunov.load_ppc       = 0.0            # Load estimate per cell (in addition to ppc)
+ito_plasma_godunov.nwo_reactions  = true           # Use or don't use the new reaction algorithm (presumably load balances better)
 ito_plasma_godunov.max_cells_hop  = 1.0            # Maximum cells to move in one time step
 ito_plasma_godunov.which_dt       = advection      # 'advection', 'diffusion', 'advection_diffusion'
 ito_plasma_godunov.ppc            = 32             # Superparticle number of cells
@@ -214,15 +215,15 @@ ito_plasma_godunov.merge_interval = 1              # How often to make superpart
 ito_plasma_godunov.relax_factor   = 9999.5         # Factor in front of relaxation time	
 ito_plasma_godunov.regrid_super   = false          # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = euler_maruyama # 'euler', 'euler_maruyama', 'midpoint'
-ito_plasma_godunov.profile        = true           # Profile advance or not
-ito_plasma_godunov.pvr_buffer     = 2              # PVR buffer for particles (overrides ito and mc_photo)
-ito_plasma_godunov.halo_buffer    = 0              # Halo buffer for particles (overrides ito and mc_photo)
+ito_plasma_godunov.profile        = false          # Profile advance or not
+ito_plasma_godunov.pvr_buffer     = 0              # PVR buffer for particles (overrides ito and mc_photo)
+ito_plasma_godunov.halo_buffer    = 1              # Halo buffer for particles (overrides ito and mc_photo)
 
 # ====================================================================================================
 # ITO_PLASMA_AIR3 CLASS OPTIONS
 # ====================================================================================================
 # Initial data
-ito_plasma_air3.blob_radius     = 3E-3          # Blob radius
+ito_plasma_air3.blob_radius     = 1E-3          # Blob radius
 ito_plasma_air3.blob_center     = 0 0 0         # Blob center
 ito_plasma_air3.seed            = 0             # RNG seed, < 0 gives a random seed (for each rank)
 ito_plasma_air3.num_particles   = 1000000       # Number of initial particles
