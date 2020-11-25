@@ -124,6 +124,18 @@ namespace physics {
       inline
       void update_reaction_rates(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const;
 
+      /*!
+	@brief Advance particles. If usign the LFA then a_mean_energies and a_sources are dummy arugments. 
+      */
+      inline
+      void advance_particles(Vector<long long>&  a_particles,
+			     Vector<long long>&  a_newPhotons,
+			     Vector<Real>&       a_mean_energies,
+			     const Vector<Real>& a_sources,
+			     const Real          a_dt,
+			     const RealVect      a_E,
+			     const Real          a_dx,
+			     const Real          a_kappa) const;
 
       /*!
 	@brief Reaction network advance in the LEA.
@@ -143,11 +155,73 @@ namespace physics {
 				    const Real                    a_dx,
 				    const Real                    a_kappa, 
 				    const Real                    a_dt);
+
+      /*!
+	@brief Reconcile the number of particles
+      */
+      inline
+      void reconcile_photons(Vector<List<photon>* >&  a_newPhotons,
+			     const Vector<long long>& a_numNewPhotons,
+			     const RealVect           a_cellPos,
+			     const RealVect           a_centroidPos,
+			     const RealVect           a_lo,
+			     const RealVect           a_hi,
+			     const RealVect           a_bndryCentroid,
+			     const RealVect           a_bndryNormal,
+			     const Real               a_dx,
+			     const Real               a_kappa) const;
+
+      /*!
+	@brief Reconcile the number of particles
+      */
+      inline
+      void reconcile_particles(Vector<List<ito_particle>* >& a_particles,
+			       const Vector<long long>&      a_newNumParticles,
+			       const Vector<long long>&      a_oldNumParticles,
+			       const RealVect                a_cellPos,
+			       const RealVect                a_centroidPos,
+			       const RealVect                a_lo,
+			       const RealVect                a_hi,
+			       const RealVect                a_bndryCentroid,
+			       const RealVect                a_bndryNormal,
+			       const Real                    a_dx,
+			       const Real                    a_kappa) const;
+
+      /*!
+	@brief Reconcile number of photons
+      */
+      inline
+      void reconcile_photons(List<photon>&      a_newPhotons,
+			     const rte_species& a_species,
+			     const long long    a_numNewPhotons,
+			     const RealVect     a_cellPos,
+			     const RealVect     a_centroidPos,
+			     const RealVect     a_lo,
+			     const RealVect     a_hi,
+			     const RealVect     a_bndryCentroid,
+			     const RealVect     a_normal,
+			     const Real         a_dx,
+			     const Real         a_kappa) const;
+
+      /*!
+	@brief Reconcile photoionization mechanism
+      */
+      inline
+      void reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
+				     Vector<Real>&                 a_mean_energies,
+				     const Vector<long long>&      a_numParticles,
+				     const Vector<List<photon>* >& a_photons) const;
+
+      
+      /*!
+	@brief Set mean particle energy
+      */
+      inline
+      void set_mean_particle_energy(Vector<List<ito_particle>* >& a_particles, const Vector<Real> a_mean_energy) const;
       
     protected:
 
       enum class algorithm { ssa, tau, hybrid };
-
 
 
       int m_seed;
@@ -245,21 +319,7 @@ namespace physics {
       inline
       long long compute_charge(const Vector<List<ito_particle>* >& a_particles) const;
 
-      /*!
-	@brief Reconcile the number of particles
-      */
-      inline
-      void reconcile_particles(Vector<List<ito_particle>* >& a_particles,
-			       const Vector<long long>&      a_newNumParticles,
-			       const Vector<long long>&      a_oldNumParticles,
-			       const RealVect                a_cellPos,
-			       const RealVect                a_centroidPos,
-			       const RealVect                a_lo,
-			       const RealVect                a_hi,
-			       const RealVect                a_bndryCentroid,
-			       const RealVect                a_bndryNormal,
-			       const Real                    a_dx,
-			       const Real                    a_kappa) const;
+
       /*!
 	@brief Reconcile number of particles
       */
@@ -296,12 +356,6 @@ namespace physics {
       */
       inline
       void remove_particles(List<ito_particle>& a_particles, const long long a_numParticlesToRemove) const;
-
-      /*!
-	@brief Set mean particle energy
-      */
-      inline
-      void set_mean_particle_energy(Vector<List<ito_particle>* >& a_particles, const Vector<Real> a_mean_energy) const;
 
       /*!
 	@brief Set mean particle energy
@@ -349,45 +403,6 @@ namespace physics {
       */
       inline
       void reconcile_weights(List<ito_particle>& a_particles, const Vector<long long>& a_particleWeights) const;
-
-      /*!
-	@brief Reconcile the number of particles
-      */
-      inline
-      void reconcile_photons(Vector<List<photon>* >&  a_newPhotons,
-			     const Vector<long long>& a_numNewPhotons,
-			     const RealVect           a_cellPos,
-			     const RealVect           a_centroidPos,
-			     const RealVect           a_lo,
-			     const RealVect           a_hi,
-			     const RealVect           a_bndryCentroid,
-			     const RealVect           a_bndryNormal,
-			     const Real               a_dx,
-			     const Real               a_kappa) const;
-      /*!
-	@brief Reconcile number of photons
-      */
-      inline
-      void reconcile_photons(List<photon>&      a_newPhotons,
-			     const rte_species& a_species,
-			     const long long    a_numNewPhotons,
-			     const RealVect     a_cellPos,
-			     const RealVect     a_centroidPos,
-			     const RealVect     a_lo,
-			     const RealVect     a_hi,
-			     const RealVect     a_bndryCentroid,
-			     const RealVect     a_normal,
-			     const Real         a_dx,
-			     const Real         a_kappa) const;
-
-      /*!
-	@brief Reconcile photoionization mechanism
-      */
-      inline
-      void reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
-				     Vector<Real>&                 a_mean_energies,
-				     const Vector<long long>&      a_numParticles,
-				     const Vector<List<photon>* >& a_photons) const;
 
       /*!
 	@brief Compute particle weights for superparticles
@@ -583,18 +598,7 @@ namespace physics {
 		       const Real          a_dx,
 		       const Real          a_kappa) const;
 
-      /*!
-	@brief Advance particles. If usign the LFA then a_mean_energies and a_sources are dummy arugments. 
-      */
-      inline
-      void advance_particles(Vector<long long>&  a_particles,
-			     Vector<long long>&  a_newPhotons,
-			     Vector<Real>&       a_mean_energies,
-			     const Vector<Real>& a_sources,
-			     const Real          a_dt,
-			     const RealVect      a_E,
-			     const Real          a_dx,
-			     const Real          a_kappa) const;
+
 
       /*!
 	@brief Do an SSA-step with a subset of reactions. You must update the reaction rates before entering this routine!

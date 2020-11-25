@@ -196,26 +196,52 @@ namespace physics {
       void compute_particles_per_cell(LevelData<EBCellFAB>& a_ppc, const int a_level);
       void compute_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box);
 
-      // Routines for chemistry advances. These are the new ones.
+      // Routines for computing the mean energy of the particles in grid cells
+      void compute_mean_energies_per_cell(EBAMRCellData& a_mean_energies);
+      void compute_mean_energies_per_cell(LevelData<EBCellFAB>& a_mean_energies, const int a_level);
+      void compute_mean_energies_per_cell(EBCellFAB& a_mean_energies, const int a_level, const DataIndex a_dit, const Box a_box);
+
+      // New routines for chemistry advances. 
       void advance_reaction_network_nwo(const Real a_dt);
-      void advance_reaction_network_nwo(const EBAMRCellData& a_E, const EBAMRCellData& a_energy_sources, const Real a_dt);
+      void advance_reaction_network_nwo(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt);
       void advance_reaction_network_nwo(LevelData<EBCellFAB>&       a_ppc,
 					LevelData<EBCellFAB>&       a_ypc,
+					LevelData<EBCellFAB>&       a_mean_energies,
 					const LevelData<EBCellFAB>& a_E,
-					const LevelData<EBCellFAB>& a_sources,
+					const LevelData<EBCellFAB>& a_EdotJ,
 					const int                   a_level,
 					const Real                  a_dt);
-      void advance_reaction_network_nwo(EBCellFAB&       a_ppc,
-					EBCellFAB&       a_ypc,
+      void advance_reaction_network_nwo(EBCellFAB&       a_particlesPerCell,
+					EBCellFAB&       a_newPhotonsPerCell,
+					EBCellFAB&       a_meanParticleEnergies,
 					const EBCellFAB& a_E,
-					const EBCellFAB& a_sources,
+					const EBCellFAB& a_EdotJ,
 					const int        a_level,
 					const DataIndex  a_dit,
 					const Box        a_box,
 					const Real       a_dx,
 					const Real       a_dt);
 
-      // Routines for chemistry advances. The physics module will switch between LFA and LEA.
+      void reconcile_particles(const EBAMRCellData& a_newParticlesPerCell,
+			       const EBAMRCellData& a_oldParticlesPerCell,
+			       const EBAMRCellData& a_meanParticleEnergies,
+			       const EBAMRCellData& a_newPhotonsPerCell);
+      void reconcile_particles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
+			       const LevelData<EBCellFAB>& a_oldParticlesPerCell,
+			       const LevelData<EBCellFAB>& a_meanParticleEnergies,
+			       const LevelData<EBCellFAB>& a_newPhotonsPerCell,
+			       const int                   a_level);
+      void reconcile_particles(const EBCellFAB& a_newParticlesPerCell,
+			       const EBCellFAB& a_oldParticlesPerCell,
+			       const EBCellFAB& a_meanParticleEnergies,
+			       const EBCellFAB& a_newPhotonsPerCell,
+			       const int        a_level,
+			       const DataIndex  a_dit,
+			       const Box        a_box,
+			       const Real       a_dx);
+
+
+      // Old routines for chemistry advances. The physics module will switch between LFA and LEA.
       void advance_reaction_network(const Real a_dt);
       void advance_reaction_network(Vector<particle_container<ito_particle>* >& a_particles,
 				    Vector<particle_container<photon>* >&       a_photons,
@@ -274,6 +300,7 @@ namespace physics {
 
       // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle realm. 
       void compute_EdotJ_source();
+      void compute_EdotJ_source_nwo();
 
     protected:
 
@@ -317,9 +344,14 @@ namespace physics {
 
       EBAMRCellData m_particle_ppc; // For holding the number of particles per cell for all species. Contains compoents = number of species
       EBAMRCellData m_particle_ypc; // For holding the number of generated photons per cell on the particle realm.
+      EBAMRCellData m_particle_eps; // For holding the mean energy on the particle realm
+      EBAMRCellData m_particle_old; // For holding the mean energy on the particle realm
       
       EBAMRCellData m_fluid_ppc;    // For holding the number of particles per cell for all species. Contains compoents = number of species
-      EBAMRCellData m_fluid_ypc;    // For holding the number of generated photons per cell on the fluid realm. 
+      EBAMRCellData m_fluid_ypc;    // For holding the number of generated photons per cell on the fluid realm.
+      EBAMRCellData m_fluid_eps;    // For holding the mean energy on the particle realm
+
+
 
       // Storage for the electric field on 
       EBAMRCellData m_fluid_E;
@@ -327,7 +359,7 @@ namespace physics {
 
       // Storage for energy source terms
       Vector<EBAMRCellData> m_energy_sources;
-      EBAMRCellData m_energy_sources_nwo;
+      EBAMRCellData m_EdotJ;
 
       // Set the particle buffers
       void set_particle_buffers();

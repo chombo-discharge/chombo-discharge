@@ -203,13 +203,17 @@ void ito_plasma_godunov::allocate_internals(){
     m_amr->allocate(m_fscratch2[i], m_fluid_realm, m_phase, 1);
   }
 
-  // Allocate for PPC and YPC on both realm
-  m_amr->allocate(m_particle_ppc, m_particle_realm, m_phase, num_ito_species);
-  m_amr->allocate(m_particle_ypc, m_particle_realm, m_phase, num_rte_species);
-  m_amr->allocate(m_fluid_ppc,    m_fluid_realm,    m_phase, num_ito_species);
-  m_amr->allocate(m_fluid_ypc,    m_fluid_realm,    m_phase, num_rte_species);
+  // Allocate for PPC and YPC on both realm. Also do EdotJ. 
+  m_amr->allocate(m_particle_ppc,   m_particle_realm, m_phase, num_ito_species);
+  m_amr->allocate(m_particle_old,   m_particle_realm, m_phase, num_ito_species);
+  m_amr->allocate(m_particle_eps,   m_particle_realm, m_phase, num_ito_species);
+  m_amr->allocate(m_particle_ypc,   m_particle_realm, m_phase, num_rte_species);
 
-  m_amr->allocate(m_energy_sources_nwo, m_fluid_realm, m_phase, num_ito_species);
+  m_amr->allocate(m_fluid_ppc,      m_fluid_realm,    m_phase, num_ito_species);
+  m_amr->allocate(m_fluid_eps,      m_fluid_realm,    m_phase, num_ito_species);
+  m_amr->allocate(m_fluid_ypc,      m_fluid_realm,    m_phase, num_rte_species);
+
+  m_amr->allocate(m_EdotJ,          m_fluid_realm,    m_phase, num_ito_species);
 }
 
 Real ito_plasma_godunov::advance(const Real a_dt) {

@@ -247,6 +247,11 @@ public:
     @brief Set the absorption coefficient on irregular EB faces
   */
   virtual EBAMRIVData& get_kappa_eb();
+
+  /*!
+    @brief Get species
+  */
+  virtual RefCountedPtr<rte_species>& get_species();
   
 protected:
 

@@ -316,6 +316,21 @@ void data_ops::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_r
   EBLevelDataOps::incr(a_lhs, a_rhs, a_scale);
 }
 
+void data_ops::plus(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::plus(*a_lhs[lvl], *a_rhs[lvl], a_srcComp, a_dstComp, a_numComp);
+  }
+}
+
+void data_ops::plus(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp){
+  for (DataIterator dit = a_lhs.disjointBoxLayout().dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& lhs       = a_lhs[dit()];
+    const EBCellFAB& rhs = a_rhs[dit()];
+
+    lhs.plus(rhs, a_srcComp, a_dstComp, a_numComp);
+  }
+}
+
 void data_ops::incr(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);

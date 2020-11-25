@@ -1,0 +1,906 @@
+cell_tagger::cell_tagger
+ito_plasma_tagger::ito_plasma_tagger
+ito_plasma_field_tagger::ito_plasma_field_tagger
+ito_plasma_streamer_tagger::define
+driver::setup_and_run
+EBIndexSpace::define - From domain
+  Building finest level...
+Entering EBISLevel::EBISLevel called by EBIndexSpace::buildFirstLevel...
+Exiting EBISLevel::EBISLevel called by EBIndexSpace::buildFirstLevel...
+ebis_after_first_level_bui|Mem Usage: OS=   104.270 (vm=   574.859) MT_peak=    67.002 MT_current=    60.066  OSPeakRSS=   107.766 (vm=   579.695) (MB)
+    irreg VoFs    : 17328
+    arcs          : 87540
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 1...
+    irreg VoFs    : 4536
+    arcs          : 23132
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 2...
+    irreg VoFs    : 1036
+    arcs          : 5404
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 3...
+    irreg VoFs    : 312
+    arcs          : 1672
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 4...
+    irreg VoFs    : 52
+    arcs          : 312
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 5...
+    irreg VoFs    : 28
+    arcs          : 168
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 6...
+    irreg VoFs    : 16
+    arcs          : 96
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 7...
+    irreg VoFs    : 8
+    arcs          : 48
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 8...
+    irreg VoFs    : 4
+    arcs          : 24
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 9...
+    irreg VoFs    : 4
+    arcs          : 24
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 10...
+    irreg VoFs    : 1
+    arcs          : 6
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 11...
+    Empty
+
+       ebis_leaving_define|Mem Usage: OS=   132.086 (vm=   602.195) MT_peak=   120.195 MT_current=    76.935  OSPeakRSS=   152.254 (vm=   622.594) (MB)
+memrep::get_max_min_memory:	 max peak = 120.624	 min peak = 101.797	 max unfreed = 76.9346	 min unfreed = 67.1193
+
+-----------------------------------------------------------------------
+driver::Grid report - timestep = 0
+			        Finest level           = 4
+			        Finest domain          = 1024 x 1024 x 1024
+			        Coarsest domain        = 64 x 64 x 64
+			        Refinement ratios      = 2 2 2 2 
+			        Grid sparsity          = 0.000457764
+			        Finest dx              = 4.88281e-05
+			        Total number boxes     = 120
+			        Number of valid cells  = 491,520
+			        Including ghost cells  = 1,277,760
+			        Total # of boxes (lvl) = 64  12  20  12  12  
+			        Total # of cells (lvl) = 262,144  49,152  81,920  49,152  49,152  
+			        Realm = particle
+				        Proc. # of valid cells = 81,920
+				        Including ghost cells  = 212,960
+				        Proc. # of boxes       = 20
+				        Proc. # of boxes (lvl) = 11  2  3  2  2  
+				        Proc. # of cells (lvl) = 45,056  8,192  12,288  8,192  8,192  
+			        Realm = primal
+				        Proc. # of valid cells = 81,920
+				        Including ghost cells  = 212,960
+				        Proc. # of boxes       = 20
+				        Proc. # of boxes (lvl) = 11  2  3  2  2  
+				        Proc. # of cells (lvl) = 45,056  8,192  12,288  8,192  8,192  
+			        Unfreed memory        = 82 (MB)
+			        Peak memory usage     = 120 (MB)
+			        Max unfreed memory    = 87 (MB)
+			        Max peak memory       = 120 (MB)
+-----------------------------------------------------------------------
+
+
+driver::run
+=================================
+driver::run -- starting run
+
+-----------------------------------------------------------------------
+driver::Grid report - timestep = 0
+			        Finest level           = 4
+			        Finest domain          = 1024 x 1024 x 1024
+			        Coarsest domain        = 64 x 64 x 64
+			        Refinement ratios      = 2 2 2 2 
+			        Grid sparsity          = 0.000457764
+			        Finest dx              = 4.88281e-05
+			        Total number boxes     = 120
+			        Number of valid cells  = 491,520
+			        Including ghost cells  = 1,277,760
+			        Total # of boxes (lvl) = 64  12  20  12  12  
+			        Total # of cells (lvl) = 262,144  49,152  81,920  49,152  49,152  
+			        Realm = particle
+				        Proc. # of valid cells = 81,920
+				        Including ghost cells  = 212,960
+				        Proc. # of boxes       = 20
+				        Proc. # of boxes (lvl) = 11  2  3  2  2  
+				        Proc. # of cells (lvl) = 45,056  8,192  12,288  8,192  8,192  
+			        Realm = primal
+				        Proc. # of valid cells = 81,920
+				        Including ghost cells  = 212,960
+				        Proc. # of boxes       = 20
+				        Proc. # of boxes (lvl) = 11  2  3  2  2  
+				        Proc. # of cells (lvl) = 45,056  8,192  12,288  8,192  8,192  
+			        Unfreed memory        = 404 (MB)
+			        Peak memory usage     = 540 (MB)
+			        Max unfreed memory    = 474 (MB)
+			        Max peak memory       = 612 (MB)
+-----------------------------------------------------------------------
+
+
+
+ito_plasma_godunov::euler_maruyama breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Old position (%)          |     2.89 |     1.01 |     2.94 |     2.21 |     0.72 |        1 |        3 | 
+Diffusion (%)             |     5.64 |     2.00 |     5.69 |     4.35 |     1.37 |        1 |        3 | 
+Remap gdnv (%)            |     0.83 |     0.83 |     0.83 |     0.83 |     0.00 |        1 |        0 | 
+Deposit gdnv (%)          |     2.36 |     2.36 |     2.36 |     2.36 |     0.00 |        1 |        3 | 
+Copy conductivity (%)     |     1.75 |     0.65 |     1.81 |     1.37 |     0.42 |        1 |        3 | 
+Conductity comp (%)       |     3.91 |     3.91 |     4.30 |     4.08 |     0.14 |        0 |        2 | 
+Poisson setup (%)         |    10.18 |     9.87 |    16.96 |    12.77 |     2.67 |        1 |        5 | 
+Poisson solve (%)         |    41.46 |    41.46 |    41.51 |    41.48 |     0.02 |        3 |        5 | 
+Velo comp (%)             |     4.49 |     1.90 |     4.57 |     3.58 |     0.99 |        1 |        3 | 
+Advect particles (%)      |     2.10 |     0.73 |     2.12 |     1.63 |     0.51 |        1 |        3 | 
+Remap particles (%)       |     6.87 |     6.87 |     6.87 |     6.87 |     0.00 |        3 |        2 | 
+Particle intersection (%) |     5.13 |     0.96 |     5.97 |     4.03 |     1.64 |        1 |        2 | 
+Deposition (%)            |     4.04 |     4.03 |     4.04 |     4.04 |     0.00 |        4 |        5 | 
+Imbalance (%)             |    10.71 |     4.59 |    25.71 |    12.75 |     6.54 |        2 |        1 | 
+Total time (s)            |     0.89 |     0.89 |     0.89 |     0.89 |     0.00 |        1 |        0 | 
+--------------------------------------------------------------------------------------------------------
+
+
+ito_plasma_godunov::advance breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Transport & Poisson (%)   |    54.96 |    54.95 |    55.36 |    55.10 |     0.15 |        3 |        1 | 
+Relax time (%)            |     3.72 |     3.72 |     3.75 |     3.73 |     0.01 |        3 |        1 | 
+Photons (%)               |     0.05 |     0.05 |     0.05 |     0.05 |     0.00 |        0 |        1 | 
+Sort (%)                  |     5.20 |     2.54 |     5.62 |     4.44 |     1.08 |        1 |        2 | 
+Superparticles (%)        |     9.87 |     4.58 |    10.74 |     8.29 |     2.08 |        1 |        3 | 
+Reaction network (%)      |    13.58 |    12.32 |    14.15 |    13.15 |     0.65 |        5 |        2 | 
+EB removal (%)            |     0.00 |     0.00 |     0.01 |     0.00 |     0.00 |        3 |        5 | 
+Deposition (%)            |     4.05 |     4.05 |     4.08 |     4.06 |     0.01 |        3 |        1 | 
+Velo comp (%)             |     3.68 |     1.89 |     3.72 |     3.09 |     0.66 |        1 |        3 | 
+Diff comp (%)             |     2.78 |     2.08 |     2.81 |     2.54 |     0.27 |        1 |        3 | 
+Imbalance (%)             |     2.10 |     1.46 |    13.21 |     5.53 |     4.35 |        2 |        1 | 
+Total time (s)            |     2.28 |     2.26 |     2.28 |     2.27 |     0.01 |        1 |        3 | 
+--------------------------------------------------------------------------------------------------------
+
+
+driver::Time step report -- Time step #1
+                                   Time  = 1e-10
+                                   dt    = 1e-10
+                                   dt restricted by 'hardcap'
+                                   Emax      = 1.65336e+07
+                                   #part     = 282964 (1307698)
+                                   #eb part  = 0 (0)
+                                   #dom part = 0 (0)
+                                   #src part = 0 (0)
+                                   #part min = 101422 (on rank = 1)
+                                   #part max = 282964 (on rank = 0)
+                                   #part avg = 217950
+                                   #part dev = 67937.9 (31.1714%)
+                                -- 10.00 percentage of time steps completed
+                                --  0.20 percentage of simulation time completed
+                                -- Elapsed time          : 000h 00m 02s 566ms
+                                -- Last time step        : 000h 00m 02s 566ms
+                                -- Wall time per ns      : 000h 00m 25s 669ms
+                                -- Estimated remaining   : 000h 00m 23s 102ms
+                                -- Unfreed memory        : 428(MB)
+                                -- Peak memory usage     : 567(MB)
+                                -- Max unfreed memory    : 493(MB)
+                                -- Max peak memory usage : 634(MB)
+
+ito_plasma_godunov::euler_maruyama breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Old position (%)          |     3.16 |     1.19 |     3.21 |     2.43 |     0.75 |        1 |        3 | 
+Diffusion (%)             |     6.10 |     2.29 |     6.16 |     4.74 |     1.42 |        1 |        3 | 
+Remap gdnv (%)            |     0.80 |     0.80 |     0.80 |     0.80 |     0.00 |        5 |        2 | 
+Deposit gdnv (%)          |     2.04 |     2.04 |     2.04 |     2.04 |     0.00 |        2 |        4 | 
+Copy conductivity (%)     |     2.06 |     0.88 |     2.09 |     1.64 |     0.44 |        1 |        3 | 
+Conductity comp (%)       |     4.12 |     4.12 |     4.47 |     4.26 |     0.13 |        0 |        5 | 
+Poisson setup (%)         |    10.39 |     9.78 |    17.14 |    13.04 |     2.84 |        1 |        5 | 
+Poisson solve (%)         |    40.10 |    40.10 |    40.13 |    40.11 |     0.01 |        0 |        2 | 
+Velo comp (%)             |     4.61 |     1.94 |     4.66 |     3.66 |     1.01 |        1 |        3 | 
+Advect particles (%)      |     2.10 |     0.72 |     2.11 |     1.62 |     0.51 |        1 |        3 | 
+Remap particles (%)       |     6.56 |     6.55 |     6.56 |     6.56 |     0.00 |        1 |        2 | 
+Particle intersection (%) |     5.31 |     1.32 |     6.02 |     4.20 |     1.57 |        1 |        2 | 
+Deposition (%)            |     4.58 |     4.58 |     4.58 |     4.58 |     0.00 |        4 |        1 | 
+Imbalance (%)             |    10.10 |     3.88 |    25.69 |    12.35 |     6.75 |        2 |        1 | 
+Total time (s)            |     0.91 |     0.91 |     0.91 |     0.91 |     0.00 |        5 |        0 | 
+--------------------------------------------------------------------------------------------------------
+
+
+ito_plasma_godunov::advance breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Transport & Poisson (%)   |    55.11 |    55.10 |    55.52 |    55.24 |     0.15 |        3 |        1 | 
+Relax time (%)            |     3.75 |     3.75 |     3.78 |     3.76 |     0.01 |        3 |        1 | 
+Photons (%)               |     0.05 |     0.05 |     0.06 |     0.06 |     0.00 |        0 |        1 | 
+Sort (%)                  |     5.03 |     2.55 |     5.26 |     4.31 |     0.91 |        1 |        3 | 
+Superparticles (%)        |     9.94 |     4.57 |    10.16 |     8.27 |     1.99 |        1 |        3 | 
+Reaction network (%)      |    14.41 |    13.15 |    14.90 |    14.00 |     0.61 |        1 |        2 | 
+EB removal (%)            |     0.01 |     0.01 |     0.02 |     0.01 |     0.00 |        1 |        2 | 
+Deposition (%)            |     3.99 |     3.99 |     4.02 |     4.00 |     0.01 |        3 |        1 | 
+Velo comp (%)             |     3.84 |     1.90 |     3.90 |     3.21 |     0.74 |        1 |        3 | 
+Diff comp (%)             |     2.84 |     2.11 |     2.85 |     2.60 |     0.27 |        1 |        3 | 
+Imbalance (%)             |     1.02 |     0.70 |    12.34 |     4.55 |     4.21 |        2 |        1 | 
+Total time (s)            |     2.32 |     2.31 |     2.32 |     2.32 |     0.01 |        1 |        3 | 
+--------------------------------------------------------------------------------------------------------
+
+
+driver::Time step report -- Time step #2
+                                   Time  = 2e-10
+                                   dt    = 1e-10
+                                   dt restricted by 'hardcap'
+                                   Emax      = 1.65336e+07
+                                   #part     = 306953 (1416138)
+                                   #eb part  = 0 (0)
+                                   #dom part = 0 (0)
+                                   #src part = 0 (0)
+                                   #part min = 105843 (on rank = 1)
+                                   #part max = 306953 (on rank = 0)
+                                   #part avg = 236023
+                                   #part dev = 74370.2 (31.5097%)
+                                -- 20.00 percentage of time steps completed
+                                --  0.40 percentage of simulation time completed
+                                -- Elapsed time          : 000h 00m 06s 322ms
+                                -- Last time step        : 000h 00m 02s 645ms
+                                -- Wall time per ns      : 000h 00m 26s 450ms
+                                -- Estimated remaining   : 000h 00m 25s 289ms
+                                -- Unfreed memory        : 432(MB)
+                                -- Peak memory usage     : 574(MB)
+                                -- Max unfreed memory    : 493(MB)
+                                -- Max peak memory usage : 637(MB)
+
+ito_plasma_godunov::euler_maruyama breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Old position (%)          |     2.55 |     0.88 |     2.57 |     1.92 |     0.62 |        1 |        3 | 
+Diffusion (%)             |     5.17 |     1.95 |     5.22 |     4.06 |     1.19 |        1 |        3 | 
+Remap gdnv (%)            |     0.63 |     0.63 |     0.63 |     0.63 |     0.00 |        5 |        0 | 
+Deposit gdnv (%)          |     1.59 |     1.59 |     1.60 |     1.59 |     0.00 |        1 |        3 | 
+Copy conductivity (%)     |     1.71 |     0.71 |     1.78 |     1.36 |     0.38 |        1 |        3 | 
+Conductity comp (%)       |     2.97 |     2.97 |     3.23 |     3.07 |     0.10 |        0 |        2 | 
+Poisson setup (%)         |     7.95 |     7.58 |    13.13 |     9.87 |     2.09 |        1 |        5 | 
+Poisson solve (%)         |    52.40 |    52.40 |    52.42 |    52.41 |     0.01 |        3 |        2 | 
+Velo comp (%)             |     3.79 |     1.50 |     3.81 |     3.00 |     0.85 |        1 |        3 | 
+Advect particles (%)      |     1.85 |     0.66 |     1.85 |     1.44 |     0.43 |        1 |        3 | 
+Remap particles (%)       |     5.28 |     5.28 |     5.28 |     5.28 |     0.00 |        5 |        0 | 
+Particle intersection (%) |     4.59 |     0.94 |     5.27 |     3.57 |     1.44 |        1 |        2 | 
+Deposition (%)            |     3.19 |     3.19 |     3.20 |     3.20 |     0.00 |        4 |        5 | 
+Imbalance (%)             |     7.91 |     3.32 |    21.28 |    10.20 |     5.67 |        2 |        1 | 
+Total time (s)            |     1.17 |     1.17 |     1.17 |     1.17 |     0.00 |        0 |        5 | 
+--------------------------------------------------------------------------------------------------------
+
+
+ito_plasma_godunov::advance breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Transport & Poisson (%)   |    58.82 |    58.80 |    59.23 |    58.95 |     0.16 |        2 |        1 | 
+Relax time (%)            |     3.63 |     3.63 |     3.66 |     3.64 |     0.01 |        2 |        1 | 
+Photons (%)               |     0.05 |     0.05 |     0.05 |     0.05 |     0.00 |        0 |        4 | 
+Sort (%)                  |     4.49 |     2.20 |     4.55 |     3.78 |     0.82 |        1 |        3 | 
+Superparticles (%)        |     9.77 |     4.19 |     9.87 |     7.97 |     2.07 |        1 |        2 | 
+Reaction network (%)      |    12.59 |    11.14 |    12.97 |    12.05 |     0.61 |        1 |        2 | 
+EB removal (%)            |     0.03 |     0.01 |     0.04 |     0.02 |     0.01 |        1 |        2 | 
+Deposition (%)            |     3.59 |     3.59 |     3.61 |     3.60 |     0.01 |        2 |        1 | 
+Velo comp (%)             |     3.52 |     1.73 |     3.64 |     3.00 |     0.65 |        1 |        3 | 
+Diff comp (%)             |     2.83 |     2.16 |     2.87 |     2.62 |     0.26 |        1 |        2 | 
+Imbalance (%)             |     0.68 |     0.37 |    12.03 |     4.32 |     4.15 |        2 |        1 | 
+Total time (s)            |     2.66 |     2.64 |     2.66 |     2.65 |     0.01 |        1 |        2 | 
+--------------------------------------------------------------------------------------------------------
+
+
+driver::Time step report -- Time step #3
+                                   Time  = 3e-10
+                                   dt    = 1e-10
+                                   dt restricted by 'hardcap'
+                                   Emax      = 1.65333e+07
+                                   #part     = 335227 (1548839)
+                                   #eb part  = 0 (0)
+                                   #dom part = 0 (0)
+                                   #src part = 0 (0)
+                                   #part min = 111935 (on rank = 1)
+                                   #part max = 335540 (on rank = 3)
+                                   #part avg = 258140
+                                   #part dev = 82893.5 (32.1118%)
+                                -- 30.00 percentage of time steps completed
+                                --  0.60 percentage of simulation time completed
+                                -- Elapsed time          : 000h 00m 10s 438ms
+                                -- Last time step        : 000h 00m 02s 995ms
+                                -- Wall time per ns      : 000h 00m 29s 956ms
+                                -- Estimated remaining   : 000h 00m 24s 355ms
+                                -- Unfreed memory        : 438(MB)
+                                -- Peak memory usage     : 580(MB)
+                                -- Max unfreed memory    : 497(MB)
+                                -- Max peak memory usage : 637(MB)
+
+ito_plasma_godunov::euler_maruyama breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Old position (%)          |     2.52 |     0.84 |     2.66 |     1.94 |     0.64 |        1 |        3 | 
+Diffusion (%)             |     5.10 |     1.77 |     5.15 |     3.94 |     1.23 |        1 |        3 | 
+Remap gdnv (%)            |     0.68 |     0.68 |     0.68 |     0.68 |     0.00 |        5 |        0 | 
+Deposit gdnv (%)          |     1.61 |     1.60 |     1.61 |     1.61 |     0.00 |        1 |        2 | 
+Copy conductivity (%)     |     1.67 |     0.66 |     1.70 |     1.32 |     0.37 |        1 |        3 | 
+Conductity comp (%)       |     2.99 |     2.99 |     3.20 |     3.09 |     0.09 |        0 |        5 | 
+Poisson setup (%)         |     7.72 |     7.31 |    13.78 |     9.76 |     2.39 |        1 |        5 | 
+Poisson solve (%)         |    51.66 |    51.66 |    51.69 |    51.67 |     0.01 |        0 |        2 | 
+Velo comp (%)             |     3.79 |     1.47 |     3.88 |     3.01 |     0.87 |        1 |        3 | 
+Advect particles (%)      |     1.94 |     0.57 |     1.97 |     1.45 |     0.52 |        1 |        2 | 
+Remap particles (%)       |     5.29 |     5.29 |     5.29 |     5.29 |     0.00 |        0 |        1 | 
+Particle intersection (%) |     4.70 |     1.00 |     5.31 |     3.68 |     1.48 |        1 |        2 | 
+Deposition (%)            |     3.08 |     3.08 |     3.08 |     3.08 |     0.00 |        2 |        3 | 
+Imbalance (%)             |     8.86 |     4.04 |    22.67 |    11.10 |     6.08 |        2 |        1 | 
+Total time (s)            |     1.24 |     1.24 |     1.24 |     1.24 |     0.00 |        1 |        3 | 
+--------------------------------------------------------------------------------------------------------
+
+
+ito_plasma_godunov::advance breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Transport & Poisson (%)   |    57.86 |    57.86 |    58.23 |    57.98 |     0.14 |        3 |        1 | 
+Relax time (%)            |     3.23 |     3.23 |     3.25 |     3.24 |     0.01 |        3 |        1 | 
+Photons (%)               |     0.06 |     0.06 |     0.06 |     0.06 |     0.00 |        2 |        5 | 
+Sort (%)                  |     4.45 |     2.18 |     4.55 |     3.90 |     0.90 |        1 |        5 | 
+Superparticles (%)        |    11.01 |     4.01 |    11.01 |     8.39 |     2.53 |        1 |        0 | 
+Reaction network (%)      |    12.06 |    10.28 |    12.24 |    11.39 |     0.66 |        1 |        2 | 
+EB removal (%)            |     0.04 |     0.01 |     0.05 |     0.03 |     0.02 |        1 |        2 | 
+Deposition (%)            |     4.59 |     4.59 |     4.62 |     4.60 |     0.01 |        3 |        1 | 
+Velo comp (%)             |     3.39 |     1.61 |     3.42 |     2.77 |     0.65 |        1 |        3 | 
+Diff comp (%)             |     2.42 |     1.79 |     2.42 |     2.21 |     0.23 |        1 |        3 | 
+Imbalance (%)             |     0.89 |     0.89 |    13.97 |     5.43 |     4.69 |        0 |        1 | 
+Total time (s)            |     2.85 |     2.83 |     2.85 |     2.85 |     0.01 |        1 |        3 | 
+--------------------------------------------------------------------------------------------------------
+
+
+driver::Time step report -- Time step #4
+                                   Time  = 4e-10
+                                   dt    = 1e-10
+                                   dt restricted by 'hardcap'
+                                   Emax      = 1.65318e+07
+                                   #part     = 357750 (1663099)
+                                   #eb part  = 0 (0)
+                                   #dom part = 0 (0)
+                                   #src part = 0 (0)
+                                   #part min = 119888 (on rank = 1)
+                                   #part max = 357750 (on rank = 0)
+                                   #part avg = 277183
+                                   #part dev = 88699.2 (32.0002%)
+                                -- 40.00 percentage of time steps completed
+                                --  0.80 percentage of simulation time completed
+                                -- Elapsed time          : 000h 00m 14s 761ms
+                                -- Last time step        : 000h 00m 03s 188ms
+                                -- Wall time per ns      : 000h 00m 31s 884ms
+                                -- Estimated remaining   : 000h 00m 22s 142ms
+                                -- Unfreed memory        : 444(MB)
+                                -- Peak memory usage     : 586(MB)
+                                -- Max unfreed memory    : 504(MB)
+                                -- Max peak memory usage : 640(MB)
+
+ito_plasma_godunov::euler_maruyama breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Old position (%)          |     2.05 |     0.73 |     2.09 |     1.61 |     0.50 |        1 |        3 | 
+Diffusion (%)             |     5.28 |     1.59 |     5.28 |     3.75 |     1.35 |        1 |        0 | 
+Remap gdnv (%)            |     0.80 |     0.80 |     0.80 |     0.80 |     0.00 |        0 |        3 | 
+Deposit gdnv (%)          |     1.44 |     1.44 |     1.44 |     1.44 |     0.00 |        2 |        3 | 
+Copy conductivity (%)     |     1.40 |     0.58 |     1.64 |     1.21 |     0.38 |        1 |        3 | 
+Conductity comp (%)       |     2.72 |     2.72 |     3.58 |     2.91 |     0.31 |        0 |        2 | 
+Poisson setup (%)         |     6.55 |     5.90 |    11.10 |     8.29 |     2.03 |        1 |        5 | 
+Poisson solve (%)         |    57.85 |    57.85 |    57.87 |    57.86 |     0.01 |        3 |        2 | 
+Velo comp (%)             |     3.10 |     1.23 |     3.16 |     2.49 |     0.70 |        1 |        3 | 
+Advect particles (%)      |     1.49 |     0.52 |     1.51 |     1.18 |     0.36 |        1 |        3 | 
+Remap particles (%)       |     4.34 |     4.34 |     4.34 |     4.34 |     0.00 |        3 |        0 | 
+Particle intersection (%) |     3.92 |     0.84 |     4.50 |     3.08 |     1.24 |        1 |        2 | 
+Deposition (%)            |     2.67 |     2.67 |     2.67 |     2.67 |     0.00 |        0 |        1 | 
+Imbalance (%)             |     7.84 |     2.10 |    20.21 |     9.80 |     5.53 |        2 |        1 | 
+Total time (s)            |     1.53 |     1.53 |     1.53 |     1.53 |     0.00 |        2 |        3 | 
+--------------------------------------------------------------------------------------------------------
+
+
+ito_plasma_godunov::advance breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Transport & Poisson (%)   |    62.62 |    62.62 |    63.05 |    62.76 |     0.16 |        0 |        1 | 
+Relax time (%)            |     3.18 |     3.18 |     3.21 |     3.19 |     0.01 |        0 |        1 | 
+Photons (%)               |     0.05 |     0.05 |     0.06 |     0.05 |     0.00 |        0 |        1 | 
+Sort (%)                  |     4.10 |     2.00 |     4.10 |     3.45 |     0.77 |        1 |        0 | 
+Superparticles (%)        |     9.57 |     3.77 |     9.57 |     7.61 |     2.11 |        1 |        0 | 
+Reaction network (%)      |    11.06 |     9.55 |    11.45 |    10.60 |     0.59 |        1 |        2 | 
+EB removal (%)            |     0.03 |     0.01 |     0.05 |     0.03 |     0.01 |        1 |        5 | 
+Deposition (%)            |     3.30 |     3.30 |     3.32 |     3.31 |     0.01 |        0 |        1 | 
+Velo comp (%)             |     3.23 |     1.50 |     3.25 |     2.67 |     0.64 |        1 |        3 | 
+Diff comp (%)             |     2.36 |     1.69 |     2.36 |     2.14 |     0.24 |        1 |        0 | 
+Imbalance (%)             |     0.49 |     0.39 |    11.85 |     4.20 |     4.14 |        2 |        1 | 
+Total time (s)            |     3.12 |     3.10 |     3.12 |     3.11 |     0.01 |        1 |        0 | 
+--------------------------------------------------------------------------------------------------------
+
+
+driver::Time step report -- Time step #5
+                                   Time  = 5e-10
+                                   dt    = 1e-10
+                                   dt restricted by 'hardcap'
+                                   Emax      = 1.65239e+07
+                                   #part     = 377360 (1770976)
+                                   #eb part  = 0 (0)
+                                   #dom part = 0 (0)
+                                   #src part = 0 (0)
+                                   #part min = 128949 (on rank = 1)
+                                   #part max = 379626 (on rank = 2)
+                                   #part avg = 295163
+                                   #part dev = 93334.9 (31.6215%)
+                                -- 50.00 percentage of time steps completed
+                                --  1.00 percentage of simulation time completed
+                                -- Elapsed time          : 000h 00m 19s 377ms
+                                -- Last time step        : 000h 00m 03s 494ms
+                                -- Wall time per ns      : 000h 00m 34s 940ms
+                                -- Estimated remaining   : 000h 00m 19s 377ms
+                                -- Unfreed memory        : 449(MB)
+                                -- Peak memory usage     : 590(MB)
+                                -- Max unfreed memory    : 510(MB)
+                                -- Max peak memory usage : 646(MB)
+-----------------------------------------------------------------------
+driver::regrid_report breakdown - Time step #5
+			Total regrid time : 000h 00m 07s 582ms
+			Cell tagging      : 1.61583%
+			Base regrid       : 30.5215%
+			Solver regrid     : 67.8627%
+-----------------------------------------------------------------------
+
+-----------------------------------------------------------------------
+driver::Grid report - timestep = 5
+			        Finest level           = 4
+			        Finest domain          = 1024 x 1024 x 1024
+			        Coarsest domain        = 64 x 64 x 64
+			        Refinement ratios      = 2 2 2 2 
+			        Grid sparsity          = 0.00106812
+			        Finest dx              = 4.88281e-05
+			        Total number boxes     = 280
+			        Number of valid cells  = 1,146,880
+			        Including ghost cells  = 2,981,440
+			        Total # of boxes (lvl) = 64  48  56  48  64  
+			        Total # of cells (lvl) = 262,144  196,608  229,376  196,608  262,144  
+			        Realm = particle
+				        Proc. # of valid cells = 245,760
+				        Including ghost cells  = 638,880
+				        Proc. # of boxes       = 60
+				        Proc. # of boxes (lvl) = 11  1  17  9  22  
+				        Proc. # of cells (lvl) = 45,056  4,096  69,632  36,864  90,112  
+			        Realm = primal
+				        Proc. # of valid cells = 192,512
+				        Including ghost cells  = 500,456
+				        Proc. # of boxes       = 47
+				        Proc. # of boxes (lvl) = 11  8  9  8  11  
+				        Proc. # of cells (lvl) = 45,056  32,768  36,864  32,768  45,056  
+			        Unfreed memory        = 758 (MB)
+			        Peak memory usage     = 811 (MB)
+			        Max unfreed memory    = 1020 (MB)
+			        Max peak memory       = 1067 (MB)
+-----------------------------------------------------------------------
+
+
+
+ito_plasma_godunov::euler_maruyama breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Old position (%)          |     0.94 |     0.62 |     0.95 |     0.87 |     0.12 |        1 |        3 | 
+Diffusion (%)             |     1.96 |     1.49 |     1.96 |     1.83 |     0.16 |        1 |        0 | 
+Remap gdnv (%)            |     0.28 |     0.28 |     0.28 |     0.28 |     0.00 |        0 |        5 | 
+Deposit gdnv (%)          |     1.84 |     1.84 |     1.84 |     1.84 |     0.00 |        1 |        5 | 
+Copy conductivity (%)     |     0.64 |     0.50 |     0.65 |     0.60 |     0.05 |        1 |        3 | 
+Conductity comp (%)       |     3.07 |     3.07 |     3.23 |     3.17 |     0.06 |        0 |        5 | 
+Poisson setup (%)         |     2.91 |     2.91 |     6.22 |     4.78 |     1.12 |        0 |        5 | 
+Poisson solve (%)         |    77.22 |    77.18 |    77.30 |    77.21 |     0.04 |        2 |        5 | 
+Velo comp (%)             |     1.48 |     1.17 |     1.52 |     1.41 |     0.12 |        1 |        3 | 
+Advect particles (%)      |     0.68 |     0.41 |     0.68 |     0.57 |     0.09 |        1 |        0 | 
+Remap particles (%)       |     1.72 |     1.72 |     1.72 |     1.72 |     0.00 |        0 |        3 | 
+Particle intersection (%) |     0.11 |     0.11 |     1.18 |     0.82 |     0.44 |        0 |        4 | 
+Deposition (%)            |     2.46 |     2.46 |     2.46 |     2.46 |     0.00 |        0 |        5 | 
+Imbalance (%)             |     6.52 |     2.66 |     6.52 |     4.28 |     1.32 |        2 |        0 | 
+Total time (s)            |     3.11 |     3.11 |     3.11 |     3.11 |     0.00 |        0 |        5 | 
+--------------------------------------------------------------------------------------------------------
+
+
+ito_plasma_godunov::advance breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Transport & Poisson (%)   |    51.69 |    51.69 |    51.77 |    51.72 |     0.02 |        0 |        1 | 
+Relax time (%)            |     3.10 |     3.10 |     3.10 |     3.10 |     0.00 |        3 |        1 | 
+Photons (%)               |     0.08 |     0.08 |     0.08 |     0.08 |     0.00 |        0 |        1 | 
+Sort (%)                  |     2.46 |     1.49 |     3.02 |     2.26 |     0.46 |        1 |        5 | 
+Superparticles (%)        |     5.92 |     4.24 |     8.54 |     5.75 |     1.35 |        1 |        5 | 
+Reaction network (%)      |    14.65 |     7.32 |    25.07 |    11.89 |     6.41 |        1 |        5 | 
+EB removal (%)            |     0.00 |     0.00 |     0.03 |     0.01 |     0.01 |        0 |        2 | 
+Deposition (%)            |     3.52 |     3.52 |     3.52 |     3.52 |     0.00 |        0 |        1 | 
+Velo comp (%)             |     2.56 |     2.16 |     2.56 |     2.42 |     0.13 |        1 |        0 | 
+Diff comp (%)             |     2.42 |     2.28 |     2.42 |     2.37 |     0.05 |        1 |        0 | 
+Imbalance (%)             |    13.61 |     0.13 |    24.03 |    16.87 |     8.17 |        5 |        1 | 
+Total time (s)            |     6.71 |     6.70 |     6.71 |     6.71 |     0.00 |        1 |        0 | 
+--------------------------------------------------------------------------------------------------------
+
+
+driver::Time step report -- Time step #6
+                                   Time  = 6e-10
+                                   dt    = 1e-10
+                                   dt restricted by 'hardcap'
+                                   Emax      = 1.64915e+07
+                                   #part     = 430051 (2482198)
+                                   #eb part  = 0 (0)
+                                   #dom part = 0 (0)
+                                   #src part = 0 (0)
+                                   #part min = 376765 (on rank = 3)
+                                   #part max = 457328 (on rank = 5)
+                                   #part avg = 413700
+                                   #part dev = 25164.9 (6.08288%)
+                                -- 60.00 percentage of time steps completed
+                                --  1.20 percentage of simulation time completed
+                                -- Elapsed time          : 000h 00m 35s 546ms
+                                -- Last time step        : 000h 00m 07s 111ms
+                                -- Wall time per ns      : 000h 01m 11s 115ms
+                                -- Estimated remaining   : 000h 00m 23s 697ms
+                                -- Unfreed memory        : 825(MB)
+                                -- Peak memory usage     : 911(MB)
+                                -- Max unfreed memory    : 1184(MB)
+                                -- Max peak memory usage : 1287(MB)
+
+ito_plasma_godunov::euler_maruyama breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Old position (%)          |     1.16 |     0.84 |     1.18 |     1.08 |     0.12 |        1 |        3 | 
+Diffusion (%)             |     2.48 |     2.34 |     2.61 |     2.49 |     0.09 |        3 |        5 | 
+Remap gdnv (%)            |     0.41 |     0.41 |     0.41 |     0.41 |     0.00 |        1 |        2 | 
+Deposit gdnv (%)          |     2.57 |     2.57 |     2.57 |     2.57 |     0.00 |        0 |        5 | 
+Copy conductivity (%)     |     0.81 |     0.57 |     0.81 |     0.72 |     0.07 |        1 |        0 | 
+Conductity comp (%)       |     3.21 |     3.21 |     3.42 |     3.34 |     0.07 |        0 |        5 | 
+Poisson setup (%)         |     2.87 |     2.87 |     6.21 |     4.86 |     1.17 |        0 |        5 | 
+Poisson solve (%)         |    73.67 |    73.63 |    73.74 |    73.65 |     0.04 |        1 |        5 | 
+Velo comp (%)             |     1.86 |     1.31 |     1.86 |     1.66 |     0.17 |        1 |        0 | 
+Advect particles (%)      |     0.88 |     0.64 |     0.88 |     0.78 |     0.07 |        1 |        0 | 
+Remap particles (%)       |     2.30 |     2.30 |     2.30 |     2.30 |     0.00 |        0 |        3 | 
+Particle intersection (%) |     0.13 |     0.13 |     1.37 |     0.93 |     0.50 |        0 |        2 | 
+Deposition (%)            |     2.63 |     2.63 |     2.63 |     2.63 |     0.00 |        4 |        5 | 
+Imbalance (%)             |     7.59 |     3.28 |     7.59 |     5.14 |     1.36 |        2 |        0 | 
+Total time (s)            |     3.36 |     3.36 |     3.36 |     3.36 |     0.00 |        1 |        5 | 
+--------------------------------------------------------------------------------------------------------
+
+
+ito_plasma_godunov::advance breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Transport & Poisson (%)   |    54.55 |    54.55 |    54.63 |    54.57 |     0.03 |        0 |        1 | 
+Relax time (%)            |     2.72 |     2.72 |     2.72 |     2.72 |     0.00 |        0 |        1 | 
+Photons (%)               |     0.09 |     0.09 |     0.09 |     0.09 |     0.00 |        0 |        1 | 
+Sort (%)                  |     2.58 |     1.67 |     2.99 |     2.37 |     0.40 |        1 |        5 | 
+Superparticles (%)        |     5.52 |     4.35 |     7.55 |     5.44 |     1.01 |        1 |        5 | 
+Reaction network (%)      |    14.29 |     7.24 |    23.76 |    11.51 |     6.00 |        1 |        5 | 
+EB removal (%)            |     0.00 |     0.00 |     0.03 |     0.02 |     0.01 |        0 |        2 | 
+Deposition (%)            |     3.47 |     3.47 |     3.47 |     3.47 |     0.00 |        0 |        1 | 
+Velo comp (%)             |     2.56 |     2.08 |     2.56 |     2.35 |     0.14 |        1 |        0 | 
+Diff comp (%)             |     2.29 |     2.15 |     2.29 |     2.24 |     0.05 |        1 |        0 | 
+Imbalance (%)             |    11.94 |     0.22 |    21.59 |    15.22 |     7.37 |        5 |        1 | 
+Total time (s)            |     7.07 |     7.06 |     7.07 |     7.07 |     0.00 |        1 |        0 | 
+--------------------------------------------------------------------------------------------------------
+
+
+driver::Time step report -- Time step #7
+                                   Time  = 7e-10
+                                   dt    = 1e-10
+                                   dt restricted by 'hardcap'
+                                   Emax      = 1.63749e+07
+                                   #part     = 433394 (2579873)
+                                   #eb part  = 0 (0)
+                                   #dom part = 0 (0)
+                                   #src part = 0 (0)
+                                   #part min = 393701 (on rank = 3)
+                                   #part max = 465396 (on rank = 5)
+                                   #part avg = 429979
+                                   #part dev = 21190.2 (4.9282%)
+                                -- 70.00 percentage of time steps completed
+                                --  1.40 percentage of simulation time completed
+                                -- Elapsed time          : 000h 00m 46s 406ms
+                                -- Last time step        : 000h 00m 07s 474ms
+                                -- Wall time per ns      : 000h 01m 14s 749ms
+                                -- Estimated remaining   : 000h 00m 19s 888ms
+                                -- Unfreed memory        : 844(MB)
+                                -- Peak memory usage     : 1155(MB)
+                                -- Max unfreed memory    : 1210(MB)
+                                -- Max peak memory usage : 1527(MB)
+
+ito_plasma_godunov::euler_maruyama breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Old position (%)          |     0.99 |     0.66 |     0.99 |     0.91 |     0.11 |        1 |        0 | 
+Diffusion (%)             |     2.17 |     1.72 |     2.18 |     2.06 |     0.16 |        1 |        5 | 
+Remap gdnv (%)            |     0.32 |     0.32 |     0.32 |     0.32 |     0.00 |        1 |        2 | 
+Deposit gdnv (%)          |     1.72 |     1.72 |     1.72 |     1.72 |     0.00 |        1 |        3 | 
+Copy conductivity (%)     |     0.78 |     0.56 |     0.78 |     0.71 |     0.07 |        1 |        0 | 
+Conductity comp (%)       |     2.69 |     2.69 |     2.85 |     2.77 |     0.06 |        0 |        5 | 
+Poisson setup (%)         |     2.53 |     2.53 |     5.69 |     4.42 |     1.10 |        0 |        2 | 
+Poisson solve (%)         |    77.65 |    77.62 |    77.72 |    77.65 |     0.04 |        2 |        5 | 
+Velo comp (%)             |     1.60 |     1.09 |     1.60 |     1.41 |     0.16 |        1 |        0 | 
+Advect particles (%)      |     0.75 |     0.50 |     0.75 |     0.65 |     0.08 |        1 |        0 | 
+Remap particles (%)       |     1.98 |     1.98 |     1.98 |     1.98 |     0.00 |        0 |        1 | 
+Particle intersection (%) |     0.10 |     0.10 |     1.18 |     0.75 |     0.41 |        0 |        4 | 
+Deposition (%)            |     2.21 |     2.21 |     2.21 |     2.21 |     0.00 |        4 |        3 | 
+Imbalance (%)             |     6.22 |     2.45 |     6.22 |     4.15 |     1.33 |        2 |        0 | 
+Total time (s)            |     3.97 |     3.97 |     3.97 |     3.97 |     0.00 |        4 |        3 | 
+--------------------------------------------------------------------------------------------------------
+
+
+ito_plasma_godunov::advance breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Transport & Poisson (%)   |    58.52 |    58.52 |    58.59 |    58.54 |     0.02 |        0 |        1 | 
+Relax time (%)            |     2.47 |     2.47 |     2.48 |     2.47 |     0.00 |        0 |        1 | 
+Photons (%)               |     0.12 |     0.12 |     0.13 |     0.12 |     0.00 |        0 |        1 | 
+Sort (%)                  |     2.40 |     1.65 |     2.81 |     2.26 |     0.34 |        1 |        5 | 
+Superparticles (%)        |     5.08 |     4.30 |     6.87 |     5.14 |     0.81 |        1 |        5 | 
+Reaction network (%)      |    13.02 |     6.45 |    21.48 |    10.53 |     5.38 |        1 |        5 | 
+EB removal (%)            |     0.00 |     0.00 |     0.03 |     0.02 |     0.01 |        0 |        4 | 
+Deposition (%)            |     3.21 |     3.21 |     3.21 |     3.21 |     0.00 |        0 |        1 | 
+Velo comp (%)             |     2.28 |     1.93 |     2.28 |     2.17 |     0.11 |        1 |        0 | 
+Diff comp (%)             |     2.20 |     2.07 |     2.20 |     2.16 |     0.04 |        1 |        0 | 
+Imbalance (%)             |    10.70 |     0.14 |    19.18 |    13.37 |     6.48 |        5 |        1 | 
+Total time (s)            |     7.65 |     7.64 |     7.65 |     7.65 |     0.00 |        1 |        0 | 
+--------------------------------------------------------------------------------------------------------
+
+
+driver::Time step report -- Time step #8
+                                   Time  = 8e-10
+                                   dt    = 1e-10
+                                   dt restricted by 'hardcap'
+                                   Emax      = 1.60557e+07
+                                   #part     = 437667 (2671840)
+                                   #eb part  = 0 (0)
+                                   #dom part = 0 (0)
+                                   #src part = 0 (0)
+                                   #part min = 409817 (on rank = 3)
+                                   #part max = 473792 (on rank = 5)
+                                   #part avg = 445307
+                                   #part dev = 19754.6 (4.43619%)
+                                -- 80.00 percentage of time steps completed
+                                --  1.60 percentage of simulation time completed
+                                -- Elapsed time          : 000h 00m 57s 920ms
+                                -- Last time step        : 000h 00m 08s 079ms
+                                -- Wall time per ns      : 000h 01m 20s 791ms
+                                -- Estimated remaining   : 000h 00m 14s 480ms
+                                -- Unfreed memory        : 845(MB)
+                                -- Peak memory usage     : 1157(MB)
+                                -- Max unfreed memory    : 1212(MB)
+                                -- Max peak memory usage : 1532(MB)
+
+ito_plasma_godunov::euler_maruyama breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Old position (%)          |     1.01 |     0.74 |     1.07 |     0.97 |     0.11 |        1 |        2 | 
+Diffusion (%)             |     2.26 |     2.06 |     2.26 |     2.22 |     0.07 |        1 |        0 | 
+Remap gdnv (%)            |     0.41 |     0.41 |     0.41 |     0.41 |     0.00 |        0 |        5 | 
+Deposit gdnv (%)          |     1.65 |     1.65 |     1.65 |     1.65 |     0.00 |        1 |        5 | 
+Copy conductivity (%)     |     0.75 |     0.57 |     0.75 |     0.68 |     0.05 |        1 |        0 | 
+Conductity comp (%)       |     2.76 |     2.76 |     2.91 |     2.85 |     0.05 |        0 |        5 | 
+Poisson setup (%)         |     2.52 |     2.52 |     5.41 |     4.33 |     1.03 |        0 |        5 | 
+Poisson solve (%)         |    77.45 |    77.41 |    77.51 |    77.44 |     0.04 |        1 |        5 | 
+Velo comp (%)             |     1.64 |     1.22 |     1.64 |     1.50 |     0.13 |        1 |        0 | 
+Advect particles (%)      |     0.81 |     0.58 |     0.81 |     0.71 |     0.07 |        1 |        0 | 
+Remap particles (%)       |     2.05 |     2.05 |     2.05 |     2.05 |     0.00 |        2 |        5 | 
+Particle intersection (%) |     0.11 |     0.11 |     1.28 |     0.83 |     0.45 |        0 |        4 | 
+Deposition (%)            |     2.25 |     2.24 |     2.25 |     2.25 |     0.00 |        4 |        1 | 
+Imbalance (%)             |     5.98 |     2.19 |     5.98 |     3.75 |     1.25 |        2 |        0 | 
+Total time (s)            |     4.00 |     4.00 |     4.00 |     4.00 |     0.00 |        4 |        1 | 
+--------------------------------------------------------------------------------------------------------
+
+
+ito_plasma_godunov::advance breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Transport & Poisson (%)   |    58.09 |    58.05 |    58.16 |    58.10 |     0.03 |        4 |        1 | 
+Relax time (%)            |     2.52 |     2.52 |     2.53 |     2.53 |     0.00 |        4 |        1 | 
+Photons (%)               |     0.15 |     0.15 |     0.15 |     0.15 |     0.00 |        4 |        1 | 
+Sort (%)                  |     2.42 |     1.80 |     2.84 |     2.34 |     0.30 |        1 |        5 | 
+Superparticles (%)        |     5.16 |     4.68 |     7.18 |     5.43 |     0.81 |        1 |        5 | 
+Reaction network (%)      |    12.93 |     6.50 |    21.59 |    10.48 |     5.43 |        1 |        5 | 
+EB removal (%)            |     0.00 |     0.00 |     0.03 |     0.02 |     0.01 |        0 |        4 | 
+Deposition (%)            |     3.16 |     3.16 |     3.16 |     3.16 |     0.00 |        4 |        1 | 
+Velo comp (%)             |     2.30 |     1.97 |     2.30 |     2.21 |     0.11 |        1 |        0 | 
+Diff comp (%)             |     2.12 |     2.00 |     2.19 |     2.10 |     0.05 |        1 |        4 | 
+Imbalance (%)             |    11.13 |     0.10 |    19.02 |    13.48 |     6.47 |        5 |        1 | 
+Total time (s)            |     7.77 |     7.76 |     7.78 |     7.77 |     0.00 |        1 |        4 | 
+--------------------------------------------------------------------------------------------------------
+
+
+driver::Time step report -- Time step #9
+                                   Time  = 9e-10
+                                   dt    = 1e-10
+                                   dt restricted by 'hardcap'
+                                   Emax      = 1.5246e+07
+                                   #part     = 444370 (2765589)
+                                   #eb part  = 0 (0)
+                                   #dom part = 0 (0)
+                                   #src part = 0 (0)
+                                   #part min = 426272 (on rank = 3)
+                                   #part max = 483451 (on rank = 5)
+                                   #part avg = 460932
+                                   #part dev = 20167.3 (4.37533%)
+                                -- 90.00 percentage of time steps completed
+                                --  1.80 percentage of simulation time completed
+                                -- Elapsed time          : 000h 01m 09s 502ms
+                                -- Last time step        : 000h 00m 08s 220ms
+                                -- Wall time per ns      : 000h 01m 22s 206ms
+                                -- Estimated remaining   : 000h 00m 07s 722ms
+                                -- Unfreed memory        : 846(MB)
+                                -- Peak memory usage     : 1158(MB)
+                                -- Max unfreed memory    : 1214(MB)
+                                -- Max peak memory usage : 1534(MB)
+
+ito_plasma_godunov::euler_maruyama breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Old position (%)          |     0.88 |     0.66 |     0.93 |     0.84 |     0.09 |        1 |        2 | 
+Diffusion (%)             |     1.88 |     1.61 |     1.98 |     1.84 |     0.12 |        1 |        2 | 
+Remap gdnv (%)            |     0.28 |     0.28 |     0.28 |     0.28 |     0.00 |        2 |        5 | 
+Deposit gdnv (%)          |     1.35 |     1.35 |     1.35 |     1.35 |     0.00 |        3 |        5 | 
+Copy conductivity (%)     |     0.64 |     0.48 |     0.64 |     0.58 |     0.05 |        1 |        0 | 
+Conductity comp (%)       |     2.33 |     2.33 |     2.45 |     2.41 |     0.04 |        0 |        2 | 
+Poisson setup (%)         |     2.09 |     2.09 |     4.53 |     3.64 |     0.86 |        0 |        2 | 
+Poisson solve (%)         |    81.05 |    81.02 |    81.10 |    81.04 |     0.03 |        2 |        5 | 
+Velo comp (%)             |     1.36 |     0.99 |     1.36 |     1.24 |     0.12 |        1 |        0 | 
+Advect particles (%)      |     0.65 |     0.49 |     0.65 |     0.60 |     0.05 |        1 |        0 | 
+Remap particles (%)       |     1.72 |     1.72 |     1.72 |     1.72 |     0.00 |        0 |        5 | 
+Particle intersection (%) |     0.09 |     0.09 |     1.10 |     0.72 |     0.39 |        0 |        4 | 
+Deposition (%)            |     1.90 |     1.90 |     1.90 |     1.90 |     0.00 |        4 |        3 | 
+Imbalance (%)             |     5.13 |     1.67 |     5.13 |     3.17 |     1.09 |        2 |        0 | 
+Total time (s)            |     4.78 |     4.78 |     4.78 |     4.78 |     0.00 |        4 |        3 | 
+--------------------------------------------------------------------------------------------------------
+
+
+ito_plasma_godunov::advance breakdown:
+======================================
+--------------------------------------------------------------------------------------------------------
+Kernel                    |     Loc. |     Min. |     Max. |     Avg. |     Dev. | Min rank | Max rank | 
+-------------------------------------------------------------------------------------------------------|
+Transport & Poisson (%)   |    61.76 |    61.76 |    61.80 |    61.77 |     0.02 |        0 |        1 | 
+Relax time (%)            |     2.37 |     2.37 |     2.37 |     2.37 |     0.00 |        0 |        1 | 
+Photons (%)               |     0.18 |     0.18 |     0.18 |     0.18 |     0.00 |        0 |        1 | 
+Sort (%)                  |     2.22 |     1.71 |     2.62 |     2.19 |     0.26 |        1 |        5 | 
+Superparticles (%)        |     4.72 |     4.40 |     6.36 |     5.02 |     0.63 |        1 |        5 | 
+Reaction network (%)      |    11.82 |     6.10 |    19.78 |     9.66 |     4.94 |        1 |        5 | 
+EB removal (%)            |     0.00 |     0.00 |     0.02 |     0.01 |     0.01 |        0 |        4 | 
+Deposition (%)            |     2.96 |     2.96 |     2.96 |     2.96 |     0.00 |        0 |        1 | 
+Velo comp (%)             |     2.07 |     1.83 |     2.07 |     2.00 |     0.08 |        1 |        0 | 
+Diff comp (%)             |     1.87 |     1.80 |     1.87 |     1.85 |     0.02 |        1 |        0 | 
+Imbalance (%)             |    10.03 |     0.08 |    16.82 |    11.98 |     5.74 |        5 |        1 | 
+Total time (s)            |     8.63 |     8.62 |     8.63 |     8.63 |     0.00 |        1 |        0 | 
+--------------------------------------------------------------------------------------------------------
+
+
+driver::Time step report -- Time step #10
+                                   Time  = 1e-09
+                                   dt    = 1e-10
+                                   dt restricted by 'hardcap'
+                                   Emax      = 1.36938e+07
+                                   #part     = 457390 (2874468)
+                                   #eb part  = 0 (0)
+                                   #dom part = 0 (0)
+                                   #src part = 0 (0)
+                                   #part min = 445437 (on rank = 3)
+                                   #part max = 498432 (on rank = 4)
+                                   #part avg = 479078
+                                   #part dev = 20907.6 (4.36413%)
+                                -- 100.00 percentage of time steps completed
+                                --  2.00 percentage of simulation time completed
+                                -- Elapsed time          : 000h 01m 22s 069ms
+                                -- Last time step        : 000h 00m 09s 096ms
+                                -- Wall time per ns      : 000h 01m 30s 960ms
+                                -- Estimated remaining   : 000h 00m 00s 000ms
+                                -- Unfreed memory        : 848(MB)
+                                -- Peak memory usage     : 1160(MB)
+                                -- Max unfreed memory    : 1217(MB)
+                                -- Max peak memory usage : 1537(MB)
+
+-----------------------------------------------------------------------
+driver::Grid report - timestep = 10
+			        Finest level           = 4
+			        Finest domain          = 1024 x 1024 x 1024
+			        Coarsest domain        = 64 x 64 x 64
+			        Refinement ratios      = 2 2 2 2 
+			        Grid sparsity          = 0.00106812
+			        Finest dx              = 4.88281e-05
+			        Total number boxes     = 280
+			        Number of valid cells  = 1,146,880
+			        Including ghost cells  = 2,981,440
+			        Total # of boxes (lvl) = 64  48  56  48  64  
+			        Total # of cells (lvl) = 262,144  196,608  229,376  196,608  262,144  
+			        Realm = particle
+				        Proc. # of valid cells = 245,760
+				        Including ghost cells  = 638,880
+				        Proc. # of boxes       = 60
+				        Proc. # of boxes (lvl) = 11  1  17  9  22  
+				        Proc. # of cells (lvl) = 45,056  4,096  69,632  36,864  90,112  
+			        Realm = primal
+				        Proc. # of valid cells = 192,512
+				        Including ghost cells  = 500,456
+				        Proc. # of boxes       = 47
+				        Proc. # of boxes (lvl) = 11  8  9  8  11  
+				        Proc. # of cells (lvl) = 45,056  32,768  36,864  32,768  45,056  
+			        Unfreed memory        = 851 (MB)
+			        Peak memory usage     = 1163 (MB)
+			        Max unfreed memory    = 1221 (MB)
+			        Max peak memory       = 1541 (MB)
+-----------------------------------------------------------------------
+
+
+==================================
+driver::run -- ending run  
+==================================
