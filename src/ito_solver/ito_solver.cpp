@@ -99,12 +99,11 @@ void ito_solver::parse_rng(){
     m_seed_rng = std::chrono::system_clock::now().time_since_epoch().count();
   }
   
-  m_rng = std::mt19937_64(m_seed_rng);
-
-  m_udist01 = std::uniform_real_distribution<Real>( 0.0, 1.0);
-  m_udist11 = std::uniform_real_distribution<Real>(-1.0, 1.0);
-  m_gauss01 = std::normal_distribution<Real>(0.0, 1.0);
-  m_udist0d = std::uniform_int_distribution<int>(0, SpaceDim-1);
+  m_rng     = RAN::mt19937_64(m_seed_rng);
+  m_udist01 = RAN::uniform_real_distribution<Real>( 0.0, 1.0);
+  m_udist11 = RAN::uniform_real_distribution<Real>(-1.0, 1.0);
+  m_gauss01 = RAN::normal_distribution<Real>(0.0, 1.0);
+  m_udist0d = RAN::uniform_int_distribution<int>(0, SpaceDim-1);
 }
 
 void ito_solver::parse_plot_vars(){

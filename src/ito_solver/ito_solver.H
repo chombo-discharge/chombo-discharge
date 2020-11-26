@@ -23,6 +23,15 @@
 
 #include <random>
 
+#define BOOST_RANDOM 0
+
+#if BOOST_RANDOM
+#include <boost/random.hpp>
+namespace RAN = boost::random;
+#else
+namespace RAN = std;
+#endif
+
 /*!
   @brief Base class for Ito diffusion particle models
   @details This is a particle class for solving Ito diffusion problems dX = vdt + Z*D*t over an AMR hierarchy. The diffusion
@@ -706,27 +715,28 @@ protected:
   /*!
     @brief RNG engine
   */
-  std::mt19937_64 m_rng;
+  //  std::mt19937_64 m_rng;
+  RAN::mt19937_64 m_rng;
 
   /*!
     @brief Uniform real distribution on [0,1]
   */
-  std::uniform_real_distribution<Real> m_udist01; 
+  RAN::uniform_real_distribution<Real> m_udist01; 
 
   /*!
     @brief Uniform real distribution on [-1,1]
   */
-  std::uniform_real_distribution<Real> m_udist11;
+  RAN::uniform_real_distribution<Real> m_udist11;
 
   /*!
     @brief Gaussian distribution centered on 0, std=1
   */
-  std::normal_distribution<Real> m_gauss01;
+  RAN::normal_distribution<Real> m_gauss01;
 
   /*!
     @brief Uniform integer distribution between [0,SpaceDim-1]
   */
-  std::uniform_int_distribution<int> m_udist0d;
+  RAN::uniform_int_distribution<int> m_udist0d;
 
   /*!
     @brief Maximum exponential
