@@ -11,7 +11,7 @@ amr_mesh.lo_corner       = -2.5E-2 -2.5E-2 -4E-2
 amr_mesh.hi_corner       =  2.5E-2 2.5E-2 1E-2
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 5           # Maximum amr depth
+amr_mesh.max_amr_depth   = 4           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
@@ -44,7 +44,7 @@ driver.initial_regrids                 = 0             # Number of initial regri
 driver.write_regrid_files              = false         # Write regrid files or not. 
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 1.0           # Stop time
-driver.max_steps                       = 100           # Maximum number of steps
+driver.max_steps                       = 10            # Maximum number of steps
 driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
 driver.write_memory                    = false         # Write MPI memory report 
@@ -233,7 +233,7 @@ ito_plasma_godunov.pvr_buffer     = 0
 ito_plasma_air3_lea.blob_radius     = 1E-3        # Blob radius
 ito_plasma_air3_lea.blob_center     = 0 0 0         # Blob center
 ito_plasma_air3_lea.seed            = 0            # RNG seed, < 0 gives a random seed (for each rank)
-ito_plasma_air3_lea.num_particles   = 10000000        # Number of initial particles
+ito_plasma_air3_lea.num_particles   = 100000        # Number of initial particles
 ito_plasma_air3_lea.particle_weight = 1             # Initial particle weights
 
 # Reaction stuff

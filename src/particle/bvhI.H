@@ -15,7 +15,7 @@
 using namespace std::chrono;
 
 #define BVH_RESERVE_SIZE 2048
-#define BVH_DEBUG 0
+#define BVH_DEBUG 1
 
 template <class T>
 bvh_node<T>::bvh_node(){
@@ -203,7 +203,7 @@ inline void bvh_node<T>::split(const int a_dir){
       Real massRem   = mass - massDiff;
 
       const long long N  = llround(massRem);//*(1.0 + 1.E-6));
-      if(N > 0){ 
+      if(N > 0LL){ 
 	const long long NR = N/2;
 	const long long NL = N - NR;
 

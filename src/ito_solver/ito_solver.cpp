@@ -24,7 +24,7 @@
 
 #include <chrono>
 
-#define ITO_DEBUG 0
+#define ITO_DEBUG 1
 
 ito_solver::ito_solver(){
   m_name       = "ito_solver";
@@ -2527,8 +2527,10 @@ void ito_solver::make_superparticles(const int a_particlesPerCell, const int a_l
     const IntVect iv = bit();
   
     List<ito_particle>& particles = cellParticles(iv, comp);
-    
-    this->bvh_merge(particles, a_particlesPerCell);
+
+    if(particles.length() > 0){
+      this->bvh_merge(particles, a_particlesPerCell);
+    }
   }
 }
 
@@ -2548,22 +2550,25 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
   std::vector<point_mass> pointMasses(a_particles.length());
   int i = 0;
   Real mass = 0.0;
-  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
+  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit, i++){
     const ito_particle& p = lit();
-    //    pointMasses[i].define(p.position(), p.mass(), p.energy()); // Note, p.energy() is average energy and not total energy.
-    pointMasses[i].define(p.position(), p.mass(), p.energy()); // Note, p.energy() is average energy and not total energy.
+    pointMasses[i].define(p.position(), p.mass(), p.energy()); // Note, p.energy() is average energy and not total energy. 
     mass += p.mass();
-    i++;
+    //    i++;
 
 #if ITO_DEBUG
-    mass_before += p.mass();
-    energy_before += p.mass()*p.energy();
-    if(p.mass() < 1.0){
-      MayDay::Abort("ito_solver::bvh_merge - bad mass!");
-    }
+    mass_before   += p.mass();
     center_before += p.mass()*p.position();
+    energy_before += p.mass()*p.energy();
 #endif
   }
+
+#if ITO_DEBUG
+  center_before *= 1./mass_before;
+  if(mass_before   < 1.0)            MayDay::Abort("ito_solver::bvh_merge - bad initial mass!");
+  if(mass_before   != mass_before)   MayDay::Abort("ito_solver::bvh_merge - initial mass is NaN");
+  if(energy_before != energy_before) MayDay::Abort("ito_solver::bvh_merge - initial energy is NaN");
+#endif
   
   // 2. Build the BVH tree and get the leaves of the tree
   const int dir = (m_kd_direction < 0) ? m_udist0d(m_rng) : m_kd_direction;
@@ -2579,18 +2584,22 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
     a_particles.add(p);
 
 #if ITO_DEBUG
-    mass_after += p.mass();
+    mass_after   += p.mass();
     energy_after += p.mass()*p.energy();
     center_after += p.mass()*p.position();
 #endif
   }
 
 #if ITO_DEBUG
-  center_before = center_before/mass_before;
-  center_after = center_after/mass_before;
-  pout() << "ito_solver, center before = " << center_before << "\t after = " << center_after << "\t rel diff = " << (center_after - center_before).vectorLength() << endl;
-  if(mass_before != mass_after)     pout() << "ito_solver::bvh_merge failed. Mass before = "   << mass_before   << "\t Mass after = "   << mass_after << endl;
-  if(energy_before != energy_after) pout() << "ito_solver::bvh_merge failed. Energy before/after = " << energy_before/energy_after << "\t Energy after = " << energy_after << endl;
+  center_after *= 1./mass_after;
+
+  constexpr Real BVH_ERR_TOL = 1.E-6;
+  const bool break_energy = Abs(energy_before/energy_after - 1.0) > BVH_ERR_TOL;
+  const bool break_center = (center_before/center_after - RealVect::Unit).vectorLength() > BVH_ERR_TOL;
+  const bool break_mass   = Abs(mass_before/mass_after - 1.0) > BVH_ERR_TOL;
+  if(break_mass)   pout() << "ito_solver::bvh_merge failed. Mass before = "   << mass_before   << "\t Mass after = "   << mass_after << endl;
+  if(break_center) pout() << "ito_solver::bvh_merge failed. center before = " << center_before << "\t center after = " << center_after << endl;
+  if(break_energy) pout() << "ito_solver::bvh_merge failed. Energy before = " << energy_before << "\t Energy after = " << energy_after << endl;
 #endif
 }
 
