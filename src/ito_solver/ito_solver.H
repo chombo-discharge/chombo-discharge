@@ -653,6 +653,11 @@ public:
   Real compute_diffusion_dt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const;
 
   /*!
+    @brief Get deposition method
+  */
+  DepositionType::Which get_deposition() const;
+
+  /*!
     @brief Return phase
   */
   phase::which_phase get_phase() const;

@@ -2961,53 +2961,63 @@ bool ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
   return ret;
 }
 
+void ito_plasma_stepper::compute_EdotJ_source(const Real a_dt){
+  CH_TIME("ito_plasma_stepper::compute_EdotJ_source(a_dt)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_EdotJ_source(a_dt)" << endl;
+  }
+
+  // Swap between these two. 
+  if(m_nwo_reactions){
+    //    this->compute_EdotJ_source_nwo();
+    this->compute_EdotJ_source_nwo2(a_dt);
+  }
+  else{
+    this->compute_EdotJ_source();
+  }
+}
+
 void ito_plasma_stepper::compute_EdotJ_source(){
   CH_TIME("ito_plasma_stepper::compute_EdotJ_source()");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::compute_EdotJ_source()" << endl;
   }
 
-  if(m_nwo_reactions){
-    this->compute_EdotJ_source_nwo();
-  }
-  else{
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<ito_solver>& solver   = solver_it();
-      RefCountedPtr<ito_species>& species = solver->get_species();
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver   = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
 
-      const int idx = solver_it.get_solver();
-      const int q   = species->get_charge();
+    const int idx = solver_it.get_solver();
+    const int q   = species->get_charge();
 
-      data_ops::set_value(m_energy_sources[idx], 0.0);
+    data_ops::set_value(m_energy_sources[idx], 0.0);
 
-      // Do mobile contribution. 
-      if(q != 0 && solver->is_mobile()){
+    // Do mobile contribution. 
+    if(q != 0 && solver->is_mobile()){
 
-	// Drift contribution
-	solver->deposit_conductivity(m_particle_scratch1, solver->get_particles()); // Deposit mu*n
-	data_ops::copy(m_particle_scratchD, m_particle_E); // Could use m_particle_E or solver's m_velo_func here, but m_velo_func = +/- E (depends on q)
+      // Drift contribution
+      solver->deposit_conductivity(m_particle_scratch1, solver->get_particles()); // Deposit mu*n
+      data_ops::copy(m_particle_scratchD, m_particle_E); // Could use m_particle_E or solver's m_velo_func here, but m_velo_func = +/- E (depends on q)
       
-	data_ops::multiply_scalar(m_particle_scratchD, m_particle_scratch1);        // m_particle_scratchD = mu*n*E
-	data_ops::dot_prod(m_particle_scratch1, m_particle_E, m_particle_scratchD); // m_particle_scratch1 = mu*n*E*E
-	data_ops::incr(m_energy_sources[idx], m_particle_scratch1, 1.0);            // a_source[idx] += mu*n*E*E
-      }
+      data_ops::multiply_scalar(m_particle_scratchD, m_particle_scratch1);        // m_particle_scratchD = mu*n*E
+      data_ops::dot_prod(m_particle_scratch1, m_particle_E, m_particle_scratchD); // m_particle_scratch1 = mu*n*E*E
+      data_ops::incr(m_energy_sources[idx], m_particle_scratch1, 1.0);            // a_source[idx] += mu*n*E*E
+    }
 
-      // Diffusive contribution
-      if(q != 0 && solver->is_diffusive()){
+    // Diffusive contribution
+    if(q != 0 && solver->is_diffusive()){
 
-	// Compute the negative gradient of the diffusion term
-	solver->deposit_diffusivity(m_particle_scratch1, solver->get_particles());
-	m_amr->compute_gradient(m_particle_scratchD, m_particle_scratch1, m_particle_realm, m_phase);
-	data_ops::scale(m_particle_scratchD, -1.0); // scratchD = -grad(D*n)
-
+      // Compute the negative gradient of the diffusion term
+      solver->deposit_diffusivity(m_particle_scratch1, solver->get_particles());
+      m_amr->compute_gradient(m_particle_scratchD, m_particle_scratch1, m_particle_realm, m_phase);
+      data_ops::scale(m_particle_scratchD, -1.0); // scratchD = -grad(D*n)
       
-	data_ops::dot_prod(m_particle_scratch1, m_particle_scratchD, m_particle_E); // m_particle_scratch1 = -E*grad(D*n)
-	data_ops::incr(m_energy_sources[idx], m_particle_scratch1, 1.0);            // a_source[idx]
-      }
+      data_ops::dot_prod(m_particle_scratch1, m_particle_scratchD, m_particle_E); // m_particle_scratch1 = -E*grad(D*n)
+      data_ops::incr(m_energy_sources[idx], m_particle_scratch1, 1.0);            // a_source[idx]
+    }
     
-      if (q != 0 && (solver->is_mobile() || solver->is_diffusive())){
-	data_ops::scale(m_energy_sources[idx], Abs(q)*units::s_Qe);
-      }
+    if (q != 0 && (solver->is_mobile() || solver->is_diffusive())){
+      data_ops::scale(m_energy_sources[idx], Abs(q)*units::s_Qe);
     }
   }
 }
@@ -3054,6 +3064,87 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
       m_amr->interp_ghost(m_fluid_scratch1, m_fluid_realm, m_phase);
       
       data_ops::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);                                 // source  += -Z*e*E*grad(D*n)
+    }
+  }
+}
+
+void ito_plasma_stepper::compute_EdotJ_source_nwo2(const Real a_dt){
+  CH_TIME("ito_plasma_stepper::compute_EdotJ_source_nwo2(a_dt)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::compute_EdotJ_source_nwo2(a_dt)" << endl;
+  }
+
+  data_ops::set_value(m_EdotJ, 0.0);
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>& solver   = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+    const int q   = species->get_charge();
+
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+
+    particle_container<ito_particle>& particles = solver->get_particles();
+
+    const DepositionType::Which deposition = solver->get_deposition();
+
+    if((mobile || diffusive) && q != 0){
+
+      // We will interpolate m_particle_E onto particle velocity vectors.
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	  const EBCellFAB& E     = (*m_particle_E[lvl])[dit()];
+	  const EBISBox& ebisbox = E.getEBISBox();
+	  const FArrayBox& Efab  = E.getFArrayBox();
+	  const RealVect dx      = m_amr->get_dx()[lvl]*RealVect::Unit;
+	  const RealVect origin  = m_amr->get_prob_lo();
+	  const Box box          = dbl[dit()];
+
+	  List<ito_particle>& particleList = particles[lvl][dit()].listItems();
+
+	  // This interpolates the velocity function on to the particle velocities
+	  EBParticleInterp meshInterp(box, ebisbox, dx, origin, true);
+	  meshInterp.interpolateVelocity(particleList, Efab, deposition);
+
+	  // Go through the particles and set their mass to E.dot(X^new - X^old)
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
+	    ito_particle& p = lit();
+
+	    const Real m         = p.mass();
+	    const RealVect& v    = p.velocity(); // Actually = E(X^new)
+	    const RealVect& Xnew = p.position();
+	    const RealVect& Xold = p.oldPosition();
+
+	    p.tmp()  = m;
+	    p.mass() = m*PolyGeom::dot(v, Xnew-Xold);
+	  } 
+	}
+      }
+
+      // Deposit the result
+      solver->deposit_particles(m_particle_scratch1, particles, deposition);
+      m_fluid_scratch1.copy(m_particle_scratch1);
+
+      // Scale by Qe/dt to make it Joule/dt. Then add to correct index
+      data_ops::scale(m_fluid_scratch1, q*units::s_Qe/a_dt);
+      data_ops::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);
+
+      // Set p.mass() back to the original value
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	  List<ito_particle>& particleList = particles[lvl][dit()].listItems();
+
+	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
+	    ito_particle& p = lit();
+	    p.mass() = p.tmp();
+	  }
+	}
+      }
     }
   }
 }

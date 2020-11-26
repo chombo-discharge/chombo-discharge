@@ -298,9 +298,12 @@ namespace physics {
       void sort_domain_photons_by_cell();
       void sort_domain_photons_by_patch();
 
-      // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle realm. 
+      // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle realm.
+      void compute_EdotJ_source(const Real a_dt);
       void compute_EdotJ_source();
       void compute_EdotJ_source_nwo();
+      void compute_EdotJ_source_nwo2(const Real a_dt);
+
 
     protected:
 

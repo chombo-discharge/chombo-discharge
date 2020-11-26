@@ -24,7 +24,7 @@
 
 #include <chrono>
 
-#define ITO_DEBUG 1
+#define ITO_DEBUG 0
 
 ito_solver::ito_solver(){
   m_name       = "ito_solver";
@@ -2598,6 +2598,10 @@ void ito_solver::remap(){
   }
 
   m_particles.remap();
+}
+
+DepositionType::Which ito_solver::get_deposition() const {
+  return m_deposition;
 }
 
 phase::which_phase ito_solver::get_phase() const{
