@@ -1,7 +1,7 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-air3_lea.potential = -40E3
+air3_lea.potential = -30E3
 air3_lea.basename  = pout
 
 # ====================================================================================================
@@ -11,7 +11,7 @@ amr_mesh.lo_corner       = -2.5E-2 -2.5E-2 -4E-2
 amr_mesh.hi_corner       =  2.5E-2 2.5E-2 1E-2
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 4           # Maximum amr depth
+amr_mesh.max_amr_depth   = 5           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
@@ -214,7 +214,7 @@ ito_plasma_godunov.load_balance   = true          # Load balance or not
 ito_plasma_godunov.load_ppc       = 1.0           # Load balance or not
 ito_plasma_godunov.load_index     = 0             # Load balance or not
 ito_plasma_godunov.nwo_reactions  = true          # Load balance or not		
-ito_plasma_godunov.max_cells_hop  = 0.01           # Maximum cells to move in one time step
+ito_plasma_godunov.max_cells_hop  = 0.125           # Maximum cells to move in one time step
 ito_plasma_godunov.which_dt       = advection     # 'advection', 'diffusion', or 'advection_diffusion'
 ito_plasma_godunov.ppc            = 32            # Superparticle number of cells
 ito_plasma_godunov.merge_interval = 1             # How often to make superparticles
@@ -244,7 +244,7 @@ ito_plasma_air3_lea.Ncrit          = -1             # How many firings away from
 ito_plasma_air3_lea.prop_eps       = 0.1            # Maximum relative change in propensity function
 ito_plasma_air3_lea.NSSA           = 100            # How many SSA steps to run when tau-leaping is inefficient
 ito_plasma_air3_lea.SSAlim         = -0.1            # When to enter SSA instead of tau-leaping
-ito_plasma_air3_lea.algorithm      = hybrid          # 'tau', 'ssa', or 'hybrid'
+ito_plasma_air3_lea.algorithm      = tau            # 'tau', 'ssa', or 'hybrid'
 
 # Zheleznyak stuff.
 ito_plasma_air3_lea.quenching_pressure = 0.03947    # Quenching pressure for photo-emission (atm)

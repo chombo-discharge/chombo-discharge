@@ -161,7 +161,7 @@ void ito_plasma_air3_lea::update_reaction_rates_lea(const RealVect a_E, const Ve
 
   //  const Real electron_energy = a_mean_energies[m_electron_idx];
   //  const Real electron_energy = 12; // Use 12eV for everything for now.
-  const Real electron_energy = Min(a_mean_energies[m_electron_idx], 15.0);
+  const Real electron_energy = Min(a_mean_energies[m_electron_idx], 100.0);
 
   // Compute the reaction rates.
   const Real dV      = pow(a_dx, SpaceDim);//*a_kappa;
