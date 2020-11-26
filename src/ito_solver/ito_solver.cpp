@@ -119,7 +119,8 @@ void ito_solver::parse_plot_vars(){
   m_plot_eb_particles     = false;
   m_plot_domain_particles = false;
   m_plot_source_particles = false;
-  m_plot_energy = false;
+  m_plot_energy_density   = false;
+  m_plot_average_energy   = false;
 
   ParmParse pp(m_class_name.c_str());
   const int num = pp.countval("plt_vars");
@@ -127,14 +128,15 @@ void ito_solver::parse_plot_vars(){
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++){
-    if(     str[i] == "phi")      m_plot_phi = true;
-    else if(str[i] == "vel")      m_plot_vel = true;
-    else if(str[i] == "dco")      m_plot_dco = true;
-    else if(str[i] == "part")     m_plot_particles        = true;
-    else if(str[i] == "eb_part")  m_plot_eb_particles     = true;
-    else if(str[i] == "dom_part") m_plot_domain_particles = true;
-    else if(str[i] == "src_part") m_plot_source_particles = true;
-    else if(str[i] == "energy")   m_plot_energy = true;
+    if(     str[i] == "phi")            m_plot_phi              = true;
+    else if(str[i] == "vel")            m_plot_vel              = true;
+    else if(str[i] == "dco")            m_plot_dco              = true;
+    else if(str[i] == "part")           m_plot_particles        = true;
+    else if(str[i] == "eb_part")        m_plot_eb_particles     = true;
+    else if(str[i] == "dom_part")       m_plot_domain_particles = true;
+    else if(str[i] == "src_part")       m_plot_source_particles = true;
+    else if(str[i] == "energy_density") m_plot_energy_density   = true;
+    else if(str[i] == "average_energy") m_plot_average_energy   = true;
   }
 }
 
@@ -297,7 +299,8 @@ Vector<std::string> ito_solver::get_plotvar_names() const {
   if(m_plot_eb_particles)      names.push_back(m_name + " eb_particles");
   if(m_plot_domain_particles)  names.push_back(m_name + " domain_particles");
   if(m_plot_source_particles)  names.push_back(m_name + " source_particles");
-  if(m_plot_energy)            names.push_back(m_name + " energy * phi");
+  if(m_plot_energy_density)    names.push_back(m_name + " energy * phi");
+  if(m_plot_average_energy)    names.push_back(m_name + " average_energy");
 
   return names;
 }
@@ -317,7 +320,8 @@ int ito_solver::get_num_plotvars() const {
   if(m_plot_eb_particles)       num_plotvars = num_plotvars + 1;
   if(m_plot_domain_particles)   num_plotvars = num_plotvars + 1;
   if(m_plot_source_particles)   num_plotvars = num_plotvars + 1;
-  if(m_plot_energy)             num_plotvars += 1;
+  if(m_plot_energy_density)     num_plotvars += 1;
+  if(m_plot_average_energy)     num_plotvars += 1;
 
   return num_plotvars;
 }
@@ -1148,9 +1152,15 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     this->deposit_particles(m_scratch, m_source_particles, m_plot_deposition);
     this->write_data(a_output, a_comp, m_scratch,  false);
   }
-  if(m_plot_energy){
-    this->deposit_energy(m_scratch, m_particles, m_plot_deposition);
+  if(m_plot_energy_density){
+    this->deposit_energy_density(m_scratch, m_particles, m_plot_deposition);
     this->write_data(a_output, a_comp, m_scratch,  false);
+  }
+  if(m_plot_average_energy){
+    m_particles.sort_particles_by_cell();
+    this->compute_average_energy(m_scratch, m_particles);
+    this->write_data(a_output, a_comp, m_scratch,  false);
+    m_particles.sort_particles_by_patch();
   }
 }
 
@@ -1368,33 +1378,160 @@ void ito_solver::deposit_diffusivity(EBAMRCellData& a_state, particle_container<
   this->unset_mass_to_diffusivity(a_particles);                                // Make mass = mass/D
 }
 
-void ito_solver::deposit_energy(){
-  CH_TIME("ito_solver::deposit_energy()");
+void ito_solver::deposit_energy_density(){
+  CH_TIME("ito_solver::deposit_energy_density()");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_energy()" << endl;
+    pout() << m_name + "::deposit_energy_density()" << endl;
   }
 
-  this->deposit_energy(m_state, m_particles);
+  this->deposit_energy_density(m_state, m_particles);
 }
 
-void ito_solver::deposit_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles){
-  CH_TIME("ito_solver::deposit_diffusivity(state, particles)");
+void ito_solver::deposit_energy_density(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::deposit_energy_density(state, particles)");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_diffusivity(state, particles)" << endl;
+    pout() << m_name + "::deposit_energy_density(state, particles)" << endl;
   }
 
-  this->deposit_energy(a_state, a_particles, m_deposition);
+  this->deposit_energy_density(a_state, a_particles, m_deposition);
 }
 
-void ito_solver::deposit_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition){
-  CH_TIME("ito_solver::deposit_energy(state, particles, deposition_type)");
+void ito_solver::deposit_energy_density(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition){
+  CH_TIME("ito_solver::deposit_energy_density(state, particles, deposition_type)");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_energy(state, particles, deposition_type)" << endl;
+    pout() << m_name + "::deposit_energy_density(state, particles, deposition_type)" << endl;
   }
 
   this->set_mass_to_energy(a_particles);                       // Make mass = mass*E
   this->deposit_particles(a_state, a_particles, a_deposition); // Deposit mass*E
   this->unset_mass_to_energy(a_particles);                     // Make mass = mass/E
+}
+
+
+void ito_solver::compute_average_mobility(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::compute_average_mobility(state, particles)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_average_mobility(state, particles)" << endl;
+  }
+
+  constexpr int comp = 0;
+
+  data_ops::set_value(a_state, 0.0);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const BinFab<ito_particle>& particles = a_particles.get_cell_particles(lvl, dit());
+
+      BaseFab<Real>& state = (*a_state[lvl])[dit()].getSingleValuedFAB();
+
+      for (BoxIterator bit(dbl[dit()]); bit.ok(); ++bit){
+	const IntVect iv = bit();
+
+	const List<ito_particle>& listParticles = particles(iv, comp);
+
+	if(listParticles.length() > 0){
+	  Real M  = 0.0;
+	  Real MU = 0.0;
+	  for (ListIterator<ito_particle> lit(listParticles); lit.ok(); ++lit){
+	    const ito_particle& p = lit();
+	    const Real m  = p.mass();
+	    const Real mu = p.mobility();
+
+	    M  += m;
+	    MU += m*mu;
+	  }
+
+	  state(iv, comp) = MU/M;
+	}
+      }
+    }
+  }
+}
+
+void ito_solver::compute_average_diffusion(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::compute_average_diffusion(state, particles)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_average_diffusion(state, particles)" << endl;
+  }
+
+  constexpr int comp = 0;
+
+  data_ops::set_value(a_state, 0.0);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const BinFab<ito_particle>& particles = a_particles.get_cell_particles(lvl, dit());
+
+      BaseFab<Real>& state = (*a_state[lvl])[dit()].getSingleValuedFAB();
+
+      for (BoxIterator bit(dbl[dit()]); bit.ok(); ++bit){
+	const IntVect iv = bit();
+
+	const List<ito_particle>& listParticles = particles(iv, comp);
+
+	if(listParticles.length() > 0){
+	  Real M = 0.0;
+	  Real D = 0.0;
+	  for (ListIterator<ito_particle> lit(listParticles); lit.ok(); ++lit){
+	    const ito_particle& p = lit();
+	    const Real m = p.mass();
+	    const Real d = p.diffusion();
+
+	    M += m;
+	    D += m*d;
+	  }
+
+	  state(iv, comp) = D/M;
+	}
+      }
+    }
+  }
+}
+
+void ito_solver::compute_average_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::compute_average_energy(state, particles)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_average_energy(state, particles)" << endl;
+  }
+
+  constexpr int comp = 0;
+
+  data_ops::set_value(a_state, 0.0);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const BinFab<ito_particle>& particles = a_particles.get_cell_particles(lvl, dit());
+
+      BaseFab<Real>& state = (*a_state[lvl])[dit()].getSingleValuedFAB();
+
+      for (BoxIterator bit(dbl[dit()]); bit.ok(); ++bit){
+	const IntVect iv = bit();
+
+	const List<ito_particle>& listParticles = particles(iv, comp);
+
+	if(listParticles.length() > 0){
+	  Real M = 0.0;
+	  Real E = 0.0;
+	  for (ListIterator<ito_particle> lit(listParticles); lit.ok(); ++lit){
+	    const ito_particle& p = lit();
+	    const Real m = p.mass();
+	    const Real e = p.energy();
+
+	    M += m;
+	    E += m*e;
+	  }
+
+	  state(iv, comp) = E/M;
+	}
+      }
+    }
+  }
 }
 
 void ito_solver::deposit_particles(){

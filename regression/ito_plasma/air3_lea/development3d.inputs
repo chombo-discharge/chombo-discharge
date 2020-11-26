@@ -1,7 +1,7 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-air3_lea.potential = -80E3
+air3_lea.potential = -50E3
 air3_lea.basename  = pout
 
 # ====================================================================================================
@@ -38,7 +38,7 @@ driver.geometry_generation             = plasmac       # Grid generation method,
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
 driver.plot_interval                   = 1            # Plot interval
-driver.regrid_interval                 = 5            # Regrid interval
+driver.regrid_interval                 = 10            # Regrid interval
 driver.checkpoint_interval             = -1            # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.write_regrid_files              = false         # Write regrid files or not. 
@@ -55,7 +55,7 @@ driver.grow_tags                       = 0             # Grow tagged by this in 
 driver.output_names                    = simulation    # Simulation output names
 driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
-driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
+driver.num_plot_ghost                  = 0             # Number of ghost cells to include in plots
 driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
 driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 driver.allow_coarsening                = true          # Allows removal of grid levels according to cell_tagger
@@ -102,17 +102,17 @@ poisson_multifluid_gmg.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi'
 # ====================================================================================================
 ito_solver.pvr_buffer          = 0             # Buffer for PVR.
 ito_solver.halo_buffer         = 1             # Buffer for PVR. 
-ito_solver.plt_vars            = phi vel energy   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part'
+ito_solver.plt_vars            = phi vel energy_density average_energy   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part'
 ito_solver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
 ito_solver.seed                = 0             # Seed for RNG
 ito_solver.max_diffusion_hop   = 2.0           # Maximum diffusion hop length (in units of dx)
 ito_solver.normal_max          = 3.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
 ito_solver.kd_direction        = -1
-ito_solver.redistribute        = true          # Turn on/off redistribution. 
+ito_solver.redistribute        = false         # Turn on/off redistribution. 
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ito_solver.checkpointing       = particles     # 'particles' or 'numbers'
 ito_solver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
-ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
+ito_solver.plot_deposition     = ngp           # Cloud-in-cell for plotting particles.
 ito_solver.halo_deposition     = native
 ito_solver.deposition          = cic           # 'ngp' = nearest grid point
                                                # 'cic' = cloud-in-cell
@@ -214,7 +214,7 @@ ito_plasma_godunov.load_balance   = true          # Load balance or not
 ito_plasma_godunov.load_ppc       = 1.0           # Load balance or not
 ito_plasma_godunov.load_index     = 0             # Load balance or not
 ito_plasma_godunov.nwo_reactions  = false         # Load balance or not		
-ito_plasma_godunov.max_cells_hop  = 1.0           # Maximum cells to move in one time step
+ito_plasma_godunov.max_cells_hop  = 0.1           # Maximum cells to move in one time step
 ito_plasma_godunov.which_dt       = advection     # 'advection', 'diffusion', or 'advection_diffusion'
 ito_plasma_godunov.ppc            = 32            # Superparticle number of cells
 ito_plasma_godunov.merge_interval = 1             # How often to make superparticles
@@ -266,6 +266,6 @@ ito_plasma_streamer_tagger.buffer            = 0            # Grow tagged cells
 
 ito_plasma_streamer_tagger.refine_curvature  = 10.0         # Curvature refinement
 ito_plasma_streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	
-ito_plasma_streamer_tagger.refine_alpha      = 0.5          # Set alpha refinement. Lower  => More mesh
+ito_plasma_streamer_tagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
 ito_plasma_streamer_tagger.coarsen_alpha     = 99.0         # Set alpha coarsening. Higher => Less mesh
 ito_plasma_streamer_tagger.max_coarsen_lvl   = 3            # Set max coarsening depth

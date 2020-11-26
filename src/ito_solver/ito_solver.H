@@ -176,19 +176,35 @@ public:
     @brief Deposit diffusivity
     @details This deposits weight*energy
   */
-  virtual void deposit_energy();
+  virtual void deposit_energy_density();
 
   /*!
     @brief Deposit energy
     @details This deposits weight*energy
   */
-  virtual void deposit_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
+  virtual void deposit_energy_density(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Deposit energy
     @details This deposits weight*energy
   */
-  virtual void deposit_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void deposit_energy_density(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
+
+  /*!
+    @brief Compute average mobility. Must sort the particles by cell first. 
+    
+  */
+  virtual void compute_average_mobility(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
+
+  /*!
+    @brief Compute average diffusion. Must sort the particles by cell first. 
+  */
+  virtual void compute_average_diffusion(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
+
+  /*!
+    @brief Compute average energy. Must sort the particles by cell first. 
+  */
+  virtual void compute_average_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Deposit particles
@@ -859,9 +875,14 @@ protected:
   bool m_plot_source_particles;
 
   /*!
-    @brief Plot energy or not
+    @brief Plot energy density
   */
-  bool m_plot_energy;
+  bool m_plot_energy_density;
+
+  /*!
+    @brief Plot average energy or not. 
+  */
+  bool m_plot_average_energy;
 
   /*!
     @brief Mass/charge deposition type
