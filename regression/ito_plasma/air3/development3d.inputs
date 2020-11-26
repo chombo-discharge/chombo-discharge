@@ -1,7 +1,7 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-air3.potential = 40E3
+air3.potential = -60E3
 air3.basename  = pout
 
 # ====================================================================================================
@@ -178,9 +178,9 @@ mc_photo.deposition         = cic           # 'ngp'  = nearest grid point
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
 geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-geo_coarsener.box1_lo     = -1  -1 500E-6     # Remove irregular cell tags 
+geo_coarsener.box1_lo     = -1  -1 1E-3     # Remove irregular cell tags 
 geo_coarsener.box1_hi     =  1  1  1      # between these two corners
-geo_coarsener.box1_lvl    = 2            # up to this level
+geo_coarsener.box1_lvl    = 3            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
@@ -233,8 +233,8 @@ ito_plasma_air3.particle_weight = 1             # Initial particle weights
 ito_plasma_air3.dX              = 2.7            # Maximum relative change Xnew/Xold during one time step.
 
 # For turning on/off moving ions
-ito_plasma_air3.mobile_ions    = false          # By default, stationary ions. 
-ito_plasma_air3.ion_mobility   = 2E-4           # Turn on/off ion mobility
+ito_plasma_air3.mobile_ions    = true          # By default, stationary ions. 
+ito_plasma_air3.ion_mobility   = 2E-2           # Turn on/off ion mobility
 
 # Reaction stuff
 ito_plasma_air3.react_ppc      = 32             # Maximum number of particles to produce in reaction step	

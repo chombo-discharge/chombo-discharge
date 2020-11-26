@@ -39,9 +39,9 @@ namespace physics {
       Vector<Real> compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const override;
 
       Vector<Real> compute_ito_diffusion_lfa(const Real         a_time,
-						     const RealVect     a_pos,
-						     const RealVect     a_E,
-						     const Vector<Real> a_cdr_densities) const override;
+					     const RealVect     a_pos,
+					     const RealVect     a_E,
+					     const Vector<Real> a_cdr_densities) const override;
 
 
     protected:

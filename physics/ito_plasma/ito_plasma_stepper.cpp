@@ -1869,7 +1869,7 @@ void ito_plasma_stepper::compute_mean_energies_per_cell(EBAMRCellData& a_mean_en
   data_ops::set_value(a_mean_energies, 0.0);
   
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    this->compute_particles_per_cell(*a_mean_energies[lvl], lvl);
+    this->compute_mean_energies_per_cell(*a_mean_energies[lvl], lvl);
   }
 }
 
@@ -1906,16 +1906,19 @@ void ito_plasma_stepper::compute_mean_energies_per_cell(EBCellFAB& a_mean_energi
 
     for (BoxIterator bit(a_box); bit.ok(); ++bit){
       const IntVect iv = bit();
-
+      
       Real m = 0.0;
       Real E = 0.0;
       const List<ito_particle>& listParticles = cellParticles(iv, 0);
-      for (ListIterator<ito_particle> lit(listParticles); lit.ok(); ++lit){
-	m += lit().mass();
-	E += lit().mass()*lit().energy();
-      }
 
-      numFab(iv, idx) = E/m;
+      if(listParticles.length() > 0){
+	for (ListIterator<ito_particle> lit(listParticles); lit.ok(); ++lit){
+	  m += lit().mass();
+	  E += lit().mass()*lit().energy();
+	}
+
+	numFab(iv, idx) = E/m;
+      }
     }
   }
 }
@@ -2034,6 +2037,7 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
       for (int i = 0; i < num_ito_species; i++){
 	particles[i]     = llround(a_particlesPerCell.getSingleValuedFAB()(iv, i));
 	meanEnergies[i]  = a_meanParticleEnergies.getSingleValuedFAB()(iv,i);
+	//	energySources[i] = a_EdotJ.getSingleValuedFAB()(iv, i)*dV/units::s_Qe;
 	energySources[i] = a_EdotJ.getSingleValuedFAB()(iv, i)*dV/units::s_Qe;
       }
 
@@ -3027,10 +3031,13 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
     if(q != 0 && solver->is_mobile()){
       solver->deposit_conductivity(m_particle_scratch1, solver->get_particles()); // Deposit mu*n
       m_fluid_scratch1.copy(m_particle_scratch1);                                 // Copy mu*n to fluid realm
-      data_ops::copy(m_fluid_scratchD, m_fluid_E);                                // Make m_fluid_scratchD = E
-      data_ops::multiply_scalar(m_fluid_scratchD, m_fluid_scratch1);              // Computes mu*n*E
-      data_ops::dot_prod(m_fluid_scratch1, m_fluid_E, m_fluid_scratchD);          // m_particle_scratch1 = mu*n*E*E
+      data_ops::copy(m_fluid_scratchD, m_fluid_E);                                // m_fluid_scratchD = E
+      data_ops::multiply_scalar(m_fluid_scratchD, m_fluid_scratch1);              // m_fluid_scratchD = E*mu*n
+      data_ops::dot_prod(m_fluid_scratch1, m_fluid_E, m_fluid_scratchD);          // m_particle_scratch1 = E.dot.(E*mu*n)
       data_ops::scale(m_fluid_scratch1, Abs(q)*units::s_Qe);                      // m_particle_scratch1 = Z*e*mu*n*E*E
+
+      m_amr->average_down(m_fluid_scratch1, m_fluid_realm, m_phase);
+      m_amr->interp_ghost(m_fluid_scratch1, m_fluid_realm, m_phase);
       data_ops::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);                       // a_source[idx] += Z*e*mu*n*E*E
     }
 
@@ -3040,9 +3047,13 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
       m_fluid_scratch1.copy(m_particle_scratch1);                                           // Copy D*n to fluid realm
       m_amr->compute_gradient(m_fluid_scratchD, m_fluid_scratch1, m_fluid_realm, m_phase);  // scratchD = grad(D*n)
       data_ops::scale(m_fluid_scratchD, -1.0);                                              // scratchD = -grad(D*n)
-      data_ops::dot_prod(m_fluid_scratch1,  m_fluid_scratchD, m_fluid_E);                   // scratch1 = -E*grad(D*n)
+      data_ops::dot_prod(m_fluid_scratch1,  m_fluid_scratchD, m_fluid_E);                   // scratch1 = -E.dot.grad(D*n)
       data_ops::scale(m_fluid_scratch1, Abs(q)*units::s_Qe);                                // scratch1 = -Z*e*E*grad(D*n)
-      data_ops::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);                                 // source += -Z*e*E*grad(D*n)
+
+      m_amr->average_down(m_fluid_scratch1, m_fluid_realm, m_phase);
+      m_amr->interp_ghost(m_fluid_scratch1, m_fluid_realm, m_phase);
+      
+      data_ops::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);                                 // source  += -Z*e*E*grad(D*n)
     }
   }
 }

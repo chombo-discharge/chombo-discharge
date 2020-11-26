@@ -108,7 +108,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   std::pair<int, Real> impact_loss     = std::make_pair(m_electron_idx, -13.0);  //  14eV per reaction of this type.
   std::pair<int, Real> friction_loss   = std::make_pair(m_electron_idx, -1.0);   // -12eV per reaction of this type.
   std::pair<int, Real> photo_loss      = std::make_pair(m_electron_idx,  -15.0); //  15 eV per photoexcitation
-  std::pair<int, Real> photo_gain      = std::make_pair(m_electron_idx,  0.0);   //  Energy of appearing photoelectrons
+  std::pair<int, Real> photo_gain      = std::make_pair(m_electron_idx,  2.0);   //  Energy of appearing photoelectrons
 
   // Particle-particle reactions
   m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}, {impact_loss}));
@@ -145,6 +145,10 @@ void ito_plasma_air3_lea::read_tables(){
   // LFA table for Townsed coefficient
   m_tables["alpha_lfa"].scale_x(m_N*units::s_Td);
   m_tables["alpha_lfa"].scale_y(m_N);
+}
+
+Real ito_plasma_air3_lea::compute_dt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const {
+  return 1.E99;
 }
 
 Real ito_plasma_air3_lea::compute_alpha(const RealVect a_E) const {
