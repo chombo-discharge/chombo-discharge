@@ -1,7 +1,7 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-air3_lea.potential = -30E3
+air3_lea.potential = -80E3
 air3_lea.basename  = pout
 
 # ====================================================================================================
@@ -11,7 +11,7 @@ amr_mesh.lo_corner       = -2.5E-2 -2.5E-2 -4E-2
 amr_mesh.hi_corner       =  2.5E-2 2.5E-2 1E-2
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 5           # Maximum amr depth
+amr_mesh.max_amr_depth   = 4           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
@@ -208,13 +208,13 @@ vessel.live_shroom     = false          # Mushroom is live or not
 # ==================================================================================================== 
 ito_plasma_godunov.verbosity      = -1            # Verbosity
 ito_plasma_godunov.min_dt         = 0.E-10        # Minimum dt
-ito_plasma_godunov.max_dt         = 1.E+10        # Maximum dt
+ito_plasma_godunov.max_dt         = 1.E-10        # Maximum dt
 ito_plasma_godunov.particle_realm = particle      # Particle realm. Default is primal
 ito_plasma_godunov.load_balance   = true          # Load balance or not
 ito_plasma_godunov.load_ppc       = 1.0           # Load balance or not
 ito_plasma_godunov.load_index     = 0             # Load balance or not
 ito_plasma_godunov.nwo_reactions  = true          # Load balance or not		
-ito_plasma_godunov.max_cells_hop  = 0.125           # Maximum cells to move in one time step
+ito_plasma_godunov.max_cells_hop  = 1.0           # Maximum cells to move in one time step
 ito_plasma_godunov.which_dt       = advection     # 'advection', 'diffusion', or 'advection_diffusion'
 ito_plasma_godunov.ppc            = 32            # Superparticle number of cells
 ito_plasma_godunov.merge_interval = 1             # How often to make superparticles

@@ -2022,6 +2022,8 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
   Vector<Real>      meanEnergies(num_ito_species);
   Vector<Real>      energySources(num_ito_species);
 
+  constexpr int N = 10;
+
   // Regular cells
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
@@ -2037,7 +2039,6 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
       for (int i = 0; i < num_ito_species; i++){
 	particles[i]     = llround(a_particlesPerCell.getSingleValuedFAB()(iv, i));
 	meanEnergies[i]  = a_meanParticleEnergies.getSingleValuedFAB()(iv,i);
-	//	energySources[i] = a_EdotJ.getSingleValuedFAB()(iv, i)*dV/units::s_Qe;
 	energySources[i] = a_EdotJ.getSingleValuedFAB()(iv, i)*dV/units::s_Qe;
       }
 
@@ -2046,7 +2047,9 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
       }
 	   
       // Do the physics advance
-      m_physics->advance_particles(particles, newPhotons, meanEnergies, energySources, a_dt, E, a_dx, kappa);
+      for (int i = 0; i < N; i++){
+	m_physics->advance_particles(particles, newPhotons, meanEnergies, energySources, a_dt/N, E, a_dx, kappa);
+      }
 
       // Set result
       for (int i = 0; i < num_ito_species; i++){
@@ -2082,7 +2085,10 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
     }
 
     // Do the physics advance
-    m_physics->advance_particles(particles, newPhotons, meanEnergies, energySources, a_dt, E, a_dx, kappa);
+    for (int i = 0; i < N; i++){
+      m_physics->advance_particles(particles, newPhotons, meanEnergies, energySources, a_dt/N, E, a_dx, kappa);
+    }
+
 
     // Set result
     for (int i = 0; i < num_ito_species; i++){

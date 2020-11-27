@@ -102,11 +102,11 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   positives.clear();
   negatives.clear();
   
-  this->draw_sphere_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight, 2.0, 0.0);
+  this->draw_sphere_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight, 20.0, 0.0);
 
   // Electron loss function
   std::pair<int, Real> impact_loss     = std::make_pair(m_electron_idx, -13.0);  //  14eV per reaction of this type.
-  std::pair<int, Real> friction_loss   = std::make_pair(m_electron_idx, -1.0);   // -12eV per reaction of this type.
+  std::pair<int, Real> friction_loss   = std::make_pair(m_electron_idx, -1.0);   // -1eV per "friction" collision. 
   std::pair<int, Real> photo_loss      = std::make_pair(m_electron_idx,  -15.0); //  15 eV per photoexcitation
   std::pair<int, Real> photo_gain      = std::make_pair(m_electron_idx,  2.0);   //  Energy of appearing photoelectrons
 
@@ -115,7 +115,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
   m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
   m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
-  m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
+  m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}, {photo_loss}));
   m_reactions.emplace("electron_scattering",    ito_reaction({m_electron_idx}, {m_electron_idx}, {friction_loss}));
 
   // Photo-reactions
@@ -216,11 +216,13 @@ ito_plasma_air3_lea::electron::~electron(){
 }
 
 Real ito_plasma_air3_lea::electron::mobility(const Real a_energy) const {
-  return m_mobility.get_entry(a_energy);
+  const Real energy = Max(a_energy, 30.0);
+  return m_mobility.get_entry(energy);
 }
 
 Real ito_plasma_air3_lea::electron::diffusion(const Real a_energy) const {
-  return m_diffusion.get_entry(a_energy);
+  const Real energy = Max(a_energy, 30.0);
+  return m_diffusion.get_entry(energy);
 }
 
 ito_plasma_air3_lea::positive::positive(){

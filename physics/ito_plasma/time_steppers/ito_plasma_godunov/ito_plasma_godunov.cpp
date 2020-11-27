@@ -268,7 +268,6 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   // If we are using the LEA, we must compute the Ohmic heating term. This must be done
   // BEFORE sorting the particles per cell. 
   if(m_physics->get_coupling() == ito_plasma_physics::coupling::LEA){
-    //    this->compute_EdotJ_source();
     this->compute_EdotJ_source(a_dt);
   }
   
@@ -989,8 +988,9 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   // 4. Recompute velocities with the new electric field, then do the actual semi-implicit Euler-Maruyama update.
   MPI_Barrier(Chombo_MPI::comm);
   velocityTime -= MPI_Wtime();
-  this->set_ito_velocity_funcs();
-  m_ito->interpolate_velocities();
+  // this->set_ito_velocity_funcs();
+  // m_ito->interpolate_velocities();
+  this->compute_ito_velocities();
   velocityTime += MPI_Wtime();
 
   MPI_Barrier(Chombo_MPI::comm);

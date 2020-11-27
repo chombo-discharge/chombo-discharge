@@ -1080,24 +1080,21 @@ void ito_plasma_physics::tau_step(Vector<long long>&      a_particles,
 
     // Jump state and energy
     a_reactions[i]->jump_state(a_particles, a_newPhotons, num_reactions);    // 
-    a_reactions[i]->jump_energy(energies,   a_mean_energies, num_reactions); // Not necessary for LFA, but not expensive either....
+    a_reactions[i]->jump_energy(energies,   a_mean_energies, a_sources, num_reactions, a_dt);
   }
 
   // Recompute mean energies afterwards.
   const Real dV = a_kappa*pow(a_dx, SpaceDim);
 
-  constexpr long long zero = 0;
   for (int i = 0; i < a_particles.size(); i++){
-    if(a_particles[i] > zero){
-      a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*a_dt)/(1.0*a_particles[i]));
+    if(a_particles[i] > 0LL){
+      a_mean_energies[i] = Max(0.0, energies[i]/(1.0*a_particles[i]));
     }
     else{
       a_mean_energies[i] = 0.0;
     }
   }
 }
-
-  
 
 inline
 void ito_plasma_physics::tau_step(Vector<long long>&  a_particles,
@@ -1226,7 +1223,7 @@ void ito_plasma_physics::ssa_step(Vector<long long>&      a_particles,
 
   const int M = a_reactions.size();
   
-  constexpr long long one = 1;
+  constexpr long long one = 1LL;
   
   if(M > 0){
     
@@ -1235,7 +1232,6 @@ void ito_plasma_physics::ssa_step(Vector<long long>&      a_particles,
     for (int i = 0; i < a_particles.size(); i++){
       energies[i] *= a_particles[i];
     }
-
 
     // RNG. 
     const Real u2 = m_udist01(m_rng);
@@ -1251,14 +1247,13 @@ void ito_plasma_physics::ssa_step(Vector<long long>&      a_particles,
 
     // Jump state and energy
     a_reactions[r]->jump_state(a_particles, a_newPhotons,    one);
-    a_reactions[r]->jump_energy(energies,   a_mean_energies, one); 
+    a_reactions[r]->jump_energy(energies, a_mean_energies, a_sources, one, a_dt); 
 
 
     // Recompute mean energies afterwards.
-    const Real dV = a_kappa*pow(a_dx, SpaceDim);
     for (int i = 0; i < a_particles.size(); i++){
-      if(a_particles[i] > 0){
-	a_mean_energies[i] = Max(0.0, (energies[i] + a_sources[i]*a_dt)/(a_particles[i]));
+      if(a_particles[i] > 0LL){
+	a_mean_energies[i] = Max(0.0, energies[i]/(1.0*a_particles[i]));
       }
       else{
 	a_mean_energies[i] = 0.0;
