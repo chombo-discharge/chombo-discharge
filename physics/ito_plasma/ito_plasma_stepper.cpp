@@ -2022,7 +2022,7 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
   Vector<Real>      meanEnergies(num_ito_species);
   Vector<Real>      energySources(num_ito_species);
 
-  constexpr int N = 10;
+  constexpr int N = 1;
 
   // Regular cells
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
