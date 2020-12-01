@@ -316,6 +316,37 @@ inline void FORTRAN_NAME(inlineINVERT, inlineINVERT)(
 }
 #endif  // GUARDINVERT 
 
+#ifndef GUARDFILTER_SMOOTH 
+#define GUARDFILTER_SMOOTH 
+// Prototype for Fortran procedure filter_smooth ...
+//
+void FORTRAN_NAME( FILTER_SMOOTH ,filter_smooth )(
+      CHFp_FRA1(lhs)
+      ,CHFp_CONST_FRA1(rhs)
+      ,CHFp_CONST_INT(stride)
+      ,CHFp_CONST_REAL(alpha)
+      ,CHFp_BOX(box) );
+
+#define FORT_FILTER_SMOOTH FORTRAN_NAME( inlineFILTER_SMOOTH, inlineFILTER_SMOOTH)
+#define FORTNT_FILTER_SMOOTH FORTRAN_NAME( FILTER_SMOOTH, filter_smooth)
+
+inline void FORTRAN_NAME(inlineFILTER_SMOOTH, inlineFILTER_SMOOTH)(
+      CHFp_FRA1(lhs)
+      ,CHFp_CONST_FRA1(rhs)
+      ,CHFp_CONST_INT(stride)
+      ,CHFp_CONST_REAL(alpha)
+      ,CHFp_BOX(box) )
+{
+ CH_TIMELEAF("FORT_FILTER_SMOOTH");
+ FORTRAN_NAME( FILTER_SMOOTH ,filter_smooth )(
+      CHFt_FRA1(lhs)
+      ,CHFt_CONST_FRA1(rhs)
+      ,CHFt_CONST_INT(stride)
+      ,CHFt_CONST_REAL(alpha)
+      ,CHFt_BOX(box) );
+}
+#endif  // GUARDFILTER_SMOOTH 
+
 }
 
 #endif

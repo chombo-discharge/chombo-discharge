@@ -1605,6 +1605,43 @@ void data_ops::shift_corners(Vector<RealVect>& a_corners, const RealVect& a_dist
   }
 }
 
+void data_ops::filter_smooth(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_stride, const Real a_alpha){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::filter_smooth(*a_lhs[lvl], *a_lhs[lvl], a_stride, a_alpha);
+  }
+}
+
+void data_ops::filter_smooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_stride, const Real a_alpha){
+
+  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
+  const IntVect ghostVec       = a_lhs.ghostVect();
+  const int ncomp              = a_lhs.nComp();
+
+  // Dummy check. 
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if(ghostVec[dir] < a_stride) MayDay::Abort("data_ops::filter_smooth - stride is too large!");
+  }
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& lhs       = a_lhs[dit()];
+    const EBCellFAB& rhs = a_rhs[dit()];
+    
+    const Box box  = dbl[dit()];
+
+
+    BaseFab<Real>&       lhs_fab = lhs.getSingleValuedFAB();
+    const BaseFab<Real>& rhs_fab = rhs.getSingleValuedFAB();
+
+    for (int icomp = 0; icomp < ncomp; icomp++){
+      FORT_FILTER_SMOOTH(CHF_FRA1(lhs_fab, icomp),
+			 CHF_CONST_FRA1(rhs_fab, icomp),
+			 CHF_CONST_INT(a_stride),
+			 CHF_CONST_REAL(a_alpha),
+			 CHF_BOX(box));
+    }
+  }
+}
+
 void data_ops::compute_particle_weights(unsigned long long&      a_weight,
 					unsigned long long&      a_num,
 					unsigned long long&      a_remainder,

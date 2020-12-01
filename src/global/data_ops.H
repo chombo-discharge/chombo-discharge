@@ -256,6 +256,10 @@ public:
 
   static void shift_corners(Vector<RealVect>& a_corners, const RealVect& a_distance);
 
+  static void filter_smooth(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_stride, const Real a_alpha);
+  
+  static void filter_smooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_stride, const Real a_alpha);
+
   static void compute_particle_weights(unsigned long long&      a_weight,
 				       unsigned long long&      a_num,
 				       unsigned long long&      a_remainder,

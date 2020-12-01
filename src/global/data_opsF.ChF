@@ -314,3 +314,29 @@ c Compute the Laplacian in the numerator (including cross-derivatives)
       return
       
       end
+
+      subroutine filter_smooth(
+     &     chf_fra1[lhs],
+     &     chf_const_fra1[rhs],
+     &     chf_const_int[stride],     
+     &     chf_const_real[alpha],
+     &     chf_box[box])
+     
+      integer dir
+      integer chf_ddecl[i;j;k]
+      integer chf_ddecl[ioff;joff;koff]
+      
+      real beta
+
+      beta = half*(1.0 - alpha)
+      do dir = 0, CH_SPACEDIM-1
+         chf_dterm[ioff = stride*chf_id(0, dir);
+                   joff = stride*chf_id(1, dir);
+                   koff = stride*chf_id(2, dir)]
+         chf_multido[box;i;j;k]
+            lhs(chf_ix[i;j;k]) = alpha*rhs(chf_ix[i;j;k]) + beta*(rhs(chf_ix[i+ioff;j+joff;k+koff]) + rhs(chf_ix[i-ioff;j-joff;k-koff]))
+         chf_enddo	 
+      enddo
+      return
+
+      end
