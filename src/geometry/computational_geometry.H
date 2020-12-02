@@ -25,6 +25,7 @@
 enum class EB_representation {
   implicit_function,
   discrete,
+  voxel,
   level_set
 };
 

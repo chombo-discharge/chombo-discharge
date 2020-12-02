@@ -234,12 +234,12 @@ public:
     @brief Remove particles that are inside the EB
     @details Calls the other version with m_particles
   */
-  virtual void remove_eb_particles(const EB_representation a_representation);
+  virtual void remove_eb_particles(const EB_representation a_representation, const Real a_tol = 0.0);
 
   /*!
     @brief Remove particles that are inside the EB
   */
-  virtual void remove_eb_particles(particle_container<ito_particle>& a_particles, const EB_representation a_representation);
+  virtual void remove_eb_particles(particle_container<ito_particle>& a_particles, const EB_representation a_representation, const Real a_tol = 0.0);
 
   /*!
     @brief Do boundary intersection tests
@@ -1087,12 +1087,17 @@ protected:
   /*!
     @brief Remove particles that are inside the EB using the implicit function
   */
-  void remove_eb_particles_if(particle_container<ito_particle>& a_particles);
+  void remove_eb_particles_if(particle_container<ito_particle>& a_particles, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB using the discrete information
   */
   void remove_eb_particles_discrete(particle_container<ito_particle>& a_particles);
+  
+  /*!
+    @brief Remove particles only in covered cells. 
+  */
+  void remove_eb_particles_voxels(particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Do boundary intersection tests with an implicit function

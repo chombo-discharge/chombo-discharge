@@ -228,7 +228,7 @@ ito_plasma_godunov.filter_1       = 0.5 1 4 true   # alpha = 0.5, stride = 1, N 
 ito_plasma_air3.blob_radius     = 1E-3          # Blob radius
 ito_plasma_air3.blob_center     = 0 0 0         # Blob center
 ito_plasma_air3.seed            = 0             # RNG seed, < 0 gives a random seed (for each rank)
-ito_plasma_air3.num_particles   = 1000000       # Number of initial particles
+ito_plasma_air3.num_particles   = 10000000       # Number of initial particles
 ito_plasma_air3.particle_weight = 1             # Initial particle weights
 
 # For controlling the time step
