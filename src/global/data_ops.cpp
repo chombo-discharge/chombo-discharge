@@ -1607,7 +1607,7 @@ void data_ops::shift_corners(Vector<RealVect>& a_corners, const RealVect& a_dist
 
 void data_ops::filter_smooth(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_stride, const Real a_alpha){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::filter_smooth(*a_lhs[lvl], *a_lhs[lvl], a_stride, a_alpha);
+    data_ops::filter_smooth(*a_lhs[lvl], *a_rhs[lvl], a_stride, a_alpha);
   }
 }
 
@@ -1638,6 +1638,19 @@ void data_ops::filter_smooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCell
 			 CHF_CONST_INT(a_stride),
 			 CHF_CONST_REAL(a_alpha),
 			 CHF_BOX(box));
+    }
+
+    // No filtering of irregular cells. 
+    const EBISBox& ebisbox = lhs.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      for (int icomp = 0; icomp < ncomp; icomp++){
+	lhs(vof, icomp) = rhs(vof, icomp);
+      }
     }
   }
 }

@@ -1,7 +1,7 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-air3.potential = -60E3
+air3.potential = 40E3
 air3.basename  = pout
 
 # ====================================================================================================
@@ -40,7 +40,7 @@ driver.geometry_generation             = plasmac       # Grid generation method,
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
 driver.plot_interval                   = 1             # Plot interval
-driver.regrid_interval                 = 5             # Regrid interval
+driver.regrid_interval                 = 5            # Regrid interval
 driver.checkpoint_interval             = 5             # Checkpoint interval
 driver.write_regrid_files              = false         # Write regrid files or not. 
 driver.initial_regrids                 = 0             # Number of initial regrids
@@ -215,9 +215,11 @@ ito_plasma_godunov.merge_interval = 1              # How often to make superpart
 ito_plasma_godunov.relax_factor   = 9999.5         # Factor in front of relaxation time	
 ito_plasma_godunov.regrid_super   = false          # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = euler_maruyama # 'euler', 'euler_maruyama', 'midpoint'
-ito_plasma_godunov.profile        = true           # Profile advance or not
+ito_plasma_godunov.profile        = false          # Profile advance or not
 ito_plasma_godunov.pvr_buffer     = 0              # PVR buffer for particles (overrides ito and mc_photo)
 ito_plasma_godunov.halo_buffer    = 1              # Halo buffer for particles (overrides ito and mc_photo)
+ito_plasma_godunov.filter_rho     = true           # Filter space charge or not
+ito_plasma_godunov.filter_1       = 0.5 1 1 true   # alpha = 0.5, stride = 1, N = 1, Compensation step = true.
 
 # ====================================================================================================
 # ITO_PLASMA_AIR3 CLASS OPTIONS

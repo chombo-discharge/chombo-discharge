@@ -671,6 +671,45 @@ void ito_plasma_stepper::print_timer_tail(){
   pout() << "--------------------------------------------------------------------------------------------------------\n";
 }
 
+void ito_plasma_stepper::parse_filters(){
+  CH_TIME("ito_plasma_stepper::compute_dt");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::parse_filters" << endl;
+  }
+
+  ParmParse pp(m_name.c_str());
+
+  // Build filters. Always uses a compensation step.
+  for (int i = 0; i < 100; i++){
+
+    const int ndigits = round(log10(1.0 + 1.0*i));
+    char* cstr = new char[1+ndigits];
+    sprintf(cstr, "%d", 1 + i);
+
+    const std::string str = "filter_" + std::string(cstr);
+
+    if(pp.contains(str.c_str())){
+      Real alpha;
+      int stride;
+      int N;
+      bool comp;
+    
+      pp.get(str.c_str(), alpha,    0);
+      pp.get(str.c_str(), stride,   1);
+      pp.get(str.c_str(), N,        2);
+      pp.get(str.c_str(), comp,     3);
+
+      m_filters.emplace_front(alpha, stride, N);
+      if(comp){
+	const Real alphaC = (N+1) - N*alpha;
+	m_filters.emplace_front(alphaC, stride, 1);
+      }
+    }
+
+    delete cstr;
+  }
+}
+
 void ito_plasma_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
   CH_TIME("ito_plasma_stepper::compute_dt");
   if(m_verbosity > 5){
@@ -997,6 +1036,26 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
 
   m_amr->average_down(a_rho, m_fluid_realm);
   m_amr->interp_ghost(a_rho, m_fluid_realm);
+
+
+  // Add potential filters.
+  if(m_filter_rho){
+    for (const auto& f : m_filters){
+      const Real alpha  = std::get<0>(f);
+      const int stride  = std::get<1>(f);
+      const int num_app = std::get<2>(f);
+
+      for (int iapp = 0; iapp < num_app; iapp++){
+	data_ops::set_value(m_fluid_scratch1, 0.0);
+	m_fluid_scratch1.copy(rhoPhase);
+	data_ops::set_covered_value(m_fluid_scratch1, 0.0, 0);
+	data_ops::filter_smooth(rhoPhase, m_fluid_scratch1, stride, alpha);
+
+	m_amr->average_down(rhoPhase, m_fluid_realm, m_phase);
+	m_amr->interp_ghost(rhoPhase, m_fluid_realm, m_phase);
+      }
+    }
+  }
 
   // Interpolate to centroids
   m_amr->interpolate_to_centroids(rhoPhase, m_fluid_realm, m_phase);

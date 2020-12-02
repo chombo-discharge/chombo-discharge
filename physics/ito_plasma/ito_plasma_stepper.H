@@ -318,11 +318,15 @@ namespace physics {
       RefCountedPtr<poisson_solver> m_poisson;
       RefCountedPtr<sigma_solver> m_sigma;
 
+      // Filters that can be applied. 
+      std::deque<std::tuple<Real, int, int> > m_filters;
+
       Real (*m_potential)(const Real a_time);
 
       bool m_regrid_superparticles;
       bool m_load_balance;
-      bool m_nwo_reactions; // For switching between the old and new reaction algorithms. 
+      bool m_nwo_reactions; // For switching between the old and new reaction algorithms.
+      bool m_filter_rho;
       
       int m_ppc;
       int m_halo_buffer;
@@ -355,8 +359,6 @@ namespace physics {
       EBAMRCellData m_fluid_ypc;    // For holding the number of generated photons per cell on the fluid realm.
       EBAMRCellData m_fluid_eps;    // For holding the mean energy on the particle realm
 
-
-
       // Storage for the electric field on 
       EBAMRCellData m_fluid_E;
       EBAMRCellData m_particle_E;
@@ -364,6 +366,9 @@ namespace physics {
       // Storage for energy source terms
       Vector<EBAMRCellData> m_energy_sources;
       EBAMRCellData m_EdotJ;
+
+      // For parsing filters
+      void parse_filters();
 
       // Set the particle buffers
       void set_particle_buffers();

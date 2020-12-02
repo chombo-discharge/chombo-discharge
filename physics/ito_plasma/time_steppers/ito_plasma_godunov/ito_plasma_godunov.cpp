@@ -135,8 +135,9 @@ void ito_plasma_godunov::parse_options() {
   pp.get("max_dt",         m_max_dt);
   pp.get("halo_buffer",    m_halo_buffer);
   pp.get("pvr_buffer",     m_pvr_buffer);
+  pp.get("filter_rho",     m_filter_rho);
 
-
+  // Get algorithm
   if(str == "euler_maruyama"){
     m_algorithm = which_algorithm::euler_maruyama;
   }
@@ -147,7 +148,7 @@ void ito_plasma_godunov::parse_options() {
     MayDay::Abort("ito_plasma_godunov::parse_options - unknown algorithm requested");
   }
 
-
+  // Dt limitation
   pp.get("which_dt", str);
   if(str == "advection"){
     m_whichDt = which_dt::advection;
@@ -162,8 +163,13 @@ void ito_plasma_godunov::parse_options() {
     MayDay::Abort("ito_plasma_godunov::parse_options - unknown 'which_dt' requested");
   }
 
+  // Parse filterse
+  this->parse_filters();
+  
+
   // Setup runtime storage (requirements change with algorithm)
   this->setup_runtime_storage();
+  
 }
 
 void ito_plasma_godunov::allocate_internals(){
