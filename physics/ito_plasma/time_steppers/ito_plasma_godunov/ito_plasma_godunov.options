@@ -21,5 +21,5 @@ ito_plasma_godunov.diffu_samples  = 64             # Maximum number of diffusion
 ito_plasma_godunov.profile        = true           # Profile advance or not
 ito_plasma_godunov.pvr_buffer     = 0              # PVR buffer for particles (overrides ito and mc_photo)
 ito_plasma_godunov.halo_buffer    = 1              # Halo buffer for particles (overrides ito and mc_photo)
-ito_plasma_godunov.filter_rho     = false          # Filter space charge or not
+ito_plasma_godunov.filter_rho     = false          # Filter space charge or not. Don't use.
 ito_plasma_godunov.filter_1       = 0.5 1 4 true   # alpha = 0.5, stride = 1, N = 4, compensation = true. 
