@@ -69,6 +69,7 @@ namespace physics {
       Real m_relax_factor; // Factor for relaxation time
       Real m_avg_cfl;      // Average CFL number
       Real m_prevDt;
+      Real m_eb_tolerance; // Tolerance for EB particle removal. 
 
       which_algorithm m_algorithm;
       which_dt        m_whichDt;

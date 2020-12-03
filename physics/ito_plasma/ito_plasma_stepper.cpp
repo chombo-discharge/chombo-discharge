@@ -1310,7 +1310,7 @@ void ito_plasma_stepper::intersect_particles(const which_particles a_which_parti
   }  
 }
 
-void ito_plasma_stepper::remove_eb_particles(const which_particles a_which_particles, const EB_representation a_representation){
+void ito_plasma_stepper::remove_eb_particles(const which_particles a_which_particles, const EB_representation a_representation, const Real a_tolerance){
   CH_TIME("ito_plasma_stepper::remove_eb_particles( which_particles)");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::remove_eb_particles( which_particles)" << endl;
@@ -1328,28 +1328,28 @@ void ito_plasma_stepper::remove_eb_particles(const which_particles a_which_parti
 
     switch(a_which_particles) {
     case which_particles::all:
-      solver->remove_eb_particles(a_representation);
+      solver->remove_eb_particles(a_representation, a_tolerance);
       break;
     case which_particles::all_mobile:
-      if(mobile) solver->remove_eb_particles(a_representation);
+      if(mobile) solver->remove_eb_particles(a_representation, a_tolerance);
       break;
     case which_particles::all_diffusive:
-      if(diffusive) solver->remove_eb_particles(a_representation);
+      if(diffusive) solver->remove_eb_particles(a_representation, a_tolerance);
       break;
     case which_particles::charged_mobile:
-      if(charged && mobile) solver->remove_eb_particles(a_representation);
+      if(charged && mobile) solver->remove_eb_particles(a_representation, a_tolerance);
       break;
     case which_particles::charged_diffusive:
-      if(charged && diffusive) solver->remove_eb_particles(a_representation);
+      if(charged && diffusive) solver->remove_eb_particles(a_representation, a_tolerance);
       break;
     case which_particles::all_mobile_or_diffusive:
-      if(mobile || diffusive) solver->remove_eb_particles(a_representation);
+      if(mobile || diffusive) solver->remove_eb_particles(a_representation, a_tolerance);
       break;
     case which_particles::charged_and_mobile_or_diffusive:
-      if(charged && (mobile || diffusive)) solver->remove_eb_particles(a_representation);
+      if(charged && (mobile || diffusive)) solver->remove_eb_particles(a_representation, a_tolerance);
       break;
     case which_particles::stationary:
-      if(!mobile && !diffusive) solver->remove_eb_particles(a_representation);
+      if(!mobile && !diffusive) solver->remove_eb_particles(a_representation, a_tolerance);
       break;
     default:
       MayDay::Abort("ito_plasma_stepper::remove_eb_particles_particles(which particles) - logic bust");
@@ -2289,7 +2289,7 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
       
       // Clear the bulk photons - they have now been absorbed on the mesh. 
       for (int i = 0; i < num_rte_species; i++){
-	bulkPhotons[i]->clear();
+	//	bulkPhotons[i]->clear();
       }
     }
   }
@@ -2307,9 +2307,9 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
 
     RealVect lo            = -0.5*RealVect::Unit;
     RealVect hi            = 0.5*RealVect::Unit;
-    if(kappa < 1.0){
-      data_ops::compute_min_valid_box(lo, hi, bndryNormal, bndryCentroid);
-    }
+    // if(kappa < 1.0){
+    //   data_ops::compute_min_valid_box(lo, hi, bndryNormal, bndryCentroid);
+    // }
 
     Vector<List<ito_particle>* > particles(num_ito_species);
     Vector<List<photon>* >       bulkPhotons(num_rte_species);
@@ -2349,7 +2349,7 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
       
     // Clear the bulk photons - they have now been absorbed on the mesh. 
     for (int i = 0; i < num_rte_species; i++){
-      bulkPhotons[i]->clear();
+      //      bulkPhotons[i]->clear();
     }
   }
 }

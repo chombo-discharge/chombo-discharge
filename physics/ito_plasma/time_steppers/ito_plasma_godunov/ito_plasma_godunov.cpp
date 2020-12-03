@@ -136,6 +136,7 @@ void ito_plasma_godunov::parse_options() {
   pp.get("halo_buffer",    m_halo_buffer);
   pp.get("pvr_buffer",     m_pvr_buffer);
   pp.get("filter_rho",     m_filter_rho);
+  pp.get("eb_tolerance",   m_eb_tolerance);
 
   // Get algorithm
   if(str == "euler_maruyama"){
@@ -748,7 +749,7 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
   m_amr->interp_ghost_pwl(a_conductivity, m_fluid_realm, m_phase);
 
   // See if this helps....
-  m_amr->interpolate_to_centroids(a_conductivity, m_fluid_realm, m_phase);
+  //  m_amr->interpolate_to_centroids(a_conductivity, m_fluid_realm, m_phase);
 
 }
 
@@ -763,7 +764,7 @@ void ito_plasma_godunov::compute_face_conductivity(){
 
   // This code extrapolates the conductivity to the EB. This should actually be the EB centroid but since the stencils
   // for EB extrapolation can be a bit nasty (e.g. negative weights), we do the centroid instead and take that as an approximation.
-#if 0
+#if 1
   const irreg_amr_stencil<centroid_interp>& ebsten = m_amr->get_centroid_interp_stencils(m_fluid_realm, m_phase);
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     ebsten.apply(m_conduct_eb, m_conduct_cell, lvl);
@@ -1013,7 +1014,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   MPI_Barrier(Chombo_MPI::comm);
   isectTime -= MPI_Wtime();
   this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function);
-  this->remove_eb_particles(which_particles::all_mobile_or_diffusive, EB_representation::discrete);         
+  this->remove_eb_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, m_eb_tolerance);
   isectTime += MPI_Wtime();
 
   // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
@@ -1222,7 +1223,7 @@ void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
 
   // Do particle-boundary intersection. 
   this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function);
-  this->remove_eb_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function);
+  this->remove_eb_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, m_eb_tolerance);
 
   // Finally, deposit particles. 
   this->deposit_particles(which_particles::all_mobile_or_diffusive);

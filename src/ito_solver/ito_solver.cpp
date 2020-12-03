@@ -508,8 +508,7 @@ void ito_solver::initial_data(){
 
   // Add particles, remove the ones that are inside the EB, and then depsit
   m_particles.add_particles(m_species->get_initial_particles()); 
-  //  this->remove_eb_particles(EB_representation::voxel);
-  this->remove_eb_particles(EB_representation::implicit_function, 1.0);
+  this->remove_eb_particles(EB_representation::implicit_function, 0.0);
   this->deposit_particles(m_state, m_particles, m_deposition);
 
 #if 0 // Test code
@@ -2125,7 +2124,7 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
     pout() << m_name + "::interpolate_diffusion" << endl;
   }
 
-  const bool force_ngp_irreg = true;
+  const bool force_ngp_irreg = false;
 
   if(m_diffusive){
     const EBCellFAB& dco_cell   = (*m_diffco_cell[a_lvl])[a_dit];
