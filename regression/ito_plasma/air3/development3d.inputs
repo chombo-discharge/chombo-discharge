@@ -43,7 +43,7 @@ driver.plot_interval                   = 1             # Plot interval
 driver.regrid_interval                 = 5             # Regrid interval
 driver.checkpoint_interval             = 5             # Checkpoint interval
 driver.write_regrid_files              = false         # Write regrid files or not. 
-driver.initial_regrids                 = 1             # Number of initial regrids
+driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 50.E-9         # Stop time
 driver.max_steps                       = 100          # Maximum number of steps
@@ -201,8 +201,8 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1             # Verbosity
-ito_plasma_godunov.min_dt         = 1.E-10         # Minimum dt
-ito_plasma_godunov.max_dt         = 1.E-10         # Maximum dt
+ito_plasma_godunov.min_dt         = 1.E-12         # Minimum dt
+ito_plasma_godunov.max_dt         = 1.E-12         # Maximum dt
 ito_plasma_godunov.particle_realm = primal         # Particle realm. Default is primal
 ito_plasma_godunov.load_balance   = false          # Load balance or not
 ito_plasma_godunov.load_index     = -1             # Which species to use for load balancing (-1 => all)
@@ -216,7 +216,7 @@ ito_plasma_godunov.merge_interval = 1              # How often to make superpart
 ito_plasma_godunov.relax_factor   = 9999.5         # Factor in front of relaxation time	
 ito_plasma_godunov.regrid_super   = false          # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = euler_maruyama # 'euler', 'euler_maruyama', 'midpoint'
-ito_plasma_godunov.profile        = false          # Profile advance or not
+ito_plasma_godunov.profile        = true           # Profile advance or not
 ito_plasma_godunov.pvr_buffer     = 0              # PVR buffer for particles (overrides ito and mc_photo)
 ito_plasma_godunov.halo_buffer    = 1              # Halo buffer for particles (overrides ito and mc_photo)
 ito_plasma_godunov.filter_rho     = false          # Filter space charge or not
@@ -226,10 +226,10 @@ ito_plasma_godunov.filter_1       = 0.5 1 4 true   # alpha = 0.5, stride = 1, N 
 # ITO_PLASMA_AIR3 CLASS OPTIONS
 # ====================================================================================================
 # Initial data
-ito_plasma_air3.blob_radius     = 500E-6        # Blob radius
+ito_plasma_air3.blob_radius     = 2.E-3        # Blob radius
 ito_plasma_air3.blob_center     = 0 0 0         # Blob center
 ito_plasma_air3.seed            = 0             # RNG seed, < 0 gives a random seed (for each rank)
-ito_plasma_air3.num_particles   = 100000        # Number of initial particles
+ito_plasma_air3.num_particles   = 10000000        # Number of initial particles
 ito_plasma_air3.particle_weight = 1             # Initial particle weights
 
 # For controlling the time step

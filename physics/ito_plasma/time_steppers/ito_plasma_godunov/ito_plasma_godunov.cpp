@@ -471,16 +471,47 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
     pout() << "ito_plasma_godunov::regrid" << endl;
   }
 
+  Real ito_time = 0.0;
+  Real poisson_time = 0.0;
+  Real rte_time = 0.0;
+  Real sigma_time = 0.0;
+  Real internal_time = 0.0;
+
+  Real solve_time = 0.0;
+  Real super_time = 0.0;
+  Real cleanup_time = 0.0;
+  Real total_time = 0.0;
+
   // Regrid solvers
+  total_time -= MPI_Wtime();
+  ito_time -= MPI_Wtime();
   m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  ito_time += MPI_Wtime();
+  
+  MPI_Barrier(Chombo_MPI::comm);
+  poisson_time -= MPI_Wtime();
   m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  poisson_time += MPI_Wtime();
+
+  MPI_Barrier(Chombo_MPI::comm);
+  rte_time -= MPI_Wtime();
   m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  rte_time += MPI_Wtime();
+
+  MPI_Barrier(Chombo_MPI::comm);
+  sigma_time -= MPI_Wtime();
   m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
+  sigma_time += MPI_Wtime();
 
   // Allocate internal memory for ito_plasma_godunov now....
+  MPI_Barrier(Chombo_MPI::comm);
+  internal_time -= MPI_Wtime();
   this->allocate_internals();
+  internal_time += MPI_Wtime();
 
-  // We need to remap/regrid the stored particles as well. 
+  // We need to remap/regrid the stored particles as well.
+  MPI_Barrier(Chombo_MPI::comm);
+  solve_time -= MPI_Wtime();
   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_particle_realm);
   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
   const Vector<Real>& dx                 = m_amr->get_dx();
@@ -497,24 +528,75 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   this->compute_regrid_rho();
   this->setup_semi_implicit_poisson(m_prevDt);
 
-  const bool converged = this->solve_poisson();
+   const bool converged = this->solve_poisson();
   if(!converged){
     MayDay::Abort("ito_plasma_godunov::regrid - Poisson solve did not converge after regrid!!!");
   }
+  solve_time += MPI_Wtime();
 
-  // Regrid superparticles. 
+  // Regrid superparticles.
+  MPI_Barrier(Chombo_MPI::comm);
+  super_time -= MPI_Wtime();
   if(m_regrid_superparticles){
     m_ito->sort_particles_by_cell();
     m_ito->make_superparticles(m_ppc);
     m_ito->sort_particles_by_patch();
   }
+  super_time += MPI_Wtime();
 
-  // Now let the ito solver deposit its actual particles... In the above it deposit m_rho_dagger_particles. 
+  // Now let the ito solver deposit its actual particles... In the above it deposit m_rho_dagger_particles.
+  MPI_Barrier(Chombo_MPI::comm);
+  cleanup_time -= MPI_Wtime();
   m_ito->deposit_particles();
 
   // Recompute new velocities and diffusion coefficients
   this->compute_ito_velocities();
   this->compute_ito_diffusion();
+  cleanup_time += MPI_Wtime();
+
+  MPI_Barrier(Chombo_MPI::comm);
+  total_time += MPI_Wtime();
+
+  if(m_profile){
+
+    // Convert to %
+    ito_time      *= 100./total_time;
+    poisson_time  *= 100./total_time;
+    rte_time      *= 100./total_time;
+    sigma_time    *= 100./total_time;
+    internal_time *= 100./total_time;
+    solve_time    *= 100./total_time;
+    super_time    *= 100./total_time;
+    cleanup_time  *= 100./total_time;
+
+    // Total percentage/imbalance
+    Real imbalance = 0.0;
+    imbalance += ito_time;
+    imbalance += poisson_time;
+    imbalance += rte_time;
+    imbalance += sigma_time;
+    imbalance += internal_time;
+    imbalance += solve_time;
+    imbalance += super_time;
+    imbalance += cleanup_time;
+    imbalance = 100. - imbalance;
+
+    pout() << "\n";
+    pout() << "ito_plasma_godunov::regrid breakdown:" << endl
+	   << "======================================" << endl;
+    print_timer_head();
+    print_timer_diagnostics(ito_time,      "Ito regrid (%)");
+    print_timer_diagnostics(poisson_time,  "Poisson regrid (%)");
+    print_timer_diagnostics(rte_time,      "RTE regrid (%)");
+    print_timer_diagnostics(sigma_time,    "Sigma regrid (%)");
+    print_timer_diagnostics(internal_time, "Internal regrid (%)");
+    print_timer_diagnostics(solve_time,    "Poisson solve (%)");
+    print_timer_diagnostics(super_time,    "Super time (%)");
+    print_timer_diagnostics(cleanup_time,  "Cleanup (%)");
+    print_timer_diagnostics(total_time,    "Total time (s)");
+    print_timer_tail();
+    pout() << "\n";
+  }
 }
 
 void ito_plasma_godunov::setup_runtime_storage(){
