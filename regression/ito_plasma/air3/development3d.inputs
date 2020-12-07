@@ -84,7 +84,7 @@ poisson_multifluid_gmg.kappa_source = true           # Volume weighted space cha
 
 poisson_multifluid_gmg.auto_tune         = false     # Do some auto-tuning
 poisson_multifluid_gmg.gmg_coarsen       = 4         # Number of coarsenings to use before level aggregation
-poisson_multifluid_gmg.gmg_verbosity     = -1        # GMG verbosity
+poisson_multifluid_gmg.gmg_verbosity     = 10        # GMG verbosity
 poisson_multifluid_gmg.gmg_pre_smooth    = 24        # Number of relaxations in downsweep
 poisson_multifluid_gmg.gmg_post_smooth   = 24        # Number of relaxations in upsweep
 poisson_multifluid_gmg.gmg_bott_smooth   = 24        # NUmber of relaxations before dropping to bottom solver
@@ -201,8 +201,8 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
 ito_plasma_godunov.verbosity      = -1             # Verbosity
-ito_plasma_godunov.min_dt         = 1.E-12         # Minimum dt
-ito_plasma_godunov.max_dt         = 1.E-12         # Maximum dt
+ito_plasma_godunov.min_dt         = 1.E-10         # Minimum dt
+ito_plasma_godunov.max_dt         = 1.E-10         # Maximum dt
 ito_plasma_godunov.particle_realm = primal         # Particle realm. Default is primal
 ito_plasma_godunov.load_balance   = false          # Load balance or not
 ito_plasma_godunov.load_index     = -1             # Which species to use for load balancing (-1 => all)

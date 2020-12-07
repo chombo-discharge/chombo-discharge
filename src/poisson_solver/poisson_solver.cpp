@@ -306,6 +306,8 @@ void poisson_solver::regrid(const int a_lmin, const int a_old_finest, const int 
 	if(lvl <= a_old_finest){
 	  scratch_phase[lvl]->copyTo(*state_phase[lvl]);
 	}
+
+	state_phase[lvl]->exchange();
       }
     }
   }

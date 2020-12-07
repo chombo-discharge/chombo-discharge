@@ -477,6 +477,8 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   Real sigma_time = 0.0;
   Real internal_time = 0.0;
 
+  Real gdnv_time = 0.0;
+  Real setup_time = 0.0;
   Real solve_time = 0.0;
   Real super_time = 0.0;
   Real cleanup_time = 0.0;
@@ -511,7 +513,7 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
 
   // We need to remap/regrid the stored particles as well.
   MPI_Barrier(Chombo_MPI::comm);
-  solve_time -= MPI_Wtime();
+  gdnv_time -= MPI_Wtime();
   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_particle_realm);
   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
   const Vector<Real>& dx                 = m_amr->get_dx();
@@ -522,13 +524,19 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
     m_rho_dagger_particles[idx]->regrid(  grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
     m_conductivity_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   }
+  gdnv_time += MPI_Wtime();
   
-  // Recompute the conductivity and space charge densities. 
+  // Recompute the conductivity and space charge densities.
+  MPI_Barrier(Chombo_MPI::comm);
+  setup_time -= MPI_Wtime();
   this->compute_regrid_conductivity();
   this->compute_regrid_rho();
   this->setup_semi_implicit_poisson(m_prevDt);
+  setup_time += MPI_Wtime();
 
-   const bool converged = this->solve_poisson();
+  MPI_Barrier(Chombo_MPI::comm);
+  solve_time -= MPI_Wtime();
+  const bool converged = this->solve_poisson();
   if(!converged){
     MayDay::Abort("ito_plasma_godunov::regrid - Poisson solve did not converge after regrid!!!");
   }
@@ -565,6 +573,8 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
     rte_time      *= 100./total_time;
     sigma_time    *= 100./total_time;
     internal_time *= 100./total_time;
+    gdnv_time     *= 100./total_time;
+    setup_time    *= 100./total_time;
     solve_time    *= 100./total_time;
     super_time    *= 100./total_time;
     cleanup_time  *= 100./total_time;
@@ -590,6 +600,8 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
     print_timer_diagnostics(rte_time,      "RTE regrid (%)");
     print_timer_diagnostics(sigma_time,    "Sigma regrid (%)");
     print_timer_diagnostics(internal_time, "Internal regrid (%)");
+    print_timer_diagnostics(gdnv_time,     "Gdnv particles (%)");
+    print_timer_diagnostics(setup_time,    "Poisson setup (%)");
     print_timer_diagnostics(solve_time,    "Poisson solve (%)");
     print_timer_diagnostics(super_time,    "Super time (%)");
     print_timer_diagnostics(cleanup_time,  "Cleanup (%)");
