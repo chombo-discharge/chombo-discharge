@@ -192,14 +192,14 @@ namespace physics {
       void compute_ito_diffusion_lea();
 
       // Routines for computing the number of particles per cell. This is done on the particle realm. 
-      void compute_particles_per_cell(EBAMRCellData& a_ppc);
-      void compute_particles_per_cell(LevelData<EBCellFAB>& a_ppc, const int a_level);
-      void compute_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box);
+      void compute_reactive_particles_per_cell(EBAMRCellData& a_ppc);
+      void compute_reactive_particles_per_cell(LevelData<EBCellFAB>& a_ppc, const int a_level);
+      void compute_reactive_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox);
 
       // Routines for computing the mean energy of the particles in grid cells
-      void compute_mean_energies_per_cell(EBAMRCellData& a_mean_energies);
-      void compute_mean_energies_per_cell(LevelData<EBCellFAB>& a_mean_energies, const int a_level);
-      void compute_mean_energies_per_cell(EBCellFAB& a_mean_energies, const int a_level, const DataIndex a_dit, const Box a_box);
+      void compute_reactive_mean_energies_per_cell(EBAMRCellData& a_mean_energies);
+      void compute_reactive_mean_energies_per_cell(LevelData<EBCellFAB>& a_mean_energies, const int a_level);
+      void compute_reactive_mean_energies_per_cell(EBCellFAB& a_mean_energies, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox);
 
       // New routines for chemistry advances. 
       void advance_reaction_network_nwo(const Real a_dt);

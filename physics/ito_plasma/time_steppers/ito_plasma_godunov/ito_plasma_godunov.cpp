@@ -471,6 +471,11 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
     pout() << "ito_plasma_godunov::regrid" << endl;
   }
 
+#if 1 // Test
+  ito_plasma_stepper::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  return;
+#endif
+
   Real ito_time = 0.0;
   Real poisson_time = 0.0;
   Real rte_time = 0.0;
@@ -843,7 +848,7 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
   m_amr->interp_ghost_pwl(a_conductivity, m_fluid_realm, m_phase);
 
   // See if this helps....
-  //  m_amr->interpolate_to_centroids(a_conductivity, m_fluid_realm, m_phase);
+  m_amr->interpolate_to_centroids(a_conductivity, m_fluid_realm, m_phase);
 
 }
 
@@ -858,7 +863,7 @@ void ito_plasma_godunov::compute_face_conductivity(){
 
   // This code extrapolates the conductivity to the EB. This should actually be the EB centroid but since the stencils
   // for EB extrapolation can be a bit nasty (e.g. negative weights), we do the centroid instead and take that as an approximation.
-#if 1
+#if 0
   const irreg_amr_stencil<centroid_interp>& ebsten = m_amr->get_centroid_interp_stencils(m_fluid_realm, m_phase);
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     ebsten.apply(m_conduct_eb, m_conduct_cell, lvl);

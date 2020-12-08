@@ -1860,39 +1860,41 @@ void ito_plasma_stepper::compute_ito_diffusion_lea(){
   }
 }
 
-void ito_plasma_stepper::compute_particles_per_cell(EBAMRCellData& a_ppc){
-  CH_TIME("ito_plasma_stepper::compute_particles_per_cell(ppc)");
+void ito_plasma_stepper::compute_reactive_particles_per_cell(EBAMRCellData& a_ppc){
+  CH_TIME("ito_plasma_stepper::compute_reactive_particles_per_cell(ppc)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_particles_per_cell(ppc)" << endl;
+    pout() << "ito_plasma_stepper::compute_reactive_particles_per_cell(ppc)" << endl;
   }
 
   data_ops::set_value(a_ppc, 0.0);
   
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    this->compute_particles_per_cell(*a_ppc[lvl], lvl);
+    this->compute_reactive_particles_per_cell(*a_ppc[lvl], lvl);
   }
 }
 
-void ito_plasma_stepper::compute_particles_per_cell(LevelData<EBCellFAB>& a_ppc, const int a_level){
-  CH_TIME("ito_plasma_stepper::compute_particles_per_cell(ppc, lvl)");
+void ito_plasma_stepper::compute_reactive_particles_per_cell(LevelData<EBCellFAB>& a_ppc, const int a_level){
+  CH_TIME("ito_plasma_stepper::compute_reactive_particles_per_cell(ppc, lvl)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_particles_per_cell(ppc, lvl)" << endl;
+    pout() << "ito_plasma_stepper::compute_reactive_particles_per_cell(ppc, lvl)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[a_level];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_particle_realm, m_phase)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       
     const Box box = dbl[dit()];
-      
-    this->compute_particles_per_cell(a_ppc[dit()], a_level, dit(), box);
+    const EBISBox& ebisbox = ebisl[dit()];
+    
+    this->compute_reactive_particles_per_cell(a_ppc[dit()], a_level, dit(), box, ebisbox);
   }
 }
 
-void ito_plasma_stepper::compute_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box){
-  CH_TIME("ito_plasma_stepper::compute_particles_per_cell(ppc, lvl, dit, box)");
+void ito_plasma_stepper::compute_reactive_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox){
+  CH_TIME("ito_plasma_stepper::compute_reactive_particles_per_cell(ppc, lvl, dit, box)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_particles_per_cell(ppc, lvl, dit, box)" << endl;
+    pout() << "ito_plasma_stepper::compute_reactive_particles_per_cell(ppc, lvl, dit, box)" << endl;
   }
 
   BaseFab<Real>& numFab = a_ppc.getSingleValuedFAB();
@@ -1904,54 +1906,89 @@ void ito_plasma_stepper::compute_particles_per_cell(EBCellFAB& a_ppc, const int 
     const particle_container<ito_particle>& particles = solver->get_particles();
     const BinFab<ito_particle>& cellParticles         = particles.get_cell_particles(a_level, a_dit);
 
+
+    // Regular cells. 
     for (BoxIterator bit(a_box); bit.ok(); ++bit){
       const IntVect iv = bit();
 
       Real num = 0.0;
+      
+      if(a_ebisbox.isRegular(iv)){
+
+	
+	const List<ito_particle>& listParticles = cellParticles(iv, 0);
+	for (ListIterator<ito_particle> lit(listParticles); lit.ok(); ++lit){
+	  num += lit().mass();
+	}
+      }
+      
+      numFab(iv, idx) = num;
+    }
+
+    // Irregular cells.
+    VoFIterator& vofit = (*m_amr->get_vofit(m_particle_realm, m_phase)[a_level])[a_dit];
+    for (vofit.reset(); vofit.ok(); ++vofit){
+      const VolIndex& vof       = vofit();
+      const IntVect iv          = vof.gridIndex();
+      const RealVect normal     = a_ebisbox.normal(vof);
+      const RealVect ebCentroid = a_ebisbox.bndryCentroid(vof);
+
+      Real num = 0.0;
 
       const List<ito_particle>& listParticles = cellParticles(iv, 0);
+      
       for (ListIterator<ito_particle> lit(listParticles); lit.ok(); ++lit){
-	num += lit().mass();
-      }
+	const RealVect& pos = lit().position();
 
+	if(PolyGeom::dot((pos-ebCentroid), normal) >= 0.0){
+	  num += lit().mass();
+	}
+      }
+      
       numFab(iv, idx) = num;
     }
   }
 }
 
-void ito_plasma_stepper::compute_mean_energies_per_cell(EBAMRCellData& a_mean_energies){
+void ito_plasma_stepper::compute_reactive_mean_energies_per_cell(EBAMRCellData& a_mean_energies){
   CH_TIME("ito_plasma_stepper::compute_mean-energies_per_cell(EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_particles_per_cell(EBAMRCellData)" << endl;
+    pout() << "ito_plasma_stepper::compute_reactive_particles_per_cell(EBAMRCellData)" << endl;
   }
 
   data_ops::set_value(a_mean_energies, 0.0);
   
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    this->compute_mean_energies_per_cell(*a_mean_energies[lvl], lvl);
+    this->compute_reactive_mean_energies_per_cell(*a_mean_energies[lvl], lvl);
   }
 }
 
-void ito_plasma_stepper::compute_mean_energies_per_cell(LevelData<EBCellFAB>& a_mean_energies, const int a_level){
-  CH_TIME("ito_plasma_stepper::compute_mean_energies_per_cell(ppc, lvl)");
+void ito_plasma_stepper::compute_reactive_mean_energies_per_cell(LevelData<EBCellFAB>& a_mean_energies, const int a_level){
+  CH_TIME("ito_plasma_stepper::compute_reactive_mean_energies_per_cell(ppc, lvl)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_mean_energies_per_cell(ppc, lvl)" << endl;
+    pout() << "ito_plasma_stepper::compute_reactive_mean_energies_per_cell(ppc, lvl)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[a_level];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_particle_realm, m_phase)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       
     const Box box = dbl[dit()];
+    const EBISBox& ebisbox = ebisl[dit()];
       
-    this->compute_mean_energies_per_cell(a_mean_energies[dit()], a_level, dit(), box);
+    this->compute_reactive_mean_energies_per_cell(a_mean_energies[dit()], a_level, dit(), box, ebisbox);
   }
 }
 
-void ito_plasma_stepper::compute_mean_energies_per_cell(EBCellFAB& a_mean_energies, const int a_level, const DataIndex a_dit, const Box a_box){
-  CH_TIME("ito_plasma_stepper::compute_mean_energies_per_cell(ppc, lvl, dit, box)");
+void ito_plasma_stepper::compute_reactive_mean_energies_per_cell(EBCellFAB&      a_mean_energies,
+								 const int       a_level,
+								 const DataIndex a_dit,
+								 const Box       a_box,
+								 const EBISBox&  a_ebisbox){
+  CH_TIME("ito_plasma_stepper::compute_reactive_mean_energies_per_cell(ppc, lvl, dit, box)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_mean_energies_per_cell(ppc, lvl, dit, box)" << endl;
+    pout() << "ito_plasma_stepper::compute_reactive_mean_energies_per_cell(ppc, lvl, dit, box)" << endl;
   }
 
   BaseFab<Real>& numFab = a_mean_energies.getSingleValuedFAB();
@@ -1963,14 +2000,16 @@ void ito_plasma_stepper::compute_mean_energies_per_cell(EBCellFAB& a_mean_energi
     const particle_container<ito_particle>& particles = solver->get_particles();
     const BinFab<ito_particle>& cellParticles         = particles.get_cell_particles(a_level, a_dit);
 
+    // Regular cells. 
     for (BoxIterator bit(a_box); bit.ok(); ++bit){
       const IntVect iv = bit();
-      
-      Real m = 0.0;
-      Real E = 0.0;
-      const List<ito_particle>& listParticles = cellParticles(iv, 0);
 
-      if(listParticles.length() > 0){
+      if (a_ebisbox.isRegular(iv)){
+	Real m = 0.0;
+	Real E = 0.0;
+	
+	const List<ito_particle>& listParticles = cellParticles(iv, 0);
+
 	for (ListIterator<ito_particle> lit(listParticles); lit.ok(); ++lit){
 	  m += lit().mass();
 	  E += lit().mass()*lit().energy();
@@ -1978,6 +2017,31 @@ void ito_plasma_stepper::compute_mean_energies_per_cell(EBCellFAB& a_mean_energi
 
 	numFab(iv, idx) = E/m;
       }
+    }
+
+    // Irregular cells.
+    VoFIterator& vofit = (*m_amr->get_vofit(m_particle_realm, m_phase)[a_level])[a_dit];
+    for (vofit.reset(); vofit.ok(); ++vofit){
+      const VolIndex& vof       = vofit();
+      const IntVect iv          = vof.gridIndex();
+      const RealVect normal     = a_ebisbox.normal(vof);
+      const RealVect ebCentroid = a_ebisbox.bndryCentroid(vof);
+
+      Real m = 0.0;
+      Real E = 0.0;
+
+      const List<ito_particle>& listParticles = cellParticles(iv, 0);
+      
+      for (ListIterator<ito_particle> lit(listParticles); lit.ok(); ++lit){
+	const RealVect& pos = lit().position();
+
+	if(PolyGeom::dot((pos-ebCentroid), normal) >= 0.0){
+	  m += lit().mass();
+	  E += lit().mass()*lit().energy();
+	}
+      }
+
+      numFab(iv, idx) = E/m;
     }
   }
 }
@@ -1998,8 +2062,8 @@ void ito_plasma_stepper::advance_reaction_network_nwo(const EBAMRCellData& a_E, 
   }
 
   // 1. Compute the number of particles per cell. Set the number of photons to be generated per cell to zero. 
-  this->compute_particles_per_cell(m_particle_ppc);
-  this->compute_mean_energies_per_cell(m_particle_eps);
+  this->compute_reactive_particles_per_cell(m_particle_ppc);
+  this->compute_reactive_mean_energies_per_cell(m_particle_eps);
 
   m_fluid_ppc.copy(m_particle_ppc);
   m_fluid_eps.copy(m_particle_eps);

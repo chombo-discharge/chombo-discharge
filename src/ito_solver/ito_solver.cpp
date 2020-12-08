@@ -506,6 +506,8 @@ void ito_solver::initial_data(){
     pout() << m_name + "::initial_data" << endl;
   }
 
+  m_particles.clear_particles();
+
   // Add particles, remove the ones that are inside the EB, and then depsit
   m_particles.add_particles(m_species->get_initial_particles()); 
   this->remove_eb_particles(EB_representation::implicit_function, 0.0);
