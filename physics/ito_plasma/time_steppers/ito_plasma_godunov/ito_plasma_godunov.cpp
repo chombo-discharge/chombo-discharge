@@ -471,11 +471,6 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
     pout() << "ito_plasma_godunov::regrid" << endl;
   }
 
-#if 1 // Test
-  ito_plasma_stepper::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
-  return;
-#endif
-
   Real ito_time = 0.0;
   Real poisson_time = 0.0;
   Real rte_time = 0.0;
