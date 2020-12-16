@@ -2682,7 +2682,7 @@ void ito_solver::make_superparticles(const int a_particlesPerPatch, const int a_
     pout() << m_name + "::make_superparticles(int, level)" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+  const DisjointBoxLayout& dbl = m_particles.get_grids()[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     this->make_superparticles(a_particlesPerPatch, a_level, dit());
@@ -2696,7 +2696,9 @@ void ito_solver::make_superparticles(const int a_particlesPerCell, const int a_l
   }
   
   const int comp = 0;
-  const Box box  = m_amr->get_grids(m_realm)[a_level].get(a_dit);
+  //  const Box box  = m_amr->get_grids(m_realm)[a_level].get(a_dit);
+
+  const Box box  = m_particles.get_grids()[a_level][a_dit];
 
   // This are the particles in the box we're currently looking at. 
   BinFab<ito_particle>& cellParticles = m_particles.get_cell_particles(a_level, a_dit);

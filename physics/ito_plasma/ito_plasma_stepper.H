@@ -11,6 +11,7 @@
 #include "time_stepper.H"
 #include "ito_plasma_physics.H"
 #include "ito_layout.H"
+#include "point_particle.H"
 #include "rte_layout.H"
 #include "mc_photo.H"
 #include "poisson_solver.H"
@@ -387,8 +388,7 @@ namespace physics {
 				       const Vector<DisjointBoxLayout>& a_grids,
 				       const int                        a_lmin,
 				       const int                        a_finest_level);
-
-      Vector<particle_container<BinItem> > get_lb_particles(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
+      void get_lb_particles(Vector<particle_container<ito_particle>* >& a_particles, Vector<RefCountedPtr<ito_solver> >& a_solvers);
     };
   }
 };
