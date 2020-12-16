@@ -75,7 +75,6 @@ void data_ops::average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_faced
 					  a_domain,
 					  icomp,
 					  icomp);
-
       }
     }
   }

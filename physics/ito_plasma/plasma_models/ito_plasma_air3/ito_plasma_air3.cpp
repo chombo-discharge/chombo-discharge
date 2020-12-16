@@ -180,9 +180,9 @@ RealVect ito_plasma_air3::compute_electron_velocity(const RealVect a_E) const {
 }
 
 Vector<Real> ito_plasma_air3::compute_ito_diffusion_lfa(const Real         a_time,
-						    const RealVect     a_pos,
-						    const RealVect     a_E,
-						    const Vector<Real> a_cdr_densities) const {
+							const RealVect     a_pos,
+							const RealVect     a_E,
+							const Vector<Real> a_cdr_densities) const {
   Vector<Real> D(m_num_ito_species, m_ion_D);
   D[m_electron_idx] = m_tables.at("diffco").get_entry(a_E.vectorLength());
   

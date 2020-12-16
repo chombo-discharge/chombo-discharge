@@ -381,13 +381,14 @@ namespace physics {
 
 
       // Do load balancing of the particle realm. 
-      bool load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
+      void load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
 				       Vector<Vector<Box> >&            a_boxes,
 				       const std::string                a_realm,
 				       const Vector<DisjointBoxLayout>& a_grids,
 				       const int                        a_lmin,
 				       const int                        a_finest_level);
 
+      Vector<particle_container<BinItem> > get_lb_particles(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
     };
   }
 };

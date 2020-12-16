@@ -73,7 +73,8 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   this->define_halo_masks();
   this->setup_particle_data(base, m_finest_level);
 
-  m_is_defined = true;
+  m_is_defined  = true;
+  m_cell_sorted = false;
 }
 
 template <class P>
@@ -135,6 +136,11 @@ void particle_container<P>::setup_particle_data(const int a_base, const int a_fi
 }
 
 template <class P>
+int particle_container<P>::get_finest_level() const {
+  return m_finest_level;
+}
+
+template <class P>
 const std::string particle_container<P>::get_realm() const {
   return m_realm;
 }
@@ -185,6 +191,16 @@ template <class P>
 const AMRParticles<P>& particle_container<P>::get_non_halo_particles() const {
   CH_assert(m_is_defined);
   return m_non_halo_particles;
+}
+
+template <class P>
+Vector<List<P> >& particle_container<P>::get_cache_particles() {
+  return m_cache_particles;
+}
+
+template <class P>
+const Vector<List<P> >& particle_container<P>::get_cache_particles() const {
+  return m_cache_particles;
 }
 
 template <class P>
@@ -791,8 +807,7 @@ void particle_container<P>::define_halo_masks(){
 
     m_halo[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > > (new LevelData<BaseFab<bool> > (m_grids[lvl], ncomp, IntVect::Zero));
 
-    if(lvl < m_finest_level){
-
+    if(lvl < m_finest_level && m_halo_buffer > 0){
       const DisjointBoxLayout& gridsCoar = m_grids[lvl];
       const DisjointBoxLayout& gridsFine = m_grids[lvl+1];
 
@@ -907,19 +922,21 @@ void particle_container<P>::copy_halo_particles(const int a_level) const {
 
   const RealVect dx = m_dx[a_level];
 
-  // 1. Copy particles from m_particles to m_halo_particles if they lie in the halo mask. 
-  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
-    const BaseFab<bool>& mask = (*m_halo[a_level])[dit()];
-    const List<P>& particles  = (*m_particles[a_level])[dit()].listItems();
-    List<P>& halo_particles   = (*m_halo_particles[a_level])[dit()].listItems();
+  // 1. Copy particles from m_particles to m_halo_particles if they lie in the halo mask.
+  if(m_halo_buffer > 0){
+    for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
+      const BaseFab<bool>& mask = (*m_halo[a_level])[dit()];
+      const List<P>& particles  = (*m_particles[a_level])[dit()].listItems();
+      List<P>& halo_particles   = (*m_halo_particles[a_level])[dit()].listItems();
 
-    for (ListIterator<P> lit(particles); lit.ok(); ++lit){
-      const RealVect x = lit().position();
-      const IntVect iv(D_DECL((int)floor((x[0] - m_prob_lo[0])/dx[0]),
-			      (int)floor((x[1] - m_prob_lo[1])/dx[1]),
-			      (int)floor((x[2] - m_prob_lo[2])/dx[2])));
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+	const RealVect x = lit().position();
+	const IntVect iv(D_DECL((int)floor((x[0] - m_prob_lo[0])/dx[0]),
+				(int)floor((x[1] - m_prob_lo[1])/dx[1]),
+				(int)floor((x[2] - m_prob_lo[2])/dx[2])));
 
-      if(mask(iv)) halo_particles.add(lit());
+	if(mask(iv)) halo_particles.add(lit());
+      }
     }
   }
 }

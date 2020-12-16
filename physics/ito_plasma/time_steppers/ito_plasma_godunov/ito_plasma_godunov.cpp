@@ -136,6 +136,7 @@ void ito_plasma_godunov::parse_options() {
   pp.get("halo_buffer",    m_halo_buffer);
   pp.get("pvr_buffer",     m_pvr_buffer);
   pp.get("filter_rho",     m_filter_rho);
+  pp.get("filter_cond",    m_filter_cond);
   pp.get("eb_tolerance",   m_eb_tolerance);
 
   // Get algorithm
@@ -826,14 +827,39 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
     const int idx = solver_it.get_solver();
     const int q   = species->get_charge();
 
-    if(Abs(q) > 0 && solver->is_mobile()){
+    if(q != 0 && solver->is_mobile()){
       data_ops::set_value(m_particle_scratch1, 0.0);
-
-      solver->deposit_particles(m_particle_scratch1, *a_particles[idx]); // The particles should have "masses" = m*mu 
+#if 1 // Original code
+      solver->deposit_particles(m_particle_scratch1, *a_particles[idx]); // The particles should have "masses" = m*mu
+#else
+      const EBAMRCellData& mu  = solver->get_mobility_func();
+      const EBAMRCellData& phi = solver->get_state();
+      data_ops::copy(m_particle_scratch1, mu);
+      data_ops::multiply(m_particle_scratch1, phi);
+#endif
 
       // Copy to fluid realm and add to fluid stuff
       m_fluid_scratch1.copy(m_particle_scratch1);
       data_ops::incr(a_conductivity, m_fluid_scratch1, Abs(q));
+    }
+  }
+
+  // Test code
+  if(m_filter_cond){
+    for (const auto& f : m_filters){
+      const Real alpha  = std::get<0>(f);
+      const int stride  = std::get<1>(f);
+      const int num_app = std::get<2>(f);
+
+      for (int iapp = 0; iapp < num_app; iapp++){
+	data_ops::set_value(m_fluid_scratch1, 0.0);
+	m_fluid_scratch1.copy(a_conductivity);
+	data_ops::set_covered_value(m_fluid_scratch1, 0.0, 0);
+	data_ops::filter_smooth(a_conductivity, m_fluid_scratch1, stride, alpha);
+
+	m_amr->average_down(a_conductivity, m_fluid_realm, m_phase);
+	m_amr->interp_ghost(a_conductivity, m_fluid_realm, m_phase);
+      }
     }
   }
 
@@ -853,6 +879,9 @@ void ito_plasma_godunov::compute_face_conductivity(){
     pout() << m_name + "::compute_face_conductivity" << endl;
   }
 
+  data_ops::set_value(m_conduct_face, 0.0);
+  data_ops::set_value(m_conduct_eb,   0.0);
+
   // This code does averaging from cell to face. 
   data_ops::average_cell_to_face_allcomps(m_conduct_face, m_conduct_cell, m_amr->get_domains());
 
@@ -864,7 +893,6 @@ void ito_plasma_godunov::compute_face_conductivity(){
     ebsten.apply(m_conduct_eb, m_conduct_cell, lvl);
   }
 #else
-  data_ops::set_value(m_conduct_eb, 0.0);
   data_ops::incr(m_conduct_eb, m_conduct_cell, 1.0);
 #endif
 
@@ -902,6 +930,9 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
 
   data_ops::incr(bco_gas,     m_conduct_face, 1.0);
   data_ops::incr(bco_irr_gas, m_conduct_eb,   1.0);
+
+  m_amr->average_down(bco_gas,     m_fluid_realm, phase::gas);
+  m_amr->average_down(bco_irr_gas, m_fluid_realm, phase::gas);
 
   // Set up the multigrid solver
   poisson->setup_operator_factory();
@@ -1060,26 +1091,29 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   this->remap_godunov_particles(m_rho_dagger_particles,   which_particles::all_diffusive);
   remapGdnvTime += MPI_Wtime();
 
-  MPI_Barrier(Chombo_MPI::comm);
-  depositGdnvTime -= MPI_Wtime();
-  this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all_diffusive);
-  depositGdnvTime += MPI_Wtime();
-
   // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch.
   MPI_Barrier(Chombo_MPI::comm);
   copyCondTime -= MPI_Wtime();
   this->copy_conductivity_particles(m_conductivity_particles); // Sets particle "weights" = w*mu
   copyCondTime += MPI_Wtime();
 
+  // Compute conductivity on mesh
   MPI_Barrier(Chombo_MPI::comm);
   condTime -= MPI_Wtime();
   this->compute_all_conductivities(m_conductivity_particles);  // Deposits q_e*Z*w*mu on the mesh
   condTime += MPI_Wtime();
 
+  // Setup Poisson solver
   MPI_Barrier(Chombo_MPI::comm);
   setupTime -= MPI_Wtime();
   this->setup_semi_implicit_poisson(a_dt);                     // Multigrid setup
   setupTime += MPI_Wtime();
+
+  // Compute space charge density 
+  MPI_Barrier(Chombo_MPI::comm);
+  depositGdnvTime -= MPI_Wtime();
+  this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all_diffusive);
+  depositGdnvTime += MPI_Wtime();
 
   MPI_Barrier(Chombo_MPI::comm);
   poissonTime -= MPI_Wtime();
@@ -1091,7 +1125,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   velocityTime -= MPI_Wtime();
   // this->set_ito_velocity_funcs();
   // m_ito->interpolate_velocities();
-  this->compute_ito_velocities();
+   this->compute_ito_velocities();
   velocityTime += MPI_Wtime();
 
   MPI_Barrier(Chombo_MPI::comm);

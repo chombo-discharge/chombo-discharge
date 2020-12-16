@@ -65,6 +65,7 @@ namespace physics {
       EBAMRIVData   m_conduct_eb;
 
       bool m_profile;
+      bool m_filter_cond;
       
       Real m_relax_factor; // Factor for relaxation time
       Real m_avg_cfl;      // Average CFL number

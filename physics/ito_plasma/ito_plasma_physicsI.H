@@ -32,16 +32,16 @@ RealVect ito_plasma_physics::random_position(const RealVect a_cellPos,
 
   RealVect pos;
 
-  constexpr Real thresh = 1.E-2;
-  // if(a_kappa < thresh){
-  //   pos = a_centroidPos;
-  // }
-  // else if(a_kappa < 1.0){ // Rejection sampling. 
-  //   pos = this->random_position(a_lo, a_hi, a_bndryCentroid, a_bndryNormal);
-  // }
-  // else{ // Regular cell. Get a position. 
+  constexpr Real thresh = 1.E-3;
+  if(a_kappa < thresh){
+    pos = a_centroidPos;
+  }
+  else if(a_kappa < 1.0){ // Rejection sampling. 
+    pos = this->random_position(a_lo, a_hi, a_bndryCentroid, a_bndryNormal);
+  }
+  else{ // Regular cell. Get a position. 
     pos = this->random_position(a_lo, a_hi);
-    //  }
+  }
 
   pos = a_cellPos + pos*a_dx;
 

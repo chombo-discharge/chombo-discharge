@@ -2053,7 +2053,7 @@ void ito_solver::interpolate_mobilities(const int a_lvl, const DataIndex& a_dit)
     pout() << m_name + "::interpolate_mobilities(lvl, dit)" << endl;
   }
 
-  const bool force_ngp_irreg = true;
+  const bool force_ngp_irreg = false;
 
   if(m_mobile){
     const EBCellFAB& mob_func  = (*m_mobility_func[a_lvl])[a_dit];

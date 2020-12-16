@@ -1039,7 +1039,7 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
 
 
   // Add potential filters.
-  if(m_filter_rho){
+  if(false){//m_filter_rho){
     for (const auto& f : m_filters){
       const Real alpha  = std::get<0>(f);
       const int stride  = std::get<1>(f);
@@ -2371,9 +2371,9 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
 
     RealVect lo            = -0.5*RealVect::Unit;
     RealVect hi            = 0.5*RealVect::Unit;
-    // if(kappa < 1.0){
-    //   data_ops::compute_min_valid_box(lo, hi, bndryNormal, bndryCentroid);
-    // }
+    if(kappa < 1.0){
+      data_ops::compute_min_valid_box(lo, hi, bndryNormal, bndryCentroid);
+    }
 
     Vector<List<ito_particle>* > particles(num_ito_species);
     Vector<List<photon>* >       bulkPhotons(num_rte_species);
@@ -2986,101 +2986,168 @@ bool ito_plasma_stepper::load_balance(Vector<Vector<int> >&            a_procs,
 
   bool ret;
 
-  if(!m_load_balance){
-    ret = false;
+  if(m_load_balance && a_realm == m_particle_realm){
+    this->load_balance_particle_realm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finest_level);
+    
+    ret = true;
   }
   else{
-    if(a_realm == m_particle_realm){
-      ret = this->load_balance_particle_realm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finest_level);
-    }
-    else{
-      ret = false;
-    }
+    ret = false;
   }
 
   return ret;
 }
 
-bool ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
+void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
 						     Vector<Vector<Box> >&            a_boxes,
 						     const std::string                a_realm,
 						     const Vector<DisjointBoxLayout>& a_grids,
 						     const int                        a_lmin,
 						     const int                        a_finest_level){
   
-  bool ret = false;
   
-  if(m_load_balance){
-    Vector<ito_solver*> Solvers;
-    Vector<particle_container<ito_particle>* > Particles;
-
-    if(m_load_balance_idx < 0){
-      for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.get_solver();
-	RefCountedPtr<ito_solver>& solver = solver_it();
-	
-	Solvers.push_back(&(*solver));
-	Particles.push_back(&(solver->get_particles()));
-      }
-    }
-    else {
-      RefCountedPtr<ito_solver>& solver           = m_ito->get_solvers()[m_load_balance_idx];
-      particle_container<ito_particle>& particles = solver->get_particles();
-
-      Solvers.push_back(&(*solver));
-      Particles.push_back(&particles);
-    }
-    
-
-    // Regrid onto new grids
-    for (int i = 0; i < Particles.size(); i++){
-      Particles[i]->regrid(a_grids, m_amr->get_domains(), m_amr->get_dx(), m_amr->get_ref_rat(), a_lmin, a_finest_level);
-    }
 
 
-    // Compute loads on each level
-    a_procs.resize(1 + a_finest_level);
-    a_boxes.resize(1 + a_finest_level);
+  // Decompose the DisjointBoxLayout
+  a_procs.resize(1 + a_finest_level);
+  a_boxes.resize(1 + a_finest_level);
   
-    for (int lvl = 0; lvl < a_lmin; lvl++){
-      a_procs[lvl] = a_grids[lvl].procIDs();
-      a_boxes[lvl] = a_grids[lvl].boxArray();
-    }
-
-
-    for (int lvl = a_lmin; lvl <= a_finest_level; lvl++){
-      a_boxes[lvl] = a_grids[lvl].boxArray();
-
-      Vector<long int> loads(a_boxes[lvl].size(), 0);
-
-      // Accumulate loads from each solver
-      for (int i = 0; i < Solvers.size(); i++){
-	Vector<long int> solverLoads;
-	Solvers[i]->compute_loads(solverLoads, a_grids[lvl], lvl);
-
-	for (int j = 0; j < loads.size(); j++){
-	  loads[j] += solverLoads[j];
-	}
-      }
-
-      // Offset loads with constant estimate. 
-      for(int i = 0; i < loads.size(); i++){
-	loads[i] += lround(m_load_ppc*a_boxes[lvl][i].numPts());
-      }
-
-
-      LoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
-    }
-
-    // Put particles back in pre-regrid mode. 
-    for (int i = 0; i < Particles.size(); i++){
-      Particles[i]->pre_regrid(a_lmin);
-    }
-
-    ret = true;
+  for (int lvl = a_lmin; lvl <= a_finest_level; lvl++){
+    a_procs[lvl] = a_grids[lvl].procIDs();
+    a_boxes[lvl] = a_grids[lvl].boxArray();
   }
 
-  return ret;
+  // Get particles for load balancing
+  Vector<particle_container<BinItem> > lb_particles = this->get_lb_particles(a_grids, a_finest_level);
+
+  // Remap lb particles
+  for (int i = 0; i < lb_particles.size(); i++){
+    lb_particles[i].remap();
+  }
+
+
+  // Make superparticles of lb_particles. This must be done properly because we have to split/merge particles up to N_ppc in order to get an realistic esimate. 
+  for (int i = 0; i < lb_particles.size(); i++){
+    lb_particles[i].sort_particles_by_cell();
+
+    // Merge/split
+
+    lb_particles[i].sort_particles_by_patch();
+  }
+
+  // Now do the load balancing
+  for (int lvl = a_lmin; lvl <= a_finest_level; lvl++){
+    const int count = a_grids[lvl].size();
+
+    Vector<long int> allLoads(count, 0L);
+
+    for (int i = 0; i < lb_particles.size(); i++){
+      Vector<long int> loads(count, 0L);
+      Vector<long int> tmp(count, 0L);
+      
+      for (DataIterator dit = a_grids[lvl].dataIterator(); dit.ok(); ++dit){
+	const int numPart = lb_particles[0][lvl][dit()].numItems();
+	loads[dit().intCode()] = numPart;
+      }
+
+      // Gather loads globally
+#ifdef CH_MPI
+      MPI_Allreduce(&(loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+      loads = tmp;
+#endif
+
+      for (int i = 0; i < count; i++){
+	allLoads[i] += loads[i];
+      }
+    }
+
+    // Do the friggin load balancing. 
+    LoadBalance(a_procs[lvl], allLoads, a_boxes[lvl]);
+  }
+}
+
+Vector<particle_container<BinItem> > ito_plasma_stepper::get_lb_particles(const Vector<DisjointBoxLayout> & a_grids, const int a_finest_level){
+  CH_TIME("ito_plasma_stepper::get_lb_particles()");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::get_lb_particles()" << endl;
+  }
+
+  Vector<particle_container<ito_particle>* > ito_particles;
+  Vector<particle_container<BinItem> >       lb_particles;
+
+  if(m_load_balance_idx < 0){
+    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<ito_solver>& solver = solver_it();
+
+      lb_particles.push_back(particle_container<BinItem>(a_grids,
+							 m_amr->get_domains(),
+							 m_amr->get_dx(),
+							 m_amr->get_ref_rat(),
+							 m_amr->get_prob_lo(),
+							 m_amr->get_blocking_factor(),
+							 a_finest_level,
+							 m_pvr_buffer,
+							 m_halo_buffer,
+							 m_particle_realm));
+      
+      ito_particles.push_back(&(solver->get_particles()));
+    }
+  }
+  else {
+    RefCountedPtr<ito_solver>& solver           = m_ito->get_solvers()[m_load_balance_idx];
+    particle_container<ito_particle>& particles = solver->get_particles();
+      
+    lb_particles.push_back(particle_container<BinItem>(a_grids,
+						       m_amr->get_domains(),
+						       m_amr->get_dx(),
+						       m_amr->get_ref_rat(),
+						       m_amr->get_prob_lo(),
+						       m_amr->get_blocking_factor(),
+						       a_finest_level,
+						       m_pvr_buffer,
+						       m_halo_buffer,
+						       m_particle_realm));
+
+    ito_particles.push_back(&(solver->get_particles()));
+  }
+
+
+  // Copy the particles for load balancing to binItemParticles -- which is a particle_container with a much lower memory footprint
+  const int newFinestLevel = a_finest_level;
+  const int oldFinestLevel = ito_particles[0]->get_finest_level();
+
+  for (int i = 0; i < lb_particles.size(); i++){
+    
+    for (int lvl = 0; lvl <= Min(newFinestLevel, oldFinestLevel); lvl++){
+      List<BinItem>& binParticles = lb_particles[i][lvl].outcast();
+
+      const List<ito_particle>& cache = ito_particles[i]->get_cache_particles()[lvl];
+
+      // Add particles to binParticles
+      for (ListIterator<ito_particle> lit(cache); lit.ok(); ++lit){
+	const RealVect& p = lit().position();
+	binParticles.add(BinItem(p));
+      }
+    }    
+  }
+
+  // If we removed a grid level we must transfer particles on the "remaining" old grid levels to the new finest grid level
+  if(oldFinestLevel > newFinestLevel){
+    for (int i = 0; i < lb_particles.size(); i++){
+      List<BinItem>& binParticles = lb_particles[i][newFinestLevel].outcast();
+      
+    for (int lvl = newFinestLevel+1; lvl <= oldFinestLevel; lvl++){
+	const List<ito_particle>& cache = ito_particles[i]->get_cache_particles()[lvl];
+	  
+	for (ListIterator<ito_particle> lit(cache); lit.ok(); ++lit){
+	  const RealVect& p = lit().position();
+	  binParticles.add(BinItem(p));
+	}
+      }      
+    }
+  }
+
+  return lb_particles;
 }
 
 void ito_plasma_stepper::compute_EdotJ_source(const Real a_dt){

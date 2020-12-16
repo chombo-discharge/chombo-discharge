@@ -116,6 +116,11 @@ public:
   void clear_particles();
 
   /*!
+    @brief Get finest level
+  */
+  int get_finest_level() const;
+
+  /*!
     @brief Get the realm
   */
   const std::string get_realm() const;
@@ -149,6 +154,16 @@ public:
     @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
   */
   const AMRParticles<P>& get_non_halo_particles() const;
+
+  /*!
+    @brief Get cache particles
+  */
+  Vector<List<P> >& get_cache_particles() ;
+
+  /*!
+    @brief Get cache particles
+  */
+  const Vector<List<P> >& get_cache_particles() const;
 
   /*!
     @brief Get PVR
