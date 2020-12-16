@@ -11,7 +11,7 @@ amr_mesh.lo_corner       = -2.5E-2 -2.5E-2 -4E-2 # Low corner of problem domain
 amr_mesh.hi_corner       =  2.5E-2  2.5E-2  1E-2 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 2           # Maximum amr depth
+amr_mesh.max_amr_depth   = 4           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -203,8 +203,8 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 ito_plasma_godunov.verbosity      = -1             # Verbosity
 ito_plasma_godunov.min_dt         = 1.E-10         # Minimum dt
 ito_plasma_godunov.max_dt         = 1.E-10         # Maximum dt
-ito_plasma_godunov.particle_realm = particle         # Particle realm. Default is primal
-ito_plasma_godunov.load_balance   = true          # Load balance or not
+ito_plasma_godunov.particle_realm = primal         # Particle realm. Default is primal
+ito_plasma_godunov.load_balance   = true           # Load balance or not
 ito_plasma_godunov.load_index     = -1             # Which species to use for load balancing (-1 => all)
 ito_plasma_godunov.load_ppc       = 0.0            # Load estimate per cell (in addition to ppc)
 ito_plasma_godunov.nwo_reactions  = true           # Use or don't use the new reaction algorithm (presumably load balances better)
@@ -216,11 +216,11 @@ ito_plasma_godunov.merge_interval = 1              # How often to make superpart
 ito_plasma_godunov.relax_factor   = 9999.5         # Factor in front of relaxation time	
 ito_plasma_godunov.regrid_super   = true           # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = euler_maruyama # 'euler', 'euler_maruyama', 'midpoint'
-ito_plasma_godunov.profile        = false           # Profile advance or not
+ito_plasma_godunov.profile        = false          # Profile advance or not
 ito_plasma_godunov.pvr_buffer     = 2              # PVR buffer for particles (overrides ito and mc_photo)
 ito_plasma_godunov.halo_buffer    = 0              # Halo buffer for particles (overrides ito and mc_photo)
 ito_plasma_godunov.filter_rho     = false          # Filter space charge or not
-ito_plasma_godunov.filter_cond    = true           # Filter conductivity or not. 
+ito_plasma_godunov.filter_cond    = false          # Filter conductivity or not. 
 ito_plasma_godunov.filter_1       = 0.5 1 4 true   # alpha = 0.5, stride = 1, N = 1, Compensation step = true.
 ito_plasma_godunov.filter_2       = 0.5 2 4 true   # alpha = 0.5, stride = 1, N = 1, Compensation step = true.
 
@@ -268,10 +268,10 @@ ito_plasma_streamer_tagger.verbosity         = -1           # Verbosity
 ito_plasma_streamer_tagger.num_boxes         = 1            # Number of allowed tag boxes (0 = tags allowe everywhere)
 ito_plasma_streamer_tagger.box1_lo           = -1 -1 -1
 ito_plasma_streamer_tagger.box1_hi           = 1 1 100E-6
-ito_plasma_streamer_tagger.buffer            = 4           # Grow tagged cells
+ito_plasma_streamer_tagger.buffer            = 0           # Grow tagged cells
 
 ito_plasma_streamer_tagger.refine_curvature  = 1.E99         # Curvature refinement
 ito_plasma_streamer_tagger.coarsen_curvature = 0.1          # Curvature coarsening	
-ito_plasma_streamer_tagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
+ito_plasma_streamer_tagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
 ito_plasma_streamer_tagger.coarsen_alpha     = 1.E99         # Set alpha coarsening. Higher => Less mesh
 ito_plasma_streamer_tagger.max_coarsen_lvl   = 1            # Set max coarsening depth

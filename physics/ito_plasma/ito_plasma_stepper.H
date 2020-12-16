@@ -388,7 +388,7 @@ namespace physics {
 				       const Vector<DisjointBoxLayout>& a_grids,
 				       const int                        a_lmin,
 				       const int                        a_finest_level);
-      void get_lb_particles(Vector<particle_container<ito_particle>* >& a_particles, Vector<RefCountedPtr<ito_solver> >& a_solvers);
+      Vector<RefCountedPtr<ito_solver> > get_lb_solvers();
     };
   }
 };

@@ -3004,10 +3004,11 @@ void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
 						     const Vector<DisjointBoxLayout>& a_grids,
 						     const int                        a_lmin,
 						     const int                        a_finest_level){
+  CH_TIME("ito_plasma_stepper::load_balance_particle_realm(...)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper_stepper::load_balance_particle_realm(...)" << endl;
+  }
   
-  
-
-
   // Decompose the DisjointBoxLayout
   a_procs.resize(1 + a_finest_level);
   a_boxes.resize(1 + a_finest_level);
@@ -3017,23 +3018,21 @@ void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
     a_boxes[lvl] = a_grids[lvl].boxArray();
   }
 
-
   // Get the particles that we will use for load balancing. 
-  Vector<particle_container<ito_particle>* > lb_particles;
-  Vector<RefCountedPtr<ito_solver> > lb_solvers;
-
-  this->get_lb_particles(lb_particles, lb_solvers);
+  Vector<RefCountedPtr<ito_solver> > lb_solvers = this->get_lb_solvers();
 
   // Regrid particles onto the "dummy grids" a_grids
-  for (int i = 0; i < lb_particles.size(); i++){
-    lb_particles[i]->regrid(a_grids, m_amr->get_domains(), m_amr->get_dx(), m_amr->get_ref_rat(), a_lmin, a_finest_level);
+  for (int i = 0; i < lb_solvers.size(); i++){
+    particle_container<ito_particle>& particles = lb_solvers[i]->get_particles();
+    
+    particles.regrid(a_grids, m_amr->get_domains(), m_amr->get_dx(), m_amr->get_ref_rat(), a_lmin, a_finest_level);
 
     // If we make superparticles during regrids, do it here so we can better estimate the computational loads for each patch. This way, if a grid is removed the realistic
-    // load estimate of the underlying grid(s) is improved. 
+    // load estimate of the underlying grid(s) is improved.
     if(m_regrid_superparticles){
-      lb_solvers[i]->sort_particles_by_cell();
+      particles.sort_particles_by_cell();
       lb_solvers[i]->make_superparticles(m_ppc);
-      lb_solvers[i]->sort_particles_by_patch();
+      particles.sort_particles_by_patch();
     }
   }
 
@@ -3043,20 +3042,10 @@ void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
 
     Vector<long int> total_loads(count, 0L);
 
-    for (int i = 0; i < lb_particles.size(); i++){
+    for (int i = 0; i < lb_solvers.size(); i++){
       Vector<long int> loads(count, 0L);
-      Vector<long int> tmp(count, 0L);
-      
-      for (DataIterator dit = a_grids[lvl].dataIterator(); dit.ok(); ++dit){
-	const int numPart = (*lb_particles[i])[lvl][dit()].numItems();
-	loads[dit().intCode()] = numPart;
-      }
 
-      // Gather loads globally
-#ifdef CH_MPI
-      MPI_Allreduce(&(loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-      loads = tmp;
-#endif
+      lb_solvers[i]->compute_loads(loads, a_grids[lvl], lvl);
 
       for (int i = 0; i < count; i++){
 	total_loads[i] += loads[i];
@@ -3068,116 +3057,33 @@ void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
   }
 
   // Go back to "pre-regrid" mode so we can get particles to the correct patches after load balancing. 
-  for (int i = 0; i < lb_particles.size(); i++){
-    lb_particles[i]->pre_regrid(a_lmin);
+  for (int i = 0; i < lb_solvers.size(); i++){
+    particle_container<ito_particle>& particles = lb_solvers[i]->get_particles();
+    particles.pre_regrid(a_lmin);
   }
 }
 
-void ito_plasma_stepper::get_lb_particles(Vector<particle_container<ito_particle>* >& a_particles, Vector<RefCountedPtr<ito_solver> >& a_solvers){
-  CH_TIME("ito_plasma_stepper::get_lb_particles(particles, solvers)");
+Vector<RefCountedPtr<ito_solver> > ito_plasma_stepper::get_lb_solvers() {
+  CH_TIME("ito_plasma_stepper::get_lb_solvers()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::get_lb_particles(particles, solvers)" << endl;
+    pout() << "ito_plasma_stepper::get_lb_solvers()" << endl;
   }
 
-  a_particles.resize(0);
-  a_solvers.resize(0);
+  Vector<RefCountedPtr<ito_solver> > lb_solvers;
 
   if(m_load_balance_idx < 0){
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<ito_solver>& solver = solver_it();
       
-      a_solvers.push_back(solver);
-      a_particles.push_back(&(solver->get_particles()));
+      lb_solvers.push_back(solver);
     }
   }
   else {
     RefCountedPtr<ito_solver>& solver = m_ito->get_solvers()[m_load_balance_idx];
-
-    a_solvers.push_back(solver);
-    a_particles.push_back(&(solver->get_particles()));
-  }
-}
-
-Vector<particle_container<point_particle> > ito_plasma_stepper::get_lb_particles(const Vector<DisjointBoxLayout> & a_grids, const int a_finest_level){
-  CH_TIME("ito_plasma_stepper::get_lb_particles(grids, int)");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::get_lb_particles(grids, int)" << endl;
+    lb_solvers.push_back(solver);
   }
 
-  Vector<particle_container<ito_particle>* >  ito_particles;
-  Vector<particle_container<point_particle> > lb_particles;
-
-  if(m_load_balance_idx < 0){
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<ito_solver>& solver = solver_it();
-
-      lb_particles.push_back(particle_container<point_particle>(a_grids,
-								m_amr->get_domains(),
-								m_amr->get_dx(),
-								m_amr->get_ref_rat(),
-								m_amr->get_prob_lo(),
-								m_amr->get_blocking_factor(),
-								a_finest_level,
-								m_pvr_buffer,
-								m_halo_buffer,
-								m_particle_realm));
-      
-      ito_particles.push_back(&(solver->get_particles()));
-    }
-  }
-  else {
-    RefCountedPtr<ito_solver>& solver           = m_ito->get_solvers()[m_load_balance_idx];
-    particle_container<ito_particle>& particles = solver->get_particles();
-      
-    lb_particles.push_back(particle_container<point_particle>(a_grids,
-							      m_amr->get_domains(),
-							      m_amr->get_dx(),
-							      m_amr->get_ref_rat(),
-							      m_amr->get_prob_lo(),
-							      m_amr->get_blocking_factor(),
-							      a_finest_level,
-							      m_pvr_buffer,
-							      m_halo_buffer,
-							      m_particle_realm));
-
-    ito_particles.push_back(&(solver->get_particles()));
-  }
-
-
-  // Copy the particles for load balancing to binItemParticles -- which is a particle_container with a much lower memory footprint
-  const int newFinestLevel = a_finest_level;
-  const int oldFinestLevel = ito_particles[0]->get_finest_level();
-
-  for (int i = 0; i < lb_particles.size(); i++){
-    
-    for (int lvl = 0; lvl <= Min(newFinestLevel, oldFinestLevel); lvl++){
-      List<point_particle>& binParticles = lb_particles[i][lvl].outcast();
-
-      const List<ito_particle>& cache = ito_particles[i]->get_cache_particles()[lvl];
-
-      // Add particles to binParticles
-      for (ListIterator<ito_particle> lit(cache); lit.ok(); ++lit){
-	binParticles.add(point_particle(lit().position(), lit().mass()));
-      }
-    }    
-  }
-
-  // If we removed a grid level we must transfer particles on the "remaining" old grid levels to the new finest grid level
-  if(oldFinestLevel > newFinestLevel){
-    for (int i = 0; i < lb_particles.size(); i++){
-      List<point_particle>& binParticles = lb_particles[i][newFinestLevel].outcast();
-      
-    for (int lvl = newFinestLevel+1; lvl <= oldFinestLevel; lvl++){
-	const List<ito_particle>& cache = ito_particles[i]->get_cache_particles()[lvl];
-	  
-	for (ListIterator<ito_particle> lit(cache); lit.ok(); ++lit){
-	  binParticles.add(point_particle(lit().position(), lit().mass()));
-	}
-      }      
-    }
-  }
-
-  return lb_particles;
+  return lb_solvers;
 }
 
 void ito_plasma_stepper::compute_EdotJ_source(const Real a_dt){
