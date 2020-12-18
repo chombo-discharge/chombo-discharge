@@ -37,7 +37,7 @@ RealVect ito_solver::random_gaussian() {
 
   RealVect r = RealVect::Zero;
   for (int i = 0; i < SpaceDim; i++){
-    //r[i] = m_gauss01(m_rng);
+    r[i] = m_gauss01(m_rng);
     r[i] = sign(r[i])*Min(Abs(r[i]), m_normal_max);
   }
 
