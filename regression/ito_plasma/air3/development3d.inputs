@@ -114,9 +114,9 @@ ito_solver.redistribute        = false         # Turn on/off redistribution.
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ito_solver.checkpointing       = particles     # Use particle numbers for writing/reading checkpoint files
 ito_solver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
-ito_solver.plot_deposition     = tsc           # Cloud-in-cell for plotting particles.
+ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
 ito_solver.halo_deposition     = native        # 'native' or 'ngp' (see documentation)
-ito_solver.deposition          = tsc           # 'ngp' = nearest grid point
+ito_solver.deposition          = cic           # 'ngp' = nearest grid point
                                                # 'cic' = cloud-in-cell
                                                # 'tsc' = triangle-shaped-cloud
                                                # 'w4'  = 3rd order interpolation
@@ -217,10 +217,10 @@ ito_plasma_godunov.relax_factor   = 9999.5         # Factor in front of relaxati
 ito_plasma_godunov.regrid_super   = true           # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = euler_maruyama # 'euler', 'euler_maruyama', 'midpoint'
 ito_plasma_godunov.profile        = false          # Profile advance or not
-ito_plasma_godunov.pvr_buffer     = 2              # PVR buffer for particles (overrides ito and mc_photo)
-ito_plasma_godunov.halo_buffer    = 0              # Halo buffer for particles (overrides ito and mc_photo)
+ito_plasma_godunov.pvr_buffer     = 0              # PVR buffer for particles (overrides ito and mc_photo)
+ito_plasma_godunov.halo_buffer    = 2              # Halo buffer for particles (overrides ito and mc_photo)
 ito_plasma_godunov.filter_rho     = false          # Filter space charge or not
-ito_plasma_godunov.filter_cond    = true           # Filter conductivity or not. 
+ito_plasma_godunov.filter_cond    = false          # Filter conductivity or not. 
 ito_plasma_godunov.filter_1       = 0.5 1 4 true   # alpha = 0.5, stride = 1, N = 1, Compensation step = true.
 ito_plasma_godunov.filter_2       = 0.5 2 4 true   # alpha = 0.5, stride = 1, N = 1, Compensation step = true.
 
@@ -228,10 +228,10 @@ ito_plasma_godunov.filter_2       = 0.5 2 4 true   # alpha = 0.5, stride = 1, N 
 # ITO_PLASMA_AIR3 CLASS OPTIONS
 # ====================================================================================================
 # Initial data
-ito_plasma_air3.blob_radius     = 500.E-6        # Blob radius
+ito_plasma_air3.blob_radius     = 1.E-3         # Blob radius
 ito_plasma_air3.blob_center     = 0 0 0         # Blob center
 ito_plasma_air3.seed            = 0             # RNG seed, < 0 gives a random seed (for each rank)
-ito_plasma_air3.num_particles   = 300000        # Number of initial particles
+ito_plasma_air3.num_particles   = 10000         # Number of initial particles
 ito_plasma_air3.particle_weight = 1             # Initial particle weights
 
 # For controlling the time step
