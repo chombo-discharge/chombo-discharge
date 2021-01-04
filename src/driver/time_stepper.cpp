@@ -44,47 +44,49 @@ int time_stepper::get_redistribution_regsize() const {
   return 1;
 }
 
-bool time_stepper::load_balance(Vector<Vector<int> >&             a_procs,
-				Vector<Vector<Box> >&             a_boxes,
-				const std::string                 a_realm,              
-				const Vector<DisjointBoxLayout>&  a_grids,
-				const int                         a_lmin,
-				const int                         a_finest_level){
-  CH_TIME("time_stepper::load_balance");
+Vector<long int> time_stepper::get_loads(const std::string a_realm, const int a_level) const {
+  CH_TIME("time_stepper::get_loads");
   if(m_verbosity > 5){
-    pout() << "time_stepper::load_balance" << endl;
+    pout() << "time_stepper::get_loads" << endl;
   }
 
-#if 0
-  Vector<long int> a_loads;
-  a_boxes = a_dbl.boxArray();
-  a_loads.resize(a_dbl.size(), 0);
+  const DisjointBoxLayout& dbl = m_amr->get_grids(a_realm)[a_level];
+  const Vector<Box>& a_boxes = dbl.boxArray();
 
-  for (DataIterator dit = a_dbl.dataIterator(); dit.ok(); ++dit){
-    const int idx = dit().intCode();
-    const Box bx  = a_dbl.get(dit());
-    a_loads[idx]  = bx.numPts();
+  Vector<long int> loads(a_boxes.size(), 0L);
+  for (int i = 0; i < a_boxes.size(); i++){
+    loads[i] = a_boxes[i].numPts();
   }
 
-  // Gather loads
-#ifdef CH_MPI
-  int count = a_loads.size();
-  Vector<long int> tmp(count);
-  MPI_Allreduce(&(a_loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-  a_loads = tmp;
-#endif
+  return loads;
+}
 
-  // Load balance
-  LoadBalance(a_procs, a_loads, a_boxes);
-#endif
+bool time_stepper::load_balance_realm(const std::string a_realm) const {
+  CH_TIME("time_stepper::load_balance_realm");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::load_balance_realm" << endl;
+  }
+
+  return false;
+}
+
+void time_stepper::load_balance_boxes(Vector<Vector<int> >&             a_procs,
+				      Vector<Vector<Box> >&             a_boxes,
+				      const std::string                 a_realm,              
+				      const Vector<DisjointBoxLayout>&  a_grids,
+				      const int                         a_lmin,
+				      const int                         a_finest_level){
+  CH_TIME("time_stepper::load_balance_boxes");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::load_balance_boxes" << endl;
+  }
 
   a_procs.resize(1 + a_finest_level);
   a_boxes.resize(1 + a_finest_level);
 
   for (int lvl = 0; lvl <= a_finest_level; lvl++){
     a_boxes[lvl] = a_grids[lvl].boxArray();
-    a_procs[lvl] = a_grids[lvl].procIDs();
-  }
 
-  return false;
+    LoadBalance(a_procs[lvl], a_boxes[lvl]);
+  }
 }

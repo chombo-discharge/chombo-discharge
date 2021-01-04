@@ -611,7 +611,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   // Define amr_mesh
   const int regsize = m_timestepper->get_redistribution_regsize();
   m_amr->set_finest_level(finest_level); 
-  m_amr->set_grids(boxes, regsize);      
+  m_amr->set_grids(boxes, regsize);
   
   // Instantiate solvers and register operators
   m_timestepper->setup_solvers();
@@ -703,10 +703,13 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   // Load balance and regrid the various realms
   const std::vector<std::string> realms = m_amr->get_realms();
   for (auto str : realms){
-    Vector<Vector<int> > procs;
-    Vector<Vector<Box> > boxes;
-    const bool got_new_grids = m_timestepper->load_balance(procs, boxes, str, m_amr->get_grids(), a_lmin, new_finest_level);
-    if(got_new_grids){
+    if(m_timestepper->load_balance_realm(str)){
+      
+      Vector<Vector<int> > procs;
+      Vector<Vector<Box> > boxes;
+      
+      m_timestepper->load_balance_boxes(procs, boxes, str, m_amr->get_grids(), a_lmin, new_finest_level);
+
       m_amr->regrid_realm(str, procs, boxes, a_lmin);
     }
   }

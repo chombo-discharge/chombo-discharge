@@ -2973,29 +2973,68 @@ void ito_plasma_stepper::sort_domain_photons_by_patch(){
 
 }
 
-bool ito_plasma_stepper::load_balance(Vector<Vector<int> >&            a_procs,
-				      Vector<Vector<Box> >&            a_boxes,
-				      const std::string                a_realm,
-				      const Vector<DisjointBoxLayout>& a_grids,
-				      const int                        a_lmin,
-				      const int                        a_finest_level){
-  CH_TIME("ito_plasma_stepper::load_balance");
+bool ito_plasma_stepper::load_balance_realm(const std::string a_realm) const{
+  CH_TIME("time_stepper::load_balance_realm");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper_stepper::load_balance" << endl;
+    pout() << "time_stepper::load_balance_realm" << endl;
   }
 
-  bool ret;
+  bool ret = false;
+
+  if(a_realm == m_particle_realm && m_load_balance){
+    ret = true;
+  }
+  
+  return ret;
+}
+
+void ito_plasma_stepper::load_balance_boxes(Vector<Vector<int> >&            a_procs,
+					    Vector<Vector<Box> >&            a_boxes,
+					    const std::string                a_realm,
+					    const Vector<DisjointBoxLayout>& a_grids,
+					    const int                        a_lmin,
+					    const int                        a_finest_level){
+  CH_TIME("ito_plasma_stepper::load_balance_boxes");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper_stepper::load_balance_boxes" << endl;
+  }
 
   if(m_load_balance && a_realm == m_particle_realm){
     this->load_balance_particle_realm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finest_level);
-    
-    ret = true;
   }
   else{
-    ret = false;
+    MayDay::Abort("ito_plasma_stepper::load_balance_boxes - shouldn't happen, how did you get here..?");
+  }
+}
+
+Vector<long int> ito_plasma_stepper::get_loads(const std::string a_realm, const int a_level) const {
+  CH_TIME("ito_plasma_stepper::get_loads(...)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper_stepper::get_loads(...)" << endl;
   }
 
-  return ret;
+  const DisjointBoxLayout& dbl = m_amr->get_grids(a_realm)[a_level];
+  const int count = dbl.size();
+
+  Vector<long int> loads(count, 0L);
+  if(m_load_balance && a_realm == m_particle_realm){
+
+    Vector<RefCountedPtr<ito_solver> > lb_solvers = this->get_lb_solvers();
+    
+    for (int i = 0; i < lb_solvers.size(); i++){
+      Vector<long int> my_loads(count, 0L);
+      lb_solvers[i]->compute_loads(my_loads, dbl, a_level);
+
+      for (int i = 0; i < count; i++){
+	loads[i] += my_loads[i];
+      }
+    }
+  }
+  else{
+    loads = time_stepper::get_loads(a_realm, a_level);
+  }
+
+  return loads;
 }
 
 void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
@@ -3063,7 +3102,7 @@ void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
   }
 }
 
-Vector<RefCountedPtr<ito_solver> > ito_plasma_stepper::get_lb_solvers() {
+Vector<RefCountedPtr<ito_solver> > ito_plasma_stepper::get_lb_solvers() const {
   CH_TIME("ito_plasma_stepper::get_lb_solvers()");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::get_lb_solvers()" << endl;

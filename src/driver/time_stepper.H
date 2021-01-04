@@ -64,12 +64,12 @@ public:
   virtual void register_realms() = 0;
   virtual void register_operators() = 0; 
 
-
   // IO routines
   virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const = 0;
   virtual void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) = 0;
   virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const = 0;
   virtual int  get_num_plot_vars() const = 0;
+  virtual Vector<long int> get_loads(const std::string a_realm, const int a_level) const;
 
   // Advance routines
   virtual void compute_dt(Real& a_dt, time_code& a_timecode) = 0;
@@ -81,13 +81,15 @@ public:
   virtual void deallocate() = 0;
   virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) = 0;
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
+
   virtual bool need_to_regrid();
-  virtual bool load_balance(Vector<Vector<int> >&            a_procs,
-			    Vector<Vector<Box> >&            a_boxes,
-			    const std::string                a_realm,
-			    const Vector<DisjointBoxLayout>& a_grids,
-			    const int                        a_lmin,
-			    const int                        a_finest_level);
+  virtual bool load_balance_realm(const std::string a_realm) const;
+  virtual void load_balance_boxes(Vector<Vector<int> >&            a_procs,
+				  Vector<Vector<Box> >&            a_boxes,
+				  const std::string                a_realm,
+				  const Vector<DisjointBoxLayout>& a_grids,
+				  const int                        a_lmin,
+				  const int                        a_finest_level);
   virtual void post_regrid() = 0;
 
   // Set routines

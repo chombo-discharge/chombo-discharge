@@ -65,6 +65,7 @@ namespace physics {
       void write_J(EBAMRCellData& a_output, int& a_icomp) const;
       void write_num_particles_per_patch(EBAMRCellData& a_output, int& a_icomp) const;
       int  get_num_plot_vars() const override;
+      Vector<long int> get_loads(const std::string a_realm, const int a_level) const override;
   
       // Advance routines
       virtual Real advance(const Real a_dt) = 0;
@@ -81,12 +82,13 @@ namespace physics {
       virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
       void post_regrid() override;
-      bool load_balance(Vector<Vector<int> >&            a_procs,
-			Vector<Vector<Box> >&            a_boxes,
-			const std::string                a_realm,
-			const Vector<DisjointBoxLayout>& a_grids,
-			const int                        a_lmin,
-			const int                        a_finest_level) override;
+      bool load_balance_realm(const std::string a_realm) const override;
+      void load_balance_boxes(Vector<Vector<int> >&            a_procs,
+			      Vector<Vector<Box> >&            a_boxes,
+			      const std::string                a_realm,
+			      const Vector<DisjointBoxLayout>& a_grids,
+			      const int                        a_lmin,
+			      const int                        a_finest_level) override;
 
 
       // Particle intersection routines
@@ -388,7 +390,8 @@ namespace physics {
 				       const Vector<DisjointBoxLayout>& a_grids,
 				       const int                        a_lmin,
 				       const int                        a_finest_level);
-      Vector<RefCountedPtr<ito_solver> > get_lb_solvers();
+      
+      Vector<RefCountedPtr<ito_solver> > get_lb_solvers() const;
     };
   }
 };
