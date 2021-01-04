@@ -69,7 +69,7 @@ public:
   virtual void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) = 0;
   virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const = 0;
   virtual int  get_num_plot_vars() const = 0;
-  virtual Vector<long int> get_loads(const std::string a_realm, const int a_level) const;
+  virtual Vector<long int> get_checkpoint_loads(const std::string a_realm, const int a_level) const;
 
   // Advance routines
   virtual void compute_dt(Real& a_dt, time_code& a_timecode) = 0;

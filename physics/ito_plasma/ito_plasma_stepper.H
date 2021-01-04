@@ -65,7 +65,7 @@ namespace physics {
       void write_J(EBAMRCellData& a_output, int& a_icomp) const;
       void write_num_particles_per_patch(EBAMRCellData& a_output, int& a_icomp) const;
       int  get_num_plot_vars() const override;
-      Vector<long int> get_loads(const std::string a_realm, const int a_level) const override;
+      Vector<long int> get_checkpoint_loads(const std::string a_realm, const int a_level) const override;
   
       // Advance routines
       virtual Real advance(const Real a_dt) = 0;

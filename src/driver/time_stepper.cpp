@@ -44,10 +44,10 @@ int time_stepper::get_redistribution_regsize() const {
   return 1;
 }
 
-Vector<long int> time_stepper::get_loads(const std::string a_realm, const int a_level) const {
-  CH_TIME("time_stepper::get_loads");
+Vector<long int> time_stepper::get_checkpoint_loads(const std::string a_realm, const int a_level) const {
+  CH_TIME("time_stepper::get_checkpoint_loads");
   if(m_verbosity > 5){
-    pout() << "time_stepper::get_loads" << endl;
+    pout() << "time_stepper::get_checkpoint_loads" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->get_grids(a_realm)[a_level];

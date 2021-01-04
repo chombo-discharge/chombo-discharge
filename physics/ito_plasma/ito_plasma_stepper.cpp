@@ -3007,10 +3007,10 @@ void ito_plasma_stepper::load_balance_boxes(Vector<Vector<int> >&            a_p
   }
 }
 
-Vector<long int> ito_plasma_stepper::get_loads(const std::string a_realm, const int a_level) const {
-  CH_TIME("ito_plasma_stepper::get_loads(...)");
+Vector<long int> ito_plasma_stepper::get_checkpoint_loads(const std::string a_realm, const int a_level) const {
+  CH_TIME("ito_plasma_stepper::get_checkpoint_loads(...)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper_stepper::get_loads(...)" << endl;
+    pout() << "ito_plasma_stepper_stepper::get_checkpoint_loads(...)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->get_grids(a_realm)[a_level];
@@ -3031,7 +3031,7 @@ Vector<long int> ito_plasma_stepper::get_loads(const std::string a_realm, const 
     }
   }
   else{
-    loads = time_stepper::get_loads(a_realm, a_level);
+    loads = time_stepper::get_checkpoint_loads(a_realm, a_level);
   }
 
   return loads;
