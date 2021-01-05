@@ -571,87 +571,7 @@ void driver::memory_report(const memory_report_mode a_mode){
 #endif
 }
 
-void driver::read_checkpoint_file(const std::string& a_restart_file){
-  CH_TIME("driver::read_checkpoint_file");
-  if(m_verbosity > 3){
-    pout() << "driver::read_checkpoint_file" << endl;
-  }
 
-
-  // Read the header that was written by new_read_checkpoint_file
-  HDF5Handle handle_in(a_restart_file, HDF5Handle::OPEN_RDONLY);
-  HDF5HeaderData header;
-  header.readFromFile(handle_in);
-
-  m_time        = header.m_real["time"];
-  m_dt          = header.m_real["dt"];
-  m_step        = header.m_int["step"];
-
-  // Get the names of the realms that were checkpointed. 
-  std::vector<std::string> chk_realms;
-  for (auto s : header.m_string){
-    chk_realms.push_back(s.second);
-  }
-
-  if(m_verbosity > 3){
-    pout() << "driver::read_checkpoint_file - checked realms are: ";
-    for (auto r : chk_realms){
-      pout() << '"' << r << '"' << "\t";
-    }
-    pout() << endl;
-  }
-  
-  const Real coarsest_dx = header.m_real["coarsest_dx"];
-  const int base_level   = 0;
-  const int finest_level = header.m_int["finest_level"];
-
-  // Abort if base resolution has changed. 
-  if(!coarsest_dx == m_amr->get_dx()[0]){
-    MayDay::Abort("driver::read_checkpoint_file - coarsest_dx != dx[0], did you change the base level resolution?!?");
-  }
-
-  // Read in grids. If the file has no grids we must abort. 
-  Vector<Vector<Box> > boxes(1 + finest_level);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    handle_in.setGroupToLevel(lvl);
-    
-    const int status = read(handle_in, boxes[lvl]);
-    
-    if(status != 0) {
-      MayDay::Error("driver::read_checkpoint_file - file has no grids");
-    }
-  }
-
-  // Define amr_mesh
-  const int regsize = m_timestepper->get_redistribution_regsize();
-  m_amr->set_finest_level(finest_level); 
-  m_amr->set_grids(boxes, regsize);
-  
-  // Instantiate solvers and register operators
-  m_timestepper->setup_solvers();
-  m_timestepper->register_realms();
-  m_timestepper->register_operators();
-  m_amr->regrid_operators(base_level, finest_level, regsize);
-  m_timestepper->allocate();
-
-  // Allocate internal stuff (e.g. space for tags)
-  this->allocate_internals();
-
-  // Go through level by level and have solvers extract their data
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    handle_in.setGroupToLevel(lvl);
-
-    // time stepper reads in data
-    m_timestepper->read_checkpoint_data(handle_in, lvl);
-
-    // Read in internal data
-    read_checkpoint_level(handle_in, lvl);
-  }
-
-  // Close input file
-  handle_in.close();
-}
 
 void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial_data){
   CH_TIME("driver::regrid");
@@ -2433,24 +2353,120 @@ void driver::write_checkpoint_realm_loads(HDF5Handle& a_handle, const int a_leve
   const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[a_level];
 
   // Make some storage. 
-  EBCellFactory fact(ebisl);
-  LevelData<EBCellFAB> scratch(dbl, 1, 3*IntVect::Unit, fact);
-  data_ops::set_value(scratch, 0.0);
+  LevelData<FArrayBox> scratch(dbl, 1, 3*IntVect::Unit);
 
   // Get loads. 
   for (auto r : m_amr->get_realms()){
     const Vector<long int> loads = m_timestepper->get_checkpoint_loads(r, a_level);
 
-    const std::string str = r + "_loads";
-
+    // Set loads on an FArrayBox
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      EBCellFAB& fab = scratch[dit()];
-      fab.setVal(loads[dit().intCode()]);
+      scratch[dit()].setVal(loads[dit().intCode()]);
     }
+
+    // String identifier in HDF file.
+    const std::string str = r + "_loads";
 
     // Write
     write(a_handle, scratch, str);
   }
+}
+
+void driver::read_checkpoint_file(const std::string& a_restart_file){
+  CH_TIME("driver::read_checkpoint_file");
+  if(m_verbosity > 3){
+    pout() << "driver::read_checkpoint_file" << endl;
+  }
+
+
+  // Read the header that was written by new_read_checkpoint_file
+  HDF5Handle handle_in(a_restart_file, HDF5Handle::OPEN_RDONLY);
+  HDF5HeaderData header;
+  header.readFromFile(handle_in);
+
+  m_time        = header.m_real["time"];
+  m_dt          = header.m_real["dt"];
+  m_step        = header.m_int["step"];
+
+  // Get the names of the realms that were checkpointed. 
+  std::vector<std::string> chk_realms;
+  std::map<std::string, Vector<Vector<long int > > > chk_loads;
+  for (auto s : header.m_string){
+    chk_realms.push_back(s.second);
+    chk_loads.emplace(s.second, Vector<Vector<long int> >());
+  }
+
+  if(m_verbosity > 2){
+    pout() << "driver::read_checkpoint_file - checked realms are: ";
+    for (auto r : chk_realms){
+      pout() << '"' << r << '"' << "\t";
+    }
+    pout() << endl;
+  }
+  
+  const Real coarsest_dx = header.m_real["coarsest_dx"];
+  const int base_level   = 0;
+  const int finest_level = header.m_int["finest_level"];
+
+  // Abort if base resolution has changed. 
+  if(!coarsest_dx == m_amr->get_dx()[0]){
+    MayDay::Abort("driver::read_checkpoint_file - coarsest_dx != dx[0], did you change the base level resolution?!?");
+  }
+
+  // Read in grids. If the file has no grids we must abort. 
+  Vector<Vector<Box> > boxes(1 + finest_level);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    handle_in.setGroupToLevel(lvl);
+    
+    const int status = read(handle_in, boxes[lvl]);
+    
+    if(status != 0) {
+      MayDay::Error("driver::read_checkpoint_file - file has no grids");
+    }
+  }
+
+  // Read in the computational loads from the HDF5 file. 
+  for (auto r : chk_loads){
+    const std::string& realm_name = r.first;
+    Vector<Vector<long int> >& realm_loads = r.second;
+
+    realm_loads.resize(1 + finest_level);
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      realm_loads[lvl].resize(boxes[lvl].size(), 0L);
+
+      this->read_checkpoint_realm_loads(realm_loads[lvl], handle_in, realm_name, lvl);
+    }
+  }
+
+  // Define amr_mesh
+  const int regsize = m_timestepper->get_redistribution_regsize();
+  m_amr->set_finest_level(finest_level); 
+  m_amr->set_grids(boxes, regsize);
+  
+  // Instantiate solvers and register operators
+  m_timestepper->setup_solvers();
+  m_timestepper->register_realms();
+  m_timestepper->register_operators();
+  m_amr->regrid_operators(base_level, finest_level, regsize);
+  m_timestepper->allocate();
+
+  // Allocate internal stuff (e.g. space for tags)
+  this->allocate_internals();
+
+  // Go through level by level and have solvers extract their data
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    handle_in.setGroupToLevel(lvl);
+
+    // time stepper reads in data
+    m_timestepper->read_checkpoint_data(handle_in, lvl);
+
+    // Read in internal data
+    read_checkpoint_level(handle_in, lvl);
+  }
+
+  // Close input file
+  handle_in.close();
 }
 
 void driver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
@@ -2487,6 +2503,28 @@ void driver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
 	tagged_cells |= iv;
       }
     }
+  }
+}
+
+void driver::read_checkpoint_realm_loads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_realm, const int a_level){
+  CH_TIME("driver::read_checkpoint_realm_loads(...)");
+  if(m_verbosity > 5){
+    pout() << "driver::read_checkpoint_realm_loads(...)" << endl;
+  }
+
+  // HDF identifier.
+  const std::string str = a_realm + "_loads";
+
+  // Read into an FArrayBox.
+  FArrayBox fab;
+  for (int ibox = 0; ibox < a_loads.size(); ibox++){
+    readFArrayBox(a_handle, fab, a_level, ibox, Interval(0,0), str);
+
+    a_loads[ibox] = fab.max();
+
+#if 1 // Dev code
+    if(fab.max() > 0) std::cout << fab.max() << std::endl;
+#endif
   }
 }
 

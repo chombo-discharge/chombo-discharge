@@ -631,6 +631,11 @@ protected:
   virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
 
   /*!
+    @brief Read realm loads. 
+  */
+  virtual void read_checkpoint_realm_loads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_realm, const int a_level);
+
+  /*!
     @brief Write vector data to a HDF5Header. This writes up to a_step
   */
   virtual void write_vector_data(HDF5HeaderData& a_header, const Vector<Real>& a_data, const std::string a_name, const int a_elem);
