@@ -616,6 +616,16 @@ protected:
   virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level);
 
   /*!
+    @brief Write tags
+  */
+  virtual void write_checkpoint_tags(HDF5Handle& a_handle, const int a_level);
+
+  /*!
+    @brief Write checkpoint realm loads
+  */
+  virtual void write_checkpoint_realm_loads(HDF5Handle& a_handle, const int a_level);
+
+  /*!
     @brief Write checkpoint data
   */
   virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);

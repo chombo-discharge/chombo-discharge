@@ -586,6 +586,20 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   m_time        = header.m_real["time"];
   m_dt          = header.m_real["dt"];
   m_step        = header.m_int["step"];
+
+  // Get the names of the realms that were checkpointed. 
+  std::vector<std::string> chk_realms;
+  for (auto s : header.m_string){
+    chk_realms.push_back(s.second);
+  }
+
+  if(m_verbosity > 3){
+    pout() << "driver::read_checkpoint_file - checked realms are: ";
+    for (auto r : chk_realms){
+      pout() << '"' << r << '"' << "\t";
+    }
+    pout() << endl;
+  }
   
   const Real coarsest_dx = header.m_real["coarsest_dx"];
   const int base_level   = 0;
@@ -2314,12 +2328,18 @@ void driver::write_checkpoint_file(){
     finest_chk_level = finest_level;
   }
 
+  // Write header. 
   HDF5HeaderData header;
   header.m_real["coarsest_dx"] = m_amr->get_dx()[0];
   header.m_real["time"]        = m_time;
   header.m_real["dt"]          = m_dt;
   header.m_int["step"]         = m_step;
   header.m_int["finest_level"] = finest_level;
+
+  // Write realm names.
+  for (auto r : m_amr->get_realms()){
+    header.m_string[r] = r;
+  }
 
   // Output file name
   char str[100];
@@ -2364,6 +2384,17 @@ void driver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level){
     pout() << "driver::write_checkpoint_level" << endl;
   }
 
+  this->write_checkpoint_tags(a_handle, a_level);
+  this->write_checkpoint_realm_loads(a_handle, a_level);
+
+}
+
+void driver::write_checkpoint_tags(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("driver::write_checkpoint_tags");
+  if(m_verbosity > 5){
+    pout() << "driver::write_checkpoint_tags" << endl;
+  }
+
   // Create some scratch data = 0 which can grok
   EBCellFactory fact(m_amr->get_ebisl(m_realm, phase::gas)[a_level]);
   LevelData<EBCellFAB> scratch(m_amr->get_grids(m_realm)[a_level], 1, 3*IntVect::Unit, fact);
@@ -2390,6 +2421,36 @@ void driver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level){
 
   // Write tags
   write(a_handle, scratch, "tagged_cells");
+}
+
+void driver::write_checkpoint_realm_loads(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("driver::write_checkpoint_realm_loads");
+  if(m_verbosity > 5){
+    pout() << "driver::write_checkpoint_realm_loads" << endl;
+  }
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[a_level];
+
+  // Make some storage. 
+  EBCellFactory fact(ebisl);
+  LevelData<EBCellFAB> scratch(dbl, 1, 3*IntVect::Unit, fact);
+  data_ops::set_value(scratch, 0.0);
+
+  // Get loads. 
+  for (auto r : m_amr->get_realms()){
+    const Vector<long int> loads = m_timestepper->get_checkpoint_loads(r, a_level);
+
+    const std::string str = r + "_loads";
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      EBCellFAB& fab = scratch[dit()];
+      fab.setVal(loads[dit().intCode()]);
+    }
+
+    // Write
+    write(a_handle, scratch, str);
+  }
 }
 
 void driver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
