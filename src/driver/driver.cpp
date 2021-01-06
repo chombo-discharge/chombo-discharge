@@ -2463,13 +2463,12 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
     }
   }
 
-  // Define amr_mesh
-  const int regsize = m_timestepper->get_redistribution_regsize();
+  // Define amr_mesh and realms. 
   m_amr->set_finest_level(finest_level); 
-  //  m_amr->set_grids(boxes, regsize);
   m_amr->set_grids(boxes, sim_loads);
   
   // Instantiate solvers and register operators
+  const int regsize = m_timestepper->get_redistribution_regsize();
   m_timestepper->setup_solvers();
   m_timestepper->register_operators();
   m_amr->regrid_operators(base_level, finest_level, regsize);
