@@ -2389,17 +2389,15 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   m_step        = header.m_int["step"];
 
   // Get the names of the realms that were checkpointed. 
-  std::vector<std::string> chk_realms;
   std::map<std::string, Vector<Vector<long int > > > chk_loads;
   for (auto s : header.m_string){
-    chk_realms.push_back(s.second);
     chk_loads.emplace(s.second, Vector<Vector<long int> >());
   }
 
   if(m_verbosity > 2){
     pout() << "driver::read_checkpoint_file - checked realms are: ";
-    for (auto r : chk_realms){
-      pout() << '"' << r << '"' << "\t";
+    for (auto r : chk_loads){
+      pout() << '"' << r.first << '"' << "\t";
     }
     pout() << endl;
   }
@@ -2438,6 +2436,27 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
     }
   }
 
+  // Time stepper can now registers realms. 
+  m_timestepper->register_realms();
+
+  // In case we restart with more or fewer realms, we need to decide how to assign the computational loads. If the realm was a new realm we may
+  // not have the computational loads for that. In that case we take the computational loads from the primal realm. 
+  std::map<std::string, Vector<Vector<long int> > > sim_loads;
+  for (auto cur_realm : m_amr->get_realms()){
+    sim_loads.emplace(cur_realm, Vector<Vector<long int> >());
+
+    Vector<Vector<long int> >& cur_loads = sim_loads.at(cur_realm);
+
+    for (auto s : chk_loads){
+      if(cur_realm == s.first){
+	cur_loads = s.second;
+      }
+      else{
+	cur_loads = chk_loads.at(realm::primal);
+      }
+    }
+  }
+
   // Define amr_mesh
   const int regsize = m_timestepper->get_redistribution_regsize();
   m_amr->set_finest_level(finest_level); 
@@ -2445,7 +2464,6 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   
   // Instantiate solvers and register operators
   m_timestepper->setup_solvers();
-  m_timestepper->register_realms();
   m_timestepper->register_operators();
   m_amr->regrid_operators(base_level, finest_level, regsize);
   m_timestepper->allocate();
@@ -2521,10 +2539,6 @@ void driver::read_checkpoint_realm_loads(Vector<long int>& a_loads, HDF5Handle& 
     readFArrayBox(a_handle, fab, a_level, ibox, Interval(0,0), str);
 
     a_loads[ibox] = fab.max();
-
-#if 1 // Dev code
-    if(fab.max() > 0) std::cout << fab.max() << std::endl;
-#endif
   }
 }
 

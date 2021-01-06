@@ -1523,13 +1523,6 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
 
   const int a_lmin = 0;
 
-#if 0
-  this->define_neighbors(a_lmin);    
-  this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
-  this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
-  this->define_vofiter(a_lmin);      // Define vof iterators
-#endif
-
   this->define_realms();
 
   for (auto& r : m_realms){
