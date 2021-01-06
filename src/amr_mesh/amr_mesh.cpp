@@ -600,13 +600,14 @@ void amr_mesh::reallocate(MFAMRCellData& a_data, const int a_lmin){
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, ncomp);
 
+    const DisjointBoxLayout& dbl = m_realms[a_realm]->get_grids()[lvl];
+
     if(!ebis_gas.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->get_ebisl(phase::gas)[lvl];
     if(!ebis_sol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->get_ebisl(phase::solid)[lvl];
     
     MFCellFactory factory(ebisl, comps);
 
-    a_data[lvl] = RefCountedPtr<LevelData<MFCellFAB> >
-      (new LevelData<MFCellFAB>(m_grids[lvl], ignored, ghost, factory));
+    a_data[lvl] = RefCountedPtr<LevelData<MFCellFAB> > (new LevelData<MFCellFAB>(dbl, ignored, ghost, factory));
 
     MFLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
@@ -1529,6 +1530,34 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
     r.second->regrid_base(a_lmin);
   }
 
+}
+
+void amr_mesh::set_grids(const Vector<Vector<Box> >& a_boxes, const std::map<std::string, Vector<Vector<long int> > >& a_realms_and_loads, const int a_regsize){
+  CH_TIME("amr_mesh::set_grids(boxes, loads, regsize)");
+  if(m_verbosity > 3){
+    pout() << "amr_mesh::set_grids(boxes, loads, regsize)" << endl;
+  }
+
+  const int lmin = 0;
+
+  for (const auto& r : a_realms_and_loads){
+    const std::string&               cur_realm = r.first;
+    const Vector<Vector<long int> >& cur_loads = r.second;
+
+    // Do load balancing. 
+    Vector<Vector<int> > pids(1 + m_finest_level);
+    for (int lvl = 0; lvl <= m_finest_level; lvl++){
+      
+      LoadBalance(pids[lvl], cur_loads[lvl], a_boxes[lvl]);
+    }
+
+    this->regrid_realm(cur_realm, pids, a_boxes, lmin);
+  }
+
+  pout() << "done with set_grids" << endl;
+
+
+  //  MayDay::Abort("amr_mesh::set_grids - not implemented");
 }
 
 void amr_mesh::parse_max_box_size(){

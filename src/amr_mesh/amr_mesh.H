@@ -518,6 +518,10 @@ public:
   */
   virtual void set_grids(Vector<Vector<Box> >& boxes, const int a_regsize=1);
 
+  /*!
+    @brief Set grids from boxes and computational loads
+  */
+  virtual void set_grids(const Vector<Vector<Box> >& a_boxes, const std::map<std::string, Vector<Vector<long int> > >& a_loads, const int a_regsize);
 
   /*!
     @brief Regrid AMR operators

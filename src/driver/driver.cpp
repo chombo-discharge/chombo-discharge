@@ -2378,6 +2378,8 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
     pout() << "driver::read_checkpoint_file" << endl;
   }
 
+  // Time stepper can register realms immediately. 
+  m_timestepper->register_realms();
 
   // Read the header that was written by new_read_checkpoint_file
   HDF5Handle handle_in(a_restart_file, HDF5Handle::OPEN_RDONLY);
@@ -2388,12 +2390,23 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   m_dt          = header.m_real["dt"];
   m_step        = header.m_int["step"];
 
-  // Get the names of the realms that were checkpointed. 
+  const Real coarsest_dx = header.m_real["coarsest_dx"];
+  const int base_level   = 0;
+  const int finest_level = header.m_int["finest_level"];
+
+  // Get the names of the realms that were checkpointed. This is a part of the HDF header. 
   std::map<std::string, Vector<Vector<long int > > > chk_loads;
   for (auto s : header.m_string){
     chk_loads.emplace(s.second, Vector<Vector<long int> >());
   }
 
+  // Get then names of the realms that will be used for simulations.
+  std::map<std::string, Vector<Vector<long int > > > sim_loads;
+  for (const auto& irealm : m_amr->get_realms()){
+    sim_loads.emplace(irealm, Vector<Vector<long int> >());
+  }
+
+  // Print checkpointed realm names. 
   if(m_verbosity > 2){
     pout() << "driver::read_checkpoint_file - checked realms are: ";
     for (auto r : chk_loads){
@@ -2401,10 +2414,6 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
     }
     pout() << endl;
   }
-  
-  const Real coarsest_dx = header.m_real["coarsest_dx"];
-  const int base_level   = 0;
-  const int finest_level = header.m_int["finest_level"];
 
   // Abort if base resolution has changed. 
   if(!coarsest_dx == m_amr->get_dx()[0]){
@@ -2424,7 +2433,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   }
 
   // Read in the computational loads from the HDF5 file. 
-  for (auto r : chk_loads){
+  for (auto& r : chk_loads){
     const std::string& realm_name = r.first;
     Vector<Vector<long int> >& realm_loads = r.second;
 
@@ -2436,20 +2445,17 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
     }
   }
 
-  // Time stepper can now registers realms. 
-  m_timestepper->register_realms();
 
   // In case we restart with more or fewer realms, we need to decide how to assign the computational loads. If the realm was a new realm we may
   // not have the computational loads for that. In that case we take the computational loads from the primal realm. 
-  std::map<std::string, Vector<Vector<long int> > > sim_loads;
-  for (auto cur_realm : m_amr->get_realms()){
-    sim_loads.emplace(cur_realm, Vector<Vector<long int> >());
+  for (auto& s : sim_loads){
 
-    Vector<Vector<long int> >& cur_loads = sim_loads.at(cur_realm);
+    const std::string&         cur_realm = s.first;
+    Vector<Vector<long int> >& cur_loads = s.second;
 
-    for (auto s : chk_loads){
-      if(cur_realm == s.first){
-	cur_loads = s.second;
+    for (const auto& c : chk_loads){
+      if(cur_realm == c.first){
+	cur_loads = c.second;
       }
       else{
 	cur_loads = chk_loads.at(realm::primal);
@@ -2460,7 +2466,8 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   // Define amr_mesh
   const int regsize = m_timestepper->get_redistribution_regsize();
   m_amr->set_finest_level(finest_level); 
-  m_amr->set_grids(boxes, regsize);
+  //  m_amr->set_grids(boxes, regsize);
+  m_amr->set_grids(boxes, sim_loads, regsize);
   
   // Instantiate solvers and register operators
   m_timestepper->setup_solvers();
