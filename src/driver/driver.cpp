@@ -2467,7 +2467,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   const int regsize = m_timestepper->get_redistribution_regsize();
   m_amr->set_finest_level(finest_level); 
   //  m_amr->set_grids(boxes, regsize);
-  m_amr->set_grids(boxes, sim_loads, regsize);
+  m_amr->set_grids(boxes, sim_loads);
   
   // Instantiate solvers and register operators
   m_timestepper->setup_solvers();

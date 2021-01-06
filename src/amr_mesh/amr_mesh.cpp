@@ -1501,38 +1501,7 @@ void amr_mesh::set_finest_level(const int a_finest_level){
   m_finest_level = Min(m_finest_level, m_max_sim_depth); // Don't exceed maximum simulation depth
 }
 
-void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
-
-  // Do Morton ordering
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    mortonOrdering((Vector<Box>&)a_boxes[lvl]);
-  }
-
-  // Load balance boxes
-  Vector<Vector<int> > proc_assign(1 + m_finest_level);
-  this->loadbalance(proc_assign, a_boxes);
-
-  // Define grids
-  m_grids.resize(1 + m_finest_level);
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    m_grids[lvl] = DisjointBoxLayout();
-    m_grids[lvl].define(a_boxes[lvl], proc_assign[lvl], m_domains[lvl]);
-    m_grids[lvl].close();
-  }
-
-  m_has_grids = true;
-
-  const int a_lmin = 0;
-
-  this->define_realms();
-
-  for (auto& r : m_realms){
-    r.second->regrid_base(a_lmin);
-  }
-
-}
-
-void amr_mesh::set_grids(const Vector<Vector<Box> >& a_boxes, const std::map<std::string, Vector<Vector<long int> > >& a_realms_and_loads, const int a_regsize){
+void amr_mesh::set_grids(const Vector<Vector<Box> >& a_boxes, const std::map<std::string, Vector<Vector<long int> > >& a_realms_and_loads){
   CH_TIME("amr_mesh::set_grids(boxes, loads, regsize)");
   if(m_verbosity > 3){
     pout() << "amr_mesh::set_grids(boxes, loads, regsize)" << endl;
@@ -1547,17 +1516,11 @@ void amr_mesh::set_grids(const Vector<Vector<Box> >& a_boxes, const std::map<std
     // Do load balancing. 
     Vector<Vector<int> > pids(1 + m_finest_level);
     for (int lvl = 0; lvl <= m_finest_level; lvl++){
-      
       LoadBalance(pids[lvl], cur_loads[lvl], a_boxes[lvl]);
     }
 
     this->regrid_realm(cur_realm, pids, a_boxes, lmin);
   }
-
-  pout() << "done with set_grids" << endl;
-
-
-  //  MayDay::Abort("amr_mesh::set_grids - not implemented");
 }
 
 void amr_mesh::parse_max_box_size(){

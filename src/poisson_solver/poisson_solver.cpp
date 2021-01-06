@@ -639,8 +639,8 @@ void poisson_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_lev
   if(!ebis_sol.isNull()) mfalias::aliasMF(state_sol,  phase::solid, *m_state[a_level]);
   
   // Read data
-  if(!ebis_gas.isNull()) read<EBCellFAB>(a_handle, state_gas, "poisson_g", m_amr->get_grids()[a_level], Interval(0,0), false);
-  if(!ebis_sol.isNull()) read<EBCellFAB>(a_handle, state_sol, "poisson_s", m_amr->get_grids()[a_level], Interval(0,0), false);
+  if(!ebis_gas.isNull()) read<EBCellFAB>(a_handle, state_gas, "poisson_g", m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
+  if(!ebis_sol.isNull()) read<EBCellFAB>(a_handle, state_sol, "poisson_s", m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
 }
 
 void poisson_solver::post_checkpoint(){

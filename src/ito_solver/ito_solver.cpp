@@ -996,7 +996,7 @@ void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
     readParticlesFromHDF(a_handle, *simpleParticles[a_level], str);
 
     // Make simple_ito_particles into ito_ particles
-    for (DataIterator dit(m_amr->get_grids()[a_level]); dit.ok(); ++dit){
+    for (DataIterator dit(m_amr->get_grids(m_realm)[a_level]); dit.ok(); ++dit){
       List<ito_particle>& particles = m_particles[a_level][dit()].listItems();
       
       for (ListIterator<simple_ito_particle> lit((*simpleParticles[a_level])[dit()].listItems()); lit.ok(); ++lit){
