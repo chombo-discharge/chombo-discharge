@@ -235,7 +235,7 @@ void cdr_solver::coarse_fine_increment(const EBAMRIVData& a_mass_diff){
   const Interval interv(0,0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
 
     RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_realm, m_phase)[lvl];
     RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_realm, m_phase)[lvl];
@@ -1851,8 +1851,8 @@ void cdr_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
     pout() << m_name + "::read_checkpoint_level" << endl;
   }
 
-  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids()[a_level], Interval(0,0), false);
-  read<EBCellFAB>(a_handle, *m_source[a_level], m_name+"_src", m_amr->get_grids()[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_source[a_level], m_name+"_src", m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
 }
 
 Real cdr_solver::compute_cfl_dt(){
