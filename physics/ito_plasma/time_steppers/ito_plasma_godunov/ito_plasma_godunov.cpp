@@ -1123,9 +1123,12 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   // 4. Recompute velocities with the new electric field, then do the actual semi-implicit Euler-Maruyama update.
   MPI_Barrier(Chombo_MPI::comm);
   velocityTime -= MPI_Wtime();
-  // this->set_ito_velocity_funcs();
-  // m_ito->interpolate_velocities();
-   this->compute_ito_velocities();
+#if 1 // This is what the algorithm says. 
+  this->set_ito_velocity_funcs();
+  m_ito->interpolate_velocities();
+#else // Have to use this for LEA - need to debug. 
+  this->compute_ito_velocities();
+#endif
   velocityTime += MPI_Wtime();
 
   MPI_Barrier(Chombo_MPI::comm);

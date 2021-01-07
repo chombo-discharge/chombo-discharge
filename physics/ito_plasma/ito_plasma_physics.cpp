@@ -38,7 +38,7 @@ ito_plasma_physics::ito_plasma_physics(){
   m_algorithm = algorithm::hybrid;
 
   // Default parameter for lookup tables
-  m_table_entries = 100;
+  m_table_entries = 1000;
 }
 
 ito_plasma_physics::~ito_plasma_physics(){

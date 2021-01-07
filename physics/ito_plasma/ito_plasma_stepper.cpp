@@ -1481,6 +1481,9 @@ void ito_plasma_stepper::compute_ito_velocities(){
 
   const ito_plasma_physics::coupling which_coupling = m_physics->get_coupling();
 
+  // Set velocity functions
+  this->set_ito_velocity_funcs();
+
   // Compute mobilities based on appropriate coupling
   switch(which_coupling){
   case ito_plasma_physics::coupling::LFA:
@@ -1490,9 +1493,6 @@ void ito_plasma_stepper::compute_ito_velocities(){
     this->compute_ito_mobilities_lea();
     break;
   }
-
-  // Set velocity functions
-  this->set_ito_velocity_funcs();
 
   // Interpolate velocity function to particle position
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
