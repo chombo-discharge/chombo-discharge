@@ -1354,7 +1354,7 @@ void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   }
 
   // These levels have changed
-  for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
+  for (int lvl = Max(1,a_lmin); lvl <= a_new_finest_level; lvl++){
     interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
     interpolator[lvl]->interpolate(*m_source[lvl], *m_source[lvl-1], interv);
     if(lvl <= Min(a_old_finest_level, a_new_finest_level)){

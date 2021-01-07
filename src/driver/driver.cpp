@@ -807,7 +807,7 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	  // on levels (l-1);
 	  int lmin, lmax;
 	  if(!m_recursive_regrid){
-	    lmin = 1; // level = 0 never changes(?)
+	    lmin = m_regrid_base_level ? 0 : 1;
 	    lmax = m_amr->get_finest_level();
 	  }
 	  else{
@@ -1081,10 +1081,10 @@ void driver::parse_regrid(){
 
   ParmParse pp("driver");
 
-  std::string str;
-  pp.get("regrid_interval", m_regrid_interval);
-  pp.get("initial_regrids", m_init_regrids);
-  pp.get("recursive_regrid", str); m_recursive_regrid = (str == "true") ? true : false;
+  pp.get("regrid_interval",   m_regrid_interval);
+  pp.get("initial_regrids",   m_init_regrids);
+  pp.get("recursive_regrid",  m_recursive_regrid);
+  pp.get("regrid_base_level", m_regrid_base_level);
 }
 
 void driver::parse_restart(){

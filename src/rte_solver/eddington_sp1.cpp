@@ -309,7 +309,7 @@ void eddington_sp1::regrid(const int a_lmin, const int a_old_finest_level, const
   }
 
   // These levels have changed
-  for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
+  for (int lvl = Max(1,a_lmin); lvl <= a_new_finest_level; lvl++){
     interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
 
     if(lvl <= a_old_finest_level){

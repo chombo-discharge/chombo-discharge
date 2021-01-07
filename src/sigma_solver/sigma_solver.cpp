@@ -100,7 +100,7 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
   }
 
   // These levels have changed
-  for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
+  for (int lvl = Max(1,a_lmin); lvl <= a_new_finest_level; lvl++){
     const DisjointBoxLayout& fine_grid = m_amr->get_grids(m_realm)[lvl];
     const ProblemDomain& fine_domain   = m_amr->get_domains()[lvl];
     const ProblemDomain& coar_domain   = m_amr->get_domains()[lvl-1];
