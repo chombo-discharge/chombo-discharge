@@ -317,6 +317,15 @@ public:
   virtual void interp_ghost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
+    @brief Interpolate ghost cells. Realm, phase, and level version.
+  */
+  virtual void interp_ghost(LevelData<EBCellFAB>&       a_fineData,
+			    const LevelData<EBCellFAB>& a_coarData,
+			    const int                   a_level,
+			    const std::string           a_realm,
+			    const phase::which_phase    a_phase);
+
+  /*!
     @brief Interpolate ghost cells over a realm
   */
   virtual void interp_ghost(MFAMRCellData& a_data, const std::string a_realm);

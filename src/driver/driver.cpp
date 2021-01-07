@@ -2119,24 +2119,29 @@ void driver::write_plot_file(const std::string a_filename){
     plot_depth = Min(m_max_plot_depth, m_amr->get_finest_level());
   }
 
+  // Interpolate ghost cells. This might be important if we use multiple realms. 
+  for (int icomp = 0; icomp < ncomp; icomp++){
+    const Interval interv(icomp, icomp);
+    
+    for (int lvl = 1; lvl <= m_amr->get_finest_level(); lvl++){
+
+      LevelData<EBCellFAB> fineAlias;
+      LevelData<EBCellFAB> coarAlias;
+
+      aliasLevelData(fineAlias, output_ptr[lvl],   interv);
+      aliasLevelData(coarAlias, output_ptr[lvl-1], interv);
+
+      m_amr->interp_ghost(fineAlias, coarAlias, lvl, m_realm, phase::gas);
+    }
+  }
+
   // Write HDF5 file
   if(m_verbosity >= 3){
     pout() << "driver::write_plot_file - writing plot file..." << endl;
   }
   Real t_write = -MPI_Wtime();
 
-  // Interpolate ghost cells
-#if 0
-  for (int icomp = 0; icomp < ncomp; icomp++){
-    const Interval intervComp(icomp, icomp);
-    const Interval intervZero(0,0);
-
-    scratch.copy(intervComp, output, intervZero);
-    m_amr->interp_ghost(scratch, m_realm, phase::gas);
-    output.copy(intervZero, scratch, intervComp);
-  }
-#endif
-
+  // Write. 
   writeEBHDF5(a_filename, 
 	      m_amr->get_grids(m_realm),
 	      output_ptr,

@@ -1280,6 +1280,41 @@ void amr_mesh::interp_ghost(EBAMRCellData& a_data, const std::string a_realm, co
   }
 }
 
+void amr_mesh::interp_ghost(LevelData<EBCellFAB>&       a_fineData,
+			    const LevelData<EBCellFAB>& a_coarData,
+			    const int                   a_fineLevel,
+			    const std::string           a_realm,
+			    const phase::which_phase    a_phase){
+  CH_TIME("amr_mesh::interp_ghost(fine, coar, level, realm, phase)");
+  if(m_verbosity > 3){
+    pout() << "amr_mesh::interp_ghost(fine, coar, level, realm, phase)" << endl;
+  }
+
+  if(!this->query_realm(a_realm)) {
+    std::string str = "amr_mesh::interp_ghost(fine, coar, level, realm, phase) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  if(a_fineLevel > 0){
+
+    const int ncomps      = a_fineData.nComp();
+    const Interval interv = Interval(0, ncomps-1);
+    
+    if(m_interp_type == ghost_interpolation::pwl){
+      AggEBPWLFillPatch& fillpatch = *m_realms[a_realm]->get_fillpatch(a_phase)[a_fineLevel];
+    
+      fillpatch.interpolate(a_fineData, a_coarData, a_coarData, 0.0, 0.0, 0.0, interv);
+    }
+    else if(m_interp_type == ghost_interpolation::quad){
+      nwoebquadcfinterp& quadcfi = *m_realms[a_realm]->get_quadcfi(a_phase)[a_fineLevel];
+      quadcfi.coarseFineInterp(a_fineData, a_coarData, 0, 0, ncomps);
+    }
+    else{
+      MayDay::Abort("amr_mesh::interp_ghost - unsupported interpolation type requested");
+    }
+  }
+}
+
 void amr_mesh::interp_ghost(MFAMRCellData& a_data, const std::string a_realm){
   CH_TIME("amr_mesh::interp_ghost(mfamrcell, realm)");
   if(m_verbosity > 3){
