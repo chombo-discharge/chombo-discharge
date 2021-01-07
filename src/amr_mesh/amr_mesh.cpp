@@ -788,7 +788,6 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
   this->regrid_operators(a_lmin, a_lmax, a_regsize);
 }
 
-
 void amr_mesh::regrid_amr(const Vector<IntVectSet>& a_tags,
 			  const int a_lmin,
 			  const int a_lmax,
@@ -861,98 +860,76 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
   //       that there are no prior grids.
   //       a_lmax is the finest level that changes. This is typically 
 
-#if 0 // Original code
-  const int base      = 0;                                    // Base level never changes.
-#else // Debug code
-  const int base = Max(0, a_lmin - 1);
-#endif
-  const int top_level = (m_finest_level == m_max_amr_depth) ? // top_level is the finest level where we have tags. We should never
-    m_finest_level - 1 : a_tags.size() - 1;                   // have tags on max_amr_depth, and we make that restriction here. 
-  Vector<Vector<Box> > new_boxes(1 + top_level);  // New boxes to be load balance
-  Vector<Vector<Box> > old_boxes(1 + top_level);  // Old grids.
+  // base is the coarsest level which does not change. top_level is the finest level where we have tags. We should never
+  // have tags on max_amr_depth, and we make that restriction here.
+  const int base      = Max(0, a_lmin - 1);
+  const int top_level = (m_finest_level == m_max_amr_depth) ? m_finest_level - 1 : a_tags.size() - 1;
 
-#if 0 // Debug
-  pout() << "amr_mesh::build_grids - " << "finest_level = " << m_finest_level
-	 << "\t max_depth = " << m_max_amr_depth
-    	 << "\t top_level = " << top_level
-	 << endl;
-#endif
+  // New and old grid boxes
+  Vector<Vector<Box> > new_boxes(1 + top_level);
+  Vector<Vector<Box> > old_boxes(1 + top_level);
 
+  // Enforce potential hardcap. 
   const int hardcap = (a_hardcap == -1) ? m_max_amr_depth : a_hardcap;
 
+  // Inside this loop we make the boxes. 
   if(m_max_amr_depth > 0 && hardcap > 0){
     domainSplit(m_domains[0], old_boxes[0], m_max_box_size, m_blocking_factor);
 
     if(!m_has_grids){
-
       for (int lvl = 1; lvl <= top_level; lvl++){
-#if 0 // This won't work because when m_domains is huge we can get a gazillion boxes. 
-	domainSplit(m_domains[lvl], old_boxes[lvl], m_max_box_size, m_blocking_factor);
-#else
 	old_boxes[lvl].resize(0);
 	old_boxes[lvl].push_back(m_domains[lvl].domainBox());
-#endif
       }
     }
     else{
-      for (int lvl = 1; lvl <= top_level; lvl++){ 
+      for (int lvl = 0; lvl <= top_level; lvl++){ 
 	old_boxes[lvl] = m_grids[lvl].boxArray();
       }
     }
 
-    int base_level = m_refine_all_depth;
-    if(top_level >= base_level){ // Use tags for regridding
-      // Berger-Rigoutsos grid generation
-      int new_finest_level;
-      if(m_gridgen == grid_generation::berger_rigoustous){
-	BRMeshRefine mesh_refine(m_domains[0], m_ref_ratios, m_fill_ratio, m_blocking_factor, m_buffer_size, m_max_box_size);
-	new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
-      }
-      else if (m_gridgen == grid_generation::tiled){
-	TiledMeshRefine mesh_refine(m_domains[0], m_ref_ratios, m_blocking_factor*IntVect::Unit);
-	new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
-      }
-      else{
-	MayDay::Abort("amr_mesh::regrid - logic bust, regridding with unknown regrid algorithm");
-      }
-
-      m_finest_level = Min(new_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
-      m_finest_level = Min(m_finest_level,   m_max_sim_depth); // Don't exceed maximum simulation depth
-      m_finest_level = Min(m_finest_level,   hardcap);         // Don't exceed hardcap
+    // Berger-Rigoutsos grid generation
+    int new_finest_level;
+    if(m_gridgen == grid_generation::berger_rigoustous){
+      BRMeshRefine mesh_refine(m_domains[0], m_ref_ratios, m_fill_ratio, m_blocking_factor, m_buffer_size, m_max_box_size);
+      new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
     }
-    else{ // Tag depth is below uniform refinement depth, create uniform grids everywhere
-      m_finest_level = m_refine_all_depth;
-      m_finest_level = Min(m_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
-      m_finest_level = Min(m_finest_level, m_max_sim_depth); // Don't exceed maximum simulation depth
-      m_finest_level = Min(m_finest_level, hardcap);         // Don't exceed hardcap
-
-      new_boxes.resize(1 + m_finest_level);
-      for (int lvl = 0; lvl <= m_finest_level; lvl++){
-	domainSplit(m_domains[lvl], new_boxes[lvl], m_max_box_size, m_blocking_factor);
-      }
+    else if (m_gridgen == grid_generation::tiled){
+      TiledMeshRefine mesh_refine(m_domains[0], m_ref_ratios, m_blocking_factor*IntVect::Unit);
+      new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
     }
+    else{
+      MayDay::Abort("amr_mesh::regrid - logic bust, regridding with unknown regrid algorithm");
+    }
+    
+    m_finest_level = Min(new_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
+    m_finest_level = Min(m_finest_level,   m_max_sim_depth); // Don't exceed maximum simulation depth
+    m_finest_level = Min(m_finest_level,   hardcap);         // Don't exceed hardcap
   }
-  else{
+  else{ // Only end up here if we have a single grid level, i.e. just single-level grid decomposition. 
     new_boxes.resize(1);
     domainSplit(m_domains[0], new_boxes[0], m_max_box_size, m_blocking_factor);
     
     m_finest_level = 0;
   }
 
-  // Do Morton ordering
+  // Morton order the boxes. 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     mortonOrdering((Vector<Box>&)new_boxes[lvl]);
   }
 
-  // Load balance boxes
-  Vector<Vector<int> > proc_assign(1 + m_finest_level);
-  this->loadbalance(proc_assign, new_boxes);
+  // Load balance boxes with patch volume as load proxy. 
+  Vector<Vector<int> > pid(1 + m_finest_level);
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    LoadBalance(pid[lvl], new_boxes[lvl]);
+  }
 
   // Define grids. If a_lmin=0 every grid is new, otherwise keep old grids up to but not including a_lmin
   if(a_lmin == 0){
+    m_grids.resize(1 + m_finest_level);
     for (int lvl = 0; lvl <= m_finest_level; lvl++){
       m_grids[lvl] = DisjointBoxLayout();
-      m_grids[lvl].define(new_boxes[lvl], proc_assign[lvl], m_domains[lvl]);
+      m_grids[lvl].define(new_boxes[lvl], pid[lvl], m_domains[lvl]);
       m_grids[lvl].close();
     }
   }
@@ -964,7 +941,7 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
     }
     for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){ // Create new ones from tags
       m_grids[lvl] = DisjointBoxLayout();
-      m_grids[lvl].define(new_boxes[lvl], proc_assign[lvl], m_domains[lvl]);
+      m_grids[lvl].define(new_boxes[lvl], pid[lvl], m_domains[lvl]);
       m_grids[lvl].close();
     }
   }
@@ -1509,18 +1486,23 @@ void amr_mesh::set_grids(const Vector<Vector<Box> >& a_boxes, const std::map<std
 
   const int lmin = 0;
 
+  Vector<Vector<int> > pids(1 + m_finest_level);
+
   for (const auto& r : a_realms_and_loads){
     const std::string&               cur_realm = r.first;
     const Vector<Vector<long int> >& cur_loads = r.second;
 
     // Do load balancing. 
-    Vector<Vector<int> > pids(1 + m_finest_level);
     for (int lvl = 0; lvl <= m_finest_level; lvl++){
       LoadBalance(pids[lvl], cur_loads[lvl], a_boxes[lvl]);
     }
 
     this->regrid_realm(cur_realm, pids, a_boxes, lmin);
   }
+
+  // Set the proxy grids, too. These are load balanced using the patch volume. 
+  m_grids = m_realms[realm::primal]->get_grids();
+  m_has_grids = true;
 }
 
 void amr_mesh::parse_max_box_size(){
@@ -1531,7 +1513,7 @@ void amr_mesh::parse_max_box_size(){
     m_max_box_size = box_size;
   }
   else{
-    MayDay::Abort("amr_mesh::parse_max_box_size - must have box_size > 8 and divisible by 2");
+    MayDay::Abort("amr_mesh::parse_max_box_size - must have box_size >= 8 and divisible by 2");
   }
 }
 
@@ -1544,7 +1526,7 @@ void amr_mesh::parse_max_ebis_box_size(){
     m_max_ebis_box_size = box_size;
   }
   else{
-    MayDay::Abort("amr_mesh::parse_max_ebis_box_size - must have box_size > 8 and divisible by 2");
+    MayDay::Abort("amr_mesh::parse_max_ebis_box_size - must have box_size >= 8 and divisible by 2");
   }
 }
 
@@ -1846,7 +1828,7 @@ Vector<ProblemDomain>& amr_mesh::get_domains(){
   return m_domains;
 }
 
-Vector<DisjointBoxLayout>& amr_mesh::get_grids(){
+Vector<DisjointBoxLayout>& amr_mesh::get_proxy_grids(){
   return m_grids;
 }
 
@@ -2039,10 +2021,17 @@ void amr_mesh::define_realms(){
   }
 
   for (auto& r : m_realms){
+#if 1 // Code hack: Need to do this because after we started checkpointing computational loads, we also started braking our assumptions
+      //            about the coarsest levels being the same. 
+    Vector<DisjointBoxLayout> grids = m_grids;
+    grids[0] = r.second->get_grids()[0];
+    r.second->define(grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
+		     m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
+#else
     r.second->define(m_grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
-			    m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
+		     m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
+#endif
   }
-
 }
 
 void amr_mesh::regrid_realm(const std::string           a_realm,
@@ -2061,25 +2050,23 @@ void amr_mesh::regrid_realm(const std::string           a_realm,
 
   // Make the dbl
   Vector<DisjointBoxLayout> grids(1 + m_finest_level);
+
+  // Levels that didn't change. 
   for (int lvl = 0; lvl < a_lmin; lvl++){
     grids[lvl] = this->get_grids(a_realm)[lvl];
   }
-  
+
+  // Levels that did change. 
   for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     grids[lvl] = DisjointBoxLayout();
     grids[lvl].define(a_boxes[lvl], a_procs[lvl], m_domains[lvl]);
     grids[lvl].close();
-    //    std::cout << a_procs[lvl] << std::endl;
   }
 
   m_realms[a_realm]->define(grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
 			    m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
 
   m_realms[a_realm]->regrid_base(a_lmin);
-
-#if 0 // This is a hack which we should get rid of when all allocators and operator fetching is complete. 
-  m_grids = m_realms[a_realm]->get_grids();
-#endif
 }
 
 std::vector<std::string> amr_mesh::get_realms() const {

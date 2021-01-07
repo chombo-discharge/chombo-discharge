@@ -1454,7 +1454,7 @@ void ito_plasma_stepper::deposit_particles(const which_particles a_which_particl
 void ito_plasma_stepper::set_ito_velocity_funcs(){
   CH_TIME("ito_plasma_stepper::set_ito_velocity_funcs");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::set_ito_velocity_funcs";
+    pout() << "ito_plasma_stepper::set_ito_velocity_funcs" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){

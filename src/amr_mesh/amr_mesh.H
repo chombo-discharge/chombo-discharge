@@ -640,7 +640,7 @@ public:
   /*!
     @brief Get the grids
   */
-  virtual Vector<DisjointBoxLayout>& get_grids();
+  virtual Vector<DisjointBoxLayout>& get_proxy_grids();
 
   /*!
     @brief Get the grids

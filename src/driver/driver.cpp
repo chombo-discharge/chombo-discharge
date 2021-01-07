@@ -635,14 +635,14 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   const int new_finest_level = m_amr->get_finest_level();
 
   // Load balance and regrid the various realms
-  const std::vector<std::string> realms = m_amr->get_realms();
-  for (auto str : realms){
+  const std::vector<std::string>& realms = m_amr->get_realms();
+  for (const auto& str : realms){
     if(m_timestepper->load_balance_realm(str)){
       
       Vector<Vector<int> > procs;
       Vector<Vector<Box> > boxes;
       
-      m_timestepper->load_balance_boxes(procs, boxes, str, m_amr->get_grids(), a_lmin, new_finest_level);
+      m_timestepper->load_balance_boxes(procs, boxes, str, m_amr->get_proxy_grids(), a_lmin, new_finest_level);
 
       m_amr->regrid_realm(str, procs, boxes, a_lmin);
     }
@@ -2479,7 +2479,6 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
 
   // Go through level by level and have solvers extract their data
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     handle_in.setGroupToLevel(lvl);
 
     // time stepper reads in data
