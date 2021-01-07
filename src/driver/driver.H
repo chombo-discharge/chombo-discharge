@@ -443,11 +443,6 @@ protected:
   */
   bool m_plot_ranks;
 
-  /*!
-    @brief Flag for seeing if we should regrid the coarsest level.
-  */
-  bool m_regrid_base_level;
-
   // Output parameters that go into checkpoint files
   Vector<Real> m_time_history;        // Simulation time
   Vector<Real> m_voltage_history;     // Applied voltage

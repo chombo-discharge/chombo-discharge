@@ -2021,16 +2021,8 @@ void amr_mesh::define_realms(){
   }
 
   for (auto& r : m_realms){
-#if 1 // Code hack: Need to do this because after we started checkpointing computational loads, we also started braking our assumptions
-      //            about the coarsest levels being the same. 
-    Vector<DisjointBoxLayout> grids = m_grids;
-    grids[0] = r.second->get_grids()[0];
-    r.second->define(grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
-		     m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
-#else
     r.second->define(m_grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
 		     m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
-#endif
   }
 }
 

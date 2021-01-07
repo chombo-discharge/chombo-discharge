@@ -7,7 +7,6 @@ driver.geometry_scan_level             = 0             # Geometry scan level for
 driver.plot_interval                   = 10            # Plot interval
 driver.checkpoint_interval             = 10            # Checkpoint interval
 driver.regrid_interval                 = 10            # Regrid interval
-driver.regrid_base_level               = false         # Switch for "regridding" the base level. 
 driver.recursive_regrid                = false         # Recursive regrids
 driver.write_regrid_files              = false         # Write regrid files or not. 
 driver.initial_regrids                 = 0             # Number of initial regrids

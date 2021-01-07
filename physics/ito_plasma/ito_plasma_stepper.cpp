@@ -3091,6 +3091,11 @@ void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
       }
     }
 
+    // Now add the "constant" loads.
+    for (int ibox = 0; ibox < a_boxes[lvl].size(); ibox++){
+      total_loads[ibox] += lround(m_load_ppc)*a_boxes[lvl][ibox].numPts();
+    }
+
     // Do the friggin load balancing. 
     LoadBalance(a_procs[lvl], total_loads, a_boxes[lvl]);
   }
