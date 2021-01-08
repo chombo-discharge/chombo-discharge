@@ -91,6 +91,11 @@ public:
   virtual void allocate_internals();
 
   /*!
+    @brief Clear a particle container
+  */
+  virtual void clear(const std::string a_container);
+
+  /*!
     @brief Empty particle container
   */
   virtual void clear(particle_container<ito_particle>& a_particles);
@@ -237,6 +242,11 @@ public:
   virtual void remove_eb_particles(const EB_representation a_representation, const Real a_tol);
 
   /*!
+    @brief Which particles to remove
+  */
+  virtual void remove_eb_particles(const EB_representation a_representation, const std::string a_container, const Real a_tol);
+
+  /*!
     @brief Remove particles that are inside the EB
   */
   virtual void remove_eb_particles(particle_container<ito_particle>& a_particles, const EB_representation a_representation, const Real a_tol);
@@ -245,6 +255,24 @@ public:
     @brief Do boundary intersection tests
   */
   virtual void intersect_particles(const EB_representation a_representation);
+
+  /*!
+    @brief Do boundary intersection tests.
+  */
+  virtual void intersect_particles(const EB_representation a_representation,
+				   const std::string       a_particles,
+				   const std::string       a_eb_particles,
+				   const std::string       a_dom_particles,
+				   const bool              a_delete);
+
+    /*!
+    @brief Do boundary intersection tests.
+  */
+  virtual void intersect_particles(const EB_representation           a_representation,
+				   particle_container<ito_particle>& a_particles,
+				   particle_container<ito_particle>& a_eb_particles,
+				   particle_container<ito_particle>& a_dom_particles,
+				   const bool                        a_delete);
 
   /*!
     @brief Compute particle load on specific levle
@@ -395,6 +423,11 @@ public:
     @brief Check if solver is diffusive
   */
   virtual bool is_diffusive() const;
+
+  /*!
+    @brief Get a general particle container
+  */
+  virtual particle_container<ito_particle>& get_particle_container(const std::string a_container);
 
   /*!
     @brief Get the particle container
@@ -549,6 +582,11 @@ public:
     @brief Remap all particles
   */
   void remap();
+
+  /*!
+    @brief Remap all particles
+  */
+  void remap(const std::string a_container);
 
   /*!
     @brief Random Gaussian
@@ -893,6 +931,11 @@ protected:
   bool m_plot_source_particles;
 
   /*!
+    @brief Plot covered particles
+  */
+  bool m_plot_covered_particles;
+
+  /*!
     @brief Plot energy density
   */
   bool m_plot_energy_density;
@@ -971,6 +1014,11 @@ protected:
     @brief Scratch particle holder.
   */
   particle_container<ito_particle> m_scratch_particles;
+
+  /*!
+    @brief Covered particles
+  */
+  particle_container<ito_particle> m_covered_particles;
 
   /*!
     @brief Parse superparticles
@@ -1116,6 +1164,14 @@ protected:
     @brief Do boundary intersection tests with an implicit function
   */
   void intersect_particles_if();
+
+  /*!
+    @brief Do boundary intersection tests with an implicit function
+  */
+  void intersect_particles_if(particle_container<ito_particle>& a_particles,
+			      particle_container<ito_particle>& a_eb_particles,
+			      particle_container<ito_particle>& a_dom_particles,
+			      const bool                        a_delete);
 
   /*!
     @brief Interpolate mobilities

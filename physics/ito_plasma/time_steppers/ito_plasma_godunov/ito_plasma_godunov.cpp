@@ -1144,7 +1144,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   MPI_Barrier(Chombo_MPI::comm);
   isectTime -= MPI_Wtime();
-  this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function);
+  this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function); // This removes from m_particles = bad code!
   this->remove_eb_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, m_eb_tolerance);
   isectTime += MPI_Wtime();
 
