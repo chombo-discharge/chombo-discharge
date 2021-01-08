@@ -91,10 +91,10 @@ namespace physics {
 			      const int                        a_finest_level) override;
 
 
-      // Particle intersection routines
-      void intersect_particles(const which_particles a_which, const EB_representation a_representation);
-      void remove_eb_particles(const which_particles a_which, const EB_representation a_representation, const Real a_tolerance);
-      void remove_eb_particles(const which_particles a_which, const EB_representation a_representation, const std::string a_container, const Real a_tolerance);
+      // Particle handling routines. 
+      void intersect_particles(const which_particles a_which, const EB_representation a_representation, const bool a_delete);
+      void remove_covered_particles(const which_particles a_which, const EB_representation a_representation, const Real a_tolerance);
+      void remove_covered_particles(const which_particles a_which, const EB_representation a_representation, const std::string a_container, const Real a_tolerance);
 
       // Internal routines
       void set_verbosity(const int a_verbosity);

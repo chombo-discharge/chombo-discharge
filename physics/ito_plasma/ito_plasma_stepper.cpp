@@ -1263,7 +1263,7 @@ bool ito_plasma_stepper::solve_poisson(MFAMRCellData&                a_potential
   return converged;
 }
 
-void ito_plasma_stepper::intersect_particles(const which_particles a_which_particles, const EB_representation a_representation){
+void ito_plasma_stepper::intersect_particles(const which_particles a_which_particles, const EB_representation a_representation, const bool a_delete){
   CH_TIME("ito_plasma_stepper::intersect_particles(which_particles, EB_representation)");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::intersect_particles(which_particles, EB_representation)" << endl;
@@ -1281,28 +1281,28 @@ void ito_plasma_stepper::intersect_particles(const which_particles a_which_parti
 
     switch(a_which_particles) {
     case which_particles::all:
-      solver->intersect_particles(a_representation);
+      solver->intersect_particles(a_representation, a_delete);
       break;
     case which_particles::all_mobile:
-      if(mobile) solver->intersect_particles(a_representation);
+      if(mobile) solver->intersect_particles(a_representation, a_delete);
       break;
     case which_particles::all_diffusive:
-      if(diffusive) solver->intersect_particles(a_representation);
+      if(diffusive) solver->intersect_particles(a_representation, a_delete);
       break;
     case which_particles::charged_mobile:
-      if(charged && mobile) solver->intersect_particles(a_representation);
+      if(charged && mobile) solver->intersect_particles(a_representation, a_delete);
       break;
     case which_particles::charged_diffusive:
-      if(charged && diffusive) solver->intersect_particles(a_representation);
+      if(charged && diffusive) solver->intersect_particles(a_representation, a_delete);
       break;
     case which_particles::all_mobile_or_diffusive:
-      if(mobile || diffusive) solver->intersect_particles(a_representation);
+      if(mobile || diffusive) solver->intersect_particles(a_representation, a_delete);
       break;
     case which_particles::charged_and_mobile_or_diffusive:
-      if(charged && (mobile || diffusive)) solver->intersect_particles(a_representation);
+      if(charged && (mobile || diffusive)) solver->intersect_particles(a_representation, a_delete);
       break;
     case which_particles::stationary:
-      if(!mobile && !diffusive) solver->intersect_particles(a_representation);
+      if(!mobile && !diffusive) solver->intersect_particles(a_representation, a_delete);
       break;
     default:
       MayDay::Abort("ito_plasma_stepper::intersect_particles_particles(which_particles, EB_representation) - logic bust");
@@ -1310,19 +1310,19 @@ void ito_plasma_stepper::intersect_particles(const which_particles a_which_parti
   }  
 }
 
-void ito_plasma_stepper::remove_eb_particles(const which_particles a_which_particles, const EB_representation a_representation, const Real a_tolerance){
-  CH_TIME("ito_plasma_stepper::remove_eb_particles(which_particles, representation, tolerance)");
+void ito_plasma_stepper::remove_covered_particles(const which_particles a_which_particles, const EB_representation a_representation, const Real a_tolerance){
+  CH_TIME("ito_plasma_stepper::remove_covered_particles(which_particles, representation, tolerance)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::remove_eb_particles(which_particles, representation, tolerance)" << endl;
+    pout() << "ito_plasma_stepper::remove_covered_particles(which_particles, representation, tolerance)" << endl;
   }
 
-  this->remove_eb_particles(a_which_particles, a_representation, "particles", a_tolerance);
+  this->remove_covered_particles(a_which_particles, a_representation, "particles", a_tolerance);
 }
 
-void ito_plasma_stepper::remove_eb_particles(const which_particles a_which, const EB_representation a_representation, const std::string a_container, const Real a_tolerance){
-  CH_TIME("ito_plasma_stepper::remove_eb_particles(which_particles, EB_representation, container, tolerance)");
+void ito_plasma_stepper::remove_covered_particles(const which_particles a_which, const EB_representation a_representation, const std::string a_container, const Real a_tolerance){
+  CH_TIME("ito_plasma_stepper::remove_covered_particles(which_particles, EB_representation, container, tolerance)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::remove_eb_particles(which_particles, EB_representation, container, tolerance)" << endl;
+    pout() << "ito_plasma_stepper::remove_covered_particles(which_particles, EB_representation, container, tolerance)" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1337,31 +1337,31 @@ void ito_plasma_stepper::remove_eb_particles(const which_particles a_which, cons
 
     switch(a_which) {
     case which_particles::all:
-      solver->remove_eb_particles(a_representation, a_container, a_tolerance);
+      solver->remove_covered_particles(a_representation, a_container, a_tolerance);
       break;
     case which_particles::all_mobile:
-      if(mobile) solver->remove_eb_particles(a_representation, a_container, a_tolerance);
+      if(mobile) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
       break;
     case which_particles::all_diffusive:
-      if(diffusive) solver->remove_eb_particles(a_representation, a_container, a_tolerance);
+      if(diffusive) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
       break;
     case which_particles::charged_mobile:
-      if(charged && mobile) solver->remove_eb_particles(a_representation, a_container, a_tolerance);
+      if(charged && mobile) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
       break;
     case which_particles::charged_diffusive:
-      if(charged && diffusive) solver->remove_eb_particles(a_representation, a_container, a_tolerance);
+      if(charged && diffusive) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
       break;
     case which_particles::all_mobile_or_diffusive:
-      if(mobile || diffusive) solver->remove_eb_particles(a_representation, a_container, a_tolerance);
+      if(mobile || diffusive) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
       break;
     case which_particles::charged_and_mobile_or_diffusive:
-      if(charged && (mobile || diffusive)) solver->remove_eb_particles(a_representation, a_container, a_tolerance);
+      if(charged && (mobile || diffusive)) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
       break;
     case which_particles::stationary:
-      if(!mobile && !diffusive) solver->remove_eb_particles(a_representation, a_container, a_tolerance);
+      if(!mobile && !diffusive) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
       break;
     default:
-      MayDay::Abort("ito_plasma_stepper::remove_eb_particles_particles(which particles) - logic bust");
+      MayDay::Abort("ito_plasma_stepper::remove_covered_particles_particles(which particles) - logic bust");
     }
   }  
 }

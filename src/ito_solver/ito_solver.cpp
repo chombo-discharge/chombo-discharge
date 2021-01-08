@@ -527,7 +527,7 @@ void ito_solver::initial_data(){
 
   // Add particles, remove the ones that are inside the EB, and then depsit
   m_particles.add_particles(m_species->get_initial_particles()); 
-  this->remove_eb_particles(EB_representation::implicit_function, 0.0);
+  this->remove_covered_particles(EB_representation::implicit_function, 0.0);
   this->deposit_particles(m_state, m_particles, m_deposition);
 
 #if 0 // Test code
@@ -559,54 +559,52 @@ void ito_solver::compute_loads(Vector<long int>& a_loads, const DisjointBoxLayou
 #endif
 }
 
-void ito_solver::remove_eb_particles(const EB_representation a_representation, const Real a_tol){
-  CH_TIME("ito_solver::remove_eb_particles(EB_representation, tolerance)");
+void ito_solver::remove_covered_particles(const EB_representation a_representation, const Real a_tol){
+  CH_TIME("ito_solver::remove_covered_particles(EB_representation, tolerance)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_eb_particles(EB_representation, tolerance)" << endl;
+    pout() << m_name + "::remove_covered_particles(EB_representation, tolerance)" << endl;
   }
 
-  this->remove_eb_particles(m_particles, a_representation, a_tol);
+  this->remove_covered_particles(m_particles, a_representation, a_tol);
 }
 
 
-void ito_solver::remove_eb_particles(const EB_representation a_representation, const std::string a_container, const Real a_tol){
-  CH_TIME("ito_solver::remove_eb_particles(EB_representation, container, tolerance)");
+void ito_solver::remove_covered_particles(const EB_representation a_representation, const std::string a_container, const Real a_tol){
+  CH_TIME("ito_solver::remove_covered_particles(EB_representation, container, tolerance)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_eb_particles(EB_representation, container, tolerance)" << endl;
+    pout() << m_name + "::remove_covered_particles(EB_representation, container, tolerance)" << endl;
   }
 
   particle_container<ito_particle>& particles = this->get_particle_container(a_container);
   
-  this->remove_eb_particles(particles, a_representation, a_tol);
-
-      
+  this->remove_covered_particles(particles, a_representation, a_tol);
 }
 
-void ito_solver::remove_eb_particles(particle_container<ito_particle>& a_particles, const EB_representation a_representation, const Real a_tol){
-  CH_TIME("ito_solver::remove_eb_particles(particles, EB_representation)");
+void ito_solver::remove_covered_particles(particle_container<ito_particle>& a_particles, const EB_representation a_representation, const Real a_tol){
+  CH_TIME("ito_solver::remove_covered_particles(particles, EB_representation)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_eb_particles(particles, EB_representation)" << endl;
+    pout() << m_name + "::remove_covered_particles(particles, EB_representation)" << endl;
   }
 
   switch(a_representation){
   case EB_representation::implicit_function:
-    this->remove_eb_particles_if(a_particles, a_tol);
+    this->remove_covered_particles_if(a_particles, a_tol);
     break;
   case EB_representation::discrete:
-    this->remove_eb_particles_discrete(a_particles);
+    this->remove_covered_particles_discrete(a_particles);
     break;
   case EB_representation::voxel:
-    this->remove_eb_particles_voxels(a_particles);
+    this->remove_covered_particles_voxels(a_particles);
     break;
   default:
-    MayDay::Abort("ito_solver::remove_eb_particles - unsupported EB representation requested");
+    MayDay::Abort("ito_solver::remove_covered_particles - unsupported EB representation requested");
   }
 }
 
-void ito_solver::remove_eb_particles_if(particle_container<ito_particle>& a_particles, const Real a_tol){
-  CH_TIME("ito_solver::remove_eb_particles_if(particles)");
+void ito_solver::remove_covered_particles_if(particle_container<ito_particle>& a_particles, const Real a_tol){
+  CH_TIME("ito_solver::remove_covered_particles_if(particles)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_eb_particles_if(particles)" << endl;
+    pout() << m_name + "::remove_covered_particles_if(particles)" << endl;
   }
 
   const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_compgeom->get_gas_if() : m_compgeom->get_sol_if();
@@ -633,10 +631,44 @@ void ito_solver::remove_eb_particles_if(particle_container<ito_particle>& a_part
   }
 }
 
-void ito_solver::remove_eb_particles_discrete(particle_container<ito_particle>& a_particles){
-  CH_TIME("ito_solver::remove_eb_particles_discrete(particles)");
+
+void ito_solver::transfer_covered_particles_if(particle_container<ito_particle>& a_src, particle_container<ito_particle>& a_dst, const Real a_tol){
+  CH_TIME("ito_solver::transfer_covered_particles_if(container, container, tolerance)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_eb_particles_discrete(particles)" << endl;
+    pout() << m_name + "::transfer_covered_particles_if(container, container, tolerance)" << endl;
+  }
+
+  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_compgeom->get_gas_if() : m_compgeom->get_sol_if();
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
+    const Real tol               = a_tol*dx;
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBISBox& ebisbox = ebisl[dit()];
+      
+      List<ito_particle>& src = a_src[lvl][dit()].listItems();
+      List<ito_particle>& dst = a_dst[lvl][dit()].listItems();
+
+      // Check if particles are outside the implicit function. 
+      for (ListIterator<ito_particle> lit(src); lit.ok(); ++lit){
+	ito_particle& p = lit();
+
+	const Real f = func->value(p.position());
+	if(f > tol) {
+	  dst.transfer(lit);
+	}
+      }
+    }
+  }
+}
+
+void ito_solver::remove_covered_particles_discrete(particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::remove_covered_particles_discrete(particles)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::remove_covered_particles_discrete(particles)" << endl;
   }
 
   const RealVect prob_lo = m_amr->get_prob_lo();
@@ -685,10 +717,10 @@ void ito_solver::remove_eb_particles_discrete(particle_container<ito_particle>& 
   }
 }
 
-void ito_solver::remove_eb_particles_voxels(particle_container<ito_particle>& a_particles){
-  CH_TIME("ito_solver::remove_eb_particles_voxels(particles)");
+void ito_solver::remove_covered_particles_voxels(particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::remove_covered_particles_voxels(particles)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_eb_particles_voxels(particles)" << endl;
+    pout() << m_name + "::remove_covered_particles_voxels(particles)" << endl;
   }
 
   const RealVect prob_lo = m_amr->get_prob_lo();
@@ -724,19 +756,52 @@ void ito_solver::remove_eb_particles_voxels(particle_container<ito_particle>& a_
   }
 }
 
-void ito_solver::intersect_particles(const EB_representation a_representation){
+void ito_solver::transfer_covered_particles(const EB_representation a_representation, const Real a_tol){
+  CH_TIME("ito_solver::transfer_covered_particles(EB_representation, tol)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::transfer_covered_particles(EB_representation, tol)" << endl;
+  }
+
+  this->transfer_covered_particles("particles", "covered_particles", a_representation, a_tol);
+}
+
+void ito_solver::transfer_covered_particles(const std::string a_containerFrom, const std::string a_containerTo, const EB_representation a_representation, const Real a_tol){
+  CH_TIME("ito_solver::transfer_covered_particles(EB_representation, string, string, tol)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::transfer_covered_particles(EB_representation, string, string, tol)" << endl;
+  }
+
+  particle_container<ito_particle>& src = this->get_particle_container(a_containerFrom);
+  particle_container<ito_particle>& dst = this->get_particle_container(a_containerTo);
+
+  this->transfer_covered_particles(src, dst, a_representation, a_tol);
+}
+
+void ito_solver::transfer_covered_particles(particle_container<ito_particle>& a_containerFrom,
+					    particle_container<ito_particle>& a_containerTo,
+					    const EB_representation           a_representation,
+					    const Real                        a_tol){
+  CH_TIME("ito_solver::transfer_covered_particles(EB_representation, container, container, tol)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::transfer_covered_particles(EB_representation, container, container, tol)" << endl;
+  }
+
+  switch(a_representation){
+  case EB_representation::implicit_function:
+    this->transfer_covered_particles_if(a_containerFrom, a_containerTo, a_tol);
+    break;
+  default:
+    MayDay::Abort("ito_solver::intersect_particles - unsupported EB representation requested");
+  }
+}
+
+void ito_solver::intersect_particles(const EB_representation a_representation, const bool a_delete){
   CH_TIME("ito_solver::intersect_particles(EB_representation)");
   if(m_verbosity > 5){
     pout() << m_name + "::intersect_particles(EB_representation)" << endl;
   }
 
-  switch(a_representation){
-  case EB_representation::implicit_function:
-    this->intersect_particles_if();
-    break;
-  default:
-    MayDay::Abort("ito_solver::intersect_particles - unsupported EB representation requested");
-  }
+  this->intersect_particles(a_representation, "particles", "eb_particles", "domain_particles", a_delete);
 }
 
 void ito_solver::intersect_particles(const EB_representation a_representation,
@@ -753,7 +818,7 @@ void ito_solver::intersect_particles(const EB_representation a_representation,
   particle_container<ito_particle>& eb_particles  = this->get_particle_container(a_eb_particles);
   particle_container<ito_particle>& dom_particles = this->get_particle_container(a_dom_particles);
 
-  this->intersect_particles(a_representation, a_particles, a_eb_particles, a_dom_particles, a_delete);
+  this->intersect_particles(a_representation, particles, eb_particles, dom_particles, a_delete);
 }
 
 
@@ -766,21 +831,19 @@ void ito_solver::intersect_particles(const EB_representation           a_represe
   if(m_verbosity > 5){
     pout() << m_name + "::intersect_particles(EB_representation, container, container, container, bool)" << endl;
   }
-}
 
-void ito_solver::intersect_particles_if(){
-  CH_TIME("ito_solver::intersect_particles_if()");
-  if(m_verbosity > 5){
-    pout() << m_name + "::intersect_particles_if()" << endl;
+  switch(a_representation){
+  case EB_representation::implicit_function:
+    this->intersect_particles_if(a_particles, a_eb_particles, a_dom_particles, a_delete);
+    break;
+  default:
+    MayDay::Abort("ito_solver::intersect_particles - unsupported EB representation requested");
   }
-
-  this->intersect_particles_if(m_particles, m_eb_particles, m_domain_particles, true);
-
 }
 
 void ito_solver::intersect_particles_if(particle_container<ito_particle>& a_particles,
 					particle_container<ito_particle>& a_eb_particles,
-					particle_container<ito_particle>& a_dom_particles,
+					particle_container<ito_particle>& a_domain_particles,
 					const bool                        a_delete){
   CH_TIME("ito_solver::intersect_particles_if(container, container, container, bool)");
   if(m_verbosity > 5){
@@ -807,10 +870,10 @@ void ito_solver::intersect_particles_if(particle_container<ito_particle>& a_part
       const EBISBox& ebisbox = m_amr->get_ebisl(m_realm, m_phase)[lvl][dit()];
 
       if(!ebisbox.isAllRegular()){
-	List<ito_particle>& particles    = a_particles[lvl][dit()].listItems();
-	List<ito_particle>& ebParticles  = a_eb_particles[lvl][dit()].listItems();
-	List<ito_particle>& domParticles = a_dom_particles[lvl][dit()].listItems();
-	
+	List<ito_particle>& particles    = m_particles[lvl][dit()].listItems();
+	List<ito_particle>& ebParticles  = m_eb_particles[lvl][dit()].listItems();
+	List<ito_particle>& domParticles = m_domain_particles[lvl][dit()].listItems();
+
 	ebParticles.clear();
 	domParticles.clear();
 
@@ -850,12 +913,12 @@ void ito_solver::intersect_particles_if(particle_container<ito_particle>& a_part
 	    if(contact_eb || contact_domain){ // Particle trajectory crossed something. 
 	      if(eb_s < dom_s){ // It was the EB first. 
 		p.position() = oldPos + eb_s*path;
-		if(a_delete){
+		//		if(a_delete){
 		  ebParticles.transfer(lit);
-		}
-		else{
-		  ebParticles.add(lit());
-		}
+		// }
+		// else{
+		//   ebParticles.add(lit());
+		// }
 	      }
 	      else{ // It was the domain boundary. 
 		p.position() = oldPos + Max(0.0,dom_s-SAFETY)*path;
@@ -1942,10 +2005,6 @@ void ito_solver::pre_regrid(const int a_base, const int a_old_finest_level){
 }
 
 particle_container<ito_particle>& ito_solver::get_particle_container(const std::string a_container){
-  CH_TIME("ito_solver::get_particle_container");
-  if(m_verbosity > 5){
-    pout() << m_name + "::get_particle_container" << endl;
-  }
 
   particle_container<ito_particle>* particles = NULL;
   
