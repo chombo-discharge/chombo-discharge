@@ -101,7 +101,7 @@ namespace physics {
 			       const bool              a_delete);
 			       
       void remove_covered_particles(const which_particles a_which, const EB_representation a_representation, const Real a_tolerance);
-      void remove_covered_particles(const which_particles a_which, const EB_representation a_representation, const std::string a_container, const Real a_tolerance);
+      void remove_covered_particles(const which_particles a_which, const std::string a_container, const EB_representation a_representation, const Real a_tolerance);
 
       // Internal routines
       void set_verbosity(const int a_verbosity);

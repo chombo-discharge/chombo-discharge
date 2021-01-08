@@ -155,75 +155,55 @@ void ito_layout<T>::set_time(const int a_step, const Real a_time, const Real a_d
 }
 
 template <class T>
-void ito_layout<T>::sort_particles_by_cell(){
+void ito_layout<T>::sort_particles_by_cell(const std::string a_container){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->sort_particles_by_cell();
+    iter()->sort_particles_by_cell(a_container);
   }
 }
 
 template <class T>
-void ito_layout<T>::sort_particles_by_patch(){
+void ito_layout<T>::sort_particles_by_patch(const std::string a_container){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->sort_particles_by_patch();
+    iter()->sort_particles_by_patch(a_container);
   }
 }
 
 template <class T>
-void ito_layout<T>::make_superparticles(const int a_ppc){
+void ito_layout<T>::make_superparticles(const std::string a_container, const int a_ppc){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->make_superparticles(a_ppc);
+    iter()->make_superparticles(a_container, a_ppc);
   }
 }
 
 template <class T>
 void ito_layout<T>::deposit_particles(){
+  this->deposit_particles("bulk_particles");
+}
+
+template <class T>
+void ito_layout<T>::deposit_particles(const std::string a_container){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->deposit_particles();
+    iter()->deposit_particles(a_container);
   }
 }
 
 template <class T>
 void ito_layout<T>::remap(){
+  this->remap("bulk_particles");
+}
+
+template <class T>
+void ito_layout<T>::remap(const std::string a_container){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->remap();
+    iter()->remap(a_container);
   }
 }
 
 template <class T>
-size_t ito_layout<T>::get_num_particles(const bool a_local) {
+size_t ito_layout<T>::get_num_particles(const std::string a_container, const bool a_local) {
   size_t ret = 0;
   for (auto iter = this->iterator(); iter.ok(); ++iter){
-    ret += iter()->get_num_particles(a_local);
-  }
-
-  return ret;
-}
-
-template <class T>
-size_t ito_layout<T>::get_num_eb_particles(const bool a_local) {
-  size_t ret = 0;
-  for (auto iter = this->iterator(); iter.ok(); ++iter){
-    ret += iter()->get_num_eb_particles(a_local);
-  }
-
-  return ret;
-}
-
-template <class T>
-size_t ito_layout<T>::get_num_domain_particles(const bool a_local) {
-  size_t ret = 0;
-  for (auto iter = this->iterator(); iter.ok(); ++iter){
-    ret += iter()->get_num_domain_particles(a_local);
-  }
-
-  return ret;
-}
-
-template <class T>
-size_t ito_layout<T>::get_num_source_particles(const bool a_local) {
-  size_t ret = 0;
-  for (auto iter = this->iterator(); iter.ok(); ++iter){
-    ret += iter()->get_num_source_particles(a_local);
+    ret += iter()->get_num_particles(a_container, a_local);
   }
 
   return ret;
@@ -369,26 +349,6 @@ Vector<particle_container<ito_particle>* > ito_layout<T>::get_particles(const st
   }
   
   return ret;
-}
-
-template <class T>
-Vector<particle_container<ito_particle>* > ito_layout<T>::get_particles(){
-  return this->get_particles("bulk_particles");
-}
-
-template <class T>
-Vector<particle_container<ito_particle>* > ito_layout<T>::get_eb_particles(){
-  return this->get_particles("eb_particles");
-}
-
-template <class T>
-Vector<particle_container<ito_particle>* > ito_layout<T>::get_domain_particles(){
-  return this->get_particles("domain_particles");
-}
-
-template <class T>
-Vector<particle_container<ito_particle>* > ito_layout<T>::get_source_particles(){
-  return this->get_particles("source_particles");
 }
 
 template <class T>

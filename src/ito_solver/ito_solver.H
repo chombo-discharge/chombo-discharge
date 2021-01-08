@@ -217,6 +217,11 @@ public:
   virtual void deposit_particles();
 
   /*!
+    @brief Deposit particles
+  */
+  virtual void deposit_particles(const std::string a_container);
+
+  /*!
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
   template <class T>
@@ -330,26 +335,6 @@ public:
   virtual size_t get_num_particles(const std::string a_container, const bool a_local) const;
 
   /*!
-    @brief Get number of particles in m_particles
-  */
-  virtual size_t get_num_particles(const bool a_local) const;
-
-  /*!
-    @brief Get number of particles in m_particles
-  */
-  virtual size_t get_num_eb_particles(const bool a_local) const;
-
-  /*!
-    @brief Get number of particles in m_particles
-  */
-  virtual size_t get_num_domain_particles(const bool a_local) const;
-
-  /*!
-    @brief Get number of particles in m_particles
-  */
-  virtual size_t get_num_source_particles(const bool a_local) const;
-
-  /*!
     @brief Register operators
   */
   virtual void register_operators();
@@ -455,29 +440,9 @@ public:
   virtual particle_container<ito_particle>& get_particles(const std::string a_container);
 
   /*!
-    @brief Get the particle container
+    @brief Get a general particle container
   */
-  virtual particle_container<ito_particle>& get_particles();
-
-  /*!
-    @brief Get the particle container
-  */
-  virtual particle_container<ito_particle>& get_eb_particles();
-
-  /*!
-    @brief Get the particle container
-  */
-  virtual particle_container<ito_particle>& get_domain_particles();
-
-  /*!
-    @brief Get the particle container
-  */
-  virtual particle_container<ito_particle>& get_source_particles();
-
-  /*!
-    @brief Get the particle container
-  */
-  virtual particle_container<ito_particle>& get_scratch_particles();
+  virtual const particle_container<ito_particle>& get_particles(const std::string a_container) const;
 
   /*!
     @brief Get the species
@@ -578,30 +543,30 @@ public:
   */
   virtual void update_diffusion(const int a_level, const DataIndex a_dit);
 
-  /*!
+    /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sort_particles_by_cell();
+  virtual void sort_particles_by_cell(const std::string a_container);
 
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sort_particles_by_patch();
+  virtual void sort_particles_by_patch(const std::string a_container);
   
   /*!
     @brief Make superparticles
   */
-  virtual void make_superparticles(const int a_particlesPerPatch);
+  virtual void make_superparticles(const std::string a_container, const int a_particlesPerPatch);
 
   /*!
     @brief Make superparticles on specified level
   */
-  virtual void make_superparticles(const int a_particlesPerPatch, const int a_level);
+  virtual void make_superparticles(const std::string a_container, const int a_particlesPerPatch, const int a_level);
 
   /*!
     @brief Make superparticles on specified level and patch
   */
-  virtual void make_superparticles(const int a_particlesPerPatch, const int a_level, const DataIndex a_dit);
+  virtual void make_superparticles(const std::string a_container, const int a_particlesPerPatch, const int a_level, const DataIndex a_dit);
 
   /*!
     @brief Remap all particles
@@ -1019,36 +984,6 @@ protected:
     @brief Various particle containers with identifiers. 
   */
   std::map<std::string, particle_container<ito_particle> > m_particle_containers;
-
-  /*!
-    @brief All particles
-  */
-  particle_container<ito_particle> m_particles;
-
-  /*!
-    @brief This is a particle container which acts as scratch space when you want to add particles through the EB
-  */
-  particle_container<ito_particle> m_eb_particles;
-
-  /*!
-    @brief This is a particle container which acts as scratch space when you want to add particles through the domain side
-  */
-  particle_container<ito_particle> m_domain_particles;
-
-  /*!
-    @brief Source particles in case you want it. 
-  */
-  particle_container<ito_particle> m_source_particles;
-
-  /*!
-    @brief Scratch particle holder.
-  */
-  particle_container<ito_particle> m_scratch_particles;
-
-  /*!
-    @brief Covered particles
-  */
-  particle_container<ito_particle> m_covered_particles;
 
   /*!
     @brief Parse superparticles

@@ -101,9 +101,19 @@ public:
   virtual void deposit_particles();
 
   /*!
+    @brief Deposit particles
+  */
+  virtual void deposit_particles(const std::string a_container);
+
+  /*!
     @brief All solvers remap. 
   */
   virtual void remap();
+
+  /*!
+    @brief All solvers remap. 
+  */
+  virtual void remap(const std::string a_container);
 
   /*!
     @brief Interpolate velocities
@@ -149,17 +159,17 @@ public:
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sort_particles_by_cell();
+  virtual void sort_particles_by_cell(const std::string a_container);
 
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sort_particles_by_patch();
+  virtual void sort_particles_by_patch(const std::string a_container);
 
   /*!
     @brief Make superparticles
   */
-  virtual void make_superparticles(const int a_ppc);
+  virtual void make_superparticles(const std::string a_container, const int a_ppc);
 
   /*!
     @brief Compute dt
@@ -194,22 +204,7 @@ public:
   /*!
     @brief Get number of particles
   */
-  virtual size_t get_num_particles(const bool a_local);
-
-  /*!
-    @brief Get number of particles in m_particles
-  */
-  virtual size_t get_num_eb_particles(const bool a_local);
-
-  /*!
-    @brief Get number of particles in m_particles
-  */
-  virtual size_t get_num_domain_particles(const bool a_local);
-
-  /*!
-    @brief Get number of particles in m_particles
-  */
-  virtual size_t get_num_source_particles(const bool a_local);
+  virtual size_t get_num_particles(const std::string a_container, const bool a_local);
 
   /*!
     @brief Get solvers
@@ -250,26 +245,6 @@ public:
     @brief Get particle containers
   */
   virtual Vector<particle_container<ito_particle>* > get_particles(const std::string a_container);
-
-  /*!
-    @brief Get all particles
-  */
-  virtual Vector<particle_container<ito_particle>* > get_particles();
-
-  /*!
-    @brief Get EB particles
-  */
-  virtual Vector<particle_container<ito_particle>* > get_eb_particles();
-
-  /*!
-    @brief Get domain particles
-  */
-  virtual Vector<particle_container<ito_particle>* > get_domain_particles();
-
-  /*!
-    @brief Get source particles
-  */
-  virtual Vector<particle_container<ito_particle>* > get_source_particles();
 
 protected:
 

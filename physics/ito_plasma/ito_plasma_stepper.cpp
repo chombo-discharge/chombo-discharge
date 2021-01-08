@@ -171,9 +171,10 @@ void ito_plasma_stepper::initial_data(){
   m_rte->initial_data();
   this->initial_sigma();
 
-  m_ito->sort_particles_by_cell();
-  m_ito->make_superparticles(m_ppc);
-  m_ito->sort_particles_by_patch();
+  const std::string str = "bulk_particles";
+  m_ito->sort_particles_by_cell(str);
+  m_ito->make_superparticles(str, m_ppc);
+  m_ito->sort_particles_by_patch(str);
   
   // Solve Poisson equation and compute the E-field
   this->solve_poisson();
@@ -390,7 +391,7 @@ void ito_plasma_stepper::write_num_particles_per_patch(EBAMRCellData& a_output, 
   data_ops::set_value(m_particle_scratch1, 0.0);
   
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const particle_container<ito_particle>& particles = solver_it()->get_particles("particles");
+    const particle_container<ito_particle>& particles = solver_it()->get_particles("bulk_particles");
 
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
@@ -437,17 +438,17 @@ void ito_plasma_stepper::print_step_report(){
 
   const Real Emax = this->compute_Emax(m_phase);
   
-  const size_t l_particles        = m_ito->get_num_particles(true);
-  const size_t g_particles        = m_ito->get_num_particles(false);
+  const size_t l_particles        = m_ito->get_num_particles("bulk_particles", true);
+  const size_t g_particles        = m_ito->get_num_particles("bulk_particles", false);
   
-  const size_t l_eb_particles     = m_ito->get_num_eb_particles(true);
-  const size_t g_eb_particles     = m_ito->get_num_eb_particles(false);
+  const size_t l_eb_particles     = m_ito->get_num_particles("eb_particles", true);
+  const size_t g_eb_particles     = m_ito->get_num_particles("eb_particles", false);
   
-  const size_t l_domain_particles = m_ito->get_num_domain_particles(true);
-  const size_t g_domain_particles = m_ito->get_num_domain_particles(false);
+  const size_t l_domain_particles = m_ito->get_num_particles("domain_particles", true);
+  const size_t g_domain_particles = m_ito->get_num_particles("domain_particles", false);
 
-  const size_t l_source_particles = m_ito->get_num_source_particles(true);
-  const size_t g_source_particles = m_ito->get_num_source_particles(false);
+  const size_t l_source_particles = m_ito->get_num_particles("source_particles", true);
+  const size_t g_source_particles = m_ito->get_num_particles("source_particles", false);
 
   Real avg;
   Real sigma;
@@ -501,7 +502,7 @@ void ito_plasma_stepper::get_particle_statistics(Real& a_avg, Real& a_sigma, siz
   const int srcProc = 0; 
   const int nProc   = numProc();
 
-  const size_t numLocal = m_ito->get_num_particles(true);
+  const size_t numLocal = m_ito->get_num_particles("bulk_particles", true);
 
   // Gather on source proc
   Vector<size_t> allCounts(nProc);
@@ -565,7 +566,7 @@ void ito_plasma_stepper::print_timer_diagnostics(Real& a_timer, const std::strin
   const int srcProc = 0; 
   const int nProc   = numProc();
 
-  const size_t numLocal = m_ito->get_num_particles(true);
+  const size_t numLocal = m_ito->get_num_particles("bulk_particles", true);
 
   // Gather all timers on source proc
   Vector<Real> allTimers(nProc);
@@ -781,9 +782,9 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, 
   m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
 
   if(m_regrid_superparticles){
-    m_ito->sort_particles_by_cell();
-    m_ito->make_superparticles(m_ppc);
-    m_ito->sort_particles_by_patch();
+    m_ito->sort_particles_by_cell("bulk_particles");
+    m_ito->make_superparticles("bulk_particles", m_ppc);
+    m_ito->sort_particles_by_patch("bulk_particles");
   }
 
   // Redeposit particles
@@ -1067,7 +1068,7 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity){
     pout() << "ito_plasma_stepper::compute_conductivity(conductivity)" << endl;
   }
 
-  this->compute_conductivity(a_conductivity, m_ito->get_particles());
+  this->compute_conductivity(a_conductivity, m_ito->get_particles("bulk_particles"));
   
 }
 
@@ -1269,7 +1270,7 @@ void ito_plasma_stepper::intersect_particles(const which_particles a_which_parti
     pout() << "ito_plasma_stepper::intersect_particles(which_particles, EB_representation)" << endl;
   }
 
-  this->intersect_particles(a_which_particles, "particles", "eb_particles", "domain_particles", a_representation, a_delete);
+  this->intersect_particles(a_which_particles, "bulk_particles", "eb_particles", "domain_particles", a_representation, a_delete);
 }
 
 void ito_plasma_stepper::intersect_particles(const which_particles   a_which_particles,
@@ -1330,13 +1331,16 @@ void ito_plasma_stepper::remove_covered_particles(const which_particles a_which_
     pout() << "ito_plasma_stepper::remove_covered_particles(which_particles, representation, tolerance)" << endl;
   }
 
-  this->remove_covered_particles(a_which_particles, a_representation, "particles", a_tolerance);
+  this->remove_covered_particles(a_which_particles, "bulk_particles", a_representation, a_tolerance);
 }
 
-void ito_plasma_stepper::remove_covered_particles(const which_particles a_which, const EB_representation a_representation, const std::string a_container, const Real a_tolerance){
-  CH_TIME("ito_plasma_stepper::remove_covered_particles(which_particles, EB_representation, container, tolerance)");
+void ito_plasma_stepper::remove_covered_particles(const which_particles   a_which,
+						  const std::string       a_container,
+						  const EB_representation a_representation,
+						  const Real              a_tolerance){
+  CH_TIME("ito_plasma_stepper::remove_covered_particles(which_particles, container, EB_representation, tolerance)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::remove_covered_particles(which_particles, EB_representation, container, tolerance)" << endl;
+    pout() << "ito_plasma_stepper::remove_covered_particles(which_particles, container, EB_representation, tolerance)" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1351,28 +1355,28 @@ void ito_plasma_stepper::remove_covered_particles(const which_particles a_which,
 
     switch(a_which) {
     case which_particles::all:
-      solver->remove_covered_particles(a_representation, a_container, a_tolerance);
+      solver->remove_covered_particles(a_container, a_representation, a_tolerance);
       break;
     case which_particles::all_mobile:
-      if(mobile) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
+      if(mobile) solver->remove_covered_particles(a_container, a_representation, a_tolerance);
       break;
     case which_particles::all_diffusive:
-      if(diffusive) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
+      if(diffusive) solver->remove_covered_particles(a_container, a_representation, a_tolerance);
       break;
     case which_particles::charged_mobile:
-      if(charged && mobile) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
+      if(charged && mobile) solver->remove_covered_particles(a_container, a_representation, a_tolerance);
       break;
     case which_particles::charged_diffusive:
-      if(charged && diffusive) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
+      if(charged && diffusive) solver->remove_covered_particles(a_container, a_representation, a_tolerance);
       break;
     case which_particles::all_mobile_or_diffusive:
-      if(mobile || diffusive) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
+      if(mobile || diffusive) solver->remove_covered_particles(a_container, a_representation, a_tolerance);
       break;
     case which_particles::charged_and_mobile_or_diffusive:
-      if(charged && (mobile || diffusive)) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
+      if(charged && (mobile || diffusive)) solver->remove_covered_particles(a_container, a_representation, a_tolerance);
       break;
     case which_particles::stationary:
-      if(!mobile && !diffusive) solver->remove_covered_particles(a_representation, a_container, a_tolerance);
+      if(!mobile && !diffusive) solver->remove_covered_particles(a_container, a_representation, a_tolerance);
       break;
     default:
       MayDay::Abort("ito_plasma_stepper::remove_covered_particles_particles(which particles) - logic bust");
@@ -1926,7 +1930,7 @@ void ito_plasma_stepper::compute_reactive_particles_per_cell(EBCellFAB& a_ppc, c
     RefCountedPtr<ito_solver>& solver = solver_it();
     const int idx                     = solver_it.get_solver();
 
-    const particle_container<ito_particle>& particles = solver->get_particles();
+    const particle_container<ito_particle>& particles = solver->get_particles("bulk_particles");
     const BinFab<ito_particle>& cellParticles         = particles.get_cell_particles(a_level, a_dit);
 
 
@@ -2020,7 +2024,7 @@ void ito_plasma_stepper::compute_reactive_mean_energies_per_cell(EBCellFAB&     
     RefCountedPtr<ito_solver>& solver = solver_it();
     const int idx                     = solver_it.get_solver();
 
-    const particle_container<ito_particle>& particles = solver->get_particles();
+    const particle_container<ito_particle>& particles = solver->get_particles("bulk_particles");
     const BinFab<ito_particle>& cellParticles         = particles.get_cell_particles(a_level, a_dit);
 
     // Regular cells. 
@@ -2310,7 +2314,7 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
     RefCountedPtr<ito_solver>& solver = solver_it();
     const int idx = solver_it.get_solver();
     
-    particle_container<ito_particle>& solverParticles = solver->get_particles();
+    particle_container<ito_particle>& solverParticles = solver->get_particles("bulk_particles");
     
     particlesFAB[idx] = &(solverParticles.get_cell_particles(a_level, a_dit));
   }
@@ -2459,7 +2463,7 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
     Vector<particle_container<photon>* > new_photons(num_rte_species);      // Produced photons go here.
 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-      particles[solver_it.get_solver()] = &(solver_it()->get_particles());
+      particles[solver_it.get_solver()] = &(solver_it()->get_particles("bulk_particles"));
     }
 
     for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -3085,7 +3089,7 @@ void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
 
   // Regrid particles onto the "dummy grids" a_grids
   for (int i = 0; i < lb_solvers.size(); i++){
-    particle_container<ito_particle>& particles = lb_solvers[i]->get_particles();
+    particle_container<ito_particle>& particles = lb_solvers[i]->get_particles("bulk_particles");
     
     particles.regrid(a_grids, m_amr->get_domains(), m_amr->get_dx(), m_amr->get_ref_rat(), a_lmin, a_finest_level);
 
@@ -3093,7 +3097,7 @@ void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
     // load estimate of the underlying grid(s) is improved.
     if(m_regrid_superparticles){
       particles.sort_particles_by_cell();
-      lb_solvers[i]->make_superparticles(m_ppc);
+      lb_solvers[i]->make_superparticles("bulk_particles", m_ppc);
       particles.sort_particles_by_patch();
     }
   }
@@ -3125,7 +3129,7 @@ void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
 
   // Go back to "pre-regrid" mode so we can get particles to the correct patches after load balancing. 
   for (int i = 0; i < lb_solvers.size(); i++){
-    particle_container<ito_particle>& particles = lb_solvers[i]->get_particles();
+    particle_container<ito_particle>& particles = lb_solvers[i]->get_particles("bulk_particles");
     particles.pre_regrid(a_lmin);
   }
 }
@@ -3188,7 +3192,7 @@ void ito_plasma_stepper::compute_EdotJ_source(){
     if(q != 0 && solver->is_mobile()){
 
       // Drift contribution
-      solver->deposit_conductivity(m_particle_scratch1, solver->get_particles()); // Deposit mu*n
+      solver->deposit_conductivity(m_particle_scratch1, solver->get_particles("bulk_particles")); // Deposit mu*n
       data_ops::copy(m_particle_scratchD, m_particle_E); // Could use m_particle_E or solver's m_velo_func here, but m_velo_func = +/- E (depends on q)
       
       data_ops::multiply_scalar(m_particle_scratchD, m_particle_scratch1);        // m_particle_scratchD = mu*n*E
@@ -3200,7 +3204,7 @@ void ito_plasma_stepper::compute_EdotJ_source(){
     if(q != 0 && solver->is_diffusive()){
 
       // Compute the negative gradient of the diffusion term
-      solver->deposit_diffusivity(m_particle_scratch1, solver->get_particles());
+      solver->deposit_diffusivity(m_particle_scratch1, solver->get_particles("bulk_particles"));
       m_amr->compute_gradient(m_particle_scratchD, m_particle_scratch1, m_particle_realm, m_phase);
       data_ops::scale(m_particle_scratchD, -1.0); // scratchD = -grad(D*n)
       
@@ -3231,7 +3235,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
 
     // Do mobile contribution. Computes Z*e*E*mu*n*E*E
     if(q != 0 && solver->is_mobile()){
-      solver->deposit_conductivity(m_particle_scratch1, solver->get_particles()); // Deposit mu*n
+      solver->deposit_conductivity(m_particle_scratch1, solver->get_particles("bulk_particles")); // Deposit mu*n
       m_fluid_scratch1.copy(m_particle_scratch1);                                 // Copy mu*n to fluid realm
       data_ops::copy(m_fluid_scratchD, m_fluid_E);                                // m_fluid_scratchD = E
       data_ops::multiply_scalar(m_fluid_scratchD, m_fluid_scratch1);              // m_fluid_scratchD = E*mu*n
@@ -3245,7 +3249,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
 
     // Diffusive contribution. Computes -Z*e*E*grad(D*n)
     if(q != 0 && solver->is_diffusive()){
-      solver->deposit_diffusivity(m_particle_scratch1, solver->get_particles());            // Deposit D*n
+      solver->deposit_diffusivity(m_particle_scratch1, solver->get_particles("bulk_particles"));            // Deposit D*n
       m_fluid_scratch1.copy(m_particle_scratch1);                                           // Copy D*n to fluid realm
       m_amr->compute_gradient(m_fluid_scratchD, m_fluid_scratch1, m_fluid_realm, m_phase);  // scratchD = grad(D*n)
       data_ops::scale(m_fluid_scratchD, -1.0);                                              // scratchD = -grad(D*n)
@@ -3278,7 +3282,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo2(const Real a_dt){
     const bool mobile    = solver->is_mobile();
     const bool diffusive = solver->is_diffusive();
 
-    particle_container<ito_particle>& particles = solver->get_particles();
+    particle_container<ito_particle>& particles = solver->get_particles("bulk_particles");
 
     const DepositionType::Which deposition = solver->get_deposition();
 
