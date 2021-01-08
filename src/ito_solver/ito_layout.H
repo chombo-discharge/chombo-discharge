@@ -247,6 +247,11 @@ public:
   virtual Vector<EBAMRCellData*> get_mobility_funcs();
 
   /*!
+    @brief Get particle containers
+  */
+  virtual Vector<particle_container<ito_particle>* > get_particles(const std::string a_container);
+
+  /*!
     @brief Get all particles
   */
   virtual Vector<particle_container<ito_particle>* > get_particles();

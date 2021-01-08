@@ -390,7 +390,7 @@ void ito_plasma_stepper::write_num_particles_per_patch(EBAMRCellData& a_output, 
   data_ops::set_value(m_particle_scratch1, 0.0);
   
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const particle_container<ito_particle>& particles = solver_it()->get_particles();
+    const particle_container<ito_particle>& particles = solver_it()->get_particles("particles");
 
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];

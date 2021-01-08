@@ -380,73 +380,21 @@ void ito_solver::set_halo_buffer(const int a_buffer)  {
 }
 
 
-size_t ito_solver::get_num_particles(const bool a_local) const{
-  CH_TIME("ito_solver::get_num_particles");
+size_t ito_solver::get_num_particles(const std::string a_container, const bool a_local) const{
+  CH_TIME("ito_solver::get_num_particles(string, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_num_particles" << endl;
+    pout() << m_name + "::get_num_particles(string, bool)" << endl;
   }
 
   size_t N;
-  
+
+  const particle_container<ito_particle>& particles = m_particle_containers.at(a_container);
+
   if(a_local){
-    N = m_particles.get_num_valid_local();
+    N = particles.get_num_valid_local();
   }
   else{
-    N = m_particles.get_num_valid_global();
-  }
-
-  return N;
-}
-
-size_t ito_solver::get_num_eb_particles(const bool a_local) const{
-  CH_TIME("ito_solver::get_num_eb_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::get_num_eb_particles" << endl;
-  }
-
-  size_t N;
-  
-  if(a_local){
-    N = m_eb_particles.get_num_valid_local();
-  }
-  else{
-    N = m_eb_particles.get_num_valid_global();
-  }
-
-  return N;
-}
-
-size_t ito_solver::get_num_domain_particles(const bool a_local) const{
-  CH_TIME("ito_solver::get_num_domain_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::get_num_domain_particles" << endl;
-  }
-
-  size_t N;
-  
-  if(a_local){
-    N = m_domain_particles.get_num_valid_local();
-  }
-  else{
-    N = m_domain_particles.get_num_valid_global();
-  }
-
-  return N;
-}
-
-size_t ito_solver::get_num_source_particles(const bool a_local) const{
-  CH_TIME("ito_solver::get_num_source_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::get_num_source_particles" << endl;
-  }
-
-  size_t N;
-  
-  if(a_local){
-    N = m_source_particles.get_num_valid_local();
-  }
-  else{
-    N = m_source_particles.get_num_valid_global();
+    N = particles.get_num_valid_global();
   }
 
   return N;
@@ -457,6 +405,7 @@ void ito_solver::set_computational_geometry(const RefCountedPtr<computational_ge
   if(m_verbosity > 5){
     pout() << m_name + "::set_computational_geometry" << endl;
   }
+  
   m_compgeom = a_compgeom;
 }
 
@@ -523,18 +472,14 @@ void ito_solver::initial_data(){
     pout() << m_name + "::initial_data" << endl;
   }
 
-  m_particles.clear_particles();
+  particle_container<ito_particle>& particles = m_particle_containers.at("bulk_particles");
+
+  particles.clear();
 
   // Add particles, remove the ones that are inside the EB, and then depsit
-  m_particles.add_particles(m_species->get_initial_particles()); 
-  this->remove_covered_particles(EB_representation::implicit_function, 0.0);
-  this->deposit_particles(m_state, m_particles, m_deposition);
-
-#if 0 // Test code
-  Vector<Box> boxes;
-  Vector<int> loads;
-  this->compute_loads(boxes, loads, 1);
-#endif
+  particles.add_particles(m_species->get_initial_particles());
+  this->remove_covered_particles(particles, EB_representation::implicit_function, 0.0);
+  this->deposit_particles(m_state, particles, m_deposition);
 }
 
 void ito_solver::compute_loads(Vector<long int>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level){
@@ -543,10 +488,12 @@ void ito_solver::compute_loads(Vector<long int>& a_loads, const DisjointBoxLayou
     pout() << m_name + "::compute_loads" << endl;
   }
 
+  const particle_container<ito_particle>& particles = m_particle_containers.at("bulk_particles");
+
   a_loads.resize(a_dbl.size(),0);
   
   for (DataIterator dit = a_dbl.dataIterator(); dit.ok(); ++dit){
-    const int numPart = m_particles[a_level][dit()].numItems();
+    const int numPart = particles[a_level][dit()].numItems();
     a_loads[dit().intCode()] = numPart;
   }
 
@@ -565,17 +512,17 @@ void ito_solver::remove_covered_particles(const EB_representation a_representati
     pout() << m_name + "::remove_covered_particles(EB_representation, tolerance)" << endl;
   }
 
-  this->remove_covered_particles(m_particles, a_representation, a_tol);
+  this->remove_covered_particles("bulk_particles", a_representation, a_tol);
 }
 
 
-void ito_solver::remove_covered_particles(const EB_representation a_representation, const std::string a_container, const Real a_tol){
-  CH_TIME("ito_solver::remove_covered_particles(EB_representation, container, tolerance)");
+void ito_solver::remove_covered_particles(const std::string a_container, const EB_representation a_representation, const Real a_tol){
+  CH_TIME("ito_solver::remove_covered_particles(container, EB_representation, tolerance)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_covered_particles(EB_representation, container, tolerance)" << endl;
+    pout() << m_name + "::remove_covered_particles(container, EB_representation, tolerance)" << endl;
   }
 
-  particle_container<ito_particle>& particles = this->get_particle_container(a_container);
+  particle_container<ito_particle>& particles = this->get_particles(a_container);
   
   this->remove_covered_particles(particles, a_representation, a_tol);
 }
@@ -762,7 +709,7 @@ void ito_solver::transfer_covered_particles(const EB_representation a_representa
     pout() << m_name + "::transfer_covered_particles(EB_representation, tol)" << endl;
   }
 
-  this->transfer_covered_particles("particles", "covered_particles", a_representation, a_tol);
+  this->transfer_covered_particles("bulk_particles", "covered_particles", a_representation, a_tol);
 }
 
 void ito_solver::transfer_covered_particles(const std::string a_containerFrom, const std::string a_containerTo, const EB_representation a_representation, const Real a_tol){
@@ -771,8 +718,8 @@ void ito_solver::transfer_covered_particles(const std::string a_containerFrom, c
     pout() << m_name + "::transfer_covered_particles(EB_representation, string, string, tol)" << endl;
   }
 
-  particle_container<ito_particle>& src = this->get_particle_container(a_containerFrom);
-  particle_container<ito_particle>& dst = this->get_particle_container(a_containerTo);
+  particle_container<ito_particle>& src = this->get_particles(a_containerFrom);
+  particle_container<ito_particle>& dst = this->get_particles(a_containerTo);
 
   this->transfer_covered_particles(src, dst, a_representation, a_tol);
 }
@@ -801,7 +748,7 @@ void ito_solver::intersect_particles(const EB_representation a_representation, c
     pout() << m_name + "::intersect_particles(EB_representation, bool)" << endl;
   }
 
-  this->intersect_particles("particles", "eb_particles", "domain_particles", a_representation, a_delete);
+  this->intersect_particles("bulk_particles", "eb_particles", "domain_particles", a_representation, a_delete);
 }
 
 void ito_solver::intersect_particles(const std::string       a_particles,
@@ -814,9 +761,9 @@ void ito_solver::intersect_particles(const std::string       a_particles,
     pout() << m_name + "::intersect_particles(string, string, string, bool, EB_representation)" << endl;
   }
 
-  particle_container<ito_particle>& particles     = this->get_particle_container(a_particles);
-  particle_container<ito_particle>& eb_particles  = this->get_particle_container(a_eb_particles);
-  particle_container<ito_particle>& dom_particles = this->get_particle_container(a_dom_particles);
+  particle_container<ito_particle>& particles     = this->get_particles(a_particles);
+  particle_container<ito_particle>& eb_particles  = this->get_particles(a_eb_particles);
+  particle_container<ito_particle>& dom_particles = this->get_particles(a_dom_particles);
 
   this->intersect_particles(particles, eb_particles, dom_particles, a_representation, a_delete);
 }
@@ -913,12 +860,12 @@ void ito_solver::intersect_particles_if(particle_container<ito_particle>& a_part
 	    if(contact_eb || contact_domain){ // Particle trajectory crossed something. 
 	      if(eb_s < dom_s){ // It was the EB first. 
 		p.position() = oldPos + eb_s*path;
-		//		if(a_delete){
+		if(a_delete){
 		  ebParticles.transfer(lit);
-		// }
-		// else{
-		//   ebParticles.add(lit());
-		// }
+		}
+		else{
+		  ebParticles.add(lit());
+		}
 	      }
 	      else{ // It was the domain boundary. 
 		p.position() = oldPos + Max(0.0,dom_s-SAFETY)*path;
@@ -972,12 +919,10 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   const Vector<Real>& dx                 = m_amr->get_dx();
   const Vector<int>& ref_rat             = m_amr->get_ref_rat();
 
-  m_particles.regrid(        grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_eb_particles.regrid(     grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_domain_particles.regrid( grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_source_particles.regrid( grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_scratch_particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_covered_particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  for (auto& container : m_particle_containers){
+    particle_container<ito_particle>& particles = container.second;
+    particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  }
 }
 
 void ito_solver::set_species(RefCountedPtr<ito_species> a_species){
@@ -1021,15 +966,17 @@ void ito_solver::allocate_internals(){
   else{
     m_amr->allocate_ptr(m_diffco_cell);
   }
-  
-  // This allocates parallel data holders using the load balancing in amr_mesh. This might give poor
-  // load balancing, but we will rectify that by rebalancing later.
-  m_amr->allocate(m_particles,          m_pvr_buffer, m_halo_buffer, m_realm);
-  m_amr->allocate(m_eb_particles,       m_pvr_buffer, m_halo_buffer, m_realm);
-  m_amr->allocate(m_domain_particles,   m_pvr_buffer, m_halo_buffer, m_realm);
-  m_amr->allocate(m_source_particles,   m_pvr_buffer, m_halo_buffer, m_realm);
-  m_amr->allocate(m_scratch_particles,  m_pvr_buffer, m_halo_buffer, m_realm);
-  m_amr->allocate(m_covered_particles,  m_pvr_buffer, m_halo_buffer, m_realm);
+
+  m_particle_containers.emplace("bulk_particles",    particle_container<ito_particle>());
+  m_particle_containers.emplace("eb_particles",      particle_container<ito_particle>());
+  m_particle_containers.emplace("domain_particles",  particle_container<ito_particle>());
+  m_particle_containers.emplace("source_particles",  particle_container<ito_particle>());
+  m_particle_containers.emplace("covered_particles", particle_container<ito_particle>());
+  m_particle_containers.emplace("scratch_particles", particle_container<ito_particle>());
+
+  for (auto& container : m_particle_containers){
+    m_amr->allocate(container.second, m_pvr_buffer, m_halo_buffer, m_realm);
+  }
 }
 
 void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
@@ -1060,10 +1007,7 @@ void ito_solver::write_checkpoint_level_particles(HDF5Handle& a_handle, const in
   const std::string str = m_name + "_particles";
 
   particle_container<simple_ito_particle> realmParticles;
-  //  particle_container<simple_ito_particle> primalParticles;
-  
   m_amr->allocate(realmParticles,  m_pvr_buffer, halo, m_realm);
-  //  m_amr->allocate(primalParticles, m_pvr_buffer, halo, m_realm);
 
   // Make ito_particle into simple_ito_particle. This saves a shitload of disk space. 
   for (DataIterator dit(m_amr->get_grids(m_realm)[a_level]); dit.ok(); ++dit){
@@ -1074,13 +1018,7 @@ void ito_solver::write_checkpoint_level_particles(HDF5Handle& a_handle, const in
     }
   }
 
-  //if(m_realm == realm::primal){
-    writeParticlesToHDF(a_handle, realmParticles[a_level], str);
-  // }
-  // else{
-  //   primalParticles.add_particles_destructive(realmParticles);
-  //   writeParticlesToHDF(a_handle, primalParticles[a_level], str);
-  // }
+  writeParticlesToHDF(a_handle, realmParticles[a_level], str);
 }
 
 void ito_solver::write_checkpoint_level_fluid(HDF5Handle& a_handle, const int a_level) const {
@@ -2004,11 +1942,11 @@ void ito_solver::pre_regrid(const int a_base, const int a_old_finest_level){
   m_covered_particles.pre_regrid(a_base);
 }
 
-particle_container<ito_particle>& ito_solver::get_particle_container(const std::string a_container){
+particle_container<ito_particle>& ito_solver::get_particles(const std::string a_container){
 
   particle_container<ito_particle>* particles = NULL;
   
-  if(a_container == "particles"){
+  if(a_container == "bulk_particles"){
     particles = &m_particles;
   }
   else if(a_container == "eb_particles"){
@@ -2027,7 +1965,7 @@ particle_container<ito_particle>& ito_solver::get_particle_container(const std::
     particles = &m_covered_particles;
   }
   else{
-    MayDay::Abort("ito_solver::get_particle_container - logic bust");
+    MayDay::Abort("ito_solver::get_particles - logic bust");
   }
 
   return *particles;
@@ -2039,7 +1977,7 @@ particle_container<ito_particle>& ito_solver::get_particles(){
     pout() << m_name + "::get_particles" << endl;
   }
 
-  return this->get_particle_container("particles");
+  return this->get_particles("bulk_particles");
 }
 
 particle_container<ito_particle>& ito_solver::get_eb_particles(){
@@ -2048,7 +1986,7 @@ particle_container<ito_particle>& ito_solver::get_eb_particles(){
     pout() << m_name + "::get_eb_particles" << endl;
   }
 
-  return this->get_particle_container("eb_particles");
+  return this->get_particles("eb_particles");
 }
 
 particle_container<ito_particle>& ito_solver::get_domain_particles(){
@@ -2057,7 +1995,7 @@ particle_container<ito_particle>& ito_solver::get_domain_particles(){
     pout() << m_name + "::get_domain_particles" << endl;
   }
 
-  return this->get_particle_container("domain_particles");
+  return this->get_particles("domain_particles");
 }
 
 particle_container<ito_particle>& ito_solver::get_source_particles(){
@@ -2066,7 +2004,7 @@ particle_container<ito_particle>& ito_solver::get_source_particles(){
     pout() << m_name + "::get_source_particles" << endl;
   }
 
-  return this->get_particle_container("source_particles");
+  return this->get_particles("source_particles");
 }
 
 particle_container<ito_particle>& ito_solver::get_scratch_particles(){
@@ -2075,7 +2013,7 @@ particle_container<ito_particle>& ito_solver::get_scratch_particles(){
     pout() << m_name + "::get_scratch_particles" << endl;
   }
 
-  return this->get_particle_container("scratch_particles");
+  return this->get_particles("scratch_particles");
 }
 
 EBAMRCellData& ito_solver::get_state(){
@@ -2899,7 +2837,7 @@ void ito_solver::remap(){
     pout() << m_name + "::remap" << endl;
   }
 
-  this->remap("particles");
+  this->remap("bulk_particles");
 
 }
 
@@ -2909,7 +2847,7 @@ void ito_solver::remap(const std::string a_container){
     pout() << m_name + "::remap(container)" << endl;
   }
 
-  particle_container<ito_particle>& particles = this->get_particle_container(a_container);
+  particle_container<ito_particle>& particles = this->get_particles(a_container);
   particles.remap();
 }
 
@@ -3065,7 +3003,7 @@ void ito_solver::clear(const std::string a_container){
     pout() << m_name + "::clear(string)" << endl;
   }
 
-  particle_container<ito_particle>& particles = this->get_particle_container(a_container);
+  particle_container<ito_particle>& particles = this->get_particles(a_container);
 
   this->clear(particles);
 }

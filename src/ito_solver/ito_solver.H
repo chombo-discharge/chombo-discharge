@@ -244,7 +244,7 @@ public:
   /*!
     @brief Which particles to remove
   */
-  virtual void remove_covered_particles(const EB_representation a_representation, const std::string a_container, const Real a_tol);
+  virtual void remove_covered_particles(const std::string a_container, const EB_representation a_representation, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB
@@ -323,6 +323,11 @@ public:
     @brief Set the halo buffer
   */
   virtual void set_halo_buffer(const int a_buffer);
+
+  /*!
+    @brief Get number of particles in a container
+  */
+  virtual size_t get_num_particles(const std::string a_container, const bool a_local) const;
 
   /*!
     @brief Get number of particles in m_particles
@@ -447,7 +452,7 @@ public:
   /*!
     @brief Get a general particle container
   */
-  virtual particle_container<ito_particle>& get_particle_container(const std::string a_container);
+  virtual particle_container<ito_particle>& get_particles(const std::string a_container);
 
   /*!
     @brief Get the particle container
@@ -1009,6 +1014,11 @@ protected:
     @brief Scratch storage for holding the mass difference when using hybrid deposition
   */
   EBAMRIVData m_massDiff;
+
+  /*!
+    @brief Various particle containers with identifiers. 
+  */
+  std::map<std::string, particle_container<ito_particle> > m_particle_containers;
 
   /*!
     @brief All particles

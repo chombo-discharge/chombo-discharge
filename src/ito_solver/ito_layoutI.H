@@ -362,46 +362,33 @@ Vector<EBAMRCellData*> ito_layout<T>::get_mobility_funcs(){
 }
 
 template <class T>
-Vector<particle_container<ito_particle>* > ito_layout<T>::get_particles(){
+Vector<particle_container<ito_particle>* > ito_layout<T>::get_particles(const std::string a_container){
   Vector<particle_container<ito_particle>* > ret(m_solvers.size(), nullptr);
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.get_solver()] = &(iter()->get_particles());
+    ret[iter.get_solver()] = &(iter()->get_particles(a_container));
   }
   
   return ret;
+}
+
+template <class T>
+Vector<particle_container<ito_particle>* > ito_layout<T>::get_particles(){
+  return this->get_particles("bulk_particles");
 }
 
 template <class T>
 Vector<particle_container<ito_particle>* > ito_layout<T>::get_eb_particles(){
-  
-  Vector<particle_container<ito_particle>* > ret(m_solvers.size(), nullptr);
-  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.get_solver()] = &(iter()->get_eb_particles());
-  }
-  
-  return ret;
+  return this->get_particles("eb_particles");
 }
 
 template <class T>
 Vector<particle_container<ito_particle>* > ito_layout<T>::get_domain_particles(){
-
-  Vector<particle_container<ito_particle>* > ret(m_solvers.size(), nullptr);
-  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.get_solver()] = &(iter()->get_domain_particles());
-  }
-  
-  return ret;
+  return this->get_particles("domain_particles");
 }
 
 template <class T>
 Vector<particle_container<ito_particle>* > ito_layout<T>::get_source_particles(){
-
-  Vector<particle_container<ito_particle>* > ret(m_solvers.size(), nullptr);
-  for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.get_solver()] = &(iter()->get_source_particles());
-  }
-  
-  return ret;
+  return this->get_particles("source_particles");
 }
 
 template <class T>
