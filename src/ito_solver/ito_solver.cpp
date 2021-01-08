@@ -2217,7 +2217,7 @@ void ito_solver::interpolate_mobilities(){
 
   if(m_mobile){
 
-    if(m_mobility_interp == mobility_interp::mobility){
+    if(m_mobility_interp == mobility_interp::velocity){
       data_ops::vector_length(m_scratch, m_velo_func); // Compute |E| (or whatever other function you've decided to provide).
       m_amr->average_down(m_scratch, m_realm, m_phase);
       m_amr->interp_ghost(m_scratch, m_realm, m_phase);
@@ -2317,8 +2317,11 @@ void ito_solver::interpolate_mobilities_vel(const int a_lvl, const DataIndex& a_
     
     // First, interpolate |E| to the particle position, it will be stored on m_tmp. 
     meshInterp.interpolateMobility(particleList, scratch, m_deposition);
+
     for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
-      lit().tmp() = lit().mobility();
+      ito_particle& p = lit();
+      
+      p.tmp() = p.mobility();
     }
 
     // This interpolates mu*|E| to the particle position and stores it on the mobility. After that, we compute mu_p = (mu*E)/E
