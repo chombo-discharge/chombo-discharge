@@ -41,6 +41,18 @@ class ito_solver {
 public:
 
   /*!
+    @brief Enum class for describing particles types
+  */
+  enum class particle_type {
+    bulk,
+    eb,
+    domain,
+    source,
+    covered,
+    scratch
+  };
+
+  /*!
     @brief Default ctor
   */
   ito_solver();
