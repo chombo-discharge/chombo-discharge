@@ -1269,7 +1269,12 @@ void ito_plasma_stepper::intersect_particles(const which_particles a_which_parti
     pout() << "ito_plasma_stepper::intersect_particles(which_particles, EB_representation)" << endl;
   }
 
-  this->intersect_particles(a_which_particles, ito_solver::which_container::bulk, ito_solver::which_container::eb, ito_solver::which_container::domain, a_representation, a_delete);
+  this->intersect_particles(a_which_particles,
+			    ito_solver::which_container::bulk,
+			    ito_solver::which_container::eb,
+			    ito_solver::which_container::domain,
+			    a_representation,
+			    a_delete);
 }
 
 void ito_plasma_stepper::intersect_particles(const which_particles             a_which_particles,

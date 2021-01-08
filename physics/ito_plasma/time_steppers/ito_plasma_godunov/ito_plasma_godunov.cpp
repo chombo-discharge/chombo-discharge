@@ -547,8 +547,8 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   MPI_Barrier(Chombo_MPI::comm);
   super_time -= MPI_Wtime();
   if(m_regrid_superparticles){
-    m_ito->sort_particles_by_cell(ito_solver::which_container::bulk);
-    m_ito->make_superparticles(ito_solver::which_container::bulk, m_ppc);
+    m_ito->sort_particles_by_cell( ito_solver::which_container::bulk);
+    m_ito->make_superparticles(    ito_solver::which_container::bulk, m_ppc);
     m_ito->sort_particles_by_patch(ito_solver::which_container::bulk);
   }
   super_time += MPI_Wtime();

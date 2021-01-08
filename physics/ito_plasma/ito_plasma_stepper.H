@@ -238,6 +238,7 @@ namespace physics {
 					const Real       a_dx,
 					const Real       a_dt);
 
+      // Routines for reconciling particles. 
       void reconcile_particles(const EBAMRCellData& a_newParticlesPerCell,
 			       const EBAMRCellData& a_oldParticlesPerCell,
 			       const EBAMRCellData& a_meanParticleEnergies,
