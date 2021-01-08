@@ -673,9 +673,22 @@ protected:
   };
 
   /*!
+    @brief Enum for deciding how to interpolate mobilities. 
+  */
+  enum class mobility_interp {
+    mobility,
+    velocity
+  };
+
+  /*!
     @brief How to checkpoint files. particles => write particles to HDF5. numbers => write numbers to HDF5
   */
   which_checkpoint m_checkpointing;
+
+  /*!
+    @brief Switch for deciding how to interpolate mobilities, i.e. interpolating either mu*E or just mu (to the particle position)
+  */
+  mobility_interp m_mobility_interp;
 
   /*!
     @brief Get number of particles used for restarting
@@ -1103,6 +1116,16 @@ protected:
     @brief Do boundary intersection tests with an implicit function
   */
   void intersect_particles_if();
+
+  /*!
+    @brief Interpolate mobilities
+  */
+  virtual void interpolate_mobilities_mu(const int a_level, const DataIndex& a_dit);
+
+  /*!
+    @brief Interpolate mobilities
+  */
+  virtual void interpolate_mobilities_vel(const int a_level, const DataIndex& a_dit);
 
   /*!
     @brief Sign function
