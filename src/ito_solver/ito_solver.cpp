@@ -796,40 +796,40 @@ void ito_solver::transfer_covered_particles(particle_container<ito_particle>& a_
 }
 
 void ito_solver::intersect_particles(const EB_representation a_representation, const bool a_delete){
-  CH_TIME("ito_solver::intersect_particles(EB_representation)");
+  CH_TIME("ito_solver::intersect_particles(EB_representation, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::intersect_particles(EB_representation)" << endl;
+    pout() << m_name + "::intersect_particles(EB_representation, bool)" << endl;
   }
 
-  this->intersect_particles(a_representation, "particles", "eb_particles", "domain_particles", a_delete);
+  this->intersect_particles("particles", "eb_particles", "domain_particles", a_representation, a_delete);
 }
 
-void ito_solver::intersect_particles(const EB_representation a_representation,
-				     const std::string       a_particles,
+void ito_solver::intersect_particles(const std::string       a_particles,
 				     const std::string       a_eb_particles,
 				     const std::string       a_dom_particles,
+				     const EB_representation a_representation,				     
 				     const bool              a_delete){
-  CH_TIME("ito_solver::intersect_particles(EB_representation, string, string, string, bool)");
+  CH_TIME("ito_solver::intersect_particles(string, string, string, bool, EB_representation)");
   if(m_verbosity > 5){
-    pout() << m_name + "::intersect_particles(EB_representation, string, string, string, bool)" << endl;
+    pout() << m_name + "::intersect_particles(string, string, string, bool, EB_representation)" << endl;
   }
 
   particle_container<ito_particle>& particles     = this->get_particle_container(a_particles);
   particle_container<ito_particle>& eb_particles  = this->get_particle_container(a_eb_particles);
   particle_container<ito_particle>& dom_particles = this->get_particle_container(a_dom_particles);
 
-  this->intersect_particles(a_representation, particles, eb_particles, dom_particles, a_delete);
+  this->intersect_particles(particles, eb_particles, dom_particles, a_representation, a_delete);
 }
 
 
-void ito_solver::intersect_particles(const EB_representation           a_representation,
-				     particle_container<ito_particle>& a_particles,
+void ito_solver::intersect_particles(particle_container<ito_particle>& a_particles,
 				     particle_container<ito_particle>& a_eb_particles,
 				     particle_container<ito_particle>& a_dom_particles,
+				     const EB_representation           a_representation,
 				     const bool                        a_delete){
-  CH_TIME("ito_solver::intersect_particles(EB_representation, container, container, container, bool)");
+  CH_TIME("ito_solver::intersect_particles(container, container, container, EB_representation, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::intersect_particles(EB_representation, container, container, container, bool)" << endl;
+    pout() << m_name + "::intersect_particles(container, container, container, EB_representation, bool)" << endl;
   }
 
   switch(a_representation){

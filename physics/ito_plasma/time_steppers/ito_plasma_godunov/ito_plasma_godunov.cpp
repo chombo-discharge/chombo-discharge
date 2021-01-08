@@ -1144,7 +1144,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   MPI_Barrier(Chombo_MPI::comm);
   isectTime -= MPI_Wtime();
-  this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, false); // Copies, does not delete. 
+  this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, true); // Copies, does not delete. 
   this->remove_covered_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, m_eb_tolerance);
   isectTime += MPI_Wtime();
 
@@ -1353,7 +1353,7 @@ void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
   // ====== CORRECTOR END =====
 
   // Do particle-boundary intersection. 
-  this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, false);
+  this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, true);
   this->remove_covered_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, m_eb_tolerance);
 
   // Finally, deposit particles. 

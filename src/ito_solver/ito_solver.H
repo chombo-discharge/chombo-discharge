@@ -279,19 +279,19 @@ public:
   /*!
     @brief Do boundary intersection tests.
   */
-  virtual void intersect_particles(const EB_representation a_representation,
-				   const std::string       a_particles,
+  virtual void intersect_particles(const std::string       a_particles,
 				   const std::string       a_eb_particles,
 				   const std::string       a_dom_particles,
+				   const EB_representation a_representation,				   
 				   const bool              a_delete);
 
     /*!
     @brief Do boundary intersection tests.
   */
-  virtual void intersect_particles(const EB_representation           a_representation,
-				   particle_container<ito_particle>& a_particles,
+  virtual void intersect_particles(particle_container<ito_particle>& a_particles,
 				   particle_container<ito_particle>& a_eb_particles,
 				   particle_container<ito_particle>& a_dom_particles,
+				   const EB_representation           a_representation,
 				   const bool                        a_delete);
 
   /*!

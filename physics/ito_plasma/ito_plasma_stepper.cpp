@@ -1269,6 +1269,20 @@ void ito_plasma_stepper::intersect_particles(const which_particles a_which_parti
     pout() << "ito_plasma_stepper::intersect_particles(which_particles, EB_representation)" << endl;
   }
 
+  this->intersect_particles(a_which_particles, "particles", "eb_particles", "domain_particles", a_representation, a_delete);
+}
+
+void ito_plasma_stepper::intersect_particles(const which_particles   a_which_particles,
+					     const std::string       a_particles,
+					     const std::string       a_eb_particles,
+					     const std::string       a_domain_particles,
+					     const EB_representation a_representation,
+					     const bool              a_delete) {
+  CH_TIME("ito_plasma_stepper::intersect_particles(which_particles, string, string, string, EB_representation, bool)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::intersect_particles(which_particles, string, string, string, EB_representation, bool)" << endl;
+  }
+
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
     RefCountedPtr<ito_species>& species = solver->get_species();
@@ -1281,31 +1295,31 @@ void ito_plasma_stepper::intersect_particles(const which_particles a_which_parti
 
     switch(a_which_particles) {
     case which_particles::all:
-      solver->intersect_particles(a_representation, a_delete);
+      solver->intersect_particles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
     case which_particles::all_mobile:
-      if(mobile) solver->intersect_particles(a_representation, a_delete);
+      if(mobile) solver->intersect_particles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
     case which_particles::all_diffusive:
-      if(diffusive) solver->intersect_particles(a_representation, a_delete);
+      if(diffusive) solver->intersect_particles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
     case which_particles::charged_mobile:
-      if(charged && mobile) solver->intersect_particles(a_representation, a_delete);
+      if(charged && mobile) solver->intersect_particles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
     case which_particles::charged_diffusive:
-      if(charged && diffusive) solver->intersect_particles(a_representation, a_delete);
+      if(charged && diffusive) solver->intersect_particles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
     case which_particles::all_mobile_or_diffusive:
-      if(mobile || diffusive) solver->intersect_particles(a_representation, a_delete);
+      if(mobile || diffusive) solver->intersect_particles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
     case which_particles::charged_and_mobile_or_diffusive:
-      if(charged && (mobile || diffusive)) solver->intersect_particles(a_representation, a_delete);
+      if(charged && (mobile || diffusive)) solver->intersect_particles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
     case which_particles::stationary:
-      if(!mobile && !diffusive) solver->intersect_particles(a_representation, a_delete);
+      if(!mobile && !diffusive) solver->intersect_particles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
     default:
-      MayDay::Abort("ito_plasma_stepper::intersect_particles_particles(which_particles, EB_representation) - logic bust");
+      MayDay::Abort("ito_plasma_stepper::intersect_particles_particles(which_particles, string, string, string, EB_representation, bool) - logic bust");
     }
   }  
 }
