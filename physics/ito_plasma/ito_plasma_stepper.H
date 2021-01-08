@@ -77,7 +77,7 @@ namespace physics {
       void register_realms() override;
       void register_operators() override;
       
-      // New regrid routines
+      // Regrid routines. 
       void deallocate() override;
       virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
@@ -93,15 +93,18 @@ namespace physics {
 
       // Particle handling routines.
       void intersect_particles(const which_particles a_which, const EB_representation a_representation, const bool a_delete);
-      void intersect_particles(const which_particles   a_which,
-			       const std::string       a_particles,
-			       const std::string       a_eb_particles,
-			       const std::string       a_domain_particles,
-			       const EB_representation a_representation,
-			       const bool              a_delete);
+      void intersect_particles(const which_particles a_which,
+			       const ito_solver::which_container a_particles,
+			       const ito_solver::which_container a_eb_particles,
+			       const ito_solver::which_container a_domain_particles,
+			       const EB_representation           a_representation,
+			       const bool                        a_delete);
 			       
       void remove_covered_particles(const which_particles a_which, const EB_representation a_representation, const Real a_tolerance);
-      void remove_covered_particles(const which_particles a_which, const std::string a_container, const EB_representation a_representation, const Real a_tolerance);
+      void remove_covered_particles(const which_particles             a_which,
+				    const ito_solver::which_container a_container,
+				    const EB_representation           a_representation,
+				    const Real                        a_tolerance);
 
       // Internal routines
       void set_verbosity(const int a_verbosity);
@@ -149,7 +152,9 @@ namespace physics {
 
       // Remap and deposition routines for solver subsets.
       void deposit_particles(const which_particles a_which_particles);
+      void deposit_particles(const which_particles a_which_particles, const ito_solver::which_container a_container);
       void remap_particles(const which_particles a_which_particles);
+      void remap_particles(const which_particles a_which_particles, const ito_solver::which_container a_container);
 
       // This sets the velocity function for each species. This is sgn(charge)*E
       void set_ito_velocity_funcs();
@@ -284,14 +289,11 @@ namespace physics {
 				    const Real                      a_dx,
 				    const Real                      a_dt);
 
-
-
       // Compute dt routines
       Real compute_physics_dt() const;
       Real compute_physics_dt(const EBAMRCellData& a_E, const Vector<EBAMRCellData*> a_densities) const;
       Real compute_physics_dt(const LevelData<EBCellFAB>& a_E, const Vector<LevelData<EBCellFAB> *> a_densities, const int a_level) const;
       Real compute_physics_dt(const EBCellFAB& a_E, const Vector<EBCellFAB*> a_densities, const int a_level, const DataIndex a_dit, const Box a_box) const;
-
 
       // Routines for advancing photons
       void advance_photons(const Real a_dt);

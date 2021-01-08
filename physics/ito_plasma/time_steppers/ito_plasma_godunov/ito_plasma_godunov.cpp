@@ -282,7 +282,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   // Sort the particles and photons per cell so we can call reaction algorithms
   MPI_Barrier(Chombo_MPI::comm);
   sort_time = -MPI_Wtime();
-  m_ito->sort_particles_by_cell("bulk_particles");
+  m_ito->sort_particles_by_cell(ito_solver::which_container::bulk);
   this->sort_bulk_photons_by_cell();
   this->sort_source_photons_by_cell();
   sort_time += MPI_Wtime();
@@ -297,14 +297,14 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   super_time = -MPI_Wtime();
   if((m_step+1) % m_merge_interval == 0 && m_merge_interval > 0){
-    m_ito->make_superparticles("bulk_particles", m_ppc);
+    m_ito->make_superparticles(ito_solver::which_container::bulk, m_ppc);
   }
   super_time += MPI_Wtime();
 
   // Sort particles per patch.
   MPI_Barrier(Chombo_MPI::comm);
   sort_time -= MPI_Wtime();
-  m_ito->sort_particles_by_patch("bulk_particles");
+  m_ito->sort_particles_by_patch(ito_solver::which_container::bulk);
   this->sort_bulk_photons_by_patch();
   this->sort_source_photons_by_patch();
   sort_time += MPI_Wtime();
@@ -313,8 +313,8 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   clear_time = -MPI_Wtime();
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->clear("eb_particles");
-    solver_it()->clear("domain_particles");
+    solver_it()->clear(ito_solver::which_container::eb);
+    solver_it()->clear(ito_solver::which_container::domain);
   }
   clear_time += MPI_Wtime();
 
@@ -547,9 +547,9 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   MPI_Barrier(Chombo_MPI::comm);
   super_time -= MPI_Wtime();
   if(m_regrid_superparticles){
-    m_ito->sort_particles_by_cell("bulk_particles");
-    m_ito->make_superparticles("bulk_particles", m_ppc);
-    m_ito->sort_particles_by_patch("bulk_particles");
+    m_ito->sort_particles_by_cell(ito_solver::which_container::bulk);
+    m_ito->make_superparticles(ito_solver::which_container::bulk, m_ppc);
+    m_ito->sort_particles_by_patch(ito_solver::which_container::bulk);
   }
   super_time += MPI_Wtime();
 
@@ -643,7 +643,7 @@ void ito_plasma_godunov::set_old_positions(){
     
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-      ParticleData<ito_particle>& particles = solver->get_particles("bulk_particles")[lvl];
+      ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -976,7 +976,7 @@ void ito_plasma_godunov::copy_conductivity_particles(Vector<particle_container<g
       const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const List<ito_particle>& ito_parts = solver->get_particles("bulk_particles")[lvl][dit()].listItems();
+	const List<ito_particle>& ito_parts = solver->get_particles(ito_solver::which_container::bulk)[lvl][dit()].listItems();
 	List<godunov_particle>& gdnv_parts  = (*a_conductivity_particles[idx])[lvl][dit()].listItems();
 
 	if(q != 0 && solver->is_mobile()){
@@ -1011,7 +1011,7 @@ void ito_plasma_godunov::copy_rho_dagger_particles(Vector<particle_container<god
       const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const List<ito_particle>& ito_parts = solver->get_particles("bulk_particles")[lvl][dit()].listItems();
+	const List<ito_particle>& ito_parts = solver->get_particles(ito_solver::which_container::bulk)[lvl][dit()].listItems();
 	List<godunov_particle>& gdnv_parts  = (*a_rho_dagger_particles[idx])[lvl][dit()].listItems();
 
 	gdnv_parts.clear();
@@ -1235,7 +1235,7 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_contai
     
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-      ParticleData<ito_particle>& particles = solver->get_particles("bulk_particles")[lvl];
+      ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -1291,7 +1291,7 @@ void ito_plasma_godunov::step_euler_maruyama(const Real a_dt){
       
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles("bulk_particles")[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -1380,7 +1380,7 @@ void ito_plasma_godunov::pre_trapezoidal_predictor(Vector<particle_container<god
     
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-      ParticleData<ito_particle>& particles = solver->get_particles("bulk_particles")[lvl];
+      ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -1428,7 +1428,7 @@ void ito_plasma_godunov::trapezoidal_predictor(const Real a_dt){
       
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles("bulk_particles")[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -1469,7 +1469,7 @@ void ito_plasma_godunov::pre_trapezoidal_corrector(Vector<particle_container<god
     
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-      ParticleData<ito_particle>& particles = solver->get_particles("bulk_particles")[lvl];
+      ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -1515,7 +1515,7 @@ void ito_plasma_godunov::trapezoidal_corrector(const Real a_dt){
       
       for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
-	ParticleData<ito_particle>& particles = solver->get_particles("bulk_particles")[lvl];
+	ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 

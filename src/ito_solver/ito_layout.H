@@ -103,7 +103,7 @@ public:
   /*!
     @brief Deposit particles
   */
-  virtual void deposit_particles(const std::string a_container);
+  virtual void deposit_particles(const ito_solver::which_container a_ptype);
 
   /*!
     @brief All solvers remap. 
@@ -113,7 +113,7 @@ public:
   /*!
     @brief All solvers remap. 
   */
-  virtual void remap(const std::string a_container);
+  virtual void remap(const ito_solver::which_container a_ptype);
 
   /*!
     @brief Interpolate velocities
@@ -159,17 +159,17 @@ public:
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sort_particles_by_cell(const std::string a_container);
+  virtual void sort_particles_by_cell(const ito_solver::which_container a_ptype);
 
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sort_particles_by_patch(const std::string a_container);
+  virtual void sort_particles_by_patch(const ito_solver::which_container a_ptype);
 
   /*!
     @brief Make superparticles
   */
-  virtual void make_superparticles(const std::string a_container, const int a_ppc);
+  virtual void make_superparticles(const ito_solver::which_container a_ptype, const int a_ppc);
 
   /*!
     @brief Compute dt
@@ -204,7 +204,7 @@ public:
   /*!
     @brief Get number of particles
   */
-  virtual size_t get_num_particles(const std::string a_container, const bool a_local);
+  virtual size_t get_num_particles(const ito_solver::which_container a_ptype, const bool a_local);
 
   /*!
     @brief Get solvers
@@ -244,7 +244,7 @@ public:
   /*!
     @brief Get particle containers
   */
-  virtual Vector<particle_container<ito_particle>* > get_particles(const std::string a_container);
+  virtual Vector<particle_container<ito_particle>* > get_particles(const ito_solver::which_container a_ptype);
 
 protected:
 

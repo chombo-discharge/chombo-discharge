@@ -41,9 +41,9 @@ class ito_solver {
 public:
 
   /*!
-    @brief Enum class for describing particles types
+    @brief Enum class for interfacing into individual containers. 
   */
-  enum class particle_type {
+  enum class which_container {
     bulk,
     eb,
     domain,
@@ -105,7 +105,7 @@ public:
   /*!
     @brief Clear a particle container
   */
-  virtual void clear(const std::string a_container);
+  virtual void clear(const which_container a_container);
 
   /*!
     @brief Empty particle container
@@ -231,7 +231,7 @@ public:
   /*!
     @brief Deposit particles
   */
-  virtual void deposit_particles(const std::string a_container);
+  virtual void deposit_particles(const which_container a_container);
 
   /*!
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
@@ -243,9 +243,7 @@ public:
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
   template <class T>
-  void deposit_particles(EBAMRCellData&               a_state,
-			 const particle_container<T>& a_particles,
-			 const DepositionType::Which  a_deposition);
+  void deposit_particles(EBAMRCellData& a_state, const particle_container<T>& a_particles, const DepositionType::Which  a_deposition);
 
   /*!
     @brief Deposit the total weight of the particles in the grid cells
@@ -261,7 +259,7 @@ public:
   /*!
     @brief Which particles to remove
   */
-  virtual void remove_covered_particles(const std::string a_container, const EB_representation a_representation, const Real a_tol);
+  virtual void remove_covered_particles(const which_container a_container, const EB_representation a_representation, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB
@@ -277,7 +275,10 @@ public:
   /*!
     @brief Which particles to remove
   */
-  virtual void transfer_covered_particles(const std::string a_containerFrom, const std::string a_containerTo, const EB_representation a_representation, const Real a_tol);
+  virtual void transfer_covered_particles(const which_container   a_containerFrom,
+					  const which_container   a_containerTo,
+					  const EB_representation a_representation,
+					  const Real              a_tol);
 
   /*!
     @brief Transfer particles that are inside the EB to another container. 
@@ -296,9 +297,9 @@ public:
   /*!
     @brief Do boundary intersection tests.
   */
-  virtual void intersect_particles(const std::string       a_particles,
-				   const std::string       a_eb_particles,
-				   const std::string       a_dom_particles,
+  virtual void intersect_particles(const which_container       a_particles,
+				   const which_container       a_eb_particles,
+				   const which_container       a_dom_particles,
 				   const EB_representation a_representation,				   
 				   const bool              a_delete);
 
@@ -344,7 +345,7 @@ public:
   /*!
     @brief Get number of particles in a container
   */
-  virtual size_t get_num_particles(const std::string a_container, const bool a_local) const;
+  virtual size_t get_num_particles(const which_container a_container, const bool a_local) const;
 
   /*!
     @brief Register operators
@@ -417,21 +418,6 @@ public:
   virtual void pre_regrid(const int a_base, const int a_old_finest_level);
 
   /*!
-    @brief Add particles. Container version. 
-  */
-  virtual void add_particles(particle_container<ito_particle>& a_part, const bool a_destructive);
-
-  /*!
-    @brief Add particles. AMR version. 
-  */
-  virtual void add_particles(AMRParticles<ito_particle>& a_part, const bool a_destructive);
-
-  /*!
-    @brief Add particles. Level version. 
-  */
-  virtual void add_particles(ParticleData<ito_particle>& a_part, const int a_level, const bool a_destructive);
-
-  /*!
     @brief Add particles. Level and patch version. 
   */
   virtual void add_particles(ListBox<ito_particle>& a_part, const int a_lvl, const DataIndex a_dit, const bool a_destructive);
@@ -449,12 +435,12 @@ public:
   /*!
     @brief Get a general particle container
   */
-  virtual particle_container<ito_particle>& get_particles(const std::string a_container);
+  virtual particle_container<ito_particle>& get_particles(const which_container a_container);
 
   /*!
     @brief Get a general particle container
   */
-  virtual const particle_container<ito_particle>& get_particles(const std::string a_container) const;
+  virtual const particle_container<ito_particle>& get_particles(const which_container a_container) const;
 
   /*!
     @brief Get the species
@@ -558,27 +544,27 @@ public:
     /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sort_particles_by_cell(const std::string a_container);
+  virtual void sort_particles_by_cell(const which_container a_container);
 
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sort_particles_by_patch(const std::string a_container);
+  virtual void sort_particles_by_patch(const which_container a_container);
   
   /*!
     @brief Make superparticles
   */
-  virtual void make_superparticles(const std::string a_container, const int a_particlesPerPatch);
+  virtual void make_superparticles(const which_container a_container, const int a_particlesPerPatch);
 
   /*!
     @brief Make superparticles on specified level
   */
-  virtual void make_superparticles(const std::string a_container, const int a_particlesPerPatch, const int a_level);
+  virtual void make_superparticles(const which_container a_container, const int a_particlesPerPatch, const int a_level);
 
   /*!
     @brief Make superparticles on specified level and patch
   */
-  virtual void make_superparticles(const std::string a_container, const int a_particlesPerPatch, const int a_level, const DataIndex a_dit);
+  virtual void make_superparticles(const which_container a_container, const int a_particlesPerPatch, const int a_level, const DataIndex a_dit);
 
   /*!
     @brief Remap all particles
@@ -588,7 +574,7 @@ public:
   /*!
     @brief Remap all particles
   */
-  void remap(const std::string a_container);
+  void remap(const which_container a_container);
 
   /*!
     @brief Random Gaussian
@@ -995,7 +981,7 @@ protected:
   /*!
     @brief Various particle containers with identifiers. 
   */
-  std::map<std::string, particle_container<ito_particle> > m_particle_containers;
+  std::map<which_container, particle_container<ito_particle> > m_particle_containers;
 
   /*!
     @brief Parse superparticles
