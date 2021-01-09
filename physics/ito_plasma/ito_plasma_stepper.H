@@ -106,6 +106,13 @@ namespace physics {
 				    const EB_representation           a_representation,
 				    const Real                        a_tolerance);
 
+      void transfer_covered_particles(const which_particles a_which, const EB_representation a_representation, const Real a_tolerance);
+      void transfer_covered_particles(const which_particles             a_which,
+				      const ito_solver::which_container a_containerFrom,
+				      const ito_solver::which_container a_containerTo,
+				      const EB_representation           a_representation,
+				      const Real                        a_tolerance);
+
       // Internal routines
       void set_verbosity(const int a_verbosity);
 

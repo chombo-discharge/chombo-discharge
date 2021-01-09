@@ -1388,6 +1388,66 @@ void ito_plasma_stepper::remove_covered_particles(const which_particles         
   }  
 }
 
+void ito_plasma_stepper::transfer_covered_particles(const which_particles a_which, const EB_representation a_representation, const Real a_tolerance){
+  CH_TIME("ito_plasma_stepper::transfer_covered_particles_particles(which_particles, EB_representation, tolerance)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::transfer_covered_particles_particles(which_particles, EB_representation, tolerance)" << endl;
+  }
+
+  this->transfer_covered_particles(a_which, ito_solver::which_container::bulk, ito_solver::which_container::covered, a_representation, a_tolerance);
+}
+
+void ito_plasma_stepper::transfer_covered_particles(const which_particles             a_which,
+						    const ito_solver::which_container a_containerFrom,
+						    const ito_solver::which_container a_containerTo,
+						    const EB_representation           a_representation,
+						    const Real                        a_tolerance){
+  CH_TIME("ito_plasma_stepper::transfer_covered_particles_particles(which_particles, container, container, EB_representation, tolerance)");
+  if(m_verbosity > 5){
+    pout() << "ito_plasma_stepper::transfer_covered_particles_particles(which_particles, container, container, EB_representation, tolerance)" << endl;
+  }
+
+  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<ito_solver>&   solver = solver_it();
+    RefCountedPtr<ito_species>& species = solver->get_species();
+
+    const int idx = solver_it.get_solver();
+
+    const bool mobile    = solver->is_mobile();
+    const bool diffusive = solver->is_diffusive();
+    const bool charged   = species->get_charge() != 0;
+
+    switch(a_which) {
+    case which_particles::all:
+      solver->transfer_covered_particles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
+      break;
+    case which_particles::all_mobile:
+      if(mobile) solver->transfer_covered_particles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
+      break;
+    case which_particles::all_diffusive:
+      if(diffusive) solver->transfer_covered_particles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
+      break;
+    case which_particles::charged_mobile:
+      if(charged && mobile) solver->transfer_covered_particles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
+      break;
+    case which_particles::charged_diffusive:
+      if(charged && diffusive) solver->transfer_covered_particles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
+      break;
+    case which_particles::all_mobile_or_diffusive:
+      if(mobile || diffusive) solver->transfer_covered_particles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
+      break;
+    case which_particles::charged_and_mobile_or_diffusive:
+      if(charged && (mobile || diffusive)) solver->transfer_covered_particles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
+      break;
+    case which_particles::stationary:
+      if(!mobile && !diffusive) solver->transfer_covered_particles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
+      break;
+    default:
+      MayDay::Abort("ito_plasma_stepper::transfer_covered_particles_particles(...) - logic bust");
+    }    
+  }
+}
+
 void ito_plasma_stepper::remap_particles(const which_particles a_which_particles){
   CH_TIME("ito_plasma_stepper::remap_particles(which_particles)");
   if(m_verbosity > 5){
