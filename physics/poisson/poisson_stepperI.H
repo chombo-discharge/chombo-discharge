@@ -178,14 +178,17 @@ namespace physics {
     }
 
     template <class T>
-    bool poisson_stepper<T>::load_balance(Vector<Vector<int> >&            a_procs,
-					  Vector<Vector<Box> >&            a_boxes,
-					  const std::string                a_realm,
-					  const Vector<DisjointBoxLayout>& a_grids,
-					  const int                        a_lmin,
-					  const int                        a_finest_level){
-      bool ret = false;
-      
+    bool poisson_stepper<T>::load_balance_realm(const std::string a_realm) const {
+      return m_load_balance ? true : false;
+    }
+
+    template <class T>
+    void poisson_stepper<T>::load_balance_boxes(Vector<Vector<int> >&            a_procs,
+						Vector<Vector<Box> >&            a_boxes,
+						const std::string                a_realm,
+						const Vector<DisjointBoxLayout>& a_grids,
+						const int                        a_lmin,
+						const int                        a_finest_level){
       if(m_load_balance){
 	a_procs.resize(1+a_finest_level);
 	a_boxes.resize(1+a_finest_level);
@@ -231,8 +234,6 @@ namespace physics {
 	  a_boxes[lvl] = dit.getBoxes();
 	  UnLongLongLoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
 
-	  ret = true;
-
 #if 0 // Debug
 	  a_procs[lvl].resize(a_boxes[lvl].size(), 0);
 	  for (int ibox = 0; ibox < a_procs[lvl].size(); ibox++){
@@ -244,11 +245,6 @@ namespace physics {
 #endif
 	}
       }
-      else{
-	ret = false;
-      }
-      
-      return ret;
     }
   }
 }

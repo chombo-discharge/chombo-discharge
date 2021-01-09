@@ -180,11 +180,11 @@ void imex_sdc::parse_advection_options(){
 }
 
 RefCountedPtr<cdr_storage>& imex_sdc::get_cdr_storage(const cdr_iterator<cdr_solver>& a_solverit){
-  return m_cdr_scratch[a_solverit.get_solver()];
+  return m_cdr_scratch[a_solverit.index()];
 }
 
 RefCountedPtr<rte_storage>& imex_sdc::get_rte_storage(const rte_iterator<rte_solver>& a_solverit){
-  return m_rte_scratch[a_solverit.get_solver()];
+  return m_rte_scratch[a_solverit.index()];
 }
 
 bool imex_sdc::need_to_regrid(){
@@ -960,7 +960,7 @@ void imex_sdc::reconcile_integrands(){
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
 
     // This has not been computed yet. Do it.
     EBAMRCellData& FAR_p     = storage->get_FAR()[m_p];
@@ -1013,7 +1013,7 @@ void imex_sdc::initialize_errors(){
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     
     // These should be zero
     if(idx == m_error_idx || m_error_idx < 0){
@@ -1043,7 +1043,7 @@ void imex_sdc::finalize_errors(){
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
 
     // Compute error
     if(idx == m_error_idx || m_error_idx < 0){
@@ -1275,7 +1275,7 @@ void imex_sdc::allocate_cdr_storage(){
   m_cdr_scratch.resize(num_species);
   
   for (cdr_iterator<cdr_solver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_realm, m_cdr->get_phase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage(m_p);
   }
@@ -1293,7 +1293,7 @@ void imex_sdc::allocate_rte_storage(){
   m_rte_scratch.resize(num_photons);
   
   for (rte_iterator<rte_solver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_realm, m_rte->get_phase(), ncomp));
     m_rte_scratch[idx]->allocate_storage(m_p);
   }
@@ -1312,13 +1312,13 @@ void imex_sdc::deallocate_internals(){
   }
 
   for (cdr_iterator<cdr_solver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     m_cdr_scratch[idx]->deallocate_storage();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
   }
 
   for (rte_iterator<rte_solver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     m_rte_scratch[idx]->deallocate_storage();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
   }
@@ -1369,7 +1369,7 @@ void imex_sdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states){
   }
 
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
     EBAMRCellData& grad = storage->get_gradient();
     m_amr->compute_gradient(grad, *a_states[idx], m_realm, m_cdr->get_phase());
@@ -1422,7 +1422,7 @@ void imex_sdc::compute_cdr_eb_states(){
   // won't hurt mass conservation because the mass hasn't been injected yet
   imex_sdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     data_ops::floor(*eb_states[idx], 0.0);
   }
 
@@ -1457,7 +1457,7 @@ void imex_sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states){
   // won't hurt mass conservation because the mass hasn't been injected yet
   imex_sdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), a_states);
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     data_ops::floor(*eb_states[idx], 0.0);
   }
 

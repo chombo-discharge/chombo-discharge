@@ -36,6 +36,7 @@ driver.recursive_regrid                = false         # Recursive regrids
 driver.plot_interval                   = 10            # Plot interval
 driver.regrid_interval                 = 10            # Regrid interval
 driver.checkpoint_interval             = 10            # Checkpoint interval
+driver.write_regrid_files              = false         # Don't write regrid files. 
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 1.0           # Stop time

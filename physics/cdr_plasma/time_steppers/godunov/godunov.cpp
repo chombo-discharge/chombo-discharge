@@ -190,11 +190,11 @@ bool godunov::need_to_regrid(){
 }
 
 RefCountedPtr<cdr_storage>& godunov::get_cdr_storage(const cdr_iterator<cdr_solver>& a_solverit){
-  return m_cdr_scratch[a_solverit.get_solver()];
+  return m_cdr_scratch[a_solverit.index()];
 }
 
 RefCountedPtr<rte_storage>& godunov::get_rte_storage(const rte_iterator<rte_solver>& a_solverit){
-  return m_rte_scratch[a_solverit.get_solver()];
+  return m_rte_scratch[a_solverit.index()];
 }
 
 Real godunov::restrict_dt(){
@@ -354,7 +354,7 @@ void godunov::allocate_internals(){
   // Allocate cdr storage
   m_cdr_scratch.resize(num_species);
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_realm, m_cdr->get_phase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
   }
@@ -362,7 +362,7 @@ void godunov::allocate_internals(){
   // Allocate RTE storage
   m_rte_scratch.resize(num_photons);
   for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_realm, m_rte->get_phase(), ncomp));
     m_rte_scratch[idx]->allocate_storage();
   }
@@ -383,13 +383,13 @@ void godunov::deallocate_internals(){
   }
 
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     m_cdr_scratch[idx]->deallocate_storage();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
   }
 
   for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     m_rte_scratch[idx]->deallocate_storage();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
   }
@@ -428,7 +428,7 @@ void godunov::compute_cdr_gradients(){
   }
 
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     RefCountedPtr<cdr_solver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
@@ -464,7 +464,7 @@ void godunov::compute_cdr_eb_states(){
   // won't hurt mass conservation because the mass hasn't been injected yet
   cdr_plasma_stepper::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     data_ops::floor(*eb_states[idx], 0.0);
   }
 
@@ -564,7 +564,7 @@ void godunov::compute_cdr_domain_states(){
   m_amr->allocate(grad, m_realm, m_cdr->get_phase(), SpaceDim);
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     if(solver->is_mobile()){
       cdr_plasma_stepper::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[idx]);
       cdr_plasma_stepper::project_domain(*domain_gradients[idx], grad);
