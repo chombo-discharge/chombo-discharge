@@ -295,7 +295,7 @@ template <class T>
 Vector<EBAMRCellData*> ito_layout<T>::get_velo_funcs(){
   Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.get_solver()] = &(iter()->get_velo_func());
+    ret[iter.index()] = &(iter()->get_velo_func());
   }
 
   return ret;
@@ -305,7 +305,7 @@ template <class T>
 Vector<EBAMRCellData*> ito_layout<T>::get_densities(){
   Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.get_solver()] = &(iter()->get_state());
+    ret[iter.index()] = &(iter()->get_state());
   }
 
   return ret;
@@ -315,7 +315,7 @@ template <class T>
 Vector<EBAMRCellData*> ito_layout<T>::get_scratch(){
   Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.get_solver()] = &(iter()->get_scratch());
+    ret[iter.index()] = &(iter()->get_scratch());
   }
 
   return ret;
@@ -325,7 +325,7 @@ template <class T>
 Vector<EBAMRCellData*> ito_layout<T>::get_diffco_funcs(){
   Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.get_solver()] = &(iter()->get_diffco_func());
+    ret[iter.index()] = &(iter()->get_diffco_func());
   }
 
   return ret;
@@ -335,7 +335,7 @@ template <class T>
 Vector<EBAMRCellData*> ito_layout<T>::get_mobility_funcs(){
   Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.get_solver()] = &(iter()->get_mobility_func());
+    ret[iter.index()] = &(iter()->get_mobility_func());
   }
 
   return ret;
@@ -345,7 +345,7 @@ template <class T>
 Vector<particle_container<ito_particle>* > ito_layout<T>::get_particles(const ito_solver::which_container a_container){
   Vector<particle_container<ito_particle>* > ret(m_solvers.size(), nullptr);
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.get_solver()] = &(iter()->get_particles(a_container));
+    ret[iter.index()] = &(iter()->get_particles(a_container));
   }
   
   return ret;

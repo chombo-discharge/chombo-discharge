@@ -41,7 +41,7 @@ int ito_iterator<T>::num_solvers(){
 }
 
 template <class T>
-int ito_iterator<T>::get_solver() const {
+int ito_iterator<T>::index() const {
   CH_assert(m_defined);
   return m_isolver;
 }

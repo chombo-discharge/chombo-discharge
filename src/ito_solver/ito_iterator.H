@@ -51,7 +51,7 @@ public:
   /*!
     @brief Get current solver number
   */
-  virtual int get_solver() const;
+  virtual int index() const;
 
   /*!
     @brief Reset iterator

@@ -101,7 +101,7 @@ void ito_plasma_godunov::allocate(){
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<ito_solver>& solver = solver_it();
 
-    const int idx         = solver_it.get_solver();
+    const int idx         = solver_it.index();
     const int pvr_buffer  = solver->get_pvr_buffer();
     const int halo_buffer = solver->get_halo_buffer();
 
@@ -459,7 +459,7 @@ void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_lev
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
       
     m_conductivity_particles[idx]->pre_regrid(a_lmin);
     m_rho_dagger_particles[idx]->pre_regrid(a_lmin);
@@ -521,7 +521,7 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   const Vector<int>& ref_rat             = m_amr->get_ref_rat();
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     m_rho_dagger_particles[idx]->regrid(  grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
     m_conductivity_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
   }
@@ -669,7 +669,7 @@ void ito_plasma_godunov::remap_godunov_particles(Vector<particle_container<godun
     RefCountedPtr<ito_solver>&   solver = solver_it();
     RefCountedPtr<ito_species>& species = solver->get_species();
 
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
 
     const bool mobile    = solver->is_mobile();
     const bool diffusive = solver->is_diffusive();
@@ -716,7 +716,7 @@ void ito_plasma_godunov::deposit_godunov_particles(const Vector<particle_contain
     RefCountedPtr<ito_solver>&   solver = solver_it();
     RefCountedPtr<ito_species>& species = solver->get_species();
 
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
 
     const bool mobile    = solver->is_mobile();
     const bool diffusive = solver->is_diffusive();
@@ -763,7 +763,7 @@ void ito_plasma_godunov::clear_godunov_particles(const Vector<particle_container
     RefCountedPtr<ito_solver>&   solver = solver_it();
     RefCountedPtr<ito_species>& species = solver->get_species();
 
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
 
     const bool mobile    = solver->is_mobile();
     const bool diffusive = solver->is_diffusive();
@@ -824,7 +824,7 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
     RefCountedPtr<ito_solver>&   solver = solver_it();
     RefCountedPtr<ito_species>& species = solver->get_species();
     
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     const int q   = species->get_charge();
 
     if(q != 0 && solver->is_mobile()){
@@ -969,7 +969,7 @@ void ito_plasma_godunov::copy_conductivity_particles(Vector<particle_container<g
     const RefCountedPtr<ito_solver>& solver   = solver_it();
     const RefCountedPtr<ito_species>& species = solver->get_species();
 
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     const int q   = species->get_charge();
 
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -1004,7 +1004,7 @@ void ito_plasma_godunov::copy_rho_dagger_particles(Vector<particle_container<god
     const RefCountedPtr<ito_solver>& solver   = solver_it();
     const RefCountedPtr<ito_species>& species = solver->get_species();
 
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
     const int q   = species->get_charge();
 
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -1225,7 +1225,7 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_contai
     RefCountedPtr<ito_solver>& solver   = solver_it();
     RefCountedPtr<ito_species>& species = solver->get_species();
 
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
 
     const bool mobile    = solver->is_mobile();
     const bool diffusive = solver->is_diffusive();
@@ -1370,7 +1370,7 @@ void ito_plasma_godunov::pre_trapezoidal_predictor(Vector<particle_container<god
     RefCountedPtr<ito_solver>& solver   = solver_it();
     RefCountedPtr<ito_species>& species = solver->get_species();
 
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
 
     const bool mobile    = solver->is_mobile();
     const bool diffusive = solver->is_diffusive();
@@ -1459,7 +1459,7 @@ void ito_plasma_godunov::pre_trapezoidal_corrector(Vector<particle_container<god
     RefCountedPtr<ito_solver>& solver   = solver_it();
     RefCountedPtr<ito_species>& species = solver->get_species();
 
-    const int idx = solver_it.get_solver();
+    const int idx = solver_it.index();
 
     const bool mobile    = solver->is_mobile();
     const bool diffusive = solver->is_diffusive();

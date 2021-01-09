@@ -56,7 +56,7 @@ public:
   /*!
     @brief Get current solver number
   */
-  virtual int get_solver() const {
+  virtual int index() const {
     CH_assert(m_defined);
     return m_isolver;
   }
