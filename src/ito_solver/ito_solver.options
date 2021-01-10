@@ -2,7 +2,7 @@
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
 ito_solver.pvr_buffer          = 0             # Buffer for PVR.
-ito_solver.halo                = 1             # Size of define halo region for particles
+ito_solver.halo_buffer         = 1             # Size of define halo region for particles
 ito_solver.plt_vars            = phi vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ito_solver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
 ito_solver.seed                = 0             # Seed for RNG

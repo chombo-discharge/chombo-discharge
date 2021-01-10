@@ -36,6 +36,7 @@ driver.recursive_regrid                = false         # Recursive regrids
 driver.plot_interval                   = 5             # Plot interval
 driver.regrid_interval                 = 5             # Regrid interval
 driver.checkpoint_interval             = 5             # Checkpoint interval
+driver.write_regrid_files              = false         # Write regrid files or not. 
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 1.0           # Stop time
@@ -62,36 +63,16 @@ driver.refine_dielectric_gas_interface = -1            # Refine dielectric-gas i
 driver.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
 driver.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----
 
-
 # ====================================================================================================
 # MC_PHOTO CLASS OPTIONS
-#
-# The mc_photo class is intended as a flexible RTE solver that may interface into several descriptions.
-# Because of that we allow several deposition types, e.g. cloud-in-cell if one wants to compute photoionization
-# profiles with less noise. If one wants the photoionization profile (which is what gets passed around
-# in the time_stepper framework) to contain just the number of photons in a cell, one would use
-# deposition_type = num. This is useful for SSA type algorithms. 
-#
-# Since the photoproduction source term is filled externally, and the filling of this depends on the
-# CFD/FHD description, mc_photo.source_type species what the solver will expect when drawing photons.
-# For example, if one species 'volume_rate', mc_photo will interpret the internal data so as to contain
-# a rate per unit volume. The number of photons produced in a volume will then be S*dx^3*dt. If you
-# filled the source term with just the number of photons that will be produced in a cell, you should
-# use source_type = number.
-#
-# The photogeneration mechanism can be done stochastically or determinsitically. How this is interpreted
-# depends on how you implemented your source terms through the plasma_kinetics interface (or equivalent).
-# This design makes sense for FHD models because the number of photons produced in a cell can be
-# computed directly, e.g. with SSA algorithms. In this way the stochasticity is provided by the SSA
-# algorithm and one would use mc_photo.source_type = deterministic. For CFD models one would probably
-# work with a volumetric rate, in which one could draw the number of photons from a Poisson distribution. 
 # ====================================================================================================
-mc_photo.instantaneous      = false         # Instantaneous transport or not
-mc_photo.max_photons        = -1            # Maximum no. generated in a cell (<= 0 yields physical photons)
+mc_photo.instantaneous      = true          # Instantaneous transport or not
+mc_photo.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
 mc_photo.blend_conservation = false         # Switch for blending with the nonconservative divergence
-mc_photo.pvr_buffer         = 0             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
-mc_photo.random_kappa       = false         # Randomize absorption length (taken from photon implementation)
-mc_photo.plt_vars           = phi src phot       # Available are 'phi' and 'src'
+mc_photo.pvr_buffer         = 0             # Buffer for PVR. 
+mc_photo.halo_buffer        = 1             # Halo region for particles. 
+mc_photo.random_kappa       = true          # Randomize absorption length (taken from photon implementation)
+mc_photo.plt_vars           = phi src phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'
 mc_photo.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 
 mc_photo.bisect_step        = 1.E-2         # Bisection step length for intersection tests
 mc_photo.seed               = 0             # Seed for RNG
@@ -103,15 +84,15 @@ mc_photo.bc_z_low           = outflow       # Boundary condition
 mc_photo.bc_z_high          = outflow       # Boundary condition
 mc_photo.poiss_exp_swap     = 100           # Swap out Poisson with exponential distribution above this mean
 mc_photo.photon_generation  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
-mc_photo.source_type        = number        # 'number'      = Source term contains the number of photons produced
-                                            # 'volume'      = Source terms contains the number of photons produced per unit volume
-                                            # 'volume_rate' = Source terms contains the volumetric rate
-                                            # 'rate'        = Source terms contains the rate
-mc_photo.deposition         = cic           # 'ngp' = nearest grid point
-                                            # 'num' = # of photons per cell
-                                            # 'cic' = cloud-in-cell
-                                            # 'tsc' = triangle-shaped-cloud
-                                            # 'w4'  = 3rd order interpolation
+mc_photo.source_type        = number        # 'number'       = Source term contains the number of photons produced
+                                            # 'volume'       = Source terms contains the number of photons produced per unit volume
+                                            # 'volume_rate'  = Source terms contains the volumetric rate
+                                            # 'rate'         = Source terms contains the rate
+mc_photo.deposition         = cic           # 'ngp'  = nearest grid point
+                                            # 'num'  = # of photons per cell
+                                            # 'cic'  = cloud-in-cell
+                                            # 'tsc'  = triangle-shaped-cloud
+                                            # 'w4'   = 3rd order interpolation
 
 
 # ====================================================================================================
