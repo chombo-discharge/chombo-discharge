@@ -195,7 +195,7 @@ void air7_stephens::parse_temperature(){
   ParmParse pp("air7_stephens");
   read_file_entries(m_e_temperature, air7_stephens::s_bolsig_energy);
 
-  m_e_temperature.dump_table();
+  //  m_e_temperature.dump_table();
   m_e_temperature.scale_x(m_N*units::s_Td);
   m_e_temperature.scale_y(2.0*units::s_Qe/(3.0*units::s_kb));
   m_e_temperature.make_uniform(m_uniform_entries);

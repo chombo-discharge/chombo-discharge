@@ -212,7 +212,7 @@ void air9eed_bourdon::read_townsend(){
   m_alpha_townsend.make_uniform(m_uniform_tables);
   m_alpha_townsend.scale_y(m_N);
 
-  m_alpha_townsend.dump_table();
+  //  m_alpha_townsend.dump_table();
 }
 
 void air9eed_bourdon::read_init_eed(){

@@ -6,6 +6,8 @@
 #include "air7_stephens_species.H"
 #include "units.H"
 
+#include "ParmParse.H"
+
 #include <chrono>
 
 using namespace physics::cdr_plasma;
