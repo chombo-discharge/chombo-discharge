@@ -79,6 +79,8 @@ ito_solver.redistribute        = true          # Turn on/off redistribution.
 ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ito_solver.checkpointing       = particles     # 'particles' or 'numbers'
 ito_solver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
+ito_solver.irr_ngp_interp      = true          # Force irregular interpolation in cut cells or not
+ito_solver.irr_ngp_deposition  = false         # How to interpolate mobility, 'mobility' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ito_solver.mobility_interp     = mobility      # How to interpolate mobility, 'mobility' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
 ito_solver.halo_deposition     = native        # Native or NGP (see documentation)

@@ -200,6 +200,9 @@ void ito_solver::parse_deposition(){
   else{
     MayDay::Abort("ito_solver::parse_deposition - unknown interpolation method for mobility");
   }
+
+  pp.get("irr_ngp_deposition", m_irreg_ngp_deposition);
+  pp.get("irr_ngp_interp",     m_irreg_ngp_interpolation);
 }
 
 void ito_solver::parse_bisect_step(){
@@ -1476,9 +1479,9 @@ void ito_solver::deposit_conductivity(EBAMRCellData& a_state, particle_container
     pout() << m_name + "::deposit_conductivity(state, particles, deposition_type)" << endl;
   }
 
-  this->set_mass_to_conductivity(a_particles);                                 // Make mass = mass*mu
+  this->set_mass_to_conductivity(a_particles);                 // Make mass = mass*mu
   this->deposit_particles(a_state, a_particles, a_deposition); // Deposit mass*mu
-  this->unset_mass_to_conductivity(a_particles);                               // Make mass = mass/mu
+  this->unset_mass_to_conductivity(a_particles);               // Make mass = mass/mu
 }
 
 void ito_solver::deposit_diffusivity(){
@@ -2044,8 +2047,6 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
     pout() << m_name + "::interpolate_velocities" << endl;
   }
 
-  const bool force_ngp_irreg = true;
-
   particle_container<ito_particle>& particles = m_particle_containers.at(which_container::bulk);
 
   if(m_mobile){
@@ -2059,7 +2060,7 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
     List<ito_particle>& particleList = particles[a_lvl][a_dit].listItems();
 
     // This interpolates the velocity function on to the particle velocities
-    EBParticleInterp meshInterp(box, ebisbox, dx, origin, force_ngp_irreg);
+    EBParticleInterp meshInterp(box, ebisbox, dx, origin, m_irreg_ngp_interpolation);
     meshInterp.interpolateVelocity(particleList, vel_fab, m_deposition);
 
     // Go through the particles and set their velocities to velo_func*mobility
@@ -2100,7 +2101,6 @@ void ito_solver::interpolate_mobilities(const int a_lvl, const DataIndex& a_dit)
     pout() << m_name + "::interpolate_mobilities(lvl, dit)" << endl;
   }
 
-  const bool force_ngp_irreg = true;
 
   if(m_mobility_interp == mobility_interp::mobility){
     this->interpolate_mobilities_mu(a_lvl, a_dit);
@@ -2117,8 +2117,6 @@ void ito_solver::interpolate_mobilities_mu(const int a_lvl, const DataIndex& a_d
     pout() << m_name + "::interpolate_mobilities_mu(lvl, dit)" << endl;
   }
 
-  const bool force_ngp_irreg = true;
-
   particle_container<ito_particle>& particles = m_particle_containers.at(which_container::bulk);
 
   if(m_mobile){
@@ -2130,7 +2128,7 @@ void ito_solver::interpolate_mobilities_mu(const int a_lvl, const DataIndex& a_d
     const Box box              = m_amr->get_grids(m_realm)[a_lvl][a_dit];
 
     List<ito_particle>& particleList = particles[a_lvl][a_dit].listItems();
-    EBParticleInterp meshInterp(box, ebisbox, dx, origin, force_ngp_irreg);
+    EBParticleInterp meshInterp(box, ebisbox, dx, origin, m_irreg_ngp_interpolation);
     
     meshInterp.interpolateMobility(particleList, mob_fab, m_deposition);
   }
@@ -2141,8 +2139,6 @@ void ito_solver::interpolate_mobilities_vel(const int a_lvl, const DataIndex& a_
   if(m_verbosity > 5){
     pout() << m_name + "::interpolate_mobilities_vel(lvl, dit)" << endl;
   }
-
-  const bool force_ngp_irreg = true;
 
   particle_container<ito_particle>& particles = m_particle_containers.at(which_container::bulk);
 
@@ -2157,7 +2153,7 @@ void ito_solver::interpolate_mobilities_vel(const int a_lvl, const DataIndex& a_
     FArrayBox& scratch = (*m_scratch[a_lvl])[a_dit].getFArrayBox();
 
     List<ito_particle>& particleList = particles[a_lvl][a_dit].listItems();
-    EBParticleInterp meshInterp(box, ebisbox, dx, origin, force_ngp_irreg);
+    EBParticleInterp meshInterp(box, ebisbox, dx, origin, m_irreg_ngp_interpolation);
     
     // First, interpolate |E| to the particle position, it will be stored on m_tmp. 
     meshInterp.interpolateMobility(particleList, scratch, m_deposition);
@@ -2236,8 +2232,6 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
     pout() << m_name + "::interpolate_diffusion" << endl;
   }
 
-  const bool force_ngp_irreg = false;
-
   particle_container<ito_particle>& particles = m_particle_containers.at(which_container::bulk);
 
   if(m_diffusive){
@@ -2250,7 +2244,7 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
 
     List<ito_particle>& particleList = particles[a_lvl][a_dit].listItems();
 
-    EBParticleInterp meshInterp(box, ebisbox,dx, origin, force_ngp_irreg);
+    EBParticleInterp meshInterp(box, ebisbox,dx, origin, m_irreg_ngp_interpolation);
     meshInterp.interpolateDiffusion(particleList, dco_fab, m_deposition);
   }
 }

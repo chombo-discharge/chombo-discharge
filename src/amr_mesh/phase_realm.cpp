@@ -16,7 +16,7 @@
 
 
 phase_realm::phase_realm(){
-  m_defined = false;
+  m_defined   = false;
   m_verbosity = -1;
 
   // Always do this shit. 

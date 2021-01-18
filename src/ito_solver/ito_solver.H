@@ -859,6 +859,16 @@ protected:
   Real m_hop_eps;
 
   /*!
+    @brief NGP deposition in cut cells or not
+  */
+  bool m_irreg_ngp_deposition;
+
+  /*!
+    @brief NGP interpolation in cut cells or not
+  */
+  bool m_irreg_ngp_interpolation;
+
+  /*!
     @brief Use ngp when depositing halo particles or not
   */
   bool m_ngp_halo;
