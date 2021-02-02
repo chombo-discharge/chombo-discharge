@@ -293,7 +293,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   this->advance_reaction_network(a_dt);
   reaction_time += MPI_Wtime();
 
-  // Make superparticles
+  // Make superparticles. 
   MPI_Barrier(Chombo_MPI::comm);
   super_time = -MPI_Wtime();
   if((m_step+1) % m_merge_interval == 0 && m_merge_interval > 0){
@@ -1144,7 +1144,8 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   MPI_Barrier(Chombo_MPI::comm);
   isectTime -= MPI_Wtime();
-  this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, true); // Copies, does not delete. 
+  const bool delete_eb_particles = true;
+  this->intersect_particles(     which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, delete_eb_particles); 
   this->remove_covered_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, m_eb_tolerance);
   isectTime += MPI_Wtime();
 
