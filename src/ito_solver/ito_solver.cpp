@@ -1017,6 +1017,8 @@ void ito_solver::write_checkpoint_level_particles(HDF5Handle& a_handle, const in
   // Make ito_particle into simple_ito_particle. This saves a shitload of disk space. 
   for (DataIterator dit(m_amr->get_grids(m_realm)[a_level]); dit.ok(); ++dit){
     List<simple_ito_particle>& other_particles = (realmParticles[a_level])[dit()].listItems();
+
+    other_particles.clear();
       
     for (ListIterator<ito_particle> lit(myParticles[a_level][dit()].listItems()); lit.ok(); ++lit){
       other_particles.append(simple_ito_particle(lit().mass(), lit().position(), lit().energy()));
@@ -2272,7 +2274,7 @@ void ito_solver::update_diffusion(const int a_level, const DataIndex a_dit){
 
   particle_container<ito_particle>& particles = this->get_particles(which_container::bulk);
 
-  if(m_mobile){
+  if(m_diffusive){
     List<ito_particle>& particleList = particles[a_level][a_dit].listItems();
 
     for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){

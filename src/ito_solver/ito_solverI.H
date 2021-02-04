@@ -127,6 +127,10 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&               a_state,
     pout() << m_name + "::deposit_kappaConservative" << endl;
   }
 
+  if(m_halo_buffer > 0 && m_pvr_buffer > 0){
+    MayDay::Abort("ito_solver::deposit_kappaConservative - conflicting inputs, halo/pvr buffers both > 0");
+  }
+
   if(m_pvr_buffer > 0){
     this->deposit_kappaConservativeWithPVR(a_state, a_particles, a_deposition);
   }

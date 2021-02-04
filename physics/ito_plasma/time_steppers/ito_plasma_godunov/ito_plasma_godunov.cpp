@@ -1112,7 +1112,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   // Compute space charge density 
   MPI_Barrier(Chombo_MPI::comm);
   depositGdnvTime -= MPI_Wtime();
-  this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all_diffusive);
+  this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all_diffusive); // Diffusive should be enough because state is not changed for others. 
   depositGdnvTime += MPI_Wtime();
 
   MPI_Barrier(Chombo_MPI::comm);
