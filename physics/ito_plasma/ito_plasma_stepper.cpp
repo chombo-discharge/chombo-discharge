@@ -3131,12 +3131,12 @@ Vector<long int> ito_plasma_stepper::get_checkpoint_loads(const std::string a_re
 
     Vector<RefCountedPtr<ito_solver> > lb_solvers = this->get_lb_solvers();
     
-    for (int i = 0; i < lb_solvers.size(); i++){
+    for (int isolver = 0; isolver < lb_solvers.size(); isolver++){
       Vector<long int> my_loads(count, 0L);
-      lb_solvers[i]->compute_loads(my_loads, dbl, a_level);
+      lb_solvers[isolver]->compute_loads(my_loads, dbl, a_level);
 
-      for (int i = 0; i < count; i++){
-	loads[i] += my_loads[i];
+      for (int ibox = 0; ibox < count; ibox++){
+	loads[ibox] += my_loads[ibox];
       }
     }
   }
