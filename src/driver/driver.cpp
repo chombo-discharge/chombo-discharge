@@ -867,6 +867,9 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	if(m_write_memory){
 	  this->write_memory_usage();
 	}
+	if(m_write_loads){
+	  this->write_computational_loads();
+	}
 #ifdef CH_USE_HDF5
 	this->write_plot_file();
 	this->write_checkpoint_file();
@@ -918,14 +921,24 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 
 
 #ifdef CH_USE_HDF5
-      if(m_step%m_plot_interval == 0 && m_plot_interval > 0 || last_step == true && m_plot_interval > 0){
-	if(m_verbosity > 2){
-	  pout() << "driver::run -- Writing plot file" << endl;
-	}
-	if(m_write_memory){
+      if(m_plot_interval > 0){
+
+	// Aux data
+      	if(m_write_memory){
 	  this->write_memory_usage();
 	}
-	this->write_plot_file();
+	if(m_write_loads){
+	  this->write_computational_loads();
+	}
+	
+	// Plot file
+	if(m_step%m_plot_interval == 0 || last_step == true){
+	  if(m_verbosity > 2){
+	    pout() << "driver::run -- Writing plot file" << endl;
+	  }
+
+	  this->write_plot_file();
+	}
       }
 
       // Write checkpoint file
@@ -1118,6 +1131,8 @@ void driver::parse_memrep(){
     m_memory_mode = memory_report_mode::allocated;
   }
   pp.get("write_memory", m_write_memory);
+
+  pp.get("write_loads", m_write_loads);
 }
 
 void driver::parse_output_directory(){
@@ -1162,6 +1177,18 @@ void driver::parse_output_directory(){
     success = system(cmd.c_str());
     if(success != 0){
       std::cout << "driver::set_output_directory - master could not create mpi directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/mpi/memory";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create mpi/memory directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/mpi/loads";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create mpi/loads directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_output_dir + "/regrid";
@@ -1426,6 +1453,9 @@ void driver::setup(const int a_init_regrids, const bool a_restart, const std::st
       if(m_plot_interval > 0){
 	if(m_write_memory){
 	  this->write_memory_usage();
+	}
+	if(m_write_loads){
+	  this->write_computational_loads();
 	}
 	this->write_plot_file();
       }
@@ -1954,7 +1984,7 @@ void driver::write_memory_usage(){
   }
 
   char file_char[1000];
-  const std::string prefix = m_output_dir + "/mpi/" + m_output_names;
+  const std::string prefix = m_output_dir + "/mpi/memory/" + m_output_names;
   sprintf(file_char, "%s.memory.step%07d.%dd.dat", prefix.c_str(), m_step, SpaceDim);
   std::string fname(file_char);
 
@@ -1980,6 +2010,68 @@ void driver::write_memory_usage(){
 	<< std::left << std::setw(width) << peak[i] << "\t"
 	<< std::left << std::setw(width) << unfreed[i] << "\t"
 	<< endl;
+    }
+  }
+}
+
+void driver::write_computational_loads(){
+  CH_TIME("driver::write_computational_loads");
+  if(m_verbosity > 3){
+    pout() << "driver::write_computational_loads" << endl;
+  }
+
+  const int nProc = numProc();
+
+  for (const auto& r : m_amr->get_realms()){
+
+    char file_char[1000];
+    const std::string prefix = m_output_dir + "/mpi/loads/" + m_output_names;
+    sprintf(file_char, "%s.%s.load.step%07d.%dd.dat", prefix.c_str(), r.c_str(), m_step, SpaceDim);
+    std::string fname(file_char);
+
+    Vector<long int> sumLoads(nProc, 0L);
+
+
+    const int id = procID();
+
+    // Compute total loads on each rank. 
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const Vector<long int> boxLoads = m_timestepper->get_checkpoint_loads(r, lvl);
+
+      const DisjointBoxLayout& dbl = m_amr->get_grids(r)[lvl];
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	sumLoads[id] += boxLoads[dit().intCode()];
+      }
+    }
+
+    // Reduce onto output rank.
+#ifdef CH_MPI
+    Vector<long int> tmp(nProc, 0L);
+    MPI_Allreduce(&(sumLoads[0]), &(tmp[0]), nProc, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+    sumLoads = tmp;
+#endif
+								
+
+    // Write data
+    if(procID() == 0){
+      std::ofstream f;
+      f.open(fname, std::ios_base::trunc);
+
+      const int width = 12;
+      
+      // Write header
+      f << std::left << std::setw(width) << "# MPI rank" << "\t"
+	<< std::left << std::setw(width) << "Load" << "\t"
+	<< endl;
+
+      // Write data
+      for (int i = 0; i < nProc; i++){
+      f << std::left << std::setw(width) << i << "\t"
+	<< std::left << std::setw(width) << sumLoads[i] << "\t"
+	<< endl;
+      }
+
+      f.close();
     }
   }
 }

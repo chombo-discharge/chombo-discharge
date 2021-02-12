@@ -384,6 +384,11 @@ protected:
   bool m_write_memory;
 
   /*!
+    @brief Write loads to file or not
+  */
+  bool m_write_loads;
+
+  /*!
     @brief Use recursive regrid (true) or regrid all levels at once (false)
   */
   bool m_recursive_regrid;
@@ -604,6 +609,11 @@ protected:
     @brief Write the memory usage to file
   */
   virtual void write_memory_usage();
+
+  /*!
+    @brief Write computational loads
+  */
+  virtual void write_computational_loads();
 
   /*!
     @brief Write a checkpoint file
