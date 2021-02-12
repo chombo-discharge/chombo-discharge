@@ -26,21 +26,32 @@ public:
   };
 
   /*!
-    @brief Convenience function. 
-    @details This just calls Chombo code. 
+    @brief Load balancing. Loads are box volumes. 
   */
-  static void load_balance_boxes(Vector<int>&       a_procs,
-				 const Vector<int>& a_loads,
-				 const Vector<Box>& a_boxes);
+  static void make_balance(Vector<int>& a_levelRanks, const Vector<Box>& a_levelBoxes);
 
   /*!
-    @brief Convenience function. 
-    @details This just calls Chombo code. 
+    @brief Load balancing
   */
-  static void load_balance_boxes(Vector<int>&                      a_procs,
-				 const Vector<unsigned long long>& a_loads,
-				 const Vector<Box>&                a_boxes);
-  
+  template <class T>
+  static void make_balance(Vector<int>& a_ranks, const Vector<T>& a_loads, const Vector<Box>& a_boxes);
+
+  /*!
+    @brief Load balancing function which load balances level by level. 
+  */
+  template <class T>
+  static void level_by_level(Vector<Vector<int> >&       a_procs,
+			     const Vector<Vector<T> >&   a_loads,
+			     const Vector<Vector<Box> >& a_boxes);
+
+  /*!
+    @brief Load balancing function which load balances all boxes at once, not caring about actual levels. 
+  */
+  template <class T>
+  static void hierarchy(Vector<Vector<int> >&       a_procs,
+			const Vector<Vector<T> >&   a_loads,
+			const Vector<Vector<Box> >& a_boxes);
+
   /*!
     @brief Gather boxes
   */
@@ -61,58 +72,9 @@ public:
   */
   static void gather_boxes_and_loads(Vector<Box>& a_boxes, Vector<int>& a_loads);
 
-  /*!
-    @brief Conventional load balancing
-  */
-  static void balance_volume(Vector<int>& a_procs, const Vector<Box>& a_boxes);
-  
-  /*!
-    @brief Do elliptic load-balancing using EBAMRPoissonOp
-    @param[out] a_procs   Processor ownership of boxes
-    @param[in]  a_boxes   Boxes (Remember to order them by using space filling curves first!)
-    @param[in]  a_ebis    Index space
-    @param[in]  a_domain  Problem domain
-    @param[in]  a_verbose Verbose
-  */
-  static void balance_elliptic(Vector<int>&                       a_procs,
-			       const Vector<Box>&                 a_boxes,
-			       const RefCountedPtr<EBIndexSpace>& a_ebis,
-			       const ProblemDomain&               a_domain,
-			       const bool                         a_verbose);
-
-  /*!
-    @brief Do elliptic load-balancing using EBAMRPoissonOp
-    @param[out] a_procs   Processor ownership of boxes
-    @param[in]  a_boxes   Boxes (Remember to order them by using space filling curves first!)
-    @param[in]  a_mfis    EBIndex-spaces
-    @param[in]  a_domain  Problem domain
-    @param[in]  a_verbose Verbose
-  */
-  static void balance_multifluid(Vector<int>&               a_procs,
-				 const Vector<Box>&         a_boxes,
-				 const RefCountedPtr<mfis>& a_mfis,
-				 const ProblemDomain&       a_domain,
-				 const bool                 a_verbose);
-
 protected:
-
-  static void get_mfpoisson_loads(Vector<unsigned long long>& a_loads,
-				  Vector<Box>&                a_boxes,
-				  RefCountedPtr<mfis>&        a_mfis,
-				  const DisjointBoxLayout&    a_dbl,
-				  const ProblemDomain&        a_domain);
-
-  static void get_cdr_loads(Vector<unsigned long long>& a_loads,
-			    Vector<Box>&                a_boxes,
-			    RefCountedPtr<mfis>&        a_mfis,
-			    const DisjointBoxLayout&    a_dbl,
-			    const ProblemDomain&        a_domain);
-
-  static void get_rte_loads(Vector<unsigned long long>& a_loads,
-			    Vector<Box>&                a_boxes,
-			    RefCountedPtr<mfis>&        a_mfis,
-			    const DisjointBoxLayout&    a_dbl,
-			    const ProblemDomain&        a_domain);  
 };
+
+#include "load_balanceI.H"
 
 #endif

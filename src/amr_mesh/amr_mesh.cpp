@@ -41,7 +41,6 @@ amr_mesh::amr_mesh(){
   parse_redist_rad();;
   parse_num_ghost();
   parse_eb_ghost();
-  parse_load_balance();
   parse_domain();
   parse_ghost_interpolation();
   parse_centroid_stencils();
@@ -714,27 +713,6 @@ void amr_mesh::parse_domain(){
   pp.getarr("hi_corner", v, 0, SpaceDim); m_prob_hi = RealVect(D_DECL(v[0], v[1], v[2]));
 }
 
-void amr_mesh::parse_load_balance(){
-
-#if 0
-  std::string balance;
-  ParmParse pp("amr_mesh");
-  pp.get("load_balance", balance);
-  
-  if(balance == "volume"){
-    m_which_balance = load_balance::volume;
-  }
-  else if(balance == "elliptic"){
-    m_which_balance = load_balance::elliptic;
-  }
-  else{
-    MayDay::Abort("amr_mesh::parse_load_balance - unknown load balance requested");
-  }
-#else
-  m_which_balance = load_balance::volume;
-#endif
-}
-
 void amr_mesh::parse_ghost_interpolation(){
 
   std::string interp_type;
@@ -921,7 +899,7 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
   // Load balance boxes with patch volume as load proxy. 
   Vector<Vector<int> > pid(1 + m_finest_level);
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    LoadBalance(pid[lvl], new_boxes[lvl]);
+    load_balance::make_balance(pid[lvl], new_boxes[lvl]);
   }
 
   // Define grids. If a_lmin=0 every grid is new, otherwise keep old grids up to but not including a_lmin
@@ -957,15 +935,7 @@ void amr_mesh::loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& 
 
   // Level-by-level load balancing. This might change in the future. 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    if(m_which_balance == load_balance::volume){
-      load_balance::balance_volume(a_procs[lvl], a_boxes[lvl]);
-    }
-    else if(m_which_balance == load_balance::elliptic){
-      load_balance::balance_elliptic(a_procs[lvl], a_boxes[lvl], m_mfis->get_ebis(phase::gas), m_domains[lvl], false);
-    }
-    else if(m_which_balance == load_balance::multifluid){
-      load_balance::balance_multifluid(a_procs[lvl], a_boxes[lvl], m_mfis, m_domains[lvl], false);
-    }
+    load_balance::make_balance(a_procs[lvl], a_boxes[lvl]);
   }
 }
 

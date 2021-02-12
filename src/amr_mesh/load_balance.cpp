@@ -8,57 +8,8 @@
 #include "load_balance.H"
 #include "EBEllipticLoadBalance.H"
 
-void load_balance::balance_volume(Vector<int>& a_procs, const Vector<Box>& a_boxes){
-  LoadBalance(a_procs, a_boxes);
-}
-
-void load_balance::balance_elliptic(Vector<int>&                       a_procs,
-				    const Vector<Box>&                 a_boxes,
-				    const RefCountedPtr<EBIndexSpace>& a_ebis,
-				    const ProblemDomain&               a_domain,
-				    const bool                         a_verbose){
-
-  EBEllipticLoadBalance(a_procs, a_boxes, a_domain, a_verbose, a_ebis);
-}
-
-void load_balance::balance_multifluid(Vector<int>&               a_procs,
-				      const Vector<Box>&         a_boxes,
-				      const RefCountedPtr<mfis>& a_mfis,
-				      const ProblemDomain&       a_domain,
-				      const bool                 a_verbose){
-
-  MayDay::Abort("load_balance::balance_multifluid - not implemented (yet)");
-  
-  // Load balance the conventional way
-  Vector<Box> boxes = a_boxes;
-  LoadBalance(a_procs, a_boxes);
-
-  
-  MayDay::Abort("load_balance::balance_multifluid - not implemented");
-}
-
-void load_balance::get_mfpoisson_loads(Vector<unsigned long long>& a_loads,
-				       Vector<Box>&                a_boxes,
-				       RefCountedPtr<mfis>&        a_mfis,
-				       const DisjointBoxLayout&    a_dbl,
-				       const ProblemDomain&        a_domain){
-  
-}
-
-void load_balance::get_cdr_loads(Vector<unsigned long long>& a_loads,
-				 Vector<Box>&                a_boxes,
-				 RefCountedPtr<mfis>&        a_mfis,
-				 const DisjointBoxLayout&    a_dbl,
-				 const ProblemDomain&        a_domain){
-  
-}
-
-void load_balance::get_rte_loads(Vector<unsigned long long>& a_loads,
-				 Vector<Box>&                a_boxes,
-				 RefCountedPtr<mfis>&        a_mfis,
-				 const DisjointBoxLayout&    a_dbl,
-				 const ProblemDomain&        a_domain){
-  
+void load_balance::make_balance(Vector<int>& a_levelRanks, const Vector<Box>& a_levelBoxes){
+  LoadBalance(a_levelRanks, a_levelBoxes);
 }
 
 void load_balance::gather_boxes(Vector<Box>& a_boxes){
@@ -219,27 +170,3 @@ void load_balance::gather_boxes_and_loads(Vector<Box>& a_boxes, Vector<int>& a_l
   load_balance::gather_boxes(a_boxes);
   load_balance::gather_loads(a_loads);
 }
-
-void load_balance::load_balance_boxes(Vector<int>&       a_procs,
-				      const Vector<int>& a_loads,
-				      const Vector<Box>& a_boxes){
-
-  if(a_loads.size()!= a_boxes.size()){
-    MayDay::Abort("load_balance::load_balance_boxes - logic bust, loads.size() != boxes.size()");
-  }
-  
-  Vector<long int> loads(a_loads.size());
-  for (int i = 0; i < loads.size(); i++){
-    loads[i] = a_loads[i];
-  }
-
-  LoadBalance(a_procs, loads, a_boxes);
-}
-
-void load_balance::load_balance_boxes(Vector<int>&                      a_procs,
-				      const Vector<unsigned long long>& a_loads,
-				      const Vector<Box>&                a_boxes){
-
-  UnLongLongLoadBalance(a_procs, a_loads, a_boxes);
-}
-  

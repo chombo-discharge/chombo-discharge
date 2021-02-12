@@ -358,7 +358,7 @@ void cdr_tga::define_mg_levels(){
       Vector<int> proc_assign;
       domainSplit(coar, boxes, max_box_size, blocking_factor);
       mortonOrdering(boxes);
-      load_balance::balance_volume(proc_assign, boxes);
+      load_balance::make_balance(proc_assign, boxes);
 
       // Add problem domain and grid
       m_mg_domains.push_back(coar);

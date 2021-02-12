@@ -351,11 +351,6 @@ public:
   virtual void set_mfis(const RefCountedPtr<mfis>& a_mfis);
 
   /*!
-    @brief Set load balance
-  */
-  virtual void parse_load_balance();
-
-  /*!
     @brief Parse domain
   */
   virtual void parse_domain();
@@ -811,11 +806,6 @@ protected:
     @brief mfis
   */
   RefCountedPtr<mfis> m_mfis;
-
-  /*!
-    @brief Load balance type
-  */
-  load_balance::which_balance m_which_balance;
 
   /*!
     @brief Stencil type
