@@ -3185,30 +3185,36 @@ void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
     }
   }
 
-  // Do Load balance each level. 
-  for (int lvl = a_lmin; lvl <= a_finest_level; lvl++){
-    const int count = a_grids[lvl].size();
+  // Construct loads
+  Vector<Vector<long int> > loads(1 + a_finest_level);
+  for (int lvl = 0; lvl <= a_finest_level; lvl++){
+    const int nbox = a_grids[lvl].size();
 
-    Vector<long int> total_loads(count, 0L);
+    // Reset
+    Vector<long int>& level_loads = loads[lvl];
+    Vector<long int> solver_loads(nbox);
+    
+    level_loads.resize(nbox, 0L);
 
-    for (int i = 0; i < lb_solvers.size(); i++){
-      Vector<long int> loads(count, 0L);
+    // Compute solver load and add it to level_loads
+    for (int isolver = 0; isolver < lb_solvers.size(); isolver++){
 
-      lb_solvers[i]->compute_loads(loads, a_grids[lvl], lvl);
-
-      for (int i = 0; i < count; i++){
-	total_loads[i] += loads[i];
+      lb_solvers[isolver]->compute_loads(solver_loads, a_grids[lvl], lvl);
+      for (int ibox = 0; ibox < nbox; ibox++){
+	level_loads[ibox] += solver_loads[ibox];
       }
     }
 
     // Now add the "constant" loads.
-    for (int ibox = 0; ibox < a_boxes[lvl].size(); ibox++){
-      total_loads[ibox] += lround(m_load_ppc)*a_boxes[lvl][ibox].numPts();
+    for (int ibox = 0; ibox < nbox; ibox++){
+      level_loads[ibox] += lround(m_load_ppc)*a_boxes[lvl][ibox].numPts();
     }
-
-    // Do the friggin load balancing. 
-    LoadBalance(a_procs[lvl], total_loads, a_boxes[lvl]);
   }
+
+  // Do the actual load balancing
+  load_balance::level_by_level(a_procs, loads, a_boxes);
+
+  
 
   // Go back to "pre-regrid" mode so we can get particles to the correct patches after load balancing. 
   for (int i = 0; i < lb_solvers.size(); i++){

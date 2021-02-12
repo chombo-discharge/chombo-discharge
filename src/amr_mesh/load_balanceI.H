@@ -36,9 +36,9 @@ void load_balance::hierarchy(Vector<Vector<int> >&       a_procs,
   
   std::map<std::pair<int, int>, int> boxmap;
   
-  Vector<Box> allBoxes(0);
-  Vector<T>   allLoads(0);
-  Vector<int> allProcs(0);
+  Vector<Box> allBoxes;
+  Vector<T>   allLoads;
+  Vector<int> allProcs;
 
   int gbox = 0;
 
