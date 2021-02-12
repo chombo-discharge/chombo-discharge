@@ -10,6 +10,8 @@
 **/doc/sphinx/build/html/**
 **/doc/sphinx/build/**
 **/doc/sphinx/build/doctrees/**
+**/mpi/loads/**
+**/mpi/memory/**
 *.doctree
 *.pyc
 **/app_builder/*.pyc

@@ -2022,25 +2022,24 @@ void driver::write_computational_loads(){
 
   const int nProc = numProc();
 
+  // Filename for output. 
+  char file_char[1000];
+  const std::string prefix = m_output_dir + "/mpi/loads/" + m_output_names;
+  sprintf(file_char, "%s.loads.step%07d.%dd.dat", prefix.c_str(), m_step, SpaceDim);
+  std::string fname(file_char);
+
+  // Get sum of all loads on all realms
+  std::map<std::string, Vector<long int> > realmLoads;
   for (const auto& r : m_amr->get_realms()){
 
-    char file_char[1000];
-    const std::string prefix = m_output_dir + "/mpi/loads/" + m_output_names;
-    sprintf(file_char, "%s.%s.load.step%07d.%dd.dat", prefix.c_str(), r.c_str(), m_step, SpaceDim);
-    std::string fname(file_char);
-
+    // Compute total loads on each rank.
     Vector<long int> sumLoads(nProc, 0L);
-
-
-    const int id = procID();
-
-    // Compute total loads on each rank. 
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       const Vector<long int> boxLoads = m_timestepper->get_checkpoint_loads(r, lvl);
 
       const DisjointBoxLayout& dbl = m_amr->get_grids(r)[lvl];
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	sumLoads[id] += boxLoads[dit().intCode()];
+	sumLoads[procID()] += boxLoads[dit().intCode()];
       }
     }
 
@@ -2050,30 +2049,63 @@ void driver::write_computational_loads(){
     MPI_Allreduce(&(sumLoads[0]), &(tmp[0]), nProc, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
     sumLoads = tmp;
 #endif
-								
 
-    // Write data
-    if(procID() == 0){
-      std::ofstream f;
-      f.open(fname, std::ios_base::trunc);
-
-      const int width = 12;
-      
-      // Write header
-      f << std::left << std::setw(width) << "# MPI rank" << "\t"
-	<< std::left << std::setw(width) << "Load" << "\t"
-	<< endl;
-
-      // Write data
-      for (int i = 0; i < nProc; i++){
-      f << std::left << std::setw(width) << i << "\t"
-	<< std::left << std::setw(width) << sumLoads[i] << "\t"
-	<< endl;
-      }
-
-      f.close();
-    }
+    realmLoads.emplace(r, sumLoads);
   }
+
+  // Write header
+  if(procID() == 0){
+    const int width = 12;
+    
+    std::ofstream f;
+    f.open(fname, std::ios_base::trunc);
+
+    // Write header
+    std::stringstream ss;
+    ss << std::left << std::setw(width) << "# Rank";
+    for (auto r : realmLoads){
+      ss << std::left << std::setw(width) << r.first;
+    }
+    f << ss.str() << endl;
+
+    // Write data.
+    for (int irank = 0; irank < nProc; irank++){
+      std::stringstream ds;
+
+      ds << std::left << std::setw(width) << irank;
+      for (auto r : realmLoads){
+	ds << std::left << std::setw(width) << r.second[irank];
+      }
+      f << ds.str() << std::endl;
+    }
+
+    
+    f.close();
+  }
+
+  
+    // // Write data
+    // if(procID() == 0){
+    //   std::ofstream f;
+    //   f.open(fname, std::ios_base::trunc);
+
+    //   const int width = 12;
+      
+    //   // Write header
+    //   f << std::left << std::setw(width) << "# MPI rank" << "\t"
+    // 	<< std::left << std::setw(width) << "Load" << "\t"
+    // 	<< endl;
+
+    //   // Write data
+    //   for (int i = 0; i < nProc; i++){
+    //   f << std::left << std::setw(width) << i << "\t"
+    // 	<< std::left << std::setw(width) << sumLoads[i] << "\t"
+    // 	<< endl;
+    //   }
+
+    //   f.close();
+    // }
+  //  }
 }
 
 void driver::write_geometry(){
