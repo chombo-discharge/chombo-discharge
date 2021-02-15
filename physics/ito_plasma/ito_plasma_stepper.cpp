@@ -3124,20 +3124,28 @@ Vector<long int> ito_plasma_stepper::get_checkpoint_loads(const std::string a_re
   }
 
   const DisjointBoxLayout& dbl = m_amr->get_grids(a_realm)[a_level];
-  const int count = dbl.size();
+  const int nbox = dbl.size();
 
-  Vector<long int> loads(count, 0L);
+  Vector<long int> loads(nbox, 0L);
   if(m_load_balance && a_realm == m_particle_realm){
 
     Vector<RefCountedPtr<ito_solver> > lb_solvers = this->get_lb_solvers();
     
     for (int isolver = 0; isolver < lb_solvers.size(); isolver++){
-      Vector<long int> my_loads(count, 0L);
-      lb_solvers[isolver]->compute_loads(my_loads, dbl, a_level);
+      Vector<long int> solver_loads(nbox, 0L);
+      lb_solvers[isolver]->compute_loads(solver_loads, dbl, a_level);
 
-      for (int ibox = 0; ibox < count; ibox++){
-	loads[ibox] += my_loads[ibox];
+      for (int ibox = 0; ibox < nbox; ibox++){
+	loads[ibox] += solver_loads[ibox];
       }
+    }
+
+    // Now add the "constant" loads
+    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit){
+      const Box box  = dbl[lit()];
+      const int ibox = lit().intCode();
+
+      loads[ibox] += lround(m_load_ppc*box.numPts());
     }
   }
   else{
@@ -3185,36 +3193,15 @@ void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
     }
   }
 
-  // Construct loads
+  // Get loads on each level
   Vector<Vector<long int> > loads(1 + a_finest_level);
   for (int lvl = 0; lvl <= a_finest_level; lvl++){
-    const int nbox = a_grids[lvl].size();
-
-    // Reset
-    Vector<long int>& level_loads = loads[lvl];
-    Vector<long int> solver_loads(nbox);
-    
-    level_loads.resize(nbox, 0L);
-
-    // Compute solver load and add it to level_loads
-    for (int isolver = 0; isolver < lb_solvers.size(); isolver++){
-
-      lb_solvers[isolver]->compute_loads(solver_loads, a_grids[lvl], lvl);
-      for (int ibox = 0; ibox < nbox; ibox++){
-	level_loads[ibox] += solver_loads[ibox];
-      }
-    }
-
-    // Now add the "constant" loads.
-    for (int ibox = 0; ibox < nbox; ibox++){
-      level_loads[ibox] += lround(m_load_ppc)*a_boxes[lvl][ibox].numPts();
-    }
+    loads[lvl] = this->get_checkpoint_loads(a_realm, lvl);
   }
 
   // Do the actual load balancing
   load_balance::level_by_level(a_procs, loads, a_boxes);
-
-  
+  //  load_balance::hierarchy(a_procs, loads, a_boxes); If you want to try something crazy...
 
   // Go back to "pre-regrid" mode so we can get particles to the correct patches after load balancing. 
   for (int i = 0; i < lb_solvers.size(); i++){
