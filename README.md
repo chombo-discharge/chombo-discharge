@@ -6,6 +6,13 @@
     |_|   |_|\__,_|___/_| |_| |_|\__,_|\____|
 
 
-This is code PlasmaC, a multiphysics code built in Chombo for plasma simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
+This is code PlasmaC, a multiphysics code built in Chombo for plasma
+simulations with adaptive mesh refinement (AMR) on embedded boundary
+grids.
 
-To get started, clone the repository: 
+The basic requirements for running this code are:
+
+1. A working MPI installation
+2. A working HDF5 installation (with MPI)
+
+A modified version of Chombo is distributed together with this code.
