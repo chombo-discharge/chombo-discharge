@@ -622,14 +622,14 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 				   const int                        a_newFinestLevel){
   if(m_cell_sorted) MayDay::Abort("particle_container<P>::regrid(...) - particles are sorted by cell!");
 
-  Real tot = 0.0;
-  Real halo = 0.0;
-  Real pvr = 0.0;
-  Real pdata = 0.0;
-  Real cache1 = 0.0;
-  Real cache2 = 0.0;
-  Real remap1 = 0.0;
-  Real remap2 = 0.0;
+  // Real tot = 0.0;
+  // Real halo = 0.0;
+  // Real pvr = 0.0;
+  // Real pdata = 0.0;
+  // Real cache1 = 0.0;
+  // Real cache2 = 0.0;
+  // Real remap1 = 0.0;
+  // Real remap2 = 0.0;
 
   // Update this stuff
   m_grids        = a_grids;
@@ -642,24 +642,31 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     m_dx[lvl] = a_dx[lvl]*RealVect::Unit;
   }
 
-  MPI_Barrier(Chombo_MPI::comm);
-  tot -= MPI_Wtime();
-  halo -= MPI_Wtime();
+  // MPI_Barrier(Chombo_MPI::comm);
+  // tot -= MPI_Wtime();
+  // halo -= MPI_Wtime();
+  
   this->define_halo_masks();
-  halo += MPI_Wtime();
-  MPI_Barrier(Chombo_MPI::comm);
-  pvr -= MPI_Wtime();
+  
+  // halo += MPI_Wtime();
+  // MPI_Barrier(Chombo_MPI::comm);
+  // pvr -= MPI_Wtime();
+  
   this->setup_pvr(a_lmin, m_finest_level);
-  pvr += MPI_Wtime();
-  MPI_Barrier(Chombo_MPI::comm);
-  pdata -= MPI_Wtime();
+  
+  // pvr += MPI_Wtime();
+  // MPI_Barrier(Chombo_MPI::comm);
+  // pdata -= MPI_Wtime();
+  
   this->setup_particle_data(a_lmin, m_finest_level);
-  pdata += MPI_Wtime();
-  MPI_Barrier(Chombo_MPI::comm);
+  
+  // pdata += MPI_Wtime();
+  // MPI_Barrier(Chombo_MPI::comm);
+  // cache1 -= MPI_Wtime();
+  
   const int oldFinestLevel = m_cache_particles.size() - 1;
 
   // If a level was removed, put the particles on the new finest level
-  cache1 -= MPI_Wtime();
   if(m_finest_level < oldFinestLevel){
     List<P>& cacheFinest = m_cache_particles[m_finest_level];
     for (int lvl = m_finest_level + 1; lvl <= oldFinestLevel; lvl++){
@@ -669,11 +676,11 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
       p.clear();
     }
   }
-  cache1 += MPI_Wtime();
   
-  MPI_Barrier(Chombo_MPI::comm);
-
-  cache2 -= MPI_Wtime();
+  // cache1 += MPI_Wtime();
+  // MPI_Barrier(Chombo_MPI::comm);
+  // cache2 -= MPI_Wtime();
+  
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++){
     //  for (int lvl = 0; lvl <= oldFinestLevel; lvl++){
     List<P>& outcast = m_particles[lvl]->outcast();
@@ -683,14 +690,14 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 
     m_particles[lvl]->remapOutcast();
   }
-  cache2 += MPI_Wtime();
-
-  MPI_Barrier(Chombo_MPI::comm);
-
+  
+  // cache2 += MPI_Wtime();
+  // MPI_Barrier(Chombo_MPI::comm);
+  // remap1 -= MPI_Wtime();
+  
   // If grids were removed the fine particle outcast list is definitely not empty. Transfer fine particles
   // to the outcast list below and remap the coarse level again. Some of these particles may be outside the
   // coar level PVR, but that is taken care of later.
-  remap1 -= MPI_Wtime();
   for (int lvl = a_newFinestLevel; lvl > 0; lvl--){
     List<P>& fineParticles = m_particles[lvl]->outcast();
     List<P>& coarParticles = m_particles[lvl-1]->outcast();
@@ -700,28 +707,28 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 
     m_particles[lvl-1]->remapOutcast();
   }
-  remap1 += MPI_Wtime();
-
-  MPI_Barrier(Chombo_MPI::comm);
-
+  
+  // remap1 += MPI_Wtime();
+  // MPI_Barrier(Chombo_MPI::comm);
+  // remap2 -= MPI_Wtime();
+  
   // Now do remap so that the PVR is respected.
-  remap2 -= MPI_Wtime();
   this->remap();
-  remap2 += MPI_Wtime();
-  MPI_Barrier(Chombo_MPI::comm);
+  
+  // remap2 += MPI_Wtime();
+  // MPI_Barrier(Chombo_MPI::comm);
+  // tot += MPI_Wtime();
 
-  tot += MPI_Wtime();
-
-  pout() << endl
-	 <<"halo   = " << 100.*halo/tot << endl
-	 << "pvr    = " << 100.*pvr/tot << endl
-    	 << "pdata  = " << 100.*pdata/tot << endl
-	 << "cache1 = " << 100.*cache1/tot << endl
-    	 << "cache2 = " << 100.*cache2/tot << endl
-	 << "remap1 = " << 100.*remap1/tot << endl
-    	 << "remap2 = " << 100.*remap2/tot << endl
-	 << "tot    = " << tot << endl
-	 << endl;
+  // pout() << endl
+  // 	 <<"halo   = " << 100.*halo/tot << endl
+  // 	 << "pvr    = " << 100.*pvr/tot << endl
+  //   	 << "pdata  = " << 100.*pdata/tot << endl
+  // 	 << "cache1 = " << 100.*cache1/tot << endl
+  //   	 << "cache2 = " << 100.*cache2/tot << endl
+  // 	 << "remap1 = " << 100.*remap1/tot << endl
+  //   	 << "remap2 = " << 100.*remap2/tot << endl
+  // 	 << "tot    = " << tot << endl
+  // 	 << endl;
 
   m_cache_particles.resize(0);
 }
@@ -919,24 +926,11 @@ void particle_container<P>::define_halo_mask(LevelData<BaseFab<bool> >& a_coarMa
     halo |= myHalo;
   }
 
+  // TLDR: In the above, we found the coarse-grid cells surrounding the fine level, viewed from the fine grids.
+  //       Below, we create that view from the coarse grid. We use a BoxLayoutData<FArrayBox> on the coarsened fine grid,
+  //       whose "ghost cells" can added to the _actual_ coarse grid. We then loop through those cells and set the mask. 
 
-#if 0 // Original code. Non-performant. 
-  // Get the global cfivs
-  gather_and_broadcast(halo);
-
-  // Set the mask
-  for (DataIterator dit = a_gridsCoar.dataIterator(); dit.ok(); ++dit){
-    BaseFab<bool>& mask = a_coarMask[dit()];
-
-    mask.setVal(false);
-
-    const IntVectSet curHalo = halo & a_gridsCoar[dit()];
-    for (IVSIterator ivsIt(curHalo); ivsIt.ok(); ++ivsIt){
-      mask(ivsIt(), comp) = true;
-    }
-  }
-#else // More efficient code
-
+  // Get some box definitions. 
   Vector<Box> coFiBoxes = gridsCoFi.boxArray();
   Vector<int> coFiProcs = gridsCoFi.procIDs();
 
@@ -990,28 +984,6 @@ void particle_container<P>::define_halo_mask(LevelData<BaseFab<bool> >& a_coarMa
       if(blMask(iv, comp) > 0.0) mask(iv, comp) = true;
     }
   }
-
-#if 1 // Debug
-  gather_and_broadcast(halo);
-  LevelData<BaseFab<bool> > originalMask(a_gridsCoar, ncomp);
-  for (DataIterator dit = a_gridsCoar.dataIterator(); dit.ok(); ++dit){
-    BaseFab<bool>& mask = originalMask[dit()];
-
-    mask.setVal(true);
-
-    const IntVectSet curHalo = halo & a_gridsCoar[dit()];
-    for (IVSIterator ivsIt(curHalo); ivsIt.ok(); ++ivsIt){
-      mask(ivsIt(), comp) = true;
-    }
-
-    // Check that they are the same
-    BaseFab<bool>& newMask = a_coarMask[dit()];
-    for (BoxIterator bit(a_gridsCoar[dit()]); bit.ok(); ++bit){
-      if(newMask(bit(), comp) != mask(bit(), comp)) MayDay::Abort("logic bust");
-    }
-  }
-#endif
-#endif
 }
 
 template <class P>
