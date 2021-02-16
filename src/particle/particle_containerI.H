@@ -940,45 +940,77 @@ void particle_container<P>::define_halo_mask(LevelData<BaseFab<bool> >& a_coarMa
   Vector<Box> coFiBoxes = gridsCoFi.boxArray();
   Vector<int> coFiProcs = gridsCoFi.procIDs();
 
+  Vector<Box> coarBoxes = a_gridsCoar.boxArray();
+  Vector<Box> coarPrioc = a_gridsCoar.boxArray();
+
+  // Grow the coarsened fine boxes
   for (int i = 0; i < coFiBoxes.size(); i++){
     coFiBoxes[i].grow(a_buffer);
     coFiBoxes[i] &= a_domainCoar;
   }
 
-  // Set the mask on the coarsened fine level. 
+  // Define boxlayouts
   BoxLayout blCoFi(coFiBoxes, coFiProcs);
+  BoxLayout blCoar(a_gridsCoar.boxArray(), a_gridsCoar.procIDs());
+
   BoxLayoutData<FArrayBox> coFiMask(blCoFi, ncomp);
+  BoxLayoutData<FArrayBox> coarMask(blCoar, ncomp);
+  
+  // Reset masks
   for (DataIterator dit(blCoFi); dit.ok(); ++dit){
     coFiMask[dit()].setVal(0.0);
+  }
+  for (DataIterator dit(a_gridsCoar); dit.ok(); ++dit){
+    coarMask[dit()].setVal(0.0);
+  }
 
+  // Run through the halo and set the halo cells to 1 on the coarsened fine grids (these are essentially "ghost cells")
+  for (DataIterator dit(blCoFi); dit.ok(); ++dit){
     IntVectSet curHalo = halo & blCoFi[dit()];
     for (IVSIterator ivsit(curHalo); ivsit.ok(); ++ivsit){
       coFiMask[dit()](ivsit(), comp) = 1.0;
     }
   }
 
-  // Reset the mask on the coarse level
-  BoxLayout blCoar(a_gridsCoar.boxArray(), a_gridsCoar.procIDs());
-  BoxLayoutData<FArrayBox> coarMask(blCoar, ncomp);
-  for (DataIterator dit(a_gridsCoar); dit.ok(); ++dit){
-    coarMask[dit()].setVal(0.0);
-  }
-
-  // Add from cofi to coarse
+  // Add the result to the coarse grid. 
   const Interval interv(0,0);
   coFiMask.addTo(interv, coarMask, interv, a_domainCoar.domainBox());
 
-
-  // Set the boolean
+  // Run through the grids and make the boolean mask
   for (DataIterator dit(a_gridsCoar); dit.ok(); ++dit){
-    a_coarMask[dit()].setVal(false);
-    const Box bx = a_gridsCoar[dit()];
-    for (BoxIterator bit(bx); bit.ok(); ++bit){
-      if(coarMask[dit()](bit(), comp) > 0.0){
-	a_coarMask[dit()](bit(), comp) = true;
-      }
+    const Box box = a_gridsCoar[dit()];
+
+    BaseFab<bool>& mask     = a_coarMask[dit()];
+    const FArrayBox& blMask = coarMask[dit()];
+
+    mask.setVal(false);
+
+    for (BoxIterator bit(box); bit.ok(); ++bit){
+      const IntVect iv = bit();
+      if(blMask(iv, comp) > 0.0) mask(iv, comp) = true;
     }
   }
+
+#if 1 // Debug
+  gather_and_broadcast(halo);
+  LevelData<BaseFab<bool> > originalMask(a_gridsCoar, ncomp);
+  for (DataIterator dit = a_gridsCoar.dataIterator(); dit.ok(); ++dit){
+    BaseFab<bool>& mask = originalMask[dit()];
+
+    mask.setVal(true);
+
+    const IntVectSet curHalo = halo & a_gridsCoar[dit()];
+    for (IVSIterator ivsIt(curHalo); ivsIt.ok(); ++ivsIt){
+      mask(ivsIt(), comp) = true;
+    }
+
+    // Check that they are the same
+    BaseFab<bool>& newMask = a_coarMask[dit()];
+    for (BoxIterator bit(a_gridsCoar[dit()]); bit.ok(); ++bit){
+      if(newMask(bit(), comp) != mask(bit(), comp)) MayDay::Abort("logic bust");
+    }
+  }
+#endif
 #endif
 }
 
