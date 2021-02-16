@@ -1499,7 +1499,7 @@ void amr_mesh::set_grids(const Vector<Vector<Box> >& a_boxes, const std::map<std
 
     // Do load balancing. 
     for (int lvl = 0; lvl <= m_finest_level; lvl++){
-      LoadBalance(pids[lvl], cur_loads[lvl], a_boxes[lvl]);
+      load_balance::make_balance(pids[lvl], cur_loads[lvl], a_boxes[lvl]);
     }
 
     this->regrid_realm(cur_realm, pids, a_boxes, lmin);
