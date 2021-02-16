@@ -642,17 +642,20 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     m_dx[lvl] = a_dx[lvl]*RealVect::Unit;
   }
 
+  MPI_Barrier(Chombo_MPI::comm);
   tot -= MPI_Wtime();
   halo -= MPI_Wtime();
   this->define_halo_masks();
   halo += MPI_Wtime();
+  MPI_Barrier(Chombo_MPI::comm);
   pvr -= MPI_Wtime();
   this->setup_pvr(a_lmin, m_finest_level);
   pvr += MPI_Wtime();
+  MPI_Barrier(Chombo_MPI::comm);
   pdata -= MPI_Wtime();
   this->setup_particle_data(a_lmin, m_finest_level);
   pdata += MPI_Wtime();
-  
+  MPI_Barrier(Chombo_MPI::comm);
   const int oldFinestLevel = m_cache_particles.size() - 1;
 
   // If a level was removed, put the particles on the new finest level
@@ -667,6 +670,8 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     }
   }
   cache1 += MPI_Wtime();
+  
+  MPI_Barrier(Chombo_MPI::comm);
 
   cache2 -= MPI_Wtime();
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++){
@@ -679,6 +684,8 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     m_particles[lvl]->remapOutcast();
   }
   cache2 += MPI_Wtime();
+
+  MPI_Barrier(Chombo_MPI::comm);
 
   // If grids were removed the fine particle outcast list is definitely not empty. Transfer fine particles
   // to the outcast list below and remap the coarse level again. Some of these particles may be outside the
@@ -695,10 +702,13 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   }
   remap1 += MPI_Wtime();
 
+  MPI_Barrier(Chombo_MPI::comm);
+
   // Now do remap so that the PVR is respected.
   remap2 -= MPI_Wtime();
   this->remap();
   remap2 += MPI_Wtime();
+  MPI_Barrier(Chombo_MPI::comm);
 
   tot += MPI_Wtime();
 
@@ -909,6 +919,8 @@ void particle_container<P>::define_halo_mask(LevelData<BaseFab<bool> >& a_coarMa
     halo |= myHalo;
   }
 
+
+#if 0 // Original code. Non-performant. 
   // Get the global cfivs
   gather_and_broadcast(halo);
 
@@ -923,6 +935,51 @@ void particle_container<P>::define_halo_mask(LevelData<BaseFab<bool> >& a_coarMa
       mask(ivsIt(), comp) = true;
     }
   }
+#else // More efficient code
+
+  Vector<Box> coFiBoxes = gridsCoFi.boxArray();
+  Vector<int> coFiProcs = gridsCoFi.procIDs();
+
+  for (int i = 0; i < coFiBoxes.size(); i++){
+    coFiBoxes[i].grow(a_buffer);
+    coFiBoxes[i] &= a_domainCoar;
+  }
+
+  // Set the mask on the coarsened fine level. 
+  BoxLayout blCoFi(coFiBoxes, coFiProcs);
+  BoxLayoutData<FArrayBox> coFiMask(blCoFi, ncomp);
+  for (DataIterator dit(blCoFi); dit.ok(); ++dit){
+    coFiMask[dit()].setVal(0.0);
+
+    IntVectSet curHalo = halo & blCoFi[dit()];
+    for (IVSIterator ivsit(curHalo); ivsit.ok(); ++ivsit){
+      coFiMask[dit()](ivsit(), comp) = 1.0;
+    }
+  }
+
+  // Reset the mask on the coarse level
+  BoxLayout blCoar(a_gridsCoar.boxArray(), a_gridsCoar.procIDs());
+  BoxLayoutData<FArrayBox> coarMask(blCoar, ncomp);
+  for (DataIterator dit(a_gridsCoar); dit.ok(); ++dit){
+    coarMask[dit()].setVal(0.0);
+  }
+
+  // Add from cofi to coarse
+  const Interval interv(0,0);
+  coFiMask.addTo(interv, coarMask, interv, a_domainCoar.domainBox());
+
+
+  // Set the boolean
+  for (DataIterator dit(a_gridsCoar); dit.ok(); ++dit){
+    a_coarMask[dit()].setVal(false);
+    const Box bx = a_gridsCoar[dit()];
+    for (BoxIterator bit(bx); bit.ok(); ++bit){
+      if(coarMask[dit()](bit(), comp) > 0.0){
+	a_coarMask[dit()](bit(), comp) = true;
+      }
+    }
+  }
+#endif
 }
 
 template <class P>
