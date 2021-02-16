@@ -1491,11 +1491,11 @@ void amr_mesh::set_grids(const Vector<Vector<Box> >& a_boxes, const std::map<std
 
   const int lmin = 0;
 
-  Vector<Vector<int> > pids(1 + m_finest_level);
-
   for (const auto& r : a_realms_and_loads){
     const std::string&               cur_realm = r.first;
     const Vector<Vector<long int> >& cur_loads = r.second;
+
+    Vector<Vector<int> > pids(1 + m_finest_level);
 
     // Do load balancing. 
     for (int lvl = 0; lvl <= m_finest_level; lvl++){

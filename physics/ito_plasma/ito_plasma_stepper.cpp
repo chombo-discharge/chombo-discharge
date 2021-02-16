@@ -262,15 +262,15 @@ void ito_plasma_stepper::post_checkpoint_poisson(){
   
   // Fluid realm
   m_fluid_E.copy(E);
-  m_amr->average_down(m_fluid_E, m_fluid_realm, m_phase);
-  m_amr->interp_ghost_pwl(m_fluid_E, m_fluid_realm, m_phase);
+  m_amr->average_down(m_fluid_E,             m_fluid_realm, m_phase);
+  m_amr->interp_ghost_pwl(m_fluid_E,         m_fluid_realm, m_phase);
   m_amr->interpolate_to_centroids(m_fluid_E, m_fluid_realm, m_phase);
 
   // Particle realm
   m_particle_E.copy(E);
-  m_amr->average_down(m_particle_E, m_particle_realm, m_phase);
-  m_amr->interp_ghost_pwl(m_particle_E, m_particle_realm, m_phase);
-  m_amr->interpolate_to_centroids(m_particle_E, m_fluid_realm, m_phase);
+  m_amr->average_down(m_particle_E,             m_particle_realm, m_phase);
+  m_amr->interp_ghost_pwl(m_particle_E,         m_particle_realm, m_phase);
+  m_amr->interpolate_to_centroids(m_particle_E, m_particle_realm, m_phase);
 
   // Compute maximum E
   // const Real Emax = this->compute_Emax(m_phase);
@@ -3128,7 +3128,6 @@ Vector<long int> ito_plasma_stepper::get_checkpoint_loads(const std::string a_re
 
   Vector<long int> loads(nbox, 0L);
   if(m_load_balance && a_realm == m_particle_realm){
-
     Vector<RefCountedPtr<ito_solver> > lb_solvers = this->get_lb_solvers();
     
     for (int isolver = 0; isolver < lb_solvers.size(); isolver++){

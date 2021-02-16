@@ -2581,6 +2581,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
     const std::string&         cur_realm = s.first;
     Vector<Vector<long int> >& cur_loads = s.second;
 
+#if 0 // Original code
     for (const auto& c : chk_loads){
       if(cur_realm == c.first){
 	cur_loads = c.second;
@@ -2589,11 +2590,26 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
 	cur_loads = chk_loads.at(realm::primal);
       }
     }
+#else
+
+    bool found_checked_loads = false;
+    for (const auto& c : chk_loads){
+      if(cur_realm == c.first){
+	found_checked_loads = true;
+      }
+    }
+
+    cur_loads = (found_checked_loads) ? chk_loads.at(cur_realm) : chk_loads.at(realm::primal);
+#endif
   }
+
+
 
   // Define amr_mesh and realms. 
   m_amr->set_finest_level(finest_level); 
   m_amr->set_grids(boxes, sim_loads);
+
+
   
   // Instantiate solvers and register operators
   const int regsize = m_timestepper->get_redistribution_regsize();
@@ -2604,6 +2620,8 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
 
   // Allocate internal stuff (e.g. space for tags)
   this->allocate_internals();
+
+
 
   // Go through level by level and have solvers extract their data
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -2671,7 +2689,7 @@ void driver::read_checkpoint_realm_loads(Vector<long int>& a_loads, HDF5Handle& 
   for (int ibox = 0; ibox < a_loads.size(); ibox++){
     readFArrayBox(a_handle, fab, a_level, ibox, Interval(0,0), str);
 
-    a_loads[ibox] = fab.max();
+    a_loads[ibox] = lround(fab.max());
   }
 }
 
