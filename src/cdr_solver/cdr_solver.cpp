@@ -917,7 +917,7 @@ void cdr_solver::initial_data_particles(){
   const int pvr_buffer  = 0;
 
   particle_container<Particle> particles;
-  m_amr->allocate(particles, pvr_buffer, halo_buffer, m_realm);
+  m_amr->allocate(particles, pvr_buffer, m_realm);
   particles.add_particles(m_species->get_initial_particles());
 
   // We will deposit onto m_state, using m_scratch as a scratch holder for interpolation stuff

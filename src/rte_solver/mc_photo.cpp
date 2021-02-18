@@ -395,11 +395,11 @@ void mc_photo::allocate_internals(){
   m_amr->allocate(m_massDiff,     m_realm, m_phase, ncomp);
 
   // Allocate particle data holders
-  m_amr->allocate(m_photons,        m_pvr_buffer, m_halo_buffer, m_realm);
-  m_amr->allocate(m_bulk_photons,   m_pvr_buffer, m_halo_buffer, m_realm);
-  m_amr->allocate(m_eb_photons,     m_pvr_buffer, m_halo_buffer, m_realm);
-  m_amr->allocate(m_domain_photons, m_pvr_buffer, m_halo_buffer, m_realm);
-  m_amr->allocate(m_source_photons, m_pvr_buffer, m_halo_buffer, m_realm);
+  m_amr->allocate(m_photons,        m_pvr_buffer, m_realm);
+  m_amr->allocate(m_bulk_photons,   m_pvr_buffer, m_realm);
+  m_amr->allocate(m_eb_photons,     m_pvr_buffer, m_realm);
+  m_amr->allocate(m_domain_photons, m_pvr_buffer, m_realm);
+  m_amr->allocate(m_source_photons, m_pvr_buffer, m_realm);
 }
 
 void mc_photo::pre_regrid(const int a_lmin, const int a_old_finest_level){
@@ -566,6 +566,9 @@ void mc_photo::register_operators(){
     m_amr->register_operator(s_eb_copier,       m_realm, m_phase);
     if(m_pvr_buffer <= 0){
       m_amr->register_operator(s_eb_ghostcloud, m_realm, m_phase);
+    }
+    if(m_halo_buffer > 0){
+      m_amr->register_mask(s_particle_halo, m_halo_buffer, m_realm);
     }
   }
 }

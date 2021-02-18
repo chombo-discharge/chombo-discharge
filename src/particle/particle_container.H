@@ -53,7 +53,6 @@ public:
 		     const int                        a_blocking_factor,
 		     const int                        a_finest_level,
 		     const int                        a_pvr_buffer,
-		     const int                        a_halo,
 		     const std::string                a_realm);
 
   /*!
@@ -72,7 +71,6 @@ public:
 	      const int                        a_blocking_factor,
 	      const int                        a_finest_level,
 	      const int                        a_pvr_buffer,
-	      const int                        a_halo_buffer,
 	      const std::string                a_realm);
 
   /*!
@@ -364,12 +362,6 @@ protected:
   int m_finest_level;
 
   /*!
-    @brief Coarse side buffer. Coarse grid particles that are within this number of cells from the refinement boundary
-           can be placed on the fine level. 
-  */
-  int m_halo_buffer;
-
-  /*!
     @brief Lower left corner of the problem domain (aka the "origin")
   */
   RealVect m_prob_lo;
@@ -409,12 +401,6 @@ protected:
            deposition steps. 
   */
   Vector<List<P> > m_cache_particles;
-
-  /*!
-    @brief Mask on the coarse level. Cells that are within m_coarse_buffer steps away from the boundary are "true". The rest
-           are false.
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<bool> > > > m_halo; 
 
   /*!
     @brief The actual particles that this particle_container represents
@@ -458,29 +444,6 @@ protected:
            for getting those particles and putting them in the correct data holder. 
   */
   void remap_lost_particles();
-
-  /*!
-    @brief Define function for the coarse-level mask (m_halo_mask)
-  */
-  void define_halo_masks();
-
-  /*!
-    @brief Define function for the coarse-level mask (m_halo_mask). Level version. 
-  */
-  void define_halo_mask(LevelData<BaseFab<bool> >& a_coarMask,
-		      const ProblemDomain&       a_domainCoar,
-		      const ProblemDomain&       a_domainFine,
-		      const DisjointBoxLayout&   a_gridsCoar,
-		      const DisjointBoxLayout&   a_gridsFine,
-		      const int                  a_buffer,
-		      const int                  a_ref_rat);
-
-  /*!
-    @brief Gather and broadcast function when setting up the coar mask.
-  */
-  void gather_and_broadcast(IntVectSet& a_set);
-
-
 };
 
 #include "particle_containerI.H"

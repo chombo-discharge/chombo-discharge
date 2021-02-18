@@ -980,7 +980,7 @@ void ito_solver::allocate_internals(){
   m_particle_containers.emplace(which_container::scratch, particle_container<ito_particle>());
 
   for (auto& container : m_particle_containers){
-    m_amr->allocate(container.second, m_pvr_buffer, m_halo_buffer, m_realm);
+    m_amr->allocate(container.second, m_pvr_buffer, m_realm);
   }
 }
 
@@ -1012,7 +1012,7 @@ void ito_solver::write_checkpoint_level_particles(HDF5Handle& a_handle, const in
   const std::string str = m_name + "_particles";
 
   particle_container<simple_ito_particle> realmParticles;
-  m_amr->allocate(realmParticles,  m_pvr_buffer, halo, m_realm);
+  m_amr->allocate(realmParticles,  m_pvr_buffer, m_realm);
 
   const particle_container<ito_particle>& myParticles = this->get_particles(which_container::bulk);
 

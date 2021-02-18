@@ -98,8 +98,7 @@ public:
     @brief Allocate a particle container
   */
   template <typename T> void allocate(particle_container<T>& a_container,
-				      const int              a_buffer,
-				      const int              a_halo,
+				      const int              a_pvr_buffer,
 				      const std::string      a_realm);
 
   /*!

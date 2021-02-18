@@ -108,8 +108,8 @@ void ito_plasma_godunov::allocate(){
     m_conductivity_particles[idx] = new particle_container<godunov_particle>();
     m_rho_dagger_particles[idx]   = new particle_container<godunov_particle>();
     
-    m_amr->allocate(*m_conductivity_particles[idx], pvr_buffer, halo_buffer, m_particle_realm);
-    m_amr->allocate(*m_rho_dagger_particles[idx],   pvr_buffer, halo_buffer, m_particle_realm);
+    m_amr->allocate(*m_conductivity_particles[idx], pvr_buffer, m_particle_realm);
+    m_amr->allocate(*m_rho_dagger_particles[idx],   pvr_buffer, m_particle_realm);
   }
 }
 
