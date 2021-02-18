@@ -1003,18 +1003,6 @@ void particle_container<P>::gather_and_broadcast(IntVectSet& a_set){
 }
 
 template <class P>
-void particle_container<P>::copy_halo_particles() const {
-  MayDay::Warning("particle_container<P> - copy_halo_particles - about to become deprecated");
-  this->copy_halo_particles(m_halo);
-}
-
-template <class P>
-void particle_container<P>::copy_non_halo_particles() const {
-  MayDay::Warning("particle_container<P> - copy_non_halo_particles - about to become deprecated");
-  this->copy_non_halo_particles(m_halo);
-}
-
-template <class P>
 void particle_container<P>::copy_halo_particles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const{
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     if(lvl < m_finest_level){

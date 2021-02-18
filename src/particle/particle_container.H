@@ -93,16 +93,6 @@ public:
   /*!
     @brief Copy particles to halo
   */
-  void copy_halo_particles() const;
-
-  /*!
-    @brief Copy non-halo particles to non-halo storage
-  */
-  void copy_non_halo_particles() const;
-
-  /*!
-    @brief Copy particles to halo
-  */
   void copy_halo_particles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const;
 
   /*!
