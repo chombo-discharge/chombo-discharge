@@ -1004,35 +1004,78 @@ void particle_container<P>::gather_and_broadcast(IntVectSet& a_set){
 
 template <class P>
 void particle_container<P>::copy_halo_particles() const {
+  MayDay::Warning("particle_container<P> - copy_halo_particles - about to become deprecated");
+  this->copy_halo_particles(m_halo);
+}
+
+template <class P>
+void particle_container<P>::copy_non_halo_particles() const {
+  MayDay::Warning("particle_container<P> - copy_non_halo_particles - about to become deprecated");
+  this->copy_non_halo_particles(m_halo);
+}
+
+template <class P>
+void particle_container<P>::copy_halo_particles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const{
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     if(lvl < m_finest_level){
-      this->copy_halo_particles(lvl);
+      this->copy_halo_particles(lvl, *a_halo[lvl]);
     }
   }
 }
 
 template <class P>
-void particle_container<P>::copy_halo_particles(const int a_level) const {
+void particle_container<P>::copy_non_halo_particles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const{
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    if(lvl < m_finest_level){
+      this->copy_non_halo_particles(lvl, *a_halo[lvl]);
+    }
+  }
+}
+
+template <class P>
+void particle_container<P>::copy_halo_particles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const {
   
   m_halo_particles[a_level]->clear();
 
   const RealVect dx = m_dx[a_level];
 
   // 1. Copy particles from m_particles to m_halo_particles if they lie in the halo mask.
-  if(m_halo_buffer > 0){
-    for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
-      const BaseFab<bool>& mask = (*m_halo[a_level])[dit()];
-      const List<P>& particles  = (*m_particles[a_level])[dit()].listItems();
-      List<P>& halo_particles   = (*m_halo_particles[a_level])[dit()].listItems();
-
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
+    const BaseFab<bool>& mask = a_halo[dit()];
+    const List<P>& particles  = (*m_particles[a_level])[dit()].listItems();
+    List<P>& halo_particles   = (*m_halo_particles[a_level])[dit()].listItems();
+    
+    for (ListIterator<P> lit(particles); lit.ok(); ++lit){
 	const RealVect x = lit().position();
 	const IntVect iv(D_DECL((int)floor((x[0] - m_prob_lo[0])/dx[0]),
 				(int)floor((x[1] - m_prob_lo[1])/dx[1]),
 				(int)floor((x[2] - m_prob_lo[2])/dx[2])));
-
+	
 	if(mask(iv)) halo_particles.add(lit());
-      }
+    }
+  }
+}
+
+template <class P>
+void particle_container<P>::copy_non_halo_particles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const {
+  
+  m_non_halo_particles[a_level]->clear();
+
+  const RealVect dx = m_dx[a_level];
+
+  // 1. Copy particles from m_particles to m_non_halo_particles if they don't lie in the halo mask
+  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
+    const BaseFab<bool>& mask   = a_halo[dit()];
+    const List<P>& particles    = (*m_particles[a_level])[dit()].listItems();
+    List<P>& non_halo_particles = (*m_non_halo_particles[a_level])[dit()].listItems();
+
+    for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+      const RealVect x = lit().position();
+      const IntVect iv(D_DECL((int)floor((x[0] - m_prob_lo[0])/dx[0]),
+			      (int)floor((x[1] - m_prob_lo[1])/dx[1]),
+			      (int)floor((x[2] - m_prob_lo[2])/dx[2])));
+
+      if(!mask(iv)) non_halo_particles.add(lit());
     }
   }
 }
@@ -1048,37 +1091,6 @@ template <class P>
 void particle_container<P>::clear_halo_particles() const {
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     m_halo_particles[lvl]->clear();
-  }
-}
-
-template <class P>
-void particle_container<P>::copy_non_halo_particles() const {
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    this->copy_non_halo_particles(lvl);
-  }
-}
-
-template <class P>
-void particle_container<P>::copy_non_halo_particles(const int a_level) const {
-  
-  m_non_halo_particles[a_level]->clear();
-
-  const RealVect dx = m_dx[a_level];
-
-  // 1. Copy particles from m_particles to m_non_halo_particles if they don't lie in the halo mask
-  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
-    const BaseFab<bool>& mask   = (*m_halo[a_level])[dit()];
-    const List<P>& particles    = (*m_particles[a_level])[dit()].listItems();
-    List<P>& non_halo_particles = (*m_non_halo_particles[a_level])[dit()].listItems();
-
-    for (ListIterator<P> lit(particles); lit.ok(); ++lit){
-      const RealVect x = lit().position();
-      const IntVect iv(D_DECL((int)floor((x[0] - m_prob_lo[0])/dx[0]),
-			      (int)floor((x[1] - m_prob_lo[1])/dx[1]),
-			      (int)floor((x[2] - m_prob_lo[2])/dx[2])));
-
-      if(!mask(iv)) non_halo_particles.add(lit());
-    }
   }
 }
 

@@ -12,6 +12,11 @@
 #include "mfis.H"
 #include "MFLevelGrid.H"
 
+static const std::string s_particle_halo         = "particle_halo";
+static const std::string s_particle_valid_region = "pvr";
+
+using AMRMask = Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >;
+
 /*!
   @brief Class for holding multifluid realms, which are the realms that we actually use. 
 */
@@ -48,9 +53,14 @@ public:
   void regrid_base(const int a_lmin);
   void regrid_operators(const int a_lmin, const int a_lmax, const int a_regsize);
 
+
   // Register and query operator
   void register_operator(const std::string a_operator, const phase::which_phase a_phase);
-  bool query_operator(const std::string a_operator, phase::which_phase a_phase);
+  bool query_operator(const std::string a_operator, const phase::which_phase a_phase);
+
+  // Register and query masks
+  void register_mask(const std::string a_mask, const int a_buffer);
+  bool query_mask(const std::string a_mask, const int a_buffer) const;
 
   // Get functions for neutral stuff
   Vector<int>& get_ref_rat();
@@ -84,6 +94,8 @@ public:
   Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(const phase::which_phase a_phase);
   Vector<RefCountedPtr<Copier> >& get_copier(const phase::which_phase a_phase);
   Vector<RefCountedPtr<Copier> >& get_reverse_copier(const phase::which_phase a_phase);
+
+  AMRMask& get_mask(const std::string a_mask, const int a_buffer);
   
 protected:
 
@@ -100,10 +112,27 @@ protected:
   
   std::map<phase::which_phase, RefCountedPtr<phase_realm> > m_realms;
 
+  // Map for checking which masks are present. 
+  std::map<std::pair<std::string, int>, bool>    m_masks_map;
+  std::map<std::pair<std::string, int>, AMRMask> m_masks;
+
   void define_mflevelgrid(const int a_lmin);
+
+  // Mask definitions. 
+  void define_masks(const int a_lmin);
+  void define_halo_masks(const int a_lmin);
+  void define_halo_mask(LevelData<BaseFab<bool> >& a_coarMask,
+			const ProblemDomain&       a_domainCoar,
+			const ProblemDomain&       a_domainFine,
+			const DisjointBoxLayout&   a_gridsCoar,
+			const DisjointBoxLayout&   a_gridsFine,
+			const int                  a_buffer,
+			const int                  a_ref_rat);
 
   // Get realm
   phase_realm& get_realm(const phase::which_phase a_phase);
+
+
   
 };
 #endif

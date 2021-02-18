@@ -68,8 +68,6 @@ amr_mesh::~amr_mesh(){
   
 }
 
-
-
 void amr_mesh::alias(EBAMRCellData&           a_data,
 		     const phase::which_phase a_phase,
 		     const MFAMRCellData&     a_mfdata,
@@ -1858,6 +1856,10 @@ Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& amr_mesh::get_neighbo
   return m_realms[a_realm]->get_neighbors(a_phase);
 }
 
+AMRMask& amr_mesh::get_mask(const std::string a_mask, const int a_buffer, const std::string a_realm) {
+  return m_realms[a_realm]->get_mask(a_mask, a_buffer);
+}
+
 Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->get_eblg(a_phase);
 }
@@ -2012,11 +2014,25 @@ void amr_mesh::register_operator(const std::string a_operator, const std::string
   }
 
   if(!this->query_realm(a_realm)) {
-    std::string str = "amr_mesh::define_realm - could not find realm '" + a_realm + "'";
+    std::string str = "amr_mesh::register_operator(operator, realm, phase) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
   m_realms[a_realm]->register_operator(a_operator, a_phase);
+}
+
+void amr_mesh::register_mask(const std::string a_mask, const int a_buffer, const std::string a_realm){
+  CH_TIME("amr_mesh::register_mask(mask, realm, buffer)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::register_mask(mask, realm, buffer)" << endl;
+  }
+
+  if(!this->query_realm(a_realm)) {
+    std::string str = "amr_mesh::register_mask(mask, realm, buffer) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  m_realms[a_realm]->register_mask(a_mask, a_buffer);
 }
 
 void amr_mesh::define_realms(){

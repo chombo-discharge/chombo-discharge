@@ -223,7 +223,9 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
 
   data_ops::set_value(a_state,    0.0);
 
-  a_particles.copy_halo_particles();
+  //  const EBAMRBool& mask = m_amr->get_mask(s_particle_halo, m_halo_buffer, m_realm);
+  const AMRMask& mask = m_amr->get_mask(s_particle_halo, m_halo_buffer, m_realm);
+  a_particles.copy_halo_particles(mask);
     
   const AMRParticles<T>& particles          = a_particles.get_particles();
   const AMRParticles<T>& halo_particles     = a_particles.get_halo_particles();
@@ -313,8 +315,10 @@ void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&              
 
   data_ops::set_value(a_state,    0.0);
 
-  a_particles.copy_halo_particles();
-  a_particles.copy_non_halo_particles();
+  const AMRMask& mask = m_amr->get_mask(s_particle_halo, m_halo_buffer, m_realm);
+
+  a_particles.copy_halo_particles(mask);
+  a_particles.copy_non_halo_particles(mask);
     
   const AMRParticles<T>& particles          = a_particles.get_particles();
   const AMRParticles<T>& halo_particles     = a_particles.get_halo_particles();

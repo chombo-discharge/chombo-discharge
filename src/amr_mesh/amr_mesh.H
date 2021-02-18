@@ -113,9 +113,14 @@ public:
   template <typename T> void allocate_ptr(EBAMRData<T>& a_data);
 
   /*!
-    @brief Register an operator over a realm
+    @brief Register an operator over a realm. This if for operators that are defined for a specific phase only. 
   */
   virtual void register_operator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase);
+
+  /*!
+    @brief Register a particle halo on a realm. 
+  */
+  virtual void register_mask(const std::string a_mask, const int a_buffer, const std::string a_realm);
 
   /*!
     @brief Query if a realm exists
@@ -655,6 +660,11 @@ public:
     @brief Get domains
   */
   virtual Vector<ProblemDomain>& get_domains();
+
+  /*!
+    @brief Get mask
+  */
+  virtual AMRMask& get_mask(const std::string a_mask, const int a_buffer, const std::string a_realm);
 
   /*!
     @brief Get the EBLevelGrid 

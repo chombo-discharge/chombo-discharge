@@ -742,6 +742,8 @@ void ito_plasma_stepper::register_operators(){
   m_poisson->register_operators();
   m_rte->register_operators();
   m_sigma->register_operators();
+
+  m_amr->register_mask("particle_halo", m_halo_buffer, m_particle_realm);
 }
   
 void ito_plasma_stepper::pre_regrid(const int a_lmin, const int a_old_finest_level){

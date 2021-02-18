@@ -436,8 +436,10 @@ void ito_solver::register_operators(){
     m_amr->register_operator(s_eb_mg_interp,    m_realm, m_phase);
     m_amr->register_operator(s_eb_copier,       m_realm, m_phase);
     m_amr->register_operator(s_eb_ghostcloud,   m_realm, m_phase);
-    m_amr->register_operator(s_eb_redist,       m_realm, m_phase);
     m_amr->register_operator(s_eb_noncons_div,  m_realm, m_phase);
+    
+    if(m_redistribute)    m_amr->register_operator(s_eb_redist,  m_realm, m_phase);
+    if(m_halo_buffer > 0) m_amr->register_mask(s_particle_halo, m_halo_buffer, m_realm);
   }
 }
 

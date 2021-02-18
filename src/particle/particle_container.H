@@ -101,6 +101,26 @@ public:
   void copy_non_halo_particles() const;
 
   /*!
+    @brief Copy particles to halo
+  */
+  void copy_halo_particles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const;
+
+  /*!
+    @brief Copy non-halo particles to non-halo storage
+  */
+  void copy_non_halo_particles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const;
+
+  /*!
+    @brief Copy particles to halo. a_level is the coarse level. 
+  */
+  void copy_halo_particles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const;
+
+  /*!
+    @brief Copy non-particles to non-halo data storage. a_level is the coarse level. 
+  */
+  void copy_non_halo_particles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const;
+
+  /*!
     @brief Frees up halo particles
   */
   void clear_halo_particles() const;
@@ -470,15 +490,7 @@ protected:
   */
   void gather_and_broadcast(IntVectSet& a_set);
 
-  /*!
-    @brief Copy particles to halo. a_level is the coarse level. 
-  */
-  void copy_halo_particles(const int a_level) const;
 
-    /*!
-    @brief Copy non-particles to non-halo data storage. a_level is the coarse level. 
-  */
-  void copy_non_halo_particles(const int a_level) const;
 };
 
 #include "particle_containerI.H"
