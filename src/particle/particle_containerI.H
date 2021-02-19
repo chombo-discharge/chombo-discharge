@@ -609,15 +609,6 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 				   const int                        a_newFinestLevel){
   if(m_cell_sorted) MayDay::Abort("particle_container<P>::regrid(...) - particles are sorted by cell!");
 
-  Real tot = 0.0;
-  Real halo = 0.0;
-  Real pvr = 0.0;
-  Real pdata = 0.0;
-  Real cache1 = 0.0;
-  Real cache2 = 0.0;
-  Real remap1 = 0.0;
-  Real remap2 = 0.0;
-
   // Update this stuff
   m_grids        = a_grids;
   m_domains      = a_domains;
@@ -628,21 +619,9 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     m_dx[lvl] = a_dx[lvl]*RealVect::Unit;
   }
-
-  tot -= MPI_Wtime();
-  pvr -= MPI_Wtime();
   
   this->setup_pvr(a_lmin, m_finest_level);
-  
-  pvr += MPI_Wtime();
-  MPI_Barrier(Chombo_MPI::comm);
-  pdata -= MPI_Wtime();
-  
   this->setup_particle_data(a_lmin, m_finest_level);
-  
-  pdata += MPI_Wtime();
-  MPI_Barrier(Chombo_MPI::comm);
-  cache1 -= MPI_Wtime();
   
   const int oldFinestLevel = m_cache_particles.size() - 1;
 
@@ -657,10 +636,6 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     }
   }
   
-  cache1 += MPI_Wtime();
-  MPI_Barrier(Chombo_MPI::comm);
-  cache2 -= MPI_Wtime();
-  
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++){
     //  for (int lvl = 0; lvl <= oldFinestLevel; lvl++){
     List<P>& outcast = m_particles[lvl]->outcast();
@@ -670,10 +645,6 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 
     m_particles[lvl]->remapOutcast();
   }
-  
-  cache2 += MPI_Wtime();
-  MPI_Barrier(Chombo_MPI::comm);
-  remap1 -= MPI_Wtime();
   
   // If grids were removed the fine particle outcast list is definitely not empty. Transfer fine particles
   // to the outcast list below and remap the coarse level again. Some of these particles may be outside the
@@ -688,26 +659,8 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     m_particles[lvl-1]->remapOutcast();
   }
   
-  remap1 += MPI_Wtime();
-  MPI_Barrier(Chombo_MPI::comm);
-  remap2 -= MPI_Wtime();
-  
   // Now do remap so that the PVR is respected.
   this->remap();
-  
-  remap2 += MPI_Wtime();
-  MPI_Barrier(Chombo_MPI::comm);
-  tot += MPI_Wtime();
-
-  pout() << endl
-  	 << "pvr    = " << 100.*pvr/tot << endl
-    	 << "pdata  = " << 100.*pdata/tot << endl
-  	 << "cache1 = " << 100.*cache1/tot << endl
-    	 << "cache2 = " << 100.*cache2/tot << endl
-  	 << "remap1 = " << 100.*remap1/tot << endl
-    	 << "remap2 = " << 100.*remap2/tot << endl
-  	 << "tot    = " << tot << endl
-  	 << endl;
 
   m_cache_particles.resize(0);
 }
