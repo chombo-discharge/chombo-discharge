@@ -131,8 +131,13 @@ BaseIF* rod_plane_profile::getBaseIF_square(){
   pp.getarr("plane_point", vec, 0, SpaceDim);
   point = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
-  const RealVect lo = point - 0.5*width*RealVect(BASISV(0)) - depth*RealVect(BASISV(1));
-  const RealVect hi = point + 0.5*width*RealVect(BASISV(0)) + depth*RealVect(BASISV(1));
+#if CH_SPACEDIM==2
+  const RealVect lo = point - 0.5*width*BASISREALV(0) - depth*BASISREALV(1);
+  const RealVect hi = point + 0.5*width*BASISREALV(0) + depth*BASISREALV(1);
+#elif CH_SPACEDIM==3
+  const RealVect lo = point - 0.5*width*(BASISREALV(0) + BASISREALV(1)) - depth*BASISREALV(2);
+  const RealVect hi = point + 0.5*width*(BASISREALV(0) + BASISREALV(1)) + depth*BASISREALV(2);
+#endif
 
   return new box_if(lo, hi, true);
 }
