@@ -1499,8 +1499,6 @@ void driver::setup_geometry_only(){
     this->write_memory_usage();
   }
 
-  return;
-
   this->get_geom_tags();       // Get geometric tags.
 
   if(m_write_memory){
