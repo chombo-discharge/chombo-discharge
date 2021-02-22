@@ -59,6 +59,55 @@ profile_plane_if::profile_plane_if(const RealVect  a_point,
   m_baseif = RefCountedPtr<BaseIF> (new SmoothUnion(parts, a_curv));
 }
 
+profile_plane_if::profile_plane_if(const RealVect  a_point,
+				   const Real      a_width,
+				   const BaseIF*   a_impFunc,
+				   const int       a_num_left,
+				   const int       a_num_right,
+				   const Real      a_ccDist,
+				   const Real      a_xShift,
+				   const Real      a_yShift,
+				   const Real      a_curv,
+				   const bool      a_inside){
+
+  const RealVect xhat  = RealVect(BASISV(0));
+  const RealVect yhat  = RealVect(BASISV(1));
+
+  const RealVect point = a_point - 1.234E-8*yhat; // Hack to make sure box does not align with grid lines
+
+  // Base planes
+  BaseIF* base_plane = static_cast<BaseIF*> (new PlaneIF(yhat,  point, a_inside));
+  BaseIF* left_plane = static_cast<BaseIF*> (new PlaneIF(-xhat, point - 0.5*a_width*xhat - xhat*1.E-10, a_inside));
+  BaseIF* righ_plane = static_cast<BaseIF*> (new PlaneIF(+xhat, point + 0.5*a_width*xhat + xhat*1.E-10, a_inside));
+  
+  Vector<BaseIF*> parts;
+  parts.push_back(base_plane);
+  parts.push_back(left_plane);
+  parts.push_back(righ_plane);
+
+  // Left profile holes
+  for (int ileft = 0; ileft < a_num_left; ileft++){
+    TransformIF* transIF = new TransformIF(*a_impFunc);
+
+    const RealVect shift = -(ileft + 0.5)*a_ccDist*xhat + a_xShift*xhat + a_yShift*yhat;
+    transIF->translate(shift);
+
+    parts.push_back(transIF);
+  }
+
+  // Right profile holes
+  for (int ileft = 0; ileft < a_num_left; ileft++){
+    TransformIF* transIF = new TransformIF(*a_impFunc);
+
+    const RealVect shift = (ileft + 0.5)*a_ccDist*xhat + a_xShift*xhat + a_yShift*yhat;
+    transIF->translate(shift);
+
+    parts.push_back(transIF);
+  }
+
+  m_baseif = RefCountedPtr<BaseIF> (new SmoothUnion(parts, a_curv));
+}
+
 profile_plane_if::profile_plane_if(const profile_plane_if& a_inputIF){
   m_baseif = a_inputIF.m_baseif;
 }
