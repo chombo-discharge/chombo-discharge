@@ -17,7 +17,8 @@
 
 #include "profile_plane_if.H"
 #include "rod_if.H"
-#include "new_sphere_if.H" 
+#include "new_sphere_if.H"
+#include "box_if.H"
 
 rod_plane_profile::rod_plane_profile(){
   if(SpaceDim == 3) MayDay::Abort("rod_plane_profile::rod_plane_profile - this is currently for 2D only");
@@ -118,6 +119,20 @@ BaseIF* rod_plane_profile::getBaseIF_circle(){
 }
 
 BaseIF* rod_plane_profile::getBaseIF_square(){
-  MayDay::Abort("rod_plane_profile::getBaseIF_square - not yet implemented");
-  return nullptr;
+  ParmParse pp("rod_plane_profile");
+  
+  Real width;
+  Real depth;
+  Vector<Real> vec(SpaceDim);
+  RealVect point;
+
+  pp.get("square_width", width);
+  pp.get("square_depth", depth);
+  pp.getarr("plane_point", vec, 0, SpaceDim);
+  point = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+
+  const RealVect lo = point - 0.5*width*RealVect(BASISV(0)) - depth*RealVect(BASISV(1));
+  const RealVect hi = point + 0.5*width*RealVect(BASISV(0)) + depth*RealVect(BASISV(1));
+
+  return new box_if(lo, hi, true);
 }

@@ -729,7 +729,7 @@ void poisson_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MF
 	      }
 	      else if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells. Use gas side data
 		for (int comp = 0; comp < ncomp; comp++){
-		  scratch_gas(iv, comp) = 0.5*(fab_gas(iv,comp) + fab_sol(iv,comp));
+		  scratch_gas(iv, comp) = fab_gas(iv,comp);
 		}
 	      }
 	    }
