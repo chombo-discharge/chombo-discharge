@@ -158,6 +158,7 @@ writeEBHDF5(const string& a_filename,
 
     }
 
+
   // set things up for each level
   for (int ilev = 0; ilev < a_numLevels; ilev++)
     {
@@ -188,7 +189,7 @@ writeEBHDF5(const string& a_filename,
 
           for (int icomp = 0; icomp < ebcellfab1.nComp(); icomp++)
             {
-              ebcellfab1.setCoveredCellVal(0.0, icomp);
+	      //              ebcellfab1.setCoveredCellVal(0.0, icomp);
             }
           const EBISBox& ebisbox = ebcellfab1.getEBISBox();
           FArrayBox& currentFab = fabData[dit()];
