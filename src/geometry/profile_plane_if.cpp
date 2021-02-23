@@ -10,6 +10,7 @@
 #include <TransformIF.H>
 #include <UnionIF.H>
 #include <SmoothUnion.H>
+#include <SmoothIntersection.H>
 
 #include "profile_plane_if.H"
 #include "new_sphere_if.H"
@@ -31,27 +32,12 @@ profile_plane_if::profile_plane_if(const RealVect  a_point,
 
   const RealVect point = a_point - 1.234E-8*yhat; // Hack to make sure box does not align with grid lines
 
-  // Base planes
-#if 0
-  BaseIF* base_plane = static_cast<BaseIF*> (new PlaneIF(yhat,  point, a_inside));
-  BaseIF* left_plane = static_cast<BaseIF*> (new PlaneIF(-xhat, point - 0.5*a_width*xhat - xhat*1.E-10, a_inside));
-  BaseIF* righ_plane = static_cast<BaseIF*> (new PlaneIF(+xhat, point + 0.5*a_width*xhat + xhat*1.E-10, a_inside));
-  
+  // Make base box
   Vector<BaseIF*> parts;
-  parts.push_back(base_plane);
-  parts.push_back(left_plane);
-  parts.push_back(righ_plane);
-#else
-  Vector<BaseIF*> parts;
-
-  const RealVect lo = a_point - 0.5*a_width*xhat - 1.E3*yhat;
-  const RealVect hi = a_point + 0.5*a_width*xhat;
+  const RealVect lo = point - 0.5*a_width*xhat - 1.E3*yhat;
+  const RealVect hi = point + 0.5*a_width*xhat;
   BaseIF* box = (BaseIF*) (new box_if(lo, hi, false));
-
   parts.push_back(box);
-#endif
-
-  
 
   // Left profile holes
   for (int ileft = 0; ileft < a_num_left; ileft++){
