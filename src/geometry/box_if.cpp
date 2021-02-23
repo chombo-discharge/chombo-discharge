@@ -14,16 +14,16 @@
 
 box_if::box_if(const RealVect& a_loCorner, 
 	       const RealVect& a_hiCorner,
-	       const bool& a_inside){
-  m_loCorner  = a_loCorner;
-  m_hiCorner  = a_hiCorner;
-  m_inside    = a_inside;
+	       const bool&     a_fluidInside){
+  m_loCorner    = a_loCorner;
+  m_hiCorner    = a_hiCorner;
+  m_fluidInside = a_fluidInside;
 }
 
 box_if::box_if(const box_if& a_inputIF){
-  m_loCorner  = a_inputIF.m_loCorner;
-  m_hiCorner  = a_inputIF.m_hiCorner;
-  m_inside    = a_inputIF.m_inside;
+  m_loCorner    = a_inputIF.m_loCorner;
+  m_hiCorner    = a_inputIF.m_hiCorner;
+  m_fluidInside = a_inputIF.m_fluidInside;
 }
 
 
@@ -58,15 +58,19 @@ Real box_if::value(const RealVect& a_pos) const{
 					 Max(m_loCorner[1] - a_pos[1], a_pos[1] - m_hiCorner[1]),
 					 Max(m_loCorner[2] - a_pos[2], a_pos[2] - m_hiCorner[2])));
 
-  const Real retval =  Min(0.0, delta[delta.maxDir(false)]) + max(RealVect::Zero, delta).vectorLength();
+  Real retval =  Min(0.0, delta[delta.maxDir(false)]) + max(RealVect::Zero, delta).vectorLength(); // Negative inside box. 
   
-  return m_inside ? retval : -retval;
+  if(!m_fluidInside){ // Flip so lsf is positive inside box and negative outside box. 
+    retval = -retval;
+  }
+
+  return retval;
 #endif
 
 
 }
 
 BaseIF* box_if::newImplicitFunction() const{
-  box_if* boxPtr = new box_if(m_loCorner,m_hiCorner,m_inside);
+  box_if* boxPtr = new box_if(m_loCorner,m_hiCorner,m_fluidInside);
   return static_cast<BaseIF*> (boxPtr);
 }

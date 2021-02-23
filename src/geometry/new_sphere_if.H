@@ -20,12 +20,12 @@ public:
 
   /*!
     @brief Constructor
-    @param[in] a_center Sphere center
-    @param[in] a_radius  Sphere radius
-    @param[in] a_inside Domain on inside or outside
+    @param[in] a_center      Sphere center
+    @param[in] a_radius      Sphere radius
+    @param[in] a_fluidInside Fluid on inside of sphere
   */
 
-  new_sphere_if(const RealVect& a_center, const Real& a_radius, const bool& a_inside);
+  new_sphere_if(const RealVect& a_center, const Real& a_radius, const bool& a_fluidInside);
 
   /*!
     @brief Copy constructor
@@ -65,6 +65,6 @@ protected:
   /*!
     @brief Inside or outside domain
   */
-  bool m_inside;
+  bool m_fluidInside;
 };
 #endif

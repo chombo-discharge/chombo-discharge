@@ -66,6 +66,7 @@ rod_plane_profile::rod_plane_profile(){
   // Build geometries
   m_dielectrics.resize(0);
   m_electrodes.resize(0);
+
   if(has_rod){
     m_electrodes.resize(1);
     RefCountedPtr<BaseIF> rod  = RefCountedPtr<BaseIF> (new rod_if(center1, center2, rod_rad, false));
@@ -74,7 +75,7 @@ rod_plane_profile::rod_plane_profile(){
   if(has_plane){
     m_dielectrics.resize(1);
     BaseIF* func = this->getBaseIF();
-    RefCountedPtr<BaseIF> plane = RefCountedPtr<BaseIF> (new profile_plane_if(point, width, func, numl, numr, dist, xshift, yshift, curv, true));
+    RefCountedPtr<BaseIF> plane = RefCountedPtr<BaseIF> (new profile_plane_if(point, width, func, numl, numr, dist, xshift, yshift, curv, false));
     m_dielectrics[0].define(plane, eps);
   }
 
@@ -133,7 +134,7 @@ BaseIF* rod_plane_profile::getBaseIF_square(){
 
 #if CH_SPACEDIM==2
   const RealVect lo = point - 0.5*width*BASISREALV(0) - depth*BASISREALV(1);
-  const RealVect hi = point + 0.5*width*BASISREALV(0) + depth*BASISREALV(1);
+  const RealVect hi = point + 0.5*width*BASISREALV(0) + 1.E-4*depth*BASISREALV(1);
 #elif CH_SPACEDIM==3
   const RealVect lo = point - 0.5*width*(BASISREALV(0) + BASISREALV(1)) - depth*BASISREALV(2);
   const RealVect hi = point + 0.5*width*(BASISREALV(0) + BASISREALV(1));

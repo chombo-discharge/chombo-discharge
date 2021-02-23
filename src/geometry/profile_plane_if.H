@@ -29,7 +29,7 @@ public:
 		   const Real      a_xShift,
 		   const Real      a_yShift,
 		   const Real      a_curv,
-		   const bool      a_inside);
+		   const bool      a_fluidInside);
 
   /*!
     @brief Copy constructor
@@ -54,5 +54,7 @@ public:
 protected:
 
   RefCountedPtr<BaseIF> m_baseif;
+
+  bool m_fluidInside;
 };
 #endif

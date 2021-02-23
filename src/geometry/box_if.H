@@ -25,7 +25,7 @@ public:
   */
   box_if(const RealVect& a_loCorner, 
 	 const RealVect& a_hiCorner,
-	 const bool&     a_inside);
+	 const bool&     a_fluidInside);
     
   /*!
     @brief Copy constructor
@@ -61,9 +61,9 @@ protected:
   RealVect m_hiCorner;
 
   /*!
-    @brief Domain on inside or outside
+    @brief Fluid inside box or not. 
   */
-  bool m_inside;
+  bool m_fluidInside;
 };
 
 #endif
