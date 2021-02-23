@@ -2396,12 +2396,15 @@ void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){
     const Real dx = m_amr->get_dx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box = dbl.get(dit());
+
 
       FArrayBox& fab = (*a_output[lvl])[dit()].getFArrayBox();
 
       fab.setVal(0.0, a_comp);
       fab.setVal(0.0, a_comp+1);
+
+      //      const Box box = dbl.get(dit());
+      const Box box = fab.box();
 
       for (BoxIterator bit(box); bit.ok(); ++bit){
       	const IntVect iv = bit();
