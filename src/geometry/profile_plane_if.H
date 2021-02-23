@@ -18,21 +18,7 @@ class profile_plane_if : public BaseIF {
 public:
 
   /*!
-    @brief Old constructor. Constructs a profiled plane with spherical cuts. 
-  */
-  profile_plane_if(const RealVect  a_point,
-		   const Real      a_width,
-		   const int       a_num_left,
-		   const int       a_num_right,
-		   const Real      a_rad,
-		   const Real      a_offset,
-		   const Real      a_shift,
-		   const Real      a_dist,
-		   const Real      a_curv,
-		   const bool      a_inside);
-
-  /*!
-    @brief Old constructor. Constructs a profiled plane with spherical cuts. 
+    @brief Ctor. 
   */
   profile_plane_if(const RealVect  a_point,
 		   const Real      a_width,
