@@ -448,6 +448,11 @@ protected:
   */
   bool m_plot_ranks;
 
+  /*!
+    @brief Plot level sets
+  */
+  bool m_plot_levelset;
+
   // Output parameters that go into checkpoint files
   Vector<Real> m_time_history;        // Simulation time
   Vector<Real> m_voltage_history;     // Applied voltage
@@ -714,6 +719,11 @@ protected:
     @brief Write MPI ranks to output
   */
   virtual void write_ranks(EBAMRCellData& a_output, int& a_comp);
+
+  /*!
+    @brief Write level sets
+  */
+  virtual void write_levelset(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Return the finest tag level

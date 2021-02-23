@@ -102,8 +102,9 @@ int driver::get_num_plot_vars() const {
 
   int num_output = 0;
 
-  if(m_plot_tags)            num_output = num_output + 1;
-  if(m_plot_ranks)           num_output = num_output+1;
+  if(m_plot_tags)     num_output = num_output + 1;
+  if(m_plot_ranks)    num_output = num_output + 1;
+  if(m_plot_levelset) num_output = num_output + 2;
 
   return num_output;
 }
@@ -118,6 +119,11 @@ Vector<std::string> driver::get_plotvar_names() const {
   
   if(m_plot_tags) names.push_back("cell_tags");
   if(m_plot_ranks) names.push_back("mpi_rank");
+  if(m_plot_levelset){
+    names.push_back("levelset_1");
+    names.push_back("levelset_2");
+  }
+  
   return names;
 }
 
@@ -1416,16 +1422,16 @@ void driver::parse_plot_vars(){
   Vector<std::string> str(num);
   pp.getarr("plt_vars", str, 0, num);
 
-  m_plot_tags   = false;
-  m_plot_ranks  = false;
+  m_plot_tags     = false;
+  m_plot_ranks    = false;
+  m_plot_levelset = false;
   
   for (int i = 0; i < num; i++){
-    if(     str[i] == "tags")     m_plot_tags   = true;
-    else if(str[i] == "mpi_rank") m_plot_ranks  = true;
+    if(     str[i] == "tags")     m_plot_tags     = true;
+    else if(str[i] == "mpi_rank") m_plot_ranks    = true;
+    else if(str[i] == "levelset") m_plot_levelset = true;
   }
 }
-
-
 
 void driver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   CH_TIME("driver::set_amr");
@@ -2112,22 +2118,33 @@ void driver::write_geometry(){
     pout() << "driver::write_geometry" << endl;
   }
 
-  EBAMRCellData output;
-  m_amr->allocate(output, m_realm, phase::gas, 1);
-  data_ops::set_value(output, 0.0);
-  Vector<std::string> names(1, "dummy_data");
+  const int ncomp = 2;
 
+  EBAMRCellData output;
+  m_amr->allocate(output, m_realm, phase::gas, ncomp);
+  data_ops::set_value(output, 0.0);
+
+  // Names
+  Vector<std::string> names(2);
+  names[0] = "levelset_1";
+  names[1] = "levelset_2";
+
+  // Write levelsets
+  int icomp = 0;
+  this->write_levelset(output, icomp);
+
+  //
   const int finest_level                 = m_amr->get_finest_level();
   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
   const Vector<Real>& dx                 = m_amr->get_dx();
   const Vector<int>& ref_rat             = m_amr->get_ref_rat();
 
-  bool replace_covered = false;
-  Vector<Real> covered_values;
-
   Vector<LevelData<EBCellFAB>*> output_ptr(1 + finest_level);
   m_amr->alias(output_ptr, output);
+
+  bool replace_covered = false;
+  Vector<Real> covered_values;
 
   // Dummy file name
   char file_char[1000];
@@ -2294,8 +2311,9 @@ void driver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     pout() << "driver::write_plot_data" << endl;
   }
 
-  if(m_plot_tags)   write_tags(a_output, a_comp);
-  if(m_plot_ranks)  write_ranks(a_output, a_comp);
+  if(m_plot_tags)     write_tags(a_output, a_comp);
+  if(m_plot_ranks)    write_ranks(a_output, a_comp);
+  if(m_plot_levelset) write_levelset(a_output, a_comp);
 }
 
 void driver::write_tags(EBAMRCellData& a_output, int& a_comp){
@@ -2360,6 +2378,47 @@ void driver::write_ranks(EBAMRCellData& a_output, int& a_comp){
   }
 
   a_comp++; 
+}
+
+void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("driver::write_levelset");
+  if(m_verbosity > 3){
+    pout() << "driver::write_levelset" << endl;
+  }
+
+  const RefCountedPtr<BaseIF>& lsf1 = m_compgeom->get_gas_if();
+  const RefCountedPtr<BaseIF>& lsf2 = m_compgeom->get_sol_if();
+
+  const RealVect prob_lo = m_amr->get_prob_lo();
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids(a_output.get_realm())[lvl];
+    const Real dx = m_amr->get_dx()[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box = dbl.get(dit());
+
+      FArrayBox& fab = (*a_output[lvl])[dit()].getFArrayBox();
+
+      fab.setVal(0.0, a_comp);
+      fab.setVal(0.0, a_comp+1);
+
+      for (BoxIterator bit(box); bit.ok(); ++bit){
+      	const IntVect iv = bit();
+	
+      	const RealVect pos = prob_lo + RealVect(iv)*dx;
+
+	if(!lsf1.isNull()){
+	  fab(iv, a_comp) = lsf1->value(pos);
+	}
+	if(!lsf1.isNull()){
+	  fab(iv, a_comp + 1) = lsf2->value(pos);
+	}
+      }
+    }
+  }
+
+  a_comp = a_comp + 2;
 }
 
 void driver::write_checkpoint_file(){
