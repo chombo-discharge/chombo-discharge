@@ -190,6 +190,8 @@ namespace physics {
 						const int                        a_lmin,
 						const int                        a_finest_level){
       if(m_load_balance){
+	constexpr int num_apply = 50;
+	
 	a_procs.resize(1+a_finest_level);
 	a_boxes.resize(1+a_finest_level);
 
@@ -200,13 +202,15 @@ namespace physics {
 	m_amr->allocate(dummy1, m_realm, 1);
 	m_amr->allocate(dummy2, m_realm, 1);
 
-	Vector<ProblemDomain> domains = m_amr->get_domains();
+	const Vector<ProblemDomain>& domains = m_amr->get_domains();
 
 	// We need to make amr_mesh restore some operators that we need. This is overkill because we only need
-	// operators for ghost cell interpolation.... 
+	// operators for ghost cell interpolation....
+
 	m_amr->regrid_operators(a_lmin, a_finest_level, 1);
 
-	// Set up the operator factor and fetch it. 
+	// Set up the operator factor and fetch it.
+	solver->set_coefficients();
 	solver->setup_operator_factory();
 	RefCountedPtr<mfconductivityopfactory>& factory = solver->get_opfact();
 
@@ -221,7 +225,7 @@ namespace physics {
 	  dit.enableTime();
 
 	  // Do some relaxations on each level. This includes BCs.
-	  for (int k = 0; k < 50; k++){
+	  for (int k = 0; k < num_apply; k++){
 	    oper->applyOp(*dummy1[lvl], *dummy2[lvl], dit, true);
 	  }
 

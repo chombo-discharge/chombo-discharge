@@ -103,7 +103,10 @@ int driver::get_num_plot_vars() const {
   int num_output = 0;
 
   if(m_plot_tags)     num_output = num_output + 1;
-  if(m_plot_ranks)    num_output = num_output + 1;
+  if(m_plot_ranks)    {
+    const int num_realms = m_amr->get_realms().size();
+    num_output = num_output + num_realms;
+  }
   if(m_plot_levelset) num_output = num_output + 2;
 
   return num_output;
@@ -118,7 +121,13 @@ Vector<std::string> driver::get_plotvar_names() const {
   Vector<std::string> names(0);
   
   if(m_plot_tags) names.push_back("cell_tags");
-  if(m_plot_ranks) names.push_back("mpi_rank");
+  if(m_plot_ranks) {
+    const std::string base = "_rank";
+    for (const auto& str : m_amr->get_realms()){
+      const std::string id = str + base;
+      names.push_back(id);
+    }
+  }
   if(m_plot_levelset){
     names.push_back("levelset_1");
     names.push_back("levelset_2");
@@ -696,13 +705,14 @@ void driver::regrid_internals(const int a_old_finest_level, const int a_new_fine
   // Copy cached tags back over to m_tags
   for (int lvl = 0; lvl <= Min(a_old_finest_level, a_new_finest_level); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-
+    
     // Copy mask
     LevelData<BaseFab<bool> > tmp;
     tmp.define(dbl, 1, IntVect::Zero);
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       tmp[dit()].setVal(false);
     }
+
     m_cached_tags[lvl]->copyTo(tmp);
     
     for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1580,13 +1590,7 @@ void driver::setup_fresh(const int a_init_regrids){
   // Allocate internal storage 
   this->allocate_internals();
 
-  // Do a grid report of the initial grid
-  if(m_verbosity > 0){
-    this->grid_report();
-  }
-
-  // Provide time_stepper with amr and geometry
-
+  // Provide time_stepper with geometry in case it needs it. 
   m_timestepper->set_computational_geometry(m_compgeom);       // Set computational geometry
 
   // time_stepper setup
@@ -1598,11 +1602,39 @@ void driver::setup_fresh(const int a_init_regrids){
 
   // Fill solves with initial data
   m_timestepper->initial_data();                                  // Fill solvers with initial data
+
+  // We now load balance and define operators and stuff like that. 
+  this->cache_tags(m_tags);
+  m_timestepper->pre_regrid(lmin, lmax);
+  for (const auto& str : m_amr->get_realms()){
+    if(m_timestepper->load_balance_realm(str)){
+      
+      Vector<Vector<int> > procs;
+      Vector<Vector<Box> > boxes;
+
+      const int lmin   = 0;
+      const int lmax = m_amr->get_finest_level(); 
+      
+      m_timestepper->load_balance_boxes(procs, boxes, str, m_amr->get_proxy_grids(), lmin, lmax);
+
+      m_amr->regrid_realm(str, procs, boxes, lmin);
+    }
+  }
+  m_amr->regrid_operators(lmin, lmax, regsize);                        // Regrid operators again.
+  this->regrid_internals(lmax, lmax);          // Regrid internals for driver.
+  m_timestepper->regrid(lmin, lmax, lmax);   // Regrid solvers.
+
+  // Do post initialize stuff
   m_timestepper->post_initialize();
 
   // cell_tagger
   if(!m_celltagger.isNull()){
     m_celltagger->regrid();
+  }
+
+  // Do a grid report of the initial grid
+  if(m_verbosity > 0){
+    this->grid_report();
   }
 
   // Initial regrids
@@ -2365,19 +2397,20 @@ void driver::write_ranks(EBAMRCellData& a_output, int& a_comp){
     pout() << "driver::write_ranks" << endl;
   }
 
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, phase::gas, 1);
+  for (const auto& r : m_amr->get_realms()){
+    EBAMRCellData scratch;
+    m_amr->allocate(scratch, r, phase::gas, 1);
 
-  const Real rank = 1.0*procID();
-  data_ops::set_value(scratch, rank);
+    data_ops::set_value(scratch, 1.0*procID());
 
-  const Interval src_interv(0, 0);
-  const Interval dst_interv(a_comp, a_comp);
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+    const Interval src(0,0);
+    const Interval dst(a_comp, a_comp);
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      scratch[lvl]->copyTo(src, *a_output[lvl], dst);
+    }
+
+    a_comp++;
   }
-
-  a_comp++; 
 }
 
 void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){

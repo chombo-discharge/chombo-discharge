@@ -891,7 +891,7 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
 
   // Morton order the boxes. 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    mortonOrdering((Vector<Box>&)new_boxes[lvl]);
+    mortonOrdering(new_boxes[lvl]);
   }
 
   // Load balance boxes with patch volume as load proxy. 

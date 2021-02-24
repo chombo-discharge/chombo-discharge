@@ -158,6 +158,11 @@ public:
     @brief Return require number of ghost cells. 
   */
   virtual int query_ghost() const;
+
+  /*!
+    @brief Set up the geometric multigrid solver 
+  */
+  virtual void setup_gmg();
   
   /*!
     @brief Set coefficients
@@ -391,10 +396,7 @@ protected:
   */
   Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
 
-  /*!
-    @brief Set up the geometric multigrid solver 
-  */
-  virtual void setup_gmg();
+
 
   /*!
     @brief Need to override this in order to pass in the correct time to boundary conditions
