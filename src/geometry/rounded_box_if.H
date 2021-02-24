@@ -22,12 +22,12 @@ public:
     @param[in] a_loCorner            Upper right corner of the object
     @param[in] a_hiCorner            Lower left corner of the object
     @param[in] a_curvature           Radius of curvature on edges and corners
-    @param[in] a_inside              Domain on inside or outside
+    @param[in] a_fluidInside         Fluid on inside (true) or outside
   */
   rounded_box_if(const RealVect& a_loCorner,
 		 const RealVect& a_hiCorner,
 		 const Real&     a_curvature,
-		 const bool&     a_inside);
+		 const bool&     a_fluidInside);
 
 
   /*!
@@ -83,7 +83,7 @@ protected:
   /*!
     @brief Inside or outside domain
   */   
-  bool m_inside;
+  bool m_fluidInside;
 
   /*!
     @brief Actual rounded box, built up by a bunch of boolean operations

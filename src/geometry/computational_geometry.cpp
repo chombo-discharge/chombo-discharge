@@ -178,7 +178,7 @@ void computational_geometry::build_solid_geoserv(GeometryService*&   a_geoserver
     RefCountedPtr<BaseIF> diel_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts_dielectrics)); // Gas outside dielectric
     RefCountedPtr<BaseIF> elec_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts_electrodes));  // Gas outside electrodes
     RefCountedPtr<BaseIF> diel_compif = RefCountedPtr<BaseIF> (new ComplementIF(*diel_baseif));        // Inside of dielectrics
-    
+
     parts.push_back(&(*diel_compif)); // Parts for intersection
     parts.push_back(&(*elec_baseif)); // Parts for intersection
     
@@ -194,7 +194,7 @@ void computational_geometry::build_solid_geoserv(GeometryService*&   a_geoserver
 								s_thresh));
     }
     else{ // Chombo geometry generation
-      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
+      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_sol_if, 0, a_dx*RealVect::Unit, s_thresh));
     }
   }
 }

@@ -38,7 +38,7 @@ profile_plane_if::profile_plane_if(const RealVect  a_point,
   const RealVect lo = point - 0.5*a_width*xhat - 1.E3*yhat;
   const RealVect hi = point + 0.5*a_width*xhat;
   BaseIF* box = (BaseIF*) (new box_if(lo, hi, false)); // Construct base box with fluid outside. 
-  //  parts.push_back(box);
+  parts.push_back(box);
 
   // Left profile holes
   for (int ileft = 0; ileft < a_num_left; ileft++){

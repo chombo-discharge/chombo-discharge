@@ -50,6 +50,5 @@ Real box_if::value(const RealVect& a_pos) const{
 }
 
 BaseIF* box_if::newImplicitFunction() const{
-  box_if* boxPtr = new box_if(m_loCorner,m_hiCorner,m_fluidInside);
-  return static_cast<BaseIF*> (boxPtr);
+  return (BaseIF*) (new box_if(m_loCorner, m_hiCorner, m_fluidInside));
 }
