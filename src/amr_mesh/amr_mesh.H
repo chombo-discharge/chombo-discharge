@@ -23,7 +23,7 @@
 #include "EBGhostCloud.H"
 #include "noncons_div.H"
 #include "realm.H"
-
+#include "load_balance.H"
 
 #include <DisjointBoxLayout.H>
 #include <ebcoarseaverage.H>
@@ -36,6 +36,8 @@
 #include <EBFineToCoarRedist.H>
 #include <EBPWLFineInterp.H>
 #include <ProblemDomain.H>
+
+
 
 /*!
   @brief Class for handling spatial operations for streamer equations.
@@ -55,15 +57,6 @@ protected:
 public:
 
   /*!
-    @brief Enum for sorting boxes when regridding. 
-  */
-  enum class box_sorting {
-    none,
-    shuffle,
-    morton
-  };
-
-  /*!
     @brief Constructor
   */
   amr_mesh();
@@ -76,49 +69,58 @@ public:
   /*!
     @brief Deallocate data. You should never need this, smart pointers are you friends :)
   */
-  template<typename T> void deallocate(Vector<T*>& a_data);
+  template<typename T>
+  void deallocate(Vector<T*>& a_data);
 
   /*!
     @brief Deallocate data
   */
-  template<typename T> void deallocate(Vector<RefCountedPtr<T> >& a_data);
+  template<typename T>
+  void deallocate(Vector<RefCountedPtr<T> >& a_data);
 
   /*!
     @brief Deallocate data
   */
-  template<typename T> void deallocate(EBAMRData<T>& a_data);
+  template<typename T>
+  void deallocate(EBAMRData<T>& a_data);
 
   /*!
     @brief Turn smart-pointer data structure into regular-pointer data structure
   */
-  template<typename T> void alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data);
+  template<typename T>
+  void alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data);
 
   /*!
     @brief Turn smart-pointer data structure into regular-pointer data structure
   */
-  template<typename T, typename S> void alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data);
+  template<typename T, typename S>
+  void alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data);
 
   /*!
     @brief Template class for generic allocation of particles
   */
-  template <typename T > void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_realm);
+  template <typename T >
+  void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_realm);
 
   /*!
     @brief Allocate a particle container
   */
-  template <typename T> void allocate(particle_container<T>& a_container,
+  template <typename T>
+  void allocate(particle_container<T>& a_container,
 				      const int              a_pvr_buffer,
 				      const std::string      a_realm);
 
   /*!
     @brief Allocate pointer but not memory
   */
-  template <typename T> void allocate_ptr(Vector<RefCountedPtr<T> >& a_data);
+  template <typename T>
+  void allocate_ptr(Vector<RefCountedPtr<T> >& a_data);
 
   /*!
     @brief Allocate pointer but not memory
   */
-  template <typename T> void allocate_ptr(EBAMRData<T>& a_data);
+  template <typename T>
+  void allocate_ptr(EBAMRData<T>& a_data);
 
   /*!
     @brief Register an operator over a realm. This if for operators that are defined for a specific phase only. 
@@ -328,6 +330,11 @@ public:
     @brief Sort boxes
   */
   virtual void sort_boxes(Vector<Box>& a_boxes, const box_sorting a_which);
+
+  /*!
+    @brief C++ standard box sort
+  */
+  virtual void std_sort_boxes(Vector<Box>& a_boxes);
 
   /*!
     @brief Random shuffle boxes
@@ -1019,6 +1026,7 @@ protected:
     @brief Define realms
   */
   virtual void define_realms();
+
 };
 
 #include "amr_meshI.H"

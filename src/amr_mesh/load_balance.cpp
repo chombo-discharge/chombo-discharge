@@ -12,6 +12,12 @@ void load_balance::make_balance(Vector<int>& a_levelRanks, const Vector<Box>& a_
   LoadBalance(a_levelRanks, a_levelBoxes);
 }
 
+void load_balance::sort(Vector<Box>& a_boxes, const box_sorting a_which){
+  Vector<int> dummy(a_boxes.size(), 0);
+
+  load_balance::sort(a_boxes, dummy, a_which);
+}
+
 void load_balance::gather_boxes(Vector<Box>& a_boxes){
 
   // TLDR: This code does a gather operation on the loads and boxes. They are gather globally in this way:

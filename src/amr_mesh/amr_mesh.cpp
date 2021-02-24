@@ -23,10 +23,6 @@
 #include <ParmParse.H>
 #include <BaseIFFactory.H>
 
-#include <algorithm>
-#include <random>
-#include <chrono>
-
 amr_mesh::amr_mesh(){
   parse_verbosity();
   parse_coarsest_num_cells();
@@ -938,6 +934,9 @@ void amr_mesh::sort_boxes(Vector<Box>& a_boxes, const box_sorting a_which){
   switch(a_which){
   case box_sorting::none:
     break;
+  case box_sorting::std:
+    this->std_sort_boxes(a_boxes);
+    break;
   case box_sorting::shuffle:
     this->shuffle_boxes(a_boxes);
     break;
@@ -948,6 +947,15 @@ void amr_mesh::sort_boxes(Vector<Box>& a_boxes, const box_sorting a_which){
     MayDay::Abort("amr_mesh::sort_boxes - unknown algorithm requested");
     break;
   }
+}
+
+void amr_mesh::std_sort_boxes(Vector<Box>& a_boxes){
+  CH_TIME("amr_mesh::std_sort_boxes");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::std_sort_boxes" << endl;
+  }
+
+  a_boxes.sort();
 }
 
 void amr_mesh::shuffle_boxes(Vector<Box>& a_boxes){
@@ -1614,6 +1622,9 @@ void amr_mesh::parse_grid_generation(){
   pp.get("box_sorting", str);
   if( str == "none"){
     m_boxsort = box_sorting::none;
+  }
+  if( str == "std"){
+    m_boxsort = box_sorting::std;
   }
   else if(str == "shuffle"){
     m_boxsort = box_sorting::shuffle;

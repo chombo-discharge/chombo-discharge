@@ -233,20 +233,13 @@ namespace physics {
 	  dit.disableTime();
 	  dit.mergeTime();
 
-	  // Now do the load balancing
+	  // Now do the load balancing. When we do this, the boxes are standard-sorted! I.e. the new mesh ignores the desired sorting from amr_mesh
 	  Vector<unsigned long long> loads = dit.getTime();
 	  a_boxes[lvl] = dit.getBoxes();
+
+	  // Do the desired sorting
+	  load_balance::sort(a_boxes[lvl], loads, box_sorting::shuffle);
 	  UnLongLongLoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
-
-#if 0 // Debug
-	  a_procs[lvl].resize(a_boxes[lvl].size(), 0);
-	  for (int ibox = 0; ibox < a_procs[lvl].size(); ibox++){
-	    a_procs[lvl][ibox] = 0;
-	  }
-	  a_procs[lvl][0] = 1;
-
-	  if(procID() == 0) std::cout << a_procs[lvl] << std::endl;
-#endif
 	}
       }
     }

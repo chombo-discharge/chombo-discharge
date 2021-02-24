@@ -11,25 +11,21 @@
 #include "mfis.H"
 
 /*!
+  @brief Enum for sorting boxes
+*/
+enum class box_sorting {
+  none,
+  std,
+  shuffle,
+  morton
+};
+
+/*!
   @brief Static class that does various kinds of load-balancing
 */
 class load_balance {
 public:
-
-  /*!
-    @brief Load-balancing types
-  */
-  enum which_balance {
-    volume,
-    elliptic,
-    multifluid
-  };
-
-  /*!
-    @brief Load balancing. Loads are box volumes. 
-  */
-  static void make_balance(Vector<int>& a_levelRanks, const Vector<Box>& a_levelBoxes);
-
+  
   /*!
     @brief Load balancing
   */
@@ -53,6 +49,23 @@ public:
 			const Vector<Vector<Box> >& a_boxes);
 
   /*!
+    @brief Main sorting function for sorting boxes and loads
+  */
+  template <typename T>
+  static void sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const box_sorting a_which);
+
+    /*!
+    @brief Load balancing. Loads are box volumes. 
+  */
+  static void make_balance(Vector<int>& a_levelRanks, const Vector<Box>& a_levelBoxes);
+
+  /*!
+    @brief Main sorting function for sorting boxes and loads
+    @details This just calls the other version. 
+  */
+  static void sort(Vector<Box>& a_boxes, const box_sorting a_which);
+
+  /*!
     @brief Gather boxes
   */
   static void gather_boxes(Vector<Box>& a_boxes);
@@ -73,6 +86,36 @@ public:
   static void gather_boxes_and_loads(Vector<Box>& a_boxes, Vector<int>& a_loads);
 
 protected:
+
+  /*!
+    @brief Make a vector pair
+  */
+  template <class T>
+  static std::vector<std::pair<Box, T> > makeVectorPair(Vector<Box>& a_boxes, Vector<T>& a_loads);
+
+  /*!
+    @brief Splits vector pair
+  */
+  template <class T>
+  static void splitVectorPair(Vector<Box>& a_boxes, Vector<T>& a_loads, const std::vector<std::pair<Box, T> >& a_pairs);
+
+  /*!
+    @brief Standard box sorting, calls C++ std::sort
+  */
+  template <class T>
+  static void std_sort(Vector<Box>& a_boxes, Vector<T>& a_loads);
+
+  /*!
+    @brief Random shuffle boxes
+  */
+  template <class T>
+  static void shuffle_sort(Vector<Box>& a_boxes, Vector<T>& a_loads);
+
+  /*!
+    @brief Morton sort boxes
+  */
+  template <class T>
+  static void morton_sort(Vector<Box>& a_boxes, Vector<T>& a_loads);
 };
 
 #include "load_balanceI.H"
