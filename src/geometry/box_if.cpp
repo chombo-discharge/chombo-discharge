@@ -26,29 +26,11 @@ box_if::box_if(const box_if& a_inputIF){
   m_fluidInside = a_inputIF.m_fluidInside;
 }
 
-
 box_if::~box_if(){
   
 }
 
 Real box_if::value(const RealVect& a_pos) const{
-#if 0 // Original code. Not a signed distance function. 
-  RealVect a_point = a_pos;
-
-  a_point -= m_loCorner;
-  RealVect newHiCorner = m_hiCorner - m_loCorner;
-  Real retval = 1.;
-  if(a_point >= RealVect::Zero && a_point <= newHiCorner){
-    retval = -1.;
-  }
-
-  if(!m_inside) {
-    retval = -retval;
-  }
-
-  return retval;
-#else
-
   // TLDR: Min(0.0, Max(dx, dy)) is the shortest distance from a point inside the rectangle to one of the edges. It becomes zero if dx > 0 or dy > 0. The
   //       second term max(RealVect::Zero, delta).vectorLength() is funky. In principle we should only take the distance to be sqrt(dx^2 + dy^2 + dz^2) if
   //       we are closest to a "corner", but if we are closest to one of the edges we have dx*dy < 0.0. We can just set the other component to zero, which is what
@@ -65,9 +47,6 @@ Real box_if::value(const RealVect& a_pos) const{
   }
 
   return retval;
-#endif
-
-
 }
 
 BaseIF* box_if::newImplicitFunction() const{
