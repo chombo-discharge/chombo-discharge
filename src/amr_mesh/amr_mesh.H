@@ -55,6 +55,15 @@ protected:
 public:
 
   /*!
+    @brief Enum for sorting boxes when regridding. 
+  */
+  enum class box_sorting {
+    none,
+    shuffle,
+    morton
+  };
+
+  /*!
     @brief Constructor
   */
   amr_mesh();
@@ -314,6 +323,16 @@ public:
     @brief Build new grids. This also load balances. 
   */
   virtual void build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap = -1);
+
+  /*!
+    @brief Sort boxes
+  */
+  virtual void sort_boxes(Vector<Box>& a_boxes, const box_sorting a_which);
+
+  /*!
+    @brief Random shuffle boxes
+  */
+  virtual void shuffle_boxes(Vector<Box>& a_boxes);
 
   /*!
     @brief Interpolate ghost vectors over a realm
@@ -810,6 +829,11 @@ protected:
     @brief Grid generation method
   */
   grid_generation m_gridgen;
+
+  /*!
+    @brief Box sorting
+  */
+  box_sorting m_boxsort;
 
   /*!
     @brief mfis

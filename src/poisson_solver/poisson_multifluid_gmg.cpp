@@ -24,7 +24,7 @@
 #include <ParmParse.H>
 #include <BRMeshRefine.H>
 
-#define POISSON_MF_GMG_TIMER 1
+#define POISSON_MF_GMG_TIMER 0
 
 poisson_multifluid_gmg::poisson_multifluid_gmg(){
   m_needs_setup = true;
