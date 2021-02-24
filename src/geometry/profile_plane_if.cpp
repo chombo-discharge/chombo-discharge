@@ -16,6 +16,7 @@
 #include "profile_plane_if.H"
 #include "new_sphere_if.H"
 #include "box_if.H"
+#include "rounded_box_if.H"
 
 profile_plane_if::profile_plane_if(const RealVect  a_point,
 				   const Real      a_width,
@@ -37,7 +38,7 @@ profile_plane_if::profile_plane_if(const RealVect  a_point,
   Vector<BaseIF*> parts;
   const RealVect lo = point - 0.5*a_width*xhat - 1.E3*yhat;
   const RealVect hi = point + 0.5*a_width*xhat;
-  BaseIF* box = (BaseIF*) (new box_if(lo, hi, false)); // Construct base box with fluid outside. 
+  BaseIF* box = (BaseIF*) (new rounded_box_if(lo, hi, a_curv, false)); // Construct base box with fluid outside. 
   parts.push_back(box);
 
   // Left profile holes
@@ -60,7 +61,7 @@ profile_plane_if::profile_plane_if(const RealVect  a_point,
     parts.push_back(transIF);
   }
 
-  m_baseif = RefCountedPtr<BaseIF> (new SmoothUnion(parts, a_curv));
+  m_baseif = RefCountedPtr<BaseIF> (new SmoothUnion(parts, 2*a_curv));
 }
 
 profile_plane_if::profile_plane_if(const profile_plane_if& a_inputIF){
