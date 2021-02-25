@@ -1525,10 +1525,10 @@ void driver::setup_geometry_only(){
   
   Vector<IntVectSet> tags = m_geom_tags;
   const int a_lmin = 0;
-  const int a_lmax = m_geom_tag_depth;
-  m_amr->build_grids(tags, a_lmin, a_lmax);//m_geom_tag_depth);
+  const int a_lmax = m_geom_tag_depth+1;
+  //  m_amr->build_grids(tags, a_lmin, a_lmax);//m_geom_tag_depth);
   //  m_amr->define_eblevelgrid(a_lmin);
-  m_amr->regrid(m_geom_tags, a_lmin, a_lmax);       // Regrid using geometric tags for now
+  m_amr->regrid_amr(m_geom_tags, a_lmin, a_lmax);       // Regrid using geometric tags for now
 
   if(m_verbosity > 0){
     this->grid_report();
@@ -2118,30 +2118,6 @@ void driver::write_computational_loads(){
     
     f.close();
   }
-
-  
-    // // Write data
-    // if(procID() == 0){
-    //   std::ofstream f;
-    //   f.open(fname, std::ios_base::trunc);
-
-    //   const int width = 12;
-      
-    //   // Write header
-    //   f << std::left << std::setw(width) << "# MPI rank" << "\t"
-    // 	<< std::left << std::setw(width) << "Load" << "\t"
-    // 	<< endl;
-
-    //   // Write data
-    //   for (int i = 0; i < nProc; i++){
-    //   f << std::left << std::setw(width) << i << "\t"
-    // 	<< std::left << std::setw(width) << sumLoads[i] << "\t"
-    // 	<< endl;
-    //   }
-
-    //   f.close();
-    // }
-  //  }
 }
 
 void driver::write_geometry(){
@@ -2430,7 +2406,6 @@ void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-
       FArrayBox& fab = (*a_output[lvl])[dit()].getFArrayBox();
 
       fab.setVal(0.0, a_comp);
@@ -2447,7 +2422,7 @@ void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){
 	if(!lsf1.isNull()){
 	  fab(iv, a_comp) = lsf1->value(pos);
 	}
-	if(!lsf1.isNull()){
+	if(!lsf2.isNull()){
 	  fab(iv, a_comp + 1) = lsf2->value(pos);
 	}
       }

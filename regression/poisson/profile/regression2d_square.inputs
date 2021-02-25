@@ -1,0 +1,154 @@
+# ====================================================================================================
+# AMR_MESH OPTIONS
+# ====================================================================================================
+amr_mesh.lo_corner       =    0.0   0.
+amr_mesh.hi_corner       =    0.04  0.02
+amr_mesh.verbosity       = -1          # Controls verbosity. 
+amr_mesh.coarsest_domain = 128 64 128 # Number of cells on coarsest domain
+amr_mesh.max_amr_depth   = 5           # Maximum amr depth
+amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
+amr_mesh.refine_all_lvl  = -1          # Refine everything down to this level.
+amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
+amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
+amr_mesh.buffer_size     = 2           # Number of cells between grid levels
+amr_mesh.grid_algorithm  = br       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+amr_mesh.box_sorting     = morton      # 'none', 'std_sort', 'shuffle', or 'morton'
+amr_mesh.blocking_factor = 8          # Default blocking factor (16 in 3D)
+amr_mesh.max_box_size    = 16          # Maximum allowed box size
+amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
+amr_mesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
+amr_mesh.num_ghost       = 3           # Number of ghost cells. Default is 3
+amr_mesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
+amr_mesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
+amr_mesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
+amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
+
+# ====================================================================================================
+# DRIVER OPTIONS
+# ====================================================================================================
+driver.verbosity                       = 3             # Engine verbosity
+driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
+driver.geometry_scan_level             = 2             # Geometry scan level for plasmac geometry generator
+driver.plot_interval                   = 10            # Plot interval
+driver.checkpoint_interval             = 10            # Checkpoint interval
+driver.regrid_interval                 = 10            # Regrid interval
+driver.recursive_regrid                = false         # Recursive regrids
+driver.write_regrid_files              = false         # Write regrid files or not. 
+driver.initial_regrids                 = 0             # Number of initial regrids
+driver.start_time                      = 0             # Start time (fresh simulations only)
+driver.stop_time                       = 1.0           # Stop time
+driver.max_steps                       = 0             # Maximum number of steps
+driver.geometry_only                   = false         # Special option that ONLY plots the geometry
+driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+driver.write_memory                    = false         # Write MPI memory report
+driver.write_loads                     = false         # Write (accumulated) computational loads
+driver.write_ebis                      = false         # Write geometry to an HDF5 file
+driver.read_ebis                       = false         # Read EBIS when restarting a simulation
+driver.output_directory                = ./            # Output directory
+driver.grow_tags                       = 0             # Grow tagged by this in every direction
+driver.output_names                    = simulation    # Simulation output names
+driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
+driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
+driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
+driver.plt_vars                        = levelset mpi_rank    # 'tags', 'mpi_rank'
+driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
+driver.allow_coarsening                = true          # Allows removal of grid levels according to cell_tagger
+driver.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
+driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
+driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+driver.refine_electrode_gas_interface  = -1            # Refine electrode-gas interfaces. -1 => ----"-----
+driver.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
+driver.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
+driver.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----
+
+
+# ====================================================================================================
+# POISSON_MULTIFLUID_GMG_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
+# ====================================================================================================
+poisson_multifluid_gmg.bc_x_low     = neumann  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_x_high    = dirichlet_ground    # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_y_low     = dirichlet_ground  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_y_high    = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_z_low     = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_z_high    = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.plt_vars     = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+poisson_multifluid_gmg.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)
+
+poisson_multifluid_gmg.auto_tune         = false     # Do some auto-tuning
+poisson_multifluid_gmg.gmg_coarsen       = 5         # Number of coarsenings to use before level aggregation
+poisson_multifluid_gmg.gmg_verbosity     = 10        # GMG verbosity
+poisson_multifluid_gmg.gmg_pre_smooth    = 12        # Number of relaxations in downsweep
+poisson_multifluid_gmg.gmg_post_smooth   = 12        # Number of relaxations in upsweep
+poisson_multifluid_gmg.gmg_bott_smooth   = 12        # NUmber of relaxations before dropping to bottom solver
+poisson_multifluid_gmg.gmg_min_iter      = 5         # Minimum number of iterations
+poisson_multifluid_gmg.gmg_max_iter      = 32        # Maximum number of iterations
+poisson_multifluid_gmg.gmg_tolerance     = 1.E-10    # Residue tolerance
+poisson_multifluid_gmg.gmg_hang          = 0.2       # Solver hang
+poisson_multifluid_gmg.gmg_bottom_drop   = 4         # Bottom drop
+poisson_multifluid_gmg.gmg_bc_order      = 2         # Boundary condition order for multigrid
+poisson_multifluid_gmg.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+poisson_multifluid_gmg.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
+poisson_multifluid_gmg.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now
+poisson_multifluid_gmg.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
+
+# ====================================================================================================
+# GEO_COARSENER CLASS OPTIONS
+# ====================================================================================================
+geo_coarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
+geo_coarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
+geo_coarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
+geo_coarsener.box1_lvl    = 0            # up to this level
+geo_coarsener.box1_inv    = false        # Remove except inside box (true)
+
+# ====================================================================================================
+# ROD_PLANE_PROFILE_PROFILE CLASS OPTIONS
+#
+# This class described a rod-plane geometry with holes on the dielectric plane. The plane_point
+# argument determines the point on the plane (oriented along the y axis), and acts as a reference
+# for where the "holes" are placed.
+#
+# Arguments 'profile_num_left' and 'profile_num_right' sets the number of holes to the left and right
+# of this point. You can shift the holes vertically with 'profile_yshift', and increase the distance
+# between the holes with 'profile_dist'. The 'profile_xshift' argument shifts all holes to the left
+# or right along the x-axis. The 'profile_curv' arguments sets the radius of curvature. Use the sub-
+# settings to select which profile you want. 
+# ====================================================================================================
+rod_plane_profile.turn_on_rod       = true          # Turn on/off electrode
+rod_plane_profile.turn_on_plane     = true          # Turn on/off dielectric
+rod_plane_profile.rod_live          = true          # Live electrode or not
+rod_plane_profile.rod_radius        = 500E-6        # Electrode inner radius
+rod_plane_profile.rod_center1       = 0.0 1E-2      # Center 1
+rod_plane_profile.rod_center2       = 0.0 1.0       # Center 2
+rod_plane_profile.plane_width       = 7.2E-2        # Plane width. 
+rod_plane_profile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 
+rod_plane_profile.plane_point       = 0.0 5E-3      # Center point on plane
+rod_plane_profile.plane_eps         = 4.0           # Plane permittivity
+rod_plane_profile.profile_num_left  = 30            # Number of holes to the left
+rod_plane_profile.profile_num_right = 30            # Number of holes to the left
+rod_plane_profile.profile_dist      = 1.28E-3       # Distance between each hole
+rod_plane_profile.profile_xshift    = 0.0           # Horizontal offset
+rod_plane_profile.profile_yshift    = 0.0           # Vertical offset
+rod_plane_profile.profile_curv      = 100E-6        # Rounding radius
+
+# Shape set. Can use 'circle' or 'square' for now. 
+rod_plane_profile.profile       = square
+
+# Circle specific settings
+rod_plane_profile.circle_radius = 1.031E-3
+
+# Square specific settings
+rod_plane_profile.square_width = 640.0123123E-6
+rod_plane_profile.square_depth = 440.01231231E-6
+
+# ====================================================================================================
+# POISSON_STEPPER CLASS OPTIONS
+# ====================================================================================================
+poisson_stepper.verbosity    = -1              # Verbosity
+poisson_stepper.realm        = primal          # Primal realm
+poisson_stepper.load_balance = true            # Load balance or not.
+poisson_stepper.box_sorting  = morton          # If you load balance you can redo the box sorting. 
+poisson_stepper.init_rho     = 0.0             # Space charge density
+poisson_stepper.init_sigma   = 0.0             # Surface charge density
+

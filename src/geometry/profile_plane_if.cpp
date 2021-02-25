@@ -29,6 +29,8 @@ profile_plane_if::profile_plane_if(const RealVect  a_point,
 				   const Real      a_curv,
 				   const bool      a_fluidInside){
 
+  m_fluidInside = a_fluidInside;
+  
   const RealVect xhat  = BASISREALV(0);
   const RealVect yhat  = BASISREALV(1);
 
@@ -40,6 +42,8 @@ profile_plane_if::profile_plane_if(const RealVect  a_point,
   const RealVect hi = point + 0.5*a_width*xhat;
   BaseIF* box = (BaseIF*) (new rounded_box_if(lo, hi, a_curv, false)); // Construct base box with fluid outside. 
   parts.push_back(box);
+
+
 
   // Left profile holes
   for (int ileft = 0; ileft < a_num_left; ileft++){
@@ -65,7 +69,8 @@ profile_plane_if::profile_plane_if(const RealVect  a_point,
 }
 
 profile_plane_if::profile_plane_if(const profile_plane_if& a_inputIF){
-  m_baseif = a_inputIF.m_baseif;
+  m_fluidInside = a_inputIF.m_fluidInside;
+  m_baseif      = a_inputIF.m_baseif;
 }
 
 profile_plane_if::~profile_plane_if(){
