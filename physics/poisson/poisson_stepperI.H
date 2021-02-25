@@ -28,7 +28,29 @@ namespace physics {
       m_verbosity = -1;
 
       ParmParse pp("poisson_stepper");
-      pp.get("realm", m_realm);
+
+      std::string str;
+
+      pp.get("load_balance", m_load_balance);
+      pp.get("box_sorting", str);
+      pp.get("realm",       m_realm);
+      pp.get("verbosity",   m_verbosity);
+      
+      if( str == "none"){
+	m_boxsort = box_sorting::none;
+      }
+      if( str == "std"){
+	m_boxsort = box_sorting::std;
+      }
+      else if(str == "shuffle"){
+	m_boxsort = box_sorting::shuffle;
+      }
+      else if(str == "morton"){
+	m_boxsort = box_sorting::morton;
+      }
+      else {
+	MayDay::Abort("poisson_stepper::poisson_stepper - unknown box sorting method requested for argument 'box_sorting'");
+      }
 
     }
 
@@ -39,14 +61,9 @@ namespace physics {
 
     template <class T>
     void poisson_stepper<T>::setup_solvers(){
-      int verb;
-      ParmParse pp("poisson_stepper");
-      pp.get("verbosity", verb);
-      pp.get("load_balance", m_load_balance);
-      
       // Poisson setup
       m_poisson = RefCountedPtr<poisson_solver> (new T());
-      m_poisson->set_verbosity(verb);
+      m_poisson->set_verbosity(m_verbosity);
       m_poisson->parse_options();
       m_poisson->set_amr(m_amr);
       m_poisson->set_computational_geometry(m_compgeom);
@@ -55,7 +72,7 @@ namespace physics {
 
       // Setup sigma
       m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
-      m_sigma->set_verbosity(verb);
+      m_sigma->set_verbosity(m_verbosity);
       m_sigma->set_amr(m_amr);
       m_sigma->set_computational_geometry(m_compgeom);
       m_sigma->set_realm(m_realm);
@@ -238,7 +255,7 @@ namespace physics {
 	  a_boxes[lvl] = dit.getBoxes();
 
 	  // Do the desired sorting
-	  load_balance::sort(a_boxes[lvl], loads, box_sorting::morton);
+	  load_balance::sort(a_boxes[lvl], loads, m_boxsort);
 	  UnLongLongLoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
 	}
       }

@@ -2169,3 +2169,7 @@ std::vector<std::string> amr_mesh::get_realms() const {
 
   return realms;
 }
+
+box_sorting amr_mesh::get_box_sorting() const{
+  return m_boxsort;
+}

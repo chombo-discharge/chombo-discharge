@@ -816,6 +816,11 @@ public:
     @brief Get the name of all realms
   */
   virtual std::vector<std::string> get_realms() const;
+
+  /*!
+    @brief Get box sorting method
+  */
+  virtual box_sorting get_box_sorting() const;
   
 protected:
 

@@ -73,6 +73,7 @@ namespace physics {
     protected:
 
       bool m_load_balance;
+      box_sorting m_boxsort;
 
       RefCountedPtr<poisson_solver> m_poisson;
       RefCountedPtr<sigma_solver>   m_sigma;
