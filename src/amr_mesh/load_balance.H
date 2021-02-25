@@ -60,6 +60,11 @@ public:
   static void make_balance(Vector<int>& a_levelRanks, const Vector<Box>& a_levelBoxes);
 
   /*!
+    @brief Round robin distribution of boxes
+  */
+  static void round_robin(Vector<int>& a_ranks, const Vector<Box>& a_boxes);
+
+  /*!
     @brief Main sorting function for sorting boxes and loads
     @details This just calls the other version. 
   */

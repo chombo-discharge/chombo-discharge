@@ -256,7 +256,15 @@ namespace physics {
 
 	  // Do the desired sorting
 	  load_balance::sort(a_boxes[lvl], loads, m_boxsort);
-	  UnLongLongLoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
+
+	  // Bah - need long long for LoadBalance
+	  Vector<long long> lloads(loads.size());
+	  for (int i = 0; i < loads.size(); i++){
+	    lloads[i] = (long long) loads[i];
+	  }
+	  
+	  // Do the friggin load balancing. 
+	  load_balance::make_balance(a_procs[lvl], lloads, a_boxes[lvl]);
 	}
       }
     }

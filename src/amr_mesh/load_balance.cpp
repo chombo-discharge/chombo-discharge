@@ -12,6 +12,17 @@ void load_balance::make_balance(Vector<int>& a_levelRanks, const Vector<Box>& a_
   LoadBalance(a_levelRanks, a_levelBoxes);
 }
 
+void load_balance::round_robin(Vector<int>& a_ranks, const Vector<Box>& a_boxes){
+
+  const int nProcs = numProc();
+  const int nBoxes = a_boxes.size();
+
+  a_ranks.resize(nBoxes);
+  for (int ibox = 0; ibox < nBoxes; ibox++){
+    a_ranks[ibox] = ibox % nProcs;
+  }
+}
+
 void load_balance::sort(Vector<Box>& a_boxes, const box_sorting a_which){
   Vector<int> dummy(a_boxes.size(), 0);
 
@@ -199,3 +210,5 @@ int load_balance::maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::
   bits++;
   return bits;
 }
+
+
