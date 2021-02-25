@@ -84,7 +84,7 @@ mechanical_shaft::mechanical_shaft(){
 #else // Test code
     const Real majorRadius = 1E-2;
     const Real minorRadius = 5E-3;
-    const Real curv = 1E-3;
+    const Real curv = 2E-3;
     const RealVect center1(-2E-2, -2E-2, 1E-2);
     const RealVect center2(2E-2, 2E-2, 3E-2);
     RefCountedPtr<BaseIF> electrode = RefCountedPtr<BaseIF> (new hollow_cylinder_if(center1, center2, majorRadius, minorRadius, curv, false));

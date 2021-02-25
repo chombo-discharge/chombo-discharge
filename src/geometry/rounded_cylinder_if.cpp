@@ -21,7 +21,6 @@ rounded_cylinder_if::rounded_cylinder_if(const RealVect a_center1, const RealVec
   m_curv         = a_curv;
   m_fluidInside  = a_fluidInside;
 
-
   this->makeBaseIF();
 }
 
@@ -33,7 +32,7 @@ rounded_cylinder_if::rounded_cylinder_if(const rounded_cylinder_if& a_inputIF){
 Real rounded_cylinder_if::value(const RealVect& a_point) const {
   Real retval = m_baseif->value(a_point);
 
-  if(!m_fluidInside){
+  if(m_fluidInside){
     retval = -retval;
   }
   
@@ -79,6 +78,8 @@ void rounded_cylinder_if::makeBaseIF3D(){
   BaseIF* torusBottom = (BaseIF*) (new TorusIF(majorRadius, minorRadius, y0, false));
   BaseIF* torusTop    = (BaseIF*) (new TorusIF(majorRadius, minorRadius, y1, false));
 
+  //  std::cout << mainCylinder->value(BASISREALV(1)) << std::endl;
+  //  std::cout << torusBottom->value(BASISREALV(1)) << std::endl;
 
   // Make the intersection of these
   Vector<BaseIF*> parts;
@@ -95,7 +96,7 @@ void rounded_cylinder_if::makeBaseIF3D(){
   transif->translate(m_center1);
 
   // Ok, we're done. 
-  m_baseif = RefCountedPtr<BaseIF> ((BaseIF*) transif);
+  m_baseif = RefCountedPtr<BaseIF> (transif);
 }
 #endif
 
