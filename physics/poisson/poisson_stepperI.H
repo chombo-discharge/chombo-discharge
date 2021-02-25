@@ -238,7 +238,7 @@ namespace physics {
 	  a_boxes[lvl] = dit.getBoxes();
 
 	  // Do the desired sorting
-	  load_balance::sort(a_boxes[lvl], loads, box_sorting::shuffle);
+	  load_balance::sort(a_boxes[lvl], loads, box_sorting::morton);
 	  UnLongLongLoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
 	}
       }

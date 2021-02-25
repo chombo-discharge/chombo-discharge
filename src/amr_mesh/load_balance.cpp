@@ -176,3 +176,26 @@ void load_balance::gather_boxes_and_loads(Vector<Box>& a_boxes, Vector<int>& a_l
   load_balance::gather_boxes(a_boxes);
   load_balance::gather_loads(a_loads);
 }
+
+int load_balance::maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last){
+  int maxSize = 0;
+  for (std::vector<Box>::iterator p= a_first; p<a_last; ++p)
+    {
+      IntVect small = p->smallEnd();
+      D_EXPR6( maxSize = Max(maxSize, Abs(small[0])),
+               maxSize = Max(maxSize, Abs(small[1])),
+               maxSize = Max(maxSize, Abs(small[2])),
+               maxSize = Max(maxSize, Abs(small[3])),
+               maxSize = Max(maxSize, Abs(small[4])),
+               maxSize = Max(maxSize, Abs(small[5])));
+    }
+  int bits;
+  for (bits=8*sizeof(int)-2; bits>0; bits--)
+    {
+      const int N = (1<<bits);
+      int rem = maxSize/N;
+      if (rem > 0) break;
+    }
+  bits++;
+  return bits;
+}

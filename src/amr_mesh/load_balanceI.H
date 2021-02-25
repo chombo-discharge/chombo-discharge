@@ -10,6 +10,8 @@
 
 #include "load_balance.H"
 
+#include "BoxLayout.H"
+
 #include <algorithm>
 #include <random>
 #include <chrono>
@@ -81,7 +83,7 @@ void load_balance::hierarchy(Vector<Vector<int> >&       a_procs,
 }
 
 template <class T>
-std::vector<std::pair<Box, T> > load_balance::makeVectorPair(Vector<Box>& a_boxes, Vector<T>& a_loads){
+std::vector<std::pair<Box, T> > load_balance::packPairs(Vector<Box>& a_boxes, Vector<T>& a_loads){
   
   std::vector<std::pair<Box, T> > vec;
   for (int i = 0; i < a_boxes.size(); i++){
@@ -92,7 +94,7 @@ std::vector<std::pair<Box, T> > load_balance::makeVectorPair(Vector<Box>& a_boxe
 }
 
 template <class T>
-void load_balance::splitVectorPair(Vector<Box>& a_boxes, Vector<T>& a_loads, const std::vector<std::pair<Box, T> >& a_pairs){
+void load_balance::unpackPairs(Vector<Box>& a_boxes, Vector<T>& a_loads, const std::vector<std::pair<Box, T> >& a_pairs){
 
   // Reconstruct boxes and loads
   a_boxes.resize(0);
@@ -126,7 +128,7 @@ void load_balance::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const box_sort
 
 template <class T>
 void load_balance::std_sort(Vector<Box>& a_boxes, Vector<T>& a_loads){
-  std::vector<std::pair<Box, T> > vec = makeVectorPair(a_boxes, a_loads);
+  std::vector<std::pair<Box, T> > vec = packPairs(a_boxes, a_loads);
 
   // Call std::sort, using box1 < box2 lambda as sorting criterion. 
   std::sort(std::begin(vec),
@@ -137,12 +139,12 @@ void load_balance::std_sort(Vector<Box>& a_boxes, Vector<T>& a_loads){
 	      return v1.first < v2.first;
 	    });
 
-  splitVectorPair(a_boxes, a_loads, vec);
+  unpackPairs(a_boxes, a_loads, vec);
 }
 
 template <class T>
 void load_balance::shuffle_sort(Vector<Box>& a_boxes, Vector<T>& a_loads){
-  auto vec = makeVectorPair(a_boxes, a_loads);
+  auto vec = packPairs(a_boxes, a_loads);
 
   // Set up RNG
   int seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -156,12 +158,49 @@ void load_balance::shuffle_sort(Vector<Box>& a_boxes, Vector<T>& a_loads){
 
   // Split boxes and loads
 
-  splitVectorPair(a_boxes, a_loads, vec);
+  unpackPairs(a_boxes, a_loads, vec);
 }
 
 template <class T>
 void load_balance::morton_sort(Vector<Box>& a_boxes, Vector<T>& a_loads){
-  MayDay::Abort("load_balance::morton_sort(boxes, loads) - not implemented");
+  auto vec = packPairs(a_boxes, a_loads);
+  
+  // Get max bits
+  std::vector<Box>& b = a_boxes.stdVector();
+  int bits = maxBits(b.begin(), b.end());
+
+  // Morton sort that motherfucker. 
+  std::sort(std::begin(vec),
+	    std::end(vec),
+	    [bits](const std::pair<Box, T>& v1,
+		   const std::pair<Box, T>& v2) -> bool {
+
+	      return mortonComparator(bits, v1, v2);
+	    });
+
+  // Put back in normal form
+  unpackPairs(a_boxes, a_loads, vec);
+}
+
+template <class T>
+bool load_balance::mortonComparator(const int a_maxBits, const std::pair<Box,T>& a_lhs, const std::pair<Box, T>& a_rhs){
+  
+  const Box& lbox = a_lhs.first;
+  const Box& rbox = a_rhs.first;
+
+  const IntVect l = lbox.smallEnd();
+  const IntVect r = rbox.smallEnd();
+	      
+  for (int i = a_maxBits; i>0; i--){
+    const int N = (1<<i); // march from most significant bit to least.
+    
+    for (int dir=CH_SPACEDIM-1; dir>=0; dir--){
+      if      ((l[dir]/N) < (r[dir]/N)) return true;
+      else if ((l[dir]/N) > (r[dir]/N)) return false;
+    }
+  }
+	      
+  return false;
 }
 
 #endif

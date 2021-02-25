@@ -91,13 +91,13 @@ protected:
     @brief Make a vector pair
   */
   template <class T>
-  static std::vector<std::pair<Box, T> > makeVectorPair(Vector<Box>& a_boxes, Vector<T>& a_loads);
+  static std::vector<std::pair<Box, T> > packPairs(Vector<Box>& a_boxes, Vector<T>& a_loads);
 
   /*!
     @brief Splits vector pair
   */
   template <class T>
-  static void splitVectorPair(Vector<Box>& a_boxes, Vector<T>& a_loads, const std::vector<std::pair<Box, T> >& a_pairs);
+  static void unpackPairs(Vector<Box>& a_boxes, Vector<T>& a_loads, const std::vector<std::pair<Box, T> >& a_pairs);
 
   /*!
     @brief Standard box sorting, calls C++ std::sort
@@ -116,6 +116,18 @@ protected:
   */
   template <class T>
   static void morton_sort(Vector<Box>& a_boxes, Vector<T>& a_loads);
+
+  /*!
+    @brief Morton comparator
+  */
+  template <class T>
+  static bool mortonComparator(const int a_maxBits, const std::pair<Box,T>& a_lhs, const std::pair<Box, T>& a_rhs);
+
+  /*!
+    @brief Get maximum bits
+  */
+  static int maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last);
+
 };
 
 #include "load_balanceI.H"
