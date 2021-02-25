@@ -1,7 +1,7 @@
 /*!
-  @file cylinder_if.H
-  @brief Declaration of a cylindrical implicit function
-  @date Nov. 2017
+  @file   cylinder_if.H
+  @brief  Declaration of a cylindrical implicit function
+  @date   Nov. 2017
   @author Robert Marskar
 */
 

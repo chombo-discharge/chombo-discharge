@@ -21,6 +21,7 @@
 #include "profile_cylinder_if.H"
 #include "polygon_rod_if.H"
 #include "hollow_cylinder_if.H"
+#include "rounded_cylinder_if.H"
 
 mechanical_shaft::mechanical_shaft(){
 #if CH_SPACEDIM == 2
@@ -73,12 +74,20 @@ mechanical_shaft::mechanical_shaft(){
 
   if(has_electrode){ // Define electrode
     m_electrodes.resize(1);
+#if 0 // Original code
     RefCountedPtr<BaseIF> electrode = RefCountedPtr<BaseIF> (new hollow_cylinder_if(electrode_inner_rad,
 										    electrode_outer_rad,
 										    electrode_height,
 										    corner_curv,
 										    electrode_center,
 										    0));
+#else // Test code
+    const Real radius = 1E-3;
+    const Real curv = 0.0;
+    const RealVect center1(-4E-2, -4E-2, 0.);
+    const RealVect center2(4E-2, 4E-2, 4E-2);
+    RefCountedPtr<BaseIF> electrode = RefCountedPtr<BaseIF> (new rounded_cylinder_if(center1, center2, radius, curv, false));
+#endif
     m_electrodes[0].define(electrode, electrode_live);
   }
 

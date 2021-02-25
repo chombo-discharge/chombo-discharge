@@ -8,6 +8,8 @@
 #include "hollow_cylinder_if.H"
 #include "hollow_cylinder_cross_sec_if.H"
 
+#include "rounded_cylinder_if.H"
+
 hollow_cylinder_if::hollow_cylinder_if(const Real&     a_innerRadius,
 				       const Real&     a_outerRadius,
 				       const Real&     a_height,
