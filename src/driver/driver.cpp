@@ -2402,17 +2402,21 @@ void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids(a_output.get_realm())[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(a_output.get_realm(), phase::gas)[lvl];
     const Real dx = m_amr->get_dx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
+      EBCellFAB& ebfab = (*a_output[lvl])[dit()];
       FArrayBox& fab = (*a_output[lvl])[dit()].getFArrayBox();
 
       fab.setVal(0.0, a_comp);
       fab.setVal(0.0, a_comp+1);
 
       //      const Box box = dbl.get(dit());
-      const Box box = fab.box();
+      const Box box          = fab.box();
+      const EBISBox& ebisbox = ebisl[dit()];
+      
 
       for (BoxIterator bit(box); bit.ok(); ++bit){
       	const IntVect iv = bit();
@@ -2424,6 +2428,18 @@ void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){
 	}
 	if(!lsf2.isNull()){
 	  fab(iv, a_comp + 1) = lsf2->value(pos);
+	}
+      }
+
+      VoFIterator& vofit = (*m_amr->get_vofit(m_realm, phase::gas)[lvl])[dit()];
+      for (vofit.reset(); vofit.ok(); ++ vofit){
+	const VolIndex& vof = vofit();
+	
+	const RealVect centroid = ebisbox.centroid(vof);
+	const RealVect pos      = prob_lo + RealVect(vof.gridIndex())*dx + dx*centroid;
+
+	if(!lsf1.isNull()){
+	  ebfab(vof, a_comp) = lsf1->value(pos);
 	}
       }
     }
