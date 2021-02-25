@@ -143,9 +143,5 @@ BaseIF* rod_plane_profile::getBaseIF_square(){
   const RealVect hi = point + 0.5*width*(BASISREALV(0) + BASISREALV(1));
 #endif
 
-#if 0 // Original code
-  return new box_if(lo, hi, true);
-#else
   return new rounded_box_if(lo, hi, curv, true);
-#endif
 }

@@ -24,10 +24,10 @@ public:
     @param[in] a_center1 Cylinder center (at center of sphere)
     @param[in] a_center2 Cylinder center (at center of sphere)
     @param[in] a_radius  Cylinder and sphere radius
-    @param[in] a_inside Domain on inside or outside
+    @param[in] a_fluidInside Domain on inside or outside
   */
 
-  rod_if(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_inside);
+  rod_if(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside);
 
   /*!
     @brief Copy constructor

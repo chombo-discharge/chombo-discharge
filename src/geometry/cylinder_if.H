@@ -21,9 +21,9 @@ public:
     @param[in] a_center1 Cylinder center
     @param[in] a_center2 Cylinder center
     @param[in] a_radius  Cylinder radius
-    @param[in] a_inside Domain on inside or outside
+    @param[in] a_inside  Domain on inside or outside
   */
-  cylinder_if(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_inside);
+  cylinder_if(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside);
 
   /*!
     @brief Copy constructor
@@ -67,6 +67,6 @@ protected:
   /*!
     @brief Inside or outside domain
   */
-  bool m_inside;
+  bool m_fluidInside;
 };
 #endif

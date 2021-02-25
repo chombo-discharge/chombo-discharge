@@ -16,7 +16,7 @@
 rod_if::rod_if(const RealVect& a_center1,
 	       const RealVect& a_center2,
 	       const Real&     a_radius,
-	       const bool&     a_inside){
+	       const bool&     a_fluidInside){
   
 
   const RealVect axis    = (a_center2 - a_center1);
@@ -28,13 +28,13 @@ rod_if::rod_if(const RealVect& a_center1,
 
   // Build the cylinder
   Vector<BaseIF*> isects;
-  isects.push_back(static_cast<BaseIF*> (new cylinder_if(c1, c2, a_radius, a_inside)));
+  isects.push_back(static_cast<BaseIF*> (new cylinder_if(c1, c2, a_radius, a_fluidInside)));
 #if 0
-  isects.push_back(static_cast<BaseIF*> (new SphereIF(a_radius, c1, a_inside)));
-  isects.push_back(static_cast<BaseIF*> (new SphereIF(a_radius, c2, a_inside)));
+  isects.push_back(static_cast<BaseIF*> (new SphereIF(a_radius, c1, a_fluidInside)));
+  isects.push_back(static_cast<BaseIF*> (new SphereIF(a_radius, c2, a_fluidInside)));
 #else
-  isects.push_back(static_cast<BaseIF*> (new new_sphere_if(c1, a_radius, a_inside)));
-  isects.push_back(static_cast<BaseIF*> (new new_sphere_if(c2, a_radius, a_inside)));
+  isects.push_back(static_cast<BaseIF*> (new new_sphere_if(c1, a_radius, a_fluidInside)));
+  isects.push_back(static_cast<BaseIF*> (new new_sphere_if(c2, a_radius, a_fluidInside)));
 #endif
 
   // Build the rod
@@ -47,7 +47,7 @@ rod_if::rod_if(const RealVect& a_center1,
 }
 
 rod_if::rod_if(const rod_if& a_inputIF){
-  this->m_baseif  = a_inputIF.m_baseif;
+  this->m_baseif = a_inputIF.m_baseif;
 }
 
 Real rod_if::value(const RealVect& a_point) const{
