@@ -8,8 +8,8 @@ mechanical_shaft.turn_on_dielectric        = true            # Turn on/off diele
 # Electrode settings
 --------------------
 mechanical_shaft.electrode.live            = true            # Live electrode or not
-mechanical_shaft.electrode.center1         = 0. 0. 3E-2      # First center
-mechanical_shaft.electrode.center2         = 0. 0. 5E-2      # First center	
+mechanical_shaft.electrode.center1         = 0. 0. 3E-2      # One   endpoint
+mechanical_shaft.electrode.center2         = 0. 0. 5E-2      # Other endpoint
 mechanical_shaft.electrode.inner_radius    = 7.E-3           # Electrode inner radius
 mechanical_shaft.electrode.outer_radius    = 1.E-2           # Electrode outer radius
 mechanical_shaft.electrode.curvature       = 1E-3            # Curvature
