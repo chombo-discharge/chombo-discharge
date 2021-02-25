@@ -327,21 +327,6 @@ public:
   virtual void build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap = -1);
 
   /*!
-    @brief Sort boxes
-  */
-  virtual void sort_boxes(Vector<Box>& a_boxes, const box_sorting a_which);
-
-  /*!
-    @brief C++ standard box sort
-  */
-  virtual void std_sort_boxes(Vector<Box>& a_boxes);
-
-  /*!
-    @brief Random shuffle boxes
-  */
-  virtual void shuffle_boxes(Vector<Box>& a_boxes);
-
-  /*!
     @brief Interpolate ghost vectors over a realm
   */
   virtual void interp_ghost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
@@ -1021,11 +1006,6 @@ protected:
     @brief Level resolutions
   */
   Vector<Real> m_dx;
-
-  /*!
-    @brief Load balance grids
-  */
-  virtual void loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& a_boxes);
 
   /*!
     @brief Define realms

@@ -889,9 +889,9 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
     m_finest_level = 0;
   }
 
-  // Morton order the boxes. 
+  // Morton order the boxes.
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    this->sort_boxes(new_boxes[lvl], m_boxsort);
+    load_balance::sort(new_boxes[lvl], m_boxsort);
   }
 
   // Load balance boxes with patch volume as load proxy. 
@@ -923,79 +923,6 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
   }
 
   m_has_grids = true;
-}
-
-void amr_mesh::sort_boxes(Vector<Box>& a_boxes, const box_sorting a_which){
-  CH_TIME("amr_mesh::sort_boxes");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::sort_boxes" << endl;
-  }
-
-  switch(a_which){
-  case box_sorting::none:
-    break;
-  case box_sorting::std:
-    this->std_sort_boxes(a_boxes);
-    break;
-  case box_sorting::shuffle:
-    this->shuffle_boxes(a_boxes);
-    break;
-  case box_sorting::morton:
-    mortonOrdering(a_boxes);
-    break;
-  default:
-    MayDay::Abort("amr_mesh::sort_boxes - unknown algorithm requested");
-    break;
-  }
-}
-
-void amr_mesh::std_sort_boxes(Vector<Box>& a_boxes){
-  CH_TIME("amr_mesh::std_sort_boxes");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::std_sort_boxes" << endl;
-  }
-
-  a_boxes.sort();
-}
-
-void amr_mesh::shuffle_boxes(Vector<Box>& a_boxes){
-  CH_TIME("amr_mesh::shuffle_boxes");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::shuffle_boxes" << endl;
-  }
-
-  // Can't shuffle Vector, but can shuffle std::vector<T>, yay. 
-  std::vector<Box> boxes;
-  for (int i = 0; i < a_boxes.size(); i++){
-    boxes.emplace_back(a_boxes[i]);
-  }
-  a_boxes.resize(0);
-  
-  // obtain a time-based seed:
-  int seed = std::chrono::system_clock::now().time_since_epoch().count();
-
-#ifdef CH_MPI // Broadcast
-  MPI_Bcast(&seed, 1, MPI_INT, 0, Chombo_MPI::comm);
-#endif
-  
-  std::default_random_engine e(seed);
-  std::shuffle(boxes.begin(), boxes.end(), e);
-
-  for (const auto& box : boxes){
-    a_boxes.push_back(box);
-  }
-}
-
-void amr_mesh::loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& a_boxes){
-  CH_TIME("amr_mesh::loadbalance");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::loadbalance" << endl;
-  }
-
-  // Level-by-level load balancing. This might change in the future. 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    load_balance::make_balance(a_procs[lvl], a_boxes[lvl]);
-  }
 }
 
 void amr_mesh::compute_gradient(LevelData<EBCellFAB>&       a_gradient,
