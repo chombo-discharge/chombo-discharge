@@ -89,7 +89,7 @@ void rounded_cylinder_if::makeBaseIF3D(){
   // Do a transform
   TransformIF* transif = new TransformIF(*isect);
 
-  if(m_center2[2] > m_center1[2]){
+  if(m_center2[2] >= m_center1[2]){
     transif->rotate(BASISREALV(2), m_center2-m_center1);
     transif->translate(m_center1);
   }
