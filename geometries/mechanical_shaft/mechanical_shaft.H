@@ -18,6 +18,15 @@ public:
 
   mechanical_shaft();
   ~mechanical_shaft();
+
+protected:
+
+  void define_electrode();
+  void define_dielectric();
+  
+  RefCountedPtr<BaseIF> get_polygon();
+  RefCountedPtr<BaseIF> get_cylinder();
+  RefCountedPtr<BaseIF> get_cylinder_profile();
 };
 
 #endif

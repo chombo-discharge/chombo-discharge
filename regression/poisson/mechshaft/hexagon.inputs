@@ -103,25 +103,54 @@ geo_coarsener.box1_lvl    = 0            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
+# POISSON_STEPPER CLASS OPTIONS
+# ====================================================================================================
+poisson_stepper.verbosity    = -1              # Verbosity
+poisson_stepper.realm        = primal          # Primal realm
+poisson_stepper.load_balance = false           # Load balance or not.
+poisson_stepper.box_sorting  = morton          # If you load balance you can redo the box sorting. 
+poisson_stepper.init_rho     = 0.0             # Space charge density
+poisson_stepper.init_sigma   = 0.0             # Surface charge density
+
+# ====================================================================================================
 # MECHANICAL_SHAFT CLASS OPTIONS
 # ====================================================================================================
 mechanical_shaft.eps0                      = 1               # Background permittivity
-mechanical_shaft.corner_curvatures         = 250E-6          # Corner curvatures
-mechanical_shaft.turn_off_electrode        = false           # Turn on/off electrode
-mechanical_shaft.turn_off_dielectric       = true            # Turn on/off dielectric
-mechanical_shaft.electrode_live            = true            # Live electrode or not
-mechanical_shaft.electrode_inner_radius    = 7.E-3           # Electrode inner radius
-mechanical_shaft.electrode_outer_radius    = 1.E-2           # Electrode outer radius
-mechanical_shaft.electrode_height          = 1.E-2           # Electrode height
-mechanical_shaft.electrode_center          = 0.0 0.0 0.0     # Electrode center
-mechanical_shaft.shaft_shape               = polygon         # 'polygon', 'cylinder', or 'cyl_profile'
-mechanical_shaft.dielectric_permittivity   = 4.0             # Dielectric permittivity
-mechanical_shaft.dielectric_rod_sides      = 6               # Number of sides for polygon shape
-mechanical_shaft.dielectric_rod_radius     = 5E-3            # Dielectric rod radius
-mechanical_shaft.dielectric_rod_length     = 1.0             # Dielectric rod length
+mechanical_shaft.turn_on_electrode         = true            # Turn on/off electrode
+mechanical_shaft.turn_on_dielectric        = false           # Turn on/off dielectric
 
-# Options for the profile cylinder shaft shape
-# --------------------------------------------
+# Electrode settings
+--------------------
+mechanical_shaft.electrode.live            = true            # Live electrode or not
+mechanical_shaft.electrode.center1         = 0. 0. 3E-2      # First center
+mechanical_shaft.electrode.center2         = 0. 0. 5E-2      # First center	
+mechanical_shaft.electrode.inner_radius    = 7.E-3           # Electrode inner radius
+mechanical_shaft.electrode.outer_radius    = 1.E-2           # Electrode outer radius
+mechanical_shaft.electrode.curvature       = 1E-3            # Curvature
+
+# Mechshaft settings
+--------------------
+mechanical_shaft.dielectric.shaft_shape    = polygon         # 'polygon', 'cylinder', or 'cyl_profile'
+mechanical_shaft.dielectric.permittivity   = 4.0             # Dielectric permittivity
+
+# Subsettings for polygonal cross section
+-----------------------------------------
+mechanical_shaft.dielectric.polygon.center1    = 0. 0. -1E-2    # Endpoint 1
+mechanical_shaft.dielectric.polygon.center2    = 0. 0.  5E-2    # Endpoint 2
+mechanical_shaft.dielectric.polygon.num_sides  = 6              # Number of sides for polygon shape. 
+mechanical_shaft.dielectric.polygon.radius     = 5E-3           # Dielectric rod radius
+mechanical_shaft.dielectric.polygon.curvature  = 1E-3           # Rounding radius
+mechanical_shaft.dielectric.polygon.length     = 1.0            # Dielectric rod length. Should be deprecated
+
+# Subsettings for 'cylinder'
+----------------------------
+mechanical_shaft.dielectric.cylinder.center1    = 0. 0. -1E-2    # Endpoint 1
+mechanical_shaft.dielectric.cylinder.center2    = 0. 0.  5E-2    # Endpoint 2
+mechanical_shaft.dielectric.cylinder.radius     = 5E-3           # Cylinder radius
+mechanical_shaft.dielectric.cylinder.curvature  = 1E-3           # Rounding radius
+
+# Subsettings for 'cyl_profile'
+-------------------------------
 mechanical_shaft.cylprofile_center         = 0.0 0.0 0.0
 mechanical_shaft.cylprofile_nleft          = 10
 mechanical_shaft.cylprofile_nright         = 10
@@ -131,13 +160,5 @@ mechanical_shaft.cylprofile_shift          = 0.0
 mechanical_shaft.cylprofile_dist           = 0.0
 mechanical_shaft.cylprofile_curv           = 0.0	
 
-# ====================================================================================================
-# POISSON_STEPPER CLASS OPTIONS
-# ====================================================================================================
-poisson_stepper.verbosity    = -1              # Verbosity
-poisson_stepper.realm        = primal          # Primal realm
-poisson_stepper.load_balance = false           # Load balance or not.
-poisson_stepper.box_sorting  = morton          # If you load balance you can redo the box sorting. 
-poisson_stepper.init_rho     = 0.0             # Space charge density
-poisson_stepper.init_sigma   = 0.0             # Surface charge density
+
 
