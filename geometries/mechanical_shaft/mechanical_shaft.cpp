@@ -82,11 +82,12 @@ mechanical_shaft::mechanical_shaft(){
 										    electrode_center,
 										    0));
 #else // Test code
-    const Real radius = 1E-3;
-    const Real curv = 0.0;
-    const RealVect center1(-4E-2, -4E-2, 0.);
-    const RealVect center2(4E-2, 4E-2, 4E-2);
-    RefCountedPtr<BaseIF> electrode = RefCountedPtr<BaseIF> (new rounded_cylinder_if(center1, center2, radius, curv, false));
+    const Real majorRadius = 1E-2;
+    const Real minorRadius = 5E-3;
+    const Real curv = 1E-3;
+    const RealVect center1(-2E-2, -2E-2, 1E-2);
+    const RealVect center2(2E-2, 2E-2, 3E-2);
+    RefCountedPtr<BaseIF> electrode = RefCountedPtr<BaseIF> (new hollow_cylinder_if(center1, center2, majorRadius, minorRadius, curv, false));
 #endif
     m_electrodes[0].define(electrode, electrode_live);
   }

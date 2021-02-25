@@ -26,15 +26,22 @@ rounded_cylinder_if::rounded_cylinder_if(const RealVect a_center1, const RealVec
 }
 
 rounded_cylinder_if::rounded_cylinder_if(const rounded_cylinder_if& a_inputIF){
+  m_fluidInside = a_inputIF.m_fluidInside;
   m_baseif      = a_inputIF.m_baseif;
 }
 
 Real rounded_cylinder_if::value(const RealVect& a_point) const {
-  return m_baseif->value(a_point);
+  Real retval = m_baseif->value(a_point);
+
+  if(!m_fluidInside){
+    retval = -retval;
+  }
+  
+  return retval;
 }
 
 BaseIF* rounded_cylinder_if::newImplicitFunction() const{
-  return static_cast<BaseIF*> (new rounded_cylinder_if(*this));
+  return (BaseIF*) (new rounded_cylinder_if(*this));
 }
 
 void rounded_cylinder_if::makeBaseIF(){
@@ -66,11 +73,11 @@ void rounded_cylinder_if::makeBaseIF3D(){
   const Real majorRadius = m_radius - m_curv;
   const Real minorRadius = m_curv;
 
-  BaseIF* mainCylinder   = (BaseIF*) (new cylinder_if(y0, y1, m_radius,        m_fluidInside));
-  BaseIF* insideCylinder = (BaseIF*) (new cylinder_if(x0, x1, m_radius-m_curv, m_fluidInside));
+  BaseIF* mainCylinder   = (BaseIF*) (new cylinder_if(y0, y1, m_radius,        false));
+  BaseIF* insideCylinder = (BaseIF*) (new cylinder_if(x0, x1, m_radius-m_curv, false));
 
-  BaseIF* torusBottom = (BaseIF*) (new TorusIF(majorRadius, minorRadius, y0, m_fluidInside));
-  BaseIF* torusTop    = (BaseIF*) (new TorusIF(majorRadius, minorRadius, y1, m_fluidInside));
+  BaseIF* torusBottom = (BaseIF*) (new TorusIF(majorRadius, minorRadius, y0, false));
+  BaseIF* torusTop    = (BaseIF*) (new TorusIF(majorRadius, minorRadius, y1, false));
 
 
   // Make the intersection of these
