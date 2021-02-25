@@ -116,7 +116,7 @@ poisson_stepper.init_sigma   = 0.0             # Surface charge density
 # MECHANICAL_SHAFT CLASS OPTIONS
 # ====================================================================================================
 mechanical_shaft.eps0                      = 1               # Background permittivity
-mechanical_shaft.turn_on_electrode         = false           # Turn on/off electrode
+mechanical_shaft.turn_on_electrode         = true           # Turn on/off electrode
 mechanical_shaft.turn_on_dielectric        = true            # Turn on/off dielectric
 
 # Electrode settings
@@ -144,8 +144,8 @@ mechanical_shaft.dielectric.polygon.length     = 1.0            # Dielectric rod
 
 # Subsettings for 'cylinder'
 ----------------------------
-mechanical_shaft.dielectric.cylinder.center1    = 0. 0. -1E-2    # Endpoint 1
-mechanical_shaft.dielectric.cylinder.center2    = 0. 0.  5E-2    # Endpoint 2
+mechanical_shaft.dielectric.cylinder.center1    = 0. 0. 1E-2    # Endpoint 1
+mechanical_shaft.dielectric.cylinder.center2    = 0. 0. 3E-2    # Endpoint 2
 mechanical_shaft.dielectric.cylinder.radius     = 5E-3           # Cylinder radius
 mechanical_shaft.dielectric.cylinder.curvature  = 1E-3           # Rounding radius
 

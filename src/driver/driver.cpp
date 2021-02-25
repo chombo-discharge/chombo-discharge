@@ -2421,7 +2421,7 @@ void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){
       for (BoxIterator bit(box); bit.ok(); ++bit){
       	const IntVect iv = bit();
 	
-      	const RealVect pos = prob_lo + RealVect(iv)*dx;
+      	const RealVect pos = prob_lo + (RealVect(iv)+ 0.5*RealVect::Unit)*dx;
 
 	if(!lsf1.isNull()){
 	  fab(iv, a_comp) = lsf1->value(pos);
@@ -2436,7 +2436,7 @@ void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){
 	const VolIndex& vof = vofit();
 	
 	const RealVect centroid = ebisbox.centroid(vof);
-	const RealVect pos      = prob_lo + RealVect(vof.gridIndex())*dx + dx*centroid;
+	const RealVect pos      = prob_lo + RealVect(vof.gridIndex())*dx + 0.5*RealVect::Unit*dx + centroid*dx;
 
 	if(!lsf1.isNull()){
 	  ebfab(vof, a_comp) = lsf1->value(pos);
