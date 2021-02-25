@@ -45,14 +45,29 @@ public:
 protected:
 
   /*!
-    @brief Cylinder center
+    @brief One end poitn
   */
-  RealVect m_center1;
+  RealVect m_endPoint1;
 
   /*!
-    @brief Cylinder center
+    @brief The other end point. 
   */
-  RealVect m_center2;
+  RealVect m_endPoint2;
+
+  /*!
+    @brief Top
+  */
+  RealVect m_top;
+
+  /*!
+    @brief Top
+  */
+  RealVect m_axis;
+
+  /*!
+    @brief Center
+  */
+  RealVect m_center;
 
   /*!
     @brief Cylinder length
@@ -68,5 +83,7 @@ protected:
     @brief Inside or outside domain
   */
   bool m_fluidInside;
+
+    
 };
 #endif
