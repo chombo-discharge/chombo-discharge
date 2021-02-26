@@ -41,57 +41,21 @@ polygon_rod_if::polygon_rod_if(const RealVect a_endPoint1,
   const RealVect zhat = RealVect(D_DECL(0., 0., 1.0));
   
   // Add the "sides" of the cylinder. 
-  Vector<BaseIF*> sides;
+  Vector<BaseIF*> planes;
   for (int iside = 0; iside < a_numSides; iside++){
     const Real theta = iside*dTheta;
-    const RealVect n = RealVect(D_DECL(cos(theta + 0.5*dTheta),sin(theta+0.5*dTheta),0));
-    const RealVect p = R*RealVect(D_DECL(cos(theta), sin(theta), 0.));
+    const RealVect n =   RealVect(D_DECL(cos(theta + 0.5*dTheta),sin(theta+0.5*dTheta), 0));
+    const RealVect p = R*RealVect(D_DECL(cos(theta),             sin(theta),            0.));
 
-    sides.push_back(static_cast<BaseIF*> (new PlaneIF(-n, p, a_fluidInside)));
+    planes.push_back(static_cast<BaseIF*> (new PlaneIF(-n, p, a_fluidInside)));
   }
 
-  // Planes that cut the rod above and below and thus define the length of it. 
-  const RealVect point = length*zhat;
-  sides.push_back((BaseIF*) (new PlaneIF(-zhat, length*zhat,    a_fluidInside)));
-  sides.push_back((BaseIF*) (new PlaneIF( zhat, RealVect::Zero, a_fluidInside)));
+  // Add cuts above/below.
+  planes.push_back((BaseIF*) (new PlaneIF(-zhat, length*zhat,    a_fluidInside)));
+  planes.push_back((BaseIF*) (new PlaneIF( zhat, RealVect::Zero, a_fluidInside)));
 
-  // Cut polygon rod corners with planes. This is for removing a part of the sharp corner; we will add a cylinder for smoothing later. 
-  Vector<BaseIF*> cut_sides;
-  for (int iside = 0; iside < a_numSides; iside++){
-    const Real theta = iside*dTheta; // Plane angle
-    const RealVect n = RealVect(D_DECL(cos(theta), sin(theta), 0.));
-    const RealVect p = n*(c + b*r);
-    cut_sides.push_back(static_cast<BaseIF*> (new PlaneIF(-n, p, a_fluidInside)));
-  }
-
-  // Add cylinders for rounding them
-  Vector<BaseIF*> corners;
-  for (int iside = 0; iside < a_numSides; iside++){
-    const Real theta  = iside*dTheta;
-    const RealVect n  = RealVect(D_DECL(cos(theta), sin(theta), 0.));
-    const RealVect p  = c*n;
-    const RealVect c1 = p;
-    const RealVect c2 = p + length*zhat;
-
-    corners.push_back(static_cast<BaseIF*> (new cylinder_if(c1, c2, r, a_fluidInside)));
-  }
-
-  // Now make the base rod, which has sharp corners, and the geometry defined by cutting the sides. 
-  BaseIF* baserod = static_cast<BaseIF*> (new UnionIF(sides));      // Rod without rounded edges. 
-  BaseIF* cutgeom = static_cast<BaseIF*> (new UnionIF(cut_sides));  // Planes that cut corners of rod.
-  
-  // Cut rod at its corners
-  Vector<BaseIF*> parts;
-  parts.push_back(baserod);
-  parts.push_back(cutgeom);
-  BaseIF* cutrod = (BaseIF*) new UnionIF(parts);
-
-  // Add in cylinders on corners
-  corners.push_back(cutrod);
-
-
-  // Make the rod
-  BaseIF* isect = (BaseIF*) new IntersectionIF(corners);
+  // Make a smooth union of those planes.
+  BaseIF* isect = (BaseIF*) new SmoothUnion(planes, a_cornerCurv);
 
   // Do a transform, translating the rod into its specified place. 
   TransformIF* transif = new TransformIF(*isect);
@@ -105,16 +69,12 @@ polygon_rod_if::polygon_rod_if(const RealVect a_endPoint1,
     transif->translate(a_endPoint2);
   }
 
-
   // Ok, we're done. Set m_baseif and clear up memory. 
   m_baseif = RefCountedPtr<BaseIF> (transif);
 
-  for (int i = 0; i < sides.size(); i++){
-    delete sides[i];
+  for (int i = 0; i < planes.size(); i++) {
+    delete planes[i];
   }
-  for (int i = 0; i < parts.size(); i++){
-    delete parts[i];
-  }  
 }
 
 polygon_rod_if::polygon_rod_if(const int&  a_nsides,
