@@ -33,19 +33,6 @@ public:
 		 const int      a_numSides,
 		 const bool     a_fluidInside);
 
-  /*!
-    @brief Base constructor
-    @param[in] a_nsides Number of sides of polygon
-    @param[in] a_radius Rod radius
-    @param[in] a_length Rod length
-    @param[in] a_cornerCurv Rounding radius on corners
-    @param[in] a_inside Domain on inside (true) or outside (false)
-  */
-  polygon_rod_if(const int&  a_nsides,
-		 const Real& a_radius,
-		 const Real& a_length,
-		 const Real& a_cornerCurv,
-		 const bool& a_inside);
     
   /*!
     @brief Copy constructor
