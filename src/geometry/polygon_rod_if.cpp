@@ -54,7 +54,7 @@ polygon_rod_if::polygon_rod_if(const RealVect a_endPoint1,
   planes.push_back((BaseIF*) (new PlaneIF( zhat, RealVect::Zero, a_fluidInside)));
 
   // Make a smooth union of those planes.
-  BaseIF* isect = (BaseIF*) new SmoothUnion(planes, 2*a_cornerCurv);
+  BaseIF* isect = (BaseIF*) new SmoothUnion(planes, a_cornerCurv);
 
   // Do a transform, translating the rod into its specified place. 
   TransformIF* transif = new TransformIF(*isect);

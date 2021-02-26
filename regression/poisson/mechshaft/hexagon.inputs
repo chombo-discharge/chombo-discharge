@@ -5,7 +5,7 @@ amr_mesh.lo_corner       = -4E-2  -4E-2   0.0  # Low corner of problem domain
 amr_mesh.hi_corner       =  4E-2   4E-2   4E-2   # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64 32    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 3           # Maximum amr depth
+amr_mesh.max_amr_depth   = 2           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = -1          # Refine everything down to this level.
 amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
@@ -122,43 +122,43 @@ mechanical_shaft.turn_on_dielectric        = true            # Turn on/off diele
 # Electrode settings
 --------------------
 mechanical_shaft.electrode.live            = true            # Live electrode or not
-mechanical_shaft.electrode.center1         = 0E-3  0  3E-2   # First center
-mechanical_shaft.electrode.center2         = 0E-3  0  5E-2   # Other end point
+mechanical_shaft.electrode.endpoint1       = 0E-3  0  3E-2   # First center
+mechanical_shaft.electrode.endpoint2       = 0E-3  0  5E-2   # Other end point
 mechanical_shaft.electrode.inner_radius    = 7.E-3           # Electrode inner radius
 mechanical_shaft.electrode.outer_radius    = 1.E-2           # Electrode outer radius
 mechanical_shaft.electrode.curvature       = 1E-3            # Curvature
 
 # Mechshaft settings
 --------------------
-mechanical_shaft.dielectric.shaft_shape    = polygon         # 'polygon', 'cylinder', or 'cyl_profile'
+mechanical_shaft.dielectric.shaft_shape    = cyl_profile     # 'polygon', 'cylinder', or 'cyl_profile'
 mechanical_shaft.dielectric.permittivity   = 4.0             # Dielectric permittivity
 
 # Subsettings for polygonal cross section
 -----------------------------------------
-mechanical_shaft.dielectric.polygon.center2    = 0. 0. -1E-2    # Endpoint 1
-mechanical_shaft.dielectric.polygon.center1    = 0. 0.  5E-2    # Endpoint 2
+mechanical_shaft.dielectric.polygon.endpoint1  = 0. 0. -1E-2    # Endpoint 1
+mechanical_shaft.dielectric.polygon.endpoint2  = 0. 0.  5E-2    # Endpoint 2
 mechanical_shaft.dielectric.polygon.num_sides  = 6              # Number of sides for polygon shape. 
 mechanical_shaft.dielectric.polygon.radius     = 5E-3           # Dielectric rod radius
-mechanical_shaft.dielectric.polygon.curvature  = 1E-3           # Rounding radius
+mechanical_shaft.dielectric.polygon.curvature  = 100E-6         # Rounding radius
 mechanical_shaft.dielectric.polygon.length     = 1.0            # Dielectric rod length. Should be deprecated
 
 # Subsettings for 'cylinder'
 ----------------------------
-mechanical_shaft.dielectric.cylinder.center1    = 0. 0. 1E-2    # Endpoint 1
-mechanical_shaft.dielectric.cylinder.center2    = 0. 0. 3E-2    # Endpoint 2
-mechanical_shaft.dielectric.cylinder.radius     = 5E-3           # Cylinder radius
-mechanical_shaft.dielectric.cylinder.curvature  = 1E-3           # Rounding radius
+mechanical_shaft.dielectric.cylinder.endpoint1  = 0. 0. 1E-2    # Endpoint 1
+mechanical_shaft.dielectric.cylinder.endpoint2  = 0. 0. 3E-2    # Endpoint 2
+mechanical_shaft.dielectric.cylinder.radius     = 5E-3          # Cylinder radius
+mechanical_shaft.dielectric.cylinder.curvature  = 1E-3          # Rounding radius
 
 # Subsettings for 'cyl_profile'
 -------------------------------
-mechanical_shaft.cylprofile_center         = 0.0 0.0 0.0
-mechanical_shaft.cylprofile_nleft          = 10
-mechanical_shaft.cylprofile_nright         = 10
-mechanical_shaft.cylprofile_rad            = 300E-6,
-mechanical_shaft.cylprofile_offset         = 0.0
-mechanical_shaft.cylprofile_shift          = 0.0
-mechanical_shaft.cylprofile_dist           = 0.0
-mechanical_shaft.cylprofile_curv           = 0.0	
-
-
+mechanical_shaft.dielectric.cyl_profile.endpoint1       = 1E-2 1E-2 1E-2   # Endpoint 1
+mechanical_shaft.dielectric.cyl_profile.endpoint2       = 0 0 3E-2   # Endpoint 2
+mechanical_shaft.dielectric.cyl_profile.cylinder_radius = 5E-3       # Cylinder radius
+mechanical_shaft.dielectric.cyl_profile.torus_major     = 5E-3       # Major torus radius
+mechanical_shaft.dielectric.cyl_profile.torus_minor     = 500E-6     # Minor torus radius
+mechanical_shaft.dielectric.cyl_profile.torus_distance  = 3E-3       # Distance between each torus
+mechanical_shaft.dielectric.cyl_profile.nleft           = 5          # Number of toroids to the left of center
+mechanical_shaft.dielectric.cyl_profile.nright          = 5          # Number of toroids to the right of center
+mechanical_shaft.dielectric.cyl_profile.shift           = 0.0        # Toroid shift from center
+mechanical_shaft.dielectric.cyl_profile.curvature       = 500E-6     # Curvature
 
