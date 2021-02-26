@@ -198,7 +198,6 @@ RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder(){
   pp.getarr("center2", vec, 0, SpaceDim); c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
   return RefCountedPtr<BaseIF> (new rounded_cylinder_if(c1, c2, radius, curv, false));
-  //  return RefCountedPtr<BaseIF> (new cylinder_if(c1, c2, radius, false));
 }
 
 RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder_profile(){

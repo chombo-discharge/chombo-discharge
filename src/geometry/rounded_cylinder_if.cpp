@@ -12,6 +12,7 @@
 
 #include "cylinder_if.H"
 #include "rounded_cylinder_if.H"
+#include "torus_if.H"
 
 rounded_cylinder_if::rounded_cylinder_if(const RealVect a_center1, const RealVect a_center2, const Real a_radius, const Real a_curv, const bool a_fluidInside){
   m_center1      = a_center1;
@@ -75,8 +76,13 @@ void rounded_cylinder_if::makeBaseIF3D(){
   BaseIF* mainCylinder   = (BaseIF*) (new cylinder_if(y0, y1, m_radius,        false));
   BaseIF* insideCylinder = (BaseIF*) (new cylinder_if(x0, x1, m_radius-m_curv, false));
 
+#if 0 // Original code
   BaseIF* torusBottom = (BaseIF*) (new TorusIF(majorRadius, minorRadius, y0, false));
   BaseIF* torusTop    = (BaseIF*) (new TorusIF(majorRadius, minorRadius, y1, false));
+#else // Use new Torus function. 
+  BaseIF* torusBottom = (BaseIF*) (new torus_if(y0, majorRadius, minorRadius, false));
+  BaseIF* torusTop    = (BaseIF*) (new torus_if(y1, majorRadius, minorRadius, false));
+#endif
 
   // Make the intersection of these
   Vector<BaseIF*> parts;
