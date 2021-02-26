@@ -46,7 +46,7 @@ polygon_rod_if::polygon_rod_if(const RealVect a_endPoint1,
     const RealVect n =   RealVect(D_DECL(cos(theta + 0.5*dTheta),sin(theta+0.5*dTheta), 0));
     const RealVect p = R*RealVect(D_DECL(cos(theta),             sin(theta),            0.));
 
-    planes.push_back(static_cast<BaseIF*> (new PlaneIF(-n, p, a_fluidInside)));
+    planes.push_back((BaseIF*) new PlaneIF(-n, p, a_fluidInside));
   }
 
   // Add cuts above/below.
@@ -54,7 +54,7 @@ polygon_rod_if::polygon_rod_if(const RealVect a_endPoint1,
   planes.push_back((BaseIF*) (new PlaneIF( zhat, RealVect::Zero, a_fluidInside)));
 
   // Make a smooth union of those planes.
-  BaseIF* isect = (BaseIF*) new SmoothUnion(planes, a_cornerCurv);
+  BaseIF* isect = (BaseIF*) new SmoothUnion(planes, 2*a_cornerCurv);
 
   // Do a transform, translating the rod into its specified place. 
   TransformIF* transif = new TransformIF(*isect);
