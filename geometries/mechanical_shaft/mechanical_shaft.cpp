@@ -178,8 +178,12 @@ RefCountedPtr<BaseIF> mechanical_shaft::get_polygon(){
 
   pp.getarr("center1", vec, 0, SpaceDim); c1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
   pp.getarr("center2", vec, 0, SpaceDim); c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-  
+
+#if 0 // Old code
   return RefCountedPtr<BaseIF> (new polygon_rod_if(numSides, radius, length, curv, false));
+#else // new code
+  return RefCountedPtr<BaseIF> (new polygon_rod_if(c1, c2, radius, curv, numSides, false));
+#endif
 }
 
 RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder(){

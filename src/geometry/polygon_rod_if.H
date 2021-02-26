@@ -19,6 +19,22 @@ public:
 
   /*!
     @brief Base constructor
+    @param[in] a_endPoint1  One endpoint
+    @param[in] a_endPoint2  Other endpoint
+    @param[in] a_length     Rod length
+    @param[in] a_cornerCurv Rounding radius on corners
+    @param[in] a_numSides   Number of sides
+    @param[in] a_inside Domain on inside (true) or outside (false)
+  */
+  polygon_rod_if(const RealVect a_center1,
+		 const RealVect a_center2,
+		 const Real     a_radius,
+		 const Real     a_cornerCurv,
+		 const int      a_numSides,
+		 const bool     a_fluidInside);
+
+  /*!
+    @brief Base constructor
     @param[in] a_nsides Number of sides of polygon
     @param[in] a_radius Rod radius
     @param[in] a_length Rod length
