@@ -261,11 +261,16 @@ void phase_realm::define_levelset(const int a_lmin){
 	FArrayBox& fab = (*m_levelset[lvl])[dit()];
 	const Box bx = fab.box();
 
-	for (BoxIterator bit(bx); bit.ok(); ++bit){
-	  const IntVect iv = bit();
-	  const RealVect pos = m_prob_lo + (0.5*RealVect::Unit + RealVect(iv))*dx;
+	if(!m_baseif.isNull()){
+	  for (BoxIterator bit(bx); bit.ok(); ++bit){
+	    const IntVect iv = bit();
+	    const RealVect pos = m_prob_lo + (0.5*RealVect::Unit + RealVect(iv))*dx;
 
-	  fab(iv, comp) = m_baseif->value(pos); 
+	    fab(iv, comp) = m_baseif->value(pos); 
+	  }
+	}
+	else{
+	  fab.setVal(-1.23456789, comp);
 	}
       }
     }

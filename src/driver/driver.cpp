@@ -2423,12 +2423,8 @@ void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){
 	
       	const RealVect pos = prob_lo + (RealVect(iv)+ 0.5*RealVect::Unit)*dx;
 
-	if(!lsf1.isNull()){
-	  fab(iv, a_comp) = lsf1->value(pos);
-	}
-	if(!lsf2.isNull()){
-	  fab(iv, a_comp + 1) = lsf2->value(pos);
-	}
+	if(!lsf1.isNull()) fab(iv, a_comp  ) = lsf1->value(pos);
+	if(!lsf2.isNull()) fab(iv, a_comp+1) = lsf2->value(pos);
       }
     }
   }
