@@ -366,6 +366,11 @@ public:
   virtual void set_mfis(const RefCountedPtr<mfis>& a_mfis);
 
   /*!
+    @brief Set implicit function
+  */
+  virtual void set_baseif(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseif);
+
+  /*!
     @brief Parse domain
   */
   virtual void parse_domain();
@@ -652,6 +657,11 @@ public:
   virtual int get_refinement_ratio(const int a_level1, const int a_level2);
 
   /*!
+    @brief Get implicit function
+  */
+  virtual const RefCountedPtr<BaseIF>& get_baseif(const phase::which_phase a_phase);
+
+  /*!
     @brief Get ALL irregular tags
   */
   virtual Vector<IntVectSet> get_irreg_tags() const;
@@ -701,6 +711,11 @@ public:
   */
   virtual Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors(const std::string a_realm,
 										   const phase::which_phase a_phase);
+
+  /*!
+    @brief Get levelset function
+  */
+  virtual EBAMRFAB& get_levelset(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the coarsening utility
@@ -821,6 +836,11 @@ protected:
     @brief These are all the realms
   */
   std::map<std::string, RefCountedPtr<realm> > m_realms;
+
+  /*!
+    @brief Implicit functions
+  */
+  std::map<phase::which_phase, RefCountedPtr<BaseIF> > m_baseif;
 
   /*!
     @brief Grid generation method

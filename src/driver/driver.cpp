@@ -1451,6 +1451,7 @@ void driver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
 
   m_amr = a_amr;
   m_amr->set_mfis(m_compgeom->get_mfis());
+
 }
 
 void driver::setup(const int a_init_regrids, const bool a_restart, const std::string a_restart_file){
@@ -1560,6 +1561,7 @@ void driver::setup_fresh(const int a_init_regrids){
 				 m_amr->get_prob_lo(),
 				 m_amr->get_finest_dx(),
 				 m_amr->get_max_ebis_box_size());
+
     if(m_write_ebis){
       this->write_ebis();        // Write EBIndexSpace's for later use
     }
@@ -1574,6 +1576,10 @@ void driver::setup_fresh(const int a_init_regrids){
   // Register realms
   m_timestepper->set_amr(m_amr);
   m_timestepper->register_realms();
+
+  // Set implicit functions now. 
+  m_amr->set_baseif(phase::gas,   m_compgeom->get_gas_if());
+  m_amr->set_baseif(phase::solid, m_compgeom->get_sol_if());
 
   // Get geometry tags
   this->get_geom_tags();

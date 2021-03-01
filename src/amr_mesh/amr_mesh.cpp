@@ -701,6 +701,15 @@ void amr_mesh::set_mfis(const RefCountedPtr<mfis>& a_mfis){
   m_mfis = a_mfis;
 }
 
+void amr_mesh::set_baseif(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseif){
+  CH_TIME("amr_mesh::set_baseif");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::set_baseif" << endl;
+  }
+
+  m_baseif.emplace(a_phase, a_baseif);
+}
+
 void amr_mesh::parse_domain(){
 
   std::string balance;
@@ -1807,6 +1816,10 @@ Vector<int>& amr_mesh::get_ref_rat(){
   return m_ref_ratios;
 }
 
+const RefCountedPtr<BaseIF>& amr_mesh::get_baseif(const phase::which_phase a_phase){
+  return m_baseif.at(a_phase);
+}
+
 Vector<IntVectSet> amr_mesh::get_irreg_tags() const {
   CH_TIME("amr_mesh::get_irreg_tags");
   if(m_verbosity > 5){
@@ -1871,6 +1884,10 @@ Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(const std::string a_real
 
 Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mflg(const std::string a_realm){
   return m_realms[a_realm]->get_mflg();
+}
+
+EBAMRFAB& amr_mesh::get_levelset(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->get_levelset(a_phase);
 }
 
 Vector<RefCountedPtr<ebcoarseaverage> >& amr_mesh::get_coarave(const std::string a_realm, const phase::which_phase a_phase){
@@ -2047,8 +2064,8 @@ void amr_mesh::define_realms(){
   }
 
   for (auto& r : m_realms){
-    r.second->define(m_grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
-		     m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
+    r.second->define(m_grids, m_domains, m_ref_ratios, m_dx, m_prob_lo, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
+		     m_ebcf, m_centroid_stencil, m_eb_stencil, m_baseif, m_mfis);
   }
 }
 
@@ -2081,8 +2098,8 @@ void amr_mesh::regrid_realm(const std::string           a_realm,
     grids[lvl].close();
   }
 
-  m_realms[a_realm]->define(grids, m_domains, m_ref_ratios, m_dx, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
-			    m_ebcf, m_centroid_stencil, m_eb_stencil, m_mfis);
+  m_realms[a_realm]->define(grids, m_domains, m_ref_ratios, m_dx, m_prob_lo, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
+			    m_ebcf, m_centroid_stencil, m_eb_stencil, m_baseif, m_mfis);
 
   m_realms[a_realm]->regrid_base(a_lmin);
 }

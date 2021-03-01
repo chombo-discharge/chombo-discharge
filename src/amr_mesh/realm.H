@@ -35,6 +35,7 @@ public:
 	      const Vector<ProblemDomain>& a_domains,
 	      const Vector<int>& a_ref_rat,
 	      const Vector<Real>& a_dx,
+	      const RealVect a_prob_lo,
 	      const int a_finest_level,
 	      const int a_ebghost,
 	      const int a_num_ghost,
@@ -42,6 +43,7 @@ public:
 	      const bool a_ebcf,
 	      const stencil_type a_centroid_stencil,
 	      const stencil_type a_eb_stencil,
+	      const std::map<phase::which_phase, RefCountedPtr<BaseIF> > a_baseif,
 	      const RefCountedPtr<mfis>& a_mfis);
 
   // realm copy function
@@ -53,14 +55,9 @@ public:
   void regrid_base(const int a_lmin);
   void regrid_operators(const int a_lmin, const int a_lmax, const int a_regsize);
 
-
   // Register and query operator
   void register_operator(const std::string a_operator, const phase::which_phase a_phase);
   bool query_operator(const std::string a_operator, const phase::which_phase a_phase);
-
-    // Register levelset
-  void register_levelset(const phase::which_phase a_phase);
-  void query_levelset(const phase::which_phase a_phase);
 
   // Register and query masks
   void register_mask(const std::string a_mask, const int a_buffer);
@@ -99,6 +96,8 @@ public:
   Vector<RefCountedPtr<Copier> >& get_copier(const phase::which_phase a_phase);
   Vector<RefCountedPtr<Copier> >& get_reverse_copier(const phase::which_phase a_phase);
 
+  EBAMRFAB& get_levelset(const phase::which_phase a_phase);
+
   AMRMask& get_mask(const std::string a_mask, const int a_buffer);
   
 protected:
@@ -107,22 +106,22 @@ protected:
   int m_verbosity;
   int m_finest_level;
 
+  RealVect m_prob_lo;
+
   Vector<Real> m_dx;
   Vector<int> m_ref_ratios;
   Vector<DisjointBoxLayout> m_grids;
   Vector<ProblemDomain> m_domains;
   Vector<RefCountedPtr<MFLevelGrid> > m_mflg;
   RefCountedPtr<mfis> m_mfis;
-  
+
+  // Phase realms and implicit functions
   std::map<phase::which_phase, RefCountedPtr<phase_realm> > m_realms;
+  std::map<phase::which_phase, RefCountedPtr<BaseIF> > m_baseif;
 
   // Map for checking which masks are present. 
   std::map<std::pair<std::string, int>, bool>    m_masks_map;
   std::map<std::pair<std::string, int>, AMRMask> m_masks;
-
-  // Map for checking which levelsets are present
-  std::map<phase::which_phase, bool>     m_lsf_map;
-  std::map<phase::which_phase, EBAMRFAB> m_lsf;
 
   void define_mflevelgrid(const int a_lmin);
 

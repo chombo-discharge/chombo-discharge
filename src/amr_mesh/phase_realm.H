@@ -49,6 +49,7 @@ static const std::string s_eb_redist       = "eb_redist";
 static const std::string s_eb_copier       = "eb_copier";
 static const std::string s_eb_ghostcloud   = "eb_ghostcloud";
 static const std::string s_eb_noncons_div  = "eb_non_cons_div";
+static const std::string s_levelset        = "levelset";
 
 /*!
   @brief Class that holds important things for an AMR phase_realm. I.e. grids, operators, etc. 
@@ -65,6 +66,7 @@ public:
 	      const Vector<ProblemDomain>& a_domains,
 	      const Vector<int>& a_ref_rat,
 	      const Vector<Real>& a_dx,
+	      const RealVect a_prob_lo,
 	      const int a_finest_level,
 	      const int a_ebghost,
 	      const int a_num_ghost,
@@ -72,6 +74,7 @@ public:
 	      const stencil_type a_centroid_stencil,
 	      const stencil_type a_eb_stencil,
 	      const bool a_ebcf,
+	      const RefCountedPtr<BaseIF>&       a_baseif,
 	      const RefCountedPtr<EBIndexSpace>& a_ebis);
 
   // Base and operator regrid
@@ -112,6 +115,7 @@ public:
   Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist();
   Vector<RefCountedPtr<Copier> >& get_copier();
   Vector<RefCountedPtr<Copier> >& get_reverse_copier();
+  EBAMRFAB& get_levelset();
   
 protected:
 
@@ -124,12 +128,14 @@ protected:
   int m_ebghost;
   int m_num_ghost;
   int m_redist_rad;
+  RealVect m_prob_lo;
   stencil_type m_centroid_stencil;
   stencil_type m_eb_stencil;
   Vector<Real> m_dx;
   Vector<int> m_ref_ratios;
 
   RefCountedPtr<EBIndexSpace> m_ebis;
+  RefCountedPtr<BaseIF> m_baseif;
 
   std::map<std::string, bool> m_operator_map; // Map that holds operators
 
@@ -152,6 +158,9 @@ protected:
   // Copiers
   Vector<RefCountedPtr<Copier> > m_copier;
   Vector<RefCountedPtr<Copier> > m_reverse_copier;
+
+  // Levelset
+  EBAMRFAB m_levelset;
 
   // Various operators
   Vector<RefCountedPtr<ebcoarseaverage> > m_coarave;
@@ -191,6 +200,7 @@ protected:
   void define_ghostcloud(const int a_lmin);                        // Make stencils for ghost clouds with particle depositions
   void define_irreg_sten();                                        // Make stencils for doing interpolation to centroids
   void define_noncons_sten();                                      // Make stencils for nonconservative averaging
+  void define_levelset(const int a_lmin);                          // Define levelset
 };
 
 #endif

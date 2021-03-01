@@ -32,6 +32,7 @@ void phase_realm::define(const Vector<DisjointBoxLayout>& a_grids,
 			 const Vector<ProblemDomain>& a_domains,
 			 const Vector<int>& a_ref_rat,
 			 const Vector<Real>& a_dx,
+			 const RealVect a_prob_lo,
 			 const int a_finest_level,
 			 const int a_ebghost,
 			 const int a_num_ghost,
@@ -39,6 +40,7 @@ void phase_realm::define(const Vector<DisjointBoxLayout>& a_grids,
 			 const stencil_type a_centroid_stencil,
 			 const stencil_type a_eb_stencil,
 			 const bool a_ebcf,
+			 const RefCountedPtr<BaseIF>&       a_baseif,
 			 const RefCountedPtr<EBIndexSpace>& a_ebis){
 
   m_ebis = a_ebis;
@@ -53,6 +55,8 @@ void phase_realm::define(const Vector<DisjointBoxLayout>& a_grids,
   m_redist_rad = a_redist_rad;
   m_centroid_stencil = a_centroid_stencil;
   m_eb_stencil = a_eb_stencil;
+  m_baseif = a_baseif;
+  m_prob_lo = a_prob_lo;
   
   if(!m_ebis.isNull()){
     m_defined = true;
@@ -103,6 +107,7 @@ void phase_realm::regrid_operators(const int a_lmin, const int a_lmax, const int
     this->define_noncons_sten();                  // Make stencils for nonconservative averaging
     this->define_copier(a_lmin);                  // Make stencils for copier
     this->define_ghostcloud(a_lmin);              // Make stencils for ghost clouds with particle depositions
+    this->define_levelset(a_lmin);                // Defining levelset
   }
 }
 
@@ -124,7 +129,8 @@ void phase_realm::register_operator(const std::string a_operator){
        a_operator.compare(s_eb_ghostcloud)   == 0 ||
        a_operator.compare(s_eb_gradient)     == 0 ||
        a_operator.compare(s_eb_irreg_interp) == 0 ||
-       a_operator.compare(s_eb_mg_interp)    == 0)){
+       a_operator.compare(s_eb_mg_interp)    == 0 ||
+       a_operator.compare(s_levelset)        == 0 )){
 
     const std::string str = "phase_realm::register_operator - unknown operator '" + a_operator + "' requested";
     MayDay::Abort(str.c_str());
@@ -135,7 +141,7 @@ void phase_realm::register_operator(const std::string a_operator){
   }
 }
 
-bool phase_realm::query_operator(const std::string a_operator){
+bool phase_realm::query_operator(const std::string a_operator) {
   CH_TIME("phase_realm::query_operator");
   if(m_verbosity > 5){
     pout() << "phase_realm::query_operator" << endl;
@@ -225,6 +231,41 @@ void phase_realm::define_neighbors(const int a_lmin){
 	  if(box.intersects(grownBox)){
 	    curNeighbors.push_back(lit());
 	  }
+	}
+      }
+    }
+  }
+}
+
+void phase_realm::define_levelset(const int a_lmin){
+  CH_TIME("phase_realm::define_levelset");
+  if(m_verbosity > 2){
+    pout() << "phase_realm::define_leveset" << endl;
+  }
+
+  const bool do_this_operator = this->query_operator(s_levelset);
+
+  m_levelset.resize(1 + m_finest_level);
+
+  if(do_this_operator){
+
+    const int comp  = 0;
+    const int ncomp = 1;
+
+    for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
+      const Real dx = m_dx[lvl];
+
+      m_levelset[lvl] = RefCountedPtr<LevelData<FArrayBox> > (new LevelData<FArrayBox>(m_grids[lvl], ncomp, m_num_ghost*IntVect::Unit));
+
+      for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit){
+	FArrayBox& fab = (*m_levelset[lvl])[dit()];
+	const Box bx = fab.box();
+
+	for (BoxIterator bit(bx); bit.ok(); ++bit){
+	  const IntVect iv = bit();
+	  const RealVect pos = m_prob_lo + (0.5*RealVect::Unit + RealVect(iv))*dx;
+
+	  fab(iv, comp) = m_baseif->value(pos); 
 	}
       }
     }
@@ -794,6 +835,13 @@ irreg_amr_stencil<noncons_div>& phase_realm::get_noncons_div_stencils() {
   
   return *m_noncons_div;
 }
+
+EBAMRFAB& phase_realm::get_levelset() {
+  if(!this->query_operator(s_levelset)) MayDay::Abort("phase_realm::get_levelset - operator not registered!");
+
+  return m_levelset;
+}
+
 Vector<RefCountedPtr<ebcoarseaverage> >& phase_realm::get_coarave() {
   if(!this->query_operator(s_eb_coar_ave)) MayDay::Abort("phase_realm::get_coarave - operator not registered!");
   

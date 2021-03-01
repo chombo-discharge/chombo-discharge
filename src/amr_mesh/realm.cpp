@@ -32,17 +32,19 @@ realm::~realm(){
 }
 
 void realm::define(const Vector<DisjointBoxLayout>& a_grids,
-		      const Vector<ProblemDomain>& a_domains,
-		      const Vector<int>& a_ref_rat,
-		      const Vector<Real>& a_dx,
-		      const int a_finest_level,
-		      const int a_ebghost,
-		      const int a_num_ghost,
-		      const int a_redist_rad,
-		      const bool a_ebcf,
-		      const stencil_type a_centroid_stencil,
-		      const stencil_type a_eb_stencil,
-		      const RefCountedPtr<mfis>& a_mfis){
+		   const Vector<ProblemDomain>& a_domains,
+		   const Vector<int>& a_ref_rat,
+		   const Vector<Real>& a_dx,
+		   const RealVect a_prob_lo,
+		   const int a_finest_level,
+		   const int a_ebghost,
+		   const int a_num_ghost,
+		   const int a_redist_rad,
+		   const bool a_ebcf,
+		   const stencil_type a_centroid_stencil,
+		   const stencil_type a_eb_stencil,
+		   const std::map<phase::which_phase, RefCountedPtr<BaseIF> > a_baseif,
+		   const RefCountedPtr<mfis>& a_mfis){
   CH_TIME("realm::define");
   if(m_verbosity > 5){
     pout() << "realm::define" << endl;
@@ -54,18 +56,22 @@ void realm::define(const Vector<DisjointBoxLayout>& a_grids,
   m_dx = a_dx;
   m_grids = a_grids;
   m_domains = a_domains;
+  m_baseif = a_baseif;
 
+  m_prob_lo = a_prob_lo;
   m_mfis = a_mfis;
   m_finest_level = a_finest_level;
   
   const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  m_realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, a_finest_level, a_ebghost, a_num_ghost, a_redist_rad,
-			       a_centroid_stencil, a_eb_stencil, a_ebcf, ebis_gas);
+  m_realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, m_prob_lo, a_finest_level, a_ebghost, a_num_ghost, a_redist_rad,
+			       a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::gas), ebis_gas);
 
-  m_realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, a_finest_level, a_ebghost, a_num_ghost, a_redist_rad,
-				 a_centroid_stencil, a_eb_stencil, a_ebcf, ebis_sol);
+  m_realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, m_prob_lo, a_finest_level, a_ebghost, a_num_ghost, a_redist_rad,
+				 a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::solid), ebis_sol);
+
+
 }
 
 void realm::set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level){
@@ -312,24 +318,6 @@ bool realm::query_operator(const std::string a_operator, const phase::which_phas
   return m_realms[a_phase]->query_operator(a_operator);
 }
 
-
-void realm::register_levelset(const phase::which_phase a_phase){
-  CH_TIME("realm::register_levelset");
-  if(m_verbosity > 5){
-    pout() << "realm::register_levelset" << endl;
-  }
-
-  //  m_masks.emplace(a_std::pair<string, int>(a_mask, a_buffer), AMRMask());
-}
-								
-
-void realm::query_levelset(const phase::which_phase a_phase){
-  CH_TIME("realm::query_levelset");
-  if(m_verbosity > 5){
-    pout() << "realm::query_levelset" << endl;
-  }
-}
-
 void realm::register_mask(const std::string a_mask, const int a_buffer){
   CH_TIME("realm::register_mask(mask, buffer)");
   if(m_verbosity > 5){
@@ -472,6 +460,10 @@ Vector<RefCountedPtr<Copier> >& realm::get_copier(const phase::which_phase a_pha
 
 Vector<RefCountedPtr<Copier> >& realm::get_reverse_copier(const phase::which_phase a_phase){
   return m_realms[a_phase]->get_reverse_copier();
+}
+
+EBAMRFAB& realm::get_levelset(const phase::which_phase a_phase) {
+  return m_realms[a_phase]->get_levelset();
 }
 
 AMRMask& realm::get_mask(const std::string a_mask, const int a_buffer){
