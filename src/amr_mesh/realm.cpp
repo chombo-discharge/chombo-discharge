@@ -312,6 +312,24 @@ bool realm::query_operator(const std::string a_operator, const phase::which_phas
   return m_realms[a_phase]->query_operator(a_operator);
 }
 
+
+void realm::register_levelset(const phase::which_phase a_phase){
+  CH_TIME("realm::register_levelset");
+  if(m_verbosity > 5){
+    pout() << "realm::register_levelset" << endl;
+  }
+
+  //  m_masks.emplace(a_std::pair<string, int>(a_mask, a_buffer), AMRMask());
+}
+								
+
+void realm::query_levelset(const phase::which_phase a_phase){
+  CH_TIME("realm::query_levelset");
+  if(m_verbosity > 5){
+    pout() << "realm::query_levelset" << endl;
+  }
+}
+
 void realm::register_mask(const std::string a_mask, const int a_buffer){
   CH_TIME("realm::register_mask(mask, buffer)");
   if(m_verbosity > 5){

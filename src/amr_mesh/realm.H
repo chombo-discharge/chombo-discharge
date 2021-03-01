@@ -58,6 +58,10 @@ public:
   void register_operator(const std::string a_operator, const phase::which_phase a_phase);
   bool query_operator(const std::string a_operator, const phase::which_phase a_phase);
 
+    // Register levelset
+  void register_levelset(const phase::which_phase a_phase);
+  void query_levelset(const phase::which_phase a_phase);
+
   // Register and query masks
   void register_mask(const std::string a_mask, const int a_buffer);
   bool query_mask(const std::string a_mask, const int a_buffer) const;
@@ -115,6 +119,10 @@ protected:
   // Map for checking which masks are present. 
   std::map<std::pair<std::string, int>, bool>    m_masks_map;
   std::map<std::pair<std::string, int>, AMRMask> m_masks;
+
+  // Map for checking which levelsets are present
+  std::map<phase::which_phase, bool>     m_lsf_map;
+  std::map<phase::which_phase, EBAMRFAB> m_lsf;
 
   void define_mflevelgrid(const int a_lmin);
 

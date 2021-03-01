@@ -118,6 +118,7 @@ template class EBAMRData<EBFaceFAB>;
 template class EBAMRData<BaseIVFAB<Real> >;
 template class EBAMRData<DomainFluxIFFAB>;
 template class EBAMRData<BaseFab<bool> >;
+template class EBAMRData<FArrayBox>;
 
 // Typedefs for simple typing.
 typedef EBAMRData<MFCellFAB>        MFAMRCellData;  // Cell-centered multifluid data
@@ -129,6 +130,7 @@ typedef EBAMRData<EBFaceFAB>        EBAMRFaceData;  // Face-centered in a single
 typedef EBAMRData<BaseIVFAB<Real> > EBAMRIVData;    // Data on irregular data centroids
 typedef EBAMRData<DomainFluxIFFAB>  EBAMRIFData;    // Data on domain phases
 typedef EBAMRData<BaseFab<bool> >   EBAMRBool;      // For holding bool at every cell
+typedef EBAMRData<FArrayBox>        EBAMRFAB;       // Just regular grid data. 
 
 #endif
 
