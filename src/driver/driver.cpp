@@ -1507,7 +1507,9 @@ void driver::setup_geometry_only(){
   const Real t1 = MPI_Wtime();
   if(procID() == 0) std::cout << "geotime = " << t1 - t0 << std::endl;
 
-
+  // Set implicit functions now. 
+  m_amr->set_baseif(phase::gas,   m_compgeom->get_gas_if());
+  m_amr->set_baseif(phase::solid, m_compgeom->get_sol_if());
 
   if(m_write_ebis){
     this->write_ebis();
@@ -2253,11 +2255,6 @@ void driver::write_plot_file(const std::string a_filename){
   if(!m_celltagger.isNull()){
     m_celltagger->write_plot_data(output, names, icomp);
   }
-
-  // Write internal data
-  names.append(this->get_plotvar_names());
-  this->write_plot_data(output, icomp);
-  t_assemble += MPI_Wtime();
 									       
   // Data file aliasing, because Chombo IO wants dumb pointers. 
   Vector<LevelData<EBCellFAB>* > output_ptr(1 + m_amr->get_finest_level());
@@ -2287,6 +2284,13 @@ void driver::write_plot_file(const std::string a_filename){
       m_amr->interp_ghost(fineAlias, coarAlias, lvl, m_realm, phase::gas);
     }
   }
+
+
+  // Write internal data
+  names.append(this->get_plotvar_names());
+  this->write_plot_data(output, icomp);
+  t_assemble += MPI_Wtime();
+
 
   // Write HDF5 file
   if(m_verbosity >= 3){
