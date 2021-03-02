@@ -185,7 +185,7 @@ bool stencil_ops::compute_interp_stencil_2D(VoFStencil&          a_stencil,
     const bool canInterpDir1 = (otherVoFsInDir1.size() > 0);
 
     // If we can only interpolate in one of the direction, return the 1D stencil along that direction. 
-    if(!canInterpDir0 && !canInterpDir1){
+    if(!canInterpDir0 && !canInterpDir1){ // This can happen if the EB cuts a domain "corner" and the normal points outwards. 
       a_stencil.clear();
       a_stencil.add(a_vof, 1.0);
 
@@ -507,11 +507,10 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
     found_stencil = compute_interp_stencil_2D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, noInterpDir);
   }
 
-  // This seriously should not happen but I'm leaving this in place in case there are cases I haven't thought of. 
+  // This can happen if the EB cuts a domain "corner" and the normal points outwards. This will cause the above code
+  // to try to reach out of the domain, but those cells are covered and we don't want to reach into them anyways since they can
+  // contain bogus data. 
   if(!found_stencil){
-#if DEBUG_STENCIL_OPS
-    MayDay::Warning("stencil_ops::compute_interp_stencil_3D - did not find stencil. Shouldn't happen, please check this code.");
-#endif
     a_stencil.clear();
     a_stencil.add(a_vof, 1.0);
 
