@@ -1,16 +1,20 @@
 # ====================================================================================================
 # COAXIAL_CABLE CLASS OPTIONS
+#
+# This is a coaxial cable class with outer and inner electrodes, and a dielectric.
+# Use coaxial_cable.endpoint1(2) to specify endpoints. Only endpoint1 is used in 2D. 
 # ====================================================================================================
-coaxial_cable.turn_off_outer      = false     # Turn off (true) outer electrode
-coaxial_cable.turn_off_dielectric = false     # Turn off (true) dielectric
-coaxial_cable.turn_off_inner      = false     # Turn off (true) inner electrode
-coaxial_cable.eps0                = 1         # Gas permittivity
-coaxial_cable.eps1                = 4         # Dielectric permittivity
-coaxial_cable.outer_radius        = 0.9       # Outer electrode radius
-coaxial_cable.dielectric_radius   = 0.6       # Dielectric radius
-coaxial_cable.inner_radius        = 0.3       # Inner electrode radius
-coaxial_cable.outer_center        = 0.0 0.0   # Outer electrode center
-coaxial_cable.dielectric_center   = 0.0 0.0   # Dielectric center
-coaxial_cable.inner_center        = 0.0 0.0   # Inner electrode center
-coaxial_cable.outer_live          = true      # Live (true) outer electrode
-coaxial_cable.inner_live          = false     # Live (true) outer electrode
+coaxial_cable.endpoint1           = -1 -1 -1  # One endpopint
+coaxial_cable.endpoint2           =  1  1  1  # Other endpoint
+
+coaxial_cable.outer.on            = true
+coaxial_cable.outer.radius        = 0.5
+coaxial_cable.outer.live          = true
+
+coaxial_cable.inner.on            = true
+coaxial_cable.inner.radius        = 0.5
+coaxial_cable.inner.live          = false
+
+coaxial_cable.dielectric.on       = true
+coaxial_cable.dielectric.radius   = 0.25
+coaxial_cable.dielectric.eps      = 4

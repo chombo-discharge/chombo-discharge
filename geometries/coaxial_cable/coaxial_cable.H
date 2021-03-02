@@ -2,7 +2,7 @@
   @file   coaxial_cable.H
   @brief  Coaxial cable geometry
   @author Robert Marskar
-  @date Nov. 2017
+  @date   Nov. 2017
 */
 
 #ifndef _COAXIAL_CABLE_
@@ -15,15 +15,7 @@
 */
 class coaxial_cable : public computational_geometry {
 public:
-
-  /*!
-    @brief Constructor. First sphere is the electrode. 
-  */
   coaxial_cable();
-
-  /*!
-    @brief Destructor
-  */
   ~coaxial_cable();
 };
 
