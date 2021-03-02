@@ -64,9 +64,8 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
     MayDay::Abort("centroid_interp::build_stencil - Unsupported stencil type");
   }
 
-
-
-  // If we couldn't find a stencil, look for stencils in this preferred order:
+  // If we couldn't find a stencil, just take the cell center to be the "interpolation". 
+#if 0
   if(!found_stencil){
     const RealVect centroid = a_ebisbox.centroid(a_vof);
     found_stencil = stencil_ops::get_linear_interp_stencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
@@ -77,6 +76,7 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
   if(!found_stencil){
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
+#endif
 
   if(!found_stencil){ // Drop to zeroth order. 
     a_sten.clear();
