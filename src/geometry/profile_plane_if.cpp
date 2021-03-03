@@ -28,7 +28,10 @@ profile_plane_if::profile_plane_if(const RealVect  a_point,
 				   const Real      a_yShift,
 				   const Real      a_curv,
 				   const bool      a_fluidInside){
-
+  if(SpaceDim==3){
+    MayDay::Abort("profile_plane_if - only 2D is currently supported");
+  }
+  
   m_fluidInside = a_fluidInside;
   
   const RealVect xhat  = BASISREALV(0);

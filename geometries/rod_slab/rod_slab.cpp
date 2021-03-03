@@ -15,6 +15,7 @@
 #include <BaseIF.H>
 #include <SphereIF.H>
 
+#include "perlin_slab_if.H"
 #include "rounded_box_if.H"
 #include "rod_if.H"
 #include "new_sphere_if.H"
