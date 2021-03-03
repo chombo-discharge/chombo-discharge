@@ -25,7 +25,7 @@ src_dirs = $(PLASMAC_HOME)/src \
 	$(PLASMAC_HOME)/src/global \
 	$(PLASMAC_HOME)/src/particle \
 	$(PLASMAC_HOME)/physics/geometry \
-	$(PLASMAC_HOME)/geometries/rod_slab\
+	$(PLASMAC_HOME)/geometries/rod_dielectric\
 
 
 include $(CHOMBO_HOME)/mk/Make.example

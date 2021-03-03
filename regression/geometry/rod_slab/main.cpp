@@ -1,5 +1,5 @@
 #include "driver.H"
-#include "rod_slab.H"
+#include "rod_dielectric.H"
 #include "geometry_stepper.H"
 #include "ParmParse.H"
 
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]){
   ParmParse pp(argc-2, argv+2, NULL, input_file);
 
   // Set geometry and AMR 
-  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_slab());
+  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_dielectric());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);
