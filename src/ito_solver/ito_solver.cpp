@@ -807,13 +807,7 @@ void ito_solver::intersect_particles_if(particle_container<ito_particle>& a_part
   const Real     SAFETY  = 1.E-6;
 
   // This is the implicit function used for intersection tests
-  RefCountedPtr<BaseIF> impfunc;
-  if(m_phase == phase::gas){
-    impfunc = m_compgeom->get_gas_if();
-  }
-  else{
-    impfunc = m_compgeom->get_sol_if();
-  }
+  const RefCountedPtr<BaseIF>& impfunc = m_amr->get_baseif(m_phase);
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     for (DataIterator dit = m_amr->get_grids(m_realm)[lvl]; dit.ok(); ++dit){
