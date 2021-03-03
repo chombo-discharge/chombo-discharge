@@ -10,40 +10,32 @@
 #include <ParmParse.H>
 
 electrode_array::electrode_array(){
-  if(SpaceDim != 3){
-    MayDay::Abort("electrode_array::electrode_array - this is a pure 3D geometry");
-  }
-  
-  m_electrodes.resize(0);
-  m_dielectrics.resize(0);
-
   ParmParse pp("electrode_array");
 
-  int ilive;
   bool live;
-  Vector<Real> a1, a2;
+  Vector<Real> v(SpaceDim);
   Real r, dx, dy;
   RealVect c1, c2;
   int nx, ny;
 
-  pp.get("live",    ilive);
+  pp.get("live",    live);
   pp.get("radius",  r);
   pp.get("delta_x", dx);
   pp.get("delta_x", dy);
   pp.get("num_x",   nx);
   pp.get("num_y",   ny);
-  pp.getarr("center1", a1, 0, SpaceDim);
-  pp.getarr("center2", a2, 0, SpaceDim);
+  
+  pp.getarr("endpoint1", v, 0, SpaceDim);  c1 = RealVect(D_DECL(v[0], v[1], v[2]));
+  pp.getarr("endpoint2", v, 0, SpaceDim);  c2 = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  live = (ilive == 0) ? false : true;
-  c1 = RealVect(D_DECL(a1[0], a1[1], a1[2]));
-  c2 = RealVect(D_DECL(a2[0], a2[1], a2[2]));
-
-
+#if CH_SPACEDIM==2 // Override in 2D. 
+  ny = 1;
+  dy = 0.0;
+#endif
   for (int ix = 0; ix < nx; ix++){
     for (int iy = 0; iy < ny; iy++){
-      const RealVect sx  = ix*dx*RealVect(BASISV(0));
-      const RealVect sy  = iy*dy*RealVect(BASISV(1));
+      const RealVect sx  = ix*dx*BASISREALV(0);
+      const RealVect sy  = iy*dy*BASISREALV(1);
       
       const RealVect ic1 = c1 + sx + sy;
       const RealVect ic2 = c2 + sx + sy;
