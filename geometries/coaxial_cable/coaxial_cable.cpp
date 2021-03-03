@@ -63,9 +63,9 @@ coaxial_cable::coaxial_cable(){
     ppInner.get("live",   live);
 
 #if CH_SPACEDIM==2
-    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new new_sphere_if(e1, rad, true));
+    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new new_sphere_if(e1, rad, false));
 #elif CH_SPACEDIM==3
-    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new cylinder_if(e1, e2, rad, true));
+    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new cylinder_if(e1, e2, rad, false));
 #endif
     m_electrodes.push_back(electrode(baseif, live));
   }
