@@ -58,53 +58,6 @@ mechanical_shaft::mechanical_shaft(){
   if(has_electrode)  this->define_electrode();
   if(has_dielectric) this->define_dielectric();
 
-#if 0    
-    m_dielectrics.resize(1);
-    RefCountedPtr<BaseIF> shaft;
-
-    if(shape == "polygon"){
-      shaft = RefCountedPtr<BaseIF> (new polygon_rod_if(dielectric_num_sides,
-							dielectric_radius,
-							dielectric_length,
-							corner_curv,
-							0));
-    }
-    else if(shape == "cylinder"){
-      const RealVect zhat = RealVect(BASISV(2));
-      shaft = RefCountedPtr<BaseIF> (new cylinder_if(electrode_center - 0.5*dielectric_length*zhat,
-						     electrode_center + 0.5*dielectric_length*zhat,
-						     dielectric_radius,
-						     false));
-						     
-    }
-    else if(shape == "cyl_profile"){
-      int nleft, nright;
-      Real rad, offset, shift, dist, curv;
-      pp.get("cylprofile_nleft", nleft);
-      pp.get("cylprofile_nright", nright);
-      pp.get("cylprofile_rad", rad);
-      pp.get("cylprofile_offset", offset);
-      pp.get("cylprofile_shift", shift);
-      pp.get("cylprofile_dist", dist);
-      pp.get("cylprofile_curv", curv);
-      shaft = RefCountedPtr<BaseIF> (new profile_cylinder_if(electrode_center,
-							     dielectric_length,
-							     dielectric_radius,
-							     nleft,
-							     nright,
-							     rad,
-							     offset,
-							     shift,
-							     dist, 
-							     curv,
-							     false));
-    }
-
-
-
-    m_dielectrics[0].define(shaft, dielectric_permittivity);
-#endif
-
   set_eps0(eps0);
 }
 
@@ -167,23 +120,18 @@ RefCountedPtr<BaseIF> mechanical_shaft::get_polygon(){
 
   int numSides;
   RealVect c1, c2;
-  Real radius, length, curv;
+  Real radius, curv;
 
   Vector<Real> vec;
 
   pp.get("num_sides", numSides);
   pp.get("radius",    radius);
   pp.get("curvature", curv);
-  pp.get("length",    length);
 
   pp.getarr("endpoint1", vec, 0, SpaceDim); c1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
   pp.getarr("endpoint2", vec, 0, SpaceDim); c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
-#if 0 // Old code
-  return RefCountedPtr<BaseIF> (new polygon_rod_if(numSides, radius, length, curv, false));
-#else // new code
   return RefCountedPtr<BaseIF> (new polygon_rod_if(c1, c2, radius, curv, numSides, false));
-#endif
 }
 
 RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder(){
