@@ -23,10 +23,9 @@ perlin_slab_if::perlin_slab_if(const RealVect a_ccPoint,
 			       const Real     a_cornerCurv,
 			       const bool     a_reseed,
 			       const bool     a_fluidInside){
+  m_fluidInside = a_fluidInside;
 
-  // By default, we make the slab such that the noisy side normal vector is along +z (+y in 2D). Then we
-  // rotate to a_normal
-
+  constexpr int up = CH_SPACEDIM-1;
 
   // Make a slab whose center is at zero and whose widths are given by a_xyz
   Vector<BaseIF*> parts;
@@ -34,27 +33,27 @@ perlin_slab_if::perlin_slab_if(const RealVect a_ccPoint,
     for (SideIterator sit; sit.ok(); ++sit){
       const int s      = sign(sit());
       const RealVect n = s*BASISREALV(dir);
-      const RealVect p = s*0.5*a_xyz[dir]*n;
+      const RealVect p = n*0.5*a_xyz[dir];
 
-      if(dir == SpaceDim && sit() == Side::Hi){
-	BaseIF* baseif = (BaseIF*) new perlin_plane_if(n, p, false, a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed);
+      if(dir == up && sit() == Side::Hi){
+	BaseIF* baseif = (BaseIF*) new perlin_plane_if(n, p, true, a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed);
 	parts.push_back(baseif);
       }
       else{
-	BaseIF* baseif = (BaseIF*) new PlaneIF(n, p, false);
+	BaseIF* baseif = (BaseIF*) new PlaneIF(n, p, true);
 	parts.push_back(baseif);
       }
     }
   }
 
-  // Make the smooth union
+  // Do rounded corners. 
   BaseIF* bif = (BaseIF*) new SmoothUnion(parts, a_cornerCurv);
 
-  // Rotate and translate into place
+  // // Rotate and translate into place
   TransformIF* tif = new TransformIF(*bif);
-  tif->translate(-BASISREALV(CH_SPACEDIM)*a_xyz[CH_SPACEDIM]); // Move so that "top" point is at RealVect::Zero. This is the rotation point
-  tif->rotate(BASISREALV(SpaceDim), a_normal);                 // Rotate so that +z/+y points along a_normal
-  tif->translate(a_ccPoint);                                   // Translate to point
+  tif->translate(-0.5*BASISREALV(up)*a_xyz[up]); // Move so that "top" point is at RealVect::Zero. This is the rotation point
+  tif->rotate(BASISREALV(up), a_normal);         // Rotate so that +z/+y points along a_normal
+  tif->translate(a_ccPoint);                     // Translate to point
 
   // Done. Delete the rest. 
   m_baseif = RefCountedPtr<BaseIF> (tif);

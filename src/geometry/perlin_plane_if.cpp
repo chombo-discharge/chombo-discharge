@@ -11,14 +11,14 @@
 #include <PlaneIF.H>
 #include <PolyGeom.H>
 
-perlin_plane_if::perlin_plane_if(const RealVect& a_normal,
-				 const RealVect& a_point,
-				 const bool&     a_inside,
-				 const Real&     a_noiseAmp,
-				 const RealVect& a_noiseFreq,
-				 const Real&     a_persistence,
-				 const int&      a_octaves,
-				 const bool&     a_reseed){
+perlin_plane_if::perlin_plane_if(const RealVect a_normal,
+				 const RealVect a_point,
+				 const bool     a_inside,
+				 const Real     a_noiseAmp,
+				 const RealVect a_noiseFreq,
+				 const Real     a_persistence,
+				 const int      a_octaves,
+				 const bool     a_reseed){
   
   // This is the maximum noise the Perlin will spit out
   Real amp = 0.0;

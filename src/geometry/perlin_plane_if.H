@@ -19,14 +19,14 @@ public:
   /*!
     @brief Constructor
   */
-  perlin_plane_if(const RealVect& a_normal,
-		  const RealVect& a_point,
-		  const bool&     a_inside,
-		  const Real&     a_noiseAmp,
-		  const RealVect& a_noiseFreq,
-		  const Real&     a_persistence,
-		  const int&      a_octaves,
-		  const bool&     a_reseed = false);
+  perlin_plane_if(const RealVect a_normal,
+		  const RealVect a_point,
+		  const bool     a_inside,
+		  const Real     a_noiseAmp,
+		  const RealVect a_noiseFreq,
+		  const Real     a_persistence,
+		  const int      a_octaves,
+		  const bool     a_reseed = false);
   /*!
     @brief Copy constructor
   */
