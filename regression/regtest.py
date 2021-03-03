@@ -14,7 +14,12 @@ if sys.version_info < MIN_PYTHON:
 # File holding regression tests, and the name of
 # this script
 # --------------------------------------------------
-tests_file       = "tests.ini"
+#tests_file       = "geometry.ini"
+#tests_file       = "poisson.ini"
+#tests_file       = "advection_diffusion.ini"
+#tests_file       = "cdr_plasma.ini"
+#tests_file       = "rte.ini"
+tests_file       = "ito.ini"
 
 # --------------------------------------------------
 # Set up arguments that can be passed into this

@@ -4,7 +4,7 @@
 amr_mesh.lo_corner       = -1 -1 -1    # Low corner of problem domain
 amr_mesh.hi_corner       =  1  1  1    # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
+amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
 amr_mesh.max_amr_depth   = 1           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = -1          # Refine everything down to this level.
@@ -16,7 +16,7 @@ amr_mesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
 amr_mesh.blocking_factor = 4           # Default blocking factor (16 in 3D)
 amr_mesh.max_box_size    = 16          # Maximum allowed box size
 amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
-amr_mesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
+amr_mesh.ref_rat         = 2 4 2 2 2 2 # Refinement ratios
 amr_mesh.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr_mesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr_mesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
@@ -28,7 +28,7 @@ amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be
 # ====================================================================================================
 # DRIVER OPTIONS
 # ====================================================================================================
-driver.verbosity                       = 20             # Engine verbosity
+driver.verbosity                       = 2             # Engine verbosity
 driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.plot_interval                   = 10            # Plot interval
@@ -52,7 +52,7 @@ driver.output_names                    = simulation    # Simulation output names
 driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
 driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
-driver.plt_vars                        = mpi_rank levelset  # 'tags', 'mpi_rank', 'levelset'
+driver.plt_vars                        = levelset mpi_rank             # 'tags', 'mpi_rank', 'levelset'
 driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 driver.allow_coarsening                = true          # Allows removal of grid levels according to cell_tagger
 driver.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
@@ -74,21 +74,26 @@ geo_coarsener.box1_lvl    = 0            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
-# ROD_PLANE CLASS OPTIONS
+# AEROSOL CLASS OPTIONS
+#
+# This class can add an arbitrary number of dielectric spheres, possibly roughy spheres. To use it,
+# you need to set 'num_spheres' to the number of spheres that you want. Each sphere needs a separate
+# radius and center. 
 # ====================================================================================================
-rod_plane.eps0                      = 1                                # Background permittivity
-rod_plane.turn_off_electrode        = false                            # Turn on/off electrode
-rod_plane.turn_off_dielectric       = false                            # Turn on/off dielectric
-rod_plane.electrode_live            = true                             # Live electrode or not
-rod_plane.electrode_radius          = 0.1                              # Electrode inner radius
-rod_plane.electrode_center1         = 0 0 0.5                          # Center 1
-rod_plane.electrode_center2         = 0 0 2.0                          # Center 2
-rod_plane.plane_permittivity        = 5.0                              # Dielectric permittivity
-rod_plane.plane_normal              = 0 0 1                            # Plane normal
-rod_plane.plane_point               = 0 0 -0.5                         # Plane point
-rod_plane.noise_amplitude           = 0.1                              # Noise amplitude
-rod_plane.noise_frequency           = 3 3 3                            # Noise frequency
-rod_plane.noise_persistence         = 0.5                              # Drop-off factor between each octave
-rod_plane.noise_octaves             = 2                                # Number of octaves to use for noise	
-rod_plane.noise_reseed              = false                            # Reseed the RNG
+aerosol.num_spheres       = 3              # Number of spheres
+aerosol.permittivity      = 5.0            # Dielectric permittivity, if the geometry is a dielectric		
+aerosol.eps0              = 1              # Permittivity
+aerosol.noise_amplitude   = 0.1            # Noise amplitude
+aerosol.noise_frequency   = 5. 5. 5.       # Noise frequency
+aerosol.noise_persistence = 0.5            # Noise persistence
+aerosol.noise_octaves     = 1              # Noise octaves
+aerosol.noise_reseed      = false          # Reseed noise
 
+aerosol.sphere1.radius    = 0.2            # Sphere radius
+aerosol.sphere1.center    = -0.5 -0.5 -0.5 # Sphere position
+
+aerosol.sphere2.radius    = 0.2            # Sphere radius
+aerosol.sphere2.center    = 0. 0. 0.       # Sphere center
+
+aerosol.sphere3.radius    = 0.2            # Sphere radius
+aerosol.sphere3.center    = 0.5 0.5 0.5    # Sphere center
