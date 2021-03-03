@@ -19,6 +19,7 @@ amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 amr_mesh.buffer_size     = 2           # Number of cells between grid levels
 amr_mesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+amr_mesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
 amr_mesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 amr_mesh.max_box_size    = 16          # Maximum allowed box size
 amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
@@ -178,6 +179,43 @@ rod_sphere.electrode_center2         = 0 1              # Center 2.
 rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
 rod_sphere.dielectric_center         = 0.0 0.0 0.0      # Dielectric center
 rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
+
+# ====================================================================================================
+# ROD_DIELECTRIC CLASS OPTIONS
+# ====================================================================================================
+rod_dielectric.electrode.on              = true          # Use electrode or not
+rod_dielectric.electrode.endpoint1       = 0 0           # One endpoint
+rod_dielectric.electrode.endpoint2       = 0 1           # Other endpoint
+rod_dielectric.electrode.radius          = 250E-6        # Electrode radius
+rod_dielectric.electrode.live            = true          # Live or not
+
+rod_dielectric.dielectric.on             = false         # Use dielectric or not
+rod_dielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'.
+rod_dielectric.dielectric.permittivity   = 4             # Dielectric permittivity
+
+# Subsettings for 'plane'
+rod_dielectric.plane.point               = 0 0 -0.5      # Plane point
+rod_dielectric.plane.normal              = 0 0 1         # Plane normal vector (outward)
+
+# Subsettings for 'box'
+rod_dielectric.box.lo_corner             = -.75 -.75 -.75 # Lo box corner
+rod_dielectric.box.hi_corner             =  .75  .75 -.25 # High box corner
+rod_dielectric.box.curvature             = 0.2
+
+# Subsettings for 'perlin_box'
+rod_dielectric.perlin_box.point          = 0  0 -0.5     # Slab center-point (side with roughness)
+rod_dielectric.perlin_box.normal         = 0  0  1       # Slab normal
+rod_dielectric.perlin_box.curvature      = 0.5           # Slab rounding radius
+rod_dielectric.perlin_box.dimensions     = 1  1  10      # Slab dimensions
+rod_dielectric.perlin_box.noise_amp      = 0.1           # Noise amplitude
+rod_dielectric.perlin_box.noise_octaves  = 1             # Noise octaves
+rod_dielectric.perlin_box.noise_persist  = 0.5           # Octave persistence
+rod_dielectric.perlin_box.noise_freq     = 5 5 5         # Noise frequency
+rod_dielectric.perlin_box.noise_reseed   = false         # Reseed noise or not
+
+# Subsettings for sphere
+rod_dielectric.sphere.center             = 0 0 -0.5      # Low corner
+rod_dielectric.sphere.radius             = 0.25          # Radius
 
 
 # ====================================================================================================
