@@ -13,6 +13,7 @@ amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 amr_mesh.buffer_size     = 2           # Number of cells between grid levels
 amr_mesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+amr_mesh.box_sorting     = morton      # Morton sorting
 amr_mesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 amr_mesh.max_box_size    = 16          # Maximum allowed box size
 amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
@@ -102,18 +103,21 @@ geo_coarsener.box1_lvl    = 0            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
-# ROD_SPHERE CLASS OPTIONS
+# ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
-rod_sphere.eps0                      = 1                # Background permittivity
-rod_sphere.turn_off_electrode        = true             # Turn on/off electrode
-rod_sphere.turn_off_dielectric       = false            # Turn on/off dielectric
-rod_sphere.electrode_live            = true             # Live electrode or not
-rod_sphere.electrode_radius          = 0.05             # Electrode inner radius
-rod_sphere.electrode_center1         = 0 0.5            # Center 1
-rod_sphere.electrode_center2         = 0 2.0            # Center 2. 
-rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
-rod_sphere.dielectric_center         = 0.0 0            # Dielectric center
-rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
+rod_dielectric.electrode.on              = false         # Use electrode or not
+rod_dielectric.electrode.endpoint1       = 0 0 0         # One endpoint
+rod_dielectric.electrode.endpoint2       = 0 0 2         # Other endpoint
+rod_dielectric.electrode.radius          = 0.1           # Electrode radius
+rod_dielectric.electrode.live            = true          # Live or not
+
+rod_dielectric.dielectric.on             = true          # Use dielectric or not
+rod_dielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'.
+rod_dielectric.dielectric.permittivity   = 4             # Dielectric permittivity
+
+# Subsettings for sphere
+rod_dielectric.sphere.center             = 0 0 0         # Sphere center
+rod_dielectric.sphere.radius             = 0.15          # Radius
 
 # ====================================================================================================
 # RTE_STEPPER CLASS OPTIONS

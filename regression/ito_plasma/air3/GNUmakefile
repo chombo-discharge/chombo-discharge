@@ -30,7 +30,7 @@ src_dirs = $(PLASMAC_HOME)/src \
 	$(PLASMAC_HOME)/src/poisson_solver \
 	$(PLASMAC_HOME)/src/rte_solver \
 	$(PLASMAC_HOME)/src/sigma_solver \
-	$(PLASMAC_HOME)/geometries/rod_sphere\
+	$(PLASMAC_HOME)/geometries/rod_dielectric\
 	$(PLASMAC_HOME)/physics/ito_plasma \
 	$(PLASMAC_HOME)/physics/ito_plasma/cell_taggers/ito_plasma_streamer_tagger\
 	$(PLASMAC_HOME)/physics/ito_plasma/time_steppers/ito_plasma_godunov\
