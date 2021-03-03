@@ -1,7 +1,7 @@
 /*!
-  @file rounded_box_if.cpp
-  @brief Implementation of rounded_box_if.H
-  @date Nov. 2017
+  @file   rounded_box_if.cpp
+  @brief  Implementation of rounded_box_if.H
+  @date   March 2021
   @author Robert Marskar
 */
 
@@ -66,4 +66,3 @@ Real rounded_box_if::value(const RealVect& a_point) const{
 BaseIF* rounded_box_if::newImplicitFunction() const{
   return static_cast<BaseIF*> (new rounded_box_if(*this));
 }
-

@@ -4,8 +4,8 @@
 amr_mesh.lo_corner       = -1 -1 -1    # Low corner of problem domain
 amr_mesh.hi_corner       =  1  1  1    # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 4           # Maximum amr depth
+amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
+amr_mesh.max_amr_depth   = 1           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = -1          # Refine everything down to this level.
 amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
@@ -13,10 +13,10 @@ amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 amr_mesh.buffer_size     = 2           # Number of cells between grid levels
 amr_mesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 amr_mesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
-amr_mesh.blocking_factor = 4           # Default blocking factor (16 in 3D)
+amr_mesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 amr_mesh.max_box_size    = 16          # Maximum allowed box size
 amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
-amr_mesh.ref_rat         = 2 4 2 4 2 2 # Refinement ratios
+amr_mesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
 amr_mesh.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr_mesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr_mesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
@@ -74,27 +74,6 @@ geo_coarsener.box1_lvl    = 0            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
-# ROD_SLAB CLASS OPTIONS
-# ====================================================================================================
-rod_slab.electrode.on              = true                # Use electrode or not
-rod_slab.electrode.endpoint1       = 0 2                 # One endpoint
-rod_slab.electrode.endpoint2       = 0 0.5               # Other endpoint
-rod_slab.electrode.radius          = 0.1                 # Electrode radius
-rod_slab.electrode.live            = true                # Live or not
-
-rod_slab.dielectric.on             = true                # Use slab or not
-rod_slab.dielectric.eps            = 4                   # Slab permittivity
-rod_slab.dielectric.point          = 0 -0.5              # Slab point
-rod_slab.dielectric.normal         = 0  1                # Slab normal
-rod_slab.dielectric.curvature      = 0.5                 # Slab rounding radius
-rod_slab.dielectric.dimensions     = 1  1                # Slab dimensions
-rod_slab.dielectric.noise_amp      = 0.1                 # Noise amplitude
-rod_slab.dielectric.noise_octaves  = 3                   # Noise octaves
-rod_slab.dielectric.noise_persist  = 0.5                 # Octave persistence
-rod_slab.dielectric.noise_freq     = 5 5                 # Noise frequency
-rod_slab.dielectric.noise_reseed   = false               # Reseed noise or not
-
-# ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
 rod_dielectric.electrode.on              = true          # Use electrode or not
@@ -104,30 +83,29 @@ rod_dielectric.electrode.radius          = 0.1           # Electrode radius
 rod_dielectric.electrode.live            = true          # Live or not
 
 rod_dielectric.dielectric.on             = true          # Use dielectric or not
-rod_dielectric.dielectric.shape          = perlin_box    # 'plane', 'box', 'perlin_box', 'sphere', 'wedge'
+rod_dielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'.
 rod_dielectric.dielectric.permittivity   = 4             # Dielectric permittivity
 
 # Subsettings for 'plane'
-rod_dielectric.plane.point               = 0 0 0         # Plane point
+rod_dielectric.plane.point               = 0 0 -0.5      # Plane point
 rod_dielectric.plane.normal              = 0 0 1         # Plane normal vector (outward)
 
 # Subsettings for 'box'
-rod_dielectric.box.lo_corner             = 0 0 0         # Low corner
-rod_dielectric.box.hi_corner             = 1 1 1         # Hi corner
-rod_dielectric.box.curvature             = 0.1
+rod_dielectric.box.lo_corner             = -.75 -.75 -.75 # Lo box corner
+rod_dielectric.box.hi_corner             =  .75  .75 -.25 # High box corner
+rod_dielectric.box.curvature             = 0.2
 
 # Subsettings for 'perlin_box'
-rod_dielectric.perlin_box.on             = true          # Use slab or not
 rod_dielectric.perlin_box.point          = 0  0 -0.5     # Slab center-point (side with roughness)
 rod_dielectric.perlin_box.normal         = 0  0  1       # Slab normal
-rod_dielectric.perlin_box.curvature      = 0.1           # Slab rounding radius
-rod_dielectric.perlin_box.dimensions     = 1  1  1       # Slab dimensions
+rod_dielectric.perlin_box.curvature      = 0.5           # Slab rounding radius
+rod_dielectric.perlin_box.dimensions     = 1  1  10      # Slab dimensions
 rod_dielectric.perlin_box.noise_amp      = 0.1           # Noise amplitude
 rod_dielectric.perlin_box.noise_octaves  = 1             # Noise octaves
 rod_dielectric.perlin_box.noise_persist  = 0.5           # Octave persistence
-rod_dielectric.perlin_box.noise_freq     = 1 1 1         # Noise frequency
+rod_dielectric.perlin_box.noise_freq     = 5 5 5         # Noise frequency
 rod_dielectric.perlin_box.noise_reseed   = false         # Reseed noise or not
 
 # Subsettings for sphere
-rod_dielectric.sphere.center             = 0 0 0         # Low corner
-rod_dielectric.sphere.radius             = 0.5           # Radius
+rod_dielectric.sphere.center             = 0 0 -0.5      # Low corner
+rod_dielectric.sphere.radius             = 0.25          # Radius

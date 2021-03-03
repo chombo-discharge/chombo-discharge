@@ -24,7 +24,7 @@ public:
     @param[in] a_loCorner            Upper right corner of the object
     @param[in] a_hiCorner            Lower left corner of the object
     @param[in] a_curvature           Radius of curvature on edges and corners
-    @param[in] a_fluidInside         Fluid on inside (true) or outside
+    @param[in] a_fluidInside         Fluid on inside (true) or outside (false)
   */
   rounded_box_if(const RealVect a_loCorner,
 		 const RealVect a_hiCorner,
@@ -34,7 +34,6 @@ public:
 
   /*!
     @brief Copy constructor
-    @param[in] a_inputIF Input hollow cylinder cross section
   */
   rounded_box_if(const rounded_box_if& a_inputIF);
 

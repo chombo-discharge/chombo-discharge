@@ -21,8 +21,6 @@ rod_dielectric.box.hi_corner             = 1 1 1         # Hi corner
 rod_dielectric.box.curvature             = 0.1
 
 # Subsettings for 'perlin_box'
-rod_dielectric.perlin_box.on             = true          # Use slab or not
-rod_dielectric.perlin_box.eps            = 4             # Slab permittivity
 rod_dielectric.perlin_box.point          = 0  0 -0.5     # Slab center-point (side with roughness)
 rod_dielectric.perlin_box.normal         = 0  0  1       # Slab normal
 rod_dielectric.perlin_box.curvature      = 0.1           # Slab rounding radius
