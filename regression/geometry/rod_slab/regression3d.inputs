@@ -91,9 +91,9 @@ rod_dielectric.plane.point               = 0 0 -0.5      # Plane point
 rod_dielectric.plane.normal              = 0 0 1         # Plane normal vector (outward)
 
 # Subsettings for 'box'
-rod_dielectric.box.lo_corner             = -.75 -.75 -.75  # Lo box corner
-rod_dielectric.box.hi_corner             =  .75  .75  0.25 # High box corner
-rod_dielectric.box.curvature             = 0.1
+rod_dielectric.box.lo_corner             = -.75 -.75 -.75 # Lo box corner
+rod_dielectric.box.hi_corner             =  .75  .75 -.25 # High box corner
+rod_dielectric.box.curvature             = 0.2
 
 # Subsettings for 'perlin_box'
 rod_dielectric.perlin_box.on             = true          # Use slab or not

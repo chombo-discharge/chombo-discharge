@@ -17,6 +17,8 @@
 class rounded_box_if : public BaseIF {
 public:
 
+  rounded_box_if() = delete;
+  
   /*!
     @brief Constructor
     @param[in] a_loCorner            Upper right corner of the object
@@ -24,10 +26,10 @@ public:
     @param[in] a_curvature           Radius of curvature on edges and corners
     @param[in] a_fluidInside         Fluid on inside (true) or outside
   */
-  rounded_box_if(const RealVect& a_loCorner,
-		 const RealVect& a_hiCorner,
-		 const Real&     a_curvature,
-		 const bool&     a_fluidInside);
+  rounded_box_if(const RealVect a_loCorner,
+		 const RealVect a_hiCorner,
+		 const Real     a_curvature,
+		 const bool     a_fluidInside);
 
 
   /*!
@@ -54,40 +56,7 @@ public:
   
 protected:
 
-#if CH_SPACEDIM == 2
-  /*!
-    @brief Build 2D box
-  */
-  virtual void buildBox2D();
-#elif CH_SPACEDIM == 3
-  /*!
-    @brief Build 3D box
-  */
-  virtual void buildBox3D();
-#endif
-  /*!
-    @brief Upper right corner of the cross section 
-  */
-  RealVect m_hiCorner;
-
-  /*!
-    @brief Lower left corner of the cross section 
-  */
-  RealVect m_loCorner;
-  
-  /*!
-    @brief Radius of curvature of the rounded edges on the cylinder base 
-  */ 
-  Real m_curv;
-  
-  /*!
-    @brief Inside or outside domain
-  */   
   bool m_fluidInside;
-
-  /*!
-    @brief Actual rounded box, built up by a bunch of boolean operations
-  */
   RefCountedPtr<BaseIF> m_baseif;
 };
 
