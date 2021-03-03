@@ -8,87 +8,45 @@
 #include "double_rod.H"
 #include "rod_if.H"
 
-#include <string>
-#include <iostream>
-#include <fstream>
-
 #include <ParmParse.H>
 
 double_rod::double_rod(){
-  m_dielectrics.resize(0);
-  m_electrodes.resize(0);
+  this->set_eps0(1.0);
 
-  Real eps0        = 1.0;
-  {
-    ParmParse pp("double_rod");
-    pp.get("eps0",              eps0);
-  }
-  this->set_eps0(eps0);
+  ParmParse pp1("double_rod.rod1");
+  ParmParse pp2("double_rod.rod2");
 
+  bool use_rod1;
+  bool use_rod2;
+
+  pp1.get("on", use_rod1);
+  pp2.get("on", use_rod2);
+
+  Vector<Real> v(SpaceDim);
+  Real radius;
+  RealVect e1, e2;
+  bool live;
   
-  
-  // Electrode parameters
-  bool turn_off_rod1    = false;
-  bool turn_off_rod2    = false;
-  bool rod1_live        = false;
-  bool rod2_live        = false;
-  
-  Real rod1_radius      = 1.E-3;
-  Real rod2_radius      = 1.E-3;
-  
-  RealVect rod1_center1 = RealVect::Zero;
-  RealVect rod1_center2 = RealVect::Unit;
-  RealVect rod2_center1 = RealVect::Zero;
-  RealVect rod2_center2 = RealVect::Unit;
+  if(use_rod1){
+    pp1.get("radius", radius);
+    pp1.get("live",   live);
+    pp1.getarr("endpoint1", v, 0, SpaceDim); e1 = RealVect(D_DECL(v[0], v[1], v[2]));
+    pp1.getarr("endpoint2", v, 0, SpaceDim); e2 = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  { // Get parameterse for electrode rod
-    ParmParse pp("double_rod");
-    std::string str1, str2;
-    Vector<Real> vec(SpaceDim);
+    RefCountedPtr<BaseIF> rod1 = RefCountedPtr<BaseIF> (new rod_if(e1, e2, radius, false));
 
-    pp.get("turn_off_rod1", str1);
-    pp.get("turn_off_rod2", str2);
-    turn_off_rod1 = (str1 == "true") ? true : false;
-    turn_off_rod2 = (str2 == "true") ? true : false;
-
-    pp.get("rod1_live", str1);
-    pp.get("rod2_live", str2);
-    rod1_live = (str1 == "true") ? true : false;
-    rod2_live = (str2 == "true") ? true : false;
-    
-    pp.get("rod1_radius", rod1_radius);
-    pp.get("rod2_radius", rod2_radius);
-
-    
-    if(pp.contains("rod1_center1")){
-      pp.getarr("rod1_center1", vec, 0, SpaceDim);
-      rod1_center1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-    }
-    if(pp.contains("rod1_center2")){
-      pp.getarr("rod1_center2", vec, 0, SpaceDim);
-      rod1_center2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-    }
-
-    if(pp.contains("rod2_center1")){
-      pp.getarr("rod2_center1", vec, 0, SpaceDim);
-      rod2_center1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-    }
-    if(pp.contains("rod2_center2")){
-      pp.getarr("rod2_center2", vec, 0, SpaceDim);
-      rod2_center2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-    }
+    m_electrodes.push_back(electrode(rod1, live));
   }
 
-  
-  if(!turn_off_rod1){
-    RefCountedPtr<BaseIF> rod = RefCountedPtr<BaseIF> (new rod_if(rod1_center1, rod1_center2, rod1_radius, false));
-    electrode e = electrode(rod, rod1_live, 1.0);
-    m_electrodes.push_back(e);
-  }
-  if(!turn_off_rod2){
-    RefCountedPtr<BaseIF> rod = RefCountedPtr<BaseIF> (new rod_if(rod2_center1, rod2_center2, rod2_radius, false));
-    electrode e = electrode(rod, rod2_live, 1.0);
-    m_electrodes.push_back(e);
+  if(use_rod2){
+    pp2.get("radius", radius);
+    pp2.get("live",   live);
+    pp2.getarr("endpoint1", v, 0, SpaceDim); e1 = RealVect(D_DECL(v[0], v[1], v[2]));
+    pp2.getarr("endpoint2", v, 0, SpaceDim); e2 = RealVect(D_DECL(v[0], v[1], v[2]));
+
+    RefCountedPtr<BaseIF> rod1 = RefCountedPtr<BaseIF> (new rod_if(e1, e2, radius, false));
+
+    m_electrodes.push_back(electrode(rod1, live));
   }
 }
 
