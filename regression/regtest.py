@@ -15,7 +15,6 @@ if sys.version_info < MIN_PYTHON:
 # this script
 # --------------------------------------------------
 tests_file       = "tests.ini"
-regression_rules = "regression_rules.py"
 
 # --------------------------------------------------
 # Set up arguments that can be passed into this
@@ -23,11 +22,11 @@ regression_rules = "regression_rules.py"
 # --------------------------------------------------
 parser = argparse.ArgumentParser()
 parser.add_argument('-compile', '--compile',  help="Compile executables", action='store_true')
-parser.add_argument('--benchmark',            help="Generate benchmark files only", action='store_true')
-parser.add_argument('-tests',                 help="Run one or more regression tests", nargs='+', required=False)
-parser.add_argument('--silent',               help="Turn off unnecessary output", action='store_true')
-parser.add_argument('--clean',                help="Do a clean compile", action='store_true')
 parser.add_argument('-run',                   help="MPI run command", type=str, default="mpirun")
+parser.add_argument('-tests',                 help="Run one or more regression tests", nargs='+', required=False)
+parser.add_argument('--silent',               help="Turn off unnecessary output",   action='store_true')
+parser.add_argument('--clean',                help="Do a clean compile",            action='store_true')
+parser.add_argument('--benchmark',            help="Generate benchmark files only", action='store_true')
 
 # --------------------------------------------------
 # Read arguments and configuration files
