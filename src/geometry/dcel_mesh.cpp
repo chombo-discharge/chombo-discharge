@@ -13,10 +13,6 @@
 
 #include <chrono>
 
-#if 1
-#include <ParmParse.H>
-#endif
-
 bool dcel_mesh::s_angle_weighted = false; // Use angle-weighted vertex normal vectors. This currently breaks. 
 
 dcel_mesh::dcel_mesh(){

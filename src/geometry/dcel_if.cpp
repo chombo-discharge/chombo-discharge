@@ -9,6 +9,8 @@
 
 #include <chrono>
 
+#define enable_dcel_timer 0
+
 dcel_if::dcel_if(){
 
 }
@@ -28,12 +30,11 @@ dcel_if::~dcel_if(){
 }
 
 Real dcel_if::value(const RealVect& a_point) const{
-#define schme 0
-#if schme
+#if dcel_timer
   auto mesh_start = std::chrono::system_clock::now(); 
 #endif
   Real retval = m_mesh->signed_distance(a_point);
-#if schme
+#if dcel_timer
   auto mesh_stop = std::chrono::system_clock::now();
   const Real blah = a_point.vectorLength() - 1.0;
   auto imp_stop = std::chrono::system_clock::now();
