@@ -20,13 +20,15 @@
 
 template<typename T>
 kd_tree<T>::kd_tree(){
-
+  m_root = nullptr;
 }
 
 template<typename T>
 kd_tree<T>::kd_tree(const std::vector<std::shared_ptr<T> >& a_data,
 		    const int                               a_max_depth,
 		    const int                               a_max_elements){
+  m_root = nullptr;
+  
   this->build_tree(a_data, a_max_depth, a_max_elements);
 }
 
@@ -37,8 +39,8 @@ kd_tree<T>::~kd_tree(){
 
 template<typename T>
 void kd_tree<T>::build_tree(const std::vector<std::shared_ptr<T> >& a_data,
-			    const int                      a_max_depth,
-			    const int                      a_max_elements){
+			    const int                             a_max_depth,
+			    const int                             a_max_elements){
 
   int datasize = a_data.size();
   if(m_root == nullptr){ // Create root
@@ -58,6 +60,7 @@ void kd_tree<T>::build_tree(const std::vector<std::shared_ptr<T> >& a_data,
     
     const int num_nodes = m_nodes.size();
     std::vector<std::shared_ptr<kd_node<T> > > children(0);
+    
     for (int i = 0; i < num_nodes; i++){
 
       std::shared_ptr<kd_node<T> >& node = m_nodes[i];
@@ -96,9 +99,8 @@ void kd_tree<T>::build_tree(const std::vector<std::shared_ptr<T> >& a_data,
     }
 
     // After each pass, append children to list of nodes
-    m_nodes.emplace_back(children);
+    m_nodes.insert(m_nodes.end(), children.begin(), children.end());
   }
-
 
   // Make sure that we find a leaf
   for (int i = 0; i < m_nodes.size(); i++){
@@ -118,8 +120,6 @@ void kd_tree<T>::build_tree(const std::vector<std::shared_ptr<T> >& a_data,
   for (int i = 0; i < m_leaves.size(); i++){
     dataleaf += m_leaves[i]->get_data().size();
   }
-
-  CH_assert(dataleaf == datasize);
 }
 
 template<typename T>

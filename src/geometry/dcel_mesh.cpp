@@ -246,12 +246,7 @@ void dcel_mesh::compute_edge_normals(){
 }
 
 void dcel_mesh::build_tree(const int a_max_depth, const int a_max_elements){
-#if 0 // Original code
   m_tree     = std::shared_ptr<kd_tree<dcel_poly> > (new kd_tree<dcel_poly>(m_polygons, a_max_depth, a_max_elements));
-#else
-  auto tree = kd_tree<dcel_poly>(m_polygons, a_max_depth, a_max_elements);
-  //  m_tree = std::shared_ptr<kd_tree<dcel_poly> >(tree);
-#endif
   m_use_tree = true;
 }
 
