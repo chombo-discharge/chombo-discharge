@@ -15,9 +15,6 @@ public:
 
   porsche();
   ~porsche();
-
-protected:
-
 };
 
 #endif

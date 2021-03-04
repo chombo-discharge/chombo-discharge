@@ -6,6 +6,7 @@ sys.path.append('./python')
 import app_main
 import app_make
 import app_options
+import app_inc
 
 # Get arguments from input script
 parser = argparse.ArgumentParser();
@@ -39,6 +40,7 @@ else:
     app_main.write_template(args)    # Write main file
     app_make.write_template(args)    # Write makefile
     app_options.write_template(args) # Write options file
+    app_inc.copy_dependencies(args)  # Copy depencies
 
     # Build executable if called for it
     if args.build:
