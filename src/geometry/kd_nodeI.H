@@ -5,43 +5,54 @@
   @date   Apr. 2018
 */
 
-#include "kd_node.H"
-#include <ParmParse.H>
+#ifndef _KD_NODEI_H_
+#define _KD_NODEI_H_
 
-template<typename T> kd_node<T>::kd_node(){
+#include "kd_node.H"
+
+template<typename T>
+kd_node<T>::kd_node(){
   this->set_leaf(true);
 }
 
-template<typename T> kd_node<T>::kd_node(const RefCountedPtr<kd_node<T> >& a_parent){
+template<typename T>
+kd_node<T>::kd_node(const std::shared_ptr<kd_node<T> >& a_parent){
   this->set_leaf(true);
   this->set_parent(a_parent);
 }
 
-template<typename T> kd_node<T>::~kd_node(){
+template<typename T>
+kd_node<T>::~kd_node(){
 
 }
 
-template<typename T> Vector<RefCountedPtr<T> >& kd_node<T>::get_data(){
+template<typename T>
+std::vector<std::shared_ptr<T> >& kd_node<T>::get_data(){
   return m_data;
 }
 
-template<typename T> const RefCountedPtr<kd_node<T> >& kd_node<T>::get_parent() const{
+template<typename T>
+const std::shared_ptr<kd_node<T> >&kd_node<T>::get_parent() const{
   return m_parent;
 }
 
-template<typename T> const RefCountedPtr<kd_node<T> >& kd_node<T>::get_left() const{
+template<typename T>
+const std::shared_ptr<kd_node<T> >& kd_node<T>::get_left() const{
   return m_left;
 }
 
-template<typename T> const RefCountedPtr<kd_node<T> >& kd_node<T>::get_right() const{
+template<typename T>
+const std::shared_ptr<kd_node<T> >& kd_node<T>::get_right() const{
   return m_right;
 }
 
-template<typename T> bool kd_node<T>::is_leaf() const {
+template<typename T>
+bool kd_node<T>::is_leaf() const {
   return m_leaf;
 }
 
-template<typename T> bool kd_node<T>::inside(const RealVect a_x0) const {
+template<typename T>
+bool kd_node<T>::inside(const RealVect a_x0) const {
   bool inside = true;
   for (int dir = 0; dir < SpaceDim; dir++){
     if(a_x0[dir] < m_lo[dir] || a_x0[dir] > m_hi[dir]){
@@ -53,12 +64,13 @@ template<typename T> bool kd_node<T>::inside(const RealVect a_x0) const {
   return inside;
 }
 
-template<typename T> int kd_node<T>::get_depth(){
+template<typename T>
+int kd_node<T>::get_depth(){
 
   int depth = 0;
 
-  RefCountedPtr<kd_node<T> > parent = m_parent;
-  while(!parent.isNull()){
+  std::shared_ptr<kd_node<T> > parent = m_parent;
+  while (parent != nullptr){
     parent = parent->get_parent();
     depth++;
   }
@@ -66,11 +78,13 @@ template<typename T> int kd_node<T>::get_depth(){
   return depth;
 }
 
-template<typename T> int kd_node<T>::get_num_elements(){
+template<typename T>
+int kd_node<T>::get_num_elements(){
   return m_data.size();
 }
 
-template<typename T> Real kd_node<T>::dist(const RealVect a_x0) const {
+template<typename T>
+Real kd_node<T>::dist(const RealVect a_x0) const {
   if(m_leaf){
     return data_dist(a_x0);
   }
@@ -79,7 +93,8 @@ template<typename T> Real kd_node<T>::dist(const RealVect a_x0) const {
   }
 }
 
-template<typename T> Real kd_node<T>::aabb_dist(const RealVect a_x0) const{
+template<typename T>
+Real kd_node<T>::aabb_dist(const RealVect a_x0) const{
   RealVect delta;
   const Real zero = 0.0;
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -89,7 +104,8 @@ template<typename T> Real kd_node<T>::aabb_dist(const RealVect a_x0) const{
   return delta.vectorLength();
 }
 
-template<typename T> Real kd_node<T>::data_dist(const RealVect a_x0) const {
+template<typename T>
+Real kd_node<T>::data_dist(const RealVect a_x0) const {
   Real dist = 1.234567E89;
   for (int i = 0; i < m_data.size(); i++){
     const Real cur_dist = Abs(m_data[i]->signed_distance(a_x0));
@@ -100,7 +116,8 @@ template<typename T> Real kd_node<T>::data_dist(const RealVect a_x0) const {
   return dist;
 }
 
-template<typename T> void kd_node<T>::compute_bbox(){
+template<typename T>
+void kd_node<T>::compute_bbox(){
 
   // Compute AABB (axis-aligned bounding box)
   RealVect lo =  1.234567E89*RealVect::Unit;
@@ -123,15 +140,10 @@ template<typename T> void kd_node<T>::compute_bbox(){
   m_hi = hi;
 
   
-#if 1 // Safety test, not part of final code
-  // Corner test
-  for (int dir = 0; dir < SpaceDim; dir++){
-    CH_assert(lo[dir] <= hi[dir]);
-  }
-
+#if 0 // Safety test, not part of final code
   // Check that every data point is inside the bounding box
   for (int i = 0; i < m_data.size(); i++){
-    Vector<RealVect> points = m_data[i]->get_points();
+    std::vector<RealVect> points = m_data[i]->get_points();
 
     for (int j = 0; j < points.size(); j++){
       for (int dir = 0; dir < SpaceDim; dir++){
@@ -149,40 +161,43 @@ template<typename T> void kd_node<T>::compute_bbox(){
 //   MayDay::Abort("stop");
 }
 
-template<typename T> void kd_node<T>::set_leaf(const bool a_leaf){
+template<typename T>
+void kd_node<T>::set_leaf(const bool a_leaf){
   m_leaf = a_leaf;
 }
 
-template<typename T> void kd_node<T>::set_parent(const RefCountedPtr<kd_node>& a_parent){
+template<typename T>
+void kd_node<T>::set_parent(const std::shared_ptr<kd_node>& a_parent){
   m_parent = a_parent;
 }
 
-template<typename T> void kd_node<T>::set_left(const RefCountedPtr<kd_node>& a_left){
+template<typename T>
+void kd_node<T>::set_left(const std::shared_ptr<kd_node>& a_left){
   m_left = a_left;
 }
 
-template<typename T> void kd_node<T>::set_right(const RefCountedPtr<kd_node>& a_right){
+template<typename T>
+void kd_node<T>::set_right(const std::shared_ptr<kd_node>& a_right){
   m_right = a_right;
 }
 
-template<typename T> void kd_node<T>::set_data(const Vector<RefCountedPtr<T> >& a_data){
+template<typename T>
+void kd_node<T>::set_data(const std::vector<std::shared_ptr<T> >& a_data){
   m_data = a_data;
 }
 
-template<typename T> void kd_node<T>::clear_data(){
+template<typename T>
+void kd_node<T>::clear_data(){
   m_data.resize(0);
 }
 
-template <typename T> void kd_node<T>::split_data(){
-  CH_assert(m_leaf);
-  CH_assert(!m_left.isNull());
-  CH_assert(!m_right.isNull());
-  
-  Vector<RefCountedPtr<T> > data_right;
-  Vector<RefCountedPtr<T> > data_left;
+template <typename T>
+void kd_node<T>::split_data(){
+  std::vector<std::shared_ptr<T> > data_right;
+  std::vector<std::shared_ptr<T> > data_left;
 
   // Find maximum and minimum coordinates (i.e. the bounding box of the data centroids)
-  Vector<RealVect> coords;
+  std::vector<RealVect> coords;
   for (int i = 0; i < m_data.size(); i++){
     coords.push_back(m_data[i]->get_coord());
   }
@@ -205,7 +220,6 @@ template <typename T> void kd_node<T>::split_data(){
   int longest_dir = 0;
   for (int dir = 0; dir < SpaceDim; dir++){
     const Real cur_longest = max_coord[dir] - min_coord[dir];
-    CH_assert(cur_longest >= 0.0);
     if(cur_longest > longest_len){
       longest_len = cur_longest;
       longest_dir = dir;
@@ -223,18 +237,20 @@ template <typename T> void kd_node<T>::split_data(){
     }
   }
 
-  if(!m_left.isNull()){
+  if(m_left != nullptr){
     m_left->set_data(data_left);
     m_left->compute_bbox();
   }
   else{
-    MayDay::Abort("kd_node<T>::split_data - left is NULL");
+    std::cerr << "kd_node<T>::split_data - left is nullptr" << std::endl;
   }
-  if(!m_right.isNull()){
+  if(m_right != nullptr){
     m_right->set_data(data_right);
     m_right->compute_bbox();
   }
   else{
-    MayDay::Abort("kd_node<T>::split_data - right is NULL");
+    std::cerr << "kd_node<T>::split_data - right is nullptr" << std::endl;
   }
 }
+
+#endif

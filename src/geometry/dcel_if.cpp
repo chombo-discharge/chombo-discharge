@@ -11,18 +11,14 @@
 
 #define enable_dcel_timer 0
 
-dcel_if::dcel_if(){
-
-}
-
-dcel_if::dcel_if(const RefCountedPtr<dcel_mesh>& a_mesh, const bool a_inside){
-  m_mesh   = a_mesh;
-  m_inside = a_inside;
+dcel_if::dcel_if(const std::shared_ptr<dcel_mesh>& a_mesh, const bool a_fluidInside){
+  m_mesh        = a_mesh;
+  m_fluidInside = a_fluidInside;
 }
 
 dcel_if::dcel_if(const dcel_if& a_object){
   m_mesh   = a_object.m_mesh;
-  m_inside = a_object.m_inside;
+  m_fluidInside = a_object.m_fluidInside;
 }
 
 dcel_if::~dcel_if(){
@@ -42,7 +38,7 @@ Real dcel_if::value(const RealVect& a_point) const{
   std::chrono::duration<double> impfunc_time = imp_stop-mesh_stop;
   pout() << "Ratio = " << 1.0*decl_time.count()/impfunc_time.count() << endl;
 #endif
-  if(m_inside){
+  if(m_fluidInside){
     retval *= -1;
   }
 

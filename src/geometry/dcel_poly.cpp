@@ -1,5 +1,5 @@
 /*!
-  @file   dcel_poly.cpp
+  @file   dcel_polyI.H
   @brief  Implementation of dcel_poly.H
   @author Robert Marskar
   @date   Apr. 2018
@@ -7,8 +7,8 @@
 
 #include "dcel_vert.H"
 #include "dcel_edge.H"
-#include "dcel_iterator.H"
 #include "dcel_poly.H"
+#include "dcel_iterator.H"
 
 #include <PolyGeom.H>
 
@@ -23,33 +23,40 @@ dcel_poly::~dcel_poly(){
 
 }
 
-const RefCountedPtr<dcel_edge>& dcel_poly::get_edge() const{
+
+const std::shared_ptr<dcel_edge>& dcel_poly::get_edge() const{
   return m_edge;
 }
 
-RefCountedPtr<dcel_edge>& dcel_poly::get_edge(){
+
+std::shared_ptr<dcel_edge>& dcel_poly::get_edge(){
   return m_edge;
 }
 
-void dcel_poly::define(const RealVect a_normal, const RefCountedPtr<dcel_edge>& a_edge){
+
+void dcel_poly::define(const RealVect& a_normal, const std::shared_ptr<dcel_edge>& a_edge){
   this->set_normal(a_normal);
   this->set_edge(a_edge);
 }
 
-void dcel_poly::set_edge(const RefCountedPtr<dcel_edge>& a_edge){
+
+void dcel_poly::set_edge(const std::shared_ptr<dcel_edge>& a_edge){
   m_edge = a_edge;
 }
 
-void dcel_poly::set_normal(const RealVect a_normal){
+
+void dcel_poly::set_normal(const RealVect& a_normal){
   m_normal = a_normal;
 }
+
 
 void dcel_poly::normalize(){
   m_normal *= 1./m_normal.vectorLength();
 }
 
+
 void dcel_poly::compute_area() {
-  const Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
+  const std::vector<std::shared_ptr<dcel_vert> > vertices = this->get_vertices();
 
   Real area = 0.0;
 
@@ -62,10 +69,10 @@ void dcel_poly::compute_area() {
   m_area = Abs(0.5*area);
 }
 
-void dcel_poly::compute_centroid() {
 
+void dcel_poly::compute_centroid() {
   m_centroid = RealVect::Zero;
-  const Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
+  const std::vector<std::shared_ptr<dcel_vert> > vertices = this->get_vertices();
 
   for (int i = 0; i < vertices.size(); i++){
     m_centroid += vertices[i]->get_pos();
@@ -73,12 +80,13 @@ void dcel_poly::compute_centroid() {
   m_centroid = m_centroid/vertices.size();
 }
 
+
 void dcel_poly::compute_normal(const bool a_outward_normal){
   
   // We assume that the normal is defined by right-hand rule where the rotation direction is along the half edges
 
   bool found_normal = false;
-  Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
+  std::vector<std::shared_ptr<dcel_vert> > vertices = this->get_vertices();
   CH_assert(vertices.size() > 2);
   const int n = vertices.size();
   for (int i = 0; i < n; i++){
@@ -108,9 +116,9 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
   }
 
 #if 0
-  const RefCountedPtr<dcel_vert>& v0 = m_edge->get_prev()->get_vert();
-  const RefCountedPtr<dcel_vert>& v1 = m_edge->get_vert();
-  const RefCountedPtr<dcel_vert>& v2 = m_edge->get_next()->get_vert();
+  const std::shared_ptr<dcel_vert>& v0 = m_edge->get_prev()->get_vert();
+  const std::shared_ptr<dcel_vert>& v1 = m_edge->get_vert();
+  const std::shared_ptr<dcel_vert>& v2 = m_edge->get_next()->get_vert();
   
   const RealVect x0 = v0->get_pos();
   const RealVect x1 = v1->get_pos();
@@ -130,9 +138,10 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
   }
 }
 
+
 void dcel_poly::compute_bbox(){
-  Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
-  Vector<RealVect> coords;
+  std::vector<std::shared_ptr<dcel_vert> > vertices = this->get_vertices();
+  std::vector<RealVect> coords;
 
   for (int i = 0; i < vertices.size(); i++){
     coords.push_back(vertices[i]->get_pos());
@@ -181,15 +190,17 @@ void dcel_poly::compute_bbox(){
 #endif
 }
 
-Real dcel_poly::get_area() const{
+
+Real dcel_poly::get_area() const {
   return m_area;
 }
+
 
 Real dcel_poly::signed_distance(const RealVect a_x0) {
 #define bug_check 0
   Real retval = 1.234567E89;
 
-  Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
+  std::vector<std::shared_ptr<dcel_vert> > vertices = this->get_vertices();
 
 #if bug_check // Debug, return shortest distance to vertex
   CH_assert(vertices.size() > 0);
@@ -242,7 +253,7 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
     retval = ncomp;
   }
   else{ // The projected point lies outside the triangle. Check distance to edges/vertices
-    const Vector<RefCountedPtr<dcel_edge> > edges = this->get_edges();
+    const std::vector<std::shared_ptr<dcel_edge> > edges = this->get_edges();
     for (int i = 0; i < edges.size(); i++){
       const Real cur_dist = edges[i]->signed_distance(a_x0);
       if(Abs(cur_dist) < Abs(retval)){
@@ -254,30 +265,36 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
   return retval;
 }
 
+
 RealVect dcel_poly::get_normal() const {
   return m_normal;
 }
+
 
 RealVect dcel_poly::get_centroid() const {
   return m_centroid;
 }
 
+
 RealVect dcel_poly::get_coord() const {
   return m_centroid;
 }
+
 
 RealVect dcel_poly::get_bbox_lo() const {
   return m_lo;
 }
 
+
 RealVect dcel_poly::get_bbox_hi() const {
   return m_hi;
 }
 
-Vector<RealVect> dcel_poly::get_points(){
-  Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
 
-  Vector<RealVect> pos;
+std::vector<RealVect> dcel_poly::get_points(){
+  std::vector<std::shared_ptr<dcel_vert> > vertices = this->get_vertices();
+
+  std::vector<RealVect> pos;
   for (int i = 0; i < vertices.size(); i++){
     pos.push_back(vertices[i]->get_pos());
   }
@@ -285,19 +302,21 @@ Vector<RealVect> dcel_poly::get_points(){
   return pos;
 }
 
-Vector<RefCountedPtr<dcel_vert> > dcel_poly::get_vertices(){
-  Vector<RefCountedPtr<dcel_vert> > vertices;
+
+std::vector<std::shared_ptr<dcel_vert> > dcel_poly::get_vertices(){
+  std::vector<std::shared_ptr<dcel_vert> > vertices;
 
   for (edge_iterator iter(*this); iter.ok(); ++iter){
-    RefCountedPtr<dcel_edge>& edge = iter();
+    std::shared_ptr<dcel_edge>& edge = iter();
     vertices.push_back(edge->get_vert());
   }
 
   return vertices;
 }
 
-Vector<RefCountedPtr<dcel_edge> > dcel_poly::get_edges(){
-  Vector<RefCountedPtr<dcel_edge> > edges;
+
+std::vector<std::shared_ptr<dcel_edge> > dcel_poly::get_edges(){
+  std::vector<std::shared_ptr<dcel_edge> > edges;
 
   for (edge_iterator iter(*this); iter.ok(); ++iter){
     edges.push_back(iter());
@@ -309,3 +328,4 @@ Vector<RefCountedPtr<dcel_edge> > dcel_poly::get_edges(){
 
   return edges;
 }
+

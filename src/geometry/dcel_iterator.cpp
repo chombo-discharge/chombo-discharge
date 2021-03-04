@@ -28,13 +28,16 @@ edge_iterator::edge_iterator(dcel_vert& a_vert){
   m_full_loop = false;
 }
 
-RefCountedPtr<dcel_edge>& edge_iterator::operator() (){
+
+std::shared_ptr<dcel_edge>& edge_iterator::operator() (){
   return m_current;
 }
+
 
 void edge_iterator::reset(){
   m_current = m_begin;
 }
+
 
 void edge_iterator::operator++(){
   if(m_polymode){
@@ -51,11 +54,13 @@ void edge_iterator::operator++(){
   }
 }
 
+
 bool edge_iterator::ok(){
-  if(m_current != NULL && !m_full_loop){
+  if(m_current != nullptr && !m_full_loop){
     return true;
   }
   else {
     return false;
   }
 }
+

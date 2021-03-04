@@ -9,7 +9,8 @@
 #define _DCEL_ITERATOR_
 
 #include "RealVect.H"
-#include "RefCountedPtr.H"
+
+#include <memory>
 
 class dcel_vert;
 class dcel_edge;
@@ -39,22 +40,26 @@ public:
   /*!
     @brief Get edge
   */
-  virtual RefCountedPtr<dcel_edge>& operator() ();
+  
+  std::shared_ptr<dcel_edge>& operator() ();
 
   /*!
     @brief Reset iterator
   */
-  virtual void reset();
+  
+  void reset();
 
   /*!
     @brief Increment edge
   */
-  virtual void operator ++();
+  
+  void operator ++();
 
   /*!
     @brief Check if ok or not
   */
-  virtual bool ok();
+  
+  bool ok();
   
 protected:
 
@@ -71,12 +76,12 @@ protected:
   /*!
     @brief Starting edge
   */
-  RefCountedPtr<dcel_edge> m_begin;
+  std::shared_ptr<dcel_edge> m_begin;
 
   /*!
     @brief Current edge
   */
-  RefCountedPtr<dcel_edge> m_current;
+  std::shared_ptr<dcel_edge> m_current;
 };
 
 #endif

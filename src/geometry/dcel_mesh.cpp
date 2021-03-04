@@ -1,5 +1,5 @@
 /*!
-  @file   dcel_mesh.cpp
+  @file   dcel_meshI.H
   @brief  Implementation of dcel_mesh.H
   @author Robert Marskar
   @date   Apr. 2018
@@ -8,6 +8,10 @@
 
 #include "dcel_mesh.H"
 #include "dcel_iterator.H"
+#include "dcel_vert.H"
+#include "dcel_poly.H"
+#include "dcel_edge.H"
+
 
 #include <PolyGeom.H>
 
@@ -24,56 +28,61 @@ dcel_mesh::~dcel_mesh(){
 
 }
 
-dcel_mesh::dcel_mesh(Vector<RefCountedPtr<dcel_poly> >& a_polygons,
-		     Vector<RefCountedPtr<dcel_edge> >& a_edges,
-		     Vector<RefCountedPtr<dcel_vert> >& a_vertices){
+
+dcel_mesh::dcel_mesh(std::vector<std::shared_ptr<dcel_poly> >& a_polygons,
+		     std::vector<std::shared_ptr<dcel_edge> >& a_edges,
+		     std::vector<std::shared_ptr<dcel_vert> >& a_vertices){
   m_reconciled = false;
   m_use_tree   = false;
   
   this->define(a_polygons, a_edges, a_vertices);
 }
 
-Vector<RefCountedPtr<dcel_vert> >& dcel_mesh::get_vertices(){
+
+std::vector<std::shared_ptr<dcel_vert> >& dcel_mesh::get_vertices(){
   return m_vertices;
 }
 
-Vector<RefCountedPtr<dcel_edge> >& dcel_mesh::get_edges(){
+
+std::vector<std::shared_ptr<dcel_edge> >& dcel_mesh::get_edges(){
   return m_edges;
 }
 
-Vector<RefCountedPtr<dcel_poly> >& dcel_mesh::get_polygons(){
+
+std::vector<std::shared_ptr<dcel_poly> >& dcel_mesh::get_polygons(){
   return m_polygons;
 }
 
+
 bool dcel_mesh::sanity_check() const {
   for (int i = 0; i < m_edges.size(); i++){
-    if(m_edges[i].isNull()){
-      MayDay::Abort("dcel_mesh::sanity_check - edge is NULL");
+    if(m_edges[i] == nullptr){
+      std::cerr << "dcel_mesh::sanity_check - edge is NULL\n";
     }
     else{
-      const RefCountedPtr<dcel_edge>& edge = m_edges[i];
+      const std::shared_ptr<dcel_edge>& edge = m_edges[i];
     
-      if(edge->get_pair().isNull()){
-	MayDay::Abort("dcel_mesh::sanity_check - pair edge is NULL, your geometry probably isn't watertight.");
+      if(edge->get_pair()== nullptr){
+	std::cerr << "dcel_mesh::sanity_check - pair edge is NULL, your geometry probably isn't watertight.\n";
       }
-      else if(edge->get_next().isNull()){
-	MayDay::Abort("dcel_mesh::sanity_check - next edge is NULL, something has gone wrong with edge generation.");
+      else if(edge->get_next()== nullptr){
+	std::cerr << "dcel_mesh::sanity_check - next edge is NULL, something has gone wrong with edge generation.\n";
       }
-      else if(edge->get_prev().isNull()){
-	MayDay::Abort("dcel_mesh::sanity_check - prev edge is NULL, something has gone wrong with edge generation.");
+      else if(edge->get_prev()== nullptr){
+	std::cerr << "dcel_mesh::sanity_check - prev edge is NULL, something has gone wrong with edge generation.\n";
       }
-      else if(edge->get_vert().isNull()){
-	MayDay::Abort("dcel_mesh::sanity_check - vertex is NULL, something has gone wrong with edge generation.");
+      else if(edge->get_vert()== nullptr){
+	std::cerr << "dcel_mesh::sanity_check - vertex is NULL, something has gone wrong with edge generation.\n";
       }
     }
   }
 
   for (int i = 0; i < m_vertices.size(); i++){
-    if(m_vertices[i].isNull()){
-      MayDay::Warning("dcel_mesh::sanity_check - m_vertices[i] is NULL, something has gone wrong with vertex generation.");
+    if(m_vertices[i]== nullptr){
+      std::cerr << "dcel_mesh::sanity_check - m_vertices[i] is NULL, something has gone wrong with vertex generation.\n";
     }
     else{
-      if(m_vertices[i]->get_edge().isNull()){
+      if(m_vertices[i]->get_edge()== nullptr){
 	CH_assert(m_vertices[i]->get_polycache().size() == 0);
 	pout() << "dcel_mesh::sanity_check - vertex edge is NULL, you may have an unreferenced vertex." << endl;
       }
@@ -83,16 +92,17 @@ bool dcel_mesh::sanity_check() const {
   return true;
 }
 
-void dcel_mesh::define(Vector<RefCountedPtr<dcel_poly> >& a_polygons,
-		       Vector<RefCountedPtr<dcel_edge> >& a_edges,
-		       Vector<RefCountedPtr<dcel_vert> >& a_vertices){
+
+void dcel_mesh::define(std::vector<std::shared_ptr<dcel_poly> >& a_polygons,
+		       std::vector<std::shared_ptr<dcel_edge> >& a_edges,
+		       std::vector<std::shared_ptr<dcel_vert> >& a_vertices){
   m_polygons = a_polygons;
   m_edges    = a_edges;
   m_vertices = a_vertices;
 }
 
 void dcel_mesh::compute_bounding_sphere(){
-  Vector<RealVect> pos;
+  std::vector<RealVect> pos;
   for (int i = 0; i < m_vertices.size(); i++){
     pos.push_back(m_vertices[i]->get_pos());
   }
@@ -100,16 +110,17 @@ void dcel_mesh::compute_bounding_sphere(){
   m_sphere.define(pos);
 }
 
+
 void dcel_mesh::reconcile_polygons(const bool a_outward_normal, const bool a_recompute_vnormal){
 
   // Reconcile polygons; compute polygon area and provide edges explicit access
   // to their polygons
   for (int i = 0; i < m_polygons.size(); i++){
-    RefCountedPtr<dcel_poly>& poly = m_polygons[i];
+    std::shared_ptr<dcel_poly>& poly = m_polygons[i];
 
     // Every edge gets a reference to this polygon
     for (edge_iterator iter(*poly); iter.ok(); ++iter){
-      RefCountedPtr<dcel_edge>& edge = iter();
+      std::shared_ptr<dcel_edge>& edge = iter();
       edge->set_poly(poly);
     }
     poly->compute_normal(a_outward_normal);
@@ -122,7 +133,7 @@ void dcel_mesh::reconcile_polygons(const bool a_outward_normal, const bool a_rec
 
   // Compute pseudonormals for vertices and edges.
   if(a_recompute_vnormal){
-    MayDay::Warning("dcel_mesh::reconcile_polygons - there is probably a bug in the vertex normal computation somewhere");
+    std::cerr << "dcel_mesh::reconcile_polygons - there is probably a bug in the vertex normal computation somewhere\n";
     this->compute_vertex_normals();
   }
   this->compute_edge_normals();
@@ -131,6 +142,7 @@ void dcel_mesh::reconcile_polygons(const bool a_outward_normal, const bool a_rec
   m_reconciled = true;
 }
 
+
 void dcel_mesh::compute_vertex_normals(){
 #define debug_func 1
 
@@ -138,11 +150,11 @@ void dcel_mesh::compute_vertex_normals(){
   pout() << "starting computation" << endl;
 #endif
   for (int i = 0; i < m_vertices.size(); i++){
-    if(!m_vertices[i]->get_edge().isNull()){
+    if(!(m_vertices[i]->get_edge()== nullptr)){
 #if 1 // This doesn't work, why?!?
-      const Vector<RefCountedPtr<dcel_poly> > polygons = m_vertices[i]->get_polygons();
+      const std::vector<std::shared_ptr<dcel_poly> > polygons = m_vertices[i]->get_polygons();
 #else
-      const Vector<RefCountedPtr<dcel_poly> > polygons = m_vertices[i]->get_polycache();
+      const std::vector<std::shared_ptr<dcel_poly> > polygons = m_vertices[i]->get_polycache();
 #endif
 
       // Mean or area weighted
@@ -170,8 +182,8 @@ void dcel_mesh::compute_vertex_normals(){
 	int num = 0;
 #endif
 	for (edge_iterator iter(*m_vertices[i]); iter.ok(); ++iter){ 
-	  const RefCountedPtr<dcel_edge>& outgoing = iter();
-	  const RefCountedPtr<dcel_edge>& incoming = outgoing->get_prev();
+	  const std::shared_ptr<dcel_edge>& outgoing = iter();
+	  const std::shared_ptr<dcel_edge>& incoming = outgoing->get_prev();
 
 	  const RealVect origin = incoming->get_vert()->get_pos();
 	  const RealVect x2     = outgoing->get_vert()->get_pos();
@@ -197,7 +209,7 @@ void dcel_mesh::compute_vertex_normals(){
 
 	  if(num > 20){
 	    pout() << "problem vertex = " << m_vertices[i]->get_pos() << endl;
-	    MayDay::Abort("dcel_compute_vertex_normals - stop");
+	    std::cerr << "dcel_compute_vertex_normals - stop\n";
 	  }
 #endif
 	}
@@ -216,11 +228,11 @@ void dcel_mesh::compute_vertex_normals(){
 void dcel_mesh::compute_edge_normals(){
   for (int i = 0; i < m_edges.size(); i++){
 
-    RefCountedPtr<dcel_edge>& cur_edge         = m_edges[i];
-    const RefCountedPtr<dcel_edge>& pair_edge = cur_edge->get_pair();
+    std::shared_ptr<dcel_edge>& cur_edge         = m_edges[i];
+    const std::shared_ptr<dcel_edge>& pair_edge = cur_edge->get_pair();
 
-    const RefCountedPtr<dcel_poly>& poly      = cur_edge->get_poly();
-    const RefCountedPtr<dcel_poly>& pair_poly = pair_edge->get_poly();
+    const std::shared_ptr<dcel_poly>& poly      = cur_edge->get_poly();
+    const std::shared_ptr<dcel_poly>& pair_poly = pair_edge->get_poly();
 
     CH_assert(pair_edge->get_pair() == cur_edge);
 
@@ -234,9 +246,15 @@ void dcel_mesh::compute_edge_normals(){
 }
 
 void dcel_mesh::build_tree(const int a_max_depth, const int a_max_elements){
-  m_tree     = RefCountedPtr<kd_tree<dcel_poly> > (new kd_tree<dcel_poly>(m_polygons, a_max_depth, a_max_elements));
+#if 0 // Original code
+  m_tree     = std::shared_ptr<kd_tree<dcel_poly> > (new kd_tree<dcel_poly>(m_polygons, a_max_depth, a_max_elements));
+#else
+  auto tree = kd_tree<dcel_poly>(m_polygons, a_max_depth, a_max_elements);
+  //  m_tree = std::shared_ptr<kd_tree<dcel_poly> >(tree);
+#endif
   m_use_tree = true;
 }
+
 
 Real dcel_mesh::signed_distance(const RealVect a_x0){
 #define print_time 0
@@ -251,8 +269,8 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
 #if print_time
       auto start_search = std::chrono::system_clock::now(); 
 #endif
-      //      Vector<RefCountedPtr<dcel_poly> > candidates = m_tree->get_candidates(a_x0);
-      Vector<RefCountedPtr<dcel_poly> > candidates = m_tree->find_closest(a_x0);
+      //      std::vector<std::shared_ptr<dcel_poly> > candidates = m_tree->get_candidates(a_x0);
+      std::vector<std::shared_ptr<dcel_poly> > candidates = m_tree->find_closest(a_x0);
       //#if print_time
       auto stop_search = std::chrono::system_clock::now();
       auto start_comp = std::chrono::system_clock::now(); 
@@ -294,3 +312,4 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
 
   return min_dist;
 }
+

@@ -10,10 +10,14 @@
 
 #include "kd_node.H"
 
+#include <memory>
+#include <vector>
+
 /*!
   @brief Class for generating k-D binary search trees for fast polygon search
 */
-template <typename T> class kd_tree {
+template <typename T>
+class kd_tree {
 public:
 
   kd_tree();
@@ -21,46 +25,47 @@ public:
   /*!
     @brief Full constructor
   */
-  kd_tree(const Vector<RefCountedPtr<T> >& a_data, const int a_max_depth, const int a_max_elements);
+  kd_tree(const std::vector<std::shared_ptr<T> >& a_data, const int a_max_depth, const int a_max_elements);
 
   /*!
     @brief Destructor
   */
-  virtual ~kd_tree();
+  ~kd_tree();
 
-    /*!
+  /*!
     @brief Build kd-tree
   */
-  virtual void build_tree(const Vector<RefCountedPtr<T> >& a_data, const int a_max_depth, const int a_max_elements);
+  void build_tree(const std::vector<std::shared_ptr<T> >& a_data, const int a_max_depth, const int a_max_elements);
 
   /*!
     @brief Find closest data 
   */
-  virtual Vector<RefCountedPtr<T> > find_closest(const RealVect a_x0);
+  std::vector<std::shared_ptr<T> > find_closest(const RealVect a_x0);
 
-  virtual int get_depth(){return m_depth;}
+  
+  int get_depth(){return m_depth;}
 
 protected:
 
   /*!
     @brief Root node
   */
-  RefCountedPtr<kd_node<T> > m_root;
+  std::shared_ptr<kd_node<T> > m_root;
 
   /*!
     @brief One of the leaf nodes
   */
-  RefCountedPtr<kd_node<T> > m_leaf;
+  std::shared_ptr<kd_node<T> > m_leaf;
   
   /*!
     @brief Nodes
   */
-  Vector<RefCountedPtr<kd_node<T> > > m_nodes;
+  std::vector<std::shared_ptr<kd_node<T> > > m_nodes;
 
   /*!
     @brief Leaves
   */
-  Vector<RefCountedPtr<kd_node<T> > > m_leaves;
+  std::vector<std::shared_ptr<kd_node<T> > > m_leaves;
 
   /*!
     @brief Depth
@@ -70,22 +75,25 @@ protected:
   /*!
     @brief Tree search
   */
-  virtual void tree_search(Vector<RefCountedPtr<kd_node<T> > >& a_candidates,
-			   Vector<Real>&                        a_distances,
-			   const RealVect                       a_x0);
+  
+  void tree_search(std::vector<std::shared_ptr<kd_node<T> > >& a_candidates,
+		   std::vector<Real>&                          a_distances,
+		   const RealVect                              a_x0);
 
   /*!
     @brief Insertion sort
   */
-  virtual void insertion_sort(Vector<RefCountedPtr<kd_node<T> > >& a_queue,
-			      Vector<Real>&                        a_distances);
+  
+  void insertion_sort(std::vector<std::shared_ptr<kd_node<T> > >& a_queue,
+		      std::vector<Real>&                          a_distances);
 
   /*!
-    @brief Trim Vector
+    @brief Trim std::vector
   */
-  virtual void trim(Vector<RefCountedPtr<kd_node<T> > >& a_queue, Vector<Real>& a_distances, const int max_elem);
+  
+  void trim(std::vector<std::shared_ptr<kd_node<T> > >& a_queue, std::vector<Real>& a_distances, const int max_elem);
 		    
-  };
+};
 
 #include "kd_treeI.H"
 

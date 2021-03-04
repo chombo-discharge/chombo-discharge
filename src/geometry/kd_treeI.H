@@ -18,27 +18,31 @@
 
 #define TREE_EPSILON 1.E-6
 
-template<typename T> kd_tree<T>::kd_tree(){
+template<typename T>
+kd_tree<T>::kd_tree(){
 
 }
 
-template<typename T> kd_tree<T>::kd_tree(const Vector<RefCountedPtr<T> >& a_data,
-					 const int                       a_max_depth,
-					 const int                       a_max_elements){
+template<typename T>
+kd_tree<T>::kd_tree(const std::vector<std::shared_ptr<T> >& a_data,
+		    const int                               a_max_depth,
+		    const int                               a_max_elements){
   this->build_tree(a_data, a_max_depth, a_max_elements);
 }
 
-template<typename T> kd_tree<T>::~kd_tree(){
+template<typename T>
+kd_tree<T>::~kd_tree(){
 
 }
 
-template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >& a_data,
-						 const int                      a_max_depth,
-						 const int                      a_max_elements){
+template<typename T>
+void kd_tree<T>::build_tree(const std::vector<std::shared_ptr<T> >& a_data,
+			    const int                      a_max_depth,
+			    const int                      a_max_elements){
 
   int datasize = a_data.size();
-  if(m_root.isNull()){ // Create root
-    m_root  = RefCountedPtr<kd_node<T> > (new kd_node<T>());
+  if(m_root == nullptr){ // Create root
+    m_root  = std::shared_ptr<kd_node<T> > (new kd_node<T>());
     m_depth = 0;
     
     m_root->set_data(a_data);
@@ -53,10 +57,10 @@ template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >
     keep_splitting = false;
     
     const int num_nodes = m_nodes.size();
-    Vector<RefCountedPtr<kd_node<T> > > children(0);
+    std::vector<std::shared_ptr<kd_node<T> > > children(0);
     for (int i = 0; i < num_nodes; i++){
 
-      RefCountedPtr<kd_node<T> >& node = m_nodes[i];
+      std::shared_ptr<kd_node<T> >& node = m_nodes[i];
 	
       const bool split_node =
 	(node->get_depth() < a_max_depth) &&          // Can we go deeper?
@@ -66,8 +70,8 @@ template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >
       if(split_node){
 	keep_splitting = true; // Must do another pass to see if we should split more nodes
 	  
-	RefCountedPtr<kd_node<T> > left  = RefCountedPtr<kd_node<T> > (new kd_node<T>(node));
-	RefCountedPtr<kd_node<T> > right = RefCountedPtr<kd_node<T> > (new kd_node<T>(node));
+	std::shared_ptr<kd_node<T> > left  = std::shared_ptr<kd_node<T> > (new kd_node<T>(node));
+	std::shared_ptr<kd_node<T> > right = std::shared_ptr<kd_node<T> > (new kd_node<T>(node));
 
 	// Create children and divide up data
 	node->set_left(left);
@@ -92,7 +96,7 @@ template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >
     }
 
     // After each pass, append children to list of nodes
-    m_nodes.append(children);
+    m_nodes.emplace_back(children);
   }
 
 
@@ -118,10 +122,11 @@ template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >
   CH_assert(dataleaf == datasize);
 }
 
-template<typename T> Vector<RefCountedPtr<T> > kd_tree<T>::find_closest(const RealVect a_x0){
+template<typename T>
+std::vector<std::shared_ptr<T> > kd_tree<T>::find_closest(const RealVect a_x0){
 
-  Vector<RefCountedPtr<kd_node<T> > > queue;
-  Vector<Real> dist;
+  std::vector<std::shared_ptr<kd_node<T> > > queue;
+  std::vector<Real> dist;
 
   queue.push_back(m_root);
   dist.push_back(m_root->dist(a_x0));
@@ -141,16 +146,17 @@ template<typename T> Vector<RefCountedPtr<T> > kd_tree<T>::find_closest(const Re
   return queue[0]->get_data();
 }
 
-template<typename T> void kd_tree<T>::tree_search(Vector<RefCountedPtr<kd_node<T> > >& a_queue,
-						   Vector<Real>&                        a_distances,
-						   const RealVect                       a_x0){
+template<typename T>
+void kd_tree<T>::tree_search(std::vector<std::shared_ptr<kd_node<T> > >& a_queue,
+			     std::vector<Real>&                        a_distances,
+			     const RealVect                            a_x0){
 
   // We assume that a_queue and a_distances is sorted on the way in
   const int Qmax = 10;
 
   if(!a_queue[0]->is_leaf()){ // Examine children
-    RefCountedPtr<kd_node<T> > left  = a_queue[0]->get_left();
-    RefCountedPtr<kd_node<T> > right = a_queue[0]->get_right();
+    std::shared_ptr<kd_node<T> > left  = a_queue[0]->get_left();
+    std::shared_ptr<kd_node<T> > right = a_queue[0]->get_right();
 
     const Real left_dist  = left->dist(a_x0);
     const Real right_dist = right->dist(a_x0);
@@ -181,20 +187,21 @@ template<typename T> void kd_tree<T>::tree_search(Vector<RefCountedPtr<kd_node<T
   }
 }
 
-template<typename T> void kd_tree<T>::insertion_sort(Vector<RefCountedPtr<kd_node<T> > >& a_queue,
-						     Vector<Real>&                        a_distances){
+template<typename T>
+void kd_tree<T>::insertion_sort(std::vector<std::shared_ptr<kd_node<T> > >& a_queue,
+				std::vector<Real>&                        a_distances){
 
   const int N = a_queue.size();
   
   for (int i = 1; i < N; i++){
 
-    const RefCountedPtr<kd_node<T> > cur_elem  = a_queue[i];
+    const std::shared_ptr<kd_node<T> > cur_elem  = a_queue[i];
     const Real cur_dist = a_distances[i];
     
     int j = i;
     while(j > 0 && a_distances[j-1] > a_distances[j]){
 
-      const RefCountedPtr<kd_node<T> > cur_elem = a_queue[j];
+      const std::shared_ptr<kd_node<T> > cur_elem = a_queue[j];
       const Real cur_dist = a_distances[j];
 
       a_queue[j]   = a_queue[j-1];
@@ -208,10 +215,11 @@ template<typename T> void kd_tree<T>::insertion_sort(Vector<RefCountedPtr<kd_nod
   }
 }
 
-template<typename T> void kd_tree<T>::trim(Vector<RefCountedPtr<kd_node<T> > >& a_queue,
-					   Vector<Real>& a_distances,
-					   const int max_elem){
-  while(a_queue.size() > max_elem){
+template<typename T>
+void kd_tree<T>::trim(std::vector<std::shared_ptr<kd_node<T> > >& a_queue,
+		      std::vector<Real>&                          a_distances,
+		      const int                                   a_max_elem){
+  while(a_queue.size() > a_max_elem){
     a_queue.pop_back();
     a_distances.pop_back();
   }

@@ -1,8 +1,8 @@
 /*!
-  @file dcel_mesh.H
-  @brief Declaration of a dcel_mesh class for handling surface tesselations
+  @file   dcel_mesh.H
+  @brief  Declaration of a dcel_mesh class for handling surface tesselations
   @author Robert Marskar
-  @date   Apr. 2018
+  @date   March 2021
 */
 
 #ifndef _DCEL_MESH_
@@ -10,12 +10,13 @@
 
 #include "ritter_sphere.H"
 #include "kd_tree.H"
-#include "dcel_poly.H"
-#include "dcel_edge.H" 
-#include "dcel_vert.H"
 
-#include <Vector.H>
-#include <RefCountedPtr.H>
+#include <vector>
+#include <memory>
+
+class dcel_poly;
+class dcel_edge;
+class dcel_vert;
 
 /*!
   @brief Class for handling surface tesselations
@@ -33,9 +34,9 @@ public:
   /*!
     @brief Full constructor
   */
-  dcel_mesh(Vector<RefCountedPtr<dcel_poly> >& a_polygons,
-	    Vector<RefCountedPtr<dcel_edge> >& a_edges,
-	    Vector<RefCountedPtr<dcel_vert> >& a_vertices);
+  dcel_mesh(std::vector<std::shared_ptr<dcel_poly> >& a_polygons,
+	    std::vector<std::shared_ptr<dcel_edge> >& a_edges,
+	    std::vector<std::shared_ptr<dcel_vert> >& a_vertices);
 
   /*!
     @brief Destructor
@@ -45,45 +46,53 @@ public:
   /*!
     @brief Check that mesh is OK
   */
-  virtual bool sanity_check() const;
+  
+  bool sanity_check() const;
 
   /*!
     @brief Define a mesh from existing polygons and edges
   */
-  virtual void define(Vector<RefCountedPtr<dcel_poly> >& a_polygons,
-		      Vector<RefCountedPtr<dcel_edge> >& a_edges,
-		      Vector<RefCountedPtr<dcel_vert> >& a_vertices);
+  
+  void define(std::vector<std::shared_ptr<dcel_poly> >& a_polygons,
+	      std::vector<std::shared_ptr<dcel_edge> >& a_edges,
+	      std::vector<std::shared_ptr<dcel_vert> >& a_vertices);
 
   /*!
     @brief Reconcile polygon edges. This gives each edge a reference to the polygon they circulate, and also computes the 
     polygon area
   */
-  virtual void reconcile_polygons(const bool a_outward_normal, const bool recompute_vnormal);
+  
+  void reconcile_polygons(const bool a_outward_normal, const bool recompute_vnormal);
 
   /*!
     @brief Build kd-tree
   */
-  virtual void build_tree(const int a_max_depth, const int a_max_elements);
+  
+  void build_tree(const int a_max_depth, const int a_max_elements);
 
   /*!
     @brief Compute signed distance
   */
-  virtual Real signed_distance(const RealVect a_x0);
+  
+  Real signed_distance(const RealVect a_x0);
 
   /*!
     @brief Get vertices
   */
-  virtual Vector<RefCountedPtr<dcel_vert> >& get_vertices();
+  
+  std::vector<std::shared_ptr<dcel_vert> >& get_vertices();
 
   /*!
     @brief Get edges
   */
-  virtual Vector<RefCountedPtr<dcel_edge> >& get_edges();
+  
+  std::vector<std::shared_ptr<dcel_edge> >& get_edges();
 
   /*!
     @brief Get polygons
   */
-  virtual Vector<RefCountedPtr<dcel_poly> >& get_polygons();
+  
+  std::vector<std::shared_ptr<dcel_poly> >& get_polygons();
 
 protected:
 
@@ -105,36 +114,39 @@ protected:
   /*!
     @brief kd-tree for fast polysearch
   */
-  RefCountedPtr<kd_tree<dcel_poly> > m_tree;
+  std::shared_ptr<kd_tree<dcel_poly> > m_tree;
 
   /*!
     @brief Mesh polygons
   */
-  Vector<RefCountedPtr<dcel_poly> > m_polygons;
+  std::vector<std::shared_ptr<dcel_poly> > m_polygons;
 
   /*!
     @brief Mesh edges
   */
-  Vector<RefCountedPtr<dcel_edge> > m_edges;
+  std::vector<std::shared_ptr<dcel_edge> > m_edges;
 
   /*!
     @brief Mesh vertices
   */
-  Vector<RefCountedPtr<dcel_vert> > m_vertices;
+  std::vector<std::shared_ptr<dcel_vert> > m_vertices;
 
   /*!
     @brief Compute vertex normals
   */
-  virtual void compute_vertex_normals();
+  
+  void compute_vertex_normals();
 
   /*!
     @brief Compute edge normals
   */
-  virtual void compute_edge_normals();
+  
+  void compute_edge_normals();
 
   /*!
     @brief Compute bounding sphere for mesh
   */
-  virtual void compute_bounding_sphere();
+  void compute_bounding_sphere();
 };
+
 #endif

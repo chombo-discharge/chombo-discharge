@@ -10,7 +10,8 @@
 
 #include "dcel_mesh.H"
 
-#include <RefCountedPtr.H>
+#include <memory>
+
 #include <BaseIF.H>
 
 /*!
@@ -19,15 +20,12 @@
 class dcel_if : public BaseIF {
 public:
 
-  /*!
-    @brief Weak constructor
-  */
-  dcel_if();
+  dcel_if() = delete;
 
   /*!
     @brief Full constructor
   */
-  dcel_if(const RefCountedPtr<dcel_mesh>& a_mesh, const bool a_inside);
+  dcel_if(const std::shared_ptr<dcel_mesh>& a_mesh, const bool a_fluidInside);
 
   /*!
     @brief Copy constructor
@@ -42,24 +40,24 @@ public:
   /*!
     @brief Value function
   */
-  virtual Real value(const RealVect& a_point) const;
+  Real value(const RealVect& a_point) const override;
 
   /*!
     @brief Factory method
   */
-  virtual BaseIF* newImplicitFunction() const;
+  BaseIF* newImplicitFunction() const override;
 
 protected:
 
   /*!
     @brief Mesh
   */
-  RefCountedPtr<dcel_mesh> m_mesh;
+  std::shared_ptr<dcel_mesh> m_mesh;
 
   /*!
     @brief Flip covered region
   */
-  bool m_inside;
+  bool m_fluidInside;
 };
 
 #endif
