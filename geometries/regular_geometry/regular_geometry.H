@@ -16,14 +16,7 @@
 class regular_geometry : public computational_geometry {
 public:
 
-  /*!
-    @brief Constructor. First sphere is the electrode. 
-  */
   regular_geometry();
-
-  /*!
-    @brief Destructor
-  */
   ~regular_geometry();
 };
 

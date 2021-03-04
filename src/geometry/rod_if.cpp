@@ -29,13 +29,8 @@ rod_if::rod_if(const RealVect& a_center1,
   // Build the cylinder
   Vector<BaseIF*> isects;
   isects.push_back(static_cast<BaseIF*> (new cylinder_if(c1, c2, a_radius, a_fluidInside)));
-#if 0
-  isects.push_back(static_cast<BaseIF*> (new SphereIF(a_radius, c1, a_fluidInside)));
-  isects.push_back(static_cast<BaseIF*> (new SphereIF(a_radius, c2, a_fluidInside)));
-#else
-  isects.push_back(static_cast<BaseIF*> (new new_sphere_if(c1, a_radius, a_fluidInside)));
-  isects.push_back(static_cast<BaseIF*> (new new_sphere_if(c2, a_radius, a_fluidInside)));
-#endif
+  isects.push_back(static_cast<BaseIF*> (new new_sphere_if(c1, a_radius,   a_fluidInside)));
+  isects.push_back(static_cast<BaseIF*> (new new_sphere_if(c2, a_radius,   a_fluidInside)));
 
   // Build the rod
   m_baseif = RefCountedPtr<BaseIF>(new IntersectionIF(isects));

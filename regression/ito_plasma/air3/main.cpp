@@ -7,7 +7,7 @@
 #include "rte_layout.H"
 #include "mc_photo.H"
 #include "ito_plasma_air3.H"
-#include "rod_sphere.H"
+#include "rod_dielectric.H"
 #include "ito_plasma_godunov.H"
 #include "ito_plasma_streamer_tagger.H"
 #include "ParmParse.H"
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]){
 
 
   // Set geometry and AMR 
-  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_sphere());
+  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_dielectric());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());
 

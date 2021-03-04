@@ -1,4 +1,5 @@
 import os
+import glob
 import argparse
 import sys
 import configparser
@@ -14,28 +15,56 @@ if sys.version_info < MIN_PYTHON:
 # File holding regression tests, and the name of
 # this script
 # --------------------------------------------------
-tests_file       = "tests.ini"
-regression_rules = "regression_rules.py"
+#tests_file       = "geometry.ini"
+#tests_file       = "poisson.ini"
+#tests_file       = "advection_diffusion.ini"
+#tests_file       = "cdr_plasma.ini"
+#tests_file       = "rte.ini"
+tests_file       = "ito.ini"
 
 # --------------------------------------------------
 # Set up arguments that can be passed into this
 # script
 # --------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument('-compile', '--compile',  help="Compile executables", action='store_true')
-parser.add_argument('--benchmark',            help="Generate benchmark files only", action='store_true')
-parser.add_argument('-tests',                 help="Run one or more regression tests", nargs='+', required=False)
-parser.add_argument('--silent',               help="Turn off unnecessary output", action='store_true')
-parser.add_argument('--clean',                help="Do a clean compile", action='store_true')
-parser.add_argument('-run',                   help="MPI run command", type=str, default="mpirun")
-
-# --------------------------------------------------
-# Read arguments and configuration files
-# --------------------------------------------------
+parser.add_argument('-compile', '--compile',  help="Compile executables.", action='store_true')
+parser.add_argument('-run',                   help="MPI run command.", type=str, default="mpirun")
+parser.add_argument('-suites',                help="Test suite (e.g. 'geometry' or 'poisson')", nargs='+', default="all")
+parser.add_argument('-tests',                 help="Individual tests in test suite.", nargs='+', required=False)
+parser.add_argument('--silent',               help="Turn off unnecessary output.",   action='store_true')
+parser.add_argument('--clean',                help="Do a clean compile.",            action='store_true')
+parser.add_argument('--benchmark',            help="Generate benchmark files only.", action='store_true')
 args = parser.parse_args()
-config = configparser.ConfigParser()
-config.read(tests_file)
+
+# --------------
+# Base directory.
+# --------------
 baseDir = os.getcwd()
+
+
+# -------------------------------------------------------
+# Set up test suite. If 'suite' is all, do all test files
+# -------------------------------------------------------
+test_files = []
+if args.suites == "all":
+    for file in glob.glob("*.ini"):
+        test_files.append(file)
+else:
+    for s in args.suites:
+        file = str(s) + ".ini"
+        test_files.append(file)
+
+# --------------------------------
+# Print which suites we're running
+# --------------------------------
+print("Running test suites: " + str(test_files))
+
+
+# ---------------
+# Parse ini files
+# ---------------
+config = configparser.ConfigParser()
+config.read(test_files)
 
 # --------------------------------------------------
 # Moron check for running the test suite

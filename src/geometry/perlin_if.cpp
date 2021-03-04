@@ -23,11 +23,11 @@ int perlin_if::s_perlin[256] = { 151,160,137,91,90,15,
 				138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180};
 
 //
-perlin_if::perlin_if(const Real&     a_noiseAmp,
-		   const RealVect& a_noiseFreq,
-		   const Real&     a_persistence,
-		   const int&      a_octaves,
-		   const bool&     a_reseed){
+perlin_if::perlin_if(const Real     a_noiseAmp,
+		   const RealVect a_noiseFreq,
+		   const Real     a_persistence,
+		   const int      a_octaves,
+		   const bool     a_reseed){
 #if CH_SPACEDIM < 2 || CH_SPACEDIM > 3
   MayDay::Abort("perlin_if::perlin_if - This will only compile in 2D or 3D");
 #endif

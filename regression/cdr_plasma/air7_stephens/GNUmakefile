@@ -29,7 +29,7 @@ src_dirs = $(PLASMAC_HOME)/src \
 	$(PLASMAC_HOME)/src/poisson_solver \
 	$(PLASMAC_HOME)/src/rte_solver \
 	$(PLASMAC_HOME)/src/sigma_solver \
-	$(PLASMAC_HOME)/geometries/rod_sphere\
+	$(PLASMAC_HOME)/geometries/rod_dielectric\
 	$(PLASMAC_HOME)/physics/cdr_plasma \
 	$(PLASMAC_HOME)/physics/cdr_plasma/cell_taggers/streamer_tagger\
 	$(PLASMAC_HOME)/physics/cdr_plasma/time_steppers/godunov\
