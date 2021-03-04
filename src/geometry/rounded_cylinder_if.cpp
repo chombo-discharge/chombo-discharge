@@ -9,9 +9,13 @@
 #include <TorusIF.H>
 #include <IntersectionIF.H>
 #include <TransformIF.H>
+#include <PlaneIF.H>
+#include <SmoothIntersection.H>
+#include <SmoothUnion.H>
 
 #include "cylinder_if.H"
 #include "rounded_cylinder_if.H"
+#include "rounded_box_if.H"
 #include "torus_if.H"
 
 rounded_cylinder_if::rounded_cylinder_if(const RealVect a_center1, const RealVect a_center2, const Real a_radius, const Real a_curv, const bool a_fluidInside){
@@ -46,29 +50,50 @@ BaseIF* rounded_cylinder_if::newImplicitFunction() const{
 
 void rounded_cylinder_if::makeBaseIF(){
 #if CH_SPACEDIM==2
-  this->makeBaseIF2D();
+  BaseIF* bif = this->makeBaseIF2D();
 #elif CH_SPACEDIM==3
-  this->makeBaseIF3D();
+  BaseIF* bif = this->makeBaseIF3D();
 #endif
+
+  // Rotate and translate into place
+  TransformIF* transif = new TransformIF(*bif);
+
+  const int dir     = SpaceDim - 1;
+  const RealVect up = BASISREALV(dir);
+  if(m_center2[dir] >= m_center1[dir]){
+    transif->rotate(up, m_center2-m_center1);
+    transif->translate(m_center1);
+  }
+  else{
+    transif->rotate(up, m_center1-m_center2);
+    transif->translate(m_center2);
+  }
+
+  m_baseif = RefCountedPtr<BaseIF> (transif);
 }
 
 #if CH_SPACEDIM==2
-void rounded_cylinder_if::makeBaseIF2D(){
-  MayDay::Abort("rounded_cylinder_if::makeBaseIF2D - not implemented (yet)");
+BaseIF* rounded_cylinder_if::makeBaseIF2D(){
+  const RealVect x0 = RealVect::Zero - m_radius*BASISREALV(0);
+  const RealVect x1 = RealVect::Zero + m_radius*BASISREALV(0) + m_length*BASISREALV(1);
+
+  return (BaseIF*) (new rounded_box_if(x0, x1, m_curv, false));
 }
 #endif
 
 #if CH_SPACEDIM==3
-void rounded_cylinder_if::makeBaseIF3D(){
+BaseIF* rounded_cylinder_if::makeBaseIF3D(){
 
   // TLDR: Construct m_baseif from a main cylinderk.  on each we put a torus and then a smaller cylinder between everything. Default orientation
-  //       is along +x, then we rotate. This is constructed such that the baseif function gives a value 
+  //       is along +z.
 
-  const RealVect x0 = RealVect::Zero;
-  const RealVect x1 = x0 + m_length*BASISREALV(2);
+  const RealVect up = BASISREALV(SpaceDim-1);
   
-  const RealVect y0 = x0 + m_curv*BASISREALV(2);
-  const RealVect y1 = x1 - m_curv*BASISREALV(2);
+  const RealVect x0 = RealVect::Zero;
+  const RealVect x1 = x0 + m_length*up;
+  
+  const RealVect y0 = x0 + m_curv*up;
+  const RealVect y1 = x1 - m_curv*up;
 
   const Real majorRadius = m_radius - m_curv;
   const Real minorRadius = m_curv;
@@ -76,13 +101,8 @@ void rounded_cylinder_if::makeBaseIF3D(){
   BaseIF* mainCylinder   = (BaseIF*) (new cylinder_if(y0, y1, m_radius,        false));
   BaseIF* insideCylinder = (BaseIF*) (new cylinder_if(x0, x1, m_radius-m_curv, false));
 
-#if 0 // Original code
-  BaseIF* torusBottom = (BaseIF*) (new TorusIF(majorRadius, minorRadius, y0, false));
-  BaseIF* torusTop    = (BaseIF*) (new TorusIF(majorRadius, minorRadius, y1, false));
-#else // Use new Torus function. 
   BaseIF* torusBottom = (BaseIF*) (new torus_if(y0, majorRadius, minorRadius, false));
   BaseIF* torusTop    = (BaseIF*) (new torus_if(y1, majorRadius, minorRadius, false));
-#endif
 
   // Make the intersection of these
   Vector<BaseIF*> parts;
@@ -90,23 +110,8 @@ void rounded_cylinder_if::makeBaseIF3D(){
   parts.push_back(insideCylinder);
   parts.push_back(torusBottom);
   parts.push_back(torusTop);
-  BaseIF* isect = (BaseIF*) (new IntersectionIF(parts));
-
-  // Do a transform
-  TransformIF* transif = new TransformIF(*isect);
-
-  if(m_center2[2] >= m_center1[2]){
-    transif->rotate(BASISREALV(2), m_center2-m_center1);
-    transif->translate(m_center1);
-  }
-  else{
-    transif->rotate(BASISREALV(2), m_center1-m_center2);
-    transif->translate(m_center2);
-  }
-
-
-  // Ok, we're done. 
-  m_baseif = RefCountedPtr<BaseIF> (transif);
+  
+  return (BaseIF*) (new IntersectionIF(parts));
 }
 #endif
 

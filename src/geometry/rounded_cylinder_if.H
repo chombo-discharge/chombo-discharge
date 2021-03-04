@@ -86,12 +86,12 @@ protected:
   void makeBaseIF();
 
   /*!
-    @brief Make 2D function
+    @brief Make BaseIF
   */
 #if CH_SPACEDIM==2
-  void makeBaseIF2D();
+  BaseIF* makeBaseIF2D();
 #elif CH_SPACEDIM==3
-  void makeBaseIF3D();
+  BaseIF* makeBaseIF3D();
 #endif
 };
 #endif
