@@ -11,19 +11,12 @@
 #include "computational_geometry.H"
 
 /*!
-  @brief This is a class that defines a wire-wire geometry
+  @brief Class that describes a rod electrode with surface roughness
 */
 class rough_rod : public computational_geometry {
 public:
 
-  /*!
-    @brief Constructor. First rod is the electrode. 
-  */
   rough_rod();
-
-  /*!
-    @brief Destructor
-  */
   ~rough_rod();
 };
 
