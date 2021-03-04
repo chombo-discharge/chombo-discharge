@@ -11,19 +11,12 @@
 #include "computational_geometry.H"
 
 /*!
-  @brief This is a class that defines a wire-wire geometry
+  @brief This is a class that a rough sphere (either electrode or dielectric)
 */
 class rough_sphere : public computational_geometry {
 public:
 
-  /*!
-    @brief Constructor. First sphere is the electrode. 
-  */
   rough_sphere();
-
-  /*!
-    @brief Destructor
-  */
   ~rough_sphere();
 };
 
