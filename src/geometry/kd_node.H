@@ -8,8 +8,6 @@
 #ifndef _KD_NODE_
 #define _KD_NODE_
 
-#include "dcel_poly.H"
-
 #include <vector>
 #include <memory>
 

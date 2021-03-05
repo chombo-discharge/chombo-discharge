@@ -7,9 +7,9 @@
 
 #include "ply_reader.H"
 #include "dcel_mesh.H"
-#include "dcel_poly.H"
+#include "dcel_polygon.H"
 #include "dcel_edge.H"
-#include "dcel_vert.H"
+#include "dcel_vertex.H"
 #include "dcel_iterator.H"
 
 #include <iostream>

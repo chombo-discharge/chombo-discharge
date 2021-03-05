@@ -9,9 +9,6 @@
 #define _PLY_READER_
 
 #include "dcel_mesh.H"
-#include "dcel_poly.H"
-#include "dcel_edge.H"
-#include "dcel_vert.H"
 
 #include <vector>
 #include <memory>

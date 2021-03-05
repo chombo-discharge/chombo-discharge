@@ -5,9 +5,9 @@
   @date   March 2021
 */
 
-#include "dcel_vert.H"
+#include "dcel_vertex.H"
 #include "dcel_edge.H"
-#include "dcel_poly.H"
+#include "dcel_polygon.H"
 #include "dcel_iterator.H"
 
 using namespace dcel;
