@@ -17,74 +17,90 @@
 
 using namespace dcel;
 
-bool dcel_mesh::s_angle_weighted = false; // Use angle-weighted vertex normal vectors. This currently breaks. 
+bool mesh::s_angle_weighted = false; // Use angle-weighted vertex normal vectors. This currently breaks. 
 
-dcel_mesh::dcel_mesh(){
+mesh::mesh(){
   m_reconciled = false;
   m_use_tree   = false;
 }
 
-dcel_mesh::~dcel_mesh(){
-
-}
-
-
-dcel_mesh::dcel_mesh(std::vector<std::shared_ptr<polygon> >& a_polygons,
-		     std::vector<std::shared_ptr<edge> >& a_edges,
-		     std::vector<std::shared_ptr<vertex> >& a_vertices){
+mesh::mesh(std::vector<std::shared_ptr<polygon> >& a_polygons,
+	   std::vector<std::shared_ptr<edge> >&    a_edges,
+	   std::vector<std::shared_ptr<vertex> >&  a_vertices){
+  
   m_reconciled = false;
   m_use_tree   = false;
   
   this->define(a_polygons, a_edges, a_vertices);
 }
 
+mesh::~mesh(){
 
-std::vector<std::shared_ptr<vertex> >& dcel_mesh::get_vertices(){
+}
+
+void mesh::define(std::vector<std::shared_ptr<polygon> >& a_polygons,
+		  std::vector<std::shared_ptr<edge> >&    a_edges,
+		  std::vector<std::shared_ptr<vertex> >&  a_vertices){
+  m_polygons = a_polygons;
+  m_edges    = a_edges;
+  m_vertices = a_vertices;
+}
+
+std::vector<std::shared_ptr<vertex> >& mesh::getVertices(){
   return m_vertices;
 }
 
+const std::vector<std::shared_ptr<vertex> >& mesh::getVertices() const {
+  return m_vertices;
+}
 
-std::vector<std::shared_ptr<edge> >& dcel_mesh::get_edges(){
+std::vector<std::shared_ptr<edge> >& mesh::getEdges(){
   return m_edges;
 }
 
+const std::vector<std::shared_ptr<edge> >& mesh::getEdges() const {
+  return m_edges;
+}
 
-std::vector<std::shared_ptr<polygon> >& dcel_mesh::get_polygons(){
+std::vector<std::shared_ptr<polygon> >& mesh::getPolygons(){
   return m_polygons;
 }
 
+const std::vector<std::shared_ptr<polygon> >& mesh::getPolygons() const {
+  return m_polygons;
+}
 
-bool dcel_mesh::sanity_check() const {
+bool mesh::sanityCheck() const {
   for (int i = 0; i < m_edges.size(); i++){
     if(m_edges[i] == nullptr){
-      std::cerr << "dcel_mesh::sanity_check - edge is NULL\n";
+      std::cerr << "mesh::sanity_check - edge is NULL\n";
     }
     else{
       const std::shared_ptr<edge>& edge = m_edges[i];
     
-      if(edge->get_pair()== nullptr){
-	std::cerr << "dcel_mesh::sanity_check - pair edge is NULL, your geometry probably isn't watertight.\n";
+      if(edge->getPairEdge()== nullptr){
+	std::cerr << "mesh::sanity_check - pair edge is NULL, your geometry probably isn't watertight.\n";
       }
-      else if(edge->get_next()== nullptr){
-	std::cerr << "dcel_mesh::sanity_check - next edge is NULL, something has gone wrong with edge generation.\n";
+      else if(edge->getNextEdge()== nullptr){
+	std::cerr << "mesh::sanity_check - next edge is NULL, something has gone wrong with edge generation.\n";
       }
-      else if(edge->get_prev()== nullptr){
-	std::cerr << "dcel_mesh::sanity_check - prev edge is NULL, something has gone wrong with edge generation.\n";
+      else if(edge->getPreviousEdge()== nullptr){
+	std::cerr << "mesh::sanity_check - prev edge is NULL, something has gone wrong with edge generation.\n";
       }
-      else if(edge->get_vert()== nullptr){
-	std::cerr << "dcel_mesh::sanity_check - vertex is NULL, something has gone wrong with edge generation.\n";
+      else if(edge->getVertex()== nullptr){
+	std::cerr << "mesh::sanity_check - vertex is NULL, something has gone wrong with edge generation.\n";
       }
     }
   }
 
   for (int i = 0; i < m_vertices.size(); i++){
     if(m_vertices[i]== nullptr){
-      std::cerr << "dcel_mesh::sanity_check - m_vertices[i] is NULL, something has gone wrong with vertex generation.\n";
+      std::cerr << "mesh::sanity_check - m_vertices[i] is NULL, something has gone wrong with vertex generation.\n";
     }
     else{
-      if(m_vertices[i]->get_edge()== nullptr){
-	CH_assert(m_vertices[i]->get_polycache().size() == 0);
-	pout() << "dcel_mesh::sanity_check - vertex edge is NULL, you may have an unreferenced vertex." << endl;
+      if(m_vertices[i]->getEdge()== nullptr){
+	CH_assert(m_vertices[i]->getPolycache().size() == 0);
+	pout() << "mesh::sanity_check - vertex edge is NULL, you may have an unreferenced vertex." << endl;
       }
     }
   }
@@ -92,26 +108,22 @@ bool dcel_mesh::sanity_check() const {
   return true;
 }
 
-
-void dcel_mesh::define(std::vector<std::shared_ptr<polygon> >& a_polygons,
-		       std::vector<std::shared_ptr<edge> >& a_edges,
-		       std::vector<std::shared_ptr<vertex> >& a_vertices){
-  m_polygons = a_polygons;
-  m_edges    = a_edges;
-  m_vertices = a_vertices;
-}
-
-void dcel_mesh::compute_bounding_sphere(){
+void mesh::computeBoundingSphere(){
   std::vector<RealVect> pos;
   for (int i = 0; i < m_vertices.size(); i++){
-    pos.push_back(m_vertices[i]->position());
+    pos.push_back(m_vertices[i]->getPosition());
   }
   
   m_sphere.define(pos);
 }
 
 
-void dcel_mesh::reconcile_polygons(const bool a_outward_normal, const bool a_recompute_vnormal){
+void mesh::reconcilePolygons(const bool a_outward_normal, const bool a_recompute_vnormal){
+
+  /*!
+    @brief Reconcile polygon edges. This gives each edge a reference to the polygon they circulate, and also computes the 
+    polygon area
+  */
 
   // Reconcile polygons; compute polygon area and provide edges explicit access
   // to their polygons
@@ -121,59 +133,58 @@ void dcel_mesh::reconcile_polygons(const bool a_outward_normal, const bool a_rec
     // Every edge gets a reference to this polygon
     for (edge_iterator iter(*poly); iter.ok(); ++iter){
       std::shared_ptr<edge>& edge = iter();
-      edge->set_poly(poly);
+      edge->setPolygon(poly);
     }
-    poly->compute_normal(a_outward_normal);
-    poly->compute_centroid();
-    poly->compute_area();
-    poly->normalize();
-    poly->compute_bbox();
+    
+    poly->computeNormal(a_outward_normal);
+    poly->computeCentroid();
+    poly->computeArea();
+    poly->normalizeNormalVector();
+    poly->computeBoundingBox();
   }
 
-
-  // Compute pseudonormals for vertices and edges.
-  if(a_recompute_vnormal){
-    std::cerr << "dcel_mesh::reconcile_polygons - there is probably a bug in the vertex normal computation somewhere\n";
-    this->compute_vertex_normals();
+  if(a_recompute_vnormal){   // Compute pseudonormals for vertices 
+    std::cerr << "mesh::reconcile_polygons - there is probably a bug in the vertex normal computation somewhere\n";
+    this->computeVertexNormals();
   }
-  this->compute_edge_normals();
-  this->compute_bounding_sphere();
+  
+  this->computeEdgeNormals();
+  this->computeBoundingSphere();
 
   m_reconciled = true;
 }
 
 
-void dcel_mesh::compute_vertex_normals(){
+void mesh::computeVertexNormals(){
 #define debug_func 1
 
 #if debug_func
   pout() << "starting computation" << endl;
 #endif
   for (int i = 0; i < m_vertices.size(); i++){
-    if(!(m_vertices[i]->get_edge()== nullptr)){
+    if(!(m_vertices[i]->getEdge()== nullptr)){
 #if 1 // This doesn't work, why?!?
-      const std::vector<std::shared_ptr<polygon> > polygons = m_vertices[i]->get_polygons();
+      const std::vector<std::shared_ptr<polygon> > polygons = m_vertices[i]->getPolygons();
 #else
-      const std::vector<std::shared_ptr<polygon> > polygons = m_vertices[i]->get_polycache();
+      const std::vector<std::shared_ptr<polygon> > polygons = m_vertices[i]->getPolycache();
 #endif
 
       // Mean or area weighted
-      CH_assert(polygons.size() >= 3);
       if(!s_angle_weighted){
 	RealVect normal = RealVect::Zero;
 	for (int j = 0; j < polygons.size(); j++){
-	  //normal += polygons[j]->get_area()*polygons[j]->normal(); // Area weighted
-	  normal += polygons[j]->normal(); // Mean
+	  //normal += polygons[j]->get_area()*polygons[j]->getNormal(); // Area weighted
+	  normal += polygons[j]->getNormal(); // Mean
 	}
 
 	// Set normal
 	if(normal.vectorLength() > 0.0){
 	  normal *= 1./normal.vectorLength();
-	  m_vertices[i]->set_normal(normal);
+	  m_vertices[i]->setNormal(normal);
 	}
 	else{
-	  normal = polygons[1]->normal();
-	  m_vertices[i]->set_normal(normal);
+	  normal = polygons[1]->getNormal();
+	  m_vertices[i]->setNormal(normal);
 	}
       }
       else { // Angle-weighted normal vector
@@ -183,11 +194,11 @@ void dcel_mesh::compute_vertex_normals(){
 #endif
 	for (edge_iterator iter(*m_vertices[i]); iter.ok(); ++iter){ 
 	  const std::shared_ptr<edge>& outgoing = iter();
-	  const std::shared_ptr<edge>& incoming = outgoing->get_prev();
+	  const std::shared_ptr<edge>& incoming = outgoing->getPreviousEdge();
 
-	  const RealVect origin = incoming->get_vert()->position();
-	  const RealVect x2     = outgoing->get_vert()->position();
-	  const RealVect x1     = incoming->get_other_vert()->position();
+	  const RealVect origin = incoming->getVertex()->getPosition();
+	  const RealVect x2     = outgoing->getVertex()->getPosition();
+	  const RealVect x1     = incoming->getOtherVertex()->getPosition();
 	  const Real len1       = (x1-origin).vectorLength();
 	  const Real len2       = (x2-origin).vectorLength();
 
@@ -208,14 +219,14 @@ void dcel_mesh::compute_vertex_normals(){
 	  pout() << num << endl;
 
 	  if(num > 20){
-	    pout() << "problem vertex = " << m_vertices[i]->position() << endl;
+	    pout() << "problem vertex = " << m_vertices[i]->getPosition() << endl;
 	    std::cerr << "dcel_compute_vertex_normals - stop\n";
 	  }
 #endif
 	}
 	normal *= 1./normal.vectorLength();
 
-	m_vertices[i]->set_normal(normal);
+	m_vertices[i]->setNormal(normal);
       }
     }
 
@@ -225,33 +236,32 @@ void dcel_mesh::compute_vertex_normals(){
   }
 }
 
-void dcel_mesh::compute_edge_normals(){
+void mesh::computeEdgeNormals(){
   for (int i = 0; i < m_edges.size(); i++){
 
-    std::shared_ptr<edge>& cur_edge         = m_edges[i];
-    const std::shared_ptr<edge>& pair_edge = cur_edge->get_pair();
+    std::shared_ptr<edge>& cur_edge        = m_edges[i];
+    const std::shared_ptr<edge>& pair_edge = cur_edge->getPairEdge();
 
-    const std::shared_ptr<polygon>& poly      = cur_edge->get_poly();
-    const std::shared_ptr<polygon>& pair_poly = pair_edge->get_poly();
+    const std::shared_ptr<polygon>& poly      = cur_edge->getPolygon();
+    const std::shared_ptr<polygon>& pair_poly = pair_edge->getPolygon();
 
-    CH_assert(pair_edge->get_pair() == cur_edge);
 
-    const RealVect n1 = poly->normal();
-    const RealVect n2 = pair_poly->normal();
+    const RealVect n1 = poly->getNormal();
+    const RealVect n2 = pair_poly->getNormal();
+    
     RealVect normal = (n1 + n2);
     normal = normal/normal.vectorLength();
     
-    cur_edge->set_normal(normal);
+    cur_edge->setNormal(normal);
   }
 }
 
-void dcel_mesh::build_tree(const int a_max_depth, const int a_max_elements){
+void mesh::buildKdTree(const int a_max_depth, const int a_max_elements){
   m_tree     = std::shared_ptr<kd_tree<polygon> > (new kd_tree<polygon>(m_polygons, a_max_depth, a_max_elements));
   m_use_tree = true;
 }
 
-
-Real dcel_mesh::signed_distance(const RealVect a_x0){
+Real mesh::signedDistance(const RealVect a_x0){
 #define print_time 0
 #if print_time
   Real t0, t1, t2, t3, t4;
@@ -271,7 +281,7 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
       auto start_comp = std::chrono::system_clock::now(); 
       //#endif
       for (int i = 0; i < candidates.size(); i++){
-	const Real cur_dist = candidates[i]->signed_distance(a_x0);
+	const Real cur_dist = candidates[i]->signedDistance(a_x0);
 	if(Abs(cur_dist) < Abs(min_dist)){
 	  min_dist = cur_dist;
 	}
@@ -293,7 +303,7 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
     }
     else{ // Brute force search
       for (int i = 0; i < m_polygons.size(); i++){
-      	const Real cur_dist = m_polygons[i]->signed_distance(a_x0);
+      	const Real cur_dist = m_polygons[i]->signedDistance(a_x0);
       	if(Abs(cur_dist) < Abs(min_dist)){
       	  min_dist = cur_dist;
       	}

@@ -27,10 +27,10 @@ porsche::porsche(){
   pp.get("max_elements", max_elements);
 
   // Build the mesh
-  std::shared_ptr<dcel::dcel_mesh> mesh = std::shared_ptr<dcel::dcel_mesh> (new dcel::dcel_mesh());
+  std::shared_ptr<dcel::mesh> mesh = std::shared_ptr<dcel::mesh> (new dcel::mesh());
   dcel::parser::PLY::read_ascii(*mesh, filename);
-  mesh->reconcile_polygons(true, false);
-  mesh->build_tree(tree_depth, max_elements);
+  mesh->reconcilePolygons(true, false);
+  mesh->buildKdTree(tree_depth, max_elements);
 
   // Create the if object
   RefCountedPtr<dcel_if> bif = RefCountedPtr<dcel_if>(new dcel_if(mesh, true));

@@ -108,7 +108,7 @@ template<typename T>
 Real kd_node<T>::data_dist(const RealVect a_x0) const {
   Real dist = 1.234567E89;
   for (int i = 0; i < m_data.size(); i++){
-    const Real cur_dist = Abs(m_data[i]->signed_distance(a_x0));
+    const Real cur_dist = Abs(m_data[i]->signedDistance(a_x0));
 
     dist = (cur_dist < dist) ? cur_dist : dist;
   }
@@ -124,8 +124,8 @@ void kd_node<T>::compute_bbox(){
   RealVect hi = -1.234567E89*RealVect::Unit;
   for (int i = 0; i < m_data.size(); i++){
     for (int dir = 0; dir < SpaceDim; dir++){
-      const RealVect cur_lo = m_data[i]->get_bbox_lo();
-      const RealVect cur_hi = m_data[i]->get_bbox_hi();
+      const RealVect cur_lo = m_data[i]->getBoundingBoxLo();
+      const RealVect cur_hi = m_data[i]->getBoundingBoxHi();
 
       if(cur_lo[dir] < lo[dir]){
 	lo[dir] = cur_lo[dir];

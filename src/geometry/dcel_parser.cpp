@@ -15,13 +15,13 @@
 #include <iostream>
 #include <fstream>
 
-void dcel::parser::PLY::read_ascii(dcel::dcel_mesh& a_mesh, const std::string a_filename){
+void dcel::parser::PLY::read_ascii(dcel::mesh& a_mesh, const std::string a_filename){
   std::ifstream filestream(a_filename);
 
   if(filestream.is_open()){
-    std::vector<std::shared_ptr<dcel::vertex> >& vertices = a_mesh.get_vertices();
-    std::vector<std::shared_ptr<dcel::edge> >& edges    = a_mesh.get_edges();
-    std::vector<std::shared_ptr<dcel::polygon> >& polygons = a_mesh.get_polygons();
+    std::vector<std::shared_ptr<dcel::vertex> >& vertices  = a_mesh.getVertices();
+    std::vector<std::shared_ptr<dcel::edge> >& edges       = a_mesh.getEdges();
+    std::vector<std::shared_ptr<dcel::polygon> >& polygons = a_mesh.getPolygons();
 
     vertices.resize(0);
     edges.resize(0);
@@ -34,13 +34,13 @@ void dcel::parser::PLY::read_ascii(dcel::dcel_mesh& a_mesh, const std::string a_
     dcel::parser::PLY::read_ascii_vertices(vertices, num_vertices, filestream);
     dcel::parser::PLY::read_ascii_polygons(polygons, edges, vertices, num_polygons, filestream);
 
-    a_mesh.sanity_check();
+    a_mesh.sanityCheck();
   
     filestream.close();
   }
   else{
     const std::string error = "dcel::parser::PLY::read_ascii - ERROR! Could not open file " + a_filename;
-    MayDay::Abort(error.c_str());
+    std::cerr << error + "\n";
   }
 }
 
@@ -109,7 +109,7 @@ void dcel::parser::PLY::read_ascii_vertices(std::vector<std::shared_ptr<dcel::ve
     sstream >> x >> y >> z >> nx >> ny >> nz;
 
     std::shared_ptr<dcel::vertex> vert = std::shared_ptr<dcel::vertex> (new dcel::vertex(pos));
-    vert->set_normal(norm);
+    vert->setNormal(norm);
     a_vertices.push_back(vert);
     if(num == a_num_vertices){
       break;
@@ -151,41 +151,41 @@ void dcel::parser::PLY::read_ascii_polygons(std::vector<std::shared_ptr<dcel::po
     std::vector<std::shared_ptr<dcel::edge> > poly_edges(num_vert);
     for (int i = 0; i < num_vert; i++){
       poly_edges[i] = std::shared_ptr<dcel::edge> (new dcel::edge());
-      poly_edges[i]->set_vert(poly_vertices[(i+1)%num_vert]);
+      poly_edges[i]->setVertex(poly_vertices[(i+1)%num_vert]);
     }
-    polygon->set_edge(poly_edges[0]);
+    polygon->setEdge(poly_edges[0]);
 
     // Associate prev/next
     for (int i = 0; i < num_vert; i++){
-      poly_edges[i]->set_next(poly_edges[(i+1)%num_vert]);
-      poly_edges[(i+1)%num_vert]->set_prev(poly_edges[i]);
+      poly_edges[i]->setNextEdge(poly_edges[(i+1)%num_vert]);
+      poly_edges[(i+1)%num_vert]->setPreviousEdge(poly_edges[i]);
     }
 
     // Set edges emanating from vertices if that hasn't been done already
     for (int i = 0; i < poly_vertices.size(); i++){
-      if(poly_vertices[i]->get_edge() == nullptr){
-	poly_vertices[i]->set_edge(poly_edges[i]);
+      if(poly_vertices[i]->getEdge() == nullptr){
+	poly_vertices[i]->setEdge(poly_edges[i]);
       }
     }
 
     // Check for pairs
     for (int i = 0; i < poly_edges.size(); i++){
 
-      std::shared_ptr<dcel::edge>& edge = poly_edges[i];
-      std::shared_ptr<dcel::vertex>& vert = edge->get_vert();
+      std::shared_ptr<dcel::edge>& edge   = poly_edges[i];
+      std::shared_ptr<dcel::vertex>& vert = edge->getVertex();
 
       // Get all polygons connected to the current vertex and look for edge pairs
-      std::vector<std::shared_ptr<dcel::polygon> >& polygons = vert->get_polycache();
+      std::vector<std::shared_ptr<dcel::polygon> >& polygons = vert->getPolycache();
 
       for (int j = 0; j < polygons.size(); j++){
-	std::shared_ptr<dcel::edge>& other_polygon_edge = polygons[j]->get_edge();
+	std::shared_ptr<dcel::edge>& other_polygon_edge = polygons[j]->getEdge();
 
 	for (dcel::edge_iterator iter(*polygons[j]); iter.ok(); ++iter){
 	  std::shared_ptr<dcel::edge>& other_polygon_edge = iter();
 
-	  if(other_polygon_edge->get_vert() == edge->get_prev()->get_vert()){
-	    edge->set_pair(other_polygon_edge);
-	    other_polygon_edge->set_pair(edge);
+	  if(other_polygon_edge->getVertex() == edge->getPreviousEdge()->getVertex()){
+	    edge->setPairEdge(other_polygon_edge);
+	    other_polygon_edge->setPairEdge(edge);
 	  }
 	}
       }
@@ -193,8 +193,7 @@ void dcel::parser::PLY::read_ascii_polygons(std::vector<std::shared_ptr<dcel::po
 
     // Add reference to newly created polygon
     for (int i = 0; i < poly_vertices.size(); i++){
-      poly_vertices[i]->add_polygon(polygon);
-      CH_assert(!poly_vertices[i]->get_edge().isNull());
+      poly_vertices[i]->addPolygon(polygon);
     }
 
     // Add edges and polygons

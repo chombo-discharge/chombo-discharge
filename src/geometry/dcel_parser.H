@@ -1,6 +1,6 @@
 /*!
   @file   dcel_parser.H
-  @brief  Various classes for reading mesh files and putting them in a dcel_mesh
+  @brief  Various classes for reading mesh files and putting them in a mesh
   @author Robert Marskar
   @date   Apr. 2018
 */
@@ -19,7 +19,7 @@ namespace dcel {
   
     /*!
       @class PLY
-      @brief Class for generation a dcel::dcel_mesh from the Stanford PLY file format
+      @brief Class for generation a dcel::mesh from the Stanford PLY file format
     */
     class PLY {
     public:
@@ -27,7 +27,7 @@ namespace dcel {
       /*!
 	@brief Read an ASCII .ply file and put it in a mesh
       */
-      static void read_ascii(dcel::dcel_mesh& a_mesh, const std::string a_filename);
+      static void read_ascii(dcel::mesh& a_mesh, const std::string a_filename);
 
     protected:
 

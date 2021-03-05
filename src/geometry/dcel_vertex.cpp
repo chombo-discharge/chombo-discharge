@@ -24,76 +24,80 @@ vertex::vertex(const RealVect& a_pos){
   m_normal = RealVect::Zero;
 }
 
+vertex::vertex(const vertex& a_otherVertex){
+  this->define(a_otherVertex.getPosition(),
+	       a_otherVertex.getEdge(),
+	       a_otherVertex.getNormal());
+}
+
 vertex::~vertex(){
 
 }
 
 void vertex::define(const RealVect& a_pos, const std::shared_ptr<edge>& a_edge, const RealVect a_normal){
-  this->set_pos(a_pos);
-  this->set_edge(a_edge);
-  this->set_normal(a_normal);
+  this->setPosition(a_pos);
+  this->setEdge(a_edge);
+  this->setNormal(a_normal);
 }
 
-void vertex::set_pos(const RealVect& a_pos){
+void vertex::setPosition(const RealVect& a_pos){
   m_pos = a_pos;
 }
 
-void vertex::set_edge(const std::shared_ptr<edge>& a_edge){
+void vertex::setEdge(const std::shared_ptr<edge>& a_edge){
   m_edge = a_edge;
 }
 
-void vertex::set_normal(const RealVect& a_normal){
+void vertex::setNormal(const RealVect& a_normal){
   m_normal = a_normal;
 }
 
-void vertex::add_polygon(const std::shared_ptr<polygon>& a_poly){
+void vertex::addPolygon(const std::shared_ptr<polygon>& a_poly){
   m_polycache.push_back(a_poly);
 }
 
-std::vector<std::shared_ptr<polygon> > vertex::get_polygons() {
+std::vector<std::shared_ptr<polygon> > vertex::getPolygons() {
   std::vector<std::shared_ptr<polygon> > polygons;
   for (edge_iterator iter(*this); iter.ok(); ++iter){
-    polygons.push_back(iter()->get_poly());
+    polygons.push_back(iter()->getPolygon());
   }
 
   return polygons;
 }
 
-const std::vector<std::shared_ptr<polygon> >& vertex::get_polycache() const{
+const std::vector<std::shared_ptr<polygon> >& vertex::getPolycache() const{
   return m_polycache;
 }
 
-std::vector<std::shared_ptr<polygon> >& vertex::get_polycache(){
+std::vector<std::shared_ptr<polygon> >& vertex::getPolycache(){
   return m_polycache;
 }
 
-
-
-std::shared_ptr<edge>& vertex::get_edge(){
+std::shared_ptr<edge>& vertex::getEdge(){
   return m_edge;
 }
 
-const std::shared_ptr<edge>& vertex::get_edge() const{
+const std::shared_ptr<edge>& vertex::getEdge() const{
   return m_edge;
 }
 
-RealVect& vertex::position() {
+RealVect& vertex::getPosition() {
   return m_pos;
 }
 
-const RealVect& vertex::position() const {
+const RealVect& vertex::getPosition() const {
   return m_pos;
 }
 
-RealVect& vertex::normal() {
+RealVect& vertex::getNormal() {
   return m_normal;
 }
 
-const RealVect& vertex::normal() const {
+const RealVect& vertex::getNormal() const {
   return m_normal;
 }
 
-Real vertex::signed_distance(const RealVect a_x0) const {
+Real vertex::signedDistance(const RealVect a_x0) const {
   const RealVect delta = a_x0 - m_pos;
   const Real dist      = delta.vectorLength();
   const Real dot       = m_normal.dotProduct(delta);

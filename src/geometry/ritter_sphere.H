@@ -52,7 +52,7 @@ public:
   */
   virtual Real get_radius() const;
 
-    /*!
+  /*!
     @brief Get center
   */
   virtual RealVect get_center() const;

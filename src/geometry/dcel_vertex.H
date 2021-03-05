@@ -23,29 +23,30 @@ namespace dcel {
 
     vertex();
     vertex(const RealVect& a_pos);
+    vertex(const vertex& a_otherVertex);
     ~vertex();
 
     void define(const RealVect& m_pos, const std::shared_ptr<edge>& a_edge, const RealVect a_normal = RealVect::Zero);
-    void set_pos(const RealVect& a_pos);
-    void set_normal(const RealVect& a_normal);
-    void set_edge(const std::shared_ptr<edge>& a_edge);
-    void add_polygon(const std::shared_ptr<polygon>& a_poly);
+    void setPosition(const RealVect& a_pos);
+    void setNormal(const RealVect& a_normal);
+    void setEdge(const std::shared_ptr<edge>& a_edge);
+    void addPolygon(const std::shared_ptr<polygon>& a_poly);
 
-    std::shared_ptr<edge>& get_edge();
-    const std::shared_ptr<edge>& get_edge() const;
+    std::shared_ptr<edge>& getEdge();
+    const std::shared_ptr<edge>& getEdge() const;
 
-    std::vector<std::shared_ptr<polygon> > get_polygons();
+    std::vector<std::shared_ptr<polygon> > getPolygons();
 
-    std::vector<std::shared_ptr<polygon> >& get_polycache();
-    const std::vector<std::shared_ptr<polygon> >& get_polycache() const;
+    std::vector<std::shared_ptr<polygon> >& getPolycache();
+    const std::vector<std::shared_ptr<polygon> >& getPolycache() const;
 
-    RealVect& position();
-    const RealVect& position() const;
+    RealVect& getPosition();
+    const RealVect& getPosition() const;
 
-    RealVect& normal();
-    const RealVect& normal() const;
+    RealVect& getNormal();
+    const RealVect& getNormal() const;
   
-    Real signed_distance(const RealVect a_x0) const;
+    Real signedDistance(const RealVect a_x0) const;
 
   protected:
 

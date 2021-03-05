@@ -11,7 +11,7 @@
 
 #define enable_dcel_timer 0
 
-dcel_if::dcel_if(const std::shared_ptr<dcel::dcel_mesh>& a_mesh, const bool a_fluidInside){
+dcel_if::dcel_if(const std::shared_ptr<dcel::mesh>& a_mesh, const bool a_fluidInside){
   m_mesh        = a_mesh;
   m_fluidInside = a_fluidInside;
 }
@@ -29,7 +29,7 @@ Real dcel_if::value(const RealVect& a_point) const{
 #if dcel_timer
   auto mesh_start = std::chrono::system_clock::now(); 
 #endif
-  Real retval = m_mesh->signed_distance(a_point);
+  Real retval = m_mesh->signedDistance(a_point);
 #if dcel_timer
   auto mesh_stop = std::chrono::system_clock::now();
   const Real blah = a_point.vectorLength() - 1.0;

@@ -18,14 +18,14 @@ edge_iterator::edge_iterator(){
 
 edge_iterator::edge_iterator(polygon& a_poly){
   m_polymode  = true;
-  m_begin     = a_poly.get_edge();
+  m_begin     = a_poly.getEdge();
   m_current   = m_begin;
   m_full_loop = false;
 }
 
 edge_iterator::edge_iterator(vertex& a_vert){
   m_polymode  = false;
-  m_begin     = a_vert.get_edge();
+  m_begin     = a_vert.getEdge();
   m_current   = m_begin;
   m_full_loop = false;
 }
@@ -43,10 +43,10 @@ void edge_iterator::reset(){
 
 void edge_iterator::operator++(){
   if(m_polymode){
-    m_current = m_current->get_next();
+    m_current = m_current->getNextEdge();
   }
   else{
-    m_current = m_current->get_prev()->get_pair();
+    m_current = m_current->getPreviousEdge()->getPairEdge();
     //    m_current = m_current->get_pair()->get_next();
   }
 

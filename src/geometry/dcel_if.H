@@ -22,41 +22,16 @@ public:
 
   dcel_if() = delete;
 
-  /*!
-    @brief Full constructor
-  */
-  dcel_if(const std::shared_ptr<dcel::dcel_mesh>& a_mesh, const bool a_fluidInside);
-
-  /*!
-    @brief Copy constructor
-  */
+  dcel_if(const std::shared_ptr<dcel::mesh>& a_mesh, const bool a_fluidInside);
   dcel_if(const dcel_if& a_object);
-
-  /*!
-    @brief Destructor
-  */
   ~dcel_if();
 
-  /*!
-    @brief Value function
-  */
   Real value(const RealVect& a_point) const override;
-
-  /*!
-    @brief Factory method
-  */
   BaseIF* newImplicitFunction() const override;
 
 protected:
 
-  /*!
-    @brief Mesh
-  */
-  std::shared_ptr<dcel::dcel_mesh> m_mesh;
-
-  /*!
-    @brief Flip covered region
-  */
+  std::shared_ptr<dcel::mesh> m_mesh;
   bool m_fluidInside;
 };
 

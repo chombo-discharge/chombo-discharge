@@ -24,178 +24,60 @@ namespace dcel {
   class edge {
   public:
 
-    /*!
-      @brief Constructor
-    */
     edge();
-
-    /*!
-      @brief Destructor
-    */
+    edge(const edge& a_otherEdge);
     ~edge();
 
-    /*!
-      @brief Define function
-    */
-  
-    void define(const std::shared_ptr<vertex>& a_vert,
-		const std::shared_ptr<edge>& a_pair,
-		const std::shared_ptr<edge>& a_next,
-		const std::shared_ptr<edge>& a_prev,
-		const RealVect                    a_normal = RealVect::Zero);
+    void define(const std::shared_ptr<vertex>& a_vertex,
+		const std::shared_ptr<edge>&   a_pairEdge,
+		const std::shared_ptr<edge>&   a_nextEdge,
+		const std::shared_ptr<edge>&   a_previousEdge,
+		const RealVect                 a_normal = RealVect::Zero);
 
+    // Set functions
+    void setPolygon(const std::shared_ptr<polygon>& a_polygon);
+    void setVertex(const std::shared_ptr<vertex>& a_vertex);
+    void setPairEdge(const std::shared_ptr<edge>& a_pairEdge);
+    void setNextEdge(const std::shared_ptr<edge>& a_nextEdge);
+    void setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge);
+    void setNormal(const RealVect a_normal);
 
-    /*!
-      @brief Set polygon
-    */
-  
-    void set_poly(const std::shared_ptr<polygon>& a_poly);
+    // Get functions for vertices
+    std::shared_ptr<vertex>& getVertex();
+    const std::shared_ptr<vertex>& getVertex() const;
 
-    /*!
-      @brief Set vertex
-    */
-  
-    void set_vert(const std::shared_ptr<vertex>& a_vert);
+    std::shared_ptr<vertex>& getOtherVertex();
+    const std::shared_ptr<vertex>& getOtherVertex() const;
 
-    /*!
-      @brief Set pair
-    */
-  
-    void set_pair(const std::shared_ptr<edge>& a_pair);
+    // Get functions for edges
+    std::shared_ptr<edge>& getPairEdge();
+    const std::shared_ptr<edge>& getPairEdge() const;
 
-    /*!
-      @brief Set next edge
-    */
+    std::shared_ptr<edge>& getPreviousEdge();  
+    const std::shared_ptr<edge>& getPreviousEdge() const;
   
-    void set_next(const std::shared_ptr<edge>& a_next);
+    std::shared_ptr<edge>& getNextEdge();
+    const std::shared_ptr<edge>& getNextEdge() const;
+    
 
-    /*!
-      @brief Set previous
-    */
-  
-    void set_prev(const std::shared_ptr<edge>& a_prev);
-  
-    /*!
-      @brief Set normal vector
-    */
-  
-    void set_normal(const RealVect a_normal);
-  
-    /*!
-      @brief Get vertex
-    */
-  
-    const std::shared_ptr<vertex>& get_vert() const;
+    // Get functions for polygons
+    std::shared_ptr<polygon>& getPolygon();  
+    const std::shared_ptr<polygon>& getPolygon() const;
 
-    /*!
-      @brief Get vertex
-    */
-  
-    std::shared_ptr<vertex>& get_vert();
+    RealVect& getNormal();
+    const RealVect& getNormal() const;
 
-    /*!
-      @brief Get other vertex
-    */
-  
-    const std::shared_ptr<vertex>& get_other_vert() const;
-
-    /*!
-      @brief Get other vertex
-    */
-  
-    std::shared_ptr<vertex>& get_other_vert();
-
-    /*!
-      @brief Get the other half edge
-    */
-  
-    const std::shared_ptr<edge>& get_pair() const;
-
-    /*!
-      @brief Get the other half edge
-    */
-  
-    std::shared_ptr<edge>& get_pair();
-
-    /*!
-      @brief Get the previous half edge
-    */
-  
-    const std::shared_ptr<edge>& get_prev() const;
-
-    /*!
-      @brief Get the previous half edge
-    */
-  
-    std::shared_ptr<edge>& get_prev();
-
-    /*!
-      @brief Get the next half edge
-    */
-  
-    const std::shared_ptr<edge>& get_next() const;
-
-    /*!
-      @brief Get the next half edge
-    */
-  
-    std::shared_ptr<edge>& get_next();
-
-    /*!
-      @brief Get polygon
-    */
-  
-    const std::shared_ptr<polygon>& get_poly() const;
-
-    /*!
-      @brief Get polygon
-    */
-  
-    std::shared_ptr<polygon>& get_poly();
-  
-    /*!
-      @brief Get pseudo-normal
-    */
-  
-    RealVect normal() const;
-
-    /*!
-      @brief Get the signed distance between this edge and a point
-    */
-  
-    Real signed_distance(const RealVect a_x0) const;
+    Real signedDistance(const RealVect a_x0) const;
 
   protected:
 
-    /*!
-      @brief Edge pseudo-normal
-    */
     RealVect m_normal;
 
-    /*!
-      @brief Vertex at end of edge
-    */
-    std::shared_ptr<vertex> m_vert; 
-
-    /*!
-      @brief Edge pair
-    */
-    std::shared_ptr<edge> m_pair;
-
-    /*!
-      @brief Previous edge
-    */
-    std::shared_ptr<edge> m_prev; 
-
-    /*!
-      @brief Next edge
-    */
-    std::shared_ptr<edge> m_next;
-
-    /*!
-      @brief Reference to polygon
-    */
-    std::shared_ptr<polygon> m_poly;
+    std::shared_ptr<vertex>  m_vertex; 
+    std::shared_ptr<edge>    m_pairEdge;
+    std::shared_ptr<edge>    m_previousEdge; 
+    std::shared_ptr<edge>    m_nextEdge;
+    std::shared_ptr<polygon> m_polygon;
   };
 
 }
