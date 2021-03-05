@@ -1,11 +1,11 @@
 /*!
-  @file   ply_reader.cpp
-  @brief  Implementation of ply_reader.H
+  @file   dcel_parser.cpp
+  @brief  Implementation of dcel_parser.H
   @author Robert Marskar
   @date   Apr. 2018
 */
 
-#include "ply_reader.H"
+#include "dcel_parser.H"
 #include "dcel_mesh.H"
 #include "dcel_polygon.H"
 #include "dcel_edge.H"
@@ -15,7 +15,7 @@
 #include <iostream>
 #include <fstream>
 
-void ply_reader::read_ascii(dcel::dcel_mesh& a_mesh, const std::string a_filename){
+void dcel::parser::PLY::read_ascii(dcel::dcel_mesh& a_mesh, const std::string a_filename){
   std::ifstream filestream(a_filename);
 
   if(filestream.is_open()){
@@ -30,23 +30,23 @@ void ply_reader::read_ascii(dcel::dcel_mesh& a_mesh, const std::string a_filenam
     int num_vertices;  // Number of vertices
     int num_polygons;  // Number of polygons
 
-    ply_reader::read_ascii_header(num_vertices, num_polygons, filestream); 
-    ply_reader::read_ascii_vertices(vertices, num_vertices, filestream);
-    ply_reader::read_ascii_polygons(polygons, edges, vertices, num_polygons, filestream);
+    dcel::parser::PLY::read_ascii_header(num_vertices, num_polygons, filestream); 
+    dcel::parser::PLY::read_ascii_vertices(vertices, num_vertices, filestream);
+    dcel::parser::PLY::read_ascii_polygons(polygons, edges, vertices, num_polygons, filestream);
 
     a_mesh.sanity_check();
   
     filestream.close();
   }
   else{
-    const std::string error = "ply_reader::read_ascii - ERROR! Could not open file " + a_filename;
+    const std::string error = "dcel::parser::PLY::read_ascii - ERROR! Could not open file " + a_filename;
     MayDay::Abort(error.c_str());
   }
 }
 
-void ply_reader::read_ascii_header(int&           a_num_vertices,
-				   int&           a_num_polygons,
-				   std::ifstream& a_inputstream){
+void dcel::parser::PLY::read_ascii_header(int&           a_num_vertices,
+					  int&           a_num_polygons,
+					  std::ifstream& a_inputstream){
 
   std::string str1;
   std::string str2;
@@ -86,9 +86,9 @@ void ply_reader::read_ascii_header(int&           a_num_vertices,
   }
 }
 
-void ply_reader::read_ascii_vertices(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
-				     const int                                 a_num_vertices,
-				     std::ifstream&                            a_inputstream){
+void dcel::parser::PLY::read_ascii_vertices(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
+					    const int                                 a_num_vertices,
+					    std::ifstream&                            a_inputstream){
 
   RealVect pos;
   Real& x = pos[0];
@@ -117,11 +117,11 @@ void ply_reader::read_ascii_vertices(std::vector<std::shared_ptr<dcel::vertex> >
   } 
 }
 
-void ply_reader::read_ascii_polygons(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons,
-				     std::vector<std::shared_ptr<dcel::edge> >& a_edges,
-				     std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
-				     const int a_num_polygons,
-				     std::ifstream& a_inputstream){
+void dcel::parser::PLY::read_ascii_polygons(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons,
+					    std::vector<std::shared_ptr<dcel::edge> >& a_edges,
+					    std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
+					    const int a_num_polygons,
+					    std::ifstream& a_inputstream){
   int num_vert;
   std::vector<int> which_vertices;
 

@@ -9,7 +9,8 @@
 
 #include <ParmParse.H>
 
-#include "ply_reader.H"
+#include "dcel_mesh.H"
+#include "dcel_parser.H"
 #include "dcel_if.H"
 
 
@@ -27,7 +28,7 @@ porsche::porsche(){
 
   // Build the mesh
   std::shared_ptr<dcel::dcel_mesh> mesh = std::shared_ptr<dcel::dcel_mesh> (new dcel::dcel_mesh());
-  ply_reader::read_ascii(*mesh, filename);
+  dcel::parser::PLY::read_ascii(*mesh, filename);
   mesh->reconcile_polygons(true, false);
   mesh->build_tree(tree_depth, max_elements);
 
