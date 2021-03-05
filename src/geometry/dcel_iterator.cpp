@@ -23,6 +23,13 @@ edge_iterator::edge_iterator(polygon& a_poly){
   m_full_loop = false;
 }
 
+edge_iterator::edge_iterator(const polygon& a_poly){
+  m_polymode  = true;
+  m_begin     = a_poly.getEdge();
+  m_current   = m_begin;
+  m_full_loop = false;
+}
+
 edge_iterator::edge_iterator(vertex& a_vert){
   m_polymode  = false;
   m_begin     = a_vert.getEdge();
@@ -30,6 +37,12 @@ edge_iterator::edge_iterator(vertex& a_vert){
   m_full_loop = false;
 }
 
+edge_iterator::edge_iterator(const vertex& a_vert){
+  m_polymode  = false;
+  m_begin     = a_vert.getEdge();
+  m_current   = m_begin;
+  m_full_loop = false;
+}
 
 std::shared_ptr<edge>& edge_iterator::operator() (){
   return m_current;

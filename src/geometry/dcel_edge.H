@@ -35,39 +35,37 @@ namespace dcel {
 		const RealVect                 a_normal = RealVect::Zero);
 
     // Set functions
-    void setPolygon(const std::shared_ptr<polygon>& a_polygon);
-    void setVertex(const std::shared_ptr<vertex>& a_vertex);
-    void setPairEdge(const std::shared_ptr<edge>& a_pairEdge);
-    void setNextEdge(const std::shared_ptr<edge>& a_nextEdge);
-    void setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge);
-    void setNormal(const RealVect a_normal);
+    void setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept;
+    void setPairEdge(const std::shared_ptr<edge>& a_pairEdge) noexcept;
+    void setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept;
+    void setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept;
+    void setNormal(const RealVect a_normal) noexcept;
+    void setPolygon(const std::shared_ptr<polygon>& a_polygon) noexcept;
 
     // Get functions for vertices
-    std::shared_ptr<vertex>& getVertex();
-    const std::shared_ptr<vertex>& getVertex() const;
+    std::shared_ptr<vertex>& getVertex() noexcept;
+    const std::shared_ptr<vertex>& getVertex() const noexcept;
 
-    std::shared_ptr<vertex>& getOtherVertex();
-    const std::shared_ptr<vertex>& getOtherVertex() const;
+    std::shared_ptr<vertex>& getOtherVertex() noexcept;
+    const std::shared_ptr<vertex>& getOtherVertex() const noexcept;
 
     // Get functions for edges
-    std::shared_ptr<edge>& getPairEdge();
-    const std::shared_ptr<edge>& getPairEdge() const;
+    std::shared_ptr<edge>& getPairEdge() noexcept;
+    const std::shared_ptr<edge>& getPairEdge() const noexcept;
 
-    std::shared_ptr<edge>& getPreviousEdge();  
-    const std::shared_ptr<edge>& getPreviousEdge() const;
+    std::shared_ptr<edge>& getPreviousEdge() noexcept;  
+    const std::shared_ptr<edge>& getPreviousEdge() const noexcept;
   
-    std::shared_ptr<edge>& getNextEdge();
-    const std::shared_ptr<edge>& getNextEdge() const;
-    
+    std::shared_ptr<edge>& getNextEdge() noexcept;
+    const std::shared_ptr<edge>& getNextEdge() const noexcept;
 
-    // Get functions for polygons
-    std::shared_ptr<polygon>& getPolygon();  
-    const std::shared_ptr<polygon>& getPolygon() const;
+    RealVect& getNormal() noexcept;
+    const RealVect& getNormal() const noexcept;
 
-    RealVect& getNormal();
-    const RealVect& getNormal() const;
+    std::shared_ptr<polygon>& getPolygon() noexcept;  
+    const std::shared_ptr<polygon>& getPolygon() const noexcept;
 
-    Real signedDistance(const RealVect a_x0) const;
+    Real signedDistance(const RealVect a_x0) const noexcept;
 
   protected:
 

@@ -40,38 +40,10 @@ mesh::~mesh(){
 
 void mesh::define(std::vector<std::shared_ptr<polygon> >& a_polygons,
 		  std::vector<std::shared_ptr<edge> >&    a_edges,
-		  std::vector<std::shared_ptr<vertex> >&  a_vertices){
+		  std::vector<std::shared_ptr<vertex> >&  a_vertices) noexcept{
   m_polygons = a_polygons;
   m_edges    = a_edges;
   m_vertices = a_vertices;
-}
-
-void mesh::setAlgorithm(SearchAlgorithm a_algorithm){
-  m_algorithm = a_algorithm;
-}
-
-std::vector<std::shared_ptr<vertex> >& mesh::getVertices(){
-  return m_vertices;
-}
-
-const std::vector<std::shared_ptr<vertex> >& mesh::getVertices() const {
-  return m_vertices;
-}
-
-std::vector<std::shared_ptr<edge> >& mesh::getEdges(){
-  return m_edges;
-}
-
-const std::vector<std::shared_ptr<edge> >& mesh::getEdges() const {
-  return m_edges;
-}
-
-std::vector<std::shared_ptr<polygon> >& mesh::getPolygons(){
-  return m_polygons;
-}
-
-const std::vector<std::shared_ptr<polygon> >& mesh::getPolygons() const {
-  return m_polygons;
 }
 
 bool mesh::sanityCheck() const {
@@ -112,7 +84,35 @@ bool mesh::sanityCheck() const {
   return true;
 }
 
-std::vector<RealVect> mesh::getAllVertexCoordinates() const{
+void mesh::setAlgorithm(SearchAlgorithm a_algorithm) noexcept {
+  m_algorithm = a_algorithm;
+}
+
+std::vector<std::shared_ptr<vertex> >& mesh::getVertices() noexcept {
+  return m_vertices;
+}
+
+const std::vector<std::shared_ptr<vertex> >& mesh::getVertices() const noexcept {
+  return m_vertices;
+}
+
+std::vector<std::shared_ptr<edge> >& mesh::getEdges() noexcept {
+  return m_edges;
+}
+
+const std::vector<std::shared_ptr<edge> >& mesh::getEdges() const noexcept {
+  return m_edges;
+}
+
+std::vector<std::shared_ptr<polygon> >& mesh::getPolygons() noexcept {
+  return m_polygons;
+}
+
+const std::vector<std::shared_ptr<polygon> >& mesh::getPolygons() const noexcept {
+  return m_polygons;
+}
+
+std::vector<RealVect> mesh::getAllVertexCoordinates() const noexcept{
   std::vector<RealVect> vertexCoordinates;
   for (const auto& v : m_vertices){
     vertexCoordinates.emplace_back(v->getPosition());
@@ -121,16 +121,16 @@ std::vector<RealVect> mesh::getAllVertexCoordinates() const{
   return vertexCoordinates;
 }
 
-void mesh::computeBoundingSphere(){
+void mesh::computeBoundingSphere() noexcept {
   m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingSphere::Algorithm::Ritter);
 }
 
-void mesh::computeBoundingBox(){
+void mesh::computeBoundingBox() noexcept {
   m_boundingBox.define(this->getAllVertexCoordinates());
 }
 
 
-void mesh::reconcilePolygons(const bool a_outward_normal, const bool a_recompute_vnormal){
+void mesh::reconcilePolygons(const bool a_outward_normal, const bool a_recompute_vnormal) noexcept{
 
   /*!
     @brief Reconcile polygon edges. This gives each edge a reference to the polygon they circulate, and also computes the 
@@ -167,7 +167,7 @@ void mesh::reconcilePolygons(const bool a_outward_normal, const bool a_recompute
 }
 
 
-void mesh::computeVertexNormals(){
+void mesh::computeVertexNormals() noexcept {
 #define debug_func 1
 
 #if debug_func
@@ -248,7 +248,7 @@ void mesh::computeVertexNormals(){
   }
 }
 
-void mesh::computeEdgeNormals(){
+void mesh::computeEdgeNormals() noexcept {
   for (int i = 0; i < m_edges.size(); i++){
 
     std::shared_ptr<edge>& cur_edge        = m_edges[i];
@@ -268,16 +268,15 @@ void mesh::computeEdgeNormals(){
   }
 }
 
-void mesh::buildKdTree(const int a_max_depth, const int a_max_elements){
-  m_tree     = std::shared_ptr<kd_tree<polygon> > (new kd_tree<polygon>(m_polygons, a_max_depth, a_max_elements));
-  m_use_tree = true;
+void mesh::buildKdTree(const int a_max_depth, const int a_max_elements) noexcept {
+  m_tree = std::shared_ptr<kd_tree<polygon> > (new kd_tree<polygon>(m_polygons, a_max_depth, a_max_elements));
 }
 
-Real mesh::signedDistance(const RealVect& a_point) const {
+Real mesh::signedDistance(const RealVect& a_point) const noexcept {
   return this->signedDistance(a_point, m_algorithm);
 }
 
-Real mesh::BruteForceSignedDistance(const RealVect& a_point) const {
+Real mesh::BruteForceSignedDistance(const RealVect& a_point) const noexcept {
   Real minDist = m_polygons.front()->signedDistance(a_point);
     
   for (const auto& poly : m_polygons){
@@ -289,7 +288,7 @@ Real mesh::BruteForceSignedDistance(const RealVect& a_point) const {
   return minDist;
 }
 
-Real mesh::KdTreeSignedDistance(const RealVect& a_point) const {
+Real mesh::KdTreeSignedDistance(const RealVect& a_point) const noexcept {
 
   Real minDist;
 
@@ -311,7 +310,7 @@ Real mesh::KdTreeSignedDistance(const RealVect& a_point) const {
   return minDist;
 }
 
-Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) const {
+Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) const noexcept {
   Real minDist;
   
   switch(a_algorithm){

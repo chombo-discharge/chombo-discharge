@@ -27,42 +27,42 @@ namespace dcel {
     polygon(const polygon& a_otherPolygon);
     ~polygon();
 
-    void define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge);
+    void define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge) noexcept;
 
-    void setEdge(const std::shared_ptr<edge>& a_edge);
-    void setNormal(const RealVect& a_normal);
+    void setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
+    void setNormal(const RealVect& a_normal) noexcept;
 
-    void normalizeNormalVector();
-    void computeArea();
-    void computeCentroid();
-    void computeNormal(const bool a_outwardNormal);
-    void computeBoundingBox();
-    void computeBoundingSphere();
+    void normalizeNormalVector() noexcept;
+    void computeArea() noexcept;
+    void computeCentroid() noexcept;
+    void computeNormal(const bool a_outwardNormal) noexcept;
+    void computeBoundingBox() noexcept;
+    void computeBoundingSphere() noexcept;
 
-    std::shared_ptr<edge>& getEdge();
-    const std::shared_ptr<edge>& getEdge() const;
+    std::shared_ptr<edge>& getEdge() noexcept;
+    const std::shared_ptr<edge>& getEdge() const noexcept;
 
-    std::vector<RealVect> getAllVertexCoordinates();
-    std::vector<std::shared_ptr<vertex> > getVertices();
-    std::vector<std::shared_ptr<edge> > getEdges();
+    const std::vector<RealVect> getAllVertexCoordinates() const noexcept;
+    const std::vector<std::shared_ptr<vertex> > getVertices() const noexcept;
+    const std::vector<std::shared_ptr<edge> > getEdges() const noexcept;
 
-    RealVect& getCentroid();
-    const RealVect& getCentroid() const;
+    RealVect& getCentroid() noexcept;
+    const RealVect& getCentroid() const noexcept;
 
-    RealVect& getNormal();
-    const RealVect& getNormal() const;
+    RealVect& getNormal() noexcept;
+    const RealVect& getNormal() const noexcept;
 
-    Real& getArea();
-    const Real& getArea() const;
+    Real& getArea() noexcept;
+    const Real& getArea() const noexcept;
 
-    RealVect& getBoundingBoxLo();
-    const RealVect& getBoundingBoxLo() const;
+    RealVect& getBoundingBoxLo() noexcept;
+    const RealVect& getBoundingBoxLo() const noexcept;
 
-    RealVect& getBoundingBoxHi();
-    const RealVect& getBoundingBoxHi() const;
+    RealVect& getBoundingBoxHi() noexcept;
+    const RealVect& getBoundingBoxHi() const noexcept;
     
     // Real signed_distance(const RealVect a_x0) const; Should be this signature. 
-    Real signedDistance(const RealVect a_x0);
+    Real signedDistance(const RealVect& a_x0) const noexcept;
 
 #if 1 // Just so kd will shut up for now. 
     RealVect get_coord() const {

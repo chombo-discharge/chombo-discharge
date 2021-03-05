@@ -34,29 +34,53 @@ vertex::~vertex(){
 
 }
 
-void vertex::define(const RealVect& a_pos, const std::shared_ptr<edge>& a_edge, const RealVect a_normal){
+void vertex::define(const RealVect& a_pos, const std::shared_ptr<edge>& a_edge, const RealVect a_normal) noexcept {
   this->setPosition(a_pos);
   this->setEdge(a_edge);
   this->setNormal(a_normal);
 }
 
-void vertex::setPosition(const RealVect& a_pos){
+void vertex::setPosition(const RealVect& a_pos) noexcept {
   m_pos = a_pos;
 }
 
-void vertex::setEdge(const std::shared_ptr<edge>& a_edge){
+void vertex::setEdge(const std::shared_ptr<edge>& a_edge) noexcept {
   m_edge = a_edge;
 }
 
-void vertex::setNormal(const RealVect& a_normal){
+void vertex::setNormal(const RealVect& a_normal) noexcept {
   m_normal = a_normal;
 }
 
-void vertex::addPolygon(const std::shared_ptr<polygon>& a_poly){
+void vertex::addPolygon(const std::shared_ptr<polygon>& a_poly) noexcept {
   m_polycache.push_back(a_poly);
 }
 
-std::vector<std::shared_ptr<polygon> > vertex::getPolygons() {
+RealVect& vertex::getPosition() noexcept {
+  return m_pos;
+}
+
+const RealVect& vertex::getPosition() const noexcept {
+  return m_pos;
+}
+
+std::shared_ptr<edge>& vertex::getEdge() noexcept {
+  return m_edge;
+}
+
+const std::shared_ptr<edge>& vertex::getEdge() const noexcept {
+  return m_edge;
+}
+
+RealVect& vertex::getNormal() noexcept {
+  return m_normal;
+}
+
+const RealVect& vertex::getNormal() const noexcept {
+  return m_normal;
+}
+
+std::vector<std::shared_ptr<polygon> > vertex::getPolygons() noexcept {
   std::vector<std::shared_ptr<polygon> > polygons;
   for (edge_iterator iter(*this); iter.ok(); ++iter){
     polygons.push_back(iter()->getPolygon());
@@ -65,39 +89,17 @@ std::vector<std::shared_ptr<polygon> > vertex::getPolygons() {
   return polygons;
 }
 
-const std::vector<std::shared_ptr<polygon> >& vertex::getPolycache() const{
+const std::vector<std::shared_ptr<polygon> >& vertex::getPolycache() const noexcept{
   return m_polycache;
 }
 
-std::vector<std::shared_ptr<polygon> >& vertex::getPolycache(){
+std::vector<std::shared_ptr<polygon> >& vertex::getPolycache() noexcept {
   return m_polycache;
 }
 
-std::shared_ptr<edge>& vertex::getEdge(){
-  return m_edge;
-}
 
-const std::shared_ptr<edge>& vertex::getEdge() const{
-  return m_edge;
-}
 
-RealVect& vertex::getPosition() {
-  return m_pos;
-}
-
-const RealVect& vertex::getPosition() const {
-  return m_pos;
-}
-
-RealVect& vertex::getNormal() {
-  return m_normal;
-}
-
-const RealVect& vertex::getNormal() const {
-  return m_normal;
-}
-
-Real vertex::signedDistance(const RealVect a_x0) const {
+Real vertex::signedDistance(const RealVect a_x0) const noexcept {
   const RealVect delta = a_x0 - m_pos;
   const Real dist      = delta.vectorLength();
   const Real dot       = m_normal.dotProduct(delta);

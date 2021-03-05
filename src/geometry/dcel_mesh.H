@@ -42,30 +42,33 @@ namespace dcel {
 
     void define(std::vector<std::shared_ptr<polygon> >& a_polygons,
 		std::vector<std::shared_ptr<edge> >&    a_edges,
-		std::vector<std::shared_ptr<vertex> >&  a_vertices);
+		std::vector<std::shared_ptr<vertex> >&  a_vertices) noexcept;
 
-    void setAlgorithm(SearchAlgorithm a_algorithm);
+    void setAlgorithm(SearchAlgorithm a_algorithm) noexcept;
 
-    void computeBoundingSphere();
-    void computeBoundingBox();
-    void computeVertexNormals();
-    void computeEdgeNormals();
-    void reconcilePolygons(const bool a_outward_normal, const bool recompute_vnormal);
-    void buildKdTree(const int a_max_depth, const int a_max_elements);
+    std::vector<std::shared_ptr<vertex> >& getVertices() noexcept;
+    const std::vector<std::shared_ptr<vertex> >& getVertices() const noexcept;
 
-    Real signedDistance(const RealVect& a_x0) const;
-    Real signedDistance(const RealVect& a_x0, SearchAlgorithm a_algorithm) const;
+    std::vector<std::shared_ptr<edge> >& getEdges() noexcept ;
+    const std::vector<std::shared_ptr<edge> >& getEdges() const noexcept;
 
-    std::vector<std::shared_ptr<vertex> >& getVertices();
-    const std::vector<std::shared_ptr<vertex> >& getVertices() const;
+    std::vector<std::shared_ptr<polygon> >& getPolygons() noexcept;
+    const std::vector<std::shared_ptr<polygon> >& getPolygons() const noexcept;
 
-    std::vector<std::shared_ptr<edge> >& getEdges();
-    const std::vector<std::shared_ptr<edge> >& getEdges() const;
+    std::vector<RealVect> getAllVertexCoordinates() const noexcept;
 
-    std::vector<std::shared_ptr<polygon> >& getPolygons();
-    const std::vector<std::shared_ptr<polygon> >& getPolygons() const;
+    void computeBoundingSphere() noexcept;
+    void computeBoundingBox() noexcept;
+    void reconcilePolygons(const bool a_outward_normal, const bool recompute_vnormal) noexcept;
+    void computeVertexNormals() noexcept;
+    void computeEdgeNormals() noexcept;
 
-    std::vector<RealVect> getAllVertexCoordinates() const;
+    void buildKdTree(const int a_max_depth, const int a_max_elements) noexcept;
+
+    Real signedDistance(const RealVect& a_x0) const noexcept ;
+    Real signedDistance(const RealVect& a_x0, SearchAlgorithm a_algorithm) const noexcept;
+
+
 
   protected:
 
@@ -83,8 +86,8 @@ namespace dcel {
     std::vector<std::shared_ptr<polygon> > m_polygons;
 
 
-    Real BruteForceSignedDistance(const RealVect& a_point) const;
-    Real KdTreeSignedDistance(const RealVect& a_point) const;
+    Real BruteForceSignedDistance(const RealVect& a_point) const noexcept;
+    Real KdTreeSignedDistance(const RealVect& a_point) const noexcept;
   };
 }
 

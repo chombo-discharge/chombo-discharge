@@ -30,16 +30,16 @@ polygon::~polygon(){
 
 }
 
-void polygon::define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge){
+void polygon::define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge) noexcept {
   this->setNormal(a_normal);
   this->setEdge(a_edge);
 }
 
-void polygon::setEdge(const std::shared_ptr<edge>& a_edge){
+void polygon::setEdge(const std::shared_ptr<edge>& a_edge) noexcept {
   m_edge = a_edge;
 }
 
-void polygon::setNormal(const RealVect& a_normal){
+void polygon::setNormal(const RealVect& a_normal) noexcept {
   m_normal = a_normal;
 }
 
@@ -47,12 +47,12 @@ void polygon::setNormal(const RealVect& a_normal){
 
 
 
-void polygon::normalizeNormalVector(){
+void polygon::normalizeNormalVector() noexcept {
   m_normal *= 1./m_normal.vectorLength();
 }
 
 
-void polygon::computeArea() {
+void polygon::computeArea() noexcept {
   const std::vector<std::shared_ptr<vertex> > vertices = this->getVertices();
 
   Real area = 0.0;
@@ -67,7 +67,7 @@ void polygon::computeArea() {
 }
 
 
-void polygon::computeCentroid() {
+void polygon::computeCentroid() noexcept {
   m_centroid = RealVect::Zero;
   
   const std::vector<std::shared_ptr<vertex> > vertices = this->getVertices();
@@ -79,7 +79,7 @@ void polygon::computeCentroid() {
   m_centroid = m_centroid/vertices.size();
 }
 
-void polygon::computeNormal(const bool a_outwardNormal){
+void polygon::computeNormal(const bool a_outwardNormal) noexcept {
   
   // TLDR: We assume that the normal is defined by right-hand rule where the rotation direction is along the half edges
   
@@ -139,23 +139,23 @@ void polygon::computeNormal(const bool a_outwardNormal){
   }
 }
 
-void polygon::computeBoundingSphere(){
+void polygon::computeBoundingSphere() noexcept {
   m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingSphere::Algorithm::Ritter);
 }
 
-void polygon::computeBoundingBox(){
+void polygon::computeBoundingBox() noexcept {
   m_boundingBox.define(this->getAllVertexCoordinates());
 }
 
-const std::shared_ptr<edge>& polygon::getEdge() const{
+const std::shared_ptr<edge>& polygon::getEdge() const noexcept{
   return m_edge;
 }
 
-std::shared_ptr<edge>& polygon::getEdge(){
+std::shared_ptr<edge>& polygon::getEdge() noexcept {
   return m_edge;
 }
 
-std::vector<RealVect> polygon::getAllVertexCoordinates(){
+const std::vector<RealVect> polygon::getAllVertexCoordinates() const noexcept {
   std::vector<std::shared_ptr<vertex> > vertices = this->getVertices();
 
   std::vector<RealVect> pos;
@@ -167,7 +167,7 @@ std::vector<RealVect> polygon::getAllVertexCoordinates(){
   return pos;
 }
 
-std::vector<std::shared_ptr<vertex> > polygon::getVertices(){
+const std::vector<std::shared_ptr<vertex> > polygon::getVertices() const noexcept {
   std::vector<std::shared_ptr<vertex> > vertices;
 
   for (edge_iterator iter(*this); iter.ok(); ++iter){
@@ -178,7 +178,7 @@ std::vector<std::shared_ptr<vertex> > polygon::getVertices(){
   return vertices;
 }
 
-std::vector<std::shared_ptr<edge> > polygon::getEdges(){
+const std::vector<std::shared_ptr<edge> > polygon::getEdges() const noexcept {
   std::vector<std::shared_ptr<edge> > edges;
 
   for (edge_iterator iter(*this); iter.ok(); ++iter){
@@ -188,49 +188,49 @@ std::vector<std::shared_ptr<edge> > polygon::getEdges(){
   return edges;
 }
 
-RealVect& polygon::getNormal() {
+RealVect& polygon::getNormal() noexcept {
   return m_normal;
 }
 
-const RealVect& polygon::getNormal() const {
+const RealVect& polygon::getNormal() const noexcept {
   return m_normal;
 }
 
 
-RealVect& polygon::getCentroid() {
+RealVect& polygon::getCentroid() noexcept {
   return m_centroid;
 }
 
-const RealVect& polygon::getCentroid() const {
+const RealVect& polygon::getCentroid() const noexcept {
   return m_centroid;
 }
 
-Real& polygon::getArea() {
+Real& polygon::getArea() noexcept {
   return m_area;
 }
 
-const Real& polygon::getArea() const {
+const Real& polygon::getArea() const noexcept {
   return m_area;
 }
 
-RealVect& polygon::getBoundingBoxLo() {
+RealVect& polygon::getBoundingBoxLo() noexcept {
   return m_boundingBox.getLowCorner();
 }
 
-const RealVect& polygon::getBoundingBoxLo() const {
+const RealVect& polygon::getBoundingBoxLo() const noexcept {
   return m_boundingBox.getLowCorner();
 }
 
 
-RealVect& polygon::getBoundingBoxHi() {
+RealVect& polygon::getBoundingBoxHi() noexcept {
   return m_boundingBox.getHighCorner();
 }
 
-const RealVect& polygon::getBoundingBoxHi() const {
+const RealVect& polygon::getBoundingBoxHi() const noexcept {
   return m_boundingBox.getHighCorner();
 }
 
-Real polygon::signedDistance(const RealVect a_x0) {
+Real polygon::signedDistance(const RealVect& a_x0) const noexcept {
 #define bug_check 0
   Real retval = 1.234567E89;
 

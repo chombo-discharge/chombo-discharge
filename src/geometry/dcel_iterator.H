@@ -29,15 +29,11 @@ namespace dcel {
     */
     edge_iterator();
   
-    /*!
-      @brief Iterator for all half edges of a polygon
-    */
     edge_iterator(polygon& a_poly);
+    edge_iterator(const polygon& a_poly);
 
-    /*!
-      @brief Iterator for outgoing half edges from the vertex
-    */
     edge_iterator(vertex& a_vert);
+    edge_iterator(const vertex& a_vert);
 
     /*!
       @brief Get edge

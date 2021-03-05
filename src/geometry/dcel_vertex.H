@@ -26,27 +26,27 @@ namespace dcel {
     vertex(const vertex& a_otherVertex);
     ~vertex();
 
-    void define(const RealVect& m_pos, const std::shared_ptr<edge>& a_edge, const RealVect a_normal = RealVect::Zero);
-    void setPosition(const RealVect& a_pos);
-    void setNormal(const RealVect& a_normal);
-    void setEdge(const std::shared_ptr<edge>& a_edge);
-    void addPolygon(const std::shared_ptr<polygon>& a_poly);
+    void define(const RealVect& m_pos, const std::shared_ptr<edge>& a_edge, const RealVect a_normal = RealVect::Zero) noexcept;
+    void setPosition(const RealVect& a_pos) noexcept;
+    void setNormal(const RealVect& a_normal) noexcept;
+    void setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
+    void addPolygon(const std::shared_ptr<polygon>& a_poly) noexcept;
 
-    std::shared_ptr<edge>& getEdge();
-    const std::shared_ptr<edge>& getEdge() const;
+    RealVect& getPosition() noexcept;
+    const RealVect& getPosition() const noexcept;
+    
+    std::shared_ptr<edge>& getEdge() noexcept;
+    const std::shared_ptr<edge>& getEdge() const noexcept;
 
-    std::vector<std::shared_ptr<polygon> > getPolygons();
+    RealVect& getNormal() noexcept;
+    const RealVect& getNormal() const noexcept;
 
-    std::vector<std::shared_ptr<polygon> >& getPolycache();
-    const std::vector<std::shared_ptr<polygon> >& getPolycache() const;
+    std::vector<std::shared_ptr<polygon> > getPolygons() noexcept;
 
-    RealVect& getPosition();
-    const RealVect& getPosition() const;
-
-    RealVect& getNormal();
-    const RealVect& getNormal() const;
+    std::vector<std::shared_ptr<polygon> >& getPolycache() noexcept;
+    const std::vector<std::shared_ptr<polygon> >& getPolycache() const noexcept;
   
-    Real signedDistance(const RealVect a_x0) const;
+    Real signedDistance(const RealVect a_x0) const noexcept;
 
   protected:
 
