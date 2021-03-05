@@ -8,8 +8,7 @@
 #ifndef _DCEL_POLY_
 #define _DCEL_POLY_
 
-#include <ritter_sphere.H>
-#include <dcel_BoundingSphere.H>
+#include <dcel_BoundingVolumes.H>
 
 #include "RealVect.H"
 
@@ -53,7 +52,6 @@ namespace dcel {
     RealVect& getNormal();
     const RealVect& getNormal() const;
 
-
     Real& getArea();
     const Real& getArea() const;
 
@@ -66,7 +64,7 @@ namespace dcel {
     // Real signed_distance(const RealVect a_x0) const; Should be this signature. 
     Real signedDistance(const RealVect a_x0);
 
-#if 1 // Just so kd will shut up
+#if 1 // Just so kd will shut up for now. 
     RealVect get_coord() const {
       return m_centroid;
     }
@@ -83,8 +81,9 @@ namespace dcel {
     RealVect m_lo;
     RealVect m_hi;
 
+    // Bounding volumes
     BoundingSphere m_boundingSphere;
-    ritter_sphere m_ritter;
+    AABB m_boundingBox;
   };
 
 }

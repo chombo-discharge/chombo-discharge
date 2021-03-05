@@ -140,69 +140,12 @@ void polygon::computeNormal(const bool a_outwardNormal){
 }
 
 void polygon::computeBoundingSphere(){
-  const std::vector<RealVect> points = this->getAllVertexCoordinates();
-
-  m_boundingSphere.define(points, BoundingSphere::Algorithm::Ritter);
+  m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingSphere::Algorithm::Ritter);
 }
 
 void polygon::computeBoundingBox(){
-  std::vector<std::shared_ptr<vertex> > vertices = this->getVertices();
-  std::vector<RealVect> coords;
-
-#if 1 // New code
-  for (const auto& v : vertices){
-    coords.emplace_back(v->getPosition());
-  }
-#else
-  // original code
-  for (int i = 0; i < vertices.size(); i++){
-    coords.push_back(vertices[i]->getPosition());
-  }
-#endif
-
-  m_lo =  1.23456E89*RealVect::Unit;
-  m_hi = -1.23456E89*RealVect::Unit;
-
-  for (int i = 0; i < coords.size(); i++){
-    for (int dir = 0; dir < SpaceDim; dir++){
-      if(coords[i][dir] < m_lo[dir]){
-	m_lo[dir] = coords[i][dir];
-      }
-      if(coords[i][dir] > m_hi[dir]){
-	m_hi[dir] = coords[i][dir];
-      }
-    }
-  }
-
-  // Define ritter sphere
-  //  m_ritter.define(coords);
-
-#if 1 // Debug test
-  for (int i = 0; i < vertices.size(); i++){
-    const RealVect pos = vertices[i]->getPosition();
-    for (int dir = 0; dir < SpaceDim; dir++){
-      if(pos[dir] < m_lo[dir] || pos[dir] > m_hi[dir]){
-	pout() << "pos = " << pos << "\t Lo = " << m_lo << "\t Hi = " << m_hi << endl;
-	MayDay::Abort("polygon::compute_bbox - Box does not contain vertices");
-      }
-    }
-  }
-#endif
-
-#if 0 // Disabled because I want a tight-fitting box
-  Real widest = 0;
-  for (int dir = 0; dir < SpaceDim; dir++){
-    const Real cur = m_hi[dir] - m_lo[dir];
-    widest = (cur > widest) ? cur : widest;
-  }
-
-
-  // Grow box by 5% in each direction
-  m_hi += 5.E-2*widest*RealVect::Unit;
-  m_lo -= 5.E-2*widest*RealVect::Unit;
-#endif
+  m_boundingBox.define(this->getAllVertexCoordinates());
 }
-
 
 const std::shared_ptr<edge>& polygon::getEdge() const{
   return m_edge;
@@ -271,22 +214,21 @@ const Real& polygon::getArea() const {
 }
 
 RealVect& polygon::getBoundingBoxLo() {
-  return m_lo;
+  return m_boundingBox.getLowCorner();
 }
 
 const RealVect& polygon::getBoundingBoxLo() const {
-  return m_lo;
+  return m_boundingBox.getLowCorner();
 }
 
 
 RealVect& polygon::getBoundingBoxHi() {
-  return m_hi;
+  return m_boundingBox.getHighCorner();
 }
 
 const RealVect& polygon::getBoundingBoxHi() const {
-  return m_hi;
+  return m_boundingBox.getHighCorner();
 }
-
 
 Real polygon::signedDistance(const RealVect a_x0) {
 #define bug_check 0

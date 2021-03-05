@@ -108,13 +108,21 @@ bool mesh::sanityCheck() const {
   return true;
 }
 
-void mesh::computeBoundingSphere(){
-  std::vector<RealVect> pos;
-  for (int i = 0; i < m_vertices.size(); i++){
-    pos.push_back(m_vertices[i]->getPosition());
+std::vector<RealVect> mesh::getAllVertexCoordinates() const{
+  std::vector<RealVect> vertexCoordinates;
+  for (const auto& v : m_vertices){
+    vertexCoordinates.emplace_back(v->getPosition());
   }
-  
-  m_sphere.define(pos);
+
+  return vertexCoordinates;
+}
+
+void mesh::computeBoundingSphere(){
+  m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingSphere::Algorithm::Ritter);
+}
+
+void mesh::computeBoundingBox(){
+  m_boundingBox.define(this->getAllVertexCoordinates());
 }
 
 
@@ -262,6 +270,9 @@ void mesh::buildKdTree(const int a_max_depth, const int a_max_elements){
 }
 
 Real mesh::signedDistance(const RealVect a_x0){
+
+  //
+  return this->signedDistance(a_x0, SearchAlgorithm::KdTree);
 #define print_time 0
 #if print_time
   Real t0, t1, t2, t3, t4;
@@ -269,7 +280,7 @@ Real mesh::signedDistance(const RealVect a_x0){
 #endif
 
   Real min_dist = 1.E99;
-  if(m_sphere.inside(a_x0)){
+  if(true){//m_sphere.inside(a_x0)){
     if(m_use_tree){ // Fast kd-tree search
 #if print_time
       auto start_search = std::chrono::system_clock::now(); 
@@ -310,11 +321,58 @@ Real mesh::signedDistance(const RealVect a_x0){
       }
     }
   }
-  else{ // We are outside every bounding box, simply return the distance to the bounding sphere
-    min_dist = (a_x0 - m_sphere.get_center()).vectorLength() - m_sphere.get_radius();
-  }
-
 
   return min_dist;
 }
 
+Real mesh::BruteForceSignedDistance(const RealVect& a_point) const {
+  Real minDist = m_polygons.front()->signedDistance(a_point);
+    
+  for (const auto& poly : m_polygons){
+    const Real curDist = poly->signedDistance(a_point);
+
+    if(std::abs(curDist) < std::abs(minDist)) minDist = curDist;
+  }
+
+  return minDist;
+}
+
+Real mesh::KdTreeSignedDistance(const RealVect& a_point) const {
+
+  Real minDist;
+
+  if(m_tree->isDefined()){
+    std::vector<std::shared_ptr<polygon> > candidates = m_tree->find_closest(a_point);
+
+    minDist = candidates.front()->signedDistance(a_point);
+    
+    for (const auto& p : candidates){
+      const Real curDist = p->signedDistance(a_point);
+
+      if(std::abs(curDist) < std::abs(minDist)) minDist = curDist;
+    }
+  }
+  else{
+    std::cerr << "In file dcel_mesh function mesh::KdTreeSignedDistance - tree is not defined!\n";
+  }
+
+  return minDist;
+}
+
+Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) const {
+  Real minDist;
+  
+  switch(a_algorithm){
+  case SearchAlgorithm::BruteForce:
+    minDist = this->BruteForceSignedDistance(a_point);
+    break;
+  case SearchAlgorithm::KdTree:
+    minDist = this->KdTreeSignedDistance(a_point);
+    break;
+  default:
+    std::cerr << "Error in file dcel_mesh mesh::signedDistance unsupported algorithm requested\n";
+    break;
+  }
+
+  return minDist;
+}

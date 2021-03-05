@@ -1,13 +1,40 @@
 /*!
-  @file   dcel_BoundingSphere.cpp
+  @file   dcel_BoundingVolumes.cpp
   @brief  Implementation of dcel_BoundingSphere.H
   @author Robert Marskar
   @date   March 2021
 */
 
-#include "dcel_BoundingSphere.H"
+#include "dcel_BoundingVolumes.H"
 
 using namespace dcel;
+
+PointLocation BoundingVolume::getPointLocation(const RealVect& a_p) const{
+  const bool inside  = this->isPointInside(a_p);
+  const bool outside = this->isPointOutside(a_p);
+
+  PointLocation ret;
+
+  if(inside){
+    ret = PointLocation::Inside;
+  }
+  else if(outside){
+    ret = PointLocation::Outside;
+  }
+  else{
+    ret = PointLocation::Boundary;
+  }
+
+  return ret;
+}
+
+bool BoundingVolume::isPointInside(const RealVect& a_x0) const{
+  return this->getDistanceToPoint(a_x0) < 0.0;
+}
+
+bool BoundingVolume::isPointOutside(const RealVect& a_x0) const{
+  return this->getDistanceToPoint(a_x0) > 0.0;
+}
 
 BoundingSphere::BoundingSphere(){
   m_radius = 0.0;
@@ -35,33 +62,6 @@ void BoundingSphere::define(const std::vector<RealVect>& a_points, const Algorit
   default:
     std::cerr << "BoundingSphere::define - unknown algorithm requested\n";
   }
-}
-
-PointLocation BoundingSphere::getPointLocation(const RealVect& a_p) const{
-  const bool inside  = this->isPointInside(a_p);
-  const bool outside = this->isPointOutside(a_p);
-
-  PointLocation ret;
-
-  if(inside){
-    ret = PointLocation::Inside;
-  }
-  else if(outside){
-    ret = PointLocation::Outside;
-  }
-  else{
-    ret = PointLocation::Boundary;
-  }
-
-  return ret;
-}
-
-bool BoundingSphere::isPointInside(const RealVect& a_x0) const{
-  return this->getDistanceToPoint(a_x0) < 0.0;
-}
-
-bool BoundingSphere::isPointOutside(const RealVect& a_x0) const{
-  return this->getDistanceToPoint(a_x0) > 0.0;
 }
 
 Real BoundingSphere::getDistanceToPoint(const RealVect& a_x0) const {
@@ -137,15 +137,62 @@ void BoundingSphere::buildRitter(const std::vector<RealVect>& a_points){
   }
 
   // Ritter algorithm is very coarse and does not give an exact result anyways. Grow the dimension for safety. 
-  m_radius *= (1.0 + 1.E-10);
+  m_radius *= (1.0 + 1.E-3);
+}
 
-#if 1 // Debug
-  for (int i = 0; i < a_points.size(); i++){
-    const Real dist = this->getDistanceToPoint(a_points[i]);
-    if(dist > 0.0){
-      std::cout << "point = " << a_points[i] << "\n";
-      std::cerr << "BoundingSphere::buildRitter - point lies outside sphere!\n";
+AABB::AABB(){
+  m_loCorner = RealVect::Zero;
+  m_hiCorner = RealVect::Zero;
+}
+
+AABB::AABB(const AABB& a_other){
+  m_loCorner = a_other.m_loCorner;
+  m_hiCorner = a_other.m_hiCorner;
+}
+
+
+AABB::AABB(const std::vector<RealVect>& a_points){
+  this->define(a_points);
+}
+
+AABB::~AABB(){
+
+}
+
+void AABB::define(const std::vector<RealVect>& a_points){
+  m_loCorner = a_points.front();
+  m_hiCorner = a_points.front();
+
+  for (const auto& p : a_points){
+    for (int dir = 0; dir < SpaceDim; dir++){
+      m_loCorner[dir] = std::min(m_loCorner[dir], p[dir]);
+      m_hiCorner[dir] = std::max(m_hiCorner[dir], p[dir]);
     }
   }
-#endif
+}
+    
+Real AABB::getDistanceToPoint(const RealVect& a_point) const {
+  const RealVect delta = RealVect(D_DECL(Max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
+					 Max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
+					 Max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2])));
+
+  const Real retval =  Min(0.0, delta[delta.maxDir(false)]) + max(RealVect::Zero, delta).vectorLength(); // This is negative inside. 
+  
+  return retval;
+}
+
+RealVect& AABB::getLowCorner(){
+  return m_loCorner;
+}
+
+const RealVect& AABB::getLowCorner() const{
+  return m_hiCorner;
+}
+
+RealVect& AABB::getHighCorner(){
+  return m_loCorner;
+}
+
+const RealVect& AABB::getHighCorner() const{
+  return m_hiCorner;
 }

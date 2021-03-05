@@ -42,10 +42,12 @@ public:
   */
   std::vector<std::shared_ptr<T> > find_closest(const RealVect a_x0);
 
-  
+  bool isDefined(){return m_isDefined;}
   int get_depth(){return m_depth;}
 
 protected:
+
+  bool m_isDefined;
 
   /*!
     @brief Root node

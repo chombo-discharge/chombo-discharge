@@ -8,7 +8,7 @@
 #ifndef _DCEL_MESH_
 #define _DCEL_MESH_
 
-#include "ritter_sphere.H"
+#include "dcel_BoundingVolumes.H"
 #include "kd_tree.H"
 
 #include <vector>
@@ -22,6 +22,11 @@ namespace dcel {
 
   class mesh {
   public:
+
+    enum class SearchAlgorithm{
+      BruteForce,
+      KdTree
+    };
 
     static bool s_angle_weighted;
 
@@ -39,11 +44,15 @@ namespace dcel {
 		std::vector<std::shared_ptr<edge> >&    a_edges,
 		std::vector<std::shared_ptr<vertex> >&  a_vertices);
 
-
+    void computeBoundingSphere();
+    void computeBoundingBox();
+    void computeVertexNormals();
+    void computeEdgeNormals();
     void reconcilePolygons(const bool a_outward_normal, const bool recompute_vnormal);
     void buildKdTree(const int a_max_depth, const int a_max_elements);
 
     Real signedDistance(const RealVect a_x0);
+    Real signedDistance(const RealVect& a_x0, SearchAlgorithm a_algorithm) const;
 
     std::vector<std::shared_ptr<vertex> >& getVertices();
     const std::vector<std::shared_ptr<vertex> >& getVertices() const;
@@ -54,6 +63,8 @@ namespace dcel {
     std::vector<std::shared_ptr<polygon> >& getPolygons();
     const std::vector<std::shared_ptr<polygon> >& getPolygons() const;
 
+    std::vector<RealVect> getAllVertexCoordinates() const;
+
   protected:
 
 
@@ -61,7 +72,8 @@ namespace dcel {
 
     bool m_use_tree;
 
-    ritter_sphere m_sphere;
+    BoundingSphere m_boundingSphere;
+    AABB m_boundingBox;
 
     std::shared_ptr<kd_tree<polygon> > m_tree;
 
@@ -69,9 +81,9 @@ namespace dcel {
     std::vector<std::shared_ptr<edge> >    m_edges;
     std::vector<std::shared_ptr<polygon> > m_polygons;
 
-    void computeVertexNormals();
-    void computeEdgeNormals();
-    void computeBoundingSphere();
+
+    Real BruteForceSignedDistance(const RealVect& a_point) const;
+    Real KdTreeSignedDistance(const RealVect& a_point) const;
   };
 }
 

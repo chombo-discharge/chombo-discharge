@@ -21,6 +21,7 @@
 template<typename T>
 kd_tree<T>::kd_tree(){
   m_root = nullptr;
+  m_isDefined = false;
 }
 
 template<typename T>
@@ -30,6 +31,8 @@ kd_tree<T>::kd_tree(const std::vector<std::shared_ptr<T> >& a_data,
   m_root = nullptr;
   
   this->build_tree(a_data, a_max_depth, a_max_elements);
+
+
 }
 
 template<typename T>
@@ -120,6 +123,8 @@ void kd_tree<T>::build_tree(const std::vector<std::shared_ptr<T> >& a_data,
   for (int i = 0; i < m_leaves.size(); i++){
     dataleaf += m_leaves[i]->get_data().size();
   }
+
+  m_isDefined = true;
 }
 
 template<typename T>
