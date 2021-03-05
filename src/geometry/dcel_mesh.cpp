@@ -104,7 +104,7 @@ void dcel_mesh::define(std::vector<std::shared_ptr<polygon> >& a_polygons,
 void dcel_mesh::compute_bounding_sphere(){
   std::vector<RealVect> pos;
   for (int i = 0; i < m_vertices.size(); i++){
-    pos.push_back(m_vertices[i]->get_pos());
+    pos.push_back(m_vertices[i]->position());
   }
   
   m_sphere.define(pos);
@@ -162,8 +162,8 @@ void dcel_mesh::compute_vertex_normals(){
       if(!s_angle_weighted){
 	RealVect normal = RealVect::Zero;
 	for (int j = 0; j < polygons.size(); j++){
-	  //normal += polygons[j]->get_area()*polygons[j]->get_normal(); // Area weighted
-	  normal += polygons[j]->get_normal(); // Mean
+	  //normal += polygons[j]->get_area()*polygons[j]->normal(); // Area weighted
+	  normal += polygons[j]->normal(); // Mean
 	}
 
 	// Set normal
@@ -172,7 +172,7 @@ void dcel_mesh::compute_vertex_normals(){
 	  m_vertices[i]->set_normal(normal);
 	}
 	else{
-	  normal = polygons[1]->get_normal();
+	  normal = polygons[1]->normal();
 	  m_vertices[i]->set_normal(normal);
 	}
       }
@@ -185,9 +185,9 @@ void dcel_mesh::compute_vertex_normals(){
 	  const std::shared_ptr<edge>& outgoing = iter();
 	  const std::shared_ptr<edge>& incoming = outgoing->get_prev();
 
-	  const RealVect origin = incoming->get_vert()->get_pos();
-	  const RealVect x2     = outgoing->get_vert()->get_pos();
-	  const RealVect x1     = incoming->get_other_vert()->get_pos();
+	  const RealVect origin = incoming->get_vert()->position();
+	  const RealVect x2     = outgoing->get_vert()->position();
+	  const RealVect x1     = incoming->get_other_vert()->position();
 	  const Real len1       = (x1-origin).vectorLength();
 	  const Real len2       = (x2-origin).vectorLength();
 
@@ -208,7 +208,7 @@ void dcel_mesh::compute_vertex_normals(){
 	  pout() << num << endl;
 
 	  if(num > 20){
-	    pout() << "problem vertex = " << m_vertices[i]->get_pos() << endl;
+	    pout() << "problem vertex = " << m_vertices[i]->position() << endl;
 	    std::cerr << "dcel_compute_vertex_normals - stop\n";
 	  }
 #endif
@@ -236,8 +236,8 @@ void dcel_mesh::compute_edge_normals(){
 
     CH_assert(pair_edge->get_pair() == cur_edge);
 
-    const RealVect n1 = poly->get_normal();
-    const RealVect n2 = pair_poly->get_normal();
+    const RealVect n1 = poly->normal();
+    const RealVect n2 = pair_poly->normal();
     RealVect normal = (n1 + n2);
     normal = normal/normal.vectorLength();
     

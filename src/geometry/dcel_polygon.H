@@ -143,7 +143,7 @@ namespace dcel {
       @brief Get face normal vector
     */
   
-    RealVect get_normal() const;
+    RealVect normal() const;
 
     /*!
       @brief Get polygon area

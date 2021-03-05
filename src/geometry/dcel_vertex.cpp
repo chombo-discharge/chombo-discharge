@@ -67,19 +67,29 @@ std::vector<std::shared_ptr<polygon> >& vertex::get_polycache(){
   return m_polycache;
 }
 
-const std::shared_ptr<edge>& vertex::get_edge() const{
-  return m_edge;
-}
+
 
 std::shared_ptr<edge>& vertex::get_edge(){
   return m_edge;
 }
 
-const RealVect& vertex::get_pos() const {
+const std::shared_ptr<edge>& vertex::get_edge() const{
+  return m_edge;
+}
+
+RealVect& vertex::position() {
   return m_pos;
 }
 
-const RealVect& vertex::get_normal() const {
+const RealVect& vertex::position() const {
+  return m_pos;
+}
+
+RealVect& vertex::normal() {
+  return m_normal;
+}
+
+const RealVect& vertex::normal() const {
   return m_normal;
 }
 

@@ -126,7 +126,7 @@ std::shared_ptr<polygon>& edge::get_poly(){
 }
 
 
-RealVect edge::get_normal() const {
+RealVect edge::normal() const {
   return m_normal;
 }
 
@@ -135,8 +135,8 @@ Real edge::signed_distance(const RealVect a_x0) const {
   Real retval = 1.234567E89;
   
   // Involved vertices
-  const RealVect x1 = this->get_other_vert()->get_pos();
-  const RealVect x2 = m_vert->get_pos();
+  const RealVect x1 = this->get_other_vert()->position();
+  const RealVect x2 = m_vert->position();
 
   const RealVect R  = PolyGeom::cross(x2-x1,PolyGeom::cross(x1-a_x0, x2-a_x0));
   const RealVect r  = R/R.vectorLength();
@@ -148,11 +148,11 @@ Real edge::signed_distance(const RealVect a_x0) const {
   RealVect n;
   if(t < 0.0){ // Closest to x1, vertex normal takes precedence.
     p = x1;
-    n = this->get_other_vert()->get_normal();
+    n = this->get_other_vert()->normal();
   }
   else if (t > 1.0){ // Closest to x2, vertex normal takes precedence
     p = x2;
-    n = m_vert->get_normal();
+    n = m_vert->normal();
   }
   else{ // Projection onto line lies on the line segment
     p = xp;

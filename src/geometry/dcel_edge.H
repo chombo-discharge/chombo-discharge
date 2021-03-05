@@ -157,7 +157,7 @@ namespace dcel {
       @brief Get pseudo-normal
     */
   
-    RealVect get_normal() const;
+    RealVect normal() const;
 
     /*!
       @brief Get the signed distance between this edge and a point

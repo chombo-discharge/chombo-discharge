@@ -63,8 +63,8 @@ void polygon::compute_area() {
   Real area = 0.0;
 
   for (int i = 0; i < vertices.size() - 1; i++){
-    const RealVect v1 = vertices[i]->get_pos();
-    const RealVect v2 = vertices[i+1]->get_pos();
+    const RealVect v1 = vertices[i]->position();
+    const RealVect v2 = vertices[i+1]->position();
     area += PolyGeom::dot(PolyGeom::cross(v2,v1), m_normal);
   }
 
@@ -77,7 +77,7 @@ void polygon::compute_centroid() {
   const std::vector<std::shared_ptr<vertex> > vertices = this->get_vertices();
 
   for (int i = 0; i < vertices.size(); i++){
-    m_centroid += vertices[i]->get_pos();
+    m_centroid += vertices[i]->position();
   }
   m_centroid = m_centroid/vertices.size();
 }
@@ -92,9 +92,9 @@ void polygon::compute_normal(const bool a_outward_normal){
   CH_assert(vertices.size() > 2);
   const int n = vertices.size();
   for (int i = 0; i < n; i++){
-    const RealVect x0 = vertices[i]->get_pos();
-    const RealVect x1 = vertices[(i+1)%n]->get_pos();
-    const RealVect x2 = vertices[(i+2)%n]->get_pos();
+    const RealVect x0 = vertices[i]->position();
+    const RealVect x1 = vertices[(i+1)%n]->position();
+    const RealVect x2 = vertices[(i+2)%n]->position();
 
     m_normal = PolyGeom::cross(x2-x1, x2-x0);
     if(m_normal.vectorLength() > 0.0){
@@ -107,7 +107,7 @@ void polygon::compute_normal(const bool a_outward_normal){
   if(!found_normal){
     pout() << "polygon::compute_normal - vertex vectors:" << endl;
     for (int i = 0; i < vertices.size(); i++){
-      pout() << "\t" << vertices[i]->get_pos() << endl;
+      pout() << "\t" << vertices[i]->position() << endl;
     }
     pout() << "polygon::compute_normal - From this I computed n = " << m_normal << endl;
     pout() << "polygon::compute_normal - Aborting..." << endl;
@@ -122,9 +122,9 @@ void polygon::compute_normal(const bool a_outward_normal){
   const std::shared_ptr<vertex>& v1 = m_edge->get_vert();
   const std::shared_ptr<vertex>& v2 = m_edge->get_next()->get_vert();
   
-  const RealVect x0 = v0->get_pos();
-  const RealVect x1 = v1->get_pos();
-  const RealVect x2 = v2->get_pos();
+  const RealVect x0 = v0->position();
+  const RealVect x1 = v1->position();
+  const RealVect x2 = v2->position();
   
   m_normal = PolyGeom::cross(x2-x1,x1-x0);
   if(m_normal.vectorLength() < 1.E-40){
@@ -146,7 +146,7 @@ void polygon::compute_bbox(){
   std::vector<RealVect> coords;
 
   for (int i = 0; i < vertices.size(); i++){
-    coords.push_back(vertices[i]->get_pos());
+    coords.push_back(vertices[i]->position());
   }
 
   m_lo =  1.23456E89*RealVect::Unit;
@@ -168,7 +168,7 @@ void polygon::compute_bbox(){
 
 #if 1 // Debug test
   for (int i = 0; i < vertices.size(); i++){
-    const RealVect pos = vertices[i]->get_pos();
+    const RealVect pos = vertices[i]->position();
     for (int dir = 0; dir < SpaceDim; dir++){
       if(pos[dir] < m_lo[dir] || pos[dir] > m_hi[dir]){
 	pout() << "pos = " << pos << "\t Lo = " << m_lo << "\t Hi = " << m_hi << endl;
@@ -208,7 +208,7 @@ Real polygon::signed_distance(const RealVect a_x0) {
   CH_assert(vertices.size() > 0);
   Real min = 1.E99;
   for (int i = 0; i < vertices.size(); i++){
-    const Real d = (a_x0 - vertices[i]->get_pos()).vectorLength();
+    const Real d = (a_x0 - vertices[i]->position()).vectorLength();
     min = (d < min) ? d : min;
   }
 
@@ -216,7 +216,7 @@ Real polygon::signed_distance(const RealVect a_x0) {
 #endif
 
   // Compute projection of x0 on the polygon plane
-  const RealVect x1 = vertices[0]->get_pos();
+  const RealVect x1 = vertices[0]->position();
   const Real ncomp  = PolyGeom::dot(a_x0-x1, m_normal);
   const RealVect xp = a_x0 - ncomp*m_normal;
 
@@ -225,8 +225,8 @@ Real polygon::signed_distance(const RealVect a_x0) {
   Real anglesum = 0.0;
   const int n = vertices.size();
   for(int i = 0; i < n; i++){
-    const RealVect p1 = vertices[i]->get_pos() - xp;
-    const RealVect p2 = vertices[(i+1)%n]->get_pos() - xp;
+    const RealVect p1 = vertices[i]->position() - xp;
+    const RealVect p2 = vertices[(i+1)%n]->position() - xp;
 
     const Real m1 = p1.vectorLength();
     const Real m2 = p2.vectorLength();
@@ -268,7 +268,7 @@ Real polygon::signed_distance(const RealVect a_x0) {
 }
 
 
-RealVect polygon::get_normal() const {
+RealVect polygon::normal() const {
   return m_normal;
 }
 
@@ -298,7 +298,7 @@ std::vector<RealVect> polygon::get_points(){
 
   std::vector<RealVect> pos;
   for (int i = 0; i < vertices.size(); i++){
-    pos.push_back(vertices[i]->get_pos());
+    pos.push_back(vertices[i]->position());
   }
 
   return pos;

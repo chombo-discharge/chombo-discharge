@@ -39,8 +39,11 @@ namespace dcel {
     std::vector<std::shared_ptr<polygon> >& get_polycache();
     const std::vector<std::shared_ptr<polygon> >& get_polycache() const;
 
-    const RealVect& get_pos() const;
-    const RealVect& get_normal() const;
+    RealVect& position();
+    const RealVect& position() const;
+
+    RealVect& normal();
+    const RealVect& normal() const;
   
     Real signed_distance(const RealVect a_x0) const;
 
