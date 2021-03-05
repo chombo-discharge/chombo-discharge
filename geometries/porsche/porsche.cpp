@@ -29,10 +29,19 @@ porsche::porsche(){
   // Build the mesh
   std::shared_ptr<dcel::mesh> mesh = std::shared_ptr<dcel::mesh> (new dcel::mesh());
   dcel::parser::PLY::read_ascii(*mesh, filename);
-  mesh->reconcilePolygons(true, false);
+  mesh->reconcilePolygons(true, true);
+
+  // Compute vertex and edge normals
+  bool recomputeVertexNormals = true;
+  if(recomputeVertexNormals){
+    mesh->computeVertexNormals();
+  }
+  mesh->computeEdgeNormals();
+  mesh->computeBoundingSphere();
+
+  // Build tree
   mesh->buildKdTree(tree_depth, max_elements);
   mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::KdTree);
-  //    mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::Direct);
 
   // Create the if object
   RefCountedPtr<dcel_if> bif = RefCountedPtr<dcel_if>(new dcel_if(mesh, false));

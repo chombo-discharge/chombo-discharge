@@ -56,6 +56,10 @@ void vertex::addPolygon(const std::shared_ptr<polygon>& a_poly) noexcept {
   m_polycache.push_back(a_poly);
 }
 
+void vertex::normalizeNormalVector() noexcept {
+  m_normal = m_normal/m_normal.vectorLength();
+}
+
 RealVect& vertex::getPosition() noexcept {
   return m_pos;
 }

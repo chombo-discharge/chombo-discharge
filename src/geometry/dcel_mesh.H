@@ -23,6 +23,11 @@ namespace dcel {
   class mesh {
   public:
 
+    enum class VertexNormalComputation {
+      Average,
+      AngleWeighted
+    };
+
     enum class SearchAlgorithm{
       Direct,
       KdTree
@@ -60,6 +65,7 @@ namespace dcel {
     void computeBoundingSphere() noexcept;
     void computeBoundingBox() noexcept;
     void reconcilePolygons(const bool a_outward_normal, const bool recompute_vnormal) noexcept;
+    void computeVertexNormals(VertexNormalComputation a_computation) noexcept;
     void computeVertexNormals() noexcept;
     void computeEdgeNormals() noexcept;
 
@@ -85,9 +91,11 @@ namespace dcel {
     std::vector<std::shared_ptr<edge> >    m_edges;
     std::vector<std::shared_ptr<polygon> > m_polygons;
 
-
     Real DirectSignedDistance(const RealVect& a_point) const noexcept;
     Real KdTreeSignedDistance(const RealVect& a_point) const noexcept;
+
+    void computeVertexNormalAngleWeighted(std::shared_ptr<vertex>& a_vert) noexcept;
+    void computeVertexNormalAverage(std::shared_ptr<vertex>& a_vert) noexcept;
   };
 }
 

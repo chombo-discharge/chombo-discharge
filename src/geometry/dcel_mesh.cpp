@@ -129,8 +129,7 @@ void mesh::computeBoundingBox() noexcept {
   m_boundingBox.define(this->getAllVertexCoordinates());
 }
 
-
-void mesh::reconcilePolygons(const bool a_outward_normal, const bool a_recompute_vnormal) noexcept{
+void mesh::reconcilePolygons(const bool a_outwardNormal, const bool a_recompute_vnormal) noexcept{
 
   /*!
     @brief Reconcile polygon edges. This gives each edge a reference to the polygon they circulate, and also computes the 
@@ -148,7 +147,7 @@ void mesh::reconcilePolygons(const bool a_outward_normal, const bool a_recompute
       edge->setPolygon(poly);
     }
     
-    poly->computeNormal(a_outward_normal);
+    poly->computeNormal(a_outwardNormal);
     poly->computeCentroid();
     poly->computeArea();
     poly->normalizeNormalVector();
@@ -165,7 +164,6 @@ void mesh::reconcilePolygons(const bool a_outward_normal, const bool a_recompute
 
   m_reconciled = true;
 }
-
 
 void mesh::computeVertexNormals() noexcept {
 #define debug_func 1
@@ -327,3 +325,68 @@ Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) 
 
   return minDist;
 }
+
+void mesh::computeVertexNormals(VertexNormalComputation a_comp) noexcept {
+  for (auto& v : m_vertices){
+    if (v == nullptr) std::cerr << "In file dcel_mesh function dcel::mesh::computeVertexNormals(VertexNormalComputation) - vertex is 'nullptr'\n";
+
+    switch(a_comp) {
+    case VertexNormalComputation::Average:
+      this->computeVertexNormalAverage(v);
+      break;
+    case VertexNormalComputation::AngleWeighted:
+      this->computeVertexNormalAngleWeighted(v);
+      break;
+    default:
+      std::cerr << "In file dcel_mesh function dcel::mesh::computeVertexNormal(VertexNormalComputation) - unsupported algorithm requested\n";
+    }
+  }
+}
+
+void mesh::computeVertexNormalAverage(std::shared_ptr<vertex>& a_vert) noexcept {
+#if 1 // This doesn't work, why?!?
+  auto polygons = a_vert->getPolygons();
+#else
+  auto polygons = a_vert->getPolycache();
+#endif
+
+  auto& normal = a_vert->getNormal();
+
+  normal = RealVect::Zero;
+  for (const auto& p : polygons){
+    normal += p->getNormal();
+  }
+
+  a_vert->normalizeNormalVector();
+}
+
+void mesh::computeVertexNormalAngleWeighted(std::shared_ptr<vertex>& a_vert) noexcept {
+
+  RealVect& normal = a_vert->getNormal();
+  
+  normal = RealVect::Zero;
+  
+  for (edge_iterator iter(*a_vert); iter.ok(); ++iter){ 
+    const std::shared_ptr<edge>& outgoing = iter();
+    const std::shared_ptr<edge>& incoming = outgoing->getPreviousEdge();
+
+    const RealVect origin = incoming->getVertex()->getPosition();
+    const RealVect x2     = outgoing->getVertex()->getPosition();
+    const RealVect x1     = incoming->getOtherVertex()->getPosition();
+    const Real len1       = (x1-origin).vectorLength();
+    const Real len2       = (x2-origin).vectorLength();
+
+    const RealVect norm = PolyGeom::cross(x2-origin, x1-origin)/(len1*len2);
+
+    //	const Real alpha = asin(norm.vectorLength());
+
+    const Real alpha = acos(PolyGeom::dot(x2-origin, x1-origin)/len1*len2);
+
+    normal += alpha*norm/norm.vectorLength();
+
+  }
+
+  a_vert->normalizeNormalVector();
+}
+
+
