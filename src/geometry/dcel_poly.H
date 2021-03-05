@@ -18,35 +18,35 @@
 namespace dcel {
 
   class vertex;
-  class dcel_edge;
+  class edge;
 
   /*!
     @brief Abstract class for declaring polygons with DCEL surface tesselations
   */
-  class dcel_poly {
+  class polygon {
   public:
   
     /*!
       @brief Constructor
     */
-    dcel_poly();
+    polygon();
 
     /*!
       @brief Destructor
     */
-    ~dcel_poly();
+    ~polygon();
 
     /*!
       @brief Define edge
     */
   
-    void define(const RealVect& a_normal, const std::shared_ptr<dcel_edge>& a_edge);
+    void define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge);
 
     /*!
       @brief Set edge
     */
   
-    void set_edge(const std::shared_ptr<dcel_edge>& a_edge);
+    void set_edge(const std::shared_ptr<edge>& a_edge);
 
     /*!
       @brief Set normal vector
@@ -89,13 +89,13 @@ namespace dcel {
       @brief Get edge
     */
   
-    const std::shared_ptr<dcel_edge>& get_edge() const;
+    const std::shared_ptr<edge>& get_edge() const;
 
     /*!
       @brief Get edge
     */
   
-    std::shared_ptr<dcel_edge>& get_edge();
+    std::shared_ptr<edge>& get_edge();
 
     /*!
       Get all positions
@@ -113,7 +113,7 @@ namespace dcel {
       @brief Get all edges
     */
   
-    std::vector<std::shared_ptr<dcel_edge> > get_edges();
+    std::vector<std::shared_ptr<edge> > get_edges();
 
     /*!
       @brief Get centroid
@@ -167,7 +167,7 @@ namespace dcel {
     /*!
       @brief One of the edges of the polygon
     */
-    std::shared_ptr<dcel_edge> m_edge;
+    std::shared_ptr<edge> m_edge;
 
     /*!
       @brief Face normal

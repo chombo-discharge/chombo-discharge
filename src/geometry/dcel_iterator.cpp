@@ -16,7 +16,7 @@ edge_iterator::edge_iterator(){
 
 }
 
-edge_iterator::edge_iterator(dcel_poly& a_poly){
+edge_iterator::edge_iterator(polygon& a_poly){
   m_polymode  = true;
   m_begin     = a_poly.get_edge();
   m_current   = m_begin;
@@ -31,7 +31,7 @@ edge_iterator::edge_iterator(vertex& a_vert){
 }
 
 
-std::shared_ptr<dcel_edge>& edge_iterator::operator() (){
+std::shared_ptr<edge>& edge_iterator::operator() (){
   return m_current;
 }
 

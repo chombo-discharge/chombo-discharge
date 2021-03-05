@@ -17,47 +17,47 @@
 
 using namespace dcel;
 
-dcel_poly::dcel_poly(){
+polygon::polygon(){
   m_normal = RealVect::Zero;
 }
 
-dcel_poly::~dcel_poly(){
+polygon::~polygon(){
 
 }
 
 
-const std::shared_ptr<dcel_edge>& dcel_poly::get_edge() const{
+const std::shared_ptr<edge>& polygon::get_edge() const{
   return m_edge;
 }
 
 
-std::shared_ptr<dcel_edge>& dcel_poly::get_edge(){
+std::shared_ptr<edge>& polygon::get_edge(){
   return m_edge;
 }
 
 
-void dcel_poly::define(const RealVect& a_normal, const std::shared_ptr<dcel_edge>& a_edge){
+void polygon::define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge){
   this->set_normal(a_normal);
   this->set_edge(a_edge);
 }
 
 
-void dcel_poly::set_edge(const std::shared_ptr<dcel_edge>& a_edge){
+void polygon::set_edge(const std::shared_ptr<edge>& a_edge){
   m_edge = a_edge;
 }
 
 
-void dcel_poly::set_normal(const RealVect& a_normal){
+void polygon::set_normal(const RealVect& a_normal){
   m_normal = a_normal;
 }
 
 
-void dcel_poly::normalize(){
+void polygon::normalize(){
   m_normal *= 1./m_normal.vectorLength();
 }
 
 
-void dcel_poly::compute_area() {
+void polygon::compute_area() {
   const std::vector<std::shared_ptr<vertex> > vertices = this->get_vertices();
 
   Real area = 0.0;
@@ -72,7 +72,7 @@ void dcel_poly::compute_area() {
 }
 
 
-void dcel_poly::compute_centroid() {
+void polygon::compute_centroid() {
   m_centroid = RealVect::Zero;
   const std::vector<std::shared_ptr<vertex> > vertices = this->get_vertices();
 
@@ -83,7 +83,7 @@ void dcel_poly::compute_centroid() {
 }
 
 
-void dcel_poly::compute_normal(const bool a_outward_normal){
+void polygon::compute_normal(const bool a_outward_normal){
   
   // We assume that the normal is defined by right-hand rule where the rotation direction is along the half edges
 
@@ -105,13 +105,13 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
 
   
   if(!found_normal){
-    pout() << "dcel_poly::compute_normal - vertex vectors:" << endl;
+    pout() << "polygon::compute_normal - vertex vectors:" << endl;
     for (int i = 0; i < vertices.size(); i++){
       pout() << "\t" << vertices[i]->get_pos() << endl;
     }
-    pout() << "dcel_poly::compute_normal - From this I computed n = " << m_normal << endl;
-    pout() << "dcel_poly::compute_normal - Aborting..." << endl;
-    MayDay::Warning("dcel_poly::compute_normal - Cannot compute normal vector. The polygon is probably degenerate");
+    pout() << "polygon::compute_normal - From this I computed n = " << m_normal << endl;
+    pout() << "polygon::compute_normal - Aborting..." << endl;
+    MayDay::Warning("polygon::compute_normal - Cannot compute normal vector. The polygon is probably degenerate");
   }
   else{
     m_normal *= 1./m_normal.vectorLength();
@@ -128,7 +128,7 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
   
   m_normal = PolyGeom::cross(x2-x1,x1-x0);
   if(m_normal.vectorLength() < 1.E-40){
-    MayDay::Abort("dcel_poly::compute_normal - vertices lie on a line. Cannot compute normal vector");
+    MayDay::Abort("polygon::compute_normal - vertices lie on a line. Cannot compute normal vector");
   }
   else{
     m_normal = m_normal/m_normal.vectorLength();
@@ -141,7 +141,7 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
 }
 
 
-void dcel_poly::compute_bbox(){
+void polygon::compute_bbox(){
   std::vector<std::shared_ptr<vertex> > vertices = this->get_vertices();
   std::vector<RealVect> coords;
 
@@ -172,7 +172,7 @@ void dcel_poly::compute_bbox(){
     for (int dir = 0; dir < SpaceDim; dir++){
       if(pos[dir] < m_lo[dir] || pos[dir] > m_hi[dir]){
 	pout() << "pos = " << pos << "\t Lo = " << m_lo << "\t Hi = " << m_hi << endl;
-	MayDay::Abort("dcel_poly::compute_bbox - Box does not contain vertices");
+	MayDay::Abort("polygon::compute_bbox - Box does not contain vertices");
       }
     }
   }
@@ -193,12 +193,12 @@ void dcel_poly::compute_bbox(){
 }
 
 
-Real dcel_poly::get_area() const {
+Real polygon::get_area() const {
   return m_area;
 }
 
 
-Real dcel_poly::signed_distance(const RealVect a_x0) {
+Real polygon::signed_distance(const RealVect a_x0) {
 #define bug_check 0
   Real retval = 1.234567E89;
 
@@ -255,7 +255,7 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
     retval = ncomp;
   }
   else{ // The projected point lies outside the triangle. Check distance to edges/vertices
-    const std::vector<std::shared_ptr<dcel_edge> > edges = this->get_edges();
+    const std::vector<std::shared_ptr<edge> > edges = this->get_edges();
     for (int i = 0; i < edges.size(); i++){
       const Real cur_dist = edges[i]->signed_distance(a_x0);
       if(Abs(cur_dist) < Abs(retval)){
@@ -268,32 +268,32 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
 }
 
 
-RealVect dcel_poly::get_normal() const {
+RealVect polygon::get_normal() const {
   return m_normal;
 }
 
 
-RealVect dcel_poly::get_centroid() const {
+RealVect polygon::get_centroid() const {
   return m_centroid;
 }
 
 
-RealVect dcel_poly::get_coord() const {
+RealVect polygon::get_coord() const {
   return m_centroid;
 }
 
 
-RealVect dcel_poly::get_bbox_lo() const {
+RealVect polygon::get_bbox_lo() const {
   return m_lo;
 }
 
 
-RealVect dcel_poly::get_bbox_hi() const {
+RealVect polygon::get_bbox_hi() const {
   return m_hi;
 }
 
 
-std::vector<RealVect> dcel_poly::get_points(){
+std::vector<RealVect> polygon::get_points(){
   std::vector<std::shared_ptr<vertex> > vertices = this->get_vertices();
 
   std::vector<RealVect> pos;
@@ -305,11 +305,11 @@ std::vector<RealVect> dcel_poly::get_points(){
 }
 
 
-std::vector<std::shared_ptr<vertex> > dcel_poly::get_vertices(){
+std::vector<std::shared_ptr<vertex> > polygon::get_vertices(){
   std::vector<std::shared_ptr<vertex> > vertices;
 
   for (edge_iterator iter(*this); iter.ok(); ++iter){
-    std::shared_ptr<dcel_edge>& edge = iter();
+    std::shared_ptr<edge>& edge = iter();
     vertices.push_back(edge->get_vert());
   }
 
@@ -317,8 +317,8 @@ std::vector<std::shared_ptr<vertex> > dcel_poly::get_vertices(){
 }
 
 
-std::vector<std::shared_ptr<dcel_edge> > dcel_poly::get_edges(){
-  std::vector<std::shared_ptr<dcel_edge> > edges;
+std::vector<std::shared_ptr<edge> > polygon::get_edges(){
+  std::vector<std::shared_ptr<edge> > edges;
 
   for (edge_iterator iter(*this); iter.ok(); ++iter){
     edges.push_back(iter());

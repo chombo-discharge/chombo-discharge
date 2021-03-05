@@ -1,6 +1,6 @@
 /*!
   @file   vertex.H
-  @brief  Declaration of a dcel_edge class for describing surface tesselations
+  @brief  Declaration of a vertex class for describing surface tesselations
   @author Robert Marskar
   @date   Apr. 2018
 */
@@ -15,8 +15,8 @@
 
 namespace dcel {
 
-  class dcel_edge;
-  class dcel_poly;
+  class edge;
+  class polygon;
 
   /*!
     @brief Vertex class for handling surface tesselations with DCEL meshes
@@ -43,7 +43,7 @@ namespace dcel {
       @brief Define function
     */
   
-    void define(const RealVect& m_pos, const std::shared_ptr<dcel_edge>& a_edge, const RealVect a_normal = RealVect::Zero);
+    void define(const RealVect& m_pos, const std::shared_ptr<edge>& a_edge, const RealVect a_normal = RealVect::Zero);
 
     /*!
       @brief Set position
@@ -61,43 +61,43 @@ namespace dcel {
       @brief Set edge
     */
   
-    void set_edge(const std::shared_ptr<dcel_edge>& a_edge);
+    void set_edge(const std::shared_ptr<edge>& a_edge);
 
     /*!
       @brief Get reference to polygon
     */
   
-    void add_polygon(const std::shared_ptr<dcel_poly>& a_poly);
+    void add_polygon(const std::shared_ptr<polygon>& a_poly);
 
     /*!
       @brief Get edge
     */
   
-    const std::shared_ptr<dcel_edge>& get_edge() const;
+    const std::shared_ptr<edge>& get_edge() const;
 
     /*!
       @brief Get edge
     */
   
-    std::shared_ptr<dcel_edge>& get_edge();
+    std::shared_ptr<edge>& get_edge();
 
     /*!
       @brief Get all polygons connected to this vertex
     */
   
-    std::vector<std::shared_ptr<dcel_poly> > get_polygons();
+    std::vector<std::shared_ptr<polygon> > get_polygons();
 
     /*!
       @brief Get all cached polygons
     */
   
-    std::vector<std::shared_ptr<dcel_poly> >& get_polycache();
+    std::vector<std::shared_ptr<polygon> >& get_polycache();
 
     /*!
       @brief Get all cached polygons
     */
   
-    const std::vector<std::shared_ptr<dcel_poly> >& get_polycache() const;
+    const std::vector<std::shared_ptr<polygon> >& get_polycache() const;
 
     /*!
       @brief Get position
@@ -132,12 +132,12 @@ namespace dcel {
     /*!
       @brief One of the half-edges in the mesh
     */
-    std::shared_ptr<dcel_edge> m_edge;
+    std::shared_ptr<edge> m_edge;
 
     /*!
       @brief Reference to polygons
     */
-    std::vector<std::shared_ptr<dcel_poly> > m_polycache;
+    std::vector<std::shared_ptr<polygon> > m_polycache;
   };
 }
 

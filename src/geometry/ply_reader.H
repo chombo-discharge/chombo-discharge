@@ -53,8 +53,8 @@ protected:
     i.e. we assume that read_ascii_vertices was called IMMEDIATELY before this function. That function will center the fstream 
     on the correct line
   */
-  static void read_ascii_polygons(std::vector<std::shared_ptr<dcel::dcel_poly> >& a_polygons,
-				  std::vector<std::shared_ptr<dcel::dcel_edge> >& a_edges,
+  static void read_ascii_polygons(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons,
+				  std::vector<std::shared_ptr<dcel::edge> >& a_edges,
 				  std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
 				  const int                                 a_num_polygons,
 				  std::ifstream&                            a_inputstream);

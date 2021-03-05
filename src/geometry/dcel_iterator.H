@@ -15,8 +15,8 @@
 namespace dcel {
   
   class vertex;
-  class dcel_edge;
-  class dcel_poly;
+  class edge;
+  class polygon;
 
   /*!
     @brief Class that iterates over edges
@@ -32,7 +32,7 @@ namespace dcel {
     /*!
       @brief Iterator for all half edges of a polygon
     */
-    edge_iterator(dcel_poly& a_poly);
+    edge_iterator(polygon& a_poly);
 
     /*!
       @brief Iterator for outgoing half edges from the vertex
@@ -43,7 +43,7 @@ namespace dcel {
       @brief Get edge
     */
   
-    std::shared_ptr<dcel_edge>& operator() ();
+    std::shared_ptr<edge>& operator() ();
 
     /*!
       @brief Reset iterator
@@ -78,12 +78,12 @@ namespace dcel {
     /*!
       @brief Starting edge
     */
-    std::shared_ptr<dcel_edge> m_begin;
+    std::shared_ptr<edge> m_begin;
 
     /*!
       @brief Current edge
     */
-    std::shared_ptr<dcel_edge> m_current;
+    std::shared_ptr<edge> m_current;
   };
 }
 

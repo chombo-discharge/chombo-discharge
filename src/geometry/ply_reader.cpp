@@ -20,8 +20,8 @@ void ply_reader::read_ascii(dcel::dcel_mesh& a_mesh, const std::string a_filenam
 
   if(filestream.is_open()){
     std::vector<std::shared_ptr<dcel::vertex> >& vertices = a_mesh.get_vertices();
-    std::vector<std::shared_ptr<dcel::dcel_edge> >& edges    = a_mesh.get_edges();
-    std::vector<std::shared_ptr<dcel::dcel_poly> >& polygons = a_mesh.get_polygons();
+    std::vector<std::shared_ptr<dcel::edge> >& edges    = a_mesh.get_edges();
+    std::vector<std::shared_ptr<dcel::polygon> >& polygons = a_mesh.get_polygons();
 
     vertices.resize(0);
     edges.resize(0);
@@ -117,8 +117,8 @@ void ply_reader::read_ascii_vertices(std::vector<std::shared_ptr<dcel::vertex> >
   } 
 }
 
-void ply_reader::read_ascii_polygons(std::vector<std::shared_ptr<dcel::dcel_poly> >& a_polygons,
-				     std::vector<std::shared_ptr<dcel::dcel_edge> >& a_edges,
+void ply_reader::read_ascii_polygons(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons,
+				     std::vector<std::shared_ptr<dcel::edge> >& a_edges,
 				     std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
 				     const int a_num_polygons,
 				     std::ifstream& a_inputstream){
@@ -139,7 +139,7 @@ void ply_reader::read_ascii_polygons(std::vector<std::shared_ptr<dcel::dcel_poly
     }
 
     // Build polygon and inside edges
-    std::shared_ptr<dcel::dcel_poly> polygon = std::shared_ptr<dcel::dcel_poly> (new dcel::dcel_poly());
+    std::shared_ptr<dcel::polygon> polygon = std::shared_ptr<dcel::polygon> (new dcel::polygon());
 
     // Get vertices. Add a reference to the newly created polygon
     std::vector<std::shared_ptr<dcel::vertex> > poly_vertices(num_vert);
@@ -148,9 +148,9 @@ void ply_reader::read_ascii_polygons(std::vector<std::shared_ptr<dcel::dcel_poly
     }
 
     // Build inside edges. Polygon gets a reference to the edge
-    std::vector<std::shared_ptr<dcel::dcel_edge> > poly_edges(num_vert);
+    std::vector<std::shared_ptr<dcel::edge> > poly_edges(num_vert);
     for (int i = 0; i < num_vert; i++){
-      poly_edges[i] = std::shared_ptr<dcel::dcel_edge> (new dcel::dcel_edge());
+      poly_edges[i] = std::shared_ptr<dcel::edge> (new dcel::edge());
       poly_edges[i]->set_vert(poly_vertices[(i+1)%num_vert]);
     }
     polygon->set_edge(poly_edges[0]);
@@ -171,17 +171,17 @@ void ply_reader::read_ascii_polygons(std::vector<std::shared_ptr<dcel::dcel_poly
     // Check for pairs
     for (int i = 0; i < poly_edges.size(); i++){
 
-      std::shared_ptr<dcel::dcel_edge>& edge = poly_edges[i];
+      std::shared_ptr<dcel::edge>& edge = poly_edges[i];
       std::shared_ptr<dcel::vertex>& vert = edge->get_vert();
 
       // Get all polygons connected to the current vertex and look for edge pairs
-      std::vector<std::shared_ptr<dcel::dcel_poly> >& polygons = vert->get_polycache();
+      std::vector<std::shared_ptr<dcel::polygon> >& polygons = vert->get_polycache();
 
       for (int j = 0; j < polygons.size(); j++){
-	std::shared_ptr<dcel::dcel_edge>& other_polygon_edge = polygons[j]->get_edge();
+	std::shared_ptr<dcel::edge>& other_polygon_edge = polygons[j]->get_edge();
 
 	for (dcel::edge_iterator iter(*polygons[j]); iter.ok(); ++iter){
-	  std::shared_ptr<dcel::dcel_edge>& other_polygon_edge = iter();
+	  std::shared_ptr<dcel::edge>& other_polygon_edge = iter();
 
 	  if(other_polygon_edge->get_vert() == edge->get_prev()->get_vert()){
 	    edge->set_pair(other_polygon_edge);

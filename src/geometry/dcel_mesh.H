@@ -16,8 +16,8 @@
 
 namespace dcel {
 
-  class dcel_poly;
-  class dcel_edge;
+  class polygon;
+  class edge;
   class vertex;
 
   /*!
@@ -36,8 +36,8 @@ namespace dcel {
     /*!
       @brief Full constructor
     */
-    dcel_mesh(std::vector<std::shared_ptr<dcel_poly> >& a_polygons,
-	      std::vector<std::shared_ptr<dcel_edge> >& a_edges,
+    dcel_mesh(std::vector<std::shared_ptr<polygon> >& a_polygons,
+	      std::vector<std::shared_ptr<edge> >& a_edges,
 	      std::vector<std::shared_ptr<vertex> >& a_vertices);
 
     /*!
@@ -55,8 +55,8 @@ namespace dcel {
       @brief Define a mesh from existing polygons and edges
     */
   
-    void define(std::vector<std::shared_ptr<dcel_poly> >& a_polygons,
-		std::vector<std::shared_ptr<dcel_edge> >& a_edges,
+    void define(std::vector<std::shared_ptr<polygon> >& a_polygons,
+		std::vector<std::shared_ptr<edge> >& a_edges,
 		std::vector<std::shared_ptr<vertex> >& a_vertices);
 
     /*!
@@ -88,13 +88,13 @@ namespace dcel {
       @brief Get edges
     */
   
-    std::vector<std::shared_ptr<dcel_edge> >& get_edges();
+    std::vector<std::shared_ptr<edge> >& get_edges();
 
     /*!
       @brief Get polygons
     */
   
-    std::vector<std::shared_ptr<dcel_poly> >& get_polygons();
+    std::vector<std::shared_ptr<polygon> >& get_polygons();
 
   protected:
 
@@ -116,17 +116,17 @@ namespace dcel {
     /*!
       @brief kd-tree for fast polysearch
     */
-    std::shared_ptr<kd_tree<dcel_poly> > m_tree;
+    std::shared_ptr<kd_tree<polygon> > m_tree;
 
     /*!
       @brief Mesh polygons
     */
-    std::vector<std::shared_ptr<dcel_poly> > m_polygons;
+    std::vector<std::shared_ptr<polygon> > m_polygons;
 
     /*!
       @brief Mesh edges
     */
-    std::vector<std::shared_ptr<dcel_edge> > m_edges;
+    std::vector<std::shared_ptr<edge> > m_edges;
 
     /*!
       @brief Mesh vertices

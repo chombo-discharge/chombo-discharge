@@ -29,8 +29,8 @@ dcel_mesh::~dcel_mesh(){
 }
 
 
-dcel_mesh::dcel_mesh(std::vector<std::shared_ptr<dcel_poly> >& a_polygons,
-		     std::vector<std::shared_ptr<dcel_edge> >& a_edges,
+dcel_mesh::dcel_mesh(std::vector<std::shared_ptr<polygon> >& a_polygons,
+		     std::vector<std::shared_ptr<edge> >& a_edges,
 		     std::vector<std::shared_ptr<vertex> >& a_vertices){
   m_reconciled = false;
   m_use_tree   = false;
@@ -44,12 +44,12 @@ std::vector<std::shared_ptr<vertex> >& dcel_mesh::get_vertices(){
 }
 
 
-std::vector<std::shared_ptr<dcel_edge> >& dcel_mesh::get_edges(){
+std::vector<std::shared_ptr<edge> >& dcel_mesh::get_edges(){
   return m_edges;
 }
 
 
-std::vector<std::shared_ptr<dcel_poly> >& dcel_mesh::get_polygons(){
+std::vector<std::shared_ptr<polygon> >& dcel_mesh::get_polygons(){
   return m_polygons;
 }
 
@@ -60,7 +60,7 @@ bool dcel_mesh::sanity_check() const {
       std::cerr << "dcel_mesh::sanity_check - edge is NULL\n";
     }
     else{
-      const std::shared_ptr<dcel_edge>& edge = m_edges[i];
+      const std::shared_ptr<edge>& edge = m_edges[i];
     
       if(edge->get_pair()== nullptr){
 	std::cerr << "dcel_mesh::sanity_check - pair edge is NULL, your geometry probably isn't watertight.\n";
@@ -93,8 +93,8 @@ bool dcel_mesh::sanity_check() const {
 }
 
 
-void dcel_mesh::define(std::vector<std::shared_ptr<dcel_poly> >& a_polygons,
-		       std::vector<std::shared_ptr<dcel_edge> >& a_edges,
+void dcel_mesh::define(std::vector<std::shared_ptr<polygon> >& a_polygons,
+		       std::vector<std::shared_ptr<edge> >& a_edges,
 		       std::vector<std::shared_ptr<vertex> >& a_vertices){
   m_polygons = a_polygons;
   m_edges    = a_edges;
@@ -116,11 +116,11 @@ void dcel_mesh::reconcile_polygons(const bool a_outward_normal, const bool a_rec
   // Reconcile polygons; compute polygon area and provide edges explicit access
   // to their polygons
   for (int i = 0; i < m_polygons.size(); i++){
-    std::shared_ptr<dcel_poly>& poly = m_polygons[i];
+    std::shared_ptr<polygon>& poly = m_polygons[i];
 
     // Every edge gets a reference to this polygon
     for (edge_iterator iter(*poly); iter.ok(); ++iter){
-      std::shared_ptr<dcel_edge>& edge = iter();
+      std::shared_ptr<edge>& edge = iter();
       edge->set_poly(poly);
     }
     poly->compute_normal(a_outward_normal);
@@ -152,9 +152,9 @@ void dcel_mesh::compute_vertex_normals(){
   for (int i = 0; i < m_vertices.size(); i++){
     if(!(m_vertices[i]->get_edge()== nullptr)){
 #if 1 // This doesn't work, why?!?
-      const std::vector<std::shared_ptr<dcel_poly> > polygons = m_vertices[i]->get_polygons();
+      const std::vector<std::shared_ptr<polygon> > polygons = m_vertices[i]->get_polygons();
 #else
-      const std::vector<std::shared_ptr<dcel_poly> > polygons = m_vertices[i]->get_polycache();
+      const std::vector<std::shared_ptr<polygon> > polygons = m_vertices[i]->get_polycache();
 #endif
 
       // Mean or area weighted
@@ -182,8 +182,8 @@ void dcel_mesh::compute_vertex_normals(){
 	int num = 0;
 #endif
 	for (edge_iterator iter(*m_vertices[i]); iter.ok(); ++iter){ 
-	  const std::shared_ptr<dcel_edge>& outgoing = iter();
-	  const std::shared_ptr<dcel_edge>& incoming = outgoing->get_prev();
+	  const std::shared_ptr<edge>& outgoing = iter();
+	  const std::shared_ptr<edge>& incoming = outgoing->get_prev();
 
 	  const RealVect origin = incoming->get_vert()->get_pos();
 	  const RealVect x2     = outgoing->get_vert()->get_pos();
@@ -228,11 +228,11 @@ void dcel_mesh::compute_vertex_normals(){
 void dcel_mesh::compute_edge_normals(){
   for (int i = 0; i < m_edges.size(); i++){
 
-    std::shared_ptr<dcel_edge>& cur_edge         = m_edges[i];
-    const std::shared_ptr<dcel_edge>& pair_edge = cur_edge->get_pair();
+    std::shared_ptr<edge>& cur_edge         = m_edges[i];
+    const std::shared_ptr<edge>& pair_edge = cur_edge->get_pair();
 
-    const std::shared_ptr<dcel_poly>& poly      = cur_edge->get_poly();
-    const std::shared_ptr<dcel_poly>& pair_poly = pair_edge->get_poly();
+    const std::shared_ptr<polygon>& poly      = cur_edge->get_poly();
+    const std::shared_ptr<polygon>& pair_poly = pair_edge->get_poly();
 
     CH_assert(pair_edge->get_pair() == cur_edge);
 
@@ -246,7 +246,7 @@ void dcel_mesh::compute_edge_normals(){
 }
 
 void dcel_mesh::build_tree(const int a_max_depth, const int a_max_elements){
-  m_tree     = std::shared_ptr<kd_tree<dcel_poly> > (new kd_tree<dcel_poly>(m_polygons, a_max_depth, a_max_elements));
+  m_tree     = std::shared_ptr<kd_tree<polygon> > (new kd_tree<polygon>(m_polygons, a_max_depth, a_max_elements));
   m_use_tree = true;
 }
 
@@ -264,8 +264,8 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
 #if print_time
       auto start_search = std::chrono::system_clock::now(); 
 #endif
-      //      std::vector<std::shared_ptr<dcel_poly> > candidates = m_tree->get_candidates(a_x0);
-      std::vector<std::shared_ptr<dcel_poly> > candidates = m_tree->find_closest(a_x0);
+      //      std::vector<std::shared_ptr<polygon> > candidates = m_tree->get_candidates(a_x0);
+      std::vector<std::shared_ptr<polygon> > candidates = m_tree->find_closest(a_x0);
       //#if print_time
       auto stop_search = std::chrono::system_clock::now();
       auto start_comp = std::chrono::system_clock::now(); 

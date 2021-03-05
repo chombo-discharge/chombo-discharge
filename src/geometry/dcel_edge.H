@@ -16,32 +16,32 @@
 namespace dcel {
   
   class vertex;
-  class dcel_poly;
+  class polygon;
 
   /*!
     @brief Edge class for handling surface tesselations with DCEL meshes
   */
-  class dcel_edge {
+  class edge {
   public:
 
     /*!
       @brief Constructor
     */
-    dcel_edge();
+    edge();
 
     /*!
       @brief Destructor
     */
-    ~dcel_edge();
+    ~edge();
 
     /*!
       @brief Define function
     */
   
     void define(const std::shared_ptr<vertex>& a_vert,
-		const std::shared_ptr<dcel_edge>& a_pair,
-		const std::shared_ptr<dcel_edge>& a_next,
-		const std::shared_ptr<dcel_edge>& a_prev,
+		const std::shared_ptr<edge>& a_pair,
+		const std::shared_ptr<edge>& a_next,
+		const std::shared_ptr<edge>& a_prev,
 		const RealVect                    a_normal = RealVect::Zero);
 
 
@@ -49,7 +49,7 @@ namespace dcel {
       @brief Set polygon
     */
   
-    void set_poly(const std::shared_ptr<dcel_poly>& a_poly);
+    void set_poly(const std::shared_ptr<polygon>& a_poly);
 
     /*!
       @brief Set vertex
@@ -61,19 +61,19 @@ namespace dcel {
       @brief Set pair
     */
   
-    void set_pair(const std::shared_ptr<dcel_edge>& a_pair);
+    void set_pair(const std::shared_ptr<edge>& a_pair);
 
     /*!
       @brief Set next edge
     */
   
-    void set_next(const std::shared_ptr<dcel_edge>& a_next);
+    void set_next(const std::shared_ptr<edge>& a_next);
 
     /*!
       @brief Set previous
     */
   
-    void set_prev(const std::shared_ptr<dcel_edge>& a_prev);
+    void set_prev(const std::shared_ptr<edge>& a_prev);
   
     /*!
       @brief Set normal vector
@@ -109,49 +109,49 @@ namespace dcel {
       @brief Get the other half edge
     */
   
-    const std::shared_ptr<dcel_edge>& get_pair() const;
+    const std::shared_ptr<edge>& get_pair() const;
 
     /*!
       @brief Get the other half edge
     */
   
-    std::shared_ptr<dcel_edge>& get_pair();
+    std::shared_ptr<edge>& get_pair();
 
     /*!
       @brief Get the previous half edge
     */
   
-    const std::shared_ptr<dcel_edge>& get_prev() const;
+    const std::shared_ptr<edge>& get_prev() const;
 
     /*!
       @brief Get the previous half edge
     */
   
-    std::shared_ptr<dcel_edge>& get_prev();
+    std::shared_ptr<edge>& get_prev();
 
     /*!
       @brief Get the next half edge
     */
   
-    const std::shared_ptr<dcel_edge>& get_next() const;
+    const std::shared_ptr<edge>& get_next() const;
 
     /*!
       @brief Get the next half edge
     */
   
-    std::shared_ptr<dcel_edge>& get_next();
+    std::shared_ptr<edge>& get_next();
 
     /*!
       @brief Get polygon
     */
   
-    const std::shared_ptr<dcel_poly>& get_poly() const;
+    const std::shared_ptr<polygon>& get_poly() const;
 
     /*!
       @brief Get polygon
     */
   
-    std::shared_ptr<dcel_poly>& get_poly();
+    std::shared_ptr<polygon>& get_poly();
   
     /*!
       @brief Get pseudo-normal
@@ -180,22 +180,22 @@ namespace dcel {
     /*!
       @brief Edge pair
     */
-    std::shared_ptr<dcel_edge> m_pair;
+    std::shared_ptr<edge> m_pair;
 
     /*!
       @brief Previous edge
     */
-    std::shared_ptr<dcel_edge> m_prev; 
+    std::shared_ptr<edge> m_prev; 
 
     /*!
       @brief Next edge
     */
-    std::shared_ptr<dcel_edge> m_next;
+    std::shared_ptr<edge> m_next;
 
     /*!
       @brief Reference to polygon
     */
-    std::shared_ptr<dcel_poly> m_poly;
+    std::shared_ptr<polygon> m_poly;
   };
 
 }
