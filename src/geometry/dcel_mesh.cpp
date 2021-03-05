@@ -129,7 +129,7 @@ void mesh::computeBoundingBox() noexcept {
   m_boundingBox.define(this->getAllVertexCoordinates());
 }
 
-void mesh::reconcilePolygons(const bool a_outwardNormal, const bool a_recompute_vnormal) noexcept{
+void mesh::reconcilePolygons(const bool a_outwardNormal) noexcept{
 
   /*!
     @brief Reconcile polygon edges. This gives each edge a reference to the polygon they circulate, and also computes the 
@@ -154,95 +154,23 @@ void mesh::reconcilePolygons(const bool a_outwardNormal, const bool a_recompute_
     poly->computeBoundingBox();
   }
 
-  if(a_recompute_vnormal){   // Compute pseudonormals for vertices 
-    std::cerr << "mesh::reconcile_polygons - there is probably a bug in the vertex normal computation somewhere\n";
-    this->computeVertexNormals();
-  }
-  
-  this->computeEdgeNormals();
-  this->computeBoundingSphere();
-
   m_reconciled = true;
 }
 
-void mesh::computeVertexNormals() noexcept {
-#define debug_func 1
+void mesh::computeVertexNormals(VertexNormalWeight a_weight) noexcept {
+  for (auto& v : m_vertices){
+    if (v == nullptr) std::cerr << "In file dcel_mesh function dcel::mesh::computeVertexNormals(VertexNormalWeighting) - vertex is 'nullptr'\n";
 
-#if debug_func
-  pout() << "starting computation" << endl;
-#endif
-  for (int i = 0; i < m_vertices.size(); i++){
-    if(!(m_vertices[i]->getEdge()== nullptr)){
-#if 1 // This doesn't work, why?!?
-      const std::vector<std::shared_ptr<polygon> > polygons = m_vertices[i]->getPolygons();
-#else
-      const std::vector<std::shared_ptr<polygon> > polygons = m_vertices[i]->getPolycache();
-#endif
-
-      // Mean or area weighted
-      if(!s_angle_weighted){
-	RealVect normal = RealVect::Zero;
-	for (int j = 0; j < polygons.size(); j++){
-	  //normal += polygons[j]->get_area()*polygons[j]->getNormal(); // Area weighted
-	  normal += polygons[j]->getNormal(); // Mean
-	}
-
-	// Set normal
-	if(normal.vectorLength() > 0.0){
-	  normal *= 1./normal.vectorLength();
-	  m_vertices[i]->setNormal(normal);
-	}
-	else{
-	  normal = polygons[1]->getNormal();
-	  m_vertices[i]->setNormal(normal);
-	}
-      }
-      else { // Angle-weighted normal vector
-	RealVect normal = RealVect::Zero;
-#if debug_func
-	int num = 0;
-#endif
-	for (edge_iterator iter(*m_vertices[i]); iter.ok(); ++iter){ 
-	  const std::shared_ptr<edge>& outgoing = iter();
-	  const std::shared_ptr<edge>& incoming = outgoing->getPreviousEdge();
-
-	  const RealVect origin = incoming->getVertex()->getPosition();
-	  const RealVect x2     = outgoing->getVertex()->getPosition();
-	  const RealVect x1     = incoming->getOtherVertex()->getPosition();
-	  const Real len1       = (x1-origin).vectorLength();
-	  const Real len2       = (x2-origin).vectorLength();
-
-	  const RealVect norm = PolyGeom::cross(x2-origin, x1-origin)/(len1*len2);
-
-#if debug_func
-	  CH_assert(len1 > 0.0);
-	  CH_assert(len2 > 0.0);
-	  CH_assert(norm.vectorLength() > 0.0);
-#endif
-	  //	const Real alpha = asin(norm.vectorLength());
-
-	  const Real alpha = acos(PolyGeom::dot(x2-origin, x1-origin)/len1*len2);
-
-	  normal += alpha*norm/norm.vectorLength();
-#if debug_func
-	  num++;
-	  pout() << num << endl;
-
-	  if(num > 20){
-	    pout() << "problem vertex = " << m_vertices[i]->getPosition() << endl;
-	    std::cerr << "dcel_compute_vertex_normals - stop\n";
-	  }
-#endif
-	}
-	normal *= 1./normal.vectorLength();
-
-	m_vertices[i]->setNormal(normal);
-      }
+    switch(a_weight) {
+    case VertexNormalWeight::None:
+      this->computeVertexNormalAverage(v);
+      break;
+    case VertexNormalWeight::Angle:
+      this->computeVertexNormalAngleWeighted(v);
+      break;
+    default:
+      std::cerr << "In file dcel_mesh function dcel::mesh::computeVertexNormal(VertexNormalWeighting) - unsupported algorithm requested\n";
     }
-
-#if debug_func
-    pout() << "done computing vertex vectors" << endl;
-#endif
   }
 }
 
@@ -326,23 +254,6 @@ Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) 
   return minDist;
 }
 
-void mesh::computeVertexNormals(VertexNormalComputation a_comp) noexcept {
-  for (auto& v : m_vertices){
-    if (v == nullptr) std::cerr << "In file dcel_mesh function dcel::mesh::computeVertexNormals(VertexNormalComputation) - vertex is 'nullptr'\n";
-
-    switch(a_comp) {
-    case VertexNormalComputation::Average:
-      this->computeVertexNormalAverage(v);
-      break;
-    case VertexNormalComputation::AngleWeighted:
-      this->computeVertexNormalAngleWeighted(v);
-      break;
-    default:
-      std::cerr << "In file dcel_mesh function dcel::mesh::computeVertexNormal(VertexNormalComputation) - unsupported algorithm requested\n";
-    }
-  }
-}
-
 void mesh::computeVertexNormalAverage(std::shared_ptr<vertex>& a_vert) noexcept {
 #if 1 // This doesn't work, why?!?
   auto polygons = a_vert->getPolygons();
@@ -350,9 +261,10 @@ void mesh::computeVertexNormalAverage(std::shared_ptr<vertex>& a_vert) noexcept 
   auto polygons = a_vert->getPolycache();
 #endif
 
-  auto& normal = a_vert->getNormal();
+  RealVect& normal = a_vert->getNormal();
 
   normal = RealVect::Zero;
+  
   for (const auto& p : polygons){
     normal += p->getNormal();
   }
@@ -370,11 +282,12 @@ void mesh::computeVertexNormalAngleWeighted(std::shared_ptr<vertex>& a_vert) noe
     const std::shared_ptr<edge>& outgoing = iter();
     const std::shared_ptr<edge>& incoming = outgoing->getPreviousEdge();
 
-    const RealVect origin = incoming->getVertex()->getPosition();
-    const RealVect x2     = outgoing->getVertex()->getPosition();
-    const RealVect x1     = incoming->getOtherVertex()->getPosition();
-    const Real len1       = (x1-origin).vectorLength();
-    const Real len2       = (x2-origin).vectorLength();
+    const RealVect& origin = incoming->getVertex()->getPosition();
+    const RealVect& x2     = outgoing->getVertex()->getPosition();
+    const RealVect& x1     = incoming->getOtherVertex()->getPosition();
+    
+    const Real len1        = (x1-origin).vectorLength();
+    const Real len2        = (x2-origin).vectorLength();
 
     const RealVect norm = PolyGeom::cross(x2-origin, x1-origin)/(len1*len2);
 

@@ -23,9 +23,9 @@ namespace dcel {
   class mesh {
   public:
 
-    enum class VertexNormalComputation {
-      Average,
-      AngleWeighted
+    enum class VertexNormalWeight {
+      None,
+      Angle,
     };
 
     enum class SearchAlgorithm{
@@ -64,9 +64,8 @@ namespace dcel {
 
     void computeBoundingSphere() noexcept;
     void computeBoundingBox() noexcept;
-    void reconcilePolygons(const bool a_outward_normal, const bool recompute_vnormal) noexcept;
-    void computeVertexNormals(VertexNormalComputation a_computation) noexcept;
-    void computeVertexNormals() noexcept;
+    void reconcilePolygons(const bool a_outwardNormal) noexcept;
+    void computeVertexNormals(VertexNormalWeight a_weight) noexcept;
     void computeEdgeNormals() noexcept;
 
     void buildKdTree(const int a_max_depth, const int a_max_elements) noexcept;
