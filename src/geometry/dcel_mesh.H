@@ -24,7 +24,7 @@ namespace dcel {
   public:
 
     enum class SearchAlgorithm{
-      BruteForce,
+      Direct,
       KdTree
     };
 
@@ -86,7 +86,7 @@ namespace dcel {
     std::vector<std::shared_ptr<polygon> > m_polygons;
 
 
-    Real BruteForceSignedDistance(const RealVect& a_point) const noexcept;
+    Real DirectSignedDistance(const RealVect& a_point) const noexcept;
     Real KdTreeSignedDistance(const RealVect& a_point) const noexcept;
   };
 }

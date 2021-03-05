@@ -276,7 +276,7 @@ Real mesh::signedDistance(const RealVect& a_point) const noexcept {
   return this->signedDistance(a_point, m_algorithm);
 }
 
-Real mesh::BruteForceSignedDistance(const RealVect& a_point) const noexcept {
+Real mesh::DirectSignedDistance(const RealVect& a_point) const noexcept {
   Real minDist = m_polygons.front()->signedDistance(a_point);
     
   for (const auto& poly : m_polygons){
@@ -314,8 +314,8 @@ Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) 
   Real minDist;
   
   switch(a_algorithm){
-  case SearchAlgorithm::BruteForce:
-    minDist = this->BruteForceSignedDistance(a_point);
+  case SearchAlgorithm::Direct:
+    minDist = this->DirectSignedDistance(a_point);
     break;
   case SearchAlgorithm::KdTree:
     minDist = this->KdTreeSignedDistance(a_point);
