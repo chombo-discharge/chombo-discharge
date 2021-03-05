@@ -46,6 +46,10 @@ void mesh::define(std::vector<std::shared_ptr<polygon> >& a_polygons,
   m_vertices = a_vertices;
 }
 
+void mesh::setAlgorithm(SearchAlgorithm a_algorithm){
+  m_algorithm = a_algorithm;
+}
+
 std::vector<std::shared_ptr<vertex> >& mesh::getVertices(){
   return m_vertices;
 }
@@ -269,60 +273,8 @@ void mesh::buildKdTree(const int a_max_depth, const int a_max_elements){
   m_use_tree = true;
 }
 
-Real mesh::signedDistance(const RealVect a_x0){
-
-  //
-  return this->signedDistance(a_x0, SearchAlgorithm::KdTree);
-#define print_time 0
-#if print_time
-  Real t0, t1, t2, t3, t4;
-  auto start = std::chrono::system_clock::now(); 
-#endif
-
-  Real min_dist = 1.E99;
-  if(true){//m_sphere.inside(a_x0)){
-    if(m_use_tree){ // Fast kd-tree search
-#if print_time
-      auto start_search = std::chrono::system_clock::now(); 
-#endif
-      //      std::vector<std::shared_ptr<polygon> > candidates = m_tree->get_candidates(a_x0);
-      std::vector<std::shared_ptr<polygon> > candidates = m_tree->find_closest(a_x0);
-      //#if print_time
-      auto stop_search = std::chrono::system_clock::now();
-      auto start_comp = std::chrono::system_clock::now(); 
-      //#endif
-      for (int i = 0; i < candidates.size(); i++){
-	const Real cur_dist = candidates[i]->signedDistance(a_x0);
-	if(Abs(cur_dist) < Abs(min_dist)){
-	  min_dist = cur_dist;
-	}
-      }
-#if print_time
-      auto stop_comp = std::chrono::system_clock::now(); 
-#endif
-
-#if print_time
-      auto stop = std::chrono::system_clock::now();
-      std::chrono::duration<double> total_time = stop - start;
-      std::chrono::duration<double> total_search = stop_search - start_search;
-      std::chrono::duration<double> total_comp = stop_comp - start_comp;
-      pout() << "Search time = "     << total_search.count()
-	     << "\t #candidates = "    << candidates.size() 
-	     << "\t Compute time = " << total_comp.count()
-	     << "\t Search/Comp = "     << 1.0*total_search.count()/total_comp.count() << endl;
-#endif
-    }
-    else{ // Brute force search
-      for (int i = 0; i < m_polygons.size(); i++){
-      	const Real cur_dist = m_polygons[i]->signedDistance(a_x0);
-      	if(Abs(cur_dist) < Abs(min_dist)){
-      	  min_dist = cur_dist;
-      	}
-      }
-    }
-  }
-
-  return min_dist;
+Real mesh::signedDistance(const RealVect& a_point) const {
+  return this->signedDistance(a_point, m_algorithm);
 }
 
 Real mesh::BruteForceSignedDistance(const RealVect& a_point) const {

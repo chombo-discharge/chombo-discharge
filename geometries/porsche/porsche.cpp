@@ -31,9 +31,10 @@ porsche::porsche(){
   dcel::parser::PLY::read_ascii(*mesh, filename);
   mesh->reconcilePolygons(true, false);
   mesh->buildKdTree(tree_depth, max_elements);
+  mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::KdTree);
 
   // Create the if object
-  RefCountedPtr<dcel_if> bif = RefCountedPtr<dcel_if>(new dcel_if(mesh, true));
+  RefCountedPtr<dcel_if> bif = RefCountedPtr<dcel_if>(new dcel_if(mesh, false));
 
   m_electrodes.push_back(electrode(bif, true));
   

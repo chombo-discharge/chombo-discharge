@@ -44,6 +44,8 @@ namespace dcel {
 		std::vector<std::shared_ptr<edge> >&    a_edges,
 		std::vector<std::shared_ptr<vertex> >&  a_vertices);
 
+    void setAlgorithm(SearchAlgorithm a_algorithm);
+
     void computeBoundingSphere();
     void computeBoundingBox();
     void computeVertexNormals();
@@ -51,7 +53,7 @@ namespace dcel {
     void reconcilePolygons(const bool a_outward_normal, const bool recompute_vnormal);
     void buildKdTree(const int a_max_depth, const int a_max_elements);
 
-    Real signedDistance(const RealVect a_x0);
+    Real signedDistance(const RealVect& a_x0) const;
     Real signedDistance(const RealVect& a_x0, SearchAlgorithm a_algorithm) const;
 
     std::vector<std::shared_ptr<vertex> >& getVertices();
@@ -67,9 +69,8 @@ namespace dcel {
 
   protected:
 
-
+    SearchAlgorithm m_algorithm;
     bool m_reconciled;
-
     bool m_use_tree;
 
     BoundingSphere m_boundingSphere;
