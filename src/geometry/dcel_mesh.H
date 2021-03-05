@@ -9,7 +9,7 @@
 #define _DCEL_MESH_
 
 #include "dcel_BoundingVolumes.H"
-#include "kd_tree.H"
+#include "dcel_KdTree.H"
 
 #include <vector>
 #include <memory>
