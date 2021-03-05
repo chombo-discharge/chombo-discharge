@@ -11,11 +11,11 @@
 #include "dcel_vert.H"
 #include "dcel_poly.H"
 #include "dcel_edge.H"
-
-
 #include <PolyGeom.H>
 
 #include <chrono>
+
+using namespace dcel;
 
 bool dcel_mesh::s_angle_weighted = false; // Use angle-weighted vertex normal vectors. This currently breaks. 
 
@@ -31,7 +31,7 @@ dcel_mesh::~dcel_mesh(){
 
 dcel_mesh::dcel_mesh(std::vector<std::shared_ptr<dcel_poly> >& a_polygons,
 		     std::vector<std::shared_ptr<dcel_edge> >& a_edges,
-		     std::vector<std::shared_ptr<dcel_vert> >& a_vertices){
+		     std::vector<std::shared_ptr<vertex> >& a_vertices){
   m_reconciled = false;
   m_use_tree   = false;
   
@@ -39,7 +39,7 @@ dcel_mesh::dcel_mesh(std::vector<std::shared_ptr<dcel_poly> >& a_polygons,
 }
 
 
-std::vector<std::shared_ptr<dcel_vert> >& dcel_mesh::get_vertices(){
+std::vector<std::shared_ptr<vertex> >& dcel_mesh::get_vertices(){
   return m_vertices;
 }
 
@@ -95,7 +95,7 @@ bool dcel_mesh::sanity_check() const {
 
 void dcel_mesh::define(std::vector<std::shared_ptr<dcel_poly> >& a_polygons,
 		       std::vector<std::shared_ptr<dcel_edge> >& a_edges,
-		       std::vector<std::shared_ptr<dcel_vert> >& a_vertices){
+		       std::vector<std::shared_ptr<vertex> >& a_vertices){
   m_polygons = a_polygons;
   m_edges    = a_edges;
   m_vertices = a_vertices;

@@ -15,187 +15,191 @@
 #include <memory>
 #include <vector>
 
-class dcel_vert;
-class dcel_edge;
+namespace dcel {
 
-/*!
-  @brief Abstract class for declaring polygons with DCEL surface tesselations
-*/
-class dcel_poly {
-public:
+  class vertex;
+  class dcel_edge;
+
+  /*!
+    @brief Abstract class for declaring polygons with DCEL surface tesselations
+  */
+  class dcel_poly {
+  public:
   
-  /*!
-    @brief Constructor
-  */
-  dcel_poly();
-
-  /*!
-    @brief Destructor
-  */
-  ~dcel_poly();
-
-  /*!
-    @brief Define edge
-  */
-  
-  void define(const RealVect& a_normal, const std::shared_ptr<dcel_edge>& a_edge);
-
-  /*!
-    @brief Set edge
-  */
-  
-  void set_edge(const std::shared_ptr<dcel_edge>& a_edge);
+    /*!
+      @brief Constructor
+    */
+    dcel_poly();
 
     /*!
-    @brief Set normal vector
-  */
-  
-  void set_normal(const RealVect& a_normal);
-
-  /*!
-    @brief Compute polygon area
-  */
-  
-  void compute_area();
-
-  /*!
-    @brief Normalize normal vector
-  */
-  
-  void normalize();
-
-  /*!
-    @brief Compute centroid. 
-    @note This currently computes the point centroid and not the mass centroid. This probably doesn't matter for performance. 
-  */
-  
-  void compute_centroid();
-
-  /*!
-    @brief Compute normal vector from vertices
-  */
-  
-  void compute_normal(const bool a_outward_normal);
-
-  /*!
-    @brief Compute bounding box
-  */
-  
-  void compute_bbox();
-
-  /*!
-    @brief Get edge
-  */
-  
-  const std::shared_ptr<dcel_edge>& get_edge() const;
-
-  /*!
-    @brief Get edge
-  */
-  
-  std::shared_ptr<dcel_edge>& get_edge();
-
-  /*!
-    Get all positions
-  */
-  
-  std::vector<RealVect> get_points();
-
-  /*!
-    @brief Get all vertices
-  */
-  
-  std::vector<std::shared_ptr<dcel_vert> > get_vertices();
-
-  /*!
-    @brief Get all edges
-  */
-  
-  std::vector<std::shared_ptr<dcel_edge> > get_edges();
-
-  /*!
-    @brief Get centroid
-  */
-  
-  RealVect get_centroid() const;
-
-  /*!
-    @brief Get the centroid
-  */
-  
-  RealVect get_coord() const;
-
-  /*!
-    @brief Get lower corner of bounding box
-  */
-  
-  RealVect get_bbox_lo() const;
+      @brief Destructor
+    */
+    ~dcel_poly();
 
     /*!
-    @brief Get high corner of bounding box
-  */
+      @brief Define edge
+    */
   
-  RealVect get_bbox_hi() const;
-  
-  /*!
-    @brief Get face normal vector
-  */
-  
-  RealVect get_normal() const;
+    void define(const RealVect& a_normal, const std::shared_ptr<dcel_edge>& a_edge);
 
-  /*!
-    @brief Get polygon area
-  */
+    /*!
+      @brief Set edge
+    */
   
-  Real get_area() const;
+    void set_edge(const std::shared_ptr<dcel_edge>& a_edge);
 
-  /*!
-    @brief Signed distance. 
-  */
+    /*!
+      @brief Set normal vector
+    */
+  
+    void set_normal(const RealVect& a_normal);
+
+    /*!
+      @brief Compute polygon area
+    */
+  
+    void compute_area();
+
+    /*!
+      @brief Normalize normal vector
+    */
+  
+    void normalize();
+
+    /*!
+      @brief Compute centroid. 
+      @note This currently computes the point centroid and not the mass centroid. This probably doesn't matter for performance. 
+    */
+  
+    void compute_centroid();
+
+    /*!
+      @brief Compute normal vector from vertices
+    */
+  
+    void compute_normal(const bool a_outward_normal);
+
+    /*!
+      @brief Compute bounding box
+    */
+  
+    void compute_bbox();
+
+    /*!
+      @brief Get edge
+    */
+  
+    const std::shared_ptr<dcel_edge>& get_edge() const;
+
+    /*!
+      @brief Get edge
+    */
+  
+    std::shared_ptr<dcel_edge>& get_edge();
+
+    /*!
+      Get all positions
+    */
+  
+    std::vector<RealVect> get_points();
+
+    /*!
+      @brief Get all vertices
+    */
+  
+    std::vector<std::shared_ptr<vertex> > get_vertices();
+
+    /*!
+      @brief Get all edges
+    */
+  
+    std::vector<std::shared_ptr<dcel_edge> > get_edges();
+
+    /*!
+      @brief Get centroid
+    */
+  
+    RealVect get_centroid() const;
+
+    /*!
+      @brief Get the centroid
+    */
+  
+    RealVect get_coord() const;
+
+    /*!
+      @brief Get lower corner of bounding box
+    */
+  
+    RealVect get_bbox_lo() const;
+
+    /*!
+      @brief Get high corner of bounding box
+    */
+  
+    RealVect get_bbox_hi() const;
+  
+    /*!
+      @brief Get face normal vector
+    */
+  
+    RealVect get_normal() const;
+
+    /*!
+      @brief Get polygon area
+    */
+  
+    Real get_area() const;
+
+    /*!
+      @brief Signed distance. 
+    */
 #if 0 // This is the actual signature
   
-  Real signed_distance(const RealVect a_x0) const;
+    Real signed_distance(const RealVect a_x0) const;
 #else // Just so that I can make things compile
   
-  Real signed_distance(const RealVect a_x0);
+    Real signed_distance(const RealVect a_x0);
 #endif
   
-protected:
+  protected:
   
-  /*!
-    @brief One of the edges of the polygon
-  */
-  std::shared_ptr<dcel_edge> m_edge;
+    /*!
+      @brief One of the edges of the polygon
+    */
+    std::shared_ptr<dcel_edge> m_edge;
 
-  /*!
-    @brief Face normal
-  */
-  RealVect m_normal;
+    /*!
+      @brief Face normal
+    */
+    RealVect m_normal;
 
-  /*!
-    @brief Polygon centroid
-  */
-  RealVect m_centroid;
+    /*!
+      @brief Polygon centroid
+    */
+    RealVect m_centroid;
 
-  /*!
-    @brief Polygon area
-  */
-  Real m_area;
+    /*!
+      @brief Polygon area
+    */
+    Real m_area;
 
-  /*!
-    @brief Bounding box low corner
-  */
-  RealVect m_lo;
+    /*!
+      @brief Bounding box low corner
+    */
+    RealVect m_lo;
 
-  /*!
-    @brief Bounding box high corner
-  */
-  RealVect m_hi;
+    /*!
+      @brief Bounding box high corner
+    */
+    RealVect m_hi;
 
-  /*!
-    @brief Ritter sphere
-  */
-  ritter_sphere m_ritter;
-};
+    /*!
+      @brief Ritter sphere
+    */
+    ritter_sphere m_ritter;
+  };
+
+}
 
 #endif

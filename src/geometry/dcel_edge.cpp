@@ -1,5 +1,5 @@
 /*!
-  @file   dcel_edgeI.H
+  @file   dcel_edge.cpp
   @brief  Implementation of dcel_edge.H
   @author Robert Marskar
   @date   March 2021
@@ -12,6 +12,8 @@
 
 #include "PolyGeom.H"
 
+using namespace dcel;
+
 dcel_edge::dcel_edge(){
 
 }
@@ -21,7 +23,7 @@ dcel_edge::~dcel_edge(){
 }
 
 
-void dcel_edge::define(const std::shared_ptr<dcel_vert>& a_vert,
+void dcel_edge::define(const std::shared_ptr<vertex>& a_vert,
 		       const std::shared_ptr<dcel_edge>& a_pair,
 		       const std::shared_ptr<dcel_edge>& a_next,
 		       const std::shared_ptr<dcel_edge>& a_prev,
@@ -39,7 +41,7 @@ void dcel_edge::set_poly(const std::shared_ptr<dcel_poly>& a_poly){
 }
 
 
-void dcel_edge::set_vert(const std::shared_ptr<dcel_vert>& a_vert){
+void dcel_edge::set_vert(const std::shared_ptr<vertex>& a_vert){
   m_vert = a_vert;
 }
 
@@ -64,22 +66,22 @@ void dcel_edge::set_normal(const RealVect a_normal){
 }
 
 
-const std::shared_ptr<dcel_vert>& dcel_edge::get_vert() const {
+const std::shared_ptr<vertex>& dcel_edge::get_vert() const {
   return m_vert;
 }
 
 
-std::shared_ptr<dcel_vert>& dcel_edge::get_vert() {
+std::shared_ptr<vertex>& dcel_edge::get_vert() {
   return m_vert;
 }
 
 
-const std::shared_ptr<dcel_vert>& dcel_edge::get_other_vert() const {
+const std::shared_ptr<vertex>& dcel_edge::get_other_vert() const {
   return m_pair->get_vert();
 }
 
 
-std::shared_ptr<dcel_vert>& dcel_edge::get_other_vert(){
+std::shared_ptr<vertex>& dcel_edge::get_other_vert(){
   return m_pair->get_vert();
 }
 

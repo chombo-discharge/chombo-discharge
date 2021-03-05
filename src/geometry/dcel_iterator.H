@@ -12,76 +12,79 @@
 
 #include <memory>
 
-class dcel_vert;
-class dcel_edge;
-class dcel_poly;
-
-/*!
-  @brief Class that iterates over edges
-*/
-class edge_iterator {
-public:
-
-  /*!
-    @brief Weak constructor
-  */
-  edge_iterator();
+namespace dcel {
   
-  /*!
-    @brief Iterator for all half edges of a polygon
-  */
-  edge_iterator(dcel_poly& a_poly);
+  class vertex;
+  class dcel_edge;
+  class dcel_poly;
 
   /*!
-    @brief Iterator for outgoing half edges from the vertex
+    @brief Class that iterates over edges
   */
-  edge_iterator(dcel_vert& a_vert);
+  class edge_iterator {
+  public:
 
-  /*!
-    @brief Get edge
-  */
+    /*!
+      @brief Weak constructor
+    */
+    edge_iterator();
   
-  std::shared_ptr<dcel_edge>& operator() ();
+    /*!
+      @brief Iterator for all half edges of a polygon
+    */
+    edge_iterator(dcel_poly& a_poly);
 
-  /*!
-    @brief Reset iterator
-  */
+    /*!
+      @brief Iterator for outgoing half edges from the vertex
+    */
+    edge_iterator(vertex& a_vert);
+
+    /*!
+      @brief Get edge
+    */
   
-  void reset();
+    std::shared_ptr<dcel_edge>& operator() ();
 
-  /*!
-    @brief Increment edge
-  */
+    /*!
+      @brief Reset iterator
+    */
   
-  void operator ++();
+    void reset();
 
-  /*!
-    @brief Check if ok or not
-  */
+    /*!
+      @brief Increment edge
+    */
   
-  bool ok();
+    void operator ++();
+
+    /*!
+      @brief Check if ok or not
+    */
   
-protected:
-
-  /*!
-    @brief Flag for encapsulating hwo we iterator
-  */
-  bool m_polymode;
-
- /*!
-    @brief Check if this is the first iteration
-  */
-  bool m_full_loop;
+    bool ok();
   
-  /*!
-    @brief Starting edge
-  */
-  std::shared_ptr<dcel_edge> m_begin;
+  protected:
 
-  /*!
-    @brief Current edge
-  */
-  std::shared_ptr<dcel_edge> m_current;
-};
+    /*!
+      @brief Flag for encapsulating hwo we iterator
+    */
+    bool m_polymode;
+
+    /*!
+      @brief Check if this is the first iteration
+    */
+    bool m_full_loop;
+  
+    /*!
+      @brief Starting edge
+    */
+    std::shared_ptr<dcel_edge> m_begin;
+
+    /*!
+      @brief Current edge
+    */
+    std::shared_ptr<dcel_edge> m_current;
+  };
+}
 
 #endif

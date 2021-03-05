@@ -25,7 +25,7 @@ public:
   /*!
     @brief Full constructor
   */
-  dcel_if(const std::shared_ptr<dcel_mesh>& a_mesh, const bool a_fluidInside);
+  dcel_if(const std::shared_ptr<dcel::dcel_mesh>& a_mesh, const bool a_fluidInside);
 
   /*!
     @brief Copy constructor
@@ -52,7 +52,7 @@ protected:
   /*!
     @brief Mesh
   */
-  std::shared_ptr<dcel_mesh> m_mesh;
+  std::shared_ptr<dcel::dcel_mesh> m_mesh;
 
   /*!
     @brief Flip covered region

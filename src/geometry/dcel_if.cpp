@@ -11,7 +11,7 @@
 
 #define enable_dcel_timer 0
 
-dcel_if::dcel_if(const std::shared_ptr<dcel_mesh>& a_mesh, const bool a_fluidInside){
+dcel_if::dcel_if(const std::shared_ptr<dcel::dcel_mesh>& a_mesh, const bool a_fluidInside){
   m_mesh        = a_mesh;
   m_fluidInside = a_fluidInside;
 }

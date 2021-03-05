@@ -26,7 +26,7 @@ porsche::porsche(){
   pp.get("max_elements", max_elements);
 
   // Build the mesh
-  std::shared_ptr<dcel_mesh> mesh = std::shared_ptr<dcel_mesh> (new dcel_mesh());
+  std::shared_ptr<dcel::dcel_mesh> mesh = std::shared_ptr<dcel::dcel_mesh> (new dcel::dcel_mesh());
   ply_reader::read_ascii(*mesh, filename);
   mesh->reconcile_polygons(true, false);
   mesh->build_tree(tree_depth, max_elements);

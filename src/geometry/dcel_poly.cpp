@@ -1,5 +1,5 @@
 /*!
-  @file   dcel_polyI.H
+  @file   dcel_poly.cpp
   @brief  Implementation of dcel_poly.H
   @author Robert Marskar
   @date   Apr. 2018
@@ -11,9 +11,11 @@
 #include "dcel_iterator.H"
 
 #include <PolyGeom.H>
-
+  
 #define EPSILON 1.E-8
 #define TWOPI 6.283185307179586476925287
+
+using namespace dcel;
 
 dcel_poly::dcel_poly(){
   m_normal = RealVect::Zero;
@@ -56,7 +58,7 @@ void dcel_poly::normalize(){
 
 
 void dcel_poly::compute_area() {
-  const std::vector<std::shared_ptr<dcel_vert> > vertices = this->get_vertices();
+  const std::vector<std::shared_ptr<vertex> > vertices = this->get_vertices();
 
   Real area = 0.0;
 
@@ -72,7 +74,7 @@ void dcel_poly::compute_area() {
 
 void dcel_poly::compute_centroid() {
   m_centroid = RealVect::Zero;
-  const std::vector<std::shared_ptr<dcel_vert> > vertices = this->get_vertices();
+  const std::vector<std::shared_ptr<vertex> > vertices = this->get_vertices();
 
   for (int i = 0; i < vertices.size(); i++){
     m_centroid += vertices[i]->get_pos();
@@ -86,7 +88,7 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
   // We assume that the normal is defined by right-hand rule where the rotation direction is along the half edges
 
   bool found_normal = false;
-  std::vector<std::shared_ptr<dcel_vert> > vertices = this->get_vertices();
+  std::vector<std::shared_ptr<vertex> > vertices = this->get_vertices();
   CH_assert(vertices.size() > 2);
   const int n = vertices.size();
   for (int i = 0; i < n; i++){
@@ -116,9 +118,9 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
   }
 
 #if 0
-  const std::shared_ptr<dcel_vert>& v0 = m_edge->get_prev()->get_vert();
-  const std::shared_ptr<dcel_vert>& v1 = m_edge->get_vert();
-  const std::shared_ptr<dcel_vert>& v2 = m_edge->get_next()->get_vert();
+  const std::shared_ptr<vertex>& v0 = m_edge->get_prev()->get_vert();
+  const std::shared_ptr<vertex>& v1 = m_edge->get_vert();
+  const std::shared_ptr<vertex>& v2 = m_edge->get_next()->get_vert();
   
   const RealVect x0 = v0->get_pos();
   const RealVect x1 = v1->get_pos();
@@ -140,7 +142,7 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
 
 
 void dcel_poly::compute_bbox(){
-  std::vector<std::shared_ptr<dcel_vert> > vertices = this->get_vertices();
+  std::vector<std::shared_ptr<vertex> > vertices = this->get_vertices();
   std::vector<RealVect> coords;
 
   for (int i = 0; i < vertices.size(); i++){
@@ -200,7 +202,7 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
 #define bug_check 0
   Real retval = 1.234567E89;
 
-  std::vector<std::shared_ptr<dcel_vert> > vertices = this->get_vertices();
+  std::vector<std::shared_ptr<vertex> > vertices = this->get_vertices();
 
 #if bug_check // Debug, return shortest distance to vertex
   CH_assert(vertices.size() > 0);
@@ -292,7 +294,7 @@ RealVect dcel_poly::get_bbox_hi() const {
 
 
 std::vector<RealVect> dcel_poly::get_points(){
-  std::vector<std::shared_ptr<dcel_vert> > vertices = this->get_vertices();
+  std::vector<std::shared_ptr<vertex> > vertices = this->get_vertices();
 
   std::vector<RealVect> pos;
   for (int i = 0; i < vertices.size(); i++){
@@ -303,8 +305,8 @@ std::vector<RealVect> dcel_poly::get_points(){
 }
 
 
-std::vector<std::shared_ptr<dcel_vert> > dcel_poly::get_vertices(){
-  std::vector<std::shared_ptr<dcel_vert> > vertices;
+std::vector<std::shared_ptr<vertex> > dcel_poly::get_vertices(){
+  std::vector<std::shared_ptr<vertex> > vertices;
 
   for (edge_iterator iter(*this); iter.ok(); ++iter){
     std::shared_ptr<dcel_edge>& edge = iter();

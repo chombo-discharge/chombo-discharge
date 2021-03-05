@@ -10,6 +10,8 @@
 #include "dcel_edge.H"
 #include "dcel_vert.H"
 
+using namespace dcel;
+
 edge_iterator::edge_iterator(){
 
 }
@@ -21,7 +23,7 @@ edge_iterator::edge_iterator(dcel_poly& a_poly){
   m_full_loop = false;
 }
 
-edge_iterator::edge_iterator(dcel_vert& a_vert){
+edge_iterator::edge_iterator(vertex& a_vert){
   m_polymode  = false;
   m_begin     = a_vert.get_edge();
   m_current   = m_begin;
