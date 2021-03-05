@@ -9,6 +9,7 @@
 #define _DCEL_POLY_
 
 #include <ritter_sphere.H>
+#include <dcel_BoundingSphere.H>
 
 #include "RealVect.H"
 
@@ -37,6 +38,7 @@ namespace dcel {
     void computeCentroid();
     void computeNormal(const bool a_outwardNormal);
     void computeBoundingBox();
+    void computeBoundingSphere();
 
     std::shared_ptr<edge>& getEdge();
     const std::shared_ptr<edge>& getEdge() const;
@@ -50,6 +52,7 @@ namespace dcel {
 
     RealVect& getNormal();
     const RealVect& getNormal() const;
+
 
     Real& getArea();
     const Real& getArea() const;
@@ -80,6 +83,7 @@ namespace dcel {
     RealVect m_lo;
     RealVect m_hi;
 
+    BoundingSphere m_boundingSphere;
     ritter_sphere m_ritter;
   };
 

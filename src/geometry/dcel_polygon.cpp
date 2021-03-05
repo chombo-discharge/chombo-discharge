@@ -139,6 +139,11 @@ void polygon::computeNormal(const bool a_outwardNormal){
   }
 }
 
+void polygon::computeBoundingSphere(){
+  const std::vector<RealVect> points = this->getAllVertexCoordinates();
+
+  m_boundingSphere.define(points, BoundingSphere::Algorithm::Ritter);
+}
 
 void polygon::computeBoundingBox(){
   std::vector<std::shared_ptr<vertex> > vertices = this->getVertices();
@@ -170,7 +175,7 @@ void polygon::computeBoundingBox(){
   }
 
   // Define ritter sphere
-  m_ritter.define(coords);
+  //  m_ritter.define(coords);
 
 #if 1 // Debug test
   for (int i = 0; i < vertices.size(); i++){
