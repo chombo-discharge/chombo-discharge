@@ -84,5 +84,10 @@ const RealVect& vertex::get_normal() const {
 }
 
 Real vertex::signed_distance(const RealVect a_x0) const {
-  return 0.0;
+  const RealVect delta = a_x0 - m_pos;
+  const Real dist      = delta.vectorLength();
+  const Real dot       = m_normal.dotProduct(delta);
+  const int sign       = (dot > 0) ? 1 : -1;
+  
+  return dist*sign;
 }
