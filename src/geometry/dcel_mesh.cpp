@@ -12,8 +12,6 @@
 #include "dcel_edge.H"
 #include <PolyGeom.H>
 
-#include <chrono>
-
 using namespace dcel;
 
 mesh::mesh(){
@@ -78,14 +76,6 @@ void mesh::sanityCheck() const {
     else if(nextEdge->getPreviousEdge() != e){
       std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - this->getNextEdge()->getPreviousEdge() is not the current edge, but it should be.\n";
     }
-    
-
-    // // Check that we can iterate around the polygon of this edge.
-    // const auto& poly = e->getPolygon();
-
-    // for (edge_iterator edgeIt(*poly); edgeIt.ok(); ++edgeIt){
-    //   const auto& cur = edgeIt;
-    // }
   }
 
   // Vertex check
