@@ -255,7 +255,7 @@ Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) 
 }
 
 void mesh::computeVertexNormalAverage(std::shared_ptr<vertex>& a_vert) noexcept {
-#if 1 // This doesn't work, why?!?
+#if 0 // This doesn't work, why?!?
   auto polygons = a_vert->getPolygons();
 #else
   auto polygons = a_vert->getPolycache();
@@ -277,26 +277,29 @@ void mesh::computeVertexNormalAngleWeighted(std::shared_ptr<vertex>& a_vert) noe
   RealVect& normal = a_vert->getNormal();
   
   normal = RealVect::Zero;
-  
-  for (edge_iterator iter(*a_vert); iter.ok(); ++iter){ 
-    const std::shared_ptr<edge>& outgoing = iter();
-    const std::shared_ptr<edge>& incoming = outgoing->getPreviousEdge();
 
-    const RealVect& origin = incoming->getVertex()->getPosition();
-    const RealVect& x2     = outgoing->getVertex()->getPosition();
-    const RealVect& x1     = incoming->getOtherVertex()->getPosition();
-    
-    const Real len1        = (x1-origin).vectorLength();
-    const Real len2        = (x2-origin).vectorLength();
+  for (edge_iterator iter(*a_vert); iter.ok(); ++iter){
+    const auto& outgoingEdge = iter();
 
-    const RealVect norm = PolyGeom::cross(x2-origin, x1-origin)/(len1*len2);
+    // Edges circulate around the polygon. Should be 
+    const RealVect& x0 = outgoingEdge->getVertex()->getPosition();
+    const RealVect& x1 = outgoingEdge->getPreviousEdge()->getVertex()->getPosition();
+    const RealVect& x2 = outgoingEdge->getNextEdge()->getVertex()->getPosition();
 
-    //	const Real alpha = asin(norm.vectorLength());
+    RealVect v1 = x1-x0;
+    RealVect v2 = x2-x0;
 
-    const Real alpha = acos(PolyGeom::dot(x2-origin, x1-origin)/len1*len2);
+    v1 = v1/v1.vectorLength();
+    v2 = v2/v2.vectorLength();
 
-    normal += alpha*norm/norm.vectorLength();
+    const RealVect norm = PolyGeom::cross(v1, v2);
 
+    // We could use the polygon normal, but I'm decoupling the way these are computed....
+    /// const RealVect norm = outgoingEdge->getPolygon()->getNormal();
+
+    const Real alpha = acos(PolyGeom::dot(v1, v2));
+
+    normal += alpha*norm;
   }
 
   a_vert->normalizeNormalVector();

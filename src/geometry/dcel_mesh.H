@@ -16,9 +16,10 @@
 
 namespace dcel {
 
-  class polygon;
-  class edge;
+
   class vertex;
+  class edge;
+  class polygon;
 
   class mesh {
   public:
@@ -72,8 +73,6 @@ namespace dcel {
 
     Real signedDistance(const RealVect& a_x0) const noexcept ;
     Real signedDistance(const RealVect& a_x0, SearchAlgorithm a_algorithm) const noexcept;
-
-
 
   protected:
 

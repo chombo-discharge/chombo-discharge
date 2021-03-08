@@ -43,10 +43,6 @@ void polygon::setNormal(const RealVect& a_normal) noexcept {
   m_normal = a_normal;
 }
 
-
-
-
-
 void polygon::normalizeNormalVector() noexcept {
   m_normal *= 1./m_normal.vectorLength();
 }
@@ -65,7 +61,6 @@ void polygon::computeArea() noexcept {
 
   m_area = Abs(0.5*area);
 }
-
 
 void polygon::computeCentroid() noexcept {
   m_centroid = RealVect::Zero;

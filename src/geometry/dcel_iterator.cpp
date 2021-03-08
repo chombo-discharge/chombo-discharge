@@ -60,10 +60,9 @@ void edge_iterator::operator++(){
   }
   else{
     m_current = m_current->getPreviousEdge()->getPairEdge();
-    //    m_current = m_current->get_pair()->get_next();
   }
 
-  // Signal a full loop around the polygon. 
+  // Have now done a full loop around the polygon or vertex. 
   if(m_current == m_begin){ 
     m_full_loop = true;
   }
