@@ -10,6 +10,7 @@
 
 #include "dcel_BoundingVolumes.H"
 #include "dcel_KdTree.H"
+#include "dcel_BVH.H"
 
 #include <vector>
 #include <memory>
