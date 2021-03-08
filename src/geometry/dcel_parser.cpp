@@ -188,7 +188,6 @@ void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::poly
 }
 
 void dcel::parser::PLY::reconcilePairEdges(std::vector<std::shared_ptr<dcel::edge> >& a_edges){
-					   
   for (auto& curEdge : a_edges){
     const auto& nextEdge = curEdge->getNextEdge();
     
