@@ -45,17 +45,16 @@ void mesh::define(std::vector<std::shared_ptr<polygon> >& a_polygons,
   m_vertices = a_vertices;
 }
 
-bool mesh::sanityCheck() const {
-  for (int i = 0; i < m_edges.size(); i++){
-    const auto& curEdge   = m_edges[i];
-    const auto& nextEdge  = curEdge->getNextEdge();
-    const auto& prevEdge  = curEdge->getPreviousEdge();
-    const auto& pairEdge  = curEdge->getPairEdge();
-    const auto& curVertex = curEdge->getVertex();
-    const auto& curPoly   = curEdge->getPolygon();
+void mesh::sanityCheck() const {
+  for (const auto& e : m_edges){
+    const auto& nextEdge  = e->getNextEdge();
+    const auto& prevEdge  = e->getPreviousEdge();
+    const auto& pairEdge  = e->getPairEdge();
+    const auto& curVertex = e->getVertex();
+    const auto& curPoly   = e->getPolygon();
 
     // Check basic points for current edge. 
-    if(curEdge == nullptr) {
+    if(e == nullptr) {
       std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - edge is nullptr\n";
     }
     else if(pairEdge == nullptr){
@@ -75,35 +74,31 @@ bool mesh::sanityCheck() const {
     // }
 
     // Check that the next edge's previous edge is this edge. 
-    if(prevEdge->getNextEdge() != curEdge){
+    if(prevEdge->getNextEdge() != e){
       std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - this->getPreviousEdge()->getNextEdge() is not the current edge, but it should be.\n";
     }
-    else if(nextEdge->getPreviousEdge() != curEdge){
+    else if(nextEdge->getPreviousEdge() != e){
       std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - this->getNextEdge()->getPreviousEdge() is not the current edge, but it should be.\n";
     }
     
 
     // // Check that we can iterate around the polygon of this edge.
-    // const auto& poly = curEdge->getPolygon();
+    // const auto& poly = e->getPolygon();
 
     // for (edge_iterator edgeIt(*poly); edgeIt.ok(); ++edgeIt){
     //   const auto& cur = edgeIt;
     // }
   }
 
-  for (int i = 0; i < m_vertices.size(); i++){
-    if(m_vertices[i]== nullptr){
-      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - m_vertices[i] is nullptr, something has gone wrong with vertex generation.\n";
+  // Vertex check
+  for (const auto& v : m_vertices){
+    if(v == nullptr){
+      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - got a nullptr vertex, something has gone wrong with vertex generation.\n";
     }
-    else{
-      if(m_vertices[i]->getEdge()== nullptr){
-	CH_assert(m_vertices[i]->getPolycache().size() == 0);
-	pout() << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - vertex edge is nullptr, you may have an unreferenced vertex." << endl;
-      }
+    else if(v->getEdge() == nullptr){
+      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - vertex has a nullptr edge, something has gone wrong with vertex generation.\n";
     }
   }
-
-  return true;
 }
 
 void mesh::setAlgorithm(SearchAlgorithm a_algorithm) noexcept {
@@ -153,15 +148,9 @@ void mesh::computeBoundingBox() noexcept {
 
 void mesh::reconcilePolygons(const bool a_outwardNormal) noexcept{
 
-  /*!
-    @brief Reconcile polygon edges. This gives each edge a reference to the polygon they circulate, and also computes the 
-    polygon area
-  */
-
   // Reconcile polygons; compute polygon area and provide edges explicit access
   // to their polygons
-  for (int i = 0; i < m_polygons.size(); i++){
-    std::shared_ptr<polygon>& poly = m_polygons[i];
+  for (auto& poly : m_polygons){
 
     // Every edge gets a reference to this polygon
     for (edge_iterator iter(*poly); iter.ok(); ++iter){
@@ -198,21 +187,20 @@ void mesh::computeVertexNormals(VertexNormalWeight a_weight) noexcept {
 }
 
 void mesh::computeEdgeNormals() noexcept {
-  for (int i = 0; i < m_edges.size(); i++){
+  for (auto& e : m_edges){
+    const std::shared_ptr<edge>& pairEdge = e->getPairEdge();
 
-    std::shared_ptr<edge>& curEdge        = m_edges[i];
-    const std::shared_ptr<edge>& pairEdge = curEdge->getPairEdge();
-
-    const std::shared_ptr<polygon>& poly     = curEdge->getPolygon();
+    const std::shared_ptr<polygon>& poly     = e->getPolygon();
     const std::shared_ptr<polygon>& pairPoly = pairEdge->getPolygon();
-    const RealVect n1 = poly->getNormal();
-    const RealVect n2 = pairPoly->getNormal();
-
-    RealVect& normal = curEdge->getNormal();
     
-    normal = (n1 + n2);
+    const RealVect& n1 = poly->getNormal();
+    const RealVect& n2 = pairPoly->getNormal();
 
-    curEdge->normalizeNormalVector();
+    RealVect& normal = e->getNormal();
+    
+    normal = n1 + n2;
+
+    e->normalizeNormalVector();
   }
 }
 

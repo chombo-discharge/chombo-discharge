@@ -44,12 +44,10 @@ namespace dcel {
 
     ~mesh();
 
-    bool sanityCheck() const;
-
+    void sanityCheck() const;
     void define(std::vector<std::shared_ptr<polygon> >& a_polygons,
 		std::vector<std::shared_ptr<edge> >&    a_edges,
 		std::vector<std::shared_ptr<vertex> >&  a_vertices) noexcept;
-
     void setAlgorithm(SearchAlgorithm a_algorithm) noexcept;
 
     std::vector<std::shared_ptr<vertex> >& getVertices() noexcept;
