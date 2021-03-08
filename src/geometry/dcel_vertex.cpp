@@ -24,6 +24,11 @@ vertex::vertex(const RealVect& a_pos){
   m_normal = RealVect::Zero;
 }
 
+vertex::vertex(const RealVect& a_pos, const RealVect& a_normal){
+  m_pos    = a_pos;
+  m_normal = a_normal;
+}
+
 vertex::vertex(const vertex& a_otherVertex){
   this->define(a_otherVertex.getPosition(),
 	       a_otherVertex.getEdge(),

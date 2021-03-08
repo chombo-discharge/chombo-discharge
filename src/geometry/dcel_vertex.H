@@ -23,6 +23,7 @@ namespace dcel {
 
     vertex();
     vertex(const RealVect& a_pos);
+    vertex(const RealVect& a_pos, const RealVect& a_normal);
     vertex(const vertex& a_otherVertex);
     ~vertex();
 

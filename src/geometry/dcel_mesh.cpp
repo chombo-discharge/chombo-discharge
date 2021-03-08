@@ -203,7 +203,7 @@ void mesh::computeEdgeNormals() noexcept {
 }
 
 void mesh::buildKdTree(const int a_max_depth, const int a_max_elements) noexcept {
-  m_tree = std::shared_ptr<kd_tree<polygon> > (new kd_tree<polygon>(m_polygons, a_max_depth, a_max_elements));
+  m_tree = std::make_shared<kd_tree<polygon> > (m_polygons, a_max_depth, a_max_elements);
 }
 
 Real mesh::signedDistance(const RealVect& a_point) const noexcept {

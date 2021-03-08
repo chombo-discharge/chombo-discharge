@@ -15,7 +15,7 @@
 #include <iostream>
 #include <fstream>
 
-void dcel::parser::PLY::read_ascii(dcel::mesh& a_mesh, const std::string a_filename){
+void dcel::parser::PLY::readASCII(dcel::mesh& a_mesh, const std::string a_filename){
   std::ifstream filestream(a_filename);
 
   if(filestream.is_open()){
@@ -30,23 +30,23 @@ void dcel::parser::PLY::read_ascii(dcel::mesh& a_mesh, const std::string a_filen
     int num_vertices;  // Number of vertices
     int num_polygons;  // Number of polygons
 
-    dcel::parser::PLY::read_ascii_header(num_vertices, num_polygons, filestream); 
-    dcel::parser::PLY::read_ascii_vertices(vertices, num_vertices, filestream);
-    dcel::parser::PLY::read_ascii_polygons(polygons, edges, vertices, num_polygons, filestream);
+    dcel::parser::PLY::readHeaderASCII(num_vertices, num_polygons, filestream); 
+    dcel::parser::PLY::readVerticesASCII(vertices, num_vertices, filestream);
+    dcel::parser::PLY::readPolygonsASCII(polygons, edges, vertices, num_polygons, filestream);
 
     a_mesh.sanityCheck();
   
     filestream.close();
   }
   else{
-    const std::string error = "dcel::parser::PLY::read_ascii - ERROR! Could not open file " + a_filename;
+    const std::string error = "dcel::parser::PLY::readASCII - ERROR! Could not open file " + a_filename;
     std::cerr << error + "\n";
   }
 }
 
-void dcel::parser::PLY::read_ascii_header(int&           a_num_vertices,
-					  int&           a_num_polygons,
-					  std::ifstream& a_inputstream){
+void dcel::parser::PLY::readHeaderASCII(int&           a_num_vertices,
+					int&           a_num_polygons,
+					std::ifstream& a_inputstream){
 
   std::string str1;
   std::string str2;
@@ -86,9 +86,9 @@ void dcel::parser::PLY::read_ascii_header(int&           a_num_vertices,
   }
 }
 
-void dcel::parser::PLY::read_ascii_vertices(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
-					    const int                                 a_num_vertices,
-					    std::ifstream&                            a_inputstream){
+void dcel::parser::PLY::readVerticesASCII(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
+					  const int                                    a_num_vertices,
+					  std::ifstream&                               a_inputstream){
 
   RealVect pos;
   Real& x = pos[0];
@@ -104,24 +104,22 @@ void dcel::parser::PLY::read_ascii_vertices(std::vector<std::shared_ptr<dcel::ve
 
   std::string line;
   while(std::getline(a_inputstream, line)){
-    num++;
     std::stringstream sstream(line);
     sstream >> x >> y >> z >> nx >> ny >> nz;
 
-    std::shared_ptr<dcel::vertex> vert = std::shared_ptr<dcel::vertex> (new dcel::vertex(pos));
-    vert->setNormal(norm);
-    a_vertices.push_back(vert);
-    if(num == a_num_vertices){
-      break;
-    }
-  } 
+    a_vertices.emplace_back(std::make_shared<dcel::vertex>(pos, norm));
+
+    // We have read all the vertices we should read. Exit now.
+    num++;
+    if(num == a_num_vertices) break;
+  }
 }
 
-void dcel::parser::PLY::read_ascii_polygons(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons,
-					    std::vector<std::shared_ptr<dcel::edge> >& a_edges,
-					    std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
-					    const int a_num_polygons,
-					    std::ifstream& a_inputstream){
+void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons,
+					  std::vector<std::shared_ptr<dcel::edge> >&    a_edges,
+					  std::vector<std::shared_ptr<dcel::vertex> >&  a_vertices,
+					  const int                                     a_num_polygons,
+					  std::ifstream&                                a_inputstream){
   int num_vert;
   std::vector<int> which_vertices;
 
