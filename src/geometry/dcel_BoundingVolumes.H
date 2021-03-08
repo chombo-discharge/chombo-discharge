@@ -26,8 +26,8 @@ namespace dcel {
   class BoundingVolume {
   public:
     
-    BoundingVolume(){}
-    ~BoundingVolume(){}
+    BoundingVolume();
+    ~BoundingVolume();
 
     PointLocation getPointLocation(const RealVect& a_p) const;
     
@@ -53,6 +53,8 @@ namespace dcel {
     ~BoundingSphere();
 
     void define(const std::vector<RealVect>& a_points, const Algorithm& a_algorith);
+
+    bool intersects(const BoundingSphere& a_other);
     
     Real getDistanceToPoint(const RealVect& a_x0) const override;
     
@@ -83,6 +85,8 @@ namespace dcel {
     ~AABB();
 
     void define(const std::vector<RealVect>& a_points);
+
+    bool intersects(const AABB& a_other) const;
     
     Real getDistanceToPoint(const RealVect& a_x0) const override;
 

@@ -9,6 +9,14 @@
 
 using namespace dcel;
 
+BoundingVolume::BoundingVolume(){
+
+}
+
+BoundingVolume::~BoundingVolume(){
+
+}
+
 PointLocation BoundingVolume::getPointLocation(const RealVect& a_p) const{
   const bool inside  = this->isPointInside(a_p);
   const bool outside = this->isPointOutside(a_p);
@@ -62,6 +70,13 @@ void BoundingSphere::define(const std::vector<RealVect>& a_points, const Algorit
   default:
     std::cerr << "BoundingSphere::define - unknown algorithm requested\n";
   }
+}
+
+bool BoundingSphere::intersects(const BoundingSphere& a_other) {
+  const RealVect deltaV = m_center - a_other.getCenter();
+  const Real sumR       = m_radius + a_other.getRadius();
+
+  return deltaV.dotProduct(deltaV) < sumR*sumR;
 }
 
 Real BoundingSphere::getDistanceToPoint(const RealVect& a_x0) const {
@@ -183,6 +198,16 @@ void AABB::define(const std::vector<RealVect>& a_points){
       m_hiCorner[dir] = std::max(m_hiCorner[dir], p[dir]);
     }
   }
+}
+
+bool AABB::intersects(const AABB& a_other) const {
+  const RealVect& otherLo = a_other.getLowCorner();
+  const RealVect& otherHi = a_other.getHighCorner();
+
+
+  return (m_loCorner[0] < otherHi[0] && m_hiCorner[0] > otherLo[0]) &&
+         (m_loCorner[1] < otherHi[1] && m_hiCorner[1] > otherLo[1]) &&
+         (m_loCorner[2] < otherHi[2] && m_hiCorner[2] > otherLo[2]);
 }
     
 Real AABB::getDistanceToPoint(const RealVect& a_point) const {
