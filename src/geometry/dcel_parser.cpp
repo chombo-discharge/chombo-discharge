@@ -28,17 +28,17 @@ void dcel::parser::PLY::readASCII(dcel::mesh& a_mesh, const std::string a_filena
     edges.resize(0);
     polygons.resize(0);
 
-    int num_vertices;  // Number of vertices
-    int num_polygons;  // Number of polygons
+    int numVertices;  // Number of vertices
+    int numPolygons;  // Number of polygons
 
-    dcel::parser::PLY::readHeaderASCII(num_vertices, num_polygons, filestream); 
-    dcel::parser::PLY::readVerticesASCII(vertices, num_vertices, filestream);
-    dcel::parser::PLY::readPolygonsASCII(polygons, edges, vertices, num_polygons, filestream);
+    dcel::parser::PLY::readHeaderASCII(numVertices, numPolygons, filestream); 
+    dcel::parser::PLY::readVerticesASCII(vertices, numVertices, filestream);
+    dcel::parser::PLY::readPolygonsASCII(polygons, edges, vertices, numPolygons, filestream);
     dcel::parser::PLY::reconcilePairEdges(edges);
     dcel::parser::PLY::clearPolygonCache(vertices);
 
     a_mesh.sanityCheck();
-  
+    
     filestream.close();
   }
   else{
@@ -47,8 +47,8 @@ void dcel::parser::PLY::readASCII(dcel::mesh& a_mesh, const std::string a_filena
   }
 }
 
-void dcel::parser::PLY::readHeaderASCII(int&           a_num_vertices,
-					int&           a_num_polygons,
+void dcel::parser::PLY::readHeaderASCII(int&           a_numVertices,
+					int&           a_numPolygons,
 					std::ifstream& a_inputstream){
 
   std::string str1;
@@ -60,7 +60,7 @@ void dcel::parser::PLY::readHeaderASCII(int&           a_num_vertices,
   a_inputstream.seekg(0);
   while (getline(a_inputstream, line)){
     std::stringstream sstream(line);
-    sstream >> str1 >> str2 >> a_num_vertices;
+    sstream >> str1 >> str2 >> a_numVertices;
     if(str1 == "element" && str2 == "vertex"){
       break;
     }
@@ -71,7 +71,7 @@ void dcel::parser::PLY::readHeaderASCII(int&           a_num_vertices,
   a_inputstream.seekg(0);
   while (getline(a_inputstream, line)){
     std::stringstream sstream(line);
-    sstream >> str1 >> str2 >> a_num_polygons;
+    sstream >> str1 >> str2 >> a_numPolygons;
     if(str1 == "element" && str2 == "face"){
       break;
     }
@@ -90,7 +90,7 @@ void dcel::parser::PLY::readHeaderASCII(int&           a_num_vertices,
 }
 
 void dcel::parser::PLY::readVerticesASCII(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
-					  const int                                    a_num_vertices,
+					  const int                                    a_numVertices,
 					  std::ifstream&                               a_inputstream){
 
   RealVect pos;
@@ -114,14 +114,14 @@ void dcel::parser::PLY::readVerticesASCII(std::vector<std::shared_ptr<dcel::vert
 
     // We have read all the vertices we should read. Exit now.
     num++;
-    if(num == a_num_vertices) break;
+    if(num == a_numVertices) break;
   }
 }
 
 void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons,
 					  std::vector<std::shared_ptr<dcel::edge> >&    a_edges,
 					  std::vector<std::shared_ptr<dcel::vertex> >&  a_vertices,
-					  const int                                     a_num_polygons,
+					  const int                                     a_numPolygons,
 					  std::ifstream&                                a_inputstream){
   int numVertices;
   std::vector<int> vertexIndices;
@@ -183,7 +183,7 @@ void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::poly
     }
 
     
-    if(counter == a_num_polygons) break;
+    if(counter == a_numPolygons) break;
   }
 }
 

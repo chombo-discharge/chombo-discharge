@@ -66,10 +66,10 @@ void polygon::computeArea() noexcept {
 }
 
 void polygon::computeCentroid() noexcept {
-  m_centroid = RealVect::Zero;
-  
   const std::vector<std::shared_ptr<vertex> > vertices = this->getVertices();
 
+  m_centroid = RealVect::Zero;
+  
   for (const auto& v : vertices){
     m_centroid += v->getPosition();
   }
@@ -78,16 +78,12 @@ void polygon::computeCentroid() noexcept {
 }
 
 void polygon::computeNormal(const bool a_outwardNormal) noexcept {
-  
-  // TLDR: We assume that the normal is defined by right-hand rule where the rotation direction is along the half edges
-  
-  bool found_normal = false;
-  
-  std::vector<std::shared_ptr<vertex> > vertices = this->getVertices();
+  std::vector<std::shared_ptr<vertex> > vertices = this->getVertices();  
 
+  // Go through all vertices because some vertices may (correctly) lie on a line (but all of them shouldn't).
 
-  // Funky code - I guess we do this since some cross products don't exist...?
   const int n = vertices.size();
+  
   for (int i = 0; i < n; i++){
     const RealVect& x0 = vertices[i]      ->getPosition();
     const RealVect& x1 = vertices[(i+1)%n]->getPosition();
@@ -95,42 +91,10 @@ void polygon::computeNormal(const bool a_outwardNormal) noexcept {
 
     m_normal = PolyGeom::cross(x2-x1, x2-x0);
     
-    if(m_normal.vectorLength() > 0.0){
-      found_normal = true;
-      break;
-    }
+    if(m_normal.vectorLength() > 0.0) break;
   }
 
   this->normalizeNormalVector();
-
-  
-  if(!found_normal){
-    pout() << "polygon::compute_normal - vertex vectors:" << endl;
-    for (int i = 0; i < vertices.size(); i++){
-      pout() << "\t" << vertices[i]->getPosition() << endl;
-    }
-    pout() << "polygon::compute_normal - From this I computed n = " << m_normal << endl;
-    pout() << "polygon::compute_normal - Aborting..." << endl;
-    MayDay::Warning("polygon::compute_normal - Cannot compute normal vector. The polygon is probably degenerate");
-  }
-
-#if 0
-  const std::shared_ptr<vertex>& v0 = m_edge->getPreviousEdge()->getVertex();
-  const std::shared_ptr<vertex>& v1 = m_edge->getVertex();
-  const std::shared_ptr<vertex>& v2 = m_edge->getNextEdge()->getVertex();
-  
-  const RealVect& x0 = v0->getPosition();
-  const RealVect& x1 = v1->getPosition();
-  const RealVect& x2 = v2->getPosition();
-  
-  m_normal = PolyGeom::cross(x2-x1,x1-x0);
-  if(m_normal.vectorLength() < 1.E-40){
-    MayDay::Abort("polygon::compute_normal - vertices lie on a line. Cannot compute normal vector");
-  }
-  else{
-    m_normal = m_normal/m_normal.vectorLength();
-  }
-#endif
 
   if(!a_outwardNormal){    // If normal points inwards, make it point outwards
     m_normal = -m_normal;
@@ -227,33 +191,20 @@ const RealVect& polygon::getBoundingBoxHi() const noexcept {
 }
 
 Real polygon::signedDistance(const RealVect& a_x0) const noexcept {
-#define bug_check 0
+  std::vector<std::shared_ptr<vertex> > vertices = this->getVertices();
+  
   Real retval = 1.234567E89;
 
-  std::vector<std::shared_ptr<vertex> > vertices = this->getVertices();
-
-#if bug_check // Debug, return shortest distance to vertex
-  CH_assert(vertices.size() > 0);
-  Real min = 1.E99;
-  for (int i = 0; i < vertices.size(); i++){
-    const Real d = (a_x0 - vertices[i]->getPosition()).vectorLength();
-    min = (d < min) ? d : min;
-  }
-
-  return min;
-#endif
-
   // Compute projection of x0 on the polygon plane
-  const RealVect x1 = vertices[0]->getPosition();
-  const Real ncomp  = PolyGeom::dot(a_x0-x1, m_normal);
-  const RealVect xp = a_x0 - ncomp*m_normal;
-
+  const RealVect x1          = vertices.front()->getPosition();
+  const Real normalComponent = PolyGeom::dot(a_x0-x1, m_normal);
+  const RealVect xp          = a_x0 - normalComponent*m_normal;
 
   // Use angle rule to check if projected point lies inside the polygon
   Real anglesum = 0.0;
   const int n = vertices.size();
   for(int i = 0; i < n; i++){
-    const RealVect p1 = vertices[i]->getPosition() - xp;
+    const RealVect p1 = vertices[i]      ->getPosition() - xp;
     const RealVect p2 = vertices[(i+1)%n]->getPosition() - xp;
 
     const Real m1 = p1.vectorLength();
@@ -264,31 +215,21 @@ Real polygon::signedDistance(const RealVect& a_x0) const noexcept {
       break;
     }
     else {
-      const Real cos_theta = PolyGeom::dot(p1, p2)/(m1*m2);
-      anglesum += acos(cos_theta);
+      const Real cosTheta = PolyGeom::dot(p1, p2)/(m1*m2);
+      anglesum += acos(cosTheta);
     }
   }
 
   // Projected point is inside if angles sum to 2*pi
-  bool inside = false;
-  if(Abs(Abs(anglesum) - TWOPI) < EPSILON){
-    inside = true;
-  }
-
-  // If projection is inside, shortest distance is the normal component of the point
-  if(inside){
-#if bug_check
-    CH_assert(Abs(ncomp) <= min);
-#endif
-    retval = ncomp;
+  if(std::abs(std::abs(anglesum) - TWOPI) < EPSILON){ // Ok, the projection onto the polygon plane places the point "inside" the planer polygon
+    retval = normalComponent;
   }
   else{ // The projected point lies outside the triangle. Check distance to edges/vertices
     const std::vector<std::shared_ptr<edge> > edges = this->getEdges();
-    for (int i = 0; i < edges.size(); i++){
-      const Real cur_dist = edges[i]->signedDistance(a_x0);
-      if(Abs(cur_dist) < Abs(retval)){
-	retval = cur_dist;
-      }
+
+    for (const auto& e : edges){
+      const Real curDist = e->signedDistance(a_x0);
+      retval = (std::abs(curDist) < std::abs(retval)) ? curDist : retval;
     }
   }
 

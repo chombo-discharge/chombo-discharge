@@ -33,12 +33,12 @@ namespace dcel {
 
       /*!
 	@brief Read an ASCII header
-	@param[out]   a_num_vertices  Number of vertices
-	@param[out]   a_num_polygons  Number of polygons
+	@param[out]   a_numVertices  Number of vertices
+	@param[out]   a_numPolygons  Number of polygons
 	@param[inout] a_inputstream   File
       */
-      static void readHeaderASCII(int&           a_num_vertices,
-				  int&           a_num_polygons,
+      static void readHeaderASCII(int&           a_numVertices,
+				  int&           a_numPolygons,
 				  std::ifstream& a_inputstream);
 
       /*!
@@ -46,7 +46,7 @@ namespace dcel {
 	before entering this routine)
       */
       static void readVerticesASCII(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
-				    const int                                    a_num_vertices,
+				    const int                                    a_numVertices,
 				    std::ifstream&                               a_inputstream);
 
       /*!
@@ -57,7 +57,7 @@ namespace dcel {
       static void readPolygonsASCII(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons,
 				    std::vector<std::shared_ptr<dcel::edge> >&    a_edges,
 				    std::vector<std::shared_ptr<dcel::vertex> >&  a_vertices,
-				    const int                                     a_num_polygons,
+				    const int                                     a_numPolygons,
 				    std::ifstream&                                a_inputstream);
 
       /*!
