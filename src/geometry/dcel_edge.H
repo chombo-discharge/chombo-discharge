@@ -26,6 +26,7 @@ namespace dcel {
 
     edge();
     edge(const edge& a_otherEdge);
+    edge(const std::shared_ptr<vertex>& a_vertex);
     ~edge();
 
     void define(const std::shared_ptr<vertex>& a_vertex,

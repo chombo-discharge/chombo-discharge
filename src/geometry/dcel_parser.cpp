@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <iterator>
 
 void dcel::parser::PLY::readASCII(dcel::mesh& a_mesh, const std::string a_filename){
   std::ifstream filestream(a_filename);
@@ -120,8 +121,8 @@ void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::poly
 					  std::vector<std::shared_ptr<dcel::vertex> >&  a_vertices,
 					  const int                                     a_num_polygons,
 					  std::ifstream&                                a_inputstream){
-  int num_vert;
-  std::vector<int> which_vertices;
+  int numVertices;
+  std::vector<int> vertexIndices;
 
   std::string line;
   int counter = 0;
@@ -130,46 +131,52 @@ void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::poly
     
     std::stringstream sstream(line);
 
-    sstream >> num_vert;
-    which_vertices.resize(num_vert);
-    for (int i = 0; i < num_vert; i++){
-      sstream >> which_vertices[i];
+    sstream >> numVertices;
+    vertexIndices.resize(numVertices);
+    for (int i = 0; i < numVertices; i++){
+      sstream >> vertexIndices[i];
+    }
+    
+    // Get the vertices that make up this polygon. 
+    std::vector<std::shared_ptr<dcel::vertex> > curVertices;
+    for (int i = 0; i < numVertices; i++){
+      const int vertexIndex = vertexIndices[i];
+      curVertices.emplace_back(a_vertices[vertexIndex]);
     }
 
-    // Build polygon and inside edges
-    std::shared_ptr<dcel::polygon> polygon = std::shared_ptr<dcel::polygon> (new dcel::polygon());
-
-    // Get vertices. Add a reference to the newly created polygon
-    std::vector<std::shared_ptr<dcel::vertex> > poly_vertices(num_vert);
-    for (int i = 0; i < num_vert; i++){
-      poly_vertices[i] = a_vertices[which_vertices[i]];
+    // Build inside half edges and give each vertex an outgoing half edge. This may get overwritten later,
+    // but the outgoing edge is not unique so it doesn't matter. 
+    std::vector<std::shared_ptr<dcel::edge> > halfEdges;
+    for (const auto& v : curVertices){
+      halfEdges.emplace_back(std::make_shared<dcel::edge>(v));
+      v->setEdge(halfEdges.back());
     }
 
-    // Build inside edges. Polygon gets a reference to the edge
-    std::vector<std::shared_ptr<dcel::edge> > poly_edges(num_vert);
-    for (int i = 0; i < num_vert; i++){
-      poly_edges[i] = std::shared_ptr<dcel::edge> (new dcel::edge());
-      poly_edges[i]->setVertex(poly_vertices[(i+1)%num_vert]);
-    }
-    polygon->setEdge(poly_edges[0]);
+    a_edges.insert(a_edges.end(), halfEdges.begin(), halfEdges.end());
 
-    // Associate prev/next
-    for (int i = 0; i < num_vert; i++){
-      poly_edges[i]->setNextEdge(poly_edges[(i+1)%num_vert]);
-      poly_edges[(i+1)%num_vert]->setPreviousEdge(poly_edges[i]);
+    // Associate next/previous for the half edges inside the current polygon. Wish we had a circular iterator
+    // but this will have to do. 
+    for (int i = 0; i < halfEdges.size(); i++){
+      auto& curEdge  = halfEdges[i];
+      auto& nextEdge = halfEdges[(i+1)%halfEdges.size()];
+
+      curEdge->setNextEdge(nextEdge);
+      nextEdge->setPreviousEdge(curEdge);
     }
 
-    // Set edges emanating from vertices if that hasn't been done already
-    for (int i = 0; i < poly_vertices.size(); i++){
-      if(poly_vertices[i]->getEdge() == nullptr){
-	poly_vertices[i]->setEdge(poly_edges[i]);
-      }
+    // Construct a new polygon
+    a_polygons.emplace_back(std::make_shared<dcel::polygon>(halfEdges.front()));
+    auto& curPolygon = a_polygons.back();
+
+    // Half edges get a reference to the currently created polygon
+    for (auto& e : halfEdges){
+      e->setPolygon(curPolygon);
     }
 
     // Check for pairs
-    for (int i = 0; i < poly_edges.size(); i++){
+    for (int i = 0; i < halfEdges.size(); i++){
 
-      std::shared_ptr<dcel::edge>& edge   = poly_edges[i];
+      std::shared_ptr<dcel::edge>& edge   = halfEdges[i];
       std::shared_ptr<dcel::vertex>& vert = edge->getVertex();
 
       // Get all polygons connected to the current vertex and look for edge pairs
@@ -189,19 +196,19 @@ void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::poly
       }
     }
 
-    // Add reference to newly created polygon
-    for (int i = 0; i < poly_vertices.size(); i++){
-      poly_vertices[i]->addPolygon(polygon);
+    // Must give vertices access to all polygons associated with them since PLY files do not give any edge association. 
+    for (auto& v : curVertices){
+      v->addPolygonToCache(curPolygon);
     }
 
+
     // Add edges and polygons
-    for (int i = 0; i < poly_edges.size(); i++){
-      a_edges.push_back(poly_edges[i]);
+    for (int i = 0; i < halfEdges.size(); i++){
+      //      halfEdges[i]->setPolygon(polygon);
+      //      a_edges.push_back(halfEdges[i]);
     }
-    a_polygons.push_back(polygon);
+    //    a_polygons.push_back(polygon);
     
-    if(counter == a_num_polygons){
-      break;
-    }
+    if(counter == a_num_polygons) break;
   }
 }

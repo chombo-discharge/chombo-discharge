@@ -21,6 +21,10 @@ polygon::polygon(){
   m_normal = RealVect::Zero;
 }
 
+polygon::polygon(const std::shared_ptr<edge>& a_edge){
+  this->setEdge(a_edge);
+}
+
 polygon::polygon(const polygon& a_otherPolygon){
   this->define(a_otherPolygon.getNormal(),
 	       a_otherPolygon.getEdge());

@@ -17,6 +17,14 @@ using namespace dcel;
 edge::edge(){
 }
 
+edge::edge(const std::shared_ptr<vertex>& a_vertex){
+  this->setVertex(a_vertex);
+  this->setPairEdge(nullptr);
+  this->setNextEdge(nullptr);
+  this->setPreviousEdge(nullptr);
+  this->setNormal(RealVect::Zero);
+}
+
 edge::edge(const edge& a_otherEdge){
   this->define(a_otherEdge.getVertex(),
 	       a_otherEdge.getPairEdge(),
@@ -28,11 +36,11 @@ edge::edge(const edge& a_otherEdge){
 edge::~edge(){
 }
 
-void edge::define(const std::shared_ptr<vertex>&    a_vertex,
-		  const std::shared_ptr<edge>& a_pairEdge,
-		  const std::shared_ptr<edge>& a_nextEdge,
-		  const std::shared_ptr<edge>& a_previousEdge,
-		  const RealVect               a_normal){
+void edge::define(const std::shared_ptr<vertex>& a_vertex,
+		  const std::shared_ptr<edge>&   a_pairEdge,
+		  const std::shared_ptr<edge>&   a_nextEdge,
+		  const std::shared_ptr<edge>&   a_previousEdge,
+		  const RealVect                 a_normal){
   this->setVertex(a_vertex);
   this->setPairEdge(a_pairEdge);
   this->setNextEdge(a_nextEdge);

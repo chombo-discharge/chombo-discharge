@@ -57,8 +57,12 @@ void vertex::setNormal(const RealVect& a_normal) noexcept {
   m_normal = a_normal;
 }
 
-void vertex::addPolygon(const std::shared_ptr<polygon>& a_poly) noexcept {
+void vertex::addPolygonToCache(const std::shared_ptr<polygon>& a_poly) noexcept {
   m_polycache.push_back(a_poly);
+}
+
+void vertex::clearPolygonCache() noexcept {
+  m_polycache.resize(0);
 }
 
 void vertex::normalizeNormalVector() noexcept {

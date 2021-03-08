@@ -31,8 +31,9 @@ namespace dcel {
     void setPosition(const RealVect& a_pos) noexcept;
     void setNormal(const RealVect& a_normal) noexcept;
     void setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
-    void addPolygon(const std::shared_ptr<polygon>& a_poly) noexcept;
+    void addPolygonToCache(const std::shared_ptr<polygon>& a_poly) noexcept;
     void normalizeNormalVector() noexcept;
+    void clearPolygonCache() noexcept;
 
     RealVect& getPosition() noexcept;
     const RealVect& getPosition() const noexcept;

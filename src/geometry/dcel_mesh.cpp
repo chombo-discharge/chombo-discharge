@@ -67,9 +67,9 @@ void mesh::sanityCheck() const {
     else if(curVertex == nullptr){
       std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - vertex is nullptr, something has gone wrong with edge generation.\n";
     }
-    // else if(curPoly == nullptr){
-    //   std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - polygon is nullptr, something has gone wrong with edge generation.\n";
-    // }
+    else if(curPoly == nullptr){
+      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - polygon is nullptr, something has gone wrong with edge generation.\n";
+    }
 
     // Check that the next edge's previous edge is this edge. 
     if(prevEdge->getNextEdge() != e){

@@ -24,6 +24,7 @@ namespace dcel {
   public:
   
     polygon();
+    polygon(const std::shared_ptr<edge>& a_edge);
     polygon(const polygon& a_otherPolygon);
     ~polygon();
 
