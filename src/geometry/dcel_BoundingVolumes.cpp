@@ -150,6 +150,20 @@ AABB::AABB(const AABB& a_other){
   m_hiCorner = a_other.m_hiCorner;
 }
 
+AABB::AABB(const std::vector<AABB>& a_others) {
+  m_loCorner = a_others.front().getLowCorner();
+  m_hiCorner = a_others.front().getHighCorner();
+
+  for (const auto& other : a_others){
+    const RealVect& otherLo = other.getLowCorner();
+    const RealVect& otherHi = other.getHighCorner();
+    
+    for (int dir = 0; dir < SpaceDim; dir++){
+      m_loCorner[dir] = std::min(m_loCorner[dir], otherLo[dir]);
+      m_hiCorner[dir] = std::min(m_hiCorner[dir], otherHi[dir]);
+    }
+  }
+}
 
 AABB::AABB(const std::vector<RealVect>& a_points){
   this->define(a_points);

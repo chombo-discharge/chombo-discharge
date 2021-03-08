@@ -78,6 +78,7 @@ namespace dcel {
 
     AABB();
     AABB(const AABB& a_other);
+    AABB(const std::vector<AABB>& a_others);
     AABB(const std::vector<RealVect>& a_points);
     ~AABB();
 
