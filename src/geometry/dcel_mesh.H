@@ -34,8 +34,6 @@ namespace dcel {
       KdTree
     };
 
-    static bool s_angle_weighted;
-
     mesh();
     mesh(const mesh& a_otherMesh) = delete;
     mesh(std::vector<std::shared_ptr<polygon> >& a_polygons,

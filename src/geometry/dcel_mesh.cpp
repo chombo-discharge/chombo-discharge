@@ -16,8 +16,6 @@
 
 using namespace dcel;
 
-bool mesh::s_angle_weighted = false; // Use angle-weighted vertex normal vectors. This currently breaks. 
-
 mesh::mesh(){
   m_reconciled = false;
   m_use_tree   = false;
