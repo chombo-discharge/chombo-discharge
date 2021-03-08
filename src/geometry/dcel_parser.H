@@ -59,6 +59,16 @@ namespace dcel {
 				    std::vector<std::shared_ptr<dcel::vertex> >&  a_vertices,
 				    const int                                     a_num_polygons,
 				    std::ifstream&                                a_inputstream);
+
+      /*!
+	@brief This sets all pair edges
+      */
+      static void reconcilePairEdges(std::vector<std::shared_ptr<dcel::edge> >& a_edges);
+
+      /*!
+	@brief Clean up memory
+      */
+      static void clearPolygonCache(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices);
     };
   }
 }

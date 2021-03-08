@@ -34,6 +34,8 @@ void dcel::parser::PLY::readASCII(dcel::mesh& a_mesh, const std::string a_filena
     dcel::parser::PLY::readHeaderASCII(num_vertices, num_polygons, filestream); 
     dcel::parser::PLY::readVerticesASCII(vertices, num_vertices, filestream);
     dcel::parser::PLY::readPolygonsASCII(polygons, edges, vertices, num_polygons, filestream);
+    dcel::parser::PLY::reconcilePairEdges(edges);
+    dcel::parser::PLY::clearPolygonCache(vertices);
 
     a_mesh.sanityCheck();
   
@@ -136,6 +138,8 @@ void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::poly
     for (int i = 0; i < numVertices; i++){
       sstream >> vertexIndices[i];
     }
+
+    if(numVertices < 3) std::cerr << "dcel::parser::PLY::readPolygonsASCII - a polygon must have at least three vertices!\n";
     
     // Get the vertices that make up this polygon. 
     std::vector<std::shared_ptr<dcel::vertex> > curVertices;
@@ -173,42 +177,43 @@ void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::poly
       e->setPolygon(curPolygon);
     }
 
-    // Check for pairs
-    for (int i = 0; i < halfEdges.size(); i++){
-
-      std::shared_ptr<dcel::edge>& edge   = halfEdges[i];
-      std::shared_ptr<dcel::vertex>& vert = edge->getVertex();
-
-      // Get all polygons connected to the current vertex and look for edge pairs
-      std::vector<std::shared_ptr<dcel::polygon> >& polygons = vert->getPolycache();
-
-      for (int j = 0; j < polygons.size(); j++){
-	std::shared_ptr<dcel::edge>& other_polygon_edge = polygons[j]->getEdge();
-
-	for (dcel::edge_iterator iter(*polygons[j]); iter.ok(); ++iter){
-	  std::shared_ptr<dcel::edge>& other_polygon_edge = iter();
-
-	  if(other_polygon_edge->getVertex() == edge->getPreviousEdge()->getVertex()){
-	    edge->setPairEdge(other_polygon_edge);
-	    other_polygon_edge->setPairEdge(edge);
-	  }
-	}
-      }
-    }
-
     // Must give vertices access to all polygons associated with them since PLY files do not give any edge association. 
     for (auto& v : curVertices){
       v->addPolygonToCache(curPolygon);
     }
 
-
-    // Add edges and polygons
-    for (int i = 0; i < halfEdges.size(); i++){
-      //      halfEdges[i]->setPolygon(polygon);
-      //      a_edges.push_back(halfEdges[i]);
-    }
-    //    a_polygons.push_back(polygon);
     
     if(counter == a_num_polygons) break;
+  }
+}
+
+void dcel::parser::PLY::reconcilePairEdges(std::vector<std::shared_ptr<dcel::edge> >& a_edges){
+					   
+  for (auto& curEdge : a_edges){
+    const auto& nextEdge = curEdge->getNextEdge();
+    
+    const auto& vertexStart = curEdge->getVertex();
+    const auto& vertexEnd   = nextEdge->getVertex();
+
+    for (const auto& p : vertexStart->getPolycache()){
+      for (edge_iterator edgeIt(*p); edgeIt.ok(); ++edgeIt){
+	const auto& polyCurEdge  = edgeIt();
+	const auto& polyNextEdge = polyCurEdge->getNextEdge();
+
+	const auto& polyVertexStart = polyCurEdge->getVertex();
+	const auto& polyVertexEnd   = polyNextEdge->getVertex();
+
+	if(vertexStart == polyVertexEnd && polyVertexStart == vertexEnd){ // Found the pair edge
+	  curEdge->setPairEdge(polyCurEdge);
+	  polyCurEdge->setPairEdge(curEdge);
+	}
+      }
+    }
+  }
+}
+
+void dcel::parser::PLY::clearPolygonCache(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices){
+  for (auto& v : a_vertices){
+    v->clearPolygonCache();
   }
 }

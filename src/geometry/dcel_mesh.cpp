@@ -263,11 +263,7 @@ Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) 
 }
 
 void mesh::computeVertexNormalAverage(std::shared_ptr<vertex>& a_vert) noexcept {
-#if 1 // This doesn't work, why?!?
-  auto polygons = a_vert->getPolygons();
-#else
-  auto polygons = a_vert->getPolycache();
-#endif
+  const auto& polygons = a_vert->getPolygons();
 
   RealVect& normal = a_vert->getNormal();
 

@@ -2,7 +2,7 @@
   @file   dcel_poly.cpp
   @brief  Implementation of dcel_poly.H
   @author Robert Marskar
-  @date   Apr. 2018
+  @date   March 2021
 */
 
 #include "dcel_vertex.H"
@@ -51,19 +51,18 @@ void polygon::normalizeNormalVector() noexcept {
   m_normal *= 1./m_normal.vectorLength();
 }
 
-
 void polygon::computeArea() noexcept {
   const std::vector<std::shared_ptr<vertex> > vertices = this->getVertices();
 
-  Real area = 0.0;
+  m_area = 0.0;
 
   for (int i = 0; i < vertices.size() - 1; i++){
     const RealVect& v1 = vertices[i]->getPosition();
     const RealVect& v2 = vertices[i+1]->getPosition();
-    area += PolyGeom::dot(PolyGeom::cross(v2,v1), m_normal);
+    m_area += m_normal.dotProduct(PolyGeom::cross(v2,v1));
   }
 
-  m_area = Abs(0.5*area);
+  m_area = 0.5*std::abs(m_area);
 }
 
 void polygon::computeCentroid() noexcept {
@@ -195,7 +194,6 @@ const RealVect& polygon::getNormal() const noexcept {
   return m_normal;
 }
 
-
 RealVect& polygon::getCentroid() noexcept {
   return m_centroid;
 }
@@ -219,7 +217,6 @@ RealVect& polygon::getBoundingBoxLo() noexcept {
 const RealVect& polygon::getBoundingBoxLo() const noexcept {
   return m_boundingBox.getLowCorner();
 }
-
 
 RealVect& polygon::getBoundingBoxHi() noexcept {
   return m_boundingBox.getHighCorner();
