@@ -41,6 +41,7 @@ namespace dcel {
     void setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept;
     void setNormal(const RealVect a_normal) noexcept;
     void setPolygon(const std::shared_ptr<polygon>& a_polygon) noexcept;
+    void normalizeNormalVector() noexcept;
 
     // Get functions for vertices
     std::shared_ptr<vertex>& getVertex() noexcept;

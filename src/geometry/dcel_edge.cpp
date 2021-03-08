@@ -64,6 +64,10 @@ void edge::setPolygon(const std::shared_ptr<polygon>& a_polygon) noexcept {
   m_polygon = a_polygon;
 }
 
+void edge::normalizeNormalVector() noexcept {
+  m_normal = m_normal/m_normal.vectorLength();
+}
+
 std::shared_ptr<vertex>& edge::getVertex() noexcept {
   return m_vertex;
 }

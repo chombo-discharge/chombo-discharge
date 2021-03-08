@@ -1,9 +1,8 @@
 /*!
-  @file   dcel_meshI.H
+  @file   dcel_mesh.cpp
   @brief  Implementation of dcel_mesh.H
   @author Robert Marskar
-  @date   Apr. 2018
-  @todo   Bugs in compute_vertex_normals. 
+  @date   March 2021.
 */
 
 #include "dcel_mesh.H"
@@ -48,35 +47,58 @@ void mesh::define(std::vector<std::shared_ptr<polygon> >& a_polygons,
 
 bool mesh::sanityCheck() const {
   for (int i = 0; i < m_edges.size(); i++){
-    if(m_edges[i] == nullptr){
-      std::cerr << "mesh::sanity_check - edge is NULL\n";
+    const auto& curEdge   = m_edges[i];
+    const auto& nextEdge  = curEdge->getNextEdge();
+    const auto& prevEdge  = curEdge->getPreviousEdge();
+    const auto& pairEdge  = curEdge->getPairEdge();
+    const auto& curVertex = curEdge->getVertex();
+    const auto& curPoly   = curEdge->getPolygon();
+
+    // Check basic points for current edge. 
+    if(curEdge == nullptr) {
+      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - edge is nullptr\n";
     }
-    else{
-      const std::shared_ptr<edge>& edge = m_edges[i];
+    else if(pairEdge == nullptr){
+      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - pair edge is nullptr, your geometry probably isn't watertight.\n";
+    }
+    else if(nextEdge == nullptr){
+      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - next edge is nullptr, something has gone wrong with edge generation.\n";
+    }
+    else if(prevEdge == nullptr){
+      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - previous edge is nullptr, something has gone wrong with edge generation.\n";
+    }
+    else if(curVertex == nullptr){
+      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - vertex is nullptr, something has gone wrong with edge generation.\n";
+    }
+    // else if(curPoly == nullptr){
+    //   std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - polygon is nullptr, something has gone wrong with edge generation.\n";
+    // }
+
+    // Check that the next edge's previous edge is this edge. 
+    if(prevEdge->getNextEdge() != curEdge){
+      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - this->getPreviousEdge()->getNextEdge() is not the current edge, but it should be.\n";
+    }
+    else if(nextEdge->getPreviousEdge() != curEdge){
+      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - this->getNextEdge()->getPreviousEdge() is not the current edge, but it should be.\n";
+    }
     
-      if(edge->getPairEdge()== nullptr){
-	std::cerr << "mesh::sanity_check - pair edge is NULL, your geometry probably isn't watertight.\n";
-      }
-      else if(edge->getNextEdge()== nullptr){
-	std::cerr << "mesh::sanity_check - next edge is NULL, something has gone wrong with edge generation.\n";
-      }
-      else if(edge->getPreviousEdge()== nullptr){
-	std::cerr << "mesh::sanity_check - prev edge is NULL, something has gone wrong with edge generation.\n";
-      }
-      else if(edge->getVertex()== nullptr){
-	std::cerr << "mesh::sanity_check - vertex is NULL, something has gone wrong with edge generation.\n";
-      }
-    }
+
+    // // Check that we can iterate around the polygon of this edge.
+    // const auto& poly = curEdge->getPolygon();
+
+    // for (edge_iterator edgeIt(*poly); edgeIt.ok(); ++edgeIt){
+    //   const auto& cur = edgeIt;
+    // }
   }
 
   for (int i = 0; i < m_vertices.size(); i++){
     if(m_vertices[i]== nullptr){
-      std::cerr << "mesh::sanity_check - m_vertices[i] is NULL, something has gone wrong with vertex generation.\n";
+      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - m_vertices[i] is nullptr, something has gone wrong with vertex generation.\n";
     }
     else{
       if(m_vertices[i]->getEdge()== nullptr){
 	CH_assert(m_vertices[i]->getPolycache().size() == 0);
-	pout() << "mesh::sanity_check - vertex edge is NULL, you may have an unreferenced vertex." << endl;
+	pout() << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - vertex edge is nullptr, you may have an unreferenced vertex." << endl;
       }
     }
   }
@@ -148,10 +170,11 @@ void mesh::reconcilePolygons(const bool a_outwardNormal) noexcept{
     }
     
     poly->computeNormal(a_outwardNormal);
+    poly->normalizeNormalVector();
     poly->computeCentroid();
     poly->computeArea();
-    poly->normalizeNormalVector();
     poly->computeBoundingBox();
+    poly->computeBoundingSphere();
   }
 
   m_reconciled = true;
@@ -177,20 +200,19 @@ void mesh::computeVertexNormals(VertexNormalWeight a_weight) noexcept {
 void mesh::computeEdgeNormals() noexcept {
   for (int i = 0; i < m_edges.size(); i++){
 
-    std::shared_ptr<edge>& cur_edge        = m_edges[i];
-    const std::shared_ptr<edge>& pair_edge = cur_edge->getPairEdge();
+    std::shared_ptr<edge>& curEdge        = m_edges[i];
+    const std::shared_ptr<edge>& pairEdge = curEdge->getPairEdge();
 
-    const std::shared_ptr<polygon>& poly      = cur_edge->getPolygon();
-    const std::shared_ptr<polygon>& pair_poly = pair_edge->getPolygon();
-
-
+    const std::shared_ptr<polygon>& poly     = curEdge->getPolygon();
+    const std::shared_ptr<polygon>& pairPoly = pairEdge->getPolygon();
     const RealVect n1 = poly->getNormal();
-    const RealVect n2 = pair_poly->getNormal();
+    const RealVect n2 = pairPoly->getNormal();
+
+    RealVect& normal = curEdge->getNormal();
     
-    RealVect normal = (n1 + n2);
-    normal = normal/normal.vectorLength();
-    
-    cur_edge->setNormal(normal);
+    normal = (n1 + n2);
+
+    curEdge->normalizeNormalVector();
   }
 }
 
@@ -255,7 +277,7 @@ Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) 
 }
 
 void mesh::computeVertexNormalAverage(std::shared_ptr<vertex>& a_vert) noexcept {
-#if 0 // This doesn't work, why?!?
+#if 1 // This doesn't work, why?!?
   auto polygons = a_vert->getPolygons();
 #else
   auto polygons = a_vert->getPolycache();

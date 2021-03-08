@@ -12,69 +12,67 @@
 
 using namespace dcel;
 
-edge_iterator::edge_iterator(){
-
-}
-
 edge_iterator::edge_iterator(polygon& a_poly){
-  m_polymode  = true;
-  m_begin     = a_poly.getEdge();
-  m_current   = m_begin;
+  m_startEdge = a_poly.getEdge();
+  m_curEdge   = m_startEdge;
   m_full_loop = false;
+  
+  m_iterMode = IterationMode::Polygon;
 }
 
 edge_iterator::edge_iterator(const polygon& a_poly){
-  m_polymode  = true;
-  m_begin     = a_poly.getEdge();
-  m_current   = m_begin;
+  m_startEdge = a_poly.getEdge();
+  m_curEdge   = m_startEdge;
   m_full_loop = false;
+
+  m_iterMode = IterationMode::Polygon;
 }
 
 edge_iterator::edge_iterator(vertex& a_vert){
-  m_polymode  = false;
-  m_begin     = a_vert.getEdge();
-  m_current   = m_begin;
+  m_startEdge = a_vert.getEdge();
+  m_curEdge   = m_startEdge;
   m_full_loop = false;
+
+  m_iterMode = IterationMode::Vertex;
 }
 
 edge_iterator::edge_iterator(const vertex& a_vert){
-  m_polymode  = false;
-  m_begin     = a_vert.getEdge();
-  m_current   = m_begin;
+  m_startEdge = a_vert.getEdge();
+  m_curEdge   = m_startEdge;
   m_full_loop = false;
+
+  m_iterMode = IterationMode::Vertex;
 }
 
 std::shared_ptr<edge>& edge_iterator::operator() (){
-  return m_current;
+  return m_curEdge;
 }
-
 
 void edge_iterator::reset(){
-  m_current = m_begin;
+  m_curEdge = m_startEdge;
 }
 
-
 void edge_iterator::operator++(){
-  if(m_polymode){
-    m_current = m_current->getNextEdge();
-  }
-  else{
-    m_current = m_current->getPreviousEdge()->getPairEdge();
+  switch(m_iterMode){
+  case IterationMode::Polygon:
+    m_curEdge = m_curEdge->getNextEdge();
+    break;
+  case IterationMode::Vertex:
+    m_curEdge = m_curEdge->getPreviousEdge()->getPairEdge();
+    break;
   }
 
-  // Have now done a full loop around the polygon or vertex. 
-  if(m_current == m_begin){ 
+  // Check if we have done a full loop.
+  if(m_curEdge == m_startEdge){ 
     m_full_loop = true;
   }
 }
 
-
 bool edge_iterator::ok(){
-  if(m_current != nullptr && !m_full_loop){
+  if(m_curEdge != nullptr && !m_full_loop){
     return true;
   }
   else {
     return false;
   }
 }
-

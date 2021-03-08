@@ -77,6 +77,5 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # PORSCHE GEOMETRY CLASS (mostly used for testing)
 # ====================================================================================================
 porsche.mesh_file    = big_porsche.ply
-porsche.mesh_file    = sphere.ply
 porsche.tree_depth   = 50
 porsche.max_elements = 10

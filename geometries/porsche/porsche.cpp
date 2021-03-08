@@ -30,6 +30,7 @@ porsche::porsche(){
   std::shared_ptr<dcel::mesh> mesh = std::shared_ptr<dcel::mesh> (new dcel::mesh());
   dcel::parser::PLY::read_ascii(*mesh, filename);
   mesh->reconcilePolygons(true);
+  mesh->sanityCheck();
 
   // Compute vertex and edge normals
   bool recomputeVertexNormals = true;
