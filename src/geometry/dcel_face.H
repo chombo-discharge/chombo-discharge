@@ -21,14 +21,6 @@ namespace dcel {
   class edge;
   class face;
 
-  struct Point2D {
-    Point2D() = default;
-    Point2D(const Real a_x, const Real a_y);
-    ~Point2D() = default;
-    Real x;
-    Real y;
-  };
-
   class Polygon2D {
   public:
     Polygon2D() = delete; 
@@ -38,6 +30,15 @@ namespace dcel {
     bool isPointInsidePolygon(const RealVect& a_point) const noexcept;
     
   protected:
+
+    struct Point2D {
+      Point2D() = default;
+      Point2D(const Real a_x, const Real a_y);
+      ~Point2D() = default;
+      Real x;
+      Real y;
+    };
+    
     void define(const face& a_face) noexcept;
     Point2D projectPoint(const RealVect& a_point) const noexcept;
     int isLeft(const Point2D& a_P0, const Point2D& a_P1, const Point2D& a_P2) const noexcept; // Returns > 0 if left, < 0 if right, = 0 if on line.

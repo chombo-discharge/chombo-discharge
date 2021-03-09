@@ -229,5 +229,6 @@ void dcel::parser::PLY::computeEdgeLengths(std::vector<std::shared_ptr<dcel::edg
 void dcel::parser::PLY::computeVerticesAndEdges(std::vector<std::shared_ptr<dcel::face> >& a_faces){
   for (auto& p : a_faces){
     p->computeVerticesAndEdges();
+    p->computePolygon2D();
   }
 }

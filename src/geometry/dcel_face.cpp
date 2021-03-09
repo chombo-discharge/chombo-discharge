@@ -14,7 +14,7 @@
 
 using namespace dcel;
 
-Point2D::Point2D(const Real a_x, const Real a_y){
+Polygon2D::Point2D::Point2D(const Real a_x, const Real a_y){
   x = a_x;
   y = a_y;
 }
@@ -23,7 +23,7 @@ Polygon2D::Polygon2D(const face& a_face){
   this->define(a_face);
 }
 
-Point2D Polygon2D::projectPoint(const RealVect& a_point) const noexcept {
+Polygon2D::Point2D Polygon2D::projectPoint(const RealVect& a_point) const noexcept {
   return Point2D(a_point[m_xDir], a_point[m_yDir]);
 }
 
@@ -155,7 +155,7 @@ void face::computeCentroid() noexcept {
   m_centroid = m_centroid/m_vertices.size();
 }
 
-void face::computeNormal(const bool a_outwardNormal) noexcept {
+void face::computeNormal(const bool a_flipNormal) noexcept {
   // Go through all vertices because some vertices may (correctly) lie on a line (but all of them shouldn't).
 
   const int n = m_vertices.size();
@@ -172,7 +172,7 @@ void face::computeNormal(const bool a_outwardNormal) noexcept {
 
   this->normalizeNormalVector();
 
-  if(!a_outwardNormal){    // If normal points inwards, make it point outwards
+  if(a_flipNormal){    // If normal points inwards, make it point outwards
     m_normal = -m_normal;
   }
 }
@@ -293,7 +293,11 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
   Real retval = 1.234567E89;
 
   // Compute projection of x0 on the face plane
+#if 1 // Original code
   const bool inside = this->isPointInsideFaceAngleSum(a_x0);
+#else
+  const bool inside = this->isPointInsideFaceWindingNumber(a_x0);
+#endif
 
   // Projected point is inside if angles sum to 2*pi
   if(inside){ // Ok, the projection onto the face plane places the point "inside" the planer face

@@ -62,7 +62,7 @@ namespace dcel {
 
     void computeBoundingSphere() noexcept;
     void computeBoundingBox() noexcept;
-    void reconcileFaces(const bool a_outwardNormal) noexcept;
+    void reconcileFaces(const bool a_flipNormal = false) noexcept;
     void computeVertexNormals(VertexNormalWeight a_weight) noexcept;
     void computeEdgeNormals() noexcept;
 

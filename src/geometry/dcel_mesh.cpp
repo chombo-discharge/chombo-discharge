@@ -134,7 +134,7 @@ void mesh::computeBoundingBox() noexcept {
   m_boundingBox.define(this->getAllVertexCoordinates());
 }
 
-void mesh::reconcileFaces(const bool a_outwardNormal) noexcept{
+void mesh::reconcileFaces(const bool a_flipNormal) noexcept{
 
   // Reconcile faces; compute face area and provide edges explicit access
   // to their faces
@@ -146,7 +146,7 @@ void mesh::reconcileFaces(const bool a_outwardNormal) noexcept{
       edge->setFace(poly);
     }
     
-    poly->computeNormal(a_outwardNormal);
+    poly->computeNormal(a_flipNormal);
     poly->normalizeNormalVector();
     poly->computeCentroid();
     poly->computeArea();
