@@ -57,10 +57,10 @@ void Polygon2D::define(const face& a_face) noexcept {
 }
 
 int Polygon2D::isLeft(const Point2D& P0, const Point2D& P1, const Point2D& P2) const noexcept {
-  return ( (P1.x - P0.x) * (P2.y - P0.y) - (P2.x -  P0.x) * (P1.y - P0.y) );
+ return (P1.x - P0.x) * (P2.y - P0.y) - (P2.x -  P0.x) * (P1.y - P0.y);
 }
 
-int Polygon2D::wn_PnPoly(const Point2D& P) const noexcept {
+int Polygon2D::computeWindingNumber(const Point2D& P) const noexcept {
   int wn = 0;    // the  winding number counter
 
   const int N = m_points.size();
@@ -86,15 +86,15 @@ int Polygon2D::wn_PnPoly(const Point2D& P) const noexcept {
   return wn;
 }
 
-int Polygon2D::wn_PnPoly(const RealVect& a_point) const noexcept {
+int Polygon2D::computeWindingNumber(const RealVect& a_point) const noexcept {
   const Point2D point2 = this->projectPoint(a_point);
-  const int WN         = this->wn_PnPoly(point2);
+  const int WN         = this->computeWindingNumber(point2);
 
   return WN;
 }
 
 bool Polygon2D::isPointInsidePolygonWindingNumber(const RealVect& a_point) const noexcept {
-  const int wn = this->wn_PnPoly(a_point);
+  const int wn = this->computeWindingNumber(a_point);
 
   return wn != 0;
 }
@@ -324,8 +324,8 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
   Real retval = 1.234567E89;
 
   // Compute projection of x0 on the face plane
-  const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
-  //const bool inside = m_poly2->isPointInsidePolygonWindingNumber(a_x0);
+  //const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
+  const bool inside = m_poly2->isPointInsidePolygonWindingNumber(a_x0);
 
   // Projected point is inside if angles sum to 2*pi
   if(inside){ // Ok, the projection onto the face plane places the point "inside" the planar face
