@@ -330,6 +330,8 @@ RealVect face::projectPointIntoFacePlane(const RealVect& a_p) const noexcept {
 }
 
 bool face::isPointInsideFaceAngleSum(const RealVect& a_p) const noexcept {
+  bool retval;
+  
   const RealVect projectedPoint = this->projectPointIntoFacePlane(a_p);
 
   Real sum = 0.0;
@@ -345,12 +347,16 @@ bool face::isPointInsideFaceAngleSum(const RealVect& a_p) const noexcept {
     const Real m1 = p1.vectorLength();
     const Real m2 = p2.vectorLength();
 
+    if(m1*m2 < thresh){
+      return false;
+    }
+
     const Real cosTheta = p1.dotProduct(p2)/(m1*m2);
 
     sum += acos(cosTheta);
   }
 
-  sum = sum/(2.0*M_PI) - 1.0;
+  sum = std::abs(sum)/(2.0*M_PI) - 1.0;
 
   return std::abs(sum) < thresh;
 }
