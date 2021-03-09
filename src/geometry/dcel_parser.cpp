@@ -36,8 +36,10 @@ void dcel::parser::PLY::readASCII(dcel::mesh& a_mesh, const std::string a_filena
     dcel::parser::PLY::readPolygonsASCII(polygons, edges, vertices, numPolygons, filestream);
     dcel::parser::PLY::reconcilePairEdges(edges);
     dcel::parser::PLY::clearPolygonCache(vertices);
-
+    
     a_mesh.sanityCheck();
+
+    dcel::parser::PLY::computeEdgeLengths(edges);
     
     filestream.close();
   }
@@ -214,5 +216,11 @@ void dcel::parser::PLY::reconcilePairEdges(std::vector<std::shared_ptr<dcel::edg
 void dcel::parser::PLY::clearPolygonCache(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices){
   for (auto& v : a_vertices){
     v->clearPolygonCache();
+  }
+}
+
+void dcel::parser::PLY::computeEdgeLengths(std::vector<std::shared_ptr<dcel::edge> >& a_edges){
+  for (auto& e : a_edges){
+    e->computeEdgeLength();
   }
 }

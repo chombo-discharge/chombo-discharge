@@ -110,13 +110,16 @@ std::vector<std::shared_ptr<polygon> >& vertex::getPolycache() noexcept {
   return m_polycache;
 }
 
-
-
-Real vertex::signedDistance(const RealVect a_x0) const noexcept {
+Real vertex::signedDistance(const RealVect& a_x0) const noexcept {
   const RealVect delta = a_x0 - m_pos;
   const Real dist      = delta.vectorLength();
   const Real dot       = m_normal.dotProduct(delta);
   const int sign       = (dot > 0) ? 1 : -1;
   
   return dist*sign;
+}
+
+Real vertex::unsignedDistance2(const RealVect& a_x0) const noexcept {
+  const RealVect d = a_x0 - m_pos;
+  return d[0]*d[0] + d[1]*d[1] + d[2]*d[2];
 }

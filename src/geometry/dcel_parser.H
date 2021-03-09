@@ -69,6 +69,11 @@ namespace dcel {
 	@brief Clean up memory
       */
       static void clearPolygonCache(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices);
+
+      /*!
+	@brief Give each edge a length and a vector for parametrization
+      */
+      static void computeEdgeLengths(std::vector<std::shared_ptr<dcel::edge> >& a_edges);
     };
   }
 }

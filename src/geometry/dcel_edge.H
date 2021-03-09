@@ -43,6 +43,7 @@ namespace dcel {
     void setNormal(const RealVect a_normal) noexcept;
     void setPolygon(const std::shared_ptr<polygon>& a_polygon) noexcept;
     void normalizeNormalVector() noexcept;
+    void computeEdgeLength() noexcept;
 
     // Get functions for vertices
     std::shared_ptr<vertex>& getVertex() noexcept;
@@ -67,17 +68,24 @@ namespace dcel {
     std::shared_ptr<polygon>& getPolygon() noexcept;  
     const std::shared_ptr<polygon>& getPolygon() const noexcept;
 
-    Real signedDistance(const RealVect a_x0) const noexcept;
+    Real signedDistance(const RealVect& a_x0) const noexcept;
+    Real unsignedDistance2(const RealVect& a_x0) const noexcept;
 
   protected:
 
     RealVect m_normal;
+
+    // Store these for efficient queries. 
+    Real     m_len2;
+    RealVect m_x2x1;
 
     std::shared_ptr<vertex>  m_vertex; 
     std::shared_ptr<edge>    m_pairEdge;
     std::shared_ptr<edge>    m_previousEdge; 
     std::shared_ptr<edge>    m_nextEdge;
     std::shared_ptr<polygon> m_polygon;
+
+    Real projectPointToEdge(const RealVect& a_x0) const noexcept;
   };
 
 }

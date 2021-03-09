@@ -28,7 +28,6 @@ Node<T, BV>::Node(std::shared_ptr<Node<T, BV> >& a_parent){
 
 template <class T, class BV>
 Node<T, BV>::~Node() {
-
 }
 
 template <class T, class BV>

@@ -49,7 +49,8 @@ namespace dcel {
     std::vector<std::shared_ptr<polygon> >& getPolycache() noexcept;
     const std::vector<std::shared_ptr<polygon> >& getPolycache() const noexcept;
   
-    Real signedDistance(const RealVect a_x0) const noexcept;
+    Real signedDistance(const RealVect& a_x0) const noexcept;
+    Real unsignedDistance2(const RealVect& a_x0) const noexcept; // Returns squared distance to point
 
   protected:
 

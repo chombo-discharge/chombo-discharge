@@ -200,7 +200,7 @@ Real polygon::signedDistance(const RealVect& a_x0) const noexcept {
   const Real normalComponent = PolyGeom::dot(a_x0-x1, m_normal);
   const RealVect xp          = a_x0 - normalComponent*m_normal;
 
-  // Use angle rule to check if projected point lies inside the polygon
+  // Use angle rule to check if projected point lies inside the polygon. Very expensive because of the acos(cosTheta). 
   Real anglesum = 0.0;
   const int n = vertices.size();
   for(int i = 0; i < n; i++){

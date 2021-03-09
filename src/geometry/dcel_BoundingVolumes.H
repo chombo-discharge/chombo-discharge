@@ -75,7 +75,7 @@ namespace dcel {
   /*!
     @brief Axis-aligned bounding box for enclosing a set of points. 
   */
-  class AABB : public BoundingVolume{
+  class AABB : public BoundingVolume {
   public:
 
     AABB();
