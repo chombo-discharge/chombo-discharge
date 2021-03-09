@@ -40,11 +40,11 @@ porsche::porsche(){
   // Build tree
   mesh->buildKdTree(tree_depth, max_elements);
   //mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::KdTree);
-  mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::Direct);
+  mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::Direct2);
 
   // Create the if object
   bool flipNormal = false;
-  RefCountedPtr<dcel_if> bif = RefCountedPtr<dcel_if>(new dcel_if(mesh, true));
+  RefCountedPtr<dcel_if> bif = RefCountedPtr<dcel_if>(new dcel_if(mesh, false));
 
   m_electrodes.push_back(electrode(bif, true));
   

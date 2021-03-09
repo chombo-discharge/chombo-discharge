@@ -32,6 +32,7 @@ namespace dcel {
 
     enum class SearchAlgorithm{
       Direct,
+      Direct2,
       KdTree
     };
 
@@ -87,6 +88,7 @@ namespace dcel {
     std::vector<std::shared_ptr<face> > m_faces;
 
     Real DirectSignedDistance(const RealVect& a_point) const noexcept;
+    Real DirectSignedDistance2(const RealVect& a_point) const noexcept;
     Real KdTreeSignedDistance(const RealVect& a_point) const noexcept;
 
     void computeVertexNormalAngleWeighted(std::shared_ptr<vertex>& a_vert) noexcept;

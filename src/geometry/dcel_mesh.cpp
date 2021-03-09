@@ -200,7 +200,6 @@ Real mesh::signedDistance(const RealVect& a_point) const noexcept {
 }
 
 Real mesh::DirectSignedDistance(const RealVect& a_point) const noexcept {
-#if 0 // Original code
   Real minDist = m_faces.front()->signedDistance(a_point);
     
   for (const auto& f : m_faces){
@@ -210,7 +209,9 @@ Real mesh::DirectSignedDistance(const RealVect& a_point) const noexcept {
   }
 
   return minDist;
-#else
+}
+
+Real mesh::DirectSignedDistance2(const RealVect& a_point) const noexcept {
   std::shared_ptr<face> closest = m_faces.front();
   Real minDist2 = closest->unsignedDistance2(a_point);
 
@@ -224,7 +225,6 @@ Real mesh::DirectSignedDistance(const RealVect& a_point) const noexcept {
   }
 
   return closest->signedDistance(a_point);
-#endif
 }
 
 Real mesh::KdTreeSignedDistance(const RealVect& a_point) const noexcept {
@@ -255,6 +255,9 @@ Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) 
   switch(a_algorithm){
   case SearchAlgorithm::Direct:
     minDist = this->DirectSignedDistance(a_point);
+    break;
+  case SearchAlgorithm::Direct2:
+    minDist = this->DirectSignedDistance2(a_point);
     break;
   case SearchAlgorithm::KdTree:
     minDist = this->KdTreeSignedDistance(a_point);

@@ -325,6 +325,7 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
 
   // Compute projection of x0 on the face plane
   const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
+  //const bool inside = m_poly2->isPointInsidePolygonWindingNumber(a_x0);
 
   // Projected point is inside if angles sum to 2*pi
   if(inside){ // Ok, the projection onto the face plane places the point "inside" the planar face
