@@ -80,8 +80,8 @@ void edge::normalizeNormalVector() noexcept {
 }
 
 void edge::computeEdgeLength() noexcept {
-  const auto& x1 = this->getVertex()->getPosition();
-  const auto& x2 = this->getOtherVertex()->getPosition();
+  const RealVect& x1 = this->getVertex()->getPosition();
+  const RealVect& x2 = this->getOtherVertex()->getPosition();
 
   m_x2x1 = x2-x1;
   m_len2 = m_x2x1.dotProduct(m_x2x1);
@@ -148,10 +148,10 @@ Real edge::signedDistance(const RealVect& a_x0) const noexcept {
   const Real t = this->projectPointToEdge(a_x0);
 
   Real retval;
-  if(t < 0.0) {
+  if(t <= 0.0) {
     retval = this->getVertex()->signedDistance(a_x0);
   }
-  else if(t > 1.0){
+  else if(t >= 1.0){
     retval = this->getOtherVertex()->signedDistance(a_x0);
   }
   else{

@@ -22,7 +22,7 @@ dcel_if::~dcel_if(){
 }
 
 Real dcel_if::value(const RealVect& a_point) const {
-  Real retval = m_mesh->signedDistance(a_point); // dcel::mesh returns positive for outside. 
+  Real retval = m_mesh->signedDistance(a_point); // dcel::mesh should return positive for outside. 
   
   if(!m_fluidInside){
     retval = -retval;

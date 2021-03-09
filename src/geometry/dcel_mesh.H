@@ -65,6 +65,7 @@ namespace dcel {
     void reconcileFaces(const bool a_flipNormal = false) noexcept;
     void computeVertexNormals(VertexNormalWeight a_weight) noexcept;
     void computeEdgeNormals() noexcept;
+    void computeVerticesAndEdges() noexcept;
 
     void buildKdTree(const int a_max_depth, const int a_max_elements) noexcept;
 
@@ -74,7 +75,6 @@ namespace dcel {
   protected:
 
     SearchAlgorithm m_algorithm;
-    bool m_reconciled;
     bool m_use_tree;
 
     BoundingSphere m_boundingSphere;

@@ -15,15 +15,12 @@
 using namespace dcel;
 
 mesh::mesh(){
-  m_reconciled = false;
   m_use_tree   = false;
 }
 
 mesh::mesh(std::vector<std::shared_ptr<face> >& a_faces,
 	   std::vector<std::shared_ptr<edge> >&    a_edges,
 	   std::vector<std::shared_ptr<vertex> >&  a_vertices){
-  
-  m_reconciled = false;
   m_use_tree   = false;
   
   this->define(a_faces, a_edges, a_vertices);
@@ -138,23 +135,16 @@ void mesh::reconcileFaces(const bool a_flipNormal) noexcept{
 
   // Reconcile faces; compute face area and provide edges explicit access
   // to their faces
-  for (auto& poly : m_faces){
-
-    // Every edge gets a reference to this face
-    for (edge_iterator iter(*poly); iter.ok(); ++iter){
-      std::shared_ptr<edge>& edge = iter();
-      edge->setFace(poly);
-    }
-    
-    poly->computeNormal(a_flipNormal);
-    poly->normalizeNormalVector();
-    poly->computeCentroid();
-    poly->computeArea();
-    poly->computeBoundingBox();
-    poly->computeBoundingSphere();
+  for (auto& f : m_faces){
+    f->computeVerticesAndEdges();
+    f->computeNormal(a_flipNormal);
+    f->normalizeNormalVector();
+    f->computeCentroid();
+    f->computeArea();
+    f->computePolygon2D();
+    f->computeBoundingBox();
+    f->computeBoundingSphere();
   }
-
-  m_reconciled = true;
 }
 
 void mesh::computeVertexNormals(VertexNormalWeight a_weight) noexcept {
@@ -178,17 +168,26 @@ void mesh::computeEdgeNormals() noexcept {
   for (auto& e : m_edges){
     const std::shared_ptr<edge>& pairEdge = e->getPairEdge();
 
-    const std::shared_ptr<face>& poly     = e->getFace();
-    const std::shared_ptr<face>& pairPoly = pairEdge->getFace();
+    const std::shared_ptr<face>& F     = e->getFace();
+    const std::shared_ptr<face>& pairF = pairEdge->getFace();
     
-    const RealVect& n1 = poly->getNormal();
-    const RealVect& n2 = pairPoly->getNormal();
+    const RealVect& n1 = F->getNormal();
+    const RealVect& n2 = pairF->getNormal();
 
     RealVect& normal = e->getNormal();
     
     normal = n1 + n2;
 
     e->normalizeNormalVector();
+
+    e->computeEdgeLength();
+  }
+}
+
+void mesh::computeVerticesAndEdges() noexcept {
+  for (auto& f : m_faces){
+    f->computeVerticesAndEdges();
+    f->computePolygon2D();
   }
 }
 
@@ -203,8 +202,8 @@ Real mesh::signedDistance(const RealVect& a_point) const noexcept {
 Real mesh::DirectSignedDistance(const RealVect& a_point) const noexcept {
   Real minDist = m_faces.front()->signedDistance(a_point);
     
-  for (const auto& poly : m_faces){
-    const Real curDist = poly->signedDistance(a_point);
+  for (const auto& f : m_faces){
+    const Real curDist = f->signedDistance(a_point);
 
     if(std::abs(curDist) < std::abs(minDist)) minDist = curDist;
   }

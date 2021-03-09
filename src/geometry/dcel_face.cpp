@@ -35,7 +35,7 @@ void Polygon2D::define(const face& a_face) noexcept {
   const RealVect& normal = a_face.getNormal();
   
   for (int dir = 0; dir < SpaceDim; dir++){
-    m_ignoreDir = (normal[dir] > normal[m_ignoreDir]) ? dir : m_ignoreDir;
+    m_ignoreDir = (std::abs(normal[dir]) > std::abs(normal[m_ignoreDir])) ? dir : m_ignoreDir;
   }
 
   m_xDir = 3;
@@ -97,6 +97,41 @@ bool Polygon2D::isPointInsidePolygon(const RealVect& a_point) const noexcept {
   const int wn = this->wn_PnPoly(a_point);
 
   return wn != 0;
+}
+
+bool Polygon2D::isPointInsideFaceAngleSum(const RealVect& a_point) const noexcept {
+  const Point2D p = this->projectPoint(a_point);
+
+  Real sumTheta = 0.0;
+
+  const int N = m_points.size();
+  
+  for (int i = 0; i < N; i++){
+    
+    const Point2D& p1 = m_points[i];
+    const Point2D& p2 = m_points[(i+1)%N];
+
+    const Point2D v1(p1.x - p.x, p1.y - p.y);
+    const Point2D v2(p2.x - p.x, p2.y - p.y);
+
+    const Real theta1 = atan2(v1.y, v1.x);
+    const Real theta2 = atan2(v2.y, v2.x);
+
+    Real dTheta = theta2 - theta1;
+
+    while (dTheta > M_PI)
+      dTheta -= 2.0*M_PI;
+    while (dTheta < -M_PI)
+      dTheta += 2.0*M_PI;
+
+    if(std::abs(std::abs(dTheta) - M_PI) < 1.E-6) return false; // Point projects to an edge or vertex. 
+
+    sumTheta += dTheta;
+  }
+
+  sumTheta = std::abs(sumTheta)/(2*M_PI);// - 1.0;
+
+  return round(sumTheta) == 1;
 }
 
 face::face(){
@@ -300,10 +335,10 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
 #endif
 
   // Projected point is inside if angles sum to 2*pi
-  if(inside){ // Ok, the projection onto the face plane places the point "inside" the planer face
-    const RealVect& x1         = m_vertices.front()->getPosition();
-    const Real normalComponent = PolyGeom::dot(a_x0-x1, m_normal);
-    retval = normalComponent;
+  if(inside){ // Ok, the projection onto the face plane places the point "inside" the planar face
+    const RealVect& facePoint = m_vertices.front()->getPosition();
+    
+    retval = m_normal.dotProduct(a_x0 - facePoint);
   }
   else{ // The projected point lies outside the triangle. Check distance to edges/vertices
     for (const auto& e : m_edges){
@@ -316,9 +351,25 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
 }
 
 Real face::unsignedDistance2(const RealVect& a_x0) const noexcept {
-  std::cerr << "In file 'dcel_face.cpp' function dcel::face::unsignedDistance2 - not implemented!\n";
+  Real retval = 1.234567E89;
+  
+  const bool inside = this->isPointInsideFaceAngleSum(a_x0);
 
-  return 0.0;
+  if(inside){ 
+    const RealVect& facePoint = m_vertices.front()->getPosition();
+    
+    retval = m_normal.dotProduct(a_x0 - facePoint);
+
+    retval *= retval;
+  }
+  else{ // The projected point lies outside the triangle. Check distance to edges/vertices
+    for (const auto& e : m_edges){
+      const Real curDist = e->unsignedDistance2(a_x0);
+      retval = (std::abs(curDist) < std::abs(retval)) ? curDist : retval;
+    }
+  }
+
+  return retval;
 }
 
 RealVect face::projectPointIntoFacePlane(const RealVect& a_p) const noexcept {
@@ -330,37 +381,11 @@ RealVect face::projectPointIntoFacePlane(const RealVect& a_p) const noexcept {
 }
 
 bool face::isPointInsideFaceAngleSum(const RealVect& a_p) const noexcept {
-  bool retval;
-  
-  const RealVect projectedPoint = this->projectPointIntoFacePlane(a_p);
-
-  Real sum = 0.0;
-
-  constexpr Real thresh = 1.E-6;
-
-  const int N = m_vertices.size();
-  
-  for (int i = 0; i < N; i++){
-    const RealVect p1 = m_vertices[i]      ->getPosition() - projectedPoint;
-    const RealVect p2 = m_vertices[(i+1)%N]->getPosition() - projectedPoint;
-
-    const Real m1 = p1.vectorLength();
-    const Real m2 = p2.vectorLength();
-
-    if(m1*m2 < thresh){
-      return false;
-    }
-
-    const Real cosTheta = p1.dotProduct(p2)/(m1*m2);
-
-    sum += acos(cosTheta);
-  }
-
-  sum = std::abs(sum)/(2.0*M_PI) - 1.0;
-
-  return std::abs(sum) < thresh;
+  return m_poly2->isPointInsideFaceAngleSum(a_p);
 }
 
 bool face::isPointInsideFaceWindingNumber(const RealVect& a_p) const noexcept {
   return m_poly2->isPointInsidePolygon(a_p);
 }
+
+

@@ -38,9 +38,6 @@ void dcel::parser::PLY::readASCII(dcel::mesh& a_mesh, const std::string a_filena
     dcel::parser::PLY::clearFaceCache(vertices);
     
     a_mesh.sanityCheck();
-
-    dcel::parser::PLY::computeEdgeLengths(edges);
-    dcel::parser::PLY::computeVerticesAndEdges(faces);
     
     filestream.close();
   }

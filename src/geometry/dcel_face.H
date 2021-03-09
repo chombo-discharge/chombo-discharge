@@ -28,6 +28,8 @@ namespace dcel {
     ~Polygon2D() = default;
 
     bool isPointInsidePolygon(const RealVect& a_point) const noexcept;
+
+    bool isPointInsideFaceAngleSum(const RealVect& a_point) const noexcept;
     
   protected:
 
@@ -44,6 +46,8 @@ namespace dcel {
     int isLeft(const Point2D& a_P0, const Point2D& a_P1, const Point2D& a_P2) const noexcept; // Returns > 0 if left, < 0 if right, = 0 if on line.
     int wn_PnPoly(const Point2D& P) const noexcept;
     int wn_PnPoly(const RealVect& a_point) const noexcept;
+
+
     
   protected:
     int m_ignoreDir;
@@ -53,10 +57,11 @@ namespace dcel {
   };
 
   // Class that describes one face of a watertight surface tesselation. This class
-  // can also embed a 2D version of itself as a two-dimensional polygon, which we use
-  // for speeding up tests when checking if a point projected to the plane of the face
-  // lies inside the face or not. This eats storage, but we avoid expensive trigonometric
-  // functions. 
+  // can also embed a 2D version of itself as a two-dimensional polygon, projected onto the
+  // cardinal plane which maximizes the projected face's area. We use this embedding
+  // for speeding up tests when checking if a point projected onto the plane of the face
+  // lies inside the face or not. This takes storage, but is required for doing those
+  // intersection tests. 
   class face {
   public:
   
@@ -142,6 +147,8 @@ namespace dcel {
     // Function that computes the subtended angles and checks for inside/outside
     bool isPointInsideFaceAngleSum(const RealVect& a_p) const noexcept;
     bool isPointInsideFaceWindingNumber(const RealVect& a_p) const noexcept;
+
+
   };
 
 }
