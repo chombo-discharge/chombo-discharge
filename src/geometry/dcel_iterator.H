@@ -16,15 +16,15 @@ namespace dcel {
   
   class vertex;
   class edge;
-  class polygon;
+  class face;
 
   class edge_iterator {
   public:
 
     edge_iterator() = delete;
   
-    edge_iterator(polygon& a_poly);
-    edge_iterator(const polygon& a_poly);
+    edge_iterator(face& a_face);
+    edge_iterator(const face& a_face);
 
     edge_iterator(vertex& a_vert);
     edge_iterator(const vertex& a_vert);
@@ -41,11 +41,10 @@ namespace dcel {
 
     enum class IterationMode {
       Vertex,
-      Polygon
+      Face
     };
 
-    bool m_polyMode;
-    bool m_full_loop;
+    bool m_fullLoop;
 
     IterationMode m_iterMode;
   

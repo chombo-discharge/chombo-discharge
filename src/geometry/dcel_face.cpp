@@ -1,5 +1,5 @@
 /*!
-  @file   dcel_poly.cpp
+  @file   dcel_face.cpp
   @brief  Implementation of dcel_poly.H
   @author Robert Marskar
   @date   March 2021
@@ -7,7 +7,7 @@
 
 #include "dcel_vertex.H"
 #include "dcel_edge.H"
-#include "dcel_polygon.H"
+#include "dcel_face.H"
 #include "dcel_iterator.H"
 
 #include <PolyGeom.H>
@@ -19,41 +19,41 @@ Point2D::Point2D(const Real a_x, const Real a_y){
   y = a_y;
 }
 
-polygon::polygon(){
+face::face(){
   m_normal = RealVect::Zero;
 }
 
-polygon::polygon(const std::shared_ptr<edge>& a_edge){
+face::face(const std::shared_ptr<edge>& a_edge){
   this->setHalfEdge(a_edge);
 }
 
-polygon::polygon(const polygon& a_otherPolygon){
-  this->define(a_otherPolygon.getNormal(),
-	       a_otherPolygon.getHalfEdge());
+face::face(const face& a_otherFace){
+  this->define(a_otherFace.getNormal(),
+	       a_otherFace.getHalfEdge());
 }
 
-polygon::~polygon(){
+face::~face(){
 
 }
 
-void polygon::define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge) noexcept {
+void face::define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge) noexcept {
   this->setNormal(a_normal);
   this->setHalfEdge(a_edge);
 }
 
-void polygon::setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept {
+void face::setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept {
   m_halfEdge = a_halfEdge;
 }
 
-void polygon::setNormal(const RealVect& a_normal) noexcept {
+void face::setNormal(const RealVect& a_normal) noexcept {
   m_normal = a_normal;
 }
 
-void polygon::normalizeNormalVector() noexcept {
+void face::normalizeNormalVector() noexcept {
   m_normal *= 1./m_normal.vectorLength();
 }
 
-void polygon::computeArea() noexcept {
+void face::computeArea() noexcept {
   m_area = 0.0;
 
   for (int i = 0; i < m_vertices.size() - 1; i++){
@@ -65,7 +65,7 @@ void polygon::computeArea() noexcept {
   m_area = 0.5*std::abs(m_area);
 }
 
-void polygon::computeCentroid() noexcept {
+void face::computeCentroid() noexcept {
   m_centroid = RealVect::Zero;
   
   for (const auto& v : m_vertices){
@@ -75,7 +75,7 @@ void polygon::computeCentroid() noexcept {
   m_centroid = m_centroid/m_vertices.size();
 }
 
-void polygon::computeNormal(const bool a_outwardNormal) noexcept {
+void face::computeNormal(const bool a_outwardNormal) noexcept {
   // Go through all vertices because some vertices may (correctly) lie on a line (but all of them shouldn't).
 
   const int n = m_vertices.size();
@@ -97,30 +97,30 @@ void polygon::computeNormal(const bool a_outwardNormal) noexcept {
   }
 }
 
-void polygon::computeBoundingSphere() noexcept {
+void face::computeBoundingSphere() noexcept {
   m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingSphere::Algorithm::Ritter);
 }
 
-void polygon::computeBoundingBox() noexcept {
+void face::computeBoundingBox() noexcept {
   m_boundingBox.define(this->getAllVertexCoordinates());
 }
 
-void polygon::computeVerticesAndEdges() noexcept {
+void face::computeVerticesAndEdges() noexcept {
   m_edges    = this->gatherEdges();
   m_vertices = this->gatherVertices();
 }
 
 
 
-const std::shared_ptr<edge>& polygon::getHalfEdge() const noexcept{
+const std::shared_ptr<edge>& face::getHalfEdge() const noexcept{
   return m_halfEdge;
 }
 
-std::shared_ptr<edge>& polygon::getHalfEdge() noexcept {
+std::shared_ptr<edge>& face::getHalfEdge() noexcept {
   return m_halfEdge;
 }
 
-const std::vector<RealVect> polygon::getAllVertexCoordinates() const noexcept {
+const std::vector<RealVect> face::getAllVertexCoordinates() const noexcept {
   std::vector<RealVect> pos;
   
   for (const auto& v : m_vertices){
@@ -130,23 +130,23 @@ const std::vector<RealVect> polygon::getAllVertexCoordinates() const noexcept {
   return pos;
 }
 
-std::vector<std::shared_ptr<vertex> >& polygon::getVertices() noexcept {
+std::vector<std::shared_ptr<vertex> >& face::getVertices() noexcept {
   return m_vertices;
 }
 
-const std::vector<std::shared_ptr<vertex> >& polygon::getVertices() const noexcept {
+const std::vector<std::shared_ptr<vertex> >& face::getVertices() const noexcept {
   return m_vertices;
 }
 
-std::vector<std::shared_ptr<edge> >& polygon::getEdges() noexcept {
+std::vector<std::shared_ptr<edge> >& face::getEdges() noexcept {
   return m_edges;
 }
 
-const std::vector<std::shared_ptr<edge> >& polygon::getEdges() const noexcept {
+const std::vector<std::shared_ptr<edge> >& face::getEdges() const noexcept {
   return m_edges;
 }
 
-const std::vector<std::shared_ptr<vertex> > polygon::gatherVertices() const noexcept {
+const std::vector<std::shared_ptr<vertex> > face::gatherVertices() const noexcept {
   std::vector<std::shared_ptr<vertex> > vertices;
 
   for (edge_iterator iter(*this); iter.ok(); ++iter){
@@ -157,7 +157,7 @@ const std::vector<std::shared_ptr<vertex> > polygon::gatherVertices() const noex
   return vertices;
 }
 
-const std::vector<std::shared_ptr<edge> > polygon::gatherEdges() const noexcept {
+const std::vector<std::shared_ptr<edge> > face::gatherEdges() const noexcept {
   std::vector<std::shared_ptr<edge> > edges;
 
   for (edge_iterator iter(*this); iter.ok(); ++iter){
@@ -167,54 +167,54 @@ const std::vector<std::shared_ptr<edge> > polygon::gatherEdges() const noexcept 
   return edges;
 }
 
-RealVect& polygon::getNormal() noexcept {
+RealVect& face::getNormal() noexcept {
   return m_normal;
 }
 
-const RealVect& polygon::getNormal() const noexcept {
+const RealVect& face::getNormal() const noexcept {
   return m_normal;
 }
 
-RealVect& polygon::getCentroid() noexcept {
+RealVect& face::getCentroid() noexcept {
   return m_centroid;
 }
 
-const RealVect& polygon::getCentroid() const noexcept {
+const RealVect& face::getCentroid() const noexcept {
   return m_centroid;
 }
 
-Real& polygon::getArea() noexcept {
+Real& face::getArea() noexcept {
   return m_area;
 }
 
-const Real& polygon::getArea() const noexcept {
+const Real& face::getArea() const noexcept {
   return m_area;
 }
 
-RealVect& polygon::getBoundingBoxLo() noexcept {
+RealVect& face::getBoundingBoxLo() noexcept {
   return m_boundingBox.getLowCorner();
 }
 
-const RealVect& polygon::getBoundingBoxLo() const noexcept {
+const RealVect& face::getBoundingBoxLo() const noexcept {
   return m_boundingBox.getLowCorner();
 }
 
-RealVect& polygon::getBoundingBoxHi() noexcept {
+RealVect& face::getBoundingBoxHi() noexcept {
   return m_boundingBox.getHighCorner();
 }
 
-const RealVect& polygon::getBoundingBoxHi() const noexcept {
+const RealVect& face::getBoundingBoxHi() const noexcept {
   return m_boundingBox.getHighCorner();
 }
 
-Real polygon::signedDistance(const RealVect& a_x0) const noexcept {
+Real face::signedDistance(const RealVect& a_x0) const noexcept {
   Real retval = 1.234567E89;
 
-  // Compute projection of x0 on the polygon plane
-  const bool inside = this->isPointInsidePolygonAngleSum(a_x0);
+  // Compute projection of x0 on the face plane
+  const bool inside = this->isPointInsideFaceAngleSum(a_x0);
 
   // Projected point is inside if angles sum to 2*pi
-  if(inside){ // Ok, the projection onto the polygon plane places the point "inside" the planer polygon
+  if(inside){ // Ok, the projection onto the face plane places the point "inside" the planer face
     const RealVect& x1         = m_vertices.front()->getPosition();
     const Real normalComponent = PolyGeom::dot(a_x0-x1, m_normal);
     retval = normalComponent;
@@ -229,13 +229,13 @@ Real polygon::signedDistance(const RealVect& a_x0) const noexcept {
   return retval;
 }
 
-Real polygon::unsignedDistance2(const RealVect& a_x0) const noexcept {
-  std::cerr << "In file 'dcel_polygon.cpp' function dcel::polygon::unsignedDistance2 - not implemented!\n";
+Real face::unsignedDistance2(const RealVect& a_x0) const noexcept {
+  std::cerr << "In file 'dcel_face.cpp' function dcel::face::unsignedDistance2 - not implemented!\n";
 
   return 0.0;
 }
 
-RealVect polygon::projectPointIntoPolygonPlane(const RealVect& a_p) const noexcept {
+RealVect face::projectPointIntoFacePlane(const RealVect& a_p) const noexcept {
   const RealVect& planePoint     = m_vertices.front()->getPosition();
   const RealVect normalComponent = m_normal.dotProduct(a_p - planePoint) * m_normal;
   const RealVect projectedPoint  = a_p - normalComponent;
@@ -243,8 +243,8 @@ RealVect polygon::projectPointIntoPolygonPlane(const RealVect& a_p) const noexce
   return projectedPoint;
 }
 
-bool polygon::isPointInsidePolygonAngleSum(const RealVect& a_p) const noexcept {
-  const RealVect projectedPoint = this->projectPointIntoPolygonPlane(a_p);
+bool face::isPointInsideFaceAngleSum(const RealVect& a_p) const noexcept {
+  const RealVect projectedPoint = this->projectPointIntoFacePlane(a_p);
 
   Real sum = 0.0;
 
@@ -269,7 +269,7 @@ bool polygon::isPointInsidePolygonAngleSum(const RealVect& a_p) const noexcept {
   return std::abs(sum) < thresh;
 }
 
-void polygon::computePolygon2D() noexcept {
+void face::computePolygon2D() noexcept {
   m_polygon2D.resize(0);
 
   m_ignoreDir = 0;
@@ -295,15 +295,15 @@ void polygon::computePolygon2D() noexcept {
   }
 }
 
-Point2D polygon::projectPointTo2D(const RealVect& a_x) const noexcept {
+Point2D face::projectPointTo2D(const RealVect& a_x) const noexcept {
   return Point2D(a_x[m_xDir], a_x[m_yDir]);
 }
 
-int polygon::isLeft(const Point2D& P0, const Point2D& P1, const Point2D& P2) const noexcept {
+int face::isLeft(const Point2D& P0, const Point2D& P1, const Point2D& P2) const noexcept {
   return ( (P1.x - P0.x) * (P2.y - P0.y) - (P2.x -  P0.x) * (P1.y - P0.y) );
 }
 
-int polygon::wn_PnPoly(const Point2D& P, const std::vector<Point2D>& a_vertices) const noexcept {
+int face::wn_PnPoly(const Point2D& P, const std::vector<Point2D>& a_vertices) const noexcept {
   int wn = 0;    // the  winding number counter
 
   const int N = a_vertices.size();
@@ -330,7 +330,7 @@ int polygon::wn_PnPoly(const Point2D& P, const std::vector<Point2D>& a_vertices)
   
 }
 
-bool polygon::isPointInsidePolygonWindingNumber(const RealVect& a_p) const noexcept{
+bool face::isPointInsideFaceWindingNumber(const RealVect& a_p) const noexcept{
   Point2D p = projectPointTo2D(a_p);
 
   const int wn = this->wn_PnPoly(p, m_polygon2D);

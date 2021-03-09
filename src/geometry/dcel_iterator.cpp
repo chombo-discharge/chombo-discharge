@@ -6,32 +6,32 @@
 */
 
 #include "dcel_iterator.H"
-#include "dcel_polygon.H"
-#include "dcel_edge.H"
 #include "dcel_vertex.H"
+#include "dcel_edge.H"
+#include "dcel_face.H"
 
 using namespace dcel;
 
-edge_iterator::edge_iterator(polygon& a_poly){
-  m_startEdge = a_poly.getHalfEdge();
+edge_iterator::edge_iterator(face& a_face){
+  m_startEdge = a_face.getHalfEdge();
   m_curEdge   = m_startEdge;
-  m_full_loop = false;
+  m_fullLoop  = false;
   
-  m_iterMode = IterationMode::Polygon;
+  m_iterMode = IterationMode::Face;
 }
 
-edge_iterator::edge_iterator(const polygon& a_poly){
-  m_startEdge = a_poly.getHalfEdge();
+edge_iterator::edge_iterator(const face& a_face){
+  m_startEdge = a_face.getHalfEdge();
   m_curEdge   = m_startEdge;
-  m_full_loop = false;
+  m_fullLoop  = false;
 
-  m_iterMode = IterationMode::Polygon;
+  m_iterMode = IterationMode::Face;
 }
 
 edge_iterator::edge_iterator(vertex& a_vert){
   m_startEdge = a_vert.getEdge();
   m_curEdge   = m_startEdge;
-  m_full_loop = false;
+  m_fullLoop  = false;
 
   m_iterMode = IterationMode::Vertex;
 }
@@ -39,7 +39,7 @@ edge_iterator::edge_iterator(vertex& a_vert){
 edge_iterator::edge_iterator(const vertex& a_vert){
   m_startEdge = a_vert.getEdge();
   m_curEdge   = m_startEdge;
-  m_full_loop = false;
+  m_fullLoop  = false;
 
   m_iterMode = IterationMode::Vertex;
 }
@@ -49,12 +49,13 @@ std::shared_ptr<edge>& edge_iterator::operator() (){
 }
 
 void edge_iterator::reset(){
-  m_curEdge = m_startEdge;
+  m_curEdge  = m_startEdge;
+  m_fullLoop = false;
 }
 
 void edge_iterator::operator++(){
   switch(m_iterMode){
-  case IterationMode::Polygon:
+  case IterationMode::Face:
     m_curEdge = m_curEdge->getNextEdge();
     break;
   case IterationMode::Vertex:
@@ -64,12 +65,12 @@ void edge_iterator::operator++(){
 
   // Check if we have done a full loop.
   if(m_curEdge == m_startEdge){ 
-    m_full_loop = true;
+    m_fullLoop = true;
   }
 }
 
 bool edge_iterator::ok(){
-  if(m_curEdge != nullptr && !m_full_loop){
+  if(m_curEdge != nullptr && !m_fullLoop){
     return true;
   }
   else {

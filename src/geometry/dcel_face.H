@@ -1,5 +1,5 @@
 /*!
-  @file   dcel_poly.H
+  @file   dcel_face.H
   @brief  Declaration of a polygon class for DCEL surface tesselations
   @author Robert Marskar
   @date   Apr. 2018
@@ -28,13 +28,17 @@ namespace dcel {
     Real y;
   };
 
-  class polygon {
+  // Class that describes one face of a watertight surface tesselation. This class
+  // can also embed a 2D version of itself as a two-dimensional polygon, which we use
+  // for speeding up tests when checking if a point projected to the plane of the face
+  // lies inside the face or not. 
+  class face {
   public:
   
-    polygon();
-    polygon(const std::shared_ptr<edge>& a_edge);
-    polygon(const polygon& a_otherPolygon);
-    ~polygon();
+    face();
+    face(const std::shared_ptr<edge>& a_edge);
+    face(const face& a_otherFace);
+    ~face();
 
     void define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge) noexcept;
 
@@ -107,12 +111,12 @@ namespace dcel {
     BoundingSphere m_boundingSphere;
     AABB m_boundingBox;
 
-    // Projects three-dimensional point a_p into the plane of the polygon
-    RealVect projectPointIntoPolygonPlane(const RealVect& a_p) const noexcept;
+    // Projects three-dimensional point a_p into the plane of the face
+    RealVect projectPointIntoFacePlane(const RealVect& a_p) const noexcept;
 
     // Function that computes the subtended angles and checks for inside/outside
-    bool isPointInsidePolygonAngleSum(const RealVect& a_p) const noexcept;
-    bool isPointInsidePolygonWindingNumber(const RealVect& a_p) const noexcept;
+    bool isPointInsideFaceAngleSum(const RealVect& a_p) const noexcept;
+    bool isPointInsideFaceWindingNumber(const RealVect& a_p) const noexcept;
 
     // These functions are for computing inside/outside tests using the winding number algorithm
     int m_ignoreDir;

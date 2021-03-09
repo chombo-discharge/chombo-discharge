@@ -6,10 +6,10 @@
 */
 
 #include "dcel_parser.H"
-#include "dcel_mesh.H"
-#include "dcel_polygon.H"
-#include "dcel_edge.H"
 #include "dcel_vertex.H"
+#include "dcel_edge.H"
+#include "dcel_face.H"
+#include "dcel_mesh.H"
 #include "dcel_iterator.H"
 
 #include <iostream>
@@ -22,25 +22,25 @@ void dcel::parser::PLY::readASCII(dcel::mesh& a_mesh, const std::string a_filena
   if(filestream.is_open()){
     std::vector<std::shared_ptr<dcel::vertex> >& vertices  = a_mesh.getVertices();
     std::vector<std::shared_ptr<dcel::edge> >& edges       = a_mesh.getEdges();
-    std::vector<std::shared_ptr<dcel::polygon> >& polygons = a_mesh.getPolygons();
+    std::vector<std::shared_ptr<dcel::face> >& faces = a_mesh.getFaces();
 
     vertices.resize(0);
     edges.resize(0);
-    polygons.resize(0);
+    faces.resize(0);
 
     int numVertices;  // Number of vertices
-    int numPolygons;  // Number of polygons
+    int numFaces;  // Number of faces
 
-    dcel::parser::PLY::readHeaderASCII(numVertices, numPolygons, filestream); 
+    dcel::parser::PLY::readHeaderASCII(numVertices, numFaces, filestream); 
     dcel::parser::PLY::readVerticesASCII(vertices, numVertices, filestream);
-    dcel::parser::PLY::readPolygonsASCII(polygons, edges, vertices, numPolygons, filestream);
+    dcel::parser::PLY::readFacesASCII(faces, edges, vertices, numFaces, filestream);
     dcel::parser::PLY::reconcilePairEdges(edges);
-    dcel::parser::PLY::clearPolygonCache(vertices);
+    dcel::parser::PLY::clearFaceCache(vertices);
     
     a_mesh.sanityCheck();
 
     dcel::parser::PLY::computeEdgeLengths(edges);
-    dcel::parser::PLY::computeVerticesAndEdges(polygons);
+    dcel::parser::PLY::computeVerticesAndEdges(faces);
     
     filestream.close();
   }
@@ -51,7 +51,7 @@ void dcel::parser::PLY::readASCII(dcel::mesh& a_mesh, const std::string a_filena
 }
 
 void dcel::parser::PLY::readHeaderASCII(int&           a_numVertices,
-					int&           a_numPolygons,
+					int&           a_numFaces,
 					std::ifstream& a_inputstream){
 
   std::string str1;
@@ -69,12 +69,12 @@ void dcel::parser::PLY::readHeaderASCII(int&           a_numVertices,
     }
   }
 
-  // Get number of polygons
+  // Get number of faces
   a_inputstream.clear();
   a_inputstream.seekg(0);
   while (getline(a_inputstream, line)){
     std::stringstream sstream(line);
-    sstream >> str1 >> str2 >> a_numPolygons;
+    sstream >> str1 >> str2 >> a_numFaces;
     if(str1 == "element" && str2 == "face"){
       break;
     }
@@ -121,10 +121,10 @@ void dcel::parser::PLY::readVerticesASCII(std::vector<std::shared_ptr<dcel::vert
   }
 }
 
-void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons,
+void dcel::parser::PLY::readFacesASCII(std::vector<std::shared_ptr<dcel::face> >& a_faces,
 					  std::vector<std::shared_ptr<dcel::edge> >&    a_edges,
 					  std::vector<std::shared_ptr<dcel::vertex> >&  a_vertices,
-					  const int                                     a_numPolygons,
+					  const int                                     a_numFaces,
 					  std::ifstream&                                a_inputstream){
   int numVertices;
   std::vector<int> vertexIndices;
@@ -142,9 +142,9 @@ void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::poly
       sstream >> vertexIndices[i];
     }
 
-    if(numVertices < 3) std::cerr << "dcel::parser::PLY::readPolygonsASCII - a polygon must have at least three vertices!\n";
+    if(numVertices < 3) std::cerr << "dcel::parser::PLY::readFacesASCII - a face must have at least three vertices!\n";
     
-    // Get the vertices that make up this polygon. 
+    // Get the vertices that make up this face. 
     std::vector<std::shared_ptr<dcel::vertex> > curVertices;
     for (int i = 0; i < numVertices; i++){
       const int vertexIndex = vertexIndices[i];
@@ -161,7 +161,7 @@ void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::poly
 
     a_edges.insert(a_edges.end(), halfEdges.begin(), halfEdges.end());
 
-    // Associate next/previous for the half edges inside the current polygon. Wish we had a circular iterator
+    // Associate next/previous for the half edges inside the current face. Wish we had a circular iterator
     // but this will have to do. 
     for (int i = 0; i < halfEdges.size(); i++){
       auto& curEdge  = halfEdges[i];
@@ -171,22 +171,22 @@ void dcel::parser::PLY::readPolygonsASCII(std::vector<std::shared_ptr<dcel::poly
       nextEdge->setPreviousEdge(curEdge);
     }
 
-    // Construct a new polygon
-    a_polygons.emplace_back(std::make_shared<dcel::polygon>(halfEdges.front()));
-    auto& curPolygon = a_polygons.back();
+    // Construct a new face
+    a_faces.emplace_back(std::make_shared<dcel::face>(halfEdges.front()));
+    auto& curFace = a_faces.back();
 
-    // Half edges get a reference to the currently created polygon
+    // Half edges get a reference to the currently created face
     for (auto& e : halfEdges){
-      e->setPolygon(curPolygon);
+      e->setFace(curFace);
     }
 
-    // Must give vertices access to all polygons associated with them since PLY files do not give any edge association. 
+    // Must give vertices access to all faces associated with them since PLY files do not give any edge association. 
     for (auto& v : curVertices){
-      v->addPolygonToCache(curPolygon);
+      v->addFaceToCache(curFace);
     }
 
     
-    if(counter == a_numPolygons) break;
+    if(counter == a_numFaces) break;
   }
 }
 
@@ -197,7 +197,7 @@ void dcel::parser::PLY::reconcilePairEdges(std::vector<std::shared_ptr<dcel::edg
     const auto& vertexStart = curEdge->getVertex();
     const auto& vertexEnd   = nextEdge->getVertex();
 
-    for (const auto& p : vertexStart->getPolycache()){
+    for (const auto& p : vertexStart->getFaceCache()){
       for (edge_iterator edgeIt(*p); edgeIt.ok(); ++edgeIt){
 	const auto& polyCurEdge  = edgeIt();
 	const auto& polyNextEdge = polyCurEdge->getNextEdge();
@@ -214,9 +214,9 @@ void dcel::parser::PLY::reconcilePairEdges(std::vector<std::shared_ptr<dcel::edg
   }
 }
 
-void dcel::parser::PLY::clearPolygonCache(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices){
+void dcel::parser::PLY::clearFaceCache(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices){
   for (auto& v : a_vertices){
-    v->clearPolygonCache();
+    v->clearFaceCache();
   }
 }
 
@@ -226,8 +226,8 @@ void dcel::parser::PLY::computeEdgeLengths(std::vector<std::shared_ptr<dcel::edg
   }
 }
 
-void dcel::parser::PLY::computeVerticesAndEdges(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons){
-  for (auto& p : a_polygons){
+void dcel::parser::PLY::computeVerticesAndEdges(std::vector<std::shared_ptr<dcel::face> >& a_faces){
+  for (auto& p : a_faces){
     p->computeVerticesAndEdges();
   }
 }

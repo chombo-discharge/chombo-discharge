@@ -20,7 +20,7 @@ namespace dcel {
 
   class vertex;
   class edge;
-  class polygon;
+  class face;
 
   class mesh {
   public:
@@ -37,14 +37,14 @@ namespace dcel {
 
     mesh();
     mesh(const mesh& a_otherMesh) = delete;
-    mesh(std::vector<std::shared_ptr<polygon> >& a_polygons,
+    mesh(std::vector<std::shared_ptr<face> >& a_faces,
 	 std::vector<std::shared_ptr<edge> >&    a_edges,
 	 std::vector<std::shared_ptr<vertex> >&  a_vertices);
 
     ~mesh();
 
     void sanityCheck() const;
-    void define(std::vector<std::shared_ptr<polygon> >& a_polygons,
+    void define(std::vector<std::shared_ptr<face> >& a_faces,
 		std::vector<std::shared_ptr<edge> >&    a_edges,
 		std::vector<std::shared_ptr<vertex> >&  a_vertices) noexcept;
     void setAlgorithm(SearchAlgorithm a_algorithm) noexcept;
@@ -55,14 +55,14 @@ namespace dcel {
     std::vector<std::shared_ptr<edge> >& getEdges() noexcept ;
     const std::vector<std::shared_ptr<edge> >& getEdges() const noexcept;
 
-    std::vector<std::shared_ptr<polygon> >& getPolygons() noexcept;
-    const std::vector<std::shared_ptr<polygon> >& getPolygons() const noexcept;
+    std::vector<std::shared_ptr<face> >& getFaces() noexcept;
+    const std::vector<std::shared_ptr<face> >& getFaces() const noexcept;
 
     std::vector<RealVect> getAllVertexCoordinates() const noexcept;
 
     void computeBoundingSphere() noexcept;
     void computeBoundingBox() noexcept;
-    void reconcilePolygons(const bool a_outwardNormal) noexcept;
+    void reconcileFaces(const bool a_outwardNormal) noexcept;
     void computeVertexNormals(VertexNormalWeight a_weight) noexcept;
     void computeEdgeNormals() noexcept;
 
@@ -80,11 +80,11 @@ namespace dcel {
     BoundingSphere m_boundingSphere;
     AABB m_boundingBox;
 
-    std::shared_ptr<kd_tree<polygon> > m_tree;
+    std::shared_ptr<kd_tree<face> > m_tree;
 
     std::vector<std::shared_ptr<vertex> >  m_vertices;
     std::vector<std::shared_ptr<edge> >    m_edges;
-    std::vector<std::shared_ptr<polygon> > m_polygons;
+    std::vector<std::shared_ptr<face> > m_faces;
 
     Real DirectSignedDistance(const RealVect& a_point) const noexcept;
     Real KdTreeSignedDistance(const RealVect& a_point) const noexcept;

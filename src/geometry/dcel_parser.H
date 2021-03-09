@@ -34,11 +34,11 @@ namespace dcel {
       /*!
 	@brief Read an ASCII header
 	@param[out]   a_numVertices  Number of vertices
-	@param[out]   a_numPolygons  Number of polygons
+	@param[out]   a_numFaces  Number of faces
 	@param[inout] a_inputstream   File
       */
       static void readHeaderASCII(int&           a_numVertices,
-				  int&           a_numPolygons,
+				  int&           a_numFaces,
 				  std::ifstream& a_inputstream);
 
       /*!
@@ -50,14 +50,14 @@ namespace dcel {
 				    std::ifstream&                               a_inputstream);
 
       /*!
-	@brief Read ASCII polygons and create mesh connectivity. The next getline() from inputstream must read the first polygon,
+	@brief Read ASCII faces and create mesh connectivity. The next getline() from inputstream must read the first face,
 	i.e. we assume that read_ascii_vertices was called IMMEDIATELY before this function. That function will center the fstream 
 	on the correct line
       */
-      static void readPolygonsASCII(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons,
+      static void readFacesASCII(std::vector<std::shared_ptr<dcel::face> >& a_faces,
 				    std::vector<std::shared_ptr<dcel::edge> >&    a_edges,
 				    std::vector<std::shared_ptr<dcel::vertex> >&  a_vertices,
-				    const int                                     a_numPolygons,
+				    const int                                     a_numFaces,
 				    std::ifstream&                                a_inputstream);
 
       /*!
@@ -68,7 +68,7 @@ namespace dcel {
       /*!
 	@brief Clean up memory
       */
-      static void clearPolygonCache(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices);
+      static void clearFaceCache(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices);
 
       /*!
 	@brief Give each edge a length and a vector for parametrization
@@ -76,9 +76,9 @@ namespace dcel {
       static void computeEdgeLengths(std::vector<std::shared_ptr<dcel::edge> >& a_edges);
 
       /*!
-	@brief Give each polygon access to edges and vertices so they don't have to be looked up every time. 
+	@brief Give each face access to edges and vertices so they don't have to be looked up every time. 
       */
-      static void computeVerticesAndEdges(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons);
+      static void computeVerticesAndEdges(std::vector<std::shared_ptr<dcel::face> >& a_faces);
     };
   }
 }

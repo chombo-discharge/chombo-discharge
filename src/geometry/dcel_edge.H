@@ -16,7 +16,7 @@
 namespace dcel {
   
   class vertex;
-  class polygon;
+  class face;
 
   /*!
     @brief Edge class for handling surface tesselations with DCEL meshes
@@ -41,7 +41,7 @@ namespace dcel {
     void setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept;
     void setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept;
     void setNormal(const RealVect a_normal) noexcept;
-    void setPolygon(const std::shared_ptr<polygon>& a_polygon) noexcept;
+    void setFace(const std::shared_ptr<face>& a_face) noexcept;
     void normalizeNormalVector() noexcept;
     void computeEdgeLength() noexcept;
 
@@ -65,8 +65,8 @@ namespace dcel {
     RealVect& getNormal() noexcept;
     const RealVect& getNormal() const noexcept;
 
-    std::shared_ptr<polygon>& getPolygon() noexcept;  
-    const std::shared_ptr<polygon>& getPolygon() const noexcept;
+    std::shared_ptr<face>& getFace() noexcept;  
+    const std::shared_ptr<face>& getFace() const noexcept;
 
     Real signedDistance(const RealVect& a_x0) const noexcept;
     Real unsignedDistance2(const RealVect& a_x0) const noexcept;
@@ -83,7 +83,7 @@ namespace dcel {
     std::shared_ptr<edge>    m_pairEdge;
     std::shared_ptr<edge>    m_previousEdge; 
     std::shared_ptr<edge>    m_nextEdge;
-    std::shared_ptr<polygon> m_polygon;
+    std::shared_ptr<face>    m_face;
 
     Real projectPointToEdge(const RealVect& a_x0) const noexcept;
   };

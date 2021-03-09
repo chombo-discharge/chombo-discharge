@@ -7,7 +7,7 @@
 
 #include "dcel_vertex.H"
 #include "dcel_edge.H"
-#include "dcel_polygon.H"
+#include "dcel_face.H"
 #include "dcel_iterator.H"
 
 #include "PolyGeom.H"
@@ -71,8 +71,8 @@ void edge::setNormal(const RealVect a_normal) noexcept {
   m_normal = a_normal;
 }
 
-void edge::setPolygon(const std::shared_ptr<polygon>& a_polygon) noexcept {
-  m_polygon = a_polygon;
+void edge::setFace(const std::shared_ptr<face>& a_face) noexcept {
+  m_face = a_face;
 }
 
 void edge::normalizeNormalVector() noexcept {
@@ -135,12 +135,12 @@ const RealVect& edge::getNormal() const noexcept {
   return m_normal;
 }
 
-std::shared_ptr<polygon>& edge::getPolygon() noexcept {
-  return m_polygon;
+std::shared_ptr<face>& edge::getFace() noexcept {
+  return m_face;
 }
 
-const std::shared_ptr<polygon>& edge::getPolygon() const noexcept {
-  return m_polygon;
+const std::shared_ptr<face>& edge::getFace() const noexcept {
+  return m_face;
 }
 
 Real edge::signedDistance(const RealVect& a_x0) const noexcept {

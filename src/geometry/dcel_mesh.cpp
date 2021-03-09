@@ -8,8 +8,8 @@
 #include "dcel_mesh.H"
 #include "dcel_iterator.H"
 #include "dcel_vertex.H"
-#include "dcel_polygon.H"
 #include "dcel_edge.H"
+#include "dcel_face.H"
 #include <PolyGeom.H>
 
 using namespace dcel;
@@ -19,24 +19,24 @@ mesh::mesh(){
   m_use_tree   = false;
 }
 
-mesh::mesh(std::vector<std::shared_ptr<polygon> >& a_polygons,
+mesh::mesh(std::vector<std::shared_ptr<face> >& a_faces,
 	   std::vector<std::shared_ptr<edge> >&    a_edges,
 	   std::vector<std::shared_ptr<vertex> >&  a_vertices){
   
   m_reconciled = false;
   m_use_tree   = false;
   
-  this->define(a_polygons, a_edges, a_vertices);
+  this->define(a_faces, a_edges, a_vertices);
 }
 
 mesh::~mesh(){
 
 }
 
-void mesh::define(std::vector<std::shared_ptr<polygon> >& a_polygons,
+void mesh::define(std::vector<std::shared_ptr<face> >& a_faces,
 		  std::vector<std::shared_ptr<edge> >&    a_edges,
 		  std::vector<std::shared_ptr<vertex> >&  a_vertices) noexcept{
-  m_polygons = a_polygons;
+  m_faces = a_faces;
   m_edges    = a_edges;
   m_vertices = a_vertices;
 }
@@ -47,7 +47,7 @@ void mesh::sanityCheck() const {
     const auto& prevEdge  = e->getPreviousEdge();
     const auto& pairEdge  = e->getPairEdge();
     const auto& curVertex = e->getVertex();
-    const auto& curPoly   = e->getPolygon();
+    const auto& curPoly   = e->getFace();
 
     // Check basic points for current edge. 
     if(e == nullptr) {
@@ -66,7 +66,7 @@ void mesh::sanityCheck() const {
       std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - vertex is nullptr, something has gone wrong with edge generation.\n";
     }
     else if(curPoly == nullptr){
-      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - polygon is nullptr, something has gone wrong with edge generation.\n";
+      std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - face is nullptr, something has gone wrong with edge generation.\n";
     }
 
     // Check that the next edge's previous edge is this edge. 
@@ -109,12 +109,12 @@ const std::vector<std::shared_ptr<edge> >& mesh::getEdges() const noexcept {
   return m_edges;
 }
 
-std::vector<std::shared_ptr<polygon> >& mesh::getPolygons() noexcept {
-  return m_polygons;
+std::vector<std::shared_ptr<face> >& mesh::getFaces() noexcept {
+  return m_faces;
 }
 
-const std::vector<std::shared_ptr<polygon> >& mesh::getPolygons() const noexcept {
-  return m_polygons;
+const std::vector<std::shared_ptr<face> >& mesh::getFaces() const noexcept {
+  return m_faces;
 }
 
 std::vector<RealVect> mesh::getAllVertexCoordinates() const noexcept{
@@ -134,16 +134,16 @@ void mesh::computeBoundingBox() noexcept {
   m_boundingBox.define(this->getAllVertexCoordinates());
 }
 
-void mesh::reconcilePolygons(const bool a_outwardNormal) noexcept{
+void mesh::reconcileFaces(const bool a_outwardNormal) noexcept{
 
-  // Reconcile polygons; compute polygon area and provide edges explicit access
-  // to their polygons
-  for (auto& poly : m_polygons){
+  // Reconcile faces; compute face area and provide edges explicit access
+  // to their faces
+  for (auto& poly : m_faces){
 
-    // Every edge gets a reference to this polygon
+    // Every edge gets a reference to this face
     for (edge_iterator iter(*poly); iter.ok(); ++iter){
       std::shared_ptr<edge>& edge = iter();
-      edge->setPolygon(poly);
+      edge->setFace(poly);
     }
     
     poly->computeNormal(a_outwardNormal);
@@ -178,8 +178,8 @@ void mesh::computeEdgeNormals() noexcept {
   for (auto& e : m_edges){
     const std::shared_ptr<edge>& pairEdge = e->getPairEdge();
 
-    const std::shared_ptr<polygon>& poly     = e->getPolygon();
-    const std::shared_ptr<polygon>& pairPoly = pairEdge->getPolygon();
+    const std::shared_ptr<face>& poly     = e->getFace();
+    const std::shared_ptr<face>& pairPoly = pairEdge->getFace();
     
     const RealVect& n1 = poly->getNormal();
     const RealVect& n2 = pairPoly->getNormal();
@@ -193,7 +193,7 @@ void mesh::computeEdgeNormals() noexcept {
 }
 
 void mesh::buildKdTree(const int a_max_depth, const int a_max_elements) noexcept {
-  m_tree = std::make_shared<kd_tree<polygon> > (m_polygons, a_max_depth, a_max_elements);
+  m_tree = std::make_shared<kd_tree<face> > (m_faces, a_max_depth, a_max_elements);
 }
 
 Real mesh::signedDistance(const RealVect& a_point) const noexcept {
@@ -201,9 +201,9 @@ Real mesh::signedDistance(const RealVect& a_point) const noexcept {
 }
 
 Real mesh::DirectSignedDistance(const RealVect& a_point) const noexcept {
-  Real minDist = m_polygons.front()->signedDistance(a_point);
+  Real minDist = m_faces.front()->signedDistance(a_point);
     
-  for (const auto& poly : m_polygons){
+  for (const auto& poly : m_faces){
     const Real curDist = poly->signedDistance(a_point);
 
     if(std::abs(curDist) < std::abs(minDist)) minDist = curDist;
@@ -217,7 +217,7 @@ Real mesh::KdTreeSignedDistance(const RealVect& a_point) const noexcept {
   Real minDist;
 
   if(m_tree->isDefined()){
-    std::vector<std::shared_ptr<polygon> > candidates = m_tree->find_closest(a_point);
+    std::vector<std::shared_ptr<face> > candidates = m_tree->find_closest(a_point);
 
     minDist = candidates.front()->signedDistance(a_point);
     
@@ -253,13 +253,13 @@ Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) 
 }
 
 void mesh::computeVertexNormalAverage(std::shared_ptr<vertex>& a_vert) noexcept {
-  const auto& polygons = a_vert->getPolygons();
+  const auto& faces = a_vert->getFaces();
 
   RealVect& normal = a_vert->getNormal();
 
   normal = RealVect::Zero;
   
-  for (const auto& p : polygons){
+  for (const auto& p : faces){
     normal += p->getNormal();
   }
 
@@ -275,7 +275,7 @@ void mesh::computeVertexNormalAngleWeighted(std::shared_ptr<vertex>& a_vert) noe
   for (edge_iterator iter(*a_vert); iter.ok(); ++iter){
     const auto& outgoingEdge = iter();
 
-    // Edges circulate around the polygon. Should be 
+    // Edges circulate around the face. Should be 
     const RealVect& x0 = outgoingEdge->getVertex()->getPosition();
     const RealVect& x1 = outgoingEdge->getPreviousEdge()->getVertex()->getPosition();
     const RealVect& x2 = outgoingEdge->getNextEdge()->getVertex()->getPosition();
@@ -288,8 +288,8 @@ void mesh::computeVertexNormalAngleWeighted(std::shared_ptr<vertex>& a_vert) noe
 
     const RealVect norm = PolyGeom::cross(v1, v2);
 
-    // We could use the polygon normal, but I'm decoupling the way these are computed....
-    /// const RealVect norm = outgoingEdge->getPolygon()->getNormal();
+    // We could use the face normal, but I'm decoupling the way these are computed....
+    /// const RealVect norm = outgoingEdge->getFace()->getNormal();
 
     const Real alpha = acos(PolyGeom::dot(v1, v2));
 

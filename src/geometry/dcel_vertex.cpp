@@ -7,7 +7,7 @@
 
 #include "dcel_vertex.H"
 #include "dcel_edge.H"
-#include "dcel_polygon.H"
+#include "dcel_face.H"
 #include "dcel_iterator.H"
 
 using namespace dcel;
@@ -16,7 +16,7 @@ vertex::vertex(){
   m_pos    = RealVect::Zero;
   m_normal = RealVect::Zero;
 
-  m_polycache.resize(0);
+  m_faceCache.resize(0);
 }
 
 vertex::vertex(const RealVect& a_pos){
@@ -57,12 +57,12 @@ void vertex::setNormal(const RealVect& a_normal) noexcept {
   m_normal = a_normal;
 }
 
-void vertex::addPolygonToCache(const std::shared_ptr<polygon>& a_poly) noexcept {
-  m_polycache.push_back(a_poly);
+void vertex::addFaceToCache(const std::shared_ptr<face>& a_face) noexcept {
+  m_faceCache.push_back(a_face);
 }
 
-void vertex::clearPolygonCache() noexcept {
-  m_polycache.resize(0);
+void vertex::clearFaceCache() noexcept {
+  m_faceCache.resize(0);
 }
 
 void vertex::normalizeNormalVector() noexcept {
@@ -93,21 +93,21 @@ const RealVect& vertex::getNormal() const noexcept {
   return m_normal;
 }
 
-std::vector<std::shared_ptr<polygon> > vertex::getPolygons() noexcept {
-  std::vector<std::shared_ptr<polygon> > polygons;
+std::vector<std::shared_ptr<face> > vertex::getFaces() noexcept {
+  std::vector<std::shared_ptr<face> > faces;
   for (edge_iterator iter(*this); iter.ok(); ++iter){
-    polygons.push_back(iter()->getPolygon());
+    faces.push_back(iter()->getFace());
   }
 
-  return polygons;
+  return faces;
 }
 
-const std::vector<std::shared_ptr<polygon> >& vertex::getPolycache() const noexcept{
-  return m_polycache;
+const std::vector<std::shared_ptr<face> >& vertex::getFaceCache() const noexcept{
+  return m_faceCache;
 }
 
-std::vector<std::shared_ptr<polygon> >& vertex::getPolycache() noexcept {
-  return m_polycache;
+std::vector<std::shared_ptr<face> >& vertex::getFaceCache() noexcept {
+  return m_faceCache;
 }
 
 Real vertex::signedDistance(const RealVect& a_x0) const noexcept {

@@ -16,7 +16,7 @@
 namespace dcel {
 
   class edge;
-  class polygon;
+  class face;
 
   class vertex {
   public:
@@ -31,9 +31,9 @@ namespace dcel {
     void setPosition(const RealVect& a_pos) noexcept;
     void setNormal(const RealVect& a_normal) noexcept;
     void setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
-    void addPolygonToCache(const std::shared_ptr<polygon>& a_poly) noexcept;
+    void addFaceToCache(const std::shared_ptr<face>& a_face) noexcept;
     void normalizeNormalVector() noexcept;
-    void clearPolygonCache() noexcept;
+    void clearFaceCache() noexcept;
 
     RealVect& getPosition() noexcept;
     const RealVect& getPosition() const noexcept;
@@ -44,10 +44,10 @@ namespace dcel {
     RealVect& getNormal() noexcept;
     const RealVect& getNormal() const noexcept;
 
-    std::vector<std::shared_ptr<polygon> > getPolygons() noexcept;
+    std::vector<std::shared_ptr<face> > getFaces() noexcept;
 
-    std::vector<std::shared_ptr<polygon> >& getPolycache() noexcept;
-    const std::vector<std::shared_ptr<polygon> >& getPolycache() const noexcept;
+    std::vector<std::shared_ptr<face> >& getFaceCache() noexcept;
+    const std::vector<std::shared_ptr<face> >& getFaceCache() const noexcept;
   
     Real signedDistance(const RealVect& a_x0) const noexcept;
     Real unsignedDistance2(const RealVect& a_x0) const noexcept; // Returns squared distance to point
@@ -59,7 +59,7 @@ namespace dcel {
     
     std::shared_ptr<edge> m_edge;
     
-    std::vector<std::shared_ptr<polygon> > m_polycache;
+    std::vector<std::shared_ptr<face> > m_faceCache;
   };
 }
 
