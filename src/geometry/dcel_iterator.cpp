@@ -13,7 +13,7 @@
 using namespace dcel;
 
 edge_iterator::edge_iterator(polygon& a_poly){
-  m_startEdge = a_poly.getEdge();
+  m_startEdge = a_poly.getHalfEdge();
   m_curEdge   = m_startEdge;
   m_full_loop = false;
   
@@ -21,7 +21,7 @@ edge_iterator::edge_iterator(polygon& a_poly){
 }
 
 edge_iterator::edge_iterator(const polygon& a_poly){
-  m_startEdge = a_poly.getEdge();
+  m_startEdge = a_poly.getHalfEdge();
   m_curEdge   = m_startEdge;
   m_full_loop = false;
 

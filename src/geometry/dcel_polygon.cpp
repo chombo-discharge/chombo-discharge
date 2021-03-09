@@ -22,12 +22,12 @@ polygon::polygon(){
 }
 
 polygon::polygon(const std::shared_ptr<edge>& a_edge){
-  this->setEdge(a_edge);
+  this->setHalfEdge(a_edge);
 }
 
 polygon::polygon(const polygon& a_otherPolygon){
   this->define(a_otherPolygon.getNormal(),
-	       a_otherPolygon.getEdge());
+	       a_otherPolygon.getHalfEdge());
 }
 
 polygon::~polygon(){
@@ -36,11 +36,11 @@ polygon::~polygon(){
 
 void polygon::define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge) noexcept {
   this->setNormal(a_normal);
-  this->setEdge(a_edge);
+  this->setHalfEdge(a_edge);
 }
 
-void polygon::setEdge(const std::shared_ptr<edge>& a_edge) noexcept {
-  m_edge = a_edge;
+void polygon::setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept {
+  m_halfEdge = a_halfEdge;
 }
 
 void polygon::setNormal(const RealVect& a_normal) noexcept {
@@ -109,12 +109,12 @@ void polygon::computeBoundingBox() noexcept {
   m_boundingBox.define(this->getAllVertexCoordinates());
 }
 
-const std::shared_ptr<edge>& polygon::getEdge() const noexcept{
-  return m_edge;
+const std::shared_ptr<edge>& polygon::getHalfEdge() const noexcept{
+  return m_halfEdge;
 }
 
-std::shared_ptr<edge>& polygon::getEdge() noexcept {
-  return m_edge;
+std::shared_ptr<edge>& polygon::getHalfEdge() noexcept {
+  return m_halfEdge;
 }
 
 const std::vector<RealVect> polygon::getAllVertexCoordinates() const noexcept {

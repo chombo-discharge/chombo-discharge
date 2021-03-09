@@ -30,7 +30,7 @@ namespace dcel {
 
     void define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge) noexcept;
 
-    void setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
+    void setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept;
     void setNormal(const RealVect& a_normal) noexcept;
 
     void normalizeNormalVector() noexcept;
@@ -40,8 +40,8 @@ namespace dcel {
     void computeBoundingBox() noexcept;
     void computeBoundingSphere() noexcept;
 
-    std::shared_ptr<edge>& getEdge() noexcept;
-    const std::shared_ptr<edge>& getEdge() const noexcept;
+    std::shared_ptr<edge>& getHalfEdge() noexcept;
+    const std::shared_ptr<edge>& getHalfEdge() const noexcept;
 
     const std::vector<RealVect> getAllVertexCoordinates() const noexcept;
     const std::vector<std::shared_ptr<vertex> > getVertices() const noexcept;
@@ -73,7 +73,7 @@ namespace dcel {
   
   protected:
   
-    std::shared_ptr<edge> m_edge;
+    std::shared_ptr<edge> m_halfEdge;
 
     Real m_area;
     
