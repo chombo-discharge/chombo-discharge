@@ -33,6 +33,8 @@ namespace dcel {
     void setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
     void addFaceToCache(const std::shared_ptr<face>& a_face) noexcept;
     void normalizeNormalVector() noexcept;
+    void computeVertexNormalAverage() noexcept;
+    void computeVertexNormalAngleWeighted() noexcept;
     void clearFaceCache() noexcept;
 
     RealVect& getPosition() noexcept;
@@ -60,6 +62,7 @@ namespace dcel {
     std::shared_ptr<edge> m_edge;
     
     std::vector<std::shared_ptr<face> > m_faceCache;
+
   };
 }
 

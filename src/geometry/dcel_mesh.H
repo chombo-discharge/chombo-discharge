@@ -91,9 +91,6 @@ namespace dcel {
     Real DirectSignedDistance(const RealVect& a_point) const noexcept;
     Real DirectSignedDistance2(const RealVect& a_point) const noexcept;
     Real KdTreeSignedDistance(const RealVect& a_point) const noexcept;
-
-    void computeVertexNormalAngleWeighted(std::shared_ptr<vertex>& a_vert) noexcept;
-    void computeVertexNormalAverage(std::shared_ptr<vertex>& a_vert) noexcept;
   };
 }
 

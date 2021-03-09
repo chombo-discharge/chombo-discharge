@@ -124,3 +124,45 @@ Real vertex::unsignedDistance2(const RealVect& a_x0) const noexcept {
 
   return d.dotProduct(d);
 }
+
+void vertex::computeVertexNormalAverage() noexcept {
+  const auto& faces = this->getFaces();
+
+  m_normal = RealVect::Zero;
+  
+  for (const auto& f : faces){
+    m_normal += f->getNormal();
+  }
+
+  this->normalizeNormalVector();
+}
+
+void vertex::computeVertexNormalAngleWeighted() noexcept {
+  m_normal = RealVect::Zero;
+
+  for (edge_iterator iter(*this); iter.ok(); ++iter){
+    const auto& outgoingEdge = iter();
+
+    // Edges circulate around the face. Should be 
+    const RealVect& x0 = outgoingEdge->getVertex()->getPosition();
+    const RealVect& x1 = outgoingEdge->getPreviousEdge()->getVertex()->getPosition();
+    const RealVect& x2 = outgoingEdge->getNextEdge()->getVertex()->getPosition();
+
+    RealVect v1 = x1-x0;
+    RealVect v2 = x2-x0;
+
+    v1 = v1/v1.vectorLength();
+    v2 = v2/v2.vectorLength();
+
+    //    const RealVect norm = PolyGeom::cross(v1, v2);
+
+    // We could use the face normal, but I'm decoupling the way these are computed....
+    const RealVect norm = outgoingEdge->getFace()->getNormal();
+
+    const Real alpha = acos(v1.dotProduct(v2));
+
+    m_normal += alpha*norm;
+  }
+
+  this->normalizeNormalVector();
+}
