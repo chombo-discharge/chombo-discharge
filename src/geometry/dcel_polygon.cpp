@@ -14,7 +14,7 @@
 
 using namespace dcel;
 
-polygon::Point2D::Point2D(const Real a_x, const Real a_y){
+Point2D::Point2D(const Real a_x, const Real a_y){
   x = a_x;
   y = a_y;
 }
@@ -295,7 +295,7 @@ void polygon::computePolygon2D() noexcept {
   }
 }
 
-polygon::Point2D polygon::projectPointTo2D(const RealVect& a_x) const noexcept {
+Point2D polygon::projectPointTo2D(const RealVect& a_x) const noexcept {
   return Point2D(a_x[m_xDir], a_x[m_yDir]);
 }
 

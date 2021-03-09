@@ -20,6 +20,14 @@ namespace dcel {
   class vertex;
   class edge;
 
+  struct Point2D {
+    Point2D() = default;
+    Point2D(const Real a_x, const Real a_y);
+    ~Point2D() = default;
+    Real x;
+    Real y;
+  };
+
   class polygon {
   public:
   
@@ -82,13 +90,7 @@ namespace dcel {
   
   protected:
 
-    struct Point2D {
-      Point2D() = default;
-      Point2D(const Real a_x, const Real a_y);
-      ~Point2D() = default;
-      Real x;
-      Real y;
-    };
+
   
     std::shared_ptr<edge> m_halfEdge; // One of the edges. This must always be != nullptr
 
