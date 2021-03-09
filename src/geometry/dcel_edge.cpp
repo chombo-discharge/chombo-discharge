@@ -159,7 +159,7 @@ Real edge::signedDistance(const RealVect& a_x0) const noexcept {
     const RealVect delta     = a_x0 - linePoint;
     const Real dot           = m_normal.dotProduct(delta);
 
-    const int sgn = (dot >= 0.0) ? 1 : -1;
+    const int sgn = (dot > 0.0) ? 1 : -1;
 
     retval = sgn*delta.vectorLength();
   }

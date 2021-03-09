@@ -29,7 +29,7 @@ porsche::porsche(){
   // Build the mesh
   std::shared_ptr<dcel::mesh> mesh = std::shared_ptr<dcel::mesh> (new dcel::mesh());
   dcel::parser::PLY::readASCII(*mesh, filename);
-  mesh->reconcileFaces(true);
+  mesh->reconcileFaces();
   mesh->sanityCheck();
 
   // Compute vertex and edge normals
@@ -44,7 +44,7 @@ porsche::porsche(){
 
   // Create the if object
   bool flipNormal = false;
-  RefCountedPtr<dcel_if> bif = RefCountedPtr<dcel_if>(new dcel_if(mesh, false));
+  RefCountedPtr<dcel_if> bif = RefCountedPtr<dcel_if>(new dcel_if(mesh, true));
 
   m_electrodes.push_back(electrode(bif, true));
   

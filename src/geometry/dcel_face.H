@@ -27,9 +27,8 @@ namespace dcel {
     Polygon2D(const face& a_face);
     ~Polygon2D() = default;
 
-    bool isPointInsidePolygon(const RealVect& a_point) const noexcept;
-
-    bool isPointInsideFaceAngleSum(const RealVect& a_point) const noexcept;
+    bool isPointInsidePolygonWindingNumber(const RealVect& a_point) const noexcept;
+    bool isPointInsidePolygonAngleSum(const RealVect& a_point) const noexcept;
     
   protected:
 
@@ -46,8 +45,6 @@ namespace dcel {
     int isLeft(const Point2D& a_P0, const Point2D& a_P1, const Point2D& a_P2) const noexcept; // Returns > 0 if left, < 0 if right, = 0 if on line.
     int wn_PnPoly(const Point2D& P) const noexcept;
     int wn_PnPoly(const RealVect& a_point) const noexcept;
-
-
     
   protected:
     int m_ignoreDir;
@@ -78,7 +75,7 @@ namespace dcel {
     void normalizeNormalVector() noexcept;
     void computeArea() noexcept;
     void computeCentroid() noexcept;
-    void computeNormal(const bool a_outwardNormal) noexcept;
+    void computeNormal() noexcept;
     void computeBoundingBox() noexcept;
     void computeBoundingSphere() noexcept;
     void computeVerticesAndEdges() noexcept;
@@ -143,12 +140,6 @@ namespace dcel {
 
     // Projects three-dimensional point a_p into the plane of the face
     RealVect projectPointIntoFacePlane(const RealVect& a_p) const noexcept;
-
-    // Function that computes the subtended angles and checks for inside/outside
-    bool isPointInsideFaceAngleSum(const RealVect& a_p) const noexcept;
-    bool isPointInsideFaceWindingNumber(const RealVect& a_p) const noexcept;
-
-
   };
 
 }

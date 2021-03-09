@@ -22,7 +22,7 @@ public:
 
   dcel_if() = delete;
 
-  dcel_if(const std::shared_ptr<dcel::mesh>& a_mesh, const bool a_fluidInside);
+  dcel_if(const std::shared_ptr<dcel::mesh>& a_mesh, const bool a_flipInside);
   dcel_if(const dcel_if& a_object);
   ~dcel_if();
 
@@ -32,7 +32,7 @@ public:
 protected:
 
   std::shared_ptr<dcel::mesh> m_mesh;
-  bool m_fluidInside;
+  bool m_flipInside;
 };
 
 #endif

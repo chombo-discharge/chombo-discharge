@@ -7,14 +7,14 @@
 
 #include "dcel_if.H"
 
-dcel_if::dcel_if(const std::shared_ptr<dcel::mesh>& a_mesh, const bool a_fluidInside){
-  m_mesh        = a_mesh;
-  m_fluidInside = a_fluidInside;
+dcel_if::dcel_if(const std::shared_ptr<dcel::mesh>& a_mesh, const bool a_flipInside){
+  m_mesh       = a_mesh;
+  m_flipInside = a_flipInside;
 }
 
 dcel_if::dcel_if(const dcel_if& a_object){
-  m_mesh        = a_object.m_mesh;
-  m_fluidInside = a_object.m_fluidInside;
+  m_mesh       = a_object.m_mesh;
+  m_flipInside = a_object.m_flipInside;
 }
 
 dcel_if::~dcel_if(){
@@ -22,9 +22,9 @@ dcel_if::~dcel_if(){
 }
 
 Real dcel_if::value(const RealVect& a_point) const {
-  Real retval = m_mesh->signedDistance(a_point); // dcel::mesh should return positive for outside. 
+  Real retval = m_mesh->signedDistance(a_point); // dcel::mesh can return either positive or negative for outside. 
   
-  if(!m_fluidInside){
+  if(m_flipInside){
     retval = -retval;
   }
 

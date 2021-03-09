@@ -131,13 +131,13 @@ void mesh::computeBoundingBox() noexcept {
   m_boundingBox.define(this->getAllVertexCoordinates());
 }
 
-void mesh::reconcileFaces(const bool a_flipNormal) noexcept{
+void mesh::reconcileFaces() noexcept{
 
   // Reconcile faces; compute face area and provide edges explicit access
   // to their faces
   for (auto& f : m_faces){
     f->computeVerticesAndEdges();
-    f->computeNormal(a_flipNormal);
+    f->computeNormal();
     f->normalizeNormalVector();
     f->computeCentroid();
     f->computeArea();
@@ -200,6 +200,7 @@ Real mesh::signedDistance(const RealVect& a_point) const noexcept {
 }
 
 Real mesh::DirectSignedDistance(const RealVect& a_point) const noexcept {
+#if 0 // Original code
   Real minDist = m_faces.front()->signedDistance(a_point);
     
   for (const auto& f : m_faces){
@@ -209,6 +210,21 @@ Real mesh::DirectSignedDistance(const RealVect& a_point) const noexcept {
   }
 
   return minDist;
+#else
+  std::shared_ptr<face> closest = m_faces.front();
+  Real minDist2 = closest->unsignedDistance2(a_point);
+
+  for (const auto& f : m_faces){
+    const Real curDist2 = f->unsignedDistance2(a_point);
+
+    if(curDist2 < minDist2) {
+      closest = f;
+      minDist2 = curDist2;
+    }
+  }
+
+  return closest->signedDistance(a_point);
+#endif
 }
 
 Real mesh::KdTreeSignedDistance(const RealVect& a_point) const noexcept {

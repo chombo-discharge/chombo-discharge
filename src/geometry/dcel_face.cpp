@@ -93,13 +93,13 @@ int Polygon2D::wn_PnPoly(const RealVect& a_point) const noexcept {
   return WN;
 }
 
-bool Polygon2D::isPointInsidePolygon(const RealVect& a_point) const noexcept {
+bool Polygon2D::isPointInsidePolygonWindingNumber(const RealVect& a_point) const noexcept {
   const int wn = this->wn_PnPoly(a_point);
 
   return wn != 0;
 }
 
-bool Polygon2D::isPointInsideFaceAngleSum(const RealVect& a_point) const noexcept {
+bool Polygon2D::isPointInsidePolygonAngleSum(const RealVect& a_point) const noexcept {
   const Point2D p = this->projectPoint(a_point);
 
   Real sumTheta = 0.0;
@@ -190,7 +190,7 @@ void face::computeCentroid() noexcept {
   m_centroid = m_centroid/m_vertices.size();
 }
 
-void face::computeNormal(const bool a_flipNormal) noexcept {
+void face::computeNormal() noexcept {
   // Go through all vertices because some vertices may (correctly) lie on a line (but all of them shouldn't).
 
   const int n = m_vertices.size();
@@ -206,10 +206,6 @@ void face::computeNormal(const bool a_flipNormal) noexcept {
   }
 
   this->normalizeNormalVector();
-
-  if(a_flipNormal){    // If normal points inwards, make it point outwards
-    m_normal = -m_normal;
-  }
 }
 
 void face::computeBoundingSphere() noexcept {
@@ -328,11 +324,7 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
   Real retval = 1.234567E89;
 
   // Compute projection of x0 on the face plane
-#if 1 // Original code
-  const bool inside = this->isPointInsideFaceAngleSum(a_x0);
-#else
-  const bool inside = this->isPointInsideFaceWindingNumber(a_x0);
-#endif
+  const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
 
   // Projected point is inside if angles sum to 2*pi
   if(inside){ // Ok, the projection onto the face plane places the point "inside" the planar face
@@ -353,7 +345,7 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
 Real face::unsignedDistance2(const RealVect& a_x0) const noexcept {
   Real retval = 1.234567E89;
   
-  const bool inside = this->isPointInsideFaceAngleSum(a_x0);
+  const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
 
   if(inside){ 
     const RealVect& facePoint = m_vertices.front()->getPosition();
@@ -378,14 +370,6 @@ RealVect face::projectPointIntoFacePlane(const RealVect& a_p) const noexcept {
   const RealVect projectedPoint  = a_p - normalComponent;
 
   return projectedPoint;
-}
-
-bool face::isPointInsideFaceAngleSum(const RealVect& a_p) const noexcept {
-  return m_poly2->isPointInsideFaceAngleSum(a_p);
-}
-
-bool face::isPointInsideFaceWindingNumber(const RealVect& a_p) const noexcept {
-  return m_poly2->isPointInsidePolygon(a_p);
 }
 
 
