@@ -208,46 +208,19 @@ const RealVect& polygon::getBoundingBoxHi() const noexcept {
 }
 
 Real polygon::signedDistance(const RealVect& a_x0) const noexcept {
-#define EPSILON 1.E-8
-#define TWOPI 6.283185307179586476925287
-  
-  const std::vector<std::shared_ptr<vertex> >& vertices = this->getVertices();
-  
   Real retval = 1.234567E89;
 
   // Compute projection of x0 on the polygon plane
-  const RealVect x1          = vertices.front()->getPosition();
-  const Real normalComponent = PolyGeom::dot(a_x0-x1, m_normal);
-  const RealVect xp          = a_x0 - normalComponent*m_normal;
-
-  // Use angle rule to check if projected point lies inside the polygon. Very expensive because of the acos(cosTheta). 
-  Real anglesum = 0.0;
-  const int n = vertices.size();
-  for(int i = 0; i < n; i++){
-    const RealVect p1 = vertices[i]      ->getPosition() - xp;
-    const RealVect p2 = vertices[(i+1)%n]->getPosition() - xp;
-
-    const Real m1 = p1.vectorLength();
-    const Real m2 = p2.vectorLength();
-
-    if(m1*m2 <= EPSILON) {// Projected point hits a vertex, return early. 
-      anglesum = 0.;
-      break;
-    }
-    else {
-      const Real cosTheta = PolyGeom::dot(p1, p2)/(m1*m2);
-      anglesum += acos(cosTheta);
-    }
-  }
+  const bool inside = this->isPointInsidePolygonAngleSum(a_x0);
 
   // Projected point is inside if angles sum to 2*pi
-  if(std::abs(std::abs(anglesum) - TWOPI) < EPSILON){ // Ok, the projection onto the polygon plane places the point "inside" the planer polygon
+  if(inside){ // Ok, the projection onto the polygon plane places the point "inside" the planer polygon
+    const RealVect& x1         = m_vertices.front()->getPosition();
+    const Real normalComponent = PolyGeom::dot(a_x0-x1, m_normal);
     retval = normalComponent;
   }
   else{ // The projected point lies outside the triangle. Check distance to edges/vertices
-    const std::vector<std::shared_ptr<edge> > edges = this->getEdges();
-
-    for (const auto& e : edges){
+    for (const auto& e : m_edges){
       const Real curDist = e->signedDistance(a_x0);
       retval = (std::abs(curDist) < std::abs(retval)) ? curDist : retval;
     }
@@ -271,10 +244,11 @@ RealVect polygon::projectPointIntoPolygonPlane(const RealVect& a_p) const noexce
 }
 
 bool polygon::isPointInsidePolygonAngleSum(const RealVect& a_p) const noexcept {
-
   const RealVect projectedPoint = this->projectPointIntoPolygonPlane(a_p);
 
   Real sum = 0.0;
+
+  constexpr Real thresh = 1.E-6;
 
   const int N = m_vertices.size();
   
@@ -290,11 +264,9 @@ bool polygon::isPointInsidePolygonAngleSum(const RealVect& a_p) const noexcept {
     sum += acos(cosTheta);
   }
 
-  sum *= 1./(2*M_PI);
+  sum = sum/(2.0*M_PI) - 1.0;
 
-  const int WN = round(sum); // If WN == 1 the point is inside. 
-
-  return WN == 1;
+  return std::abs(sum) < thresh;
 }
 
 void polygon::computePolygon2D() noexcept {
