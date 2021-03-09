@@ -31,18 +31,18 @@ namespace dcel {
 
   class Polygon2D {
   public:
-    Polygon2D() = delete;
+    Polygon2D() = delete; 
     Polygon2D(const face& a_face);
     ~Polygon2D() = default;
 
-    void define(const face& a_face) noexcept;
-    bool inside(const RealVect& a_point) const noexcept;
-    int wn_PnPoly(const RealVect& a_point) const noexcept;
+    bool isPointInsidePolygon(const RealVect& a_point) const noexcept;
     
   protected:
+    void define(const face& a_face) noexcept;
     Point2D projectPoint(const RealVect& a_point) const noexcept;
     int isLeft(const Point2D& a_P0, const Point2D& a_P1, const Point2D& a_P2) const noexcept; // Returns > 0 if left, < 0 if right, = 0 if on line.
     int wn_PnPoly(const Point2D& P) const noexcept;
+    int wn_PnPoly(const RealVect& a_point) const noexcept;
     
   protected:
     int m_ignoreDir;
@@ -76,7 +76,7 @@ namespace dcel {
     void computeBoundingBox() noexcept;
     void computeBoundingSphere() noexcept;
     void computeVerticesAndEdges() noexcept;
-
+    void computePolygon2D() noexcept;
 
     std::shared_ptr<edge>& getHalfEdge() noexcept;
     const std::shared_ptr<edge>& getHalfEdge() const noexcept;
@@ -132,23 +132,15 @@ namespace dcel {
     BoundingSphere m_boundingSphere;
     AABB m_boundingBox;
 
+    // 2D polygon
+    std::shared_ptr<Polygon2D> m_poly2;
+
     // Projects three-dimensional point a_p into the plane of the face
     RealVect projectPointIntoFacePlane(const RealVect& a_p) const noexcept;
 
     // Function that computes the subtended angles and checks for inside/outside
     bool isPointInsideFaceAngleSum(const RealVect& a_p) const noexcept;
     bool isPointInsideFaceWindingNumber(const RealVect& a_p) const noexcept;
-
-    // These functions are for computing inside/outside tests using the winding number algorithm
-    int m_ignoreDir;
-    int m_xDir;
-    int m_yDir;
-    std::vector<Point2D> m_polygon2D;
-    void computePolygon2D() noexcept; // Computes m_ignoreDir, m_xDir, m_yDir and m_polygon2D
-    Point2D projectPointTo2D(const RealVect& a_x) const noexcept; // Must call computePolygon2D first
-    int isLeft(const Point2D& a_P0, const Point2D& a_P1, const Point2D& a_P2) const noexcept; // Returns > 0 if left, < 0 if right, = 0 if on line.
-    int wn_PnPoly(const Point2D& P, const std::vector<Point2D>& a_vertices) const noexcept;
-
   };
 
 }
