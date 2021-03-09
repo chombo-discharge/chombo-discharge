@@ -42,8 +42,8 @@ porsche::porsche(){
 
   // Build tree
   mesh->buildKdTree(tree_depth, max_elements);
-  mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::KdTree);
-  //  mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::Direct);
+  //  mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::KdTree);
+  mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::Direct);
 
   // Create the if object
   RefCountedPtr<dcel_if> bif = RefCountedPtr<dcel_if>(new dcel_if(mesh, false));

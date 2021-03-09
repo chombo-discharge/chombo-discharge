@@ -74,6 +74,11 @@ namespace dcel {
 	@brief Give each edge a length and a vector for parametrization
       */
       static void computeEdgeLengths(std::vector<std::shared_ptr<dcel::edge> >& a_edges);
+
+      /*!
+	@brief Give each polygon access to edges and vertices so they don't have to be looked up every time. 
+      */
+      static void computeVerticesAndEdges(std::vector<std::shared_ptr<dcel::polygon> >& a_polygons);
     };
   }
 }
