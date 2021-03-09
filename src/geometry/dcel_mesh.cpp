@@ -162,8 +162,6 @@ void mesh::reconcileEdges() noexcept {
 
 void mesh::reconcileVertices(VertexNormalWeight a_weight) noexcept {
   for (auto& v : m_vertices){
-    if (v == nullptr) std::cerr << "In file dcel_mesh function dcel::mesh::computeVertexNormals(VertexNormalWeighting) - vertex is 'nullptr'\n";
-
     switch(a_weight) {
     case VertexNormalWeight::None:
       v->computeVertexNormalAverage();
@@ -174,13 +172,6 @@ void mesh::reconcileVertices(VertexNormalWeight a_weight) noexcept {
     default:
       std::cerr << "In file dcel_mesh function dcel::mesh::reconcileVertices(VertexNormalWeighting) - unsupported algorithm requested\n";
     }
-  }
-}
-
-void mesh::computeVerticesAndEdges() noexcept {
-  for (auto& f : m_faces){
-    f->computeVerticesAndEdges();
-    f->computePolygon2D();
   }
 }
 

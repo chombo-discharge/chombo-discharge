@@ -82,8 +82,6 @@ namespace dcel {
 
     std::vector<RealVect> getAllVertexCoordinates() const noexcept;
     
-    void computeVerticesAndEdges() noexcept;
-    
     void reconcileFaces() noexcept;
     void reconcileEdges() noexcept;
     void reconcileVertices(VertexNormalWeight a_weight) noexcept;
