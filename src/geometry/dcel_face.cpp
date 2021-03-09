@@ -1,6 +1,6 @@
 /*!
   @file   dcel_face.cpp
-  @brief  Implementation of dcel_poly.H
+  @brief  Implementation of dcel_face.H
   @author Robert Marskar
   @date   March 2021
 */
@@ -17,6 +17,86 @@ using namespace dcel;
 Point2D::Point2D(const Real a_x, const Real a_y){
   x = a_x;
   y = a_y;
+}
+
+Polygon2D::Polygon2D(const face& a_face){
+  this->define(a_face);
+}
+
+Point2D Polygon2D::projectPoint(const RealVect& a_point) const noexcept {
+  return Point2D(a_point[m_xDir], a_point[m_yDir]);
+}
+
+void Polygon2D::define(const face& a_face) noexcept {
+  m_points.resize(0);
+
+  m_ignoreDir = 0;
+
+  const RealVect& normal = a_face.getNormal();
+  
+  for (int dir = 0; dir < SpaceDim; dir++){
+    m_ignoreDir = (normal[dir] > normal[m_ignoreDir]) ? dir : m_ignoreDir;
+  }
+
+  m_xDir = 3;
+  m_yDir = -1;
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if(dir != m_ignoreDir){
+      m_xDir = std::min(m_xDir, dir);
+      m_yDir = std::max(m_yDir, dir);
+    }
+  }
+
+  // Ignore coordinate with biggest normal component
+  for (const auto& v : a_face.getVertices()){
+    const RealVect& p = v->getPosition();
+    
+    m_points.emplace_back(projectPoint(p));
+  }
+}
+
+int Polygon2D::isLeft(const Point2D& P0, const Point2D& P1, const Point2D& P2) const noexcept {
+  return ( (P1.x - P0.x) * (P2.y - P0.y) - (P2.x -  P0.x) * (P1.y - P0.y) );
+}
+
+int Polygon2D::wn_PnPoly(const Point2D& P) const noexcept {
+  int wn = 0;    // the  winding number counter
+
+  const int N = m_points.size();
+
+  // loop through all edges of the polygon
+  for (int i = 0; i < N; i++) {   // edge from V[i] to  V[i+1]
+
+    const Point2D& P1 = m_points[i];
+    const Point2D& P2 = m_points[(i+1)%N];
+    
+    if (P1.y <= P.y) {          // start y <= P.y
+      if (P2.y  > P.y)      // an upward crossing
+	if (isLeft( P1, P2, P) > 0)  // P left of  edge
+	  ++wn;            // have  a valid up intersect
+    }
+    else {                        // start y > P.y (no test needed)
+      if (P2.y  <= P.y)     // a downward crossing
+	if (isLeft( P1, P2, P) < 0)  // P right of  edge
+	  --wn;            // have  a valid down intersect
+    }
+  }
+  
+  return wn;
+}
+
+int Polygon2D::wn_PnPoly(const RealVect& a_point) const noexcept {
+  const Point2D point2 = this->projectPoint(a_point);
+  const int WN         = this->wn_PnPoly(point2);
+
+  return WN;
+}
+
+bool Polygon2D::inside(const RealVect& a_point) const noexcept {
+  const int wn = this->wn_PnPoly(a_point);
+
+  return wn != 0;
 }
 
 face::face(){
@@ -327,7 +407,6 @@ int face::wn_PnPoly(const Point2D& P, const std::vector<Point2D>& a_vertices) co
   }
   
   return wn;
-  
 }
 
 bool face::isPointInsideFaceWindingNumber(const RealVect& a_p) const noexcept{
@@ -337,3 +416,5 @@ bool face::isPointInsideFaceWindingNumber(const RealVect& a_p) const noexcept{
 
   return wn != 0;
 }
+
+

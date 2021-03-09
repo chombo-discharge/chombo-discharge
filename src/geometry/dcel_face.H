@@ -19,6 +19,7 @@ namespace dcel {
 
   class vertex;
   class edge;
+  class face;
 
   struct Point2D {
     Point2D() = default;
@@ -28,10 +29,33 @@ namespace dcel {
     Real y;
   };
 
+  class Polygon2D {
+  public:
+    Polygon2D() = delete;
+    Polygon2D(const face& a_face);
+    ~Polygon2D() = default;
+
+    void define(const face& a_face) noexcept;
+    bool inside(const RealVect& a_point) const noexcept;
+    int wn_PnPoly(const RealVect& a_point) const noexcept;
+    
+  protected:
+    Point2D projectPoint(const RealVect& a_point) const noexcept;
+    int isLeft(const Point2D& a_P0, const Point2D& a_P1, const Point2D& a_P2) const noexcept; // Returns > 0 if left, < 0 if right, = 0 if on line.
+    int wn_PnPoly(const Point2D& P) const noexcept;
+    
+  protected:
+    int m_ignoreDir;
+    int m_xDir;
+    int m_yDir;
+    std::vector<Point2D> m_points;
+  };
+
   // Class that describes one face of a watertight surface tesselation. This class
   // can also embed a 2D version of itself as a two-dimensional polygon, which we use
   // for speeding up tests when checking if a point projected to the plane of the face
-  // lies inside the face or not. 
+  // lies inside the face or not. This eats storage, but we avoid expensive trigonometric
+  // functions. 
   class face {
   public:
   
@@ -93,12 +117,9 @@ namespace dcel {
 #endif
   
   protected:
+    std::shared_ptr<edge> m_halfEdge; // One of the edges. This must always be != nullptr for a valid face. 
 
-
-  
-    std::shared_ptr<edge> m_halfEdge; // One of the edges. This must always be != nullptr
-
-    std::vector<std::shared_ptr<vertex> > m_vertices;
+    std::vector<std::shared_ptr<vertex> > m_vertices; 
     std::vector<std::shared_ptr<edge> > m_edges;
 
     Real     m_area;
@@ -131,5 +152,4 @@ namespace dcel {
   };
 
 }
-
 #endif
