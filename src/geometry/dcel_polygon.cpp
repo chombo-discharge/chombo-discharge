@@ -235,3 +235,13 @@ Real polygon::signedDistance(const RealVect& a_x0) const noexcept {
 
   return retval;
 }
+
+Real polygon::unsignedDistance2(const RealVect& a_x0) const noexcept {
+  std::cerr << "In file 'dcel_polygon.cpp' function dcel::polygon::unsignedDistance2 - not implemented!\n";
+
+  return 0.0;
+}
+
+PointLocation polygon::getPointLocation(const RealVect& a_p) const noexcept {
+  return PointLocation::Inside;
+}

@@ -62,8 +62,8 @@ namespace dcel {
     RealVect& getBoundingBoxHi() noexcept;
     const RealVect& getBoundingBoxHi() const noexcept;
     
-    // Real signed_distance(const RealVect a_x0) const; Should be this signature. 
     Real signedDistance(const RealVect& a_x0) const noexcept;
+    Real unsignedDistance2(const RealVect& a_x0) const noexcept;
 
 #if 1 // Just so kd will shut up for now. 
     RealVect get_coord() const {
@@ -85,6 +85,8 @@ namespace dcel {
     // Bounding volumes
     BoundingSphere m_boundingSphere;
     AABB m_boundingBox;
+
+    PointLocation getPointLocation(const RealVect& a_p) const noexcept;
   };
 
 }
