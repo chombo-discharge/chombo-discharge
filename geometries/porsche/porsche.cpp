@@ -29,16 +29,14 @@ porsche::porsche(){
   // Build the mesh
   std::shared_ptr<dcel::mesh> mesh = std::shared_ptr<dcel::mesh> (new dcel::mesh());
   dcel::parser::PLY::readASCII(*mesh, filename);
-  mesh->reconcileFaces();
   mesh->sanityCheck();
-
-  // Compute vertex and edge normals
-  mesh->computeVertexNormals(dcel::mesh::VertexNormalWeight::Angle);
-  mesh->computeEdgeNormals();
-  mesh->computeBoundingSphere();
+  mesh->reconcile();
 
   // Build tree
+  mesh->computeBoundingSphere();
   mesh->buildKdTree(tree_depth, max_elements);
+
+  // Set algorithm
   //mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::KdTree);
   mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::Direct2);
 

@@ -131,6 +131,12 @@ void mesh::computeBoundingBox() noexcept {
   m_boundingBox.define(this->getAllVertexCoordinates());
 }
 
+void mesh::reconcile(VertexNormalWeight a_weight) noexcept {
+  this->reconcileFaces();
+  this->reconcileEdges();
+  this->reconcileVertices(a_weight);
+}
+
 void mesh::reconcileFaces() noexcept{
 
   // Reconcile faces; compute face area and provide edges explicit access
@@ -147,7 +153,14 @@ void mesh::reconcileFaces() noexcept{
   }
 }
 
-void mesh::computeVertexNormals(VertexNormalWeight a_weight) noexcept {
+void mesh::reconcileEdges() noexcept {
+  for (auto& e : m_edges){
+    e->computeNormal();
+    e->computeEdgeLength();
+  }
+}
+
+void mesh::reconcileVertices(VertexNormalWeight a_weight) noexcept {
   for (auto& v : m_vertices){
     if (v == nullptr) std::cerr << "In file dcel_mesh function dcel::mesh::computeVertexNormals(VertexNormalWeighting) - vertex is 'nullptr'\n";
 
@@ -161,26 +174,6 @@ void mesh::computeVertexNormals(VertexNormalWeight a_weight) noexcept {
     default:
       std::cerr << "In file dcel_mesh function dcel::mesh::computeVertexNormal(VertexNormalWeighting) - unsupported algorithm requested\n";
     }
-  }
-}
-
-void mesh::computeEdgeNormals() noexcept {
-  for (auto& e : m_edges){
-    const std::shared_ptr<edge>& pairEdge = e->getPairEdge();
-
-    const std::shared_ptr<face>& F     = e->getFace();
-    const std::shared_ptr<face>& pairF = pairEdge->getFace();
-    
-    const RealVect& n1 = F->getNormal();
-    const RealVect& n2 = pairF->getNormal();
-
-    RealVect& normal = e->getNormal();
-    
-    normal = n1 + n2;
-
-    e->normalizeNormalVector();
-
-    e->computeEdgeLength();
   }
 }
 

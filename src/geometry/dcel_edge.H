@@ -44,6 +44,7 @@ namespace dcel {
     void setFace(const std::shared_ptr<face>& a_face) noexcept;
     void normalizeNormalVector() noexcept;
     void computeEdgeLength() noexcept;
+    void computeNormal() noexcept;
 
     // Get functions for vertices
     std::shared_ptr<vertex>& getVertex() noexcept;

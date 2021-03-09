@@ -49,6 +49,10 @@ namespace dcel {
 		std::vector<std::shared_ptr<edge> >&    a_edges,
 		std::vector<std::shared_ptr<vertex> >&  a_vertices) noexcept;
     void setAlgorithm(SearchAlgorithm a_algorithm) noexcept;
+    void reconcile(VertexNormalWeight a_weight = VertexNormalWeight::Angle) noexcept;
+    void computeBoundingSphere() noexcept;
+    void computeBoundingBox() noexcept;
+    void buildKdTree(const int a_max_depth, const int a_max_elements) noexcept;
 
     std::vector<std::shared_ptr<vertex> >& getVertices() noexcept;
     const std::vector<std::shared_ptr<vertex> >& getVertices() const noexcept;
@@ -58,17 +62,6 @@ namespace dcel {
 
     std::vector<std::shared_ptr<face> >& getFaces() noexcept;
     const std::vector<std::shared_ptr<face> >& getFaces() const noexcept;
-
-    std::vector<RealVect> getAllVertexCoordinates() const noexcept;
-
-    void computeBoundingSphere() noexcept;
-    void computeBoundingBox() noexcept;
-    void reconcileFaces() noexcept;
-    void computeVertexNormals(VertexNormalWeight a_weight) noexcept;
-    void computeEdgeNormals() noexcept;
-    void computeVerticesAndEdges() noexcept;
-
-    void buildKdTree(const int a_max_depth, const int a_max_elements) noexcept;
 
     Real signedDistance(const RealVect& a_x0) const noexcept ;
     Real signedDistance(const RealVect& a_x0, SearchAlgorithm a_algorithm) const noexcept;
@@ -86,6 +79,14 @@ namespace dcel {
     std::vector<std::shared_ptr<vertex> >  m_vertices;
     std::vector<std::shared_ptr<edge> >    m_edges;
     std::vector<std::shared_ptr<face> > m_faces;
+
+    std::vector<RealVect> getAllVertexCoordinates() const noexcept;
+    
+    void computeVerticesAndEdges() noexcept;
+    
+    void reconcileFaces() noexcept;
+    void reconcileEdges() noexcept;
+    void reconcileVertices(VertexNormalWeight a_weight) noexcept;
 
     Real DirectSignedDistance(const RealVect& a_point) const noexcept;
     Real DirectSignedDistance2(const RealVect& a_point) const noexcept;

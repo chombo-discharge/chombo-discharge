@@ -87,6 +87,20 @@ void edge::computeEdgeLength() noexcept {
   m_len2 = m_x2x1.dotProduct(m_x2x1);
 }
 
+void edge::computeNormal() noexcept {
+  const std::shared_ptr<edge>& pairEdge = this->getPairEdge();
+
+  const std::shared_ptr<face>& F     = this->getFace();
+  const std::shared_ptr<face>& pairF = pairEdge->getFace();
+    
+  const RealVect& n1 = F->getNormal();
+  const RealVect& n2 = pairF->getNormal();
+
+  m_normal = n1 + n2;
+
+  this->normalizeNormalVector();
+}
+
 std::shared_ptr<vertex>& edge::getVertex() noexcept {
   return m_vertex;
 }
