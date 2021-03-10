@@ -42,7 +42,7 @@ namespace dcel {
       ret = this->isPointInsidePolygonWindingNumber(a_point);
       break;
     default:
-      std::cerr << "In file 'dcel_face.cpp' function dcel::Polygon2D<T>::isPointInside - unsupported algorithm requested.\n";
+      std::cerr << "In file 'dcel_polyI.H' function dcel::Polygon2D<T>::isPointInside - unsupported algorithm requested.\n";
     }
 
     return ret;
