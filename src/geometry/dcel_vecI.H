@@ -8,6 +8,10 @@
 #ifndef _DCEL_VECI_H_
 #define _DCEL_VECI_H_
 
+#include "dcel_vec.H"
+
+#include <math.h>
+
 namespace dcel {
 
   inline

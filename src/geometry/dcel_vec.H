@@ -15,6 +15,10 @@ namespace dcel {
 
   class Vec2 {
   public:
+
+    static const Vec2 Zero;
+    static const Vec2 Unit;
+    
     Vec2() = default;
     Vec2(const double a_x, const double a_y);
     ~Vec2() = default;
@@ -49,6 +53,10 @@ namespace dcel {
 
   class Vec3 {
   public:
+
+    static const Vec3 Zero;
+    static const Vec3 Unit;
+    
     Vec3() = default;
     Vec3(const Vec3& u) = default;
     Vec3(const double a_x, const double a_y, const double a_z);
