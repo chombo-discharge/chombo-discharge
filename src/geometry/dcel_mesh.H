@@ -11,12 +11,12 @@
 #include "dcel_BoundingVolumes.H"
 #include "dcel_KdTree.H"
 #include "dcel_BVH.H"
+#include "dcel_algorithms.H"
 
 #include <vector>
 #include <memory>
 
 namespace dcel {
-
 
   class vertex;
   class edge;
@@ -25,16 +25,7 @@ namespace dcel {
   class mesh {
   public:
 
-    enum class VertexNormalWeight {
-      None,
-      Angle,
-    };
 
-    enum class SearchAlgorithm{
-      Direct,
-      Direct2,
-      KdTree
-    };
 
     mesh();
     mesh(const mesh& a_otherMesh) = delete;
@@ -48,7 +39,8 @@ namespace dcel {
     void define(std::vector<std::shared_ptr<face> >& a_faces,
 		std::vector<std::shared_ptr<edge> >&    a_edges,
 		std::vector<std::shared_ptr<vertex> >&  a_vertices) noexcept;
-    void setAlgorithm(SearchAlgorithm a_algorithm) noexcept;
+    void setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept;
+    void setInsideOutsideAlgorithm(const dcel::InsideOutsideAlgorithm a_algorithm) noexcept;
     void reconcile(VertexNormalWeight a_weight = VertexNormalWeight::Angle) noexcept;
     void computeBoundingSphere() noexcept;
     void computeBoundingBox() noexcept;

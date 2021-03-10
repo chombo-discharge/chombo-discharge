@@ -64,6 +64,26 @@ Polygon2D::Polygon2D(const face& a_face){
   this->define(a_face);
 }
 
+bool Polygon2D::isPointInside(const RealVect& a_point, const InsideOutsideAlgorithm a_algorithm) {
+  bool ret;
+  
+  switch(a_algorithm){
+  case InsideOutsideAlgorithm::SubtendedAngle:
+    ret = this->isPointInsidePolygonSubtend(a_point);
+    break;
+  case InsideOutsideAlgorithm::CrossingNumber:
+    ret = this->isPointInsidePolygonCrossingNumber(a_point);
+    break;
+  case InsideOutsideAlgorithm::WindingNumber:
+    ret = this->isPointInsidePolygonWindingNumber(a_point);
+    break;
+  default:
+    std::cerr << "In file 'dcel_face.cpp' function dcel::Polygon2D::isPointInside - unsupported algorithm requested.\n";
+  }
+
+  return ret;
+}
+
 bool Polygon2D::isPointInsidePolygonWindingNumber(const RealVect& a_point) const noexcept {
   const Point2D p = this->projectPoint(a_point);
   
@@ -73,40 +93,35 @@ bool Polygon2D::isPointInsidePolygonWindingNumber(const RealVect& a_point) const
 }
 
 bool Polygon2D::isPointInsidePolygonCrossingNumber(const RealVect& a_point) const noexcept {
-  Point2D p = this->projectPoint(a_point);
+  const Point2D p = this->projectPoint(a_point);
   
-  //  const bool pointOnBndry = this->isPointOnBoundary(p, 1.E-10);
-  const bool pointOnBndry = false;
-
-  bool ret = false;
-
-  if(!pointOnBndry){
-    const int cn = this->computeCrossingNumber(p);
+  const int cn  = this->computeCrossingNumber(p);
     
-    ret = (cn&1);
-  }
+  const bool ret = (cn&1);
 
   return ret;
 }
 
-bool Polygon2D::isPointInsidePolygonAngleSum(const RealVect& a_point) const noexcept {
+bool Polygon2D::isPointInsidePolygonSubtend(const RealVect& a_point) const noexcept {
   const Point2D p = this->projectPoint(a_point);
-  
-  Real sumTheta = this->computeSubtendedAngle(p);
 
-  sumTheta = std::abs(sumTheta)/(2.*M_PI) - 1.0;
+  Real sumTheta = this->computeSubtendedAngle(p); // Should be = 2pi if point is inside. 
 
-  return round(sumTheta) == 0;
+  sumTheta = std::abs(sumTheta)/(2.*M_PI); 
+
+  const bool ret = (round(sumTheta) == 1); // 2PI if the polygon is inside. 
+
+  return ret;
 }
 
 bool Polygon2D::isPointOnEdge(const Point2D& a_point, const Point2D& a_endPoint1, const Point2D& a_endPoint2, const Real a_thresh) const noexcept{
   const Real AB2 = (a_endPoint2 - a_endPoint1).length2();
-  const Real AC2 = (a_point     - a_endPoint1).length2();
-  const Real BC2 = (a_point     - a_endPoint2).length2();
+  const Real CA2 = (a_point     - a_endPoint1).length2();
+  const Real CB2 = (a_point     - a_endPoint2).length2();
 
   bool ret = false;
   
-  if(AC2 + BC2 <= AB2*(1. + a_thresh)) ret = true;
+  if(CA2 + CB2 <= AB2*(1. + a_thresh)) ret = true;
 
   return ret;
 }
@@ -122,7 +137,7 @@ bool Polygon2D::isPointOnBoundary(const Point2D& a_point, const Real a_thresh) c
     const bool pointOnLine = this->isPointOnEdge(a_point, p1, p2, a_thresh);
 
     if(pointOnLine){
-      ret = false;
+      ret = true;
       break;
     }
   }
@@ -135,15 +150,14 @@ Polygon2D::Point2D Polygon2D::projectPoint(const RealVect& a_point) const noexce
 }
 
 void Polygon2D::define(const face& a_face) noexcept {
-  m_points.resize(0, Point2D(0., 0.));
-
-  m_ignoreDir = 0;
+  m_points.resize(0);
 
   const RealVect& normal = a_face.getNormal();
+  m_ignoreDir = normal.maxDir(true);
   
-  for (int dir = 0; dir < SpaceDim; dir++){
-    m_ignoreDir = (std::abs(normal[dir]) > std::abs(normal[m_ignoreDir])) ? dir : m_ignoreDir;
-  }
+  // for (int dir = 0; dir < SpaceDim; dir++){
+  //   m_ignoreDir = (std::abs(normal[dir]) > std::abs(normal[m_ignoreDir])) ? dir : m_ignoreDir;
+  // }
 
   m_xDir = 3;
   m_yDir = -1;
@@ -155,16 +169,18 @@ void Polygon2D::define(const face& a_face) noexcept {
     }
   }
 
+  if(normal[m_ignoreDir] > 0.0){
+    int tmp = m_xDir;
+    m_xDir = m_yDir;
+    m_yDir = tmp;
+  }
+
   // Ignore coordinate with biggest normal component
   for (const auto& v : a_face.getVertices()){
     const RealVect& p = v->getPosition();
     
     m_points.emplace_back(projectPoint(p));
   }
-
-  // if(normal[m_ignoreDir] < 0.){ // Must revert vector
-  //   std::reverse(m_points.begin(), m_points.end());
-  // }
 }
 
 int Polygon2D::computeWindingNumber(const Point2D& P) const noexcept {
@@ -209,7 +225,7 @@ int Polygon2D::computeCrossingNumber(const Point2D& P) const noexcept {
 
   const int N = m_points.size();
 
-  constexpr Real thresh = 1.E-1;
+  constexpr Real thresh = 1.E-6;
   
   for (int i = 0; i < N; i++) {    // edge from V[i]  to V[i+1]
     const Point2D& P1 = m_points[i];
@@ -221,11 +237,11 @@ int Polygon2D::computeCrossingNumber(const Point2D& P) const noexcept {
     if(upwardCrossing || downwardCrossing){
       const Real t = (P.y - P1.y)/(P2.y - P1.y);
 
-      if(std::abs(t) > thresh && std::abs(1-t) > thresh){ // If t is zero or 1 the point lies on the edge and the don't have a valid crossing. 
+      //      if(std::abs(t) > thresh && std::abs(1-t) > thresh){ // If t is zero or 1 the point lies on the edge and the don't have a valid crossing. 
       if (P.x <  P1.x + t * (P2.x - P1.x)) {// P.x < intersect
 	  cn += 1;   // a valid crossing of y=P.y right of P.x
 	}
-      }
+      //      }
     }
   }
 
@@ -246,15 +262,7 @@ Real Polygon2D::computeSubtendedAngle(const Point2D& p) const noexcept {
     const Real theta1 = atan2(p1.y, p1.x);
     const Real theta2 = atan2(p2.y, p2.x);
 
-
     Real dTheta = theta2 - theta1;
-
-#if 1
-    if(std::abs(std::abs(dTheta) - M_PI) < thresh) {
-      sumTheta = 0.0;
-      break;
-    }
-#endif
 
     while (dTheta > M_PI)
       dTheta -= 2.0*M_PI;
@@ -267,17 +275,16 @@ Real Polygon2D::computeSubtendedAngle(const Point2D& p) const noexcept {
   return sumTheta;
 }
 
-
-
 face::face(){
   m_normal = RealVect::Zero;
+  m_poly2Algorithm = InsideOutsideAlgorithm::CrossingNumber;
 }
 
-face::face(const std::shared_ptr<edge>& a_edge){
+face::face(const std::shared_ptr<edge>& a_edge) : face() {
   this->setHalfEdge(a_edge);
 }
 
-face::face(const face& a_otherFace){
+face::face(const face& a_otherFace) : face() {
   this->define(a_otherFace.getNormal(),
 	       a_otherFace.getHalfEdge());
 }
@@ -300,7 +307,11 @@ void face::setNormal(const RealVect& a_normal) noexcept {
 }
 
 void face::normalizeNormalVector() noexcept {
-  m_normal *= 1./m_normal.vectorLength();
+  m_normal = m_normal/m_normal.vectorLength();
+}
+
+void face::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept {
+  m_poly2Algorithm = a_algorithm;
 }
 
 void face::computeArea() noexcept {
@@ -317,12 +328,14 @@ void face::computeArea() noexcept {
 
 void face::computeCentroid() noexcept {
   m_centroid = RealVect::Zero;
+
+  const int N = m_vertices.size();
   
   for (const auto& v : m_vertices){
     m_centroid += v->getPosition();
   }
   
-  m_centroid = m_centroid/m_vertices.size();
+  m_centroid = m_centroid/N; 
 }
 
 void face::computeNormal() noexcept {
@@ -458,21 +471,18 @@ const RealVect& face::getBoundingBoxHi() const noexcept {
 Real face::signedDistance(const RealVect& a_x0) const noexcept {
   Real retval = 1.234567E89;
 
-  // Compute projection of x0 on the face plane
-  const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
-  //  bool inside = m_poly2->isPointInsidePolygonWindingNumber(a_x0);
-  //  const bool inside = m_poly2->isPointInsidePolygonCrossingNumber(a_x0);
+  const bool inside = this->isPointInsideFace(a_x0);
 
-  // Projected point is inside if angles sum to 2*pi
-  if(inside){ // Ok, the projection onto the face plane places the point "inside" the planar face
-    const RealVect& facePoint = m_vertices.front()->getPosition();
-    
-    retval = m_normal.dotProduct(a_x0 - facePoint);
+  if(inside){ 
+    retval = m_normal.dotProduct(a_x0 - m_centroid);
   }
-  else{ // The projected point lies outside the triangle. Check distance to edges/vertices
-    for (const auto& e : m_edges){
-      const Real curDist = e->signedDistance(a_x0);
-      retval = (std::abs(curDist) < std::abs(retval)) ? curDist : retval;
+
+  // Now check the edges. 
+  for (const auto& e : m_edges){
+    const Real curDist = e->signedDistance(a_x0);
+    
+    if(std::abs(curDist) <= std::abs(retval)){ // <= because edge normals are more important than polygon normals. 
+      retval = curDist;
     }
   }
 
@@ -481,14 +491,11 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
 
 Real face::unsignedDistance2(const RealVect& a_x0) const noexcept {
   Real retval = 1.234567E89;
-  
-  const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
+
+  const bool inside = this->isPointInsideFace(a_x0);
 
   if(inside){ 
-    const RealVect& facePoint = m_vertices.front()->getPosition();
-    
-    retval = m_normal.dotProduct(a_x0 - facePoint);
-
+    retval  = m_normal.dotProduct(a_x0 - m_centroid);
     retval *= retval;
   }
   else{ // The projected point lies outside the triangle. Check distance to edges/vertices
@@ -509,4 +516,8 @@ RealVect face::projectPointIntoFacePlane(const RealVect& a_p) const noexcept {
   return projectedPoint;
 }
 
+bool face::isPointInsideFace(const RealVect& a_p) const noexcept {
+  const RealVect projectedPoint = this->projectPointIntoFacePlane(a_p);
 
+  return m_poly2->isPointInside(projectedPoint, m_poly2Algorithm);
+}

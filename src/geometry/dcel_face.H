@@ -5,10 +5,11 @@
   @date   Apr. 2018
 */
 
-#ifndef _DCEL_POLY_
-#define _DCEL_POLY_
+#ifndef _DCEL_FACE__
+#define _DCEL_FACE__
 
-#include <dcel_BoundingVolumes.H>
+#include "dcel_BoundingVolumes.H"
+#include "dcel_algorithms.H"
 
 #include "RealVect.H"
 
@@ -21,20 +22,29 @@ namespace dcel {
   class edge;
   class face;
 
+  // enum class InsideOutsideAlgorithm {
+  //   SubtendedAngle,
+  //   CrossingNumber,
+  //   WindingNumber
+  // };
+
   class Polygon2D {
   public:
+      
     Polygon2D() = delete; 
     Polygon2D(const face& a_face);
     ~Polygon2D() = default;
 
+    bool isPointInside(const RealVect& a_point, const InsideOutsideAlgorithm a_algorithm);
+
     bool isPointInsidePolygonWindingNumber(const RealVect& a_point) const noexcept;
-    bool isPointInsidePolygonAngleSum(const RealVect& a_point) const noexcept;
+    bool isPointInsidePolygonSubtend(const RealVect& a_point) const noexcept;
     bool isPointInsidePolygonCrossingNumber(const RealVect& a_point) const noexcept;
     
   protected:
 
     struct Point2D {
-      Point2D() = delete;
+      Point2D() = default;
       Point2D(const Real a_x, const Real a_y);
       ~Point2D() = default;
       Real x;
@@ -61,10 +71,9 @@ namespace dcel {
     int computeCrossingNumber(const Point2D& P) const noexcept;
     
     Real computeSubtendedAngle(const Point2D& P) const noexcept;
-
-    
     
   protected:
+    
     int m_ignoreDir;
     int m_xDir;
     int m_yDir;
@@ -79,7 +88,7 @@ namespace dcel {
   // intersection tests. 
   class face {
   public:
-  
+    
     face();
     face(const std::shared_ptr<edge>& a_edge);
     face(const face& a_otherFace);
@@ -89,7 +98,7 @@ namespace dcel {
 
     void setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept;
     void setNormal(const RealVect& a_normal) noexcept;
-
+    void setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept;
     void normalizeNormalVector() noexcept;
     void computeArea() noexcept;
     void computeCentroid() noexcept;
@@ -131,13 +140,14 @@ namespace dcel {
     Real signedDistance(const RealVect& a_x0) const noexcept;
     Real unsignedDistance2(const RealVect& a_x0) const noexcept;
 
-#if 1 // Just so kd will shut up for now. 
+#if 1 // Just so kd will shut up for now. Will redo the BVH interface when all bugs are squashed in the direct brute-force method. 
     RealVect get_coord() const {
       return m_centroid;
     }
 #endif
   
   protected:
+    
     std::shared_ptr<edge> m_halfEdge; // One of the edges. This must always be != nullptr for a valid face. 
 
     std::vector<std::shared_ptr<vertex> > m_vertices; 
@@ -155,9 +165,11 @@ namespace dcel {
 
     // 2D polygon
     std::shared_ptr<Polygon2D> m_poly2;
+    InsideOutsideAlgorithm m_poly2Algorithm;
 
     // Projects three-dimensional point a_p into the plane of the face
     RealVect projectPointIntoFacePlane(const RealVect& a_p) const noexcept;
+    bool isPointInsideFace(const RealVect& a_p) const noexcept;
   };
 
 }

@@ -30,15 +30,16 @@ porsche::porsche(){
   std::shared_ptr<dcel::mesh> mesh = std::shared_ptr<dcel::mesh> (new dcel::mesh());
   dcel::parser::PLY::readASCII(*mesh, filename);
   mesh->sanityCheck();
-  mesh->reconcile(dcel::mesh::VertexNormalWeight::Angle);
+  mesh->reconcile(dcel::VertexNormalWeight::Angle);
 
   // Build tree
   mesh->computeBoundingSphere();
   mesh->buildKdTree(tree_depth, max_elements);
 
-  // Set algorithm
+  // Set algorithms
   //mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::KdTree);
-  mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::Direct);
+  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::Direct);
+  mesh->setInsideOutsideAlgorithm(dcel::InsideOutsideAlgorithm::CrossingNumber);
 
   // Create the if object
   bool flipNormal = false;

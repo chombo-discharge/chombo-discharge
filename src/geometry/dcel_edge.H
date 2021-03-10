@@ -69,6 +69,8 @@ namespace dcel {
     std::shared_ptr<face>& getFace() noexcept;  
     const std::shared_ptr<face>& getFace() const noexcept;
 
+    bool isOrthogonal(const RealVect& a_x0) const noexcept;
+
     Real signedDistance(const RealVect& a_x0) const noexcept;
     Real unsignedDistance2(const RealVect& a_x0) const noexcept;
 

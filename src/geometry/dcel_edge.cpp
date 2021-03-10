@@ -157,11 +157,17 @@ const std::shared_ptr<face>& edge::getFace() const noexcept {
   return m_face;
 }
 
-Real edge::signedDistance(const RealVect& a_x0) const noexcept {
+Real edge::projectPointToEdge(const RealVect& a_x0) const noexcept {
+  const RealVect p = a_x0 - m_vertex->getPosition();
 
+  return p.dotProduct(m_x2x1)/m_len2;
+}
+
+Real edge::signedDistance(const RealVect& a_x0) const noexcept {
   const Real t = this->projectPointToEdge(a_x0);
 
   Real retval;
+  
   if(t <= 0.0) {
     retval = this->getVertex()->signedDistance(a_x0);
   }
@@ -173,6 +179,8 @@ Real edge::signedDistance(const RealVect& a_x0) const noexcept {
     const RealVect delta     = a_x0 - linePoint;
     const Real dot           = m_normal.dotProduct(delta);
 
+    // I don't know why, but currently classifying this as "inside" works, this shouldn't matter because the polygon
+    // test should trigger in that case. 
     const int sgn = (dot > 0.0) ? 1 : -1;
 
     retval = sgn*delta.vectorLength();
@@ -192,8 +200,8 @@ Real edge::unsignedDistance2(const RealVect& a_x0) const noexcept {
   return d.dotProduct(d);
 }
 
-Real edge::projectPointToEdge(const RealVect& a_x0) const noexcept {
-  const RealVect p = a_x0 - m_vertex->getPosition();
-
-  return p.dotProduct(m_x2x1)/m_len2;
+bool edge::isOrthogonal(const RealVect& a_x0) const noexcept{
+  const bool ortho = m_normal.dotProduct(a_x0 - m_vertex->getPosition()) == 0.;
+  
+  return ortho;
 }

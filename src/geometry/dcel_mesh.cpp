@@ -86,8 +86,14 @@ void mesh::sanityCheck() const {
   }
 }
 
-void mesh::setAlgorithm(SearchAlgorithm a_algorithm) noexcept {
+void mesh::setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept {
   m_algorithm = a_algorithm;
+}
+
+void mesh::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm a_algorithm) noexcept {
+  for (auto& f : m_faces){
+    f->setInsideOutsideAlgorithm(a_algorithm);
+  }
 }
 
 std::vector<std::shared_ptr<vertex> >& mesh::getVertices() noexcept {
