@@ -24,9 +24,6 @@ namespace dcel {
     ~Polygon2D() = default;
 
     inline
-    bool isPointInside(const RealVect& a_point, const InsideOutsideAlgorithm a_algorithm);
-
-    inline
     bool isPointInside(const Vec3<T>& a_point, const InsideOutsideAlgorithm a_algorithm);
     
   protected:

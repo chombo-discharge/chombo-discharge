@@ -1,8 +1,8 @@
 /*!
   @file   dcel_face.H
-  @brief  Declaration of a polygon class for DCEL surface tesselations
+  @brief  Implementation of dcel_face.H
   @author Robert Marskar
-  @date   Apr. 2018
+  @date   March 2021
 */
 
 #ifndef _DCEL_FACE__
@@ -41,8 +41,8 @@ namespace dcel {
 
     void setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept;
     void setNormal(const RealVect& a_normal) noexcept;
-    void setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept;
     void normalizeNormalVector() noexcept;
+    void setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept;
     void computeArea() noexcept;
     void computeCentroid() noexcept;
     void computeNormal() noexcept;
@@ -65,22 +65,40 @@ namespace dcel {
     const std::vector<std::shared_ptr<vertex> > gatherVertices() const noexcept;
     const std::vector<std::shared_ptr<edge> > gatherEdges() const noexcept;
 
+    inline
     RealVect& getCentroid() noexcept;
+
+    inline
     const RealVect& getCentroid() const noexcept;
 
+    inline
     RealVect& getNormal() noexcept;
+
+    inline
     const RealVect& getNormal() const noexcept;
 
+    inline
     Real& getArea() noexcept;
+
+    inline
     const Real& getArea() const noexcept;
 
+    inline
     RealVect& getBoundingBoxLo() noexcept;
+
+    inline
     const RealVect& getBoundingBoxLo() const noexcept;
 
+    inline
     RealVect& getBoundingBoxHi() noexcept;
+
+    inline
     const RealVect& getBoundingBoxHi() const noexcept;
-    
+
+    inline
     Real signedDistance(const RealVect& a_x0) const noexcept;
+
+    inline
     Real unsignedDistance2(const RealVect& a_x0) const noexcept;
 
 #if 1 // Just so kd will shut up for now. Will redo the BVH interface when all bugs are squashed in the direct brute-force method. 
@@ -116,4 +134,7 @@ namespace dcel {
   };
 
 }
+
+#include "dcel_faceI.H"
+
 #endif

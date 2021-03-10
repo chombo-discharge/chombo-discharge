@@ -20,14 +20,6 @@ namespace dcel {
 
   template <class T>
   inline
-  bool Polygon2D<T>::isPointInside(const RealVect& a_point, const InsideOutsideAlgorithm a_algorithm) {
-    const Vec3<T> v3(a_point[0], a_point[1], a_point[2]);
-
-    return this->isPointInside(v3, a_algorithm);
-  }
-
-  template <class T>
-  inline
   bool Polygon2D<T>::isPointInside(const Vec3<T>& a_point, const InsideOutsideAlgorithm a_algorithm) {
     bool ret;
   
