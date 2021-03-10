@@ -13,18 +13,19 @@
 
 namespace dcel {
 
+  template<class T>
   class Vec2 {
   public:
 
     // static const Vec2 Zero;
     // static const Vec2 Unit;
-    
+
     Vec2() = default;
-    Vec2(const double& a_x, const double& a_y);
+    Vec2(const T& a_x, const T& a_y);
     ~Vec2() = default;
     
-    double x;
-    double y;
+    T x;
+    T y;
 
     inline
     Vec2& operator=(const Vec2& a_other) noexcept;
@@ -42,13 +43,13 @@ namespace dcel {
     Vec2 operator-(const Vec2& a_other) const noexcept;
 
     inline
-    double dot(const Vec2& a_other) noexcept;
+    T dot(const Vec2& a_other) noexcept;
 
     inline
-    double length() const noexcept;
+    T length() const noexcept;
 
     inline
-    double length2() const noexcept;
+    T length2() const noexcept;
   };
 
   template <class T>

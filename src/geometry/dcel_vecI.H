@@ -14,58 +14,67 @@
 
 namespace dcel {
 
+  template <class T>
   inline
-  Vec2::Vec2(const double& a_x, const double& a_y){
+  Vec2<T>::Vec2(const T& a_x, const T& a_y){
     x = a_x;
     y = a_y;
   }
 
+  template <class T>
   inline
-  Vec2& Vec2::operator=(const Vec2& u) noexcept {
+  Vec2<T>& Vec2<T>::operator=(const Vec2<T>& u) noexcept {
     x = u.x;
     y = u.y;
 
     return *this;
   }
 
+  template <class T>
   inline
-  Vec2& Vec2::operator+=(const Vec2& u) noexcept {
+  Vec2<T>& Vec2<T>::operator+=(const Vec2<T>& u) noexcept {
     x += u.x;
     y += u.y;
 
     return *this;
   }
 
+  template <class T>
   inline
-  Vec2& Vec2::operator-=(const Vec2& u) noexcept {
+  Vec2<T>& Vec2<T>::operator-=(const Vec2<T>& u) noexcept {
     x -= u.x;
     y -= u.y;
 
     return *this;
   }
 
+  template <class T>
   inline
-  Vec2 Vec2::operator+(const Vec2& u) const noexcept {
-    return Vec2(x+u.x, y+u.y);
+  Vec2<T> Vec2<T>::operator+(const Vec2<T>& u) const noexcept {
+    return Vec2<T>(x+u.x, y+u.y);
   }
 
+  template <class T>
   inline
-  Vec2 Vec2::operator-(const Vec2& u) const noexcept {
-    return Vec2(x-u.x, y-u.y);
+  Vec2<T> Vec2<T>::operator-(const Vec2<T>& u) const noexcept {
+    return Vec2<T>(x-u.x, y-u.y);
   }
 
+  template <class T>
   inline
-  double Vec2::dot(const Vec2& u) noexcept{
+  T Vec2<T>::dot(const Vec2<T>& u) noexcept{
     return x*u.x + y*u.y;
   }
 
+  template <class T>
   inline
-  double Vec2::length() const noexcept {
+  T Vec2<T>::length() const noexcept {
     return sqrt(x*x + y*y);
   }
 
+  template <class T>
   inline
-  double Vec2::length2() const noexcept {
+  T Vec2<T>::length2() const noexcept {
     return x*x + y*y;
   }
 
