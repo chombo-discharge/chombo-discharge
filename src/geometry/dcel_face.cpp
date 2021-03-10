@@ -8,6 +8,7 @@
 #include "dcel_vertex.H"
 #include "dcel_edge.H"
 #include "dcel_face.H"
+#include "dcel_poly2.H"
 #include "dcel_iterator.H"
 
 #include <PolyGeom.H>

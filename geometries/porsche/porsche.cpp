@@ -43,7 +43,7 @@ porsche::porsche(){
 
   // Create the if object
   bool flipNormal = false;
-  RefCountedPtr<dcel_if> bif = RefCountedPtr<dcel_if>(new dcel_if(mesh, false));
+  RefCountedPtr<dcel_if> bif = RefCountedPtr<dcel_if>(new dcel_if(mesh,false));
 
   m_electrodes.push_back(electrode(bif, true));
   
