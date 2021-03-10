@@ -38,7 +38,7 @@ porsche::porsche(){
 
   // Set algorithm
   //mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::KdTree);
-  mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::Direct2);
+  mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::Direct);
 
   // Create the if object
   bool flipNormal = false;

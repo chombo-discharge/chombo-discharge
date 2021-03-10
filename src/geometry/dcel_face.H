@@ -33,7 +33,7 @@ namespace dcel {
   protected:
 
     struct Point2D {
-      Point2D() = default;
+      Point2D() = delete;
       Point2D(const Real a_x, const Real a_y);
       ~Point2D() = default;
       Real x;
@@ -45,6 +45,9 @@ namespace dcel {
     int isLeft(const Point2D& a_P0, const Point2D& a_P1, const Point2D& a_P2) const noexcept; // Returns > 0 if left, < 0 if right, = 0 if on line.
     int computeWindingNumber(const Point2D& P) const noexcept;
     int computeWindingNumber(const RealVect& a_point) const noexcept;
+    Real computeSubtendedAngle(const Point2D& P) const noexcept;
+    Real computeSubtendedAngle(const RealVect& a_point) const noexcept;
+    
     
   protected:
     int m_ignoreDir;

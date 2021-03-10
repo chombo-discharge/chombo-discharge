@@ -28,7 +28,7 @@ Polygon2D::Point2D Polygon2D::projectPoint(const RealVect& a_point) const noexce
 }
 
 void Polygon2D::define(const face& a_face) noexcept {
-  m_points.resize(0);
+  m_points.resize(0, Point2D(0., 0.));
 
   m_ignoreDir = 0;
 
@@ -99,12 +99,18 @@ bool Polygon2D::isPointInsidePolygonWindingNumber(const RealVect& a_point) const
   return wn != 0;
 }
 
-bool Polygon2D::isPointInsidePolygonAngleSum(const RealVect& a_point) const noexcept {
-  const Point2D p = this->projectPoint(a_point);
+Real Polygon2D::computeSubtendedAngle(const RealVect& a_point) const noexcept {
+  Point2D p = this->projectPoint(a_point);
 
+  return this->computeSubtendedAngle(p);
+}
+
+Real Polygon2D::computeSubtendedAngle(const Point2D& p) const noexcept {
   Real sumTheta = 0.0;
-
+  
   const int N = m_points.size();
+
+  constexpr Real thresh = 1.E-6;
   
   for (int i = 0; i < N; i++){
     
@@ -119,19 +125,29 @@ bool Polygon2D::isPointInsidePolygonAngleSum(const RealVect& a_point) const noex
 
     Real dTheta = theta2 - theta1;
 
+    if(std::abs(std::abs(dTheta) - M_PI) < thresh) {
+      sumTheta = 0.0;
+      break;
+    }
+
     while (dTheta > M_PI)
       dTheta -= 2.0*M_PI;
     while (dTheta < -M_PI)
       dTheta += 2.0*M_PI;
 
-    if(std::abs(std::abs(dTheta) - M_PI) < 1.E-6) return false; // Point projects to an edge or vertex. 
-
     sumTheta += dTheta;
   }
 
-  sumTheta = std::abs(sumTheta)/(2*M_PI);// - 1.0;
+  return sumTheta;
+}
 
-  return round(sumTheta) == 1;
+bool Polygon2D::isPointInsidePolygonAngleSum(const RealVect& a_point) const noexcept {
+
+  Real sumTheta = this->computeSubtendedAngle(a_point);
+
+  sumTheta = std::abs(sumTheta)/(2.*M_PI) - 1.0;
+
+  return round(sumTheta) == 0;
 }
 
 face::face(){
@@ -324,8 +340,8 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
   Real retval = 1.234567E89;
 
   // Compute projection of x0 on the face plane
-  const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
-  //const bool inside = m_poly2->isPointInsidePolygonWindingNumber(a_x0);
+  //const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
+  const bool inside = m_poly2->isPointInsidePolygonWindingNumber(a_x0);
 
   // Projected point is inside if angles sum to 2*pi
   if(inside){ // Ok, the projection onto the face plane places the point "inside" the planar face
@@ -358,7 +374,7 @@ Real face::unsignedDistance2(const RealVect& a_x0) const noexcept {
   else{ // The projected point lies outside the triangle. Check distance to edges/vertices
     for (const auto& e : m_edges){
       const Real curDist = e->unsignedDistance2(a_x0);
-      retval = (std::abs(curDist) < std::abs(retval)) ? curDist : retval;
+      retval = std::min(retval, curDist);
     }
   }
 
