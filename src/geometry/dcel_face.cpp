@@ -45,11 +45,19 @@ Polygon2D::Point2D Polygon2D::Point2D::operator+(const Point2D& a_other) const n
 }
 
 Polygon2D::Point2D Polygon2D::Point2D::operator-(const Point2D& a_other) const noexcept {
-  return Point2D(x+a_other.x, y+a_other.y);
+  return Point2D(x-a_other.x, y-a_other.y);
 }
 
 Real Polygon2D::Point2D::dotProduct(const Point2D& a_other) noexcept{
   return x*a_other.x + y*a_other.y;
+}
+
+Real Polygon2D::Point2D::length() const noexcept {
+  return sqrt(x*x + y*y);
+}
+
+Real Polygon2D::Point2D::length2() const noexcept {
+  return x*x + y*y;
 }
 
 Polygon2D::Polygon2D(const face& a_face){
@@ -57,24 +65,70 @@ Polygon2D::Polygon2D(const face& a_face){
 }
 
 bool Polygon2D::isPointInsidePolygonWindingNumber(const RealVect& a_point) const noexcept {
-  const int wn = this->computeWindingNumber(a_point);
+  const Point2D p = this->projectPoint(a_point);
+  
+  const int wn = this->computeWindingNumber(p);
 
   return wn != 0;
 }
 
 bool Polygon2D::isPointInsidePolygonCrossingNumber(const RealVect& a_point) const noexcept {
-  const int cn = this->computeCrossingNumber(a_point);
+  Point2D p = this->projectPoint(a_point);
+  
+  const bool pointOnBndry = this->isPointOnBoundary(p, 1.E-6);
 
-  return cn != 0;
+  bool ret;
+
+  if(pointOnBndry){
+    ret = false;
+  }
+  else{
+    const int cn = this->computeCrossingNumber(p);
+    ret = cn != 0;
+  }
+
+  return ret;
 }
 
 bool Polygon2D::isPointInsidePolygonAngleSum(const RealVect& a_point) const noexcept {
-
-  Real sumTheta = this->computeSubtendedAngle(a_point);
+  const Point2D p = this->projectPoint(a_point);
+  
+  Real sumTheta = this->computeSubtendedAngle(p);
 
   sumTheta = std::abs(sumTheta)/(2.*M_PI) - 1.0;
 
   return round(sumTheta) == 0;
+}
+
+bool Polygon2D::isPointOnEdge(const Point2D& a_point, const Point2D& a_endPoint1, const Point2D& a_endPoint2, const Real a_thresh) const noexcept{
+  const Real AB2 = (a_endPoint2 - a_endPoint1).length2();
+  const Real AC2 = (a_point     - a_endPoint1).length2();
+  const Real BC2 = (a_point     - a_endPoint2).length2();
+
+  bool ret = false;
+  
+  if(AC2 + BC2 <= AB2*(1. + a_thresh)) ret = true;
+
+  return ret;
+}
+
+bool Polygon2D::isPointOnBoundary(const Point2D& a_point, const Real a_thresh) const noexcept {
+  const int N = m_points.size();
+
+  bool ret = false;
+  for (int i = 0; i < N; i++){
+    const Point2D& p1 = m_points[i];
+    const Point2D& p2 = m_points[(i+1)%N];
+
+    const bool pointOnLine = this->isPointOnEdge(a_point, p1, p2, a_thresh);
+
+    if(pointOnLine){
+      ret = false;
+      break;
+    }
+  }
+
+  return ret;
 }
 
 Polygon2D::Point2D Polygon2D::projectPoint(const RealVect& a_point) const noexcept {
@@ -147,19 +201,6 @@ int Polygon2D::computeWindingNumber(const Point2D& P) const noexcept {
   return wn;
 }
 
-int Polygon2D::computeWindingNumber(const RealVect& a_point) const noexcept {
-  const Point2D point2 = this->projectPoint(a_point);
-  const int WN         = this->computeWindingNumber(point2);
-
-  return WN;
-}
-
-int Polygon2D::computeCrossingNumber(const RealVect& a_point) const noexcept {
-  Point2D p = this->projectPoint(a_point);
-
-  return this->computeCrossingNumber(p);
-}
-
 int Polygon2D::computeCrossingNumber(const Point2D& P) const noexcept {
   int cn = 0; 
 
@@ -188,13 +229,6 @@ int Polygon2D::computeCrossingNumber(const Point2D& P) const noexcept {
   return cn;
 }
 
-
-Real Polygon2D::computeSubtendedAngle(const RealVect& a_point) const noexcept {
-  Point2D p = this->projectPoint(a_point);
-
-  return this->computeSubtendedAngle(p);
-}
-
 Real Polygon2D::computeSubtendedAngle(const Point2D& p) const noexcept {
   Real sumTheta = 0.0;
   
@@ -207,11 +241,17 @@ Real Polygon2D::computeSubtendedAngle(const Point2D& p) const noexcept {
     const Point2D& p1 = m_points[i];
     const Point2D& p2 = m_points[(i+1)%N];
 
+#if 0
     const Point2D v1(p1.x - p.x, p1.y - p.y);
     const Point2D v2(p2.x - p.x, p2.y - p.y);
-
+#else
+    const Point2D v1 = p1 - p;
+    const Point2D v2 = p2 - p;
+#endif
+    
     const Real theta1 = atan2(v1.y, v1.x);
     const Real theta2 = atan2(v2.y, v2.x);
+
 
     Real dTheta = theta2 - theta1;
 
@@ -425,7 +465,7 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
   Real retval = 1.234567E89;
 
   // Compute projection of x0 on the face plane
-  //const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
+  //  const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
   //  bool inside = m_poly2->isPointInsidePolygonWindingNumber(a_x0);
   const bool inside = m_poly2->isPointInsidePolygonCrossingNumber(a_x0);
 

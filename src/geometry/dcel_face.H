@@ -46,20 +46,20 @@ namespace dcel {
       Point2D operator+(const Point2D& a_other) const noexcept;
       Point2D operator-(const Point2D& a_other) const noexcept;
       Real dotProduct(const Point2D& a_other) noexcept;
-
+      Real length() const noexcept;
+      Real length2() const noexcept;
     };
 
     Point2D projectPoint(const RealVect& a_point) const noexcept;
 
+    bool isPointOnEdge(const Point2D& a_point, const Point2D& a_endPoint1, const Point2D& a_endPoint2, const Real a_thresh) const noexcept;
+    bool isPointOnBoundary(const Point2D& a_point, const Real a_thresh) const noexcept;
+
     void define(const face& a_face) noexcept;
 
-    int computeWindingNumber(const RealVect& a_point) const noexcept;
     int computeWindingNumber(const Point2D& P) const noexcept;
-
-    int computeCrossingNumber(const RealVect& a_point) const noexcept;
     int computeCrossingNumber(const Point2D& P) const noexcept;
     
-    Real computeSubtendedAngle(const RealVect& a_point) const noexcept;
     Real computeSubtendedAngle(const Point2D& P) const noexcept;
 
     
