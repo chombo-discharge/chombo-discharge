@@ -8,8 +8,6 @@
 #ifndef _DCEL_POLY2_H_
 #define _DCEL_POLY2_H_
 
-#include "RealVect.H"
-
 #include "dcel_vec.H"
 
 #include <memory>
@@ -17,44 +15,49 @@
 
 namespace dcel {
 
+  template <class T>
   class Polygon2D {
   public:
       
     Polygon2D() = delete; 
-    Polygon2D(const Vec3<double>& a_normal, const std::vector<Vec3<double> >& a_points);
+    Polygon2D(const Vec3<T>& a_normal, const std::vector<Vec3<T> >& a_points);
     ~Polygon2D() = default;
 
+    inline
     bool isPointInside(const RealVect& a_point, const InsideOutsideAlgorithm a_algorithm);
-    bool isPointInside(const Vec3<double>& a_point, const InsideOutsideAlgorithm a_algorithm);
+
+    inline
+    bool isPointInside(const Vec3<T>& a_point, const InsideOutsideAlgorithm a_algorithm);
     
   protected:
 
-    Vec2<double> projectPoint(const Vec3<double>& a_point) const noexcept;
+    inline
+    Vec2<T> projectPoint(const Vec3<T>& a_point) const noexcept;
 
-    bool isPointOnEdge(const Vec2<double>& a_point, const Vec2<double>& a_endPoint1, const Vec2<double>& a_endPoint2, const double a_thresh) const noexcept;
-    bool isPointOnBoundary(const Vec2<double>& a_point, const double a_thresh) const noexcept;
+    inline
+    void define(const Vec3<T>& a_normal, const std::vector<Vec3<T> >& a_points);
 
-    void define(const Vec3<double>& a_normal, const std::vector<Vec3<double> >& a_points);
+    inline
+    int computeWindingNumber(const Vec2<T>& P) const noexcept;
 
-    int computeWindingNumber(const Vec2<double>& P) const noexcept;
-    int computeCrossingNumber(const Vec2<double>& P) const noexcept;
+    inline
+    int computeCrossingNumber(const Vec2<T>& P) const noexcept;
     
-    double computeSubtendedAngle(const Vec2<double>& P) const noexcept;
+    T computeSubtendedAngle(const Vec2<T>& P) const noexcept;
 
-    bool isPointInsidePolygonWindingNumber(const Vec3<double>& a_point) const noexcept;
-    bool isPointInsidePolygonSubtend(const Vec3<double>& a_point) const noexcept;
-    bool isPointInsidePolygonCrossingNumber(const Vec3<double>& a_point) const noexcept;
+    bool isPointInsidePolygonWindingNumber(const Vec3<T>& a_point) const noexcept;
+    bool isPointInsidePolygonSubtend(const Vec3<T>& a_point) const noexcept;
+    bool isPointInsidePolygonCrossingNumber(const Vec3<T>& a_point) const noexcept;
     
     
     int m_ignoreDir;
     int m_xDir;
     int m_yDir;
-    std::vector<Vec2<double> > m_points;
-
-
+    
+    std::vector<Vec2<T> > m_points;
   };
 }
 
-
+#include "dcel_polyI.H"
 
 #endif

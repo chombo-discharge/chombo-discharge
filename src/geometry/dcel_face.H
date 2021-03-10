@@ -10,6 +10,7 @@
 
 #include "dcel_BoundingVolumes.H"
 #include "dcel_algorithms.H"
+#include "dcel_poly.H"
 
 #include "RealVect.H"
 
@@ -21,7 +22,6 @@ namespace dcel {
   class vertex;
   class edge;
   class face;
-  class Polygon2D;
 
   // Class that describes one face of a watertight surface tesselation. This class
   // can also embed a 2D version of itself as a two-dimensional polygon, projected onto the
@@ -107,7 +107,7 @@ namespace dcel {
     AABB m_boundingBox;
 
     // 2D polygon
-    std::shared_ptr<Polygon2D> m_poly2;
+    std::shared_ptr<Polygon2D<double> > m_poly2;
     InsideOutsideAlgorithm m_poly2Algorithm;
 
     // Projects three-dimensional point a_p into the plane of the face

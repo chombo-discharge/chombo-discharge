@@ -120,7 +120,7 @@ void face::computePolygon2D() noexcept {
     points.emplace_back(x[0], x[1], x[2]);
   }
 
-  m_poly2 = std::make_shared<Polygon2D>(n, points);
+  m_poly2 = std::make_shared<Polygon2D<double> >(n, points);
 }
 
 const std::shared_ptr<edge>& face::getHalfEdge() const noexcept{
