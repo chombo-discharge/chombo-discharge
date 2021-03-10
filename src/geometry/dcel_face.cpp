@@ -75,16 +75,15 @@ bool Polygon2D::isPointInsidePolygonWindingNumber(const RealVect& a_point) const
 bool Polygon2D::isPointInsidePolygonCrossingNumber(const RealVect& a_point) const noexcept {
   Point2D p = this->projectPoint(a_point);
   
-  const bool pointOnBndry = this->isPointOnBoundary(p, 1.E-6);
+  //  const bool pointOnBndry = this->isPointOnBoundary(p, 1.E-10);
+  const bool pointOnBndry = false;
 
-  bool ret;
+  bool ret = false;
 
-  if(pointOnBndry){
-    ret = false;
-  }
-  else{
+  if(!pointOnBndry){
     const int cn = this->computeCrossingNumber(p);
-    ret = cn != 0;
+    
+    ret = (cn&1);
   }
 
   return ret;
@@ -162,6 +161,10 @@ void Polygon2D::define(const face& a_face) noexcept {
     
     m_points.emplace_back(projectPoint(p));
   }
+
+  // if(normal[m_ignoreDir] < 0.){ // Must revert vector
+  //   std::reverse(m_points.begin(), m_points.end());
+  // }
 }
 
 int Polygon2D::computeWindingNumber(const Point2D& P) const noexcept {
@@ -206,7 +209,7 @@ int Polygon2D::computeCrossingNumber(const Point2D& P) const noexcept {
 
   const int N = m_points.size();
 
-  constexpr Real thresh = 1.E-6;
+  constexpr Real thresh = 1.E-1;
   
   for (int i = 0; i < N; i++) {    // edge from V[i]  to V[i+1]
     const Point2D& P1 = m_points[i];
@@ -219,7 +222,7 @@ int Polygon2D::computeCrossingNumber(const Point2D& P) const noexcept {
       const Real t = (P.y - P1.y)/(P2.y - P1.y);
 
       if(std::abs(t) > thresh && std::abs(1-t) > thresh){ // If t is zero or 1 the point lies on the edge and the don't have a valid crossing. 
-	if (P.x <  P1.x + t * (P2.x - P1.x)) {// P.x < intersect
+      if (P.x <  P1.x + t * (P2.x - P1.x)) {// P.x < intersect
 	  cn += 1;   // a valid crossing of y=P.y right of P.x
 	}
       }
@@ -237,25 +240,16 @@ Real Polygon2D::computeSubtendedAngle(const Point2D& p) const noexcept {
   constexpr Real thresh = 1.E-6;
   
   for (int i = 0; i < N; i++){
+    const Point2D p1 = m_points[i]       - p;
+    const Point2D p2 = m_points[(i+1)%N] - p;
     
-    const Point2D& p1 = m_points[i];
-    const Point2D& p2 = m_points[(i+1)%N];
-
-#if 0
-    const Point2D v1(p1.x - p.x, p1.y - p.y);
-    const Point2D v2(p2.x - p.x, p2.y - p.y);
-#else
-    const Point2D v1 = p1 - p;
-    const Point2D v2 = p2 - p;
-#endif
-    
-    const Real theta1 = atan2(v1.y, v1.x);
-    const Real theta2 = atan2(v2.y, v2.x);
+    const Real theta1 = atan2(p1.y, p1.x);
+    const Real theta2 = atan2(p2.y, p2.x);
 
 
     Real dTheta = theta2 - theta1;
 
-#if 0
+#if 1
     if(std::abs(std::abs(dTheta) - M_PI) < thresh) {
       sumTheta = 0.0;
       break;
@@ -465,9 +459,9 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
   Real retval = 1.234567E89;
 
   // Compute projection of x0 on the face plane
-  //  const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
+  const bool inside = m_poly2->isPointInsidePolygonAngleSum(a_x0);
   //  bool inside = m_poly2->isPointInsidePolygonWindingNumber(a_x0);
-  const bool inside = m_poly2->isPointInsidePolygonCrossingNumber(a_x0);
+  //  const bool inside = m_poly2->isPointInsidePolygonCrossingNumber(a_x0);
 
   // Projected point is inside if angles sum to 2*pi
   if(inside){ // Ok, the projection onto the face plane places the point "inside" the planar face
