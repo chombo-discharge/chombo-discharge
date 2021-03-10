@@ -38,7 +38,7 @@ porsche::porsche(){
 
   // Set algorithms
   //  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::KdTree);
-  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::Direct2);
+  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::Direct);
   mesh->setInsideOutsideAlgorithm(dcel::InsideOutsideAlgorithm::CrossingNumber);
 
   // Create the if object

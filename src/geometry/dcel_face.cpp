@@ -8,7 +8,7 @@
 #include "dcel_vertex.H"
 #include "dcel_edge.H"
 #include "dcel_face.H"
-#include "dcel_poly2.H"
+#include "dcel_poly.H"
 #include "dcel_iterator.H"
 
 #include <PolyGeom.H>
@@ -110,7 +110,17 @@ void face::computeVerticesAndEdges() noexcept {
 }
 
 void face::computePolygon2D() noexcept {
-  m_poly2 = std::make_shared<Polygon2D>(*this);
+  //  m_poly2 = std::make_shared<Polygon2D>(*this);
+
+  Vec3 n(m_normal[0], m_normal[1], m_normal[2]);
+
+  std::vector<Vec3> points;
+  for (const auto& v : m_vertices){
+    const RealVect& x = v->getPosition();
+    points.emplace_back(x[0], x[1], x[2]);
+  }
+
+  m_poly2 = std::make_shared<Polygon2D>(n, points);
 }
 
 const std::shared_ptr<edge>& face::getHalfEdge() const noexcept{
@@ -217,14 +227,14 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
     retval = m_normal.dotProduct(a_x0 - m_centroid);
   }
   else {
-  // Now check the edges. 
-  for (const auto& e : m_edges){
-    const Real curDist = e->signedDistance(a_x0);
+    for (const auto& e : m_edges){
+      const Real curDist = e->signedDistance(a_x0);
     
-    if(std::abs(curDist) <= std::abs(retval)){ // <= because edge normals are more important than polygon normals. 
-      retval = curDist;
+      if(std::abs(curDist) <= std::abs(retval)){ // <= because edge normals are more important than polygon normals. 
+	retval = curDist;
+      }
     }
-  }}
+  }
 
   return retval;
 }
