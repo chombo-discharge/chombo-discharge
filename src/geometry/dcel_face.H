@@ -37,32 +37,67 @@ namespace dcel {
     face(const face& a_otherFace);
     ~face();
 
+    inline
     void define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge) noexcept;
 
+    inline
     void setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept;
+    
+    inline
     void setNormal(const RealVect& a_normal) noexcept;
+
+    inline
     void normalizeNormalVector() noexcept;
+
+    inline
     void setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept;
+
+    inline
     void computeArea() noexcept;
+
+    inline
     void computeCentroid() noexcept;
+
+    inline
     void computeNormal() noexcept;
+
+    inline
     void computeBoundingBox() noexcept;
+
+    inline
     void computeBoundingSphere() noexcept;
+
+    inline
     void computeVerticesAndEdges() noexcept;
+
+    inline
     void computePolygon2D() noexcept;
 
+    inline
     std::shared_ptr<edge>& getHalfEdge() noexcept;
+
+    inline
     const std::shared_ptr<edge>& getHalfEdge() const noexcept;
 
+    inline
     const std::vector<RealVect> getAllVertexCoordinates() const noexcept;
 
+    inline
     std::vector<std::shared_ptr<vertex> >& getVertices() noexcept;
+
+    inline
     const std::vector<std::shared_ptr<vertex> >& getVertices() const noexcept;
 
+    inline
     std::vector<std::shared_ptr<edge> >& getEdges() noexcept;
+    
+    inline
     const std::vector<std::shared_ptr<edge> >& getEdges() const noexcept;
 
+    inline
     const std::vector<std::shared_ptr<vertex> > gatherVertices() const noexcept;
+
+    inline
     const std::vector<std::shared_ptr<edge> > gatherEdges() const noexcept;
 
     inline

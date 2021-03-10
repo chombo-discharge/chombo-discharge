@@ -181,10 +181,6 @@ void mesh::reconcileVertices(VertexNormalWeight a_weight) noexcept {
   }
 }
 
-void mesh::buildKdTree(const int a_max_depth, const int a_max_elements) noexcept {
-  m_tree = std::make_shared<kd_tree<face> > (m_faces, a_max_depth, a_max_elements);
-}
-
 Real mesh::signedDistance(const RealVect& a_point) const noexcept {
   return this->signedDistance(a_point, m_algorithm);
 }
@@ -219,28 +215,6 @@ Real mesh::DirectSignedDistance2(const RealVect& a_point) const noexcept {
   return closest->signedDistance(a_point);
 }
 
-Real mesh::KdTreeSignedDistance(const RealVect& a_point) const noexcept {
-
-  Real minDist;
-
-  if(m_tree->isDefined()){
-    std::vector<std::shared_ptr<face> > candidates = m_tree->find_closest(a_point);
-
-    minDist = candidates.front()->signedDistance(a_point);
-    
-    for (const auto& p : candidates){
-      const Real curDist = p->signedDistance(a_point);
-
-      if(std::abs(curDist) < std::abs(minDist)) minDist = curDist;
-    }
-  }
-  else{
-    std::cerr << "In file dcel_mesh function mesh::KdTreeSignedDistance - tree is not defined!\n";
-  }
-
-  return minDist;
-}
-
 Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) const noexcept {
   Real minDist;
   
@@ -250,9 +224,6 @@ Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) 
     break;
   case SearchAlgorithm::Direct2:
     minDist = this->DirectSignedDistance2(a_point);
-    break;
-  case SearchAlgorithm::KdTree:
-    minDist = this->KdTreeSignedDistance(a_point);
     break;
   default:
     std::cerr << "Error in file dcel_mesh mesh::signedDistance unsupported algorithm requested\n";

@@ -15,6 +15,7 @@
 #include <iostream>
 #include <fstream>
 #include <iterator>
+#include <sstream>
 
 void dcel::parser::PLY::readASCII(dcel::mesh& a_mesh, const std::string a_filename){
   std::ifstream filestream(a_filename);

@@ -33,12 +33,12 @@ porsche::porsche(){
   mesh->reconcile(dcel::VertexNormalWeight::Angle);
 
   // Build tree
-  mesh->computeBoundingSphere();
-  mesh->buildKdTree(tree_depth, max_elements);
+  //  mesh->computeBoundingSphere();
+  //  mesh->buildKdTree(tree_depth, max_elements);
 
   // Set algorithms
   //  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::KdTree);
-  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::Direct);
+  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::Direct2);
   mesh->setInsideOutsideAlgorithm(dcel::InsideOutsideAlgorithm::CrossingNumber);
 
   // Create the if object
