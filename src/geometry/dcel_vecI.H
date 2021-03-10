@@ -15,7 +15,7 @@
 namespace dcel {
 
   inline
-  Vec2::Vec2(const double a_x, const double a_y){
+  Vec2::Vec2(const double& a_x, const double& a_y){
     x = a_x;
     y = a_y;
   }
@@ -69,15 +69,17 @@ namespace dcel {
     return x*x + y*y;
   }
 
+  template <class T>
   inline
-  Vec3::Vec3(const double a_x, const double a_y, const double a_z){
+  Vec3<T>::Vec3(const T& a_x, const T& a_y, const T& a_z){
     X[0] = a_x;
     X[1] = a_y;
     X[2] = a_z;
   }
 
+  template <class T>
   inline
-  Vec3& Vec3::operator=(const Vec3& u) noexcept {
+  Vec3<T>& Vec3<T>::operator=(const Vec3<T>& u) noexcept {
     X[0] = u[0];
     X[1] = u[1];
     X[2] = u[2];
@@ -85,8 +87,9 @@ namespace dcel {
     return *this;
   }
 
+  template <class T>
   inline
-  Vec3& Vec3::operator+=(const Vec3& u) noexcept {
+  Vec3<T>& Vec3<T>::operator+=(const Vec3<T>& u) noexcept {
     X[0] += u[0];
     X[1] += u[1];
     X[2] += u[2];
@@ -94,8 +97,9 @@ namespace dcel {
     return *this;
   }
 
+  template <class T>
   inline
-  Vec3& Vec3::operator-=(const Vec3& u) noexcept {
+  Vec3<T>& Vec3<T>::operator-=(const Vec3<T>& u) noexcept {
     X[0] -= u[0];
     X[1] -= u[1];
     X[2] -= u[2];
@@ -103,45 +107,53 @@ namespace dcel {
     return *this;
   }
 
+  template <class T>
   inline
-  Vec3 Vec3::operator+(const Vec3& u) const noexcept {
-    return Vec3(X[0]+u[0], X[1]+u[1], X[2]+u[2]);
+  Vec3<T> Vec3<T>::operator+(const Vec3<T>& u) const noexcept {
+    return Vec3<T>(X[0]+u[0], X[1]+u[1], X[2]+u[2]);
   }
 
+  template <class T>
   inline
-  Vec3 Vec3::operator-(const Vec3& u) const noexcept {
-    return Vec3(X[0]-u[0], X[1]-u[1], X[2]-u[2]);
+  Vec3<T> Vec3<T>::operator-(const Vec3<T>& u) const noexcept {
+    return Vec3<T>(X[0]-u[0], X[1]-u[1], X[2]-u[2]);
   }
 
+  template <class T>
   inline
-  Vec3 Vec3::cross(const Vec3& u) const noexcept {
-    return Vec3(X[1]*u[2] - X[2]*u[1],
+  Vec3<T> Vec3<T>::cross(const Vec3<T>& u) const noexcept {
+    return Vec3<T>(X[1]*u[2] - X[2]*u[1],
 		X[2]*u[1] - X[1]*u[2],
 		X[0]*u[1] - X[1]*u[0]);
   }
 
+  template <class T>
   inline
-  double& Vec3::operator[](int i) noexcept {
+  T& Vec3<T>::operator[](int i) noexcept {
     return X[i];
   }
 
+  template <class T>
   inline
-  const double& Vec3::operator[](int i) const noexcept {
+  const T& Vec3<T>::operator[](int i) const noexcept {
     return X[i];
   }
 
+  template <class T>
   inline
-  double Vec3::dot(const Vec3& u) noexcept {
+  T Vec3<T>::dot(const Vec3<T>& u) noexcept {
     return X[0]*u[0] + X[1]*u[1] + X[2]*u[2];
   }
 
+  template <class T>
   inline
-  double Vec3::length() const noexcept {
+  T Vec3<T>::length() const noexcept {
     return sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
   }
 
+  template <class T>
   inline
-  double Vec3::length2() const noexcept {
+  T Vec3<T>::length2() const noexcept {
     return X[0]*X[0] + X[1]*X[1] + X[2]*X[2];
   }
 }

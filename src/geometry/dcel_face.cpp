@@ -112,9 +112,9 @@ void face::computeVerticesAndEdges() noexcept {
 void face::computePolygon2D() noexcept {
   //  m_poly2 = std::make_shared<Polygon2D>(*this);
 
-  Vec3 n(m_normal[0], m_normal[1], m_normal[2]);
+  Vec3<double> n(m_normal[0], m_normal[1], m_normal[2]);
 
-  std::vector<Vec3> points;
+  std::vector<Vec3<double> > points;
   for (const auto& v : m_vertices){
     const RealVect& x = v->getPosition();
     points.emplace_back(x[0], x[1], x[2]);

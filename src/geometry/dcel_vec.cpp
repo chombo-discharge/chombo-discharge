@@ -9,8 +9,8 @@
 
 using namespace dcel;
 
-const Vec2 Vec2::Zero(0., 0.);
-const Vec2 Vec2::Unit(1., 1.);
+// const Vec2 Vec2::Zero(0., 0.);
+// const Vec2 Vec2::Unit(1., 1.);
 
-const Vec3 Vec3::Zero(0., 0., 0.);
-const Vec3 Vec3::Unit(1., 1., 1.);
+// const Vec3 Vec3::Zero(0., 0., 0.);
+// const Vec3 Vec3::Unit(1., 1., 1.);

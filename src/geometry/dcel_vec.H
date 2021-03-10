@@ -16,11 +16,11 @@ namespace dcel {
   class Vec2 {
   public:
 
-    static const Vec2 Zero;
-    static const Vec2 Unit;
+    // static const Vec2 Zero;
+    // static const Vec2 Unit;
     
     Vec2() = default;
-    Vec2(const double a_x, const double a_y);
+    Vec2(const double& a_x, const double& a_y);
     ~Vec2() = default;
     
     double x;
@@ -51,15 +51,15 @@ namespace dcel {
     double length2() const noexcept;
   };
 
+  template <class T>
   class Vec3 {
   public:
 
-    static const Vec3 Zero;
-    static const Vec3 Unit;
+    // static const Vec3 Zero;
+    // static const Vec3 Unit;
     
     Vec3() = default;
-    Vec3(const Vec3& u) = default;
-    Vec3(const double a_x, const double a_y, const double a_z);
+    Vec3(const T& a_x, const T& a_y, const T& a_z);
     ~Vec3() = default;
 
     inline
@@ -78,25 +78,25 @@ namespace dcel {
     Vec3 operator-(const Vec3& u) const noexcept;
 
     inline
-    double& operator[](int i) noexcept;
+    T& operator[](int i) noexcept;
 
     inline
-    const double& operator[](int i) const noexcept;
+    const T& operator[](int i) const noexcept;
 
     inline
     Vec3 cross(const Vec3& u) const noexcept;
 
     inline
-    double dot(const Vec3& u) noexcept;
+    T dot(const Vec3& u) noexcept;
 
     inline
-    double length() const noexcept;
+    T length() const noexcept;
 
     inline
-    double length2() const noexcept;
+    T length2() const noexcept;
 
   protected:
-    double X[3];
+    T X[3];
   };
 }
 

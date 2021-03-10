@@ -12,17 +12,17 @@
 
 using namespace dcel;
 
-Polygon2D::Polygon2D(const Vec3& a_normal, const std::vector<Vec3>& a_points) {
+Polygon2D::Polygon2D(const Vec3<double>& a_normal, const std::vector<Vec3<double> >& a_points) {
   this->define(a_normal, a_points);
 }
 
 bool Polygon2D::isPointInside(const RealVect& a_point, const InsideOutsideAlgorithm a_algorithm) {
-  const Vec3 v3(a_point[0], a_point[1], a_point[2]);
+  const Vec3<double> v3(a_point[0], a_point[1], a_point[2]);
 
   return this->isPointInside(v3, a_algorithm);
 }
 
-bool Polygon2D::isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm a_algorithm) {
+bool Polygon2D::isPointInside(const Vec3<double>& a_point, const InsideOutsideAlgorithm a_algorithm) {
   bool ret;
   
   switch(a_algorithm){
@@ -42,7 +42,7 @@ bool Polygon2D::isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm 
   return ret;
 }
 
-bool Polygon2D::isPointInsidePolygonWindingNumber(const Vec3& a_point) const noexcept {
+bool Polygon2D::isPointInsidePolygonWindingNumber(const Vec3<double>& a_point) const noexcept {
   const Vec2 p = this->projectPoint(a_point);
   
   const int wn = this->computeWindingNumber(p);
@@ -50,7 +50,7 @@ bool Polygon2D::isPointInsidePolygonWindingNumber(const Vec3& a_point) const noe
   return wn != 0;
 }
 
-bool Polygon2D::isPointInsidePolygonCrossingNumber(const Vec3& a_point) const noexcept {
+bool Polygon2D::isPointInsidePolygonCrossingNumber(const Vec3<double>& a_point) const noexcept {
   const Vec2 p = this->projectPoint(a_point);
   
   const int cn  = this->computeCrossingNumber(p);
@@ -60,7 +60,7 @@ bool Polygon2D::isPointInsidePolygonCrossingNumber(const Vec3& a_point) const no
   return ret;
 }
 
-bool Polygon2D::isPointInsidePolygonSubtend(const Vec3& a_point) const noexcept {
+bool Polygon2D::isPointInsidePolygonSubtend(const Vec3<double>& a_point) const noexcept {
   const Vec2 p = this->projectPoint(a_point);
 
   double sumTheta = this->computeSubtendedAngle(p); // Should be = 2pi if point is inside. 
@@ -103,11 +103,11 @@ bool Polygon2D::isPointOnBoundary(const Vec2& a_point, const double a_thresh) co
   return ret;
 }
 
-Vec2 Polygon2D::projectPoint(const Vec3& a_point) const noexcept {
+Vec2 Polygon2D::projectPoint(const Vec3<double>& a_point) const noexcept {
   return Vec2(a_point[m_xDir], a_point[m_yDir]);
 }
 
-void Polygon2D::define(const Vec3& a_normal, const std::vector<Vec3>& a_points) {
+void Polygon2D::define(const Vec3<double>& a_normal, const std::vector<Vec3<double> >& a_points) {
   const auto& nx = std::abs(a_normal[0]);
   const auto& ny = std::abs(a_normal[1]);
   const auto& nz = std::abs(a_normal[2]);
