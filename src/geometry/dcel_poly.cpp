@@ -12,15 +12,17 @@
 
 using namespace dcel;
 
-Polygon2D::Polygon2D(const face& a_face){
-  this->define(a_face);
-}
-
 Polygon2D::Polygon2D(const Vec3& a_normal, const std::vector<Vec3>& a_points) {
   this->define(a_normal, a_points);
 }
 
 bool Polygon2D::isPointInside(const RealVect& a_point, const InsideOutsideAlgorithm a_algorithm) {
+  const Vec3 v3(a_point[0], a_point[1], a_point[2]);
+
+  return this->isPointInside(v3, a_algorithm);
+}
+
+bool Polygon2D::isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm a_algorithm) {
   bool ret;
   
   switch(a_algorithm){
@@ -40,7 +42,7 @@ bool Polygon2D::isPointInside(const RealVect& a_point, const InsideOutsideAlgori
   return ret;
 }
 
-bool Polygon2D::isPointInsidePolygonWindingNumber(const RealVect& a_point) const noexcept {
+bool Polygon2D::isPointInsidePolygonWindingNumber(const Vec3& a_point) const noexcept {
   const Vec2 p = this->projectPoint(a_point);
   
   const int wn = this->computeWindingNumber(p);
@@ -48,7 +50,7 @@ bool Polygon2D::isPointInsidePolygonWindingNumber(const RealVect& a_point) const
   return wn != 0;
 }
 
-bool Polygon2D::isPointInsidePolygonCrossingNumber(const RealVect& a_point) const noexcept {
+bool Polygon2D::isPointInsidePolygonCrossingNumber(const Vec3& a_point) const noexcept {
   const Vec2 p = this->projectPoint(a_point);
   
   const int cn  = this->computeCrossingNumber(p);
@@ -58,7 +60,7 @@ bool Polygon2D::isPointInsidePolygonCrossingNumber(const RealVect& a_point) cons
   return ret;
 }
 
-bool Polygon2D::isPointInsidePolygonSubtend(const RealVect& a_point) const noexcept {
+bool Polygon2D::isPointInsidePolygonSubtend(const Vec3& a_point) const noexcept {
   const Vec2 p = this->projectPoint(a_point);
 
   double sumTheta = this->computeSubtendedAngle(p); // Should be = 2pi if point is inside. 
@@ -101,46 +103,8 @@ bool Polygon2D::isPointOnBoundary(const Vec2& a_point, const double a_thresh) co
   return ret;
 }
 
-Vec2 Polygon2D::projectPoint(const RealVect& a_point) const noexcept {
-  return Vec2(a_point[m_xDir], a_point[m_yDir]);
-}
-
 Vec2 Polygon2D::projectPoint(const Vec3& a_point) const noexcept {
   return Vec2(a_point[m_xDir], a_point[m_yDir]);
-}
-
-void Polygon2D::define(const face& a_face) noexcept {
-  m_points.resize(0);
-
-  const RealVect& normal = a_face.getNormal();
-  m_ignoreDir = normal.maxDir(true);
-  
-  // for (int dir = 0; dir < SpaceDim; dir++){
-  //   m_ignoreDir = (std::abs(normal[dir]) > std::abs(normal[m_ignoreDir])) ? dir : m_ignoreDir;
-  // }
-
-  m_xDir = 3;
-  m_yDir = -1;
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    if(dir != m_ignoreDir){
-      m_xDir = std::min(m_xDir, dir);
-      m_yDir = std::max(m_yDir, dir);
-    }
-  }
-
-  if(normal[m_ignoreDir] > 0.0){
-    int tmp = m_xDir;
-    m_xDir = m_yDir;
-    m_yDir = tmp;
-  }
-
-  // Ignore coordinate with biggest normal component
-  for (const auto& v : a_face.getVertices()){
-    const RealVect& p = v->getPosition();
-    
-    m_points.emplace_back(projectPoint(p));
-  }
 }
 
 void Polygon2D::define(const Vec3& a_normal, const std::vector<Vec3>& a_points) {
