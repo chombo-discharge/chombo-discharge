@@ -25,8 +25,6 @@ namespace dcel {
   class mesh {
   public:
 
-
-
     mesh();
     mesh(const mesh& a_otherMesh) = delete;
     mesh(std::vector<std::shared_ptr<face> >& a_faces,

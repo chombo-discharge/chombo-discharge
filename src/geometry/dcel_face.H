@@ -22,12 +22,6 @@ namespace dcel {
   class edge;
   class face;
 
-  // enum class InsideOutsideAlgorithm {
-  //   SubtendedAngle,
-  //   CrossingNumber,
-  //   WindingNumber
-  // };
-
   class Polygon2D {
   public:
       
