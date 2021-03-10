@@ -2,7 +2,7 @@
   @file   dcel_vec.H
   @brief  Declaration of 2D and 3D point/vector classes (so that we can decouple from Chombo). 
   @author Robert Marskar
-  @date   Apr. 2018
+  @date   March 2021
 */
 
 #ifndef _DCEL_VEC_H_

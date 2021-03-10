@@ -111,30 +111,6 @@ void vertex::computeVertexNormalAngleWeighted() noexcept {
   this->normalizeNormalVector();
 }
 
-RealVect& vertex::getPosition() noexcept {
-  return m_pos;
-}
-
-const RealVect& vertex::getPosition() const noexcept {
-  return m_pos;
-}
-
-std::shared_ptr<edge>& vertex::getEdge() noexcept {
-  return m_edge;
-}
-
-const std::shared_ptr<edge>& vertex::getEdge() const noexcept {
-  return m_edge;
-}
-
-RealVect& vertex::getNormal() noexcept {
-  return m_normal;
-}
-
-const RealVect& vertex::getNormal() const noexcept {
-  return m_normal;
-}
-
 std::vector<std::shared_ptr<face> > vertex::getFaces() noexcept {
   std::vector<std::shared_ptr<face> > faces;
   for (edge_iterator iter(*this); iter.ok(); ++iter){

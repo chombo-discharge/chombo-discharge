@@ -37,13 +37,22 @@ namespace dcel {
     void computeVertexNormalAngleWeighted() noexcept;
     void clearFaceCache() noexcept;
 
+    inline
     RealVect& getPosition() noexcept;
+
+    inline
     const RealVect& getPosition() const noexcept;
-    
+
+    inline
     std::shared_ptr<edge>& getEdge() noexcept;
+
+    inline
     const std::shared_ptr<edge>& getEdge() const noexcept;
 
+    inline
     RealVect& getNormal() noexcept;
+
+    inline
     const RealVect& getNormal() const noexcept;
 
     std::vector<std::shared_ptr<face> > getFaces() noexcept;
@@ -66,4 +75,5 @@ namespace dcel {
   };
 }
 
+#include "dcel_vertexI.H"
 #endif
