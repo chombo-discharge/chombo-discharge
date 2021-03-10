@@ -189,7 +189,9 @@ Real mesh::DirectSignedDistance(const RealVect& a_point) const noexcept {
   for (const auto& f : m_faces){
     const Real curDist = f->signedDistance(a_point);
 
-    if(std::abs(curDist) < std::abs(minDist)) minDist = curDist;
+    if(std::abs(curDist) < std::abs(minDist)){
+      minDist = curDist;
+    }
   }
 
   return minDist;

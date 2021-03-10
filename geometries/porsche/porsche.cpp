@@ -30,7 +30,7 @@ porsche::porsche(){
   std::shared_ptr<dcel::mesh> mesh = std::shared_ptr<dcel::mesh> (new dcel::mesh());
   dcel::parser::PLY::readASCII(*mesh, filename);
   mesh->sanityCheck();
-  mesh->reconcile();
+  mesh->reconcile(dcel::mesh::VertexNormalWeight::Angle);
 
   // Build tree
   mesh->computeBoundingSphere();

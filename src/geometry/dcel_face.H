@@ -29,6 +29,7 @@ namespace dcel {
 
     bool isPointInsidePolygonWindingNumber(const RealVect& a_point) const noexcept;
     bool isPointInsidePolygonAngleSum(const RealVect& a_point) const noexcept;
+    bool isPointInsidePolygonCrossingNumber(const RealVect& a_point) const noexcept;
     
   protected:
 
@@ -38,14 +39,29 @@ namespace dcel {
       ~Point2D() = default;
       Real x;
       Real y;
+
+      Point2D& operator=(const Point2D& a_other) noexcept;
+      Point2D& operator+=(const Point2D& a_other) noexcept;
+      Point2D& operator-=(const Point2D& a_other) noexcept;
+      Point2D operator+(const Point2D& a_other) const noexcept;
+      Point2D operator-(const Point2D& a_other) const noexcept;
+      Real dotProduct(const Point2D& a_other) noexcept;
+
     };
-    
-    void define(const face& a_face) noexcept;
+
     Point2D projectPoint(const RealVect& a_point) const noexcept;
-    int computeWindingNumber(const Point2D& P) const noexcept;
+
+    void define(const face& a_face) noexcept;
+
     int computeWindingNumber(const RealVect& a_point) const noexcept;
-    Real computeSubtendedAngle(const Point2D& P) const noexcept;
+    int computeWindingNumber(const Point2D& P) const noexcept;
+
+    int computeCrossingNumber(const RealVect& a_point) const noexcept;
+    int computeCrossingNumber(const Point2D& P) const noexcept;
+    
     Real computeSubtendedAngle(const RealVect& a_point) const noexcept;
+    Real computeSubtendedAngle(const Point2D& P) const noexcept;
+
     
     
   protected:
