@@ -56,14 +56,14 @@ void Polygon2D::define(const face& a_face) noexcept {
   }
 }
 
-int Polygon2D::isLeft(const Point2D& P0, const Point2D& P1, const Point2D& P2) const noexcept {
- return (P1.x - P0.x) * (P2.y - P0.y) - (P2.x -  P0.x) * (P1.y - P0.y);
-}
-
 int Polygon2D::computeWindingNumber(const Point2D& P) const noexcept {
   int wn = 0;    // the  winding number counter
 
   const int N = m_points.size();
+
+  auto isLeft = [](const Point2D& p0, const Point2D& p1, const Point2D& p2){
+    return (int) ((p1.x - p0.x) * (p2.y - p0.y) - (p2.x -  p0.x) * (p1.y - p0.y));
+  };
 
   // loop through all edges of the polygon
   for (int i = 0; i < N; i++) {   // edge from V[i] to  V[i+1]
@@ -73,12 +73,12 @@ int Polygon2D::computeWindingNumber(const Point2D& P) const noexcept {
     
     if (P1.y <= P.y) {          // start y <= P.y
       if (P2.y  > P.y)      // an upward crossing
-	if (this->isLeft( P1, P2, P) > 0)  // P left of  edge
+	if (isLeft( P1, P2, P) > 0)  // P left of  edge
 	  ++wn;            // have  a valid up intersect
     }
     else {                        // start y > P.y (no test needed)
       if (P2.y  <= P.y)     // a downward crossing
-	if (this->isLeft( P1, P2, P) < 0)  // P right of  edge
+	if (isLeft( P1, P2, P) < 0)  // P right of  edge
 	  --wn;            // have  a valid down intersect
     }
   }

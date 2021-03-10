@@ -42,7 +42,6 @@ namespace dcel {
     
     void define(const face& a_face) noexcept;
     Point2D projectPoint(const RealVect& a_point) const noexcept;
-    int isLeft(const Point2D& a_P0, const Point2D& a_P1, const Point2D& a_P2) const noexcept; // Returns > 0 if left, < 0 if right, = 0 if on line.
     int computeWindingNumber(const Point2D& P) const noexcept;
     int computeWindingNumber(const RealVect& a_point) const noexcept;
     Real computeSubtendedAngle(const Point2D& P) const noexcept;
