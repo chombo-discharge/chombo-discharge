@@ -216,7 +216,7 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
   if(inside){ 
     retval = m_normal.dotProduct(a_x0 - m_centroid);
   }
-
+  else {
   // Now check the edges. 
   for (const auto& e : m_edges){
     const Real curDist = e->signedDistance(a_x0);
@@ -224,7 +224,7 @@ Real face::signedDistance(const RealVect& a_x0) const noexcept {
     if(std::abs(curDist) <= std::abs(retval)){ // <= because edge normals are more important than polygon normals. 
       retval = curDist;
     }
-  }
+  }}
 
   return retval;
 }

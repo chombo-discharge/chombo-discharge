@@ -37,9 +37,9 @@ porsche::porsche(){
   mesh->buildKdTree(tree_depth, max_elements);
 
   // Set algorithms
-  //mesh->setAlgorithm(dcel::mesh::SearchAlgorithm::KdTree);
-  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::Direct);
-  mesh->setInsideOutsideAlgorithm(dcel::InsideOutsideAlgorithm::SubtendedAngle);
+  //  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::KdTree);
+  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::Direct2);
+  mesh->setInsideOutsideAlgorithm(dcel::InsideOutsideAlgorithm::CrossingNumber);
 
   // Create the if object
   bool flipNormal = false;

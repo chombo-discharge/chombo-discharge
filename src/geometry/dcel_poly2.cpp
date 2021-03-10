@@ -6,7 +6,6 @@
 */
 
 #include "dcel_vertex.H"
-#include "dcel_edge.H"
 #include "dcel_face.H"
 #include "dcel_poly2.H"
 #include "dcel_iterator.H"
@@ -187,8 +186,8 @@ int Polygon2D::computeWindingNumber(const Point2D& P) const noexcept {
 
   const int N = m_points.size();
 
-  auto isLeft = [](const Point2D& p0, const Point2D& p1, const Point2D& p2){
-    return (p1.x - p0.x) * (p2.y - p0.y) - (p2.x -  p0.x) * (p1.y - p0.y);
+  auto isLeft = [](const Point2D& P0, const Point2D& P1, const Point2D& P2){
+    return (P1.x - P0.x)*(P2.y - P0.y) - (P2.x -  P0.x)*(P1.y - P0.y);
   };
 
   // loop through all edges of the polygon
@@ -197,12 +196,7 @@ int Polygon2D::computeWindingNumber(const Point2D& P) const noexcept {
     const Point2D& P1 = m_points[i];
     const Point2D& P2 = m_points[(i+1)%N];
 
-    const int res = (int) isLeft(P1, P2, P);
-
-    if(res == 0) {
-      wn = 0;
-      break;
-    }
+    const int res = int(isLeft(P1, P2, P));
     
     if (P1.y <= P.y) {          // start y <= P.y
       if (P2.y  > P.y)      // an upward crossing
@@ -210,7 +204,7 @@ int Polygon2D::computeWindingNumber(const Point2D& P) const noexcept {
 	  ++wn;            // have  a valid up intersect
     }
     else {                        // start y > P.y (no test needed)
-      if (P2.y  <= P.y)     // a downward crossing
+      if (P2.y <= P.y)     // a downward crossing
 	if (res < 0)  // P right of  edge
 	  --wn;            // have  a valid down intersect
     }
@@ -230,17 +224,15 @@ int Polygon2D::computeCrossingNumber(const Point2D& P) const noexcept {
     const Point2D& P1 = m_points[i];
     const Point2D& P2 = m_points[(i+1)%N];
 
-    const bool upwardCrossing   = (P1.y < P.y) && (P2.y > P.y);
-    const bool downwardCrossing = (P1.y > P.y) && (P2.y < P.y);
+    const bool upwardCrossing   = (P1.y <= P.y) && (P2.y >  P.y);
+    const bool downwardCrossing = (P1.y >  P.y) && (P2.y <= P.y);
 
     if(upwardCrossing || downwardCrossing){
       const Real t = (P.y - P1.y)/(P2.y - P1.y);
 
-      //      if(std::abs(t) > thresh && std::abs(1-t) > thresh){ // If t is zero or 1 the point lies on the edge and the don't have a valid crossing. 
       if (P.x <  P1.x + t * (P2.x - P1.x)) {// P.x < intersect
 	  cn += 1;   // a valid crossing of y=P.y right of P.x
-	}
-      //      }
+      }
     }
   }
 
