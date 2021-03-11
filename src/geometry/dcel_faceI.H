@@ -130,22 +130,22 @@ namespace dcel {
   }
 
   inline
-  Vec3T<double>& face::getCentroid() noexcept {
+  auto face::getCentroid() noexcept -> Vec3& {
     return m_centroid;
   }
 
   inline
-  const Vec3T<double>& face::getCentroid() const noexcept {
+  auto face::getCentroid() const noexcept -> const Vec3& {
     return m_centroid;
   }
 
   inline
-  Vec3T<double>& face::getNormal() noexcept {
+  auto face::getNormal() noexcept -> Vec3&{
     return m_normal;
   }
 
   inline
-  const Vec3T<double>& face::getNormal() const noexcept {
+  auto face::getNormal() const noexcept -> const Vec3&{
     return m_normal;
   }
 
@@ -214,7 +214,7 @@ namespace dcel {
   }
 
   inline
-  Vec3T<double> face::projectPointIntoFacePlane(const Vec3T<double>& a_p) const noexcept {
+  auto face::projectPointIntoFacePlane(const Vec3T<double>& a_p) const noexcept -> Vec3 {
     const Vec3T<double> normalComponent = m_normal.dot(a_p - m_centroid) * m_normal;
     const Vec3T<double> projectedPoint  = a_p - normalComponent;
 

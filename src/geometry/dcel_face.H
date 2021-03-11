@@ -53,16 +53,16 @@ namespace dcel {
     const std::shared_ptr<edge>& getHalfEdge() const noexcept;
 
     inline
-    Vec3& getCentroid() noexcept;
+    auto getCentroid() noexcept -> Vec3&;
 
     inline
-    const Vec3& getCentroid() const noexcept;
+    auto getCentroid() const noexcept -> const Vec3&;
 
     inline
-    Vec3& getNormal() noexcept;
+    auto getNormal() noexcept -> Vec3&;
 
     inline
-    const Vec3& getNormal() const noexcept;
+    auto getNormal() const noexcept -> const Vec3&;
 
     inline
     Vec3& getBoundingBoxLo() noexcept;
@@ -89,11 +89,12 @@ namespace dcel {
     std::vector<std::shared_ptr<vertex> > m_vertices; 
     std::vector<std::shared_ptr<edge> > m_edges;
 
-    double       m_area;
-    Vec3 m_normal;
-    Vec3 m_centroid;
-    Vec3 m_lo;
-    Vec3 m_hi;
+    double m_area;
+    
+    Vec3   m_normal;
+    Vec3   m_centroid;
+    Vec3   m_lo;
+    Vec3   m_hi;
 
     // Potential bounding volumes
     BoundingSphere m_boundingSphere;
@@ -131,13 +132,13 @@ namespace dcel {
     const double& getArea() const noexcept;
 
     inline
-    const std::vector<Vec3 > getAllVertexCoordinates() const noexcept;
+    const std::vector<Vec3> getAllVertexCoordinates() const noexcept;
 
     inline
     const std::vector<std::shared_ptr<vertex> > gatherVertices() const noexcept;
 
     inline
-    Vec3 projectPointIntoFacePlane(const Vec3& a_p) const noexcept;
+    auto projectPointIntoFacePlane(const Vec3& a_p) const noexcept -> Vec3;
 
     inline
     bool isPointInsideFace(const Vec3& a_p) const noexcept;
