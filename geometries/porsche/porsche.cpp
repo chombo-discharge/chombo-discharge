@@ -27,10 +27,10 @@ porsche::porsche(){
   pp.get("max_elements", max_elements);
 
   // Build the mesh
-  std::shared_ptr<dcel::mesh> mesh = std::shared_ptr<dcel::mesh> (new dcel::mesh());
-  dcel::parser::PLY::readASCII(*mesh, filename);
-  mesh->sanityCheck();
-  mesh->reconcile(dcel::VertexNormalWeight::Angle);
+  std::shared_ptr<dcel::mesh<double> > m = std::shared_ptr<dcel::mesh<double>> (new dcel::mesh<double>());
+  dcel::parser::PLY<double>::readASCII(*m, filename);
+  m->sanityCheck();
+  m->reconcile(dcel::VertexNormalWeight::Angle);
 
   // Build tree
   //  mesh->computeBoundingSphere();
@@ -38,12 +38,12 @@ porsche::porsche(){
 
   // Set algorithms
   //  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::KdTree);
-  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::Direct2);
-  mesh->setInsideOutsideAlgorithm(dcel::InsideOutsideAlgorithm::CrossingNumber);
+  m->setSearchAlgorithm(dcel::SearchAlgorithm::Direct2);
+  m->setInsideOutsideAlgorithm(dcel::InsideOutsideAlgorithm::CrossingNumber);
 
   // Create the if object
   bool flipNormal = false;
-  RefCountedPtr<dcel_if> bif = RefCountedPtr<dcel_if>(new dcel_if(mesh,false));
+  RefCountedPtr<dcel_if<double> > bif = RefCountedPtr<dcel_if<double> >(new dcel_if<double>(m,false));
 
   m_electrodes.push_back(electrode(bif, true));
   

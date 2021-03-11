@@ -9,27 +9,36 @@
 #define _DCEL_EDGE_
 
 #include "dcel_vec.H"
+#include "dcel_face.H"
 
 #include <vector>
 #include <memory>
 
 namespace dcel {
-  
-  class vertex;
-  class face;
 
-  class edge {
+  template <class T> class vertexT;
+  template <class T> class edgeT;
+  template <class T> class faceT;
+  template <class T> class edge_iteratorT;
+
+  template<class T>
+  class edgeT {
   public:
 
-    using Vec3 = Vec3T<double>;
+    using Vec3   = Vec3T<T>;
+    using vertex = vertexT<T>;
+    using edge   = edgeT<T>;
+    using face   = faceT<T>;
 
-    edge();
+    using edge_iterator = edge_iteratorT<T>;
+
+    edgeT();
     
-    edge(const edge& a_otherEdge);
+    edgeT(const edge& a_otherEdge);
     
-    edge(const std::shared_ptr<vertex>& a_vertex);
+    edgeT(const std::shared_ptr<vertex>& a_vertex);
     
-    ~edge();
+    ~edgeT();
 
     inline
     auto define(const std::shared_ptr<vertex>& a_vertex,
@@ -99,16 +108,16 @@ namespace dcel {
     const std::shared_ptr<face>& getFace() const noexcept;
 
     inline
-    auto signedDistance(const Vec3& a_x0) const noexcept -> double;
+    auto signedDistance(const Vec3& a_x0) const noexcept -> T;
 
     inline
-    auto unsignedDistance2(const Vec3& a_x0) const noexcept -> double;
+    auto unsignedDistance2(const Vec3& a_x0) const noexcept -> T;
 
   protected:
 
     Vec3   m_normal;
     Vec3   m_x2x1;
-    double m_len2;
+    T m_len2;
 
     std::shared_ptr<vertex>  m_vertex; 
     std::shared_ptr<edge>    m_pairEdge;
@@ -117,7 +126,7 @@ namespace dcel {
     std::shared_ptr<face>    m_face;
 
     inline
-    auto projectPointToEdge(const Vec3& a_x0) const noexcept -> double;
+    auto projectPointToEdge(const Vec3& a_x0) const noexcept -> T;
 
     inline
     auto normalizeNormalVector() noexcept -> void;

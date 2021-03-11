@@ -16,13 +16,15 @@
 
 namespace dcel {
 
+  template <class T>
   inline
-  mesh::mesh(){
+  mesh<T>::mesh(){
     m_use_tree   = false;
   }
 
+  template <class T>
   inline
-  mesh::mesh(std::vector<std::shared_ptr<face> >&   a_faces,
+  mesh<T>::mesh(std::vector<std::shared_ptr<face> >&   a_faces,
 	     std::vector<std::shared_ptr<edge> >&   a_edges,
 	     std::vector<std::shared_ptr<vertex> >& a_vertices){
     m_use_tree   = false;
@@ -30,13 +32,15 @@ namespace dcel {
     this->define(a_faces, a_edges, a_vertices);
   }
 
+  template <class T>
   inline
-  mesh::~mesh(){
+  mesh<T>::~mesh(){
 
   }
 
+  template <class T>
   inline
-  void mesh::define(std::vector<std::shared_ptr<face> >&   a_faces,
+  void mesh<T>::define(std::vector<std::shared_ptr<face> >&   a_faces,
 		    std::vector<std::shared_ptr<edge> >&   a_edges,
 		    std::vector<std::shared_ptr<vertex> >& a_vertices) noexcept{
     m_faces = a_faces;
@@ -44,8 +48,9 @@ namespace dcel {
     m_vertices = a_vertices;
   }
 
+  template <class T>
   inline
-  auto mesh::sanityCheck() const noexcept -> void {
+  auto mesh<T>::sanityCheck() const noexcept -> void {
     for (const auto& e : m_edges){
       const auto& nextEdge  = e->getNextEdge();
       const auto& prevEdge  = e->getPreviousEdge();
@@ -55,65 +60,69 @@ namespace dcel {
 
       // Check basic points for current edge. 
       if(e == nullptr) {
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - edge is nullptr\n";
+	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh<T>::sanityCheck  - edge is nullptr\n";
       }
       else if(pairEdge == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - pair edge is nullptr, your geometry probably isn't watertight.\n";
+	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh<T>::sanityCheck  - pair edge is nullptr, your geometry probably isn't watertight.\n";
       }
       else if(nextEdge == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - next edge is nullptr, something has gone wrong with edge generation.\n";
+	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh<T>::sanityCheck  - next edge is nullptr, something has gone wrong with edge generation.\n";
       }
       else if(prevEdge == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - previous edge is nullptr, something has gone wrong with edge generation.\n";
+	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh<T>::sanityCheck  - previous edge is nullptr, something has gone wrong with edge generation.\n";
       }
       else if(curVertex == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - vertex is nullptr, something has gone wrong with edge generation.\n";
+	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh<T>::sanityCheck  - vertex is nullptr, something has gone wrong with edge generation.\n";
       }
       else if(curPoly == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - face is nullptr, something has gone wrong with edge generation.\n";
+	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh<T>::sanityCheck  - face is nullptr, something has gone wrong with edge generation.\n";
       }
 
       // Check that the next edge's previous edge is this edge. 
       if(prevEdge->getNextEdge() != e){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - this->getPreviousEdge()->getNextEdge() is not the current edge, but it should be.\n";
+	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh<T>::sanityCheck  - this->getPreviousEdge()->getNextEdge() is not the current edge, but it should be.\n";
       }
       else if(nextEdge->getPreviousEdge() != e){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - this->getNextEdge()->getPreviousEdge() is not the current edge, but it should be.\n";
+	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh<T>::sanityCheck  - this->getNextEdge()->getPreviousEdge() is not the current edge, but it should be.\n";
       }
     }
 
     // Vertex check
     for (const auto& v : m_vertices){
       if(v == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - got a nullptr vertex, something has gone wrong with vertex generation.\n";
+	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh<T>::sanityCheck  - got a nullptr vertex, something has gone wrong with vertex generation.\n";
       }
       else if(v->getEdge() == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh::sanityCheck  - vertex has a nullptr edge, something has gone wrong with vertex generation.\n";
+	std::cerr << "In file 'dcel_mesh.cpp' function dcel::mesh<T>::sanityCheck  - vertex has a nullptr edge, something has gone wrong with vertex generation.\n";
       }
     }
   }
 
+  template <class T>
   inline
-  auto mesh::setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept -> void {
+  auto mesh<T>::setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept -> void {
     m_algorithm = a_algorithm;
   }
 
+  template <class T>
   inline
-  auto mesh::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm a_algorithm) noexcept -> void {
+  auto mesh<T>::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm a_algorithm) noexcept -> void {
     for (auto& f : m_faces){
       f->setInsideOutsideAlgorithm(a_algorithm);
     }
   }
 
+  template <class T>
   inline
-  auto mesh::reconcile(VertexNormalWeight a_weight) noexcept -> void {
+  auto mesh<T>::reconcile(VertexNormalWeight a_weight) noexcept -> void {
     this->reconcileFaces();
     this->reconcileEdges();
     this->reconcileVertices(a_weight);
   }
 
+  template <class T>
   inline
-  auto mesh::reconcileFaces() noexcept -> void {
+  auto mesh<T>::reconcileFaces() noexcept -> void {
     // Reconcile faces; compute face area and provide edges explicit access
     // to their faces
     for (auto& f : m_faces){
@@ -121,15 +130,17 @@ namespace dcel {
     }
   }
 
+  template <class T>
   inline
-  auto mesh::reconcileEdges() noexcept -> void {
+  auto mesh<T>::reconcileEdges() noexcept -> void {
     for (auto& e : m_edges){
       e->reconcile();
     }
   }
 
+  template <class T>
   inline
-  auto mesh::reconcileVertices(VertexNormalWeight a_weight) noexcept -> void {
+  auto mesh<T>::reconcileVertices(VertexNormalWeight a_weight) noexcept -> void {
     for (auto& v : m_vertices){
       switch(a_weight) {
       case VertexNormalWeight::None:
@@ -139,53 +150,62 @@ namespace dcel {
 	v->computeVertexNormalAngleWeighted();
 	break;
       default:
-	std::cerr << "In file dcel_mesh function dcel::mesh::reconcileVertices(VertexNormalWeighting) - unsupported algorithm requested\n";
+	std::cerr << "In file dcel_mesh function dcel::mesh<T>::reconcileVertices(VertexNormalWeighting) - unsupported algorithm requested\n";
       }
     }
   }
 
+  template <class T>
   inline
-  auto mesh::computeBoundingSphere() noexcept -> void {
+  auto mesh<T>::computeBoundingSphere() noexcept -> void {
     m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingVolumeAlgorithm::Ritter);
   }
 
+  template <class T>
   inline
-  auto mesh::computeBoundingBox() noexcept -> void {
+  auto mesh<T>::computeBoundingBox() noexcept -> void {
     m_boundingBox.define(this->getAllVertexCoordinates());
   }
 
+  template <class T>
   inline
-  auto mesh::getVertices() noexcept -> std::vector<std::shared_ptr<vertex> >& {
+  auto mesh<T>::getVertices() noexcept -> std::vector<std::shared_ptr<vertex> >& {
     return m_vertices;
   }
 
+  template <class T>
   inline
-  auto mesh::getVertices() const noexcept -> const std::vector<std::shared_ptr<vertex> >& {
+  auto mesh<T>::getVertices() const noexcept -> const std::vector<std::shared_ptr<vertex> >& {
     return m_vertices;
   }
 
+  template <class T>  
   inline
-  auto mesh::getEdges() noexcept -> std::vector<std::shared_ptr<edge> >& {
+  auto mesh<T>::getEdges() noexcept -> std::vector<std::shared_ptr<edge> >& {
     return m_edges;
   }
 
+  template <class T>  
   inline
-  auto mesh::getEdges() const noexcept -> const std::vector<std::shared_ptr<edge> >& {
+  auto mesh<T>::getEdges() const noexcept -> const std::vector<std::shared_ptr<edge> >& {
     return m_edges;
   }
 
+  template <class T>
   inline
-  auto mesh::getFaces() noexcept -> std::vector<std::shared_ptr<face> >& {
+  auto mesh<T>::getFaces() noexcept -> std::vector<std::shared_ptr<face> >& {
     return m_faces;
   }
 
+  template <class T>  
   inline
-  auto mesh::getFaces() const noexcept -> const std::vector<std::shared_ptr<face> >& {
+  auto mesh<T>::getFaces() const noexcept -> const std::vector<std::shared_ptr<face> >& {
     return m_faces;
   }
 
+  template <class T>  
   inline
-  auto mesh::getAllVertexCoordinates() const noexcept -> std::vector<Vec3 >{
+  auto mesh<T>::getAllVertexCoordinates() const noexcept -> std::vector<Vec3 >{
     std::vector<Vec3 > vertexCoordinates;
     for (const auto& v : m_vertices){
       vertexCoordinates.emplace_back(v->getPosition());
@@ -194,13 +214,15 @@ namespace dcel {
     return vertexCoordinates;
   }
 
+  template <class T>  
   inline
-  auto mesh::signedDistance(const Vec3& a_point) const noexcept -> double {
+  auto mesh<T>::signedDistance(const Vec3& a_point) const noexcept -> double {
     return this->signedDistance(a_point, m_algorithm);
   }
 
+  template <class T>  
   inline
-  auto mesh::signedDistance(const Vec3& a_point, SearchAlgorithm a_algorithm) const noexcept -> double {
+  auto mesh<T>::signedDistance(const Vec3& a_point, SearchAlgorithm a_algorithm) const noexcept -> double {
     double minDist;
   
     switch(a_algorithm){
@@ -211,15 +233,16 @@ namespace dcel {
       minDist = this->DirectSignedDistance2(a_point);
       break;
     default:
-      std::cerr << "Error in file dcel_mesh mesh::signedDistance unsupported algorithm requested\n";
+      std::cerr << "Error in file dcel_mesh mesh<T>::signedDistance unsupported algorithm requested\n";
       break;
     }
 
     return minDist;
   }
 
+  template <class T>  
   inline
-  auto mesh::DirectSignedDistance(const Vec3& a_point) const noexcept -> double {
+  auto mesh<T>::DirectSignedDistance(const Vec3& a_point) const noexcept -> double {
     double minDist = m_faces.front()->signedDistance(a_point);
     
     for (const auto& f : m_faces){
@@ -233,8 +256,9 @@ namespace dcel {
     return minDist;
   }
 
+  template <class T>  
   inline
-  auto mesh::DirectSignedDistance2(const Vec3& a_point) const noexcept -> double {
+  auto mesh<T>::DirectSignedDistance2(const Vec3& a_point) const noexcept -> double {
     std::shared_ptr<face> closest = m_faces.front();
     double minDist2 = closest->unsignedDistance2(a_point);
 

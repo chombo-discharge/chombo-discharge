@@ -8,6 +8,9 @@
 #ifndef _DCEL_PARSER_
 #define _DCEL_PARSER_
 
+#include "dcel_vertex.H"
+#include "dcel_edge.H"
+#include "dcel_face.H"
 #include "dcel_mesh.H"
 
 #include <vector>
@@ -21,13 +24,21 @@ namespace dcel {
       @class PLY
       @brief Class for generation a dcel::mesh from the Stanford PLY file format
     */
+    template <class T>
     class PLY {
     public:
+
+      using vertex = vertexT<T>;
+      using edge   = edgeT<T>;
+      using face   = faceT<T>;
+
+      using edge_iterator = edge_iteratorT<T>;
 
       /*!
 	@brief Read an ASCII .ply file and put it in a mesh
       */
-      static void readASCII(dcel::mesh& a_mesh, const std::string a_filename);
+      inline
+      static void readASCII(mesh<T>& a_mesh, const std::string a_filename);
 
     protected:
 
@@ -37,40 +48,47 @@ namespace dcel {
 	@param[out]   a_numFaces  Number of faces
 	@param[inout] a_inputstream   File
       */
-      static void readHeaderASCII(int&           a_numVertices,
+      inline
+      static auto readHeaderASCII(int&           a_numVertices,
 				  int&           a_numFaces,
-				  std::ifstream& a_inputstream);
+				  std::ifstream& a_inputstream) -> void;
 
       /*!
 	@brief Read ASCII vertices. The next getline() from inputstream must read the first vertex (i.e. don't rewind the stream
 	before entering this routine)
       */
-      static void readVerticesASCII(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
-				    const int                                    a_numVertices,
-				    std::ifstream&                               a_inputstream);
+      inline
+      static auto readVerticesASCII(std::vector<std::shared_ptr<vertex> >& a_vertices,
+				    const int                              a_numVertices,
+				    std::ifstream&                         a_inputstream) -> void;
 
       /*!
 	@brief Read ASCII faces and create mesh connectivity. The next getline() from inputstream must read the first face,
 	i.e. we assume that read_ascii_vertices was called IMMEDIATELY before this function. That function will center the fstream 
 	on the correct line
       */
-      static void readFacesASCII(std::vector<std::shared_ptr<dcel::face> >&      a_faces,
-				    std::vector<std::shared_ptr<dcel::edge> >&   a_edges,
-				    std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
-				    const int                                    a_numFaces,
-				    std::ifstream&                               a_inputstream);
+      inline
+      static auto readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
+				 std::vector<std::shared_ptr<edge> >&   a_edges,
+				 std::vector<std::shared_ptr<vertex> >& a_vertices,
+				 const int                              a_numFaces,
+				 std::ifstream&                         a_inputstream) -> void;
 
       /*!
 	@brief This sets all pair edges
       */
-      static void reconcilePairEdges(std::vector<std::shared_ptr<dcel::edge> >& a_edges);
+      inline
+      static auto reconcilePairEdges(std::vector<std::shared_ptr<edge> >& a_edges) -> void;
 
       /*!
 	@brief Clean up memory
       */
-      static void clearFaceCache(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices);
+      inline
+      static auto clearFaceCache(std::vector<std::shared_ptr<vertex> >& a_vertices) -> void;
     };
   }
 }
+
+#include "dcel_parserI.H"
 
 #endif

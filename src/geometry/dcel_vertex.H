@@ -9,25 +9,35 @@
 #define _VERTEX_
 
 #include "dcel_vec.H"
+#include "dcel_edge.H"
+#include "dcel_face.H"
 
 #include <vector>
 #include <memory>
 
 namespace dcel {
 
-  class edge;
-  class face;
+  template <class T> class vertexT;
+  template <class T> class edgeT;
+  template <class T> class faceT;
+  template <class T> class edge_iteratorT;
 
-  class vertex {
+  template <class T>
+  class vertexT {
   public:
 
-    using Vec3 = Vec3T<double>;
+    using Vec3   = Vec3T<T>;
+    using vertex = vertexT<T>;
+    using edge   = edgeT<T>;
+    using face   = faceT<T>;
+    
+    using edge_iterator = edge_iteratorT<T>;
 
-    vertex();
-    vertex(const Vec3& a_pos);
-    vertex(const Vec3& a_pos, const Vec3& a_normal);
-    vertex(const vertex& a_otherVertex);
-    ~vertex();
+    vertexT();
+    vertexT(const Vec3& a_pos);
+    vertexT(const Vec3& a_pos, const Vec3& a_normal);
+    vertexT(const vertex& a_otherVertex);
+    ~vertexT();
 
     inline
     auto define(const Vec3& m_pos, const std::shared_ptr<edge>& a_edge, const Vec3 a_normal = Vec3::Zero) noexcept -> void;
@@ -81,10 +91,10 @@ namespace dcel {
     auto getFaceCache() const noexcept -> const std::vector<std::shared_ptr<face> >& ;
 
     inline
-    auto signedDistance(const Vec3& a_x0) const noexcept -> double;
+    auto signedDistance(const Vec3& a_x0) const noexcept -> T;
 
     inline
-    auto unsignedDistance2(const Vec3& a_x0) const noexcept -> double;
+    auto unsignedDistance2(const Vec3& a_x0) const noexcept -> T;
 
   protected:
 
@@ -99,4 +109,5 @@ namespace dcel {
 }
 
 #include "dcel_vertexI.H"
+
 #endif

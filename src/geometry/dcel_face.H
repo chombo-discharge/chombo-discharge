@@ -12,27 +12,38 @@
 #include "dcel_algorithms.H"
 #include "dcel_poly.H"
 
+#include "dcel_vec.H"
+#include "dcel_vertex.H"
+#include "dcel_edge.H"
+
 #include <memory>
 #include <vector>
 
 namespace dcel {
 
-  class vertex;
-  class edge;
-  class face;
-
-  class face {
+  template <class T> class vertexT;
+  template <class T> class edgeT;
+  template <class T> class faceT;
+  template <class T> class edge_iteratorT;
+  
+  template <class T>
+  class faceT {
   public:
 
-    using Vec3 = Vec3T<double>;
+    using Vec3   = Vec3T<T>;
+    using vertex = vertexT<T>;
+    using edge   = edgeT<T>;
+    using face   = faceT<T>;
+
+    using edge_iterator = edge_iteratorT<T>;
     
-    face();
+    faceT();
     
-    face(const std::shared_ptr<edge>& a_edge);
+    faceT(const std::shared_ptr<edge>& a_edge);
     
-    face(const face& a_otherFace);
+    faceT(const face& a_otherFace);
     
-    ~face();
+    ~faceT();
 
     inline
     auto define(const Vec3& a_normal, const std::shared_ptr<edge>& a_edge) noexcept -> void;
@@ -77,10 +88,10 @@ namespace dcel {
     auto getBoundingBoxHi() const noexcept -> const Vec3&;
 
     inline
-    auto signedDistance(const Vec3& a_x0) const noexcept -> double;
+    auto signedDistance(const Vec3& a_x0) const noexcept -> T;
 
     inline
-    auto unsignedDistance2(const Vec3& a_x0) const noexcept -> double;
+    auto unsignedDistance2(const Vec3& a_x0) const noexcept -> T;
   
   protected:
     
@@ -89,7 +100,7 @@ namespace dcel {
     std::vector<std::shared_ptr<vertex> > m_vertices; 
     std::vector<std::shared_ptr<edge> > m_edges;
 
-    double m_area;
+    T m_area;
     
     Vec3 m_normal;
     Vec3 m_centroid;
@@ -97,11 +108,11 @@ namespace dcel {
     Vec3 m_hi;
 
     // Potential bounding volumes
-    BoundingSphere<double> m_boundingSphere;
-    AABB<double> m_boundingBox;
+    BoundingSphere<T> m_boundingSphere;
+    AABB<T> m_boundingBox;
 
     // 2D polygon
-    std::shared_ptr<Polygon2D<double> > m_poly2;
+    std::shared_ptr<Polygon2D<T> > m_poly2;
     InsideOutsideAlgorithm m_poly2Algorithm;
 
     inline
@@ -126,10 +137,10 @@ namespace dcel {
     auto normalizeNormalVector() noexcept -> void;
 
     inline
-    auto getArea() noexcept -> double&;
+    auto getArea() noexcept -> T&;
 
     inline
-    auto getArea() const noexcept -> const double& ;
+    auto getArea() const noexcept -> const T& ;
 
     inline
     auto getAllVertexCoordinates() const noexcept -> std::vector<Vec3>;

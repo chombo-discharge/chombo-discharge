@@ -15,77 +15,90 @@
 
 namespace dcel {
 
+  template <class T>
   inline
-  vertex::vertex(){
+  vertexT<T>::vertexT(){
     m_pos    = Vec3::Zero;
     m_normal = Vec3::Zero;
 
     m_faceCache.resize(0);
   }
 
+  template <class T>
   inline
-  vertex::vertex(const Vec3& a_pos){
+  vertexT<T>::vertexT(const Vec3& a_pos){
     m_pos    = a_pos;
     m_normal = Vec3::Zero;
   }
 
+  template <class T>
   inline
-  vertex::vertex(const Vec3& a_pos, const Vec3& a_normal){
+  vertexT<T>::vertexT(const Vec3& a_pos, const Vec3& a_normal){
     m_pos    = a_pos;
     m_normal = a_normal;
   }
 
+  template <class T>
   inline
-  vertex::vertex(const vertex& a_otherVertex){
+  vertexT<T>::vertexT(const vertexT<T>& a_otherVertex){
     this->define(a_otherVertex.getPosition(),
 		 a_otherVertex.getEdge(),
 		 a_otherVertex.getNormal());
   }
 
+  template <class T>
   inline
-  vertex::~vertex(){
+  vertexT<T>::~vertexT(){
 
   }
 
+  template <class T>
   inline
-  auto vertex::define(const Vec3& a_pos, const std::shared_ptr<edge>& a_edge, const Vec3 a_normal) noexcept -> void{
+  auto vertexT<T>::define(const Vec3& a_pos, const std::shared_ptr<edge>& a_edge, const Vec3 a_normal) noexcept -> void {
     m_pos = a_pos;
     m_edge = a_edge;
     m_normal = a_normal;
   }
 
+  template <class T>
   inline
-  auto vertex::setPosition(const Vec3& a_pos) noexcept -> void{
+  auto vertexT<T>::setPosition(const Vec3& a_pos) noexcept -> void {
     m_pos = a_pos;
   }
 
+  template <class T>
   inline
-  auto vertex::setEdge(const std::shared_ptr<edge>& a_edge) noexcept -> void{
+  auto vertexT<T>::setEdge(const std::shared_ptr<edge>& a_edge) noexcept -> void {
     m_edge = a_edge;
   }
 
+  template <class T>
   inline
-  auto vertex::setNormal(const Vec3& a_normal) noexcept -> void{
+  auto vertexT<T>::setNormal(const Vec3& a_normal) noexcept -> void {
     m_normal = a_normal;
   }
 
+  template <class T>
   inline
-  auto vertex::addFaceToCache(const std::shared_ptr<face>& a_face) noexcept -> void{
+  auto vertexT<T>::addFaceToCache(const std::shared_ptr<face>& a_face) noexcept -> void {
     m_faceCache.push_back(a_face);
   }
 
+  template <class T>
   inline
-  auto vertex::clearFaceCache() noexcept -> void{
+  auto vertexT<T>::clearFaceCache() noexcept -> void {
     m_faceCache.resize(0);
   }
 
+  template <class T>
   inline
-  auto vertex::normalizeNormalVector() noexcept -> void{
+  auto vertexT<T>::normalizeNormalVector() noexcept -> void {
     m_normal = m_normal/m_normal.length();
   }
 
+  template <class T>
   inline
-  auto vertex::computeVertexNormalAverage() noexcept -> void{
+  auto vertexT<T>::computeVertexNormalAverage() noexcept -> void {
     std::vector<std::shared_ptr<face> > faces;
     for (edge_iterator iter(*this); iter.ok(); ++iter){
       faces.emplace_back(iter()->getFace());
@@ -100,8 +113,9 @@ namespace dcel {
     this->normalizeNormalVector();
   }
 
+  template <class T>
   inline
-  auto vertex::computeVertexNormalAngleWeighted() noexcept -> void{
+  auto vertexT<T>::computeVertexNormalAngleWeighted() noexcept -> void {
     m_normal = Vec3::Zero;
 
     for (edge_iterator iter(*this); iter.ok(); ++iter){
@@ -119,66 +133,76 @@ namespace dcel {
 
       const Vec3 norm = outgoingEdge->getFace()->getNormal();
 
-      const double alpha = acos(v1.dot(v2));
+      const T alpha = acos(v1.dot(v2));
 
       m_normal += alpha*norm;
     }
 
     this->normalizeNormalVector();
   }
-
+  
+  template <class T>
   inline
-  auto vertex::getPosition() noexcept -> Vec3& {
+  auto vertexT<T>::getPosition() noexcept -> Vec3& {
     return m_pos;
   }
 
+  template <class T>
   inline
-  auto vertex::getPosition() const noexcept -> const Vec3& {
+  auto vertexT<T>::getPosition() const noexcept -> const Vec3& {
     return m_pos;
   }
 
+  template <class T>
   inline
-  auto vertex::getNormal() noexcept -> Vec3& {
+  auto vertexT<T>::getNormal() noexcept -> Vec3& {
     return m_normal;
   }
 
+  template <class T>
   inline
-  auto vertex::getNormal() const noexcept -> const Vec3& {
+  auto vertexT<T>::getNormal() const noexcept -> const Vec3& {
     return m_normal;
   }
 
+  template <class T>
   inline
-  auto vertex::getEdge() noexcept -> std::shared_ptr<edge>& {
+  auto vertexT<T>::getEdge() noexcept -> std::shared_ptr<edge>& {
     return m_edge;
   }
 
+  template <class T>
   inline
-  auto vertex::getEdge() const noexcept -> const std::shared_ptr<edge>& {
+  auto vertexT<T>::getEdge() const noexcept -> const std::shared_ptr<edge>& {
     return m_edge;
   }
 
+  template <class T>
   inline
-  auto vertex::getFaceCache() const noexcept -> const std::vector<std::shared_ptr<face> >& {
+  auto vertexT<T>::getFaceCache() const noexcept -> const std::vector<std::shared_ptr<face> >& {
     return m_faceCache;
   }
 
+  template <class T>
   inline
-  auto vertex::getFaceCache() noexcept -> std::vector<std::shared_ptr<face> >& {
+  auto vertexT<T>::getFaceCache() noexcept -> std::vector<std::shared_ptr<face> >& {
     return m_faceCache;
   }
 
+  template <class T>
   inline
-  auto vertex::signedDistance(const Vec3& a_x0) const noexcept -> double{
+  auto vertexT<T>::signedDistance(const Vec3& a_x0) const noexcept -> T{
     const Vec3 delta = a_x0 - m_pos;
-    const double dist        = delta.length();
-    const double dot         = m_normal.dot(delta);
+    const T dist        = delta.length();
+    const T dot         = m_normal.dot(delta);
     const int sign           = (dot > 0.) ? 1 : -1;
   
     return dist*sign;
   }
 
+  template <class T>
   inline
-  auto vertex::unsignedDistance2(const Vec3& a_x0) const noexcept -> double {
+  auto vertexT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept -> T {
     const Vec3 d = a_x0 - m_pos;
 
     return d.dot(d);

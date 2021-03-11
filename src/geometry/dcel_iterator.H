@@ -14,35 +14,40 @@
 
 namespace dcel {
   
-  class vertex;
-  class edge;
-  class face;
+  template <class T> class vertexT;
+  template <class T> class edgeT;
+  template <class T> class faceT;
 
-  class edge_iterator {
+  template <class T>
+  class edge_iteratorT {
   public:
 
-    edge_iterator() = delete;
+    using vertex = vertexT<T>;
+    using edge   = edgeT<T>;
+    using face   = faceT<T>;
+
+    edge_iteratorT() = delete;
   
-    edge_iterator(face& a_face);
-    edge_iterator(const face& a_face);
+    edge_iteratorT(face& a_face);
+    edge_iteratorT(const face& a_face);
 
-    edge_iterator(vertex& a_vert);
-    edge_iterator(const vertex& a_vert);
-
-    inline
-    std::shared_ptr<edge>& operator() () noexcept;
+    edge_iteratorT(vertex& a_vert);
+    edge_iteratorT(const vertex& a_vert);
 
     inline
-    const std::shared_ptr<edge>& operator() () const noexcept;
+    auto operator() () noexcept -> std::shared_ptr<edge>&;
 
     inline
-    void reset() noexcept;
+    auto operator() () const noexcept -> const std::shared_ptr<edge>&;
 
     inline
-    void operator ++() noexcept;
+    auto reset() noexcept -> void;
 
     inline
-    bool ok() const noexcept;
+    auto operator ++() noexcept -> void;
+
+    inline
+    auto ok() const noexcept -> bool;
   
   protected:
 

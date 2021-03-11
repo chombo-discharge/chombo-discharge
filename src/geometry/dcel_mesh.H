@@ -17,14 +17,18 @@
 
 namespace dcel {
 
-  class vertex;
-  class edge;
-  class face;
+  template <class T> class vertexT;
+  template <class T> class edgeT;
+  template <class T> class faceT;
 
+  template <class T>
   class mesh {
   public:
 
-    using Vec3 = Vec3T<double>;
+    using Vec3   = Vec3T<double>;
+    using vertex = vertexT<T>;
+    using edge   = edgeT<T>;
+    using face   = faceT<T>;
 
     mesh();
     mesh(const mesh& a_otherMesh) = delete;
