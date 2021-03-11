@@ -63,9 +63,6 @@ namespace dcel {
     void computeBoundingSphere() noexcept;
 
     inline
-    void computeVerticesAndEdges() noexcept;
-
-    inline
     void computePolygon2D() noexcept;
 
     inline
@@ -75,19 +72,7 @@ namespace dcel {
     const std::shared_ptr<edge>& getHalfEdge() const noexcept;
 
     inline
-    const std::vector<Vec3<double>> getAllVertexCoordinates() const noexcept;
-
-    inline
-    std::vector<std::shared_ptr<vertex> >& getVertices() noexcept;
-
-    inline
-    const std::vector<std::shared_ptr<vertex> >& getVertices() const noexcept;
-
-    inline
-    std::vector<std::shared_ptr<edge> >& getEdges() noexcept;
-    
-    inline
-    const std::vector<std::shared_ptr<edge> >& getEdges() const noexcept;
+    const std::vector<Vec3<double> > getAllVertexCoordinates() const noexcept;
 
     inline
     const std::vector<std::shared_ptr<vertex> > gatherVertices() const noexcept;

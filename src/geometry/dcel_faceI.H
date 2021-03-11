@@ -65,9 +65,11 @@ namespace dcel {
   void face::computeArea() noexcept {
     m_area = 0.0;
 
-    for (int i = 0; i < m_vertices.size() - 1; i++){
-      const Vec3<double>& v1 = m_vertices[i]  ->getPosition();
-      const Vec3<double>& v2 = m_vertices[i+1]->getPosition();
+    const auto vertices = this->gatherVertices();
+
+    for (int i = 0; i < vertices.size() - 1; i++){
+      const Vec3<double>& v1 = vertices[i]  ->getPosition();
+      const Vec3<double>& v2 = vertices[i+1]->getPosition();
       m_area += m_normal.dot(v2.cross(v1));
     }
 
@@ -77,22 +79,26 @@ namespace dcel {
   inline
   void face::computeCentroid() noexcept {
     m_centroid = Vec3<double>::Zero;
+
+    const auto vertices = this->gatherVertices();
   
-    for (const auto& v : m_vertices){
+    for (const auto& v : vertices){
       m_centroid += v->getPosition();
     }
   
-    m_centroid = m_centroid/m_vertices.size();
+    m_centroid = m_centroid/vertices.size();
   }
 
   inline
   void face::computeNormal() noexcept {
-    const int N = m_vertices.size();
+    const auto vertices = this->gatherVertices();
+    
+    const int N = vertices.size();
   
     for (int i = 0; i < N; i++){
-      const Vec3<double>& x0 = m_vertices[i]      ->getPosition();
-      const Vec3<double>& x1 = m_vertices[(i+1)%N]->getPosition();
-      const Vec3<double>& x2 = m_vertices[(i+2)%N]->getPosition();
+      const Vec3<double>& x0 = vertices[i]      ->getPosition();
+      const Vec3<double>& x1 = vertices[(i+1)%N]->getPosition();
+      const Vec3<double>& x2 = vertices[(i+2)%N]->getPosition();
 
       m_normal = (x2-x1).cross(x2-x0);
     
@@ -110,12 +116,6 @@ namespace dcel {
   inline
   void face::computeBoundingSphere() noexcept {
     m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingSphere::Algorithm::Ritter);
-  }
-
-  inline
-  void face::computeVerticesAndEdges() noexcept {
-    m_edges    = this->gatherEdges();
-    m_vertices = this->gatherVertices();
   }
 
   inline
@@ -184,37 +184,6 @@ namespace dcel {
   }
 
   inline
-  const std::vector<Vec3<double> > face::getAllVertexCoordinates() const noexcept {
-    std::vector<Vec3<double> > pos;
-  
-    for (const auto& v : m_vertices){
-      pos.emplace_back(v->getPosition());
-    }
-  
-    return pos;
-  }
-
-  inline
-  std::vector<std::shared_ptr<vertex> >& face::getVertices() noexcept {
-    return m_vertices;
-  }
-
-  inline
-  const std::vector<std::shared_ptr<vertex> >& face::getVertices() const noexcept {
-    return m_vertices;
-  }
-
-  inline
-  std::vector<std::shared_ptr<edge> >& face::getEdges() noexcept {
-    return m_edges;
-  }
-
-  inline
-  const std::vector<std::shared_ptr<edge> >& face::getEdges() const noexcept {
-    return m_edges;
-  }
-
-  inline
   const std::vector<std::shared_ptr<vertex> > face::gatherVertices() const noexcept {
     std::vector<std::shared_ptr<vertex> > vertices;
 
@@ -224,6 +193,18 @@ namespace dcel {
     }
 
     return vertices;
+  }
+
+  inline
+  const std::vector<Vec3<double> > face::getAllVertexCoordinates() const noexcept {
+    std::vector<Vec3<double> > ret;
+
+    for (edge_iterator iter(*this); iter.ok(); ++iter){
+      std::shared_ptr<edge>& edge = iter();
+      ret.emplace_back(edge->getVertex()->getPosition());
+    }
+
+    return ret;
   }
 
   inline
@@ -239,8 +220,7 @@ namespace dcel {
 
   inline
   Vec3<double> face::projectPointIntoFacePlane(const Vec3<double>& a_p) const noexcept {
-    const Vec3<double>& planePoint     = m_vertices.front()->getPosition();
-    const Vec3<double> normalComponent = m_normal.dot(a_p - planePoint) * m_normal;
+    const Vec3<double> normalComponent = m_normal.dot(a_p - m_centroid) * m_normal;
     const Vec3<double> projectedPoint  = a_p - normalComponent;
 
     return projectedPoint;
@@ -263,10 +243,12 @@ namespace dcel {
       retval = m_normal.dot(a_x0 - m_centroid);
     }
     else {
-      for (const auto& e : m_edges){
+      for (edge_iterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
+	const auto& e = edgeIt();
+	
 	const Real curDist = e->signedDistance(a_x0);
     
-	if(std::abs(curDist) <= std::abs(retval)){ // <= because edge normals are more important than polygon normals. 
+	if(std::abs(curDist) < std::abs(retval)){ // <= because edge normals are more important than polygon normals. 
 	  retval = curDist;
 	}
       }
@@ -286,7 +268,9 @@ namespace dcel {
       retval *= retval;
     }
     else{ // The projected point lies outside the triangle. Check distance to edges/vertices
-      for (const auto& e : m_edges){
+      for (edge_iterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
+	const auto& e = edgeIt();
+	
 	const Real curDist = e->unsignedDistance2(a_x0);
 	retval = std::min(retval, curDist);
       }
