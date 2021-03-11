@@ -43,16 +43,18 @@ namespace dcel {
   edge::~edge(){
   }
 
+
   inline
   void edge::define(const std::shared_ptr<vertex>& a_vertex,
 		    const std::shared_ptr<edge>&   a_pairEdge,
 		    const std::shared_ptr<edge>&   a_nextEdge,
 		    const std::shared_ptr<edge>&   a_previousEdge,
-		    const Vec3<double>                 a_normal){
-    this->setVertex(a_vertex);
-    this->setPairEdge(a_pairEdge);
-    this->setNextEdge(a_nextEdge);
-    this->setPreviousEdge(a_previousEdge);
+		    const Vec3<double>             a_normal){
+    m_vertex       = a_vertex;
+    m_pairEdge     = a_pairEdge;
+    m_nextEdge     = a_nextEdge;
+    m_previousEdge = a_previousEdge;
+    m_normal       = a_normal;
   }
 
   inline

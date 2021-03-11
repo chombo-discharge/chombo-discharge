@@ -36,49 +36,19 @@ namespace dcel {
     void define(const Vec3<double>& a_normal, const std::shared_ptr<edge>& a_edge) noexcept;
 
     inline
-    void setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept;
-    
-    inline
-    void setNormal(const Vec3<double>& a_normal) noexcept;
+    void reconcile() noexcept;
 
     inline
-    void normalizeNormalVector() noexcept;
+    void setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept;
 
     inline
     void setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept;
-
-    inline
-    void computeArea() noexcept;
-
-    inline
-    void computeCentroid() noexcept;
-
-    inline
-    void computeNormal() noexcept;
-
-    inline
-    void computeBoundingBox() noexcept;
-
-    inline
-    void computeBoundingSphere() noexcept;
-
-    inline
-    void computePolygon2D() noexcept;
 
     inline
     std::shared_ptr<edge>& getHalfEdge() noexcept;
 
     inline
     const std::shared_ptr<edge>& getHalfEdge() const noexcept;
-
-    inline
-    const std::vector<Vec3<double> > getAllVertexCoordinates() const noexcept;
-
-    inline
-    const std::vector<std::shared_ptr<vertex> > gatherVertices() const noexcept;
-
-    inline
-    const std::vector<std::shared_ptr<edge> > gatherEdges() const noexcept;
 
     inline
     Vec3<double>& getCentroid() noexcept;
@@ -91,12 +61,6 @@ namespace dcel {
 
     inline
     const Vec3<double>& getNormal() const noexcept;
-
-    inline
-    double& getArea() noexcept;
-
-    inline
-    const double& getArea() const noexcept;
 
     inline
     Vec3<double>& getBoundingBoxLo() noexcept;
@@ -136,6 +100,39 @@ namespace dcel {
     // 2D polygon
     std::shared_ptr<Polygon2D<double> > m_poly2;
     InsideOutsideAlgorithm m_poly2Algorithm;
+
+    inline
+    void computeArea() noexcept;
+
+    inline
+    void computeCentroid() noexcept;
+
+    inline
+    void computeNormal() noexcept;
+
+    inline
+    void computeBoundingBox() noexcept;
+
+    inline
+    void computeBoundingSphere() noexcept;
+
+    inline
+    void computePolygon2D() noexcept;
+    
+    inline
+    void normalizeNormalVector() noexcept;
+
+    inline
+    double& getArea() noexcept;
+
+    inline
+    const double& getArea() const noexcept;
+
+    inline
+    const std::vector<Vec3<double> > getAllVertexCoordinates() const noexcept;
+
+    inline
+    const std::vector<std::shared_ptr<vertex> > gatherVertices() const noexcept;
 
     // Projects three-dimensional point a_p into the plane of the face
     inline

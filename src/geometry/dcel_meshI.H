@@ -117,13 +117,7 @@ namespace dcel {
     // Reconcile faces; compute face area and provide edges explicit access
     // to their faces
     for (auto& f : m_faces){
-      f->computeNormal();
-      f->normalizeNormalVector();
-      f->computeCentroid();
-      f->computeArea();
-      f->computePolygon2D();
-      f->computeBoundingBox();
-      f->computeBoundingSphere();
+      f->reconcile();
     }
   }
 

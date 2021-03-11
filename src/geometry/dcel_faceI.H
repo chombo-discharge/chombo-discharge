@@ -42,13 +42,19 @@ namespace dcel {
   }
 
   inline
-  void face::setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept {
-    m_halfEdge = a_halfEdge;
+  void face::reconcile() noexcept {
+    this->computeNormal();
+    this->normalizeNormalVector();
+    this->computeCentroid();
+    this->computeArea();
+    this->computePolygon2D();
+    this->computeBoundingBox();
+    this->computeBoundingSphere();
   }
 
   inline
-  void face::setNormal(const Vec3<double>& a_normal) noexcept {
-    m_normal = a_normal;
+  void face::setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept {
+    m_halfEdge = a_halfEdge;
   }
 
   inline
@@ -205,17 +211,6 @@ namespace dcel {
     }
 
     return ret;
-  }
-
-  inline
-  const std::vector<std::shared_ptr<edge> > face::gatherEdges() const noexcept {
-    std::vector<std::shared_ptr<edge> > edges;
-
-    for (edge_iterator iter(*this); iter.ok(); ++iter){
-      edges.emplace_back(iter());
-    }
-
-    return edges;
   }
 
   inline
