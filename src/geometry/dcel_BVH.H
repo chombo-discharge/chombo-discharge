@@ -28,15 +28,15 @@ namespace dcel {
       void setLeft(const std::shared_ptr<Node<T, BV> >& a_left) noexcept;
       void setRight(const std::shared_ptr<Node<T, BV> >& a_right) noexcept;
 
-      PointLocation getPointLocation(const Vec3<double>& a_p) const noexcept;
+      PointLocation getPointLocation(const Vec3T<double>& a_p) const noexcept;
 
       bool isRoot() const noexcept;
       bool isLeaf() const noexcept;
     
-      bool isPointInside(const Vec3<double>& a_x0) const noexcept;
-      bool isPointOutside(const Vec3<double>& a_x0) const noexcept;
+      bool isPointInside(const Vec3T<double>& a_x0) const noexcept;
+      bool isPointOutside(const Vec3T<double>& a_x0) const noexcept;
       
-      double getDistanceToPoint(const Vec3<double>& a_x0) const noexcept;
+      double getDistanceToPoint(const Vec3T<double>& a_x0) const noexcept;
 
       BV& getBoundingVolume() noexcept;
       const BV& getBoundingVolume() const noexcept;

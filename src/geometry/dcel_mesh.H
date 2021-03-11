@@ -76,10 +76,10 @@ namespace dcel {
     const std::vector<std::shared_ptr<face> >& getFaces() const noexcept;
 
     inline
-    double signedDistance(const Vec3<double>& a_x0) const noexcept ;
+    double signedDistance(const Vec3T<double>& a_x0) const noexcept ;
 
     inline
-    double signedDistance(const Vec3<double>& a_x0, SearchAlgorithm a_algorithm) const noexcept;
+    double signedDistance(const Vec3T<double>& a_x0, SearchAlgorithm a_algorithm) const noexcept;
 
   protected:
 
@@ -94,7 +94,7 @@ namespace dcel {
     std::vector<std::shared_ptr<face> > m_faces;
 
     inline
-    std::vector<Vec3<double> > getAllVertexCoordinates() const noexcept;
+    std::vector<Vec3T<double> > getAllVertexCoordinates() const noexcept;
 
     inline
     void reconcileFaces() noexcept;
@@ -106,10 +106,10 @@ namespace dcel {
     void reconcileVertices(VertexNormalWeight a_weight) noexcept;
 
     inline
-    double DirectSignedDistance(const Vec3<double>& a_point) const noexcept;
+    double DirectSignedDistance(const Vec3T<double>& a_point) const noexcept;
 
     inline
-    double DirectSignedDistance2(const Vec3<double>& a_point) const noexcept;
+    double DirectSignedDistance2(const Vec3T<double>& a_point) const noexcept;
   };
 }
 

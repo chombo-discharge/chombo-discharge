@@ -18,6 +18,8 @@ namespace dcel {
   class vertex;
   class face;
 
+  using Vec3 = Vec3T<double>;
+
   class edge {
   public:
 
@@ -34,7 +36,7 @@ namespace dcel {
 		const std::shared_ptr<edge>&   a_pairEdge,
 		const std::shared_ptr<edge>&   a_nextEdge,
 		const std::shared_ptr<edge>&   a_previousEdge,
-		const Vec3<double>             a_normal = Vec3<double>::Zero);
+		const Vec3                     a_normal);
 
     inline
     void setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept;
@@ -85,10 +87,10 @@ namespace dcel {
     const std::shared_ptr<edge>& getNextEdge() const noexcept;
 
     inline
-    Vec3<double>& getNormal() noexcept;
+    Vec3& getNormal() noexcept;
 
     inline
-    const Vec3<double>& getNormal() const noexcept;
+    const Vec3& getNormal() const noexcept;
 
     inline
     std::shared_ptr<face>& getFace() noexcept;
@@ -97,18 +99,18 @@ namespace dcel {
     const std::shared_ptr<face>& getFace() const noexcept;
 
     inline
-    double signedDistance(const Vec3<double>& a_x0) const noexcept;
+    double signedDistance(const Vec3& a_x0) const noexcept;
 
     inline
-    double unsignedDistance2(const Vec3<double>& a_x0) const noexcept;
+    double unsignedDistance2(const Vec3& a_x0) const noexcept;
 
   protected:
 
-    Vec3<double> m_normal;
+    Vec3 m_normal;
 
     // Store these for efficient queries. 
     double     m_len2;
-    Vec3<double> m_x2x1;
+    Vec3 m_x2x1;
 
     std::shared_ptr<vertex>  m_vertex; 
     std::shared_ptr<edge>    m_pairEdge;
@@ -117,7 +119,7 @@ namespace dcel {
     std::shared_ptr<face>    m_face;
 
     inline
-    double projectPointToEdge(const Vec3<double>& a_x0) const noexcept;
+    double projectPointToEdge(const Vec3& a_x0) const noexcept;
 
     inline
     void normalizeNormalVector() noexcept;

@@ -56,17 +56,17 @@ bool Node<T, BV>::isLeaf() const noexcept {
 }
 
 template <class T, class BV>
-bool Node<T, BV>::isPointInside(const Vec3<double>& a_x0) const noexcept {
+bool Node<T, BV>::isPointInside(const Vec3T<double>& a_x0) const noexcept {
   return m_bv.isPointInside(a_x0);
 }
 
 template <class T, class BV>
-bool Node<T, BV>::isPointOutside(const Vec3<double>& a_x0) const noexcept {
+bool Node<T, BV>::isPointOutside(const Vec3T<double>& a_x0) const noexcept {
   return m_bv.isPointOutside(a_x0);
 }
 
 template <class T, class BV>
-double Node<T, BV>::getDistanceToPoint(const Vec3<double>& a_x0) const noexcept {
+double Node<T, BV>::getDistanceToPoint(const Vec3T<double>& a_x0) const noexcept {
   return m_bv.getDistanceToPoint(a_x0);
 }
 

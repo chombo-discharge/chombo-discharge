@@ -1,32 +1,7 @@
 /home/robertm/Projects/plasmac/Chombo/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
 /home/robertm/Projects/plasmac/Chombo/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
-Depending /home/robertm/Projects/plasmac/geometries/porsche/porsche.cpp ...
-Depending /home/robertm/Projects/plasmac/src/geometry/dcel_vec.cpp ...
-Depending /home/robertm/Projects/plasmac/src/geometry/dcel_iterator.cpp ...
-Depending /home/robertm/Projects/plasmac/src/geometry/dcel_if.cpp ...
 Depending /home/robertm/Projects/plasmac/src/geometry/dcel_parser.cpp ...
-Depending /home/robertm/Projects/plasmac/src/geometry/dcel_BoundingVolumes.cpp ...
 /home/robertm/Projects/plasmac/Chombo/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
 /home/robertm/Projects/plasmac/Chombo/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
 /home/robertm/Projects/plasmac/Chombo/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
 /home/robertm/Projects/plasmac/Chombo/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
-/home/robertm/Projects/plasmac/src/geometry/dcel_if.cpp: In member function ‘virtual Real dcel_if::value(const RealVect&) const’:
-/home/robertm/Projects/plasmac/src/geometry/dcel_if.cpp:26:3: error: ‘Vec3’ was not declared in this scope
-   Vec3<double> p(a_point[0], a_point[1], a_point[2]);
-   ^~~~
-/home/robertm/Projects/plasmac/src/geometry/dcel_if.cpp:26:3: note: suggested alternative:
-In file included from /home/robertm/Projects/plasmac/src/geometry/dcel_if.cpp:8:0:
-/home/robertm/Projects/plasmac/src/geometry/dcel_vec.H:77:9: note:   ‘dcel::Vec3’
-   class Vec3 {
-         ^~~~
-/home/robertm/Projects/plasmac/src/geometry/dcel_if.cpp:26:8: error: expected primary-expression before ‘double’
-   Vec3<double> p(a_point[0], a_point[1], a_point[2]);
-        ^~~~~~
-/home/robertm/Projects/plasmac/src/geometry/dcel_if.cpp:28:40: error: ‘p’ was not declared in this scope
-   Real retval = m_mesh->signedDistance(p); // dcel::mesh can return either positive or negative for outside.
-                                        ^
-/home/robertm/Projects/plasmac/Chombo/lib/mk/Make.rules:517: recipe for target 'o/3d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/dcel_if.o' failed
-make[1]: *** [o/3d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/dcel_if.o] Error 1
-make[1]: *** Waiting for unfinished jobs....
-/home/robertm/Projects/plasmac/Chombo/lib/mk/Make.rules:425: recipe for target 'main' failed
-make: *** [main] Error 2

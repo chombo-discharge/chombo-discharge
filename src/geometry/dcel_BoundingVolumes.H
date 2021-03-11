@@ -26,12 +26,12 @@ namespace dcel {
     BoundingVolume();
     ~BoundingVolume();
 
-    PointLocation getPointLocation(const Vec3<double>& a_p) const;
+    PointLocation getPointLocation(const Vec3T<double>& a_p) const;
     
-    bool isPointInside(const Vec3<double>& a_x0) const;
-    bool isPointOutside(const Vec3<double>& a_x0) const;
+    bool isPointInside(const Vec3T<double>& a_x0) const;
+    bool isPointOutside(const Vec3T<double>& a_x0) const;
     
-    virtual double getDistanceToPoint(const Vec3<double>& a_x0) const = 0;
+    virtual double getDistanceToPoint(const Vec3T<double>& a_x0) const = 0;
   };
   
   class BoundingSphere : public BoundingVolume {
@@ -43,27 +43,27 @@ namespace dcel {
 
     BoundingSphere();
     BoundingSphere(const BoundingSphere& a_other);
-    BoundingSphere(const std::vector<Vec3<double>>& a_points, const Algorithm& a_alg);
+    BoundingSphere(const std::vector<Vec3T<double>>& a_points, const Algorithm& a_alg);
     ~BoundingSphere();
 
-    void define(const std::vector<Vec3<double>>& a_points, const Algorithm& a_algorith);
+    void define(const std::vector<Vec3T<double>>& a_points, const Algorithm& a_algorith);
 
     bool intersects(const BoundingSphere& a_other);
     
-    double getDistanceToPoint(const Vec3<double>& a_x0) const override;
+    double getDistanceToPoint(const Vec3T<double>& a_x0) const override;
     
     double& getRadius();
     const double& getRadius() const;
     
-    Vec3<double>& getCenter();
-    const Vec3<double>& getCenter() const;
+    Vec3T<double>& getCenter();
+    const Vec3T<double>& getCenter() const;
 
   protected:
 
     double m_radius;
-    Vec3<double> m_center;
+    Vec3T<double> m_center;
 
-    void buildRitter(const std::vector<Vec3<double>>& a_points);
+    void buildRitter(const std::vector<Vec3T<double>>& a_points);
   };
 
   class AABB : public BoundingVolume {
@@ -72,25 +72,25 @@ namespace dcel {
     AABB();
     AABB(const AABB& a_other);
     AABB(const std::vector<AABB>& a_others);
-    AABB(const std::vector<Vec3<double>>& a_points);
+    AABB(const std::vector<Vec3T<double>>& a_points);
     ~AABB();
 
-    void define(const std::vector<Vec3<double>>& a_points);
+    void define(const std::vector<Vec3T<double>>& a_points);
 
     bool intersects(const AABB& a_other) const;
     
-    double getDistanceToPoint(const Vec3<double>& a_x0) const override;
+    double getDistanceToPoint(const Vec3T<double>& a_x0) const override;
 
-    Vec3<double>& getLowCorner();
-    const Vec3<double>& getLowCorner() const;
+    Vec3T<double>& getLowCorner();
+    const Vec3T<double>& getLowCorner() const;
 
-    Vec3<double>& getHighCorner();
-    const Vec3<double>& getHighCorner() const;
+    Vec3T<double>& getHighCorner();
+    const Vec3T<double>& getHighCorner() const;
 
   protected:
 
-    Vec3<double> m_loCorner;
-    Vec3<double> m_hiCorner;
+    Vec3T<double> m_loCorner;
+    Vec3T<double> m_hiCorner;
   };
 }
 

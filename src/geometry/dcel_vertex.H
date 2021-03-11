@@ -21,20 +21,22 @@ namespace dcel {
   class vertex {
   public:
 
+    using Vec3 = Vec3T<double>;
+
     vertex();
-    vertex(const Vec3<double>& a_pos);
-    vertex(const Vec3<double>& a_pos, const Vec3<double>& a_normal);
+    vertex(const Vec3& a_pos);
+    vertex(const Vec3& a_pos, const Vec3& a_normal);
     vertex(const vertex& a_otherVertex);
     ~vertex();
 
     inline
-    void define(const Vec3<double>& m_pos, const std::shared_ptr<edge>& a_edge, const Vec3<double> a_normal = Vec3<double>::Zero) noexcept;
+    void define(const Vec3& m_pos, const std::shared_ptr<edge>& a_edge, const Vec3 a_normal = Vec3::Zero) noexcept;
 
     inline
-    void setPosition(const Vec3<double>& a_pos) noexcept;
+    void setPosition(const Vec3& a_pos) noexcept;
 
     inline
-    void setNormal(const Vec3<double>& a_normal) noexcept;
+    void setNormal(const Vec3& a_normal) noexcept;
 
     inline
     void setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
@@ -55,10 +57,10 @@ namespace dcel {
     void clearFaceCache() noexcept;
 
     inline
-    Vec3<double>& getPosition() noexcept;
+    Vec3& getPosition() noexcept;
 
     inline
-    const Vec3<double>& getPosition() const noexcept;
+    const Vec3& getPosition() const noexcept;
 
     inline
     std::shared_ptr<edge>& getEdge() noexcept;
@@ -67,10 +69,10 @@ namespace dcel {
     const std::shared_ptr<edge>& getEdge() const noexcept;
 
     inline
-    Vec3<double>& getNormal() noexcept;
+    Vec3& getNormal() noexcept;
 
     inline
-    const Vec3<double>& getNormal() const noexcept;
+    const Vec3& getNormal() const noexcept;
 
     inline
     std::vector<std::shared_ptr<face> >& getFaceCache() noexcept;
@@ -79,15 +81,15 @@ namespace dcel {
     const std::vector<std::shared_ptr<face> >& getFaceCache() const noexcept;
 
     inline
-    double signedDistance(const Vec3<double>& a_x0) const noexcept;
+    double signedDistance(const Vec3& a_x0) const noexcept;
 
     inline
-    double unsignedDistance2(const Vec3<double>& a_x0) const noexcept; 
+    double unsignedDistance2(const Vec3& a_x0) const noexcept; 
 
   protected:
 
-    Vec3<double> m_pos;
-    Vec3<double> m_normal;
+    Vec3 m_pos;
+    Vec3 m_normal;
     
     std::shared_ptr<edge> m_edge;
     

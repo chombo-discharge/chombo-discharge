@@ -94,12 +94,12 @@ void dcel::parser::PLY::readVerticesASCII(std::vector<std::shared_ptr<dcel::vert
 					  const int                                    a_numVertices,
 					  std::ifstream&                               a_inputstream){
 
-  Vec3<double> pos;
+  Vec3T<double> pos;
   double& x = pos[0];
   double& y = pos[1];
   double& z = pos[2];
 
-  Vec3<double> norm;
+  Vec3T<double> norm;
   double& nx = norm[0];
   double& ny = norm[1];
   double& nz = norm[2];

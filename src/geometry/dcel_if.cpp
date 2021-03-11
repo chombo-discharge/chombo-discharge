@@ -23,7 +23,7 @@ dcel_if::~dcel_if(){
 }
 
 Real dcel_if::value(const RealVect& a_point) const {
-  dcel::Vec3<double> p(a_point[0], a_point[1], a_point[2]);
+  dcel::Vec3T<double> p(a_point[0], a_point[1], a_point[2]);
   
   Real retval = m_mesh->signedDistance(p); // dcel::mesh can return either positive or negative for outside. 
   

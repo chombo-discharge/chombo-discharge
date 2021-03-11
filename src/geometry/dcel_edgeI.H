@@ -49,7 +49,7 @@ namespace dcel {
 		    const std::shared_ptr<edge>&   a_pairEdge,
 		    const std::shared_ptr<edge>&   a_nextEdge,
 		    const std::shared_ptr<edge>&   a_previousEdge,
-		    const Vec3<double>             a_normal){
+		    const Vec3T<double>             a_normal){
     m_vertex       = a_vertex;
     m_pairEdge     = a_pairEdge;
     m_nextEdge     = a_nextEdge;
@@ -89,8 +89,8 @@ namespace dcel {
 
   inline
   void edge::computeEdgeLength() noexcept {
-    const Vec3<double>& x1 = this->getVertex()->getPosition();
-    const Vec3<double>& x2 = this->getOtherVertex()->getPosition();
+    const Vec3T<double>& x1 = this->getVertex()->getPosition();
+    const Vec3T<double>& x2 = this->getOtherVertex()->getPosition();
 
     m_x2x1 = x2-x1;
     m_len2 = m_x2x1.dot(m_x2x1);
@@ -103,8 +103,8 @@ namespace dcel {
     const std::shared_ptr<face>& F     = this->getFace();
     const std::shared_ptr<face>& pairF = pairEdge->getFace();
     
-    const Vec3<double>& n1 = F->getNormal();
-    const Vec3<double>& n2 = pairF->getNormal();
+    const Vec3T<double>& n1 = F->getNormal();
+    const Vec3T<double>& n2 = pairF->getNormal();
 
     m_normal = n1 + n2;
 
@@ -168,12 +168,12 @@ namespace dcel {
   }
 
   inline
-  Vec3<double>& edge::getNormal() noexcept {
+  Vec3T<double>& edge::getNormal() noexcept {
     return m_normal;
   }
 
   inline
-  const Vec3<double>& edge::getNormal() const noexcept {
+  const Vec3T<double>& edge::getNormal() const noexcept {
     return m_normal;
   }
 
@@ -188,14 +188,14 @@ namespace dcel {
   }
 
   inline
-  double edge::projectPointToEdge(const Vec3<double>& a_x0) const noexcept {
-    const Vec3<double> p = a_x0 - m_vertex->getPosition();
+  double edge::projectPointToEdge(const Vec3T<double>& a_x0) const noexcept {
+    const Vec3T<double> p = a_x0 - m_vertex->getPosition();
 
     return p.dot(m_x2x1)/m_len2;
   }
 
   inline
-  double edge::signedDistance(const Vec3<double>& a_x0) const noexcept {
+  double edge::signedDistance(const Vec3T<double>& a_x0) const noexcept {
     const double t = this->projectPointToEdge(a_x0);
 
     double retval;
@@ -207,8 +207,8 @@ namespace dcel {
       retval = this->getOtherVertex()->signedDistance(a_x0);
     }
     else{
-      const Vec3<double> linePoint = m_vertex->getPosition() + t*m_x2x1;
-      const Vec3<double> delta     = a_x0 - linePoint;
+      const Vec3T<double> linePoint = m_vertex->getPosition() + t*m_x2x1;
+      const Vec3T<double> delta     = a_x0 - linePoint;
       const double dot             = m_normal.dot(delta);
 
       // I don't know why, but currently classifying this as "inside" works, this shouldn't matter because the polygon
@@ -222,13 +222,13 @@ namespace dcel {
   }
 
   inline
-  double edge::unsignedDistance2(const Vec3<double>& a_x0) const noexcept {
+  double edge::unsignedDistance2(const Vec3T<double>& a_x0) const noexcept {
     double t = this->projectPointToEdge(a_x0);
     t = std::min(std::max(0.,t), 1.);
 
-    const Vec3<double> linePoint = m_vertex->getPosition() + t*m_x2x1;
+    const Vec3T<double> linePoint = m_vertex->getPosition() + t*m_x2x1;
 
-    const Vec3<double> d = a_x0 - linePoint;
+    const Vec3T<double> d = a_x0 - linePoint;
     
     return d.dot(d);
   }

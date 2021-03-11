@@ -185,8 +185,8 @@ namespace dcel {
   }
 
   inline
-  std::vector<Vec3<double> > mesh::getAllVertexCoordinates() const noexcept{
-    std::vector<Vec3<double> > vertexCoordinates;
+  std::vector<Vec3T<double> > mesh::getAllVertexCoordinates() const noexcept{
+    std::vector<Vec3T<double> > vertexCoordinates;
     for (const auto& v : m_vertices){
       vertexCoordinates.emplace_back(v->getPosition());
     }
@@ -195,12 +195,12 @@ namespace dcel {
   }
 
   inline
-  double mesh::signedDistance(const Vec3<double>& a_point) const noexcept {
+  double mesh::signedDistance(const Vec3T<double>& a_point) const noexcept {
     return this->signedDistance(a_point, m_algorithm);
   }
 
   inline
-  double mesh::signedDistance(const Vec3<double>& a_point, SearchAlgorithm a_algorithm) const noexcept {
+  double mesh::signedDistance(const Vec3T<double>& a_point, SearchAlgorithm a_algorithm) const noexcept {
     double minDist;
   
     switch(a_algorithm){
@@ -219,7 +219,7 @@ namespace dcel {
   }
 
   inline
-  double mesh::DirectSignedDistance(const Vec3<double>& a_point) const noexcept {
+  double mesh::DirectSignedDistance(const Vec3T<double>& a_point) const noexcept {
     double minDist = m_faces.front()->signedDistance(a_point);
     
     for (const auto& f : m_faces){
@@ -234,7 +234,7 @@ namespace dcel {
   }
 
   inline
-  double mesh::DirectSignedDistance2(const Vec3<double>& a_point) const noexcept {
+  double mesh::DirectSignedDistance2(const Vec3T<double>& a_point) const noexcept {
     std::shared_ptr<face> closest = m_faces.front();
     double minDist2 = closest->unsignedDistance2(a_point);
 
