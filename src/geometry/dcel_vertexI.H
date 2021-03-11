@@ -86,7 +86,10 @@ namespace dcel {
 
   inline
   void vertex::computeVertexNormalAverage() noexcept {
-    const auto& faces = this->getFaces();
+    std::vector<std::shared_ptr<face> > faces;
+    for (edge_iterator iter(*this); iter.ok(); ++iter){
+      faces.emplace_back(iter()->getFace());
+    }
 
     m_normal = RealVect::Zero;
   
@@ -156,16 +159,6 @@ namespace dcel {
   inline
   const std::shared_ptr<edge>& vertex::getEdge() const noexcept {
     return m_edge;
-  }
-
-  inline
-  std::vector<std::shared_ptr<face> > vertex::getFaces() noexcept {
-    std::vector<std::shared_ptr<face> > faces;
-    for (edge_iterator iter(*this); iter.ok(); ++iter){
-      faces.push_back(iter()->getFace());
-    }
-
-    return faces;
   }
 
   inline

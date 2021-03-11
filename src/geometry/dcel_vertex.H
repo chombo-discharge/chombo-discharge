@@ -72,8 +72,6 @@ namespace dcel {
     inline
     const RealVect& getNormal() const noexcept;
 
-    inline
-    std::vector<std::shared_ptr<face> > getFaces() noexcept;
 
     inline
     std::vector<std::shared_ptr<face> >& getFaceCache() noexcept;
