@@ -38,11 +38,20 @@ namespace dcel {
 
     inline
     void setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
-    
+
+    inline
     void addFaceToCache(const std::shared_ptr<face>& a_face) noexcept;
+
+    inline
     void normalizeNormalVector() noexcept;
+
+    inline
     void computeVertexNormalAverage() noexcept;
+
+    inline
     void computeVertexNormalAngleWeighted() noexcept;
+
+    inline
     void clearFaceCache() noexcept;
 
     inline
@@ -63,9 +72,13 @@ namespace dcel {
     inline
     const RealVect& getNormal() const noexcept;
 
+    inline
     std::vector<std::shared_ptr<face> > getFaces() noexcept;
 
+    inline
     std::vector<std::shared_ptr<face> >& getFaceCache() noexcept;
+
+    inline
     const std::vector<std::shared_ptr<face> >& getFaceCache() const noexcept;
   
     Real signedDistance(const RealVect& a_x0) const noexcept;
