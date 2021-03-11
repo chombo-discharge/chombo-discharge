@@ -29,13 +29,20 @@ namespace dcel {
     edge_iterator(vertex& a_vert);
     edge_iterator(const vertex& a_vert);
 
-    std::shared_ptr<edge>& operator() ();
+    inline
+    std::shared_ptr<edge>& operator() () noexcept;
 
-    void reset();
+    inline
+    const std::shared_ptr<edge>& operator() () const noexcept;
 
-    void operator ++();
+    inline
+    void reset() noexcept;
 
-    bool ok();
+    inline
+    void operator ++() noexcept;
+
+    inline
+    bool ok() const noexcept;
   
   protected:
 
@@ -52,5 +59,7 @@ namespace dcel {
     std::shared_ptr<edge> m_curEdge; // Current edge
   };
 }
+
+#include "dcel_iteratorI.H"
 
 #endif
