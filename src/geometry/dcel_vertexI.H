@@ -107,18 +107,8 @@ namespace dcel {
     for (edge_iterator iter(*this); iter.ok(); ++iter){
       const auto& outgoingEdge = iter();
 
-      // May seem a bit weird but edge_iterator(vertex) gives yields all outgoing half-edges from the vertex, 
-      // and we need the incoming edge into the vertex. So, we get that one here...
-      std::shared_ptr<edge> previousEdge = nullptr;
-      for (edge_iterator iter(outgoingEdge); iter.ok(); ++iter){
-	const auto& e = iter();
-	if(e->getNextEdge() == outgoingEdge){
-	  previousEdge = e;
-	}
-      }
-
       const Vec3<double>& x0 = outgoingEdge->getVertex()->getPosition();
-      const Vec3<double>& x1 = previousEdge->getVertex()->getPosition();
+      const Vec3<double>& x1 = outgoingEdge->getPreviousEdge()->getVertex()->getPosition();
       const Vec3<double>& x2 = outgoingEdge->getNextEdge()->getVertex()->getPosition();
 
       Vec3<double> v1 = x1-x0;
