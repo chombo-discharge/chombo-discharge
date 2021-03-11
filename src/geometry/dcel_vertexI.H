@@ -100,7 +100,7 @@ namespace dcel {
   inline
   auto vertexT<T>::computeVertexNormalAverage() noexcept -> void {
     std::vector<std::shared_ptr<face> > faces;
-    for (edge_iterator iter(*this); iter.ok(); ++iter){
+    for (edgeIterator iter(*this); iter.ok(); ++iter){
       faces.emplace_back(iter()->getFace());
     }
 
@@ -118,7 +118,7 @@ namespace dcel {
   auto vertexT<T>::computeVertexNormalAngleWeighted() noexcept -> void {
     m_normal = Vec3::Zero;
 
-    for (edge_iterator iter(*this); iter.ok(); ++iter){
+    for (edgeIterator iter(*this); iter.ok(); ++iter){
       const auto& outgoingEdge = iter();
 
       const Vec3& x0 = outgoingEdge->getVertex()->getPosition();

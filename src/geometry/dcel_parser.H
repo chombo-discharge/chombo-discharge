@@ -32,7 +32,7 @@ namespace dcel {
       using edge   = edgeT<T>;
       using face   = faceT<T>;
 
-      using edge_iterator = edge_iteratorT<T>;
+      using edgeIterator = edgeIteratorT<T>;
 
       /*!
 	@brief Read an ASCII .ply file and put it in a mesh

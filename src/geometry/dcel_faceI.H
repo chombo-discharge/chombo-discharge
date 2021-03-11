@@ -221,7 +221,7 @@ namespace dcel {
   auto faceT<T>::gatherVertices() const noexcept -> std::vector<std::shared_ptr<vertex> > {
     std::vector<std::shared_ptr<vertex> > vertices;
 
-    for (edge_iterator iter(*this); iter.ok(); ++iter){
+    for (edgeIterator iter(*this); iter.ok(); ++iter){
       std::shared_ptr<edge>& edge = iter();
       vertices.emplace_back(edge->getVertex());
     }
@@ -234,7 +234,7 @@ namespace dcel {
   auto faceT<T>::getAllVertexCoordinates() const noexcept -> std::vector<Vec3> {
     std::vector<Vec3> ret;
 
-    for (edge_iterator iter(*this); iter.ok(); ++iter){
+    for (edgeIterator iter(*this); iter.ok(); ++iter){
       std::shared_ptr<edge>& edge = iter();
       ret.emplace_back(edge->getVertex()->getPosition());
     }
@@ -270,7 +270,7 @@ namespace dcel {
       retval = m_normal.dot(a_x0 - m_centroid);
     }
     else {
-      for (edge_iterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
+      for (edgeIterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
 	const auto& e = edgeIt();
 	
 	const T curDist = e->signedDistance(a_x0);
@@ -296,7 +296,7 @@ namespace dcel {
       retval *= retval;
     }
     else{ // The projected point lies outside the triangle. Check distance to edges/vertices
-      for (edge_iterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
+      for (edgeIterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
 	const auto& e = edgeIt();
 	
 	const T curDist = e->unsignedDistance2(a_x0);

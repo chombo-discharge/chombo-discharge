@@ -17,7 +17,7 @@ namespace dcel {
 
   template <class T>
   inline
-  edge_iteratorT<T>::edge_iteratorT(face& a_face){
+  edgeIteratorT<T>::edgeIteratorT(face& a_face){
     m_startEdge = a_face.getHalfEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
@@ -27,7 +27,7 @@ namespace dcel {
 
   template <class T>
   inline
-  edge_iteratorT<T>::edge_iteratorT(const face& a_face){
+  edgeIteratorT<T>::edgeIteratorT(const face& a_face){
     m_startEdge = a_face.getHalfEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
@@ -37,7 +37,7 @@ namespace dcel {
 
   template <class T>
   inline
-  edge_iteratorT<T>::edge_iteratorT(vertex& a_vert){
+  edgeIteratorT<T>::edgeIteratorT(vertex& a_vert){
     m_startEdge = a_vert.getEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
@@ -47,7 +47,7 @@ namespace dcel {
 
   template <class T>
   inline
-  edge_iteratorT<T>::edge_iteratorT(const vertex& a_vert){
+  edgeIteratorT<T>::edgeIteratorT(const vertex& a_vert){
     m_startEdge = a_vert.getEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
@@ -57,26 +57,26 @@ namespace dcel {
 
   template <class T>
   inline
-  auto edge_iteratorT<T>::operator() () noexcept -> std::shared_ptr<edge>& {
+  auto edgeIteratorT<T>::operator() () noexcept -> std::shared_ptr<edge>& {
     return m_curEdge;
   }
 
   template <class T>
   inline
-  auto edge_iteratorT<T>::operator() () const noexcept -> const std::shared_ptr<edge>& {
+  auto edgeIteratorT<T>::operator() () const noexcept -> const std::shared_ptr<edge>& {
     return m_curEdge;
   }
 
   template <class T>
   inline
-  void edge_iteratorT<T>::reset() noexcept {
+  void edgeIteratorT<T>::reset() noexcept {
     m_curEdge  = m_startEdge;
     m_fullLoop = false;
   }
 
   template <class T>
   inline
-  void edge_iteratorT<T>::operator++() noexcept {
+  void edgeIteratorT<T>::operator++() noexcept {
     switch(m_iterMode){
     case IterationMode::Face:
       m_curEdge = m_curEdge->getNextEdge();
@@ -91,7 +91,7 @@ namespace dcel {
 
   template <class T>
   inline
-  bool edge_iteratorT<T>::ok() const noexcept{
+  bool edgeIteratorT<T>::ok() const noexcept{
     return !m_fullLoop;
   }
 }

@@ -20,7 +20,7 @@ namespace dcel {
   template <class T> class vertexT;
   template <class T> class edgeT;
   template <class T> class faceT;
-  template <class T> class edge_iteratorT;
+  template <class T> class edgeIteratorT;
 
   template <class T>
   class vertexT {
@@ -31,7 +31,7 @@ namespace dcel {
     using edge   = edgeT<T>;
     using face   = faceT<T>;
     
-    using edge_iterator = edge_iteratorT<T>;
+    using edgeIterator = edgeIteratorT<T>;
 
     vertexT();
     vertexT(const Vec3& a_pos);
