@@ -32,26 +32,53 @@ namespace dcel {
 
     ~mesh();
 
-    void sanityCheck() const;
+
+
+    inline
     void define(std::vector<std::shared_ptr<face> >&   a_faces,
 		std::vector<std::shared_ptr<edge> >&   a_edges,
 		std::vector<std::shared_ptr<vertex> >& a_vertices) noexcept;
+    
+    inline
+    void sanityCheck() const;
+
+    inline
     void setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept;
+
+    inline
     void setInsideOutsideAlgorithm(const dcel::InsideOutsideAlgorithm a_algorithm) noexcept;
+
+    inline
     void reconcile(VertexNormalWeight a_weight = VertexNormalWeight::Angle) noexcept;
+
+    inline
     void computeBoundingSphere() noexcept;
+
+    inline
     void computeBoundingBox() noexcept;
 
+    inline
     std::vector<std::shared_ptr<vertex> >& getVertices() noexcept;
+
+    inline
     const std::vector<std::shared_ptr<vertex> >& getVertices() const noexcept;
 
+    inline
     std::vector<std::shared_ptr<edge> >& getEdges() noexcept ;
+
+    inline
     const std::vector<std::shared_ptr<edge> >& getEdges() const noexcept;
 
+    inline
     std::vector<std::shared_ptr<face> >& getFaces() noexcept;
+
+    inline
     const std::vector<std::shared_ptr<face> >& getFaces() const noexcept;
 
+    inline
     Real signedDistance(const RealVect& a_x0) const noexcept ;
+
+    inline
     Real signedDistance(const RealVect& a_x0, SearchAlgorithm a_algorithm) const noexcept;
 
   protected:
@@ -66,16 +93,28 @@ namespace dcel {
     std::vector<std::shared_ptr<edge> >    m_edges;
     std::vector<std::shared_ptr<face> > m_faces;
 
+    inline
     std::vector<RealVect> getAllVertexCoordinates() const noexcept;
-    
+
+    inline
     void reconcileFaces() noexcept;
+
+    inline
     void reconcileEdges() noexcept;
+
+    inline
     void reconcileVertices(VertexNormalWeight a_weight) noexcept;
 
+    inline
     Real DirectSignedDistance(const RealVect& a_point) const noexcept;
+
+    inline
     Real DirectSignedDistance2(const RealVect& a_point) const noexcept;
+
+    inline
     Real KdTreeSignedDistance(const RealVect& a_point) const noexcept;
   };
 }
 
+#include "dcel_meshI.H"
 #endif
