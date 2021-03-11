@@ -32,47 +32,47 @@ namespace dcel {
     ~edge();
 
     inline
-    void define(const std::shared_ptr<vertex>& a_vertex,
+    auto define(const std::shared_ptr<vertex>& a_vertex,
 		const std::shared_ptr<edge>&   a_pairEdge,
 		const std::shared_ptr<edge>&   a_nextEdge,
 		const std::shared_ptr<edge>&   a_previousEdge,
-		const Vec3                     a_normal);
+		const Vec3                     a_normal) noexcept -> void;
 
     inline
-    void setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept;
+    auto setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept -> void;
 
     inline
-    void setPairEdge(const std::shared_ptr<edge>& a_pairEdge) noexcept;
+    auto setPairEdge(const std::shared_ptr<edge>& a_pairEdge) noexcept -> void;
 
     inline
-    void setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept;
+    auto setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept -> void;
 
     inline
-    void setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept;
+    auto setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept -> void;
 
     inline
-    void setFace(const std::shared_ptr<face>& a_face) noexcept;
+    auto setFace(const std::shared_ptr<face>& a_face) noexcept -> void;
 
     inline
-    void reconcile() noexcept;
+    auto reconcile() noexcept -> void;
 
     inline
-    std::shared_ptr<vertex>& getVertex() noexcept;
+    auto getVertex() noexcept -> std::shared_ptr<vertex>&;
 
     inline
-    const std::shared_ptr<vertex>& getVertex() const noexcept;
+    auto getVertex() const noexcept -> const std::shared_ptr<vertex>&;
 
     inline
-    std::shared_ptr<vertex>& getOtherVertex() noexcept;
+    auto getOtherVertex() noexcept -> std::shared_ptr<vertex>&;
 
     inline
-    const std::shared_ptr<vertex>& getOtherVertex() const noexcept;
+    auto getOtherVertex() const noexcept -> const std::shared_ptr<vertex>&;
 
     inline
-    std::shared_ptr<edge>& getPairEdge() noexcept;
+    auto getPairEdge() noexcept -> std::shared_ptr<edge>&;
 
     inline
-    const std::shared_ptr<edge>& getPairEdge() const noexcept;
+    auto getPairEdge() const noexcept -> const std::shared_ptr<edge>& ;
 
     inline
     std::shared_ptr<edge>& getPreviousEdge() noexcept;

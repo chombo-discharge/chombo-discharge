@@ -48,11 +48,11 @@ namespace dcel {
 
 
   inline
-  void edge::define(const std::shared_ptr<vertex>& a_vertex,
+  auto edge::define(const std::shared_ptr<vertex>& a_vertex,
 		    const std::shared_ptr<edge>&   a_pairEdge,
 		    const std::shared_ptr<edge>&   a_nextEdge,
 		    const std::shared_ptr<edge>&   a_previousEdge,
-		    const Vec3                     a_normal){
+		    const Vec3                     a_normal) noexcept -> void {
     m_vertex       = a_vertex;
     m_pairEdge     = a_pairEdge;
     m_nextEdge     = a_nextEdge;
@@ -61,27 +61,27 @@ namespace dcel {
   }
 
   inline
-  void edge::setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept {
+  auto edge::setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept -> void {
     m_vertex = a_vertex;
   }
 
   inline
-  void edge::setPairEdge(const std::shared_ptr<edge>& a_pairEdge) noexcept {
+  auto edge::setPairEdge(const std::shared_ptr<edge>& a_pairEdge) noexcept -> void {
     m_pairEdge = a_pairEdge;
   }
 
   inline
-  void edge::setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept {
+  auto edge::setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept -> void {
     m_nextEdge = a_nextEdge;
   }
 
   inline
-  void edge::setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept {
+  auto edge::setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept -> void {
     m_previousEdge = a_previousEdge;
   }
 
   inline
-  void edge::setFace(const std::shared_ptr<face>& a_face) noexcept {
+  auto edge::setFace(const std::shared_ptr<face>& a_face) noexcept -> void {
     m_face = a_face;
   }
 
@@ -115,38 +115,38 @@ namespace dcel {
   }
 
   inline
-  void edge::reconcile() noexcept {
+  auto edge::reconcile() noexcept -> void {
     this->computeNormal();
     this->computeEdgeLength();
   }
 
   inline
-  std::shared_ptr<vertex>& edge::getVertex() noexcept {
+  auto edge::getVertex() noexcept -> std::shared_ptr<vertex>& {
     return m_vertex;
   }
 
   inline
-  const std::shared_ptr<vertex>& edge::getVertex() const noexcept {
+  auto edge::getVertex() const noexcept -> const std::shared_ptr<vertex>& {
     return m_vertex;
   }
 
   inline
-  std::shared_ptr<vertex>& edge::getOtherVertex() noexcept{
+  auto edge::getOtherVertex() noexcept -> std::shared_ptr<vertex>& {
     return m_pairEdge->getVertex();
   }
 
   inline
-  const std::shared_ptr<vertex>& edge::getOtherVertex() const noexcept {
+  auto edge::getOtherVertex() const noexcept -> const std::shared_ptr<vertex>& {
     return m_pairEdge->getVertex();
   }
 
   inline
-  std::shared_ptr<edge>& edge::getPairEdge() noexcept {
+  auto edge::getPairEdge() noexcept -> std::shared_ptr<edge>& {
     return m_pairEdge;
   }
 
   inline
-  const std::shared_ptr<edge>& edge::getPairEdge() const noexcept {
+  auto edge::getPairEdge() const noexcept -> const std::shared_ptr<edge>&  {
     return m_pairEdge;
   }
 
