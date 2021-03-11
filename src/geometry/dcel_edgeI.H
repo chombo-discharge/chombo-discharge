@@ -17,26 +17,29 @@ namespace dcel {
 
   inline
   edge::edge(){
+    m_vertex       = nullptr;
+    m_pairEdge     = nullptr;
+    m_nextEdge     = nullptr;
+    m_previousEdge = nullptr;
+    m_normal       = Vec3::Zero;
+    m_x2x1         = Vec3::Zero;
+    m_len2         = 0.0; 
   }
 
   inline
-  edge::edge(const std::shared_ptr<vertex>& a_vertex){
-    this->setVertex(a_vertex);
-    this->setPairEdge(nullptr);
-    this->setNextEdge(nullptr);
-    this->setPreviousEdge(nullptr);
+  edge::edge(const std::shared_ptr<vertex>& a_vertex) : edge() {
+    m_vertex = a_vertex;
   }
 
   inline
-  edge::edge(const edge& a_otherEdge){
-    this->define(a_otherEdge.getVertex(),
-		 a_otherEdge.getPairEdge(),
-		 a_otherEdge.getNextEdge(),
-		 a_otherEdge.getPreviousEdge(),
-		 a_otherEdge.getNormal());
-
-    m_len2 = a_otherEdge.m_len2;
-    m_x2x1 = a_otherEdge.m_x2x1;
+  edge::edge(const edge& a_otherEdge) : edge() {
+    m_vertex       = a_otherEdge.m_vertex;
+    m_pairEdge     = a_otherEdge.m_pairEdge;
+    m_nextEdge     = a_otherEdge.m_nextEdge;
+    m_previousEdge = a_otherEdge.m_previousEdge;
+    m_normal       = a_otherEdge.m_normal;
+    m_x2x1         = a_otherEdge.m_x2x1;
+    m_len2         = a_otherEdge.m_len2;
   }
 
   inline
@@ -49,7 +52,7 @@ namespace dcel {
 		    const std::shared_ptr<edge>&   a_pairEdge,
 		    const std::shared_ptr<edge>&   a_nextEdge,
 		    const std::shared_ptr<edge>&   a_previousEdge,
-		    const Vec3T<double>             a_normal){
+		    const Vec3                     a_normal){
     m_vertex       = a_vertex;
     m_pairEdge     = a_pairEdge;
     m_nextEdge     = a_nextEdge;
@@ -89,8 +92,8 @@ namespace dcel {
 
   inline
   void edge::computeEdgeLength() noexcept {
-    const Vec3T<double>& x1 = this->getVertex()->getPosition();
-    const Vec3T<double>& x2 = this->getOtherVertex()->getPosition();
+    const Vec3& x1 = this->getVertex()->getPosition();
+    const Vec3& x2 = this->getOtherVertex()->getPosition();
 
     m_x2x1 = x2-x1;
     m_len2 = m_x2x1.dot(m_x2x1);
@@ -103,8 +106,8 @@ namespace dcel {
     const std::shared_ptr<face>& F     = this->getFace();
     const std::shared_ptr<face>& pairF = pairEdge->getFace();
     
-    const Vec3T<double>& n1 = F->getNormal();
-    const Vec3T<double>& n2 = pairF->getNormal();
+    const Vec3& n1 = F->getNormal();
+    const Vec3& n2 = pairF->getNormal();
 
     m_normal = n1 + n2;
 

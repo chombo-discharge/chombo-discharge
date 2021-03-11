@@ -18,10 +18,10 @@ namespace dcel {
   class vertex;
   class face;
 
-  using Vec3 = Vec3T<double>;
-
   class edge {
   public:
+
+    using Vec3 = Vec3T<double>;
 
     edge();
     
