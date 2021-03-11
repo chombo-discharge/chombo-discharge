@@ -8,6 +8,7 @@
 #ifndef _VERTEX_
 #define _VERTEX_
 
+#include "dcel_vec.H"
 #include "RealVect.H"
 
 #include <vector>

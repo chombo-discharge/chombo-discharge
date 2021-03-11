@@ -17,8 +17,8 @@ namespace dcel {
   class Vec2 {
   public:
 
-    // static const Vec2 Zero;
-    // static const Vec2 Unit;
+    static const Vec2 Zero;
+    static const Vec2 Unit;
 
     Vec2() = default;
     Vec2(const T& a_x, const T& a_y);
@@ -56,8 +56,8 @@ namespace dcel {
   class Vec3 {
   public:
 
-    // static const Vec3 Zero;
-    // static const Vec3 Unit;
+    static const Vec3 Zero;
+    static const Vec3 Unit;
     
     Vec3() = default;
     Vec3(const T& a_x, const T& a_y, const T& a_z);
