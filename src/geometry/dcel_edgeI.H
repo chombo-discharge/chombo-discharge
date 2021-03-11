@@ -212,10 +212,8 @@ namespace dcel {
     else{
       const Vec3 linePoint = m_vertex->getPosition() + t*m_x2x1;
       const Vec3 delta     = a_x0 - linePoint;
-      const double dot             = m_normal.dot(delta);
+      const double dot     = m_normal.dot(delta);
 
-      // I don't know why, but currently classifying this as "inside" works, this shouldn't matter because the polygon
-      // test should trigger in that case. 
       const int sgn = (dot > 0.0) ? 1 : -1;
 
       retval = sgn*delta.length();
