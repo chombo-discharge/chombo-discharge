@@ -14,13 +14,13 @@ namespace dcel {
 
   template <class T>
   inline
-  Polygon2D<T>::Polygon2D(const Vec3T<T>& a_normal, const std::vector<Vec3>& a_points) {
+  Polygon2D<T>::Polygon2D(const Vec3& a_normal, const std::vector<Vec3>& a_points) {
     this->define(a_normal, a_points);
   }
 
   template <class T>
   inline
-  bool Polygon2D<T>::isPointInside(const Vec3T<T>& a_point, const InsideOutsideAlgorithm a_algorithm) {
+  bool Polygon2D<T>::isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm a_algorithm) {
     bool ret;
   
     switch(a_algorithm){
@@ -42,13 +42,13 @@ namespace dcel {
 
   template <class T>
   inline
-  auto Polygon2D<T>::projectPoint(const Vec3T<T>& a_point) const noexcept -> Vec2 {
+  auto Polygon2D<T>::projectPoint(const Vec3& a_point) const noexcept -> Vec2 {
     return Vec2(a_point[m_xDir], a_point[m_yDir]);
   }
 
   template <class T>
   inline
-  void Polygon2D<T>::define(const Vec3T<T>& a_normal, const std::vector<Vec3>& a_points) {
+  void Polygon2D<T>::define(const Vec3& a_normal, const std::vector<Vec3>& a_points) {
     const auto& nx = std::abs(a_normal[0]);
     const auto& ny = std::abs(a_normal[1]);
     const auto& nz = std::abs(a_normal[2]);
@@ -169,7 +169,7 @@ namespace dcel {
 
   template <class T>
   inline
-  bool Polygon2D<T>::isPointInsidePolygonWindingNumber(const Vec3T<T>& a_point) const noexcept {
+  bool Polygon2D<T>::isPointInsidePolygonWindingNumber(const Vec3& a_point) const noexcept {
     const Vec2 p = this->projectPoint(a_point);
   
     const int wn = this->computeWindingNumber(p);
@@ -179,7 +179,7 @@ namespace dcel {
 
   template <class T>
   inline
-  bool Polygon2D<T>::isPointInsidePolygonCrossingNumber(const Vec3T<T>& a_point) const noexcept {
+  bool Polygon2D<T>::isPointInsidePolygonCrossingNumber(const Vec3& a_point) const noexcept {
     const Vec2 p = this->projectPoint(a_point);
   
     const int cn  = this->computeCrossingNumber(p);
@@ -191,7 +191,7 @@ namespace dcel {
 
   template <class T>
   inline
-  bool Polygon2D<T>::isPointInsidePolygonSubtend(const Vec3T<T>& a_point) const noexcept {
+  bool Polygon2D<T>::isPointInsidePolygonSubtend(const Vec3& a_point) const noexcept {
     const Vec2 p = this->projectPoint(a_point);
 
     T sumTheta = this->computeSubtendedAngle(p); // Should be = 2pi if point is inside. 
