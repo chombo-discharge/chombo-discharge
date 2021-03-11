@@ -96,26 +96,26 @@ namespace dcel {
   inline
   auto BoundingSphere<T>::intersects(const BoundingSphere& a_other) const noexcept -> bool {
     const Vec3 deltaV = m_center - a_other.getCenter();
-    const double sumR       = m_radius + a_other.getRadius();
+    const T sumR       = m_radius + a_other.getRadius();
 
     return deltaV.dot(deltaV) < sumR*sumR;
   }
 
   template <class T>
   inline
-  auto BoundingSphere<T>::getDistanceToPoint(const Vec3& a_x0) const noexcept -> double {
+  auto BoundingSphere<T>::getDistanceToPoint(const Vec3& a_x0) const noexcept -> T {
     return (a_x0 - m_center).length() - m_radius;
   }
 
   template <class T>
   inline
-  auto BoundingSphere<T>::getRadius() noexcept -> double& {
+  auto BoundingSphere<T>::getRadius() noexcept -> T& {
     return m_radius;
   }
 
   template <class T>
   inline
-  auto BoundingSphere<T>::getRadius() const noexcept -> const double& {
+  auto BoundingSphere<T>::getRadius() const noexcept -> const T& {
     return m_radius;
   }
 
@@ -137,7 +137,7 @@ namespace dcel {
     m_radius = 0.0;
     m_center = Vec3::Zero;
 
-    constexpr double half = 0.5;
+    constexpr T half = 0.5;
 
     constexpr int DIM = 3;
 
@@ -159,10 +159,10 @@ namespace dcel {
       }
     }
 
-    double dist = -1;
+    T dist = -1;
     Vec3 p1,p2;
     for (int dir = 0; dir < DIM; dir++){
-      const double len = (max_coord[dir]-min_coord[dir]).length();
+      const T len = (max_coord[dir]-min_coord[dir]).length();
       if(len > dist ){
 	dist = len;
 	p1 = min_coord[dir];
@@ -177,7 +177,7 @@ namespace dcel {
 
     // SECOND PASS
     for (int i = 0; i < a_points.size(); i++){
-      const double dist = (a_points[i]-m_center).length() - m_radius; 
+      const T dist = (a_points[i]-m_center).length() - m_radius; 
       if(dist > 0){ // Point lies outside
 	const Vec3 v  = a_points[i] - m_center;
 	const Vec3 p1 = a_points[i];
@@ -261,12 +261,14 @@ namespace dcel {
 
   template <class T>
   inline
-  auto AABB<T>::getDistanceToPoint(const Vec3& a_point) const noexcept -> double {
+  auto AABB<T>::getDistanceToPoint(const Vec3& a_point) const noexcept -> T {
     const Vec3 delta = Vec3(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
 			    std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
 			    std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));
 
-    const double retval =  std::min(0.0, delta[delta.maxDir(false)]) + std::max(Vec3::Zero, delta).length(); // This is negative inside. 
+    constexpr T zero = 0.0;
+    
+    const T retval =  std::min(zero, delta[delta.maxDir(false)]) + std::max(Vec3::Zero, delta).length(); // This is negative inside. 
   
     return retval;
   }

@@ -216,14 +216,14 @@ namespace dcel {
 
   template <class T>  
   inline
-  auto mesh<T>::signedDistance(const Vec3& a_point) const noexcept -> double {
+  auto mesh<T>::signedDistance(const Vec3& a_point) const noexcept -> T {
     return this->signedDistance(a_point, m_algorithm);
   }
 
   template <class T>  
   inline
-  auto mesh<T>::signedDistance(const Vec3& a_point, SearchAlgorithm a_algorithm) const noexcept -> double {
-    double minDist;
+  auto mesh<T>::signedDistance(const Vec3& a_point, SearchAlgorithm a_algorithm) const noexcept -> T {
+    T minDist;
   
     switch(a_algorithm){
     case SearchAlgorithm::Direct:
@@ -242,11 +242,11 @@ namespace dcel {
 
   template <class T>  
   inline
-  auto mesh<T>::DirectSignedDistance(const Vec3& a_point) const noexcept -> double {
-    double minDist = m_faces.front()->signedDistance(a_point);
+  auto mesh<T>::DirectSignedDistance(const Vec3& a_point) const noexcept -> T {
+    T minDist = m_faces.front()->signedDistance(a_point);
     
     for (const auto& f : m_faces){
-      const double curDist = f->signedDistance(a_point);
+      const T curDist = f->signedDistance(a_point);
 
       if(std::abs(curDist) < std::abs(minDist)){
 	minDist = curDist;
@@ -258,12 +258,12 @@ namespace dcel {
 
   template <class T>  
   inline
-  auto mesh<T>::DirectSignedDistance2(const Vec3& a_point) const noexcept -> double {
+  auto mesh<T>::DirectSignedDistance2(const Vec3& a_point) const noexcept -> T {
     std::shared_ptr<face> closest = m_faces.front();
-    double minDist2 = closest->unsignedDistance2(a_point);
+    T minDist2 = closest->unsignedDistance2(a_point);
 
     for (const auto& f : m_faces){
-      const double curDist2 = f->unsignedDistance2(a_point);
+      const T curDist2 = f->unsignedDistance2(a_point);
 
       if(curDist2 < minDist2) {
 	closest = f;

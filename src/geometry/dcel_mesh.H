@@ -25,7 +25,7 @@ namespace dcel {
   class mesh {
   public:
 
-    using Vec3   = Vec3T<double>;
+    using Vec3   = Vec3T<T>;
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
     using face   = faceT<T>;
@@ -82,18 +82,18 @@ namespace dcel {
     auto getFaces() const noexcept -> const std::vector<std::shared_ptr<face> >&;
 
     inline
-    auto signedDistance(const Vec3& a_x0) const noexcept -> double;
+    auto signedDistance(const Vec3& a_x0) const noexcept -> T;
 
     inline
-    auto signedDistance(const Vec3& a_x0, SearchAlgorithm a_algorithm) const noexcept -> double;
+    auto signedDistance(const Vec3& a_x0, SearchAlgorithm a_algorithm) const noexcept -> T;
 
   protected:
 
     SearchAlgorithm m_algorithm;
     bool m_use_tree;
 
-    BoundingSphere<double> m_boundingSphere;
-    AABB<double> m_boundingBox;
+    BoundingSphere<T> m_boundingSphere;
+    AABB<T> m_boundingBox;
 
     std::vector<std::shared_ptr<vertex> >  m_vertices;
     std::vector<std::shared_ptr<edge> >    m_edges;
@@ -112,10 +112,10 @@ namespace dcel {
     auto reconcileVertices(VertexNormalWeight a_weight) noexcept -> void;
 
     inline
-    auto DirectSignedDistance(const Vec3& a_point) const noexcept -> double;
+    auto DirectSignedDistance(const Vec3& a_point) const noexcept -> T;
 
     inline
-    auto DirectSignedDistance2(const Vec3& a_point) const noexcept -> double;
+    auto DirectSignedDistance2(const Vec3& a_point) const noexcept -> T;
   };
 }
 

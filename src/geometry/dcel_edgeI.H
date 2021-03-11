@@ -255,7 +255,11 @@ namespace dcel {
   inline
   auto edgeT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept -> T {
     T t = this->projectPointToEdge(a_x0);
-    t = std::min(std::max(0.,t), 1.);
+
+    constexpr T zero = 0.0;
+    constexpr T one  = 1.0;
+    
+    t = std::min(std::max(zero,t), one);
 
     const Vec3 linePoint = m_vertex->getPosition() + t*m_x2x1;
 

@@ -13,8 +13,9 @@
 #include "dcel_parser.H"
 #include "dcel_if.H"
 
-
 porsche::porsche(){
+
+  using prec = float;
 
   std::string filename;
   int tree_depth;
@@ -27,8 +28,8 @@ porsche::porsche(){
   pp.get("max_elements", max_elements);
 
   // Build the mesh
-  std::shared_ptr<dcel::mesh<double> > m = std::shared_ptr<dcel::mesh<double>> (new dcel::mesh<double>());
-  dcel::parser::PLY<double>::readASCII(*m, filename);
+  std::shared_ptr<dcel::mesh<prec> > m = std::shared_ptr<dcel::mesh<prec>> (new dcel::mesh<prec>());
+  dcel::parser::PLY<prec>::readASCII(*m, filename);
   m->sanityCheck();
   m->reconcile(dcel::VertexNormalWeight::Angle);
 
@@ -43,7 +44,7 @@ porsche::porsche(){
 
   // Create the if object
   bool flipNormal = false;
-  RefCountedPtr<dcel_if<double> > bif = RefCountedPtr<dcel_if<double> >(new dcel_if<double>(m,false));
+  RefCountedPtr<dcel_if<prec> > bif = RefCountedPtr<dcel_if<prec> >(new dcel_if<prec>(m,false));
 
   m_electrodes.push_back(electrode(bif, true));
   

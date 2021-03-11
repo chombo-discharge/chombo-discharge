@@ -105,15 +105,15 @@ namespace dcel {
 					 const int                              a_numVertices,
 					 std::ifstream&                         a_inputstream) -> void {
 
-    Vec3T<double> pos;
-    double& x = pos[0];
-    double& y = pos[1];
-    double& z = pos[2];
+    Vec3T<T> pos;
+    T& x = pos[0];
+    T& y = pos[1];
+    T& z = pos[2];
 
-    Vec3T<double> norm;
-    double& nx = norm[0];
-    double& ny = norm[1];
-    double& nz = norm[2];
+    Vec3T<T> norm;
+    T& nx = norm[0];
+    T& ny = norm[1];
+    T& nz = norm[2];
   
     int num = 0;
 

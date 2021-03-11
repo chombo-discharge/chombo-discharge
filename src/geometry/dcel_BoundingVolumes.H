@@ -42,7 +42,7 @@ namespace dcel {
     inline
     auto isPointOutside(const Vec3& a_x0) const -> bool;
     
-    virtual auto getDistanceToPoint(const Vec3& a_x0) const -> double = 0;
+    virtual auto getDistanceToPoint(const Vec3& a_x0) const -> T = 0;
   };
 
   template <class T>
@@ -63,13 +63,13 @@ namespace dcel {
     auto intersects(const BoundingSphere& a_other) const noexcept-> bool;
 
     inline
-    auto getDistanceToPoint(const Vec3& a_x0) const noexcept -> double override;
+    auto getDistanceToPoint(const Vec3& a_x0) const noexcept -> T override;
 
     inline
-    auto getRadius() noexcept -> double&;
+    auto getRadius() noexcept -> T&;
 
     inline
-    auto getRadius() const noexcept -> const double&;
+    auto getRadius() const noexcept -> const T&;
 
     inline
     auto getCenter() noexcept -> Vec3&;
@@ -79,7 +79,7 @@ namespace dcel {
 
   protected:
 
-    double m_radius;
+    T m_radius;
     Vec3 m_center;
 
     inline
@@ -105,7 +105,7 @@ namespace dcel {
     auto intersects(const AABB& a_other) const noexcept -> bool;
 
     inline
-    auto getDistanceToPoint(const Vec3& a_x0) const noexcept -> double override;
+    auto getDistanceToPoint(const Vec3& a_x0) const noexcept -> T override;
 
     inline
     auto getLowCorner() noexcept -> Vec3&;
