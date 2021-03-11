@@ -20,45 +20,61 @@ namespace dcel {
     Boundary
   };
 
+  enum class BoundingVolumeAlgorithm {
+    Ritter,
+  };
+
+  template <class T>
   class BoundingVolume {
   public:
 
-    using Vec3 = Vec3T<double>;
+    using Vec3 = Vec3T<T>;
     
     BoundingVolume();
     ~BoundingVolume();
 
+    inline
     auto getPointLocation(const Vec3& a_p) const noexcept -> PointLocation;
+
+    inline
     auto isPointInside(const Vec3& a_x0) const -> bool;
+
+    inline
     auto isPointOutside(const Vec3& a_x0) const -> bool;
     
     virtual auto getDistanceToPoint(const Vec3& a_x0) const -> double = 0;
   };
-  
-  class BoundingSphere : public BoundingVolume {
+
+  template <class T>
+  class BoundingSphere : public BoundingVolume<T> {
   public:
 
-    enum class Algorithm {
-      Ritter,
-    };
-
-    using Vec3 = Vec3T<double>;
+    using Vec3 = Vec3T<T>;
 
     BoundingSphere();
     BoundingSphere(const BoundingSphere& a_other);
-    BoundingSphere(const std::vector<Vec3>& a_points, const Algorithm& a_alg);
+    BoundingSphere(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_alg);
     ~BoundingSphere();
 
-    auto define(const std::vector<Vec3>& a_points, const Algorithm& a_algorithm) noexcept -> void;
+    inline
+    auto define(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept -> void;
 
+    inline
     auto intersects(const BoundingSphere& a_other) const noexcept-> bool;
-    
+
+    inline
     auto getDistanceToPoint(const Vec3& a_x0) const noexcept -> double override;
-    
+
+    inline
     auto getRadius() noexcept -> double&;
+
+    inline
     auto getRadius() const noexcept -> const double&;
-    
+
+    inline
     auto getCenter() noexcept -> Vec3&;
+
+    inline
     auto getCenter() const noexcept -> const Vec3&;
 
   protected:
@@ -66,13 +82,15 @@ namespace dcel {
     double m_radius;
     Vec3 m_center;
 
+    inline
     auto buildRitter(const std::vector<Vec3>& a_points) noexcept -> void;
   };
 
-  class AABB : public BoundingVolume {
+  template <class T>
+  class AABB : public BoundingVolume<T> {
   public:
 
-    using Vec3 = Vec3T<double>;
+    using Vec3 = Vec3T<T>;
 
     AABB();
     AABB(const AABB& a_other);
@@ -80,18 +98,26 @@ namespace dcel {
     AABB(const std::vector<Vec3>& a_points);
     ~AABB();
 
+    inline
     auto define(const std::vector<Vec3>& a_points) noexcept -> void;
 
+    inline
     auto intersects(const AABB& a_other) const noexcept -> bool;
-    
+
+    inline
     auto getDistanceToPoint(const Vec3& a_x0) const noexcept -> double override;
 
+    inline
     auto getLowCorner() noexcept -> Vec3&;
+
+    inline
     auto getLowCorner() const noexcept -> const Vec3&;
 
+    inline
     auto getHighCorner() noexcept -> Vec3&;
-    auto getHighCorner() const noexcept -> const Vec3&;
 
+    inline
+    auto getHighCorner() const noexcept -> const Vec3&;
     
   protected:
 
@@ -99,5 +125,7 @@ namespace dcel {
     Vec3 m_hiCorner;
   };
 }
+
+#include "dcel_BoundingVolumesI.H"
 
 #endif

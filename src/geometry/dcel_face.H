@@ -91,14 +91,14 @@ namespace dcel {
 
     double m_area;
     
-    Vec3   m_normal;
-    Vec3   m_centroid;
-    Vec3   m_lo;
-    Vec3   m_hi;
+    Vec3 m_normal;
+    Vec3 m_centroid;
+    Vec3 m_lo;
+    Vec3 m_hi;
 
     // Potential bounding volumes
-    BoundingSphere m_boundingSphere;
-    AABB m_boundingBox;
+    BoundingSphere<double> m_boundingSphere;
+    AABB<double> m_boundingBox;
 
     // 2D polygon
     std::shared_ptr<Polygon2D<double> > m_poly2;

@@ -88,8 +88,8 @@ namespace dcel {
     SearchAlgorithm m_algorithm;
     bool m_use_tree;
 
-    BoundingSphere m_boundingSphere;
-    AABB m_boundingBox;
+    BoundingSphere<double> m_boundingSphere;
+    AABB<double> m_boundingBox;
 
     std::vector<std::shared_ptr<vertex> >  m_vertices;
     std::vector<std::shared_ptr<edge> >    m_edges;

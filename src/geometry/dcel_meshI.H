@@ -146,7 +146,7 @@ namespace dcel {
 
   inline
   auto mesh::computeBoundingSphere() noexcept -> void {
-    m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingSphere::Algorithm::Ritter);
+    m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingVolumeAlgorithm::Ritter);
   }
 
   inline
