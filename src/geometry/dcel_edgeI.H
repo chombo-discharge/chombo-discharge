@@ -86,12 +86,12 @@ namespace dcel {
   }
 
   inline
-  void edge::normalizeNormalVector() noexcept {
+  auto edge::normalizeNormalVector() noexcept -> void {
     m_normal = m_normal/m_normal.length();
   }
 
   inline
-  void edge::computeEdgeLength() noexcept {
+  auto edge::computeEdgeLength() noexcept -> void {
     const Vec3& x1 = this->getVertex()->getPosition();
     const Vec3& x2 = this->getOtherVertex()->getPosition();
 
@@ -100,7 +100,7 @@ namespace dcel {
   }
 
   inline
-  void edge::computeNormal() noexcept {
+  auto edge::computeNormal() noexcept -> void {
     const std::shared_ptr<edge>& pairEdge = this->getPairEdge();
 
     const std::shared_ptr<face>& F     = this->getFace();
@@ -151,22 +151,22 @@ namespace dcel {
   }
 
   inline
-  std::shared_ptr<edge>& edge::getPreviousEdge() noexcept {
+  auto edge::getPreviousEdge() noexcept -> std::shared_ptr<edge>&  {
     return m_previousEdge;
   }
 
   inline
-  const std::shared_ptr<edge>& edge::getPreviousEdge() const noexcept {
+  auto edge::getPreviousEdge() const noexcept -> const std::shared_ptr<edge>& {
     return m_previousEdge;
   }
 
   inline
-  std::shared_ptr<edge>& edge::getNextEdge() noexcept {
+  auto edge::getNextEdge() noexcept -> std::shared_ptr<edge>& {
     return m_nextEdge;
   }
 
   inline
-  const std::shared_ptr<edge>& edge::getNextEdge() const noexcept {
+  auto edge::getNextEdge() const noexcept -> const std::shared_ptr<edge>&  {
     return m_nextEdge;
   }
 
@@ -181,24 +181,24 @@ namespace dcel {
   }
 
   inline
-  std::shared_ptr<face>& edge::getFace() noexcept {
+  auto edge::getFace() noexcept -> std::shared_ptr<face>& {
     return m_face;
   }
 
   inline
-  const std::shared_ptr<face>& edge::getFace() const noexcept {
+  auto edge::getFace() const noexcept -> const std::shared_ptr<face>& {
     return m_face;
   }
 
   inline
-  double edge::projectPointToEdge(const Vec3& a_x0) const noexcept {
+  auto edge::projectPointToEdge(const Vec3& a_x0) const noexcept -> double {
     const Vec3 p = a_x0 - m_vertex->getPosition();
 
     return p.dot(m_x2x1)/m_len2;
   }
 
   inline
-  double edge::signedDistance(const Vec3& a_x0) const noexcept {
+  auto edge::signedDistance(const Vec3& a_x0) const noexcept -> double {
     const double t = this->projectPointToEdge(a_x0);
 
     double retval;
@@ -223,7 +223,7 @@ namespace dcel {
   }
 
   inline
-  double edge::unsignedDistance2(const Vec3& a_x0) const noexcept {
+  auto edge::unsignedDistance2(const Vec3& a_x0) const noexcept -> double {
     double t = this->projectPointToEdge(a_x0);
     t = std::min(std::max(0.,t), 1.);
 

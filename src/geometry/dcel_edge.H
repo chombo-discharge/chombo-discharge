@@ -75,16 +75,16 @@ namespace dcel {
     auto getPairEdge() const noexcept -> const std::shared_ptr<edge>& ;
 
     inline
-    std::shared_ptr<edge>& getPreviousEdge() noexcept;
+    auto getPreviousEdge() noexcept -> std::shared_ptr<edge>&;
 
     inline
-    const std::shared_ptr<edge>& getPreviousEdge() const noexcept;
+    auto getPreviousEdge() const noexcept -> const std::shared_ptr<edge>& ;
 
     inline
-    std::shared_ptr<edge>& getNextEdge() noexcept;
+    auto getNextEdge() noexcept -> std::shared_ptr<edge>& ;
 
     inline
-    const std::shared_ptr<edge>& getNextEdge() const noexcept;
+    auto getNextEdge() const noexcept -> const std::shared_ptr<edge>& ;
 
     inline
     auto getNormal() noexcept -> Vec3&;
@@ -99,10 +99,10 @@ namespace dcel {
     const std::shared_ptr<face>& getFace() const noexcept;
 
     inline
-    double signedDistance(const Vec3& a_x0) const noexcept;
+    auto signedDistance(const Vec3& a_x0) const noexcept -> double;
 
     inline
-    double unsignedDistance2(const Vec3& a_x0) const noexcept;
+    auto unsignedDistance2(const Vec3& a_x0) const noexcept -> double;
 
   protected:
 
@@ -117,16 +117,16 @@ namespace dcel {
     std::shared_ptr<face>    m_face;
 
     inline
-    double projectPointToEdge(const Vec3& a_x0) const noexcept;
+    auto projectPointToEdge(const Vec3& a_x0) const noexcept -> double;
 
     inline
-    void normalizeNormalVector() noexcept;
+    auto normalizeNormalVector() noexcept -> void;
 
     inline
-    void computeEdgeLength() noexcept;
+    auto computeEdgeLength() noexcept -> void;
 
     inline
-    void computeNormal() noexcept;
+    auto computeNormal() noexcept -> void;
   };
 
 }
