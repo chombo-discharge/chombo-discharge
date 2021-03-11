@@ -28,49 +28,49 @@ namespace dcel {
     T y;
 
     inline
-    Vec2T& operator=(const Vec2T& a_other) noexcept;
+    auto operator=(const Vec2T& a_other) noexcept -> Vec2T<T>&;
 
     inline
-    Vec2T operator+(const Vec2T& a_other) const noexcept;
+    auto operator+(const Vec2T& a_other) const noexcept -> Vec2T<T>;
 
     inline
-    Vec2T operator-(const Vec2T& a_other) const noexcept;
+    auto operator-(const Vec2T& a_other) const noexcept -> Vec2T<T>;
 
     inline
-    Vec2T operator*(const T& s) const noexcept;
+    auto operator*(const T& s) const noexcept -> Vec2T<T>;
 
     inline
-    Vec2T operator/(const T& s) const noexcept;
+    auto operator/(const T& s) const noexcept -> Vec2T<T>;
 
     inline
-    Vec2T& operator+=(const Vec2T& a_other) noexcept;
+    auto operator+=(const Vec2T& a_other) noexcept -> Vec2T<T>&;
 
     inline
-    Vec2T& operator-=(const Vec2T& a_other) noexcept;
+    auto operator-=(const Vec2T& a_other) noexcept -> Vec2T<T>&;
 
     inline
-    Vec2T& operator*=(const T& s) noexcept;
+    auto operator*=(const T& s) noexcept -> Vec2T<T>&;
 
     inline
-    Vec2T& operator/=(const T& s) noexcept;
+    auto operator/=(const T& s) noexcept -> Vec2T<T>&;
 
     inline
-    T dot(const Vec2T& a_other) const noexcept;
+    auto dot(const Vec2T& a_other) const noexcept -> T;
 
     inline
-    T length() const noexcept;
+    auto length() const noexcept -> T;
 
     inline
-    T length2() const noexcept;
+    auto length2() const noexcept ->T;
   };
 
   template <class T>
   inline
-  Vec2T<T> operator*(const T& s, const Vec2T<T>& a_other) noexcept;
+  auto operator*(const T& s, const Vec2T<T>& a_other) noexcept -> Vec2T<T>;
 
   template <class T>
   inline
-  Vec2T<T> operator/(const T& s, const Vec2T<T>& a_other) noexcept;
+  auto operator/(const T& s, const Vec2T<T>& a_other) noexcept -> Vec2T<T>;
 
   template <class T>
   class Vec3T {

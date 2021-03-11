@@ -23,7 +23,7 @@ namespace dcel {
 
   template <class T>
   inline
-  Vec2T<T>& Vec2T<T>::operator=(const Vec2T<T>& u) noexcept {
+  auto Vec2T<T>::operator=(const Vec2T<T>& u) noexcept -> Vec2T<T>& {
     x = u.x;
     y = u.y;
 
@@ -32,32 +32,32 @@ namespace dcel {
 
   template <class T>
   inline
-  Vec2T<T> Vec2T<T>::operator+(const Vec2T<T>& u) const noexcept {
+  auto Vec2T<T>::operator+(const Vec2T<T>& u) const noexcept -> Vec2T<T>{
     return Vec2T<T>(x+u.x, y+u.y);
   }
 
   template <class T>
   inline
-  Vec2T<T> Vec2T<T>::operator-(const Vec2T<T>& u) const noexcept {
+  auto Vec2T<T>::operator-(const Vec2T<T>& u) const noexcept -> Vec2T<T> {
     return Vec2T<T>(x-u.x, y-u.y);
   }
 
   template <class T>
   inline
-  Vec2T<T> Vec2T<T>::operator*(const T& s) const noexcept {
+  auto Vec2T<T>::operator*(const T& s) const noexcept -> Vec2T<T> {
     return Vec2T<T>(x*s, y*s);
   }
 
   template <class T>
   inline
-  Vec2T<T> Vec2T<T>::operator/(const T& s) const noexcept {
+  auto Vec2T<T>::operator/(const T& s) const noexcept -> Vec2T<T>{
     const T is = 1./s;
     return Vec2T<T>(x*is, y*is);
   }
 
   template <class T>
   inline
-  Vec2T<T>& Vec2T<T>::operator+=(const Vec2T<T>& u) noexcept {
+  auto Vec2T<T>::operator+=(const Vec2T<T>& u) noexcept -> Vec2T<T>& {
     x += u.x;
     y += u.y;
 
@@ -66,7 +66,7 @@ namespace dcel {
 
   template <class T>
   inline
-  Vec2T<T>& Vec2T<T>::operator-=(const Vec2T<T>& u) noexcept {
+  auto Vec2T<T>::operator-=(const Vec2T<T>& u) noexcept -> Vec2T<T>& {
     x -= u.x;
     y -= u.y;
 
@@ -75,7 +75,7 @@ namespace dcel {
 
   template <class T>
   inline
-  Vec2T<T>& Vec2T<T>::operator*=(const T& s) noexcept {
+  auto Vec2T<T>::operator*=(const T& s) noexcept -> Vec2T<T>& {
     x *= s;
     y *= s;
 
@@ -84,7 +84,7 @@ namespace dcel {
 
   template <class T>
   inline
-  Vec2T<T>& Vec2T<T>::operator/=(const T& s) noexcept {
+  auto Vec2T<T>::operator/=(const T& s) noexcept -> Vec2T<T>& {
     const T is = 1./s;
     
     x *= is;
@@ -95,31 +95,31 @@ namespace dcel {
 
   template <class T>
   inline
-  T Vec2T<T>::dot(const Vec2T<T>& u) const noexcept{
+  auto Vec2T<T>::dot(const Vec2T<T>& u) const noexcept -> T {
     return x*u.x + y*u.y;
   }
 
   template <class T>
   inline
-  T Vec2T<T>::length() const noexcept {
+  auto Vec2T<T>::length() const noexcept -> T {
     return sqrt(x*x + y*y);
   }
 
   template <class T>
   inline
-  T Vec2T<T>::length2() const noexcept {
+  auto Vec2T<T>::length2() const noexcept -> T {
     return x*x + y*y;
   }
 
   template <class T>
   inline
-  Vec2T<T> operator*(const T& s, const Vec2T<T>& a_other) noexcept {
+  auto operator*(const T& s, const Vec2T<T>& a_other) noexcept -> Vec2T<T> {
     return a_other*s;
   }
 
   template <class T>
   inline
-  Vec2T<T> operator/(const T& s, const Vec2T<T>& a_other) noexcept {
+  auto operator/(const T& s, const Vec2T<T>& a_other) noexcept -> Vec2T<T> {
     return a_other/s;
   }
 
