@@ -45,7 +45,7 @@ namespace dcel {
   }
 
   inline
-  void mesh::sanityCheck() const {
+  auto mesh::sanityCheck() const noexcept -> void {
     for (const auto& e : m_edges){
       const auto& nextEdge  = e->getNextEdge();
       const auto& prevEdge  = e->getPreviousEdge();
@@ -94,26 +94,26 @@ namespace dcel {
   }
 
   inline
-  void mesh::setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept {
+  auto mesh::setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept -> void {
     m_algorithm = a_algorithm;
   }
 
   inline
-  void mesh::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm a_algorithm) noexcept {
+  auto mesh::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm a_algorithm) noexcept -> void {
     for (auto& f : m_faces){
       f->setInsideOutsideAlgorithm(a_algorithm);
     }
   }
 
   inline
-  void mesh::reconcile(VertexNormalWeight a_weight) noexcept {
+  auto mesh::reconcile(VertexNormalWeight a_weight) noexcept -> void {
     this->reconcileFaces();
     this->reconcileEdges();
     this->reconcileVertices(a_weight);
   }
 
   inline
-  void mesh::reconcileFaces() noexcept{
+  auto mesh::reconcileFaces() noexcept -> void {
     // Reconcile faces; compute face area and provide edges explicit access
     // to their faces
     for (auto& f : m_faces){
@@ -122,14 +122,14 @@ namespace dcel {
   }
 
   inline
-  void mesh::reconcileEdges() noexcept {
+  auto mesh::reconcileEdges() noexcept -> void {
     for (auto& e : m_edges){
       e->reconcile();
     }
   }
 
   inline
-  void mesh::reconcileVertices(VertexNormalWeight a_weight) noexcept {
+  auto mesh::reconcileVertices(VertexNormalWeight a_weight) noexcept -> void {
     for (auto& v : m_vertices){
       switch(a_weight) {
       case VertexNormalWeight::None:
@@ -145,48 +145,48 @@ namespace dcel {
   }
 
   inline
-  void mesh::computeBoundingSphere() noexcept {
+  auto mesh::computeBoundingSphere() noexcept -> void {
     m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingSphere::Algorithm::Ritter);
   }
 
   inline
-  void mesh::computeBoundingBox() noexcept {
+  auto mesh::computeBoundingBox() noexcept -> void {
     m_boundingBox.define(this->getAllVertexCoordinates());
   }
 
   inline
-  std::vector<std::shared_ptr<vertex> >& mesh::getVertices() noexcept {
+  auto mesh::getVertices() noexcept -> std::vector<std::shared_ptr<vertex> >& {
     return m_vertices;
   }
 
   inline
-  const std::vector<std::shared_ptr<vertex> >& mesh::getVertices() const noexcept {
+  auto mesh::getVertices() const noexcept -> const std::vector<std::shared_ptr<vertex> >& {
     return m_vertices;
   }
 
   inline
-  std::vector<std::shared_ptr<edge> >& mesh::getEdges() noexcept {
+  auto mesh::getEdges() noexcept -> std::vector<std::shared_ptr<edge> >& {
     return m_edges;
   }
 
   inline
-  const std::vector<std::shared_ptr<edge> >& mesh::getEdges() const noexcept {
+  auto mesh::getEdges() const noexcept -> const std::vector<std::shared_ptr<edge> >& {
     return m_edges;
   }
 
   inline
-  std::vector<std::shared_ptr<face> >& mesh::getFaces() noexcept {
+  auto mesh::getFaces() noexcept -> std::vector<std::shared_ptr<face> >& {
     return m_faces;
   }
 
   inline
-  const std::vector<std::shared_ptr<face> >& mesh::getFaces() const noexcept {
+  auto mesh::getFaces() const noexcept -> const std::vector<std::shared_ptr<face> >& {
     return m_faces;
   }
 
   inline
-  std::vector<Vec3T<double> > mesh::getAllVertexCoordinates() const noexcept{
-    std::vector<Vec3T<double> > vertexCoordinates;
+  auto mesh::getAllVertexCoordinates() const noexcept -> std::vector<Vec3 >{
+    std::vector<Vec3 > vertexCoordinates;
     for (const auto& v : m_vertices){
       vertexCoordinates.emplace_back(v->getPosition());
     }
@@ -195,12 +195,12 @@ namespace dcel {
   }
 
   inline
-  double mesh::signedDistance(const Vec3T<double>& a_point) const noexcept {
+  auto mesh::signedDistance(const Vec3& a_point) const noexcept -> double {
     return this->signedDistance(a_point, m_algorithm);
   }
 
   inline
-  double mesh::signedDistance(const Vec3T<double>& a_point, SearchAlgorithm a_algorithm) const noexcept {
+  auto mesh::signedDistance(const Vec3& a_point, SearchAlgorithm a_algorithm) const noexcept -> double {
     double minDist;
   
     switch(a_algorithm){
@@ -219,7 +219,7 @@ namespace dcel {
   }
 
   inline
-  double mesh::DirectSignedDistance(const Vec3T<double>& a_point) const noexcept {
+  auto mesh::DirectSignedDistance(const Vec3& a_point) const noexcept -> double {
     double minDist = m_faces.front()->signedDistance(a_point);
     
     for (const auto& f : m_faces){
@@ -234,7 +234,7 @@ namespace dcel {
   }
 
   inline
-  double mesh::DirectSignedDistance2(const Vec3T<double>& a_point) const noexcept {
+  auto mesh::DirectSignedDistance2(const Vec3& a_point) const noexcept -> double {
     std::shared_ptr<face> closest = m_faces.front();
     double minDist2 = closest->unsignedDistance2(a_point);
 
