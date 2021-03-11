@@ -131,8 +131,7 @@ namespace dcel {
   inline
   void mesh::reconcileEdges() noexcept {
     for (auto& e : m_edges){
-      e->computeNormal();
-      e->computeEdgeLength();
+      e->reconcile();
     }
   }
 

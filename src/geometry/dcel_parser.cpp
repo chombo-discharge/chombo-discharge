@@ -217,16 +217,3 @@ void dcel::parser::PLY::clearFaceCache(std::vector<std::shared_ptr<dcel::vertex>
     v->clearFaceCache();
   }
 }
-
-void dcel::parser::PLY::computeEdgeLengths(std::vector<std::shared_ptr<dcel::edge> >& a_edges){
-  for (auto& e : a_edges){
-    e->computeEdgeLength();
-  }
-}
-
-void dcel::parser::PLY::computeVerticesAndEdges(std::vector<std::shared_ptr<dcel::face> >& a_faces){
-  for (auto& p : a_faces){
-    p->computeVerticesAndEdges();
-    p->computePolygon2D();
-  }
-}

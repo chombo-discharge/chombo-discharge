@@ -35,25 +35,20 @@ namespace dcel {
 		const std::shared_ptr<edge>&   a_previousEdge,
 		const RealVect                 a_normal = RealVect::Zero);
 
-    // Set functions
     void setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept;
     void setPairEdge(const std::shared_ptr<edge>& a_pairEdge) noexcept;
     void setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept;
     void setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept;
-    void setNormal(const RealVect a_normal) noexcept;
     void setFace(const std::shared_ptr<face>& a_face) noexcept;
-    void normalizeNormalVector() noexcept;
-    void computeEdgeLength() noexcept;
-    void computeNormal() noexcept;
 
-    // Get functions for vertices
+    void reconcile() noexcept;
+
     std::shared_ptr<vertex>& getVertex() noexcept;
     const std::shared_ptr<vertex>& getVertex() const noexcept;
 
     std::shared_ptr<vertex>& getOtherVertex() noexcept;
     const std::shared_ptr<vertex>& getOtherVertex() const noexcept;
 
-    // Get functions for edges
     std::shared_ptr<edge>& getPairEdge() noexcept;
     const std::shared_ptr<edge>& getPairEdge() const noexcept;
 
@@ -68,8 +63,6 @@ namespace dcel {
 
     std::shared_ptr<face>& getFace() noexcept;  
     const std::shared_ptr<face>& getFace() const noexcept;
-
-    bool isOrthogonal(const RealVect& a_x0) const noexcept;
 
     Real signedDistance(const RealVect& a_x0) const noexcept;
     Real unsignedDistance2(const RealVect& a_x0) const noexcept;
@@ -89,7 +82,14 @@ namespace dcel {
     std::shared_ptr<face>    m_face;
 
     Real projectPointToEdge(const RealVect& a_x0) const noexcept;
+    
+    void normalizeNormalVector() noexcept;
+    void computeEdgeLength() noexcept;
+    void computeNormal() noexcept;
   };
 
 }
+
+#include "dcel_edgeI.H"
+
 #endif

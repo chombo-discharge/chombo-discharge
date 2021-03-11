@@ -69,16 +69,6 @@ namespace dcel {
 	@brief Clean up memory
       */
       static void clearFaceCache(std::vector<std::shared_ptr<dcel::vertex> >& a_vertices);
-
-      /*!
-	@brief Give each edge a length and a vector for parametrization
-      */
-      static void computeEdgeLengths(std::vector<std::shared_ptr<dcel::edge> >& a_edges);
-
-      /*!
-	@brief Give each face access to edges and vertices so they don't have to be looked up every time. 
-      */
-      static void computeVerticesAndEdges(std::vector<std::shared_ptr<dcel::face> >& a_faces);
     };
   }
 }
