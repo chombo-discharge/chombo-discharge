@@ -12,33 +12,6 @@
 
 using namespace dcel;
 
-vertex::vertex(){
-  m_pos    = RealVect::Zero;
-  m_normal = RealVect::Zero;
-
-  m_faceCache.resize(0);
-}
-
-vertex::vertex(const RealVect& a_pos){
-  m_pos    = a_pos;
-  m_normal = RealVect::Zero;
-}
-
-vertex::vertex(const RealVect& a_pos, const RealVect& a_normal){
-  m_pos    = a_pos;
-  m_normal = a_normal;
-}
-
-vertex::vertex(const vertex& a_otherVertex){
-  this->define(a_otherVertex.getPosition(),
-	       a_otherVertex.getEdge(),
-	       a_otherVertex.getNormal());
-}
-
-vertex::~vertex(){
-
-}
-
 void vertex::define(const RealVect& a_pos, const std::shared_ptr<edge>& a_edge, const RealVect a_normal) noexcept {
   this->setPosition(a_pos);
   this->setEdge(a_edge);
