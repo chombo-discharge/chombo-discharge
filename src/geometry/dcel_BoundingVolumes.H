@@ -72,24 +72,27 @@ namespace dcel {
   class AABB : public BoundingVolume {
   public:
 
+    using Vec3 = Vec3T<double>;
+
     AABB();
     AABB(const AABB& a_other);
     AABB(const std::vector<AABB>& a_others);
     AABB(const std::vector<Vec3>& a_points);
     ~AABB();
 
-    void define(const std::vector<Vec3>& a_points);
+    auto define(const std::vector<Vec3>& a_points) noexcept -> void;
 
-    bool intersects(const AABB& a_other) const;
+    auto intersects(const AABB& a_other) const noexcept -> bool;
     
-    auto getDistanceToPoint(const Vec3& a_x0) const -> double override;
+    auto getDistanceToPoint(const Vec3& a_x0) const noexcept -> double override;
 
-    Vec3& getLowCorner();
-    const Vec3& getLowCorner() const;
+    auto getLowCorner() noexcept -> Vec3&;
+    auto getLowCorner() const noexcept -> const Vec3&;
 
-    Vec3& getHighCorner();
-    const Vec3& getHighCorner() const;
+    auto getHighCorner() noexcept -> Vec3&;
+    auto getHighCorner() const noexcept -> const Vec3&;
 
+    
   protected:
 
     Vec3 m_loCorner;

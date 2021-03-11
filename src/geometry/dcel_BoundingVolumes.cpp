@@ -161,8 +161,8 @@ auto BoundingSphere::buildRitter(const std::vector<Vec3>& a_points) noexcept -> 
 }
 
 AABB::AABB(){
-  m_loCorner = Vec3T<double>::Zero;
-  m_hiCorner = Vec3T<double>::Zero;
+  m_loCorner = Vec3::Zero;
+  m_hiCorner = Vec3::Zero;
 }
 
 AABB::AABB(const AABB& a_other){
@@ -177,8 +177,8 @@ AABB::AABB(const std::vector<AABB>& a_others) {
   m_hiCorner = a_others.front().getHighCorner();
 
   for (const auto& other : a_others){
-    const Vec3T<double>& otherLo = other.getLowCorner();
-    const Vec3T<double>& otherHi = other.getHighCorner();
+    const Vec3& otherLo = other.getLowCorner();
+    const Vec3& otherHi = other.getHighCorner();
     
     for (int dir = 0; dir < DIM; dir++){
       m_loCorner[dir] = std::min(m_loCorner[dir], otherLo[dir]);
@@ -187,7 +187,7 @@ AABB::AABB(const std::vector<AABB>& a_others) {
   }
 }
 
-AABB::AABB(const std::vector<Vec3T<double> >& a_points){
+AABB::AABB(const std::vector<Vec3 >& a_points){
   this->define(a_points);
 }
 
@@ -195,7 +195,7 @@ AABB::~AABB(){
 
 }
 
-void AABB::define(const std::vector<Vec3T<double> >& a_points){
+auto AABB::define(const std::vector<Vec3 >& a_points) noexcept -> void{
   constexpr int DIM = 3;
   m_loCorner = a_points.front();
   m_hiCorner = a_points.front();
@@ -208,9 +208,9 @@ void AABB::define(const std::vector<Vec3T<double> >& a_points){
   }
 }
 
-bool AABB::intersects(const AABB& a_other) const {
-  const Vec3T<double>& otherLo = a_other.getLowCorner();
-  const Vec3T<double>& otherHi = a_other.getHighCorner();
+auto AABB::intersects(const AABB& a_other) const noexcept -> bool {
+  const Vec3& otherLo = a_other.getLowCorner();
+  const Vec3& otherHi = a_other.getHighCorner();
 
 
   return (m_loCorner[0] < otherHi[0] && m_hiCorner[0] > otherLo[0]) &&
@@ -218,28 +218,28 @@ bool AABB::intersects(const AABB& a_other) const {
          (m_loCorner[2] < otherHi[2] && m_hiCorner[2] > otherLo[2]);
 }
     
-auto AABB::getDistanceToPoint(const Vec3T<double>& a_point) const -> double {
-  const Vec3T<double> delta = Vec3T<double>(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
+auto AABB::getDistanceToPoint(const Vec3& a_point) const noexcept -> double {
+  const Vec3 delta = Vec3(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
 					  std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
 					  std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));
 
-  const double retval =  std::min(0.0, delta[delta.maxDir(false)]) + std::max(Vec3T<double>::Zero, delta).length(); // This is negative inside. 
+  const double retval =  std::min(0.0, delta[delta.maxDir(false)]) + std::max(Vec3::Zero, delta).length(); // This is negative inside. 
   
   return retval;
 }
 
-Vec3T<double>& AABB::getLowCorner(){
+auto AABB::getLowCorner() noexcept -> Vec3& {
   return m_loCorner;
 }
 
-const Vec3T<double>& AABB::getLowCorner() const{
+auto AABB::getLowCorner() const noexcept -> const Vec3& {
+  return m_loCorner;
+}
+
+auto AABB::getHighCorner() noexcept -> Vec3& {
   return m_hiCorner;
 }
 
-Vec3T<double>& AABB::getHighCorner(){
-  return m_loCorner;
-}
-
-const Vec3T<double>& AABB::getHighCorner() const{
+auto AABB::getHighCorner() const noexcept -> const Vec3& {
   return m_hiCorner;
 }
