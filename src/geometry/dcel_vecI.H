@@ -133,7 +133,7 @@ namespace dcel {
 
   template <class T>
   inline
-  Vec3T<T>& Vec3T<T>::operator=(const Vec3T<T>& u) noexcept {
+  auto Vec3T<T>::operator=(const Vec3T<T>& u) noexcept -> Vec3T<T>& {
     X[0] = u[0];
     X[1] = u[1];
     X[2] = u[2];
@@ -143,32 +143,32 @@ namespace dcel {
 
   template <class T>
   inline
-  Vec3T<T> Vec3T<T>::operator+(const Vec3T<T>& u) const noexcept {
+  auto Vec3T<T>::operator+(const Vec3T<T>& u) const noexcept -> Vec3T<T> {
     return Vec3T<T>(X[0]+u[0], X[1]+u[1], X[2]+u[2]);
   }
 
   template <class T>
   inline
-  Vec3T<T> Vec3T<T>::operator-(const Vec3T<T>& u) const noexcept {
+  auto Vec3T<T>::operator-(const Vec3T<T>& u) const noexcept -> Vec3T<T> {
     return Vec3T<T>(X[0]-u[0], X[1]-u[1], X[2]-u[2]);
   }
 
   template <class T>
   inline
-  Vec3T<T> Vec3T<T>::operator*(const T& s) const noexcept {
+  auto Vec3T<T>::operator*(const T& s) const noexcept -> Vec3T<T> {
     return Vec3T(s*X[0], s*X[1], s*X[2]);
   }
 
   template <class T>
   inline
-  Vec3T<T> Vec3T<T>::operator/(const T& s) const noexcept {
+  auto Vec3T<T>::operator/(const T& s) const noexcept -> Vec3T<T> {
     const T is = 1./s;
     return Vec3T(is*X[0], is*X[1], is*X[2]);
   }
   
   template <class T>
   inline
-  Vec3T<T>& Vec3T<T>::operator+=(const Vec3T<T>& u) noexcept {
+  auto Vec3T<T>::operator+=(const Vec3T<T>& u) noexcept -> Vec3T<T>& {
     X[0] += u[0];
     X[1] += u[1];
     X[2] += u[2];
@@ -178,7 +178,7 @@ namespace dcel {
 
   template <class T>
   inline
-  Vec3T<T>& Vec3T<T>::operator-=(const Vec3T<T>& u) noexcept {
+  auto Vec3T<T>::operator-=(const Vec3T<T>& u) noexcept -> Vec3T<T>& {
     X[0] -= u[0];
     X[1] -= u[1];
     X[2] -= u[2];
@@ -188,7 +188,7 @@ namespace dcel {
 
   template <class T>
   inline
-  Vec3T<T>& Vec3T<T>::operator*=(const T& s) noexcept {
+  auto Vec3T<T>::operator*=(const T& s) noexcept -> Vec3T<T>& {
     X[0] *= s;
     X[1] *= s;
     X[2] *= s;
@@ -198,7 +198,7 @@ namespace dcel {
 
   template <class T>
   inline
-  Vec3T<T>& Vec3T<T>::operator/=(const T& s) noexcept {
+  auto Vec3T<T>::operator/=(const T& s) noexcept -> Vec3T<T>& {
     const T is = 1./s;
     
     X[0] *= is;
@@ -210,7 +210,7 @@ namespace dcel {
 
   template <class T>
   inline
-  Vec3T<T> Vec3T<T>::cross(const Vec3T<T>& u) const noexcept {
+  auto Vec3T<T>::cross(const Vec3T<T>& u) const noexcept -> Vec3T<T> {
     return Vec3T<T>(X[1]*u[2] - X[2]*u[1],
 		   X[2]*u[0] - X[0]*u[2],
 		   X[0]*u[1] - X[1]*u[0]);
@@ -218,19 +218,19 @@ namespace dcel {
 
   template <class T>
   inline
-  T& Vec3T<T>::operator[](int i) noexcept {
+  auto Vec3T<T>::operator[](int i) noexcept -> T& {
     return X[i];
   }
 
   template <class T>
   inline
-  const T& Vec3T<T>::operator[](int i) const noexcept {
+  auto  Vec3T<T>::operator[](int i) const noexcept -> const T& {
     return X[i];
   }
 
   template <class T>
   inline
-  int Vec3T<T>::maxDir(const bool a_doAbs) const noexcept {
+  auto Vec3T<T>::maxDir(const bool a_doAbs) const noexcept -> int {
     int mDir = 0;
     
     for (int dir = 0; dir < 3; dir++){
@@ -251,61 +251,61 @@ namespace dcel {
 
   template <class T>
   inline
-  bool Vec3T<T>::operator==(const Vec3T<T>& u) const noexcept {
+  auto Vec3T<T>::operator==(const Vec3T<T>& u) const noexcept -> bool {
     return (X[0]==u[0] && X[1]==u[1] && X[2]==u[2]);
   }
 
   template <class T>
   inline
-  bool Vec3T<T>::operator<(const Vec3T<T>& u) const noexcept {
+  auto Vec3T<T>::operator<(const Vec3T<T>& u) const noexcept -> bool {
     return (X[0]<u[0] && X[1]<u[1] && X[2]<u[2]);
   }
 
   template <class T>
   inline
-  bool Vec3T<T>::operator>(const Vec3T<T>& u) const noexcept {
+  auto Vec3T<T>::operator>(const Vec3T<T>& u) const noexcept -> bool {
     return (X[0]>u[0] && X[1]>u[1] && X[2]>u[2]);
   }
 
   template <class T>
   inline
-  bool Vec3T<T>::operator<=(const Vec3T<T>& u) const noexcept {
+  auto Vec3T<T>::operator<=(const Vec3T<T>& u) const noexcept -> bool {
     return (X[0]<=u[0] && X[1]<=u[1] && X[2]<=u[2]);
   }
 
   template <class T>
   inline
-  bool Vec3T<T>::operator>=(const Vec3T<T>& u) const noexcept {
+  auto Vec3T<T>::operator>=(const Vec3T<T>& u) const noexcept -> bool {
     return (X[0]>=u[0] && X[1]>=u[1] && X[2]>=u[2]);
   }
 
   template <class T>
   inline
-  T Vec3T<T>::dot(const Vec3T<T>& u) const noexcept {
+  auto Vec3T<T>::dot(const Vec3T<T>& u) const noexcept -> T {
     return X[0]*u[0] + X[1]*u[1] + X[2]*u[2];
   }
 
   template <class T>
   inline
-  T Vec3T<T>::length() const noexcept {
+  auto Vec3T<T>::length() const noexcept -> T {
     return sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
   }
 
   template <class T>
   inline
-  T Vec3T<T>::length2() const noexcept {
+  auto Vec3T<T>::length2() const noexcept -> T {
     return X[0]*X[0] + X[1]*X[1] + X[2]*X[2];
   }
 
   template <class T>
   inline
-  Vec3T<T> operator*(const T& s, const Vec3T<T>& a_other) noexcept {
+  auto operator*(const T& s, const Vec3T<T>& a_other) noexcept -> Vec3T<T> {
     return a_other*s;
   }
 
   template <class T>
   inline
-  Vec3T<T> operator/(const T& s, const Vec3T<T>& a_other) noexcept {
+  auto operator/(const T& s, const Vec3T<T>& a_other) noexcept -> Vec3T<T> {
     return a_other/s;
   }
 }

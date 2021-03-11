@@ -8,9 +8,6 @@
 #ifndef _DCEL_VEC_H_
 #define _DCEL_VEC_H_
 
-#include <memory>
-#include <vector>
-
 namespace dcel {
 
   template<class T>
@@ -84,67 +81,67 @@ namespace dcel {
     ~Vec3T() = default;
 
     inline
-    Vec3T& operator=(const Vec3T& u) noexcept;
+    auto operator=(const Vec3T& u) noexcept -> Vec3T<T>&;
 
     inline
-    Vec3T operator+(const Vec3T& u) const noexcept;
+    auto operator+(const Vec3T& u) const noexcept -> Vec3T<T>;
 
     inline
-    Vec3T operator-(const Vec3T& u) const noexcept;
+    auto operator-(const Vec3T& u) const noexcept -> Vec3T<T>;
 
     inline
-    Vec3T operator*(const T& s) const noexcept;
+    auto operator*(const T& s) const noexcept -> Vec3T<T>;
 
     inline
-    Vec3T operator/(const T& s) const noexcept;
+    auto operator/(const T& s) const noexcept -> Vec3T<T>;
 
     inline
-    Vec3T& operator+=(const Vec3T& u) noexcept;
+    auto operator+=(const Vec3T& u) noexcept -> Vec3T<T>&;
 
     inline
-    Vec3T& operator-=(const Vec3T& u) noexcept;
+    auto operator-=(const Vec3T& u) noexcept -> Vec3T<T>&;
 
     inline
-    Vec3T& operator*=(const T& s) noexcept;
+    auto operator*=(const T& s) noexcept -> Vec3T<T>&;
 
     inline
-    Vec3T& operator/=(const T& s) noexcept;
+    auto operator/=(const T& s) noexcept -> Vec3T<T>&;
 
     inline
-    T& operator[](int i) noexcept;
+    auto operator[](int i) noexcept -> T&;
 
     inline
-    const T& operator[](int i) const noexcept;
+    auto operator[](int i) const noexcept -> const T& ;
 
     inline
-    int maxDir(const bool a_doAbs) const noexcept;
+    auto operator==(const Vec3T& u) const noexcept -> bool;
 
     inline
-    bool operator==(const Vec3T& u) const noexcept;
+    auto operator<(const Vec3T& u) const noexcept -> bool;
 
     inline
-    bool operator<(const Vec3T& u) const noexcept;
+    auto operator>(const Vec3T& u) const noexcept -> bool;
 
     inline
-    bool operator>(const Vec3T& u) const noexcept;
+    auto operator<=(const Vec3T& u) const noexcept -> bool;
 
     inline
-    bool operator<=(const Vec3T& u) const noexcept;
+    auto operator>=(const Vec3T& u) const noexcept -> bool;
 
     inline
-    bool operator>=(const Vec3T& u) const noexcept;
+    auto maxDir(const bool a_doAbs) const noexcept -> int;
 
     inline
-    Vec3T cross(const Vec3T& u) const noexcept;
+    auto cross(const Vec3T& u) const noexcept -> Vec3T<T>;
 
     inline
-    T dot(const Vec3T& u) const noexcept;
+    auto dot(const Vec3T& u) const noexcept -> T;
 
     inline
-    T length() const noexcept;
+    auto length() const noexcept -> T;
 
     inline
-    T length2() const noexcept;
+    auto length2() const noexcept -> T;
 
   protected:
     T X[3];
@@ -153,11 +150,11 @@ namespace dcel {
 
   template <class T>
   inline
-  Vec3T<T> operator*(const T& s, const Vec3T<T>& a_other) noexcept;
+  auto operator*(const T& s, const Vec3T<T>& a_other) noexcept -> Vec3T<T>;
 
   template <class T>
   inline
-  Vec3T<T> operator/(const T& s, const Vec3T<T>& a_other) noexcept;
+  auto operator/(const T& s, const Vec3T<T>& a_other) noexcept -> Vec3T<T>;
 }
 
 #include "dcel_vecI.H"
