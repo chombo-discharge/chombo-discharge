@@ -171,12 +171,12 @@ namespace dcel {
   }
 
   inline
-  Vec3T<double>& edge::getNormal() noexcept {
+  Vec3& edge::getNormal() noexcept {
     return m_normal;
   }
 
   inline
-  const Vec3T<double>& edge::getNormal() const noexcept {
+  const Vec3& edge::getNormal() const noexcept {
     return m_normal;
   }
 
@@ -191,14 +191,14 @@ namespace dcel {
   }
 
   inline
-  double edge::projectPointToEdge(const Vec3T<double>& a_x0) const noexcept {
-    const Vec3T<double> p = a_x0 - m_vertex->getPosition();
+  double edge::projectPointToEdge(const Vec3& a_x0) const noexcept {
+    const Vec3 p = a_x0 - m_vertex->getPosition();
 
     return p.dot(m_x2x1)/m_len2;
   }
 
   inline
-  double edge::signedDistance(const Vec3T<double>& a_x0) const noexcept {
+  double edge::signedDistance(const Vec3& a_x0) const noexcept {
     const double t = this->projectPointToEdge(a_x0);
 
     double retval;
@@ -210,8 +210,8 @@ namespace dcel {
       retval = this->getOtherVertex()->signedDistance(a_x0);
     }
     else{
-      const Vec3T<double> linePoint = m_vertex->getPosition() + t*m_x2x1;
-      const Vec3T<double> delta     = a_x0 - linePoint;
+      const Vec3 linePoint = m_vertex->getPosition() + t*m_x2x1;
+      const Vec3 delta     = a_x0 - linePoint;
       const double dot             = m_normal.dot(delta);
 
       // I don't know why, but currently classifying this as "inside" works, this shouldn't matter because the polygon
@@ -225,13 +225,13 @@ namespace dcel {
   }
 
   inline
-  double edge::unsignedDistance2(const Vec3T<double>& a_x0) const noexcept {
+  double edge::unsignedDistance2(const Vec3& a_x0) const noexcept {
     double t = this->projectPointToEdge(a_x0);
     t = std::min(std::max(0.,t), 1.);
 
-    const Vec3T<double> linePoint = m_vertex->getPosition() + t*m_x2x1;
+    const Vec3 linePoint = m_vertex->getPosition() + t*m_x2x1;
 
-    const Vec3T<double> d = a_x0 - linePoint;
+    const Vec3 d = a_x0 - linePoint;
     
     return d.dot(d);
   }
