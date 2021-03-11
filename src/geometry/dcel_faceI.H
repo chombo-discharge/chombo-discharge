@@ -261,8 +261,8 @@ namespace dcel {
 
   template <class T>
   inline
-  auto faceT<T>::signedDistance(const Vec3& a_x0) const noexcept -> T{
-    T retval = 1.234567E89;
+  auto faceT<T>::signedDistance(const Vec3& a_x0) const noexcept -> T {
+    T retval = std::numeric_limits<T>::max();
 
     const bool inside = this->isPointInsideFace(a_x0);
 
@@ -287,7 +287,7 @@ namespace dcel {
   template <class T>
   inline
   auto faceT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept -> T {
-    T retval = 1.234567E89;
+    T retval = std::numeric_limits<T>::max();
 
     const bool inside = this->isPointInsideFace(a_x0);
 
