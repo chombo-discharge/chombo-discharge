@@ -12,24 +12,6 @@
 
 using namespace dcel;
 
-void vertex::define(const RealVect& a_pos, const std::shared_ptr<edge>& a_edge, const RealVect a_normal) noexcept {
-  this->setPosition(a_pos);
-  this->setEdge(a_edge);
-  this->setNormal(a_normal);
-}
-
-void vertex::setPosition(const RealVect& a_pos) noexcept {
-  m_pos = a_pos;
-}
-
-void vertex::setEdge(const std::shared_ptr<edge>& a_edge) noexcept {
-  m_edge = a_edge;
-}
-
-void vertex::setNormal(const RealVect& a_normal) noexcept {
-  m_normal = a_normal;
-}
-
 void vertex::addFaceToCache(const std::shared_ptr<face>& a_face) noexcept {
   m_faceCache.push_back(a_face);
 }

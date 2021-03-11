@@ -27,10 +27,18 @@ namespace dcel {
     vertex(const vertex& a_otherVertex);
     ~vertex();
 
+    inline
     void define(const RealVect& m_pos, const std::shared_ptr<edge>& a_edge, const RealVect a_normal = RealVect::Zero) noexcept;
+
+    inline
     void setPosition(const RealVect& a_pos) noexcept;
+
+    inline
     void setNormal(const RealVect& a_normal) noexcept;
+
+    inline
     void setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
+    
     void addFaceToCache(const std::shared_ptr<face>& a_face) noexcept;
     void normalizeNormalVector() noexcept;
     void computeVertexNormalAverage() noexcept;
