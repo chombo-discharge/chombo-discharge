@@ -19,7 +19,7 @@ BoundingVolume::~BoundingVolume(){
 
 }
 
-PointLocation BoundingVolume::getPointLocation(const Vec3T<double>& a_p) const{
+auto BoundingVolume::getPointLocation(const Vec3& a_p) const noexcept -> PointLocation {
   const bool inside  = this->isPointInside(a_p);
   const bool outside = this->isPointOutside(a_p);
 
@@ -38,17 +38,17 @@ PointLocation BoundingVolume::getPointLocation(const Vec3T<double>& a_p) const{
   return ret;
 }
 
-bool BoundingVolume::isPointInside(const Vec3T<double>& a_x0) const{
+auto BoundingVolume::isPointInside(const Vec3& a_x0) const -> bool {
   return this->getDistanceToPoint(a_x0) < 0.0;
 }
 
-bool BoundingVolume::isPointOutside(const Vec3T<double>& a_x0) const{
+auto BoundingVolume::isPointOutside(const Vec3& a_x0) const -> bool {
   return this->getDistanceToPoint(a_x0) > 0.0;
 }
 
 BoundingSphere::BoundingSphere(){
   m_radius = 0.0;
-  m_center = Vec3T<double>::Zero;
+  m_center = Vec3::Zero;
 }
 
 BoundingSphere::BoundingSphere(const BoundingSphere& a_other){
@@ -56,7 +56,7 @@ BoundingSphere::BoundingSphere(const BoundingSphere& a_other){
   m_center = a_other.m_center;
 }
 
-BoundingSphere::BoundingSphere(const std::vector<Vec3T<double> >& a_points, const Algorithm& a_algorithm){
+BoundingSphere::BoundingSphere(const std::vector<Vec3 >& a_points, const Algorithm& a_algorithm){
   this->define(a_points, a_algorithm);
 }
 
@@ -64,7 +64,7 @@ BoundingSphere::~BoundingSphere(){
 
 }
 
-void BoundingSphere::define(const std::vector<Vec3T<double> >& a_points, const Algorithm& a_algorithm){
+auto BoundingSphere::define(const std::vector<Vec3 >& a_points, const Algorithm& a_algorithm) noexcept -> void {
   switch(a_algorithm) {
   case Algorithm::Ritter:
     this->buildRitter(a_points);
@@ -74,49 +74,49 @@ void BoundingSphere::define(const std::vector<Vec3T<double> >& a_points, const A
   }
 }
 
-bool BoundingSphere::intersects(const BoundingSphere& a_other) {
-  const Vec3T<double> deltaV = m_center - a_other.getCenter();
+auto BoundingSphere::intersects(const BoundingSphere& a_other) const noexcept -> bool {
+  const Vec3 deltaV = m_center - a_other.getCenter();
   const double sumR       = m_radius + a_other.getRadius();
 
   return deltaV.dot(deltaV) < sumR*sumR;
 }
 
-double BoundingSphere::getDistanceToPoint(const Vec3T<double>& a_x0) const {
+auto BoundingSphere::getDistanceToPoint(const Vec3& a_x0) const noexcept -> double {
   return (a_x0 - m_center).length() - m_radius;
 }
 
-double& BoundingSphere::getRadius() {
+auto  BoundingSphere::getRadius() noexcept -> double& {
   return m_radius;
 }
 
-const double& BoundingSphere::getRadius() const {
+auto BoundingSphere::getRadius() const noexcept -> const double& {
   return m_radius;
 }
 
-Vec3T<double>& BoundingSphere::getCenter() {
+auto BoundingSphere::getCenter() noexcept -> Vec3& {
   return m_center;
 }
 
-const Vec3T<double>& BoundingSphere::getCenter() const {
+auto  BoundingSphere::getCenter() const noexcept -> const Vec3& {
   return m_center;
 }
 
-void BoundingSphere::buildRitter(const std::vector<Vec3T<double> >& a_points){
+auto BoundingSphere::buildRitter(const std::vector<Vec3>& a_points) noexcept -> void {
   m_radius = 0.0;
-  m_center = Vec3T<double>::Zero;
+  m_center = Vec3::Zero;
 
   constexpr double half = 0.5;
 
   constexpr int DIM = 3;
 
   // INITIAL PASS
-  std::vector<Vec3T<double> > min_coord(DIM, a_points[0]); // [0] = Minimum x, [1] = Minimum y, [2] = Minimum z
-  std::vector<Vec3T<double> > max_coord(DIM, a_points[0]);
+  std::vector<Vec3 > min_coord(DIM, a_points[0]); // [0] = Minimum x, [1] = Minimum y, [2] = Minimum z
+  std::vector<Vec3 > max_coord(DIM, a_points[0]);
   
   for (int i = 1; i < a_points.size(); i++){
     for (int dir = 0; dir < DIM; dir++){
-      Vec3T<double>& min = min_coord[dir];
-      Vec3T<double>& max = max_coord[dir];
+      Vec3& min = min_coord[dir];
+      Vec3& max = max_coord[dir];
       
       if(a_points[i][dir] < min[dir]){
 	min = a_points[i];
@@ -128,7 +128,7 @@ void BoundingSphere::buildRitter(const std::vector<Vec3T<double> >& a_points){
   }
 
   double dist = -1;
-  Vec3T<double> p1,p2;
+  Vec3 p1,p2;
   for (int dir = 0; dir < DIM; dir++){
     const double len = (max_coord[dir]-min_coord[dir]).length();
     if(len > dist ){
@@ -147,9 +147,9 @@ void BoundingSphere::buildRitter(const std::vector<Vec3T<double> >& a_points){
   for (int i = 0; i < a_points.size(); i++){
     const double dist = (a_points[i]-m_center).length() - m_radius; 
     if(dist > 0){ // Point lies outside
-      const Vec3T<double> v  = a_points[i] - m_center;
-      const Vec3T<double> p1 = a_points[i];
-      const Vec3T<double> p2 = m_center - m_radius*v/v.length();
+      const Vec3 v  = a_points[i] - m_center;
+      const Vec3 p1 = a_points[i];
+      const Vec3 p2 = m_center - m_radius*v/v.length();
 
       m_center = half*(p2+p1);
       m_radius = half*(p2-p1).length();
@@ -218,7 +218,7 @@ bool AABB::intersects(const AABB& a_other) const {
          (m_loCorner[2] < otherHi[2] && m_hiCorner[2] > otherLo[2]);
 }
     
-double AABB::getDistanceToPoint(const Vec3T<double>& a_point) const {
+auto AABB::getDistanceToPoint(const Vec3T<double>& a_point) const -> double {
   const Vec3T<double> delta = Vec3T<double>(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
 					  std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
 					  std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));

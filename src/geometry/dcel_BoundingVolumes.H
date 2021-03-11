@@ -22,16 +22,17 @@ namespace dcel {
 
   class BoundingVolume {
   public:
+
+    using Vec3 = Vec3T<double>;
     
     BoundingVolume();
     ~BoundingVolume();
 
-    PointLocation getPointLocation(const Vec3T<double>& a_p) const;
+    auto getPointLocation(const Vec3& a_p) const noexcept -> PointLocation;
+    auto isPointInside(const Vec3& a_x0) const -> bool;
+    auto isPointOutside(const Vec3& a_x0) const -> bool;
     
-    bool isPointInside(const Vec3T<double>& a_x0) const;
-    bool isPointOutside(const Vec3T<double>& a_x0) const;
-    
-    virtual double getDistanceToPoint(const Vec3T<double>& a_x0) const = 0;
+    virtual auto getDistanceToPoint(const Vec3& a_x0) const -> double = 0;
   };
   
   class BoundingSphere : public BoundingVolume {
@@ -41,29 +42,31 @@ namespace dcel {
       Ritter,
     };
 
+    using Vec3 = Vec3T<double>;
+
     BoundingSphere();
     BoundingSphere(const BoundingSphere& a_other);
-    BoundingSphere(const std::vector<Vec3T<double>>& a_points, const Algorithm& a_alg);
+    BoundingSphere(const std::vector<Vec3>& a_points, const Algorithm& a_alg);
     ~BoundingSphere();
 
-    void define(const std::vector<Vec3T<double>>& a_points, const Algorithm& a_algorith);
+    auto define(const std::vector<Vec3>& a_points, const Algorithm& a_algorithm) noexcept -> void;
 
-    bool intersects(const BoundingSphere& a_other);
+    auto intersects(const BoundingSphere& a_other) const noexcept-> bool;
     
-    double getDistanceToPoint(const Vec3T<double>& a_x0) const override;
+    auto getDistanceToPoint(const Vec3& a_x0) const noexcept -> double override;
     
-    double& getRadius();
-    const double& getRadius() const;
+    auto getRadius() noexcept -> double&;
+    auto getRadius() const noexcept -> const double&;
     
-    Vec3T<double>& getCenter();
-    const Vec3T<double>& getCenter() const;
+    auto getCenter() noexcept -> Vec3&;
+    auto getCenter() const noexcept -> const Vec3&;
 
   protected:
 
     double m_radius;
-    Vec3T<double> m_center;
+    Vec3 m_center;
 
-    void buildRitter(const std::vector<Vec3T<double>>& a_points);
+    auto buildRitter(const std::vector<Vec3>& a_points) noexcept -> void;
   };
 
   class AABB : public BoundingVolume {
@@ -72,25 +75,25 @@ namespace dcel {
     AABB();
     AABB(const AABB& a_other);
     AABB(const std::vector<AABB>& a_others);
-    AABB(const std::vector<Vec3T<double>>& a_points);
+    AABB(const std::vector<Vec3>& a_points);
     ~AABB();
 
-    void define(const std::vector<Vec3T<double>>& a_points);
+    void define(const std::vector<Vec3>& a_points);
 
     bool intersects(const AABB& a_other) const;
     
-    double getDistanceToPoint(const Vec3T<double>& a_x0) const override;
+    auto getDistanceToPoint(const Vec3& a_x0) const -> double override;
 
-    Vec3T<double>& getLowCorner();
-    const Vec3T<double>& getLowCorner() const;
+    Vec3& getLowCorner();
+    const Vec3& getLowCorner() const;
 
-    Vec3T<double>& getHighCorner();
-    const Vec3T<double>& getHighCorner() const;
+    Vec3& getHighCorner();
+    const Vec3& getHighCorner() const;
 
   protected:
 
-    Vec3T<double> m_loCorner;
-    Vec3T<double> m_hiCorner;
+    Vec3 m_loCorner;
+    Vec3 m_hiCorner;
   };
 }
 
