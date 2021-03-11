@@ -87,10 +87,10 @@ namespace dcel {
     const std::shared_ptr<edge>& getNextEdge() const noexcept;
 
     inline
-    Vec3& getNormal() noexcept;
+    auto getNormal() noexcept -> Vec3&;
 
     inline
-    const Vec3& getNormal() const noexcept;
+    auto getNormal() const noexcept -> const Vec3&;
 
     inline
     std::shared_ptr<face>& getFace() noexcept;
@@ -106,11 +106,9 @@ namespace dcel {
 
   protected:
 
-    Vec3 m_normal;
-
-    // Store these for efficient queries. 
-    double     m_len2;
-    Vec3 m_x2x1;
+    Vec3   m_normal;
+    Vec3   m_x2x1;
+    double m_len2;
 
     std::shared_ptr<vertex>  m_vertex; 
     std::shared_ptr<edge>    m_pairEdge;

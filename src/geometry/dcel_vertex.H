@@ -57,22 +57,22 @@ namespace dcel {
     void clearFaceCache() noexcept;
 
     inline
-    Vec3& getPosition() noexcept;
+    auto getPosition() noexcept -> Vec3&;
 
     inline
-    const Vec3& getPosition() const noexcept;
+    auto getPosition() const noexcept -> const Vec3&;
+
+    inline
+    auto getNormal() noexcept -> Vec3&;
+
+    inline
+    auto getNormal() const noexcept -> const Vec3&;
 
     inline
     std::shared_ptr<edge>& getEdge() noexcept;
 
     inline
     const std::shared_ptr<edge>& getEdge() const noexcept;
-
-    inline
-    Vec3& getNormal() noexcept;
-
-    inline
-    const Vec3& getNormal() const noexcept;
 
     inline
     std::vector<std::shared_ptr<face> >& getFaceCache() noexcept;

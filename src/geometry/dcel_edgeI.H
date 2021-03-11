@@ -171,12 +171,12 @@ namespace dcel {
   }
 
   inline
-  Vec3& edge::getNormal() noexcept {
+  auto edge::getNormal() noexcept -> Vec3& {
     return m_normal;
   }
 
   inline
-  const Vec3& edge::getNormal() const noexcept {
+  auto edge::getNormal() const noexcept -> const Vec3& {
     return m_normal;
   }
 

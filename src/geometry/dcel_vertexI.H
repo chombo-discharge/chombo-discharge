@@ -128,22 +128,22 @@ namespace dcel {
   }
 
   inline
-  Vec3& vertex::getPosition() noexcept {
+  auto vertex::getPosition() noexcept -> Vec3& {
     return m_pos;
   }
 
   inline
-  const Vec3& vertex::getPosition() const noexcept {
+  auto vertex::getPosition() const noexcept -> const Vec3& {
     return m_pos;
   }
 
   inline
-  Vec3& vertex::getNormal() noexcept {
+  auto vertex::getNormal() noexcept -> Vec3& {
     return m_normal;
   }
 
   inline
-  const Vec3& vertex::getNormal() const noexcept {
+  auto vertex::getNormal() const noexcept -> const Vec3& {
     return m_normal;
   }
 
