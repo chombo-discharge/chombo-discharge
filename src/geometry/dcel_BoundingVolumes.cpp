@@ -7,6 +7,8 @@
 
 #include "dcel_BoundingVolumes.H"
 
+#include <iostream>
+
 using namespace dcel;
 
 BoundingVolume::BoundingVolume(){
@@ -17,7 +19,7 @@ BoundingVolume::~BoundingVolume(){
 
 }
 
-PointLocation BoundingVolume::getPointLocation(const RealVect& a_p) const{
+PointLocation BoundingVolume::getPointLocation(const Vec3<double>& a_p) const{
   const bool inside  = this->isPointInside(a_p);
   const bool outside = this->isPointOutside(a_p);
 
@@ -36,17 +38,17 @@ PointLocation BoundingVolume::getPointLocation(const RealVect& a_p) const{
   return ret;
 }
 
-bool BoundingVolume::isPointInside(const RealVect& a_x0) const{
+bool BoundingVolume::isPointInside(const Vec3<double>& a_x0) const{
   return this->getDistanceToPoint(a_x0) < 0.0;
 }
 
-bool BoundingVolume::isPointOutside(const RealVect& a_x0) const{
+bool BoundingVolume::isPointOutside(const Vec3<double>& a_x0) const{
   return this->getDistanceToPoint(a_x0) > 0.0;
 }
 
 BoundingSphere::BoundingSphere(){
   m_radius = 0.0;
-  m_center = RealVect::Zero;
+  m_center = Vec3<double>::Zero;
 }
 
 BoundingSphere::BoundingSphere(const BoundingSphere& a_other){
@@ -54,7 +56,7 @@ BoundingSphere::BoundingSphere(const BoundingSphere& a_other){
   m_center = a_other.m_center;
 }
 
-BoundingSphere::BoundingSphere(const std::vector<RealVect>& a_points, const Algorithm& a_algorithm){
+BoundingSphere::BoundingSphere(const std::vector<Vec3<double> >& a_points, const Algorithm& a_algorithm){
   this->define(a_points, a_algorithm);
 }
 
@@ -62,7 +64,7 @@ BoundingSphere::~BoundingSphere(){
 
 }
 
-void BoundingSphere::define(const std::vector<RealVect>& a_points, const Algorithm& a_algorithm){
+void BoundingSphere::define(const std::vector<Vec3<double> >& a_points, const Algorithm& a_algorithm){
   switch(a_algorithm) {
   case Algorithm::Ritter:
     this->buildRitter(a_points);
@@ -73,46 +75,48 @@ void BoundingSphere::define(const std::vector<RealVect>& a_points, const Algorit
 }
 
 bool BoundingSphere::intersects(const BoundingSphere& a_other) {
-  const RealVect deltaV = m_center - a_other.getCenter();
-  const Real sumR       = m_radius + a_other.getRadius();
+  const Vec3<double> deltaV = m_center - a_other.getCenter();
+  const double sumR       = m_radius + a_other.getRadius();
 
-  return deltaV.dotProduct(deltaV) < sumR*sumR;
+  return deltaV.dot(deltaV) < sumR*sumR;
 }
 
-Real BoundingSphere::getDistanceToPoint(const RealVect& a_x0) const {
-  return (a_x0 - m_center).vectorLength() - m_radius;
+double BoundingSphere::getDistanceToPoint(const Vec3<double>& a_x0) const {
+  return (a_x0 - m_center).length() - m_radius;
 }
 
-Real& BoundingSphere::getRadius() {
+double& BoundingSphere::getRadius() {
   return m_radius;
 }
 
-const Real& BoundingSphere::getRadius() const {
+const double& BoundingSphere::getRadius() const {
   return m_radius;
 }
 
-RealVect& BoundingSphere::getCenter() {
+Vec3<double>& BoundingSphere::getCenter() {
   return m_center;
 }
 
-const RealVect& BoundingSphere::getCenter() const {
+const Vec3<double>& BoundingSphere::getCenter() const {
   return m_center;
 }
 
-void BoundingSphere::buildRitter(const std::vector<RealVect>& a_points){
+void BoundingSphere::buildRitter(const std::vector<Vec3<double> >& a_points){
   m_radius = 0.0;
-  m_center = RealVect::Zero;
+  m_center = Vec3<double>::Zero;
 
-  constexpr Real half = 0.5;
+  constexpr double half = 0.5;
+
+  constexpr int DIM = 3;
 
   // INITIAL PASS
-  std::vector<RealVect> min_coord(SpaceDim, a_points[0]); // [0] = Minimum x, [1] = Minimum y, [2] = Minimum z
-  std::vector<RealVect> max_coord(SpaceDim, a_points[0]);
+  std::vector<Vec3<double> > min_coord(DIM, a_points[0]); // [0] = Minimum x, [1] = Minimum y, [2] = Minimum z
+  std::vector<Vec3<double> > max_coord(DIM, a_points[0]);
   
   for (int i = 1; i < a_points.size(); i++){
-    for (int dir = 0; dir < SpaceDim; dir++){
-      RealVect& min = min_coord[dir];
-      RealVect& max = max_coord[dir];
+    for (int dir = 0; dir < DIM; dir++){
+      Vec3<double>& min = min_coord[dir];
+      Vec3<double>& max = max_coord[dir];
       
       if(a_points[i][dir] < min[dir]){
 	min = a_points[i];
@@ -123,10 +127,10 @@ void BoundingSphere::buildRitter(const std::vector<RealVect>& a_points){
     }
   }
 
-  Real dist = -1;
-  RealVect p1,p2;
-  for (int dir = 0; dir < SpaceDim; dir++){
-    const Real len = (max_coord[dir]-min_coord[dir]).vectorLength();
+  double dist = -1;
+  Vec3<double> p1,p2;
+  for (int dir = 0; dir < DIM; dir++){
+    const double len = (max_coord[dir]-min_coord[dir]).length();
     if(len > dist ){
       dist = len;
       p1 = min_coord[dir];
@@ -134,20 +138,21 @@ void BoundingSphere::buildRitter(const std::vector<RealVect>& a_points){
     }
   }
 
-  m_center = half*(p1+p2);
-  m_radius = half*(p2-p1).vectorLength();
+  //  m_center = half*(p1+p2);
+  m_center = (p1+p2)*half;
+  m_radius = half*(p2-p1).length();
 
 
   // SECOND PASS
   for (int i = 0; i < a_points.size(); i++){
-    const Real dist = (a_points[i]-m_center).vectorLength() - m_radius; 
+    const double dist = (a_points[i]-m_center).length() - m_radius; 
     if(dist > 0){ // Point lies outside
-      const RealVect v  = a_points[i] - m_center;
-      const RealVect p1 = a_points[i];
-      const RealVect p2 = m_center - m_radius*v/v.vectorLength();
+      const Vec3<double> v  = a_points[i] - m_center;
+      const Vec3<double> p1 = a_points[i];
+      const Vec3<double> p2 = m_center - m_radius*v/v.length();
 
       m_center = half*(p2+p1);
-      m_radius = half*(p2-p1).vectorLength();
+      m_radius = half*(p2-p1).length();
     }
   }
 
@@ -156,8 +161,8 @@ void BoundingSphere::buildRitter(const std::vector<RealVect>& a_points){
 }
 
 AABB::AABB(){
-  m_loCorner = RealVect::Zero;
-  m_hiCorner = RealVect::Zero;
+  m_loCorner = Vec3<double>::Zero;
+  m_hiCorner = Vec3<double>::Zero;
 }
 
 AABB::AABB(const AABB& a_other){
@@ -166,21 +171,23 @@ AABB::AABB(const AABB& a_other){
 }
 
 AABB::AABB(const std::vector<AABB>& a_others) {
+  constexpr int DIM = 3;
+  
   m_loCorner = a_others.front().getLowCorner();
   m_hiCorner = a_others.front().getHighCorner();
 
   for (const auto& other : a_others){
-    const RealVect& otherLo = other.getLowCorner();
-    const RealVect& otherHi = other.getHighCorner();
+    const Vec3<double>& otherLo = other.getLowCorner();
+    const Vec3<double>& otherHi = other.getHighCorner();
     
-    for (int dir = 0; dir < SpaceDim; dir++){
+    for (int dir = 0; dir < DIM; dir++){
       m_loCorner[dir] = std::min(m_loCorner[dir], otherLo[dir]);
       m_hiCorner[dir] = std::min(m_hiCorner[dir], otherHi[dir]);
     }
   }
 }
 
-AABB::AABB(const std::vector<RealVect>& a_points){
+AABB::AABB(const std::vector<Vec3<double> >& a_points){
   this->define(a_points);
 }
 
@@ -188,12 +195,13 @@ AABB::~AABB(){
 
 }
 
-void AABB::define(const std::vector<RealVect>& a_points){
+void AABB::define(const std::vector<Vec3<double> >& a_points){
+  constexpr int DIM = 3;
   m_loCorner = a_points.front();
   m_hiCorner = a_points.front();
 
   for (const auto& p : a_points){
-    for (int dir = 0; dir < SpaceDim; dir++){
+    for (int dir = 0; dir < 3; dir++){
       m_loCorner[dir] = std::min(m_loCorner[dir], p[dir]);
       m_hiCorner[dir] = std::max(m_hiCorner[dir], p[dir]);
     }
@@ -201,8 +209,8 @@ void AABB::define(const std::vector<RealVect>& a_points){
 }
 
 bool AABB::intersects(const AABB& a_other) const {
-  const RealVect& otherLo = a_other.getLowCorner();
-  const RealVect& otherHi = a_other.getHighCorner();
+  const Vec3<double>& otherLo = a_other.getLowCorner();
+  const Vec3<double>& otherHi = a_other.getHighCorner();
 
 
   return (m_loCorner[0] < otherHi[0] && m_hiCorner[0] > otherLo[0]) &&
@@ -210,28 +218,28 @@ bool AABB::intersects(const AABB& a_other) const {
          (m_loCorner[2] < otherHi[2] && m_hiCorner[2] > otherLo[2]);
 }
     
-Real AABB::getDistanceToPoint(const RealVect& a_point) const {
-  const RealVect delta = RealVect(D_DECL(Max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
-					 Max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
-					 Max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2])));
+double AABB::getDistanceToPoint(const Vec3<double>& a_point) const {
+  const Vec3<double> delta = Vec3<double>(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
+					  std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
+					  std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));
 
-  const Real retval =  Min(0.0, delta[delta.maxDir(false)]) + max(RealVect::Zero, delta).vectorLength(); // This is negative inside. 
+  const double retval =  std::min(0.0, delta[delta.maxDir(false)]) + std::max(Vec3<double>::Zero, delta).length(); // This is negative inside. 
   
   return retval;
 }
 
-RealVect& AABB::getLowCorner(){
+Vec3<double>& AABB::getLowCorner(){
   return m_loCorner;
 }
 
-const RealVect& AABB::getLowCorner() const{
+const Vec3<double>& AABB::getLowCorner() const{
   return m_hiCorner;
 }
 
-RealVect& AABB::getHighCorner(){
+Vec3<double>& AABB::getHighCorner(){
   return m_loCorner;
 }
 
-const RealVect& AABB::getHighCorner() const{
+const Vec3<double>& AABB::getHighCorner() const{
   return m_hiCorner;
 }

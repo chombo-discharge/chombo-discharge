@@ -9,7 +9,6 @@
 #define _VERTEX_
 
 #include "dcel_vec.H"
-#include "RealVect.H"
 
 #include <vector>
 #include <memory>
@@ -23,19 +22,19 @@ namespace dcel {
   public:
 
     vertex();
-    vertex(const RealVect& a_pos);
-    vertex(const RealVect& a_pos, const RealVect& a_normal);
+    vertex(const Vec3<double>& a_pos);
+    vertex(const Vec3<double>& a_pos, const Vec3<double>& a_normal);
     vertex(const vertex& a_otherVertex);
     ~vertex();
 
     inline
-    void define(const RealVect& m_pos, const std::shared_ptr<edge>& a_edge, const RealVect a_normal = RealVect::Zero) noexcept;
+    void define(const Vec3<double>& m_pos, const std::shared_ptr<edge>& a_edge, const Vec3<double> a_normal = Vec3<double>::Zero) noexcept;
 
     inline
-    void setPosition(const RealVect& a_pos) noexcept;
+    void setPosition(const Vec3<double>& a_pos) noexcept;
 
     inline
-    void setNormal(const RealVect& a_normal) noexcept;
+    void setNormal(const Vec3<double>& a_normal) noexcept;
 
     inline
     void setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
@@ -56,10 +55,10 @@ namespace dcel {
     void clearFaceCache() noexcept;
 
     inline
-    RealVect& getPosition() noexcept;
+    Vec3<double>& getPosition() noexcept;
 
     inline
-    const RealVect& getPosition() const noexcept;
+    const Vec3<double>& getPosition() const noexcept;
 
     inline
     std::shared_ptr<edge>& getEdge() noexcept;
@@ -68,25 +67,27 @@ namespace dcel {
     const std::shared_ptr<edge>& getEdge() const noexcept;
 
     inline
-    RealVect& getNormal() noexcept;
+    Vec3<double>& getNormal() noexcept;
 
     inline
-    const RealVect& getNormal() const noexcept;
-
+    const Vec3<double>& getNormal() const noexcept;
 
     inline
     std::vector<std::shared_ptr<face> >& getFaceCache() noexcept;
 
     inline
     const std::vector<std::shared_ptr<face> >& getFaceCache() const noexcept;
-  
-    Real signedDistance(const RealVect& a_x0) const noexcept;
-    Real unsignedDistance2(const RealVect& a_x0) const noexcept; // Returns squared distance to point
+
+    inline
+    double signedDistance(const Vec3<double>& a_x0) const noexcept;
+
+    inline
+    double unsignedDistance2(const Vec3<double>& a_x0) const noexcept; 
 
   protected:
 
-    RealVect m_pos;
-    RealVect m_normal;
+    Vec3<double> m_pos;
+    Vec3<double> m_normal;
     
     std::shared_ptr<edge> m_edge;
     

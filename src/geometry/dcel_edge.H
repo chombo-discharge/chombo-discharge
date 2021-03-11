@@ -2,13 +2,13 @@
   @file   dcel_edge.H
   @brief  Declaration of a dcel_edge class for describing surface tesselations
   @author Robert Marskar
-  @date   Apr. 2018
+  @date   March 2021
 */
 
 #ifndef _DCEL_EDGE_
 #define _DCEL_EDGE_
 
-#include "RealVect.H"
+#include "dcel_vec.H"
 
 #include <vector>
 #include <memory>
@@ -18,62 +18,97 @@ namespace dcel {
   class vertex;
   class face;
 
-  /*!
-    @brief Edge class for handling surface tesselations with DCEL meshes
-  */
   class edge {
   public:
 
     edge();
+    
     edge(const edge& a_otherEdge);
+    
     edge(const std::shared_ptr<vertex>& a_vertex);
+    
     ~edge();
 
+    inline
     void define(const std::shared_ptr<vertex>& a_vertex,
 		const std::shared_ptr<edge>&   a_pairEdge,
 		const std::shared_ptr<edge>&   a_nextEdge,
 		const std::shared_ptr<edge>&   a_previousEdge,
-		const RealVect                 a_normal = RealVect::Zero);
+		const Vec3<double>             a_normal = Vec3<double>::Zero);
 
+    inline
     void setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept;
+
+    inline
     void setPairEdge(const std::shared_ptr<edge>& a_pairEdge) noexcept;
+
+    inline
     void setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept;
+
+    inline
     void setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept;
+
+    inline
     void setFace(const std::shared_ptr<face>& a_face) noexcept;
 
+    inline
     void reconcile() noexcept;
 
+    inline
     std::shared_ptr<vertex>& getVertex() noexcept;
+
+    inline
     const std::shared_ptr<vertex>& getVertex() const noexcept;
 
+    inline
     std::shared_ptr<vertex>& getOtherVertex() noexcept;
+
+    inline
     const std::shared_ptr<vertex>& getOtherVertex() const noexcept;
 
+    inline
     std::shared_ptr<edge>& getPairEdge() noexcept;
+
+    inline
     const std::shared_ptr<edge>& getPairEdge() const noexcept;
 
-    std::shared_ptr<edge>& getPreviousEdge() noexcept;  
+    inline
+    std::shared_ptr<edge>& getPreviousEdge() noexcept;
+
+    inline
     const std::shared_ptr<edge>& getPreviousEdge() const noexcept;
-  
+
+    inline
     std::shared_ptr<edge>& getNextEdge() noexcept;
+
+    inline
     const std::shared_ptr<edge>& getNextEdge() const noexcept;
 
-    RealVect& getNormal() noexcept;
-    const RealVect& getNormal() const noexcept;
+    inline
+    Vec3<double>& getNormal() noexcept;
 
-    std::shared_ptr<face>& getFace() noexcept;  
+    inline
+    const Vec3<double>& getNormal() const noexcept;
+
+    inline
+    std::shared_ptr<face>& getFace() noexcept;
+
+    inline
     const std::shared_ptr<face>& getFace() const noexcept;
 
-    Real signedDistance(const RealVect& a_x0) const noexcept;
-    Real unsignedDistance2(const RealVect& a_x0) const noexcept;
+    inline
+    double signedDistance(const Vec3<double>& a_x0) const noexcept;
+
+    inline
+    double unsignedDistance2(const Vec3<double>& a_x0) const noexcept;
 
   protected:
 
-    RealVect m_normal;
+    Vec3<double> m_normal;
 
     // Store these for efficient queries. 
-    Real     m_len2;
-    RealVect m_x2x1;
+    double     m_len2;
+    Vec3<double> m_x2x1;
 
     std::shared_ptr<vertex>  m_vertex; 
     std::shared_ptr<edge>    m_pairEdge;
@@ -81,10 +116,16 @@ namespace dcel {
     std::shared_ptr<edge>    m_nextEdge;
     std::shared_ptr<face>    m_face;
 
-    Real projectPointToEdge(const RealVect& a_x0) const noexcept;
-    
+    inline
+    double projectPointToEdge(const Vec3<double>& a_x0) const noexcept;
+
+    inline
     void normalizeNormalVector() noexcept;
+
+    inline
     void computeEdgeLength() noexcept;
+
+    inline
     void computeNormal() noexcept;
   };
 

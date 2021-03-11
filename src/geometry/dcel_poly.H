@@ -26,7 +26,7 @@ namespace dcel {
     inline
     bool isPointInside(const Vec3<T>& a_point, const InsideOutsideAlgorithm a_algorithm);
     
-  protected:
+  private:
 
     inline
     Vec2<T> projectPoint(const Vec3<T>& a_point) const noexcept;
@@ -39,13 +39,18 @@ namespace dcel {
 
     inline
     int computeCrossingNumber(const Vec2<T>& P) const noexcept;
-    
+
+    inline
     T computeSubtendedAngle(const Vec2<T>& P) const noexcept;
 
+    inline
     bool isPointInsidePolygonWindingNumber(const Vec3<T>& a_point) const noexcept;
+
+    inline
     bool isPointInsidePolygonSubtend(const Vec3<T>& a_point) const noexcept;
+
+    inline
     bool isPointInsidePolygonCrossingNumber(const Vec3<T>& a_point) const noexcept;
-    
     
     int m_ignoreDir;
     int m_xDir;

@@ -17,20 +17,20 @@ namespace dcel {
 
   inline
   vertex::vertex(){
-    m_pos    = RealVect::Zero;
-    m_normal = RealVect::Zero;
+    m_pos    = Vec3<double>::Zero;
+    m_normal = Vec3<double>::Zero;
 
     m_faceCache.resize(0);
   }
 
   inline
-  vertex::vertex(const RealVect& a_pos){
+  vertex::vertex(const Vec3<double>& a_pos){
     m_pos    = a_pos;
-    m_normal = RealVect::Zero;
+    m_normal = Vec3<double>::Zero;
   }
 
   inline
-  vertex::vertex(const RealVect& a_pos, const RealVect& a_normal){
+  vertex::vertex(const Vec3<double>& a_pos, const Vec3<double>& a_normal){
     m_pos    = a_pos;
     m_normal = a_normal;
   }
@@ -48,14 +48,14 @@ namespace dcel {
   }
 
   inline
-  void vertex::define(const RealVect& a_pos, const std::shared_ptr<edge>& a_edge, const RealVect a_normal) noexcept {
+  void vertex::define(const Vec3<double>& a_pos, const std::shared_ptr<edge>& a_edge, const Vec3<double> a_normal) noexcept {
     m_pos = a_pos;
     m_edge = a_edge;
     m_normal = a_normal;
   }
 
   inline
-  void vertex::setPosition(const RealVect& a_pos) noexcept {
+  void vertex::setPosition(const Vec3<double>& a_pos) noexcept {
     m_pos = a_pos;
   }
 
@@ -65,7 +65,7 @@ namespace dcel {
   }
 
   inline
-  void vertex::setNormal(const RealVect& a_normal) noexcept {
+  void vertex::setNormal(const Vec3<double>& a_normal) noexcept {
     m_normal = a_normal;
   }
 
@@ -81,7 +81,7 @@ namespace dcel {
 
   inline
   void vertex::normalizeNormalVector() noexcept {
-    m_normal = m_normal/m_normal.vectorLength();
+    m_normal = m_normal/m_normal.length();
   }
 
   inline
@@ -91,7 +91,7 @@ namespace dcel {
       faces.emplace_back(iter()->getFace());
     }
 
-    m_normal = RealVect::Zero;
+    m_normal = Vec3<double>::Zero;
   
     for (const auto& f : faces){
       m_normal += f->getNormal();
@@ -102,28 +102,26 @@ namespace dcel {
 
   inline
   void vertex::computeVertexNormalAngleWeighted() noexcept {
-    m_normal = RealVect::Zero;
+    m_normal = Vec3<double>::Zero;
 
     for (edge_iterator iter(*this); iter.ok(); ++iter){
       const auto& outgoingEdge = iter();
 
       // Edges circulate around the face. Should be 
-      const RealVect& x0 = outgoingEdge->getVertex()->getPosition();
-      const RealVect& x1 = outgoingEdge->getPreviousEdge()->getVertex()->getPosition();
-      const RealVect& x2 = outgoingEdge->getNextEdge()->getVertex()->getPosition();
+      const Vec3<double>& x0 = outgoingEdge->getVertex()->getPosition();
+      const Vec3<double>& x1 = outgoingEdge->getPreviousEdge()->getVertex()->getPosition();
+      const Vec3<double>& x2 = outgoingEdge->getNextEdge()->getVertex()->getPosition();
 
-      RealVect v1 = x1-x0;
-      RealVect v2 = x2-x0;
+      Vec3<double> v1 = x1-x0;
+      Vec3<double> v2 = x2-x0;
 
-      v1 = v1/v1.vectorLength();
-      v2 = v2/v2.vectorLength();
-
-      //    const RealVect norm = PolyGeom::cross(v1, v2);
+      v1 = v1/v1.length();
+      v2 = v2/v2.length();
 
       // We could use the face normal, but I'm decoupling the way these are computed....
-      const RealVect norm = outgoingEdge->getFace()->getNormal();
+      const Vec3<double> norm = outgoingEdge->getFace()->getNormal();
 
-      const Real alpha = acos(v1.dotProduct(v2));
+      const double alpha = acos(v1.dot(v2));
 
       m_normal += alpha*norm;
     }
@@ -132,22 +130,22 @@ namespace dcel {
   }
 
   inline
-  RealVect& vertex::getPosition() noexcept {
+  Vec3<double>& vertex::getPosition() noexcept {
     return m_pos;
   }
 
   inline
-  const RealVect& vertex::getPosition() const noexcept {
+  const Vec3<double>& vertex::getPosition() const noexcept {
     return m_pos;
   }
 
   inline
-  RealVect& vertex::getNormal() noexcept {
+  Vec3<double>& vertex::getNormal() noexcept {
     return m_normal;
   }
 
   inline
-  const RealVect& vertex::getNormal() const noexcept {
+  const Vec3<double>& vertex::getNormal() const noexcept {
     return m_normal;
   }
 
@@ -172,20 +170,20 @@ namespace dcel {
   }
 
   inline
-  Real vertex::signedDistance(const RealVect& a_x0) const noexcept {
-    const RealVect delta = a_x0 - m_pos;
-    const Real dist      = delta.vectorLength();
-    const Real dot       = m_normal.dotProduct(delta);
+  double vertex::signedDistance(const Vec3<double>& a_x0) const noexcept {
+    const Vec3<double> delta = a_x0 - m_pos;
+    const double dist      = delta.length();
+    const double dot       = m_normal.dot(delta);
     const int sign       = (dot > 0.) ? 1 : -1;
   
     return dist*sign;
   }
 
   inline
-  Real vertex::unsignedDistance2(const RealVect& a_x0) const noexcept {
-    const RealVect d = a_x0 - m_pos;
+  double vertex::unsignedDistance2(const Vec3<double>& a_x0) const noexcept {
+    const Vec3<double> d = a_x0 - m_pos;
 
-    return d.dotProduct(d);
+    return d.dot(d);
   }
 }
 

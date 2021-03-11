@@ -192,8 +192,8 @@ namespace dcel {
   }
 
   inline
-  std::vector<RealVect> mesh::getAllVertexCoordinates() const noexcept{
-    std::vector<RealVect> vertexCoordinates;
+  std::vector<Vec3<double> > mesh::getAllVertexCoordinates() const noexcept{
+    std::vector<Vec3<double> > vertexCoordinates;
     for (const auto& v : m_vertices){
       vertexCoordinates.emplace_back(v->getPosition());
     }
@@ -202,13 +202,13 @@ namespace dcel {
   }
 
   inline
-  Real mesh::signedDistance(const RealVect& a_point) const noexcept {
+  double mesh::signedDistance(const Vec3<double>& a_point) const noexcept {
     return this->signedDistance(a_point, m_algorithm);
   }
 
   inline
-  Real mesh::signedDistance(const RealVect& a_point, SearchAlgorithm a_algorithm) const noexcept {
-    Real minDist;
+  double mesh::signedDistance(const Vec3<double>& a_point, SearchAlgorithm a_algorithm) const noexcept {
+    double minDist;
   
     switch(a_algorithm){
     case SearchAlgorithm::Direct:
@@ -226,11 +226,11 @@ namespace dcel {
   }
 
   inline
-  Real mesh::DirectSignedDistance(const RealVect& a_point) const noexcept {
-    Real minDist = m_faces.front()->signedDistance(a_point);
+  double mesh::DirectSignedDistance(const Vec3<double>& a_point) const noexcept {
+    double minDist = m_faces.front()->signedDistance(a_point);
     
     for (const auto& f : m_faces){
-      const Real curDist = f->signedDistance(a_point);
+      const double curDist = f->signedDistance(a_point);
 
       if(std::abs(curDist) < std::abs(minDist)){
 	minDist = curDist;
@@ -241,12 +241,12 @@ namespace dcel {
   }
 
   inline
-  Real mesh::DirectSignedDistance2(const RealVect& a_point) const noexcept {
+  double mesh::DirectSignedDistance2(const Vec3<double>& a_point) const noexcept {
     std::shared_ptr<face> closest = m_faces.front();
-    Real minDist2 = closest->unsignedDistance2(a_point);
+    double minDist2 = closest->unsignedDistance2(a_point);
 
     for (const auto& f : m_faces){
-      const Real curDist2 = f->unsignedDistance2(a_point);
+      const double curDist2 = f->unsignedDistance2(a_point);
 
       if(curDist2 < minDist2) {
 	closest = f;

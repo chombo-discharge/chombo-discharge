@@ -94,15 +94,15 @@ void dcel::parser::PLY::readVerticesASCII(std::vector<std::shared_ptr<dcel::vert
 					  const int                                    a_numVertices,
 					  std::ifstream&                               a_inputstream){
 
-  RealVect pos;
-  Real& x = pos[0];
-  Real& y = pos[1];
-  Real& z = pos[2];
+  Vec3<double> pos;
+  double& x = pos[0];
+  double& y = pos[1];
+  double& z = pos[2];
 
-  RealVect norm;
-  Real& nx = norm[0];
-  Real& ny = norm[1];
-  Real& nz = norm[2];
+  Vec3<double> norm;
+  double& nx = norm[0];
+  double& ny = norm[1];
+  double& nz = norm[2];
   
   int num = 0;
 
@@ -119,11 +119,11 @@ void dcel::parser::PLY::readVerticesASCII(std::vector<std::shared_ptr<dcel::vert
   }
 }
 
-void dcel::parser::PLY::readFacesASCII(std::vector<std::shared_ptr<dcel::face> >& a_faces,
-					  std::vector<std::shared_ptr<dcel::edge> >&    a_edges,
-					  std::vector<std::shared_ptr<dcel::vertex> >&  a_vertices,
-					  const int                                     a_numFaces,
-					  std::ifstream&                                a_inputstream){
+void dcel::parser::PLY::readFacesASCII(std::vector<std::shared_ptr<dcel::face> >&   a_faces,
+				       std::vector<std::shared_ptr<dcel::edge> >&   a_edges,
+				       std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
+				       const int                                    a_numFaces,
+				       std::ifstream&                               a_inputstream){
   int numVertices;
   std::vector<int> vertexIndices;
 

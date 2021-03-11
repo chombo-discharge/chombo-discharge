@@ -13,8 +13,6 @@
 #include "dcel_face.H"
 #include "dcel_iterator.H"
 
-#include "PolyGeom.H"
-
 namespace dcel {
 
   inline
@@ -50,7 +48,7 @@ namespace dcel {
 		    const std::shared_ptr<edge>&   a_pairEdge,
 		    const std::shared_ptr<edge>&   a_nextEdge,
 		    const std::shared_ptr<edge>&   a_previousEdge,
-		    const RealVect                 a_normal){
+		    const Vec3<double>                 a_normal){
     this->setVertex(a_vertex);
     this->setPairEdge(a_pairEdge);
     this->setNextEdge(a_nextEdge);
@@ -84,16 +82,16 @@ namespace dcel {
 
   inline
   void edge::normalizeNormalVector() noexcept {
-    m_normal = m_normal/m_normal.vectorLength();
+    m_normal = m_normal/m_normal.length();
   }
 
   inline
   void edge::computeEdgeLength() noexcept {
-    const RealVect& x1 = this->getVertex()->getPosition();
-    const RealVect& x2 = this->getOtherVertex()->getPosition();
+    const Vec3<double>& x1 = this->getVertex()->getPosition();
+    const Vec3<double>& x2 = this->getOtherVertex()->getPosition();
 
     m_x2x1 = x2-x1;
-    m_len2 = m_x2x1.dotProduct(m_x2x1);
+    m_len2 = m_x2x1.dot(m_x2x1);
   }
 
   inline
@@ -103,8 +101,8 @@ namespace dcel {
     const std::shared_ptr<face>& F     = this->getFace();
     const std::shared_ptr<face>& pairF = pairEdge->getFace();
     
-    const RealVect& n1 = F->getNormal();
-    const RealVect& n2 = pairF->getNormal();
+    const Vec3<double>& n1 = F->getNormal();
+    const Vec3<double>& n2 = pairF->getNormal();
 
     m_normal = n1 + n2;
 
@@ -168,12 +166,12 @@ namespace dcel {
   }
 
   inline
-  RealVect& edge::getNormal() noexcept {
+  Vec3<double>& edge::getNormal() noexcept {
     return m_normal;
   }
 
   inline
-  const RealVect& edge::getNormal() const noexcept {
+  const Vec3<double>& edge::getNormal() const noexcept {
     return m_normal;
   }
 
@@ -188,17 +186,17 @@ namespace dcel {
   }
 
   inline
-  Real edge::projectPointToEdge(const RealVect& a_x0) const noexcept {
-    const RealVect p = a_x0 - m_vertex->getPosition();
+  double edge::projectPointToEdge(const Vec3<double>& a_x0) const noexcept {
+    const Vec3<double> p = a_x0 - m_vertex->getPosition();
 
-    return p.dotProduct(m_x2x1)/m_len2;
+    return p.dot(m_x2x1)/m_len2;
   }
 
   inline
-  Real edge::signedDistance(const RealVect& a_x0) const noexcept {
-    const Real t = this->projectPointToEdge(a_x0);
+  double edge::signedDistance(const Vec3<double>& a_x0) const noexcept {
+    const double t = this->projectPointToEdge(a_x0);
 
-    Real retval;
+    double retval;
   
     if(t <= 0.0) {
       retval = this->getVertex()->signedDistance(a_x0);
@@ -207,30 +205,30 @@ namespace dcel {
       retval = this->getOtherVertex()->signedDistance(a_x0);
     }
     else{
-      const RealVect linePoint = m_vertex->getPosition() + t*m_x2x1;
-      const RealVect delta     = a_x0 - linePoint;
-      const Real dot           = m_normal.dotProduct(delta);
+      const Vec3<double> linePoint = m_vertex->getPosition() + t*m_x2x1;
+      const Vec3<double> delta     = a_x0 - linePoint;
+      const double dot             = m_normal.dot(delta);
 
       // I don't know why, but currently classifying this as "inside" works, this shouldn't matter because the polygon
       // test should trigger in that case. 
       const int sgn = (dot > 0.0) ? 1 : -1;
 
-      retval = sgn*delta.vectorLength();
+      retval = sgn*delta.length();
     }
 
     return retval;
   }
 
   inline
-  Real edge::unsignedDistance2(const RealVect& a_x0) const noexcept {
-    Real t = this->projectPointToEdge(a_x0);
+  double edge::unsignedDistance2(const Vec3<double>& a_x0) const noexcept {
+    double t = this->projectPointToEdge(a_x0);
     t = std::min(std::max(0.,t), 1.);
 
-    const RealVect linePoint = m_vertex->getPosition() + t*m_x2x1;
+    const Vec3<double> linePoint = m_vertex->getPosition() + t*m_x2x1;
 
-    const RealVect d = a_x0 - linePoint;
+    const Vec3<double> d = a_x0 - linePoint;
     
-    return d.dotProduct(d);
+    return d.dot(d);
   }
 }
 

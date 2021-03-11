@@ -12,8 +12,6 @@
 #include "dcel_algorithms.H"
 #include "dcel_poly.H"
 
-#include "RealVect.H"
-
 #include <memory>
 #include <vector>
 
@@ -23,28 +21,25 @@ namespace dcel {
   class edge;
   class face;
 
-  // Class that describes one face of a watertight surface tesselation. This class
-  // can also embed a 2D version of itself as a two-dimensional polygon, projected onto the
-  // cardinal plane which maximizes the projected face's area. We use this embedding
-  // for speeding up tests when checking if a point projected onto the plane of the face
-  // lies inside the face or not. This takes storage, but is required for doing those
-  // intersection tests. 
   class face {
   public:
     
     face();
+    
     face(const std::shared_ptr<edge>& a_edge);
+    
     face(const face& a_otherFace);
+    
     ~face();
 
     inline
-    void define(const RealVect& a_normal, const std::shared_ptr<edge>& a_edge) noexcept;
+    void define(const Vec3<double>& a_normal, const std::shared_ptr<edge>& a_edge) noexcept;
 
     inline
     void setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept;
     
     inline
-    void setNormal(const RealVect& a_normal) noexcept;
+    void setNormal(const Vec3<double>& a_normal) noexcept;
 
     inline
     void normalizeNormalVector() noexcept;
@@ -80,7 +75,7 @@ namespace dcel {
     const std::shared_ptr<edge>& getHalfEdge() const noexcept;
 
     inline
-    const std::vector<RealVect> getAllVertexCoordinates() const noexcept;
+    const std::vector<Vec3<double>> getAllVertexCoordinates() const noexcept;
 
     inline
     std::vector<std::shared_ptr<vertex> >& getVertices() noexcept;
@@ -101,46 +96,40 @@ namespace dcel {
     const std::vector<std::shared_ptr<edge> > gatherEdges() const noexcept;
 
     inline
-    RealVect& getCentroid() noexcept;
+    Vec3<double>& getCentroid() noexcept;
 
     inline
-    const RealVect& getCentroid() const noexcept;
+    const Vec3<double>& getCentroid() const noexcept;
 
     inline
-    RealVect& getNormal() noexcept;
+    Vec3<double>& getNormal() noexcept;
 
     inline
-    const RealVect& getNormal() const noexcept;
+    const Vec3<double>& getNormal() const noexcept;
 
     inline
-    Real& getArea() noexcept;
+    double& getArea() noexcept;
 
     inline
-    const Real& getArea() const noexcept;
+    const double& getArea() const noexcept;
 
     inline
-    RealVect& getBoundingBoxLo() noexcept;
+    Vec3<double>& getBoundingBoxLo() noexcept;
 
     inline
-    const RealVect& getBoundingBoxLo() const noexcept;
+    const Vec3<double>& getBoundingBoxLo() const noexcept;
 
     inline
-    RealVect& getBoundingBoxHi() noexcept;
+    Vec3<double>& getBoundingBoxHi() noexcept;
 
     inline
-    const RealVect& getBoundingBoxHi() const noexcept;
+    const Vec3<double>& getBoundingBoxHi() const noexcept;
 
     inline
-    Real signedDistance(const RealVect& a_x0) const noexcept;
+    double signedDistance(const Vec3<double>& a_x0) const noexcept;
 
     inline
-    Real unsignedDistance2(const RealVect& a_x0) const noexcept;
-
-#if 1 // Just so kd will shut up for now. Will redo the BVH interface when all bugs are squashed in the direct brute-force method. 
-    RealVect get_coord() const {
-      return m_centroid;
-    }
-#endif
+    double unsignedDistance2(const Vec3<double>& a_x0) const noexcept;
   
   protected:
     
@@ -149,11 +138,11 @@ namespace dcel {
     std::vector<std::shared_ptr<vertex> > m_vertices; 
     std::vector<std::shared_ptr<edge> > m_edges;
 
-    Real     m_area;
-    RealVect m_normal;
-    RealVect m_centroid;
-    RealVect m_lo;
-    RealVect m_hi;
+    double       m_area;
+    Vec3<double> m_normal;
+    Vec3<double> m_centroid;
+    Vec3<double> m_lo;
+    Vec3<double> m_hi;
 
     // Potential bounding volumes
     BoundingSphere m_boundingSphere;
@@ -164,8 +153,11 @@ namespace dcel {
     InsideOutsideAlgorithm m_poly2Algorithm;
 
     // Projects three-dimensional point a_p into the plane of the face
-    RealVect projectPointIntoFacePlane(const RealVect& a_p) const noexcept;
-    bool isPointInsideFace(const RealVect& a_p) const noexcept;
+    inline
+    Vec3<double> projectPointIntoFacePlane(const Vec3<double>& a_p) const noexcept;
+
+    inline
+    bool isPointInsideFace(const Vec3<double>& a_p) const noexcept;
   };
 
 }

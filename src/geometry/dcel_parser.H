@@ -54,11 +54,11 @@ namespace dcel {
 	i.e. we assume that read_ascii_vertices was called IMMEDIATELY before this function. That function will center the fstream 
 	on the correct line
       */
-      static void readFacesASCII(std::vector<std::shared_ptr<dcel::face> >& a_faces,
-				    std::vector<std::shared_ptr<dcel::edge> >&    a_edges,
-				    std::vector<std::shared_ptr<dcel::vertex> >&  a_vertices,
-				    const int                                     a_numFaces,
-				    std::ifstream&                                a_inputstream);
+      static void readFacesASCII(std::vector<std::shared_ptr<dcel::face> >&      a_faces,
+				    std::vector<std::shared_ptr<dcel::edge> >&   a_edges,
+				    std::vector<std::shared_ptr<dcel::vertex> >& a_vertices,
+				    const int                                    a_numFaces,
+				    std::ifstream&                               a_inputstream);
 
       /*!
 	@brief This sets all pair edges
