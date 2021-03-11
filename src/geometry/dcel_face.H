@@ -65,16 +65,16 @@ namespace dcel {
     auto getNormal() const noexcept -> const Vec3&;
 
     inline
-    Vec3& getBoundingBoxLo() noexcept;
+    auto getBoundingBoxLo() noexcept -> Vec3&;
 
     inline
-    const Vec3& getBoundingBoxLo() const noexcept;
+    auto getBoundingBoxLo() const noexcept -> const Vec3&;
 
     inline
-    Vec3& getBoundingBoxHi() noexcept;
+    auto getBoundingBoxHi() noexcept -> Vec3&;
 
     inline
-    const Vec3& getBoundingBoxHi() const noexcept;
+    auto getBoundingBoxHi() const noexcept -> const Vec3&;
 
     inline
     double signedDistance(const Vec3& a_x0) const noexcept;
@@ -132,7 +132,7 @@ namespace dcel {
     const double& getArea() const noexcept;
 
     inline
-    const std::vector<Vec3> getAllVertexCoordinates() const noexcept;
+    auto getAllVertexCoordinates() const noexcept -> std::vector<Vec3>;
 
     inline
     const std::vector<std::shared_ptr<vertex> > gatherVertices() const noexcept;

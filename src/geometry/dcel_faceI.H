@@ -16,7 +16,7 @@ namespace dcel {
   inline
   face::face(){
     m_halfEdge       = nullptr;
-    m_normal         = Vec3T<double>::Zero;
+    m_normal         = Vec3::Zero;
     m_poly2Algorithm = InsideOutsideAlgorithm::CrossingNumber;
   }
 
@@ -36,7 +36,7 @@ namespace dcel {
   }
 
   inline
-  void face::define(const Vec3T<double>& a_normal, const std::shared_ptr<edge>& a_edge) noexcept {
+  void face::define(const Vec3& a_normal, const std::shared_ptr<edge>& a_edge) noexcept {
     m_normal   = a_normal;
     m_halfEdge = a_edge;
   }
@@ -74,8 +74,8 @@ namespace dcel {
     const auto vertices = this->gatherVertices();
 
     for (int i = 0; i < vertices.size() - 1; i++){
-      const Vec3T<double>& v1 = vertices[i]  ->getPosition();
-      const Vec3T<double>& v2 = vertices[i+1]->getPosition();
+      const Vec3& v1 = vertices[i]  ->getPosition();
+      const Vec3& v2 = vertices[i+1]->getPosition();
       m_area += m_normal.dot(v2.cross(v1));
     }
 
@@ -84,7 +84,7 @@ namespace dcel {
 
   inline
   void face::computeCentroid() noexcept {
-    m_centroid = Vec3T<double>::Zero;
+    m_centroid = Vec3::Zero;
 
     const auto vertices = this->gatherVertices();
   
@@ -102,9 +102,9 @@ namespace dcel {
     const int N = vertices.size();
   
     for (int i = 0; i < N; i++){
-      const Vec3T<double>& x0 = vertices[i]      ->getPosition();
-      const Vec3T<double>& x1 = vertices[(i+1)%N]->getPosition();
-      const Vec3T<double>& x2 = vertices[(i+2)%N]->getPosition();
+      const Vec3& x0 = vertices[i]      ->getPosition();
+      const Vec3& x1 = vertices[(i+1)%N]->getPosition();
+      const Vec3& x2 = vertices[(i+2)%N]->getPosition();
 
       m_normal = (x2-x1).cross(x2-x0);
     
@@ -150,32 +150,32 @@ namespace dcel {
   }
 
   inline
-  Real& face::getArea() noexcept {
+  double& face::getArea() noexcept {
     return m_area;
   }
 
   inline
-  const Real& face::getArea() const noexcept {
+  const double& face::getArea() const noexcept {
     return m_area;
   }
 
   inline
-  Vec3T<double>& face::getBoundingBoxLo() noexcept {
+  auto face::getBoundingBoxLo() noexcept -> Vec3& {
     return m_boundingBox.getLowCorner();
   }
 
   inline
-  const Vec3T<double>& face::getBoundingBoxLo() const noexcept {
+  auto face::getBoundingBoxLo() const noexcept -> const Vec3& {
     return m_boundingBox.getLowCorner();
   }
 
   inline
-  Vec3T<double>& face::getBoundingBoxHi() noexcept {
+  auto face::getBoundingBoxHi() noexcept -> Vec3& {
     return m_boundingBox.getHighCorner();
   }
 
   inline
-  const Vec3T<double>& face::getBoundingBoxHi() const noexcept {
+  auto face::getBoundingBoxHi() const noexcept -> const Vec3& {
     return m_boundingBox.getHighCorner();
   }
 
@@ -202,8 +202,8 @@ namespace dcel {
   }
 
   inline
-  const std::vector<Vec3T<double> > face::getAllVertexCoordinates() const noexcept {
-    std::vector<Vec3T<double> > ret;
+  auto face::getAllVertexCoordinates() const noexcept -> std::vector<Vec3> {
+    std::vector<Vec3> ret;
 
     for (edge_iterator iter(*this); iter.ok(); ++iter){
       std::shared_ptr<edge>& edge = iter();
@@ -214,23 +214,23 @@ namespace dcel {
   }
 
   inline
-  auto face::projectPointIntoFacePlane(const Vec3T<double>& a_p) const noexcept -> Vec3 {
-    const Vec3T<double> normalComponent = m_normal.dot(a_p - m_centroid) * m_normal;
-    const Vec3T<double> projectedPoint  = a_p - normalComponent;
+  auto face::projectPointIntoFacePlane(const Vec3& a_p) const noexcept -> Vec3 {
+    const Vec3 normalComponent = m_normal.dot(a_p - m_centroid) * m_normal;
+    const Vec3 projectedPoint  = a_p - normalComponent;
 
     return projectedPoint;
   }
 
   inline
-  bool face::isPointInsideFace(const Vec3T<double>& a_p) const noexcept {
-    const Vec3T<double> p = this->projectPointIntoFacePlane(a_p);
+  bool face::isPointInsideFace(const Vec3& a_p) const noexcept {
+    const Vec3 p = this->projectPointIntoFacePlane(a_p);
 
     return m_poly2->isPointInside(p, m_poly2Algorithm);
   }
 
   inline
-  Real face::signedDistance(const Vec3T<double>& a_x0) const noexcept {
-    Real retval = 1.234567E89;
+  double face::signedDistance(const Vec3& a_x0) const noexcept {
+    double retval = 1.234567E89;
 
     const bool inside = this->isPointInsideFace(a_x0);
 
@@ -241,7 +241,7 @@ namespace dcel {
       for (edge_iterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
 	const auto& e = edgeIt();
 	
-	const Real curDist = e->signedDistance(a_x0);
+	const double curDist = e->signedDistance(a_x0);
     
 	if(std::abs(curDist) < std::abs(retval)){ // <= because edge normals are more important than polygon normals. 
 	  retval = curDist;
@@ -253,8 +253,8 @@ namespace dcel {
   }
 
   inline
-  Real face::unsignedDistance2(const Vec3T<double>& a_x0) const noexcept {
-    Real retval = 1.234567E89;
+  double face::unsignedDistance2(const Vec3& a_x0) const noexcept {
+    double retval = 1.234567E89;
 
     const bool inside = this->isPointInsideFace(a_x0);
 
@@ -266,7 +266,7 @@ namespace dcel {
       for (edge_iterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
 	const auto& e = edgeIt();
 	
-	const Real curDist = e->unsignedDistance2(a_x0);
+	const double curDist = e->unsignedDistance2(a_x0);
 	retval = std::min(retval, curDist);
       }
     }
