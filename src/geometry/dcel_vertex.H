@@ -30,31 +30,31 @@ namespace dcel {
     ~vertex();
 
     inline
-    void define(const Vec3& m_pos, const std::shared_ptr<edge>& a_edge, const Vec3 a_normal = Vec3::Zero) noexcept;
+    auto define(const Vec3& m_pos, const std::shared_ptr<edge>& a_edge, const Vec3 a_normal = Vec3::Zero) noexcept -> void;
 
     inline
-    void setPosition(const Vec3& a_pos) noexcept;
+    auto setPosition(const Vec3& a_pos) noexcept -> void;
 
     inline
-    void setNormal(const Vec3& a_normal) noexcept;
+    auto setNormal(const Vec3& a_normal) noexcept -> void;
 
     inline
-    void setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
+    auto setEdge(const std::shared_ptr<edge>& a_edge) noexcept -> void;
 
     inline
-    void addFaceToCache(const std::shared_ptr<face>& a_face) noexcept;
+    auto addFaceToCache(const std::shared_ptr<face>& a_face) noexcept -> void;
 
     inline
-    void normalizeNormalVector() noexcept;
+    auto normalizeNormalVector() noexcept -> void;
 
     inline
-    void computeVertexNormalAverage() noexcept;
+    auto computeVertexNormalAverage() noexcept -> void;
 
     inline
-    void computeVertexNormalAngleWeighted() noexcept;
+    auto computeVertexNormalAngleWeighted() noexcept -> void;
 
     inline
-    void clearFaceCache() noexcept;
+    auto clearFaceCache() noexcept -> void;
 
     inline
     auto getPosition() noexcept -> Vec3&;
@@ -69,22 +69,22 @@ namespace dcel {
     auto getNormal() const noexcept -> const Vec3&;
 
     inline
-    std::shared_ptr<edge>& getEdge() noexcept;
+    auto getEdge() noexcept -> std::shared_ptr<edge>&;
 
     inline
-    const std::shared_ptr<edge>& getEdge() const noexcept;
+    auto getEdge() const noexcept -> const std::shared_ptr<edge>& ;
 
     inline
-    std::vector<std::shared_ptr<face> >& getFaceCache() noexcept;
+    auto getFaceCache() noexcept -> std::vector<std::shared_ptr<face> >&;
 
     inline
-    const std::vector<std::shared_ptr<face> >& getFaceCache() const noexcept;
+    auto getFaceCache() const noexcept -> const std::vector<std::shared_ptr<face> >& ;
 
     inline
-    double signedDistance(const Vec3& a_x0) const noexcept;
+    auto signedDistance(const Vec3& a_x0) const noexcept -> double;
 
     inline
-    double unsignedDistance2(const Vec3& a_x0) const noexcept; 
+    auto unsignedDistance2(const Vec3& a_x0) const noexcept -> double;
 
   protected:
 

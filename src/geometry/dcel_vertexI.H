@@ -48,44 +48,44 @@ namespace dcel {
   }
 
   inline
-  void vertex::define(const Vec3& a_pos, const std::shared_ptr<edge>& a_edge, const Vec3 a_normal) noexcept {
+  auto vertex::define(const Vec3& a_pos, const std::shared_ptr<edge>& a_edge, const Vec3 a_normal) noexcept -> void{
     m_pos = a_pos;
     m_edge = a_edge;
     m_normal = a_normal;
   }
 
   inline
-  void vertex::setPosition(const Vec3& a_pos) noexcept {
+  auto vertex::setPosition(const Vec3& a_pos) noexcept -> void{
     m_pos = a_pos;
   }
 
   inline
-  void vertex::setEdge(const std::shared_ptr<edge>& a_edge) noexcept {
+  auto vertex::setEdge(const std::shared_ptr<edge>& a_edge) noexcept -> void{
     m_edge = a_edge;
   }
 
   inline
-  void vertex::setNormal(const Vec3& a_normal) noexcept {
+  auto vertex::setNormal(const Vec3& a_normal) noexcept -> void{
     m_normal = a_normal;
   }
 
   inline
-  void vertex::addFaceToCache(const std::shared_ptr<face>& a_face) noexcept {
+  auto vertex::addFaceToCache(const std::shared_ptr<face>& a_face) noexcept -> void{
     m_faceCache.push_back(a_face);
   }
 
   inline
-  void vertex::clearFaceCache() noexcept {
+  auto vertex::clearFaceCache() noexcept -> void{
     m_faceCache.resize(0);
   }
 
   inline
-  void vertex::normalizeNormalVector() noexcept {
+  auto vertex::normalizeNormalVector() noexcept -> void{
     m_normal = m_normal/m_normal.length();
   }
 
   inline
-  void vertex::computeVertexNormalAverage() noexcept {
+  auto vertex::computeVertexNormalAverage() noexcept -> void{
     std::vector<std::shared_ptr<face> > faces;
     for (edge_iterator iter(*this); iter.ok(); ++iter){
       faces.emplace_back(iter()->getFace());
@@ -101,7 +101,7 @@ namespace dcel {
   }
 
   inline
-  void vertex::computeVertexNormalAngleWeighted() noexcept {
+  auto vertex::computeVertexNormalAngleWeighted() noexcept -> void{
     m_normal = Vec3::Zero;
 
     for (edge_iterator iter(*this); iter.ok(); ++iter){
@@ -148,27 +148,27 @@ namespace dcel {
   }
 
   inline
-  std::shared_ptr<edge>& vertex::getEdge() noexcept {
+  auto vertex::getEdge() noexcept -> std::shared_ptr<edge>& {
     return m_edge;
   }
 
   inline
-  const std::shared_ptr<edge>& vertex::getEdge() const noexcept {
+  auto vertex::getEdge() const noexcept -> const std::shared_ptr<edge>& {
     return m_edge;
   }
 
   inline
-  const std::vector<std::shared_ptr<face> >& vertex::getFaceCache() const noexcept{
+  auto vertex::getFaceCache() const noexcept -> const std::vector<std::shared_ptr<face> >& {
     return m_faceCache;
   }
 
   inline
-  std::vector<std::shared_ptr<face> >& vertex::getFaceCache() noexcept {
+  auto vertex::getFaceCache() noexcept -> std::vector<std::shared_ptr<face> >& {
     return m_faceCache;
   }
 
   inline
-  double vertex::signedDistance(const Vec3& a_x0) const noexcept {
+  auto vertex::signedDistance(const Vec3& a_x0) const noexcept -> double{
     const Vec3 delta = a_x0 - m_pos;
     const double dist        = delta.length();
     const double dot         = m_normal.dot(delta);
@@ -178,7 +178,7 @@ namespace dcel {
   }
 
   inline
-  double vertex::unsignedDistance2(const Vec3& a_x0) const noexcept {
+  auto vertex::unsignedDistance2(const Vec3& a_x0) const noexcept -> double {
     const Vec3 d = a_x0 - m_pos;
 
     return d.dot(d);
