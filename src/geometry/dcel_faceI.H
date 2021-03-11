@@ -36,13 +36,13 @@ namespace dcel {
   }
 
   inline
-  void face::define(const Vec3& a_normal, const std::shared_ptr<edge>& a_edge) noexcept {
+  auto face::define(const Vec3& a_normal, const std::shared_ptr<edge>& a_edge) noexcept -> void{
     m_normal   = a_normal;
     m_halfEdge = a_edge;
   }
 
   inline
-  void face::reconcile() noexcept {
+  auto face::reconcile() noexcept -> void {
     this->computeNormal();
     this->normalizeNormalVector();
     this->computeCentroid();
@@ -53,22 +53,22 @@ namespace dcel {
   }
 
   inline
-  void face::setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept {
+  auto face::setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept -> void{
     m_halfEdge = a_halfEdge;
   }
 
   inline
-  void face::normalizeNormalVector() noexcept {
+  auto face::normalizeNormalVector() noexcept -> void{
     m_normal = m_normal/m_normal.length();
   }
 
   inline
-  void face::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept {
+  auto face::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept -> void{
     m_poly2Algorithm = a_algorithm;
   }
 
   inline
-  void face::computeArea() noexcept {
+  auto face::computeArea() noexcept -> void{
     m_area = 0.0;
 
     const auto vertices = this->gatherVertices();
@@ -83,7 +83,7 @@ namespace dcel {
   }
 
   inline
-  void face::computeCentroid() noexcept {
+  auto face::computeCentroid() noexcept -> void{
     m_centroid = Vec3::Zero;
 
     const auto vertices = this->gatherVertices();
@@ -96,7 +96,7 @@ namespace dcel {
   }
 
   inline
-  void face::computeNormal() noexcept {
+  auto face::computeNormal() noexcept -> void{
     const auto vertices = this->gatherVertices();
     
     const int N = vertices.size();
@@ -115,17 +115,17 @@ namespace dcel {
   }
 
   inline
-  void face::computeBoundingBox() noexcept {
+  auto face::computeBoundingBox() noexcept -> void{
     m_boundingBox.define(this->getAllVertexCoordinates());
   }
 
   inline
-  void face::computeBoundingSphere() noexcept {
+  auto face::computeBoundingSphere() noexcept -> void{
     m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingSphere::Algorithm::Ritter);
   }
 
   inline
-  void face::computePolygon2D() noexcept {
+  auto face::computePolygon2D() noexcept -> void{
     m_poly2 = std::make_shared<Polygon2D<double> >(m_normal, this->getAllVertexCoordinates());
   }
 
@@ -150,12 +150,12 @@ namespace dcel {
   }
 
   inline
-  double& face::getArea() noexcept {
+  auto face::getArea() noexcept -> double&{
     return m_area;
   }
 
   inline
-  const double& face::getArea() const noexcept {
+  auto face::getArea() const noexcept -> const double& {
     return m_area;
   }
 
@@ -180,17 +180,17 @@ namespace dcel {
   }
 
   inline
-  std::shared_ptr<edge>& face::getHalfEdge() noexcept {
+  auto face::getHalfEdge() noexcept -> std::shared_ptr<edge>& {
     return m_halfEdge;
   }
 
   inline
-  const std::shared_ptr<edge>& face::getHalfEdge() const noexcept{
+  auto face::getHalfEdge() const noexcept -> const std::shared_ptr<edge>& {
     return m_halfEdge;
   }
 
   inline
-  const std::vector<std::shared_ptr<vertex> > face::gatherVertices() const noexcept {
+  auto face::gatherVertices() const noexcept -> std::vector<std::shared_ptr<vertex> > {
     std::vector<std::shared_ptr<vertex> > vertices;
 
     for (edge_iterator iter(*this); iter.ok(); ++iter){
@@ -222,14 +222,14 @@ namespace dcel {
   }
 
   inline
-  bool face::isPointInsideFace(const Vec3& a_p) const noexcept {
+  auto face::isPointInsideFace(const Vec3& a_p) const noexcept -> bool {
     const Vec3 p = this->projectPointIntoFacePlane(a_p);
 
     return m_poly2->isPointInside(p, m_poly2Algorithm);
   }
 
   inline
-  double face::signedDistance(const Vec3& a_x0) const noexcept {
+  auto face::signedDistance(const Vec3& a_x0) const noexcept -> double{
     double retval = 1.234567E89;
 
     const bool inside = this->isPointInsideFace(a_x0);
@@ -253,7 +253,7 @@ namespace dcel {
   }
 
   inline
-  double face::unsignedDistance2(const Vec3& a_x0) const noexcept {
+  auto face::unsignedDistance2(const Vec3& a_x0) const noexcept -> double {
     double retval = 1.234567E89;
 
     const bool inside = this->isPointInsideFace(a_x0);

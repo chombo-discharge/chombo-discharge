@@ -35,22 +35,22 @@ namespace dcel {
     ~face();
 
     inline
-    void define(const Vec3& a_normal, const std::shared_ptr<edge>& a_edge) noexcept;
+    auto define(const Vec3& a_normal, const std::shared_ptr<edge>& a_edge) noexcept -> void;
 
     inline
-    void reconcile() noexcept;
+    auto reconcile() noexcept -> void;
 
     inline
-    void setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept;
+    auto setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept -> void;
 
     inline
-    void setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept;
+    auto setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept -> void;
 
     inline
-    std::shared_ptr<edge>& getHalfEdge() noexcept;
+    auto getHalfEdge() noexcept -> std::shared_ptr<edge>&;
 
     inline
-    const std::shared_ptr<edge>& getHalfEdge() const noexcept;
+    auto getHalfEdge() const noexcept -> const std::shared_ptr<edge>&;
 
     inline
     auto getCentroid() noexcept -> Vec3&;
@@ -77,10 +77,10 @@ namespace dcel {
     auto getBoundingBoxHi() const noexcept -> const Vec3&;
 
     inline
-    double signedDistance(const Vec3& a_x0) const noexcept;
+    auto signedDistance(const Vec3& a_x0) const noexcept -> double;
 
     inline
-    double unsignedDistance2(const Vec3& a_x0) const noexcept;
+    auto unsignedDistance2(const Vec3& a_x0) const noexcept -> double;
   
   protected:
     
@@ -105,43 +105,43 @@ namespace dcel {
     InsideOutsideAlgorithm m_poly2Algorithm;
 
     inline
-    void computeArea() noexcept;
+    auto computeArea() noexcept -> void;
 
     inline
-    void computeCentroid() noexcept;
+    auto computeCentroid() noexcept -> void;
 
     inline
-    void computeNormal() noexcept;
+    auto computeNormal() noexcept -> void;
 
     inline
-    void computeBoundingBox() noexcept;
+    auto computeBoundingBox() noexcept -> void;
 
     inline
-    void computeBoundingSphere() noexcept;
+    auto computeBoundingSphere() noexcept -> void;
 
     inline
-    void computePolygon2D() noexcept;
+    auto computePolygon2D() noexcept -> void;
     
     inline
-    void normalizeNormalVector() noexcept;
+    auto normalizeNormalVector() noexcept -> void;
 
     inline
-    double& getArea() noexcept;
+    auto getArea() noexcept -> double&;
 
     inline
-    const double& getArea() const noexcept;
+    auto getArea() const noexcept -> const double& ;
 
     inline
     auto getAllVertexCoordinates() const noexcept -> std::vector<Vec3>;
 
     inline
-    const std::vector<std::shared_ptr<vertex> > gatherVertices() const noexcept;
+    auto gatherVertices() const noexcept -> std::vector<std::shared_ptr<vertex> >;
 
     inline
     auto projectPointIntoFacePlane(const Vec3& a_p) const noexcept -> Vec3;
 
     inline
-    bool isPointInsideFace(const Vec3& a_p) const noexcept;
+    auto isPointInsideFace(const Vec3& a_p) const noexcept -> bool;
   };
 
 }
