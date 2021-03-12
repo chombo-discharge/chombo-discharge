@@ -13,6 +13,12 @@
 #include "dcel_parser.H"
 #include "dcel_if.H"
 
+// Grouping in space. In principle we could use Morton ordering, even. 
+template <class T>
+auto comparator = [](const dcel::faceT<T>& f1, const dcel::faceT<T>& f2, const int a_dir){
+  return f1.getCentroid()[a_dir] < f2.getCentroid()[a_dir];
+};
+
 porsche::porsche(){
 
   using prec = float;
@@ -41,6 +47,9 @@ porsche::porsche(){
   //  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::KdTree);
   m->setSearchAlgorithm(dcel::SearchAlgorithm::Direct2);
   m->setInsideOutsideAlgorithm(dcel::InsideOutsideAlgorithm::CrossingNumber);
+
+
+  m->buildBVH(comparator<prec>);
 
   // Create the if object
   bool flipNormal = false;

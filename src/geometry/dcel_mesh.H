@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <memory>
+#include <functional>
 
 namespace dcel {
 
@@ -87,6 +88,9 @@ namespace dcel {
     inline
     decltype(auto) signedDistance(const Vec3& a_x0, SearchAlgorithm a_algorithm) const noexcept;
 
+    inline
+    decltype(auto) buildBVH(std::function<bool(const face&, const face&, const int)> compare);
+
   protected:
 
     SearchAlgorithm m_algorithm;
@@ -94,6 +98,8 @@ namespace dcel {
 
     BoundingSphere<T> m_boundingSphere;
     AABB<T> m_boundingBox;
+
+    std::shared_ptr<BVH::Tree<face, AABB<T> > > m_tree;
 
     std::vector<std::shared_ptr<vertex> >  m_vertices;
     std::vector<std::shared_ptr<edge> >    m_edges;

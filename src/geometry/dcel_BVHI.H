@@ -13,6 +13,7 @@
 using namespace dcel::BVH;
 
 template <class T, class BV>
+inline
 Node<T, BV>::Node() {
   m_parent = nullptr;
   m_left   = nullptr;
@@ -20,6 +21,7 @@ Node<T, BV>::Node() {
 }
 
 template <class T, class BV>
+inline
 Node<T, BV>::Node(std::shared_ptr<Node<T, BV> >& a_parent){
   m_parent = a_parent;
   m_left   = nullptr;
@@ -27,75 +29,90 @@ Node<T, BV>::Node(std::shared_ptr<Node<T, BV> >& a_parent){
 }
 
 template <class T, class BV>
+inline
 Node<T, BV>::~Node() {
 }
 
 template <class T, class BV>
+inline
 void Node<T, BV>::setParent(const std::shared_ptr<Node<T, BV> >& a_parent) noexcept {
   m_parent = a_parent;
 }
 
 template <class T, class BV>
+inline
 void Node<T, BV>::setLeft(const std::shared_ptr<Node<T, BV> >& a_left) noexcept {
   m_left = a_left;
 }
 
 template <class T, class BV>
+inline
 void Node<T, BV>::setRight(const std::shared_ptr<Node<T, BV> >& a_right) noexcept{
   m_right = a_right;
 }
 
 template <class T, class BV>
+inline
 bool Node<T, BV>::isRoot() const noexcept {
   return m_parent == nullptr;
 }
 
 template <class T, class BV>
+inline
 bool Node<T, BV>::isLeaf() const noexcept {
   return m_left == nullptr && m_right == nullptr;
 }
 
 template <class T, class BV>
+inline
 bool Node<T, BV>::isPointInside(const Vec3T<double>& a_x0) const noexcept {
   return m_bv.isPointInside(a_x0);
 }
 
 template <class T, class BV>
+inline
 bool Node<T, BV>::isPointOutside(const Vec3T<double>& a_x0) const noexcept {
   return m_bv.isPointOutside(a_x0);
 }
 
 template <class T, class BV>
+inline
 double Node<T, BV>::getDistanceToPoint(const Vec3T<double>& a_x0) const noexcept {
   return m_bv.getDistanceToPoint(a_x0);
 }
 
 template <class T, class BV>
+inline
 BV& Node<T, BV>::getBoundingVolume() noexcept {
   return m_bv;
 }
 
 template <class T, class BV>
+inline
 const BV& Node<T, BV>::getBoundingVolume() const noexcept {
   return m_bv;
 }
 
 template <class T, class BV>
+inline
 std::vector<std::shared_ptr<T> >& Node<T, BV>::getObjects() noexcept {
   return m_objects;
 }
 
 template <class T, class BV>
+inline
 const std::vector<std::shared_ptr<T> >& Node<T, BV>::getObjects() const noexcept {
   return m_objects;
 }
 
 template <class T, class BV>
+inline
 Tree<T, BV>::Tree() {
-
+  m_root = nullptr;
 }
 
 template <class T, class BV>
+inline
 Tree<T, BV>::~Tree() {
 
 }

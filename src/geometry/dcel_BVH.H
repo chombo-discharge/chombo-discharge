@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <vector>
+#include <functional>
 
 namespace dcel {
   namespace BVH {
@@ -24,24 +25,43 @@ namespace dcel {
       Node(std::shared_ptr<Node<T, BV> >& a_parent);
       ~Node();
 
+      inline
       void setParent(const std::shared_ptr<Node<T, BV> >& a_parent) noexcept;
+
+      inline
       void setLeft(const std::shared_ptr<Node<T, BV> >& a_left) noexcept;
+
+      inline
       void setRight(const std::shared_ptr<Node<T, BV> >& a_right) noexcept;
 
+      inline
       PointLocation getPointLocation(const Vec3T<double>& a_p) const noexcept;
 
+      inline
       bool isRoot() const noexcept;
+
+      inline
       bool isLeaf() const noexcept;
-    
+
+      inline
       bool isPointInside(const Vec3T<double>& a_x0) const noexcept;
+
+      inline
       bool isPointOutside(const Vec3T<double>& a_x0) const noexcept;
-      
+
+      inline
       double getDistanceToPoint(const Vec3T<double>& a_x0) const noexcept;
 
+      inline
       BV& getBoundingVolume() noexcept;
+
+      inline
       const BV& getBoundingVolume() const noexcept;
 
+      inline
       std::vector<std::shared_ptr<T> >& getObjects() noexcept;
+
+      inline
       const std::vector<std::shared_ptr<T> >& getObjects() const noexcept;
 
     protected:
@@ -57,9 +77,11 @@ namespace dcel {
 
     template <class T, class BV>
     class Tree {
+    public:
       Tree();
       ~Tree();
 
+      
     protected:
 
       std::shared_ptr<Node<T, BV> > m_root;

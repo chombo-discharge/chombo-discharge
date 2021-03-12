@@ -212,6 +212,8 @@ namespace dcel {
     return vertexCoordinates;
   }
 
+
+
   template <class T>  
   inline
   decltype(auto) mesh<T>::signedDistance(const Vec3& a_point) const noexcept {
@@ -270,6 +272,12 @@ namespace dcel {
     }
 
     return closest->signedDistance(a_point);
+  }
+
+  template <class T>
+  inline
+  decltype(auto) mesh<T>::buildBVH(std::function<bool(const face&, const face&, const int)> compare){
+    m_tree = std::make_shared<BVH::Tree<face, AABB<T> > >();
   }
 }
 
