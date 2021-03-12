@@ -17,7 +17,7 @@ namespace dcel {
   inline
   faceT<T>::faceT(){
     m_halfEdge       = nullptr;
-    m_normal         = Vec3::Zero;
+    m_normal         = Vec3::zero();
     m_poly2Algorithm = InsideOutsideAlgorithm::CrossingNumber;
   }
 
@@ -95,7 +95,7 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) faceT<T>::computeCentroid() noexcept {
-    m_centroid = Vec3::Zero;
+    m_centroid = Vec3::zero();
 
     const auto vertices = this->gatherVertices();
   

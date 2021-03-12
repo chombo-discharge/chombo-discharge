@@ -14,15 +14,19 @@ namespace dcel {
   class Vec2T {
   public:
 
-    static const Vec2T Zero;
-    static const Vec2T Unit;
-
-    Vec2T() = default;
+    Vec2T();
+    Vec2T(const Vec2T& u);
     Vec2T(const T& a_x, const T& a_y);
     ~Vec2T() = default;
     
     T x;
     T y;
+
+    inline
+    static decltype(auto) zero() noexcept;
+
+    inline
+    static decltype(auto) one() noexcept;
 
     inline
     decltype(auto) operator=(const Vec2T& a_other) noexcept;
@@ -72,13 +76,17 @@ namespace dcel {
   template <class T>
   class Vec3T {
   public:
-
-    static const Vec3T Zero;
-    static const Vec3T Unit;
     
-    Vec3T() = default;
+    Vec3T();
+    Vec3T(const Vec3T& a_u);
     Vec3T(const T& a_x, const T& a_y, const T& a_z);
     ~Vec3T() = default;
+
+    inline
+    static decltype(auto) zero() noexcept;
+
+    inline
+    static decltype(auto) one() noexcept;
 
     inline
     decltype(auto) operator=(const Vec3T& u) noexcept;

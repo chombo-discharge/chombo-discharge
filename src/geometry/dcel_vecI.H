@@ -16,9 +16,34 @@ namespace dcel {
 
   template <class T>
   inline
+  Vec2T<T>::Vec2T(){
+    *this = Vec2T<T>::zero();
+  }
+
+  template <class T>
+  inline
+  Vec2T<T>::Vec2T(const Vec2T& u){
+    x = u.x;
+    y = u.y;
+  }
+
+  template <class T>
+  inline
   Vec2T<T>::Vec2T(const T& a_x, const T& a_y){
     x = a_x;
     y = a_y;
+  }
+
+  template <class T>
+  inline
+  decltype(auto) Vec2T<T>::zero() noexcept {
+    return Vec2T<T>(0, 0);
+  }
+
+  template <class T>
+  inline
+  decltype(auto) Vec2T<T>::one() noexcept {
+    return Vec2T<T>(1, 1);
   }
 
   template <class T>
@@ -125,10 +150,36 @@ namespace dcel {
 
   template <class T>
   inline
+  Vec3T<T>::Vec3T(){
+    (*this) = Vec3T<T>::zero();
+  }
+
+  template <class T>
+  inline
+  Vec3T<T>::Vec3T(const Vec3T<T>& u) {
+    X[0] = u[0];
+    X[1] = u[1];
+    X[2] = u[2];
+  }
+
+  template <class T>
+  inline
   Vec3T<T>::Vec3T(const T& a_x, const T& a_y, const T& a_z){
     X[0] = a_x;
     X[1] = a_y;
     X[2] = a_z;
+  }
+
+  template <class T>
+  inline
+  decltype(auto) Vec3T<T>::zero() noexcept {
+    return Vec3T<T>(0, 0, 0);
+  }
+
+  template <class T>
+  inline
+  decltype(auto) Vec3T<T>::one() noexcept {
+    return Vec3T<T>(1, 1, 1);
   }
 
   template <class T>

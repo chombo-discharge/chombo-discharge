@@ -61,7 +61,7 @@ namespace dcel {
   inline
   BoundingSphere<T>::BoundingSphere(){
     m_radius = 0.0;
-    m_center = Vec3::Zero;
+    m_center = Vec3::zero();
   }
 
   template <class T>
@@ -129,7 +129,7 @@ namespace dcel {
   inline
   decltype(auto) BoundingSphere<T>::buildRitter(const std::vector<Vec3>& a_points) noexcept {
     m_radius = 0.0;
-    m_center = Vec3::Zero;
+    m_center = Vec3::zero();
 
     constexpr T half = 0.5;
 
@@ -194,8 +194,8 @@ namespace dcel {
 
   template <class T>
   AABB<T>::AABB(){
-    m_loCorner = Vec3::Zero;
-    m_hiCorner = Vec3::Zero;
+    m_loCorner = Vec3::zero();
+    m_hiCorner = Vec3::zero();
   }
 
   template <class T>
@@ -292,7 +292,7 @@ namespace dcel {
 
     constexpr T zero = 0.0;
     
-    const T retval =  std::min(zero, delta[delta.maxDir(false)]) + std::max(Vec3::Zero, delta).length(); // This is negative inside. 
+    const T retval =  std::min(zero, delta[delta.maxDir(false)]) + std::max(Vec3::zero(), delta).length(); // This is negative inside. 
   
     return retval;
   }

@@ -22,8 +22,8 @@ namespace dcel {
     m_pairEdge     = nullptr;
     m_nextEdge     = nullptr;
     m_previousEdge = nullptr;
-    m_normal       = Vec3::Zero;
-    m_x2x1         = Vec3::Zero;
+    m_normal       = Vec3::zero();
+    m_x2x1         = Vec3::zero();
     m_len2         = 0.0; 
   }
 

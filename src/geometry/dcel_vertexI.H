@@ -18,8 +18,8 @@ namespace dcel {
   template <class T>
   inline
   vertexT<T>::vertexT(){
-    m_pos    = Vec3::Zero;
-    m_normal = Vec3::Zero;
+    m_pos    = Vec3::zero();
+    m_normal = Vec3::zero();
 
     m_faceCache.resize(0, nullptr);
   }
@@ -108,7 +108,7 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) vertexT<T>::computeVertexNormalAngleWeighted() noexcept {
-    m_normal = Vec3::Zero;
+    m_normal = Vec3::zero();
 
     for (edgeIterator iter(*this); iter.ok(); ++iter){
       const auto& outgoingEdge = iter();
