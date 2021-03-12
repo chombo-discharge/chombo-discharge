@@ -16,27 +16,8 @@
 
 using namespace dcel;
 
-using prec = double;
-using face = faceT<prec>;
-using mesh = meshT<prec>;
-using AABB = AABBT<prec>;
-
-
-#if 0
-// In case you want to pass in a different lambda for sorting
-SortingFunctor<prec> sortFunc = [](const face& f1, const face& f2, const int a_dir){
-  return f1.getCentroid()[a_dir] > f2.getCentroid()[a_dir];
-};
-
-// In case you want to pass in a different cost function. 
-CostFunctor<prec> costFunc = [](const std::vector<std::shared_ptr<face> >& sortedFaces, const int a_dir) {
-  for (const auto& f : sortedFaces){
-    std::cout << f->getCentroid()[0] << std::endl;
-  }
-    
-  return std::pair<double, int>(0., 0);
-};
-#endif
+using mesh = meshT<float>;
+using AABB = AABBT<float>;
 
 porsche::porsche(){
 
@@ -50,7 +31,7 @@ porsche::porsche(){
   auto m = std::make_shared<mesh>();
 
   // Read mesh from file and reconcile. 
-  parser::PLY<prec>::readASCII(*m, filename);
+  parser::PLY<float>::readASCII(*m, filename);
   m->sanityCheck();
   m->reconcile(VertexNormalWeight::Angle);
   m->setSearchAlgorithm(SearchAlgorithm::Direct2);
@@ -58,7 +39,7 @@ porsche::porsche(){
 
 
   // Creat the object and build the BVH. 
-  RefCountedPtr<dcel_if<prec, AABB> > bif = RefCountedPtr<dcel_if<prec, AABB> > (new dcel_if<prec, AABB>(m,true));
+  RefCountedPtr<dcel_if<float, AABB> > bif = RefCountedPtr<dcel_if<float, AABB> > (new dcel_if<float, AABB>(m,true));
 
   bif->buildBVH();
 
