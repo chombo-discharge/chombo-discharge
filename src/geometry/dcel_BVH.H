@@ -25,47 +25,51 @@ namespace dcel {
       using Node = NodeT<T, BV>;
 
       NodeT();
-      NodeT(std::shared_ptr<Node >& a_parent);
+      NodeT(std::shared_ptr<Node>& a_parent);
+      NodeT(std::vector<std::shared_ptr<T> >& a_data);
       ~NodeT();
 
       inline
-      void setParent(const std::shared_ptr<Node >& a_parent) noexcept;
+      decltype(auto) setParent(const std::shared_ptr<Node>& a_parent) noexcept;
 
       inline
-      void setLeft(const std::shared_ptr<Node >& a_left) noexcept;
+      decltype(auto) setLeft(const std::shared_ptr<Node>& a_left) noexcept;
 
       inline
-      void setRight(const std::shared_ptr<Node >& a_right) noexcept;
+      decltype(auto) setRight(const std::shared_ptr<Node>& a_right) noexcept;
 
       inline
-      PointLocation getPointLocation(const Vec3& a_p) const noexcept;
+      decltype(auto) getParent() noexcept;
 
       inline
-      bool isRoot() const noexcept;
+      decltype(auto) getParent() const noexcept;
 
       inline
-      bool isLeaf() const noexcept;
+      decltype(auto) isRoot() const noexcept;
 
       inline
-      bool isPointInside(const Vec3& a_x0) const noexcept;
+      decltype(auto) isLeaf() const noexcept;
 
       inline
-      bool isPointOutside(const Vec3& a_x0) const noexcept;
+      decltype(auto) isPointInside(const Vec3& a_x0) const noexcept;
 
       inline
-      double getDistanceToPoint(const Vec3& a_x0) const noexcept;
+      decltype(auto) isPointOutside(const Vec3& a_x0) const noexcept;
 
       inline
-      BV& getBoundingVolume() noexcept;
+      decltype(auto) getDistanceToPoint(const Vec3& a_x0) const noexcept;
 
       inline
-      const BV& getBoundingVolume() const noexcept;
+      decltype(auto) getBoundingVolume() noexcept;
 
       inline
-      std::vector<std::shared_ptr<T> >& getObjects() noexcept;
+      decltype(auto) getBoundingVolume() const noexcept;
 
       inline
-      const std::vector<std::shared_ptr<T> >& getObjects() const noexcept;
+      decltype(auto) getObjects() noexcept;
+
+      inline
+      decltype(auto) getObjects() const noexcept;
 
     protected:
 
@@ -73,9 +77,9 @@ namespace dcel {
 
       std::vector<std::shared_ptr<T> > m_objects;
 
-      std::shared_ptr<Node > m_parent;
-      std::shared_ptr<Node > m_left;
-      std::shared_ptr<Node > m_right;
+      std::shared_ptr<Node> m_parent;
+      std::shared_ptr<Node> m_left;
+      std::shared_ptr<Node> m_right;
     };
 
     template <class T, class BV>

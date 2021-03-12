@@ -22,10 +22,16 @@ NodeT<T, BV>::NodeT() {
 
 template <class T, class BV>
 inline
-NodeT<T, BV>::NodeT(std::shared_ptr<Node >& a_parent){
+NodeT<T, BV>::NodeT(std::shared_ptr<Node>& a_parent){
   m_parent = a_parent;
   m_left   = nullptr;
   m_right  = nullptr;
+}
+
+template <class T, class BV>
+inline
+NodeT<T, BV>::NodeT(std::vector<std::shared_ptr<T> >& a_objects) {
+  m_objects = a_objects;
 }
 
 template <class T, class BV>
@@ -35,74 +41,86 @@ NodeT<T, BV>::~NodeT() {
 
 template <class T, class BV>
 inline
-void NodeT<T, BV>::setParent(const std::shared_ptr<Node>& a_parent) noexcept {
+decltype(auto) NodeT<T, BV>::setParent(const std::shared_ptr<Node>& a_parent) noexcept {
   m_parent = a_parent;
 }
 
 template <class T, class BV>
 inline
-void NodeT<T, BV>::setLeft(const std::shared_ptr<Node>& a_left) noexcept {
+decltype(auto) NodeT<T, BV>::setLeft(const std::shared_ptr<Node>& a_left) noexcept {
   m_left = a_left;
 }
 
 template <class T, class BV>
 inline
-void NodeT<T, BV>::setRight(const std::shared_ptr<Node >& a_right) noexcept{
+decltype(auto) NodeT<T, BV>::setRight(const std::shared_ptr<Node>& a_right) noexcept{
   m_right = a_right;
 }
 
 template <class T, class BV>
 inline
-bool NodeT<T, BV>::isRoot() const noexcept {
+decltype(auto) NodeT<T, BV>::getParent() noexcept {
+  return (m_parent);
+}
+
+template <class T, class BV>
+inline
+decltype(auto) NodeT<T, BV>::getParent() const noexcept {
+  return (m_parent);
+}
+
+template <class T, class BV>
+inline
+decltype(auto) NodeT<T, BV>::isRoot() const noexcept {
   return m_parent == nullptr;
 }
 
 template <class T, class BV>
 inline
-bool NodeT<T, BV>::isLeaf() const noexcept {
+decltype(auto) NodeT<T, BV>::isLeaf() const noexcept {
   return m_left == nullptr && m_right == nullptr;
 }
 
 template <class T, class BV>
 inline
-bool NodeT<T, BV>::isPointInside(const Vec3& a_x0) const noexcept {
+decltype(auto) NodeT<T, BV>::isPointInside(const Vec3& a_x0) const noexcept {
   return m_bv.isPointInside(a_x0);
 }
 
 template <class T, class BV>
 inline
-bool NodeT<T, BV>::isPointOutside(const Vec3& a_x0) const noexcept {
+decltype(auto) NodeT<T, BV>::isPointOutside(const Vec3& a_x0) const noexcept {
   return m_bv.isPointOutside(a_x0);
 }
 
 template <class T, class BV>
 inline
-double NodeT<T, BV>::getDistanceToPoint(const Vec3& a_x0) const noexcept {
+decltype(auto) NodeT<T, BV>::getDistanceToPoint(const Vec3& a_x0) const noexcept {
   return m_bv.getDistanceToPoint(a_x0);
 }
 
 template <class T, class BV>
 inline
-BV& NodeT<T, BV>::getBoundingVolume() noexcept {
-  return m_bv;
+decltype(auto) NodeT<T, BV>::getBoundingVolume() noexcept {
+  return (m_bv);
 }
 
 template <class T, class BV>
 inline
-const BV& NodeT<T, BV>::getBoundingVolume() const noexcept {
-  return m_bv;
+decltype(auto) NodeT<T, BV>::getBoundingVolume() const noexcept {
+  return (m_bv);
 }
 
 template <class T, class BV>
 inline
-std::vector<std::shared_ptr<T> >& NodeT<T, BV>::getObjects() noexcept {
-  return m_objects;
+decltype(auto) NodeT<T, BV>::getObjects() noexcept {
+  return (m_objects);
 }
 
 template <class T, class BV>
 inline
-const std::vector<std::shared_ptr<T> >& NodeT<T, BV>::getObjects() const noexcept {
-  return m_objects;
+decltype(auto) NodeT<T, BV>::getObjects() const noexcept {
+  return (m_objects);
 }
 
 template <class T, class BV>
