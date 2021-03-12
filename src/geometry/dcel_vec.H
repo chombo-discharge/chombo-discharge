@@ -25,49 +25,49 @@ namespace dcel {
     T y;
 
     inline
-    auto operator=(const Vec2T& a_other) noexcept -> Vec2T<T>&;
+    decltype(auto) operator=(const Vec2T& a_other) noexcept;
 
     inline
-    auto operator+(const Vec2T& a_other) const noexcept -> Vec2T<T>;
+    decltype(auto) operator+(const Vec2T& a_other) const noexcept;
 
     inline
-    auto operator-(const Vec2T& a_other) const noexcept -> Vec2T<T>;
+    decltype(auto) operator-(const Vec2T& a_other) const noexcept;
 
     inline
-    auto operator*(const T& s) const noexcept -> Vec2T<T>;
+    decltype(auto) operator*(const T& s) const noexcept;
 
     inline
-    auto operator/(const T& s) const noexcept -> Vec2T<T>;
+    decltype(auto) operator/(const T& s) const noexcept;
 
     inline
-    auto operator+=(const Vec2T& a_other) noexcept -> Vec2T<T>&;
+    decltype(auto) operator+=(const Vec2T& a_other) noexcept;
 
     inline
-    auto operator-=(const Vec2T& a_other) noexcept -> Vec2T<T>&;
+    decltype(auto) operator-=(const Vec2T& a_other) noexcept;
 
     inline
-    auto operator*=(const T& s) noexcept -> Vec2T<T>&;
+    decltype(auto) operator*=(const T& s) noexcept;
 
     inline
-    auto operator/=(const T& s) noexcept -> Vec2T<T>&;
+    decltype(auto) operator/=(const T& s) noexcept;
 
     inline
-    auto dot(const Vec2T& a_other) const noexcept -> T;
+    decltype(auto) dot(const Vec2T& a_other) const noexcept;
 
     inline
-    auto length() const noexcept -> T;
+    decltype(auto) length() const noexcept;
 
     inline
-    auto length2() const noexcept ->T;
+    decltype(auto) length2() const noexcept;
   };
 
   template <class T>
   inline
-  auto operator*(const T& s, const Vec2T<T>& a_other) noexcept -> Vec2T<T>;
+  decltype(auto) operator*(const T& s, const Vec2T<T>& a_other) noexcept;
 
   template <class T>
   inline
-  auto operator/(const T& s, const Vec2T<T>& a_other) noexcept -> Vec2T<T>;
+  decltype(auto) operator/(const T& s, const Vec2T<T>& a_other) noexcept;
 
   template <class T>
   class Vec3T {
@@ -81,67 +81,67 @@ namespace dcel {
     ~Vec3T() = default;
 
     inline
-    auto operator=(const Vec3T& u) noexcept -> Vec3T<T>&;
+    decltype(auto) operator=(const Vec3T& u) noexcept;
 
     inline
-    auto operator+(const Vec3T& u) const noexcept -> Vec3T<T>;
+    decltype(auto) operator+(const Vec3T& u) const noexcept;
 
     inline
-    auto operator-(const Vec3T& u) const noexcept -> Vec3T<T>;
+    decltype(auto) operator-(const Vec3T& u) const noexcept;
 
     inline
-    auto operator*(const T& s) const noexcept -> Vec3T<T>;
+    decltype(auto) operator*(const T& s) const noexcept;
 
     inline
-    auto operator/(const T& s) const noexcept -> Vec3T<T>;
+    decltype(auto) operator/(const T& s) const noexcept;
 
     inline
-    auto operator+=(const Vec3T& u) noexcept -> Vec3T<T>&;
+    decltype(auto) operator+=(const Vec3T& u) noexcept;
 
     inline
-    auto operator-=(const Vec3T& u) noexcept -> Vec3T<T>&;
+    decltype(auto) operator-=(const Vec3T& u) noexcept;
 
     inline
-    auto operator*=(const T& s) noexcept -> Vec3T<T>&;
+    decltype(auto) operator*=(const T& s) noexcept;
 
     inline
-    auto operator/=(const T& s) noexcept -> Vec3T<T>&;
+    decltype(auto) operator/=(const T& s) noexcept;
 
     inline
-    auto operator[](int i) noexcept -> T&;
+    decltype(auto) operator[](int i) noexcept;
 
     inline
-    auto operator[](int i) const noexcept -> const T& ;
+    decltype(auto) operator[](int i) const noexcept;
 
     inline
-    auto operator==(const Vec3T& u) const noexcept -> bool;
+    decltype(auto) operator==(const Vec3T& u) const noexcept;
 
     inline
-    auto operator<(const Vec3T& u) const noexcept -> bool;
+    decltype(auto) operator<(const Vec3T& u) const noexcept;
 
     inline
-    auto operator>(const Vec3T& u) const noexcept -> bool;
+    decltype(auto) operator>(const Vec3T& u) const noexcept;
 
     inline
-    auto operator<=(const Vec3T& u) const noexcept -> bool;
+    decltype(auto) operator<=(const Vec3T& u) const noexcept;
 
     inline
-    auto operator>=(const Vec3T& u) const noexcept -> bool;
+    decltype(auto) operator>=(const Vec3T& u) const noexcept;
 
     inline
-    auto maxDir(const bool a_doAbs) const noexcept -> int;
+    decltype(auto) maxDir(const bool a_doAbs) const noexcept;
 
     inline
-    auto cross(const Vec3T& u) const noexcept -> Vec3T<T>;
+    decltype(auto) cross(const Vec3T& u) const noexcept;
 
     inline
-    auto dot(const Vec3T& u) const noexcept -> T;
+    decltype(auto) dot(const Vec3T& u) const noexcept;
 
     inline
-    auto length() const noexcept -> T;
+    decltype(auto) length() const noexcept;
 
     inline
-    auto length2() const noexcept -> T;
+    decltype(auto) length2() const noexcept;
 
   protected:
     T X[3];
@@ -150,11 +150,11 @@ namespace dcel {
 
   template <class T>
   inline
-  auto operator*(const T& s, const Vec3T<T>& a_other) noexcept -> Vec3T<T>;
+  decltype(auto) operator*(const T& s, const Vec3T<T>& a_other) noexcept;
 
   template <class T>
   inline
-  auto operator/(const T& s, const Vec3T<T>& a_other) noexcept -> Vec3T<T>;
+  decltype(auto) operator/(const T& s, const Vec3T<T>& a_other) noexcept;
 }
 
 #include "dcel_vecI.H"
