@@ -43,7 +43,7 @@ namespace dcel {
   decltype(auto) meshT<T>::define(std::vector<std::shared_ptr<face> >&   a_faces,
 				 std::vector<std::shared_ptr<edge> >&   a_edges,
 				 std::vector<std::shared_ptr<vertex> >& a_vertices) noexcept{
-    m_faces = a_faces;
+    m_faces    = a_faces;
     m_edges    = a_edges;
     m_vertices = a_vertices;
   }
@@ -151,18 +151,6 @@ namespace dcel {
 	std::cerr << "In file dcel_mesh function dcel::meshT<T>::reconcileVertices(VertexNormalWeighting) - unsupported algorithm requested\n";
       }
     }
-  }
-
-  template <class T>
-  inline
-  decltype(auto) meshT<T>::computeBoundingSphere() noexcept {
-    m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingVolumeAlgorithm::Ritter);
-  }
-
-  template <class T>
-  inline
-  decltype(auto) meshT<T>::computeBoundingBox() noexcept {
-    m_boundingBox.define(this->getAllVertexCoordinates());
   }
 
   template <class T>
@@ -277,7 +265,6 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) meshT<T>::buildBVH(std::function<bool(const face&, const face&, const int)> comparator){
-    m_tree = std::make_shared<BVH::Tree<face, AABB> >();
   }
 }
 

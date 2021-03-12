@@ -49,4 +49,11 @@ BaseIF* dcel_if<T, BV>::newImplicitFunction() const {
   return static_cast<BaseIF*> (new dcel_if(*this));
 }
 
+template <class T, class BV>
+inline
+decltype(auto) dcel_if<T, BV>::buildBVH(std::function<bool(const face&, const face&, const int)> comparator){
+  m_bvh = std::make_shared<BVH::Tree<face, AABB> >();
+}
+
 #endif
+

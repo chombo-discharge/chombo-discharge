@@ -31,10 +31,6 @@ namespace dcel {
     using edge   = edgeT<T>;
     using face   = faceT<T>;
     using mesh   = meshT<T>;
-    using AABB   = AABBT<T>;
-    
-    using BoundingSphere = BoundingSphereT<T>;
-
 
     meshT();
     meshT(const mesh& a_otherMesh) = delete;
@@ -43,8 +39,6 @@ namespace dcel {
 	  std::vector<std::shared_ptr<vertex> >& a_vertices);
 
     ~meshT();
-
-
 
     inline
     decltype(auto) define(std::vector<std::shared_ptr<face> >&   a_faces,
@@ -62,12 +56,6 @@ namespace dcel {
 
     inline
     decltype(auto) reconcile(VertexNormalWeight a_weight = VertexNormalWeight::Angle) noexcept;
-
-    inline
-    decltype(auto) computeBoundingSphere() noexcept;
-
-    inline
-    decltype(auto) computeBoundingBox() noexcept;
 
     inline
     decltype(auto) getVertices() noexcept;
@@ -94,17 +82,12 @@ namespace dcel {
     decltype(auto) signedDistance(const Vec3& a_x0, SearchAlgorithm a_algorithm) const noexcept;
 
     inline
-    decltype(auto) buildBVH(std::function<bool(const face&, const face&, const int)> comparator);
+    decltype(auto) buildBVH(std::function<bool(const face&, const face&, const int)> comparator); // Remove later. 
 
   protected:
 
     SearchAlgorithm m_algorithm;
     bool m_use_tree;
-
-    BoundingSphere m_boundingSphere;
-    AABB m_boundingBox;
-
-    std::shared_ptr<BVH::Tree<face, AABB> > m_tree;
 
     std::vector<std::shared_ptr<vertex> >  m_vertices;
     std::vector<std::shared_ptr<edge> >    m_edges;

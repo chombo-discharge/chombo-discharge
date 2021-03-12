@@ -38,11 +38,15 @@ public:
   
   BaseIF* newImplicitFunction() const override;
 
+  inline
+  decltype(auto) buildBVH(std::function<bool(const face&, const face&, const int)> comparator);
+
 protected:
 
   std::shared_ptr<mesh> m_mesh;
 
   std::shared_ptr<Tree> m_bvh;
+  
   bool m_flipInside;
 };
 
