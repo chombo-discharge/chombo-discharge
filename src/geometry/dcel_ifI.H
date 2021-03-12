@@ -12,7 +12,7 @@
 #include "dcel_if.H"
 
 template <class T>
-dcel_if<T>::dcel_if(const std::shared_ptr<dcel::mesh<T> >& a_mesh, const bool a_flipInside){
+dcel_if<T>::dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside){
   m_mesh       = a_mesh;
   m_flipInside = a_flipInside;
 }

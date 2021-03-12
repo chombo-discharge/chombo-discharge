@@ -23,25 +23,26 @@ namespace dcel {
   template <class T> class faceT;
 
   template <class T>
-  class mesh {
+  class meshT {
   public:
 
     using Vec3   = Vec3T<T>;
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
     using face   = faceT<T>;
+    using mesh   = meshT<T>;
     using AABB   = AABBT<T>;
     
     using BoundingSphere = BoundingSphereT<T>;
 
 
-    mesh();
-    mesh(const mesh& a_otherMesh) = delete;
-    mesh(std::vector<std::shared_ptr<face> >&   a_faces,
-	 std::vector<std::shared_ptr<edge> >&   a_edges,
-	 std::vector<std::shared_ptr<vertex> >& a_vertices);
+    meshT();
+    meshT(const mesh& a_otherMesh) = delete;
+    meshT(std::vector<std::shared_ptr<face> >&   a_faces,
+	  std::vector<std::shared_ptr<edge> >&   a_edges,
+	  std::vector<std::shared_ptr<vertex> >& a_vertices);
 
-    ~mesh();
+    ~meshT();
 
 
 
@@ -130,4 +131,5 @@ namespace dcel {
 }
 
 #include "dcel_meshI.H"
+
 #endif

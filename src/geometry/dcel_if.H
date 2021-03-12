@@ -2,7 +2,7 @@
   @file   dcel_if.H
   @brief  Declaration of an implicit-function class that gets its value function from a DCEL surface tesselation
   @author Robert Marskar
-  @date   Apr. 2018
+  @date   March 2021
 */
 
 #ifndef _DCEL_IF_
@@ -22,20 +22,26 @@ template <class T>
 class dcel_if : public BaseIF {
 public:
 
+  using mesh = dcel::meshT<T>;
+  using face = dcel::faceT<T>;
+  using AABB = dcel::AABBT<T>;
+  using Tree = dcel::BVH::Tree<face, AABB>;
+
   dcel_if() = delete;
 
-  dcel_if(const std::shared_ptr<dcel::mesh<T> >& a_mesh, const bool a_flipInside);
+  dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside);
   dcel_if(const dcel_if& a_object);
   ~dcel_if();
 
   Real value(const RealVect& a_point) const override;
+  
   BaseIF* newImplicitFunction() const override;
 
 protected:
 
-  std::shared_ptr<dcel::mesh<T> > m_mesh;
+  std::shared_ptr<mesh> m_mesh;
 
-  std::shared_ptr<dcel::BVH::Tree<dcel::faceT<T>, dcel::AABBT<T> > > m_bvh;
+  std::shared_ptr<Tree> m_bvh;
   bool m_flipInside;
 };
 

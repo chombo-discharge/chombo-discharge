@@ -19,9 +19,12 @@ auto comparator = [](const dcel::faceT<T>& f1, const dcel::faceT<T>& f2, const i
   return f1.getCentroid()[a_dir] < f2.getCentroid()[a_dir];
 };
 
+using namespace dcel;
+
 porsche::porsche(){
 
   using prec = float;
+  using mesh = meshT<prec>;
 
   std::string filename;
   int tree_depth;
@@ -34,19 +37,16 @@ porsche::porsche(){
   pp.get("max_elements", max_elements);
 
   // Build the mesh
-  std::shared_ptr<dcel::mesh<prec> > m = std::shared_ptr<dcel::mesh<prec>> (new dcel::mesh<prec>());
-  dcel::parser::PLY<prec>::readASCII(*m, filename);
+  std::shared_ptr<mesh> m = std::shared_ptr<mesh> (new mesh());
+  parser::PLY<prec>::readASCII(*m, filename);
   m->sanityCheck();
-  m->reconcile(dcel::VertexNormalWeight::Angle);
+  m->reconcile(VertexNormalWeight::Angle);
 
-  // Build tree
-  //  mesh->computeBoundingSphere();
-  //  mesh->buildKdTree(tree_depth, max_elements);
 
   // Set algorithms
   //  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::KdTree);
-  m->setSearchAlgorithm(dcel::SearchAlgorithm::Direct2);
-  m->setInsideOutsideAlgorithm(dcel::InsideOutsideAlgorithm::CrossingNumber);
+  m->setSearchAlgorithm(SearchAlgorithm::Direct2);
+  m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::CrossingNumber);
 
 
   m->buildBVH(comparator<prec>);
