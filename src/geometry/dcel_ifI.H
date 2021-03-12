@@ -14,6 +14,16 @@
 using namespace dcel;
 
 template <class T, class BV>
+SortingFunctor<faceT<T>> dcel_if<T, BV>::defaultSortingFunctor = [](const faceT<T>& f1, const faceT<T>& f2, const int dir){
+  return f1.getCentroid()[dir] < f1.getCentroid()[dir];
+};
+
+template <class T, class BV>
+CostFunctor<faceT<T>> dcel_if<T, BV>::defaultCostFunctor = [](const std::vector<std::shared_ptr<faceT<T> > >, const int dir){
+    return std::make_pair(0,dir);
+  };
+
+template <class T, class BV>
 dcel_if<T, BV>::dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside){
   m_mesh       = a_mesh;
   m_flipInside = a_flipInside;
@@ -52,7 +62,7 @@ BaseIF* dcel_if<T, BV>::newImplicitFunction() const {
 
 template <class T, class BV>
 inline
-decltype(auto) dcel_if<T, BV>::buildBVH(SortingFunctor<T> sortFunc, CostFunctor<T> costFunc) noexcept{
+decltype(auto) dcel_if<T, BV>::buildBVH(SortingFunctor<face> sortFunc, CostFunctor<face> costFunc) noexcept {
   
   m_root = std::make_shared<Node>(m_mesh->getFaces());
   

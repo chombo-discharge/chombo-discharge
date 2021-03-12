@@ -149,15 +149,14 @@ decltype(auto) NodeT<T, BV>::getObjects() const noexcept {
 
 template <class T, class BV>
 inline
-decltype(auto) NodeT<T, BV>::sortAndPartitionObjects(std::function<bool(const T&, const T&, const int)> sortingFunction,
-						     std::function<std::pair<double, int>(const std::vector<std::shared_ptr<T> >&, const int)> costFunction) noexcept {
+decltype(auto) NodeT<T, BV>::sortAndPartitionObjects(SortingFunctor<T> sortingFunc, CostFunctor<T> costFunc) noexcept {
 
   int splitDir   = 0;
   int splitIndex = 0;
   
   for (int dir = 0; dir < 3; dir++){
-    auto comp = [sortingFunction, dir](const std::shared_ptr<T>& t1, const std::shared_ptr<T>& t2) {
-      return sortingFunction(*t1, *t2, dir);
+    auto comp = [sortingFunc, dir](const std::shared_ptr<T>& t1, const std::shared_ptr<T>& t2) {
+      return sortingFunc(*t1, *t2, dir);
     };
 
     std::cout << "partitioning in dir = " << dir << std::endl;

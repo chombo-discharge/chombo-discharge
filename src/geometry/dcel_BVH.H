@@ -15,6 +15,13 @@
 #include <functional>
 
 namespace dcel {
+
+  template <class T>
+  using SortingFunctor = std::function<bool(const T&, const T&, const int)>;
+
+  template <class T>
+  using CostFunctor = std::function<std::pair<double, int>(const std::vector<std::shared_ptr<T> >&, const int)>;
+  
   namespace BVH {
         
     template <class T, class BV>
@@ -84,8 +91,7 @@ namespace dcel {
       decltype(auto) getObjects() const noexcept;
 
       inline
-      decltype(auto) sortAndPartitionObjects(std::function<bool(const T&, const T&, const int)> sortingFunction,
-					     std::function<std::pair<double, int>(const std::vector<std::shared_ptr<T> >&, const int)> costFunction) noexcept;
+      decltype(auto) sortAndPartitionObjects(SortingFunctor<T> sortingFunc, CostFunctor<T> costFunc) noexcept;
 
     protected:
 

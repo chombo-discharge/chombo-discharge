@@ -16,49 +16,40 @@
 
 using namespace dcel;
 
-using prec = float;
+using prec = double;
 using face = faceT<prec>;
 using mesh = meshT<prec>;
 using AABB = AABBT<prec>;
-#if 0
-//using SortingFunctor = std::function<bool(const face&, const face&, const int)>;
 
-// Sorting criterion of the triangles. 
-SortingFunctor sortFunc = [](const face& f1, const face& f2, const int a_dir){
-  return f1.getCentroid()[a_dir] < f2.getCentroid()[a_dir];
+
+#if 0
+// In case you want to pass in a different lambda for sorting
+SortingFunctor<prec> sortFunc = [](const face& f1, const face& f2, const int a_dir){
+  return f1.getCentroid()[a_dir] > f2.getCentroid()[a_dir];
 };
 
-
-CostFunctor costFunc = [](const std::vector<std::shared_ptr<face> >& sortedFaces, const int a_dir) {
+// In case you want to pass in a different cost function. 
+CostFunctor<prec> costFunc = [](const std::vector<std::shared_ptr<face> >& sortedFaces, const int a_dir) {
   for (const auto& f : sortedFaces){
     std::cout << f->getCentroid()[0] << std::endl;
   }
     
   return std::pair<double, int>(0., 0);
 };
-
-auto testFunction = [](const std::vector<int>& a_vector) -> int {
-  return 0;
-};
 #endif
 
-// Grouping in space. In principle we could use Morton ordering, even. 
 porsche::porsche(){
 
-
-
   std::string filename;
-  int tree_depth;
-  int max_elements;
 
   ParmParse pp("porsche");
 
-  pp.get("mesh_file",    filename);
-  pp.get("tree_depth",   tree_depth);
-  pp.get("max_elements", max_elements);
+  pp.get("mesh_file", filename);
 
   // Build the mesh and set default parameters. 
-  std::shared_ptr<mesh> m = std::shared_ptr<mesh> (new mesh());
+  auto m = std::make_shared<mesh>();
+
+  // Read mesh from file and reconcile. 
   parser::PLY<prec>::readASCII(*m, filename);
   m->sanityCheck();
   m->reconcile(VertexNormalWeight::Angle);
