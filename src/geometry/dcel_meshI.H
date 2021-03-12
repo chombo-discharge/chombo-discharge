@@ -276,7 +276,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) mesh<T>::buildBVH(std::function<bool(const face&, const face&, const int)> compare){
+  decltype(auto) mesh<T>::buildBVH(std::function<bool(const face&, const face&, const int)> comparator){
     m_tree = std::make_shared<BVH::Tree<face, AABB> >();
   }
 }

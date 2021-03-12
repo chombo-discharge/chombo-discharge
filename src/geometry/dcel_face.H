@@ -8,13 +8,11 @@
 #ifndef _DCEL_FACE__
 #define _DCEL_FACE__
 
-#include "dcel_BoundingVolumes.H"
 #include "dcel_algorithms.H"
-#include "dcel_poly.H"
-
 #include "dcel_vec.H"
 #include "dcel_vertex.H"
 #include "dcel_edge.H"
+#include "dcel_poly.H"
 
 #include <memory>
 #include <vector>

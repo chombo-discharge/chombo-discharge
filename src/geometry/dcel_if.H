@@ -8,6 +8,7 @@
 #ifndef _DCEL_IF_
 #define _DCEL_IF_
 
+#include "dcel_BVH.H"
 #include "dcel_mesh.H"
 
 #include <memory>
@@ -33,6 +34,8 @@ public:
 protected:
 
   std::shared_ptr<dcel::mesh<T> > m_mesh;
+
+  std::shared_ptr<dcel::BVH::Tree<dcel::faceT<T>, dcel::AABBT<T> > > m_bvh;
   bool m_flipInside;
 };
 
