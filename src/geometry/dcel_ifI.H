@@ -52,7 +52,7 @@ BaseIF* dcel_if<T, BV>::newImplicitFunction() const {
 
 template <class T, class BV>
 inline
-decltype(auto) dcel_if<T, BV>::buildBVH(SortingFunctor sortFunc, CostFunctor costFunc) noexcept{
+decltype(auto) dcel_if<T, BV>::buildBVH(SortingFunctor<T> sortFunc, CostFunctor<T> costFunc) noexcept{
   
   m_root = std::make_shared<Node>(m_mesh->getFaces());
   

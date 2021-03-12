@@ -15,6 +15,25 @@
 
 #include <BaseIF.H>
 
+using namespace dcel;
+
+template <class T>
+using SortingFunctor = std::function<bool(const faceT<T>&, const faceT<T> &, const int)>;
+
+template <class T>
+using CostFunctor    = std::function<std::pair<double, int>(const std::vector<std::shared_ptr<faceT<T> > >&, const int)>;
+
+template <class T>
+SortingFunctor<T> defaultSortingFunctor = [](const faceT<T>& f1, const faceT<T>& f2, const int dir){
+  return f1.getCentroid()[dir] < f1.getCentroid()[dir];
+};
+
+template <class T>
+CostFunctor<T> defaultCostFunctor = [](const std::vector<std::shared_ptr<faceT<T> > >& a_faces, const int a_dir){
+  return std::make_pair(0,a_dir);
+};
+
+
 /*!
   @brief Class that gets it's value function from a surface tesselation 
 */
@@ -28,9 +47,6 @@ public:
   using AABB = dcel::AABBT<T>;
   using Node = dcel::BVH::NodeT<face, BV>;
 
-  using SortingFunctor = std::function<bool(const face&, const face&, const int)>;
-  using CostFunctor    = std::function<std::pair<double, int>(const std::vector<std::shared_ptr<face> >&, const int)>;
-
   dcel_if() = delete;
 
   dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside);
@@ -42,7 +58,7 @@ public:
   BaseIF* newImplicitFunction() const override;
 
   inline
-  decltype(auto) buildBVH(SortingFunctor sortFunc, CostFunctor costFunc) noexcept;
+  decltype(auto) buildBVH(SortingFunctor<T> sortFunc = defaultSortingFunctor<T>, CostFunctor<T> costFunc = defaultCostFunctor<T>) noexcept;
 
 protected:
 

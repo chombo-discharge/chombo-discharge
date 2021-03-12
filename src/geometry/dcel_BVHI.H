@@ -160,6 +160,8 @@ decltype(auto) NodeT<T, BV>::sortAndPartitionObjects(std::function<bool(const T&
       return sortingFunction(*t1, *t2, dir);
     };
 
+    std::cout << "partitioning in dir = " << dir << std::endl;
+
     // Have now sorted the objects based on sortingFunction along dir
     std::sort(m_objects.begin(), m_objects.end(), comp); // How to pass into blargh?
 

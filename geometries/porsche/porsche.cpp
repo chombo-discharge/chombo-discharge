@@ -20,16 +20,16 @@ using prec = float;
 using face = faceT<prec>;
 using mesh = meshT<prec>;
 using AABB = AABBT<prec>;
-
+#if 0
 //using SortingFunctor = std::function<bool(const face&, const face&, const int)>;
 
 // Sorting criterion of the triangles. 
-dcel_if<prec, AABB>::SortingFunctor sortFunc = [](const face& f1, const face& f2, const int a_dir){
+SortingFunctor sortFunc = [](const face& f1, const face& f2, const int a_dir){
   return f1.getCentroid()[a_dir] < f2.getCentroid()[a_dir];
 };
 
 
-dcel_if<prec, AABB>::CostFunctor costFunc = [](const std::vector<std::shared_ptr<face> >& sortedFaces, const int a_dir) {
+CostFunctor costFunc = [](const std::vector<std::shared_ptr<face> >& sortedFaces, const int a_dir) {
   for (const auto& f : sortedFaces){
     std::cout << f->getCentroid()[0] << std::endl;
   }
@@ -40,6 +40,7 @@ dcel_if<prec, AABB>::CostFunctor costFunc = [](const std::vector<std::shared_ptr
 auto testFunction = [](const std::vector<int>& a_vector) -> int {
   return 0;
 };
+#endif
 
 // Grouping in space. In principle we could use Morton ordering, even. 
 porsche::porsche(){
@@ -68,7 +69,7 @@ porsche::porsche(){
   // Creat the object and build the BVH. 
   RefCountedPtr<dcel_if<prec, AABB> > bif = RefCountedPtr<dcel_if<prec, AABB> > (new dcel_if<prec, AABB>(m,true));
 
-  bif->buildBVH(sortFunc, costFunc);
+  bif->buildBVH();
 
   m_electrodes.push_back(electrode(bif, true));
   
