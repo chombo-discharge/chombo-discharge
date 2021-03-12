@@ -1,8 +1,8 @@
 /*!
-  @file   dcel_BoundingSphere.H
-  @brief  Declaration of a BoundingSphere class. Sphere can be computed with various approximate or exact functions. 
+  @file   dcel_BoundingVolumes.H
+  @brief  Declaration of a various bounding volumes. 
   @author Robert Marskar
-  @date   Ap. 2018
+  @date   March 2021
 */
 
 #ifndef _DCEL_BOUNDINGVOLUMES_H_
@@ -25,13 +25,13 @@ namespace dcel {
   };
 
   template <class T>
-  class BoundingVolume {
+  class BoundingVolumeT {
   public:
 
     using Vec3 = Vec3T<T>;
     
-    BoundingVolume();
-    ~BoundingVolume();
+    BoundingVolumeT();
+    ~BoundingVolumeT();
 
     inline
     decltype(auto) getPointLocation(const Vec3& a_p) const noexcept;
@@ -46,21 +46,21 @@ namespace dcel {
   };
 
   template <class T>
-  class BoundingSphere : public BoundingVolume<T> {
+  class BoundingSphereT : public BoundingVolumeT<T> {
   public:
 
     using Vec3 = Vec3T<T>;
 
-    BoundingSphere();
-    BoundingSphere(const BoundingSphere& a_other);
-    BoundingSphere(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_alg);
-    ~BoundingSphere();
+    BoundingSphereT();
+    BoundingSphereT(const BoundingSphereT& a_other);
+    BoundingSphereT(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_alg);
+    ~BoundingSphereT();
 
     inline
     decltype(auto) define(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept;
 
     inline
-    decltype(auto) intersects(const BoundingSphere& a_other) const noexcept;
+    decltype(auto) intersects(const BoundingSphereT& a_other) const noexcept;
 
     inline
     decltype(auto) getRadius() noexcept;
@@ -87,22 +87,22 @@ namespace dcel {
   };
 
   template <class T>
-  class AABB : public BoundingVolume<T> {
+  class AABBT : public BoundingVolumeT<T> {
   public:
 
     using Vec3 = Vec3T<T>;
 
-    AABB();
-    AABB(const AABB& a_other);
-    AABB(const std::vector<AABB>& a_others);
-    AABB(const std::vector<Vec3>& a_points);
-    ~AABB();
+    AABBT();
+    AABBT(const AABBT& a_other);
+    AABBT(const std::vector<AABBT>& a_others);
+    AABBT(const std::vector<Vec3>& a_points);
+    ~AABBT();
 
     inline
     decltype(auto) define(const std::vector<Vec3>& a_points) noexcept;
 
     inline
-    decltype(auto) intersects(const AABB& a_other) const noexcept;
+    decltype(auto) intersects(const AABBT& a_other) const noexcept;
 
     inline
     T getDistanceToPoint(const Vec3& a_x0) const noexcept override;

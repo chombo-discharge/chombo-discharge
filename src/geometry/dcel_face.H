@@ -76,18 +76,6 @@ namespace dcel {
     decltype(auto) getNormal() const noexcept;
 
     inline
-    decltype(auto) getBoundingBoxLo() noexcept;
-
-    inline
-    decltype(auto) getBoundingBoxLo() const noexcept;
-
-    inline
-    decltype(auto) getBoundingBoxHi() noexcept;
-
-    inline
-    decltype(auto) getBoundingBoxHi() const noexcept;
-
-    inline
     decltype(auto) signedDistance(const Vec3& a_x0) const noexcept;
 
     inline
@@ -104,12 +92,6 @@ namespace dcel {
     
     Vec3 m_normal;
     Vec3 m_centroid;
-    Vec3 m_lo;
-    Vec3 m_hi;
-
-    // Potential bounding volumes
-    BoundingSphere<T> m_boundingSphere;
-    AABB<T> m_boundingBox;
 
     // 2D polygon
     std::shared_ptr<Polygon2D<T> > m_poly2;
@@ -123,12 +105,6 @@ namespace dcel {
 
     inline
     decltype(auto) computeNormal() noexcept;
-
-    inline
-    decltype(auto) computeBoundingBox() noexcept;
-
-    inline
-    decltype(auto) computeBoundingSphere() noexcept;
 
     inline
     decltype(auto) computePolygon2D() noexcept;

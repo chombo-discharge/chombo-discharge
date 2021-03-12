@@ -30,6 +30,10 @@ namespace dcel {
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
     using face   = faceT<T>;
+    using AABB   = AABBT<T>;
+    
+    using BoundingSphere = BoundingSphereT<T>;
+
 
     mesh();
     mesh(const mesh& a_otherMesh) = delete;
@@ -96,10 +100,10 @@ namespace dcel {
     SearchAlgorithm m_algorithm;
     bool m_use_tree;
 
-    BoundingSphere<T> m_boundingSphere;
-    AABB<T> m_boundingBox;
+    BoundingSphere m_boundingSphere;
+    AABB m_boundingBox;
 
-    std::shared_ptr<BVH::Tree<face, AABB<T> > > m_tree;
+    std::shared_ptr<BVH::Tree<face, AABB> > m_tree;
 
     std::vector<std::shared_ptr<vertex> >  m_vertices;
     std::vector<std::shared_ptr<edge> >    m_edges;

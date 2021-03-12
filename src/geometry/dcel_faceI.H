@@ -54,8 +54,6 @@ namespace dcel {
     this->computeCentroid();
     this->computeArea();
     this->computePolygon2D();
-    this->computeBoundingBox();
-    this->computeBoundingSphere();
   }
 
   template <class T>
@@ -128,18 +126,6 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::computeBoundingBox() noexcept{
-    m_boundingBox.define(this->getAllVertexCoordinates());
-  }
-
-  template <class T>
-  inline
-  decltype(auto) faceT<T>::computeBoundingSphere() noexcept {
-    m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingVolumeAlgorithm::Ritter);
-  }
-
-  template <class T>
-  inline
   decltype(auto) faceT<T>::computePolygon2D() noexcept{
     m_poly2 = std::make_shared<Polygon2D<T> >(m_normal, this->getAllVertexCoordinates());
   }
@@ -178,30 +164,6 @@ namespace dcel {
   inline
   decltype(auto) faceT<T>::getArea() const noexcept {
     return (m_area);
-  }
-
-  template <class T>
-  inline
-  decltype(auto) faceT<T>::getBoundingBoxLo() noexcept {
-    return (m_boundingBox.getLowCorner());
-  }
-
-  template <class T>
-  inline
-  decltype(auto) faceT<T>::getBoundingBoxLo() const noexcept {
-    return (m_boundingBox.getLowCorner());
-  }
-
-  template <class T>
-  inline
-  decltype(auto) faceT<T>::getBoundingBoxHi() noexcept {
-    return (m_boundingBox.getHighCorner());
-  }
-
-  template <class T>
-  inline
-  decltype(auto) faceT<T>::getBoundingBoxHi() const noexcept {
-    return (m_boundingBox.getHighCorner());
   }
 
   template <class T>

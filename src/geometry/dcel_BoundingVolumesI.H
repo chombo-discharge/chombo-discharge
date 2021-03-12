@@ -1,6 +1,6 @@
 /*!
-  @file   dcel_BoundingVolumes.cpp
-  @brief  Implementation of dcel_BoundingSphere.H
+  @file   dcel_BoundingVolumesI.H
+  @brief  Implementation of dcel_BoundingVolumes.H
   @author Robert Marskar
   @date   March 2021
 */
@@ -15,18 +15,18 @@
 namespace dcel {
 
   template <class T>
-  BoundingVolume<T>::BoundingVolume(){
+  BoundingVolumeT<T>::BoundingVolumeT(){
 
   }
 
   template <class T>
-  BoundingVolume<T>::~BoundingVolume(){
+  BoundingVolumeT<T>::~BoundingVolumeT(){
 
   }
 
   template <class T>
   inline
-  decltype(auto) BoundingVolume<T>::getPointLocation(const Vec3& a_p) const noexcept {
+  decltype(auto) BoundingVolumeT<T>::getPointLocation(const Vec3& a_p) const noexcept {
     const bool inside  = this->isPointInside(a_p);
     const bool outside = this->isPointOutside(a_p);
 
@@ -47,54 +47,54 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) BoundingVolume<T>::isPointInside(const Vec3& a_x0) const {
+  decltype(auto) BoundingVolumeT<T>::isPointInside(const Vec3& a_x0) const {
     return this->getDistanceToPoint(a_x0) < 0.0;
   }
 
   template <class T>
   inline
-  decltype(auto) BoundingVolume<T>::isPointOutside(const Vec3& a_x0) const {
+  decltype(auto) BoundingVolumeT<T>::isPointOutside(const Vec3& a_x0) const {
     return this->getDistanceToPoint(a_x0) > 0.0;
   }
 
   template <class T>
   inline
-  BoundingSphere<T>::BoundingSphere(){
+  BoundingSphereT<T>::BoundingSphereT(){
     m_radius = 0.0;
     m_center = Vec3::zero();
   }
 
   template <class T>
-  BoundingSphere<T>::BoundingSphere(const BoundingSphere& a_other){
+  BoundingSphereT<T>::BoundingSphereT(const BoundingSphereT& a_other){
     m_radius = a_other.m_radius;
     m_center = a_other.m_center;
   }
 
   template <class T>
-  BoundingSphere<T>::BoundingSphere(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_algorithm){
+  BoundingSphereT<T>::BoundingSphereT(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_algorithm){
     this->define(a_points, a_algorithm);
   }
 
   template <class T>
-  BoundingSphere<T>::~BoundingSphere(){
+  BoundingSphereT<T>::~BoundingSphereT(){
 
   }
 
   template <class T>
   inline
-  decltype(auto) BoundingSphere<T>::define(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept {
+  decltype(auto) BoundingSphereT<T>::define(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept {
     switch(a_algorithm) {
     case BoundingVolumeAlgorithm::Ritter:
       this->buildRitter(a_points);
       break;
     default:
-      std::cerr << "BoundingSphere::define - unsupported algorithm requested\n";
+      std::cerr << "BoundingSphereT::define - unsupported algorithm requested\n";
     }
   }
 
   template <class T>
   inline
-  decltype(auto) BoundingSphere<T>::intersects(const BoundingSphere& a_other) const noexcept {
+  decltype(auto) BoundingSphereT<T>::intersects(const BoundingSphereT& a_other) const noexcept {
     const Vec3 deltaV = m_center - a_other.getCenter();
     const T sumR       = m_radius + a_other.getRadius();
 
@@ -103,31 +103,31 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) BoundingSphere<T>::getRadius() noexcept {
+  decltype(auto) BoundingSphereT<T>::getRadius() noexcept {
     return (m_radius);
   }
 
   template <class T>
   inline
-  decltype(auto) BoundingSphere<T>::getRadius() const noexcept {
+  decltype(auto) BoundingSphereT<T>::getRadius() const noexcept {
     return (m_radius);
   }
 
   template <class T>
   inline
-  decltype(auto) BoundingSphere<T>::getCenter() noexcept {
+  decltype(auto) BoundingSphereT<T>::getCenter() noexcept {
     return (m_center);
   }
 
   template <class T>
   inline
-  decltype(auto) BoundingSphere<T>::getCenter() const noexcept {
+  decltype(auto) BoundingSphereT<T>::getCenter() const noexcept {
     return (m_center);
   }
 
   template <class T>
   inline
-  decltype(auto) BoundingSphere<T>::buildRitter(const std::vector<Vec3>& a_points) noexcept {
+  decltype(auto) BoundingSphereT<T>::buildRitter(const std::vector<Vec3>& a_points) noexcept {
     m_radius = 0.0;
     m_center = Vec3::zero();
 
@@ -188,24 +188,24 @@ namespace dcel {
 
   template <class T>
   inline
-  T BoundingSphere<T>::getDistanceToPoint(const Vec3& a_x0) const noexcept {
+  T BoundingSphereT<T>::getDistanceToPoint(const Vec3& a_x0) const noexcept {
     return (a_x0 - m_center).length() - m_radius;
   }
 
   template <class T>
-  AABB<T>::AABB(){
+  AABBT<T>::AABBT(){
     m_loCorner = Vec3::zero();
     m_hiCorner = Vec3::zero();
   }
 
   template <class T>
-  AABB<T>::AABB(const AABB<T>& a_other){
+  AABBT<T>::AABBT(const AABBT<T>& a_other){
     m_loCorner = a_other.m_loCorner;
     m_hiCorner = a_other.m_hiCorner;
   }
 
   template <class T>
-  AABB<T>::AABB(const std::vector<AABB<T> >& a_others) {
+  AABBT<T>::AABBT(const std::vector<AABBT<T> >& a_others) {
     constexpr int DIM = 3;
   
     m_loCorner = a_others.front().getLowCorner();
@@ -223,18 +223,18 @@ namespace dcel {
   }
 
   template <class T>
-  AABB<T>::AABB(const std::vector<Vec3>& a_points){
+  AABBT<T>::AABBT(const std::vector<Vec3>& a_points){
     this->define(a_points);
   }
 
   template <class T>
-  AABB<T>::~AABB(){
+  AABBT<T>::~AABBT(){
 
   }
 
   template <class T>
   inline
-  decltype(auto) AABB<T>::define(const std::vector<Vec3>& a_points) noexcept {
+  decltype(auto) AABBT<T>::define(const std::vector<Vec3>& a_points) noexcept {
     constexpr int DIM = 3;
     m_loCorner = a_points.front();
     m_hiCorner = a_points.front();
@@ -249,7 +249,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) AABB<T>::intersects(const AABB& a_other) const noexcept {
+  decltype(auto) AABBT<T>::intersects(const AABBT& a_other) const noexcept {
     const Vec3& otherLo = a_other.getLowCorner();
     const Vec3& otherHi = a_other.getHighCorner();
 
@@ -261,31 +261,31 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) AABB<T>::getLowCorner() noexcept {
+  decltype(auto) AABBT<T>::getLowCorner() noexcept {
     return (m_loCorner);
   }
 
   template <class T>
   inline
-  decltype(auto) AABB<T>::getLowCorner() const noexcept {
+  decltype(auto) AABBT<T>::getLowCorner() const noexcept {
     return (m_loCorner);
   }
 
   template <class T>
   inline
-  decltype(auto) AABB<T>::getHighCorner() noexcept {
+  decltype(auto) AABBT<T>::getHighCorner() noexcept {
     return (m_hiCorner);
   }
 
   template <class T>
   inline
-  decltype(auto) AABB<T>::getHighCorner() const noexcept {
+  decltype(auto) AABBT<T>::getHighCorner() const noexcept {
     return (m_hiCorner);
   }
 
   template <class T>
   inline
-  T AABB<T>::getDistanceToPoint(const Vec3& a_point) const noexcept {
+  T AABBT<T>::getDistanceToPoint(const Vec3& a_point) const noexcept {
     const Vec3 delta = Vec3(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
 			    std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
 			    std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));
