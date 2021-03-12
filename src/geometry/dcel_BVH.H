@@ -84,7 +84,8 @@ namespace dcel {
       decltype(auto) getObjects() const noexcept;
 
       inline
-      decltype(auto) sortAndPartitionObjects(std::function<bool(const T&, const T&, const int)> a_comparator) noexcept;
+      decltype(auto) sortAndPartitionObjects(std::function<bool(const T&, const T&, const int)> sortingFunction,
+					     std::function<std::pair<double, int>(const std::vector<std::shared_ptr<T> >&, const int)> costFunction) noexcept;
 
     protected:
 
@@ -95,22 +96,6 @@ namespace dcel {
       std::shared_ptr<Node> m_parent;
       std::shared_ptr<Node> m_left;
       std::shared_ptr<Node> m_right;
-    };
-
-    template <class T, class BV>
-    class Tree {
-    public:
-
-      using Node = NodeT<T, BV>;
-      
-      Tree();
-      Tree(std::vector<std::shared_ptr<T> >& a_objects);
-      ~Tree();
-
-      
-    protected:
-
-      std::shared_ptr<Node> m_root;
     };
   }
 }

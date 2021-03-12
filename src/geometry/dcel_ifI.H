@@ -17,8 +17,7 @@ template <class T, class BV>
 dcel_if<T, BV>::dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside){
   m_mesh       = a_mesh;
   m_flipInside = a_flipInside;
-
-  m_bvh = std::make_shared<Tree>();
+  m_root       = nullptr;
 }
 
 template <class T, class BV>
@@ -53,11 +52,11 @@ BaseIF* dcel_if<T, BV>::newImplicitFunction() const {
 
 template <class T, class BV>
 inline
-decltype(auto) dcel_if<T, BV>::buildBVH(std::function<bool(const face&, const face&, const int)> comparator){
-  //  m_bvh = std::make_shared<BVH::Tree<face, AABB> >(m_mesh->getFaces());
-  m_node = std::make_shared<Node>(m_mesh->getFaces());
-
-  m_node->sortAndPartitionObjects(comparator);
+decltype(auto) dcel_if<T, BV>::buildBVH(SortingFunctor sortFunc, CostFunctor costFunc) noexcept{
+  
+  m_root = std::make_shared<Node>(m_mesh->getFaces());
+  
+  m_root->sortAndPartitionObjects(sortFunc, costFunc);
 }
 
 #endif

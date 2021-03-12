@@ -149,35 +149,21 @@ decltype(auto) NodeT<T, BV>::getObjects() const noexcept {
 
 template <class T, class BV>
 inline
-decltype(auto) NodeT<T, BV>::sortAndPartitionObjects(std::function<bool(const T&, const T&, const int)> a_comparator) noexcept {
+decltype(auto) NodeT<T, BV>::sortAndPartitionObjects(std::function<bool(const T&, const T&, const int)> sortingFunction,
+						     std::function<std::pair<double, int>(const std::vector<std::shared_ptr<T> >&, const int)> costFunction) noexcept {
 
+  int splitDir   = 0;
+  int splitIndex = 0;
+  
   for (int dir = 0; dir < 3; dir++){
-    auto comp = [a_comparator, dir](const std::shared_ptr<T>& t1, const std::shared_ptr<T>& t2) {
-      return a_comparator(*t1, *t2, dir);
+    auto comp = [sortingFunction, dir](const std::shared_ptr<T>& t1, const std::shared_ptr<T>& t2) {
+      return sortingFunction(*t1, *t2, dir);
     };
 
-    // Have now sorted the objects basd on a_comparator along dir
+    // Have now sorted the objects based on sortingFunction along dir
     std::sort(m_objects.begin(), m_objects.end(), comp); // How to pass into blargh?
 
-    std::cout << dir << std::endl;
   }
-}
-
-template <class T, class BV>
-inline
-Tree<T, BV>::Tree() {
-  m_root = std::make_shared<Node>();
-}
-
-template <class T, class BV>
-Tree<T, BV>::Tree(std::vector<std::shared_ptr<T> >& a_objects){
-  m_root = std::make_shared<Node>();
-}
-
-template <class T, class BV>
-inline
-Tree<T, BV>::~Tree() {
-
 }
 
 #endif

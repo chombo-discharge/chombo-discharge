@@ -26,8 +26,10 @@ public:
   using mesh = dcel::meshT<T>;
   using face = dcel::faceT<T>;
   using AABB = dcel::AABBT<T>;
-  using Tree = dcel::BVH::Tree<face, BV>;
   using Node = dcel::BVH::NodeT<face, BV>;
+
+  using SortingFunctor = std::function<bool(const face&, const face&, const int)>;
+  using CostFunctor    = std::function<std::pair<double, int>(const std::vector<std::shared_ptr<face> >&, const int)>;
 
   dcel_if() = delete;
 
@@ -40,14 +42,13 @@ public:
   BaseIF* newImplicitFunction() const override;
 
   inline
-  decltype(auto) buildBVH(std::function<bool(const face&, const face&, const int)> comparator);
+  decltype(auto) buildBVH(SortingFunctor sortFunc, CostFunctor costFunc) noexcept;
 
 protected:
 
   std::shared_ptr<mesh> m_mesh;
 
-  std::shared_ptr<Tree> m_bvh;
-  std::shared_ptr<Node> m_node;
+  std::shared_ptr<Node> m_root;
   
   bool m_flipInside;
 };

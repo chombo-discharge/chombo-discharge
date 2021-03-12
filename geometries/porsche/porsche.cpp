@@ -16,21 +16,35 @@
 
 using namespace dcel;
 
+using prec = float;
+using face = faceT<prec>;
+using mesh = meshT<prec>;
+using AABB = AABBT<prec>;
 
+//using SortingFunctor = std::function<bool(const face&, const face&, const int)>;
+
+// Sorting criterion of the triangles. 
+dcel_if<prec, AABB>::SortingFunctor sortFunc = [](const face& f1, const face& f2, const int a_dir){
+  return f1.getCentroid()[a_dir] < f2.getCentroid()[a_dir];
+};
+
+
+dcel_if<prec, AABB>::CostFunctor costFunc = [](const std::vector<std::shared_ptr<face> >& sortedFaces, const int a_dir) {
+  for (const auto& f : sortedFaces){
+    std::cout << f->getCentroid()[0] << std::endl;
+  }
+    
+  return std::pair<double, int>(0., 0);
+};
+
+auto testFunction = [](const std::vector<int>& a_vector) -> int {
+  return 0;
+};
 
 // Grouping in space. In principle we could use Morton ordering, even. 
-
-
 porsche::porsche(){
 
-  using prec = float;
-  using face = faceT<prec>;
-  using mesh = meshT<prec>;
-  using AABB = AABBT<prec>;
 
-  auto comparator = [](const face& f1, const face& f2, const int a_dir) -> bool {
-    return f1.getCentroid()[a_dir] < f2.getCentroid()[a_dir];
-  };
 
   std::string filename;
   int tree_depth;
@@ -42,24 +56,19 @@ porsche::porsche(){
   pp.get("tree_depth",   tree_depth);
   pp.get("max_elements", max_elements);
 
-  // Build the mesh
+  // Build the mesh and set default parameters. 
   std::shared_ptr<mesh> m = std::shared_ptr<mesh> (new mesh());
   parser::PLY<prec>::readASCII(*m, filename);
   m->sanityCheck();
   m->reconcile(VertexNormalWeight::Angle);
-
-
-  // Set algorithms
-  //  mesh->setSearchAlgorithm(dcel::SearchAlgorithm::KdTree);
   m->setSearchAlgorithm(SearchAlgorithm::Direct2);
   m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::CrossingNumber);
 
-  // Create the if object
-  bool flipNormal = false;
 
+  // Creat the object and build the BVH. 
   RefCountedPtr<dcel_if<prec, AABB> > bif = RefCountedPtr<dcel_if<prec, AABB> > (new dcel_if<prec, AABB>(m,true));
 
-  bif->buildBVH(comparator);
+  bif->buildBVH(sortFunc, costFunc);
 
   m_electrodes.push_back(electrode(bif, true));
   
