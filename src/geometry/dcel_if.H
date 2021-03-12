@@ -18,14 +18,15 @@
 /*!
   @brief Class that gets it's value function from a surface tesselation 
 */
-template <class T>
+template <class T, class BV>
 class dcel_if : public BaseIF {
 public:
 
+  using Vec3 = dcel::Vec3T<T>;
   using mesh = dcel::meshT<T>;
   using face = dcel::faceT<T>;
   using AABB = dcel::AABBT<T>;
-  using Tree = dcel::BVH::Tree<face, AABB>;
+  using Tree = dcel::BVH::Tree<face, BV>;
 
   dcel_if() = delete;
 

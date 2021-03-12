@@ -11,27 +11,29 @@
 #include "dcel_vec.H"
 #include "dcel_if.H"
 
-template <class T>
-dcel_if<T>::dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside){
+using namespace dcel;
+
+template <class T, class BV>
+dcel_if<T, BV>::dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside){
   m_mesh       = a_mesh;
   m_flipInside = a_flipInside;
 }
 
-template <class T>
-dcel_if<T>::dcel_if(const dcel_if& a_object){
+template <class T, class BV>
+dcel_if<T, BV>::dcel_if(const dcel_if& a_object){
   m_mesh       = a_object.m_mesh;
   m_flipInside = a_object.m_flipInside;
 }
 
-template <class T>
-dcel_if<T>::~dcel_if(){
+template <class T, class BV>
+dcel_if<T, BV>::~dcel_if(){
 
 }
 
-template <class T>
-Real dcel_if<T>::value(const RealVect& a_point) const {
+template <class T, class BV>
+Real dcel_if<T, BV>::value(const RealVect& a_point) const {
   
-  dcel::Vec3T<T> p(a_point[0], a_point[1], a_point[2]);
+  Vec3 p(a_point[0], a_point[1], a_point[2]);
   
   T retval = m_mesh->signedDistance(p); // dcel::mesh can return either positive or negative for outside. 
   
@@ -42,8 +44,8 @@ Real dcel_if<T>::value(const RealVect& a_point) const {
   return Real(retval);
 }
 
-template <class T>
-BaseIF* dcel_if<T>::newImplicitFunction() const {
+template <class T, class BV>
+BaseIF* dcel_if<T, BV>::newImplicitFunction() const {
   return static_cast<BaseIF*> (new dcel_if(*this));
 }
 

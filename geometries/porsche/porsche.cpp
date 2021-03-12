@@ -9,6 +9,7 @@
 
 #include <ParmParse.H>
 
+#include "dcel_BoundingVolumes.H"
 #include "dcel_mesh.H"
 #include "dcel_parser.H"
 #include "dcel_if.H"
@@ -25,6 +26,7 @@ porsche::porsche(){
 
   using prec = float;
   using mesh = meshT<prec>;
+  using AABB = AABBT<prec>;
 
   std::string filename;
   int tree_depth;
@@ -53,7 +55,8 @@ porsche::porsche(){
 
   // Create the if object
   bool flipNormal = false;
-  RefCountedPtr<dcel_if<prec> > bif = RefCountedPtr<dcel_if<prec> >(new dcel_if<prec>(m,true));
+
+  RefCountedPtr<dcel_if<prec, AABB> > bif = RefCountedPtr<dcel_if<prec, AABB> > (new dcel_if<prec, AABB>(m,true));
 
   m_electrodes.push_back(electrode(bif, true));
   
