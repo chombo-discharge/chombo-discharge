@@ -38,7 +38,7 @@ namespace dcel {
 	@brief Read an ASCII .ply file and put it in a mesh
       */
       inline
-      static void readASCII(mesh<T>& a_mesh, const std::string a_filename);
+      static decltype(auto) readASCII(mesh<T>& a_mesh, const std::string a_filename);
 
     protected:
 
@@ -49,18 +49,18 @@ namespace dcel {
 	@param[inout] a_inputstream   File
       */
       inline
-      static auto readHeaderASCII(int&           a_numVertices,
-				  int&           a_numFaces,
-				  std::ifstream& a_inputstream) -> void;
+      static decltype(auto) readHeaderASCII(int&           a_numVertices,
+					    int&           a_numFaces,
+					    std::ifstream& a_inputstream);
 
       /*!
 	@brief Read ASCII vertices. The next getline() from inputstream must read the first vertex (i.e. don't rewind the stream
 	before entering this routine)
       */
       inline
-      static auto readVerticesASCII(std::vector<std::shared_ptr<vertex> >& a_vertices,
-				    const int                              a_numVertices,
-				    std::ifstream&                         a_inputstream) -> void;
+      static decltype(auto) readVerticesASCII(std::vector<std::shared_ptr<vertex> >& a_vertices,
+					      const int                              a_numVertices,
+					      std::ifstream&                         a_inputstream);
 
       /*!
 	@brief Read ASCII faces and create mesh connectivity. The next getline() from inputstream must read the first face,
@@ -68,23 +68,23 @@ namespace dcel {
 	on the correct line
       */
       inline
-      static auto readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
-				 std::vector<std::shared_ptr<edge> >&   a_edges,
-				 std::vector<std::shared_ptr<vertex> >& a_vertices,
-				 const int                              a_numFaces,
-				 std::ifstream&                         a_inputstream) -> void;
+      static decltype(auto) readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
+					   std::vector<std::shared_ptr<edge> >&   a_edges,
+					   std::vector<std::shared_ptr<vertex> >& a_vertices,
+					   const int                              a_numFaces,
+					   std::ifstream&                         a_inputstream);
 
       /*!
 	@brief This sets all pair edges
       */
       inline
-      static auto reconcilePairEdges(std::vector<std::shared_ptr<edge> >& a_edges) -> void;
+      static decltype(auto) reconcilePairEdges(std::vector<std::shared_ptr<edge> >& a_edges);
 
       /*!
 	@brief Clean up memory
       */
       inline
-      static auto clearFaceCache(std::vector<std::shared_ptr<vertex> >& a_vertices) -> void;
+      static decltype(auto) clearFaceCache(std::vector<std::shared_ptr<vertex> >& a_vertices);
     };
   }
 }

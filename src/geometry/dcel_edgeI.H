@@ -220,7 +220,7 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) edgeT<T>::projectPointToEdge(const Vec3& a_x0) const noexcept {
-    const Vec3 p = a_x0 - m_vertex->getPosition();
+    const auto p = a_x0 - m_vertex->getPosition();
 
     return p.dot(m_x2x1)/m_len2;
   }
@@ -261,11 +261,10 @@ namespace dcel {
     
     t = std::min(std::max(zero,t), one);
 
-    const Vec3 linePoint = m_vertex->getPosition() + t*m_x2x1;
-
-    const Vec3 d = a_x0 - linePoint;
+    const auto linePoint = m_vertex->getPosition() + t*m_x2x1;
+    const auto delta     = a_x0 - linePoint;
     
-    return d.dot(d);
+    return delta.dot(delta);
   }
 }
 

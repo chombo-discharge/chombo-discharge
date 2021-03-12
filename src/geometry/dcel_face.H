@@ -46,52 +46,52 @@ namespace dcel {
     ~faceT();
 
     inline
-    auto define(const Vec3& a_normal, const std::shared_ptr<edge>& a_edge) noexcept -> void;
+    decltype(auto) define(const Vec3& a_normal, const std::shared_ptr<edge>& a_edge) noexcept;
 
     inline
-    auto reconcile() noexcept -> void;
+    decltype(auto) reconcile() noexcept;
 
     inline
-    auto setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept -> void;
+    decltype(auto) setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept;
 
     inline
-    auto setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept -> void;
+    decltype(auto) setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept;
 
     inline
-    auto getHalfEdge() noexcept -> std::shared_ptr<edge>&;
+    decltype(auto) getHalfEdge() noexcept;
 
     inline
-    auto getHalfEdge() const noexcept -> const std::shared_ptr<edge>&;
+    decltype(auto) getHalfEdge() const noexcept;
 
     inline
-    auto getCentroid() noexcept -> Vec3&;
+    decltype(auto) getCentroid() noexcept;
 
     inline
-    auto getCentroid() const noexcept -> const Vec3&;
+    decltype(auto) getCentroid() const noexcept;
 
     inline
-    auto getNormal() noexcept -> Vec3&;
+    decltype(auto) getNormal() noexcept;
 
     inline
-    auto getNormal() const noexcept -> const Vec3&;
+    decltype(auto) getNormal() const noexcept;
 
     inline
-    auto getBoundingBoxLo() noexcept -> Vec3&;
+    decltype(auto) getBoundingBoxLo() noexcept;
 
     inline
-    auto getBoundingBoxLo() const noexcept -> const Vec3&;
+    decltype(auto) getBoundingBoxLo() const noexcept;
 
     inline
-    auto getBoundingBoxHi() noexcept -> Vec3&;
+    decltype(auto) getBoundingBoxHi() noexcept;
 
     inline
-    auto getBoundingBoxHi() const noexcept -> const Vec3&;
+    decltype(auto) getBoundingBoxHi() const noexcept;
 
     inline
-    auto signedDistance(const Vec3& a_x0) const noexcept -> T;
+    decltype(auto) signedDistance(const Vec3& a_x0) const noexcept;
 
     inline
-    auto unsignedDistance2(const Vec3& a_x0) const noexcept -> T;
+    decltype(auto) unsignedDistance2(const Vec3& a_x0) const noexcept;
   
   protected:
     
@@ -116,43 +116,43 @@ namespace dcel {
     InsideOutsideAlgorithm m_poly2Algorithm;
 
     inline
-    auto computeArea() noexcept -> void;
+    decltype(auto) computeArea() noexcept;
 
     inline
-    auto computeCentroid() noexcept -> void;
+    decltype(auto) computeCentroid() noexcept;
 
     inline
-    auto computeNormal() noexcept -> void;
+    decltype(auto) computeNormal() noexcept;
 
     inline
-    auto computeBoundingBox() noexcept -> void;
+    decltype(auto) computeBoundingBox() noexcept;
 
     inline
-    auto computeBoundingSphere() noexcept -> void;
+    decltype(auto) computeBoundingSphere() noexcept;
 
     inline
-    auto computePolygon2D() noexcept -> void;
+    decltype(auto) computePolygon2D() noexcept;
     
     inline
-    auto normalizeNormalVector() noexcept -> void;
+    decltype(auto) normalizeNormalVector() noexcept;
 
     inline
-    auto getArea() noexcept -> T&;
+    decltype(auto) getArea() noexcept;
 
     inline
-    auto getArea() const noexcept -> const T& ;
+    decltype(auto) getArea() const noexcept;
 
     inline
-    auto getAllVertexCoordinates() const noexcept -> std::vector<Vec3>;
+    decltype(auto) getAllVertexCoordinates() const noexcept;
 
     inline
-    auto gatherVertices() const noexcept -> std::vector<std::shared_ptr<vertex> >;
+    decltype(auto) gatherVertices() const noexcept;
 
     inline
-    auto projectPointIntoFacePlane(const Vec3& a_p) const noexcept -> Vec3;
+    decltype(auto) projectPointIntoFacePlane(const Vec3& a_p) const noexcept;
 
     inline
-    auto isPointInsideFace(const Vec3& a_p) const noexcept -> bool;
+    decltype(auto) isPointInsideFace(const Vec3& a_p) const noexcept;
   };
 
 }

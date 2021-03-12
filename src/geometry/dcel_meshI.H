@@ -40,9 +40,9 @@ namespace dcel {
 
   template <class T>
   inline
-  void mesh<T>::define(std::vector<std::shared_ptr<face> >&   a_faces,
-		    std::vector<std::shared_ptr<edge> >&   a_edges,
-		    std::vector<std::shared_ptr<vertex> >& a_vertices) noexcept{
+  decltype(auto) mesh<T>::define(std::vector<std::shared_ptr<face> >&   a_faces,
+				 std::vector<std::shared_ptr<edge> >&   a_edges,
+				 std::vector<std::shared_ptr<vertex> >& a_vertices) noexcept{
     m_faces = a_faces;
     m_edges    = a_edges;
     m_vertices = a_vertices;
@@ -50,7 +50,7 @@ namespace dcel {
 
   template <class T>
   inline
-  auto mesh<T>::sanityCheck() const noexcept -> void {
+  decltype(auto) mesh<T>::sanityCheck() const noexcept {
     for (const auto& e : m_edges){
       const auto& nextEdge  = e->getNextEdge();
       const auto& prevEdge  = e->getPreviousEdge();
@@ -100,13 +100,13 @@ namespace dcel {
 
   template <class T>
   inline
-  auto mesh<T>::setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept -> void {
+  decltype(auto) mesh<T>::setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept {
     m_algorithm = a_algorithm;
   }
 
   template <class T>
   inline
-  auto mesh<T>::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm a_algorithm) noexcept -> void {
+  decltype(auto) mesh<T>::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm a_algorithm) noexcept {
     for (auto& f : m_faces){
       f->setInsideOutsideAlgorithm(a_algorithm);
     }
@@ -114,7 +114,7 @@ namespace dcel {
 
   template <class T>
   inline
-  auto mesh<T>::reconcile(VertexNormalWeight a_weight) noexcept -> void {
+  decltype(auto) mesh<T>::reconcile(VertexNormalWeight a_weight) noexcept {
     this->reconcileFaces();
     this->reconcileEdges();
     this->reconcileVertices(a_weight);
@@ -122,9 +122,7 @@ namespace dcel {
 
   template <class T>
   inline
-  auto mesh<T>::reconcileFaces() noexcept -> void {
-    // Reconcile faces; compute face area and provide edges explicit access
-    // to their faces
+  decltype(auto) mesh<T>::reconcileFaces() noexcept {
     for (auto& f : m_faces){
       f->reconcile();
     }
@@ -132,7 +130,7 @@ namespace dcel {
 
   template <class T>
   inline
-  auto mesh<T>::reconcileEdges() noexcept -> void {
+  decltype(auto) mesh<T>::reconcileEdges() noexcept {
     for (auto& e : m_edges){
       e->reconcile();
     }
@@ -140,7 +138,7 @@ namespace dcel {
 
   template <class T>
   inline
-  auto mesh<T>::reconcileVertices(VertexNormalWeight a_weight) noexcept -> void {
+  decltype(auto) mesh<T>::reconcileVertices(VertexNormalWeight a_weight) noexcept {
     for (auto& v : m_vertices){
       switch(a_weight) {
       case VertexNormalWeight::None:
@@ -157,55 +155,55 @@ namespace dcel {
 
   template <class T>
   inline
-  auto mesh<T>::computeBoundingSphere() noexcept -> void {
+  decltype(auto) mesh<T>::computeBoundingSphere() noexcept {
     m_boundingSphere.define(this->getAllVertexCoordinates(), BoundingVolumeAlgorithm::Ritter);
   }
 
   template <class T>
   inline
-  auto mesh<T>::computeBoundingBox() noexcept -> void {
+  decltype(auto) mesh<T>::computeBoundingBox() noexcept {
     m_boundingBox.define(this->getAllVertexCoordinates());
   }
 
   template <class T>
   inline
-  auto mesh<T>::getVertices() noexcept -> std::vector<std::shared_ptr<vertex> >& {
-    return m_vertices;
+  decltype(auto) mesh<T>::getVertices() noexcept {
+    return (m_vertices);
   }
 
   template <class T>
   inline
-  auto mesh<T>::getVertices() const noexcept -> const std::vector<std::shared_ptr<vertex> >& {
-    return m_vertices;
+  decltype(auto) mesh<T>::getVertices() const noexcept {
+    return (m_vertices);
   }
 
   template <class T>  
   inline
-  auto mesh<T>::getEdges() noexcept -> std::vector<std::shared_ptr<edge> >& {
-    return m_edges;
+  decltype(auto) mesh<T>::getEdges() noexcept {
+    return (m_edges);
   }
 
   template <class T>  
   inline
-  auto mesh<T>::getEdges() const noexcept -> const std::vector<std::shared_ptr<edge> >& {
-    return m_edges;
+  decltype(auto) mesh<T>::getEdges() const noexcept {
+    return (m_edges);
   }
 
   template <class T>
   inline
-  auto mesh<T>::getFaces() noexcept -> std::vector<std::shared_ptr<face> >& {
-    return m_faces;
+  decltype(auto) mesh<T>::getFaces() noexcept {
+    return (m_faces);
   }
 
   template <class T>  
   inline
-  auto mesh<T>::getFaces() const noexcept -> const std::vector<std::shared_ptr<face> >& {
-    return m_faces;
+  decltype(auto) mesh<T>::getFaces() const noexcept {
+    return (m_faces);
   }
 
   template <class T>  
   inline
-  auto mesh<T>::getAllVertexCoordinates() const noexcept -> std::vector<Vec3 >{
+  decltype(auto) mesh<T>::getAllVertexCoordinates() const noexcept {
     std::vector<Vec3 > vertexCoordinates;
     for (const auto& v : m_vertices){
       vertexCoordinates.emplace_back(v->getPosition());
@@ -216,13 +214,13 @@ namespace dcel {
 
   template <class T>  
   inline
-  auto mesh<T>::signedDistance(const Vec3& a_point) const noexcept -> T {
+  decltype(auto) mesh<T>::signedDistance(const Vec3& a_point) const noexcept {
     return this->signedDistance(a_point, m_algorithm);
   }
 
   template <class T>  
   inline
-  auto mesh<T>::signedDistance(const Vec3& a_point, SearchAlgorithm a_algorithm) const noexcept -> T {
+  decltype(auto) mesh<T>::signedDistance(const Vec3& a_point, SearchAlgorithm a_algorithm) const noexcept {
     T minDist;
   
     switch(a_algorithm){
@@ -242,7 +240,7 @@ namespace dcel {
 
   template <class T>  
   inline
-  auto mesh<T>::DirectSignedDistance(const Vec3& a_point) const noexcept -> T {
+  decltype(auto) mesh<T>::DirectSignedDistance(const Vec3& a_point) const noexcept {
     T minDist = m_faces.front()->signedDistance(a_point);
     
     for (const auto& f : m_faces){
@@ -258,7 +256,7 @@ namespace dcel {
 
   template <class T>  
   inline
-  auto mesh<T>::DirectSignedDistance2(const Vec3& a_point) const noexcept -> T {
+  decltype(auto) mesh<T>::DirectSignedDistance2(const Vec3& a_point) const noexcept {
     std::shared_ptr<face> closest = m_faces.front();
     T minDist2 = closest->unsignedDistance2(a_point);
 

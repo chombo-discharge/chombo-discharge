@@ -34,15 +34,15 @@ namespace dcel {
     ~BoundingVolume();
 
     inline
-    auto getPointLocation(const Vec3& a_p) const noexcept -> PointLocation;
+    decltype(auto) getPointLocation(const Vec3& a_p) const noexcept;
 
     inline
-    auto isPointInside(const Vec3& a_x0) const -> bool;
+    decltype(auto) isPointInside(const Vec3& a_x0) const;
 
     inline
-    auto isPointOutside(const Vec3& a_x0) const -> bool;
+    decltype(auto) isPointOutside(const Vec3& a_x0) const;
     
-    virtual auto getDistanceToPoint(const Vec3& a_x0) const -> T = 0;
+    virtual T getDistanceToPoint(const Vec3& a_x0) const = 0;
   };
 
   template <class T>
@@ -57,25 +57,25 @@ namespace dcel {
     ~BoundingSphere();
 
     inline
-    auto define(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept -> void;
+    decltype(auto) define(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept;
 
     inline
-    auto intersects(const BoundingSphere& a_other) const noexcept-> bool;
+    decltype(auto) intersects(const BoundingSphere& a_other) const noexcept;
 
     inline
-    auto getDistanceToPoint(const Vec3& a_x0) const noexcept -> T override;
+    decltype(auto) getRadius() noexcept;
 
     inline
-    auto getRadius() noexcept -> T&;
+    decltype(auto) getRadius() const noexcept;
 
     inline
-    auto getRadius() const noexcept -> const T&;
+    decltype(auto) getCenter() noexcept;
 
     inline
-    auto getCenter() noexcept -> Vec3&;
+    decltype(auto) getCenter() const noexcept;
 
     inline
-    auto getCenter() const noexcept -> const Vec3&;
+    T getDistanceToPoint(const Vec3& a_x0) const noexcept override;
 
   protected:
 
@@ -83,7 +83,7 @@ namespace dcel {
     Vec3 m_center;
 
     inline
-    auto buildRitter(const std::vector<Vec3>& a_points) noexcept -> void;
+    decltype(auto) buildRitter(const std::vector<Vec3>& a_points) noexcept;
   };
 
   template <class T>
@@ -99,25 +99,25 @@ namespace dcel {
     ~AABB();
 
     inline
-    auto define(const std::vector<Vec3>& a_points) noexcept -> void;
+    decltype(auto) define(const std::vector<Vec3>& a_points) noexcept;
 
     inline
-    auto intersects(const AABB& a_other) const noexcept -> bool;
+    decltype(auto) intersects(const AABB& a_other) const noexcept;
 
     inline
-    auto getDistanceToPoint(const Vec3& a_x0) const noexcept -> T override;
+    T getDistanceToPoint(const Vec3& a_x0) const noexcept override;
 
     inline
-    auto getLowCorner() noexcept -> Vec3&;
+    decltype(auto) getLowCorner() noexcept;
 
     inline
-    auto getLowCorner() const noexcept -> const Vec3&;
+    decltype(auto) getLowCorner() const noexcept;
 
     inline
-    auto getHighCorner() noexcept -> Vec3&;
+    decltype(auto) getHighCorner() noexcept;
 
     inline
-    auto getHighCorner() const noexcept -> const Vec3&;
+    decltype(auto) getHighCorner() const noexcept;
     
   protected:
 

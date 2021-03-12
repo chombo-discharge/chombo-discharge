@@ -27,33 +27,33 @@ namespace dcel {
     ~Polygon2D() = default;
 
     inline
-    bool isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm a_algorithm);
+    decltype(auto) isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm a_algorithm) const noexcept;
     
   private:
 
     inline
-    auto projectPoint(const Vec3& a_point) const noexcept -> Vec2;
+    decltype(auto) projectPoint(const Vec3& a_point) const noexcept;
 
     inline
-    void define(const Vec3& a_normal, const std::vector<Vec3>& a_points);
+    decltype(auto) define(const Vec3& a_normal, const std::vector<Vec3>& a_points);
 
     inline
-    int computeWindingNumber(const Vec2& P) const noexcept;
+    decltype(auto) computeWindingNumber(const Vec2& P) const noexcept;
 
     inline
-    int computeCrossingNumber(const Vec2& P) const noexcept;
+    decltype(auto) computeCrossingNumber(const Vec2& P) const noexcept;
 
     inline
     T computeSubtendedAngle(const Vec2& P) const noexcept;
 
     inline
-    bool isPointInsidePolygonWindingNumber(const Vec3& a_point) const noexcept;
+    decltype(auto) isPointInsidePolygonWindingNumber(const Vec3& a_point) const noexcept;
 
     inline
-    bool isPointInsidePolygonSubtend(const Vec3& a_point) const noexcept;
+    decltype(auto) isPointInsidePolygonSubtend(const Vec3& a_point) const noexcept;
 
     inline
-    bool isPointInsidePolygonCrossingNumber(const Vec3& a_point) const noexcept;
+    decltype(auto) isPointInsidePolygonCrossingNumber(const Vec3& a_point) const noexcept;
     
     int m_ignoreDir;
     int m_xDir;
