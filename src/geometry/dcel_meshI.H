@@ -2,7 +2,7 @@
   @file   dcel_meshI.H
   @brief  Implementation of dcel_mesh.H
   @author Robert Marskar
-  @date   March 2021.
+  @date   March 2021
 */
 
 #ifndef _DCEL_MESHI_H_
@@ -19,16 +19,14 @@ namespace dcel {
   template <class T>
   inline
   meshT<T>::meshT(){
-    m_use_tree   = false;
+
   }
 
   template <class T>
   inline
   meshT<T>::meshT(std::vector<std::shared_ptr<face> >&   a_faces,
-	     std::vector<std::shared_ptr<edge> >&   a_edges,
-	     std::vector<std::shared_ptr<vertex> >& a_vertices){
-    m_use_tree   = false;
-  
+		  std::vector<std::shared_ptr<edge> >&   a_edges,
+		  std::vector<std::shared_ptr<vertex> >& a_vertices){
     this->define(a_faces, a_edges, a_vertices);
   }
 
@@ -41,8 +39,8 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) meshT<T>::define(std::vector<std::shared_ptr<face> >&   a_faces,
-				 std::vector<std::shared_ptr<edge> >&   a_edges,
-				 std::vector<std::shared_ptr<vertex> >& a_vertices) noexcept{
+				  std::vector<std::shared_ptr<edge> >&   a_edges,
+				  std::vector<std::shared_ptr<vertex> >& a_vertices) noexcept{
     m_faces    = a_faces;
     m_edges    = a_edges;
     m_vertices = a_vertices;

@@ -8,8 +8,6 @@
 #ifndef _DCEL_MESH_
 #define _DCEL_MESH_
 
-#include "dcel_BoundingVolumes.H"
-#include "dcel_BVH.H"
 #include "dcel_algorithms.H"
 
 #include <vector>
@@ -87,7 +85,6 @@ namespace dcel {
   protected:
 
     SearchAlgorithm m_algorithm;
-    bool m_use_tree;
 
     std::vector<std::shared_ptr<vertex> >  m_vertices;
     std::vector<std::shared_ptr<edge> >    m_edges;
