@@ -57,26 +57,26 @@ namespace dcel {
 
   template <class T>
   inline
-  auto edgeIteratorT<T>::operator() () noexcept -> std::shared_ptr<edge>& {
-    return m_curEdge;
+  decltype(auto) edgeIteratorT<T>::operator() () noexcept {
+    return (m_curEdge);
   }
 
   template <class T>
   inline
-  auto edgeIteratorT<T>::operator() () const noexcept -> const std::shared_ptr<edge>& {
-    return m_curEdge;
+  decltype(auto) edgeIteratorT<T>::operator() () const noexcept {
+    return (m_curEdge);
   }
 
   template <class T>
   inline
-  void edgeIteratorT<T>::reset() noexcept {
+  decltype(auto) edgeIteratorT<T>::reset() noexcept {
     m_curEdge  = m_startEdge;
     m_fullLoop = false;
   }
 
   template <class T>
   inline
-  void edgeIteratorT<T>::operator++() noexcept {
+  decltype(auto) edgeIteratorT<T>::operator++() noexcept {
     switch(m_iterMode){
     case IterationMode::Face:
       m_curEdge = m_curEdge->getNextEdge();
@@ -91,7 +91,7 @@ namespace dcel {
 
   template <class T>
   inline
-  bool edgeIteratorT<T>::ok() const noexcept{
+  decltype(auto) edgeIteratorT<T>::ok() const noexcept {
     return !m_fullLoop && m_curEdge;
   }
 }

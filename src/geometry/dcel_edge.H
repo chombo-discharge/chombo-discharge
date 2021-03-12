@@ -41,77 +41,77 @@ namespace dcel {
     ~edgeT();
 
     inline
-    auto define(const std::shared_ptr<vertex>& a_vertex,
-		const std::shared_ptr<edge>&   a_pairEdge,
-		const std::shared_ptr<edge>&   a_nextEdge,
-		const std::shared_ptr<edge>&   a_previousEdge,
-		const Vec3                     a_normal) noexcept -> void;
+    decltype(auto) define(const std::shared_ptr<vertex>& a_vertex,
+			  const std::shared_ptr<edge>&   a_pairEdge,
+			  const std::shared_ptr<edge>&   a_nextEdge,
+			  const std::shared_ptr<edge>&   a_previousEdge,
+			  const Vec3                     a_normal) noexcept;
 
     inline
-    auto setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept -> void;
+    decltype(auto) setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept;
 
     inline
-    auto setPairEdge(const std::shared_ptr<edge>& a_pairEdge) noexcept -> void;
+    decltype(auto) setPairEdge(const std::shared_ptr<edge>& a_pairEdge) noexcept;
 
     inline
-    auto setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept -> void;
+    decltype(auto) setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept;
 
     inline
-    auto setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept -> void;
+    decltype(auto) setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept;
 
     inline
-    auto setFace(const std::shared_ptr<face>& a_face) noexcept -> void;
+    decltype(auto) setFace(const std::shared_ptr<face>& a_face) noexcept;
 
     inline
-    auto reconcile() noexcept -> void;
+    decltype(auto) reconcile() noexcept;
 
     inline
-    auto getVertex() noexcept -> std::shared_ptr<vertex>&;
+    decltype(auto) getVertex() noexcept;
 
     inline
-    auto getVertex() const noexcept -> const std::shared_ptr<vertex>&;
+    decltype(auto) getVertex() const noexcept;
 
     inline
-    auto getOtherVertex() noexcept -> std::shared_ptr<vertex>&;
+    decltype(auto) getOtherVertex() noexcept;
 
     inline
-    auto getOtherVertex() const noexcept -> const std::shared_ptr<vertex>&;
+    decltype(auto) getOtherVertex() const noexcept;
 
     inline
-    auto getPairEdge() noexcept -> std::shared_ptr<edge>&;
+    decltype(auto) getPairEdge() noexcept;
 
     inline
-    auto getPairEdge() const noexcept -> const std::shared_ptr<edge>& ;
+    decltype(auto) getPairEdge() const noexcept;
 
     inline
-    auto getPreviousEdge() noexcept -> std::shared_ptr<edge>&;
+    decltype(auto) getPreviousEdge() noexcept;
 
     inline
-    auto getPreviousEdge() const noexcept -> const std::shared_ptr<edge>& ;
+    decltype(auto) getPreviousEdge() const noexcept;
 
     inline
-    auto getNextEdge() noexcept -> std::shared_ptr<edge>& ;
+    decltype(auto) getNextEdge() noexcept;
 
     inline
-    auto getNextEdge() const noexcept -> const std::shared_ptr<edge>& ;
+    decltype(auto) getNextEdge() const noexcept;
 
     inline
-    auto getNormal() noexcept -> Vec3&;
+    decltype(auto) getNormal() noexcept;
 
     inline
-    auto getNormal() const noexcept -> const Vec3&;
+    decltype(auto) getNormal() const noexcept;
 
     inline
-    std::shared_ptr<face>& getFace() noexcept;
+    decltype(auto) getFace() noexcept;
 
     inline
-    const std::shared_ptr<face>& getFace() const noexcept;
+    decltype(auto) getFace() const noexcept;
 
     inline
-    auto signedDistance(const Vec3& a_x0) const noexcept -> T;
+    decltype(auto) signedDistance(const Vec3& a_x0) const noexcept;
 
     inline
-    auto unsignedDistance2(const Vec3& a_x0) const noexcept -> T;
+    decltype(auto) unsignedDistance2(const Vec3& a_x0) const noexcept;
 
   protected:
 
@@ -126,16 +126,16 @@ namespace dcel {
     std::shared_ptr<face>    m_face;
 
     inline
-    auto projectPointToEdge(const Vec3& a_x0) const noexcept -> T;
+    decltype(auto) projectPointToEdge(const Vec3& a_x0) const noexcept;
 
     inline
-    auto normalizeNormalVector() noexcept -> void;
+    decltype(auto) normalizeNormalVector() noexcept;
 
     inline
-    auto computeEdgeLength() noexcept -> void;
+    decltype(auto) computeEdgeLength() noexcept;
 
     inline
-    auto computeNormal() noexcept -> void;
+    decltype(auto) computeNormal() noexcept;
   };
 
 }

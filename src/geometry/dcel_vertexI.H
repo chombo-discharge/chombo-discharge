@@ -53,51 +53,51 @@ namespace dcel {
 
   template <class T>
   inline
-  auto vertexT<T>::define(const Vec3& a_pos, const std::shared_ptr<edge>& a_edge, const Vec3& a_normal) noexcept -> void {
-    m_pos = a_pos;
-    m_edge = a_edge;
+  decltype(auto) vertexT<T>::define(const Vec3& a_pos, const std::shared_ptr<edge>& a_edge, const Vec3& a_normal) noexcept {
+    m_pos    = a_pos;
+    m_edge   = a_edge;
     m_normal = a_normal;
   }
 
   template <class T>
   inline
-  auto vertexT<T>::setPosition(const Vec3& a_pos) noexcept -> void {
+  decltype(auto) vertexT<T>::setPosition(const Vec3& a_pos) noexcept {
     m_pos = a_pos;
   }
 
   template <class T>
   inline
-  auto vertexT<T>::setEdge(const std::shared_ptr<edge>& a_edge) noexcept -> void {
+  decltype(auto) vertexT<T>::setEdge(const std::shared_ptr<edge>& a_edge) noexcept {
     m_edge = a_edge;
   }
 
   template <class T>
   inline
-  auto vertexT<T>::setNormal(const Vec3& a_normal) noexcept -> void {
+  decltype(auto) vertexT<T>::setNormal(const Vec3& a_normal) noexcept {
     m_normal = a_normal;
   }
 
   template <class T>
   inline
-  auto vertexT<T>::addFaceToCache(const std::shared_ptr<face>& a_face) noexcept -> void {
+  decltype(auto) vertexT<T>::addFaceToCache(const std::shared_ptr<face>& a_face) noexcept {
     m_faceCache.emplace_back(a_face);
   }
 
   template <class T>
   inline
-  auto vertexT<T>::clearFaceCache() noexcept -> void {
+  decltype(auto) vertexT<T>::clearFaceCache() noexcept {
     m_faceCache.resize(0);
   }
 
   template <class T>
   inline
-  auto vertexT<T>::normalizeNormalVector() noexcept -> void {
+  decltype(auto) vertexT<T>::normalizeNormalVector() noexcept {
     m_normal = m_normal/m_normal.length();
   }
 
   template <class T>
   inline
-  auto vertexT<T>::computeVertexNormalAverage() noexcept -> void {
+  decltype(auto) vertexT<T>::computeVertexNormalAverage() noexcept {
     for (edgeIterator iter(*this); iter.ok(); ++iter){
       m_normal += iter()->getNormal();
     }
@@ -107,7 +107,7 @@ namespace dcel {
 
   template <class T>
   inline
-  auto vertexT<T>::computeVertexNormalAngleWeighted() noexcept -> void {
+  decltype(auto) vertexT<T>::computeVertexNormalAngleWeighted() noexcept {
     m_normal = Vec3::Zero;
 
     for (edgeIterator iter(*this); iter.ok(); ++iter){
@@ -135,56 +135,56 @@ namespace dcel {
   
   template <class T>
   inline
-  auto vertexT<T>::getPosition() noexcept -> Vec3& {
-    return m_pos;
+  decltype(auto) vertexT<T>::getPosition() noexcept {
+    return (m_pos);
   }
 
   template <class T>
   inline
-  auto vertexT<T>::getPosition() const noexcept -> const Vec3& {
-    return m_pos;
+  decltype(auto) vertexT<T>::getPosition() const noexcept {
+    return (m_pos);
   }
 
   template <class T>
   inline
-  auto vertexT<T>::getNormal() noexcept -> Vec3& {
-    return m_normal;
+  decltype(auto) vertexT<T>::getNormal() noexcept {
+    return (m_normal);
   }
 
   template <class T>
   inline
-  auto vertexT<T>::getNormal() const noexcept -> const Vec3& {
-    return m_normal;
+  decltype(auto) vertexT<T>::getNormal() const noexcept {
+    return (m_normal);
   }
 
   template <class T>
   inline
-  auto vertexT<T>::getEdge() noexcept -> std::shared_ptr<edge>& {
-    return m_edge;
+  decltype(auto) vertexT<T>::getEdge() noexcept {
+    return (m_edge);
   }
 
   template <class T>
   inline
-  auto vertexT<T>::getEdge() const noexcept -> const std::shared_ptr<edge>& {
-    return m_edge;
+  decltype(auto) vertexT<T>::getEdge() const noexcept {
+    return (m_edge);
   }
 
   template <class T>
   inline
-  auto vertexT<T>::getFaceCache() const noexcept -> const std::vector<std::shared_ptr<face> >& {
-    return m_faceCache;
+  decltype(auto) vertexT<T>::getFaceCache() noexcept {
+    return (m_faceCache);
   }
 
   template <class T>
   inline
-  auto vertexT<T>::getFaceCache() noexcept -> std::vector<std::shared_ptr<face> >& {
-    return m_faceCache;
+  decltype(auto) vertexT<T>::getFaceCache() const noexcept {
+    return (m_faceCache);
   }
 
   template <class T>
   inline
-  auto vertexT<T>::signedDistance(const Vec3& a_x0) const noexcept -> T{
-    const Vec3 delta = a_x0 - m_pos;
+  decltype(auto) vertexT<T>::signedDistance(const Vec3& a_x0) const noexcept {
+    const auto delta = a_x0 - m_pos;
     const T dist     = delta.length();
     const T dot      = m_normal.dot(delta);
     const int sign   = (dot > 0.) ? 1 : -1;
@@ -194,8 +194,8 @@ namespace dcel {
 
   template <class T>
   inline
-  auto vertexT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept -> T {
-    const Vec3 d = a_x0 - m_pos;
+  decltype(auto) vertexT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept {
+    const auto d = a_x0 - m_pos;
 
     return d.dot(d);
   }

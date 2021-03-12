@@ -34,78 +34,75 @@ namespace dcel {
     using face   = faceT<T>;
     
     using edgeIterator = edgeIteratorT<T>;
-
+    
     vertexT();
     vertexT(const Vec3& a_pos);
     vertexT(const Vec3& a_pos, const Vec3& a_normal);
     vertexT(const vertex& a_otherVertex);
     ~vertexT();
 
-    std::shared_ptr<edge> m_edge;
+    inline
+    decltype(auto) define(const Vec3& m_pos, const std::shared_ptr<edge>& a_edge, const Vec3& a_normal) noexcept;
 
     inline
-    auto define(const Vec3& m_pos, const std::shared_ptr<edge>& a_edge, const Vec3& a_normal) noexcept -> void;
+    decltype(auto) setPosition(const Vec3& a_pos) noexcept;
 
     inline
-    auto setPosition(const Vec3& a_pos) noexcept -> void;
+    decltype(auto) setNormal(const Vec3& a_normal) noexcept;
 
     inline
-    auto setNormal(const Vec3& a_normal) noexcept -> void;
+    decltype(auto) setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
 
     inline
-    auto setEdge(const std::shared_ptr<edge>& a_edge) noexcept -> void;
+    decltype(auto) addFaceToCache(const std::shared_ptr<face>& a_face) noexcept;
 
     inline
-    auto addFaceToCache(const std::shared_ptr<face>& a_face) noexcept -> void;
+    decltype(auto) normalizeNormalVector() noexcept;
 
     inline
-    auto normalizeNormalVector() noexcept -> void;
+    decltype(auto) computeVertexNormalAverage() noexcept;
 
     inline
-    auto computeVertexNormalAverage() noexcept -> void;
+    decltype(auto) computeVertexNormalAngleWeighted() noexcept;
 
     inline
-    auto computeVertexNormalAngleWeighted() noexcept -> void;
+    decltype(auto) clearFaceCache() noexcept;
 
     inline
-    auto clearFaceCache() noexcept -> void;
+    decltype(auto) getPosition() noexcept;
 
     inline
-    auto getPosition() noexcept -> Vec3&;
+    decltype(auto) getPosition() const noexcept;
 
     inline
-    auto getPosition() const noexcept -> const Vec3&;
+    decltype(auto) getNormal() noexcept;
 
     inline
-    auto getNormal() noexcept -> Vec3&;
+    decltype(auto) getNormal() const noexcept;
 
     inline
-    auto getNormal() const noexcept -> const Vec3&;
+    decltype(auto) getEdge() noexcept;
 
     inline
-    auto getEdge() noexcept -> std::shared_ptr<edge>&;
+    decltype(auto) getEdge() const noexcept;
 
     inline
-    auto getEdge() const noexcept -> const std::shared_ptr<edge>& ;
+    decltype(auto) getFaceCache() noexcept;
 
     inline
-    auto getFaceCache() noexcept -> std::vector<std::shared_ptr<face> >&;
+    decltype(auto) getFaceCache() const noexcept;
 
     inline
-    auto getFaceCache() const noexcept -> const std::vector<std::shared_ptr<face> >& ;
+    decltype(auto) signedDistance(const Vec3& a_x0) const noexcept;
 
     inline
-    auto signedDistance(const Vec3& a_x0) const noexcept -> T;
-
-    inline
-    auto unsignedDistance2(const Vec3& a_x0) const noexcept -> T;
+    decltype(auto) unsignedDistance2(const Vec3& a_x0) const noexcept;
 
   protected:
-
+    std::shared_ptr<edge> m_edge;
+    
     Vec3 m_pos;
     Vec3 m_normal;
-    
-
     
     std::vector<std::shared_ptr<face> > m_faceCache;
 

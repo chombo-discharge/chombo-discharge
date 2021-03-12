@@ -52,11 +52,11 @@ namespace dcel {
 
   template <class T>
   inline
-  auto edgeT<T>::define(const std::shared_ptr<vertex>& a_vertex,
-			const std::shared_ptr<edge>&   a_pairEdge,
-			const std::shared_ptr<edge>&   a_nextEdge,
-			const std::shared_ptr<edge>&   a_previousEdge,
-			const Vec3                     a_normal) noexcept -> void {
+  decltype(auto) edgeT<T>::define(const std::shared_ptr<vertex>& a_vertex,
+				  const std::shared_ptr<edge>&   a_pairEdge,
+				  const std::shared_ptr<edge>&   a_nextEdge,
+				  const std::shared_ptr<edge>&   a_previousEdge,
+				  const Vec3                     a_normal) noexcept {
     m_vertex       = a_vertex;
     m_pairEdge     = a_pairEdge;
     m_nextEdge     = a_nextEdge;
@@ -66,45 +66,45 @@ namespace dcel {
 
   template <class T>
   inline
-  auto edgeT<T>::setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept -> void {
+  decltype(auto) edgeT<T>::setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept {
     m_vertex = a_vertex;
   }
 
   template <class T>
   inline
-  auto edgeT<T>::setPairEdge(const std::shared_ptr<edge>& a_pairEdge) noexcept -> void {
+  decltype(auto) edgeT<T>::setPairEdge(const std::shared_ptr<edge>& a_pairEdge) noexcept {
     m_pairEdge = a_pairEdge;
   }
 
   template <class T>
   inline
-  auto edgeT<T>::setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept -> void {
+  decltype(auto) edgeT<T>::setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept {
     m_nextEdge = a_nextEdge;
   }
 
   template <class T>
   inline
-  auto edgeT<T>::setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept -> void {
+  decltype(auto) edgeT<T>::setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept {
     m_previousEdge = a_previousEdge;
   }
 
   template <class T>
   inline
-  auto edgeT<T>::setFace(const std::shared_ptr<face>& a_face) noexcept -> void {
+  decltype(auto) edgeT<T>::setFace(const std::shared_ptr<face>& a_face) noexcept {
     m_face = a_face;
   }
 
   template <class T>
   inline
-  auto edgeT<T>::normalizeNormalVector() noexcept -> void {
+  decltype(auto) edgeT<T>::normalizeNormalVector() noexcept {
     m_normal = m_normal/m_normal.length();
   }
 
   template <class T>
   inline
-  auto edgeT<T>::computeEdgeLength() noexcept -> void {
-    const Vec3& x1 = this->getVertex()->getPosition();
-    const Vec3& x2 = this->getOtherVertex()->getPosition();
+  decltype(auto) edgeT<T>::computeEdgeLength() noexcept {
+    const auto& x1 = this->getVertex()->getPosition();
+    const auto& x2 = this->getOtherVertex()->getPosition();
 
     m_x2x1 = x2-x1;
     m_len2 = m_x2x1.dot(m_x2x1);
@@ -112,14 +112,14 @@ namespace dcel {
 
   template <class T>
   inline
-  auto edgeT<T>::computeNormal() noexcept -> void {
-    const std::shared_ptr<edge>& pairEdge = this->getPairEdge();
+  decltype(auto) edgeT<T>::computeNormal() noexcept {
+    const auto& pairEdge = this->getPairEdge();
 
-    const std::shared_ptr<face>& F     = this->getFace();
-    const std::shared_ptr<face>& pairF = pairEdge->getFace();
+    const auto& F     = this->getFace();
+    const auto& pairF = pairEdge->getFace();
     
-    const Vec3& n1 = F->getNormal();
-    const Vec3& n2 = pairF->getNormal();
+    const auto& n1 = F->getNormal();
+    const auto& n2 = pairF->getNormal();
 
     m_normal = n1 + n2;
 
@@ -128,98 +128,98 @@ namespace dcel {
 
   template <class T>
   inline
-  auto edgeT<T>::reconcile() noexcept -> void {
+  decltype(auto) edgeT<T>::reconcile() noexcept {
     this->computeNormal();
     this->computeEdgeLength();
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getVertex() noexcept -> std::shared_ptr<vertex>& {
-    return m_vertex;
+  decltype(auto) edgeT<T>::getVertex() noexcept {
+    return (m_vertex);
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getVertex() const noexcept -> const std::shared_ptr<vertex>& {
-    return m_vertex;
+  decltype(auto) edgeT<T>::getVertex() const noexcept {
+    return (m_vertex);
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getOtherVertex() noexcept -> std::shared_ptr<vertex>& {
-    return m_pairEdge->getVertex();
+  decltype(auto) edgeT<T>::getOtherVertex() noexcept {
+    return (m_pairEdge->getVertex());
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getOtherVertex() const noexcept -> const std::shared_ptr<vertex>& {
-    return m_pairEdge->getVertex();
+  decltype(auto) edgeT<T>::getOtherVertex() const noexcept {
+    return (m_pairEdge->getVertex());
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getPairEdge() noexcept -> std::shared_ptr<edge>& {
-    return m_pairEdge;
+  decltype(auto) edgeT<T>::getPairEdge() noexcept {
+    return (m_pairEdge);
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getPairEdge() const noexcept -> const std::shared_ptr<edge>&  {
-    return m_pairEdge;
+  decltype(auto) edgeT<T>::getPairEdge() const noexcept {
+    return (m_pairEdge);
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getPreviousEdge() noexcept -> std::shared_ptr<edge>&  {
-    return m_previousEdge;
+  decltype(auto) edgeT<T>::getPreviousEdge() noexcept {
+    return (m_previousEdge);
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getPreviousEdge() const noexcept -> const std::shared_ptr<edge>& {
-    return m_previousEdge;
+  decltype(auto) edgeT<T>::getPreviousEdge() const noexcept {
+    return (m_previousEdge);
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getNextEdge() noexcept -> std::shared_ptr<edge>& {
-    return m_nextEdge;
+  decltype(auto) edgeT<T>::getNextEdge() noexcept {
+    return (m_nextEdge);
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getNextEdge() const noexcept -> const std::shared_ptr<edge>&  {
-    return m_nextEdge;
+  decltype(auto) edgeT<T>::getNextEdge() const noexcept {
+    return (m_nextEdge);
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getNormal() noexcept -> Vec3& {
-    return m_normal;
+  decltype(auto) edgeT<T>::getNormal() noexcept {
+    return (m_normal);
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getNormal() const noexcept -> const Vec3& {
-    return m_normal;
+  decltype(auto) edgeT<T>::getNormal() const noexcept {
+    return (m_normal);
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getFace() noexcept -> std::shared_ptr<face>& {
-    return m_face;
+  decltype(auto) edgeT<T>::getFace() noexcept {
+    return (m_face);
   }
 
   template <class T>
   inline
-  auto edgeT<T>::getFace() const noexcept -> const std::shared_ptr<face>& {
-    return m_face;
+  decltype(auto) edgeT<T>::getFace() const noexcept {
+    return (m_face);
   }
 
   template <class T>
   inline
-  auto edgeT<T>::projectPointToEdge(const Vec3& a_x0) const noexcept -> T {
+  decltype(auto) edgeT<T>::projectPointToEdge(const Vec3& a_x0) const noexcept {
     const Vec3 p = a_x0 - m_vertex->getPosition();
 
     return p.dot(m_x2x1)/m_len2;
@@ -227,7 +227,7 @@ namespace dcel {
 
   template <class T>
   inline
-  auto edgeT<T>::signedDistance(const Vec3& a_x0) const noexcept -> T {
+  decltype(auto) edgeT<T>::signedDistance(const Vec3& a_x0) const noexcept {
     const T t = this->projectPointToEdge(a_x0);
 
     T retval;
@@ -253,7 +253,7 @@ namespace dcel {
 
   template <class T>
   inline
-  auto edgeT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept -> T {
+  decltype(auto) edgeT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept {
     T t = this->projectPointToEdge(a_x0);
 
     constexpr T zero = 0.0;

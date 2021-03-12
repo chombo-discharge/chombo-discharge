@@ -35,19 +35,19 @@ namespace dcel {
     edgeIteratorT(const vertex& a_vert);
 
     inline
-    auto operator() () noexcept -> std::shared_ptr<edge>&;
+    decltype(auto) operator() () noexcept;
 
     inline
-    auto operator() () const noexcept -> const std::shared_ptr<edge>&;
+    decltype(auto) operator() () const noexcept;
 
     inline
-    auto reset() noexcept -> void;
+    decltype(auto) reset() noexcept;
 
     inline
-    auto operator ++() noexcept -> void;
+    decltype(auto) operator ++() noexcept;
 
     inline
-    auto ok() const noexcept -> bool;
+    decltype(auto) ok() const noexcept;
   
   protected:
 

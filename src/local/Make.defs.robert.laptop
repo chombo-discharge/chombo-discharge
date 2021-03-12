@@ -94,7 +94,7 @@ makefiles+=Make.defs.local
 # 2) The compiler options can be set on the command line using the
 #    variables: CPPFLAGS CXXFLAGS FFLAGS LDFLAGS.
 #    These variables supercede any settings in the makefiles.
-# 3) The GNUmakefile in "Chombo/lib" will check these variables and complain if
+# 3) The GNUmakefile in "Chombo/lib" will check these variables and complain fidecltype
 #    they have invalid values.  On systems that don't have MPI installed, the
 #    various MPI variables should not be set (or should be set to empty strings)
 #    to prevent the checker from complaining.
@@ -107,13 +107,13 @@ makefiles+=Make.defs.local
 DIM           = 2
 DEBUG         = FALSE
 OPT           = HIGH
-#PRECISION     =
+PRECISION     = DOUBLE
 #PROFILE       =
-CXX           = icpc
-FC            = ifort
+CXX           = g++-6
+FC            = gfortran
 MPI           = TRUE
 ## Note: don't set the MPICXX variable if you don't have MPI installed
-MPICXX        = mpiicpc
+MPICXX        = mpicxx
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
@@ -122,11 +122,11 @@ MPICXX        = mpiicpc
 USE_EB        = TRUE
 #USE_CCSE      =
 USE_HDF       = TRUE
-HDFINCFLAGS   = -I/cluster/software/HDF5/1.8.18-intel-2017a/include
-HDFLIBFLAGS   = -L/cluster/software/HDF5/1.8.18-intel-2017a/lib -lhdf5 -lz
+HDFINCFLAGS   = -I/usr/local/hdf5-1.8.14/include
+HDFLIBFLAGS   = -L/usr/local/hdf5-1.8.14/lib -lhdf5 -lz
 ## Note: don't set the HDFMPI* variables if you don't have parallel HDF installed
-HDFMPIINCFLAGS= -I/cluster/software/HDF5/1.8.18-intel-2017a/include
-HDFMPILIBFLAGS= -L/cluster/software/HDF5/1.8.18-intel-2017a/lib -lhdf5 -lz
+HDFMPIINCFLAGS= -I/usr/local/hdf5-1.8.14/include
+HDFMPILIBFLAGS= -L/usr/local/hdf5-1.8.14/lib -lhdf5 -lz
 USE_MF        = TRUE
 #USE_MT        =
 #USE_SETVAL    =
@@ -139,17 +139,18 @@ USE_MF        = TRUE
 #cppdbgflags   =
 #cppoptflags   =
 #cxxcppflags   =
-#cxxdbgflags   =
-cxxoptflags   = -Ofast -xCORE-AVX2 -march=native -std=c++14
+#cxxdbgflags   = 
+#cxxoptflags   = -O3 -ftree-vectorize -fopt-info-vec-missed -funroll-loops
+cxxoptflags   = -O3 -ftree-vectorize -funroll-loops -std=c++14
 #cxxprofflags  =
 #fcppflags     =
 #fdbgflags     =
-foptflags     = -Ofast -xCORE-AVX2
+foptflags     = -O3 -ftree-vectorize
 #fprofflags    =
-flibflags     = -mkl=sequential
+#flibflags     =
 #lddbgflags    =
 #ldoptflags    =
 #ldprofflags   =
-syslibflags   = -ldl -lm -lz
+syslibflags   = -llapack -lblas -ldl -lm
 
 #end  -- dont change this line

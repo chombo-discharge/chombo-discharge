@@ -140,7 +140,7 @@ USE_MF        = TRUE
 #cppoptflags   =
 #cxxcppflags   =
 #cxxdbgflags   =
-cxxoptflags   = -O3
+cxxoptflags   = -O3  -std=c++14
 #cxxprofflags  =
 #fcppflags     =
 #fdbgflags     =
