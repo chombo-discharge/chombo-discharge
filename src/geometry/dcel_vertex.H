@@ -2,7 +2,7 @@
   @file   vertex.H
   @brief  Declaration of a vertex class for describing surface tesselations
   @author Robert Marskar
-  @date   Apr. 2018
+  @date   March 2021
 */
 
 #ifndef _VERTEX_
@@ -17,6 +17,7 @@
 
 namespace dcel {
 
+  template <class T> class Vec3T;
   template <class T> class vertexT;
   template <class T> class edgeT;
   template <class T> class faceT;
@@ -27,6 +28,7 @@ namespace dcel {
   public:
 
     using Vec3   = Vec3T<T>;
+    
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
     using face   = faceT<T>;
@@ -39,8 +41,10 @@ namespace dcel {
     vertexT(const vertex& a_otherVertex);
     ~vertexT();
 
+    std::shared_ptr<edge> m_edge;
+
     inline
-    auto define(const Vec3& m_pos, const std::shared_ptr<edge>& a_edge, const Vec3 a_normal = Vec3::Zero) noexcept -> void;
+    auto define(const Vec3& m_pos, const std::shared_ptr<edge>& a_edge, const Vec3& a_normal) noexcept -> void;
 
     inline
     auto setPosition(const Vec3& a_pos) noexcept -> void;
@@ -101,7 +105,7 @@ namespace dcel {
     Vec3 m_pos;
     Vec3 m_normal;
     
-    std::shared_ptr<edge> m_edge;
+
     
     std::vector<std::shared_ptr<face> > m_faceCache;
 

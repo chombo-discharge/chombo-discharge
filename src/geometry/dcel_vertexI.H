@@ -21,19 +21,18 @@ namespace dcel {
     m_pos    = Vec3::Zero;
     m_normal = Vec3::Zero;
 
-    m_faceCache.resize(0);
+    m_faceCache.resize(0, nullptr);
   }
 
   template <class T>
   inline
-  vertexT<T>::vertexT(const Vec3& a_pos){
+  vertexT<T>::vertexT(const Vec3& a_pos) : vertexT() {
     m_pos    = a_pos;
-    m_normal = Vec3::Zero;
   }
 
   template <class T>
   inline
-  vertexT<T>::vertexT(const Vec3& a_pos, const Vec3& a_normal){
+  vertexT<T>::vertexT(const Vec3& a_pos, const Vec3& a_normal) : vertexT() {
     m_pos    = a_pos;
     m_normal = a_normal;
   }
@@ -41,9 +40,9 @@ namespace dcel {
   template <class T>
   inline
   vertexT<T>::vertexT(const vertexT<T>& a_otherVertex){
-    this->define(a_otherVertex.getPosition(),
-		 a_otherVertex.getEdge(),
-		 a_otherVertex.getNormal());
+    m_pos    = a_otherVertex.m_pos;
+    m_normal = a_otherVertex.m_m_normal;
+    m_edge   = a_otherVertex.m_edge;
   }
 
   template <class T>
@@ -54,7 +53,7 @@ namespace dcel {
 
   template <class T>
   inline
-  auto vertexT<T>::define(const Vec3& a_pos, const std::shared_ptr<edge>& a_edge, const Vec3 a_normal) noexcept -> void {
+  auto vertexT<T>::define(const Vec3& a_pos, const std::shared_ptr<edge>& a_edge, const Vec3& a_normal) noexcept -> void {
     m_pos = a_pos;
     m_edge = a_edge;
     m_normal = a_normal;
@@ -81,7 +80,7 @@ namespace dcel {
   template <class T>
   inline
   auto vertexT<T>::addFaceToCache(const std::shared_ptr<face>& a_face) noexcept -> void {
-    m_faceCache.push_back(a_face);
+    m_faceCache.emplace_back(a_face);
   }
 
   template <class T>
@@ -99,15 +98,8 @@ namespace dcel {
   template <class T>
   inline
   auto vertexT<T>::computeVertexNormalAverage() noexcept -> void {
-    std::vector<std::shared_ptr<face> > faces;
     for (edgeIterator iter(*this); iter.ok(); ++iter){
-      faces.emplace_back(iter()->getFace());
-    }
-
-    m_normal = Vec3::Zero;
-  
-    for (const auto& f : faces){
-      m_normal += f->getNormal();
+      m_normal += iter()->getNormal();
     }
 
     this->normalizeNormalVector();
@@ -193,9 +185,9 @@ namespace dcel {
   inline
   auto vertexT<T>::signedDistance(const Vec3& a_x0) const noexcept -> T{
     const Vec3 delta = a_x0 - m_pos;
-    const T dist        = delta.length();
-    const T dot         = m_normal.dot(delta);
-    const int sign           = (dot > 0.) ? 1 : -1;
+    const T dist     = delta.length();
+    const T dot      = m_normal.dot(delta);
+    const int sign   = (dot > 0.) ? 1 : -1;
   
     return dist*sign;
   }

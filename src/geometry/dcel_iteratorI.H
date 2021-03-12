@@ -92,7 +92,7 @@ namespace dcel {
   template <class T>
   inline
   bool edgeIteratorT<T>::ok() const noexcept{
-    return !m_fullLoop;
+    return !m_fullLoop && m_curEdge;
   }
 }
 
