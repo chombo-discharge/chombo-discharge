@@ -14,19 +14,23 @@
 #include "dcel_parser.H"
 #include "dcel_if.H"
 
-// Grouping in space. In principle we could use Morton ordering, even. 
-template <class T>
-auto comparator = [](const dcel::faceT<T>& f1, const dcel::faceT<T>& f2, const int a_dir){
-  return f1.getCentroid()[a_dir] < f2.getCentroid()[a_dir];
-};
-
 using namespace dcel;
+
+
+
+// Grouping in space. In principle we could use Morton ordering, even. 
+
 
 porsche::porsche(){
 
   using prec = float;
+  using face = faceT<prec>;
   using mesh = meshT<prec>;
   using AABB = AABBT<prec>;
+
+  auto comparator = [](const face& f1, const face& f2, const int a_dir) -> bool {
+    return f1.getCentroid()[a_dir] < f2.getCentroid()[a_dir];
+  };
 
   std::string filename;
   int tree_depth;
@@ -50,13 +54,12 @@ porsche::porsche(){
   m->setSearchAlgorithm(SearchAlgorithm::Direct2);
   m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::CrossingNumber);
 
-
-  m->buildBVH(comparator<prec>);
-
   // Create the if object
   bool flipNormal = false;
 
   RefCountedPtr<dcel_if<prec, AABB> > bif = RefCountedPtr<dcel_if<prec, AABB> > (new dcel_if<prec, AABB>(m,true));
+
+  bif->buildBVH(comparator);
 
   m_electrodes.push_back(electrode(bif, true));
   

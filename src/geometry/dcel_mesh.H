@@ -79,9 +79,6 @@ namespace dcel {
     inline
     decltype(auto) signedDistance(const Vec3& a_x0, SearchAlgorithm a_algorithm) const noexcept;
 
-    inline
-    decltype(auto) buildBVH(std::function<bool(const face&, const face&, const int)> comparator); // Remove later. 
-
   protected:
 
     SearchAlgorithm m_algorithm;

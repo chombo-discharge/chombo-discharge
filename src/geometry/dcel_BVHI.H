@@ -71,6 +71,30 @@ decltype(auto) NodeT<T, BV>::getParent() const noexcept {
 
 template <class T, class BV>
 inline
+decltype(auto) NodeT<T, BV>::getLeft() noexcept {
+  return (m_left);
+}
+
+template <class T, class BV>
+inline
+decltype(auto) NodeT<T, BV>::getLeft() const noexcept {
+  return (m_left);
+}
+
+template <class T, class BV>
+inline
+decltype(auto) NodeT<T, BV>::getRight() noexcept {
+  return (m_right);
+}
+
+template <class T, class BV>
+inline
+decltype(auto) NodeT<T, BV>::getRight() const noexcept {
+  return (m_right);
+}
+
+template <class T, class BV>
+inline
 decltype(auto) NodeT<T, BV>::isRoot() const noexcept {
   return m_parent == nullptr;
 }
@@ -121,6 +145,22 @@ template <class T, class BV>
 inline
 decltype(auto) NodeT<T, BV>::getObjects() const noexcept {
   return (m_objects);
+}
+
+template <class T, class BV>
+inline
+decltype(auto) NodeT<T, BV>::sortAndPartitionObjects(std::function<bool(const T&, const T&, const int)> a_comparator) noexcept {
+
+  for (int dir = 0; dir < 3; dir++){
+    auto comp = [a_comparator, dir](const std::shared_ptr<T>& t1, const std::shared_ptr<T>& t2) {
+      return a_comparator(*t1, *t2, dir);
+    };
+
+    // Have now sorted the objects basd on a_comparator along dir
+    std::sort(m_objects.begin(), m_objects.end(), comp); // How to pass into blargh?
+
+    std::cout << dir << std::endl;
+  }
 }
 
 template <class T, class BV>

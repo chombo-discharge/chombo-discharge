@@ -27,6 +27,7 @@ public:
   using face = dcel::faceT<T>;
   using AABB = dcel::AABBT<T>;
   using Tree = dcel::BVH::Tree<face, BV>;
+  using Node = dcel::BVH::NodeT<face, BV>;
 
   dcel_if() = delete;
 
@@ -46,6 +47,7 @@ protected:
   std::shared_ptr<mesh> m_mesh;
 
   std::shared_ptr<Tree> m_bvh;
+  std::shared_ptr<Node> m_node;
   
   bool m_flipInside;
 };

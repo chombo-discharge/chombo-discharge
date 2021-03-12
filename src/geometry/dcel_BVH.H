@@ -21,7 +21,7 @@ namespace dcel {
     class NodeT {
     public:
 
-      using Vec3 = Vec3T<T>;
+      using Vec3 = Vec3T<double>;
       using Node = NodeT<T, BV>;
 
       NodeT();
@@ -43,6 +43,18 @@ namespace dcel {
 
       inline
       decltype(auto) getParent() const noexcept;
+
+      inline
+      decltype(auto) getLeft() noexcept;
+
+      inline
+      decltype(auto) getLeft() const noexcept;
+
+      inline
+      decltype(auto) getRight() noexcept;
+
+      inline
+      decltype(auto) getRight() const noexcept;
 
       inline
       decltype(auto) isRoot() const noexcept;
@@ -70,6 +82,9 @@ namespace dcel {
 
       inline
       decltype(auto) getObjects() const noexcept;
+
+      inline
+      decltype(auto) sortAndPartitionObjects(std::function<bool(const T&, const T&, const int)> a_comparator) noexcept;
 
     protected:
 

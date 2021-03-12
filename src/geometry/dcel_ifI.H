@@ -54,7 +54,10 @@ BaseIF* dcel_if<T, BV>::newImplicitFunction() const {
 template <class T, class BV>
 inline
 decltype(auto) dcel_if<T, BV>::buildBVH(std::function<bool(const face&, const face&, const int)> comparator){
-  m_bvh = std::make_shared<BVH::Tree<face, AABB> >();
+  //  m_bvh = std::make_shared<BVH::Tree<face, AABB> >(m_mesh->getFaces());
+  m_node = std::make_shared<Node>(m_mesh->getFaces());
+
+  m_node->sortAndPartitionObjects(comparator);
 }
 
 #endif

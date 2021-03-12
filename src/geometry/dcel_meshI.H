@@ -259,11 +259,6 @@ namespace dcel {
 
     return closest->signedDistance(a_point);
   }
-
-  template <class T>
-  inline
-  decltype(auto) meshT<T>::buildBVH(std::function<bool(const face&, const face&, const int)> comparator){
-  }
 }
 
 #endif
