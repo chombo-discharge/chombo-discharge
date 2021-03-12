@@ -17,6 +17,8 @@ template <class T, class BV>
 dcel_if<T, BV>::dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside){
   m_mesh       = a_mesh;
   m_flipInside = a_flipInside;
+
+  m_bvh = std::make_shared<Tree>();
 }
 
 template <class T, class BV>
