@@ -12,6 +12,7 @@
 #include "dcel_if.H"
 
 using namespace dcel;
+using namespace dcel::BVH;
 
 template <class T, class BV>
 SortingFunction<faceT<T> > dcel_if<T, BV>::defaultSortingFunction = [](const faceT<T>& f1, const faceT<T>& f2, const int dir){
@@ -20,8 +21,12 @@ SortingFunction<faceT<T> > dcel_if<T, BV>::defaultSortingFunction = [](const fac
 
 template <class T, class BV>
 CostFunction<faceT<T> > dcel_if<T, BV>::defaultCostFunction = [](const std::vector<std::shared_ptr<faceT<T> > >& a_objects, const int a_dir){
-  //  std::cout << "calling costfunctor" << std::endl;
   return std::make_pair(0,a_dir);
+};
+
+template <class T, class BV>
+PartitionFunction<faceT<T>, BV> dcel_if<T, BV>::defaultPartitionFunction = [](NodeT<faceT<T>, BV>&) -> int{
+  return 1;
 };
 
 template <class T, class BV>
@@ -33,7 +38,9 @@ StopFunction<faceT<T>, BV> dcel_if<T, BV>::defaultStopFunction = [](const NodeT<
 };
 
 template <class T, class BV>
-BVConstructor<faceT<T>, BV> dcel_if<T, BV>::defaultBVConstructor = [](const std::vector<std::shared_ptr<faceT<T> > >& a_objects){
+BVConstructor<faceT<T>, BV> dcel_if<T, BV>::defaultBVConstructor = [](const NodeT<faceT<T>, BV>& a_node){
+  const auto& a_objects = a_node.getObjects();
+  
   std::vector<Vec3T<T>> coordinates;
 
   for (const auto& f : a_objects){
@@ -43,6 +50,9 @@ BVConstructor<faceT<T>, BV> dcel_if<T, BV>::defaultBVConstructor = [](const std:
 
   return BV(coordinates);
 };
+
+
+
 
 template <class T, class BV>
 dcel_if<T, BV>::dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside){
@@ -85,8 +95,8 @@ template <class T, class BV>
 inline
 decltype(auto) dcel_if<T, BV>::buildBVH(SortingFunction<face>   sortFunc,
 					CostFunction<face>      costFunc,
-					StopFunction<face, BV>  stopFunc,
-					BVConstructor<face, BV> bvFunc) noexcept {
+					const StopFunction<face, BV>&  stopFunc,
+					const BVConstructor<face, BV>& bvFunc) noexcept {
   
   m_root = std::make_shared<Node>(m_mesh->getFaces());
   m_root->setDepth(0);

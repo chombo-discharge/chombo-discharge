@@ -87,7 +87,7 @@ decltype(auto) NodeT<Obj, BV>::setToRegularNode() noexcept {
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::computeBoundingVolume(const BVConstructor<Obj, BV> bvFunction) noexcept {
+decltype(auto) NodeT<Obj, BV>::computeBoundingVolume(const BVConstructor<Obj, BV>& bvFunction) noexcept {
   m_bv = bvFunction(m_objects);
 }
 
@@ -173,8 +173,8 @@ template <class Obj, class BV>
 inline
 decltype(auto) NodeT<Obj, BV>::topDownSortAndPartitionObjects(SortingFunction<Obj>   sortingFunc,
 							      CostFunction<Obj>      costFunc,
-							      StopFunction<Obj, BV>  stopFunc,
-							      BVConstructor<Obj, BV> bvFunc) noexcept -> void {
+							      const StopFunction<Obj, BV>&  stopFunc,
+							      const BVConstructor<Obj, BV>& bvFunc) noexcept -> void {
 
   //  const bool stopSplitting = stopFunc(m_objects, m_depth);
   const bool stopSplitting = stopFunc(*this);

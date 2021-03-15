@@ -26,14 +26,16 @@ namespace dcel {
     template <class Obj>
     using CostFunction = std::function<std::pair<double, int>(const std::vector<std::shared_ptr<Obj> >&, const int)>;
 
-    template <class Obj, class BV>
-    using SortAndPartitionFunction = std::function<int(NodeT<Obj, BV>&)>;
 
+    // These are the new functions. 
     template <class Obj, class BV>
     using StopFunction = std::function<bool(const NodeT<Obj, BV>&)>;
 
     template <class Obj, class BV>
-    using BVConstructor = std::function<BV(const std::vector<std::shared_ptr<Obj> >&)>;
+    using PartitionFunction = std::function<int(NodeT<Obj, BV>&)>;
+
+    template <class Obj, class BV>
+    using BVConstructor = std::function<BV(const NodeT<Obj, BV>&)>;
 
     enum class NodeType {
       Regular,
@@ -74,13 +76,13 @@ namespace dcel {
       decltype(auto) setObjects(const ObjectList& a_data) noexcept;
 
       inline
-      decltype(auto) computeBoundingVolume(const BVConstructor<Obj, BV> bvFunction) noexcept;
+      decltype(auto) computeBoundingVolume(const BVConstructor<Obj, BV>& bvFunction) noexcept;
 
       inline
       decltype(auto) topDownSortAndPartitionObjects(SortingFunction<Obj>   sortingFunc,
 						    CostFunction<Obj>      costFunc,
-						    StopFunction<Obj, BV>  stopFunc,
-						    BVConstructor<Obj, BV> bvFunc) noexcept -> void;
+						    const StopFunction<Obj, BV>&  stopFunc,
+						    const BVConstructor<Obj, BV>& bvFunc) noexcept -> void;
 
       inline
       decltype(auto) getParent() noexcept;

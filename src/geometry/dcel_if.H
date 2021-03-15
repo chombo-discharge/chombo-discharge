@@ -30,8 +30,10 @@ public:
 
   static SortingFunction<face>   defaultSortingFunction;
   static CostFunction<face>      defaultCostFunction;
-  static StopFunction<face, BV>  defaultStopFunction;
-  static BVConstructor<face, BV> defaultBVConstructor;
+
+  static PartitionFunction<face, BV> defaultPartitionFunction;
+  static StopFunction<face, BV>      defaultStopFunction;
+  static BVConstructor<face, BV>     defaultBVConstructor;
 
 
   dcel_if() = delete;
@@ -47,8 +49,8 @@ public:
   inline
   decltype(auto) buildBVH(SortingFunction<face>   sortFunc = defaultSortingFunction,
 			  CostFunction<face>      costFunc = defaultCostFunction,
-			  StopFunction<face, BV>  stopFunc = defaultStopFunction,
-			  BVConstructor<face, BV> bvFunc   = defaultBVConstructor) noexcept;
+			  const StopFunction<face, BV>&  stopFunc = defaultStopFunction,
+			  const BVConstructor<face, BV>& bvFunc   = defaultBVConstructor) noexcept;
 
 protected:
 
