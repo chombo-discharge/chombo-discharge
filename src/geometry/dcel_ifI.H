@@ -49,17 +49,8 @@ PartitionFunctionT<faceT<T>, BV> dcel_if<T, BV>::defaultPartitionFunction = [](N
   Vec3T<T> maxCorner = objects.front()->getCentroid();
 
   for(const auto& f : objects){
-#if 1 // Debug
-    for (int dir = 0; dir < 3; dir++){
-      const auto cDir = f->getCentroid()[dir];
-
-      if(cDir < minCorner[dir] ) minCorner[dir] = cDir;
-      if(cDir > maxCorner[dir] ) maxCorner[dir] = cDir;
-    }
-#else
     minCorner = std::min(minCorner, f->getCentroid());
     maxCorner = std::max(maxCorner, f->getCentroid());
-#endif
   }
 
   const Vec3T<T> delta = maxCorner - minCorner;
@@ -103,7 +94,7 @@ Real dcel_if<T, BV>::value(const RealVect& a_point) const {
 
   //  T retval = m_mesh->signedDistance(p); // dcel::mesh can return either positive or negative for outside.
 
-  double distSoFar = std::numeric_limits<double>::max();
+  double distSoFar = std::numeric_limits<double>::infinity();
   double retval = m_root->signedDistance(p2, distSoFar);
 
   //  const auto candidates = m_root->getMinSignedDistanceToPointCandidates(p2);

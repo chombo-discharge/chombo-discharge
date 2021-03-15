@@ -20,6 +20,8 @@ using mesh = meshT<double>;
 using AABB = AABBT<double>;
 using Sphere = BoundingSphereT<double>;
 
+using BV = Sphere;
+
 porsche::porsche(){
 
   std::string filename;
@@ -40,7 +42,7 @@ porsche::porsche(){
 
 
   // Creat the object and build the BVH. 
-  RefCountedPtr<dcel_if<double, AABB> > bif = RefCountedPtr<dcel_if<double, AABB> > (new dcel_if<double, AABB>(m,true));
+  RefCountedPtr<dcel_if<double, BV> > bif = RefCountedPtr<dcel_if<double, BV> > (new dcel_if<double, BV>(m,true));
 
   bif->buildBVH();
 

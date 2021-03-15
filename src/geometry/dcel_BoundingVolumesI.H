@@ -48,13 +48,13 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) BoundingVolumeT<T>::isPointInside(const Vec3& a_x0) const {
-    return this->getSignedMinDistanceToPoint(a_x0) < 0.0;
+    return this->getDistance(a_x0) < 0.0;
   }
 
   template <class T>
   inline
   decltype(auto) BoundingVolumeT<T>::isPointOutside(const Vec3& a_x0) const {
-    return this->getSignedMinDistanceToPoint(a_x0) > 0.0;
+    return this->getDistance(a_x0) > 0.0;
   }
 
   template <class T>
@@ -183,19 +183,15 @@ namespace dcel {
     }
 
     // Ritter algorithm is very coarse and does not give an exact result anyways. Grow the dimension for safety. 
-    m_radius *= (1.0 + 1.E-3);
+    m_radius *= (1.0 + 1E-2);
   }
 
   template <class T>
   inline
-  T BoundingSphereT<T>::getSignedMinDistanceToPoint(const Vec3& a_x0) const noexcept {
-    return (a_x0 - m_center).length() - m_radius;
-  }
+  T BoundingSphereT<T>::getDistance(const Vec3& a_x0) const noexcept {
+    constexpr T zero = 0.0;
 
-  template <class T>
-  inline
-  T BoundingSphereT<T>::getUnsignedMaxDistanceToPoint(const Vec3& a_x0) const noexcept {
-    return (a_x0 - m_center).length() + m_radius;
+    return std::max(0.0, (a_x0-m_center).length() - m_radius);
   }
 
   template <class T>
@@ -295,7 +291,7 @@ namespace dcel {
 
   template <class T>
   inline
-  T AABBT<T>::getSignedMinDistanceToPoint(const Vec3& a_point) const noexcept {
+  T AABBT<T>::getDistance(const Vec3& a_point) const noexcept {
     const Vec3 delta = Vec3(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
 			    std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
 			    std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));
@@ -304,18 +300,9 @@ namespace dcel {
     
     const T retval =  std::min(zero, delta[delta.maxDir(false)]) + std::max(Vec3::zero(), delta).length(); // Negative inside and positive outside. 
   
-    return retval;
+    return std::max(zero, retval);
   }
 
-  template <class T>
-  inline
-  T AABBT<T>::getUnsignedMaxDistanceToPoint(const Vec3& a_point) const noexcept {
-    const Vec3 delta = Vec3(std::max(a_point[0] - m_loCorner[0], m_hiCorner[0] - a_point[0]),
-			    std::max(a_point[1] - m_loCorner[1], m_hiCorner[1] - a_point[1]),
-			    std::max(a_point[2] - m_loCorner[2], m_hiCorner[2] - a_point[2]));  // Distance 
-
-    return delta.length();
-  }
 }
 
 #endif

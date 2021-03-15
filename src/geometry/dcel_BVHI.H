@@ -192,7 +192,7 @@ decltype(auto) NodeT<Obj, BV>::topDownSortAndPartitionObjects(const StopFunction
     this->insertNode(m_left,  lData);
     this->insertNode(m_right, rData);
 
-    m_left->topDownSortAndPartitionObjects(a_stopFunc, a_partFunc, a_bvFunc);
+    m_left ->topDownSortAndPartitionObjects(a_stopFunc, a_partFunc, a_bvFunc);
     m_right->topDownSortAndPartitionObjects(a_stopFunc, a_partFunc, a_bvFunc);
 
     this->setToRegularNode();
@@ -229,13 +229,15 @@ decltype(auto) NodeT<Obj, BV>::getLeafData() const noexcept -> ObjectList {
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::signedDistance(const Vec3& a_point, const double a_shorterThanThisDistance) const noexcept {
-  ObjectList candidates = this->getMinSignedDistanceToPointCandidates(a_point, a_shorterThanThisDistance);
+decltype(auto) NodeT<Obj, BV>::signedDistance(const Vec3& a_point, double& a_pruneDistance) const noexcept {
+  ObjectList candidates = this->getMinSignedDistanceToPointCandidates(a_point, a_pruneDistance);
 
-  double minDist = (double) candidates.front()->signedDistance(a_point);
+  //  pout() << candidates.size() << endl;
+
+  double minDist = std::numeric_limits<double>::infinity();
 
   for (const auto& c : candidates){
-    double curDist = (double) c->signedDistance(a_point);
+    const double curDist = (double) c->signedDistance(a_point);
 
     if(std::abs(curDist) < std::abs(minDist)){
       minDist = curDist;
@@ -247,37 +249,42 @@ decltype(auto) NodeT<Obj, BV>::signedDistance(const Vec3& a_point, const double 
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getMinSignedDistanceToPointCandidates(const Vec3& a_point, const double a_shorterThanThisDistance) const noexcept -> ObjectList {
+decltype(auto) NodeT<Obj, BV>::getMinSignedDistanceToPointCandidates(const Vec3& a_point, double& a_pruneDistance) const noexcept -> ObjectList {
 
-  auto cand = m_objects;
+  ObjectList cand = ObjectList();
 
-  if(m_nodeType == NodeType::Regular){
+  if(m_nodeType == NodeType::Leaf){
+    bool returnObjects = false;
     
-    const BV& bvL = m_left->getBoundingVolume();
+    for (const auto& O : m_objects){
+      const double cur = O->signedDistance(a_point);
+
+      if(std::abs(cur) < a_pruneDistance){
+	a_pruneDistance = std::abs(cur);
+	returnObjects   = true;
+      }
+    }
+
+    if(returnObjects){
+      cand = m_objects;
+    }
+  }
+  else {
+    const BV& bvL = m_left ->getBoundingVolume();
     const BV& bvR = m_right->getBoundingVolume();
     
-    const auto minL = (double) std::abs(bvL.getSignedMinDistanceToPoint(a_point));
-    const auto maxL = (double) std::abs(bvL.getUnsignedMaxDistanceToPoint(a_point));
+    const double minL = std::abs(bvL.getDistance(a_point));
+    const double minR = std::abs(bvR.getDistance(a_point));
 
-    const auto minR = (double) std::abs(bvR.getSignedMinDistanceToPoint(a_point));
-    const auto maxR = (double) std::abs(bvR.getUnsignedMaxDistanceToPoint(a_point));
-
-    const bool pruneL = (maxR < minL) || (minL > a_shorterThanThisDistance); // We know that the object is closer than a_shorterThanThisDistance
-    const bool pruneR = (maxL < minR) || (minR > a_shorterThanThisDistance);
-    
-    const bool searchL = !pruneL;
-    const bool searchR = !pruneR;
-
-    //    const double nextShorter = std::min(a_shorterThanThisDistance, std::min(minL, minR));
-    double nextShorter = std::min(a_shorterThanThisDistance, std::min(maxL, maxR));
-    
-    if(searchL){
-      const auto lcand = m_left->getMinSignedDistanceToPointCandidates(a_point, nextShorter);
+    const bool pruneLeft = (minL > a_pruneDistance);
+    if(!pruneLeft){
+      const ObjectList lcand = m_left->getMinSignedDistanceToPointCandidates(a_point, a_pruneDistance);
       cand.insert(cand.end(), lcand.begin(), lcand.end());
     }
-    
-    if (searchR){
-      const auto rcand = m_right->getMinSignedDistanceToPointCandidates(a_point, nextShorter);
+
+    const bool pruneRight = (minR > a_pruneDistance);
+    if (!pruneRight){
+      const ObjectList rcand = m_right->getMinSignedDistanceToPointCandidates(a_point, a_pruneDistance);
       cand.insert(cand.end(), rcand.begin(), rcand.end());
     }
   }
