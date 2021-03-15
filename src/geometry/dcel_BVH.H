@@ -26,8 +26,8 @@ namespace dcel {
     template <class Obj>
     using CostFunction = std::function<std::pair<double, int>(const std::vector<std::shared_ptr<Obj> >&, const int)>;
 
-    template <class Obj>
-    using SortAndPartitionFunction = std::function<int(const std::vector<shared_ptr<Obj> >&)>;
+    template <class Obj, class BV>
+    using SortAndPartitionFunction = std::function<int(NodeT<Obj, BV>&)>;
 
     template <class Obj, class BV>
     using StopFunction = std::function<bool(const NodeT<Obj, BV>&)>;
@@ -45,12 +45,14 @@ namespace dcel {
     class NodeT {
     public:
 
-      using Vec3 = Vec3T<double>;
-      using Node = NodeT<Obj, BV>;
+      using Vec3       = Vec3T<double>;
+      using Node       = NodeT<Obj, BV>;
+      using NodePtr    = std::shared_ptr<Node>;
+      using ObjectList = std::vector<std::shared_ptr<Obj> >;
 
       NodeT();
       NodeT(std::shared_ptr<Node>& a_parent);
-      NodeT(std::vector<std::shared_ptr<Obj> >& a_data);
+      NodeT(const ObjectList& a_data);
       ~NodeT();
 
       inline
@@ -69,7 +71,7 @@ namespace dcel {
       decltype(auto) setDepth(const int a_depth) noexcept;
 
       inline
-      decltype(auto) setObjects(const std::vector<std::shared_ptr<Obj> >& a_data) noexcept;
+      decltype(auto) setObjects(const ObjectList& a_data) noexcept;
 
       inline
       decltype(auto) computeBoundingVolume(const BVConstructor<Obj, BV> bvFunction) noexcept;
@@ -127,14 +129,14 @@ namespace dcel {
 
       int m_depth;
       
-      std::vector<std::shared_ptr<Obj> > m_objects;
+      ObjectList m_objects;
 
-      std::shared_ptr<Node> m_parent;
-      std::shared_ptr<Node> m_left;
-      std::shared_ptr<Node> m_right;
+      NodePtr m_parent;
+      NodePtr m_left;
+      NodePtr m_right;
 
       inline
-      decltype(auto) insertNode(std::shared_ptr<Node>&  a_node, const std::vector<std::shared_ptr<Obj> >& a_objects) noexcept;
+      decltype(auto) insertNode(std::shared_ptr<Node>&  a_node, const ObjectList& a_objects) noexcept;
 
       inline
       decltype(auto) setToRegularNode() noexcept;

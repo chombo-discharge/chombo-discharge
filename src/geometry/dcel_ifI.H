@@ -29,9 +29,7 @@ StopFunction<faceT<T>, BV> dcel_if<T, BV>::defaultStopFunction = [](const NodeT<
   const auto& objects = a_node.getObjects();
   const auto& depth   = a_node.getDepth();
   
-  if(depth > 0) std::cout << "stopping because depth > 0" << std::endl;
-  return depth>0;
-  //  return (a_objects.size() < 5) || a_depth > 0;
+  return depth > 0;
 };
 
 template <class T, class BV>

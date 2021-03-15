@@ -25,14 +25,14 @@ NodeT<Obj, BV>::NodeT() {
 
 template <class Obj, class BV>
 inline
-NodeT<Obj, BV>::NodeT(std::shared_ptr<Node>& a_parent) : NodeT<Obj, BV>() {
+NodeT<Obj, BV>::NodeT(NodePtr& a_parent) : NodeT<Obj, BV>() {
   m_parent = a_parent;
   m_depth  = a_parent.m_depth + 1;
 }
 
 template <class Obj, class BV>
 inline
-NodeT<Obj, BV>::NodeT(std::vector<std::shared_ptr<Obj> >& a_objects) : NodeT<Obj, BV>() {
+NodeT<Obj, BV>::NodeT(const ObjectList& a_objects) : NodeT<Obj, BV>() {
   m_objects  = a_objects;
   m_nodeType = NodeType::Leaf;
 }
@@ -44,19 +44,19 @@ NodeT<Obj, BV>::~NodeT() {
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::setParent(const std::shared_ptr<Node>& a_parent) noexcept {
+decltype(auto) NodeT<Obj, BV>::setParent(const NodePtr& a_parent) noexcept {
   m_parent = a_parent;
 }
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::setLeft(const std::shared_ptr<Node>& a_left) noexcept {
+decltype(auto) NodeT<Obj, BV>::setLeft(const NodePtr& a_left) noexcept {
   m_left = a_left;
 }
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::setRight(const std::shared_ptr<Node>& a_right) noexcept{
+decltype(auto) NodeT<Obj, BV>::setRight(const NodePtr& a_right) noexcept{
   m_right = a_right;
 }
 
@@ -74,7 +74,7 @@ decltype(auto) NodeT<Obj, BV>::setDepth(const int a_depth) noexcept {
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::setObjects(const std::vector<std::shared_ptr<Obj> >& a_objects) noexcept {
+decltype(auto) NodeT<Obj, BV>::setObjects(const ObjectList& a_objects) noexcept {
   m_objects = a_objects;
 }
 
@@ -218,8 +218,8 @@ decltype(auto) NodeT<Obj, BV>::topDownSortAndPartitionObjects(SortingFunction<Ob
 
 
     // Create the left and right nodes and move further down the tree. 
-    std::vector<std::shared_ptr<Obj> > lData(m_objects.begin(), m_objects.begin() + splitIndex);
-    std::vector<std::shared_ptr<Obj> > rData(m_objects.begin() + splitIndex+1, m_objects.end());
+    ObjectList lData(m_objects.begin(), m_objects.begin() + splitIndex);
+    ObjectList rData(m_objects.begin() + splitIndex+1, m_objects.end());
 
     this->insertNode(m_left,  lData);
     this->insertNode(m_right, rData);
@@ -233,7 +233,7 @@ decltype(auto) NodeT<Obj, BV>::topDownSortAndPartitionObjects(SortingFunction<Ob
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::insertNode(std::shared_ptr<Node>& a_node, const std::vector<std::shared_ptr<Obj> >& a_objects) noexcept {
+decltype(auto) NodeT<Obj, BV>::insertNode(NodePtr& a_node, const ObjectList& a_objects) noexcept {
   a_node = std::make_shared<NodeT<Obj, BV> >();
 
   a_node->setObjects(a_objects);
