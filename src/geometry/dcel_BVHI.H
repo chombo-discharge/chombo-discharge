@@ -12,9 +12,9 @@
 
 using namespace dcel::BVH;
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-NodeT<Obj, BV>::NodeT() {
+NodeT<T, Obj, BV>::NodeT() {
   m_parent = nullptr;
   m_left   = nullptr;
   m_right  = nullptr;
@@ -23,133 +23,133 @@ NodeT<Obj, BV>::NodeT() {
   m_nodeType = NodeType::Regular;
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-NodeT<Obj, BV>::NodeT(NodePtr& a_parent) : NodeT<Obj, BV>() {
+NodeT<T, Obj, BV>::NodeT(NodePtr& a_parent) : NodeT<T, Obj, BV>() {
   m_parent   = a_parent;
   m_depth    = a_parent.m_depth + 1;
   m_nodeType = NodeType::Leaf;
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-NodeT<Obj, BV>::NodeT(const ObjectList& a_objects) : NodeT<Obj, BV>() {
+NodeT<T, Obj, BV>::NodeT(const ObjectList& a_objects) : NodeT<T, Obj, BV>() {
   m_objects  = a_objects;
   m_nodeType = NodeType::Leaf;
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-NodeT<Obj, BV>::~NodeT() {
+NodeT<T, Obj, BV>::~NodeT() {
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::setParent(const NodePtr& a_parent) noexcept {
+decltype(auto) NodeT<T, Obj, BV>::setParent(const NodePtr& a_parent) noexcept {
   m_parent = a_parent;
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::setLeft(const NodePtr& a_left) noexcept {
+decltype(auto) NodeT<T, Obj, BV>::setLeft(const NodePtr& a_left) noexcept {
   m_left = a_left;
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::setRight(const NodePtr& a_right) noexcept{
+decltype(auto) NodeT<T, Obj, BV>::setRight(const NodePtr& a_right) noexcept{
   m_right = a_right;
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::setNodeType(const NodeType a_nodeType) noexcept {
+decltype(auto) NodeT<T, Obj, BV>::setNodeType(const NodeType a_nodeType) noexcept {
   m_nodeType = a_nodeType;
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::setDepth(const int a_depth) noexcept {
+decltype(auto) NodeT<T, Obj, BV>::setDepth(const int a_depth) noexcept {
   m_depth = a_depth;
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::setObjects(const ObjectList& a_objects) noexcept {
+decltype(auto) NodeT<T, Obj, BV>::setObjects(const ObjectList& a_objects) noexcept {
   m_objects = a_objects;
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::setToRegularNode() noexcept {
+decltype(auto) NodeT<T, Obj, BV>::setToRegularNode() noexcept {
   m_nodeType = NodeType::Regular;
   m_objects.resize(0);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::computeBoundingVolume(const BVConstructor& bvFunction) noexcept {
+decltype(auto) NodeT<T, Obj, BV>::computeBoundingVolume(const BVConstructor& bvFunction) noexcept {
   m_bv = bvFunction(m_objects);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getParent() noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getParent() noexcept {
   return (m_parent);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getParent() const noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getParent() const noexcept {
   return (m_parent);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getLeft() noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getLeft() noexcept {
   return (m_left);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getLeft() const noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getLeft() const noexcept {
   return (m_left);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getRight() noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getRight() noexcept {
   return (m_right);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getRight() const noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getRight() const noexcept {
   return (m_right);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getNodeType() const noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getNodeType() const noexcept {
   return m_nodeType;
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getDepth() const noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getDepth() const noexcept {
   return (m_depth);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getDistanceToBV(const Vec3& a_x0) const noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getDistanceToBV(const Vec3& a_x0) const noexcept {
   return m_bv.getDistance(a_x0);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getDistanceToData(const Vec3& a_x0) const noexcept {
-  float ret = std::numeric_limits<float>::infinity();
+decltype(auto) NodeT<T, Obj, BV>::getDistanceToData(const Vec3& a_x0) const noexcept {
+  T ret = std::numeric_limits<T>::infinity();
 
   for (const auto& o : m_objects){
     const auto cur = std::abs(o->unsignedDistance2(a_x0));
@@ -160,33 +160,33 @@ decltype(auto) NodeT<Obj, BV>::getDistanceToData(const Vec3& a_x0) const noexcep
   return sqrt(ret);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getBoundingVolume() noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getBoundingVolume() noexcept {
   return (m_bv);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getBoundingVolume() const noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getBoundingVolume() const noexcept {
   return (m_bv);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getObjects() noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getObjects() noexcept {
   return (m_objects);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getObjects() const noexcept {
+decltype(auto) NodeT<T, Obj, BV>::getObjects() const noexcept {
   return (m_objects);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::topDownSortAndPartitionObjects(const StopFunction&      a_stopFunc,
+decltype(auto) NodeT<T, Obj, BV>::topDownSortAndPartitionObjects(const StopFunction&      a_stopFunc,
 							      const PartitionFunction& a_partFunc,
 							      const BVConstructor&     a_bvFunc) noexcept -> void {
 
@@ -214,20 +214,20 @@ decltype(auto) NodeT<Obj, BV>::topDownSortAndPartitionObjects(const StopFunction
   }
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::insertNode(NodePtr& a_node, const ObjectList& a_objects) noexcept {
-  a_node = std::make_shared<NodeT<Obj, BV> >();
+decltype(auto) NodeT<T, Obj, BV>::insertNode(NodePtr& a_node, const ObjectList& a_objects) noexcept {
+  a_node = std::make_shared<NodeT<T, Obj, BV> >();
 
   a_node->setObjects(a_objects);
-  a_node->setParent(std::make_shared<NodeT<Obj, BV> >(*this));
+  a_node->setParent(std::make_shared<NodeT<T, Obj, BV> >(*this));
   a_node->setNodeType(NodeType::Leaf);
   a_node->setDepth(m_depth+1);
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getLeafData() const noexcept -> ObjectList {
+decltype(auto) NodeT<T, Obj, BV>::getLeafData() const noexcept -> ObjectList {
 
   ObjectList objects = ObjectList();
 
@@ -245,15 +245,15 @@ decltype(auto) NodeT<Obj, BV>::getLeafData() const noexcept -> ObjectList {
   return objects;
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::signedDistance(const Vec3& a_point, float& a_pruneDistance) const noexcept {
+decltype(auto) NodeT<T, Obj, BV>::signedDistance(const Vec3& a_point, T& a_pruneDistance) const noexcept {
   ObjectList candidates = this->pruneTree(a_point, a_pruneDistance);
 
-  float minDist = std::numeric_limits<float>::infinity();
+  T minDist = std::numeric_limits<T>::infinity();
 
   for (const auto& c : candidates){
-    const float curDist = (float) c->signedDistance(a_point);
+    const T curDist = (T) c->signedDistance(a_point);
 
     if(std::abs(curDist) < std::abs(minDist)){
       minDist = curDist;
@@ -263,14 +263,14 @@ decltype(auto) NodeT<Obj, BV>::signedDistance(const Vec3& a_point, float& a_prun
   return minDist;
 }
 
-template <class Obj, class BV>
+template <class T, class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::pruneTree(const Vec3& a_point, float& a_pruneDistance) const noexcept -> ObjectList {
+decltype(auto) NodeT<T, Obj, BV>::pruneTree(const Vec3& a_point, T& a_pruneDistance) const noexcept -> ObjectList {
 
   ObjectList cand = ObjectList();
 
   if(m_nodeType == NodeType::Leaf){
-    const float distanceToData = this->getDistanceToData(a_point);
+    const T distanceToData = this->getDistanceToData(a_point);
 
     if(distanceToData < a_pruneDistance){
       cand = m_objects;
@@ -278,16 +278,16 @@ decltype(auto) NodeT<Obj, BV>::pruneTree(const Vec3& a_point, float& a_pruneDist
     }
   }
   else {
-    const float minL = m_left ->getDistanceToBV(a_point);
-    const float minR = m_right->getDistanceToBV(a_point);
+    const T minL = m_left ->getDistanceToBV(a_point);
+    const T minR = m_right->getDistanceToBV(a_point);
 
     const bool leftFirst = minL < minR;
     
-    std::shared_ptr<NodeT<Obj, BV> > first  = leftFirst ? m_left  : m_right;
-    std::shared_ptr<NodeT<Obj, BV> > second = leftFirst ? m_right : m_left;
+    std::shared_ptr<NodeT<T, Obj, BV> > first  = leftFirst ? m_left  : m_right;
+    std::shared_ptr<NodeT<T, Obj, BV> > second = leftFirst ? m_right : m_left;
 
-    const float minFirst  = std::min(minL, minR);
-    const float minSecond = std::max(minL, minR);
+    const T minFirst  = std::min(minL, minR);
+    const T minSecond = std::max(minL, minR);
 
     if(minFirst < a_pruneDistance){
       const ObjectList branchCand = first->pruneTree(a_point, a_pruneDistance);

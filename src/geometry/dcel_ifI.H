@@ -15,7 +15,7 @@ using namespace dcel;
 using namespace dcel::BVH;
 
 template <class T, class BV>
-StopFunctionT<faceT<T>, BV> dcel_if<T, BV>::defaultStopFunction = [](const NodeT<faceT<T>, BV>& a_node){
+StopFunctionT<T, faceT<T>, BV> dcel_if<T, BV>::defaultStopFunction = [](const NodeT<T, faceT<T>, BV>& a_node){
   const auto& objects = a_node.getObjects();
   const int depth     = a_node.getDepth();
 
@@ -23,7 +23,7 @@ StopFunctionT<faceT<T>, BV> dcel_if<T, BV>::defaultStopFunction = [](const NodeT
 };
 
 template <class T, class BV>
-BVConstructorT<faceT<T>, BV> dcel_if<T, BV>::defaultBVConstructor = [](const NodeT<faceT<T>, BV>& a_node){
+BVConstructorT<T, faceT<T>, BV> dcel_if<T, BV>::defaultBVConstructor = [](const NodeT<T, faceT<T>, BV>& a_node){
   const auto& a_objects = a_node.getObjects();
   
   std::vector<Vec3T<T> > coordinates;
@@ -37,7 +37,7 @@ BVConstructorT<faceT<T>, BV> dcel_if<T, BV>::defaultBVConstructor = [](const Nod
 };
 
 template <class T, class BV>
-PartitionFunctionT<faceT<T>, BV> dcel_if<T, BV>::defaultPartitionFunction = [](NodeT<faceT<T>, BV>& a_node){
+PartitionFunctionT<T, faceT<T>, BV> dcel_if<T, BV>::defaultPartitionFunction = [](NodeT<T, faceT<T>, BV>& a_node){
 
   // TLDR: Very, very naive partitioning of objects. We search for the spatial direction where the centroids are spaced furthest apart,
   //       and split the vector in half along that direction. 
@@ -90,12 +90,11 @@ template <class T, class BV>
 Real dcel_if<T, BV>::value(const RealVect& a_point) const {
   
   Vec3 p(a_point[0], a_point[1], a_point[2]);
-  Vec3T<float> p2(a_point[0], a_point[1], a_point[2]);
 
   //  T retval = m_mesh->signedDistance(p); // dcel::mesh can return either positive or negative for outside.
 
-  float distSoFar = std::numeric_limits<float>::infinity();
-  float retval = m_root->signedDistance(p2, distSoFar);
+  T distSoFar = std::numeric_limits<float>::infinity();
+  T retval = m_root->signedDistance(p, distSoFar);
 
   //  const auto candidates = m_root->getMinSignedDistanceToPointCandidates(p2);
   
@@ -115,9 +114,9 @@ BaseIF* dcel_if<T, BV>::newImplicitFunction() const {
 
 template <class T, class BV>
 inline
-decltype(auto) dcel_if<T, BV>::buildBVH(const StopFunctionT<face, BV>&      stopFunc,
-					const PartitionFunctionT<face, BV>& partFunc,
-					const BVConstructorT<face, BV>&     bvFunc) noexcept {
+decltype(auto) dcel_if<T, BV>::buildBVH(const StopFunctionT<T, face, BV>&      stopFunc,
+					const PartitionFunctionT<T, face, BV>& partFunc,
+					const BVConstructorT<T, face, BV>&     bvFunc) noexcept {
   
   m_root = std::make_shared<Node>(m_mesh->getFaces());
   m_root->setDepth(0);

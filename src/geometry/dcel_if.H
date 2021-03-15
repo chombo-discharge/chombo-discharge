@@ -25,11 +25,11 @@ public:
   using Vec3 = dcel::Vec3T<T>;
   using mesh = dcel::meshT<T>;
   using face = dcel::faceT<T>;
-  using Node = dcel::BVH::NodeT<face, BV>;
+  using Node = dcel::BVH::NodeT<T, face, BV>;
 
-  static StopFunctionT<face, BV>      defaultStopFunction;
-  static PartitionFunctionT<face, BV> defaultPartitionFunction;
-  static BVConstructorT<face, BV>     defaultBVConstructor;
+  static StopFunctionT<T, face, BV>      defaultStopFunction;
+  static PartitionFunctionT<T, face, BV> defaultPartitionFunction;
+  static BVConstructorT<T, face, BV>     defaultBVConstructor;
 
 
   dcel_if() = delete;
@@ -43,9 +43,9 @@ public:
   BaseIF* newImplicitFunction() const override;
 
   inline
-  decltype(auto) buildBVH(const StopFunctionT<face, BV>&  stopFunc = defaultStopFunction,
-			  const PartitionFunctionT<face, BV>& partFunc = defaultPartitionFunction,
-			  const BVConstructorT<face, BV>& bvFunc   = defaultBVConstructor) noexcept;
+  decltype(auto) buildBVH(const StopFunctionT<T, face, BV>&  stopFunc     = defaultStopFunction,
+			  const PartitionFunctionT<T, face, BV>& partFunc = defaultPartitionFunction,
+			  const BVConstructorT<T, face, BV>& bvFunc       = defaultBVConstructor) noexcept;
 
 protected:
 

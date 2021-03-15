@@ -17,38 +17,38 @@
 namespace dcel {
   namespace BVH {
 
-    template <class Obj, class BV>
+    template <class T, class Obj, class BV>
     class NodeT;
 
-    template <class Obj, class BV>
-    using PartitionFunctionT = std::function<int(NodeT<Obj, BV>&)>;
+    template <class T, class Obj, class BV>
+    using PartitionFunctionT = std::function<int(NodeT<T, Obj, BV>&)>;
     
-    template <class Obj, class BV>
-    using StopFunctionT = std::function<bool(const NodeT<Obj, BV>&)>;
+    template <class T, class Obj, class BV>
+    using StopFunctionT = std::function<bool(const NodeT<T, Obj, BV>&)>;
 
-    template <class Obj, class BV>
-    using BVConstructorT = std::function<BV(const NodeT<Obj, BV>&)>;
+    template <class T, class Obj, class BV>
+    using BVConstructorT = std::function<BV(const NodeT<T, Obj, BV>&)>;
 
     enum class NodeType {
       Regular,
       Leaf,
     };
 
-    // Obj is the object type you want to enclose, BV is the bounding volume you use for it. 
-    template <class Obj, class BV>
+    // T is the precision for Vec3, Obj is the object type you want to enclose, BV is the bounding volume you use for it. 
+    template <class T, class Obj, class BV>
     class NodeT {
     public:
 
       using ObjectList = std::vector<std::shared_ptr<Obj> >;
 
-      using Vec3       = Vec3T<float>;
+      using Vec3       = Vec3T<T>;
       
-      using Node       = NodeT<Obj, BV>;
+      using Node       = NodeT<T, Obj, BV>;
       using NodePtr    = std::shared_ptr<Node>;
       
-      using PartitionFunction = PartitionFunctionT<Obj, BV>;
-      using StopFunction      = StopFunctionT<Obj, BV>;
-      using BVConstructor     = BVConstructorT<Obj, BV>;
+      using PartitionFunction = PartitionFunctionT<T, Obj, BV>;
+      using StopFunction      = StopFunctionT<T, Obj, BV>;
+      using BVConstructor     = BVConstructorT<T, Obj, BV>;
 
       NodeT();
       NodeT(NodePtr& a_parent);
@@ -76,7 +76,7 @@ namespace dcel {
       decltype(auto) getObjects() const noexcept;
 
       inline
-      decltype(auto) signedDistance(const Vec3& a_point, float& a_pruneDistance) const noexcept;
+      decltype(auto) signedDistance(const Vec3& a_point, T& a_pruneDistance) const noexcept;
 
     protected:
 
@@ -141,7 +141,7 @@ namespace dcel {
       decltype(auto) getLeafData() const noexcept -> ObjectList;
 
       inline
-      decltype(auto) pruneTree(const Vec3& a_point, float& a_pruneDistance) const noexcept -> ObjectList;
+      decltype(auto) pruneTree(const Vec3& a_point, T& a_pruneDistance) const noexcept -> ObjectList;
 
       inline
       decltype(auto) setParent(const NodePtr& a_parent) noexcept;
