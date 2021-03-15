@@ -15,33 +15,18 @@ using namespace dcel;
 using namespace dcel::BVH;
 
 template <class T, class BV>
-SortingFunction<faceT<T> > dcel_if<T, BV>::defaultSortingFunction = [](const faceT<T>& f1, const faceT<T>& f2, const int dir){
-  return f1.getCentroid()[dir] < f1.getCentroid()[dir];
-};
-
-template <class T, class BV>
-CostFunction<faceT<T> > dcel_if<T, BV>::defaultCostFunction = [](const std::vector<std::shared_ptr<faceT<T> > >& a_objects, const int a_dir){
-  return std::make_pair(0,a_dir);
-};
-
-template <class T, class BV>
-PartitionFunction<faceT<T>, BV> dcel_if<T, BV>::defaultPartitionFunction = [](NodeT<faceT<T>, BV>&) -> int{
-  return 1;
-};
-
-template <class T, class BV>
-StopFunction<faceT<T>, BV> dcel_if<T, BV>::defaultStopFunction = [](const NodeT<faceT<T>, BV>& a_node){
+StopFunctionT<faceT<T>, BV> dcel_if<T, BV>::defaultStopFunction = [](const NodeT<faceT<T>, BV>& a_node){
   const auto& objects = a_node.getObjects();
-  const auto& depth   = a_node.getDepth();
-  
-  return depth > 0;
+  const int depth     = a_node.getDepth();
+
+  return objects.size() <= 4 || depth > 5;
 };
 
 template <class T, class BV>
-BVConstructor<faceT<T>, BV> dcel_if<T, BV>::defaultBVConstructor = [](const NodeT<faceT<T>, BV>& a_node){
+BVConstructorT<faceT<T>, BV> dcel_if<T, BV>::defaultBVConstructor = [](const NodeT<faceT<T>, BV>& a_node){
   const auto& a_objects = a_node.getObjects();
   
-  std::vector<Vec3T<T>> coordinates;
+  std::vector<Vec3T<T> > coordinates;
 
   for (const auto& f : a_objects){
     const auto faceCoordinates = f->getAllVertexCoordinates();
@@ -51,8 +36,36 @@ BVConstructor<faceT<T>, BV> dcel_if<T, BV>::defaultBVConstructor = [](const Node
   return BV(coordinates);
 };
 
+template <class T, class BV>
+PartitionFunctionT<faceT<T>, BV> dcel_if<T, BV>::defaultPartitionFunction = [](NodeT<faceT<T>, BV>& a_node){
+
+  // TLDR: Very, very naive partitioning of objects. We search for the spatial direction where the centroids are spaced furthest apart,
+  //       and split the vector in half along that direction. 
+
+  auto& objects = a_node.getObjects();
+
+  // Determine along which axis to split.
+  Vec3T<T> minCorner = objects.front()->getCentroid();
+  Vec3T<T> maxCorner = objects.front()->getCentroid();
+
+  for(const auto& f : objects){
+    minCorner = std::min(minCorner, f->getCentroid());
+    maxCorner = std::max(maxCorner, f->getCentroid());
+  }
+
+  const Vec3T<T> delta = maxCorner - minCorner;
+  const int splitDir   = delta.maxDir(true);
 
 
+  // Sort centroids along splitDir and split the vector in half.
+  auto comparator = [splitDir](const std::shared_ptr<faceT<T> >& f1, const std::shared_ptr<faceT<T> >& f2){
+    return f1->getCentroid()[splitDir] < f2->getCentroid()[splitDir];
+  };
+    
+  std::sort(objects.begin(), objects.end(), comparator);
+  
+  return (objects.size()-1)/2;
+};
 
 template <class T, class BV>
 dcel_if<T, BV>::dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside){
@@ -93,17 +106,16 @@ BaseIF* dcel_if<T, BV>::newImplicitFunction() const {
 
 template <class T, class BV>
 inline
-decltype(auto) dcel_if<T, BV>::buildBVH(SortingFunction<face>   sortFunc,
-					CostFunction<face>      costFunc,
-					const StopFunction<face, BV>&  stopFunc,
-					const BVConstructor<face, BV>& bvFunc) noexcept {
+decltype(auto) dcel_if<T, BV>::buildBVH(const StopFunctionT<face, BV>&      stopFunc,
+					const PartitionFunctionT<face, BV>& partFunc,
+					const BVConstructorT<face, BV>&     bvFunc) noexcept {
   
   m_root = std::make_shared<Node>(m_mesh->getFaces());
   m_root->setDepth(0);
   m_root->setNodeType(BVH::NodeType::Leaf);
-  m_root->computeBoundingVolume(bvFunc);
+  //  m_root->computeBoundingVolume(bvFunc);
   
-  m_root->topDownSortAndPartitionObjects(sortFunc, costFunc, stopFunc, bvFunc);
+  m_root->topDownSortAndPartitionObjects(stopFunc, partFunc, bvFunc);
 }
 
 #endif

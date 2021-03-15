@@ -20,22 +20,16 @@ namespace dcel {
     template <class Obj, class BV>
     class NodeT;
 
-    template <class Obj>
-    using SortingFunction = std::function<bool(const Obj&, const Obj&, const int)>;
 
-    template <class Obj>
-    using CostFunction = std::function<std::pair<double, int>(const std::vector<std::shared_ptr<Obj> >&, const int)>;
-
-
-    // These are the new functions. 
+    // These are the new functions.
     template <class Obj, class BV>
-    using StopFunction = std::function<bool(const NodeT<Obj, BV>&)>;
+    using PartitionFunctionT = std::function<int(NodeT<Obj, BV>&)>;
+    
+    template <class Obj, class BV>
+    using StopFunctionT = std::function<bool(const NodeT<Obj, BV>&)>;
 
     template <class Obj, class BV>
-    using PartitionFunction = std::function<int(NodeT<Obj, BV>&)>;
-
-    template <class Obj, class BV>
-    using BVConstructor = std::function<BV(const NodeT<Obj, BV>&)>;
+    using BVConstructorT = std::function<BV(const NodeT<Obj, BV>&)>;
 
     enum class NodeType {
       Regular,
@@ -47,24 +41,30 @@ namespace dcel {
     class NodeT {
     public:
 
-      using Vec3       = Vec3T<double>;
-      using Node       = NodeT<Obj, BV>;
-      using NodePtr    = std::shared_ptr<Node>;
       using ObjectList = std::vector<std::shared_ptr<Obj> >;
 
+      using Vec3       = Vec3T<double>;
+      
+      using Node       = NodeT<Obj, BV>;
+      using NodePtr    = std::shared_ptr<Node>;
+      
+      using PartitionFunction = PartitionFunctionT<Obj, BV>;
+      using StopFunction      = StopFunctionT<Obj, BV>;
+      using BVConstructor     = BVConstructorT<Obj, BV>;
+
       NodeT();
-      NodeT(std::shared_ptr<Node>& a_parent);
+      NodeT(NodePtr& a_parent);
       NodeT(const ObjectList& a_data);
       ~NodeT();
 
       inline
-      decltype(auto) setParent(const std::shared_ptr<Node>& a_parent) noexcept;
+      decltype(auto) setParent(const NodePtr& a_parent) noexcept;
 
       inline
-      decltype(auto) setLeft(const std::shared_ptr<Node>& a_left) noexcept;
+      decltype(auto) setLeft(const NodePtr& a_left) noexcept;
 
       inline
-      decltype(auto) setRight(const std::shared_ptr<Node>& a_right) noexcept;
+      decltype(auto) setRight(const NodePtr& a_right) noexcept;
 
       inline
       decltype(auto) setNodeType(const NodeType a_nodeType) noexcept;
@@ -76,13 +76,12 @@ namespace dcel {
       decltype(auto) setObjects(const ObjectList& a_data) noexcept;
 
       inline
-      decltype(auto) computeBoundingVolume(const BVConstructor<Obj, BV>& bvFunction) noexcept;
+      decltype(auto) computeBoundingVolume(const BVConstructor& bvFunction) noexcept;
 
       inline
-      decltype(auto) topDownSortAndPartitionObjects(SortingFunction<Obj>   sortingFunc,
-						    CostFunction<Obj>      costFunc,
-						    const StopFunction<Obj, BV>&  stopFunc,
-						    const BVConstructor<Obj, BV>& bvFunc) noexcept -> void;
+      decltype(auto) topDownSortAndPartitionObjects(const StopFunction&      a_stopFunc,
+						    const PartitionFunction& a_partFunc,
+						    const BVConstructor&     a_bvFunc) noexcept -> void;
 
       inline
       decltype(auto) getParent() noexcept;
@@ -138,7 +137,7 @@ namespace dcel {
       NodePtr m_right;
 
       inline
-      decltype(auto) insertNode(std::shared_ptr<Node>&  a_node, const ObjectList& a_objects) noexcept;
+      decltype(auto) insertNode(NodePtr&  a_node, const ObjectList& a_objects) noexcept;
 
       inline
       decltype(auto) setToRegularNode() noexcept;

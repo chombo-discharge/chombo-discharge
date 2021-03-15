@@ -87,7 +87,7 @@ decltype(auto) NodeT<Obj, BV>::setToRegularNode() noexcept {
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::computeBoundingVolume(const BVConstructor<Obj, BV>& bvFunction) noexcept {
+decltype(auto) NodeT<Obj, BV>::computeBoundingVolume(const BVConstructor& bvFunction) noexcept {
   m_bv = bvFunction(m_objects);
 }
 
@@ -171,61 +171,29 @@ decltype(auto) NodeT<Obj, BV>::getObjects() const noexcept {
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::topDownSortAndPartitionObjects(SortingFunction<Obj>   sortingFunc,
-							      CostFunction<Obj>      costFunc,
-							      const StopFunction<Obj, BV>&  stopFunc,
-							      const BVConstructor<Obj, BV>& bvFunc) noexcept -> void {
+decltype(auto) NodeT<Obj, BV>::topDownSortAndPartitionObjects(const StopFunction&      a_stopFunc,
+							      const PartitionFunction& a_partFunc,
+							      const BVConstructor&     a_bvFunc) noexcept -> void {
 
-  //  const bool stopSplitting = stopFunc(m_objects, m_depth);
-  const bool stopSplitting = stopFunc(*this);
+  //  const bool stopSplitting = a_stopFunc(m_objects, m_depth);
+  //const bool splitThisNode = !(a_stopFunc(*this));
+  const bool stopSplitting = a_stopFunc(*this);
 
-  if(procID() == 0){
-    std::cout << "my data size = " << m_objects.size() << std::endl;
-  }
-
-  this->computeBoundingVolume(bvFunc);
-
+  this->computeBoundingVolume(a_bvFunc);
+  
   if(!stopSplitting){
-    int splitDir     = 0;
-    int splitIndex   = 0;
-    double splitCost = std::numeric_limits<double>::max();
 
-    // Sorting lambda, captures spatial direction in which objects are sorted. 
-    int dir = 0;
-    auto comp = [sortingFunc, dir](const std::shared_ptr<Obj>& t1, const std::shared_ptr<Obj>& t2) {
-      return sortingFunc(*t1, *t2, dir);
-    };
+    const int splitIndex = a_partFunc(*this);
 
-
-    // Determine in which spatial direction we partition the objects. 
-    for (dir = 0; dir < 3; dir++){
-
-      // Sort objects and compute a splitting direction and cost
-      std::sort(m_objects.begin(), m_objects.end(), comp); 
-
-      const std::pair<double, int> costAndIndex = costFunc(m_objects, dir);
-
-      if(costAndIndex.first < splitCost){
-	splitDir = dir;
-      }
-    }
-
-    // Direction has been determined, partition objects along given direction. 
-    dir = splitDir;
-    std::sort(m_objects.begin(), m_objects.end(), comp);
-    const std::pair<double, int> costAndIndex = costFunc(m_objects, dir);
-    splitIndex = costAndIndex.second;
-
-
-    // Create the left and right nodes and move further down the tree. 
-    ObjectList lData(m_objects.begin(), m_objects.begin() + splitIndex);
-    ObjectList rData(m_objects.begin() + splitIndex+1, m_objects.end());
+    // Create the left and right nodes and move further down the tree.
+    ObjectList lData(m_objects.begin(), m_objects.begin() + splitIndex+1);
+    ObjectList rData(m_objects.begin() + splitIndex + 1, m_objects.end());
 
     this->insertNode(m_left,  lData);
     this->insertNode(m_right, rData);
 
-    m_left->topDownSortAndPartitionObjects(sortingFunc, costFunc, stopFunc, bvFunc);
-    m_right->topDownSortAndPartitionObjects(sortingFunc, costFunc, stopFunc, bvFunc);
+    m_left->topDownSortAndPartitionObjects(a_stopFunc, a_partFunc, a_bvFunc);
+    m_right->topDownSortAndPartitionObjects(a_stopFunc, a_partFunc, a_bvFunc);
 
     this->setToRegularNode();
   }
