@@ -55,7 +55,7 @@ namespace dcel {
 
     BoundingSphereT();
     BoundingSphereT(const BoundingSphereT& a_other);
-    BoundingSphereT(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_alg);
+    BoundingSphereT(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_alg = BoundingVolumeAlgorithm::Ritter);
     ~BoundingSphereT();
 
     inline

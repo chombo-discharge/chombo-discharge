@@ -111,18 +111,18 @@ namespace dcel {
       decltype(auto) getSignedDistanceToPoint(const Vec3& a_x0) const noexcept;
 
       inline
-      decltype(auto) getBoundingVolume() noexcept;
-
-      inline
-      decltype(auto) getBoundingVolume() const noexcept;
-
-      inline
       decltype(auto) getObjects() noexcept;
 
       inline
       decltype(auto) getObjects() const noexcept;
 
-    protected:
+      inline
+      decltype(auto) getLeafData() const noexcept -> ObjectList;
+
+      inline
+      decltype(auto) signedDistance(const Vec3& a_point, const double a_shorterThanThisDistance) const noexcept;
+
+      //    protected:
 
       BV m_bv;
 
@@ -141,6 +141,15 @@ namespace dcel {
 
       inline
       decltype(auto) setToRegularNode() noexcept;
+
+      inline
+      decltype(auto) getBoundingVolume() noexcept;
+
+      inline
+      decltype(auto) getBoundingVolume() const noexcept;
+
+      inline
+      decltype(auto) getMinSignedDistanceToPointCandidates(const Vec3& a_point, const double a_shorterThanThisDistance) const noexcept -> ObjectList;
       
     };
   }

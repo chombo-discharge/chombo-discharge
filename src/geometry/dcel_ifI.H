@@ -19,7 +19,7 @@ StopFunctionT<faceT<T>, BV> dcel_if<T, BV>::defaultStopFunction = [](const NodeT
   const auto& objects = a_node.getObjects();
   const int depth     = a_node.getDepth();
 
-  return objects.size() <= 4 || depth > 5;
+  return objects.size() < 2;
 };
 
 template <class T, class BV>
@@ -49,8 +49,17 @@ PartitionFunctionT<faceT<T>, BV> dcel_if<T, BV>::defaultPartitionFunction = [](N
   Vec3T<T> maxCorner = objects.front()->getCentroid();
 
   for(const auto& f : objects){
+#if 1 // Debug
+    for (int dir = 0; dir < 3; dir++){
+      const auto cDir = f->getCentroid()[dir];
+
+      if(cDir < minCorner[dir] ) minCorner[dir] = cDir;
+      if(cDir > maxCorner[dir] ) maxCorner[dir] = cDir;
+    }
+#else
     minCorner = std::min(minCorner, f->getCentroid());
     maxCorner = std::max(maxCorner, f->getCentroid());
+#endif
   }
 
   const Vec3T<T> delta = maxCorner - minCorner;
@@ -77,6 +86,7 @@ dcel_if<T, BV>::dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipIn
 template <class T, class BV>
 dcel_if<T, BV>::dcel_if(const dcel_if& a_object){
   m_mesh       = a_object.m_mesh;
+  m_root       = a_object.m_root;
   m_flipInside = a_object.m_flipInside;
 }
 
@@ -89,12 +99,20 @@ template <class T, class BV>
 Real dcel_if<T, BV>::value(const RealVect& a_point) const {
   
   Vec3 p(a_point[0], a_point[1], a_point[2]);
-  
-  T retval = m_mesh->signedDistance(p); // dcel::mesh can return either positive or negative for outside. 
+  Vec3T<double> p2(a_point[0], a_point[1], a_point[2]);
+
+  //  T retval = m_mesh->signedDistance(p); // dcel::mesh can return either positive or negative for outside.
+
+  double distSoFar = std::numeric_limits<double>::max();
+  double retval = m_root->signedDistance(p2, distSoFar);
+
+  //  const auto candidates = m_root->getMinSignedDistanceToPointCandidates(p2);
   
   if(m_flipInside){
     retval = -retval;
   }
+
+  
 
   return Real(retval);
 }
@@ -113,9 +131,9 @@ decltype(auto) dcel_if<T, BV>::buildBVH(const StopFunctionT<face, BV>&      stop
   m_root = std::make_shared<Node>(m_mesh->getFaces());
   m_root->setDepth(0);
   m_root->setNodeType(BVH::NodeType::Leaf);
-  //  m_root->computeBoundingVolume(bvFunc);
   
   m_root->topDownSortAndPartitionObjects(stopFunc, partFunc, bvFunc);
+
 }
 
 #endif

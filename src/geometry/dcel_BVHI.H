@@ -210,4 +210,79 @@ decltype(auto) NodeT<Obj, BV>::insertNode(NodePtr& a_node, const ObjectList& a_o
   a_node->setDepth(m_depth+1);
 }
 
+template <class Obj, class BV>
+inline
+decltype(auto) NodeT<Obj, BV>::getLeafData() const noexcept -> ObjectList {
+
+  auto objects = m_objects;
+
+  if(m_nodeType == NodeType::Regular){
+    const auto leftObjects  = m_left->getLeafData();
+    const auto rightObjects = m_right->getLeafData();
+
+    objects.insert(objects.end(), leftObjects.begin(),  leftObjects.end());
+    objects.insert(objects.end(), rightObjects.begin(), rightObjects.end());
+  }
+
+  return objects;
+}
+
+template <class Obj, class BV>
+inline
+decltype(auto) NodeT<Obj, BV>::signedDistance(const Vec3& a_point, const double a_shorterThanThisDistance) const noexcept {
+  ObjectList candidates = this->getMinSignedDistanceToPointCandidates(a_point, a_shorterThanThisDistance);
+
+  double minDist = (double) candidates.front()->signedDistance(a_point);
+
+  for (const auto& c : candidates){
+    double curDist = (double) c->signedDistance(a_point);
+
+    if(std::abs(curDist) < std::abs(minDist)){
+      minDist = curDist;
+    }
+  }
+    
+  return minDist;
+}
+
+template <class Obj, class BV>
+inline
+decltype(auto) NodeT<Obj, BV>::getMinSignedDistanceToPointCandidates(const Vec3& a_point, const double a_shorterThanThisDistance) const noexcept -> ObjectList {
+
+  auto cand = m_objects;
+
+  if(m_nodeType == NodeType::Regular){
+    
+    const BV& bvL = m_left->getBoundingVolume();
+    const BV& bvR = m_right->getBoundingVolume();
+    
+    const auto minL = (double) std::abs(bvL.getSignedMinDistanceToPoint(a_point));
+    const auto maxL = (double) std::abs(bvL.getUnsignedMaxDistanceToPoint(a_point));
+
+    const auto minR = (double) std::abs(bvR.getSignedMinDistanceToPoint(a_point));
+    const auto maxR = (double) std::abs(bvR.getUnsignedMaxDistanceToPoint(a_point));
+
+    const bool pruneL = (maxR < minL) || (minL > a_shorterThanThisDistance); // We know that the object is closer than a_shorterThanThisDistance
+    const bool pruneR = (maxL < minR) || (minR > a_shorterThanThisDistance);
+    
+    const bool searchL = !pruneL;
+    const bool searchR = !pruneR;
+
+    //    const double nextShorter = std::min(a_shorterThanThisDistance, std::min(minL, minR));
+    double nextShorter = std::min(a_shorterThanThisDistance, std::min(maxL, maxR));
+    
+    if(searchL){
+      const auto lcand = m_left->getMinSignedDistanceToPointCandidates(a_point, nextShorter);
+      cand.insert(cand.end(), lcand.begin(), lcand.end());
+    }
+    
+    if (searchR){
+      const auto rcand = m_right->getMinSignedDistanceToPointCandidates(a_point, nextShorter);
+      cand.insert(cand.end(), rcand.begin(), rcand.end());
+    }
+  }
+  
+  return cand;
+}
+
 #endif
