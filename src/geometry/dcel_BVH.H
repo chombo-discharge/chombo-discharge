@@ -16,17 +16,17 @@
 
 namespace dcel {
 
-  template <class T>
-  using SortingFunction = std::function<bool(const T&, const T&, const int)>;
+  template <class Obj>
+  using SortingFunction = std::function<bool(const Obj&, const Obj&, const int)>;
 
-  template <class T>
-  using CostFunction = std::function<std::pair<double, int>(const std::vector<std::shared_ptr<T> >&, const int)>;
+  template <class Obj>
+  using CostFunction = std::function<std::pair<double, int>(const std::vector<std::shared_ptr<Obj> >&, const int)>;
 
-  template <class T>
-  using StopFunction = std::function<bool(const std::vector<std::shared_ptr<T> >&, const int)>;
+  template <class Obj>
+  using StopFunction = std::function<bool(const std::vector<std::shared_ptr<Obj> >&, const int)>;
 
-  template <class T, class BV>
-  using BVConstructor = std::function<BV(const std::vector<std::shared_ptr<T> >&)>;
+  template <class Obj, class BV>
+  using BVConstructor = std::function<BV(const std::vector<std::shared_ptr<Obj> >&)>;
   
   namespace BVH {
 
@@ -34,17 +34,18 @@ namespace dcel {
       Regular,
       Leaf,
     };
-        
-    template <class T, class BV>
+
+    // Obj is the object type you want to enclose, BV is the bounding volume you use for it. 
+    template <class Obj, class BV>
     class NodeT {
     public:
 
       using Vec3 = Vec3T<double>;
-      using Node = NodeT<T, BV>;
+      using Node = NodeT<Obj, BV>;
 
       NodeT();
       NodeT(std::shared_ptr<Node>& a_parent);
-      NodeT(std::vector<std::shared_ptr<T> >& a_data);
+      NodeT(std::vector<std::shared_ptr<Obj> >& a_data);
       ~NodeT();
 
       inline
@@ -63,16 +64,16 @@ namespace dcel {
       decltype(auto) setDepth(const int a_depth) noexcept;
 
       inline
-      decltype(auto) setObjects(const std::vector<std::shared_ptr<T> >& a_data) noexcept;
+      decltype(auto) setObjects(const std::vector<std::shared_ptr<Obj> >& a_data) noexcept;
 
       inline
-      decltype(auto) computeBoundingVolume(BVConstructor<T, BV> bvFunction) noexcept;
+      decltype(auto) computeBoundingVolume(const BVConstructor<Obj, BV> bvFunction) noexcept;
 
       inline
-      decltype(auto) topDownSortAndPartitionObjects(SortingFunction<T>   sortingFunc,
-						    CostFunction<T>      costFunc,
-						    StopFunction<T>      stopFunc,
-						    BVConstructor<T, BV> bvFunc) noexcept -> void;
+      decltype(auto) topDownSortAndPartitionObjects(SortingFunction<Obj>   sortingFunc,
+						    CostFunction<Obj>      costFunc,
+						    StopFunction<Obj>      stopFunc,
+						    BVConstructor<Obj, BV> bvFunc) noexcept -> void;
 
       inline
       decltype(auto) getParent() noexcept;
@@ -121,11 +122,18 @@ namespace dcel {
 
       int m_depth;
       
-      std::vector<std::shared_ptr<T> > m_objects;
+      std::vector<std::shared_ptr<Obj> > m_objects;
 
       std::shared_ptr<Node> m_parent;
       std::shared_ptr<Node> m_left;
       std::shared_ptr<Node> m_right;
+
+      inline
+      decltype(auto) insertNode(std::shared_ptr<Node>&  a_node, const std::vector<std::shared_ptr<Obj> >& a_objects) noexcept;
+
+      inline
+      decltype(auto) setToRegularNode() noexcept;
+      
     };
   }
 }
