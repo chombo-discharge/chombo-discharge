@@ -16,6 +16,7 @@
 #include <BaseIF.H>
 
 using namespace dcel;
+using namespace dcel::BVH;
 
 template <class T, class BV>
 class dcel_if : public BaseIF {
@@ -29,8 +30,9 @@ public:
 
   static SortingFunction<face>   defaultSortingFunction;
   static CostFunction<face>      defaultCostFunction;
-  static StopFunction<face>      defaultStopFunction;
+  static StopFunction<face, BV>  defaultStopFunction;
   static BVConstructor<face, BV> defaultBVConstructor;
+
 
   dcel_if() = delete;
 
@@ -45,7 +47,7 @@ public:
   inline
   decltype(auto) buildBVH(SortingFunction<face>   sortFunc = defaultSortingFunction,
 			  CostFunction<face>      costFunc = defaultCostFunction,
-			  StopFunction<face>      stopFunc = defaultStopFunction,
+			  StopFunction<face, BV>  stopFunc = defaultStopFunction,
 			  BVConstructor<face, BV> bvFunc   = defaultBVConstructor) noexcept;
 
 protected:

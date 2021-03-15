@@ -25,9 +25,12 @@ CostFunction<faceT<T> > dcel_if<T, BV>::defaultCostFunction = [](const std::vect
 };
 
 template <class T, class BV>
-StopFunction<faceT<T> > dcel_if<T, BV>::defaultStopFunction = [](const std::vector<std::shared_ptr<faceT<T> > >& a_objects, const int a_depth){
-  if(a_depth > 0) std::cout << "stopping because depth > 0" << std::endl;
-  return a_depth>0;
+StopFunction<faceT<T>, BV> dcel_if<T, BV>::defaultStopFunction = [](const NodeT<faceT<T>, BV>& a_node){
+  const auto& objects = a_node.getObjects();
+  const auto& depth   = a_node.getDepth();
+  
+  if(depth > 0) std::cout << "stopping because depth > 0" << std::endl;
+  return depth>0;
   //  return (a_objects.size() < 5) || a_depth > 0;
 };
 
@@ -84,7 +87,7 @@ template <class T, class BV>
 inline
 decltype(auto) dcel_if<T, BV>::buildBVH(SortingFunction<face>   sortFunc,
 					CostFunction<face>      costFunc,
-					StopFunction<face>      stopFunc,
+					StopFunction<face, BV>  stopFunc,
 					BVConstructor<face, BV> bvFunc) noexcept {
   
   m_root = std::make_shared<Node>(m_mesh->getFaces());

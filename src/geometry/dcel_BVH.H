@@ -15,20 +15,25 @@
 #include <functional>
 
 namespace dcel {
-
-  template <class Obj>
-  using SortingFunction = std::function<bool(const Obj&, const Obj&, const int)>;
-
-  template <class Obj>
-  using CostFunction = std::function<std::pair<double, int>(const std::vector<std::shared_ptr<Obj> >&, const int)>;
-
-  template <class Obj>
-  using StopFunction = std::function<bool(const std::vector<std::shared_ptr<Obj> >&, const int)>;
-
-  template <class Obj, class BV>
-  using BVConstructor = std::function<BV(const std::vector<std::shared_ptr<Obj> >&)>;
-  
   namespace BVH {
+
+    template <class Obj, class BV>
+    class NodeT;
+
+    template <class Obj>
+    using SortingFunction = std::function<bool(const Obj&, const Obj&, const int)>;
+
+    template <class Obj>
+    using CostFunction = std::function<std::pair<double, int>(const std::vector<std::shared_ptr<Obj> >&, const int)>;
+
+    template <class Obj>
+    using SortAndPartitionFunction = std::function<int(const std::vector<shared_ptr<Obj> >&)>;
+
+    template <class Obj, class BV>
+    using StopFunction = std::function<bool(const NodeT<Obj, BV>&)>;
+
+    template <class Obj, class BV>
+    using BVConstructor = std::function<BV(const std::vector<std::shared_ptr<Obj> >&)>;
 
     enum class NodeType {
       Regular,
@@ -72,7 +77,7 @@ namespace dcel {
       inline
       decltype(auto) topDownSortAndPartitionObjects(SortingFunction<Obj>   sortingFunc,
 						    CostFunction<Obj>      costFunc,
-						    StopFunction<Obj>      stopFunc,
+						    StopFunction<Obj, BV>  stopFunc,
 						    BVConstructor<Obj, BV> bvFunc) noexcept -> void;
 
       inline

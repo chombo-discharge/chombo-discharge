@@ -173,10 +173,11 @@ template <class Obj, class BV>
 inline
 decltype(auto) NodeT<Obj, BV>::topDownSortAndPartitionObjects(SortingFunction<Obj>   sortingFunc,
 							      CostFunction<Obj>      costFunc,
-							      StopFunction<Obj>      stopFunc,
+							      StopFunction<Obj, BV>  stopFunc,
 							      BVConstructor<Obj, BV> bvFunc) noexcept -> void {
 
-  const bool stopSplitting = stopFunc(m_objects, m_depth);
+  //  const bool stopSplitting = stopFunc(m_objects, m_depth);
+  const bool stopSplitting = stopFunc(*this);
 
   if(procID() == 0){
     std::cout << "my data size = " << m_objects.size() << std::endl;
@@ -240,9 +241,5 @@ decltype(auto) NodeT<Obj, BV>::insertNode(std::shared_ptr<Node>& a_node, const s
   a_node->setNodeType(NodeType::Leaf);
   a_node->setDepth(m_depth+1);
 }
-
-
-
-
 
 #endif
