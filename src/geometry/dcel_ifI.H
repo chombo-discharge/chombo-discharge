@@ -124,7 +124,6 @@ decltype(auto) dcel_if<T, BV>::buildBVH(const StopFunctionT<face, BV>&      stop
   m_root->setNodeType(BVH::NodeType::Leaf);
   
   m_root->topDownSortAndPartitionObjects(stopFunc, partFunc, bvFunc);
-
 }
 
 #endif

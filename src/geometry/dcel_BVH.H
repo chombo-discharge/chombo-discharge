@@ -58,19 +58,47 @@ namespace dcel {
       ~NodeT();
 
       inline
-      decltype(auto) setParent(const NodePtr& a_parent) noexcept;
-
-      inline
-      decltype(auto) setLeft(const NodePtr& a_left) noexcept;
-
-      inline
-      decltype(auto) setRight(const NodePtr& a_right) noexcept;
-
-      inline
       decltype(auto) setNodeType(const NodeType a_nodeType) noexcept;
 
       inline
       decltype(auto) setDepth(const int a_depth) noexcept;
+
+      inline
+      decltype(auto) topDownSortAndPartitionObjects(const StopFunction&      a_stopFunc,
+						    const PartitionFunction& a_partFunc,
+						    const BVConstructor&     a_bvFunc) noexcept -> void;
+
+      inline
+      decltype(auto) getDepth() const noexcept;
+
+      inline
+      decltype(auto) getObjects() noexcept;
+
+      inline
+      decltype(auto) getObjects() const noexcept;
+
+      inline
+      decltype(auto) signedDistance(const Vec3& a_point, double& a_pruneDistance) const noexcept;
+
+    protected:
+
+      BV m_bv;
+
+      NodeType m_nodeType;
+
+      int m_depth;
+      
+      ObjectList m_objects;
+
+      NodePtr m_parent;
+      NodePtr m_left;
+      NodePtr m_right;
+
+      inline
+      decltype(auto) insertNode(NodePtr&  a_node, const ObjectList& a_objects) noexcept;
+
+      inline
+      decltype(auto) setToRegularNode() noexcept;
 
       inline
       decltype(auto) setObjects(const ObjectList& a_data) noexcept;
@@ -79,9 +107,10 @@ namespace dcel {
       decltype(auto) computeBoundingVolume(const BVConstructor& bvFunction) noexcept;
 
       inline
-      decltype(auto) topDownSortAndPartitionObjects(const StopFunction&      a_stopFunc,
-						    const PartitionFunction& a_partFunc,
-						    const BVConstructor&     a_bvFunc) noexcept -> void;
+      decltype(auto) getBoundingVolume() noexcept;
+
+      inline
+      decltype(auto) getBoundingVolume() const noexcept;
 
       inline
       decltype(auto) getParent() noexcept;
@@ -103,53 +132,27 @@ namespace dcel {
 
       inline
       decltype(auto) getNodeType() const noexcept;
+
+      inline
+      decltype(auto) getDistanceToBV(const Vec3& a_x0) const noexcept;
+
+      inline
+      decltype(auto) getDistanceToData(const Vec3& a_x0) const noexcept;
       
-      inline
-      decltype(auto) getDepth() const noexcept;
-
-      inline
-      decltype(auto) getSignedDistanceToPoint(const Vec3& a_x0) const noexcept;
-
-      inline
-      decltype(auto) getObjects() noexcept;
-
-      inline
-      decltype(auto) getObjects() const noexcept;
-
       inline
       decltype(auto) getLeafData() const noexcept -> ObjectList;
 
       inline
-      decltype(auto) signedDistance(const Vec3& a_point, double& a_pruneDistance) const noexcept;
-
-      //    protected:
-
-      BV m_bv;
-
-      NodeType m_nodeType;
-
-      int m_depth;
-      
-      ObjectList m_objects;
-
-      NodePtr m_parent;
-      NodePtr m_left;
-      NodePtr m_right;
+      decltype(auto) pruneTree(const Vec3& a_point, double& a_pruneDistance) const noexcept -> ObjectList;
 
       inline
-      decltype(auto) insertNode(NodePtr&  a_node, const ObjectList& a_objects) noexcept;
+      decltype(auto) setParent(const NodePtr& a_parent) noexcept;
 
       inline
-      decltype(auto) setToRegularNode() noexcept;
+      decltype(auto) setLeft(const NodePtr& a_left) noexcept;
 
       inline
-      decltype(auto) getBoundingVolume() noexcept;
-
-      inline
-      decltype(auto) getBoundingVolume() const noexcept;
-
-      inline
-      decltype(auto) getMinSignedDistanceToPointCandidates(const Vec3& a_point, double& a_pruneDistance) const noexcept -> ObjectList;
+      decltype(auto) setRight(const NodePtr& a_right) noexcept;
       
     };
   }

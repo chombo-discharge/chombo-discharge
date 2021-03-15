@@ -141,8 +141,22 @@ decltype(auto) NodeT<Obj, BV>::getDepth() const noexcept {
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getSignedDistanceToPoint(const Vec3& a_x0) const noexcept {
-  return m_bv.getSignedDistanceToPoint(a_x0);
+decltype(auto) NodeT<Obj, BV>::getDistanceToBV(const Vec3& a_x0) const noexcept {
+  return m_bv.getDistance(a_x0);
+}
+
+template <class Obj, class BV>
+inline
+decltype(auto) NodeT<Obj, BV>::getDistanceToData(const Vec3& a_x0) const noexcept {
+  double ret = std::numeric_limits<double>::infinity();
+
+  for (const auto& o : m_objects){
+    const auto cur = std::abs(o->unsignedDistance2(a_x0));
+
+    ret = std::min(cur, ret);
+  }
+
+  return sqrt(ret);
 }
 
 template <class Obj, class BV>
@@ -214,9 +228,12 @@ template <class Obj, class BV>
 inline
 decltype(auto) NodeT<Obj, BV>::getLeafData() const noexcept -> ObjectList {
 
-  auto objects = m_objects;
+  ObjectList objects = ObjectList();
 
-  if(m_nodeType == NodeType::Regular){
+  if(m_nodeType == NodeType::Leaf){
+    objects = m_objects;
+  }
+  else{
     const auto leftObjects  = m_left->getLeafData();
     const auto rightObjects = m_right->getLeafData();
 
@@ -230,9 +247,7 @@ decltype(auto) NodeT<Obj, BV>::getLeafData() const noexcept -> ObjectList {
 template <class Obj, class BV>
 inline
 decltype(auto) NodeT<Obj, BV>::signedDistance(const Vec3& a_point, double& a_pruneDistance) const noexcept {
-  ObjectList candidates = this->getMinSignedDistanceToPointCandidates(a_point, a_pruneDistance);
-
-  //  pout() << candidates.size() << endl;
+  ObjectList candidates = this->pruneTree(a_point, a_pruneDistance);
 
   double minDist = std::numeric_limits<double>::infinity();
 
@@ -249,43 +264,38 @@ decltype(auto) NodeT<Obj, BV>::signedDistance(const Vec3& a_point, double& a_pru
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::getMinSignedDistanceToPointCandidates(const Vec3& a_point, double& a_pruneDistance) const noexcept -> ObjectList {
+decltype(auto) NodeT<Obj, BV>::pruneTree(const Vec3& a_point, double& a_pruneDistance) const noexcept -> ObjectList {
 
   ObjectList cand = ObjectList();
 
   if(m_nodeType == NodeType::Leaf){
-    bool returnObjects = false;
-    
-    for (const auto& O : m_objects){
-      const double cur = O->signedDistance(a_point);
+    const double distanceToData = this->getDistanceToData(a_point);
 
-      if(std::abs(cur) < a_pruneDistance){
-	a_pruneDistance = std::abs(cur);
-	returnObjects   = true;
-      }
-    }
-
-    if(returnObjects){
+    if(distanceToData < a_pruneDistance){
       cand = m_objects;
+      a_pruneDistance = distanceToData;
     }
   }
   else {
-    const BV& bvL = m_left ->getBoundingVolume();
-    const BV& bvR = m_right->getBoundingVolume();
-    
-    const double minL = std::abs(bvL.getDistance(a_point));
-    const double minR = std::abs(bvR.getDistance(a_point));
+    const double minL = m_left ->getDistanceToBV(a_point);
+    const double minR = m_right->getDistanceToBV(a_point);
 
-    const bool pruneLeft = (minL > a_pruneDistance);
-    if(!pruneLeft){
-      const ObjectList lcand = m_left->getMinSignedDistanceToPointCandidates(a_point, a_pruneDistance);
-      cand.insert(cand.end(), lcand.begin(), lcand.end());
+    const bool leftFirst = minL < minR;
+    
+    std::shared_ptr<NodeT<Obj, BV> > first  = leftFirst ? m_left  : m_right;
+    std::shared_ptr<NodeT<Obj, BV> > second = leftFirst ? m_right : m_left;
+
+    const double minFirst  = std::min(minL, minR);
+    const double minSecond = std::max(minL, minR);
+
+    if(minFirst < a_pruneDistance){
+      const ObjectList branchCand = first->pruneTree(a_point, a_pruneDistance);
+      cand.insert(cand.end(), branchCand.begin(), branchCand.end());
     }
 
-    const bool pruneRight = (minR > a_pruneDistance);
-    if (!pruneRight){
-      const ObjectList rcand = m_right->getMinSignedDistanceToPointCandidates(a_point, a_pruneDistance);
-      cand.insert(cand.end(), rcand.begin(), rcand.end());
+    if (minSecond < a_pruneDistance){
+      const ObjectList branchCand = second->pruneTree(a_point, a_pruneDistance);
+      cand.insert(cand.end(), branchCand.begin(), branchCand.end());
     }
   }
   
