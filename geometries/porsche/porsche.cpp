@@ -16,9 +16,9 @@
 
 using namespace dcel;
 
-using mesh = meshT<double>;
-using AABB = AABBT<double>;
-using Sphere = BoundingSphereT<double>;
+using mesh   = meshT<float>;
+using AABB   = AABBT<float>;
+using Sphere = BoundingSphereT<float>;
 
 using BV = Sphere;
 
@@ -34,7 +34,7 @@ porsche::porsche(){
   auto m = std::make_shared<mesh>();
 
   // Read mesh from file and reconcile. 
-  parser::PLY<double>::readASCII(*m, filename);
+  parser::PLY<float>::readASCII(*m, filename);
   m->sanityCheck();
   m->reconcile(VertexNormalWeight::Angle);
   m->setSearchAlgorithm(SearchAlgorithm::Direct2);
@@ -42,7 +42,7 @@ porsche::porsche(){
 
 
   // Creat the object and build the BVH. 
-  RefCountedPtr<dcel_if<double, BV> > bif = RefCountedPtr<dcel_if<double, BV> > (new dcel_if<double, BV>(m,true));
+  RefCountedPtr<dcel_if<float, BV> > bif = RefCountedPtr<dcel_if<float, BV> > (new dcel_if<float, BV>(m,true));
 
   bif->buildBVH();
 

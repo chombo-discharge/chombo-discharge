@@ -90,12 +90,12 @@ template <class T, class BV>
 Real dcel_if<T, BV>::value(const RealVect& a_point) const {
   
   Vec3 p(a_point[0], a_point[1], a_point[2]);
-  Vec3T<double> p2(a_point[0], a_point[1], a_point[2]);
+  Vec3T<float> p2(a_point[0], a_point[1], a_point[2]);
 
   //  T retval = m_mesh->signedDistance(p); // dcel::mesh can return either positive or negative for outside.
 
-  double distSoFar = std::numeric_limits<double>::infinity();
-  double retval = m_root->signedDistance(p2, distSoFar);
+  float distSoFar = std::numeric_limits<float>::infinity();
+  float retval = m_root->signedDistance(p2, distSoFar);
 
   //  const auto candidates = m_root->getMinSignedDistanceToPointCandidates(p2);
   

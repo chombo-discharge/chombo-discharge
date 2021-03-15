@@ -48,13 +48,17 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) BoundingVolumeT<T>::isPointInside(const Vec3& a_x0) const {
-    return this->getDistance(a_x0) < 0.0;
+    constexpr T zero = 0.0;
+    
+    return this->getDistance(a_x0) < zero;
   }
 
   template <class T>
   inline
   decltype(auto) BoundingVolumeT<T>::isPointOutside(const Vec3& a_x0) const {
-    return this->getDistance(a_x0) > 0.0;
+    constexpr T zero = 0.0;
+    
+    return this->getDistance(a_x0) > zero;
   }
 
   template <class T>
@@ -191,7 +195,7 @@ namespace dcel {
   T BoundingSphereT<T>::getDistance(const Vec3& a_x0) const noexcept {
     constexpr T zero = 0.0;
 
-    return std::max(0.0, (a_x0-m_center).length() - m_radius);
+    return std::max(zero, (a_x0-m_center).length() - m_radius);
   }
 
   template <class T>
@@ -292,12 +296,12 @@ namespace dcel {
   template <class T>
   inline
   T AABBT<T>::getDistance(const Vec3& a_point) const noexcept {
+    constexpr T zero = 0.0;
+    
     const Vec3 delta = Vec3(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
 			    std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
 			    std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));
 
-    constexpr T zero = 0.0;
-    
     const T retval =  std::min(zero, delta[delta.maxDir(false)]) + std::max(Vec3::zero(), delta).length(); // Negative inside and positive outside. 
   
     return std::max(zero, retval);

@@ -26,8 +26,9 @@ NodeT<Obj, BV>::NodeT() {
 template <class Obj, class BV>
 inline
 NodeT<Obj, BV>::NodeT(NodePtr& a_parent) : NodeT<Obj, BV>() {
-  m_parent = a_parent;
-  m_depth  = a_parent.m_depth + 1;
+  m_parent   = a_parent;
+  m_depth    = a_parent.m_depth + 1;
+  m_nodeType = NodeType::Leaf;
 }
 
 template <class Obj, class BV>
@@ -148,7 +149,7 @@ decltype(auto) NodeT<Obj, BV>::getDistanceToBV(const Vec3& a_x0) const noexcept 
 template <class Obj, class BV>
 inline
 decltype(auto) NodeT<Obj, BV>::getDistanceToData(const Vec3& a_x0) const noexcept {
-  double ret = std::numeric_limits<double>::infinity();
+  float ret = std::numeric_limits<float>::infinity();
 
   for (const auto& o : m_objects){
     const auto cur = std::abs(o->unsignedDistance2(a_x0));
@@ -246,13 +247,13 @@ decltype(auto) NodeT<Obj, BV>::getLeafData() const noexcept -> ObjectList {
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::signedDistance(const Vec3& a_point, double& a_pruneDistance) const noexcept {
+decltype(auto) NodeT<Obj, BV>::signedDistance(const Vec3& a_point, float& a_pruneDistance) const noexcept {
   ObjectList candidates = this->pruneTree(a_point, a_pruneDistance);
 
-  double minDist = std::numeric_limits<double>::infinity();
+  float minDist = std::numeric_limits<float>::infinity();
 
   for (const auto& c : candidates){
-    const double curDist = (double) c->signedDistance(a_point);
+    const float curDist = (float) c->signedDistance(a_point);
 
     if(std::abs(curDist) < std::abs(minDist)){
       minDist = curDist;
@@ -264,12 +265,12 @@ decltype(auto) NodeT<Obj, BV>::signedDistance(const Vec3& a_point, double& a_pru
 
 template <class Obj, class BV>
 inline
-decltype(auto) NodeT<Obj, BV>::pruneTree(const Vec3& a_point, double& a_pruneDistance) const noexcept -> ObjectList {
+decltype(auto) NodeT<Obj, BV>::pruneTree(const Vec3& a_point, float& a_pruneDistance) const noexcept -> ObjectList {
 
   ObjectList cand = ObjectList();
 
   if(m_nodeType == NodeType::Leaf){
-    const double distanceToData = this->getDistanceToData(a_point);
+    const float distanceToData = this->getDistanceToData(a_point);
 
     if(distanceToData < a_pruneDistance){
       cand = m_objects;
@@ -277,16 +278,16 @@ decltype(auto) NodeT<Obj, BV>::pruneTree(const Vec3& a_point, double& a_pruneDis
     }
   }
   else {
-    const double minL = m_left ->getDistanceToBV(a_point);
-    const double minR = m_right->getDistanceToBV(a_point);
+    const float minL = m_left ->getDistanceToBV(a_point);
+    const float minR = m_right->getDistanceToBV(a_point);
 
     const bool leftFirst = minL < minR;
     
     std::shared_ptr<NodeT<Obj, BV> > first  = leftFirst ? m_left  : m_right;
     std::shared_ptr<NodeT<Obj, BV> > second = leftFirst ? m_right : m_left;
 
-    const double minFirst  = std::min(minL, minR);
-    const double minSecond = std::max(minL, minR);
+    const float minFirst  = std::min(minL, minR);
+    const float minSecond = std::max(minL, minR);
 
     if(minFirst < a_pruneDistance){
       const ObjectList branchCand = first->pruneTree(a_point, a_pruneDistance);

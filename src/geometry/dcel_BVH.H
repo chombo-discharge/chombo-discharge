@@ -20,8 +20,6 @@ namespace dcel {
     template <class Obj, class BV>
     class NodeT;
 
-
-    // These are the new functions.
     template <class Obj, class BV>
     using PartitionFunctionT = std::function<int(NodeT<Obj, BV>&)>;
     
@@ -43,7 +41,7 @@ namespace dcel {
 
       using ObjectList = std::vector<std::shared_ptr<Obj> >;
 
-      using Vec3       = Vec3T<double>;
+      using Vec3       = Vec3T<float>;
       
       using Node       = NodeT<Obj, BV>;
       using NodePtr    = std::shared_ptr<Node>;
@@ -78,7 +76,7 @@ namespace dcel {
       decltype(auto) getObjects() const noexcept;
 
       inline
-      decltype(auto) signedDistance(const Vec3& a_point, double& a_pruneDistance) const noexcept;
+      decltype(auto) signedDistance(const Vec3& a_point, float& a_pruneDistance) const noexcept;
 
     protected:
 
@@ -143,7 +141,7 @@ namespace dcel {
       decltype(auto) getLeafData() const noexcept -> ObjectList;
 
       inline
-      decltype(auto) pruneTree(const Vec3& a_point, double& a_pruneDistance) const noexcept -> ObjectList;
+      decltype(auto) pruneTree(const Vec3& a_point, float& a_pruneDistance) const noexcept -> ObjectList;
 
       inline
       decltype(auto) setParent(const NodePtr& a_parent) noexcept;
