@@ -78,6 +78,9 @@ namespace dcel {
 
     inline
     decltype(auto) unsignedDistance2(const Vec3& a_x0) const noexcept;
+
+    inline
+    decltype(auto) getAllVertexCoordinates() const noexcept;
   
   protected:
     
@@ -115,9 +118,6 @@ namespace dcel {
 
     inline
     decltype(auto) getArea() const noexcept;
-
-    inline
-    decltype(auto) getAllVertexCoordinates() const noexcept;
 
     inline
     decltype(auto) gatherVertices() const noexcept;

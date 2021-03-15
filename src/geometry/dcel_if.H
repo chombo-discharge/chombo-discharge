@@ -17,10 +17,6 @@
 
 using namespace dcel;
 
-
-/*!
-  @brief Class that gets it's value function from a surface tesselation 
-*/
 template <class T, class BV>
 class dcel_if : public BaseIF {
 public:
@@ -31,8 +27,10 @@ public:
   using AABB = dcel::AABBT<T>;
   using Node = dcel::BVH::NodeT<face, BV>;
 
-  static SortingFunctor<face> defaultSortingFunctor;
-  static CostFunctor<face> defaultCostFunctor;
+  static SortingFunction<face>   defaultSortingFunction;
+  static CostFunction<face>      defaultCostFunction;
+  static StopFunction<face>      defaultStopFunction;
+  static BVConstructor<face, BV> defaultBVConstructor;
 
   dcel_if() = delete;
 
@@ -45,7 +43,10 @@ public:
   BaseIF* newImplicitFunction() const override;
 
   inline
-  decltype(auto) buildBVH(SortingFunctor<face> sortFunc = defaultSortingFunctor, CostFunctor<face> costFunc = defaultCostFunctor) noexcept;
+  decltype(auto) buildBVH(SortingFunction<face>   sortFunc = defaultSortingFunction,
+			  CostFunction<face>      costFunc = defaultCostFunction,
+			  StopFunction<face>      stopFunc = defaultStopFunction,
+			  BVConstructor<face, BV> bvFunc   = defaultBVConstructor) noexcept;
 
 protected:
 

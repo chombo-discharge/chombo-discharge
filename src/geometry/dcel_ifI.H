@@ -14,14 +14,34 @@
 using namespace dcel;
 
 template <class T, class BV>
-SortingFunctor<faceT<T>> dcel_if<T, BV>::defaultSortingFunctor = [](const faceT<T>& f1, const faceT<T>& f2, const int dir){
+SortingFunction<faceT<T> > dcel_if<T, BV>::defaultSortingFunction = [](const faceT<T>& f1, const faceT<T>& f2, const int dir){
   return f1.getCentroid()[dir] < f1.getCentroid()[dir];
 };
 
 template <class T, class BV>
-CostFunctor<faceT<T>> dcel_if<T, BV>::defaultCostFunctor = [](const std::vector<std::shared_ptr<faceT<T> > >, const int dir){
-    return std::make_pair(0,dir);
-  };
+CostFunction<faceT<T> > dcel_if<T, BV>::defaultCostFunction = [](const std::vector<std::shared_ptr<faceT<T> > >& a_objects, const int a_dir){
+  //  std::cout << "calling costfunctor" << std::endl;
+  return std::make_pair(0,a_dir);
+};
+
+template <class T, class BV>
+StopFunction<faceT<T> > dcel_if<T, BV>::defaultStopFunction = [](const std::vector<std::shared_ptr<faceT<T> > >& a_objects, const int a_depth){
+  if(a_depth > 0) std::cout << "stopping because depth > 0" << std::endl;
+  return a_depth>0;
+  //  return (a_objects.size() < 5) || a_depth > 0;
+};
+
+template <class T, class BV>
+BVConstructor<faceT<T>, BV> dcel_if<T, BV>::defaultBVConstructor = [](const std::vector<std::shared_ptr<faceT<T> > >& a_objects){
+  std::vector<Vec3T<T>> coordinates;
+
+  for (const auto& f : a_objects){
+    const auto faceCoordinates = f->getAllVertexCoordinates();
+    coordinates.insert(coordinates.end(), faceCoordinates.begin(), faceCoordinates.end());
+  }
+
+  return BV(coordinates);
+};
 
 template <class T, class BV>
 dcel_if<T, BV>::dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside){
@@ -62,11 +82,17 @@ BaseIF* dcel_if<T, BV>::newImplicitFunction() const {
 
 template <class T, class BV>
 inline
-decltype(auto) dcel_if<T, BV>::buildBVH(SortingFunctor<face> sortFunc, CostFunctor<face> costFunc) noexcept {
+decltype(auto) dcel_if<T, BV>::buildBVH(SortingFunction<face>   sortFunc,
+					CostFunction<face>      costFunc,
+					StopFunction<face>      stopFunc,
+					BVConstructor<face, BV> bvFunc) noexcept {
   
   m_root = std::make_shared<Node>(m_mesh->getFaces());
+  m_root->setDepth(0);
+  m_root->setNodeType(BVH::NodeType::Leaf);
+  m_root->computeBoundingVolume(bvFunc);
   
-  m_root->sortAndPartitionObjects(sortFunc, costFunc);
+  m_root->topDownSortAndPartitionObjects(sortFunc, costFunc, stopFunc, bvFunc);
 }
 
 #endif

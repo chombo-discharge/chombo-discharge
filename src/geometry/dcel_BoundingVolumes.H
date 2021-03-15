@@ -42,7 +42,9 @@ namespace dcel {
     inline
     decltype(auto) isPointOutside(const Vec3& a_x0) const;
     
-    virtual T getDistanceToPoint(const Vec3& a_x0) const = 0;
+    virtual T getSignedMinDistanceToPoint(const Vec3& a_x0) const = 0;
+
+    virtual T getUnsignedMaxDistanceToPoint(const Vec3& a_x0) const = 0;
   };
 
   template <class T>
@@ -75,7 +77,10 @@ namespace dcel {
     decltype(auto) getCenter() const noexcept;
 
     inline
-    T getDistanceToPoint(const Vec3& a_x0) const noexcept override;
+    T getSignedMinDistanceToPoint(const Vec3& a_x0) const noexcept override;
+
+    inline
+    T getUnsignedMaxDistanceToPoint(const Vec3& a_x0) const noexcept override;
 
   protected:
 
@@ -105,7 +110,10 @@ namespace dcel {
     decltype(auto) intersects(const AABBT& a_other) const noexcept;
 
     inline
-    T getDistanceToPoint(const Vec3& a_x0) const noexcept override;
+    T getSignedMinDistanceToPoint(const Vec3& a_x0) const noexcept override;
+
+    inline
+    T getUnsignedMaxDistanceToPoint(const Vec3& a_x0) const noexcept override;
 
     inline
     decltype(auto) getLowCorner() noexcept;
