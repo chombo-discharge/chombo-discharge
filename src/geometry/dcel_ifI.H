@@ -93,10 +93,8 @@ Real dcel_if<T, BV>::value(const RealVect& a_point) const {
 
   //  T retval = m_mesh->signedDistance(p); // dcel::mesh can return either positive or negative for outside.
 
-  T distSoFar = std::numeric_limits<float>::infinity();
-  T retval = m_root->signedDistance(p, distSoFar);
-
-  //  const auto candidates = m_root->getMinSignedDistanceToPointCandidates(p2);
+  T pruneDistance = std::numeric_limits<T>::infinity();
+  T retval = m_root->signedDistance(p, pruneDistance);
   
   if(m_flipInside){
     retval = -retval;
@@ -123,6 +121,8 @@ decltype(auto) dcel_if<T, BV>::buildBVH(const StopFunctionT<T, face, BV>&      s
   m_root->setNodeType(BVH::NodeType::Leaf);
   
   m_root->topDownSortAndPartitionObjects(stopFunc, partFunc, bvFunc);
+
+  
 }
 
 #endif

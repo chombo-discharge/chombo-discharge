@@ -16,7 +16,7 @@
 
 using namespace dcel;
 
-using precision = double;
+using precision = float;
 
 using mesh   = meshT<precision>;
 using AABB   = AABBT<precision>;
