@@ -26,6 +26,8 @@ public:
   using mesh  = meshT<T>;
   using face  = faceT<T>;
   using Node  = NodeT<T, face, BV>;
+  using PrimitiveList = BVH::PrimitiveListT<face>;
+  //  using Queue = std::priority_queue<std::pair<T, Node> >;
 
   // Lambdas for interfaceing into dcel_BVH
   static StopFunctionT<T, face, BV>      defaultStopFunction;

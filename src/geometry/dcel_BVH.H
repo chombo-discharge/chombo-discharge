@@ -13,6 +13,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <queue>
 
 namespace dcel {
   namespace BVH {
@@ -20,9 +21,11 @@ namespace dcel {
     template <class T, class P, class BV>
     class NodeT;
 
+    // Implementation of list of primitives. 
     template <class P>
     using PrimitiveListT = std::vector<std::shared_ptr<P> >;
 
+    // Lambdas for partitioning and searching closest distance. 
     template <class T, class P, class BV>
     using PartitionFunctionT = std::function<int(NodeT<T, P, BV>&)>;
     
@@ -33,7 +36,6 @@ namespace dcel {
     using BVConstructorT = std::function<BV(const NodeT<T, P, BV>&)>;
 
     template <class T, class P>
-    //    using DistanceFunctionT = std::function<T(const std::vector<std::shared_ptr<P> >&, const Vec3T<T>& a_point)>;
     using DistanceFunctionT = std::function<T(const PrimitiveListT<P>&, const Vec3T<T>& a_point)>;
 
     enum class NodeType {
@@ -56,6 +58,12 @@ namespace dcel {
       using StopFunction      = StopFunctionT<T, P, BV>;
       using BVConstructor     = BVConstructorT<T, P, BV>;
       using DistanceFunction  = DistanceFunctionT<T, P>;
+
+      using QueueElement = std::pair<T, NodePtr>;
+      using QueueVector  = std::vector<QueueElement>;
+      
+      //      using Queue = std::priority_queue<QueueElement, QueueVector, QueueComparator>;
+
 
       NodeT();
       NodeT(NodePtr& a_parent);
@@ -84,6 +92,9 @@ namespace dcel {
 
       inline
       decltype(auto) pruneBranches(const Vec3& a_point, T& a_closest, const DistanceFunction& a_distFunc) const noexcept -> void;
+
+      inline
+      decltype(auto) pruneQ(const Vec3& a_point, const DistanceFunction& a_distFunc) const noexcept -> void;
 
     protected:
 
@@ -149,6 +160,9 @@ namespace dcel {
 
       inline
       decltype(auto) setRight(const NodePtr& a_right) noexcept;
+
+      inline
+      decltype(auto) pruneQ(double& a_closest, const Vec3& a_point, const DistanceFunction& a_distFunc) const noexcept -> void;
       
     };
   }

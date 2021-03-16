@@ -238,4 +238,20 @@ decltype(auto) NodeT<T, P, BV>::pruneBranches(const Vec3& a_point, T& a_closest,
   }
 }
 
+template <class T, class P, class BV>
+inline
+decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3& a_point, const DistanceFunction& a_distFunc) const noexcept -> void {
+
+  auto QueueComparator = [](const QueueElement& a_q1, const QueueElement& a_q2) {
+    return a_q1.first < a_q2.first;
+  };
+
+  std::priority_queue<QueueElement, QueueVector, decltype(QueueComparator)> Q();
+}
+// template <class T, class P, class BV>
+// inline
+// decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3& a_point, Queue& a_Q, const DistanceFunction& a_distFunc) const noexcept -> void {
+  
+// }
+
 #endif
