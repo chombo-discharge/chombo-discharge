@@ -104,7 +104,7 @@ Real bvh_if<T, BV>::value(const RealVect& a_point) const {
 
   T pruneDistance = std::numeric_limits<T>::infinity();
   
-  m_root->pruneClosest(p, pruneDistance, bvh_if<T, BV>::defaultDistanceFunction);
+  m_root->pruneBranches(p, pruneDistance, bvh_if<T, BV>::defaultDistanceFunction);
 
   if(m_flipInside){
     pruneDistance = -pruneDistance;

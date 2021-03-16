@@ -83,10 +83,7 @@ namespace dcel {
       decltype(auto) getPrimitives() const noexcept;
 
       inline
-      decltype(auto) pruneTree(const Vec3& a_point, T& a_pruneDistance) const noexcept -> PrimitiveList;
-
-      inline
-      decltype(auto) pruneClosest(const Vec3& a_point, T& a_closest, const DistanceFunction& a_distFunc) const noexcept -> void;
+      decltype(auto) pruneBranches(const Vec3& a_point, T& a_closest, const DistanceFunction& a_distFunc) const noexcept -> void;
 
     protected:
 

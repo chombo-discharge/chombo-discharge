@@ -213,7 +213,7 @@ decltype(auto) NodeT<T, P, BV>::getDistanceToBV(const Vec3& a_x0) const noexcept
 
 template <class T, class P, class BV>
 inline
-decltype(auto) NodeT<T, P, BV>::pruneClosest(const Vec3& a_point, T& a_closest, const DistanceFunction& a_distFunc) const noexcept -> void {
+decltype(auto) NodeT<T, P, BV>::pruneBranches(const Vec3& a_point, T& a_closest, const DistanceFunction& a_distFunc) const noexcept -> void {
   if(m_nodeType == NodeType::Leaf){
     const auto primDist = T(a_distFunc(m_primitives, a_point));
 
@@ -233,8 +233,8 @@ decltype(auto) NodeT<T, P, BV>::pruneClosest(const Vec3& a_point, T& a_closest, 
     const auto minFirst  = std::min(minL, minR);
     const auto minSecond = std::max(minL, minR);
 
-    if(minFirst  < std::abs(a_closest)) first ->pruneClosest(a_point, a_closest, a_distFunc);
-    if(minSecond < std::abs(a_closest)) second->pruneClosest(a_point, a_closest, a_distFunc);
+    if(minFirst  < std::abs(a_closest)) first ->pruneBranches(a_point, a_closest, a_distFunc);
+    if(minSecond < std::abs(a_closest)) second->pruneBranches(a_point, a_closest, a_distFunc);
   }
 }
 
