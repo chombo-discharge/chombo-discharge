@@ -92,6 +92,7 @@ Real bvh_if<T, BV>::value(const RealVect& a_point) const {
   
   const auto faces = m_root->pruneTree(p, pruneDistance);
 
+#if 0
   for (const auto& f : faces){
     const T curDist = f->signedDistance(p);
 
@@ -103,6 +104,14 @@ Real bvh_if<T, BV>::value(const RealVect& a_point) const {
   }
 
   return Real(minDist);
+#else
+
+  if(m_flipInside){
+    pruneDistance = -pruneDistance;
+  }
+
+  return Real(pruneDistance);
+#endif
 }
 
 template <class T, class BV>

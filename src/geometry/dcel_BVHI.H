@@ -153,12 +153,18 @@ decltype(auto) NodeT<T, Obj, BV>::getDistanceToData(const Vec3& a_x0) const noex
   T ret = std::numeric_limits<T>::infinity();
 
   for (const auto& o : m_objects){
-    const auto cur = std::abs(o->unsignedDistance2(a_x0));
+    const auto cur = o->signedDistance(a_x0);
 
-    ret = std::min(cur, ret);
+    if(std::abs(cur) < std::abs(ret)){
+      ret = cur;
+    }
+    // const auto cur = std::abs(o->unsignedDistance2(a_x0));
+
+    // ret = std::min(cur, ret);
   }
 
-  return sqrt(ret);
+  return ret;
+  //  return sqrt(ret);
 }
 
 template <class T, class Obj, class BV>
@@ -252,7 +258,7 @@ decltype(auto) NodeT<T, Obj, BV>::pruneTree(const Vec3& a_point, T& a_pruneDista
   if(m_nodeType == NodeType::Leaf){
     const T distanceToData = this->getDistanceToData(a_point);
 
-    if(distanceToData < a_pruneDistance){
+    if(std::abs(distanceToData) < std::abs(a_pruneDistance)){
       cand = m_objects;
       a_pruneDistance = distanceToData;
     }
@@ -269,12 +275,12 @@ decltype(auto) NodeT<T, Obj, BV>::pruneTree(const Vec3& a_point, T& a_pruneDista
     const T minFirst  = std::min(minL, minR);
     const T minSecond = std::max(minL, minR);
 
-    if(minFirst < a_pruneDistance){
+    if(minFirst < std::abs(a_pruneDistance)){
       const ObjectList branchCand = first->pruneTree(a_point, a_pruneDistance);
       cand.insert(cand.end(), branchCand.begin(), branchCand.end());
     }
 
-    if (minSecond < a_pruneDistance){
+    if (minSecond < std::abs(a_pruneDistance)){
       const ObjectList branchCand = second->pruneTree(a_point, a_pruneDistance);
       cand.insert(cand.end(), branchCand.begin(), branchCand.end());
     }

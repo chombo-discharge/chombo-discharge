@@ -34,7 +34,7 @@ porsche::porsche(){
 
   pp.get("mesh_file", filename);
 
-  // Build the mesh and set default parameters. 
+  // Build the dcel_mesh and set default parameters. 
   auto m = std::make_shared<mesh>();
   parser::PLY<precision>::readASCII(*m, filename);
   m->sanityCheck();
