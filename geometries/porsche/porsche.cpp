@@ -46,12 +46,12 @@ porsche::porsche(){
 
   // Build BVH
   auto root = std::make_shared<NodeT<precision, face, BV> >(m->getFaces());
-  root->topDownSortAndPartitionObjects(bvh_if<precision, BV>::defaultStopFunction,
-				       bvh_if<precision, BV>::defaultPartitionFunction,
-				       bvh_if<precision, BV>::defaultBVConstructor);
+  root->topDownSortAndPartitionPrimitives(bvh_if<precision, BV>::defaultStopFunction,
+					  bvh_if<precision, BV>::defaultPartitionFunction,
+					  bvh_if<precision, BV>::defaultBVConstructor);
 
   // Pass BVH to implicit function
-  auto bif = RefCountedPtr<bvh_if<precision, BV> > (new bvh_if<precision, BV>(root,true));
+  auto bif = RefCountedPtr<bvh_if<precision, BV> > (new bvh_if<precision, BV>(root,false));
 
   m_electrodes.push_back(electrode(bif, true));
   

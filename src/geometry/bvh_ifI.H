@@ -16,19 +16,19 @@ using namespace dcel::BVH;
 
 template <class T, class BV>
 StopFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultStopFunction = [](const NodeT<T, faceT<T>, BV>& a_node){
-  const auto& objects = a_node.getObjects();
+  const auto& primitives = a_node.getPrimitives();
   const int depth     = a_node.getDepth();
 
-  return objects.size() < 2;
+  return primitives.size() < 2;
 };
 
 template <class T, class BV>
 BVConstructorT<T, faceT<T>, BV> bvh_if<T, BV>::defaultBVConstructor = [](const NodeT<T, faceT<T>, BV>& a_node){
-  const auto& a_objects = a_node.getObjects();
+  const auto& a_primitives = a_node.getPrimitives();
   
   std::vector<Vec3T<T> > coordinates;
 
-  for (const auto& f : a_objects){
+  for (const auto& f : a_primitives){
     const auto faceCoordinates = f->getAllVertexCoordinates();
     coordinates.insert(coordinates.end(), faceCoordinates.begin(), faceCoordinates.end());
   }
@@ -39,16 +39,16 @@ BVConstructorT<T, faceT<T>, BV> bvh_if<T, BV>::defaultBVConstructor = [](const N
 template <class T, class BV>
 PartitionFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultPartitionFunction = [](NodeT<T, faceT<T>, BV>& a_node){
 
-  // TLDR: Very, very naive partitioning of objects. We search for the spatial direction where the centroids are spaced furthest apart,
+  // TLDR: Very, very naive partitioning of primitives. We search for the spatial direction where the centroids are spaced furthest apart,
   //       and split the vector in half along that direction. 
 
-  auto& objects = a_node.getObjects();
+  auto& primitives = a_node.getPrimitives();
 
   // Determine along which axis to split.
-  Vec3T<T> minCorner = objects.front()->getCentroid();
-  Vec3T<T> maxCorner = objects.front()->getCentroid();
+  Vec3T<T> minCorner = primitives.front()->getCentroid();
+  Vec3T<T> maxCorner = primitives.front()->getCentroid();
 
-  for(const auto& f : objects){
+  for(const auto& f : primitives){
     minCorner = std::min(minCorner, f->getCentroid());
     maxCorner = std::max(maxCorner, f->getCentroid());
   }
@@ -61,9 +61,9 @@ PartitionFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultPartitionFunction = []
   auto comparator = [splitDir](const std::shared_ptr<faceT<T> >& f1, const std::shared_ptr<faceT<T> >& f2){
     return f1->getCentroid()[splitDir] < f2->getCentroid()[splitDir];
   };
-  std::sort(objects.begin(), objects.end(), comparator);
+  std::sort(primitives.begin(), primitives.end(), comparator);
   
-  return (objects.size()-1)/2;
+  return (primitives.size()-1)/2;
 };
 
 template <class T, class BV>
@@ -73,9 +73,9 @@ bvh_if<T, BV>::bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInsi
 }
 
 template <class T, class BV>
-bvh_if<T, BV>::bvh_if(const bvh_if& a_object){
-  m_root       = a_object.m_root;
-  m_flipInside = a_object.m_flipInside;
+bvh_if<T, BV>::bvh_if(const bvh_if& a_primitive){
+  m_root       = a_primitive.m_root;
+  m_flipInside = a_primitive.m_flipInside;
 }
 
 template <class T, class BV>

@@ -17,42 +17,40 @@
 namespace dcel {
   namespace BVH {
 
-    template <class T, class Obj, class BV>
+    template <class T, class P, class BV>
     class NodeT;
 
-    template <class T, class Obj, class BV>
-    using PartitionFunctionT = std::function<int(NodeT<T, Obj, BV>&)>;
+    template <class T, class P, class BV>
+    using PartitionFunctionT = std::function<int(NodeT<T, P, BV>&)>;
     
-    template <class T, class Obj, class BV>
-    using StopFunctionT = std::function<bool(const NodeT<T, Obj, BV>&)>;
+    template <class T, class P, class BV>
+    using StopFunctionT = std::function<bool(const NodeT<T, P, BV>&)>;
 
-    template <class T, class Obj, class BV>
-    using BVConstructorT = std::function<BV(const NodeT<T, Obj, BV>&)>;
+    template <class T, class P, class BV>
+    using BVConstructorT = std::function<BV(const NodeT<T, P, BV>&)>;
 
     enum class NodeType {
       Regular,
       Leaf,
     };
 
-    // T is the precision for Vec3, Obj is the object type you want to enclose, BV is the bounding volume you use for it. 
-    template <class T, class Obj, class BV>
+    // T is the precision for Vec3, P is the primitive type you want to enclose, BV is the bounding volume you use for it. 
+    template <class T, class P, class BV>
     class NodeT {
     public:
 
-      using ObjectList = std::vector<std::shared_ptr<Obj> >;
-
+      using PrimitiveList = std::vector<std::shared_ptr<P> >;
       using Vec3       = Vec3T<T>;
-      
-      using Node       = NodeT<T, Obj, BV>;
+      using Node       = NodeT<T, P, BV>;
       using NodePtr    = std::shared_ptr<Node>;
       
-      using PartitionFunction = PartitionFunctionT<T, Obj, BV>;
-      using StopFunction      = StopFunctionT<T, Obj, BV>;
-      using BVConstructor     = BVConstructorT<T, Obj, BV>;
+      using PartitionFunction = PartitionFunctionT<T, P, BV>;
+      using StopFunction      = StopFunctionT<T, P, BV>;
+      using BVConstructor     = BVConstructorT<T, P, BV>;
 
       NodeT();
       NodeT(NodePtr& a_parent);
-      NodeT(const ObjectList& a_data);
+      NodeT(const PrimitiveList& a_data);
       ~NodeT();
 
       inline
@@ -62,7 +60,7 @@ namespace dcel {
       decltype(auto) setDepth(const int a_depth) noexcept;
 
       inline
-      decltype(auto) topDownSortAndPartitionObjects(const StopFunction&      a_stopFunc,
+      decltype(auto) topDownSortAndPartitionPrimitives(const StopFunction&      a_stopFunc,
 						    const PartitionFunction& a_partFunc,
 						    const BVConstructor&     a_bvFunc) noexcept -> void;
 
@@ -70,13 +68,13 @@ namespace dcel {
       decltype(auto) getDepth() const noexcept;
 
       inline
-      decltype(auto) getObjects() noexcept;
+      decltype(auto) getPrimitives() noexcept;
 
       inline
-      decltype(auto) getObjects() const noexcept;
+      decltype(auto) getPrimitives() const noexcept;
 
       inline
-      decltype(auto) pruneTree(const Vec3& a_point, T& a_pruneDistance) const noexcept -> ObjectList;
+      decltype(auto) pruneTree(const Vec3& a_point, T& a_pruneDistance) const noexcept -> PrimitiveList;
 
     protected:
 
@@ -86,20 +84,20 @@ namespace dcel {
 
       int m_depth;
       
-      ObjectList m_objects;
+      PrimitiveList m_primitives;
 
       NodePtr m_parent;
       NodePtr m_left;
       NodePtr m_right;
 
       inline
-      decltype(auto) insertNode(NodePtr&  a_node, const ObjectList& a_objects) noexcept;
+      decltype(auto) insertNode(NodePtr&  a_node, const PrimitiveList& a_primitives) noexcept;
 
       inline
       decltype(auto) setToRegularNode() noexcept;
 
       inline
-      decltype(auto) setObjects(const ObjectList& a_data) noexcept;
+      decltype(auto) setPrimitives(const PrimitiveList& a_data) noexcept;
 
       inline
       decltype(auto) computeBoundingVolume(const BVConstructor& bvFunction) noexcept;
@@ -138,7 +136,7 @@ namespace dcel {
       decltype(auto) getDistanceToData(const Vec3& a_x0) const noexcept;
       
       inline
-      decltype(auto) getLeafData() const noexcept -> ObjectList;
+      decltype(auto) getLeafData() const noexcept -> PrimitiveList;
 
       inline
       decltype(auto) setParent(const NodePtr& a_parent) noexcept;
