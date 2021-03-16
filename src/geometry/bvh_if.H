@@ -31,10 +31,9 @@ public:
   static PartitionFunctionT<T, face, BV> defaultPartitionFunction;
   static BVConstructorT<T, face, BV>     defaultBVConstructor;
 
-
   bvh_if() = delete;
 
-  bvh_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside);
+  bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInside);
   bvh_if(const bvh_if& a_object);
   ~bvh_if();
 
@@ -42,14 +41,8 @@ public:
   
   BaseIF* newImplicitFunction() const override;
 
-  inline
-  decltype(auto) buildBVH(const StopFunctionT<T, face, BV>&  stopFunc     = defaultStopFunction,
-			  const PartitionFunctionT<T, face, BV>& partFunc = defaultPartitionFunction,
-			  const BVConstructorT<T, face, BV>& bvFunc       = defaultBVConstructor) noexcept;
-
 protected:
 
-  std::shared_ptr<mesh> m_mesh;
   std::shared_ptr<Node> m_root;
   
   bool m_flipInside;

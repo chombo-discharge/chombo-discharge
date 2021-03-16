@@ -76,7 +76,7 @@ namespace dcel {
       decltype(auto) getObjects() const noexcept;
 
       inline
-      decltype(auto) signedDistance(const Vec3& a_point, T& a_pruneDistance) const noexcept;
+      decltype(auto) pruneTree(const Vec3& a_point, T& a_pruneDistance) const noexcept -> ObjectList;
 
     protected:
 
@@ -139,9 +139,6 @@ namespace dcel {
       
       inline
       decltype(auto) getLeafData() const noexcept -> ObjectList;
-
-      inline
-      decltype(auto) pruneTree(const Vec3& a_point, T& a_pruneDistance) const noexcept -> ObjectList;
 
       inline
       decltype(auto) setParent(const NodePtr& a_parent) noexcept;

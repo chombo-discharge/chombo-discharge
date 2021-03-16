@@ -19,6 +19,7 @@ using namespace dcel;
 
 using precision = float;
 
+using face   = faceT<precision>;
 using mesh   = meshT<precision>;
 using AABB   = AABBT<precision>;
 using Sphere = BoundingSphereT<precision>;
@@ -35,24 +36,22 @@ porsche::porsche(){
 
   // Build the mesh and set default parameters. 
   auto m = std::make_shared<mesh>();
-
-  // Read mesh from file and reconcile. 
   parser::PLY<precision>::readASCII(*m, filename);
   m->sanityCheck();
-  m->reconcile();
   m->reconcile(VertexNormalWeight::Angle);
-  m->setSearchAlgorithm(SearchAlgorithm::Direct2); // Only for direct searches!
-  m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::CrossingNumber);
+  // m->setSearchAlgorithm(SearchAlgorithm::Direct2); // Only for direct searches!
+  // m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::CrossingNumber);
 
 
   // Creat the object and build the BVH.
-#if 0
-  RefCountedPtr<bvh_if<precision, BV> > bif = RefCountedPtr<bvh_if<precision, BV> > (new bvh_if<precision, BV>(m,true));
+  auto root = std::make_shared<NodeT<precision, face, BV> >(m->getFaces());
+  root->topDownSortAndPartitionObjects(bvh_if<precision, BV>::defaultStopFunction,
+				       bvh_if<precision, BV>::defaultPartitionFunction,
+				       bvh_if<precision, BV>::defaultBVConstructor);
+  
+  RefCountedPtr<bvh_if<precision, BV> > bif = RefCountedPtr<bvh_if<precision, BV> > (new bvh_if<precision, BV>(root,true));
 
-  bif->buildBVH();
-#else
-  RefCountedPtr<dcel_if<precision> > bif = RefCountedPtr<dcel_if<precision> > (new dcel_if<precision>(m,true));
-#endif
+  //  bif->buildBVH();
 
   m_electrodes.push_back(electrode(bif, true));
   

@@ -36,6 +36,7 @@ inline
 NodeT<T, Obj, BV>::NodeT(const ObjectList& a_objects) : NodeT<T, Obj, BV>() {
   m_objects  = a_objects;
   m_nodeType = NodeType::Leaf;
+  m_depth    = 0;
 }
 
 template <class T, class Obj, class BV>
@@ -243,24 +244,6 @@ decltype(auto) NodeT<T, Obj, BV>::getLeafData() const noexcept -> ObjectList {
   }
 
   return objects;
-}
-
-template <class T, class Obj, class BV>
-inline
-decltype(auto) NodeT<T, Obj, BV>::signedDistance(const Vec3& a_point, T& a_pruneDistance) const noexcept {
-  ObjectList candidates = this->pruneTree(a_point, a_pruneDistance);
-
-  T minDist = std::numeric_limits<T>::infinity();
-
-  for (const auto& c : candidates){
-    const T curDist = (T) c->signedDistance(a_point);
-
-    if(std::abs(curDist) < std::abs(minDist)){
-      minDist = curDist;
-    }
-  }
-    
-  return minDist;
 }
 
 template <class T, class Obj, class BV>
