@@ -20,6 +20,9 @@ namespace dcel {
     template <class T, class P, class BV>
     class NodeT;
 
+    template <class P>
+    using PrimitiveListT = std::vector<std::shared_ptr<P> >;
+
     template <class T, class P, class BV>
     using PartitionFunctionT = std::function<int(NodeT<T, P, BV>&)>;
     
@@ -30,7 +33,8 @@ namespace dcel {
     using BVConstructorT = std::function<BV(const NodeT<T, P, BV>&)>;
 
     template <class T, class P>
-    using DistanceFunctionT = std::function<T(const std::vector<std::shared_ptr<P> >&, const Vec3T<T>& a_point)>;
+    //    using DistanceFunctionT = std::function<T(const std::vector<std::shared_ptr<P> >&, const Vec3T<T>& a_point)>;
+    using DistanceFunctionT = std::function<T(const PrimitiveListT<P>&, const Vec3T<T>& a_point)>;
 
     enum class NodeType {
       Regular,
@@ -42,7 +46,7 @@ namespace dcel {
     class NodeT {
     public:
 
-      using PrimitiveList = std::vector<std::shared_ptr<P> >;
+      using PrimitiveList = PrimitiveListT<P>;
       
       using Vec3       = Vec3T<T>;
       using Node       = NodeT<T, P, BV>;

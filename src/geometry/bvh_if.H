@@ -26,8 +26,8 @@ public:
   using mesh  = meshT<T>;
   using face  = faceT<T>;
   using Node  = NodeT<T, face, BV>;
-  using PList = std::vector<std::shared_ptr<face> >;
 
+  // Lambdas for interfaceing into dcel_BVH
   static StopFunctionT<T, face, BV>      defaultStopFunction;
   static PartitionFunctionT<T, face, BV> defaultPartitionFunction;
   static BVConstructorT<T, face, BV>     defaultBVConstructor;

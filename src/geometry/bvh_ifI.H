@@ -67,13 +67,13 @@ PartitionFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultPartitionFunction = []
 };
 
 template <class T, class BV>
-DistanceFunctionT<T, faceT<T> > bvh_if<T, BV>::defaultDistanceFunction = [](const std::vector<std::shared_ptr<faceT<T> > >& a_faces, const Vec3T<T>& a_point){
+DistanceFunctionT<T, faceT<T> > bvh_if<T, BV>::defaultDistanceFunction = [](const PrimitiveListT<face>& a_faces, const Vec3T<T>& a_point){
   T d = std::numeric_limits<T>::max();
 
   for (const auto& f : a_faces){
     const T cur = f->signedDistance(a_point);
 
-    if(std::abs(cur) < std::abs(d)){
+    if(std::abs(cur) < std::abs(d)) {
       d = cur;
     }
   }
