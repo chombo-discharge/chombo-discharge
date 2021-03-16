@@ -29,6 +29,9 @@ namespace dcel {
     template <class T, class P, class BV>
     using BVConstructorT = std::function<BV(const NodeT<T, P, BV>&)>;
 
+    template <class T, class P>
+    using DistanceFunctionT = std::function<T(const std::vector<std::shared_ptr<P> >&, const Vec3T<T>& a_point)>;
+
     enum class NodeType {
       Regular,
       Leaf,
@@ -40,6 +43,7 @@ namespace dcel {
     public:
 
       using PrimitiveList = std::vector<std::shared_ptr<P> >;
+      
       using Vec3       = Vec3T<T>;
       using Node       = NodeT<T, P, BV>;
       using NodePtr    = std::shared_ptr<Node>;
@@ -47,10 +51,11 @@ namespace dcel {
       using PartitionFunction = PartitionFunctionT<T, P, BV>;
       using StopFunction      = StopFunctionT<T, P, BV>;
       using BVConstructor     = BVConstructorT<T, P, BV>;
+      using DistanceFunction  = DistanceFunctionT<T, P>;
 
       NodeT();
       NodeT(NodePtr& a_parent);
-      NodeT(const PrimitiveList& a_data);
+      NodeT(const PrimitiveList& a_primitives);
       ~NodeT();
 
       inline
@@ -61,8 +66,8 @@ namespace dcel {
 
       inline
       decltype(auto) topDownSortAndPartitionPrimitives(const StopFunction&      a_stopFunc,
-						    const PartitionFunction& a_partFunc,
-						    const BVConstructor&     a_bvFunc) noexcept -> void;
+						       const PartitionFunction& a_partFunc,
+						       const BVConstructor&     a_bvFunc) noexcept -> void;
 
       inline
       decltype(auto) getDepth() const noexcept;
@@ -75,6 +80,9 @@ namespace dcel {
 
       inline
       decltype(auto) pruneTree(const Vec3& a_point, T& a_pruneDistance) const noexcept -> PrimitiveList;
+
+      inline
+      decltype(auto) pruneClosest(const Vec3& a_point, T& a_closest, const DistanceFunction& a_distFunc) const noexcept -> void;
 
     protected:
 
@@ -97,7 +105,7 @@ namespace dcel {
       decltype(auto) setToRegularNode() noexcept;
 
       inline
-      decltype(auto) setPrimitives(const PrimitiveList& a_data) noexcept;
+      decltype(auto) setPrimitives(const PrimitiveList& a_primitives) noexcept;
 
       inline
       decltype(auto) computeBoundingVolume(const BVConstructor& bvFunction) noexcept;
@@ -133,10 +141,7 @@ namespace dcel {
       decltype(auto) getDistanceToBV(const Vec3& a_x0) const noexcept;
 
       inline
-      decltype(auto) getDistanceToData(const Vec3& a_x0) const noexcept;
-      
-      inline
-      decltype(auto) getLeafData() const noexcept -> PrimitiveList;
+      decltype(auto) getDistanceToPrimitives(const Vec3& a_x0) const noexcept;
 
       inline
       decltype(auto) setParent(const NodePtr& a_parent) noexcept;

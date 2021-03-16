@@ -67,6 +67,21 @@ PartitionFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultPartitionFunction = []
 };
 
 template <class T, class BV>
+DistanceFunctionT<T, faceT<T> > bvh_if<T, BV>::defaultDistanceFunction = [](const std::vector<std::shared_ptr<faceT<T> > >& a_faces, const Vec3T<T>& a_point){
+  T d = std::numeric_limits<T>::max();
+
+  for (const auto& f : a_faces){
+    const T cur = f->signedDistance(a_point);
+
+    if(std::abs(cur) < std::abs(d)){
+      d = cur;
+    }
+  }
+
+  return d;
+};
+
+template <class T, class BV>
 bvh_if<T, BV>::bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInside){
   m_root       = a_root;
   m_flipInside = a_flipInside;
@@ -88,30 +103,14 @@ Real bvh_if<T, BV>::value(const RealVect& a_point) const {
   Vec3 p(a_point[0], a_point[1], a_point[2]); 
 
   T pruneDistance = std::numeric_limits<T>::infinity();
-  T minDist       = std::numeric_limits<T>::infinity();
   
-  const auto faces = m_root->pruneTree(p, pruneDistance);
-
-#if 0
-  for (const auto& f : faces){
-    const T curDist = f->signedDistance(p);
-
-    minDist = (std::abs(curDist) < std::abs(minDist)) ? curDist : minDist;
-  }
-
-  if(m_flipInside){
-    minDist = -minDist;
-  }
-
-  return Real(minDist);
-#else
+  m_root->pruneClosest(p, pruneDistance, bvh_if<T, BV>::defaultDistanceFunction);
 
   if(m_flipInside){
     pruneDistance = -pruneDistance;
   }
 
   return Real(pruneDistance);
-#endif
 }
 
 template <class T, class BV>

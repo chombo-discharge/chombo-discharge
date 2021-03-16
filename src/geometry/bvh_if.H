@@ -26,10 +26,12 @@ public:
   using mesh = meshT<T>;
   using face = faceT<T>;
   using Node = NodeT<T, face, BV>;
+  using PList = std::vector<std::shared_ptr<face> >;
 
   static StopFunctionT<T, face, BV>      defaultStopFunction;
   static PartitionFunctionT<T, face, BV> defaultPartitionFunction;
   static BVConstructorT<T, face, BV>     defaultBVConstructor;
+  static DistanceFunctionT<T, face>      defaultDistanceFunction;
 
   bvh_if() = delete;
 
