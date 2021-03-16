@@ -13,6 +13,7 @@
 #include "dcel_mesh.H"
 #include "dcel_parser.H"
 #include "dcel_if.H"
+#include "bvh_if.H"
 
 using namespace dcel;
 
@@ -38,15 +39,20 @@ porsche::porsche(){
   // Read mesh from file and reconcile. 
   parser::PLY<precision>::readASCII(*m, filename);
   m->sanityCheck();
+  m->reconcile();
   m->reconcile(VertexNormalWeight::Angle);
-  m->setSearchAlgorithm(SearchAlgorithm::Direct2);
+  m->setSearchAlgorithm(SearchAlgorithm::Direct2); // Only for direct searches!
   m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::CrossingNumber);
 
 
-  // Creat the object and build the BVH. 
-  RefCountedPtr<dcel_if<precision, BV> > bif = RefCountedPtr<dcel_if<precision, BV> > (new dcel_if<precision, BV>(m,true));
+  // Creat the object and build the BVH.
+#if 0
+  RefCountedPtr<bvh_if<precision, BV> > bif = RefCountedPtr<bvh_if<precision, BV> > (new bvh_if<precision, BV>(m,true));
 
   bif->buildBVH();
+#else
+  RefCountedPtr<dcel_if<precision> > bif = RefCountedPtr<dcel_if<precision> > (new dcel_if<precision>(m,true));
+#endif
 
   m_electrodes.push_back(electrode(bif, true));
   
