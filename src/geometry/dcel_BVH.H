@@ -141,9 +141,6 @@ namespace dcel {
       decltype(auto) getDistanceToBV(const Vec3& a_x0) const noexcept;
 
       inline
-      decltype(auto) getDistanceToPrimitives(const Vec3& a_x0) const noexcept;
-
-      inline
       decltype(auto) setParent(const NodePtr& a_parent) noexcept;
 
       inline

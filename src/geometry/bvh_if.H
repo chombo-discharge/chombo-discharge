@@ -22,10 +22,10 @@ template <class T, class BV>
 class bvh_if : public BaseIF {
 public:
 
-  using Vec3 = Vec3T<T>;
-  using mesh = meshT<T>;
-  using face = faceT<T>;
-  using Node = NodeT<T, face, BV>;
+  using Vec3  = Vec3T<T>;
+  using mesh  = meshT<T>;
+  using face  = faceT<T>;
+  using Node  = NodeT<T, face, BV>;
   using PList = std::vector<std::shared_ptr<face> >;
 
   static StopFunctionT<T, face, BV>      defaultStopFunction;

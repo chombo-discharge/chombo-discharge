@@ -170,8 +170,8 @@ decltype(auto) NodeT<T, P, BV>::getPrimitives() const noexcept {
 template <class T, class P, class BV>
 inline
 decltype(auto) NodeT<T, P, BV>::topDownSortAndPartitionPrimitives(const StopFunction&      a_stopFunc,
-								 const PartitionFunction& a_partFunc,
-								 const BVConstructor&     a_bvFunc) noexcept -> void {
+								  const PartitionFunction& a_partFunc,
+								  const BVConstructor&     a_bvFunc) noexcept -> void {
   const bool stopSplitting = a_stopFunc(*this);
 
   this->computeBoundingVolume(a_bvFunc);
@@ -208,31 +208,14 @@ decltype(auto) NodeT<T, P, BV>::insertNode(NodePtr& a_node, const PrimitiveList&
 template <class T, class P, class BV>
 inline
 decltype(auto) NodeT<T, P, BV>::getDistanceToBV(const Vec3& a_x0) const noexcept {
-  return m_bv.getDistance(a_x0);
-}
-
-template <class T, class P, class BV>
-inline
-decltype(auto) NodeT<T, P, BV>::getDistanceToPrimitives(const Vec3& a_x0) const noexcept {
-  T ret = std::numeric_limits<T>::infinity();
-
-  for (const auto& o : m_primitives){
-    const auto cur = o->signedDistance(a_x0);
-
-    if(std::abs(cur) < std::abs(ret)){
-      ret = cur;
-    }
-  }
-
-  return ret;
+  return T(m_bv.getDistance(a_x0));
 }
 
 template <class T, class P, class BV>
 inline
 decltype(auto) NodeT<T, P, BV>::pruneClosest(const Vec3& a_point, T& a_closest, const DistanceFunction& a_distFunc) const noexcept -> void {
   if(m_nodeType == NodeType::Leaf){
-    //    const T primDist = this->getDistanceToPrimitives(a_point);
-    const T primDist = a_distFunc(m_primitives, a_point);
+    const auto primDist = T(a_distFunc(m_primitives, a_point));
 
     if(std::abs(primDist) < std::abs(a_closest)){
       a_closest = primDist;
@@ -242,13 +225,13 @@ decltype(auto) NodeT<T, P, BV>::pruneClosest(const Vec3& a_point, T& a_closest, 
     const auto minL = m_left ->getDistanceToBV(a_point);
     const auto minR = m_right->getDistanceToBV(a_point);
 
-    const bool leftFirst = minL < minR;
+    const auto leftFirst = minL < minR;
     
-    const std::shared_ptr<NodeT<T, P, BV> > first  = leftFirst ? m_left  : m_right;
-    const std::shared_ptr<NodeT<T, P, BV> > second = leftFirst ? m_right : m_left;
+    const auto first  = leftFirst ? m_left  : m_right;
+    const auto second = leftFirst ? m_right : m_left;
 
-    const T minFirst  = std::min(minL, minR);
-    const T minSecond = std::max(minL, minR);
+    const auto minFirst  = std::min(minL, minR);
+    const auto minSecond = std::max(minL, minR);
 
     if(minFirst  < std::abs(a_closest)) first ->pruneClosest(a_point, a_closest, a_distFunc);
     if(minSecond < std::abs(a_closest)) second->pruneClosest(a_point, a_closest, a_distFunc);
