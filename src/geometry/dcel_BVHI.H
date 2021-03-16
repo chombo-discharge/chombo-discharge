@@ -188,11 +188,8 @@ decltype(auto) NodeT<T, Obj, BV>::getObjects() const noexcept {
 template <class T, class Obj, class BV>
 inline
 decltype(auto) NodeT<T, Obj, BV>::topDownSortAndPartitionObjects(const StopFunction&      a_stopFunc,
-							      const PartitionFunction& a_partFunc,
-							      const BVConstructor&     a_bvFunc) noexcept -> void {
-
-  //  const bool stopSplitting = a_stopFunc(m_objects, m_depth);
-  //const bool splitThisNode = !(a_stopFunc(*this));
+								 const PartitionFunction& a_partFunc,
+								 const BVConstructor&     a_bvFunc) noexcept -> void {
   const bool stopSplitting = a_stopFunc(*this);
 
   this->computeBoundingVolume(a_bvFunc);

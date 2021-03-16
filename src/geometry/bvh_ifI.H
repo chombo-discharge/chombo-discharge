@@ -61,7 +61,6 @@ PartitionFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultPartitionFunction = []
   auto comparator = [splitDir](const std::shared_ptr<faceT<T> >& f1, const std::shared_ptr<faceT<T> >& f2){
     return f1->getCentroid()[splitDir] < f2->getCentroid()[splitDir];
   };
-    
   std::sort(objects.begin(), objects.end(), comparator);
   
   return (objects.size()-1)/2;

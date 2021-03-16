@@ -24,7 +24,7 @@ using mesh   = meshT<precision>;
 using AABB   = AABBT<precision>;
 using Sphere = BoundingSphereT<precision>;
 
-using BV = Sphere;
+using BV = AABB;
 
 porsche::porsche(){
 
@@ -38,20 +38,20 @@ porsche::porsche(){
   auto m = std::make_shared<mesh>();
   parser::PLY<precision>::readASCII(*m, filename);
   m->sanityCheck();
-  m->reconcile(VertexNormalWeight::Angle);
+  m->reconcile();
+  // m->reconcile(VertexNormalWeight::Angle);
   // m->setSearchAlgorithm(SearchAlgorithm::Direct2); // Only for direct searches!
   // m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::CrossingNumber);
 
 
-  // Creat the object and build the BVH.
+  // Build BVH
   auto root = std::make_shared<NodeT<precision, face, BV> >(m->getFaces());
   root->topDownSortAndPartitionObjects(bvh_if<precision, BV>::defaultStopFunction,
 				       bvh_if<precision, BV>::defaultPartitionFunction,
 				       bvh_if<precision, BV>::defaultBVConstructor);
-  
-  RefCountedPtr<bvh_if<precision, BV> > bif = RefCountedPtr<bvh_if<precision, BV> > (new bvh_if<precision, BV>(root,true));
 
-  //  bif->buildBVH();
+  // Pass BVH to implicit function
+  auto bif = RefCountedPtr<bvh_if<precision, BV> > (new bvh_if<precision, BV>(root,true));
 
   m_electrodes.push_back(electrode(bif, true));
   

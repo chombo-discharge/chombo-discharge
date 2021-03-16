@@ -223,7 +223,7 @@ namespace dcel {
     
       for (int dir = 0; dir < DIM; dir++){
 	m_loCorner[dir] = std::min(m_loCorner[dir], otherLo[dir]);
-	m_hiCorner[dir] = std::min(m_hiCorner[dir], otherHi[dir]);
+	m_hiCorner[dir] = std::max(m_hiCorner[dir], otherHi[dir]);
       }
     }
   }
@@ -251,10 +251,6 @@ namespace dcel {
 	m_hiCorner[dir] = std::max(m_hiCorner[dir], p[dir]);
       }
     }
-#if 0 // Debugging
-    std::cout << m_loCorner[0] << "\t" << m_loCorner[1] << "\t" << m_loCorner[2] << "\n"
-	      << m_hiCorner[0] << "\t" << m_hiCorner[1] << "\t" << m_hiCorner[2] << "\n";
-#endif
   }
 
   template <class T>
@@ -262,7 +258,6 @@ namespace dcel {
   decltype(auto) AABBT<T>::intersects(const AABBT& a_other) const noexcept {
     const Vec3& otherLo = a_other.getLowCorner();
     const Vec3& otherHi = a_other.getHighCorner();
-
 
     return (m_loCorner[0] < otherHi[0] && m_hiCorner[0] > otherLo[0]) &&
            (m_loCorner[1] < otherHi[1] && m_hiCorner[1] > otherLo[1]) &&
@@ -302,7 +297,7 @@ namespace dcel {
 			    std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
 			    std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));
 
-    const T retval =  std::min(zero, delta[delta.maxDir(false)]) + std::max(Vec3::zero(), delta).length(); // Negative inside and positive outside. 
+    const T retval =  std::min(zero, delta[delta.maxDir(false)]) + max(Vec3::zero(), delta).length(); 
   
     return std::max(zero, retval);
   }

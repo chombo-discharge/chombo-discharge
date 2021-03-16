@@ -11,6 +11,7 @@
 #include "dcel_vec.H"
 
 #include <math.h>
+#include <algorithm>
 
 namespace dcel {
 
@@ -275,8 +276,28 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto)  Vec3T<T>::operator[](int i) const noexcept {
+  decltype(auto) Vec3T<T>::operator[](int i) const noexcept {
     return X[i];
+  }
+
+  template <class T>
+  inline
+  decltype(auto) Vec3T<T>::min(const Vec3T<T>& u) noexcept {
+    X[0] = std::min(X[0], u[0]);
+    X[1] = std::min(X[1], u[1]);
+    X[2] = std::min(X[2], u[2]);
+
+    return *this;
+  }
+
+  template <class T>
+  inline
+  decltype(auto) Vec3T<T>::max(const Vec3T<T>& u) noexcept {
+    X[0] = std::max(X[0], u[0]);
+    X[1] = std::max(X[1], u[1]);
+    X[2] = std::max(X[2], u[2]);
+
+    return *this;
   }
 
   template <class T>
@@ -358,6 +379,22 @@ namespace dcel {
   inline
   decltype(auto) operator/(const T& s, const Vec3T<T>& a_other) noexcept {
     return a_other/s;
+  }
+
+  template <class T>
+  inline
+  decltype(auto) min(const Vec3T<T>& u, const Vec3T<T>& v) noexcept {
+    return Vec3T<T>(std::min(u[0], v[0]),
+		    std::min(u[1], v[1]),
+		    std::min(u[2], v[2]));
+  }
+
+  template <class T>
+  inline
+  decltype(auto) max(const Vec3T<T>& u, const Vec3T<T>& v) noexcept {
+    return Vec3T<T>(std::max(u[0], v[0]),
+		    std::max(u[1], v[1]),
+		    std::max(u[2], v[2]));
   }
 }
 

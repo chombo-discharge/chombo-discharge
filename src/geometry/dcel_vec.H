@@ -137,6 +137,12 @@ namespace dcel {
     decltype(auto) operator>=(const Vec3T& u) const noexcept;
 
     inline
+    decltype(auto) min(const Vec3T& u) noexcept;
+
+    inline
+    decltype(auto) max(const Vec3T& u) noexcept;
+
+    inline
     decltype(auto) maxDir(const bool a_doAbs) const noexcept;
 
     inline
@@ -155,7 +161,6 @@ namespace dcel {
     T X[3];
   };
 
-
   template <class T>
   inline
   decltype(auto) operator*(const T& s, const Vec3T<T>& a_other) noexcept;
@@ -163,6 +168,14 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) operator/(const T& s, const Vec3T<T>& a_other) noexcept;
+
+  template <class T>
+  inline
+  decltype(auto) min(const Vec3T<T>& u, const Vec3T<T>& v) noexcept;
+
+  template <class T>
+  inline
+  decltype(auto) max(const Vec3T<T>& u, const Vec3T<T>& v) noexcept;
 }
 
 #include "dcel_vecI.H"
