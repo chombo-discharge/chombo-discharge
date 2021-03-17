@@ -221,13 +221,8 @@ namespace dcel {
     m_hiCorner = a_others.front().getHighCorner();
 
     for (const auto& other : a_others){
-      const Vec3& otherLo = other.getLowCorner();
-      const Vec3& otherHi = other.getHighCorner();
-    
-      for (int dir = 0; dir < DIM; dir++){
-	m_loCorner[dir] = std::min(m_loCorner[dir], otherLo[dir]);
-	m_hiCorner[dir] = std::max(m_hiCorner[dir], otherHi[dir]);
-      }
+      m_loCorner = min(m_loCorner, other.getLowCorner());
+      m_hiCorner = max(m_loCorner, other.getHicorner());
     }
   }
 
@@ -251,10 +246,8 @@ namespace dcel {
     m_hiCorner = a_points.front();
 
     for (const auto& p : a_points){
-      for (int dir = 0; dir < 3; dir++){
-	m_loCorner[dir] = std::min(m_loCorner[dir], p[dir]);
-	m_hiCorner[dir] = std::max(m_hiCorner[dir], p[dir]);
-      }
+      m_loCorner = min(m_loCorner, p);
+      m_hiCorner = max(m_hiCorner, p);
     }
   }
 

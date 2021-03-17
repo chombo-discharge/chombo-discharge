@@ -32,8 +32,6 @@ public:
   static PartitionFunctionT<face>   defaultPartitionFunction;
   static BVConstructorT<face, BV>   defaultBVConstructor;
 
-
-
   bvh_if() = delete;
 
   bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInside);
