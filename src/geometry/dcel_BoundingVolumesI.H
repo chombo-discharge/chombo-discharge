@@ -75,7 +75,8 @@ namespace dcel {
   }
 
   template <class T>
-  BoundingSphereT<T>::BoundingSphereT(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_algorithm){
+  template <class P>
+  BoundingSphereT<T>::BoundingSphereT(const std::vector<Vec3T<P> >& a_points, const BoundingVolumeAlgorithm& a_algorithm){
     this->define(a_points, a_algorithm);
   }
 
@@ -85,8 +86,9 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) BoundingSphereT<T>::define(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept {
+  decltype(auto) BoundingSphereT<T>::define(const std::vector<Vec3T<P> >& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept {
     switch(a_algorithm) {
     case BoundingVolumeAlgorithm::Ritter:
       this->buildRitter(a_points);
@@ -130,8 +132,9 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) BoundingSphereT<T>::buildRitter(const std::vector<Vec3>& a_points) noexcept {
+  decltype(auto) BoundingSphereT<T>::buildRitter(const std::vector<Vec3T<P> >& a_points) noexcept {
     m_radius = 0.0;
     m_center = Vec3::zero();
 
@@ -229,7 +232,8 @@ namespace dcel {
   }
 
   template <class T>
-  AABBT<T>::AABBT(const std::vector<Vec3>& a_points){
+  template <class P>
+  AABBT<T>::AABBT(const std::vector<Vec3T<P> >& a_points){
     this->define(a_points);
   }
 
@@ -239,8 +243,9 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) AABBT<T>::define(const std::vector<Vec3>& a_points) noexcept {
+  decltype(auto) AABBT<T>::define(const std::vector<Vec3T<P> >& a_points) noexcept {
     constexpr int DIM = 3;
     m_loCorner = a_points.front();
     m_hiCorner = a_points.front();

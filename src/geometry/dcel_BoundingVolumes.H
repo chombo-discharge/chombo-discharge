@@ -53,11 +53,14 @@ namespace dcel {
 
     BoundingSphereT();
     BoundingSphereT(const BoundingSphereT& a_other);
-    BoundingSphereT(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_alg = BoundingVolumeAlgorithm::Ritter);
     ~BoundingSphereT();
+    
+    template <class P>
+    BoundingSphereT(const std::vector<Vec3T<P> >& a_points, const BoundingVolumeAlgorithm& a_alg = BoundingVolumeAlgorithm::Ritter);
 
+    template <class P>
     inline
-    decltype(auto) define(const std::vector<Vec3>& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept;
+    decltype(auto) define(const std::vector<Vec3T<P> >& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept;
 
     inline
     decltype(auto) intersects(const BoundingSphereT& a_other) const noexcept;
@@ -82,8 +85,9 @@ namespace dcel {
     T m_radius;
     Vec3 m_center;
 
+    template <class P>
     inline
-    decltype(auto) buildRitter(const std::vector<Vec3>& a_points) noexcept;
+    decltype(auto) buildRitter(const std::vector<Vec3T<P> >& a_points) noexcept;
   };
 
   template <class T>
@@ -95,11 +99,14 @@ namespace dcel {
     AABBT();
     AABBT(const AABBT& a_other);
     AABBT(const std::vector<AABBT>& a_others);
-    AABBT(const std::vector<Vec3>& a_points);
     ~AABBT();
+    
+    template <class P>
+    AABBT(const std::vector<Vec3T<P> >& a_points);
 
+    template <class P>
     inline
-    decltype(auto) define(const std::vector<Vec3>& a_points) noexcept;
+    decltype(auto) define(const std::vector<Vec3T<P> >& a_points) noexcept;
 
     inline
     decltype(auto) intersects(const AABBT& a_other) const noexcept;

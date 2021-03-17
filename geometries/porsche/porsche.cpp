@@ -22,9 +22,9 @@ using precision = float;
 using face   = faceT<precision>;
 using mesh   = meshT<precision>;
 using AABB   = AABBT<precision>;
-using Sphere = BoundingSphereT<precision>;
+using Sphere = BoundingSphereT<double>;
 
-using BV = Sphere;
+using BV = AABB;
 
 porsche::porsche(){
 
