@@ -25,18 +25,15 @@ namespace dcel {
     template <class P>
     using PrimitiveListT = std::vector<std::shared_ptr<const P> >;
 
-    // Lambdas for partitioning and searching closest distance. 
-    // template <class T, class P, class BV>
-    // using PartitionFunctionT = std::function<int(NodeT<T, P, BV>&)>;
-
+    // Partitioning functions. 
     template <class P>
     using PartitionFunctionT = std::function<std::pair<PrimitiveListT<P>, PrimitiveListT<P> >(const PrimitiveListT<P>&)>;
     
     template <class T, class P, class BV>
     using StopFunctionT = std::function<bool(const NodeT<T, P, BV>&)>;
 
-    template <class T, class P, class BV>
-    using BVConstructorT = std::function<BV(const NodeT<T, P, BV>&)>;
+    template <class P, class BV>
+    using BVConstructorT = std::function<BV(const PrimitiveListT<P>&)>;
 
     enum class NodeType {
       Regular,
@@ -58,7 +55,7 @@ namespace dcel {
       //      using PartitionFunction = PartitionFunctionT<T, P, BV>;
       using PartitionFunction = PartitionFunctionT<P>;
       using StopFunction      = StopFunctionT<T, P, BV>;
-      using BVConstructor     = BVConstructorT<T, P, BV>;
+      using BVConstructor     = BVConstructorT<P, BV>;
 
       NodeT();
       NodeT(NodePtr& a_parent);
@@ -74,8 +71,7 @@ namespace dcel {
       inline
       decltype(auto) getDepth() const noexcept;
 
-      inline
-      decltype(auto) getPrimitives() noexcept;
+
 
       inline
       decltype(auto) getPrimitives() const noexcept;
@@ -147,6 +143,9 @@ namespace dcel {
 
       inline
       decltype(auto) getNodeType() const noexcept;
+
+      inline
+      decltype(auto) getPrimitives() noexcept;
 
       inline
       decltype(auto) setParent(const NodePtr& a_parent) noexcept;

@@ -179,23 +179,17 @@ decltype(auto) NodeT<T, P, BV>::topDownSortAndPartitionPrimitives(const StopFunc
 								  const BVConstructor&     a_bvFunc) noexcept -> void {
   const bool stopSplitting = a_stopFunc(*this);
 
-  m_bv = a_bvFunc(*this);
+  m_bv = a_bvFunc(m_primitives);
   
   if(!stopSplitting){
-
-    //    const int splitIndex = a_partFunc(*this);
-
+    
     const auto partitions = a_partFunc(m_primitives);
     
-    // Create the left and right nodes and move further down the tree.
-    // PrimitiveList lPrimitives(m_primitives.begin(), m_primitives.begin() + splitIndex+1);
-    // PrimitiveList rPrimitives(m_primitives.begin() + splitIndex + 1, m_primitives.end());
+    const auto leftPrims  = partitions.first;
+    const auto rightPrims = partitions.second;
 
-    const auto lPrimitives = partitions.first;
-    const auto rPrimitives = partitions.second;
-
-    this->insertNode(m_left,  lPrimitives);
-    this->insertNode(m_right, rPrimitives);
+    this->insertNode(m_left,  leftPrims);
+    this->insertNode(m_right, rightPrims);
 
     m_left ->topDownSortAndPartitionPrimitives(a_stopFunc, a_partFunc, a_bvFunc);
     m_right->topDownSortAndPartitionPrimitives(a_stopFunc, a_partFunc, a_bvFunc);

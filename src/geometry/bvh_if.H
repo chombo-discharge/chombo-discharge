@@ -26,14 +26,13 @@ public:
   using mesh  = meshT<T>;
   using face  = faceT<T>;
   using Node  = NodeT<T, face, BV>;
-  using PrimitiveList = BVH::PrimitiveListT<face>;
 
   // Lambdas for interfacing into dcel_BVH
-  static StopFunctionT<T, face, BV>      defaultStopFunction;
-  //  static PartitionFunctionT<T, face, BV> defaultPartitionFunction;
-  static BVConstructorT<T, face, BV>     defaultBVConstructor;
+  static StopFunctionT<T, face, BV> defaultStopFunction;
+  static PartitionFunctionT<face>   defaultPartitionFunction;
+  static BVConstructorT<face, BV>   defaultBVConstructor;
 
-  static PartitionFunctionT<face> defaultPartitionFunction;
+
 
   bvh_if() = delete;
 

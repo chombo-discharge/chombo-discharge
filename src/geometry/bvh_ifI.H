@@ -14,6 +14,9 @@
 using namespace dcel;
 using namespace dcel::BVH;
 
+template <class T>
+using PrimitiveList = std::vector<std::shared_ptr<const faceT<T> > >; 
+
 template <class T, class BV>
 StopFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultStopFunction = [](const NodeT<T, faceT<T>, BV>& a_node){
   const auto& primitives = a_node.getPrimitives();
@@ -23,9 +26,7 @@ StopFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultStopFunction = [](const Nod
 };
 
 template <class T, class BV>
-BVConstructorT<T, faceT<T>, BV> bvh_if<T, BV>::defaultBVConstructor = [](const NodeT<T, faceT<T>, BV>& a_node){
-  const auto& a_primitives = a_node.getPrimitives();
-  
+BVConstructorT<faceT<T>, BV> bvh_if<T, BV>::defaultBVConstructor = [](const PrimitiveList<T>& a_primitives){
   std::vector<Vec3T<T> > coordinates;
 
   for (const auto& f : a_primitives){
@@ -36,55 +37,20 @@ BVConstructorT<T, faceT<T>, BV> bvh_if<T, BV>::defaultBVConstructor = [](const N
   return BV(coordinates);
 };
 
-#if 0
 template <class T, class BV>
-PartitionFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultPartitionFunction = [](NodeT<T, faceT<T>, BV>& a_node){
-
-  // TLDR: Very, very naive partitioning of primitives. We search for the spatial direction where the centroids are spaced furthest apart,
-  //       and split the vector in half along that direction. 
-
-  auto& primitives = a_node.getPrimitives();
-
-  // Determine along which axis to split.
-  Vec3T<T> minCorner = primitives.front()->getCentroid();
-  Vec3T<T> maxCorner = primitives.front()->getCentroid();
-
-  for(const auto& f : primitives){
-    minCorner = std::min(minCorner, f->getCentroid());
-    maxCorner = std::max(maxCorner, f->getCentroid());
-  }
-
-  const Vec3T<T> delta = maxCorner - minCorner;
-  const int splitDir   = delta.maxDir(true);
-
-
-  // Sort centroids along splitDir and split the vector in half.
-  auto comparator = [splitDir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
-    return f1->getCentroid()[splitDir] < f2->getCentroid()[splitDir];
-  };
-  
-  std::sort(primitives.begin(), primitives.end(), comparator);
-  
-  return (primitives.size()-1)/2;
-};
-#else
-template <class T, class BV>
-PartitionFunctionT<faceT<T> > bvh_if<T, BV>::defaultPartitionFunction = [](const std::vector<std::shared_ptr<const faceT<T> > >& a_primitives){
-  using PrimitiveList = std::vector<std::shared_ptr<const faceT<T> > >;
-
+PartitionFunctionT<faceT<T> > bvh_if<T, BV>::defaultPartitionFunction = [](const PrimitiveList<T>& a_primitives){
   Vec3T<T> minCorner = a_primitives.front()->getCentroid();
   Vec3T<T> maxCorner = a_primitives.front()->getCentroid();
 
   for(const auto& p : a_primitives){
-    minCorner = std::min(minCorner, p->getCentroid());
-    maxCorner = std::max(maxCorner, p->getCentroid());
+    minCorner = min(minCorner, p->getCentroid());
+    maxCorner = max(minCorner, p->getCentroid());
   }
 
   const Vec3T<T> delta = maxCorner - minCorner;
   const int splitDir   = delta.maxDir(true);
 
-
-  PrimitiveList sortedPrimitives(a_primitives);
+  PrimitiveList<T> sortedPrimitives(a_primitives);
   auto comparator = [splitDir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
     return f1->getCentroid()[splitDir] < f2->getCentroid()[splitDir];
   };
@@ -93,13 +59,12 @@ PartitionFunctionT<faceT<T> > bvh_if<T, BV>::defaultPartitionFunction = [](const
 
   const int splitIndex = (sortedPrimitives.size()-1)/2;
 
-  PrimitiveList lPrims(sortedPrimitives.begin(), sortedPrimitives.begin() + splitIndex+1);
-  PrimitiveList rPrims(sortedPrimitives.begin() + splitIndex + 1, sortedPrimitives.end());
+  PrimitiveList<T> lPrims(sortedPrimitives.begin(), sortedPrimitives.begin() + splitIndex+1);
+  PrimitiveList<T> rPrims(sortedPrimitives.begin() + splitIndex + 1, sortedPrimitives.end());
   
   return std::make_pair(lPrims, rPrims);
   
 };
-#endif
 
 template <class T, class BV>
 bvh_if<T, BV>::bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInside){
