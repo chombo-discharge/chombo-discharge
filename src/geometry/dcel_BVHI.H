@@ -201,6 +201,7 @@ decltype(auto) NodeT<T, P, BV>::insertNode(NodePtr& a_node, const PrimitiveList&
 
   a_node->setPrimitives(a_primitives);
   a_node->setParent(std::make_shared<NodeT<T, P, BV> >(*this));
+  //  a_node->setParent(std::shared_ptr<Node>(this));
   a_node->setNodeType(NodeType::Leaf);
   a_node->setDepth(m_depth+1);
 }
@@ -213,17 +214,21 @@ decltype(auto) NodeT<T, P, BV>::getDistanceToBV(const Vec3& a_x0) const noexcept
 
 template <class T, class P, class BV>
 inline
-decltype(auto) NodeT<T, P, BV>::pruneBranches(const Vec3& a_point, T& a_closest, const DistanceFunction& a_distFunc) const noexcept -> void {
+decltype(auto) NodeT<T, P, BV>::pruneBranches(T&                                    a_closest,
+					      const Vec3&                           a_point,
+					      const PrimitivesDistanceFunction&     a_primFunc,
+					      const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void {
+					      
   if(m_nodeType == NodeType::Leaf){
-    const auto primDist = T(a_distFunc(m_primitives, a_point));
+    const auto primDist = T(a_primFunc(m_primitives, a_point));
 
     if(std::abs(primDist) < std::abs(a_closest)){
       a_closest = primDist;
     }
   }
   else {
-    const auto minL = m_left ->getDistanceToBV(a_point);
-    const auto minR = m_right->getDistanceToBV(a_point);
+    const auto minL = a_bvFunc(m_left ->getBoundingVolume(), a_point);
+    const auto minR = a_bvFunc(m_right->getBoundingVolume(), a_point);
 
     const auto leftFirst = minL < minR;
     
@@ -233,25 +238,35 @@ decltype(auto) NodeT<T, P, BV>::pruneBranches(const Vec3& a_point, T& a_closest,
     const auto minFirst  = std::min(minL, minR);
     const auto minSecond = std::max(minL, minR);
 
-    if(minFirst  < std::abs(a_closest)) first ->pruneBranches(a_point, a_closest, a_distFunc);
-    if(minSecond < std::abs(a_closest)) second->pruneBranches(a_point, a_closest, a_distFunc);
+    if(minFirst  < std::abs(a_closest)) first ->pruneBranches(a_closest, a_point, a_primFunc, a_bvFunc);
+    if(minSecond < std::abs(a_closest)) second->pruneBranches(a_closest, a_point, a_primFunc, a_bvFunc);
   }
 }
 
 template <class T, class P, class BV>
 inline
-decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3& a_point, const DistanceFunction& a_distFunc) const noexcept -> void {
+decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_point,
+				       const PrimitivesDistanceFunction&     a_distFunc,
+				       const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void {
+  auto Q = this->getNewQueue();
+  
+  Q.push(QueueElement(1.0, std::make_shared<const Node>(*this)));
+  Q.push(QueueElement(2.0, std::make_shared<const Node>(*this)));
 
-  auto QueueComparator = [](const QueueElement& a_q1, const QueueElement& a_q2) {
-    return a_q1.first < a_q2.first;
+  QueueElement blargh = Q.top();
+
+  std::cout << blargh.first << std::endl;
+}
+
+template <class T, class P, class BV>
+inline
+decltype(auto) NodeT<T, P, BV>::getNewQueue() const noexcept {
+
+  auto Compare = [](const QueueElement& a_q1, const QueueElement& a_q2) {
+    return a_q1.first > a_q2.first;
   };
 
-  std::priority_queue<QueueElement, QueueVector, decltype(QueueComparator)> Q();
+  return Queue(Compare);
 }
-// template <class T, class P, class BV>
-// inline
-// decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3& a_point, Queue& a_Q, const DistanceFunction& a_distFunc) const noexcept -> void {
-  
-// }
 
 #endif

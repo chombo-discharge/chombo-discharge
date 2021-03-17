@@ -27,13 +27,14 @@ public:
   using face  = faceT<T>;
   using Node  = NodeT<T, face, BV>;
   using PrimitiveList = BVH::PrimitiveListT<face>;
-  //  using Queue = std::priority_queue<std::pair<T, Node> >;
 
-  // Lambdas for interfaceing into dcel_BVH
+  // Lambdas for interfacing into dcel_BVH
   static StopFunctionT<T, face, BV>      defaultStopFunction;
   static PartitionFunctionT<T, face, BV> defaultPartitionFunction;
   static BVConstructorT<T, face, BV>     defaultBVConstructor;
-  static DistanceFunctionT<T, face>      defaultDistanceFunction;
+  
+  static PrimitivesDistanceFunctionT<T, face>   defaultPrimDistanceFunction; 
+  static BoundingVolumeDistanceFunctionT<T, BV> defaultBvDistanceFunction;;
 
   bvh_if() = delete;
 
@@ -46,7 +47,6 @@ public:
   BaseIF* newImplicitFunction() const override;
 
 protected:
-
   std::shared_ptr<Node> m_root;
   
   bool m_flipInside;

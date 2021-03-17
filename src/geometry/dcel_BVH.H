@@ -36,7 +36,10 @@ namespace dcel {
     using BVConstructorT = std::function<BV(const NodeT<T, P, BV>&)>;
 
     template <class T, class P>
-    using DistanceFunctionT = std::function<T(const PrimitiveListT<P>&, const Vec3T<T>& a_point)>;
+    using PrimitivesDistanceFunctionT = std::function<T(const PrimitiveListT<P>&, const Vec3T<T>& a_point)>;
+
+    template <class T, class BV>
+    using BoundingVolumeDistanceFunctionT = std::function<T(const BV&, const Vec3T<T>& a_point)>;
 
     enum class NodeType {
       Regular,
@@ -53,17 +56,21 @@ namespace dcel {
       using Vec3       = Vec3T<T>;
       using Node       = NodeT<T, P, BV>;
       using NodePtr    = std::shared_ptr<Node>;
+      using NodePtrC   = std::shared_ptr<const Node>;
       
       using PartitionFunction = PartitionFunctionT<T, P, BV>;
       using StopFunction      = StopFunctionT<T, P, BV>;
       using BVConstructor     = BVConstructorT<T, P, BV>;
-      using DistanceFunction  = DistanceFunctionT<T, P>;
-
-      using QueueElement = std::pair<T, NodePtr>;
-      using QueueVector  = std::vector<QueueElement>;
       
-      //      using Queue = std::priority_queue<QueueElement, QueueVector, QueueComparator>;
+      using PrimitivesDistanceFunction     = PrimitivesDistanceFunctionT<T, P>;
+      using BoundingVolumeDistanceFunction = BoundingVolumeDistanceFunctionT<T, BV>;
 
+      using QueueElement = std::pair<T, NodePtrC>;
+      using QueueVector  = std::vector<QueueElement>;
+      using QueueComp    = std::function<bool(QueueElement&, QueueElement&)>;
+      using Queue        = std::priority_queue<QueueElement, QueueVector, QueueComp>;
+
+      using schme = int;
 
       NodeT();
       NodeT(NodePtr& a_parent);
@@ -91,10 +98,15 @@ namespace dcel {
       decltype(auto) getPrimitives() const noexcept;
 
       inline
-      decltype(auto) pruneBranches(const Vec3& a_point, T& a_closest, const DistanceFunction& a_distFunc) const noexcept -> void;
+      decltype(auto) pruneBranches(T&                                    a_closest,
+				   const Vec3&                           a_point,
+				   const PrimitivesDistanceFunction&     a_primFunc,
+				   const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void;
 
       inline
-      decltype(auto) pruneQ(const Vec3& a_point, const DistanceFunction& a_distFunc) const noexcept -> void;
+      decltype(auto) pruneQ(const Vec3&                           a_point,
+			    const PrimitivesDistanceFunction&     a_distFunc,
+			    const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void;
 
     protected:
 
@@ -160,10 +172,14 @@ namespace dcel {
 
       inline
       decltype(auto) setRight(const NodePtr& a_right) noexcept;
-
+      
+      inline
+      decltype(auto) getNewQueue() const noexcept;
+      
+      #if 0
       inline
       decltype(auto) pruneQ(double& a_closest, const Vec3& a_point, const DistanceFunction& a_distFunc) const noexcept -> void;
-      
+#endif      
     };
   }
 }

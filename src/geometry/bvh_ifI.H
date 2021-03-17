@@ -17,7 +17,7 @@ using namespace dcel::BVH;
 template <class T, class BV>
 StopFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultStopFunction = [](const NodeT<T, faceT<T>, BV>& a_node){
   const auto& primitives = a_node.getPrimitives();
-  const int depth     = a_node.getDepth();
+  const int depth        = a_node.getDepth();
 
   return primitives.size() < 2;
 };
@@ -67,7 +67,7 @@ PartitionFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultPartitionFunction = []
 };
 
 template <class T, class BV>
-DistanceFunctionT<T, faceT<T> > bvh_if<T, BV>::defaultDistanceFunction = [](const PrimitiveListT<face>& a_faces, const Vec3T<T>& a_point){
+PrimitivesDistanceFunctionT<T, faceT<T> > bvh_if<T, BV>::defaultPrimDistanceFunction = [](const PrimitiveListT<face>& a_faces, const Vec3T<T>& a_point){
   T d = std::numeric_limits<T>::max();
 
   for (const auto& f : a_faces){
@@ -82,9 +82,18 @@ DistanceFunctionT<T, faceT<T> > bvh_if<T, BV>::defaultDistanceFunction = [](cons
 };
 
 template <class T, class BV>
+BoundingVolumeDistanceFunctionT<T, BV> bvh_if<T, BV>::defaultBvDistanceFunction = [](const BV& a_bv, const Vec3T<T>& a_point){
+  return a_bv.getDistance(a_point);
+};
+
+template <class T, class BV>
 bvh_if<T, BV>::bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInside){
   m_root       = a_root;
   m_flipInside = a_flipInside;
+
+  Vec3 p = Vec3::zero();
+  m_root->pruneQ(p, bvh_if<T, BV>::defaultPrimDistanceFunction, bvh_if<T, BV>::defaultBvDistanceFunction);
+
 }
 
 template <class T, class BV>
@@ -104,16 +113,16 @@ Real bvh_if<T, BV>::value(const RealVect& a_point) const {
 
   T d = std::numeric_limits<T>::infinity();
   
-  m_root->pruneBranches(p, d, bvh_if<T, BV>::defaultDistanceFunction);
+  m_root->pruneBranches(d,
+			p,
+			bvh_if<T, BV>::defaultPrimDistanceFunction,
+			bvh_if<T, BV>::defaultBvDistanceFunction);
 
   if(m_flipInside){
     d = -d;
   }
 
   return Real(d);
-
-
-  //  auto Q = Queue(
 }
 
 template <class T, class BV>
