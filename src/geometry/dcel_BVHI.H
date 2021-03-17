@@ -203,40 +203,54 @@ decltype(auto) NodeT<T, P, BV>::insertNode(NodePtr& a_node, const PrimitiveList&
 }
 
 template <class T, class P, class BV>
-template <class Q>
 inline
-decltype(auto) NodeT<T, P, BV>::pruneBranches(const Vec3T<Q>&                       a_point,
-					      const PrimitivesDistanceFunction&     a_primFunc,
-					      const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept {
-
-  auto d = std::numeric_limits<T>::infinity();
-
-  const Vec3 p(a_point);
-
-  this->pruneBranches(d, p, a_primFunc, a_bvFunc);
-
-  return d;
+decltype(auto) NodeT<T, P, BV>::getDistanceToBoundingVolume(const Vec3& a_point) const noexcept{
+  return m_bv.getDistance(a_point);
 }
 
 template <class T, class P, class BV>
 inline
-decltype(auto) NodeT<T, P, BV>::pruneBranches(T&                                    a_closest,
-					      const Vec3&                           a_point,
-					      const PrimitivesDistanceFunction&     a_primFunc,
-					      const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void {
+decltype(auto) NodeT<T, P, BV>::getDistanceToPrimitives(const Vec3& a_point) const noexcept {
+  T minDist = std::numeric_limits<T>::max();
+
+  for (const auto& p : m_primitives){
+    const auto curDist = p->signedDistance(a_point);
+
+    if(std::abs(curDist) < std::abs(minDist)){
+      minDist = curDist;
+    }
+  }
+
+  return minDist;
+}
+
+template <class T, class P, class BV>
+inline
+decltype(auto) NodeT<T, P, BV>::pruneBranches(const Vec3& a_point) const noexcept {
+
+  T minDist = std::numeric_limits<T>::infinity();
+
+  this->pruneBranches(minDist, a_point);
+
+  return minDist;
+}
+
+template <class T, class P, class BV>
+inline
+decltype(auto) NodeT<T, P, BV>::pruneBranches(T& a_closest, const Vec3& a_point) const noexcept -> void {
 					      
   if(m_nodeType == NodeType::Leaf){
-    const auto primDist = T(a_primFunc(m_primitives, a_point));
+    const T primDist = this->getDistanceToPrimitives(a_point);
 
     if(std::abs(primDist) < std::abs(a_closest)){
       a_closest = primDist;
     }
   }
   else {
-    const auto minL = a_bvFunc(m_left ->getBoundingVolume(), a_point);
-    const auto minR = a_bvFunc(m_right->getBoundingVolume(), a_point);
+    const T minL = m_left->getDistanceToBoundingVolume(a_point);
+    const T minR = m_right->getDistanceToBoundingVolume(a_point);
 
-    const auto leftFirst = minL < minR;
+    const auto leftFirst = (minL < minR);
     
     const auto first  = leftFirst ? m_left  : m_right;
     const auto second = leftFirst ? m_right : m_left;
@@ -244,8 +258,8 @@ decltype(auto) NodeT<T, P, BV>::pruneBranches(T&                                
     const auto minFirst  = std::min(minL, minR);
     const auto minSecond = std::max(minL, minR);
 
-    if(minFirst  < std::abs(a_closest)) first ->pruneBranches(a_closest, a_point, a_primFunc, a_bvFunc);
-    if(minSecond < std::abs(a_closest)) second->pruneBranches(a_closest, a_point, a_primFunc, a_bvFunc);
+    if(minFirst  < std::abs(a_closest)) first ->pruneBranches(a_closest, a_point);
+    if(minSecond < std::abs(a_closest)) second->pruneBranches(a_closest, a_point);
   }
 }
 

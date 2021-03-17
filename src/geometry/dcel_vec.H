@@ -79,8 +79,8 @@ namespace dcel {
     
     Vec3T();
 
-    template <class P>
-    Vec3T(const Vec3T<P>& a_u);
+    
+    Vec3T(const Vec3T<T>& a_u);
     Vec3T(const T& a_x, const T& a_y, const T& a_z);
     ~Vec3T() = default;
 
@@ -95,78 +95,60 @@ namespace dcel {
 
     inline
     decltype(auto) operator[](int i) const noexcept;
-
-    template <class P>
+    
     inline
-    decltype(auto) operator==(const Vec3T<P>& u) const noexcept;
-
-    template <class P>
+    decltype(auto) operator==(const Vec3T<T>& u) const noexcept;
+    
     inline
-    decltype(auto) operator<(const Vec3T<P>& u) const noexcept;
-
-    template <class P>
+    decltype(auto) operator<(const Vec3T<T>& u) const noexcept;
+    
     inline
-    decltype(auto) operator>(const Vec3T<P>& u) const noexcept;
-
-    template <class P>
+    decltype(auto) operator>(const Vec3T<T>& u) const noexcept;
+    
     inline
-    decltype(auto) operator<=(const Vec3T<P>& u) const noexcept;
-
-    template <class P>
+    decltype(auto) operator<=(const Vec3T<T>& u) const noexcept;
+    
     inline
-    decltype(auto) operator>=(const Vec3T<P>& u) const noexcept;
-
-    template <class P>
+    decltype(auto) operator>=(const Vec3T<T>& u) const noexcept;
+    
     inline
-    decltype(auto) operator=(const Vec3T<P>& u) noexcept;
-
-    template <class P>
+    decltype(auto) operator=(const Vec3T<T>& u) noexcept;
+    
     inline
-    decltype(auto) operator+(const Vec3T<P>& u) const noexcept;
-
-    template <class P>
+    decltype(auto) operator+(const Vec3T<T>& u) const noexcept;
+    
     inline
-    decltype(auto) operator-(const Vec3T<P>& u) const noexcept;
-
-    template <class P>
+    decltype(auto) operator-(const Vec3T<T>& u) const noexcept;
+    
     inline
-    decltype(auto) operator*(const P& s) const noexcept;
-
-    template <class P>
+    decltype(auto) operator*(const T& s) const noexcept;
+    
     inline
-    decltype(auto) operator/(const P& s) const noexcept;
-
-    template <class P>
+    decltype(auto) operator/(const T& s) const noexcept;
+    
     inline
-    decltype(auto) operator+=(const Vec3T<P>& u) noexcept;
-
-    template <class P>
+    decltype(auto) operator+=(const Vec3T<T>& u) noexcept;
+    
     inline
-    decltype(auto) operator-=(const Vec3T<P>& u) noexcept;
-
-    template <class P>
+    decltype(auto) operator-=(const Vec3T<T>& u) noexcept;
+    
     inline
-    decltype(auto) operator*=(const P& s) noexcept;
-
-    template <class P>
+    decltype(auto) operator*=(const T& s) noexcept;
+    
     inline
-    decltype(auto) operator/=(const P& s) noexcept;
-
-    template <class P>
+    decltype(auto) operator/=(const T& s) noexcept;
+    
     inline
-    decltype(auto) min(const Vec3T<P>& u) noexcept;
-
-    template <class P>
+    decltype(auto) min(const Vec3T<T>& u) noexcept;
+    
     inline
-    decltype(auto) max(const Vec3T<P>& u) noexcept;
-
-    template <class P>
+    decltype(auto) max(const Vec3T<T>& u) noexcept;
+    
     inline
-    decltype(auto) cross(const Vec3T<P>& u) const noexcept;
-
-    template <class P>
+    decltype(auto) cross(const Vec3T<T>& u) const noexcept;
+    
     inline
-    decltype(auto) dot(const Vec3T<P>& u) const noexcept;
+    decltype(auto) dot(const Vec3T<T>& u) const noexcept;
 
     inline
     decltype(auto) maxDir(const bool a_doAbs) const noexcept;

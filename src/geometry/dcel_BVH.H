@@ -84,11 +84,8 @@ namespace dcel {
       inline
       decltype(auto) getPrimitives() const noexcept;
 
-      template <class Q>
       inline
-      decltype(auto) pruneBranches(const Vec3T<Q>&                       a_point,
-				   const PrimitivesDistanceFunction&     a_primFunc,
-				   const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept;
+      decltype(auto) pruneBranches(const Vec3& a_point) const noexcept;
 
       inline
       decltype(auto) pruneQ(const Vec3&                           a_point,
@@ -131,6 +128,12 @@ namespace dcel {
       decltype(auto) getBoundingVolume() const noexcept;
 
       inline
+      decltype(auto) getDistanceToBoundingVolume(const Vec3& a_point) const noexcept;
+
+      inline
+      decltype(auto) getDistanceToPrimitives(const Vec3& a_point) const noexcept;
+
+      inline
       decltype(auto) getParent() noexcept;
 
       inline
@@ -161,10 +164,8 @@ namespace dcel {
       decltype(auto) setRight(const NodePtr& a_right) noexcept;
 
       inline
-      decltype(auto) pruneBranches(T&                                    a_closest,
-				   const Vec3&                           a_point,
-				   const PrimitivesDistanceFunction&     a_primFunc,
-				   const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void;
+      decltype(auto) pruneBranches(T& a_closest, const Vec3& a_point) const noexcept -> void;
+
     };
   }
 }
