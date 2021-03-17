@@ -206,14 +206,17 @@ decltype(auto) NodeT<T, P, BV>::insertNode(NodePtr& a_node, const PrimitiveList&
 }
 
 template <class T, class P, class BV>
+template <class Q>
 inline
-decltype(auto) NodeT<T, P, BV>::pruneBranches(const Vec3&                           a_point,
+decltype(auto) NodeT<T, P, BV>::pruneBranches(const Vec3T<Q>&                       a_point,
 					      const PrimitivesDistanceFunction&     a_primFunc,
 					      const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept {
 
   auto d = std::numeric_limits<T>::infinity();
 
-  this->pruneBranches(d, a_point, a_primFunc, a_bvFunc);
+  const Vec3 p(a_point);
+
+  this->pruneBranches(d, p, a_primFunc, a_bvFunc);
 
   return d;
 }
