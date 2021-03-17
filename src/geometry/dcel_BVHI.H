@@ -208,8 +208,13 @@ decltype(auto) NodeT<T, P, BV>::insertNode(NodePtr& a_node, const PrimitiveList&
 
 template <class T, class P, class BV>
 inline
-decltype(auto) NodeT<T, P, BV>::getDistanceToBV(const Vec3& a_x0) const noexcept {
-  return T(m_bv.getDistance(a_x0));
+decltype(auto) NodeT<T, P, BV>::getNewQueue() const noexcept {
+
+  auto Compare = [](const QueueElement& a_q1, const QueueElement& a_q2) {
+    return a_q1.first > a_q2.first;
+  };
+
+  return Queue(Compare);
 }
 
 template <class T, class P, class BV>
@@ -243,9 +248,12 @@ decltype(auto) NodeT<T, P, BV>::pruneBranches(T&                                
   }
 }
 
+
+
 template <class T, class P, class BV>
 inline
-decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_point,
+decltype(auto) NodeT<T, P, BV>::pruneQ(T&                                    a_closest,
+				       const Vec3&                           a_point,
 				       const PrimitivesDistanceFunction&     a_distFunc,
 				       const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void {
   auto Q = this->getNewQueue();
@@ -257,16 +265,16 @@ decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_p
 
   std::cout << blargh.first << std::endl;
 }
-
+#if 0
 template <class T, class P, class BV>
 inline
-decltype(auto) NodeT<T, P, BV>::getNewQueue() const noexcept {
-
-  auto Compare = [](const QueueElement& a_q1, const QueueElement& a_q2) {
-    return a_q1.first > a_q2.first;
-  };
-
-  return Queue(Compare);
+decltype(auto) NodeT<T, P, BV>::pruneQ(double&                               a_closest,
+				       Queue&                                a_Q,
+				       const Vec3&                           a_point,
+				       const PrimitivesDistanceFunction&     a_distFunc,
+				       const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void {
+  return;
 }
+#endif
 
 #endif

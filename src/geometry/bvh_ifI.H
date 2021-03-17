@@ -91,8 +91,11 @@ bvh_if<T, BV>::bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInsi
   m_root       = a_root;
   m_flipInside = a_flipInside;
 
+#if 1 // Test
+  T d = std::numeric_limits<T>::max();
   Vec3 p = Vec3::zero();
-  m_root->pruneQ(p, bvh_if<T, BV>::defaultPrimDistanceFunction, bvh_if<T, BV>::defaultBvDistanceFunction);
+  m_root->pruneQ(d, p, bvh_if<T, BV>::defaultPrimDistanceFunction, bvh_if<T, BV>::defaultBvDistanceFunction);
+#endif
 
 }
 

@@ -104,7 +104,8 @@ namespace dcel {
 				   const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void;
 
       inline
-      decltype(auto) pruneQ(const Vec3&                           a_point,
+      decltype(auto) pruneQ(T&                                    a_closest,
+			    const Vec3&                           a_point,
 			    const PrimitivesDistanceFunction&     a_distFunc,
 			    const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void;
 
@@ -162,9 +163,6 @@ namespace dcel {
       decltype(auto) getNodeType() const noexcept;
 
       inline
-      decltype(auto) getDistanceToBV(const Vec3& a_x0) const noexcept;
-
-      inline
       decltype(auto) setParent(const NodePtr& a_parent) noexcept;
 
       inline
@@ -176,10 +174,12 @@ namespace dcel {
       inline
       decltype(auto) getNewQueue() const noexcept;
       
-      #if 0
       inline
-      decltype(auto) pruneQ(double& a_closest, const Vec3& a_point, const DistanceFunction& a_distFunc) const noexcept -> void;
-#endif      
+      decltype(auto) pruneQ(double&                               a_closest,
+			    Queue&                                a_Q,
+			    const Vec3&                           a_point,
+			    const PrimitivesDistanceFunction&     a_distFunc,
+			    const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void;
     };
   }
 }
