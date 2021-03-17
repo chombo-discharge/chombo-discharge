@@ -70,7 +70,7 @@ PartitionFunctionT<faceT<T> > bvh_if<T, BV>::partitionMinimumOverlap = [](const 
 
   const int splitIndex    = (a_primitives.size() - 1)/2;
 
-  T minOverlap = std::numeric_limits<T>::max();
+  T minOverlap = std::numeric_limits<T>::infinity();
 
   int bestDir;
 
@@ -79,11 +79,10 @@ PartitionFunctionT<faceT<T> > bvh_if<T, BV>::partitionMinimumOverlap = [](const 
   // Identify the best direction by the minimum overlap
   for (int dir = 0; dir < 3; dir++){
 
-    auto comparator = [dir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
-      return f1->getCentroid()[dir] < f2->getCentroid()[dir];
-    };
-    
-    std::sort(sortedPrimitives.begin(), sortedPrimitives.end(), comparator);
+    std::sort(sortedPrimitives.begin(), sortedPrimitives.end(),
+	      [dir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
+		return f1->getCentroid()[dir] < f2->getCentroid()[dir];
+	      });
 
     PrimitiveList<T> lPrims(sortedPrimitives.begin(), sortedPrimitives.begin() + splitIndex+1);
     PrimitiveList<T> rPrims(sortedPrimitives.begin() + splitIndex + 1, sortedPrimitives.end());
@@ -99,12 +98,11 @@ PartitionFunctionT<faceT<T> > bvh_if<T, BV>::partitionMinimumOverlap = [](const 
     }
   }
 
-  // Partition in direction that minimizes resulting bounding volume overlap. 
-  auto comparator = [bestDir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
-    return f1->getCentroid()[bestDir] < f2->getCentroid()[bestDir];
-  };
-  
-  std::sort(sortedPrimitives.begin(), sortedPrimitives.end(), comparator);
+  // Build the two halves. 
+  std::sort(sortedPrimitives.begin(), sortedPrimitives.end(),
+	    [bestDir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
+	      return f1->getCentroid()[bestDir] < f2->getCentroid()[bestDir];
+	    });
 
   PrimitiveList<T> leftPrims(sortedPrimitives.begin(), sortedPrimitives.begin() + splitIndex+1);
   PrimitiveList<T> rightPrims(sortedPrimitives.begin() + splitIndex + 1, sortedPrimitives.end());
