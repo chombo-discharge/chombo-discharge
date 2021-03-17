@@ -78,6 +78,9 @@ namespace dcel {
     decltype(auto) getCenter() const noexcept;
 
     inline
+    decltype(auto) getOverlappingVolume(const BoundingSphereT<T>& a_other) const noexcept;
+
+    inline
     T getDistance(const Vec3& a_x0) const noexcept override;
 
   protected:
@@ -112,9 +115,6 @@ namespace dcel {
     decltype(auto) intersects(const AABBT& a_other) const noexcept;
 
     inline
-    T getDistance(const Vec3& a_x0) const noexcept override;
-
-    inline
     decltype(auto) getLowCorner() noexcept;
 
     inline
@@ -125,12 +125,32 @@ namespace dcel {
 
     inline
     decltype(auto) getHighCorner() const noexcept;
+
+    inline
+    decltype(auto) getOverlappingVolume(const AABBT<T>& a_other) const noexcept;
+
+    inline
+    T getDistance(const Vec3& a_x0) const noexcept override;
     
   protected:
 
     Vec3 m_loCorner;
     Vec3 m_hiCorner;
   };
+
+  template <class T>
+  decltype(auto) intersects(const BoundingSphereT<T>& a_u, const BoundingSphereT<T>& a_v) noexcept;
+
+  template <class T>
+  decltype(auto) getOverlappingVolume(const BoundingSphereT<T>& a_u, const BoundingSphereT<T>& a_v) noexcept;
+
+  template <class T>
+  decltype(auto) intersects(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
+
+  template <class T>
+  decltype(auto) getOverlappingVolume(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
+
+
 }
 
 #include "dcel_BoundingVolumesI.H"

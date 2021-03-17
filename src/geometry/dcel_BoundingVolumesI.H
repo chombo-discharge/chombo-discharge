@@ -102,7 +102,7 @@ namespace dcel {
   inline
   decltype(auto) BoundingSphereT<T>::intersects(const BoundingSphereT& a_other) const noexcept {
     const Vec3 deltaV = m_center - a_other.getCenter();
-    const T sumR       = m_radius + a_other.getRadius();
+    const T sumR      = m_radius + a_other.getRadius();
 
     return deltaV.dot(deltaV) < sumR*sumR;
   }
@@ -191,6 +191,25 @@ namespace dcel {
 
     // Ritter algorithm is very coarse and does not give an exact result anyways. Grow the dimension for safety. 
     m_radius *= (1.0 + 1E-2);
+  }
+
+  template <class T>
+  inline
+  decltype(auto) BoundingSphereT<T>::getOverlappingVolume(const BoundingSphereT<T>& a_other) const noexcept {
+    constexpr T zero = 0.0;
+
+    T retval = zero;
+    
+    if(this->intersects(a_other)){
+      const auto& r1 = m_radius;
+      const auto& r2 = a_other.getRadius();
+
+      const auto d   = (m_center-a_other.getCenter()).length();
+
+      retval = M_PI/(12.*d) * (r1+r2-d)*(r1+r2-d) * (d*d + 2*d*(r1+r2) - 3*(r1-r2)*(r1-r2));
+    }
+
+    return retval;
   }
 
   template <class T>
@@ -288,6 +307,28 @@ namespace dcel {
 
   template <class T>
   inline
+  decltype(auto) AABBT<T>::getOverlappingVolume(const AABBT<T>& a_other) const noexcept {
+    constexpr T zero = 0.0;
+    
+    T ret = 1.0;
+
+    for (int dir = 0; dir < 3; dir++){
+      const auto xL = m_loCorner[dir];
+      const auto xH = m_hiCorner[dir];
+
+      const auto yL = a_other.m_loCorner[dir];
+      const auto yH = a_other.m_hiCorner[dir];
+      
+      const auto delta = std::max(zero, std::min(xH, yH) - std::max(xL, yL));
+
+      ret *= delta;
+    }
+
+    return ret;
+  }
+
+  template <class T>
+  inline
   T AABBT<T>::getDistance(const Vec3& a_point) const noexcept {
     constexpr T zero = 0.0;
     
@@ -300,6 +341,25 @@ namespace dcel {
     return std::max(zero, retval);
   }
 
+  template <class T>
+  decltype(auto) intersects(const BoundingSphereT<T>& u, const BoundingSphereT<T>& v) noexcept {
+    return u.intersects(v);
+  }
+
+  template <class T>
+  decltype(auto) getOverlappingVolume(const BoundingSphereT<T>& u, const BoundingSphereT<T>& v) noexcept {
+    return u.getOverlappingVolume(v);
+  }
+
+  template <class T>
+  decltype(auto) intersects(const AABBT<T>& u, const AABBT<T>& v) noexcept {
+    return u.intersects(v);
+  }
+
+  template <class T>
+  decltype(auto) getOverlappingVolume(const AABBT<T>& u, const AABBT<T>& v) noexcept {
+    return u.getOverlappingVolume(v);
+  }
 }
 
 #endif

@@ -22,7 +22,7 @@ using precision = float;
 using face   = faceT<precision>;
 using mesh   = meshT<precision>;
 using AABB   = AABBT<precision>;
-using Sphere = BoundingSphereT<double>;
+using Sphere = BoundingSphereT<precision>;
 
 using BV = AABB;
 
@@ -47,9 +47,15 @@ porsche::porsche(){
 
   // Build BVH
   auto root = std::make_shared<NodeT<precision, face, BV> >(m->getFaces());
+#if 0 // Previous code
   root->topDownSortAndPartitionPrimitives(bvh_if<precision, BV>::defaultStopFunction,
 					  bvh_if<precision, BV>::defaultPartitionFunction,
 					  bvh_if<precision, BV>::defaultBVConstructor);
+#else
+  root->topDownSortAndPartitionPrimitives(bvh_if<precision, BV>::defaultStopFunction,
+					  bvh_if<precision, BV>::partitionMinimumOverlap,
+					  bvh_if<precision, BV>::defaultBVConstructor);
+#endif
 
   // Pass BVH to implicit function
   auto bif = RefCountedPtr<bvh_if<precision, BV> > (new bvh_if<precision, BV>(root,false));

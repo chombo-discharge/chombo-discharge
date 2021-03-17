@@ -31,7 +31,7 @@ public:
   static StopFunctionT<T, face, BV> defaultStopFunction;
   static PartitionFunctionT<face>   defaultPartitionFunction;
   static BVConstructorT<face, BV>   defaultBVConstructor;
-  static PartitionFunctionT<face>   partitionSAH;
+  static PartitionFunctionT<face>   partitionMinimumOverlap;
 
   bvh_if() = delete;
 

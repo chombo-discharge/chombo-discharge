@@ -66,8 +66,51 @@ PartitionFunctionT<faceT<T> > bvh_if<T, BV>::defaultPartitionFunction = [](const
 };
 
 template <class T, class BV>
-PartitionFunctionT<faceT<T> > bvh_if<T, BV>::partitionSAH = [](const PrimitiveList<T>& a_primitives){
+PartitionFunctionT<faceT<T> > bvh_if<T, BV>::partitionMinimumOverlap = [](const PrimitiveList<T>& a_primitives){
 
+  const int splitIndex    = (a_primitives.size() - 1)/2;
+
+  T minOverlap = std::numeric_limits<T>::max();
+
+  int bestDir;
+
+  PrimitiveList<T> sortedPrimitives(a_primitives);
+  
+  // Identify the best direction by the minimum overlap
+  for (int dir = 0; dir < 3; dir++){
+
+    auto comparator = [dir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
+      return f1->getCentroid()[dir] < f2->getCentroid()[dir];
+    };
+    
+    std::sort(sortedPrimitives.begin(), sortedPrimitives.end(), comparator);
+
+    PrimitiveList<T> lPrims(sortedPrimitives.begin(), sortedPrimitives.begin() + splitIndex+1);
+    PrimitiveList<T> rPrims(sortedPrimitives.begin() + splitIndex + 1, sortedPrimitives.end());
+
+    const BV lBV = bvh_if<T, BV>::defaultBVConstructor(lPrims);
+    const BV rBV = bvh_if<T, BV>::defaultBVConstructor(rPrims);
+
+    const T curOverlap = getOverlappingVolume(lBV, rBV);
+
+    if (curOverlap < minOverlap){
+      minOverlap = curOverlap;
+      bestDir = dir;
+    }
+  }
+
+  // Partition in direction that minimizes resulting bounding volume overlap. 
+  auto comparator = [bestDir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
+    return f1->getCentroid()[bestDir] < f2->getCentroid()[bestDir];
+  };
+  
+  std::sort(sortedPrimitives.begin(), sortedPrimitives.end(), comparator);
+
+  PrimitiveList<T> leftPrims(sortedPrimitives.begin(), sortedPrimitives.begin() + splitIndex+1);
+  PrimitiveList<T> rightPrims(sortedPrimitives.begin() + splitIndex + 1, sortedPrimitives.end());
+
+  return std::make_pair(leftPrims, rightPrims);
+  
 };
 
 template <class T, class BV>
