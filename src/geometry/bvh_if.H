@@ -32,9 +32,6 @@ public:
   static StopFunctionT<T, face, BV>      defaultStopFunction;
   static PartitionFunctionT<T, face, BV> defaultPartitionFunction;
   static BVConstructorT<T, face, BV>     defaultBVConstructor;
-  
-  static PrimitivesDistanceFunctionT<T, face>   defaultPrimDistanceFunction; 
-  static BoundingVolumeDistanceFunctionT<T, BV> defaultBvDistanceFunction;;
 
   bvh_if() = delete;
 

@@ -68,26 +68,6 @@ PartitionFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultPartitionFunction = []
 };
 
 template <class T, class BV>
-PrimitivesDistanceFunctionT<T, faceT<T> > bvh_if<T, BV>::defaultPrimDistanceFunction = [](const PrimitiveListT<face>& a_faces, const Vec3T<T>& a_point){
-  T d = std::numeric_limits<T>::max();
-
-  for (const auto& f : a_faces){
-    const T cur = f->signedDistance(a_point);
-
-    if(std::abs(cur) < std::abs(d)) {
-      d = cur;
-    }
-  }
-
-  return d;
-};
-
-template <class T, class BV>
-BoundingVolumeDistanceFunctionT<T, BV> bvh_if<T, BV>::defaultBvDistanceFunction = [](const BV& a_bv, const Vec3T<T>& a_point){
-  return a_bv.getDistance(a_point);
-};
-
-template <class T, class BV>
 bvh_if<T, BV>::bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInside){
   m_root       = a_root;
   m_flipInside = a_flipInside;

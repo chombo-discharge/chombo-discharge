@@ -34,11 +34,19 @@ NodeT<T, P, BV>::NodeT(NodePtr& a_parent) : NodeT<T, P, BV>() {
 
 template <class T, class P, class BV>
 inline
-//NodeT<T, P, BV>::NodeT(const PrimitiveList& a_primitives) : NodeT<T, P, BV>() {
 NodeT<T, P, BV>::NodeT(const std::vector<std::shared_ptr<P> >& a_primitives) : NodeT<T, P, BV>() {
   for (const auto& p : a_primitives){
     m_primitives.emplace_back(p);
   }
+  
+  m_nodeType = NodeType::Leaf;
+  m_depth    = 0;
+}
+
+template <class T, class P, class BV>
+inline
+NodeT<T, P, BV>::NodeT(const PrimitiveList& a_primitives) : NodeT<T, P, BV>() {
+  m_primitives = a_primitives;
   
   m_nodeType = NodeType::Leaf;
   m_depth    = 0;

@@ -28,6 +28,9 @@ namespace dcel {
     // Lambdas for partitioning and searching closest distance. 
     template <class T, class P, class BV>
     using PartitionFunctionT = std::function<int(NodeT<T, P, BV>&)>;
+
+    // template <class P>
+    // using PartitionFunctionT = std::function<std::pair<PrimitiveListT<P>, PrimitiveListT<P> >(const PrimitiveListT<P>&)>;
     
     template <class T, class P, class BV>
     using StopFunctionT = std::function<bool(const NodeT<T, P, BV>&)>;
@@ -35,18 +38,13 @@ namespace dcel {
     template <class T, class P, class BV>
     using BVConstructorT = std::function<BV(const NodeT<T, P, BV>&)>;
 
-    template <class T, class P>
-    using PrimitivesDistanceFunctionT = std::function<T(const PrimitiveListT<P>&, const Vec3T<T>& a_point)>;
-
-    template <class T, class BV>
-    using BoundingVolumeDistanceFunctionT = std::function<T(const BV&, const Vec3T<T>& a_point)>;
-
     enum class NodeType {
       Regular,
       Leaf,
     };
 
-    // T is the precision for Vec3, P is the primitive type you want to enclose, BV is the bounding volume you use for it. 
+    // T is the precision for Vec3, P is the primitive type you want to enclose, BV is the bounding volume you use for it. P must supply a function
+    // signedDistance(...) and BV must supply a function getDistance. 
     template <class T, class P, class BV>
     class NodeT {
     public:
@@ -60,14 +58,11 @@ namespace dcel {
       using PartitionFunction = PartitionFunctionT<T, P, BV>;
       using StopFunction      = StopFunctionT<T, P, BV>;
       using BVConstructor     = BVConstructorT<T, P, BV>;
-      
-      using PrimitivesDistanceFunction     = PrimitivesDistanceFunctionT<T, P>;
-      using BoundingVolumeDistanceFunction = BoundingVolumeDistanceFunctionT<T, BV>;
 
       NodeT();
       NodeT(NodePtr& a_parent);
-      //      NodeT(const PrimitiveList& a_primitives);
       NodeT(const std::vector<std::shared_ptr<P> >& a_primitives);
+      NodeT(const std::vector<std::shared_ptr<const P> >& a_primitives);
       ~NodeT();
 
       inline
