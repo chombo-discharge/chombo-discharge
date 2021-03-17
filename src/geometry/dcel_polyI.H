@@ -93,16 +93,16 @@ namespace dcel {
       const Vec2& P1 = m_points[i];
       const Vec2& P2 = m_points[(i+1)%N];
 
-      const int res = int(isLeft(P1, P2, P));
+      const T res = isLeft(P1, P2, P);
     
       if (P1.y <= P.y) {          // start y <= P.y
 	if (P2.y  > P.y)      // an upward crossing
-	  if (res > 0)  // P left of  edge
+	  if (res > 0.)  // P left of  edge
 	    ++wn;            // have  a valid up intersect
       }
       else {                        // start y > P.y (no test needed)
 	if (P2.y <= P.y)     // a downward crossing
-	  if (res < 0)  // P right of  edge
+	  if (res < 0.)  // P right of  edge
 	    --wn;            // have  a valid down intersect
       }
     }
