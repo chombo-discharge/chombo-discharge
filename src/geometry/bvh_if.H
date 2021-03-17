@@ -30,8 +30,10 @@ public:
 
   // Lambdas for interfacing into dcel_BVH
   static StopFunctionT<T, face, BV>      defaultStopFunction;
-  static PartitionFunctionT<T, face, BV> defaultPartitionFunction;
+  //  static PartitionFunctionT<T, face, BV> defaultPartitionFunction;
   static BVConstructorT<T, face, BV>     defaultBVConstructor;
+
+  static PartitionFunctionT<face> defaultPartitionFunction;
 
   bvh_if() = delete;
 

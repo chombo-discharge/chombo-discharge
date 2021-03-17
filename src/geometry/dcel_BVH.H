@@ -26,11 +26,11 @@ namespace dcel {
     using PrimitiveListT = std::vector<std::shared_ptr<const P> >;
 
     // Lambdas for partitioning and searching closest distance. 
-    template <class T, class P, class BV>
-    using PartitionFunctionT = std::function<int(NodeT<T, P, BV>&)>;
+    // template <class T, class P, class BV>
+    // using PartitionFunctionT = std::function<int(NodeT<T, P, BV>&)>;
 
-    // template <class P>
-    // using PartitionFunctionT = std::function<std::pair<PrimitiveListT<P>, PrimitiveListT<P> >(const PrimitiveListT<P>&)>;
+    template <class P>
+    using PartitionFunctionT = std::function<std::pair<PrimitiveListT<P>, PrimitiveListT<P> >(const PrimitiveListT<P>&)>;
     
     template <class T, class P, class BV>
     using StopFunctionT = std::function<bool(const NodeT<T, P, BV>&)>;
@@ -55,7 +55,8 @@ namespace dcel {
       using Node       = NodeT<T, P, BV>;
       using NodePtr    = std::shared_ptr<Node>;
       
-      using PartitionFunction = PartitionFunctionT<T, P, BV>;
+      //      using PartitionFunction = PartitionFunctionT<T, P, BV>;
+      using PartitionFunction = PartitionFunctionT<P>;
       using StopFunction      = StopFunctionT<T, P, BV>;
       using BVConstructor     = BVConstructorT<T, P, BV>;
 
