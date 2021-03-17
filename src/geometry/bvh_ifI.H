@@ -140,10 +140,8 @@ bvh_if<T, BV>::~bvh_if(){
 
 template <class T, class BV>
 Real bvh_if<T, BV>::value(const RealVect& a_point) const {
-  Vec3 p(a_point[0], a_point[1], a_point[2]); 
-
-
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
+  Vec3 p(a_point[0], a_point[1], a_point[2]); 
   
   auto d = m_root->pruneOrdered(p);
   // auto d = m_root->pruneUnordered(p);

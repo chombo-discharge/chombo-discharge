@@ -223,7 +223,7 @@ decltype(auto) NodeT<T, P, BV>::getDistanceToPrimitives(const Vec3& a_point) con
   for (const auto& p : m_primitives){
     const auto curDist = p->signedDistance(a_point);
 
-    if(std::abs(curDist) < std::abs(minDist)){
+    if(curDist*curDist < minDist*minDist){
       minDist = curDist;
     }
   }
@@ -249,7 +249,7 @@ decltype(auto) NodeT<T, P, BV>::pruneOrdered(T& a_closest, const Vec3& a_point) 
   if(m_nodeType == NodeType::Leaf){
     const T primDist = this->getDistanceToPrimitives(a_point);
 
-    if(std::abs(primDist) < std::abs(a_closest)){
+    if(primDist*primDist < a_closest*a_closest){
       a_closest = primDist;
     }
   }
@@ -265,8 +265,8 @@ decltype(auto) NodeT<T, P, BV>::pruneOrdered(T& a_closest, const Vec3& a_point) 
     const auto minFirst  = std::min(minL, minR);
     const auto minSecond = std::max(minL, minR);
 
-    if(minFirst  < std::abs(a_closest)) first ->pruneOrdered(a_closest, a_point);
-    if(minSecond < std::abs(a_closest)) second->pruneOrdered(a_closest, a_point);
+    if(minFirst*minFirst   < a_closest*a_closest) first ->pruneOrdered(a_closest, a_point);
+    if(minSecond*minSecond < a_closest*a_closest) second->pruneOrdered(a_closest, a_point);
   }
 }
 
@@ -288,16 +288,16 @@ decltype(auto) NodeT<T, P, BV>::pruneUnordered(T& a_closest, const Vec3& a_point
   if(m_nodeType == NodeType::Leaf){
     const T primDist = this->getDistanceToPrimitives(a_point);
 
-    if(std::abs(primDist) < std::abs(a_closest)){
+    if(primDist*primDist < a_closest*a_closest){
       a_closest = primDist;
     }
   }
   else {
-    const T minL = m_left->getDistanceToBoundingVolume(a_point);
+    const T minL = m_left ->getDistanceToBoundingVolume(a_point);
     const T minR = m_right->getDistanceToBoundingVolume(a_point);
 
-    if(minL  < std::abs(a_closest)) m_left ->pruneUnordered(a_closest, a_point);
-    if(minR < std::abs(a_closest))  m_right->pruneUnordered(a_closest, a_point);
+    if(minL*minL < a_closest*a_closest) m_left ->pruneUnordered(a_closest, a_point);
+    if(minR*minR < a_closest*a_closest) m_right->pruneUnordered(a_closest, a_point);
   }
 }
 
@@ -329,7 +329,7 @@ decltype(auto) NodeT<T, P, BV>::prunePriorityQueue(const Vec3& a_point) const no
     const auto ds = cur.first;
     const auto N  = cur.second;
     
-    if (std::abs(ds) < std::abs(d)){
+    if (ds*ds < d*d){
       if(N->getNodeType() == NodeType::Leaf){
 	const T primDist = N->getDistanceToPrimitives(a_point);
 	
@@ -344,8 +344,8 @@ decltype(auto) NodeT<T, P, BV>::prunePriorityQueue(const Vec3& a_point) const no
 	const T dl = lN->getDistanceToBoundingVolume(a_point);
 	const T dr = rN->getDistanceToBoundingVolume(a_point);
 	
-	if(dl < std::abs(d)) Q.emplace(QueueElement(dl, std::make_shared<const Node>(*lN)));
-	if(dr < std::abs(d)) Q.emplace(QueueElement(dr, std::make_shared<const Node>(*rN)));
+	if(dl*dl < d*d) Q.emplace(QueueElement(dl, std::make_shared<const Node>(*lN)));
+	if(dr*dr < d*d) Q.emplace(QueueElement(dr, std::make_shared<const Node>(*rN)));
       }
     }
   }

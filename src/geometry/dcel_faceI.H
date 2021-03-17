@@ -237,7 +237,7 @@ namespace dcel {
 	
 	const T curDist = e->signedDistance(a_x0);
     
-	if(std::abs(curDist) < std::abs(retval)){ // <= because edge normals are more important than polygon normals. 
+	if(curDist*curDist < retval*retval){ // <= because edge normals are more important than polygon normals. 
 	  retval = curDist;
 	}
       }

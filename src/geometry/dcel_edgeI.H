@@ -241,7 +241,7 @@ namespace dcel {
     else{
       const Vec3 linePoint = m_vertex->getPosition() + t*m_x2x1;
       const Vec3 delta     = a_x0 - linePoint;
-      const T dot     = m_normal.dot(delta);
+      const T dot          = m_normal.dot(delta);
 
       const int sgn = (dot > 0.0) ? 1 : -1;
 
