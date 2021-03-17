@@ -23,7 +23,7 @@ namespace dcel {
 
     // Implementation of list of primitives. 
     template <class P>
-    using PrimitiveListT = std::vector<std::shared_ptr<P> >;
+    using PrimitiveListT = std::vector<std::shared_ptr<const P> >;
 
     // Lambdas for partitioning and searching closest distance. 
     template <class T, class P, class BV>
@@ -66,14 +66,9 @@ namespace dcel {
 
       NodeT();
       NodeT(NodePtr& a_parent);
-      NodeT(const PrimitiveList& a_primitives);
+      //      NodeT(const PrimitiveList& a_primitives);
+      NodeT(const std::vector<std::shared_ptr<P> >& a_primitives);
       ~NodeT();
-
-      inline
-      decltype(auto) setNodeType(const NodeType a_nodeType) noexcept;
-
-      inline
-      decltype(auto) setDepth(const int a_depth) noexcept;
 
       inline
       decltype(auto) topDownSortAndPartitionPrimitives(const StopFunction&      a_stopFunc,
@@ -115,6 +110,12 @@ namespace dcel {
       NodePtr m_right;
 
       inline
+      decltype(auto) setNodeType(const NodeType a_nodeType) noexcept;
+
+      inline
+      decltype(auto) setDepth(const int a_depth) noexcept;
+
+      inline
       decltype(auto) insertNode(NodePtr&  a_node, const PrimitiveList& a_primitives) noexcept;
 
       inline
@@ -122,9 +123,6 @@ namespace dcel {
 
       inline
       decltype(auto) setPrimitives(const PrimitiveList& a_primitives) noexcept;
-
-      inline
-      decltype(auto) computeBoundingVolume(const BVConstructor& bvFunction) noexcept;
 
       inline
       decltype(auto) getBoundingVolume() noexcept;

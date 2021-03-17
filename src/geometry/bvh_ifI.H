@@ -61,6 +61,7 @@ PartitionFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultPartitionFunction = []
   auto comparator = [splitDir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
     return f1->getCentroid()[splitDir] < f2->getCentroid()[splitDir];
   };
+  
   std::sort(primitives.begin(), primitives.end(), comparator);
   
   return (primitives.size()-1)/2;
@@ -109,7 +110,7 @@ Real bvh_if<T, BV>::value(const RealVect& a_point) const {
   Vec3 p(a_point[0], a_point[1], a_point[2]); 
 
 
-#if 0
+#if 1
   auto d = m_root->pruneBranches(p,
 			      bvh_if<T, BV>::defaultPrimDistanceFunction,
 			      bvh_if<T, BV>::defaultBvDistanceFunction);

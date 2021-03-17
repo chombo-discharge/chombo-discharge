@@ -18,6 +18,7 @@ NodeT<T, P, BV>::NodeT() {
   m_parent = nullptr;
   m_left   = nullptr;
   m_right  = nullptr;
+  m_primitives.resize(0);
 
   m_depth    = 0;
   m_nodeType = NodeType::Regular;
@@ -33,8 +34,12 @@ NodeT<T, P, BV>::NodeT(NodePtr& a_parent) : NodeT<T, P, BV>() {
 
 template <class T, class P, class BV>
 inline
-NodeT<T, P, BV>::NodeT(const PrimitiveList& a_primitives) : NodeT<T, P, BV>() {
-  m_primitives  = a_primitives;
+//NodeT<T, P, BV>::NodeT(const PrimitiveList& a_primitives) : NodeT<T, P, BV>() {
+NodeT<T, P, BV>::NodeT(const std::vector<std::shared_ptr<P> >& a_primitives) : NodeT<T, P, BV>() {
+  for (const auto& p : a_primitives){
+    m_primitives.emplace_back(p);
+  }
+  
   m_nodeType = NodeType::Leaf;
   m_depth    = 0;
 }
@@ -89,12 +94,6 @@ decltype(auto) NodeT<T, P, BV>::setToRegularNode() noexcept {
 
 template <class T, class P, class BV>
 inline
-decltype(auto) NodeT<T, P, BV>::computeBoundingVolume(const BVConstructor& bvFunction) noexcept {
-  m_bv = bvFunction(m_primitives);
-}
-
-template <class T, class P, class BV>
-inline
 decltype(auto) NodeT<T, P, BV>::getParent() noexcept {
   return (m_parent);
 }
@@ -141,8 +140,6 @@ decltype(auto) NodeT<T, P, BV>::getDepth() const noexcept {
   return (m_depth);
 }
 
-
-
 template <class T, class P, class BV>
 inline
 decltype(auto) NodeT<T, P, BV>::getBoundingVolume() noexcept {
@@ -174,7 +171,7 @@ decltype(auto) NodeT<T, P, BV>::topDownSortAndPartitionPrimitives(const StopFunc
 								  const BVConstructor&     a_bvFunc) noexcept -> void {
   const bool stopSplitting = a_stopFunc(*this);
 
-  this->computeBoundingVolume(a_bvFunc);
+  m_bv = a_bvFunc(*this);
   
   if(!stopSplitting){
 
