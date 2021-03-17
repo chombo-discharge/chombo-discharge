@@ -24,7 +24,7 @@ using mesh   = meshT<precision>;
 using AABB   = AABBT<precision>;
 using Sphere = BoundingSphereT<precision>;
 
-using BV = AABB;
+using BV = Sphere;
 
 porsche::porsche(){
 

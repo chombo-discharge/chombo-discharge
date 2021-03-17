@@ -156,8 +156,9 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  Vec3T<T>::Vec3T(const Vec3T<T>& u) {
+  Vec3T<T>::Vec3T(const Vec3T<P>& u) {
     X[0] = u[0];
     X[1] = u[1];
     X[2] = u[2];
@@ -184,8 +185,9 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator=(const Vec3T<T>& u) noexcept {
+  decltype(auto) Vec3T<T>::operator=(const Vec3T<P>& u) noexcept {
     X[0] = u[0];
     X[1] = u[1];
     X[2] = u[2];
@@ -194,33 +196,38 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator+(const Vec3T<T>& u) const noexcept {
+  decltype(auto) Vec3T<T>::operator+(const Vec3T<P>& u) const noexcept {
     return Vec3T<T>(X[0]+u[0], X[1]+u[1], X[2]+u[2]);
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator-(const Vec3T<T>& u) const noexcept {
+  decltype(auto) Vec3T<T>::operator-(const Vec3T<P>& u) const noexcept {
     return Vec3T<T>(X[0]-u[0], X[1]-u[1], X[2]-u[2]);
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator*(const T& s) const noexcept {
-    return Vec3T(s*X[0], s*X[1], s*X[2]);
+  decltype(auto) Vec3T<T>::operator*(const P& s) const noexcept {
+    return Vec3T<T>(s*X[0], s*X[1], s*X[2]);
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator/(const T& s) const noexcept {
-    const T is = 1./s;
-    return Vec3T(is*X[0], is*X[1], is*X[2]);
+  decltype(auto) Vec3T<T>::operator/(const P& s) const noexcept {
+    const P is = 1./s;
+    return Vec3T<T>(is*X[0], is*X[1], is*X[2]);
   }
   
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator+=(const Vec3T<T>& u) noexcept {
+  decltype(auto) Vec3T<T>::operator+=(const Vec3T<P>& u) noexcept {
     X[0] += u[0];
     X[1] += u[1];
     X[2] += u[2];
@@ -229,8 +236,9 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator-=(const Vec3T<T>& u) noexcept {
+  decltype(auto) Vec3T<T>::operator-=(const Vec3T<P>& u) noexcept {
     X[0] -= u[0];
     X[1] -= u[1];
     X[2] -= u[2];
@@ -239,8 +247,9 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator*=(const T& s) noexcept {
+  decltype(auto) Vec3T<T>::operator*=(const P& s) noexcept {
     X[0] *= s;
     X[1] *= s;
     X[2] *= s;
@@ -249,8 +258,9 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator/=(const T& s) noexcept {
+  decltype(auto) Vec3T<T>::operator/=(const P& s) noexcept {
     const T is = 1./s;
     
     X[0] *= is;
@@ -261,11 +271,12 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::cross(const Vec3T<T>& u) const noexcept {
+  decltype(auto) Vec3T<T>::cross(const Vec3T<P>& u) const noexcept {
     return Vec3T<T>(X[1]*u[2] - X[2]*u[1],
-		   X[2]*u[0] - X[0]*u[2],
-		   X[0]*u[1] - X[1]*u[0]);
+		    X[2]*u[0] - X[0]*u[2],
+		    X[0]*u[1] - X[1]*u[0]);
   }
 
   template <class T>
@@ -281,8 +292,9 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::min(const Vec3T<T>& u) noexcept {
+  decltype(auto) Vec3T<T>::min(const Vec3T<P>& u) noexcept {
     X[0] = std::min(X[0], u[0]);
     X[1] = std::min(X[1], u[1]);
     X[2] = std::min(X[2], u[2]);
@@ -291,8 +303,9 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::max(const Vec3T<T>& u) noexcept {
+  decltype(auto) Vec3T<T>::max(const Vec3T<P>& u) noexcept {
     X[0] = std::max(X[0], u[0]);
     X[1] = std::max(X[1], u[1]);
     X[2] = std::max(X[2], u[2]);
@@ -322,38 +335,44 @@ namespace dcel {
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator==(const Vec3T<T>& u) const noexcept {
+  decltype(auto) Vec3T<T>::operator==(const Vec3T<P>& u) const noexcept {
     return (X[0]==u[0] && X[1]==u[1] && X[2]==u[2]);
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator<(const Vec3T<T>& u) const noexcept {
+  decltype(auto) Vec3T<T>::operator<(const Vec3T<P>& u) const noexcept {
     return (X[0]<u[0] && X[1]<u[1] && X[2]<u[2]);
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator>(const Vec3T<T>& u) const noexcept {
+  decltype(auto) Vec3T<T>::operator>(const Vec3T<P>& u) const noexcept {
     return (X[0]>u[0] && X[1]>u[1] && X[2]>u[2]);
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator<=(const Vec3T<T>& u) const noexcept {
+  decltype(auto) Vec3T<T>::operator<=(const Vec3T<P>& u) const noexcept {
     return (X[0]<=u[0] && X[1]<=u[1] && X[2]<=u[2]);
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::operator>=(const Vec3T<T>& u) const noexcept {
+  decltype(auto) Vec3T<T>::operator>=(const Vec3T<P>& u) const noexcept {
     return (X[0]>=u[0] && X[1]>=u[1] && X[2]>=u[2]);
   }
 
   template <class T>
+  template <class P>
   inline
-  decltype(auto) Vec3T<T>::dot(const Vec3T<T>& u) const noexcept {
+  decltype(auto) Vec3T<T>::dot(const Vec3T<P>& u) const noexcept {
     return X[0]*u[0] + X[1]*u[1] + X[2]*u[2];
   }
 

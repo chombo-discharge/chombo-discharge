@@ -268,6 +268,7 @@ decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_p
   Q.push(QueueElement(a_bvFunc(m_bv, a_point), std::make_shared<const Node>(*this)));
 
   auto d = std::numeric_limits<T>::infinity();
+
   while(!Q.empty()) {
     const QueueElement cur = Q.top();
     Q.pop();
@@ -277,7 +278,7 @@ decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_p
     
     if (std::abs(ds) < std::abs(d)){
       if(N->getNodeType() == NodeType::Leaf){
-	const auto primDist = T(a_primFunc(N->getPrimitives(), a_point));
+	const auto primDist = a_primFunc(N->getPrimitives(), a_point);
 	
 	if(std::abs(primDist) < std::abs(d)){
 	  d = primDist;
@@ -289,13 +290,13 @@ decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_p
 	
 	const auto dl = a_bvFunc(lN->getBoundingVolume(), a_point);
 	const auto dr = a_bvFunc(rN->getBoundingVolume(), a_point);
-
+	
 	if(dl < std::abs(d)) Q.emplace(QueueElement(dl, std::make_shared<const Node>(*lN)));
 	if(dr < std::abs(d)) Q.emplace(QueueElement(dr, std::make_shared<const Node>(*rN)));
       }
     }
   }
-
+  
   return d;
 }
 
