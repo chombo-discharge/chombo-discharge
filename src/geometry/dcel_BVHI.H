@@ -207,6 +207,19 @@ decltype(auto) NodeT<T, P, BV>::insertNode(NodePtr& a_node, const PrimitiveList&
 
 template <class T, class P, class BV>
 inline
+decltype(auto) NodeT<T, P, BV>::pruneBranches(const Vec3&                           a_point,
+					      const PrimitivesDistanceFunction&     a_primFunc,
+					      const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept {
+
+  auto d = std::numeric_limits<T>::infinity();
+
+  this->pruneBranches(d, a_point, a_primFunc, a_bvFunc);
+
+  return d;
+}
+
+template <class T, class P, class BV>
+inline
 decltype(auto) NodeT<T, P, BV>::pruneBranches(T&                                    a_closest,
 					      const Vec3&                           a_point,
 					      const PrimitivesDistanceFunction&     a_primFunc,
@@ -244,7 +257,7 @@ decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_p
 
   using QueueElement = std::pair<T, std::shared_ptr<const Node> >;
   using QueueVector  = std::vector<QueueElement>;
-  using QueueComp    = std::function<bool(QueueElement&, QueueElement&)>;
+  using QueueComp    = std::function<bool(const QueueElement&, const QueueElement&)>;
   using Queue        = std::priority_queue<QueueElement, QueueVector, QueueComp>;
       
   auto CompareElements = [](const QueueElement& a_q1, const QueueElement& a_q2){
@@ -252,9 +265,9 @@ decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_p
   };
 
   Queue Q(CompareElements);
-  auto d = std::numeric_limits<T>::infinity();
   Q.push(QueueElement(a_bvFunc(m_bv, a_point), std::make_shared<const Node>(*this)));
 
+  auto d = std::numeric_limits<T>::infinity();
   while(!Q.empty()) {
     const QueueElement cur = Q.top();
     Q.pop();
@@ -276,9 +289,9 @@ decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_p
 	
 	const auto dl = a_bvFunc(lN->getBoundingVolume(), a_point);
 	const auto dr = a_bvFunc(rN->getBoundingVolume(), a_point);
-	
-	Q.push(QueueElement(dl, std::make_shared<const Node>(*lN)));
-	Q.push(QueueElement(dr, std::make_shared<const Node>(*rN)));
+
+	if(dl < std::abs(d)) Q.emplace(QueueElement(dl, std::make_shared<const Node>(*lN)));
+	if(dr < std::abs(d)) Q.emplace(QueueElement(dr, std::make_shared<const Node>(*rN)));
       }
     }
   }

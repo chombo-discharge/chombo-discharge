@@ -89,11 +89,9 @@ namespace dcel {
       inline
       decltype(auto) getPrimitives() const noexcept;
 
-      inline
-      decltype(auto) pruneBranches(T&                                    a_closest,
-				   const Vec3&                           a_point,
-				   const PrimitivesDistanceFunction&     a_primFunc,
-				   const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void;
+      inline decltype(auto) pruneBranches(const Vec3&                           a_point,
+					  const PrimitivesDistanceFunction&     a_primFunc,
+					  const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept;
 
       inline
       decltype(auto) pruneQ(const Vec3&                           a_point,
@@ -161,9 +159,12 @@ namespace dcel {
 
       inline
       decltype(auto) setRight(const NodePtr& a_right) noexcept;
-      
+
       inline
-      decltype(auto) getNewQueue() const noexcept;
+      decltype(auto) pruneBranches(T&                                    a_closest,
+				   const Vec3&                           a_point,
+				   const PrimitivesDistanceFunction&     a_primFunc,
+				   const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void;
     };
   }
 }

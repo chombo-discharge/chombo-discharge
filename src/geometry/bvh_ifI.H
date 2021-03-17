@@ -108,19 +108,16 @@ template <class T, class BV>
 Real bvh_if<T, BV>::value(const RealVect& a_point) const {
   Vec3 p(a_point[0], a_point[1], a_point[2]); 
 
-  T d = std::numeric_limits<T>::infinity();
 
-#if 0
-  m_root->pruneBranches(d,
-			p,
-			bvh_if<T, BV>::defaultPrimDistanceFunction,
-			bvh_if<T, BV>::defaultBvDistanceFunction);
+#if 1
+  auto d = m_root->pruneBranches(p,
+			    bvh_if<T, BV>::defaultPrimDistanceFunction,
+			    bvh_if<T, BV>::defaultBvDistanceFunction);
 #else
-  d = m_root->pruneQ(p,
-		     bvh_if<T, BV>::defaultPrimDistanceFunction,
-		     bvh_if<T, BV>::defaultBvDistanceFunction);
+  auto d = m_root->pruneQ(p,
+			  bvh_if<T, BV>::defaultPrimDistanceFunction,
+			  bvh_if<T, BV>::defaultBvDistanceFunction);
 #endif
-		 
 
   if(m_flipInside){
     d = -d;
