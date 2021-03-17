@@ -19,7 +19,7 @@ StopFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultStopFunction = [](const Nod
   const auto& primitives = a_node.getPrimitives();
   const int depth        = a_node.getDepth();
 
-  return primitives.size() < 2;
+  return primitives.size() < 4;
 };
 
 template <class T, class BV>
@@ -91,12 +91,6 @@ bvh_if<T, BV>::bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInsi
   m_root       = a_root;
   m_flipInside = a_flipInside;
 
-#if 1 // Test
-  T d = std::numeric_limits<T>::max();
-  Vec3 p = Vec3::zero();
-  m_root->pruneQ(d, p, bvh_if<T, BV>::defaultPrimDistanceFunction, bvh_if<T, BV>::defaultBvDistanceFunction);
-#endif
-
 }
 
 template <class T, class BV>
@@ -115,11 +109,18 @@ Real bvh_if<T, BV>::value(const RealVect& a_point) const {
   Vec3 p(a_point[0], a_point[1], a_point[2]); 
 
   T d = std::numeric_limits<T>::infinity();
-  
+
+#if 0
   m_root->pruneBranches(d,
 			p,
 			bvh_if<T, BV>::defaultPrimDistanceFunction,
 			bvh_if<T, BV>::defaultBvDistanceFunction);
+#else
+  d = m_root->pruneQ(p,
+		     bvh_if<T, BV>::defaultPrimDistanceFunction,
+		     bvh_if<T, BV>::defaultBvDistanceFunction);
+#endif
+		 
 
   if(m_flipInside){
     d = -d;

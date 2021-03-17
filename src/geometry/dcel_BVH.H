@@ -56,7 +56,6 @@ namespace dcel {
       using Vec3       = Vec3T<T>;
       using Node       = NodeT<T, P, BV>;
       using NodePtr    = std::shared_ptr<Node>;
-      using NodePtrC   = std::shared_ptr<const Node>;
       
       using PartitionFunction = PartitionFunctionT<T, P, BV>;
       using StopFunction      = StopFunctionT<T, P, BV>;
@@ -64,13 +63,6 @@ namespace dcel {
       
       using PrimitivesDistanceFunction     = PrimitivesDistanceFunctionT<T, P>;
       using BoundingVolumeDistanceFunction = BoundingVolumeDistanceFunctionT<T, BV>;
-
-      using QueueElement = std::pair<T, NodePtrC>;
-      using QueueVector  = std::vector<QueueElement>;
-      using QueueComp    = std::function<bool(QueueElement&, QueueElement&)>;
-      using Queue        = std::priority_queue<QueueElement, QueueVector, QueueComp>;
-
-      using schme = int;
 
       NodeT();
       NodeT(NodePtr& a_parent);
@@ -104,10 +96,9 @@ namespace dcel {
 				   const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void;
 
       inline
-      decltype(auto) pruneQ(T&                                    a_closest,
-			    const Vec3&                           a_point,
+      decltype(auto) pruneQ(const Vec3&                           a_point,
 			    const PrimitivesDistanceFunction&     a_distFunc,
-			    const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void;
+			    const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept;
 
     protected:
 
@@ -173,13 +164,6 @@ namespace dcel {
       
       inline
       decltype(auto) getNewQueue() const noexcept;
-      
-      inline
-      decltype(auto) pruneQ(double&                               a_closest,
-			    Queue&                                a_Q,
-			    const Vec3&                           a_point,
-			    const PrimitivesDistanceFunction&     a_distFunc,
-			    const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept -> void;
     };
   }
 }
