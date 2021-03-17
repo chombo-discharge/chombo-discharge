@@ -12,6 +12,7 @@
 #include "dcel_mesh.H"
 
 #include <memory>
+#include <chrono>
 
 #include <BaseIF.H>
 
@@ -33,8 +34,8 @@ public:
   static BVConstructorT<face, BV>   defaultBVConstructor;
   static PartitionFunctionT<face>   partitionMinimumOverlap;
 
-  bvh_if() = delete;
-
+  //  bvh_if() = delete;
+  bvh_if();
   bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInside);
   bvh_if(const bvh_if& a_object);
   ~bvh_if();
@@ -45,6 +46,10 @@ public:
 
 protected:
   std::shared_ptr<Node> m_root;
+
+  mutable long m_numCalled;
+
+  mutable std::chrono::duration<double> m_timespan;
   
   bool m_flipInside;
 };

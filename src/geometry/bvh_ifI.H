@@ -11,8 +11,11 @@
 #include "dcel_vec.H"
 #include "bvh_if.H"
 
+#include <chrono>
+
 using namespace dcel;
 using namespace dcel::BVH;
+using namespace std::chrono;
 
 template <class T>
 using PrimitiveList = std::vector<std::shared_ptr<const faceT<T> > >; 
@@ -108,25 +111,31 @@ PartitionFunctionT<faceT<T> > bvh_if<T, BV>::partitionMinimumOverlap = [](const 
   PrimitiveList<T> rightPrims(sortedPrimitives.begin() + splitIndex + 1, sortedPrimitives.end());
 
   return std::make_pair(leftPrims, rightPrims);
-  
 };
 
 template <class T, class BV>
-bvh_if<T, BV>::bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInside){
-  m_root       = a_root;
-  m_flipInside = a_flipInside;
-
+bvh_if<T, BV>::bvh_if(){
+  m_numCalled = 0L;
+  m_timespan = duration<double>(0.0);
 }
 
 template <class T, class BV>
-bvh_if<T, BV>::bvh_if(const bvh_if& a_primitive){
+bvh_if<T, BV>::bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInside) : bvh_if() {
+  m_root       = a_root;
+  m_flipInside = a_flipInside;
+}
+
+template <class T, class BV>
+bvh_if<T, BV>::bvh_if(const bvh_if& a_primitive) : bvh_if() {
   m_root       = a_primitive.m_root;
   m_flipInside = a_primitive.m_flipInside;
 }
 
 template <class T, class BV>
 bvh_if<T, BV>::~bvh_if(){
-
+  if(m_numCalled > 0L){
+    std::cout << "On destructor: Calls: " << m_numCalled << "\t Tot: " << m_timespan.count() << "\t Avg./Call = " << m_timespan.count()/(1.0*m_numCalled) << std::endl;
+  }
 }
 
 template <class T, class BV>
@@ -134,15 +143,21 @@ Real bvh_if<T, BV>::value(const RealVect& a_point) const {
   Vec3 p(a_point[0], a_point[1], a_point[2]); 
 
 
-#if 1
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+  
   auto d = m_root->pruneOrdered(p);
-#else
-  auto d = m_root->prunePriorityQueue(p);
-#endif
+  // auto d = m_root->pruneUnordered(p);
+  // auto d = m_root->prunePriorityQueue(p);
+
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 
   if(m_flipInside){
     d = -d;
   }
+
+  m_timespan += time_span;
+  m_numCalled++;
 
   return Real(d);
 }

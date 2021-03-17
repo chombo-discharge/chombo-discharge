@@ -41,8 +41,9 @@ porsche::porsche(){
   m->reconcile();
   // m->reconcile(VertexNormalWeight::Angle);
   // m->setSearchAlgorithm(SearchAlgorithm::Direct2); // Only for direct searches!
-  //  m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::CrossingNumber);
-  m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::WindingNumber);
+  //m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::CrossingNumber);
+  //m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::WindingNumber);
+  //m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::SubtendedAngle);
 
 
   // Build BVH
