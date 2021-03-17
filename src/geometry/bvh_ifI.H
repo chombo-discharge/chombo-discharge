@@ -63,7 +63,11 @@ PartitionFunctionT<faceT<T> > bvh_if<T, BV>::defaultPartitionFunction = [](const
   PrimitiveList<T> rPrims(sortedPrimitives.begin() + splitIndex + 1, sortedPrimitives.end());
   
   return std::make_pair(lPrims, rPrims);
-  
+};
+
+template <class T, class BV>
+PartitionFunctionT<faceT<T> > bvh_if<T, BV>::partitionSAH = [](const PrimitiveList<T>& a_primitives){
+
 };
 
 template <class T, class BV>
@@ -90,9 +94,9 @@ Real bvh_if<T, BV>::value(const RealVect& a_point) const {
 
 
 #if 1
-  auto d = m_root->pruneBranches(p);
+  auto d = m_root->pruneOrdered(p);
 #else
-  auto d = m_root->pruneQ(p);
+  auto d = m_root->prunePriorityQueue(p);
 #endif
 
   if(m_flipInside){

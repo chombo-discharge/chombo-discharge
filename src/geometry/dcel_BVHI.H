@@ -233,18 +233,18 @@ decltype(auto) NodeT<T, P, BV>::getDistanceToPrimitives(const Vec3& a_point) con
 
 template <class T, class P, class BV>
 inline
-decltype(auto) NodeT<T, P, BV>::pruneBranches(const Vec3& a_point) const noexcept {
+decltype(auto) NodeT<T, P, BV>::pruneOrdered(const Vec3& a_point) const noexcept {
 
   T minDist = std::numeric_limits<T>::infinity();
 
-  this->pruneBranches(minDist, a_point);
+  this->pruneOrdered(minDist, a_point);
 
   return minDist;
 }
 
 template <class T, class P, class BV>
 inline
-decltype(auto) NodeT<T, P, BV>::pruneBranches(T& a_closest, const Vec3& a_point) const noexcept -> void {
+decltype(auto) NodeT<T, P, BV>::pruneOrdered(T& a_closest, const Vec3& a_point) const noexcept -> void {
 					      
   if(m_nodeType == NodeType::Leaf){
     const T primDist = this->getDistanceToPrimitives(a_point);
@@ -265,14 +265,45 @@ decltype(auto) NodeT<T, P, BV>::pruneBranches(T& a_closest, const Vec3& a_point)
     const auto minFirst  = std::min(minL, minR);
     const auto minSecond = std::max(minL, minR);
 
-    if(minFirst  < std::abs(a_closest)) first ->pruneBranches(a_closest, a_point);
-    if(minSecond < std::abs(a_closest)) second->pruneBranches(a_closest, a_point);
+    if(minFirst  < std::abs(a_closest)) first ->pruneOrdered(a_closest, a_point);
+    if(minSecond < std::abs(a_closest)) second->pruneOrdered(a_closest, a_point);
   }
 }
 
 template <class T, class P, class BV>
 inline
-decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3& a_point) const noexcept {
+decltype(auto) NodeT<T, P, BV>::pruneUnordered(const Vec3& a_point) const noexcept {
+
+  T minDist = std::numeric_limits<T>::infinity();
+
+  this->pruneUnordered(minDist, a_point);
+
+  return minDist;
+}
+
+template <class T, class P, class BV>
+inline
+decltype(auto) NodeT<T, P, BV>::pruneUnordered(T& a_closest, const Vec3& a_point) const noexcept -> void {
+					      
+  if(m_nodeType == NodeType::Leaf){
+    const T primDist = this->getDistanceToPrimitives(a_point);
+
+    if(std::abs(primDist) < std::abs(a_closest)){
+      a_closest = primDist;
+    }
+  }
+  else {
+    const T minL = m_left->getDistanceToBoundingVolume(a_point);
+    const T minR = m_right->getDistanceToBoundingVolume(a_point);
+
+    if(minL  < std::abs(a_closest)) m_left ->pruneUnordered(a_closest, a_point);
+    if(minR < std::abs(a_closest))  m_right->pruneUnordered(a_closest, a_point);
+  }
+}
+
+template <class T, class P, class BV>
+inline
+decltype(auto) NodeT<T, P, BV>::prunePriorityQueue(const Vec3& a_point) const noexcept {
   
   using QueueElement = std::pair<T, std::shared_ptr<const Node> >;
   using QueueVector  = std::vector<QueueElement>;

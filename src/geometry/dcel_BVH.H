@@ -77,10 +77,13 @@ namespace dcel {
       decltype(auto) getPrimitives() const noexcept;
 
       inline
-      decltype(auto) pruneBranches(const Vec3& a_point) const noexcept;
+      decltype(auto) pruneOrdered(const Vec3& a_point) const noexcept;
 
       inline
-      decltype(auto) pruneQ(const Vec3& a_point) const noexcept;
+      decltype(auto) pruneUnordered(const Vec3& a_point) const noexcept;
+
+      inline
+      decltype(auto) prunePriorityQueue(const Vec3& a_point) const noexcept;
 
     protected:
 
@@ -157,7 +160,10 @@ namespace dcel {
       decltype(auto) setRight(const NodePtr& a_right) noexcept;
 
       inline
-      decltype(auto) pruneBranches(T& a_closest, const Vec3& a_point) const noexcept -> void;
+      decltype(auto) pruneOrdered(T& a_closest, const Vec3& a_point) const noexcept -> void;
+
+      inline
+      decltype(auto) pruneUnordered(T& a_closest, const Vec3& a_point) const noexcept -> void;
 
     };
   }
