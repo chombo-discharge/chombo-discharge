@@ -88,9 +88,7 @@ namespace dcel {
       decltype(auto) pruneBranches(const Vec3& a_point) const noexcept;
 
       inline
-      decltype(auto) pruneQ(const Vec3&                           a_point,
-			    const PrimitivesDistanceFunction&     a_distFunc,
-			    const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept;
+      decltype(auto) pruneQ(const Vec3& a_point) const noexcept;
 
     protected:
 

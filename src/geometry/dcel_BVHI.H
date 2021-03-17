@@ -265,10 +265,8 @@ decltype(auto) NodeT<T, P, BV>::pruneBranches(T& a_closest, const Vec3& a_point)
 
 template <class T, class P, class BV>
 inline
-decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_point,
-				       const PrimitivesDistanceFunction&     a_primFunc,
-				       const BoundingVolumeDistanceFunction& a_bvFunc) const noexcept {
-
+decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3& a_point) const noexcept {
+  
   using QueueElement = std::pair<T, std::shared_ptr<const Node> >;
   using QueueVector  = std::vector<QueueElement>;
   using QueueComp    = std::function<bool(const QueueElement&, const QueueElement&)>;
@@ -279,7 +277,10 @@ decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_p
   };
 
   Queue Q(CompareElements);
-  Q.push(QueueElement(a_bvFunc(m_bv, a_point), std::make_shared<const Node>(*this)));
+
+  const auto ds = this->getDistanceToBoundingVolume(a_point);
+  const auto N  = std::make_shared<const Node>(*this);
+  Q.push(QueueElement(ds, N));
 
   auto d = std::numeric_limits<T>::infinity();
 
@@ -292,7 +293,7 @@ decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_p
     
     if (std::abs(ds) < std::abs(d)){
       if(N->getNodeType() == NodeType::Leaf){
-	const auto primDist = a_primFunc(N->getPrimitives(), a_point);
+	const T primDist = N->getDistanceToPrimitives(a_point);
 	
 	if(std::abs(primDist) < std::abs(d)){
 	  d = primDist;
@@ -301,9 +302,9 @@ decltype(auto) NodeT<T, P, BV>::pruneQ(const Vec3&                           a_p
       else{
 	const auto& lN = N->getLeft();
 	const auto& rN = N->getRight();
-	
-	const auto dl = a_bvFunc(lN->getBoundingVolume(), a_point);
-	const auto dr = a_bvFunc(rN->getBoundingVolume(), a_point);
+
+	const T dl = lN->getDistanceToBoundingVolume(a_point);
+	const T dr = rN->getDistanceToBoundingVolume(a_point);
 	
 	if(dl < std::abs(d)) Q.emplace(QueueElement(dl, std::make_shared<const Node>(*lN)));
 	if(dr < std::abs(d)) Q.emplace(QueueElement(dr, std::make_shared<const Node>(*rN)));

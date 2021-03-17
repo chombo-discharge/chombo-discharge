@@ -113,9 +113,7 @@ Real bvh_if<T, BV>::value(const RealVect& a_point) const {
 #if 1
   auto d = m_root->pruneBranches(p);
 #else
-  auto d = m_root->pruneQ(p,
-		       bvh_if<T, BV>::defaultPrimDistanceFunction,
-		       bvh_if<T, BV>::defaultBvDistanceFunction);
+  auto d = m_root->pruneQ(p);
 #endif
 
   if(m_flipInside){
