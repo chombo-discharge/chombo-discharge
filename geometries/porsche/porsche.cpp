@@ -29,40 +29,41 @@ using BV = AABB;
 porsche::porsche(){
 
   std::string filename;
+  std::string partitioner;
 
   ParmParse pp("porsche");
 
-  pp.get("mesh_file", filename);
+  pp.get("mesh_file",   filename);
+  pp.get("partitioner", partitioner);
 
-  // Build the dcel_mesh and set default parameters. 
+  // Build the dcel_mesh and the BVH
   auto m = std::make_shared<mesh>();
   parser::PLY<precision>::readASCII(*m, filename);
   m->sanityCheck();
   m->reconcile();
-  // m->reconcile(VertexNormalWeight::Angle);
-  // m->setSearchAlgorithm(SearchAlgorithm::Direct2); // Only for direct searches!
-  // m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::CrossingNumber);
-  // m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::WindingNumber);
-  // m->setInsideOutsideAlgorithm(InsideOutsideAlgorithm::SubtendedAngle);
 
-
-  // Build BVH
   auto root = std::make_shared<NodeT<precision, face, BV> >(m->getFaces());
 
-  // root->topDownSortAndPartitionPrimitives(bvh_if<precision, BV>::defaultStopFunction,
-  // 					  bvh_if<precision, BV>::defaultPartitionFunction,
-  // 					  bvh_if<precision, BV>::defaultBVConstructor);
+  if(partitioner == "default"){
+    root->topDownSortAndPartitionPrimitives(bvh_if<precision, BV>::defaultStopFunction,
+					    bvh_if<precision, BV>::defaultPartitionFunction,
+					    bvh_if<precision, BV>::defaultBVConstructor);
+  }
+  else if(partitioner == "overlap"){
+    root->topDownSortAndPartitionPrimitives(bvh_if<precision, BV>::defaultStopFunction,
+					    bvh_if<precision, BV>::partitionMinimumOverlap,
+					    bvh_if<precision, BV>::defaultBVConstructor);
+  }
+  else if(partitioner == "sah"){
+    root->topDownSortAndPartitionPrimitives(bvh_if<precision, BV>::defaultStopFunction,
+					    bvh_if<precision, BV>::partitionSAH,
+					    bvh_if<precision, BV>::defaultBVConstructor);
+  }
+  else{
+    MayDay::Abort("porsche::porsche() -- unknown partitioner requested");
+  }
 
-  // root->topDownSortAndPartitionPrimitives(bvh_if<precision, BV>::defaultStopFunction,
-  // 					  bvh_if<precision, BV>::partitionMinimumOverlap,
-  // 					  bvh_if<precision, BV>::defaultBVConstructor);
 
-  root->topDownSortAndPartitionPrimitives(bvh_if<precision, BV>::defaultStopFunction,
-  					  bvh_if<precision, BV>::partitionSAH,
-  					  bvh_if<precision, BV>::defaultBVConstructor);
-
-
-  // Pass BVH to implicit function
   auto bif = RefCountedPtr<bvh_if<precision, BV> > (new bvh_if<precision, BV>(root,false));
 
   m_electrodes.push_back(electrode(bif, true));

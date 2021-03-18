@@ -106,13 +106,11 @@ PartitionFunctionT<faceT<T> > bvh_if<T, BV>::partitionMinimumOverlap = [](const 
 
 template <class T, class BV>
 PartitionFunctionT<faceT<T> > bvh_if<T, BV>::partitionSAH = [](const PrimitiveList<T>& a_primitives){
-
-  
   constexpr int DIM   = 3; 
   constexpr int nBins = 100;
   constexpr T invBins = 1./nBins;
   constexpr T Ct      = 1.0;
-  constexpr T Ci      = 4.0;
+  constexpr T Ci      = 1.0;
 
   const auto curBV   = defaultBVConstructor(a_primitives);
   const auto curArea = curBV.getArea();
@@ -132,15 +130,16 @@ PartitionFunctionT<faceT<T> > bvh_if<T, BV>::partitionSAH = [](const PrimitiveLi
   
   for (int dir = 0; dir < DIM; dir++){
 
+    // Sort primitives along dir direction
     PrimitiveList<T> sortedPrimitives = a_primitives;
-    
     std::sort(sortedPrimitives.begin(), sortedPrimitives.end(),
 	      [dir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
 		return f1->getCentroid()[dir] < f2->getCentroid()[dir];
 	      });
 
+    // Look through spatial bins and determine lowest cost.
     for (int ibin = 0; ibin <= nBins; ibin++){
-      const Vec3T<T> pos = lo + T(ibin)*delta;
+      const Vec3T<T> pos = lo + T(1.0*ibin)*delta;
 
       PrimitiveList<T> lPrims;
       PrimitiveList<T> rPrims;
