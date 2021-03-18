@@ -308,8 +308,8 @@ namespace dcel {
     constexpr T zero = 0.0;
     
     const Vec3 u = Vec3(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
-			    std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
-			    std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));
+			std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
+			std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));
 
     const Vec3 v = max(Vec3::zero(), u);
 

@@ -28,6 +28,15 @@ namespace dcel {
 
     inline
     decltype(auto) isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm a_algorithm) const noexcept;
+
+    inline
+    decltype(auto) isPointInsidePolygonWindingNumber(const Vec3& a_point) const noexcept;
+
+    inline
+    decltype(auto) isPointInsidePolygonSubtend(const Vec3& a_point) const noexcept;
+
+    inline
+    decltype(auto) isPointInsidePolygonCrossingNumber(const Vec3& a_point) const noexcept;
     
   private:
 
@@ -46,14 +55,7 @@ namespace dcel {
     inline
     T computeSubtendedAngle(const Vec2& P) const noexcept;
 
-    inline
-    decltype(auto) isPointInsidePolygonWindingNumber(const Vec3& a_point) const noexcept;
 
-    inline
-    decltype(auto) isPointInsidePolygonSubtend(const Vec3& a_point) const noexcept;
-
-    inline
-    decltype(auto) isPointInsidePolygonCrossingNumber(const Vec3& a_point) const noexcept;
     
     int m_ignoreDir;
     int m_xDir;

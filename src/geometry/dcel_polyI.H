@@ -22,7 +22,7 @@ namespace dcel {
   inline
   decltype(auto) Polygon2D<T>::isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm a_algorithm) const noexcept {
     bool ret;
-  
+    
     switch(a_algorithm){
     case InsideOutsideAlgorithm::SubtendedAngle:
       ret = this->isPointInsidePolygonSubtend(a_point);

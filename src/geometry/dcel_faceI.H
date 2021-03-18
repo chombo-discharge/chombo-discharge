@@ -207,10 +207,7 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) faceT<T>::projectPointIntoFacePlane(const Vec3& a_p) const noexcept {
-    const auto normalComponent = m_normal.dot(a_p - m_centroid) * m_normal;
-    const auto projectedPoint  = a_p - normalComponent;
-
-    return projectedPoint;
+    return a_p - m_normal * (m_normal.dot(a_p-m_centroid));
   }
 
   template <class T>
@@ -224,7 +221,7 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) faceT<T>::signedDistance(const Vec3& a_x0) const noexcept {
-    T retval = std::numeric_limits<T>::max();
+    T retval = std::numeric_limits<T>::infinity();
 
     const bool inside = this->isPointInsideFace(a_x0);
 
@@ -237,7 +234,7 @@ namespace dcel {
 	
 	const T curDist = e->signedDistance(a_x0);
     
-	if(curDist*curDist < retval*retval){ // <= because edge normals are more important than polygon normals. 
+	if(curDist*curDist < retval*retval){
 	  retval = curDist;
 	}
       }
@@ -249,7 +246,7 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) faceT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept {
-    T retval = std::numeric_limits<T>::max();
+    T retval = std::numeric_limits<T>::infinity();
 
     const bool inside = this->isPointInsideFace(a_x0);
 
