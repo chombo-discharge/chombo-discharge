@@ -71,8 +71,6 @@ namespace dcel {
       inline
       decltype(auto) getDepth() const noexcept;
 
-
-
       inline
       decltype(auto) getPrimitives() const noexcept;
 
@@ -80,10 +78,19 @@ namespace dcel {
       decltype(auto) pruneOrdered(const Vec3& a_point) const noexcept;
 
       inline
+      decltype(auto) pruneOrdered2(const Vec3& a_point) const noexcept;
+
+      inline
       decltype(auto) pruneUnordered(const Vec3& a_point) const noexcept;
 
       inline
+      decltype(auto) pruneUnordered2(const Vec3& a_point) const noexcept;
+
+      inline
       decltype(auto) prunePriorityQueue(const Vec3& a_point) const noexcept;
+
+      inline
+      decltype(auto) prunePriorityQueue2(const Vec3& a_point) const noexcept;
 
     protected:
 
@@ -122,6 +129,9 @@ namespace dcel {
 
       inline
       decltype(auto) getDistanceToBoundingVolume(const Vec3& a_point) const noexcept;
+
+      inline
+      decltype(auto) getDistanceToBoundingVolume2(const Vec3& a_point) const noexcept;
 
       inline
       decltype(auto) getDistanceToPrimitives(const Vec3& a_point) const noexcept;
@@ -163,8 +173,13 @@ namespace dcel {
       decltype(auto) pruneOrdered(T& a_closest, const Vec3& a_point) const noexcept -> void;
 
       inline
+      decltype(auto) pruneOrdered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept -> void;
+
+      inline
       decltype(auto) pruneUnordered(T& a_closest, const Vec3& a_point) const noexcept -> void;
 
+      inline
+      decltype(auto) pruneUnordered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept -> void;
     };
   }
 }

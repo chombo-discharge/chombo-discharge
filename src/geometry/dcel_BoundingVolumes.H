@@ -68,7 +68,6 @@ namespace dcel {
   protected:
 
     T m_radius;
-    T m_radius2;
     Vec3 m_center;
 
     template <class P>

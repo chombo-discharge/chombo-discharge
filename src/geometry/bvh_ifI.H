@@ -25,7 +25,7 @@ StopFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultStopFunction = [](const Nod
   const auto& primitives = a_node.getPrimitives();
   const int depth        = a_node.getDepth();
 
-  return primitives.size() < 2;
+  return primitives.size() < 4;
 };
 
 template <class T, class BV>
@@ -142,10 +142,14 @@ template <class T, class BV>
 Real bvh_if<T, BV>::value(const RealVect& a_point) const {
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   Vec3 p(a_point[0], a_point[1], a_point[2]); 
-  
-  auto d = m_root->pruneOrdered(p);
+
+
+  // auto d = m_root->pruneOrdered(p);
+  auto d = m_root->pruneOrdered2(p);
   // auto d = m_root->pruneUnordered(p);
+  // auto d = m_root->pruneUnordered2(p);
   // auto d = m_root->prunePriorityQueue(p);
+  // auto d = m_root->prunePriorityQueue2(p);
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);

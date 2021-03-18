@@ -23,8 +23,8 @@ namespace dcel {
 
   template <class T>
   BoundingSphereT<T>::BoundingSphereT(const BoundingSphereT& a_other){
-    m_radius = a_other.m_radius;
-    m_center = a_other.m_center;
+    m_radius  = a_other.m_radius;
+    m_center  = a_other.m_center;
   }
 
   template <class T>
@@ -144,7 +144,6 @@ namespace dcel {
 
     // Ritter algorithm is very coarse and does not give an exact result anyways. Grow the dimension for safety. 
     m_radius *= (1.0 + 1E-2);
-    m_radius2 = m_radius*m_radius;
   }
 
   template <class T>
@@ -179,7 +178,7 @@ namespace dcel {
   decltype(auto) BoundingSphereT<T>::getDistance2(const Vec3& a_x0) const noexcept {
     constexpr T zero = 0.0;
     
-    return std::max(zero, (a_x0-m_center).length2() - m_radius2);
+    return std::max(zero, (a_x0-m_center).length2() - m_radius*m_radius);
   }
 
   template <class T>
