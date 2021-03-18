@@ -15,53 +15,6 @@
 namespace dcel {
 
   template <class T>
-  BoundingVolumeT<T>::BoundingVolumeT(){
-
-  }
-
-  template <class T>
-  BoundingVolumeT<T>::~BoundingVolumeT(){
-
-  }
-
-  template <class T>
-  inline
-  decltype(auto) BoundingVolumeT<T>::getPointLocation(const Vec3& a_p) const noexcept {
-    const bool inside  = this->isPointInside(a_p);
-    const bool outside = this->isPointOutside(a_p);
-
-    PointLocation ret;
-
-    if(inside){
-      ret = PointLocation::Inside;
-    }
-    else if(outside){
-      ret = PointLocation::Outside;
-    }
-    else{
-      ret = PointLocation::Boundary;
-    }
-
-    return ret;
-  }
-
-  template <class T>
-  inline
-  decltype(auto) BoundingVolumeT<T>::isPointInside(const Vec3& a_x0) const {
-    constexpr T zero = 0.0;
-    
-    return this->getDistance(a_x0) < zero;
-  }
-
-  template <class T>
-  inline
-  decltype(auto) BoundingVolumeT<T>::isPointOutside(const Vec3& a_x0) const {
-    constexpr T zero = 0.0;
-    
-    return this->getDistance(a_x0) > zero;
-  }
-
-  template <class T>
   inline
   BoundingSphereT<T>::BoundingSphereT(){
     m_radius = 0.0;
@@ -191,6 +144,7 @@ namespace dcel {
 
     // Ritter algorithm is very coarse and does not give an exact result anyways. Grow the dimension for safety. 
     m_radius *= (1.0 + 1E-2);
+    m_radius2 = m_radius*m_radius;
   }
 
   template <class T>
@@ -214,10 +168,18 @@ namespace dcel {
 
   template <class T>
   inline
-  T BoundingSphereT<T>::getDistance(const Vec3& a_x0) const noexcept {
+  decltype(auto) BoundingSphereT<T>::getDistance(const Vec3& a_x0) const noexcept {
     constexpr T zero = 0.0;
 
     return std::max(zero, (a_x0-m_center).length() - m_radius);
+  }
+
+  template <class T>
+  inline
+  decltype(auto) BoundingSphereT<T>::getDistance2(const Vec3& a_x0) const noexcept {
+    constexpr T zero = 0.0;
+    
+    return std::max(zero, (a_x0-m_center).length2() - m_radius2);
   }
 
   template <class T>
@@ -329,16 +291,30 @@ namespace dcel {
 
   template <class T>
   inline
-  T AABBT<T>::getDistance(const Vec3& a_point) const noexcept {
+  decltype(auto) AABBT<T>::getDistance(const Vec3& a_point) const noexcept {
     constexpr T zero = 0.0;
     
     const Vec3 delta = Vec3(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
 			    std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
 			    std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));
 
-    const T retval =  std::min(zero, delta[delta.maxDir(false)]) + max(Vec3::zero(), delta).length(); 
-  
-    return std::max(zero, retval);
+    const T retval = std::max(zero, max(Vec3::zero(), delta).length());
+    
+    return retval;
+  }
+
+  template <class T>
+  inline
+  decltype(auto) AABBT<T>::getDistance2(const Vec3& a_point) const noexcept {
+    constexpr T zero = 0.0;
+    
+    const Vec3 u = Vec3(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
+			    std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
+			    std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));
+
+    const Vec3 v = max(Vec3::zero(), u);
+
+    return v.length2();
   }
 
   template <class T>

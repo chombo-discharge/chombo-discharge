@@ -25,28 +25,7 @@ namespace dcel {
   };
 
   template <class T>
-  class BoundingVolumeT {
-  public:
-
-    using Vec3 = Vec3T<T>;
-    
-    BoundingVolumeT();
-    ~BoundingVolumeT();
-
-    inline
-    decltype(auto) getPointLocation(const Vec3& a_p) const noexcept;
-
-    inline
-    decltype(auto) isPointInside(const Vec3& a_x0) const;
-
-    inline
-    decltype(auto) isPointOutside(const Vec3& a_x0) const;
-    
-    virtual T getDistance(const Vec3& a_x0) const = 0;
-  };
-
-  template <class T>
-  class BoundingSphereT : public BoundingVolumeT<T> {
+  class BoundingSphereT {
   public:
 
     using Vec3 = Vec3T<T>;
@@ -81,11 +60,15 @@ namespace dcel {
     decltype(auto) getOverlappingVolume(const BoundingSphereT<T>& a_other) const noexcept;
 
     inline
-    T getDistance(const Vec3& a_x0) const noexcept override;
+    decltype(auto) getDistance(const Vec3& a_x0) const noexcept;
+
+    inline
+    decltype(auto) getDistance2(const Vec3& a_x0) const noexcept;
 
   protected:
 
     T m_radius;
+    T m_radius2;
     Vec3 m_center;
 
     template <class P>
@@ -94,7 +77,7 @@ namespace dcel {
   };
 
   template <class T>
-  class AABBT : public BoundingVolumeT<T> {
+  class AABBT {
   public:
 
     using Vec3 = Vec3T<T>;
@@ -130,7 +113,10 @@ namespace dcel {
     decltype(auto) getOverlappingVolume(const AABBT<T>& a_other) const noexcept;
 
     inline
-    T getDistance(const Vec3& a_x0) const noexcept override;
+    decltype(auto) getDistance(const Vec3& a_x0) const noexcept;
+
+    inline
+    decltype(auto) getDistance2(const Vec3& a_x0) const noexcept;
     
   protected:
 
