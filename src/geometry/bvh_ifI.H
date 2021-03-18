@@ -25,7 +25,7 @@ StopFunctionT<T, faceT<T>, BV> bvh_if<T, BV>::defaultStopFunction = [](const Nod
   const auto& primitives = a_node.getPrimitives();
   const int depth        = a_node.getDepth();
 
-  return primitives.size() < 4;
+  return primitives.size() < 2;
 };
 
 template <class T, class BV>
@@ -70,47 +70,111 @@ PartitionFunctionT<faceT<T> > bvh_if<T, BV>::defaultPartitionFunction = [](const
 
 template <class T, class BV>
 PartitionFunctionT<faceT<T> > bvh_if<T, BV>::partitionMinimumOverlap = [](const PrimitiveList<T>& a_primitives){
-
   const int splitIndex    = (a_primitives.size() - 1)/2;
 
   T minOverlap = std::numeric_limits<T>::infinity();
 
-  int bestDir;
+  std::pair<PrimitiveList<T>, PrimitiveList<T> > ret;
 
-  PrimitiveList<T> sortedPrimitives(a_primitives);
+  constexpr int DIM = 3;
   
-  // Identify the best direction by the minimum overlap
-  for (int dir = 0; dir < 3; dir++){
+  for (int dir = 0; dir < DIM; dir++){
 
+    PrimitiveList<T> sortedPrims(a_primitives);
+    std::sort(sortedPrims.begin(), sortedPrims.end(),
+	      [dir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
+		return f1->getCentroid()[dir] < f2->getCentroid()[dir];
+	      });
+
+    PrimitiveList<T> lPrims(sortedPrims.begin(), sortedPrims.begin() + splitIndex+1);
+    PrimitiveList<T> rPrims(sortedPrims.begin() + splitIndex + 1, sortedPrims.end());
+
+    const BV leftBV  = bvh_if<T, BV>::defaultBVConstructor(lPrims);
+    const BV rightBV = bvh_if<T, BV>::defaultBVConstructor(rPrims);
+
+    const T curOverlap = getOverlappingVolume(leftBV, rightBV);
+
+    if (curOverlap < minOverlap){
+      minOverlap = curOverlap;
+
+      ret = std::make_pair(lPrims, rPrims);
+    }
+  }
+
+  return ret;
+};
+
+template <class T, class BV>
+PartitionFunctionT<faceT<T> > bvh_if<T, BV>::partitionSAH = [](const PrimitiveList<T>& a_primitives){
+
+  
+  constexpr int DIM   = 3; 
+  constexpr int nBins = 100;
+  constexpr T invBins = 1./nBins;
+  constexpr T Ct      = 1.0;
+  constexpr T Ci      = 4.0;
+
+  const auto curBV   = defaultBVConstructor(a_primitives);
+  const auto curArea = curBV.getArea();
+
+  Vec3T<T> lo = a_primitives.front()->getCentroid();
+  Vec3T<T> hi = a_primitives.front()->getCentroid();
+  for (const auto& p : a_primitives){
+    lo = min(lo, p->getCentroid());
+    hi = max(hi, p->getCentroid());
+  }
+  
+  const Vec3T<T> delta = (hi-lo)*invBins;
+
+  T minCost = std::numeric_limits<T>::max();
+
+  std::pair<PrimitiveList<T>, PrimitiveList<T> > ret;
+  
+  for (int dir = 0; dir < DIM; dir++){
+
+    PrimitiveList<T> sortedPrimitives = a_primitives;
+    
     std::sort(sortedPrimitives.begin(), sortedPrimitives.end(),
 	      [dir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
 		return f1->getCentroid()[dir] < f2->getCentroid()[dir];
 	      });
 
-    PrimitiveList<T> lPrims(sortedPrimitives.begin(), sortedPrimitives.begin() + splitIndex+1);
-    PrimitiveList<T> rPrims(sortedPrimitives.begin() + splitIndex + 1, sortedPrimitives.end());
+    for (int ibin = 0; ibin <= nBins; ibin++){
+      const Vec3T<T> pos = lo + T(ibin)*delta;
 
-    const BV lBV = bvh_if<T, BV>::defaultBVConstructor(lPrims);
-    const BV rBV = bvh_if<T, BV>::defaultBVConstructor(rPrims);
+      PrimitiveList<T> lPrims;
+      PrimitiveList<T> rPrims;
 
-    const T curOverlap = getOverlappingVolume(lBV, rBV);
+      for (const auto& p : sortedPrimitives){
+	if(p->getCentroid()[dir] <= pos[dir]){
+	  lPrims.emplace_back(p);
+	}
+	else{
+	  rPrims.emplace_back(p);
+	}
+      }
 
-    if (curOverlap < minOverlap){
-      minOverlap = curOverlap;
-      bestDir = dir;
+      const auto numLeft  = lPrims.size();
+      const auto numRight = rPrims.size();
+
+      if(numLeft == 0 || numRight == 0) continue;
+
+      const auto bvLeft  = defaultBVConstructor(lPrims);
+      const auto bvRight = defaultBVConstructor(rPrims);
+
+      const auto leftArea  = bvLeft.getArea();
+      const auto rightArea = bvRight.getArea();
+
+      const auto C = Ct + (leftArea/curArea)*Ci*numLeft + (rightArea/curArea)*Ci*numRight;
+
+      if(C < minCost){
+	minCost = C;
+	ret     = std::make_pair(lPrims, rPrims);
+      }
     }
   }
 
-  // Build the two halves. 
-  std::sort(sortedPrimitives.begin(), sortedPrimitives.end(),
-	    [bestDir](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
-	      return f1->getCentroid()[bestDir] < f2->getCentroid()[bestDir];
-	    });
-
-  PrimitiveList<T> leftPrims(sortedPrimitives.begin(), sortedPrimitives.begin() + splitIndex+1);
-  PrimitiveList<T> rightPrims(sortedPrimitives.begin() + splitIndex + 1, sortedPrimitives.end());
-
-  return std::make_pair(leftPrims, rightPrims);
+  return ret;
 };
 
 template <class T, class BV>
@@ -143,13 +207,7 @@ Real bvh_if<T, BV>::value(const RealVect& a_point) const {
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   Vec3 p(a_point[0], a_point[1], a_point[2]); 
 
-
-  // auto d = m_root->pruneOrdered(p);
   auto d = m_root->pruneOrdered2(p);
-  // auto d = m_root->pruneUnordered(p);
-  // auto d = m_root->pruneUnordered2(p);
-  // auto d = m_root->prunePriorityQueue(p);
-  // auto d = m_root->prunePriorityQueue2(p);
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);

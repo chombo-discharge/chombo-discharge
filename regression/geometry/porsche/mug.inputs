@@ -1,10 +1,10 @@
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-amr_mesh.lo_corner       = -0.1 -0.05 -0.1    # Low corner of problem domain
-amr_mesh.hi_corner       =  0.1  0.15  0.1    # High corner of problem domain
+amr_mesh.lo_corner       = -0.2 -0.15 -0.2    # Low corner of problem domain
+amr_mesh.hi_corner       =  0.2  0.25  0.2    # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 32 32 32    # Number of cells on coarsest domain
+amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
 amr_mesh.max_amr_depth   = 0           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = -1          # Refine everything down to this level.
@@ -77,5 +77,4 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # PORSCHE GEOMETRY CLASS (mostly used for testing)
 # ====================================================================================================
 porsche.mesh_file    = mug.ply
-porsche.tree_depth   = 50
-porsche.max_elements = 10
+

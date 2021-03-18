@@ -182,6 +182,12 @@ namespace dcel {
   }
 
   template <class T>
+  inline
+  decltype(auto) BoundingSphereT<T>::getArea() const noexcept {
+    return T(4.*M_PI*m_radius*m_radius);
+  }
+
+  template <class T>
   AABBT<T>::AABBT(){
     m_loCorner = Vec3::zero();
     m_hiCorner = Vec3::zero();
@@ -314,6 +320,25 @@ namespace dcel {
     const Vec3 v = max(Vec3::zero(), u);
 
     return v.length2();
+  }
+
+  template <class T>
+  inline
+  decltype(auto) AABBT<T>::getArea() const noexcept {
+    constexpr int DIM = 3;
+
+    T ret = 0.0;
+
+    const auto delta = m_hiCorner - m_loCorner;
+    
+    for (int dir = 0; dir < DIM; dir++){
+      const int otherDir1 = (dir+1)%DIM;
+      const int otherDir2 = (dir+2)%DIM;
+
+      ret += 2.0*delta[otherDir1]*delta[otherDir2];
+    }
+
+    return ret;
   }
 
   template <class T>

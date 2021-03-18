@@ -65,6 +65,9 @@ namespace dcel {
     inline
     decltype(auto) getDistance2(const Vec3& a_x0) const noexcept;
 
+    inline
+    decltype(auto) getArea() const noexcept;
+
   protected:
 
     T m_radius;
@@ -116,6 +119,9 @@ namespace dcel {
 
     inline
     decltype(auto) getDistance2(const Vec3& a_x0) const noexcept;
+
+    inline
+    decltype(auto) getArea() const noexcept;
     
   protected:
 
@@ -134,7 +140,6 @@ namespace dcel {
 
   template <class T>
   decltype(auto) getOverlappingVolume(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
-
 
 }
 
