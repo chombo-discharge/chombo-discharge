@@ -116,8 +116,10 @@ namespace dcel {
   protected:
 
     Vec3   m_normal;
-    Vec3   m_x2x1;
-    T m_len2;
+
+    // These are not necessary and exist because of performance reasons. 
+    Vec3 m_x2x1;
+    T    m_invLen2;
 
     std::shared_ptr<vertex>  m_vertex; 
     std::shared_ptr<edge>    m_pairEdge;

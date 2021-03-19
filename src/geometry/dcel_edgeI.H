@@ -24,7 +24,7 @@ namespace dcel {
     m_previousEdge = nullptr;
     m_normal       = Vec3::zero();
     m_x2x1         = Vec3::zero();
-    m_len2         = 0.0; 
+    m_invLen2      = 0.0; 
   }
 
   template <class T>
@@ -42,7 +42,7 @@ namespace dcel {
     m_previousEdge = a_otherEdge.m_previousEdge;
     m_normal       = a_otherEdge.m_normal;
     m_x2x1         = a_otherEdge.m_x2x1;
-    m_len2         = a_otherEdge.m_len2;
+    m_invLen2      = a_otherEdge.m_invLen2;
   }
 
   template <class T>
@@ -107,7 +107,10 @@ namespace dcel {
     const auto& x2 = this->getOtherVertex()->getPosition();
 
     m_x2x1 = x2-x1;
-    m_len2 = m_x2x1.dot(m_x2x1);
+
+    const auto len2 = m_x2x1.dot(m_x2x1);
+
+    m_invLen2 = 1./len2;
   }
 
   template <class T>
@@ -222,7 +225,7 @@ namespace dcel {
   decltype(auto) edgeT<T>::projectPointToEdge(const Vec3& a_x0) const noexcept {
     const auto p = a_x0 - m_vertex->getPosition();
 
-    return p.dot(m_x2x1)/m_len2;
+    return p.dot(m_x2x1)*m_invLen2;
   }
 
   template <class T>
@@ -261,8 +264,8 @@ namespace dcel {
     
     t = std::min(std::max(zero,t), one);
 
-    const auto linePoint = m_vertex->getPosition() + t*m_x2x1;
-    const auto delta     = a_x0 - linePoint;
+    const Vec3T<T> linePoint = m_vertex->getPosition() + t*m_x2x1;
+    const Vec3T<T> delta     = a_x0 - linePoint;
     
     return delta.dot(delta);
   }

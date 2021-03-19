@@ -54,6 +54,10 @@ namespace dcel {
     this->computeCentroid();
     this->computeArea();
     this->computePolygon2D();
+
+    for (edgeIterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
+      m_edges.emplace_back(edgeIt());
+    }
   }
 
   template <class T>
@@ -229,14 +233,10 @@ namespace dcel {
       retval = m_normal.dot(a_x0 - m_centroid);
     }
     else {
-      for (edgeIterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
-	const auto& e = edgeIt();
-	
+      for (const auto& e : m_edges){
 	const T curDist = e->signedDistance(a_x0);
-    
-	if(curDist*curDist < retval*retval){
-	  retval = curDist;
-	}
+
+	retval = (curDist*curDist < retval*retval) ? curDist : retval;
       }
     }
 
@@ -250,16 +250,16 @@ namespace dcel {
 
     const bool inside = this->isPointInsideFace(a_x0);
 
-    if(inside){ 
-      retval  = m_normal.dot(a_x0 - m_centroid);
-      retval *= retval;
+    if(inside){
+      const T normDist = m_normal.dot(a_x0-m_centroid);
+      
+      retval = normDist*normDist;
     }
-    else{ // The projected point lies outside the triangle. Check distance to edges/vertices
-      for (edgeIterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
-	const auto& e = edgeIt();
-	
-	const T curDist = e->unsignedDistance2(a_x0);
-	retval = std::min(retval, curDist);
+    else{ 
+      for (const auto& e : m_edges){
+	const T curDist2 = e->unsignedDistance2(a_x0);
+
+    	retval = (curDist2 < retval) ? curDist2 : retval;
       }
     }
 

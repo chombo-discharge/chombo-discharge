@@ -77,4 +77,4 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # PORSCHE GEOMETRY CLASS (mostly used for testing)
 # ====================================================================================================
 porsche.mesh_file    = mug.ply
-porsche.partitioner  = overlap
+porsche.partitioner  = sah

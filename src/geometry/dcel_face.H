@@ -84,10 +84,9 @@ namespace dcel {
   
   protected:
     
-    std::shared_ptr<edge> m_halfEdge; // One of the edges. This must always be != nullptr for a valid face. 
-
-    std::vector<std::shared_ptr<vertex> > m_vertices; 
-    std::vector<std::shared_ptr<edge> > m_edges;
+    std::shared_ptr<edge> m_halfEdge; // One of the edges. This must always be != nullptr for a valid face.
+    
+    std::vector<std::shared_ptr<edge> > m_edges; // Exists because of performance reasons. 
 
     T m_area;
     
