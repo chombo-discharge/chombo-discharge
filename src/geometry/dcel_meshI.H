@@ -24,9 +24,9 @@ namespace dcel {
 
   template <class T>
   inline
-  meshT<T>::meshT(std::vector<std::shared_ptr<face> >&   a_faces,
-		  std::vector<std::shared_ptr<edge> >&   a_edges,
-		  std::vector<std::shared_ptr<vertex> >& a_vertices){
+  meshT<T>::meshT(std::vector<facePtr >&   a_faces,
+		  std::vector<edgePtr >&   a_edges,
+		  std::vector<vertexPtr >& a_vertices){
     this->define(a_faces, a_edges, a_vertices);
   }
 
@@ -38,9 +38,9 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::define(std::vector<std::shared_ptr<face> >&   a_faces,
-				  std::vector<std::shared_ptr<edge> >&   a_edges,
-				  std::vector<std::shared_ptr<vertex> >& a_vertices) noexcept{
+  decltype(auto) meshT<T>::define(std::vector<facePtr >&   a_faces,
+				  std::vector<edgePtr >&   a_edges,
+				  std::vector<vertexPtr >& a_vertices) noexcept{
     m_faces    = a_faces;
     m_edges    = a_edges;
     m_vertices = a_vertices;
@@ -90,7 +90,7 @@ namespace dcel {
       if(v == nullptr){
 	std::cerr << "In file 'dcel_mesh.cpp' function dcel::meshT<T>::sanityCheck  - got a nullptr vertex, something has gone wrong with vertex generation.\n";
       }
-      else if(v->getEdge() == nullptr){
+      else if(v->getOutgoingEdge() == nullptr){
 	std::cerr << "In file 'dcel_mesh.cpp' function dcel::meshT<T>::sanityCheck  - vertex has a nullptr edge, something has gone wrong with vertex generation.\n";
       }
     }
@@ -245,7 +245,7 @@ namespace dcel {
   template <class T>  
   inline
   decltype(auto) meshT<T>::DirectSignedDistance2(const Vec3& a_point) const noexcept {
-    std::shared_ptr<face> closest = m_faces.front();
+    facePtr closest = m_faces.front();
     T minDist2 = closest->unsignedDistance2(a_point);
 
     for (const auto& f : m_faces){

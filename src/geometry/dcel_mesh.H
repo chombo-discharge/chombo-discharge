@@ -25,23 +25,29 @@ namespace dcel {
   public:
 
     using Vec3   = Vec3T<T>;
+    
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
     using face   = faceT<T>;
+
+    using vertexPtr = std::shared_ptr<vertex>;
+    using edgePtr   = std::shared_ptr<edge>;
+    using facePtr   = std::shared_ptr<face>;
+    
     using mesh   = meshT<T>;
 
     meshT();
     meshT(const mesh& a_otherMesh) = delete;
-    meshT(std::vector<std::shared_ptr<face> >&   a_faces,
-	  std::vector<std::shared_ptr<edge> >&   a_edges,
-	  std::vector<std::shared_ptr<vertex> >& a_vertices);
+    meshT(std::vector<facePtr >&   a_faces,
+	  std::vector<edgePtr >&   a_edges,
+	  std::vector<vertexPtr >& a_vertices);
 
     ~meshT();
 
     inline
-    decltype(auto) define(std::vector<std::shared_ptr<face> >&   a_faces,
-			  std::vector<std::shared_ptr<edge> >&   a_edges,
-			  std::vector<std::shared_ptr<vertex> >& a_vertices) noexcept;
+    decltype(auto) define(std::vector<facePtr >&   a_faces,
+			  std::vector<edgePtr >&   a_edges,
+			  std::vector<vertexPtr >& a_vertices) noexcept;
     
     inline
     decltype(auto) sanityCheck() const noexcept;
@@ -83,9 +89,9 @@ namespace dcel {
 
     SearchAlgorithm m_algorithm;
 
-    std::vector<std::shared_ptr<vertex> >  m_vertices;
-    std::vector<std::shared_ptr<edge> >    m_edges;
-    std::vector<std::shared_ptr<face> >    m_faces;
+    std::vector<vertexPtr >  m_vertices;
+    std::vector<edgePtr >    m_edges;
+    std::vector<facePtr >    m_faces;
 
     inline
     decltype(auto) getAllVertexCoordinates() const noexcept;

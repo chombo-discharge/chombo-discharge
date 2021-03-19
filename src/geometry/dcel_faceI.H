@@ -23,7 +23,7 @@ namespace dcel {
 
   template <class T>
   inline
-  faceT<T>::faceT(const std::shared_ptr<edge>& a_edge) : face() {
+  faceT<T>::faceT(const edgePtr& a_edge) : face() {
     m_halfEdge = a_edge;
   }
 
@@ -41,7 +41,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::define(const Vec3& a_normal, const std::shared_ptr<edge>& a_edge) noexcept {
+  decltype(auto) faceT<T>::define(const Vec3& a_normal, const edgePtr& a_edge) noexcept {
     m_normal   = a_normal;
     m_halfEdge = a_edge;
   }
@@ -54,6 +54,13 @@ namespace dcel {
     this->computeCentroid();
     this->computeArea();
     this->computePolygon2D();
+    this->computeAndStoreEdges();
+  }
+
+  template <class T>
+  inline
+  decltype(auto) faceT<T>::computeAndStoreEdges() noexcept {
+    m_edges.resize(0);
 
     for (edgeIterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
       m_edges.emplace_back(edgeIt());
@@ -62,7 +69,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept {
+  decltype(auto) faceT<T>::setHalfEdge(const edgePtr& a_halfEdge) noexcept {
     m_halfEdge = a_halfEdge;
   }
 
@@ -185,10 +192,10 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) faceT<T>::gatherVertices() const noexcept {
-    std::vector<std::shared_ptr<vertex> > vertices;
+    std::vector<vertexPtr> vertices;
 
     for (edgeIterator iter(*this); iter.ok(); ++iter){
-      std::shared_ptr<edge>& edge = iter();
+      edgePtr& edge = iter();
       vertices.emplace_back(edge->getVertex());
     }
 
@@ -201,7 +208,7 @@ namespace dcel {
     std::vector<Vec3> ret;
 
     for (edgeIterator iter(*this); iter.ok(); ++iter){
-      std::shared_ptr<edge>& edge = iter();
+      edgePtr& edge = iter();
       ret.emplace_back(edge->getVertex()->getPosition());
     }
 
@@ -265,5 +272,15 @@ namespace dcel {
 
     return retval;
   }
+
+  template <class T>
+  inline
+  decltype(auto) faceT<T>::getFlippedFace() const noexcept {
+
+
+    
+  }
 }
+
+
 #endif

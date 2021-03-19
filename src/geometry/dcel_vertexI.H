@@ -21,7 +21,7 @@ namespace dcel {
     m_pos    = Vec3::zero();
     m_normal = Vec3::zero();
 
-    m_faceCache.resize(0, nullptr);
+    m_faces.resize(0);
   }
 
   template <class T>
@@ -40,9 +40,9 @@ namespace dcel {
   template <class T>
   inline
   vertexT<T>::vertexT(const vertexT<T>& a_otherVertex){
-    m_pos    = a_otherVertex.m_pos;
-    m_normal = a_otherVertex.m_m_normal;
-    m_edge   = a_otherVertex.m_edge;
+    m_pos          = a_otherVertex.m_pos;
+    m_normal       = a_otherVertex.m_m_normal;
+    m_outgoingEdge = a_otherVertex.m_outgoingEdge;
   }
 
   template <class T>
@@ -53,9 +53,9 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::define(const Vec3& a_pos, const std::shared_ptr<edge>& a_edge, const Vec3& a_normal) noexcept {
+  decltype(auto) vertexT<T>::define(const Vec3& a_pos, const edgePtr& a_edge, const Vec3& a_normal) noexcept {
     m_pos    = a_pos;
-    m_edge   = a_edge;
+    m_outgoingEdge   = a_edge;
     m_normal = a_normal;
   }
 
@@ -67,8 +67,8 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::setEdge(const std::shared_ptr<edge>& a_edge) noexcept {
-    m_edge = a_edge;
+  decltype(auto) vertexT<T>::setEdge(const edgePtr& a_edge) noexcept {
+    m_outgoingEdge = a_edge;
   }
 
   template <class T>
@@ -79,14 +79,8 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::addFaceToCache(const std::shared_ptr<face>& a_face) noexcept {
-    m_faceCache.emplace_back(a_face);
-  }
-
-  template <class T>
-  inline
-  decltype(auto) vertexT<T>::clearFaceCache() noexcept {
-    m_faceCache.resize(0);
+  decltype(auto) vertexT<T>::addFace(const facePtr& a_face) noexcept {
+    m_faces.emplace_back(a_face);
   }
 
   template <class T>
@@ -98,8 +92,10 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) vertexT<T>::computeVertexNormalAverage() noexcept {
-    for (edgeIterator iter(*this); iter.ok(); ++iter){
-      m_normal += iter()->getNormal();
+    m_normal = Vec3::zero();
+    
+    for (const auto& f : m_faces){
+      m_normal += f->getNormal();
     }
 
     this->normalizeNormalVector();
@@ -110,12 +106,47 @@ namespace dcel {
   decltype(auto) vertexT<T>::computeVertexNormalAngleWeighted() noexcept {
     m_normal = Vec3::zero();
 
-    for (edgeIterator iter(*this); iter.ok(); ++iter){
-      const auto& outgoingEdge = iter();
+    // This is more complicated than it look, and it happens because we want the two half edges that has the current vertex
+    // as a mutual vertex (i.e. the "incoming" and "outgoing" edges into this vertex). Normally we'd just iterate through edges,
+    // but if it happens that an input face is flipped, this will result in infinite iteration. Instead, we have stored the pointers
+    // to each face connected to this vertex. We look through each face to find the endpoints of the edges the have the current vertex
+    // as the common vertex, and then compute the subtended angle between those. Sigh...
 
-      const Vec3& x0 = outgoingEdge->getVertex()->getPosition();
-      const Vec3& x1 = outgoingEdge->getPreviousEdge()->getVertex()->getPosition();
-      const Vec3& x2 = outgoingEdge->getNextEdge()->getVertex()->getPosition();
+    const vertexPtr& originVertex = m_outgoingEdge->getVertex(); // AKA 'this'
+    
+    for (const auto& f : m_faces){
+      
+      std::vector<vertexPtr> inoutVertices(0);
+      for (edgeIterator edgeIt(f->getHalfEdge()); edgeIt.ok(); ++edgeIt){
+	const auto& e = edgeIt();
+
+	const auto& v1 = e->getVertex();
+	const auto& v2 = e->getOtherVertex();
+
+	if(v1 == originVertex || v2 == originVertex){
+	  if(v1 == originVertex){
+	    inoutVertices.emplace_back(v2);
+	  }
+	  else if(v2 == originVertex){
+	    inoutVertices.emplace_back(v1);
+	  }
+	  else{
+	    std::cerr << "In file 'dcel_vertexI.H' function vertexT<T>::computeVertexNormalAngleWeighted() - logic bust.\n";
+	  }
+	}
+      }
+
+      if(inoutVertices.size() != 2) {
+	std::cerr << "In file 'dcel_vertexI.H' function vertexT<T>::computeVertexNormalAngleWeighted() - logic bust 2.\n";
+      }
+
+      const Vec3& x0 = originVertex->getPosition();
+      const Vec3& x1 = inoutVertices[0]->getPosition();
+      const Vec3& x2 = inoutVertices[1]->getPosition();
+
+      if(x1 == x2 || x0 == x1 || x1 == x2){
+	std::cerr << "In file 'dcel_vertexI.H' function vertexT<T>::computeVertexNormalAngleWeighted() - logic bust 3.\n";
+      }
 
       Vec3 v1 = x1-x0;
       Vec3 v2 = x2-x0;
@@ -123,7 +154,7 @@ namespace dcel {
       v1 = v1/v1.length();
       v2 = v2/v2.length();
 
-      const Vec3 norm = outgoingEdge->getFace()->getNormal();
+      const Vec3& norm = f->getNormal();
 
       const T alpha = acos(v1.dot(v2));
 
@@ -159,26 +190,26 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::getEdge() noexcept {
-    return (m_edge);
+  decltype(auto) vertexT<T>::getOutgoingEdge() noexcept {
+    return (m_outgoingEdge);
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::getEdge() const noexcept {
-    return (m_edge);
+  decltype(auto) vertexT<T>::getOutgoingEdge() const noexcept {
+    return (m_outgoingEdge);
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::getFaceCache() noexcept {
-    return (m_faceCache);
+  decltype(auto) vertexT<T>::getFaces() noexcept {
+    return (m_faces);
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::getFaceCache() const noexcept {
-    return (m_faceCache);
+  decltype(auto) vertexT<T>::getFaces() const noexcept {
+    return (m_faces);
   }
 
   template <class T>

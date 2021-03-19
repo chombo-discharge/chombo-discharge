@@ -26,9 +26,14 @@ namespace dcel {
   public:
 
     using Vec3   = Vec3T<T>;
+    
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
     using face   = faceT<T>;
+
+    using vertexPtr = std::shared_ptr<vertex>;
+    using edgePtr   = std::shared_ptr<edge>;
+    using facePtr   = std::shared_ptr<face>;
 
     using edgeIterator = edgeIteratorT<T>;
 
@@ -36,31 +41,31 @@ namespace dcel {
     
     edgeT(const edge& a_otherEdge);
     
-    edgeT(const std::shared_ptr<vertex>& a_vertex);
+    edgeT(const vertexPtr& a_vertex);
     
     ~edgeT();
 
     inline
-    decltype(auto) define(const std::shared_ptr<vertex>& a_vertex,
-			  const std::shared_ptr<edge>&   a_pairEdge,
-			  const std::shared_ptr<edge>&   a_nextEdge,
-			  const std::shared_ptr<edge>&   a_previousEdge,
+    decltype(auto) define(const vertexPtr& a_vertex,
+			  const edgePtr&   a_pairEdge,
+			  const edgePtr&   a_nextEdge,
+			  const edgePtr&   a_previousEdge,
 			  const Vec3                     a_normal) noexcept;
 
     inline
-    decltype(auto) setVertex(const std::shared_ptr<vertex>& a_vertex) noexcept;
+    decltype(auto) setVertex(const vertexPtr& a_vertex) noexcept;
 
     inline
-    decltype(auto) setPairEdge(const std::shared_ptr<edge>& a_pairEdge) noexcept;
+    decltype(auto) setPairEdge(const edgePtr& a_pairEdge) noexcept;
 
     inline
-    decltype(auto) setNextEdge(const std::shared_ptr<edge>& a_nextEdge) noexcept;
+    decltype(auto) setNextEdge(const edgePtr& a_nextEdge) noexcept;
 
     inline
-    decltype(auto) setPreviousEdge(const std::shared_ptr<edge>& a_previousEdge) noexcept;
+    decltype(auto) setPreviousEdge(const edgePtr& a_previousEdge) noexcept;
 
     inline
-    decltype(auto) setFace(const std::shared_ptr<face>& a_face) noexcept;
+    decltype(auto) setFace(const facePtr& a_face) noexcept;
 
     inline
     decltype(auto) reconcile() noexcept;
@@ -113,6 +118,9 @@ namespace dcel {
     inline
     decltype(auto) unsignedDistance2(const Vec3& a_x0) const noexcept;
 
+    inline
+    decltype(auto) getFlippedEdge() const noexcept;
+
   protected:
 
     Vec3   m_normal;
@@ -121,11 +129,11 @@ namespace dcel {
     Vec3 m_x2x1;
     T    m_invLen2;
 
-    std::shared_ptr<vertex>  m_vertex; 
-    std::shared_ptr<edge>    m_pairEdge;
-    std::shared_ptr<edge>    m_previousEdge; 
-    std::shared_ptr<edge>    m_nextEdge;
-    std::shared_ptr<face>    m_face;
+    vertexPtr  m_vertex; 
+    edgePtr    m_pairEdge;
+    edgePtr    m_previousEdge; 
+    edgePtr    m_nextEdge;
+    facePtr    m_face;
 
     inline
     decltype(auto) projectPointToEdge(const Vec3& a_x0) const noexcept;

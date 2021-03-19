@@ -70,6 +70,12 @@ namespace dcel {
 
   template <class T>
   inline
+  decltype(auto) Vec2T<T>::operator-() const noexcept {
+    return Vec2T<T>(-x, -y);
+  }
+
+  template <class T>
+  inline
   decltype(auto) Vec2T<T>::operator*(const T& s) const noexcept {
     return Vec2T<T>(x*s, y*s);
   }
@@ -203,6 +209,12 @@ namespace dcel {
   inline
   decltype(auto) Vec3T<T>::operator-(const Vec3T<T>& u) const noexcept {
     return Vec3T<T>(X[0]-u[0], X[1]-u[1], X[2]-u[2]);
+  }
+
+  template <class T>
+  inline
+  decltype(auto) Vec3T<T>::operator-() const noexcept {
+    return Vec3T<T>(-X[0], -X[1], -X[2]);
   }
 
   template <class T>

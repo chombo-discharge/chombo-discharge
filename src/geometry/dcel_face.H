@@ -29,28 +29,33 @@ namespace dcel {
   public:
 
     using Vec3   = Vec3T<T>;
+    
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
     using face   = faceT<T>;
+
+    using vertexPtr = std::shared_ptr<vertex>;
+    using edgePtr   = std::shared_ptr<edge>;
+    using facePtr   = std::shared_ptr<face>;
 
     using edgeIterator = edgeIteratorT<T>;
     
     faceT();
     
-    faceT(const std::shared_ptr<edge>& a_edge);
+    faceT(const edgePtr& a_edge);
     
     faceT(const face& a_otherFace);
     
     ~faceT();
 
     inline
-    decltype(auto) define(const Vec3& a_normal, const std::shared_ptr<edge>& a_edge) noexcept;
+    decltype(auto) define(const Vec3& a_normal, const edgePtr& a_edge) noexcept;
 
     inline
     decltype(auto) reconcile() noexcept;
 
     inline
-    decltype(auto) setHalfEdge(const std::shared_ptr<edge>& a_halfEdge) noexcept;
+    decltype(auto) setHalfEdge(const edgePtr& a_halfEdge) noexcept;
 
     inline
     decltype(auto) setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept;
@@ -81,12 +86,15 @@ namespace dcel {
 
     inline
     decltype(auto) getAllVertexCoordinates() const noexcept;
+
+    inline
+    decltype(auto) getFlippedFace() const noexcept;
   
   protected:
     
-    std::shared_ptr<edge> m_halfEdge; // One of the edges. This must always be != nullptr for a valid face.
+    edgePtr m_halfEdge; // One of the edges. This must always be != nullptr for a valid face.
     
-    std::vector<std::shared_ptr<edge> > m_edges; // Exists because of performance reasons. 
+    std::vector<edgePtr > m_edges; // Exists because of performance reasons. 
 
     T m_area;
     
@@ -120,6 +128,9 @@ namespace dcel {
 
     inline
     decltype(auto) gatherVertices() const noexcept;
+
+    inline
+    decltype(auto) computeAndStoreEdges() noexcept;
 
     inline
     decltype(auto) projectPointIntoFacePlane(const Vec3& a_p) const noexcept;

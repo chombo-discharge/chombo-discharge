@@ -32,6 +32,10 @@ namespace dcel {
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
     using face   = faceT<T>;
+
+    using vertexPtr = std::shared_ptr<vertex>;
+    using edgePtr   = std::shared_ptr<edge>;
+    using facePtr   = std::shared_ptr<face>;
     
     using edgeIterator = edgeIteratorT<T>;
     
@@ -42,7 +46,7 @@ namespace dcel {
     ~vertexT();
 
     inline
-    decltype(auto) define(const Vec3& m_pos, const std::shared_ptr<edge>& a_edge, const Vec3& a_normal) noexcept;
+    decltype(auto) define(const Vec3& m_pos, const edgePtr& a_edge, const Vec3& a_normal) noexcept;
 
     inline
     decltype(auto) setPosition(const Vec3& a_pos) noexcept;
@@ -51,10 +55,10 @@ namespace dcel {
     decltype(auto) setNormal(const Vec3& a_normal) noexcept;
 
     inline
-    decltype(auto) setEdge(const std::shared_ptr<edge>& a_edge) noexcept;
+    decltype(auto) setEdge(const edgePtr& a_edge) noexcept;
 
     inline
-    decltype(auto) addFaceToCache(const std::shared_ptr<face>& a_face) noexcept;
+    decltype(auto) addFace(const facePtr& a_face) noexcept;
 
     inline
     decltype(auto) normalizeNormalVector() noexcept;
@@ -64,9 +68,6 @@ namespace dcel {
 
     inline
     decltype(auto) computeVertexNormalAngleWeighted() noexcept;
-
-    inline
-    decltype(auto) clearFaceCache() noexcept;
 
     inline
     decltype(auto) getPosition() noexcept;
@@ -81,16 +82,16 @@ namespace dcel {
     decltype(auto) getNormal() const noexcept;
 
     inline
-    decltype(auto) getEdge() noexcept;
+    decltype(auto) getOutgoingEdge() noexcept;
 
     inline
-    decltype(auto) getEdge() const noexcept;
+    decltype(auto) getOutgoingEdge() const noexcept;
 
     inline
-    decltype(auto) getFaceCache() noexcept;
+    decltype(auto) getFaces() noexcept;
 
     inline
-    decltype(auto) getFaceCache() const noexcept;
+    decltype(auto) getFaces() const noexcept;
 
     inline
     decltype(auto) signedDistance(const Vec3& a_x0) const noexcept;
@@ -99,12 +100,14 @@ namespace dcel {
     decltype(auto) unsignedDistance2(const Vec3& a_x0) const noexcept;
 
   protected:
-    std::shared_ptr<edge> m_edge;
+    
+    edgePtr m_outgoingEdge;
     
     Vec3 m_pos;
     Vec3 m_normal;
     
-    std::vector<std::shared_ptr<face> > m_faceCache;
+    std::vector<facePtr > m_faces;
+
 
   };
 }

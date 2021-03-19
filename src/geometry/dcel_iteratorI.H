@@ -38,7 +38,7 @@ namespace dcel {
   template <class T>
   inline
   edgeIteratorT<T>::edgeIteratorT(vertex& a_vert){
-    m_startEdge = a_vert.getEdge();
+    m_startEdge = a_vert.getOutgoingEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
 
@@ -48,7 +48,7 @@ namespace dcel {
   template <class T>
   inline
   edgeIteratorT<T>::edgeIteratorT(const vertex& a_vert){
-    m_startEdge = a_vert.getEdge();
+    m_startEdge = a_vert.getOutgoingEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
 
@@ -82,6 +82,7 @@ namespace dcel {
       m_curEdge = m_curEdge->getNextEdge();
       break;
     case IterationMode::Vertex:
+      // For vertices, we want to compute the 
       m_curEdge = m_curEdge->getPreviousEdge()->getPairEdge();
       break;
     }

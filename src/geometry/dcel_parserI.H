@@ -39,12 +39,11 @@ namespace dcel {
       int numVertices;  // Number of vertices
       int numFaces;  // Number of faces
 
-      dcel::parser::PLY<T>::readHeaderASCII(numVertices, numFaces, filestream); 
+      dcel::parser::PLY<T>::readHeaderASCII(numVertices, numFaces, filestream);
       dcel::parser::PLY<T>::readVerticesASCII(vertices, numVertices, filestream);
       dcel::parser::PLY<T>::readFacesASCII(faces, edges, vertices, numFaces, filestream);
       dcel::parser::PLY<T>::reconcilePairEdges(edges);
-      dcel::parser::PLY<T>::clearFaceCache(vertices);
-    
+
       a_mesh.sanityCheck();
     
       filestream.close();
@@ -193,7 +192,7 @@ namespace dcel {
 
       // Must give vertices access to all faces associated with them since PLY files do not give any edge association. 
       for (auto& v : curVertices){
-	v->addFaceToCache(curFace);
+	v->addFace(curFace);
       }
 
     
@@ -210,7 +209,7 @@ namespace dcel {
       const auto& vertexStart = curEdge->getVertex();
       const auto& vertexEnd   = nextEdge->getVertex();
 
-      for (const auto& p : vertexStart->getFaceCache()){
+      for (const auto& p : vertexStart->getFaces()){
 	for (edgeIterator edgeIt(*p); edgeIt.ok(); ++edgeIt){
 	  const auto& polyCurEdge  = edgeIt();
 	  const auto& polyNextEdge = polyCurEdge->getNextEdge();
@@ -226,14 +225,5 @@ namespace dcel {
       }
     }
   }
-
-  template <class T>
-  inline
-  decltype(auto) dcel::parser::PLY<T>::clearFaceCache(std::vector<std::shared_ptr<vertex> >& a_vertices) {
-    for (auto& v : a_vertices){
-      v->clearFaceCache();
-    }
-  }
-
 }
 #endif

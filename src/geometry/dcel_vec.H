@@ -36,6 +36,9 @@ namespace dcel {
 
     inline
     decltype(auto) operator-(const Vec2T& a_other) const noexcept;
+    
+    inline
+    decltype(auto) operator-() const noexcept;
 
     inline
     decltype(auto) operator*(const T& s) const noexcept;
@@ -119,6 +122,9 @@ namespace dcel {
     
     inline
     decltype(auto) operator-(const Vec3T<T>& u) const noexcept;
+
+    inline
+    decltype(auto) operator-() const noexcept;
     
     inline
     decltype(auto) operator*(const T& s) const noexcept;
