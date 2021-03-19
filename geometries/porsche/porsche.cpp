@@ -39,7 +39,7 @@ porsche::porsche(){
   // Build the dcel_mesh and the BVH
   auto m = std::make_shared<mesh>();
   parser::PLY<precision>::readASCII(*m, filename);
-  m->reconcile();
+  m->reconcile(VertexNormalWeight::None);
 
   auto root = std::make_shared<NodeT<precision, face, BV> >(m->getFaces());
 

@@ -140,11 +140,11 @@ namespace dcel {
 	std::cerr << "In file 'dcel_vertexI.H' function vertexT<T>::computeVertexNormalAngleWeighted() - logic bust 2.\n";
       }
 
-      const Vec3& x0 = originVertex->getPosition();
+      const Vec3& x0 = originVertex    ->getPosition();
       const Vec3& x1 = inoutVertices[0]->getPosition();
       const Vec3& x2 = inoutVertices[1]->getPosition();
 
-      if(x1 == x2 || x0 == x1 || x1 == x2){
+      if(x0 == x1 || x0 == x2 || x1 == x2){
 	std::cerr << "In file 'dcel_vertexI.H' function vertexT<T>::computeVertexNormalAngleWeighted() - logic bust 3.\n";
       }
 

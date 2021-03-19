@@ -198,8 +198,6 @@ namespace dcel {
     return vertexCoordinates;
   }
 
-
-
   template <class T>  
   inline
   decltype(auto) meshT<T>::signedDistance(const Vec3& a_point) const noexcept {
