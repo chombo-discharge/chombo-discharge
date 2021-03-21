@@ -13,6 +13,7 @@
 #include "dcel_mesh.H"
 #include "dcel_parser.H"
 #include "dcel_if.H"
+#include "dcel_BVH.H"
 #include "bvh_if.H"
 
 using namespace dcel;
@@ -44,19 +45,19 @@ porsche::porsche(){
   auto root = std::make_shared<NodeT<precision, face, BV> >(m->getFaces());
 
   if(partitioner == "default"){
-    root->topDownSortAndPartitionPrimitives(bvh_if<precision, BV>::defaultStopFunction,
-					    bvh_if<precision, BV>::defaultPartitionFunction,
-					    bvh_if<precision, BV>::defaultBVConstructor);
+    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV>,
+					    defaultPartitionFunction<precision>,
+					    defaultBVConstructor<precision, BV>);
   }
   else if(partitioner == "overlap"){
-    root->topDownSortAndPartitionPrimitives(bvh_if<precision, BV>::defaultStopFunction,
-					    bvh_if<precision, BV>::partitionMinimumOverlap,
-					    bvh_if<precision, BV>::defaultBVConstructor);
+    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV>,
+					    partitionMinimumOverlap<precision, BV>,
+					    defaultBVConstructor<precision, BV>);
   }
   else if(partitioner == "sah"){
-    root->topDownSortAndPartitionPrimitives(bvh_if<precision, BV>::defaultStopFunction,
-					    bvh_if<precision, BV>::partitionSAH,
-					    bvh_if<precision, BV>::defaultBVConstructor);
+    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV>,
+					    partitionSAH<precision, BV>,
+					    defaultBVConstructor<precision, BV>);
   }
   else{
     MayDay::Abort("porsche::porsche() -- unknown partitioner requested");

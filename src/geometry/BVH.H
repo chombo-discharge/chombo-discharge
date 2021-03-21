@@ -5,8 +5,8 @@
   @date   March 2021
 */
 
-#ifndef _DCEL_BVH_H_
-#define _DCEL_BVH_H_
+#ifndef _BVH_H_
+#define _BVH_H_
 
 #include "Vec.H"
 
@@ -24,12 +24,12 @@ namespace BVH {
   template <class P>
   using PrimitiveListT = std::vector<std::shared_ptr<const P> >;
 
-  // Partitioning functions. 
-  template <class P>
-  using PartitionFunctionT = std::function<std::pair<PrimitiveListT<P>, PrimitiveListT<P> >(const PrimitiveListT<P>&)>;
-    
+  // Stop, partitioning, and bounding volume constructor functions. 
   template <class T, class P, class BV>
   using StopFunctionT = std::function<bool(const NodeT<T, P, BV>&)>;
+  
+  template <class P>
+  using PartitionFunctionT = std::function<std::pair<PrimitiveListT<P>, PrimitiveListT<P> >(const PrimitiveListT<P>&)>;
 
   template <class P, class BV>
   using BVConstructorT = std::function<BV(const PrimitiveListT<P>&)>;
