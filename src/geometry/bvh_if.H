@@ -26,14 +26,6 @@ public:
   using Vec3  = Vec3T<T>;
   using face  = faceT<T>;
   using Node  = NodeT<T, face, BV>;
-
-  // Lambdas for interfacing into dcel_BVH
-  static StopFunctionT<T, face, BV> defaultStopFunction;
-  static PartitionFunctionT<face>   defaultPartitionFunction;
-  static BVConstructorT<face, BV>   defaultBVConstructor;
-
-  static PartitionFunctionT<face>   partitionMinimumOverlap;
-  static PartitionFunctionT<face>   partitionSAH;
   
 
   //  bvh_if() = delete;
