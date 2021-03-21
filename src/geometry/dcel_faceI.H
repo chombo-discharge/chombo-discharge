@@ -266,7 +266,7 @@ namespace dcel {
       for (const auto& e : m_edges){
 	const T curDist2 = e->unsignedDistance2(a_x0);
 
-    	retval = (curDist2 <= retval) ? curDist2 : retval;
+    	retval = (curDist2 < retval) ? curDist2 : retval;
       }
     }
 

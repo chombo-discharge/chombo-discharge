@@ -40,7 +40,7 @@ tesselation::tesselation(){
   // Build the dcel_mesh and the BVH
   auto m = std::make_shared<mesh>();
   parser::PLY<precision>::readASCII(*m, filename);
-  m->reconcile(VertexNormalWeight::None);
+  m->reconcile(VertexNormalWeight::Angle);
 
   auto root = std::make_shared<NodeT<precision, face, BV> >(m->getFaces());
 
