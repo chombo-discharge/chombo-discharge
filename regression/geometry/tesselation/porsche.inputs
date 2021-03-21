@@ -77,4 +77,4 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # TESSELATION GEOMETRY CLASS
 # ====================================================================================================
 tesselation.mesh_file    = porsche.ply
-tesselation.partitioner  = sah
+tesselation.partitioner  = overlap
