@@ -8,13 +8,14 @@
 #ifndef _BVH_IFI_H_
 #define _BVH_IFI_H_
 
-#include "dcel_vec.H"
+#include "Vec.H"
+
 #include "bvh_if.H"
 
 #include <chrono>
 
 using namespace dcel;
-using namespace dcel::BVH;
+using namespace BVH;
 using namespace std::chrono;
 
 template <class T>
@@ -206,6 +207,7 @@ Real bvh_if<T, BV>::value(const RealVect& a_point) const {
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   Vec3 p(a_point[0], a_point[1], a_point[2]); 
 
+  //  auto d = m_root->pruneOrdered2(p);
   auto d = m_root->pruneOrdered2(p);
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();

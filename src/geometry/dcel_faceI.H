@@ -272,14 +272,6 @@ namespace dcel {
 
     return retval;
   }
-
-  template <class T>
-  inline
-  decltype(auto) faceT<T>::getFlippedFace() const noexcept {
-
-
-    
-  }
 }
 
 

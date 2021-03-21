@@ -8,7 +8,8 @@
 #ifndef _VERTEX_
 #define _VERTEX_
 
-#include "dcel_vec.H"
+#include "Vec.H"
+
 #include "dcel_edge.H"
 #include "dcel_face.H"
 
@@ -17,7 +18,6 @@
 
 namespace dcel {
 
-  template <class T> class Vec3T;
   template <class T> class vertexT;
   template <class T> class edgeT;
   template <class T> class faceT;

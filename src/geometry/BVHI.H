@@ -1,16 +1,16 @@
 /*!
-  @file   dcel_BVHI.H
-  @brief  Implementation of dcel_BVH.H
+  @file   BVHI.H
+  @brief  Implementation of BVH.H
   @author Robert Marskar
   @date   March 2021
 */
 
-#ifndef _DCEL_BVHI_H_
-#define _DCEL_BVHI_H_
+#ifndef _BVHI_H_
+#define _BVHI_H_
 
-#include "dcel_BVH.H"
+#include "BVH.H"
 
-using namespace dcel::BVH;
+using namespace BVH;
 
 template <class T, class P, class BV>
 inline

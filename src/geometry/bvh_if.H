@@ -8,8 +8,8 @@
 #ifndef _BVH_IF_
 #define _BVH_IF_
 
-#include "dcel_BVH.H"
-#include "dcel_mesh.H"
+#include "BVH.H"
+#include "dcel_face.H"
 
 #include <memory>
 #include <chrono>
@@ -17,14 +17,13 @@
 #include <BaseIF.H>
 
 using namespace dcel;
-using namespace dcel::BVH;
+using namespace BVH;
 
 template <class T, class BV>
 class bvh_if : public BaseIF {
 public:
 
   using Vec3  = Vec3T<T>;
-  using mesh  = meshT<T>;
   using face  = faceT<T>;
   using Node  = NodeT<T, face, BV>;
 

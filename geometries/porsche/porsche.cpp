@@ -9,7 +9,7 @@
 
 #include <ParmParse.H>
 
-#include "dcel_BoundingVolumes.H"
+#include "BoundingVolumes.H"
 #include "dcel_mesh.H"
 #include "dcel_parser.H"
 #include "dcel_if.H"

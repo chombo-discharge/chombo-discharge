@@ -8,8 +8,9 @@
 #ifndef _DCEL_FACE__
 #define _DCEL_FACE__
 
+#include "Vec.H"
+
 #include "dcel_algorithms.H"
-#include "dcel_vec.H"
 #include "dcel_vertex.H"
 #include "dcel_edge.H"
 #include "dcel_poly.H"
@@ -86,9 +87,6 @@ namespace dcel {
 
     inline
     decltype(auto) getAllVertexCoordinates() const noexcept;
-
-    inline
-    decltype(auto) getFlippedFace() const noexcept;
   
   protected:
     

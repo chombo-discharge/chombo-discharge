@@ -8,7 +8,8 @@
 #ifndef _DCEL_EDGE_
 #define _DCEL_EDGE_
 
-#include "dcel_vec.H"
+#include "Vec.H"
+
 #include "dcel_face.H"
 
 #include <vector>

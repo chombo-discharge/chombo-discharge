@@ -8,7 +8,6 @@
 #ifndef _DCEL_IF_
 #define _DCEL_IF_
 
-#include "dcel_BVH.H"
 #include "dcel_mesh.H"
 
 #include <memory>

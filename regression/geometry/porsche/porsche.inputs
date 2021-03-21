@@ -4,7 +4,7 @@
 amr_mesh.lo_corner       = -8 -3 -8
 amr_mesh.hi_corner       =  8  5  8
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 64 32 64    # Number of cells on coarsest domain
+amr_mesh.coarsest_domain = 32 16 32    # Number of cells on coarsest domain
 amr_mesh.max_amr_depth   = 0           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = -1          # Refine everything down to this level.
