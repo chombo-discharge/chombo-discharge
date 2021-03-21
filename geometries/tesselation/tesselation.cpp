@@ -1,11 +1,11 @@
 /*!
-  @file   porsche.cpp
-  @brief  Implementation of porsche.H
+  @file   tesselation.cpp
+  @brief  Implementation of tesselation.H
   @author Robert Marskar
-  @date   Jan. 2019
+  @date   March 2021
 */
 
-#include "porsche.H"
+#include "tesselation.H"
 
 #include <ParmParse.H>
 
@@ -27,12 +27,12 @@ using Sphere = BoundingSphereT<precision>;
 
 using BV = AABB;
 
-porsche::porsche(){
+tesselation::tesselation(){
 
   std::string filename;
   std::string partitioner;
 
-  ParmParse pp("porsche");
+  ParmParse pp("tesselation");
 
   pp.get("mesh_file",   filename);
   pp.get("partitioner", partitioner);
@@ -60,7 +60,7 @@ porsche::porsche(){
 					    defaultBVConstructor<precision, BV>);
   }
   else{
-    MayDay::Abort("porsche::porsche() -- unknown partitioner requested");
+    MayDay::Abort("tesselation::tesselation() -- unknown partitioner requested");
   }
 
 
@@ -70,6 +70,6 @@ porsche::porsche(){
   
 }
 
-porsche::~porsche(){
+tesselation::~tesselation(){
   
 }

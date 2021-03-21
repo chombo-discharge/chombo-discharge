@@ -1,6 +1,6 @@
 # ====================================================================================================
-# PORSCHE GEOMETRY CLASS (mostly used for testing)
+# TESSELATION GEOMETRY CLASS
 # ====================================================================================================
-porsche.mesh_file    = big_porsche.ply
-porsche.tree_depth   = 10
-porsche.max_elements = 50
+tesselation.mesh_file   = porsche.ply
+tesselation.partitioner = sah
+
