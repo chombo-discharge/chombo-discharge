@@ -27,30 +27,30 @@ namespace dcel {
     ~Polygon2D() = default;
 
     inline
-    decltype(auto) isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm a_algorithm) const noexcept;
+    bool isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm a_algorithm) const noexcept;
 
     inline
-    decltype(auto) isPointInsidePolygonWindingNumber(const Vec3& a_point) const noexcept;
+    bool isPointInsidePolygonWindingNumber(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) isPointInsidePolygonSubtend(const Vec3& a_point) const noexcept;
+    bool isPointInsidePolygonSubtend(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) isPointInsidePolygonCrossingNumber(const Vec3& a_point) const noexcept;
+    bool isPointInsidePolygonCrossingNumber(const Vec3& a_point) const noexcept;
     
   private:
 
     inline
-    decltype(auto) projectPoint(const Vec3& a_point) const noexcept;
+    Vec2 projectPoint(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) define(const Vec3& a_normal, const std::vector<Vec3>& a_points);
+    void define(const Vec3& a_normal, const std::vector<Vec3>& a_points);
 
     inline
-    decltype(auto) computeWindingNumber(const Vec2& P) const noexcept;
+    int computeWindingNumber(const Vec2& P) const noexcept;
 
     inline
-    decltype(auto) computeCrossingNumber(const Vec2& P) const noexcept;
+    int computeCrossingNumber(const Vec2& P) const noexcept;
 
     inline
     T computeSubtendedAngle(const Vec2& P) const noexcept;

@@ -45,45 +45,45 @@ namespace dcel {
     ~meshT();
 
     inline
-    decltype(auto) define(std::vector<facePtr >&   a_faces,
+    void define(std::vector<facePtr >&   a_faces,
 			  std::vector<edgePtr >&   a_edges,
 			  std::vector<vertexPtr >& a_vertices) noexcept;
     
     inline
-    decltype(auto) sanityCheck() const noexcept;
+    void sanityCheck() const noexcept;
 
     inline
-    decltype(auto) setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept;
+    void setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept;
 
     inline
-    decltype(auto) setInsideOutsideAlgorithm(const dcel::InsideOutsideAlgorithm a_algorithm) noexcept;
+    void setInsideOutsideAlgorithm(const dcel::InsideOutsideAlgorithm a_algorithm) noexcept;
 
     inline
-    decltype(auto) reconcile(VertexNormalWeight a_weight = VertexNormalWeight::Angle) noexcept;
+    void reconcile(VertexNormalWeight a_weight = VertexNormalWeight::Angle) noexcept;
 
     inline
-    decltype(auto) getVertices() noexcept;
+    std::vector<vertexPtr>& getVertices() noexcept;
 
     inline
-    decltype(auto) getVertices() const noexcept;
+    const std::vector<vertexPtr>& getVertices() const noexcept;
 
     inline
-    decltype(auto) getEdges() noexcept;
+    std::vector<edgePtr>& getEdges() noexcept;
 
     inline
-    decltype(auto) getEdges() const noexcept;
+    const std::vector<edgePtr>& getEdges() const noexcept;
 
     inline
-    decltype(auto) getFaces() noexcept;
+    std::vector<facePtr>& getFaces() noexcept;
 
     inline
-    decltype(auto) getFaces() const noexcept;
+    const std::vector<facePtr>& getFaces() const noexcept;
 
     inline
-    decltype(auto) signedDistance(const Vec3& a_x0) const noexcept;
+    T signedDistance(const Vec3& a_x0) const noexcept;
 
     inline
-    decltype(auto) signedDistance(const Vec3& a_x0, SearchAlgorithm a_algorithm) const noexcept;
+    T signedDistance(const Vec3& a_x0, SearchAlgorithm a_algorithm) const noexcept;
 
   protected:
 
@@ -94,28 +94,28 @@ namespace dcel {
     std::vector<facePtr >    m_faces;
 
     inline
-    decltype(auto) getAllVertexCoordinates() const noexcept;
+    std::vector<Vec3T<T> > getAllVertexCoordinates() const noexcept;
 
     inline
-    decltype(auto) reconcileFaces() noexcept;
+    void reconcileFaces() noexcept;
 
     inline
-    decltype(auto) reconcileEdges() noexcept;
+    void reconcileEdges() noexcept;
 
     inline
-    decltype(auto) reconcileVertices(VertexNormalWeight a_weight) noexcept;
+    void reconcileVertices(VertexNormalWeight a_weight) noexcept;
 
     inline
-    decltype(auto) DirectSignedDistance(const Vec3& a_point) const noexcept;
+    T DirectSignedDistance(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) DirectSignedDistance2(const Vec3& a_point) const noexcept;
+    T DirectSignedDistance2(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) incrementWarning(std::map<std::string, int>& a_warnings, const std::string& a_warn) const noexcept;
+    void incrementWarning(std::map<std::string, int>& a_warnings, const std::string& a_warn) const noexcept;
 
     inline
-    decltype(auto) printWarnings(const std::map<std::string, int>& a_warnings) const noexcept;
+    void printWarnings(const std::map<std::string, int>& a_warnings) const noexcept;
   };
 }
 

@@ -38,7 +38,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::define(std::vector<facePtr >&   a_faces,
+  void meshT<T>::define(std::vector<facePtr >&   a_faces,
 				  std::vector<edgePtr >&   a_edges,
 				  std::vector<vertexPtr >& a_vertices) noexcept{
     m_faces    = a_faces;
@@ -48,13 +48,13 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::incrementWarning(std::map<std::string, int>& a_warnings, const std::string& a_warn) const noexcept {
+  void meshT<T>::incrementWarning(std::map<std::string, int>& a_warnings, const std::string& a_warn) const noexcept {
     a_warnings.at(a_warn) += 1;
   }
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::printWarnings(const std::map<std::string, int>& a_warnings) const noexcept {
+  void meshT<T>::printWarnings(const std::map<std::string, int>& a_warnings) const noexcept {
     for (const auto& warn : a_warnings){
       if(warn.second > 0){
 	std::cerr << "In file 'dcel_mesh.cpp' function dcel_meshT<T>::sanityCheck() - warnings about error '" << warn.first << "' = " << warn.second << "\n";
@@ -64,7 +64,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::sanityCheck() const noexcept {
+  void meshT<T>::sanityCheck() const noexcept {
 
 
     const std::string e_null       = "nullptr edges";
@@ -143,13 +143,13 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept {
+  void meshT<T>::setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept {
     m_algorithm = a_algorithm;
   }
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm a_algorithm) noexcept {
+  void meshT<T>::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm a_algorithm) noexcept {
     for (auto& f : m_faces){
       f->setInsideOutsideAlgorithm(a_algorithm);
     }
@@ -157,7 +157,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::reconcile(VertexNormalWeight a_weight) noexcept {
+  void meshT<T>::reconcile(VertexNormalWeight a_weight) noexcept {
     this->reconcileFaces();
     this->reconcileEdges();
     this->reconcileVertices(a_weight);
@@ -165,7 +165,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::reconcileFaces() noexcept {
+  void meshT<T>::reconcileFaces() noexcept {
     for (auto& f : m_faces){
       f->reconcile();
     }
@@ -173,7 +173,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::reconcileEdges() noexcept {
+  void meshT<T>::reconcileEdges() noexcept {
     for (auto& e : m_edges){
       e->reconcile();
     }
@@ -181,7 +181,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::reconcileVertices(VertexNormalWeight a_weight) noexcept {
+  void meshT<T>::reconcileVertices(VertexNormalWeight a_weight) noexcept {
     for (auto& v : m_vertices){
       switch(a_weight) {
       case VertexNormalWeight::None:
@@ -198,43 +198,43 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::getVertices() noexcept {
+  std::vector<std::shared_ptr<vertexT<T> > >& meshT<T>::getVertices() noexcept {
     return (m_vertices);
   }
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::getVertices() const noexcept {
+  const std::vector<std::shared_ptr<vertexT<T> > >& meshT<T>::getVertices() const noexcept {
     return (m_vertices);
   }
 
   template <class T>  
   inline
-  decltype(auto) meshT<T>::getEdges() noexcept {
+  std::vector<std::shared_ptr<edgeT<T> > >& meshT<T>::getEdges() noexcept {
     return (m_edges);
   }
 
   template <class T>  
   inline
-  decltype(auto) meshT<T>::getEdges() const noexcept {
+  const std::vector<std::shared_ptr<edgeT<T> > >& meshT<T>::getEdges() const noexcept {
     return (m_edges);
   }
 
   template <class T>
   inline
-  decltype(auto) meshT<T>::getFaces() noexcept {
+  std::vector<std::shared_ptr<faceT<T> > >& meshT<T>::getFaces() noexcept {
     return (m_faces);
   }
 
   template <class T>  
   inline
-  decltype(auto) meshT<T>::getFaces() const noexcept {
+  const std::vector<std::shared_ptr<faceT<T> > >& meshT<T>::getFaces() const noexcept {
     return (m_faces);
   }
 
   template <class T>  
   inline
-  decltype(auto) meshT<T>::getAllVertexCoordinates() const noexcept {
+  std::vector<Vec3T<T> > meshT<T>::getAllVertexCoordinates() const noexcept {
     std::vector<Vec3 > vertexCoordinates;
     for (const auto& v : m_vertices){
       vertexCoordinates.emplace_back(v->getPosition());
@@ -245,13 +245,13 @@ namespace dcel {
 
   template <class T>  
   inline
-  decltype(auto) meshT<T>::signedDistance(const Vec3& a_point) const noexcept {
+  T meshT<T>::signedDistance(const Vec3& a_point) const noexcept {
     return this->signedDistance(a_point, m_algorithm);
   }
 
   template <class T>  
   inline
-  decltype(auto) meshT<T>::signedDistance(const Vec3& a_point, SearchAlgorithm a_algorithm) const noexcept {
+  T meshT<T>::signedDistance(const Vec3& a_point, SearchAlgorithm a_algorithm) const noexcept {
     T minDist;
   
     switch(a_algorithm){
@@ -271,7 +271,7 @@ namespace dcel {
 
   template <class T>  
   inline
-  decltype(auto) meshT<T>::DirectSignedDistance(const Vec3& a_point) const noexcept {
+  T meshT<T>::DirectSignedDistance(const Vec3& a_point) const noexcept {
     T minDist = m_faces.front()->signedDistance(a_point);
     
     for (const auto& f : m_faces){
@@ -287,7 +287,7 @@ namespace dcel {
 
   template <class T>  
   inline
-  decltype(auto) meshT<T>::DirectSignedDistance2(const Vec3& a_point) const noexcept {
+  T meshT<T>::DirectSignedDistance2(const Vec3& a_point) const noexcept {
     facePtr closest = m_faces.front();
     T minDist2 = closest->unsignedDistance2(a_point);
 
