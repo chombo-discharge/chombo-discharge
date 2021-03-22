@@ -2,6 +2,7 @@ dodecahedron.ply
 hind.ply
 mug.ply
 octahedron.ply
+orion.ply
 porsche.ply
 sphere.ply
 tetrahedron.ply

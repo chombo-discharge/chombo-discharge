@@ -38,27 +38,27 @@ bvh_if<T, BV>::bvh_if(const bvh_if& a_primitive) : bvh_if() {
 
 template <class T, class BV>
 bvh_if<T, BV>::~bvh_if(){
-  // if(m_numCalled > 0L){
-  //   std::cout << "On destructor: Calls: " << m_numCalled << "\t Tot: " << m_timespan.count() << "\t Avg./Call = " << m_timespan.count()/(1.0*m_numCalled) << std::endl;
-  // }
+  if(m_numCalled > 0L){
+    std::cout << "On destructor: Calls: " << m_numCalled << "\t Tot: " << m_timespan.count() << "\t Avg./Call = " << m_timespan.count()/(1.0*m_numCalled) << std::endl;
+  }
 }
 
 template <class T, class BV>
 Real bvh_if<T, BV>::value(const RealVect& a_point) const {
-  //  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
   Vec3 p(a_point[0], a_point[1], a_point[2]); 
 
   auto d = m_root->pruneOrdered2(p);
 
-  // high_resolution_clock::time_point t2 = high_resolution_clock::now();
-  // duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 
   if(m_flipInside){
     d = -d;
   }
 
-  // m_timespan += time_span;
-  // m_numCalled++;
+  m_timespan += time_span;
+  m_numCalled++;
 
   return Real(d);
 }
