@@ -46,58 +46,58 @@ namespace dcel {
     ~vertexT();
 
     inline
-    decltype(auto) define(const Vec3& m_pos, const edgePtr& a_edge, const Vec3& a_normal) noexcept;
+    void define(const Vec3& m_pos, const edgePtr& a_edge, const Vec3& a_normal) noexcept;
 
     inline
-    decltype(auto) setPosition(const Vec3& a_pos) noexcept;
+    void setPosition(const Vec3& a_pos) noexcept;
 
     inline
-    decltype(auto) setNormal(const Vec3& a_normal) noexcept;
+    void setNormal(const Vec3& a_normal) noexcept;
 
     inline
-    decltype(auto) setEdge(const edgePtr& a_edge) noexcept;
+    void setEdge(const edgePtr& a_edge) noexcept;
 
     inline
-    decltype(auto) addFace(const facePtr& a_face) noexcept;
+    void addFace(const facePtr& a_face) noexcept;
 
     inline
-    decltype(auto) normalizeNormalVector() noexcept;
+    void normalizeNormalVector() noexcept;
 
     inline
-    decltype(auto) computeVertexNormalAverage() noexcept;
+    void computeVertexNormalAverage() noexcept;
 
     inline
-    decltype(auto) computeVertexNormalAngleWeighted() noexcept;
+    void computeVertexNormalAngleWeighted() noexcept;
 
     inline
-    decltype(auto) getPosition() noexcept;
+    Vec3T<T>& getPosition() noexcept;
 
     inline
-    decltype(auto) getPosition() const noexcept;
+    const Vec3T<T>& getPosition() const noexcept;
 
     inline
-    decltype(auto) getNormal() noexcept;
+    Vec3T<T>& getNormal() noexcept;
 
     inline
-    decltype(auto) getNormal() const noexcept;
+    const Vec3T<T>& getNormal() const noexcept;
 
     inline
-    decltype(auto) getOutgoingEdge() noexcept;
+    edgePtr& getOutgoingEdge() noexcept;
 
     inline
-    decltype(auto) getOutgoingEdge() const noexcept;
+    const edgePtr& getOutgoingEdge() const noexcept;
 
     inline
-    decltype(auto) getFaces() noexcept;
+    std::vector<facePtr>& getFaces() noexcept;
 
     inline
-    decltype(auto) getFaces() const noexcept;
+    const std::vector<facePtr>& getFaces() const noexcept;
 
     inline
-    decltype(auto) signedDistance(const Vec3& a_x0) const noexcept;
+    T signedDistance(const Vec3& a_x0) const noexcept;
 
     inline
-    decltype(auto) unsignedDistance2(const Vec3& a_x0) const noexcept;
+    T unsignedDistance2(const Vec3& a_x0) const noexcept;
 
   protected:
     

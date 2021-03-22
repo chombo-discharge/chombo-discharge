@@ -53,7 +53,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::define(const Vec3& a_pos, const edgePtr& a_edge, const Vec3& a_normal) noexcept {
+  void vertexT<T>::define(const Vec3& a_pos, const edgePtr& a_edge, const Vec3& a_normal) noexcept {
     m_pos    = a_pos;
     m_outgoingEdge   = a_edge;
     m_normal = a_normal;
@@ -61,37 +61,37 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::setPosition(const Vec3& a_pos) noexcept {
+  void vertexT<T>::setPosition(const Vec3& a_pos) noexcept {
     m_pos = a_pos;
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::setEdge(const edgePtr& a_edge) noexcept {
+  void vertexT<T>::setEdge(const edgePtr& a_edge) noexcept {
     m_outgoingEdge = a_edge;
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::setNormal(const Vec3& a_normal) noexcept {
+  void vertexT<T>::setNormal(const Vec3& a_normal) noexcept {
     m_normal = a_normal;
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::addFace(const facePtr& a_face) noexcept {
+  void vertexT<T>::addFace(const facePtr& a_face) noexcept {
     m_faces.emplace_back(a_face);
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::normalizeNormalVector() noexcept {
+  void vertexT<T>::normalizeNormalVector() noexcept {
     m_normal = m_normal/m_normal.length();
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::computeVertexNormalAverage() noexcept {
+  void vertexT<T>::computeVertexNormalAverage() noexcept {
     m_normal = Vec3::zero();
     
     for (const auto& f : m_faces){
@@ -103,7 +103,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::computeVertexNormalAngleWeighted() noexcept {
+  void vertexT<T>::computeVertexNormalAngleWeighted() noexcept {
     m_normal = Vec3::zero();
 
     // This is more complicated than it looks, and it happens because we want the two half edges that has the current vertex
@@ -166,55 +166,55 @@ namespace dcel {
   
   template <class T>
   inline
-  decltype(auto) vertexT<T>::getPosition() noexcept {
+  Vec3T<T>& vertexT<T>::getPosition() noexcept {
     return (m_pos);
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::getPosition() const noexcept {
+  const Vec3T<T>& vertexT<T>::getPosition() const noexcept {
     return (m_pos);
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::getNormal() noexcept {
+  Vec3T<T>& vertexT<T>::getNormal() noexcept {
     return (m_normal);
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::getNormal() const noexcept {
+  const Vec3T<T>& vertexT<T>::getNormal() const noexcept {
     return (m_normal);
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::getOutgoingEdge() noexcept {
+  std::shared_ptr<edgeT<T> >& vertexT<T>::getOutgoingEdge() noexcept {
     return (m_outgoingEdge);
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::getOutgoingEdge() const noexcept {
+  const std::shared_ptr<edgeT<T> >& vertexT<T>::getOutgoingEdge() const noexcept {
     return (m_outgoingEdge);
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::getFaces() noexcept {
+  std::vector<std::shared_ptr<faceT<T> > >& vertexT<T>::getFaces() noexcept {
     return (m_faces);
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::getFaces() const noexcept {
+  const std::vector<std::shared_ptr<faceT<T> > >& vertexT<T>::getFaces() const noexcept {
     return (m_faces);
   }
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::signedDistance(const Vec3& a_x0) const noexcept {
+  T vertexT<T>::signedDistance(const Vec3& a_x0) const noexcept {
     const auto delta = a_x0 - m_pos;
     const T dist     = delta.length();
     const T dot      = m_normal.dot(delta);
@@ -225,7 +225,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) vertexT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept {
+  T vertexT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept {
     const auto d = a_x0 - m_pos;
 
     return d.dot(d);
