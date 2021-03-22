@@ -21,58 +21,58 @@ public:
   T y;
 
   inline
-  static decltype(auto) zero() noexcept;
+  static Vec2T<T> zero() noexcept;
 
   inline
-  static decltype(auto) one() noexcept;
+  static Vec2T<T> one() noexcept;
 
   inline
-  decltype(auto) operator=(const Vec2T& a_other) noexcept;
+  Vec2T<T>& operator=(const Vec2T& a_other) noexcept;
 
   inline
-  decltype(auto) operator+(const Vec2T& a_other) const noexcept;
+  Vec2T<T> operator+(const Vec2T& a_other) const noexcept;
 
   inline
-  decltype(auto) operator-(const Vec2T& a_other) const noexcept;
+  Vec2T<T> operator-(const Vec2T& a_other) const noexcept;
     
   inline
-  decltype(auto) operator-() const noexcept;
+  Vec2T<T> operator-() const noexcept;
 
   inline
-  decltype(auto) operator*(const T& s) const noexcept;
+  Vec2T<T> operator*(const T& s) const noexcept;
 
   inline
-  decltype(auto) operator/(const T& s) const noexcept;
+  Vec2T<T> operator/(const T& s) const noexcept;
 
   inline
-  decltype(auto) operator+=(const Vec2T& a_other) noexcept;
+  Vec2T<T>& operator+=(const Vec2T& a_other) noexcept;
 
   inline
-  decltype(auto) operator-=(const Vec2T& a_other) noexcept;
+  Vec2T<T>& operator-=(const Vec2T& a_other) noexcept;
 
   inline
-  decltype(auto) operator*=(const T& s) noexcept;
+  Vec2T<T>& operator*=(const T& s) noexcept;
 
   inline
-  decltype(auto) operator/=(const T& s) noexcept;
+  Vec2T<T>& operator/=(const T& s) noexcept;
 
   inline
-  decltype(auto) dot(const Vec2T& a_other) const noexcept;
+  T dot(const Vec2T& a_other) const noexcept;
 
   inline
-  decltype(auto) length() const noexcept;
+  T length() const noexcept;
 
   inline
-  decltype(auto) length2() const noexcept;
+  T length2() const noexcept;
 };
 
 template <class T>
 inline
-decltype(auto) operator*(const T& s, const Vec2T<T>& a_other) noexcept;
+Vec2T<T> operator*(const T& s, const Vec2T<T>& a_other) noexcept;
 
 template <class T>
 inline
-decltype(auto) operator/(const T& s, const Vec2T<T>& a_other) noexcept;
+Vec2T<T> operator/(const T& s, const Vec2T<T>& a_other) noexcept;
 
 template <class T>
 class Vec3T {
@@ -86,82 +86,82 @@ public:
   ~Vec3T() = default;
 
   inline
-  static decltype(auto) zero() noexcept;
+  static Vec3T<T> zero() noexcept;
 
   inline
-  static decltype(auto) one() noexcept;
+  static Vec3T<T> one() noexcept;
 
   inline
-  decltype(auto) operator[](int i) noexcept;
+  T& operator[](int i) noexcept;
 
   inline
-  decltype(auto) operator[](int i) const noexcept;
+  const T& operator[](int i) const noexcept;
     
   inline
-  decltype(auto) operator==(const Vec3T<T>& u) const noexcept;
+  bool operator==(const Vec3T<T>& u) const noexcept;
     
   inline
-  decltype(auto) operator<(const Vec3T<T>& u) const noexcept;
+  bool operator<(const Vec3T<T>& u) const noexcept;
     
   inline
-  decltype(auto) operator>(const Vec3T<T>& u) const noexcept;
+  bool operator>(const Vec3T<T>& u) const noexcept;
     
   inline
-  decltype(auto) operator<=(const Vec3T<T>& u) const noexcept;
+  bool operator<=(const Vec3T<T>& u) const noexcept;
     
   inline
-  decltype(auto) operator>=(const Vec3T<T>& u) const noexcept;
+  bool operator>=(const Vec3T<T>& u) const noexcept;
     
   inline
-  decltype(auto) operator=(const Vec3T<T>& u) noexcept;
+  Vec3T<T>& operator=(const Vec3T<T>& u) noexcept;
     
   inline
-  decltype(auto) operator+(const Vec3T<T>& u) const noexcept;
+  Vec3T<T> operator+(const Vec3T<T>& u) const noexcept;
     
   inline
-  decltype(auto) operator-(const Vec3T<T>& u) const noexcept;
+  Vec3T<T> operator-(const Vec3T<T>& u) const noexcept;
 
   inline
-  decltype(auto) operator-() const noexcept;
+  Vec3T<T> operator-() const noexcept;
     
   inline
-  decltype(auto) operator*(const T& s) const noexcept;
+  Vec3T<T> operator*(const T& s) const noexcept;
     
   inline
-  decltype(auto) operator/(const T& s) const noexcept;
+  Vec3T<T> operator/(const T& s) const noexcept;
     
   inline
-  decltype(auto) operator+=(const Vec3T<T>& u) noexcept;
+  Vec3T<T>& operator+=(const Vec3T<T>& u) noexcept;
     
   inline
-  decltype(auto) operator-=(const Vec3T<T>& u) noexcept;
+  Vec3T<T>& operator-=(const Vec3T<T>& u) noexcept;
     
   inline
-  decltype(auto) operator*=(const T& s) noexcept;
+  Vec3T<T>& operator*=(const T& s) noexcept;
     
   inline
-  decltype(auto) operator/=(const T& s) noexcept;
+  Vec3T<T>& operator/=(const T& s) noexcept;
     
   inline
-  decltype(auto) min(const Vec3T<T>& u) noexcept;
+  Vec3T<T> min(const Vec3T<T>& u) noexcept;
     
   inline
-  decltype(auto) max(const Vec3T<T>& u) noexcept;
+  Vec3T<T> max(const Vec3T<T>& u) noexcept;
     
   inline
-  decltype(auto) cross(const Vec3T<T>& u) const noexcept;
+  Vec3T<T> cross(const Vec3T<T>& u) const noexcept;
     
   inline
-  decltype(auto) dot(const Vec3T<T>& u) const noexcept;
+  T dot(const Vec3T<T>& u) const noexcept;
 
   inline
-  decltype(auto) maxDir(const bool a_doAbs) const noexcept;
+  int maxDir(const bool a_doAbs) const noexcept;
 
   inline
-  decltype(auto) length() const noexcept;
+  T length() const noexcept;
 
   inline
-  decltype(auto) length2() const noexcept;
+  T length2() const noexcept;
 
 protected:
   T X[3];
@@ -169,19 +169,19 @@ protected:
 
 template <class T>
 inline
-decltype(auto) operator*(const T& s, const Vec3T<T>& a_other) noexcept;
+Vec3T<T> operator*(const T& s, const Vec3T<T>& a_other) noexcept;
 
 template <class T>
 inline
-decltype(auto) operator/(const T& s, const Vec3T<T>& a_other) noexcept;
+Vec3T<T> operator/(const T& s, const Vec3T<T>& a_other) noexcept;
 
 template <class T>
 inline
-decltype(auto) min(const Vec3T<T>& u, const Vec3T<T>& v) noexcept;
+Vec3T<T> min(const Vec3T<T>& u, const Vec3T<T>& v) noexcept;
 
 template <class T>
 inline
-decltype(auto) max(const Vec3T<T>& u, const Vec3T<T>& v) noexcept;
+Vec3T<T> max(const Vec3T<T>& u, const Vec3T<T>& v) noexcept;
 
 #include "VecI.H"
 
