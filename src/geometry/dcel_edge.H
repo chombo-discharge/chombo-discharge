@@ -47,77 +47,77 @@ namespace dcel {
     ~edgeT();
 
     inline
-    decltype(auto) define(const vertexPtr& a_vertex,
+    void define(const vertexPtr& a_vertex,
 			  const edgePtr&   a_pairEdge,
 			  const edgePtr&   a_nextEdge,
 			  const edgePtr&   a_previousEdge,
 			  const Vec3                     a_normal) noexcept;
 
     inline
-    decltype(auto) setVertex(const vertexPtr& a_vertex) noexcept;
+    void setVertex(const vertexPtr& a_vertex) noexcept;
 
     inline
-    decltype(auto) setPairEdge(const edgePtr& a_pairEdge) noexcept;
+    void setPairEdge(const edgePtr& a_pairEdge) noexcept;
 
     inline
-    decltype(auto) setNextEdge(const edgePtr& a_nextEdge) noexcept;
+    void setNextEdge(const edgePtr& a_nextEdge) noexcept;
 
     inline
-    decltype(auto) setPreviousEdge(const edgePtr& a_previousEdge) noexcept;
+    void setPreviousEdge(const edgePtr& a_previousEdge) noexcept;
 
     inline
-    decltype(auto) setFace(const facePtr& a_face) noexcept;
+    void setFace(const facePtr& a_face) noexcept;
 
     inline
-    decltype(auto) reconcile() noexcept;
+    void reconcile() noexcept;
 
     inline
-    decltype(auto) getVertex() noexcept;
+    vertexPtr& getVertex() noexcept;
 
     inline
-    decltype(auto) getVertex() const noexcept;
+    const vertexPtr& getVertex() const noexcept;
 
     inline
-    decltype(auto) getOtherVertex() noexcept;
+    vertexPtr& getOtherVertex() noexcept;
 
     inline
-    decltype(auto) getOtherVertex() const noexcept;
+    const vertexPtr& getOtherVertex() const noexcept;
 
     inline
-    decltype(auto) getPairEdge() noexcept;
+    edgePtr& getPairEdge() noexcept;
 
     inline
-    decltype(auto) getPairEdge() const noexcept;
+    const edgePtr& getPairEdge() const noexcept;
 
     inline
-    decltype(auto) getPreviousEdge() noexcept;
+    edgePtr& getPreviousEdge() noexcept;
 
     inline
-    decltype(auto) getPreviousEdge() const noexcept;
+    const edgePtr& getPreviousEdge() const noexcept;
 
     inline
-    decltype(auto) getNextEdge() noexcept;
+    edgePtr& getNextEdge() noexcept;
 
     inline
-    decltype(auto) getNextEdge() const noexcept;
+    const edgePtr& getNextEdge() const noexcept;
 
     inline
-    decltype(auto) getNormal() noexcept;
+    Vec3T<T>& getNormal() noexcept;
 
     inline
-    decltype(auto) getNormal() const noexcept;
+    const Vec3T<T>& getNormal() const noexcept;
 
     inline
-    decltype(auto) getFace() noexcept;
+    facePtr& getFace() noexcept;
 
     inline
-    decltype(auto) getFace() const noexcept;
+    const facePtr& getFace() const noexcept;
 
     inline
-    decltype(auto) signedDistance(const Vec3& a_x0) const noexcept;
+    T signedDistance(const Vec3& a_x0) const noexcept;
 
     inline
-    decltype(auto) unsignedDistance2(const Vec3& a_x0) const noexcept;
+    T unsignedDistance2(const Vec3& a_x0) const noexcept;
 
   protected:
 
@@ -134,16 +134,16 @@ namespace dcel {
     facePtr    m_face;
 
     inline
-    decltype(auto) projectPointToEdge(const Vec3& a_x0) const noexcept;
+    T projectPointToEdge(const Vec3& a_x0) const noexcept;
 
     inline
-    decltype(auto) normalizeNormalVector() noexcept;
+    void normalizeNormalVector() noexcept;
 
     inline
-    decltype(auto) computeEdgeLength() noexcept;
+    void computeEdgeLength() noexcept;
 
     inline
-    decltype(auto) computeNormal() noexcept;
+    void computeNormal() noexcept;
   };
 
 }
