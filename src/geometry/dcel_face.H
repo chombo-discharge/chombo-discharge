@@ -50,43 +50,43 @@ namespace dcel {
     ~faceT();
 
     inline
-    decltype(auto) define(const Vec3& a_normal, const edgePtr& a_edge) noexcept;
+    void define(const Vec3& a_normal, const edgePtr& a_edge) noexcept;
 
     inline
-    decltype(auto) reconcile() noexcept;
+    void reconcile() noexcept;
 
     inline
-    decltype(auto) setHalfEdge(const edgePtr& a_halfEdge) noexcept;
+    void setHalfEdge(const edgePtr& a_halfEdge) noexcept;
 
     inline
-    decltype(auto) setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept;
+    void setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept;
 
     inline
-    decltype(auto) getHalfEdge() noexcept;
+    edgePtr& getHalfEdge() noexcept;
 
     inline
-    decltype(auto) getHalfEdge() const noexcept;
+    const edgePtr& getHalfEdge() const noexcept;
 
     inline
-    decltype(auto) getCentroid() noexcept;
+    Vec3T<T>& getCentroid() noexcept;
 
     inline
-    decltype(auto) getCentroid() const noexcept;
+    const Vec3T<T>& getCentroid() const noexcept;
 
     inline
-    decltype(auto) getNormal() noexcept;
+    Vec3T<T>& getNormal() noexcept;
 
     inline
-    decltype(auto) getNormal() const noexcept;
+    const Vec3T<T>& getNormal() const noexcept;
 
     inline
-    decltype(auto) signedDistance(const Vec3& a_x0) const noexcept;
+    T signedDistance(const Vec3& a_x0) const noexcept;
 
     inline
-    decltype(auto) unsignedDistance2(const Vec3& a_x0) const noexcept;
+    T unsignedDistance2(const Vec3& a_x0) const noexcept;
 
     inline
-    decltype(auto) getAllVertexCoordinates() const noexcept;
+    std::vector<Vec3T<T> > getAllVertexCoordinates() const noexcept;
   
   protected:
     
@@ -104,37 +104,37 @@ namespace dcel {
     InsideOutsideAlgorithm m_poly2Algorithm;
 
     inline
-    decltype(auto) computeArea() noexcept;
+    void computeArea() noexcept;
 
     inline
-    decltype(auto) computeCentroid() noexcept;
+    void computeCentroid() noexcept;
 
     inline
-    decltype(auto) computeNormal() noexcept;
+    void computeNormal() noexcept;
 
     inline
-    decltype(auto) computePolygon2D() noexcept;
+    void computePolygon2D() noexcept;
     
     inline
-    decltype(auto) normalizeNormalVector() noexcept;
+    void normalizeNormalVector() noexcept;
 
     inline
-    decltype(auto) getArea() noexcept;
+    T getArea() noexcept;
 
     inline
-    decltype(auto) getArea() const noexcept;
+    T getArea() const noexcept;
 
     inline
-    decltype(auto) gatherVertices() const noexcept;
+    std::vector<vertexPtr> gatherVertices() const noexcept;
 
     inline
-    decltype(auto) computeAndStoreEdges() noexcept;
+    void computeAndStoreEdges() noexcept;
 
     inline
-    decltype(auto) projectPointIntoFacePlane(const Vec3& a_p) const noexcept;
+    Vec3T<T> projectPointIntoFacePlane(const Vec3& a_p) const noexcept;
 
     inline
-    decltype(auto) isPointInsideFace(const Vec3& a_p) const noexcept;
+    bool isPointInsideFace(const Vec3& a_p) const noexcept;
   };
 
 }

@@ -41,14 +41,14 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::define(const Vec3& a_normal, const edgePtr& a_edge) noexcept {
+  void faceT<T>::define(const Vec3& a_normal, const edgePtr& a_edge) noexcept {
     m_normal   = a_normal;
     m_halfEdge = a_edge;
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::reconcile() noexcept {
+  void faceT<T>::reconcile() noexcept {
     this->computeNormal();
     this->normalizeNormalVector();
     this->computeCentroid();
@@ -59,7 +59,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::computeAndStoreEdges() noexcept {
+  void faceT<T>::computeAndStoreEdges() noexcept {
     m_edges.resize(0);
 
     for (edgeIterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
@@ -69,25 +69,25 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::setHalfEdge(const edgePtr& a_halfEdge) noexcept {
+  void faceT<T>::setHalfEdge(const edgePtr& a_halfEdge) noexcept {
     m_halfEdge = a_halfEdge;
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::normalizeNormalVector() noexcept {
+  void faceT<T>::normalizeNormalVector() noexcept {
     m_normal = m_normal/m_normal.length();
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept {
+  void faceT<T>::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept {
     m_poly2Algorithm = a_algorithm;
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::computeArea() noexcept {
+  void faceT<T>::computeArea() noexcept {
     m_area = 0.0;
 
     const auto vertices = this->gatherVertices();
@@ -103,7 +103,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::computeCentroid() noexcept {
+  void faceT<T>::computeCentroid() noexcept {
     m_centroid = Vec3::zero();
 
     const auto vertices = this->gatherVertices();
@@ -117,7 +117,7 @@ namespace dcel {
 
   template <class T>  
   inline
-  decltype(auto) faceT<T>::computeNormal() noexcept {
+  void faceT<T>::computeNormal() noexcept {
     const auto vertices = this->gatherVertices();
     
     const int N = vertices.size();
@@ -137,61 +137,61 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::computePolygon2D() noexcept{
+  void faceT<T>::computePolygon2D() noexcept{
     m_poly2 = std::make_shared<Polygon2D<T> >(m_normal, this->getAllVertexCoordinates());
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::getCentroid() noexcept {
+  Vec3T<T>& faceT<T>::getCentroid() noexcept {
     return (m_centroid);
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::getCentroid() const noexcept {
+  const Vec3T<T>& faceT<T>::getCentroid() const noexcept {
     return (m_centroid);
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::getNormal() noexcept {
+  Vec3T<T>& faceT<T>::getNormal() noexcept {
     return (m_normal);
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::getNormal() const noexcept {
+  const Vec3T<T>& faceT<T>::getNormal() const noexcept {
     return (m_normal);
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::getArea() noexcept {
+  T faceT<T>::getArea() noexcept {
     return (m_area);
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::getArea() const noexcept {
+  T faceT<T>::getArea() const noexcept {
     return (m_area);
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::getHalfEdge() noexcept {
+  std::shared_ptr<edgeT<T> >& faceT<T>::getHalfEdge() noexcept {
     return (m_halfEdge);
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::getHalfEdge() const noexcept {
+  const std::shared_ptr<edgeT<T> >& faceT<T>::getHalfEdge() const noexcept {
     return (m_halfEdge);
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::gatherVertices() const noexcept {
+  std::vector<std::shared_ptr<vertexT<T> > > faceT<T>::gatherVertices() const noexcept {
     std::vector<vertexPtr> vertices;
 
     for (edgeIterator iter(*this); iter.ok(); ++iter){
@@ -204,7 +204,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::getAllVertexCoordinates() const noexcept {
+  std::vector<Vec3T<T> > faceT<T>::getAllVertexCoordinates() const noexcept {
     std::vector<Vec3> ret;
 
     for (edgeIterator iter(*this); iter.ok(); ++iter){
@@ -217,13 +217,13 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::projectPointIntoFacePlane(const Vec3& a_p) const noexcept {
+  Vec3T<T> faceT<T>::projectPointIntoFacePlane(const Vec3& a_p) const noexcept {
     return a_p - m_normal * (m_normal.dot(a_p-m_centroid));
   }
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::isPointInsideFace(const Vec3& a_p) const noexcept {
+  bool faceT<T>::isPointInsideFace(const Vec3& a_p) const noexcept {
     const Vec3 p = this->projectPointIntoFacePlane(a_p);
 
     return m_poly2->isPointInside(p, m_poly2Algorithm);
@@ -231,7 +231,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::signedDistance(const Vec3& a_x0) const noexcept {
+  T faceT<T>::signedDistance(const Vec3& a_x0) const noexcept {
     T retval = std::numeric_limits<T>::infinity();
 
     const bool inside = this->isPointInsideFace(a_x0);
@@ -252,7 +252,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) faceT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept {
+  T faceT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept {
     T retval = std::numeric_limits<T>::infinity();
 
     const bool inside = this->isPointInsideFace(a_x0);
