@@ -260,7 +260,7 @@ namespace BVH {
       }
     }
     else {
-      const T minL = m_left->getDistanceToBoundingVolume(a_point);
+      const T minL = m_left ->getDistanceToBoundingVolume(a_point);
       const T minR = m_right->getDistanceToBoundingVolume(a_point);
 
       const auto leftFirst = (minL < minR);

@@ -90,7 +90,7 @@ namespace dcel {
   template <class T, class BV>
   BVH::PartitionFunctionT<faceT<T> > partitionSAH = [](const PrimitiveList<T>& a_primitives){
     constexpr int DIM   = 3; 
-    constexpr int nBins = 100;
+    constexpr int nBins = 50;
     constexpr T invBins = 1./nBins;
     constexpr T Ct      = 1.0;
     constexpr T Ci      = 1.0;
