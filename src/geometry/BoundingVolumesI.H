@@ -39,7 +39,7 @@ BoundingSphereT<T>::~BoundingSphereT(){
 template <class T>
 template <class P>
 inline
-decltype(auto) BoundingSphereT<T>::define(const std::vector<Vec3T<P> >& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept {
+void BoundingSphereT<T>::define(const std::vector<Vec3T<P> >& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept {
   switch(a_algorithm) {
   case BoundingVolumeAlgorithm::Ritter:
     this->buildRitter(a_points);
@@ -51,7 +51,7 @@ decltype(auto) BoundingSphereT<T>::define(const std::vector<Vec3T<P> >& a_points
 
 template <class T>
 inline
-decltype(auto) BoundingSphereT<T>::intersects(const BoundingSphereT& a_other) const noexcept {
+bool BoundingSphereT<T>::intersects(const BoundingSphereT& a_other) const noexcept {
   const Vec3 deltaV = m_center - a_other.getCenter();
   const T sumR      = m_radius + a_other.getRadius();
 
@@ -60,32 +60,32 @@ decltype(auto) BoundingSphereT<T>::intersects(const BoundingSphereT& a_other) co
 
 template <class T>
 inline
-decltype(auto) BoundingSphereT<T>::getRadius() noexcept {
+T& BoundingSphereT<T>::getRadius() noexcept {
   return (m_radius);
 }
 
 template <class T>
 inline
-decltype(auto) BoundingSphereT<T>::getRadius() const noexcept {
+const T& BoundingSphereT<T>::getRadius() const noexcept {
   return (m_radius);
 }
 
 template <class T>
 inline
-decltype(auto) BoundingSphereT<T>::getCenter() noexcept {
+Vec3T<T>& BoundingSphereT<T>::getCenter() noexcept {
   return (m_center);
 }
 
 template <class T>
 inline
-decltype(auto) BoundingSphereT<T>::getCenter() const noexcept {
+const Vec3T<T>& BoundingSphereT<T>::getCenter() const noexcept {
   return (m_center);
 }
 
 template <class T>
 template <class P>
 inline
-decltype(auto) BoundingSphereT<T>::buildRitter(const std::vector<Vec3T<P> >& a_points) noexcept {
+void BoundingSphereT<T>::buildRitter(const std::vector<Vec3T<P> >& a_points) noexcept {
   m_radius = 0.0;
   m_center = Vec3::zero();
 
@@ -146,7 +146,7 @@ decltype(auto) BoundingSphereT<T>::buildRitter(const std::vector<Vec3T<P> >& a_p
 
 template <class T>
 inline
-decltype(auto) BoundingSphereT<T>::getOverlappingVolume(const BoundingSphereT<T>& a_other) const noexcept {
+T BoundingSphereT<T>::getOverlappingVolume(const BoundingSphereT<T>& a_other) const noexcept {
   constexpr T zero = 0.0;
 
   T retval = zero;
@@ -165,7 +165,7 @@ decltype(auto) BoundingSphereT<T>::getOverlappingVolume(const BoundingSphereT<T>
 
 template <class T>
 inline
-decltype(auto) BoundingSphereT<T>::getDistance(const Vec3& a_x0) const noexcept {
+T BoundingSphereT<T>::getDistance(const Vec3& a_x0) const noexcept {
   constexpr T zero = 0.0;
 
   return std::max(zero, (a_x0-m_center).length() - m_radius);
@@ -173,7 +173,7 @@ decltype(auto) BoundingSphereT<T>::getDistance(const Vec3& a_x0) const noexcept 
 
 template <class T>
 inline
-decltype(auto) BoundingSphereT<T>::getDistance2(const Vec3& a_x0) const noexcept {
+T BoundingSphereT<T>::getDistance2(const Vec3& a_x0) const noexcept {
   constexpr T zero = 0.0;
     
   return std::max(zero, (a_x0-m_center).length2() - m_radius*m_radius);
@@ -181,7 +181,7 @@ decltype(auto) BoundingSphereT<T>::getDistance2(const Vec3& a_x0) const noexcept
 
 template <class T>
 inline
-decltype(auto) BoundingSphereT<T>::getArea() const noexcept {
+T BoundingSphereT<T>::getArea() const noexcept {
   return T(4.*M_PI*m_radius*m_radius);
 }
 
@@ -224,7 +224,7 @@ AABBT<T>::~AABBT(){
 template <class T>
 template <class P>
 inline
-decltype(auto) AABBT<T>::define(const std::vector<Vec3T<P> >& a_points) noexcept {
+void AABBT<T>::define(const std::vector<Vec3T<P> >& a_points) noexcept {
   constexpr int DIM = 3;
   m_loCorner = a_points.front();
   m_hiCorner = a_points.front();
@@ -237,7 +237,7 @@ decltype(auto) AABBT<T>::define(const std::vector<Vec3T<P> >& a_points) noexcept
 
 template <class T>
 inline
-decltype(auto) AABBT<T>::intersects(const AABBT& a_other) const noexcept {
+bool AABBT<T>::intersects(const AABBT& a_other) const noexcept {
   const Vec3& otherLo = a_other.getLowCorner();
   const Vec3& otherHi = a_other.getHighCorner();
 
@@ -248,31 +248,31 @@ decltype(auto) AABBT<T>::intersects(const AABBT& a_other) const noexcept {
 
 template <class T>
 inline
-decltype(auto) AABBT<T>::getLowCorner() noexcept {
+Vec3T<T>& AABBT<T>::getLowCorner() noexcept {
   return (m_loCorner);
 }
 
 template <class T>
 inline
-decltype(auto) AABBT<T>::getLowCorner() const noexcept {
+const Vec3T<T>& AABBT<T>::getLowCorner() const noexcept {
   return (m_loCorner);
 }
 
 template <class T>
 inline
-decltype(auto) AABBT<T>::getHighCorner() noexcept {
+Vec3T<T>& AABBT<T>::getHighCorner() noexcept {
   return (m_hiCorner);
 }
 
 template <class T>
 inline
-decltype(auto) AABBT<T>::getHighCorner() const noexcept {
+const Vec3T<T>& AABBT<T>::getHighCorner() const noexcept {
   return (m_hiCorner);
 }
 
 template <class T>
 inline
-decltype(auto) AABBT<T>::getOverlappingVolume(const AABBT<T>& a_other) const noexcept {
+T AABBT<T>::getOverlappingVolume(const AABBT<T>& a_other) const noexcept {
   constexpr T zero = 0.0;
     
   T ret = 1.0;
@@ -294,7 +294,7 @@ decltype(auto) AABBT<T>::getOverlappingVolume(const AABBT<T>& a_other) const noe
 
 template <class T>
 inline
-decltype(auto) AABBT<T>::getDistance(const Vec3& a_point) const noexcept {
+T AABBT<T>::getDistance(const Vec3& a_point) const noexcept {
   constexpr T zero = 0.0;
     
   const Vec3 delta = Vec3(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
@@ -308,7 +308,7 @@ decltype(auto) AABBT<T>::getDistance(const Vec3& a_point) const noexcept {
 
 template <class T>
 inline
-decltype(auto) AABBT<T>::getDistance2(const Vec3& a_point) const noexcept {
+T AABBT<T>::getDistance2(const Vec3& a_point) const noexcept {
   constexpr T zero = 0.0;
     
   const Vec3 u = Vec3(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
@@ -322,7 +322,7 @@ decltype(auto) AABBT<T>::getDistance2(const Vec3& a_point) const noexcept {
 
 template <class T>
 inline
-decltype(auto) AABBT<T>::getArea() const noexcept {
+T AABBT<T>::getArea() const noexcept {
   constexpr int DIM = 3;
 
   T ret = 0.0;
@@ -340,22 +340,22 @@ decltype(auto) AABBT<T>::getArea() const noexcept {
 }
 
 template <class T>
-decltype(auto) intersects(const BoundingSphereT<T>& u, const BoundingSphereT<T>& v) noexcept {
+bool intersects(const BoundingSphereT<T>& u, const BoundingSphereT<T>& v) noexcept {
   return u.intersects(v);
 }
 
 template <class T>
-decltype(auto) getOverlappingVolume(const BoundingSphereT<T>& u, const BoundingSphereT<T>& v) noexcept {
+T getOverlappingVolume(const BoundingSphereT<T>& u, const BoundingSphereT<T>& v) noexcept {
   return u.getOverlappingVolume(v);
 }
 
 template <class T>
-decltype(auto) intersects(const AABBT<T>& u, const AABBT<T>& v) noexcept {
+bool intersects(const AABBT<T>& u, const AABBT<T>& v) noexcept {
   return u.intersects(v);
 }
 
 template <class T>
-decltype(auto) getOverlappingVolume(const AABBT<T>& u, const AABBT<T>& v) noexcept {
+T getOverlappingVolume(const AABBT<T>& u, const AABBT<T>& v) noexcept {
   return u.getOverlappingVolume(v);
 }
 

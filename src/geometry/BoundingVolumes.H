@@ -37,34 +37,34 @@ public:
 
   template <class P>
   inline
-  decltype(auto) define(const std::vector<Vec3T<P> >& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept;
+  void define(const std::vector<Vec3T<P> >& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept;
 
   inline
-  decltype(auto) intersects(const BoundingSphereT& a_other) const noexcept;
+  bool intersects(const BoundingSphereT& a_other) const noexcept;
 
   inline
-  decltype(auto) getRadius() noexcept;
+  T& getRadius() noexcept;
 
   inline
-  decltype(auto) getRadius() const noexcept;
+  const T& getRadius() const noexcept;
 
   inline
-  decltype(auto) getCenter() noexcept;
+  Vec3& getCenter() noexcept;
 
   inline
-  decltype(auto) getCenter() const noexcept;
+  const Vec3& getCenter() const noexcept;
 
   inline
-  decltype(auto) getOverlappingVolume(const BoundingSphereT<T>& a_other) const noexcept;
+  T getOverlappingVolume(const BoundingSphereT<T>& a_other) const noexcept;
 
   inline
-  decltype(auto) getDistance(const Vec3& a_x0) const noexcept;
+  T getDistance(const Vec3& a_x0) const noexcept;
 
   inline
-  decltype(auto) getDistance2(const Vec3& a_x0) const noexcept;
+  T getDistance2(const Vec3& a_x0) const noexcept;
 
   inline
-  decltype(auto) getArea() const noexcept;
+  T getArea() const noexcept;
 
 protected:
 
@@ -73,7 +73,7 @@ protected:
 
   template <class P>
   inline
-  decltype(auto) buildRitter(const std::vector<Vec3T<P> >& a_points) noexcept;
+  void buildRitter(const std::vector<Vec3T<P> >& a_points) noexcept;
 };
 
 template <class T>
@@ -92,34 +92,34 @@ public:
 
   template <class P>
   inline
-  decltype(auto) define(const std::vector<Vec3T<P> >& a_points) noexcept;
+  void define(const std::vector<Vec3T<P> >& a_points) noexcept;
 
   inline
-  decltype(auto) intersects(const AABBT& a_other) const noexcept;
+  bool intersects(const AABBT& a_other) const noexcept;
 
   inline
-  decltype(auto) getLowCorner() noexcept;
+  Vec3T<T>& getLowCorner() noexcept;
 
   inline
-  decltype(auto) getLowCorner() const noexcept;
+  const Vec3T<T>& getLowCorner() const noexcept;
 
   inline
-  decltype(auto) getHighCorner() noexcept;
+  Vec3T<T>& getHighCorner() noexcept;
 
   inline
-  decltype(auto) getHighCorner() const noexcept;
+  const Vec3T<T>& getHighCorner() const noexcept;
 
   inline
-  decltype(auto) getOverlappingVolume(const AABBT<T>& a_other) const noexcept;
+  T getOverlappingVolume(const AABBT<T>& a_other) const noexcept;
 
   inline
-  decltype(auto) getDistance(const Vec3& a_x0) const noexcept;
+  T getDistance(const Vec3& a_x0) const noexcept;
 
   inline
-  decltype(auto) getDistance2(const Vec3& a_x0) const noexcept;
+  T getDistance2(const Vec3& a_x0) const noexcept;
 
   inline
-  decltype(auto) getArea() const noexcept;
+  T getArea() const noexcept;
     
 protected:
 
@@ -128,16 +128,16 @@ protected:
 };
 
 template <class T>
-decltype(auto) intersects(const BoundingSphereT<T>& a_u, const BoundingSphereT<T>& a_v) noexcept;
+bool intersects(const BoundingSphereT<T>& a_u, const BoundingSphereT<T>& a_v) noexcept;
 
 template <class T>
-decltype(auto) getOverlappingVolume(const BoundingSphereT<T>& a_u, const BoundingSphereT<T>& a_v) noexcept;
+T getOverlappingVolume(const BoundingSphereT<T>& a_u, const BoundingSphereT<T>& a_v) noexcept;
 
 template <class T>
-decltype(auto) intersects(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
+bool intersects(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
 
 template <class T>
-decltype(auto) getOverlappingVolume(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
+T getOverlappingVolume(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
 
 #include "BoundingVolumesI.H"
 
