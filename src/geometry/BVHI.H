@@ -59,124 +59,124 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::setParent(const NodePtr& a_parent) noexcept {
+  void NodeT<T, P, BV>::setParent(const NodePtr& a_parent) noexcept {
     m_parent = a_parent;
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::setLeft(const NodePtr& a_left) noexcept {
+  void NodeT<T, P, BV>::setLeft(const NodePtr& a_left) noexcept {
     m_left = a_left;
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::setRight(const NodePtr& a_right) noexcept{
+  void NodeT<T, P, BV>::setRight(const NodePtr& a_right) noexcept{
     m_right = a_right;
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::setNodeType(const NodeType a_nodeType) noexcept {
+  void NodeT<T, P, BV>::setNodeType(const NodeType a_nodeType) noexcept {
     m_nodeType = a_nodeType;
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::setDepth(const int a_depth) noexcept {
+  void NodeT<T, P, BV>::setDepth(const int a_depth) noexcept {
     m_depth = a_depth;
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::setPrimitives(const PrimitiveList& a_primitives) noexcept {
+  void NodeT<T, P, BV>::setPrimitives(const PrimitiveList& a_primitives) noexcept {
     m_primitives = a_primitives;
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::setToRegularNode() noexcept {
+  void NodeT<T, P, BV>::setToRegularNode() noexcept {
     m_nodeType = NodeType::Regular;
     m_primitives.resize(0);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getParent() noexcept {
+  NodeT<T, P, BV>& NodeT<T, P, BV>::getParent() noexcept {
     return (m_parent);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getParent() const noexcept {
+  const NodeT<T, P, BV>& NodeT<T, P, BV>::getParent() const noexcept {
     return (m_parent);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getLeft() noexcept {
+  NodeT<T, P, BV>&  NodeT<T, P, BV>::getLeft() noexcept {
     return (m_left);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getLeft() const noexcept {
+  const NodeT<T, P, BV>& NodeT<T, P, BV>::getLeft() const noexcept {
     return (m_left);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getRight() noexcept {
+  NodeT<T, P, BV>& NodeT<T, P, BV>::getRight() noexcept {
     return (m_right);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getRight() const noexcept {
+  const NodeT<T, P, BV>& NodeT<T, P, BV>::getRight() const noexcept {
     return (m_right);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getNodeType() const noexcept {
+  NodeType NodeT<T, P, BV>::getNodeType() const noexcept {
     return m_nodeType;
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getDepth() const noexcept {
-    return (m_depth);
+  int NodeT<T, P, BV>::getDepth() const noexcept {
+    return m_depth;
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getBoundingVolume() noexcept {
+  BV& NodeT<T, P, BV>::getBoundingVolume() noexcept {
     return (m_bv);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getBoundingVolume() const noexcept {
+  const BV& NodeT<T, P, BV>::getBoundingVolume() const noexcept {
     return (m_bv);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getPrimitives() noexcept {
+  PrimitiveListT<P>& NodeT<T, P, BV>::getPrimitives() noexcept {
     return (m_primitives);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getPrimitives() const noexcept {
+  const PrimitiveListT<P>& NodeT<T, P, BV>::getPrimitives() const noexcept {
     return (m_primitives);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::topDownSortAndPartitionPrimitives(const StopFunction&      a_stopFunc,
+  void NodeT<T, P, BV>::topDownSortAndPartitionPrimitives(const StopFunction&      a_stopFunc,
 								    const PartitionFunction& a_partFunc,
-								    const BVConstructor&     a_bvFunc) noexcept -> void {
+							  const BVConstructor&     a_bvFunc) noexcept {
     const bool stopSplitting = a_stopFunc(*this);
 
     m_bv = a_bvFunc(m_primitives);
@@ -200,7 +200,7 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::insertNode(NodePtr& a_node, const PrimitiveList& a_primitives) noexcept {
+  void NodeT<T, P, BV>::insertNode(NodePtr& a_node, const PrimitiveList& a_primitives) noexcept {
     a_node = std::make_shared<NodeT<T, P, BV> >();
 
     a_node->setPrimitives(a_primitives);
@@ -211,19 +211,19 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getDistanceToBoundingVolume(const Vec3& a_point) const noexcept{
+  T NodeT<T, P, BV>::getDistanceToBoundingVolume(const Vec3& a_point) const noexcept{
     return m_bv.getDistance(a_point);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getDistanceToBoundingVolume2(const Vec3& a_point) const noexcept{
+  T NodeT<T, P, BV>::getDistanceToBoundingVolume2(const Vec3& a_point) const noexcept{
     return m_bv.getDistance2(a_point);
   }
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::getDistanceToPrimitives(const Vec3& a_point) const noexcept {
+  T NodeT<T, P, BV>::getDistanceToPrimitives(const Vec3& a_point) const noexcept {
     T minDist = std::numeric_limits<T>::max();
 
     for (const auto& p : m_primitives){
@@ -239,7 +239,7 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::pruneOrdered(const Vec3& a_point) const noexcept {
+  T NodeT<T, P, BV>::pruneOrdered(const Vec3& a_point) const noexcept {
 
     T minDist = std::numeric_limits<T>::infinity();
 
@@ -250,7 +250,7 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::pruneOrdered(T& a_closest, const Vec3& a_point) const noexcept -> void {
+  void NodeT<T, P, BV>::pruneOrdered(T& a_closest, const Vec3& a_point) const noexcept  {
 					      
     if(m_nodeType == NodeType::Leaf){
       const T primDist = this->getDistanceToPrimitives(a_point);
@@ -278,7 +278,7 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::pruneOrdered2(const Vec3& a_point) const noexcept {
+  T NodeT<T, P, BV>::pruneOrdered2(const Vec3& a_point) const noexcept {
 
     T minDist2 = std::numeric_limits<T>::infinity();
 
@@ -293,7 +293,7 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::pruneOrdered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept -> void {
+  void NodeT<T, P, BV>::pruneOrdered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept  {
 
     if(m_nodeType == NodeType::Leaf){
       for (const auto& p : m_primitives){
@@ -324,7 +324,7 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::pruneUnordered(const Vec3& a_point) const noexcept {
+  T NodeT<T, P, BV>::pruneUnordered(const Vec3& a_point) const noexcept {
 
     T minDist = std::numeric_limits<T>::infinity();
 
@@ -335,7 +335,7 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::pruneUnordered(T& a_closest, const Vec3& a_point) const noexcept -> void {
+  void NodeT<T, P, BV>::pruneUnordered(T& a_closest, const Vec3& a_point) const noexcept  {
 					      
     if(m_nodeType == NodeType::Leaf){
       const T primDist = this->getDistanceToPrimitives(a_point);
@@ -355,7 +355,7 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::pruneUnordered2(const Vec3& a_point) const noexcept {
+  T NodeT<T, P, BV>::pruneUnordered2(const Vec3& a_point) const noexcept {
 
     T minDist2 = std::numeric_limits<T>::infinity();
 
@@ -370,7 +370,7 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::pruneUnordered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept -> void {
+  void NodeT<T, P, BV>::pruneUnordered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept  {
 
     if(m_nodeType == NodeType::Leaf){
       for (const auto& p : m_primitives){
@@ -393,7 +393,7 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::prunePriorityQueue(const Vec3& a_point) const noexcept {
+  T NodeT<T, P, BV>::prunePriorityQueue(const Vec3& a_point) const noexcept {
   
     using QueueElement = std::pair<T, std::shared_ptr<const Node> >;
       
@@ -444,7 +444,7 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  decltype(auto) NodeT<T, P, BV>::prunePriorityQueue2(const Vec3& a_point) const noexcept {
+  T NodeT<T, P, BV>::prunePriorityQueue2(const Vec3& a_point) const noexcept {
   
     using QueueElement = std::pair<T, std::shared_ptr<const Node> >;
       

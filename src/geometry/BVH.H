@@ -63,33 +63,33 @@ namespace BVH {
     ~NodeT();
 
     inline
-    decltype(auto) topDownSortAndPartitionPrimitives(const StopFunction&      a_stopFunc,
-						     const PartitionFunction& a_partFunc,
-						     const BVConstructor&     a_bvFunc) noexcept -> void;
+    void topDownSortAndPartitionPrimitives(const StopFunction&      a_stopFunc,
+					   const PartitionFunction& a_partFunc,
+					   const BVConstructor&     a_bvFunc) noexcept;
 
     inline
-    decltype(auto) getDepth() const noexcept;
+    int getDepth() const noexcept;
 
     inline
-    decltype(auto) getPrimitives() const noexcept;
+    const PrimitiveList& getPrimitives() const noexcept;
 
     inline
-    decltype(auto) pruneOrdered(const Vec3& a_point) const noexcept;
+    T pruneOrdered(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) pruneOrdered2(const Vec3& a_point) const noexcept;
+    T pruneOrdered2(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) pruneUnordered(const Vec3& a_point) const noexcept;
+    T pruneUnordered(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) pruneUnordered2(const Vec3& a_point) const noexcept;
+    T pruneUnordered2(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) prunePriorityQueue(const Vec3& a_point) const noexcept;
+    T prunePriorityQueue(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) prunePriorityQueue2(const Vec3& a_point) const noexcept;
+    T prunePriorityQueue2(const Vec3& a_point) const noexcept;
 
   protected:
 
@@ -106,79 +106,79 @@ namespace BVH {
     NodePtr m_right;
 
     inline
-    decltype(auto) setNodeType(const NodeType a_nodeType) noexcept;
+    void setNodeType(const NodeType a_nodeType) noexcept;
 
     inline
-    decltype(auto) setDepth(const int a_depth) noexcept;
+    void setDepth(const int a_depth) noexcept;
 
     inline
-    decltype(auto) insertNode(NodePtr&  a_node, const PrimitiveList& a_primitives) noexcept;
+    void insertNode(NodePtr& a_node, const PrimitiveList& a_primitives) noexcept;
 
     inline
-    decltype(auto) setToRegularNode() noexcept;
+    void setToRegularNode() noexcept;
 
     inline
-    decltype(auto) setPrimitives(const PrimitiveList& a_primitives) noexcept;
+    void setPrimitives(const PrimitiveList& a_primitives) noexcept;
 
     inline
-    decltype(auto) getBoundingVolume() noexcept;
+    BV& getBoundingVolume() noexcept;
 
     inline
-    decltype(auto) getBoundingVolume() const noexcept;
+    const BV& getBoundingVolume() const noexcept;
 
     inline
-    decltype(auto) getDistanceToBoundingVolume(const Vec3& a_point) const noexcept;
+    T getDistanceToBoundingVolume(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) getDistanceToBoundingVolume2(const Vec3& a_point) const noexcept;
+    T getDistanceToBoundingVolume2(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) getDistanceToPrimitives(const Vec3& a_point) const noexcept;
+    T getDistanceToPrimitives(const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) getParent() noexcept;
+    Node& getParent() noexcept;
 
     inline
-    decltype(auto) getParent() const noexcept;
+    const Node& getParent() const noexcept;
 
     inline
-    decltype(auto) getLeft() noexcept;
+    Node& getLeft() noexcept;
 
     inline
-    decltype(auto) getLeft() const noexcept;
+    const Node& getLeft() const noexcept;
 
     inline
-    decltype(auto) getRight() noexcept;
+    Node& getRight() noexcept;
 
     inline
-    decltype(auto) getRight() const noexcept;
+    const Node& getRight() const noexcept;
 
     inline
-    decltype(auto) getNodeType() const noexcept;
+    NodeType getNodeType() const noexcept;
 
     inline
-    decltype(auto) getPrimitives() noexcept;
+    PrimitiveList& getPrimitives() noexcept;
 
     inline
-    decltype(auto) setParent(const NodePtr& a_parent) noexcept;
+    void setParent(const NodePtr& a_parent) noexcept;
 
     inline
-    decltype(auto) setLeft(const NodePtr& a_left) noexcept;
+    void setLeft(const NodePtr& a_left) noexcept;
 
     inline
-    decltype(auto) setRight(const NodePtr& a_right) noexcept;
+    void setRight(const NodePtr& a_right) noexcept;
 
     inline
-    decltype(auto) pruneOrdered(T& a_closest, const Vec3& a_point) const noexcept -> void;
+    void pruneOrdered(T& a_closest, const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) pruneOrdered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept -> void;
+    void pruneOrdered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) pruneUnordered(T& a_closest, const Vec3& a_point) const noexcept -> void;
+    void pruneUnordered(T& a_closest, const Vec3& a_point) const noexcept;
 
     inline
-    decltype(auto) pruneUnordered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept -> void;
+    void pruneUnordered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept;
   };
 }
 
