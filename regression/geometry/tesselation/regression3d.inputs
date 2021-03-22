@@ -1,10 +1,10 @@
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-amr_mesh.lo_corner       = -8 -3 -8
-amr_mesh.hi_corner       =  8  5  8
+amr_mesh.lo_corner       = -500 -500 -500   # Low corner of problem domain
+amr_mesh.hi_corner       =  500  500  500   # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 32 16 32    # Number of cells on coarsest domain
+amr_mesh.coarsest_domain = 32 32 32    # Number of cells on coarsest domain
 amr_mesh.max_amr_depth   = 1           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = -1          # Refine everything down to this level.
@@ -17,8 +17,8 @@ amr_mesh.blocking_factor = 4           # Default blocking factor (16 in 3D)
 amr_mesh.max_box_size    = 16          # Maximum allowed box size
 amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
 amr_mesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
-amr_mesh.num_ghost       = 1           # Number of ghost cells. Default is 3
-amr_mesh.eb_ghost        = 2           # Set number of of ghost cells for EB stuff
+amr_mesh.num_ghost       = 3           # Number of ghost cells. Default is 3
+amr_mesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr_mesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
@@ -76,5 +76,5 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 # TESSELATION GEOMETRY CLASS
 # ====================================================================================================
-tesselation.mesh_file    = porsche.ply
-tesselation.partitioner  = sah
+tesselation.mesh_file    = sphere.ply
+tesselation.partitioner  = overlap
