@@ -24,7 +24,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) parser::PLY<T>::readASCII(mesh& a_mesh, const std::string a_filename) {
+  void parser::PLY<T>::readASCII(mesh& a_mesh, const std::string a_filename) {
     std::ifstream filestream(a_filename);
 
     if(filestream.is_open()){
@@ -56,7 +56,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) parser::PLY<T>::readHeaderASCII(int&           a_numVertices,
+  void parser::PLY<T>::readHeaderASCII(int&           a_numVertices,
 						 int&           a_numFaces,
 						 std::ifstream& a_inputstream) {
 
@@ -100,7 +100,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) parser::PLY<T>::readVerticesASCII(std::vector<std::shared_ptr<vertex> >& a_vertices,
+  void parser::PLY<T>::readVerticesASCII(std::vector<std::shared_ptr<vertex> >& a_vertices,
 						   const int                              a_numVertices,
 						   std::ifstream&                         a_inputstream) {
 
@@ -131,7 +131,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) dcel::parser::PLY<T>::readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
+  void dcel::parser::PLY<T>::readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
 						      std::vector<std::shared_ptr<edge> >&   a_edges,
 						      std::vector<std::shared_ptr<vertex> >& a_vertices,
 						      const int                              a_numFaces,
@@ -202,7 +202,7 @@ namespace dcel {
 
   template <class T>
   inline
-  decltype(auto) parser::PLY<T>::reconcilePairEdges(std::vector<std::shared_ptr<edge> >& a_edges) {
+  void parser::PLY<T>::reconcilePairEdges(std::vector<std::shared_ptr<edge> >& a_edges) {
     for (auto& curEdge : a_edges){
       const auto& nextEdge = curEdge->getNextEdge();
     

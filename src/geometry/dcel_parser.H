@@ -39,7 +39,7 @@ namespace dcel {
 	@brief Read an ASCII .ply file and put it in a mesh
       */
       inline
-      static decltype(auto) readASCII(mesh& a_mesh, const std::string a_filename);
+      static void readASCII(mesh& a_mesh, const std::string a_filename);
 
     protected:
 
@@ -50,7 +50,7 @@ namespace dcel {
 	@param[inout] a_inputstream   File
       */
       inline
-      static decltype(auto) readHeaderASCII(int&           a_numVertices,
+      static void readHeaderASCII(int&           a_numVertices,
 					    int&           a_numFaces,
 					    std::ifstream& a_inputstream);
 
@@ -59,7 +59,7 @@ namespace dcel {
 	before entering this routine)
       */
       inline
-      static decltype(auto) readVerticesASCII(std::vector<std::shared_ptr<vertex> >& a_vertices,
+      static void readVerticesASCII(std::vector<std::shared_ptr<vertex> >& a_vertices,
 					      const int                              a_numVertices,
 					      std::ifstream&                         a_inputstream);
 
@@ -69,7 +69,7 @@ namespace dcel {
 	on the correct line
       */
       inline
-      static decltype(auto) readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
+      static void readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
 					   std::vector<std::shared_ptr<edge> >&   a_edges,
 					   std::vector<std::shared_ptr<vertex> >& a_vertices,
 					   const int                              a_numFaces,
@@ -79,13 +79,13 @@ namespace dcel {
 	@brief This sets all pair edges
       */
       inline
-      static decltype(auto) reconcilePairEdges(std::vector<std::shared_ptr<edge> >& a_edges);
+      static void reconcilePairEdges(std::vector<std::shared_ptr<edge> >& a_edges);
 
       /*!
 	@brief Clean up memory
       */
       inline
-      static decltype(auto) clearFaceCache(std::vector<std::shared_ptr<vertex> >& a_vertices);
+      static void clearFaceCache(std::vector<std::shared_ptr<vertex> >& a_vertices);
     };
   }
 }

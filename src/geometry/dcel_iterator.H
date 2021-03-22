@@ -26,6 +26,10 @@ namespace dcel {
     using edge   = edgeT<T>;
     using face   = faceT<T>;
 
+    using vertexPtr = std::shared_ptr<vertex>;
+    using edgePtr   = std::shared_ptr<edge>;
+    using facePtr   = std::shared_ptr<face>;
+
     edgeIteratorT() = delete;
   
     edgeIteratorT(face& a_face);
@@ -35,19 +39,19 @@ namespace dcel {
     edgeIteratorT(const vertex& a_vert);
 
     inline
-    decltype(auto) operator() () noexcept;
+    edgePtr& operator() () noexcept;
 
     inline
-    decltype(auto) operator() () const noexcept;
+    const edgePtr& operator() () const noexcept;
 
     inline
-    decltype(auto) reset() noexcept;
+    void reset() noexcept;
 
     inline
-    decltype(auto) operator ++() noexcept;
+    void operator++() noexcept;
 
     inline
-    decltype(auto) ok() const noexcept;
+    bool ok() const noexcept;
   
   protected:
 
