@@ -116,15 +116,12 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) edgeT<T>::computeNormal() noexcept {
-    const auto& pairEdge = this->getPairEdge();
 
-    const auto& F     = this->getFace();
-    const auto& pairF = pairEdge->getFace();
-    
-    const auto& n1 = F->getNormal();
-    const auto& n2 = pairF->getNormal();
+    m_normal = m_face->getNormal();
 
-    m_normal = n1 + n2;
+    if(m_pairEdge){
+      m_normal += m_pairEdge->getFace()->getNormal();
+    }
 
     this->normalizeNormalVector();
   }
@@ -151,13 +148,14 @@ namespace dcel {
   template <class T>
   inline
   decltype(auto) edgeT<T>::getOtherVertex() noexcept {
-    return (m_pairEdge->getVertex());
+    return (m_nextEdge->getVertex());
   }
 
   template <class T>
   inline
   decltype(auto) edgeT<T>::getOtherVertex() const noexcept {
-    return (m_pairEdge->getVertex());
+    return (m_nextEdge->getVertex());
+
   }
 
   template <class T>
@@ -218,24 +216,6 @@ namespace dcel {
   inline
   decltype(auto) edgeT<T>::getFace() const noexcept {
     return (m_face);
-  }
-
-  template <class T>
-  inline
-  decltype(auto) edgeT<T>::getFlippedEdge() const noexcept {
-
-    edgeT<T> flippedEdge = edgeT<T>();
-
-    flippedEdge.m_vertex       = this->getOtherVertex();
-    flippedEdge.m_pairEdge     = m_pairEdge;
-    flippedEdge.m_previousEdge = m_nextEdge;
-    flippedEdge.m_nextEdge     = m_previousEdge;
-    flippedEdge.m_normal       = m_normal;
-    flippedEdge.m_x2x1         = -m_x2x1;
-    flippedEdge.m_invLen2      = m_invLen2;
-    flippedEdge.m_face         = m_face;
-
-    return std::make_shared<edgeT<T> >(flippedEdge);
   }
 
   template <class T>

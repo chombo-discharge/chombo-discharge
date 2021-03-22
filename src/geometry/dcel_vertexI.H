@@ -106,7 +106,7 @@ namespace dcel {
   decltype(auto) vertexT<T>::computeVertexNormalAngleWeighted() noexcept {
     m_normal = Vec3::zero();
 
-    // This is more complicated than it look, and it happens because we want the two half edges that has the current vertex
+    // This is more complicated than it looks, and it happens because we want the two half edges that has the current vertex
     // as a mutual vertex (i.e. the "incoming" and "outgoing" edges into this vertex). Normally we'd just iterate through edges,
     // but if it happens that an input face is flipped, this will result in infinite iteration. Instead, we have stored the pointers
     // to each face connected to this vertex. We look through each face to find the endpoints of the edges the have the current vertex

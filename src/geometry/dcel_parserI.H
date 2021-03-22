@@ -37,7 +37,7 @@ namespace dcel {
       faces.resize(0);
 
       int numVertices;  // Number of vertices
-      int numFaces;  // Number of faces
+      int numFaces;     // Number of faces
 
       dcel::parser::PLY<T>::readHeaderASCII(numVertices, numFaces, filestream);
       dcel::parser::PLY<T>::readVerticesASCII(vertices, numVertices, filestream);

@@ -119,9 +119,6 @@ namespace dcel {
     inline
     decltype(auto) unsignedDistance2(const Vec3& a_x0) const noexcept;
 
-    inline
-    decltype(auto) getFlippedEdge() const noexcept;
-
   protected:
 
     Vec3   m_normal;
