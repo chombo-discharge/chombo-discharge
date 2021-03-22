@@ -396,25 +396,24 @@ namespace BVH {
   decltype(auto) NodeT<T, P, BV>::prunePriorityQueue(const Vec3& a_point) const noexcept {
   
     using QueueElement = std::pair<T, std::shared_ptr<const Node> >;
-    using QueueVector  = std::vector<QueueElement>;
-    using QueueComp    = std::function<bool(const QueueElement&, const QueueElement&)>;
-    using Queue        = std::priority_queue<QueueElement, QueueVector, QueueComp>;
       
     auto CompareElements = [](const QueueElement& a_q1, const QueueElement& a_q2){
       return a_q1.first > a_q2.first;
     };
 
-    Queue Q(CompareElements);
+    std::vector<QueueElement> Q(0);
 
     const auto ds = this->getDistanceToBoundingVolume(a_point);
     const auto N  = std::make_shared<const Node>(*this);
-    Q.push(QueueElement(ds, N));
+    Q.emplace_back(QueueElement(ds, N));
 
     auto d = std::numeric_limits<T>::infinity();
 
     while(!Q.empty()) {
-      const QueueElement cur = Q.top();
-      Q.pop();
+
+      std::sort(Q.begin(), Q.end(), CompareElements);
+      const QueueElement cur = Q.back();
+      Q.pop_back();
 
       const auto ds = cur.first;
       const auto N  = cur.second;
@@ -434,8 +433,8 @@ namespace BVH {
 	  const T dl = lN->getDistanceToBoundingVolume(a_point);
 	  const T dr = rN->getDistanceToBoundingVolume(a_point);
 	
-	  if(dl*dl < d*d) Q.emplace(QueueElement(dl, std::make_shared<const Node>(*lN)));
-	  if(dr*dr < d*d) Q.emplace(QueueElement(dr, std::make_shared<const Node>(*rN)));
+	  if(dl*dl < d*d) Q.emplace_back(QueueElement(dl, std::make_shared<const Node>(*lN)));
+	  if(dr*dr < d*d) Q.emplace_back(QueueElement(dr, std::make_shared<const Node>(*rN)));
 	}
       }
     }
@@ -448,28 +447,28 @@ namespace BVH {
   decltype(auto) NodeT<T, P, BV>::prunePriorityQueue2(const Vec3& a_point) const noexcept {
   
     using QueueElement = std::pair<T, std::shared_ptr<const Node> >;
-    using QueueVector  = std::vector<QueueElement>;
-    using QueueComp    = std::function<bool(const QueueElement&, const QueueElement&)>;
-    using Queue        = std::priority_queue<QueueElement, QueueVector, QueueComp>;
       
     auto CompareElements = [](const QueueElement& a_q1, const QueueElement& a_q2){
       return a_q1.first > a_q2.first;
     };
-
   
     std::shared_ptr<const P> closestPrimitive = nullptr;
     auto minDist2 = std::numeric_limits<T>::infinity();
 
+    std::vector<QueueElement> Q(0);
+
     // Push node onto queue.
-    Queue Q(CompareElements);
     const auto d = this->getDistanceToBoundingVolume2(a_point);
     const auto N = std::make_shared<const Node>(*this);
-    Q.push(QueueElement(d, N));
+    Q.emplace_back(QueueElement(d, N));
 
 
     while(!Q.empty()) {
-      const QueueElement cur = Q.top();
-      Q.pop();
+
+
+      std::sort(Q.begin(), Q.end(), CompareElements);
+      const QueueElement cur = Q.back();
+      Q.pop_back();
 
       const auto dist2 = cur.first;
     
@@ -493,8 +492,8 @@ namespace BVH {
 	  const T distL2 = leftNode ->getDistanceToBoundingVolume2(a_point);
 	  const T distR2 = rightNode->getDistanceToBoundingVolume2(a_point);
 	
-	  if(distL2 < minDist2) Q.emplace(QueueElement(distL2, std::make_shared<const Node>(*leftNode)));
-	  if(distR2 < minDist2) Q.emplace(QueueElement(distR2, std::make_shared<const Node>(*rightNode)));
+	  if(distL2 < minDist2) Q.emplace_back(QueueElement(distL2, std::make_shared<const Node>(*leftNode)));
+	  if(distR2 < minDist2) Q.emplace_back(QueueElement(distR2, std::make_shared<const Node>(*rightNode)));
 	}
       }
     }

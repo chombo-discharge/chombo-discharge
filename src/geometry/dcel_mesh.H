@@ -110,6 +110,12 @@ namespace dcel {
 
     inline
     decltype(auto) DirectSignedDistance2(const Vec3& a_point) const noexcept;
+
+    inline
+    decltype(auto) incrementWarning(std::map<std::string, int>& a_warnings, const std::string& a_warn) const noexcept;
+
+    inline
+    decltype(auto) printWarnings(const std::map<std::string, int>& a_warnings) const noexcept;
   };
 }
 

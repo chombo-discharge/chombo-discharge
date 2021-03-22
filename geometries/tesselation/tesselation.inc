@@ -1,9 +1,11 @@
+bunny.ply
 dodecahedron.ply
 hind.ply
 mug.ply
 octahedron.ply
 orion.ply
 porsche.ply
+shuttle.ply
 sphere.ply
 tetrahedron.ply
 turbine.ply

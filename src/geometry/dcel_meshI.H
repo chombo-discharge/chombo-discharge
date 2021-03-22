@@ -48,52 +48,97 @@ namespace dcel {
 
   template <class T>
   inline
+  decltype(auto) meshT<T>::incrementWarning(std::map<std::string, int>& a_warnings, const std::string& a_warn) const noexcept {
+    a_warnings.at(a_warn) += 1;
+  }
+
+  template <class T>
+  inline
+  decltype(auto) meshT<T>::printWarnings(const std::map<std::string, int>& a_warnings) const noexcept {
+    for (const auto& warn : a_warnings){
+      if(warn.second > 0){
+	std::cerr << "In file 'dcel_mesh.cpp' function dcel_meshT<T>::sanityCheck() - warnings about error '" << warn.first << "' = " << warn.second << "\n";
+      }
+    }
+  }
+
+  template <class T>
+  inline
   decltype(auto) meshT<T>::sanityCheck() const noexcept {
+
+
+    const std::string e_null       = "nullptr edges";
+    const std::string e_noPairEdge = "no pair edge (not watertight)";
+    const std::string e_noNextEdge = "no next edge (badly linked dcel)";
+    const std::string e_noPrevEdge = "no previous edge (badly linked dcel)";
+    const std::string e_noOrigVert = "no origin vertex found for half edge (badly linked dcel)";
+    const std::string e_noFace     = "no face found for half edge (badly linked dcel)";
+    const std::string e_noPrevNext = "previous edge's next edge is not this edge (badly linked dcel)";
+    const std::string e_noNextPrev = "next edge's previous edge is not this edge (badly linked dcel)";
+
+    const std::string v_null    = "nullptr vertex";
+    const std::string v_noEdge  = "no referenced edge for vertex (unreferenced vertex)";
+
+    std::map<std::string, int> warnings = {
+      {e_null,       0},
+      {e_noPairEdge, 0},
+      {e_noNextEdge, 0},
+      {e_noPrevEdge, 0},
+      {e_noOrigVert, 0},
+      {e_noFace,     0},
+      {e_noPrevNext, 0},
+      {e_noNextPrev, 0},
+      {v_null,       0},
+      {v_noEdge,     0}
+    };
+    
     for (const auto& e : m_edges){
       const auto& nextEdge  = e->getNextEdge();
       const auto& prevEdge  = e->getPreviousEdge();
       const auto& pairEdge  = e->getPairEdge();
       const auto& curVertex = e->getVertex();
-      const auto& curPoly   = e->getFace();
+      const auto& curFace   = e->getFace();
 
       // Check basic points for current edge. 
       if(e == nullptr) {
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::meshT<T>::sanityCheck  - edge is nullptr\n";
+	incrementWarning(warnings, e_null);
       }
       else if(pairEdge == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::meshT<T>::sanityCheck  - pair edge is nullptr, your geometry probably isn't watertight.\n";
+	incrementWarning(warnings, e_noPairEdge);
       }
       else if(nextEdge == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::meshT<T>::sanityCheck  - next edge is nullptr, something has gone wrong with edge generation.\n";
+	incrementWarning(warnings, e_noNextEdge);
       }
       else if(prevEdge == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::meshT<T>::sanityCheck  - previous edge is nullptr, something has gone wrong with edge generation.\n";
+	incrementWarning(warnings, e_noPrevEdge);
       }
       else if(curVertex == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::meshT<T>::sanityCheck  - vertex is nullptr, something has gone wrong with edge generation.\n";
+	incrementWarning(warnings, e_noOrigVert);
       }
-      else if(curPoly == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::meshT<T>::sanityCheck  - face is nullptr, something has gone wrong with edge generation.\n";
+      else if(curFace == nullptr){
+	incrementWarning(warnings, e_noFace);
       }
 
       // Check that the next edge's previous edge is this edge. 
       if(prevEdge->getNextEdge() != e){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::meshT<T>::sanityCheck  - this->getPreviousEdge()->getNextEdge() is not the current edge, but it should be.\n";
+	incrementWarning(warnings, e_noPrevNext);
       }
       else if(nextEdge->getPreviousEdge() != e){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::meshT<T>::sanityCheck  - this->getNextEdge()->getPreviousEdge() is not the current edge, but it should be.\n";
+	incrementWarning(warnings, e_noNextPrev);
       }
     }
 
     // Vertex check
     for (const auto& v : m_vertices){
       if(v == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::meshT<T>::sanityCheck  - got a nullptr vertex, something has gone wrong with vertex generation.\n";
+	incrementWarning(warnings, v_null);
       }
       else if(v->getOutgoingEdge() == nullptr){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel::meshT<T>::sanityCheck  - vertex has a nullptr edge, something has gone wrong with vertex generation.\n";
+	incrementWarning(warnings, v_noEdge);
       }
     }
+
+    this->printWarnings(warnings);
   }
 
   template <class T>

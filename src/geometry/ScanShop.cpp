@@ -17,7 +17,7 @@
 
 bool ScanShop::s_irregularBalance = true;
 bool ScanShop::s_recursive        = true;
-int ScanShop::s_grow              = 6;
+int ScanShop::s_grow              = 4;
 
 ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const int           a_verbosity,
