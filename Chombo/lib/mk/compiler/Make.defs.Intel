@@ -42,7 +42,7 @@ getcompilerversion := $(CHOMBO_HOME)/mk/compilerVersion.pl
 # -C disable stripping out C++ comments, which are valid code in Fortran
 CH_CPP = $(CXX) -EP 
 
-_cxxbaseflags = -restrict -m64 -std=c++11
+_cxxbaseflags = -restrict -m64 -std=c++14
 
 cxxdbgflags += -g -Wall -Wextra -pedantic -fstack-protector-all $(_cxxbaseflags)
 cxxoptflags += -O3 -qopt-multi-version-aggressive $(_cxxbaseflags)
