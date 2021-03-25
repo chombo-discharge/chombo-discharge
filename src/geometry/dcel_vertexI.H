@@ -92,9 +92,15 @@ namespace dcel {
   template <class T>
   inline
   void vertexT<T>::computeVertexNormalAverage() noexcept {
+    this->computeVertexNormalAverage(m_faces);
+  }
+
+  template <class T>
+  inline
+  void vertexT<T>::computeVertexNormalAverage(const std::vector<facePtr>& a_faces) noexcept {
     m_normal = Vec3::zero();
     
-    for (const auto& f : m_faces){
+    for (const auto& f : a_faces){
       m_normal += f->getNormal();
     }
 
@@ -104,6 +110,12 @@ namespace dcel {
   template <class T>
   inline
   void vertexT<T>::computeVertexNormalAngleWeighted() noexcept {
+    computeVertexNormalAngleWeighted(m_faces);
+  }
+
+  template <class T>
+  inline
+  void vertexT<T>::computeVertexNormalAngleWeighted(const std::vector<facePtr>& a_faces) noexcept {
     m_normal = Vec3::zero();
 
     // This is more complicated than it looks, and it happens because we want the two half edges that has the current vertex
@@ -114,7 +126,7 @@ namespace dcel {
 
     const vertexPtr& originVertex = m_outgoingEdge->getVertex(); // AKA 'this'
     
-    for (const auto& f : m_faces){
+    for (const auto& f : a_faces){
       
       std::vector<vertexPtr> inoutVertices(0);
       for (edgeIterator edgeIt(f->getHalfEdge()); edgeIt.ok(); ++edgeIt){

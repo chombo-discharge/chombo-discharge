@@ -10,6 +10,8 @@
 
 #include "dcel_poly.H"
 
+#include <iostream>
+
 namespace dcel {
 
   template <class T>

@@ -10,6 +10,7 @@
 #include <ParmParse.H>
 
 #include "BoundingVolumes.H"
+#include "BVH.H"
 #include "dcel_mesh.H"
 #include "dcel_parser.H"
 #include "dcel_if.H"
@@ -22,8 +23,8 @@ using precision = float;
 
 using face   = faceT<precision>;
 using mesh   = meshT<precision>;
-using AABB   = AABBT<precision>;
-using Sphere = BoundingSphereT<precision>;
+using AABB   = BoundingVolumes::AABBT<precision>;
+using Sphere = BoundingVolumes::BoundingSphereT<precision>;
 
 using BV = AABB;
 

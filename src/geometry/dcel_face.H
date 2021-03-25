@@ -74,6 +74,12 @@ namespace dcel {
     const Vec3T<T>& getCentroid() const noexcept;
 
     inline
+    T& getCentroid(const int a_dir) noexcept;
+
+    inline
+    const T& getCentroid(const int a_dir) const noexcept;
+
+    inline
     Vec3T<T>& getNormal() noexcept;
 
     inline
@@ -87,6 +93,15 @@ namespace dcel {
 
     inline
     std::vector<Vec3T<T> > getAllVertexCoordinates() const noexcept;
+
+    inline
+    std::vector<vertexPtr> gatherVertices() const noexcept;
+
+    inline
+    Vec3T<T> getSmallestCoordinate() const noexcept;
+
+    inline
+    Vec3T<T> getHighestCoordinate() const noexcept;
   
   protected:
     
@@ -123,9 +138,6 @@ namespace dcel {
 
     inline
     T getArea() const noexcept;
-
-    inline
-    std::vector<vertexPtr> gatherVertices() const noexcept;
 
     inline
     void computeAndStoreEdges() noexcept;

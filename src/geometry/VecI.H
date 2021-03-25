@@ -36,13 +36,31 @@ Vec2T<T>::Vec2T(const T& a_x, const T& a_y){
 template <class T>
 inline
 Vec2T<T> Vec2T<T>::zero() noexcept {
-  return Vec2T<T>(0, 0);
+  return Vec2T<T>(0., 0.);
 }
 
 template <class T>
 inline
 Vec2T<T> Vec2T<T>::one() noexcept {
-  return Vec2T<T>(1, 1);
+  return Vec2T<T>(1., 1.);
+}
+
+template <class T>
+inline
+Vec2T<T> Vec2T<T>::min() noexcept {
+  return Vec2T<T>(-std::numeric_limits<T>::max(), -std::numeric_limits<T>::max());
+}
+
+template <class T>
+inline
+Vec2T<T> Vec2T<T>::max() noexcept {
+  return Vec2T<T>(std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
+}
+
+template <class T>
+inline
+Vec2T<T> Vec2T<T>::infinity() noexcept {
+  return Vec2T<T>(std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity());
 }
 
 template <class T>
@@ -185,6 +203,24 @@ template <class T>
 inline
 Vec3T<T> Vec3T<T>::one() noexcept {
   return Vec3T<T>(1, 1, 1);
+}
+
+template <class T>
+inline
+Vec3T<T> Vec3T<T>::min() noexcept {
+  return Vec3T<T>(-std::numeric_limits<T>::max(), -std::numeric_limits<T>::max(), -std::numeric_limits<T>::max());
+}
+
+template <class T>
+inline
+Vec3T<T> Vec3T<T>::max() noexcept {
+  return Vec3T<T>(std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
+}
+
+template <class T>
+inline
+Vec3T<T> Vec3T<T>::infinity() noexcept {
+  return Vec3T<T>(std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity());
 }
 
 template <class T>

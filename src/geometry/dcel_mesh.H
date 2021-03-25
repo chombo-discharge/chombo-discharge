@@ -13,6 +13,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <map>
 
 namespace dcel {
 
@@ -46,8 +47,8 @@ namespace dcel {
 
     inline
     void define(std::vector<facePtr >&   a_faces,
-			  std::vector<edgePtr >&   a_edges,
-			  std::vector<vertexPtr >& a_vertices) noexcept;
+		std::vector<edgePtr >&   a_edges,
+		std::vector<vertexPtr >& a_vertices) noexcept;
     
     inline
     void sanityCheck() const noexcept;

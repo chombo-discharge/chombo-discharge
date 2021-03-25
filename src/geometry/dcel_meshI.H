@@ -19,14 +19,14 @@ namespace dcel {
   template <class T>
   inline
   meshT<T>::meshT(){
-
+    m_algorithm = SearchAlgorithm::Direct2;
   }
 
   template <class T>
   inline
   meshT<T>::meshT(std::vector<facePtr >&   a_faces,
 		  std::vector<edgePtr >&   a_edges,
-		  std::vector<vertexPtr >& a_vertices){
+		  std::vector<vertexPtr >& a_vertices) : meshT() {
     this->define(a_faces, a_edges, a_vertices);
   }
 
@@ -39,8 +39,8 @@ namespace dcel {
   template <class T>
   inline
   void meshT<T>::define(std::vector<facePtr >&   a_faces,
-				  std::vector<edgePtr >&   a_edges,
-				  std::vector<vertexPtr >& a_vertices) noexcept{
+			std::vector<edgePtr >&   a_edges,
+			std::vector<vertexPtr >& a_vertices) noexcept{
     m_faces    = a_faces;
     m_edges    = a_edges;
     m_vertices = a_vertices;
@@ -66,8 +66,12 @@ namespace dcel {
   inline
   void meshT<T>::sanityCheck() const noexcept {
 
-
+    const std::string f_null       = "nullptr face";
+    const std::string f_noEdge     = "face with no edge";
+    const std::string f_degenerate = "degenerate face";
+      
     const std::string e_null       = "nullptr edges";
+    const std::string e_degenerate = "degenerate edge";
     const std::string e_noPairEdge = "no pair edge (not watertight)";
     const std::string e_noNextEdge = "no next edge (badly linked dcel)";
     const std::string e_noPrevEdge = "no previous edge (badly linked dcel)";
@@ -80,7 +84,11 @@ namespace dcel {
     const std::string v_noEdge  = "no referenced edge for vertex (unreferenced vertex)";
 
     std::map<std::string, int> warnings = {
+      {f_null,       0},
+      {f_noEdge,     0},
+      {f_degenerate, 0},
       {e_null,       0},
+      {e_degenerate, 0},
       {e_noPairEdge, 0},
       {e_noNextEdge, 0},
       {e_noPrevEdge, 0},
@@ -91,6 +99,26 @@ namespace dcel {
       {v_null,       0},
       {v_noEdge,     0}
     };
+
+    for (const auto& f : m_faces){
+      const auto& halfEdge = f->getHalfEdge();
+
+      // Check for duplicate vertices
+      auto vertices  = f->gatherVertices();
+      std::sort(vertices.begin(), vertices.end());
+      auto it = std::unique(vertices.begin(), vertices.end());
+      const bool noDuplicates = (it == vertices.end());
+      
+      if(f == nullptr){
+	incrementWarning(warnings, f_null);
+      }
+      else if(halfEdge == nullptr){
+	incrementWarning(warnings, f_noEdge);
+      }
+      if(!noDuplicates){
+	incrementWarning(warnings, f_degenerate);
+      }
+    }
     
     for (const auto& e : m_edges){
       const auto& nextEdge  = e->getNextEdge();
@@ -102,6 +130,9 @@ namespace dcel {
       // Check basic points for current edge. 
       if(e == nullptr) {
 	incrementWarning(warnings, e_null);
+      }
+      else if(e->getVertex() == e->getOtherVertex()){
+	incrementWarning(warnings, e_degenerate);
       }
       else if(pairEdge == nullptr){
 	incrementWarning(warnings, e_noPairEdge);
@@ -272,13 +303,16 @@ namespace dcel {
   template <class T>  
   inline
   T meshT<T>::DirectSignedDistance(const Vec3& a_point) const noexcept {
-    T minDist = m_faces.front()->signedDistance(a_point);
+    T minDist  = m_faces.front()->signedDistance(a_point);
+    T minDist2 = minDist*minDist;
     
     for (const auto& f : m_faces){
-      const T curDist = f->signedDistance(a_point);
-
-      if(std::abs(curDist) < std::abs(minDist)){
-	minDist = curDist;
+      const T curDist  = f->signedDistance(a_point);
+      const T curDist2 = curDist*curDist;
+      
+      if(curDist2 < minDist2){
+	minDist  = curDist;
+	minDist2 = curDist2;
       }
     }
 

@@ -27,6 +27,15 @@ public:
   static Vec2T<T> one() noexcept;
 
   inline
+  static Vec2T<T> min() noexcept;
+
+  inline
+  static Vec2T<T> max() noexcept;
+
+  inline
+  static Vec2T<T> infinity() noexcept;
+
+  inline
   Vec2T<T>& operator=(const Vec2T& a_other) noexcept;
 
   inline
@@ -90,6 +99,15 @@ public:
 
   inline
   static Vec3T<T> one() noexcept;
+
+  inline
+  static Vec3T<T> min() noexcept;
+
+  inline
+  static Vec3T<T> max() noexcept;
+
+  inline
+  static Vec3T<T> infinity() noexcept;
 
   inline
   T& operator[](int i) noexcept;

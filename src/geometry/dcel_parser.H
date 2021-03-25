@@ -15,6 +15,7 @@
 
 #include <vector>
 #include <memory>
+#include <map>
 
 namespace dcel {
 
@@ -51,8 +52,8 @@ namespace dcel {
       */
       inline
       static void readHeaderASCII(int&           a_numVertices,
-					    int&           a_numFaces,
-					    std::ifstream& a_inputstream);
+				  int&           a_numFaces,
+				  std::ifstream& a_inputstream);
 
       /*!
 	@brief Read ASCII vertices. The next getline() from inputstream must read the first vertex (i.e. don't rewind the stream
@@ -60,8 +61,8 @@ namespace dcel {
       */
       inline
       static void readVerticesASCII(std::vector<std::shared_ptr<vertex> >& a_vertices,
-					      const int                              a_numVertices,
-					      std::ifstream&                         a_inputstream);
+				    const int                              a_numVertices,
+				    std::ifstream&                         a_inputstream);
 
       /*!
 	@brief Read ASCII faces and create mesh connectivity. The next getline() from inputstream must read the first face,
@@ -70,10 +71,10 @@ namespace dcel {
       */
       inline
       static void readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
-					   std::vector<std::shared_ptr<edge> >&   a_edges,
-					   std::vector<std::shared_ptr<vertex> >& a_vertices,
-					   const int                              a_numFaces,
-					   std::ifstream&                         a_inputstream);
+				 std::vector<std::shared_ptr<edge> >&   a_edges,
+				 std::vector<std::shared_ptr<vertex> >& a_vertices,
+				 const int                              a_numFaces,
+				 std::ifstream&                         a_inputstream);
 
       /*!
 	@brief This sets all pair edges

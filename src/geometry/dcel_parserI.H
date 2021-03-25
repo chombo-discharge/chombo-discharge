@@ -20,6 +20,7 @@
 #include <iterator>
 #include <sstream>
 
+
 namespace dcel {
 
   template <class T>

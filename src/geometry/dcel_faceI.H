@@ -143,6 +143,18 @@ namespace dcel {
 
   template <class T>
   inline
+  T& faceT<T>::getCentroid(const int a_dir) noexcept {
+    return m_centroid[a_dir];
+  }
+
+  template <class T>
+  inline
+  const T& faceT<T>::getCentroid(const int a_dir) const noexcept {
+    return m_centroid[a_dir];
+  }
+
+  template <class T>
+  inline
   Vec3T<T>& faceT<T>::getCentroid() noexcept {
     return (m_centroid);
   }
@@ -217,6 +229,34 @@ namespace dcel {
 
   template <class T>
   inline
+  Vec3T<T> faceT<T>::getSmallestCoordinate() const noexcept {
+    const auto coords = this->getAllVertexCoordinates();
+
+    auto minCoord = coords.front();
+
+    for (const auto& c : coords){
+      minCoord = min(minCoord, c);
+    }
+
+    return minCoord;
+  }
+
+  template <class T>
+  inline
+  Vec3T<T> faceT<T>::getHighestCoordinate() const noexcept {
+    const auto coords = this->getAllVertexCoordinates();
+
+    auto maxCoord = coords.front();
+
+    for (const auto& c : coords){
+      maxCoord = max(maxCoord, c);
+    }
+
+    return maxCoord;
+  }
+
+  template <class T>
+  inline
   Vec3T<T> faceT<T>::projectPointIntoFacePlane(const Vec3& a_p) const noexcept {
     return a_p - m_normal * (m_normal.dot(a_p-m_centroid));
   }
@@ -262,7 +302,7 @@ namespace dcel {
       
       retval = normDist*normDist;
     }
-    else{ 
+    else{
       for (const auto& e : m_edges){
 	const T curDist2 = e->unsignedDistance2(a_x0);
 

@@ -231,7 +231,6 @@ namespace dcel {
     const T t = this->projectPointToEdge(a_x0);
 
     T retval;
-  
     if(t <= 0.0) {
       retval = this->getVertex()->signedDistance(a_x0);
     }

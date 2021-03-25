@@ -67,7 +67,13 @@ namespace dcel {
     void computeVertexNormalAverage() noexcept;
 
     inline
+    void computeVertexNormalAverage(const std::vector<facePtr>& a_faces) noexcept;
+
+    inline
     void computeVertexNormalAngleWeighted() noexcept;
+
+    inline
+    void computeVertexNormalAngleWeighted(const std::vector<facePtr>& a_faces) noexcept;
 
     inline
     Vec3T<T>& getPosition() noexcept;

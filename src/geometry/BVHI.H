@@ -12,6 +12,9 @@
 
 namespace BVH {
 
+  int reguCalls = 0;
+  int leafCalls = 0;
+
   template <class T, class P, class BV>
   inline
   NodeT<T, P, BV>::NodeT() {
@@ -251,8 +254,8 @@ namespace BVH {
   template <class T, class P, class BV>
   inline
   void NodeT<T, P, BV>::pruneOrdered(T& a_closest, const Vec3& a_point) const noexcept  {
-					      
     if(m_nodeType == NodeType::Leaf){
+      leafCalls++;
       const T primDist = this->getDistanceToPrimitives(a_point);
 
       if(primDist*primDist < a_closest*a_closest){
@@ -260,6 +263,7 @@ namespace BVH {
       }
     }
     else {
+      reguCalls++;
       const T minL = m_left ->getDistanceToBoundingVolume(a_point);
       const T minR = m_right->getDistanceToBoundingVolume(a_point);
 
@@ -294,8 +298,8 @@ namespace BVH {
   template <class T, class P, class BV>
   inline
   void NodeT<T, P, BV>::pruneOrdered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept  {
-
     if(m_nodeType == NodeType::Leaf){
+      leafCalls++;
       for (const auto& p : m_primitives){
 	const auto curDist2 = p->unsignedDistance2(a_point);
 
@@ -306,6 +310,7 @@ namespace BVH {
       }
     }
     else{
+      reguCalls++;
       const auto minL2 = m_left ->getDistanceToBoundingVolume2(a_point);
       const auto minR2 = m_right->getDistanceToBoundingVolume2(a_point);
 
