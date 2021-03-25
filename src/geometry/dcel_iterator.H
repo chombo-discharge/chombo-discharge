@@ -8,8 +8,6 @@
 #ifndef _DCEL_ITERATOR_
 #define _DCEL_ITERATOR_
 
-#include "RealVect.H"
-
 #include <memory>
 
 namespace dcel {
