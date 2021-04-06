@@ -18,6 +18,7 @@ amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for
 amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr_mesh.irreg_growth    = 8           # How much to grow irregular tagged cells
 amr_mesh.buffer_size     = 2           # Number of cells between grid levels
+amr_mesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
 amr_mesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 amr_mesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
 amr_mesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
