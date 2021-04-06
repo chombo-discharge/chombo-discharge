@@ -132,8 +132,8 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
 bool ScanShop::isRegular(const Box a_box, const RealVect a_origin, const Real a_dx){
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
-    const RealVect a_point = a_origin + a_dx*RealVect(iv);
-    if(m_baseif->value(a_point) > 0.0){
+    const RealVect a_point = a_origin + a_dx*(0.5*RealVect::Unit + RealVect(iv));
+    if(m_baseif->value(a_point) > -0.5*a_dx){
       return false;
     }
   }
@@ -144,9 +144,8 @@ bool ScanShop::isRegular(const Box a_box, const RealVect a_origin, const Real a_
 bool ScanShop::isCovered(const Box a_box, const RealVect a_origin, const Real a_dx){
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
-    const RealVect a_point = a_origin + a_dx*RealVect(iv);
-
-    if(m_baseif->value(a_point) < 0.0) return false;
+    const RealVect a_point = a_origin + a_dx*(0.5*RealVect::Unit + RealVect(iv));
+    if(m_baseif->value(a_point) < 0.5*a_dx) return false;
   }
 
   return true;
