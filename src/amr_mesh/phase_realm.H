@@ -70,6 +70,7 @@ public:
 	      const int a_finest_level,
 	      const int a_ebghost,
 	      const int a_num_ghost,
+	      const int a_lsf_ghost,
 	      const int a_redist_rad,
 	      const stencil_type a_centroid_stencil,
 	      const stencil_type a_eb_stencil,
@@ -125,8 +126,9 @@ protected:
   int m_finest_level;
   int m_mg_coarsen;
   int m_verbosity;
-  int m_ebghost;
   int m_num_ghost;
+  int m_ebghost;
+  int m_lsf_ghost;
   int m_redist_rad;
   RealVect m_prob_lo;
   stencil_type m_centroid_stencil;
@@ -200,7 +202,7 @@ protected:
   void define_ghostcloud(const int a_lmin);                        // Make stencils for ghost clouds with particle depositions
   void define_irreg_sten();                                        // Make stencils for doing interpolation to centroids
   void define_noncons_sten();                                      // Make stencils for nonconservative averaging
-  void define_levelset(const int a_lmin);                          // Define levelset
+  void define_levelset(const int a_lmin, const int a_numGhost);    // Define levelset
 };
 
 #endif

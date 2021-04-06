@@ -36,6 +36,7 @@ void phase_realm::define(const Vector<DisjointBoxLayout>& a_grids,
 			 const int a_finest_level,
 			 const int a_ebghost,
 			 const int a_num_ghost,
+			 const int a_lsf_ghost,
 			 const int a_redist_rad,
 			 const stencil_type a_centroid_stencil,
 			 const stencil_type a_eb_stencil,
@@ -52,6 +53,7 @@ void phase_realm::define(const Vector<DisjointBoxLayout>& a_grids,
   m_ebcf = a_ebcf;
   m_ebghost = a_ebghost;
   m_num_ghost = a_num_ghost;
+  m_lsf_ghost = a_lsf_ghost;
   m_redist_rad = a_redist_rad;
   m_centroid_stencil = a_centroid_stencil;
   m_eb_stencil = a_eb_stencil;
@@ -107,7 +109,7 @@ void phase_realm::regrid_operators(const int a_lmin, const int a_lmax, const int
     this->define_noncons_sten();                  // Make stencils for nonconservative averaging
     this->define_copier(a_lmin);                  // Make stencils for copier
     this->define_ghostcloud(a_lmin);              // Make stencils for ghost clouds with particle depositions
-    this->define_levelset(a_lmin);                // Defining levelset
+    this->define_levelset(a_lmin, m_lsf_ghost);   // Defining levelset
   }
 }
 
@@ -237,7 +239,7 @@ void phase_realm::define_neighbors(const int a_lmin){
   }
 }
 
-void phase_realm::define_levelset(const int a_lmin){
+void phase_realm::define_levelset(const int a_lmin, const int a_numGhost){
   CH_TIME("phase_realm::define_levelset");
   if(m_verbosity > 2){
     pout() << "phase_realm::define_leveset" << endl;
@@ -255,7 +257,7 @@ void phase_realm::define_levelset(const int a_lmin){
     for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
       const Real dx = m_dx[lvl];
 
-      m_levelset[lvl] = RefCountedPtr<LevelData<FArrayBox> > (new LevelData<FArrayBox>(m_grids[lvl], ncomp, m_num_ghost*IntVect::Unit));
+      m_levelset[lvl] = RefCountedPtr<LevelData<FArrayBox> > (new LevelData<FArrayBox>(m_grids[lvl], ncomp, a_numGhost*IntVect::Unit));
 
       for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit){
 	FArrayBox& fab = (*m_levelset[lvl])[dit()];

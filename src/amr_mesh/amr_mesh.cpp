@@ -1607,6 +1607,7 @@ void amr_mesh::parse_num_ghost(){
   ParmParse pp("amr_mesh");
   int ghost;
   pp.get("num_ghost", m_num_ghost);
+  pp.get("lsf_ghost", m_lsf_ghost);
 }
 
 void amr_mesh::parse_redist_rad(){
@@ -2064,7 +2065,7 @@ void amr_mesh::define_realms(){
   }
 
   for (auto& r : m_realms){
-    r.second->define(m_grids, m_domains, m_ref_ratios, m_dx, m_prob_lo, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
+    r.second->define(m_grids, m_domains, m_ref_ratios, m_dx, m_prob_lo, m_finest_level, m_ebghost, m_num_ghost, m_lsf_ghost, m_redist_rad,
 		     m_ebcf, m_centroid_stencil, m_eb_stencil, m_baseif, m_mfis);
   }
 }
@@ -2098,7 +2099,7 @@ void amr_mesh::regrid_realm(const std::string           a_realm,
     grids[lvl].close();
   }
 
-  m_realms[a_realm]->define(grids, m_domains, m_ref_ratios, m_dx, m_prob_lo, m_finest_level, m_ebghost, m_num_ghost, m_redist_rad,
+  m_realms[a_realm]->define(grids, m_domains, m_ref_ratios, m_dx, m_prob_lo, m_finest_level, m_ebghost, m_num_ghost, m_lsf_ghost, m_redist_rad,
 			    m_ebcf, m_centroid_stencil, m_eb_stencil, m_baseif, m_mfis);
 
   m_realms[a_realm]->regrid_base(a_lmin);

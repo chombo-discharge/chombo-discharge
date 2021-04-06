@@ -39,6 +39,7 @@ public:
 	      const int a_finest_level,
 	      const int a_ebghost,
 	      const int a_num_ghost,
+	      const int a_lsf_ghost,
 	      const int a_redist_rad,
 	      const bool a_ebcf,
 	      const stencil_type a_centroid_stencil,

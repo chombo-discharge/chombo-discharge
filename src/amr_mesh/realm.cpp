@@ -39,6 +39,7 @@ void realm::define(const Vector<DisjointBoxLayout>& a_grids,
 		   const int a_finest_level,
 		   const int a_ebghost,
 		   const int a_num_ghost,
+		   const int a_lsf_ghost,
 		   const int a_redist_rad,
 		   const bool a_ebcf,
 		   const stencil_type a_centroid_stencil,
@@ -65,10 +66,10 @@ void realm::define(const Vector<DisjointBoxLayout>& a_grids,
   const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  m_realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, m_prob_lo, a_finest_level, a_ebghost, a_num_ghost, a_redist_rad,
+  m_realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, m_prob_lo, a_finest_level, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
 			       a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::gas), ebis_gas);
 
-  m_realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, m_prob_lo, a_finest_level, a_ebghost, a_num_ghost, a_redist_rad,
+  m_realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, m_prob_lo, a_finest_level, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
 				 a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::solid), ebis_sol);
 
 

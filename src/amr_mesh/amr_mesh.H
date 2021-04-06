@@ -958,9 +958,14 @@ protected:
   int m_ebghost;
 
   /*!
-    @brief Number of ghost cells to interpolate
+    @brief Number of ghost cells
   */
   int m_num_ghost;
+
+  /*!
+    @brief Number of ghost cells to use when writing level-set to grid
+  */
+  int m_lsf_ghost;
 
   /*!
     @brief Redistribution radius
