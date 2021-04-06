@@ -18,7 +18,6 @@ amr_mesh.max_box_size    = 16          # Maximum allowed box size
 amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
 amr_mesh.ref_rat         = 2 4 2 4 2 2 # Refinement ratios
 amr_mesh.num_ghost       = 3           # Number of ghost cells. Default is 3
-amr_mesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
 amr_mesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr_mesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
