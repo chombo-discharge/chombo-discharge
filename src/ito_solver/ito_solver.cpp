@@ -836,7 +836,7 @@ void ito_solver::intersect_particles_if(particle_container<ito_particle>& a_part
 	  bool checkEB  = false;
 	  bool checkDom = false;
 
-	  if(impfunc->value(oldPos) < pathLen){ // Checks distance to EB. 
+	  if(std::abs(impfunc->value(oldPos)) < pathLen){ // Checks distance to EB. 
 	    checkEB = true;
 	  }
 	  for (int dir = 0; dir < SpaceDim; dir++){
@@ -854,7 +854,11 @@ void ito_solver::intersect_particles_if(particle_container<ito_particle>& a_part
 	    bool contact_eb     = false;
 	      
 	    if(checkDom) contact_domain = particle_ops::domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
-	    if(checkEB)  contact_eb     = particle_ops::eb_bc_intersection(impfunc, oldPos, newPos, pathLen, dx, eb_s);
+#if 0
+	    if(checkEB)  contact_eb     = particle_ops::eb_intersection_bisect(impfunc, oldPos, newPos, pathLen, dx, eb_s);
+#else
+	    if(checkEB)  contact_eb     = particle_ops::eb_intersection_raycast(impfunc, oldPos, newPos, 1.E-10*dx, dx, eb_s);
+#endif
 	  
 	    if(contact_eb || contact_domain){ // Particle trajectory crossed something. 
 	      if(eb_s < dom_s){ // It was the EB first. 

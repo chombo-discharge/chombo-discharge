@@ -1304,7 +1304,7 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
 	    contact_domain = particle_ops::domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
 	  }
 	  if(checkEB){
-	    contact_eb = particle_ops::eb_bc_intersection(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
+	    contact_eb = particle_ops::eb_intersection_bisect(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
 	  }
 
 	  // Move the photon to the data holder where it belongs. 
@@ -1458,7 +1458,7 @@ void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_phot
 
 	// Check absorption on EBs and domain
 	if(checkEB){
-	  absorbed_eb = particle_ops::eb_bc_intersection(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
+	  absorbed_eb = particle_ops::eb_intersection_bisect(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
 	}
 	if(checkDom){
 	  absorbed_domain = particle_ops::domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);

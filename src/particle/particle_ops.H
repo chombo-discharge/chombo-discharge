@@ -11,20 +11,29 @@
 class particle_ops {
 public:
 
-  static inline bool domain_bc_intersection(const RealVect& a_oldPos,
-					    const RealVect& a_newPos,
-					    const RealVect& a_path,
-					    const RealVect& a_prob_lo,
-					    const RealVect& a_prob_hi,
-					    Real&           a_s);
+  static
+  inline bool domain_bc_intersection(const RealVect& a_oldPos,
+				     const RealVect& a_newPos,
+				     const RealVect& a_path,
+				     const RealVect& a_prob_lo,
+				     const RealVect& a_prob_hi,
+				     Real&           a_s);
 
-  static inline bool eb_bc_intersection(const RefCountedPtr<BaseIF>& a_impfunc,
-					const RealVect&              a_oldPos,
-					const RealVect&              a_newPos,
-					const Real&                  a_pathLen,
-					const Real&                  a_bisectStep,
-					Real&                        a_s);
-  
+  static
+  inline bool eb_intersection_bisect(const RefCountedPtr<BaseIF>& a_impfunc,
+				     const RealVect&              a_oldPos,
+				     const RealVect&              a_newPos,
+				     const Real&                  a_pathLen,
+				     const Real&                  a_bisectStep,
+				     Real&                        a_s);
+
+  static
+  inline bool eb_intersection_raycast(const RefCountedPtr<BaseIF>& a_impfunc,
+				      const RealVect&              a_x0,
+				      const RealVect&              a_x1,
+				      const Real&                  a_tolerance,
+				      const Real&                  a_dx,
+				      Real&                        a_s);
 };
 
 #include "particle_opsI.H"

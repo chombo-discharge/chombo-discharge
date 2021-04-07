@@ -108,7 +108,7 @@ poisson_multifluid_gmg.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi'
 ito_solver.pvr_buffer          = 0             # Buffer for PVR.
 ito_solver.halo_buffer         = 1             # Halo buffer. 
 ito_solver.plt_vars            = phi vel dco mobility eb_part dom_part src_part   # Currently available are 'phi', 'vel', and 'dco'
-ito_solver.bisect_step         = 1.E-3         # Bisection step length for intersection tests
+ito_solver.bisect_step         = 1.E-5         # Bisection step length for intersection tests
 ito_solver.seed                = 0             # Seed for RNG
 ito_solver.kd_direction        = -1            # Kd-tree direction, -1 => random, 0,1,2 => first plane split in this dir
 ito_solver.max_diffusion_hop   = 99.0          # Maximum diffusion hop length (in units of dx)
@@ -121,7 +121,7 @@ ito_solver.blend_conservation  = false         # Turn on/off blending with nonco
 ito_solver.checkpointing       = particles     # Use particle numbers for writing/reading checkpoint files
 ito_solver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
 ito_solver.mobility_interp     = velocity      # 'mobility' or 'velocity', depending on how you wish to compute. 
-ito_solver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
+ito_solver.plot_deposition     = ngp           # Cloud-in-cell for plotting particles.
 ito_solver.halo_deposition     = native        # 'native' or 'ngp' (see documentation)
 ito_solver.deposition          = cic           # 'ngp' = nearest grid point
                                                # 'cic' = cloud-in-cell
@@ -226,7 +226,7 @@ ito_plasma_godunov.merge_interval = 1              # How often to make superpart
 ito_plasma_godunov.relax_factor   = 9999.5         # Factor in front of relaxation time	
 ito_plasma_godunov.regrid_super   = true           # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = euler_maruyama # 'euler', 'euler_maruyama', 'midpoint'
-ito_plasma_godunov.profile        = false          # Profile advance or not
+ito_plasma_godunov.profile        = true           # Profile advance or not
 ito_plasma_godunov.pvr_buffer     = 0              # PVR buffer for particles (overrides ito and mc_photo)
 ito_plasma_godunov.halo_buffer    = 2              # Halo buffer for particles (overrides ito and mc_photo)
 ito_plasma_godunov.filter_rho     = false          # Filter space charge or not

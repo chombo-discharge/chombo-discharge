@@ -13,6 +13,7 @@
 
 #include <PolyGeom.H>
 
+inline
 bool particle_ops::domain_bc_intersection(const RealVect& a_oldPos,
 					  const RealVect& a_newPos,
 					  const RealVect& a_path,
@@ -48,12 +49,14 @@ bool particle_ops::domain_bc_intersection(const RealVect& a_oldPos,
   return retval;
 }
 
-bool particle_ops::eb_bc_intersection(const RefCountedPtr<BaseIF>& a_impfunc,
-				      const RealVect&              a_oldPos,
-				      const RealVect&              a_newPos,
-				      const Real&                  a_pathLen,
-				      const Real&                  a_bisect_step,
-				      Real&                        a_s){
+
+inline
+bool particle_ops::eb_intersection_bisect(const RefCountedPtr<BaseIF>& a_impfunc,
+					  const RealVect&              a_oldPos,
+					  const RealVect&              a_newPos,
+					  const Real&                  a_pathLen,
+					  const Real&                  a_bisect_step,
+					  Real&                        a_s){
 
   bool retval = false;
   
@@ -72,7 +75,7 @@ bool particle_ops::eb_bc_intersection(const RefCountedPtr<BaseIF>& a_impfunc,
       const RealVect xcol = poly::brent_root_finder(a_impfunc, cur_pos, cur_pos + dxStep);
       a_s = (xcol - a_oldPos).vectorLength()/a_pathLen;
       retval = true;
-      
+
       break;
     }
     else{ // Move to next interval
@@ -81,6 +84,49 @@ bool particle_ops::eb_bc_intersection(const RefCountedPtr<BaseIF>& a_impfunc,
   }
 
   return retval;
+}
+
+inline
+bool particle_ops::eb_intersection_raycast(const RefCountedPtr<BaseIF>& impfunc,
+					   const RealVect&              x0,
+					   const RealVect&              x1,
+					   const Real&                  tol,
+					   const Real&                  dx,
+					   Real&                        s){
+  
+  bool ret = false;
+
+  auto dist = [&](const RealVect& x) -> Real {
+    return std::abs(impfunc->value(x));
+  };
+  
+  const Real  D = (x1-x0).vectorLength();  
+  const Real D0 = dist(x0);
+
+  if(D > D0){
+
+    const RealVect t = (x1-x0)/D;
+
+    // Move x0 along +t towards the boundary. If we end up too close to the boundary the particle has intersected the BC. 
+    RealVect xa = x0;
+    Real r  = D;
+    Real d  = dist(xa);
+    
+    while(d < r){
+      if(d < tol) {
+	s   = (xa-x0).vectorLength()/D;
+	ret = true;
+	break;
+      }
+      else{
+	xa += t*d;
+	r  -= d;
+	d   = dist(xa);
+      }
+    }
+  }
+
+  return ret;
 }
 
 #endif
