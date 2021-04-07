@@ -1593,8 +1593,8 @@ void driver::setup_fresh(const int a_init_regrids){
   // When we're setting up fresh, we need to regrid everything from the base level
   // and upwards. We have tags on m_geom_tag_depth, so that is our current finest level. 
   const int lmin = 0;
-  const int lmax = m_geom_tag_depth;
-  m_amr->regrid_amr(m_geom_tags, lmin, lmax, m_geom_tag_depth);
+  m_amr->regrid_amr(m_geom_tags, lmin, m_geom_tag_depth, m_geom_tag_depth);
+  const int lmax = m_amr->get_finest_level();
 
   // Allocate internal storage 
   this->allocate_internals();
