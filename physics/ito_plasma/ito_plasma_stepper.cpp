@@ -3200,7 +3200,9 @@ void ito_plasma_stepper::load_balance_particle_realm(Vector<Vector<int> >&      
     loads[lvl] = this->get_checkpoint_loads(a_realm, lvl);
   }
 
+
   // Do the actual load balancing
+  load_balance::sort(a_boxes, loads, m_boxsort);
   load_balance::level_by_level(a_procs, loads, a_boxes);
   //  load_balance::hierarchy(a_procs, loads, a_boxes); If you want to try something crazy...
 

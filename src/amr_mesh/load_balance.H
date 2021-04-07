@@ -49,6 +49,12 @@ public:
 			const Vector<Vector<Box> >& a_boxes);
 
   /*!
+    @brief Sort boxes and loads over a hierarchy
+  */
+  template <typename T>
+  static void sort(Vector<Vector<Box> >& a_boxes, Vector<Vector<T> >& a_loads, const box_sorting a_which);
+  
+  /*!
     @brief Main sorting function for sorting boxes and loads
   */
   template <typename T>

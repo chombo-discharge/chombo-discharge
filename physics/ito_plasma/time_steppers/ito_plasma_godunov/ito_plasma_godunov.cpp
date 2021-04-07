@@ -165,6 +165,24 @@ void ito_plasma_godunov::parse_options() {
     MayDay::Abort("ito_plasma_godunov::parse_options - unknown 'which_dt' requested");
   }
 
+  // Box sorting for load balancing
+  pp.get("box_sorting", str);
+  if( str == "none"){
+    m_boxsort = box_sorting::none;
+  }
+  if( str == "std"){
+    m_boxsort = box_sorting::std;
+  }
+  else if(str == "shuffle"){
+    m_boxsort = box_sorting::shuffle;
+  }
+  else if(str == "morton"){
+    m_boxsort = box_sorting::morton;
+  }
+  else {
+    MayDay::Abort("ito_plasma_godunov::parse_options - unknown box sorting method requested for argument 'box_sorting'");
+  }
+
   // Parse filterse
   this->parse_filters();
   

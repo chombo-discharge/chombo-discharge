@@ -332,6 +332,8 @@ namespace physics {
       std::string m_particle_realm;  // Realm for particles. Defaults to realm::primal
       std::string m_name;
       phase::which_phase m_phase;
+
+      box_sorting m_boxsort;
       
       RefCountedPtr<ito_plasma_physics> m_physics;
       RefCountedPtr<ito_layout<ito_solver> > m_ito;

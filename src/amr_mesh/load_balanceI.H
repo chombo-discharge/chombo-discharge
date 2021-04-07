@@ -106,6 +106,13 @@ void load_balance::unpackPairs(Vector<Box>& a_boxes, Vector<T>& a_loads, const s
 }
 
 template <typename T>
+void load_balance::sort(Vector<Vector<Box> >& a_boxes, Vector<Vector<T> >& a_loads, const box_sorting a_which){
+  for (int lvl = 0; lvl < a_boxes.size(); lvl++){
+    load_balance::sort(a_boxes[lvl], a_loads[lvl], a_which);
+  }
+}
+
+template <typename T>
 void load_balance::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const box_sorting a_which){
 
   switch(a_which){
