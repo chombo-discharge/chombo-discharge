@@ -1250,6 +1250,7 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
   
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       List<photon>& bulkPhotons = a_bulk_photons[lvl][dit()].listItems();
@@ -1278,7 +1279,7 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
 	bool checkEB  = false;
 	bool checkDom = false;
 
-	if(impfunc->value(oldPos) < pathLen){
+	if(!impfunc.isNull()){
 	  checkEB = true;
 	}
 	for (int dir = 0; dir < SpaceDim; dir++){
@@ -1300,12 +1301,9 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
 	  bool contact_eb     = false;
 
 	  // Do intersection tests
-	  if(checkDom){
-	    contact_domain = particle_ops::domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
-	  }
-	  if(checkEB){
-	    contact_eb = particle_ops::eb_intersection_bisect(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
-	  }
+	  if(checkDom) contact_domain = particle_ops::domain_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
+	  //	  if(checkEB)  contact_eb = particle_ops::eb_intersection_bisect(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
+	  if(checkEB)  contact_eb = particle_ops::eb_intersection_raycast(impfunc, oldPos, newPos, 1.E-10*dx, eb_s);
 
 	  // Move the photon to the data holder where it belongs. 
 	  if(!contact_eb && !contact_domain){
@@ -1399,6 +1397,7 @@ void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_phot
   
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const Real dx = m_amr->get_dx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       List<photon>& bulkPhotons = a_bulk_photons[lvl][dit()].listItems();
@@ -1430,7 +1429,7 @@ void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_phot
 	bool checkEB  = false;
 	bool checkDom = false;
 
-	if(impfunc->value(oldPos) < pathLen){
+	if(!impfunc.isNull()){
 	  checkEB = true;
 	}
 	for (int dir = 0; dir < SpaceDim; dir++){
@@ -1458,10 +1457,11 @@ void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_phot
 
 	// Check absorption on EBs and domain
 	if(checkEB){
-	  absorbed_eb = particle_ops::eb_intersection_bisect(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
+	  //	  absorbed_eb = particle_ops::eb_intersection_bisect(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
+	  absorbed_eb = particle_ops::eb_intersection_raycast(impfunc, oldPos, newPos, 1.E-10*dx, eb_s);
 	}
 	if(checkDom){
-	  absorbed_domain = particle_ops::domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
+	  absorbed_domain = particle_ops::domain_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
 	  dom_s = (absorbed_domain) ? Max(0.0, dom_s - SAFETY) : dom_s;
 	}
 

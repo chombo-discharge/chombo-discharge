@@ -815,69 +815,67 @@ void ito_solver::intersect_particles_if(particle_container<ito_particle>& a_part
       const Real     dx      = m_amr->get_dx()[lvl];
       const EBISBox& ebisbox = m_amr->get_ebisl(m_realm, m_phase)[lvl][dit()];
 
-      if(!ebisbox.isAllRegular()){
-	List<ito_particle>& particles    = a_particles[lvl][dit()].listItems();
-	List<ito_particle>& ebParticles  = a_eb_particles[lvl][dit()].listItems();
-	List<ito_particle>& domParticles = a_domain_particles[lvl][dit()].listItems();
+      List<ito_particle>& particles    = a_particles[lvl][dit()].listItems();
+      List<ito_particle>& ebParticles  = a_eb_particles[lvl][dit()].listItems();
+      List<ito_particle>& domParticles = a_domain_particles[lvl][dit()].listItems();
 
-	ebParticles.clear();
-	domParticles.clear();
+      ebParticles.clear();
+      domParticles.clear();
 
-	for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
-	  ito_particle& p = lit();
+      for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
+	ito_particle& p = lit();
 
-	  const RealVect newPos  = p.position();
-	  const RealVect oldPos  = p.oldPosition();
-	  const RealVect path    = newPos - oldPos;
-	  const Real     pathLen = path.vectorLength();
+	const RealVect newPos  = p.position();
+	const RealVect oldPos  = p.oldPosition();
+	const RealVect path    = newPos - oldPos;
+	const Real     pathLen = path.vectorLength();
 
-	  // Check if we should check of different types of boundary intersections. These are checp initial tests that allow
-	  // us to skip intersection tests for some photons.
-	  bool checkEB  = false;
-	  bool checkDom = false;
+	// Check if we should check of different types of boundary intersections. These are checp initial tests that allow
+	// us to skip intersection tests for some photons.
+	bool checkEB  = false;
+	bool checkDom = false;
 
-	  if(std::abs(impfunc->value(oldPos)) < pathLen){ // Checks distance to EB. 
-	    checkEB = true;
+	if(!impfunc.isNull()){
+	  checkEB = true;
+	}
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  if(newPos[dir] < prob_lo[dir] || newPos[dir] > prob_hi[dir]){ // Checks if we crossed a domain boundary. 
+	    checkDom = true; 
 	  }
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    if(newPos[dir] < prob_lo[dir] || newPos[dir] > prob_hi[dir]){ // Checks if we crossed a domain boundary. 
-	      checkDom = true; 
-	    }
-	  }
+	}
 
-	  // Must do intersection test on at least one of these. 
-	  if(checkEB || checkDom){ 
-	    Real dom_s = 1.E99;
-	    Real eb_s  = 1.E99;
+	// Must do intersection test on at least one of these. 
+	if(checkEB || checkDom){ 
+	  Real dom_s = 1.E99;
+	  Real eb_s  = 1.E99;
 
-	    bool contact_domain = false;
-	    bool contact_eb     = false;
+	  bool contact_domain = false;
+	  bool contact_eb     = false;
 	      
-	    if(checkDom) contact_domain = particle_ops::domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
+	  if(checkDom) contact_domain = particle_ops::domain_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
 #if 0
-	    if(checkEB)  contact_eb     = particle_ops::eb_intersection_bisect(impfunc, oldPos, newPos, pathLen, dx, eb_s);
+	  if(checkEB)  contact_eb     = particle_ops::eb_intersection_bisect(impfunc, oldPos, newPos, pathLen, dx, eb_s);
 #else
-	    if(checkEB)  contact_eb     = particle_ops::eb_intersection_raycast(impfunc, oldPos, newPos, 1.E-10*dx, dx, eb_s);
+	  if(checkEB)  contact_eb     = particle_ops::eb_intersection_raycast(impfunc, oldPos, newPos, 1.E-10*dx, eb_s);
 #endif
 	  
-	    if(contact_eb || contact_domain){ // Particle trajectory crossed something. 
-	      if(eb_s < dom_s){ // It was the EB first. 
-		p.position() = oldPos + eb_s*path;
-		if(a_delete){
-		  ebParticles.transfer(lit);
-		}
-		else{
-		  ebParticles.add(lit());
-		}
+	  if(contact_eb || contact_domain){ // Particle trajectory crossed something. 
+	    if(eb_s < dom_s){ // It was the EB first. 
+	      p.position() = oldPos + eb_s*path;
+	      if(a_delete){
+		ebParticles.transfer(lit);
 	      }
-	      else{ // It was the domain boundary. 
-		p.position() = oldPos + Max(0.0,dom_s-SAFETY)*path;
-		if(a_delete){
-		  domParticles.transfer(lit);
-		}
-		else{
-		  domParticles.add(lit());
-		}
+	      else{
+		ebParticles.add(lit());
+	      }
+	    }
+	    else{ // It was the domain boundary. 
+	      p.position() = oldPos + Max(0.0,dom_s-SAFETY)*path;
+	      if(a_delete){
+		domParticles.transfer(lit);
+	      }
+	      else{
+		domParticles.add(lit());
 	      }
 	    }
 	  }

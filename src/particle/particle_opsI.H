@@ -14,7 +14,7 @@
 #include <PolyGeom.H>
 
 inline
-bool particle_ops::domain_bc_intersection(const RealVect& a_oldPos,
+bool particle_ops::domain_intersection(const RealVect& a_oldPos,
 					  const RealVect& a_newPos,
 					  const RealVect& a_path,
 					  const RealVect& a_prob_lo,
@@ -91,7 +91,6 @@ bool particle_ops::eb_intersection_raycast(const RefCountedPtr<BaseIF>& impfunc,
 					   const RealVect&              x0,
 					   const RealVect&              x1,
 					   const Real&                  tol,
-					   const Real&                  dx,
 					   Real&                        s){
   
   bool ret = false;

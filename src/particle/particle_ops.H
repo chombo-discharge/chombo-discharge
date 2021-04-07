@@ -12,7 +12,7 @@ class particle_ops {
 public:
 
   static
-  inline bool domain_bc_intersection(const RealVect& a_oldPos,
+  inline bool domain_intersection(const RealVect& a_oldPos,
 				     const RealVect& a_newPos,
 				     const RealVect& a_path,
 				     const RealVect& a_prob_lo,
@@ -32,8 +32,8 @@ public:
 				      const RealVect&              a_x0,
 				      const RealVect&              a_x1,
 				      const Real&                  a_tolerance,
-				      const Real&                  a_dx,
 				      Real&                        a_s);
+  
 };
 
 #include "particle_opsI.H"
