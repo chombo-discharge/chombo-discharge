@@ -1,0 +1,426 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting started &mdash; PlasmaC 19.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The PlasmaC code" href="Model.html" />
+    <link rel="prev" title="Welcome to PlasmaC’s user documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PlasmaC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                19.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">PlasmaC introduction</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#obtaining-plasmac">Obtaining <cite>PlasmaC</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installing-hdf5">Installing HDF5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-up-your-environment">Setting up your environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#compiling-plasmac">Compiling <cite>PlasmaC</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualization">Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#my-first-compilation">My first compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-this-documentation">Using this documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Model.html">The <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Basics.html">Chombo basics</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Using PlasmaC</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Understanding mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParticleData.html">Understanding particle data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">PlasmaC design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">amr_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">computational_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">time_stepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">cell_tagger</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Supported solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Solver.html">Solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Poisson.html">Poisson</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Implemented models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="PoissonModel.html">Poisson model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection diffusion model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimalPlasmaModel.html">Minimal plasma model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html#setting-up-time-stepper">Setting up <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="References.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PlasmaC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Getting started</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/GettingStarted.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="getting-started">
+<span id="chap-gettingstarted"></span><h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>This chapter discusses how you may obtain <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> and compile it.</p>
+<div class="section" id="obtaining-plasmac">
+<span id="chap-obtaining"></span><h2>Obtaining <cite>PlasmaC</cite><a class="headerlink" href="#obtaining-plasmac" title="Permalink to this headline">¶</a></h2>
+<p><cite>PlasmaC</cite> is obtained by cloning the following repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone ssh://git@git.code.sintef.no/~robertm/plasmac
+</pre></div>
+</div>
+</div>
+<div class="section" id="prerequisites">
+<span id="chap-prerequisites"></span><h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<p>From the ground up, <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> is built on top of the <a class="reference external" href="https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations">Chombo</a> framework.
+To compile <cite>PlasmaC</cite>, you must first install the following:</p>
+<ul class="simple">
+<li><p>A Fortran compiler, usually gfortran or Intel Fortran</p></li>
+<li><p>A C++ compiler, usually g++ or Intel C++</p></li>
+<li><p>An MPI installation</p></li>
+<li><p>A parallel HDF5 installation</p></li>
+<li><p>LAPACK and BLAS</p></li>
+</ul>
+<p>Usually, laptops and desktops already have appropriate Fortran and C++ compilers installed, as well as a version of MPI.
+On clusters, HDF5 is (usually) preinstalled, and in this case, it will be sufficient to modify the <cite>Chombo</cite> build files in order to compile <cite>PlasmaC</cite>.
+Following some changes that we’ve made to the way <cite>Chombo</cite> generates its embedded boundaries, <cite>Chombo</cite> is released together with <cite>PlasmaC</cite>.</p>
+<p>If you already have HDF5 installed, you may skip directly to <a class="reference internal" href="#chap-environment"><span class="std std-ref">Setting up your environment</span></a>.</p>
+<div class="section" id="installing-hdf5">
+<span id="chap-hdf5"></span><h3>Installing HDF5<a class="headerlink" href="#installing-hdf5" title="Permalink to this headline">¶</a></h3>
+<p>If you do not have HDF5 installed, you may do the following:</p>
+<ol class="arabic">
+<li><p>Compile and install zlib, which is a compression library used by HDF5. zlib can be installed by</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">zlib1g</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</li>
+<li><p>Download HDF5 (version 1.8 or newer) and install it for parallel execution</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="p">.</span><span class="o">/</span><span class="n">configure</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">hdf5_parallel</span> <span class="o">--</span><span class="n">enable</span><span class="o">-</span><span class="n">production</span> <span class="o">--</span><span class="n">enable</span><span class="o">-</span><span class="n">fortran</span> <span class="o">--</span><span class="n">enable</span><span class="o">-</span><span class="n">parallel</span>
+<span class="n">make</span>
+<span class="n">make</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>This will install HDF5 in /usr/local/hdf5_parallel.
+You may need to install both parallel and serial versions of HDF5.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="setting-up-your-environment">
+<span id="chap-environment"></span><h3>Setting up your environment<a class="headerlink" href="#setting-up-your-environment" title="Permalink to this headline">¶</a></h3>
+<p>In <cite>Chombo</cite>,the system information is supplied through a file known as Make.defs.local, which resides in the <cite>Chombo</cite> library itself.
+This file contains a number of build settings, such as dimension, compilers, paths to HDF5 and so on.
+The configuration file is /lib/mk/Make.defs.local in your <cite>Chombo</cite> folder.
+The build parameters can also be controlled through the command line.</p>
+<p>Here are the configuration variables that have been used used on the <a class="reference external" href="https://www.top500.org/system/179072">fram</a> supercomputer</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DIM</span>           <span class="o">=</span> <span class="mi">3</span>
+<span class="n">DEBUG</span>         <span class="o">=</span> <span class="n">FALSE</span>
+<span class="n">OPT</span>           <span class="o">=</span> <span class="n">HIGH</span>
+<span class="cp">#PRECISION     =</span>
+<span class="cp">#PROFILE       =</span>
+<span class="n">CXX</span>            <span class="o">=</span> <span class="n">icpc</span>
+<span class="n">FC</span>             <span class="o">=</span> <span class="n">ifort</span>
+<span class="n">MPI</span>            <span class="o">=</span> <span class="n">TRUE</span>
+<span class="cp">## Note: don&#39;t set the MPICXX variable if you don&#39;t have MPI installed</span>
+<span class="n">MPICXX</span>         <span class="o">=</span> <span class="n">mpicxx</span>
+<span class="cp">#OBJMODEL      =</span>
+<span class="cp">#XTRACONFIG    =</span>
+<span class="cp">## Optional features</span>
+<span class="cp">#USE_64        =</span>
+<span class="cp">#USE_COMPLEX   =</span>
+<span class="n">USE_EB</span>         <span class="o">=</span> <span class="n">TRUE</span>
+<span class="cp">#USE_CCSE      =</span>
+<span class="n">USE_HDF</span>        <span class="o">=</span> <span class="n">TRUE</span>
+<span class="n">HDFINCFLAGS</span>    <span class="o">=</span> <span class="o">-</span><span class="n">I</span><span class="o">/</span><span class="n">cluster</span><span class="o">/</span><span class="n">software</span><span class="o">/</span><span class="n">HDF5</span><span class="o">/</span><span class="mf">1.10.1</span><span class="o">-</span><span class="n">intel</span><span class="o">-</span><span class="mi">2017</span><span class="n">a</span><span class="o">/</span><span class="n">include</span>
+<span class="n">HDFLIBFLAGS</span>    <span class="o">=</span> <span class="o">-</span><span class="n">L</span><span class="o">/</span><span class="n">cluster</span><span class="o">/</span><span class="n">software</span><span class="o">/</span><span class="n">HDF5</span><span class="o">/</span><span class="mf">1.10.1</span><span class="o">-</span><span class="n">intel</span><span class="o">-</span><span class="mi">2017</span><span class="n">a</span><span class="o">/</span><span class="n">lib</span> <span class="o">-</span><span class="n">lhdf5</span> <span class="o">-</span><span class="n">lz</span>
+<span class="cp">## Note: don&#39;t set the HDFMPI* variables if you don&#39;t have parallel HDF installed</span>
+<span class="n">HDFMPIINCFLAGS</span> <span class="o">=</span> <span class="o">-</span><span class="n">I</span><span class="o">/</span><span class="n">cluster</span><span class="o">/</span><span class="n">software</span><span class="o">/</span><span class="n">HDF5</span><span class="o">/</span><span class="mf">1.10.1</span><span class="o">-</span><span class="n">intel</span><span class="o">-</span><span class="mi">2017</span><span class="n">a</span><span class="o">/</span><span class="n">include</span>
+<span class="n">HDFMPILIBFLAGS</span> <span class="o">=</span> <span class="o">-</span><span class="n">L</span><span class="o">/</span><span class="n">cluster</span><span class="o">/</span><span class="n">software</span><span class="o">/</span><span class="n">HDF5</span><span class="o">/</span><span class="mf">1.10.1</span><span class="o">-</span><span class="n">intel</span><span class="o">-</span><span class="mi">2017</span><span class="n">a</span><span class="o">/</span><span class="n">lib</span> <span class="o">-</span><span class="n">lhdf5</span> <span class="o">-</span><span class="n">lz</span>
+<span class="n">USE_MF</span>         <span class="o">=</span> <span class="n">TRUE</span>
+<span class="cp">#USE_MT        =</span>
+<span class="cp">#USE_SETVAL    =</span>
+<span class="cp">#CH_AR         =</span>
+<span class="cp">#CH_CPP        =</span>
+<span class="cp">#DOXYGEN       =</span>
+<span class="cp">#LD            =</span>
+<span class="cp">#PERL          =</span>
+<span class="cp">#RANLIB        =</span>
+<span class="cp">#cppdbgflags   =</span>
+<span class="cp">#cppoptflags   =</span>
+<span class="cp">#cxxcppflags   =</span>
+<span class="cp">#cxxdbgflags   =</span>
+<span class="n">cxxoptflags</span>    <span class="o">=</span> <span class="o">-</span><span class="n">Ofast</span> <span class="o">-</span><span class="n">xCORE</span><span class="o">-</span><span class="n">AVX2</span> <span class="o">-</span><span class="n">march</span><span class="o">=</span><span class="n">native</span>
+<span class="cp">#cxxprofflags  =</span>
+<span class="cp">#fcppflags     =</span>
+<span class="cp">#fdbgflags     =</span>
+<span class="n">foptflags</span>      <span class="o">=</span> <span class="o">-</span><span class="n">Ofast</span> <span class="o">-</span><span class="n">xCORE</span><span class="o">-</span><span class="n">AVX2</span>
+<span class="cp">#fprofflags    =</span>
+<span class="n">flibflags</span>      <span class="o">=</span> <span class="o">-</span><span class="n">lblas</span> <span class="o">-</span><span class="n">llapack</span>
+<span class="cp">#lddbgflags    =</span>
+<span class="cp">#ldoptflags    =</span>
+<span class="cp">#ldprofflags   =</span>
+<span class="n">syslibflags</span>    <span class="o">=</span> <span class="o">-</span><span class="n">ldl</span> <span class="o">-</span><span class="n">lm</span> <span class="o">-</span><span class="n">lz</span>
+</pre></div>
+</div>
+<p>We also recommend that you create environment variables that hold the path to your <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> version. For example,</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">PLASMAC_HOME</span><span class="o">=/</span><span class="n">home</span><span class="o">/</span><span class="n">foo</span><span class="o">/</span><span class="n">plasmac</span>
+</pre></div>
+</div>
+<p>This environment variables is used in the <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> makefile system so that our makefiles can find <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code>.</p>
+<p>We recommend that you take care of your <code class="file docutils literal notranslate"><span class="pre">Make.defs.local</span></code> for all your computers.
+If you want, you may place your <code class="file docutils literal notranslate"><span class="pre">Make.defs.local</span></code> for all your computers into <code class="file docutils literal notranslate"><span class="pre">/src/local</span></code> and push to the main repository.</p>
+</div>
+</div>
+<div class="section" id="compiling-plasmac">
+<span id="chap-compiling"></span><h2>Compiling <cite>PlasmaC</cite><a class="headerlink" href="#compiling-plasmac" title="Permalink to this headline">¶</a></h2>
+<p>In <cite>PlasmaC</cite>, each problem is compiled as a mini-application into a subfolder.
+Mini-apps are usually set up through a Python pre-compilation script that generates the required source code, makefiles, and simulation parameters.
+There is no separate build for the <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> source code and your own application files and you will <em>not</em> be able to install <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> as a separate library.</p>
+<p>Once an application has been set up, the makefile system tracks the necessary <cite>Chombo</cite> and <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> source files.
+Compiling is done in the subfolder that houses your mini-app:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make -s -j8 <span class="nv">DIM</span><span class="o">=</span><span class="m">2</span> <span class="nv">OPT</span><span class="o">=</span>HIGH &lt;application_name&gt;
+</pre></div>
+</div>
+<p>We generally recommend that you compile with <code class="docutils literal notranslate"><span class="pre">OPT=HIGH</span></code> for performance reasons.</p>
+</div>
+<div class="section" id="visualization">
+<h2>Visualization<a class="headerlink" href="#visualization" title="Permalink to this headline">¶</a></h2>
+<p>PlasmaC writes output files to HDF5. Users can decide what data to output, as well as restrict plot depth to a certain grid levels level. There are also options for including ghost cells in the output files.</p>
+<p>Our favorite tool for visualization is <a class="reference external" href="https://wci.llnl.gov/codes/visit/">VisIt</a>, which can be freely downloaded. Our experience is that client-server visualization is beneficial for visualization of three-dimensional simulation data. For information on how to set up host profiles for VisIt, please contact your local guru or refer to the <a class="reference external" href="http://visit-sphinx-user-manual.readthedocs.io/en/latest/index.html">VisIt documentation</a>.</p>
+</div>
+<div class="section" id="my-first-compilation">
+<span id="chap-myfirstcompilation"></span><h2>My first compilation<a class="headerlink" href="#my-first-compilation" title="Permalink to this headline">¶</a></h2>
+<p>Before moving on with more complex descriptions of <cite>PlasmaC</cite>, we will try to compile a test problem which simply advects a scalar.
+The application we will use is a part of the regression testing in <cite>PlasmaC</cite>.</p>
+<p>To run this application, navigate to <code class="file docutils literal notranslate"><span class="pre">/regression/advection_diffusion</span></code> and compile with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make -s -j4 <span class="nv">DIM</span><span class="o">=</span><span class="m">2</span> main
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">-j4</span></code> is the number of cores used for the compilation. If you want to compile this example in 3D, you should put DIM=3.
+If the application compiles successfully, you will see a file called <code class="file docutils literal notranslate"><span class="pre">main2d.&lt;bunch_of_options&gt;.ex</span></code>.
+If you see this file, you will be able to compile all of <cite>PlasmaC</cite>. If you don’t, you won’t be able to compile any of it.
+Before moving on further, please make sure that your model compiles.</p>
+<p>Once we have compiled our application, we are ready to run it.
+The example that we will run is a very simple setup of scalar advection and diffusion of a rotating flow, where the base code is provided in <code class="file docutils literal notranslate"><span class="pre">/physics/advection_diffusion</span></code>.
+To run the example, you can do</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun -np <span class="m">4</span> main2d.&lt;bunch_of_options&gt;.ex regression2d.inputs
+</pre></div>
+</div>
+<p>Output files should now appear in <code class="file docutils literal notranslate"><span class="pre">/regression/advection_diffusion/plt</span></code>.</p>
+</div>
+<div class="section" id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<p>If the prerequisites are in place, compilation of <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> is usually straightforward.
+However, due to dependencies on <cite>Chombo</cite> and HDF5, compilation can sometimes be an issue.
+Our experience is that if <cite>Chombo</cite> compiles, so does <cite>PlasmaC</cite>.
+For that reason we refer you to the <cite>Chombo</cite> user guide for troubleshooting.</p>
+</div>
+<div class="section" id="using-this-documentation">
+<h2>Using this documentation<a class="headerlink" href="#using-this-documentation" title="Permalink to this headline">¶</a></h2>
+<p>This documentation was built using <cite>reStructuredText</cite> with <cite>Sphinx</cite>. If you want to build a PDF version of this documentation, please navigate to <code class="file docutils literal notranslate"><span class="pre">plasmac/doc/sphinx</span></code> and execute</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make latexpdf
+</pre></div>
+</div>
+<p>A PDF version of this documentation named <code class="file docutils literal notranslate"><span class="pre">PlasmaC.pdf</span></code> will appear in <code class="file docutils literal notranslate"><span class="pre">plasma/doc/sphinx/build/latex</span></code>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Model.html" class="btn btn-neutral float-right" title="The PlasmaC code" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to PlasmaC’s user documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Robert Marskar
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

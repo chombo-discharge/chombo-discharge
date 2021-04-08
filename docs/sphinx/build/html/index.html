@@ -1,0 +1,513 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to PlasmaC’s user documentation! &mdash; PlasmaC 19.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting started" href="GettingStarted.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> PlasmaC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                19.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">PlasmaC introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Model.html">The <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Basics.html">Chombo basics</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Using PlasmaC</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Understanding mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParticleData.html">Understanding particle data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">PlasmaC design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">amr_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">computational_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">time_stepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">cell_tagger</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Supported solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Solver.html">Solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Poisson.html">Poisson</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Implemented models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="PoissonModel.html">Poisson model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection diffusion model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimalPlasmaModel.html">Minimal plasma model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html#setting-up-time-stepper">Setting up <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="References.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">PlasmaC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>Welcome to <cite>PlasmaC</cite>’s user documentation!</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <p><strong>This is an alpha release of PlasmaC. Development is still in progress, and various bugs may or may not be present. User interfaces can and will change.</strong></p>
+<div class="section" id="welcome-to-plasmac-s-user-documentation">
+<h1>Welcome to <cite>PlasmaC</cite>’s user documentation!<a class="headerlink" href="#welcome-to-plasmac-s-user-documentation" title="Permalink to this headline">¶</a></h1>
+<p><cite>PlasmaC</cite> is a modular and scalable computer code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries.</p>
+<ul class="simple">
+<li><p>Electrostatics with support for electrodes and dielectrics</p></li>
+<li><p>Radiative transport as a diffusion or Monte Carlo process</p></li>
+<li><p>Scalar advection-diffusion-reaction transport in complex geometries, with support for fluctuating hydrodynamics</p></li>
+<li><p>Îto particle models for microscopic drift-diffusion-reaction processes</p></li>
+<li><p>Parallel I/O with HDF5</p></li>
+<li><p>Sensible and simple-to-use physics interfaces</p></li>
+<li><p>Various time integration schemes</p></li>
+<li><p>Dual-grid simulations with separate fluid and particle grids.</p></li>
+</ul>
+<p>Numerical solvers are designed to run on their own, but are best used through physics interfaces.</p>
+<p>For scalability, <cite>PlasmaC</cite> is built on top of <a class="reference external" href="https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations">Chombo</a>, and therefore additionally features</p>
+<ul class="simple">
+<li><p>Cut-cell representation of multi-material geometries</p></li>
+<li><p>Patch based adaptive mesh refinement</p></li>
+<li><p>Good weak and strong scalability to thousands of computer cores</p></li>
+</ul>
+<p>Our goal is that users will be able to use <cite>PlasmaC</cite> without modifying the underlying solvers.
+There are interfaces for describing the plasma physics, setting up boundary conditions, ensuring mesh refinement, and so on.
+As <cite>PlasmaC</cite> evolves, so will these interfaces.
+We aim for (but cannot guarantee) backward compatibility such that existing <cite>PlasmaC</cite> models can be run on future versions.
+This documentation is the user documentation <cite>PlasmaC</cite>. There is a separate <a class="reference external" href="../doxygen/html/index.html">Doxygen API</a> that can be compiled together with the source code.</p>
+</div>
+<div class="section" id="introduction">
+<span id="chap-introduction"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">PlasmaC introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#obtaining-plasmac">Obtaining <cite>PlasmaC</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#prerequisites">Prerequisites</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted.html#installing-hdf5">Installing HDF5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted.html#setting-up-your-environment">Setting up your environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#compiling-plasmac">Compiling <cite>PlasmaC</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#visualization">Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#my-first-compilation">My first compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#using-this-documentation">Using this documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Model.html">The <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Model.html#main-functionality">Main functionality</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Model.html#solvers">Solvers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Model.html#simulation-inputs">Simulation inputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Model.html#simulation-outputs">Simulation outputs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Model.html#spatial-discretization">Spatial discretization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Model.html#mesh-generation">Mesh generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Model.html#geometry-generation">Geometry generation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Basics.html">Chombo basics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Basics.html#real">Real</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Basics.html#realvect">RealVect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Basics.html#intvect">IntVect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Basics.html#box">Box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Basics.html#ebcellfab-and-farraybox">EBCellFAB and FArrayBox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Basics.html#vector">Vector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Basics.html#refcountedptr">RefCountedPtr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Basics.html#disjointboxlayout">DisjointBoxLayout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Basics.html#leveldata">LevelData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Basics.html#ebislayout-and-ebisbox">EBISLayout and EBISBox</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="understanding-plasmac">
+<span id="chap-usingplasmac"></span><h1>Understanding PlasmaC<a class="headerlink" href="#understanding-plasmac" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Using PlasmaC</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Understanding mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParticleData.html">Understanding particle data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ParticleData.html#particle-container">particle_container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ParticleData.html#allocating-particles">Allocating particles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ParticleData.html#particledata">ParticleData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ParticleData.html#iterating-over-particles">Iterating over particles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ParticleData.html#particlevalidregion">ParticleValidRegion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ParticleData.html#remapping-particles">Remapping particles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ParticleData.html#outcasts">Outcasts</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Control.html#basic-compiling-and-running">Basic compiling and running</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Control.html#controlling-output">Controlling output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Control.html#controlling-processor-output">Controlling processor output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Control.html#restarting-simulations">Restarting simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Control.html#visualization">Visualization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="plasmac-design">
+<h1>PlasmaC design<a class="headerlink" href="#plasmac-design" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">PlasmaC design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">driver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Driver.html#how-fresh-simulations-are-set-up">How fresh simulations are set up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Driver.html#how-simulations-are-restarted">How simulations are restarted</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Driver.html#how-simulations-are-run">How simulations are run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Driver.html#how-regrids-are-performed">How regrids are performed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Driver.html#class-options">Class options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">amr_mesh</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="AmrMesh.html#main-functionality">Main functionality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="AmrMesh.html#registering-operators">Registering operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="AmrMesh.html#class-options">Class options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">computational_geometry</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ComputationalGeometry.html#electrode">electrode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ComputationalGeometry.html#dielectric">dielectric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ComputationalGeometry.html#how-computational-geometry-works">How <code class="docutils literal notranslate"><span class="pre">computational_geometry</span></code> works</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">time_stepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">cell_tagger</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="CellTagger.html#restrict-tagging">Restrict tagging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CellTagger.html#adding-a-buffer">Adding a buffer</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="supported-solvers">
+<span id="chap-supportedsolvers"></span><h1>Supported Solvers<a class="headerlink" href="#supported-solvers" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Supported solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Solver.html">Solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="CDR.html#cdr-solver">cdr_solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CDR.html#using-cdr-solver">Using cdr_solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CDR.html#setting-up-the-solver">Setting up the solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CDR.html#filling-the-solver">Filling the solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CDR.html#adjusting-output">Adjusting output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CDR.html#cdr-species">cdr_species</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CDR.html#discretization-details">Discretization details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="CDR.html#computing-explicit-divergences">Computing explicit divergences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CDR.html#maintaining-non-negative-densities">Maintaining non-negative densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CDR.html#explicit-advection">Explicit advection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CDR.html#explicit-diffusion">Explicit diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CDR.html#explicit-advection-diffusion">Explicit advection-diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CDR.html#implicit-diffusion">Implicit diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CDR.html#adding-a-stochastic-flux">Adding a stochastic flux</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Poisson.html">Poisson</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Poisson.html#setting-up-the-solver">Setting up the solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Poisson.html#boundary-conditions">Boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Poisson.html#tuning-multigrid-performance">Tuning multigrid performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Poisson.html#adjusting-output">Adjusting output</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RTE.html#diffusion-approximation">Diffusion approximation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RTE.html#monte-carlo-methods">Monte Carlo methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="RTE.html#photon-particle">photon particle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RTE.html#interaction-with-boundaries">Interaction with boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RTE.html#stationary-monte-carlo">Stationary Monte Carlo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RTE.html#transient-monte-carlo">Transient Monte Carlo</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="RTE.html#limitations">Limitations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Ito.html#the-ito-particle">The Îto particle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Ito.html#ito-species">ito_species</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Ito.html#setting-initial-conditions">Setting initial conditions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Ito.html#computing-time-steps">Computing time steps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Ito.html#drift">Drift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Ito.html#diffusion">Diffusion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Ito.html#remapping-particles">Remapping particles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Ito.html#limitations">Limitations</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="implemented-models">
+<span id="chap-implementedmodels"></span><h1>Implemented models<a class="headerlink" href="#implemented-models" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Implemented models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="PoissonModel.html">Poisson model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection diffusion model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimalPlasmaModel.html">Minimal plasma model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="MinimalPlasmaModel.html#equations-of-motion">Equations of motion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MinimalPlasmaModel.html#cdr-plasma-physics">cdr_plasma_physics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="MinimalPlasmaModel.html#defining-drift-velocities">Defining drift velocities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MinimalPlasmaModel.html#defining-diffusion-coefficients">Defining diffusion coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MinimalPlasmaModel.html#defining-chemistry-terms">Defining chemistry terms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MinimalPlasmaModel.html#defining-photon-production-terms">Defining photon production terms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MinimalPlasmaModel.html#setting-transport-boundary-conditions">Setting transport boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MinimalPlasmaModel.html#setting-initial-surface-charge">Setting initial surface charge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MinimalPlasmaModel.html#species">species</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MinimalPlasmaModel.html#photons">photons</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="MinimalPlasmaModel.html#temporal-discretization">Temporal discretization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MinimalPlasmaModel.html#time-step-limitations">Time step limitations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MinimalPlasmaModel.html#deterministic-integrators">Deterministic integrators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="MinimalPlasmaModel.html#godunov">godunov</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MinimalPlasmaModel.html#imex-sdc">imex sdc</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="MinimalPlasmaModel.html#spectral-deferred-corrections">Spectral deferred corrections</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MinimalPlasmaModel.html#sisdc-predictor">SISDC predictor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MinimalPlasmaModel.html#sisdc-corrector">SISDC corrector</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MinimalPlasmaModel.html#order-stability-and-computational-cost">Order, stability, and computational cost</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="MinimalPlasmaModel.html#stochastic-integrators">Stochastic integrators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="MinimalPlasmaModel.html#euler-maruyama">euler_maruyama</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="tutorial">
+<span id="chap-tutorial"></span><h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html#setting-up-time-stepper">Setting up <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code></a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="references">
+<span id="chap-references"></span><h1>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="References.html">References</a></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="GettingStarted.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Robert Marskar
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
