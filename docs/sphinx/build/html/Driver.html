@@ -25,7 +25,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -318,43 +318,6 @@ Implementing a deallocation function for <code class="docutils literal notransla
 <div class="section" id="class-options">
 <h2>Class options<a class="headerlink" href="#class-options" title="Permalink to this headline">¶</a></h2>
 <p>Various class options are available for adjusting the behavior of the <code class="docutils literal notranslate"><span class="pre">driver</span></code> class.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
-<span class="c1"># DRIVER OPTIONS</span>
-<span class="c1"># ====================================================================================================</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">verbosity</span>                       <span class="o">=</span> <span class="mi">2</span>             <span class="c1"># Engine verbosity</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">geometry_generation</span>             <span class="o">=</span> <span class="n">plasmac</span>       <span class="c1"># Grid generation method, &#39;plasmac&#39; or &#39;chombo&#39;</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">geometry_scan_level</span>             <span class="o">=</span> <span class="mi">0</span>             <span class="c1"># Geometry scan level for plasmac geometry generator</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">recursive_regrid</span>                <span class="o">=</span> <span class="n">false</span>         <span class="c1"># Recursive regrids</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">plot_interval</span>                   <span class="o">=</span> <span class="mi">10</span>            <span class="c1"># Plot interval</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">regrid_interval</span>                 <span class="o">=</span> <span class="mi">10</span>            <span class="c1"># Regrid interval</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">checkpoint_interval</span>             <span class="o">=</span> <span class="mi">10</span>            <span class="c1"># Checkpoint interval</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">initial_regrids</span>                 <span class="o">=</span> <span class="mi">0</span>             <span class="c1"># Number of initial regrids</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">start_time</span>                      <span class="o">=</span> <span class="mi">0</span>             <span class="c1"># Start time (fresh simulations only)</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">stop_time</span>                       <span class="o">=</span> <span class="mf">1.0</span>           <span class="c1"># Stop time</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">max_steps</span>                       <span class="o">=</span> <span class="mi">100</span>           <span class="c1"># Maximum number of steps</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">geometry_only</span>                   <span class="o">=</span> <span class="n">false</span>         <span class="c1"># Special option that ONLY plots the geometry</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">ebis_memory_load_balance</span>        <span class="o">=</span> <span class="n">false</span>         <span class="c1"># Use memory as loads for EBIS generation</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">write_memory</span>                    <span class="o">=</span> <span class="n">false</span>         <span class="c1"># Write MPI memory report </span>
-<span class="n">driver</span><span class="o">.</span><span class="n">write_ebis</span>                      <span class="o">=</span> <span class="n">false</span>         <span class="c1"># Write geometry to an HDF5 file</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">read_ebis</span>                       <span class="o">=</span> <span class="n">false</span>         <span class="c1"># Read EBIS when restarting a simulation</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">output_directory</span>                <span class="o">=</span> <span class="o">./</span>            <span class="c1"># Output directory</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">grow_tags</span>                       <span class="o">=</span> <span class="mi">0</span>             <span class="c1"># Grow tagged by this in every direction</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">output_names</span>                    <span class="o">=</span> <span class="n">simulation</span>    <span class="c1"># Simulation output names</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">max_plot_depth</span>                  <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>            <span class="c1"># Restrict maximum plot depth (-1 =&gt; finest simulation level)</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">max_chk_depth</span>                   <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>            <span class="c1"># Restrict chechkpoint depth (-1 =&gt; finest simulation level)	</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">num_plot_ghost</span>                  <span class="o">=</span> <span class="mi">1</span>             <span class="c1"># Number of ghost cells to include in plots</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">plt_vars</span>                        <span class="o">=</span> <span class="mi">0</span>             <span class="c1"># &#39;tags&#39;, &#39;mpi_rank&#39;</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">restart</span>                         <span class="o">=</span> <span class="mi">0</span>             <span class="c1"># Restart step (less or equal to 0 implies fresh simulation)</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">allow_coarsening</span>                <span class="o">=</span> <span class="n">true</span>          <span class="c1"># Allows removal of grid levels according to cell_tagger</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">refine_geometry</span>                 <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>            <span class="c1"># Refine geometry, -1 =&gt; Refine all the way down</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">refine_electrodes</span>               <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>            <span class="c1"># Refine electrode surfaces. -1 =&gt; equal to refine_geometry</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">refine_dielectrics</span>              <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>            <span class="c1"># Refine dielectric surfaces. -1 =&gt; equal to refine_geometry</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">refine_electrode_gas_interface</span>  <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>            <span class="c1"># Refine electrode-gas interfaces. -1 =&gt; ----&quot;-----</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">refine_dielectric_gas_interface</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>            <span class="c1"># Refine dielectric-gas interfaces. -1 =&gt; ----&quot;-----</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">refine_solid_gas_interface</span>      <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>            <span class="c1"># Refine solid-gas interfaces. -1 =&gt; ----&quot;-----</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">refine_solid_solid_interface</span>    <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>            <span class="c1"># Refine solid-solid interfaces. -1 =&gt; ----&quot;-----</span>
-</pre></div>
-</div>
 </div>
 </div>
 

@@ -9,6 +9,7 @@ Welcome to `PlasmaC`'s user documentation!
 ******************************************
 	      
 `PlasmaC` is a modular and scalable computer code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries.
+It is currently hosted at `https://github.com/rmrsk/plasmac <https://github.com/rmrsk/plasmac>`_.
 
 * Electrostatics with support for electrodes and dielectrics
 * Radiative transport as a diffusion or Monte Carlo process

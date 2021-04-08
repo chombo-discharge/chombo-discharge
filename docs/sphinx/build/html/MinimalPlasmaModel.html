@@ -25,7 +25,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -671,85 +671,6 @@ R_{m+1}^k - R_m^k &amp;= \int_{t_m}^{t_{m+1}}\left[\mathcal{F}_{\textrm{AR}}\lef
 <p>For the predictor step, it is necessary to evaluate <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{AR}}\left(\phi_m^{k+1}\right)\)</span> and thus update the Poisson and radiative transfer equations at each node. In addition, it is necessary to solve the diffusion equation at every node except <span class="math notranslate nohighlight">\(m=0\)</span> for every diffusive species, which may also require auxiliary updates of the electric field. The corrector step contains extra floating point operator due to the extra terms <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{AR}}\left(t_m, \phi_m^k\right)\)</span> and <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{D}}\left(t_{m+1}, \phi_{m+1}^k\right)\)</span> and the quadrature <span class="math notranslate nohighlight">\(I_m^{m+1}\)</span>. The computational cost of adding in these terms is small compared to the cost of an Euler update of the advection-reaction equation since one must also computate source terms, drift velocities, and boundary conditions in addition to construction of the hybrid divergence. In short, the computational cost of the predictor and corrector steps are about the same.</p>
 <p>Next, we provide some remarks on the extra computational work involved for higher order methods. Broadly speaking, the total amount of floating point operations increases quadratically with the order. Each node requires evaluation of one advection-reaction operator, at least one electric field update, and one radiative transfer update. Likewise, each substep requires one diffusion solve. Thus, <span class="math notranslate nohighlight">\(\verb|SISDC|_K^K\)</span> requires <span class="math notranslate nohighlight">\(K^2\)</span> advection-reaction evaluations, <span class="math notranslate nohighlight">\((K-1)^2\)</span> diffusion solves, <span class="math notranslate nohighlight">\((K-1)^2\)</span> radiative transfer updates, and at least <span class="math notranslate nohighlight">\(K^2\)</span> electric field updates. In these estimates we have assumed that the diffusion solve couples semi-implicitly to the electric field, thus each corrector iteration requires one electric field update per node, giving a total cost <span class="math notranslate nohighlight">\(K^2\)</span>. Strictly speaking, the number of advection-reaction evaluations is slightly less since <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{AR}}\left(t_0, \phi_0^k\right)\)</span> does not require re-evaluation in the corrector, and <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{AR}}\left(t_p,\phi_p^{K-1}\right)\)</span> does not need to be computed for the final iteration since the lagged quadrature is not further needed. Nonetheless, the computational work is quadratically increasing, but this is partially compensated by allowance of larger time steps since the <span class="math notranslate nohighlight">\(\verb|SISDC|_K^K\)</span> has a stability limit of <span class="math notranslate nohighlight">\((K-1)\Delta t_{\textrm{cfl}}\)</span> rather than <span class="math notranslate nohighlight">\(\Delta t_{\textrm{cfl}}\)</span> for uniformly spaced nodes. For comparison with the predictor <span class="math notranslate nohighlight">\(\verb|SISDC|_K^1\)</span> which is a first order method, the work done for integration over <span class="math notranslate nohighlight">\((K-1)\Delta t_{\textrm{cfl}}\)</span> amounts to <span class="math notranslate nohighlight">\(K-1\)</span> advection-reaction updates, <span class="math notranslate nohighlight">\(K-1\)</span> diffusion updates, <span class="math notranslate nohighlight">\(K-1\)</span> radiative transfer updates, and <span class="math notranslate nohighlight">\(K\)</span> electric field updates. If we take the electric field updates as a reasonable metric for the computational work, the efficiency of the <span class="math notranslate nohighlight">\(K\)</span> th order method over the first order method is about <span class="math notranslate nohighlight">\(K\)</span> for integration over the same time interval, i.e. it increases linearly rather than quadratically. However, this estimate is only valid if we do not take accuracy into account. In practice, the predictor does not provide the same accuracy as the corrector over the same integration interval. A fair comparison of the extra computational work involved would require that the accuracy of the two methods be the same after integration over a time <span class="math notranslate nohighlight">\((K-1)\Delta t_{\textrm{cfl}}\)</span>, which will generally require more substeps for the first order method. While we do not further pursue this quantification in this paper, the pertinent point is that the extra computational work involved for tolerance-bound higher order discretizations increases sub-linearly rather than quadratically when compared to lower-order equivalents.</p>
 <p>We have implemented the SISDC algorithm in the <code class="docutils literal notranslate"><span class="pre">sisdc</span></code> class in <code class="file docutils literal notranslate"><span class="pre">/time_steppers/sisdc</span></code>. The following class options are available:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
-<span class="c1"># IMEX_SDC CLASS OPTIONS</span>
-<span class="c1">#</span>
-<span class="c1"># This class uses semi-implicit spectral deferred corrections. Diffusion is handled implicitly,</span>
-<span class="c1"># and advection-reaction is handled explicitly.</span>
-<span class="c1">#</span>
-<span class="c1"># The maximum possible global order of accuracy is (p+1) where p is the number of subintervals. Each</span>
-<span class="c1"># correction raises the order by 1 (corr_iter=0 is the first order solution). To reach the maximum</span>
-<span class="c1"># possible order, you should perform p correction iterations. </span>
-<span class="c1">#</span>
-<span class="c1"># </span>
-<span class="c1"># ====================================================================================================</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">verbosity</span>        <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>      <span class="c1"># Class verbosity</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">solver_verbosity</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>      <span class="c1"># Individual solver verbosities</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">fast_rte</span>         <span class="o">=</span> <span class="mi">1</span>       <span class="c1"># Solve RTE every this time steps</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">fast_poisson</span>     <span class="o">=</span> <span class="mi">1</span>       <span class="c1"># Solve Poisson every this time steps	</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">min_dt</span>           <span class="o">=</span> <span class="mf">0.</span>      <span class="c1"># Minimum permitted time step</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">max_dt</span>           <span class="o">=</span> <span class="mf">1.E99</span>   <span class="c1"># Maximum permitted time step</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">cfl</span>              <span class="o">=</span> <span class="mf">0.5</span>     <span class="c1"># CFL number</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">relax_time</span>       <span class="o">=</span> <span class="mf">1.0</span>     <span class="c1"># Relaxation time constant</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">source_comp</span>      <span class="o">=</span> <span class="n">interp</span>  <span class="c1"># Interpolated &#39;interp&#39; or cell-average &#39;cell_ave&#39; for source computations</span>
-
-<span class="c1"># ------------------------------------</span>
-<span class="c1"># Nodes, subintervals, and corrections</span>
-<span class="c1"># ------------------------------------</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">quad_nodes</span>   <span class="o">=</span> <span class="n">lobatto</span>     <span class="c1"># Nodes to be used for quadrature. &#39;lobatto&#39;, &#39;uniform&#39;, or &#39;chebyshev&#39;</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">subintervals</span> <span class="o">=</span> <span class="mi">1</span>           <span class="c1"># Number of subintervals. This will be the maximum possible order.</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">corr_iter</span>    <span class="o">=</span> <span class="mi">1</span>           <span class="c1"># Number of iterations of the correction equation. Should be (subintervals-1)</span>
-                                 <span class="c1"># for maximum order</span>
-
-<span class="c1"># ---------------------------------------------------------	</span>
-<span class="c1"># Diffusive coupling</span>
-<span class="c1">#</span>
-<span class="c1"># This defines the weak coupling used for the implicit diffusion advance. </span>
-<span class="c1"># ---------------------------------------------------------</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">diffusive_coupling</span> <span class="o">=</span> <span class="n">weak</span>  <span class="c1"># Diffusion coupling, either &#39;weak&#39; or &#39;strong&#39;</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">use_tga</span>            <span class="o">=</span> <span class="n">false</span> <span class="c1"># Use second order diffusion per substep (&#39;true&#39;)</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">num_diff_corr</span>      <span class="o">=</span> <span class="mi">0</span>     <span class="c1"># Number of corrections for &#39;strong&#39;</span>
-
-<span class="c1"># Adaptive time stepping</span>
-<span class="c1"># ---------------------------------------------------------</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">print_report</span>    <span class="o">=</span> <span class="n">false</span>    <span class="c1"># Print report with error and stuff	</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">adaptive_dt</span>     <span class="o">=</span> <span class="n">false</span>    <span class="c1"># Use adaptive time stepping</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">error_norm</span>      <span class="o">=</span> <span class="mi">2</span>        <span class="c1"># Error norm (0 = Linf)</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">min_corr</span>        <span class="o">=</span> <span class="mi">0</span>        <span class="c1"># Minimum number of corrections</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">max_retries</span>     <span class="o">=</span> <span class="mi">100</span>      <span class="c1"># Maximum number of tries (for step rejection)</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">max_growth</span>      <span class="o">=</span> <span class="mf">1.2</span>      <span class="c1"># Maximum permissible time step growth</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">decrease_safety</span> <span class="o">=</span> <span class="mf">0.9</span>      <span class="c1"># Fudge factor when we decrease the time step. </span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">min_cfl</span>         <span class="o">=</span> <span class="mf">0.1</span>      <span class="c1"># Minimum CFL</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">max_cfl</span>         <span class="o">=</span> <span class="mf">0.75</span>     <span class="c1"># Maximum CFL</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">max_error</span>       <span class="o">=</span> <span class="mf">1.E-3</span>    <span class="c1"># Error threshold</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">error_index</span>     <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>       <span class="c1"># Error index. If -1, evaluate all CDR solvers	</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">safety</span>          <span class="o">=</span> <span class="mf">0.75</span>     <span class="c1"># Safety factor for time stepping</span>
-
-<span class="c1"># ---------------------------------------------------------	</span>
-<span class="c1"># &quot;Asymptotic preserving&quot;. Development feature. </span>
-<span class="c1"># ---------------------------------------------------------	</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">use_AP</span>        <span class="o">=</span> <span class="n">false</span>      <span class="c1"># Turn on the &quot;asymptotic preserving&quot; feature. </span>
-
-<span class="c1"># ---------------------------------------------------------	</span>
-<span class="c1"># Debugging options</span>
-<span class="c1"># ---------------------------------------------------------</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">consistent_E</span>      <span class="o">=</span> <span class="n">true</span>   <span class="c1"># Use consistent E-field computations (update in between RK stages)</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">consistent_rte</span>    <span class="o">=</span> <span class="n">true</span>   <span class="c1"># Use consistent RTE updates</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">compute_v</span>         <span class="o">=</span> <span class="n">true</span>   <span class="c1"># Compute v in between substeps. </span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">compute_S</span>         <span class="o">=</span> <span class="n">true</span>   <span class="c1"># Compute S in between substeps.</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">compute_D</span>         <span class="o">=</span> <span class="n">true</span>   <span class="c1"># Compute S in between substeps.</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">do_advec_src</span>      <span class="o">=</span> <span class="n">true</span>   <span class="c1"># Turn off code functionality. Only for debugging </span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">do_diffusion</span>      <span class="o">=</span> <span class="n">true</span>   <span class="c1"># Turn off code functionality. Only for debugging</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">do_poisson</span>        <span class="o">=</span> <span class="n">true</span>   <span class="c1"># Turn off code functionality. Only for debugging</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">do_rte</span>            <span class="o">=</span> <span class="n">true</span>   <span class="c1"># Turn off code functionality. Only for debugging</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">profile_steps</span>     <span class="o">=</span> <span class="n">false</span>  <span class="c1"># Profile time steps with order, accuracy, cfl, etc.</span>
-
-<span class="c1"># ---------------------</span>
-<span class="c1"># Advection extrapolation. Currently does NOT work with subcycling (but I&#39;m working on it...)</span>
-<span class="c1"># ---------------------</span>
-<span class="n">imex_sdc</span><span class="o">.</span><span class="n">extrap_advect</span> <span class="o">=</span> <span class="n">true</span>      <span class="c1"># Time extrapolate with source and diffusion in advection step</span>
-</pre></div>
-</div>
 </div>
 </div>
 </div>

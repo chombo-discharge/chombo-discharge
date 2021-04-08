@@ -15,16 +15,14 @@ Obtaining `PlasmaC`
 
 .. code-block:: bash
 
-   git clone ssh://git@git.code.sintef.no/~robertm/plasmac
-
-
+   git clone ssh://git@github.com/rmrsk/plasmac
 
 .. _Chap:Prerequisites:
 
 Prerequisites
 -------------
 
-From the ground up, ``PlasmaC`` is built on top of the `Chombo <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_ framework.
+``PlasmaC`` is built on top of the `Chombo <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_ framework.
 To compile `PlasmaC`, you must first install the following:
 
 * A Fortran compiler, usually gfortran or Intel Fortran

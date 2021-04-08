@@ -25,7 +25,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -242,33 +242,6 @@ Currently, the following operators are supported:</p>
 </div>
 <div class="section" id="class-options">
 <h2>Class options<a class="headerlink" href="#class-options" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
-<span class="c1"># AMR_MESH OPTIONS</span>
-<span class="c1"># ====================================================================================================</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">lo_corner</span>       <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">-</span><span class="mi">1</span> <span class="o">-</span><span class="mi">1</span>    <span class="c1"># Low corner of problem domain</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">hi_corner</span>       <span class="o">=</span>  <span class="mi">1</span>  <span class="mi">1</span>  <span class="mi">1</span>    <span class="c1"># High corner of problem domain</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">verbosity</span>       <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>          <span class="c1"># Controls verbosity. </span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">coarsest_domain</span> <span class="o">=</span> <span class="mi">128</span> <span class="mi">128</span> <span class="mi">128</span> <span class="c1"># Number of cells on coarsest domain</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">max_amr_depth</span>   <span class="o">=</span> <span class="mi">0</span>           <span class="c1"># Maximum amr depth</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">max_sim_depth</span>   <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>          <span class="c1"># Maximum simulation depth</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">refine_all_lvl</span>  <span class="o">=</span> <span class="mi">0</span>           <span class="c1"># Refine everything down to this level.</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">fill_ratio</span>      <span class="o">=</span> <span class="mf">1.0</span>         <span class="c1"># Fill ratio for grid generation</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">irreg_growth</span>    <span class="o">=</span> <span class="mi">2</span>           <span class="c1"># How much to grow irregular tagged cells</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">buffer_size</span>     <span class="o">=</span> <span class="mi">2</span>           <span class="c1"># Number of cells between grid levels</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">grid_algorithm</span>  <span class="o">=</span> <span class="n">br</span>          <span class="c1"># Berger-Rigoustous &#39;br&#39; or &#39;tiled&#39; for the tiled algorithm</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">blocking_factor</span> <span class="o">=</span> <span class="mi">16</span>          <span class="c1"># Default blocking factor (16 in 3D)</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">max_box_size</span>    <span class="o">=</span> <span class="mi">16</span>          <span class="c1"># Maximum allowed box size</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">max_ebis_box</span>    <span class="o">=</span> <span class="mi">16</span>          <span class="c1"># Maximum allowed box size</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">ref_rat</span>         <span class="o">=</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">2</span> <span class="c1"># Refinement ratios</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">num_ghost</span>       <span class="o">=</span> <span class="mi">3</span>           <span class="c1"># Number of ghost cells. Default is 3</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">eb_ghost</span>        <span class="o">=</span> <span class="mi">4</span>           <span class="c1"># Set number of of ghost cells for EB stuff</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">centroid_sten</span>   <span class="o">=</span> <span class="n">linear</span>      <span class="c1"># Centroid interp stencils. &#39;pwl&#39;, &#39;linear&#39;, &#39;taylor, &#39;lsq&#39;</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">eb_sten</span>         <span class="o">=</span> <span class="n">pwl</span>         <span class="c1"># EB interp stencils. &#39;pwl&#39;, &#39;linear&#39;, &#39;taylor, &#39;lsq&#39;</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">redist_radius</span>   <span class="o">=</span> <span class="mi">1</span>           <span class="c1"># Redistribution radius for hyperbolic conservation laws</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">ghost_interp</span>    <span class="o">=</span> <span class="n">pwl</span>         <span class="c1"># Ghost cell interpolation type. Valid options are &#39;pwl&#39; or &#39;quad&#39;</span>
-<span class="n">amr_mesh</span><span class="o">.</span><span class="n">ebcf</span>            <span class="o">=</span> <span class="n">true</span>        <span class="c1"># If you have EBCF crossing, this must be true. </span>
-</pre></div>
-</div>
 <p>We now discuss the various <code class="docutils literal notranslate"><span class="pre">amr_mesh</span></code> class options.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">amr_mesh.verbosity</span></code> controls the verbosity of this class. <code class="docutils literal notranslate"><span class="pre">amr_mesh</span></code> can potentially do a lot of output, so it is best to leave this to the default value (-1) unless you are debugging.</p></li>
