@@ -170,7 +170,7 @@ void ito_plasma_godunov::parse_options() {
   if( str == "none"){
     m_boxsort = box_sorting::none;
   }
-  if( str == "std"){
+  else if( str == "std"){
     m_boxsort = box_sorting::std;
   }
   else if(str == "shuffle"){
