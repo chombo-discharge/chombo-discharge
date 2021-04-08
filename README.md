@@ -16,3 +16,4 @@ The basic requirements for running this code are:
 2. A working HDF5 installation (with MPI)
 
 A modified version of Chombo is distributed together with this code.
+PlasmaC only uses Chombo; it is not affiliated nor endorsed by LBNL. 
