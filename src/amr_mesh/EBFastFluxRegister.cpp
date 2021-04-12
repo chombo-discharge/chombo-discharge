@@ -90,7 +90,6 @@ void EBFastFluxRegister::define(const EBLevelGrid&       a_eblgFine,
     MayDay::Error("EBFastFluxRegister::define: dbl not coarsenable by refrat");
   }
 
-  pout() << "copier define" << endl;
   coarsen(m_eblgCoFi, a_eblgFine, a_refRat);
   m_eblgCoFi.getEBISL().setMaxRefinementRatio(a_refRat, m_eblgCoFi.getEBIS());
   m_reverseCopier.ghostDefine(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(),m_eblgCoar.getDomain(),IntVect::Unit);
@@ -100,7 +99,6 @@ void EBFastFluxRegister::define(const EBLevelGrid&       a_eblgFine,
   m_levelFluxReg = new LevelFluxRegister();
 
   //  pout() << "before regular define" << endl;
-  pout() << "regular define" << endl;
   m_levelFluxReg->define(a_eblgFine.getDBL(),
                          a_eblgCoar.getDBL(),
                          a_eblgFine.getDomain(),
@@ -113,11 +111,8 @@ void EBFastFluxRegister::define(const EBLevelGrid&       a_eblgFine,
   }
 
   //if no EBCF--nothing happens here but calls to level flux register
-  pout() << "ebcf comp" << endl;
   if (m_hasEBCF){
-    pout() << "mask def" << endl;
     defineMasks();
-    pout() << "mask def done" << endl;
     fastDefineSetsAndIterators();
     defineBuffers();
   }
