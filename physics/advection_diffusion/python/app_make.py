@@ -7,7 +7,6 @@ def write_template(args):
     makef = open(make_filename, "w")
     
     # Make rules
-    makef.write("export CHOMBO_HOME=$(PLASMAC_HOME)/Chombo/lib\n")
     makef.write("include $(CHOMBO_HOME)/mk/Make.defs")
     makef.write("\n")
 
