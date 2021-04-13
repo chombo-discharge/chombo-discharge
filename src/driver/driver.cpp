@@ -1688,6 +1688,10 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
   m_timestepper->register_realms();                      // Register realms
   m_timestepper->set_computational_geometry(m_compgeom); // Set computational geometry
 
+  // Set implicit functions now. 
+  m_amr->set_baseif(phase::gas,   m_compgeom->get_gas_if());
+  m_amr->set_baseif(phase::solid, m_compgeom->get_sol_if());
+
   // Read checkpoint file
   this->read_checkpoint_file(a_restart_file); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
 
@@ -2676,13 +2680,9 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
 #endif
   }
 
-
-
   // Define amr_mesh and realms. 
   m_amr->set_finest_level(finest_level); 
   m_amr->set_grids(boxes, sim_loads);
-
-
   
   // Instantiate solvers and register operators
   const int regsize = m_timestepper->get_redistribution_regsize();

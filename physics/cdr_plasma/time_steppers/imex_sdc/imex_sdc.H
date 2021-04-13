@@ -13,218 +13,219 @@
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 
-namespace physics::cdr_plasma {
+namespace physics {
+  namespace cdr_plasma {
   
-  extern "C" void dgesv_(int*    N,
-			 int*    NRHS,
-			 double* A,
-			 int*    LDA,
-			 int*    IPIV,
-			 double* B,
-			 int*    LDB,
-			 int*    INFO);
+    extern "C" void dgesv_(int*    N,
+			   int*    NRHS,
+			   double* A,
+			   int*    LDA,
+			   int*    IPIV,
+			   double* B,
+			   int*    LDB,
+			   int*    INFO);
 
-  /*!
-    @brief Class for evolving plasma equations with a multirate method using semi-implicit spectral deferred corrections
-  */
-  class imex_sdc : public cdr_plasma_stepper {
-  public:
+    /*!
+      @brief Class for evolving plasma equations with a multirate method using semi-implicit spectral deferred corrections
+    */
+    class imex_sdc : public cdr_plasma_stepper {
+    public:
   
-    // Forward declare nested classes. I don't want to clutter this file.
-    class cdr_storage;
-    class poisson_storage;
-    class rte_storage;
-    class sigma_storage;
+      // Forward declare nested classes. I don't want to clutter this file.
+      class cdr_storage;
+      class poisson_storage;
+      class rte_storage;
+      class sigma_storage;
 
   
-  public:
+    public:
 
-    imex_sdc();
-    imex_sdc(RefCountedPtr<cdr_plasma_physics>& a_physics);
-    ~imex_sdc();
+      imex_sdc();
+      imex_sdc(RefCountedPtr<cdr_plasma_physics>& a_physics);
+      ~imex_sdc();
   
-    Real advance(const Real a_dt);
+      Real advance(const Real a_dt);
 
-    void init();
-    void allocate_internals();
-    void deallocate_internals();
-    void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
-    void parse_options();
-    bool need_to_regrid();
+      void init();
+      void allocate_internals();
+      void deallocate_internals();
+      void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+      void parse_options();
+      bool need_to_regrid();
 
-    Vector<EBAMRCellData*> get_cdr_errors();
+      Vector<EBAMRCellData*> get_cdr_errors();
   
-  protected:
+    protected:
 
-    Vector<RefCountedPtr<cdr_storage> > m_cdr_scratch;
-    Vector<RefCountedPtr<rte_storage> > m_rte_scratch;
-    RefCountedPtr<poisson_storage>      m_poisson_scratch;
-    RefCountedPtr<sigma_storage>        m_sigma_scratch;
+      Vector<RefCountedPtr<cdr_storage> > m_cdr_scratch;
+      Vector<RefCountedPtr<rte_storage> > m_rte_scratch;
+      RefCountedPtr<poisson_storage>      m_poisson_scratch;
+      RefCountedPtr<sigma_storage>        m_sigma_scratch;
 
-    // Extra storage outside of solver storage
-    EBAMRCellData scratch1;
-    EBAMRCellData scratchD;
+      // Extra storage outside of solver storage
+      EBAMRCellData scratch1;
+      EBAMRCellData scratchD;
 
-    int m_max_retries;
-    int m_p;
-    int m_k;
-    int m_error_norm;
-    int m_min_corr;
-    int m_error_idx;
+      int m_max_retries;
+      int m_p;
+      int m_k;
+      int m_error_norm;
+      int m_min_corr;
+      int m_error_idx;
 
-    Real m_accum_cfl;
-    Real m_regrid_cfl;
-    Real m_max_growth;
-    Real m_minCFL;
-    Real m_maxCFL;
-    Real m_cycleCFL;
-    Real m_err_thresh;
-    Real m_safety;
-    Real m_decrease_safe;
-    Real m_new_dt; // dt for next time step
-    Real m_extrap_dt;
+      Real m_accum_cfl;
+      Real m_regrid_cfl;
+      Real m_max_growth;
+      Real m_minCFL;
+      Real m_maxCFL;
+      Real m_cycleCFL;
+      Real m_err_thresh;
+      Real m_safety;
+      Real m_decrease_safe;
+      Real m_new_dt; // dt for next time step
+      Real m_extrap_dt;
 
-    bool m_extrap_advect;
-    bool m_adaptive_dt;
-    bool m_print_report;
-    bool m_have_err; 
-    bool m_use_tga; // Second order diffusion
-    bool m_use_AP; // Use the AP scheme
+      bool m_extrap_advect;
+      bool m_adaptive_dt;
+      bool m_print_report;
+      bool m_have_err; 
+      bool m_use_tga; // Second order diffusion
+      bool m_use_AP; // Use the AP scheme
   
 
-    // Basically only debugging stuff
-    bool m_do_advec_src;  
-    bool m_do_diffusion;  
-    bool m_do_poisson;
-    bool m_do_rte;
-    bool m_compute_D;
-    bool m_compute_v;
-    bool m_compute_S;
-    bool m_consistent_E;
-    bool m_consistent_rte;
-    bool m_have_dt_err;
-    bool m_profile_steps;
+      // Basically only debugging stuff
+      bool m_do_advec_src;  
+      bool m_do_diffusion;  
+      bool m_do_poisson;
+      bool m_do_rte;
+      bool m_compute_D;
+      bool m_compute_v;
+      bool m_compute_S;
+      bool m_consistent_E;
+      bool m_consistent_rte;
+      bool m_have_dt_err;
+      bool m_profile_steps;
 
-    // Error things
-    Vector<Real> m_cdr_error;
-    Real m_sigma_error;
-    Real m_max_error;
-    Real m_pre_error;
+      // Error things
+      Vector<Real> m_cdr_error;
+      Real m_sigma_error;
+      Real m_max_error;
+      Real m_pre_error;
 
-    // Stuff for Lobatto intervals, Vandermonde matrix, integration
-    // weights, Lobatto nodes etc. 
-    Vector<Vector<Real> > m_qmj;
-    Vector<Vector<Real> > m_vandermonde;
-    Vector<Real> m_nodes;
-    Vector<Real> m_tm;
-    Vector<Real> m_dtm;
+      // Stuff for Lobatto intervals, Vandermonde matrix, integration
+      // weights, Lobatto nodes etc. 
+      Vector<Vector<Real> > m_qmj;
+      Vector<Vector<Real> > m_vandermonde;
+      Vector<Real> m_nodes;
+      Vector<Real> m_tm;
+      Vector<Real> m_dtm;
 
-    time_code m_timecode;
+      time_code m_timecode;
 
-    std::string m_which_nodes;
+      std::string m_which_nodes;
 
-    // Get functions for storage
-    RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator<cdr_solver>& a_solverit);
-    RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator<rte_solver>& a_solverit);
+      // Get functions for storage
+      RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator<cdr_solver>& a_solverit);
+      RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator<rte_solver>& a_solverit);
 
-    // Allocation functions
-    void allocate_cdr_storage();
-    void allocate_poisson_storage();
-    void allocate_rte_storage();
-    void allocate_sigma_storage();
+      // Allocation functions
+      void allocate_cdr_storage();
+      void allocate_poisson_storage();
+      void allocate_rte_storage();
+      void allocate_sigma_storage();
 
-    // Get functions for substep data. 
-    Vector<EBAMRCellData*> get_cdr_phik(const int a_m);
-    EBAMRIVData& get_sigmak(const int a_m);
+      // Get functions for substep data. 
+      Vector<EBAMRCellData*> get_cdr_phik(const int a_m);
+      EBAMRIVData& get_sigmak(const int a_m);
 
-    // Routines for intervals and quadrature
-    void setup_quadrature_nodes(const int a_p);
-    void setup_uniform_nodes(const int a_p);
-    void setup_lobatto_nodes(const int a_p);
-    void setup_chebyshev_nodes(const int a_p);
-    void setup_qmj(const int a_p);
-    void setup_subintervals(const Real a_time, const Real a_dt);
-    void quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m);
-    void quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand, const int a_m);
+      // Routines for intervals and quadrature
+      void setup_quadrature_nodes(const int a_p);
+      void setup_uniform_nodes(const int a_p);
+      void setup_lobatto_nodes(const int a_p);
+      void setup_chebyshev_nodes(const int a_p);
+      void setup_qmj(const int a_p);
+      void setup_subintervals(const Real a_time, const Real a_dt);
+      void quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m);
+      void quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand, const int a_m);
 
-    // Routines for copying data at tm[0] and tm[p]
-    void copy_cdr_to_phi_m0();
-    void copy_sigma_to_sigma_m0();
+      // Routines for copying data at tm[0] and tm[p]
+      void copy_cdr_to_phi_m0();
+      void copy_sigma_to_sigma_m0();
 
-    void copy_phi_p_to_cdr();
-    void copy_sigma_p_to_sigma();
+      void copy_phi_p_to_cdr();
+      void copy_sigma_p_to_sigma();
 
-    void integrate_rte_transient(const Real a_dt);
-    void integrate_rte_stationary();
+      void integrate_rte_transient(const Real a_dt);
+      void integrate_rte_stationary();
 
-    // These are the standard IMEX_SDC integration routines
-    void integrate(const Real a_dt, const Real a_time, const bool a_lagged_terms);
-    void integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_lagged_terms);
-    void integrate_advection(const Real a_dt, const int a_m, const bool a_lagged_terms);
-    void integrate_diffusion(const Real a_dt, const int a_m, const bool a_lagged_terms);
+      // These are the standard IMEX_SDC integration routines
+      void integrate(const Real a_dt, const Real a_time, const bool a_lagged_terms);
+      void integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_lagged_terms);
+      void integrate_advection(const Real a_dt, const int a_m, const bool a_lagged_terms);
+      void integrate_diffusion(const Real a_dt, const int a_m, const bool a_lagged_terms);
 
-    // Make integrands quadrature-ready
-    void reconcile_integrands();
+      // Make integrands quadrature-ready
+      void reconcile_integrands();
 
-    // IMEX_SDC predictor routines
-    void compute_FD_0();
+      // IMEX_SDC predictor routines
+      void compute_FD_0();
 
-    // IMEX_SDC corrector routines
-    void initialize_errors();
-    void finalize_errors();
+      // IMEX_SDC corrector routines
+      void initialize_errors();
+      void finalize_errors();
 
-    // Step size control routines
-    void compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num_corrections);
-    void adaptive_report(const Real a_first_dt, const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err);
+      // Step size control routines
+      void compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num_corrections);
+      void adaptive_report(const Real a_first_dt, const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err);
 
-    // Poisson, RTE, and diffusion coefficient updates
-    void update_poisson(); // This uses the solver states
-    void update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma);
-    void update_diffusion_coefficients();
+      // Poisson, RTE, and diffusion coefficient updates
+      void update_poisson(); // This uses the solver states
+      void update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma);
+      void update_diffusion_coefficients();
 
-    // Store & restore functions
-    void store_solvers();
-    void restore_solvers();
+      // Store & restore functions
+      void store_solvers();
+      void restore_solvers();
 
-    // Aux functions
-    void compute_reaction_network(const int a_m, const Real a_time, const Real a_dt);
-    void compute_E_into_scratch();
-    void compute_cdr_eb_states();
-    void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states);
-    void compute_cdr_domain_states();
-    void compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_states);
-    void compute_cdr_gradients();
-    void compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states);
-    void compute_cdr_fluxes(const Real a_time);
-    void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
-    void compute_cdr_domain_fluxes(const Real a_time);
-    void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
-    void compute_cdr_velo(const Real a_time);
-    void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
-    void compute_dt(Real& a_dt, time_code& a_timecode);
-    void compute_sigma_flux();
+      // Aux functions
+      void compute_reaction_network(const int a_m, const Real a_time, const Real a_dt);
+      void compute_E_into_scratch();
+      void compute_cdr_eb_states();
+      void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states);
+      void compute_cdr_domain_states();
+      void compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_states);
+      void compute_cdr_gradients();
+      void compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states);
+      void compute_cdr_fluxes(const Real a_time);
+      void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+      void compute_cdr_domain_fluxes(const Real a_time);
+      void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+      void compute_cdr_velo(const Real a_time);
+      void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+      void compute_dt(Real& a_dt, time_code& a_timecode);
+      void compute_sigma_flux();
 
-    //
-    Real get_max_error();
-    Real restrict_dt() ;
-    Real get_max_node_distance();
+      //
+      Real get_max_error();
+      Real restrict_dt() ;
+      Real get_max_node_distance();
 
-    // Profiling
-    void write_step_profile(const Real a_dt,
-			    const Real a_error,
-			    const int  a_substeps,
-			    const int  a_corrections,
-			    const int  a_rejections);
+      // Profiling
+      void write_step_profile(const Real a_dt,
+			      const Real a_error,
+			      const int  a_substeps,
+			      const int  a_corrections,
+			      const int  a_rejections);
 
-    // Parse optiosn that are not really used
-    void parse_nodes();
-    void parse_AP();
-    void parse_diffusion_coupling();
-    void parse_adaptive_options();
-    void parse_subcycle_options();
-    void parse_debug_options();
-    void parse_advection_options();
-  };
-
+      // Parse optiosn that are not really used
+      void parse_nodes();
+      void parse_AP();
+      void parse_diffusion_coupling();
+      void parse_adaptive_options();
+      void parse_subcycle_options();
+      void parse_debug_options();
+      void parse_advection_options();
+    };
+  }
 }
 #endif

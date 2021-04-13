@@ -1,0 +1,405 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>The PlasmaC code &mdash; PlasmaC 19.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Chombo basics" href="Basics.html" />
+    <link rel="prev" title="Getting started" href="GettingStarted.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PlasmaC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                19.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">PlasmaC introduction</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#main-functionality">Main functionality</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#solvers">Solvers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulation-inputs">Simulation inputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulation-outputs">Simulation outputs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#spatial-discretization">Spatial discretization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mesh-generation">Mesh generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#geometry-generation">Geometry generation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Basics.html">Chombo basics</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Using PlasmaC</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Understanding mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParticleData.html">Understanding particle data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">PlasmaC design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">amr_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">computational_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">time_stepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">cell_tagger</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Supported solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Solver.html">Solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Poisson.html">Poisson</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Implemented models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="PoissonModel.html">Poisson model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection diffusion model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimalPlasmaModel.html">Minimal plasma model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html#setting-up-time-stepper">Setting up <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="References.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PlasmaC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>The <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> code</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Model.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="the-plasmac-code">
+<span id="chap-model"></span><h1>The <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> code<a class="headerlink" href="#the-plasmac-code" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> code is a loosely coupled code targeted at solving plasma problems.
+The code uses an embedded boundary (EB) adaptive mesh refinement (AMR) formalism where the grids frequently change and are adapted to the solution as simulations progress.
+By design, the <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> does not subcycle and all the grids are advanced using the same time step.
+<code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> also supports the concept of a <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>, which in short means that <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> supports using one set of grids for Eulerian solvers and a different set of grids for Lagrangian solvers.</p>
+<p>The core functionality is centered around a set of solvers, for example a Poisson solver and a convection-diffusion-reaction solver, and then using the built-in solver functionality to advance the equations of motion.
+This is done through a class <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code>, which is an abstract class that advances the equations of motion within the <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> framework.
+The <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> can instantiate an arbitrary number of solvers, and allows developers to use a fairly high-level description of their problem.
+For example, all <em>solvers</em> have functions like <code class="docutils literal notranslate"><span class="pre">write_plot_data(...)</span></code> that the user may use within the <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> output routines.</p>
+<p>Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> and still use the EBAMR formalism, <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> also provide some physics modules for describing various types of problems.
+These modules reside in <code class="file docutils literal notranslate"><span class="pre">/physics</span></code> and they are intended to both be problem-solving physics modules, and as well acting like benchmarks, regression tests, and examples for extension to new types of physics modules in the future.</p>
+<div class="section" id="main-functionality">
+<h2>Main functionality<a class="headerlink" href="#main-functionality" title="Permalink to this headline">¶</a></h2>
+<p>The main functionality in <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> is centered around the concept of a <a class="reference internal" href="Solver.html#chap-solver"><span class="std std-ref">Solver</span></a>.</p>
+<p>In this section we summarize how components in <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> are connected, such that users may understand more readily how the code is designed.</p>
+<p>There are four major components <cite>PlasmaC</cite>:</p>
+<ol class="arabic simple">
+<li><p>A computational geometry which describes a level-set geometry consisting of electrodes and possibly also dielectrics.
+This functionality is encapsulated by <a class="reference internal" href="ComputationalGeometry.html#chap-computational-geometry"><span class="std std-ref">computational_geometry</span></a>.</p></li>
+<li><p>An AMR mesh which contains the grids, grid generation routines, and functionality for handling data coarsening and refinement.
+This functionality is encapsulated by <a class="reference internal" href="AmrMesh.html#chap-amr-mesh"><span class="std std-ref">amr_mesh</span></a>.
+The <code class="docutils literal notranslate"><span class="pre">amr_mesh</span></code> class acts as a centralized repository for grid generation, performing AMR operations like filling ghost cells, allocating data over the AMR hierarchy and so on.
+<code class="docutils literal notranslate"><span class="pre">amr_mesh</span></code> is a standalone class - it has no view over the rest of <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code>.</p></li>
+<li><p>A time stepper which advances the equations of motion (whatever they are).
+This class has been made abstract with a public interface that is used by the <code class="docutils literal notranslate"><span class="pre">driver</span></code> class (see below).
+In order to actually use <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> for anything the user must either write his own derived <a class="reference internal" href="TimeStepper.html#chap-time-stepper"><span class="std std-ref">time_stepper</span></a> class, or use one of the pre-defined physics modules.
+The <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> is purposefully quite general so that the whole <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> framework can be set up to solve completely new sets of equations without affecting the rest of the framework.</p></li>
+<li><p>A cell tagger which flags cells for refinement and coarsening.
+This functionality is encapsulated by the <a class="reference internal" href="CellTagger.html#chap-cell-tagger"><span class="std std-ref">cell_tagger</span></a> class and it, too, is abstract.</p></li>
+</ol>
+<p>Instantiations of the above four classes are fed into the <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">driver</span></a> class which contains calling functions for generation the geometry, having the time integrator to perform and time step, performing, I/O, setting checkpoint/restart and so on.
+The reason for the above division of labor is that we have wanted to segregate responsibilities in order to increase flexibility.
+For that reason, the computational geometry does not have any view of the actual AMR grids; it only contains the level-set functions and some meta-information (such as the permittivity of a dielectric).
+Likewise, the <a class="reference internal" href="AmrMesh.html#chap-amr-mesh"><span class="std std-ref">amr_mesh</span></a> class only acts a centralized repository of useful functions for AMR simulations.
+These functions include algorithms for generating AMR grids, allocating data across AMR, and synchronizing AMR levels (e.g. interpolating ghost cells).</p>
+<p>All the physics is encapsulated by the <a class="reference internal" href="TimeStepper.html#chap-time-stepper"><span class="std std-ref">time_stepper</span></a> class.
+This class will have direct ownership of all the solvers and the functions required to advance them over a time step.
+Instantiations of the class will also contain the routines for setting up a simulation, e.g. instantiating solvers, setting up boundary conditions.
+Typically, implementation new physics consists of writing a new <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> class that allocates the relevant solvers, and then implement the time integration algorithms that advances them.
+The folder <code class="file docutils literal notranslate"><span class="pre">/physics</span></code> contains implementation of a few different physics modules.
+Since problems within a physics module tend to be conceptually similar, all of these modules also have a Python setup script so that users can quickly set up new types of problems within the same module.</p>
+<p>The <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">driver</span></a> class is only responsible for <em>running</em> a simulation, and it uses <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> to do so.
+The <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">driver</span></a> class will call for regrids at certain intervals, call the <a class="reference internal" href="TimeStepper.html#chap-time-stepper"><span class="std std-ref">time_stepper</span></a> for writing plot and checkpoint data, and also call for the <a class="reference internal" href="TimeStepper.html#chap-time-stepper"><span class="std std-ref">time_stepper</span></a> to advance the equations of motion through a function <code class="docutils literal notranslate"><span class="pre">advance(...)</span></code>.
+In order to understand how <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> runs a simulation, it will be useful to first understand how <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">driver</span></a> works.</p>
+<div class="section" id="solvers">
+<h3>Solvers<a class="headerlink" href="#solvers" title="Permalink to this headline">¶</a></h3>
+<p>Various solvers are implemented in <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code>, see <a class="reference internal" href="index.html#chap-supportedsolvers"><span class="std std-ref">Supported Solvers</span></a>.
+All solvers are designed to run through the <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> class.
+Therefore, in order to run only a single solver (e.g. advection-diffusion or Poisson), one must have a <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> implementation that allocates the appropriate solver, sets it up, and runs it.
+Currently, there are separate physics modules for each type of solver such that users may see how they are set up and run.
+These are located in <code class="file docutils literal notranslate"><span class="pre">/physics/</span></code>.</p>
+<p>The solvers may be abstract or non-abstract.
+All solvers that are <em>not</em> abstract are supplemented by an options file that contain all the possible run-time configurations that can be made to the solver.
+Such options can include multigrid parameters, how to handle particle deposition with refinement boundaries, slope limiters, etc.
+For example, all numerical solvers have independent adjustment of output.
+The input parameters for each solver class is included in a separate file named <code class="file docutils literal notranslate"><span class="pre">&lt;solver&gt;.options</span></code> that resides in the same folder as the solver.
+For example, the input parameters for the default Poisson solver defined in <code class="file docutils literal notranslate"><span class="pre">/src/poisson/poisson_multifluid_gmg.H</span></code> is contained in a file <code class="file docutils literal notranslate"><span class="pre">/src/poisson/poisson_multifluid_gmg.options</span></code>.</p>
+</div>
+<div class="section" id="simulation-inputs">
+<h3>Simulation inputs<a class="headerlink" href="#simulation-inputs" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> simulations take their input from a single simulation input file, possibly appended with overriding options on the command line.
+Simulations may consist of several hundred possible switches for altering the behavior of a simulation, and physics models in <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> are therefore equipped with Python setup tools that collect all such options in a single file.
+Generally, these input parameters are fetched from the options file of each class that is used in a simulation.
+Simulation options usually consist of a prefix, a suffix, and a configuration value.
+For example, the configuration options that adjusts the number of time steps that will be run in a simulation is</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>driver.max_steps <span class="o">=</span> <span class="m">100</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="simulation-outputs">
+<h3>Simulation outputs<a class="headerlink" href="#simulation-outputs" title="Permalink to this headline">¶</a></h3>
+<p>Mesh data from <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> simulations is by default written to HDF5 files.
+Users that wish to write or output other types of data must supply code themselves.</p>
+<p>In addition to plot files, MPI ranks can output information to separate files so that the simulation progress can be tracked.
+See <a class="reference internal" href="Control.html#chap-control"><span class="std std-ref">Controlling PlasmaC</span></a> for details.
+This is also useful for debugging purposes.</p>
+</div>
+</div>
+<div class="section" id="spatial-discretization">
+<span id="chap-spatialdiscretization"></span><h2>Spatial discretization<a class="headerlink" href="#spatial-discretization" title="Permalink to this headline">¶</a></h2>
+<p><cite>PlasmaC</cite> uses structured adaptive mesh refinement (SAMR provided by Chombo <a class="bibtex reference internal" href="References.html#ebchombo" id="id1">[ACG+04]</a>.
+SAMR exists in two separate categories, patch-based and tree-based AMR.
+Patch-based AMR is the more general type and contain tree-based grids as a subset; they can use refinement factors other than 2, as well as accomodate anisotropic resolutions and non-cubic patches.
+In patch-based AMR the domain is subdivided into a collection of hierarchically nested overlapping patches (or boxes).
+Each patch is a rectangular block of cells which, in space, exists on a subdomain of the union of patches with a coarser resolution.
+Patch-based grids generally do not have unique parent-children relations: A fine-level patch may have multiple coarse-level parents.
+An obvious advantage of a patch-based approach is that entire Cartesian blocks are sent into solvers, and that the patches are not restricted to squares or cubes that align with the coarse-grid boundary.
+A notable disadvantage is that additional logic is required when updating a coarse grid level from the overlapping region of a finer level.
+Tree-based AMR use quadtree or octree data structures that describe a hierarchy of unique parent-children relations throughout the AMR levels: Each child has exactly one parent, whereas each parent has multiple children (4 in 2D, 8 in 3D).
+In <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> and Chombo, computations occur over a set of levels with different resolutions, where the resolution refinement between levels can be a factor 2 or 4.
+On each level, the mesh is described by a set of disjoint patches (rectangular box in space), where the patches are distributed among MPI processes.</p>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="_images/complex_patches.png"><img alt="_images/complex_patches.png" src="_images/complex_patches.png" style="width: 480px;" /></a>
+<p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">Patch-based refinement (factor 4 between levels) of a complex surface. Each color shows a patch, which is a rectangular computational unit.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p>Embedded boundary applications are supported by additionally describing the mesh with a graph near cut-cells.
+This allows us to combine the efficiency of patch-based AMR with complex geometries.
+However, there is significant overhead with the embedded boundary approach and, furthermore, arbitrarily complex geometries are not possible.</p>
+<div class="section" id="mesh-generation">
+<span id="chap-meshgeneration"></span><h3>Mesh generation<a class="headerlink" href="#mesh-generation" title="Permalink to this headline">¶</a></h3>
+<p><cite>PlasmaC</cite> offers two algorithm for AMR grid generation.
+Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags.
+The first algorithm that we support is the classical Berger-Rigoustous grid algorithm that ships with Chombo, see the figure below.
+The classical Berger-Rigoustous algorithm is serial-like in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes.
+The algorithm is typically not used at large scale because of its memory consumption.</p>
+<div class="figure align-center" id="id3">
+<a class="reference internal image-reference" href="_images/amr.png"><img alt="_images/amr.png" src="_images/amr.png" style="width: 240px;" /></a>
+<p class="caption"><span class="caption-number">Fig. 2 </span><span class="caption-text">Classical cartoon of patch-based refinement. Bold lines indicate entire grid blocks.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<p>As an alternative, we also support a tiled algorithm where the grid boxes on each block are generated according to a predefined tiled pattern.
+If a tile contains a single tag, the entire tile is flagged for refinement.
+The tiled algorithm produces grids that are similar to octrees, but it is more general since it also supports refinement factors other than 2, and is not restricted to domain extensions that are an integer factor of 2 (e.g. <span class="math notranslate nohighlight">\(2^{10}\)</span> cells in each direction).</p>
+<div class="figure align-center" id="id4">
+<a class="reference internal image-reference" href="_images/tiled.png"><img alt="_images/tiled.png" src="_images/tiled.png" style="width: 360px;" /></a>
+<p class="caption"><span class="caption-number">Fig. 3 </span><span class="caption-text">Classical cartoon of tiled patch-based refinement. Bold lines indicate entire grid blocks.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="geometry-generation">
+<span id="chap-ebmesh"></span><h3>Geometry generation<a class="headerlink" href="#geometry-generation" title="Permalink to this headline">¶</a></h3>
+<p>Geometry generation for <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> follows that of Chombo. In Chombo, the geometries are generated from an implicit function <span class="math notranslate nohighlight">\(f(\mathbf{x}) = 0\)</span> that describes the level-set surface.</p>
+<p>In <cite>Chombo</cite>, geometry generation is done by first constructing a set of boxes that covers the finest AMR level.
+If the function intersects one of these boxes, the box will allocate a <em>graph</em> that describes the connectivity of the volume-of-fluid indices in the entire box.
+The geometric data in the box is allocated sparsely so that memory consumption due to EB information storage is typically not very high.
+In general, there should be no graphs in boxes that are all-covered or all-regular.</p>
+<p>When EB information is first generated across the AMR hierarchy, one begins by computing the information on the finest grid level.
+From there, coarser levels are generated through <em>coarsening</em> of the fine-information data.
+The default load-balancing for geometry generation in <cite>Chombo</cite> is an even division of the grid level among the ranks.
+This is a reasonable approach for porous media where the cut-cells distribute evenly through the computational domain.
+However, most geometries consists of a small 2D surface in 3D space and the default Chombo approach wastes a lot of time looking for cut-cells where they don’t exist.</p>
+<p>To achieve scalable geometry generation, we have changed how <cite>Chombo</cite> generates the geometry generation on the various levels.
+Our new approach first generates a map on a <em>coarse</em> level which is specified by the user.
+On the specified level the domain is broken up into equal-sized chunks and cut-cell boxes are located.
+Uncut and cut boxes are load balanced among the various ranks.
+We then proceed towards the next finer level where the cut-cell boxes are identified by a refinement of the box distribution on the previous level.
+Boxes that resulted from a refinement of the coarse level cut boxes are again broken up into equal-sized chunks, whereas the uncut boxes are not.
+This is again followed by load-balancing of the cut boxes, and this process is repeated recursively down to the finest AMR level.
+In essence, the geometry generation is load balanced based on where the cut cells are going to be.
+For the user, he will be able to switch between the <cite>Chombo</cite> and <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> approaches to geometry generation load balancing by flipping a flag in an input script.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Basics.html" class="btn btn-neutral float-right" title="Chombo basics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="GettingStarted.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Robert Marskar
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

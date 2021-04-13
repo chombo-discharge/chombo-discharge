@@ -1,0 +1,4 @@
+.. _Chap:solver:
+
+Solver
+======

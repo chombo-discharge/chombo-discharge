@@ -1,0 +1,373 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>driver &mdash; PlasmaC 19.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="amr_mesh" href="AmrMesh.html" />
+    <link rel="prev" title="Visualization" href="Visualization.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PlasmaC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                19.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">PlasmaC introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Model.html">The <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Basics.html">Chombo basics</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Using PlasmaC</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Understanding mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParticleData.html">Understanding particle data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">PlasmaC design</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">driver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-fresh-simulations-are-set-up">How fresh simulations are set up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-simulations-are-restarted">How simulations are restarted</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-simulations-are-run">How simulations are run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-regrids-are-performed">How regrids are performed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#class-options">Class options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">amr_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">computational_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">time_stepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">cell_tagger</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Supported solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Solver.html">Solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Poisson.html">Poisson</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Implemented models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="PoissonModel.html">Poisson model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection diffusion model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimalPlasmaModel.html">Minimal plasma model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html#setting-up-time-stepper">Setting up <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="References.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PlasmaC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>driver</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Driver.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="driver">
+<span id="chap-driver"></span><h1>driver<a class="headerlink" href="#driver" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">driver</span></code> class is the class that runs <cite>PlasmaC</cite> simulations and is defined in <code class="file docutils literal notranslate"><span class="pre">/src/driver/driver.cpp(H)</span></code>.
+The constructor for this class is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">driver</span><span class="p">(</span><span class="k">const</span> <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">computational_geometry</span><span class="o">&gt;&amp;</span> <span class="n">a_compgeom</span><span class="p">,</span>
+       <span class="k">const</span> <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">time_stepper</span><span class="o">&gt;&amp;</span>           <span class="n">a_timestepper</span><span class="p">,</span>
+       <span class="k">const</span> <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">amr_mesh</span><span class="o">&gt;&amp;</span>               <span class="n">a_amr</span><span class="p">,</span>
+       <span class="k">const</span> <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">cell_tagger</span><span class="o">&gt;&amp;</span>            <span class="n">a_celltagger</span> <span class="o">=</span> <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">cell_tagger</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">NULL</span><span class="p">),</span>
+       <span class="k">const</span> <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">geo_coarsener</span><span class="o">&gt;&amp;</span>          <span class="n">a_geocoarsen</span> <span class="o">=</span> <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">geo_coarsener</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">NULL</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>Observe that the <code class="docutils literal notranslate"><span class="pre">driver</span></code> class does not <em>require</em> an instance of <a class="reference internal" href="CellTagger.html#chap-cell-tagger"><span class="std std-ref">cell_tagger</span></a>.
+If users decide to omit a cell tagger, regridding functionality is completely turned off and only the initially generated grids will be used.</p>
+<p>The usage of the <code class="docutils literal notranslate"><span class="pre">driver</span></code> class is primarily object construction with dependency injection of the geometry, the physics (i.e. <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code>), the <code class="docutils literal notranslate"><span class="pre">amr_mesh</span></code> instance, and possibly a cell tagger.
+The driver class will automatically retrieve run-time options from the input script during object creation.
+Usually, only a single routine is used:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">setup_and_run</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>This routine will set up and run a simulation.
+Simulation setup depends on the way a simulation is run.</p>
+<div class="section" id="how-fresh-simulations-are-set-up">
+<h2>How fresh simulations are set up<a class="headerlink" href="#how-fresh-simulations-are-set-up" title="Permalink to this headline">¶</a></h2>
+<p>If a simulation starts from the first time step, the <code class="docutils literal notranslate"><span class="pre">driver</span></code> class will perform the following major steps within <code class="docutils literal notranslate"><span class="pre">setup_and_run()</span></code>.</p>
+<ol class="arabic simple">
+<li><p>Ask <code class="docutils literal notranslate"><span class="pre">computational_geometry</span></code> to generate the cut-cell moments.</p></li>
+<li><p>Collect all the cut-cells and ask <code class="docutils literal notranslate"><span class="pre">amr_mesh</span></code> to set up an initial grid where all the cut-cells are refined.
+It is possible to restrict the maximum level that can be generated from the geometric tags, or remove some of the cut-cell refinement flags through the auxiliary class <code class="docutils literal notranslate"><span class="pre">geo_coarsener</span></code>.</p></li>
+<li><p>Ask the <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> to set up all the relevant solvers and fill them with initial data.</p></li>
+<li><p>Perform the number of initial regrids that the user asks for.</p></li>
+</ol>
+<p>Step 3 will differ significantly depending on the physics that is solved for.</p>
+</div>
+<div class="section" id="how-simulations-are-restarted">
+<h2>How simulations are restarted<a class="headerlink" href="#how-simulations-are-restarted" title="Permalink to this headline">¶</a></h2>
+<p>If a simulation <em>does not start</em> from the first time step, the <code class="docutils literal notranslate"><span class="pre">driver</span></code> class will perform the following major steps within <code class="docutils literal notranslate"><span class="pre">setup_and_run()</span></code>.</p>
+<ol class="arabic simple">
+<li><p>Ask <code class="docutils literal notranslate"><span class="pre">computational_geometry</span></code> to generate the cut-cell moments.</p></li>
+<li><p>Read a checkpoint file that contains the grids and all the data that have been checkpointed by the solvers.</p></li>
+<li><p>Ask the <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> to perform a “post-checkpoint” step to initialize any remaining data so that a time step can be taken.
+This functionality has been included because not all data in every solver needs to be checkpointed.
+For example, an electric field solver only needs to write the electric potential to the checkpoint file because the electric field is simply obtained by taking the gradient.</p></li>
+<li><p>Perform the number of initial regrids that the user asks for.</p></li>
+</ol>
+<p>Again, step 3 will differ significantly depending on the physics that is solved for.</p>
+</div>
+<div class="section" id="how-simulations-are-run">
+<h2>How simulations are run<a class="headerlink" href="#how-simulations-are-run" title="Permalink to this headline">¶</a></h2>
+<p>The algorithm for running a simulation is very simple; the <code class="docutils literal notranslate"><span class="pre">driver</span></code> class simply calls <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> for computing a reasonable time step for advancing the equations, and then it asks <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> to actually perform the advance.
+Regrids, plot files, and checkpoint files are written at certain step intervals.
+In essence, the algorithm looks like this:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">driver</span><span class="o">::</span><span class="n">run</span><span class="p">(...){</span>
+
+   <span class="k">while</span><span class="p">(</span><span class="n">KeepRunningTheSimulation</span><span class="p">){</span>
+      <span class="k">if</span><span class="p">(</span><span class="n">RegridEverything</span><span class="p">){</span>
+         <span class="n">driver</span><span class="o">-&gt;</span><span class="n">regrid</span><span class="p">()</span>
+      <span class="p">}</span>
+
+      <span class="n">time_stepper</span><span class="o">-&gt;</span><span class="n">computeTimeStep</span><span class="p">()</span>
+      <span class="n">time_stepper</span><span class="o">-&gt;</span><span class="n">advanceAllEquationsOneStep</span><span class="p">()</span>
+
+      <span class="k">if</span><span class="p">(</span><span class="n">WriteAPlotFile</span> <span class="o">||</span> <span class="n">EndOfSimulatoin</span><span class="p">){</span>
+         <span class="n">driver</span><span class="o">-&gt;</span><span class="n">writePlotFile</span><span class="p">();</span>
+      <span class="p">}</span>
+      <span class="k">if</span><span class="p">(</span><span class="n">TimeToWriteACheckpointFile</span> <span class="o">||</span> <span class="n">EndOfSimulation</span><span class="p">){</span>
+         <span class="n">driver</span><span class="o">-&gt;</span><span class="n">writeCheckpointFile</span><span class="p">()</span>
+      <span class="p">}</span>
+
+      <span class="n">KeepRunningTheSimulation</span> <span class="o">=</span> <span class="nb">true</span> <span class="n">or</span> <span class="nb">false</span>
+   <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>None of the current physics modules use subcycling in time, but this <em>is</em> possible by having an implementation class of <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> that subcycles.
+The biggest caveat is that the recursive type of regridding that is performed by subcycled algorithms is not yet supported.
+It is possible to modify <code class="docutils literal notranslate"><span class="pre">driver</span></code> such that this is supported, but this has not been a priority.</p>
+</div>
+<div class="section" id="how-regrids-are-performed">
+<h2>How regrids are performed<a class="headerlink" href="#how-regrids-are-performed" title="Permalink to this headline">¶</a></h2>
+<p>Regrids are called by the <code class="docutils literal notranslate"><span class="pre">driver</span></code> class and occur as follows in <code class="docutils literal notranslate"><span class="pre">driver::regrid(...)</span></code>:</p>
+<ol class="arabic simple">
+<li><p>Ask <code class="docutils literal notranslate"><span class="pre">cell_tagger</span></code> to generate tags for grid refinement and coarsening.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> class stores data that is subject to regrids.
+How this happens depends on the solver that is run.
+For grid-based solvers, e.g. CDR solvers, the scalar <span class="math notranslate nohighlight">\(\phi\)</span> is copied into a scratch space.
+The reason for this backup is that during the regrid <span class="math notranslate nohighlight">\(\phi\)</span> will be allocated on the <em>new</em> AMR grids, but we must still have access to the previously defined data in order to interpolate to the new grids.</p></li>
+<li><p>If necessary, <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> can deallocate unecessary storage.
+Implementing a deallocation function for <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code>-derived classes is not a requirement, but can in certain cases be useful, for example when using the Berger-Rigoutsous algorithm at large scale.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">amr_mesh</span></code> class generates the new grids and defines new AMR operators.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> class regrids its solvers and internal data.</p></li>
+</ol>
+<p>In C++ pseudo-code, this looks something like:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">driver</span><span class="o">::</span><span class="n">regrid</span><span class="p">(){</span>
+
+   <span class="c1">// Tag cells</span>
+   <span class="n">cell_tagger</span><span class="o">-&gt;</span><span class="n">tagCellsForRefinement</span><span class="p">()</span>
+
+   <span class="c1">// Store old data and free up some memory</span>
+   <span class="n">time_stepper</span><span class="o">-&gt;</span><span class="n">storeOldGridData</span><span class="p">()</span>
+   <span class="n">time_stepper</span><span class="o">-&gt;</span><span class="n">deallocateUnneccesaryData</span><span class="p">()</span>
+
+   <span class="c1">// Generate the new grids</span>
+   <span class="n">amr_mesh</span><span class="o">-&gt;</span><span class="n">regrid</span><span class="p">()</span>
+
+   <span class="c1">// Regrid physics and all solvers</span>
+   <span class="n">time_stepper</span><span class="o">-&gt;</span><span class="n">regrid</span><span class="p">()</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The full code is defined in <code class="docutils literal notranslate"><span class="pre">driver::regrid()</span></code> in file <code class="file docutils literal notranslate"><span class="pre">/src/driver/driver.cpp</span></code>.</p>
+</div>
+<div class="section" id="class-options">
+<h2>Class options<a class="headerlink" href="#class-options" title="Permalink to this headline">¶</a></h2>
+<p>Various class options are available for adjusting the behavior of the <code class="docutils literal notranslate"><span class="pre">driver</span></code> class.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="AmrMesh.html" class="btn btn-neutral float-right" title="amr_mesh" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Visualization.html" class="btn btn-neutral float-left" title="Visualization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Robert Marskar
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

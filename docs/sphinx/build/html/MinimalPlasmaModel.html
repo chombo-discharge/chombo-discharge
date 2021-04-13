@@ -1,0 +1,737 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Minimal plasma model &mdash; PlasmaC 19.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction" href="Tutorial.html" />
+    <link rel="prev" title="Brownian walker model" href="BrownianWalkerModel.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PlasmaC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                19.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">PlasmaC introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Model.html">The <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Basics.html">Chombo basics</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Using PlasmaC</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Understanding mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParticleData.html">Understanding particle data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">PlasmaC design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">amr_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">computational_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">time_stepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">cell_tagger</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Supported solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Solver.html">Solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Poisson.html">Poisson</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Implemented models</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PoissonModel.html">Poisson model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection diffusion model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Minimal plasma model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#equations-of-motion">Equations of motion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cdr-plasma-physics">cdr_plasma_physics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#defining-drift-velocities">Defining drift velocities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#defining-diffusion-coefficients">Defining diffusion coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#defining-chemistry-terms">Defining chemistry terms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#defining-photon-production-terms">Defining photon production terms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-transport-boundary-conditions">Setting transport boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-initial-surface-charge">Setting initial surface charge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#species">species</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#photons">photons</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#temporal-discretization">Temporal discretization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#time-step-limitations">Time step limitations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deterministic-integrators">Deterministic integrators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#godunov">godunov</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#imex-sdc">imex sdc</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spectral-deferred-corrections">Spectral deferred corrections</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sisdc-predictor">SISDC predictor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sisdc-corrector">SISDC corrector</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#order-stability-and-computational-cost">Order, stability, and computational cost</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stochastic-integrators">Stochastic integrators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#euler-maruyama">euler_maruyama</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html#setting-up-time-stepper">Setting up <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="References.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PlasmaC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Minimal plasma model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/MinimalPlasmaModel.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="minimal-plasma-model">
+<span id="chap-minimalplasmamodel"></span><h1>Minimal plasma model<a class="headerlink" href="#minimal-plasma-model" title="Permalink to this headline">¶</a></h1>
+<p>The minimal plasma model resides in <code class="file docutils literal notranslate"><span class="pre">/physics/cdr_plasma</span></code> and describes plasmas in the drift-diffusion approximation.
+This physics model also includes the following subfolders:</p>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">/physics/cdr_plasma/plasma_models</span></code> which contains various implementation of some plasma models that we have used.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">/physics/cdr_plasma/time_steppers</span></code> contains various algorithms for advancing the equations in an EBAMR context.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">/physics/cdr_plasma/cell_taggers</span></code> contains various algorithms for advancing the equations in an EBAMR context.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">/physics/cdr_plasma/python</span></code> contains Python source files for quick setup of “mini-applications”.</p></li>
+</ul>
+<p>If users decide to develop new code for the minimal plasma model, e.g. new grid refinement routines, plasma models, integrators, or other types of improvements, they should be put in the folders above.</p>
+<div class="section" id="equations-of-motion">
+<h2>Equations of motion<a class="headerlink" href="#equations-of-motion" title="Permalink to this headline">¶</a></h2>
+<p>In the minimal plasma model, we are solving</p>
+<div class="math notranslate nohighlight">
+\begin{align}
+&amp;\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}, \\[1ex]
+&amp;\frac{\partial\sigma}{\partial t} = F_\sigma,\\[1ex]
+&amp;\frac{\partial n}{\partial t} + \nabla\cdot\left(\mathbf{v} n - D\nabla n + \sqrt{2D\phi}\mathbf{Z}\right) = S,
+\end{align}</div><p>where <span class="math notranslate nohighlight">\(\sqrt{2D\phi}\mathbf{Z}\)</span> is a stochastic diffusion flux suitable for fluctuating hydrodynamics models.
+By default, this flux is turned off.</p>
+<p>The above equations must be supported by additional boundary conditions on electrodes and insulating surfaces.</p>
+<p>Radiative transport is also supported, which is done either in the diffusive approximation or by means of Monte Carlo methods. Diffusive RTE methods involve solving</p>
+<div class="math notranslate nohighlight">
+\begin{align}
+   \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) &amp;= \frac{\eta}{c},
+\end{align}</div><p>where <span class="math notranslate nohighlight">\(\Psi\)</span> is the isotropic photon density, <span class="math notranslate nohighlight">\(\kappa\)</span> is an absorption length and <span class="math notranslate nohighlight">\(\eta\)</span> is an isotropic source term.
+The time dependent term can be turned off and the equations can be solved stationary.
+As an alternative, we also provide discrete photon methods that solve for the photoionization profile on a mesh by sampling discrete photons.
+Our discrete photon methods are capable of including far more physics; they can easily be adapted to e.g. scattering media and also provide much better qualitative features (like shadows, for example).
+They are, on the other hand, inherently stochastic which implies that some extra care must be taken when integrating the equations of motion.</p>
+<p>The coupling that is (currently) available in <cite>PlasmaC</cite> is</p>
+<div class="math notranslate nohighlight">
+\begin{align}
+   \epsilon_r &amp;= \epsilon_r(\mathbf{x}), (\textrm{can additionally be discontinuous}), \\[1ex]
+   \mathbf{v} &amp;= \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
+   D &amp;= \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
+   S &amp;= S(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi), \\[1ex]
+   \eta &amp;= \eta\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
+   F &amp;= F(t, \mathbf{x}, \mathbf{E}, n),
+\end{align}</div><p>where <span class="math notranslate nohighlight">\(F\)</span> is the boundary flux on insulators or electrodes (which must be separately implemented).</p>
+<p><cite>PlasmaC</cite> works by embedding the equations above into an abstract C++ framework that the user must implement or reuse existing pieces of, and then compile into a <em>mini-application</em>.</p>
+</div>
+<div class="section" id="cdr-plasma-physics">
+<span id="chap-cdr-plasma-physics"></span><h2>cdr_plasma_physics<a class="headerlink" href="#cdr-plasma-physics" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#chap-cdr-plasma-physics"><span class="std std-ref">cdr_plasma_physics</span></a> represents the microphysics in <code class="file docutils literal notranslate"><span class="pre">/physics/cdr_plasma</span></code>.
+The entire class is an interface, whose implementations are used in the time integrators that advance the equations.
+As mentioned above, the time integrators are located in <code class="file docutils literal notranslate"><span class="pre">/physics/cdr_plasma/time_steppers</span></code>.</p>
+<p>There are no default input parameters for <a class="reference internal" href="#chap-cdr-plasma-physics"><span class="std std-ref">cdr_plasma_physics</span></a>, as users must generally implement their own kinetics.
+A successful implementation of <a class="reference internal" href="#chap-cdr-plasma-physics"><span class="std std-ref">cdr_plasma_physics</span></a> has the following:</p>
+<ul class="simple">
+<li><p>Instantiated <a class="reference internal" href="#chap-species"><span class="std std-ref">species</span></a>. These contain metadata for the transport solvers.</p></li>
+<li><p>Instantiated <a class="reference internal" href="#chap-photon"><span class="std std-ref">photons</span></a>. These contain metadata for the radiative transport solvers.</p></li>
+<li><p>Implemented the core functionality that couple all solvers.</p></li>
+</ul>
+<p><cite>PlasmaC</cite> automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers. For information on how to interface into the CDR solvers, see <a class="reference internal" href="#chap-species"><span class="std std-ref">species</span></a>. Likewise, see <a class="reference internal" href="#chap-photon"><span class="std std-ref">photons</span></a> for how to interface into the RTE solvers.</p>
+<p>There are currently no support for existing file formats for describing reactions and so on. If you have a huge list of reactions that need to be implemented, it would probably pay off to write a code-generating interface between <a class="reference internal" href="#chap-cdr-plasma-physics"><span class="std std-ref">cdr_plasma_physics</span></a> and your list of reactions.</p>
+<p>Implementation of the core functionality is comparatively straightforward. In the constructor, the user should fetch his input parameters (if he has any) and <strong>must</strong> instantiate all species and photons in the internal containers. When the class is used by <cite>PlasmaC</cite> later on, all arguments in the core functions follow that ordering. The core functionality is given by the following functions:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span> <span class="n">compute_cdr_velocities</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span>         <span class="n">a_time</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_E</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_densities</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_cdr_diffusion_coefficients</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span>         <span class="n">a_time</span><span class="p">,</span>
+                                                        <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                                        <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_E</span><span class="p">,</span>
+                                                        <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_densities</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_cdr_source_terms</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>              <span class="n">a_time</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>         <span class="n">a_pos</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>         <span class="n">a_E</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>         <span class="n">a_gradE</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>     <span class="n">a_cdr_densities</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>     <span class="n">a_rte_densities</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span> <span class="n">a_grad_cdr</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_cdr_electrode_fluxes</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span>         <span class="n">a_time</span><span class="p">,</span>
+                                                  <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                                  <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_normal</span><span class="p">,</span>
+                                                  <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_E</span><span class="p">,</span>
+                                                  <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_densities</span><span class="p">,</span>
+                                                  <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_velocities</span><span class="p">,</span>
+                                                  <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_gradients</span><span class="p">,</span>
+                                                  <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_rte_fluxes</span><span class="p">,</span>
+                                                  <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_extrap_cdr_fluxes</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_cdr_dielectric_fluxes</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span>         <span class="n">a_time</span><span class="p">,</span>
+                                                   <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                                   <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_normal</span><span class="p">,</span>
+                                                   <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_E</span><span class="p">,</span>
+                                                   <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_densities</span><span class="p">,</span>
+                                                   <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_velocities</span><span class="p">,</span>
+                                                   <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_gradients</span><span class="p">,</span>
+                                                   <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_rte_fluxes</span><span class="p">,</span>
+                                                   <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_extrap_cdr_fluxes</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_cdr_domain_fluxes</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span>           <span class="n">a_time</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>       <span class="n">a_pos</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span>            <span class="n">a_dir</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="o">&amp;</span> <span class="n">a_side</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>       <span class="n">a_E</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>   <span class="n">a_cdr_densities</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>   <span class="n">a_cdr_velocities</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>   <span class="n">a_cdr_gradients</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>   <span class="n">a_rte_fluxes</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>   <span class="n">a_extrap_cdr_fluxes</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_rte_source_terms</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span>         <span class="n">a_time</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_E</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_densities</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Real</span> <span class="nf">initial_sigma</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>      <span class="n">a_time</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">a_pos</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The above code blocks do exactly what their signatures indicate. It is up to the user to implement these. The length of the Vector holding the return values from these functions are expected to be equal to the number of CDR solvers, with the exception of <em>compute_rte_source_terms</em> which has the length given by the number of RTE solvers. Note that in all of the above, the ordering of the input vectors are expected to be the same as the ordering of the species vector of <a class="reference internal" href="#chap-cdr-plasma-physics"><span class="std std-ref">cdr_plasma_physics</span></a>.</p>
+<p>For example, if the user has defined only a single advected species, he may implement the constructor as</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">my_kinetics</span><span class="o">::</span><span class="n">my_kinetics</span><span class="p">(){</span>
+   <span class="n">m_num_species</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+   <span class="n">m_num_photons</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+   <span class="n">m_species</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">m_num_species</span><span class="p">);</span>
+   <span class="n">m_photons</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">m_num_photons</span><span class="p">);</span>
+
+   <span class="n">m_species</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">species</span><span class="o">&gt;</span> <span class="p">(</span><span class="k">new</span> <span class="n">my_species</span><span class="p">());</span>
+   <span class="n">m_photons</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">photon</span><span class="o">&gt;</span> <span class="p">(</span><span class="k">new</span> <span class="n">my_photon</span><span class="p">());</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This constructor assumes that <em>my_species</em> has already been defined somewhere (for example, as a private class within <em>my_kinetics</em>).</p>
+<div class="section" id="defining-drift-velocities">
+<h3>Defining drift velocities<a class="headerlink" href="#defining-drift-velocities" title="Permalink to this headline">¶</a></h3>
+<p>Next the user may implement the velocity computation function, which sets <span class="math notranslate nohighlight">\(\mathbf{v}\)</span> in the CDR equations:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span> <span class="n">compute_cdr_velocities</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span>         <span class="n">a_time</span><span class="p">,</span>
+                                        <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                        <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_E</span><span class="p">,</span>
+                                        <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_densities</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+   <span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span> <span class="n">velo</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+   <span class="n">velo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">a_E</span><span class="p">;</span>
+   <span class="k">return</span> <span class="n">velo</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This implementation is a full implementation of the velocity coupling of the CDR equations. In this case, the velocity of the advected component is equal to <span class="math notranslate nohighlight">\(\mathbf{E}\)</span>. For a full plasma simulation, there will also be mobilities involved, which the user is reponsible for obtaining.</p>
+</div>
+<div class="section" id="defining-diffusion-coefficients">
+<h3>Defining diffusion coefficients<a class="headerlink" href="#defining-diffusion-coefficients" title="Permalink to this headline">¶</a></h3>
+<p>In order to define diffusion coefficients, the user implements <em>compute_cdr_diffusion_coefficients</em>, which returns the diffusion coefficients for the diffused species. If a species (e.g. positive ions) is not diffusive, it does not matter what diffusion coefficient you set.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_cdr_diffusion_coefficients</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span>         <span class="n">a_time</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_E</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_densities</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+   <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">diffco</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">);</span>
+   <span class="n">diffco</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>
+   <span class="k">return</span> <span class="n">diffco</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="defining-chemistry-terms">
+<h3>Defining chemistry terms<a class="headerlink" href="#defining-chemistry-terms" title="Permalink to this headline">¶</a></h3>
+<p>The function <em>compute_cdr_source_terms</em> is reponsible for computing <span class="math notranslate nohighlight">\(S\)</span> in the CDR equations. If we want, for example, <span class="math notranslate nohighlight">\(S_1 = k n_1n_2\)</span>, where <span class="math notranslate nohighlight">\(k\)</span> is some rate and <span class="math notranslate nohighlight">\(n_1\)</span> and <span class="math notranslate nohighlight">\(n_2\)</span> are densities of some species (e.g. electrons and positive ions),</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_cdr_source_terms</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>              <span class="n">a_time</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>         <span class="n">a_pos</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>         <span class="n">a_E</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>         <span class="n">a_gradE</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>     <span class="n">a_cdr_densities</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>     <span class="n">a_rte_densities</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span> <span class="n">a_grad_cdr</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+   <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">source</span><span class="p">(</span><span class="n">m_num_species</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">);</span>
+   <span class="n">source</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span><span class="o">*</span><span class="n">a_cdr_densities</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">a_cdr_densities</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+   <span class="k">return</span> <span class="n">source</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In the above function, the user may also implement photoionization: The argument <em>Vector&lt;Real&gt; a_rte_densities</em> is the isotropic photon densities, i.e. the number of photons per unit volume.</p>
+</div>
+<div class="section" id="defining-photon-production-terms">
+<h3>Defining photon production terms<a class="headerlink" href="#defining-photon-production-terms" title="Permalink to this headline">¶</a></h3>
+<p>Reverse coupling between the CDR equations and the RTE equations occur through the <em>compute_rte_source_terms</em> function. The return value of this function is the mean number of photons produced per steradian. Often, such functions may be complicated. If we assume, for example, that the RTE source term is <span class="math notranslate nohighlight">\(\eta = n/\tau\)</span>, where <span class="math notranslate nohighlight">\(\tau\)</span> is a spontaneous emission lifetime, then we can implement the coupling as</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_rte_source_terms</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span>         <span class="n">a_time</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_E</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_densities</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+   <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">source</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+   <span class="n">source</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">a_cdr_densities</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">tau</span><span class="p">;</span>
+   <span class="k">return</span> <span class="n">source</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">Generally</span><span class="p">,</span> <span class="n">one</span> <span class="n">wants</span> <span class="n">to</span> <span class="n">ensure</span> <span class="n">consistency</span> <span class="n">in</span> <span class="n">how</span> <span class="n">one</span> <span class="n">handles</span> <span class="n">photon</span> <span class="n">production</span> <span class="n">and</span> <span class="n">excited</span> <span class="n">state</span> <span class="n">relaxation</span><span class="p">.</span> <span class="n">For</span> <span class="n">the</span> <span class="n">above</span> <span class="n">radiative</span> <span class="n">transfer</span> <span class="n">example</span><span class="p">,</span> <span class="n">the</span> <span class="n">user</span> <span class="n">should</span> <span class="n">also</span> <span class="n">include</span> <span class="n">a</span> <span class="n">corresponding</span> <span class="n">term</span> <span class="n">in</span> <span class="n">the</span> <span class="n">function</span> <span class="n">that</span> <span class="n">computes</span> <span class="n">the</span> <span class="n">chemistry</span> <span class="n">source</span> <span class="n">terms</span><span class="p">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setting-transport-boundary-conditions">
+<h3>Setting transport boundary conditions<a class="headerlink" href="#setting-transport-boundary-conditions" title="Permalink to this headline">¶</a></h3>
+<p>Boundary conditions are support through three functions that handle transport through three types of boundaries: domain boundaries, dielectric surfaces, and electrode surfaces. The three functions have (almost) the same signature:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_cdr_electrode_fluxes</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span>         <span class="n">a_time</span><span class="p">,</span>
+                                          <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                          <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_normal</span><span class="p">,</span>
+                                          <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span>     <span class="n">a_E</span><span class="p">,</span>
+                                          <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_densities</span><span class="p">,</span>
+                                          <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_velocities</span><span class="p">,</span>
+                                          <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_cdr_gradients</span><span class="p">,</span>
+                                          <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_rte_fluxes</span><span class="p">,</span>
+                                          <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span> <span class="n">a_extrap_cdr_fluxes</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+   <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">fluxes</span><span class="p">(</span><span class="n">m_num_species</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">);</span>
+   <span class="k">return</span> <span class="n">fluxes</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This function expects you to return the transport fluxes at the boundaries - like those occuring in a finite volume context. For domain boundaries, this signature is slightly changed: The argument <code class="docutils literal notranslate"><span class="pre">a_normal</span></code> (which is the normal vector <em>into</em> the gas volume) is replaced by two arguments that describe the side and direction of the domain wall. The <code class="docutils literal notranslate"><span class="pre">a_normal</span></code> is the normal into the gas volume, which is opposite to the convention used in finite volume formulations. The arguments <code class="docutils literal notranslate"><span class="pre">a_cdr_velocities</span></code> are the drift velocities projected on the outward normal, and the same convention is used for <code class="docutils literal notranslate"><span class="pre">a_cdr_gradients</span></code> (which hold the spatial gradients) and <code class="docutils literal notranslate"><span class="pre">a_extrap_cdr_fluxes</span></code> which hold the extrapolated drift fluxes. If you want simple extrapolated boundary conditions you would set one of the fluxes equal to <code class="docutils literal notranslate"><span class="pre">a_extrap_cdr_fluxes</span></code>. A small caveat: <code class="docutils literal notranslate"><span class="pre">a_extrap_cdr_fluxes</span></code> are the extrapolated <em>drift</em> fluxes; if you also want the diffusive flux you can use the gradient argument and recompute the diffusion coefficient.</p>
+</div>
+<div class="section" id="setting-initial-surface-charge">
+<h3>Setting initial surface charge<a class="headerlink" href="#setting-initial-surface-charge" title="Permalink to this headline">¶</a></h3>
+<p>Finally, the final function specifies the initial surface charge in the domain. If there is no initial surface charge, then</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span> <span class="nf">initial_sigma</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>      <span class="n">a_time</span><span class="p">,</span>
+                   <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">a_pos</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+   <span class="k">return</span> <span class="mf">0.0</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="species">
+<span id="chap-species"></span><h3>species<a class="headerlink" href="#species" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="#chap-species"><span class="std std-ref">species</span></a> is a lightweight class used to provide information into convection-diffusion-reaction solvers. This class is mostly used within <a class="reference internal" href="#chap-cdr-plasma-physics"><span class="std std-ref">cdr_plasma_physics</span></a> in order to provide information on how to instantiate CDR solvers. <a class="reference internal" href="#chap-species"><span class="std std-ref">species</span></a> is abstract so that the user must implement</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span> <span class="n">Real</span> <span class="nf">initial_data</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_pos</span><span class="p">,</span> <span class="k">const</span> <span class="n">Real</span> <span class="n">a_time</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This function specifies the initial data of the species that is advected. For example, the following implementation sets the initial CDR density value to one:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span> <span class="nf">initial_data</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_pos</span><span class="p">,</span> <span class="k">const</span> <span class="n">Real</span> <span class="n">a_time</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+   <span class="k">return</span> <span class="mf">1.0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In addition to this, the user <em>must</em> provide information on the charge of the species, and whether or not it is mobile or diffusive. In addition, he should set the name of the species so that it can be identified in output files. In <cite>PlasmaC</cite>, this is done by setting the following four values in the constructor</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">m_name</span><span class="p">;</span> <span class="c1">// Solver name</span>
+<span class="kt">int</span> <span class="n">m_charge</span><span class="p">;</span>       <span class="c1">// Charge (in units of the elementary charge)</span>
+<span class="kt">bool</span> <span class="n">m_diffusive</span><span class="p">;</span>   <span class="c1">// Diffusive species or not</span>
+<span class="kt">bool</span> <span class="n">m_mobile</span><span class="p">;</span>      <span class="c1">// Mobile species or not</span>
+</pre></div>
+</div>
+<p>Usually, these are set through the constructor. The <code class="docutils literal notranslate"><span class="pre">m_charge</span></code> unit is in units of the elementary charge. For example, the following is a full implementation of an electron species:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">electron</span> <span class="o">:</span> <span class="k">public</span> <span class="n">species</span> <span class="p">{</span>
+  <span class="n">electron</span><span class="p">()</span> <span class="p">{</span>
+     <span class="n">m_name</span>   <span class="o">=</span> <span class="s">&quot;electrons&quot;</span><span class="p">;</span>
+     <span class="n">m_charge</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+     <span class="n">m_diffusive</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+     <span class="n">m_mobile</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="o">~</span><span class="n">electron</span><span class="p">(){}</span>
+
+  <span class="n">Real</span> <span class="n">initial_data</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_pos</span><span class="p">,</span> <span class="k">const</span> <span class="n">Real</span> <span class="n">a_time</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+     <span class="k">return</span> <span class="mf">1.0</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The members <code class="docutils literal notranslate"><span class="pre">m_mobile</span></code> and <code class="docutils literal notranslate"><span class="pre">m_diffusive</span></code> are used for optimization in <cite>PlasmaC</cite>: If the user specifies that a species is immobile, <cite>PlasmaC</cite> will skip the advection computation. Note that <code class="docutils literal notranslate"><span class="pre">m_diffusive</span></code> and <code class="docutils literal notranslate"><span class="pre">m_mobile</span></code> override the specifications in <a class="reference internal" href="#chap-cdr-plasma-physics"><span class="std std-ref">cdr_plasma_physics</span></a>. If the user provides a non-zero velocity through <a class="reference internal" href="#chap-cdr-plasma-physics"><span class="std std-ref">cdr_plasma_physics</span></a> function <em>compute_cdr_velocities</em>, and sets <code class="docutils literal notranslate"><span class="pre">m_mobile</span></code> to <code class="docutils literal notranslate"><span class="pre">false</span></code>, the species velocity will be zero. Of course, the user will often want to provide additional input information to his species, for example by specifying a seed for the initial conditions.</p>
+</div>
+<div class="section" id="photons">
+<span id="chap-photon"></span><h3>photons<a class="headerlink" href="#photons" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference internal" href="#chap-photon"><span class="std std-ref">photons</span></a> is the class that supplies extra information to the RTE solvers. In those solvers, the source term computation is handled by <a class="reference internal" href="#chap-cdr-plasma-physics"><span class="std std-ref">cdr_plasma_physics</span></a>, so the <a class="reference internal" href="#chap-photon"><span class="std std-ref">photons</span></a> class is very lightweight. The user must implement a single function which specifies the absorption coefficient at a point in space:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span> <span class="k">const</span> <span class="n">Real</span> <span class="nf">get_absorption_coeff</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">a_pos</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>In addition, the user should provide a name for the RTE solver so that it can be identified in the output files. This is done by setting a <code class="docutils literal notranslate"><span class="pre">m_name</span></code> attribute in the <a class="reference internal" href="#chap-photon"><span class="std std-ref">photons</span></a> class.</p>
+<p>The following is a full implementation of the <a class="reference internal" href="#chap-photon"><span class="std std-ref">photons</span></a> class:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">my_photon</span> <span class="o">:</span> <span class="k">public</span> <span class="n">photon</span> <span class="p">{</span>
+  <span class="n">my_photon</span><span class="p">()</span> <span class="p">{</span>
+     <span class="n">m_name</span> <span class="o">=</span> <span class="s">&quot;my_photon&quot;</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="o">~</span><span class="n">my_photon</span><span class="p">(){}</span>
+
+  <span class="k">const</span> <span class="n">Real</span> <span class="n">get_absorption_coeff</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">a_pos</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+     <span class="k">return</span> <span class="mf">1.0</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>By default, there are no input parameters available for the <a class="reference internal" href="#chap-photon"><span class="std std-ref">photons</span></a> class, but the user will often want to include these, for example by modifying the absorption coefficient. Note that you are allowed to use a spatially varying absorption coefficient.</p>
+<p>For most users, this will mostly include implementing a new geometry or a new plasma-kinetic scheme.
+It is possible to generate entirely new physics interfaces, too.
+Our goal is that the user does not need to worry about temporal or spatial discretization of these equations, but rather focus on the actual setup of the geometry and physics.</p>
+</div>
+</div>
+<div class="section" id="temporal-discretization">
+<h2>Temporal discretization<a class="headerlink" href="#temporal-discretization" title="Permalink to this headline">¶</a></h2>
+<p>In this chapter we discuss the supported temporal integrators for <cite>PlasmaC</cite>, and discuss their input parameters. These integrators differ in their level of efficiency and accuracy. Currently, none of the integrators can subcycle in time.</p>
+</div>
+<div class="section" id="time-step-limitations">
+<h2>Time step limitations<a class="headerlink" href="#time-step-limitations" title="Permalink to this headline">¶</a></h2>
+<p>Our time integrators have different time step limitations. Fully explicit codes are limited by the advective and diffusive CFL constraints and usually also the dielectric relaxation time. However, some of the <cite>PlasmaC</cite> integrators eliminate the dielectric relaxation time, and all integrators can handle diffusion either implicitly or explicitly. In some cases only the advective CFL constraint is the only time step restriction.</p>
+</div>
+<div class="section" id="deterministic-integrators">
+<h2>Deterministic integrators<a class="headerlink" href="#deterministic-integrators" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="godunov">
+<span id="chap-godunov"></span><h3>godunov<a class="headerlink" href="#godunov" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">godunov</span></code> temporal integrator is a rather unsophisticated, but very stable, temporal integrator. <code class="docutils literal notranslate"><span class="pre">godunov</span></code> uses an operator splitting between charge transport and plasma chemistry in the following way:</p>
+<ol class="arabic simple">
+<li><p>Advance <span class="math notranslate nohighlight">\(\partial_t\phi = -\nabla\cdot\left(\mathbf{v}\phi - D\nabla\phi + \sqrt{2D\phi}\mathbf{Z}\right)\)</span> (and the surface charge solver) over a time step <span class="math notranslate nohighlight">\(\Delta t\)</span>.</p></li>
+<li><p>Compute the electric field</p></li>
+<li><p>Advance the plasma chemistry over the same time step using the field computed in 2). I.e. advance <span class="math notranslate nohighlight">\(\partial_t\phi = S\)</span> over a time step <span class="math notranslate nohighlight">\(\Delta t\)</span>.</p></li>
+<li><p>Move photons and deposit them on the mesh.</p></li>
+</ol>
+<p>Various integration options for the transport and chemistry steps are available but are discussed elsewhere. Note that the <code class="docutils literal notranslate"><span class="pre">godunov</span></code> integrator uses a semi-implicit coupling between the plasma chemistry terms and the electric field, and therefore eliminates the so-called dielectric relaxation time. The formal order of convergence of the <code class="docutils literal notranslate"><span class="pre">godunov</span></code> integrator is 1, but the accuracy can be quite good depending on the transport and chemistry schemes that are chosen.</p>
+</div>
+<div class="section" id="imex-sdc">
+<span id="chap-sisdc"></span><h3>imex sdc<a class="headerlink" href="#imex-sdc" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">imex_sdc</span></code> is a semi-implicit spectral deferred correction method for the <cite>PlasmaC</cite> equation set and is an adaptive high-order discretization with implicit diffusion. This method integrates the advection-diffusion-reaction equations in the following way.</p>
+<div class="section" id="spectral-deferred-corrections">
+<h4>Spectral deferred corrections<a class="headerlink" href="#spectral-deferred-corrections" title="Permalink to this headline">¶</a></h4>
+<p>Given an ordinary differential equation (ODE) as</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial u}{\partial t} = F(u,t), \quad u(t_0) = u_0,\]</div>
+<p>the exact solution is</p>
+<div class="math notranslate nohighlight">
+\[u(t) = u_0 + \int_{t_0}^tF\left(u,\tau\right)d\tau.\]</div>
+<p>Denote an approximation to this solution by <span class="math notranslate nohighlight">\(\widetilde{u}(t)\)</span> and the correction by <span class="math notranslate nohighlight">\(\delta(t) = u(t) - \widetilde{u}(t)\)</span>. The measure of error in <span class="math notranslate nohighlight">\(\widetilde{u}(t)\)</span> is then</p>
+<div class="math notranslate nohighlight">
+\[R(\widetilde{u}, t) = u_0 + \int_{t_0}^tF(\widetilde{u}, \tau)d\tau - \widetilde{u}(t).\]</div>
+<p>Equivalently, since <span class="math notranslate nohighlight">\(u = \widetilde{u} + \delta\)</span>, we can write</p>
+<div class="math notranslate nohighlight">
+\[\widetilde{u} + \delta = u_0 + \int_{t_0}^t F\left(\widetilde{u}+\delta, \tau\right)d\tau.\]</div>
+<p>This yields</p>
+<div class="math notranslate nohighlight">
+\[\delta = \int_{t_0}^t\left[F\left(\widetilde{u}+\delta, \tau\right) - F\left(\widetilde{u}, \tau\right)\right]d\tau + R\left(\widetilde{u},t\right).\]</div>
+<p>This is called the correction equation. The goal of SDC is to iteratively solve this equation in order to provide a high-order discretization.</p>
+<p>We now discuss the semi-implicit SDC (SISDC) method. First, we apply the method of lines (MOL) such that</p>
+<div class="math notranslate nohighlight">
+\begin{align}
+\frac{d\phi_{\mathbf{i}}}{dt} &amp;= \mathcal{F}_{\textrm{AR}}\left(t, \phi_{\mathbf{i}}\right) + \mathcal{F}_{\textrm{D}}\left(t, \phi_{\mathbf{i}}; \mathbf{E}_{\mathbf{i}}\right), \\
+\frac{d\sigma_{\mathbf{i}}}{dt} &amp;= \mathcal{F}_{\sigma}\left(t, \phi_{\mathbf{i}}\right),
+\end{align}</div><p>where <span class="math notranslate nohighlight">\(\phi_{\mathbf{i}}\)</span> denotes a cell-averaged variable, <span class="math notranslate nohighlight">\(\mathcal{F}_{\sigma}\)</span> is as described in <a class="reference internal" href="Model.html#chap-spatialdiscretization"><span class="std std-ref">Spatial discretization</span></a>, <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{AR}}\left(t, \phi_{\mathbf{i}}\right) = -D^c_{\mathbf{i}} + S_{\mathbf{i}}\)</span> is the advection-reaction operator , and <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{D}}(t, \phi_{\mathbf{i}}; \mathbf{E}_{\mathbf{i}}) = \frac{1}{\kappa_{\mathbf{i}}}\int_{V_{\mathbf{i}}}\left[\nabla\cdot\left(D\nabla\phi\right)\right]dV_{\mathbf{i}}\)</span> is the diffusion operator. Note that the advective operator contains the hybrid divergence discussed in <a class="reference internal" href="CDR.html#chap-cdr"><span class="std std-ref">Convection-Diffusion-Reaction</span></a> and <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{D}}\)</span> is parametrically coupled to <span class="math notranslate nohighlight">\(\mathbf{E}\)</span> through <span class="math notranslate nohighlight">\(D = D\left(\mathbf{E}\right)\)</span> (we use a semi-colon to indicate this dependence). Strictly speaking, <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{AR}}\)</span> is parametrically coupled in the same way through the  mobilities and boundary conditions, and additionally coupled to <span class="math notranslate nohighlight">\(\Psi\)</span> through source terms so that the notation <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{AR}}\left(t, \phi_{\mathbf{i}}; \mathbf{E}_{\mathbf{i}}, \Psi_{\mathbf{i}}\right)\)</span> would be appropriate. However, charge injection, advection, and chemistry will be integrated explicitly so this dependence is notationally suppressed. On the other hand, the diffusion part will be solved with the backward Euler method - which yields a Helmholtz equation - and so we need to maintain this dependence for now. Later, we will clarify how this dependence is resolved. The rationale for solving diffusion implicitly is due to the numerical time step constraint of explicit diffusion methods which scales as <span class="math notranslate nohighlight">\(\mathcal{O}\left(\Delta x^2\right)\)</span>, whereas advection scales more favorably at <span class="math notranslate nohighlight">\(\mathcal{O}\left(\Delta x\right)\)</span>. We have chosen to integrate the reactive terms explicitly. The reason is that the reactive terms can be non-local, i.e. they can depend on the electron gradient. This is for example the case for fluid models in the local energy approximation where the electron energy source term contains terms that are proportional to the electron diffusion term <span class="math notranslate nohighlight">\(D_e\nabla\phi_e\)</span>. Implicit discretization of the reactive terms then yield a fully coupled system rather than systems coupled only within individual cells. Charge injection is also handled explicitly. This design choice is mandated by the fact that implicit charge injection through the diffusion terms couples every diffusive species, leading to a system of diffusion equations that are fully coupled through their boundary conditions. Although charge injection could reasonably be performed as a separate step, this leads to numerical instabilities for cut-cell methods since the injected charge must be normalized by the volume fraction of the cell (which can be arbitrarily small).</p>
+</div>
+<div class="section" id="sisdc-predictor">
+<h4>SISDC predictor<a class="headerlink" href="#sisdc-predictor" title="Permalink to this headline">¶</a></h4>
+<p>Next, we present the SISDC method. In what follows, we suppress the index <span class="math notranslate nohighlight">\({\mathbf{i}}\)</span> as it is not explicitly needed. Given an interval <span class="math notranslate nohighlight">\([t_n, t_{n+1}]\)</span> on which a solution is sought, SDC methods divide this interval into <span class="math notranslate nohighlight">\(p\)</span> subintervals <span class="math notranslate nohighlight">\(t_n = t_{n,0} &lt; t_{n,1} &lt; \ldots &lt; t_{n,p} = t_{n+1}\)</span>. Our discussion, however, pertains only to the interval <span class="math notranslate nohighlight">\([t_n, t_{n+1}]\)</span> so we compress the notation to <span class="math notranslate nohighlight">\(t_m\equiv t_{n,m}\)</span>. We obtain an initial solution <span class="math notranslate nohighlight">\(\phi_{m}^0, m=0,1,\ldots,p\)</span> as the semi-implicit advance</p>
+<div class="math notranslate nohighlight">
+\begin{align}
+\phi_{m+1}^0 &amp;= \phi_m^0 + \Delta t_m\left[\mathcal{F}_{\textrm{AR}}\left(t_m,\phi_m^0\right) + \mathcal{F}_{\textrm{D}}\left(t_{m+1},\phi_{m+1}^0; \mathbf{E}_{m+1}^0\right)\right],\\
+\sigma_{m+1}^0 &amp;= \sigma_m^0 + \Delta t_mF_\sigma\left(t_m,\phi_m^0\right).
+\end{align}</div><p>This defines a Helmholtz problem for <span class="math notranslate nohighlight">\(\phi_{m+1}^0\)</span> through <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{D}}\)</span>. Generally, the upper subscript denotes an SDC iteration where subscript 0 is the SISDC predictor, and we also have <span class="math notranslate nohighlight">\(\phi_0^0 = \phi(t_n)\)</span> and <span class="math notranslate nohighlight">\(\sigma_0^0 = \sigma(t_n)\)</span>. This predictor treats advection and chemistry terms explicitly, and diffusion implicitly. Other types of semi-implicit or multi-implicit couplings are possible <a class="bibtex reference internal" href="References.html#bourlioux2003" id="id1">[BLM03]</a><a class="bibtex reference internal" href="References.html#layton2004" id="id2">[LM04]</a><a class="bibtex reference internal" href="References.html#nonaka2012" id="id3">[NBD+12]</a>. SDC improves this solution by using deferred corrections: Given a numerical solution <span class="math notranslate nohighlight">\(\phi_{m+1}^k\)</span>, we compute an error <span class="math notranslate nohighlight">\(\delta_{m+1}^k\)</span> and obtain the next iterate <span class="math notranslate nohighlight">\(\phi_{m+1}^{k+1} = \phi_{m+1}^k + \delta_{m+1}^k\)</span>. Each iteration raises the discretization order by one <a class="bibtex reference internal" href="References.html#dutt2000" id="id4">[DGR00]</a><a class="bibtex reference internal" href="References.html#minion2003" id="id5">[Min03]</a>, to maximum order <span class="math notranslate nohighlight">\(p+1\)</span>. Critical to the success of this approach is the precise evaluation of the numerical quadrature.</p>
+<p>The parametric coupling of the electric field complicates things since the predictor contains <span class="math notranslate nohighlight">\(\mathbf{E}_{m+1}^0 = \mathbf{E}\left(\phi_{m+1}^0\right)\)</span>, implying that the Poisson equation and the diffusion advance require concurrent solves for the diffusion update. We simplify this system by using a weak coupling by first computing</p>
+<div class="math notranslate nohighlight">
+\begin{align}
+\phi_{m+1}^{0,\ast} &amp;= \phi_m^0 + \Delta t_m\mathcal{F}_{\textrm{AR}}\left(t_m, \phi_m^0\right), \\
+\sigma_{m+1}^0 &amp;= \sigma_m^0 + \Delta t_mF_\sigma\left(t_m, \phi_m^0\right),
+\end{align}</div><p>Next, we will approximate <span class="math notranslate nohighlight">\(\mathbf{E}_{m+1}^{0}\)</span> for use in the predictor. There are two choices for this coupling; one may either use <span class="math notranslate nohighlight">\(\mathbf{E}_m^0\)</span> for computation of the diffusion coefficients, which we will refer to as the semi-implicit coupling, or one may use fixed-point iteration and compute <span class="math notranslate nohighlight">\(\mathbf{E}_{m+1}^{0,\ast} = \mathbf{E}\left(\phi_{m+1}^{0, \ast}, \sigma_{m+1}^0\right)\)</span>, followed by the diffusion advance</p>
+<div class="math notranslate nohighlight">
+\[\phi_{m+1}^{0,\dagger} = \phi_{m+1}^{0,\ast} + \Delta t_m\mathcal{F}_{\textrm{D}}\left(t_{m+1}, \phi_{m+1}^0; \mathbf{E}_{m+1}^\ast\right),\]</div>
+<p>which we will refer to as the implicit coupling. This is e.g. the electric field coupling used in <a class="bibtex reference internal" href="References.html#marskar2019" id="id6">[Mar19]</a>. This approximation can be improved by using more fixed-point iterations that computes <span class="math notranslate nohighlight">\(\mathbf{E}_{m+1}^{0,\dagger} = \mathbf{E}\left(\phi_{m+1}^{0,\dagger}, \sigma_{m+1}^0\right)\)</span> and then re-solves the predictor equation with <span class="math notranslate nohighlight">\(\mathbf{E}_{m+1}^{0,\dagger}\)</span> in place of <span class="math notranslate nohighlight">\(\mathbf{E}_{m+1}^{0,\ast}\)</span>. The process can then be repeated for increased accuracy. Regardless of which coupling is used, we have now calculated <span class="math notranslate nohighlight">\(\phi_{m+1}^0\)</span>, <span class="math notranslate nohighlight">\(\sigma_{m+1}^0\)</span>, through which we obtain <span class="math notranslate nohighlight">\(\mathbf{E}_{m+1}^0 = \mathbf{E}\left(\phi_{m+1}^0, \sigma_{m+1}^0\right)\)</span>, and <span class="math notranslate nohighlight">\(\Psi_{m+1}^0 = \Psi\left(\mathbf{E}_{m+1}^0, \phi_{m+1}^0\right)\)</span>. Finally, we remark that the SISDC predictor is a sequentially advanced semi-implicit Euler method, which is locally second order accurate and globally first order accurate. Each step of the predictor can be thought of as a Godunov splitting between the advective-reactive and diffusive terms.</p>
+</div>
+<div class="section" id="sisdc-corrector">
+<h4>SISDC corrector<a class="headerlink" href="#sisdc-corrector" title="Permalink to this headline">¶</a></h4>
+<p>Next, the semi-implicit discretization of the correction equation is</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{split}
+\delta_{m+1}^k &amp;= \delta_m^k  + \Delta t_m\left[\mathcal{F}_{\textrm{AR}}\left(t_m, \phi_m^k + \delta_m^k\right) - \mathcal{F}_{\textrm{AR}}\left(t_m, \phi_m^k\right)\right.\\
+&amp;+ \left.\mathcal{F}_{\textrm{D}}\left(t_{m+1}, \phi_{m+1}^k + \delta_{m+1}^k; \mathbf{E}_{m+1}^k\right) - \mathcal{F}_{\textrm{D}}\left(t_{m+1}, \phi_{m+1}^k; \mathbf{E}_{m+1}^k\right)\right] - \left(R_{m+1}^k - R_{m}^k\right).
+\end{split}\end{split}\]</div>
+<p>We furthermore define</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{split}
+R_{m+1}^k - R_m^k &amp;= \int_{t_m}^{t_{m+1}}\left[\mathcal{F}_{\textrm{AR}}\left(\phi^k\right) + \mathcal{F}_{\textrm{D}}\left(\phi^k; \mathbf{E}^k\right)\right]d\tau - \phi_{m+1}^k + \phi_m^k \\
+&amp;\equiv I_m^{m+1}\left(\phi^k\right) - \phi_{m+1}^k + \phi_m^k.
+\end{split}\end{split}\]</div>
+<p>Evaluation of <span class="math notranslate nohighlight">\(I_m^{m+1}\)</span> yields <span class="math notranslate nohighlight">\(p\)</span> quadrature rules and we may write</p>
+<div class="math notranslate nohighlight">
+\[I_m^{m+1}\left(\phi^k\right) = \sum_{l=0}^p q_m^l\left[\mathcal{F}_{\textrm{AR}}\left(t_l, \phi^k_l\right) + \mathcal{F}_{\textrm{D}}\left(t_l, \phi^k_l; \mathbf{E}_l^k\right)\right],\]</div>
+<p>where the weights <span class="math notranslate nohighlight">\(q_m^l\)</span> are quadrature weights. The final update for <span class="math notranslate nohighlight">\(\phi^{k+1}_{m+1}\)</span> is then</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{split}
+\phi_{m+1}^{k+1} &amp;= \phi_{m}^{k+1} + \Delta t_m\left[\mathcal{F}_{\textrm{AR}}\left(t_m, \phi_m^{k+1}\right) -\mathcal{F}_{\textrm{AR}}\left(t_m, \phi_m^{k}\right)\right.\\
+&amp; + \left.\mathcal{F}_{\textrm{D}}\left(t_{m+1}, \phi_{m+1}^{k+1}; \phi_{m+1}^{k+1}\right) - \mathcal{F}_{\textrm{D}}\left(t_{m+1}, \phi_{m+1}^{k}; \mathbf{E}_{m+1}^k\right)\right] + I_{m}^{m+1}\left(\phi^k\right).
+\end{split}\end{split}\]</div>
+<p>With the exception of <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{D}}\left(t_{m+1}, \phi_{m+1}^{k+1}; \mathbf{E}_{m+1}^{k+1}\right)\)</span>, all quantities on the right-hand are known and the correction equation is reduced to a Helmholtz equation for <span class="math notranslate nohighlight">\(\phi_{m+1}^{k+1}\)</span> with error <span class="math notranslate nohighlight">\(\delta_{m+1}^k = \phi_{m+1}^{k+1} - \phi_{m+1}^k\)</span>. An analogous equation is found for <span class="math notranslate nohighlight">\(\sigma_{m+1}^{k+1}\)</span>.</p>
+<p>The correction step has the same coupling to the electric field as the prediction step in that <span class="math notranslate nohighlight">\(\mathbf{E}_{m+1}^{k+1}\)</span> appears in the update equation for <span class="math notranslate nohighlight">\(\phi_{m+1}^{k+1}\)</span>. As for the prediction, we use a weak coupling through which we first compute</p>
+<div class="math notranslate nohighlight">
+\begin{align}
+\phi_{m+1}^{k+1,\ast} &amp;= \phi_m^{k+1} + \Delta t_m\left[\mathcal{F}_{\textrm{AR}}\left(t_m, \phi_m^{k+1}\right) - \mathcal{F}_{\textrm{AR}}\left(t_m, \phi_m^{k}\right)\right] + I_m^{m+1}\left(\phi^k\right),\\
+\sigma_{m+1}^{k+1} &amp;= \sigma_m^{k+1} + \Delta t_m\left[F_\sigma\left(t_m, \phi_m^{k+1}\right) - F_\sigma\left(t_m, \phi_m^{k}\right)\right] + \Sigma_m^{m+1}\left(\phi^k\right).
+\end{align}</div><p>The solution for <span class="math notranslate nohighlight">\(\sigma_{m+1}^{k+1}\)</span> is final since all charge is injected through the advection operator for <span class="math notranslate nohighlight">\(\phi\)</span>. The term <span class="math notranslate nohighlight">\(\Sigma_m^{m+1}\)</span> contains the injected charge through <span class="math notranslate nohighlight">\(I_m^{m+1}\left(\phi^k\right)\)</span>, as was discussed in <a class="reference internal" href="Model.html#chap-spatialdiscretization"><span class="std std-ref">Spatial discretization</span></a>. We then solve</p>
+<div class="math notranslate nohighlight">
+\[\phi_{m+1}^{k+1} = \phi_{m+1}^{k+1, \ast} + \Delta t_m\left[\mathcal{F}_{\textrm{D}}\left(t_{m+1}, \phi_{m+1}^{k+1}; \mathbf{E}_{m+1}^{k+1}\right) - \mathcal{F}_{\textrm{D}}\left(t_{m+1}, \phi_{m+1}^{k}; \mathbf{E}_{m+1}^k\right)\right],\]</div>
+<p>with some approximation for <span class="math notranslate nohighlight">\(\mathbf{E}_{m+1}^{k+1}\)</span>. As before, this coupling can be made either semi-implicitly or implicitly. The corrector equation defines a Helmholtz equation for <span class="math notranslate nohighlight">\(\phi_{m+1}^{k+1}\)</span> using <span class="math notranslate nohighlight">\(\phi_{m+1}^{k+1,\ast}\)</span> as the previous solution and <span class="math notranslate nohighlight">\(-\mathcal{F}_{\textrm{D}}\left(\phi_{m+1}^{k}; \mathbf{E}_{m+1}^k\right)\)</span> as a source term.</p>
+</div>
+<div class="section" id="order-stability-and-computational-cost">
+<h4>Order, stability, and computational cost<a class="headerlink" href="#order-stability-and-computational-cost" title="Permalink to this headline">¶</a></h4>
+<p>For consistency with the literature, denote the SISDC method which uses <span class="math notranslate nohighlight">\(P\)</span> nodes (i.e. <span class="math notranslate nohighlight">\(P-1\)</span> subintervals) and <span class="math notranslate nohighlight">\(K\)</span> total iterations (i.e. <span class="math notranslate nohighlight">\(K-1\)</span> iterations of the correction equation) by <span class="math notranslate nohighlight">\(\verb|SISDC|_P^K\)</span>. This method will have a global order of accuracy <span class="math notranslate nohighlight">\(\min\left(K,P\right)\)</span> if the quadrature can be evaluated with appropriate accuracy. Order reductions may occur if the interpolating polynomial in the quadrature suffers from Runge’s phenomenon. As we discuss below, uniformly spaced nodes have some computational advantage but is therefore also associated with some risk. Safer choices include Lobatto nodes or Chebyshev nodes (with inclusion of endpoints) to minimize the risk of order reductions. Implications on the choice of quadrature nodes can be found in <a class="bibtex reference internal" href="References.html#layton2005" id="id7">[LM05]</a>.</p>
+<p>For explicit advection, the deferred correction procedure integrates the correction equation sequentially and therefore does not allow each substep <span class="math notranslate nohighlight">\(\Delta t_m\)</span> to exceed the CFL-limited time step <span class="math notranslate nohighlight">\(\Delta t_{\textrm{cfl}}\)</span>, i.e. <span class="math notranslate nohighlight">\(\Delta t_m &lt; \Delta t_{\textrm{cfl}} \forall m\)</span>. Since we have <span class="math notranslate nohighlight">\(\Delta t = \sum_m\Delta t_m\)</span>, uniform nodes maximize <span class="math notranslate nohighlight">\(\Delta t\)</span> subject to the CFL constraint. For example, an <span class="math notranslate nohighlight">\(\verb|SISDC|_P^K\)</span> method with uniformly spaced nodes has a maximum possible time step <span class="math notranslate nohighlight">\(\Delta t &lt; (P-1)\Delta t_{\textrm{cfl}}\)</span>. For the same number of function evaluations, the allowed time step with for Lobatto or Chebyshev nodes is smaller. For <span class="math notranslate nohighlight">\(P\leq 3\)</span>, the uniform nodes, Lobatto nodes, and Chebyshev nodes coincide. Larger time steps are possible with uniform nodes for <span class="math notranslate nohighlight">\(P&gt;3\)</span>, which has some computational consequence. The table below summarizes the largest possible time steps for the <span class="math notranslate nohighlight">\(\verb|SISDC|_P^K\)</span> method with the various quadratures. Finally, note that <span class="math notranslate nohighlight">\(\Delta t_m &lt; \Delta t_{\textrm{cfl}}\)</span> does not guarantee stability since further restrictions may required for stability of the reaction terms.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 31%" />
+<col style="width: 32%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(P\)</span></p></th>
+<th class="head"><p>Lobatto</p></th>
+<th class="head"><p>Chebyshev</p></th>
+<th class="head"><p>Uniform</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta t_{\textrm{cfl}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta t_{\textrm{cfl}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta t_{\textrm{cfl}}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p><span class="math notranslate nohighlight">\(2\Delta t_{\textrm{cfl}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2\Delta t_{\textrm{cfl}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2\Delta t_{\textrm{cfl}}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p><span class="math notranslate nohighlight">\(2.26\Delta t_{\textrm{cfl}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.73\Delta t_{\textrm{cfl}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(3\Delta t_{\textrm{cfl}}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p><span class="math notranslate nohighlight">\(3.05\Delta t_{\textrm{cfl}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.82\Delta t_{\textrm{cfl}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(4\Delta t_{\textrm{cfl}}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p><span class="math notranslate nohighlight">\(3.50\Delta t_{\textrm{cfl}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(3.29\Delta t_{\textrm{cfl}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(5\Delta t_{\textrm{cfl}}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>7</p></td>
+<td><p><span class="math notranslate nohighlight">\(4.26\Delta t_{\textrm{cfl}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(4.36\Delta t_{\textrm{cfl}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(6\Delta t_{\textrm{cfl}}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+<p>For the predictor step, it is necessary to evaluate <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{AR}}\left(\phi_m^{k+1}\right)\)</span> and thus update the Poisson and radiative transfer equations at each node. In addition, it is necessary to solve the diffusion equation at every node except <span class="math notranslate nohighlight">\(m=0\)</span> for every diffusive species, which may also require auxiliary updates of the electric field. The corrector step contains extra floating point operator due to the extra terms <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{AR}}\left(t_m, \phi_m^k\right)\)</span> and <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{D}}\left(t_{m+1}, \phi_{m+1}^k\right)\)</span> and the quadrature <span class="math notranslate nohighlight">\(I_m^{m+1}\)</span>. The computational cost of adding in these terms is small compared to the cost of an Euler update of the advection-reaction equation since one must also computate source terms, drift velocities, and boundary conditions in addition to construction of the hybrid divergence. In short, the computational cost of the predictor and corrector steps are about the same.</p>
+<p>Next, we provide some remarks on the extra computational work involved for higher order methods. Broadly speaking, the total amount of floating point operations increases quadratically with the order. Each node requires evaluation of one advection-reaction operator, at least one electric field update, and one radiative transfer update. Likewise, each substep requires one diffusion solve. Thus, <span class="math notranslate nohighlight">\(\verb|SISDC|_K^K\)</span> requires <span class="math notranslate nohighlight">\(K^2\)</span> advection-reaction evaluations, <span class="math notranslate nohighlight">\((K-1)^2\)</span> diffusion solves, <span class="math notranslate nohighlight">\((K-1)^2\)</span> radiative transfer updates, and at least <span class="math notranslate nohighlight">\(K^2\)</span> electric field updates. In these estimates we have assumed that the diffusion solve couples semi-implicitly to the electric field, thus each corrector iteration requires one electric field update per node, giving a total cost <span class="math notranslate nohighlight">\(K^2\)</span>. Strictly speaking, the number of advection-reaction evaluations is slightly less since <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{AR}}\left(t_0, \phi_0^k\right)\)</span> does not require re-evaluation in the corrector, and <span class="math notranslate nohighlight">\(\mathcal{F}_{\textrm{AR}}\left(t_p,\phi_p^{K-1}\right)\)</span> does not need to be computed for the final iteration since the lagged quadrature is not further needed. Nonetheless, the computational work is quadratically increasing, but this is partially compensated by allowance of larger time steps since the <span class="math notranslate nohighlight">\(\verb|SISDC|_K^K\)</span> has a stability limit of <span class="math notranslate nohighlight">\((K-1)\Delta t_{\textrm{cfl}}\)</span> rather than <span class="math notranslate nohighlight">\(\Delta t_{\textrm{cfl}}\)</span> for uniformly spaced nodes. For comparison with the predictor <span class="math notranslate nohighlight">\(\verb|SISDC|_K^1\)</span> which is a first order method, the work done for integration over <span class="math notranslate nohighlight">\((K-1)\Delta t_{\textrm{cfl}}\)</span> amounts to <span class="math notranslate nohighlight">\(K-1\)</span> advection-reaction updates, <span class="math notranslate nohighlight">\(K-1\)</span> diffusion updates, <span class="math notranslate nohighlight">\(K-1\)</span> radiative transfer updates, and <span class="math notranslate nohighlight">\(K\)</span> electric field updates. If we take the electric field updates as a reasonable metric for the computational work, the efficiency of the <span class="math notranslate nohighlight">\(K\)</span> th order method over the first order method is about <span class="math notranslate nohighlight">\(K\)</span> for integration over the same time interval, i.e. it increases linearly rather than quadratically. However, this estimate is only valid if we do not take accuracy into account. In practice, the predictor does not provide the same accuracy as the corrector over the same integration interval. A fair comparison of the extra computational work involved would require that the accuracy of the two methods be the same after integration over a time <span class="math notranslate nohighlight">\((K-1)\Delta t_{\textrm{cfl}}\)</span>, which will generally require more substeps for the first order method. While we do not further pursue this quantification in this paper, the pertinent point is that the extra computational work involved for tolerance-bound higher order discretizations increases sub-linearly rather than quadratically when compared to lower-order equivalents.</p>
+<p>We have implemented the SISDC algorithm in the <code class="docutils literal notranslate"><span class="pre">sisdc</span></code> class in <code class="file docutils literal notranslate"><span class="pre">/time_steppers/sisdc</span></code>. The following class options are available:</p>
+</div>
+</div>
+</div>
+<div class="section" id="stochastic-integrators">
+<span id="chap-misdc"></span><h2>Stochastic integrators<a class="headerlink" href="#stochastic-integrators" title="Permalink to this headline">¶</a></h2>
+<p>Deterministic CFD integrators are generally not suitable for stochastic ODEs. For example, the recursive nature of Heun’s method or spectral deferred corrections hardly make sense for stochastic ODEs.</p>
+<p>For fluctuating hydrodynamics we are preparing several temporal integrators. <code class="docutils literal notranslate"><span class="pre">godunov</span></code> is generally useful for FHD but we also provide an Euler-Maruyama integrator (<code class="docutils literal notranslate"><span class="pre">euler_maruyama</span></code>) which is first order accurate in time (although with an accurate advective integrator). Although <code class="docutils literal notranslate"><span class="pre">euler_maruyama</span></code> is functionally similar to <code class="docutils literal notranslate"><span class="pre">godunov</span></code>, it does not eliminate the dielectric relaxation time and is therefore less stable for some simulation cases.</p>
+<div class="section" id="euler-maruyama">
+<span id="chap-euler-maruyama"></span><h3>euler_maruyama<a class="headerlink" href="#euler-maruyama" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference internal" href="#chap-euler-maruyama"><span class="std std-ref">euler_maruyama</span></a> implements the Euler-Maruyama method. This method is based on an Euler method with explicit or implicit diffusion.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Tutorial.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="BrownianWalkerModel.html" class="btn btn-neutral float-left" title="Brownian walker model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Robert Marskar
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

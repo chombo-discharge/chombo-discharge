@@ -205,7 +205,7 @@ void EBFastFluxRegister::defineMasks(){
   const int ghostCoFi = 1;
   for (int i = 0; i < coFiBoxes.size(); i++){
     coFiBoxes[i].grow(ghostCoFi);
-    coFiBoxes[i] &= coarDomain;
+    //    coFiBoxes[i] &= coarDomain;
   }
 
   const DisjointBoxLayout grownCoFiGrid(coFiBoxes, coFiProcs);

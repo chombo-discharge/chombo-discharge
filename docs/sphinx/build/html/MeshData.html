@@ -1,0 +1,275 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Understanding mesh data &mdash; PlasmaC 19.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Understanding particle data" href="ParticleData.html" />
+    <link rel="prev" title="Realm" href="Realm.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PlasmaC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                19.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">PlasmaC introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Model.html">The <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Basics.html">Chombo basics</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Using PlasmaC</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Understanding mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParticleData.html">Understanding particle data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">PlasmaC design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">amr_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">computational_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">time_stepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">cell_tagger</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Supported solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Solver.html">Solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Poisson.html">Poisson</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Implemented models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="PoissonModel.html">Poisson model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection diffusion model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimalPlasmaModel.html">Minimal plasma model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html#setting-up-time-stepper">Setting up <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="References.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PlasmaC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Understanding mesh data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/MeshData.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="understanding-mesh-data">
+<span id="chap-meshdata"></span><h1>Understanding mesh data<a class="headerlink" href="#understanding-mesh-data" title="Permalink to this headline">¶</a></h1>
+<p>Mesh datastructures in <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> are derived from a class <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> which holds a typename <code class="docutils literal notranslate"><span class="pre">T</span></code> at every box at every level in the AMR hierarchy.
+Internally, the data is stored as a <code class="docutils literal notranslate"><span class="pre">Vector&lt;RefCountedPtr&lt;LevelData&lt;T&gt;</span> <span class="pre">&gt;</span> <span class="pre">&gt;</span></code> and the user may fetch the data through <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;::get_data()</span></code>.
+Here, the <code class="docutils literal notranslate"><span class="pre">Vector</span></code> holds a set of data on each AMR level; the data is allocated with a smart pointer called <code class="docutils literal notranslate"><span class="pre">RefCountedPtr</span></code> which points to a <code class="docutils literal notranslate"><span class="pre">LevelData</span></code> template structure, see <a class="reference internal" href="Basics.html#chap-basics"><span class="std std-ref">Chombo basics</span></a>.</p>
+<p>The reason for having class encapsulation of mesh data is due to <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>, so that we can only keep track on which realm the mesh data is defined.
+Users will not have to interact with <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> directly, but will do so primarily through <code class="docutils literal notranslate"><span class="pre">amr_mesh</span></code>.
+<code class="docutils literal notranslate"><span class="pre">amr_mesh</span></code> has functionality for defining most <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> types on one of the realms, and <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> itself it typically not used anywhere elsewhere within <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code>.</p>
+<p>A number of explicit template specifications also exist, and these are outlined below:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="n">EBAMRData</span><span class="o">&lt;</span><span class="n">MFCellFAB</span><span class="o">&gt;</span>        <span class="n">MFAMRCellData</span><span class="p">;</span>  <span class="c1">// Cell-centered multifluid data</span>
+<span class="k">typedef</span> <span class="n">EBAMRData</span><span class="o">&lt;</span><span class="n">MFFluxFAB</span><span class="o">&gt;</span>        <span class="n">MFAMRFluxData</span><span class="p">;</span>  <span class="c1">// Face-centered multifluid data</span>
+<span class="k">typedef</span> <span class="n">EBAMRData</span><span class="o">&lt;</span><span class="n">MFBaseIVFAB</span><span class="o">&gt;</span>      <span class="n">MFAMRIVData</span><span class="p">;</span>    <span class="c1">// Irregular face multifluid data</span>
+<span class="k">typedef</span> <span class="n">EBAMRData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;</span>        <span class="n">EBAMRCellData</span><span class="p">;</span>  <span class="c1">// Cell-centered single-phase data</span>
+<span class="k">typedef</span> <span class="n">EBAMRData</span><span class="o">&lt;</span><span class="n">EBFluxFAB</span><span class="o">&gt;</span>        <span class="n">EBAMRFluxData</span><span class="p">;</span>  <span class="c1">// Face-centered data in all coordinate direction</span>
+<span class="k">typedef</span> <span class="n">EBAMRData</span><span class="o">&lt;</span><span class="n">EBFaceFAB</span><span class="o">&gt;</span>        <span class="n">EBAMRFaceData</span><span class="p">;</span>  <span class="c1">// Face-centered in a single coordinate direction</span>
+<span class="k">typedef</span> <span class="n">EBAMRData</span><span class="o">&lt;</span><span class="n">BaseIVFAB</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">EBAMRIVData</span><span class="p">;</span>    <span class="c1">// Data on irregular data centroids</span>
+<span class="k">typedef</span> <span class="n">EBAMRData</span><span class="o">&lt;</span><span class="n">DomainFluxIFFAB</span><span class="o">&gt;</span>  <span class="n">EBAMRIFData</span><span class="p">;</span>    <span class="c1">// Data on domain phases</span>
+<span class="k">typedef</span> <span class="n">EBAMRData</span><span class="o">&lt;</span><span class="n">BaseFab</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="o">&gt;</span>   <span class="n">EBAMRBool</span><span class="p">;</span>      <span class="c1">// For holding bool at every cell</span>
+</pre></div>
+</div>
+<p>There are many more data structures in place, but the above data structures are the most commonly used ones.
+Here, <code class="docutils literal notranslate"><span class="pre">EBAMRFluxData</span></code> is precisely like <code class="docutils literal notranslate"><span class="pre">EBAMRCellData</span></code>, except that the data is stored on <em>cell faces</em> rather than cell centers.
+Likewise, <code class="docutils literal notranslate"><span class="pre">EBAMRIVData</span></code> is a typedef’ed data holder that holds data on each cut-cell center across the entire AMR hierachy.
+In the same way, <code class="docutils literal notranslate"><span class="pre">EBAMRIFData</span></code> holds data on each face of all cut cells.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="ParticleData.html" class="btn btn-neutral float-right" title="Understanding particle data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Realm.html" class="btn btn-neutral float-left" title="Realm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Robert Marskar
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

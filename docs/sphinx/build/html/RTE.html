@@ -1,0 +1,357 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Radiative transfer &mdash; PlasmaC 19.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Surface charge solver" href="Sigma.html" />
+    <link rel="prev" title="Poisson" href="Poisson.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PlasmaC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                19.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">PlasmaC introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Model.html">The <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code> code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Basics.html">Chombo basics</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Using PlasmaC</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Understanding mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParticleData.html">Understanding particle data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">PlasmaC</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">PlasmaC design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">amr_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">computational_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">time_stepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">cell_tagger</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Supported solvers</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Solver.html">Solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Poisson.html">Poisson</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Radiative transfer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#diffusion-approximation">Diffusion approximation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monte-carlo-methods">Monte Carlo methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#photon-particle">photon particle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interaction-with-boundaries">Interaction with boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stationary-monte-carlo">Stationary Monte Carlo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transient-monte-carlo">Transient Monte Carlo</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#limitations">Limitations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Implemented models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="PoissonModel.html">Poisson model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection diffusion model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimalPlasmaModel.html">Minimal plasma model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html#setting-up-time-stepper">Setting up <code class="docutils literal notranslate"><span class="pre">time_stepper</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="References.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PlasmaC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Radiative transfer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/RTE.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="radiative-transfer">
+<span id="chap-radiativetransfer"></span><h1>Radiative transfer<a class="headerlink" href="#radiative-transfer" title="Permalink to this headline">¶</a></h1>
+<p>Radiative transfer is supported in the diffusion (i.e. Eddington or Helmholtz) approximation and with Monte Carlo sampling of discrete photons.
+The solvers share a common interface but since diffusion RTE is deterministic and discrete Monte Carlo photons are stochastic, not all temporal integration methods will support both.
+The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or ‘’stationary’’ transport.</p>
+<div class="section" id="diffusion-approximation">
+<h2>Diffusion approximation<a class="headerlink" href="#diffusion-approximation" title="Permalink to this headline">¶</a></h2>
+<p>In the diffusion approximation, the radiative transport equation is</p>
+<div class="math notranslate nohighlight">
+\[\partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
+<p>which is called the Eddington approximation. The radiative flux is <span class="math notranslate nohighlight">\(F = -\frac{c}{3\kappa}\nabla \Psi\)</span>.
+We do not currently support flux-limited diffusion radiative transfer.
+In the stationary case this yields a Helmholtz equation</p>
+<div class="math notranslate nohighlight">
+\[\kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
+<p>which is solved by a geometric multigrid method. The default boundary conditions are of the Robin type.
+For fully transient radiative transport, we offer discretizations based on the backward Euler and TGA schemes.</p>
+</div>
+<div class="section" id="monte-carlo-methods">
+<h2>Monte Carlo methods<a class="headerlink" href="#monte-carlo-methods" title="Permalink to this headline">¶</a></h2>
+<p>All types of moment-closed radiative transfer equations contain nonphysical artifacts (which may or may not be acceptable).
+For example, in the diffusion approximation the radiative flux is <span class="math notranslate nohighlight">\(F = -\frac{c}{3\kappa}\nabla \Psi\)</span>, implying that photons can leak around boundaries.
+I.e. the diffusion approximation does not correctly describe shadows.
+It is possible to go beyond the diffusion approximation by also solving for higher-order moments like the radiative flux.
+While such methods can describe shadows, they contain other nonphysical features.</p>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="_images/rte_comp.png"><img alt="_images/rte_comp.png" src="_images/rte_comp.png" style="width: 720px;" /></a>
+<p class="caption"><span class="caption-number">Fig. 7 </span><span class="caption-text">Qualitative comparison between predictions made with a diffusion RTE solver and a Monte Carlo RTE solver.
+Left: Source term.
+Middle: Solution computed in the diffusion approximation with homogeneous Robin boundary conditions.
+Right: Solution computed with a Monte Carlo method.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>Both ‘’stationary’’ and transient Monte Carlo methods are offered as an alternative to the diffusion approximation.</p>
+<div class="section" id="photon-particle">
+<h3>photon particle<a class="headerlink" href="#photon-particle" title="Permalink to this headline">¶</a></h3>
+<p>The Îto particle is a computational particle class in <cite>PlasmaC</cite> which can be used together with the particle tools in <cite>Chombo</cite>.
+The following data fields are implemented in the particle:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span> <span class="n">m_position</span><span class="p">;</span>
+<span class="n">RealVect</span> <span class="n">m_velocity</span><span class="p">;</span>
+<span class="n">Real</span> <span class="n">m_mass</span><span class="p">;</span>
+<span class="n">Real</span> <span class="n">m_kappa</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>To obtain the fields, the user will call</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">position</span><span class="p">();</span>
+<span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">velocity</span><span class="p">();</span>
+<span class="n">Real</span><span class="o">&amp;</span> <span class="n">mass</span><span class="p">();</span>
+<span class="n">Real</span><span class="o">&amp;</span> <span class="n">diffusion</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>All functions also have <code class="docutils literal notranslate"><span class="pre">const</span></code> versions.
+Note that the field <code class="docutils literal notranslate"><span class="pre">m_mass</span></code> is the same as the <em>weight</em> of the computational particle.
+The following functions are used to set the various properties:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">setPosition</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_pos</span><span class="p">);</span>
+<span class="n">setVelocity</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_vel</span><span class="p">);</span>
+<span class="n">setMass</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_mass</span><span class="p">);</span>
+<span class="n">setDiffusion</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_diffusion</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="interaction-with-boundaries">
+<h3>Interaction with boundaries<a class="headerlink" href="#interaction-with-boundaries" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="stationary-monte-carlo">
+<h3>Stationary Monte Carlo<a class="headerlink" href="#stationary-monte-carlo" title="Permalink to this headline">¶</a></h3>
+<p>The stationary Monte Carlo method proceeds as follows.</p>
+<ol class="arabic simple">
+<li><p>For each cell in the mesh, draw a discrete number of photons <span class="math notranslate nohighlight">\(\mathcal{P}\left(\eta \Delta V\Delta t\right)\)</span> where <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> is a Poisson distribution. The user may also choose to use pseudophotons rather than physical photons by modifying photon weights. Each photon is generated in the cell centroid <span class="math notranslate nohighlight">\(\mathbf{x}_0\)</span> and given a random propagation direction <span class="math notranslate nohighlight">\(\mathbf{n}\)</span>.</p></li>
+<li><p>Draw a propagation distance <span class="math notranslate nohighlight">\(r\)</span> by drawing random numbers from an exponential distribution <span class="math notranslate nohighlight">\(p(r) = \kappa \exp\left(-\kappa r\right)\)</span>. The absorbed position of the photon is <span class="math notranslate nohighlight">\(\mathbf{x} = \mathbf{x}_0 + r\mathbf{n}\)</span>.</p></li>
+<li><p>Check if the path from <span class="math notranslate nohighlight">\(\mathbf{x}_0\)</span> to <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> intersects an internal or domain boundary. If it does, absorb the photon on the boundary. If not, move the photon to <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> or reflect it off symmetry boundaries.</p></li>
+<li><p>Rebin the absorbed photons onto the AMR grid. This involves parallel communication.</p></li>
+<li><p>Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell).</p></li>
+</ol>
+<p>The Monte Carlo methods use computational particles for advancing the photons in exactly the same way a Particle-In-Cell method would use them for advancing electrons. Although a computational photon would normally live on the finest grid level that overlaps its position, this is not practical for all particle deposition kernels. For example, for cloud-in-cell deposition schemes it is useful to have the restrict the interpolation kernels to the grid level where the particle lives. In Chombo-speak, we therefore use a buffer region that extends some cells from a refinement boundary where the photons are not allowed to live. Instead, photons in that buffer region are transferred to a coarser level, and their deposition clouds are first interpolated to the fine level before deposition on the fine level happens. Selecting a deposition scheme and adjusting the buffer region is done through an input script associated with the solver.</p>
+</div>
+<div class="section" id="transient-monte-carlo">
+<h3>Transient Monte Carlo<a class="headerlink" href="#transient-monte-carlo" title="Permalink to this headline">¶</a></h3>
+<p>The transient Monte Carlo method is almost identical to the stationary method, except that it does not deposit all generated photons on the mesh but tracks them through time. The transient method is implemented as follows:</p>
+<ol class="arabic simple">
+<li><p>For each cell in the mesh, draw a discrete number of photons <span class="math notranslate nohighlight">\(\mathcal{P}\left(\eta \Delta V\Delta t\right)\)</span> as above, and append these to the already existing photons. Each photon is given a uniformly distributed random creation time within <span class="math notranslate nohighlight">\(\Delta t\)</span>.</p></li>
+<li><p>Each photon is advanced over the time step <span class="math notranslate nohighlight">\(\Delta t\)</span> by a sequence of <span class="math notranslate nohighlight">\(N\)</span> substeps (<span class="math notranslate nohighlight">\(N\)</span> may be different for each photon).</p>
+<ol class="loweralpha simple">
+<li><p>We compute <span class="math notranslate nohighlight">\(N\)</span> such that we sample <span class="math notranslate nohighlight">\(N\Delta \tau = \Delta t\)</span> with <span class="math notranslate nohighlight">\(c\kappa\Delta\tau &lt; 1\)</span>.</p></li>
+<li><p>A photon at position <span class="math notranslate nohighlight">\(\mathbf{x}_0\)</span> is moved a distance <span class="math notranslate nohighlight">\(\Delta \mathbf{x} = c\mathbf{n}\Delta\tau\)</span>. For each step we compute the absorption probability <span class="math notranslate nohighlight">\(p = \kappa\left|\Delta\mathbf{x}\right|\)</span> where <span class="math notranslate nohighlight">\(p\in[0,1]\)</span> is a uniform random number. If the photon is absorbed on this interval, draw a new uniform random number <span class="math notranslate nohighlight">\(r \in [0,1]\)</span> and absorb the photon at the position <span class="math notranslate nohighlight">\(\mathbf{x}_0 + r\Delta\mathbf{x}\)</span>. If the photon is not absorbed, it is moved to position <span class="math notranslate nohighlight">\(\mathbf{x}_0 + r\Delta\mathbf{x}\)</span>.</p></li>
+</ol>
+</li>
+<li><p>Check if the path from <span class="math notranslate nohighlight">\(\mathbf{x}_0\)</span> to <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> intersects an internal or domain boundary. If it does, absorb the photon on the boundary. If not, move the photon to <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>.</p></li>
+<li><p>Rebin the absorbed photons onto the AMR grid. This involves parallel communication.</p></li>
+<li><p>Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell).</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Sigma.html" class="btn btn-neutral float-right" title="Surface charge solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Poisson.html" class="btn btn-neutral float-left" title="Poisson" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Robert Marskar
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
