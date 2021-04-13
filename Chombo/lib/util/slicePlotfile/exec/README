@@ -1,9 +1,0 @@
-utility for slicing 4d plotfiles to 2D or 3D for ease of visualization, etc.
-(future extension would be to arbitrary-dimensioned source plotfile)
-
-usage:
-slicePlot.<config>.ex <filename.4d.hdf5> <dir1> <comp1> (<dir2> <comp2>)
-
-if dir2 and comp2 not defined, takes filename.4d.hdf5 and slices it in the dir1 direction at comp1 and writes to a plotfile named filename.3d.hdf5
-
-if dir2 and comp2 are defined, performs the same 4d->3d slice as above, then performs a slice from 3d->2d in the dir2 direction at comp2 and writes to a plotfile named filename.2d.hdf5

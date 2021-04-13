@@ -1,7 +1,0 @@
-#!/bin/sh
-
-## make symbolic links for the login nodes on seaborg
-
-for s in jacin01 jacin02 jacin03 jacin04 ; do
-  ln -s Make.defs.jacquard Make.defs.$s
-done

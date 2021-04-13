@@ -1,9 +1,0 @@
-This directory contains the files needed for the chdiff utility, which makes use of the ChomboCompare code.  Use "chdiff" to diff two Chombo hdf5 plotfiles which have the same domains and AMR grid hierarchies.
-
-In particular, chdiff uses the "sameSize" option in the ChomboCompare code to subtract one hdf5 file from the other, then report norms of the differences for each variable that appears in both plotfiles, either to stdout (serial) or a pout file (MPI).  It also produces a diff.hdf5 file which contains the differences for easy visualization.
-
-To use:
-1. build the ChomboCompare utility.
-2. edit the "chdiff" file to set the path in the "compare" variable on line 24 to point to your current installation of ChomboCompare
-3. copy both "chdiff" and "chdiff.template" to a location in your path.
-4. At that point, you should be invoke chdiff the same way that one invokes the regular diff. For example, "chdiff file1.2d.hdf5 file2.2d.hdf5 "

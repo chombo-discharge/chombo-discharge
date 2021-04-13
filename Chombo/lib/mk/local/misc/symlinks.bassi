@@ -1,7 +1,0 @@
-#!/bin/sh
-
-## make symbolic links for the login nodes on bassi
-
-for s in b0301 b0201 ; do
-  ln -s Make.defs.bassi Make.defs.$s
-done
