@@ -1,4 +1,3 @@
-export CHOMBO_HOME=$(PLASMAC_HOME)/Chombo/lib
 include $(CHOMBO_HOME)/mk/Make.defs
 
 include $(CHOMBO_HOME)/mk/Make.defs
