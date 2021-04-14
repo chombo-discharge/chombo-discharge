@@ -308,6 +308,11 @@ protected:
   bool m_write_regrid_files;
 
   /*!
+    @brief Write restart files or not
+  */
+  bool m_write_restart_files;
+
+  /*!
     @brief Allow grid coarsening
   */
   bool m_allow_coarsen;
@@ -531,6 +536,11 @@ protected:
     @brief Write a regrid file
   */
   void write_regrid_file();
+
+    /*!
+    @brief Write a restart file
+  */
+  void write_restart_file();
 
   /*!
     @brief Write a plot file

@@ -961,6 +961,7 @@ void driver::parse_options(){
   pp.get("plot_interval",            m_plot_interval);
   pp.get("checkpoint_interval",      m_chk_interval);
   pp.get("write_regrid_files",       m_write_regrid_files);
+  pp.get("write_restart_files",      m_write_restart_files);
   pp.get("num_plot_ghost",           m_num_plot_ghost);
   pp.get("allow_coarsening",         m_allow_coarsen);
   pp.get("geometry_only",            m_geometry_only);
@@ -1054,8 +1055,6 @@ void driver::parse_geo_refinement(){
   m_geom_tag_depth = Max(m_geom_tag_depth, m_gas_dielectric_interface_tag_depth);
   m_geom_tag_depth = Max(m_geom_tag_depth, m_gas_solid_interface_tag_depth);
   m_geom_tag_depth = Max(m_geom_tag_depth, m_solid_solid_interface_tag_depth);
-
-  std::cout << m_dielectric_tag_depth <<"\n";
 }
 
 void driver::create_output_directories(){
@@ -1115,6 +1114,12 @@ void driver::create_output_directories(){
     success = system(cmd.c_str());
     if(success != 0){
       std::cout << "driver::set_output_directory - master could not create regrid directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/restart";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create restart directory" << std::endl;
     }    
   }
   
@@ -1366,6 +1371,10 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
     m_celltagger->regrid();         
   }
 
+  if(m_write_restart_files){
+    this->write_restart_file();
+  }
+
   // Initial regrids
   for (int i = 0; i < a_init_regrids; i++){
     if(m_verbosity > 0){
@@ -1380,6 +1389,8 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
       this->grid_report();
     }
   }
+
+
 }
 
 void driver::sanity_check(){
@@ -1812,6 +1823,22 @@ void driver::write_regrid_file(){
   char file_char[1000];
   const std::string prefix = m_output_dir + "/regrid/" + m_output_names;
   sprintf(file_char, "%s.regrid%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
+  string fname(file_char);
+
+  this->write_plot_file(fname);
+
+}
+
+void driver::write_restart_file(){
+  CH_TIME("driver::write_restart_file");
+  if(m_verbosity > 3){
+    pout() << "driver::write_restart_file" << endl;
+  }
+
+  // Filename
+  char file_char[1000];
+  const std::string prefix = m_output_dir + "/restart/" + m_output_names;
+  sprintf(file_char, "%s.restart%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
   string fname(file_char);
 
   this->write_plot_file(fname);
