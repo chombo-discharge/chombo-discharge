@@ -37,11 +37,8 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   CH_TIME("driver::driver(full)");
 
   parse_verbosity();
-  if(m_verbosity > 5){
-    pout() << "driver::driver(full)" << endl;
-  }
   
-  set_computational_geometry(a_compgeom);              // Set computational geometry
+ set_computational_geometry(a_compgeom);              // Set computational geometry
   set_time_stepper(a_timestepper);                     // Set time stepper
   set_amr(a_amr);                                      // Set amr
   set_cell_tagger(a_celltagger);                       // Set cell tagger
@@ -693,6 +690,7 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
 			base_regrid - cell_tags,
 			solver_regrid - base_regrid);
   }
+
 }
 
 void driver::regrid_internals(const int a_old_finest_level, const int a_new_finest_level){
@@ -859,6 +857,8 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	  }
 #endif
 	}
+
+	this->rebuildParmParse();
       }
 
       // if(m_dump_mass){
@@ -989,7 +989,7 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
   }
 }
 
-void driver::setup_and_run(){
+void driver::setup_and_run(const std::string a_input_file){
   CH_TIME("driver::setup_and_run");
   if(m_verbosity > 0){
     pout() << "driver::setup_and_run" << endl;
@@ -999,11 +999,17 @@ void driver::setup_and_run(){
   sprintf(iter_str, ".check%07d.%dd.hdf5", m_restart_step, SpaceDim);
   const std::string restart_file = m_output_dir + "/chk/" + m_output_names + std::string(iter_str);
 
-  this->setup(m_init_regrids, m_restart, restart_file);
+  this->setup(a_input_file, m_init_regrids, m_restart, restart_file);
 
   if(!m_geometry_only){
     this->run(m_start_time, m_stop_time, m_max_steps);
   }
+}
+
+void driver::rebuildParmParse() const {
+  ParmParse pp("");
+
+  pp.redefine(m_input_file.c_str());
 }
 
 void driver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
@@ -1455,11 +1461,13 @@ void driver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
 
 }
 
-void driver::setup(const int a_init_regrids, const bool a_restart, const std::string a_restart_file){
+void driver::setup(const std::string a_input_file, const int a_init_regrids, const bool a_restart, const std::string a_restart_file){
   CH_TIME("driver::setup");
   if(m_verbosity > 5){
     pout() << "driver::setup" << endl;
   }
+
+  m_input_file = a_input_file;
 
   if(m_geometry_only){
     this->setup_geometry_only();

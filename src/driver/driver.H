@@ -44,7 +44,7 @@ public:
   /*!
     @brief Setup and run simulations
   */
-  virtual void setup_and_run();
+  virtual void setup_and_run(const std::string a_input_file);
 
   // /*!
   //   @brief This function will read two checkpoint files, and compute the error norms on the finest level in a_chk_coar data 
@@ -84,7 +84,7 @@ public:
   /*!
     @brief Setup function
   */
-  virtual void setup(const int a_init_regrids, const bool a_restart, const std::string a_restart_file);
+  virtual void setup(const std::string a_input_file, const int a_init_regrids, const bool a_restart, const std::string a_restart_file);
 
   /*!
     @brief Set amr
@@ -128,6 +128,8 @@ public:
   virtual void sanity_check();
 
 protected:
+
+
 
   /*!
     @brief Memory report mode enum
@@ -182,6 +184,11 @@ protected:
     @brief Memory report mode
   */
   memory_report_mode m_memory_mode;
+
+  /*!
+    @brief Input file
+  */
+  std::string m_input_file;
 
   /*!
     @brief
@@ -729,5 +736,10 @@ protected:
     @brief Return the finest tag level
   */
   virtual int get_finest_tag_level(const EBAMRTags& a_cell_tags) const;
+
+  /*!
+    @brief Rebuild Parmparse
+  */
+  virtual void rebuildParmParse() const;
 };
 #endif
