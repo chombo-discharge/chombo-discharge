@@ -37,29 +37,10 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   m_amr->build_domains();                // Build domains and resolutions, nothing else
 
   // Parse some class options
-#if 1
   parse_options();
+
+  // Create output directories. 
   create_output_directories();
-#else
-  parse_verbosity();
-  parse_regrid();
-  parse_restart();
-  parse_memrep();
-  parse_coarsen();
-  parse_output_directory();
-  parse_output_file_names();
-  parse_verbosity();
-  parse_output_intervals();
-  parse_geo_refinement();
-  parse_num_plot_ghost();
-  parse_grow_tags();
-  parse_geom_only();
-  parse_ebis_memory_load_balance();
-  parse_simulation_time();
-  parse_file_depth();
-  parse_plot_vars();
-  parse_geometry_generation();
-#endif
 
   // Ok we're ready to go. 
   m_step          = 0;
@@ -364,16 +345,16 @@ void driver::get_loads_and_boxes(long long& a_myPoints,
 }
 
 const std::string driver::number_fmt(const long long n, char sep) const {
-    stringstream fmt;
-    fmt << n;
-    string s = fmt.str();
-    s.reserve(s.length() + s.length() / 3);
+  stringstream fmt;
+  fmt << n;
+  string s = fmt.str();
+  s.reserve(s.length() + s.length() / 3);
 
-    for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j)
-        if (i != 0 && j % 3 == 0)
-            s.insert(i++, 1, sep);
+  for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j)
+    if (i != 0 && j % 3 == 0)
+      s.insert(i++, 1, sep);
 
-    return s;
+  return s;
 }
 
 const Vector<std::string> driver::number_fmt(const Vector<long long> a_number, char a_sep) const{
@@ -507,19 +488,19 @@ void driver::grid_report(){
 	   << "\t\t\t\t        Proc. # of boxes       = " << number_fmt(myBoxes) << endl
 	   << "\t\t\t\t        Proc. # of boxes (lvl) = " << number_fmt(my_level_boxes) << endl
 	   << "\t\t\t\t        Proc. # of cells (lvl) = " << number_fmt(my_level_points) << endl;
-      }
+  }
   
   pout()
 #ifdef CH_USE_MEMORY_TRACKING
-	 << "\t\t\t        Unfreed memory        = " << curMem/BytesPerMB << " (MB)" << endl
-    	 << "\t\t\t        Peak memory usage     = " << peakMem/BytesPerMB << " (MB)" << endl
+    << "\t\t\t        Unfreed memory        = " << curMem/BytesPerMB << " (MB)" << endl
+    << "\t\t\t        Peak memory usage     = " << peakMem/BytesPerMB << " (MB)" << endl
 #ifdef CH_MPI
-    	 << "\t\t\t        Max unfreed memory    = " << max_unfreed_mem/BytesPerMB << " (MB)" << endl
-	 << "\t\t\t        Max peak memory       = " << max_peak_mem/BytesPerMB << " (MB)" << endl
+    << "\t\t\t        Max unfreed memory    = " << max_unfreed_mem/BytesPerMB << " (MB)" << endl
+    << "\t\t\t        Max peak memory       = " << max_peak_mem/BytesPerMB << " (MB)" << endl
 #endif
-    	 << "-----------------------------------------------------------------------" << endl
+    << "-----------------------------------------------------------------------" << endl
 #endif
-	 << endl;
+    << endl;
 
   pout() << endl;
 }
@@ -868,18 +849,6 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	this->step_report(a_start_time, a_end_time, a_max_steps);
       }
 
-#if 0 // Development feature
-      // Positive current = current OUT OF DOMAIN
-      const Real electrode_I  = m_timestepper->compute_electrode_current();
-      const Real dielectric_I = m_timestepper->compute_dielectric_current();
-      const Real ohmic_I      = m_timestepper->compute_ohmic_induction_current();
-      const Real domain_I     = m_timestepper->compute_domain_current();
-      if(procID() == 0){
-	std::cout << m_time << "\t" << electrode_I << "\t" << domain_I << "\t" << ohmic_I << std::endl;
-      }
-#endif
-
-
 #ifdef CH_USE_HDF5
       if(m_plot_interval > 0){
 
@@ -945,7 +914,7 @@ void driver::setup_and_run(const std::string a_input_file){
 void driver::rebuildParmParse() const {
   ParmParse pp("driver");
 
-  //  pp.redefine(m_input_file.c_str());
+  pp.redefine(m_input_file.c_str());
 }
 
 void driver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
@@ -985,58 +954,7 @@ void driver::set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen){
   m_geocoarsen = a_geocoarsen;
 }
 
-void driver::set_geom_refinement_depth(const int a_depth1,
-				       const int a_depth2,
-				       const int a_depth3,
-				       const int a_depth4,
-				       const int a_depth5,
-				       const int a_depth6){
-  CH_TIME("driver::set_geom_refinement_depth(full");
-  if(m_verbosity > 5){
-    pout() << "driver::set_geom_refinement_depth(full)" << endl;
-  }
-  
-  const int max_depth = m_amr->get_max_amr_depth();
 
-  m_conductor_tag_depth                = Min(a_depth1, max_depth);
-  m_dielectric_tag_depth               = Min(a_depth2, max_depth);
-  m_gas_conductor_interface_tag_depth  = Min(a_depth3, max_depth);
-  m_gas_dielectric_interface_tag_depth = Min(a_depth4, max_depth);
-  m_gas_solid_interface_tag_depth      = Min(a_depth5, max_depth);
-  m_solid_solid_interface_tag_depth    = Min(a_depth6, max_depth);
-
-
-  m_geom_tag_depth = 0;
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth1);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth2);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth3);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth4);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth5);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth6);
-}
-
-void driver::parse_geometry_generation(){
-  CH_TIME("driver::parse_geometry_generation");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_geometry_generation" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("geometry_generation", m_geometry_generation);
-  pp.get("geometry_scan_level", m_geo_scan_level);
-  
-
-  if(m_geometry_generation == "plasmac"){ // Need to activate some flags that trigger the correct code. 
-    computational_geometry::s_use_new_gshop = true;
-    EBISLevel::s_distributedData            = true;
-    computational_geometry::s_ScanDomain = m_amr->get_domains()[m_geo_scan_level];
-  }
-  else if(m_geometry_generation == "chombo"){
-  }
-  else{
-    MayDay::Abort("driver:parse_geometry_generation - unsupported argument requested");
-  }
-}
 
 void driver::parse_options(){
   CH_TIME("driver::parse_geometry_generation");
@@ -1070,16 +988,132 @@ void driver::parse_options(){
   pp.get("max_plot_depth",           m_max_plot_depth);
   pp.get("max_chk_depth",            m_max_chk_depth);
 
-  // Stuff that's too extensive to clutter with here. 
-  parse_plot_vars();
-  parse_geometry_generation();
-  parse_geo_refinement();
-
-  //
   m_restart   = (m_restart_step > 0) ? true : false;
   m_grow_tags = Max(0, m_grow_tags);
 
-  std::cout << m_geom_tag_depth << std::endl;
+  // Stuff that's a little too verbose to include here directly. 
+  parse_plot_vars();
+  parse_geometry_generation();
+  parse_geo_refinement();
+}
+
+void driver::parse_plot_vars(){
+  ParmParse pp("driver");
+  const int num = pp.countval("plt_vars");
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
+
+  m_plot_tags     = false;
+  m_plot_ranks    = false;
+  m_plot_levelset = false;
+  
+  for (int i = 0; i < num; i++){
+    if(     str[i] == "tags")     m_plot_tags     = true;
+    else if(str[i] == "mpi_rank") m_plot_ranks    = true;
+    else if(str[i] == "levelset") m_plot_levelset = true;
+  }
+}
+
+
+void driver::parse_geometry_generation(){
+  CH_TIME("driver::parse_geometry_generation");
+  if(m_verbosity > 5){
+    pout() << "driver::parse_geometry_generation" << endl;
+  }
+
+  ParmParse pp("driver");
+  pp.get("geometry_generation", m_geometry_generation);
+  pp.get("geometry_scan_level", m_geo_scan_level);
+  
+
+  if(m_geometry_generation == "plasmac"){ // Need to activate some flags that trigger the correct code. 
+    computational_geometry::s_use_new_gshop = true;
+    EBISLevel::s_distributedData            = true;
+    computational_geometry::s_ScanDomain = m_amr->get_domains()[m_geo_scan_level];
+  }
+  else if(m_geometry_generation == "chombo"){
+  }
+  else{
+    MayDay::Abort("driver:parse_geometry_generation - unsupported argument requested");
+  }
+}
+
+void driver::parse_geo_refinement(){
+  CH_TIME("driver::set_geom_refinement_depth");
+  if(m_verbosity > 5){
+    pout() << "driver::set_geom_refinement_depth" << endl;
+  }
+
+  const int max_depth = m_amr->get_max_amr_depth();
+  
+  int depth     = max_depth;
+  int depth1    = depth;
+  int depth2    = depth;
+  int depth3    = depth;
+  int depth4    = depth;
+  int depth5    = depth;
+  int depth6    = depth;
+
+  { // Get parameter from input script
+    ParmParse pp("driver");
+    pp.get("refine_geometry", depth);
+    depth  = (depth < 0) ? max_depth : depth;
+    depth1 = depth;
+    depth2 = depth;
+    depth3 = depth;
+    depth4 = depth;
+    depth5 = depth;
+    depth6 = depth;
+  }
+
+  { // Get fine controls from input script
+    ParmParse pp("driver");
+    pp.get("refine_electrodes",               depth1);
+    pp.get("refine_dielectrics",              depth2);
+    pp.get("refine_electrode_gas_interface",  depth3);
+    pp.get("refine_dielectric_gas_interface", depth4);
+    pp.get("refine_solid_gas_interface",      depth5);
+    pp.get("refine_solid_solid_interface",    depth6);
+
+    depth1 = (depth1 < 0) ? depth : depth1;
+    depth2 = (depth2 < 0) ? depth : depth2;
+    depth3 = (depth3 < 0) ? depth : depth3;
+    depth4 = (depth4 < 0) ? depth : depth4;
+    depth5 = (depth5 < 0) ? depth : depth5;
+    depth6 = (depth6 < 0) ? depth : depth6;
+  }
+  
+  set_geom_refinement_depth(depth1, depth2, depth3, depth4, depth5, depth6);
+}
+
+void driver::set_geom_refinement_depth(const int a_depth1,
+				       const int a_depth2,
+				       const int a_depth3,
+				       const int a_depth4,
+				       const int a_depth5,
+				       const int a_depth6){
+  CH_TIME("driver::set_geom_refinement_depth(full");
+  if(m_verbosity > 5){
+    pout() << "driver::set_geom_refinement_depth(full)" << endl;
+  }
+  
+  const int max_depth = m_amr->get_max_amr_depth();
+
+  m_conductor_tag_depth                = Min(a_depth1, max_depth);
+  m_dielectric_tag_depth               = Min(a_depth2, max_depth);
+  m_gas_conductor_interface_tag_depth  = Min(a_depth3, max_depth);
+  m_gas_dielectric_interface_tag_depth = Min(a_depth4, max_depth);
+  m_gas_solid_interface_tag_depth      = Min(a_depth5, max_depth);
+  m_solid_solid_interface_tag_depth    = Min(a_depth6, max_depth);
+
+
+  m_geom_tag_depth = 0;
+  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth1);
+  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth2);
+  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth3);
+  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth4);
+  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth5);
+  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth6);
 }
 
 void driver::create_output_directories(){
@@ -1148,316 +1182,7 @@ void driver::create_output_directories(){
   }
 }
 
-void driver::parse_verbosity(){
-  CH_TIME("driver::parse_verbosity");
 
-  ParmParse pp("driver");
-  pp.get("verbosity", m_verbosity);
-}
-
-void driver::parse_regrid(){
-  CH_TIME("driver::parse_regrid");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_regrid" << endl;
-  }
-
-  ParmParse pp("driver");
-
-  pp.get("regrid_interval",   m_regrid_interval);
-  pp.get("initial_regrids",   m_init_regrids);
-  pp.get("recursive_regrid",  m_recursive_regrid);
-}
-
-void driver::parse_restart(){
-  CH_TIME("driver::parse_restart");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_restart" << endl;
-  }
-
-  ParmParse pp("driver");
-
-  // Get restart step
-  pp.get("restart", m_restart_step); // Get restart step
-  m_restart = (m_restart_step > 0) ? true : false;
-}
-
-void driver::parse_memrep(){
-  CH_TIME("driver::parse_memrep");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_memrep" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("driver");
-  pp.query("memory_report_mode", str);
-  if(str == "overall"){
-    m_memory_mode = memory_report_mode::overall;
-  }
-  else if(str == "unfreed"){
-    m_memory_mode = memory_report_mode::unfreed;
-  }
-  else if(str == "allocated"){
-    m_memory_mode = memory_report_mode::allocated;
-  }
-  pp.get("write_memory", m_write_memory);
-
-  pp.get("write_loads", m_write_loads);
-}
-
-void driver::parse_output_directory(){
-  CH_TIME("driver::parse_output_directory");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_output_directory" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("output_directory", m_output_dir);
-
-  // If directory does not exist, create it
-  int success = 0;
-  if(procID() == 0){
-    std::string cmd;
-
-    cmd = "mkdir -p " + m_output_dir;
-    success = system(cmd.c_str());
-    if(success != 0){
-      std::cout << "driver::set_output_directory - master could not create directory" << std::endl;
-    }
-
-    cmd = "mkdir -p " + m_output_dir + "/plt";
-    success = system(cmd.c_str());
-    if(success != 0){
-      std::cout << "driver::set_output_directory - master could not create plot directory" << std::endl;
-    }
-
-    cmd = "mkdir -p " + m_output_dir + "/geo";
-    success = system(cmd.c_str());
-    if(success != 0){
-      std::cout << "driver::set_output_directory - master could not create geo directory" << std::endl;
-    }
-
-    cmd = "mkdir -p " + m_output_dir + "/chk";
-    success = system(cmd.c_str());
-    if(success != 0){
-      std::cout << "driver::set_output_directory - master could not create checkpoint directory" << std::endl;
-    }
-
-    cmd = "mkdir -p " + m_output_dir + "/mpi";
-    success = system(cmd.c_str());
-    if(success != 0){
-      std::cout << "driver::set_output_directory - master could not create mpi directory" << std::endl;
-    }
-
-    cmd = "mkdir -p " + m_output_dir + "/mpi/memory";
-    success = system(cmd.c_str());
-    if(success != 0){
-      std::cout << "driver::set_output_directory - master could not create mpi/memory directory" << std::endl;
-    }
-
-    cmd = "mkdir -p " + m_output_dir + "/mpi/loads";
-    success = system(cmd.c_str());
-    if(success != 0){
-      std::cout << "driver::set_output_directory - master could not create mpi/loads directory" << std::endl;
-    }
-
-    cmd = "mkdir -p " + m_output_dir + "/regrid";
-    success = system(cmd.c_str());
-    if(success != 0){
-      std::cout << "driver::set_output_directory - master could not create regrid directory" << std::endl;
-    }    
-  }
-  
-  MPI_Barrier(Chombo_MPI::comm);
-  if(success != 0){
-    MayDay::Abort("driver::set_output_directory - could not create directories for output");
-  }
-}
-
-void driver::parse_output_file_names(){
-  CH_TIME("driver::set_output_names");
-  if(m_verbosity > 5){
-    pout() << "driver::set_output_names" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("output_names", m_output_names);
-}
-
-void driver::parse_output_intervals(){
-  CH_TIME("driver::set_plot_interval");
-  if(m_verbosity > 5){
-    pout() << "driver::set_plot_interval" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("plot_interval", m_plot_interval);
-  pp.get("checkpoint_interval", m_chk_interval);
-  pp.get("write_regrid_files", m_write_regrid_files);
-}
-
-void driver::parse_geo_refinement(){
-  CH_TIME("driver::set_geom_refinement_depth");
-  if(m_verbosity > 5){
-    pout() << "driver::set_geom_refinement_depth" << endl;
-  }
-
-  const int max_depth = m_amr->get_max_amr_depth();
-  
-  int depth     = max_depth;
-  int depth1    = depth;
-  int depth2    = depth;
-  int depth3    = depth;
-  int depth4    = depth;
-  int depth5    = depth;
-  int depth6    = depth;
-
-  { // Get parameter from input script
-    ParmParse pp("driver");
-    pp.get("refine_geometry", depth);
-    depth  = (depth < 0) ? max_depth : depth;
-    depth1 = depth;
-    depth2 = depth;
-    depth3 = depth;
-    depth4 = depth;
-    depth5 = depth;
-    depth6 = depth;
-  }
-
-  { // Get fine controls from input script
-    ParmParse pp("driver");
-    pp.get("refine_electrodes",               depth1);
-    pp.get("refine_dielectrics",              depth2);
-    pp.get("refine_electrode_gas_interface",  depth3);
-    pp.get("refine_dielectric_gas_interface", depth4);
-    pp.get("refine_solid_gas_interface",      depth5);
-    pp.get("refine_solid_solid_interface",    depth6);
-
-    depth1 = (depth1 < 0) ? depth : depth1;
-    depth2 = (depth2 < 0) ? depth : depth2;
-    depth3 = (depth3 < 0) ? depth : depth3;
-    depth4 = (depth4 < 0) ? depth : depth4;
-    depth5 = (depth5 < 0) ? depth : depth5;
-    depth6 = (depth6 < 0) ? depth : depth6;
-  }
-  
-  set_geom_refinement_depth(depth1, depth2, depth3, depth4, depth5, depth6);
-}
-
-void driver::parse_num_plot_ghost(){
-  CH_TIME("driver::parse_num_plot_ghost");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_num_plot_ghost" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("num_plot_ghost", m_num_plot_ghost);
-
-  m_num_plot_ghost = (m_num_plot_ghost < 0) ? 0 : m_num_plot_ghost;
-  m_num_plot_ghost = (m_num_plot_ghost > 3) ? 3 : m_num_plot_ghost;
-}
-
-void driver::parse_coarsen(){
-  CH_TIME("driver::parse_coarsen");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_coarsen" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("driver");
-  pp.get("allow_coarsening", str);
-  if(str == "true"){
-    m_allow_coarsen = true;
-  }
-  else if(str == "false"){
-    m_allow_coarsen = false;
-  }
-}
-
-void driver::parse_grow_tags(){
-  CH_TIME("driver::parse_grow_tags");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_grow_tags" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("grow_tags", m_grow_tags);
-
-  m_grow_tags = Max(0, m_grow_tags);
-}
-
-void driver::parse_geom_only(){
-  CH_TIME("driver::parse_geom_only");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_geom_only" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("driver");
-  pp.get("geometry_only", str);
-  if(str == "true"){
-    m_geometry_only = true;
-  }
-  else if(str == "false"){
-    m_geometry_only = false;
-  }
-}
-
-void driver::parse_ebis_memory_load_balance(){
-  CH_TIME("driver::parse_ebis_memory_load_balance");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_ebis_memory_load_balance" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("driver");
-  pp.get("ebis_memory_load_balance", str);
-  if(str == "true"){
-    m_ebis_memory_load_balance = true;
-  }
-  else if(str == "false"){
-    m_ebis_memory_load_balance = false;
-  }
-}
-
-void driver::parse_simulation_time(){
-  CH_TIME("driver::parse_simulation_time");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_simulation_time" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("max_steps", m_max_steps);
-  pp.get("start_time", m_start_time);
-  pp.get("stop_time", m_stop_time);
-}
-
-void driver::parse_file_depth(){
-  CH_TIME("driver::parse_file_depth");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_file_depth" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("max_plot_depth", m_max_plot_depth);
-  pp.get("max_chk_depth", m_max_chk_depth);
-}
-
-void driver::parse_plot_vars(){
-  ParmParse pp("driver");
-  const int num = pp.countval("plt_vars");
-  Vector<std::string> str(num);
-  pp.getarr("plt_vars", str, 0, num);
-
-  m_plot_tags     = false;
-  m_plot_ranks    = false;
-  m_plot_levelset = false;
-  
-  for (int i = 0; i < num; i++){
-    if(     str[i] == "tags")     m_plot_tags     = true;
-    else if(str[i] == "mpi_rank") m_plot_ranks    = true;
-    else if(str[i] == "levelset") m_plot_levelset = true;
-  }
-}
 
 void driver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   CH_TIME("driver::set_amr");

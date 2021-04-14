@@ -45,18 +45,6 @@ public:
     @brief Setup and run simulations
   */
   void setup_and_run(const std::string a_input_file);
-
-  // /*!
-  //   @brief This function will read two checkpoint files, and compute the error norms on the finest level in a_chk_coar data 
-  // */
-  //  void compute_norm(std::string a_chk_coarse, std::string a_chk_fine);
-
-  // /*!
-  //   @brief Compute the error norm on the coarsest level 
-  // */
-  //  void compute_coarse_norm(const std::string a_chk1, const std::string a_chk2, const int a_species = -1);
-
-
   
   /*!
     @brief Run the solvers untils a_time or a_max_steps has been reached
@@ -68,32 +56,7 @@ public:
   */
   void setup(const std::string a_input_file, const int a_init_regrids, const bool a_restart, const std::string a_restart_file);
 
-  /*!
-    @brief Set amr
-  */
-  void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
-  /*!
-    @brief Set geometrical refinement depths. This provides a little more flexibility than the basic call. 
-    @param[in] a_depth1 Conductor tag depth
-    @param[in] a_depth2 Dielectric tag depth
-    @param[in] a_depth3 Conductor-gas interface tag depth
-    @param[in] a_depth4 Dielectric-gas interface tag depth
-    @param[in] a_depth5 Solid-gas interface tag depth
-    @param[in] a_depth6 Solid-solid interface tag depth
-  */
-  void set_geom_refinement_depth(const int a_depth1,
-				 const int a_depth2,
-				 const int a_depth3,
-				 const int a_depth4,
-				 const int a_depth5,
-				 const int a_depth6);
-
-
-  /*!
-    @brief Sanity check
-  */
-  void sanity_check();
 
 protected:
 
@@ -403,39 +366,56 @@ protected:
   */
   bool m_plot_levelset;
 
-  // Output parameters that go into checkpoint files
-  Vector<Real> m_time_history;        // Simulation time
-  Vector<Real> m_voltage_history;     // Applied voltage
-  Vector<Real> m_dt_history;          // Time steps
-  Vector<Real> m_exec_history;        // Execution time per time step
-  Vector<Real> m_charge_history;      // Total charge in domain
-  Vector<Real> m_ohmic_induced_I;     // Ohmic induced current
-  Vector<Real> m_capacitive_induced;  // Capacitively induced current
-  Vector<Real> m_domain_I;            // Current through domain faces
-  Vector<Real> m_electrode_I;         // Current through electrode EBs
+  /*!
+    @brief Set amr
+  */
+  void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
+  /*!
+    @brief Sanity check
+  */
+  void sanity_check();
+
+  /*!
+    @brief Parse options
+  */
   void parse_options();
-  void create_output_directories();
-  
-  void parse_regrid();
-  void parse_restart();
-  void parse_memrep();
-  void parse_output_directory();
+
+  /*!
+    @brief Parse geometrical refinement
+  */
   void parse_geo_refinement();
-  void parse_coarsen();
-  void parse_verbosity();
-  void parse_output_file_names();
-  void parse_output_intervals();
-  void parse_num_plot_ghost();
-  void parse_grow_tags();
-  void parse_geom_only();
-  void parse_ebis_memory_load_balance();
-  void parse_write_ebis();
-  void parse_read_ebis();
-  void parse_simulation_time();
-  void parse_file_depth();
+
+  /*!
+    @brief Parse plot variables
+  */
   void parse_plot_vars();
+
+  /*!
+    @brief Parse option for geometry generation
+  */
   void parse_geometry_generation();
+
+  /*!
+    @brief Set geometrical refinement depths. This provides a little more flexibility than the basic call. 
+    @param[in] a_depth1 Conductor tag depth
+    @param[in] a_depth2 Dielectric tag depth
+    @param[in] a_depth3 Conductor-gas interface tag depth
+    @param[in] a_depth4 Dielectric-gas interface tag depth
+    @param[in] a_depth5 Solid-gas interface tag depth
+    @param[in] a_depth6 Solid-solid interface tag depth
+  */
+  void set_geom_refinement_depth(const int a_depth1,
+				 const int a_depth2,
+				 const int a_depth3,
+				 const int a_depth4,
+				 const int a_depth5,
+				 const int a_depth6);
+
+  /*!
+    @brief Create output directories
+  */
+  void create_output_directories();
 
   /*!
     @brief Allocate internals
