@@ -89,20 +89,6 @@ public:
 				 const int a_depth5,
 				 const int a_depth6);
 
-  // /*!
-  //   @brief Dump mass for cdr solvers
-  // */
-  //  void set_dump_mass(const bool a_dump_mass);
-
-  // /*!
-  //   @brief Dump charge for cdr and sigma solvers
-  // */
-  //  void set_dump_charge(const bool a_dump_charge);
-
-  /*!
-    @brief Output on centroids or cell centers
-  */
-  void set_output_centroids(const bool a_output_centroids);
 
   /*!
     @brief Sanity check
@@ -383,11 +369,6 @@ protected:
   bool m_recursive_regrid;
 
   /*!
-    @brief Output on centroids or not
-  */
-  bool m_output_centroids;
-
-  /*!
     @brief Potential has been set
   */
   bool m_potential_set;
@@ -406,16 +387,6 @@ protected:
     @brief Use memory as load balance for EBIS
   */
   bool m_ebis_memory_load_balance;
-
-  /*!
-    @brief Dump total mass (or charge) for every cdr solver at every time_step
-  */
-  bool m_dump_mass;
-
-  /*!
-    @brief Dump charge for cdr and surface charge solvers at every time step
-  */
-  bool m_dump_charge;
 
   /*!
     @brief Plot tagged cells
@@ -660,36 +631,6 @@ protected:
     @brief Write the geometry only
   */
   void write_geometry();
-  
-  // /*!
-  //   @brief Open file for mass dump
-  // */
-  //  void open_mass_dump_file(ofstream& a_file);
-
-  // /*!
-  //   @brief Open file for mass dump
-  // */
-  //  void open_charge_dump_file(ofstream& a_file);
-
-  // /*!
-  //   @brief Dump mass
-  // */
-  //  void dump_mass(ofstream& a_file);
-
-  // /*!
-  //   @brief Dump charge
-  // */
-  //  void dump_charge(ofstream& a_file);
-
-  // /*!
-  //   @brief Close file for mass dump
-  // */
-  //  void close_mass_dump_file(ofstream& a_file);
-
-  // /*!
-  //   @brief Close file for mass dump
-  // */
-  //  void close_charge_dump_file(ofstream& a_file);
 
   /*!
     @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);
