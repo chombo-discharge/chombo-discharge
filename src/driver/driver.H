@@ -523,6 +523,11 @@ protected:
   void setup_geometry_only();
 
   /*!
+    @brief Check if restart file exists
+  */
+  void check_restart_file(const std::string a_restart_file) const;
+
+  /*!
     @brief Write a time step report
   */
   void step_report(const Real a_start_time, const Real a_end_time, const int a_max_steps);

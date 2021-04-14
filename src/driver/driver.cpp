@@ -11,6 +11,8 @@
 #include "units.H"
 #include "memrep.H"
 
+#include <fstream>
+
 #include <EBArith.H>
 #include <EBAlias.H>
 #include <LevelData.H>
@@ -1343,6 +1345,10 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
     pout() << "driver::setup_for_restart" << endl;
   }
 
+  this->check_restart_file(a_restart_file);
+
+
+
   this->sanity_check();                                    // Sanity check before doing anything expensive
 
   m_compgeom->build_geometries(m_amr->get_finest_domain(),
@@ -1391,6 +1397,19 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
   }
 
 
+}
+
+void driver::check_restart_file(const std::string a_restart_file) const {
+  CH_TIME("driver::check_restart_file");
+  if(m_verbosity > 4){
+    pout() << "driver::check_restart_file" << endl;
+  }
+
+  ifstream f(a_restart_file.c_str());
+  if(!f.good()){
+    pout() << "driver::check_restart_file - could not find file = " << a_restart_file << endl;
+    MayDay::Abort("driver::check_restart_file - abort, could not find file");
+  }
 }
 
 void driver::sanity_check(){
