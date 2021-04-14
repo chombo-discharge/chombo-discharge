@@ -916,36 +916,41 @@ void cdr_solver::initial_data_particles(){
   const int halo_buffer = 0;
   const int pvr_buffer  = 0;
 
-  particle_container<Particle> particles;
-  m_amr->allocate(particles, pvr_buffer, m_realm);
-  particles.add_particles(m_species->get_initial_particles());
+  const List<Particle>& init_particles = m_species->get_initial_particles();
 
-  // We will deposit onto m_state, using m_scratch as a scratch holder for interpolation stuff
-  data_ops::set_value(m_state, 0.0);
+  if(init_particles.length() > 0){
+
+    particle_container<Particle> particles;
+    m_amr->allocate(particles, pvr_buffer, m_realm);
+    particles.add_particles(m_species->get_initial_particles());
+
+    // We will deposit onto m_state, using m_scratch as a scratch holder for interpolation stuff
+    data_ops::set_value(m_state, 0.0);
   
-  // Deposit onto mseh
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const RealVect dx            = m_amr->get_dx()[lvl]*RealVect::Unit;
-    const RealVect origin        = m_amr->get_prob_lo();
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const ProblemDomain& dom     = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+    // Deposit onto mseh
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const RealVect dx            = m_amr->get_dx()[lvl]*RealVect::Unit;
+      const RealVect origin        = m_amr->get_prob_lo();
+      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+      const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
     
-    // 2. Deposit this levels particles and exchange ghost cells
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleInterp interp(box, ebisbox, dx, origin, true);
-      interp.deposit(particles[lvl][dit()].listItems(), (*m_state[lvl])[dit()].getFArrayBox(), DepositionType::NGP);
+      // 2. Deposit this levels particles and exchange ghost cells
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const Box box          = dbl.get(dit());
+	const EBISBox& ebisbox = ebisl[dit()];
+	EBParticleInterp interp(box, ebisbox, dx, origin, true);
+	interp.deposit(particles[lvl][dit()].listItems(), (*m_state[lvl])[dit()].getFArrayBox(), DepositionType::NGP);
+      }
     }
-  }
 
 #if CH_SPACEDIM==2 // Only do this scaling for planar cartesian
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const Real dx = m_amr->get_dx()[lvl];
-    data_ops::scale(*m_state[lvl], 1./dx);
-  }
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const Real dx = m_amr->get_dx()[lvl];
+      data_ops::scale(*m_state[lvl], 1./dx);
+    }
 #endif
+  }
 }
 
 void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
