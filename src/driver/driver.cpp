@@ -525,8 +525,6 @@ void driver::memory_report(const memory_report_mode a_mode){
 #endif
 }
 
-
-
 void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial_data){
   CH_TIME("driver::regrid");
   if(m_verbosity > 2){
@@ -1031,63 +1029,33 @@ void driver::parse_geo_refinement(){
   ParmParse pp("driver");
 
   const int max_depth = m_amr->get_max_amr_depth();
-  
-  int depth     = max_depth;
-  int depth1    = depth;
-  int depth2    = depth;
-  int depth3    = depth;
-  int depth4    = depth;
-  int depth5    = depth;
-  int depth6    = depth;
 
-  pp.get("refine_geometry",                 depth);
-  pp.get("refine_electrodes",               depth1);
-  pp.get("refine_dielectrics",              depth2);
-  pp.get("refine_electrode_gas_interface",  depth3);
-  pp.get("refine_dielectric_gas_interface", depth4);
-  pp.get("refine_solid_gas_interface",      depth5);
-  pp.get("refine_solid_solid_interface",    depth6);
+  int depth0;
+
+  pp.get("refine_geometry",                 depth0);
+  pp.get("refine_electrodes",               m_conductor_tag_depth);
+  pp.get("refine_dielectrics",              m_dielectric_tag_depth);
+  pp.get("refine_electrode_gas_interface",  m_gas_conductor_interface_tag_depth);
+  pp.get("refine_dielectric_gas_interface", m_gas_dielectric_interface_tag_depth);
+  pp.get("refine_solid_gas_interface",      m_gas_solid_interface_tag_depth);
+  pp.get("refine_solid_solid_interface",    m_solid_solid_interface_tag_depth);
   
-  depth  = (depth  < 0) ? max_depth : depth;
-  depth1 = (depth1 < 0) ? depth : depth1;
-  depth2 = (depth2 < 0) ? depth : depth2;
-  depth3 = (depth3 < 0) ? depth : depth3;
-  depth4 = (depth4 < 0) ? depth : depth4;
-  depth5 = (depth5 < 0) ? depth : depth5;
-  depth6 = (depth6 < 0) ? depth : depth6;
-  
-  set_geom_refinement_depth(depth1, depth2, depth3, depth4, depth5, depth6);
+  depth0                                = (depth0                               < 0) ? max_depth : depth0;
+  m_conductor_tag_depth                 = (m_conductor_tag_depth                < 0) ? depth0 : m_conductor_tag_depth;
+  m_dielectric_tag_depth                = (m_dielectric_tag_depth               < 0) ? depth0 : m_dielectric_tag_depth;
+  m_gas_conductor_interface_tag_depth   = (m_gas_conductor_interface_tag_depth  < 0) ? depth0 : m_gas_conductor_interface_tag_depth;
+  m_gas_dielectric_interface_tag_depth  = (m_gas_dielectric_interface_tag_depth < 0) ? depth0 : m_gas_dielectric_interface_tag_depth;
+  m_gas_solid_interface_tag_depth       = (m_gas_solid_interface_tag_depth      < 0) ? depth0 : m_gas_solid_interface_tag_depth;
+  m_solid_solid_interface_tag_depth     = (m_solid_solid_interface_tag_depth    < 0) ? depth0 : m_solid_solid_interface_tag_depth;
+
+  m_geom_tag_depth = Max(m_geom_tag_depth, m_conductor_tag_depth);
+  m_geom_tag_depth = Max(m_geom_tag_depth, m_dielectric_tag_depth);
+  m_geom_tag_depth = Max(m_geom_tag_depth, m_gas_conductor_interface_tag_depth);
+  m_geom_tag_depth = Max(m_geom_tag_depth, m_gas_dielectric_interface_tag_depth);
+  m_geom_tag_depth = Max(m_geom_tag_depth, m_gas_solid_interface_tag_depth);
+  m_geom_tag_depth = Max(m_geom_tag_depth, m_solid_solid_interface_tag_depth);
 }
 
-void driver::set_geom_refinement_depth(const int a_depth1,
-				       const int a_depth2,
-				       const int a_depth3,
-				       const int a_depth4,
-				       const int a_depth5,
-				       const int a_depth6){
-  CH_TIME("driver::set_geom_refinement_depth(full");
-  if(m_verbosity > 5){
-    pout() << "driver::set_geom_refinement_depth(full)" << endl;
-  }
-  
-  const int max_depth = m_amr->get_max_amr_depth();
-
-  m_conductor_tag_depth                = Min(a_depth1, max_depth);
-  m_dielectric_tag_depth               = Min(a_depth2, max_depth);
-  m_gas_conductor_interface_tag_depth  = Min(a_depth3, max_depth);
-  m_gas_dielectric_interface_tag_depth = Min(a_depth4, max_depth);
-  m_gas_solid_interface_tag_depth      = Min(a_depth5, max_depth);
-  m_solid_solid_interface_tag_depth    = Min(a_depth6, max_depth);
-
-
-  m_geom_tag_depth = 0;
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth1);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth2);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth3);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth4);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth5);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth6);
-}
 
 void driver::create_output_directories(){
   CH_TIME("driver::create_output_directories");

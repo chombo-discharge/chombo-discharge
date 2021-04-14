@@ -56,11 +56,7 @@ public:
   */
   void setup(const std::string a_input_file, const int a_init_regrids, const bool a_restart, const std::string a_restart_file);
 
-
-
 protected:
-
-
 
   /*!
     @brief Memory report mode enum
@@ -390,22 +386,6 @@ protected:
     @brief Parse option for geometry generation
   */
   void parse_geometry_generation();
-
-  /*!
-    @brief Set geometrical refinement depths. This provides a little more flexibility than the basic call. 
-    @param[in] a_depth1 Conductor tag depth
-    @param[in] a_depth2 Dielectric tag depth
-    @param[in] a_depth3 Conductor-gas interface tag depth
-    @param[in] a_depth4 Dielectric-gas interface tag depth
-    @param[in] a_depth5 Solid-gas interface tag depth
-    @param[in] a_depth6 Solid-solid interface tag depth
-  */
-  void set_geom_refinement_depth(const int a_depth1,
-				 const int a_depth2,
-				 const int a_depth3,
-				 const int a_depth4,
-				 const int a_depth5,
-				 const int a_depth6);
 
   /*!
     @brief Create output directories
