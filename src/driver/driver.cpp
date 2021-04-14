@@ -55,8 +55,6 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   parse_grow_tags();
   parse_geom_only();
   parse_ebis_memory_load_balance();
-  parse_write_ebis();
-  parse_read_ebis(); 
   parse_simulation_time();
   parse_file_depth();
   parse_plot_vars();
@@ -185,30 +183,6 @@ void driver::deallocate_internals(){
   }
 
   //  m_amr->deallocate(m_tags);
-}
-
-void driver::write_ebis(){
-  CH_TIME("driver::write_ebis");
-  if(m_verbosity > 5){
-    pout() << "driver::write_ebis" << endl;
-  }
-
-  const std::string path_gas = m_output_dir + "/geo/" + m_ebis_gas_file;
-  const std::string path_sol = m_output_dir + "/geo/" + m_ebis_sol_file;
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
-
-  if(!ebis_gas.isNull()){
-    HDF5Handle gas_handle(path_gas.c_str(), HDF5Handle::CREATE);
-    ebis_gas->write(gas_handle);
-    gas_handle.close();
-  }
-  if(!ebis_sol.isNull()){
-    HDF5Handle sol_handle(path_sol.c_str(), HDF5Handle::CREATE);
-    ebis_sol->write(sol_handle);
-    sol_handle.close();
-  }
 }
 
 void driver::get_geom_tags(){
@@ -1480,43 +1454,6 @@ void driver::parse_ebis_memory_load_balance(){
   }
 }
 
-void driver::parse_write_ebis(){
-  CH_TIME("driver::parse_write_ebis");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_write_ebis" << endl;
-  }
-
-  m_ebis_gas_file = m_output_names + ".ebis.gas.hdf5";
-  m_ebis_sol_file = m_output_names + ".ebis.sol.hdf5";
-
-  std::string str;
-  ParmParse pp("driver");
-  pp.get("write_ebis", str);
-  if(str == "true"){
-    m_write_ebis = true;
-  }
-  else if(str == "false"){
-    m_write_ebis = false;
-  }
-}
-
-void driver::parse_read_ebis(){
-  CH_TIME("driver::parse_read_ebis");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_read_ebis" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("driver");
-  pp.get("read_ebis", str);
-  if(str == "true"){
-    m_read_ebis = true;
-  }
-  else if(str == "false"){
-    m_read_ebis = false;
-  }
-}
-
 void driver::parse_simulation_time(){
   CH_TIME("driver::parse_simulation_time");
   if(m_verbosity > 5){
@@ -1627,9 +1564,6 @@ void driver::setup_geometry_only(){
   m_amr->set_baseif(phase::gas,   m_compgeom->get_gas_if());
   m_amr->set_baseif(phase::solid, m_compgeom->get_sol_if());
 
-  if(m_write_ebis){
-    this->write_ebis();
-  }
   if(m_write_memory){
     this->write_memory_usage();
   }
@@ -1674,22 +1608,11 @@ void driver::setup_fresh(const int a_init_regrids){
     EBIndexSpace::s_useMemoryLoadBalance = false;
   }
 
-  if(!m_read_ebis){
-    m_compgeom->build_geometries(m_amr->get_finest_domain(),
-				 m_amr->get_prob_lo(),
-				 m_amr->get_finest_dx(),
-				 m_amr->get_max_ebis_box_size());
+  m_compgeom->build_geometries(m_amr->get_finest_domain(),
+			       m_amr->get_prob_lo(),
+			       m_amr->get_finest_dx(),
+			       m_amr->get_max_ebis_box_size());
 
-    if(m_write_ebis){
-      this->write_ebis();        // Write EBIndexSpace's for later use
-    }
-  }
-  else{
-    const std::string path_gas = m_output_dir + "/geo/" + m_ebis_gas_file;
-    const std::string path_sol = m_output_dir + "/geo/" + m_ebis_sol_file;
-
-    m_compgeom->build_geo_from_files(path_gas, path_sol);
-  }
 
   // Register realms
   m_timestepper->set_amr(m_amr);
@@ -1785,17 +1708,10 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
 
   this->sanity_check();                                    // Sanity check before doing anything expensive
 
-  if(!m_read_ebis){
-    m_compgeom->build_geometries(m_amr->get_finest_domain(),
-				 m_amr->get_prob_lo(),
-				 m_amr->get_finest_dx(),
-				 m_amr->get_max_ebis_box_size());
-  }
-  else{
-    const std::string path_gas = m_output_dir + "/geo/" + m_ebis_gas_file;
-    const std::string path_sol = m_output_dir + "/geo/" + m_ebis_sol_file;
-    m_compgeom->build_geo_from_files(path_gas, path_sol);
-  }
+  m_compgeom->build_geometries(m_amr->get_finest_domain(),
+			       m_amr->get_prob_lo(),
+			       m_amr->get_finest_dx(),
+			       m_amr->get_max_ebis_box_size());
 
   this->get_geom_tags();       // Get geometric tags.
 

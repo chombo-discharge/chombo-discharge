@@ -408,16 +408,6 @@ protected:
   bool m_ebis_memory_load_balance;
 
   /*!
-    @brief Write EBIS to HDF5. Might be useful for restarting simulations
-  */
-  bool m_write_ebis;
-
-  /*!
-    @brief Read EBIS file from HDF5. Useful for restarting simulation.
-  */
-  bool m_read_ebis;
-
-  /*!
     @brief Dump total mass (or charge) for every cdr solver at every time_step
   */
   bool m_dump_mass;
