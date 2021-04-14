@@ -327,11 +327,6 @@ protected:
   bool m_write_loads;
 
   /*!
-    @brief Use recursive regrid (true) or regrid all levels at once (false)
-  */
-  bool m_recursive_regrid;
-
-  /*!
     @brief Potential has been set
   */
   bool m_potential_set;

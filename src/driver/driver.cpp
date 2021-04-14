@@ -751,22 +751,9 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 
 	  // We'll regrid levels lmin through lmax. As always, new grids on level l are generated through tags
 	  // on levels (l-1);
-	  int lmin, lmax;
-	  if(!m_recursive_regrid){
-	    lmin = 0;
-	    lmax = m_amr->get_finest_level();
-	  }
-	  else{
-	    int iref = 1;//m_regrid_interval;
-	    lmax = m_amr->get_finest_level();
-	    lmin = 1;
-	    for (int lvl = m_amr->get_finest_level(); lvl > 0; lvl--){
-	      if(m_step%(iref*m_regrid_interval) == 0){
-		lmin = lvl;
-	      }
-	      iref *= m_amr->get_ref_rat()[lvl-1];
-	    }
-	  }
+	  const int lmin = 0;
+	  const int lmax = m_amr->get_finest_level();
+
 #if 0 // Debug test
 	  const Real t0 = MPI_Wtime();
 #endif
@@ -968,8 +955,7 @@ void driver::parse_options(){
   
   pp.get("regrid_interval",          m_regrid_interval);
   pp.get("initial_regrids",          m_init_regrids);
-  pp.get("recursive_regrid",         m_recursive_regrid);
-  pp.get("restart",                  m_restart_step); // Get restart step
+  pp.get("restart",                  m_restart_step); 
   pp.get("write_memory",             m_write_memory);
   pp.get("write_loads",              m_write_loads);
   pp.get("output_directory",         m_output_dir);
@@ -979,7 +965,6 @@ void driver::parse_options(){
   pp.get("write_regrid_files",       m_write_regrid_files);
   pp.get("num_plot_ghost",           m_num_plot_ghost);
   pp.get("allow_coarsening",         m_allow_coarsen);
-  pp.get("grow_tags",                m_grow_tags);
   pp.get("geometry_only",            m_geometry_only);
   pp.get("ebis_memory_load_balance", m_ebis_memory_load_balance);
   pp.get("max_steps",                m_max_steps);
@@ -989,7 +974,6 @@ void driver::parse_options(){
   pp.get("max_chk_depth",            m_max_chk_depth);
 
   m_restart   = (m_restart_step > 0) ? true : false;
-  m_grow_tags = Max(0, m_grow_tags);
 
   // Stuff that's a little too verbose to include here directly. 
   parse_plot_vars();
@@ -1044,6 +1028,8 @@ void driver::parse_geo_refinement(){
     pout() << "driver::set_geom_refinement_depth" << endl;
   }
 
+  ParmParse pp("driver");
+
   const int max_depth = m_amr->get_max_amr_depth();
   
   int depth     = max_depth;
@@ -1054,34 +1040,21 @@ void driver::parse_geo_refinement(){
   int depth5    = depth;
   int depth6    = depth;
 
-  { // Get parameter from input script
-    ParmParse pp("driver");
-    pp.get("refine_geometry", depth);
-    depth  = (depth < 0) ? max_depth : depth;
-    depth1 = depth;
-    depth2 = depth;
-    depth3 = depth;
-    depth4 = depth;
-    depth5 = depth;
-    depth6 = depth;
-  }
-
-  { // Get fine controls from input script
-    ParmParse pp("driver");
-    pp.get("refine_electrodes",               depth1);
-    pp.get("refine_dielectrics",              depth2);
-    pp.get("refine_electrode_gas_interface",  depth3);
-    pp.get("refine_dielectric_gas_interface", depth4);
-    pp.get("refine_solid_gas_interface",      depth5);
-    pp.get("refine_solid_solid_interface",    depth6);
-
-    depth1 = (depth1 < 0) ? depth : depth1;
-    depth2 = (depth2 < 0) ? depth : depth2;
-    depth3 = (depth3 < 0) ? depth : depth3;
-    depth4 = (depth4 < 0) ? depth : depth4;
-    depth5 = (depth5 < 0) ? depth : depth5;
-    depth6 = (depth6 < 0) ? depth : depth6;
-  }
+  pp.get("refine_geometry",                 depth);
+  pp.get("refine_electrodes",               depth1);
+  pp.get("refine_dielectrics",              depth2);
+  pp.get("refine_electrode_gas_interface",  depth3);
+  pp.get("refine_dielectric_gas_interface", depth4);
+  pp.get("refine_solid_gas_interface",      depth5);
+  pp.get("refine_solid_solid_interface",    depth6);
+  
+  depth  = (depth  < 0) ? max_depth : depth;
+  depth1 = (depth1 < 0) ? depth : depth1;
+  depth2 = (depth2 < 0) ? depth : depth2;
+  depth3 = (depth3 < 0) ? depth : depth3;
+  depth4 = (depth4 < 0) ? depth : depth4;
+  depth5 = (depth5 < 0) ? depth : depth5;
+  depth6 = (depth6 < 0) ? depth : depth6;
   
   set_geom_refinement_depth(depth1, depth2, depth3, depth4, depth5, depth6);
 }
