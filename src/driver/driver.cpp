@@ -202,7 +202,7 @@ void driver::get_geom_tags(){
 	diel_tags = ebis_sol->irregCells(which_level);
       }
     }
-#if 1 // Subject to removal
+
     // Gas-solid interface cells
     if(m_gas_solid_interface_tag_depth > lvl){ 
       if(!ebis_sol.isNull()){
@@ -238,7 +238,6 @@ void driver::get_geom_tags(){
 	solid_tags &= tmp;
       }
     }
-#endif
 
     m_geom_tags[lvl].makeEmpty();
     m_geom_tags[lvl] |= diel_tags;

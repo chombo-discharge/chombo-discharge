@@ -1,6 +1,6 @@
 /*!
-  @file   mflevelgrid.cpp
-  @brief  Implementation of MFLEVELGRID.H
+  @file   MFLevelGrid.cpp
+  @brief  Implementation of MFLevelGrid.H
   @author Robert Marskar
   @date   Dec. 2017
 */
