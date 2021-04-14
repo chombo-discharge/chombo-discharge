@@ -202,7 +202,7 @@ void driver::get_geom_tags(){
 	diel_tags = ebis_sol->irregCells(which_level);
       }
     }
-
+#if 1 // Subject to removal
     // Gas-solid interface cells
     if(m_gas_solid_interface_tag_depth > lvl){ 
       if(!ebis_sol.isNull()){
@@ -238,6 +238,7 @@ void driver::get_geom_tags(){
 	solid_tags &= tmp;
       }
     }
+#endif
 
     m_geom_tags[lvl].makeEmpty();
     m_geom_tags[lvl] |= diel_tags;
@@ -1054,8 +1055,9 @@ void driver::parse_geo_refinement(){
   m_geom_tag_depth = Max(m_geom_tag_depth, m_gas_dielectric_interface_tag_depth);
   m_geom_tag_depth = Max(m_geom_tag_depth, m_gas_solid_interface_tag_depth);
   m_geom_tag_depth = Max(m_geom_tag_depth, m_solid_solid_interface_tag_depth);
-}
 
+  std::cout << m_dielectric_tag_depth <<"\n";
+}
 
 void driver::create_output_directories(){
   CH_TIME("driver::create_output_directories");
