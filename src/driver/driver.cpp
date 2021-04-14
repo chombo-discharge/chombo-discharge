@@ -19,16 +19,6 @@
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
 
-driver::driver(){
-  CH_TIME("driver::driver(weak)");
-  if(m_verbosity > 5){
-    pout() << "driver::driver(weak)" << endl;
-  }
-
-  MayDay::Abort("driver::driver - weak construction is not allowed (yet)");
-
-}
-
 driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
 	       const RefCountedPtr<time_stepper>&           a_timestepper,
 	       const RefCountedPtr<amr_mesh>&               a_amr,
@@ -36,15 +26,22 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
 	       const RefCountedPtr<geo_coarsener>&          a_geocoarsen){
   CH_TIME("driver::driver(full)");
 
-  parse_verbosity();
-  
- set_computational_geometry(a_compgeom);              // Set computational geometry
+  set_computational_geometry(a_compgeom);              // Set computational geometry
   set_time_stepper(a_timestepper);                     // Set time stepper
   set_amr(a_amr);                                      // Set amr
   set_cell_tagger(a_celltagger);                       // Set cell tagger
   set_geo_coarsen(a_geocoarsen);                       // Set geo coarsener
 
+  // AMR does its thing
+  m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
+  m_amr->build_domains();                // Build domains and resolutions, nothing else
+
   // Parse some class options
+#if 0
+  parse_options();
+  create_output_directories();
+#else
+  parse_verbosity();
   parse_regrid();
   parse_restart();
   parse_memrep();
@@ -63,19 +60,13 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   parse_simulation_time();
   parse_file_depth();
   parse_plot_vars();
-
+  parse_geometry_generation();
+#endif
 
   // Debugging stuff
   // this->set_dump_mass(false);                                // Dump mass to file
   // this->set_dump_charge(false);                              // Dump charges to file
   this->set_output_centroids(true);                          // Use cell centroids for output
-
-  // AMR does its thing
-  m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
-  m_amr->build_domains();                // Build domains and resolutions, nothing else
-
-  // Parse the geometry generation method
-  parse_geometry_generation();
 
   // Ok we're ready to go. 
   m_step          = 0;
@@ -1007,9 +998,9 @@ void driver::setup_and_run(const std::string a_input_file){
 }
 
 void driver::rebuildParmParse() const {
-  ParmParse pp("");
+  ParmParse pp("driver");
 
-  pp.redefine(m_input_file.c_str());
+  //  pp.redefine(m_input_file.c_str());
 }
 
 void driver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
@@ -1099,6 +1090,122 @@ void driver::parse_geometry_generation(){
   }
   else{
     MayDay::Abort("driver:parse_geometry_generation - unsupported argument requested");
+  }
+}
+
+void driver::parse_options(){
+  CH_TIME("driver::parse_geometry_generation");
+  pout() << "in parse options" << endl;
+
+  ParmParse pp("driver");
+  
+  std::string str;
+
+  pp.get("verbosity",                m_verbosity);
+  if(m_verbosity > 5){
+    pout() << "driver::parse_options" << endl;
+  }
+  
+  pp.get("regrid_interval",          m_regrid_interval);
+  pp.get("initial_regrids",          m_init_regrids);
+  pp.get("recursive_regrid",         m_recursive_regrid);
+  pp.get("restart",                  m_restart_step); // Get restart step
+  pp.get("write_memory",             m_write_memory);
+  pp.get("write_loads",              m_write_loads);
+  pp.get("output_directory",         m_output_dir);
+  pp.get("output_names",             m_output_names);
+  pp.get("plot_interval",            m_plot_interval);
+  pp.get("checkpoint_interval",      m_chk_interval);
+  pp.get("write_regrid_files",       m_write_regrid_files);
+  pp.get("num_plot_ghost",           m_num_plot_ghost);
+  pp.get("allow_coarsening",         m_allow_coarsen);
+  pp.get("refine_geometry",          m_geom_tag_depth);
+  pp.get("grow_tags",                m_grow_tags);
+  pp.get("geometry_only",            m_geometry_only);
+  pp.get("ebis_memory_load_balance", m_ebis_memory_load_balance);
+  pp.get("max_steps",                m_max_steps);
+  pp.get("start_time",               m_start_time);
+  pp.get("stop_time",                m_stop_time);
+  pp.get("max_plot_depth",           m_max_plot_depth);
+  pp.get("max_chk_depth",            m_max_chk_depth);
+
+  // Parse plot variables and geometry generation
+  parse_plot_vars();
+  parse_geometry_generation();
+
+  // Set restart flag. 
+  m_restart = (m_restart_step > 0) ? true : false;
+
+  // Set maximum refinement depth
+  m_geom_tag_depth = Max(0,Min(m_geom_tag_depth, m_amr->get_max_amr_depth()-1));
+  m_grow_tags = Max(0, m_grow_tags);
+
+
+}
+
+void driver::create_output_directories(){
+  CH_TIME("driver::create_output_directories");
+  if(m_verbosity > 5){
+    pout() << "driver::create_output_directories" << endl;
+  }
+
+    // If directory does not exist, create it
+  int success = 0;
+  if(procID() == 0){
+    std::string cmd;
+
+    cmd = "mkdir -p " + m_output_dir;
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/plt";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create plot directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/geo";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create geo directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/chk";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create checkpoint directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/mpi";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create mpi directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/mpi/memory";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create mpi/memory directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/mpi/loads";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create mpi/loads directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/regrid";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create regrid directory" << std::endl;
+    }    
+  }
+  
+  MPI_Barrier(Chombo_MPI::comm);
+  if(success != 0){
+    MayDay::Abort("driver::set_output_directory - could not create directories for output");
   }
 }
 
