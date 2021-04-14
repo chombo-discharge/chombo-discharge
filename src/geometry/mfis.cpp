@@ -88,11 +88,44 @@ IntVectSet mfis::interface_region(const ProblemDomain& a_domain) const {
   CH_TIME("mfis::interface_region");
 
   const int which_level = m_ebis[0]->getLevel(a_domain);
-  
+#if 0  
   IntVectSet iface_reg = m_ebis[0]->irregCells(which_level);
   for (int i = 1; i < this->num_phases(); i++){
     iface_reg &= m_ebis[i]->irregCells(which_level);
   }
 
   return iface_reg;
+#else
+  IntVectSet irreg0;
+  IntVectSet irreg1;
+  IntVectSet myIrregCellsPhase0 = m_ebis[0]->irregCells(which_level);
+  IntVectSet myIrregCellsPhase1 = m_ebis[1]->irregCells(which_level);
+
+  Vector<IntVectSet> allIrregCellsPhase0(numProc());
+  Vector<IntVectSet> allIrregCellsPhase1(numProc());
+  
+  gather(allIrregCellsPhase0, myIrregCellsPhase0, 0);
+  gather(allIrregCellsPhase1, myIrregCellsPhase1, 0);
+
+  IntVectSet ret;
+  
+  if(procID() == 0){
+    for (int i = 0; i < allIrregCellsPhase1.size(); i++){
+      irreg0 |= allIrregCellsPhase1[i];
+    }
+
+    for (int i = 0; i < allIrregCellsPhase0.size(); i++){
+      irreg1 |= allIrregCellsPhase0[i];
+    }
+
+    ret = irreg1 & irreg0;
+
+  }
+
+  broadcast(ret, 0);
+
+  return ret;
+#endif
+
+
 }
