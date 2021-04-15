@@ -995,6 +995,7 @@ void driver::parse_runtime_options(){
   pp.get("write_memory",             m_write_memory);
   pp.get("write_loads",              m_write_loads);
   pp.get("plot_interval",            m_plot_interval);
+  pp.get("regrid_interval",          m_regrid_interval);
   pp.get("checkpoint_interval",      m_chk_interval);
   pp.get("write_regrid_files",       m_write_regrid_files);
   pp.get("write_restart_files",      m_write_restart_files);

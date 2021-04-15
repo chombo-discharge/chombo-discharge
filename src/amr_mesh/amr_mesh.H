@@ -71,6 +71,11 @@ public:
   */
   void parse_options();
 
+    /*!
+    @brief Parse options
+  */
+  void parse_runtime_options();
+
   /*!
     @brief Deallocate data. You should never need this, smart pointers are you friends :)
   */

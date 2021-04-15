@@ -713,6 +713,16 @@ void amr_mesh::parse_options(){
   parse_eb_stencils();
 }
 
+void amr_mesh::parse_runtime_options(){
+  parse_verbosity();
+  parse_blocking_factor();
+  parse_max_box_size();
+  parse_grid_generation();
+  parse_buffer_size();
+  parse_irreg_growth();
+  parse_fill_ratio();
+}
+
 void amr_mesh::parse_domain(){
 
   std::string balance;
