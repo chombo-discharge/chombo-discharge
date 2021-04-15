@@ -70,6 +70,11 @@ public:
     @brief Parse class options
   */
   virtual void parse_options();
+
+  /*!
+    @brief Parse class options
+  */
+  virtual void parse_runtime_options();
   
   /*!
     @brief Allocate internal storage

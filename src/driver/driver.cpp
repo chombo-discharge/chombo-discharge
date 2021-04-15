@@ -866,10 +866,13 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 #endif
 
       // Rebuild input parameters
+      Real TT = -MPI_Wtime();
       this->rebuildParmParse();
       this->parse_runtime_options();
       m_amr->parse_runtime_options();
       m_timestepper->parse_runtime_options();
+      TT += MPI_Wtime();
+      if(procID() == 0) std::cout << TT << std::endl;
     }
   }
 

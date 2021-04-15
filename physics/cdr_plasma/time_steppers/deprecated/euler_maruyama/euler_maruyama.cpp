@@ -47,6 +47,30 @@ void euler_maruyama::parse_options(){
   parse_debug();
 }
 
+void euler_maruyama::parse_runtime_options(){
+  CH_TIME("euler_maruyama::parse_runtime_options");
+  if(m_verbosity > 5){
+    pout() << "euler_maruyama::parse_runtime_options" << endl;
+  }
+
+  parse_verbosity();
+  parse_solver_verbosity();
+  parse_fast_poisson();
+  parse_cfl();
+  parse_relax_time();
+  parse_min_dt();
+  parse_max_dt();
+  parse_source_comp();
+  parse_diffusion();
+  parse_advection();
+  parse_floor();
+  parse_debug();
+
+  m_cdr->parse_runtime_options();
+  m_rte->parse_runtime_options();
+  m_poisson->parse_runtime_options();
+}
+
 void euler_maruyama::parse_diffusion(){
   CH_TIME("euler_maruyama::parse_diffusion");
   if(m_verbosity > 5){

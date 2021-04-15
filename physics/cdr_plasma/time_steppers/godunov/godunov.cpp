@@ -58,6 +58,33 @@ void godunov::parse_options(){
   parse_fhd();
 }
 
+void godunov::parse_runtime_options(){
+  CH_TIME("godunov::parse_runtime_options");
+  if(m_verbosity > 5){
+    pout() << "godunov::parse_runtime_options" << endl;
+  }
+
+  parse_verbosity();
+  parse_solver_verbosity();
+  parse_fast_poisson();
+  parse_fast_rte();
+  parse_cfl();
+  parse_relax_time();
+  parse_min_dt();
+  parse_max_dt();
+  parse_source_comp();
+  parse_diffusion();
+  parse_transport();
+  parse_advection();
+  parse_floor();
+  parse_debug();
+  parse_fhd();
+
+  m_cdr->parse_runtime_options();
+  m_rte->parse_runtime_options();
+  m_poisson->parse_runtime_options();
+}
+
 void godunov::parse_diffusion(){
   CH_TIME("godunov::parse_diffusion");
   if(m_verbosity > 5){

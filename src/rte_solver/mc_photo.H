@@ -155,6 +155,11 @@ public:
     Parse options
   */
   virtual void parse_options();
+
+  /*!
+    Parse options
+  */
+  virtual void parse_runtime_options();
   
   /*!
     @brief Allocate internal storage

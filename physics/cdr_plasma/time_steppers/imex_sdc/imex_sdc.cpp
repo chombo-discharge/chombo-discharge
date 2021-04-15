@@ -65,6 +65,39 @@ void imex_sdc::parse_options(){
   imex_sdc::setup_qmj(m_p);
 }
 
+void imex_sdc::parse_runtime_options(){
+  CH_TIME("imex_sdc::parse_runtime_options");
+  if(m_verbosity > 5){
+    pout() << "imex_sdc::parse_runtime_options" << endl;
+  }
+
+  // Regular stuff from cdr_plasma_stepper that we almost always need
+  parse_verbosity();
+  parse_solver_verbosity();
+  parse_cfl();
+  parse_relax_time();
+  parse_fast_rte();
+  parse_fast_poisson();
+  parse_min_dt();
+  parse_max_dt();
+  parse_source_comp();
+
+  // Specific to this class
+  parse_nodes();
+  parse_diffusion_coupling();
+  parse_adaptive_options();
+  parse_debug_options();
+  parse_advection_options();
+
+  // Setup nodes
+  imex_sdc::setup_quadrature_nodes(m_p);
+  imex_sdc::setup_qmj(m_p);
+
+  m_cdr->parse_runtime_options();
+  m_rte->parse_runtime_options();
+  m_poisson->parse_runtime_options();
+}
+
 void imex_sdc::parse_nodes(){
   CH_TIME("imex_sdc::parse_nodes");
   if(m_verbosity > 5){

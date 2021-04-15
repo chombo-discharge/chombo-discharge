@@ -58,6 +58,11 @@ public:
   virtual void parse_options();
 
   /*!
+    @brief Parse runtime options
+  */
+  virtual void parse_runtime_options();
+
+  /*!
     @brief Add solver
   */
   virtual void add_solver(RefCountedPtr<T> a_solver);

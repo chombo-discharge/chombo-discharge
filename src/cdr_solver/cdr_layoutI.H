@@ -71,6 +71,19 @@ void cdr_layout<T>::parse_options(){
 }
 
 template <class T>
+void cdr_layout<T>::parse_runtime_options(){
+  CH_TIME("cdr_layout<T>::parse_runtime_options");
+  if(m_verbosity > 6){
+    pout() << "cdr_layout<T>::parse_runtime_options" << endl;
+  }
+
+  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    solver->parse_runtime_options();
+  }
+}
+
+template <class T>
 void cdr_layout<T>::allocate_internals(){
   CH_TIME("cdr_layout<T>::allocate_internals");
   if(m_verbosity > 6){

@@ -47,11 +47,12 @@ namespace physics {
       Real advance(const Real a_dt);
 
       void init();
-      void allocate_internals();
-      void deallocate_internals();
-      void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
-      void parse_options();
-      bool need_to_regrid();
+      void allocate_internals() override;
+      void deallocate_internals() override;
+      void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+      void parse_options() override;
+      void parse_runtime_options() override;
+      bool need_to_regrid() override;
 
       Vector<EBAMRCellData*> get_cdr_errors();
   
