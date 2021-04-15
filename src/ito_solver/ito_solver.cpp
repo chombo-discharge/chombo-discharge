@@ -74,6 +74,24 @@ void ito_solver::parse_options(){
   this->parse_checkpointing();
 }
 
+void ito_solver::parse_runtime_options(){
+  CH_TIME("ito_solver::parse_runtime_options");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_runtime_options" << endl;
+  }
+
+  this->parse_superparticles();
+  this->parse_rng();
+  this->parse_plot_vars();
+  this->parse_deposition();
+  this->parse_bisect_step();
+  this->parse_pvr_buffer();
+  this->parse_diffusion_hop();
+  this->parse_redistribution();
+  this->parse_conservation();
+  this->parse_checkpointing();
+}
+
 void ito_solver::parse_superparticles(){
   CH_TIME("ito_solver::parse_superparticles");
   if(m_verbosity > 5){

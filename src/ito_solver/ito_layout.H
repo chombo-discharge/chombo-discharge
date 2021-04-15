@@ -65,6 +65,11 @@ public:
   */
   virtual void parse_options();
 
+    /*!
+    @brief Parse options for all solvers
+  */
+  virtual void parse_runtime_options();
+
   /*!
     @brief Set PVR buffer for all solvers
   */

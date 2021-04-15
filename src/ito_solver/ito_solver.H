@@ -82,6 +82,11 @@ public:
   */
   virtual void parse_options();
 
+    /*!
+    @brief Parse options
+  */
+  virtual void parse_runtime_options();
+
   /*!
     @brief Get output plot names
   */
