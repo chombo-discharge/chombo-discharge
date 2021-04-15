@@ -12,8 +12,8 @@ int main(int argc, char* argv[]){
 #endif
 
   // Build class options from input script and command line options
-  char* input_file = argv[1];
-  ParmParse pp(argc-2, argv+2, NULL, input_file);
+  const std::string input_file = argv[1];
+  ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());
 
   // Set geometry and AMR 
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new wire_wire());
@@ -26,7 +26,7 @@ int main(int argc, char* argv[]){
 
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
-  engine->setup_and_run();
+  engine->setup_and_run(input_file);
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

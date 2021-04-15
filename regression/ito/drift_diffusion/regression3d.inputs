@@ -37,6 +37,7 @@ driver.plot_interval                   = 5             # Plot interval
 driver.regrid_interval                 = 5             # Regrid interval
 driver.checkpoint_interval             = -1            # Checkpoint interval
 driver.write_regrid_files              = false         # Write regrid files or not. 
+driver.write_restart_files             = false         # Write restart files or not
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 3.0           # Stop time

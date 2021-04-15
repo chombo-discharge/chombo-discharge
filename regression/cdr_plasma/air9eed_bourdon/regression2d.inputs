@@ -44,6 +44,7 @@ driver.regrid_interval                 = 5             # Regrid interval
 driver.checkpoint_interval             = 5             # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.write_regrid_files              = false         # Write regrid files or not
+driver.write_restart_files             = false         # Write restart files or not
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 1.0           # Stop time
 driver.max_steps                       = 10            # Maximum number of steps
