@@ -192,6 +192,87 @@ void ito_plasma_godunov::parse_options() {
   
 }
 
+void ito_plasma_godunov::parse_runtime_options() {
+  CH_TIME("ito_plasma_godunov::parse_runtime_options");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_runtime_options" << endl;
+  }
+
+  ParmParse pp(m_name.c_str());
+  std::string str;
+  
+  pp.get("verbosity",      m_verbosity);
+  pp.get("ppc",            m_ppc);
+  pp.get("max_cells_hop",  m_max_cells_hop);
+  pp.get("merge_interval", m_merge_interval);
+  pp.get("relax_factor",   m_relax_factor);
+  pp.get("regrid_super",   m_regrid_superparticles);
+  pp.get("algorithm",      str);
+  pp.get("load_balance",   m_load_balance);
+  pp.get("load_index",     m_load_balance_idx);
+  pp.get("min_dt",         m_min_dt);
+  pp.get("max_dt",         m_max_dt);
+  pp.get("filter_rho",     m_filter_rho);
+  pp.get("filter_cond",    m_filter_cond);
+  pp.get("eb_tolerance",   m_eb_tolerance);
+
+  // Get algorithm
+  if(str == "euler_maruyama"){
+    m_algorithm = which_algorithm::euler_maruyama;
+  }
+  else if(str ==  "trapezoidal"){
+    m_algorithm = which_algorithm::trapezoidal;
+  }
+  else{
+    MayDay::Abort("ito_plasma_godunov::parse_options - unknown algorithm requested");
+  }
+
+  // Dt limitation
+  pp.get("which_dt", str);
+  if(str == "advection"){
+    m_whichDt = which_dt::advection;
+  }
+  else if(str == "diffusion"){
+    m_whichDt = which_dt::diffusion;
+  }
+  else if(str == "advection_diffusion"){
+    m_whichDt = which_dt::advection_diffusion;
+  }
+  else{
+    MayDay::Abort("ito_plasma_godunov::parse_options - unknown 'which_dt' requested");
+  }
+
+  // Box sorting for load balancing
+  pp.get("box_sorting", str);
+  if( str == "none"){
+    m_boxsort = box_sorting::none;
+  }
+  else if( str == "std"){
+    m_boxsort = box_sorting::std;
+  }
+  else if(str == "shuffle"){
+    m_boxsort = box_sorting::shuffle;
+  }
+  else if(str == "morton"){
+    m_boxsort = box_sorting::morton;
+  }
+  else {
+    MayDay::Abort("ito_plasma_godunov::parse_options - unknown box sorting method requested for argument 'box_sorting'");
+  }
+
+  // Parse filterse
+  this->parse_filters();
+  
+
+  // Setup runtime storage (requirements change with algorithm)
+  this->setup_runtime_storage();
+
+  //
+  m_ito->parse_runtime_options();
+  m_poisson->parse_runtime_options();
+  m_rte->parse_runtime_options();
+}
+
 void ito_plasma_godunov::allocate_internals(){
   CH_TIME("ito_plasma_godunov::allocate_internals");
   if(m_verbosity > 5){

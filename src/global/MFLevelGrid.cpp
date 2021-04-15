@@ -1,6 +1,6 @@
 /*!
-  @file   mflevelgrid.cpp
-  @brief  Implementation of MFLEVELGRID.H
+  @file   MFLevelGrid.cpp
+  @brief  Implementation of MFLevelGrid.H
   @author Robert Marskar
   @date   Dec. 2017
 */
@@ -40,7 +40,7 @@ int MFLevelGrid::num_phases() const {
 }
 
 void MFLevelGrid::define(const RefCountedPtr<mfis>& a_mfis,
-		    const Vector<EBLevelGrid>& a_eblg){
+			 const Vector<EBLevelGrid>& a_eblg){
   m_mfis = a_mfis;
   m_eblg = a_eblg;
 }

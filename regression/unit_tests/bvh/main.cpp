@@ -16,7 +16,7 @@ int main(int argc, char* argv[]){
 #endif
 
   // Build class options from input script and command line options
-  char* input_file = argv[1];
+  const std::string input_file = argv[1];
   ParmParse parmParse(argc-2, argv+2, NULL, input_file);
 
   ParmParse pp("bvh");

@@ -34,6 +34,22 @@ void cdr_muscl::parse_options(){
   m_extrap_source = false; // This class can't extrapolate with source term (yet)
 }
 
+void cdr_muscl::parse_runtime_options(){
+  CH_TIME("cdr_muscl::parse_runtime_options");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_runtime_options" << endl;
+  }
+
+  parse_plotmode();     // Parses plot mode
+  parse_domain_bc();    // Parses domain BC options
+  parse_slopelim();     // Parses slope limiter settings
+  parse_plot_vars();    // Parses plot variables
+  parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+  parse_conservation();  // Nonlinear divergence blending
+
+  m_extrap_source = false; // This class can't extrapolate with source term (yet)
+}
+
 void cdr_muscl::parse_slopelim(){
   ParmParse pp(m_class_name.c_str());
 

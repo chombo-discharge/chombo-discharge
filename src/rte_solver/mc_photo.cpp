@@ -93,6 +93,24 @@ void mc_photo::parse_options(){
   this->parse_conservation();
 }
 
+void mc_photo::parse_runtime_options(){
+  CH_TIME("mc_photo::parse_runtime_options");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_runtime_options" << endl;
+  }
+  
+  this->parse_pseudophotons();
+  this->parse_photogen();
+  this->parse_source_type();
+  this->parse_deposition();
+  this->parse_bisect_step();
+  this->parse_domain_bc();
+  this->parse_pvr_buffer();
+  this->parse_plot_vars();
+  this->parse_instantaneous();
+  this->parse_conservation();
+}
+
 void mc_photo::parse_conservation(){
   CH_TIME("mc_photo::parse_conservation");
   if(m_verbosity > 5){

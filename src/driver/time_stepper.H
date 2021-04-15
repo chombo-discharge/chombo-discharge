@@ -62,7 +62,10 @@ public:
 
   // Registration routines
   virtual void register_realms() = 0;
-  virtual void register_operators() = 0; 
+  virtual void register_operators() = 0;
+
+  // Runtime options
+  virtual void parse_runtime_options();
 
   // IO routines
   virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const = 0;

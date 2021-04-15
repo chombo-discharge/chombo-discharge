@@ -48,6 +48,17 @@ void eddington_sp1::parse_options(){
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
 }
 
+void eddington_sp1::parse_runtime_options(){
+  CH_TIME("eddington_sp1::parse_runtime_options");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_runtime_options" << endl;
+  }
+  
+  parse_stationary();   // Parse stationary solver
+  parse_plot_vars();    // Parses plot variables
+  parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+}
+
 void eddington_sp1::parse_domain_bc(){
   CH_TIME("eddington_sp1::parse_domain_bc");
   if(m_verbosity > 5){

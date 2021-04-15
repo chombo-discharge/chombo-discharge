@@ -37,6 +37,18 @@ brownian_walker_stepper::~brownian_walker_stepper(){
 
 }
 
+void brownian_walker_stepper::parse_runtime_options() {
+
+  ParmParse pp("brownian_walker");
+  
+  pp.get("verbosity",      m_verbosity);
+  pp.get("ppc",            m_ppc);
+  pp.get("max_cells_hop",  m_max_cells_hop);
+  pp.get("load_balance",   m_load_balance);
+  
+  m_solver->parse_runtime_options();
+}
+
 void brownian_walker_stepper::initial_data(){
   CH_TIME("brownian_walker_stepper::initial_data");
   if(m_verbosity > 5){

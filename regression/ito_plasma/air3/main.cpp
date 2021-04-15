@@ -27,8 +27,8 @@ int main(int argc, char* argv[]){
 #endif
 
   // Build class options from input script and command line options
-  char* input_file = argv[1];
-  ParmParse pp(argc-2, argv+2, NULL, input_file);
+  const std::string input_file = argv[1];
+  ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());
 
   // Get potential from input script 
   std::string basename; 
@@ -71,7 +71,7 @@ timestepper->set_potential(potential_curve);
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
 #if 1 // Original code
-  engine->setup_and_run();
+  engine->setup_and_run(input_file);
 #else
   const RealVect E = 1.E7*RealVect(BASISV(0));
   physics->update_reaction_rates(E, 1.0, 1.0);

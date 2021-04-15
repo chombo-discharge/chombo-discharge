@@ -44,88 +44,27 @@ public:
   /*!
     @brief Setup and run simulations
   */
-  virtual void setup_and_run();
-
-  // /*!
-  //   @brief This function will read two checkpoint files, and compute the error norms on the finest level in a_chk_coar data 
-  // */
-  // virtual void compute_norm(std::string a_chk_coarse, std::string a_chk_fine);
-
-  // /*!
-  //   @brief Compute the error norm on the coarsest level 
-  // */
-  // virtual void compute_coarse_norm(const std::string a_chk1, const std::string a_chk2, const int a_species = -1);
-
-  virtual void parse_regrid();
-  virtual void parse_restart();
-  virtual void parse_memrep();
-  virtual void parse_output_directory();
-  virtual void parse_geo_refinement();
-  virtual void parse_coarsen();
-  virtual void parse_verbosity();
-  virtual void parse_output_file_names();
-  virtual void parse_output_intervals();
-  virtual void parse_num_plot_ghost();
-  virtual void parse_grow_tags();
-  virtual void parse_geom_only();
-  virtual void parse_ebis_memory_load_balance();
-  virtual void parse_write_ebis();
-  virtual void parse_read_ebis();
-  virtual void parse_simulation_time();
-  virtual void parse_file_depth();
-  virtual void parse_plot_vars();
-  virtual void parse_geometry_generation();
+  void setup_and_run(const std::string a_input_file);
   
   /*!
     @brief Run the solvers untils a_time or a_max_steps has been reached
   */
-  virtual void run(const Real a_start_time, const Real a_end_time, const int a_max_steps);
+  void run(const Real a_start_time, const Real a_end_time, const int a_max_steps);
 
   /*!
     @brief Setup function
   */
-  virtual void setup(const int a_init_regrids, const bool a_restart, const std::string a_restart_file);
+  void setup(const std::string a_input_file, const int a_init_regrids, const bool a_restart, const std::string a_restart_file);
 
   /*!
-    @brief Set amr
+    @brief Parse options
   */
-  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+  void parse_options();
 
   /*!
-    @brief Set geometrical refinement depths. This provides a little more flexibility than the basic call. 
-    @param[in] a_depth1 Conductor tag depth
-    @param[in] a_depth2 Dielectric tag depth
-    @param[in] a_depth3 Conductor-gas interface tag depth
-    @param[in] a_depth4 Dielectric-gas interface tag depth
-    @param[in] a_depth5 Solid-gas interface tag depth
-    @param[in] a_depth6 Solid-solid interface tag depth
+    @brief Parse runtime options
   */
-  virtual void set_geom_refinement_depth(const int a_depth1,
-					 const int a_depth2,
-					 const int a_depth3,
-					 const int a_depth4,
-					 const int a_depth5,
-					 const int a_depth6);
-
-  // /*!
-  //   @brief Dump mass for cdr solvers
-  // */
-  // virtual void set_dump_mass(const bool a_dump_mass);
-
-  // /*!
-  //   @brief Dump charge for cdr and sigma solvers
-  // */
-  // virtual void set_dump_charge(const bool a_dump_charge);
-
-  /*!
-    @brief Output on centroids or cell centers
-  */
-  virtual void set_output_centroids(const bool a_output_centroids);
-
-  /*!
-    @brief Sanity check
-  */
-  virtual void sanity_check();
+  void parse_runtime_options();
 
 protected:
 
@@ -141,7 +80,7 @@ protected:
   /*!
     @brief Constructor
   */
-  driver();
+  driver() = delete;
 
   /*!
     @brief Index space
@@ -182,6 +121,11 @@ protected:
     @brief Memory report mode
   */
   memory_report_mode m_memory_mode;
+
+  /*!
+    @brief Input file
+  */
+  std::string m_input_file;
 
   /*!
     @brief
@@ -374,6 +318,11 @@ protected:
   bool m_write_regrid_files;
 
   /*!
+    @brief Write restart files or not
+  */
+  bool m_write_restart_files;
+
+  /*!
     @brief Allow grid coarsening
   */
   bool m_allow_coarsen;
@@ -387,16 +336,6 @@ protected:
     @brief Write loads to file or not
   */
   bool m_write_loads;
-
-  /*!
-    @brief Use recursive regrid (true) or regrid all levels at once (false)
-  */
-  bool m_recursive_regrid;
-
-  /*!
-    @brief Output on centroids or not
-  */
-  bool m_output_centroids;
 
   /*!
     @brief Potential has been set
@@ -419,26 +358,6 @@ protected:
   bool m_ebis_memory_load_balance;
 
   /*!
-    @brief Write EBIS to HDF5. Might be useful for restarting simulations
-  */
-  bool m_write_ebis;
-
-  /*!
-    @brief Read EBIS file from HDF5. Useful for restarting simulation.
-  */
-  bool m_read_ebis;
-
-  /*!
-    @brief Dump total mass (or charge) for every cdr solver at every time_step
-  */
-  bool m_dump_mass;
-
-  /*!
-    @brief Dump charge for cdr and surface charge solvers at every time step
-  */
-  bool m_dump_charge;
-
-  /*!
     @brief Plot tagged cells
   */
   bool m_plot_tags;
@@ -453,281 +372,289 @@ protected:
   */
   bool m_plot_levelset;
 
-  // Output parameters that go into checkpoint files
-  Vector<Real> m_time_history;        // Simulation time
-  Vector<Real> m_voltage_history;     // Applied voltage
-  Vector<Real> m_dt_history;          // Time steps
-  Vector<Real> m_exec_history;        // Execution time per time step
-  Vector<Real> m_charge_history;      // Total charge in domain
-  Vector<Real> m_ohmic_induced_I;     // Ohmic induced current
-  Vector<Real> m_capacitive_induced;  // Capacitively induced current
-  Vector<Real> m_domain_I;            // Current through domain faces
-  Vector<Real> m_electrode_I;         // Current through electrode EBs
+  /*!
+    @brief Set amr
+  */
+  void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
+  /*!
+    @brief Sanity check
+  */
+  void sanity_check();
+
+  /*!
+    @brief Parse geometrical refinement
+  */
+  void parse_geo_refinement();
+
+  /*!
+    @brief Parse plot variables
+  */
+  void parse_plot_vars();
+
+  /*!
+    @brief Parse option for geometry generation
+  */
+  void parse_geometry_generation();
+
+  /*!
+    @brief Create output directories
+  */
+  void create_output_directories();
 
   /*!
     @brief Allocate internals
   */
-  virtual void allocate_internals();
+  void allocate_internals();
   
   /*!
     @brief Cache tags
   */
-  virtual void cache_tags(const EBAMRTags& a_tags);
+  void cache_tags(const EBAMRTags& a_tags);
 
   /*!
     @brief Deallocate internal storage
   */
-  virtual void deallocate_internals();
+  void deallocate_internals();
 
   /*!
     @brief Write the geometry to file
   */
-  virtual void write_ebis();
+  void write_ebis();
 
   /*!
     @brief Get geometric tags
   */
-  virtual void get_geom_tags();
+  void get_geom_tags();
 
   /*!
     @brief Get boxes and points for everything
   */
-  virtual void get_loads_and_boxes(long long& a_myPoints,
-				   long long& a_myPointsGhosts,
-				   long long& a_myBoxes,
-				   long long& a_totalPoints,
-				   long long& a_totalPointsGhosts,
-				   long long& a_totalBoxes,
-				   Vector<long long>& a_my_level_boxes,
-				   Vector<long long>& a_total_level_boxes,
-				   Vector<long long>& a_my_level_points,
-				   Vector<long long>& a_total_level_points,
-				   const int& a_finestLevel,
-				   const Vector<DisjointBoxLayout>& a_grids);
+  void get_loads_and_boxes(long long& a_myPoints,
+			   long long& a_myPointsGhosts,
+			   long long& a_myBoxes,
+			   long long& a_totalPoints,
+			   long long& a_totalPointsGhosts,
+			   long long& a_totalBoxes,
+			   Vector<long long>& a_my_level_boxes,
+			   Vector<long long>& a_total_level_boxes,
+			   Vector<long long>& a_my_level_points,
+			   Vector<long long>& a_total_level_points,
+			   const int& a_finestLevel,
+			   const Vector<DisjointBoxLayout>& a_grids);
 
   /*!
     @brief Write a grid report
   */
-  virtual void grid_report();
+  void grid_report();
 
   /*!
     @brief Number formatting game. This just prints the number 123456 as 123,456
   */
-  virtual const std::string number_fmt(const long long a_number, char a_sep = ',') const;
+  const std::string number_fmt(const long long a_number, char a_sep = ',') const;
 
   /*!
     @brief Number formatting game. This just prints the number 123456 as 123,456
   */
-  virtual const Vector<std::string> number_fmt(const Vector<long long> a_number, char a_sep = ',') const;
+  const Vector<std::string> number_fmt(const Vector<long long> a_number, char a_sep = ',') const;
 
   /*!
     @brief Memory report
   */
-  virtual void memory_report(const memory_report_mode a_mode);
+  void memory_report(const memory_report_mode a_mode);
 
   /*!
     @brief Read checkpoint file
   */
-  virtual void read_checkpoint_file(const std::string& a_restart_file);
+  void read_checkpoint_file(const std::string& a_restart_file);
 
   /*!
     @brief Read vector data up to and including a_step
   */
-  virtual void read_vector_data(HDF5HeaderData& a_header, Vector<Real>& a_data, const std::string a_name, const int a_elements);
+  void read_vector_data(HDF5HeaderData& a_header, Vector<Real>& a_data, const std::string a_name, const int a_elements);
 
   /*!
     @brief Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver
     whose solution is recomputed. The same goes for stationary RTE methods. 
   */
-  virtual void regrid(const int a_lmin, const int a_lmax, const bool a_use_initial_data);
+  void regrid(const int a_lmin, const int a_lmax, const bool a_use_initial_data);
 
   /*!
     @brief Regrid internal storage for this class
   */
-  virtual void regrid_internals(const int a_old_finest_level, const int a_new_finest_level);
+  void regrid_internals(const int a_old_finest_level, const int a_new_finest_level);
 
   /*!
     @brief Write a regrid report
   */
-  virtual void regrid_report(const Real a_total_time,
-			     const Real a_tag_time,
-			     const Real a_base_regrid_time,
-			     const Real a_solver_regrid_time);
+  void regrid_report(const Real a_total_time,
+		     const Real a_tag_time,
+		     const Real a_base_regrid_time,
+		     const Real a_solver_regrid_time);
   
   /*!
     @brief Set the computational geometry
   */
-  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
+  void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
 
   /*!
     @brief Set the time stepper
   */
-  virtual void set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper);
+  void set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper);
 
   /*!
     @brief Set the cell tagger
   */
-  virtual void set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger);
+  void set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger);
 
   /*!
     @brief Set the geo coarsener
   */
-  virtual void set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen);
+  void set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen);
 
   /*!
     @brief Setup function
   */
-  virtual void setup_fresh(const int a_init_regrids);
+  void setup_fresh(const int a_init_regrids);
 
   /*!
     @brief Set for restart
   */
-  virtual void setup_for_restart(const int a_init_regrids, const std::string a_restart_file);
+  void setup_for_restart(const int a_init_regrids, const std::string a_restart_file);
 
   /*!
     @brief Set up for geometry only
   */
-  virtual void setup_geometry_only();
+  void setup_geometry_only();
+
+  /*!
+    @brief Check if restart file exists
+  */
+  void check_restart_file(const std::string a_restart_file) const;
 
   /*!
     @brief Write a time step report
   */
-  virtual void step_report(const Real a_start_time, const Real a_end_time, const int a_max_steps);
+  void step_report(const Real a_start_time, const Real a_end_time, const int a_max_steps);
 
   /*!
     @brief Write a plot file
   */
-  virtual void write_plot_file();
+  void write_plot_file();
 
   /*!
     @brief Write a regrid file
   */
-  virtual void write_regrid_file();
+  void write_regrid_file();
+
+  /*!
+    @brief Write a restart file
+  */
+  void write_restart_file();
+
+  /*!
+    @brief Write a crash file
+  */
+  void write_crash_file();
 
   /*!
     @brief Write a plot file
   */
-  virtual void write_plot_file(const std::string a_filename);
+  void write_plot_file(const std::string a_filename);
 
   /*!
     @brief Write the memory usage to file
   */
-  virtual void write_memory_usage();
+  void write_memory_usage();
 
   /*!
     @brief Write computational loads
   */
-  virtual void write_computational_loads();
+  void write_computational_loads();
 
   /*!
     @brief Write a checkpoint file
   */
-  virtual void write_checkpoint_file();
+  void write_checkpoint_file();
   
   /*!
     @brief Write checkpoint data
   */
-  virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level);
+  void write_checkpoint_level(HDF5Handle& a_handle, const int a_level);
 
   /*!
     @brief Write tags
   */
-  virtual void write_checkpoint_tags(HDF5Handle& a_handle, const int a_level);
+  void write_checkpoint_tags(HDF5Handle& a_handle, const int a_level);
 
   /*!
     @brief Write checkpoint realm loads
   */
-  virtual void write_checkpoint_realm_loads(HDF5Handle& a_handle, const int a_level);
+  void write_checkpoint_realm_loads(HDF5Handle& a_handle, const int a_level);
 
   /*!
     @brief Write checkpoint data
   */
-  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
+  void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
 
   /*!
     @brief Read realm loads. 
   */
-  virtual void read_checkpoint_realm_loads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_realm, const int a_level);
+  void read_checkpoint_realm_loads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_realm, const int a_level);
 
   /*!
     @brief Write vector data to a HDF5Header. This writes up to a_step
   */
-  virtual void write_vector_data(HDF5HeaderData& a_header, const Vector<Real>& a_data, const std::string a_name, const int a_elem);
+  void write_vector_data(HDF5HeaderData& a_header, const Vector<Real>& a_data, const std::string a_name, const int a_elem);
 
   /*!
     @brief Write the geometry only
   */
-  virtual void write_geometry();
-  
-  // /*!
-  //   @brief Open file for mass dump
-  // */
-  // virtual void open_mass_dump_file(ofstream& a_file);
-
-  // /*!
-  //   @brief Open file for mass dump
-  // */
-  // virtual void open_charge_dump_file(ofstream& a_file);
-
-  // /*!
-  //   @brief Dump mass
-  // */
-  // virtual void dump_mass(ofstream& a_file);
-
-  // /*!
-  //   @brief Dump charge
-  // */
-  // virtual void dump_charge(ofstream& a_file);
-
-  // /*!
-  //   @brief Close file for mass dump
-  // */
-  // virtual void close_mass_dump_file(ofstream& a_file);
-
-  // /*!
-  //   @brief Close file for mass dump
-  // */
-  // virtual void close_charge_dump_file(ofstream& a_file);
+  void write_geometry();
 
   /*!
     @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);
   */
-  virtual bool tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags);
+  bool tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags);
 
   /*!
     @brief Get number of plot variables
   */
-  virtual int get_num_plot_vars() const;
+  int get_num_plot_vars() const;
 
   /*!
     @brief Get names for the plot variables
   */
-  virtual Vector<std::string> get_plotvar_names() const;
+  Vector<std::string> get_plotvar_names() const;
 
   /*!
     @brief Write internal plot data
   */
-  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+  void write_plot_data(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write cell tags to file
   */
-  virtual void write_tags(EBAMRCellData& a_output, int& a_comp);
+  void write_tags(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write MPI ranks to output
   */
-  virtual void write_ranks(EBAMRCellData& a_output, int& a_comp);
+  void write_ranks(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write level sets
   */
-  virtual void write_levelset(EBAMRCellData& a_output, int& a_comp);
+  void write_levelset(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Return the finest tag level
   */
-  virtual int get_finest_tag_level(const EBAMRTags& a_cell_tags) const;
+  int get_finest_tag_level(const EBAMRTags& a_cell_tags) const;
+
+  /*!
+    @brief Rebuild Parmparse
+  */
+  void rebuildParmParse() const;
 };
 #endif

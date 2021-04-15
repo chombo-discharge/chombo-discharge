@@ -11,6 +11,8 @@
 #include "units.H"
 #include "memrep.H"
 
+#include <fstream>
+
 #include <EBArith.H>
 #include <EBAlias.H>
 #include <LevelData.H>
@@ -19,16 +21,6 @@
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
 
-driver::driver(){
-  CH_TIME("driver::driver(weak)");
-  if(m_verbosity > 5){
-    pout() << "driver::driver(weak)" << endl;
-  }
-
-  MayDay::Abort("driver::driver - weak construction is not allowed (yet)");
-
-}
-
 driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
 	       const RefCountedPtr<time_stepper>&           a_timestepper,
 	       const RefCountedPtr<amr_mesh>&               a_amr,
@@ -36,49 +28,21 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
 	       const RefCountedPtr<geo_coarsener>&          a_geocoarsen){
   CH_TIME("driver::driver(full)");
 
-  parse_verbosity();
-  if(m_verbosity > 5){
-    pout() << "driver::driver(full)" << endl;
-  }
-  
   set_computational_geometry(a_compgeom);              // Set computational geometry
   set_time_stepper(a_timestepper);                     // Set time stepper
   set_amr(a_amr);                                      // Set amr
   set_cell_tagger(a_celltagger);                       // Set cell tagger
   set_geo_coarsen(a_geocoarsen);                       // Set geo coarsener
 
-  // Parse some class options
-  parse_regrid();
-  parse_restart();
-  parse_memrep();
-  parse_coarsen();
-  parse_output_directory();
-  parse_output_file_names();
-  parse_verbosity();
-  parse_output_intervals();
-  parse_geo_refinement();
-  parse_num_plot_ghost();
-  parse_grow_tags();
-  parse_geom_only();
-  parse_ebis_memory_load_balance();
-  parse_write_ebis();
-  parse_read_ebis(); 
-  parse_simulation_time();
-  parse_file_depth();
-  parse_plot_vars();
-
-
-  // Debugging stuff
-  // this->set_dump_mass(false);                                // Dump mass to file
-  // this->set_dump_charge(false);                              // Dump charges to file
-  this->set_output_centroids(true);                          // Use cell centroids for output
-
   // AMR does its thing
   m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
   m_amr->build_domains();                // Build domains and resolutions, nothing else
 
-  // Parse the geometry generation method
-  parse_geometry_generation();
+  // Parse some class options
+  parse_options();
+
+  // Create output directories. 
+  create_output_directories();
 
   // Ok we're ready to go. 
   m_step          = 0;
@@ -197,30 +161,6 @@ void driver::deallocate_internals(){
   }
 
   //  m_amr->deallocate(m_tags);
-}
-
-void driver::write_ebis(){
-  CH_TIME("driver::write_ebis");
-  if(m_verbosity > 5){
-    pout() << "driver::write_ebis" << endl;
-  }
-
-  const std::string path_gas = m_output_dir + "/geo/" + m_ebis_gas_file;
-  const std::string path_sol = m_output_dir + "/geo/" + m_ebis_sol_file;
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
-
-  if(!ebis_gas.isNull()){
-    HDF5Handle gas_handle(path_gas.c_str(), HDF5Handle::CREATE);
-    ebis_gas->write(gas_handle);
-    gas_handle.close();
-  }
-  if(!ebis_sol.isNull()){
-    HDF5Handle sol_handle(path_sol.c_str(), HDF5Handle::CREATE);
-    ebis_sol->write(sol_handle);
-    sol_handle.close();
-  }
 }
 
 void driver::get_geom_tags(){
@@ -407,16 +347,16 @@ void driver::get_loads_and_boxes(long long& a_myPoints,
 }
 
 const std::string driver::number_fmt(const long long n, char sep) const {
-    stringstream fmt;
-    fmt << n;
-    string s = fmt.str();
-    s.reserve(s.length() + s.length() / 3);
+  stringstream fmt;
+  fmt << n;
+  string s = fmt.str();
+  s.reserve(s.length() + s.length() / 3);
 
-    for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j)
-        if (i != 0 && j % 3 == 0)
-            s.insert(i++, 1, sep);
+  for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j)
+    if (i != 0 && j % 3 == 0)
+      s.insert(i++, 1, sep);
 
-    return s;
+  return s;
 }
 
 const Vector<std::string> driver::number_fmt(const Vector<long long> a_number, char a_sep) const{
@@ -550,19 +490,19 @@ void driver::grid_report(){
 	   << "\t\t\t\t        Proc. # of boxes       = " << number_fmt(myBoxes) << endl
 	   << "\t\t\t\t        Proc. # of boxes (lvl) = " << number_fmt(my_level_boxes) << endl
 	   << "\t\t\t\t        Proc. # of cells (lvl) = " << number_fmt(my_level_points) << endl;
-      }
+  }
   
   pout()
 #ifdef CH_USE_MEMORY_TRACKING
-	 << "\t\t\t        Unfreed memory        = " << curMem/BytesPerMB << " (MB)" << endl
-    	 << "\t\t\t        Peak memory usage     = " << peakMem/BytesPerMB << " (MB)" << endl
+    << "\t\t\t        Unfreed memory        = " << curMem/BytesPerMB << " (MB)" << endl
+    << "\t\t\t        Peak memory usage     = " << peakMem/BytesPerMB << " (MB)" << endl
 #ifdef CH_MPI
-    	 << "\t\t\t        Max unfreed memory    = " << max_unfreed_mem/BytesPerMB << " (MB)" << endl
-	 << "\t\t\t        Max peak memory       = " << max_peak_mem/BytesPerMB << " (MB)" << endl
+    << "\t\t\t        Max unfreed memory    = " << max_unfreed_mem/BytesPerMB << " (MB)" << endl
+    << "\t\t\t        Max peak memory       = " << max_peak_mem/BytesPerMB << " (MB)" << endl
 #endif
-    	 << "-----------------------------------------------------------------------" << endl
+    << "-----------------------------------------------------------------------" << endl
 #endif
-	 << endl;
+    << endl;
 
   pout() << endl;
 }
@@ -586,8 +526,6 @@ void driver::memory_report(const memory_report_mode a_mode){
   pout() << endl;
 #endif
 }
-
-
 
 void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial_data){
   CH_TIME("driver::regrid");
@@ -693,6 +631,7 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
 			base_regrid - cell_tags,
 			solver_regrid - base_regrid);
   }
+
 }
 
 void driver::regrid_internals(const int a_old_finest_level, const int a_new_finest_level){
@@ -798,16 +737,6 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 
     m_wallclock_start = MPI_Wtime();
 
-    // This is actually a debugging
-    ofstream mass_dump_file;
-    ofstream charge_dump_file;
-    // if(m_dump_mass){
-    //   this->open_mass_dump_file(mass_dump_file);
-    // }
-    // if(m_dump_charge){
-    //   this->open_charge_dump_file(charge_dump_file);
-    // }
-
     while(m_time < a_end_time && m_step < a_max_steps && !last_step){
       const int max_sim_depth = m_amr->get_max_sim_depth();
       const int max_amr_depth = m_amr->get_max_amr_depth();
@@ -822,22 +751,9 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 
 	  // We'll regrid levels lmin through lmax. As always, new grids on level l are generated through tags
 	  // on levels (l-1);
-	  int lmin, lmax;
-	  if(!m_recursive_regrid){
-	    lmin = 0;
-	    lmax = m_amr->get_finest_level();
-	  }
-	  else{
-	    int iref = 1;//m_regrid_interval;
-	    lmax = m_amr->get_finest_level();
-	    lmin = 1;
-	    for (int lvl = m_amr->get_finest_level(); lvl > 0; lvl--){
-	      if(m_step%(iref*m_regrid_interval) == 0){
-		lmin = lvl;
-	      }
-	      iref *= m_amr->get_ref_rat()[lvl-1];
-	    }
-	  }
+	  const int lmin = 0;
+	  const int lmax = m_amr->get_finest_level();
+
 #if 0 // Debug test
 	  const Real t0 = MPI_Wtime();
 #endif
@@ -859,15 +775,9 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	  }
 #endif
 	}
+
+
       }
-
-      // if(m_dump_mass){
-      // 	this->dump_mass(mass_dump_file);
-      // }
-      // if(m_dump_charge){
-      // 	this->dump_charge(charge_dump_file);
-      // }
-
 
       if(!first_step){
 	m_timestepper->compute_dt(m_dt, m_timecode);
@@ -888,8 +798,8 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	  this->write_computational_loads();
 	}
 #ifdef CH_USE_HDF5
-	this->write_plot_file();
-	this->write_checkpoint_file();
+	this->write_crash_file();
+	//	this->write_checkpoint_file();
 #endif
 
 	MayDay::Abort("driver::run - the time step became too small");
@@ -925,18 +835,6 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	this->step_report(a_start_time, a_end_time, a_max_steps);
       }
 
-#if 0 // Development feature
-      // Positive current = current OUT OF DOMAIN
-      const Real electrode_I  = m_timestepper->compute_electrode_current();
-      const Real dielectric_I = m_timestepper->compute_dielectric_current();
-      const Real ohmic_I      = m_timestepper->compute_ohmic_induction_current();
-      const Real domain_I     = m_timestepper->compute_domain_current();
-      if(procID() == 0){
-	std::cout << m_time << "\t" << electrode_I << "\t" << domain_I << "\t" << ohmic_I << std::endl;
-      }
-#endif
-
-
 #ifdef CH_USE_HDF5
       if(m_plot_interval > 0){
 
@@ -966,14 +864,17 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	this->write_checkpoint_file();
       }
 #endif
-    }
 
-    // if(m_dump_mass){
-    //   this->close_mass_dump_file(mass_dump_file);
-    // }
-    // if(m_dump_charge){
-    //   this->close_charge_dump_file(charge_dump_file);
-    // }
+      // Rebuild input parameters
+      // MPI_Barrier(Chombo_MPI::comm);
+      // Real TT = -MPI_Wtime();
+      this->rebuildParmParse();
+      this->parse_runtime_options();
+      m_amr->parse_runtime_options();
+      m_timestepper->parse_runtime_options();
+      // TT += MPI_Wtime();
+      // if(procID() == 0) std::cout << TT << std::endl;
+    }
   }
 
   m_timestepper->deallocate();
@@ -989,7 +890,7 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
   }
 }
 
-void driver::setup_and_run(){
+void driver::setup_and_run(const std::string a_input_file){
   CH_TIME("driver::setup_and_run");
   if(m_verbosity > 0){
     pout() << "driver::setup_and_run" << endl;
@@ -999,11 +900,17 @@ void driver::setup_and_run(){
   sprintf(iter_str, ".check%07d.%dd.hdf5", m_restart_step, SpaceDim);
   const std::string restart_file = m_output_dir + "/chk/" + m_output_names + std::string(iter_str);
 
-  this->setup(m_init_regrids, m_restart, restart_file);
+  this->setup(a_input_file, m_init_regrids, m_restart, restart_file);
 
   if(!m_geometry_only){
     this->run(m_start_time, m_stop_time, m_max_steps);
   }
+}
+
+void driver::rebuildParmParse() const {
+  ParmParse pp("driver");
+
+  pp.redefine(m_input_file.c_str());
 }
 
 void driver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
@@ -1043,35 +950,84 @@ void driver::set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen){
   m_geocoarsen = a_geocoarsen;
 }
 
-void driver::set_geom_refinement_depth(const int a_depth1,
-				       const int a_depth2,
-				       const int a_depth3,
-				       const int a_depth4,
-				       const int a_depth5,
-				       const int a_depth6){
-  CH_TIME("driver::set_geom_refinement_depth(full");
+void driver::parse_options(){
+  CH_TIME("driver::parse_options");
+
+  ParmParse pp("driver");
+
+  pp.get("verbosity",                m_verbosity);
   if(m_verbosity > 5){
-    pout() << "driver::set_geom_refinement_depth(full)" << endl;
+    pout() << "driver::parse_options" << endl;
   }
   
-  const int max_depth = m_amr->get_max_amr_depth();
+  pp.get("regrid_interval",          m_regrid_interval);
+  pp.get("initial_regrids",          m_init_regrids);
+  pp.get("restart",                  m_restart_step); 
+  pp.get("write_memory",             m_write_memory);
+  pp.get("write_loads",              m_write_loads);
+  pp.get("output_directory",         m_output_dir);
+  pp.get("output_names",             m_output_names);
+  pp.get("plot_interval",            m_plot_interval);
+  pp.get("checkpoint_interval",      m_chk_interval);
+  pp.get("write_regrid_files",       m_write_regrid_files);
+  pp.get("write_restart_files",      m_write_restart_files);
+  pp.get("num_plot_ghost",           m_num_plot_ghost);
+  pp.get("allow_coarsening",         m_allow_coarsen);
+  pp.get("geometry_only",            m_geometry_only);
+  pp.get("ebis_memory_load_balance", m_ebis_memory_load_balance);
+  pp.get("max_steps",                m_max_steps);
+  pp.get("start_time",               m_start_time);
+  pp.get("stop_time",                m_stop_time);
+  pp.get("max_plot_depth",           m_max_plot_depth);
+  pp.get("max_chk_depth",            m_max_chk_depth);
 
-  m_conductor_tag_depth                = Min(a_depth1, max_depth);
-  m_dielectric_tag_depth               = Min(a_depth2, max_depth);
-  m_gas_conductor_interface_tag_depth  = Min(a_depth3, max_depth);
-  m_gas_dielectric_interface_tag_depth = Min(a_depth4, max_depth);
-  m_gas_solid_interface_tag_depth      = Min(a_depth5, max_depth);
-  m_solid_solid_interface_tag_depth    = Min(a_depth6, max_depth);
+  m_restart   = (m_restart_step > 0) ? true : false;
 
-
-  m_geom_tag_depth = 0;
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth1);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth2);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth3);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth4);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth5);
-  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth6);
+  // Stuff that's a little too verbose to include here directly. 
+  parse_plot_vars();
+  parse_geometry_generation();
+  parse_geo_refinement();
 }
+
+void driver::parse_runtime_options(){
+  CH_TIME("driver::parse_runtime_options");
+
+  ParmParse pp("driver");
+
+  pp.get("verbosity",                m_verbosity);
+  if(m_verbosity > 5){
+    pout() << "driver::parse_runtime_options" << endl;
+  }
+  pp.get("write_memory",             m_write_memory);
+  pp.get("write_loads",              m_write_loads);
+  pp.get("plot_interval",            m_plot_interval);
+  pp.get("regrid_interval",          m_regrid_interval);
+  pp.get("checkpoint_interval",      m_chk_interval);
+  pp.get("write_regrid_files",       m_write_regrid_files);
+  pp.get("write_restart_files",      m_write_restart_files);
+  pp.get("num_plot_ghost",           m_num_plot_ghost);
+  pp.get("allow_coarsening",         m_allow_coarsen);
+  pp.get("max_steps",                m_max_steps);
+  pp.get("stop_time",                m_stop_time);
+}
+
+void driver::parse_plot_vars(){
+  ParmParse pp("driver");
+  const int num = pp.countval("plt_vars");
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
+
+  m_plot_tags     = false;
+  m_plot_ranks    = false;
+  m_plot_levelset = false;
+  
+  for (int i = 0; i < num; i++){
+    if(     str[i] == "tags")     m_plot_tags     = true;
+    else if(str[i] == "mpi_rank") m_plot_ranks    = true;
+    else if(str[i] == "levelset") m_plot_levelset = true;
+  }
+}
+
 
 void driver::parse_geometry_generation(){
   CH_TIME("driver::parse_geometry_generation");
@@ -1096,72 +1052,49 @@ void driver::parse_geometry_generation(){
   }
 }
 
-void driver::parse_verbosity(){
-  CH_TIME("driver::parse_verbosity");
+void driver::parse_geo_refinement(){
+  CH_TIME("driver::set_geom_refinement_depth");
+  if(m_verbosity > 5){
+    pout() << "driver::set_geom_refinement_depth" << endl;
+  }
 
   ParmParse pp("driver");
-  pp.get("verbosity", m_verbosity);
+
+  const int max_depth = m_amr->get_max_amr_depth();
+
+  int depth0;
+
+  pp.get("refine_geometry",                 depth0);
+  pp.get("refine_electrodes",               m_conductor_tag_depth);
+  pp.get("refine_dielectrics",              m_dielectric_tag_depth);
+  pp.get("refine_electrode_gas_interface",  m_gas_conductor_interface_tag_depth);
+  pp.get("refine_dielectric_gas_interface", m_gas_dielectric_interface_tag_depth);
+  pp.get("refine_solid_gas_interface",      m_gas_solid_interface_tag_depth);
+  pp.get("refine_solid_solid_interface",    m_solid_solid_interface_tag_depth);
+  
+  depth0                                = (depth0                               < 0) ? max_depth : depth0;
+  m_conductor_tag_depth                 = (m_conductor_tag_depth                < 0) ? depth0 : m_conductor_tag_depth;
+  m_dielectric_tag_depth                = (m_dielectric_tag_depth               < 0) ? depth0 : m_dielectric_tag_depth;
+  m_gas_conductor_interface_tag_depth   = (m_gas_conductor_interface_tag_depth  < 0) ? depth0 : m_gas_conductor_interface_tag_depth;
+  m_gas_dielectric_interface_tag_depth  = (m_gas_dielectric_interface_tag_depth < 0) ? depth0 : m_gas_dielectric_interface_tag_depth;
+  m_gas_solid_interface_tag_depth       = (m_gas_solid_interface_tag_depth      < 0) ? depth0 : m_gas_solid_interface_tag_depth;
+  m_solid_solid_interface_tag_depth     = (m_solid_solid_interface_tag_depth    < 0) ? depth0 : m_solid_solid_interface_tag_depth;
+
+  m_geom_tag_depth = Max(m_geom_tag_depth, m_conductor_tag_depth);
+  m_geom_tag_depth = Max(m_geom_tag_depth, m_dielectric_tag_depth);
+  m_geom_tag_depth = Max(m_geom_tag_depth, m_gas_conductor_interface_tag_depth);
+  m_geom_tag_depth = Max(m_geom_tag_depth, m_gas_dielectric_interface_tag_depth);
+  m_geom_tag_depth = Max(m_geom_tag_depth, m_gas_solid_interface_tag_depth);
+  m_geom_tag_depth = Max(m_geom_tag_depth, m_solid_solid_interface_tag_depth);
 }
 
-void driver::parse_regrid(){
-  CH_TIME("driver::parse_regrid");
+void driver::create_output_directories(){
+  CH_TIME("driver::create_output_directories");
   if(m_verbosity > 5){
-    pout() << "driver::parse_regrid" << endl;
+    pout() << "driver::create_output_directories" << endl;
   }
 
-  ParmParse pp("driver");
-
-  pp.get("regrid_interval",   m_regrid_interval);
-  pp.get("initial_regrids",   m_init_regrids);
-  pp.get("recursive_regrid",  m_recursive_regrid);
-}
-
-void driver::parse_restart(){
-  CH_TIME("driver::parse_restart");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_restart" << endl;
-  }
-
-  ParmParse pp("driver");
-
-  // Get restart step
-  pp.get("restart", m_restart_step); // Get restart step
-  m_restart = (m_restart_step > 0) ? true : false;
-}
-
-void driver::parse_memrep(){
-  CH_TIME("driver::parse_memrep");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_memrep" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("driver");
-  pp.query("memory_report_mode", str);
-  if(str == "overall"){
-    m_memory_mode = memory_report_mode::overall;
-  }
-  else if(str == "unfreed"){
-    m_memory_mode = memory_report_mode::unfreed;
-  }
-  else if(str == "allocated"){
-    m_memory_mode = memory_report_mode::allocated;
-  }
-  pp.get("write_memory", m_write_memory);
-
-  pp.get("write_loads", m_write_loads);
-}
-
-void driver::parse_output_directory(){
-  CH_TIME("driver::parse_output_directory");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_output_directory" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("output_directory", m_output_dir);
-
-  // If directory does not exist, create it
+    // If directory does not exist, create it
   int success = 0;
   if(procID() == 0){
     std::string cmd;
@@ -1212,6 +1145,18 @@ void driver::parse_output_directory(){
     success = system(cmd.c_str());
     if(success != 0){
       std::cout << "driver::set_output_directory - master could not create regrid directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/restart";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create restart directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/crash";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create crash directory" << std::endl;
     }    
   }
   
@@ -1221,228 +1166,7 @@ void driver::parse_output_directory(){
   }
 }
 
-void driver::parse_output_file_names(){
-  CH_TIME("driver::set_output_names");
-  if(m_verbosity > 5){
-    pout() << "driver::set_output_names" << endl;
-  }
 
-  ParmParse pp("driver");
-  pp.get("output_names", m_output_names);
-}
-
-void driver::parse_output_intervals(){
-  CH_TIME("driver::set_plot_interval");
-  if(m_verbosity > 5){
-    pout() << "driver::set_plot_interval" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("plot_interval", m_plot_interval);
-  pp.get("checkpoint_interval", m_chk_interval);
-  pp.get("write_regrid_files", m_write_regrid_files);
-}
-
-void driver::parse_geo_refinement(){
-  CH_TIME("driver::set_geom_refinement_depth");
-  if(m_verbosity > 5){
-    pout() << "driver::set_geom_refinement_depth" << endl;
-  }
-
-  const int max_depth = m_amr->get_max_amr_depth();
-  
-  int depth     = max_depth;
-  int depth1    = depth;
-  int depth2    = depth;
-  int depth3    = depth;
-  int depth4    = depth;
-  int depth5    = depth;
-  int depth6    = depth;
-
-  { // Get parameter from input script
-    ParmParse pp("driver");
-    pp.get("refine_geometry", depth);
-    depth  = (depth < 0) ? max_depth : depth;
-    depth1 = depth;
-    depth2 = depth;
-    depth3 = depth;
-    depth4 = depth;
-    depth5 = depth;
-    depth6 = depth;
-  }
-
-  { // Get fine controls from input script
-    ParmParse pp("driver");
-    pp.get("refine_electrodes",               depth1);
-    pp.get("refine_dielectrics",              depth2);
-    pp.get("refine_electrode_gas_interface",  depth3);
-    pp.get("refine_dielectric_gas_interface", depth4);
-    pp.get("refine_solid_gas_interface",      depth5);
-    pp.get("refine_solid_solid_interface",    depth6);
-
-    depth1 = (depth1 < 0) ? depth : depth1;
-    depth2 = (depth2 < 0) ? depth : depth2;
-    depth3 = (depth3 < 0) ? depth : depth3;
-    depth4 = (depth4 < 0) ? depth : depth4;
-    depth5 = (depth5 < 0) ? depth : depth5;
-    depth6 = (depth6 < 0) ? depth : depth6;
-  }
-  
-  set_geom_refinement_depth(depth1, depth2, depth3, depth4, depth5, depth6);
-}
-
-void driver::parse_num_plot_ghost(){
-  CH_TIME("driver::parse_num_plot_ghost");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_num_plot_ghost" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("num_plot_ghost", m_num_plot_ghost);
-
-  m_num_plot_ghost = (m_num_plot_ghost < 0) ? 0 : m_num_plot_ghost;
-  m_num_plot_ghost = (m_num_plot_ghost > 3) ? 3 : m_num_plot_ghost;
-}
-
-void driver::parse_coarsen(){
-  CH_TIME("driver::parse_coarsen");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_coarsen" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("driver");
-  pp.get("allow_coarsening", str);
-  if(str == "true"){
-    m_allow_coarsen = true;
-  }
-  else if(str == "false"){
-    m_allow_coarsen = false;
-  }
-}
-
-void driver::parse_grow_tags(){
-  CH_TIME("driver::parse_grow_tags");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_grow_tags" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("grow_tags", m_grow_tags);
-
-  m_grow_tags = Max(0, m_grow_tags);
-}
-
-void driver::parse_geom_only(){
-  CH_TIME("driver::parse_geom_only");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_geom_only" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("driver");
-  pp.get("geometry_only", str);
-  if(str == "true"){
-    m_geometry_only = true;
-  }
-  else if(str == "false"){
-    m_geometry_only = false;
-  }
-}
-
-void driver::parse_ebis_memory_load_balance(){
-  CH_TIME("driver::parse_ebis_memory_load_balance");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_ebis_memory_load_balance" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("driver");
-  pp.get("ebis_memory_load_balance", str);
-  if(str == "true"){
-    m_ebis_memory_load_balance = true;
-  }
-  else if(str == "false"){
-    m_ebis_memory_load_balance = false;
-  }
-}
-
-void driver::parse_write_ebis(){
-  CH_TIME("driver::parse_write_ebis");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_write_ebis" << endl;
-  }
-
-  m_ebis_gas_file = m_output_names + ".ebis.gas.hdf5";
-  m_ebis_sol_file = m_output_names + ".ebis.sol.hdf5";
-
-  std::string str;
-  ParmParse pp("driver");
-  pp.get("write_ebis", str);
-  if(str == "true"){
-    m_write_ebis = true;
-  }
-  else if(str == "false"){
-    m_write_ebis = false;
-  }
-}
-
-void driver::parse_read_ebis(){
-  CH_TIME("driver::parse_read_ebis");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_read_ebis" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("driver");
-  pp.get("read_ebis", str);
-  if(str == "true"){
-    m_read_ebis = true;
-  }
-  else if(str == "false"){
-    m_read_ebis = false;
-  }
-}
-
-void driver::parse_simulation_time(){
-  CH_TIME("driver::parse_simulation_time");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_simulation_time" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("max_steps", m_max_steps);
-  pp.get("start_time", m_start_time);
-  pp.get("stop_time", m_stop_time);
-}
-
-void driver::parse_file_depth(){
-  CH_TIME("driver::parse_file_depth");
-  if(m_verbosity > 5){
-    pout() << "driver::parse_file_depth" << endl;
-  }
-
-  ParmParse pp("driver");
-  pp.get("max_plot_depth", m_max_plot_depth);
-  pp.get("max_chk_depth", m_max_chk_depth);
-}
-
-void driver::parse_plot_vars(){
-  ParmParse pp("driver");
-  const int num = pp.countval("plt_vars");
-  Vector<std::string> str(num);
-  pp.getarr("plt_vars", str, 0, num);
-
-  m_plot_tags     = false;
-  m_plot_ranks    = false;
-  m_plot_levelset = false;
-  
-  for (int i = 0; i < num; i++){
-    if(     str[i] == "tags")     m_plot_tags     = true;
-    else if(str[i] == "mpi_rank") m_plot_ranks    = true;
-    else if(str[i] == "levelset") m_plot_levelset = true;
-  }
-}
 
 void driver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   CH_TIME("driver::set_amr");
@@ -1455,11 +1179,13 @@ void driver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
 
 }
 
-void driver::setup(const int a_init_regrids, const bool a_restart, const std::string a_restart_file){
+void driver::setup(const std::string a_input_file, const int a_init_regrids, const bool a_restart, const std::string a_restart_file){
   CH_TIME("driver::setup");
   if(m_verbosity > 5){
     pout() << "driver::setup" << endl;
   }
+
+  m_input_file = a_input_file;
 
   if(m_geometry_only){
     this->setup_geometry_only();
@@ -1512,9 +1238,6 @@ void driver::setup_geometry_only(){
   m_amr->set_baseif(phase::gas,   m_compgeom->get_gas_if());
   m_amr->set_baseif(phase::solid, m_compgeom->get_sol_if());
 
-  if(m_write_ebis){
-    this->write_ebis();
-  }
   if(m_write_memory){
     this->write_memory_usage();
   }
@@ -1559,22 +1282,11 @@ void driver::setup_fresh(const int a_init_regrids){
     EBIndexSpace::s_useMemoryLoadBalance = false;
   }
 
-  if(!m_read_ebis){
-    m_compgeom->build_geometries(m_amr->get_finest_domain(),
-				 m_amr->get_prob_lo(),
-				 m_amr->get_finest_dx(),
-				 m_amr->get_max_ebis_box_size());
+  m_compgeom->build_geometries(m_amr->get_finest_domain(),
+			       m_amr->get_prob_lo(),
+			       m_amr->get_finest_dx(),
+			       m_amr->get_max_ebis_box_size());
 
-    if(m_write_ebis){
-      this->write_ebis();        // Write EBIndexSpace's for later use
-    }
-  }
-  else{
-    const std::string path_gas = m_output_dir + "/geo/" + m_ebis_gas_file;
-    const std::string path_sol = m_output_dir + "/geo/" + m_ebis_sol_file;
-
-    m_compgeom->build_geo_from_files(path_gas, path_sol);
-  }
 
   // Register realms
   m_timestepper->set_amr(m_amr);
@@ -1668,19 +1380,16 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
     pout() << "driver::setup_for_restart" << endl;
   }
 
+  this->check_restart_file(a_restart_file);
+
+
+
   this->sanity_check();                                    // Sanity check before doing anything expensive
 
-  if(!m_read_ebis){
-    m_compgeom->build_geometries(m_amr->get_finest_domain(),
-				 m_amr->get_prob_lo(),
-				 m_amr->get_finest_dx(),
-				 m_amr->get_max_ebis_box_size());
-  }
-  else{
-    const std::string path_gas = m_output_dir + "/geo/" + m_ebis_gas_file;
-    const std::string path_sol = m_output_dir + "/geo/" + m_ebis_sol_file;
-    m_compgeom->build_geo_from_files(path_gas, path_sol);
-  }
+  m_compgeom->build_geometries(m_amr->get_finest_domain(),
+			       m_amr->get_prob_lo(),
+			       m_amr->get_finest_dx(),
+			       m_amr->get_max_ebis_box_size());
 
   this->get_geom_tags();       // Get geometric tags.
 
@@ -1703,6 +1412,10 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
     m_celltagger->regrid();         
   }
 
+  if(m_write_restart_files){
+    this->write_restart_file();
+  }
+
   // Initial regrids
   for (int i = 0; i < a_init_regrids; i++){
     if(m_verbosity > 0){
@@ -1717,72 +1430,22 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
       this->grid_report();
     }
   }
+
+
 }
 
-// void driver::set_dump_mass(const bool a_dump_mass){
-//   CH_TIME("driver::set_dump_mass");
-//   if(m_verbosity > 5){
-//     pout() << "driver::set_dump_mass" << endl;
-//   }
-
-//   m_dump_mass = a_dump_mass;
-
-//   { // get parameter from input script
-//     std::string str;
-//     ParmParse pp("driver");
-//     pp.query("dump_mass", str);
-//     if(str == "true"){
-//       m_dump_mass = true;
-//     }
-//     else if(str == "false"){
-//       m_dump_mass = false;
-//     }
-//   }
-// }
-
-// void driver::set_dump_charge(const bool a_dump_charge){
-//   CH_TIME("driver::set_dump_charge");
-//   if(m_verbosity > 5){
-//     pout() << "driver::set_dump_charge" << endl;
-//   }
-
-//   m_dump_charge = a_dump_charge;
-
-//   { // get parameter from input script
-//     std::string str;
-//     ParmParse pp("driver");
-//     pp.query("dump_charge", str);
-//     if(str == "true"){
-//       m_dump_charge = true;
-//     }
-//     else if(str == "false"){
-//       m_dump_charge = false;
-//     }
-//   }
-// }
-
-void driver::set_output_centroids(const bool a_output_centroids){
-  CH_TIME("driver::set_output_centroids");
-  if(m_verbosity > 5){
-    pout() << "driver::set_output_centroids" << endl;
+void driver::check_restart_file(const std::string a_restart_file) const {
+  CH_TIME("driver::check_restart_file");
+  if(m_verbosity > 4){
+    pout() << "driver::check_restart_file" << endl;
   }
 
-  m_output_centroids = a_output_centroids;
-
-  { // get parameter from input script
-    std::string str;
-    ParmParse pp("driver");
-    pp.query("output_centroids", str);
-    if(str == "true"){
-      m_output_centroids = true;
-    }
-    else if(str == "false"){
-      m_output_centroids = false;
-    }
+  ifstream f(a_restart_file.c_str());
+  if(!f.good()){
+    pout() << "driver::check_restart_file - could not find file = " << a_restart_file << endl;
+    MayDay::Abort("driver::check_restart_file - abort, could not find file");
   }
 }
-
-
 
 void driver::sanity_check(){
   CH_TIME("driver::sanity_check");
@@ -2217,7 +1880,36 @@ void driver::write_regrid_file(){
   string fname(file_char);
 
   this->write_plot_file(fname);
+}
 
+void driver::write_restart_file(){
+  CH_TIME("driver::write_restart_file");
+  if(m_verbosity > 3){
+    pout() << "driver::write_restart_file" << endl;
+  }
+
+  // Filename
+  char file_char[1000];
+  const std::string prefix = m_output_dir + "/restart/" + m_output_names;
+  sprintf(file_char, "%s.restart%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
+  string fname(file_char);
+
+  this->write_plot_file(fname);
+}
+
+void driver::write_crash_file(){
+  CH_TIME("driver::write_crash_file");
+  if(m_verbosity > 3){
+    pout() << "driver::write_crash_file" << endl;
+  }
+
+  // Filename
+  char file_char[1000];
+  const std::string prefix = m_output_dir + "/crash/" + m_output_names;
+  sprintf(file_char, "%s.crash%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
+  string fname(file_char);
+
+  this->write_plot_file(fname);
 }
 
 void driver::write_plot_file(const std::string a_filename){
@@ -2805,243 +2497,3 @@ void driver::read_vector_data(HDF5HeaderData& a_header,
     a_data[i] = a_header.m_real[identifier];
   }
 }
-
-// void driver::open_mass_dump_file(ofstream& a_file){
-//   if(procID() == 0){
-//     const std::string prefix = m_output_dir + "/" + "mass_dump.txt";
-//     a_file.open(prefix);
-
-//     const Vector<std::string> names = m_timestepper->get_cdr()->get_names();
-
-//     a_file << "# time step" << "\t" << "time";
-//     for (int i = 0; i < names.size(); i++){
-//       a_file << "\t" << names[i];
-//     }
-//     a_file << endl;
-//   }
-// }
-
-// void driver::open_charge_dump_file(ofstream& a_file){
-//   if(procID() == 0){
-//     const std::string prefix = m_output_dir + "/" + "charge_dump.txt";
-//     a_file.open(prefix);
-
-//     const Vector<std::string> names = m_timestepper->get_cdr()->get_names();
-
-//     a_file << "# time step" << "\t" << "time";
-//     for (int i = 0; i < names.size(); i++){
-//       a_file << "\t" << names[i];
-//     }
-//     a_file << "\t" << "surface charge" << endl;
-//     a_file << endl;
-//   }
-// }
-
-// void driver::dump_mass(ofstream& a_file){
-//   const Vector<Real> masses = m_timestepper->get_cdr()->compute_mass();
-//   if(procID() == 0){
-//     a_file << m_step << "\t" << m_time;
-//     for (int i = 0; i < masses.size(); i++){
-//       a_file << "\t" << masses[i];
-//     }
-//     a_file << endl;
-//   }
-// }
-
-// void driver::dump_charge(ofstream& a_file){
-//   const Real surface_charge  = m_timestepper->get_sigma()->compute_charge();
-//   const Vector<Real> charges = m_timestepper->get_cdr()->compute_charge();
-//   if(procID() == 0){
-//     a_file << m_step << "\t" << m_time;
-//     for (int i = 0; i < charges.size(); i++){
-//       a_file << "\t" << charges[i]/units::s_Qe;
-//     }
-//     a_file << "\t" << surface_charge/units::s_Qe;
-//     a_file << endl;
-//   }
-// }
-
-// void driver::close_mass_dump_file(ofstream& a_file){
-//   if(procID() == 0){
-//     a_file.close();
-//   }
-// }
-
-// void driver::close_charge_dump_file(ofstream& a_file){
-//   if(procID() == 0){
-//     a_file.close();
-//   }
-// }
-
-// void driver::compute_norm(std::string a_chk_coarse, std::string a_chk_fine){
-//   CH_TIME("driver::compute_norm");
-//   if(m_verbosity > 5){
-//     pout() << "driver::compute_norm" << endl;
-//   }
-
-//   // TLDR: This routine is long and ugly. In short, it instantiates a all solvers and read the fine-level checkpoint file
-//   // into those solvers.
-//   RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
-
-//   this->read_checkpoint_file(a_chk_fine); // This reads the fine-level data
-
-//   Vector<EBISLayout>& fine_ebisl        = m_amr->get_ebisl(phase::gas);
-//   Vector<DisjointBoxLayout>& fine_grids = m_amr->get_grids();
-//   Vector<ProblemDomain>& fine_domains   = m_amr->get_domains();
-
-//   // Read the second file header
-//   HDF5Handle handle_in(a_chk_coarse, HDF5Handle::OPEN_RDONLY);
-//   HDF5HeaderData header;
-//   header.readFromFile(handle_in);
-//   int finest_coar_level = header.m_int["finest_level"];
-
-
-//   // Read coarse data into these data holders
-//   Vector<EBAMRCellData> cdr_densities(1 + m_plaskin->get_num_species());
-//   for (int i = 0; i < cdr_densities.size(); i++){
-//     cdr_densities[i].resize(1+finest_coar_level);
-//   }
-
-//   // Read cdr data
-//   for (int lvl = 0; lvl <= finest_coar_level; lvl++){
-//     handle_in.setGroupToLevel(lvl);
-    
-//     for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
-//       const int idx = solver_it.get_solver();
-//       RefCountedPtr<cdr_solver>& solver = solver_it();
-//       const std::string solver_name = solver->get_name();
-      
-//       EBCellFactory cellfact(fine_ebisl[lvl]);
-//       cdr_densities[idx][lvl] = RefCountedPtr<LevelData<EBCellFAB> > 
-// 	(new LevelData<EBCellFAB>(fine_grids[lvl], 1, 3*IntVect::Unit, cellfact));
-      
-//       read<EBCellFAB>(handle_in, *cdr_densities[idx][lvl], solver_name, fine_grids[lvl], Interval(), false);
-//     }
-//   }
-
-
-//   // We will now compute n_2h - A(n_h)
-//   pout() << "files are '"  << a_chk_coarse << "' and '" << a_chk_fine << "'" << endl;
-//   EBCellFactory cellfact(fine_ebisl[finest_coar_level]);
-//   LevelData<EBCellFAB> diff(fine_grids[finest_coar_level], 1, 0*IntVect::Unit, cellfact);
-//   for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
-//     const int idx = solver_it.get_solver();
-//     RefCountedPtr<cdr_solver>& solver = solver_it();
-//     const std::string solver_name = solver->get_name();
-
-//     LevelData<EBCellFAB>& fine_sol = *solver->get_state()[finest_coar_level];
-//     LevelData<EBCellFAB>& coar_sol = *cdr_densities[idx][finest_coar_level];
-
-//     data_ops::set_value(diff, 0.0);
-//     data_ops::incr(diff, coar_sol,   1.0);
-//     data_ops::incr(diff, fine_sol,  -1.0);
-//     data_ops::scale(diff, 1.E-18);
-
-//     writeEBLevelname (&diff, "diff.hdf5");
-//     Real volume;
-
-//     Real Linf;
-//     Real L1;
-//     Real L2;
-
-//     Linf = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[finest_coar_level], 0);
-//     L1   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[finest_coar_level], 1);
-//     L2   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[finest_coar_level], 2);
-    
-//     pout() << idx << "\t Linf = " << Linf << "\t L1 = " << L1 << "\t L2 = " << L2 << endl;
-//   }
-  
-//   handle_in.close();
-// }
-
-// void driver::compute_coarse_norm(const std::string a_chk_coarse, const std::string a_chk_fine, const int a_species){
-//   CH_TIME("driver::compute_coarse_norm");
-//   if(m_verbosity > 5){
-//     pout() << "driver::compute_coarse_norm" << endl;
-//   }
-
-//   // TLDR: This routine is long and ugly. In short, it instantiates a all solvers and read the fine-level checkpoint file
-//   // into those solvers.
-//   RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
-
-//   this->read_checkpoint_file(a_chk_fine); // This reads the fine-level data
-
-//   Vector<EBISLayout>& fine_ebisl        = m_amr->get_ebisl(phase::gas);
-//   Vector<DisjointBoxLayout>& fine_grids = m_amr->get_grids();
-//   Vector<ProblemDomain>& fine_domains   = m_amr->get_domains();
-
-//   // Read the second file header
-//   HDF5Handle handle_in(a_chk_coarse, HDF5Handle::OPEN_RDONLY);
-//   HDF5HeaderData header;
-//   header.readFromFile(handle_in);
-//   int finest_coar_level = 0;
-//   Real dt = header.m_real["dt"];
-
-//   // Read coarse data into these data holders
-//   Vector<EBAMRCellData> cdr_densities(1 + m_plaskin->get_num_species());
-//   for (int i = 0; i < cdr_densities.size(); i++){
-//     cdr_densities[i].resize(1+finest_coar_level);
-//   }
-
-//   // Read cdr data
-//   for (int lvl = 0; lvl <= finest_coar_level; lvl++){
-//     handle_in.setGroupToLevel(lvl);
-    
-//     for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
-//       const int idx = solver_it.get_solver();
-//       RefCountedPtr<cdr_solver>& solver = solver_it();
-//       const std::string solver_name = solver->get_name();
-      
-//       EBCellFactory cellfact(fine_ebisl[lvl]);
-//       cdr_densities[idx][lvl] = RefCountedPtr<LevelData<EBCellFAB> > 
-// 	(new LevelData<EBCellFAB>(fine_grids[lvl], 1, 3*IntVect::Unit, cellfact));
-      
-//       read<EBCellFAB>(handle_in, *cdr_densities[idx][lvl], solver_name, fine_grids[lvl], Interval(), false);
-//     }
-//   }
-
-
-//   // For each of the
-//   if(a_species == -1){
-//     pout() << "files are '"  << a_chk_coarse << "' and '" << a_chk_fine << "'" << endl;
-//   }
-//   const int compute_level = 0;
-//   EBCellFactory cellfact(fine_ebisl[compute_level]);
-//   LevelData<EBCellFAB> diff(fine_grids[compute_level], 1, 0*IntVect::Unit, cellfact);
-//   if(a_species == -1){
-//     pout() << "Linf" << "\t L1" << "\t L2" << endl;
-//   }
-//   for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
-//     const int idx = solver_it.get_solver();
-//     RefCountedPtr<cdr_solver>& solver = solver_it();
-//     const std::string solver_name = solver->get_name();
-
-//     LevelData<EBCellFAB>& fine_sol = *solver->get_state()[compute_level];
-//     LevelData<EBCellFAB>& coar_sol = *cdr_densities[idx][compute_level];
-
-//     data_ops::set_value(diff, 0.0);
-//     data_ops::incr(diff, coar_sol,   1.0);
-//     data_ops::incr(diff, fine_sol,  -1.0);
-
-//     writeEBLevelname (&diff, "diff.hdf5");
-//     Real volume;
-
-
-//     const Real Linf = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 0);
-//     const Real L1   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 1);
-//     const Real L2   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 2);
-
-//     const Real sLinf = EBLevelDataOps::kappaNorm(volume, fine_sol, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 0);
-//     const Real sL1   = EBLevelDataOps::kappaNorm(volume, fine_sol, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 1);
-//     const Real sL2   = EBLevelDataOps::kappaNorm(volume, fine_sol, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 2);
-
-//     if(a_species == -1){
-//       pout() << Linf/sLinf << "\t" << L1/sL1 << "\t" << L2/sL2 << endl;
-//     }
-//     else if(idx == a_species){
-//       pout() << dt << "\t" << Linf/sLinf << "\t" << L1/sL1 << "\t" << L2/sL2 << endl;
-//     }
-//   }
-  
-//   handle_in.close();
-// }

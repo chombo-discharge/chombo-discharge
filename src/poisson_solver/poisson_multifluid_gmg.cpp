@@ -49,6 +49,13 @@ void poisson_multifluid_gmg::parse_options(){
   parse_kappa_source();
 }
 
+void poisson_multifluid_gmg::parse_runtime_options(){
+  parse_domain_bc();
+  parse_plot_vars();
+  parse_gmg_settings();
+  parse_kappa_source();
+}
+
 void poisson_multifluid_gmg::parse_kappa_source(){
   ParmParse pp(m_class_name.c_str());
 

@@ -50,6 +50,11 @@ public:
   virtual void parse_options() = 0;
 
   /*!
+    @brief Parse runtime options
+  */
+  virtual void parse_runtime_options() = 0;
+
+  /*!
     @brief Implicit diffusion TGA advance without source terms
   */
   virtual void advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt) = 0;

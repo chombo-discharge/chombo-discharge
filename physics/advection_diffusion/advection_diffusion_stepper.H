@@ -42,6 +42,9 @@ namespace physics {
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
       void print_step_report() override;
 
+      //
+      void parse_runtime_options() override;
+
       // Registration routines
       void register_realms() override;
       void register_operators() override;

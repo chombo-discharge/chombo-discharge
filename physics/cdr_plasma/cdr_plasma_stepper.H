@@ -107,6 +107,11 @@ namespace physics {
       virtual void parse_options() = 0;
 
       /*!
+	@brief Parse runtime options
+      */
+      virtual void parse_runtime_options() = 0;
+
+      /*!
 	@brief New caching function for regridding
       */
       virtual void pre_regrid(const int a_lbase, const int a_finest_level);
@@ -688,6 +693,9 @@ namespace physics {
       */
       virtual void initial_data();
 
+      /*!
+	@brief Initialize sigma
+      */
       virtual void initial_sigma();
 
       /*!

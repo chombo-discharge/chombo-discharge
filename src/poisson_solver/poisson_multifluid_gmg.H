@@ -77,7 +77,12 @@ public:
   /*!
     @brief parse options
   */
-  virtual void parse_options();
+  virtual void parse_options() override;
+
+    /*!
+    @brief Parse runtime options
+  */
+  virtual void parse_runtime_options() override;
 
   /*!
     @brief Automatic tuning of the Poisson solver

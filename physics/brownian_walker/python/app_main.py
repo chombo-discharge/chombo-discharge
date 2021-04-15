@@ -32,8 +32,8 @@ def write_template(args):
     
     mainf.write("\n")
     mainf.write("  // Build class options from input script and command line options\n")
-    mainf.write("  char* input_file = argv[1];\n")
-    mainf.write("  ParmParse pp(argc-2, argv+2, NULL, input_file);")
+    mainf.write("  const std::string input_file = argv[1];\n")
+    mainf.write("  ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());")
     mainf.write("\n")
 
     mainf.write("\n")
@@ -52,7 +52,7 @@ def write_template(args):
     
     mainf.write("  // Set up the driver and run it\n")
     mainf.write("  RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));\n")
-    mainf.write("  engine->setup_and_run();\n");
+    mainf.write("  engine->setup_and_run(input_file);\n");
     mainf.write("\n")
 
     if args.use_mpi:

@@ -31,34 +31,39 @@ public:
   /*!
     @brief Parse options
   */
-  virtual void parse_options();
+  virtual void parse_options() override;
+
+    /*!
+    @brief Parse options
+  */
+  virtual void parse_runtime_options() override;
 
   /*!
     @brief Query number of ghost cells
   */
-  virtual int query_ghost() const;
+  virtual int query_ghost() const override;
 
   /*!
     @brief Allocate internal stuff
   */
-  virtual void allocate_internals();
+  virtual void allocate_internals() override;
 
   /*!
     @brief Average velocities to faces
   */
-  virtual void average_velo_to_faces();
+  virtual void average_velo_to_faces() override;
 
   /*!
     @brief Call parent function: Then fix no influx
   */
-  virtual void average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell);
+  virtual void average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell) override;
 
 protected:
 
   /*!
     @brief Godunov face extrapolation method for advection
   */
-  virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt);
+  virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt) override;
 
   /*!
     @brief Level advect integrator

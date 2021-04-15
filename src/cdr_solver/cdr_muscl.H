@@ -30,34 +30,32 @@ public:
   /*!
     @brief Query number of ghost cells
   */
-  virtual int query_ghost() const;
+  virtual int query_ghost() const override;
 
   /*!
     @brief Parse options
   */
-  virtual void parse_options();
+  virtual void parse_options() override;
+
+  /*!
+    @brief Parse options
+  */
+  virtual void parse_runtime_options() override;
 
   /*!
     @brief Pure advective advance. Calling this is an error - SG currently only works with MOL methods.
   */
   virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt);
 
-    /*!
-    @brief Advective advance using subcycling
-  */
-  virtual void eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bool a_redist){
-    MayDay::Abort("cdr_muscl::eulerF_subcycle - not implemented");
-  }
-
   /*!
     @brief MUSCL advection to faces
   */
-  virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt);
+  virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt) override;
 
   /*!
     @brief Allocate internal stuff
   */
-  virtual void allocate_internals();
+  virtual void allocate_internals() override;
 
 protected:
 
