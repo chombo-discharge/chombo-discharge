@@ -44,6 +44,7 @@ namespace physics {
 
       // Setup routines
       virtual void parse_options() = 0;
+      virtual void parse_runtime_options() = 0;
       virtual void allocate_internals() = 0;
       virtual void setup_solvers() override;
       virtual void allocate() override;

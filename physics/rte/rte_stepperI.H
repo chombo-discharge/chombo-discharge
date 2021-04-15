@@ -47,6 +47,15 @@ namespace physics {
     }
 
     template <typename T>
+    void rte_stepper<T>::parse_runtime_options() {
+      ParmParse pp("rte_stepper");
+
+      pp.get   ("verbosity", m_verbosity);
+      
+      m_solver->parse_runtime_options();
+    }
+
+    template <typename T>
     void rte_stepper<T>::allocate() {
       m_solver->allocate_internals();
     }

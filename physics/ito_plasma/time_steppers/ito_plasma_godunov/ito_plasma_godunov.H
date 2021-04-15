@@ -34,6 +34,7 @@ namespace physics {
       // Setup routines
       void allocate() override;
       void parse_options() override;
+      void parse_runtime_options() override;
       void allocate_internals() override;
 
       // Regrid routines
