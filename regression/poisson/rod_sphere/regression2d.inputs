@@ -121,7 +121,7 @@ rod_dielectric.sphere.radius             = 0.1           # Radius
 # ====================================================================================================
 poisson_stepper.verbosity    = -1              # Verbosity
 poisson_stepper.realm        = primal          # Primal realm	
-poisson_stepper.load_balance = true            # Load balance or not
+poisson_stepper.load_balance = false           # Load balance or not
 poisson_stepper.box_sorting  = morton          # Box sorting algorithm
 poisson_stepper.init_rho     = 1E-10           # Space charge density
 poisson_stepper.init_sigma   = 1E-10           # Surface charge density
