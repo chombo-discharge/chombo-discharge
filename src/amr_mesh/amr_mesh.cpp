@@ -690,7 +690,6 @@ void amr_mesh::set_baseif(const phase::which_phase a_phase, const RefCountedPtr<
 }
 
 void amr_mesh::parse_options(){
-
   parse_verbosity();
   parse_coarsest_num_cells();
   parse_max_amr_depth();
@@ -725,7 +724,6 @@ void amr_mesh::parse_runtime_options(){
 
 void amr_mesh::parse_domain(){
 
-  std::string balance;
   ParmParse pp("amr_mesh");
 
   Vector<Real> v(SpaceDim);
@@ -909,6 +907,10 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
     domainSplit(m_domains[0], new_boxes[0], m_max_box_size, m_blocking_factor);
     
     m_finest_level = 0;
+  }
+
+  if(a_lmin == 0){ // Coarsest level also changes in this case, but that's not caught by the regridders. 
+    domainSplit(m_domains[0], new_boxes[0], m_max_box_size, m_blocking_factor);
   }
 
   // Morton order the boxes.

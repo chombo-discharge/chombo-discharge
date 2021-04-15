@@ -776,9 +776,7 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 #endif
 	}
 
-	this->rebuildParmParse();
-	this->parse_runtime_options();
-	m_amr->parse_options();
+
       }
 
       if(!first_step){
@@ -866,6 +864,11 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	this->write_checkpoint_file();
       }
 #endif
+
+      // Rebuild input parameters
+      this->rebuildParmParse();
+      this->parse_runtime_options();
+      m_amr->parse_runtime_options();
     }
   }
 
@@ -941,8 +944,6 @@ void driver::set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen){
   }
   m_geocoarsen = a_geocoarsen;
 }
-
-
 
 void driver::parse_options(){
   CH_TIME("driver::parse_options");
