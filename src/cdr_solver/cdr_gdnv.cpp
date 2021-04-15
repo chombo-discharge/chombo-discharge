@@ -41,6 +41,21 @@ void cdr_gdnv::parse_options(){
   parse_conservation();  // Nonlinear divergence blending
 }
 
+void cdr_gdnv::parse_runtime_options(){
+  CH_TIME("cdr_gdnv::parse_runtime_options");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_runtime_options" << endl;
+  }
+
+  parse_slopelim();
+  parse_plot_vars();
+  parse_plotmode();
+  parse_gmg_settings();
+  parse_domain_bc();
+  parse_extrap_source();
+  parse_conservation();
+}
+
 void cdr_gdnv::parse_slopelim(){
   ParmParse pp(m_class_name.c_str());
 

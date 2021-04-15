@@ -869,6 +869,7 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
       this->rebuildParmParse();
       this->parse_runtime_options();
       m_amr->parse_runtime_options();
+      m_timestepper->parse_runtime_options();
     }
   }
 

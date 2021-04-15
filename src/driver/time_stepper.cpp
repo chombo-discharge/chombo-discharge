@@ -44,6 +44,13 @@ int time_stepper::get_redistribution_regsize() const {
   return 1;
 }
 
+void time_stepper::parse_runtime_options() {
+  CH_TIME("time_stepper::parse_runtime_options");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::parse_runtime_options" << endl;
+  }
+}
+
 Vector<long int> time_stepper::get_checkpoint_loads(const std::string a_realm, const int a_level) const {
   CH_TIME("time_stepper::get_checkpoint_loads");
   if(m_verbosity > 5){
