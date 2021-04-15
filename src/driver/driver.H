@@ -547,10 +547,15 @@ protected:
   */
   void write_regrid_file();
 
-    /*!
+  /*!
     @brief Write a restart file
   */
   void write_restart_file();
+
+  /*!
+    @brief Write a crash file
+  */
+  void write_crash_file();
 
   /*!
     @brief Write a plot file

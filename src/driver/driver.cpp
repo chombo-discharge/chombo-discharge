@@ -800,8 +800,8 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	  this->write_computational_loads();
 	}
 #ifdef CH_USE_HDF5
-	this->write_plot_file();
-	this->write_checkpoint_file();
+	this->write_crash_file();
+	//	this->write_checkpoint_file();
 #endif
 
 	MayDay::Abort("driver::run - the time step became too small");
@@ -1145,6 +1145,12 @@ void driver::create_output_directories(){
     success = system(cmd.c_str());
     if(success != 0){
       std::cout << "driver::set_output_directory - master could not create restart directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/crash";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "driver::set_output_directory - master could not create crash directory" << std::endl;
     }    
   }
   
@@ -1868,7 +1874,6 @@ void driver::write_regrid_file(){
   string fname(file_char);
 
   this->write_plot_file(fname);
-
 }
 
 void driver::write_restart_file(){
@@ -1884,7 +1889,21 @@ void driver::write_restart_file(){
   string fname(file_char);
 
   this->write_plot_file(fname);
+}
 
+void driver::write_crash_file(){
+  CH_TIME("driver::write_crash_file");
+  if(m_verbosity > 3){
+    pout() << "driver::write_crash_file" << endl;
+  }
+
+  // Filename
+  char file_char[1000];
+  const std::string prefix = m_output_dir + "/crash/" + m_output_names;
+  sprintf(file_char, "%s.crash%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
+  string fname(file_char);
+
+  this->write_plot_file(fname);
 }
 
 void driver::write_plot_file(const std::string a_filename){
