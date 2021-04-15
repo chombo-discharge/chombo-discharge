@@ -85,7 +85,6 @@ void ito_solver::parse_runtime_options(){
   this->parse_plot_vars();
   this->parse_deposition();
   this->parse_bisect_step();
-  this->parse_pvr_buffer();
   this->parse_diffusion_hop();
   this->parse_redistribution();
   this->parse_conservation();
