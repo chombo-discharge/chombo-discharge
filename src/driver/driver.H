@@ -56,6 +56,16 @@ public:
   */
   void setup(const std::string a_input_file, const int a_init_regrids, const bool a_restart, const std::string a_restart_file);
 
+  /*!
+    @brief Parse options
+  */
+  void parse_options();
+
+  /*!
+    @brief Parse runtime options
+  */
+  void parse_runtime_options();
+
 protected:
 
   /*!
@@ -371,11 +381,6 @@ protected:
     @brief Sanity check
   */
   void sanity_check();
-
-  /*!
-    @brief Parse options
-  */
-  void parse_options();
 
   /*!
     @brief Parse geometrical refinement

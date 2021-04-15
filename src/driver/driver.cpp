@@ -777,7 +777,8 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	}
 
 	this->rebuildParmParse();
-	this->parse_options();
+	this->parse_runtime_options();
+	m_amr->parse_options();
       }
 
       if(!first_step){
@@ -944,7 +945,7 @@ void driver::set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen){
 
 
 void driver::parse_options(){
-  CH_TIME("driver::parse_geometry_generation");
+  CH_TIME("driver::parse_options");
 
   ParmParse pp("driver");
 
@@ -980,6 +981,27 @@ void driver::parse_options(){
   parse_plot_vars();
   parse_geometry_generation();
   parse_geo_refinement();
+}
+
+void driver::parse_runtime_options(){
+  CH_TIME("driver::parse_runtime_options");
+
+  ParmParse pp("driver");
+
+  pp.get("verbosity",                m_verbosity);
+  if(m_verbosity > 5){
+    pout() << "driver::parse_runtime_options" << endl;
+  }
+  pp.get("write_memory",             m_write_memory);
+  pp.get("write_loads",              m_write_loads);
+  pp.get("plot_interval",            m_plot_interval);
+  pp.get("checkpoint_interval",      m_chk_interval);
+  pp.get("write_regrid_files",       m_write_regrid_files);
+  pp.get("write_restart_files",      m_write_restart_files);
+  pp.get("num_plot_ghost",           m_num_plot_ghost);
+  pp.get("allow_coarsening",         m_allow_coarsen);
+  pp.get("max_steps",                m_max_steps);
+  pp.get("stop_time",                m_stop_time);
 }
 
 void driver::parse_plot_vars(){

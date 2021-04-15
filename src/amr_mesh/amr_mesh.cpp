@@ -24,28 +24,7 @@
 #include <BaseIFFactory.H>
 
 amr_mesh::amr_mesh(){
-  parse_verbosity();
-  parse_coarsest_num_cells();
-  parse_max_amr_depth();
-  parse_max_simulation_depth();
-  parse_refine_all_depth();
-  parse_ebcf();
-  parse_refinement_ratio();
-  parse_blocking_factor();
-  parse_max_box_size();
-  parse_max_ebis_box_size();
-  parse_grid_generation();
-  parse_buffer_size();
-  parse_irreg_growth();
-  parse_fill_ratio();
-  parse_redist_rad();;
-  parse_num_ghost();
-  parse_eb_ghost();
-  parse_domain();
-  parse_ghost_interpolation();
-  parse_centroid_stencils();
-  parse_eb_stencils();
-
+  parse_options();
 
   m_finest_level = 0;
   m_has_grids    = false;
@@ -708,6 +687,30 @@ void amr_mesh::set_baseif(const phase::which_phase a_phase, const RefCountedPtr<
   }
 
   m_baseif.emplace(a_phase, a_baseif);
+}
+
+void amr_mesh::parse_options(){
+
+  parse_verbosity();
+  parse_coarsest_num_cells();
+  parse_max_amr_depth();
+  parse_max_simulation_depth();
+  parse_ebcf();
+  parse_refinement_ratio();
+  parse_blocking_factor();
+  parse_max_box_size();
+  parse_max_ebis_box_size();
+  parse_grid_generation();
+  parse_buffer_size();
+  parse_irreg_growth();
+  parse_fill_ratio();
+  parse_redist_rad();;
+  parse_num_ghost();
+  parse_eb_ghost();
+  parse_domain();
+  parse_ghost_interpolation();
+  parse_centroid_stencils();
+  parse_eb_stencils();
 }
 
 void amr_mesh::parse_domain(){
@@ -1419,19 +1422,6 @@ void amr_mesh::parse_max_simulation_depth(){
   }
 }
 
-void amr_mesh::parse_refine_all_depth(){
-
-  ParmParse pp("amr_mesh");
-  int depth;
-  pp.get("refine_all_lvl", depth);
-  if(depth > 0){
-    m_refine_all_depth = depth;
-  }
-  else {
-    m_refine_all_depth = 0;
-  }
-}
-
 void amr_mesh::parse_ebcf(){
   ParmParse pp("amr_mesh");
   std::string str;
@@ -1755,10 +1745,6 @@ int amr_mesh::get_max_amr_depth(){
 
 int amr_mesh::get_max_sim_depth(){
   return m_max_sim_depth;
-}
-
-int amr_mesh::get_refine_all_depth(){
-  return m_refine_all_depth;
 }
 
 int amr_mesh::get_num_ghost(){

@@ -67,6 +67,11 @@ public:
   ~amr_mesh();
 
   /*!
+    @brief Parse options
+  */
+  void parse_options();
+
+  /*!
     @brief Deallocate data. You should never need this, smart pointers are you friends :)
   */
   template<typename T>
@@ -107,8 +112,8 @@ public:
   */
   template <typename T>
   void allocate(particle_container<T>& a_container,
-				      const int              a_pvr_buffer,
-				      const std::string      a_realm);
+		const int              a_pvr_buffer,
+		const std::string      a_realm);
 
   /*!
     @brief Allocate pointer but not memory
@@ -125,702 +130,697 @@ public:
   /*!
     @brief Register an operator over a realm. This if for operators that are defined for a specific phase only. 
   */
-  virtual void register_operator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase);
+  void register_operator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Register a particle halo on a realm. 
   */
-  virtual void register_mask(const std::string a_mask, const int a_buffer, const std::string a_realm);
+  void register_mask(const std::string a_mask, const int a_buffer, const std::string a_realm);
 
   /*!
     @brief Query if a realm exists
   */
-  virtual bool query_realm(const std::string a_realm);
+  bool query_realm(const std::string a_realm);
 
   /*!
     @brief Register a new realm
   */
-  virtual void register_realm(const std::string a_realm);
+  void register_realm(const std::string a_realm);
 
   /*!
     @brief Alias an entire hierarchy of data. 
   */
-  virtual void alias(EBAMRCellData&           a_data,
-		     const phase::which_phase a_phase,
-		     const MFAMRCellData&     a_mfdata,
-		     const int                a_finest_level);
+  void alias(EBAMRCellData&           a_data,
+	     const phase::which_phase a_phase,
+	     const MFAMRCellData&     a_mfdata,
+	     const int                a_finest_level);
 
   /*!
     @brief Alias an entire hierarchy of data
   */
-  virtual void alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata);
+  void alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata);
 
   /*!
     @brief Alias an entire hierarchy of data
   */
-  virtual void alias(EBAMRFluxData& a_data, const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata);
+  void alias(EBAMRFluxData& a_data, const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata);
 
-    /*!
+  /*!
     @brief Alias an entire hierarchy of data
   */
-  virtual void alias(EBAMRIVData& a_data, const phase::which_phase a_phase, const MFAMRIVData& a_mfdata);
+  void alias(EBAMRIVData& a_data, const phase::which_phase a_phase, const MFAMRIVData& a_mfdata);
 
   /*!
     @brief Compute gradient on level
   */
-  virtual void compute_gradient(LevelData<EBCellFAB>&       a_gradient,
-				const LevelData<EBCellFAB>& a_phi,
-				const std::string           a_realm,
-				const phase::which_phase    a_phase,
-				const int                   a_lvl);
+  void compute_gradient(LevelData<EBCellFAB>&       a_gradient,
+			const LevelData<EBCellFAB>& a_phi,
+			const std::string           a_realm,
+			const phase::which_phase    a_phase,
+			const int                   a_lvl);
   /*!
     @brief Compute cell-centered gradient. 
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
   */
-  virtual void compute_gradient(EBAMRCellData&           a_gradient,
-				const EBAMRCellData&     a_phi,
-				const std::string        a_realm,  
-				const phase::which_phase a_phase);
+  void compute_gradient(EBAMRCellData&           a_gradient,
+			const EBAMRCellData&     a_phi,
+			const std::string        a_realm,  
+			const phase::which_phase a_phase);
 
   /*!
     @brief Compute cell-centered gradient. 
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
   */
-  virtual void compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm);
+  void compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm);
 
   /*!
     @brief Allocate a data holder over a specific realm
   */
-  virtual void allocate(EBAMRCellData&           a_data,
-			const std::string        a_realm,
-			const phase::which_phase a_phase,
-			const int                a_ncomp,
-			const int                a_ghost = -1);
+  void allocate(EBAMRCellData&           a_data,
+		const std::string        a_realm,
+		const phase::which_phase a_phase,
+		const int                a_ncomp,
+		const int                a_ghost = -1);
 
   /*!
     @brief Allocate a data holder over a specific realm
   */
-  virtual void allocate(EBAMRFluxData&           a_data,
-			const std::string        a_realm,
-			const phase::which_phase a_phase,
-			const int                a_ncomp,
-			const int                a_ghost = -1);
+  void allocate(EBAMRFluxData&           a_data,
+		const std::string        a_realm,
+		const phase::which_phase a_phase,
+		const int                a_ncomp,
+		const int                a_ghost = -1);
 
   /*!
     @brief Allocate a data holder over a specific realm
   */
-  virtual void allocate(EBAMRIVData&             a_data,
-			const std::string        a_realm,
-			const phase::which_phase a_phase,
-			const int                a_ncomp,
-			const int                a_ghost = -1);
+  void allocate(EBAMRIVData&             a_data,
+		const std::string        a_realm,
+		const phase::which_phase a_phase,
+		const int                a_ncomp,
+		const int                a_ghost = -1);
 
   /*!
     @brief Allocate a data holder over a specific realm
   */
-  virtual void allocate(EBAMRIFData&             a_data,
-			const std::string        a_realm,
-			const phase::which_phase a_phase,
-			const int                a_ncomp,
-			const int                a_ghost = -1);
+  void allocate(EBAMRIFData&             a_data,
+		const std::string        a_realm,
+		const phase::which_phase a_phase,
+		const int                a_ncomp,
+		const int                a_ghost = -1);
 
   /*!
     @brief Allocate Boolean data over a specific realm
   */
-  virtual void allocate(EBAMRBool& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost);
+  void allocate(EBAMRBool& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost);
   
   /*!
     @brief Allocate a data holder over a specific realm
   */
-  virtual void allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
+  void allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Allocate a data holder over a specific realm.
   */
-  virtual void allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
+  void allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Allocate a data holder over a specific realm
   */
-  virtual void allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
+  void allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Reallocate data. 
   */
-  virtual void reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin);
+  void reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data. 
   */
-  virtual void reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_lmin);
+  void reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin);
+  void reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_lmin);
+  void reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(EBAMRBool& a_data, const int a_lmin);
+  void reallocate(EBAMRBool& a_data, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(MFAMRCellData& a_data, const int a_lmin);
+  void reallocate(MFAMRCellData& a_data, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(MFAMRFluxData& a_data, const int a_lmin);
+  void reallocate(MFAMRFluxData& a_data, const int a_lmin);
   
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(MFAMRIVData& a_data, const int a_lmin);
+  void reallocate(MFAMRIVData& a_data, const int a_lmin);
 
   /*!
     @brief Average down both phases on specific realm
   */
-  virtual void average_down(MFAMRCellData& a_data, const std::string a_realm);
+  void average_down(MFAMRCellData& a_data, const std::string a_realm);
 
   /*!
     @brief Average down on specific realm
   */
-  virtual void average_down(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void average_down(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Average down level
   */
-  virtual void average_down(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lvl);
+  void average_down(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lvl);
 
   /*!
     @brief Average down both phases on specific realm
   */
-  virtual void average_down(MFAMRFluxData& a_data, const std::string a_realm);
+  void average_down(MFAMRFluxData& a_data, const std::string a_realm);
 
-    /*!
+  /*!
     @brief Average down on specific realm
   */
-  virtual void average_down(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void average_down(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Average down on realm
   */
-  virtual void average_down(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void average_down(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Average down on realm
   */
-  virtual void conservative_average(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void conservative_average(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Build new grids. This also load balances. 
   */
-  virtual void build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap = -1);
+  void build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap = -1);
 
   /*!
     @brief Interpolate ghost vectors over a realm
   */
-  virtual void interp_ghost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void interp_ghost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Interpolate ghost cells. Realm, phase, and level version.
   */
-  virtual void interp_ghost(LevelData<EBCellFAB>&       a_fineData,
-			    const LevelData<EBCellFAB>& a_coarData,
-			    const int                   a_level,
-			    const std::string           a_realm,
-			    const phase::which_phase    a_phase);
+  void interp_ghost(LevelData<EBCellFAB>&       a_fineData,
+		    const LevelData<EBCellFAB>& a_coarData,
+		    const int                   a_level,
+		    const std::string           a_realm,
+		    const phase::which_phase    a_phase);
 
   /*!
     @brief Interpolate ghost cells over a realm
   */
-  virtual void interp_ghost(MFAMRCellData& a_data, const std::string a_realm);
+  void interp_ghost(MFAMRCellData& a_data, const std::string a_realm);
 
   /*!
     @brief Fill ghost cells using quadratic interpolation
   */
-  virtual void interp_ghost_quad(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void interp_ghost_quad(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Fill ghost cells using piecewise linear interpolation. Specific realm. 
   */
-  virtual void interp_ghost_pwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void interp_ghost_pwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Interpolate data to centroids on realm
   */
-  virtual void interpolate_to_centroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void interpolate_to_centroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
   
   /*!
     @brief Set mfis
   */
-  virtual void set_mfis(const RefCountedPtr<mfis>& a_mfis);
+  void set_mfis(const RefCountedPtr<mfis>& a_mfis);
 
   /*!
     @brief Set implicit function
   */
-  virtual void set_baseif(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseif);
+  void set_baseif(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseif);
 
   /*!
     @brief Parse domain
   */
-  virtual void parse_domain();
+  void parse_domain();
 
   /*!
     @brief Set ghost cell interpolation type. Either piecewise linear or quadratic. 
   */
-  virtual void parse_ghost_interpolation();
+  void parse_ghost_interpolation();
 
   /*!
     @brief Build domains
   */
-  virtual void build_domains();
+  void build_domains();
 
   /*!
     @brief Parse the grid generation algorithm
   */
-  virtual void parse_grid_generation();
+  void parse_grid_generation();
 
   /*!
     @brief Set verbosity
   */
-  virtual void parse_verbosity();
+  void parse_verbosity();
 
   /*!
     @brief Set coarsest level box; this is the coarsest domain (well, except for lower levels GMG)
   */
-  virtual void parse_coarsest_num_cells();
+  void parse_coarsest_num_cells();
 
   /*!
     @brief Maximum AMR depth
   */
-  virtual void parse_max_amr_depth();
+  void parse_max_amr_depth();
 
   /*!
     @brief Set maximum simulation depth. 
   */
-  virtual void parse_max_simulation_depth();
-
-  /*!
-    @brief Refine all cells down to this level
-  */
-  virtual void parse_refine_all_depth();
+  void parse_max_simulation_depth();
 
   /*!
     @brief Tell amr_mesh to forget about ebcf (user must guarantee that this is the case)
   */
-  virtual void parse_ebcf();
+  void parse_ebcf();
 
   /*!
     @brief Set refinement ratio
   */
-  virtual void parse_refinement_ratio();
+  void parse_refinement_ratio();
 
   /*!
     @brief Set refinement ratios
   */
-  virtual void set_refinement_ratios(const Vector<int> a_ref_ratios);
+  void set_refinement_ratios(const Vector<int> a_ref_ratios);
 
   /*!
     @brief Set buffer size
   */
-  virtual void parse_buffer_size();
+  void parse_buffer_size();
 
   /*!
     @brief Set irregular growth
   */
-  virtual void parse_irreg_growth();
+  void parse_irreg_growth();
 
   /*!
     @brief Set fill ratio
   */
-  virtual void parse_fill_ratio();
+  void parse_fill_ratio();
 
   /*!
     @brief Set the finest level
   */
-  virtual void set_finest_level(const int a_finest_level);
+  void set_finest_level(const int a_finest_level);
 
   /*!
     @brief Set the maximum box size
   */
-  virtual void parse_max_box_size();
+  void parse_max_box_size();
 
   /*!
     @brief Set the maximum EBIS generation box size
   */
-  virtual void parse_max_ebis_box_size();
+  void parse_max_ebis_box_size();
 
   /*!
     @brief Set the blocking factor
   */
-  virtual void parse_blocking_factor();
+  void parse_blocking_factor();
 
   /*!
     @brief Set number of ghost cells for eb stuff
   */ 
-  virtual void parse_eb_ghost();
+  void parse_eb_ghost();
 
   /*!
     @brief Set number of ghost cells 
   */ 
-  virtual void parse_num_ghost();
+  void parse_num_ghost();
 
   /*!
     @brief Set redistribution radius
   */
-  virtual void parse_redist_rad();
+  void parse_redist_rad();
 
   /*!
     @brief Parse centroid interpolation stencils
-*/
-  virtual void parse_centroid_stencils();
+  */
+  void parse_centroid_stencils();
 
   /*!
     @brief Parse EB interpolation (or extrapolation) stencils
   */
-  virtual void parse_eb_stencils();
+  void parse_eb_stencils();
 
   /*!
     @brief Set preferred stencil type
   */
-  virtual void set_irreg_sten_type(const stencil_type a_type);
+  void set_irreg_sten_type(const stencil_type a_type);
 
   /*!
     @brief Set irregular stencil order
   */
-  virtual void set_irreg_sten_order(const int a_irreg_sten_order);
+  void set_irreg_sten_order(const int a_irreg_sten_order);
 
   /*!
     @brief Set maximum stencil radius for irregular stencils
   */
-  virtual void set_irreg_sten_radius(const int a_irreg_sten_radius);
+  void set_irreg_sten_radius(const int a_irreg_sten_radius);
 
   /*!
     @brief Regrid function. Generate new grids. 
     @details lmin is the finest level that changed. 
   */
-  virtual void regrid(const Vector<IntVectSet>& a_tags,
-		      const int a_lmin,
-		      const int a_lmax,
-		      const int a_regsize=1, 
-		      const int a_hardcap=123456);
+  void regrid(const Vector<IntVectSet>& a_tags,
+	      const int a_lmin,
+	      const int a_lmax,
+	      const int a_regsize=1, 
+	      const int a_hardcap=123456);
 
   /*!
     @brief Regrid AMR. This builds the grids and sets them. 
   */
-  virtual void regrid_amr(const Vector<IntVectSet>& a_tags,
-			  const int a_lmin,
-			  const int a_lmax,
-			  const int a_hardcap=123456);
+  void regrid_amr(const Vector<IntVectSet>& a_tags,
+		  const int a_lmin,
+		  const int a_lmax,
+		  const int a_hardcap=123456);
 
   /*!
     @brief Regrid AMR. This takes a set of grids. 
     @todo Remove. 
   */
-  virtual void regrid_amr(const Vector<Vector<int> >& a_procs, const Vector<Vector<Box> >& a_boxes, const int a_lmin);
+  void regrid_amr(const Vector<Vector<int> >& a_procs, const Vector<Vector<Box> >& a_boxes, const int a_lmin);
 
   /*!
     @brief Define a realm
   */
-  virtual void regrid_realm(const std::string a_realm,
-			    const Vector<Vector<int> >& a_procs,
-			    const Vector<Vector<Box> >& a_boxes,
-			    const int a_lmin);
+  void regrid_realm(const std::string a_realm,
+		    const Vector<Vector<int> >& a_procs,
+		    const Vector<Vector<Box> >& a_boxes,
+		    const int a_lmin);
 
   /*!
     @brief Set grids from boxes and computational loads
   */
-  virtual void set_grids(const Vector<Vector<Box> >& a_boxes, const std::map<std::string, Vector<Vector<long int> > >& a_loads);
+  void set_grids(const Vector<Vector<Box> >& a_boxes, const std::map<std::string, Vector<Vector<long int> > >& a_loads);
 
   /*!
     @brief Regrid AMR operators
   */
-  virtual void regrid_operators(const int a_lmin,
-				const int a_lmax,
-				const int a_regsize=1);
+  void regrid_operators(const int a_lmin,
+			const int a_lmax,
+			const int a_regsize=1);
 
 
 
   /*!
     @brief Do a sanity check to make sure everything is set up correctly
   */
-  virtual void sanity_check();
+  void sanity_check();
 
   /*!
     @brief True if there is ebcf crossing
   */
-  virtual bool get_ebcf();
+  bool get_ebcf();
 
-    /*!
+  /*!
     @brief Get refinement ratios
   */
-  virtual int get_finest_level();
+  int get_finest_level();
 
   /*!
     @brief Get irregular cell growth
   */
-  virtual int get_irreg_growth();
+  int get_irreg_growth();
 
   /*!
     @brief Get maximum amr depth
   */
-  virtual int get_max_amr_depth();
+  int get_max_amr_depth();
 
   /*!
     @brief Get maximum simulation depth
   */
-  virtual int get_max_sim_depth();
+  int get_max_sim_depth();
 
   /*!
     @brief Get maximum  depth
   */
-  virtual int get_refine_all_depth();
+  int get_refine_all_depth();
 
   /*!
     @brief Get blocking factor
   */
-  virtual int get_blocking_factor();
+  int get_blocking_factor();
 
   /*!
     @brief Get maximum box size
   */
-  virtual int get_max_box_size();
+  int get_max_box_size();
 
   /*!
     @brief Return bffer
   */
-  virtual int get_buffer();
+  int get_buffer();
 
   /*!
     @brief Get maximum box size for EBIS generation
   */
-  virtual int get_max_ebis_box_size();
+  int get_max_ebis_box_size();
 
   /*!
     @brief Get number of ghost cells
   */
-  virtual int get_num_ghost();
+  int get_num_ghost();
 
   /*!
     @brief Get number of ghost cells used for EB
   */
-  virtual int get_eb_ghost();
+  int get_eb_ghost();
 
   /*!
     @brief Get redistribution radius
   */
-  virtual int get_redist_rad();
+  int get_redist_rad();
   
   /*!
     @brief Get finest level
   */
-  virtual Real get_finest_dx();
+  Real get_finest_dx();
 
   /*!
     @brief Get origin
   */
-  virtual RealVect get_prob_lo();
+  RealVect get_prob_lo();
 
   /*!
     @brief Get high end
   */
-  virtual RealVect get_prob_hi();
+  RealVect get_prob_hi();
 
   /*!
     @brief Get finest domain
   */
-  virtual ProblemDomain get_finest_domain();
+  ProblemDomain get_finest_domain();
 
   /*!
     @brief Get resolutions
   */
-  virtual Vector<Real>& get_dx();
+  Vector<Real>& get_dx();
 
   /*!
     @brief Get refinement ratios
   */
-  virtual Vector<int>& get_ref_rat();
+  Vector<int>& get_ref_rat();
 
   /*!
     @brief Get refinement factor between two levels
   */
-  virtual int get_refinement_ratio(const int a_level1, const int a_level2);
+  int get_refinement_ratio(const int a_level1, const int a_level2);
 
   /*!
     @brief Get implicit function
   */
-  virtual const RefCountedPtr<BaseIF>& get_baseif(const phase::which_phase a_phase);
+  const RefCountedPtr<BaseIF>& get_baseif(const phase::which_phase a_phase);
 
   /*!
     @brief Get ALL irregular tags
   */
-  virtual Vector<IntVectSet> get_irreg_tags() const;
+  Vector<IntVectSet> get_irreg_tags() const;
 
   /*!
     @brief Get the grids
   */
-  virtual Vector<DisjointBoxLayout>& get_proxy_grids();
+  Vector<DisjointBoxLayout>& get_proxy_grids();
 
   /*!
     @brief Get the grids
   */
-  virtual Vector<DisjointBoxLayout>& get_grids(const std::string a_realm);
+  Vector<DisjointBoxLayout>& get_grids(const std::string a_realm);
 
   /*!
     @brief Get domains
   */
-  virtual Vector<ProblemDomain>& get_domains();
+  Vector<ProblemDomain>& get_domains();
 
   /*!
     @brief Get mask
   */
-  virtual AMRMask& get_mask(const std::string a_mask, const int a_buffer, const std::string a_realm);
+  AMRMask& get_mask(const std::string a_mask, const int a_buffer, const std::string a_realm);
 
   /*!
     @brief Get the EBLevelGrid 
   */
-  virtual Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(const std::string a_realm, const phase::which_phase a_phase);
   
   /*!
     @brief Get the EBISLayouts
   */
-  virtual Vector<EBISLayout>& get_ebisl(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<EBISLayout>& get_ebisl(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the EBLevelGrid 
   */
-  virtual Vector<RefCountedPtr<MFLevelGrid> >& get_mflg(const std::string a_realm);
+  Vector<RefCountedPtr<MFLevelGrid> >& get_mflg(const std::string a_realm);
 
   /*!
     @brief Get the vof iterator
   */
-  virtual Vector<RefCountedPtr<LayoutData<VoFIterator> > > get_vofit(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<VoFIterator> > > get_vofit(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get neighbor boxes
   */
-  virtual Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors(const std::string a_realm,
-										   const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors(const std::string a_realm,
+									   const phase::which_phase a_phase);
 
   /*!
     @brief Get levelset function
   */
-  virtual EBAMRFAB& get_levelset(const std::string a_realm, const phase::which_phase a_phase);
+  EBAMRFAB& get_levelset(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the coarsening utility
   */
-  virtual Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the ghost cloud particle magic
   */
-  virtual Vector<RefCountedPtr<EBGhostCloud> >& get_ghostcloud(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBGhostCloud> >& get_ghostcloud(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the ghost cell interpolation utility
   */
-  virtual Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the old interpolation utility (needed for EBConductivityOps)
   */
-  virtual Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get piecewise linear ghost cell interpolator
   */
-  virtual Vector<RefCountedPtr<AggEBPWLFillPatch> >& get_fillpatch(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<AggEBPWLFillPatch> >& get_fillpatch(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get interpolator 
   */
-  virtual Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get interpolator 
   */
-  virtual Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get flux register
   */
-  virtual Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get redistribution
   */
-  virtual Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get coar-to-fine redistribution
   */
-  virtual Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist(const std::string        a_realm,
-									       const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist(const std::string        a_realm,
+								       const phase::which_phase a_phase);
   
   /*!
     @brief Get coar-to-coar redistribution
   */
-  virtual Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist(const std::string        a_realm,
-									       const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist(const std::string        a_realm,
+								       const phase::which_phase a_phase);
 
   /*!
     @brief Get coar-to-coar redistribution
   */
-  virtual Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(const std::string        a_realm,
-									       const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(const std::string        a_realm,
+								       const phase::which_phase a_phase);
   
   /*!
     @brief Get interpolation stencils
   */
-  virtual irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(const std::string a_realm,
-									   const phase::which_phase a_phase);
+  irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(const std::string a_realm,
+								   const phase::which_phase a_phase);
 
   /*!
     @brief Get interpolation stencils
   */
-  virtual irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(const std::string        a_realm,
-										 const phase::which_phase a_phase);
+  irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(const std::string        a_realm,
+									 const phase::which_phase a_phase);
 
   /*!
     @brief Get Nonconservative divergence stencils
   */
-  virtual irreg_amr_stencil<noncons_div>& get_noncons_div_stencils(const std::string a_realm, const phase::which_phase a_phase);
+  irreg_amr_stencil<noncons_div>& get_noncons_div_stencils(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get copier
   */
-  virtual Vector<RefCountedPtr<Copier> >& get_copier(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<Copier> >& get_copier(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get reverse copier
   */
-  virtual Vector<RefCountedPtr<Copier> >& get_reverse_copier(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<Copier> >& get_reverse_copier(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Build tiles from a box
   */
-  virtual Vector<Box> make_tiles(const Box a_box, const IntVect a_tilesize);
+  Vector<Box> make_tiles(const Box a_box, const IntVect a_tilesize);
 
   /*!
     @brief Get the name of all realms
   */
-  virtual std::vector<std::string> get_realms() const;
+  std::vector<std::string> get_realms() const;
 
   /*!
     @brief Get box sorting method
   */
-  virtual box_sorting get_box_sorting() const;
+  box_sorting get_box_sorting() const;
   
 protected:
 
@@ -1035,7 +1035,7 @@ protected:
   /*!
     @brief Define realms
   */
-  virtual void define_realms();
+  void define_realms();
 
 };
 
