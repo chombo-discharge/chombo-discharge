@@ -7,7 +7,6 @@ amr_mesh.verbosity       = -1          # Controls verbosity.
 amr_mesh.coarsest_domain = 64 64 32    # Number of cells on coarsest domain
 amr_mesh.max_amr_depth   = 0           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
-amr_mesh.refine_all_lvl  = -1          # Refine everything down to this level.
 amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 amr_mesh.buffer_size     = 2           # Number of cells between grid levels
