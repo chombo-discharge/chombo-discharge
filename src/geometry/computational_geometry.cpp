@@ -139,7 +139,7 @@ void computational_geometry::build_gas_geoserv(GeometryService*&   a_geoserver,
   // }
   // else {
     m_gas_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
-    if(s_use_new_gshop){ // PlasmaC geometry generation
+    if(s_use_new_gshop){
       a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_gas_if,
 								0,
 								a_dx,
@@ -184,7 +184,7 @@ void computational_geometry::build_solid_geoserv(GeometryService*&   a_geoserver
     
     m_sol_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts)); 
 
-    if(s_use_new_gshop){ // PlasmaC geometry generation
+    if(s_use_new_gshop){
       a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_sol_if,
 								0,
 								a_dx,
