@@ -73,8 +73,8 @@ def pre_check(silent):
     """ Check that PLASMAC has been appropriately set up with an environment variable. 
         Print some error messages and what to do if we can't run anything. """
     print("Running " + __file__ + "...")
-    plasmac_home = os.environ.get("DISCHARGE_HOME")
-    if not plasmac_home:
+    discharge_home = os.environ.get("DISCHARGE_HOME")
+    if not discharge_home:
         print("Error: Cannot run regression tests because the DISCHARGE_HOME environment variable has not been set.")
         print("Please set DISCHARGE_HOME, for example: '> export  DISCHARGE_HOME=<directory>'")
         print("Aborting regtest suite")
@@ -82,7 +82,7 @@ def pre_check(silent):
     else:
         if not silent:
             print("CWD          = " + os.getcwd())
-            print("DISCHARGE_HOME = " + plasmac_home)
+            print("DISCHARGE_HOME = " + discharge_home)
 
 # --------------------------------------------------
 # Function that compiles a test

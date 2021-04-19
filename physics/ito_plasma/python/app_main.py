@@ -3,10 +3,10 @@ import sys
 
 def write_template(args):
     # Make sure that every class can be found where they should
-    geofile = args.plasmac_home + "/geometries" + "/" + args.geometry + "/" + args.geometry + ".H"
-    tsfile  = args.plasmac_home + "/physics/ito_plasma/time_steppers" + "/" + args.time_stepper + "/" + args.time_stepper + ".H"
-    kinfile = args.plasmac_home + "/physics/ito_plasma/plasma_models" + "/" + args.physics + "/" + args.physics + ".H"
-    tagfile = args.plasmac_home + "/physics/ito_plasma/cell_taggers" +  "/" + args.cell_tagger + "/" + args.cell_tagger + ".H"
+    geofile = args.discharge_home + "/geometries" + "/" + args.geometry + "/" + args.geometry + ".H"
+    tsfile  = args.discharge_home + "/physics/ito_plasma/time_steppers" + "/" + args.time_stepper + "/" + args.time_stepper + ".H"
+    kinfile = args.discharge_home + "/physics/ito_plasma/plasma_models" + "/" + args.physics + "/" + args.physics + ".H"
+    tagfile = args.discharge_home + "/physics/ito_plasma/cell_taggers" +  "/" + args.cell_tagger + "/" + args.cell_tagger + ".H"
     if not os.path.exists(geofile):
         print 'Could not find ' + geofile
     if not os.path.exists(tsfile):
@@ -17,7 +17,7 @@ def write_template(args):
         print 'Could not find ' + tagfile
                     
     # Create app directory if it does not exist
-    app_dir = args.plasmac_home + "/" + args.base_dir + "/" + args.app_name
+    app_dir = args.discharge_home + "/" + args.base_dir + "/" + args.app_name
     print(app_dir)
     if not os.path.exists(app_dir):
         os.makedirs(app_dir)

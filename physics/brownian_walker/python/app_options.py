@@ -3,17 +3,17 @@ import sys
 
 # Write an options file. This should be a separate routine
 def write_template(args):
-    app_dir = args.plasmac_home + "/" + args.base_dir + "/" + args.app_name
+    app_dir = args.discharge_home + "/" + args.base_dir + "/" + args.app_name
     options_filename = app_dir + "/template.inputs"
     optf = open(options_filename, 'w')
     
     # Write plasma kinetics options
-    options_files = [args.plasmac_home + "/src/amr_mesh/amr_mesh.options", \
-                     args.plasmac_home + "/src/driver/driver.options", \
-                     args.plasmac_home + "/src/ito_solver/" + args.ito_solver + ".options",\
-                     args.plasmac_home + "/src/geometry/geo_coarsener.options", \
-                     args.plasmac_home + "/geometries/" + args.geometry + "/" + args.geometry + ".options", \
-                     args.plasmac_home + "/physics/brownian_walker/brownian_walker_stepper.options"]
+    options_files = [args.discharge_home + "/src/amr_mesh/amr_mesh.options", \
+                     args.discharge_home + "/src/driver/driver.options", \
+                     args.discharge_home + "/src/ito_solver/" + args.ito_solver + ".options",\
+                     args.discharge_home + "/src/geometry/geo_coarsener.options", \
+                     args.discharge_home + "/geometries/" + args.geometry + "/" + args.geometry + ".options", \
+                     args.discharge_home + "/physics/brownian_walker/brownian_walker_stepper.options"]
 
     for opt in options_files:
         if os.path.exists(opt):

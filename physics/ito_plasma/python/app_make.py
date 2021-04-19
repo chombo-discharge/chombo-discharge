@@ -2,7 +2,7 @@ import os
 import sys
 
 def write_template(args):
-    app_dir = args.plasmac_home + "/" + args.base_dir + "/" + args.app_name
+    app_dir = args.discharge_home + "/" + args.base_dir + "/" + args.app_name
     make_filename = app_dir + "/GNUmakefile"
     makef = open(make_filename, "w")
     
