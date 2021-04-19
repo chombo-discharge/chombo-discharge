@@ -2,7 +2,7 @@ import os
 import sys
 
 def write_template(args):
-    app_dir = args.plasmac_home + "/" + args.base_dir + "/" + args.app_name
+    app_dir = args.discharge_home + "/" + args.base_dir + "/" + args.app_name
     make_filename = app_dir + "/GNUmakefile"
     makef = open(make_filename, "w")
     
@@ -33,19 +33,19 @@ def write_template(args):
 
     makef.write('\n')
     makef.write('base_dir = .\n')
-    makef.write('src_dirs = $(PLASMAC_HOME)/src \\\n')
-    makef.write('\t$(PLASMAC_HOME)/src/amr_mesh \\\n')
-    makef.write('\t$(PLASMAC_HOME)/src/cell_tagger \\\n')
-    makef.write('\t$(PLASMAC_HOME)/src/driver \\\n')
-    makef.write('\t$(PLASMAC_HOME)/src/elliptic \\\n')
-    makef.write('\t$(PLASMAC_HOME)/src/geometry \\\n')
-    makef.write('\t$(PLASMAC_HOME)/src/rte_solver \\\n')
-    makef.write('\t$(PLASMAC_HOME)/src/sigma_solver \\\n')
-    makef.write('\t$(PLASMAC_HOME)/src/particle \\\n')
-    makef.write('\t$(PLASMAC_HOME)/src/global \\\n')
-    makef.write('\t$(PLASMAC_HOME)/src/poisson_solver \\\n')
-    makef.write('\t$(PLASMAC_HOME)/geometries/' + args.geometry + '\\\n')
-    makef.write('\t$(PLASMAC_HOME)/physics/rte \\\n')
+    makef.write('src_dirs = $(DISCHARGE_HOME)/src \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/amr_mesh \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/cell_tagger \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/driver \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/elliptic \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/geometry \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/rte_solver \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/sigma_solver \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/particle \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/global \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/poisson_solver \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/geometries/' + args.geometry + '\\\n')
+    makef.write('\t$(DISCHARGE_HOME)/physics/rte \\\n')
     makef.write('\n')
 
     makef.write('\n')

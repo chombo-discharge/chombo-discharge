@@ -31,8 +31,8 @@ amr_mesh.ebcf            = false        # If you have EBCF crossing, this must b
 # DRIVER OPTIONS
 # ====================================================================================================
 driver.verbosity                       = 2             # Engine verbosity
-driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
-driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
+driver.geometry_generation             = chombo-discharge       # Grid generation method, 'chombo-discharge' or 'chombo'
+driver.geometry_scan_level             = 0             # Geometry scan level for chombo-discharge geometry generator
 driver.plot_interval                   = 5             # Plot interval
 driver.regrid_interval                 = 5             # Regrid interval
 driver.checkpoint_interval             = -1            # Checkpoint interval

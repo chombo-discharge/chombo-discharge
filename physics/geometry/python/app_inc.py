@@ -4,9 +4,9 @@ from shutil import copyfile
 
 # Write an options file. This should be a separate routine
 def copy_dependencies(args):
-    app_dir  = args.plasmac_home + "/" + args.base_dir + "/" + args.app_name
-    kin_home = args.plasmac_home + "/geometries/" + args.geometry
-    kin_name = args.plasmac_home + "/geometries/" + args.geometry + "/" + args.geometry
+    app_dir  = args.discharge_home + "/" + args.base_dir + "/" + args.app_name
+    kin_home = args.discharge_home + "/geometries/" + args.geometry
+    kin_name = args.discharge_home + "/geometries/" + args.geometry + "/" + args.geometry
     if os.path.exists(kin_name + ".inc"): # Read file and copy all listed dependencies
         f = open(kin_name + ".inc", 'r')
         incf = f.readline().strip();

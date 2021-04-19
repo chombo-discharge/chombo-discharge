@@ -70,19 +70,19 @@ config.read(test_files)
 # Moron check for running the test suite
 # --------------------------------------------------
 def pre_check(silent):
-    """ Check that PLASMAC has been appropriately set up with an environment variable. 
+    """ Check that chombo-discharge has been appropriately set up with an environment variable. 
         Print some error messages and what to do if we can't run anything. """
     print("Running " + __file__ + "...")
-    plasmac_home = os.environ.get("PLASMAC_HOME")
-    if not plasmac_home:
-        print("Error: Cannot run regression tests because the PLASMAC_HOME environment variable has not been set.")
-        print("Please set PLASMAC_HOME, for example: '> export  PLASMAC_HOME=<directory>'")
+    discharge_home = os.environ.get("DISCHARGE_HOME")
+    if not discharge_home:
+        print("Error: Cannot run regression tests because the DISCHARGE_HOME environment variable has not been set.")
+        print("Please set DISCHARGE_HOME, for example: '> export  DISCHARGE_HOME=<directory>'")
         print("Aborting regtest suite")
         exit()
     else:
         if not silent:
             print("CWD          = " + os.getcwd())
-            print("PLASMAC_HOME = " + plasmac_home)
+            print("DISCHARGE_HOME = " + discharge_home)
 
 # --------------------------------------------------
 # Function that compiles a test
