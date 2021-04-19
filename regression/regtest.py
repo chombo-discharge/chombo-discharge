@@ -70,7 +70,7 @@ config.read(test_files)
 # Moron check for running the test suite
 # --------------------------------------------------
 def pre_check(silent):
-    """ Check that PLASMAC has been appropriately set up with an environment variable. 
+    """ Check that chombo-discharge has been appropriately set up with an environment variable. 
         Print some error messages and what to do if we can't run anything. """
     print("Running " + __file__ + "...")
     discharge_home = os.environ.get("DISCHARGE_HOME")
