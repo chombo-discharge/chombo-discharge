@@ -16,15 +16,15 @@ LibNames:= MFElliptic MFTools EBAMRTimeDependent EBAMRElliptic EBAMRTools EBTool
 all: all-test
 
 base_dir = .
-src_dirs = $(PLASMAC_HOME)/src \
-	$(PLASMAC_HOME)/src/amr_mesh \
-	$(PLASMAC_HOME)/src/cell_tagger \
-	$(PLASMAC_HOME)/src/driver \
-	$(PLASMAC_HOME)/src/geometry \
-	$(PLASMAC_HOME)/src/global \
-	$(PLASMAC_HOME)/src/particle \
-	$(PLASMAC_HOME)/physics/geometry \
-	$(PLASMAC_HOME)/geometries/regular_geometry\
+src_dirs = $(DISCHARGE_HOME)/src \
+	$(DISCHARGE_HOME)/src/amr_mesh \
+	$(DISCHARGE_HOME)/src/cell_tagger \
+	$(DISCHARGE_HOME)/src/driver \
+	$(DISCHARGE_HOME)/src/geometry \
+	$(DISCHARGE_HOME)/src/global \
+	$(DISCHARGE_HOME)/src/particle \
+	$(DISCHARGE_HOME)/physics/geometry \
+	$(DISCHARGE_HOME)/geometries/regular_geometry\
 
 
 include $(CHOMBO_HOME)/mk/Make.example

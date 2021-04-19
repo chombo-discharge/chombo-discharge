@@ -16,24 +16,24 @@ LibNames:= MFElliptic MFTools EBAMRTimeDependent EBAMRElliptic EBAMRTools EBTool
 all: all-test
 
 base_dir = .
-src_dirs = $(PLASMAC_HOME)/src \
-	$(PLASMAC_HOME)/src/amr_mesh \
-	$(PLASMAC_HOME)/src/cdr_solver \
-	$(PLASMAC_HOME)/src/cell_tagger \
-	$(PLASMAC_HOME)/src/elliptic \
-	$(PLASMAC_HOME)/src/geometry \
-	$(PLASMAC_HOME)/src/global \
-	$(PLASMAC_HOME)/src/driver \
-	$(PLASMAC_HOME)/src/particle \
-	$(PLASMAC_HOME)/src/ito_solver \
-	$(PLASMAC_HOME)/src/poisson_solver \
-	$(PLASMAC_HOME)/src/rte_solver \
-	$(PLASMAC_HOME)/src/sigma_solver \
-	$(PLASMAC_HOME)/geometries/rod_dielectric\
-	$(PLASMAC_HOME)/physics/ito_plasma \
-	$(PLASMAC_HOME)/physics/ito_plasma/cell_taggers/ito_plasma_streamer_tagger\
-	$(PLASMAC_HOME)/physics/ito_plasma/time_steppers/ito_plasma_godunov\
-	$(PLASMAC_HOME)/physics/ito_plasma/plasma_models/ito_plasma_air3
+src_dirs = $(DISCHARGE_HOME)/src \
+	$(DISCHARGE_HOME)/src/amr_mesh \
+	$(DISCHARGE_HOME)/src/cdr_solver \
+	$(DISCHARGE_HOME)/src/cell_tagger \
+	$(DISCHARGE_HOME)/src/elliptic \
+	$(DISCHARGE_HOME)/src/geometry \
+	$(DISCHARGE_HOME)/src/global \
+	$(DISCHARGE_HOME)/src/driver \
+	$(DISCHARGE_HOME)/src/particle \
+	$(DISCHARGE_HOME)/src/ito_solver \
+	$(DISCHARGE_HOME)/src/poisson_solver \
+	$(DISCHARGE_HOME)/src/rte_solver \
+	$(DISCHARGE_HOME)/src/sigma_solver \
+	$(DISCHARGE_HOME)/geometries/rod_dielectric\
+	$(DISCHARGE_HOME)/physics/ito_plasma \
+	$(DISCHARGE_HOME)/physics/ito_plasma/cell_taggers/ito_plasma_streamer_tagger\
+	$(DISCHARGE_HOME)/physics/ito_plasma/time_steppers/ito_plasma_godunov\
+	$(DISCHARGE_HOME)/physics/ito_plasma/plasma_models/ito_plasma_air3
 
 
 include $(CHOMBO_HOME)/mk/Make.example

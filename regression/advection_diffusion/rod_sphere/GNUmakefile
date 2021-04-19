@@ -16,19 +16,19 @@ LibNames:= MFElliptic MFTools EBAMRTimeDependent EBAMRElliptic EBAMRTools EBTool
 all: all-test
 
 base_dir = .
-src_dirs = $(PLASMAC_HOME)/src \
-	$(PLASMAC_HOME)/src/amr_mesh \
-	$(PLASMAC_HOME)/src/cdr_solver \
-	$(PLASMAC_HOME)/src/cell_tagger \
-	$(PLASMAC_HOME)/src/driver \
-	$(PLASMAC_HOME)/src/elliptic \
-	$(PLASMAC_HOME)/src/geometry \
-	$(PLASMAC_HOME)/src/rte_solver \
-	$(PLASMAC_HOME)/src/sigma_solver \
-	$(PLASMAC_HOME)/src/particle \
-	$(PLASMAC_HOME)/src/global \
-	$(PLASMAC_HOME)/geometries/rod_dielectric\
-	$(PLASMAC_HOME)/physics/advection_diffusion \
+src_dirs = $(DISCHARGE_HOME)/src \
+	$(DISCHARGE_HOME)/src/amr_mesh \
+	$(DISCHARGE_HOME)/src/cdr_solver \
+	$(DISCHARGE_HOME)/src/cell_tagger \
+	$(DISCHARGE_HOME)/src/driver \
+	$(DISCHARGE_HOME)/src/elliptic \
+	$(DISCHARGE_HOME)/src/geometry \
+	$(DISCHARGE_HOME)/src/rte_solver \
+	$(DISCHARGE_HOME)/src/sigma_solver \
+	$(DISCHARGE_HOME)/src/particle \
+	$(DISCHARGE_HOME)/src/global \
+	$(DISCHARGE_HOME)/geometries/rod_dielectric\
+	$(DISCHARGE_HOME)/physics/advection_diffusion \
 
 
 include $(CHOMBO_HOME)/mk/Make.example
