@@ -1025,7 +1025,7 @@ void cdr_solver::reset_redist_weights(const EBAMRCellData& a_state){
 
       if(has_coar){
 	EBFineToCoarRedist& fine2coar = *m_amr->get_fine_to_coar_redist(m_realm, m_phase)[lvl];
-	fine2coar.resetWeights(*a_state[lvl], comp);
+	fine2coar.resetWeights(*a_state[lvl-1], comp);
       }
       if(has_fine){
 	EBCoarToCoarRedist& coar2coar = *m_amr->get_coar_to_coar_redist(m_realm, m_phase)[lvl];
