@@ -927,6 +927,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
 
       bool applyStencil = true;
 
+#if 0
       if(solver->is_mobile()){
 	const EBCellFAB& velo = *a_particle_velocities[idx];
 	const RealVect v = RealVect(D_DECL(velo(vof,0), velo(vof,1), velo(vof,2)));
@@ -940,6 +941,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
       else{
 	applyStencil = true;
       }
+#endif
 
       if(applyStencil){
 	Real phi = 0.0;
