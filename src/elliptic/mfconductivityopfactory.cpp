@@ -509,6 +509,15 @@ void mfconductivityopfactory::average_down_mg(){
 #endif
 }
 
+void mfconductivityopfactory::reset_jump(){
+  CH_TIME("mfconductivityopfactory::reset_jump()");
+
+  data_ops::set_value(m_jump, 0.0);
+  for (int i = 0; i < m_jump_mg.size(); i++){
+    data_ops::set_value(m_jump_mg[i], 0.0);
+  }
+}
+
 void mfconductivityopfactory::set_jump(const Real& a_sigma, const Real& a_scale){
   CH_TIME("mfconductivityopfactory::set_jump(scalar)");
   for (int lvl = 0; lvl < m_num_levels; lvl++){
@@ -531,7 +540,9 @@ void mfconductivityopfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a
   pout() << "mfconductivityopfactory::set_jump(data based)" << endl;
 #endif
 
-  // Note: copyTo is a little bit volatile since it drops to linearization functions. Going to copy directly instead.
+  //  reset_jump(); Shouldn't be necessary
+
+  // Note: copyTo is a little bit volatile since the linearization functions are crap. So, do a direct local instead. 
   for (int lvl = 0; lvl < m_num_levels; lvl++){
     for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
       const Box box = m_grids[lvl].get(dit());
