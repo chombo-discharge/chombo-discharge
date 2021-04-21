@@ -228,7 +228,6 @@ protected:
   LayoutData<MFInterfaceFAB<Real> >       m_avgWeights;
   LayoutData<MFInterfaceFAB<Real> >       m_avgBco;
   LayoutData<MFInterfaceFAB<Real> >       m_avgJump;
-  LayoutData<MFInterfaceFAB<Real> >       m_avgFactor;
 
   /*!
     @brief VoFIterator for gas-side cells

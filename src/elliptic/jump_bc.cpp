@@ -156,7 +156,6 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_avgWeights.define(m_grids);
   m_avgStencils.define(m_grids);
   m_avgBco.define(m_grids);
-  m_avgFactor.define(m_grids);
   m_avgJump.define(m_grids);
 
   int num = 0;
@@ -169,7 +168,6 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
       MFInterfaceFAB<Real>& inhomo         = m_inhomo[dit()];
       MFInterfaceFAB<Real>& homog          = m_homog[dit()];
       MFInterfaceFAB<Real>& avgWeights     = m_avgWeights[dit()];
-      MFInterfaceFAB<Real>& avgFactor      = m_avgFactor[dit()];
       MFInterfaceFAB<Real>& avgBco         = m_avgBco[dit()];
       MFInterfaceFAB<Real>& avgJump        = m_avgJump[dit()];
       MFInterfaceFAB<VoFStencil>& stens    = m_stencils[dit()];
@@ -246,7 +244,6 @@ void jump_bc::build_stencils(){
       BaseIVFAB<Real>& avgBco            = m_avgBco[dit()].get_ivfab(iphase);
       BaseIVFAB<Real>& weights           = m_weights[dit()].get_ivfab(iphase);
       BaseIVFAB<Real>& avgWeights        = m_avgWeights[dit()].get_ivfab(iphase);
-      BaseIVFAB<Real>& avgFactor         = m_avgFactor[dit()].get_ivfab(iphase);
       BaseIVFAB<VoFStencil>& stencils    = m_stencils[dit()].get_ivfab(iphase);
       BaseIVFAB<VoFStencil>& avgStencils = m_avgStencils[dit()].get_ivfab(iphase);
 
