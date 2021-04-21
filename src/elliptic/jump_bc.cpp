@@ -13,6 +13,7 @@
 
 bool jump_bc::s_quadrant_based = true;
 int  jump_bc::s_lsq_radius     = 1;
+Real jump_bc::SAFETY           = 1.E-4;
 
 jump_bc::jump_bc(){
   CH_TIME("jump_bc::jump_bc(weak)");
@@ -279,35 +280,36 @@ void jump_bc::build_stencils(){
 	const IntVect iv = ivsit();
 	const Vector<VolIndex> vofs = ebisbox.getVoFs(iv);
 
-	Real totalArea = 0.0;
 	Real curWeight = 0.0;
 	Real curBco    = 0.0;
-	int num        = 0;
 	VoFStencil curStencil;
-	for (int v = 0; v < vofs.size(); v++){
-	  num++;
-	  const VolIndex vof = vofs[v];
 
-	  const Real area = ebisbox.bndryArea(vof);
+	if(ebisbox.isMultiValued(iv)){
+	  Real totalArea = jump_bc::SAFETY;
 
-	  totalArea += area;
-	  curWeight += area*weights(vof, comp);
-	  curBco    += area*bco(vof,comp);
+	  for (int v = 0; v < vofs.size(); v++){
+	    const VolIndex vof = vofs[v];
 
-	  VoFStencil sten = stencils(vof,comp);
-	  sten *= area;
-	  curStencil += sten;
+	    const Real area = ebisbox.bndryArea(vof);
+
+	    totalArea += area;
+	    curWeight += area*weights(vof, comp);
+	    curBco    += area*bco(vof,comp);
+
+	    VoFStencil sten = stencils(vof,comp);
+	    sten *= area;
+	    curStencil += sten;
+	  }
+
+	  curStencil *= 1./totalArea;
+	  curWeight  *= 1./totalArea;
+	  curBco     *= 1./totalArea;
 	}
-
-#if 0 // Test scale
-	totalArea = totalArea/num;
-#endif
-
-	curStencil *= 1./totalArea;
-	curWeight  *= 1./totalArea;
-	curBco     *= 1./totalArea;
-
-
+	else{
+	  curWeight  = weights(vofs[0], comp);
+	  curBco     = bco(vofs[0], comp);
+	  curStencil = stencils(vofs[0], comp);
+	}
 
 	// Put average stuff on the first vof component. No multicell storage for the average stencils
 	const VolIndex vof(iv,0);
@@ -475,8 +477,9 @@ inline void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 
 inline void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit){
 
-  const IntVectSet ivs = m_avgJump[a_dit].get_ivs();
+  const IntVectSet& ivs = m_avgJump[a_dit].get_ivs();
 
+  const int comp   = 0;
   const int phase1 = 0;
   const int phase2 = 1;
   
@@ -485,6 +488,9 @@ inline void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCel
 
   BaseIVFAB<Real>& avg1 = m_avgJump[a_dit].get_ivfab(phase1);
   BaseIVFAB<Real>& avg2 = m_avgJump[a_dit].get_ivfab(phase2);
+
+  avg1.setVal(0.0);
+  avg2.setVal(0.0);
   
   const EBISBox& ebisbox1 = a_phi.getPhase(phase1).getEBISBox();
   const EBISBox& ebisbox2 = a_phi.getPhase(phase2).getEBISBox();
@@ -497,23 +503,31 @@ inline void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCel
     const Vector<VolIndex> vofs2 = ebisbox2.getVoFs(iv);
 
     // Compute average jump condition
-    Real totalArea = 0.0;
+
     Real totalJump = 0.0;
-    for (int v = 0; v < vofs1.size(); v++){
-      const VolIndex vof = vofs1[v];
 
-      const Real area = ebisbox1.bndryArea(vof);
+    if(ebisbox1.isMultiValued(iv)){
+      Real totalArea = jump_bc::SAFETY;
+      
+      for (int v = 0; v < vofs1.size(); v++){
+	const VolIndex vof = vofs1[v];
 
-      totalArea += area;
-      totalJump += area*a_jump(vof,0);
+	const Real area = ebisbox1.bndryArea(vof);
+
+	totalArea += area;
+	totalJump += area*a_jump(vof,0);
+      }
+      totalJump = totalJump/totalArea;
     }
-    totalJump = totalJump/totalArea;
+    else{
+      totalJump = a_jump(vofs1[0], comp);
+    }
 
 
     // Set the jump
-    const VolIndex vof0(iv, 0);
-    avg1(vof0,0) = totalJump;
-    avg2(vof0,0) = totalJump;
+    const VolIndex vof0(iv, comp);
+    avg1(vof0, comp) = totalJump;
+    avg2(vof0, comp) = totalJump;
   }
 }
 

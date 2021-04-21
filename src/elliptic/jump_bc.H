@@ -152,6 +152,8 @@ public:
 
 protected:
 
+  static Real SAFETY;
+
   RefCountedPtr<mfis> m_mfis;
 
   /*!
