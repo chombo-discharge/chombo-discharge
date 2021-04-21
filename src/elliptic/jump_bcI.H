@@ -10,7 +10,7 @@
 
 #include "jump_bc.H"
 
-#define DEBUG 0
+#define DEBUG_JUMP 1
 
 inline
 void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit){
@@ -27,8 +27,8 @@ void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a
   BaseIVFAB<Real>& avg1 = m_avgJump[a_dit].get_ivfab(phase1);
   BaseIVFAB<Real>& avg2 = m_avgJump[a_dit].get_ivfab(phase2);
 
-  avg1.setVal(0.0);
-  avg2.setVal(0.0);
+  // avg1.setVal(0.0);
+  // avg2.setVal(0.0);
   
   const EBISBox& ebisbox1 = a_phi.getPhase(phase1).getEBISBox();
   const EBISBox& ebisbox2 = a_phi.getPhase(phase2).getEBISBox();
@@ -128,7 +128,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
       const VolIndex ivof    = avgStencil1.vof(i);
       const Real     iweight = avgStencil1.weight(i);
       apply_sten1 += iweight*phi1(ivof,comp);
-#if DEBUG
+#if DEBUG_JUMP
       const IntVect iiv = ivof.gridIndex();
       if(iweight != iweight)      MayDay::Abort("got weight2 NaN");
       if(ebisbox1.isCovered(iiv)) MayDay::Abort("reaching into covered cell for phase1");
@@ -140,7 +140,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
       const VolIndex ivof    = avgStencil2.vof(i);
       const Real     iweight = avgStencil2.weight(i);
       apply_sten2 += iweight*phi2(ivof,comp);
-#if DEBUG
+#if DEBUG_JUMP
       const IntVect iiv = ivof.gridIndex();
       if(iweight != iweight)      MayDay::Abort("got weight2 NaN");
       if(ebisbox2.isCovered(iiv)) MayDay::Abort("reaching into covered cell for phase2");
@@ -150,7 +150,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     // Compute the factor 1/(bp*wb + bq*wq)
     const Real factor = 1.0/(avg_bco1(vof0,0)*avg_w1(vof0,0) + avg_bco2(vof0,0)*avg_w2(vof0,0));
 
-#if DEBUG 
+#if DEBUG_JUMP 
     if(factor      != factor)      MayDay::Abort("got factor NaN");
     if(apply_sten1 != apply_sten1) MayDay::Abort("got sten1 NaN");
     if(apply_sten2 != apply_sten2) MayDay::Abort("got sten2 NaN");
@@ -170,7 +170,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
       homog1(vof,comp)  *= factor;
       inhomo1(vof,comp) *= factor;
 
-#if DEBUG
+#if DEBUG_JUMP
       if(homog1(vof,comp)  != homog1(vof,comp))  MayDay::Abort("got homo1 NaN");
       if(inhomo1(vof,comp) != inhomo1(vof,comp)) MayDay::Abort("got inhomo1 NaN");
 #endif
@@ -186,7 +186,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
       homog2(vof,comp)  *= factor;
       inhomo2(vof,comp) *= factor;
 
-#if DEBUG
+#if DEBUG_JUMP
       if(homog2(vof,comp)  != homog2(vof,comp))  MayDay::Abort("got homo2 NaN");
       if(inhomo2(vof,comp) != inhomo2(vof,comp)) MayDay::Abort("got inhomo2 NaN");
 #endif

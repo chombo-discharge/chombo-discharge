@@ -9,8 +9,6 @@
 
 #include <EBArith.H>
 
-#define DEBUG 0
-
 bool jump_bc::s_quadrant_based = true;
 int  jump_bc::s_lsq_radius     = 1;
 Real jump_bc::SAFETY           = 1.E-4;
@@ -73,7 +71,7 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
 
   // Damn, still haven't found a stencil. Approximate using one side only
   if(a_stencil.size() == 0){
-#if DEBUG
+#if DEBUG_JUMP
     pout() << "jump_bc::get_first_order sten - no sten on domain = "
 	   << m_domain << "\t vof = "
 	   << a_vof.gridIndex() << endl;
@@ -315,7 +313,7 @@ void jump_bc::build_stencils(){
 	avgStencils(vof,comp) = curStencil;
 	avgBco(vof,comp)      = curBco;
 
-#if DEBUG
+#if DEBUG_JUMP
 	if(curWeight != curWeight) MayDay::Abort("jumpc_bc::build_stencils - got NaN weight");
 	if(curBco    != curBco)    MayDay::Abort("jumpc_bc::build_stencils - got NaN bco");
 #endif
