@@ -61,7 +61,8 @@ void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a
     }
 
 
-    // Set the jump
+    // Set the jump. It should not matter if the cell is multivalued because
+    // the other VoFs in the cells are never referenced. 
     const VolIndex vof0(iv, comp);
     avg1(vof0, comp) = totalJump;
     avg2(vof0, comp) = totalJump;
