@@ -94,6 +94,8 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
 
   this->allocate_internals();
 
+  data_ops::set_value(m_state, 0.0);
+
   // These levels have never changed
   for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
     m_cache[lvl]->copyTo(*m_state[lvl]); 
