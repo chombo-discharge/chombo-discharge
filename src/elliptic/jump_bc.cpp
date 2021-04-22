@@ -12,8 +12,6 @@
 bool jump_bc::s_quadrant_based = true;
 int  jump_bc::s_lsq_radius     = 1;
 
-Real jump_bc::SAFETY = 1.E-4;
-
 jump_bc::jump_bc(){
   CH_TIME("jump_bc::jump_bc(weak)");
 }
