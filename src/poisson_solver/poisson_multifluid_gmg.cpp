@@ -353,7 +353,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
     m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
 
     const int status = m_gmg_solver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
+    if(status == 1 || status == 8){  // 8 => Norm sufficiently small
       converged = true;
     }
   }
@@ -877,6 +877,8 @@ void poisson_multifluid_gmg::define_mg_levels(){
       break;
     }
   }
+  
+  m_has_mg_stuff = true;
 }
 
 void poisson_multifluid_gmg::setup_gmg(){
@@ -885,10 +887,9 @@ void poisson_multifluid_gmg::setup_gmg(){
     pout() << "poisson_multifluid_gmg::setup_gmg" << endl;
   }
 
-  //  if(!m_has_mg_stuff){
+  if(!m_has_mg_stuff){
     this->define_mg_levels();     // Define MG levels. These don't change during regrids so we only need to set them once. 
-    //    m_has_mg_stuff = true;
-    //  }
+  }
   this->set_coefficients();       // Set coefficients
   this->setup_operator_factory(); // Set the operator factory
   this->setup_solver();           // Set up the AMR multigrid solver
