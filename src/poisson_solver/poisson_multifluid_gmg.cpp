@@ -316,6 +316,22 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   data_ops::set_value(source, 0.0);
 #endif
 
+#if 0 // Check NaN/Inf input
+  EBAMRCellData phiGas = m_amr->alias(phase::gas,   a_state);
+  EBAMRCellData phiSol = m_amr->alias(phase::solid, a_state);
+
+  EBAMRCellData srcGas = m_amr->alias(phase::gas,   m_scaled_source);
+  EBAMRCellData srcSol = m_amr->alias(phase::solid, m_scaled_source);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    EBLevelDataOps::checkNANINF(*phiGas[lvl]);
+    EBLevelDataOps::checkNANINF(*phiSol[lvl]);
+
+    EBLevelDataOps::checkNANINF(*srcGas[lvl]);
+    EBLevelDataOps::checkNANINF(*srcSol[lvl]);
+  }
+#endif
+
   // Aliasing
   Vector<LevelData<MFCellFAB>* > phi, cpy, rhs, res, zero;
   m_amr->alias(phi,     a_state);
