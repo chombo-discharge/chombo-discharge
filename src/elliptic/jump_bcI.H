@@ -24,14 +24,14 @@ void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a
   const BaseIVFAB<Real>& bco1 = m_bco[a_dit].get_ivfab(phase1);
   const BaseIVFAB<Real>& bco2 = m_bco[a_dit].get_ivfab(phase2);
 
+  const EBISBox& ebisbox1 = a_phi.getPhase(phase1).getEBISBox();
+  const EBISBox& ebisbox2 = a_phi.getPhase(phase2).getEBISBox();
+
   BaseIVFAB<Real>& avg1 = m_avgJump[a_dit].get_ivfab(phase1);
   BaseIVFAB<Real>& avg2 = m_avgJump[a_dit].get_ivfab(phase2);
 
-  // avg1.setVal(0.0);
-  // avg2.setVal(0.0);
-  
-  const EBISBox& ebisbox1 = a_phi.getPhase(phase1).getEBISBox();
-  const EBISBox& ebisbox2 = a_phi.getPhase(phase2).getEBISBox();
+  avg1.setVal(0.0);
+  avg2.setVal(0.0);
 
   for (IVSIterator ivsit(m_ivs[a_dit]); ivsit.ok(); ++ivsit){
     const IntVect iv = ivsit();
@@ -44,7 +44,7 @@ void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a
     Real totalJump = 0.0;
 
     if(ebisbox1.isMultiValued(iv)){
-      Real totalArea = jump_bc::SAFETY;
+      Real totalArea = 0.0;
       
       for (int v = 0; v < vofs1.size(); v++){
 	const VolIndex vof = vofs1[v];
@@ -54,7 +54,10 @@ void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a
 	totalArea += area;
 	totalJump += area*a_jump(vof,0);
       }
-      totalJump = totalJump/totalArea;
+
+      if(totalArea > jump_bc::SAFETY){
+	totalJump = totalJump/totalArea;
+      }
     }
     else{
       totalJump = a_jump(vofs1[0], comp);
@@ -62,7 +65,7 @@ void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a
 
 
     // Set the jump. It should not matter if the cell is multivalued because
-    // the other VoFs in the cells are never referenced. 
+    // the other VoFs in the cells should never be referenced. 
     const VolIndex vof0(iv, comp);
     avg1(vof0, comp) = totalJump;
     avg2(vof0, comp) = totalJump;
@@ -105,11 +108,11 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   BaseIVFAB<Real>& homog1  = m_homog[a_dit].get_ivfab(phase1);
   BaseIVFAB<Real>& homog2  = m_homog[a_dit].get_ivfab(phase2);
 
-  // homog1.setVal(0.0); // This is the contribution of the surface charge for phase1
-  // homog2.setVal(0.0); // This is the contribution of the surface charge for phase2
+  homog1.setVal(0.0); // This is the contribution of the surface charge for phase1
+  homog2.setVal(0.0); // This is the contribution of the surface charge for phase2
 
-  // inhomo1.setVal(0.0); // This is the contribution from the other side for phase1
-  // inhomo2.setVal(0.0); // This is the contribution from the other side for phase2
+  inhomo1.setVal(0.0); // This is the contribution from the other side for phase1
+  inhomo2.setVal(0.0); // This is the contribution from the other side for phase2
   
   // Compute the average jump. 
   for (IVSIterator ivsit(m_ivs[a_dit]); ivsit.ok(); ++ivsit){
