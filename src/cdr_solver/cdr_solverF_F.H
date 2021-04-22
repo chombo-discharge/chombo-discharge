@@ -168,56 +168,56 @@ inline void FORTRAN_NAME(inlineGET_MAXNORM, inlineGET_MAXNORM)(
 // Prototype for Fortran procedure advection_dt ...
 //
 void FORTRAN_NAME( ADVECTION_DT ,advection_dt )(
-      CHFp_CONST_FRA(velo)
+      CHFp_FRA1(min_dt)
+      ,CHFp_CONST_FRA(velo)
       ,CHFp_CONST_REAL(dx)
-      ,CHFp_BOX(dcalc)
-      ,CHFp_REAL(min_dt) );
+      ,CHFp_BOX(dcalc) );
 
 #define FORT_ADVECTION_DT FORTRAN_NAME( inlineADVECTION_DT, inlineADVECTION_DT)
 #define FORTNT_ADVECTION_DT FORTRAN_NAME( ADVECTION_DT, advection_dt)
 
 inline void FORTRAN_NAME(inlineADVECTION_DT, inlineADVECTION_DT)(
-      CHFp_CONST_FRA(velo)
+      CHFp_FRA1(min_dt)
+      ,CHFp_CONST_FRA(velo)
       ,CHFp_CONST_REAL(dx)
-      ,CHFp_BOX(dcalc)
-      ,CHFp_REAL(min_dt) )
+      ,CHFp_BOX(dcalc) )
 {
  CH_TIMELEAF("FORT_ADVECTION_DT");
  FORTRAN_NAME( ADVECTION_DT ,advection_dt )(
-      CHFt_CONST_FRA(velo)
+      CHFt_FRA1(min_dt)
+      ,CHFt_CONST_FRA(velo)
       ,CHFt_CONST_REAL(dx)
-      ,CHFt_BOX(dcalc)
-      ,CHFt_REAL(min_dt) );
+      ,CHFt_BOX(dcalc) );
 }
 #endif  // GUARDADVECTION_DT 
 
-#ifndef GUARDDIFFUSIVE_DT 
-#define GUARDDIFFUSIVE_DT 
-// Prototype for Fortran procedure diffusive_dt ...
+#ifndef GUARDDIFFUSION_DT 
+#define GUARDDIFFUSION_DT 
+// Prototype for Fortran procedure diffusion_dt ...
 //
-void FORTRAN_NAME( DIFFUSIVE_DT ,diffusive_dt )(
+void FORTRAN_NAME( DIFFUSION_DT ,diffusion_dt )(
       CHFp_CONST_FRA1(diffco)
       ,CHFp_CONST_REAL(dx)
       ,CHFp_BOX(facebox)
       ,CHFp_REAL(min_dt) );
 
-#define FORT_DIFFUSIVE_DT FORTRAN_NAME( inlineDIFFUSIVE_DT, inlineDIFFUSIVE_DT)
-#define FORTNT_DIFFUSIVE_DT FORTRAN_NAME( DIFFUSIVE_DT, diffusive_dt)
+#define FORT_DIFFUSION_DT FORTRAN_NAME( inlineDIFFUSION_DT, inlineDIFFUSION_DT)
+#define FORTNT_DIFFUSION_DT FORTRAN_NAME( DIFFUSION_DT, diffusion_dt)
 
-inline void FORTRAN_NAME(inlineDIFFUSIVE_DT, inlineDIFFUSIVE_DT)(
+inline void FORTRAN_NAME(inlineDIFFUSION_DT, inlineDIFFUSION_DT)(
       CHFp_CONST_FRA1(diffco)
       ,CHFp_CONST_REAL(dx)
       ,CHFp_BOX(facebox)
       ,CHFp_REAL(min_dt) )
 {
- CH_TIMELEAF("FORT_DIFFUSIVE_DT");
- FORTRAN_NAME( DIFFUSIVE_DT ,diffusive_dt )(
+ CH_TIMELEAF("FORT_DIFFUSION_DT");
+ FORTRAN_NAME( DIFFUSION_DT ,diffusion_dt )(
       CHFt_CONST_FRA1(diffco)
       ,CHFt_CONST_REAL(dx)
       ,CHFt_BOX(facebox)
       ,CHFt_REAL(min_dt) );
 }
-#endif  // GUARDDIFFUSIVE_DT 
+#endif  // GUARDDIFFUSION_DT 
 
 #ifndef GUARDCONSDIV_BLOCK 
 #define GUARDCONSDIV_BLOCK 

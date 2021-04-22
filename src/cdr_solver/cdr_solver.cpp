@@ -1800,6 +1800,9 @@ Real cdr_solver::compute_cfl_dt(){
     pout() << m_name + "::compute_cfl_dt" << endl;
   }
 
+#if 1
+  return this->compute_advection_dt();
+#else
   Real min_dt = std::numeric_limits<Real>::max();
 
   if(m_mobile){
@@ -1846,6 +1849,7 @@ Real cdr_solver::compute_cfl_dt(){
   }
 
   return min_dt;
+#endif
 }
 
 Real cdr_solver::compute_advection_dt(){
@@ -1857,20 +1861,27 @@ Real cdr_solver::compute_advection_dt(){
   Real min_dt = std::numeric_limits<Real>::max();
 
   if(m_mobile){
+    const int comp = 0;
+
+    data_ops::set_value(m_scratch, min_dt);
+    
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
       const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
       const Real dx                = m_amr->get_dx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	EBCellFAB& dt          = (*m_scratch[lvl])[dit()];
 	const EBCellFAB& velo  = (*m_velo_cell[lvl])[dit()];
 	const Box box          = dbl.get(dit());
 
+	BaseFab<Real>& dt_fab         = dt.getSingleValuedFAB();
 	const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
-	FORT_ADVECTION_DT(CHF_CONST_FRA(velo_fab),
+	FORT_ADVECTION_DT(CHF_FRA1(dt_fab, comp),
+			  CHF_CONST_FRA(velo_fab),
 			  CHF_CONST_REAL(dx),
-			  CHF_BOX(box),
-			  CHF_REAL(min_dt));
+			  CHF_BOX(box));
+
 
 	VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
@@ -1881,15 +1892,16 @@ Real cdr_solver::compute_advection_dt(){
 	    vel += Abs(velo(vof, dir));
 	  }
 
-	  min_dt = std::min(min_dt, dx/vel);
+	  dt(vof, comp) = dx/vel;
 	}
       }
     }
-  
-#ifdef CH_MPI
-    Real tmp = min_dt;
-    int result = MPI_Allreduce(&tmp, &min_dt, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-#endif
+
+
+    Real maxVal = std::numeric_limits<Real>::max();
+    
+    data_ops::set_covered_value(m_scratch, comp, maxVal);
+    data_ops::get_max_min(maxVal, min_dt, m_scratch, comp);
   }
 
 
@@ -1925,7 +1937,7 @@ Real cdr_solver::compute_diffusion_dt(){
 	  Box facebox = box;
 	  facebox.surroundingNodes(dir);
 
-	  FORT_DIFFUSIVE_DT(CHF_CONST_FRA1(diffco_fab, comp),
+	  FORT_DIFFUSION_DT(CHF_CONST_FRA1(diffco_fab, comp),
 			    CHF_CONST_REAL(dx),
 			    CHF_BOX(facebox),
 			    CHF_REAL(min_dt));
@@ -1962,7 +1974,7 @@ Real cdr_solver::compute_diffusion_dt(){
     Real tmp = 1.;
     int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
     if(result != MPI_SUCCESS){
-      MayDay::Error("cdr_solver::compute_diffusive_dt() - communication error on norm");
+      MayDay::Error("cdr_solver::compute_diffusion_dt() - communication error on norm");
     }
     min_dt = tmp;
 #endif
