@@ -152,6 +152,8 @@ public:
 
 protected:
 
+  static Real SAFETY;
+
   RefCountedPtr<mfis> m_mfis;
 
   /*!
@@ -226,7 +228,6 @@ protected:
   LayoutData<MFInterfaceFAB<Real> >       m_avgWeights;
   LayoutData<MFInterfaceFAB<Real> >       m_avgBco;
   LayoutData<MFInterfaceFAB<Real> >       m_avgJump;
-  LayoutData<MFInterfaceFAB<Real> >       m_avgFactor;
 
   /*!
     @brief VoFIterator for gas-side cells
@@ -279,15 +280,19 @@ protected:
   /*!
     @brief Match the boundary condition
   */
-  inline void match_bc(BaseIVFAB<Real>&                  a_phibc,
-		       const BaseIVFAB<Real>&            a_jump,
-		       const MFCellFAB&                  a_phi,
-		       const DataIndex&                  a_dit);
+  inline
+  void match_bc(BaseIVFAB<Real>&                  a_phibc,
+		const BaseIVFAB<Real>&            a_jump,
+		const MFCellFAB&                  a_phi,
+		const DataIndex&                  a_dit);
 
   /*!
     @brief Compute the average jump condition
   */
-  inline void compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit);
+  inline
+  void compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit);
 };
+
+#include "jump_bcI.H"
 
 #endif

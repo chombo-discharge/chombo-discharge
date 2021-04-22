@@ -53,7 +53,8 @@ void sigma_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
   const int finest_level = m_amr->get_finest_level();
   
   m_amr->allocate(m_cache, m_realm, m_phase, ncomp);
-
+  data_ops::set_value(m_cache, 0.0);
+  
   for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
     m_state[lvl]->localCopyTo(*m_cache[lvl]);
   }
@@ -94,6 +95,8 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
 
   this->allocate_internals();
 
+  data_ops::set_value(m_state, 0.0);
+
   // These levels have never changed
   for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
     m_cache[lvl]->copyTo(*m_state[lvl]); 
@@ -131,6 +134,7 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
     LevelData<BaseIVFAB<Real> > coarsened_fine_data(coar_grid, ncomp, m_state[0]->ghostVect(), ivfact);
 
     //
+    EBLevelDataOps::setVal(coarsened_fine_data, 0.0);
     m_state[lvl-1]->copyTo(coarsened_fine_data);
 
 
@@ -147,17 +151,22 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
     	const VolIndex& fine_vof = vofit();
     	const VolIndex  coar_vof = fine_ebisl.coarsen(fine_vof, nref, dit());
-
-    	// Get all the area fractions of the refine coar vof in order to find weighting fractions
-    	Vector<VolIndex> refined_vofs = coar_ebisl.refine(coar_vof, nref, dit());
-    	Real sumfrac = 0.0;
+	const Real coarArea      = coar_ebisbox.bndryArea(coar_vof);
+	
+    	// Same sigma for all refined cells such that charge is conserved. 
+    	const Vector<VolIndex> refined_vofs = coar_ebisl.refine(coar_vof, nref, dit());
+    	Real fineArea = 0.0;
     	for (int i = 0; i < refined_vofs.size(); i++){
-	  sumfrac += fine_ebisbox.bndryArea(refined_vofs[i]);
+	  fineArea += fine_ebisbox.bndryArea(refined_vofs[i]);
     	}
 
     	// Initialize conserved charge
-    	const Real coarFrac = coar_ebisbox.bndryArea(coar_vof);
-	fine_state(fine_vof, comp) = coar_state(coar_vof, comp)*nref/sumfrac;
+	if(fineArea > 0.0 && coarArea > 0.0){
+	  fine_state(fine_vof, comp) = coar_state(coar_vof, comp)*nref*coarArea/fineArea;
+	}
+	else{
+	  fine_state(fine_vof, comp) = 0.0;
+	}
       }
     }
 

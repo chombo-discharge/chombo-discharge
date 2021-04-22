@@ -1,9 +1,8 @@
 /*!
-  @file mfconductivityopfactory.cpp
-  @brief Implementation of mfconductivityopfactory.H
+  @file   mfconductivityopfactory.cpp
+  @brief  Implementation of mfconductivityopfactory.H
   @author Robert Marskar
-  @date Dec. 2017
-  @todo Boundary condition order and bottom drop should be constructor arguments
+  @date   Dec. 2017
 */
 
 #include "mfconductivityopfactory.H"
@@ -509,17 +508,32 @@ void mfconductivityopfactory::average_down_mg(){
 #endif
 }
 
+void mfconductivityopfactory::reset_jump(){
+  CH_TIME("mfconductivityopfactory::reset_jump()");
+
+  data_ops::set_value(m_jump, 0.0);
+  for (int i = 0; i < m_jump_mg.size(); i++){
+    data_ops::set_value(m_jump_mg[i], 0.0);
+  }
+}
+
 void mfconductivityopfactory::set_jump(const Real& a_sigma, const Real& a_scale){
   CH_TIME("mfconductivityopfactory::set_jump(scalar)");
-  for (int lvl = 0; lvl < m_num_levels; lvl++){
-    EBLevelDataOps::setVal(*m_jump[lvl], a_sigma);
-    data_ops::scale(*m_jump[lvl], a_scale);
-  }
+
 #if verb
   pout() << "mfconductivityopfactory::set_jump" << endl;
 #endif
-  this->average_down_amr();
-  this->average_down_mg();
+  // for (int lvl = 0; lvl < m_num_levels; lvl++){
+  //   EBLevelDataOps::setVal(*m_jump[lvl], a_sigma);
+  //   data_ops::scale(*m_jump[lvl], a_scale);
+  // }
+  // this->average_down_amr();
+  // this->average_down_mg();
+
+  data_ops::set_value(m_jump, a_sigma*a_scale);
+  for (int i = 0; i < m_jump_mg.size(); i++){
+    data_ops::set_value(m_jump_mg[i], a_sigma*a_scale);
+  }
 #if verb
   pout() << "mfconductivityopfactory::set_jump - done" << endl;
 #endif
@@ -531,7 +545,9 @@ void mfconductivityopfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a
   pout() << "mfconductivityopfactory::set_jump(data based)" << endl;
 #endif
 
-  // Note: copyTo is a little bit volatile since it drops to linearization functions. Going to copy directly instead.
+  //  reset_jump(); Shouldn't be necessary
+
+  // Note: copyTo is a little bit volatile since the linearization functions are crap. So, do a direct local instead. 
   for (int lvl = 0; lvl < m_num_levels; lvl++){
     for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
       const Box box = m_grids[lvl].get(dit());

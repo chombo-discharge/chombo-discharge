@@ -47,6 +47,48 @@ amr_mesh::~amr_mesh(){
   
 }
 
+EBAMRCellData amr_mesh::alias(const phase::which_phase a_phase, const MFAMRCellData& a_mfdata){
+  CH_TIME("amr_mesh::alias(phase, mfamrcelldata)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::alias(phase, mfamrcelldata)" << endl;
+  }
+
+  EBAMRCellData ret;
+  allocate_ptr(ret);
+
+  alias(ret, a_phase, a_mfdata);
+
+  return ret;
+}
+
+EBAMRFluxData amr_mesh::alias(const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata){
+  CH_TIME("amr_mesh::alias(phase, mfamrfluxdata)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::alias(phase, mfamrfluxdata)" << endl;
+  }
+
+  EBAMRFluxData ret;
+  allocate_ptr(ret);
+
+  alias(ret, a_phase, a_mfdata);
+
+  return ret;
+}
+
+EBAMRIVData amr_mesh::alias(const phase::which_phase a_phase, const MFAMRIVData& a_mfdata){
+  CH_TIME("amr_mesh::alias(phase, mfamrivdata)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::alias(phase, mfamrivdata)" << endl;
+  }
+
+  EBAMRIVData ret;
+  allocate_ptr(ret);
+
+  alias(ret, a_phase, a_mfdata);
+
+  return ret;
+}
+
 void amr_mesh::alias(EBAMRCellData&           a_data,
 		     const phase::which_phase a_phase,
 		     const MFAMRCellData&     a_mfdata,

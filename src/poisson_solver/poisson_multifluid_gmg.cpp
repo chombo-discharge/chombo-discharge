@@ -316,6 +316,22 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   data_ops::set_value(source, 0.0);
 #endif
 
+#if 0 // Check NaN/Inf input
+  EBAMRCellData phiGas = m_amr->alias(phase::gas,   a_state);
+  EBAMRCellData phiSol = m_amr->alias(phase::solid, a_state);
+
+  EBAMRCellData srcGas = m_amr->alias(phase::gas,   m_scaled_source);
+  EBAMRCellData srcSol = m_amr->alias(phase::solid, m_scaled_source);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    EBLevelDataOps::checkNANINF(*phiGas[lvl]);
+    EBLevelDataOps::checkNANINF(*phiSol[lvl]);
+
+    EBLevelDataOps::checkNANINF(*srcGas[lvl]);
+    EBLevelDataOps::checkNANINF(*srcSol[lvl]);
+  }
+#endif
+
   // Aliasing
   Vector<LevelData<MFCellFAB>* > phi, cpy, rhs, res, zero;
   m_amr->alias(phi,     a_state);
@@ -337,7 +353,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
     m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
 
     const int status = m_gmg_solver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
+    if(status == 1 || status == 8){  // 8 => Norm sufficiently small
       converged = true;
     }
   }
@@ -871,6 +887,8 @@ void poisson_multifluid_gmg::define_mg_levels(){
       break;
     }
   }
+  
+  m_has_mg_stuff = true;
 }
 
 void poisson_multifluid_gmg::setup_gmg(){
@@ -879,10 +897,9 @@ void poisson_multifluid_gmg::setup_gmg(){
     pout() << "poisson_multifluid_gmg::setup_gmg" << endl;
   }
 
-  //  if(!m_has_mg_stuff){
+  if(!m_has_mg_stuff){
     this->define_mg_levels();     // Define MG levels. These don't change during regrids so we only need to set them once. 
-    //    m_has_mg_stuff = true;
-    //  }
+  }
   this->set_coefficients();       // Set coefficients
   this->setup_operator_factory(); // Set the operator factory
   this->setup_solver();           // Set up the AMR multigrid solver
@@ -931,7 +948,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   }
 
   // Appropriate coefficients for poisson equation
-  const Real alpha =  0.0;
+  const Real alpha =  1.0; // Aco is zero. 
   const Real beta  = -1.0;
 
   RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory> (NULL);

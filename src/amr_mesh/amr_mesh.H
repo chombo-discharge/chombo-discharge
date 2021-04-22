@@ -176,6 +176,21 @@ public:
   void alias(EBAMRIVData& a_data, const phase::which_phase a_phase, const MFAMRIVData& a_mfdata);
 
   /*!
+    @brief Alias data on phase. 
+  */
+  EBAMRCellData alias(const phase::which_phase a_phase, const MFAMRCellData& a_mfdata);
+
+  /*!
+    @brief Alias data on phase. 
+  */
+  EBAMRFluxData alias(const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata);
+
+  /*!
+    @brief Alias data on phase. 
+  */
+  EBAMRIVData alias(const phase::which_phase a_phase, const MFAMRIVData& a_mfdata);
+
+  /*!
     @brief Compute gradient on level
   */
   void compute_gradient(LevelData<EBCellFAB>&       a_gradient,

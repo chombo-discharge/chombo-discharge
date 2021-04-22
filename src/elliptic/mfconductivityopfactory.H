@@ -105,6 +105,11 @@ public:
 				    const LevelData<MFFluxFAB>&   a_bco_fine,
 				    const LevelData<MFBaseIVFAB>& a_bco_irreg_fine,
 				    const int&                    a_ref_to_depth);
+
+  /*!
+    @brief Reset jump
+  */
+  virtual void reset_jump();
   
   /*!
     @brief Set jump conditions. 
