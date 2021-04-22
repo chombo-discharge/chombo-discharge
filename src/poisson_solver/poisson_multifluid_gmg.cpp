@@ -938,7 +938,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   }
 
   // Appropriate coefficients for poisson equation
-  const Real alpha =  0.0;
+  const Real alpha =  1.0; // Aco is zero. 
   const Real beta  = -1.0;
 
   RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory> (NULL);
