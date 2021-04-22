@@ -363,6 +363,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   // Solver hang. Try again. 
   if(!converged){
+    this->setup_gmg();
     data_ops::set_value(a_state, 0.0);
     m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
 
