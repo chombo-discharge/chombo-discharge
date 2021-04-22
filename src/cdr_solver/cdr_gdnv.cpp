@@ -151,7 +151,7 @@ void cdr_gdnv::allocate_internals(){
     const Vector<int>& ref_ratios                    = m_amr->get_ref_rat();
     const Vector<Real>& dx                           = m_amr->get_dx();
     const int finest_level                           = m_amr->get_finest_level();
-    const bool ebcf                                  = m_amr->get_ebcf();
+    const bool has_ebcf                              = m_amr->get_ebcf();
     m_level_advect.resize(1 + finest_level);
   
     for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -165,6 +165,8 @@ void cdr_gdnv::allocate_internals(){
 	eblg_coar = *eblgs[lvl-1];
 	ref_rat   = ref_ratios[lvl-1];
       }
+
+      const bool forceNoEBCF = !has_ebcf;
     
       m_level_advect[lvl] = RefCountedPtr<EBAdvectLevelIntegrator> (new EBAdvectLevelIntegrator(*eblgs[lvl],
 												eblg_coar,
@@ -172,7 +174,7 @@ void cdr_gdnv::allocate_internals(){
 												dx[lvl]*RealVect::Unit,
 												has_coar,
 												has_fine,
-												ebcf,
+												forceNoEBCF,
 												m_slopelim,
 												m_ebis));
     }

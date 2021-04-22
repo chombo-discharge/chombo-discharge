@@ -139,8 +139,6 @@ void cdr_muscl::compute_slopes(EBCellFAB&           a_deltaC,
     pout() << m_name + "::compute_slopes" << endl;
   }
 
-  //  MayDay::Warning("cdr_muscl::compute_slopes - reason to believe there is a bug in this routine...");
-
   const int comp         = 0;
   const int ncomp        = 1;
 
