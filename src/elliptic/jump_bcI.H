@@ -15,8 +15,6 @@
 inline
 void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit){
 
-  //  const IntVectSet& ivs = m_avgJump[a_dit].get_ivs();
-
   const int comp   = 0;
   const int phase1 = 0;
   const int phase2 = 1;
@@ -35,39 +33,24 @@ void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a
 
   for (IVSIterator ivsit(m_ivs[a_dit]); ivsit.ok(); ++ivsit){
     const IntVect iv = ivsit();
+
+    const VolIndex vof0(iv, comp);
     
     const Vector<VolIndex> vofs1 = ebisbox1.getVoFs(iv);
     const Vector<VolIndex> vofs2 = ebisbox2.getVoFs(iv);
 
-    // Compute average jump condition
-
+    // Compute average jump condition. a_jump should be defined on phase 1. 
     Real totalJump = 0.0;
+    for (int ivof = 0; ivof < vofs1.size(); ivof++){
+      const VolIndex& vof = vofs1[ivof];
 
-    if(ebisbox1.isMultiValued(iv)){
-      Real totalArea = 0.0;
-      
-      for (int v = 0; v < vofs1.size(); v++){
-	const VolIndex vof = vofs1[v];
-
-	//	const Real area = ebisbox1.bndryArea(vof);
-	const Real area = 1.0;
-
-	totalArea += area;
-	totalJump += area*a_jump(vof,0);
-      }
-
-      if(totalArea > jump_bc::SAFETY){
-	totalJump = totalJump/totalArea;
-      }
+      totalJump += a_jump(vof, comp);
     }
-    else{
-      totalJump = a_jump(vofs1[0], comp);
-    }
+    totalJump /= vofs1.size();
 
 
     // Set the jump. It should not matter if the cell is multivalued because
     // the other VoFs in the cells should never be referenced. 
-    const VolIndex vof0(iv, comp);
     avg1(vof0, comp) = totalJump;
     avg2(vof0, comp) = totalJump;
   }
@@ -82,7 +65,6 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   const int phase1 = 0;
   const int phase2 = 1;
 
-  // First, compute the area-weighted jump coefficient
   jump_bc::compute_avg_jump(a_jump, a_phi, a_dit);
   
   const BaseIVFAB<Real>& avg_bco1    = m_avgBco[a_dit].get_ivfab(phase1);
@@ -121,79 +103,78 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 
     const VolIndex vof0 = VolIndex(iv, 0);
 
-    // Apply the stencils
-    Real apply_sten1 = 0.0; // This is the applied stencil on phase 1. It will be an EB flux contribution to phase 2.
-    Real apply_sten2 = 0.0; // This is the applied stencil on phase 2. It will be an EB flux contribution to phase 1.
+    const Real& jump1 = avg_jump1(vof0, 0);
+    const Real& jump2 = avg_jump2(vof0, 0);
+
+    const Real& bco1  = avg_bco1(vof0, 0);
+    const Real& bco2  = avg_bco2(vof0, 0);
+
+    const Real& w1    = avg_w1(vof0, 0);
+    const Real& w2    = avg_w2(vof0, 0);
 
     const VoFStencil& avgStencil1 = avg_sten1(vof0, 0);
     const VoFStencil& avgStencil2 = avg_sten2(vof0, 0);
 
-    // Apply stencil on the gas side
-    for (int i = 0; i < avgStencil1.size(); i++){
-      const VolIndex ivof    = avgStencil1.vof(i);
-      const Real     iweight = avgStencil1.weight(i);
-      apply_sten1 += iweight*phi1(ivof,comp);
-#if DEBUG_JUMP
-      const IntVect iiv = ivof.gridIndex();
-      if(iweight != iweight)      MayDay::Abort("got weight2 NaN");
-      if(ebisbox1.isCovered(iiv)) MayDay::Abort("reaching into covered cell for phase1");
-#endif
-    }
+    const Real factor = 1.0/(bco1*w1 + bco2*w2);
 
-    // Apply stencil on the other side
-    for (int i = 0; i < avgStencil2.size(); i++){
-      const VolIndex ivof    = avgStencil2.vof(i);
-      const Real     iweight = avgStencil2.weight(i);
-      apply_sten2 += iweight*phi2(ivof,comp);
-#if DEBUG_JUMP
-      const IntVect iiv = ivof.gridIndex();
-      if(iweight != iweight)      MayDay::Abort("got weight2 NaN");
-      if(ebisbox2.isCovered(iiv)) MayDay::Abort("reaching into covered cell for phase2");
-#endif
-    }
-
-    // Compute the factor 1/(bp*wb + bq*wq)
-    const Real factor = 1.0/(avg_bco1(vof0,0)*avg_w1(vof0,0) + avg_bco2(vof0,0)*avg_w2(vof0,0));
-
-#if DEBUG_JUMP 
-    if(factor      != factor)      MayDay::Abort("got factor NaN");
-    if(apply_sten1 != apply_sten1) MayDay::Abort("got sten1 NaN");
-    if(apply_sten2 != apply_sten2) MayDay::Abort("got sten2 NaN");
-#endif
-
-    // Now make the "inhomogeneous" and "homogeneous" contributions
     const Vector<VolIndex> vofs1 = ebisbox1.getVoFs(iv);
     const Vector<VolIndex> vofs2 = ebisbox2.getVoFs(iv);
 
-    // Phase 1 -- should the contributions be weighted somehow...?
+#if DEBUG_JUMP
+    if (std::isnan(factor))     MayDay::Abort("jump_bc::match_bc -- factor is NaN");
+    if (ebisbox1.isCovered(iv)) MayDay::Abort("jump_bc::match_bc -- cell is covered on phase 1");
+    if (ebisbox2.isCovered(iv)) MayDay::Abort("jump_bc::match_bc -- cell is covered on phase 2");
+#endif
+
+    // Apply the stencils on each side. apply_sten1 is an EB flux contribution to phase 2 and vice versa. 
+    Real apply_sten1 = 0.0;
+    Real apply_sten2 = 0.0;
+
+    for (int i = 0; i < avgStencil1.size(); i++){
+      const VolIndex& ivof    = avgStencil1.vof(i);
+      const Real&     iweight = avgStencil1.weight(i);
+      apply_sten1 += iweight*phi1(ivof,comp);
+    }
+
+    for (int i = 0; i < avgStencil2.size(); i++){
+      const VolIndex& ivof    = avgStencil2.vof(i);
+      const Real&     iweight = avgStencil2.weight(i);
+      apply_sten2 += iweight*phi2(ivof,comp);
+    }
+
+#if DEBUG_JUMP 
+    if(std::isnan(apply_sten1)) MayDay::Abort("got sten1 NaN");
+    if(std::isnan(apply_sten2)) MayDay::Abort("got sten2 NaN");
+#endif
+
+    // Now make the "inhomogeneous" and "homogeneous" contributions on each side. This gets area weighted in mfdirichletconductivityebbc. 
     for (int v = 0; v < vofs1.size(); v++){
       const VolIndex vof = vofs1[v];
 
-      homog1(vof,comp)  =  avg_jump1(vof0, 0);
-      inhomo1(vof,comp) = -avg_bco2(vof0,0)*apply_sten2;
+      homog1(vof,comp)  =  jump1;
+      inhomo1(vof,comp) = -bco2*apply_sten2;
 
       homog1(vof,comp)  *= factor;
       inhomo1(vof,comp) *= factor;
 
 #if DEBUG_JUMP
-      if(homog1(vof,comp)  != homog1(vof,comp))  MayDay::Abort("got homo1 NaN");
-      if(inhomo1(vof,comp) != inhomo1(vof,comp)) MayDay::Abort("got inhomo1 NaN");
+      if(std::isnan(homog1(vof,comp)))  MayDay::Abort("got homo1 NaN");
+      if(std::isnan(inhomo1(vof,comp))) MayDay::Abort("got inhomo1 NaN");
 #endif
     }
 
-    // Phase 2 -- should the contributions be weighted somehow...?
     for (int v = 0; v < vofs2.size(); v++){
       const VolIndex vof = vofs2[v];
 
-      homog2(vof,comp)  =  avg_jump2(vof0, 0);
-      inhomo2(vof,comp) = -avg_bco1(vof0,0)*apply_sten1;
+      homog2(vof,comp)  =  jump2;
+      inhomo2(vof,comp) = -bco1*apply_sten1; 
 
       homog2(vof,comp)  *= factor;
       inhomo2(vof,comp) *= factor;
 
 #if DEBUG_JUMP
-      if(homog2(vof,comp)  != homog2(vof,comp))  MayDay::Abort("got homo2 NaN");
-      if(inhomo2(vof,comp) != inhomo2(vof,comp)) MayDay::Abort("got inhomo2 NaN");
+      if(std::isnan(homog2(vof,comp)))  MayDay::Abort("got homo2 NaN");
+      if(std::isnan(inhomo2(vof,comp))) MayDay::Abort("got inhomo2 NaN");
 #endif
     }
   }
