@@ -282,14 +282,16 @@ void jump_bc::build_stencils(){
 	VoFStencil curStencil;
 
 	if(ebisbox.isMultiValued(iv)){
-	  Real totalArea = jump_bc::SAFETY;
+	  //	  Real totalArea = jump_bc::SAFETY;
+	  Real totalArea = 0.0;
 
 	  for (int v = 0; v < vofs.size(); v++){
 	    const VolIndex vof = vofs[v];
 
-	    const Real area = ebisbox.bndryArea(vof);
+	    //	    const Real area = ebisbox.bndryArea(vof);
+	    const Real area = 1.0;
 
-	    totalArea += area;
+	    totalArea += 1.0;
 	    curWeight += area*weights(vof, comp);
 	    curBco    += area*bco(vof,comp);
 

@@ -49,7 +49,8 @@ void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a
       for (int v = 0; v < vofs1.size(); v++){
 	const VolIndex vof = vofs1[v];
 
-	const Real area = ebisbox1.bndryArea(vof);
+	//	const Real area = ebisbox1.bndryArea(vof);
+	const Real area = 1.0;
 
 	totalArea += area;
 	totalJump += area*a_jump(vof,0);
