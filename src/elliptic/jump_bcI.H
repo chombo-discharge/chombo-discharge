@@ -78,6 +78,9 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 
   const BaseIVFAB<Real>& avg_jump1   = m_avgJump[a_dit].get_ivfab(phase1);
   const BaseIVFAB<Real>& avg_jump2   = m_avgJump[a_dit].get_ivfab(phase2);
+
+  const BaseIVFAB<Real>& avg_factor1   = m_avgFactor[a_dit].get_ivfab(phase1);
+  const BaseIVFAB<Real>& avg_factor2   = m_avgFactor[a_dit].get_ivfab(phase2);
   
   const EBCellFAB& phi1              = a_phi.getPhase(phase1);
   const EBCellFAB& phi2              = a_phi.getPhase(phase2);
@@ -115,13 +118,14 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     const VoFStencil& avgStencil1 = avg_sten1(vof0, 0);
     const VoFStencil& avgStencil2 = avg_sten2(vof0, 0);
 
-    const Real factor = 1.0/(bco1*w1 + bco2*w2);
+    //    const Real factor = 1.0/(bco1*w1 + bco2*w2);
+    const Real& factor1 = avg_factor1(vof0, 0);
+    const Real& factor2 = avg_factor2(vof0, 0);
 
     const Vector<VolIndex> vofs1 = ebisbox1.getVoFs(iv);
     const Vector<VolIndex> vofs2 = ebisbox2.getVoFs(iv);
 
 #if DEBUG_JUMP
-    if (std::isnan(factor))     MayDay::Abort("jump_bc::match_bc -- factor is NaN");
     if (ebisbox1.isCovered(iv)) MayDay::Abort("jump_bc::match_bc -- cell is covered on phase 1");
     if (ebisbox2.isCovered(iv)) MayDay::Abort("jump_bc::match_bc -- cell is covered on phase 2");
 #endif
@@ -154,8 +158,8 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
       homog1(vof,comp)  =  jump1;
       inhomo1(vof,comp) = -bco2*apply_sten2;
 
-      homog1(vof,comp)  *= factor;
-      inhomo1(vof,comp) *= factor;
+      homog1(vof,comp)  *= factor1;
+      inhomo1(vof,comp) *= factor1;
 
 #if DEBUG_JUMP
       if(std::isnan(homog1(vof,comp)))  MayDay::Abort("got homo1 NaN");
@@ -169,8 +173,8 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
       homog2(vof,comp)  =  jump2;
       inhomo2(vof,comp) = -bco1*apply_sten1; 
 
-      homog2(vof,comp)  *= factor;
-      inhomo2(vof,comp) *= factor;
+      homog2(vof,comp)  *= factor2;
+      inhomo2(vof,comp) *= factor2;
 
 #if DEBUG_JUMP
       if(std::isnan(homog2(vof,comp)))  MayDay::Abort("got homo2 NaN");

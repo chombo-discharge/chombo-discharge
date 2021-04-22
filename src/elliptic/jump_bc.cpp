@@ -151,6 +151,7 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_avgStencils.define(m_grids);
   m_avgBco.define(m_grids);
   m_avgJump.define(m_grids);
+  m_avgFactor.define(m_grids);
 
   int num = 0;
 
@@ -164,6 +165,7 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
       MFInterfaceFAB<Real>& avgWeights     = m_avgWeights[dit()];
       MFInterfaceFAB<Real>& avgBco         = m_avgBco[dit()];
       MFInterfaceFAB<Real>& avgJump        = m_avgJump[dit()];
+      MFInterfaceFAB<Real>& avgFactor      = m_avgFactor[dit()];
       MFInterfaceFAB<VoFStencil>& stens    = m_stencils[dit()];
       MFInterfaceFAB<VoFStencil>& avgStens = m_avgStencils[dit()];
 
@@ -173,6 +175,7 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
       inhomo.define(m_mflg,     dit());
       avgBco.define(m_mflg,     dit());
       avgJump.define(m_mflg,    dit());
+      avgFactor.define(m_mflg,  dit());
       weights.define(m_mflg,    dit());
       avgStens.define(m_mflg,   dit());
       avgWeights.define(m_mflg, dit());
@@ -305,6 +308,45 @@ void jump_bc::build_stencils(){
 	if(std::isnan(curBco))    MayDay::Abort("jumpc_bc::build_stencils - got NaN bco");
 #endif
       }
+    }
+
+    
+
+    // Build the average factor on each side.
+    const int phase1 = 0;
+    const int phase2 = 1;
+
+    BaseIVFAB<Real>& factor1 = m_avgFactor[dit()].get_ivfab(phase1);
+    BaseIVFAB<Real>& factor2 = m_avgFactor[dit()].get_ivfab(phase2);
+
+    const BaseIVFAB<Real>& avgBco1 = m_avgBco[dit()].get_ivfab(phase1);
+    const BaseIVFAB<Real>& avgBco2 = m_avgBco[dit()].get_ivfab(phase2);
+
+    const BaseIVFAB<Real>& avgWeights1 = m_avgWeights[dit()].get_ivfab(phase1);
+    const BaseIVFAB<Real>& avgWeights2 = m_avgWeights[dit()].get_ivfab(phase2);
+
+    factor1.setVal(0.0);
+    factor2.setVal(0.0);
+    
+    for (IVSIterator ivsit(m_ivs[dit()]); ivsit.ok(); ++ivsit){
+      const IntVect iv = ivsit();
+
+      const VolIndex vof0(iv, 0);
+      
+      const Real& bco1 = avgBco1(vof0, 0);
+      const Real& bco2 = avgBco2(vof0, 0);
+
+      const Real& w1 = avgWeights1(vof0, 0);
+      const Real& w2 = avgWeights2(vof0, 0);
+
+      const Real factor = 1.0/(bco1*w1 + bco2*w2);
+
+#if DEBUG_JUMP
+      if(std::isnan(factor)) MayDay::Abort("jump_bc::build_stencils -- factor is NaN");
+#endif
+
+      factor1(vof0, 0) = factor;
+      factor2(vof0, 0) = factor;
     }
   }
 }
