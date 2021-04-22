@@ -195,7 +195,7 @@ void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
     
   // CFL on diffusion, if explicit diffusion
   if(m_solver->is_diffusive() && m_integrator == 0){
-    diff_dt = m_solver->compute_diffusive_dt();
+    diff_dt = m_solver->compute_diffusion_dt();
 
     if(m_solver->is_mobile()){
       a_dt = m_cfl*1./(1./cfl_dt + 1./diff_dt);

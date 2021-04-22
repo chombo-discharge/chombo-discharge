@@ -76,34 +76,6 @@ inline void FORTRAN_NAME(inlineCONSDIV_REG, inlineCONSDIV_REG)(
 }
 #endif  // GUARDCONSDIV_REG 
 
-#ifndef GUARDADVECTIVE_CFL 
-#define GUARDADVECTIVE_CFL 
-// Prototype for Fortran procedure advective_cfl ...
-//
-void FORTRAN_NAME( ADVECTIVE_CFL ,advective_cfl )(
-      CHFp_CONST_FRA(velo)
-      ,CHFp_CONST_REAL(dx)
-      ,CHFp_BOX(dcalc)
-      ,CHFp_REAL(min_dt) );
-
-#define FORT_ADVECTIVE_CFL FORTRAN_NAME( inlineADVECTIVE_CFL, inlineADVECTIVE_CFL)
-#define FORTNT_ADVECTIVE_CFL FORTRAN_NAME( ADVECTIVE_CFL, advective_cfl)
-
-inline void FORTRAN_NAME(inlineADVECTIVE_CFL, inlineADVECTIVE_CFL)(
-      CHFp_CONST_FRA(velo)
-      ,CHFp_CONST_REAL(dx)
-      ,CHFp_BOX(dcalc)
-      ,CHFp_REAL(min_dt) )
-{
- CH_TIMELEAF("FORT_ADVECTIVE_CFL");
- FORTRAN_NAME( ADVECTIVE_CFL ,advective_cfl )(
-      CHFt_CONST_FRA(velo)
-      ,CHFt_CONST_REAL(dx)
-      ,CHFt_BOX(dcalc)
-      ,CHFt_REAL(min_dt) );
-}
-#endif  // GUARDADVECTIVE_CFL 
-
 #ifndef GUARDSOURCE_DT 
 #define GUARDSOURCE_DT 
 // Prototype for Fortran procedure source_dt ...
@@ -191,33 +163,33 @@ inline void FORTRAN_NAME(inlineGET_MAXNORM, inlineGET_MAXNORM)(
 }
 #endif  // GUARDGET_MAXNORM 
 
-#ifndef GUARDADVECTIVE_CFL_DT 
-#define GUARDADVECTIVE_CFL_DT 
-// Prototype for Fortran procedure advective_cfl_dt ...
+#ifndef GUARDADVECTION_DT 
+#define GUARDADVECTION_DT 
+// Prototype for Fortran procedure advection_dt ...
 //
-void FORTRAN_NAME( ADVECTIVE_CFL_DT ,advective_cfl_dt )(
+void FORTRAN_NAME( ADVECTION_DT ,advection_dt )(
       CHFp_CONST_FRA(velo)
       ,CHFp_CONST_REAL(dx)
       ,CHFp_BOX(dcalc)
       ,CHFp_REAL(min_dt) );
 
-#define FORT_ADVECTIVE_CFL_DT FORTRAN_NAME( inlineADVECTIVE_CFL_DT, inlineADVECTIVE_CFL_DT)
-#define FORTNT_ADVECTIVE_CFL_DT FORTRAN_NAME( ADVECTIVE_CFL_DT, advective_cfl_dt)
+#define FORT_ADVECTION_DT FORTRAN_NAME( inlineADVECTION_DT, inlineADVECTION_DT)
+#define FORTNT_ADVECTION_DT FORTRAN_NAME( ADVECTION_DT, advection_dt)
 
-inline void FORTRAN_NAME(inlineADVECTIVE_CFL_DT, inlineADVECTIVE_CFL_DT)(
+inline void FORTRAN_NAME(inlineADVECTION_DT, inlineADVECTION_DT)(
       CHFp_CONST_FRA(velo)
       ,CHFp_CONST_REAL(dx)
       ,CHFp_BOX(dcalc)
       ,CHFp_REAL(min_dt) )
 {
- CH_TIMELEAF("FORT_ADVECTIVE_CFL_DT");
- FORTRAN_NAME( ADVECTIVE_CFL_DT ,advective_cfl_dt )(
+ CH_TIMELEAF("FORT_ADVECTION_DT");
+ FORTRAN_NAME( ADVECTION_DT ,advection_dt )(
       CHFt_CONST_FRA(velo)
       ,CHFt_CONST_REAL(dx)
       ,CHFt_BOX(dcalc)
       ,CHFt_REAL(min_dt) );
 }
-#endif  // GUARDADVECTIVE_CFL_DT 
+#endif  // GUARDADVECTION_DT 
 
 #ifndef GUARDDIFFUSIVE_DT 
 #define GUARDDIFFUSIVE_DT 

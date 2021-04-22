@@ -341,7 +341,17 @@ public:
   /*!
     @brief Compute the largest possible diffusive time step (for explicit methods)
   */
-  virtual Real compute_diffusive_dt();
+  virtual Real compute_advection_dt();
+
+  /*!
+    @brief Compute the largest possible diffusive time step (for explicit methods)
+  */
+  virtual Real compute_diffusion_dt();
+
+  /*!
+    @brief Compute the largest possible diffusive time step (for explicit methods)
+  */
+  virtual Real compute_advection_diffusion_dt();
 
   /*!
     @brief Compute the largest possible source time step (for explicit methods

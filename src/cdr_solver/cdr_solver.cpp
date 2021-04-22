@@ -1800,78 +1800,22 @@ Real cdr_solver::compute_cfl_dt(){
     pout() << m_name + "::compute_cfl_dt" << endl;
   }
 
-#if 0
-  Real min_dt = 1.E99;
-  
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const Real dx = m_amr->get_dx()[lvl];
-    Real maxVal = 0.0;
-
-    for (int dir = 0; dir < SpaceDim; dir++){
-      Real maxloc = 0.0;
-      Real minloc = 0.0;
-      EBLevelDataOps::getMaxMin(maxloc, minloc, *m_velo_cell[lvl], dir, true);
-      maxVal = std::max(maxVal, maxloc);
-    }
-    if(maxVal > 0.0){
-      min_dt = std::min(min_dt, dx/maxVal);
-    }
-  }
-
-  return min_dt;
-#else
-
-  Real min_dt = 1.E99;
+  Real min_dt = std::numeric_limits<Real>::max();
 
   if(m_mobile){
-    const Real SAFETY = 1.E-10; 
-
-    const int comp  = 0;
-    const int ncomp = 1;
     const int finest_level = m_amr->get_finest_level();
-    const Interval interv(comp, comp);
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
       const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
       const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
       const Real dx                = m_amr->get_dx()[lvl];
 
-      Real max_vel = 0.0;
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const EBCellFAB& velo  = (*m_velo_cell[lvl])[dit()];
 	const Box box          = dbl.get(dit());
 
-#if 0 // I think this is wrong, the CFL should be dx/(|vx| + |vy| + |vz|)
-	int fab_type;
-	const BaseFab<char>& mask     = ebgraph.getMask(fab_type);
 	const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
-
-	if(fab_type != -1){// not all covered
-	  if(fab_type == 0){ // Has irregular cells
-	    for (int dir = 0; dir < SpaceDim; dir++){
-	      FORT_GET_MAX_VEL(CHF_REAL(max_vel),
-			       CHF_CONST_FRA1(velo_fab, dir),
-			       CHF_BOX(box),
-			       CHF_CONST_FBA1(mask, 0));
-	    }
-	    for (VoFIterator vofit(ebisbox.getMultiCells(box), ebgraph); vofit.ok(); ++vofit){
-	      const VolIndex& vof = vofit();
-	      for (int dir = 0; dir < SpaceDim; dir++){
-		max_vel = Max(max_vel, Abs(velo(vof, dir)));
-	      }
-	    }
-	  }
-	  else { // all regular
-	    for (int dir = 0; dir < SpaceDim; dir++){
-	      FORT_GET_MAXNORM(CHF_REAL(max_vel),
-			       CHF_CONST_FRA1(velo_fab, dir),
-			       CHF_BOX(box));
-	    }
-	  }
-	}
-#else // This is the correct way of computing this (I think)
-	const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
-	FORT_ADVECTIVE_CFL_DT(CHF_CONST_FRA(velo_fab),
+	FORT_ADVECTION_DT(CHF_CONST_FRA(velo_fab),
 			      CHF_CONST_REAL(dx),
 			      CHF_BOX(box),
 			      CHF_REAL(min_dt));
@@ -1882,17 +1826,12 @@ Real cdr_solver::compute_cfl_dt(){
 	
 	  Real vel = 0.0;
 	  for (int dir = 0; dir < SpaceDim; dir++){
-	    vel += Abs(velo(vof, dir));
+	    vel += std::abs(velo(vof, dir));
 	  }
 	  const Real thisdt = dx/vel;
 	  min_dt = Min(thisdt, min_dt);
 	}
-#endif
       }
-
-    
-      max_vel = Max(max_vel, SAFETY);
-      min_dt  = Min(min_dt, dx/max_vel);
     }
 
   
@@ -1906,33 +1845,77 @@ Real cdr_solver::compute_cfl_dt(){
 #endif
   }
 
-
   return min_dt;
-#endif
 }
 
-Real cdr_solver::compute_diffusive_dt(){
-  CH_TIME("cdr_solver::compute_diffusive_dt");
+Real cdr_solver::compute_advection_dt(){
+  CH_TIME("cdr_solver::compute_advection_dt");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_diffusive_dt" << endl;
+    pout() << m_name + "::compute_advection_dt" << endl;
   }
 
-  Real min_dt = 1.E99;
+  Real min_dt = std::numeric_limits<Real>::max();
 
-  if(m_diffusive){
-    const int comp  = 0;
-    const int ncomp = 1;
-    const int finest_level = m_amr->get_finest_level();
-    const Interval interv(comp, comp);
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
+  if(m_mobile){
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
       const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
       const Real dx                = m_amr->get_dx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const EBCellFAB& velo     = (*m_velo_cell[lvl])[dit()];
-	const Box box             = dbl.get(dit());
+	const EBCellFAB& velo  = (*m_velo_cell[lvl])[dit()];
+	const Box box          = dbl.get(dit());
+
+	const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
+	FORT_ADVECTION_DT(CHF_CONST_FRA(velo_fab),
+			  CHF_CONST_REAL(dx),
+			  CHF_BOX(box),
+			  CHF_REAL(min_dt));
+
+	VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
+	for (vofit.reset(); vofit.ok(); ++vofit){
+	  const VolIndex& vof = vofit();
+	
+	  Real vel = 0.0;
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    vel += Abs(velo(vof, dir));
+	  }
+
+	  min_dt = std::min(min_dt, dx/vel);
+	}
+      }
+    }
+  
+#ifdef CH_MPI
+    Real tmp = min_dt;
+    int result = MPI_Allreduce(&tmp, &min_dt, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+#endif
+  }
+
+
+  return min_dt;
+}
+
+Real cdr_solver::compute_diffusion_dt(){
+  CH_TIME("cdr_solver::compute_diffusion_dt");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_diffusion_dt" << endl;
+  }
+
+  Real min_dt = std::numeric_limits<Real>::max();
+
+  if(m_diffusive){
+    const int comp  = 0;
+
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+      const Real dx                = m_amr->get_dx()[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const Box box                   = dbl.get(dit());
+	const EBISBox& ebisbox          = ebisl[dit()];
+	const BaseIVFAB<Real>& diffcoEB = (*m_diffco_eb[lvl])[dit()];
 
 	// Regular faces
 	for (int dir = 0; dir < SpaceDim; dir++){
@@ -1948,15 +1931,29 @@ Real cdr_solver::compute_diffusive_dt(){
 			    CHF_REAL(min_dt));
 	}
 
-	// Irregular faces
-	const BaseIVFAB<Real>& diffco = (*m_diffco_eb[lvl])[dit()];
-
+	// Irregular faces. 
 	VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex vof = vofit();
-	  const Real thisdt = dx*dx/(2*SpaceDim*diffco(vof, comp));
 
-	  min_dt = Min(min_dt, thisdt);
+	  Real irregD  = diffcoEB(vof, comp);
+	  
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    const EBFaceFAB& diffcoFace = (*m_diffco[lvl])[dit()][dir];
+	    for (SideIterator sit; sit.ok(); ++sit){
+	      const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit());
+
+	      for (int iface = 0; iface < faces.size(); iface++){
+		const FaceIndex& face = faces[iface];
+		
+		irregD = std::max(irregD, diffcoFace(face, comp));
+	      }
+	    }
+	  }
+	  
+	  const Real irregDt = dx*dx/(2*SpaceDim*irregD);
+
+	  min_dt = Min(min_dt, irregDt);
 	}
       }
     }
@@ -1970,6 +1967,86 @@ Real cdr_solver::compute_diffusive_dt(){
     min_dt = tmp;
 #endif
   }
+
+  return min_dt;
+}
+
+Real cdr_solver::compute_advection_diffusion_dt(){
+  CH_TIME("cdr_solver::compute_advection_diffusion_dt");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_advection_diffusion_dt" << endl;
+  }
+
+  Real min_dt = std::numeric_limits<Real>::max();
+
+  if(m_mobile && !m_diffusive){
+    min_dt = this->compute_advection_dt();
+  }
+  else if(!m_mobile && m_diffusive){
+    min_dt = this->compute_diffusion_dt();
+  }
+  else if(m_mobile && m_diffusive){
+    const int comp  = 0;
+
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+      const Real dx                = m_amr->get_dx()[lvl];
+
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const Box box                   = dbl.get(dit());
+	const EBISBox& ebisbox          = ebisl[dit()];
+	const EBCellFAB& cellVel        = (*m_velo_cell[lvl])[dit()];
+	const BaseIVFAB<Real>& diffcoEB = (*m_diffco_eb[lvl])[dit()];
+
+
+	// Regular cells
+
+
+	// Irregular cells
+	VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
+	for (vofit.reset(); vofit.ok(); ++vofit){
+	  const VolIndex vof = vofit();
+
+	  // Compute advective velocity. 
+	  Real vel = 0.0;
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    vel += std::abs(cellVel(vof, dir));
+	  }
+
+	  // Find largest diffusion coefficient. 
+	  Real irregD  = diffcoEB(vof, comp);
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    const EBFaceFAB& diffcoFace = (*m_diffco[lvl])[dit()][dir];
+	    for (SideIterator sit; sit.ok(); ++sit){
+	      const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit());
+
+	      for (int iface = 0; iface < faces.size(); iface++){
+		const FaceIndex& face = faces[iface];
+		
+		irregD = std::max(irregD, diffcoFace(face, comp));
+	      }
+	    }
+	  }
+
+	  const Real dtA  = vel/dx;
+	  const Real dtD  = dx*dx/(2*SpaceDim*irregD);
+	  const Real dtAD = 1.0/(1./dtA + 1./dtD);
+
+	  min_dt = std::min(min_dt, dtAD);
+	}
+      }
+    }
+    
+    MayDay::Abort("cdr_solver::compute_advection_diffusion_dt - not implemented");
+  
+#ifdef CH_MPI
+    Real tmp = min_dt;
+    int result = MPI_Allreduce(&tmp, &min_dt, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+#endif
+  }
+
 
   return min_dt;
 }
