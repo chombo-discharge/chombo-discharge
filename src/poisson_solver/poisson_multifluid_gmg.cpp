@@ -343,7 +343,17 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   }
   else{ // Solution is already converged
     converged = true;
+  }
 
+  // Solver hang. Try again. 
+  if(!converged){
+    data_ops::set_value(a_state, 0.0);
+    m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
+
+    const int status = m_gmg_solver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
+    if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
+      converged = true;
+    }
   }
 
   const Real t4 = MPI_Wtime();
