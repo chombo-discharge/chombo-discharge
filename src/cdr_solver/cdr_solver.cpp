@@ -1436,8 +1436,6 @@ void cdr_solver::set_diffco(const Real a_diffco){
 
   m_amr->average_down(m_diffco,    m_realm, m_phase);
   m_amr->average_down(m_diffco_eb, m_realm, m_phase);
-
-  pout() << "done" << endl;
 }
 
 void cdr_solver::set_ebflux(const EBAMRIVData& a_ebflux){
@@ -1996,20 +1994,45 @@ Real cdr_solver::compute_advection_diffusion_dt(){
   else if(m_mobile && m_diffusive){
     const int comp  = 0;
 
+    data_ops::set_value(m_scratch, 0.0);
+
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
       const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
       const Real dx                = m_amr->get_dx()[lvl];
 
-
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const Box box                   = dbl.get(dit());
+	EBCellFAB& dt                   = (*m_scratch[lvl])[dit()];
 	const EBISBox& ebisbox          = ebisl[dit()];
-	const EBCellFAB& cellVel        = (*m_velo_cell[lvl])[dit()];
+	const EBCellFAB& velo           = (*m_velo_cell[lvl])[dit()];
 	const BaseIVFAB<Real>& diffcoEB = (*m_diffco_eb[lvl])[dit()];
+	const Box box                   = dbl.get(dit());
 
 
-	// Regular cells
+	// Regular cells. First compute dt = 2*D*d/(dx*dx)
+	BaseFab<Real>& dt_fab         = dt.getSingleValuedFAB();
+
+	// Regular faces
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  const EBFaceFAB& diffco         = (*m_diffco[lvl])[dit()][dir];
+	  const BaseFab<Real>& diffco_fab = diffco.getSingleValuedFAB();
+	  FORT_ADVECTION_DIFFUSION_DT_ONE(CHF_FRA1(dt_fab, comp),
+	  				  CHF_CONST_FRA1(diffco_fab, comp),
+	  				  CHF_CONST_REAL(dx),
+	  				  CHF_CONST_INT(dir),
+	  				  CHF_BOX(box));
+	}
+
+	// Add the advective contribution so that dt_fab = (|Vx|+|Vy|+|Vz|)/dx + 2*d*D/(dx*dx)
+	const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
+	FORT_ADVECTION_DIFFUSION_DT_TWO(CHF_FRA1(dt_fab, comp),  
+					CHF_CONST_FRA(velo_fab),
+					CHF_CONST_REAL(dx),
+					CHF_BOX(box));
+
+	// Invert the result. 
+	FORT_ADVECTION_DIFFUSION_DT_INVERT(CHF_FRA1(dt_fab, comp),  
+					   CHF_BOX(box));
 
 
 	// Irregular cells
@@ -2020,7 +2043,7 @@ Real cdr_solver::compute_advection_diffusion_dt(){
 	  // Compute advective velocity. 
 	  Real vel = 0.0;
 	  for (int dir = 0; dir < SpaceDim; dir++){
-	    vel += std::abs(cellVel(vof, dir));
+	    vel += std::abs(velo(vof, dir));
 	  }
 
 	  // Find largest diffusion coefficient. 
@@ -2038,21 +2061,18 @@ Real cdr_solver::compute_advection_diffusion_dt(){
 	    }
 	  }
 
-	  const Real dtA  = vel/dx;
-	  const Real dtD  = dx*dx/(2*SpaceDim*irregD);
-	  const Real dtAD = 1.0/(1./dtA + 1./dtD);
+	  const Real idtA  = vel/dx;
+	  const Real idtD  = (2*SpaceDim*irregD)/(dx*dx);
 
-	  min_dt = std::min(min_dt, dtAD);
+	  dt(vof, comp) = 1.0/(idtA + idtD);
 	}
       }
     }
+
+    Real maxVal = std::numeric_limits<Real>::max();
     
-    MayDay::Abort("cdr_solver::compute_advection_diffusion_dt - not implemented");
-  
-#ifdef CH_MPI
-    Real tmp = min_dt;
-    int result = MPI_Allreduce(&tmp, &min_dt, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-#endif
+    data_ops::set_covered_value(m_scratch, comp, maxVal);  // Covered cells are bogus. 
+    data_ops::get_max_min(maxVal, min_dt, m_scratch, comp);
   }
 
 
