@@ -158,17 +158,26 @@
       end
 
       subroutine diffusion_dt(
+     &     chf_fra1[min_dt],      
      &     chf_const_fra1[diffco],
      &     chf_const_real[dx],
-     &     chf_box[facebox],
-     &     chf_real[min_dt])
+     &     chf_const_int[facedir],
+     &     chf_box[cellbox])
 
-      real_t dt
+      real_t D, Dlo, Dhi
       integer chf_ddecl[i; j; k]
 
-      chf_multido[facebox; i;j; k]
-         dt = dx*dx/(2*CH_SPACEDIM*diffco(chf_ix[i;j;k]))
-         min_dt = min(dt, min_dt);
+      integer chf_ddecl[ioff; joff; koff]
+      chf_dterm[ioff = chf_id(0,facedir);
+                joff = chf_id(1,facedir);
+                koff = chf_id(2,facedir)]
+      		
+      chf_multido[cellbox; i;j; k]
+         Dlo = diffco(chf_ix[i;      j;      k])
+         Dhi = diffco(chf_ix[i+ioff; j+joff; k+koff])      	 
+         D   = max(Dlo, Dhi)
+	 
+         min_dt(chf_ix[i;j;k]) = dx*dx/(2*CH_SPACEDIM*D)
       chf_enddo	 
 
       return

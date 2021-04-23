@@ -1919,28 +1919,30 @@ Real cdr_solver::compute_diffusion_dt(){
   if(m_diffusive){
     const int comp  = 0;
 
+    data_ops::set_value(m_scratch, min_dt);
+
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
       const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
       const Real dx                = m_amr->get_dx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	EBCellFAB& dt                   = (*m_scratch[lvl])[dit()];
 	const Box box                   = dbl.get(dit());
 	const EBISBox& ebisbox          = ebisl[dit()];
 	const BaseIVFAB<Real>& diffcoEB = (*m_diffco_eb[lvl])[dit()];
 
 	// Regular faces
 	for (int dir = 0; dir < SpaceDim; dir++){
-	  const EBFaceFAB& diffco = (*m_diffco[lvl])[dit()][dir];
-
+	  BaseFab<Real>& dt_fab           = dt.getSingleValuedFAB();
+	  const EBFaceFAB& diffco         = (*m_diffco[lvl])[dit()][dir];
 	  const BaseFab<Real>& diffco_fab = diffco.getSingleValuedFAB();
-	  Box facebox = box;
-	  facebox.surroundingNodes(dir);
-
-	  FORT_DIFFUSION_DT(CHF_CONST_FRA1(diffco_fab, comp),
+	  
+	  FORT_DIFFUSION_DT(CHF_FRA1(dt_fab, comp),
+			    CHF_CONST_FRA1(diffco_fab, comp),
 			    CHF_CONST_REAL(dx),
-			    CHF_BOX(facebox),
-			    CHF_REAL(min_dt));
+			    CHF_CONST_INT(dir),
+			    CHF_BOX(box));
 	}
 
 	// Irregular faces. 
@@ -1962,22 +1964,16 @@ Real cdr_solver::compute_diffusion_dt(){
 	      }
 	    }
 	  }
-	  
-	  const Real irregDt = dx*dx/(2*SpaceDim*irregD);
 
-	  min_dt = Min(min_dt, irregDt);
+	  dt(vof, comp) = dx*dx/(2.0*SpaceDim*irregD);
 	}
       }
+
+      Real maxVal = std::numeric_limits<Real>::max();
+    
+      data_ops::set_covered_value(m_scratch, comp, maxVal);
+      data_ops::get_max_min(maxVal, min_dt, m_scratch, comp);
     }
-  
-#ifdef CH_MPI
-    Real tmp = 1.;
-    int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    if(result != MPI_SUCCESS){
-      MayDay::Error("cdr_solver::compute_diffusion_dt() - communication error on norm");
-    }
-    min_dt = tmp;
-#endif
   }
 
   return min_dt;

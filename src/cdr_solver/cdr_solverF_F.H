@@ -196,26 +196,29 @@ inline void FORTRAN_NAME(inlineADVECTION_DT, inlineADVECTION_DT)(
 // Prototype for Fortran procedure diffusion_dt ...
 //
 void FORTRAN_NAME( DIFFUSION_DT ,diffusion_dt )(
-      CHFp_CONST_FRA1(diffco)
+      CHFp_FRA1(min_dt)
+      ,CHFp_CONST_FRA1(diffco)
       ,CHFp_CONST_REAL(dx)
-      ,CHFp_BOX(facebox)
-      ,CHFp_REAL(min_dt) );
+      ,CHFp_CONST_INT(facedir)
+      ,CHFp_BOX(cellbox) );
 
 #define FORT_DIFFUSION_DT FORTRAN_NAME( inlineDIFFUSION_DT, inlineDIFFUSION_DT)
 #define FORTNT_DIFFUSION_DT FORTRAN_NAME( DIFFUSION_DT, diffusion_dt)
 
 inline void FORTRAN_NAME(inlineDIFFUSION_DT, inlineDIFFUSION_DT)(
-      CHFp_CONST_FRA1(diffco)
+      CHFp_FRA1(min_dt)
+      ,CHFp_CONST_FRA1(diffco)
       ,CHFp_CONST_REAL(dx)
-      ,CHFp_BOX(facebox)
-      ,CHFp_REAL(min_dt) )
+      ,CHFp_CONST_INT(facedir)
+      ,CHFp_BOX(cellbox) )
 {
  CH_TIMELEAF("FORT_DIFFUSION_DT");
  FORTRAN_NAME( DIFFUSION_DT ,diffusion_dt )(
-      CHFt_CONST_FRA1(diffco)
+      CHFt_FRA1(min_dt)
+      ,CHFt_CONST_FRA1(diffco)
       ,CHFt_CONST_REAL(dx)
-      ,CHFt_BOX(facebox)
-      ,CHFt_REAL(min_dt) );
+      ,CHFt_CONST_INT(facedir)
+      ,CHFt_BOX(cellbox) );
 }
 #endif  // GUARDDIFFUSION_DT 
 
