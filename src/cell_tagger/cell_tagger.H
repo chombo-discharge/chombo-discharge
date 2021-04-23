@@ -42,6 +42,11 @@ public:
   virtual void parse_options() = 0;
 
   /*!
+    @brief Parse class options
+  */
+  virtual void parse_runtime_options();
+
+  /*!
     @brief Tag cells
   */
   virtual bool tag_cells(EBAMRTags& a_tags) = 0;

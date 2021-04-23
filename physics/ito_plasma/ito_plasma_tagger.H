@@ -64,6 +64,11 @@ namespace physics {
       virtual void parse_options() = 0;
 
       /*!
+	@brief Parse class options
+      */
+      virtual void parse_runtime_options() = 0;
+
+      /*!
 	@brief
       */
       virtual int get_num_plot_vars();

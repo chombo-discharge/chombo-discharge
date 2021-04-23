@@ -41,6 +41,19 @@ void ito_plasma_streamer_tagger::parse_options(){
   pp.get("max_coarsen_lvl",   m_max_coarsen_level);
 }
 
+void ito_plasma_streamer_tagger::parse_runtime_options(){
+  parse_verbosity();
+  parse_boxes();
+  parse_buffer();
+
+  ParmParse pp(m_name.c_str());
+  pp.get("coarsen_curvature", m_coar_curv);
+  pp.get("refine_curvature",  m_refi_curv);
+  pp.get("refine_alpha",      m_refi_alpha);
+  pp.get("coarsen_alpha",     m_coar_alpha);
+  pp.get("max_coarsen_lvl",   m_max_coarsen_level);
+}
+
 
 Vector<Real> ito_plasma_streamer_tagger::tracer(const RealVect         a_pos,
 						const Real             a_time,

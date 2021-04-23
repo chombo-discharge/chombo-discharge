@@ -506,7 +506,7 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
   }
     
   a_dt = a_dt*m_max_cells_hop;
-  a_timecode = time_code::cfl;
+  a_timecode = time_code::advection;
 
 
   // Physics-based restriction
