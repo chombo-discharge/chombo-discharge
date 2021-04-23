@@ -15,32 +15,18 @@
 /*!
   @brief Time code for output
 */
-#if 0 // Orignal code
-namespace time_code {
-  enum which_code {
-    cfl             = 0,
-    diffusion       = 1,
-    source          = 2,
-    relaxation_time = 3,
-    restricted      = 4,
-    hardcap         = 5,
-    error           = 6,
-    adv_diffusion   = 7,
-  };
-};
-#else
 enum class time_code {
-  cfl,
+  advection,
   diffusion,
+  advection_diffusion,  
   source,
   relaxation_time,
   restricted,
   hardcap,
   error,
-  adv_diffusion,
+
   physics
 };
-#endif
 
 /*!
   @brief Abstract class for performing time stepping

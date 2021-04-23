@@ -180,31 +180,20 @@ void advection_diffusion_stepper::write_plot_data(EBAMRCellData&       a_output,
 }
 
 void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
-  Real cfl_dt;
-  Real diff_dt;
-
-  a_dt = 1.E99;
-  
-  // CFL on advection
-  if(m_solver->is_mobile()){
-    cfl_dt = m_solver->compute_cfl_dt();
-    a_timecode = time_code::cfl;
-
-    a_dt = m_cfl*cfl_dt;
-  }
+  if(m_integrator == 0){      // Explicit diffusion. 
+    const Real dt = m_solver->compute_advection_diffusion_dt();
     
-  // CFL on diffusion, if explicit diffusion
-  if(m_solver->is_diffusive() && m_integrator == 0){
-    diff_dt = m_solver->compute_diffusion_dt();
+    a_dt       = m_cfl*dt;
+    a_timecode = time_code::advection_diffusion;
+  }
+  else if(m_integrator == 1){ // Implicit diffusion
+    const Real dt = m_solver->compute_advection_dt();
 
-    if(m_solver->is_mobile()){
-      a_dt = m_cfl*1./(1./cfl_dt + 1./diff_dt);
-      a_timecode = time_code::adv_diffusion;
-    }
-    else{
-      a_dt = m_cfl*diff_dt;
-      a_timecode = time_code::diffusion;
-    }
+    a_dt       = m_cfl*dt;
+    a_timecode = time_code::advection;
+  }
+  else{
+    MayDay::Abort("advection_diffusion_stepper::compute_dt - logic bust");
   }
 }
 
