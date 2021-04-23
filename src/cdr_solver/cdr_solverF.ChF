@@ -67,35 +67,6 @@
       return
       end
 
-      subroutine advective_cfl(
-     &     chf_const_fra[velo],
-     &     chf_const_real[dx],
-     &     chf_box[dcalc],
-     &     chf_real[min_dt])
-
-      real_t vel, dt
-      integer chf_ddecl[i; j; k]
-
-#if CH_SPACEDIM==3
-      do k = CHF_LBOUND[dcalc;2], CHF_UBOUND[dcalc;2]
-#endif
-         do j = CHF_LBOUND[dcalc;1], CHF_UBOUND[dcalc;1]
-            do i = CHF_LBOUND[dcalc;0], CHF_UBOUND[dcalc;0]
-     	       vel = CHF_DTERM[
-     &                velo(chf_ix[i;j;k],0)*velo(chf_ix[i;j;k],0);
-     &              + velo(chf_ix[i;j;k],1)*velo(chf_ix[i;j;k],1);
-     &              + velo(chf_ix[i;j;k],2)*velo(chf_ix[i;j;k],2)]
-     	       dt = dx/sqrt(vel)
-     	       min_dt = min(dt, min_dt)
-            enddo
-         enddo
-#if CH_SPACEDIM==3
-      enddo
-#endif
-
-      return
-      end
-
 
       subroutine source_dt(
      &     chf_real[min_dt],
@@ -158,13 +129,13 @@
       return
       end
 
-      subroutine advective_cfl_dt(
+      subroutine advection_dt(
+     &     chf_fra1[min_dt],      
      &     chf_const_fra[velo],
      &     chf_const_real[dx],
-     &     chf_box[dcalc],
-     &     chf_real[min_dt])
+     &     chf_box[dcalc])
 
-      real_t vel, dt
+      real_t vel
       integer chf_ddecl[i; j; k]
 
 #if CH_SPACEDIM==3
@@ -176,8 +147,7 @@
      &                abs(velo(chf_ix[i;j;k],0));
      &              + abs(velo(chf_ix[i;j;k],1));
      &              + abs(velo(chf_ix[i;j;k],2))]
-     	       dt = dx/vel
-     	       min_dt = min(dt, min_dt)
+     	       min_dt(chf_ix[i;j;k]) = dx/vel
             enddo
          enddo
 #if CH_SPACEDIM==3
@@ -187,19 +157,105 @@
       return
       end
 
-      subroutine diffusive_dt(
+      subroutine diffusion_dt(
+     &     chf_fra1[min_dt],      
      &     chf_const_fra1[diffco],
      &     chf_const_real[dx],
-     &     chf_box[facebox],
-     &     chf_real[min_dt])
+     &     chf_const_int[facedir],
+     &     chf_box[cellbox])
 
-      real_t dt
+      real_t D, Dlo, Dhi, dt
       integer chf_ddecl[i; j; k]
 
-      chf_multido[facebox; i;j; k]
-         dt = dx*dx/(2*CH_SPACEDIM*diffco(chf_ix[i;j;k]))
-         min_dt = min(dt, min_dt);
+      integer chf_ddecl[ioff; joff; koff]
+      chf_dterm[ioff = chf_id(0,facedir);
+                joff = chf_id(1,facedir);
+                koff = chf_id(2,facedir)]
+      		
+      chf_multido[cellbox; i;j; k]
+         Dlo = diffco(chf_ix[i;      j;      k])
+         Dhi = diffco(chf_ix[i+ioff; j+joff; k+koff])      	 
+         D   = max(Dlo, Dhi)
+         dt  = dx*dx/(2*CH_SPACEDIM*D)
+	 
+         min_dt(chf_ix[i;j;k]) = min(min_dt(chf_ix[i;j;k]), dt)
       chf_enddo	 
+
+      return
+      end
+
+      subroutine advection_diffusion_dt_one(
+     &     chf_fra1[invDt],      
+     &     chf_const_fra1[diffco],
+     &     chf_const_real[dx],
+     &     chf_const_int[facedir],
+     &     chf_box[cellbox])
+
+      real_t D, Dlo, Dhi, idt
+      integer chf_ddecl[i; j; k]
+
+      integer chf_ddecl[ioff; joff; koff]
+      chf_dterm[ioff = chf_id(0,facedir);
+                joff = chf_id(1,facedir);
+                koff = chf_id(2,facedir)]
+      		
+      chf_multido[cellbox; i;j; k]
+         Dlo = diffco(chf_ix[i;      j;      k])
+         Dhi = diffco(chf_ix[i+ioff; j+joff; k+koff])      	 
+         D   = max(Dlo, Dhi)
+         idt = (2*CH_SPACEDIM*D)/dx*dx
+	 
+         invDt(chf_ix[i;j;k]) = max(invDt(chf_ix[i;j;k]), idt)
+      chf_enddo	 
+
+      return
+      end
+
+      subroutine advection_diffusion_dt_two(
+     &     chf_fra1[invDt],      
+     &     chf_const_fra[velo],
+     &     chf_const_real[dx],
+     &     chf_box[dcalc])
+
+      real_t vel
+      integer chf_ddecl[i; j; k]
+
+#if CH_SPACEDIM==3
+      do k = CHF_LBOUND[dcalc;2], CHF_UBOUND[dcalc;2]
+#endif
+         do j = CHF_LBOUND[dcalc;1], CHF_UBOUND[dcalc;1]
+            do i = CHF_LBOUND[dcalc;0], CHF_UBOUND[dcalc;0]
+     	       vel = CHF_DTERM[
+     &                abs(velo(chf_ix[i;j;k],0));
+     &              + abs(velo(chf_ix[i;j;k],1));
+     &              + abs(velo(chf_ix[i;j;k],2))]
+     	       invDt(chf_ix[i;j;k]) = invDt(chf_ix[i;j;k]) + vel/dx
+            enddo
+         enddo
+#if CH_SPACEDIM==3
+      enddo
+#endif
+
+      return
+      end
+
+      subroutine advection_diffusion_dt_invert(
+     &     chf_fra1[invDt],      
+     &     chf_box[dcalc])
+
+      integer chf_ddecl[i; j; k]
+
+#if CH_SPACEDIM==3
+      do k = CHF_LBOUND[dcalc;2], CHF_UBOUND[dcalc;2]
+#endif
+         do j = CHF_LBOUND[dcalc;1], CHF_UBOUND[dcalc;1]
+            do i = CHF_LBOUND[dcalc;0], CHF_UBOUND[dcalc;0]
+     	       invDt(chf_ix[i;j;k]) = 1.0/invDt(chf_ix[i;j;k])
+            enddo
+         enddo
+#if CH_SPACEDIM==3
+      enddo
+#endif
 
       return
       end
@@ -267,4 +323,5 @@
          divD(chf_ix[i;j;k]) = dco(chf_ix[i;j;k])*(hival-loval)*idx
       chf_enddo
       return
-      end      
+      end
+

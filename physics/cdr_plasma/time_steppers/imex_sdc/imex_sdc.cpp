@@ -1208,7 +1208,7 @@ void imex_sdc::compute_dt(Real& a_dt, time_code& a_timecode){
     Nref = Nref*m_amr->get_ref_rat()[lvl];
   }
   const Real max_gl_dist = imex_sdc::get_max_node_distance();
-  m_dt_cfl = m_cdr->compute_cfl_dt();
+  m_dt_cfl = m_cdr->compute_advection_dt();
 
   Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
   
@@ -1216,7 +1216,7 @@ void imex_sdc::compute_dt(Real& a_dt, time_code& a_timecode){
   if(!m_adaptive_dt){
     if(dt_cfl < dt){
       dt = m_cfl*dt_cfl;
-      a_timecode = time_code::cfl;
+      a_timecode = time_code::advection;
     }
   }
   else{

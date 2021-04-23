@@ -373,17 +373,17 @@ void cdr_layout<T>::write_plot_file(){
 }
 
 template <class T>
-Real cdr_layout<T>::compute_cfl_dt(){
-  CH_TIME("cdr_layout<T>::compute_cfl_dt");
+Real cdr_layout<T>::compute_advection_dt(){
+  CH_TIME("cdr_layout<T>::compute_advection_dt");
   if(m_verbosity > 5){
-    pout() << "cdr_layout<T>::compute_cfl_dt" << endl;
+    pout() << "cdr_layout<T>::compute_advection_dt" << endl;
   }
 
   Real dt = 1.E99;
   
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    const Real this_dt = solver->compute_cfl_dt();
+    const Real this_dt = solver->compute_advection_dt();
 
     dt = Min(dt, this_dt);
   }
@@ -392,17 +392,36 @@ Real cdr_layout<T>::compute_cfl_dt(){
 }
 
 template <class T>
-Real cdr_layout<T>::compute_diffusive_dt(){
-  CH_TIME("cdr_layout<T>::compute_diffusive_dt");
+Real cdr_layout<T>::compute_diffusion_dt(){
+  CH_TIME("cdr_layout<T>::compute_diffusion_dt");
   if(m_verbosity > 5){
-    pout() << "cdr_layout<T>::compute_diffusive_dt" << endl;
+    pout() << "cdr_layout<T>::compute_diffusion_dt" << endl;
   }
 
   Real dt = 1.E99;
   
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    const Real this_dt = solver->compute_diffusive_dt();
+    const Real this_dt = solver->compute_diffusion_dt();
+
+    dt = Min(dt, this_dt);
+  }
+
+  return dt;
+}
+
+template <class T>
+Real cdr_layout<T>::compute_advection_diffusion_dt(){
+  CH_TIME("cdr_layout<T>::compute_advection_diffusion_dt");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout<T>::compute_advection_diffusion_dt" << endl;
+  }
+
+  Real dt = 1.E99;
+  
+  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    const Real this_dt = solver->compute_advection_diffusion_dt();
 
     dt = Min(dt, this_dt);
   }

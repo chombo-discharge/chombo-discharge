@@ -76,34 +76,6 @@ inline void FORTRAN_NAME(inlineCONSDIV_REG, inlineCONSDIV_REG)(
 }
 #endif  // GUARDCONSDIV_REG 
 
-#ifndef GUARDADVECTIVE_CFL 
-#define GUARDADVECTIVE_CFL 
-// Prototype for Fortran procedure advective_cfl ...
-//
-void FORTRAN_NAME( ADVECTIVE_CFL ,advective_cfl )(
-      CHFp_CONST_FRA(velo)
-      ,CHFp_CONST_REAL(dx)
-      ,CHFp_BOX(dcalc)
-      ,CHFp_REAL(min_dt) );
-
-#define FORT_ADVECTIVE_CFL FORTRAN_NAME( inlineADVECTIVE_CFL, inlineADVECTIVE_CFL)
-#define FORTNT_ADVECTIVE_CFL FORTRAN_NAME( ADVECTIVE_CFL, advective_cfl)
-
-inline void FORTRAN_NAME(inlineADVECTIVE_CFL, inlineADVECTIVE_CFL)(
-      CHFp_CONST_FRA(velo)
-      ,CHFp_CONST_REAL(dx)
-      ,CHFp_BOX(dcalc)
-      ,CHFp_REAL(min_dt) )
-{
- CH_TIMELEAF("FORT_ADVECTIVE_CFL");
- FORTRAN_NAME( ADVECTIVE_CFL ,advective_cfl )(
-      CHFt_CONST_FRA(velo)
-      ,CHFt_CONST_REAL(dx)
-      ,CHFt_BOX(dcalc)
-      ,CHFt_REAL(min_dt) );
-}
-#endif  // GUARDADVECTIVE_CFL 
-
 #ifndef GUARDSOURCE_DT 
 #define GUARDSOURCE_DT 
 // Prototype for Fortran procedure source_dt ...
@@ -191,61 +163,145 @@ inline void FORTRAN_NAME(inlineGET_MAXNORM, inlineGET_MAXNORM)(
 }
 #endif  // GUARDGET_MAXNORM 
 
-#ifndef GUARDADVECTIVE_CFL_DT 
-#define GUARDADVECTIVE_CFL_DT 
-// Prototype for Fortran procedure advective_cfl_dt ...
+#ifndef GUARDADVECTION_DT 
+#define GUARDADVECTION_DT 
+// Prototype for Fortran procedure advection_dt ...
 //
-void FORTRAN_NAME( ADVECTIVE_CFL_DT ,advective_cfl_dt )(
-      CHFp_CONST_FRA(velo)
+void FORTRAN_NAME( ADVECTION_DT ,advection_dt )(
+      CHFp_FRA1(min_dt)
+      ,CHFp_CONST_FRA(velo)
       ,CHFp_CONST_REAL(dx)
-      ,CHFp_BOX(dcalc)
-      ,CHFp_REAL(min_dt) );
+      ,CHFp_BOX(dcalc) );
 
-#define FORT_ADVECTIVE_CFL_DT FORTRAN_NAME( inlineADVECTIVE_CFL_DT, inlineADVECTIVE_CFL_DT)
-#define FORTNT_ADVECTIVE_CFL_DT FORTRAN_NAME( ADVECTIVE_CFL_DT, advective_cfl_dt)
+#define FORT_ADVECTION_DT FORTRAN_NAME( inlineADVECTION_DT, inlineADVECTION_DT)
+#define FORTNT_ADVECTION_DT FORTRAN_NAME( ADVECTION_DT, advection_dt)
 
-inline void FORTRAN_NAME(inlineADVECTIVE_CFL_DT, inlineADVECTIVE_CFL_DT)(
-      CHFp_CONST_FRA(velo)
+inline void FORTRAN_NAME(inlineADVECTION_DT, inlineADVECTION_DT)(
+      CHFp_FRA1(min_dt)
+      ,CHFp_CONST_FRA(velo)
       ,CHFp_CONST_REAL(dx)
-      ,CHFp_BOX(dcalc)
-      ,CHFp_REAL(min_dt) )
+      ,CHFp_BOX(dcalc) )
 {
- CH_TIMELEAF("FORT_ADVECTIVE_CFL_DT");
- FORTRAN_NAME( ADVECTIVE_CFL_DT ,advective_cfl_dt )(
-      CHFt_CONST_FRA(velo)
+ CH_TIMELEAF("FORT_ADVECTION_DT");
+ FORTRAN_NAME( ADVECTION_DT ,advection_dt )(
+      CHFt_FRA1(min_dt)
+      ,CHFt_CONST_FRA(velo)
       ,CHFt_CONST_REAL(dx)
-      ,CHFt_BOX(dcalc)
-      ,CHFt_REAL(min_dt) );
+      ,CHFt_BOX(dcalc) );
 }
-#endif  // GUARDADVECTIVE_CFL_DT 
+#endif  // GUARDADVECTION_DT 
 
-#ifndef GUARDDIFFUSIVE_DT 
-#define GUARDDIFFUSIVE_DT 
-// Prototype for Fortran procedure diffusive_dt ...
+#ifndef GUARDDIFFUSION_DT 
+#define GUARDDIFFUSION_DT 
+// Prototype for Fortran procedure diffusion_dt ...
 //
-void FORTRAN_NAME( DIFFUSIVE_DT ,diffusive_dt )(
-      CHFp_CONST_FRA1(diffco)
+void FORTRAN_NAME( DIFFUSION_DT ,diffusion_dt )(
+      CHFp_FRA1(min_dt)
+      ,CHFp_CONST_FRA1(diffco)
       ,CHFp_CONST_REAL(dx)
-      ,CHFp_BOX(facebox)
-      ,CHFp_REAL(min_dt) );
+      ,CHFp_CONST_INT(facedir)
+      ,CHFp_BOX(cellbox) );
 
-#define FORT_DIFFUSIVE_DT FORTRAN_NAME( inlineDIFFUSIVE_DT, inlineDIFFUSIVE_DT)
-#define FORTNT_DIFFUSIVE_DT FORTRAN_NAME( DIFFUSIVE_DT, diffusive_dt)
+#define FORT_DIFFUSION_DT FORTRAN_NAME( inlineDIFFUSION_DT, inlineDIFFUSION_DT)
+#define FORTNT_DIFFUSION_DT FORTRAN_NAME( DIFFUSION_DT, diffusion_dt)
 
-inline void FORTRAN_NAME(inlineDIFFUSIVE_DT, inlineDIFFUSIVE_DT)(
-      CHFp_CONST_FRA1(diffco)
+inline void FORTRAN_NAME(inlineDIFFUSION_DT, inlineDIFFUSION_DT)(
+      CHFp_FRA1(min_dt)
+      ,CHFp_CONST_FRA1(diffco)
       ,CHFp_CONST_REAL(dx)
-      ,CHFp_BOX(facebox)
-      ,CHFp_REAL(min_dt) )
+      ,CHFp_CONST_INT(facedir)
+      ,CHFp_BOX(cellbox) )
 {
- CH_TIMELEAF("FORT_DIFFUSIVE_DT");
- FORTRAN_NAME( DIFFUSIVE_DT ,diffusive_dt )(
-      CHFt_CONST_FRA1(diffco)
+ CH_TIMELEAF("FORT_DIFFUSION_DT");
+ FORTRAN_NAME( DIFFUSION_DT ,diffusion_dt )(
+      CHFt_FRA1(min_dt)
+      ,CHFt_CONST_FRA1(diffco)
       ,CHFt_CONST_REAL(dx)
-      ,CHFt_BOX(facebox)
-      ,CHFt_REAL(min_dt) );
+      ,CHFt_CONST_INT(facedir)
+      ,CHFt_BOX(cellbox) );
 }
-#endif  // GUARDDIFFUSIVE_DT 
+#endif  // GUARDDIFFUSION_DT 
+
+#ifndef GUARDADVECTION_DIFFUSION_DT_ONE 
+#define GUARDADVECTION_DIFFUSION_DT_ONE 
+// Prototype for Fortran procedure advection_diffusion_dt_one ...
+//
+void FORTRAN_NAME( ADVECTION_DIFFUSION_DT_ONE ,advection_diffusion_dt_one )(
+      CHFp_FRA1(invDt)
+      ,CHFp_CONST_FRA1(diffco)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_CONST_INT(facedir)
+      ,CHFp_BOX(cellbox) );
+
+#define FORT_ADVECTION_DIFFUSION_DT_ONE FORTRAN_NAME( inlineADVECTION_DIFFUSION_DT_ONE, inlineADVECTION_DIFFUSION_DT_ONE)
+#define FORTNT_ADVECTION_DIFFUSION_DT_ONE FORTRAN_NAME( ADVECTION_DIFFUSION_DT_ONE, advection_diffusion_dt_one)
+
+inline void FORTRAN_NAME(inlineADVECTION_DIFFUSION_DT_ONE, inlineADVECTION_DIFFUSION_DT_ONE)(
+      CHFp_FRA1(invDt)
+      ,CHFp_CONST_FRA1(diffco)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_CONST_INT(facedir)
+      ,CHFp_BOX(cellbox) )
+{
+ CH_TIMELEAF("FORT_ADVECTION_DIFFUSION_DT_ONE");
+ FORTRAN_NAME( ADVECTION_DIFFUSION_DT_ONE ,advection_diffusion_dt_one )(
+      CHFt_FRA1(invDt)
+      ,CHFt_CONST_FRA1(diffco)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_CONST_INT(facedir)
+      ,CHFt_BOX(cellbox) );
+}
+#endif  // GUARDADVECTION_DIFFUSION_DT_ONE 
+
+#ifndef GUARDADVECTION_DIFFUSION_DT_TWO 
+#define GUARDADVECTION_DIFFUSION_DT_TWO 
+// Prototype for Fortran procedure advection_diffusion_dt_two ...
+//
+void FORTRAN_NAME( ADVECTION_DIFFUSION_DT_TWO ,advection_diffusion_dt_two )(
+      CHFp_FRA1(invDt)
+      ,CHFp_CONST_FRA(velo)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(dcalc) );
+
+#define FORT_ADVECTION_DIFFUSION_DT_TWO FORTRAN_NAME( inlineADVECTION_DIFFUSION_DT_TWO, inlineADVECTION_DIFFUSION_DT_TWO)
+#define FORTNT_ADVECTION_DIFFUSION_DT_TWO FORTRAN_NAME( ADVECTION_DIFFUSION_DT_TWO, advection_diffusion_dt_two)
+
+inline void FORTRAN_NAME(inlineADVECTION_DIFFUSION_DT_TWO, inlineADVECTION_DIFFUSION_DT_TWO)(
+      CHFp_FRA1(invDt)
+      ,CHFp_CONST_FRA(velo)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(dcalc) )
+{
+ CH_TIMELEAF("FORT_ADVECTION_DIFFUSION_DT_TWO");
+ FORTRAN_NAME( ADVECTION_DIFFUSION_DT_TWO ,advection_diffusion_dt_two )(
+      CHFt_FRA1(invDt)
+      ,CHFt_CONST_FRA(velo)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_BOX(dcalc) );
+}
+#endif  // GUARDADVECTION_DIFFUSION_DT_TWO 
+
+#ifndef GUARDADVECTION_DIFFUSION_DT_INVERT 
+#define GUARDADVECTION_DIFFUSION_DT_INVERT 
+// Prototype for Fortran procedure advection_diffusion_dt_invert ...
+//
+void FORTRAN_NAME( ADVECTION_DIFFUSION_DT_INVERT ,advection_diffusion_dt_invert )(
+      CHFp_FRA1(invDt)
+      ,CHFp_BOX(dcalc) );
+
+#define FORT_ADVECTION_DIFFUSION_DT_INVERT FORTRAN_NAME( inlineADVECTION_DIFFUSION_DT_INVERT, inlineADVECTION_DIFFUSION_DT_INVERT)
+#define FORTNT_ADVECTION_DIFFUSION_DT_INVERT FORTRAN_NAME( ADVECTION_DIFFUSION_DT_INVERT, advection_diffusion_dt_invert)
+
+inline void FORTRAN_NAME(inlineADVECTION_DIFFUSION_DT_INVERT, inlineADVECTION_DIFFUSION_DT_INVERT)(
+      CHFp_FRA1(invDt)
+      ,CHFp_BOX(dcalc) )
+{
+ CH_TIMELEAF("FORT_ADVECTION_DIFFUSION_DT_INVERT");
+ FORTRAN_NAME( ADVECTION_DIFFUSION_DT_INVERT ,advection_diffusion_dt_invert )(
+      CHFt_FRA1(invDt)
+      ,CHFt_BOX(dcalc) );
+}
+#endif  // GUARDADVECTION_DIFFUSION_DT_INVERT 
 
 #ifndef GUARDCONSDIV_BLOCK 
 #define GUARDCONSDIV_BLOCK 

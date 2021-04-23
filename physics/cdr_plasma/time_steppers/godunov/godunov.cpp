@@ -1051,59 +1051,59 @@ void godunov::compute_dt(Real& a_dt, time_code& a_timecode){
     pout() << "godunov::compute_dt" << endl;
   }
 
-  Real dt = 1.E99;
-
-  m_dt_cfl          = m_cdr->compute_cfl_dt();
-  const Real dt_cfl = m_cfl*m_dt_cfl;
-  if(dt_cfl < dt){
-    dt = dt_cfl;
-    a_timecode = time_code::cfl;
+  // Restrict by advection or advection-diffusion. 
+  if(m_whichDiffusion == whichDiffusion::Explicit){
+    m_dt_cfl   = m_cdr->compute_advection_diffusion_dt();
+    
+    a_timecode = time_code::advection_diffusion;
+    a_dt       = m_cfl*m_dt_cfl;
   }
+  else if(m_whichDiffusion == whichDiffusion::Implicit){
+    m_dt_cfl   = m_cdr->compute_advection_dt();
+    a_timecode = time_code::advection;
 
-  // Diffusion step step constraint. If diffusion dt is the shortest scale, 
-  if(m_whichDiffusion == whichDiffusion::Explicit){ // Have to accept time step constraint
-    const Real dt_diffusion = m_cdr->compute_diffusive_dt();
-
-    m_dt_cfl = 1./(1./m_dt_cfl + 1./dt_diffusion);
-    dt = m_cfl*m_dt_cfl;
-    a_timecode = time_code::adv_diffusion;
+    a_dt = m_cfl*m_dt_cfl;
   }
-  else if(m_whichDiffusion == whichDiffusion::Automatic){ // If explicit diffusion dt is the shortest, go implicit.
-    const Real dt_diffusion = m_cdr->compute_diffusive_dt();
-    if(dt_diffusion < dt){ // Use implicit diffusion
+  else if (m_whichDiffusion == whichDiffusion::Automatic){
+    const Real advection_dt = m_cdr->compute_advection_dt();
+    const Real diffusion_dt = m_cdr->compute_diffusion_dt();
+
+    if(diffusion_dt < advection_dt){
       m_implicit_diffusion = true;
+
+      m_dt_cfl   = advection_dt;
+      a_dt       = m_cfl*m_dt_cfl;
+      a_timecode = time_code::advection;
     }
-    else{ // Use explicit diffusion
+    else {
       m_implicit_diffusion = false;
+
+      m_dt_cfl   = m_cdr->compute_advection_diffusion_dt();
+      a_dt       = m_cfl*m_dt_cfl;
+      a_timecode = time_code::advection_diffusion;
     }
+
+    m_dt_cfl = a_dt/m_cfl;
   }
 
+  // Below here we restrict by relaxation time and hardcaps. 
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
-  if(dt_relax < dt){
-    dt = dt_relax;
+  if(dt_relax < a_dt){
+    a_dt = dt_relax;
     a_timecode = time_code::relaxation_time;
   }
 
-  if(dt < m_min_dt){
-    dt = m_min_dt;
+  if(a_dt < m_min_dt){
+    a_dt = m_min_dt;
     a_timecode = time_code::hardcap;
   }
 
-  if(dt > m_max_dt){
-    dt = m_max_dt;
+  if(a_dt > m_max_dt){
+    a_dt = m_max_dt;
     a_timecode = time_code::hardcap;
   }
-
-
 
   m_timecode = a_timecode;
-  a_dt = dt;
-
-#if 0 // debug
-  if(procID() == 0){
-    std::cout << "godunov::compute_dt - step = " << m_step << "\t dt = " << a_dt << std::endl;
-  }
-#endif
 }
 
 void godunov::post_step(){

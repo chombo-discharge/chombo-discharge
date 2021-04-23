@@ -287,7 +287,7 @@ namespace physics {
       /*!
 	@brief Compute the time step and how it was restricted
       */
-      virtual void compute_dt(Real& a_dt, time_code& a_timecode);
+      virtual void compute_dt(Real& a_dt, time_code& a_timecode) = 0;
 
       /*!
 	@brief Compute the cell-centered electric field on both phases

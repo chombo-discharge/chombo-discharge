@@ -181,12 +181,17 @@ public:
   /*!
     @brief Get largest possible time step for advection part
   */
-  virtual Real compute_cfl_dt();
+  virtual Real compute_advection_dt();
 
   /*!
     @brief Get largest possible time step for diffusion part
   */
-  virtual Real compute_diffusive_dt();
+  virtual Real compute_diffusion_dt();
+
+  /*!
+    @brief Get largest possible time step for diffusion part
+  */
+  virtual Real compute_advection_diffusion_dt();
 
   /*!
     @brief Get largest possible time step for source term
