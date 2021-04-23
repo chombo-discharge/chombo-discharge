@@ -2552,52 +2552,6 @@ void cdr_plasma_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, co
   }
 }
 
-void cdr_plasma_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
-  CH_TIME("cdr_plasma_stepper::compute_dt");
-  if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_dt" << endl;
-  }
-
-  Real dt = 1.E99;
-
-  m_dt_cfl          = m_cdr->compute_cfl_dt();
-  const Real dt_cfl = m_cfl*m_dt_cfl;
-  if(dt_cfl < dt){
-    dt = dt_cfl;
-    a_timecode = time_code::cfl;
-  }
-  
-  const Real dt_dif = m_cfl*m_cdr->compute_diffusive_dt();
-  if(dt_dif < dt){
-    dt = dt_dif;
-    a_timecode = time_code::diffusion;
-  }
-
-  const Real dt_relax = m_relax_time*this->compute_relaxation_time();
-  if(dt_relax < dt){
-    dt = dt_relax;
-    a_timecode = time_code::relaxation_time;
-  }
-
-  const Real dt_restrict = this->restrict_dt();
-  if(dt_restrict < dt){
-    dt = dt_restrict;
-    a_timecode = time_code::restricted;
-  }
-
-  if(dt < m_min_dt){
-    dt = m_min_dt;
-    a_timecode = time_code::hardcap;
-  }
-
-  if(dt > m_max_dt){
-    dt = m_max_dt;
-    a_timecode = time_code::hardcap;
-  }
-
-  a_dt = dt;
-}
-
 void cdr_plasma_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
   CH_TIME("cdr_plasma_stepper::compute_E(mfamrcell, mfamrcell)");
   if(m_verbosity > 5){
@@ -4379,29 +4333,29 @@ void cdr_plasma_stepper::print_step_report(){
   const Real cfl_dt = this->get_cfl_dt();
 
   std::string str;
-  if(m_timecode == time_code::cfl){
-    str = " (Restricted by CFL)";
+  if(m_timecode == time_code::advection){
+    str = " (Restricted by advection)";
   }
-  if(m_timecode == time_code::adv_diffusion){
+  else if(m_timecode == time_code::advection_diffusion){
     str = " (Restricted by advection-diffusion)";
-    }
-  if(m_timecode == time_code::error){
+  }
+  else if(m_timecode == time_code::error){
     str = " (Restricted by error)";
   }
-  if(m_timecode == time_code::diffusion){
+  else if(m_timecode == time_code::diffusion){
     str = " (Restricted by diffusion)";
   }
-  if(m_timecode == time_code::source){
+  else if(m_timecode == time_code::source){
     MayDay::Abort("driver::step_report - shouldn't happen, source term has been taken out of the design");
     str = " (Restricted by source term)";
   }
-  if(m_timecode == time_code::relaxation_time){
+  else if(m_timecode == time_code::relaxation_time){
     str = " (Restricted by relaxation time)";
   }
-  if(m_timecode == time_code::restricted){
+  else if(m_timecode == time_code::restricted){
     str = " (Restricted by time stepper)";
   }
-  if(m_timecode == time_code::hardcap){
+  else if(m_timecode == time_code::hardcap){
     str = " (Restricted by a hardcap)";
   }
   pout() << "                                   mode  = " << str << endl
