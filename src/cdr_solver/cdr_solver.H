@@ -334,11 +334,6 @@ public:
   virtual int get_num_plotvars() const;
 
   /*!
-    @brief Compute the largest possible advection time step (for explicit methods)
-  */
-  virtual Real compute_cfl_dt();
-
-  /*!
     @brief Compute the largest possible diffusive time step (for explicit methods)
   */
   virtual Real compute_advection_dt();

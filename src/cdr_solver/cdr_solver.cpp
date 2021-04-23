@@ -1792,64 +1792,6 @@ void cdr_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   read<EBCellFAB>(a_handle, *m_source[a_level], m_name+"_src", m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
 }
 
-Real cdr_solver::compute_cfl_dt(){
-  CH_TIME("cdr_solver::compute_cfl_dt");
-  if(m_verbosity > 5){
-    pout() << m_name + "::compute_cfl_dt" << endl;
-  }
-
-#if 1
-  return this->compute_advection_dt();
-#else
-  Real min_dt = std::numeric_limits<Real>::max();
-
-  if(m_mobile){
-    const int finest_level = m_amr->get_finest_level();
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-      const Real dx                = m_amr->get_dx()[lvl];
-
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const EBCellFAB& velo  = (*m_velo_cell[lvl])[dit()];
-	const Box box          = dbl.get(dit());
-
-	const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
-	FORT_ADVECTION_DT(CHF_CONST_FRA(velo_fab),
-			      CHF_CONST_REAL(dx),
-			      CHF_BOX(box),
-			      CHF_REAL(min_dt));
-
-	VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
-	for (vofit.reset(); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-	
-	  Real vel = 0.0;
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    vel += std::abs(velo(vof, dir));
-	  }
-	  const Real thisdt = dx/vel;
-	  min_dt = Min(thisdt, min_dt);
-	}
-      }
-    }
-
-  
-#ifdef CH_MPI
-    Real tmp = 1.;
-    int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    if(result != MPI_SUCCESS){
-      MayDay::Error("cdr_solver::compute_cfl_dt() - communication error on norm");
-    }
-    min_dt = tmp;
-#endif
-  }
-
-  return min_dt;
-#endif
-}
-
 Real cdr_solver::compute_advection_dt(){
   CH_TIME("cdr_solver::compute_advection_dt");
   if(m_verbosity > 5){
