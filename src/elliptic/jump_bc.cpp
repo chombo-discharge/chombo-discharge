@@ -12,8 +12,6 @@
 bool jump_bc::s_quadrant_based = true;
 int  jump_bc::s_lsq_radius     = 1;
 
-Real jump_bc::SAFETY = 1.E-4;
-
 jump_bc::jump_bc(){
   CH_TIME("jump_bc::jump_bc(weak)");
 }
@@ -108,11 +106,6 @@ bool jump_bc::get_second_order_sten(Real&             a_weight,
     return true;
   }
 
-
-  // If we got this far we have a stencil
-  CH_assert(distance_along_lines.size() >= 2);
-  CH_assert(point_stencils.size() >= 2);
-
   const Real& x1   = distance_along_lines[0];
   const Real& x2   = distance_along_lines[1];
   const Real denom = x2*x2*x1 - x1*x1*x2;
@@ -156,6 +149,7 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_avgStencils.define(m_grids);
   m_avgBco.define(m_grids);
   m_avgJump.define(m_grids);
+  m_avgFactor.define(m_grids);
 
   int num = 0;
 
@@ -169,6 +163,7 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
       MFInterfaceFAB<Real>& avgWeights     = m_avgWeights[dit()];
       MFInterfaceFAB<Real>& avgBco         = m_avgBco[dit()];
       MFInterfaceFAB<Real>& avgJump        = m_avgJump[dit()];
+      MFInterfaceFAB<Real>& avgFactor      = m_avgFactor[dit()];
       MFInterfaceFAB<VoFStencil>& stens    = m_stencils[dit()];
       MFInterfaceFAB<VoFStencil>& avgStens = m_avgStencils[dit()];
 
@@ -178,6 +173,7 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
       inhomo.define(m_mflg,     dit());
       avgBco.define(m_mflg,     dit());
       avgJump.define(m_mflg,    dit());
+      avgFactor.define(m_mflg,  dit());
       weights.define(m_mflg,    dit());
       avgStens.define(m_mflg,   dit());
       avgWeights.define(m_mflg, dit());
@@ -235,7 +231,6 @@ void jump_bc::build_stencils(){
 
   const int comp = 0;
 
-  CH_assert(!m_mfis.isNull());
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     for (int iphase = 0; iphase < m_mfis->num_phases(); iphase ++){
 
@@ -246,12 +241,16 @@ void jump_bc::build_stencils(){
       BaseIVFAB<VoFStencil>& stencils    = m_stencils[dit()].get_ivfab(iphase);
       BaseIVFAB<VoFStencil>& avgStencils = m_avgStencils[dit()].get_ivfab(iphase);
 
+      avgBco.setVal(0.0);
+      avgWeights.setVal(0.0);
+
       const EBLevelGrid& eblg = m_mflg.get_eblg(iphase);
       const EBISLayout ebisl  = eblg.getEBISL();
 
       const EBISBox& ebisbox  = ebisl[dit()];
       const IntVectSet& cfivs = (*m_cfivs)[dit()];
 
+      // Get stencils just like we would do for regular BCs. 
       for (VoFIterator vofit(weights.getIVS(), weights.getEBGraph()); vofit.ok(); ++vofit){
 	const VolIndex& vof     = vofit();
 	Real& cur_weight        = weights(vof, comp);
@@ -275,52 +274,77 @@ void jump_bc::build_stencils(){
       const IntVectSet& ivs = avgWeights.getIVS();
       for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
 	const IntVect iv = ivsit();
+	
+	const VolIndex vof0(iv, 0);
 	const Vector<VolIndex> vofs = ebisbox.getVoFs(iv);
 
-	Real curWeight = 0.0;
-	Real curBco    = 0.0;
-	VoFStencil curStencil;
+	Real& curBco           = avgBco(vof0, comp);
+	Real& curWeight        = avgWeights(vof0, comp);
+	VoFStencil& curStencil = avgStencils(vof0, comp);
 
-	if(ebisbox.isMultiValued(iv)){
-	  //	  Real totalArea = jump_bc::SAFETY;
-	  Real totalArea = 0.0;
+	curBco    = 0.0;
+	curWeight = 0.0;
+	curStencil.clear();
+	
+	for (int ivof = 0; ivof < vofs.size(); ivof++){
+	  const VolIndex& vof = vofs[ivof];
 
-	  for (int v = 0; v < vofs.size(); v++){
-	    const VolIndex vof = vofs[v];
-
-	    //	    const Real area = ebisbox.bndryArea(vof);
-	    const Real area = 1.0;
-
-	    totalArea += 1.0;
-	    curWeight += area*weights(vof, comp);
-	    curBco    += area*bco(vof,comp);
-
-	    VoFStencil sten = stencils(vof,comp);
-	    sten *= area;
-	    curStencil += sten;
-	  }
-
-	  curStencil *= 1./totalArea;
-	  curWeight  *= 1./totalArea;
-	  curBco     *= 1./totalArea;
-	}
-	else{
-	  curWeight  = weights(vofs[0], comp);
-	  curBco     = bco(vofs[0], comp);
-	  curStencil = stencils(vofs[0], comp);
+	  curBco     += bco(vof, comp);
+	  curWeight  += weights(vof, comp);
+	  curStencil += stencils(vof, comp);
 	}
 
-	// Put average stuff on the first vof component. No multicell storage for the average stencils
-	const VolIndex vof(iv,0);
-	avgWeights(vof, comp) = curWeight;
-	avgStencils(vof,comp) = curStencil;
-	avgBco(vof,comp)      = curBco;
+	const Real invNum = 1./vofs.size();
+
+	curBco     *= invNum;
+	curWeight  *= invNum;
+	curStencil *= invNum;
+
 
 #if DEBUG_JUMP
-	if(curWeight != curWeight) MayDay::Abort("jumpc_bc::build_stencils - got NaN weight");
-	if(curBco    != curBco)    MayDay::Abort("jumpc_bc::build_stencils - got NaN bco");
+	if(std::isnan(curWeight)) MayDay::Abort("jumpc_bc::build_stencils - got NaN weight");
+	if(std::isnan(curBco))    MayDay::Abort("jumpc_bc::build_stencils - got NaN bco");
 #endif
       }
+    }
+
+    
+
+    // Build the average factor on each side.
+    const int phase1 = 0;
+    const int phase2 = 1;
+
+    BaseIVFAB<Real>& factor1 = m_avgFactor[dit()].get_ivfab(phase1);
+    BaseIVFAB<Real>& factor2 = m_avgFactor[dit()].get_ivfab(phase2);
+
+    const BaseIVFAB<Real>& avgBco1 = m_avgBco[dit()].get_ivfab(phase1);
+    const BaseIVFAB<Real>& avgBco2 = m_avgBco[dit()].get_ivfab(phase2);
+
+    const BaseIVFAB<Real>& avgWeights1 = m_avgWeights[dit()].get_ivfab(phase1);
+    const BaseIVFAB<Real>& avgWeights2 = m_avgWeights[dit()].get_ivfab(phase2);
+
+    factor1.setVal(0.0);
+    factor2.setVal(0.0);
+    
+    for (IVSIterator ivsit(m_ivs[dit()]); ivsit.ok(); ++ivsit){
+      const IntVect iv = ivsit();
+
+      const VolIndex vof0(iv, 0);
+      
+      const Real& bco1 = avgBco1(vof0, 0);
+      const Real& bco2 = avgBco2(vof0, 0);
+
+      const Real& w1 = avgWeights1(vof0, 0);
+      const Real& w2 = avgWeights2(vof0, 0);
+
+      const Real factor = 1.0/(bco1*w1 + bco2*w2);
+
+#if DEBUG_JUMP
+      if(std::isnan(factor)) MayDay::Abort("jump_bc::build_stencils -- factor is NaN");
+#endif
+
+      factor1(vof0, 0) = factor;
+      factor2(vof0, 0) = factor;
     }
   }
 }
