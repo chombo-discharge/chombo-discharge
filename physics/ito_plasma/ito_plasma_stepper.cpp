@@ -467,8 +467,8 @@ void ito_plasma_stepper::print_step_report(){
   case time_code::physics:
     str = "dt restricted by 'physics'";
     break;
-  case time_code::cfl:
-    str = "dt restricted by 'cfl'";
+  case time_code::advection:
+    str = "dt restricted by 'advection'";
     break;
   case time_code::relaxation_time:
     str = "dt restricted by 'relaxation time'";
@@ -718,7 +718,7 @@ void ito_plasma_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
   
   a_dt = m_ito->compute_dt();
   a_dt = a_dt*m_max_cells_hop;
-  a_timecode = time_code::cfl;
+  a_timecode = time_code::advection;
   
 }
 

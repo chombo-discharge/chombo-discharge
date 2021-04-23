@@ -43,6 +43,11 @@ namespace physics {
       virtual void parse_options();
 
       /*!
+	@brief Parse class options
+      */
+      virtual void parse_runtime_options();
+
+      /*!
 	@brief Return tracer field
       */
       virtual Vector<Real> tracer(const RealVect         a_pos,

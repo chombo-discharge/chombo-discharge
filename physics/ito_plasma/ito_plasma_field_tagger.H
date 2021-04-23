@@ -41,6 +41,11 @@ namespace physics {
       */
       virtual void parse_options() = 0;
 
+      /*!
+	@brief Parse options
+      */
+      virtual void parse_runtime_options() = 0;
+
     protected:
 
       /*!
