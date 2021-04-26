@@ -140,16 +140,16 @@ USE_MF        = TRUE
 #cppoptflags   =
 #cxxcppflags   =
 #cxxdbgflags   =
-cxxoptflags   = -O3  -std=c++14
+cxxoptflags   = -O3
 #cxxprofflags  =
 #fcppflags     =
 #fdbgflags     =
 foptflags     = -O3
 #fprofflags    =
-#flibflags     = -mkl=sequential
+#flibflags     = 
 #lddbgflags    =
 #ldoptflags    =
 #ldprofflags   =
-syslibflags   = -ldl -lm -lz
+syslibflags   = -lopenblas
 
 #end  -- dont change this line

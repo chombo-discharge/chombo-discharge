@@ -107,13 +107,13 @@ makefiles+=Make.defs.local
 DIM           = 2
 DEBUG         = FALSE
 OPT           = HIGH
-PRECISION     = DOUBLE
+#PRECISION     =
 #PROFILE       =
-CXX           = g++-6
-FC            = gfortran
+CXX           = icpc
+FC            = ifort
 MPI           = TRUE
 ## Note: don't set the MPICXX variable if you don't have MPI installed
-MPICXX        = mpicxx
+MPICXX        = mpiicpc
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
@@ -122,11 +122,11 @@ MPICXX        = mpicxx
 USE_EB        = TRUE
 #USE_CCSE      =
 USE_HDF       = TRUE
-HDFINCFLAGS   = -I/usr/local/hdf5-1.8.14/include
-HDFLIBFLAGS   = -L/usr/local/hdf5-1.8.14/lib -lhdf5 -lz
+HDFINCFLAGS   = -I/cluster/software/HDF5/1.8.18-intel-2017a/include
+HDFLIBFLAGS   = -L/cluster/software/HDF5/1.8.18-intel-2017a/lib -lhdf5 -lz
 ## Note: don't set the HDFMPI* variables if you don't have parallel HDF installed
-HDFMPIINCFLAGS= -I/usr/local/hdf5-1.8.14/include
-HDFMPILIBFLAGS= -L/usr/local/hdf5-1.8.14/lib -lhdf5 -lz
+HDFMPIINCFLAGS= -I/cluster/software/HDF5/1.8.18-intel-2017a/include
+HDFMPILIBFLAGS= -L/cluster/software/HDF5/1.8.18-intel-2017a/lib -lhdf5 -lz
 USE_MF        = TRUE
 #USE_MT        =
 #USE_SETVAL    =
@@ -139,17 +139,17 @@ USE_MF        = TRUE
 #cppdbgflags   =
 #cppoptflags   =
 #cxxcppflags   =
-#cxxdbgflags   = 
-cxxoptflags   = -O3
+#cxxdbgflags   =
+cxxoptflags   = -Ofast -xCORE-AVX2 -march=native
 #cxxprofflags  =
 #fcppflags     =
 #fdbgflags     =
-foptflags     = -O3
+foptflags     = -Ofast -xCORE-AVX2
 #fprofflags    =
-#flibflags     =
+flibflags     = -mkl=sequential
 #lddbgflags    =
 #ldoptflags    =
 #ldprofflags   =
-syslibflags   = -llapack -lblas -ldl -lm
+syslibflags   = -ldl -lm -lz
 
 #end  -- dont change this line
