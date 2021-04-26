@@ -146,7 +146,7 @@ cxxoptflags   = -O3  -std=c++14
 #fdbgflags     =
 foptflags     = -O3
 #fprofflags    =
-flibflags     = -mkl=sequential
+#flibflags     = -mkl=sequential
 #lddbgflags    =
 #ldoptflags    =
 #ldprofflags   =
