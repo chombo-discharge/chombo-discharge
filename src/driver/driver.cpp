@@ -1012,6 +1012,8 @@ void driver::parse_runtime_options(){
   pp.get("allow_coarsening",         m_allow_coarsen);
   pp.get("max_steps",                m_max_steps);
   pp.get("stop_time",                m_stop_time);
+
+  parse_plot_vars();
 }
 
 void driver::parse_plot_vars(){
