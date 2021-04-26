@@ -1,5 +1,5 @@
 # ====================================================================================================
-# POISSON_MULTIFLUID_GMG_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
+# POISSON_MULTIFLUID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
 poisson_multifluid_gmg.bc_x_low     = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
 poisson_multifluid_gmg.bc_x_high    = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
