@@ -19,4 +19,6 @@ public:
   RefCountedPtr<poisson_solver> new_solver() const;
 };
 
+#include "poisson_factoryI.H"
+
 #endif

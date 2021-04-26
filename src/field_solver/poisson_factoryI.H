@@ -3,6 +3,9 @@
   @brief Implementation of poisson_factory.H
 */
 
+#ifndef _POISSON_FACTORYI_H_
+#define _POISSON_FACTORYI_H_
+
 #include "poisson_factory.H"
 
 template <class T>
@@ -18,3 +21,5 @@ template <class T>
 RefCountedPtr<poisson_solver> poisson_factory<T>::new_solver() const {
   return RefCountedPtr<poisson_solver> (new T);
 }
+
+#endif
