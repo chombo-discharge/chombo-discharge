@@ -25,26 +25,32 @@ mv src/field_solver/poisson_factoryI.H src/field_solver/$factoryI.H
 for i in `find . -name "*.H" -type f`;
 do
     sed -i 's/poisson_solver/field_solver/g' $i
+    sed -i 's/POISSON_SOLVER/FIELD_SOLVER/g' $i    
 done
 for i in `find . -name "*.cpp" -type f`;
 do
     sed -i 's/poisson_solver/field_solver/g' $i
+    sed -i 's/POISSON_SOLVER/FIELD_SOLVER/g' $i    
 done
 for i in `find . -name "*.options" -type f`;
 do
     sed -i 's/poisson_solver/field_solver/g' $i
+    sed -i 's/POISSON_SOLVER/FIELD_SOLVER/g' $i        
 done
 for i in `find . -name "*.inputs" -type f`;
 do
     sed -i 's/poisson_solver/field_solver/g' $i
+    sed -i 's/POISSON_SOLVER/FIELD_SOLVER/g' $i        
 done
 for i in `find . -name "*.py" -type f`;
 do
     sed -i 's/poisson_solver/field_solver/g' $i
+    sed -i 's/POISSON_SOLVER/FIELD_SOLVER/g' $i        
 done
 for i in `find . -name "GNUmakefile" -type f`;
 do
     sed -i 's/poisson_solver/field_solver/g' $i
+    sed -i 's/POISSON_SOLVER/FIELD_SOLVER/g' $i        
 done
 
 # Find and replaces poisson_multifluid_gmg with field_solver stuff in all .H files
@@ -93,3 +99,4 @@ for i in `find . -name "*.inputs" -type f`;
 do
     sed -i "s/GMG_GMG/GMG/g" $i
 done    
+
