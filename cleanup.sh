@@ -77,11 +77,11 @@ done
 #
 for i in `find . -name "*.H" -type f`;
 do
-    sed -i "s/poisson_factory_gmg/$factory/g" $i
+    sed -i "s/poisson_factory/$factory/g" $i
 done
 for i in `find . -name "*.cpp" -type f`;
 do
-    sed -i "s/poisson_factory_gmg/$factory/g" $i
+    sed -i "s/poisson_factory/$factory/g" $i
 done
 
 # Fix some typos in input and option files. 
@@ -93,5 +93,3 @@ for i in `find . -name "*.inputs" -type f`;
 do
     sed -i "s/GMG_GMG/GMG/g" $i
 done    
-
-# Change gmg_verbosity to gmg.verbosity etc. 
