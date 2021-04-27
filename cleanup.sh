@@ -26,8 +26,8 @@ mv physics/poisson/poisson_stepper.options physics/poisson/field_stepper.options
 mv physics/poisson physics/field
 
 # Move regression tests
-mv regression/poisson regression/field
-mv regression/poisson.ini regression/field.ini
+#mv regression/poisson regression/field
+#mv regression/poisson.ini regression/field.ini
 
 
 # Find and replaces field_solver with field_solver stuff in all .H files
