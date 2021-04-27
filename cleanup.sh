@@ -1,9 +1,10 @@
 base=field_solver
-BASE=field_solver
+BASE=FIELD_SOLVER
 implem=field_solver_multigrid
 IMPLEM=FIELD_SOLVER_MULTIGRID
 factory=field_solver_factory
 factoryI=field_solver_factoryI
+ste
 
 # Move poisson_solver.* field_solver.*
 mv src/field_solver/poisson_solver.cpp src/field_solver/$base.cpp
@@ -18,6 +19,13 @@ mv src/field_solver/poisson_multifluid_gmg.options src/field_solver/$implem.opti
 # Factory class
 mv src/field_solver/poisson_factory.H src/field_solver/$factory.H
 mv src/field_solver/poisson_factoryI.H src/field_solver/$factoryI.H
+
+# Move poisson_stepper to field_stepper
+mv physics/poisson/poisson_stepper.H physics/poisson/field_stepper.H
+mv physics/poisson/poisson_stepperI.H physics/poisson/field_stepperI.H
+mv physics/poisson/poisson_stepper.options physics/poisson/field_stepper.options
+mv physics/poisson physics/field
+
 
 # Find and replaces field_solver with field_solver stuff in all .H files
 for i in `find . -name "*.H" -type f`;
