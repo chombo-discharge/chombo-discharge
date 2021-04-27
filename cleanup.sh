@@ -125,7 +125,7 @@ done
 # done    
 
 # Replace regtest names
-for i in `find . -name "*.init" -type f`;
+for i in `find . -name "*.ini" -type f`;
 do
-    sed -i 's/[poisson/[field/g' $i
+    sed -i 's/poisson/field/g' $i
 done
