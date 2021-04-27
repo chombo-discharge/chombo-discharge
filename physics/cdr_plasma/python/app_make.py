@@ -42,7 +42,7 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/src/global \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/driver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/particle \\\n')
-    makef.write('\t$(DISCHARGE_HOME)/src/poisson_solver \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/field_solver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/rte_solver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/sigma_solver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/geometries/' + args.geometry + '\\\n')

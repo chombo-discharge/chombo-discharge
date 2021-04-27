@@ -10,7 +10,7 @@
 #include "data_ops.H"
 #include "units.H"
 #include "cdr_gdnv.H"
-#include "poisson_multifluid_gmg.H"
+#include "field_solver_multigrid.H"
 
 #include <fstream>
 #include <iostream>
@@ -965,7 +965,7 @@ void sdc::set_semi_implicit_permittivities(){
     pout() << "sdc::set_semi_implicit_permittivities" << endl;
   }
 
-  poisson_multifluid_gmg* poisson = (poisson_multifluid_gmg*) (&(*m_poisson));
+  field_solver_multigrid* poisson = (field_solver_multigrid*) (&(*m_poisson));
 
   // Set coefficients as usual
   poisson->set_coefficients();

@@ -9,7 +9,7 @@
 #define _POISSON_STEPPER_
 
 #include "time_stepper.H"
-#include "poisson_solver.H"
+#include "field_solver.H"
 #include "sigma_solver.H"
 
 namespace physics {
@@ -75,7 +75,7 @@ namespace physics {
       bool m_load_balance;
       box_sorting m_boxsort;
 
-      RefCountedPtr<poisson_solver> m_poisson;
+      RefCountedPtr<field_solver> m_poisson;
       RefCountedPtr<sigma_solver>   m_sigma;
 
       std::string m_realm;

@@ -1,12 +1,12 @@
 /*!
-  @file   poisson_solver.cpp
-  @brief  Implementation of poisson_solver.H
+  @file   field_solver.cpp
+  @brief  Implementation of field_solver.H
   @author Robert Marskar
   @date   Nov. 2017
   @todo   set_covered_potential is buggy and breaks when we don't have dielectrics. Fix this. 
 */
 
-#include "poisson_solver.H"
+#include "field_solver.H"
 #include "MFAliasFactory.H"
 #include "mfalias.H"
 #include "data_ops.H"
@@ -18,46 +18,46 @@
 #include <MFAMRIO.H>
 #include <EBAMRIO.H>
 
-Real poisson_solver::s_potential_one(const Real a_time){
+Real field_solver::s_potential_one(const Real a_time){
   return 1.0;
 }
 
-Real poisson_solver::s_constant_one(const RealVect a_pos){
+Real field_solver::s_constant_one(const RealVect a_pos){
   return 1.0;
 }
 
-poisson_solver::poisson_solver(){
-  m_class_name = "poisson_solver";
+field_solver::field_solver(){
+  m_class_name = "field_solver";
   this->set_verbosity(-1);
 
   m_realm = realm::primal;
 }
 
-poisson_solver::~poisson_solver(){
+field_solver::~field_solver(){
   
 }
 
-bool poisson_solver::solve(const bool a_zerophi) {
+bool field_solver::solve(const bool a_zerophi) {
   return this->solve(m_state, m_source, a_zerophi);
 }
 
-bool poisson_solver::solve(MFAMRCellData& a_state, const bool a_zerophi){
+bool field_solver::solve(MFAMRCellData& a_state, const bool a_zerophi){
   return this->solve(a_state, m_source, a_zerophi);
 }
 
-void poisson_solver::compute_E(){
-  CH_TIME("poisson_solver::compute_E()");
+void field_solver::compute_E(){
+  CH_TIME("field_solver::compute_E()");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::compute_E()" << endl;
+    pout() << "field_solver::compute_E()" << endl;
   }
 
   this->compute_E(m_E, m_state);
 }
 
-void poisson_solver::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
-  CH_TIME("poisson_solver::compute_E(mfamrcell, mfamrcell)");
+void field_solver::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
+  CH_TIME("field_solver::compute_E(mfamrcell, mfamrcell)");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::compute_E(mfamrcell, mfamrcell)" << endl;
+    pout() << "field_solver::compute_E(mfamrcell, mfamrcell)" << endl;
   }
 
   m_amr->compute_gradient(a_E, a_potential, m_realm);
@@ -67,10 +67,10 @@ void poisson_solver::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potent
   m_amr->interp_ghost(a_E, m_realm);
 }
 
-void poisson_solver::allocate_internals(){
-  CH_TIME("poisson_solver::allocate_internals");
+void field_solver::allocate_internals(){
+  CH_TIME("field_solver::allocate_internals");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::allocate_internals" << endl;
+    pout() << "field_solver::allocate_internals" << endl;
   }
 
   const int ncomp = 1;
@@ -88,10 +88,10 @@ void poisson_solver::allocate_internals(){
   data_ops::set_value(m_E,  0.0);
 }
 
-void poisson_solver::allocate_wall_bc(){
-  CH_TIME("poisson_solver::poisson_solver(full)");
+void field_solver::allocate_wall_bc(){
+  CH_TIME("field_solver::field_solver(full)");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::poisson_solver(full)" << endl;
+    pout() << "field_solver::field_solver(full)" << endl;
   }
   m_wallbc.resize(2*SpaceDim);
   for (int i = 0; i < 2*SpaceDim; i++){
@@ -99,10 +99,10 @@ void poisson_solver::allocate_wall_bc(){
   }
 }
 
-void poisson_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
-  CH_TIME("poisson_solver::pre_regrid");
+void field_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
+  CH_TIME("field_solver::pre_regrid");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::pre_regrid" << endl;
+    pout() << "field_solver::pre_regrid" << endl;
   }
 
   const int ncomp = 1;
@@ -114,10 +114,10 @@ void poisson_solver::pre_regrid(const int a_lbase, const int a_old_finest_level)
   }
 }
 
-void poisson_solver::compute_D(MFAMRCellData& a_D, const MFAMRCellData& a_E){
-  CH_TIME("poisson_solver::compute_D");
+void field_solver::compute_D(MFAMRCellData& a_D, const MFAMRCellData& a_E){
+  CH_TIME("field_solver::compute_D");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::compute_D" << endl;
+    pout() << "field_solver::compute_D" << endl;
   }
 
   const Vector<dielectric>& dielectrics = m_compgeom->get_dielectrics();
@@ -179,10 +179,10 @@ void poisson_solver::compute_D(MFAMRCellData& a_D, const MFAMRCellData& a_E){
   }
 }
 
-Real poisson_solver::compute_U(const MFAMRCellData& a_E){
-  CH_TIME("poisson_solver::compute_U");
+Real field_solver::compute_U(const MFAMRCellData& a_E){
+  CH_TIME("field_solver::compute_U");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::compute_U" << endl;
+    pout() << "field_solver::compute_U" << endl;
   }
 
   MFAMRCellData D, EdotD;   
@@ -212,10 +212,10 @@ Real poisson_solver::compute_U(const MFAMRCellData& a_E){
   return 0.5*(U_g + U_s);
 }
 
-Real poisson_solver::compute_capacitance(){
-  CH_TIME("poisson_solver::compute_capacitance");
+Real field_solver::compute_capacitance(){
+  CH_TIME("field_solver::compute_capacitance");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::compute_capacitance" << endl;
+    pout() << "field_solver::compute_capacitance" << endl;
   }
 
   // TLDR; We MUST compute the energy density with the Laplace field, so no sources here...
@@ -243,17 +243,17 @@ Real poisson_solver::compute_capacitance(){
   // U = 0.5*CV^2
   const Real pot = m_potential(m_time);
   if(pot == 0.0){
-    MayDay::Abort("poisson_solver::compute_capacitance - error, can't compute energy density with V = 0");
+    MayDay::Abort("field_solver::compute_capacitance - error, can't compute energy density with V = 0");
   }
   C = 2.0*U/(pot*pot);
 
   return C;
 }
 
-void poisson_solver::deallocate_internals(){
-  CH_TIME("poisson_solver::deallocate_internals");
+void field_solver::deallocate_internals(){
+  CH_TIME("field_solver::deallocate_internals");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::deallocate_internals" << endl;
+    pout() << "field_solver::deallocate_internals" << endl;
   }
   m_amr->deallocate(m_state);
   m_amr->deallocate(m_source);
@@ -261,10 +261,10 @@ void poisson_solver::deallocate_internals(){
   m_amr->deallocate(m_sigma);
 }
 
-void poisson_solver::regrid(const int a_lmin, const int a_old_finest, const int a_new_finest){
-  CH_TIME("poisson_solver::regrid");
+void field_solver::regrid(const int a_lmin, const int a_old_finest, const int a_new_finest){
+  CH_TIME("field_solver::regrid");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::regrid" << endl;
+    pout() << "field_solver::regrid" << endl;
   }
 
   const int comp  = 0;
@@ -319,10 +319,10 @@ void poisson_solver::regrid(const int a_lmin, const int a_old_finest, const int 
   this->compute_E();
 }
 
-void poisson_solver::sanity_check(){
-  CH_TIME("poisson_solver::sanity_check");
+void field_solver::sanity_check(){
+  CH_TIME("field_solver::sanity_check");
   if(m_verbosity > 4){
-    pout() << "poisson_solver::sanity_check" << endl;
+    pout() << "field_solver::sanity_check" << endl;
   }
 
   CH_assert(!m_compgeom.isNull());
@@ -330,17 +330,17 @@ void poisson_solver::sanity_check(){
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sideit; sideit.ok(); ++sideit){
       if(m_wallbc[wall_bc::map_bc(dir, sideit())].isNull()){
-	pout() << "poisson_solver::sanity_check() - bc is null at coord = " << dir << ", side = " << sideit() << endl;
-  	MayDay::Abort("poisson_solver::sanity_check() failed. Wall BC has not been set properly");
+	pout() << "field_solver::sanity_check() - bc is null at coord = " << dir << ", side = " << sideit() << endl;
+  	MayDay::Abort("field_solver::sanity_check() failed. Wall BC has not been set properly");
       }
     }
   }
 }
 
-void poisson_solver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
-  CH_TIME("poisson_solver::set_computational_geometry");
+void field_solver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
+  CH_TIME("field_solver::set_computational_geometry");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::set_computational_geometry" << endl;
+    pout() << "field_solver::set_computational_geometry" << endl;
   }
 
   m_compgeom = a_compgeom;
@@ -348,28 +348,28 @@ void poisson_solver::set_computational_geometry(const RefCountedPtr<computationa
   this->set_mfis(m_compgeom->get_mfis());
 }
 
-void poisson_solver::set_mfis(const RefCountedPtr<mfis>& a_mfis){
-  CH_TIME("poisson_solver::set_mfis");
+void field_solver::set_mfis(const RefCountedPtr<mfis>& a_mfis){
+  CH_TIME("field_solver::set_mfis");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::set_mfis" << endl;
+    pout() << "field_solver::set_mfis" << endl;
   }
 
   m_mfis = a_mfis;
 }
 
-void poisson_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
-  CH_TIME("poisson_solver::set_amr");
+void field_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+  CH_TIME("field_solver::set_amr");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::set_amr" << endl;
+    pout() << "field_solver::set_amr" << endl;
   }
 
   m_amr = a_amr;
 }
 
-void poisson_solver::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential a_live){
-  CH_TIME("poisson_solver::set_dirichlet_wall_bc");
+void field_solver::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential a_live){
+  CH_TIME("field_solver::set_dirichlet_wall_bc");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::set_dirichlet_wall_bc" << endl;
+    pout() << "field_solver::set_dirichlet_wall_bc" << endl;
   }
 
   const int idx = wall_bc::map_bc(a_dir, a_side);
@@ -382,10 +382,10 @@ void poisson_solver::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_sid
   }
 }
 
-void poisson_solver::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
-  CH_TIME("poisson_solver::set_neumann_wall_bc");
+void field_solver::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
+  CH_TIME("field_solver::set_neumann_wall_bc");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::set_neumann_wall_bc" << endl;
+    pout() << "field_solver::set_neumann_wall_bc" << endl;
   }
 
   const int idx = wall_bc::map_bc(a_dir, a_side);
@@ -393,10 +393,10 @@ void poisson_solver::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side,
   m_wallbc[idx]->set_value(a_value);
 }
 
-void poisson_solver::set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
-  CH_TIME("poisson_solver::set_robin_wall_bc");
+void field_solver::set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
+  CH_TIME("field_solver::set_robin_wall_bc");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::set_robin_wall_bc" << endl;
+    pout() << "field_solver::set_robin_wall_bc" << endl;
   }
 
   const int idx = wall_bc::map_bc(a_dir, a_side);
@@ -404,14 +404,14 @@ void poisson_solver::set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, c
   m_wallbc[idx]->set_value(a_value);
 }
 
-void poisson_solver::set_potential(Real (*a_potential)(const Real a_time)){
+void field_solver::set_potential(Real (*a_potential)(const Real a_time)){
   m_potential = a_potential;
 }
 
-void poisson_solver::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("poisson_solver::set_poisson_wall_func");
+void field_solver::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
+  CH_TIME("field_solver::set_poisson_wall_func");
   if(m_verbosity > 4){
-    pout() << "poisson_solver::set_poisson_wall_func" << endl;
+    pout() << "field_solver::set_poisson_wall_func" << endl;
   }
 
   if(a_dir == 0){
@@ -442,19 +442,19 @@ void poisson_solver::set_poisson_wall_func(const int a_dir, const Side::LoHiSide
 #endif
 }
 
-void poisson_solver::set_verbosity(const int a_verbosity){
-  CH_TIME("poisson_solver::set_verbosity");
+void field_solver::set_verbosity(const int a_verbosity){
+  CH_TIME("field_solver::set_verbosity");
   m_verbosity = a_verbosity;
 
   if(m_verbosity > 4){
-    pout() << "poisson_solver::set_verbosity" << endl;
+    pout() << "field_solver::set_verbosity" << endl;
   }
 }
 
-void poisson_solver::set_time(const int a_step, const Real a_time, const Real a_dt) {
-  CH_TIME("poisson_solver::set_time");
+void field_solver::set_time(const int a_step, const Real a_time, const Real a_dt) {
+  CH_TIME("field_solver::set_time");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::set_time" << endl;
+    pout() << "field_solver::set_time" << endl;
   }
   
   m_step = a_step;
@@ -462,27 +462,27 @@ void poisson_solver::set_time(const int a_step, const Real a_time, const Real a_
   m_dt   = a_dt;
 }
 
-void poisson_solver::set_realm(const std::string a_realm){
-  CH_TIME("poisson_solver::set_realm");
+void field_solver::set_realm(const std::string a_realm){
+  CH_TIME("field_solver::set_realm");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::set_realm" << endl;
+    pout() << "field_solver::set_realm" << endl;
   }  
   m_realm = a_realm;
 }
 
-const std::string poisson_solver::get_realm() const{
-  CH_TIME("poisson_solver::get_realm");
+const std::string field_solver::get_realm() const{
+  CH_TIME("field_solver::get_realm");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::get_realm" << endl;
+    pout() << "field_solver::get_realm" << endl;
   }
   
   return m_realm;
 }
 
-void poisson_solver::set_covered_potential(EBAMRCellData& a_phi, const int a_comp, const Real a_time){
-  CH_TIME("poisson_solver::set_covered_potential");
+void field_solver::set_covered_potential(EBAMRCellData& a_phi, const int a_comp, const Real a_time){
+  CH_TIME("field_solver::set_covered_potential");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::set_covered_potential" << endl;
+    pout() << "field_solver::set_covered_potential" << endl;
   }
 
 
@@ -534,10 +534,10 @@ void poisson_solver::set_covered_potential(EBAMRCellData& a_phi, const int a_com
   }
 }
 
-void poisson_solver::set_output_variables(){
-  CH_TIME("poisson_solver::set_output_variables");
+void field_solver::set_output_variables(){
+  CH_TIME("field_solver::set_output_variables");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::set_output_variables" << endl;
+    pout() << "field_solver::set_output_variables" << endl;
   }
 
   m_plot_phi = false;
@@ -545,7 +545,7 @@ void poisson_solver::set_output_variables(){
   m_plot_E   = false;
   m_plot_res = false;
 
-  ParmParse pp("poisson_solver");
+  ParmParse pp("field_solver");
   const int num = pp.countval("plt_vars");
   Vector<std::string> str(num);
   pp.getarr("plt_vars", str, 0, num);
@@ -558,10 +558,10 @@ void poisson_solver::set_output_variables(){
   }
 }
 
-void poisson_solver::write_plot_file(){
-  CH_TIME("poisson_solver::write_plot_file");
+void field_solver::write_plot_file(){
+  CH_TIME("field_solver::write_plot_file");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::write_plot_file" << endl;
+    pout() << "field_solver::write_plot_file" << endl;
   }
 
   // Number of output components and their names
@@ -578,7 +578,7 @@ void poisson_solver::write_plot_file(){
 
   // Filename
   char file_char[1000];
-  sprintf(file_char, "%s.step%07d.%dd.hdf5", "poisson_solver", m_step, SpaceDim);
+  sprintf(file_char, "%s.step%07d.%dd.hdf5", "field_solver", m_step, SpaceDim);
 
   // Alias
   Vector<LevelData<EBCellFAB>* > output_ptr(1+m_amr->get_finest_level());
@@ -601,10 +601,10 @@ void poisson_solver::write_plot_file(){
 	      IntVect::Unit);
 }
 
-void poisson_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("poisson_solver::write_checkpoint_level");
+void field_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("field_solver::write_checkpoint_level");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::write_checkpoint_level" << endl;
+    pout() << "field_solver::write_checkpoint_level" << endl;
   }
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
@@ -622,10 +622,10 @@ void poisson_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_le
   if(!ebis_sol.isNull()) write(a_handle, state_sol, "poisson_s");
 }
 
-void poisson_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("poisson_solver::read_checkpoint_level");
+void field_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("field_solver::read_checkpoint_level");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::read_checkpoint_level" << endl;
+    pout() << "field_solver::read_checkpoint_level" << endl;
   }
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
@@ -643,19 +643,19 @@ void poisson_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_lev
   if(!ebis_sol.isNull()) read<EBCellFAB>(a_handle, state_sol, "poisson_s", m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
 }
 
-void poisson_solver::post_checkpoint(){
-  CH_TIME("poisson_solver::post_checkpoint");
+void field_solver::post_checkpoint(){
+  CH_TIME("field_solver::post_checkpoint");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::post_checkpoint" << endl;
+    pout() << "field_solver::post_checkpoint" << endl;
   }
 
   
 }
 
-void poisson_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("poisson_solver::write_plot_level");
+void field_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("field_solver::write_plot_level");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::write_plot_level" << endl;
+    pout() << "field_solver::write_plot_level" << endl;
   }
 
   // Add phi to output
@@ -671,10 +671,10 @@ void poisson_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
 }
 
-void poisson_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp){
-  CH_TIME("poisson_solver::write_mfdata");
+void field_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp){
+  CH_TIME("field_solver::write_mfdata");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::write_mfdata" << endl;
+    pout() << "field_solver::write_mfdata" << endl;
   }
 
   const int ncomp = a_data[0]->nComp();
@@ -761,10 +761,10 @@ void poisson_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MF
   a_comp += ncomp;
 }
 
-int poisson_solver::get_num_plotvars() const {
-  CH_TIME("poisson_solver::get_num_plotvars");
+int field_solver::get_num_plotvars() const {
+  CH_TIME("field_solver::get_num_plotvars");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::get_num_plotvars" << endl;
+    pout() << "field_solver::get_num_plotvars" << endl;
   }
 
   int num_output = 0;
@@ -777,10 +777,10 @@ int poisson_solver::get_num_plotvars() const {
   return num_output;
 }
 
-Vector<std::string> poisson_solver::get_plotvar_names() const {
-  CH_TIME("poisson_solver::get_plotvar_names");
+Vector<std::string> field_solver::get_plotvar_names() const {
+  CH_TIME("field_solver::get_plotvar_names");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::get_plotvar_names" << endl;
+    pout() << "field_solver::get_plotvar_names" << endl;
   }
   Vector<std::string> names(0);
   
@@ -798,31 +798,31 @@ Vector<std::string> poisson_solver::get_plotvar_names() const {
   return names;
 }
 
-Real poisson_solver::get_time() const{
+Real field_solver::get_time() const{
   return m_time;
 }
 
 
-wall_bc& poisson_solver::get_wall_bc(const int a_dir, Side::LoHiSide a_side) const{
-  CH_TIME("poisson_solver::get_wall_bc");
+wall_bc& field_solver::get_wall_bc(const int a_dir, Side::LoHiSide a_side) const{
+  CH_TIME("field_solver::get_wall_bc");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::get_wall_bc" << endl;
+    pout() << "field_solver::get_wall_bc" << endl;
   }
   return *m_wallbc[wall_bc::map_bc(a_dir, a_side)];
 }
 
-MFAMRCellData& poisson_solver::get_state(){
+MFAMRCellData& field_solver::get_state(){
   return m_state;
 }
 
-MFAMRCellData& poisson_solver::get_E(){
+MFAMRCellData& field_solver::get_E(){
   return m_E;
 }
 
-MFAMRCellData& poisson_solver::get_source(){
+MFAMRCellData& field_solver::get_source(){
   return m_source;
 }
 
-MFAMRCellData& poisson_solver::get_resid(){
+MFAMRCellData& field_solver::get_resid(){
   return m_resid;
 }

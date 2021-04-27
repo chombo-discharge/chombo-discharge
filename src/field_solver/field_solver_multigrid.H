@@ -1,14 +1,14 @@
 /*!
-  @file poisson_multifluid_gmg.H
+  @file field_solver_multigrid.H
   @brief Geometric multigrid multifluid poisson solver
   @author Robert Marskar
   @date Nov. 2017
 */
 
-#ifndef _POISSON_MULTIFLUID_GMG_
-#define _POISSON_MULTIFLUID_GMG_
+#ifndef _FIELD_SOLVER_MULTIGRID_
+#define _FIELD_SOLVER_MULTIGRID_
 
-#include "poisson_solver.H"
+#include "field_solver.H"
 #include "mfconductivityopfactory.H"
 #include "dirichlet_func.H"
 
@@ -22,9 +22,9 @@
 #include <BaseBCFuncEval.H>
 
 /*!
-  @brief Implementation of poisson_solver which uses a two-phase geometric multigrid solver
+  @brief Implementation of field_solver which uses a two-phase geometric multigrid solver
 */
-class poisson_multifluid_gmg : public poisson_solver {
+class field_solver_multigrid : public field_solver {
 protected:
 
   /*!
@@ -54,12 +54,12 @@ public:
   /*!
     @brief Constructor
   */
-  poisson_multifluid_gmg();
+  field_solver_multigrid();
 
   /*!
     @brief Constructor
   */
-  virtual ~poisson_multifluid_gmg();
+  virtual ~field_solver_multigrid();
 
   /*!
     @brief Override this one for testing purposes. 

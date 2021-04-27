@@ -1,7 +1,7 @@
 /*!
   @file    dirichlet_func.H
   @brief   Declaration of a potential function class 
-  @details This is the class that poisson_multifluid_gmg uses to pass boundary conditions to AMRMultiGrid
+  @details This is the class that field_solver_multigrid uses to pass boundary conditions to AMRMultiGrid
   @author  Robert Marskar
   @date    June 2018
 */

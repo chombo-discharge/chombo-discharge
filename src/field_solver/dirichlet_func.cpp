@@ -29,7 +29,7 @@ Real dirichlet_func::value(const RealVect& a_point, const int& a_comp) const {
 }
 
 Real dirichlet_func::derivative(const RealVect& a_point, const int& a_comp, const int& a_dir) const {
-  MayDay::Abort("poisson_multifluid_gmg::dirichlet_func::derivative - this should not be called. How did you get here?");
+  MayDay::Abort("field_solver_multigrid::dirichlet_func::derivative - this should not be called. How did you get here?");
 
   return 0.0;
 }

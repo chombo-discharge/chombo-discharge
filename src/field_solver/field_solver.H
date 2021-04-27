@@ -1,12 +1,12 @@
 /*!
-  @file poisson_solver.H
+  @file field_solver.H
   @brief Abstract multi-phase Poisson solver
   @author Robert Marskar
   @date Nov. 2017
 */
 
-#ifndef _POISSON_SOLVER_
-#define _POISSON_SOLVER_
+#ifndef _FIELD_SOLVER_
+#define _FIELD_SOLVER_
 
 #include "computational_geometry.H"
 #include "amr_mesh.H"
@@ -15,7 +15,7 @@
 /*!
   @brief Abstract Poisson solver class. Boundary conditions are passed through this class. 
 */
-class poisson_solver {
+class field_solver {
 public:
 
   /*!
@@ -40,12 +40,12 @@ public:
   /*!
     @brief Constructor
   */
-  poisson_solver();
+  field_solver();
 
   /*!
     @brief Constructor
   */
-  virtual ~poisson_solver();
+  virtual ~field_solver();
 
   /*!
     @brief Solve Poisson equation

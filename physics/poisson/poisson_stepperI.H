@@ -62,7 +62,7 @@ namespace physics {
     template <class T>
     void poisson_stepper<T>::setup_solvers(){
       // Poisson setup
-      m_poisson = RefCountedPtr<poisson_solver> (new T());
+      m_poisson = RefCountedPtr<field_solver> (new T());
       m_poisson->set_verbosity(m_verbosity);
       m_poisson->parse_options();
       m_poisson->set_amr(m_amr);
@@ -212,7 +212,7 @@ namespace physics {
 	a_procs.resize(1+a_finest_level);
 	a_boxes.resize(1+a_finest_level);
 
-	poisson_multifluid_gmg* solver = (poisson_multifluid_gmg*) (&(*m_poisson));
+	field_solver_multigrid* solver = (field_solver_multigrid*) (&(*m_poisson));
 
 	MFAMRCellData dummy1, dummy2;
 

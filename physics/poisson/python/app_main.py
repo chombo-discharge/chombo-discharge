@@ -14,7 +14,7 @@ def write_template(args):
     main_filename = app_dir + "/" + args.filename + ".cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include "driver.H"\n')
-    mainf.write('#include "' + args.poisson_solver + '.H"\n')
+    mainf.write('#include "' + args.field_solver + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "poisson_stepper.H"\n')
     mainf.write('#include "ParmParse.H"\n')
@@ -44,8 +44,8 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Set up basic Poisson, potential = 1 \n")
-    mainf.write("  auto timestepper = RefCountedPtr<poisson_stepper<" + args.poisson_solver + "> >\n")
-    mainf.write("     (new poisson_stepper<" + args.poisson_solver + ">());\n")
+    mainf.write("  auto timestepper = RefCountedPtr<poisson_stepper<" + args.field_solver + "> >\n")
+    mainf.write("     (new poisson_stepper<" + args.field_solver + ">());\n")
     mainf.write("\n")
 
 

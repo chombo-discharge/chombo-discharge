@@ -1,11 +1,11 @@
 /*!
-  @file poisson_multifluid_gmg.cpp
-  @brief Implementation of poisson_multifluid_gmg.H
+  @file field_solver_multigrid.cpp
+  @brief Implementation of field_solver_multigrid.H
   @author Robert Marskar
   @date Nov. 2017
 */
 
-#include "poisson_multifluid_gmg.H"
+#include "field_solver_multigrid.H"
 #include "dirichlet_func.H"
 #include "data_ops.H"
 #include "MFQuadCFInterp.H"
@@ -26,21 +26,21 @@
 
 #define POISSON_MF_GMG_TIMER 0
 
-poisson_multifluid_gmg::poisson_multifluid_gmg(){
+field_solver_multigrid::field_solver_multigrid(){
   m_needs_setup = true;
   m_has_mg_stuff = false;
-  m_class_name  = "poisson_multifluid_gmg";
+  m_class_name  = "field_solver_multigrid";
 }
 
-poisson_multifluid_gmg::~poisson_multifluid_gmg(){
+field_solver_multigrid::~field_solver_multigrid(){
 
 }
 
-Real poisson_multifluid_gmg::s_constant_one(const RealVect a_pos){
+Real field_solver_multigrid::s_constant_one(const RealVect a_pos){
   return 1.0;
 }
 
-void poisson_multifluid_gmg::parse_options(){
+void field_solver_multigrid::parse_options(){
 
   parse_autotune();
   parse_domain_bc();
@@ -49,14 +49,14 @@ void poisson_multifluid_gmg::parse_options(){
   parse_kappa_source();
 }
 
-void poisson_multifluid_gmg::parse_runtime_options(){
+void field_solver_multigrid::parse_runtime_options(){
   parse_domain_bc();
   parse_plot_vars();
   parse_gmg_settings();
   parse_kappa_source();
 }
 
-void poisson_multifluid_gmg::parse_kappa_source(){
+void field_solver_multigrid::parse_kappa_source(){
   ParmParse pp(m_class_name.c_str());
 
   std::string str;
@@ -64,7 +64,7 @@ void poisson_multifluid_gmg::parse_kappa_source(){
 
 }
 
-void poisson_multifluid_gmg::parse_autotune(){
+void field_solver_multigrid::parse_autotune(){
   ParmParse pp(m_class_name.c_str());
 
   std::string str;
@@ -72,7 +72,7 @@ void poisson_multifluid_gmg::parse_autotune(){
   m_autotune = (str == "true") ? true : false;
 }
 
-void poisson_multifluid_gmg::parse_domain_bc(){
+void field_solver_multigrid::parse_domain_bc(){
   ParmParse pp(m_class_name.c_str());
 
   this->allocate_wall_bc();
@@ -111,7 +111,7 @@ void poisson_multifluid_gmg::parse_domain_bc(){
 	  this->set_robin_wall_bc(dir, Side::Lo, 0.0);
 	}
 	else {
-	  std::string error = "poisson_multifluid_gmg::poisson_multifluid_gmg - unknown bc requested for " + bc_string;
+	  std::string error = "field_solver_multigrid::field_solver_multigrid - unknown bc requested for " + bc_string;
 	  MayDay::Abort(error.c_str());
 	}
       }
@@ -132,7 +132,7 @@ void poisson_multifluid_gmg::parse_domain_bc(){
 	  this->set_robin_wall_bc(dir, Side::Hi, 0.0);
 	}
 	else {
-	  std::string error = "poisson_multifluid_gmg::poisson_multifluid_gmg - unknown bc requested for " + bc_string;
+	  std::string error = "field_solver_multigrid::field_solver_multigrid - unknown bc requested for " + bc_string;
 	  MayDay::Abort(error.c_str());
 	}
       }
@@ -140,17 +140,17 @@ void poisson_multifluid_gmg::parse_domain_bc(){
   }
 
   // Set default distribution on domain edges
-  m_wall_func_x_lo = poisson_solver::s_constant_one;
-  m_wall_func_x_hi = poisson_solver::s_constant_one;
-  m_wall_func_y_lo = poisson_solver::s_constant_one;
-  m_wall_func_y_hi = poisson_solver::s_constant_one;
+  m_wall_func_x_lo = field_solver::s_constant_one;
+  m_wall_func_x_hi = field_solver::s_constant_one;
+  m_wall_func_y_lo = field_solver::s_constant_one;
+  m_wall_func_y_hi = field_solver::s_constant_one;
 #if CH_SPACEDIM==3
-  m_wall_func_z_lo = poisson_solver::s_constant_one;
-  m_wall_func_z_hi = poisson_solver::s_constant_one;
+  m_wall_func_z_lo = field_solver::s_constant_one;
+  m_wall_func_z_hi = field_solver::s_constant_one;
 #endif
 }
 
-void poisson_multifluid_gmg::parse_plot_vars(){
+void field_solver_multigrid::parse_plot_vars(){
   ParmParse pp(m_class_name.c_str());
   const int num = pp.countval("plt_vars");
   Vector<std::string> str(num);
@@ -169,7 +169,7 @@ void poisson_multifluid_gmg::parse_plot_vars(){
   }
 }
 
-void poisson_multifluid_gmg::parse_gmg_settings(){
+void field_solver_multigrid::parse_gmg_settings(){
   ParmParse pp(m_class_name.c_str());
 
   std::string str;
@@ -187,7 +187,7 @@ void poisson_multifluid_gmg::parse_gmg_settings(){
   pp.get("gmg_bc_order",    m_bc_order);
 
   if(!(m_bc_order == 1 || m_bc_order == 2)){
-    MayDay::Abort("poisson_multifluid_gmg::parse_gmg_settings - boundary condition order must be 1 or 2");
+    MayDay::Abort("field_solver_multigrid::parse_gmg_settings - boundary condition order must be 1 or 2");
   }
 
   // Bottom solver
@@ -202,7 +202,7 @@ void poisson_multifluid_gmg::parse_gmg_settings(){
     m_bottomsolver = 2;
     }
   else{
-    MayDay::Abort("poisson_multifluid_gmg::parse_gmg_settings - unknown bottom solver requested");
+    MayDay::Abort("field_solver_multigrid::parse_gmg_settings - unknown bottom solver requested");
   }
 
   // Relaxation type
@@ -214,7 +214,7 @@ void poisson_multifluid_gmg::parse_gmg_settings(){
     m_gmg_relax_type = relax::gauss_seidel;
   }
   else{
-    MayDay::Abort("poisson_multifluid_gmgcdr_gdnv::parse_gmg_settings - unsupported relaxation method requested");
+    MayDay::Abort("field_solver_multigridcdr_gdnv::parse_gmg_settings - unsupported relaxation method requested");
   }
 
   // Cycle type
@@ -232,23 +232,23 @@ void poisson_multifluid_gmg::parse_gmg_settings(){
   }
 }
 
-void poisson_multifluid_gmg::post_checkpoint(){
-  CH_TIME("poisson_multifluid_gmg::post_checkpoint");
+void field_solver_multigrid::post_checkpoint(){
+  CH_TIME("field_solver_multigrid::post_checkpoint");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::post_checkpoint" << endl;
+    pout() << "field_solver_multigrid::post_checkpoint" << endl;
   }
 
   // Define the MG levels. 
   this->define_mg_levels();
 }
 
-void poisson_multifluid_gmg::allocate_internals(){
-  CH_TIME("poisson_multifluid_gmg::allocate_internals");
+void field_solver_multigrid::allocate_internals(){
+  CH_TIME("field_solver_multigrid::allocate_internals");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::allocate_internals" << endl;
+    pout() << "field_solver_multigrid::allocate_internals" << endl;
   }
 
-  poisson_solver::allocate_internals();
+  field_solver::allocate_internals();
 
   const int ncomp = 1;
 
@@ -259,10 +259,10 @@ void poisson_multifluid_gmg::allocate_internals(){
   data_ops::set_value(m_zero, 0.0);
 }
 
-bool poisson_multifluid_gmg::solve(const bool a_zerophi){
-  CH_TIME("poisson_multifluid_gmg::solve");
+bool field_solver_multigrid::solve(const bool a_zerophi){
+  CH_TIME("field_solver_multigrid::solve");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::solve" << endl;
+    pout() << "field_solver_multigrid::solve" << endl;
   }
   
   const bool converged = this->solve(m_state, m_source, m_sigma, a_zerophi);
@@ -271,13 +271,13 @@ bool poisson_multifluid_gmg::solve(const bool a_zerophi){
   return converged;
 }
 
-bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
+bool field_solver_multigrid::solve(MFAMRCellData&       a_state,
 				   const MFAMRCellData& a_source,
 				   const EBAMRIVData&   a_sigma,
 				   const bool           a_zerophi){
-  CH_TIME("poisson_multifluid_gmg::solve(mfamrcell, mfamrcell");
+  CH_TIME("field_solver_multigrid::solve(mfamrcell, mfamrcell");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::solve(mfamrcell, mfamrcell)" << endl;
+    pout() << "field_solver_multigrid::solve(mfamrcell, mfamrcell)" << endl;
   }
 
   bool converged = false;
@@ -311,7 +311,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   const Real t2 = MPI_Wtime();
   
 #if 0 // Debug
-  MayDay::Warning("poisson_multifluid_gmg::solve - debug mode");
+  MayDay::Warning("field_solver_multigrid::solve - debug mode");
   m_opfact->set_jump(0.0, 1.0);
   data_ops::set_value(source, 0.0);
 #endif
@@ -396,7 +396,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 #if POISSON_MF_GMG_TIMER
   const Real T = t5 - t0;
   pout() << endl;
-  pout() << "poisson_multifluid_gmg::solve breakdown" << endl;
+  pout() << "field_solver_multigrid::solve breakdown" << endl;
   pout() << "alloc :     " << 100.*(t1-t0)/T << "%" << endl;
   pout() << "set jump:   " << 100.*(t2-t1)/T << "%" << endl;
   pout() << "resid:      " << 100.*(t3-t2)/T << "%" << endl;
@@ -408,12 +408,12 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   return converged;
 }
 
-int poisson_multifluid_gmg::query_ghost() const {
+int field_solver_multigrid::query_ghost() const {
   return 3; // Need this many cells
 }
 
-void poisson_multifluid_gmg::set_potential(Real (*a_potential)(const Real a_time)){
-  poisson_solver::set_potential(a_potential);
+void field_solver_multigrid::set_potential(Real (*a_potential)(const Real a_time)){
+  field_solver::set_potential(a_potential);
 
   const RealVect origin  = m_amr->get_prob_lo();
 
@@ -439,8 +439,8 @@ void poisson_multifluid_gmg::set_potential(Real (*a_potential)(const Real a_time
 #endif
 }
 
-void poisson_multifluid_gmg::set_time(const int a_step, const Real a_time, const Real a_dt){
-  poisson_solver::set_time(a_step, a_time, a_dt);
+void field_solver_multigrid::set_time(const int a_step, const Real a_time, const Real a_dt){
+  field_solver::set_time(a_step, a_time, a_dt);
   m_bcfunc->set_time(a_time);
   for (int i = 0; i < m_wall_bcfunc.size(); i++){
     dirichlet_func* func = static_cast<dirichlet_func*> (&(*m_wall_bcfunc[i]));
@@ -452,17 +452,17 @@ void poisson_multifluid_gmg::set_time(const int a_step, const Real a_time, const
   }
 }
 
-void poisson_multifluid_gmg::auto_tune(){
-  CH_TIME("poisson_multifluid_gmg::auto_tune");
+void field_solver_multigrid::auto_tune(){
+  CH_TIME("field_solver_multigrid::auto_tune");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::auto_tune" << endl;
+    pout() << "field_solver_multigrid::auto_tune" << endl;
   }
 
   if(m_autotune){
     const ProblemDomain coarsest = m_amr->get_domains()[0];
 
     if(m_verbosity > 2){
-      pout() << "poisson_multifluid_gmg - autotuning solver parameters (bottom drop only)" << endl;
+      pout() << "field_solver_multigrid - autotuning solver parameters (bottom drop only)" << endl;
     }
       
       
@@ -515,23 +515,23 @@ void poisson_multifluid_gmg::auto_tune(){
   }
 }
 
-void poisson_multifluid_gmg::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
-  CH_TIME("poisson_multifluid_gmg::regrid");
+void field_solver_multigrid::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+  CH_TIME("field_solver_multigrid::regrid");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::regrid" << endl;
+    pout() << "field_solver_multigrid::regrid" << endl;
   }
-  poisson_solver::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  field_solver::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
   m_needs_setup = true;
 }
 
-void poisson_multifluid_gmg::register_operators(){
-  CH_TIME("poisson_multifluid_gmg::register_operators");
+void field_solver_multigrid::register_operators(){
+  CH_TIME("field_solver_multigrid::register_operators");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::register_operators" << endl;
+    pout() << "field_solver_multigrid::register_operators" << endl;
   }
 
   if(m_amr.isNull()){
-    MayDay::Abort("poisson_multifluid_gmg::register_operators - need to set amr_mesh!");
+    MayDay::Abort("field_solver_multigrid::register_operators - need to set amr_mesh!");
   }
   else{
     m_amr->register_operator(s_eb_coar_ave,     m_realm, phase::gas);
@@ -549,10 +549,10 @@ void poisson_multifluid_gmg::register_operators(){
   }
 }
 
-void poisson_multifluid_gmg::set_bottom_solver(const int a_whichsolver){
-  CH_TIME("poisson_multifluid_gmg::set_bottom_solver");
+void field_solver_multigrid::set_bottom_solver(const int a_whichsolver){
+  CH_TIME("field_solver_multigrid::set_bottom_solver");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::set_bottom_solver" << endl;
+    pout() << "field_solver_multigrid::set_bottom_solver" << endl;
   }
   
   if(a_whichsolver == 0 || a_whichsolver == 1 || a_whichsolver == 2){
@@ -572,14 +572,14 @@ void poisson_multifluid_gmg::set_bottom_solver(const int a_whichsolver){
     }
   }
   else{
-    MayDay::Abort("poisson_multifluid_gmg::set_bottom_solver - Unsupported solver type requested");
+    MayDay::Abort("field_solver_multigrid::set_bottom_solver - Unsupported solver type requested");
   }
 }
 
-void poisson_multifluid_gmg::set_botsolver_smooth(const int a_numsmooth){
-  CH_TIME("poisson_multifluid_gmg::set_botsolver_smooth");
+void field_solver_multigrid::set_botsolver_smooth(const int a_numsmooth){
+  CH_TIME("field_solver_multigrid::set_botsolver_smooth");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::set_botsolver_smooth" << endl;
+    pout() << "field_solver_multigrid::set_botsolver_smooth" << endl;
   }
   CH_assert(a_numsmooth > 0);
   
@@ -589,10 +589,10 @@ void poisson_multifluid_gmg::set_botsolver_smooth(const int a_numsmooth){
   pp.query("gmg_bottom_relax", m_numsmooth);
 }
 
-void poisson_multifluid_gmg::set_bottom_drop(const int a_bottom_drop){
-  CH_TIME("poisson_multifluid_gmg::set_bottom_drop");
+void field_solver_multigrid::set_bottom_drop(const int a_bottom_drop){
+  CH_TIME("field_solver_multigrid::set_bottom_drop");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::set_bottom_drop" << endl;
+    pout() << "field_solver_multigrid::set_bottom_drop" << endl;
   }
   
   m_bottom_drop = a_bottom_drop;
@@ -604,7 +604,7 @@ void poisson_multifluid_gmg::set_bottom_drop(const int a_bottom_drop){
   }
 }
 
-void poisson_multifluid_gmg::set_gmg_solver_parameters(relax      a_relax_type,
+void field_solver_multigrid::set_gmg_solver_parameters(relax      a_relax_type,
 						       amrmg      a_gmg_type,      
 						       const int  a_verbosity,          
 						       const int  a_pre_smooth,         
@@ -614,9 +614,9 @@ void poisson_multifluid_gmg::set_gmg_solver_parameters(relax      a_relax_type,
 						       const int  a_min_iter,
 						       const Real a_eps,               
 						       const Real a_hang){
-  CH_TIME("poisson_multifluid_gmg::set_gmg_solver_parameters");
+  CH_TIME("field_solver_multigrid::set_gmg_solver_parameters");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::set_gmg_solver_parameters" << endl;
+    pout() << "field_solver_multigrid::set_gmg_solver_parameters" << endl;
   }
 
   m_gmg_relax_type  = a_relax_type;
@@ -649,10 +649,10 @@ void poisson_multifluid_gmg::set_gmg_solver_parameters(relax      a_relax_type,
 
 
 
-void poisson_multifluid_gmg::set_coefficients(){
-  CH_TIME("poisson_multifluid_gmg::set_coefficients");
+void field_solver_multigrid::set_coefficients(){
+  CH_TIME("field_solver_multigrid::set_coefficients");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::set_coefficients" << endl;
+    pout() << "field_solver_multigrid::set_coefficients" << endl;
   }
 
   const int ncomps = 1;
@@ -670,10 +670,10 @@ void poisson_multifluid_gmg::set_coefficients(){
   this->set_permittivities(m_compgeom->get_dielectrics());
 }
 
-void poisson_multifluid_gmg::set_permittivities(const Vector<dielectric>& a_dielectrics){
-  CH_TIME("poisson_multifluid_gmg::set_permittivities");
+void field_solver_multigrid::set_permittivities(const Vector<dielectric>& a_dielectrics){
+  CH_TIME("field_solver_multigrid::set_permittivities");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::set_permittivities" << endl;
+    pout() << "field_solver_multigrid::set_permittivities" << endl;
   }
 
   if(a_dielectrics.size() > 0){
@@ -702,14 +702,14 @@ void poisson_multifluid_gmg::set_permittivities(const Vector<dielectric>& a_diel
   }
 }
 
-void poisson_multifluid_gmg::set_face_perm(EBFluxFAB&                a_perm,
+void field_solver_multigrid::set_face_perm(EBFluxFAB&                a_perm,
 					   const Box&                a_box,
 					   const RealVect&           a_origin,
 					   const Real&               a_dx,
 					   const Vector<dielectric>& a_dielectrics){
-  CH_TIME("poisson_multifluid_gmg::set_face_perm");
+  CH_TIME("field_solver_multigrid::set_face_perm");
   if(m_verbosity > 10){
-    pout() << "poisson_multifluid_gmg::set_face_perm" << endl;
+    pout() << "field_solver_multigrid::set_face_perm" << endl;
   }
 
   const int comp         = 0;
@@ -769,14 +769,14 @@ void poisson_multifluid_gmg::set_face_perm(EBFluxFAB&                a_perm,
 }
 
 
-void poisson_multifluid_gmg::set_eb_perm(BaseIVFAB<Real>&          a_perm,
+void field_solver_multigrid::set_eb_perm(BaseIVFAB<Real>&          a_perm,
 					 const Box&                a_box,
 					 const RealVect&           a_origin,
 					 const Real&               a_dx,
 					 const Vector<dielectric>& a_dielectrics){
-  CH_TIME("poisson_multifluid_gmg::set_eb_perm");
+  CH_TIME("field_solver_multigrid::set_eb_perm");
   if(m_verbosity > 10){
-    pout() << "poisson_multifluid_gmg::set_eb_perm" << endl;
+    pout() << "field_solver_multigrid::set_eb_perm" << endl;
   }
   
   const int comp         = 0;
@@ -804,10 +804,10 @@ void poisson_multifluid_gmg::set_eb_perm(BaseIVFAB<Real>&          a_perm,
   }
 }
 
-void poisson_multifluid_gmg::define_mg_levels(){
-  CH_TIME("poisson_multifluid_gmg::define_mg_level");
+void field_solver_multigrid::define_mg_levels(){
+  CH_TIME("field_solver_multigrid::define_mg_level");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::define_mg_levels" << endl;
+    pout() << "field_solver_multigrid::define_mg_levels" << endl;
   }
 
   const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
@@ -892,10 +892,10 @@ void poisson_multifluid_gmg::define_mg_levels(){
   m_has_mg_stuff = true;
 }
 
-void poisson_multifluid_gmg::setup_gmg(){
-  CH_TIME("poisson_multifluid_gmg::setup_gmg");
+void field_solver_multigrid::setup_gmg(){
+  CH_TIME("field_solver_multigrid::setup_gmg");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::setup_gmg" << endl;
+    pout() << "field_solver_multigrid::setup_gmg" << endl;
   }
 
   if(!m_has_mg_stuff){
@@ -908,10 +908,10 @@ void poisson_multifluid_gmg::setup_gmg(){
   m_needs_setup = false;
 }
 
-void poisson_multifluid_gmg::setup_operator_factory(){
-  CH_TIME("poisson_multifluid_gmg::setup_operator_factory");
+void field_solver_multigrid::setup_operator_factory(){
+  CH_TIME("field_solver_multigrid::setup_operator_factory");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::setup_operator_factory" << endl;
+    pout() << "field_solver_multigrid::setup_operator_factory" << endl;
   }
 
   const int nphases                      = m_mfis->num_phases();
@@ -1014,10 +1014,10 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   m_opfact->set_electrodes(m_compgeom->get_electrodes(), m_bcfunc);
 }
 
-void poisson_multifluid_gmg::setup_solver(){
-  CH_TIME("poisson_multifluid_gmg::setup_solver");
+void field_solver_multigrid::setup_solver(){
+  CH_TIME("field_solver_multigrid::setup_solver");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::setup_solver" << endl;
+    pout() << "field_solver_multigrid::setup_solver" << endl;
   }
 
   const int finest_level       = m_amr->get_finest_level();
@@ -1036,7 +1036,7 @@ void poisson_multifluid_gmg::setup_solver(){
       botsolver = &m_mfsolver;
       
       if(m_verbosity > 0){
-	pout() << "poisson_multifluid_gmg::poisson_multifluid_gmg - BiCGStab not supported for multifluid" << endl;
+	pout() << "field_solver_multigrid::field_solver_multigrid - BiCGStab not supported for multifluid" << endl;
       }
     }
 #endif
@@ -1087,18 +1087,18 @@ void poisson_multifluid_gmg::setup_solver(){
   m_gmg_solver.init(phi, rhs, finest_level, 0);
 }
 
-MFAMRCellData& poisson_multifluid_gmg::get_aco(){
+MFAMRCellData& field_solver_multigrid::get_aco(){
   return m_aco;
 }
 
-MFAMRFluxData& poisson_multifluid_gmg::get_bco(){
+MFAMRFluxData& field_solver_multigrid::get_bco(){
   return m_bco;
 }
 
-MFAMRIVData& poisson_multifluid_gmg::get_bco_irreg(){
+MFAMRIVData& field_solver_multigrid::get_bco_irreg(){
   return m_bco_irreg;
 }
 
-void poisson_multifluid_gmg::set_needs_setup(const bool& a_needs_setup){
+void field_solver_multigrid::set_needs_setup(const bool& a_needs_setup){
   m_needs_setup = a_needs_setup;
 }

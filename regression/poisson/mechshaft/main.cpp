@@ -1,5 +1,5 @@
 #include "driver.H"
-#include "poisson_multifluid_gmg.H"
+#include "field_solver_multigrid.H"
 #include "mechanical_shaft.H"
 #include "poisson_stepper.H"
 #include "ParmParse.H"
@@ -23,8 +23,8 @@ int main(int argc, char* argv[]){
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);
 
   // Set up basic Poisson, potential = 1 
-  auto timestepper = RefCountedPtr<poisson_stepper<poisson_multifluid_gmg> >
-     (new poisson_stepper<poisson_multifluid_gmg>());
+  auto timestepper = RefCountedPtr<poisson_stepper<field_solver_multigrid> >
+     (new poisson_stepper<field_solver_multigrid>());
 
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
