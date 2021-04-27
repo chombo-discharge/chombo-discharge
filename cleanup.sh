@@ -5,8 +5,6 @@ IMPLEM=FIELD_SOLVER_MULTIGRID
 factory=field_solver_factory
 factoryI=field_solver_factoryI
 
-echo $newName
-
 # Move poisson_solver.* field_solver.*
 mv src/field_solver/poisson_solver.cpp src/field_solver/$base.cpp
 mv src/field_solver/poisson_solver.H src/field_solver/$base.H
@@ -84,10 +82,12 @@ done
 for i in `find . -name "*.H" -type f`;
 do
     sed -i "s/poisson_factory/$factory/g" $i
+    sed -i "s/poisson_factoryI/$factoryI/g" $i
 done
 for i in `find . -name "*.cpp" -type f`;
 do
     sed -i "s/poisson_factory/$factory/g" $i
+    sed -i "s/poisson_factoryI/$factoryI/g" $i    
 done
 
 # Fix some typos in input and option files. 
