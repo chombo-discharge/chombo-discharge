@@ -28,7 +28,7 @@ src_dirs = $(DISCHARGE_HOME)/src \
 	$(DISCHARGE_HOME)/src/field_solver \
 	$(DISCHARGE_HOME)/src/particle \
 	$(DISCHARGE_HOME)/geometries/rod_plane_profile\
-	$(DISCHARGE_HOME)/physics/poisson \
+	$(DISCHARGE_HOME)/physics/field \
 
 
 include $(CHOMBO_HOME)/mk/Make.example

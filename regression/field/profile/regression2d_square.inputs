@@ -140,12 +140,12 @@ rod_plane_profile.square_width = 640.0123123E-6
 rod_plane_profile.square_depth = 440.01231231E-6
 
 # ====================================================================================================
-# POISSON_STEPPER CLASS OPTIONS
+# FIELD_STEPPER CLASS OPTIONS
 # ====================================================================================================
-poisson_stepper.verbosity    = -1              # Verbosity
-poisson_stepper.realm        = primal          # Primal realm
-poisson_stepper.load_balance = false           # Load balance or not.
-poisson_stepper.box_sorting  = shuffle         # If you load balance you can redo the box sorting. 
-poisson_stepper.init_rho     = 0.0             # Space charge density
-poisson_stepper.init_sigma   = 0.0             # Surface charge density
+field_stepper.verbosity    = -1              # Verbosity
+field_stepper.realm        = primal          # Primal realm
+field_stepper.load_balance = false           # Load balance or not.
+field_stepper.box_sorting  = shuffle         # If you load balance you can redo the box sorting. 
+field_stepper.init_rho     = 0.0             # Space charge density
+field_stepper.init_sigma   = 0.0             # Surface charge density
 

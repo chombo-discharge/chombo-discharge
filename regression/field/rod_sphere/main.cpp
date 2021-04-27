@@ -1,7 +1,7 @@
 #include "driver.H"
 #include "field_solver_multigrid.H"
 #include "rod_dielectric.H"
-#include "poisson_stepper.H"
+#include "field_stepper.H"
 #include "ParmParse.H"
 
 using namespace physics::poisson;
@@ -23,8 +23,8 @@ int main(int argc, char* argv[]){
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);
 
   // Set up basic Poisson, potential = 1 
-  auto timestepper = RefCountedPtr<poisson_stepper<field_solver_multigrid> >
-     (new poisson_stepper<field_solver_multigrid>());
+  auto timestepper = RefCountedPtr<field_stepper<field_solver_multigrid> >
+     (new field_stepper<field_solver_multigrid>());
 
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));

@@ -28,6 +28,6 @@ src_dirs = $(DISCHARGE_HOME)/src \
 	$(DISCHARGE_HOME)/src/particle \
 	$(DISCHARGE_HOME)/src/field_solver \
 	$(DISCHARGE_HOME)/geometries/rod_dielectric\
-	$(DISCHARGE_HOME)/physics/poisson \
+	$(DISCHARGE_HOME)/physics/field \
 
 include $(CHOMBO_HOME)/mk/Make.example

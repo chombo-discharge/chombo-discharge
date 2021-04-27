@@ -13,7 +13,7 @@ def write_template(args):
                      args.discharge_home + "/src/field_solver/" + args.field_solver + ".options",\
                      args.discharge_home + "/src/geometry/geo_coarsener.options", \
                      args.discharge_home + "/geometries/" + args.geometry + "/" + args.geometry + ".options", \
-                     args.discharge_home + "/physics/poisson/poisson_stepper.options"]
+                     args.discharge_home + "/physics/poisson/field_stepper.options"]
 
     for opt in options_files:
         if os.path.exists(opt):

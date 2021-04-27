@@ -1,12 +1,12 @@
 /*!
-  @file   poisson_stepper.H
+  @file   field_stepper.H
   @brief  time_stepper class for only solving the Poisson equation (with surface charge)
   @author Robert Marskar
   @data   March 2020
 */
 
-#ifndef _POISSON_STEPPER_
-#define _POISSON_STEPPER_
+#ifndef _FIELD_STEPPER_
+#define _FIELD_STEPPER_
 
 #include "time_stepper.H"
 #include "field_solver.H"
@@ -19,14 +19,14 @@ namespace physics {
       @brief Class that just solves the poisson equation
     */
     template <class T>
-    class poisson_stepper : public time_stepper{
+    class field_stepper : public time_stepper{
     public:
 
       static Real s_constant_one(const RealVect a_pos);
       static Real s_potential_one(const Real a_time);
 
-      poisson_stepper();
-      ~poisson_stepper();
+      field_stepper();
+      ~field_stepper();
 
       // Stuff below here is derived from time_stepper.
       // ----------------------------------------------
@@ -86,6 +86,6 @@ namespace physics {
   }
 }
 
-#include "poisson_stepperI.H"
+#include "field_stepperI.H"
 
 #endif
