@@ -14,7 +14,7 @@
 #include "mfis.H"
 #include "cdr_layout.H"
 #include "rte_layout.H"
-#include "poisson_solver.H"
+#include "field_solver.H"
 #include "sigma_solver.H"
 #include "time_stepper.H"
 
@@ -836,7 +836,7 @@ namespace physics {
       /*!
 	@brief Set the Poisson solver
       */
-      virtual void set_poisson(RefCountedPtr<poisson_solver>& a_poisson);
+      virtual void set_poisson(RefCountedPtr<field_solver>& a_poisson);
 
       /*!
 	@brief Set the RTE layout
@@ -918,7 +918,7 @@ namespace physics {
       /*!
 	@brief Get cdr solvers
       */
-      virtual RefCountedPtr<poisson_solver>& get_poisson();
+      virtual RefCountedPtr<field_solver>& get_poisson();
   
       /*!
 	@brief Get cdr solvers
@@ -985,7 +985,7 @@ namespace physics {
       /*!
 	@brief Poisson solver
       */
-      RefCountedPtr<poisson_solver> m_poisson;
+      RefCountedPtr<field_solver> m_poisson;
 
       /*!
 	@brief Surface charge solver

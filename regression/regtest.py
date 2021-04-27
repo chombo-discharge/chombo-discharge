@@ -12,24 +12,13 @@ if sys.version_info < MIN_PYTHON:
     sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
     
 # --------------------------------------------------
-# File holding regression tests, and the name of
-# this script
-# --------------------------------------------------
-#tests_file       = "geometry.ini"
-#tests_file       = "poisson.ini"
-#tests_file       = "advection_diffusion.ini"
-#tests_file       = "cdr_plasma.ini"
-#tests_file       = "rte.ini"
-tests_file       = "ito.ini"
-
-# --------------------------------------------------
 # Set up arguments that can be passed into this
 # script
 # --------------------------------------------------
 parser = argparse.ArgumentParser()
 parser.add_argument('-compile', '--compile',  help="Compile executables.", action='store_true')
 parser.add_argument('-run',                   help="MPI run command.", type=str, default="mpirun")
-parser.add_argument('-suites',                help="Test suite (e.g. 'geometry' or 'poisson')", nargs='+', default="all")
+parser.add_argument('-suites',                help="Test suite (e.g. 'geometry' or 'field')", nargs='+', default="all")
 parser.add_argument('-tests',                 help="Individual tests in test suite.", nargs='+', required=False)
 parser.add_argument('--silent',               help="Turn off unnecessary output.",   action='store_true')
 parser.add_argument('--clean',                help="Do a clean compile.",            action='store_true')

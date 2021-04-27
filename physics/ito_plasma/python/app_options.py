@@ -17,7 +17,7 @@ def write_template(args):
 
     options_files = [args.discharge_home + "/src/amr_mesh/amr_mesh.options", \
                      args.discharge_home + "/src/driver/driver.options", \
-                     args.discharge_home + "/src/poisson_solver/" + args.poisson_solver + ".options",\
+                     args.discharge_home + "/src/field_solver/" + args.field_solver + ".options",\
                      args.discharge_home + "/src/ito_solver/" + args.ito_solver + ".options",\
                      args.discharge_home + "/src/rte_solver/mc_photo.options",\
                      args.discharge_home + "/src/geometry/geo_coarsener.options", \

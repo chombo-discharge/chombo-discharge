@@ -6,7 +6,7 @@
 */
 
 #include "cdr_plasma_stepper.H"
-#include "poisson_multifluid_gmg.H"
+#include "field_solver_multigrid.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 #include "units.H"
@@ -3166,7 +3166,7 @@ void cdr_plasma_stepper::set_cdr(RefCountedPtr<cdr_layout<cdr_solver>>& a_cdr){
   m_cdr = a_cdr;
 }
 
-void cdr_plasma_stepper::set_poisson(RefCountedPtr<poisson_solver>& a_poisson){
+void cdr_plasma_stepper::set_poisson(RefCountedPtr<field_solver>& a_poisson){
   CH_TIME("cdr_plasma_stepper::set_poisson");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::set_poisson" << endl;
@@ -4114,7 +4114,7 @@ RefCountedPtr<cdr_layout<cdr_solver>>& cdr_plasma_stepper::get_cdr(){
   return m_cdr;
 }
 
-RefCountedPtr<poisson_solver>& cdr_plasma_stepper::get_poisson(){
+RefCountedPtr<field_solver>& cdr_plasma_stepper::get_poisson(){
   return m_poisson;
 }
 

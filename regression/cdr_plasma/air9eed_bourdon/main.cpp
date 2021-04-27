@@ -1,7 +1,7 @@
 #include "driver.H"
 #include "geo_coarsener.H"
-#include "poisson_factoryI.H"
-#include "poisson_multifluid_gmg.H"
+#include "field_solver_factoryI.H"
+#include "field_solver_multigrid.H"
 #include "cdr_layoutI.H"
 #include "cdr_gdnv.H"
 #include "rte_layoutI.H"
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new streamer_tagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
-  auto poi_fact = new poisson_factory<poisson_multifluid_gmg>();
+  auto poi_fact = new field_solver_factory<field_solver_multigrid>();
   auto cdr_fact = new cdr_factory<cdr_solver, cdr_gdnv>();
   auto rte_fact = new rte_factory<rte_solver, eddington_sp1>();
 

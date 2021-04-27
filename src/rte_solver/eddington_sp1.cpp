@@ -338,7 +338,7 @@ void eddington_sp1::register_operators(){
   }
 
     if(m_amr.isNull()){
-    MayDay::Abort("poisson_multifluid_gmg::register_operators - need to set amr_mesh!");
+    MayDay::Abort("eddington_sp1::register_operators - need to set amr_mesh!");
   }
   else{
     m_amr->register_operator(s_eb_coar_ave,     m_realm, m_phase);

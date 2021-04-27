@@ -8,7 +8,7 @@
 #include "ito_plasma_stepper.H"
 #include "data_ops.H"
 #include "units.H"
-#include "poisson_multifluid_gmg.H"
+#include "field_solver_multigrid.H"
 
 #include <EBArith.H>
 #include <PolyGeom.H>
@@ -841,7 +841,7 @@ void ito_plasma_stepper::set_ito(RefCountedPtr<ito_layout<ito_solver> >& a_ito){
   m_ito = a_ito;
 }
 
-void ito_plasma_stepper::set_poisson(RefCountedPtr<poisson_solver>& a_poisson){
+void ito_plasma_stepper::set_poisson(RefCountedPtr<field_solver>& a_poisson){
   CH_TIME("ito_plasma_stepper::set_poisson");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::set_poisson" << endl;
