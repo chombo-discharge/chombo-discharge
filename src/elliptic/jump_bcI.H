@@ -10,7 +10,7 @@
 
 #include "jump_bc.H"
 
-#define DEBUG_JUMP 1
+#define DEBUG_JUMP 0
 
 inline
 void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit){

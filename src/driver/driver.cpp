@@ -866,8 +866,6 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 #endif
 
       // Rebuild input parameters
-      // MPI_Barrier(Chombo_MPI::comm);
-      // Real TT = -MPI_Wtime();
       this->rebuildParmParse();
       this->parse_runtime_options();
       m_amr->parse_runtime_options();
@@ -875,8 +873,6 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
       if(!m_celltagger.isNull()){
 	m_celltagger->parse_runtime_options();
       }
-      // TT += MPI_Wtime();
-      // if(procID() == 0) std::cout << TT << std::endl;
     }
   }
 
