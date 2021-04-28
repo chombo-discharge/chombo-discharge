@@ -132,7 +132,7 @@ namespace physics {
       Real m_ion_diffusion; // Ion diffusion coefficient
 
       Real m_photoexc_eff; // Photoexcitation efficiency
-      Real m_photo_eff;    // Photoionizationn efficiency
+      Real m_photoi_eff;    // Photoionizationn efficiency
 
 
       void read_file_entries(lookup_table& a_table, const std::string a_string);

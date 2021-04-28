@@ -36,8 +36,8 @@ air3_bourdon::air3_bourdon() {
   pp.get("ion_mobility",                  m_ion_mobility);
 
   pp.get("excitation_efficiency",         m_photoexc_eff);
-  pp.get("photoionization_efficiency",    m_photo_eff);
-  
+  pp.get("photoionization_efficiency",    m_photoi_eff);
+
   pp.get("electrode_townsend2",           m_townsend2_electrode);
   pp.get("dielectric_townsend2",          m_townsend2_dielectric);
   pp.get("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
@@ -59,25 +59,25 @@ air3_bourdon::air3_bourdon() {
     infile.close();
 
     read_file_entries(m_e_mobility, air3_bourdon::s_bolsig_mobility);
-    read_file_entries(m_e_diffco, air3_bourdon::s_bolsig_diffco);
-    read_file_entries(m_e_alpha, air3_bourdon::s_bolsig_alpha);
-    read_file_entries(m_e_eta, air3_bourdon::s_bolsig_eta);
+    read_file_entries(m_e_diffco,   air3_bourdon::s_bolsig_diffco);
+    read_file_entries(m_e_alpha,    air3_bourdon::s_bolsig_alpha);
+    read_file_entries(m_e_eta,      air3_bourdon::s_bolsig_eta);
     
     m_e_mobility.scale_x(m_N*units::s_Td);
-    m_e_mobility.scale_y(1./m_N); 
-    m_e_mobility.make_uniform(m_uniform_entries);
-
     m_e_diffco.scale_x(m_N*units::s_Td);
-    m_e_diffco.scale_y(1./m_N); 
-    m_e_diffco.make_uniform(m_uniform_entries);
-
     m_e_alpha.scale_x(m_N*units::s_Td);
-    m_e_alpha.scale_y(m_N); 
-    m_e_alpha.make_uniform(m_uniform_entries);
-
     m_e_eta.scale_x(m_N*units::s_Td);
+    
+    m_e_mobility.scale_y(1./m_N); 
+    m_e_diffco.scale_y(1./m_N); 
+    m_e_alpha.scale_y(m_N); 
     m_e_eta.scale_y(m_N);
+
+    m_e_diffco.make_uniform(m_uniform_entries);
+    m_e_mobility.make_uniform(m_uniform_entries);
+    m_e_alpha.make_uniform(m_uniform_entries);
     m_e_eta.make_uniform(m_uniform_entries);
+
   }
   else{
     MayDay::Abort("air3_bourdon::parse_transport_file - could not find transport data");
@@ -88,7 +88,7 @@ air3_bourdon::air3_bourdon() {
   parse_domain_bc();
 
   // Instantiate species. 
-  instantiate_species();      
+  instantiate_species();
 }
 
 air3_bourdon::~air3_bourdon() {
@@ -250,7 +250,7 @@ void air3_bourdon::advance_reaction_network(Vector<Real>&          a_particle_so
   const air3_bourdon::photon_two*   photon2 = static_cast<air3_bourdon::photon_two*>   (&(*m_rte_species[m_pho2_idx]));
   const air3_bourdon::photon_three* photon3 = static_cast<air3_bourdon::photon_three*> (&(*m_rte_species[m_pho3_idx]));
 
-  const Real Sph = m_photo_eff*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_photon_densities[m_pho1_idx]
+  const Real Sph = m_photoi_eff*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_photon_densities[m_pho1_idx]
 						       + photon2->get_A()*a_photon_densities[m_pho2_idx]
 						       + photon3->get_A()*a_photon_densities[m_pho3_idx]);
   Se += Sph;
