@@ -203,7 +203,7 @@
          Dlo = diffco(chf_ix[i;      j;      k])
          Dhi = diffco(chf_ix[i+ioff; j+joff; k+koff])      	 
          D   = max(Dlo, Dhi)
-         idt = (2*CH_SPACEDIM*D)/dx*dx
+         idt = (2*CH_SPACEDIM*D)/(dx*dx)
 	 
          invDt(chf_ix[i;j;k]) = max(invDt(chf_ix[i;j;k]), idt)
       chf_enddo	 

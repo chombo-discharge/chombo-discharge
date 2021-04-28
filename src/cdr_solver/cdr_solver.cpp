@@ -1931,6 +1931,7 @@ Real cdr_solver::compute_advection_diffusion_dt(){
 	const BaseIVFAB<Real>& diffcoEB = (*m_diffco_eb[lvl])[dit()];
 	const Box box                   = dbl.get(dit());
 
+	dt.setVal(0.0);
 
 	// Regular cells. First compute dt = 2*D*d/(dx*dx)
 	BaseFab<Real>& dt_fab         = dt.getSingleValuedFAB();

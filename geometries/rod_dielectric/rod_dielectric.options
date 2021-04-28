@@ -2,8 +2,8 @@
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
 rod_dielectric.electrode.on              = true          # Use electrode or not
-rod_dielectric.electrode.endpoint1       = 0 0 2         # One endpoint
-rod_dielectric.electrode.endpoint2       = 0 0 0.5       # Other endpoint
+rod_dielectric.electrode.endpoint1       = 0 0 1         # One endpoint
+rod_dielectric.electrode.endpoint2       = 1 1 1         # Other endpoint
 rod_dielectric.electrode.radius          = 0.1           # Electrode radius
 rod_dielectric.electrode.live            = true          # Live or not
 
