@@ -64,19 +64,35 @@ void cdr_tga::advance_euler(EBAMRCellData&       a_new_state,
     const int ncomp        = 1;
     const int finest_level = m_amr->get_finest_level();
 
-    // Do the aliasing stuff
+    // Set convergence metric. Make zero = 0 and m_scratch = phi^k + dt*S^k. Then
+    // compute the residue L(zero) - m_scratch which sets the convergence metric. 
+    EBAMRCellData zero;
+    m_amr->allocate(zero, m_realm, m_phase, ncomp);
+    data_ops::set_value(zero, 0.0);
+    data_ops::copy(m_scratch, a_old_state);
+    data_ops::incr(m_scratch, a_source, a_dt);
+
+    Vector<LevelData<EBCellFAB>* > orez;
+    Vector<LevelData<EBCellFAB>* > shr;
+    m_amr->alias(orez, zero);
+    m_amr->alias(shr,  m_scratch);
+
+    m_eulersolver->resetAlphaAndBeta(1.0, -a_dt);
+    
+    const Real zero_resid = m_gmg_solver->computeAMRResidual(orez, shr, finest_level, 0);
+    const Real stopcrit   = zero_resid;
+    m_gmg_solver->m_convergenceMetric = zero_resid;
+
+
+    // Now do the solve. 
     Vector<LevelData<EBCellFAB>* > new_state, old_state, source;
     m_amr->alias(new_state, a_new_state);
     m_amr->alias(old_state, a_old_state);
     m_amr->alias(source,    a_source);
 
-    const Real alpha = 0.0;
-    const Real beta  = 1.0;
 
-    m_eulersolver->resetAlphaAndBeta(alpha, beta);
-    data_ops::set_value(m_diffco_eb, 0.0);
-    
     // Euler solve
+    data_ops::set_value(m_diffco_eb, 0.0);
     m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
     const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
@@ -496,7 +512,7 @@ void cdr_tga::setup_multigrid(){
 				    m_gmg_max_iter,
 				    m_gmg_eps,
 				    m_gmg_hang,
-				    1.E-99); // Residue set through other means
+				    1.E-90); // Residue set through other means
 
 }
 
