@@ -62,7 +62,7 @@ public:
   */
   virtual void parse_options() = 0;
 
-    /*!
+  /*!
     @brief Parse class options
   */
   virtual void parse_runtime_options() = 0;
@@ -139,9 +139,9 @@ public:
     @brief Implicit diffusion TGA advance with source terms
   */
   virtual void advance_tga(EBAMRCellData&       a_new_state,
-			     const EBAMRCellData& a_old_state,
-			     const EBAMRCellData& a_source,
-			     const Real           a_dt);
+			   const EBAMRCellData& a_old_state,
+			   const EBAMRCellData& a_source,
+			   const Real           a_dt);
 
   /*!
     @brief Implicit diffusion Euler advance without source terms
@@ -317,7 +317,5 @@ protected:
     @brief Parse solver settings for geometric multigrid
   */
   virtual void parse_gmg_settings();
-
-
 };
 #endif
