@@ -26,7 +26,7 @@ def write_template(args):
     mainf = open(main_filename, "w")
     mainf.write('#include "driver.H"\n')
     mainf.write('#include "geo_coarsener.H"\n')
-    mainf.write('#include "poisson_factoryI.H"\n')
+    mainf.write('#include "field_solver_factoryI.H"\n')
     mainf.write('#include "' + args.field_solver + '.H"\n')
     mainf.write('#include "cdr_layoutI.H"\n')
     mainf.write('#include "' + args.cdr_solver + '.H"\n')
@@ -90,7 +90,7 @@ def write_template(args):
     mainf.write("\n")
 
     mainf.write("  // Create solver factories\n")
-    mainf.write("  auto poi_fact = new poisson_factory<" + args.field_solver + ">();\n")
+    mainf.write("  auto poi_fact = new field_solver_factory<" + args.field_solver + ">();\n")
     mainf.write("  auto cdr_fact = new cdr_factory<cdr_solver, " + args.cdr_solver + ">();\n")
     mainf.write("  auto rte_fact = new rte_factory<rte_solver, " + args.rte_solver + ">();\n")
     mainf.write("\n")
