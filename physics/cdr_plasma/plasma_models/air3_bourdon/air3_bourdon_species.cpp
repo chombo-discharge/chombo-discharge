@@ -71,7 +71,7 @@ air3_bourdon::photon_one::photon_one(){
   ParmParse pp("air3_bourdon");
   pp.get("photon1_A_coeff",      m_A);
   pp.get("photon1_lambda_coeff", m_lambda);
-  pp.get("gas_pressure",         pressure);
+  pp.get("pressure",             pressure);
   
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
@@ -86,7 +86,7 @@ air3_bourdon::photon_two::photon_two(){
   ParmParse pp("air3_bourdon");
   pp.get("photon2_A_coeff",      m_A);
   pp.get("photon2_lambda_coeff", m_lambda);
-  pp.get("gas_pressure",         pressure);
+  pp.get("pressure",             pressure);
   
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
@@ -100,7 +100,7 @@ air3_bourdon::photon_three::photon_three(){
   ParmParse pp("air3_bourdon");
   pp.get("photon3_A_coeff",      m_A);
   pp.get("photon3_lambda_coeff", m_lambda);
-  pp.get("gas_pressure",         pressure);
+  pp.get("pressure",             pressure);
   
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
