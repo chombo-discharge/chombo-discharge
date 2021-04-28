@@ -34,18 +34,18 @@ namespace physics {
 				    const Real             a_dx,
 				    const Real             a_dt,
 				    const Real             a_time,
-				    const Real             a_kappa) const;
+				    const Real             a_kappa) const override;
 
 
       Vector<Real> compute_cdr_diffusion_coefficients(const Real         a_time,
 						      const RealVect     a_pos,
 						      const RealVect     a_E,
-						      const Vector<Real> a_cdr_densities) const;
+						      const Vector<Real> a_cdr_densities) const override;
   
       Vector<RealVect> compute_cdr_velocities(const Real         a_time,
 					      const RealVect     a_pos,
 					      const RealVect     a_E,
-					      const Vector<Real> a_cdr_densities) const;
+					      const Vector<Real> a_cdr_densities) const override;
   
       Vector<Real> compute_cdr_domain_fluxes(const Real           a_time,
 					     const RealVect       a_pos,
@@ -56,7 +56,7 @@ namespace physics {
 					     const Vector<Real>   a_cdr_velocities,
 					     const Vector<Real>   a_cdr_gradients,
 					     const Vector<Real>   a_rte_fluxes,
-					     const Vector<Real>   a_extrap_cdr_fluxes) const;
+					     const Vector<Real>   a_extrap_cdr_fluxes) const override;
   
       Vector<Real> compute_cdr_electrode_fluxes(const Real         a_time,
 						const RealVect     a_pos,
@@ -66,7 +66,7 @@ namespace physics {
 						const Vector<Real> a_cdr_velocities,
 						const Vector<Real> a_cdr_gradients,
 						const Vector<Real> a_rte_fluxes,
-						const Vector<Real> a_extrap_cdr_fluxes) const;
+						const Vector<Real> a_extrap_cdr_fluxes) const override;
 
       Vector<Real> compute_cdr_dielectric_fluxes(const Real         a_time,
 						 const RealVect     a_pos,
@@ -76,11 +76,11 @@ namespace physics {
 						 const Vector<Real> a_cdr_velocities,
 						 const Vector<Real> a_cdr_gradients,
 						 const Vector<Real> a_rte_fluxes,
-						 const Vector<Real> a_extrap_cdr_fluxes) const;
+						 const Vector<Real> a_extrap_cdr_fluxes) const override;
 
-      Real initial_sigma(const Real a_time, const RealVect a_pos) const;
+      Real initial_sigma(const Real a_time, const RealVect a_pos) const override;
 
-      Real compute_alpha(const RealVect a_E) const;
+      Real compute_alpha(const RealVect a_E) const override;
 
     protected:
 

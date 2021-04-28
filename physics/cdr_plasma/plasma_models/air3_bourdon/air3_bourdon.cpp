@@ -196,7 +196,7 @@ void air3_bourdon::parse_domain_bc(){
 
 void air3_bourdon::advance_reaction_network(Vector<Real>&          a_particle_sources,
 					    Vector<Real>&          a_photon_sources,
-					    Vector<Real>&          a_particle_densities,
+					    const Vector<Real>     a_particle_densities,
 					    const Vector<RealVect> a_particle_gradients,
 					    const Vector<Real>     a_photon_densities,
 					    const RealVect         a_E,
@@ -204,7 +204,7 @@ void air3_bourdon::advance_reaction_network(Vector<Real>&          a_particle_so
 					    const Real             a_dx,
 					    const Real             a_dt,
 					    const Real             a_time,
-					    const Real             a_kappa) const{
+					    const Real             a_kappa) const {
   const Real E      = a_E.vectorLength();
   const Real ve     = E*m_e_mobility.get_entry(E);
   
@@ -250,7 +250,7 @@ void air3_bourdon::advance_reaction_network(Vector<Real>&          a_particle_so
   const air3_bourdon::photon_two*   photon2 = static_cast<air3_bourdon::photon_two*>   (&(*m_rte_species[m_pho2_idx]));
   const air3_bourdon::photon_three* photon3 = static_cast<air3_bourdon::photon_three*> (&(*m_rte_species[m_pho3_idx]));
 
-  const Real Sph = m_photo_eff*units::s_c0*m_fracO2*m_p*(photon1->get_A()*a_photon_densities[m_pho1_idx]
+  const Real Sph = m_photo_eff*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_photon_densities[m_pho1_idx]
 						       + photon2->get_A()*a_photon_densities[m_pho2_idx]
 						       + photon3->get_A()*a_photon_densities[m_pho3_idx]);
   Se += Sph;
