@@ -499,13 +499,13 @@ void phase_realm::define_flux_reg(const int a_lmin, const int a_regsize){
 
       if(has_fine){
 	m_flux_reg[lvl] = RefCountedPtr<EBFluxRegister> (new EBFastFluxRegister(m_grids[lvl+1],
-									    m_grids[lvl],
-									    m_ebisl[lvl+1],
-									    m_ebisl[lvl],
-									    m_domains[lvl].domainBox(),
-									    m_ref_ratios[lvl],
-									    comps,
-									    &(*m_ebis)));
+										m_grids[lvl],
+										m_ebisl[lvl+1],
+										m_ebisl[lvl],
+										m_domains[lvl].domainBox(),
+										m_ref_ratios[lvl],
+										comps,
+										&(*m_ebis)));
       }
     }
   }
