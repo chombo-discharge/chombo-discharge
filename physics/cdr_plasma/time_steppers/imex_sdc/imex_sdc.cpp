@@ -504,7 +504,6 @@ Real imex_sdc::advance(const Real a_dt){
   // TLDR:  When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
   //        advancement. If you think that this may not be the case, activate the debugging below
   // ---------------------------------------------------------------------------------------------------
-  pout() << "entering advance" << endl;
   // Initialize integrations. If we do corrections, we need FD(phi_0) since this is implicit. If we do adaptive_dt, we should
   // also a
   imex_sdc::copy_cdr_to_phi_m0();
@@ -538,9 +537,7 @@ Real imex_sdc::advance(const Real a_dt){
       imex_sdc::reconcile_integrands();
 
       // SDC correction along whole interval
-      pout() << "doing integrate" << endl;
       imex_sdc::integrate(actual_dt, m_time, true);
-      pout() << "integrate done" << endl;
 
       // Compute error and check if we need to keep iterating
       imex_sdc::finalize_errors();
@@ -589,7 +586,7 @@ Real imex_sdc::advance(const Real a_dt){
   // Store current error. 
   m_have_err  = true;
   m_pre_error = m_max_error;
-  pout() << "done advance" << endl;  
+
   return actual_dt;
 }
 
