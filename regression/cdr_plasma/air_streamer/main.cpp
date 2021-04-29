@@ -8,7 +8,7 @@
 #include "eddington_sp1.H"
 #include "air3_bourdon.H"
 #include "rod_dielectric.H"
-#include "godunov.H"
+#include "imex_sdc.H"
 #include "streamer_tagger.H"
 #include "ParmParse.H"
 
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
 
   // Set up physics 
   RefCountedPtr<cdr_plasma_physics> physics      = RefCountedPtr<cdr_plasma_physics> (new air3_bourdon());
-  RefCountedPtr<cdr_plasma_stepper> timestepper  = RefCountedPtr<cdr_plasma_stepper> (new godunov(physics));
+  RefCountedPtr<cdr_plasma_stepper> timestepper  = RefCountedPtr<cdr_plasma_stepper> (new imex_sdc(physics));
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new streamer_tagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories

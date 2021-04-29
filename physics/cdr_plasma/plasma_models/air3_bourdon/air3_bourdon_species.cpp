@@ -45,7 +45,7 @@ air3_bourdon::M_minus::M_minus(){
   ParmParse pp("air3_bourdon");
   std::string str;
   
-  pp.get("mobile_ions", m_mobile);    
+  pp.get("mobile_ions",    m_mobile);    
   pp.get("diffusive_ions", m_diffusive);
 }
 

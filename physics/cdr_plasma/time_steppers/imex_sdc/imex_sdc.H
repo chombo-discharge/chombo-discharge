@@ -121,8 +121,6 @@ namespace physics {
       Vector<Real> m_tm;
       Vector<Real> m_dtm;
 
-      time_code m_timecode;
-
       std::string m_which_nodes;
 
       // Get functions for storage
