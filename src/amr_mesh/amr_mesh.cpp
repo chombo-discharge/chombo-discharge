@@ -1619,11 +1619,9 @@ void amr_mesh::parse_grid_generation(){
 
 void amr_mesh::parse_irreg_growth(){
   ParmParse pp("amr_mesh");
-  int buffer;
-  pp.get("irreg_growth", buffer);
-  if(buffer > 0){
-    m_irreg_growth = buffer;
-  }
+  pp.get("irreg_growth", m_irreg_growth);
+
+  m_irreg_growth = std::max(m_irreg_growth, 0);
 }
 
 void amr_mesh::parse_blocking_factor(){

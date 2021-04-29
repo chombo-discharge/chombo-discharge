@@ -257,7 +257,7 @@ void driver::get_geom_tags(){
 
   // Grow tags. This is an ad-hoc fix that prevents ugly grid near EBs (i.e. cases where only ghost cells are used
   // for elliptic equations)
-  const int growth = Max(1, m_amr->get_irreg_growth());
+  const int growth = m_amr->get_irreg_growth();
   for (int lvl = 0; lvl < maxdepth; lvl++){
     m_geom_tags[lvl].grow(growth);
   }
