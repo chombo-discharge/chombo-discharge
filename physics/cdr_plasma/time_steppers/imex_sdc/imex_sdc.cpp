@@ -83,7 +83,6 @@ void imex_sdc::parse_runtime_options(){
   parse_source_comp();
 
   // Specific to this class
-  parse_nodes();
   parse_diffusion_coupling();
   parse_adaptive_options();
   parse_debug_options();
@@ -165,12 +164,10 @@ void imex_sdc::parse_adaptive_options(){
   pp.get("max_error",        m_err_thresh);
   pp.get("error_index",      m_error_idx);
   pp.get("safety",           m_safety);
+  pp.get("print_report",     m_print_report);
+  pp.get("adaptive_dt",      m_adaptive_dt);
 
-  pp.get("print_report", str);
-  m_print_report = (str == "true") ? true : false;
-  
-  pp.get("adaptive_dt", str);
-  m_adaptive_dt = (str == "true") ? true : false;
+  m_min_corr = (!m_adaptive_dt) ? 0 : m_min_corr;
 }
 
 void imex_sdc::parse_debug_options(){
@@ -507,7 +504,6 @@ Real imex_sdc::advance(const Real a_dt){
   // TLDR:  When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
   //        advancement. If you think that this may not be the case, activate the debugging below
   // ---------------------------------------------------------------------------------------------------
-
   // Initialize integrations. If we do corrections, we need FD(phi_0) since this is implicit. If we do adaptive_dt, we should
   // also a
   imex_sdc::copy_cdr_to_phi_m0();
@@ -590,7 +586,7 @@ Real imex_sdc::advance(const Real a_dt){
   // Store current error. 
   m_have_err  = true;
   m_pre_error = m_max_error;
-  
+
   return actual_dt;
 }
 

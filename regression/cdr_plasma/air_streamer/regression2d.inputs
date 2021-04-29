@@ -11,7 +11,7 @@ amr_mesh.lo_corner       = -2E-2 -1E-2 # Low corner of problem domain
 amr_mesh.hi_corner       =  2E-2  1E-2 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 128 64      # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 5           # Maximum amr depth
+amr_mesh.max_amr_depth   = 6           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
@@ -40,10 +40,10 @@ driver.geometry_scan_level             = 0                # Geometry scan level 
 driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
 driver.plot_interval                   = 10               # Plot interval
 driver.checkpoint_interval             = 10               # Checkpoint interval
-driver.regrid_interval                 = 10               # Regrid interval
+driver.regrid_interval                 = 5                # Regrid interval
 driver.write_regrid_files              = false            # Write regrid files or not.
 driver.write_restart_files             = false            # Write restart files or not
-driver.initial_regrids                 = 0                # Number of initial regrids
+driver.initial_regrids                 = 1                # Number of initial regrids
 driver.start_time                      = 0                # Start time (fresh simulations only)
 driver.stop_time                       = 10.E-0           # Stop time
 driver.max_steps                       = 100              # Maximum number of steps
@@ -57,7 +57,7 @@ driver.max_chk_depth                   = -1               # Restrict chechkpoint
 driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
 driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
 driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
-driver.allow_coarsening                = true             # Allows removal of grid levels according to cell_tagger
+driver.allow_coarsening                = false            # Allows removal of grid levels according to cell_tagger
 driver.refine_geometry                 = -1               # Refine geometry, -1 => Refine all the way down
 driver.refine_electrodes               = -1               # Refine electrode surfaces. -1 => equal to refine_geometry
 driver.refine_dielectrics              = -1               # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -200,24 +200,82 @@ rod_dielectric.sphere.radius             = 0.5           # Radius
 
 
 # ====================================================================================================
-# GODUNOV CLASS OPTIONS
+# IMEX_SDC CLASS OPTIONS
+#
+# This class uses semi-implicit spectral deferred corrections. Diffusion is handled implicitly,
+# and advection-reaction is handled explicitly.
+#
+# The maximum possible global order of accuracy is (p+1) where p is the number of subintervals. Each
+# correction raises the order by 1 (corr_iter=0 is the first order solution). To reach the maximum
+# possible order, you should perform p correction iterations. 
+#
+# 
 # ====================================================================================================
-godunov.verbosity        = -1        # Class verbosity
-godunov.solver_verbosity = -1        # Individual solver verbosities
-godunov.min_dt           = 0.        # Minimum permitted time step
-godunov.max_dt           = 1.E99     # Maximum permitted time step
-godunov.cfl              = 0.8       # CFL number
-godunov.diffusion        = implicit  # Diffusion. 'explicit', 'implicit', or 'auto'
-godunov.transport        = euler     # Transport algorithm. 'euler' or 'rk2'
-godunov.relax_time       = 1.0       # Relaxation time constant
-godunov.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
-godunov.fast_rte         = 1         # Solve RTE every this time steps. Mostly for debugging.
-godunov.fhd              = false     # Set to true if you want to add a stochastic diffusion flux
-godunov.source_comp      = interp    # Interpolated 'interp' or cell-average 'cell_ave' for source computations
-godunov.extrap_advect    = true      # Use time-extrapolation capabilities (if they exist) in the cdr_solver
-godunov.floor_cdr        = true      # Floor CDR solvers to avoid negative densities
-godunov.debug            = false     # Turn on debugging messages. Also monitors mass if it was injected into the system. 
+imex_sdc.verbosity        = -1      # Class verbosity
+imex_sdc.solver_verbosity = -1      # Individual solver verbosities
+imex_sdc.fast_rte         = 1       # Solve RTE every this time steps
+imex_sdc.fast_poisson     = 1       # Solve Poisson every this time steps	
+imex_sdc.min_dt           = 0.      # Minimum permitted time step
+imex_sdc.max_dt           = 1.E99   # Maximum permitted time step
+imex_sdc.cfl              = 0.9     # CFL number
+imex_sdc.relax_time       = 1.0     # Relaxation time constant
+imex_sdc.source_comp      = interp  # Interpolated 'interp' or cell-average 'cell_ave' for source computations
 
+# ------------------------------------
+# Nodes, subintervals, and corrections
+# ------------------------------------
+imex_sdc.quad_nodes   = lobatto     # Nodes to be used for quadrature. 'lobatto', 'uniform', or 'chebyshev'
+imex_sdc.subintervals = 1           # Number of subintervals. This will be the maximum possible order.
+imex_sdc.corr_iter    = 0           # Number of iterations of the correction equation. Should be (subintervals-1)
+                                    # for maximum order
+
+# ---------------------------------------------------------	
+# Diffusive coupling
+#
+# This defines the weak coupling used for the implicit diffusion advance. 
+# ---------------------------------------------------------
+imex_sdc.diffusive_coupling = weak  # Diffusion coupling, either 'weak' or 'strong'
+imex_sdc.use_tga            = false # Use second order diffusion per substep ('true')
+imex_sdc.num_diff_corr      = 0     # Number of corrections for 'strong'
+
+# Adaptive time stepping
+# ---------------------------------------------------------
+imex_sdc.print_report    = false    # Print report with error and stuff	
+imex_sdc.adaptive_dt     = false    # Use adaptive time stepping
+imex_sdc.error_norm      = 0        # Error norm (0 = Linf)
+imex_sdc.min_corr        = 1        # Minimum number of corrections
+imex_sdc.max_retries     = 100      # Maximum number of tries (for step rejection)
+imex_sdc.max_growth      = 1.2      # Maximum permissible time step growth
+imex_sdc.decrease_safety = 0.9      # Fudge factor when we decrease the time step. 
+imex_sdc.min_cfl         = 0.1      # Minimum CFL
+imex_sdc.max_cfl         = 0.75     # Maximum CFL
+imex_sdc.max_error       = 1.E-4    # Error threshold
+imex_sdc.error_index     = -1       # Error index. If -1, evaluate all CDR solvers	
+imex_sdc.safety          = 0.75     # Safety factor for time stepping
+
+# ---------------------------------------------------------	
+# "Asymptotic preserving". Development feature. 
+# ---------------------------------------------------------	
+imex_sdc.use_AP        = false      # Turn on the "asymptotic preserving" feature.
+
+# ---------------------------------------------------------	
+# Debugging options
+# ---------------------------------------------------------
+imex_sdc.consistent_E      = true   # Use consistent E-field computations (update in between RK stages)
+imex_sdc.consistent_rte    = true   # Use consistent RTE updates
+imex_sdc.compute_v         = true   # Compute v in between substeps. 
+imex_sdc.compute_S         = true   # Compute S in between substeps.
+imex_sdc.compute_D         = true   # Compute S in between substeps.
+imex_sdc.do_advec_src      = true   # Turn off code functionality. Only for debugging 
+imex_sdc.do_diffusion      = true   # Turn off code functionality. Only for debugging
+imex_sdc.do_poisson        = true   # Turn off code functionality. Only for debugging
+imex_sdc.do_rte            = true   # Turn off code functionality. Only for debugging
+imex_sdc.profile_steps     = false  # Profile time steps with order, accuracy, cfl, etc.
+
+# ---------------------
+# Advection extrapolation. Currently does NOT work with subcycling (but I'm working on it...)
+# ---------------------
+imex_sdc.extrap_advect = true      # Time extrapolate with source and diffusion in advection step
 
 # ====================================================================================================
 # AIR3_BOURDON CLASS OPTIONS
@@ -267,10 +325,10 @@ streamer_tagger.verbosity         = -1           # Verbosity
 streamer_tagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 streamer_tagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
 streamer_tagger.box1_hi           = 0.0 0.0 0.0  # these two corners
-streamer_tagger.buffer            = 4            # Grow tagged cells
+streamer_tagger.buffer            = 8            # Grow tagged cells
 
 streamer_tagger.refine_curvature  = 1.0          # Curvature refinement
 streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	
-streamer_tagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
+streamer_tagger.refine_alpha      = 0.5          # Set alpha refinement. Lower  => More mesh
 streamer_tagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
 streamer_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth

@@ -31,7 +31,7 @@ src_dirs = $(DISCHARGE_HOME)/src \
 	$(DISCHARGE_HOME)/geometries/rod_dielectric\
 	$(DISCHARGE_HOME)/physics/cdr_plasma \
 	$(DISCHARGE_HOME)/physics/cdr_plasma/cell_taggers/streamer_tagger\
-	$(DISCHARGE_HOME)/physics/cdr_plasma/time_steppers/godunov\
+	$(DISCHARGE_HOME)/physics/cdr_plasma/time_steppers/imex_sdc\
 	$(DISCHARGE_HOME)/physics/cdr_plasma/plasma_models/air3_bourdon
 
 
