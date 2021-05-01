@@ -23,7 +23,7 @@ amr_mesh.eb_ghost        = 4           # Set number of of ghost cells for EB stu
 amr_mesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
-amr_mesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
+amr_mesh.ghost_interp    = quad        # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr_mesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
 amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
 
@@ -94,7 +94,7 @@ field_solver_multigrid.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi'
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
 geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-geo_coarsener.box1_lo     = -2 -0.05       # Coarsening box, lo
+geo_coarsener.box1_lo     = -2 0.05       # Coarsening box, lo
 geo_coarsener.box1_hi     =  2 2.0       # Coarsening box, hi
 geo_coarsener.box1_lvl    = 0            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
@@ -103,8 +103,8 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
 rod_dielectric.electrode.on              = true          # Use electrode or not
-rod_dielectric.electrode.endpoint1       = 0.001 -0.12        # One endpoint
-rod_dielectric.electrode.endpoint2       = 0 2           # Other endpoint
+rod_dielectric.electrode.endpoint1       = -0.0 -0.12        # One endpoint
+rod_dielectric.electrode.endpoint2       = 0.0 0.5           # Other endpoint
 rod_dielectric.electrode.radius          = 0.1           # Electrode radius
 rod_dielectric.electrode.live            = true          # Live or not
 

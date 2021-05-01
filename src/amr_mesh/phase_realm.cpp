@@ -657,7 +657,9 @@ void phase_realm::define_gradsten(const int a_lmin){
 	  sten.clear();
 	  for (int dir = 0; dir < SpaceDim; dir++){
 	    VoFStencil dirsten;
-	    EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, &cfivs[dit()], dir);
+	    //	    EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, &cfivs[dit()], dir);
+	    EBArith::getFirstDerivStencilWidthOne(dirsten, vof, ebisbox, dir, dx, NULL, dir);
+	    //	    EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, NULL, dir);
 	    sten += dirsten;
 	  }
 	}
