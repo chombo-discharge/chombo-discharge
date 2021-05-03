@@ -8,7 +8,7 @@
 #ifndef _LAPACKUTILS_
 #define _LAPACKUTILS_
 
-#include "Vector.H"
+#include <vector>
 #include "RealVect.H"
 
 /*!
@@ -83,12 +83,12 @@ namespace LaPackUtils {
     \f]
     The input and output matrices are assumed to be stored column-major so that a_A[0] is the first column of \f$A\f$. 
   */
-  bool computeSVD(Vector<Real>&       a_linU,
-		  Vector<Real>&       a_linSigma,
-		  Vector<Real>&       a_linVtran,
-		  const Vector<Real>& a_linA,
-		  const int&          a_M,
-		  const int&          a_N);
+  bool computeSVD(std::vector<Real>&       a_linU,
+		  std::vector<Real>&       a_linSigma,
+		  std::vector<Real>&       a_linVtran,
+		  const std::vector<Real>& a_linA,
+		  const int&               a_M,
+		  const int&               a_N);
 
   /*!
     @brief Compute the pseudoinverse of matrix through singular value decomposition
@@ -97,10 +97,10 @@ namespace LaPackUtils {
     @param[in] a_M Number of rows in A
     @param[in] a_N Number of colums in A
   */
-  bool computePseudoInverse(Vector<Real>&       a_linAplus,
-			    const Vector<Real>& a_linA,
-			    const int&          a_M,
-			    const int&          a_N);
+  bool computePseudoInverse(std::vector<Real>&       a_linAplus,
+			    const std::vector<Real>& a_linA,
+			    const int&               a_M,
+			    const int&               a_N);
   /*!
     @brief Linearize a matrix to column major Fortran form by assuming row or major colum format of the input matrix. 
     @param[out] a_linA Linearized matrix
@@ -109,7 +109,7 @@ namespace LaPackUtils {
     @param[in] a_A Input matrix
     @param[in] a_format Format of input matrix, either 'C' or 'R'. If 'C', then a_A[0] is the first column of the matrix. Likewise, if 'R' then a_A[0] is the first row of the matrix. 
   */
-  void linearizeMatrix(Vector<Real>& a_linA, int& a_M, int& a_N, const Vector<Vector<Real> >& a_A, const char& a_format);
+  void linearizeMatrix(std::vector<Real>& a_linA, int& a_M, int& a_N, const std::vector<std::vector<Real> >& a_A, const char& a_format);
 
   /*!
     @brief Linearize a matrix to column major Fortran form by column major format of the input matrix. 
@@ -118,7 +118,7 @@ namespace LaPackUtils {
     @param[out] a_N Number of columns
     @param[in] a_A Input matrix
   */
-  void linearizeColumnMajorMatrix(Vector<Real>& a_linA, int& a_M, int& a_N, const Vector<Vector<Real> >& a_A);
+  void linearizeColumnMajorMatrix(std::vector<Real>& a_linA, int& a_M, int& a_N, const std::vector<std::vector<Real> >& a_A);
 
   
   /*!
@@ -128,7 +128,7 @@ namespace LaPackUtils {
     @param[out] a_N Number of columns
     @param[in] a_A Input matrix
   */
-  void linearizeRowMajorMatrix(Vector<Real>& a_linA, int& a_M, int& a_N, const Vector<Vector<Real> >& a_A);
+  void linearizeRowMajorMatrix(std::vector<Real>& a_linA, int& a_M, int& a_N, const std::vector<std::vector<Real> >& a_A);
 
 
 
@@ -141,11 +141,11 @@ namespace LaPackUtils {
     @param[in] a_format Format of input matrix, either 'C' or 'R'. If 'C', then a_A[0] is the first column of the matrix. 
     Likewise, if 'R' then a_A[0] is the first row of the matrix. 
   */
-  void deLinearizeMatrix(Vector<Vector<Real> >& a_A,
-			 const int&             a_M,
-			 const int&             a_N,
-			 const Vector<Real>&    a_linA,
-			 const char&            a_format);
+  void deLinearizeMatrix(std::vector<std::vector<Real> >& a_A,
+			 const int&                       a_M,
+			 const int&                       a_N,
+			 const std::vector<Real>&         a_linA,
+			 const char&                      a_format);
 
   /*!
     @brief Delinearize a linearized matrix from column major Fortran to column major form
@@ -154,10 +154,10 @@ namespace LaPackUtils {
     @param[in] a_N Number of columns
     @param[in] a_linA Linearized matrix
   */
-  void deLinearizeColumnMajorMatrix(Vector<Vector<Real> >& a_A,
-				    const int&             a_M,
-				    const int&             a_N,
-				    const Vector<Real>&    a_linA);
+  void deLinearizeColumnMajorMatrix(std::vector<std::vector<Real> >& a_A,
+				    const int&                       a_M,
+				    const int&                       a_N,
+				    const std::vector<Real>&         a_linA);
 				   
   /*!
     @brief Delinearize a linearized matrix from column major Fortran to row major form
@@ -166,9 +166,9 @@ namespace LaPackUtils {
     @param[in] a_N Number of columns
     @param[in] a_linA Linearized matrix
   */
-  void deLinearizeRowMajorMatrix(Vector<Vector<Real> >& a_A,
-				 const int&             a_M,
-				 const int&             a_N,
-				 const Vector<Real>&    a_linA);
+  void deLinearizeRowMajorMatrix(std::vector<std::vector<Real> >& a_A,
+				 const int&                       a_M,
+				 const int&                       a_N,
+				 const std::vector<Real>&         a_linA);
 }
 #endif

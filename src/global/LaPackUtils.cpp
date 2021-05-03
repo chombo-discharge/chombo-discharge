@@ -11,12 +11,12 @@
 
 #include "CH_Timer.H"
 
-bool LaPackUtils::computeSVD(Vector<Real>&       a_linU,
-			     Vector<Real>&       a_linSigma,
-			     Vector<Real>&       a_linVT,
-			     const Vector<Real>& a_linA,
-			     const int&          a_M,
-			     const int&          a_N){
+bool LaPackUtils::computeSVD(std::vector<Real>&       a_linU,
+			     std::vector<Real>&       a_linSigma,
+			     std::vector<Real>&       a_linVT,
+			     const std::vector<Real>& a_linA,
+			     const int&               a_M,
+			     const int&               a_N){
   CH_TIME("LaPackUtils::computeSVD");
 
   int M = a_M;
@@ -28,7 +28,6 @@ bool LaPackUtils::computeSVD(Vector<Real>&       a_linU,
     A[i] = a_linA[i];
   }
 
-  //
   const int mx = Max(M,N);
   const int mn = Min(M,N);
 
@@ -84,17 +83,16 @@ bool LaPackUtils::computeSVD(Vector<Real>&       a_linU,
   return foundSVD;
 }
 
-bool LaPackUtils::computePseudoInverse(Vector<Real>&       a_linAplus,
-				       const Vector<Real>& a_linA,
-				       const int&          a_M,
-				       const int&          a_N){
+bool LaPackUtils::computePseudoInverse(std::vector<Real>&       a_linAplus,
+				       const std::vector<Real>& a_linA,
+				       const int&               a_M,
+				       const int&               a_N){
   CH_TIME("LaPackUtils::computePseudoInverse");
 
   // Compute the singular value decomposition
-  Vector<Real> linU, linVT, linSigma;
+  std::vector<Real> linU, linVT, linSigma;
   const bool foundSVD = computeSVD(linU, linSigma, linVT, a_linA, a_M, a_N);
 
-  //
   if(foundSVD){
 
     int M = a_M;
@@ -105,7 +103,7 @@ bool LaPackUtils::computePseudoInverse(Vector<Real>&       a_linAplus,
     for (int i = 0; i < linSigma.size(); i++){
       maxS = linSigma[i] > maxS ? linSigma[i] : maxS;
     }
-    const Real eps = std::numeric_limits<double>::epsilon();
+    const Real eps = std::numeric_limits<Real>::epsilon();
     const Real tol = eps*Max(M,N)*maxS;
     
     // Need to storage the matrices in a form useable by LaPack, and then use dgemm to multiply them. 
@@ -177,10 +175,10 @@ bool LaPackUtils::computePseudoInverse(Vector<Real>&       a_linAplus,
   return foundSVD;
 }
 
-void LaPackUtils::linearizeColumnMajorMatrix(Vector<Real>& a_linA,
-					     int& a_M,
-					     int& a_N,
-					     const Vector<Vector<Real> >& a_A){
+void LaPackUtils::linearizeColumnMajorMatrix(std::vector<Real>&                     a_linA,
+					     int&                                   a_M,
+					     int&                                   a_N,
+					     const std::vector<std::vector<Real> >& a_A){
   CH_TIME("LaPackUtils::linearizeColumMajorMatrix");
 
   // Number of rows and columns
@@ -197,10 +195,10 @@ void LaPackUtils::linearizeColumnMajorMatrix(Vector<Real>& a_linA,
   }
 }
 
-void LaPackUtils::linearizeRowMajorMatrix(Vector<Real>&                a_linA,
-					  int&                         a_M,
-					  int&                         a_N,
-					  const Vector<Vector<Real> >& a_A){
+void LaPackUtils::linearizeRowMajorMatrix(std::vector<Real>&                     a_linA,
+					  int&                                   a_M,
+					  int&                                   a_N,
+					  const std::vector<std::vector<Real> >& a_A){
   CH_TIME("LaPackUtils::linearizeRowMajorMatrix");
   
   // Number of rows and columns
@@ -217,14 +215,13 @@ void LaPackUtils::linearizeRowMajorMatrix(Vector<Real>&                a_linA,
   }
 }
 
-void LaPackUtils::linearizeMatrix(Vector<Real>&                a_linA,
-				  int&                         a_M,
-				  int&                         a_N,
-				  const Vector<Vector<Real> >& a_A,
-				  const char&                  a_format){
+void LaPackUtils::linearizeMatrix(std::vector<Real>&                     a_linA,
+				  int&                                   a_M,
+				  int&                                   a_N,
+				  const std::vector<std::vector<Real> >& a_A,
+				  const char&                            a_format){
   CH_TIME("LaPackUtils::linearizeMatrix");
 
-  //
   if(a_format == 'C'){
     linearizeColumnMajorMatrix(a_linA, a_M, a_N, a_A);
   }
@@ -236,10 +233,10 @@ void LaPackUtils::linearizeMatrix(Vector<Real>&                a_linA,
   }
 }
 
-void LaPackUtils::deLinearizeColumnMajorMatrix(Vector<Vector<Real> >& a_A,
-					       const int&             a_M,
-					       const int&             a_N,
-					       const Vector<Real>&    a_linA){
+void LaPackUtils::deLinearizeColumnMajorMatrix(std::vector<std::vector<Real> >& a_A,
+					       const int&                       a_M,
+					       const int&                       a_N,
+					       const std::vector<Real>&         a_linA){
   CH_TIME("LaPackUtils::deLinearizeColumnMajorMatrix");
 
   // Resize the matrix
@@ -257,10 +254,10 @@ void LaPackUtils::deLinearizeColumnMajorMatrix(Vector<Vector<Real> >& a_A,
   } 
 }
 
-void LaPackUtils::deLinearizeRowMajorMatrix(Vector<Vector<Real> >& a_A,
-					    const int&             a_M,
-					    const int&             a_N,
-					    const Vector<Real>&    a_linA){
+void LaPackUtils::deLinearizeRowMajorMatrix(std::vector<std::vector<Real> >& a_A,
+					    const int&                       a_M,
+					    const int&                       a_N,
+					    const std::vector<Real>&         a_linA){
   CH_TIME("LaPackUtils::deLinearizeRowMajorMatrix");
 
   // Resize the matrix
@@ -278,11 +275,11 @@ void LaPackUtils::deLinearizeRowMajorMatrix(Vector<Vector<Real> >& a_A,
   }  
 }
 
-void LaPackUtils::deLinearizeMatrix(Vector<Vector<Real> >& a_A,
-				    const int&             a_M,
-				    const int&             a_N,
-				    const Vector<Real>&    a_linA,
-				    const char&            a_format){
+void LaPackUtils::deLinearizeMatrix(std::vector<std::vector<Real> >& a_A,
+				    const int&                       a_M,
+				    const int&                       a_N,
+				    const std::vector<Real>&         a_linA,
+				    const char&                      a_format){
   CH_TIME("LaPackUtils::deLinearizeMatrix");
 
   if(a_format == 'C'){

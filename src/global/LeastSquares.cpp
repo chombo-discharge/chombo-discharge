@@ -8,8 +8,6 @@
 #include "LeastSquares.H"
 #include "LaPackUtils.H"
 
-#include "EBCellFactory.H"
-#include "BaseIVFactory.H"
 #include "EBArith.H"
 
 Vector<Real> LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacements, const Real a_pow){
@@ -330,7 +328,7 @@ bool LeastSquares::getLSqInterpStencil(VoFStencil&             a_stencil,
 
   // Let LaPack compute the Moore-Penrose pseudoinverse
   Vector<Real> linAPlus(M*N, 0.0);
-  const bool foundSVD = LaPackUtils::computePseudoInverse(linAPlus, linA, M, N);
+  const bool foundSVD = LaPackUtils::computePseudoInverse(linAPlus.stdVector(), linA.stdVector(), M, N);
 
   if(foundSVD){
 
@@ -430,7 +428,7 @@ bool LeastSquares::getLSqGradientStencil(VoFStencil&             a_stencil,
 
   // Let LaPack compute the Moore-Penrose pseudoinverse
   Vector<Real> linAPlus(M*N, 0.0);
-  const bool foundSVD = LaPackUtils::computePseudoInverse(linAPlus, linA, M, N);
+  const bool foundSVD = LaPackUtils::computePseudoInverse(linAPlus.stdVector(), linA.stdVector(), M, N);
 
   if(foundSVD){
 
