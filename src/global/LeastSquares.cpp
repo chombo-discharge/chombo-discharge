@@ -10,6 +10,10 @@
 
 #include "EBArith.H"
 
+Vector<VolIndex> LeastSquares::getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect a_normal){
+  MayDay::Warning("LeastSquares::getAllVoFsInQuadrant - not implemented");
+}
+
 Vector<VolIndex> LeastSquares::getAllVoFsInRadius(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVoF){
 
   Vector<VolIndex> ret;
@@ -162,7 +166,7 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
 
   // Get Vofs in radius
   const int radius = 1;
-  Vector<VolIndex> allVoFs = LeastSquares::getAllVoFsInRadius(a_vof, a_ebisbox, radius, false);
+  Vector<VolIndex> allVoFs = LeastSquares::getAllVoFsInRadius(a_vof, a_ebisbox, radius, true);
 
   // Get minimum number of equations to reach this order. 
   const int order  = 1;

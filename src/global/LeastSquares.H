@@ -29,6 +29,11 @@ namespace LeastSquares {
     Centroid,
     Boundary
   };
+
+  /*!
+    @brief Get All VoFs in quadrant
+  */
+  Vector<VolIndex> getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect a_normal);
   
   /*!
     @brief Get all VoFs within radius a_radius. Add the start vof if you want it. 
