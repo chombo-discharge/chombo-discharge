@@ -130,6 +130,4 @@ namespace LeastSquares {
   int getTaylorExpansionSize(const int a_Q);
 };
 
-#include "LeastSquaresI.H"
-
 #endif

@@ -21,20 +21,21 @@ bool LaPackUtils::computeSVD(std::vector<double>&       a_linU,
 			     const std::vector<double>& a_linA,
 			     const int&                 a_M,
 			     const int&                 a_N){
-  int M = a_M;
-  int N = a_N;
+
 
   // linA must be stored as a double array in order to interface into LaPack
-  double A[M*N];
+  double A[a_M*a_N];
   for (int i = 0; i < a_linA.size(); i++){
     A[i] = a_linA[i];
   }
 
-  const int mx = std::max(M,N);
-  const int mn = std::min(M,N);
+  const int mx = std::max(a_M,a_N);
+  const int mn = std::min(a_M,a_N);
 
   // This is the stuff that is needed for LaPack
   char JOBZ  = 'A';
+  int M      = a_M;
+  int N      = a_N;
   int LDA    = M;
   int LDU    = M;
   int LDVT   = N;
@@ -77,7 +78,7 @@ bool LaPackUtils::computeSVD(std::vector<double>&       a_linU,
     for (int i = 0; i < N*N; i++){
       a_linVT[i]  = VT[i];
     }
-    for (int i = 0; i < std::min(M, N); i ++){
+    for (int i = 0; i < std::min(M, N); i++){
       a_linSigma[i*(M+1)] = S[i];
     }
   }
@@ -95,21 +96,18 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
 
   if(foundSVD){
 
-    int M = a_M;
-    int N = a_N;
-
     // Pseudoinversion of Sigma can be nasty for singular values close to zero. Define a tolerance for this. 
     double maxS = std::numeric_limits<double>::min();
-    for (int i = 0; i < linSigma.size(); i++){
-      maxS = (linSigma[i] > maxS) ? linSigma[i] : maxS;
+    for (const auto& s : linSigma){
+      maxS = std::max(maxS, s);
     }
     const double eps = std::numeric_limits<double>::epsilon();
-    const double tol = eps*std::max(M,N)*maxS;
+    const double tol = eps*std::max(a_M,a_N)*maxS;
     
     // Need to storage the matrices in a form useable by LaPack, and then use dgemm to multiply them. 
-    double U[M*M];
-    double SigmaReciprocal[M*N];
-    double VT[N*N];
+    double U[a_M*a_M];
+    double SigmaReciprocal[a_M*a_N];
+    double VT[a_N*a_N];
 
     for (int i = 0; i < linU.size(); i++){
       U[i] = linU[i];
@@ -126,50 +124,174 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
       }
     }
 
-    // Compute C = V*Transpose(SigmaReciprocal) by using dgemm
-    double C[N*M];
-    char TRANSA = 'T';
-    char TRANSB = 'T';
-    double ALPHA = 1.0;
-    double BETA  = 0.0;
-    dgemm_(&TRANSA,
-	   &TRANSB,
-	   &N,
-	   &M,
-	   &N,
-	   &ALPHA,
-	   VT,
-	   &N,
-	   SigmaReciprocal,
-	   &M,
-	   &BETA,
-	   C,
-	   &N);
+#if 0 // New way
+    // Compute the transpose of the stuff above.
+    double UT[a_M*a_M];
+    double V[a_N*a_N];
+    double SigmaT[a_N*a_M];
+    for (int i = 0; i < a_M; i++){
+      for (int j = 0; j < a_M; j++){
+	const int idx1 = linearIndex(i, j, a_M, a_M);
+	const int idx2 = linearIndex(j, i, a_M, a_M); // Swap rows and colums
 
-    // Now compute Aplus = C*Transpose(U)
-    double Aplus[N*M];
-    TRANSA = 'N';
-    TRANSB = 'T';
-    dgemm_(&TRANSA,
-	   &TRANSB,
-	   &N,
-	   &M,
-	   &M,
-	   &ALPHA,
-	   C,
-	   &N,
-	   U,
-	   &M,
-	   &BETA,
-	   Aplus,
-	   &N);
+	UT[idx2] = U[idx1];
+      }
+    }
+
+    for (int i = 0; i < a_N; i++){
+      for (int j = 0; j < a_N; j++){
+	const int idx1 = linearIndex(i, j, a_N, a_N);
+	const int idx2 = linearIndex(j, i, a_N, a_N);
+
+	V[idx2] = VT[idx1];
+      }
+    }
+
+    for (int i = 0; i < a_M; i++){ // Row
+      for (int j = 0; j < a_N; j++){ // Column
+	const int idx1 = linearIndex(i, j, a_M, a_N);
+	const int idx2 = linearIndex(j, i, a_N, a_M);
+
+	SigmaT[idx2] = SigmaReciprocal[idx1];
+      }
+    }
+
+
+
+
+    // Want to compute C = V*SigmaT. V is N*N and SigmaT is N*M. The result is N*M. 
+    double C[a_N*a_M];
+    {
+      char TRANSA  = 'N';
+      char TRANSB  = 'N';
+      int M        = a_N;
+      int N        = a_M;
+      int K        = a_N;
+      double ALPHA = 1.0;
+      int LDA      = M;
+      int LDB      = K;
+      double BETA  = 0.0;
+      int LDC      = M;
+      dgemm_(&TRANSA,
+	     &TRANSB,
+	     &M,
+	     &N,
+	     &K,
+	     &ALPHA,
+	     V,
+	     &LDA,
+	     SigmaT,
+	     &LDB,
+	     &BETA,
+	     C,
+	     &LDC);
+    }
+
+    // Now compute C*UT where C is N*M and UT is M*M
+    double Aplus[a_N*a_M];
+    {
+      char TRANSA  = 'N';
+      char TRANSB  = 'N';
+      int M        = a_N;
+      int N        = a_M;
+      int K        = a_M;
+      double ALPHA = 1.0;
+      int LDA      = M;
+      int LDB      = K;
+      double BETA  = 0.0;
+      int LDC      = M;
+      dgemm_(&TRANSA,
+	     &TRANSB,
+	     &M,
+	     &N,
+	     &K,
+	     &ALPHA,
+	     C,
+	     &LDA,
+	     UT,
+	     &LDB,
+	     &BETA,
+	     Aplus,
+	     &LDC);
+    }
+    
+#else
+    // Compute C = V*Transpose(SigmaReciprocal) by using dgemm. The dimensions are:
+    //
+    // VT = N*N               => op(A) is N*N
+    // SigmaReciprocal = M*N  => op(B) is N*M
+    //
+    // We want to compute V*Transpose(SigmaReciprocal) onto C, which is N*M big.
+    //
+    double C[a_N*a_M];
+    {
+      char TRANSA  = 'T';
+      char TRANSB  = 'T';
+      double ALPHA = 1.0;
+      double BETA  = 0.0;
+      int M        = a_N; // VT is N*N;
+      int N        = a_M; // B = SigmaReciprocal which is M*N so op(B) = B**T is N*M
+      int K        = a_N;
+      int LDA      = K;
+      int LDB      = N;
+      int LDC      = M;
+      dgemm_(&TRANSA,
+	     &TRANSB,
+	     &M,
+	     &N,
+	     &K,
+	     &ALPHA,
+	     VT,
+	     &LDA,
+	     SigmaReciprocal,
+	     &LDB,
+	     &BETA,
+	     C,
+	     &LDC);
+    }
+
+    // Now compute Aplus = C*Transpose(U). C is a N*M matrix. Here, U is an M*M matrix and C is an N*M matrix.
+    // So we have
+    //
+    // op(A) => M*M
+    // op(B) => N*M
+    double Aplus[a_N*a_M];
+    {
+      char TRANSA  = 'N';
+      char TRANSB  = 'T';
+      double ALPHA = 1.0;
+      double BETA  = 0.0;
+      int M        = a_N;
+      int N        = a_M;
+      int K        = a_M;
+      int LDA      = M;
+      int LDB      = K;
+      int LDC      = M;
+      dgemm_(&TRANSA,
+	     &TRANSB,
+	     &M,
+	     &N,
+	     &K,
+	     &ALPHA,
+	     C,
+	     &LDA,
+	     U,
+	     &LDB,
+	     &BETA,
+	     Aplus,
+	     &LDC);
+    }
+#endif
 
 
     // Put Aplus into the output vector
-    a_linAplus.resize(N*M);
-    for (int i = 0; i < N*M; i++){
+    a_linAplus.resize(a_N*a_M);
+    for (int i = 0; i < a_N*a_M; i++){
       a_linAplus[i] = Aplus[i];
     }
+  }
+  else{
+    MayDay::Abort("SVD not found!!!");
   }
 
   return foundSVD;

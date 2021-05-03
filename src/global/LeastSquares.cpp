@@ -107,7 +107,7 @@ VoFStencil LeastSquares::getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
   if(K < D) MayDay::Abort("LeastSquares::getGradStenOrderOne -- not enough equations, must have K >= 3");
   
   // Build A, which is a KxD matrix. 
-  Vector<Real> linA(K*D);
+  Vector<Real> linA(K*D, 0.0);
   for (int k = 0; k < K; k++){ // Row
     for (int d = 0; d < D; d++){ // Column
       const int idx = LaPackUtils::linearIndex(k, d, K, D);
