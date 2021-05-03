@@ -5,6 +5,7 @@
   @date Dec. 2017
 */
 
+#include "LeastSquares.H"
 #include "mfdirichletconductivityebbc.H"
 
 bool mfdirichletconductivityebbc::s_areaFracWeighted = false;
