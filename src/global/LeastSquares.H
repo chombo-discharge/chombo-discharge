@@ -57,9 +57,9 @@ namespace LeastSquares {
     @param[in]  a_dx Resolution
   */
   Vector<RealVect> getCenterToEBDisplacements(const VolIndex&         a_vof,
-						      const Vector<VolIndex>& a_monoVoFs,
-						      const EBISBox&          a_ebisbox,
-						      const Real&             a_dx);
+					      const Vector<VolIndex>& a_monoVoFs,
+					      const EBISBox&          a_ebisbox,
+					      const Real&             a_dx);
 
   /*!
     @brief Build the vector of distances that goes into LeastSquares::getCentroidToCenterInterpStencil
@@ -72,6 +72,39 @@ namespace LeastSquares {
 						    const Vector<VolIndex>& a_monoVoFs,
 						    const EBISBox&          a_ebisbox,
 						    const Real&             a_dx);
+
+  /*!
+    @brief Get the least squares gradient stencil
+    @param[out] a_stencil Gradient stencil (has SpaceDim components)
+    @param[in]  a_monoVoFs VolIndexes
+    @param[in]  a_displ Displacements
+    @param[in]  a_Q Interpolation order. 
+    @param[in]  a_pow Weighting "power", i.e. w = 1/|x1-x0|^p where p is power. 
+  */
+  bool getLSqGradientStencil(VoFStencil&             a_stencil,
+			     const Vector<VolIndex>& a_monoVoFs,
+			     const Vector<RealVect>& a_displ,
+			     const int               a_Q,
+			     const int               a_pow);
+
+  /*!
+    @brief Compute a least squares gradient stencil on the EB centroid
+    @param[out] a_stencil Stencil
+    @param[in]  a_vof Input vof
+    @param[in]  a_ebisbox ebisbox
+    @param[in]  a_dx Resolution
+    @param[in]  a_order Interpolation order
+    @param[in]  a_radius Radius for least squares problem. Typically a_radius >= a_order. If you put radius = -1, we 
+    will first try a_radius = a_order, and then increase until the system has more neighbors than unknowns. 
+    @return True if stencil was found. False otherwise. 
+  */
+  bool getEbCentroidGradientStencil(VoFStencil&     a_stencil,
+				    const VolIndex& a_vof,
+				    const EBISBox&  a_ebisbox,
+				    const Real&     a_dx,
+				    const int       a_order = 1,
+				    const int       a_radius = 1,
+				    const int       a_weight = 1);
   
   /*!
     @brief Compute an interpolation stencil that interpolates from cell-centered data to centroid-centered data
@@ -103,11 +136,11 @@ namespace LeastSquares {
     @return True if stencil was found. False otherwise. 
   */
   bool getCenterToEBInterpStencil(VoFStencil&     a_stencil,
-					  const VolIndex& a_vof,
-					  const EBISBox&  a_ebisbox,
-					  const Real&     a_dx,
-					  const int       a_order = 1,
-					  const int       a_radius = 1);
+				  const VolIndex& a_vof,
+				  const EBISBox&  a_ebisbox,
+				  const Real&     a_dx,
+				  const int       a_order = 1,
+				  const int       a_radius = 1);
   /*!
     @brief Compute an interpolation stencil that interpolates from centroid-centered data to cell-centered data
     @param[out] a_stencil Stencil
@@ -126,26 +159,7 @@ namespace LeastSquares {
 					const int       a_order = 1,
 					const int       a_radius = 1);
 
-  /*!
-    @brief Compute a least squares gradient stencil on the EB centroid
-    @param[out] a_stencil Stencil
-    @param[in]  a_vof Input vof
-    @param[in]  a_ebisbox ebisbox
-    @param[in]  a_dx Resolution
-    @param[in]  a_order Interpolation order
-    @param[in]  a_radius Radius for least squares problem. Typically a_radius >= a_order. If you put radius = -1, we 
-    will first try a_radius = a_order, and then increase until the system has more neighbors than unknowns. 
-    @return True if stencil was found. False otherwise. 
-  */
-  bool getEbCentroidGradientStencil(VoFStencil&     a_stencil,
-				    const VolIndex& a_vof,
-				    const EBISBox&  a_ebisbox,
-				    const Real&     a_dx,
-				    const int       a_order = 1,
-				    const int       a_radius = 1);
-  
 
-  
   /*!
     @brief Get the least squares interpolation stencil
     @param[out] a_stencil Stencil
@@ -158,17 +172,7 @@ namespace LeastSquares {
 			   const Vector<RealVect>& a_displ,
 			   const int               a_Q);
 
-  /*!
-    @brief Get the least squares gradient stencil
-    @param[out] a_stencil Gradient stencil (has SpaceDim components)
-    @param[in]  a_monoVoFs VolIndexes
-    @param[in]  a_displ Displacements
-    @param[in]  a_Q Interpolation order. 
-  */
-  bool getLSqGradientStencil(VoFStencil&             a_stencil,
-			     const Vector<VolIndex>& a_monoVoFs,
-			     const Vector<RealVect>& a_displ,
-			     const int               a_Q);
+
 
   /*!
     @brief Get neighbouring VolIndex. Return false if there are fewer neighbours than a_minVoFs. If a_radius = -1, adjust radius
