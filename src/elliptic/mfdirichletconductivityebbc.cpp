@@ -7,6 +7,7 @@
 
 #include "LeastSquares.H"
 #include "mfdirichletconductivityebbc.H"
+#include "ParmParse.H"
 
 bool mfdirichletconductivityebbc::s_areaFracWeighted = false;
 bool mfdirichletconductivityebbc::s_quadrant_based   = true;
@@ -306,6 +307,28 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
     }
     a_weight = 0.0;
   }
+
+#if 1 // Test LeastSquares
+  ParmParse pp("lsq");
+
+  bool useLSQ = false;
+  pp.query("use", useLSQ);
+
+  if(useLSQ){
+    VoFStencil mySten;
+
+    const bool foundLSQ = LeastSquares::getBndryGradStencil(mySten, a_vof, a_ebisbox, m_dx[0], 1, 1, 1);
+
+    if(!foundLSQ) {
+      std::cout << "did not find lsq gradient stencil" << std::endl;
+    }
+    else{
+      a_stencil = LeastSquares::projectGradSten(mySten, normal);
+      a_weight  = -LeastSquares::sumAllWeights(a_stencil);
+    }
+  }
+ 
+#endif
 
 }
 

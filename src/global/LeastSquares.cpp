@@ -64,7 +64,7 @@ Vector<RealVect> LeastSquares::getDisplacements(const CellPosition      a_from,
 
 Vector<Real> LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow){
   Vector<Real> ret(a_displacements.size(), 1.0);
-
+  
   if(a_pow > 0){
     for (int i = 0; i < a_displacements.size(); i++){
       const RealVect& d = a_displacements[i];
@@ -132,17 +132,16 @@ bool LeastSquares::getGradSten(VoFStencil&             a_stencil,
   bool foundStencil;
 
   // Build a vector of weights for the least squares method. The weights are given by the inverse distance
-  Vector<Real> wi = makeDiagWeights(a_displ, a_weight);
+  Vector<Real> wi = LeastSquares::makeDiagWeights(a_displ, a_weight);
 
   // Size of the linear system
   Vector<MultiIndex> indices = LeastSquares::getMultiIndicesLexiOrder(a_Q);
-  int k;
   int M = LeastSquares::getTaylorExpansionSize(a_Q);
   int N = LeastSquares::getTaylorExpansionSize(a_Q);
   int K = a_displ.size();
 
   // Build the A-matrix so we can use LaPackUtils::computePseudoInverse
-  k = 0;
+  int k = 0;
   Vector<Real> linA(M*N);
   for (MultiIndex q(IntVect::Zero); q <= a_Q; q.next(a_Q)){
     for (MultiIndex p(IntVect::Zero); p <= a_Q; p.next(a_Q)){
@@ -229,11 +228,12 @@ bool LeastSquares::getBndryGradStencil(VoFStencil&     a_stencil,
 				       const int       a_order,
 				       const int       a_radius,
 				       const int       a_weight){
-  int radius = a_radius;
-  Vector<VolIndex> monoVoFs;
+
   const int numTaylorTerms = LeastSquares::getTaylorExpansionSize(a_order);
 
-  // Can or must we drop order?
+  // Find VoFs in radius
+  int radius = a_radius;
+  Vector<VolIndex> monoVoFs;
   const bool dropOrder = LeastSquares::getVoFsRadius(monoVoFs, a_vof, a_ebisbox, numTaylorTerms, a_order, a_radius);
 
   bool foundStencil = false;
@@ -247,12 +247,63 @@ bool LeastSquares::getBndryGradStencil(VoFStencil&     a_stencil,
 
     // Drop order if we could not find stencil
     if(!foundStencil){
-      pout() << "LeastSquares::getBndryGradStencil - could not find stencil" << endl;
       a_stencil.clear();
     }
+#if 0 // debug
+    else{
+      RealVect sumWeights = RealVect::Zero;
+      for (int i = 0; i < a_stencil.size(); i++){
+	const Real w  = a_stencil.weight(i);
+	const int var = a_stencil.variable(i);
+
+	sumWeights[var] += w;
+      }
+      std::cout << "sumweights = " << sumWeights << std::endl;
+    }
+#endif
   }
 
   return foundStencil;
+}
+
+VoFStencil LeastSquares::projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection) {
+  VoFStencil sten;
+
+  for (int i = 0; i < a_stencil.size(); i++){
+    const VolIndex& vof = a_stencil.vof(i);
+    const Real& weight  = a_stencil.weight(i);
+    const int dir       = a_stencil.variable(i);
+
+    const Real p = a_projection[dir];
+
+    sten.add(vof, p*weight);
+  }
+
+  return sten;
+}
+
+Real LeastSquares::sumWeights(const VoFStencil& a_stencil, const int a_variable){
+
+  Real ret = 0.0;
+
+  for (int i = 0; i < a_stencil.size(); i++){
+    const int var = a_stencil.variable(i);
+    if(var == a_variable){
+      ret += a_stencil.weight(i);
+    }
+  }
+
+  return ret;
+}
+
+Real LeastSquares::sumAllWeights(const VoFStencil& a_stencil){
+  Real ret = 0.0;
+
+  for (int i = 0; i < a_stencil.size(); i++){
+    ret += a_stencil.weight(i);
+  }
+
+  return ret;
 }
 
 bool LeastSquares::getCenterToCentroidInterpStencil(VoFStencil&     a_stencil,

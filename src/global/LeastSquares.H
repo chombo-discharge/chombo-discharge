@@ -114,7 +114,6 @@ namespace LeastSquares {
 						    const Vector<VolIndex>& a_monoVoFs,
 						    const EBISBox&          a_ebisbox,
 						    const Real&             a_dx);
-
   /*!
     @brief Get the least squares gradient stencil
     @param[out] a_stencil Gradient stencil (has SpaceDim components)
@@ -147,6 +146,26 @@ namespace LeastSquares {
 			   const int       a_order = 1,
 			   const int       a_radius = 1,
 			   const int       a_weight = 1);
+
+  /*!
+    @brief Assuming that a_stencil is a gradient stencil, project it along a direction. 
+    @param[in] a_stencil Stencil
+    @param[in] a_projection Vector to project stencil along. 
+  */
+  VoFStencil projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection);
+
+  /*!
+    @brief Return the sum of weights in the stencil, for a specific variable. 
+    @param[in] a_stencil Stencil
+    @param[in] a_variable Which variable to sum. 
+  */
+  Real sumWeights(const VoFStencil& a_stencil, const int a_variable = 0);
+
+  /*!
+    @brief Return the sum of weights in the stencil. 
+    @param[in] a_stencil Stencil
+  */
+  Real sumAllWeights(const VoFStencil& a_stencil);
 
   /*!
     @brief Compute an interpolation stencil that interpolates from cell-centered data to centroid-centered data
