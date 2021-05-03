@@ -61,7 +61,7 @@ bool LaPackUtils::computeSVD(std::vector<double>&       a_linU,
   const bool foundSVD = (INFO == 0);
 
   if(foundSVD){
-    //
+
     a_linU.resize(M*M, 0.0);
     a_linSigma.resize(M*N, 0.0);
     a_linVT.resize(N*N, 0.0);
@@ -86,7 +86,7 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
 				       const int&                 a_M,
 				       const int&                 a_N){
   // Compute the singular value decomposition
-  std::vector<double> linU, linVT, linSigma;
+  std::vector<double> linU, linSigma, linVT;
   const bool foundSVD = computeSVD(linU, linSigma, linVT, a_linA, a_M, a_N);
 
   if(foundSVD){
@@ -95,9 +95,9 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
     int N = a_N;
 
     // Pseudoinversion of Sigma can be nasty for singular values close to zero. Define a tolerance for this. 
-    double maxS = -1.E99;
+    double maxS = std::numeric_limits<double>::min();
     for (int i = 0; i < linSigma.size(); i++){
-      maxS = linSigma[i] > maxS ? linSigma[i] : maxS;
+      maxS = (linSigma[i] > maxS) ? linSigma[i] : maxS;
     }
     const double eps = std::numeric_limits<double>::epsilon();
     const double tol = eps*std::max(M,N)*maxS;
@@ -114,7 +114,7 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
       VT[i] = linVT[i];
     }
     for (int i = 0; i < linSigma.size(); i++){
-      if(std::abs(linSigma[i]) > tol){
+      if(std::abs(linSigma[i]) > tol){         
 	SigmaReciprocal[i] = 1./linSigma[i];
       }
       else{

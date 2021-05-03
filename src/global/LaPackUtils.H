@@ -87,27 +87,27 @@ namespace LaPackUtils {
 		  std::vector<double>&       a_linSigma,
 		  std::vector<double>&       a_linVtran,
 		  const std::vector<double>& a_linA,
-		  const int&               a_M,
-		  const int&               a_N);
+		  const int&                 a_M,
+		  const int&                 a_N);
 
   /*!
     @brief Compute the pseudoinverse of matrix through singular value decomposition
     @param[out] a_linAplus Pseudoinverse in column major Fortran order. 
-    @param[in] a_linA Input matrix in column major Fortran order
-    @param[in] a_M Number of rows in A
-    @param[in] a_N Number of colums in A
+    @param[in]  a_linA Input matrix in column major Fortran order
+    @param[in]  a_M Number of rows in A
+    @param[in]  a_N Number of colums in A
   */
   bool computePseudoInverse(std::vector<double>&       a_linAplus,
 			    const std::vector<double>& a_linA,
-			    const int&               a_M,
-			    const int&               a_N);
+			    const int&                 a_M,
+			    const int&                 a_N);
   /*!
     @brief Linearize a matrix to column major Fortran form by assuming row or major colum format of the input matrix. 
     @param[out] a_linA Linearized matrix
     @param[out] a_M Number of rows
     @param[out] a_N Number of columns
-    @param[in] a_A Input matrix
-    @param[in] a_format Format of input matrix, either 'C' or 'R'. If 'C', then a_A[0] is the first column of the matrix. Likewise, if 'R' then a_A[0] is the first row of the matrix. 
+    @param[in]  a_A Input matrix
+    @param[in]  a_format Format of input matrix, either 'C' or 'R'. If 'C', then a_A[0] is the first column of the matrix. Likewise, if 'R' then a_A[0] is the first row of the matrix. 
   */
   void linearizeMatrix(std::vector<double>& a_linA, int& a_M, int& a_N, const std::vector<std::vector<double> >& a_A, const char& a_format);
 
@@ -116,7 +116,7 @@ namespace LaPackUtils {
     @param[out] a_linA Linearized matrix
     @param[out] a_M Number of rows
     @param[out] a_N Number of columns
-    @param[in] a_A Input matrix
+    @param[in]  a_A Input matrix
   */
   void linearizeColumnMajorMatrix(std::vector<double>& a_linA, int& a_M, int& a_N, const std::vector<std::vector<double> >& a_A);
 
@@ -126,7 +126,7 @@ namespace LaPackUtils {
     @param[out] a_linA Linearized matrix
     @param[out] a_M Number of rows
     @param[out] a_N Number of columns
-    @param[in] a_A Input matrix
+    @param[in]  a_A Input matrix
   */
   void linearizeRowMajorMatrix(std::vector<double>& a_linA, int& a_M, int& a_N, const std::vector<std::vector<double> >& a_A);
 
@@ -135,40 +135,40 @@ namespace LaPackUtils {
   /*!
     @brief Delinearize a linearized matrix from column major Fortran to row or major colum matrix format.
     @param[out] a_A Output matrix
-    @param[in] a_M Number of rows
-    @param[in] a_N Number of columns
-    @param[in] a_linA Linearized matrix
-    @param[in] a_format Format of input matrix, either 'C' or 'R'. If 'C', then a_A[0] is the first column of the matrix. 
+    @param[in]  a_M Number of rows
+    @param[in]  a_N Number of columns
+    @param[in]  a_linA Linearized matrix
+    @param[in]  a_format Format of input matrix, either 'C' or 'R'. If 'C', then a_A[0] is the first column of the matrix. 
     Likewise, if 'R' then a_A[0] is the first row of the matrix. 
   */
   void deLinearizeMatrix(std::vector<std::vector<double> >& a_A,
-			 const int&                       a_M,
-			 const int&                       a_N,
+			 const int&                         a_M,
+			 const int&                         a_N,
 			 const std::vector<double>&         a_linA,
-			 const char&                      a_format);
+			 const char&                        a_format);
 
   /*!
     @brief Delinearize a linearized matrix from column major Fortran to column major form
     @param[out] a_A Output matrix
-    @param[in] a_M Number of rows
-    @param[in] a_N Number of columns
-    @param[in] a_linA Linearized matrix
+    @param[in]  a_M Number of rows
+    @param[in]  a_N Number of columns
+    @param[in]  a_linA Linearized matrix
   */
   void deLinearizeColumnMajorMatrix(std::vector<std::vector<double> >& a_A,
-				    const int&                       a_M,
-				    const int&                       a_N,
+				    const int&                         a_M,
+				    const int&                         a_N,
 				    const std::vector<double>&         a_linA);
 				   
   /*!
     @brief Delinearize a linearized matrix from column major Fortran to row major form
     @param[out] a_A Output matrix
-    @param[in] a_M Number of rows
-    @param[in] a_N Number of columns
-    @param[in] a_linA Linearized matrix
+    @param[in]  a_M Number of rows
+    @param[in]  a_N Number of columns
+    @param[in]  a_linA Linearized matrix
   */
   void deLinearizeRowMajorMatrix(std::vector<std::vector<double> >& a_A,
-				 const int&                       a_M,
-				 const int&                       a_N,
+				 const int&                         a_M,
+				 const int&                         a_N,
 				 const std::vector<double>&         a_linA);
 }
 #endif
