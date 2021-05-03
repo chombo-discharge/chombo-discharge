@@ -50,13 +50,13 @@ namespace LeastSquares {
 						    const Real&             a_dx);
 
   /*!
-    @brief Build the vector of distances that goes into LeastSquares::getCenterToEbCentroidInterpStencil
+    @brief Build the vector of distances that goes into LeastSquares::getCenterToEBInterpStencil
     @param[in]  a_vof Input vof
     @param[in]  a_monoVoFs VoFs that can be reached. This should include a_vof
     @param[in]  a_ebisbox EBISBox
     @param[in]  a_dx Resolution
   */
-  Vector<RealVect> getCenterToEbCentroidDisplacements(const VolIndex&         a_vof,
+  Vector<RealVect> getCenterToEBDisplacements(const VolIndex&         a_vof,
 						      const Vector<VolIndex>& a_monoVoFs,
 						      const EBISBox&          a_ebisbox,
 						      const Real&             a_dx);
@@ -102,7 +102,7 @@ namespace LeastSquares {
     will first try a_radius = a_order, and then increase until the system has more neighbors than unknowns. 
     @return True if stencil was found. False otherwise. 
   */
-  bool getCenterToEbCentroidInterpStencil(VoFStencil&     a_stencil,
+  bool getCenterToEBInterpStencil(VoFStencil&     a_stencil,
 					  const VolIndex& a_vof,
 					  const EBISBox&  a_ebisbox,
 					  const Real&     a_dx,

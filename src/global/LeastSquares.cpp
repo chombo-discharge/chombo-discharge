@@ -39,7 +39,7 @@ Vector<RealVect> LeastSquares::getCenterToCentroidDisplacements(const VolIndex& 
   return displacements;
 }
 
-Vector<RealVect> LeastSquares::getCenterToEbCentroidDisplacements(const VolIndex&         a_vof,
+Vector<RealVect> LeastSquares::getCenterToEBDisplacements(const VolIndex&         a_vof,
 								  const Vector<VolIndex>& a_monoVoFs,
 								  const EBISBox&          a_ebisbox,
 								  const Real&             a_dx){
@@ -117,13 +117,13 @@ bool LeastSquares::getCenterToCentroidInterpStencil(VoFStencil&     a_stencil,
   return foundStencil;
 }
 
-bool LeastSquares::getCenterToEbCentroidInterpStencil(VoFStencil&     a_stencil,
+bool LeastSquares::getCenterToEBInterpStencil(VoFStencil&     a_stencil,
 						      const VolIndex& a_vof,
 						      const EBISBox&  a_ebisbox,
 						      const Real&     a_dx,
 						      const int       a_order,
 						      const int       a_radius){
-  CH_TIME("LeastSquares::getCenterToEbCentroidInterpStencil");
+  CH_TIME("LeastSquares::getCenterToEBInterpStencil");
 
   bool foundStencil;
   int radius = a_radius;
@@ -142,14 +142,14 @@ bool LeastSquares::getCenterToEbCentroidInterpStencil(VoFStencil&     a_stencil,
 
   if(!dropOrder){
     // Get the displacement vectors
-    Vector<RealVect> displacements = LeastSquares::getCenterToEbCentroidDisplacements(a_vof, monoVoFs, a_ebisbox, a_dx);
+    Vector<RealVect> displacements = LeastSquares::getCenterToEBDisplacements(a_vof, monoVoFs, a_ebisbox, a_dx);
 
     // Build least squarse system and solve it
     foundStencil = LeastSquares::getLSqInterpStencil(a_stencil, monoVoFs, displacements, a_order);
 
     // Drop order if we could not find stencil
     if(!foundStencil){
-      pout() << "LeastSquares::getCenterToEbCentroid - could not find stencil, dropping order" << endl;
+      pout() << "LeastSquares::getCenterToEB - could not find stencil, dropping order" << endl;
       a_stencil.clear();
       a_stencil.add(a_vof, 1.0);
     }
@@ -190,7 +190,7 @@ bool LeastSquares::getEbCentroidGradientStencil(VoFStencil&     a_stencil,
   bool foundStencil = false;
   if(!dropOrder){
     // Get the displacement vectors
-    Vector<RealVect> displacements = LeastSquares::getCenterToEbCentroidDisplacements(a_vof, monoVoFs, a_ebisbox, a_dx);
+    Vector<RealVect> displacements = LeastSquares::getCenterToEBDisplacements(a_vof, monoVoFs, a_ebisbox, a_dx);
 
     // Build least squarse system and solve it
     foundStencil = LeastSquares::getLSqGradientStencil(a_stencil, monoVoFs, displacements, a_order);
