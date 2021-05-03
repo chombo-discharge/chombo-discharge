@@ -10,61 +10,64 @@
 
 #include "EBArith.H"
 
-Vector<Real> LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacements, const Real a_pow){
-  Vector<Real> ret(a_displacements.size(), 1.0);
+Vector<Real> LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow){
+  Vector<Real> ret;
 
   for (int i = 0; i < a_displacements.size(); i++){
-    const Real len = a_displacements[i].vectorLength();
-    ret[i] = 1./std::pow(len, a_pow);
+    const RealVect& d = a_displacements[i];
+    const Real len    = d.vectorLength();
+    const Real w      = 1./std::pow(len, a_pow);
+
+    ret.push_back(w);
   }
 
   return ret;
 }
 
-void LeastSquares::getCenterToCentroidDisplacements(Vector<RealVect>&       a_dist,
-						    const VolIndex&         a_vof,
-						    const Vector<VolIndex>& a_monoVoFs,
-						    const EBISBox&          a_ebisbox,
-						    const Real&             a_dx){
-  // Build a vector of distances from the cell centroid
-  a_dist.resize(a_monoVoFs.size());
-  const RealVect centroid = RealVect(a_vof.gridIndex()) + a_ebisbox.centroid(a_vof);
-  for (int i = 0; i < a_monoVoFs.size(); i++){
-    const RealVect center = RealVect(a_monoVoFs[i].gridIndex());
-    a_dist[i] = (center - centroid)*a_dx;
+Vector<RealVect> LeastSquares::getCenterToCentroidDisplacements(const VolIndex&         a_curVoF,
+								const Vector<VolIndex>& a_allVoFs,
+								const EBISBox&          a_ebisbox,
+								const Real&             a_dx){
+  Vector<RealVect> displacements(a_allVoFs.size());
+  const RealVect centroid = RealVect(a_curVoF.gridIndex()) + a_ebisbox.centroid(a_curVoF);
+  
+  for (int i = 0; i < a_allVoFs.size(); i++){
+    const RealVect center = RealVect(a_allVoFs[i].gridIndex());
+    displacements[i] = (center - centroid)*a_dx;
   }
+
+  return displacements;
 }
 
-void LeastSquares::getCenterToEbCentroidDisplacements(Vector<RealVect>&       a_dist,
-						      const VolIndex&         a_vof,
-						      const Vector<VolIndex>& a_monoVoFs,
-						      const EBISBox&          a_ebisbox,
-						      const Real&             a_dx){
-  // Build a vector of distances from the cell centroid
-  a_dist.resize(a_monoVoFs.size());
+Vector<RealVect> LeastSquares::getCenterToEbCentroidDisplacements(const VolIndex&         a_vof,
+								  const Vector<VolIndex>& a_monoVoFs,
+								  const EBISBox&          a_ebisbox,
+								  const Real&             a_dx){
+  Vector<RealVect> displacements(a_monoVoFs.size());
   const RealVect ebCentroid = RealVect(a_vof.gridIndex()) + a_ebisbox.bndryCentroid(a_vof);
   for (int i = 0; i < a_monoVoFs.size(); i++){
     const RealVect center = RealVect(a_monoVoFs[i].gridIndex());
-    a_dist[i] = (center - ebCentroid)*a_dx;;
+    displacements[i] = (center - ebCentroid)*a_dx;;
   }
+
+  return displacements;
 }
 
-void LeastSquares::getCentroidToCenterDisplacements(Vector<RealVect>&       a_dist,
-						    const VolIndex&         a_vof,
-						    const Vector<VolIndex>& a_monoVoFs,
-						    const EBISBox&          a_ebisbox,
-						    const Real&             a_dx){
+Vector<RealVect> LeastSquares::getCentroidToCenterDisplacements(const VolIndex&         a_vof,
+								const Vector<VolIndex>& a_monoVoFs,
+								const EBISBox&          a_ebisbox,
+								const Real&             a_dx){
 
   // Build a vector of distances from the cell centroid
-  a_dist.resize(a_monoVoFs.size());
+  Vector<RealVect> displacements(a_monoVoFs.size());
   const RealVect center = RealVect(a_vof.gridIndex());
   
   for (int i = 0; i < a_monoVoFs.size(); i++){
-    const VolIndex& ivof = a_monoVoFs[i];
-    
-    const RealVect centroid = RealVect(ivof.gridIndex()) + a_ebisbox.centroid(ivof);
-    a_dist[i] = (centroid - center)*a_dx;
+    const RealVect centroid = RealVect(a_monoVoFs[i].gridIndex()) + a_ebisbox.centroid(a_monoVoFs[i]);
+    displacements[i] = (centroid - center)*a_dx;
   }
+
+  return displacements;
 }
 
 bool LeastSquares::getCenterToCentroidInterpStencil(VoFStencil&     a_stencil,
@@ -91,8 +94,7 @@ bool LeastSquares::getCenterToCentroidInterpStencil(VoFStencil&     a_stencil,
 
   if(!dropOrder){
     // Get the displacement vectors
-    Vector<RealVect> displacements;
-    LeastSquares::getCenterToCentroidDisplacements(displacements, a_vof, monoVoFs, a_ebisbox, a_dx);
+    Vector<RealVect> displacements = LeastSquares::getCenterToCentroidDisplacements(a_vof, monoVoFs, a_ebisbox, a_dx);
 
     // Build least squarse system and solve it
     foundStencil = LeastSquares::getLSqInterpStencil(a_stencil, monoVoFs, displacements, a_order);
@@ -140,8 +142,7 @@ bool LeastSquares::getCenterToEbCentroidInterpStencil(VoFStencil&     a_stencil,
 
   if(!dropOrder){
     // Get the displacement vectors
-    Vector<RealVect> displacements;
-    LeastSquares::getCenterToEbCentroidDisplacements(displacements, a_vof, monoVoFs, a_ebisbox, a_dx);
+    Vector<RealVect> displacements = LeastSquares::getCenterToEbCentroidDisplacements(a_vof, monoVoFs, a_ebisbox, a_dx);
 
     // Build least squarse system and solve it
     foundStencil = LeastSquares::getLSqInterpStencil(a_stencil, monoVoFs, displacements, a_order);
@@ -189,8 +190,7 @@ bool LeastSquares::getEbCentroidGradientStencil(VoFStencil&     a_stencil,
   bool foundStencil = false;
   if(!dropOrder){
     // Get the displacement vectors
-    Vector<RealVect> displacements;
-    LeastSquares::getCenterToEbCentroidDisplacements(displacements, a_vof, monoVoFs, a_ebisbox, a_dx);
+    Vector<RealVect> displacements = LeastSquares::getCenterToEbCentroidDisplacements(a_vof, monoVoFs, a_ebisbox, a_dx);
 
     // Build least squarse system and solve it
     foundStencil = LeastSquares::getLSqGradientStencil(a_stencil, monoVoFs, displacements, a_order);
@@ -231,8 +231,7 @@ bool LeastSquares::getCentroidToCenterInterpStencil(VoFStencil&     a_stencil,
   if(!dropOrder){
 
     // Get the displacement vectors
-    Vector<RealVect> displacements;
-    LeastSquares::getCentroidToCenterDisplacements(displacements, a_vof, monoVoFs, a_ebisbox, a_dx);
+    Vector<RealVect> displacements = LeastSquares::getCentroidToCenterDisplacements(a_vof, monoVoFs, a_ebisbox, a_dx);
 
     // Build least squarse system and solve it
     foundStencil = LeastSquares::getLSqInterpStencil(a_stencil, monoVoFs, displacements, a_order);

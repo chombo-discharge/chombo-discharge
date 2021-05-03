@@ -23,11 +23,55 @@
   @brief Agglomeration of various useful stencil computations
 */  
 namespace LeastSquares {
-  
+
   /*!
     @brief Tolerance for stencil computations. 
   */
   static Real s_tol = 1.E-8;
+
+  /*!
+    @brief Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The weights
+    are given as 1/||x1-x0||^a where a is the power. 
+    @param[in] a_displacements Displacement vectors, i.e. (x1-x0,x2-x0, x3-x0,...,(xN-x0)^T. 
+    @param[in] a_power Power factor for weights.
+  */
+  Vector<Real> makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow);
+
+  /*!
+    @brief Build the vector of distances that goes into LeastSquares::getCenterToCentroidInterpStencil
+    @param[in]  a_vof Input vof
+    @param[in]  a_monoVoFs VoFs that can be reached. This should include a_vof
+    @param[in]  a_ebisbox EBISBox
+    @param[in]  a_dx Resolution
+  */
+  Vector<RealVect> getCenterToCentroidDisplacements(const VolIndex&         a_curVoF,
+						    const Vector<VolIndex>& a_allVoFs,
+						    const EBISBox&          a_ebisbox,
+						    const Real&             a_dx);
+
+  /*!
+    @brief Build the vector of distances that goes into LeastSquares::getCenterToEbCentroidInterpStencil
+    @param[in]  a_vof Input vof
+    @param[in]  a_monoVoFs VoFs that can be reached. This should include a_vof
+    @param[in]  a_ebisbox EBISBox
+    @param[in]  a_dx Resolution
+  */
+  Vector<RealVect> getCenterToEbCentroidDisplacements(const VolIndex&         a_vof,
+						      const Vector<VolIndex>& a_monoVoFs,
+						      const EBISBox&          a_ebisbox,
+						      const Real&             a_dx);
+
+  /*!
+    @brief Build the vector of distances that goes into LeastSquares::getCentroidToCenterInterpStencil
+    @param[in]  a_vof Inputs vof
+    @param[in]  a_monoVoFs VoFs that can be reached. This should include a_vof
+    @param[in]  a_ebisbox EBISBox
+    @param[in]  a_dx Resolution
+  */
+  Vector<RealVect> getCentroidToCenterDisplacements(const VolIndex&         a_vof,
+						    const Vector<VolIndex>& a_monoVoFs,
+						    const EBISBox&          a_ebisbox,
+						    const Real&             a_dx);
   
   /*!
     @brief Compute an interpolation stencil that interpolates from cell-centered data to centroid-centered data
@@ -100,47 +144,7 @@ namespace LeastSquares {
 				    const int       a_order = 1,
 				    const int       a_radius = 1);
   
-  /*!
-    @brief Build the vector of distances that goes into LeastSquares::getCenterToCentroidInterpStencil
-    @param[out] a_displ The displacement vector \f$x_i - x_0\f$ where \f$x_i\f$ are cell centers and \f$x_0\f$ is the cell centroid
-    @param[in]  a_vof Input vof
-    @param[in]  a_monoVoFs VoFs that can be reached. This should include a_vof
-    @param[in]  a_ebisbox EBISBox
-    @param[in]  a_dx Resolution
-  */
-  void getCenterToCentroidDisplacements(Vector<RealVect>&       a_displ,
-					const VolIndex&         a_vof,
-					const Vector<VolIndex>& a_monoVoFs,
-					const EBISBox&          a_ebisbox,
-					const Real&             a_dx);
 
-  /*!
-    @brief Build the vector of distances that goes into LeastSquares::getCenterToEbCentroidInterpStencil
-    @param[out] a_displ The displacement vector \f$x_i - x_0\f$ where \f$x_i\f$ are cell centers and \f$x_0\f$ is the EB centroid
-    @param[in]  a_vof Input vof
-    @param[in]  a_monoVoFs VoFs that can be reached. This should include a_vof
-    @param[in]  a_ebisbox EBISBox
-    @param[in]  a_dx Resolution
-  */
-  void getCenterToEbCentroidDisplacements(Vector<RealVect>&       a_displ,
-					  const VolIndex&         a_vof,
-					  const Vector<VolIndex>& a_monoVoFs,
-					  const EBISBox&          a_ebisbox,
-					  const Real&             a_dx);
-
-  /*!
-    @brief Build the vector of distances that goes into LeastSquares::getCentroidToCenterInterpStencil
-    @param[out] a_displ The displacement vector \f$x_i - x_0\f$ where \f$x_i\f$ are cell centroid and \f$x_0\f$ is the cell center.
-    @param[in]  a_vof Inputs vof
-    @param[in]  a_monoVoFs VoFs that can be reached. This should include a_vof
-    @param[in]  a_ebisbox EBISBox
-    @param[in]  a_dx Resolution
-  */
-  void getCentroidToCenterDisplacements(Vector<RealVect>&       a_displ,
-					const VolIndex&         a_vof,
-					const Vector<VolIndex>& a_monoVoFs,
-					const EBISBox&          a_ebisbox,
-					const Real&             a_dx);
   
   /*!
     @brief Get the least squares interpolation stencil
@@ -184,13 +188,7 @@ namespace LeastSquares {
 		     const int         a_order, 
 		     const int         a_radius = -1);
 
-  /*!
-    @brief Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The weights
-           are given as 1/||x1-x0||^a where a is the power. 
-    @param[in] a_displacements Displacement vectors, i.e. (x1-x0,x2-x0, x3-x0,...,(xN-x0)^T. 
-    @param[in] a_power Power factor for weights.
-  */
-  Vector<Real> makeDiagWeights(const Vector<RealVect>& a_displacements, const Real a_pow);
+
   
   /*!
     @brief Generate a sequence of multi-indices |q| <= Q in lexicographical order
@@ -203,5 +201,7 @@ namespace LeastSquares {
   */
   int getTaylorExpansionSize(const int a_Q);
 };
+
+#include "LeastSquaresI.H"
 
 #endif
