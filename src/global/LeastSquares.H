@@ -29,6 +29,47 @@ namespace LeastSquares {
   */
   static Real s_tol = 1.E-8;
 
+  enum class CellPosition {
+    Center,
+    Centroid,
+    Boundary
+  };
+
+  /*!
+    @brief Returns position of a VoF. This ignores the "origin" of the coordinate system 
+    since this is only used together with LeastSquares::displacement(...)
+  */
+  RealVect position(const CellPosition a_position,
+		    const VolIndex&    a_vof,
+		    const EBISBox&     a_ebisbox,
+		    const Real&        a_dx);
+  
+  /*!
+    @brief Distance between two VoFs
+  */
+  RealVect displacement(const CellPosition      a_from,
+			const CellPosition      a_to,
+			const VolIndex&         a_fromVoF,
+			const VolIndex&         a_toVoF,
+			const EBISBox&          a_ebisbox,
+			const Real&             a_dx);
+
+  /*!
+    @brief Get displacement vectors from a cell position to another cell position for a list of VoFs, i.e. x = (xFrom - xTo).
+    @param[in] a_from    From this position
+    @param[in] a_to      To this position. 
+    @param[in] a_curVoF  Origin vof
+    @param[in] a_toVoFs VoFs to compute the distance to/from
+    @param[in] a_ebisbox EBISBox
+    @param[in] a_dx      Grid resolution
+  */
+  Vector<RealVect> getDisplacements(const CellPosition      a_from,
+				    const CellPosition      a_to,
+				    const VolIndex&         a_fromVoF,
+				    const Vector<VolIndex>& a_toVoFs,
+				    const EBISBox&          a_ebisbox,
+				    const Real&             a_dx);
+
   /*!
     @brief Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The weights
     are given as 1/||x1-x0||^a where a is the power. 
@@ -36,6 +77,7 @@ namespace LeastSquares {
     @param[in] a_power Power factor for weights.
   */
   Vector<Real> makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow);
+				    
 
   /*!
     @brief Build the vector of distances that goes into LeastSquares::getCenterToCentroidInterpStencil
@@ -81,11 +123,11 @@ namespace LeastSquares {
     @param[in]  a_Q Interpolation order. 
     @param[in]  a_pow Weighting "power", i.e. w = 1/|x1-x0|^p where p is power. 
   */
-  bool getLSqGradientStencil(VoFStencil&             a_stencil,
-			     const Vector<VolIndex>& a_monoVoFs,
-			     const Vector<RealVect>& a_displ,
-			     const int               a_Q,
-			     const int               a_pow);
+  bool getGradSten(VoFStencil&             a_stencil,
+		   const Vector<VolIndex>& a_monoVoFs,
+		   const Vector<RealVect>& a_displ,
+		   const int               a_Q,
+		   const int               a_weight);
 
   /*!
     @brief Compute a least squares gradient stencil on the EB centroid
@@ -98,14 +140,14 @@ namespace LeastSquares {
     will first try a_radius = a_order, and then increase until the system has more neighbors than unknowns. 
     @return True if stencil was found. False otherwise. 
   */
-  bool getEbCentroidGradientStencil(VoFStencil&     a_stencil,
-				    const VolIndex& a_vof,
-				    const EBISBox&  a_ebisbox,
-				    const Real&     a_dx,
-				    const int       a_order = 1,
-				    const int       a_radius = 1,
-				    const int       a_weight = 1);
-  
+  bool getBndryGradStencil(VoFStencil&     a_stencil,
+			   const VolIndex& a_vof,
+			   const EBISBox&  a_ebisbox,
+			   const Real&     a_dx,
+			   const int       a_order = 1,
+			   const int       a_radius = 1,
+			   const int       a_weight = 1);
+
   /*!
     @brief Compute an interpolation stencil that interpolates from cell-centered data to centroid-centered data
     @param[out] a_stencil Stencil

@@ -10,6 +10,58 @@
 
 #include "EBArith.H"
 
+RealVect LeastSquares::position(const CellPosition a_position,
+				const VolIndex&    a_vof,
+				const EBISBox&     a_ebisbox,
+				const Real&        a_dx){
+
+  RealVect ret;
+  switch(a_position){
+  case CellPosition::Center:
+    ret = RealVect(a_vof.gridIndex());
+    break;
+  case CellPosition::Centroid:
+    ret = RealVect(a_vof.gridIndex()) + a_ebisbox.centroid(a_vof);;
+    break;
+  case CellPosition::Boundary:
+    ret = RealVect(a_vof.gridIndex()) + a_ebisbox.bndryCentroid(a_vof);;
+    break;
+  }
+
+  return ret;
+}
+
+RealVect LeastSquares::displacement(const CellPosition      a_from,
+				    const CellPosition      a_to,
+				    const VolIndex&         a_fromVoF,
+				    const VolIndex&         a_toVoF,
+				    const EBISBox&          a_ebisbox,
+				    const Real&             a_dx){
+
+  const RealVect a = LeastSquares::position(a_from, a_fromVoF, a_ebisbox, a_dx);
+  const RealVect b = LeastSquares::position(a_to,   a_toVoF,   a_ebisbox, a_dx);
+
+  return (b-a);
+}
+
+Vector<RealVect> LeastSquares::getDisplacements(const CellPosition      a_from,
+						const CellPosition      a_to,
+						const VolIndex&         a_fromVoF,
+						const Vector<VolIndex>& a_toVoFs,
+						const EBISBox&          a_ebisbox,
+						const Real&             a_dx){
+
+  Vector<RealVect> ret;
+
+  for (int i = 0; i < a_toVoFs.size(); i++){
+    const RealVect d = LeastSquares::displacement(a_from, a_to, a_fromVoF, a_toVoFs[i], a_ebisbox, a_dx);
+
+    ret.push_back(d);
+  }
+
+  return ret;
+}
+
 Vector<Real> LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow){
   Vector<Real> ret(a_displacements.size(), 1.0);
 
@@ -72,15 +124,15 @@ Vector<RealVect> LeastSquares::getCentroidToCenterDisplacements(const VolIndex& 
   return displacements;
 }
 
-bool LeastSquares::getLSqGradientStencil(VoFStencil&             a_stencil,
-					 const Vector<VolIndex>& a_monoVoFs,
-					 const Vector<RealVect>& a_displ,
-					 const int               a_Q,
-					 const int               a_pow){
+bool LeastSquares::getGradSten(VoFStencil&             a_stencil,
+			       const Vector<VolIndex>& a_monoVoFs,
+			       const Vector<RealVect>& a_displ,
+			       const int               a_Q,
+			       const int               a_weight){
   bool foundStencil;
 
   // Build a vector of weights for the least squares method. The weights are given by the inverse distance
-  Vector<Real> wi = makeDiagWeights(a_displ, a_pow);
+  Vector<Real> wi = makeDiagWeights(a_displ, a_weight);
 
   // Size of the linear system
   Vector<MultiIndex> indices = LeastSquares::getMultiIndicesLexiOrder(a_Q);
@@ -88,7 +140,6 @@ bool LeastSquares::getLSqGradientStencil(VoFStencil&             a_stencil,
   int M = LeastSquares::getTaylorExpansionSize(a_Q);
   int N = LeastSquares::getTaylorExpansionSize(a_Q);
   int K = a_displ.size();
-  CH_assert(K >= M);
 
   // Build the A-matrix so we can use LaPackUtils::computePseudoInverse
   k = 0;
@@ -171,13 +222,13 @@ bool LeastSquares::getLSqGradientStencil(VoFStencil&             a_stencil,
   return foundStencil;
 }
 
-bool LeastSquares::getEbCentroidGradientStencil(VoFStencil&     a_stencil,
-						const VolIndex& a_vof,
-						const EBISBox&  a_ebisbox,
-						const Real&     a_dx,
-						const int       a_order,
-						const int       a_radius,
-						const int       a_weight){
+bool LeastSquares::getBndryGradStencil(VoFStencil&     a_stencil,
+				       const VolIndex& a_vof,
+				       const EBISBox&  a_ebisbox,
+				       const Real&     a_dx,
+				       const int       a_order,
+				       const int       a_radius,
+				       const int       a_weight){
   int radius = a_radius;
   Vector<VolIndex> monoVoFs;
   const int numTaylorTerms = LeastSquares::getTaylorExpansionSize(a_order);
@@ -192,11 +243,11 @@ bool LeastSquares::getEbCentroidGradientStencil(VoFStencil&     a_stencil,
     Vector<RealVect> displacements = LeastSquares::getCenterToEBDisplacements(a_vof, monoVoFs, a_ebisbox, a_dx);
 
     // Build least squarse system and solve it
-    foundStencil = LeastSquares::getLSqGradientStencil(a_stencil, monoVoFs, displacements, a_order, a_weight);
+    foundStencil = LeastSquares::getGradSten(a_stencil, monoVoFs, displacements, a_order, a_weight);
 
     // Drop order if we could not find stencil
     if(!foundStencil){
-      pout() << "LeastSquares::getEbCentroidGradientStencil - could not find stencil" << endl;
+      pout() << "LeastSquares::getBndryGradStencil - could not find stencil" << endl;
       a_stencil.clear();
     }
   }
