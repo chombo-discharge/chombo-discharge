@@ -24,34 +24,16 @@
 */  
 namespace LeastSquares {
 
-  /*!
-    @brief Tolerance for stencil computations. 
-  */
-  static Real s_tol = 1.E-8;
-
   enum class CellPosition {
     Center,
     Centroid,
     Boundary
   };
-
+  
   /*!
-    @brief Get neighbouring VolIndex. Return false if there are fewer neighbours than a_minVoFs. If a_radius = -1, adjust radius
-    until we get enough VoFs.
-    @param[out] a_allVofs All VolIndex in a given radius (including a_vof)
-    @param[in]  a_vof Input vof
-    @param[in]  a_ebisbox EBISBox
-    @param[in]  a_minVoFs Minimum amoumt of vofs. Return false if a_allVoFsRad < a_minVoFs
-    @param[in]  a_order Taylor expansion order
-    @param[in]  a_radius Radius to search. If radius = -1, adjust radius until we get enough vofs
-
+    @brief Get all VoFs within radius a_radius. Add the start vof if you want it. 
   */
-  bool getVoFsRadius(Vector<VolIndex>& a_allVoFsRad,
-		     const VolIndex&   a_vof,
-		     const EBISBox&    a_ebisbox,
-		     const int         a_minVoFs,
-		     const int         a_order, 
-		     const int         a_radius = -1);
+  Vector<VolIndex> getAllVoFsInRadius(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVoF);
 
   /*!
     @brief Returns position of a VoF. This ignores the "origin" of the coordinate system 
@@ -65,12 +47,12 @@ namespace LeastSquares {
   /*!
     @brief Distance between two VoFs
   */
-  RealVect displacement(const CellPosition      a_from,
-			const CellPosition      a_to,
-			const VolIndex&         a_fromVoF,
-			const VolIndex&         a_toVoF,
-			const EBISBox&          a_ebisbox,
-			const Real&             a_dx);
+  RealVect displacement(const CellPosition a_from,
+			const CellPosition a_to,
+			const VolIndex&    a_fromVoF,
+			const VolIndex&    a_toVoF,
+			const EBISBox&     a_ebisbox,
+			const Real&        a_dx);
 
   /*!
     @brief Get displacement vectors from a cell position to another cell position for a list of VoFs, i.e. x = (xFrom - xTo).
@@ -95,8 +77,14 @@ namespace LeastSquares {
     @param[in] a_power Power factor for weights.
   */
   Vector<Real> makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow);
-				    
 
+  /*!
+    @brief Get a least squares gradient stencil by computing the Moore-Penrose pseudoinverse.
+  */
+  VoFStencil getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
+				 const Vector<RealVect>& a_displacements,
+				 const Vector<Real>&     a_weights);
+  
   /*!
     @brief Get a least squares gradient stencil by computing the Moore-Penrose pseudoinverse.
   */
@@ -115,39 +103,7 @@ namespace LeastSquares {
 				      const EBISBox&  a_ebisbox,
 				      const Real&     a_dx,
 				      const int       a_p);
-  /*!
-    @brief Get the least squares gradient stencil
-    @param[out] a_stencil Gradient stencil (has SpaceDim components)
-    @param[in]  a_monoVoFs VolIndexes
-    @param[in]  a_displ Displacements
-    @param[in]  a_Q Interpolation order. 
-    @param[in]  a_pow Weighting "power", i.e. w = 1/|x1-x0|^p where p is power. 
-  */
-  bool getGradSten(VoFStencil&             a_stencil,
-		   const Vector<VolIndex>& a_monoVoFs,
-		   const Vector<RealVect>& a_displ,
-		   const int               a_Q,
-		   const int               a_weight);
-
-  /*!
-    @brief Compute a least squares gradient stencil on the EB centroid
-    @param[out] a_stencil Stencil
-    @param[in]  a_vof Input vof
-    @param[in]  a_ebisbox ebisbox
-    @param[in]  a_dx Resolution
-    @param[in]  a_order Interpolation order
-    @param[in]  a_radius Radius for least squares problem. Typically a_radius >= a_order. If you put radius = -1, we 
-    will first try a_radius = a_order, and then increase until the system has more neighbors than unknowns. 
-    @return True if stencil was found. False otherwise. 
-  */
-  bool getBndryGradStencil(VoFStencil&     a_stencil,
-			   const VolIndex& a_vof,
-			   const EBISBox&  a_ebisbox,
-			   const Real&     a_dx,
-			   const int       a_order = 1,
-			   const int       a_radius = 1,
-			   const int       a_weight = 1);
-
+  
   /*!
     @brief Assuming that a_stencil is a gradient stencil, project it along a direction. 
     @param[in] a_stencil Stencil
@@ -168,12 +124,6 @@ namespace LeastSquares {
   */
   Real sumAllWeights(const VoFStencil& a_stencil);
   
-  /*!
-    @brief Generate a sequence of multi-indices |q| <= Q in lexicographical order
-    @param[in] a_Q Largest multi-index
-  */
-  Vector<MultiIndex> getMultiIndicesLexiOrder(const int a_Q);
-
   /*!
     @brief Get the size of a Taylor expansion for a given order
   */

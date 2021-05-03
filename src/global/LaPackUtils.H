@@ -70,6 +70,15 @@ extern "C" void dgemm_(char*   a_TRANSA,
 namespace LaPackUtils {
 
   /*!
+    @brief Get the index in the linearized matrix of size MxN
+    @param[in] irow The row number
+    @param[in] jcol The column number
+    @param[in] M Number of rows
+    @param[in] N Number columns
+  */
+  int linearIndex(const int irow, const int jcol, const int M, const int N);
+
+  /*!
     @brief Compute the singular value decomposition of a matrix. 
     @param[out] a_linU \f$U\f$-matrix. Linearized in column major Fortran order. 
     @param[out] a_linSigma \f$\Sigma\f$-matrix. Linearized in column major Fortran order. 

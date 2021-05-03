@@ -11,6 +11,10 @@
 
 #include "CH_Timer.H"
 
+int LaPackUtils::linearIndex(const int irow, const int jcol, const int M, const int N){
+  return irow + jcol*M;
+}
+
 bool LaPackUtils::computeSVD(std::vector<double>&       a_linU,
 			     std::vector<double>&       a_linSigma,
 			     std::vector<double>&       a_linVT,
