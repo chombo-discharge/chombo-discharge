@@ -66,10 +66,10 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 # FIELD_SOLVER_MULTIGRID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
-field_solver_multigrid.bc_x_low  = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver_multigrid.bc_x_high = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+field_solver_multigrid.bc_x_low  = dirichlet_ground           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+field_solver_multigrid.bc_x_high = dirichlet_ground           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
 field_solver_multigrid.bc_y_low  = dirichlet_ground  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver_multigrid.bc_y_high = dirichlet_live    # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+field_solver_multigrid.bc_y_high = dirichlet_ground    # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
 field_solver_multigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 field_solver_multigrid.kappa_source = true           # Volume weighted space charge density or not (depends on algorithm)
 
@@ -103,8 +103,8 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
 rod_dielectric.electrode.on              = true          # Use electrode or not
-rod_dielectric.electrode.endpoint1       = -0.3 -0.5        # One endpoint
-rod_dielectric.electrode.endpoint2       =  0.3  0.5           # Other endpoint
+rod_dielectric.electrode.endpoint1       = -0.28 -0.5        # One endpoint
+rod_dielectric.electrode.endpoint2       =  0.32  0.5           # Other endpoint
 rod_dielectric.electrode.radius          = 0.1           # Electrode radius
 rod_dielectric.electrode.live            = true          # Live or not
 
