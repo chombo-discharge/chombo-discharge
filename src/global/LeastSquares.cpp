@@ -176,7 +176,7 @@ VoFStencil LeastSquares::getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
 	
 	const int idx       = LaPackUtils::linearIndex(dir, k, D, K);
 	
-	const Real weight   = linAplus[idx]*a_weights[k]; 
+	const Real weight   = a_weights[k]*linAplus[idx];
 	const VolIndex& vof = a_allVoFs[k];        
 	
 	sten.add(vof, weight, dir);
@@ -211,7 +211,7 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
   // Get Vofs in radius
   const int radius = 1;
 
-  //Vector<VolIndex> allVoFs       = LeastSquares::getAllVoFsInRadius(a_vof, a_ebisbox, radius, false);
+  //  Vector<VolIndex> allVoFs       = LeastSquares::getAllVoFsInRadius(a_vof, a_ebisbox, radius, false);
   Vector<VolIndex> allVoFs       = LeastSquares::getAllVoFsInQuadrant(a_vof, a_ebisbox, a_ebisbox.normal(a_vof));
   Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
 								  CellPosition::Center,
