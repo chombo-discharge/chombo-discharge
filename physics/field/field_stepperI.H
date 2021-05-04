@@ -69,6 +69,7 @@ namespace physics {
       m_poisson->set_computational_geometry(m_compgeom);
       m_poisson->set_potential(s_potential_one);
       m_poisson->set_realm(m_realm);
+      m_poisson->set_time(0, 0.0, 0.0);
 
       // Setup sigma
       m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
