@@ -124,7 +124,7 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
       }
     }
 
-#if 0 // New way
+#if 1 // New way
     // Compute the transpose of the stuff above.
     double UT[a_M*a_M];
     double V[a_N*a_N];

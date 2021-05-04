@@ -11,7 +11,31 @@
 #include "EBArith.H"
 
 Vector<VolIndex> LeastSquares::getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect a_normal){
-  MayDay::Warning("LeastSquares::getAllVoFsInQuadrant - not implemented");
+  IntVect quadrant;
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if(a_normal[dir] < 0){
+      quadrant[dir] = -1;
+    }
+    else{
+      quadrant[dir] = 1;
+    }
+  }
+
+  IntVect iv0 = a_startVoF.gridIndex();
+  IntVect iv1 = iv0 + BASISV(0)*quadrant[0]                         ;
+  IntVect iv2 = iv0                         + BASISV(1)*quadrant[1] ;
+  IntVect iv3 = iv0 + BASISV(0)*quadrant[0] + BASISV(1)*quadrant[1] ;
+
+  VolIndex vof1, vof2, vof3;
+
+  Vector<VolIndex> ret;
+  if(a_ebisbox.getVoFs(iv1).size() > 0) ret.push_back(VolIndex(iv1, 0));
+  if(a_ebisbox.getVoFs(iv2).size() > 0) ret.push_back(VolIndex(iv2, 0));
+  if(a_ebisbox.getVoFs(iv3).size() > 0) ret.push_back(VolIndex(iv3, 0));
+
+  ret.push_back(VolIndex(iv0, 0));
+  return ret;
+  
 }
 
 Vector<VolIndex> LeastSquares::getAllVoFsInRadius(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVoF){
@@ -98,6 +122,22 @@ Vector<Real> LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacemen
   return ret;
 }
 
+void LeastSquares::removeEquations(Vector<VolIndex>& a_allVoFs, Vector<RealVect>& a_displacements, const Real a_tolerance){
+
+  Vector<VolIndex> newVoFs;
+  Vector<RealVect> newDeltas;
+
+  for (int i = 0; i < a_allVoFs.size(); i++){
+    if(a_displacements[i].vectorLength() > a_tolerance){
+      newVoFs.push_back(a_allVoFs[i]);
+      newDeltas.push_back(a_displacements[i]);
+    }
+  }
+
+  a_allVoFs       = newVoFs;
+  a_displacements = newDeltas;
+}
+
 VoFStencil LeastSquares::getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
 					     const Vector<RealVect>& a_displacements,
 					     const Vector<Real>&     a_weights){
@@ -153,7 +193,11 @@ VoFStencil LeastSquares::getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
 					     const int&              a_p){
 
   // Build weights and call the other version. 
-  const Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
+  Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
+
+  for (int i = 0; i < weights.size(); i++){
+    weights[i] *= 1E4;
+  }
 
   return LeastSquares::getGradStenOrderOne(a_allVoFs, a_displacements, weights);
 }
@@ -166,7 +210,15 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
 
   // Get Vofs in radius
   const int radius = 1;
-  Vector<VolIndex> allVoFs = LeastSquares::getAllVoFsInRadius(a_vof, a_ebisbox, radius, true);
+
+  //Vector<VolIndex> allVoFs       = LeastSquares::getAllVoFsInRadius(a_vof, a_ebisbox, radius, false);
+  Vector<VolIndex> allVoFs       = LeastSquares::getAllVoFsInQuadrant(a_vof, a_ebisbox, a_ebisbox.normal(a_vof));
+  Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
+								  CellPosition::Center,
+								  a_vof,
+								  allVoFs,
+								  a_ebisbox,
+								  a_dx);
 
   // Get minimum number of equations to reach this order. 
   const int order  = 1;
@@ -174,13 +226,6 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
 
   // Build the stencil if we can. 
   if(allVoFs.size() > numTaylorTerms){
-    const Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
-									  CellPosition::Center,
-									  a_vof,
-									  allVoFs,
-									  a_ebisbox,
-									  a_dx);
-    
     sten = LeastSquares::getGradStenOrderOne(allVoFs, displacements, a_p);
   }
 

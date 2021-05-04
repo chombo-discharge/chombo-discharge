@@ -76,6 +76,11 @@ namespace LeastSquares {
 				    const Real&             a_dx);
 
   /*!
+    @brief Removes equations from LSQ system if displacement length is shorter than a_tolerance.
+  */
+  void removeEquations(Vector<VolIndex>& a_allVoFs, Vector<RealVect>& a_displacements, const Real a_tolerance);
+
+  /*!
     @brief Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The weights
     are given as 1/||x1-x0||^a where a is the power. 
     @param[in] a_displacements Displacement vectors, i.e. (x1-x0,x2-x0, x3-x0,...,(xN-x0)^T. 
