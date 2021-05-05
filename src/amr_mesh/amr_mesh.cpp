@@ -1016,9 +1016,6 @@ void amr_mesh::compute_gradient(LevelData<EBCellFAB>&       a_gradient,
   const DisjointBoxLayout& dbl = m_realms[a_realm]->get_grids()[a_lvl];
   const ProblemDomain& domain  = m_realms[a_realm]->get_domains()[a_lvl];
 
-  LayoutData<IntVectSet> cfivs;
-  EBArith::defineCFIVS(cfivs, dbl, domain);
-
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     EBCellFAB& grad        = a_gradient[dit()];
     const EBCellFAB& phi   = a_phi[dit()];
@@ -1040,17 +1037,16 @@ void amr_mesh::compute_gradient(LevelData<EBCellFAB>&       a_gradient,
       const VolIndex& vof    = vofit();
       const VoFStencil& sten = grad_stencils(vof, 0);
 
-
       for (int dir = 0; dir < SpaceDim; dir++){
-    	grad(vof, dir) = 0.0;
+	grad(vof, dir) = 0.0;
       }
 
       for (int i = 0; i < sten.size(); i++){
-    	const VolIndex& ivof = sten.vof(i);
-    	const Real& iweight  = sten.weight(i);
-    	const int ivar       = sten.variable(i);
+	const VolIndex& ivof = sten.vof(i);
+	const Real& iweight  = sten.weight(i);
+	const int ivar       = sten.variable(i); // Note: For the gradient stencil the ivar is the direction. 
 
-    	grad(vof, ivar) += phi(ivof, comp)*iweight;
+	grad(vof, ivar) += phi(ivof, comp)*iweight;
       }
     }
 
@@ -1619,11 +1615,9 @@ void amr_mesh::parse_grid_generation(){
 
 void amr_mesh::parse_irreg_growth(){
   ParmParse pp("amr_mesh");
-  int buffer;
-  pp.get("irreg_growth", buffer);
-  if(buffer > 0){
-    m_irreg_growth = buffer;
-  }
+  pp.get("irreg_growth", m_irreg_growth);
+
+  m_irreg_growth = std::max(m_irreg_growth, 0);
 }
 
 void amr_mesh::parse_blocking_factor(){

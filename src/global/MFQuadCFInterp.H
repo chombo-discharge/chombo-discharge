@@ -1,9 +1,8 @@
 /*!
-  @file MFQuadCFInterp.H
-  @brief Wrapper class for holding multifluid EBQuadCFInterps
+  @file   MFQuadCFInterp.H
+  @brief  Wrapper class for holding multifluid EBQuadCFInterps
   @author Robert Marskar
-  @date Dec. 2017
-  @todo Segregate implementation file. 
+  @date   Dec. 2017
 */
 
 #ifndef _MFQUADCFINTERP_
@@ -21,51 +20,37 @@ public:
   /*!
     @brief Constructor
   */
-  MFQuadCFInterp(){
-
-  }
+  MFQuadCFInterp();
 
   /*!
     @brief Destructor
   */
-  ~MFQuadCFInterp(){
-
-  }
+  ~MFQuadCFInterp();
 
   /*!
     @brief Full constructor. Calls define
   */
-  MFQuadCFInterp(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi){
-    this->define(a_quadcfi);
-  }
+  MFQuadCFInterp(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi);
 
   /*!
     @brief Define function
   */
-  void define(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi){
-    m_quadcfi = a_quadcfi;
-  }
+  void define(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi);
 
   /*!
     @brief Get interpolation utility
   */
-  const RefCountedPtr<EBQuadCFInterp>& get_quadcfi_ptr(const int a_phase) const {
-    return m_quadcfi[a_phase];
-  }
+  const RefCountedPtr<EBQuadCFInterp>& get_quadcfi_ptr(const int a_phase) const;
 
   /*!
     @brief get interpolation utility for phase
   */
-  EBQuadCFInterp& get_quadcfi(const int a_phase) {
-    return *m_quadcfi[a_phase];
-  }
+  EBQuadCFInterp& get_quadcfi(const int a_phase);
 
   /*!
     @brief get interpolation utility for phase
   */
-  const EBQuadCFInterp& get_quadcfi(const int a_phase) const {
-    return *m_quadcfi[a_phase];
-  }
+  const EBQuadCFInterp& get_quadcfi(const int a_phase) const;
   
 protected:
 

@@ -499,13 +499,13 @@ void phase_realm::define_flux_reg(const int a_lmin, const int a_regsize){
 
       if(has_fine){
 	m_flux_reg[lvl] = RefCountedPtr<EBFluxRegister> (new EBFastFluxRegister(m_grids[lvl+1],
-									    m_grids[lvl],
-									    m_ebisl[lvl+1],
-									    m_ebisl[lvl],
-									    m_domains[lvl].domainBox(),
-									    m_ref_ratios[lvl],
-									    comps,
-									    &(*m_ebis)));
+										m_grids[lvl],
+										m_ebisl[lvl+1],
+										m_ebisl[lvl],
+										m_domains[lvl].domainBox(),
+										m_ref_ratios[lvl],
+										comps,
+										&(*m_ebis)));
       }
     }
   }
@@ -657,7 +657,9 @@ void phase_realm::define_gradsten(const int a_lmin){
 	  sten.clear();
 	  for (int dir = 0; dir < SpaceDim; dir++){
 	    VoFStencil dirsten;
-	    EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, &cfivs[dit()], dir);
+	    //	    EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, &cfivs[dit()], dir);
+	    EBArith::getFirstDerivStencilWidthOne(dirsten, vof, ebisbox, dir, dx, NULL, dir);
+	    //	    EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, NULL, dir);
 	    sten += dirsten;
 	  }
 	}
