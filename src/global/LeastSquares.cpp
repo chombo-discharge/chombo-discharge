@@ -8,50 +8,11 @@
 
 #include "LeastSquares.H"
 #include "LaPackUtils.H"
+#include "VoFUtils.H"
 
 #include "EBArith.H"
 
-Vector<VolIndex> LeastSquares::getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect a_normal){
-  IntVect quadrant;
-  for (int dir = 0; dir < SpaceDim; dir++){
-    if(a_normal[dir] < 0){
-      quadrant[dir] = -1;
-    }
-    else{
-      quadrant[dir] = 1;
-    }
-  }
 
-  IntVect iv0 = a_startVoF.gridIndex();
-  IntVect iv1 = iv0 + BASISV(0)*quadrant[0]                         ;
-  IntVect iv2 = iv0                         + BASISV(1)*quadrant[1] ;
-  IntVect iv3 = iv0 + BASISV(0)*quadrant[0] + BASISV(1)*quadrant[1] ;
-
-  VolIndex vof1, vof2, vof3;
-
-  Vector<VolIndex> ret;
-  if(a_ebisbox.getVoFs(iv1).size() > 0) ret.push_back(VolIndex(iv1, 0));
-  if(a_ebisbox.getVoFs(iv2).size() > 0) ret.push_back(VolIndex(iv2, 0));
-  if(a_ebisbox.getVoFs(iv3).size() > 0) ret.push_back(VolIndex(iv3, 0));
-
-  ret.push_back(VolIndex(iv0, 0));
-  
-  return ret;
-}
-
-Vector<VolIndex> LeastSquares::getAllVoFsInRadius(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVoF){
-
-  Vector<VolIndex> ret;
-  Vector<IntVect>  ivs;
-  
-  EBArith::getAllVoFsWithinRadiusExcludingStartVoF(ret, ivs, a_startVoF, a_ebisbox, a_radius);
-
-  if(a_addStartVoF){
-    ret.push_back(a_startVoF);
-  }
-
-  return ret;
-}
 
 RealVect LeastSquares::position(const CellPosition a_position,
 				const VolIndex&    a_vof,
@@ -212,8 +173,8 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
   // Get Vofs in radius
   const int radius = 1;
 
-  //  Vector<VolIndex> allVoFs       = LeastSquares::getAllVoFsInRadius(a_vof, a_ebisbox, radius, false);
-  Vector<VolIndex> allVoFs       = LeastSquares::getAllVoFsInQuadrant(a_vof, a_ebisbox, a_ebisbox.normal(a_vof));
+  //  Vector<VolIndex> allVoFs       = VoFUtils::getAllVoFsInRadius(a_vof, a_ebisbox, radius, false);
+  Vector<VolIndex> allVoFs       = VoFUtils::getAllVoFsInQuadrant(a_vof, a_ebisbox, a_ebisbox.normal(a_vof), true);
   Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
 								  CellPosition::Center,
 								  a_vof,

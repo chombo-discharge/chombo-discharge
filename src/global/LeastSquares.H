@@ -31,16 +31,6 @@ namespace LeastSquares {
   };
 
   /*!
-    @brief Get All VoFs in quadrant
-  */
-  Vector<VolIndex> getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect a_normal);
-  
-  /*!
-    @brief Get all VoFs within radius a_radius. Add the start vof if you want it. 
-  */
-  Vector<VolIndex> getAllVoFsInRadius(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVoF);
-
-  /*!
     @brief Returns position of a VoF. This ignores the "origin" of the coordinate system 
     since this is only used together with LeastSquares::displacement(...)
   */
