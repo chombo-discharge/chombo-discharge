@@ -180,7 +180,8 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
 						  const int       a_p){
   VoFStencil bndrySten;
 
-  const RealVect normal    = a_ebisbox.normal(a_vof);
+  const bool addStartingVoF = false;
+  const RealVect normal     = a_ebisbox.normal(a_vof);
 
   if(normal != RealVect::Zero){ // Don't support zero normal vector (yet)
     const int radius = 1;
@@ -189,12 +190,12 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
 
     Vector<VolIndex> allVoFs;
     if(VoFUtils::isQuadrantWellDefined(normal)){ // Try to use quadrants. 
-      allVoFs = VoFUtils::getAllVoFsInQuadrant(a_vof, a_ebisbox, normal, radius, false);
+      allVoFs = VoFUtils::getAllVoFsInQuadrant(a_vof, a_ebisbox, normal, radius, addStartingVoF);
     }
     else{
       const std::pair<int, Side::LoHiSide> cardinal = VoFUtils::getCardinalDirection(normal);
 
-      allVoFs = VoFUtils::getAllVoFsSymmetric(a_vof, a_ebisbox, cardinal.first, cardinal.second, radius, false);
+      allVoFs = VoFUtils::getAllVoFsSymmetric(a_vof, a_ebisbox, cardinal.first, cardinal.second, radius, addStartingVoF);
     }
 
     // Build the stencil if we can. 
