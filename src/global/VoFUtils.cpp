@@ -61,15 +61,15 @@ Vector<VolIndex> VoFUtils::getAllVoFsInQuadrant(const VolIndex& a_startVoF, cons
     }
     bx &= a_ebisbox.getDomain().domainBox(); 
 
-
-    for (VoFIterator vofit(IntVectSet(bx), a_ebisbox.getEBGraph()); vofit.ok(); ++vofit){
-      const VolIndex& curVoF = vofit();
-
-      if(curVoF != a_startVoF) {
-	ret.push_back(curVoF);
+    // Get all VoFs that can be reached with a monotone path and add them if they fall within the quadrant. 
+    Vector<VolIndex> monoVoFs;
+    EBArith::getAllVoFsInMonotonePath(monoVoFs, a_startVoF, a_ebisbox, a_radius);
+    for (auto& ivof : monoVoFs.stdVector()){
+      if(bx.contains(ivof.gridIndex()) && ivof != a_startVoF){
+	ret.push_back(ivof);
       }
     }
-
+    
     if(a_addStartVoF){
       ret.push_back(a_startVoF);
     }
