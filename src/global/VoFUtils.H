@@ -25,6 +25,11 @@ namespace VoFUtils {
   bool isQuadrantWellDefined(const RealVect a_normal);
 
   /*!
+    @brief Returns the coordinate direction
+  */
+  int getCardinalDirection(const RealVect a_normal);
+
+  /*!
     @brief Get quadrant defined by direction in space. 
     @param[in] a_normal The direction in space which defines the quadrant. 
     @return Quadrant as IntVect. The IntVect is ill-defined if the quadrant is not well-defined. 
@@ -41,6 +46,11 @@ namespace VoFUtils {
     @return Vector of VoFs in quadrant defined by the normal vector. If a_normal[dir]==0 there is no unique quadrant and the routine returns an empty vector. 
   */
   Vector<VolIndex> getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect a_normal, const int a_radius, const bool a_addStartVoF);
+
+  /*!
+    @brief Get all VoFs within a radius, but ignore VoFs that are ''opposite'' to a specified normal direction in space. 
+  */
+  Vector<VolIndex> getAllVoFsSymmetric(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_normal, const int a_radius, const bool a_addStartVoF);
 
   /*!
     @brief Get all VoFs within a specific radius from a starting VoF. Can also add the starting VoF to the list
