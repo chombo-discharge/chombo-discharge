@@ -18,14 +18,29 @@
 namespace VoFUtils {
 
   /*!
+    @brief Check if a quadrant is well-defined for a direction in space.
+    @param[in] a_normal The direction in space which defines the quadrant. 
+    @return True if the quadrant is well defined and false otherwise. 
+  */
+  bool isQuadrantWellDefined(const RealVect a_normal);
+
+  /*!
+    @brief Get quadrant defined by direction in space. 
+    @param[in] a_normal The direction in space which defines the quadrant. 
+    @return Quadrant as IntVect. The IntVect is ill-defined if the quadrant is not well-defined. 
+  */
+  IntVect getQuadrant(const RealVect a_normal);
+
+  /*!
     @brief Get all VoFs in a quadrant. The quadrant is defined by the normal vector. 
-    @param[in] a_startVoF Starting VoF
-    @param[in] a_ebisBox  EBISBox
-    @param[in] a_normal   Normal vector which defines the quadrant.
+    @param[in] a_startVoF     Starting VoF
+    @param[in] a_ebisBox      EBISBox
+    @param[in] a_normal       Normal vector which defines the quadrant.
+    @param[in] a_radius       Radius of quadrant
     @param[in] a_addStartVoF  If true, adds a_startVoF to the list. 
     @return Vector of VoFs in quadrant defined by the normal vector. If a_normal[dir]==0 there is no unique quadrant and the routine returns an empty vector. 
   */
-  Vector<VolIndex> getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect a_normal, const bool a_addStartVoF);
+  Vector<VolIndex> getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect a_normal, const int a_radius, const bool a_addStartVoF);
 
   /*!
     @brief Get all VoFs within a specific radius from a starting VoF. Can also add the starting VoF to the list

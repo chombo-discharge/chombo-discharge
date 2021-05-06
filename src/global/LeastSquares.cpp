@@ -182,30 +182,32 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
 						  const EBISBox&  a_ebisbox,
 						  const Real&     a_dx,
 						  const int       a_p){
-  VoFStencil sten;
+  VoFStencil bndrySten;
 
   // Get Vofs in radius
   const int radius = 1;
 
   //  Vector<VolIndex> allVoFs       = VoFUtils::getAllVoFsInRadius(a_vof, a_ebisbox, radius, false);
-  Vector<VolIndex> allVoFs       = VoFUtils::getAllVoFsInQuadrant(a_vof, a_ebisbox, a_ebisbox.normal(a_vof), true);
-  Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
-								  CellPosition::Center,
-								  a_vof,
-								  allVoFs,
-								  a_ebisbox,
-								  a_dx);
+  Vector<VolIndex> allVoFs       = VoFUtils::getAllVoFsInQuadrant(a_vof, a_ebisbox, a_ebisbox.normal(a_vof), radius, true);
 
-  // Get minimum number of equations to reach this order. 
+
+  // Get minimum number of equations to reach order 1 (2/3 equations in 2D/3d). 
   const int order  = 1;
   const int numTaylorTerms = LeastSquares::getTaylorExpansionSize(order);
 
   // Build the stencil if we can. 
   if(allVoFs.size() > numTaylorTerms){
-    sten = LeastSquares::getGradStenOrderOne(allVoFs, displacements, a_p);
+    const Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
+								    CellPosition::Center,
+								    a_vof,
+								    allVoFs,
+								    a_ebisbox,
+								    a_dx);
+    
+    bndrySten = LeastSquares::getGradStenOrderOne(allVoFs, displacements, a_p);
   }
 
-  return sten;
+  return bndrySten;
 }
 
 VoFStencil LeastSquares::projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection) {

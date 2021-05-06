@@ -131,6 +131,8 @@ namespace LeastSquares {
     @param[in]  a_dx Resolution
     @param[in]  a_p Scaling
     @return     Returns a least squares stencil for evaluating the a first order approximation to the normal derivative on the boundary centroid. 
+    @details    This will first try to get all VoFs defined in the quadrant defined by the normal vector, i.e. 3 cells in 2D and up to 7 cells in 3D. If that
+                does not work the routine will try to fetch a symmetric stencil. If that does not work it will get all VoFs within a certain radius. 
   */
   VoFStencil getBndryGradStenOrderOne(const VolIndex& a_vof,
 				      const EBISBox&  a_ebisbox,
@@ -150,14 +152,14 @@ namespace LeastSquares {
     @brief Return the sum of weights in the stencil, for a specific variable. 
     @param[in] a_stencil Stencil
     @param[in] a_variable Which variable to sum. 
-    @return     Returns sum of weights for a specific variable in the stencil. 
+    @return    Returns sum of weights for a specific variable in the stencil. 
   */
   Real sumWeights(const VoFStencil& a_stencil, const int a_variable);
 
   /*!
     @brief Compute the sum of all weights in a stencil. 
     @param[in] a_stencil Stencil
-    @return Returns sum of weights in a_stencil (over all variables).
+    @return    Returns sum of weights in a_stencil (over all variables).
   */
   Real sumAllWeights(const VoFStencil& a_stencil);
   

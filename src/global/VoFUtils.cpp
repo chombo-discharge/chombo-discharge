@@ -10,11 +10,78 @@
 
 #include "EBArith.H"
 
-Vector<VolIndex> VoFUtils::getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect a_normal, const bool a_addStartVoF) {
-  IntVect quadrant;
+bool VoFUtils::isQuadrantWellDefined(const RealVect a_normal){
+  bool ret = true;
+
+  const RealVect v = a_normal/a_normal.vectorLength(); // Idiot guard. 
+  
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if (v[dir] == 1.0 || v[dir] == 0.0) ret = false;
+  }
+
+  return ret;
+}
+
+IntVect VoFUtils::getQuadrant(const RealVect a_normal){
+
+  IntVect quadrant = IntVect::Zero;
 
   for (int dir = 0; dir < SpaceDim; dir++){
-    if(a_normal[dir] < 0){
+    if(a_normal[dir] < 0.0){
+      quadrant[dir] = -1;
+    }
+    else if(a_normal[dir] > 0.0){
+      quadrant[dir] = 1;
+    }
+  }
+
+  return quadrant;
+}
+
+Vector<VolIndex> VoFUtils::getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect a_normal, const int a_radius, const bool a_addStartVoF) {
+
+  Vector<VolIndex> ret;
+  if(VoFUtils::isQuadrantWellDefined(a_normal)){
+
+    // Define the quadrant
+    const IntVect quadrant = VoFUtils::getQuadrant(a_normal);
+
+    // Grow the box in the direction defined by the quadrant
+    Box bx(a_startVoF.gridIndex(), a_startVoF.gridIndex());
+    for (int dir = 0; dir < SpaceDim; dir++){
+      if(quadrant[dir] > 0){
+	bx.growHi(dir, a_radius);
+      }
+      else if(quadrant[dir] < 0){
+	bx.growLo(dir, a_radius);
+      }
+      else{
+	MayDay::Abort("VoFUtils::getAllVoFsInQuadrant - logic bust");
+      }
+    }
+    bx &= a_ebisbox.getDomain().domainBox(); 
+
+
+    for (VoFIterator vofit(IntVectSet(bx), a_ebisbox.getEBGraph()); vofit.ok(); ++vofit){
+      const VolIndex& curVoF = vofit();
+
+      if(curVoF != a_startVoF) {
+	ret.push_back(curVoF);
+      }
+    }
+
+    if(a_addStartVoF){
+      ret.push_back(a_startVoF);
+    }
+
+    return ret;
+  }
+
+  
+
+  IntVect quadrant;
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if(a_normal[dir] <= 0.){
       quadrant[dir] = -1;
     }
     else{
@@ -22,6 +89,8 @@ Vector<VolIndex> VoFUtils::getAllVoFsInQuadrant(const VolIndex& a_startVoF, cons
     }
   }
 
+
+  
   IntVect iv0 = a_startVoF.gridIndex();
   IntVect iv1 = iv0 + BASISV(0)*quadrant[0]                         ;
   IntVect iv2 = iv0                         + BASISV(1)*quadrant[1] ;
@@ -29,7 +98,6 @@ Vector<VolIndex> VoFUtils::getAllVoFsInQuadrant(const VolIndex& a_startVoF, cons
 
   VolIndex vof1, vof2, vof3;
 
-  Vector<VolIndex> ret;
   if(a_ebisbox.getVoFs(iv1).size() > 0) ret.push_back(VolIndex(iv1, 0));
   if(a_ebisbox.getVoFs(iv2).size() > 0) ret.push_back(VolIndex(iv2, 0));
   if(a_ebisbox.getVoFs(iv3).size() > 0) ret.push_back(VolIndex(iv3, 0));
