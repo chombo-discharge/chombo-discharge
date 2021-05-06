@@ -295,7 +295,6 @@ Vector<VolIndex> VoFUtils::getAllVoFsSymmetric(const VolIndex&      a_startVoF,
   }
   bx &= a_ebisbox.getDomain().domainBox();
 
-
   ret = VoFUtils::getAllConnectedVoFsInBox(a_startVoF, a_ebisbox, bx, IntVectSet());
 
   if(a_addStartVoF){
