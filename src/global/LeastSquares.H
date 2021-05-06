@@ -111,18 +111,31 @@ namespace LeastSquares {
   Vector<Real> makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow);
 
   /*!
-    @brief Get a least squares gradient stencil by computing the Moore-Penrose pseudoinverse.
+    @brief Get a least squares gradient stencil solution for a system of first-order Taylor extrapolation for computing the gradient at a point.
+    @param[in] a_allVoFs       VoFs for which the displacement vectors were computed. 
+    @param[in] a_displacements Displacement vectors from VoFs to the interpolation point
+    @param[in] a_weights       Weights for each system of equations. 
+    @note This computes weights using makeDiagWeights(a_displacements, a_p) and then calls the other version. 
+    @return Stencil for obtaining the gradient in a point. Stencils for each direction are put in the VoFStencil.variable(i). 
+  */
+  VoFStencil getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
+				 const Vector<RealVect>& a_displacements,
+				 const int&              a_p);
+
+  /*!
+    @brief Get a least squares gradient stencil solution for a system of first-order Taylor extrapolation for computing the gradient at a point.
+    @param[in] a_allVoFs       VoFs for which the displacement vectors were computed. 
+    @param[in] a_displacements Displacement vectors from VoFs to the interpolation point
+    @param[in] a_weights       Weights for each system of equations. 
+    @return Stencil for obtaining the gradient in a point. Stencils for each direction are put in the VoFStencil.variable(i). 
+    @note This routine will cause a run-time error if you have less than SpaceDim equations, which is the minimum number of equations needed for obtaining a gradient. 
+    However, the routine does *not* check if the inputs are degenerate. 
   */
   VoFStencil getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
 				 const Vector<RealVect>& a_displacements,
 				 const Vector<Real>&     a_weights);
   
-  /*!
-    @brief Get a least squares gradient stencil by computing the Moore-Penrose pseudoinverse.
-  */
-  VoFStencil getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
-				 const Vector<RealVect>& a_displacements,
-				 const int&              a_p);
+
 
   /*!
     @brief Compute a least squares gradient stencil on the EB centroid
@@ -138,7 +151,7 @@ namespace LeastSquares {
 				      const EBISBox&  a_ebisbox,
 				      const Real&     a_dx,
 				      const int       a_p);
-  
+
   /*!
     @brief Assuming that a_stencil is a gradient stencil, project it along a direction. 
     @param[in] a_stencil Stencil describing a gradient. 
@@ -148,6 +161,48 @@ namespace LeastSquares {
   */
   VoFStencil projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection);
 
+  /*!
+    @brief Compute an interpolation stencil to specified order by solving a least squares system
+    @param[in] a_allVoFs VoFs to include in the interpolation method. 
+    @param[in] a_displacements Displacement vectors from the VoFs to the interpolation point
+    @param[in] a_order         Order of the interpolation. 
+    @param[in] a_weightP       Weighting order for the least squares system. Must be > 0 to have an effect. 
+    @return Stencil for the least squares solution to the interpolation problem. 
+    @note This computes weights using makeDiagWeights(a_displacements, a_pow) and then calls the other version. 
+  */
+  VoFStencil getInterpolationStencil(const Vector<VolIndex>& a_allVoFs,
+				     const Vector<RealVect>& a_displacements,
+				     const int               a_pow,
+				     const int               a_order);
+  
+  /*!
+    @brief Compute an interpolation stencil to specified order by solving a least squares system
+    @param[in] a_allVoFs VoFs to include in the interpolation method. 
+    @param[in] a_displacements Displacement vectors from the VoFs to the interpolation point
+    @param[in] a_order         Order of the interpolation. 
+    @param[in] a_weightP       Weighting order for the least squares system. Must be > 0 to have an effect. 
+    @return Stencil for the least squares solution to the interpolation problem. 
+    @details This will throw an error if you don't have enough equations for obtaining the specified order. 
+  */
+  VoFStencil getInterpolationStencil(const Vector<VolIndex>& a_allVoFs,
+				     const Vector<RealVect>& a_displacements,
+				     const Vector<Real>&     a_weights,
+				     const int               a_order);
+
+  /*!
+    @brief Compute an interpolation stencil to specified order by solving a least squares system
+    @param[in] a_allVoFs VoFs to include in the interpolation method. 
+    @param[in] a_displacements Displacement vectors from the VoFs to the interpolation point
+    @param[in] a_order         Order of the interpolation. 
+    @param[in] a_weightP       Weighting order for the least squares system. Must be > 0 to have an effect. 
+    @return Stencil for the least squares solution to the interpolation problem. 
+    @details This will throw an error if you don't have enough equations 
+  */
+  VoFStencil getInterpolationStencil(const Vector<VolIndex>& a_allVoFs,
+				     const Vector<RealVect>& a_displacements,
+				     const int               a_order,
+				     const int               a_weightP);
+  
   /*!
     @brief Return the sum of weights in the stencil, for a specific variable. 
     @param[in] a_stencil Stencil

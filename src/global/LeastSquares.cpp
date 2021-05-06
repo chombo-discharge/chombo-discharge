@@ -114,6 +114,14 @@ void LeastSquares::removeEquations(Vector<VolIndex>& a_allVoFs, Vector<RealVect>
 
 VoFStencil LeastSquares::getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
 					     const Vector<RealVect>& a_displacements,
+					     const int&              a_p){
+  Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
+
+  return LeastSquares::getGradStenOrderOne(a_allVoFs, a_displacements, weights);
+}
+
+VoFStencil LeastSquares::getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
+					     const Vector<RealVect>& a_displacements,
 					     const Vector<Real>&     a_weights){
 
   VoFStencil sten;
@@ -162,15 +170,7 @@ VoFStencil LeastSquares::getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
 
 }
 
-VoFStencil LeastSquares::getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
-					     const Vector<RealVect>& a_displacements,
-					     const int&              a_p){
 
-  // Build weights and call the other version. 
-  Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
-
-  return LeastSquares::getGradStenOrderOne(a_allVoFs, a_displacements, weights);
-}
 
 VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
 						  const EBISBox&  a_ebisbox,
