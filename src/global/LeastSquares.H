@@ -138,6 +138,12 @@ namespace LeastSquares {
     @brief Get the size of a Taylor expansion for a given order
   */
   int getTaylorExpansionSize(const int a_Q);
+
+  /*!
+    @brief Generate a sequence of multi-indices |q| <= Q in lexicographical order
+    @param[in] a_Q Largest multi-index
+  */
+  Vector<MultiIndex> getMultiIndicesLexiOrder(const int a_Q);
 };
 
 #endif

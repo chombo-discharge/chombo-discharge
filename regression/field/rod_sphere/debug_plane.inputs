@@ -103,7 +103,7 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
 rod_dielectric.electrode.on              = true          # Use electrode or not
-rod_dielectric.electrode.endpoint1       = 0 -0.11        # One endpoint
+rod_dielectric.electrode.endpoint1       = 0 -0.12        # One endpoint
 rod_dielectric.electrode.endpoint2       = 0 2E20           # Other endpoint
 rod_dielectric.electrode.radius          = 1.5E10           # Electrode radius
 rod_dielectric.electrode.live            = true          # Live or not

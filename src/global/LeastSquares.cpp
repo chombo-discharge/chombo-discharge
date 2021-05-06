@@ -281,3 +281,12 @@ int LeastSquares::getTaylorExpansionSize(const int a_Q){
   
   return nTerms;
 }
+
+Vector<MultiIndex> LeastSquares::getMultiIndicesLexiOrder(const int a_Q){
+  Vector<MultiIndex> ret;
+  for (MultiIndex cur = IntVect::Zero; cur <= a_Q; cur.next(a_Q)){
+    ret.push_back(cur);
+  }
+
+  return ret;
+}
