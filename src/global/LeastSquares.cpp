@@ -1,8 +1,9 @@
 /*!
-  @file LeastSquares.cpp
-  @brief Implementation of LeastSquares.hpp
+  @file   LeastSquares.cpp
+  @brief  Implementation of LeastSquares.H
   @author Robert Marskar
-  @date May 2016
+  @date   May 2016
+  @todo   getAllVoFsInQuadrant is hard-coded for 2D right now. 
 */
 
 #include "LeastSquares.H"
@@ -34,8 +35,8 @@ Vector<VolIndex> LeastSquares::getAllVoFsInQuadrant(const VolIndex& a_startVoF, 
   if(a_ebisbox.getVoFs(iv3).size() > 0) ret.push_back(VolIndex(iv3, 0));
 
   ret.push_back(VolIndex(iv0, 0));
-  return ret;
   
+  return ret;
 }
 
 Vector<VolIndex> LeastSquares::getAllVoFsInRadius(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVoF){

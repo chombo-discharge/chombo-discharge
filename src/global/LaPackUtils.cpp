@@ -124,98 +124,6 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
       }
     }
 
-#if 1 // New way
-    // Compute the transpose of the stuff above.
-    double UT[a_M*a_M];
-    double V[a_N*a_N];
-    double SigmaT[a_N*a_M];
-    for (int i = 0; i < a_M; i++){
-      for (int j = 0; j < a_M; j++){
-	const int idx1 = linearIndex(i, j, a_M, a_M);
-	const int idx2 = linearIndex(j, i, a_M, a_M); // Swap rows and colums
-
-	UT[idx2] = U[idx1];
-      }
-    }
-
-    for (int i = 0; i < a_N; i++){
-      for (int j = 0; j < a_N; j++){
-	const int idx1 = linearIndex(i, j, a_N, a_N);
-	const int idx2 = linearIndex(j, i, a_N, a_N);
-
-	V[idx2] = VT[idx1];
-      }
-    }
-
-    for (int i = 0; i < a_M; i++){ // Row
-      for (int j = 0; j < a_N; j++){ // Column
-	const int idx1 = linearIndex(i, j, a_M, a_N);
-	const int idx2 = linearIndex(j, i, a_N, a_M);
-
-	SigmaT[idx2] = SigmaReciprocal[idx1];
-      }
-    }
-
-
-
-
-    // Want to compute C = V*SigmaT. V is N*N and SigmaT is N*M. The result is N*M. 
-    double C[a_N*a_M];
-    {
-      char TRANSA  = 'N';
-      char TRANSB  = 'N';
-      int M        = a_N;
-      int N        = a_M;
-      int K        = a_N;
-      double ALPHA = 1.0;
-      int LDA      = M;
-      int LDB      = K;
-      double BETA  = 0.0;
-      int LDC      = M;
-      dgemm_(&TRANSA,
-	     &TRANSB,
-	     &M,
-	     &N,
-	     &K,
-	     &ALPHA,
-	     V,
-	     &LDA,
-	     SigmaT,
-	     &LDB,
-	     &BETA,
-	     C,
-	     &LDC);
-    }
-
-    // Now compute C*UT where C is N*M and UT is M*M
-    double Aplus[a_N*a_M];
-    {
-      char TRANSA  = 'N';
-      char TRANSB  = 'N';
-      int M        = a_N;
-      int N        = a_M;
-      int K        = a_M;
-      double ALPHA = 1.0;
-      int LDA      = M;
-      int LDB      = K;
-      double BETA  = 0.0;
-      int LDC      = M;
-      dgemm_(&TRANSA,
-	     &TRANSB,
-	     &M,
-	     &N,
-	     &K,
-	     &ALPHA,
-	     C,
-	     &LDA,
-	     UT,
-	     &LDB,
-	     &BETA,
-	     Aplus,
-	     &LDC);
-    }
-    
-#else
     // Compute C = V*Transpose(SigmaReciprocal) by using dgemm. The dimensions are:
     //
     // VT = N*N               => op(A) is N*N
@@ -281,7 +189,6 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
 	     Aplus,
 	     &LDC);
     }
-#endif
 
 
     // Put Aplus into the output vector
@@ -289,9 +196,6 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
     for (int i = 0; i < a_N*a_M; i++){
       a_linAplus[i] = Aplus[i];
     }
-  }
-  else{
-    MayDay::Abort("SVD not found!!!");
   }
 
   return foundSVD;
