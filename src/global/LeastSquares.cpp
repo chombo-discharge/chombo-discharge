@@ -189,12 +189,12 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
 
     Vector<VolIndex> allVoFs;
     if(VoFUtils::isQuadrantWellDefined(normal)){ // Try to use quadrants. 
-      allVoFs = VoFUtils::getAllVoFsInQuadrant(a_vof, a_ebisbox, normal, radius, true);
+      allVoFs = VoFUtils::getAllVoFsInQuadrant(a_vof, a_ebisbox, normal, radius, false);
     }
     else{
       const std::pair<int, Side::LoHiSide> cardinal = VoFUtils::getCardinalDirection(normal);
 
-      allVoFs = VoFUtils::getAllVoFsSymmetric(a_vof, a_ebisbox, cardinal.first, cardinal.second, radius, true);
+      allVoFs = VoFUtils::getAllVoFsSymmetric(a_vof, a_ebisbox, cardinal.first, cardinal.second, radius, false);
     }
 
     // Build the stencil if we can. 

@@ -105,7 +105,7 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 rod_dielectric.electrode.on              = true          # Use electrode or not
 rod_dielectric.electrode.endpoint1       = -0.3 -0.5        # One endpoint
 rod_dielectric.electrode.endpoint2       =  0.3  0.5           # Other endpoint
-rod_dielectric.electrode.radius          = 0.1           # Electrode radius
+rod_dielectric.electrode.radius          = 0.01           # Electrode radius
 rod_dielectric.electrode.live            = true          # Live or not
 
 rod_dielectric.dielectric.on             = false         # Use dielectric or not
