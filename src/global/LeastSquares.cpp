@@ -11,8 +11,6 @@
 
 #include "EBArith.H"
 
-
-
 RealVect LeastSquares::position(const CellPosition a_position,
 				const VolIndex&    a_vof,
 				const EBISBox&     a_ebisbox,
