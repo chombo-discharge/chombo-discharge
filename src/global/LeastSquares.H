@@ -118,9 +118,9 @@ namespace LeastSquares {
     @note This computes weights using makeDiagWeights(a_displacements, a_p) and then calls the other version. 
     @return Stencil for obtaining the gradient in a point. Stencils for each direction are put in the VoFStencil.variable(i). 
   */
-  VoFStencil getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
-				 const Vector<RealVect>& a_displacements,
-				 const int&              a_p);
+  VoFStencil computeGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
+				     const Vector<RealVect>& a_displacements,
+				     const int&              a_p);
 
   /*!
     @brief Get a least squares gradient stencil solution for a system of first-order Taylor extrapolation for computing the gradient at a point.
@@ -131,9 +131,9 @@ namespace LeastSquares {
     @note This routine will cause a run-time error if you have less than SpaceDim equations, which is the minimum number of equations needed for obtaining a gradient. 
     However, the routine does *not* check if the inputs are degenerate. 
   */
-  VoFStencil getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
-				 const Vector<RealVect>& a_displacements,
-				 const Vector<Real>&     a_weights);
+  VoFStencil computeGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
+				     const Vector<RealVect>& a_displacements,
+				     const Vector<Real>&     a_weights);
   
 
 
@@ -145,7 +145,7 @@ namespace LeastSquares {
     @param[in]  a_p Scaling
     @return     Returns a least squares stencil for evaluating the a first order approximation to the normal derivative on the boundary centroid. 
     @details    This will first try to get all VoFs defined in the quadrant defined by the normal vector, i.e. 3 cells in 2D and up to 7 cells in 3D. If that
-                does not work the routine will try to fetch a symmetric stencil. If that does not work it will get all VoFs within a certain radius. 
+    does not work the routine will try to fetch a symmetric stencil. If that does not work it will get all VoFs within a certain radius. 
   */
   VoFStencil getBndryGradStenOrderOne(const VolIndex& a_vof,
 				      const EBISBox&  a_ebisbox,
@@ -170,10 +170,10 @@ namespace LeastSquares {
     @return Stencil for the least squares solution to the interpolation problem. 
     @note This computes weights using makeDiagWeights(a_displacements, a_pow) and then calls the other version. 
   */
-  VoFStencil getInterpolationStencil(const Vector<VolIndex>& a_allVoFs,
-				     const Vector<RealVect>& a_displacements,
-				     const int               a_pow,
-				     const int               a_order);
+  VoFStencil computeInterpolationStencil(const Vector<VolIndex>& a_allVoFs,
+					 const Vector<RealVect>& a_displacements,
+					 const int               a_pow,
+					 const int               a_order);
   
   /*!
     @brief Compute an interpolation stencil to specified order by solving a least squares system
@@ -184,24 +184,10 @@ namespace LeastSquares {
     @return Stencil for the least squares solution to the interpolation problem. 
     @details This will throw an error if you don't have enough equations for obtaining the specified order. 
   */
-  VoFStencil getInterpolationStencil(const Vector<VolIndex>& a_allVoFs,
-				     const Vector<RealVect>& a_displacements,
-				     const Vector<Real>&     a_weights,
-				     const int               a_order);
-
-  /*!
-    @brief Compute an interpolation stencil to specified order by solving a least squares system
-    @param[in] a_allVoFs VoFs to include in the interpolation method. 
-    @param[in] a_displacements Displacement vectors from the VoFs to the interpolation point
-    @param[in] a_order         Order of the interpolation. 
-    @param[in] a_weightP       Weighting order for the least squares system. Must be > 0 to have an effect. 
-    @return Stencil for the least squares solution to the interpolation problem. 
-    @details This will throw an error if you don't have enough equations 
-  */
-  VoFStencil getInterpolationStencil(const Vector<VolIndex>& a_allVoFs,
-				     const Vector<RealVect>& a_displacements,
-				     const int               a_order,
-				     const int               a_weightP);
+  VoFStencil computeInterpolationStencil(const Vector<VolIndex>& a_allVoFs,
+					 const Vector<RealVect>& a_displacements,
+					 const Vector<Real>&     a_weights,
+					 const int               a_order);
   
   /*!
     @brief Return the sum of weights in the stencil, for a specific variable. 
@@ -220,10 +206,10 @@ namespace LeastSquares {
   
   /*!
     @brief Get the size of a Taylor expansion for a given order
-    @param[in] a_Q Desired order in Taylor expansion
+    @param[in] a_order Desired order in Taylor expansion
     @return Returns number of terms in Taylor expansion. 
   */
-  int getTaylorExpansionSize(const int a_Q);
+  int getTaylorExpansionSize(const int a_order);
 
   /*!
     @brief Generate a sequence of multi-indices |q| <= Q in lexicographical order

@@ -112,17 +112,17 @@ void LeastSquares::removeEquations(Vector<VolIndex>& a_allVoFs, Vector<RealVect>
   a_displacements = newDeltas;
 }
 
-VoFStencil LeastSquares::getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
-					     const Vector<RealVect>& a_displacements,
-					     const int&              a_p){
+VoFStencil LeastSquares::computeGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
+						 const Vector<RealVect>& a_displacements,
+						 const int&              a_p){
   Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
 
-  return LeastSquares::getGradStenOrderOne(a_allVoFs, a_displacements, weights);
+  return LeastSquares::computeGradStenOrderOne(a_allVoFs, a_displacements, weights);
 }
 
-VoFStencil LeastSquares::getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
-					     const Vector<RealVect>& a_displacements,
-					     const Vector<Real>&     a_weights){
+VoFStencil LeastSquares::computeGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
+						 const Vector<RealVect>& a_displacements,
+						 const Vector<Real>&     a_weights){
 
   VoFStencil sten;
 
@@ -130,7 +130,7 @@ VoFStencil LeastSquares::getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
   const int K = a_displacements.size();
 
   // Make sure we have enough equations. 
-  if(K < D) MayDay::Abort("LeastSquares::getGradStenOrderOne -- not enough equations, must have K >= 3");
+  if(K < D) MayDay::Abort("LeastSquares::computeGradStenOrderOne -- not enough equations, must have K >= 3");
   
   // Build A, which is a KxD matrix. 
   Vector<Real> linA(K*D, 0.0);
@@ -205,7 +205,7 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
 									    a_ebisbox,
 									    a_dx);
     
-      bndrySten = LeastSquares::getGradStenOrderOne(allVoFs, displacements, a_p);
+      bndrySten = LeastSquares::computeGradStenOrderOne(allVoFs, displacements, a_p);
     }
   }
   else{
@@ -229,6 +229,24 @@ VoFStencil LeastSquares::projectGradSten(const VoFStencil& a_stencil, const Real
   }
 
   return sten;
+}
+
+VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_allVoFs,
+						     const Vector<RealVect>& a_displacements,
+						     const int               a_pow,
+						     const int               a_order){
+
+  Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_pow);
+
+  return LeastSquares::computeInterpolationStencil(a_allVoFs, a_displacements, weights, a_order);
+}
+  
+VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_allVoFs,
+						     const Vector<RealVect>& a_displacements,
+						     const Vector<Real>&     a_weights,
+						     const int               a_order){
+
+  MayDay::Abort("LeastSquares::computeInterpolationStencil");
 }
 
 Real LeastSquares::sumWeights(const VoFStencil& a_stencil, const int a_variable){
@@ -255,11 +273,11 @@ Real LeastSquares::sumAllWeights(const VoFStencil& a_stencil){
   return ret;
 }
 
-int LeastSquares::getTaylorExpansionSize(const int a_Q){
+int LeastSquares::getTaylorExpansionSize(const int a_order){
 
   int nTerms = 0;
-  for (MultiIndex cur(IntVect::Zero); cur <= a_Q; cur.next(a_Q)){
-    nTerms ++;
+  for (MultiIndex cur(IntVect::Zero); cur <= a_order; cur.next(a_order)){
+    nTerms++;
   }
   
   return nTerms;
