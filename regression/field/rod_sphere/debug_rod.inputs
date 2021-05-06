@@ -9,7 +9,7 @@ amr_mesh.max_amr_depth   = 1           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
 amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
-amr_mesh.irreg_growth    = 0           # How much to grow irregular tagged cells
+amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 amr_mesh.buffer_size     = 2           # Number of cells between grid levels
 amr_mesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 amr_mesh.box_sorting     = morton      # Box sorting algorithm
@@ -50,7 +50,7 @@ driver.output_directory                = ./            # Output directory
 driver.output_names                    = poisson2d     # Simulation output names
 driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
-driver.num_plot_ghost                  = 0             # Number of ghost cells to include in plots
+driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
 driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
 driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 driver.allow_coarsening                = true          # Allows removal of grid levels according to cell_tagger
@@ -66,10 +66,10 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 # FIELD_SOLVER_MULTIGRID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
-field_solver_multigrid.bc_x_low  = dirichlet_ground           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver_multigrid.bc_x_high = dirichlet_ground           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver_multigrid.bc_y_low  = dirichlet_ground  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver_multigrid.bc_y_high = dirichlet_ground    # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+field_solver_multigrid.bc_x_low  = dirichlet_ground  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+field_solver_multigrid.bc_x_high = dirichlet_ground  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+field_solver_multigrid.bc_y_low  = neumann  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+field_solver_multigrid.bc_y_high = neumann  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
 field_solver_multigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 field_solver_multigrid.kappa_source = true           # Volume weighted space charge density or not (depends on algorithm)
 
@@ -105,7 +105,7 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 rod_dielectric.electrode.on              = true          # Use electrode or not
 rod_dielectric.electrode.endpoint1       = -0.0 -0.5        # One endpoint
 rod_dielectric.electrode.endpoint2       =  0.0  0.5           # Other endpoint
-rod_dielectric.electrode.radius          = 0.1           # Electrode radius
+rod_dielectric.electrode.radius          = 0.2           # Electrode radius
 rod_dielectric.electrode.live            = true          # Live or not
 
 rod_dielectric.dielectric.on             = false         # Use dielectric or not

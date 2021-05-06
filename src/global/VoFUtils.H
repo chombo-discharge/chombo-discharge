@@ -26,8 +26,10 @@ namespace VoFUtils {
 
   /*!
     @brief Returns the coordinate direction
+    @param[in] Non-zero normal vector
+    @param[in] Returns dirction where ||a_normal[dir]|| == 1. If a_normal[dir] == -1 then dir => -dir
   */
-  int getCardinalDirection(const RealVect a_normal);
+  std::pair<int, Side::LoHiSide> getCardinalDirection(const RealVect a_normal);
 
   /*!
     @brief Get quadrant defined by direction in space. 
@@ -37,6 +39,95 @@ namespace VoFUtils {
   IntVect getQuadrant(const RealVect a_normal);
 
   /*!
+    @brief Get all VoFs in a radius from a starting VoF
+    @param[in] a_startVoF   Starting VoF
+    @param[in] a_ebisbox    EBISBox
+    @param[in] a_radius     Search radius
+  */
+  Vector<VolIndex> getAllVoFsInRadius(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVoF);
+
+    /*!
+    @brief Get all VoFs within a box.
+    @param[in] a_box     Box where you want to get VoFs. 
+    @param[in] a_ebisbox EBISBox
+    @details Avoids fetching stuff outside the domain. 
+  */
+  Vector<VolIndex> getAllVoFsInBox(const Box& a_box, const EBISBox& a_ebisbox);
+
+    /*!
+    @brief Modifies a_vofs so it doesn't include cells in a_excludeIVS
+    @param[in] a_vofs List of vofs to be modified
+    @param[in] a_excludeBox Box to be excluded
+    @return Modifed list of vofs which do not include cell in a box
+  */
+  void excludeCells(Vector<VolIndex>& a_vofs, const Box& a_excludeBox);
+
+  /*!
+    @brief Modifies a_vofs so it doesn't include cells in a_excludeIVS
+    @param[in] a_vofs List of vofs to be modified
+    @param[in] a_excludeIVS List of cells to be excluded. 
+    @return Modifed list of vofs which do not include a_excludeIVS cells. 
+  */
+  void excludeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_excludeIVS);
+
+  /*!
+    @brief Modifies a_vofs so it only includes cells in a box
+    @param[in] a_vofs       List of vofs to be modified
+    @param[in] a_includeBox List of cells to be excluded. 
+    @return Modifed list of vofs which are guaranteed to lie in a_box
+  */
+  void includeCells(Vector<VolIndex>& a_vofs, const Box& a_includeBox);
+
+    /*!
+    @brief Modifies a_vofs so it only includes cells in a box
+    @param[in] a_vofs       List of vofs to be modified
+    @param[in] a_includeIVS List of cells to be included
+    @return Modifed list of vofs which are guaranteed to lie in specified grid cells
+  */
+  void includeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_includeIVS);
+
+  /*!
+    @brief Get all VoFs that are connected to a specific starting VoF. The connection does not have to be direct. 
+    @param[in] a_startVoF Starting VoF
+    @param[in] a_allVoFs  All VoFs. This can, but does not have to, include a_startVoF.
+    @param[in] a_ebisbox  EBISBox. 
+    @return List of VoFs that are connected to a_startVoF. This list does *not* include a_startVoF
+  */
+  Vector<VolIndex> getConnectedVoFs(const VolIndex& a_startVoF, const Vector<VolIndex>& a_allVoFs, const EBISBox& a_ebisbox);
+
+  /*!
+    @brief Get all connected VoFs in radius which can be reached without crossing a covered face or reaching into a domain boundary. 
+    @param[in] a_startVoF    Starting VoF
+    @param[in] a_ebisbox     EBISBox
+    @param[in] a_radius      Search radius
+    @param[in] a_addStartVoF Adds start VoF if true
+    @param[in] a_excludeIVS Do not add VoFs with these grid indices. 
+    @return Returns all VoFs within radius a_radius from a_startVoF
+    @note a_excludeIVS overrides a_addStartVoF if there are conflicting inputs. 
+  */
+  Vector<VolIndex> getAllConnectedVoFsInRadius(const VolIndex&   a_startVoF,
+					       const EBISBox&    a_ebisbox,
+					       const int         a_radius,
+					       const bool        a_addStartVoF,
+					       const IntVectSet& a_excludeIVS);
+  
+  /*!
+    @brief Get all connected VoFs in a box which can be reached without crossing a covered face or reaching into a domain boundary. 
+    @param[in] a_startVoF    Starting VoF
+    @param[in] a_box         Box
+    @param[in] a_ebisbox     EBISBox
+    @param[in] a_addStartVoF Adds start VoF if true
+    @param[in] a_excludeIVS Do not add VoFs with these grid indices. 
+    @return Returns all VoFs within radius a_radius from a_startVoF
+    @note a_excludeIVS overrides a_addStartVoF if there are conflicting inputs. 
+  */
+  Vector<VolIndex> getAllConnectedVoFsInBox(const VolIndex&   a_startVoF,
+					    const EBISBox&    a_ebisbox,
+					    const Box&        a_box,
+					    const bool        a_addStartVoF,
+					    const IntVectSet& a_excludeIVS);
+
+  /*!
     @brief Get all VoFs in a quadrant. The quadrant is defined by the normal vector. 
     @param[in] a_startVoF     Starting VoF
     @param[in] a_ebisBox      EBISBox
@@ -44,13 +135,19 @@ namespace VoFUtils {
     @param[in] a_radius       Radius of quadrant
     @param[in] a_addStartVoF  If true, adds a_startVoF to the list. 
     @return Vector of VoFs in quadrant defined by the normal vector. If a_normal[dir]==0 there is no unique quadrant and the routine returns an empty vector. 
+
   */
-  Vector<VolIndex> getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect a_normal, const int a_radius, const bool a_addStartVoF);
+  Vector<VolIndex> getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect& a_normal, const int a_radius, const bool a_addStartVoF);
 
   /*!
     @brief Get all VoFs within a radius, but ignore VoFs that are ''opposite'' to a specified normal direction in space. 
   */
-  Vector<VolIndex> getAllVoFsSymmetric(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_normal, const int a_radius, const bool a_addStartVoF);
+  Vector<VolIndex> getAllVoFsSymmetric(const VolIndex&      a_startVoF,
+				       const EBISBox&       a_ebisbox,
+				       const int            a_cardinal,
+				       const Side::LoHiSide a_side,
+				       const int            a_radius,
+				       const bool           a_addStartVoF);
 
   /*!
     @brief Get all VoFs within a specific radius from a starting VoF. Can also add the starting VoF to the list

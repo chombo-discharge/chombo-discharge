@@ -327,8 +327,6 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
       a_weight  = -LeastSquares::sumAllWeights(a_stencil);
     }
   }
-
-  //  std::cout << a_weight << std::endl;
 #endif
 
 }

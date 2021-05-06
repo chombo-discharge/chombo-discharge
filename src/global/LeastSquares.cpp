@@ -171,10 +171,6 @@ VoFStencil LeastSquares::getGradStenOrderOne(const Vector<VolIndex>& a_allVoFs,
   // Build weights and call the other version. 
   Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
 
-  for (int i = 0; i < weights.size(); i++){
-    weights[i] *= 1E4;
-  }
-
   return LeastSquares::getGradStenOrderOne(a_allVoFs, a_displacements, weights);
 }
 
@@ -184,27 +180,37 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
 						  const int       a_p){
   VoFStencil bndrySten;
 
-  // Get Vofs in radius
-  const int radius = 1;
+  const RealVect normal    = a_ebisbox.normal(a_vof);
 
-  //  Vector<VolIndex> allVoFs       = VoFUtils::getAllVoFsInRadius(a_vof, a_ebisbox, radius, false);
-  Vector<VolIndex> allVoFs       = VoFUtils::getAllVoFsInQuadrant(a_vof, a_ebisbox, a_ebisbox.normal(a_vof), radius, true);
+  if(normal != RealVect::Zero){ // Don't support zero normal vector (yet)
+    const int radius = 1;
+    const int order  = 1;
+    const int numTaylorTerms = LeastSquares::getTaylorExpansionSize(order);
 
+    Vector<VolIndex> allVoFs;
+    if(VoFUtils::isQuadrantWellDefined(normal)){ // Try to use quadrants. 
+      allVoFs = VoFUtils::getAllVoFsInQuadrant(a_vof, a_ebisbox, normal, radius, true);
+    }
+    else{
+      const std::pair<int, Side::LoHiSide> cardinal = VoFUtils::getCardinalDirection(normal);
 
-  // Get minimum number of equations to reach order 1 (2/3 equations in 2D/3d). 
-  const int order  = 1;
-  const int numTaylorTerms = LeastSquares::getTaylorExpansionSize(order);
+      allVoFs = VoFUtils::getAllVoFsSymmetric(a_vof, a_ebisbox, cardinal.first, cardinal.second, radius, true);
+    }
 
-  // Build the stencil if we can. 
-  if(allVoFs.size() > numTaylorTerms){
-    const Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
-								    CellPosition::Center,
-								    a_vof,
-								    allVoFs,
-								    a_ebisbox,
-								    a_dx);
+    // Build the stencil if we can. 
+    if(allVoFs.size() >= numTaylorTerms){
+      const Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
+									    CellPosition::Center,
+									    a_vof,
+									    allVoFs,
+									    a_ebisbox,
+									    a_dx);
     
-    bndrySten = LeastSquares::getGradStenOrderOne(allVoFs, displacements, a_p);
+      bndrySten = LeastSquares::getGradStenOrderOne(allVoFs, displacements, a_p);
+    }
+  }
+  else{
+    MayDay::Warning("LeastSquares::getBndryGradStenOrderOne -- got zero normal vector but not sure what to do about that. You probably shouldn't use this routine.");
   }
 
   return bndrySten;
