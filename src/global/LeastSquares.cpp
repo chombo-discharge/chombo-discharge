@@ -170,8 +170,6 @@ VoFStencil LeastSquares::computeGradStenOrderOne(const Vector<VolIndex>& a_allVo
 
 }
 
-
-
 VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
 						  const EBISBox&  a_ebisbox,
 						  const Real&     a_dx,
@@ -181,22 +179,22 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
   const bool addStartingVoF = false;
   const RealVect normal     = a_ebisbox.normal(a_vof);
 
-  if(normal != RealVect::Zero){ // Don't support zero normal vector (yet)
+  if(normal != RealVect::Zero){ // Can only do this if we actual have a normal vector. 
     const int radius = 1;
     const int order  = 1;
     const int numTaylorTerms = LeastSquares::getTaylorExpansionSize(order);
 
+    // Get VoFs, try to use quadrants but if the normal is aligned with the grid just get a "symmetric" stencil. 
     Vector<VolIndex> allVoFs;
     if(VoFUtils::isQuadrantWellDefined(normal)){ // Try to use quadrants. 
       allVoFs = VoFUtils::getAllVoFsInQuadrant(a_vof, a_ebisbox, normal, radius, addStartingVoF);
     }
     else{
       const std::pair<int, Side::LoHiSide> cardinal = VoFUtils::getCardinalDirection(normal);
-
       allVoFs = VoFUtils::getAllVoFsSymmetric(a_vof, a_ebisbox, cardinal.first, cardinal.second, radius, addStartingVoF);
     }
 
-    // Build the stencil if we can. 
+    // Now build the stencil. 
     if(allVoFs.size() >= numTaylorTerms){
       const Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
 									    CellPosition::Center,
@@ -207,9 +205,6 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
     
       bndrySten = LeastSquares::computeGradStenOrderOne(allVoFs, displacements, a_p);
     }
-  }
-  else{
-    MayDay::Warning("LeastSquares::getBndryGradStenOrderOne -- got zero normal vector but not sure what to do about that. You probably shouldn't use this routine.");
   }
 
   return bndrySten;
