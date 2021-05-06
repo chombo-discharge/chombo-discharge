@@ -100,15 +100,12 @@ namespace VoFUtils {
     @param[in] a_startVoF    Starting VoF
     @param[in] a_ebisbox     EBISBox
     @param[in] a_radius      Search radius
-    @param[in] a_addStartVoF Adds start VoF if true
     @param[in] a_excludeIVS Do not add VoFs with these grid indices. 
     @return Returns all VoFs within radius a_radius from a_startVoF
-    @note a_excludeIVS overrides a_addStartVoF if there are conflicting inputs. 
   */
   Vector<VolIndex> getAllConnectedVoFsInRadius(const VolIndex&   a_startVoF,
 					       const EBISBox&    a_ebisbox,
 					       const int         a_radius,
-					       const bool        a_addStartVoF,
 					       const IntVectSet& a_excludeIVS);
   
   /*!
@@ -116,15 +113,12 @@ namespace VoFUtils {
     @param[in] a_startVoF    Starting VoF
     @param[in] a_box         Box
     @param[in] a_ebisbox     EBISBox
-    @param[in] a_addStartVoF Adds start VoF if true
     @param[in] a_excludeIVS Do not add VoFs with these grid indices. 
     @return Returns all VoFs within radius a_radius from a_startVoF
-    @note a_excludeIVS overrides a_addStartVoF if there are conflicting inputs. 
   */
   Vector<VolIndex> getAllConnectedVoFsInBox(const VolIndex&   a_startVoF,
 					    const EBISBox&    a_ebisbox,
 					    const Box&        a_box,
-					    const bool        a_addStartVoF,
 					    const IntVectSet& a_excludeIVS);
 
   /*!

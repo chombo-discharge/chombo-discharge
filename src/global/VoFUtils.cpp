@@ -215,15 +215,9 @@ Vector<VolIndex> VoFUtils::getConnectedVoFs(const VolIndex& a_startVoF, const Ve
 Vector<VolIndex> VoFUtils::getAllConnectedVoFsInRadius(const VolIndex&   a_startVoF,
 						       const EBISBox&    a_ebisbox,
 						       const int         a_radius,
-						       const bool        a_addStartVoF,
 						       const IntVectSet& a_excludeIVS){
   Vector<VolIndex> allVoFs       = VoFUtils::getAllVoFsInRadius(a_startVoF, a_ebisbox, a_radius, true);
   Vector<VolIndex> connectedVoFs = VoFUtils::getConnectedVoFs(a_startVoF, allVoFs, a_ebisbox);
-
-  // Add starting vof if we must
-  if(a_addStartVoF){
-    connectedVoFs.push_back(a_startVoF);
-  }
 
   VoFUtils::excludeCells(connectedVoFs, a_excludeIVS);
 
@@ -233,17 +227,11 @@ Vector<VolIndex> VoFUtils::getAllConnectedVoFsInRadius(const VolIndex&   a_start
 Vector<VolIndex> VoFUtils::getAllConnectedVoFsInBox(const VolIndex&   a_startVoF,
 						    const EBISBox&    a_ebisbox,
 						    const Box&        a_box,
-						    const bool        a_addStartVoF,
 						    const IntVectSet& a_excludeIVS){
 
   // Get all Vofs in box and exclude them so they don't include cells in a_excludeIVS
   Vector<VolIndex> allVoFs       = VoFUtils::getAllVoFsInBox(a_box, a_ebisbox);
   Vector<VolIndex> connectedVoFs = VoFUtils::getConnectedVoFs(a_startVoF, allVoFs, a_ebisbox);
-
-  // Add starting vof if we must
-  if(a_addStartVoF){
-    connectedVoFs.push_back(a_startVoF);
-  }
 
   VoFUtils::excludeCells(connectedVoFs, a_excludeIVS);
 
@@ -275,7 +263,11 @@ Vector<VolIndex> VoFUtils::getAllVoFsInQuadrant(const VolIndex& a_startVoF, cons
     bx &= a_ebisbox.getDomain().domainBox();
 
 
-    ret = VoFUtils::getAllConnectedVoFsInBox(a_startVoF, a_ebisbox, bx, a_addStartVoF, IntVectSet());
+    ret = VoFUtils::getAllConnectedVoFsInBox(a_startVoF, a_ebisbox, bx, IntVectSet());
+
+    if(a_addStartVoF){
+      ret.push_back(a_startVoF);
+    }
 
   }
 
@@ -304,7 +296,11 @@ Vector<VolIndex> VoFUtils::getAllVoFsSymmetric(const VolIndex&      a_startVoF,
   bx &= a_ebisbox.getDomain().domainBox();
 
 
-  ret = VoFUtils::getAllConnectedVoFsInBox(a_startVoF, a_ebisbox, bx, a_addStartVoF, IntVectSet());
+  ret = VoFUtils::getAllConnectedVoFsInBox(a_startVoF, a_ebisbox, bx, IntVectSet());
+
+  if(a_addStartVoF){
+    ret.push_back(a_startVoF);
+  }
 
   return ret;
 }
