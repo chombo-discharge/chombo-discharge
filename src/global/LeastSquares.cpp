@@ -3,7 +3,6 @@
   @brief  Implementation of LeastSquares.H
   @author Robert Marskar
   @date   May 2016
-  @todo   getAllVoFsInQuadrant is hard-coded for 2D right now. 
 */
 
 #include "LeastSquares.H"
@@ -46,6 +45,21 @@ RealVect LeastSquares::displacement(const CellPosition a_from,
 
   const RealVect a = LeastSquares::position(a_from, a_fromVoF, a_ebisbox, a_dx);
   const RealVect b = LeastSquares::position(a_to,   a_toVoF,   a_ebisbox, a_dx);
+
+  return (b-a);
+}
+
+RealVect LeastSquares::displacement(const CellPosition a_from,
+				    const CellPosition a_to,
+				    const VolIndex&    a_fromVoF,
+				    const VolIndex&    a_toVoF,
+				    const EBISBox&     a_ebisboxFrom,
+				    const EBISBox&     a_ebisboxTo,
+				    const Real&        a_dxFrom,
+				    const Real&        a_dxTo){
+
+  const RealVect a = LeastSquares::position(a_from, a_fromVoF, a_ebisboxFrom, a_dxFrom);
+  const RealVect b = LeastSquares::position(a_to,   a_toVoF,   a_ebisboxTo,   a_dxTo);
 
   return (b-a);
 }

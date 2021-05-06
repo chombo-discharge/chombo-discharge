@@ -31,8 +31,12 @@ namespace LeastSquares {
   };
 
   /*!
-    @brief Returns position of a VoF. This ignores the "origin" of the coordinate system 
-    since this is only used together with LeastSquares::displacement(...)
+    @brief Compute the position (ignoring the "origin) of a VoF. 
+    @param[in] a_position  Position within the grid cell (e.g. center, centroid, boundary).
+    @param[in] a_vof       VolIndex to compute the position of
+    @param[in] a_ebisbox   EBISBox
+    @param[in] a_dx        Grid resolution
+    @return Tosition of a VoF, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
   */
   RealVect position(const CellPosition a_position,
 		    const VolIndex&    a_vof,
@@ -40,7 +44,14 @@ namespace LeastSquares {
 		    const Real&        a_dx);
   
   /*!
-    @brief Distance between two VoFs
+    @brief Computes the distance between two VoFs that are defined on the same grid level. 
+    @param[in] a_from     Specifying position in the cell defined by a_fromVoF
+    @param[in] a_to       Specifying position in the cell defined by a_toVoF
+    @param[in] a_fromVoF  VoF to compute the distance from
+    @param[in] a_toVoF    VoF to compute the distance to
+    @param[in] a_ebisbox  EBISBox
+    @param[in] a_dx       Grid resolution
+    @returns The vector pos(a_toVoF) - pos(a_fromVoF). 
   */
   RealVect displacement(const CellPosition a_from,
 			const CellPosition a_to,
@@ -48,6 +59,27 @@ namespace LeastSquares {
 			const VolIndex&    a_toVoF,
 			const EBISBox&     a_ebisbox,
 			const Real&        a_dx);
+
+  /*!
+    @brief Computes the distance between two VoFs that are defined on two different grid levels. 
+    @param[in] a_from        Specifying position in the cell defined by a_fromVoF
+    @param[in] a_to          Specifying position in the cell defined by a_toVoF
+    @param[in] a_fromVoF     VoF to compute the distance from
+    @param[in] a_toVoF       VoF to compute the distance to
+    @param[in] a_ebisboxFrom EBISBox which can reach a_fromVoF
+    @param[in] a_ebisboxTo   EBISBox which can reach a_toVoF
+    @param[in] a_dxFrom      Grid resolution for the a_fromVoF vof
+    @param[in] a_dxTo        Grid resolution for the a_toVoF vof
+    @returns The vector pos(a_toVoF) - pos(a_fromVoF). 
+  */
+  RealVect displacement(const CellPosition a_from,
+			const CellPosition a_to,
+			const VolIndex&    a_fromVoF,
+			const VolIndex&    a_toVoF,
+			const EBISBox&     a_ebisboxFrom,
+			const EBISBox&     a_ebisboxTo,
+			const Real&        a_dxFrom,
+			const Real&        a_dxTo);
 
   /*!
     @brief Get displacement vectors from a cell position to another cell position for a list of VoFs, i.e. x = (xFrom - xTo).
@@ -98,6 +130,7 @@ namespace LeastSquares {
     @param[in]  a_ebisbox ebisbox
     @param[in]  a_dx Resolution
     @param[in]  a_p Scaling
+    @return     Returns a least squares stencil for evaluating the a first order approximation to the normal derivative on the boundary centroid. 
   */
   VoFStencil getBndryGradStenOrderOne(const VolIndex& a_vof,
 				      const EBISBox&  a_ebisbox,
@@ -106,8 +139,10 @@ namespace LeastSquares {
   
   /*!
     @brief Assuming that a_stencil is a gradient stencil, project it along a direction. 
-    @param[in] a_stencil Stencil
+    @param[in] a_stencil Stencil describing a gradient. 
     @param[in] a_projection Vector to project stencil along. 
+    @return  Returns gradient stencil projected along a_project. 
+    @note Users need to make sure ||a_projection|| = 1 for this routine to make sense. 
   */
   VoFStencil projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection);
 
@@ -115,17 +150,21 @@ namespace LeastSquares {
     @brief Return the sum of weights in the stencil, for a specific variable. 
     @param[in] a_stencil Stencil
     @param[in] a_variable Which variable to sum. 
+    @return     Returns sum of weights for a specific variable in the stencil. 
   */
-  Real sumWeights(const VoFStencil& a_stencil, const int a_variable = 0);
+  Real sumWeights(const VoFStencil& a_stencil, const int a_variable);
 
   /*!
-    @brief Return the sum of weights in the stencil. 
+    @brief Compute the sum of all weights in a stencil. 
     @param[in] a_stencil Stencil
+    @return Returns sum of weights in a_stencil (over all variables).
   */
   Real sumAllWeights(const VoFStencil& a_stencil);
   
   /*!
     @brief Get the size of a Taylor expansion for a given order
+    @param[in] a_Q Desired order in Taylor expansion
+    @return Returns number of terms in Taylor expansion. 
   */
   int getTaylorExpansionSize(const int a_Q);
 

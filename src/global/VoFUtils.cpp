@@ -3,6 +3,7 @@
   @brief  Various functions for getting VoFs near cut-cells
   @author Robert Marskar
   @date   May 2021
+  @todo   getAllVoFsInQuadrant is hard-coded for 2D right now. 
 */
 
 #include "VoFUtils.H"
