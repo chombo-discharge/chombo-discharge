@@ -20,7 +20,9 @@ void MultiIndex::define(const IntVect a_index, const int a_Q){
   m_curIndex = a_index;
   m_Q        = a_Q;
 
-  //  Now define the map. 
+  //  Now define the map.
+  makeIndices();
+  makeMaps();
 }
   
 
@@ -120,13 +122,19 @@ int MultiIndex::factorial() const {
 }
 
 int MultiIndex::norm() const {
+  return norm(m_curIndex);
+}
+
+int MultiIndex::norm(const IntVect a_iv) const {
   int retval = 0;
   for (int dir = 0; dir < SpaceDim; dir++){
-    retval += m_curIndex[dir];
+    retval += a_iv[dir];
   }
 
   return retval;
 }
+
+
 
 Real MultiIndex::pow(const RealVect& a_vec){
 
@@ -169,3 +177,50 @@ void MultiIndex::operator++(){
   }
 }
 
+void MultiIndex::makeIndices() {
+
+  IntVect cur = IntVect::Zero;
+
+  while(MultiIndex::norm(cur) <= m_Q){
+    m_indices.emplace_back(cur);
+
+    // Now go to the next index in lexigraphical order
+    if(norm(cur) < m_Q) { // Can raise first index.
+      cur[0]++;
+    }
+    else if(norm(cur) == m_Q){ // Can't raise first order, check next index.
+
+      IntVect next = IntVect(D_DECL(0, cur[1]+1, cur[2]));
+      if(norm(next) <= m_Q){ // Ok, this is a valid index.
+	cur = next;
+      }
+#if CH_SPACEDIM==3
+      else if(norm(cur) > m_Q){
+	MultiIndex newIndex = MultiIndex(IntVect(D_DECL(0, 0, m_curIndex[2]+1)), m_q);
+	IntVect next = IntVect(D_DECL(0, 0, cur[2]+1));
+	if(norm(next) <= m_Q){
+	  cur = next;
+	}
+	else{
+	  cur[0]++; // Designed to break out of loop
+	}
+      }
+#endif
+      else{
+	cur[0]++; // Designed to break out of loop
+      }
+    }
+  }
+}
+
+void MultiIndex::makeMaps(){
+
+  // Create the map from multi-index to linear index (i.e. column entry). 
+  for (int k = 0; k < m_indices.size(); k++){
+    m_mapToLinearIndex.emplace(m_indices[k], k);
+  }
+
+  for (const auto& lm : m_mapToLinearIndex){
+    m_mapToMultiIndex.emplace(lm.second, lm.first);
+  }
+}

@@ -170,6 +170,22 @@ protected:
     @brief Base factorial function
   */
   int factorial(const int a_n) const;
+
+  /*!
+    @brief Fill m_indices
+  */
+  void makeIndices();
+
+  /*!
+    @brief Fill maps
+  */
+  void makeMaps();
+
+  private:
+  /*!
+    @brief Get norm
+  */
+  int norm(const IntVect a_index) const;
 };
 
 #endif
