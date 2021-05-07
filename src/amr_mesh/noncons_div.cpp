@@ -6,10 +6,8 @@
 */
 
 #include "noncons_div.H"
-#include "stencil_ops.H"
 
 #include "EBArith.H"
-
 
 noncons_div::noncons_div() : irreg_stencil(){
   CH_TIME("noncons_div::noncons_div");

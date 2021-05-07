@@ -6,7 +6,7 @@
 */
 
 #include "centroid_interp.H"
-#include "stencil_ops.H"
+#include "LinearStencil.H"
 #include "LeastSquares.H"
 
 #include "EBArith.H"
@@ -49,7 +49,7 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
   bool found_stencil = false;
 
   if(m_stencil_type == stencil_type::linear){
-    found_stencil = stencil_ops::get_linear_interp_stencil(a_sten, a_ebisbox.centroid(a_vof), a_vof, a_domain, a_ebisbox);
+    found_stencil = LinearStencil::getLinearInterpStencil(a_sten, a_ebisbox.centroid(a_vof), a_vof, a_domain, a_ebisbox);
   }
   else if(m_stencil_type == stencil_type::taylor){
     found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);

@@ -146,6 +146,12 @@ namespace VoFUtils {
 
   /*!
     @brief Get all VoFs within a radius, but ignore VoFs that are ''opposite'' to a specified normal direction in space. 
+    @param[in] a_startVoF    Starting VoF. 
+    @param[in] a_ebisbox     EBISBox.
+    @param[in] a_cardinal    Specifies cardinal direction in space.
+    @param[in] a_side        Specifies direction in space.
+    @param[in] a_radius      Radius.
+    @param[in] a_addStartVoF If true, add a_startVoF to the returned vector. 
   */
   Vector<VolIndex> getAllVoFsSymmetric(const VolIndex&      a_startVoF,
 				       const EBISBox&       a_ebisbox,

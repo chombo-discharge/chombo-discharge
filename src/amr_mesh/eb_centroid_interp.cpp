@@ -6,7 +6,7 @@
 */
 
 #include "eb_centroid_interp.H"
-#include "stencil_ops.H"
+#include "LinearStencil.H"
 #include "LeastSquares.H"
 
 #include "EBArith.H"
@@ -51,7 +51,7 @@ void eb_centroid_interp::build_stencil(VoFStencil&              a_sten,
   // Find the preferred stencil type
   if(m_stencil_type == stencil_type::linear){
     const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
-    found_stencil = stencil_ops::get_linear_interp_stencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+    found_stencil = LinearStencil::getLinearInterpStencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
   }
   else if(m_stencil_type == stencil_type::taylor){
     found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
@@ -69,7 +69,7 @@ void eb_centroid_interp::build_stencil(VoFStencil&              a_sten,
   // If we couldn't find a stencil, try other types in this order
   if(!found_stencil){
     const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
-    found_stencil = stencil_ops::get_linear_interp_stencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+    found_stencil = LinearStencil::getLinearInterpStencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
   }
   if(!found_stencil){
     found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
