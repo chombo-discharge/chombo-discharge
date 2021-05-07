@@ -6,6 +6,7 @@
 */
 
 #include "noncons_div.H"
+#include "VoFUtils.H"
 
 #include "EBArith.H"
 
@@ -44,8 +45,8 @@ void noncons_div::build_stencil(VoFStencil&              a_sten,
   a_sten.clear();
 
   Real norm = 0.;
-  Vector<VolIndex> vofs;
-  EBArith::getAllVoFsInMonotonePath(vofs, a_vof, a_ebisbox, m_radius);
+
+  const Vector<VolIndex> vofs = VoFUtils::getAllConnectedVoFsInRadius(a_vof, a_ebisbox, m_radius, IntVectSet());
   for (int i = 0; i < vofs.size(); i++){
     if(vofs[i] != a_vof){
       const VolIndex& ivof = vofs[i];
