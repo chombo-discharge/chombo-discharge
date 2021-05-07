@@ -10,11 +10,14 @@
 
 #include "computational_geometry.H"
 
-class tesselation : public computational_geometry {
-public:
+namespace ChomboDischarge {
 
-  tesselation();
-  ~tesselation();
-};
+  class tesselation : public computational_geometry {
+  public:
+
+    tesselation();
+    ~tesselation();
+  };
+}
 
 #endif

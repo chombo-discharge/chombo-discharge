@@ -10,39 +10,42 @@
 
 #include <ParmParse.H>
 
-rough_rod::rough_rod(){
-  this->set_eps0(1.0);
+namespace ChomboDischarge {
 
-  ParmParse pp("rough_rod");
+  rough_rod::rough_rod(){
+    this->set_eps0(1.0);
 
-  bool useRod;
+    ParmParse pp("rough_rod");
+
+    bool useRod;
   
-  pp.get("on", useRod);
+    pp.get("on", useRod);
 
-  if(useRod){
-    bool live, reseed;
-    RealVect f, e1, e2;
-    Real r, persist, amp;
-    int octaves;
-    Vector<Real> v;
+    if(useRod){
+      bool live, reseed;
+      RealVect f, e1, e2;
+      Real r, persist, amp;
+      int octaves;
+      Vector<Real> v;
 
-    pp.get("radius", r);
-    pp.get("live", live);
-    pp.get("noise_reseed", reseed);
-    pp.get("noise_amplitude", amp);
-    pp.get("noise_octaves", octaves);
-    pp.get("noise_persistence", persist);
+      pp.get("radius", r);
+      pp.get("live", live);
+      pp.get("noise_reseed", reseed);
+      pp.get("noise_amplitude", amp);
+      pp.get("noise_octaves", octaves);
+      pp.get("noise_persistence", persist);
 
-    pp.getarr("noise_frequency", v, 0 ,SpaceDim); f  = RealVect(D_DECL(v[0], v[1], v[2]));
-    pp.getarr("endpoint1",       v, 0 ,SpaceDim); e1 = RealVect(D_DECL(v[0], v[1], v[2]));
-    pp.getarr("endpoint2",       v, 0 ,SpaceDim); e2 = RealVect(D_DECL(v[0], v[1], v[2]));
+      pp.getarr("noise_frequency", v, 0 ,SpaceDim); f  = RealVect(D_DECL(v[0], v[1], v[2]));
+      pp.getarr("endpoint1",       v, 0 ,SpaceDim); e1 = RealVect(D_DECL(v[0], v[1], v[2]));
+      pp.getarr("endpoint2",       v, 0 ,SpaceDim); e2 = RealVect(D_DECL(v[0], v[1], v[2]));
 
-    RefCountedPtr<BaseIF> rod = RefCountedPtr<BaseIF> (new perlin_rod_if(r, e1, e2, false, amp, f, persist, octaves, reseed));
+      RefCountedPtr<BaseIF> rod = RefCountedPtr<BaseIF> (new perlin_rod_if(r, e1, e2, false, amp, f, persist, octaves, reseed));
 
-    m_electrodes.push_back(electrode(rod, live));
+      m_electrodes.push_back(electrode(rod, live));
+    }
   }
-}
 
-rough_rod::~rough_rod(){
+  rough_rod::~rough_rod(){
   
+  }
 }

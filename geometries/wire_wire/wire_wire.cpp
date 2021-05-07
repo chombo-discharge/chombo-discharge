@@ -10,25 +10,27 @@
 #include "new_sphere_if.H"
 #include "cylinder_if.H"
 
-wire_wire::wire_wire(){
-  ParmParse pp1("wire_wire.first");
-  ParmParse pp2("wire_wire.second");
+namespace ChomboDischarge {
 
-  bool useFirst;
-  bool useSecond;
+  wire_wire::wire_wire(){
+    ParmParse pp1("wire_wire.first");
+    ParmParse pp2("wire_wire.second");
 
-  pp1.get("on", useFirst);
-  pp2.get("on", useSecond);
+    bool useFirst;
+    bool useSecond;
 
-  if(useFirst)  this->addWire(pp1);
-  if(useSecond) this->addWire(pp2);
-}
+    pp1.get("on", useFirst);
+    pp2.get("on", useSecond);
+
+    if(useFirst)  this->addWire(pp1);
+    if(useSecond) this->addWire(pp2);
+  }
 
 
-wire_wire::~wire_wire(){
-}
+  wire_wire::~wire_wire(){
+  }
 
-void wire_wire::addWire(ParmParse& a_pp){
+  void wire_wire::addWire(ParmParse& a_pp){
     Real r;
     RealVect e1, e2;
     bool live;
@@ -50,4 +52,5 @@ void wire_wire::addWire(ParmParse& a_pp){
 #endif
 
     m_electrodes.push_back(electrode(bif, true, pot));
+  }
 }

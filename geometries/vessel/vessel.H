@@ -10,24 +10,28 @@
 
 #include "computational_geometry.H"
 
-class vessel : public computational_geometry {
-public:
-  vessel();
-  ~vessel();
-protected:
+namespace ChomboDischarge {
 
-  RealVect m_rod_center;
-  RealVect m_shroom_center;
-  Real m_rod_R;
-  Real m_shroom_R;
-  Real m_shroom_r;
-  Real m_shroom_d;
-  Real m_shroom_c;
+  class vessel : public computational_geometry {
+  public:
+    vessel();
+    ~vessel();
+  protected:
 
-  bool m_rod_live;
-  bool m_shroom_live;
+    RealVect m_rod_center;
+    RealVect m_shroom_center;
+    Real m_rod_R;
+    Real m_shroom_R;
+    Real m_shroom_r;
+    Real m_shroom_d;
+    Real m_shroom_c;
 
-  bool m_shroom;
-  bool m_rod;
-};
+    bool m_rod_live;
+    bool m_shroom_live;
+
+    bool m_shroom;
+    bool m_rod;
+  };
+}
+
 #endif

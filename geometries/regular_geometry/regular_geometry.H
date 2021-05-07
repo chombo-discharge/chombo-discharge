@@ -10,14 +10,17 @@
 
 #include "computational_geometry.H"
 
-/*!
-  @brief This class implements an empty geometry
-*/
-class regular_geometry : public computational_geometry {
-public:
+namespace ChomboDischarge {
+  
+  /*!
+    @brief This class implements an empty geometry
+  */
+  class regular_geometry : public computational_geometry {
+  public:
 
-  regular_geometry();
-  ~regular_geometry();
-};
+    regular_geometry();
+    ~regular_geometry();
+  };
+}
 
 #endif

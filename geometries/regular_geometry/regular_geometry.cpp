@@ -7,11 +7,14 @@
 
 #include "regular_geometry.H"
 
-regular_geometry::regular_geometry(){
-  m_dielectrics.resize(0);
-  m_electrodes.resize(0);
-}
+namespace ChomboDischarge {
 
-regular_geometry::~regular_geometry(){
+  regular_geometry::regular_geometry(){
+    m_dielectrics.resize(0);
+    m_electrodes.resize(0);
+  }
+
+  regular_geometry::~regular_geometry(){
   
+  }
 }

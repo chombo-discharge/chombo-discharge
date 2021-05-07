@@ -10,13 +10,16 @@
 
 #include "computational_geometry.H"
 
-/*!
-  @brief This is a class that defines a coaxial cable geometry 
-*/
-class coaxial_cable : public computational_geometry {
-public:
-  coaxial_cable();
-  ~coaxial_cable();
-};
+namespace ChomboDischarge {
+
+  /*!
+    @brief This is a class that defines a coaxial cable geometry 
+  */
+  class coaxial_cable : public computational_geometry {
+  public:
+    coaxial_cable();
+    ~coaxial_cable();
+  };
+}
 
 #endif

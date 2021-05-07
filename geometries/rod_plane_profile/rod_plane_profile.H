@@ -10,27 +10,30 @@
 
 #include "computational_geometry.H"
 
-/*!
-  @brief Geometry class which defines an electrode blade and a dielectric slab with various surface profiles. 
-*/
-class rod_plane_profile : public computational_geometry {
-public:
+namespace ChomboDischarge {
 
-  enum class profile {
-    circle,
-    square,
+  /*!
+    @brief Geometry class which defines an electrode blade and a dielectric slab with various surface profiles. 
+  */
+  class rod_plane_profile : public computational_geometry {
+  public:
+
+    enum class profile {
+      circle,
+      square,
+    };
+
+    rod_plane_profile();
+    ~rod_plane_profile();
+
+  protected:
+
+    profile m_profile;
+
+    BaseIF* getBaseIF();
+    BaseIF* getBaseIF_circle();
+    BaseIF* getBaseIF_square();
   };
-
-  rod_plane_profile();
-  ~rod_plane_profile();
-
-protected:
-
-  profile m_profile;
-
-  BaseIF* getBaseIF();
-  BaseIF* getBaseIF_circle();
-  BaseIF* getBaseIF_square();
-};
+}
 
 #endif

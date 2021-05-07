@@ -10,14 +10,17 @@
 
 #include "computational_geometry.H"
 
-/*!
-  @brief Class that describes a rod electrode with surface roughness
-*/
-class rough_rod : public computational_geometry {
-public:
+namespace ChomboDischarge {
 
-  rough_rod();
-  ~rough_rod();
-};
+  /*!
+    @brief Class that describes a rod electrode with surface roughness
+  */
+  class rough_rod : public computational_geometry {
+  public:
+
+    rough_rod();
+    ~rough_rod();
+  };
+}
 
 #endif

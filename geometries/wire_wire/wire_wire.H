@@ -12,18 +12,21 @@
 
 #include <ParmParse.H>
 
-/*!
-  @brief This is a class that defines a wire-wire geometry
-*/
-class wire_wire : public computational_geometry {
-public:
+namespace ChomboDischarge {
+
+  /*!
+    @brief This is a class that defines a wire-wire geometry
+  */
+  class wire_wire : public computational_geometry {
+  public:
   
-  wire_wire();
-  ~wire_wire();
+    wire_wire();
+    ~wire_wire();
 
-protected:
+  protected:
 
-  void addWire(ParmParse& a_pp);
-};
+    void addWire(ParmParse& a_pp);
+  };
+}
 
 #endif

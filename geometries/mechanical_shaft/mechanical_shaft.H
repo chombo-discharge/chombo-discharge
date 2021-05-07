@@ -10,23 +10,26 @@
 
 #include "computational_geometry.H"
 
-/*!
-  @brief Mechanical shaft class
-*/
-class mechanical_shaft : public computational_geometry {
-public:
+namespace ChomboDischarge {
 
-  mechanical_shaft();
-  ~mechanical_shaft();
+  /*!
+    @brief Mechanical shaft class
+  */
+  class mechanical_shaft : public computational_geometry {
+  public:
 
-protected:
+    mechanical_shaft();
+    ~mechanical_shaft();
 
-  void define_electrode();
-  void define_dielectric();
+  protected:
+
+    void define_electrode();
+    void define_dielectric();
   
-  RefCountedPtr<BaseIF> get_polygon();
-  RefCountedPtr<BaseIF> get_cylinder();
-  RefCountedPtr<BaseIF> get_cylinder_profile();
-};
+    RefCountedPtr<BaseIF> get_polygon();
+    RefCountedPtr<BaseIF> get_cylinder();
+    RefCountedPtr<BaseIF> get_cylinder_profile();
+  };
+}
 
 #endif

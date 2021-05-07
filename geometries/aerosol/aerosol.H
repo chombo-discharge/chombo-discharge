@@ -10,11 +10,14 @@
 
 #include "computational_geometry.H"
 
-class aerosol : public computational_geometry {
-public:
+namespace ChomboDischarge {
 
-  aerosol();
-  ~aerosol();
-};
+  class aerosol : public computational_geometry {
+  public:
+
+    aerosol();
+    ~aerosol();
+  };
+}
 
 #endif
