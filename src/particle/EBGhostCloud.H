@@ -13,160 +13,163 @@
 #include "EBCellFAB.H"
 #include "ProblemDomain.H"
 
-class EBGhostCloud {
-public:
+namespace ChomboDischarge {
 
-  /*!
-    @brief Default constructor. Needs to call define
-  */
-  EBGhostCloud();
+  class EBGhostCloud {
+  public:
 
-  /*!
-    @brief Full constructor. Calls define. 
-  */
-  EBGhostCloud(const DisjointBoxLayout& a_gridsCoar,
-	       const DisjointBoxLayout& a_gridsFine,
-	       const EBLevelGrid&       a_eblgCoar,
-	       const EBLevelGrid&       a_eblgFine,
-	       const ProblemDomain&     a_domainCoar,
-	       const ProblemDomain&     a_domainFine,
-	       const int                a_ref_rat,
-	       const int                a_nComp,
-	       const int                a_ghost);
+    /*!
+      @brief Default constructor. Needs to call define
+    */
+    EBGhostCloud();
 
-  /*!
-    @brief Dtor
-  */
-  ~EBGhostCloud();
+    /*!
+      @brief Full constructor. Calls define. 
+    */
+    EBGhostCloud(const DisjointBoxLayout& a_gridsCoar,
+		 const DisjointBoxLayout& a_gridsFine,
+		 const EBLevelGrid&       a_eblgCoar,
+		 const EBLevelGrid&       a_eblgFine,
+		 const ProblemDomain&     a_domainCoar,
+		 const ProblemDomain&     a_domainFine,
+		 const int                a_ref_rat,
+		 const int                a_nComp,
+		 const int                a_ghost);
 
-  /*!
-    @brief Define function
-  */
-  void define(const DisjointBoxLayout& a_gridsCoar,
-	      const DisjointBoxLayout& a_gridsFine,
-	      const EBLevelGrid&       a_eblgCoar,
-	      const EBLevelGrid&       a_eblgFine,
-	      const ProblemDomain&     a_domainCoar,
-	      const ProblemDomain&     a_domainFine,
-	      const int                a_ref_rat,
-	      const int                a_nComp,
-	      const int                a_ghost);
+    /*!
+      @brief Dtor
+    */
+    ~EBGhostCloud();
 
-  /*!
-    @brief Coarsen the fine-level ghost cells and add them to the coarse level
-  */
-  void addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData);
+    /*!
+      @brief Define function
+    */
+    void define(const DisjointBoxLayout& a_gridsCoar,
+		const DisjointBoxLayout& a_gridsFine,
+		const EBLevelGrid&       a_eblgCoar,
+		const EBLevelGrid&       a_eblgFine,
+		const ProblemDomain&     a_domainCoar,
+		const ProblemDomain&     a_domainFine,
+		const int                a_ref_rat,
+		const int                a_nComp,
+		const int                a_ghost);
 
-  /*!
-    @brief Add the ghost cells on the refined coarse level to the fine level. 
-  */
-  void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<FArrayBox>& a_fiCoData);
+    /*!
+      @brief Coarsen the fine-level ghost cells and add them to the coarse level
+    */
+    void addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData);
 
-  /*!
-    @brief Get the refined coarse buffer
-  */
-  BoxLayoutData<FArrayBox>& getFiCoBuffer();
+    /*!
+      @brief Add the ghost cells on the refined coarse level to the fine level. 
+    */
+    void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<FArrayBox>& a_fiCoData);
 
-  /*!
-    @brief Get the refined coarse buffer
-  */
-  const BoxLayoutData<FArrayBox>& getFiCoBuffer() const;
+    /*!
+      @brief Get the refined coarse buffer
+    */
+    BoxLayoutData<FArrayBox>& getFiCoBuffer();
 
-  /*!
-    @brief Get the refined version of the coarse eblevelgrid
-  */
-  const EBLevelGrid& getEblgFiCo() const;
+    /*!
+      @brief Get the refined coarse buffer
+    */
+    const BoxLayoutData<FArrayBox>& getFiCoBuffer() const;
 
-protected:
+    /*!
+      @brief Get the refined version of the coarse eblevelgrid
+    */
+    const EBLevelGrid& getEblgFiCo() const;
 
-  /*!
-    @brief Is defined or not
-  */
-  bool m_isDefined;
+  protected:
 
-  /*!
-    @brief Coarse grids
-  */
-  DisjointBoxLayout m_gridsCoar;
+    /*!
+      @brief Is defined or not
+    */
+    bool m_isDefined;
 
-  /*!
-    @brief Fine grids
-  */
-  DisjointBoxLayout m_gridsFine;
+    /*!
+      @brief Coarse grids
+    */
+    DisjointBoxLayout m_gridsCoar;
 
-  /*!
-    @brief Coarse EBLevelGrid
-  */
-  EBLevelGrid m_eblgCoar;
+    /*!
+      @brief Fine grids
+    */
+    DisjointBoxLayout m_gridsFine;
 
-  /*!
-    @brief Fine EBLevelGrid
-  */
-  EBLevelGrid m_eblgFine;
+    /*!
+      @brief Coarse EBLevelGrid
+    */
+    EBLevelGrid m_eblgCoar;
 
-  /*!
-    @brief Refined coarse EBLevelGrid
-  */
-  EBLevelGrid m_eblgFiCo;
+    /*!
+      @brief Fine EBLevelGrid
+    */
+    EBLevelGrid m_eblgFine;
 
-  /*!
-    @brief Coarse domain
-  */
-  ProblemDomain m_domainCoar;
+    /*!
+      @brief Refined coarse EBLevelGrid
+    */
+    EBLevelGrid m_eblgFiCo;
 
-  /*!
-    @brief Fine domain
-  */
-  ProblemDomain m_domainFine;
+    /*!
+      @brief Coarse domain
+    */
+    ProblemDomain m_domainCoar;
 
-  /*!
-    @brief Coarsened grids, grown by the required amount of ghost cells. 
-  */
-  BoxLayout m_gridsCoFi;
+    /*!
+      @brief Fine domain
+    */
+    ProblemDomain m_domainFine;
 
-  /*!
-    @brief Refined coarse grids.
-  */
-  BoxLayout m_gridsFiCo;
+    /*!
+      @brief Coarsened grids, grown by the required amount of ghost cells. 
+    */
+    BoxLayout m_gridsCoFi;
 
-  /*!
-    @brief Data defined on the coarsened fine grid
-  */
-  BoxLayoutData<FArrayBox> m_dataCoFi;
+    /*!
+      @brief Refined coarse grids.
+    */
+    BoxLayout m_gridsFiCo;
 
-  /*!
-    @brief Data defined on the refined coarse grid
-  */
-  BoxLayoutData<FArrayBox> m_dataFiCo;
+    /*!
+      @brief Data defined on the coarsened fine grid
+    */
+    BoxLayoutData<FArrayBox> m_dataCoFi;
 
-  /*!
-    @brief Scratch storage for fine grid data
-  */
-  LevelData<EBCellFAB> m_scratchFine;
+    /*!
+      @brief Data defined on the refined coarse grid
+    */
+    BoxLayoutData<FArrayBox> m_dataFiCo;
 
-  /*!
-    @brief Refinement ratio between the two levels
-  */
-  int m_refRat;
+    /*!
+      @brief Scratch storage for fine grid data
+    */
+    LevelData<EBCellFAB> m_scratchFine;
 
-  /*!
-    @brief Maximum number of components
-  */
-  int m_nComp;
+    /*!
+      @brief Refinement ratio between the two levels
+    */
+    int m_refRat;
 
-  /*!
-    @brief Required number of ghost cells
-  */
-  int m_ghost;
+    /*!
+      @brief Maximum number of components
+    */
+    int m_nComp;
 
-  /*!
-    @brief Make the coarsened fine grids and data
-  */
-  void makeCoFiStuff();
+    /*!
+      @brief Required number of ghost cells
+    */
+    int m_ghost;
 
-  /*!
-    @brief Make the refined coarse grids and data
-  */
-  void makeFiCoStuff();
-};
+    /*!
+      @brief Make the coarsened fine grids and data
+    */
+    void makeCoFiStuff();
+
+    /*!
+      @brief Make the refined coarse grids and data
+    */
+    void makeFiCoStuff();
+  };
+}
 #endif
