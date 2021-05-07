@@ -1,16 +1,27 @@
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
 Depending main.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/geometry/geo_coarsener.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp ...
+Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/geometries/rod_dielectric/rod_dielectric.cpp ...
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
-In file included from main.cpp:3:0:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/geometries/rod_dielectric/rod_dielectric.H:16:54: error: expected class-name before ‘{’ token
- class rod_dielectric : public computational_geometry {
-                                                      ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/geometry/mfis.cpp: In member function ‘virtual void mfis::define(const Box&, const RealVect&, const Real&, const Vector<GeometryService*>&, int, int, bool)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/geometry/mfis.cpp:35:6: error: ‘computational_geometry’ has not been declared
+   if(computational_geometry::s_use_new_gshop){
+      ^~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/geometry/mfis.cpp:40:3: error: ‘memrep’ has not been declared
+   memrep::get_max_min_memory();
+   ^~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/geometry/mfis.cpp:49:8: error: ‘computational_geometry’ has not been declared
+     if(computational_geometry::s_use_new_gshop){
+        ^~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/geometry/mfis.cpp:54:5: error: ‘memrep’ has not been declared
+     memrep::get_max_min_memory();
+     ^~~~~~
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:517: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/mfis.o' failed
+make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/mfis.o] Error 1
+make[1]: *** Waiting for unfinished jobs....
 main.cpp:7:17: error: ‘physics’ has not been declared
  using namespace physics::poisson;
                  ^~~~~~~
@@ -37,6 +48,9 @@ main.cpp:20:88: error: type/value mismatch at argument 1 in template parameter l
    RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_dielectric());
                                                                                         ^
 main.cpp:20:88: note:   expected a type, got ‘computational_geometry’
+main.cpp:20:95: error: expected type-specifier before ‘rod_dielectric’
+   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_dielectric());
+                                                                                               ^~~~~~~~~~~~~~
 main.cpp:21:17: error: ‘amr_mesh’ was not declared in this scope
    RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
                  ^~~~~~~~
@@ -139,23 +153,7 @@ main.cpp:30:61: error: expected type-specifier before ‘driver’
 main.cpp:31:9: error: base operand of ‘->’ is not a pointer
    engine->setup_and_run(input_file);
          ^~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/geometry/mfis.cpp: In member function ‘virtual void mfis::define(const Box&, const RealVect&, const Real&, const Vector<GeometryService*>&, int, int, bool)’:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/geometry/mfis.cpp:35:6: error: ‘computational_geometry’ has not been declared
-   if(computational_geometry::s_use_new_gshop){
-      ^~~~~~~~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/geometry/mfis.cpp:40:3: error: ‘memrep’ has not been declared
-   memrep::get_max_min_memory();
-   ^~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/geometry/mfis.cpp:49:8: error: ‘computational_geometry’ has not been declared
-     if(computational_geometry::s_use_new_gshop){
-        ^~~~~~~~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/geometry/mfis.cpp:54:5: error: ‘memrep’ has not been declared
-     memrep::get_max_min_memory();
-     ^~~~~~
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:517: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/main.o' failed
 make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/main.o] Error 1
-make[1]: *** Waiting for unfinished jobs....
-/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:517: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/mfis.o' failed
-make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/mfis.o] Error 1
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:425: recipe for target 'main' failed
 make: *** [main] Error 2

@@ -4,7 +4,8 @@
 #include "field_stepper.H"
 #include "ParmParse.H"
 
-using namespace physics::poisson;
+using namespace ChomboDischarge;
+using namespace ChomboDischarge::physics::poisson;
 
 int main(int argc, char* argv[]){
 

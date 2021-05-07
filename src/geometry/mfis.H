@@ -13,88 +13,91 @@
 #include <RealVect.H>
 #include <MFIndexSpace.H>
 
-/*!
-  @brief phase names
-*/
-namespace phase {
-  const int num_phases = 2;
+namespace ChomboDischarge {
+
+  /*!
+    @brief phase names
+  */
+  namespace phase {
+    const int num_phases = 2;
   
-  enum which_phase {
-    gas   = 0,
-    solid = 1
+    enum which_phase {
+      gas   = 0,
+      solid = 1
+    };
   };
-};
-
-/*!
-  @brief Two-fluid index space
-*/
-class mfis {
-public:
-
 
   /*!
-    @brief Weak constructor. Must call define later
+    @brief Two-fluid index space
   */
-  mfis();
+  class mfis {
+  public:
 
-  /*!
-    @brief Destructor
-  */
-  ~mfis();
 
-  /*!
-    @brief Define function
-  */
-  virtual void define(const Box                     & a_domain,
-		      const RealVect                & a_origin,
-		      const Real                    & a_dx,
-		      const Vector<GeometryService*>& a_geoservers,
-		      int                             a_nCellMax                              = -1,
-		      int                             a_maxCoarsenings                        = -1,
-		      bool                            a_fixOnlyFirstPhaseRegNextToMultiValued = false);
+    /*!
+      @brief Weak constructor. Must call define later
+    */
+    mfis();
 
-  /*!
-    @brief Get a particular ebis
-  */
-  const RefCountedPtr<EBIndexSpace>& get_ebis(const phase::which_phase a_phase) const;
+    /*!
+      @brief Destructor
+    */
+    ~mfis();
 
-  /*!
-    @brief Get a particular ebis
-  */
-  const RefCountedPtr<EBIndexSpace>& get_ebis(const int a_phase) const;
+    /*!
+      @brief Define function
+    */
+    virtual void define(const Box                     & a_domain,
+			const RealVect                & a_origin,
+			const Real                    & a_dx,
+			const Vector<GeometryService*>& a_geoservers,
+			int                             a_nCellMax                              = -1,
+			int                             a_maxCoarsenings                        = -1,
+			bool                            a_fixOnlyFirstPhaseRegNextToMultiValued = false);
 
-  /*!
-    @brief Get a particular ebis
-  */
-  RefCountedPtr<EBIndexSpace>& get_ebis(const phase::which_phase a_phase);
+    /*!
+      @brief Get a particular ebis
+    */
+    const RefCountedPtr<EBIndexSpace>& get_ebis(const phase::which_phase a_phase) const;
 
-  /*!
-    @brief Get ebis
-  */
-  RefCountedPtr<EBIndexSpace>& get_ebis(const int a_phase);
+    /*!
+      @brief Get a particular ebis
+    */
+    const RefCountedPtr<EBIndexSpace>& get_ebis(const int a_phase) const;
 
-  /*!
-    @brief Get the interface region. This is defined as the intersection between the irregular cells of the 
-    gas phase and the other phases. 
-  */
-  IntVectSet interface_region(const ProblemDomain& a_domain) const;
+    /*!
+      @brief Get a particular ebis
+    */
+    RefCountedPtr<EBIndexSpace>& get_ebis(const phase::which_phase a_phase);
 
-  /*!
-    @brief Get number of phases
-  */
-  int num_phases() const;
+    /*!
+      @brief Get ebis
+    */
+    RefCountedPtr<EBIndexSpace>& get_ebis(const int a_phase);
 
-protected:
+    /*!
+      @brief Get the interface region. This is defined as the intersection between the irregular cells of the 
+      gas phase and the other phases. 
+    */
+    IntVectSet interface_region(const ProblemDomain& a_domain) const;
 
-  /*!
-    @brief EBIndexSpaces
-  */
-  Vector<RefCountedPtr<EBIndexSpace> > m_ebis;
+    /*!
+      @brief Get number of phases
+    */
+    int num_phases() const;
 
-  /*!
-    @brief MFIndexSpace
-  */
-  RefCountedPtr<MFIndexSpace> m_mfis;
-};
+  protected:
+
+    /*!
+      @brief EBIndexSpaces
+    */
+    Vector<RefCountedPtr<EBIndexSpace> > m_ebis;
+
+    /*!
+      @brief MFIndexSpace
+    */
+    RefCountedPtr<MFIndexSpace> m_mfis;
+  };
+}
 
 #endif
