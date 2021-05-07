@@ -17,10 +17,9 @@
 #include "dcel_BVH.H"
 #include "bvh_if.H"
 
-
-using namespace dcel;
-
 namespace ChomboDischarge {
+
+  using namespace dcel;
 
   using precision = float;
 
