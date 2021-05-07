@@ -240,43 +240,16 @@ VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_a
 						     const Vector<RealVect>& a_displacements,
 						     const Vector<Real>&     a_weights,
 						     const int               a_order){
+
   VoFStencil ret;
+  
+  const IntVect deriv = IntVect::Zero;
+  const IntVectSet ivs(deriv);
 
-  const int M = LeastSquares::getTaylorExpansionSize(a_order);
-  const int K = a_displacements.size();
+  std::map<IntVect, VoFStencil> allStens = LeastSquares::computeInterpolationStencil(ivs, a_allVoFs, a_displacements, a_weights, a_order);
 
-  if(K < M) MayDay::Abort("LeastSquares::computeInterpolation -- not enough equations to achieve desired order!");
-
-  // Build the A-matrix in column major order so we can use LaPackUtils::computePseudoInverse.
-  // Use of multi-indices makes higher-order Taylor series a walk in the park. 
-  int i = 0;
-  Vector<Real> linA(K*M, 0.0);
-  for (MultiIndex mi(a_order); mi.ok(); ++mi){
-    
-    for (int k = 0; k < K; k++){
-      linA[i] = a_weights[k]*mi.pow(a_displacements[k])/mi.factorial();
-      
-      i++;
-    }
-  }
-
-  // Compute the pseudo-inverse.
-  Vector<Real> linAplus(M*K, 0.0);
-  const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), linA.stdVector(), K, M);
-
-  if(foundSVD){ 
-
-    // Ok, only need to extract the stencil, which is just the first row of linAplus*W. We use
-    // multi-index for safety in case the ordering is re-done at some point. 
-    const MultiIndex mi(a_order);
-    const int row = mi.getLinearIndex(IntVect::Zero);
-
-    // Recall that linAplus is M*K so the stride is M
-    for (int k = 0; k < K; k++){
-      const int idx = row + k*M;
-      
-      ret.add(a_allVoFs[k], a_weights[k]*linAplus[idx]);
-    }
+  if(allStens.find(deriv) != allStens.end()){
+    ret = allStens.at(deriv);
   }
 
   return ret;
@@ -294,12 +267,13 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
     const int M = LeastSquares::getTaylorExpansionSize(a_order);
     const int K = a_displacements.size();
 
-    if(K < M) MayDay::Abort("LeastSquares::computeInterpolation -- not enough equations to achieve desired order!");
+    if(K < M) MayDay::Abort("LeastSquares::computeInterpolationStencil -- not enough equations to achieve desired order!");
 
     // Build the A-matrix in column major order so we can use LaPackUtils::computePseudoInverse.
     // Use of multi-indices makes higher-order Taylor series a walk in the park. 
     int i = 0;
-    Vector<Real> linA(K*M, 0.0);
+    Vector<Real> linA    (K*M, 0.0);
+    Vector<Real> linAplus(M*K, 0.0);
     for (MultiIndex mi(a_order); mi.ok(); ++mi){
     
       for (int k = 0; k < K; k++){
@@ -310,13 +284,9 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
     }
 
     // Compute the pseudo-inverse.
-    Vector<Real> linAplus(M*K, 0.0);
     const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), linA.stdVector(), K, M);
 
     if(foundSVD){
-
-
-      
       const MultiIndex mi(a_order);
 
       // Recall that linAplus is M*K so the stride is always M, starting at some specified row.

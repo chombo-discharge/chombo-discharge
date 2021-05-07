@@ -204,6 +204,7 @@ namespace LeastSquares {
     @param[in] a_weightP       Weighting order for the least squares system. Must be > 0 to have an effect. 
     @return Stencils for each of the derivatives specified in the input argument. 
     @note This will throw an error if you don't have enough equations for obtaining the specified order. 
+    @note This will return an empty map if a_derivs is also empty. 
   */
   std::map<IntVect, VoFStencil> computeInterpolationStencil(const IntVectSet&       a_derivs,
 							    const Vector<VolIndex>& a_allVoFs,
