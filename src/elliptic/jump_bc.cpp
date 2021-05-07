@@ -88,6 +88,8 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
       }
     }
   }
+
+
 }
 
 bool jump_bc::get_second_order_sten(Real&             a_weight,
@@ -209,7 +211,7 @@ void jump_bc::define_vofiter(){
 }
 
 void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
-  CH_TIME("jump_bc::build_stencils");
+  CH_TIME("jump_bc::set_bco");
 
   const int comp = 0;
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){

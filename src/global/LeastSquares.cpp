@@ -182,7 +182,7 @@ VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
   if(normal != RealVect::Zero){ // Can only do this if we actual have a normal vector. 
     const int radius = 1;
     const int order  = 1;
-    const int numTaylorTerms = LeastSquares::getTaylorExpansionSize(order);
+    const int numTaylorTerms = SpaceDim; // Must have at least SpaceDim equations to be able to get the stencil. 
 
     // Get VoFs, try to use quadrants but if the normal is aligned with the grid just get a "symmetric" stencil. 
     Vector<VolIndex> allVoFs;
@@ -241,7 +241,12 @@ VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_a
 						     const Vector<Real>&     a_weights,
 						     const int               a_order){
 
-  MayDay::Abort("LeastSquares::computeInterpolationStencil");
+  MayDay::Abort("LeastSquares::computeInterpolationStencil - not implemented");
+
+  const int M = LeastSquares::getTaylorExpansionSize(a_order);
+  const int K = a_displacements.size();
+
+  if(K < M) MayDay::Abort("LeastSquares::computeInterpolation -- not enough equations to achieve desired order!");
 }
 
 Real LeastSquares::sumWeights(const VoFStencil& a_stencil, const int a_variable){
@@ -271,18 +276,11 @@ Real LeastSquares::sumAllWeights(const VoFStencil& a_stencil){
 int LeastSquares::getTaylorExpansionSize(const int a_order){
 
   int nTerms = 0;
+#if 0
   for (MultiIndex cur(IntVect::Zero); cur <= a_order; cur.next(a_order)){
     nTerms++;
   }
+#endif
   
   return nTerms;
-}
-
-Vector<MultiIndex> LeastSquares::getMultiIndicesLexiOrder(const int a_Q){
-  Vector<MultiIndex> ret;
-  for (MultiIndex cur = IntVect::Zero; cur <= a_Q; cur.next(a_Q)){
-    ret.push_back(cur);
-  }
-
-  return ret;
 }

@@ -3,6 +3,7 @@
   @brief  Agglomeration of various routines that use least squares computations
   @author Robert Marskar
   @date   May 2016
+  @todo   Only first order gradient reconstruction is currently supported, but it should be possible to generalize this. 
 */
 
 #ifndef _LEASTSQUARES_H_
@@ -210,12 +211,6 @@ namespace LeastSquares {
     @return Returns number of terms in Taylor expansion. 
   */
   int getTaylorExpansionSize(const int a_order);
-
-  /*!
-    @brief Generate a sequence of multi-indices |q| <= Q in lexicographical order
-    @param[in] a_Q Largest multi-index
-  */
-  Vector<MultiIndex> getMultiIndicesLexiOrder(const int a_Q);
 };
 
 #endif
