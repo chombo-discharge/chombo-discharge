@@ -1,8 +1,8 @@
 /*!
-  @file centroid_interp.H
-  @brief Implementation of irreg_stencil that interpolates from cell centers to cell centroids
+  @file   centroid_interp.H
+  @brief  Implementation of irreg_stencil that interpolates from cell centers to cell centroids
   @author Robert Marskar
-  @date Aug. 2017
+  @date   Aug. 2017
 */
 
 
@@ -49,11 +49,6 @@ public:
     @brief Tolerance
   */
   static Real s_tolerance;
-
-  /*!
-    @brief Use quadrant based stencils for least squares
-  */
-  static bool s_quadrant_based;
   
 protected:
   
@@ -67,7 +62,7 @@ protected:
 			     const EBISBox&           a_ebisbox,
 			     const Box&               a_box,
 			     const Real&              a_dx,
-			     const IntVectSet&        a_cfivs);
+			     const IntVectSet&        a_cfivs) override;
 
   /*!
     @brief Get a Taylor-based stencil

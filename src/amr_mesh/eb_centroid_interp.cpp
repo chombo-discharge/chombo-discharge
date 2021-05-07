@@ -7,6 +7,7 @@
 
 #include "eb_centroid_interp.H"
 #include "stencil_ops.H"
+#include "LeastSquares.H"
 
 #include "EBArith.H"
 
@@ -125,61 +126,18 @@ bool eb_centroid_interp::get_lsq_grad_stencil(VoFStencil&              a_sten,
 					      const IntVectSet&        a_cfivs){
   CH_TIME("eb_centroid_interp::get_lsq_grad_stencil");
 
-#if CH_SPACEDIM == 2
-  const int minStenSize = 3;
-#elif CH_SPACEDIM== 3
-  const int minStenSize = 7;
-#endif
+  const int weightingPower = 0;
+  
+  a_sten = LeastSquares::getInterpolationStencilUsingAllVoFsInRadius(LeastSquares::CellPosition::Boundary,
+  								     LeastSquares::CellPosition::Center,
+  								     a_vof,
+  								     a_ebisbox,
+  								     a_dx,
+  								     weightingPower,
+  								     m_radius,
+  								     m_order);
 
-  a_sten.clear();
-    
-  Real weight              = 0;
-  const int comp           = 0;
-  const RealVect& centroid = a_ebisbox.bndryCentroid(a_vof);
-  const RealVect normal    = centroid/centroid.vectorLength();
-
-  // Find the quadrant that the normal points into
-  IntVect quadrant;
-  for (int dir = 0; dir < SpaceDim; dir++){
-    quadrant[dir] = (normal[dir] < 0) ? -1 : 1;
-  }
-
-  // Quadrant or monotone-path based stencils
-  if(s_quadrant_based){
-    EBArith::getLeastSquaresGradSten(a_sten,               // Find a stencil for the gradient at the cell center
-				     weight,
-				     normal,
-				     RealVect::Zero,
-				     quadrant,
-				     a_vof,
-				     a_ebisbox,
-				     a_dx*RealVect::Unit,
-				     a_domain,
-				     comp);
-  }
-  else{
-    EBArith::getLeastSquaresGradStenAllVoFsRad(a_sten,               // Find a stencil for the gradient at the cell center
-					       weight,
-					       normal,
-					       RealVect::Zero,
-					       a_vof,
-					       a_ebisbox,
-					       a_dx*RealVect::Unit,
-					       a_domain,
-					       comp,
-					       m_radius);
-  }
-
-  if(a_sten.size() >= minStenSize){         // Do a Taylor expansion phi_centroid = phi_cell + grad_cell*(x_centroid - x_cell)
-    a_sten.add(a_vof, weight);
-    a_sten *= m_dx*centroid.vectorLength();
-    a_sten.add(a_vof, 1.0);
-      
-    return true;
-  }
-  else{
-    return false;
-  }
+  return (a_sten.size() > 0);
 }
 
 bool eb_centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
@@ -218,79 +176,6 @@ bool eb_centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
       }
     }
   }
-
-  return true;
-}
-
-
-
-bool eb_centroid_interp::get_ebavg_stencil(VoFStencil&              a_sten,
-					   const VolIndex&          a_vof,
-					   const DisjointBoxLayout& a_dbl,
-					   const ProblemDomain&     a_domain,
-					   const EBISBox&           a_ebisbox,
-					   const Box&               a_box,
-					   const Real&              a_dx,
-					   const IntVectSet&        a_cfivs){
-
-  const int avg_radius = 1;
-
-  a_sten.clear();
-
-  // Get all the other VoFs
-  Vector<VolIndex> candidateVoFs;
-  EBArith::getAllVoFsInMonotonePath(candidateVoFs, a_vof, a_ebisbox, avg_radius);
-  //  std::cout << candidateVoFs.size() << std::endl;
-  const IntVect IV = a_vof.gridIndex();
-
-  // Make sure the other VoFs lie on the domain
-  Vector<VolIndex> goodVoFs;
-  for (int i = 0; i < candidateVoFs.size(); i++){
-    const VolIndex vof = candidateVoFs[i];
-    const IntVect iv   = vof.gridIndex();
-
-    if(vof != a_vof){
-      if(a_ebisbox.isIrregular(iv) && !a_cfivs.contains(iv)){
-	goodVoFs.push_back(vof);
-      }
-    }
-  }
-  //  goodVoFs.push_back(a_vof);
-
-  const RealVect c0 = a_ebisbox.bndryCentroid(a_vof);
-
-  ///  std::cout << goodVoFs.size() << std::endl;
-  // Build the basic stencil
-  a_sten.clear();
-  Real sumweights = 0.0;
-
-  const bool found_stencil = this->get_pwl_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
-  const Real w0 = a_ebisbox.bndryArea(a_vof);
-  a_sten *= w0;
-  sumweights += w0;
-
-  // Now do the other stencils
-  for (int i = 0; i < goodVoFs.size(); i++){
-    VoFStencil curSten;
-    VolIndex curVoF = goodVoFs[i];
-    const bool found_stencil = this->get_pwl_stencil(curSten, curVoF, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
-
-    if(found_stencil){
-      Real weight = a_ebisbox.bndryArea(curVoF);
-      RealVect c = a_ebisbox.bndryCentroid(curVoF);
-
-      RealVect d = (RealVect(IV) + c0) - (RealVect(curVoF.gridIndex())+c);
-      //      weight *= 1./(1+d.vectorLength());
-      
-      curSten *= weight;
-
-      sumweights += weight;
-      a_sten += curSten;
-    }
-  }
-
-  a_sten *= 1./sumweights;
-
 
   return true;
 }

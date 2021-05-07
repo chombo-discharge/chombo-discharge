@@ -38,19 +38,19 @@ void irreg_stencil::define(const DisjointBoxLayout&       a_dbl,
 			   const int                      a_radius,
 			   const stencil_type             a_type){
 
-  m_dbl    = a_dbl;
-  m_ebisl  = a_ebisl;
-  m_dx     = a_dx;
-  m_radius = a_radius;
-  m_order  = a_order;
-  m_stencils.define(m_dbl);
+  m_dbl          = a_dbl;
+  m_ebisl        = a_ebisl;
+  m_dx           = a_dx;
+  m_radius       = a_radius;
+  m_order        = a_order;
   m_stencil_type = a_type;
-
+  
   const int ncomp = 1;
 
-  LayoutData<IntVectSet> cfivs;
-  EBArith::defineCFIVS(cfivs, m_dbl, m_domain);
+  // LayoutData<IntVectSet> cfivs;
+  // EBArith::defineCFIVS(cfivs, m_dbl, m_domain);
 
+  m_stencils.define(m_dbl);
   for (DataIterator dit = m_dbl.dataIterator(); dit.ok(); ++dit){
     const Box&     box     = m_dbl.get(dit());
     const EBISBox& ebisbox = m_ebisl[dit()];
@@ -62,7 +62,7 @@ void irreg_stencil::define(const DisjointBoxLayout&       a_dbl,
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       VoFStencil& stencil = (*m_stencils[dit()])(vof, 0);
-      this->build_stencil(stencil, vof, m_dbl, m_domain, ebisbox, box, m_dx, cfivs[dit()]);
+      this->build_stencil(stencil, vof, m_dbl, m_domain, ebisbox, box, m_dx, IntVectSet());// Can respect the CFIVS if we want to, but we dont. cfivs[dit()]);
 
 #if 0 // Safety test
       Real sum = 0.0;
