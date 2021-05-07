@@ -11,60 +11,63 @@
 #include <BaseIF.H>
 #include <IntersectionIF.H>
 
-/*!
-  @brief Declaration of a hemispheric rod IF class
-  @details This class is esseentially a cylinder with a hemisphere at one of its ends. 
-*/
-class new_sphere_if : public BaseIF {
-public:
+namespace ChomboDischarge {
 
   /*!
-    @brief Constructor
-    @param[in] a_center      Sphere center
-    @param[in] a_radius      Sphere radius
-    @param[in] a_fluidInside Fluid on inside of sphere
+    @brief Declaration of a hemispheric rod IF class
+    @details This class is esseentially a cylinder with a hemisphere at one of its ends. 
   */
+  class new_sphere_if : public BaseIF {
+  public:
 
-  new_sphere_if(const RealVect& a_center, const Real& a_radius, const bool& a_fluidInside);
+    /*!
+      @brief Constructor
+      @param[in] a_center      Sphere center
+      @param[in] a_radius      Sphere radius
+      @param[in] a_fluidInside Fluid on inside of sphere
+    */
 
-  /*!
-    @brief Copy constructor
-    @param[in] a_inputIF Input cylinder
-  */
+    new_sphere_if(const RealVect& a_center, const Real& a_radius, const bool& a_fluidInside);
+
+    /*!
+      @brief Copy constructor
+      @param[in] a_inputIF Input cylinder
+    */
   
-  new_sphere_if(const new_sphere_if& a_inputIF);
+    new_sphere_if(const new_sphere_if& a_inputIF);
 
-  /*!
-    @brief Destructor
-  */
-  virtual ~new_sphere_if();
+    /*!
+      @brief Destructor
+    */
+    virtual ~new_sphere_if();
 
-  /*!
-    @brief Test whether inside or not
-    @param[in] a_point Physical position. 
-  */
-  virtual Real value(const RealVect& a_point) const; 
+    /*!
+      @brief Test whether inside or not
+      @param[in] a_point Physical position. 
+    */
+    virtual Real value(const RealVect& a_point) const; 
 
-  /*!
-    @brief IF factory method
-  */
-  virtual BaseIF* newImplicitFunction() const;
+    /*!
+      @brief IF factory method
+    */
+    virtual BaseIF* newImplicitFunction() const;
 
-protected:
+  protected:
 
-  /*!
-    @brief Sphere center
-  */
-  RealVect m_center;
+    /*!
+      @brief Sphere center
+    */
+    RealVect m_center;
 
-  /*!
-    @brief Cylinder radius
-  */
-  Real m_radius;
+    /*!
+      @brief Cylinder radius
+    */
+    Real m_radius;
   
-  /*!
-    @brief Inside or outside domain
-  */
-  bool m_fluidInside;
-};
+    /*!
+      @brief Inside or outside domain
+    */
+    bool m_fluidInside;
+  };
+}
 #endif

@@ -13,67 +13,71 @@
 
 #include "perlin_if.H"
 
-/*!
-  @brief perlin_sphere_if function
-*/
-class perlin_sphere_if : public BaseIF {
-public:
+namespace ChomboDischarge {
 
   /*!
-   */
-  perlin_sphere_if(){}
-  /*!
-    @brief Constructor
+    @brief perlin_sphere_if function
   */
-  perlin_sphere_if(const Real&     a_rad,
-		   const RealVect& a_center,
-		   const bool&     a_inside,
-		   const Real&     a_noiseAmp,
-		   const RealVect& a_noiseFreq,
-		   const Real&     a_persistence,
-		   const int&      a_octaves,
-		   const bool&     a_reseed = false);
+  class perlin_sphere_if : public BaseIF {
+  public:
 
-  /*!
-    @brief Copy constructor
-  */
-  perlin_sphere_if(const perlin_sphere_if& a_inputIF);
+    /*!
+     */
+    perlin_sphere_if(){}
+    /*!
+      @brief Constructor
+    */
+    perlin_sphere_if(const Real&     a_rad,
+		     const RealVect& a_center,
+		     const bool&     a_inside,
+		     const Real&     a_noiseAmp,
+		     const RealVect& a_noiseFreq,
+		     const Real&     a_persistence,
+		     const int&      a_octaves,
+		     const bool&     a_reseed = false);
 
-  /*!
-    @brief Destructor
-  */
-  virtual ~perlin_sphere_if();
+    /*!
+      @brief Copy constructor
+    */
+    perlin_sphere_if(const perlin_sphere_if& a_inputIF);
 
-  /*!
-    @brief Value function
-  */
-  virtual Real value(const RealVect& a_pos) const;
+    /*!
+      @brief Destructor
+    */
+    virtual ~perlin_sphere_if();
 
-  /*!
-    @brief Factory function
-  */
-  virtual BaseIF* newImplicitFunction() const;
+    /*!
+      @brief Value function
+    */
+    virtual Real value(const RealVect& a_pos) const;
+
+    /*!
+      @brief Factory function
+    */
+    virtual BaseIF* newImplicitFunction() const;
   
-protected:
+  protected:
 
-  /*!
-    @brief Radius
-  */
-  Real m_rad;
+    /*!
+      @brief Radius
+    */
+    Real m_rad;
 
-  /*!
-    @brief Center
-  */
-  RealVect m_center;
+    /*!
+      @brief Center
+    */
+    RealVect m_center;
 
-  /*!
-    @brief Inside/outside
-  */
-  bool m_inside;
+    /*!
+      @brief Inside/outside
+    */
+    bool m_inside;
   
-  /*!
-    @brief Noise function
-  */
-  RefCountedPtr<BaseIF> m_perlinIF;
-};
+    /*!
+      @brief Noise function
+    */
+    RefCountedPtr<BaseIF> m_perlinIF;
+  };
+}
+
 #endif

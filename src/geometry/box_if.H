@@ -10,60 +10,62 @@
 
 #include <BaseIF.H>
 
-
-/*!
-  @brief Class for defining a two- or three-dimensional box with arbitrary centroid and orientation.
-*/
-class box_if: public BaseIF {
-public:
-
-  /*!
-    @brief Base constructor
-    @param[in] a_loCorner Lower left corner
-    @param[in] a_hiCorner Upper right corner
-    @param[in] a_inside Object on inside or outside
-  */
-  box_if(const RealVect& a_loCorner, 
-	 const RealVect& a_hiCorner,
-	 const bool&     a_fluidInside);
-    
-  /*!
-    @brief Copy constructor
-    @param[in] a_inputIF Another box_if
-  */
-  box_if(const box_if& a_inputIF);
-
-  /*!
-    @brief Destructor
-  */
-  virtual ~box_if();
-
-  /*!
-    @brief Test if object is on inside or outside
-  */
-  virtual Real value(const RealVect& a_pos) const;
-
-  /*!
-    @brief IF Factory method
-  */
-  virtual BaseIF* newImplicitFunction() const;
-
-protected:
+namespace ChomboDischarge {
   
   /*!
-    @brief Lower left corner
+    @brief Class for defining a two- or three-dimensional box with arbitrary centroid and orientation.
   */
-  RealVect m_loCorner;
+  class box_if: public BaseIF {
+  public:
 
-  /*!
-    @brief Upper right corner
-  */
-  RealVect m_hiCorner;
+    /*!
+      @brief Base constructor
+      @param[in] a_loCorner Lower left corner
+      @param[in] a_hiCorner Upper right corner
+      @param[in] a_inside Object on inside or outside
+    */
+    box_if(const RealVect& a_loCorner, 
+	   const RealVect& a_hiCorner,
+	   const bool&     a_fluidInside);
+    
+    /*!
+      @brief Copy constructor
+      @param[in] a_inputIF Another box_if
+    */
+    box_if(const box_if& a_inputIF);
 
-  /*!
-    @brief Fluid inside box or not. 
-  */
-  bool m_fluidInside;
-};
+    /*!
+      @brief Destructor
+    */
+    virtual ~box_if();
+
+    /*!
+      @brief Test if object is on inside or outside
+    */
+    virtual Real value(const RealVect& a_pos) const;
+
+    /*!
+      @brief IF Factory method
+    */
+    virtual BaseIF* newImplicitFunction() const;
+
+  protected:
+  
+    /*!
+      @brief Lower left corner
+    */
+    RealVect m_loCorner;
+
+    /*!
+      @brief Upper right corner
+    */
+    RealVect m_hiCorner;
+
+    /*!
+      @brief Fluid inside box or not. 
+    */
+    bool m_fluidInside;
+  };
+}
 
 #endif

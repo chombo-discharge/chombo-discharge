@@ -137,7 +137,6 @@ namespace ChomboDischarge {
 	}
 #if CH_SPACEDIM==3
 	else if(norm(cur) > m_order){
-	  MultiIndex newIndex = MultiIndex(IntVect(D_DECL(0, 0, cur[2]+1)), m_q);
 	  IntVect next = IntVect(D_DECL(0, 0, cur[2]+1));
 	  if(norm(next) <= m_order){
 	    cur = next;

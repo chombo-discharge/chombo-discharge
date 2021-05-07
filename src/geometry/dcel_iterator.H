@@ -10,61 +10,63 @@
 
 #include <memory>
 
-namespace dcel {
+namespace ChomboDischarge {
+  namespace dcel {
   
-  template <class T> class vertexT;
-  template <class T> class edgeT;
-  template <class T> class faceT;
+    template <class T> class vertexT;
+    template <class T> class edgeT;
+    template <class T> class faceT;
 
-  template <class T>
-  class edgeIteratorT {
-  public:
+    template <class T>
+    class edgeIteratorT {
+    public:
 
-    using vertex = vertexT<T>;
-    using edge   = edgeT<T>;
-    using face   = faceT<T>;
+      using vertex = vertexT<T>;
+      using edge   = edgeT<T>;
+      using face   = faceT<T>;
 
-    using vertexPtr = std::shared_ptr<vertex>;
-    using edgePtr   = std::shared_ptr<edge>;
-    using facePtr   = std::shared_ptr<face>;
+      using vertexPtr = std::shared_ptr<vertex>;
+      using edgePtr   = std::shared_ptr<edge>;
+      using facePtr   = std::shared_ptr<face>;
 
-    edgeIteratorT() = delete;
+      edgeIteratorT() = delete;
   
-    edgeIteratorT(face& a_face);
-    edgeIteratorT(const face& a_face);
+      edgeIteratorT(face& a_face);
+      edgeIteratorT(const face& a_face);
 
-    edgeIteratorT(vertex& a_vert);
-    edgeIteratorT(const vertex& a_vert);
+      edgeIteratorT(vertex& a_vert);
+      edgeIteratorT(const vertex& a_vert);
 
-    inline
-    edgePtr& operator() () noexcept;
+      inline
+      edgePtr& operator() () noexcept;
 
-    inline
-    const edgePtr& operator() () const noexcept;
+      inline
+      const edgePtr& operator() () const noexcept;
 
-    inline
-    void reset() noexcept;
+      inline
+      void reset() noexcept;
 
-    inline
-    void operator++() noexcept;
+      inline
+      void operator++() noexcept;
 
-    inline
-    bool ok() const noexcept;
+      inline
+      bool ok() const noexcept;
   
-  protected:
+    protected:
 
-    enum class IterationMode {
-      Vertex,
-      Face
+      enum class IterationMode {
+	Vertex,
+	Face
+      };
+
+      bool m_fullLoop;
+
+      IterationMode m_iterMode;
+  
+      std::shared_ptr<edge> m_startEdge;   // Starting edge
+      std::shared_ptr<edge> m_curEdge; // Current edge
     };
-
-    bool m_fullLoop;
-
-    IterationMode m_iterMode;
-  
-    std::shared_ptr<edge> m_startEdge;   // Starting edge
-    std::shared_ptr<edge> m_curEdge; // Current edge
-  };
+  }
 }
 
 #include "dcel_iteratorI.H"

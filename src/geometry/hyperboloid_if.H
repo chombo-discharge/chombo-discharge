@@ -11,65 +11,68 @@
 #include <RealVect.H> 
 #include <BaseIF.H>
 
-/*!
-  @brief Declaration of a two-sheet hyperboloid. 
-  @details The implicit function used for the single sheet is
-  \f[
-  \frac{z}{c} - \sqrt{1 + \frac{x^2}{a^2} + \frac{y^2}{b^2}} = 0
-  \f]
-*/
-class hyperboloid_if : public BaseIF{
-public:
+namespace ChomboDischarge {
 
   /*!
-    @brief Constructor
-    @param[in] a_radii Hyperboloid radii
-    @param[in] a_center Hyperboloid center
-    @param[in] a_inside Domain on inside or outside
+    @brief Declaration of a two-sheet hyperboloid. 
+    @details The implicit function used for the single sheet is
+    \f[
+    \frac{z}{c} - \sqrt{1 + \frac{x^2}{a^2} + \frac{y^2}{b^2}} = 0
+    \f]
   */
-  hyperboloid_if(const RealVect& a_radii, const RealVect& a_center, const bool& a_inside);
+  class hyperboloid_if : public BaseIF{
+  public:
 
-  /*!
-    @brief Copy constructor
-    @param[in] a_inputIF Input one-sheeted hyperboloid
-  */
-  hyperboloid_if(const hyperboloid_if& a_inputIF);
+    /*!
+      @brief Constructor
+      @param[in] a_radii Hyperboloid radii
+      @param[in] a_center Hyperboloid center
+      @param[in] a_inside Domain on inside or outside
+    */
+    hyperboloid_if(const RealVect& a_radii, const RealVect& a_center, const bool& a_inside);
 
-  /*!
-    @brief Test whether inside or not
-    @param[in] a_point Physical position. 
-  */
-  virtual Real value(const RealVect& a_point) const; 
+    /*!
+      @brief Copy constructor
+      @param[in] a_inputIF Input one-sheeted hyperboloid
+    */
+    hyperboloid_if(const hyperboloid_if& a_inputIF);
 
-  /*!
-    @brief IF factory method
-  */
-  virtual BaseIF* newImplicitFunction() const;
+    /*!
+      @brief Test whether inside or not
+      @param[in] a_point Physical position. 
+    */
+    virtual Real value(const RealVect& a_point) const; 
 
-protected:
-  /*!
-    @brief Hyperboloid radii
-  */
-  RealVect m_radii;
+    /*!
+      @brief IF factory method
+    */
+    virtual BaseIF* newImplicitFunction() const;
 
-  /*!
-    @brief Hyperboloid radii squared
-  */
-  RealVect m_radii2;
+  protected:
+    /*!
+      @brief Hyperboloid radii
+    */
+    RealVect m_radii;
 
-  /*!
-    @brief Holder for sign convention
-  */
-  RealVect m_sign;
+    /*!
+      @brief Hyperboloid radii squared
+    */
+    RealVect m_radii2;
 
-  /*!
-    @brief Hyperboloid center
-  */
-  RealVect m_center;
+    /*!
+      @brief Holder for sign convention
+    */
+    RealVect m_sign;
 
-  /*!
-    @brief Inside or outside domain
-  */
-  bool m_inside;
-};
+    /*!
+      @brief Hyperboloid center
+    */
+    RealVect m_center;
+
+    /*!
+      @brief Inside or outside domain
+    */
+    bool m_inside;
+  };
+}
 #endif

@@ -10,80 +10,81 @@
 
 #include <BaseIF.H>
 
-/*!
-  @brief Declaration of a cylinder IF class
-*/
-class cylinder_if : public BaseIF {
-public:
+namespace ChomboDischarge {
 
   /*!
-    @brief Constructor
-    @param[in] a_center1 Cylinder center
-    @param[in] a_center2 Cylinder center
-    @param[in] a_radius  Cylinder radius
-    @param[in] a_inside  Domain on inside or outside
+    @brief Declaration of a cylinder IF class
   */
-  cylinder_if(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside);
+  class cylinder_if : public BaseIF {
+  public:
 
-  /*!
-    @brief Copy constructor
-    @param[in] a_inputIF Input cylinder
-  */
-  cylinder_if(const cylinder_if& a_inputIF);
+    /*!
+      @brief Constructor
+      @param[in] a_center1 Cylinder center
+      @param[in] a_center2 Cylinder center
+      @param[in] a_radius  Cylinder radius
+      @param[in] a_inside  Domain on inside or outside
+    */
+    cylinder_if(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside);
 
-  /*!
-    @brief Test whether inside or not
-    @param[in] a_point Physical position. 
-  */
-  virtual Real value(const RealVect& a_point) const; 
+    /*!
+      @brief Copy constructor
+      @param[in] a_inputIF Input cylinder
+    */
+    cylinder_if(const cylinder_if& a_inputIF);
 
-  /*!
-    @brief IF factory method
-  */
-  virtual BaseIF* newImplicitFunction() const;
+    /*!
+      @brief Test whether inside or not
+      @param[in] a_point Physical position. 
+    */
+    virtual Real value(const RealVect& a_point) const; 
 
-protected:
+    /*!
+      @brief IF factory method
+    */
+    virtual BaseIF* newImplicitFunction() const;
 
-  /*!
-    @brief One end poitn
-  */
-  RealVect m_endPoint1;
+  protected:
 
-  /*!
-    @brief The other end point. 
-  */
-  RealVect m_endPoint2;
+    /*!
+      @brief One end poitn
+    */
+    RealVect m_endPoint1;
 
-  /*!
-    @brief Top
-  */
-  RealVect m_top;
+    /*!
+      @brief The other end point. 
+    */
+    RealVect m_endPoint2;
 
-  /*!
-    @brief Top
-  */
-  RealVect m_axis;
+    /*!
+      @brief Top
+    */
+    RealVect m_top;
 
-  /*!
-    @brief Center
-  */
-  RealVect m_center;
+    /*!
+      @brief Top
+    */
+    RealVect m_axis;
 
-  /*!
-    @brief Cylinder length
-  */
-  Real m_length;
+    /*!
+      @brief Center
+    */
+    RealVect m_center;
 
-  /*!
-    @brief Cylinder radius
-  */
-  Real m_radius;
+    /*!
+      @brief Cylinder length
+    */
+    Real m_length;
 
-  /*!
-    @brief Inside or outside domain
-  */
-  bool m_fluidInside;
+    /*!
+      @brief Cylinder radius
+    */
+    Real m_radius;
 
-    
-};
+    /*!
+      @brief Inside or outside domain
+    */
+    bool m_fluidInside;
+  };
+}
 #endif

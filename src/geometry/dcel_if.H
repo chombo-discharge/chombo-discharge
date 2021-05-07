@@ -14,30 +14,33 @@
 
 #include <BaseIF.H>
 
-using namespace dcel;
+namespace ChomboDischarge {
 
-template <class T>
-class dcel_if : public BaseIF {
-public:
+  using namespace dcel;
 
-  using Vec3 = Vec3T<T>;
-  using mesh = meshT<T>;
+  template <class T>
+  class dcel_if : public BaseIF {
+  public:
 
-  dcel_if() = delete;
-  dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside);
-  dcel_if(const dcel_if& a_object);
-  ~dcel_if();
+    using Vec3 = Vec3T<T>;
+    using mesh = meshT<T>;
 
-  Real value(const RealVect& a_point) const override;
+    dcel_if() = delete;
+    dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside);
+    dcel_if(const dcel_if& a_object);
+    ~dcel_if();
+
+    Real value(const RealVect& a_point) const override;
   
-  BaseIF* newImplicitFunction() const override;
+    BaseIF* newImplicitFunction() const override;
 
-protected:
+  protected:
 
-  std::shared_ptr<mesh> m_mesh;
+    std::shared_ptr<mesh> m_mesh;
   
-  bool m_flipInside;
-};
+    bool m_flipInside;
+  };
+}
 
 #include "dcel_ifI.H"
 

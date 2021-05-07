@@ -15,137 +15,139 @@
 #include <vector>
 #include <memory>
 
-namespace dcel {
+namespace ChomboDischarge {
 
-  template <class T> class vertexT;
-  template <class T> class edgeT;
-  template <class T> class faceT;
-  template <class T> class edgeIteratorT;
+  namespace dcel {
 
-  template<class T>
-  class edgeT {
-  public:
+    template <class T> class vertexT;
+    template <class T> class edgeT;
+    template <class T> class faceT;
+    template <class T> class edgeIteratorT;
 
-    using Vec3   = Vec3T<T>;
+    template<class T>
+    class edgeT {
+    public:
+
+      using Vec3   = Vec3T<T>;
     
-    using vertex = vertexT<T>;
-    using edge   = edgeT<T>;
-    using face   = faceT<T>;
+      using vertex = vertexT<T>;
+      using edge   = edgeT<T>;
+      using face   = faceT<T>;
 
-    using vertexPtr = std::shared_ptr<vertex>;
-    using edgePtr   = std::shared_ptr<edge>;
-    using facePtr   = std::shared_ptr<face>;
+      using vertexPtr = std::shared_ptr<vertex>;
+      using edgePtr   = std::shared_ptr<edge>;
+      using facePtr   = std::shared_ptr<face>;
 
-    using edgeIterator = edgeIteratorT<T>;
+      using edgeIterator = edgeIteratorT<T>;
 
-    edgeT();
+      edgeT();
     
-    edgeT(const edge& a_otherEdge);
+      edgeT(const edge& a_otherEdge);
     
-    edgeT(const vertexPtr& a_vertex);
+      edgeT(const vertexPtr& a_vertex);
     
-    ~edgeT();
+      ~edgeT();
 
-    inline
-    void define(const vertexPtr& a_vertex,
-			  const edgePtr&   a_pairEdge,
-			  const edgePtr&   a_nextEdge,
-			  const edgePtr&   a_previousEdge,
-			  const Vec3                     a_normal) noexcept;
+      inline
+      void define(const vertexPtr& a_vertex,
+		  const edgePtr&   a_pairEdge,
+		  const edgePtr&   a_nextEdge,
+		  const edgePtr&   a_previousEdge,
+		  const Vec3                     a_normal) noexcept;
 
-    inline
-    void setVertex(const vertexPtr& a_vertex) noexcept;
+      inline
+      void setVertex(const vertexPtr& a_vertex) noexcept;
 
-    inline
-    void setPairEdge(const edgePtr& a_pairEdge) noexcept;
+      inline
+      void setPairEdge(const edgePtr& a_pairEdge) noexcept;
 
-    inline
-    void setNextEdge(const edgePtr& a_nextEdge) noexcept;
+      inline
+      void setNextEdge(const edgePtr& a_nextEdge) noexcept;
 
-    inline
-    void setPreviousEdge(const edgePtr& a_previousEdge) noexcept;
+      inline
+      void setPreviousEdge(const edgePtr& a_previousEdge) noexcept;
 
-    inline
-    void setFace(const facePtr& a_face) noexcept;
+      inline
+      void setFace(const facePtr& a_face) noexcept;
 
-    inline
-    void reconcile() noexcept;
+      inline
+      void reconcile() noexcept;
 
-    inline
-    vertexPtr& getVertex() noexcept;
+      inline
+      vertexPtr& getVertex() noexcept;
 
-    inline
-    const vertexPtr& getVertex() const noexcept;
+      inline
+      const vertexPtr& getVertex() const noexcept;
 
-    inline
-    vertexPtr& getOtherVertex() noexcept;
+      inline
+      vertexPtr& getOtherVertex() noexcept;
 
-    inline
-    const vertexPtr& getOtherVertex() const noexcept;
+      inline
+      const vertexPtr& getOtherVertex() const noexcept;
 
-    inline
-    edgePtr& getPairEdge() noexcept;
+      inline
+      edgePtr& getPairEdge() noexcept;
 
-    inline
-    const edgePtr& getPairEdge() const noexcept;
+      inline
+      const edgePtr& getPairEdge() const noexcept;
 
-    inline
-    edgePtr& getPreviousEdge() noexcept;
+      inline
+      edgePtr& getPreviousEdge() noexcept;
 
-    inline
-    const edgePtr& getPreviousEdge() const noexcept;
+      inline
+      const edgePtr& getPreviousEdge() const noexcept;
 
-    inline
-    edgePtr& getNextEdge() noexcept;
+      inline
+      edgePtr& getNextEdge() noexcept;
 
-    inline
-    const edgePtr& getNextEdge() const noexcept;
+      inline
+      const edgePtr& getNextEdge() const noexcept;
 
-    inline
-    Vec3T<T>& getNormal() noexcept;
+      inline
+      Vec3T<T>& getNormal() noexcept;
 
-    inline
-    const Vec3T<T>& getNormal() const noexcept;
+      inline
+      const Vec3T<T>& getNormal() const noexcept;
 
-    inline
-    facePtr& getFace() noexcept;
+      inline
+      facePtr& getFace() noexcept;
 
-    inline
-    const facePtr& getFace() const noexcept;
+      inline
+      const facePtr& getFace() const noexcept;
 
-    inline
-    T signedDistance(const Vec3& a_x0) const noexcept;
+      inline
+      T signedDistance(const Vec3& a_x0) const noexcept;
 
-    inline
-    T unsignedDistance2(const Vec3& a_x0) const noexcept;
+      inline
+      T unsignedDistance2(const Vec3& a_x0) const noexcept;
 
-  protected:
+    protected:
 
-    Vec3   m_normal;
+      Vec3   m_normal;
 
-    // These are not necessary and exist because of performance reasons. 
-    Vec3 m_x2x1;
-    T    m_invLen2;
+      // These are not necessary and exist because of performance reasons. 
+      Vec3 m_x2x1;
+      T    m_invLen2;
 
-    vertexPtr  m_vertex; 
-    edgePtr    m_pairEdge;
-    edgePtr    m_previousEdge; 
-    edgePtr    m_nextEdge;
-    facePtr    m_face;
+      vertexPtr  m_vertex; 
+      edgePtr    m_pairEdge;
+      edgePtr    m_previousEdge; 
+      edgePtr    m_nextEdge;
+      facePtr    m_face;
 
-    inline
-    T projectPointToEdge(const Vec3& a_x0) const noexcept;
+      inline
+      T projectPointToEdge(const Vec3& a_x0) const noexcept;
 
-    inline
-    void normalizeNormalVector() noexcept;
+      inline
+      void normalizeNormalVector() noexcept;
 
-    inline
-    void computeEdgeLength() noexcept;
+      inline
+      void computeEdgeLength() noexcept;
 
-    inline
-    void computeNormal() noexcept;
-  };
-
+      inline
+      void computeNormal() noexcept;
+    };
+  }
 }
 
 #include "dcel_edgeI.H"

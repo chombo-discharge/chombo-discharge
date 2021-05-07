@@ -8,25 +8,27 @@
 #ifndef _DCEL_ALGORITHMS_H_
 #define _DCEL_ALGORITHMS_H_
 
-namespace dcel {
+namespace ChomboDischarge {
 
-  enum class InsideOutsideAlgorithm {
-    SubtendedAngle,
-    CrossingNumber,
-    WindingNumber
-  };
+  namespace dcel {
 
-  enum class VertexNormalWeight {
-    None,
-    Angle,
-  };
+    enum class InsideOutsideAlgorithm {
+      SubtendedAngle,
+      CrossingNumber,
+      WindingNumber
+    };
 
-  enum class SearchAlgorithm{
-    Direct,
-    Direct2,
-    KdTree
-  };
+    enum class VertexNormalWeight {
+      None,
+      Angle,
+    };
 
+    enum class SearchAlgorithm{
+      Direct,
+      Direct2,
+      KdTree
+    };
+  }
 }
 
 #endif
