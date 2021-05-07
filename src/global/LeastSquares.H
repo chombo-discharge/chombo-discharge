@@ -183,12 +183,33 @@ namespace LeastSquares {
     @param[in] a_order         Order of the interpolation. 
     @param[in] a_weightP       Weighting order for the least squares system. Must be > 0 to have an effect. 
     @return Stencil for the least squares solution to the interpolation problem. 
-    @details This will throw an error if you don't have enough equations for obtaining the specified order. 
+    @note This will throw an error if you don't have enough equations for obtaining the specified order. 
   */
   VoFStencil computeInterpolationStencil(const Vector<VolIndex>& a_allVoFs,
 					 const Vector<RealVect>& a_displacements,
 					 const Vector<Real>&     a_weights,
 					 const int               a_order);
+
+
+  /*!
+    @brief Compute a least squares interpolation to a specified order. 
+    @details This is the general version which lets the caller specify why derivatives he wants out of the interpolation. The user
+    specifies this via a_derivs where each IntVect represent a differentiation. E.g. IntVect(0,0,0) is just f, IntVect(1,0,0) = d/dx,
+    IntVect(1,1,2) = (d^4)/(dx dy dx^2) and so on. The stencils for the directional derivatives are coded onto the return map. E.g.
+    if a_derivs contains IntVect(1,0,0) the stencil for d/dx is found in map.at(IntVect(1,0,0)). 
+    @param[in] a_derives       Specification of which derivates. 
+    @param[in] a_allVoFs       VoFs to include in the interpolation method. 
+    @param[in] a_displacements Displacement vectors from the VoFs to the interpolation point
+    @param[in] a_order         Order of the interpolation. 
+    @param[in] a_weightP       Weighting order for the least squares system. Must be > 0 to have an effect. 
+    @return Stencils for each of the derivatives specified in the input argument. 
+    @note This will throw an error if you don't have enough equations for obtaining the specified order. 
+  */
+  std::map<IntVect, VoFStencil> computeInterpolationStencil(const IntVectSet&       a_derivs,
+							    const Vector<VolIndex>& a_allVoFs,
+							    const Vector<RealVect>& a_displacements,
+							    const Vector<Real>&     a_weights,
+							    const int               a_order);
   
   /*!
     @brief Return the sum of weights in the stencil, for a specific variable. 
