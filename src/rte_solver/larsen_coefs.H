@@ -13,46 +13,49 @@
 
 #include <RefCountedPtr.H>
 
-/*!
-  @brief Class that holds appropriate coefficients for Robin implementation of the Larsen boundary condition
-*/
-class larsen_coefs : public robin_coef {
-public:
+namespace ChomboDischarge {
 
   /*!
-    @brief Constructor
+    @brief Class that holds appropriate coefficients for Robin implementation of the Larsen boundary condition
   */
-  larsen_coefs(const RefCountedPtr<rte_species>& a_rte_species,
-	       const Real                         a_r1,
-	       const Real                         a_r2);
+  class larsen_coefs : public robin_coef {
+  public:
 
-  /*!
-    @brief Destructor
-  */
-  ~larsen_coefs();
+    /*!
+      @brief Constructor
+    */
+    larsen_coefs(const RefCountedPtr<rte_species>& a_rte_species,
+		 const Real                         a_r1,
+		 const Real                         a_r2);
 
-  /*!
-    @brief aco. Equal to 0.5*3*kappa*kappa*(1 + 3*r2)/(1 - 2*r1)
-  */
-  virtual Real aco(const RealVect a_pos) const;
+    /*!
+      @brief Destructor
+    */
+    ~larsen_coefs();
 
-  /*!
-    @brief bco. Equal to -kappa
-  */
-  virtual Real bco(const RealVect a_pos) const;
+    /*!
+      @brief aco. Equal to 0.5*3*kappa*kappa*(1 + 3*r2)/(1 - 2*r1)
+    */
+    virtual Real aco(const RealVect a_pos) const;
 
-  /*!
-    @brief Surface source term. Return zero.
-  */
-  virtual Real rhs(const RealVect a_pos) const;
+    /*!
+      @brief bco. Equal to -kappa
+    */
+    virtual Real bco(const RealVect a_pos) const;
+
+    /*!
+      @brief Surface source term. Return zero.
+    */
+    virtual Real rhs(const RealVect a_pos) const;
     
-protected:
+  protected:
 
-  RefCountedPtr<rte_species> m_rte_species;
+    RefCountedPtr<rte_species> m_rte_species;
 
-  Real m_r1;
+    Real m_r1;
     
-  Real m_r2;
-};
+    Real m_r2;
+  };
+}
 
 #endif
