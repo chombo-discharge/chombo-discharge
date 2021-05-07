@@ -8,18 +8,21 @@
 
 #include "field_solver_factory.H"
 
-template <class T>
-field_solver_factory<T>::field_solver_factory(){
-}
+namespace ChomboDischarge {
+
+  template <class T>
+  field_solver_factory<T>::field_solver_factory(){
+  }
 
 
-template <class T>
-field_solver_factory<T>::~field_solver_factory(){
-}
+  template <class T>
+  field_solver_factory<T>::~field_solver_factory(){
+  }
 
-template <class T>
-RefCountedPtr<field_solver> field_solver_factory<T>::new_solver() const {
-  return RefCountedPtr<field_solver> (new T);
+  template <class T>
+  RefCountedPtr<field_solver> field_solver_factory<T>::new_solver() const {
+    return RefCountedPtr<field_solver> (new T);
+  }
 }
 
 #endif

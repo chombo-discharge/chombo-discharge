@@ -1,83 +1,13 @@
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
 Depending main.cpp ...
+Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.cpp ...
+Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/dirichlet_func.cpp ...
 Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/ebconductivityopfactory.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/conductivitydomainbc_wrapper.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/dirichletconductivityebbc.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/mfconductivityop.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/conductivitydomainbc_wrapper_factory.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/ebconductivityop.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/mfconductivityopfactory.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/jump_bc.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/mfdirichletconductivityebbc.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.cpp ...
-Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/cell_tagger/cell_tagger.cpp ...
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:11:0,
-                 from main.cpp:2:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:131:44: error: ‘amr_mesh’ was not declared in this scope
-   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
-                                            ^~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:131:44: note: suggested alternative:
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
-                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
-                 from main.cpp:1:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
-   class amr_mesh {
-         ^~~~~~~~
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:11:0,
-                 from main.cpp:2:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:131:52: error: template argument 1 is invalid
-   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
-                                                    ^
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:309:17: error: ‘amr_mesh’ was not declared in this scope
-   RefCountedPtr<amr_mesh> m_amr;
-                 ^~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:309:17: note: suggested alternative:
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
-                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
-                 from main.cpp:1:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
-   class amr_mesh {
-         ^~~~~~~~
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:11:0,
-                 from main.cpp:2:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:309:25: error: template argument 1 is invalid
-   RefCountedPtr<amr_mesh> m_amr;
-                         ^
-In file included from main.cpp:2:0:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:50:17: error: ‘mfconductivityopfactory’ was not declared in this scope
-   RefCountedPtr<mfconductivityopfactory>& get_opfact(){
-                 ^~~~~~~~~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:50:17: note: suggested alternative:
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:12:0,
-                 from main.cpp:2:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/mfconductivityopfactory.H:41:9: note:   ‘ChomboDischarge::mfconductivityopfactory’
-   class mfconductivityopfactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
-         ^~~~~~~~~~~~~~~~~~~~~~~
-In file included from main.cpp:2:0:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:50:40: error: template argument 1 is invalid
-   RefCountedPtr<mfconductivityopfactory>& get_opfact(){
-                                        ^
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:312:17: error: ‘mfconductivityopfactory’ was not declared in this scope
-   RefCountedPtr<mfconductivityopfactory> m_opfact;
-                 ^~~~~~~~~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:312:17: note: suggested alternative:
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:12:0,
-                 from main.cpp:2:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/mfconductivityopfactory.H:41:9: note:   ‘ChomboDischarge::mfconductivityopfactory’
-   class mfconductivityopfactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
-         ^~~~~~~~~~~~~~~~~~~~~~~
-In file included from main.cpp:2:0:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:312:40: error: template argument 1 is invalid
-   RefCountedPtr<mfconductivityopfactory> m_opfact;
-                                        ^
 In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:13:0,
                  from main.cpp:4:
 /home/robertm/Projects/chombo-discharge/chombo-discharge/src/sigma_solver/sigma_solver.H:78:44: error: ‘amr_mesh’ was not declared in this scope
@@ -120,6 +50,19 @@ In file included from main.cpp:4:0:
 /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:76:7: error: ‘box_sorting’ does not name a type
        box_sorting m_boxsort;
        ^~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:78:21: error: ‘field_solver’ was not declared in this scope
+       RefCountedPtr<field_solver> m_poisson;
+                     ^~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:78:21: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:11:0,
+                 from main.cpp:2:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:20:9: note:   ‘ChomboDischarge::field_solver’
+   class field_solver {
+         ^~~~~~~~~~~~
+In file included from main.cpp:4:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:78:33: error: template argument 1 is invalid
+       RefCountedPtr<field_solver> m_poisson;
+                                 ^
 In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:89:0,
                  from main.cpp:4:
 /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In constructor ‘physics::poisson::field_stepper<T>::field_stepper()’:
@@ -151,19 +94,93 @@ In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/p
   m_boxsort = box_sorting::morton;
               ^~~~~~~~~~~
 /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::setup_solvers()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:65:33: error: ‘field_solver’ was not declared in this scope
+       m_poisson = RefCountedPtr<field_solver> (new T());
+                                 ^~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:65:33: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:11:0,
+                 from main.cpp:2:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:20:9: note:   ‘ChomboDischarge::field_solver’
+   class field_solver {
+         ^~~~~~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:89:0,
+                 from main.cpp:4:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:65:45: error: template argument 1 is invalid
+       m_poisson = RefCountedPtr<field_solver> (new T());
+                                             ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:66:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->set_verbosity(m_verbosity);
+                ^~
 /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:66:32: error: ‘m_verbosity’ was not declared in this scope
        m_poisson->set_verbosity(m_verbosity);
                                 ^~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:67:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->parse_options();
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:68:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->set_amr(m_amr);
+                ^~
 /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:68:26: error: ‘m_amr’ was not declared in this scope
        m_poisson->set_amr(m_amr);
                           ^~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:69:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->set_computational_geometry(m_compgeom);
+                ^~
 /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:69:45: error: ‘m_compgeom’ was not declared in this scope
        m_poisson->set_computational_geometry(m_compgeom);
                                              ^~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:70:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->set_potential(s_potential_one);
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:71:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->set_realm(m_realm);
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:72:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->set_time(0, 0.0, 0.0);
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::register_operators()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:85:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->register_operators();
+                ^~
 /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::register_realms()’:
 /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:90:7: error: ‘m_amr’ was not declared in this scope
        m_amr->register_realm(m_realm);
        ^~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::allocate()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:95:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->allocate_internals();
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::initial_data()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:105:39: error: base operand of ‘->’ is not a pointer
+       MFAMRCellData& state = m_poisson->get_state();
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:106:39: error: base operand of ‘->’ is not a pointer
+       MFAMRCellData& rho   = m_poisson->get_source();
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::solve_poisson()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:116:39: error: base operand of ‘->’ is not a pointer
+       MFAMRCellData& state = m_poisson->get_state();
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:117:39: error: base operand of ‘->’ is not a pointer
+       MFAMRCellData& rho   = m_poisson->get_source();
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:121:39: error: base operand of ‘->’ is not a pointer
+       const bool converged = m_poisson->solve(state, rho, sigma);
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:126:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->compute_E();
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘int physics::poisson::field_stepper<T>::get_num_plot_vars() const’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:156:28: error: base operand of ‘->’ is not a pointer
+       int ncomp = m_poisson->get_num_plotvars();
+                            ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::write_plot_data(EBAMRCellData&, Vector<std::__cxx11::basic_string<char> >&, int&) const’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:163:39: error: base operand of ‘->’ is not a pointer
+       a_plotvar_names.append(m_poisson->get_plotvar_names());
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:164:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->write_plot_data(a_output, a_icomp);
+                ^~
 /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::synchronize_solver_times(int, Real, Real)’:
 /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:172:7: error: ‘m_step’ was not declared in this scope
        m_step = a_step;
@@ -186,7 +203,42 @@ In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/p
        m_dt   = a_dt;
        ^~~~
        a_dt
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::pre_regrid(int, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:179:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->pre_regrid(a_lbase, a_old_finest_level);
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::deallocate()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:185:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->deallocate_internals();
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::regrid(int, int, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:191:16: error: base operand of ‘->’ is not a pointer
+       m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+                ^~
 /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::load_balance_boxes(Vector<Vector<int> >&, Vector<Vector<Box> >&, std::__cxx11::string, const Vector<DisjointBoxLayout>&, int, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:216:2: error: ‘field_solver_multigrid’ was not declared in this scope
+  field_solver_multigrid* solver = (field_solver_multigrid*) (&(*m_poisson));
+  ^~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:216:2: note: suggested alternative:
+In file included from main.cpp:2:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:29:9: note:   ‘ChomboDischarge::field_solver_multigrid’
+   class field_solver_multigrid : public field_solver {
+         ^~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:89:0,
+                 from main.cpp:4:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:216:26: error: ‘solver’ was not declared in this scope
+  field_solver_multigrid* solver = (field_solver_multigrid*) (&(*m_poisson));
+                          ^~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:216:26: note: suggested alternative: ‘Copier’
+  field_solver_multigrid* solver = (field_solver_multigrid*) (&(*m_poisson));
+                          ^~~~~~
+                          Copier
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:216:59: error: expected primary-expression before ‘)’ token
+  field_solver_multigrid* solver = (field_solver_multigrid*) (&(*m_poisson));
+                                                           ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:216:65: error: invalid type argument of unary ‘*’ (have ‘int’)
+  field_solver_multigrid* solver = (field_solver_multigrid*) (&(*m_poisson));
+                                                                 ^~~~~~~~~
 /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:220:2: error: ‘m_amr’ was not declared in this scope
   m_amr->allocate(dummy1, m_realm, 1);
   ^~~~~
@@ -270,91 +322,24 @@ main.cpp:23:77: error: type/value mismatch at argument 1 in template parameter l
    RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);
                                                                              ^
 main.cpp:23:77: note:   expected a type, got ‘cell_tagger’
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:89:0,
-                 from main.cpp:4:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H: In instantiation of ‘class physics::poisson::field_stepper<field_solver_multigrid>’:
-main.cpp:27:49:   required from here
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:63:10: error: ‘void physics::poisson::field_stepper<T>::setup_solvers() [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-     void field_stepper<T>::setup_solvers(){
-          ^~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:100:10: error: ‘void physics::poisson::field_stepper<T>::initial_data() [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-     void field_stepper<T>::initial_data(){
-          ^~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:134:10: error: ‘void physics::poisson::field_stepper<T>::post_initialize() [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-     void field_stepper<T>::post_initialize() {
-          ^~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:94:10: error: ‘void physics::poisson::field_stepper<T>::allocate() [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-     void field_stepper<T>::allocate() {
-          ^~~~~~~~~~~~~~~~
-In file included from main.cpp:4:0:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:39:12: error: ‘void physics::poisson::field_stepper<T>::write_checkpoint_data(HDF5Handle&, int) const [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-       void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override{}
-            ^~~~~~~~~~~~~~~~~~~~~
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:89:0,
-                 from main.cpp:4:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:150:10: error: ‘void physics::poisson::field_stepper<T>::read_checkpoint_data(HDF5Handle&, int) [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-     void field_stepper<T>::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
-          ^~~~~~~~~~~~~~~~
-In file included from main.cpp:4:0:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:41:12: error: ‘void physics::poisson::field_stepper<T>::post_checkpoint_setup() [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-       void post_checkpoint_setup() override {}
-            ^~~~~~~~~~~~~~~~~~~~~
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:89:0,
-                 from main.cpp:4:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:155:9: error: ‘int physics::poisson::field_stepper<T>::get_num_plot_vars() const [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-     int field_stepper<T>::get_num_plot_vars() const{
-         ^~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:162:10: error: ‘void physics::poisson::field_stepper<T>::write_plot_data(EBAMRCellData&, Vector<std::__cxx11::basic_string<char> >&, int&) const [with T = field_solver_multigrid; EBAMRCellData = EBAMRData<EBCellFAB>]’ marked ‘override’, but does not override
-     void field_stepper<T>::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const{
-          ^~~~~~~~~~~~~~~~
-In file included from main.cpp:4:0:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:46:12: error: ‘void physics::poisson::field_stepper<T>::compute_dt(Real&, int&) [with T = field_solver_multigrid; Real = double]’ marked ‘override’, but does not override
-       void compute_dt(Real& a_dt, time_code& a_timecode) override {a_dt = 0.0;}
-            ^~~~~~~~~~
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:89:0,
-                 from main.cpp:4:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:144:10: error: ‘Real physics::poisson::field_stepper<T>::advance(Real) [with T = field_solver_multigrid; Real = double]’ marked ‘override’, but does not override
-     Real field_stepper<T>::advance(const Real a_dt){
-          ^~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:171:10: error: ‘void physics::poisson::field_stepper<T>::synchronize_solver_times(int, Real, Real) [with T = field_solver_multigrid; Real = double]’ marked ‘override’, but does not override
-     void field_stepper<T>::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
-          ^~~~~~~~~~~~~~~~
-In file included from main.cpp:4:0:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:49:12: error: ‘void physics::poisson::field_stepper<T>::print_step_report() [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-       void print_step_report() override {};
-            ^~~~~~~~~~~~~~~~~
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:89:0,
-                 from main.cpp:4:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:89:10: error: ‘void physics::poisson::field_stepper<T>::register_realms() [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-     void field_stepper<T>::register_realms(){
-          ^~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:84:10: error: ‘void physics::poisson::field_stepper<T>::register_operators() [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-     void field_stepper<T>::register_operators(){
-          ^~~~~~~~~~~~~~~~
-In file included from main.cpp:4:0:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:56:12: error: ‘bool physics::poisson::field_stepper<T>::need_to_regrid() [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-       bool need_to_regrid() override {return false;}
-            ^~~~~~~~~~~~~~
-In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:89:0,
-                 from main.cpp:4:
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:178:10: error: ‘void physics::poisson::field_stepper<T>::pre_regrid(int, int) [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-     void field_stepper<T>::pre_regrid(const int a_lbase, const int a_old_finest_level){
-          ^~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:184:10: error: ‘void physics::poisson::field_stepper<T>::deallocate() [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-     void field_stepper<T>::deallocate(){
-          ^~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:199:10: error: ‘bool physics::poisson::field_stepper<T>::load_balance_realm(std::__cxx11::string) const [with T = field_solver_multigrid; std::__cxx11::string = std::__cxx11::basic_string<char>]’ marked ‘override’, but does not override
-     bool field_stepper<T>::load_balance_realm(const std::string a_realm) const {
-          ^~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:204:10: error: ‘void physics::poisson::field_stepper<T>::load_balance_boxes(Vector<Vector<int> >&, Vector<Vector<Box> >&, std::__cxx11::string, const Vector<DisjointBoxLayout>&, int, int) [with T = field_solver_multigrid; std::__cxx11::string = std::__cxx11::basic_string<char>]’ marked ‘override’, but does not override
-     void field_stepper<T>::load_balance_boxes(Vector<Vector<int> >&            a_procs,
-          ^~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:190:10: error: ‘void physics::poisson::field_stepper<T>::regrid(int, int, int) [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-     void field_stepper<T>::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
-          ^~~~~~~~~~~~~~~~
-/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:139:10: error: ‘void physics::poisson::field_stepper<T>::post_regrid() [with T = field_solver_multigrid]’ marked ‘override’, but does not override
-     void field_stepper<T>::post_regrid(){
-          ^~~~~~~~~~~~~~~~
+main.cpp:26:50: error: ‘field_solver_multigrid’ was not declared in this scope
+   auto timestepper = RefCountedPtr<field_stepper<field_solver_multigrid> >
+                                                  ^~~~~~~~~~~~~~~~~~~~~~
+main.cpp:26:50: note: suggested alternative:
+In file included from main.cpp:2:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:29:9: note:   ‘ChomboDischarge::field_solver_multigrid’
+   class field_solver_multigrid : public field_solver {
+         ^~~~~~~~~~~~~~~~~~~~~~
+main.cpp:26:72: error: template argument 1 is invalid
+   auto timestepper = RefCountedPtr<field_stepper<field_solver_multigrid> >
+                                                                        ^
+main.cpp:26:74: error: template argument 1 is invalid
+   auto timestepper = RefCountedPtr<field_stepper<field_solver_multigrid> >
+                                                                          ^
+main.cpp:27:47: error: type/value mismatch at argument 1 in template parameter list for ‘template<class T> class physics::poisson::field_stepper’
+      (new field_stepper<field_solver_multigrid>());
+                                               ^
+main.cpp:27:47: note:   expected a type, got ‘field_solver_multigrid’
 main.cpp:30:17: error: ‘driver’ was not declared in this scope
    RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
                  ^~~~~~
@@ -379,5 +364,705 @@ main.cpp:31:9: error: base operand of ‘->’ is not a pointer
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:517: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/main.o' failed
 make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/main.o] Error 1
 make[1]: *** Waiting for unfinished jobs....
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:89:44: error: ‘amr_mesh’ was not declared in this scope
+   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                            ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:89:44: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:89:52: error: template argument 1 is invalid
+   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                                    ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:286:17: error: ‘amr_mesh’ was not declared in this scope
+   RefCountedPtr<amr_mesh> m_amr;
+                 ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:286:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:286:25: error: template argument 1 is invalid
+   RefCountedPtr<amr_mesh> m_amr;
+                         ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:13:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/larsen_coefs.H:19:40: error: expected class-name before ‘{’ token
+ class larsen_coefs : public robin_coef {
+                                        ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:291:17: error: ‘ebconductivityopfactory’ was not declared in this scope
+   RefCountedPtr<ebconductivityopfactory> m_opfact;
+                 ^~~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:291:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/ebconductivityopfactory.H:45:9: note:   ‘ChomboDischarge::ebconductivityopfactory’
+   class ebconductivityopfactory: public AMRLevelOpFactory<LevelData<EBCellFAB> >
+         ^~~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:291:40: error: template argument 1 is invalid
+   RefCountedPtr<ebconductivityopfactory> m_opfact;
+                                        ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:301:17: error: ‘robinconductivityebbcfactory’ was not declared in this scope
+   RefCountedPtr<robinconductivityebbcfactory> m_ebfact;
+                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:301:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:14:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/robinconductivityebbcfactory.H:22:9: note:   ‘ChomboDischarge::robinconductivityebbcfactory’
+   class robinconductivityebbcfactory : public BaseEBBCFactory {
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:301:45: error: template argument 1 is invalid
+   RefCountedPtr<robinconductivityebbcfactory> m_ebfact;
+                                             ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:306:17: error: ‘robinconductivitydomainbcfactory’ was not declared in this scope
+   RefCountedPtr<robinconductivitydomainbcfactory> m_domfact;
+                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:306:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:15:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/robinconductivitydomainbcfactory.H:22:9: note:   ‘ChomboDischarge::robinconductivitydomainbcfactory’
+   class robinconductivitydomainbcfactory : public BaseDomainBCFactory {
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:306:49: error: template argument 1 is invalid
+   RefCountedPtr<robinconductivitydomainbcfactory> m_domfact;
+                                                 ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:311:24: error: ‘wall_bc’ was not declared in this scope
+   Vector<RefCountedPtr<wall_bc> > m_wallbc;
+                        ^~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:311:24: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/conductivitydomainbc_wrapper.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/conductivitydomainbc_wrapper_factory.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:16,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/wall_bc.H:37:9: note:   ‘ChomboDischarge::wall_bc’
+   class wall_bc {
+         ^~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:311:31: error: template argument 1 is invalid
+   Vector<RefCountedPtr<wall_bc> > m_wallbc;
+                               ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:311:33: error: template argument 1 is invalid
+   Vector<RefCountedPtr<wall_bc> > m_wallbc;
+                                 ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::allocate_wall_bc()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:240:12: error: request for member ‘resize’ in ‘((eddington_sp1*)this)->eddington_sp1::m_wallbc’, which is of non-class type ‘int’
+   m_wallbc.resize(2*SpaceDim);
+            ^~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:242:15: error: invalid types ‘int[int]’ for array subscript
+     m_wallbc[i] = RefCountedPtr<wall_bc> (NULL);
+               ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:242:33: error: ‘wall_bc’ was not declared in this scope
+     m_wallbc[i] = RefCountedPtr<wall_bc> (NULL);
+                                 ^~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:242:33: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/conductivitydomainbc_wrapper.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/conductivitydomainbc_wrapper_factory.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:16,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/wall_bc.H:37:9: note:   ‘ChomboDischarge::wall_bc’
+   class wall_bc {
+         ^~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:242:40: error: template argument 1 is invalid
+     m_wallbc[i] = RefCountedPtr<wall_bc> (NULL);
+                                        ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::pre_regrid(int, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:253:33: error: base operand of ‘->’ is not a pointer
+   const int finest_level = m_amr->get_finest_level();
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:255:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(m_cache, m_realm, m_phase, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::allocate_internals()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:280:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(m_aco,       m_realm, m_phase, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:281:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(m_bco,       m_realm, m_phase, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:282:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(m_bco_irreg, m_realm, m_phase, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:283:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(m_state,     m_realm, m_phase, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:284:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(m_source,    m_realm, m_phase, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:285:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(m_resid,     m_realm, m_phase, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::deallocate_internals()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:295:8: error: base operand of ‘->’ is not a pointer
+   m_amr->deallocate(m_aco);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:296:8: error: base operand of ‘->’ is not a pointer
+   m_amr->deallocate(m_bco);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:297:8: error: base operand of ‘->’ is not a pointer
+   m_amr->deallocate(m_bco_irreg);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:298:8: error: base operand of ‘->’ is not a pointer
+   m_amr->deallocate(m_state);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:299:8: error: base operand of ‘->’ is not a pointer
+   m_amr->deallocate(m_source);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:300:8: error: base operand of ‘->’ is not a pointer
+   m_amr->deallocate(m_resid);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::regrid(int, int, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:315:64: error: base operand of ‘->’ is not a pointer
+   Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_realm, m_phase);
+                                                                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::register_operators()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:340:14: error: request for member ‘isNull’ in ‘((eddington_sp1*)this)->eddington_sp1::<anonymous>.rte_solver::m_amr’, which is of non-class type ‘int’
+     if(m_amr.isNull()){
+              ^~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:344:10: error: base operand of ‘->’ is not a pointer
+     m_amr->register_operator(s_eb_coar_ave,     m_realm, m_phase);
+          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:344:30: error: ‘s_eb_coar_ave’ was not declared in this scope
+     m_amr->register_operator(s_eb_coar_ave,     m_realm, m_phase);
+                              ^~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:344:30: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/realm.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:24,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:12,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/phase_realm.H:43:28: note:   ‘ChomboDischarge::s_eb_coar_ave’
+   static const std::string s_eb_coar_ave     = "eb_coar_ave";
+                            ^~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:345:10: error: base operand of ‘->’ is not a pointer
+     m_amr->register_operator(s_eb_fill_patch,   m_realm, m_phase);
+          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:345:30: error: ‘s_eb_fill_patch’ was not declared in this scope
+     m_amr->register_operator(s_eb_fill_patch,   m_realm, m_phase);
+                              ^~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:345:30: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/realm.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:24,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:12,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/phase_realm.H:45:28: note:   ‘ChomboDischarge::s_eb_fill_patch’
+   static const std::string s_eb_fill_patch   = "eb_fill_patch";
+                            ^~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:346:10: error: base operand of ‘->’ is not a pointer
+     m_amr->register_operator(s_eb_flux_reg,     m_realm, m_phase);
+          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:346:30: error: ‘s_eb_flux_reg’ was not declared in this scope
+     m_amr->register_operator(s_eb_flux_reg,     m_realm, m_phase);
+                              ^~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:346:30: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/realm.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:24,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:12,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/phase_realm.H:48:28: note:   ‘ChomboDischarge::s_eb_flux_reg’
+   static const std::string s_eb_flux_reg     = "eb_flux_reg";
+                            ^~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:347:10: error: base operand of ‘->’ is not a pointer
+     m_amr->register_operator(s_eb_quad_cfi,     m_realm, m_phase);
+          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:347:30: error: ‘s_eb_quad_cfi’ was not declared in this scope
+     m_amr->register_operator(s_eb_quad_cfi,     m_realm, m_phase);
+                              ^~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:347:30: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/realm.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:24,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:12,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/phase_realm.H:44:28: note:   ‘ChomboDischarge::s_eb_quad_cfi’
+   static const std::string s_eb_quad_cfi     = "eb_quad_cfi";
+                            ^~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:348:10: error: base operand of ‘->’ is not a pointer
+     m_amr->register_operator(s_eb_gradient,     m_realm, m_phase);
+          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:348:30: error: ‘s_eb_gradient’ was not declared in this scope
+     m_amr->register_operator(s_eb_gradient,     m_realm, m_phase);
+                              ^~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:348:30: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/realm.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:24,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:12,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/phase_realm.H:41:28: note:   ‘ChomboDischarge::s_eb_gradient’
+   static const std::string s_eb_gradient     = "eb_gradient";
+                            ^~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:349:10: error: base operand of ‘->’ is not a pointer
+     m_amr->register_operator(s_eb_irreg_interp, m_realm, m_phase);
+          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:349:30: error: ‘s_eb_irreg_interp’ was not declared in this scope
+     m_amr->register_operator(s_eb_irreg_interp, m_realm, m_phase);
+                              ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:349:30: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/realm.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:24,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:12,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/phase_realm.H:42:28: note:   ‘ChomboDischarge::s_eb_irreg_interp’
+   static const std::string s_eb_irreg_interp = "eb_irreg_interp";
+                            ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual bool eddington_sp1::advance(Real, EBAMRCellData&, const EBAMRCellData&, bool)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:360:33: error: base operand of ‘->’ is not a pointer
+   const int finest_level = m_amr->get_finest_level();
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:371:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(dummy,  m_realm, m_phase, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:372:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(source, m_realm, m_phase, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:386:8: error: base operand of ‘->’ is not a pointer
+   m_amr->alias(phi,  a_state);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:387:8: error: base operand of ‘->’ is not a pointer
+   m_amr->alias(rhs,  source);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:388:8: error: base operand of ‘->’ is not a pointer
+   m_amr->alias(res,  m_resid);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:389:8: error: base operand of ‘->’ is not a pointer
+   m_amr->alias(zero, dummy);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:436:8: error: base operand of ‘->’ is not a pointer
+   m_amr->average_down(a_state, m_realm, m_phase);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:437:8: error: base operand of ‘->’ is not a pointer
+   m_amr->interp_ghost(a_state, m_realm, m_phase);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::set_coefficients()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:480:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(m_aco,        m_realm, m_phase, ncomp, ghost);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:481:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(m_bco,        m_realm, m_phase, ncomp, ghost);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:482:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(m_bco_irreg,  m_realm, m_phase, ncomp, ghost);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::set_aco_and_bco()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:501:35: error: base operand of ‘->’ is not a pointer
+     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+                                   ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:502:36: error: base operand of ‘->’ is not a pointer
+       const RealVect origin = m_amr->get_prob_lo();
+                                    ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:503:36: error: base operand of ‘->’ is not a pointer
+       const Real dx         = m_amr->get_dx()[lvl];
+                                    ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:510:24: error: base operand of ‘->’ is not a pointer
+  const Box box = (m_amr->get_grids(m_realm)[lvl]).get(dit());
+                        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:515:10: error: base operand of ‘->’ is not a pointer
+     m_amr->average_down(m_aco, m_realm, m_phase);
+          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:516:10: error: base operand of ‘->’ is not a pointer
+     m_amr->interp_ghost(m_aco, m_realm, m_phase);
+          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:517:64: error: base operand of ‘->’ is not a pointer
+     data_ops::average_cell_to_face_allcomps(m_bco, m_aco, m_amr->get_domains()); // Average aco onto face
+                                                                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::set_aco_and_bco_box(EBCellFAB&, BaseIVFAB<double>&, Box, RealVect, Real, int, const DataIndex&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:561:31: error: base operand of ‘->’ is not a pointer
+   VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[a_lvl])[a_dit];
+                               ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::define_mg_levels()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:588:47: error: base operand of ‘->’ is not a pointer
+   const Vector<ProblemDomain>& domains = m_amr->get_domains();
+                                               ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:589:47: error: base operand of ‘->’ is not a pointer
+   const int max_box_size               = m_amr->get_max_box_size();
+                                               ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:590:47: error: base operand of ‘->’ is not a pointer
+   const int blocking_factor            = m_amr->get_blocking_factor();
+                                               ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:591:47: error: base operand of ‘->’ is not a pointer
+   const int num_ebghost                = m_amr->get_eb_ghost();
+                                               ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:615:7: error: ‘load_balance’ has not been declared
+       load_balance::make_balance(proc_assign, boxes);
+       ^~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::setup_operator_factory()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:644:49: error: base operand of ‘->’ is not a pointer
+   const int finest_level                 = m_amr->get_finest_level();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:645:49: error: base operand of ‘->’ is not a pointer
+   const int ghost                        = m_amr->get_num_ghost();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:646:49: error: base operand of ‘->’ is not a pointer
+   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:647:49: error: base operand of ‘->’ is not a pointer
+   const Vector<int>& refinement_ratios   = m_amr->get_ref_rat();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:648:49: error: base operand of ‘->’ is not a pointer
+   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:649:49: error: base operand of ‘->’ is not a pointer
+   const Vector<Real>& dx                 = m_amr->get_dx();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:650:49: error: base operand of ‘->’ is not a pointer
+   const RealVect& origin                 = m_amr->get_prob_lo();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:651:49: error: base operand of ‘->’ is not a pointer
+   const Vector<EBISLayout>& ebisl        = m_amr->get_ebisl(m_realm, m_phase);
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:653:65: error: base operand of ‘->’ is not a pointer
+   const Vector<RefCountedPtr<EBQuadCFInterp> >& quadcfi  = m_amr->get_old_quadcfi(m_realm, m_phase);
+                                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:654:65: error: base operand of ‘->’ is not a pointer
+   const Vector<RefCountedPtr<EBFluxRegister> >& fastFR   = m_amr->get_flux_reg(m_realm, m_phase);
+                                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:659:33: error: base operand of ‘->’ is not a pointer
+     levelgrids.push_back(*(m_amr->get_eblg(m_realm, m_phase)[lvl])); // amr_mesh uses RefCounted levelgrids. EBConductivityOp does not.
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:683:3: error: ‘conductivitydomainbc_wrapper_factory’ was not declared in this scope
+   conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
+   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:683:3: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:16:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/conductivitydomainbc_wrapper_factory.H:23:9: note:   ‘ChomboDischarge::conductivitydomainbc_wrapper_factory’
+   class conductivitydomainbc_wrapper_factory : public BaseDomainBCFactory {
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:683:41: error: ‘bcfact’ was not declared in this scope
+   conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
+                                         ^~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:683:41: note: suggested alternative: ‘domfact’
+   conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
+                                         ^~~~~~
+                                         domfact
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:683:54: error: expected type-specifier before ‘conductivitydomainbc_wrapper_factory’
+   conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
+                                                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:684:24: error: ‘robin_coef’ was not declared in this scope
+   Vector<RefCountedPtr<robin_coef> > coefs(2*SpaceDim, m_robinco);
+                        ^~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:684:24: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/larsen_coefs.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:13,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/robin_coef.H:18:9: note:   ‘ChomboDischarge::robin_coef’
+   class robin_coef {
+         ^~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:684:34: error: template argument 1 is invalid
+   Vector<RefCountedPtr<robin_coef> > coefs(2*SpaceDim, m_robinco);
+                                  ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:684:36: error: template argument 1 is invalid
+   Vector<RefCountedPtr<robin_coef> > coefs(2*SpaceDim, m_robinco);
+                                    ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:684:65: error: expression list treated as compound expression in initializer [-fpermissive]
+   Vector<RefCountedPtr<robin_coef> > coefs(2*SpaceDim, m_robinco);
+                                                                 ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:684:65: error: invalid user-defined conversion from ‘RefCountedPtr<larsen_coefs>’ to ‘int’ [-fpermissive]
+In file included from /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/src/EBTools/EBISBox.H:26:0,
+                 from /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/src/EBTools/GeometryService.H:25,
+                 from /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/src/Workshop/BaseIF.H:21,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/geometry/computational_geometry.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/src/BaseTools/RefCountedPtr.H:591:1: note: candidate is: RefCountedPtr<T, OP>::operator T*() const [with T = larsen_coefs; OP = RCPPointerPolicy] <near match>
+ RefCountedPtr<T, OP>::operator T* () const
+ ^~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/src/BaseTools/RefCountedPtr.H:591:1: note:   no known conversion from ‘larsen_coefs*’ to ‘int’
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:691:29: error: ‘robinconductivityebbcfactory’ was not declared in this scope
+   m_ebfact  = RefCountedPtr<robinconductivityebbcfactory> (new robinconductivityebbcfactory(origin));
+                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:691:29: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:14:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/robinconductivityebbcfactory.H:22:9: note:   ‘ChomboDischarge::robinconductivityebbcfactory’
+   class robinconductivityebbcfactory : public BaseEBBCFactory {
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:691:57: error: template argument 1 is invalid
+   m_ebfact  = RefCountedPtr<robinconductivityebbcfactory> (new robinconductivityebbcfactory(origin));
+                                                         ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:691:64: error: expected type-specifier before ‘robinconductivityebbcfactory’
+   m_ebfact  = RefCountedPtr<robinconductivityebbcfactory> (new robinconductivityebbcfactory(origin));
+                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:692:11: error: base operand of ‘->’ is not a pointer
+   m_ebfact->set_coefs(m_robinco);
+           ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:693:11: error: base operand of ‘->’ is not a pointer
+   m_ebfact->set_type(stencil_type::lsq);
+           ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:708:28: error: ‘ebconductivityopfactory’ was not declared in this scope
+   m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
+                            ^~~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:708:28: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/ebconductivityopfactory.H:45:9: note:   ‘ChomboDischarge::ebconductivityopfactory’
+   class ebconductivityopfactory: public AMRLevelOpFactory<LevelData<EBCellFAB> >
+         ^~~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:708:51: error: template argument 1 is invalid
+   m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
+                                                   ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:708:58: error: expected type-specifier before ‘ebconductivityopfactory’
+   m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
+                                                          ^~~~~~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::setup_multigrid()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:734:39: error: base operand of ‘->’ is not a pointer
+   const int finest_level       = m_amr->get_finest_level();
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:735:39: error: base operand of ‘->’ is not a pointer
+   const ProblemDomain coar_dom = m_amr->get_domains()[0];
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:760:35: error: invalid type argument of unary ‘*’ (have ‘int’)
+   m_gmg_solver->define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
+                                   ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:775:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(dummy1, m_realm, m_phase, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:776:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(dummy2, m_realm, m_phase, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:782:8: error: base operand of ‘->’ is not a pointer
+   m_amr->alias(phi, dummy1);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:783:8: error: base operand of ‘->’ is not a pointer
+   m_amr->alias(rhs, dummy2);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::setup_tga()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:795:39: error: base operand of ‘->’ is not a pointer
+   const int finest_level       = m_amr->get_finest_level();
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:796:39: error: base operand of ‘->’ is not a pointer
+   const ProblemDomain coar_dom = m_amr->get_domains()[0];
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:797:39: error: base operand of ‘->’ is not a pointer
+   const Vector<int> ref_rat    = m_amr->get_ref_rat();
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:800:56: error: invalid type argument of unary ‘*’ (have ‘int’)
+     (new AMRTGA<LevelData<EBCellFAB> > (m_gmg_solver, *m_opfact, coar_dom, ref_rat, 1 + finest_level, m_gmg_solver->m_verbosity));
+                                                        ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:804:8: error: base operand of ‘->’ is not a pointer
+   m_amr->alias(phi, m_state);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:805:8: error: base operand of ‘->’ is not a pointer
+   m_amr->alias(rhs, m_source);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::setup_euler()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:815:39: error: base operand of ‘->’ is not a pointer
+   const int finest_level       = m_amr->get_finest_level();
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:816:39: error: base operand of ‘->’ is not a pointer
+   const ProblemDomain coar_dom = m_amr->get_domains()[0];
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:817:39: error: base operand of ‘->’ is not a pointer
+   const Vector<int> ref_rat    = m_amr->get_ref_rat();
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:820:42: error: invalid type argument of unary ‘*’ (have ‘int’)
+     (new EBBackwardEuler (m_gmg_solver, *m_opfact, coar_dom, ref_rat, 1 + finest_level, m_gmg_solver->m_verbosity));
+                                          ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::compute_boundary_flux(EBAMRIVData&, const EBAMRCellData&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:831:33: error: base operand of ‘->’ is not a pointer
+   const int finest_level = m_amr->get_finest_level();
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:833:3: error: ‘irreg_amr_stencil’ was not declared in this scope
+   irreg_amr_stencil<eb_centroid_interp>& sten = m_amr->get_eb_centroid_interp_stencils(m_realm, m_phase);
+   ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:833:3: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:14:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:12,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/irreg_amr_stencil.H:20:28: note:   ‘ChomboDischarge::irreg_amr_stencil’
+   template <class T> class irreg_amr_stencil {
+                            ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:833:21: error: ‘eb_centroid_interp’ was not declared in this scope
+   irreg_amr_stencil<eb_centroid_interp>& sten = m_amr->get_eb_centroid_interp_stencils(m_realm, m_phase);
+                     ^~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:833:21: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/irreg_amr_stencilImplem.H:13:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/irreg_amr_stencil.H:221,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:14,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:12,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/eb_centroid_interp.H:19:9: note:   ‘ChomboDischarge::eb_centroid_interp’
+   class eb_centroid_interp : public irreg_stencil {
+         ^~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:833:42: error: ‘sten’ was not declared in this scope
+   irreg_amr_stencil<eb_centroid_interp>& sten = m_amr->get_eb_centroid_interp_stencils(m_realm, m_phase);
+                                          ^~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:833:42: note: suggested alternative: ‘sign’
+   irreg_amr_stencil<eb_centroid_interp>& sten = m_amr->get_eb_centroid_interp_stencils(m_realm, m_phase);
+                                          ^~~~
+                                          sign
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:833:54: error: base operand of ‘->’ is not a pointer
+   irreg_amr_stencil<eb_centroid_interp>& sten = m_amr->get_eb_centroid_interp_stencils(m_realm, m_phase);
+                                                      ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:838:8: error: base operand of ‘->’ is not a pointer
+   m_amr->average_down(a_ebflux, m_realm, m_phase);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::compute_domain_flux(EBAMRIFData&, const EBAMRCellData&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:850:33: error: base operand of ‘->’ is not a pointer
+   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:853:41: error: base operand of ‘->’ is not a pointer
+     const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+                                         ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:854:41: error: base operand of ‘->’ is not a pointer
+     const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+                                         ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::compute_flux(EBAMRCellData&, const EBAMRCellData&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:914:33: error: base operand of ‘->’ is not a pointer
+   const int finest_level = m_amr->get_finest_level();
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:916:8: error: base operand of ‘->’ is not a pointer
+   m_amr->compute_gradient(a_flux, a_state, m_realm, m_phase); // flux = grad(phi)
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:922:8: error: base operand of ‘->’ is not a pointer
+   m_amr->average_down(a_flux, m_realm, m_phase);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:923:8: error: base operand of ‘->’ is not a pointer
+   m_amr->interp_ghost(a_flux, m_realm, m_phase);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::compute_density(EBAMRCellData&, const EBAMRCellData&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:933:33: error: base operand of ‘->’ is not a pointer
+   const int finest_level = m_amr->get_finest_level();
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::write_plot_file()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:967:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(flux, m_realm, m_phase, SpaceDim);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:972:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(output, m_realm, m_phase, ncomps, 1);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:988:3: error: ‘irreg_amr_stencil’ was not declared in this scope
+   irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(m_realm, phase::gas);
+   ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:988:3: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:14:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:12,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/irreg_amr_stencil.H:20:28: note:   ‘ChomboDischarge::irreg_amr_stencil’
+   template <class T> class irreg_amr_stencil {
+                            ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:988:21: error: ‘centroid_interp’ was not declared in this scope
+   irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(m_realm, phase::gas);
+                     ^~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:988:21: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/irreg_amr_stencilImplem.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/irreg_amr_stencil.H:221,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:14,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/rte_solver.H:12,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/centroid_interp.H:18:9: note:   ‘ChomboDischarge::centroid_interp’
+   class centroid_interp : public irreg_stencil {
+         ^~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:988:39: error: ‘sten’ was not declared in this scope
+   irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(m_realm, phase::gas);
+                                       ^~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:988:39: note: suggested alternative: ‘sign’
+   irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(m_realm, phase::gas);
+                                       ^~~~
+                                       sign
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:988:51: error: base operand of ‘->’ is not a pointer
+   irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(m_realm, phase::gas);
+                                                   ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:993:8: error: base operand of ‘->’ is not a pointer
+   m_amr->alias(output_ptr, output);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:998:13: error: base operand of ‘->’ is not a pointer
+        m_amr->get_grids(m_realm),
+             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1001:13: error: base operand of ‘->’ is not a pointer
+        m_amr->get_domains()[0].domainBox(),
+             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1002:13: error: base operand of ‘->’ is not a pointer
+        m_amr->get_dx()[0],
+             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1005:13: error: base operand of ‘->’ is not a pointer
+        m_amr->get_ref_rat(),
+             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1006:13: error: base operand of ‘->’ is not a pointer
+        m_amr->get_finest_level() + 1,
+             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::read_checkpoint_level(HDF5Handle&, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1027:61: error: base operand of ‘->’ is not a pointer
+   read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
+                                                             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::set_neumann_wall_bc(int, Side::LoHiSide, Real)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1036:19: error: ‘wall_bc’ has not been declared
+   const int idx = wall_bc::map_bc(a_dir, a_side);
+                   ^~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1037:15: error: invalid types ‘int[const int]’ for array subscript
+   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::neumann));
+               ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1037:33: error: ‘wall_bc’ was not declared in this scope
+   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::neumann));
+                                 ^~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1037:33: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/conductivitydomainbc_wrapper.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/conductivitydomainbc_wrapper_factory.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:16,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/wall_bc.H:37:9: note:   ‘ChomboDischarge::wall_bc’
+   class wall_bc {
+         ^~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1037:40: error: template argument 1 is invalid
+   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::neumann));
+                                        ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1037:47: error: expected type-specifier before ‘wall_bc’
+   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::neumann));
+                                               ^~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1038:15: error: invalid types ‘int[const int]’ for array subscript
+   m_wallbc[idx]->set_value(a_value);
+               ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp: In member function ‘virtual void eddington_sp1::set_robin_wall_bc(int, Side::LoHiSide, Real)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1047:19: error: ‘wall_bc’ has not been declared
+   const int idx = wall_bc::map_bc(a_dir, a_side);
+                   ^~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1048:15: error: invalid types ‘int[const int]’ for array subscript
+   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::robin));
+               ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1048:33: error: ‘wall_bc’ was not declared in this scope
+   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::robin));
+                                 ^~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1048:33: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/conductivitydomainbc_wrapper.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/conductivitydomainbc_wrapper_factory.H:11,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.H:16,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:9:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/wall_bc.H:37:9: note:   ‘ChomboDischarge::wall_bc’
+   class wall_bc {
+         ^~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1048:40: error: template argument 1 is invalid
+   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::robin));
+                                        ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1048:47: error: expected type-specifier before ‘wall_bc’
+   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::robin));
+                                               ^~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/rte_solver/eddington_sp1.cpp:1049:15: error: invalid types ‘int[const int]’ for array subscript
+   m_wallbc[idx]->set_value(a_value);
+               ^
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:517: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/eddington_sp1.o' failed
+make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/eddington_sp1.o] Error 1
 /home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:425: recipe for target 'main' failed
 make: *** [main] Error 2

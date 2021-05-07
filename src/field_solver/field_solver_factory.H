@@ -8,16 +8,19 @@
 
 #include "field_solver.H"
 
-/*!
-  @brief Factory class for poisson solvers. Used to instantiate any field_solver-derived class
-*/
-template <class T>
-class field_solver_factory {
-public:
-  field_solver_factory();
-  ~field_solver_factory();
-  RefCountedPtr<field_solver> new_solver() const;
-};
+namespace ChomboDischarge {
+
+  /*!
+    @brief Factory class for poisson solvers. Used to instantiate any field_solver-derived class
+  */
+  template <class T>
+  class field_solver_factory {
+  public:
+    field_solver_factory();
+    ~field_solver_factory();
+    RefCountedPtr<field_solver> new_solver() const;
+  };
+}
 
 #include "field_solver_factoryI.H"
 
