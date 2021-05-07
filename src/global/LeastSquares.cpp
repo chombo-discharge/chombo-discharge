@@ -247,23 +247,21 @@ VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_a
 
   if(K < M) MayDay::Abort("LeastSquares::computeInterpolation -- not enough equations to achieve desired order!");
 
-  // Build the A-matrix so we can use LaPackUtils::computePseudoInverse. Use of multi-indices makes this a goddamn breeze. 
+  // Build the A-matrix in column major order so we can use LaPackUtils::computePseudoInverse.
+  // Use of multi-indices makes higher-order Taylor series a walk in the park. 
   int i = 0;
-  Vector<Real> linA(K*M);
+  Vector<Real> linA(K*M, 0.0);
   for (MultiIndex mi(a_order); mi.ok(); ++mi){
     
     for (int k = 0; k < K; k++){
-      linA[k] = a_weights[k]*mi.pow(a_displacements[k])/mi.factorial();
+      linA[i] = a_weights[k]*mi.pow(a_displacements[k])/mi.factorial();
+      
       i++;
-
-      if(procID() == 0){
-	std::cout << "k = " << k << " => linA = " << linA[k] << std::endl;
-      }
     }
   }
 
   // Compute the pseudo-inverse.
-  Vector<Real> linAplus(M*K);
+  Vector<Real> linAplus(M*K, 0.0);
   const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), linA.stdVector(), K, M);
 
   if(foundSVD){ 

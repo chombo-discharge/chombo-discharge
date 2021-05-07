@@ -61,7 +61,7 @@ int main(int argc, char* argv[]){
   Real f3 = 1.0;
   Real f4 = 1.0;
 
-  VoFStencil sten = LeastSquares::computeInterpolationStencil(vofs, deltas, 0, 1);
+  VoFStencil sten = LeastSquares::computeInterpolationStencil(vofs, deltas, 2, 1);
 
   if(procID() == 0){
     Real f0 = 0.0;
@@ -70,6 +70,7 @@ int main(int argc, char* argv[]){
       const Real w        = sten.weight(i);
 
       std::cout << vof << "\t" << w << std::endl;
+      
       if(vof == v1) f0 += f1*w;
       if(vof == v2) f0 += f2*w;
       if(vof == v3) f0 += f3*w;
