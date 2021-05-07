@@ -56,14 +56,23 @@ int main(int argc, char* argv[]){
   deltas.push_back(p3-p0);
   deltas.push_back(p4-p0);
 
-  Real f1 = 1.0;
-  Real f2 = 1.0;
+  Real f1 = 0.0;
+  Real f2 = 0.0;
   Real f3 = 1.0;
   Real f4 = 1.0;
 
-  VoFStencil sten = LeastSquares::computeInterpolationStencil(vofs, deltas, 2, 1);
+  IntVectSet derivs;
+  derivs |= IntVect(0,0);
+  derivs |= IntVect(1,0);
+  derivs |= IntVect(0,1);
+
+  const std::map<IntVect, VoFStencil> allStencils = LeastSquares::computeInterpolationStencil(derivs, vofs, deltas, 0, 1);
+  //  VoFStencil sten = LeastSquares::computeInterpolationStencil(vofs, deltas, 2, 1);
+
+
 
   if(procID() == 0){
+    const VoFStencil& sten = allStencils.at(IntVect(1,0));
     Real f0 = 0.0;
     for (int i = 0; i < sten.size(); i++){
       const VolIndex& vof = sten.vof(i);

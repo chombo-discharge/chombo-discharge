@@ -231,7 +231,7 @@ VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_a
 						     const int               a_pow,
 						     const int               a_order){
 
-  Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_pow);
+  const Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_pow);
 
   return LeastSquares::computeInterpolationStencil(a_allVoFs, a_displacements, weights, a_order);
 }
@@ -248,11 +248,21 @@ VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_a
 
   std::map<IntVect, VoFStencil> allStens = LeastSquares::computeInterpolationStencil(ivs, a_allVoFs, a_displacements, a_weights, a_order);
 
-  if(allStens.find(deriv) != allStens.end()){
-    ret = allStens.at(deriv);
-  }
+  ret = allStens.at(deriv);
 
   return ret;
+}
+
+std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const IntVectSet&       a_derivs,
+									const Vector<VolIndex>& a_allVoFs,
+									const Vector<RealVect>& a_displacements,
+									const int               a_p,
+									const int               a_order){
+
+  const Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
+
+  return LeastSquares::computeInterpolationStencil(a_derivs, a_allVoFs, a_displacements, weights, a_order);
+    
 }
 
 std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const IntVectSet&       a_derivs,
@@ -261,6 +271,11 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
 									const Vector<Real>&     a_weights,
 									const int               a_order){
   std::map<IntVect, VoFStencil> ret;
+
+  // Initialize return. 
+  for (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt){
+    ret.emplace(ivsIt(), VoFStencil());
+  }
   
   if(a_derivs.numPts() > 0){
 
@@ -277,12 +292,10 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
     for (MultiIndex mi(a_order); mi.ok(); ++mi){
     
       for (int k = 0; k < K; k++){
-	linA[i] = a_weights[k]*mi.pow(a_displacements[k])/mi.factorial();
-      
-	i++;
+	linA[i] = a_weights[k]*mi.pow(a_displacements[k])/mi.factorial(); i++;
       }
     }
-
+ 
     // Compute the pseudo-inverse.
     const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), linA.stdVector(), K, M);
 
@@ -295,13 +308,13 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
 	
 	const int row = mi.getLinearIndex(ivsIt());
 
-	VoFStencil sten;
+	VoFStencil& sten = ret.at(deriv);
+
+	sten.clear();
 	for (int k = 0; k < K; k++){
 	  const int idx = row + k*M;
 	  sten.add(a_allVoFs[k], a_weights[k]*linAplus[idx]);
 	}
-
-	ret.emplace(deriv, sten);
       }
     }
   }
