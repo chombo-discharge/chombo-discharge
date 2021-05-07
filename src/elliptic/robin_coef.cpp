@@ -7,8 +7,12 @@
 
 #include "robin_coef.H"
 
-robin_coef::robin_coef(){
-}
+namespace ChomboDischarge {
 
-robin_coef::~robin_coef(){
+  robin_coef::robin_coef(){
+  }
+
+  robin_coef::~robin_coef(){
+  }
+
 }

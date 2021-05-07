@@ -14,104 +14,107 @@
 #include <BaseDomainBC.H>
 #include <ConductivityBaseDomainBC.H>
 
-/*!
-  @brief Boundary condition class for Robin type boundary conditions
-*/
-class robinconductivitydomainbc : public ConductivityBaseDomainBC {
-public:
-
-  /*!
-    @brief Constructor
-  */
-  robinconductivitydomainbc();
-
-  /*!
-    @brief Destructor
-  */
-  ~robinconductivitydomainbc();
-
-  /*!
-    @brief Function based coefficients and right hand sides
-  */
-  virtual void set_coefs(RefCountedPtr<robin_coef> a_robinco);
-
-  /*!
-    @brief Set constant coefficients
-  */
-  virtual void set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs);
-
-  /*!
-    @brief Set data-based coefficients
-  */
-  virtual void set_coefs(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
-			 const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
-			 const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs);
-
-  /*!
-    @brief Face flux
-  */
-  virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux, 
-			   const BaseFab<Real>&  a_phi, 
-			   const RealVect&       a_probLo, 
-			   const RealVect&       a_dx, 
-			   const int&            a_idir, 
-			   const Side::LoHiSide& a_side, 
-			   const DataIndex&      a_dit, 
-			   const Real&           a_time, 
-			   const bool&           a_useHomogeneous);
-
-  /*!
-    @brief Compute face flux
-  */
-  virtual void getFaceFlux(Real&                 a_faceFlux,
-			   const VolIndex&       a_vof, 
-			   const int&            a_comp, 
-			   const EBCellFAB&      a_phi, 
-			   const RealVect&       a_probLo, 
-			   const RealVect&       a_dx, 
-			   const int&            a_idir, 
-			   const Side::LoHiSide& a_side, 
-			   const DataIndex&      a_dit, 
-			   const Real&           a_time, 
-			   const bool&           a_useHomogeneous);
-
-  /*!
-    @brief Compute gradient
-  */
-  virtual void getFaceGradPhi(Real&                 a_faceFlux, 
-			      const FaceIndex&      a_face, 
-			      const int&            a_comp, 
-			      const EBCellFAB&      a_phi, 
-			      const RealVect&       a_probLo, 
-			      const RealVect&       a_dx, 
-			      const int&            a_idir, 
-			      const Side::LoHiSide& a_side, 
-			      const DataIndex&      a_dit, 
-			      const Real&           a_time, 
-			      const bool&           a_useAreaFrac, 
-			      const RealVect&       a_centroid, 
-			      const bool&           a_useHomogeneous);
+namespace ChomboDischarge {
   
-protected:
+  /*!
+    @brief Boundary condition class for Robin type boundary conditions
+  */
+  class robinconductivitydomainbc : public ConductivityBaseDomainBC {
+  public:
+
+    /*!
+      @brief Constructor
+    */
+    robinconductivitydomainbc();
+
+    /*!
+      @brief Destructor
+    */
+    ~robinconductivitydomainbc();
+
+    /*!
+      @brief Function based coefficients and right hand sides
+    */
+    virtual void set_coefs(RefCountedPtr<robin_coef> a_robinco);
+
+    /*!
+      @brief Set constant coefficients
+    */
+    virtual void set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs);
+
+    /*!
+      @brief Set data-based coefficients
+    */
+    virtual void set_coefs(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
+			   const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
+			   const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs);
+
+    /*!
+      @brief Face flux
+    */
+    virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux, 
+			     const BaseFab<Real>&  a_phi, 
+			     const RealVect&       a_probLo, 
+			     const RealVect&       a_dx, 
+			     const int&            a_idir, 
+			     const Side::LoHiSide& a_side, 
+			     const DataIndex&      a_dit, 
+			     const Real&           a_time, 
+			     const bool&           a_useHomogeneous);
+
+    /*!
+      @brief Compute face flux
+    */
+    virtual void getFaceFlux(Real&                 a_faceFlux,
+			     const VolIndex&       a_vof, 
+			     const int&            a_comp, 
+			     const EBCellFAB&      a_phi, 
+			     const RealVect&       a_probLo, 
+			     const RealVect&       a_dx, 
+			     const int&            a_idir, 
+			     const Side::LoHiSide& a_side, 
+			     const DataIndex&      a_dit, 
+			     const Real&           a_time, 
+			     const bool&           a_useHomogeneous);
+
+    /*!
+      @brief Compute gradient
+    */
+    virtual void getFaceGradPhi(Real&                 a_faceFlux, 
+				const FaceIndex&      a_face, 
+				const int&            a_comp, 
+				const EBCellFAB&      a_phi, 
+				const RealVect&       a_probLo, 
+				const RealVect&       a_dx, 
+				const int&            a_idir, 
+				const Side::LoHiSide& a_side, 
+				const DataIndex&      a_dit, 
+				const Real&           a_time, 
+				const bool&           a_useAreaFrac, 
+				const RealVect&       a_centroid, 
+				const bool&           a_useHomogeneous);
   
-  RefCountedPtr<robin_coef> m_robinco;
-
-  Real m_aco;
-
-  Real m_bco;
+  protected:
   
-  Real m_rhs;
+    RefCountedPtr<robin_coef> m_robinco;
 
-  RefCountedPtr<LevelData<EBFluxFAB> > m_acodata;
+    Real m_aco;
 
-  RefCountedPtr<LevelData<EBFluxFAB> > m_bcodata;
+    Real m_bco;
   
-  RefCountedPtr<LevelData<EBFluxFAB> > m_rhsdata;
+    Real m_rhs;
 
-  bool m_const_coeff;
+    RefCountedPtr<LevelData<EBFluxFAB> > m_acodata;
 
-  bool m_data_coeff;
+    RefCountedPtr<LevelData<EBFluxFAB> > m_bcodata;
+  
+    RefCountedPtr<LevelData<EBFluxFAB> > m_rhsdata;
 
-  bool m_func_coeff;  
-};
+    bool m_const_coeff;
+
+    bool m_data_coeff;
+
+    bool m_func_coeff;  
+  };
+}
 #endif

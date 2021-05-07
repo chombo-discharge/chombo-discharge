@@ -14,63 +14,66 @@
 
 #include <BaseDomainBC.H>
 
-/*!
-  @brief Factory class for generating Robin boundary condition on domain faces
-*/
-class robinconductivitydomainbcfactory : public BaseDomainBCFactory {
-public:
+namespace ChomboDischarge {
 
   /*!
-    @brief Constructor
+    @brief Factory class for generating Robin boundary condition on domain faces
   */
-  robinconductivitydomainbcfactory();
+  class robinconductivitydomainbcfactory : public BaseDomainBCFactory {
+  public:
 
-  /*!
-    @brief Destructor
-  */
-  ~robinconductivitydomainbcfactory();
+    /*!
+      @brief Constructor
+    */
+    robinconductivitydomainbcfactory();
 
-  /*!
-    @brief Function based coefficients and right hand sides
-  */
-  virtual void set_coefs(RefCountedPtr<robin_coef> a_robinco);
+    /*!
+      @brief Destructor
+    */
+    ~robinconductivitydomainbcfactory();
 
-  /*!
-    @brief Set constant coefficients
-  */
-  virtual void set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs);
+    /*!
+      @brief Function based coefficients and right hand sides
+    */
+    virtual void set_coefs(RefCountedPtr<robin_coef> a_robinco);
 
-  /*!
-    @brief Set data-based coefficients
-  */
-  virtual void set_coefs(const EBAMRFluxData& a_aco, const EBAMRFluxData& a_bco, const EBAMRFluxData& a_rhs);
+    /*!
+      @brief Set constant coefficients
+    */
+    virtual void set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs);
 
-  /*!
-    @brief Create robin boundary condition object
-  */
-  virtual BaseDomainBC* create(const ProblemDomain& a_domain, const EBISLayout& a_ebisl, const RealVect& a_dx);
+    /*!
+      @brief Set data-based coefficients
+    */
+    virtual void set_coefs(const EBAMRFluxData& a_aco, const EBAMRFluxData& a_bco, const EBAMRFluxData& a_rhs);
+
+    /*!
+      @brief Create robin boundary condition object
+    */
+    virtual BaseDomainBC* create(const ProblemDomain& a_domain, const EBISLayout& a_ebisl, const RealVect& a_dx);
   
-protected:
+  protected:
 
-  RefCountedPtr<robin_coef> m_robinco;
+    RefCountedPtr<robin_coef> m_robinco;
 
-  Real m_aco;
+    Real m_aco;
 
-  Real m_bco;
+    Real m_bco;
   
-  Real m_rhs;
+    Real m_rhs;
 
-  EBAMRFluxData m_acodata;
+    EBAMRFluxData m_acodata;
 
-  EBAMRFluxData m_bcodata;
+    EBAMRFluxData m_bcodata;
   
-  EBAMRFluxData m_rhsdata;
+    EBAMRFluxData m_rhsdata;
 
-  bool m_const_coeff;
+    bool m_const_coeff;
 
-  bool m_data_coeff;
+    bool m_data_coeff;
 
-  bool m_func_coeff;
-};
+    bool m_func_coeff;
+  };
+}
 
 #endif
