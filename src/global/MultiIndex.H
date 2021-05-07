@@ -31,13 +31,9 @@ public:
 
   /*!
     @brief Full constructor
+    @param[i] a_order
   */
-  MultiIndex(const int a_Q);
-
-  /*!
-    @brief Copy constructor. 
-  */
-  MultiIndex(const IntVect a_init, const int a_Q);
+  MultiIndex(const int a_order);
 
   /*!
     @brief Destructor
@@ -47,7 +43,7 @@ public:
   /*!
     @brief Define function
   */
-  void define(const IntVect a_index, const int a_Q);
+  void define(const int a_order);
 
   /*!
     @brief Factorial function
@@ -57,12 +53,12 @@ public:
   /*!
     @brief Get index
   */
-  IntVect getIntVect() const;
+  IntVect getCurrentIndex() const;
 
   /*!
     @brief Get highest order for this index
   */
-  int getQ() const;
+  int getOrder() const;
 
   /*!
     @brief Get the linear index (i.e. column number) for a given multi-index. 
@@ -85,43 +81,14 @@ public:
   int operator[](const int a_dir) const;
 
   /*!
-    @brief Equal operator 
-  */
-  bool operator==(const MultiIndex& a_index) const;
-
-  /*!
-    @brief Equal operator 
-  */
-  bool operator==(const int a_Q) const;
-
-  /*!
-    @brief Comparison operator. This uses lexicographical ordering
-  */
-  bool operator>(const MultiIndex& a_index) const;
-    /*!
-    @brief Comparison operator. Returns true if abs(this) > a_Q
-  */
-  bool operator>(const int a_Q) const;
-
-  /*!
-    @brief Comparison operator. This uses lexicographical ordering
-  */
-  bool operator<(const MultiIndex& a_index) const;
-
-  /*!
-    @brief Comparison operator. Returns true if abs(this) < a_Q
-  */
-  bool operator<(const int a_Q) const;
-
-  /*!
-    @brief Comparison operator
-  */
-  bool operator <= (const int a_Q) const;
-
-  /*!
     @brief Increment multi-index lexigraphically
   */
   void operator++() ;
+
+  /*!
+    @brief Reset multi-index to point to the first index
+  */
+  void reset();
 
   /*!
     @brief Check that multi-index is ok
@@ -135,6 +102,11 @@ public:
   int norm() const;
 
   /*!
+    @brief Return number of indices in MultiIndex range
+  */
+  int getNumIndices() const;
+
+  /*!
     @brief Power function for multi-indices
   */
   Real pow(const RealVect& a_vec);
@@ -144,12 +116,17 @@ protected:
   /*!
     @brief Maximum order representable by this multi-index
   */
-  int m_Q;
+  int m_order;
 
   /*!
     @brief Current idnex
   */
   IntVect m_curIndex;
+
+  /*!
+    @brief Pointer to index
+  */
+  std::vector<IntVect>::iterator m_iter;
 
   /*!
     @brief All indices
@@ -181,7 +158,8 @@ protected:
   */
   void makeMaps();
 
-  private:
+private:
+  
   /*!
     @brief Get norm
   */

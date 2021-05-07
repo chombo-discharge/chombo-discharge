@@ -7,100 +7,67 @@
 
 #include "MultiIndex.H"
 
-MultiIndex::MultiIndex(const int a_Q){
-  this->define(IntVect::Zero, a_Q);
+MultiIndex::MultiIndex(const int a_order){
+  this->define(a_order);
 }
 
-MultiIndex::MultiIndex(const IntVect a_init, const int a_Q){
-  this->define(a_init, a_Q);
-}
+void MultiIndex::define(const int a_order){
+  m_order = a_order;
 
-
-void MultiIndex::define(const IntVect a_index, const int a_Q){
-  m_curIndex = a_index;
-  m_Q        = a_Q;
-
-  //  Now define the map.
+  // Make indices and define maps. 
   makeIndices();
   makeMaps();
+  reset();
 }
   
-
-IntVect MultiIndex::getIntVect() const {
-  return m_curIndex;
+void MultiIndex::reset(){
+  m_iter = m_indices.begin();
 }
 
-int MultiIndex::getQ() const {
-  return m_Q;
+IntVect MultiIndex::getCurrentIndex() const {
+  return *m_iter;
+}
+
+int MultiIndex::getOrder() const {
+  return m_order;
+}
+
+int MultiIndex::getNumIndices() const {
+  return m_indices.size();
 }
 
 int MultiIndex::getLinearIndex(const IntVect a_multiIndex) const {
-  return m_mapToLinearIndex.at(a_multiIndex);
+  int ret = -1;
+
+  if(m_mapToLinearIndex.find(a_multiIndex) != m_mapToLinearIndex.end()){
+    ret = m_mapToLinearIndex.at(a_multiIndex);
+  }
+  else{
+    MayDay::Abort("MultiIndex::getLinearIndex - index out of range!");
+  }
+
+  return ret;
 }
 
 IntVect MultiIndex::getMultiIndex(const int a_linearIndex) const {
-  return m_mapToMultiIndex.at(a_linearIndex);
+  IntVect ret;
+
+  if(m_mapToMultiIndex.find(a_linearIndex) != m_mapToMultiIndex.end()){
+    ret = m_mapToMultiIndex.at(a_linearIndex);
+  }
+  else{
+    MayDay::Abort("MultiIndex::getMultiIndex - index out of range!");
+  }
+
+  return ret;
 }
 
 int MultiIndex::operator[](const int a_dir) const {
-  return m_curIndex[a_dir];
-}
-
-bool MultiIndex::operator==(const MultiIndex& a_index) const {
-  return D_TERM(m_curIndex[0] == a_index[0], && m_curIndex[1] == a_index[1], && m_curIndex[2] == a_index[2]);
-}
-
-bool MultiIndex::operator==(const int a_Q) const {
-  return this->norm() == a_Q;
-}
-
-bool MultiIndex::operator>(const MultiIndex& a_index) const {
-  
-  for (int dir = 0; dir < SpaceDim; dir++){
-    if(m_curIndex[dir] > a_index[dir]){
-      return true;
-    }
-    else if(m_curIndex[dir] < a_index[dir]){
-      return false;
-    }
-  }
-
-  return false;
-}
-
-bool MultiIndex::operator>(const int a_Q) const {
-  return this->norm() > a_Q;
-}
-
-bool MultiIndex::operator<(const MultiIndex& a_index) const {
-  
-  for (int dir = 0; dir < SpaceDim; dir++){
-    if(m_curIndex[dir] < a_index[dir]){
-      return true;
-    }
-    else if(m_curIndex[dir] > a_index[dir]){
-      return false;
-    }
-  }
-
-  return false;
-}
-
-bool MultiIndex::operator<(const int a_Q) const {
-  return this->norm() < a_Q;
-}
-
-bool MultiIndex::operator<=(const int a_Q) const {
-  if(this->norm() < a_Q || this->norm() == a_Q) {
-    return true;
-  }
-  else{
-    return false;
-  }
+  return (*m_iter)[a_dir];
 }
 
 bool MultiIndex::ok() const {
-  return (this->norm() <= m_Q);
+  return (m_iter != m_indices.end());
 }
 
 int MultiIndex::factorial(const int a_n) const {
@@ -115,14 +82,14 @@ int MultiIndex::factorial(const int a_n) const {
 int MultiIndex::factorial() const {
   int fact = 1;
   for (int dir = 0; dir < SpaceDim; dir++){
-    fact *= factorial(m_curIndex[dir]);
+    fact *= factorial((*m_iter)[dir]);
   }
 
   return fact;
 }
 
 int MultiIndex::norm() const {
-  return norm(m_curIndex);
+  return norm((*m_iter));
 }
 
 int MultiIndex::norm(const IntVect a_iv) const {
@@ -134,15 +101,13 @@ int MultiIndex::norm(const IntVect a_iv) const {
   return retval;
 }
 
-
-
 Real MultiIndex::pow(const RealVect& a_vec){
 
   Real retval = 1.;
 
   for (int dir = 0; dir < SpaceDim; dir++){
     double base = a_vec[dir];
-    double exp  = 1.0*m_curIndex[dir];
+    double exp  = 1.0*(*m_iter)[dir];
     retval *= std::pow(base, exp);
   }
 
@@ -150,55 +115,31 @@ Real MultiIndex::pow(const RealVect& a_vec){
 }
 
 void MultiIndex::operator++(){
-
-  if(this->norm() < m_Q) { // Can raise first index.
-    m_curIndex[0]++;
-  }
-  else if(this->norm() == m_Q){ // Can't raise first order, check next index.
-
-    MultiIndex newIndex(IntVect(D_DECL(0, m_curIndex[1]+1, m_curIndex[2])), m_Q);
-    if(newIndex.norm() <= m_Q){ // Ok, this is a valid index.
-      *this = newIndex;
-    }
-#if CH_SPACEDIM==3
-    else if(newIndex.norm() > m_Q){
-      MultiIndex newIndex = MultiIndex(IntVect(D_DECL(0, 0, m_curIndex[2]+1)), m_q);
-      if(newIndex.norm() <= m_Q){
-	*this = newIndex;
-      }
-      else{
-	m_curIndex[0]++; // Designed to break out of ::ok() loop.
-      }
-    }
-#endif
-    else{
-      m_curIndex[0]++; // Designed to break out of ::ok() loop.
-    }
-  }
+  m_iter++;
 }
 
 void MultiIndex::makeIndices() {
 
   IntVect cur = IntVect::Zero;
 
-  while(MultiIndex::norm(cur) <= m_Q){
+  while(MultiIndex::norm(cur) <= m_order){
     m_indices.emplace_back(cur);
 
     // Now go to the next index in lexigraphical order
-    if(norm(cur) < m_Q) { // Can raise first index.
+    if(norm(cur) < m_order) { // Can raise first index.
       cur[0]++;
     }
-    else if(norm(cur) == m_Q){ // Can't raise first order, check next index.
+    else if(norm(cur) == m_order){ // Can't raise first order, check next index.
 
       IntVect next = IntVect(D_DECL(0, cur[1]+1, cur[2]));
-      if(norm(next) <= m_Q){ // Ok, this is a valid index.
+      if(norm(next) <= m_order){ // Ok, this is a valid index.
 	cur = next;
       }
 #if CH_SPACEDIM==3
-      else if(norm(cur) > m_Q){
-	MultiIndex newIndex = MultiIndex(IntVect(D_DECL(0, 0, m_curIndex[2]+1)), m_q);
+      else if(norm(cur) > m_order){
+	MultiIndex newIndex = MultiIndex(IntVect(D_DECL(0, 0, cur[2]+1)), m_q);
 	IntVect next = IntVect(D_DECL(0, 0, cur[2]+1));
-	if(norm(next) <= m_Q){
+	if(norm(next) <= m_order){
 	  cur = next;
 	}
 	else{
