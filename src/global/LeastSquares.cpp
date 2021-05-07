@@ -226,6 +226,37 @@ VoFStencil LeastSquares::projectGradSten(const VoFStencil& a_stencil, const Real
   return sten;
 }
 
+Real LeastSquares::sumWeights(const VoFStencil& a_stencil, const int a_variable){
+
+  Real ret = 0.0;
+
+  for (int i = 0; i < a_stencil.size(); i++){
+    const int var = a_stencil.variable(i);
+    if(var == a_variable){
+      ret += a_stencil.weight(i);
+    }
+  }
+
+  return ret;
+}
+
+Real LeastSquares::sumAllWeights(const VoFStencil& a_stencil){
+  Real ret = 0.0;
+
+  for (int i = 0; i < a_stencil.size(); i++){
+    ret += a_stencil.weight(i);
+  }
+
+  return ret;
+}
+
+int LeastSquares::getTaylorExpansionSize(const int a_order){
+
+  MultiIndex mi(a_order);
+  
+  return mi.getNumIndices();
+}
+
 VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_allVoFs,
 						     const Vector<RealVect>& a_displacements,
 						     const int               a_pow,
@@ -322,33 +353,28 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
   return ret;
 }
 
-Real LeastSquares::sumWeights(const VoFStencil& a_stencil, const int a_variable){
+VoFStencil LeastSquares::getInterpolationStencilUsingAllVoFsInRadius(const CellPosition a_cellPos,
+								     const CellPosition a_otherCellsPos,
+								     const VolIndex&    a_vof,
+								     const EBISBox&     a_ebisbox,
+								     const Real         a_dx,
+								     const int          a_p,
+								     const int          a_radius,
+								     const int          a_order){
 
-  Real ret = 0.0;
+  // Get all VoFs in a radius, and then compute the displacement vectors. 
+  Vector<VolIndex> vofs = VoFUtils::getAllConnectedVoFsInRadius(a_vof, a_ebisbox, a_radius, IntVectSet());
+  vofs.push_back(a_vof);
+  const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_cellPos, a_otherCellsPos, a_vof, vofs, a_ebisbox, a_dx);
 
-  for (int i = 0; i < a_stencil.size(); i++){
-    const int var = a_stencil.variable(i);
-    if(var == a_variable){
-      ret += a_stencil.weight(i);
-    }
+
+  const int M = LeastSquares::getTaylorExpansionSize(a_order);
+  const int K = displacements.size();
+
+  VoFStencil ret;
+  if(K >= M) { // Have enough equations to compute.
+    ret = LeastSquares::computeInterpolationStencil(vofs, displacements, a_p, a_order);
   }
 
   return ret;
-}
-
-Real LeastSquares::sumAllWeights(const VoFStencil& a_stencil){
-  Real ret = 0.0;
-
-  for (int i = 0; i < a_stencil.size(); i++){
-    ret += a_stencil.weight(i);
-  }
-
-  return ret;
-}
-
-int LeastSquares::getTaylorExpansionSize(const int a_order){
-
-  MultiIndex mi(a_order);
-  
-  return mi.getNumIndices();
 }

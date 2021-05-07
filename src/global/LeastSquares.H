@@ -136,8 +136,6 @@ namespace LeastSquares {
 				     const Vector<RealVect>& a_displacements,
 				     const Vector<Real>&     a_weights);
   
-
-
   /*!
     @brief Compute a least squares gradient stencil on the EB centroid
     @param[in]  a_vof Input vof
@@ -161,6 +159,28 @@ namespace LeastSquares {
     @note Users need to make sure ||a_projection|| = 1 for this routine to make sense. 
   */
   VoFStencil projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection);
+
+  /*!
+    @brief Return the sum of weights in the stencil, for a specific variable. 
+    @param[in] a_stencil Stencil
+    @param[in] a_variable Which variable to sum. 
+    @return    Returns sum of weights for a specific variable in the stencil. 
+  */
+  Real sumWeights(const VoFStencil& a_stencil, const int a_variable);
+
+  /*!
+    @brief Compute the sum of all weights in a stencil. 
+    @param[in] a_stencil Stencil
+    @return    Returns sum of weights in a_stencil (over all variables).
+  */
+  Real sumAllWeights(const VoFStencil& a_stencil);
+  
+  /*!
+    @brief Get the size of a Taylor expansion for a given order
+    @param[in] a_order Desired order in Taylor expansion
+    @return Returns number of terms in Taylor expansion. 
+  */
+  int getTaylorExpansionSize(const int a_order);
 
   /*!
     @brief Compute an interpolation stencil to specified order by solving a least squares system
@@ -231,28 +251,20 @@ namespace LeastSquares {
 							    const Vector<RealVect>& a_displacements,
 							    const Vector<Real>&     a_weights,
 							    const int               a_order);
-  
-  /*!
-    @brief Return the sum of weights in the stencil, for a specific variable. 
-    @param[in] a_stencil Stencil
-    @param[in] a_variable Which variable to sum. 
-    @return    Returns sum of weights for a specific variable in the stencil. 
-  */
-  Real sumWeights(const VoFStencil& a_stencil, const int a_variable);
 
   /*!
-    @brief Compute the sum of all weights in a stencil. 
-    @param[in] a_stencil Stencil
-    @return    Returns sum of weights in a_stencil (over all variables).
+    @brief Get an interpolation stencil to a point in a cell with a specified order and radius. 
   */
-  Real sumAllWeights(const VoFStencil& a_stencil);
+  VoFStencil getInterpolationStencilUsingAllVoFsInRadius(const CellPosition a_cellpos,
+							 const CellPosition a_otherCellsPos,
+							 const VolIndex&    a_startVoF,
+							 const EBISBox&     a_ebisbox,
+							 const Real         a_dx,
+							 const int          a_p,
+							 const int          a_radius,
+							 const int          a_order);
   
-  /*!
-    @brief Get the size of a Taylor expansion for a given order
-    @param[in] a_order Desired order in Taylor expansion
-    @return Returns number of terms in Taylor expansion. 
-  */
-  int getTaylorExpansionSize(const int a_order);
+
 };
 
 #endif

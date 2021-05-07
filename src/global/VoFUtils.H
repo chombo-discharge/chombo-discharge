@@ -128,10 +128,21 @@ namespace VoFUtils {
     @param[in] a_normal       Normal vector which defines the quadrant.
     @param[in] a_radius       Radius of quadrant
     @param[in] a_addStartVoF  If true, adds a_startVoF to the list. 
+    @note This creates a quadrant and calls the other version. 
     @return Vector of VoFs in quadrant defined by the normal vector. If a_normal[dir]==0 there is no unique quadrant and the routine returns an empty vector. 
-
   */
   Vector<VolIndex> getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const RealVect& a_normal, const int a_radius, const bool a_addStartVoF);
+
+    /*!
+    @brief Get all VoFs in a quadrant. The quadrant is defined by the normal vector. 
+    @param[in] a_startVoF     Starting VoF
+    @param[in] a_ebisBox      EBISBox
+    @param[in] a_normal       Normal vector which defines the quadrant.
+    @param[in] a_quadrant     Quadrant
+    @param[in] a_addStartVoF  If true, adds a_startVoF to the list. 
+    @return Vector of VoFs in quadrant defined by the normal vector. If a_normal[dir]==0 there is no unique quadrant and the routine returns an empty vector. 
+  */
+  Vector<VolIndex> getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const IntVect a_quadrant, const int a_radius, const bool a_addStartVoF);
 
   /*!
     @brief Get all VoFs within a radius, but ignore VoFs that are ''opposite'' to a specified normal direction in space. 

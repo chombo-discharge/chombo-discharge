@@ -7,6 +7,7 @@
 
 #include "centroid_interp.H"
 #include "stencil_ops.H"
+#include "LeastSquares.H"
 
 #include "EBArith.H"
 
@@ -130,7 +131,7 @@ bool centroid_interp::get_lsq_grad_stencil(VoFStencil&              a_sten,
 					   const Real&              a_dx,
 					   const IntVectSet&        a_cfivs){
   CH_TIME("centroid_interp::get_lsq_grad_stencil");
-
+#if 0 // Old way
 #if CH_SPACEDIM == 2
   const int minStenSize = 3;
 #elif CH_SPACEDIM== 3
@@ -186,6 +187,22 @@ bool centroid_interp::get_lsq_grad_stencil(VoFStencil&              a_sten,
   else{
     return false;
   }
+#else // New, and much better way.
+
+  const int weightP = 0;
+  const int radius  = 1;
+  const int order   = 1;
+  
+  a_sten = LeastSquares::getInterpolationStencilUsingAllVoFsInRadius(LeastSquares::CellPosition::Centroid,
+  								     LeastSquares::CellPosition::Center,
+  								     a_vof,
+  								     a_ebisbox,
+  								     a_dx,
+  								     weightP,
+  								     radius,
+  								     order);
+
+#endif
 }
 
 bool centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
@@ -196,7 +213,6 @@ bool centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
 				      const Box&               a_box,
 				      const Real&              a_dx,
 				      const IntVectSet&        a_cfivs){
-
   a_sten.clear();
   a_sten.add(a_vof, 1.0);
 
@@ -207,8 +223,8 @@ bool centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
 
     bool hasLo, hasLower, hasHi, hasHigher;
     VolIndex loVoF, lowerVoF, hiVoF, higherVoF;
-    EBArith::getVoFsDir(hasLo, loVoF, hasLower, lowerVoF,   a_ebisbox, a_vof, dir, Side::Lo, (IntVectSet*) &a_cfivs);
-    EBArith::getVoFsDir(hasHi, hiVoF, hasHigher, higherVoF, a_ebisbox, a_vof, dir, Side::Hi, (IntVectSet*) &a_cfivs);
+    EBArith::getVoFsDir(hasLo, loVoF, hasLower, lowerVoF,   a_ebisbox, a_vof, dir, Side::Lo, NULL);
+    EBArith::getVoFsDir(hasHi, hiVoF, hasHigher, higherVoF, a_ebisbox, a_vof, dir, Side::Hi, NULL);
 
     if(hasLo || hasHi){
       if(centroid[dir] > thresh && hasHi){ // Deriv is to the right
@@ -222,11 +238,6 @@ bool centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
       else if(Abs(centroid[dir]) < thresh){
 	// No deriv in this direction
       }
-#if 0
-      else{ // Logic bust, shouldn't happen
-	MayDay::Abort("centroid_interp::get_pwl_stencil - logic bust, shouldn't happen");
-      }
-#endif
     }
   }
 

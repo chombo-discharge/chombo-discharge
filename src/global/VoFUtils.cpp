@@ -247,28 +247,33 @@ Vector<VolIndex> VoFUtils::getAllVoFsInQuadrant(const VolIndex& a_startVoF, cons
     // Define the quadrant
     const IntVect quadrant = VoFUtils::getQuadrant(a_normal);
 
-    // Grow the box in the direction defined by the quadrant
-    Box bx(a_startVoF.gridIndex(), a_startVoF.gridIndex());
-    for (int dir = 0; dir < SpaceDim; dir++){
-      if(quadrant[dir] > 0){
-	bx.growHi(dir, a_radius); 
-      }
-      else if(quadrant[dir] < 0){
-	bx.growLo(dir, a_radius);
-      }
-      else{
-	MayDay::Abort("VoFUtils::getAllVoFsInQuadrant - logic bust");
-      }
+    ret = VoFUtils::getAllVoFsInQuadrant(a_startVoF, a_ebisbox, quadrant, a_radius, a_addStartVoF);
+  }
+
+  return ret;
+}
+
+Vector<VolIndex> VoFUtils::getAllVoFsInQuadrant(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const IntVect a_quadrant, const int a_radius, const bool a_addStartVoF) {
+
+  Vector<VolIndex> ret;
+  
+  // Grow the box in the direction defined by the quadrant
+  Box bx(a_startVoF.gridIndex(), a_startVoF.gridIndex());
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if(a_quadrant[dir] > 0){
+      bx.growHi(dir, a_radius); 
     }
-    bx &= a_ebisbox.getDomain().domainBox();
-
-
-    ret = VoFUtils::getAllConnectedVoFsInBox(a_startVoF, a_ebisbox, bx, IntVectSet());
-
-    if(a_addStartVoF){
-      ret.push_back(a_startVoF);
+    else if(a_quadrant[dir] < 0){
+      bx.growLo(dir, a_radius);
     }
+  }
+  bx &= a_ebisbox.getDomain().domainBox();
 
+
+  ret = VoFUtils::getAllConnectedVoFsInBox(a_startVoF, a_ebisbox, bx, IntVectSet());
+
+  if(a_addStartVoF){
+    ret.push_back(a_startVoF);
   }
 
   return ret;
