@@ -10,397 +10,399 @@
 #ifndef _AIR9EED_BOURDON_SPECIES_
 #define _AIR9EED_BOURDON_SPECIES_
 
-namespace physics {
-  namespace cdr_plasma {
+namespace ChomboDischarge {
+  namespace physics {
+    namespace cdr_plasma {
 
-
-    /*!
-      @brief Electron energy distribution
-    */
-    class air9eed_bourdon::eed : public cdr_species {
-    public:
 
       /*!
-	@brief Constructor
+	@brief Electron energy distribution
       */
-      eed();
+      class air9eed_bourdon::eed : public cdr_species {
+      public:
 
-      /*!
-	@brief Destructor
-      */
-      virtual ~eed();
+	/*!
+	  @brief Constructor
+	*/
+	eed();
 
-      /*!
-	@brief Initial data
-      */
-      virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+	/*!
+	  @brief Destructor
+	*/
+	virtual ~eed();
+
+	/*!
+	  @brief Initial data
+	*/
+	virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
-    protected:
+      protected:
+
+	/*!
+	  @brief Gas temperature
+	*/
+	Real m_init_energy;
+      };
 
       /*!
-	@brief Gas temperature
+	@brief Electron class
       */
-      Real m_init_energy;
-    };
+      class air9eed_bourdon::electron : public cdr_species {
+      public:
 
-    /*!
-      @brief Electron class
-    */
-    class air9eed_bourdon::electron : public cdr_species {
-    public:
+	/*!
+	  @brief Constructor
+	*/
+	electron();
 
-      /*!
-	@brief Constructor
-      */
-      electron();
+	/*!
+	  @brief Destructor
+	*/
+	virtual ~electron();
 
-      /*!
-	@brief Destructor
-      */
-      virtual ~electron();
-
-      /*!
-	@brief Initial data
-      */
-      virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+	/*!
+	  @brief Initial data
+	*/
+	virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
-    protected:
+      protected:
 
-      /*!
-	@brief Initial ionization level
-      */
-      Real m_initial_ionization;
+	/*!
+	  @brief Initial ionization level
+	*/
+	Real m_initial_ionization;
   
-    };
-
-    /*!
-      @brief N2plus class
-    */
-    class air9eed_bourdon::N2plus : public cdr_species {
-    public:
+      };
 
       /*!
-	@brief Constructor
+	@brief N2plus class
       */
-      N2plus();
+      class air9eed_bourdon::N2plus : public cdr_species {
+      public:
 
-      /*!
-	@brief Destructor
-      */
-      virtual ~N2plus();
+	/*!
+	  @brief Constructor
+	*/
+	N2plus();
 
-      /*!
-	@brief Initial data
-      */
-      virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+	/*!
+	  @brief Destructor
+	*/
+	virtual ~N2plus();
+
+	/*!
+	  @brief Initial data
+	*/
+	virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
-    protected:
+      protected:
 
-      Real m_initial_ionization;
-    };
-
-    /*!
-      @brief N4plus class
-    */
-    class air9eed_bourdon::N4plus : public cdr_species {
-    public:
+	Real m_initial_ionization;
+      };
 
       /*!
-	@brief Constructor
+	@brief N4plus class
       */
-      N4plus();
+      class air9eed_bourdon::N4plus : public cdr_species {
+      public:
 
-      /*!
-	@brief Destructor
-      */
-      virtual ~N4plus();
+	/*!
+	  @brief Constructor
+	*/
+	N4plus();
 
-      /*!
-	@brief Initial data
-      */
-      virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+	/*!
+	  @brief Destructor
+	*/
+	virtual ~N4plus();
+
+	/*!
+	  @brief Initial data
+	*/
+	virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
-    protected:
-    };
-
-    /*!
-      @brief O2plus class
-    */
-    class air9eed_bourdon::O2plus : public cdr_species {
-    public:
+      protected:
+      };
 
       /*!
-	@brief Constructor
+	@brief O2plus class
       */
-      O2plus();
+      class air9eed_bourdon::O2plus : public cdr_species {
+      public:
 
-      /*!
-	@brief Destructor
-      */
-      virtual ~O2plus();
+	/*!
+	  @brief Constructor
+	*/
+	O2plus();
 
-      /*!
-	@brief Initial data
-      */
-      virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+	/*!
+	  @brief Destructor
+	*/
+	virtual ~O2plus();
+
+	/*!
+	  @brief Initial data
+	*/
+	virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
-    protected:
+      protected:
 
-      Real m_initial_ionization;
-    };
-
-    /*!
-      @brief O4plus class
-    */
-    class air9eed_bourdon::O4plus : public cdr_species {
-    public:
+	Real m_initial_ionization;
+      };
 
       /*!
-	@brief Constructor
+	@brief O4plus class
       */
-      O4plus();
+      class air9eed_bourdon::O4plus : public cdr_species {
+      public:
 
-      /*!
-	@brief Destructor
-      */
-      virtual ~O4plus();
+	/*!
+	  @brief Constructor
+	*/
+	O4plus();
 
-      /*!
-	@brief Initial data
-      */
-      virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+	/*!
+	  @brief Destructor
+	*/
+	virtual ~O4plus();
+
+	/*!
+	  @brief Initial data
+	*/
+	virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
-    protected:
-    };
-
-    /*!
-      @brief O2plusN2 class
-    */
-    class air9eed_bourdon::O2plusN2 : public cdr_species {
-    public:
+      protected:
+      };
 
       /*!
-	@brief Constructor
+	@brief O2plusN2 class
       */
-      O2plusN2();
+      class air9eed_bourdon::O2plusN2 : public cdr_species {
+      public:
 
-      /*!
-	@brief Destructor
-      */
-      virtual ~O2plusN2();
+	/*!
+	  @brief Constructor
+	*/
+	O2plusN2();
 
-      /*!
-	@brief Initial data
-      */
-      virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+	/*!
+	  @brief Destructor
+	*/
+	virtual ~O2plusN2();
+
+	/*!
+	  @brief Initial data
+	*/
+	virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
-    protected:
-    };
-
-    /*!
-      @brief O2minus class
-    */
-    class air9eed_bourdon::O2minus : public cdr_species {
-    public:
+      protected:
+      };
 
       /*!
-	@brief Constructor
+	@brief O2minus class
       */
-      O2minus();
+      class air9eed_bourdon::O2minus : public cdr_species {
+      public:
 
-      /*!
-	@brief Destructor
-      */
-      virtual ~O2minus();
+	/*!
+	  @brief Constructor
+	*/
+	O2minus();
 
-      /*!
-	@brief Initial data
-      */
-      virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+	/*!
+	  @brief Destructor
+	*/
+	virtual ~O2minus();
+
+	/*!
+	  @brief Initial data
+	*/
+	virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
-    protected:
-    };
-
-    /*!
-      @brief Ominus class
-    */
-    class air9eed_bourdon::Ominus : public cdr_species {
-    public:
+      protected:
+      };
 
       /*!
-	@brief Constructor
+	@brief Ominus class
       */
-      Ominus();
+      class air9eed_bourdon::Ominus : public cdr_species {
+      public:
 
-      /*!
-	@brief Destructor
-      */
-      virtual ~Ominus();
+	/*!
+	  @brief Constructor
+	*/
+	Ominus();
 
-      /*!
-	@brief Initial data
-      */
-      virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+	/*!
+	  @brief Destructor
+	*/
+	virtual ~Ominus();
+
+	/*!
+	  @brief Initial data
+	*/
+	virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
-    protected:
-    };
+      protected:
+      };
 
-
-    /*!
-      @brief First Contribution to \gamma + O2 -> e + O2minus
-    */
-    class air9eed_bourdon::photon_one : public rte_species {
-    public:
-      /*!
-	@brief Constructor
-      */
-      photon_one();
 
       /*!
-	@brief Destructor
+	@brief First Contribution to \gamma + O2 -> e + O2minus
       */
-      ~photon_one();
+      class air9eed_bourdon::photon_one : public rte_species {
+      public:
+	/*!
+	  @brief Constructor
+	*/
+	photon_one();
+
+	/*!
+	  @brief Destructor
+	*/
+	~photon_one();
+
+	/*!
+	  @brief Get the absorption coefficient
+	*/
+	virtual Real get_kappa(const RealVect a_pos) const;
+
+	/*!
+	  @brief Get the lambda coefficient
+	*/
+	virtual Real get_lambda() const;
+
+	/*!
+	  @brief Get the A-coefficient
+	*/
+	virtual Real get_A() const;
+
+	/*!
+	  @brief Get the partial oxygen pressure
+	*/
+	virtual Real get_pO2() const;
+
+      protected:
+	/*!
+	  @brief Lambda-coefficient
+	*/
+	Real m_lambda;
+
+	/*!
+	  @brief A-coefficient
+	*/
+	Real m_A;
+
+	/*!
+	  @brief O2-fraction
+	*/
+	Real m_pO2;
+      };
 
       /*!
-	@brief Get the absorption coefficient
+	@brief First Contribution to \gamma + O2 -> e + O2minus
       */
-      virtual Real get_kappa(const RealVect a_pos) const;
+      class air9eed_bourdon::photon_two : public rte_species {
+      public:
+	/*!
+	  @brief Constructor
+	*/
+	photon_two();
+
+	/*!
+	  @brief Destructor
+	*/
+	~photon_two();
+
+	/*!
+	  @brief Get the absorption coefficient
+	*/
+	virtual Real get_kappa(const RealVect a_pos) const;
+
+	/*!
+	  @brief Get the lambda coefficient
+	*/
+	virtual Real get_lambda() const;
+
+	/*!
+	  @brief Get the A-coefficient
+	*/
+	virtual Real get_A() const;
+
+	/*!
+	  @brief Get the partial oxygen pressure
+	*/
+	virtual Real get_pO2() const;
+
+      protected:
+	/*!
+	  @brief Lambda-coefficient
+	*/
+	Real m_lambda;
+
+	/*!
+	  @brief A-coefficient
+	*/
+	Real m_A;
+
+	/*!
+	  @brief O2-fraction
+	*/
+	Real m_pO2;
+      };
 
       /*!
-	@brief Get the lambda coefficient
+	@brief First Contribution to \gamma + O2 -> e + O2minus
       */
-      virtual Real get_lambda() const;
+      class air9eed_bourdon::photon_three : public rte_species {
+      public:
+	/*!
+	  @brief Constructor
+	*/
+	photon_three();
 
-      /*!
-	@brief Get the A-coefficient
-      */
-      virtual Real get_A() const;
+	/*!
+	  @brief Destructor
+	*/
+	~photon_three();
 
-      /*!
-	@brief Get the partial oxygen pressure
-      */
-      virtual Real get_pO2() const;
+	/*!
+	  @brief Get the absorption coefficient
+	*/
+	virtual Real get_kappa(const RealVect a_pos) const;
 
-    protected:
-      /*!
-	@brief Lambda-coefficient
-      */
-      Real m_lambda;
+	/*!
+	  @brief Get the lambda coefficient
+	*/
+	virtual Real get_lambda() const;
 
-      /*!
-	@brief A-coefficient
-      */
-      Real m_A;
+	/*!
+	  @brief Get the A-coefficient
+	*/
+	virtual Real get_A() const;
 
-      /*!
-	@brief O2-fraction
-      */
-      Real m_pO2;
-    };
+	/*!
+	  @brief Get the partial oxygen pressure
+	*/
+	virtual Real get_pO2() const;
 
-    /*!
-      @brief First Contribution to \gamma + O2 -> e + O2minus
-    */
-    class air9eed_bourdon::photon_two : public rte_species {
-    public:
-      /*!
-	@brief Constructor
-      */
-      photon_two();
+      protected:
+	/*!
+	  @brief Lambda-coefficient
+	*/
+	Real m_lambda;
 
-      /*!
-	@brief Destructor
-      */
-      ~photon_two();
+	/*!
+	  @brief A-coefficient
+	*/
+	Real m_A;
 
-      /*!
-	@brief Get the absorption coefficient
-      */
-      virtual Real get_kappa(const RealVect a_pos) const;
-
-      /*!
-	@brief Get the lambda coefficient
-      */
-      virtual Real get_lambda() const;
-
-      /*!
-	@brief Get the A-coefficient
-      */
-      virtual Real get_A() const;
-
-      /*!
-	@brief Get the partial oxygen pressure
-      */
-      virtual Real get_pO2() const;
-
-    protected:
-      /*!
-	@brief Lambda-coefficient
-      */
-      Real m_lambda;
-
-      /*!
-	@brief A-coefficient
-      */
-      Real m_A;
-
-      /*!
-	@brief O2-fraction
-      */
-      Real m_pO2;
-    };
-
-    /*!
-      @brief First Contribution to \gamma + O2 -> e + O2minus
-    */
-    class air9eed_bourdon::photon_three : public rte_species {
-    public:
-      /*!
-	@brief Constructor
-      */
-      photon_three();
-
-      /*!
-	@brief Destructor
-      */
-      ~photon_three();
-
-      /*!
-	@brief Get the absorption coefficient
-      */
-      virtual Real get_kappa(const RealVect a_pos) const;
-
-      /*!
-	@brief Get the lambda coefficient
-      */
-      virtual Real get_lambda() const;
-
-      /*!
-	@brief Get the A-coefficient
-      */
-      virtual Real get_A() const;
-
-      /*!
-	@brief Get the partial oxygen pressure
-      */
-      virtual Real get_pO2() const;
-
-    protected:
-      /*!
-	@brief Lambda-coefficient
-      */
-      Real m_lambda;
-
-      /*!
-	@brief A-coefficient
-      */
-      Real m_A;
-
-      /*!
-	@brief O2-fraction
-      */
-      Real m_pO2;
-    };
+	/*!
+	  @brief O2-fraction
+	*/
+	Real m_pO2;
+      };
+    }
   }
 }
 

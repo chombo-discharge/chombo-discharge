@@ -10,14 +10,16 @@
 
 #include "rte_species.H"
 
-namespace physics {
-  namespace rte {
+namespace ChomboDischarge {
+  namespace physics {
+    namespace rte {
 
-    class rte_physics_species : public rte_species {
-    public:
-      rte_physics_species();
-      ~rte_physics_species();
-    };
+      class rte_physics_species : public rte_species {
+      public:
+	rte_physics_species();
+	~rte_physics_species();
+      };
+    }
   }
 }
 

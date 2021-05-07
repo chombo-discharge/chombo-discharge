@@ -10,65 +10,67 @@
 
 #include "ito_plasma_physics.H"
 
-namespace physics {
-  namespace ito_plasma {
-
-    /*!
-      @brief Abstract clas for specifying plasma kinetics
-    */
-    class ito_plasma_physics_lea : public ito_plasma_physics {
-    public:
+namespace ChomboDischarge {
+  namespace physics {
+    namespace ito_plasma {
 
       /*!
-	@brief Ctor. Does nothing.
+	@brief Abstract clas for specifying plasma kinetics
       */
-      ito_plasma_physics_lea(){
+      class ito_plasma_physics_lea : public ito_plasma_physics {
+      public:
 
-      }
+	/*!
+	  @brief Ctor. Does nothing.
+	*/
+	ito_plasma_physics_lea(){
 
-      /*!
-	@brief Dtor. Does nothing. 
-      */
-      ~ito_plasma_physics_lea(){
+	}
 
-      }
+	/*!
+	  @brief Dtor. Does nothing. 
+	*/
+	~ito_plasma_physics_lea(){
 
-      /*!
-	@brief Compute Townsend ionization length
-      */
-      virtual Real compute_alpha(const RealVect a_E) const = 0;
+	}
 
-      /*!
-	@brief Set initial surface charge. Default is 0, override if you want.
-      */
-      virtual Real initial_sigma(const Real a_time, const RealVect a_pos) const {return 0.0;}
+	/*!
+	  @brief Compute Townsend ionization length
+	*/
+	virtual Real compute_alpha(const RealVect a_E) const = 0;
 
-      /*!
-	@brief This must be overridden.
-      */
-      virtual void update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const override = 0;
+	/*!
+	  @brief Set initial surface charge. Default is 0, override if you want.
+	*/
+	virtual Real initial_sigma(const Real a_time, const RealVect a_pos) const {return 0.0;}
 
-      // Disabled in LEA
-      Vector<Real> compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const override final {
-	MayDay::Abort("ito_plasma_physics_lea::compute_ito_mobilities_lfa - should not end up here with an LEA model");
-      }
+	/*!
+	  @brief This must be overridden.
+	*/
+	virtual void update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const override = 0;
 
-      // Disabled in LEA
-      Vector<Real> compute_ito_diffusion_lfa(const Real         a_time,
-						     const RealVect     a_pos,
-						     const RealVect     a_E,
-						     const Vector<Real> a_cdr_densities) const override final {
-	MayDay::Abort("ito_plasma_physics_lea::compute_diffusion_lfa - should not end up here with an LEA model");
-      }
+	// Disabled in LEA
+	Vector<Real> compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const override final {
+	  MayDay::Abort("ito_plasma_physics_lea::compute_ito_mobilities_lfa - should not end up here with an LEA model");
+	}
 
-      // Disables in LEA
-      void update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const override final {
-	MayDay::Abort("ito_plasma_physics_lea::update_reaction_rates_lfa - should not end up here with an LEA model");
-      }
+	// Disabled in LEA
+	Vector<Real> compute_ito_diffusion_lfa(const Real         a_time,
+					       const RealVect     a_pos,
+					       const RealVect     a_E,
+					       const Vector<Real> a_cdr_densities) const override final {
+	  MayDay::Abort("ito_plasma_physics_lea::compute_diffusion_lfa - should not end up here with an LEA model");
+	}
+
+	// Disables in LEA
+	void update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const override final {
+	  MayDay::Abort("ito_plasma_physics_lea::update_reaction_rates_lfa - should not end up here with an LEA model");
+	}
 
 
       
-    };
+      };
+    }
   }
 }
 

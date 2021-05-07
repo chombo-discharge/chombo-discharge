@@ -12,93 +12,95 @@
 #include "ito_solver.H"
 #include "ito_layout.H"
 
-namespace physics {
-  namespace brownian_walker {
+namespace ChomboDischarge {
+  namespace physics {
+    namespace brownian_walker {
 
-    /*!
-      @brief Class that just solves the brownian_walker equation
-    */
-    class brownian_walker_stepper : public time_stepper {
-    public:
+      /*!
+	@brief Class that just solves the brownian_walker equation
+      */
+      class brownian_walker_stepper : public time_stepper {
+      public:
 
-      brownian_walker_stepper();
-      brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver);
-      ~brownian_walker_stepper();
+	brownian_walker_stepper();
+	brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver);
+	~brownian_walker_stepper();
 
-      // Setup routines
-      void initial_data() override;
-      void allocate() override;
-      void post_initialize() override;
+	// Setup routines
+	void initial_data() override;
+	void allocate() override;
+	void post_initialize() override;
 
-      // Load balancing
-      bool load_balance_realm(const std::string a_realm) const override;
-      void load_balance_boxes(Vector<Vector<int> >&            a_procs,
-			      Vector<Vector<Box> >&            a_boxes,
-			      const std::string                a_realm,
-			      const Vector<DisjointBoxLayout>& a_grids,
-			      const int                        a_lmin,
-			      const int                        a_finest_level) override;
+	// Load balancing
+	bool load_balance_realm(const std::string a_realm) const override;
+	void load_balance_boxes(Vector<Vector<int> >&            a_procs,
+				Vector<Vector<Box> >&            a_boxes,
+				const std::string                a_realm,
+				const Vector<DisjointBoxLayout>& a_grids,
+				const int                        a_lmin,
+				const int                        a_finest_level) override;
 
-      // IO routines
-      void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
-      void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
-      void post_checkpoint_setup() override;
-      int get_num_plot_vars() const override;
-      void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
+	// IO routines
+	void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
+	void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
+	void post_checkpoint_setup() override;
+	int get_num_plot_vars() const override;
+	void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
 
-      // Advance routines
-      void compute_dt(Real& a_dt, time_code& a_timecode) override;
+	// Advance routines
+	void compute_dt(Real& a_dt, time_code& a_timecode) override;
 
-      void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
-      void print_step_report() override;
+	void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
+	void print_step_report() override;
       
-      // Registration routines
-      void register_operators() override;
-      void register_realms() override;
+	// Registration routines
+	void register_operators() override;
+	void register_realms() override;
 
-      // Runtime options
-      void parse_runtime_options() override;
+	// Runtime options
+	void parse_runtime_options() override;
 
-      // Regrid routines
-      bool need_to_regrid() override;
+	// Regrid routines
+	bool need_to_regrid() override;
 
-      void pre_regrid(const int a_lbase, const int a_old_finest_level) override;
-      void deallocate() override;
+	void pre_regrid(const int a_lbase, const int a_old_finest_level) override;
+	void deallocate() override;
 
-      // Pure routines for derived classes
-      void setup_solvers() override;
-      Real advance(const Real a_dt) override;
-      void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
-      void post_regrid() override;
+	// Pure routines for derived classes
+	void setup_solvers() override;
+	Real advance(const Real a_dt) override;
+	void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+	void post_regrid() override;
 
-    protected:
+      protected:
 
-      // Realm
-      std::string m_realm; 
+	// Realm
+	std::string m_realm; 
 
-      // Phase
-      phase::which_phase m_phase;
+	// Phase
+	phase::which_phase m_phase;
 
-      // Load balance or not
-      bool m_load_balance;
+	// Load balance or not
+	bool m_load_balance;
 
-      // Ito solver & species
-      RefCountedPtr<ito_solver>  m_solver;
-      RefCountedPtr<ito_species> m_species;
+	// Ito solver & species
+	RefCountedPtr<ito_solver>  m_solver;
+	RefCountedPtr<ito_species> m_species;
 
-      // Diffusion coefficient and velocity
-      Real m_diffco;
-      Real m_omega;
+	// Diffusion coefficient and velocity
+	Real m_diffco;
+	Real m_omega;
 
-      // Particles per cell
-      int m_ppc;
+	// Particles per cell
+	int m_ppc;
 
-      // Maximum hops and stuff like that
-      Real m_max_cells_hop;
+	// Maximum hops and stuff like that
+	Real m_max_cells_hop;
 
-      void set_velocity();
-      void set_velocity(const int a_level);
-    };
+	void set_velocity();
+	void set_velocity(const int a_level);
+      };
+    }
   }
 }
 #endif

@@ -11,67 +11,69 @@
 #include "time_stepper.H"
 #include "rte_solver.H"
 
-namespace physics {
-  namespace rte {
+namespace ChomboDischarge {
+  namespace physics {
+    namespace rte {
 
-    /*!
-      @brief Class that just solves the rte equation using the rte_solver advance method
-    */
-    template <class T>
-    class rte_stepper : public time_stepper {
-    public:
-      rte_stepper();
-      ~rte_stepper();
+      /*!
+	@brief Class that just solves the rte equation using the rte_solver advance method
+      */
+      template <class T>
+      class rte_stepper : public time_stepper {
+      public:
+	rte_stepper();
+	~rte_stepper();
 
-      // Stuff below here is derived from time_stepper.
-      // ----------------------------------------------
-      void setup_solvers() override;
-      void initial_data() override;
-      void allocate() override;
-      void post_initialize() override;
+	// Stuff below here is derived from time_stepper.
+	// ----------------------------------------------
+	void setup_solvers() override;
+	void initial_data() override;
+	void allocate() override;
+	void post_initialize() override;
 
-      // IO routines
-      void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
-      void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
-      void post_checkpoint_setup() override;
-      int get_num_plot_vars() const override;
-      void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
+	// IO routines
+	void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
+	void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
+	void post_checkpoint_setup() override;
+	int get_num_plot_vars() const override;
+	void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
 
-      // Advance routines
-      void compute_dt(Real& a_dt, time_code& a_timecode) override;
-      Real advance(const Real a_dt) override;
-      void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
-      void print_step_report() override;
+	// Advance routines
+	void compute_dt(Real& a_dt, time_code& a_timecode) override;
+	Real advance(const Real a_dt) override;
+	void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
+	void print_step_report() override;
 
-      // Runtime options
-      void parse_runtime_options() override;
+	// Runtime options
+	void parse_runtime_options() override;
 
-      // Registration routines
-      void register_realms() override;
-      void register_operators() override;
+	// Registration routines
+	void register_realms() override;
+	void register_operators() override;
 
-      // Regrid routines
-      bool need_to_regrid() override;
-      void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
-      void deallocate() override;
-      void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
-      void post_regrid() override;
+	// Regrid routines
+	bool need_to_regrid() override;
+	void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
+	void deallocate() override;
+	void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+	void post_regrid() override;
 
-    protected:
+      protected:
 
-      std::string m_realm;
+	std::string m_realm;
 
-      // Solver and species
-      RefCountedPtr<rte_solver>  m_solver;
-      RefCountedPtr<rte_species> m_species;
+	// Solver and species
+	RefCountedPtr<rte_solver>  m_solver;
+	RefCountedPtr<rte_species> m_species;
 
-      // Stuff for source term
-      Real     m_blob_radius;    // Gaussian radius
-      Real     m_blob_amplitude; // Gaussian amplitude
-      RealVect m_blob_center;    // Center
+	// Stuff for source term
+	Real     m_blob_radius;    // Gaussian radius
+	Real     m_blob_amplitude; // Gaussian amplitude
+	RealVect m_blob_center;    // Center
 
-      void set_gaussian_source();
-    };
+	void set_gaussian_source();
+      };
+    }
   }
 }
 
