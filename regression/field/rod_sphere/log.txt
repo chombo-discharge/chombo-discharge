@@ -1,0 +1,979 @@
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
+Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/TiledMeshRefine.cpp ...
+Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.cpp ...
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:14:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:66:40: error: ‘nwoebquadcfinterp’ was not declared in this scope
+                    const RefCountedPtr<nwoebquadcfinterp>&              a_quadCFI,
+                                        ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:66:40: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:38:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:14:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/nwoebquadcfinterp.H:47:9: note:   ‘ChomboDischarge::nwoebquadcfinterp’
+   class nwoebquadcfinterp
+         ^~~~~~~~~~~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:14:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:66:57: error: template argument 1 is invalid
+                    const RefCountedPtr<nwoebquadcfinterp>&              a_quadCFI,
+                                                         ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:493:17: error: ‘nwoebquadcfinterp’ was not declared in this scope
+   RefCountedPtr<nwoebquadcfinterp>  m_interpWithCoarser;
+                 ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:493:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:38:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:14:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/nwoebquadcfinterp.H:47:9: note:   ‘ChomboDischarge::nwoebquadcfinterp’
+   class nwoebquadcfinterp
+         ^~~~~~~~~~~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:14:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:493:34: error: template argument 1 is invalid
+   RefCountedPtr<nwoebquadcfinterp>  m_interpWithCoarser;
+                                  ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:18:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.H:52:57: error: ‘nwoebquadcfinterp’ was not declared in this scope
+                              const Vector<RefCountedPtr<nwoebquadcfinterp> >&             a_quadCFI,
+                                                         ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.H:52:57: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:38:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:14:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/nwoebquadcfinterp.H:47:9: note:   ‘ChomboDischarge::nwoebquadcfinterp’
+   class nwoebquadcfinterp
+         ^~~~~~~~~~~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:18:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.H:52:74: error: template argument 1 is invalid
+                              const Vector<RefCountedPtr<nwoebquadcfinterp> >&             a_quadCFI,
+                                                                          ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.H:52:76: error: template argument 1 is invalid
+                              const Vector<RefCountedPtr<nwoebquadcfinterp> >&             a_quadCFI,
+                                                                            ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.H:158:24: error: ‘nwoebquadcfinterp’ was not declared in this scope
+   Vector<RefCountedPtr<nwoebquadcfinterp> >            m_quadCFI;
+                        ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.H:158:24: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:38:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:14:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/nwoebquadcfinterp.H:47:9: note:   ‘ChomboDischarge::nwoebquadcfinterp’
+   class nwoebquadcfinterp
+         ^~~~~~~~~~~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:18:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.H:158:41: error: template argument 1 is invalid
+   Vector<RefCountedPtr<nwoebquadcfinterp> >            m_quadCFI;
+                                         ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.H:158:43: error: template argument 1 is invalid
+   Vector<RefCountedPtr<nwoebquadcfinterp> >            m_quadCFI;
+                                           ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:96:52: error: ‘nwoebquadcfinterp’ was not declared in this scope
+                         const Vector<RefCountedPtr<nwoebquadcfinterp> >&            a_quadCFI,
+                                                    ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:96:52: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:38:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:14:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/nwoebquadcfinterp.H:47:9: note:   ‘ChomboDischarge::nwoebquadcfinterp’
+   class nwoebquadcfinterp
+         ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:96:69: error: template argument 1 is invalid
+                         const Vector<RefCountedPtr<nwoebquadcfinterp> >&            a_quadCFI,
+                                                                     ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:96:71: error: template argument 1 is invalid
+                         const Vector<RefCountedPtr<nwoebquadcfinterp> >&            a_quadCFI,
+                                                                       ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp: In member function ‘virtual nwoebconductivityop* nwoebconductivityopfactory::MGnewOp(const ProblemDomain&, int, bool)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:272:17: error: ‘nwoebquadcfinterp’ was not declared in this scope
+   RefCountedPtr<nwoebquadcfinterp> quadCFI; //only defined if on an amr level
+                 ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:272:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:38:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:14:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/nwoebquadcfinterp.H:47:9: note:   ‘ChomboDischarge::nwoebquadcfinterp’
+   class nwoebquadcfinterp
+         ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:272:34: error: template argument 1 is invalid
+   RefCountedPtr<nwoebquadcfinterp> quadCFI; //only defined if on an amr level
+                                  ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:290:35: error: invalid types ‘int[int]’ for array subscript
+     quadCFI        = m_quadCFI[ref];
+                                   ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp: In member function ‘virtual nwoebconductivityop* nwoebconductivityopfactory::AMRnewOp(const ProblemDomain&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityopfactory.cpp:434:93: error: invalid types ‘int[int]’ for array subscript
+   newOp = new nwoebconductivityop(eblgFine, eblgMGLevel, eblgCoar, eblgCoarMG, m_quadCFI[ref],
+                                                                                             ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:85:44: error: ‘amr_mesh’ was not declared in this scope
+   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                            ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:85:44: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:85:52: error: template argument 1 is invalid
+   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                                    ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:118:17: error: ‘amr_mesh’ was not declared in this scope
+   RefCountedPtr<amr_mesh> m_amr;
+                 ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:118:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:118:25: error: template argument 1 is invalid
+   RefCountedPtr<amr_mesh> m_amr;
+                         ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:35:23: error: ‘amr_mesh’ was not declared in this scope
+   const RefCountedPtr<amr_mesh>&               a_amr,
+                       ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:35:23: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:35:31: error: template argument 1 is invalid
+   const RefCountedPtr<amr_mesh>&               a_amr,
+                               ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:93:17: error: ‘amr_mesh’ was not declared in this scope
+   RefCountedPtr<amr_mesh> m_amr;
+                 ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:93:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:93:25: error: template argument 1 is invalid
+   RefCountedPtr<amr_mesh> m_amr;
+                         ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:378:36: error: ‘amr_mesh’ was not declared in this scope
+   void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                    ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:378:36: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:378:44: error: template argument 1 is invalid
+   void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                            ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.cpp:8:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:85:44: error: ‘amr_mesh’ was not declared in this scope
+   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                            ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:85:44: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.cpp:8:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:85:52: error: template argument 1 is invalid
+   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                                    ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:118:17: error: ‘amr_mesh’ was not declared in this scope
+   RefCountedPtr<amr_mesh> m_amr;
+                 ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:118:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.cpp:8:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:118:25: error: template argument 1 is invalid
+   RefCountedPtr<amr_mesh> m_amr;
+                         ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.cpp:11:48: error: ‘amr_mesh’ was not declared in this scope
+ void time_stepper::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+                                                ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.cpp:11:48: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.cpp:11:56: error: template argument 1 is invalid
+ void time_stepper::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+                                                        ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.cpp: In member function ‘virtual Vector<long int> time_stepper::get_checkpoint_loads(std::__cxx11::string, int) const’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.cpp:60:39: error: base operand of ‘->’ is not a pointer
+   const DisjointBoxLayout& dbl = m_amr->get_grids(a_realm)[a_level];
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:26:29: error: ‘amr_mesh’ was not declared in this scope
+         const RefCountedPtr<amr_mesh>&               a_amr,
+                             ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:26:29: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:26:37: error: template argument 1 is invalid
+         const RefCountedPtr<amr_mesh>&               a_amr,
+                                     ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In constructor ‘driver::driver(const RefCountedPtr<computational_geometry>&, const RefCountedPtr<time_stepper>&, const int&, const RefCountedPtr<cell_tagger>&, const RefCountedPtr<geo_coarsener>&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:38:8: error: base operand of ‘->’ is not a pointer
+   m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:39:8: error: base operand of ‘->’ is not a pointer
+   m_amr->build_domains();                // Build domains and resolutions, nothing else
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:53:13: error: ‘realm’ has not been declared
+   m_realm = realm::primal;
+             ^~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:54:8: error: base operand of ‘->’ is not a pointer
+   m_amr->register_realm(m_realm);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:55:8: error: base operand of ‘->’ is not a pointer
+   m_amr->register_operator(s_eb_pwl_interp, m_realm, phase::gas); // For output
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:55:28: error: ‘s_eb_pwl_interp’ was not declared in this scope
+   m_amr->register_operator(s_eb_pwl_interp, m_realm, phase::gas); // For output
+                            ^~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:55:28: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/realm.H:11:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:24,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/phase_realm.H:46:28: note:   ‘ChomboDischarge::s_eb_pwl_interp’
+   static const std::string s_eb_pwl_interp   = "eb_pwl_interp";
+                            ^~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘int driver::get_num_plot_vars() const’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:72:33: error: base operand of ‘->’ is not a pointer
+     const int num_realms = m_amr->get_realms().size();
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘Vector<std::__cxx11::basic_string<char> > driver::get_plotvar_names() const’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:91:33: error: base operand of ‘->’ is not a pointer
+     for (const auto& str : m_amr->get_realms()){
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::allocate_internals()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:111:33: error: base operand of ‘->’ is not a pointer
+   const int finest_level = m_amr->get_finest_level();
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:117:41: error: base operand of ‘->’ is not a pointer
+     const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+                                         ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::cache_tags(const EBAMRTags&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:134:34: error: base operand of ‘->’ is not a pointer
+   const int finest_level  = m_amr->get_finest_level();
+                                  ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:137:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(m_cached_tags, m_realm, ncomp, ghost);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:141:41: error: base operand of ‘->’ is not a pointer
+     const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+                                         ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::get_geom_tags()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:172:29: error: base operand of ‘->’ is not a pointer
+   const int maxdepth = m_amr->get_max_amr_depth();
+                             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:182:41: error: base operand of ‘->’ is not a pointer
+     const ProblemDomain& cur_dom = m_amr->get_domains()[lvl];
+                                         ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:255:50: error: base operand of ‘->’ is not a pointer
+     m_geocoarsen->coarsen_tags(m_geom_tags, m_amr->get_dx(), m_amr->get_prob_lo());
+                                                  ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:255:67: error: base operand of ‘->’ is not a pointer
+     m_geocoarsen->coarsen_tags(m_geom_tags, m_amr->get_dx(), m_amr->get_prob_lo());
+                                                                   ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:260:27: error: base operand of ‘->’ is not a pointer
+   const int growth = m_amr->get_irreg_growth();
+                           ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::get_loads_and_boxes(long long int&, long long int&, long long int&, long long int&, long long int&, long long int&, Vector<long long int>&, Vector<long long int>&, Vector<long long int>&, Vector<long long int>&, const int&, const Vector<DisjointBoxLayout>&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:295:26: error: base operand of ‘->’ is not a pointer
+   const int ghost = m_amr->get_num_ghost();
+                          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::grid_report()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:379:49: error: base operand of ‘->’ is not a pointer
+   const int finest_level                 = m_amr->get_finest_level();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:380:49: error: base operand of ‘->’ is not a pointer
+   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:381:49: error: base operand of ‘->’ is not a pointer
+   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:382:49: error: base operand of ‘->’ is not a pointer
+   const Vector<Real> dx                  = m_amr->get_dx();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:421:46: error: base operand of ‘->’ is not a pointer
+   const ProblemDomain coarsest_domain = m_amr->get_domains()[0];
+                                              ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:422:46: error: base operand of ‘->’ is not a pointer
+   const ProblemDomain finest_domain   = m_amr->get_domains()[finest_level];
+                                              ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:425:29: error: base operand of ‘->’ is not a pointer
+   Vector<int> refRat = m_amr->get_ref_rat();
+                             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:432:48: error: base operand of ‘->’ is not a pointer
+   const std::vector<std::string> realms = m_amr->get_realms();
+                                                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:445:15: error: base operand of ‘->’ is not a pointer
+          m_amr->get_grids(str));
+               ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:486:15: error: base operand of ‘->’ is not a pointer
+          m_amr->get_grids(str));
+               ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::regrid(int, int, bool)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:578:42: error: base operand of ‘->’ is not a pointer
+   m_timestepper->pre_regrid(a_lmin, m_amr->get_finest_level());
+                                          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:587:37: error: base operand of ‘->’ is not a pointer
+   const int old_finest_level = m_amr->get_finest_level();
+                                     ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:588:8: error: base operand of ‘->’ is not a pointer
+   m_amr->regrid_amr(tags, a_lmin, a_lmax);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:589:37: error: base operand of ‘->’ is not a pointer
+   const int new_finest_level = m_amr->get_finest_level();
+                                     ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:592:49: error: base operand of ‘->’ is not a pointer
+   const std::vector<std::string>& realms = m_amr->get_realms();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:599:65: error: base operand of ‘->’ is not a pointer
+       m_timestepper->load_balance_boxes(procs, boxes, str, m_amr->get_proxy_grids(), a_lmin, new_finest_level);
+                                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:601:12: error: base operand of ‘->’ is not a pointer
+       m_amr->regrid_realm(str, procs, boxes, a_lmin);
+            ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:608:8: error: base operand of ‘->’ is not a pointer
+   m_amr->regrid_operators(a_lmin, a_lmax, regsize);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::regrid_internals(int, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:647:41: error: base operand of ‘->’ is not a pointer
+     const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+                                         ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::run(Real, Real, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:741:38: error: base operand of ‘->’ is not a pointer
+       const int max_sim_depth = m_amr->get_max_sim_depth();
+                                      ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:742:38: error: base operand of ‘->’ is not a pointer
+       const int max_amr_depth = m_amr->get_max_amr_depth();
+                                      ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:755:26: error: base operand of ‘->’ is not a pointer
+    const int lmax = m_amr->get_finest_level();
+                          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:871:12: error: base operand of ‘->’ is not a pointer
+       m_amr->parse_runtime_options();
+            ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::parse_geometry_generation()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1047:49: error: base operand of ‘->’ is not a pointer
+     computational_geometry::s_ScanDomain = m_amr->get_domains()[m_geo_scan_level];
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::parse_geo_refinement()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1064:30: error: base operand of ‘->’ is not a pointer
+   const int max_depth = m_amr->get_max_amr_depth();
+                              ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: At global scope:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1172:42: error: ‘amr_mesh’ was not declared in this scope
+ void driver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+                                          ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1172:42: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:8:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1172:50: error: template argument 1 is invalid
+ void driver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+                                                  ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::set_amr(const int&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1179:8: error: base operand of ‘->’ is not a pointer
+   m_amr->set_mfis(m_compgeom->get_mfis());
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::setup_geometry_only()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1231:37: error: base operand of ‘->’ is not a pointer
+   m_compgeom->build_geometries(m_amr->get_finest_domain(),
+                                     ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1232:16: error: base operand of ‘->’ is not a pointer
+           m_amr->get_prob_lo(),
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1233:16: error: base operand of ‘->’ is not a pointer
+           m_amr->get_finest_dx(),
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1234:16: error: base operand of ‘->’ is not a pointer
+           m_amr->get_max_ebis_box_size());
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1239:8: error: base operand of ‘->’ is not a pointer
+   m_amr->set_baseif(phase::gas,   m_compgeom->get_gas_if());
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1240:8: error: base operand of ‘->’ is not a pointer
+   m_amr->set_baseif(phase::solid, m_compgeom->get_sol_if());
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1259:8: error: base operand of ‘->’ is not a pointer
+   m_amr->regrid_amr(m_geom_tags, a_lmin, a_lmax);       // Regrid using geometric tags for now
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::setup_fresh(int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1286:37: error: base operand of ‘->’ is not a pointer
+   m_compgeom->build_geometries(m_amr->get_finest_domain(),
+                                     ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1287:16: error: base operand of ‘->’ is not a pointer
+           m_amr->get_prob_lo(),
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1288:16: error: base operand of ‘->’ is not a pointer
+           m_amr->get_finest_dx(),
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1289:16: error: base operand of ‘->’ is not a pointer
+           m_amr->get_max_ebis_box_size());
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1297:8: error: base operand of ‘->’ is not a pointer
+   m_amr->set_baseif(phase::gas,   m_compgeom->get_gas_if());
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1298:8: error: base operand of ‘->’ is not a pointer
+   m_amr->set_baseif(phase::solid, m_compgeom->get_sol_if());
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1309:8: error: base operand of ‘->’ is not a pointer
+   m_amr->regrid_amr(m_geom_tags, lmin, m_geom_tag_depth, m_geom_tag_depth);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1310:25: error: base operand of ‘->’ is not a pointer
+   const int lmax = m_amr->get_finest_level();
+                         ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1322:8: error: base operand of ‘->’ is not a pointer
+   m_amr->regrid_operators(lmin, lmax, regsize);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1331:31: error: base operand of ‘->’ is not a pointer
+   for (const auto& str : m_amr->get_realms()){
+                               ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1338:29: error: base operand of ‘->’ is not a pointer
+       const int lmax = m_amr->get_finest_level();
+                             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1340:65: error: base operand of ‘->’ is not a pointer
+       m_timestepper->load_balance_boxes(procs, boxes, str, m_amr->get_proxy_grids(), lmin, lmax);
+                                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1342:12: error: base operand of ‘->’ is not a pointer
+       m_amr->regrid_realm(str, procs, boxes, lmin);
+            ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1345:8: error: base operand of ‘->’ is not a pointer
+   m_amr->regrid_operators(lmin, lmax, regsize);                        // Regrid operators again.
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1369:27: error: base operand of ‘->’ is not a pointer
+     const int lmax = m_amr->get_finest_level();
+                           ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::setup_for_restart(int, std::__cxx11::string)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1390:37: error: base operand of ‘->’ is not a pointer
+   m_compgeom->build_geometries(m_amr->get_finest_domain(),
+                                     ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1391:16: error: base operand of ‘->’ is not a pointer
+           m_amr->get_prob_lo(),
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1392:16: error: base operand of ‘->’ is not a pointer
+           m_amr->get_finest_dx(),
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1393:16: error: base operand of ‘->’ is not a pointer
+           m_amr->get_max_ebis_box_size());
+                ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1402:8: error: base operand of ‘->’ is not a pointer
+   m_amr->set_baseif(phase::gas,   m_compgeom->get_gas_if());
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1403:8: error: base operand of ‘->’ is not a pointer
+   m_amr->set_baseif(phase::solid, m_compgeom->get_sol_if());
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1427:27: error: base operand of ‘->’ is not a pointer
+     const int lmax = m_amr->get_finest_level();
+                           ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::step_report(Real, Real, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1474:49: error: base operand of ‘->’ is not a pointer
+   const int finest_level                 = m_amr->get_finest_level();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1475:49: error: base operand of ‘->’ is not a pointer
+   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1476:49: error: base operand of ‘->’ is not a pointer
+   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1477:49: error: base operand of ‘->’ is not a pointer
+   const Vector<Real>& dx                 = m_amr->get_dx();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘int driver::get_finest_tag_level(const EBAMRTags&) const’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1605:41: error: base operand of ‘->’ is not a pointer
+     const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+                                         ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘bool driver::tag_cells(Vector<IntVectSet>&, EBAMRTags&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1636:34: error: base operand of ‘->’ is not a pointer
+   const int finest_level  = m_amr->get_finest_level();
+                                  ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1669:21: error: base operand of ‘->’ is not a pointer
+       if(lvl < m_amr->get_max_amr_depth()){ // Geometric tags don't exist on amr_mesh.m_max_amr_depth
+                     ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::write_computational_loads()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1746:29: error: base operand of ‘->’ is not a pointer
+   for (const auto& r : m_amr->get_realms()){
+                             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1750:35: error: base operand of ‘->’ is not a pointer
+     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+                                   ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1753:43: error: base operand of ‘->’ is not a pointer
+       const DisjointBoxLayout& dbl = m_amr->get_grids(r)[lvl];
+                                           ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::write_geometry()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1809:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(output, m_realm, phase::gas, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1822:49: error: base operand of ‘->’ is not a pointer
+   const int finest_level                 = m_amr->get_finest_level();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1823:49: error: base operand of ‘->’ is not a pointer
+   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1824:49: error: base operand of ‘->’ is not a pointer
+   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1825:49: error: base operand of ‘->’ is not a pointer
+   const Vector<Real>& dx                 = m_amr->get_dx();
+                                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1826:49: error: base operand of ‘->’ is not a pointer
+   const Vector<int>& ref_rat             = m_amr->get_ref_rat();
+                                                 ^~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14:0,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:85:44: error: ‘amr_mesh’ was not declared in this scope
+   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                            ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:85:44: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14:0,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:85:52: error: template argument 1 is invalid
+   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                                    ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:118:17: error: ‘amr_mesh’ was not declared in this scope
+   RefCountedPtr<amr_mesh> m_amr;
+                 ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:118:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14:0,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:118:25: error: template argument 1 is invalid
+   RefCountedPtr<amr_mesh> m_amr;
+                         ^
+In file included from main.cpp:1:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:35:23: error: ‘amr_mesh’ was not declared in this scope
+   const RefCountedPtr<amr_mesh>&               a_amr,
+                       ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:35:23: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from main.cpp:1:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:35:31: error: template argument 1 is invalid
+   const RefCountedPtr<amr_mesh>&               a_amr,
+                               ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:93:17: error: ‘amr_mesh’ was not declared in this scope
+   RefCountedPtr<amr_mesh> m_amr;
+                 ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:93:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from main.cpp:1:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:93:25: error: template argument 1 is invalid
+   RefCountedPtr<amr_mesh> m_amr;
+                         ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1829:8: error: base operand of ‘->’ is not a pointer
+   m_amr->alias(output_ptr, output);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::write_plot_file(std::__cxx11::string)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1937:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(output,  m_realm, phase::gas, ncomp);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1938:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(scratch, m_realm, phase::gas, 1);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1958:54: error: base operand of ‘->’ is not a pointer
+   Vector<LevelData<EBCellFAB>* > output_ptr(1 + m_amr->get_finest_level());
+                                                      ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1959:8: error: base operand of ‘->’ is not a pointer
+   m_amr->alias(output_ptr, output);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1964:23: error: base operand of ‘->’ is not a pointer
+     plot_depth = m_amr->get_finest_level();
+                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1967:45: error: base operand of ‘->’ is not a pointer
+     plot_depth = Min(m_max_plot_depth, m_amr->get_finest_level());
+                                             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1974:35: error: base operand of ‘->’ is not a pointer
+     for (int lvl = 1; lvl <= m_amr->get_finest_level(); lvl++){
+                                   ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:1982:12: error: base operand of ‘->’ is not a pointer
+       m_amr->interp_ghost(fineAlias, coarAlias, lvl, m_realm, phase::gas);
+            ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2001:13: error: base operand of ‘->’ is not a pointer
+        m_amr->get_grids(m_realm),
+             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2004:13: error: base operand of ‘->’ is not a pointer
+        m_amr->get_domains()[0],
+             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2005:13: error: base operand of ‘->’ is not a pointer
+        m_amr->get_dx()[0],
+             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2008:13: error: base operand of ‘->’ is not a pointer
+        m_amr->get_ref_rat(),
+             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::write_tags(EBAMRCellData&, int&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2044:8: error: base operand of ‘->’ is not a pointer
+   m_amr->allocate(tags, m_realm, phase::gas, 1);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2048:33: error: base operand of ‘->’ is not a pointer
+   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2049:41: error: base operand of ‘->’ is not a pointer
+     const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+                                         ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2050:41: error: base operand of ‘->’ is not a pointer
+     const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[lvl];
+                                         ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2071:33: error: base operand of ‘->’ is not a pointer
+   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::write_ranks(EBAMRCellData&, int&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2084:29: error: base operand of ‘->’ is not a pointer
+   for (const auto& r : m_amr->get_realms()){
+                             ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2086:10: error: base operand of ‘->’ is not a pointer
+     m_amr->allocate(scratch, r, phase::gas, 1);
+          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2092:35: error: base operand of ‘->’ is not a pointer
+     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+                                   ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::write_levelset(EBAMRCellData&, int&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2109:33: error: base operand of ‘->’ is not a pointer
+   const RealVect prob_lo = m_amr->get_prob_lo();
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2111:33: error: base operand of ‘->’ is not a pointer
+   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2112:41: error: base operand of ‘->’ is not a pointer
+     const DisjointBoxLayout& dbl = m_amr->get_grids(a_output.get_realm())[lvl];
+                                         ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2113:26: error: base operand of ‘->’ is not a pointer
+     const Real dx = m_amr->get_dx()[lvl];
+                          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::write_checkpoint_file()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2143:33: error: base operand of ‘->’ is not a pointer
+   const int finest_level = m_amr->get_finest_level();
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2151:39: error: base operand of ‘->’ is not a pointer
+   header.m_real["coarsest_dx"] = m_amr->get_dx()[0];
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2158:22: error: base operand of ‘->’ is not a pointer
+   for (auto r : m_amr->get_realms()){
+                      ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2181:28: error: base operand of ‘->’ is not a pointer
+     write(handle_out, m_amr->get_grids(m_realm)[lvl]); // write AMR grids
+                            ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:378:36: error: ‘amr_mesh’ was not declared in this scope
+   void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                    ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:378:36: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from main.cpp:1:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:378:44: error: template argument 1 is invalid
+   void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                            ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::write_checkpoint_tags(HDF5Handle&, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2217:27: error: base operand of ‘->’ is not a pointer
+   EBCellFactory fact(m_amr->get_ebisl(m_realm, phase::gas)[a_level]);
+                           ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2218:37: error: base operand of ‘->’ is not a pointer
+   LevelData<EBCellFAB> scratch(m_amr->get_grids(m_realm)[a_level], 1, 3*IntVect::Unit, fact);
+                                     ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2222:39: error: base operand of ‘->’ is not a pointer
+   const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2223:39: error: base operand of ‘->’ is not a pointer
+   const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[a_level];
+                                       ^~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:11:0,
+                 from main.cpp:2:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:131:44: error: ‘amr_mesh’ was not declared in this scope
+   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                            ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:131:44: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:11:0,
+                 from main.cpp:2:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:131:52: error: template argument 1 is invalid
+   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                                    ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::write_checkpoint_realm_loads(HDF5Handle&, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2250:39: error: base operand of ‘->’ is not a pointer
+   const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2251:39: error: base operand of ‘->’ is not a pointer
+   const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[a_level];
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:309:17: error: ‘amr_mesh’ was not declared in this scope
+   RefCountedPtr<amr_mesh> m_amr;
+                 ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:309:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver_multigrid.H:11:0,
+                 from main.cpp:2:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/field_solver/field_solver.H:309:25: error: template argument 1 is invalid
+   RefCountedPtr<amr_mesh> m_amr;
+                         ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2257:22: error: base operand of ‘->’ is not a pointer
+   for (auto r : m_amr->get_realms()){
+                      ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::read_checkpoint_file(const string&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2303:34: error: base operand of ‘->’ is not a pointer
+   for (const auto& irealm : m_amr->get_realms()){
+                                  ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2317:27: error: base operand of ‘->’ is not a pointer
+   if(!coarsest_dx == m_amr->get_dx()[0]){
+                           ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2372:80: error: ‘realm’ has not been declared
+     cur_loads = (found_checked_loads) ? chk_loads.at(cur_realm) : chk_loads.at(realm::primal);
+                                                                                ^~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2377:8: error: base operand of ‘->’ is not a pointer
+   m_amr->set_finest_level(finest_level);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2378:8: error: base operand of ‘->’ is not a pointer
+   m_amr->set_grids(boxes, sim_loads);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2384:8: error: base operand of ‘->’ is not a pointer
+   m_amr->regrid_operators(base_level, finest_level, regsize);
+        ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2393:33: error: base operand of ‘->’ is not a pointer
+   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+                                 ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp: In member function ‘void driver::read_checkpoint_level(HDF5Handle&, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2413:39: error: base operand of ‘->’ is not a pointer
+   const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+                                       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.cpp:2414:39: error: base operand of ‘->’ is not a pointer
+   const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[a_level];
+                                       ^~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:13:0,
+                 from main.cpp:4:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/sigma_solver/sigma_solver.H:78:44: error: ‘amr_mesh’ was not declared in this scope
+   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                            ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/sigma_solver/sigma_solver.H:78:44: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:13:0,
+                 from main.cpp:4:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/sigma_solver/sigma_solver.H:78:52: error: template argument 1 is invalid
+   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+                                                    ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/sigma_solver/sigma_solver.H:176:17: error: ‘amr_mesh’ was not declared in this scope
+   RefCountedPtr<amr_mesh> m_amr;
+                 ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/sigma_solver/sigma_solver.H:176:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:13:0,
+                 from main.cpp:4:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/sigma_solver/sigma_solver.H:176:25: error: template argument 1 is invalid
+   RefCountedPtr<amr_mesh> m_amr;
+                         ^
+In file included from main.cpp:4:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:76:7: error: ‘box_sorting’ does not name a type
+       box_sorting m_boxsort;
+       ^~~~~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:89:0,
+                 from main.cpp:4:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In constructor ‘physics::poisson::field_stepper<T>::field_stepper()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:40:2: error: ‘m_boxsort’ was not declared in this scope
+  m_boxsort = box_sorting::none;
+  ^~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:40:14: error: ‘box_sorting’ has not been declared
+  m_boxsort = box_sorting::none;
+              ^~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:43:2: error: ‘m_boxsort’ was not declared in this scope
+  m_boxsort = box_sorting::std;
+  ^~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:43:14: error: ‘box_sorting’ has not been declared
+  m_boxsort = box_sorting::std;
+              ^~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:46:2: error: ‘m_boxsort’ was not declared in this scope
+  m_boxsort = box_sorting::shuffle;
+  ^~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:46:14: error: ‘box_sorting’ has not been declared
+  m_boxsort = box_sorting::shuffle;
+              ^~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:49:2: error: ‘m_boxsort’ was not declared in this scope
+  m_boxsort = box_sorting::morton;
+  ^~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:49:14: error: ‘box_sorting’ has not been declared
+  m_boxsort = box_sorting::morton;
+              ^~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::register_realms()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:90:12: error: base operand of ‘->’ is not a pointer
+       m_amr->register_realm(m_realm);
+            ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H: In member function ‘void physics::poisson::field_stepper<T>::load_balance_boxes(Vector<Vector<int> >&, Vector<Vector<Box> >&, std::__cxx11::string, const Vector<DisjointBoxLayout>&, int, int)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:220:7: error: base operand of ‘->’ is not a pointer
+  m_amr->allocate(dummy1, m_realm, 1);
+       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:221:7: error: base operand of ‘->’ is not a pointer
+  m_amr->allocate(dummy2, m_realm, 1);
+       ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:223:46: error: base operand of ‘->’ is not a pointer
+  const Vector<ProblemDomain>& domains = m_amr->get_domains();
+                                              ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:228:7: error: base operand of ‘->’ is not a pointer
+  m_amr->regrid_operators(a_lmin, a_finest_level, 1);
+       ^~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepper.H:89:0,
+                 from main.cpp:4:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:259:4: error: ‘load_balance’ has not been declared
+    load_balance::sort(a_boxes[lvl], loads, m_boxsort);
+    ^~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:259:44: error: ‘m_boxsort’ was not declared in this scope
+    load_balance::sort(a_boxes[lvl], loads, m_boxsort);
+                                            ^~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/physics/field/field_stepperI.H:268:4: error: ‘load_balance’ has not been declared
+    load_balance::make_balance(a_procs[lvl], lloads, a_boxes[lvl]);
+    ^~~~~~~~~~~~
+main.cpp: In function ‘int main(int, char**)’:
+main.cpp:21:17: error: ‘amr_mesh’ was not declared in this scope
+   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
+                 ^~~~~~~~
+main.cpp:21:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/time_stepper.H:12:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/driver/driver.H:14,
+                 from main.cpp:1:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/amr_mesh.H:46:9: note:   ‘ChomboDischarge::amr_mesh’
+   class amr_mesh {
+         ^~~~~~~~
+main.cpp:21:25: error: template argument 1 is invalid
+   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
+                         ^
+main.cpp:21:74: error: type/value mismatch at argument 1 in template parameter list for ‘template<class T, class OP> class RefCountedPtr’
+   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
+                                                                          ^
+main.cpp:21:74: note:   expected a type, got ‘amr_mesh’
+main.cpp:21:81: error: expected type-specifier before ‘amr_mesh’
+   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
+                                                                                 ^~~~~~~~
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:517: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/nwoebconductivityopfactory.o' failed
+make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/nwoebconductivityopfactory.o] Error 1
+make[1]: *** Waiting for unfinished jobs....
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:517: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/time_stepper.o' failed
+make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/time_stepper.o] Error 1
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:14:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:66:40: error: ‘nwoebquadcfinterp’ was not declared in this scope
+                    const RefCountedPtr<nwoebquadcfinterp>&              a_quadCFI,
+                                        ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:66:40: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:38:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:14:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/nwoebquadcfinterp.H:47:9: note:   ‘ChomboDischarge::nwoebquadcfinterp’
+   class nwoebquadcfinterp
+         ^~~~~~~~~~~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:14:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:66:57: error: template argument 1 is invalid
+                    const RefCountedPtr<nwoebquadcfinterp>&              a_quadCFI,
+                                                         ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:493:17: error: ‘nwoebquadcfinterp’ was not declared in this scope
+   RefCountedPtr<nwoebquadcfinterp>  m_interpWithCoarser;
+                 ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:493:17: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:38:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:14:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/nwoebquadcfinterp.H:47:9: note:   ‘ChomboDischarge::nwoebquadcfinterp’
+   class nwoebquadcfinterp
+         ^~~~~~~~~~~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:14:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:493:34: error: template argument 1 is invalid
+   RefCountedPtr<nwoebquadcfinterp>  m_interpWithCoarser;
+                                  ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:42:41: error: ‘nwoebquadcfinterp’ was not declared in this scope
+                     const RefCountedPtr<nwoebquadcfinterp>&              a_quadCFI,
+                                         ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:42:41: note: suggested alternative:
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.H:38:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:14:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/amr_mesh/nwoebquadcfinterp.H:47:9: note:   ‘ChomboDischarge::nwoebquadcfinterp’
+   class nwoebquadcfinterp
+         ^~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:42:58: error: template argument 1 is invalid
+                     const RefCountedPtr<nwoebquadcfinterp>&              a_quadCFI,
+                                                          ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp: In member function ‘virtual void nwoebconductivityop::applyOp(LevelData<EBCellFAB>&, const LevelData<EBCellFAB>&, const LevelData<EBCellFAB>*, const bool&, const bool&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:724:30: error: base operand of ‘->’ is not a pointer
+           m_interpWithCoarser->coarseFineInterpH(phi,  0, 0, 1);
+                              ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:728:30: error: base operand of ‘->’ is not a pointer
+           m_interpWithCoarser->coarseFineInterp(phi, *a_phiCoar,  0, 0, 1);
+                              ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp: In member function ‘void nwoebconductivityop::homogeneousCFInterp(LevelData<EBCellFAB>&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:1141:26: error: base operand of ‘->’ is not a pointer
+       m_interpWithCoarser->coarseFineInterpH(a_phif,  0, 0, 1);
+                          ^~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp: In member function ‘void nwoebconductivityop::incrementFRFine(EBFastFR&, const LevelData<EBCellFAB>&, const LevelData<EBCellFAB>&, AMRLevelOp<LevelData<EBCellFAB> >*)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/src/elliptic/nwoebconductivityop.cpp:1629:35: error: base operand of ‘->’ is not a pointer
+   finerEBAMROp.m_interpWithCoarser->coarseFineInterp(phiFine, a_phi, 0, 0, 1);
+                                   ^~
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:517: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/driver.o' failed
+make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/driver.o] Error 1
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:517: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/main.o' failed
+make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/main.o] Error 1
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:517: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/nwoebconductivityop.o' failed
+make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/nwoebconductivityop.o] Error 1
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:425: recipe for target 'main' failed
+make: *** [main] Error 2

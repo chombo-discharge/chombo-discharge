@@ -5,81 +5,70 @@
   @date   Aug. 2017
 */
 
-
-#ifndef _CENTROID_INTERP_
-#define _CENTROID_INTERP_
+#ifndef _CD_CentroidInterp_H_
+#define _CD_CentroidInterp_H_
 
 #include "irreg_stencil.H"
 
-/*!
-  @brief Class for holding stencils on irregular cells over a single AMR level
-*/
-class centroid_interp : public irreg_stencil {
-public:
-
-  /*!
-    @brief Constructor
-  */
-  centroid_interp();
-
-  /*!
-    @brief Full constructor. Subsequently calls define
-    @param[in] a_dbl Grids
-    @param[in] a_ebisl EBIS layout
-    @param[in] a_domain Problem domain
-    @param[in] a_dx Resolutions
-    @param[in] a_order Interpolation order
-    @param[in] a_radius Radius for least squares
-    @param[in] a_type Stencil type
-  */
-  centroid_interp(const DisjointBoxLayout&       a_dbl,
-		  const EBISLayout&              a_ebisl,
-		  const ProblemDomain&           a_domain,
-		  const Real&                    a_dx,
-		  const int                      a_order,
-		  const int                      a_radius,
-		  const stencil_type             a_type);
-
-  /*!
-    @brief Destructor
-  */
-  ~centroid_interp();
-
-  /*!
-    @brief Tolerance
-  */
-  static Real s_tolerance;
-  
-protected:
+namespace ChomboDischarge {
   
   /*!
-    @brief Build the interpolation stencils
+    @brief Class for holding stencils on irregular cells over a single AMR level
   */
-  virtual void build_stencil(VoFStencil&              a_sten,
-			     const VolIndex&          a_vof,
-			     const DisjointBoxLayout& a_dbl,
-			     const ProblemDomain&     a_domain,
-			     const EBISBox&           a_ebisbox,
-			     const Box&               a_box,
-			     const Real&              a_dx,
-			     const IntVectSet&        a_cfivs) override;
+  class centroid_interp : public irreg_stencil {
+  public:
 
-  /*!
-    @brief Get a Taylor-based stencil
-  */
-  virtual bool get_taylor_stencil(VoFStencil&              a_sten,
-				  const VolIndex&          a_vof,
-				  const DisjointBoxLayout& a_dbl,
-				  const ProblemDomain&     a_domain,
-				  const EBISBox&           a_ebisbox,
-				  const Box&               a_box,
-				  const Real&              a_dx,
-				  const IntVectSet&        a_cfivs);
+    /*!
+      @brief Constructor
+    */
+    centroid_interp();
 
-  /*!
-    @brief Get a least-squares based first order stencil
-  */
-  virtual bool get_lsq_grad_stencil(VoFStencil&              a_sten,
+    /*!
+      @brief Full constructor. Subsequently calls define
+      @param[in] a_dbl Grids
+      @param[in] a_ebisl EBIS layout
+      @param[in] a_domain Problem domain
+      @param[in] a_dx Resolutions
+      @param[in] a_order Interpolation order
+      @param[in] a_radius Radius for least squares
+      @param[in] a_type Stencil type
+    */
+    centroid_interp(const DisjointBoxLayout&       a_dbl,
+		    const EBISLayout&              a_ebisl,
+		    const ProblemDomain&           a_domain,
+		    const Real&                    a_dx,
+		    const int                      a_order,
+		    const int                      a_radius,
+		    const stencil_type             a_type);
+
+    /*!
+      @brief Destructor
+    */
+    ~centroid_interp();
+
+    /*!
+      @brief Tolerance
+    */
+    static Real s_tolerance;
+  
+  protected:
+  
+    /*!
+      @brief Build the interpolation stencils
+    */
+    virtual void build_stencil(VoFStencil&              a_sten,
+			       const VolIndex&          a_vof,
+			       const DisjointBoxLayout& a_dbl,
+			       const ProblemDomain&     a_domain,
+			       const EBISBox&           a_ebisbox,
+			       const Box&               a_box,
+			       const Real&              a_dx,
+			       const IntVectSet&        a_cfivs) override;
+
+    /*!
+      @brief Get a Taylor-based stencil
+    */
+    virtual bool get_taylor_stencil(VoFStencil&              a_sten,
 				    const VolIndex&          a_vof,
 				    const DisjointBoxLayout& a_dbl,
 				    const ProblemDomain&     a_domain,
@@ -89,16 +78,30 @@ protected:
 				    const IntVectSet&        a_cfivs);
 
     /*!
-    @brief Get a least-squares based first order stencil
-  */
-  virtual bool get_pwl_stencil(VoFStencil&              a_sten,
-			       const VolIndex&          a_vof,
-			       const DisjointBoxLayout& a_dbl,
-			       const ProblemDomain&     a_domain,
-			       const EBISBox&           a_ebisbox,
-			       const Box&               a_box,
-			       const Real&              a_dx,
-			       const IntVectSet&        a_cfivs);
+      @brief Get a least-squares based first order stencil
+    */
+    virtual bool get_lsq_grad_stencil(VoFStencil&              a_sten,
+				      const VolIndex&          a_vof,
+				      const DisjointBoxLayout& a_dbl,
+				      const ProblemDomain&     a_domain,
+				      const EBISBox&           a_ebisbox,
+				      const Box&               a_box,
+				      const Real&              a_dx,
+				      const IntVectSet&        a_cfivs);
+
+    /*!
+      @brief Get a least-squares based first order stencil
+    */
+    virtual bool get_pwl_stencil(VoFStencil&              a_sten,
+				 const VolIndex&          a_vof,
+				 const DisjointBoxLayout& a_dbl,
+				 const ProblemDomain&     a_domain,
+				 const EBISBox&           a_ebisbox,
+				 const Box&               a_box,
+				 const Real&              a_dx,
+				 const IntVectSet&        a_cfivs);
   
-};
+  };
+}
+
 #endif

@@ -9,34 +9,35 @@
 
 #include "EBCoarToFineRedist.H"
 
-/*!
-  @brief EBFineToCoarRedist with faster define function
-*/
-class EBFastCoarToFineRedist : public EBCoarToFineRedist {
-public:
+namespace ChomboDischarge {
 
-  EBFastCoarToFineRedist();
-  ~EBFastCoarToFineRedist();
+  /*!
+    @brief EBFineToCoarRedist with faster define function
+  */
+  class EBFastCoarToFineRedist : public EBCoarToFineRedist {
+  public:
 
-  void define(const EBLevelGrid&                      a_eblgFine,
-	      const EBLevelGrid&                      a_eblgCoar,
-	      const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
-	      const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
-	      const int&                              a_nref,
-	      const int&                              a_nvar,
-	      const int&                              a_redistRad);
+    EBFastCoarToFineRedist();
+    ~EBFastCoarToFineRedist();
 
-protected:
+    void define(const EBLevelGrid&                      a_eblgFine,
+		const EBLevelGrid&                      a_eblgCoar,
+		const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
+		const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
+		const int&                              a_nref,
+		const int&                              a_nvar,
+		const int&                              a_redistRad);
 
-  void makeCedFineSets(   IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar);
-  void makeCoarSets(const IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
+  protected:
 
-  // Debugging functions
-  void gatherBroadcast(  IntVectSet& a_set);
-  void gatherSetsCedFine(IntVectSet& a_setsCedFine);
-  void gatherSetsCoar(   IntVectSet& a_setsCoar);
+    void makeCedFineSets(   IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar);
+    void makeCoarSets(const IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
 
-
-};
+    // Debugging functions
+    void gatherBroadcast(  IntVectSet& a_set);
+    void gatherSetsCedFine(IntVectSet& a_setsCedFine);
+    void gatherSetsCoar(   IntVectSet& a_setsCoar);
+  };
+}
 
 #endif

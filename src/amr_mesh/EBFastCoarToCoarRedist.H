@@ -9,28 +9,30 @@
 
 #include "EBCoarToCoarRedist.H"
 
-/*!
-  @brief EBFineToCoarRedist with faster define function
-*/
-class EBFastCoarToCoarRedist : public EBCoarToCoarRedist {
-public:
+namespace ChomboDischarge {
+  /*!
+    @brief EBFineToCoarRedist with faster define function
+  */
+  class EBFastCoarToCoarRedist : public EBCoarToCoarRedist {
+  public:
 
-  EBFastCoarToCoarRedist();
-  ~EBFastCoarToCoarRedist();
+    EBFastCoarToCoarRedist();
+    ~EBFastCoarToCoarRedist();
   
-  void define(const EBLevelGrid&                      a_eblgFine,
-	      const EBLevelGrid&                      a_eblgCoar,
-	      const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
-	      const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
-	      const int&                              a_nref,
-	      const int&                              a_nvar,
-	      const int&                              a_redistRad);
+    void define(const EBLevelGrid&                      a_eblgFine,
+		const EBLevelGrid&                      a_eblgCoar,
+		const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
+		const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
+		const int&                              a_nref,
+		const int&                              a_nvar,
+		const int&                              a_redistRad);
 
-protected:
+  protected:
 
-  // Debugging functions
-  void gatherBroadcast(IntVectSet& a_set);
-  void gatherCoarSet(IntVectSet& coarSet); // Debugging function
-};
+    // Debugging functions
+    void gatherBroadcast(IntVectSet& a_set);
+    void gatherCoarSet(IntVectSet& coarSet); // Debugging function
+  };
+}
 
 #endif

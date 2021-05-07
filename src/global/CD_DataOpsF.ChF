@@ -1,0 +1,342 @@
+      subroutine vector_length(
+     &     chf_fra1[dst],
+     &     chf_const_fra[src],
+     &     chf_const_fra1[mask],
+     &     chf_box[region] )
+
+      real_t len2
+      integer chf_ddecl[i;j;k]
+      
+      chf_multido[region;i;j;k]
+         if(mask(chf_ix[i;j;k]) > 0.0) then
+            len2 = CHF_DTERM[src(chf_ix[i;j;k], 0)*src(chf_ix[i;j;k], 0);
+     &                     + src(chf_ix[i;j;k], 1)*src(chf_ix[i;j;k], 1);
+     &                     + src(chf_ix[i;j;k], 2)*src(chf_ix[i;j;k], 2)];     
+            dst(chf_ix[i;j;k]) = sqrt(len2)
+         endif
+      chf_enddo
+      
+      return
+      end
+
+
+      subroutine floor(
+     &     chf_fra[src],
+     &     chf_const_int[ncomps],
+     &     chf_const_real[value],
+     &     chf_box[region])
+
+      integer ic
+      integer chf_ddecl[i;j;k]
+
+      do ic=0,ncomps-1
+         chf_multido[region;i;j;k]
+            src(chf_ix[i;j;k],ic) = max(value, src(chf_ix[i;j;k],ic))
+         chf_enddo
+      enddo      
+      return
+      
+      end
+
+      subroutine max_min_norm(
+     &     chf_real[max_val],
+     &     chf_real[min_val],
+     &     chf_const_fra[src],
+     &     chf_const_fra1[mask],
+     &     chf_const_int[ncomps],
+     &     chf_box[box])
+
+      real_t value
+      integer ic
+      integer chf_ddecl[i;j;k]
+
+      chf_multido[box;i;j;k]
+         value = 0.0
+
+         if(mask(chf_ix[i;j;k]) > 0.0) then
+            do ic=0, ncomps-1
+               value = value + src(chf_ix[i;j;k], ic)*src(chf_ix[i;j;k], ic)
+            enddo
+            value = sqrt(value)
+
+            max_val = max(max_val, value)
+            min_val = min(min_val, value)
+         endif
+      chf_enddo
+      return
+
+      end
+
+      subroutine dot_product(
+     &     chf_fra1[result],
+     &     chf_const_fra[data1],
+     &     chf_const_fra[data2],	
+     &     chf_const_int[ncomps],
+     &     chf_box[box])
+
+      integer ic
+      integer chf_ddecl[i;j;k]
+
+      chf_multido[box;i;j;k]
+         result(chf_ix[i;j;k]) = 0.0;
+         do ic=0, ncomps-1
+            result(chf_ix[i;j;k]) = result(chf_ix[i;j;k]) + data1(chf_ix[i;j;k], ic)*data2(chf_ix[i;j;k], ic)
+         enddo
+      chf_enddo
+      return
+
+      end
+
+      subroutine vector_length2(
+     &     chf_fra1[dst],
+     &     chf_const_fra[src],
+     &     chf_const_fra1[mask],
+     &     chf_box[region] )
+
+      real_t len2
+      integer chf_ddecl[i;j;k]
+      
+      chf_multido[region;i;j;k]
+         if(mask(chf_ix[i;j;k]) > 0.0) then
+            len2 = CHF_DTERM[src(chf_ix[i;j;k], 0)*src(chf_ix[i;j;k], 0);
+     &                     + src(chf_ix[i;j;k], 1)*src(chf_ix[i;j;k], 1);
+     &                     + src(chf_ix[i;j;k], 2)*src(chf_ix[i;j;k], 2)];     
+            dst(chf_ix[i;j;k]) = len2
+         endif
+      chf_enddo
+      
+      return
+      end
+
+      subroutine laplacian(
+     &     chf_fra1[lapl],
+     &     chf_const_fra1[data],
+     &     chf_box[region] )
+
+      integer chf_ddecl[i; j; k]
+      integer chf_ddecl[ioff; joff; koff]
+      integer dir
+
+      chf_multido[region;i;j;k]
+         lapl(chf_ix[i;j;k]) = 0.0
+         do dir=1,CH_SPACEDIM
+            chf_dterm[ioff = chf_id(0, dir);
+                      joff = chf_id(1, dir);
+                      koff = chf_id(2, dir)]
+            lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k])
+     &                          +     data(chf_ix[i+ioff; j+joff; k+koff])
+     &                          - 2.0*data(chf_ix[i;      j;      k     ])
+     &                          +     data(chf_ix[i-ioff; j-joff; k-koff])
+         enddo
+      chf_enddo
+      
+      return
+      end
+
+      subroutine flash_error(
+     &     chf_fra1[lapl],
+     &     chf_const_fra1[data],
+     &     chf_const_real[eps],     
+     &     chf_box[region] )
+
+      integer chf_ddecl[i; j; k]
+      integer chf_ddecl[ii; jj; kk]	
+      integer chf_ddecl[ioff; joff; koff]
+      integer chf_ddecl[ioff2; joff2; koff2]
+      integer dir, p, q
+      real_t res, denom, uavg
+
+      chf_multido[region;i;j;k]
+         lapl(chf_ix[i;j;k]) = 0.0
+
+c Compute the Laplacian in the numerator (including cross-derivatives)
+         do p=1,CH_SPACEDIM
+            do q=1,CH_SPACEDIM
+               chf_dterm[ioff  = chf_id(0, p);
+                         joff  = chf_id(1, p);
+                         koff  = chf_id(2, p)]
+               chf_dterm[ioff2 = chf_id(0, q);
+                         joff2 = chf_id(1, q);
+                         koff2 = chf_id(2, q)]
+               if(p .eq. q) then
+                  res = data(chf_ix[i+ioff;j+joff;k+koff]) - 2.0*data(chf_ix[i;j;k]) + data(chf_ix[i-ioff;j-joff;k-koff])
+               else	       
+                  res = data(chf_ix[i+ioff+ioff2;j+joff+joff2;k+koff+koff2])
+     &                - data(chf_ix[i+ioff-ioff2;j+joff-joff2;k+koff-koff2])
+     &                - data(chf_ix[i-ioff+ioff2;j-joff+joff2;k-koff+koff2])
+     &                + data(chf_ix[i-ioff-ioff2;j-joff-joff2;k-koff-koff2])
+                  res = 0.25*res
+               endif
+               lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + res*res
+            enddo
+         enddo
+
+c Compute the denominator part with the gradients
+        denom = 0.0
+        do q=1,CH_SPACEDIM
+           do p=1,CH_SPACEDIM
+              chf_dterm[ioff  = chf_id(0, p);
+	                joff  = chf_id(1, p);
+                        koff  = chf_id(2, p)]
+              chf_dterm[ioff2 = chf_id(0, p);
+	                joff2 = chf_id(1, p);
+                        koff2 = chf_id(2, p)]
+
+              res = 0.0
+
+c Compute the Laplacian	of |u| with cross terms
+              if(p .eq. q) then
+                 res =    abs(data(chf_ix[i+ioff;j+joff;k+koff]))
+     &               +2.0*abs(data(chf_ix[i;j;k]))
+     &                  + abs(data(chf_ix[i-ioff;j-joff;k-koff]))
+              else	       
+                 res = abs(data(chf_ix[i+ioff+ioff2;j+joff+joff2;k+koff+koff2]))
+     &               + abs(data(chf_ix[i+ioff-ioff2;j+joff-joff2;k+koff-koff2]))
+     &               + abs(data(chf_ix[i-ioff+ioff2;j-joff+joff2;k-koff+koff2]))
+     &               + abs(data(chf_ix[i-ioff-ioff2;j-joff-joff2;k-koff-koff2]))
+                 res = 0.25*res
+              endif		  
+              res = eps*abs(res)
+	      
+c Shift point to iq+1 and compute |du/dxp|
+              chf_dterm[ii = i + chf_id(0, q);
+	                jj = j + chf_id(1, q);
+                        kk = k + chf_id(2, q)]
+	      res = res + 0.25*abs((data(chf_ix[ii+ioff; jj+joff; kk+koff]) - data(chf_ix[ii-ioff; jj-joff; kk-koff])))
+
+c Shift point to iq-1 and compute du/dxp
+              chf_dterm[ii = i - chf_id(0, q);
+	                jj = j - chf_id(1, q);
+                        kk = k - chf_id(2, q)]
+              res = res + 0.25*abs((data(chf_ix[ii+ioff; jj+joff; kk+koff]) - data(chf_ix[ii-ioff; jj-joff; kk-koff])))
+	      denom = denom + res*res
+           enddo
+        enddo
+
+        lapl(chf_ix[i;j;k]) = sqrt(lapl(chf_ix[i;j;k])/denom)
+      chf_enddo	 
+      return
+      end
+
+      subroutine gen_laplacian(
+     &     chf_fra1[lapl],
+     &     chf_const_fra1[data],
+     &     chf_box[region] )
+
+      integer chf_ddecl[i; j; k]
+      integer chf_ddecl[ii; jj; kk]	
+      integer chf_ddecl[ioff; joff; koff]
+      integer chf_ddecl[ioff2; joff2; koff2]
+      integer dir, p, q
+      real_t res
+
+      chf_multido[region;i;j;k]
+         lapl(chf_ix[i;j;k]) = 0.0
+
+c Compute the Laplacian in the numerator (including cross-derivatives)
+         do p=1,CH_SPACEDIM
+            do q=1,CH_SPACEDIM
+               chf_dterm[ioff  = chf_id(0, p);
+                         joff  = chf_id(1, p);
+                         koff  = chf_id(2, p)]
+               chf_dterm[ioff2 = chf_id(0, q);
+                         joff2 = chf_id(1, q);
+                         koff2 = chf_id(2, q)]
+               if(p .eq. q) then
+                  res = data(chf_ix[i+ioff;j+joff;k+koff]) - 2.0*data(chf_ix[i;j;k]) + data(chf_ix[i-ioff;j-joff;k-koff])
+               else	       
+                  res = data(chf_ix[i+ioff+ioff2;j+joff+joff2;k+koff+koff2])
+     &                - data(chf_ix[i+ioff-ioff2;j+joff-joff2;k+koff-koff2])
+     &                - data(chf_ix[i-ioff+ioff2;j-joff+joff2;k-koff+koff2])
+     &                + data(chf_ix[i-ioff-ioff2;j-joff-joff2;k-koff-koff2])
+                  res = 0.25*res
+               endif
+               lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + res*res
+            enddo
+         enddo
+
+        lapl(chf_ix[i;j;k]) = sqrt(lapl(chf_ix[i;j;k]))
+      chf_enddo	 
+      return
+      end
+
+      subroutine square_root(
+     &     chf_fra1[data],
+     &     chf_const_int[dir],     
+     &     chf_box[facebox])
+     
+      integer i,j,k
+      chf_multido[facebox;i;j;k]
+         data(chf_ix[i;j;k]) = sqrt(data(chf_ix[i;j;k]))      
+      chf_enddo      
+      end
+
+
+      subroutine average_face_to_cell(
+     &     chf_fra[cellreg],
+     &     chf_const_fra[facereg],
+     &     chf_const_int[dir],     
+     &     chf_const_int[ncomps],
+     &     chf_box[box])
+
+      real_t factor
+      integer ic
+      integer chf_ddecl[i;j;k]
+      integer chf_ddecl[ioff;joff;koff]
+
+      chf_dterm[ioff = chf_id(0, dir);
+                joff = chf_id(1, dir);
+                koff = chf_id(2, dir)]
+      factor = 1./(2*CH_SPACEDIM)		
+      chf_multido[box;i;j;k]
+         do ic=0, ncomps-1
+            cellreg(chf_ix[i;j;k], ic) = cellreg(chf_ix[i;j;k], ic)
+     &                                + factor*(facereg(chf_ix[i+ioff;j+joff;k+koff], ic) + facereg(chf_ix[i;j;k], ic))
+         enddo
+      chf_enddo
+      return
+
+      end
+
+      subroutine invert(
+     &     chf_fra[data],
+     &     chf_const_int[ncomps],
+     &     chf_box[region])
+
+      integer ic
+      integer chf_ddecl[i;j;k]
+
+      do ic=0,ncomps-1
+         chf_multido[region;i;j;k]
+            data(chf_ix[i;j;k],ic) = 1.0/data(chf_ix[i;j;k],ic)
+         chf_enddo
+      enddo      
+      return
+      
+      end
+
+      subroutine filter_smooth(
+     &     chf_fra1[lhs],
+     &     chf_const_fra1[rhs],
+     &     chf_const_int[stride],     
+     &     chf_const_real[alpha],
+     &     chf_box[box])
+     
+      integer dir
+      integer chf_ddecl[i;j;k]
+      integer chf_ddecl[ioff;joff;koff]
+      
+      real beta
+
+      beta = half*(1.0 - alpha)
+      do dir = 0, CH_SPACEDIM-1
+         chf_dterm[ioff = stride*chf_id(0, dir);
+                   joff = stride*chf_id(1, dir);
+                   koff = stride*chf_id(2, dir)]
+         chf_multido[box;i;j;k]
+            lhs(chf_ix[i;j;k]) = alpha*rhs(chf_ix[i;j;k]) + beta*(rhs(chf_ix[i+ioff;j+joff;k+koff]) + rhs(chf_ix[i-ioff;j-joff;k-koff]))
+         chf_enddo	 
+      enddo
+      return
+
+      end

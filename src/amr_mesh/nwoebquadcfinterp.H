@@ -40,106 +40,107 @@
 #include "CornerCopier.H"
 #include "EBCFData.H"
 #include "EBQuadCFInterp.H"
-#include "NamespaceHeader.H"
 
-/// Quadratic coarse-fine interpolation utility 
-class nwoebquadcfinterp
-{
-public:
-
-  ///
-  nwoebquadcfinterp(const DisjointBoxLayout&           a_gridsFine,
-                    const DisjointBoxLayout&           a_gridsCoar,
-                    const EBISLayout&                  a_ebislFine,
-                    const EBISLayout&                  a_ebislCoar,
-                    const ProblemDomain&               a_domainCoar,
-                    const int&                         a_nref,
-                    const int&                         a_nvar,
-                    const Real&                        a_dxFine,
-                    const int&                         a_ghost,
-                    const LayoutData<IntVectSet>&      a_cfivs,
-		    const RefCountedPtr<EBIndexSpace>& a_ebisPtr);
-
-  ///
-  ~nwoebquadcfinterp()
-  {  }
-
-  ///
-  /**
-     Coarse / Fine interpolation operator.
-  */
-  void coarseFineInterp(LevelData<EBCellFAB>&       a_phif,
-                        const LevelData<EBCellFAB>& a_phic,
-                        int isrc, int idst, int inco);
-
-
-  ///
-  /**
-     Coarse-fine interpolation operator with homogeneous BCs.
-     Does same interpolation as coarseFineInterp function,
-     but with all coarse-level data set to 0.
-  */
-  void coarseFineInterpH(LevelData<EBCellFAB>& a_phif,
-                        int isrc, int idst, int inco);
-
-
-protected:
-  void
-  defineInternals(const LayoutData<IntVectSet>& a_cfivs, const RefCountedPtr<EBIndexSpace>& a_ebisPtr);
-  void
-  defineStencils (const LayoutData<IntVectSet>& a_cfivs);
+namespace ChomboDischarge {
   
-  void
-  getStencils(Vector<RefCountedPtr< BaseStencil> >  & a_stencils, 
-              Vector<RefCountedPtr< BaseIndex  > >  & a_baseDstVoFs,
-              const IntVectSet                      & a_cfivs,
-              const EBISBox                         & a_ebisFine,
-              const EBISBox                         & a_ebisCoFi,
-              const DataIndex                       & a_dit);
+  /// Quadratic coarse-fine interpolation utility 
+  class nwoebquadcfinterp
+  {
+  public:
+
+    ///
+    nwoebquadcfinterp(const DisjointBoxLayout&           a_gridsFine,
+		      const DisjointBoxLayout&           a_gridsCoar,
+		      const EBISLayout&                  a_ebislFine,
+		      const EBISLayout&                  a_ebislCoar,
+		      const ProblemDomain&               a_domainCoar,
+		      const int&                         a_nref,
+		      const int&                         a_nvar,
+		      const Real&                        a_dxFine,
+		      const int&                         a_ghost,
+		      const LayoutData<IntVectSet>&      a_cfivs,
+		      const RefCountedPtr<EBIndexSpace>& a_ebisPtr);
+
+    ///
+    ~nwoebquadcfinterp()
+    {  }
+
+    ///
+    /**
+       Coarse / Fine interpolation operator.
+    */
+    void coarseFineInterp(LevelData<EBCellFAB>&       a_phif,
+			  const LevelData<EBCellFAB>& a_phic,
+			  int isrc, int idst, int inco);
 
 
-  void
-  getStencil(VoFStencil           & a_stencil,
-             const VolIndex       & a_vofFine,
-             const EBISBox        & a_ebisFine,
-             const EBISBox        & a_ebisCoFi,
-             const DataIndex      & a_dit);
+    ///
+    /**
+       Coarse-fine interpolation operator with homogeneous BCs.
+       Does same interpolation as coarseFineInterp function,
+       but with all coarse-level data set to 0.
+    */
+    void coarseFineInterpH(LevelData<EBCellFAB>& a_phif,
+			   int isrc, int idst, int inco);
 
-  DisjointBoxLayout m_gridsFine;
-  DisjointBoxLayout m_gridsCoar;
-  DisjointBoxLayout m_gridsCoFi;
-  EBISLayout        m_ebislFine;
-  EBISLayout        m_ebislCoar;
-  EBISLayout        m_ebislCoFi;
-  ProblemDomain     m_domainCoar;
-  int               m_nref;
-  int               m_nvar;
-  Real              m_dxFine;
-  int               m_ghost;
-  LayoutData<RefCountedPtr< AggStencil<EBCellFAB, EBCellFAB> > > m_stencil;
-  LevelData<EBCellFAB> m_bufferCoFi;
+
+  protected:
+    void
+    defineInternals(const LayoutData<IntVectSet>& a_cfivs, const RefCountedPtr<EBIndexSpace>& a_ebisPtr);
+    void
+    defineStencils (const LayoutData<IntVectSet>& a_cfivs);
+  
+    void
+    getStencils(Vector<RefCountedPtr< BaseStencil> >  & a_stencils, 
+		Vector<RefCountedPtr< BaseIndex  > >  & a_baseDstVoFs,
+		const IntVectSet                      & a_cfivs,
+		const EBISBox                         & a_ebisFine,
+		const EBISBox                         & a_ebisCoFi,
+		const DataIndex                       & a_dit);
+
+
+    void
+    getStencil(VoFStencil           & a_stencil,
+	       const VolIndex       & a_vofFine,
+	       const EBISBox        & a_ebisFine,
+	       const EBISBox        & a_ebisCoFi,
+	       const DataIndex      & a_dit);
+
+    DisjointBoxLayout m_gridsFine;
+    DisjointBoxLayout m_gridsCoar;
+    DisjointBoxLayout m_gridsCoFi;
+    EBISLayout        m_ebislFine;
+    EBISLayout        m_ebislCoar;
+    EBISLayout        m_ebislCoFi;
+    ProblemDomain     m_domainCoar;
+    int               m_nref;
+    int               m_nvar;
+    Real              m_dxFine;
+    int               m_ghost;
+    LayoutData<RefCountedPtr< AggStencil<EBCellFAB, EBCellFAB> > > m_stencil;
+    LevelData<EBCellFAB> m_bufferCoFi;
   
 
-private:
-  //weak construction is bad
-  nwoebquadcfinterp()
-  {
-    MayDay::Error("invalid operator");
-  }
+  private:
+    //weak construction is bad
+    nwoebquadcfinterp()
+    {
+      MayDay::Error("invalid operator");
+    }
 
-  //disallowed for all the usual reasons
-  nwoebquadcfinterp(nwoebquadcfinterp& a_input)
-  {
-    MayDay::Error("invalid operator");
-  }
+    //disallowed for all the usual reasons
+    nwoebquadcfinterp(nwoebquadcfinterp& a_input)
+    {
+      MayDay::Error("invalid operator");
+    }
 
-  //disallowed for all the usual reasons
-  void operator=(nwoebquadcfinterp& a_input)
-  {
-    MayDay::Error("invalid operator");
-  }
+    //disallowed for all the usual reasons
+    void operator=(nwoebquadcfinterp& a_input)
+    {
+      MayDay::Error("invalid operator");
+    }
 
-};
+  };
+}
 
-#include "NamespaceFooter.H"
 #endif
