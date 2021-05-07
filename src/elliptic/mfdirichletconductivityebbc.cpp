@@ -5,9 +5,11 @@
   @date Dec. 2017
 */
 
-#include "LeastSquares.H"
+#include "CD_LeastSquares.H"
 #include "mfdirichletconductivityebbc.H"
 #include "ParmParse.H"
+
+using namespace ChomboDischarge;
 
 bool mfdirichletconductivityebbc::s_areaFracWeighted = false;
 bool mfdirichletconductivityebbc::s_quadrant_based   = true;

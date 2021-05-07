@@ -7,9 +7,11 @@
 
 #include "eb_centroid_interp.H"
 #include "LinearStencil.H"
-#include "LeastSquares.H"
+#include "CD_LeastSquares.H"
 
 #include "EBArith.H"
+
+using namespace ChomboDischarge;
 
 Real eb_centroid_interp::s_tolerance      = 1.E-8;
 bool eb_centroid_interp::s_quadrant_based = true;   // Use quadrant based stencils for least squares
@@ -128,7 +130,7 @@ bool eb_centroid_interp::get_lsq_grad_stencil(VoFStencil&              a_sten,
 
   const int weightingPower = 0;
   
-  a_sten = LeastSquares::getInterpolationStencilUsingAllVoFsInRadius(LeastSquares::CellPosition::Boundary,
+  a_sten = LeastSquares::getInterpolationStencilUsingAllVofsInRadius(LeastSquares::CellPosition::Boundary,
   								     LeastSquares::CellPosition::Center,
   								     a_vof,
   								     a_ebisbox,

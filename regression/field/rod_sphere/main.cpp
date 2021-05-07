@@ -3,7 +3,6 @@
 #include "rod_dielectric.H"
 #include "field_stepper.H"
 #include "ParmParse.H"
-#include "LeastSquares.H"
 
 using namespace physics::poisson;
 

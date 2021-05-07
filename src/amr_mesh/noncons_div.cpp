@@ -6,7 +6,9 @@
 */
 
 #include "noncons_div.H"
-#include "VoFUtils.H"
+#include "CD_VofUtils.H"
+
+using namespace ChomboDischarge;
 
 #include "EBArith.H"
 
@@ -46,7 +48,7 @@ void noncons_div::build_stencil(VoFStencil&              a_sten,
 
   Real norm = 0.;
 
-  const Vector<VolIndex> vofs = VoFUtils::getAllConnectedVoFsInRadius(a_vof, a_ebisbox, m_radius, IntVectSet());
+  const Vector<VolIndex> vofs = VofUtils::getAllConnectedVofsInRadius(a_vof, a_ebisbox, m_radius, IntVectSet());
   for (int i = 0; i < vofs.size(); i++){
     if(vofs[i] != a_vof){
       const VolIndex& ivof = vofs[i];

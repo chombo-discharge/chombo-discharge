@@ -7,11 +7,13 @@
 
 #include "centroid_interp.H"
 #include "LinearStencil.H"
-#include "LeastSquares.H"
+#include "CD_LeastSquares.H"
 
 #include "EBArith.H"
 
 #define DEBUG_CENTROID_INTERP 1
+
+using namespace ChomboDischarge;
 
 Real centroid_interp::s_tolerance = 1.E-8;
 
@@ -118,7 +120,7 @@ bool centroid_interp::get_lsq_grad_stencil(VoFStencil&              a_sten,
 
   const int weightingPower = 0;
   
-  a_sten = LeastSquares::getInterpolationStencilUsingAllVoFsInRadius(LeastSquares::CellPosition::Centroid,
+  a_sten = LeastSquares::getInterpolationStencilUsingAllVofsInRadius(LeastSquares::CellPosition::Centroid,
   								     LeastSquares::CellPosition::Center,
   								     a_vof,
   								     a_ebisbox,
