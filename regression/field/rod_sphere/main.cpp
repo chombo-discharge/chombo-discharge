@@ -31,66 +31,6 @@ int main(int argc, char* argv[]){
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
   engine->setup_and_run(input_file);
 
-#if 1 // Try to make a least squares interpolation
-  RealVect p0( 0.0,  0.0);
-  RealVect p1(-2, -2);
-  RealVect p2(-2,  2);
-  RealVect p3( 2,  2);
-  RealVect p4( 2, -2);
-
-  VolIndex v0(IntVect( 0,  0), 0);
-  VolIndex v1(IntVect(-1, -1), 0);
-  VolIndex v2(IntVect(-1,  1), 0);
-  VolIndex v3(IntVect( 1,  1), 0);
-  VolIndex v4(IntVect( 1, -1), 0);
-
-  Vector<VolIndex> vofs;
-  vofs.push_back(v1);
-  vofs.push_back(v2);
-  vofs.push_back(v3);
-  vofs.push_back(v4);
-
-  Vector<RealVect> deltas;
-  deltas.push_back(p1-p0);
-  deltas.push_back(p2-p0);
-  deltas.push_back(p3-p0);
-  deltas.push_back(p4-p0);
-
-  Real f1 = 0.0;
-  Real f2 = 0.0;
-  Real f3 = 1.0;
-  Real f4 = 1.0;
-
-  IntVectSet derivs;
-  derivs |= IntVect(0,0);
-  derivs |= IntVect(1,0);
-  derivs |= IntVect(0,1);
-
-  const std::map<IntVect, VoFStencil> allStencils = LeastSquares::computeInterpolationStencil(derivs, vofs, deltas, 0, 1);
-  //  VoFStencil sten = LeastSquares::computeInterpolationStencil(vofs, deltas, 2, 1);
-
-
-
-  if(procID() == 0){
-    const VoFStencil& sten = allStencils.at(IntVect(1,0));
-    Real f0 = 0.0;
-    for (int i = 0; i < sten.size(); i++){
-      const VolIndex& vof = sten.vof(i);
-      const Real w        = sten.weight(i);
-
-      std::cout << vof << "\t" << w << std::endl;
-      
-      if(vof == v1) f0 += f1*w;
-      if(vof == v2) f0 += f2*w;
-      if(vof == v3) f0 += f3*w;
-      if(vof == v4) f0 += f4*w;
-    }
-
-    std::cout << f0 << std::endl;
-  }
-  
-#endif
-
 #ifdef CH_MPI
   CH_TIMER_REPORT();
   MPI_Finalize();
