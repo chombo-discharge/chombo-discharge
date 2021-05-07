@@ -10,21 +10,23 @@
 
 #include "cdr_species.H"
 
-namespace physics {
-  namespace advection_diffusion {
+namespace ChomboDischarge {
+  namespace physics {
+    namespace advection_diffusion {
 
-    class advection_diffusion_species : public cdr_species {
-    public:
-      advection_diffusion_species();
-      ~advection_diffusion_species();
+      class advection_diffusion_species : public cdr_species {
+      public:
+	advection_diffusion_species();
+	~advection_diffusion_species();
 
-      Real initial_data(const RealVect a_pos, const Real a_time) const;
-    protected:
-      Real     m_blob_radius;
-      Real     m_blob_amplitude;
-      RealVect m_blob_center;
+	Real initial_data(const RealVect a_pos, const Real a_time) const;
+      protected:
+	Real     m_blob_radius;
+	Real     m_blob_amplitude;
+	RealVect m_blob_center;
     
-    };
+      };
+    }
   }
 }
 
