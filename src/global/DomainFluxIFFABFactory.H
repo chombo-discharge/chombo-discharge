@@ -14,20 +14,24 @@
 #include <EBISLayout.H>
 #include <DataIndex.H>
 
-/*!
-  @brief Factory class for DomainFluxIFFAB
-*/
-class DomainFluxIFFABFactory : public DataFactory<DomainFluxIFFAB> {
-public:
+namespace ChomboDischarge {
+  
+  /*!
+    @brief Factory class for DomainFluxIFFAB
+  */
+  class DomainFluxIFFABFactory : public DataFactory<DomainFluxIFFAB> {
+  public:
 
-  DomainFluxIFFABFactory(const EBISLayout& a_ebisl, const ProblemDomain& a_domain);
-  ~DomainFluxIFFABFactory();
+    DomainFluxIFFABFactory(const EBISLayout& a_ebisl, const ProblemDomain& a_domain);
+    ~DomainFluxIFFABFactory();
 
-  virtual DomainFluxIFFAB* create(const Box& a_box, int a_ncomps, const DataIndex& a_dit) const;
+    virtual DomainFluxIFFAB* create(const Box& a_box, int a_ncomps, const DataIndex& a_dit) const;
 
-private:
-  EBISLayout    m_ebisl;
-  ProblemDomain m_domain;
-};
+  private:
+    EBISLayout    m_ebisl;
+    ProblemDomain m_domain;
+  };
+  
+}
 
 #endif

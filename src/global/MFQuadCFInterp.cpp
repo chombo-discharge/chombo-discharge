@@ -7,28 +7,32 @@
 
 #include "MFQuadCFInterp.H"
 
-MFQuadCFInterp::MFQuadCFInterp(){
-}
+namespace ChomboDischarge {
 
-MFQuadCFInterp::~MFQuadCFInterp(){
-}
+  MFQuadCFInterp::MFQuadCFInterp(){
+  }
 
-MFQuadCFInterp::MFQuadCFInterp(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi){
-  this->define(a_quadcfi);
-}
+  MFQuadCFInterp::~MFQuadCFInterp(){
+  }
 
-void MFQuadCFInterp::define(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi){
-  m_quadcfi = a_quadcfi;
-}
+  MFQuadCFInterp::MFQuadCFInterp(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi){
+    this->define(a_quadcfi);
+  }
 
-const RefCountedPtr<EBQuadCFInterp>& MFQuadCFInterp::get_quadcfi_ptr(const int a_phase) const {
-  return m_quadcfi[a_phase];
-}
+  void MFQuadCFInterp::define(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi){
+    m_quadcfi = a_quadcfi;
+  }
 
-EBQuadCFInterp& MFQuadCFInterp::get_quadcfi(const int a_phase) {
-  return *m_quadcfi[a_phase];
-}
+  const RefCountedPtr<EBQuadCFInterp>& MFQuadCFInterp::get_quadcfi_ptr(const int a_phase) const {
+    return m_quadcfi[a_phase];
+  }
 
-const EBQuadCFInterp& MFQuadCFInterp::get_quadcfi(const int a_phase) const {
-  return *m_quadcfi[a_phase];
+  EBQuadCFInterp& MFQuadCFInterp::get_quadcfi(const int a_phase) {
+    return *m_quadcfi[a_phase];
+  }
+
+  const EBQuadCFInterp& MFQuadCFInterp::get_quadcfi(const int a_phase) const {
+    return *m_quadcfi[a_phase];
+  }
+
 }

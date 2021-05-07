@@ -13,92 +13,95 @@
 
 #include "EBLevelGrid.H"
 
-/*!
-  @brief Wrapper class for holding multifluid EBLevelGrids
-*/
-class MFLevelGrid {
-public:
+namespace ChomboDischarge {
 
   /*!
-    @brief Weak constructor, must subsequently call define
+    @brief Wrapper class for holding multifluid EBLevelGrids
   */
-  MFLevelGrid();
+  class MFLevelGrid {
+  public:
 
-  /*!
-    @brief Full constructor. Does full allocation
-  */
-  MFLevelGrid(const DisjointBoxLayout&          a_dbl,
-	      const ProblemDomain&              a_domain,
-	      const int                         a_ebghost,
-	      const RefCountedPtr<mfis>&        a_mfis);
+    /*!
+      @brief Weak constructor, must subsequently call define
+    */
+    MFLevelGrid();
 
-  /*!
-    @brief Alternative full constructor - RefCounted storage so no allocation here
-  */
-  MFLevelGrid(const RefCountedPtr<mfis>& a_mfis, const Vector<EBLevelGrid>& a_eblg);
+    /*!
+      @brief Full constructor. Does full allocation
+    */
+    MFLevelGrid(const DisjointBoxLayout&          a_dbl,
+		const ProblemDomain&              a_domain,
+		const int                         a_ebghost,
+		const RefCountedPtr<mfis>&        a_mfis);
 
-  /*!
-    @brief Destructor
-  */
-  ~MFLevelGrid();
+    /*!
+      @brief Alternative full constructor - RefCounted storage so no allocation here
+    */
+    MFLevelGrid(const RefCountedPtr<mfis>& a_mfis, const Vector<EBLevelGrid>& a_eblg);
 
-  /*!
-    @brief Number of phases
-  */
-  virtual int num_phases() const;
+    /*!
+      @brief Destructor
+    */
+    ~MFLevelGrid();
 
-  /*!
-    @brief Define function
-  */
-  virtual void define(const RefCountedPtr<mfis>& a_mfis, const Vector<EBLevelGrid>& a_eblg);
+    /*!
+      @brief Number of phases
+    */
+    virtual int num_phases() const;
 
-  /*!
-    @brief Get the index space
-  */
-  virtual const RefCountedPtr<mfis>& get_mfis() const;
+    /*!
+      @brief Define function
+    */
+    virtual void define(const RefCountedPtr<mfis>& a_mfis, const Vector<EBLevelGrid>& a_eblg);
 
-  /*!
-    @brief Get the problem domain
-  */
-  virtual ProblemDomain get_domain() const;
+    /*!
+      @brief Get the index space
+    */
+    virtual const RefCountedPtr<mfis>& get_mfis() const;
 
-  /*!
-    @brief Get the grids
-  */
-  virtual DisjointBoxLayout get_grids() const;
+    /*!
+      @brief Get the problem domain
+    */
+    virtual ProblemDomain get_domain() const;
+
+    /*!
+      @brief Get the grids
+    */
+    virtual DisjointBoxLayout get_grids() const;
     
-  /*!
-    @brief Get phase
-  */
-  virtual EBLevelGrid& get_eblg(int a_phase);
+    /*!
+      @brief Get phase
+    */
+    virtual EBLevelGrid& get_eblg(int a_phase);
 
-  /*!
-    @brief Get phase
-  */
-  virtual const EBLevelGrid& get_eblg(int a_phase) const;
+    /*!
+      @brief Get phase
+    */
+    virtual const EBLevelGrid& get_eblg(int a_phase) const;
 
-  /*!
-    @brief Get interface region between two phases.
-  */
-  virtual IntVectSet interface_region(const Box&       a_box,
-				      const DataIndex& a_dit,
-				      const int        a_phase1 = 0,
-				      const int        a_phase2 = 1) const;
+    /*!
+      @brief Get interface region between two phases.
+    */
+    virtual IntVectSet interface_region(const Box&       a_box,
+					const DataIndex& a_dit,
+					const int        a_phase1 = 0,
+					const int        a_phase2 = 1) const;
 
-  /*!
-    @brief Get the interface IntVect on the other side of the EB. Useful for when EB aligns with cell face
-  */
-  virtual bool interface_pair(IntVect& a_iv,
-			      const IntVect&   a_iv_in,
-			      const Box&       a_box,
-			      const DataIndex& a_dit,
-			      const int        a_phase1 = 0,
-			      const int        a_phase2 = 1) const;
-private:
+    /*!
+      @brief Get the interface IntVect on the other side of the EB. Useful for when EB aligns with cell face
+    */
+    virtual bool interface_pair(IntVect& a_iv,
+				const IntVect&   a_iv_in,
+				const Box&       a_box,
+				const DataIndex& a_dit,
+				const int        a_phase1 = 0,
+				const int        a_phase2 = 1) const;
+  private:
 
-  RefCountedPtr<mfis> m_mfis;
+    RefCountedPtr<mfis> m_mfis;
 
-  Vector<EBLevelGrid> m_eblg;
-};
+    Vector<EBLevelGrid> m_eblg;
+  };
+}
 
 #endif

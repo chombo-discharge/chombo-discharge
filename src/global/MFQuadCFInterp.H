@@ -11,55 +11,58 @@
 #include <RefCountedPtr.H>
 #include <EBQuadCFInterp.H>
 
-/*!
-  @brief Class for filling ghost cells alà EBQuadCFInterp for multiphase
-*/
-class MFQuadCFInterp {
-public:
-
-  /*!
-    @brief Constructor
-  */
-  MFQuadCFInterp();
-
-  /*!
-    @brief Destructor
-  */
-  ~MFQuadCFInterp();
-
-  /*!
-    @brief Full constructor. Calls define
-  */
-  MFQuadCFInterp(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi);
-
-  /*!
-    @brief Define function
-  */
-  void define(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi);
-
-  /*!
-    @brief Get interpolation utility
-  */
-  const RefCountedPtr<EBQuadCFInterp>& get_quadcfi_ptr(const int a_phase) const;
-
-  /*!
-    @brief get interpolation utility for phase
-  */
-  EBQuadCFInterp& get_quadcfi(const int a_phase);
-
-  /*!
-    @brief get interpolation utility for phase
-  */
-  const EBQuadCFInterp& get_quadcfi(const int a_phase) const;
+namespace ChomboDischarge {
   
-protected:
-
-
   /*!
-    @brief Interpolation for each phase. 
+    @brief Class for filling ghost cells alà EBQuadCFInterp for multiphase
   */
-  Vector<RefCountedPtr<EBQuadCFInterp> > m_quadcfi;
+  class MFQuadCFInterp {
+  public:
+
+    /*!
+      @brief Constructor
+    */
+    MFQuadCFInterp();
+
+    /*!
+      @brief Destructor
+    */
+    ~MFQuadCFInterp();
+
+    /*!
+      @brief Full constructor. Calls define
+    */
+    MFQuadCFInterp(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi);
+
+    /*!
+      @brief Define function
+    */
+    void define(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi);
+
+    /*!
+      @brief Get interpolation utility
+    */
+    const RefCountedPtr<EBQuadCFInterp>& get_quadcfi_ptr(const int a_phase) const;
+
+    /*!
+      @brief get interpolation utility for phase
+    */
+    EBQuadCFInterp& get_quadcfi(const int a_phase);
+
+    /*!
+      @brief get interpolation utility for phase
+    */
+    const EBQuadCFInterp& get_quadcfi(const int a_phase) const;
   
-};
+  protected:
+
+
+    /*!
+      @brief Interpolation for each phase. 
+    */
+    Vector<RefCountedPtr<EBQuadCFInterp> > m_quadcfi;
+  
+  };
+}
 
 #endif

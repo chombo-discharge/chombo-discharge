@@ -8,65 +8,66 @@
 #ifndef _UNITS_
 #define _UNITS_
 
-/*!
-  @brief Various SI units
-*/
-namespace units {
-
+namespace ChomboDischarge {
   /*!
-    @brief Permittivity of free space
+    @brief Various SI units
   */
-  const static Real s_eps0 = 8.854187817E-12;
+  namespace units {
 
-  /*!
-    @brief Elementary charge 
-  */
-  const static Real s_Qe   = 1.6021766208E-19;
+    /*!
+      @brief Permittivity of free space
+    */
+    const static Real s_eps0 = 8.854187817E-12;
 
-  /*!
-    @brief Speed of light
-  */
-  const static Real s_c0   = 299792458;
+    /*!
+      @brief Elementary charge 
+    */
+    const static Real s_Qe   = 1.6021766208E-19;
 
-  /*!
-    @brief Boltzmann constant
-  */
-  const static Real s_kb   = 1.38084852E-23;
+    /*!
+      @brief Speed of light
+    */
+    const static Real s_c0   = 299792458;
 
-  /*!
-    @brief Towsend unit
-  */
-  const static Real s_Td   = 1.E-21;
+    /*!
+      @brief Boltzmann constant
+    */
+    const static Real s_kb   = 1.38084852E-23;
 
-  /*!
-    @brief Electron volt
-  */
-  const static Real s_eV   = s_Qe;
+    /*!
+      @brief Towsend unit
+    */
+    const static Real s_Td   = 1.E-21;
 
-  /*!
-    @brief Avogadro number
-  */
-  const static Real s_Na   = 6.022140857E23;
+    /*!
+      @brief Electron volt
+    */
+    const static Real s_eV   = s_Qe;
 
-  /*!
-    @brief Universal gas constant
-  */
-  const static Real s_R    = 8.3144598;
+    /*!
+      @brief Avogadro number
+    */
+    const static Real s_Na   = 6.022140857E23;
 
-  /*!
-    @brief Conversion from atm to pascal
-  */
-  const static Real s_atm2pascal  = 101325;
+    /*!
+      @brief Universal gas constant
+    */
+    const static Real s_R    = 8.3144598;
 
-  /*!
-    @brief pi
-  */
-  const static Real s_pi = 3.14159265359;
+    /*!
+      @brief Conversion from atm to pascal
+    */
+    const static Real s_atm2pascal  = 101325;
 
-  /*!
-    @brief Electron mass
-  */
-  const static Real s_me = 9.109383E-31;
+    /*!
+      @brief pi
+    */
+    const static Real s_pi = 3.14159265359;
 
+    /*!
+      @brief Electron mass
+    */
+    const static Real s_me = 9.109383E-31;
+  }
 }
 #endif

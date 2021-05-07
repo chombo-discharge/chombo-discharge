@@ -22,105 +22,108 @@
 #include "DomainFluxIFFAB.H"
 #include "MFBaseIVFAB.H"
 
-/*!
-  @brief Default class for holding LevelData<T> data across an EBAMR realm
-  @details This class is a base class for holding LevelData<T> over a realm. The class does not have arithmetic operators or 
-  assignment operators because LevelData<T> does not have them. Manipulating the data is done directly by fetching the data 
-  on a level through the indexing operator [], or by fetching all the data through get_data. 
-*/ 
-template <typename T>
-class EBAMRData {
-public:
+namespace ChomboDischarge {
 
   /*!
-    @brief Default constructor. Does nothing.
-  */
-  EBAMRData();
+    @brief Default class for holding LevelData<T> data across an EBAMR realm
+    @details This class is a base class for holding LevelData<T> over a realm. The class does not have arithmetic operators or 
+    assignment operators because LevelData<T> does not have them. Manipulating the data is done directly by fetching the data 
+    on a level through the indexing operator [], or by fetching all the data through get_data. 
+  */ 
+  template <typename T>
+  class EBAMRData {
+  public:
 
-  /*!
-    @brief Destructor. Sets m_data to size a_size but does not allocate anything.
-  */
-  EBAMRData(const int a_size);
+    /*!
+      @brief Default constructor. Does nothing.
+    */
+    EBAMRData();
 
-  /*!
-    @brief Destructor. Does nothing.
-  */
-  ~EBAMRData();
+    /*!
+      @brief Destructor. Sets m_data to size a_size but does not allocate anything.
+    */
+    EBAMRData(const int a_size);
 
-  /*!
-    @brief Indexing operators. Returns m_data[lvl]
-  */
-  RefCountedPtr<LevelData<T> >& operator[](int a_level);
+    /*!
+      @brief Destructor. Does nothing.
+    */
+    ~EBAMRData();
 
-  /*!
-    @brief Indexing operators. Returns const m_data[lvl]
-  */
-  const RefCountedPtr<LevelData<T> >& operator[](int a_level) const;
+    /*!
+      @brief Indexing operators. Returns m_data[lvl]
+    */
+    RefCountedPtr<LevelData<T> >& operator[](int a_level);
 
-  /*!
-    @brief Resize m_data to having size a_size
-  */
-  void resize(const int a_size);
+    /*!
+      @brief Indexing operators. Returns const m_data[lvl]
+    */
+    const RefCountedPtr<LevelData<T> >& operator[](int a_level) const;
 
-  /*!
-    @brief Sets the realm for this object
-  */
-  void set_realm(const std::string a_realm);
+    /*!
+      @brief Resize m_data to having size a_size
+    */
+    void resize(const int a_size);
 
-  /*!
-    @brief Get size of m_data
-  */
-  int size();
+    /*!
+      @brief Sets the realm for this object
+    */
+    void set_realm(const std::string a_realm);
 
-  /*!
-    @brief Get size of m_data
-  */
-  const int size() const;
+    /*!
+      @brief Get size of m_data
+    */
+    int size();
 
-  /*!
-    @brief Get underlying data. Returns m_data. 
-  */
-  Vector<RefCountedPtr<LevelData<T> > >& get_data();
+    /*!
+      @brief Get size of m_data
+    */
+    const int size() const;
 
-  /*!
-    @brief Get underlying data. Returns const m_data.
-  */
-  const Vector<RefCountedPtr<LevelData<T> > >& get_data() const;
+    /*!
+      @brief Get underlying data. Returns m_data. 
+    */
+    Vector<RefCountedPtr<LevelData<T> > >& get_data();
 
-  /*!
-    @brief General copying of another object. This does a local copy if the two realms are the same. Otherwise it does
-    a communication copy. In Chombo-speak this is localCopyTo versus copyTo. 
-  */
-  void copy(const EBAMRData<T>& a_other);
+    /*!
+      @brief Get underlying data. Returns const m_data.
+    */
+    const Vector<RefCountedPtr<LevelData<T> > >& get_data() const;
 
-  /*!
-    @brief General copying of another object. This does a local copy if the two realms are the same. Otherwise it does
-    a communication copy. In Chombo-speak this is localCopyTo versus copyTo. 
-  */
-  void copy(const Interval a_srcInterval, const EBAMRData<T>& a_other, const Interval a_dstInterval);
+    /*!
+      @brief General copying of another object. This does a local copy if the two realms are the same. Otherwise it does
+      a communication copy. In Chombo-speak this is localCopyTo versus copyTo. 
+    */
+    void copy(const EBAMRData<T>& a_other);
 
-  /*!
-    @brief Push a LevelData<T> object to the back of the data vector
-  */
-  void push_back(RefCountedPtr<LevelData<T> >& a_levelData);
+    /*!
+      @brief General copying of another object. This does a local copy if the two realms are the same. Otherwise it does
+      a communication copy. In Chombo-speak this is localCopyTo versus copyTo. 
+    */
+    void copy(const Interval a_srcInterval, const EBAMRData<T>& a_other, const Interval a_dstInterval);
 
-  /*!
-    @brief Returns the string identifier for whatever realm this data is supposed to be allocated over. 
-  */
-  const std::string get_realm() const;
+    /*!
+      @brief Push a LevelData<T> object to the back of the data vector
+    */
+    void push_back(RefCountedPtr<LevelData<T> >& a_levelData);
+
+    /*!
+      @brief Returns the string identifier for whatever realm this data is supposed to be allocated over. 
+    */
+    const std::string get_realm() const;
   
-protected:
+  protected:
 
-  /*!
-    @brief Identifier for realm
-  */
-  std::string m_realm;
+    /*!
+      @brief Identifier for realm
+    */
+    std::string m_realm;
 
-  /*!
-    @brief Underlying data
-  */
-  Vector<RefCountedPtr<LevelData<T> > > m_data;
-};
+    /*!
+      @brief Underlying data
+    */
+    Vector<RefCountedPtr<LevelData<T> > > m_data;
+  };
+}
 
 #include <EBAMRDataI.H>
 

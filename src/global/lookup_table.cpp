@@ -7,18 +7,21 @@
 
 #include "lookup_table.H"
 
-lookup_table::lookup_table(){
+namespace ChomboDischarge {
+  
+  lookup_table::lookup_table(){
 
-  m_num_entries = 0;
-  m_x.resize(m_num_entries);
-  m_y.resize(m_num_entries);
-}
+    m_num_entries = 0;
+    m_x.resize(m_num_entries);
+    m_y.resize(m_num_entries);
+  }
 
-lookup_table::~lookup_table(){}
+  lookup_table::~lookup_table(){}
 
-lookup_table::lookup_table(const lookup_table& a_table){
-  m_dx = a_table.m_dx;
-  m_num_entries = a_table.m_num_entries;
-  m_x = a_table.m_x;
-  m_y = a_table.m_y;
+  lookup_table::lookup_table(const lookup_table& a_table){
+    m_dx = a_table.m_dx;
+    m_num_entries = a_table.m_num_entries;
+    m_x = a_table.m_x;
+    m_y = a_table.m_y;
+  }
 }
