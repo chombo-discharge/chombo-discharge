@@ -13,100 +13,103 @@
 #include "amr_mesh.H"
 #include "real_box.H"
 
-using EBAMRTags = Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > >;
-
-/*!
-  @brief Abstract class for tagging cells across an AMR hierarchy
-*/
-class cell_tagger {
-public:
+namespace ChomboDischarge {
+  
+  using EBAMRTags = Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > >;
 
   /*!
-    @brief Weak constructor, must subsequently call define
+    @brief Abstract class for tagging cells across an AMR hierarchy
   */
-  cell_tagger();
+  class cell_tagger {
+  public:
 
-  /*!
-    @brief Destructor
-  */
-  virtual ~cell_tagger();
+    /*!
+      @brief Weak constructor, must subsequently call define
+    */
+    cell_tagger();
 
-  /*!
-    @brief Regrid storage for tracer field
-  */
-  virtual void regrid() = 0;
+    /*!
+      @brief Destructor
+    */
+    virtual ~cell_tagger();
 
-  /*!
-    @brief Parse class options
-  */
-  virtual void parse_options() = 0;
+    /*!
+      @brief Regrid storage for tracer field
+    */
+    virtual void regrid() = 0;
 
-  /*!
-    @brief Parse class options
-  */
-  virtual void parse_runtime_options();
+    /*!
+      @brief Parse class options
+    */
+    virtual void parse_options() = 0;
 
-  /*!
-    @brief Tag cells
-  */
-  virtual bool tag_cells(EBAMRTags& a_tags) = 0;
+    /*!
+      @brief Parse class options
+    */
+    virtual void parse_runtime_options();
 
-  /*!
-    @brief Get number of tracer fields
-  */
-  virtual int get_num_plot_vars();
+    /*!
+      @brief Tag cells
+    */
+    virtual bool tag_cells(EBAMRTags& a_tags) = 0;
 
-  /*!
-    @brief Write plot data
-  */
-  virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp);
+    /*!
+      @brief Get number of tracer fields
+    */
+    virtual int get_num_plot_vars();
 
-  /*!
-    @brief Get tag buffer
-  */
-  int get_buffer();
+    /*!
+      @brief Write plot data
+    */
+    virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp);
 
-protected:
+    /*!
+      @brief Get tag buffer
+    */
+    int get_buffer();
 
-  /*!
-    @brief Class name
-  */
-  std::string m_name;
+  protected:
 
-  /*!
-    @brief Verbosity
-  */
-  int m_verbosity;
+    /*!
+      @brief Class name
+    */
+    std::string m_name;
 
-  /*!
-    @brief Buffer. Grow tags by this amount (finest level only)
-  */
-  int m_buffer;
+    /*!
+      @brief Verbosity
+    */
+    int m_verbosity;
 
-  /*!
-    @brief Boxes used for tagging
-  */
-  Vector<real_box> m_tagboxes;
+    /*!
+      @brief Buffer. Grow tags by this amount (finest level only)
+    */
+    int m_buffer;
 
-  /*!
-    @brief Check if a point is inside a tagging box
-  */
-  bool inside_tag_box(const RealVect a_pos);
+    /*!
+      @brief Boxes used for tagging
+    */
+    Vector<real_box> m_tagboxes;
 
-  /*!
-    @brief Parse boxes
-  */
-  virtual void parse_boxes();
+    /*!
+      @brief Check if a point is inside a tagging box
+    */
+    bool inside_tag_box(const RealVect a_pos);
 
-  /*!
-    @brief Parse buffer
-  */
-  virtual void parse_buffer();
+    /*!
+      @brief Parse boxes
+    */
+    virtual void parse_boxes();
 
-  /*!
-    @brief Set verbosity
-  */
-  virtual void parse_verbosity();
-};
+    /*!
+      @brief Parse buffer
+    */
+    virtual void parse_buffer();
+
+    /*!
+      @brief Set verbosity
+    */
+    virtual void parse_verbosity();
+  };
+}
 
 #endif
