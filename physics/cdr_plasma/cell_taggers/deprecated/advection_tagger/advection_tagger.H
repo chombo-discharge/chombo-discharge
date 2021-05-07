@@ -17,10 +17,10 @@
   Class options
   -------------
 
-      gradient_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
-      gradient_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
-      gradient_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
-      gradient_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
+  gradient_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
+  gradient_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
+  gradient_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
+  gradient_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
 
 */
 class gradient_tagger : public full_tagger {
@@ -89,5 +89,5 @@ protected:
     @brief Threshold for coarsening based on magnitude
   */
   Real m_refi_mag;
-};
+#include "CD_NamespaceFooter.H"
 #endif

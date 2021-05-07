@@ -131,4 +131,4 @@ void rk2::sigma_storage::deallocate_storage(){
   m_amr->deallocate(m_phi);
   m_amr->deallocate(m_k1);
   m_amr->deallocate(m_k2);
-}
+#include "CD_NamespaceFooter.H"

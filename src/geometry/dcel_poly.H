@@ -13,59 +13,59 @@
 #include <memory>
 #include <vector>
 
-namespace ChomboDischarge {
-  namespace dcel {
+#include "CD_NamespaceHeader.H"
+namespace dcel {
     
-    template <class T>
-    class Polygon2D {
-    public:
+  template <class T>
+  class Polygon2D {
+  public:
 
-      using Vec2 = Vec2T<T>;
-      using Vec3 = Vec3T<T>;
+    using Vec2 = Vec2T<T>;
+    using Vec3 = Vec3T<T>;
 
-      Polygon2D() = delete; 
-      Polygon2D(const Vec3& a_normal, const std::vector<Vec3>& a_points);
-      ~Polygon2D() = default;
+    Polygon2D() = delete; 
+    Polygon2D(const Vec3& a_normal, const std::vector<Vec3>& a_points);
+    ~Polygon2D() = default;
 
-      inline
-      bool isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm a_algorithm) const noexcept;
+    inline
+    bool isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm a_algorithm) const noexcept;
 
-      inline
-      bool isPointInsidePolygonWindingNumber(const Vec3& a_point) const noexcept;
+    inline
+    bool isPointInsidePolygonWindingNumber(const Vec3& a_point) const noexcept;
 
-      inline
-      bool isPointInsidePolygonSubtend(const Vec3& a_point) const noexcept;
+    inline
+    bool isPointInsidePolygonSubtend(const Vec3& a_point) const noexcept;
 
-      inline
-      bool isPointInsidePolygonCrossingNumber(const Vec3& a_point) const noexcept;
+    inline
+    bool isPointInsidePolygonCrossingNumber(const Vec3& a_point) const noexcept;
     
-    private:
+  private:
 
-      inline
-      Vec2 projectPoint(const Vec3& a_point) const noexcept;
+    inline
+    Vec2 projectPoint(const Vec3& a_point) const noexcept;
 
-      inline
-      void define(const Vec3& a_normal, const std::vector<Vec3>& a_points);
+    inline
+    void define(const Vec3& a_normal, const std::vector<Vec3>& a_points);
 
-      inline
-      int computeWindingNumber(const Vec2& P) const noexcept;
+    inline
+    int computeWindingNumber(const Vec2& P) const noexcept;
 
-      inline
-      int computeCrossingNumber(const Vec2& P) const noexcept;
+    inline
+    int computeCrossingNumber(const Vec2& P) const noexcept;
 
-      inline
-      T computeSubtendedAngle(const Vec2& P) const noexcept;
+    inline
+    T computeSubtendedAngle(const Vec2& P) const noexcept;
 
 
     
-      int m_ignoreDir;
-      int m_xDir;
-      int m_yDir;
+    int m_ignoreDir;
+    int m_xDir;
+    int m_yDir;
     
-      std::vector<Vec2> m_points;
-    };
-  }
+    std::vector<Vec2> m_points;
+  };
 }
+#include "CD_NamespaceFooter.H"
 
 #include "dcel_polyI.H"
 

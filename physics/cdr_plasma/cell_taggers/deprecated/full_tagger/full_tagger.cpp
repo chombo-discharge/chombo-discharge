@@ -412,4 +412,4 @@ void full_tagger::compute_rte_densities(Vector<EBAMRCellData>& a_rte_densities){
     data_ops::set_value(a_rte_densities[idx], 0.0);
     data_ops::incr(a_rte_densities[idx], m_scratch, 1.0);
   }
-}
+#include "CD_NamespaceFooter.H"

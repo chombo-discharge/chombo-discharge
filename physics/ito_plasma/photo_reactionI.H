@@ -10,23 +10,23 @@
 
 #include "photo_reaction.H"
 
-namespace ChomboDischarge {
-  using namespace physics::ito_plasma;
+#include "CD_NamespaceHeader.H"
+using namespace physics::ito_plasma;
 
-  inline
-  const int& photo_reaction::source() const {
-    return m_source;
-  }
-
-  inline
-  const std::deque<int>& photo_reaction::targets() const {
-    return m_targets;
-  }
-
-  inline
-  const std::deque<std::pair<int, Real> >& photo_reaction::get_target_energies() const{
-    return m_energies;
-  }
+inline
+const int& photo_reaction::source() const {
+  return m_source;
 }
+
+inline
+const std::deque<int>& photo_reaction::targets() const {
+  return m_targets;
+}
+
+inline
+const std::deque<std::pair<int, Real> >& photo_reaction::get_target_energies() const{
+  return m_energies;
+}
+#include "CD_NamespaceFooter.H"
 
 #endif

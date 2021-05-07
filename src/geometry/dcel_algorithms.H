@@ -8,27 +8,27 @@
 #ifndef _DCEL_ALGORITHMS_H_
 #define _DCEL_ALGORITHMS_H_
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
 
-  namespace dcel {
+namespace dcel {
 
-    enum class InsideOutsideAlgorithm {
-      SubtendedAngle,
-      CrossingNumber,
-      WindingNumber
-    };
+  enum class InsideOutsideAlgorithm {
+    SubtendedAngle,
+    CrossingNumber,
+    WindingNumber
+  };
 
-    enum class VertexNormalWeight {
-      None,
-      Angle,
-    };
+  enum class VertexNormalWeight {
+    None,
+    Angle,
+  };
 
-    enum class SearchAlgorithm{
-      Direct,
-      Direct2,
-      KdTree
-    };
-  }
+  enum class SearchAlgorithm{
+    Direct,
+    Direct2,
+    KdTree
+  };
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

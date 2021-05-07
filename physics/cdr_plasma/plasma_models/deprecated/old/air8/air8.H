@@ -232,6 +232,6 @@ private:
 				  const Vector<Real>& a_extrap_cdr_fluxes,
 				  const Real&         a_townsend2,
 				  const Real&         a_quantum_efficiency) const;
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

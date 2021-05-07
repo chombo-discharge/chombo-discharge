@@ -13,45 +13,45 @@
 
 #include <ConductivityBaseDomainBC.H>
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
+
+/*!
+  @brief Class for generating conductivitydomainbc_wrapper objects
+  @details This class does not (currently) do Robin boundary conditions, although it can probably be extended to take care of 
+  those cases as well. 
+*/
+class conductivitydomainbc_wrapper_factory : public BaseDomainBCFactory {
+public:
+  
+  /*!
+    @brief Constructor
+  */
+  conductivitydomainbc_wrapper_factory();
 
   /*!
-    @brief Class for generating conductivitydomainbc_wrapper objects
-    @details This class does not (currently) do Robin boundary conditions, although it can probably be extended to take care of 
-    those cases as well. 
+    @brief Destructor
   */
-  class conductivitydomainbc_wrapper_factory : public BaseDomainBCFactory {
-  public:
+  virtual ~conductivitydomainbc_wrapper_factory();
+
+  virtual void set_wallbc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc);
+  virtual void set_potentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials);
+  virtual void set_robin_coefs(const Vector<RefCountedPtr<robin_coef> >& a_robinco);
+
+  /*!
+    @brief Factory method
+  */
+  virtual conductivitydomainbc_wrapper* create(const ProblemDomain& a_domain,
+					       const EBISLayout&    a_ebisl,
+					       const RealVect&      a_dx);
   
-    /*!
-      @brief Constructor
-    */
-    conductivitydomainbc_wrapper_factory();
+protected:
 
-    /*!
-      @brief Destructor
-    */
-    virtual ~conductivitydomainbc_wrapper_factory();
+  bool m_hasbc;
 
-    virtual void set_wallbc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc);
-    virtual void set_potentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials);
-    virtual void set_robin_coefs(const Vector<RefCountedPtr<robin_coef> >& a_robinco);
+  Vector<RefCountedPtr<wall_bc> >        m_wallbc;      // BC identifier
+  Vector<RefCountedPtr<BaseBCFuncEval> > m_potentials;  // Wall potential
+  Vector<RefCountedPtr<robin_coef> >     m_robinco;     // Robin coefficients for Robin
 
-    /*!
-      @brief Factory method
-    */
-    virtual conductivitydomainbc_wrapper* create(const ProblemDomain& a_domain,
-						 const EBISLayout&    a_ebisl,
-						 const RealVect&      a_dx);
-  
-  protected:
-
-    bool m_hasbc;
-
-    Vector<RefCountedPtr<wall_bc> >        m_wallbc;      // BC identifier
-    Vector<RefCountedPtr<BaseBCFuncEval> > m_potentials;  // Wall potential
-    Vector<RefCountedPtr<robin_coef> >     m_robinco;     // Robin coefficients for Robin
-
-  };
-}
+};
+#include "CD_NamespaceFooter.H"
 #endif

@@ -16,40 +16,40 @@
 
 #include <BaseIF.H>
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
 
-  using namespace dcel;
-  using namespace BVH;
+using namespace dcel;
+using namespace BVH;
 
-  template <class T, class BV>
-  class bvh_if : public BaseIF {
-  public:
+template <class T, class BV>
+class bvh_if : public BaseIF {
+public:
 
-    using Vec3  = Vec3T<T>;
-    using face  = faceT<T>;
-    using Node  = NodeT<T, face, BV>;
+  using Vec3  = Vec3T<T>;
+  using face  = faceT<T>;
+  using Node  = NodeT<T, face, BV>;
   
 
-    //  bvh_if() = delete;
-    bvh_if();
-    bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInside);
-    bvh_if(const bvh_if& a_object);
-    ~bvh_if();
+  //  bvh_if() = delete;
+  bvh_if();
+  bvh_if(const std::shared_ptr<Node>& a_root, const bool a_flipInside);
+  bvh_if(const bvh_if& a_object);
+  ~bvh_if();
 
-    Real value(const RealVect& a_point) const override;
+  Real value(const RealVect& a_point) const override;
   
-    BaseIF* newImplicitFunction() const override;
+  BaseIF* newImplicitFunction() const override;
 
-  protected:
-    std::shared_ptr<Node> m_root;
+protected:
+  std::shared_ptr<Node> m_root;
 
-    mutable long m_numCalled;
+  mutable long m_numCalled;
 
-    mutable std::chrono::duration<double> m_timespan;
+  mutable std::chrono::duration<double> m_timespan;
   
-    bool m_flipInside;
-  };
-}
+  bool m_flipInside;
+};
+#include "CD_NamespaceFooter.H"
 
 #include "bvh_ifI.H"
 

@@ -75,7 +75,7 @@ protected:
   Real m_lambda;
   Real m_A;
   Real m_pO2;
-};
+#include "CD_NamespaceFooter.H"
 
 
 

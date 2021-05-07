@@ -10,17 +10,17 @@
 
 #include "computational_geometry.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
 
-  /*!
-    @brief Class that describes a rod electrode with surface roughness
-  */
-  class rough_rod : public computational_geometry {
-  public:
+/*!
+  @brief Class that describes a rod electrode with surface roughness
+*/
+class rough_rod : public computational_geometry {
+public:
 
-    rough_rod();
-    ~rough_rod();
-  };
-}
+  rough_rod();
+  ~rough_rod();
+};
+#include "CD_NamespaceFooter.H"
 
 #endif

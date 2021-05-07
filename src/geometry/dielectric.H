@@ -11,62 +11,62 @@
 #include <BaseIF.H>
 #include <RefCountedPtr.H>
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
+/*!
+  @brief dielectric class. Simple tuple.
+*/
+class dielectric {
+public:
+
   /*!
-    @brief dielectric class. Simple tuple.
+    @brief Weak constructor
   */
-  class dielectric {
-  public:
-
-    /*!
-      @brief Weak constructor
-    */
-    dielectric();
+  dielectric();
   
-    /*!
-      @brief Constructor. Calls define
-    */
-    dielectric(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
+  /*!
+    @brief Constructor. Calls define
+  */
+  dielectric(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
 
-    /*!
-      @brief Constructor, allows for spatially dependent permittivity
-    */
-    dielectric(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos));
+  /*!
+    @brief Constructor, allows for spatially dependent permittivity
+  */
+  dielectric(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos));
 
-    /*!
-      @brief 
-    */
-    virtual ~dielectric();
+  /*!
+    @brief 
+  */
+  virtual ~dielectric();
 
-    /*!
-      @brief Define function
-    */
-    virtual void define(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
+  /*!
+    @brief Define function
+  */
+  virtual void define(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
 
-    /*!
-      @brief Define function for variable permittivity
-    */
-    virtual void define(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos));
+  /*!
+    @brief Define function for variable permittivity
+  */
+  virtual void define(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos));
 
-    /*!
-      @brief Get level-set function
-    */
-    virtual const RefCountedPtr<BaseIF>& get_function() const;
+  /*!
+    @brief Get level-set function
+  */
+  virtual const RefCountedPtr<BaseIF>& get_function() const;
 
-    /*!
-      @brief Get permittivity
-    */
-    virtual Real get_permittivity(const RealVect a_pos) const;
+  /*!
+    @brief Get permittivity
+  */
+  virtual Real get_permittivity(const RealVect a_pos) const;
 
-  protected:
+protected:
 
-    RefCountedPtr<BaseIF> m_baseif;
+  RefCountedPtr<BaseIF> m_baseif;
 
-    Real m_permittivity;
+  Real m_permittivity;
 
-    Real (*m_variablepermittivity)(const RealVect a_pos);
+  Real (*m_variablepermittivity)(const RealVect a_pos);
   
-    bool m_constant;
-  };
-}
+  bool m_constant;
+};
+#include "CD_NamespaceFooter.H"
 #endif

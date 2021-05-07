@@ -517,4 +517,4 @@ Real air8::compute_e_2O2_to_O2minus_O2(const Real a_Te)             const {retur
 Real air8::compute_O2minus_O4plus_to_3O2()                          const {return 1.E-13;}
 Real air8::compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg)       const {return 3.12E-31*pow(a_Tg, -2.5);}
 Real air8::compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg)       const {return 3.12E-31*pow(a_Tg, -2.5);}
-Real air8::compute_Oplus_O2_to_O_O2(const Real a_Tg)                const {return 3.46E-12/sqrt(a_Tg);}
+#include "CD_NamespaceFooter.H"

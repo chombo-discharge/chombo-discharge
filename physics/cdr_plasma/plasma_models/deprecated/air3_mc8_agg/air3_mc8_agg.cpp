@@ -643,4 +643,4 @@ Real air3_mc8_agg::compute_alpha_eff(const RealVect a_E) const{
   const Real alpha = m_e_alpha.get_entry(a_E.vectorLength());
   const Real eta   = m_e_eta.get_entry(a_E.vectorLength());
   return (alpha-eta);
-}
+#include "CD_NamespaceFooter.H"

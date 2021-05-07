@@ -10,18 +10,18 @@
 
 #include "RealVect.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
 
-  class memrep {
-  public:
+class memrep {
+public:
   
-    static void get_max_min_memory();
+  static void get_max_min_memory();
 
-    static void get_max_min_memory(Real& a_max_peak, Real& a_min_peak, Real& a_min_unfreed, Real& a_max_unfreed);
+  static void get_max_min_memory(Real& a_max_peak, Real& a_min_peak, Real& a_min_unfreed, Real& a_max_unfreed);
 
-    static void get_memory(Vector<Real>& a_peak, Vector<Real>& a_unfreed);
-  };
+  static void get_memory(Vector<Real>& a_peak, Vector<Real>& a_unfreed);
+};
 
-}
+#include "CD_NamespaceFooter.H"
 
 #endif

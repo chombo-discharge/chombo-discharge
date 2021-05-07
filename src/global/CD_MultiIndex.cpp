@@ -162,6 +162,6 @@ void MultiIndex::makeMaps(){
   for (const auto& lm : m_mapToLinearIndex){
     m_mapToMultiIndex.emplace(lm.second, lm.first);
   }
-}
+#include "CD_NamespaceFooter.H"
 
 #include "CD_NamespaceFooter.H"

@@ -14,81 +14,81 @@
 
 #include <BaseEBBC.H>
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
+
+/*!
+  @brief Factory class for generating Robin boundary conditions \f$a\phi + b\partial_n\phi = g\f$, where \f$n\f$ is the EB unit normal. 
+*/
+class robinconductivityebbcfactory : public BaseEBBCFactory {
+public:
 
   /*!
-    @brief Factory class for generating Robin boundary conditions \f$a\phi + b\partial_n\phi = g\f$, where \f$n\f$ is the EB unit normal. 
+    @brief Constructor
   */
-  class robinconductivityebbcfactory : public BaseEBBCFactory {
-  public:
+  robinconductivityebbcfactory(const RealVect a_origin);
 
-    /*!
-      @brief Constructor
-    */
-    robinconductivityebbcfactory(const RealVect a_origin);
+  /*!
+    @brief Destructor
+  */
+  ~robinconductivityebbcfactory();
 
-    /*!
-      @brief Destructor
-    */
-    ~robinconductivityebbcfactory();
+  /*!
+    @brief Set bc order
+  */
+  virtual void set_type(const stencil_type a_type);
 
-    /*!
-      @brief Set bc order
-    */
-    virtual void set_type(const stencil_type a_type);
+  /*!
+    @brief Function based coefficients and right hand sides
+  */
+  virtual void set_coefs(RefCountedPtr<robin_coef> a_robinco);
 
-    /*!
-      @brief Function based coefficients and right hand sides
-    */
-    virtual void set_coefs(RefCountedPtr<robin_coef> a_robinco);
+  /*!
+    @brief Set constant coefficients
+  */
+  virtual void set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs);
 
-    /*!
-      @brief Set constant coefficients
-    */
-    virtual void set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs);
+  /*!
+    @brief Set data-based coefficients
+  */
+  virtual void set_coefs(const EBAMRIVData& a_aco,
+			 const EBAMRIVData& a_bco,
+			 const EBAMRIVData& a_rhs);
 
-    /*!
-      @brief Set data-based coefficients
-    */
-    virtual void set_coefs(const EBAMRIVData& a_aco,
-			   const EBAMRIVData& a_bco,
-			   const EBAMRIVData& a_rhs);
+  /*!
+    @brief Create Robin type boundary condition
+  */
+  robinconductivityebbc* create(const ProblemDomain& a_domain,
+				const EBISLayout&    a_ebisl,
+				const RealVect&      a_dx,
+				const IntVect*       a_ghost_phi = 0,
+				const IntVect*       a_ghost_rhs = 0);
 
-    /*!
-      @brief Create Robin type boundary condition
-    */
-    robinconductivityebbc* create(const ProblemDomain& a_domain,
-				  const EBISLayout&    a_ebisl,
-				  const RealVect&      a_dx,
-				  const IntVect*       a_ghost_phi = 0,
-				  const IntVect*       a_ghost_rhs = 0);
+protected:
 
-  protected:
+  stencil_type m_type;
 
-    stencil_type m_type;
+  RealVect m_origin;
 
-    RealVect m_origin;
+  RefCountedPtr<robin_coef> m_robinco;
 
-    RefCountedPtr<robin_coef> m_robinco;
+  Real m_aco;
 
-    Real m_aco;
-
-    Real m_bco;
+  Real m_bco;
   
-    Real m_rhs;
+  Real m_rhs;
 
-    EBAMRIVData m_acodata;
+  EBAMRIVData m_acodata;
 
-    EBAMRIVData m_bcodata;
+  EBAMRIVData m_bcodata;
   
-    EBAMRIVData m_rhsdata;
+  EBAMRIVData m_rhsdata;
 
-    bool m_const_coeff;
+  bool m_const_coeff;
 
-    bool m_data_coeff;
+  bool m_data_coeff;
 
-    bool m_func_coeff;
-  };
-}
+  bool m_func_coeff;
+};
+#include "CD_NamespaceFooter.H"
 
 #endif

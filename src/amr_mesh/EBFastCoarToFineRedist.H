@@ -9,35 +9,35 @@
 
 #include "EBCoarToFineRedist.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
 
-  /*!
-    @brief EBFineToCoarRedist with faster define function
-  */
-  class EBFastCoarToFineRedist : public EBCoarToFineRedist {
-  public:
+/*!
+  @brief EBFineToCoarRedist with faster define function
+*/
+class EBFastCoarToFineRedist : public EBCoarToFineRedist {
+public:
 
-    EBFastCoarToFineRedist();
-    ~EBFastCoarToFineRedist();
+  EBFastCoarToFineRedist();
+  ~EBFastCoarToFineRedist();
 
-    void define(const EBLevelGrid&                      a_eblgFine,
-		const EBLevelGrid&                      a_eblgCoar,
-		const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
-		const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
-		const int&                              a_nref,
-		const int&                              a_nvar,
-		const int&                              a_redistRad);
+  void define(const EBLevelGrid&                      a_eblgFine,
+	      const EBLevelGrid&                      a_eblgCoar,
+	      const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
+	      const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
+	      const int&                              a_nref,
+	      const int&                              a_nvar,
+	      const int&                              a_redistRad);
 
-  protected:
+protected:
 
-    void makeCedFineSets(   IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar);
-    void makeCoarSets(const IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
+  void makeCedFineSets(   IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar);
+  void makeCoarSets(const IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
 
-    // Debugging functions
-    void gatherBroadcast(  IntVectSet& a_set);
-    void gatherSetsCedFine(IntVectSet& a_setsCedFine);
-    void gatherSetsCoar(   IntVectSet& a_setsCoar);
-  };
-}
+  // Debugging functions
+  void gatherBroadcast(  IntVectSet& a_set);
+  void gatherSetsCedFine(IntVectSet& a_setsCedFine);
+  void gatherSetsCoar(   IntVectSet& a_setsCoar);
+};
+#include "CD_NamespaceFooter.H"
 
 #endif

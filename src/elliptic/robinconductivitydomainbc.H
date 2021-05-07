@@ -14,107 +14,107 @@
 #include <BaseDomainBC.H>
 #include <ConductivityBaseDomainBC.H>
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
   
+/*!
+  @brief Boundary condition class for Robin type boundary conditions
+*/
+class robinconductivitydomainbc : public ConductivityBaseDomainBC {
+public:
+
   /*!
-    @brief Boundary condition class for Robin type boundary conditions
+    @brief Constructor
   */
-  class robinconductivitydomainbc : public ConductivityBaseDomainBC {
-  public:
+  robinconductivitydomainbc();
 
-    /*!
-      @brief Constructor
-    */
-    robinconductivitydomainbc();
+  /*!
+    @brief Destructor
+  */
+  ~robinconductivitydomainbc();
 
-    /*!
-      @brief Destructor
-    */
-    ~robinconductivitydomainbc();
+  /*!
+    @brief Function based coefficients and right hand sides
+  */
+  virtual void set_coefs(RefCountedPtr<robin_coef> a_robinco);
 
-    /*!
-      @brief Function based coefficients and right hand sides
-    */
-    virtual void set_coefs(RefCountedPtr<robin_coef> a_robinco);
+  /*!
+    @brief Set constant coefficients
+  */
+  virtual void set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs);
 
-    /*!
-      @brief Set constant coefficients
-    */
-    virtual void set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs);
+  /*!
+    @brief Set data-based coefficients
+  */
+  virtual void set_coefs(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
+			 const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
+			 const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs);
 
-    /*!
-      @brief Set data-based coefficients
-    */
-    virtual void set_coefs(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
-			   const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
-			   const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs);
+  /*!
+    @brief Face flux
+  */
+  virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux, 
+			   const BaseFab<Real>&  a_phi, 
+			   const RealVect&       a_probLo, 
+			   const RealVect&       a_dx, 
+			   const int&            a_idir, 
+			   const Side::LoHiSide& a_side, 
+			   const DataIndex&      a_dit, 
+			   const Real&           a_time, 
+			   const bool&           a_useHomogeneous);
 
-    /*!
-      @brief Face flux
-    */
-    virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux, 
-			     const BaseFab<Real>&  a_phi, 
-			     const RealVect&       a_probLo, 
-			     const RealVect&       a_dx, 
-			     const int&            a_idir, 
-			     const Side::LoHiSide& a_side, 
-			     const DataIndex&      a_dit, 
-			     const Real&           a_time, 
-			     const bool&           a_useHomogeneous);
+  /*!
+    @brief Compute face flux
+  */
+  virtual void getFaceFlux(Real&                 a_faceFlux,
+			   const VolIndex&       a_vof, 
+			   const int&            a_comp, 
+			   const EBCellFAB&      a_phi, 
+			   const RealVect&       a_probLo, 
+			   const RealVect&       a_dx, 
+			   const int&            a_idir, 
+			   const Side::LoHiSide& a_side, 
+			   const DataIndex&      a_dit, 
+			   const Real&           a_time, 
+			   const bool&           a_useHomogeneous);
 
-    /*!
-      @brief Compute face flux
-    */
-    virtual void getFaceFlux(Real&                 a_faceFlux,
-			     const VolIndex&       a_vof, 
-			     const int&            a_comp, 
-			     const EBCellFAB&      a_phi, 
-			     const RealVect&       a_probLo, 
-			     const RealVect&       a_dx, 
-			     const int&            a_idir, 
-			     const Side::LoHiSide& a_side, 
-			     const DataIndex&      a_dit, 
-			     const Real&           a_time, 
-			     const bool&           a_useHomogeneous);
-
-    /*!
-      @brief Compute gradient
-    */
-    virtual void getFaceGradPhi(Real&                 a_faceFlux, 
-				const FaceIndex&      a_face, 
-				const int&            a_comp, 
-				const EBCellFAB&      a_phi, 
-				const RealVect&       a_probLo, 
-				const RealVect&       a_dx, 
-				const int&            a_idir, 
-				const Side::LoHiSide& a_side, 
-				const DataIndex&      a_dit, 
-				const Real&           a_time, 
-				const bool&           a_useAreaFrac, 
-				const RealVect&       a_centroid, 
-				const bool&           a_useHomogeneous);
+  /*!
+    @brief Compute gradient
+  */
+  virtual void getFaceGradPhi(Real&                 a_faceFlux, 
+			      const FaceIndex&      a_face, 
+			      const int&            a_comp, 
+			      const EBCellFAB&      a_phi, 
+			      const RealVect&       a_probLo, 
+			      const RealVect&       a_dx, 
+			      const int&            a_idir, 
+			      const Side::LoHiSide& a_side, 
+			      const DataIndex&      a_dit, 
+			      const Real&           a_time, 
+			      const bool&           a_useAreaFrac, 
+			      const RealVect&       a_centroid, 
+			      const bool&           a_useHomogeneous);
   
-  protected:
+protected:
   
-    RefCountedPtr<robin_coef> m_robinco;
+  RefCountedPtr<robin_coef> m_robinco;
 
-    Real m_aco;
+  Real m_aco;
 
-    Real m_bco;
+  Real m_bco;
   
-    Real m_rhs;
+  Real m_rhs;
 
-    RefCountedPtr<LevelData<EBFluxFAB> > m_acodata;
+  RefCountedPtr<LevelData<EBFluxFAB> > m_acodata;
 
-    RefCountedPtr<LevelData<EBFluxFAB> > m_bcodata;
+  RefCountedPtr<LevelData<EBFluxFAB> > m_bcodata;
   
-    RefCountedPtr<LevelData<EBFluxFAB> > m_rhsdata;
+  RefCountedPtr<LevelData<EBFluxFAB> > m_rhsdata;
 
-    bool m_const_coeff;
+  bool m_const_coeff;
 
-    bool m_data_coeff;
+  bool m_data_coeff;
 
-    bool m_func_coeff;  
-  };
-}
+  bool m_func_coeff;  
+};
+#include "CD_NamespaceFooter.H"
 #endif

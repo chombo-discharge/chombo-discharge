@@ -34,10 +34,10 @@ int main(int argc, char* argv[]){
   // Get potential from input script 
   std::string basename; 
   {
-     ParmParse pp("air9eed_bourdon");
-     pp.get("potential", g_potential);
-     pp.get("basename",  basename);
-     setPoutBaseName(basename);
+    ParmParse pp("air9eed_bourdon");
+    pp.get("potential", g_potential);
+    pp.get("basename",  basename);
+    setPoutBaseName(basename);
   }
 
   // Set geometry and AMR 
@@ -76,4 +76,4 @@ int main(int argc, char* argv[]){
   CH_TIMER_REPORT();
   MPI_Finalize();
 #endif
-}
+#include "CD_NamespaceFooter.H"

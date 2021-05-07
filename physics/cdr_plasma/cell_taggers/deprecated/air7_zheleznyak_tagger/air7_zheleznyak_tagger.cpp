@@ -83,4 +83,4 @@ bool air7_zheleznyak_tagger::refine_cell(const RealVect         a_pos,
   const bool refine2 = a_tracer[1]*a_dx > m_refi_alpha;
 
   return refine1 || refine2;
-}
+#include "CD_NamespaceFooter.H"

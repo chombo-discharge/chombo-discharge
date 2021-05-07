@@ -10,17 +10,17 @@
 
 #include "rte_species.H"
 
-namespace ChomboDischarge {
-  namespace physics {
-    namespace rte {
+#include "CD_NamespaceHeader.H"
+namespace physics {
+  namespace rte {
 
-      class rte_physics_species : public rte_species {
-      public:
-	rte_physics_species();
-	~rte_physics_species();
-      };
-    }
+    class rte_physics_species : public rte_species {
+    public:
+      rte_physics_species();
+      ~rte_physics_species();
+    };
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

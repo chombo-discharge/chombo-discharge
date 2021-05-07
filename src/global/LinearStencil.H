@@ -12,56 +12,56 @@
 #include <ProblemDomain.H>
 #include <EBISBox.H>
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
+  
+/*!
+  @brief Static class with routines for getting various kinds of stencils
+*/
+class LinearStencil {
+public:
+
+  static Real tolerance;
+
+  /*!
+    @brief Get a bi(tri)linear interpolation stencil in 2D(3D)
+  */
+  static bool getLinearInterpStencil(VoFStencil&          a_stencil, 
+				     const RealVect&      a_centroid,
+				     const VolIndex&      a_vof,
+				     const ProblemDomain& a_domain,
+				     const EBISBox&       a_ebisbox);
+
+protected:
   
   /*!
-    @brief Static class with routines for getting various kinds of stencils
+    @brief Compute a bilinear interpolation stencil
   */
-  class LinearStencil {
-  public:
-
-    static Real tolerance;
-
-    /*!
-      @brief Get a bi(tri)linear interpolation stencil in 2D(3D)
-    */
-    static bool getLinearInterpStencil(VoFStencil&          a_stencil, 
-				       const RealVect&      a_centroid,
-				       const VolIndex&      a_vof,
-				       const ProblemDomain& a_domain,
-				       const EBISBox&       a_ebisbox);
-
-  protected:
-  
-    /*!
-      @brief Compute a bilinear interpolation stencil
-    */
-    static bool computeInterpStencil1D(VoFStencil&          a_stencil,
-				       const RealVect&      a_centroid,
-				       const VolIndex&      a_vof,
-				       const ProblemDomain& a_domain,
-				       const EBISBox&       a_ebisbox,
-				       const int            a_interp_dir);
-    /*!
-      @brief Compute a bilinear interpolation stencil
-    */
-    static bool computeInterpStencil2D(VoFStencil&          a_stencil,
-				       const RealVect&      a_centroid,
-				       const VolIndex&      a_vof,
-				       const ProblemDomain& a_domain,
-				       const EBISBox&       a_ebisbox,
-				       const int            a_no_interp_dir = 2);
+  static bool computeInterpStencil1D(VoFStencil&          a_stencil,
+				     const RealVect&      a_centroid,
+				     const VolIndex&      a_vof,
+				     const ProblemDomain& a_domain,
+				     const EBISBox&       a_ebisbox,
+				     const int            a_interp_dir);
+  /*!
+    @brief Compute a bilinear interpolation stencil
+  */
+  static bool computeInterpStencil2D(VoFStencil&          a_stencil,
+				     const RealVect&      a_centroid,
+				     const VolIndex&      a_vof,
+				     const ProblemDomain& a_domain,
+				     const EBISBox&       a_ebisbox,
+				     const int            a_no_interp_dir = 2);
 
 
-    /*!
-      @brief Compute a trilinear interpolation stencil
-    */
-    static bool computeInterpStencil3D(VoFStencil&          a_stencil,
-				       const RealVect&      a_centroid,
-				       const VolIndex&      a_vof,
-				       const ProblemDomain& a_domain,
-				       const EBISBox&       a_ebisbox);
-  };
-}
+  /*!
+    @brief Compute a trilinear interpolation stencil
+  */
+  static bool computeInterpStencil3D(VoFStencil&          a_stencil,
+				     const RealVect&      a_centroid,
+				     const VolIndex&      a_vof,
+				     const ProblemDomain& a_domain,
+				     const EBISBox&       a_ebisbox);
+};
+#include "CD_NamespaceFooter.H"
 
 #endif

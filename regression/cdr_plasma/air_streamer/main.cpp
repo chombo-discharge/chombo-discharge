@@ -34,10 +34,10 @@ int main(int argc, char* argv[]){
   // Get potential from input script 
   std::string basename; 
   {
-     ParmParse pp("air_streamer");
-     pp.get("potential", g_potential);
-     pp.get("basename",  basename);
-     setPoutBaseName(basename);
+    ParmParse pp("air_streamer");
+    pp.get("potential", g_potential);
+    pp.get("basename",  basename);
+    setPoutBaseName(basename);
   }
 
   // Set geometry and AMR 
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]){
   timestepper->set_rte(rte);
 
   // Set potential 
-timestepper->set_potential(potential_curve);
+  timestepper->set_potential(potential_curve);
 
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
@@ -76,4 +76,4 @@ timestepper->set_potential(potential_curve);
   CH_TIMER_REPORT();
   MPI_Finalize();
 #endif
-}
+#include "CD_NamespaceFooter.H"

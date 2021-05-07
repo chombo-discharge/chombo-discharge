@@ -44,6 +44,6 @@ protected:
 		   const int&              a_lvl,
 		   const Vector<Real>&     a_tracer,
 		   const Vector<RealVect>& a_grad_tracer);
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

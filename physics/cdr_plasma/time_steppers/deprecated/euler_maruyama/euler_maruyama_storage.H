@@ -125,6 +125,6 @@ protected:
   RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

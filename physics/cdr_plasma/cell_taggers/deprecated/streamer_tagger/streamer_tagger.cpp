@@ -196,4 +196,4 @@ bool streamer_tagger::refine_cell(const RealVect&         a_pos,
   const bool refine2 = a_grad_tracer[1].vectorLength()*a_dx/a_tracer[1] > m_thresh2[a_lvl] ? true : false;
 
   return refine1 || refine2;
-}
+#include "CD_NamespaceFooter.H"

@@ -13,8 +13,8 @@ rk2_tga::cdr_storage::cdr_storage(){
 }
 
 rk2_tga::cdr_storage::cdr_storage(const RefCountedPtr<amr_mesh>& a_amr,
-					const phase::which_phase       a_phase,
-					const int                      a_ncomp){
+				  const phase::which_phase       a_phase,
+				  const int                      a_ncomp){
   m_amr   = a_amr;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
@@ -52,8 +52,8 @@ rk2_tga::poisson_storage::poisson_storage(){
 }
 
 rk2_tga::poisson_storage::poisson_storage(const RefCountedPtr<amr_mesh>& a_amr,
-						const phase::which_phase       a_phase,
-						const int                      a_ncomp){
+					  const phase::which_phase       a_phase,
+					  const int                      a_ncomp){
   m_amr   = a_amr;
   m_ncomp = a_ncomp;
   m_phase = a_phase;
@@ -82,8 +82,8 @@ rk2_tga::rte_storage::rte_storage(){
 }
 
 rk2_tga::rte_storage::rte_storage(const RefCountedPtr<amr_mesh>& a_amr,
-					const phase::which_phase       a_phase,
-					const int                      a_ncomp){
+				  const phase::which_phase       a_phase,
+				  const int                      a_ncomp){
   m_amr   = a_amr;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
@@ -108,8 +108,8 @@ rk2_tga::sigma_storage::sigma_storage(){
 }
 
 rk2_tga::sigma_storage::sigma_storage(const RefCountedPtr<amr_mesh>& a_amr,
-					    const phase::which_phase       a_phase,
-					    const int                      a_ncomp){
+				      const phase::which_phase       a_phase,
+				      const int                      a_ncomp){
   m_amr   = a_amr;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
@@ -128,4 +128,4 @@ void rk2_tga::sigma_storage::deallocate_storage(){
   m_amr->deallocate(m_cache);
   m_amr->deallocate(m_k1);
   m_amr->deallocate(m_k2);
-}
+#include "CD_NamespaceFooter.H"

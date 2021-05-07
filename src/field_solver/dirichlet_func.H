@@ -11,61 +11,61 @@
 
 #include <BaseBCFuncEval.H>
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
+
+/*!
+  @brief Class for passing time and space dependent boundary conditions into the GMG boundary condition classes. 
+*/
+class dirichlet_func : public BaseBCFuncEval {
+public:
 
   /*!
-    @brief Class for passing time and space dependent boundary conditions into the GMG boundary condition classes. 
+    @brief New constructor
   */
-  class dirichlet_func : public BaseBCFuncEval {
-  public:
+  dirichlet_func(Real (*a_potential)(const Real a_time), Real (*a_func)(const RealVect a_pos), const RealVect a_origin);
 
-    /*!
-      @brief New constructor
-    */
-    dirichlet_func(Real (*a_potential)(const Real a_time), Real (*a_func)(const RealVect a_pos), const RealVect a_origin);
+  /*!
+    @brief Destructor
+  */
+  virtual ~dirichlet_func();
 
-    /*!
-      @brief Destructor
-    */
-    virtual ~dirichlet_func();
+  /*!
+    @brief Update the time
+  */
+  virtual void set_time(const Real a_time);
 
-    /*!
-      @brief Update the time
-    */
-    virtual void set_time(const Real a_time);
+  /*!
+    @brief Value function. Called by BC classes in AMRMultiGrid
+  */
+  virtual Real value(const RealVect& a_point, const int& a_comp) const;
 
-    /*!
-      @brief Value function. Called by BC classes in AMRMultiGrid
-    */
-    virtual Real value(const RealVect& a_point, const int& a_comp) const;
+  /*!
+    @brief Should never be called.
+  */
+  virtual Real derivative(const RealVect& a_point, const int& a_comp, const int& a_dir) const;
 
-    /*!
-      @brief Should never be called.
-    */
-    virtual Real derivative(const RealVect& a_point, const int& a_comp, const int& a_dir) const;
+protected:
 
-  protected:
+  /*!
+    @brief Potential as function of time
+  */
+  Real (*m_potential)(const Real a_time);
 
-    /*!
-      @brief Potential as function of time
-    */
-    Real (*m_potential)(const Real a_time);
+  /*!
+    @brief Spatial distribution
+  */
+  Real (*m_func)(const RealVect a_pos);
 
-    /*!
-      @brief Spatial distribution
-    */
-    Real (*m_func)(const RealVect a_pos);
+  /*!
+    @brief Time
+  */
+  Real m_time;
 
-    /*!
-      @brief Time
-    */
-    Real m_time;
-
-    /*!
-      @brief Physical origin (the value function is called with computational coordinates)
-    */
-    RealVect m_origin;
-  };
-}
+  /*!
+    @brief Physical origin (the value function is called with computational coordinates)
+  */
+  RealVect m_origin;
+};
+#include "CD_NamespaceFooter.H"
 
 #endif

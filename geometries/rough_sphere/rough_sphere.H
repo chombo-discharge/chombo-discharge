@@ -10,17 +10,17 @@
 
 #include "computational_geometry.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
 
-  /*!
-    @brief This is a class that a rough sphere (either electrode or dielectric)
-  */
-  class rough_sphere : public computational_geometry {
-  public:
+/*!
+  @brief This is a class that a rough sphere (either electrode or dielectric)
+*/
+class rough_sphere : public computational_geometry {
+public:
 
-    rough_sphere();
-    ~rough_sphere();
-  };
-}
+  rough_sphere();
+  ~rough_sphere();
+};
+#include "CD_NamespaceFooter.H"
 
 #endif

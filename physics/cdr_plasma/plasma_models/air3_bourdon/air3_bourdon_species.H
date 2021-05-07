@@ -4,87 +4,87 @@
 #include "air3_bourdon.H"
 #include <random>
 
-namespace ChomboDischarge {
-  namespace physics {
-    namespace cdr_plasma {
+#include "CD_NamespaceHeader.H"
+namespace physics {
+  namespace cdr_plasma {
 
-      class air3_bourdon::electron : public cdr_species {
-      public:
-	electron();
-	~electron() {}
-	Real initial_data(const RealVect a_pos, const Real a_time) const;
+    class air3_bourdon::electron : public cdr_species {
+    public:
+      electron();
+      ~electron() {}
+      Real initial_data(const RealVect a_pos, const Real a_time) const;
 
-      protected:
-	Real m_uniform_density;
-	Real m_seed_density;
-	Real m_seed_rad;
-	RealVect m_seed_pos;
-      };
+    protected:
+      Real m_uniform_density;
+      Real m_seed_density;
+      Real m_seed_rad;
+      RealVect m_seed_pos;
+    };
 
-      class air3_bourdon::M_plus : public cdr_species {
-      public:
-	M_plus();
-	~M_plus(){}
-	Real initial_data(const RealVect a_pos, const Real a_time) const;
-      protected:
-	Real m_uniform_density;
-	Real m_seed_density;
-	Real m_seed_rad;
-	RealVect m_seed_pos;
-      };
+    class air3_bourdon::M_plus : public cdr_species {
+    public:
+      M_plus();
+      ~M_plus(){}
+      Real initial_data(const RealVect a_pos, const Real a_time) const;
+    protected:
+      Real m_uniform_density;
+      Real m_seed_density;
+      Real m_seed_rad;
+      RealVect m_seed_pos;
+    };
 
-      class air3_bourdon::M_minus : public cdr_species {
-      public:
-	M_minus();
-	~M_minus(){}
-	Real initial_data(const RealVect a_pos, const Real a_time) const {return 0.0;}
-      };
+    class air3_bourdon::M_minus : public cdr_species {
+    public:
+      M_minus();
+      ~M_minus(){}
+      Real initial_data(const RealVect a_pos, const Real a_time) const {return 0.0;}
+    };
 
-      class air3_bourdon::photon_one : public rte_species {
-      public:
-	photon_one();
-	~photon_one(){}
-	Real get_kappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
-	Real get_lambda() const { return m_lambda;}
-	Real get_A()      const { return m_A;}
-	Real get_pO2()    const { return m_pO2; }
+    class air3_bourdon::photon_one : public rte_species {
+    public:
+      photon_one();
+      ~photon_one(){}
+      Real get_kappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
+      Real get_lambda() const { return m_lambda;}
+      Real get_A()      const { return m_A;}
+      Real get_pO2()    const { return m_pO2; }
 
-      protected:
-	Real m_lambda;
-	Real m_A;
-	Real m_pO2;
-      };
+    protected:
+      Real m_lambda;
+      Real m_A;
+      Real m_pO2;
+    };
 
-      class air3_bourdon::photon_two : public rte_species {
-      public:
-	photon_two();
-	~photon_two(){}
-	Real get_kappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
-	Real get_lambda() const { return m_lambda;}
-	Real get_A()      const { return m_A;}
-	Real get_pO2()    const { return m_pO2; }
+    class air3_bourdon::photon_two : public rte_species {
+    public:
+      photon_two();
+      ~photon_two(){}
+      Real get_kappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
+      Real get_lambda() const { return m_lambda;}
+      Real get_A()      const { return m_A;}
+      Real get_pO2()    const { return m_pO2; }
 
-      protected:
-	Real m_lambda;
-	Real m_A;
-	Real m_pO2;
-      };
+    protected:
+      Real m_lambda;
+      Real m_A;
+      Real m_pO2;
+    };
 
-      class air3_bourdon::photon_three : public rte_species {
-      public:
-	photon_three();
-	~photon_three(){}
-	Real get_kappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
-	Real get_lambda() const { return m_lambda;}
-	Real get_A()      const { return m_A;}
-	Real get_pO2()    const { return m_pO2; }
+    class air3_bourdon::photon_three : public rte_species {
+    public:
+      photon_three();
+      ~photon_three(){}
+      Real get_kappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
+      Real get_lambda() const { return m_lambda;}
+      Real get_A()      const { return m_A;}
+      Real get_pO2()    const { return m_pO2; }
 
-      protected:
-	Real m_lambda;
-	Real m_A;
-	Real m_pO2;
-      };
-    }
+    protected:
+      Real m_lambda;
+      Real m_A;
+      Real m_pO2;
+    };
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

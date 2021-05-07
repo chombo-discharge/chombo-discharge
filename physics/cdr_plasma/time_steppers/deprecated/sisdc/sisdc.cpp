@@ -1169,12 +1169,12 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
 
     // Update sigma. Also compute the new slope.
 #if 0 // Bogus code, please, please fix this!
-  EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
-  EBAMRIVData& Fsig_new      = m_sigma_scratch->get_Fnew()[a_m];
-  const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
-  m_sigma->compute_rhs(Fsig_new); // Fills Fsig_new with BCs from CDR solvers
-  data_ops::copy(sigma_m1, sigma_m);
-  data_ops::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
+    EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
+    EBAMRIVData& Fsig_new      = m_sigma_scratch->get_Fnew()[a_m];
+    const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
+    m_sigma->compute_rhs(Fsig_new); // Fills Fsig_new with BCs from CDR solvers
+    data_ops::copy(sigma_m1, sigma_m);
+    data_ops::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
 #endif
 
     // Always update BC between stages
@@ -1413,7 +1413,7 @@ void sisdc::reconcile_integrands(){
   EBAMRIVData& sigma_p = sisdc::get_sigmak(m_p);
   const Real t_p = m_tm[m_p];
 
-//  Update electric field, RTE equations, source terms, and velocities
+  //  Update electric field, RTE equations, source terms, and velocities
   if(m_consistent_E)   sisdc::update_poisson(cdr_densities_p, sigma_p);
   if(m_consistent_rte) sisdc::update_stationary_rte(cdr_densities_p, t_p);
   if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_p);
@@ -2795,15 +2795,15 @@ void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
       }
 
 #if 0 // Debug
-    if(procID() == 0 && a_lvl == 0) std::cout << std::endl;
-    if(procID() == 0) std::cout << "lvl = " << a_lvl
-				<< " dt_cfl = " << m_dt_cfl
-				<< " dt = " << a_dt
-				<< " .....On next level I'm taking nref = " << nref << " steps"
-				<< " with time = " << dt_ref 
-				<< " for total time = " << dt_ref*nref
-				<< " with level cfl = " << dt_ref/dt_cfl_level
-				<< endl;
+      if(procID() == 0 && a_lvl == 0) std::cout << std::endl;
+      if(procID() == 0) std::cout << "lvl = " << a_lvl
+				  << " dt_cfl = " << m_dt_cfl
+				  << " dt = " << a_dt
+				  << " .....On next level I'm taking nref = " << nref << " steps"
+				  << " with time = " << dt_ref 
+				  << " for total time = " << dt_ref*nref
+				  << " with level cfl = " << dt_ref/dt_cfl_level
+				  << endl;
 #endif
     }
 
@@ -2953,53 +2953,53 @@ void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a
   m_amr->compute_gradient(*grad_E[a_lvl], *E_norm[a_lvl], a_lvl);// Compute grad(|E|) on this level
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      Vector<EBCellFAB*> sources(num_species);
-      Vector<EBCellFAB*> cdr_densities(num_species);
-      Vector<EBCellFAB*> cdr_gradients(num_species);
-      Vector<EBCellFAB*> rte_densities(num_photons);
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	RefCountedPtr<cdr_solver>& solver   = solver_it();
-	RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
-	const int idx = solver_it.get_solver();
-	EBAMRCellData& src   = solver->get_source();
-	EBAMRCellData& phim  = storage->get_phi()[a_m+1];
-	EBAMRCellData& gradm = storage->get_gradient();
+    Vector<EBCellFAB*> sources(num_species);
+    Vector<EBCellFAB*> cdr_densities(num_species);
+    Vector<EBCellFAB*> cdr_gradients(num_species);
+    Vector<EBCellFAB*> rte_densities(num_photons);
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+      const int idx = solver_it.get_solver();
+      EBAMRCellData& src   = solver->get_source();
+      EBAMRCellData& phim  = storage->get_phi()[a_m+1];
+      EBAMRCellData& gradm = storage->get_gradient();
 	
-	sources[idx]       = &((*src[a_lvl])[dit()]);
-	cdr_densities[idx] = &((*phim[a_lvl])[dit()]);
-	cdr_gradients[idx] = &((*gradm[a_lvl])[dit()]);
-      }
-      for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      	const int idx = solver_it.get_solver();
-	RefCountedPtr<rte_solver>& solver = solver_it();
-	EBAMRCellData& state = solver->get_state();
-      	rte_densities[idx] = &((*state[a_lvl])[dit()]);
-      }
-      const EBCellFAB& e  = (*E[a_lvl])[dit()];
-      const EBCellFAB& gE = (*grad_E[a_lvl])[dit()];
+      sources[idx]       = &((*src[a_lvl])[dit()]);
+      cdr_densities[idx] = &((*phim[a_lvl])[dit()]);
+      cdr_gradients[idx] = &((*gradm[a_lvl])[dit()]);
+    }
+    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      RefCountedPtr<rte_solver>& solver = solver_it();
+      EBAMRCellData& state = solver->get_state();
+      rte_densities[idx] = &((*state[a_lvl])[dit()]);
+    }
+    const EBCellFAB& e  = (*E[a_lvl])[dit()];
+    const EBCellFAB& gE = (*grad_E[a_lvl])[dit()];
 
-      // This does all cells
-      time_stepper::compute_cdr_sources_reg(sources,
-      					    cdr_densities,
-      					    cdr_gradients,
-      					    rte_densities,
-      					    e,
-      					    gE,
-      					    dbl.get(dit()),
-      					    a_time,
-      					    dx);
+    // This does all cells
+    time_stepper::compute_cdr_sources_reg(sources,
+					  cdr_densities,
+					  cdr_gradients,
+					  rte_densities,
+					  e,
+					  gE,
+					  dbl.get(dit()),
+					  a_time,
+					  dx);
 
-      // Have to redo irregular cells
-      time_stepper::compute_cdr_sources_irreg(sources,
-					      cdr_densities,
-					      cdr_gradients,
-					      rte_densities,
-					      e,
-					      gE,
-					      interp_stencils[a_lvl][dit()],
-					      dbl.get(dit()),
-					      a_time,
-					      dx);
+    // Have to redo irregular cells
+    time_stepper::compute_cdr_sources_irreg(sources,
+					    cdr_densities,
+					    cdr_gradients,
+					    rte_densities,
+					    e,
+					    gE,
+					    interp_stencils[a_lvl][dit()],
+					    dbl.get(dit()),
+					    a_time,
+					    dx);
   }
 }
 
@@ -3245,4 +3245,4 @@ void sisdc::restore_solvers(){
 
     data_ops::copy(state, previous);
   }
-}
+#include "CD_NamespaceFooter.H"

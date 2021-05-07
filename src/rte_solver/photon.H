@@ -15,48 +15,48 @@
 
 #include "BinItem.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
   
-  /*!
-    @brief photon class
-  */
-  class photon : public BinItem {
-  public:
+/*!
+  @brief photon class
+*/
+class photon : public BinItem {
+public:
 
-    photon();
-    photon(const RealVect& a_position, const RealVect& a_velocity, const Real& a_kappa, const Real a_mass = 1.0);
+  photon();
+  photon(const RealVect& a_position, const RealVect& a_velocity, const Real& a_kappa, const Real a_mass = 1.0);
 
-    virtual ~photon();
+  virtual ~photon();
 
-    void define(const RealVect& a_position, const RealVect& a_velocity, const Real& a_kappa, const Real a_mass = 1.0);
+  void define(const RealVect& a_position, const RealVect& a_velocity, const Real& a_kappa, const Real a_mass = 1.0);
 
-    void setKappa(const Real a_kappa);
-    void setMass(const Real a_mass);
-    void setVelocity(const RealVect& a_velocity);
+  void setKappa(const Real a_kappa);
+  void setMass(const Real a_mass);
+  void setVelocity(const RealVect& a_velocity);
 
-    Real&     mass();
-    Real&     kappa();
-    RealVect& velocity();
+  Real&     mass();
+  Real&     kappa();
+  RealVect& velocity();
 
-    const Real&     kappa()    const;
-    const Real&     mass()   const;
-    const RealVect& velocity() const;
+  const Real&     kappa()    const;
+  const Real&     mass()   const;
+  const RealVect& velocity() const;
 
-    virtual bool operator==(const photon& a_p) const;
-    virtual bool operator==(const photon* a_p) const;
-    virtual bool operator!=(const photon& a_p) const;
+  virtual bool operator==(const photon& a_p) const;
+  virtual bool operator==(const photon* a_p) const;
+  virtual bool operator!=(const photon& a_p) const;
 
-    virtual int  size() const;
-    virtual void linearOut(void* buf) const;
-    virtual void linearIn(void* buf);
+  virtual int  size() const;
+  virtual void linearOut(void* buf) const;
+  virtual void linearIn(void* buf);
 
-  protected:
+protected:
 
-    Real     m_kappa;
-    Real     m_mass;
-    RealVect m_velocity;
-  };
-}
+  Real     m_kappa;
+  Real     m_mass;
+  RealVect m_velocity;
+};
+#include "CD_NamespaceFooter.H"
 
 
 #endif 

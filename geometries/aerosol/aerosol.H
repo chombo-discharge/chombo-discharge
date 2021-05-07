@@ -10,14 +10,14 @@
 
 #include "computational_geometry.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
 
-  class aerosol : public computational_geometry {
-  public:
+class aerosol : public computational_geometry {
+public:
 
-    aerosol();
-    ~aerosol();
-  };
-}
+  aerosol();
+  ~aerosol();
+};
+#include "CD_NamespaceFooter.H"
 
 #endif

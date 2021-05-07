@@ -10,20 +10,20 @@
 
 #include "computational_geometry.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
   
-  /*!
-    @brief This is a class that defines an array of electrodes.
-  */
-  class electrode_array : public computational_geometry {
-  public:
+/*!
+  @brief This is a class that defines an array of electrodes.
+*/
+class electrode_array : public computational_geometry {
+public:
 
-    electrode_array();
-    ~electrode_array();
+  electrode_array();
+  ~electrode_array();
 
-  protected:
+protected:
 
 
-  };
-}
+};
+#include "CD_NamespaceFooter.H"
 #endif

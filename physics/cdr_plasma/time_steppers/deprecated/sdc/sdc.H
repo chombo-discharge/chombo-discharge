@@ -239,6 +239,6 @@ protected:
   void parse_debug_options();
   void parse_advection_options();
   void parse_photoi_options();
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

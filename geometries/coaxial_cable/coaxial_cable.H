@@ -10,16 +10,16 @@
 
 #include "computational_geometry.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
 
-  /*!
-    @brief This is a class that defines a coaxial cable geometry 
-  */
-  class coaxial_cable : public computational_geometry {
-  public:
-    coaxial_cable();
-    ~coaxial_cable();
-  };
-}
+/*!
+  @brief This is a class that defines a coaxial cable geometry 
+*/
+class coaxial_cable : public computational_geometry {
+public:
+  coaxial_cable();
+  ~coaxial_cable();
+};
+#include "CD_NamespaceFooter.H"
 
 #endif

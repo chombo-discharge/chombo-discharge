@@ -10,28 +10,28 @@
 
 #include "computational_geometry.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
   
+/*!
+  @brief This is a class that defines two dielectric rods.
+*/
+class double_rod : public computational_geometry {
+public:
+
   /*!
-    @brief This is a class that defines two dielectric rods.
+    @brief Constructor. First sphere is the electrode. 
   */
-  class double_rod : public computational_geometry {
-  public:
+  double_rod();
 
-    /*!
-      @brief Constructor. First sphere is the electrode. 
-    */
-    double_rod();
+  /*!
+    @brief Destructor
+  */
+  ~double_rod();
 
-    /*!
-      @brief Destructor
-    */
-    ~double_rod();
-
-  protected:
+protected:
 
 
-  };
-}
+};
+#include "CD_NamespaceFooter.H"
 
 #endif

@@ -10,17 +10,17 @@
 
 #include "computational_geometry.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
   
-  /*!
-    @brief This class implements an empty geometry
-  */
-  class regular_geometry : public computational_geometry {
-  public:
+/*!
+  @brief This class implements an empty geometry
+*/
+class regular_geometry : public computational_geometry {
+public:
 
-    regular_geometry();
-    ~regular_geometry();
-  };
-}
+  regular_geometry();
+  ~regular_geometry();
+};
+#include "CD_NamespaceFooter.H"
 
 #endif

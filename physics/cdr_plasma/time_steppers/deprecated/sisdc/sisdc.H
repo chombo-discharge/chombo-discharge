@@ -310,6 +310,6 @@ protected:
   void parse_subcycle_options();
   void parse_debug_options();
   void parse_advection_options();
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

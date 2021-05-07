@@ -73,5 +73,5 @@ protected:
   RealVect m_seed_pos;
   Real m_seed_radius;
   Real m_refine_radius;
-};
+#include "CD_NamespaceFooter.H"
 #endif

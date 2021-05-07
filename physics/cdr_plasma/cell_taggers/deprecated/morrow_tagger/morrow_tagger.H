@@ -89,5 +89,5 @@ protected:
     @brief Max coarsening level
   */
   int m_max_coarsen_level;
-};
+#include "CD_NamespaceFooter.H"
 #endif

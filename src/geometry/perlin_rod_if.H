@@ -13,53 +13,53 @@
 #include "cylinder_if.H"
 #include "graded_perlin_sphere_if.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
+
+/*!
+  @brief perlin_rod_if function
+*/
+class perlin_rod_if : public perlin_sphere_if {
+public:  
+  /*!
+    @brief Constructor
+  */
+  perlin_rod_if(const Real&     a_rad,
+		const RealVect& a_center1,
+		const RealVect& a_center2,
+		const bool&     a_inside,
+		const Real&     a_noiseAmp,
+		const RealVect& a_noiseFreq,
+		const Real&     a_persistence,
+		const int&      a_octaves,
+		const bool&     a_reseed = false);
 
   /*!
-    @brief perlin_rod_if function
+    @brief Copy constructor
   */
-  class perlin_rod_if : public perlin_sphere_if {
-  public:  
-    /*!
-      @brief Constructor
-    */
-    perlin_rod_if(const Real&     a_rad,
-		  const RealVect& a_center1,
-		  const RealVect& a_center2,
-		  const bool&     a_inside,
-		  const Real&     a_noiseAmp,
-		  const RealVect& a_noiseFreq,
-		  const Real&     a_persistence,
-		  const int&      a_octaves,
-		  const bool&     a_reseed = false);
 
-    /*!
-      @brief Copy constructor
-    */
+  perlin_rod_if(const perlin_rod_if& a_inputIF);
 
-    perlin_rod_if(const perlin_rod_if& a_inputIF);
+  /*!
+    @brief Destructor
+  */
+  virtual ~perlin_rod_if();
 
-    /*!
-      @brief Destructor
-    */
-    virtual ~perlin_rod_if();
+  /*!
+    @brief Value function
+  */
+  virtual Real value(const RealVect& a_pos) const;
 
-    /*!
-      @brief Value function
-    */
-    virtual Real value(const RealVect& a_pos) const;
-
-    /*!
-      @brief Factory function
-    */
-    virtual BaseIF* newImplicitFunction() const;
+  /*!
+    @brief Factory function
+  */
+  virtual BaseIF* newImplicitFunction() const;
   
-  protected:
+protected:
 
-    /*!
-      @brief Basis rod, used for copying
-    */
-    RefCountedPtr<BaseIF> m_baseif;
-  };
-}
+  /*!
+    @brief Basis rod, used for copying
+  */
+  RefCountedPtr<BaseIF> m_baseif;
+};
+#include "CD_NamespaceFooter.H"
 #endif

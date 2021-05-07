@@ -12,30 +12,30 @@
 
 #include <random>
 
-namespace ChomboDischarge {
-  namespace physics {
-    namespace brownian_walker {
+#include "CD_NamespaceHeader.H"
+namespace physics {
+  namespace brownian_walker {
 
-      class brownian_walker_species : public ito_species {
-      public:
-	brownian_walker_species();
-	~brownian_walker_species();
-      protected:
-	Real     m_blob_radius;
-	Real     m_blob_amplitude;
-	int      m_num_particles;
-	RealVect m_blob_center;
+    class brownian_walker_species : public ito_species {
+    public:
+      brownian_walker_species();
+      ~brownian_walker_species();
+    protected:
+      Real     m_blob_radius;
+      Real     m_blob_amplitude;
+      int      m_num_particles;
+      RealVect m_blob_center;
 
-	int m_seed;
-	std::mt19937_64 m_rng;
-	std::uniform_real_distribution<Real> m_udist11;
-	std::normal_distribution<Real> m_gauss;
+      int m_seed;
+      std::mt19937_64 m_rng;
+      std::uniform_real_distribution<Real> m_udist11;
+      std::normal_distribution<Real> m_gauss;
 
-	void draw_initial_particles();
-	RealVect random_gaussian();
-	RealVect random_direction();
-      };
-    }
+      void draw_initial_particles();
+      RealVect random_gaussian();
+      RealVect random_direction();
+    };
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

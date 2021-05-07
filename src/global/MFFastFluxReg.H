@@ -12,72 +12,72 @@
 #include <RefCountedPtr.H>
 #include <EBFluxRegister.H>
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
   
+/*!
+  @brief Class for filling ghost cells alà EBFasterFR for multiphase
+*/
+class MFFastFluxReg {
+public:
+
   /*!
-    @brief Class for filling ghost cells alà EBFasterFR for multiphase
+    @brief Constructor
   */
-  class MFFastFluxReg {
-  public:
+  MFFastFluxReg(){
 
-    /*!
-      @brief Constructor
-    */
-    MFFastFluxReg(){
+  }
 
-    }
+  /*!
+    @brief Destructor
+  */
+  ~MFFastFluxReg(){
 
-    /*!
-      @brief Destructor
-    */
-    ~MFFastFluxReg(){
+  }
 
-    }
+  /*!
+    @brief Full constructor. Calls define
+  */
+  MFFastFluxReg(const Vector<RefCountedPtr<EBFluxRegister> >& a_fastfr){
+    this->define(a_fastfr);
+  }
 
-    /*!
-      @brief Full constructor. Calls define
-    */
-    MFFastFluxReg(const Vector<RefCountedPtr<EBFluxRegister> >& a_fastfr){
-      this->define(a_fastfr);
-    }
+  /*!
+    @brief Define function
+  */
+  void define(const Vector<RefCountedPtr<EBFluxRegister> >& a_fastfr){
+    m_fastfr = a_fastfr;
+  }
 
-    /*!
-      @brief Define function
-    */
-    void define(const Vector<RefCountedPtr<EBFluxRegister> >& a_fastfr){
-      m_fastfr = a_fastfr;
-    }
+  /*!
+    @brief Get interpolation utility
+  */
+  const RefCountedPtr<EBFluxRegister>& get_fastfr_ptr(const int a_phase) const {
+    return m_fastfr[a_phase];
+  }
 
-    /*!
-      @brief Get interpolation utility
-    */
-    const RefCountedPtr<EBFluxRegister>& get_fastfr_ptr(const int a_phase) const {
-      return m_fastfr[a_phase];
-    }
+  /*!
+    @brief get interpolation utility for phase
+  */
+  EBFluxRegister& get_fastfr(const int a_phase) {
+    return *m_fastfr[a_phase];
+  }
 
-    /*!
-      @brief get interpolation utility for phase
-    */
-    EBFluxRegister& get_fastfr(const int a_phase) {
-      return *m_fastfr[a_phase];
-    }
-
-    /*!
-      @brief get interpolation utility for phase
-    */
-    const EBFluxRegister& get_fastfr(const int a_phase) const {
-      return *m_fastfr[a_phase];
-    }
+  /*!
+    @brief get interpolation utility for phase
+  */
+  const EBFluxRegister& get_fastfr(const int a_phase) const {
+    return *m_fastfr[a_phase];
+  }
   
-  protected:
+protected:
 
 
-    /*!
-      @brief Interpolation for each phase. 
-    */
-    Vector<RefCountedPtr<EBFluxRegister> > m_fastfr;
+  /*!
+    @brief Interpolation for each phase. 
+  */
+  Vector<RefCountedPtr<EBFluxRegister> > m_fastfr;
   
-  };
-}
+};
+#include "CD_NamespaceFooter.H"
 
 #endif

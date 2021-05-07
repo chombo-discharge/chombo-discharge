@@ -185,6 +185,6 @@ protected:
 			   const int              a_lvl,
 			   const Vector<Real>     a_tracer,
 			   const Vector<RealVect> a_grad_tracer) = 0;
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

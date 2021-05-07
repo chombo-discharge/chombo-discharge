@@ -626,6 +626,6 @@ air_bolsig::photon_three::photon_three(){
 
 air_bolsig::photon_three::~photon_three(){
   
-}
+#include "CD_NamespaceFooter.H"
 
 

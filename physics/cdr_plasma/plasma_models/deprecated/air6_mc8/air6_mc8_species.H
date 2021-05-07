@@ -123,6 +123,6 @@ public:
   Real get_random_kappa() const {return m_kappa;}
 protected:
   Real m_kappa;
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

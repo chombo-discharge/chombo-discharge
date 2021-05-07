@@ -227,7 +227,7 @@ public:
     return m_E_face;
   }
 
-    /*!
+  /*!
     @brief Get the electric field storage
   */
   virtual EBAMRIVData& get_E_eb(){
@@ -433,6 +433,6 @@ protected:
     @brief k2
   */
   EBAMRIVData m_k2;
-};
+#include "CD_NamespaceFooter.H"
 #endif
    

@@ -15,109 +15,109 @@
 
 #include "BinItem.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
+
+/*!
+  @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers
+*/
+class simple_ito_particle : public BinItem {
+public:
 
   /*!
-    @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers
+    @brief Default constructor
   */
-  class simple_ito_particle : public BinItem {
-  public:
+  simple_ito_particle();
 
-    /*!
-      @brief Default constructor
-    */
-    simple_ito_particle();
+  /*!
+    @brief Constructor. Subsequently calls define
+  */
+  simple_ito_particle(const Real a_mass, const RealVect a_position, const Real a_energy);
 
-    /*!
-      @brief Constructor. Subsequently calls define
-    */
-    simple_ito_particle(const Real a_mass, const RealVect a_position, const Real a_energy);
+  /*!
+    @brief Default dtor
+  */
+  ~simple_ito_particle();
 
-    /*!
-      @brief Default dtor
-    */
-    ~simple_ito_particle();
+  /*!
+    @brief For non-default ctor
+  */
+  void define(const Real a_mass, const RealVect a_position, const Real a_energy);
 
-    /*!
-      @brief For non-default ctor
-    */
-    void define(const Real a_mass, const RealVect a_position, const Real a_energy);
+  /*!
+    @brief Set particle mass
+  */
+  void setMass(const Real a_mass);
 
-    /*!
-      @brief Set particle mass
-    */
-    void setMass(const Real a_mass);
+  /*!
+    @brief Get mass
+  */
+  Real& mass();
 
-    /*!
-      @brief Get mass
-    */
-    Real& mass();
+  /*! 
+    @brief Const retrieve mass
+  */
+  const Real& mass() const;
 
-    /*! 
-      @brief Const retrieve mass
-    */
-    const Real& mass() const;
+  /*!
+    @brief Set particle energy
+  */
+  void setEnergy(const Real a_energy);
 
-    /*!
-      @brief Set particle energy
-    */
-    void setEnergy(const Real a_energy);
+  /*!
+    @brief Get energy
+  */
+  Real& energy();
 
-    /*!
-      @brief Get energy
-    */
-    Real& energy();
+  /*! 
+    @brief Const retrieve energy
+  */
+  const Real& energy() const;
 
-    /*! 
-      @brief Const retrieve energy
-    */
-    const Real& energy() const;
+  /*!
+    @brief Comparison operator
+  */
+  bool operator==(const simple_ito_particle& a_p) const;
 
-    /*!
-      @brief Comparison operator
-    */
-    bool operator==(const simple_ito_particle& a_p) const;
+  /*!
+    @brief Comparison operator
+  */
+  bool operator==(const simple_ito_particle* a_p) const;
 
-    /*!
-      @brief Comparison operator
-    */
-    bool operator==(const simple_ito_particle* a_p) const;
+  /*!
+    @brief Comparison operator
+  */
+  bool operator!=(const simple_ito_particle& a_p) const;
 
-    /*!
-      @brief Comparison operator
-    */
-    bool operator!=(const simple_ito_particle& a_p) const;
+  /*!
+    @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
+  */
+  virtual int size() const;
 
-    /*!
-      @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
-    */
-    virtual int size() const;
+  /*!
+    @brief Write a linear binary representation of the internal data. Assumes that
+    sufficient memory for the buffer has already been allocated by
+    the caller.
+  */
+  virtual void linearOut(void* buf) const;
 
-    /*!
-      @brief Write a linear binary representation of the internal data. Assumes that
-      sufficient memory for the buffer has already been allocated by
-      the caller.
-    */
-    virtual void linearOut(void* buf) const;
+  /*!
+    @brief Read a linear binary representation of the internal data.
+    Assumes that the buffer has the correct data.
+  */
+  virtual void linearIn(void* buf);
 
-    /*!
-      @brief Read a linear binary representation of the internal data.
-      Assumes that the buffer has the correct data.
-    */
-    virtual void linearIn(void* buf);
+  /*!
+    @brief For outputting particle
+  */
+  friend std::ostream & operator<<(std::ostream& ostr,const simple_ito_particle& p);
 
-    /*!
-      @brief For outputting particle
-    */
-    friend std::ostream & operator<<(std::ostream& ostr,const simple_ito_particle& p);
+protected:
 
-  protected:
+  Real m_mass;
+  Real m_energy;
+};
 
-    Real m_mass;
-    Real m_energy;
-  };
-
-  std::ostream & operator<<(std::ostream& ostr, const simple_ito_particle& p);
-}
+std::ostream & operator<<(std::ostream& ostr, const simple_ito_particle& p);
+#include "CD_NamespaceFooter.H"
 
 #endif

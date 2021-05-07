@@ -22,7 +22,7 @@ public:
   ~M_plus(){}
   Real initial_data(const RealVect a_pos, const Real a_time) const;
 protected:
-    Real m_uniform_density;
+  Real m_uniform_density;
   Real m_seed_density;
   Real m_seed_rad;
   RealVect m_seed_pos;
@@ -113,6 +113,6 @@ public:
   Real get_random_kappa() const {return m_kappa;}
 protected:
   Real m_kappa;
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

@@ -838,5 +838,5 @@ void euler_maruyama::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   }
 
   a_dt = dt;
-}
+#include "CD_NamespaceFooter.H"
 

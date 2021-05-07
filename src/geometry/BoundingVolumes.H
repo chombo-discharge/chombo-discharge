@@ -11,140 +11,140 @@
 #include "Vec.H"
 #include <vector>
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
 
-  namespace BoundingVolumes {
+namespace BoundingVolumes {
   
-    enum class BoundingVolumeAlgorithm {
-      Ritter,
-    };
+  enum class BoundingVolumeAlgorithm {
+    Ritter,
+  };
 
-    template <class T>
-    class BoundingSphereT {
-    public:
+  template <class T>
+  class BoundingSphereT {
+  public:
 
-      using Vec3 = Vec3T<T>;
+    using Vec3 = Vec3T<T>;
 
-      BoundingSphereT();
-      BoundingSphereT(const Vec3T<T>& a_center, const T& a_radius);
-      BoundingSphereT(const BoundingSphereT& a_other);
-      ~BoundingSphereT();
+    BoundingSphereT();
+    BoundingSphereT(const Vec3T<T>& a_center, const T& a_radius);
+    BoundingSphereT(const BoundingSphereT& a_other);
+    ~BoundingSphereT();
     
-      template <class P>
-      BoundingSphereT(const std::vector<Vec3T<P> >& a_points, const BoundingVolumeAlgorithm& a_alg = BoundingVolumeAlgorithm::Ritter);
+    template <class P>
+    BoundingSphereT(const std::vector<Vec3T<P> >& a_points, const BoundingVolumeAlgorithm& a_alg = BoundingVolumeAlgorithm::Ritter);
 
-      template <class P>
-      inline
-      void define(const std::vector<Vec3T<P> >& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept;
+    template <class P>
+    inline
+    void define(const std::vector<Vec3T<P> >& a_points, const BoundingVolumeAlgorithm& a_algorithm) noexcept;
 
-      inline
-      bool intersects(const BoundingSphereT& a_other) const noexcept;
+    inline
+    bool intersects(const BoundingSphereT& a_other) const noexcept;
 
-      inline
-      T& getRadius() noexcept;
+    inline
+    T& getRadius() noexcept;
 
-      inline
-      const T& getRadius() const noexcept;
+    inline
+    const T& getRadius() const noexcept;
 
-      inline
-      Vec3& getCenter() noexcept;
+    inline
+    Vec3& getCenter() noexcept;
 
-      inline
-      const Vec3& getCenter() const noexcept;
+    inline
+    const Vec3& getCenter() const noexcept;
 
-      inline
-      T getOverlappingVolume(const BoundingSphereT<T>& a_other) const noexcept;
+    inline
+    T getOverlappingVolume(const BoundingSphereT<T>& a_other) const noexcept;
 
-      inline
-      T getDistance(const Vec3& a_x0) const noexcept;
+    inline
+    T getDistance(const Vec3& a_x0) const noexcept;
 
-      inline
-      T getDistance2(const Vec3& a_x0) const noexcept;
+    inline
+    T getDistance2(const Vec3& a_x0) const noexcept;
 
-      inline
-      T getVolume() const noexcept;
+    inline
+    T getVolume() const noexcept;
 
-      inline
-      T getArea() const noexcept;
+    inline
+    T getArea() const noexcept;
 
-    protected:
+  protected:
 
-      T m_radius;
-      Vec3 m_center;
+    T m_radius;
+    Vec3 m_center;
 
-      template <class P>
-      inline
-      void buildRitter(const std::vector<Vec3T<P> >& a_points) noexcept;
-    };
+    template <class P>
+    inline
+    void buildRitter(const std::vector<Vec3T<P> >& a_points) noexcept;
+  };
 
-    template <class T>
-    class AABBT {
-    public:
+  template <class T>
+  class AABBT {
+  public:
 
-      using Vec3 = Vec3T<T>;
+    using Vec3 = Vec3T<T>;
 
-      AABBT();
-      AABBT(const Vec3T<T>& a_lo, const Vec3T<T>& a_hi);
-      AABBT(const AABBT& a_other);
-      AABBT(const std::vector<AABBT>& a_others);
-      ~AABBT();
+    AABBT();
+    AABBT(const Vec3T<T>& a_lo, const Vec3T<T>& a_hi);
+    AABBT(const AABBT& a_other);
+    AABBT(const std::vector<AABBT>& a_others);
+    ~AABBT();
     
-      template <class P>
-      AABBT(const std::vector<Vec3T<P> >& a_points);
+    template <class P>
+    AABBT(const std::vector<Vec3T<P> >& a_points);
 
-      template <class P>
-      inline
-      void define(const std::vector<Vec3T<P> >& a_points) noexcept;
+    template <class P>
+    inline
+    void define(const std::vector<Vec3T<P> >& a_points) noexcept;
 
-      inline
-      bool intersects(const AABBT& a_other) const noexcept;
+    inline
+    bool intersects(const AABBT& a_other) const noexcept;
 
-      inline
-      Vec3T<T>& getLowCorner() noexcept;
+    inline
+    Vec3T<T>& getLowCorner() noexcept;
 
-      inline
-      const Vec3T<T>& getLowCorner() const noexcept;
+    inline
+    const Vec3T<T>& getLowCorner() const noexcept;
 
-      inline
-      Vec3T<T>& getHighCorner() noexcept;
+    inline
+    Vec3T<T>& getHighCorner() noexcept;
 
-      inline
-      const Vec3T<T>& getHighCorner() const noexcept;
+    inline
+    const Vec3T<T>& getHighCorner() const noexcept;
 
-      inline
-      T getOverlappingVolume(const AABBT<T>& a_other) const noexcept;
+    inline
+    T getOverlappingVolume(const AABBT<T>& a_other) const noexcept;
 
-      inline
-      T getDistance(const Vec3& a_x0) const noexcept;
+    inline
+    T getDistance(const Vec3& a_x0) const noexcept;
 
-      inline
-      T getDistance2(const Vec3& a_x0) const noexcept;
+    inline
+    T getDistance2(const Vec3& a_x0) const noexcept;
 
-      inline
-      T getVolume() const noexcept;
+    inline
+    T getVolume() const noexcept;
 
-      inline
-      T getArea() const noexcept;
+    inline
+    T getArea() const noexcept;
     
-    protected:
+  protected:
 
-      Vec3 m_loCorner;
-      Vec3 m_hiCorner;
-    };
+    Vec3 m_loCorner;
+    Vec3 m_hiCorner;
+  };
 
-    template <class T>
-    bool intersects(const BoundingSphereT<T>& a_u, const BoundingSphereT<T>& a_v) noexcept;
+  template <class T>
+  bool intersects(const BoundingSphereT<T>& a_u, const BoundingSphereT<T>& a_v) noexcept;
 
-    template <class T>
-    bool intersects(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
+  template <class T>
+  bool intersects(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
 
-    template <class T>
-    T getOverlappingVolume(const BoundingSphereT<T>& a_u, const BoundingSphereT<T>& a_v) noexcept;
+  template <class T>
+  T getOverlappingVolume(const BoundingSphereT<T>& a_u, const BoundingSphereT<T>& a_v) noexcept;
 
-    template <class T>
-    T getOverlappingVolume(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
-  }
+  template <class T>
+  T getOverlappingVolume(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
 }
+#include "CD_NamespaceFooter.H"
 
 #include "BoundingVolumesI.H"
 

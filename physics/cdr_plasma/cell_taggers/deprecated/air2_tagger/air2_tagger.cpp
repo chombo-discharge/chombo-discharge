@@ -88,4 +88,4 @@ bool air2_tagger::refine_cell(const RealVect         a_pos,
 
     
   return refine1 || refine2 || refine3;
-}
+#include "CD_NamespaceFooter.H"

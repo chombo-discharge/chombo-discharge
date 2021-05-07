@@ -380,4 +380,4 @@ namespace ChomboDischarge{
 
     return ret;
   }
-}
+#include "CD_NamespaceFooter.H"

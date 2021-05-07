@@ -10,27 +10,27 @@
 
 #include "computational_geometry.H"
 
-namespace ChomboDischarge {
+#include "CD_NamespaceHeader.H"
 
-  /*!
-    @brief Class that defines an electrode rod and a dielectric (some shapes supported)
-  */
-  class rod_dielectric : public computational_geometry {
-  public:
+/*!
+  @brief Class that defines an electrode rod and a dielectric (some shapes supported)
+*/
+class rod_dielectric : public computational_geometry {
+public:
 
-    rod_dielectric();
-    ~rod_dielectric();
+  rod_dielectric();
+  ~rod_dielectric();
 
-  protected:
+protected:
 
-    void define_electrode();
-    void define_insulator();
+  void define_electrode();
+  void define_insulator();
 
-    RefCountedPtr<BaseIF> get_box();
-    RefCountedPtr<BaseIF> get_plane();
-    RefCountedPtr<BaseIF> get_sphere();
-    RefCountedPtr<BaseIF> get_perlin_box();
-  };
-}
+  RefCountedPtr<BaseIF> get_box();
+  RefCountedPtr<BaseIF> get_plane();
+  RefCountedPtr<BaseIF> get_sphere();
+  RefCountedPtr<BaseIF> get_perlin_box();
+};
+#include "CD_NamespaceFooter.H"
 
 #endif
