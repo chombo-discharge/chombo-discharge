@@ -106,9 +106,7 @@ Real MultiIndex::pow(const RealVect& a_vec){
   Real retval = 1.;
 
   for (int dir = 0; dir < SpaceDim; dir++){
-    double base = a_vec[dir];
-    double exp  = 1.0*(*m_iter)[dir];
-    retval *= std::pow(base, exp);
+    retval *= std::pow(a_vec[dir], (*m_iter)[dir]);
   }
 
   return retval;

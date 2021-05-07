@@ -3,6 +3,7 @@
 #include "rod_dielectric.H"
 #include "field_stepper.H"
 #include "ParmParse.H"
+#include "LeastSquares.H"
 
 using namespace physics::poisson;
 
@@ -29,6 +30,56 @@ int main(int argc, char* argv[]){
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
   engine->setup_and_run(input_file);
+
+#if 1 // Try to make a least squares interpolation
+  RealVect p0( 0.0,  0.0);
+  RealVect p1(-1, -1);
+  RealVect p2(-1,  1);
+  RealVect p3( 1,  1);
+  RealVect p4( 1, -1);
+
+  VolIndex v0(IntVect( 0,  0), 0);
+  VolIndex v1(IntVect(-1, -1), 0);
+  VolIndex v2(IntVect(-1,  1), 0);
+  VolIndex v3(IntVect( 1,  1), 0);
+  VolIndex v4(IntVect( 1, -1), 0);
+
+  Vector<VolIndex> vofs;
+  vofs.push_back(v1);
+  vofs.push_back(v2);
+  vofs.push_back(v3);
+  vofs.push_back(v4);
+
+  Vector<RealVect> deltas;
+  deltas.push_back(p0-p1);
+  deltas.push_back(p0-p2);
+  deltas.push_back(p0-p3);
+  deltas.push_back(p0-p4);
+
+  Real f1 = 1.0;
+  Real f2 = 1.0;
+  Real f3 = 1.0;
+  Real f4 = 1.0;
+
+  VoFStencil sten = LeastSquares::computeInterpolationStencil(vofs, deltas, 0, 1);
+
+  if(procID() == 0){
+    Real f0 = 0.0;
+    for (int i = 0; i < sten.size(); i++){
+      const VolIndex& vof = sten.vof(i);
+      const Real w        = sten.weight(i);
+
+      std::cout << vof << "\t" << w << std::endl;
+      if(vof == v1) f0 += f1*w;
+      if(vof == v2) f0 += f2*w;
+      if(vof == v3) f0 += f3*w;
+      if(vof == v4) f0 += f4*w;
+    }
+
+    std::cout << f0 << std::endl;
+  }
+  
+#endif
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

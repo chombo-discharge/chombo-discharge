@@ -240,13 +240,45 @@ VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_a
 						     const Vector<RealVect>& a_displacements,
 						     const Vector<Real>&     a_weights,
 						     const int               a_order){
-
-  MayDay::Abort("LeastSquares::computeInterpolationStencil - not implemented");
+  VoFStencil ret;
+  
 
   const int M = LeastSquares::getTaylorExpansionSize(a_order);
   const int K = a_displacements.size();
 
   if(K < M) MayDay::Abort("LeastSquares::computeInterpolation -- not enough equations to achieve desired order!");
+
+  // Build the A-matrix so we can use LaPackUtils::computePseudoInverse. Use of multi-indices makes this a goddamn breeze. 
+  int i = 0;
+  Vector<Real> linA(K*M);
+  for (MultiIndex mi(a_order); mi.ok(); ++mi){
+    
+    for (int k = 0; k < K; k++){
+      linA[k] = a_weights[k]*mi.pow(a_displacements[k])/mi.factorial();
+      i++;
+    }
+  }
+
+  // Compute the pseudo-inverse.
+  Vector<Real> linAplus(M*K);
+  const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), linA.stdVector(), K, M);
+
+  if(foundSVD){ 
+
+    // Ok, only need to extract the stencil, which is just the first row of linAplus*W. We use
+    // multi-index for safety in case the ordering is re-done at some point. 
+    const MultiIndex mi(a_order);
+    const int row = mi.getLinearIndex(IntVect::Zero);
+
+    // Recall that linAplus is M*K so the stride is M
+    for (int k = 0; k < K; k++){
+      const int idx = row + k*M;
+
+      ret.add(a_allVoFs[k], a_weights[k]*linAplus[idx]);
+    }
+  }
+
+  return ret;
 }
 
 Real LeastSquares::sumWeights(const VoFStencil& a_stencil, const int a_variable){
@@ -275,12 +307,7 @@ Real LeastSquares::sumAllWeights(const VoFStencil& a_stencil){
 
 int LeastSquares::getTaylorExpansionSize(const int a_order){
 
-  int nTerms = 0;
-#if 0
-  for (MultiIndex cur(IntVect::Zero); cur <= a_order; cur.next(a_order)){
-    nTerms++;
-  }
-#endif
+  MultiIndex mi(a_order);
   
-  return nTerms;
+  return mi.getNumIndices();
 }
