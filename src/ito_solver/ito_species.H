@@ -13,92 +13,95 @@
 #include <BinItem.H>
 #include <MeshInterp.H>
 
-#include "ito_particle.H" 
+#include "ito_particle.H"
 
-/*!
-  @brief Metadata class that parses for ito_solver
-  @details The ito_solver takes it's information from this class, e.g. mobile/diffusive, charge, name, initial particles etc. 
-*/
-class ito_species {
-public:
+namespace ChomboDischarge {
 
   /*!
-    @brief Full constructor
+    @brief Metadata class that parses for ito_solver
+    @details The ito_solver takes it's information from this class, e.g. mobile/diffusive, charge, name, initial particles etc. 
   */
-  ito_species(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive);
+  class ito_species {
+  public:
 
-  /*!
-    @brief Destructor
-  */
-  ~ito_species();
+    /*!
+      @brief Full constructor
+    */
+    ito_species(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive);
 
-  /*!
-    @brief Return name
-  */
-  std::string get_name() const;
+    /*!
+      @brief Destructor
+    */
+    ~ito_species();
 
-  /*!
-    @brief Return charge
-  */
-  int get_charge() const;
+    /*!
+      @brief Return name
+    */
+    std::string get_name() const;
+
+    /*!
+      @brief Return charge
+    */
+    int get_charge() const;
     
-  /*!
-    @brief Return diffusive or not
-  */
-  bool is_diffusive() const;
+    /*!
+      @brief Return diffusive or not
+    */
+    bool is_diffusive() const;
 
-  /*!
-    @brief Mobile ito_species or not
-  */
-  bool is_mobile() const;
+    /*!
+      @brief Mobile ito_species or not
+    */
+    bool is_mobile() const;
 
-  /*!
-    @brief Compute the mobility. This is mostly used for the LEA. 
-  */
-  virtual Real mobility(const Real a_energy) const;
+    /*!
+      @brief Compute the mobility. This is mostly used for the LEA. 
+    */
+    virtual Real mobility(const Real a_energy) const;
 
-  /*!
-    @brief Compute the mobility. This is mostly used for the LEA.  
-  */
-  virtual Real diffusion(const Real a_energy) const;
+    /*!
+      @brief Compute the mobility. This is mostly used for the LEA.  
+    */
+    virtual Real diffusion(const Real a_energy) const;
 
-  /*!
-    @brief Get initial particles
-  */
-  List<ito_particle>& get_initial_particles();
+    /*!
+      @brief Get initial particles
+    */
+    List<ito_particle>& get_initial_particles();
 
-protected:
+  protected:
 
-  /*!
-    @brief Ito_Species name
-  */
-  std::string m_name;
+    /*!
+      @brief Ito_Species name
+    */
+    std::string m_name;
   
-  /*!
-    @brief Charge
-  */
-  int m_charge;
+    /*!
+      @brief Charge
+    */
+    int m_charge;
 
-  /*!
-    @brief Diffusive ito_species or not
-  */
-  bool m_diffusive;
+    /*!
+      @brief Diffusive ito_species or not
+    */
+    bool m_diffusive;
 
-  /*!
-    @brief Mobile ito_species or not
-  */
-  bool m_mobile;
+    /*!
+      @brief Mobile ito_species or not
+    */
+    bool m_mobile;
 
-  /*!
-    @brief Initial particles
-  */
-  List<ito_particle> m_initial_particles;
+    /*!
+      @brief Initial particles
+    */
+    List<ito_particle> m_initial_particles;
 
-  /*!
-    @brief Weak constructor. 
-  */
-  ito_species();
+    /*!
+      @brief Weak constructor. 
+    */
+    ito_species();
 
-};
+  };
+}
 
 #endif
