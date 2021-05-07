@@ -16,123 +16,126 @@
 #include <Stencils.H>
 #include <LayoutData.H>
 
-/*!
-  @brief Stencil types
-*/
-enum class stencil_type {
-  linear,
-  taylor,
-  ray,
-  lsq,
-  pwl
-};
-
-/*!
-  @brief Class for holding stencils on irregular cells over a single AMR level
-*/
-class irreg_stencil {
-public:
+namespace ChomboDischarge {
 
   /*!
-    @brief Constructor. You must subseqently call define. No strong construction for this class since buildStencils is pure virtual
+    @brief Stencil types
   */
-  irreg_stencil();
+  enum class stencil_type {
+    linear,
+    taylor,
+    ray,
+    lsq,
+    pwl
+  };
 
   /*!
-    @brief Full constructor
+    @brief Class for holding stencils on irregular cells over a single AMR level
   */
-  irreg_stencil(const DisjointBoxLayout&       a_dbl,
-		const EBISLayout&              a_ebisl,
-		const ProblemDomain&           a_domain,
-		const Real&                    a_dx,
-		const int                      a_order,
-		const int                      a_radius,
-		const stencil_type             a_type);
+  class irreg_stencil {
+  public:
 
-  /*!
-    @brief Destructor
-  */
-  ~irreg_stencil();
+    /*!
+      @brief Constructor. You must subseqently call define. No strong construction for this class since buildStencils is pure virtual
+    */
+    irreg_stencil();
 
-  /*!
-    @brief Define function
-  */
-  virtual void define(const DisjointBoxLayout&       a_dbl,
-		      const EBISLayout&              a_ebisl,
-		      const ProblemDomain&           a_domain,
-		      const Real&                    a_dx,
-		      const int                      a_order,
-		      const int                      a_radius,
-		      const stencil_type             a_type);
+    /*!
+      @brief Full constructor
+    */
+    irreg_stencil(const DisjointBoxLayout&       a_dbl,
+		  const EBISLayout&              a_ebisl,
+		  const ProblemDomain&           a_domain,
+		  const Real&                    a_dx,
+		  const int                      a_order,
+		  const int                      a_radius,
+		  const stencil_type             a_type);
 
-  /*!
-    @brief Get the stencils over a single box
-  */
-  const BaseIVFAB<VoFStencil>& operator[](const DataIndex& a_dit) const {
-    return *m_stencils[a_dit];
-  }
+    /*!
+      @brief Destructor
+    */
+    ~irreg_stencil();
+
+    /*!
+      @brief Define function
+    */
+    virtual void define(const DisjointBoxLayout&       a_dbl,
+			const EBISLayout&              a_ebisl,
+			const ProblemDomain&           a_domain,
+			const Real&                    a_dx,
+			const int                      a_order,
+			const int                      a_radius,
+			const stencil_type             a_type);
+
+    /*!
+      @brief Get the stencils over a single box
+    */
+    const BaseIVFAB<VoFStencil>& operator[](const DataIndex& a_dit) const {
+      return *m_stencils[a_dit];
+    }
   
-  /*!
-    @brief Get the stencils over a single box
-  */
-  BaseIVFAB<VoFStencil>& operator[](const DataIndex& a_dit) {
-    return *m_stencils[a_dit];
-  }
+    /*!
+      @brief Get the stencils over a single box
+    */
+    BaseIVFAB<VoFStencil>& operator[](const DataIndex& a_dit) {
+      return *m_stencils[a_dit];
+    }
 
-protected:
+  protected:
 
-  LayoutData<RefCountedPtr<BaseIVFAB<VoFStencil> > > m_stencils;
+    LayoutData<RefCountedPtr<BaseIVFAB<VoFStencil> > > m_stencils;
 
-  /*!
-    @brief Stencils defined or not
-  */
-  bool m_defined;;
+    /*!
+      @brief Stencils defined or not
+    */
+    bool m_defined;;
 
-  /*!
-    @brief Grids
-  */
-  DisjointBoxLayout m_dbl;
+    /*!
+      @brief Grids
+    */
+    DisjointBoxLayout m_dbl;
 
-  /*!
-    @brief EBIS layout
-  */
-  EBISLayout m_ebisl;
+    /*!
+      @brief EBIS layout
+    */
+    EBISLayout m_ebisl;
 
-  /*!
-    @brief Level resolution
-  */
-  Real m_dx;
+    /*!
+      @brief Level resolution
+    */
+    Real m_dx;
 
-  /*!
-    @brief Stencil radius
-  */
-  int m_radius;
+    /*!
+      @brief Stencil radius
+    */
+    int m_radius;
 
-  /*!
-    @brief Stencil order
-  */
-  int m_order;
+    /*!
+      @brief Stencil order
+    */
+    int m_order;
 
-  /*!
-    @brief Stencil type
-  */
-  stencil_type m_stencil_type;
+    /*!
+      @brief Stencil type
+    */
+    stencil_type m_stencil_type;
 
-  /*!
-    @brief Domain
-  */
-  ProblemDomain m_domain;
+    /*!
+      @brief Domain
+    */
+    ProblemDomain m_domain;
   
-  /*!
-    @brief Build the desired stencil
-  */
-  virtual void build_stencil(VoFStencil&              a_sten,
-			     const VolIndex&          a_vof,
-			     const DisjointBoxLayout& a_dbl,
-			     const ProblemDomain&     a_domain,
-			     const EBISBox&           a_ebisbox,
-			     const Box&               a_box,
-			     const Real&              a_dx,
-			     const IntVectSet&        a_cfivs) = 0;
-};
+    /*!
+      @brief Build the desired stencil
+    */
+    virtual void build_stencil(VoFStencil&              a_sten,
+			       const VolIndex&          a_vof,
+			       const DisjointBoxLayout& a_dbl,
+			       const ProblemDomain&     a_domain,
+			       const EBISBox&           a_ebisbox,
+			       const Box&               a_box,
+			       const Real&              a_dx,
+			       const IntVectSet&        a_cfivs) = 0;
+  };
+}
 #endif
