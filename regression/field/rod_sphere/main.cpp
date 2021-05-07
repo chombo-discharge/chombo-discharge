@@ -33,10 +33,10 @@ int main(int argc, char* argv[]){
 
 #if 1 // Try to make a least squares interpolation
   RealVect p0( 0.0,  0.0);
-  RealVect p1(-1, -1);
-  RealVect p2(-1,  1);
-  RealVect p3( 1,  1);
-  RealVect p4( 1, -1);
+  RealVect p1(-2, -2);
+  RealVect p2(-2,  2);
+  RealVect p3( 2,  2);
+  RealVect p4( 2, -2);
 
   VolIndex v0(IntVect( 0,  0), 0);
   VolIndex v1(IntVect(-1, -1), 0);
@@ -51,10 +51,10 @@ int main(int argc, char* argv[]){
   vofs.push_back(v4);
 
   Vector<RealVect> deltas;
-  deltas.push_back(p0-p1);
-  deltas.push_back(p0-p2);
-  deltas.push_back(p0-p3);
-  deltas.push_back(p0-p4);
+  deltas.push_back(p1-p0);
+  deltas.push_back(p2-p0);
+  deltas.push_back(p3-p0);
+  deltas.push_back(p4-p0);
 
   Real f1 = 1.0;
   Real f2 = 1.0;

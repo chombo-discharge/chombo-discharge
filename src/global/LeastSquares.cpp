@@ -241,7 +241,6 @@ VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_a
 						     const Vector<Real>&     a_weights,
 						     const int               a_order){
   VoFStencil ret;
-  
 
   const int M = LeastSquares::getTaylorExpansionSize(a_order);
   const int K = a_displacements.size();
@@ -256,6 +255,10 @@ VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_a
     for (int k = 0; k < K; k++){
       linA[k] = a_weights[k]*mi.pow(a_displacements[k])/mi.factorial();
       i++;
+
+      if(procID() == 0){
+	std::cout << "k = " << k << " => linA = " << linA[k] << std::endl;
+      }
     }
   }
 
@@ -273,7 +276,7 @@ VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_a
     // Recall that linAplus is M*K so the stride is M
     for (int k = 0; k < K; k++){
       const int idx = row + k*M;
-
+      
       ret.add(a_allVoFs[k], a_weights[k]*linAplus[idx]);
     }
   }
