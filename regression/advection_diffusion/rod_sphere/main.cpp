@@ -6,6 +6,7 @@
 #include "advection_diffusion_tagger.H"
 #include "ParmParse.H"
 
+using namespace ChomboDischarge;
 using namespace physics::advection_diffusion;
 
 int main(int argc, char* argv[]){

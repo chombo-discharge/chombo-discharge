@@ -4,6 +4,7 @@
 #include "rte_stepper.H"
 #include "ParmParse.H"
 
+using namespace ChomboDischarge;
 using namespace physics::rte;
 
 int main(int argc, char* argv[]){

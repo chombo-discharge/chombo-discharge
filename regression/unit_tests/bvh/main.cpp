@@ -9,6 +9,8 @@
 
 #include <ParmParse.H>
 
+using namespace ChomboDischarge;
+
 int main(int argc, char* argv[]){
 
 #ifdef CH_MPI

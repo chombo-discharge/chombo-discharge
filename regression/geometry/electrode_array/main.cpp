@@ -3,6 +3,7 @@
 #include "geometry_stepper.H"
 #include "ParmParse.H"
 
+using namespace ChomboDischarge;
 using namespace physics::geometry;
 
 int main(int argc, char* argv[]){

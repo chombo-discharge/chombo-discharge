@@ -5,6 +5,7 @@
 #include "brownian_walker_tagger.H"
 #include "ParmParse.H"
 
+using namespace ChomboDischarge;
 using namespace physics::brownian_walker;
 
 int main(int argc, char* argv[]){

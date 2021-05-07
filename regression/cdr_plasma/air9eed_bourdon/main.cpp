@@ -18,6 +18,7 @@ Real potential_curve(const Real a_time){
   return g_potential;
 }
 
+using namespace ChomboDischarge;
 using namespace physics::cdr_plasma;
 
 int main(int argc, char* argv[]){
