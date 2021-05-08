@@ -63,6 +63,18 @@ extern "C" void dgemm_(char*   a_TRANSA,
 		       double* a_C,
 		       int*    a_LDC);
 
+/*!
+  @brief Interface to LaPack for computing solution to Ax=b
+*/
+extern "C" void dgesv_(int*    N,
+		       int*    NRHS,
+		       double* A,
+		       int*    LDA,
+		       int*    IPIV,
+		       double* B,
+		       int*    LDB,
+		       int*    INFO);
+
 
 #include "CD_NamespaceHeader.H"
 namespace LaPackUtils {

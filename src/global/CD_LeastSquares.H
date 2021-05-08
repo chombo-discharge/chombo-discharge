@@ -18,6 +18,7 @@
 #include "EBISLayout.H"
 
 #include "CD_NamespaceHeader.H"
+
 namespace LeastSquares {
 
   enum class CellPosition {
