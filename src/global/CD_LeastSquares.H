@@ -209,7 +209,8 @@ namespace LeastSquares {
     IntVect(1,1,2) = (d^4)/(dx dy dz^2) and so on. The stencils for the directional derivatives are coded onto the return map. E.g.
     if a_derivs contains IntVect(1,0,0) the stencil for d/dx is found in map.at(IntVect(1,0,0)). The user can solve a smaller system
     if some of the terms in the expansion are known, typically used when computing an approximation to the gradient at a point in space
-    where the scalar value is known. He or she will need to find his own way of using these together with the returned stencils. 
+    where the scalar value is known. Note that this will modify the right hand side of the system, and the user will have to figure out 
+    how to make sense of the stencil. 
     @param[in] a_derives       Specification of which terms to obtain from the series.
     @param[in] a_knownTerms    Which terms in the Taylor series are known, and will be eliminated from the least squares system. 
     @param[in] a_allVofs       Vofs to include in the interpolation method. 
@@ -233,7 +234,8 @@ namespace LeastSquares {
     IntVect(1,1,2) = (d^4)/(dx dy dz^2) and so on. The stencils for the directional derivatives are coded onto the return map. E.g.
     if a_derivs contains IntVect(1,0,0) the stencil for d/dx is found in map.at(IntVect(1,0,0)). The user can solve a smaller system
     if some of the terms in the expansion are known, typically used when computing an approximation to the gradient at a point in space
-    where the scalar value is known. 
+    where the scalar value is known. Note that this will modify the right hand side of the system, and the user will have to figure out 
+    how to make sense of the stencil. 
     @param[in] a_derives       Specification of which unknowns in the Taylor series will be returned.
     @param[in] a_knownTerms    Which terms in the Taylor series are known. 
     @param[in] a_allVofs       Vofs to include in the interpolation method. 

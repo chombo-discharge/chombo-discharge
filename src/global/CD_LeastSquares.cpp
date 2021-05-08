@@ -111,44 +111,31 @@ namespace ChomboDischarge{
 						   const Vector<RealVect>& a_displacements,
 						   const Vector<Real>&     a_weights){
 
-    VoFStencil sten;
 
-    const int D = SpaceDim;
-    const int K = a_displacements.size();
-
-    // Make sure we have enough equations. 
-    if(K < D) MayDay::Abort("LeastSquares::computeGradStenOrderOne -- not enough equations, must have K >= 3");
-  
-    // Build A, which is a KxD matrix. 
-    Vector<Real> linA(K*D, 0.0);
-    for (int k = 0; k < K; k++){ // Row
-      for (int d = 0; d < D; d++){ // Column
-	const int idx = LaPackUtils::linearIndex(k, d, K, D);
-      
-	const Real delta = a_displacements[k][d];
-      
-	linA[idx] = a_weights[k]*delta;
-      }
+    // TLDR: This routine 
+    IntVectSet derivs;
+    for (int dir = 0; dir < SpaceDim; dir++){
+      derivs |= BASISV(dir);
     }
 
-    // Compute pseudoinverse
-    Vector<Real> linAplus(D*K, 0.0);
-    const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), linA.stdVector(), K, D);
+    IntVectSet knowns;
+    knowns |= IntVect::Zero;
 
-    if(foundSVD){
-    
-      sten.clear();
+    std::map<IntVect, VoFStencil> taylorTerms = LeastSquares::computeInterpolationStencil(derivs, knowns, a_allVofs, a_displacements, a_weights, 1);
 
-      // Pseudoinverse is a DxK matrix. 
-      for (int dir = 0; dir < D; dir++){ // Row
-	for (int k = 0; k < K; k++){ // Column
-	
-	  const int idx       = LaPackUtils::linearIndex(dir, k, D, K);
-	
-	  const Real weight   = a_weights[k]*linAplus[idx];
-	  const VolIndex& vof = a_allVofs[k];        
-	
-	  sten.add(vof, weight, dir);
+    VoFStencil sten;
+    for (const auto& m : taylorTerms){
+      for (int dir = 0; dir < SpaceDim; dir++){
+	if (m.first == BASISV(dir)) {
+	  
+	  const VoFStencil& iSten = m.second;
+	  
+	  for (int i = 0; i < iSten.size(); i++){
+	    const VolIndex& vof = iSten.vof(i);
+	    const Real& weight  = iSten.weight(i);
+
+	    sten.add(vof, weight, dir);
+	  }
 	}
       }
     }
@@ -315,10 +302,10 @@ namespace ChomboDischarge{
       int i = 0;
       Vector<Real> linA    (K*M, 0.0);
       Vector<Real> linAplus(M*K, 0.0);
-      for (MultiIndex mi(a_order); mi.ok(); ++mi){ // Columns
+      for (MultiIndex mi(a_order); mi.ok(); ++mi){ // Loop over column
 
 	if(!a_knownTerms.contains(mi.getCurrentIndex())){ // Add column if it is an unknown in the lsq system. 
-	  for (int k = 0; k < K; k++){ // Rows
+	  for (int k = 0; k < K; k++){ 
 	    linA[i] = a_weights[k]*mi.pow(a_displacements[k])/mi.factorial(); i++;
 	  }
 	}
@@ -330,11 +317,23 @@ namespace ChomboDischarge{
       if(foundSVD){
 	const MultiIndex mi(a_order);
 
-	// Recall that linAplus is M*K so the stride is always M, starting at some specified row.
+	// When we have eliminated rows in the linear system we can't use MultiIndex to map directly. 
+	// Rather, we need to first map the rows of A to indices and use that to fetch
+	// the row in Aplus corresponding to a specific unknown in the Taylor series. 
+	std::map<IntVect, int> rowMap;
+	int row = 0;
+	for (MultiIndex mi(a_order); mi.ok(); ++mi){
+	  if(!a_knownTerms.contains(mi.getCurrentIndex())){ // This is the order in which A was built. 
+	    rowMap.emplace(mi.getCurrentIndex(), row);
+	    row++;
+	  }
+	}
+
+	// Recall that linAplus is M*K so the stride is always M, starting at some specified row. 
 	for (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt){
 	  const IntVect deriv = ivsIt();
 	
-	  const int row = mi.getLinearIndex(ivsIt());
+	  const int row = rowMap.at(ivsIt());
 
 	  VoFStencil& sten = ret.at(deriv);
 
