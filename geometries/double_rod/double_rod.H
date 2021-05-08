@@ -10,9 +10,10 @@
 
 #include "computational_geometry.H"
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief This is a class that defines two dielectric rods.
-
 */
 class double_rod : public computational_geometry {
 public:
@@ -31,5 +32,6 @@ protected:
 
 
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

@@ -9,6 +9,7 @@
 
 #include "EBCoarToCoarRedist.H"
 
+#include "CD_NamespaceHeader.H"
 /*!
   @brief EBFineToCoarRedist with faster define function
 */
@@ -32,5 +33,6 @@ protected:
   void gatherBroadcast(IntVectSet& a_set);
   void gatherCoarSet(IntVectSet& coarSet); // Debugging function
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

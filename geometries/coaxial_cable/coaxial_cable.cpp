@@ -16,6 +16,8 @@
 #include "cylinder_if.H"
 #include "new_sphere_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 coaxial_cable::coaxial_cable(){
 
   ParmParse pp      ("coaxial_cable");
@@ -89,3 +91,4 @@ coaxial_cable::coaxial_cable(){
 coaxial_cable::~coaxial_cable(){
   
 }
+#include "CD_NamespaceFooter.H"

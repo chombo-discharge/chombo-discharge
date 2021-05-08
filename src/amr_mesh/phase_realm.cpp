@@ -14,7 +14,7 @@
 
 #include <EBArith.H>
 
-
+#include "CD_NamespaceHeader.H"
 phase_realm::phase_realm(){
   m_defined   = false;
   m_verbosity = -1;
@@ -934,3 +934,4 @@ Vector<RefCountedPtr<Copier> >& phase_realm::get_reverse_copier() {
   
   return m_reverse_copier;
 }
+#include "CD_NamespaceFooter.H"

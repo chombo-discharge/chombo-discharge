@@ -18,6 +18,8 @@
 #include "rounded_box_if.H"
 #include "torus_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 rounded_cylinder_if::rounded_cylinder_if(const RealVect a_center1, const RealVect a_center2, const Real a_radius, const Real a_curv, const bool a_fluidInside){
   m_center1      = a_center1;
   m_center2      = a_center2;
@@ -114,4 +116,4 @@ BaseIF* rounded_cylinder_if::makeBaseIF3D(){
   return (BaseIF*) (new IntersectionIF(parts));
 }
 #endif
-
+#include "CD_NamespaceFooter.H"

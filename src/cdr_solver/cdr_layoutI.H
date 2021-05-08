@@ -12,6 +12,8 @@
 #include "cdr_iterator.H"
 #include "units.H"
 
+#include "CD_NamespaceHeader.H"
+
 template <class T>
 cdr_layout<T>::cdr_layout(){
 
@@ -695,5 +697,6 @@ RefCountedPtr<cdr_layout<T> > cdr_factory<T, S>::new_layout(const Vector<RefCoun
 
   return cdr;
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

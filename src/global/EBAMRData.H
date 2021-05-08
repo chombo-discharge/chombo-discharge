@@ -22,6 +22,8 @@
 #include "DomainFluxIFFAB.H"
 #include "MFBaseIVFAB.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Default class for holding LevelData<T> data across an EBAMR realm
   @details This class is a base class for holding LevelData<T> over a realm. The class does not have arithmetic operators or 
@@ -121,6 +123,7 @@ protected:
   */
   Vector<RefCountedPtr<LevelData<T> > > m_data;
 };
+#include "CD_NamespaceFooter.H"
 
 #include <EBAMRDataI.H>
 

@@ -13,6 +13,7 @@
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace cdr_plasma {
   
@@ -107,4 +108,5 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

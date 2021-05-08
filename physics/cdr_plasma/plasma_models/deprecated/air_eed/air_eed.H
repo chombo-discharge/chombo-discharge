@@ -248,6 +248,6 @@ protected:
 			       const Real             a_kappa) const;
 
   //  void advance_chemistry_rk4(
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

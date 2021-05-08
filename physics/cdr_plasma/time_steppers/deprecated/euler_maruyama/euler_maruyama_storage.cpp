@@ -121,8 +121,8 @@ euler_maruyama::sigma_storage::sigma_storage(){
 }
 
 euler_maruyama::sigma_storage::sigma_storage(const RefCountedPtr<amr_mesh>& a_amr,
-					   const phase::which_phase a_phase,
-					   const int a_ncomp){
+					     const phase::which_phase a_phase,
+					     const int a_ncomp){
   m_amr   = a_amr;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
@@ -138,4 +138,4 @@ void euler_maruyama::sigma_storage::allocate_storage(){
 
 void euler_maruyama::sigma_storage::deallocate_storage(){
 
-}
+#include "CD_NamespaceFooter.H"

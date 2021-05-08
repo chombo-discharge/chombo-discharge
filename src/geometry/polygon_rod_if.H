@@ -11,6 +11,8 @@
 
 #include <BaseIF.H>
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Implicit function class describing a hexagonal rod
 */
@@ -63,4 +65,5 @@ protected:
   RefCountedPtr<BaseIF> m_baseif;
   
 };
+#include "CD_NamespaceFooter.H"
 #endif

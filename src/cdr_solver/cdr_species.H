@@ -12,6 +12,8 @@
 #include <Particle.H>
 #include <EBParticleInterp.H>
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Abstract class that describes an electron or cdr_species
 */
@@ -44,7 +46,7 @@ public:
   */
   virtual std::string get_name() const;
 
-    /*!
+  /*!
     @brief Return unit
   */
   virtual std::string get_unit() const;
@@ -141,5 +143,6 @@ protected:
   */
   DepositionType::Which m_deposition;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

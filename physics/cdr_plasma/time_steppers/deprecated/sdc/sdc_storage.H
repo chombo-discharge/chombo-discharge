@@ -181,6 +181,6 @@ protected:
   Vector<EBAMRIVData> m_sigma;   // sigma^k in the SDC notation
   Vector<EBAMRIVData> m_Fnew;    // New operator lsopes
   Vector<EBAMRIVData> m_Fold;    // Lagged operator slopes
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

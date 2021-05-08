@@ -12,6 +12,8 @@
 #include "amr_mesh.H"
 #include "rte_species.H"
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Abstract RTE solver class. This is essentially just an interface. 
 */
@@ -43,7 +45,7 @@ public:
   */
   virtual void parse_options() = 0;
 
-    /*!
+  /*!
     @brief Parse options
   */
   virtual void parse_runtime_options() = 0;
@@ -94,7 +96,7 @@ public:
   */
   virtual void set_phase(phase::which_phase a_phase = phase::gas);
 
-    /*!
+  /*!
     @brief Set verbosity.
   */
   virtual void set_verbosity(const int a_verbosity);
@@ -369,4 +371,6 @@ protected:
   */
   void set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis);
 };
+#include "CD_NamespaceFooter.H"
+
 #endif

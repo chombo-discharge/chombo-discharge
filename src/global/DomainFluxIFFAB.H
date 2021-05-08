@@ -12,6 +12,8 @@
 #include <ProblemDomain.H>
 #include <EBISLayout.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class for holding fluxes on domain boundaries
   @details The internal functionality of this class is to use two SpaceDim-sized tuples that hold the fluxes in each direction
@@ -51,10 +53,10 @@ public:
       box R is completely contained in both the src and destination
       boxes.  This function equired by BoxLayoutData */
   void copy(const Box& Rfrom,
-            const Interval& Cdest,
-            const Box& Rto,
-            const DomainFluxIFFAB& src,
-            const Interval& Csrc);
+	    const Interval& Cdest,
+	    const Box& Rto,
+	    const DomainFluxIFFAB& src,
+	    const Interval& Csrc);
   
   
 protected:
@@ -71,5 +73,6 @@ protected:
   void setDefaultValues();
   void clear();
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

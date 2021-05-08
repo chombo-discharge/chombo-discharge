@@ -619,4 +619,4 @@ void rk2_tga::advance_rte_stationary(const Real a_time){
     const Real dummy_dt = 0.0;
     this->solve_rte(rte_states, rte_sources, cdr_states, E, a_time, dummy_dt, centering::cell_center);
   }
-}
+#include "CD_NamespaceFooter.H"

@@ -11,6 +11,8 @@
 #include <RealVect.H>
 #include <Box.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Rectangular box
 */
@@ -60,5 +62,6 @@ protected:
   RealVect m_hi;
 
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

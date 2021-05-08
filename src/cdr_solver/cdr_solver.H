@@ -16,6 +16,8 @@
 #include <time.h>
 #include <chrono>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Boundary condition types for the CDR solvers
 */
@@ -832,7 +834,7 @@ protected:
   */
   virtual void parse_rng_seed();
 
-    /*!
+  /*!
     @brief Parse plot mode
   */
   virtual void parse_plotmode();
@@ -847,5 +849,6 @@ protected:
   */
   virtual void parse_extrap_source();
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

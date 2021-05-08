@@ -1,12 +1,11 @@
 /*!
-   @file cdr_gdnv.cpp
-   @brief Implementation of cdr_gdnv.H
-   @author Robert Marskar
-   @date Jan. 2018
- */
+  @file cdr_gdnv.cpp
+  @brief Implementation of cdr_gdnv.H
+  @author Robert Marskar
+  @date Jan. 2018
+*/
 
 #include "cdr_gdnv.H"
-#include "gdnv_outflow_bc.H"
 #include "data_ops.H"
 
 #include <ExtrapAdvectBC.H>
@@ -15,6 +14,8 @@
 #include <ParmParse.H>
 
 ExtrapAdvectBCFactory s_physibc;
+
+#include "CD_NamespaceHeader.H"
 
 cdr_gdnv::cdr_gdnv() : cdr_tga() {
   m_class_name = "cdr_gdnv";
@@ -239,3 +240,4 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
     }
   }
 }
+#include "CD_NamespaceFooter.H"

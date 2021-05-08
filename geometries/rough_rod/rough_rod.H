@@ -10,6 +10,8 @@
 
 #include "computational_geometry.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class that describes a rod electrode with surface roughness
 */
@@ -19,5 +21,6 @@ public:
   rough_rod();
   ~rough_rod();
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

@@ -20,6 +20,8 @@
 
 #include <random>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Radiative tranfer equation solver using stationary Monte-Carlo
 */
@@ -243,7 +245,7 @@ public:
   */
   virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
 
-    /*!
+  /*!
     @brief Get output plot names
   */
   virtual Vector<std::string> get_plotvar_names() const;
@@ -358,7 +360,7 @@ protected:
   */
   bool m_plot_bulk_phot;
 
-    /*!
+  /*!
     @brief Check if source_bulk_photons should be plotted
   */
   bool m_plot_src_phot;
@@ -478,7 +480,7 @@ protected:
   */
   particle_container<photon> m_domain_photons;
 
-    /*!
+  /*!
     @brief This is a particle container that can be used to add photons directly. 
   */
   particle_container<photon> m_source_photons;
@@ -618,5 +620,6 @@ protected:
   void parse_plot_vars();
 
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

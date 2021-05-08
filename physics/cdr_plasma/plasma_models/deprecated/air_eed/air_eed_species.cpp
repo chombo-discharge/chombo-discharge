@@ -195,4 +195,4 @@ Real air_eed::M_plus::initial_data(const RealVect a_pos, const Real a_time) cons
   const Real factor = (a_pos - m_seed_pos).vectorLength();
 
   return m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad));
-}
+#include "CD_NamespaceFooter.H"

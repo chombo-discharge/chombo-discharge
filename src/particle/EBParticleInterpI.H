@@ -8,7 +8,8 @@
 #ifndef _EBPARTICLEINTERPI_H_
 #define _EBPARTICLEINTERPI_H_
 
-
+#include "CD_NamespaceHeader.H"
+  
 template <class P>
 void EBParticleInterp::deposit(const List<P>& a_particleList, FArrayBox& a_rho, DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
@@ -121,5 +122,6 @@ void EBParticleInterp::interpolateAcceleration(List<P>&              a_particleL
     p.setAcceleration(particleAcceleration);
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

@@ -29,10 +29,11 @@
 #include "EBCoarseAverage.H"
 #include "ParmParse.H"
 #include "CH_OpenMP.H"
-#include "NamespaceHeader.H"
 
 #define verb 0
 
+#include "CD_NamespaceHeader.H"
+  
 //IntVect ebconductivityop::s_ivDebug = IntVect(D_DECL(111, 124, 3));
 bool ebconductivityop::s_turnOffBCs       = false; //REALLY needs to default to false
 bool ebconductivityop::s_forceNoEBCF      = false; //REALLY needs to default to false
@@ -41,74 +42,74 @@ bool ebconductivityop::s_areaFracWeighted = false; // Precondition the system wi
 //-----------------------------------------------------------------------
 ebconductivityop::
 ebconductivityop(const EBLevelGrid &                                  a_eblgFine,
-                 const EBLevelGrid &                                  a_eblg,
-                 const EBLevelGrid &                                  a_eblgCoar,
-                 const EBLevelGrid &                                  a_eblgCoarMG,
-                 const RefCountedPtr<EBQuadCFInterp>&                 a_quadCFI,
+		 const EBLevelGrid &                                  a_eblg,
+		 const EBLevelGrid &                                  a_eblgCoar,
+		 const EBLevelGrid &                                  a_eblgCoarMG,
+		 const RefCountedPtr<EBQuadCFInterp>&                 a_quadCFI,
 		 const RefCountedPtr<EBFluxRegister>&                 a_fastFR,
-                 const RefCountedPtr<ConductivityBaseDomainBC>&       a_domainBC,
-                 const RefCountedPtr<ConductivityBaseEBBC>&           a_ebBC,
-                 const Real    &                                      a_dx,
-                 const Real    &                                      a_dxCoar,
-                 const int&                                           a_refToFine,
-                 const int&                                           a_refToCoar,
-                 const bool&                                          a_hasFine,
-                 const bool&                                          a_hasCoar,
-                 const bool&                                          a_hasMGObjects,
-                 const bool&                                          a_layoutChanged,
-                 const Real&                                          a_alpha,
-                 const Real&                                          a_beta,
-                 const RefCountedPtr<LevelData<EBCellFAB> >&          a_acoef,
-                 const RefCountedPtr<LevelData<EBFluxFAB> >&          a_bcoef,
-                 const RefCountedPtr<LevelData<BaseIVFAB<Real> > >&   a_bcoIrreg,
-                 const IntVect&                                       a_ghostCellsPhi,
-                 const IntVect&                                       a_ghostCellsRHS,
-                 const int&                                           a_relaxType)
-  : LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // is time-independent
-    m_relaxType(a_relaxType),
-    m_ghostCellsPhi(a_ghostCellsPhi),
-    m_ghostCellsRHS(a_ghostCellsRHS),
-    m_quadCFIWithCoar(a_quadCFI),
-    m_eblg(a_eblg),
-    m_eblgFine(),
-    m_eblgCoar(),
-    m_eblgCoarMG(),
-    m_eblgCoarsenedFine(),
-    m_domainBC(a_domainBC),
-    m_ebBC(a_ebBC),
-    m_dxFine(),
-    m_dx(a_dx),
-    m_dxCoar(a_dxCoar),
-    m_acoef(a_acoef),
-    m_bcoef(a_bcoef),
-    m_bcoIrreg(a_bcoIrreg),
-    m_alpha(a_alpha),
-    m_beta(a_beta),
-    m_alphaDiagWeight(),
-    m_betaDiagWeight(),
-    m_refToFine(a_hasFine ? a_refToFine : 1),
-    m_refToCoar(a_hasCoar ? a_refToCoar : 1),
-    m_hasFine(a_hasFine),
-    m_hasInterpAve(false),
-    m_hasCoar(a_hasCoar),
-    m_ebAverage(),
-    m_ebInterp(),
-    m_opEBStencil(),
-    m_relCoef(),
-    m_vofIterIrreg(),
-    m_vofIterMulti(),
-    m_vofIterDomLo(),
-    m_vofIterDomHi(),
-    m_loCFIVS(),
-    m_hiCFIVS(),
-    m_hasMGObjects(a_hasMGObjects),
-    m_layoutChanged(a_layoutChanged),
-    m_ebAverageMG(),
-    m_ebInterpMG(),
-    m_dblCoarMG(),
-    m_ebislCoarMG(),
-    m_domainCoarMG(),
-    m_colors()
+		 const RefCountedPtr<ConductivityBaseDomainBC>&       a_domainBC,
+		 const RefCountedPtr<ConductivityBaseEBBC>&           a_ebBC,
+		 const Real    &                                      a_dx,
+		 const Real    &                                      a_dxCoar,
+		 const int&                                           a_refToFine,
+		 const int&                                           a_refToCoar,
+		 const bool&                                          a_hasFine,
+		 const bool&                                          a_hasCoar,
+		 const bool&                                          a_hasMGObjects,
+		 const bool&                                          a_layoutChanged,
+		 const Real&                                          a_alpha,
+		 const Real&                                          a_beta,
+		 const RefCountedPtr<LevelData<EBCellFAB> >&          a_acoef,
+		 const RefCountedPtr<LevelData<EBFluxFAB> >&          a_bcoef,
+		 const RefCountedPtr<LevelData<BaseIVFAB<Real> > >&   a_bcoIrreg,
+		 const IntVect&                                       a_ghostCellsPhi,
+		 const IntVect&                                       a_ghostCellsRHS,
+		 const int&                                           a_relaxType)
+: LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // is time-independent
+  m_relaxType(a_relaxType),
+  m_ghostCellsPhi(a_ghostCellsPhi),
+  m_ghostCellsRHS(a_ghostCellsRHS),
+  m_quadCFIWithCoar(a_quadCFI),
+  m_eblg(a_eblg),
+  m_eblgFine(),
+  m_eblgCoar(),
+  m_eblgCoarMG(),
+  m_eblgCoarsenedFine(),
+  m_domainBC(a_domainBC),
+  m_ebBC(a_ebBC),
+  m_dxFine(),
+  m_dx(a_dx),
+  m_dxCoar(a_dxCoar),
+  m_acoef(a_acoef),
+  m_bcoef(a_bcoef),
+  m_bcoIrreg(a_bcoIrreg),
+  m_alpha(a_alpha),
+  m_beta(a_beta),
+  m_alphaDiagWeight(),
+  m_betaDiagWeight(),
+  m_refToFine(a_hasFine ? a_refToFine : 1),
+  m_refToCoar(a_hasCoar ? a_refToCoar : 1),
+  m_hasFine(a_hasFine),
+  m_hasInterpAve(false),
+  m_hasCoar(a_hasCoar),
+  m_ebAverage(),
+  m_ebInterp(),
+  m_opEBStencil(),
+  m_relCoef(),
+  m_vofIterIrreg(),
+  m_vofIterMulti(),
+  m_vofIterDomLo(),
+  m_vofIterDomHi(),
+  m_loCFIVS(),
+  m_hiCFIVS(),
+  m_hasMGObjects(a_hasMGObjects),
+  m_layoutChanged(a_layoutChanged),
+  m_ebAverageMG(),
+  m_ebInterpMG(),
+  m_dblCoarMG(),
+  m_ebislCoarMG(),
+  m_domainCoarMG(),
+  m_colors()
 {
   CH_TIME("ebconductivityop::ConductivityOp");
   int ncomp = 1;
@@ -130,23 +131,23 @@ ebconductivityop(const EBLevelGrid &                                  a_eblgFine
       DataIterator dit = m_eblg.getDBL().dataIterator(); 
       int nbox = dit.size();
       for (int idir = 0; idir < SpaceDim; idir++)
-        {
-          m_loCFIVS[idir].define(m_eblg.getDBL());
-          m_hiCFIVS[idir].define(m_eblg.getDBL());
+	{
+	  m_loCFIVS[idir].define(m_eblg.getDBL());
+	  m_hiCFIVS[idir].define(m_eblg.getDBL());
 #pragma omp parallel
-          {
+	  {
 #pragma omp for
-            for (int mybox=0;mybox<nbox;mybox++)
-              {
-                //                pout() << "doing lo cfivs for box " << mybox << endl;
-                m_loCFIVS[idir][dit[mybox]].define(m_eblg.getDomain(), m_eblg.getDBL().get(dit[mybox]),
-                                              m_eblg.getDBL(), idir,Side::Lo);
-                //                pout() << "doing hi cfivs for box " << mybox << endl;
-                m_hiCFIVS[idir][dit[mybox]].define(m_eblg.getDomain(), m_eblg.getDBL().get(dit[mybox]),
-                                              m_eblg.getDBL(), idir,Side::Hi);
-              }
-          }
-        }
+	    for (int mybox=0;mybox<nbox;mybox++)
+	      {
+		//                pout() << "doing lo cfivs for box " << mybox << endl;
+		m_loCFIVS[idir][dit[mybox]].define(m_eblg.getDomain(), m_eblg.getDBL().get(dit[mybox]),
+						   m_eblg.getDBL(), idir,Side::Lo);
+		//                pout() << "doing hi cfivs for box " << mybox << endl;
+		m_hiCFIVS[idir][dit[mybox]].define(m_eblg.getDomain(), m_eblg.getDBL().get(dit[mybox]),
+						   m_eblg.getDBL(), idir,Side::Hi);
+	      }
+	  }
+	}
 
       //if this fails, then the AMR grids violate proper nesting.
       ProblemDomain domainCoarsenedFine;
@@ -155,28 +156,28 @@ ebconductivityop(const EBLevelGrid &                                  a_eblgFine
       int maxBoxSize = 32;
       bool dumbool;
       bool hasCoarser = EBAMRPoissonOp::getCoarserLayouts(dblCoarsenedFine,
-                                                          domainCoarsenedFine,
-                                                          m_eblg.getDBL(),
-                                                          m_eblg.getEBISL(),
-                                                          m_eblg.getDomain(),
-                                                          m_refToCoar,
-                                                          m_eblg.getEBIS(),
-                                                          maxBoxSize, dumbool);
+							  domainCoarsenedFine,
+							  m_eblg.getDBL(),
+							  m_eblg.getEBISL(),
+							  m_eblg.getDomain(),
+							  m_refToCoar,
+							  m_eblg.getEBIS(),
+							  maxBoxSize, dumbool);
 
       //should follow from coarsenable
       if (hasCoarser)
-        {
-          m_eblgCoarsenedFine = EBLevelGrid(dblCoarsenedFine, domainCoarsenedFine, 4, m_eblg.getEBIS());
-          m_hasInterpAve = true;
-          m_ebInterp.define( m_eblg.getDBL(),     m_eblgCoar.getDBL(),
-                             m_eblg.getEBISL(), m_eblgCoar.getEBISL(),
-                             domainCoarsenedFine, m_refToCoar, ncomp, m_eblg.getEBIS(),
-                             a_ghostCellsPhi);
-          m_ebAverage.define(m_eblg.getDBL(),     m_eblgCoarsenedFine.getDBL(),
-                             m_eblg.getEBISL(), m_eblgCoarsenedFine.getEBISL(),
-                             domainCoarsenedFine, m_refToCoar, ncomp, m_eblg.getEBIS(),
-                             a_ghostCellsRHS);
-        }
+	{
+	  m_eblgCoarsenedFine = EBLevelGrid(dblCoarsenedFine, domainCoarsenedFine, 4, m_eblg.getEBIS());
+	  m_hasInterpAve = true;
+	  m_ebInterp.define( m_eblg.getDBL(),     m_eblgCoar.getDBL(),
+			     m_eblg.getEBISL(), m_eblgCoar.getEBISL(),
+			     domainCoarsenedFine, m_refToCoar, ncomp, m_eblg.getEBIS(),
+			     a_ghostCellsPhi);
+	  m_ebAverage.define(m_eblg.getDBL(),     m_eblgCoarsenedFine.getDBL(),
+			     m_eblg.getEBISL(), m_eblgCoarsenedFine.getEBISL(),
+			     domainCoarsenedFine, m_refToCoar, ncomp, m_eblg.getEBIS(),
+			     a_ghostCellsRHS);
+	}
     }
 
   //special mg objects for when we do not have
@@ -189,13 +190,13 @@ ebconductivityop(const EBLevelGrid &                                  a_eblgFine
       m_eblgCoarMG = a_eblgCoarMG;
 
       m_ebInterpMG.define( m_eblg.getDBL(),     m_eblgCoarMG.getDBL(),
-                           m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(),
-                           m_eblgCoarMG.getDomain(), mgRef, ncomp, m_eblg.getEBIS(),
-                           a_ghostCellsPhi);
+			   m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(),
+			   m_eblgCoarMG.getDomain(), mgRef, ncomp, m_eblg.getEBIS(),
+			   a_ghostCellsPhi);
       m_ebAverageMG.define(m_eblg.getDBL(),     m_eblgCoarMG.getDBL(),
-                           m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(),
-                           m_eblgCoarMG.getDomain() , mgRef, ncomp, m_eblg.getEBIS(),
-                           a_ghostCellsRHS);
+			   m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(),
+			   m_eblgCoarMG.getDomain() , mgRef, ncomp, m_eblg.getEBIS(),
+			   a_ghostCellsRHS);
 
     }
 
@@ -217,7 +218,7 @@ fillGrad(const LevelData<EBCellFAB>& a_phi)
 void
 ebconductivityop::
 finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator,
-                     int a_coarseningFactor)
+		     int a_coarseningFactor)
 {
   const ebconductivityop& op =
     dynamic_cast<const ebconductivityop&>(a_operator);
@@ -235,9 +236,9 @@ finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator,
   if (a_coarseningFactor != 1)
     {
       EBCoarseAverage averageOp(eblgFine.getDBL(), eblgCoar.getDBL(),
-                                eblgFine.getEBISL(), eblgCoar.getEBISL(),
-                                eblgCoar.getDomain(), a_coarseningFactor, 1,
-                                eblgCoar.getEBIS());
+				eblgFine.getEBISL(), eblgCoar.getEBISL(),
+				eblgCoar.getDomain(), a_coarseningFactor, 1,
+				eblgCoar.getEBIS());
 
       //MayDay::Warning("might want to figure out what harmonic averaging is in this context");
       averageOp.average(acoefCoar, acoefFine, interv);
@@ -278,13 +279,13 @@ calculateAlphaWeight()
     for(int mybox=0; mybox<nbox; mybox++)
       {
 
-        VoFIterator& vofit = m_vofIterIrreg[dit[mybox]];
-        for (vofit.reset(); vofit.ok(); ++vofit)
-          {
-            const VolIndex& VoF = vofit();
-            Real volFrac = m_eblg.getEBISL()[dit[mybox]].volFrac(VoF);
-            Real alphaWeight = (*m_acoef)[dit[mybox]](VoF, 0);
-            alphaWeight *= volFrac;
+	VoFIterator& vofit = m_vofIterIrreg[dit[mybox]];
+	for (vofit.reset(); vofit.ok(); ++vofit)
+	  {
+	    const VolIndex& VoF = vofit();
+	    Real volFrac = m_eblg.getEBISL()[dit[mybox]].volFrac(VoF);
+	    Real alphaWeight = (*m_acoef)[dit[mybox]](VoF, 0);
+	    alphaWeight *= volFrac;
 	    if(s_areaFracWeighted){
 	      alphaWeight *= m_eblg.getEBISL()[dit[mybox]].areaFracScaling(VoF);
 
@@ -298,8 +299,8 @@ calculateAlphaWeight()
 	      // alphaWeight *= 1./area;
 	    }
 
-            m_alphaDiagWeight[dit[mybox]](VoF, 0) = alphaWeight;
-          }
+	    m_alphaDiagWeight[dit[mybox]](VoF, 0) = alphaWeight;
+	  }
       }
   }
 }
@@ -307,8 +308,8 @@ calculateAlphaWeight()
 void
 ebconductivityop::
 getDivFStencil(VoFStencil&      a_vofStencil,
-               const VolIndex&  a_vof,
-               const DataIndex& a_dit)
+	       const VolIndex&  a_vof,
+	       const DataIndex& a_dit)
 {
   CH_TIME("ebconductivityop::getDivFStencil");
   const EBISBox& ebisBox = m_eblg.getEBISL()[a_dit];
@@ -316,18 +317,18 @@ getDivFStencil(VoFStencil&      a_vofStencil,
   for (int idir = 0; idir < SpaceDim; idir++)
     {
       for (SideIterator sit; sit.ok(); ++sit)
-        {
-          int isign = sign(sit());
-          Vector<FaceIndex> faces = ebisBox.getFaces(a_vof, idir, sit());
-          for (int iface = 0; iface < faces.size(); iface++)
-            {
-              VoFStencil fluxStencil;
-              getFluxStencil(fluxStencil, faces[iface], a_dit);
-              Real areaFrac = ebisBox.areaFrac(faces[iface]);
-              fluxStencil *= Real(isign)*areaFrac/m_dx;
-              a_vofStencil += fluxStencil;
-            }
-        }
+	{
+	  int isign = sign(sit());
+	  Vector<FaceIndex> faces = ebisBox.getFaces(a_vof, idir, sit());
+	  for (int iface = 0; iface < faces.size(); iface++)
+	    {
+	      VoFStencil fluxStencil;
+	      getFluxStencil(fluxStencil, faces[iface], a_dit);
+	      Real areaFrac = ebisBox.areaFrac(faces[iface]);
+	      fluxStencil *= Real(isign)*areaFrac/m_dx;
+	      a_vofStencil += fluxStencil;
+	    }
+	}
     }
 
   if(s_areaFracWeighted){
@@ -346,8 +347,8 @@ getDivFStencil(VoFStencil&      a_vofStencil,
 void
 ebconductivityop::
 getFluxStencil(VoFStencil&      a_fluxStencil,
-               const FaceIndex& a_face,
-               const DataIndex& a_dit)
+	       const FaceIndex& a_face,
+	       const DataIndex& a_dit)
 {
   /// stencil for flux computation.   the truly ugly part of this computation
   /// beta and eta are multiplied in here
@@ -357,9 +358,9 @@ getFluxStencil(VoFStencil&      a_fluxStencil,
   //so get the stencil at each face center and add with
   //interpolation weights
   FaceStencil interpSten = EBArith::getInterpStencil(a_face,
-                                                     (*m_eblg.getCFIVS())[a_dit],
-                                                     m_eblg.getEBISL()[a_dit],
-                                                     m_eblg.getDomain());
+						     (*m_eblg.getCFIVS())[a_dit],
+						     m_eblg.getEBISL()[a_dit],
+						     m_eblg.getDomain());
 
   a_fluxStencil.clear();
   for (int isten = 0; isten < interpSten.size(); isten++)
@@ -376,8 +377,8 @@ getFluxStencil(VoFStencil&      a_fluxStencil,
 void
 ebconductivityop::
 getFaceCenteredFluxStencil(VoFStencil&      a_fluxStencil,
-                           const FaceIndex& a_face,
-                           const DataIndex& a_dit)
+			   const FaceIndex& a_face,
+			   const DataIndex& a_dit)
 {
   CH_TIME("ebconductivityop::getFaceCenteredFluxStencil");
   //face centered gradient is just a centered diff
@@ -399,7 +400,7 @@ getFaceCenteredFluxStencil(VoFStencil&      a_fluxStencil,
 void
 ebconductivityop::
 setAlphaAndBeta(const Real& a_alpha,
-                const Real& a_beta)
+		const Real& a_beta)
 {
   CH_TIME("ebconductivityop::setAlphaAndBeta");
   m_alpha = a_alpha;
@@ -425,7 +426,7 @@ kappaScale(LevelData<EBCellFAB> & a_rhs)
 void
 ebconductivityop::
 diagonalScale(LevelData<EBCellFAB> & a_rhs,
-              bool a_kappaWeighted)
+	      bool a_kappaWeighted)
 {
 
   CH_TIME("ebconductivityop::diagonalScale");
@@ -445,7 +446,7 @@ diagonalScale(LevelData<EBCellFAB> & a_rhs,
 #pragma omp for
     for(int mybox=0; mybox<nbox; mybox++)
       {
-        a_rhs[dit[mybox]] *= (*m_acoef)[dit[mybox]];
+	a_rhs[dit[mybox]] *= (*m_acoef)[dit[mybox]];
       }
   }
 
@@ -471,7 +472,7 @@ divideByIdentityCoef(LevelData<EBCellFAB> & a_rhs)
 #pragma omp for
     for(int mybox=0; mybox<nbox; mybox++)
       {
-        a_rhs[dit[mybox]] /= (*m_acoef)[dit[mybox]];
+	a_rhs[dit[mybox]] /= (*m_acoef)[dit[mybox]];
       }
   }
 }
@@ -490,56 +491,56 @@ calculateRelaxationCoefficient()
 #pragma omp for
     for (int mybox=0;mybox<nbox;mybox++)
       {
-        const Box& grid = m_eblg.getDBL().get(dit[mybox]);
+	const Box& grid = m_eblg.getDBL().get(dit[mybox]);
       
-        // For time-independent acoef, initialize lambda = alpha * acoef.
-        const EBCellFAB& acofab = (*m_acoef)[dit[mybox]];
-        m_relCoef[dit[mybox]].setVal(0.);
-        m_relCoef[dit[mybox]].plus(acofab, 0, 0, 1);
-        m_relCoef[dit[mybox]]*= m_alpha;
+	// For time-independent acoef, initialize lambda = alpha * acoef.
+	const EBCellFAB& acofab = (*m_acoef)[dit[mybox]];
+	m_relCoef[dit[mybox]].setVal(0.);
+	m_relCoef[dit[mybox]].plus(acofab, 0, 0, 1);
+	m_relCoef[dit[mybox]]*= m_alpha;
       
-        // Compute the relaxation coefficient in regular cells.
-        BaseFab<Real>& regRel = m_relCoef[dit[mybox]].getSingleValuedFAB();
-        for (int idir = 0; idir < SpaceDim; idir++)
-          {
-            BaseFab<Real>& regBCo = (*m_bcoef)[dit[mybox]][idir].getSingleValuedFAB();
-            FORT_DECRINVRELCOEFEBCO(CHF_FRA1(regRel,0),
-                                    CHF_FRA1(regBCo,0),
-                                    CHF_CONST_REAL(m_beta),
-                                    CHF_BOX(grid),
-                                    CHF_REAL(m_dx),
-                                    CHF_INT(idir));
-          }
+	// Compute the relaxation coefficient in regular cells.
+	BaseFab<Real>& regRel = m_relCoef[dit[mybox]].getSingleValuedFAB();
+	for (int idir = 0; idir < SpaceDim; idir++)
+	  {
+	    BaseFab<Real>& regBCo = (*m_bcoef)[dit[mybox]][idir].getSingleValuedFAB();
+	    FORT_DECRINVRELCOEFEBCO(CHF_FRA1(regRel,0),
+				    CHF_FRA1(regBCo,0),
+				    CHF_CONST_REAL(m_beta),
+				    CHF_BOX(grid),
+				    CHF_REAL(m_dx),
+				    CHF_INT(idir));
+	  }
       
-        //now invert so lambda = stable lambda for variable coef lapl
-        //(according to phil, this is the correct lambda)
-        FORT_INVERTLAMBDAEBCO(CHF_FRA1(regRel,0),
-                              CHF_REAL(safety),
-                              CHF_BOX(grid));
+	//now invert so lambda = stable lambda for variable coef lapl
+	//(according to phil, this is the correct lambda)
+	FORT_INVERTLAMBDAEBCO(CHF_FRA1(regRel,0),
+			      CHF_REAL(safety),
+			      CHF_BOX(grid));
       
-        // Now go over the irregular cells.
-        VoFIterator& vofit = m_vofIterIrreg[dit[mybox]];
-        for (vofit.reset(); vofit.ok(); ++vofit)
-          {
-            const VolIndex& VoF = vofit();
+	// Now go over the irregular cells.
+	VoFIterator& vofit = m_vofIterIrreg[dit[mybox]];
+	for (vofit.reset(); vofit.ok(); ++vofit)
+	  {
+	    const VolIndex& VoF = vofit();
           
-            Real alphaWeight = m_alphaDiagWeight[dit[mybox]](VoF, 0);
-            Real  betaWeight =  m_betaDiagWeight[dit[mybox]](VoF, 0);
-            alphaWeight *= m_alpha;
-            betaWeight  *= m_beta;
+	    Real alphaWeight = m_alphaDiagWeight[dit[mybox]](VoF, 0);
+	    Real  betaWeight =  m_betaDiagWeight[dit[mybox]](VoF, 0);
+	    alphaWeight *= m_alpha;
+	    betaWeight  *= m_beta;
           
-            Real diagWeight  = alphaWeight + betaWeight;
+	    Real diagWeight  = alphaWeight + betaWeight;
           
-            // Set the irregular relaxation coefficients.
-            if (Abs(diagWeight) > 1.0e-9)
-              {
-                m_relCoef[dit[mybox]](VoF, 0) = safety/diagWeight;
-              }
-            else
-              {
-                m_relCoef[dit[mybox]](VoF, 0) = 0.;
-              }
-          }
+	    // Set the irregular relaxation coefficients.
+	    if (Abs(diagWeight) > 1.0e-9)
+	      {
+		m_relCoef[dit[mybox]](VoF, 0) = safety/diagWeight;
+	      }
+	    else
+	      {
+		m_relCoef[dit[mybox]](VoF, 0) = 0.;
+	      }
+	  }
       }
   }
 }
@@ -589,102 +590,102 @@ defineStencils()
     for(int mybox=0; mybox<nbox; mybox++)
       {
 
-        const Box& curBox = m_eblg.getDBL().get(dit[mybox]);
-        const EBISBox& ebisBox = m_eblg.getEBISL()[dit[mybox]];
-        const EBGraph& ebgraph = ebisBox.getEBGraph();
+	const Box& curBox = m_eblg.getDBL().get(dit[mybox]);
+	const EBISBox& ebisBox = m_eblg.getEBISL()[dit[mybox]];
+	const EBGraph& ebgraph = ebisBox.getEBGraph();
 
-        IntVectSet irregIVS = ebisBox.getIrregIVS(curBox);
-        IntVectSet multiIVS = ebisBox.getMultiCells(curBox);
+	IntVectSet irregIVS = ebisBox.getIrregIVS(curBox);
+	IntVectSet multiIVS = ebisBox.getMultiCells(curBox);
 
-        BaseIVFAB<VoFStencil> opStencil(irregIVS,ebgraph, 1);
+	BaseIVFAB<VoFStencil> opStencil(irregIVS,ebgraph, 1);
 
-        //cache the vofIterators
-        m_alphaDiagWeight[dit[mybox]].define(irregIVS,ebisBox.getEBGraph(), 1);
-        m_betaDiagWeight [dit[mybox]].define(irregIVS,ebisBox.getEBGraph(), 1);
-        m_vofIterIrreg   [dit[mybox]].define(irregIVS,ebisBox.getEBGraph());
-        m_vofIterMulti   [dit[mybox]].define(multiIVS,ebisBox.getEBGraph());
+	//cache the vofIterators
+	m_alphaDiagWeight[dit[mybox]].define(irregIVS,ebisBox.getEBGraph(), 1);
+	m_betaDiagWeight [dit[mybox]].define(irregIVS,ebisBox.getEBGraph(), 1);
+	m_vofIterIrreg   [dit[mybox]].define(irregIVS,ebisBox.getEBGraph());
+	m_vofIterMulti   [dit[mybox]].define(multiIVS,ebisBox.getEBGraph());
 
-        for (int idir = 0; idir < SpaceDim; idir++)
-          {
-            IntVectSet loIrreg = irregIVS;
-            IntVectSet hiIrreg = irregIVS;
-            loIrreg &= sideBoxLo[idir];
-            hiIrreg &= sideBoxHi[idir];
-            m_vofIterDomLo[idir][dit[mybox]].define(loIrreg,ebisBox.getEBGraph());
-            m_vofIterDomHi[idir][dit[mybox]].define(hiIrreg,ebisBox.getEBGraph());
-          }
+	for (int idir = 0; idir < SpaceDim; idir++)
+	  {
+	    IntVectSet loIrreg = irregIVS;
+	    IntVectSet hiIrreg = irregIVS;
+	    loIrreg &= sideBoxLo[idir];
+	    hiIrreg &= sideBoxHi[idir];
+	    m_vofIterDomLo[idir][dit[mybox]].define(loIrreg,ebisBox.getEBGraph());
+	    m_vofIterDomHi[idir][dit[mybox]].define(hiIrreg,ebisBox.getEBGraph());
+	  }
 
-        VoFIterator& vofit = m_vofIterIrreg[dit[mybox]];
-        for (vofit.reset(); vofit.ok(); ++vofit)
-          {
-            const VolIndex& VoF = vofit();
+	VoFIterator& vofit = m_vofIterIrreg[dit[mybox]];
+	for (vofit.reset(); vofit.ok(); ++vofit)
+	  {
+	    const VolIndex& VoF = vofit();
 
-            VoFStencil& curStencil = opStencil(VoF,0);
+	    VoFStencil& curStencil = opStencil(VoF,0);
 
-            //bcoef is included here in the flux consistent
-            //with the regular
-            getDivFStencil(curStencil,VoF, dit[mybox]);
-            if (fluxStencil != NULL)
-              {
-                BaseIVFAB<VoFStencil>& fluxStencilBaseIVFAB = (*fluxStencil)[dit[mybox]];
-                //this fills the stencil with the gradient*beta*bcoef
-                VoFStencil  fluxStencilPt = fluxStencilBaseIVFAB(VoF,0);
-                curStencil += fluxStencilPt;
-              }
-            Real betaWeight = EBArith::getDiagWeight(curStencil, VoF);
-            const IntVect& iv = VoF.gridIndex();
-            for (int idir = 0; idir < SpaceDim; idir++)
-              {
-                Box loSide = bdryLo(m_eblg.getDomain(),idir);
-                loSide.shiftHalf(idir,1);
-                Real adjust = 0;
-                if (loSide.contains(iv))
-                  {
-                    Real faceAreaFrac = 0.0;
-                    Real weightedAreaFrac = 0;
-                    Vector<FaceIndex> faces = ebisBox.getFaces(VoF,idir,Side::Lo);
-                    for (int i = 0; i < faces.size(); i++)
-                      {
-                        weightedAreaFrac = ebisBox.areaFrac(faces[i]);
-                        weightedAreaFrac *= (*m_bcoef)[dit[mybox]][idir](faces[i],0);
-                        faceAreaFrac +=  weightedAreaFrac;
-                      }
-                    adjust += -weightedAreaFrac /(m_dx*m_dx);
-                  }
-                Box hiSide = bdryHi(m_eblg.getDomain(),idir);
-                hiSide.shiftHalf(idir,-1);
-                if (hiSide.contains(iv))
-                  {
-                    Real faceAreaFrac = 0.0;
-                    Real weightedAreaFrac = 0;
-                    Vector<FaceIndex> faces = ebisBox.getFaces(VoF,idir,Side::Hi);
-                    for (int i = 0; i < faces.size(); i++)
-                      {
-                        weightedAreaFrac = ebisBox.areaFrac(faces[i]);
-                        weightedAreaFrac *= (*m_bcoef)[dit[mybox]][idir](faces[i],0);
-                        faceAreaFrac +=  weightedAreaFrac;
-                      }
-                    adjust += -weightedAreaFrac /(m_dx*m_dx);
-                  }
-                betaWeight += adjust;
-              }
+	    //bcoef is included here in the flux consistent
+	    //with the regular
+	    getDivFStencil(curStencil,VoF, dit[mybox]);
+	    if (fluxStencil != NULL)
+	      {
+		BaseIVFAB<VoFStencil>& fluxStencilBaseIVFAB = (*fluxStencil)[dit[mybox]];
+		//this fills the stencil with the gradient*beta*bcoef
+		VoFStencil  fluxStencilPt = fluxStencilBaseIVFAB(VoF,0);
+		curStencil += fluxStencilPt;
+	      }
+	    Real betaWeight = EBArith::getDiagWeight(curStencil, VoF);
+	    const IntVect& iv = VoF.gridIndex();
+	    for (int idir = 0; idir < SpaceDim; idir++)
+	      {
+		Box loSide = bdryLo(m_eblg.getDomain(),idir);
+		loSide.shiftHalf(idir,1);
+		Real adjust = 0;
+		if (loSide.contains(iv))
+		  {
+		    Real faceAreaFrac = 0.0;
+		    Real weightedAreaFrac = 0;
+		    Vector<FaceIndex> faces = ebisBox.getFaces(VoF,idir,Side::Lo);
+		    for (int i = 0; i < faces.size(); i++)
+		      {
+			weightedAreaFrac = ebisBox.areaFrac(faces[i]);
+			weightedAreaFrac *= (*m_bcoef)[dit[mybox]][idir](faces[i],0);
+			faceAreaFrac +=  weightedAreaFrac;
+		      }
+		    adjust += -weightedAreaFrac /(m_dx*m_dx);
+		  }
+		Box hiSide = bdryHi(m_eblg.getDomain(),idir);
+		hiSide.shiftHalf(idir,-1);
+		if (hiSide.contains(iv))
+		  {
+		    Real faceAreaFrac = 0.0;
+		    Real weightedAreaFrac = 0;
+		    Vector<FaceIndex> faces = ebisBox.getFaces(VoF,idir,Side::Hi);
+		    for (int i = 0; i < faces.size(); i++)
+		      {
+			weightedAreaFrac = ebisBox.areaFrac(faces[i]);
+			weightedAreaFrac *= (*m_bcoef)[dit[mybox]][idir](faces[i],0);
+			faceAreaFrac +=  weightedAreaFrac;
+		      }
+		    adjust += -weightedAreaFrac /(m_dx*m_dx);
+		  }
+		betaWeight += adjust;
+	      }
 
-            //add in identity term
-            Real volFrac = ebisBox.volFrac(VoF);
-            Real alphaWeight = (*m_acoef)[dit[mybox]](VoF, 0);
-            alphaWeight *= volFrac;
+	    //add in identity term
+	    Real volFrac = ebisBox.volFrac(VoF);
+	    Real alphaWeight = (*m_acoef)[dit[mybox]](VoF, 0);
+	    alphaWeight *= volFrac;
 	    if(s_areaFracWeighted){
 	      alphaWeight *= ebisBox.areaFracScaling(VoF);
 	    }
 
-            m_alphaDiagWeight[dit[mybox]](VoF, 0) = alphaWeight;
-            m_betaDiagWeight[dit[mybox]](VoF, 0)  = betaWeight;
-          }
+	    m_alphaDiagWeight[dit[mybox]](VoF, 0) = alphaWeight;
+	    m_betaDiagWeight[dit[mybox]](VoF, 0)  = betaWeight;
+	  }
 
-        //Operator ebstencil
-        m_opEBStencil[dit[mybox]] = RefCountedPtr<EBStencil>
-          (new EBStencil(m_vofIterIrreg[dit[mybox]].getVector(), opStencil, m_eblg.getDBL().get(dit[mybox]),
-                         m_eblg.getEBISL()[dit[mybox]], m_ghostCellsPhi, m_ghostCellsRHS, 0, true));
+	//Operator ebstencil
+	m_opEBStencil[dit[mybox]] = RefCountedPtr<EBStencil>
+	  (new EBStencil(m_vofIterIrreg[dit[mybox]].getVector(), opStencil, m_eblg.getDBL().get(dit[mybox]),
+			 m_eblg.getEBISL()[dit[mybox]], m_ghostCellsPhi, m_ghostCellsRHS, 0, true));
       }//dit
   } //pragma
 
@@ -705,14 +706,14 @@ defineStencils()
   else{
     m_fastFR = RefCountedPtr<EBFluxRegister>();
   }
-   defineEBCFStencils();
-   defineColorStencils(sideBoxLo, sideBoxHi);
+  defineEBCFStencils();
+  defineColorStencils(sideBoxLo, sideBoxHi);
 }
 //-----------------------------------------------------------------------
 void
 ebconductivityop::
 defineColorStencils(Box a_sideBoxLo[SpaceDim],
-                    Box a_sideBoxHi[SpaceDim])
+		    Box a_sideBoxHi[SpaceDim])
 {
   LayoutData<BaseIVFAB<VoFStencil> >* fluxStencil = m_ebBC->getFluxStencil(0);
   //define the stencils and iterators specific to gsrb.
@@ -720,92 +721,92 @@ defineColorStencils(Box a_sideBoxLo[SpaceDim],
     {
       m_colorEBStencil[icolor].define(m_eblg.getDBL());
       for (int idir = 0; idir < SpaceDim; idir++)
-        {
-          m_vofItIrregColorDomLo[icolor][idir].define( m_eblg.getDBL());
-          m_vofItIrregColorDomHi[icolor][idir].define( m_eblg.getDBL());
-          m_cacheEBxDomainFluxLo[icolor][idir].define( m_eblg.getDBL());
-          m_cacheEBxDomainFluxHi[icolor][idir].define( m_eblg.getDBL());
-        }
+	{
+	  m_vofItIrregColorDomLo[icolor][idir].define( m_eblg.getDBL());
+	  m_vofItIrregColorDomHi[icolor][idir].define( m_eblg.getDBL());
+	  m_cacheEBxDomainFluxLo[icolor][idir].define( m_eblg.getDBL());
+	  m_cacheEBxDomainFluxHi[icolor][idir].define( m_eblg.getDBL());
+	}
       DataIterator dit = m_eblg.getDBL().dataIterator(); 
 
       int nbox = dit.size();
       //this breaks
       //#pragma omp parallel for
       for(int mybox=0; mybox<nbox; mybox++)
-        {
-          const EBISBox& curEBISBox = m_eblg.getEBISL()[dit[mybox]];
-          const EBGraph& curEBGraph = curEBISBox.getEBGraph();
-          Box dblBox( m_eblg.getDBL().get(dit[mybox]) );
+	{
+	  const EBISBox& curEBISBox = m_eblg.getEBISL()[dit[mybox]];
+	  const EBGraph& curEBGraph = curEBISBox.getEBGraph();
+	  Box dblBox( m_eblg.getDBL().get(dit[mybox]) );
 
-          IntVectSet ivsColor(DenseIntVectSet(dblBox, false));
+	  IntVectSet ivsColor(DenseIntVectSet(dblBox, false));
 
-          VoFIterator& vofit = m_vofIterIrreg[dit[mybox]];
-          for (vofit.reset(); vofit.ok(); ++vofit)
-            {
-              const VolIndex& vof = vofit();
-              const IntVect& iv = vof.gridIndex();
+	  VoFIterator& vofit = m_vofIterIrreg[dit[mybox]];
+	  for (vofit.reset(); vofit.ok(); ++vofit)
+	    {
+	      const VolIndex& vof = vofit();
+	      const IntVect& iv = vof.gridIndex();
 
-              bool doThisVoF = true;
-              for (int idir = 0; idir < SpaceDim; idir++)
-                {
-                  if (iv[idir] % 2 != m_colors[icolor][idir])
-                    {
-                      doThisVoF = false;
-                      break;
-                    }
-                }
+	      bool doThisVoF = true;
+	      for (int idir = 0; idir < SpaceDim; idir++)
+		{
+		  if (iv[idir] % 2 != m_colors[icolor][idir])
+		    {
+		      doThisVoF = false;
+		      break;
+		    }
+		}
 
-              if (doThisVoF)
-                {
-                  ivsColor |= iv;
-                }
-            }
+	      if (doThisVoF)
+		{
+		  ivsColor |= iv;
+		}
+	    }
 
-          BaseIVFAB<VoFStencil> colorStencilBaseIVFAB(ivsColor, curEBGraph, 1);
+	  BaseIVFAB<VoFStencil> colorStencilBaseIVFAB(ivsColor, curEBGraph, 1);
 
-          for (int idir = 0; idir < SpaceDim; idir++)
-            {
-              IntVectSet loIrregColor = ivsColor;
-              IntVectSet hiIrregColor = ivsColor;
-              loIrregColor &= a_sideBoxLo[idir];
-              hiIrregColor &= a_sideBoxHi[idir];
-              m_vofItIrregColorDomLo[icolor][idir][dit[mybox]].define(loIrregColor,curEBGraph);
-              m_vofItIrregColorDomHi[icolor][idir][dit[mybox]].define(hiIrregColor,curEBGraph);
-              m_cacheEBxDomainFluxLo[icolor][idir][dit[mybox]].define(loIrregColor,curEBGraph,1);
-              m_cacheEBxDomainFluxHi[icolor][idir][dit[mybox]].define(hiIrregColor,curEBGraph,1);
-            }
+	  for (int idir = 0; idir < SpaceDim; idir++)
+	    {
+	      IntVectSet loIrregColor = ivsColor;
+	      IntVectSet hiIrregColor = ivsColor;
+	      loIrregColor &= a_sideBoxLo[idir];
+	      hiIrregColor &= a_sideBoxHi[idir];
+	      m_vofItIrregColorDomLo[icolor][idir][dit[mybox]].define(loIrregColor,curEBGraph);
+	      m_vofItIrregColorDomHi[icolor][idir][dit[mybox]].define(hiIrregColor,curEBGraph);
+	      m_cacheEBxDomainFluxLo[icolor][idir][dit[mybox]].define(loIrregColor,curEBGraph,1);
+	      m_cacheEBxDomainFluxHi[icolor][idir][dit[mybox]].define(hiIrregColor,curEBGraph,1);
+	    }
 
-          VoFIterator vofitcolor(ivsColor, curEBGraph);
-          int ivof = 0;
-          for (vofitcolor.reset(); vofitcolor.ok(); ++vofitcolor)
-            {
-              const VolIndex& vof = vofitcolor();
+	  VoFIterator vofitcolor(ivsColor, curEBGraph);
+	  int ivof = 0;
+	  for (vofitcolor.reset(); vofitcolor.ok(); ++vofitcolor)
+	    {
+	      const VolIndex& vof = vofitcolor();
 
-              VoFStencil& colorStencil =   colorStencilBaseIVFAB(vof,0);
-              getDivFStencil(colorStencil,vof, dit[mybox]);
+	      VoFStencil& colorStencil =   colorStencilBaseIVFAB(vof,0);
+	      getDivFStencil(colorStencil,vof, dit[mybox]);
 
-              if (fluxStencil != NULL)
-                {
-                  BaseIVFAB<VoFStencil>& ebFluxStencilBaseIVFAB = (*fluxStencil)[dit[mybox]];
-                  //this fills the stencil with the gradient
-                  const VoFStencil&  ebFluxStencilPt = ebFluxStencilBaseIVFAB(vof,0);
-                  //if the stencil returns empty, this means that our
-                  //geometry is underresolved and we just set the
-                  //stencil to zero.   This might not work.
-                  if (ebFluxStencilPt.size() != 0)
-                    {
-                      colorStencil += ebFluxStencilPt;
-                    }
-                }
-              ivof++;
-            }
+	      if (fluxStencil != NULL)
+		{
+		  BaseIVFAB<VoFStencil>& ebFluxStencilBaseIVFAB = (*fluxStencil)[dit[mybox]];
+		  //this fills the stencil with the gradient
+		  const VoFStencil&  ebFluxStencilPt = ebFluxStencilBaseIVFAB(vof,0);
+		  //if the stencil returns empty, this means that our
+		  //geometry is underresolved and we just set the
+		  //stencil to zero.   This might not work.
+		  if (ebFluxStencilPt.size() != 0)
+		    {
+		      colorStencil += ebFluxStencilPt;
+		    }
+		}
+	      ivof++;
+	    }
 
-          const Vector<VolIndex>& srcVofs = vofitcolor.getVector();
+	  const Vector<VolIndex>& srcVofs = vofitcolor.getVector();
 
-          m_colorEBStencil[icolor][dit[mybox]]  = RefCountedPtr<EBStencil>
-            (new EBStencil(srcVofs, colorStencilBaseIVFAB,  m_eblg.getDBL().get(dit[mybox]),
-                           m_eblg.getEBISL()[dit[mybox]], m_ghostCellsPhi, m_ghostCellsRHS, 0, true));
-        }//dit
+	  m_colorEBStencil[icolor][dit[mybox]]  = RefCountedPtr<EBStencil>
+	    (new EBStencil(srcVofs, colorStencilBaseIVFAB,  m_eblg.getDBL().get(dit[mybox]),
+			   m_eblg.getEBISL()[dit[mybox]], m_ghostCellsPhi, m_ghostCellsRHS, 0, true));
+	}//dit
     }//color
 }
 //-----------------------------------------------------------------------
@@ -833,48 +834,48 @@ defineEBCFStencils()
   if (m_hasFine && m_hasEBCF)
     {
       for (int idir = 0; idir < SpaceDim; idir++)
-        {
-          for (SideIterator sit; sit.ok(); ++sit)
-            {
-              //coarse fine stuff is between me and next finer level
-              //fine stuff lives over m_eblgfine
-              //coar stuff lives over m_eblg
-              int index = m_fastFR->index(idir, sit());
-              m_stencilCoar[index].define(m_eblg.getDBL());
-              m_faceitCoar [index].define(m_eblg.getDBL());
+	{
+	  for (SideIterator sit; sit.ok(); ++sit)
+	    {
+	      //coarse fine stuff is between me and next finer level
+	      //fine stuff lives over m_eblgfine
+	      //coar stuff lives over m_eblg
+	      int index = m_fastFR->index(idir, sit());
+	      m_stencilCoar[index].define(m_eblg.getDBL());
+	      m_faceitCoar [index].define(m_eblg.getDBL());
 
-              DataIterator dit = m_eblg.getDBL().dataIterator(); 
-              int nbox = dit.size();
+	      DataIterator dit = m_eblg.getDBL().dataIterator(); 
+	      int nbox = dit.size();
 
 #pragma omp parallel for
-              for(int mybox=0; mybox<nbox; mybox++)
-                {
-                  Vector<FaceIndex>& facesEBCFCoar =  m_faceitCoar[index][dit[mybox]];
-                  Vector<VoFStencil>& stencEBCFCoar= m_stencilCoar[index][dit[mybox]];
-                  Vector<VoFIterator>& vofitlist = m_fastFR->getVoFItCoar(dit[mybox], idir, sit());
-                  //first build up the list of the faces
-                  for (int ivofit = 0; ivofit < vofitlist.size(); ivofit++)
-                    {
-                      VoFIterator& vofit = vofitlist[ivofit];
-                      for (vofit.reset(); vofit.ok(); ++vofit)
-                        {
-                          //on the coarse side of the CF interface we are
-                          //looking in the flip direction because we look
-                          //back at the interface
-                          Vector<FaceIndex> facespt = m_eblg.getEBISL()[dit[mybox]].getFaces(vofit(), idir, flip(sit()));
-                          facesEBCFCoar.append(facespt);
-                        }
-                    }
+	      for(int mybox=0; mybox<nbox; mybox++)
+		{
+		  Vector<FaceIndex>& facesEBCFCoar =  m_faceitCoar[index][dit[mybox]];
+		  Vector<VoFStencil>& stencEBCFCoar= m_stencilCoar[index][dit[mybox]];
+		  Vector<VoFIterator>& vofitlist = m_fastFR->getVoFItCoar(dit[mybox], idir, sit());
+		  //first build up the list of the faces
+		  for (int ivofit = 0; ivofit < vofitlist.size(); ivofit++)
+		    {
+		      VoFIterator& vofit = vofitlist[ivofit];
+		      for (vofit.reset(); vofit.ok(); ++vofit)
+			{
+			  //on the coarse side of the CF interface we are
+			  //looking in the flip direction because we look
+			  //back at the interface
+			  Vector<FaceIndex> facespt = m_eblg.getEBISL()[dit[mybox]].getFaces(vofit(), idir, flip(sit()));
+			  facesEBCFCoar.append(facespt);
+			}
+		    }
 
-                  stencEBCFCoar.resize(facesEBCFCoar.size());
-                  for (int iface = 0; iface < stencEBCFCoar.size(); iface++)
-                    {
-                      IntVectSet cfivs; //does not apply here
-                      getFluxStencil(stencEBCFCoar[iface], facesEBCFCoar[iface], dit[mybox]);
-                    }
-                }
-            }
-        }
+		  stencEBCFCoar.resize(facesEBCFCoar.size());
+		  for (int iface = 0; iface < stencEBCFCoar.size(); iface++)
+		    {
+		      IntVectSet cfivs; //does not apply here
+		      getFluxStencil(stencEBCFCoar[iface], facesEBCFCoar[iface], dit[mybox]);
+		    }
+		}
+	    }
+	}
     }
 }
 
@@ -882,9 +883,9 @@ defineEBCFStencils()
 void
 ebconductivityop::
 residual(LevelData<EBCellFAB>&       a_residual,
-         const LevelData<EBCellFAB>& a_phi,
-         const LevelData<EBCellFAB>& a_rhs,
-         bool                        a_homogeneousPhysBC)
+	 const LevelData<EBCellFAB>& a_phi,
+	 const LevelData<EBCellFAB>& a_rhs,
+	 bool                        a_homogeneousPhysBC)
 {
   CH_TIME("ebconductivityop::residual");
   //this is a multigrid operator so only homogeneous CF BC
@@ -898,7 +899,7 @@ residual(LevelData<EBCellFAB>&       a_residual,
 void
 ebconductivityop::
 preCond(LevelData<EBCellFAB>&       a_lhs,
-        const LevelData<EBCellFAB>& a_rhs)
+	const LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("ebconductivityop::preCond");
   EBLevelDataOps::assign(a_lhs, a_rhs);
@@ -910,8 +911,8 @@ preCond(LevelData<EBCellFAB>&       a_lhs,
 void
 ebconductivityop::
 applyOp(LevelData<EBCellFAB>&             a_opPhi,
-        const LevelData<EBCellFAB>&       a_phi,
-        bool                              a_homogeneousPhysBC)
+	const LevelData<EBCellFAB>&       a_phi,
+	bool                              a_homogeneousPhysBC)
 {
   //homogeneous CFBCs because that is all we can do.
   applyOp(a_opPhi, a_phi, NULL, a_homogeneousPhysBC, true);
@@ -921,16 +922,16 @@ applyOp(LevelData<EBCellFAB>&             a_opPhi,
 void
 ebconductivityop::
 incrOpRegularAllDirs(Box * a_loBox,
-                     Box * a_hiBox,
-                     int * a_hasLo,
-                     int * a_hasHi,
-                     Box & a_curDblBox,
-                     Box & a_curPhiBox,
-                     int a_nComps,
-                     BaseFab<Real> & a_curOpPhiFAB,
-                     const BaseFab<Real> & a_curPhiFAB,
-                     bool a_homogeneousPhysBC,
-                     const DataIndex& a_dit)
+		     Box * a_hiBox,
+		     int * a_hasLo,
+		     int * a_hasHi,
+		     Box & a_curDblBox,
+		     Box & a_curPhiBox,
+		     int a_nComps,
+		     BaseFab<Real> & a_curOpPhiFAB,
+		     const BaseFab<Real> & a_curPhiFAB,
+		     bool a_homogeneousPhysBC,
+		     const DataIndex& a_dit)
 {
   CH_TIME("ebconductivityop::incrOpRegularAllDirs");
   CH_assert(m_domainBC != NULL);
@@ -940,8 +941,8 @@ incrOpRegularAllDirs(Box * a_loBox,
     {
       BaseFab<Real>& phiFAB = (BaseFab<Real>&) a_curPhiFAB;
       applyDomainFlux(a_loBox, a_hiBox, a_hasLo, a_hasHi,
-                      a_curDblBox, a_nComps, phiFAB,
-                      a_homogeneousPhysBC, a_dit);
+		      a_curDblBox, a_nComps, phiFAB,
+		      a_homogeneousPhysBC, a_dit);
     }
 
   for (int comp = 0; comp<a_nComps; comp++)
@@ -953,24 +954,24 @@ incrOpRegularAllDirs(Box * a_loBox,
       //need three coeffs because this has to work in 3d
       //this is my klunky way to make the call dimension-independent
       for (int iloc = 0; iloc < 3; iloc++)
-        {
-          if (iloc >= SpaceDim)
-            {
-              bc[iloc]= &dummy;
-            }
-          else
-            {
-              bc[iloc] = &((*m_bcoef)[a_dit][iloc].getSingleValuedFAB());
-            }
-        }
+	{
+	  if (iloc >= SpaceDim)
+	    {
+	      bc[iloc]= &dummy;
+	    }
+	  else
+	    {
+	      bc[iloc] = &((*m_bcoef)[a_dit][iloc].getSingleValuedFAB());
+	    }
+	}
       FORT_CONDUCTIVITYINPLACE(CHF_FRA1(a_curOpPhiFAB,comp),
-                               CHF_CONST_FRA1(a_curPhiFAB,comp),
-                               CHF_CONST_FRA1((*bc[0]),comp),
-                               CHF_CONST_FRA1((*bc[1]),comp),
-                               CHF_CONST_FRA1((*bc[2]),comp),
-                               CHF_CONST_REAL(m_beta),
-                               CHF_CONST_REAL(m_dx),
-                               CHF_BOX(a_curDblBox));
+			       CHF_CONST_FRA1(a_curPhiFAB,comp),
+			       CHF_CONST_FRA1((*bc[0]),comp),
+			       CHF_CONST_FRA1((*bc[1]),comp),
+			       CHF_CONST_FRA1((*bc[2]),comp),
+			       CHF_CONST_REAL(m_beta),
+			       CHF_CONST_REAL(m_dx),
+			       CHF_BOX(a_curDblBox));
     }
 }
 
@@ -978,14 +979,14 @@ incrOpRegularAllDirs(Box * a_loBox,
 void
 ebconductivityop::
 applyDomainFlux(Box * a_loBox,
-                Box * a_hiBox,
-                int * a_hasLo,
-                int * a_hasHi,
-                Box & a_dblBox,
-                int a_nComps,
-                BaseFab<Real> & a_phiFAB,
-                bool a_homogeneousPhysBC,
-                const DataIndex& a_dit)
+		Box * a_hiBox,
+		int * a_hasLo,
+		int * a_hasHi,
+		Box & a_dblBox,
+		int a_nComps,
+		BaseFab<Real> & a_phiFAB,
+		bool a_homogeneousPhysBC,
+		const DataIndex& a_dit)
 {
   CH_TIME("ebconductivityop::applyDomainFlux");
   CH_assert(m_domainBC != NULL);
@@ -994,68 +995,68 @@ applyDomainFlux(Box * a_loBox,
     {
 
       EBArith::loHi(a_loBox[idir], a_hasLo[idir],
-                    a_hiBox[idir], a_hasHi[idir],
-                    m_eblg.getDomain(),a_dblBox, idir);
+		    a_hiBox[idir], a_hasHi[idir],
+		    m_eblg.getDomain(),a_dblBox, idir);
 
       for (int comp = 0; comp<a_nComps; comp++)
-        {
+	{
 
-          if (a_hasLo[idir] == 1)
-            {
-              Box lbox=a_loBox[idir];
-              lbox.shift(idir,-1);
-              FArrayBox loFaceFlux(a_loBox[idir],a_nComps);
-              int side = -1;
-              Real time = 0;
-              m_domainBC->getFaceFlux(loFaceFlux,a_phiFAB,RealVect::Zero,m_dx*RealVect::Unit,idir,Side::Lo,a_dit,time,a_homogeneousPhysBC);
+	  if (a_hasLo[idir] == 1)
+	    {
+	      Box lbox=a_loBox[idir];
+	      lbox.shift(idir,-1);
+	      FArrayBox loFaceFlux(a_loBox[idir],a_nComps);
+	      int side = -1;
+	      Real time = 0;
+	      m_domainBC->getFaceFlux(loFaceFlux,a_phiFAB,RealVect::Zero,m_dx*RealVect::Unit,idir,Side::Lo,a_dit,time,a_homogeneousPhysBC);
 
-              BaseFab<Real>& bc = ((*m_bcoef)[a_dit][idir].getSingleValuedFAB());
-              //again, following the odd convention of EBAMRPoissonOp
-              //(because I am reusing its BC classes),
-              //the input flux here is CELL centered and the input box
-              //is the box adjacent to the domain boundary on the valid side.
-              //because I am not insane (yet) I will just shift the flux's box
-              //over and multiply by the appropriate coefficient
-              bc.shiftHalf(idir, 1);
-              FORT_EBCOREGAPPLYDOMAINFLUX(CHF_FRA1(a_phiFAB,comp),
-                                          CHF_CONST_FRA1(loFaceFlux,comp),
-                                          CHF_CONST_FRA1(bc,comp),
-                                          CHF_CONST_REAL(m_dx),
-                                          CHF_CONST_INT(side),
-                                          CHF_CONST_INT(idir),
-                                          CHF_BOX(lbox));
-              bc.shiftHalf(idir, -1);
-            }
+	      BaseFab<Real>& bc = ((*m_bcoef)[a_dit][idir].getSingleValuedFAB());
+	      //again, following the odd convention of EBAMRPoissonOp
+	      //(because I am reusing its BC classes),
+	      //the input flux here is CELL centered and the input box
+	      //is the box adjacent to the domain boundary on the valid side.
+	      //because I am not insane (yet) I will just shift the flux's box
+	      //over and multiply by the appropriate coefficient
+	      bc.shiftHalf(idir, 1);
+	      FORT_EBCOREGAPPLYDOMAINFLUX(CHF_FRA1(a_phiFAB,comp),
+					  CHF_CONST_FRA1(loFaceFlux,comp),
+					  CHF_CONST_FRA1(bc,comp),
+					  CHF_CONST_REAL(m_dx),
+					  CHF_CONST_INT(side),
+					  CHF_CONST_INT(idir),
+					  CHF_BOX(lbox));
+	      bc.shiftHalf(idir, -1);
+	    }
 
-          if (a_hasHi[idir] == 1)
-            {
-              Box hbox=a_hiBox[idir];
-              hbox.shift(idir,1);
-              FArrayBox hiFaceFlux(a_hiBox[idir],a_nComps);
-              int side = 1;
-              Real time = 0;
-              m_domainBC->getFaceFlux(hiFaceFlux,a_phiFAB,RealVect::Zero,m_dx*RealVect::Unit,idir,Side::Hi,a_dit,time,a_homogeneousPhysBC);
+	  if (a_hasHi[idir] == 1)
+	    {
+	      Box hbox=a_hiBox[idir];
+	      hbox.shift(idir,1);
+	      FArrayBox hiFaceFlux(a_hiBox[idir],a_nComps);
+	      int side = 1;
+	      Real time = 0;
+	      m_domainBC->getFaceFlux(hiFaceFlux,a_phiFAB,RealVect::Zero,m_dx*RealVect::Unit,idir,Side::Hi,a_dit,time,a_homogeneousPhysBC);
 
-              BaseFab<Real>& bc = ((*m_bcoef)[a_dit][idir].getSingleValuedFAB());
-              //again, following the odd convention of EBAMRPoissonOp
-              //(because I am reusing its BC classes),
-              //the input flux here is CELL centered and the input box
-              //is the box adjacent to the domain boundary on the valid side.
-              //because I am not insane (yet) I will just shift the flux's box
-              //over and multiply by the appropriate coefficient
-              bc.shiftHalf(idir, -1);
-              FORT_EBCOREGAPPLYDOMAINFLUX(CHF_FRA1(a_phiFAB,comp),
-                                          CHF_CONST_FRA1(hiFaceFlux,comp),
-                                          CHF_CONST_FRA1(bc,comp),
-                                          CHF_CONST_REAL(m_dx),
-                                          CHF_CONST_INT(side),
-                                          CHF_CONST_INT(idir),
-                                          CHF_BOX(hbox));
-              bc.shiftHalf(idir, 1);
+	      BaseFab<Real>& bc = ((*m_bcoef)[a_dit][idir].getSingleValuedFAB());
+	      //again, following the odd convention of EBAMRPoissonOp
+	      //(because I am reusing its BC classes),
+	      //the input flux here is CELL centered and the input box
+	      //is the box adjacent to the domain boundary on the valid side.
+	      //because I am not insane (yet) I will just shift the flux's box
+	      //over and multiply by the appropriate coefficient
+	      bc.shiftHalf(idir, -1);
+	      FORT_EBCOREGAPPLYDOMAINFLUX(CHF_FRA1(a_phiFAB,comp),
+					  CHF_CONST_FRA1(hiFaceFlux,comp),
+					  CHF_CONST_FRA1(bc,comp),
+					  CHF_CONST_REAL(m_dx),
+					  CHF_CONST_INT(side),
+					  CHF_CONST_INT(idir),
+					  CHF_BOX(hbox));
+	      bc.shiftHalf(idir, 1);
 
-            }
+	    }
 
-        }
+	}
     }
 }
 
@@ -1063,10 +1064,10 @@ applyDomainFlux(Box * a_loBox,
 void
 ebconductivityop::
 applyOp(LevelData<EBCellFAB>&                    a_lhs,
-        const LevelData<EBCellFAB>&              a_phi,
-        const LevelData<EBCellFAB>* const        a_phiCoar,
-        const bool&                              a_homogeneousPhysBC,
-        const bool&                              a_homogeneousCFBC,
+	const LevelData<EBCellFAB>&              a_phi,
+	const LevelData<EBCellFAB>* const        a_phiCoar,
+	const bool&                              a_homogeneousPhysBC,
+	const bool&                              a_homogeneousCFBC,
 	const bool&                              a_doexchange)
 {
   DataIterator dit = a_lhs.dataIterator();
@@ -1076,10 +1077,10 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
 void
 ebconductivityop::
 applyOp(LevelData<EBCellFAB>&                    a_lhs,
-        const LevelData<EBCellFAB>&              a_phi,
-        const LevelData<EBCellFAB>* const        a_phiCoar,
-        const bool&                              a_homogeneousPhysBC,
-        const bool&                              a_homogeneousCFBC,
+	const LevelData<EBCellFAB>&              a_phi,
+	const LevelData<EBCellFAB>* const        a_phiCoar,
+	const bool&                              a_homogeneousPhysBC,
+	const bool&                              a_homogeneousCFBC,
 	DataIterator&                            a_dit,
 	const bool&                              a_doexchange)
 {
@@ -1145,10 +1146,10 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
 void
 ebconductivityop::
 incrOpRegularDir(EBCellFAB&             a_lhs,
-                 const EBCellFAB&       a_phi,
-                 const bool&            a_homogeneous,
-                 const int&             a_dir,
-                 const DataIndex&       a_datInd)
+		 const EBCellFAB&       a_phi,
+		 const bool&            a_homogeneous,
+		 const int&             a_dir,
+		 const DataIndex&       a_datInd)
 {
   CH_TIME("ebco::incrOpReg");
   const Box& grid = m_eblg.getDBL()[a_datInd];
@@ -1184,24 +1185,24 @@ incrOpRegularDir(EBCellFAB&             a_lhs,
       loBoxFace.shiftHalf(a_dir, -1);
       domainFluxLo.resize(loBoxFace, 1);
       if (!s_turnOffBCs)
-        {
-          //using EBAMRPoissonOp BCs which require a cell centered box.
-          domainFluxLo.shiftHalf(a_dir, 1);
-          m_domainBC->getFaceFlux(domainFluxLo,phi,origin,dxVect,a_dir,Side::Lo,a_datInd,time,a_homogeneous);
-          domainFluxLo *= m_beta;
-          domainFluxLo.shiftHalf(a_dir,-1);
-        }
+	{
+	  //using EBAMRPoissonOp BCs which require a cell centered box.
+	  domainFluxLo.shiftHalf(a_dir, 1);
+	  m_domainBC->getFaceFlux(domainFluxLo,phi,origin,dxVect,a_dir,Side::Lo,a_datInd,time,a_homogeneous);
+	  domainFluxLo *= m_beta;
+	  domainFluxLo.shiftHalf(a_dir,-1);
+	}
       else
-        {
-          //extrapolate to domain flux if there is no bc
-          for (BoxIterator boxit(loBoxFace); boxit.ok(); ++boxit)
-            {
-              const IntVect& iv = boxit();
-              IntVect ivn= iv;
-              ivn[a_dir]++;
-              domainFluxLo(iv, 0) = interiorFlux(ivn, 0);
-            }
-        }
+	{
+	  //extrapolate to domain flux if there is no bc
+	  for (BoxIterator boxit(loBoxFace); boxit.ok(); ++boxit)
+	    {
+	      const IntVect& iv = boxit();
+	      IntVect ivn= iv;
+	      ivn[a_dir]++;
+	      domainFluxLo(iv, 0) = interiorFlux(ivn, 0);
+	    }
+	}
     }
   if (hasHi==1)
     {
@@ -1209,45 +1210,45 @@ incrOpRegularDir(EBCellFAB&             a_lhs,
       hiBoxFace.shiftHalf(a_dir, 1);
       domainFluxHi.resize(hiBoxFace, 1);
       if (!s_turnOffBCs)
-        {
-          //using EBAMRPoissonOp BCs which require a cell centered box.
-          domainFluxHi.shiftHalf(a_dir, -1);
-          m_domainBC->getFaceFlux(domainFluxHi,phi,origin,dxVect,a_dir,Side::Hi,a_datInd,time,a_homogeneous);
-          domainFluxHi *= m_beta;
-          domainFluxHi.shiftHalf(a_dir,  1);
-        }
+	{
+	  //using EBAMRPoissonOp BCs which require a cell centered box.
+	  domainFluxHi.shiftHalf(a_dir, -1);
+	  m_domainBC->getFaceFlux(domainFluxHi,phi,origin,dxVect,a_dir,Side::Hi,a_datInd,time,a_homogeneous);
+	  domainFluxHi *= m_beta;
+	  domainFluxHi.shiftHalf(a_dir,  1);
+	}
       else
-        {
-          //extrapolate to domain flux if there is no bc
-          for (BoxIterator boxit(hiBoxFace); boxit.ok(); ++boxit)
-            {
-              const IntVect& iv = boxit();
-              IntVect ivn= iv;
-              ivn[a_dir]--;
-              domainFluxHi(iv, 0) = interiorFlux(ivn, 0);
-            }
-        }
+	{
+	  //extrapolate to domain flux if there is no bc
+	  for (BoxIterator boxit(hiBoxFace); boxit.ok(); ++boxit)
+	    {
+	      const IntVect& iv = boxit();
+	      IntVect ivn= iv;
+	      ivn[a_dir]--;
+	      domainFluxHi(iv, 0) = interiorFlux(ivn, 0);
+	    }
+	}
     }
   Real unity = 1.0;  //beta already in the flux
   FORT_INCRAPPLYEBCO(CHF_FRA1(reglhs,0),
-                     CHF_CONST_FRA1(interiorFlux, 0),
-                     CHF_CONST_FRA1(domainFluxLo, 0),
-                     CHF_CONST_FRA1(domainFluxHi, 0),
-                     CHF_CONST_REAL(unity),
-                     CHF_CONST_REAL(m_dx),
-                     CHF_BOX(loBox),
-                     CHF_BOX(hiBox),
-                     CHF_BOX(centerBox),
-                     CHF_CONST_INT(hasLo),
-                     CHF_CONST_INT(hasHi),
-                     CHF_CONST_INT(a_dir));
+		     CHF_CONST_FRA1(interiorFlux, 0),
+		     CHF_CONST_FRA1(domainFluxLo, 0),
+		     CHF_CONST_FRA1(domainFluxHi, 0),
+		     CHF_CONST_REAL(unity),
+		     CHF_CONST_REAL(m_dx),
+		     CHF_BOX(loBox),
+		     CHF_BOX(hiBox),
+		     CHF_BOX(centerBox),
+		     CHF_CONST_INT(hasLo),
+		     CHF_CONST_INT(hasHi),
+		     CHF_CONST_INT(a_dir));
 }
 //-----------------------------------------------------------------------
 void
 ebconductivityop::
 dumpFABPoint(const EBCellFAB&       a_lhs,
-             const DataIndex&       a_datInd,
-             const string&          a_blab)
+	     const DataIndex&       a_datInd,
+	     const string&          a_blab)
 {
   //  if (EBCellFAB::s_verbose)
   //    {
@@ -1271,17 +1272,17 @@ dumpFABPoint(const EBCellFAB&       a_lhs,
 void
 ebconductivityop::
 applyOpIrregular(EBCellFAB&             a_lhs,
-                 const EBCellFAB&       a_phi,
-                 const bool&            a_homogeneous,
-                 const DataIndex&       a_datInd)
+		 const EBCellFAB&       a_phi,
+		 const bool&            a_homogeneous,
+		 const DataIndex&       a_datInd)
 {
   CH_TIME("ebco::applyOpIrr");
 
-//  bool stopHere = false;
-//  if (a_lhs.box().contains(IntVect(26, 1)))
-//    {
-//      stopHere = true;
-//    }
+  //  bool stopHere = false;
+  //  if (a_lhs.box().contains(IntVect(26, 1)))
+  //    {
+  //      stopHere = true;
+  //    }
 
   //  dumpFABPoint(a_lhs, a_datInd, string("ebconductivityop::applyopirr before apply lhs="));
   RealVect vectDx = m_dx*RealVect::Unit;
@@ -1299,32 +1300,32 @@ applyOpIrregular(EBCellFAB&             a_lhs,
     {
       int comp = 0;
       for (m_vofIterDomLo[idir][a_datInd].reset(); m_vofIterDomLo[idir][a_datInd].ok();  ++m_vofIterDomLo[idir][a_datInd])
-        {
-          Real flux;
-          const VolIndex& vof = m_vofIterDomLo[idir][a_datInd]();
-          m_domainBC->getFaceFlux(flux,vof,comp,a_phi,
-                                  RealVect::Zero,vectDx,idir,Side::Lo, a_datInd, 0.0,
-                                  a_homogeneous);
-          //area gets multiplied in by bc operator
-          a_lhs(vof,comp) -= flux*m_beta/m_dx;
-        }
+	{
+	  Real flux;
+	  const VolIndex& vof = m_vofIterDomLo[idir][a_datInd]();
+	  m_domainBC->getFaceFlux(flux,vof,comp,a_phi,
+				  RealVect::Zero,vectDx,idir,Side::Lo, a_datInd, 0.0,
+				  a_homogeneous);
+	  //area gets multiplied in by bc operator
+	  a_lhs(vof,comp) -= flux*m_beta/m_dx;
+	}
       for (m_vofIterDomHi[idir][a_datInd].reset(); m_vofIterDomHi[idir][a_datInd].ok();  ++m_vofIterDomHi[idir][a_datInd])
-        {
-          Real flux;
-          const VolIndex& vof = m_vofIterDomHi[idir][a_datInd]();
-          m_domainBC->getFaceFlux(flux,vof,comp,a_phi,
-                                  RealVect::Zero,vectDx,idir,Side::Hi,a_datInd,0.0,
-                                  a_homogeneous);
-          //area gets multiplied in by bc operator
-          a_lhs(vof,comp) += flux*m_beta/m_dx;
-        }
+	{
+	  Real flux;
+	  const VolIndex& vof = m_vofIterDomHi[idir][a_datInd]();
+	  m_domainBC->getFaceFlux(flux,vof,comp,a_phi,
+				  RealVect::Zero,vectDx,idir,Side::Hi,a_datInd,0.0,
+				  a_homogeneous);
+	  //area gets multiplied in by bc operator
+	  a_lhs(vof,comp) += flux*m_beta/m_dx;
+	}
     }
 }
 //-----------------------------------------------------------------------
 void
 ebconductivityop::
 applyOpNoBoundary(LevelData<EBCellFAB>&        a_opPhi,
-                  const LevelData<EBCellFAB>&  a_phi)
+		  const LevelData<EBCellFAB>&  a_phi)
 {
   s_turnOffBCs = true;
   applyOp(a_opPhi, a_phi, true);
@@ -1347,8 +1348,8 @@ create(LevelData<EBCellFAB>&       a_lhs,
 void
 ebconductivityop::
 createCoarsened(LevelData<EBCellFAB>&       a_lhs,
-                const LevelData<EBCellFAB>& a_rhs,
-                const int &                 a_refRat)
+		const LevelData<EBCellFAB>& a_rhs,
+		const int &                 a_refRat)
 {
   CH_TIME("ebco::createCoar");
   int ncomp = a_rhs.nComp();
@@ -1387,7 +1388,7 @@ assign(LevelData<EBCellFAB>&       a_lhs,
 Real
 ebconductivityop::
 dotProduct(const LevelData<EBCellFAB>& a_1,
-           const LevelData<EBCellFAB>& a_2)
+	   const LevelData<EBCellFAB>& a_2)
 {
   CH_TIME("ebco::dotProd");
   ProblemDomain domain;
@@ -1432,40 +1433,40 @@ ebconductivityop::
 norm(const LevelData<EBCellFAB>& a_rhs,
      int                         a_ord)
 {
- CH_TIMERS("ebconductivityop::norm");
- CH_TIMER("mpi_allreduce",t1);
+  CH_TIMERS("ebconductivityop::norm");
+  CH_TIMER("mpi_allreduce",t1);
 
- Real maxNorm = 0.0;
+  Real maxNorm = 0.0;
 
- maxNorm = localMaxNorm(a_rhs);
+  maxNorm = localMaxNorm(a_rhs);
 
- CH_START(t1);
+  CH_START(t1);
 #ifdef CH_MPI
-       Real tmp = 1.;
-       int result = MPI_Allreduce(&maxNorm, &tmp, 1, MPI_CH_REAL,
-                         MPI_MAX, Chombo_MPI::comm);
-       if (result != MPI_SUCCESS)
-         { //bark!!!
-           MayDay::Error("sorry, but I had a communcation error on norm");
-         }
-       maxNorm = tmp;
+  Real tmp = 1.;
+  int result = MPI_Allreduce(&maxNorm, &tmp, 1, MPI_CH_REAL,
+			     MPI_MAX, Chombo_MPI::comm);
+  if (result != MPI_SUCCESS)
+    { //bark!!!
+      MayDay::Error("sorry, but I had a communcation error on norm");
+    }
+  maxNorm = tmp;
 #endif
-//  Real volume=1.;
-//  EBLevelDataOps::gatherBroadCast(maxNorm, volume, 0);
- CH_STOP(t1);
+  //  Real volume=1.;
+  //  EBLevelDataOps::gatherBroadCast(maxNorm, volume, 0);
+  CH_STOP(t1);
 
- return maxNorm;
+  return maxNorm;
 }
 
 Real 
 ebconductivityop::
 localMaxNorm(const LevelData<EBCellFAB>& a_rhs)
 {
- CH_TIME("EBAMRPoissonOp::localMaxNorm");
- return  EBAMRPoissonOp::staticMaxNorm(a_rhs, m_eblg);
-//  ProblemDomain domain;
-//  Real volume;
-//  return EBLevelDataOps::kappaNorm(volume,a_rhs,EBLEVELDATAOPS_ALLVOFS,domain,0);
+  CH_TIME("EBAMRPoissonOp::localMaxNorm");
+  return  EBAMRPoissonOp::staticMaxNorm(a_rhs, m_eblg);
+  //  ProblemDomain domain;
+  //  Real volume;
+  //  return EBLevelDataOps::kappaNorm(volume,a_rhs,EBLEVELDATAOPS_ALLVOFS,domain,0);
 }
 //-----------------------------------------------------------------------
 void
@@ -1487,8 +1488,8 @@ setVal(LevelData<EBCellFAB>& a_lhs, const Real& a_value)
 void
 ebconductivityop::
 createCoarser(LevelData<EBCellFAB>&       a_coar,
-              const LevelData<EBCellFAB>& a_fine,
-              bool                        a_ghosted)
+	      const LevelData<EBCellFAB>& a_fine,
+	      bool                        a_ghosted)
 {
   CH_TIME("ebco::createCoarser");
   CH_assert(a_fine.nComp() == 1);
@@ -1500,7 +1501,7 @@ createCoarser(LevelData<EBCellFAB>&       a_coar,
 
   const EBIndexSpace* const ebisPtr = m_eblg.getEBIS();
   ebisPtr->fillEBISLayout(coarEBISL,
-                          dbl, coarDom, nghost);
+			  dbl, coarDom, nghost);
 
   EBCellFactory ebcellfact(coarEBISL);
   a_coar.define(dbl, 1,a_fine.ghostVect(),ebcellfact);
@@ -1570,8 +1571,8 @@ void ebconductivityop::relax_mf(LevelData<EBCellFAB>& a_phi, const LevelData<EBC
 void
 ebconductivityop::
 relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
-              const LevelData<EBCellFAB>& a_rhs,
-              int                         a_iterations)
+	      const LevelData<EBCellFAB>& a_rhs,
+	      int                         a_iterations)
 {
   CH_TIME("ebconductivityop::relaxGSRBFast");
 
@@ -1598,111 +1599,111 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
 #pragma omp parallel
       {
 #pragma omp for
-      for (int mybox=0;mybox<nbox; mybox++)
-        {
-          Box dblBox(m_eblg.getDBL().get(dit[mybox]));
-          EBCellFAB& phi = a_phi[dit[mybox]];
-          BaseFab<Real>& phiFAB       = phi.getSingleValuedFAB();
+	for (int mybox=0;mybox<nbox; mybox++)
+	  {
+	    Box dblBox(m_eblg.getDBL().get(dit[mybox]));
+	    EBCellFAB& phi = a_phi[dit[mybox]];
+	    BaseFab<Real>& phiFAB       = phi.getSingleValuedFAB();
 
-          Box loBox[SpaceDim],hiBox[SpaceDim];
-          int hasLo[SpaceDim],hasHi[SpaceDim];
+	    Box loBox[SpaceDim],hiBox[SpaceDim];
+	    int hasLo[SpaceDim],hasHi[SpaceDim];
 
-          {
- //           CH_TIME("ebconductivityop::levelGSRB::applyDomainFlux");
-            applyDomainFlux(loBox, hiBox, hasLo, hasHi,
-                            dblBox, nComps, phiFAB,
-                            true, dit[mybox]);
-          }
-          ibox++;
-        }
+	    {
+	      //           CH_TIME("ebconductivityop::levelGSRB::applyDomainFlux");
+	      applyDomainFlux(loBox, hiBox, hasLo, hasHi,
+			      dblBox, nComps, phiFAB,
+			      true, dit[mybox]);
+	    }
+	    ibox++;
+	  }
 
-        }
+      }
 
       // do first red, then black passes
       // int id = omp_get_thread_num();
       // pout() << "my thread " << id << endl;
       for (int redBlack =0; redBlack <= 1; redBlack++)
-        {
-//          CH_TIME("ebconductivityop::levelGSRB::Compute");
+	{
+	  //          CH_TIME("ebconductivityop::levelGSRB::Compute");
             
-          a_phi.exchange();
+	  a_phi.exchange();
             
-          if (m_hasCoar)
-            {
-//              CH_TIME("ebconductivityop::levelGSRB::homogeneousCFInterp");
-              applyCFBCs(a_phi, NULL, true);
-            }
-          ibox = 0;
+	  if (m_hasCoar)
+	    {
+	      //              CH_TIME("ebconductivityop::levelGSRB::homogeneousCFInterp");
+	      applyCFBCs(a_phi, NULL, true);
+	    }
+	  ibox = 0;
 #pragma omp parallel
-          {
+	  {
 #pragma omp for
-            for (int mybox=0;mybox<nbox; mybox++)
-              {
-                EBCellFAB& phifab = a_phi[dit[mybox]];
-                const EBCellFAB& rhsfab = a_rhs[dit[mybox]];
+	    for (int mybox=0;mybox<nbox; mybox++)
+	      {
+		EBCellFAB& phifab = a_phi[dit[mybox]];
+		const EBCellFAB& rhsfab = a_rhs[dit[mybox]];
                 
-                //cache phi
-                for (int c = 0; c < m_colors.size()/2; ++c)
-                  {
-                    m_colorEBStencil[m_colors.size()/2*redBlack+c][dit[mybox]]->cachePhi(phifab);
-                  }
+		//cache phi
+		for (int c = 0; c < m_colors.size()/2; ++c)
+		  {
+		    m_colorEBStencil[m_colors.size()/2*redBlack+c][dit[mybox]]->cachePhi(phifab);
+		  }
                 
-                //reg cells
-                const Box& region = dbl.get(dit[mybox]);
-                Box dblBox(m_eblg.getDBL().get(dit[mybox]));
-                //dummy has to be real because basefab::dataPtr is retarded
-                BaseFab<Real> dummy(Box(IntVect::Zero, IntVect::Zero), 1);
+		//reg cells
+		const Box& region = dbl.get(dit[mybox]);
+		Box dblBox(m_eblg.getDBL().get(dit[mybox]));
+		//dummy has to be real because basefab::dataPtr is retarded
+		BaseFab<Real> dummy(Box(IntVect::Zero, IntVect::Zero), 1);
                 
-                BaseFab<Real>      & reguPhi =      (a_phi[dit[mybox]]).getSingleValuedFAB();
-                const BaseFab<Real>& reguRHS =     (a_rhs[dit[mybox]] ).getSingleValuedFAB();
-                const BaseFab<Real>& relCoef = (m_relCoef[dit[mybox]] ).getSingleValuedFAB();
-                const BaseFab<Real>& regACoe =((*m_acoef)[dit[mybox]] ).getSingleValuedFAB();
-                const BaseFab<Real>* regBCoe[3];
-                //need three coeffs because this has to work in 3d
-                //this is my klunky way to make the call dimension-independent
-                for (int iloc = 0; iloc < 3; iloc++)
-                  {
-                    if (iloc >= SpaceDim)
-                      {
-                        regBCoe[iloc]= &dummy;
-                      }
-                    else
-                      {
-                        regBCoe[iloc] = &((*m_bcoef)[dit[mybox]][iloc].getSingleValuedFAB());
-                      }
-                  }
+		BaseFab<Real>      & reguPhi =      (a_phi[dit[mybox]]).getSingleValuedFAB();
+		const BaseFab<Real>& reguRHS =     (a_rhs[dit[mybox]] ).getSingleValuedFAB();
+		const BaseFab<Real>& relCoef = (m_relCoef[dit[mybox]] ).getSingleValuedFAB();
+		const BaseFab<Real>& regACoe =((*m_acoef)[dit[mybox]] ).getSingleValuedFAB();
+		const BaseFab<Real>* regBCoe[3];
+		//need three coeffs because this has to work in 3d
+		//this is my klunky way to make the call dimension-independent
+		for (int iloc = 0; iloc < 3; iloc++)
+		  {
+		    if (iloc >= SpaceDim)
+		      {
+			regBCoe[iloc]= &dummy;
+		      }
+		    else
+		      {
+			regBCoe[iloc] = &((*m_bcoef)[dit[mybox]][iloc].getSingleValuedFAB());
+		      }
+		  }
                 
                 
-                for (int comp = 0; comp < a_phi.nComp(); comp++)
-                  {
-                    FORT_CONDUCTIVITYGSRB(CHF_FRA1(        reguPhi,    comp),
-                                          CHF_CONST_FRA1(  reguRHS,    comp),
-                                          CHF_CONST_FRA1(  relCoef,    comp),
-                                          CHF_CONST_FRA1(  regACoe,    comp),
-                                          CHF_CONST_FRA1((*regBCoe[0]),comp),
-                                          CHF_CONST_FRA1((*regBCoe[1]),comp),
-                                          CHF_CONST_FRA1((*regBCoe[2]),comp),
-                                          CHF_CONST_REAL(m_alpha),
-                                          CHF_CONST_REAL(m_beta),
-                                          CHF_CONST_REAL(m_dx),
-                                          CHF_BOX(region),
-                                          CHF_CONST_INT(redBlack));
-                  }
+		for (int comp = 0; comp < a_phi.nComp(); comp++)
+		  {
+		    FORT_CONDUCTIVITYGSRB(CHF_FRA1(        reguPhi,    comp),
+					  CHF_CONST_FRA1(  reguRHS,    comp),
+					  CHF_CONST_FRA1(  relCoef,    comp),
+					  CHF_CONST_FRA1(  regACoe,    comp),
+					  CHF_CONST_FRA1((*regBCoe[0]),comp),
+					  CHF_CONST_FRA1((*regBCoe[1]),comp),
+					  CHF_CONST_FRA1((*regBCoe[2]),comp),
+					  CHF_CONST_REAL(m_alpha),
+					  CHF_CONST_REAL(m_beta),
+					  CHF_CONST_REAL(m_dx),
+					  CHF_BOX(region),
+					  CHF_CONST_INT(redBlack));
+		  }
 
-                //uncache phi
-                for (int c = 0; c < m_colors.size()/2; ++c)
-                  {
-                    m_colorEBStencil[m_colors.size()/2*redBlack+c][dit[mybox]]->uncachePhi(phifab);
-                  }
+		//uncache phi
+		for (int c = 0; c < m_colors.size()/2; ++c)
+		  {
+		    m_colorEBStencil[m_colors.size()/2*redBlack+c][dit[mybox]]->uncachePhi(phifab);
+		  }
                 
-                for (int c = 0; c < m_colors.size()/2; ++c)
-                  {
+		for (int c = 0; c < m_colors.size()/2; ++c)
+		  {
 		    GSColorAllIrregular(phifab, rhsfab, m_colors.size()/2*redBlack+c, dit[mybox]);
-                  }
-                ibox++;
-              }
-          }
-        } // end pragma
+		  }
+		ibox++;
+	      }
+	  }
+	} // end pragma
     } //end red black
 
 
@@ -1711,9 +1712,9 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
 void
 ebconductivityop::
 GSColorAllIrregular(EBCellFAB&                   a_phi,
-                    const EBCellFAB&             a_rhs,
-                    const int&                   a_icolor,
-                    const DataIndex&             a_dit)
+		    const EBCellFAB&             a_rhs,
+		    const int&                   a_icolor,
+		    const DataIndex&             a_dit)
 {
   CH_TIME("EBConductivyOp::GSColorAllIrregular");
 
@@ -1726,24 +1727,24 @@ GSColorAllIrregular(EBCellFAB&                   a_phi,
     {
       CH_TIME("domain cross eb stuff cache");
       for (m_vofItIrregColorDomLo[a_icolor][idir][a_dit].reset(); m_vofItIrregColorDomLo[a_icolor][idir][a_dit].ok();  ++m_vofItIrregColorDomLo[a_icolor][idir][a_dit])
-        {
-          const VolIndex& vof = m_vofItIrregColorDomLo[a_icolor][idir][a_dit]();
-          Real flux;
-          m_domainBC->getFaceFlux(flux,vof,comp,a_phi,
-                                  RealVect::Zero,vdx,idir,Side::Lo, a_dit, time, true);
+	{
+	  const VolIndex& vof = m_vofItIrregColorDomLo[a_icolor][idir][a_dit]();
+	  Real flux;
+	  m_domainBC->getFaceFlux(flux,vof,comp,a_phi,
+				  RealVect::Zero,vdx,idir,Side::Lo, a_dit, time, true);
 
-          m_cacheEBxDomainFluxLo[a_icolor][idir][a_dit](vof, comp) = flux;
-        }
+	  m_cacheEBxDomainFluxLo[a_icolor][idir][a_dit](vof, comp) = flux;
+	}
 
       for (m_vofItIrregColorDomHi[a_icolor][idir][a_dit].reset(); m_vofItIrregColorDomHi[a_icolor][idir][a_dit].ok();  ++m_vofItIrregColorDomHi[a_icolor][idir][a_dit])
-        {
-          const VolIndex& vof = m_vofItIrregColorDomHi[a_icolor][idir][a_dit]();
-          Real flux;
-          m_domainBC->getFaceFlux(flux,vof,comp,a_phi,
-                                  RealVect::Zero,vdx,idir,Side::Hi,a_dit,time, true);
+	{
+	  const VolIndex& vof = m_vofItIrregColorDomHi[a_icolor][idir][a_dit]();
+	  Real flux;
+	  m_domainBC->getFaceFlux(flux,vof,comp,a_phi,
+				  RealVect::Zero,vdx,idir,Side::Hi,a_dit,time, true);
 
-          m_cacheEBxDomainFluxHi[a_icolor][idir][a_dit](vof, comp) = flux;
-        }
+	  m_cacheEBxDomainFluxHi[a_icolor][idir][a_dit](vof, comp) = flux;
+	}
     }
   {
     CH_TIME("color ebstencil bit");
@@ -1759,36 +1760,36 @@ GSColorAllIrregular(EBCellFAB&                   a_phi,
     {
       CH_TIME("domain cross eb stuff uncache");
       for (m_vofItIrregColorDomLo[a_icolor][idir][a_dit].reset(); m_vofItIrregColorDomLo[a_icolor][idir][a_dit].ok();  ++m_vofItIrregColorDomLo[a_icolor][idir][a_dit])
-        {
-          const VolIndex& vof = m_vofItIrregColorDomLo[a_icolor][idir][a_dit]();
-          Real weightIrreg = m_alpha*curAlphaWeight(vof,0) + m_beta*curBetaWeight(vof,0);
-          Real lambda = 0.0;
-          if (Abs(weightIrreg) > 1.e-12)
-            {
-              lambda = 1./weightIrreg;
-            }
-          a_phi(vof,comp) += lambda * m_cacheEBxDomainFluxLo[a_icolor][idir][a_dit](vof, comp) * m_beta/m_dx;
-        }
+	{
+	  const VolIndex& vof = m_vofItIrregColorDomLo[a_icolor][idir][a_dit]();
+	  Real weightIrreg = m_alpha*curAlphaWeight(vof,0) + m_beta*curBetaWeight(vof,0);
+	  Real lambda = 0.0;
+	  if (Abs(weightIrreg) > 1.e-12)
+	    {
+	      lambda = 1./weightIrreg;
+	    }
+	  a_phi(vof,comp) += lambda * m_cacheEBxDomainFluxLo[a_icolor][idir][a_dit](vof, comp) * m_beta/m_dx;
+	}
 
       for (m_vofItIrregColorDomHi[a_icolor][idir][a_dit].reset(); m_vofItIrregColorDomHi[a_icolor][idir][a_dit].ok();  ++m_vofItIrregColorDomHi[a_icolor][idir][a_dit])
-        {
-          const VolIndex& vof = m_vofItIrregColorDomHi[a_icolor][idir][a_dit]();
-          Real weightIrreg = m_alpha*curAlphaWeight(vof,0) + m_beta*curBetaWeight(vof,0);
-          Real lambda = 0.0;
-          if (Abs(weightIrreg) > 1.e-12)
-            {
-              lambda = 1./weightIrreg;
-            }
-          a_phi(vof,comp) -= lambda * m_cacheEBxDomainFluxHi[a_icolor][idir][a_dit](vof, comp) * m_beta/m_dx;
-        }
+	{
+	  const VolIndex& vof = m_vofItIrregColorDomHi[a_icolor][idir][a_dit]();
+	  Real weightIrreg = m_alpha*curAlphaWeight(vof,0) + m_beta*curBetaWeight(vof,0);
+	  Real lambda = 0.0;
+	  if (Abs(weightIrreg) > 1.e-12)
+	    {
+	      lambda = 1./weightIrreg;
+	    }
+	  a_phi(vof,comp) -= lambda * m_cacheEBxDomainFluxHi[a_icolor][idir][a_dit](vof, comp) * m_beta/m_dx;
+	}
     }
 }
 //-----------------------------------------------------------------------
 void
 ebconductivityop::
 relaxGauSai(LevelData<EBCellFAB>&       a_phi,
-            const LevelData<EBCellFAB>& a_rhs,
-            int                         a_iterations)
+	    const LevelData<EBCellFAB>& a_rhs,
+	    int                         a_iterations)
 {
   CH_TIME("ebconductivityop::relaxGauSai");
 
@@ -1803,16 +1804,16 @@ relaxGauSai(LevelData<EBCellFAB>&       a_phi,
   for (int whichIter =0; whichIter < a_iterations; whichIter++)
     {
       for (int icolor = 0; icolor < m_colors.size(); icolor++)
-        {
-          applyHomogeneousCFBCs(a_phi);
+	{
+	  applyHomogeneousCFBCs(a_phi);
 
 
 
-          //after this lphi = L(phi)
-          //this call contains bcs and exchange
+	  //after this lphi = L(phi)
+	  //this call contains bcs and exchange
 	  applyOp(  lphi,  a_phi, true);
-          gsrbColor(a_phi, lphi, a_rhs, m_colors[icolor]);
-        }
+	  gsrbColor(a_phi, lphi, a_rhs, m_colors[icolor]);
+	}
     }
 }
 
@@ -1846,8 +1847,8 @@ void ebconductivityop::lazyGauSai(LevelData<EBCellFAB>&       a_phi,
 void
 ebconductivityop::
 relaxPoiJac(LevelData<EBCellFAB>&       a_phi,
-            const LevelData<EBCellFAB>& a_rhs,
-            int                         a_iterations)
+	    const LevelData<EBCellFAB>& a_rhs,
+	    int                         a_iterations)
 {
   CH_TIME("ebconductivityop::relaxPoiJac");
 
@@ -1871,24 +1872,24 @@ relaxPoiJac(LevelData<EBCellFAB>&       a_phi,
       int nbox = dit.size();
 #pragma omp parallel for
       for(int mybox=0; mybox<nbox; mybox++)
-        {
+	{
 
-          lphi[dit[mybox]] -=     a_rhs[dit[mybox]];
-          lphi[dit[mybox]] *= m_relCoef[dit[mybox]];
-          //this is a safety factor because pt jacobi needs a smaller
-          //relaxation param
-          lphi[dit[mybox]] *= -0.5;
-          a_phi[dit[mybox]] += lphi[dit[mybox]];
-        }
+	  lphi[dit[mybox]] -=     a_rhs[dit[mybox]];
+	  lphi[dit[mybox]] *= m_relCoef[dit[mybox]];
+	  //this is a safety factor because pt jacobi needs a smaller
+	  //relaxation param
+	  lphi[dit[mybox]] *= -0.5;
+	  a_phi[dit[mybox]] += lphi[dit[mybox]];
+	}
     }
 }
 //-----------------------------------------------------------------------
 void
 ebconductivityop::
 gsrbColor(LevelData<EBCellFAB>&       a_phi,
-          const LevelData<EBCellFAB>& a_lph,
-          const LevelData<EBCellFAB>& a_rhs,
-          const IntVect&              a_color)
+	  const LevelData<EBCellFAB>& a_lph,
+	  const LevelData<EBCellFAB>& a_rhs,
+	  const IntVect&              a_color)
 {
   CH_TIME("ebconductivityop::gsrbColor");
 
@@ -1897,63 +1898,63 @@ gsrbColor(LevelData<EBCellFAB>&       a_phi,
   DataIterator dit = dbl.dataIterator(); 
   int nbox=dit.size();
 #pragma omp parallel
-      {
+  {
 #pragma omp for
-        for( int mybox=0; mybox<nbox; mybox++)
-          {
-	    const EBISBox& ebisbox = a_phi[dit[mybox]].getEBISBox();
-	      Box dblBox  = dbl.get(dit[mybox]);
-	      BaseFab<Real>&       regPhi =     a_phi[dit[mybox]].getSingleValuedFAB();
-	      const BaseFab<Real>& regLph =     a_lph[dit[mybox]].getSingleValuedFAB();
-	      const BaseFab<Real>& regRhs =     a_rhs[dit[mybox]].getSingleValuedFAB();
-	      IntVect loIV = dblBox.smallEnd();
-	      IntVect hiIV = dblBox.bigEnd();
+    for( int mybox=0; mybox<nbox; mybox++)
+      {
+	const EBISBox& ebisbox = a_phi[dit[mybox]].getEBISBox();
+	Box dblBox  = dbl.get(dit[mybox]);
+	BaseFab<Real>&       regPhi =     a_phi[dit[mybox]].getSingleValuedFAB();
+	const BaseFab<Real>& regLph =     a_lph[dit[mybox]].getSingleValuedFAB();
+	const BaseFab<Real>& regRhs =     a_rhs[dit[mybox]].getSingleValuedFAB();
+	IntVect loIV = dblBox.smallEnd();
+	IntVect hiIV = dblBox.bigEnd();
             
-	      for (int idir = 0; idir < SpaceDim; idir++)
-		{
-		  if (loIV[idir] % 2 != a_color[idir])
-		    {
-		      loIV[idir]++;
-		    }
-		}
-            
-	      const BaseFab<Real>& regRel = m_relCoef[dit[mybox]].getSingleValuedFAB();
-	      if (loIV <= hiIV)
-		{
-		  Box coloredBox(loIV, hiIV);
-		  FORT_GSRBEBCO(CHF_FRA1(regPhi,0),
-				CHF_CONST_FRA1(regLph,0),
-				CHF_CONST_FRA1(regRhs,0),
-				CHF_CONST_FRA1(regRel,0),
-				CHF_BOX(coloredBox));
-		}
-            
-	      for (m_vofIterMulti[dit[mybox]].reset(); m_vofIterMulti[dit[mybox]].ok(); ++m_vofIterMulti[dit[mybox]])
-		{
-		  const VolIndex& vof = m_vofIterMulti[dit[mybox]]();
-		  const IntVect& iv = vof.gridIndex();
-                
-		  bool doThisVoF = true;
-		  for (int idir = 0; idir < SpaceDim; idir++)
-		    {
-		      if (iv[idir] % 2 != a_color[idir])
-			{
-			  doThisVoF = false;
-			  break;
-			}
-		    }
-                
-		  if (doThisVoF)
-		    {
-		      Real lph    = a_lph[dit[mybox]](vof, 0);
-		      Real rhs    = a_rhs[dit[mybox]](vof, 0);
-		      Real resid  = rhs - lph;
-		      Real lambda = m_relCoef[dit[mybox]](vof, 0);
-		      a_phi[dit[mybox]](vof, 0) += lambda*resid;
-		    }
-	    }
+	for (int idir = 0; idir < SpaceDim; idir++)
+	  {
+	    if (loIV[idir] % 2 != a_color[idir])
+	      {
+		loIV[idir]++;
+	      }
 	  }
-      }// end pragma
+            
+	const BaseFab<Real>& regRel = m_relCoef[dit[mybox]].getSingleValuedFAB();
+	if (loIV <= hiIV)
+	  {
+	    Box coloredBox(loIV, hiIV);
+	    FORT_GSRBEBCO(CHF_FRA1(regPhi,0),
+			  CHF_CONST_FRA1(regLph,0),
+			  CHF_CONST_FRA1(regRhs,0),
+			  CHF_CONST_FRA1(regRel,0),
+			  CHF_BOX(coloredBox));
+	  }
+            
+	for (m_vofIterMulti[dit[mybox]].reset(); m_vofIterMulti[dit[mybox]].ok(); ++m_vofIterMulti[dit[mybox]])
+	  {
+	    const VolIndex& vof = m_vofIterMulti[dit[mybox]]();
+	    const IntVect& iv = vof.gridIndex();
+                
+	    bool doThisVoF = true;
+	    for (int idir = 0; idir < SpaceDim; idir++)
+	      {
+		if (iv[idir] % 2 != a_color[idir])
+		  {
+		    doThisVoF = false;
+		    break;
+		  }
+	      }
+                
+	    if (doThisVoF)
+	      {
+		Real lph    = a_lph[dit[mybox]](vof, 0);
+		Real rhs    = a_rhs[dit[mybox]](vof, 0);
+		Real resid  = rhs - lph;
+		Real lambda = m_relCoef[dit[mybox]](vof, 0);
+		a_phi[dit[mybox]](vof, 0) += lambda*resid;
+	      }
+	  }
+      }
+  }// end pragma
 }
 
 void
@@ -2035,8 +2036,8 @@ void ebconductivityop::gsrbColor(EBCellFAB&       a_phi,
 //-----------------------------------------------------------------------
 void ebconductivityop::
 restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
-                 LevelData<EBCellFAB>&       a_phiThisLevel,
-                 const LevelData<EBCellFAB>& a_rhsThisLevel)
+		 LevelData<EBCellFAB>&       a_phiThisLevel,
+		 const LevelData<EBCellFAB>& a_rhsThisLevel)
 {
   CH_TIME("ebconductivityop::restrictResidual");
 
@@ -2069,7 +2070,7 @@ restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
 //-----------------------------------------------------------------------
 void ebconductivityop::
 prolongIncrement(LevelData<EBCellFAB>&       a_phiThisLevel,
-                 const LevelData<EBCellFAB>& a_correctCoar)
+		 const LevelData<EBCellFAB>& a_correctCoar)
 {
   CH_TIME("ebconductivityop::prolongIncrement");
   Interval vars(0, 0);
@@ -2086,8 +2087,8 @@ prolongIncrement(LevelData<EBCellFAB>&       a_phiThisLevel,
 void
 ebconductivityop::
 applyCFBCs(LevelData<EBCellFAB>&             a_phi,
-           const LevelData<EBCellFAB>* const a_phiCoar,
-           bool a_homogeneousCFBC)
+	   const LevelData<EBCellFAB>* const a_phiCoar,
+	   bool a_homogeneousCFBC)
 {
   CH_TIMERS("ebconductivityop::applyCFBCs");
   CH_TIMER("inhomogeneous_cfbcs_define",t1);
@@ -2098,30 +2099,30 @@ applyCFBCs(LevelData<EBCellFAB>&             a_phi,
   if (m_hasCoar)
     {
       if (!a_homogeneousCFBC)
-        {
-          CH_START(t1);
-          if (a_phiCoar==NULL)
-            {
-              MayDay::Error("cannot enforce inhomogeneous CFBCs with NULL coar");
-            }
-          //define coarse fine interpolation object on the fly
-          //because most operators do not need it
-          CH_assert(a_phiCoar->nComp() == 1);
-          CH_STOP(t1);
+	{
+	  CH_START(t1);
+	  if (a_phiCoar==NULL)
+	    {
+	      MayDay::Error("cannot enforce inhomogeneous CFBCs with NULL coar");
+	    }
+	  //define coarse fine interpolation object on the fly
+	  //because most operators do not need it
+	  CH_assert(a_phiCoar->nComp() == 1);
+	  CH_STOP(t1);
 
-          CH_START(t3);
-          Interval interv(0,0);
-          m_quadCFIWithCoar->interpolate(a_phi, *a_phiCoar, interv);
-          //          dumpEBLevelGhost(&a_phi);
-          CH_STOP(t3);
+	  CH_START(t3);
+	  Interval interv(0,0);
+	  m_quadCFIWithCoar->interpolate(a_phi, *a_phiCoar, interv);
+	  //          dumpEBLevelGhost(&a_phi);
+	  CH_STOP(t3);
 
-        }
+	}
       else
-        {
-          CH_START(t2);
-          applyHomogeneousCFBCs(a_phi);
-          CH_STOP(t2);
-        }
+	{
+	  CH_START(t2);
+	  applyHomogeneousCFBCs(a_phi);
+	  CH_STOP(t2);
+	}
     }
 }
 //-----------------------------------------------------------------------
@@ -2139,21 +2140,21 @@ applyHomogeneousCFBCs(LevelData<EBCellFAB>&   a_phi)
     {
 
       for (int idir = 0; idir < SpaceDim; idir++)
-        {
-          for (SideIterator sit; sit.ok(); sit.next())
-            {
-              applyHomogeneousCFBCs(a_phi[dit[mybox]],dit[mybox],idir,sit());
-            }
-        }
+	{
+	  for (SideIterator sit; sit.ok(); sit.next())
+	    {
+	      applyHomogeneousCFBCs(a_phi[dit[mybox]],dit[mybox],idir,sit());
+	    }
+	}
     }
 }
 //-----------------------------------------------------------------------
 void
 ebconductivityop::
 applyHomogeneousCFBCs(EBCellFAB&            a_phi,
-                      const DataIndex&      a_datInd,
-                      int                   a_idir,
-                      Side::LoHiSide        a_hiorlo)
+		      const DataIndex&      a_datInd,
+		      int                   a_idir,
+		      Side::LoHiSide        a_hiorlo)
 {
   if (m_hasCoar)
     {
@@ -2168,111 +2169,111 @@ applyHomogeneousCFBCs(EBCellFAB&            a_phi,
       const CFIVS* cfivsPtr = NULL;
 
       if (a_hiorlo == Side::Lo)
-        {
-          cfivsPtr = &m_loCFIVS[a_idir][a_datInd];
-        }
+	{
+	  cfivsPtr = &m_loCFIVS[a_idir][a_datInd];
+	}
       else
-        {
-          cfivsPtr = &m_hiCFIVS[a_idir][a_datInd];
-        }
+	{
+	  cfivsPtr = &m_hiCFIVS[a_idir][a_datInd];
+	}
 
       const IntVectSet& interpIVS = cfivsPtr->getFineIVS();
       if (cfivsPtr->isPacked() )
-        {
-          CH_START(t1);
-          const int ihiorlo = sign(a_hiorlo);
-          FORT_INTERPHOMO(CHF_FRA(a_phi.getSingleValuedFAB()),
-                          CHF_BOX(cfivsPtr->packedBox()),
-                          CHF_CONST_REAL(m_dx),
-                          CHF_CONST_REAL(m_dxCoar),
-                          CHF_CONST_INT(a_idir),
-                          CHF_CONST_INT(ihiorlo));
+	{
+	  CH_START(t1);
+	  const int ihiorlo = sign(a_hiorlo);
+	  FORT_INTERPHOMO(CHF_FRA(a_phi.getSingleValuedFAB()),
+			  CHF_BOX(cfivsPtr->packedBox()),
+			  CHF_CONST_REAL(m_dx),
+			  CHF_CONST_REAL(m_dxCoar),
+			  CHF_CONST_INT(a_idir),
+			  CHF_CONST_INT(ihiorlo));
 
-          CH_STOP(t1);
-        }
+	  CH_STOP(t1);
+	}
       else
-        {
-          if (!interpIVS.isEmpty())
-            {
-              CH_START(t2);
-              Real halfdxcoar = m_dxCoar/2.0;
-              Real halfdxfine = m_dx/2.0;
-              Real xg = halfdxcoar -   halfdxfine;
-              Real xc = halfdxcoar +   halfdxfine;
-              Real xf = halfdxcoar + 3*halfdxfine;
-              Real hf = m_dx;
-              Real denom = xf*xc*hf;
+	{
+	  if (!interpIVS.isEmpty())
+	    {
+	      CH_START(t2);
+	      Real halfdxcoar = m_dxCoar/2.0;
+	      Real halfdxfine = m_dx/2.0;
+	      Real xg = halfdxcoar -   halfdxfine;
+	      Real xc = halfdxcoar +   halfdxfine;
+	      Real xf = halfdxcoar + 3*halfdxfine;
+	      Real hf = m_dx;
+	      Real denom = xf*xc*hf;
 
-              const EBISBox&  ebisBox = m_eblg.getEBISL()[a_datInd];
-              const EBGraph&  ebgraph = m_eblg.getEBISL()[a_datInd].getEBGraph();
-              for (VoFIterator vofit(interpIVS, ebgraph); vofit.ok(); ++vofit)
-                {
-                  const VolIndex& VoFGhost = vofit();
+	      const EBISBox&  ebisBox = m_eblg.getEBISL()[a_datInd];
+	      const EBGraph&  ebgraph = m_eblg.getEBISL()[a_datInd].getEBGraph();
+	      for (VoFIterator vofit(interpIVS, ebgraph); vofit.ok(); ++vofit)
+		{
+		  const VolIndex& VoFGhost = vofit();
 
-                  IntVect ivGhost  = VoFGhost.gridIndex();
-                  IntVect ivClose =  ivGhost;
-                  IntVect ivFar   =  ivGhost;
+		  IntVect ivGhost  = VoFGhost.gridIndex();
+		  IntVect ivClose =  ivGhost;
+		  IntVect ivFar   =  ivGhost;
 
-                  Vector<VolIndex> farVoFs;
-                  Vector<VolIndex> closeVoFs = ebisBox.getVoFs(VoFGhost,
-                                                               a_idir,
-                                                               flip(a_hiorlo),
-                                                               1);
-                  bool hasClose = (closeVoFs.size() > 0);
-                  bool hasFar = false;
-                  Real phic = 0.0;
-                  Real phif = 0.0;
-                  if (hasClose)
-                    {
-                      const int& numClose = closeVoFs.size();
-                      for (int iVof=0;iVof<numClose;iVof++)
-                        {
-                          const VolIndex& vofClose = closeVoFs[iVof];
-                          phic += a_phi(vofClose,0);
-                        }
-                      phic /= Real(numClose);
+		  Vector<VolIndex> farVoFs;
+		  Vector<VolIndex> closeVoFs = ebisBox.getVoFs(VoFGhost,
+							       a_idir,
+							       flip(a_hiorlo),
+							       1);
+		  bool hasClose = (closeVoFs.size() > 0);
+		  bool hasFar = false;
+		  Real phic = 0.0;
+		  Real phif = 0.0;
+		  if (hasClose)
+		    {
+		      const int& numClose = closeVoFs.size();
+		      for (int iVof=0;iVof<numClose;iVof++)
+			{
+			  const VolIndex& vofClose = closeVoFs[iVof];
+			  phic += a_phi(vofClose,0);
+			}
+		      phic /= Real(numClose);
 
-                      farVoFs = ebisBox.getVoFs(VoFGhost,
-                                                a_idir,
-                                                flip(a_hiorlo),
-                                                2);
-                      hasFar   = (farVoFs.size()   > 0);
-                      if (hasFar)
-                        {
-                          const int& numFar = farVoFs.size();
-                          for (int iVof=0;iVof<numFar;iVof++)
-                            {
-                              const VolIndex& vofFar = farVoFs[iVof];
-                              phif += a_phi(vofFar,0);
-                            }
-                          phif /= Real(numFar);
-                        }
-                    }
+		      farVoFs = ebisBox.getVoFs(VoFGhost,
+						a_idir,
+						flip(a_hiorlo),
+						2);
+		      hasFar   = (farVoFs.size()   > 0);
+		      if (hasFar)
+			{
+			  const int& numFar = farVoFs.size();
+			  for (int iVof=0;iVof<numFar;iVof++)
+			    {
+			      const VolIndex& vofFar = farVoFs[iVof];
+			      phif += a_phi(vofFar,0);
+			    }
+			  phif /= Real(numFar);
+			}
+		    }
 
-                  Real phiGhost;
-                  if (hasClose && hasFar)
-                    {
-                      // quadratic interpolation  phi = ax^2 + bx + c
-                      Real A = (phif*xc - phic*xf)/denom;
-                      Real B = (phic*hf*xf - phif*xc*xc + phic*xf*xc)/denom;
+		  Real phiGhost;
+		  if (hasClose && hasFar)
+		    {
+		      // quadratic interpolation  phi = ax^2 + bx + c
+		      Real A = (phif*xc - phic*xf)/denom;
+		      Real B = (phic*hf*xf - phif*xc*xc + phic*xf*xc)/denom;
 
-                      phiGhost = A*xg*xg + B*xg;
-                    }
-                  else if (hasClose)
-                    {
-                      //linear interpolation
-                      Real slope =  phic/xc;
-                      phiGhost   =  slope*xg;
-                    }
-                  else
-                    {
-                      phiGhost = 0.0; //nothing to interpolate from
-                    }
-                  a_phi(VoFGhost, ivar) = phiGhost;
-                }
-              CH_STOP(t2);
-            }
-        }
+		      phiGhost = A*xg*xg + B*xg;
+		    }
+		  else if (hasClose)
+		    {
+		      //linear interpolation
+		      Real slope =  phic/xc;
+		      phiGhost   =  slope*xg;
+		    }
+		  else
+		    {
+		      phiGhost = 0.0; //nothing to interpolate from
+		    }
+		  a_phi(VoFGhost, ivar) = phiGhost;
+		}
+	      CH_STOP(t2);
+	    }
+	}
     }
 }
 //-----------------------------------------------------------------------
@@ -2290,12 +2291,12 @@ refToFiner()
 //-----------------------------------------------------------------------
 void ebconductivityop::
 AMRResidual(LevelData<EBCellFAB>&       a_residual,
-            const LevelData<EBCellFAB>& a_phiFine,
-            const LevelData<EBCellFAB>& a_phi,
-            const LevelData<EBCellFAB>& a_phiCoar,
-            const LevelData<EBCellFAB>& a_rhs,
-            bool a_homogeneousPhysBC,
-            AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
+	    const LevelData<EBCellFAB>& a_phiFine,
+	    const LevelData<EBCellFAB>& a_phi,
+	    const LevelData<EBCellFAB>& a_phiCoar,
+	    const LevelData<EBCellFAB>& a_rhs,
+	    bool a_homogeneousPhysBC,
+	    AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
 {
   CH_TIMERS("ebconductivityop::AMRResidual");
   CH_TIMER("AMROperator", t1);
@@ -2308,7 +2309,7 @@ AMRResidual(LevelData<EBCellFAB>&       a_residual,
 
   CH_START(t1);
   AMROperator(a_residual, a_phiFine, a_phi, a_phiCoar,
-              a_homogeneousPhysBC, a_finerOp);
+	      a_homogeneousPhysBC, a_finerOp);
   CH_STOP(t1);
 
   //  dumpLevelPoint(a_residual, string("ebconductivityop: AMRResidual: lphi = "));
@@ -2332,11 +2333,11 @@ dumpLevelPoint(const LevelData<EBCellFAB>& a_res, const string& a_blab)
 //-----------------------------------------------------------------------
 void ebconductivityop::
 AMROperator(LevelData<EBCellFAB>&       a_LofPhi,
-            const LevelData<EBCellFAB>& a_phiFine,
-            const LevelData<EBCellFAB>& a_phi,
-            const LevelData<EBCellFAB>& a_phiCoar,
-            bool a_homogeneousPhysBC,
-            AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
+	    const LevelData<EBCellFAB>& a_phiFine,
+	    const LevelData<EBCellFAB>& a_phi,
+	    const LevelData<EBCellFAB>& a_phiCoar,
+	    bool a_homogeneousPhysBC,
+	    AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
 {
   CH_TIMERS("ebconductivityop::AMROperator");
   CH_TIMER("applyOp", t1);
@@ -2430,8 +2431,8 @@ reflux(LevelData<EBCellFAB>& a_residual,
 void
 ebconductivityop::
 incrementFRCoar(EBFluxRegister&             a_fluxReg,
-                const LevelData<EBCellFAB>& a_phiFine,
-                const LevelData<EBCellFAB>& a_phi)
+		const LevelData<EBCellFAB>& a_phiFine,
+		const LevelData<EBCellFAB>& a_phi)
 {
   CH_TIME("ebconductivityop::incrementFRCoar");
   CH_assert(a_phiFine.nComp() == 1);
@@ -2450,41 +2451,41 @@ incrementFRCoar(EBFluxRegister&             a_fluxReg,
       const EBISBox& ebisBox = m_eblg.getEBISL()[dit[mybox]];
       const Box&  box = m_eblg.getDBL().get(dit[mybox]);
       for (int idir = 0; idir < SpaceDim; idir++)
-        {
-          //no boundary faces here.
+	{
+	  //no boundary faces here.
 
-          Box ghostedBox = box;
-          ghostedBox.grow(1);
-          ghostedBox.grow(idir,-1);
-          ghostedBox &= m_eblg.getDomain();
+	  Box ghostedBox = box;
+	  ghostedBox.grow(1);
+	  ghostedBox.grow(idir,-1);
+	  ghostedBox &= m_eblg.getDomain();
 
-          EBFaceFAB coarflux(ebisBox, ghostedBox, idir, ncomp);
+	  EBFaceFAB coarflux(ebisBox, ghostedBox, idir, ncomp);
 
-          //old way
-          //getFlux(coarflux, coarfab, ghostedBox, box, m_eblg.getDomain(), ebisBox, m_dx, dit[mybox], idir);
+	  //old way
+	  //getFlux(coarflux, coarfab, ghostedBox, box, m_eblg.getDomain(), ebisBox, m_dx, dit[mybox], idir);
 	  
-          // new way
-          getFluxRegOnly(coarflux, coarfab, ghostedBox, m_dx, dit[mybox], idir);
-          for (SideIterator sit; sit.ok(); ++sit)
-            {
-              Vector<FaceIndex>*  faceit;
-              Vector<VoFStencil>* stencil;
-              int index = EBFastFR::index(idir, sit());
-              if (m_hasEBCF)
-                {
-                  faceit  = &( m_faceitCoar[index][dit[mybox]]);
-                  stencil = &(m_stencilCoar[index][dit[mybox]]);
-                }
+	  // new way
+	  getFluxRegOnly(coarflux, coarfab, ghostedBox, m_dx, dit[mybox], idir);
+	  for (SideIterator sit; sit.ok(); ++sit)
+	    {
+	      Vector<FaceIndex>*  faceit;
+	      Vector<VoFStencil>* stencil;
+	      int index = EBFastFR::index(idir, sit());
+	      if (m_hasEBCF)
+		{
+		  faceit  = &( m_faceitCoar[index][dit[mybox]]);
+		  stencil = &(m_stencilCoar[index][dit[mybox]]);
+		}
 	      getFluxEBCF(coarflux, coarfab, ghostedBox, *faceit, *stencil);
-            }
+	    }
 
-          //          dumpFlux(coarflux, idir,  string("incrementFRCoar: flux = "));
-          Real scale = 1.0; //beta and bcoef already in flux
-          for (SideIterator sit; sit.ok(); ++sit)
-            {
-              a_fluxReg.incrementCoarseBoth(coarflux, scale, dit[mybox], interv, idir, sit());
-            }
-        }
+	  //          dumpFlux(coarflux, idir,  string("incrementFRCoar: flux = "));
+	  Real scale = 1.0; //beta and bcoef already in flux
+	  for (SideIterator sit; sit.ok(); ++sit)
+	    {
+	      a_fluxReg.incrementCoarseBoth(coarflux, scale, dit[mybox], interv, idir, sit());
+	    }
+	}
     }
 
 }
@@ -2492,10 +2493,10 @@ incrementFRCoar(EBFluxRegister&             a_fluxReg,
 void
 ebconductivityop::
 getFluxEBCF(EBFaceFAB&                    a_flux,
-            const EBCellFAB&              a_phi,
-            const Box&                    a_ghostedBox,
-            Vector<FaceIndex>&            a_faceitEBCF,
-            Vector<VoFStencil>&           a_stenEBCF)
+	    const EBCellFAB&              a_phi,
+	    const Box&                    a_ghostedBox,
+	    Vector<FaceIndex>&            a_faceitEBCF,
+	    Vector<VoFStencil>&           a_stenEBCF)
 {
   CH_TIME("ebconductivityop::getFluxEBCF");
 
@@ -2505,18 +2506,18 @@ getFluxEBCF(EBFaceFAB&                    a_flux,
     {
       CH_TIME("EBCF stuff");
       for (int iface = 0; iface < a_faceitEBCF.size(); iface++)
-        {
-          const FaceIndex& face =     a_faceitEBCF[iface];
-          const VoFStencil& stencil   = a_stenEBCF[iface];
-          Real fluxval = 0;
+	{
+	  const FaceIndex& face =     a_faceitEBCF[iface];
+	  const VoFStencil& stencil   = a_stenEBCF[iface];
+	  Real fluxval = 0;
 
-          for (int isten = 0; isten < stencil.size(); isten++)
-            {
-              fluxval += stencil.weight(isten)*(a_phi(stencil.vof(isten), 0));
-            }
-          //note the last minute beta
-          a_flux(face, 0) = m_beta*fluxval;
-        }
+	  for (int isten = 0; isten < stencil.size(); isten++)
+	    {
+	      fluxval += stencil.weight(isten)*(a_phi(stencil.vof(isten), 0));
+	    }
+	  //note the last minute beta
+	  a_flux(face, 0) = m_beta*fluxval;
+	}
     }
 }
 
@@ -2524,10 +2525,10 @@ getFluxEBCF(EBFaceFAB&                    a_flux,
 void
 ebconductivityop::
 getFlux(EBFluxFAB&                    a_flux,
-        const LevelData<EBCellFAB>&   a_data,
-        const Box&                    a_grid,
-        const DataIndex&              a_dit,
-        Real                          a_scale)
+	const LevelData<EBCellFAB>&   a_data,
+	const Box&                    a_grid,
+	const DataIndex&              a_dit,
+	Real                          a_scale)
 {
   CH_TIME("ebco::getflux1");
   a_flux.define(m_eblg.getEBISL()[a_dit], a_grid, 1);
@@ -2541,7 +2542,7 @@ getFlux(EBFluxFAB&                    a_flux,
 
 
       getFlux(a_flux[idir], a_data[a_dit], ghostedBox, a_grid,
-              m_eblg.getDomain(), m_eblg.getEBISL()[a_dit], m_dx, a_dit, idir);
+	      m_eblg.getDomain(), m_eblg.getEBISL()[a_dit], m_dx, a_dit, idir);
 
     }
 }
@@ -2549,14 +2550,14 @@ getFlux(EBFluxFAB&                    a_flux,
 void
 ebconductivityop::
 getFlux(EBFaceFAB&                    a_fluxCentroid,
-        const EBCellFAB&              a_phi,
-        const Box&                    a_ghostedBox,
-        const Box&                    a_fabBox,
-        const ProblemDomain&          a_domain,
-        const EBISBox&                a_ebisBox,
-        const Real&                   a_dx,
-        const DataIndex&              a_datInd,
-        const int&                    a_idir)
+	const EBCellFAB&              a_phi,
+	const Box&                    a_ghostedBox,
+	const Box&                    a_fabBox,
+	const ProblemDomain&          a_domain,
+	const EBISBox&                a_ebisBox,
+	const Real&                   a_dx,
+	const DataIndex&              a_datInd,
+	const int&                    a_idir)
 {
   CH_TIME("ebco::getFlux2");
   //has some extra cells so...
@@ -2579,11 +2580,11 @@ getFlux(EBFaceFAB&                    a_fluxCentroid,
   const FArrayBox& regBCo = (const FArrayBox&)(bcoebff.getSingleValuedFAB());
 
   FORT_GETFLUXEBCO(CHF_FRA1(regFlux,0),
-                   CHF_CONST_FRA1(regBCo,0),
-                   CHF_CONST_FRA1(regPhi, 0),
-                   CHF_BOX(faceBox),
-                   CHF_CONST_REAL(a_dx),
-                   CHF_CONST_INT(a_idir));
+		   CHF_CONST_FRA1(regBCo,0),
+		   CHF_CONST_FRA1(regPhi, 0),
+		   CHF_BOX(faceBox),
+		   CHF_CONST_REAL(a_dx),
+		   CHF_CONST_INT(a_idir));
 
 
   a_fluxCentroid.copy(fluxCenter);
@@ -2601,27 +2602,27 @@ getFlux(EBFaceFAB&                    a_fluxCentroid,
       FaceStop::WhichFaces stopCrit = FaceStop::SurroundingNoBoundary;
 
       for (FaceIterator faceit(ivsCell, a_ebisBox.getEBGraph(), a_idir,stopCrit);
-          faceit.ok(); ++faceit)
-        {
-          const FaceIndex& face = faceit();
-          Real phiHi = a_phi(face.getVoF(Side::Hi), 0);
-          Real phiLo = a_phi(face.getVoF(Side::Lo), 0);
-          Real fluxFace = bcoebff(face, 0)*(phiHi - phiLo)/a_dx;
-          //          if (EBCellFAB::s_verbose && ((face==facedeb1) || (face==facedeb2)))
-          //            {
-          //              pout() << "ebconductivityop::getFlux at "<< face ;
-          //              pout() << ", phiHi, phiLo, flux = " << phiHi << ", " << phiLo << ", "<< fluxFace << endl;
-          //            }
-          fluxCenter(face, 0) = fluxFace;
-        }
+	   faceit.ok(); ++faceit)
+	{
+	  const FaceIndex& face = faceit();
+	  Real phiHi = a_phi(face.getVoF(Side::Hi), 0);
+	  Real phiLo = a_phi(face.getVoF(Side::Lo), 0);
+	  Real fluxFace = bcoebff(face, 0)*(phiHi - phiLo)/a_dx;
+	  //          if (EBCellFAB::s_verbose && ((face==facedeb1) || (face==facedeb2)))
+	  //            {
+	  //              pout() << "ebconductivityop::getFlux at "<< face ;
+	  //              pout() << ", phiHi, phiLo, flux = " << phiHi << ", " << phiLo << ", "<< fluxFace << endl;
+	  //            }
+	  fluxCenter(face, 0) = fluxFace;
+	}
       //interpolate from face centers to face centroids
       Box cellBox = a_fluxCentroid.getCellRegion();
       EBArith::interpolateFluxToCentroids(a_fluxCentroid,
-                                          fluxCenter,
-                                          a_fabBox,
-                                          a_ebisBox,
-                                          a_domain,
-                                          a_idir);
+					  fluxCenter,
+					  a_fabBox,
+					  a_ebisBox,
+					  a_domain,
+					  a_idir);
     }
 
   a_fluxCentroid *= m_beta;
@@ -2630,11 +2631,11 @@ getFlux(EBFaceFAB&                    a_fluxCentroid,
 void
 ebconductivityop::
 getFluxRegOnly(EBFaceFAB&                    a_fluxCentroid,
-               const EBCellFAB&              a_phi,
-               const Box&                    a_ghostedBox,
-               const Real&                   a_dx,
-               const DataIndex&              a_datInd,
-               const int&                    a_idir)
+	       const EBCellFAB&              a_phi,
+	       const Box&                    a_ghostedBox,
+	       const Real&                   a_dx,
+	       const DataIndex&              a_datInd,
+	       const int&                    a_idir)
 {
   CH_TIME("ebco::getFluxRegOnly");
   const ProblemDomain& domain = m_eblg.getDomain();
@@ -2658,11 +2659,11 @@ getFluxRegOnly(EBFaceFAB&                    a_fluxCentroid,
   const FArrayBox& regBCo = (const FArrayBox&)(bcoebff.getSingleValuedFAB());
 
   FORT_GETFLUXEBCO(CHF_FRA1(regFlux,0),
-                   CHF_CONST_FRA1(regBCo,0),
-                   CHF_CONST_FRA1(regPhi, 0),
-                   CHF_BOX(faceBox),
-                   CHF_CONST_REAL(a_dx),
-                   CHF_CONST_INT(a_idir));
+		   CHF_CONST_FRA1(regBCo,0),
+		   CHF_CONST_FRA1(regPhi, 0),
+		   CHF_BOX(faceBox),
+		   CHF_CONST_REAL(a_dx),
+		   CHF_CONST_INT(a_idir));
 
   a_fluxCentroid *= m_beta;
 }
@@ -2670,9 +2671,9 @@ getFluxRegOnly(EBFaceFAB&                    a_fluxCentroid,
 void
 ebconductivityop::
 incrementFRFine(EBFluxRegister&             a_fluxReg,
-                const LevelData<EBCellFAB>& a_phiFine,
-                const LevelData<EBCellFAB>& a_phi,
-                AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
+		const LevelData<EBCellFAB>& a_phiFine,
+		const LevelData<EBCellFAB>& a_phi,
+		AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
 {
   CH_TIME("ebconductivityop::incrementFRFine");
   CH_assert(a_phiFine.nComp() == 1);
@@ -2694,57 +2695,57 @@ incrementFRFine(EBFluxRegister&             a_fluxReg,
   pout() << "ebconductivityop::done interpolate" << endl;
 #endif
 
- DataIterator ditf = a_phiFine.dataIterator();
- int nbox = ditf.size();
+  DataIterator ditf = a_phiFine.dataIterator();
+  int nbox = ditf.size();
 #pragma omp parallel for
- for(int mybox=0; mybox<nbox; mybox++)
-   {
+  for(int mybox=0; mybox<nbox; mybox++)
+    {
       const Box&     boxFine = m_eblgFine.getDBL().get(ditf[mybox]);
       const EBISBox& ebisBoxFine = m_eblgFine.getEBISL()[ditf[mybox]];
       const EBCellFAB& phiFine = a_phiFine[ditf[mybox]];
 
       for (int idir = 0; idir < SpaceDim; idir++)
-        {
-          for (SideIterator sit; sit.ok(); sit.next())
-            {
-              Box fabBox = adjCellBox(boxFine, idir, sit(), 1);
-              fabBox.shift(idir, -sign(sit()));
+	{
+	  for (SideIterator sit; sit.ok(); sit.next())
+	    {
+	      Box fabBox = adjCellBox(boxFine, idir, sit(), 1);
+	      fabBox.shift(idir, -sign(sit()));
 
-              Box ghostedBox = fabBox;
-              ghostedBox.grow(1);
-              ghostedBox.grow(idir,-1);
-              ghostedBox &= m_eblgFine.getDomain();
+	      Box ghostedBox = fabBox;
+	      ghostedBox.grow(1);
+	      ghostedBox.grow(idir,-1);
+	      ghostedBox &= m_eblgFine.getDomain();
 
-              EBFaceFAB fluxFine(ebisBoxFine, ghostedBox, idir, ncomp);
-              finerEBAMROp.getFlux(fluxFine, phiFine, ghostedBox, fabBox, m_eblgFine.getDomain(),
-                                   ebisBoxFine, m_dxFine, ditf[mybox], idir);
+	      EBFaceFAB fluxFine(ebisBoxFine, ghostedBox, idir, ncomp);
+	      finerEBAMROp.getFlux(fluxFine, phiFine, ghostedBox, fabBox, m_eblgFine.getDomain(),
+				   ebisBoxFine, m_dxFine, ditf[mybox], idir);
 
-              Real scale = 1.0; //beta and bcoef already in flux
+	      Real scale = 1.0; //beta and bcoef already in flux
 
-              a_fluxReg.incrementFineBoth(fluxFine, scale, ditf[mybox], interv, idir, sit());
-            }
-        }
+	      a_fluxReg.incrementFineBoth(fluxFine, scale, ditf[mybox], interv, idir, sit());
+	    }
+	}
     }
 }
 //-----------------------------------------------------------------------
 void
 ebconductivityop::
 getFlux(FArrayBox&                    a_flux,
-        const FArrayBox&              a_phi,
-        const Box&                    a_faceBox,
-        const int&                    a_idir,
-        const Real&                   a_dx,
-        const DataIndex&              a_datInd)
+	const FArrayBox&              a_phi,
+	const Box&                    a_faceBox,
+	const int&                    a_idir,
+	const Real&                   a_dx,
+	const DataIndex&              a_datInd)
 {
   CH_TIME("ebco::getflux3");
   const EBFaceFAB& bcoebff = (*m_bcoef)[a_datInd][a_idir];
   const FArrayBox& regBCo = (const FArrayBox&)(bcoebff.getSingleValuedFAB());
   FORT_GETFLUXEBCO(CHF_FRA1(a_flux,0),
-                   CHF_CONST_FRA1(regBCo,0),
-                   CHF_CONST_FRA1(a_phi, 0),
-                   CHF_BOX(a_faceBox),
-                   CHF_CONST_REAL(a_dx),
-                   CHF_CONST_INT(a_idir));
+		   CHF_CONST_FRA1(regBCo,0),
+		   CHF_CONST_FRA1(a_phi, 0),
+		   CHF_BOX(a_faceBox),
+		   CHF_CONST_REAL(a_dx),
+		   CHF_CONST_INT(a_idir));
 
   a_flux *= m_beta;
 }
@@ -2753,11 +2754,11 @@ getFlux(FArrayBox&                    a_flux,
 void
 ebconductivityop::
 AMRResidualNC(LevelData<EBCellFAB>&       a_residual,
-              const LevelData<EBCellFAB>& a_phiFine,
-              const LevelData<EBCellFAB>& a_phi,
-              const LevelData<EBCellFAB>& a_rhs,
-              bool a_homogeneousPhysBC,
-              AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
+	      const LevelData<EBCellFAB>& a_phiFine,
+	      const LevelData<EBCellFAB>& a_phi,
+	      const LevelData<EBCellFAB>& a_rhs,
+	      bool a_homogeneousPhysBC,
+	      AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
 {
   //dummy. there is no coarse when this is called
   CH_assert(a_residual.ghostVect() == m_ghostCellsRHS);
@@ -2770,17 +2771,17 @@ AMRResidualNC(LevelData<EBCellFAB>&       a_residual,
 void
 ebconductivityop::
 AMRResidualNF(LevelData<EBCellFAB>&       a_residual,
-              const LevelData<EBCellFAB>& a_phi,
-              const LevelData<EBCellFAB>& a_phiCoar,
-              const LevelData<EBCellFAB>& a_rhs,
-              bool a_homogeneousPhysBC)
+	      const LevelData<EBCellFAB>& a_phi,
+	      const LevelData<EBCellFAB>& a_phiCoar,
+	      const LevelData<EBCellFAB>& a_rhs,
+	      bool a_homogeneousPhysBC)
 {
   CH_TIME("ebco::amrresNF");
   CH_assert(a_residual.ghostVect() == m_ghostCellsRHS);
   CH_assert(a_rhs.ghostVect() == m_ghostCellsRHS);
 
   AMROperatorNF(a_residual, a_phi, a_phiCoar,
-                a_homogeneousPhysBC);
+		a_homogeneousPhysBC);
   axby(a_residual,a_residual,a_rhs,-1.0, 1.0);
 }
 //-----------------------------------------------------------------------
@@ -2788,26 +2789,26 @@ AMRResidualNF(LevelData<EBCellFAB>&       a_residual,
 void
 ebconductivityop::
 AMROperatorNC(LevelData<EBCellFAB>&       a_LofPhi,
-              const LevelData<EBCellFAB>& a_phiFine,
-              const LevelData<EBCellFAB>& a_phi,
-              bool a_homogeneousPhysBC,
-              AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
+	      const LevelData<EBCellFAB>& a_phiFine,
+	      const LevelData<EBCellFAB>& a_phi,
+	      bool a_homogeneousPhysBC,
+	      AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
 {
   CH_TIME("ebco::amrOpNC");
   //dummy. there is no coarse when this is called
   CH_assert(a_LofPhi.ghostVect() == m_ghostCellsRHS);
   LevelData<EBCellFAB> phiC;
   AMROperator(a_LofPhi, a_phiFine, a_phi, phiC,
-              a_homogeneousPhysBC, a_finerOp);
+	      a_homogeneousPhysBC, a_finerOp);
 }
 //-----------------------------------------------------------------------
 
 void
 ebconductivityop::
 AMROperatorNF(LevelData<EBCellFAB>&       a_LofPhi,
-              const LevelData<EBCellFAB>& a_phi,
-              const LevelData<EBCellFAB>& a_phiCoar,
-              bool a_homogeneousPhysBC)
+	      const LevelData<EBCellFAB>& a_phi,
+	      const LevelData<EBCellFAB>& a_phiCoar,
+	      bool a_homogeneousPhysBC)
 {
   CH_assert(a_LofPhi.ghostVect() == m_ghostCellsRHS);
 
@@ -2818,10 +2819,10 @@ AMROperatorNF(LevelData<EBCellFAB>&       a_LofPhi,
 void
 ebconductivityop::
 AMRRestrict(LevelData<EBCellFAB>&       a_resCoar,
-            const LevelData<EBCellFAB>& a_residual,
-            const LevelData<EBCellFAB>& a_correction,
-            const LevelData<EBCellFAB>& a_coarCorrection, 
-            bool a_skip_res )
+	    const LevelData<EBCellFAB>& a_residual,
+	    const LevelData<EBCellFAB>& a_correction,
+	    const LevelData<EBCellFAB>& a_coarCorrection, 
+	    bool a_skip_res )
 {
   CH_TIME("ebconductivityop::AMRRestrict");
   CH_assert(a_residual.ghostVect() == m_ghostCellsRHS);
@@ -2858,9 +2859,9 @@ AMRRestrict(LevelData<EBCellFAB>&       a_resCoar,
 Real
 ebconductivityop::
 AMRNorm(const LevelData<EBCellFAB>& a_coarResid,
-        const LevelData<EBCellFAB>& a_fineResid,
-        const int& a_refRat,
-        const int& a_ord)
+	const LevelData<EBCellFAB>& a_fineResid,
+	const int& a_refRat,
+	const int& a_ord)
 
 {
   // compute norm over all cells on coarse not covered by finer
@@ -2873,7 +2874,7 @@ AMRNorm(const LevelData<EBCellFAB>& a_coarResid,
 void
 ebconductivityop::
 AMRProlong(LevelData<EBCellFAB>&       a_correction,
-           const LevelData<EBCellFAB>& a_coarCorrection)
+	   const LevelData<EBCellFAB>& a_coarCorrection)
 {
   CH_TIME("ebconductivityop::AMRProlong");
   //use cached interpolation object
@@ -2885,8 +2886,8 @@ AMRProlong(LevelData<EBCellFAB>&       a_correction,
 void
 ebconductivityop::
 AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
-                  const LevelData<EBCellFAB>& a_correction,
-                  const LevelData<EBCellFAB>& a_coarCorrection)
+		  const LevelData<EBCellFAB>& a_correction,
+		  const LevelData<EBCellFAB>& a_coarCorrection)
 {
   CH_TIME("ebconductivityop::AMRUpdateResidual");
   CH_assert(a_residual.ghostVect() == m_ghostCellsRHS);
@@ -2907,5 +2908,4 @@ AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
   incr(a_residual, lcorr, -1);
 }
 //-----------------------------------------------------------------------
-
-#include "NamespaceFooter.H"
+#include "CD_NamespaceFooter.H"

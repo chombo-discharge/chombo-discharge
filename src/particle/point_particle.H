@@ -15,7 +15,8 @@
 
 #include "BinItem.H"
 
-
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers
 */
@@ -79,6 +80,7 @@ protected:
   
   Real m_mass;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif
 

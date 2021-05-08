@@ -18,6 +18,7 @@
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 std::string air7_stephens::s_bolsig_energy   = "# Mean energy (E/N, eV)";
@@ -74,7 +75,7 @@ void air7_stephens::read_file_entries(lookup_table& a_table, const std::string a
     if(read_line){
       std::istringstream iss(line);
       if (!(iss >> x >> y)) {
-    	continue;
+	continue;
       }
       a_table.add_entry(x, y);
     }
@@ -884,3 +885,4 @@ Real air7_stephens::compute_alpha(const RealVect a_E) const{
 
   return alpha;
 }
+#include "CD_NamespaceFooter.H"

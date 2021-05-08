@@ -11,6 +11,8 @@
 #include "EBAMRData.H"
 #include "MFInterfaceFAB.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Agglomeration of useful data operations. Doing this because I use smart pointer all around
 */
@@ -267,6 +269,7 @@ public:
 				       const int                a_ppc);
 
 };
+#include "CD_NamespaceFooter.H"
 
 #include "data_opsI.H"
 

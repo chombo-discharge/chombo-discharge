@@ -148,5 +148,5 @@ air3_mc8::phot_b1v1_X1v1::phot_b1v1_X1v1(){
   pp.get("b1v1_X1v1_beer", m_kappa);
   
   m_kappa = 1./(m_kappa*p);
-}
+#include "CD_NamespaceFooter.H"
 

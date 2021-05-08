@@ -10,6 +10,8 @@
 
 #include "ito_iterator.H"
 
+#include "CD_NamespaceHeader.H"
+
 template <class T>
 ito_iterator<T>::ito_iterator(){
   CH_TIME("ito_iterator<T>::ito_iterator<T>");
@@ -112,5 +114,6 @@ RefCountedPtr<ito_species>& ito_iterator<T>::get_species() {
   CH_assert(m_isolver < m_num);
   return m_species[m_isolver];
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

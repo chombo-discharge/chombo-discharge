@@ -222,4 +222,4 @@ void sdc::sigma_storage::deallocate_storage(){
     m_amr->deallocate(m_Fnew[m]);
     m_amr->deallocate(m_Fold[m]);
   }
-}
+#include "CD_NamespaceFooter.H"

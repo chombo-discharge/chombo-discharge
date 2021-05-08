@@ -16,6 +16,8 @@
 #include "polygon_rod_if.H"
 #include "cylinder_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 polygon_rod_if::polygon_rod_if(const RealVect a_endPoint1,
 			       const RealVect a_endPoint2,
 			       const Real     a_radius,
@@ -90,3 +92,4 @@ Real polygon_rod_if::value(const RealVect& a_pos) const {
 BaseIF* polygon_rod_if::newImplicitFunction() const {
   return (BaseIF*) new polygon_rod_if(*this);
 }
+#include "CD_NamespaceFooter.H"

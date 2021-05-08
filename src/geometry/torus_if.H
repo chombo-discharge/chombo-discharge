@@ -10,6 +10,8 @@
 
 #include <BaseIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Declaration of a torus signed distance function. The orientation is along z
 */
@@ -62,7 +64,7 @@ protected:
   */
   Real m_majorRadius;
 
-    /*!
+  /*!
     @brief Cylinder radius
   */
   Real m_minorRadius;
@@ -72,4 +74,5 @@ protected:
   */
   bool m_fluidInside;
 };
+#include "CD_NamespaceFooter.H"
 #endif

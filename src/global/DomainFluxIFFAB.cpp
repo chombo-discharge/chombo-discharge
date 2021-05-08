@@ -6,6 +6,8 @@
 */
 
 #include "DomainFluxIFFAB.H"
+
+#include "CD_NamespaceHeader.H"
   
 DomainFluxIFFAB::DomainFluxIFFAB(){
   setDefaultValues();
@@ -199,3 +201,4 @@ const BaseIFFAB<Real>& DomainFluxIFFAB::operator()(const int a_dir, const Side::
 
   return *ptr;
 }
+#include "CD_NamespaceFooter.H"

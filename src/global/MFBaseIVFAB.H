@@ -13,6 +13,8 @@
 #include "IntVectSet.H"
 #include "EBGraph.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Multiphase BaseIVFAB
 */
@@ -221,4 +223,5 @@ protected:
   Vector<int> m_ncomp;
 
 };
+#include "CD_NamespaceFooter.H"
 #endif

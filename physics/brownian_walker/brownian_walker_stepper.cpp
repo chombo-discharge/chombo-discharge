@@ -13,6 +13,7 @@
 #include <PolyGeom.H>
 #include <BinFab.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::brownian_walker;
 
 brownian_walker_stepper::brownian_walker_stepper(){
@@ -512,3 +513,4 @@ void brownian_walker_stepper::post_regrid(){
     pout() << "brownian_walker_stepper::post_regrid" << endl;
   }
 }
+#include "CD_NamespaceFooter.H"

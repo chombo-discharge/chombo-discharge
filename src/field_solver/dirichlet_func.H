@@ -11,6 +11,8 @@
 
 #include <BaseBCFuncEval.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class for passing time and space dependent boundary conditions into the GMG boundary condition classes. 
 */
@@ -64,5 +66,6 @@ protected:
   */
   RealVect m_origin;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

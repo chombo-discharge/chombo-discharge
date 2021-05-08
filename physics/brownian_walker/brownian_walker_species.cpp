@@ -9,6 +9,7 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::brownian_walker;
 
 brownian_walker_species::brownian_walker_species() : m_rng(), m_gauss(0., 1.) {
@@ -99,3 +100,4 @@ RealVect brownian_walker_species::random_direction(){
   return RealVect(x,y,z);
 #endif
 }
+#include "CD_NamespaceFooter.H"

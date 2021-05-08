@@ -613,4 +613,4 @@ Real morrow_fhd::uv_photon::get_kappa(const RealVect a_pos) const {
 Real morrow_fhd::uv_photon::get_random_kappa() const {
   const Real f = m_f1 + (*m_udist01)(*m_rng)*(m_f2 - m_f1);
   return m_K1*pow(m_K2/m_K1, (f-m_f1)/(m_f2-m_f1));
-}
+#include "CD_NamespaceFooter.H"

@@ -10,6 +10,8 @@
 
 #include "jump_bc.H"
 
+#include "CD_NamespaceHeader.H"
+
 #define DEBUG_JUMP 0
 
 inline
@@ -183,7 +185,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     }
   }
 }
-
+#include "CD_NamespaceFooter.H"
 
 
 #endif

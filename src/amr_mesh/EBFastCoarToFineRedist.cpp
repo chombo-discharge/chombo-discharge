@@ -8,6 +8,8 @@
 
 #define EBFASTC2F_DEBUG 0
 
+#include "CD_NamespaceHeader.H"
+
 EBFastCoarToFineRedist::EBFastCoarToFineRedist() : EBCoarToFineRedist(){
 
 }
@@ -43,7 +45,7 @@ void EBFastCoarToFineRedist::define(const EBLevelGrid&                      a_eb
   CH_assert(ebisPtr->isDefined());
   int nghost = 3*m_redistRad;
   ebisPtr->fillEBISLayout(m_ebislCedFine, m_gridsCedFine,
-                          m_domainCoar, nghost);
+			  m_domainCoar, nghost);
   m_ebislCedFine.setMaxRefinementRatio(m_refRat, ebisPtr);
 
   //define the intvectsets over which the objects live
@@ -160,3 +162,4 @@ void EBFastCoarToFineRedist::gatherSetsCoar(IntVectSet& a_setsCoar){
   }
   gatherBroadcast(a_setsCoar);
 }
+#include "CD_NamespaceFooter.H"

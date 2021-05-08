@@ -13,6 +13,8 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Declaration of a cylinder with rounded caps
 */
@@ -51,4 +53,6 @@ protected:
 
   RefCountedPtr<BaseIF> m_baseif;
 };
+#include "CD_NamespaceFooter.H"
+
 #endif

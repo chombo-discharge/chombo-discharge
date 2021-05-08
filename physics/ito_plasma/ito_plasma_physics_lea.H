@@ -10,6 +10,7 @@
 
 #include "ito_plasma_physics.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace ito_plasma {
 
@@ -55,9 +56,9 @@ namespace physics {
 
       // Disabled in LEA
       Vector<Real> compute_ito_diffusion_lfa(const Real         a_time,
-						     const RealVect     a_pos,
-						     const RealVect     a_E,
-						     const Vector<Real> a_cdr_densities) const override final {
+					     const RealVect     a_pos,
+					     const RealVect     a_E,
+					     const Vector<Real> a_cdr_densities) const override final {
 	MayDay::Abort("ito_plasma_physics_lea::compute_diffusion_lfa - should not end up here with an LEA model");
       }
 
@@ -71,5 +72,6 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

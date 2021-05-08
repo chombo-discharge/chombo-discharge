@@ -7,6 +7,8 @@
 
 #include "mfconductivityopfactory.H"
 
+#include "CD_NamespaceHeader.H"
+  
 #define verb 0
 
 mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&                a_mfis,
@@ -563,7 +565,7 @@ void mfconductivityopfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a
   this->average_down_amr();
   this->average_down_mg();
 
-  #if verb
+#if verb
   pout() << "mfconductivityopfactory::set_jump(data based) - done" << endl;
 #endif
 }
@@ -933,5 +935,5 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
   pout() << "mfconductivityopfactory::AMRnewOp - returning new op" << endl;
 #endif
   return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (oper);
-
 }
+#include "CD_NamespaceFooter.H"

@@ -14,6 +14,8 @@
 #include "EBStencil.H"
 #include "NamespaceHeader.H"
 
+#include "CD_NamespaceHeader.H"
+
 void
 dirichletconductivityebbc::
 define(const LayoutData<IntVectSet>& a_cfivs,
@@ -33,41 +35,41 @@ define(const LayoutData<IntVectSet>& a_cfivs,
       const EBGraph&    ebg = poissSten[dit()].getEBGraph();
       m_fluxStencil[dit()].define(ivs, ebg, 1);
       for (VoFIterator vofit(ivs, ebg); vofit.ok(); ++vofit)
-        {
-          m_fluxStencil[dit()](vofit(), 0) = poissSten[dit()](vofit(), 0);
-          Real factor = (*m_bcoe)[dit()](vofit(), 0);
-          factor *= m_beta;
-          m_fluxStencil[dit()](vofit(), 0) *= factor;
-        }
+	{
+	  m_fluxStencil[dit()](vofit(), 0) = poissSten[dit()](vofit(), 0);
+	  Real factor = (*m_bcoe)[dit()](vofit(), 0);
+	  factor *= m_beta;
+	  m_fluxStencil[dit()](vofit(), 0) *= factor;
+	}
     }
 }
 /*****************/
 void
 dirichletconductivityebbc::
 getEBFlux(Real&                         a_flux,
-          const VolIndex&               a_vof,
-          const LevelData<EBCellFAB>&   a_phi,
-          const LayoutData<IntVectSet>& a_cfivs,
-          const DataIndex&              a_dit,
-          const RealVect&               a_probLo,
-          const RealVect&               a_dx,
-          const bool&                   a_useHomogeneous,
-          const Real&                   a_time,
-          const pair<int,Real>*         a_cacheHint )
+	  const VolIndex&               a_vof,
+	  const LevelData<EBCellFAB>&   a_phi,
+	  const LayoutData<IntVectSet>& a_cfivs,
+	  const DataIndex&              a_dit,
+	  const RealVect&               a_probLo,
+	  const RealVect&               a_dx,
+	  const bool&                   a_useHomogeneous,
+	  const Real&                   a_time,
+	  const pair<int,Real>*         a_cacheHint )
 {
 #if 1 // Robert, change Dec. 20, 2017. This can be removed.
   MayDay::Abort("how did I get called?");
 #endif
   m_bc.getEBFlux(a_flux,
-                 a_vof,
-                 a_phi,
-                 a_cfivs,
-                 a_dit,
-                 a_probLo,
-                 a_dx,
-                 a_useHomogeneous,
-                 a_time,
-                 a_cacheHint );
+		 a_vof,
+		 a_phi,
+		 a_cfivs,
+		 a_dit,
+		 a_probLo,
+		 a_dx,
+		 a_useHomogeneous,
+		 a_time,
+		 a_cacheHint );
 
   Real bcoef = (*m_bcoe)[a_dit](a_vof,0);
   a_flux *= bcoef;
@@ -97,15 +99,15 @@ setFunction(RefCountedPtr<BaseBCValue> a_flux)
 void
 dirichletconductivityebbc::
 applyEBFlux(EBCellFAB&                    a_lphi,
-            const EBCellFAB&              a_phi,
-            VoFIterator&                  a_vofit,
-            const LayoutData<IntVectSet>& a_cfivs,
-            const DataIndex&              a_dit,
-            const RealVect&               a_probLo,
-            const RealVect&               a_dx,
-            const Real&                   a_factor,
-            const bool&                   a_useHomogeneous,
-            const Real&                   a_time)
+	    const EBCellFAB&              a_phi,
+	    VoFIterator&                  a_vofit,
+	    const LayoutData<IntVectSet>& a_cfivs,
+	    const DataIndex&              a_dit,
+	    const RealVect&               a_probLo,
+	    const RealVect&               a_dx,
+	    const Real&                   a_factor,
+	    const bool&                   a_useHomogeneous,
+	    const Real&                   a_time)
 {
   CH_TIME("dirichletconductivityebbc::applyEBFlux");
   CH_assert(a_lphi.nComp() == 1 );
@@ -209,19 +211,20 @@ create(const ProblemDomain& a_domain,
   if (!m_onlyHomogeneous)
     {
       if (m_dataBased)
-        {
-          fresh->setData(m_data);
-        }
+	{
+	  fresh->setData(m_data);
+	}
       else if (!m_isFunction)
-        {
-          fresh->setValue(m_value);
-        }
+	{
+	  fresh->setValue(m_value);
+	}
       else
-        {
-          fresh->setFunction(m_flux);
-        }
+	{
+	  fresh->setFunction(m_flux);
+	}
     }
 
   return fresh;
 }
+#include "CD_NamespaceFooter.H"
 #include "NamespaceFooter.H"

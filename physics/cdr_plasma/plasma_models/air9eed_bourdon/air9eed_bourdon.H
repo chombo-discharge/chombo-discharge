@@ -11,6 +11,7 @@
 #include "cdr_plasma_physics.H"
 #include "lookup_table.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace cdr_plasma {
     
@@ -306,4 +307,5 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

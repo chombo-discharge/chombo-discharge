@@ -272,7 +272,7 @@ protected:
 			       const Real             a_dt,
 			       const Real             a_time,
 			       const Real             a_kappa) const;
-};
+#include "CD_NamespaceFooter.H"
 
 
 #endif

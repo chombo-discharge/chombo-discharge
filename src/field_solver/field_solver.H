@@ -12,6 +12,8 @@
 #include "amr_mesh.H"
 #include "wall_bc.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Abstract Poisson solver class. Boundary conditions are passed through this class. 
 */
@@ -235,7 +237,7 @@ public:
   */
   virtual Real compute_capacitance();
 
-    /*!
+  /*!
     @brief Compute energy density U = 0.5*int(E.dot.D dV)
   */
   virtual Real compute_U(const MFAMRCellData& a_E);
@@ -413,7 +415,7 @@ protected:
   */
   Real (*m_wall_func_x_hi)(const RealVect a_pos);
 
-    /*!
+  /*!
     @brief Function pointer for potential on domain walls (dirichlet)
   */
   Real (*m_wall_func_y_lo)(const RealVect a_pos);
@@ -423,7 +425,7 @@ protected:
   */
   Real (*m_wall_func_y_hi)(const RealVect a_pos);
 
-    /*!
+  /*!
     @brief Function pointer for potential on domain walls (dirichlet)
   */
   Real (*m_wall_func_z_lo)(const RealVect a_pos);
@@ -443,4 +445,6 @@ protected:
   */
   virtual void allocate_wall_bc();
 };
+#include "CD_NamespaceFooter.H"
+
 #endif

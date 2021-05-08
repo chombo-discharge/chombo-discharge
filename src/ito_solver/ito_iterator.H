@@ -10,6 +10,8 @@
 
 #include "ito_layout.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Iterator class for ito_layout
 */
@@ -60,7 +62,7 @@ public:
 
   /*!
     @brief Ok or not
-   */
+  */
   virtual bool ok();
   
   /*!
@@ -92,7 +94,7 @@ protected:
 
   /*!
     @brief Number of solvers
-   */
+  */
   int m_num;;
 
   /*!
@@ -111,6 +113,7 @@ protected:
   Vector<RefCountedPtr<ito_species> > m_species;
 
 };
+#include "CD_NamespaceFooter.H"
 
 #include "ito_iteratorI.H"
 

@@ -7,6 +7,8 @@
 
 #include "dirichlet_func.H"
 
+#include "CD_NamespaceHeader.H"
+
 dirichlet_func::dirichlet_func(Real (*a_potential)(const Real a_time),
 			       Real (*a_func)(const RealVect a_pos),
 			       const RealVect a_origin){
@@ -33,3 +35,4 @@ Real dirichlet_func::derivative(const RealVect& a_point, const int& a_comp, cons
 
   return 0.0;
 }
+#include "CD_NamespaceFooter.H"

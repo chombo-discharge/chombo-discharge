@@ -32,6 +32,8 @@ namespace RAN = boost::random;
 namespace RAN = std;
 #endif
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Base class for Ito diffusion particle models
   @details This is a particle class for solving Ito diffusion problems dX = vdt + Z*D*t over an AMR hierarchy. The diffusion
@@ -82,7 +84,7 @@ public:
   */
   virtual void parse_options();
 
-    /*!
+  /*!
     @brief Parse options
   */
   virtual void parse_runtime_options();
@@ -308,7 +310,7 @@ public:
 				   const EB_representation a_representation,				   
 				   const bool              a_delete);
 
-    /*!
+  /*!
     @brief Do boundary intersection tests.
   */
   virtual void intersect_particles(particle_container<ito_particle>& a_particles,
@@ -337,7 +339,7 @@ public:
   */
   virtual int get_halo_buffer() const;
 
-    /*!
+  /*!
     @brief Set the PVR buffer
   */
   virtual void set_pvr_buffer(const int a_buffer);
@@ -546,7 +548,7 @@ public:
   */
   virtual void update_diffusion(const int a_level, const DataIndex a_dit);
 
-    /*!
+  /*!
     @brief Sort the m_particles container by cell
   */
   virtual void sort_particles_by_cell(const which_container a_container);
@@ -1192,6 +1194,7 @@ protected:
   */
   RealVect random_position(const RealVect a_lo, const RealVect a_hi);
 };
+#include "CD_NamespaceFooter.H"
 
 #include "ito_solverI.H"
 

@@ -7,6 +7,8 @@
 
 #include "simple_ito_particle.H"
 
+#include "CD_NamespaceHeader.H"
+
 simple_ito_particle::simple_ito_particle() : BinItem(){
 }
 
@@ -54,7 +56,7 @@ const Real& simple_ito_particle::energy() const{
 bool simple_ito_particle::operator==(const simple_ito_particle& a_p) const{
   return ( m_mass      == a_p.m_mass     &&
 	   m_energy    == a_p.m_energy   &&
-           m_position  == a_p.m_position);
+	   m_position  == a_p.m_position);
 }
 
 bool simple_ito_particle::operator==(const simple_ito_particle* a_p) const{
@@ -104,3 +106,4 @@ std::ostream & operator<<(std::ostream& ostr, const simple_ito_particle& p){
   ostr << " energy " << p.energy() << std::endl;
   return ostr;
 }
+#include "CD_NamespaceFooter.H"

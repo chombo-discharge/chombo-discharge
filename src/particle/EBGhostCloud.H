@@ -13,6 +13,8 @@
 #include "EBCellFAB.H"
 #include "ProblemDomain.H"
 
+#include "CD_NamespaceHeader.H"
+
 class EBGhostCloud {
 public:
 
@@ -169,4 +171,5 @@ protected:
   */
   void makeFiCoStuff();
 };
+#include "CD_NamespaceFooter.H"
 #endif

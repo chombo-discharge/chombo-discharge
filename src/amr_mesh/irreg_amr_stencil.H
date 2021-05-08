@@ -11,6 +11,8 @@
 #include "EBAMRData.H"
 #include "irreg_stencil.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class for holding stencils on irregular cells over an entire AMR hierarchy
   @note This class holds a single stencil on each irregular cells. When you apply the stencil to a data holder, the same stencil will be applied to all the components of that holder. 
@@ -214,7 +216,8 @@ protected:
   */
   stencil_type m_stencil_type;
 };
+#include "CD_NamespaceFooter.H"
 
-#include "irreg_amr_stencilI.H"
+#include "irreg_amr_stencilImplem.H"
 
 #endif

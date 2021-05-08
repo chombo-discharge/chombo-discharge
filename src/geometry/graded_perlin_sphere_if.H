@@ -10,6 +10,8 @@
 
 #include "perlin_sphere_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief graded_perlin_sphere_if function
 */
@@ -47,7 +49,6 @@ public:
     @brief Factory function
   */
   virtual BaseIF* newImplicitFunction() const;
-  
-protected:
 };
+#include "CD_NamespaceFooter.H"
 #endif

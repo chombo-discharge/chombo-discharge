@@ -7,6 +7,8 @@
   
 #include "hyperboloid_two_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 hyperboloid_two_if::hyperboloid_two_if(const RealVect& a_radii, const RealVect& a_center, const bool& a_inside){
   m_radii  = a_radii;
   m_center = a_center;
@@ -49,3 +51,4 @@ Real hyperboloid_two_if::value(const RealVect& a_point) const{
 BaseIF* hyperboloid_two_if::newImplicitFunction() const{
   return static_cast<BaseIF*> (new hyperboloid_two_if(m_radii,m_center,m_inside));
 }
+#include "CD_NamespaceFooter.H"

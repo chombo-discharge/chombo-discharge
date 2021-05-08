@@ -10,11 +10,15 @@
 #include "data_ops.H"
 #include "units.H"
 #include "cdr_gdnv.H"
+#include "CD_LaPackUtils.H"
 
 #include <fstream>
 #include <iostream>
 #include <iomanip>
-#include <ParmParse.H>
+
+#include "ParmParse.H"
+
+#include "CD_NamespaceHeader.H"
 
 using namespace physics::cdr_plasma;
 
@@ -204,7 +208,7 @@ void imex_sdc::parse_advection_options(){
   std::string str;
 
   m_extrap_dt = 0.5;  // Relic of an ancient past. I don't see any reason why extrapolating to anything but the half interval
-                      // would make sense. 
+  // would make sense. 
 
   pp.get("extrap_advect", str); m_extrap_advect = (str == "true") ? true : false;
 }
@@ -1619,13 +1623,13 @@ void imex_sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const 
 
   const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
   cdr_plasma_stepper::compute_cdr_fluxes(cdr_fluxes,
-				   extrap_cdr_fluxes,
-				   extrap_cdr_densities,
-				   extrap_cdr_velocities,
-				   extrap_cdr_gradients,
-				   extrap_rte_fluxes,
-				   E,
-				   a_time);
+					 extrap_cdr_fluxes,
+					 extrap_cdr_densities,
+					 extrap_cdr_velocities,
+					 extrap_cdr_gradients,
+					 extrap_rte_fluxes,
+					 E,
+					 a_time);
 }
 
 void imex_sdc::compute_cdr_domain_fluxes(const Real a_time){
@@ -1691,13 +1695,13 @@ void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states,
 
   // This fills the solvers' domain fluxes
   cdr_plasma_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
-					  extrap_cdr_fluxes,
-					  extrap_cdr_densities,
-					  extrap_cdr_velocities,
-					  extrap_cdr_gradients,
-					  extrap_rte_fluxes,
-					  E,
-					  a_time);
+						extrap_cdr_fluxes,
+						extrap_cdr_densities,
+						extrap_cdr_velocities,
+						extrap_cdr_gradients,
+						extrap_rte_fluxes,
+						E,
+						a_time);
 }
 
 void imex_sdc::compute_sigma_flux(){
@@ -1759,10 +1763,10 @@ void imex_sdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const E
   if(m_do_poisson){ // Solve Poisson equation
     if((m_step +1) % m_fast_poisson == 0){
       cdr_plasma_stepper::solve_poisson(m_poisson->get_state(),
-				  m_poisson->get_source(),
-				  a_densities,
-				  a_sigma,
-				  centering::cell_center);
+					m_poisson->get_source(),
+					a_densities,
+					a_sigma,
+					centering::cell_center);
       this->compute_E_into_scratch();
     }
   }
@@ -1851,10 +1855,10 @@ EBAMRIVData& imex_sdc::get_sigmak(const int a_m){
 }
 
 void imex_sdc::write_step_profile(const Real a_dt,
-			       const Real a_error,
-			       const int  a_substeps,
-			       const int  a_corrections,
-			       const int  a_rejections){
+				  const Real a_error,
+				  const int  a_substeps,
+				  const int  a_corrections,
+				  const int  a_rejections){
   CH_TIME("sissdc::write_step_profile");
   if(m_verbosity > 5){
     pout() << "imex_sdc::write_step_profile" << endl;
@@ -1953,3 +1957,4 @@ void imex_sdc::restore_solvers(){
     data_ops::copy(state, previous);
   }
 }
+#include "CD_NamespaceFooter.H"

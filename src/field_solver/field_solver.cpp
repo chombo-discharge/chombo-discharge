@@ -18,6 +18,8 @@
 #include <MFAMRIO.H>
 #include <EBAMRIO.H>
 
+#include "CD_NamespaceHeader.H"
+
 Real field_solver::s_potential_one(const Real a_time){
   return 1.0;
 }
@@ -331,7 +333,7 @@ void field_solver::sanity_check(){
     for (SideIterator sideit; sideit.ok(); ++sideit){
       if(m_wallbc[wall_bc::map_bc(dir, sideit())].isNull()){
 	pout() << "field_solver::sanity_check() - bc is null at coord = " << dir << ", side = " << sideit() << endl;
-  	MayDay::Abort("field_solver::sanity_check() failed. Wall BC has not been set properly");
+	MayDay::Abort("field_solver::sanity_check() failed. Wall BC has not been set properly");
       }
     }
   }
@@ -826,3 +828,4 @@ MFAMRCellData& field_solver::get_source(){
 MFAMRCellData& field_solver::get_resid(){
   return m_resid;
 }
+#include "CD_NamespaceFooter.H"

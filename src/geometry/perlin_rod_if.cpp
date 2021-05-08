@@ -11,7 +11,8 @@
 #include <TransformIF.H>
 #include <IntersectionIF.H>
 
-//
+#include "CD_NamespaceHeader.H"
+  
 perlin_rod_if::perlin_rod_if(const Real&     a_rad,
 			     const RealVect& a_center1,
 			     const RealVect& a_center2,
@@ -25,7 +26,7 @@ perlin_rod_if::perlin_rod_if(const Real&     a_rad,
   // Fix up center2
   const RealVect axis    = a_center2 - a_center1;
   //const RealVect center2 = a_center2  - axis*a_rad/axis.vectorLeng;
-   const RealVect center2 = a_center2 - axis*a_rad/axis.vectorLength();
+  const RealVect center2 = a_center2 - axis*a_rad/axis.vectorLength();
 
 
   // Cylinder and graded noise sphere
@@ -81,3 +82,4 @@ Real perlin_rod_if::value(const RealVect& a_pos) const {
 BaseIF* perlin_rod_if::newImplicitFunction() const {
   return static_cast<BaseIF*> (new perlin_rod_if(*this));
 }
+#include "CD_NamespaceFooter.H"

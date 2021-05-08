@@ -15,6 +15,8 @@
 #include <vector>
 #include <memory>
 
+#include "CD_NamespaceHeader.H"
+
 namespace dcel {
 
   template <class T> class vertexT;
@@ -48,10 +50,10 @@ namespace dcel {
 
     inline
     void define(const vertexPtr& a_vertex,
-			  const edgePtr&   a_pairEdge,
-			  const edgePtr&   a_nextEdge,
-			  const edgePtr&   a_previousEdge,
-			  const Vec3                     a_normal) noexcept;
+		const edgePtr&   a_pairEdge,
+		const edgePtr&   a_nextEdge,
+		const edgePtr&   a_previousEdge,
+		const Vec3                     a_normal) noexcept;
 
     inline
     void setVertex(const vertexPtr& a_vertex) noexcept;
@@ -145,8 +147,8 @@ namespace dcel {
     inline
     void computeNormal() noexcept;
   };
-
 }
+#include "CD_NamespaceFooter.H"
 
 #include "dcel_edgeI.H"
 

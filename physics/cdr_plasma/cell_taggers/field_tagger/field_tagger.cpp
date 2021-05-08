@@ -9,6 +9,7 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 field_tagger::field_tagger(){
@@ -80,3 +81,4 @@ bool field_tagger::refine_cell(const RealVect         a_pos,
 
   return refine;
 }
+#include "CD_NamespaceFooter.H"

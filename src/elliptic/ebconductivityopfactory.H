@@ -35,9 +35,10 @@
 #include "PolyGeom.H"
 #include "EBAMRPoissonOp.H"
 #include "EBLevelGrid.H"
-#include "NamespaceHeader.H"
 
 
+#include "CD_NamespaceHeader.H"
+  
 //! \class ebconductivityopfactory
 //! Factory class to generate ebconductivityops.  This follows the
 //! AMRLevelOpFactory interface.
@@ -48,22 +49,22 @@ public:
   //! Constructs a factory that builds ebconductivityops with time-independent
   //! A and B coefficients.
   ebconductivityopfactory(const Vector<EBLevelGrid>&                                  a_eblgs,
-                          const Vector<RefCountedPtr<EBQuadCFInterp> >&               a_quadCFI,
+			  const Vector<RefCountedPtr<EBQuadCFInterp> >&               a_quadCFI,
 			  const Vector<RefCountedPtr<EBFluxRegister> >&               a_fastFR,
-                          const Real&                                                 a_alpha,
-                          const Real                                         &        a_beta,
-                          const Vector<RefCountedPtr<LevelData<EBCellFAB> > >&        a_acoef,
-                          const Vector<RefCountedPtr<LevelData<EBFluxFAB> > >&        a_bcoef,
-                          const Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > >& a_bcoefIrreg,
-                          const Real&                                                 a_dxCoarse,
-                          const Vector<int>&                                          a_refRatio,
-                          const RefCountedPtr<BaseDomainBCFactory>&                   a_domainBCFactory,
-                          const RefCountedPtr<BaseEBBCFactory>    &                   a_ebBcFactory,
-                          const IntVect&                                              a_ghostCellsPhi,
-                          const IntVect&                                              a_ghostCellsRhs,
-                          const int&                                                  a_relaxType,
+			  const Real&                                                 a_alpha,
+			  const Real                                         &        a_beta,
+			  const Vector<RefCountedPtr<LevelData<EBCellFAB> > >&        a_acoef,
+			  const Vector<RefCountedPtr<LevelData<EBFluxFAB> > >&        a_bcoef,
+			  const Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > >& a_bcoefIrreg,
+			  const Real&                                                 a_dxCoarse,
+			  const Vector<int>&                                          a_refRatio,
+			  const RefCountedPtr<BaseDomainBCFactory>&                   a_domainBCFactory,
+			  const RefCountedPtr<BaseEBBCFactory>    &                   a_ebBcFactory,
+			  const IntVect&                                              a_ghostCellsPhi,
+			  const IntVect&                                              a_ghostCellsRhs,
+			  const int&                                                  a_relaxType,
 			  const int&                                                  a_botdrop = 8,
-                          const int                                                   a_numLevels = -1,
+			  const int                                                   a_numLevels = -1,
 			  const Vector<EBLevelGrid>&                                  m_mg_eblgs = Vector<EBLevelGrid>(0));
 
 
@@ -80,15 +81,15 @@ public:
   ///
   virtual ebconductivityop*
   MGnewOp(const ProblemDomain& a_FineindexSpace,
-          int                  a_depth,
-          bool                 a_homoOnly = true);
+	  int                  a_depth,
+	  bool                 a_homoOnly = true);
 
   ebconductivityop* createOperator(const EBLevelGrid&             a_eblgMGLevel,
-                                   const EBLevelGrid&             a_eblgCoarMG,
-                                   const bool&                    a_hasMGObjects,
-                                   const RealVect&                a_dxMGLevel,
-                                   const RealVect&                a_dxCoar,
-                                   const int&                     a_whichLevel);
+				   const EBLevelGrid&             a_eblgCoarMG,
+				   const bool&                    a_hasMGObjects,
+				   const RealVect&                a_dxMGLevel,
+				   const RealVect&                a_dxCoar,
+				   const int&                     a_whichLevel);
   ///
   virtual void reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim);
 
@@ -108,7 +109,7 @@ public:
   /**
      testRef is the size of the coarsest domain allowed in multigrid. If testRef=2,
      then the coarsest domain in multigrid will be 2x2(x2)
-   **/
+  **/
   static void setTestRef(int a_testRef)
   {
     s_testRef = a_testRef;
@@ -124,10 +125,10 @@ public:
 
   //! Reset the coefficients for the conductivity operator (time-independent).
   void resetCoefficients(const Real&                                                 a_alpha,
-                         const Real                                         &        a_beta,
-                         const Vector<RefCountedPtr<LevelData<EBCellFAB> > >&        a_acoef,
-                         const Vector<RefCountedPtr<LevelData<EBFluxFAB> > >&        a_bcoef,
-                         const Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > >& a_bcoefIrreg)
+			 const Real                                         &        a_beta,
+			 const Vector<RefCountedPtr<LevelData<EBCellFAB> > >&        a_acoef,
+			 const Vector<RefCountedPtr<LevelData<EBFluxFAB> > >&        a_bcoef,
+			 const Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > >& a_bcoefIrreg)
   {
     m_alpha       = a_alpha      ;
     m_beta        = a_beta       ;
@@ -197,6 +198,6 @@ private:
     MayDay::Error("invalid operator");
   }
 };
+#include "CD_NamespaceFooter.H"
 
-#include "NamespaceFooter.H"
 #endif

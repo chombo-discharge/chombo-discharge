@@ -16,6 +16,8 @@
 
 #include "perlin_sphere_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 aerosol::aerosol(){
 
   Real eps, eps0, noise_persistence, noise_amplitude;
@@ -75,3 +77,4 @@ aerosol::aerosol(){
 aerosol::~aerosol(){
   
 }
+#include "CD_NamespaceFooter.H"

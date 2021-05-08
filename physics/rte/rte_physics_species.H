@@ -10,6 +10,7 @@
 
 #include "rte_species.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace rte {
 
@@ -20,5 +21,6 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

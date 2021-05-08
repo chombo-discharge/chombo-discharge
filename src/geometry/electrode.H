@@ -11,6 +11,7 @@
 #include <BaseIF.H>
 #include <RefCountedPtr.H>
 
+#include "CD_NamespaceHeader.H"
 /*!
   @brief electrode class. Simple tuple.
 */
@@ -58,5 +59,6 @@ protected:
   */
   Real m_fraction;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

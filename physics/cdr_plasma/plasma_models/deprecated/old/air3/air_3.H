@@ -37,7 +37,7 @@ public:
   */
   virtual ~air_3();
 
-    /*!
+  /*!
     @brief Compute diffusion coefficients
   */
   virtual Vector<Real> compute_cdr_diffusion_coefficients(const Real&         a_time,
@@ -181,5 +181,5 @@ protected:
   */
   Real m_excitation_efficiency;
 
-};
+#include "CD_NamespaceFooter.H"
 #endif

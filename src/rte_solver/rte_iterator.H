@@ -10,6 +10,8 @@
 
 #include "rte_layout.H"
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Iterator class for rte_layout
 */
@@ -72,7 +74,7 @@ public:
 
   /*!
     @brief Ok or not
-   */
+  */
   virtual bool ok(){
     return (m_isolver < m_num);
   }
@@ -112,7 +114,7 @@ protected:
 
   /*!
     @brief Number of solvers
-   */
+  */
   int m_num;;
 
   /*!
@@ -131,4 +133,5 @@ protected:
   Vector<RefCountedPtr<rte_species> > m_species;
 
 };
+#include "CD_NamespaceFooter.H"
 #endif

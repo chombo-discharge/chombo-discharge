@@ -64,7 +64,7 @@ air8::N4plus::N4plus(){
   m_diffusive = false;
   m_mobile = true;
 
-    std::string str;
+  std::string str;
   ParmParse pp("air8");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
@@ -165,7 +165,7 @@ air8::O2minus::O2minus(){
   m_diffusive = false;
   m_mobile = true;
 
-    std::string str;
+  std::string str;
   ParmParse pp("air8");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
@@ -189,7 +189,7 @@ air8::Ominus::Ominus(){
   m_diffusive = false;
   m_mobile = true;
 
-    std::string str;
+  std::string str;
   ParmParse pp("air8");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
@@ -347,5 +347,5 @@ Real air8::photon_three::get_A() const {
 
 Real air8::photon_three::get_pO2() const {
   return m_pO2;
-}
+#include "CD_NamespaceFooter.H"
 

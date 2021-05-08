@@ -8,6 +8,8 @@
 #ifndef _VEC_H_
 #define _VEC_H_
 
+#include "CD_NamespaceHeader.H"
+
 template<class T>
 class Vec2T {
 public:
@@ -200,6 +202,7 @@ Vec3T<T> min(const Vec3T<T>& u, const Vec3T<T>& v) noexcept;
 template <class T>
 inline
 Vec3T<T> max(const Vec3T<T>& u, const Vec3T<T>& v) noexcept;
+#include "CD_NamespaceFooter.H"
 
 #include "VecI.H"
 

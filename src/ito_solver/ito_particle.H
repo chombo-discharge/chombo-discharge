@@ -15,6 +15,8 @@
 
 #include "BinItem.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers
 */
@@ -71,7 +73,7 @@ public:
   */
   void define(const Real      a_mass,
 	      const RealVect& a_position,
-              const RealVect& a_velocity  = RealVect::Zero,
+	      const RealVect& a_velocity  = RealVect::Zero,
 	      const Real      a_diffusion = 0.0,
 	      const Real      a_mobility  = 1.0,
 	      const Real      a_energy    = 0.0);
@@ -266,6 +268,6 @@ protected:
 };
 
 std::ostream & operator<<(std::ostream& ostr, const ito_particle& p);
-
+#include "CD_NamespaceFooter.H"
 #endif
 

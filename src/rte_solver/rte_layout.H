@@ -10,6 +10,8 @@
 
 #include "rte_solver.H"
 
+#include "CD_NamespaceHeader.H"
+  
 template <class T>
 class rte_iterator;
 
@@ -55,7 +57,7 @@ public:
   */
   virtual void parse_options();
 
-    /*!
+  /*!
     @brief Parse options
   */
   virtual void parse_runtime_options();
@@ -70,7 +72,7 @@ public:
   */
   virtual void pre_regrid(const int a_base, const int a_old_finest_level);
 
-    /*!
+  /*!
     @brief Deallocate internal storage for solvers
   */
   virtual void deallocate_internals();
@@ -212,6 +214,7 @@ public:
   ~rte_factory();
   RefCountedPtr<rte_layout<T> > new_layout(const Vector<RefCountedPtr<rte_species> >& a_species) const;
 };
+#include "CD_NamespaceFooter.H"
 
 #include "rte_layoutI.H"
 

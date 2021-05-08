@@ -11,6 +11,7 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 air9eed_bourdon::eed::eed(){
@@ -82,7 +83,7 @@ air9eed_bourdon::N4plus::N4plus(){
   m_diffusive = false;
   m_mobile = true;
 
-    std::string str;
+  std::string str;
   ParmParse pp("air9eed_bourdon");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
@@ -183,7 +184,7 @@ air9eed_bourdon::O2minus::O2minus(){
   m_diffusive = false;
   m_mobile = true;
 
-    std::string str;
+  std::string str;
   ParmParse pp("air9eed_bourdon");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
@@ -207,7 +208,7 @@ air9eed_bourdon::Ominus::Ominus(){
   m_diffusive = false;
   m_mobile = true;
 
-    std::string str;
+  std::string str;
   ParmParse pp("air9eed_bourdon");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
@@ -370,4 +371,4 @@ Real air9eed_bourdon::photon_three::get_A() const {
 Real air9eed_bourdon::photon_three::get_pO2() const {
   return m_pO2;
 }
-
+#include "CD_NamespaceFooter.H"

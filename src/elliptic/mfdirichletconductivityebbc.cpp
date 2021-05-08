@@ -5,7 +5,11 @@
   @date Dec. 2017
 */
 
+#include "CD_LeastSquares.H"
 #include "mfdirichletconductivityebbc.H"
+#include "ParmParse.H"
+
+#include "CD_NamespaceHeader.H"
 
 bool mfdirichletconductivityebbc::s_areaFracWeighted = false;
 bool mfdirichletconductivityebbc::s_quadrant_based   = true;
@@ -306,6 +310,36 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
     a_weight = 0.0;
   }
 
+#if 0 // Test LeastSquares
+  ParmParse pp("lsq");
+
+  int p = 0;
+  int order = 1;
+  bool useLSQ = false;
+  pp.query("use", useLSQ);
+  pp.query("p", p);
+  pp.query("order", order);
+  
+
+  if(useLSQ){
+    VoFStencil mySten = LeastSquares::getBndryGradSten(a_vof, a_ebisbox, m_dx[0], p, order);
+
+    if(mySten.size() == 0){
+      mySten = LeastSquares::getBndryGradSten(a_vof, a_ebisbox, m_dx[0], p, 1);
+
+      if(mySten.size() == 0){
+    	std::cout << "did not find lsq gradient stencil" << std::endl;
+      }
+    }
+
+    // This is how you do the weights for the boundary point
+    if(mySten.size() > 0){
+      a_stencil =  LeastSquares::projectGradSten(mySten, -normal);
+      a_weight  = -LeastSquares::sumAllWeights(a_stencil);
+    }
+  }
+#endif
+
 }
 
 void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,
@@ -369,10 +403,11 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
       Real flux              = weight*value*beta*bco*area_frac*a_factor;
 
       if(mfdirichletconductivityebbc::s_areaFracWeighted){
-      	flux *= ebisbox.areaFracScaling(vof);
+	flux *= ebisbox.areaFracScaling(vof);
       }
 
       a_lphi(vof, comp) += flux;
     }
   }
 }
+#include "CD_NamespaceFooter.H"

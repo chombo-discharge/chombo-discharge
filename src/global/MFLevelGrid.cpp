@@ -8,6 +8,7 @@
 #include "mfis.H"
 #include "MFLevelGrid.H"
 
+#include "CD_NamespaceHeader.H"
 
 MFLevelGrid::MFLevelGrid(){
 
@@ -127,3 +128,4 @@ bool MFLevelGrid::interface_pair(IntVect&             a_iv,
 
   return found_iv;
 }
+#include "CD_NamespaceFooter.H"

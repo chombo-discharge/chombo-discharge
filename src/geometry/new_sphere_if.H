@@ -11,6 +11,8 @@
 #include <BaseIF.H>
 #include <IntersectionIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Declaration of a hemispheric rod IF class
   @details This class is esseentially a cylinder with a hemisphere at one of its ends. 
@@ -67,4 +69,5 @@ protected:
   */
   bool m_fluidInside;
 };
+#include "CD_NamespaceFooter.H"
 #endif

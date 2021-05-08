@@ -13,6 +13,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "CD_NamespaceHeader.H"
+  
 using namespace physics::ito_plasma;
 
 ito_plasma_physics::ito_plasma_physics(){
@@ -101,3 +103,4 @@ void ito_plasma_physics::read_file(lookup_table& a_table, const std::string a_fi
   }
   infile.close();
 }
+#include "CD_NamespaceFooter.H"

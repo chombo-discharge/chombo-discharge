@@ -15,6 +15,8 @@
 
 #include "MFBaseIVFAB.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class for aliasing multifluid things
 */
@@ -37,7 +39,7 @@ public:
     a_alias.define(a_input.disjointBoxLayout(), a_input.nComp(), a_input.ghostVect(), factory);
   }
 
-    /*!
+  /*!
     @brief Alias MFBaseIVFABs
   */
   static void aliasMF(LevelData<BaseIVFAB<Real> >& a_alias, int a_phase, const LevelData<MFBaseIVFAB>& a_input){
@@ -129,7 +131,7 @@ private:
     int m_phase;
   };
 
-    /*!
+  /*!
     @brief Class for aliasing 
   */
   class mf_baseivfab_alias_factory : public DataFactory<BaseIVFAB<Real> > {
@@ -170,5 +172,6 @@ private:
     int m_phase;
   };
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

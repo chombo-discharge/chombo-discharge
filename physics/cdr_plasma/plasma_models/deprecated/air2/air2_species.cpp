@@ -118,4 +118,4 @@ Real air2::photon_two::get_pO2() const {return m_pO2;}
 Real air2::photon_three::get_kappa(const RealVect a_pos) const { return m_lambda*m_pO2/(sqrt(3.0));}
 Real air2::photon_three::get_lambda() const { return m_lambda;}
 Real air2::photon_three::get_A() const {return m_A;}
-Real air2::photon_three::get_pO2() const {return m_pO2;}
+#include "CD_NamespaceFooter.H"

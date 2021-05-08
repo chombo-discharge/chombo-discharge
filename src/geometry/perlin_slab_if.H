@@ -10,6 +10,8 @@
 
 #include <BaseIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Implicit function class describing a hexagonal rod
 */
@@ -48,4 +50,5 @@ protected:
   bool m_fluidInside;
 
 };
+#include "CD_NamespaceFooter.H"
 #endif

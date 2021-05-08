@@ -8,6 +8,8 @@
 #include "time_stepper.H"
 #include "LoadBalance.H"
 
+#include "CD_NamespaceHeader.H"
+
 void time_stepper::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   CH_TIME("time_stepper::set_amr");
   if(m_verbosity > 5){
@@ -97,3 +99,4 @@ void time_stepper::load_balance_boxes(Vector<Vector<int> >&             a_procs,
     LoadBalance(a_procs[lvl], a_boxes[lvl]);
   }
 }
+#include "CD_NamespaceFooter.H"

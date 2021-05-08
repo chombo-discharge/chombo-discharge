@@ -18,6 +18,8 @@
 #include "ScanShop.H"
 #include "memrep.H"
 
+#include "CD_NamespaceHeader.H"
+
 #if CH_USE_DOUBLE
 Real computational_geometry::s_thresh = 1.E-15;
 #elif CH_USE_FLOAT
@@ -138,20 +140,20 @@ void computational_geometry::build_gas_geoserv(GeometryService*&   a_geoserver,
   //   a_geoserver = new AllRegularService();
   // }
   // else {
-    m_gas_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
-    if(s_use_new_gshop){
-      a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_gas_if,
-								0,
-								a_dx,
-								a_origin,
-								a_finestDomain,
-								s_ScanDomain,
-								s_thresh));
-    }
-    else{ // Chombo geometry generation
-      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
-    }
-    //  }
+  m_gas_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
+  if(s_use_new_gshop){
+    a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_gas_if,
+							      0,
+							      a_dx,
+							      a_origin,
+							      a_finestDomain,
+							      s_ScanDomain,
+							      s_thresh));
+  }
+  else{ // Chombo geometry generation
+    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
+  }
+  //  }
 }
 
 void computational_geometry::build_solid_geoserv(GeometryService*&   a_geoserver,
@@ -198,3 +200,4 @@ void computational_geometry::build_solid_geoserv(GeometryService*&   a_geoserver
     }
   }
 }
+#include "CD_NamespaceFooter.H"

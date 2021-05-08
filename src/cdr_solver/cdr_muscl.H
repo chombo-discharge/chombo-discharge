@@ -11,6 +11,8 @@
 #include "cdr_tga.H"
 #include "cdr_gdnv.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class that uses MUSCL discretization for the advective term in the cdr equation
 */
@@ -93,4 +95,5 @@ protected:
 
   virtual void parse_slopelim();     // Parses slope limiter settings
 };
+#include "CD_NamespaceFooter.H"
 #endif

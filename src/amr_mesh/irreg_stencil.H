@@ -16,6 +16,8 @@
 #include <Stencils.H>
 #include <LayoutData.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Stencil types
 */
@@ -135,4 +137,5 @@ protected:
 			     const Real&              a_dx,
 			     const IntVectSet&        a_cfivs) = 0;
 };
+#include "CD_NamespaceFooter.H"
 #endif

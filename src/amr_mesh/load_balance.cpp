@@ -8,6 +8,8 @@
 #include "load_balance.H"
 #include "EBEllipticLoadBalance.H"
 
+#include "CD_NamespaceHeader.H"
+
 void load_balance::make_balance(Vector<int>& a_levelRanks, const Vector<Box>& a_levelBoxes){
   LoadBalance(a_levelRanks, a_levelBoxes);
 }
@@ -194,11 +196,11 @@ int load_balance::maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::
     {
       IntVect small = p->smallEnd();
       D_EXPR6( maxSize = Max(maxSize, Abs(small[0])),
-               maxSize = Max(maxSize, Abs(small[1])),
-               maxSize = Max(maxSize, Abs(small[2])),
-               maxSize = Max(maxSize, Abs(small[3])),
-               maxSize = Max(maxSize, Abs(small[4])),
-               maxSize = Max(maxSize, Abs(small[5])));
+	       maxSize = Max(maxSize, Abs(small[1])),
+	       maxSize = Max(maxSize, Abs(small[2])),
+	       maxSize = Max(maxSize, Abs(small[3])),
+	       maxSize = Max(maxSize, Abs(small[4])),
+	       maxSize = Max(maxSize, Abs(small[5])));
     }
   int bits;
   for (bits=8*sizeof(int)-2; bits>0; bits--)
@@ -210,5 +212,4 @@ int load_balance::maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::
   bits++;
   return bits;
 }
-
-
+#include "CD_NamespaceFooter.H"

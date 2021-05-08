@@ -13,6 +13,8 @@
 #include "dcel_face.H"
 #include "dcel_iterator.H"
 
+#include "CD_NamespaceHeader.H"
+
 namespace dcel {
 
   template <class T>
@@ -53,10 +55,10 @@ namespace dcel {
   template <class T>
   inline
   void edgeT<T>::define(const vertexPtr& a_vertex,
-				  const edgePtr&   a_pairEdge,
-				  const edgePtr&   a_nextEdge,
-				  const edgePtr&   a_previousEdge,
-				  const Vec3       a_normal) noexcept {
+			const edgePtr&   a_pairEdge,
+			const edgePtr&   a_nextEdge,
+			const edgePtr&   a_previousEdge,
+			const Vec3       a_normal) noexcept {
     m_vertex       = a_vertex;
     m_pairEdge     = a_pairEdge;
     m_nextEdge     = a_nextEdge;
@@ -266,5 +268,6 @@ namespace dcel {
     return delta.dot(delta);
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

@@ -180,4 +180,4 @@ Real advection_kinetics::phi_advect::initial_data(const RealVect a_pos, const Re
   }
 
   return ret;
-}
+#include "CD_NamespaceFooter.H"

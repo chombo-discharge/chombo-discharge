@@ -13,6 +13,8 @@
 #include <RealVect.H>
 #include <MFIndexSpace.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief phase names
 */
@@ -96,5 +98,6 @@ protected:
   */
   RefCountedPtr<MFIndexSpace> m_mfis;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

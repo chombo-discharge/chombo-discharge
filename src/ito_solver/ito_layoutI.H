@@ -11,6 +11,8 @@
 #include "ito_layout.H"
 #include "ito_iterator.H"
 
+#include "CD_NamespaceHeader.H"
+
 template <class T>
 ito_layout<T>::ito_layout(){
   m_isDefined = false;
@@ -388,5 +390,6 @@ RefCountedPtr<ito_layout<T> > ito_factory<T, S>::new_layout(const Vector<RefCoun
 
   return ito;
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

@@ -11,6 +11,8 @@
 #include <PlaneIF.H>
 #include <PolyGeom.H>
 
+#include "CD_NamespaceHeader.H"
+
 perlin_plane_if::perlin_plane_if(const RealVect a_normal,
 				 const RealVect a_point,
 				 const bool     a_inside,
@@ -57,3 +59,4 @@ Real perlin_plane_if::value(const RealVect& a_pos) const {
 BaseIF* perlin_plane_if::newImplicitFunction() const {
   return static_cast<BaseIF*> (new perlin_plane_if(*this));
 }
+#include "CD_NamespaceFooter.H"

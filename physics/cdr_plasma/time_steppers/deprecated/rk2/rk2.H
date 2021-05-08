@@ -20,7 +20,7 @@
   Class options
   -------------
 
-      rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method
+  rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method
 
 */
 class rk2 : public time_stepper {
@@ -248,7 +248,7 @@ protected:
   */
   virtual Real restrict_dt();
   
-};
+#include "CD_NamespaceFooter.H"
 
 #endif
 

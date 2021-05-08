@@ -13,6 +13,7 @@
 #include <EBArith.H>
 #include <PolyGeom.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::ito_plasma;
 
 ito_plasma_stepper::ito_plasma_stepper(){
@@ -485,10 +486,10 @@ void ito_plasma_stepper::print_step_report(){
 	 << "                                   #part     = " << l_particles << " (" << g_particles << ")" << endl
 	 << "                                   #eb part  = " << l_eb_particles << " (" << g_eb_particles << ")" << endl
 	 << "                                   #dom part = " << l_domain_particles << " (" << g_domain_particles << ")" << endl
-    	 << "                                   #src part = " << l_source_particles << " (" << g_source_particles << ")" << endl
+	 << "                                   #src part = " << l_source_particles << " (" << g_source_particles << ")" << endl
 	 << "                                   #part min = " << minParticles << " (on rank = " << minRank << ")" << endl
-    	 << "                                   #part max = " << maxParticles << " (on rank = " << maxRank << ")" << endl
-    	 << "                                   #part avg = " << avg << endl
+	 << "                                   #part max = " << maxParticles << " (on rank = " << maxRank << ")" << endl
+	 << "                                   #part avg = " << avg << endl
 	 << "                                   #part dev = " << sigma << " (" << 100.*sigma/avg << "%)" << endl;
 }
 
@@ -642,28 +643,28 @@ void ito_plasma_stepper::print_timer_diagnostics(Real& a_timer, const std::strin
 
   pout() << std::left << std::setw(25) << a_prefix
 	 << " | " << std::right << std::setw(8) << ss_locTime.str()
-    	 << " | " << std::right << std::setw(8) << ss_minTime.str()
-    	 << " | " << std::right << std::setw(8) << ss_maxTime.str()
-    	 << " | " << std::right << std::setw(8) << ss_avgTime.str()
+	 << " | " << std::right << std::setw(8) << ss_minTime.str()
+	 << " | " << std::right << std::setw(8) << ss_maxTime.str()
+	 << " | " << std::right << std::setw(8) << ss_avgTime.str()
 	 << " | " << std::right << std::setw(8) << ss_sigTime.str()
-    	 << " | " << std::right << std::setw(8) << minRank
+	 << " | " << std::right << std::setw(8) << minRank
 	 << " | " << std::right << std::setw(8) << maxRank
-    	 << " | " << endl;
+	 << " | " << endl;
 }
 
 void ito_plasma_stepper::print_timer_head(){
   pout() << "--------------------------------------------------------------------------------------------------------"
 	 << endl
 	 << std::left << std::setw(25) << "Kernel"
-    	 << " | " << std::right << std::setw(8) << "Loc."
-    	 << " | " << std::right << std::setw(8) << "Min."
+	 << " | " << std::right << std::setw(8) << "Loc."
+	 << " | " << std::right << std::setw(8) << "Min."
 	 << " | " << std::right << std::setw(8) << "Max."
-    	 << " | " << std::right << std::setw(8) << "Avg." 
+	 << " | " << std::right << std::setw(8) << "Avg." 
 	 << " | " << std::right << std::setw(8) << "Dev."
 	 << " | " << std::right << std::setw(8)  << "Min rank"
 	 << " | " << std::right << std::setw(8)  << "Max rank"
 	 << " | " << endl
-  	 << "-------------------------------------------------------------------------------------------------------|"
+	 << "-------------------------------------------------------------------------------------------------------|"
 	 << endl;
 }
 
@@ -963,18 +964,18 @@ void ito_plasma_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_p
       const Box& box          = dbl.get(dit());
       
       for (int dir = 0; dir < SpaceDim; dir++){
-      	EBFaceFAB& E_face = (*a_E_face[lvl])[dit()][dir];
+	EBFaceFAB& E_face = (*a_E_face[lvl])[dit()][dir];
 	E_face.setVal(0.0);
 
-      	EBLevelDataOps::averageCellToFace(E_face,
-      					  E_cell,
-      					  ebgraph,
-      					  box,
-      					  0,
-      					  dir,
-      					  domain,
-      					  dir,
-      					  dir);
+	EBLevelDataOps::averageCellToFace(E_face,
+					  E_cell,
+					  ebgraph,
+					  box,
+					  0,
+					  dir,
+					  domain,
+					  dir,
+					  dir);
       }
 
     }
@@ -3423,3 +3424,4 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo2(const Real a_dt){
     }
   }
 }
+#include "CD_NamespaceFooter.H"

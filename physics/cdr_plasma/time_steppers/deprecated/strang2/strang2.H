@@ -149,6 +149,6 @@ protected:
   
   Real get_max_error();
   Real restrict_dt() ;
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

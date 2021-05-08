@@ -13,6 +13,8 @@
 #include <IntersectionIF.H>
 #include <PolyGeom.H>
 
+#include "CD_NamespaceHeader.H"
+
 rod_if::rod_if(const RealVect& a_center1,
 	       const RealVect& a_center2,
 	       const Real&     a_radius,
@@ -52,3 +54,4 @@ Real rod_if::value(const RealVect& a_point) const{
 BaseIF* rod_if::newImplicitFunction() const{
   return static_cast<BaseIF*> (new rod_if(*this));
 }
+#include "CD_NamespaceFooter.H"

@@ -13,6 +13,8 @@
 
 #include "EBLevelGrid.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Wrapper class for holding multifluid EBLevelGrids
 */
@@ -100,5 +102,6 @@ private:
 
   Vector<EBLevelGrid> m_eblg;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

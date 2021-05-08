@@ -11,6 +11,8 @@
 
 #include <BaseIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief perlin_plane_if function
 */
@@ -69,4 +71,5 @@ protected:
   */
   RefCountedPtr<BaseIF> m_perlin;
 };
+#include "CD_NamespaceFooter.H"
 #endif

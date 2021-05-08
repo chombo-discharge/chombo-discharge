@@ -15,6 +15,8 @@
 
 #include <DirichletConductivityEBBC.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class for doing regular Dirichlet boundary conditions on EBConductivityOps with selected multifluid matching 
   boundary conditions.
@@ -198,4 +200,5 @@ protected:
   */
   bool m_definedmf;
 };
+#include "CD_NamespaceFooter.H"
 #endif

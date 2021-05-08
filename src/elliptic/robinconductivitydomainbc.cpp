@@ -10,6 +10,8 @@
 #include "DirichletPoissonDomainBCF_F.H"
 #include "PolyGeom.H"
 
+#include "CD_NamespaceHeader.H"
+
 robinconductivitydomainbc::robinconductivitydomainbc(){
   this->set_coefs(1., -1.0, 0);
 }
@@ -122,9 +124,9 @@ void robinconductivitydomainbc::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   int  idst = 0;
   int  inum = 1;
   FORT_MULTIPLYTWOFAB(CHF_FRA(a_faceFlux),
-                      CHF_CONST_FRA(regCoef),
-                      CHF_BOX(faceBox),
-                      CHF_INT(isrc),CHF_INT(idst),CHF_INT(inum));
+		      CHF_CONST_FRA(regCoef),
+		      CHF_BOX(faceBox),
+		      CHF_INT(isrc),CHF_INT(idst),CHF_INT(inum));
   a_faceFlux.shiftHalf(a_idir, sign(a_side));
 }
 
@@ -264,4 +266,4 @@ void robinconductivitydomainbc::getFaceGradPhi(Real&                 a_faceFlux,
     MayDay::Abort("robinconductivitydomainbc::getFaceGradPhi - useAreaFrac=true shouldn't happen");
   }
 }
-
+#include "CD_NamespaceFooter.H"

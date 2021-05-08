@@ -10,6 +10,8 @@
 
 #include "computational_geometry.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Mechanical shaft class
 */
@@ -28,5 +30,6 @@ protected:
   RefCountedPtr<BaseIF> get_cylinder();
   RefCountedPtr<BaseIF> get_cylinder_profile();
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

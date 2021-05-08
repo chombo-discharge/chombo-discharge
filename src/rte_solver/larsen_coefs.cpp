@@ -7,6 +7,8 @@
 
 #include "larsen_coefs.H"
 
+#include "CD_NamespaceHeader.H"
+
 larsen_coefs::larsen_coefs(const RefCountedPtr<rte_species>& a_rte_species,
 			   const Real                         a_r1,
 			   const Real                         a_r2){
@@ -35,3 +37,4 @@ Real larsen_coefs::bco(const RealVect a_pos) const {
 Real larsen_coefs::rhs(const RealVect a_pos) const {
   return 0.;
 }
+#include "CD_NamespaceFooter.H"

@@ -13,6 +13,8 @@
 #include <TransformIF.H>
 #include <LatheIF.H>
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief This class is used to generate a hollow cylinder. The edges on the base of the cylinder are rounded, while the edges on the cylinder top are sharp. 
 */
@@ -59,5 +61,6 @@ protected:
   RefCountedPtr<BaseIF> m_baseif;
 
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

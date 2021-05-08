@@ -10,6 +10,8 @@
 
 #include <BaseIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Declaration of a one-sheet hyperboloid. 
   @details The implicit function used for the sheet is 
@@ -71,4 +73,5 @@ protected:
   */
   bool m_inside;
 };
+#include "CD_NamespaceFooter.H"
 #endif

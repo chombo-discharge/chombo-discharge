@@ -87,6 +87,6 @@ protected:
   void parse_advection();
   void parse_floor();
   void parse_debug();
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

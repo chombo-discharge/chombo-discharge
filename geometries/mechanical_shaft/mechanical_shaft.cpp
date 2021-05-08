@@ -23,6 +23,8 @@
 #include "hollow_cylinder_if.H"
 #include "rounded_cylinder_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 mechanical_shaft::mechanical_shaft(){
 #if CH_SPACEDIM == 2
   MayDay::Abort("mechanical_shaft::mechanical_shaft - this class is for 3D only");
@@ -173,3 +175,4 @@ RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder_profile(){
 
   return RefCountedPtr<BaseIF> (new profile_cylinder_if(c1, c2, cylRad, torusMajor, torusMinor, ccDist, shift, curv, nLeft, nRight, false));
 }
+#include "CD_NamespaceFooter.H"

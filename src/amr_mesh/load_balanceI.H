@@ -5,8 +5,8 @@
   @date    Jan. 2018
 */
 
-#ifndef _LOADBALANCEI_H_
-#define _LOADBALANCEI_H_
+#ifndef _CD_LoadBalanceImplem_H_
+#define _CD_LoadBalanceImplem_H_
 
 #include "load_balance.H"
 
@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <random>
 #include <chrono>
+
+#include "CD_NamespaceHeader.H"
 
 template <class T>
 void load_balance::make_balance(Vector<int>& a_levelRanks, const Vector<T>& a_loads, const Vector<Box>& a_levelBoxes) {
@@ -209,5 +211,6 @@ bool load_balance::mortonComparator(const int a_maxBits, const std::pair<Box,T>&
 	      
   return false;
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

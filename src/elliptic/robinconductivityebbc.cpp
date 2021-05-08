@@ -7,6 +7,8 @@
 
 #include "robinconductivityebbc.H"
 
+#include "CD_NamespaceHeader.H"
+  
 bool robinconductivityebbc::s_quadrant_based = false;
 int  robinconductivityebbc::s_lsq_radius     = 1;
 
@@ -247,3 +249,4 @@ void robinconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,
 LayoutData<BaseIVFAB<VoFStencil> >* robinconductivityebbc::getFluxStencil(int ivar){
   return &m_bcstencils;
 }
+#include "CD_NamespaceFooter.H"

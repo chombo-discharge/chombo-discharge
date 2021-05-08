@@ -7,6 +7,8 @@
 
 #include "ito_particle.H"
 
+#include "CD_NamespaceHeader.H"
+  
 int ito_particle::s_num_runtime_scalars = 0;
 int ito_particle::s_num_runtime_vectors = 0;
 
@@ -198,8 +200,8 @@ const RealVect& ito_particle::runtime_vector(const int a_num) const {
 
 bool ito_particle::operator==(const ito_particle& a_p) const{
   return ( m_mass      == a_p.m_mass     &&
-           m_position  == a_p.m_position &&
-           m_velocity  == a_p.m_velocity &&
+	   m_position  == a_p.m_position &&
+	   m_velocity  == a_p.m_velocity &&
 	   m_diffusion == a_p.m_diffusion);
 }
 
@@ -255,12 +257,12 @@ void ito_particle::linearOut(void* buf) const{
   }
 
   for (int i = 0; i < s_num_runtime_vectors; i++){
-  D_TERM6( *buffer++ = m_runtimeVectors[i][0];,
-	   *buffer++ = m_runtimeVectors[i][1];,
-	   *buffer++ = m_runtimeVectors[i][2];,
-	   *buffer++ = m_runtimeVectors[i][3];,
-	   *buffer++ = m_runtimeVectors[i][4];,
-	   *buffer++ = m_runtimeVectors[i][5];);
+    D_TERM6( *buffer++ = m_runtimeVectors[i][0];,
+	     *buffer++ = m_runtimeVectors[i][1];,
+	     *buffer++ = m_runtimeVectors[i][2];,
+	     *buffer++ = m_runtimeVectors[i][3];,
+	     *buffer++ = m_runtimeVectors[i][4];,
+	     *buffer++ = m_runtimeVectors[i][5];);
   }
 
   *buffer = m_energy;
@@ -323,3 +325,4 @@ std::ostream & operator<<(std::ostream& ostr, const ito_particle& p){
   ostr << std::endl << " energy " << p.energy() << std::endl;
   return ostr;
 }
+#include "CD_NamespaceFooter.H"

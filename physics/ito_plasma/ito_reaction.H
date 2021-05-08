@@ -11,6 +11,7 @@
 #include <Vector.H>
 #include <RealVect.H>
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace ito_plasma {
     
@@ -198,6 +199,7 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #include "ito_reactionI.H"
 

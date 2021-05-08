@@ -12,6 +12,7 @@
 #include "cdr_solver.H"
 #include "amr_mesh.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace advection_diffusion {
 
@@ -45,4 +46,5 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

@@ -21,6 +21,8 @@
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+
 driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
 	       const RefCountedPtr<time_stepper>&           a_timestepper,
 	       const RefCountedPtr<amr_mesh>&               a_amr,
@@ -455,19 +457,19 @@ void driver::grid_report(){
 #elif CH_SPACEDIM==3
     " x " << finestBox.size()[2] << endl
 #endif
-    	 << "\t\t\t        Coarsest domain        = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1] <<
+	 << "\t\t\t        Coarsest domain        = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1] <<
 #if CH_SPACEDIM==2
     endl
 #elif CH_SPACEDIM==3
     " x " << coarsestBox.size()[2] << endl
 #endif
 	 << "\t\t\t        Refinement ratios      = " << ref_rat << endl
-    	 << "\t\t\t        Grid sparsity          = " << 1.0*totPoints/uniformPoints << endl
+	 << "\t\t\t        Grid sparsity          = " << 1.0*totPoints/uniformPoints << endl
 	 << "\t\t\t        Finest dx              = " << dx[finest_level] << endl
-    	 << "\t\t\t        Total number boxes     = " << number_fmt(totBoxes) << endl
-    	 << "\t\t\t        Number of valid cells  = " << number_fmt(totPoints) << endl
+	 << "\t\t\t        Total number boxes     = " << number_fmt(totBoxes) << endl
+	 << "\t\t\t        Number of valid cells  = " << number_fmt(totPoints) << endl
 	 << "\t\t\t        Including ghost cells  = " << number_fmt(totPointsGhosts)  << endl
-    	 << "\t\t\t        Total # of boxes (lvl) = " << number_fmt(total_level_boxes) << endl
+	 << "\t\t\t        Total # of boxes (lvl) = " << number_fmt(total_level_boxes) << endl
 	 << "\t\t\t        Total # of cells (lvl) = " << number_fmt(total_level_points) << endl;
 
   // Do a local report for each realm
@@ -697,7 +699,7 @@ void driver::regrid_report(const Real a_total_time,
 	 << "driver::regrid_report breakdown - Time step #" << m_step << endl
 	 << "\t\t\t" << "Total regrid time : " << metrics << endl
 	 << "\t\t\t" << "Cell tagging      : " << 100.*(a_tag_time/a_total_time) << "%" << endl
-    	 << "\t\t\t" << "Base regrid       : " << 100.*(a_base_regrid_time/a_total_time) << "%" << endl
+	 << "\t\t\t" << "Base regrid       : " << 100.*(a_base_regrid_time/a_total_time) << "%" << endl
 	 << "\t\t\t" << "Solver regrid     : " << 100.*(a_solver_regrid_time/a_total_time) << "%" << endl
 	 << "-----------------------------------------------------------------------" << endl;
 }
@@ -839,7 +841,7 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
       if(m_plot_interval > 0){
 
 	// Aux data
-      	if(m_write_memory){
+	if(m_write_memory){
 	  this->write_memory_usage();
 	}
 	if(m_write_loads){
@@ -1095,7 +1097,7 @@ void driver::create_output_directories(){
     pout() << "driver::create_output_directories" << endl;
   }
 
-    // If directory does not exist, create it
+  // If directory does not exist, create it
   int success = 0;
   if(procID() == 0){
     std::string cmd;
@@ -2015,9 +2017,9 @@ void driver::write_plot_file(const std::string a_filename){
   const Real t_tot = t_write + t_assemble;
   if(m_verbosity >= 3){
     pout() << "driver::write_plot_file - writing plot file... DONE!. " << endl
-      	   << "\t Total time    = " << t_tot << " seconds" << endl
+	   << "\t Total time    = " << t_tot << " seconds" << endl
 	   << "\t Assemble data = " << 100.*t_assemble/t_tot << "%" << endl
-      	   << "\t Write time    = " << 100.*t_write/t_tot << "%" << endl;
+	   << "\t Write time    = " << 100.*t_write/t_tot << "%" << endl;
   }
 }
 
@@ -2121,9 +2123,9 @@ void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){
       const Box box          = fab.box();
 
       for (BoxIterator bit(box); bit.ok(); ++bit){
-      	const IntVect iv = bit();
+	const IntVect iv = bit();
 	
-      	const RealVect pos = prob_lo + (RealVect(iv)+ 0.5*RealVect::Unit)*dx;
+	const RealVect pos = prob_lo + (RealVect(iv)+ 0.5*RealVect::Unit)*dx;
 
 	if(!lsf1.isNull()) fab(iv, a_comp  ) = lsf1->value(pos);
 	if(!lsf2.isNull()) fab(iv, a_comp+1) = lsf2->value(pos);
@@ -2498,3 +2500,4 @@ void driver::read_vector_data(HDF5HeaderData& a_header,
     a_data[i] = a_header.m_real[identifier];
   }
 }
+#include "CD_NamespaceFooter.H"

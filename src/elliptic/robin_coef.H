@@ -10,6 +10,8 @@
 
 #include "RealVect.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Abstract base class for supplying function-based coefficients to the Robin boundary condition classes. Because BaseBCValue is not enough. 
 */
@@ -42,5 +44,6 @@ public:
   
 protected:
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

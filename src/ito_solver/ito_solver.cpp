@@ -26,6 +26,8 @@
 
 #define ITO_DEBUG 0
 
+#include "CD_NamespaceHeader.H"
+
 ito_solver::ito_solver(){
   m_name       = "ito_solver";
   m_class_name = "ito_solver";
@@ -2334,12 +2336,12 @@ Real ito_solver::compute_dt(const int a_lvl) const{
   }
 
 #ifdef CH_MPI
-    Real tmp = 1.;
-    int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    if(result != MPI_SUCCESS){
-      MayDay::Error("ito_solver::compute_dt(lvl) - communication error on norm");
-    }
-    dt = tmp;
+  Real tmp = 1.;
+  int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("ito_solver::compute_dt(lvl) - communication error on norm");
+  }
+  dt = tmp;
 #endif  
 
   return dt;
@@ -2434,12 +2436,12 @@ Real ito_solver::compute_min_dt(const Real a_maxCellsToMove, const int a_lvl) co
   }
 
 #ifdef CH_MPI
-    Real tmp = 1.;
-    int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    if(result != MPI_SUCCESS){
-      MayDay::Error("ito_solver::compute_dt(lvl) - communication error on norm");
-    }
-    dt = tmp;
+  Real tmp = 1.;
+  int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("ito_solver::compute_dt(lvl) - communication error on norm");
+  }
+  dt = tmp;
 #endif  
 
   return dt;
@@ -2598,12 +2600,12 @@ Real ito_solver::compute_drift_dt(const int a_lvl) const {
   }
 
 #ifdef CH_MPI
-    Real tmp = 1.;
-    int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-    if(result != MPI_SUCCESS){
-      MayDay::Error("ito_solver::compute_drift_level(lvl) - communication error on norm");
-    }
-    dt = tmp;
+  Real tmp = 1.;
+  int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("ito_solver::compute_drift_level(lvl) - communication error on norm");
+  }
+  dt = tmp;
 #endif  
 
   return dt;
@@ -3009,3 +3011,4 @@ RealVect ito_solver::random_position(const RealVect a_lo, const RealVect a_hi) {
 
   return pos;
 }
+#include "CD_NamespaceFooter.H"

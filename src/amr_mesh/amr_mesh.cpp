@@ -23,6 +23,8 @@
 #include <ParmParse.H>
 #include <BaseIFFactory.H>
 
+#include "CD_NamespaceHeader.H"
+
 amr_mesh::amr_mesh(){
   parse_options();
 
@@ -2152,3 +2154,4 @@ std::vector<std::string> amr_mesh::get_realms() const {
 box_sorting amr_mesh::get_box_sorting() const{
   return m_boxsort;
 }
+#include "CD_NamespaceFooter.H"

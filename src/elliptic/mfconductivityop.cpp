@@ -16,6 +16,8 @@
 #include <BaseIVFactory.H>
 #include <EBAMRDataOps.H>
 
+#include "CD_NamespaceHeader.H"
+  
 #define verb 0
 
 mfconductivityop::mfconductivityop(){
@@ -680,7 +682,7 @@ Real mfconductivityop::kappaNorm(Real& a_volume, const LevelData<MFCellFAB>& a_d
       const EBCellFAB& data = a_data[d].getPhase(i);
       const Box& box = a_data.getBoxes().get(d);
       phaseCur = EBLevelDataOps::vectorSumKappaPow(phaseVolume,data,box,
-      						   EBLEVELDATAOPS_ALLVOFS,m_domain,a_p);
+						   EBLEVELDATAOPS_ALLVOFS,m_domain,a_p);
 
 
       for (int i=0; i<ncomp; i++){
@@ -763,34 +765,34 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
   pout() << "mfconductivityop::relax"<< endl;
 #endif
 
-// #if 0
-//   for (int i=0; i < a_iterations; i++){
-//     if (m_relax == 0){
-//       this->levelJacobi(a_e, a_residual);
-//     }
-//     else if (m_relax == 1){
-//       this->levelMulticolorGS(a_e, a_residual);
-//     }
-//     else if (m_relax == 2){
-//       this->levelGSRB(a_e, a_residual);
-//     }
-//     else{
-//       MayDay::Error("mfconductivityop: Invalid relaxation type");
-//     }
-//   }
-// #else
-//   const bool homogeneous = true;
-//   for (int i = 0; i < a_iterations; i++){
-//     this->update_bc(a_e, homogeneous);
+  // #if 0
+  //   for (int i=0; i < a_iterations; i++){
+  //     if (m_relax == 0){
+  //       this->levelJacobi(a_e, a_residual);
+  //     }
+  //     else if (m_relax == 1){
+  //       this->levelMulticolorGS(a_e, a_residual);
+  //     }
+  //     else if (m_relax == 2){
+  //       this->levelGSRB(a_e, a_residual);
+  //     }
+  //     else{
+  //       MayDay::Error("mfconductivityop: Invalid relaxation type");
+  //     }
+  //   }
+  // #else
+  //   const bool homogeneous = true;
+  //   for (int i = 0; i < a_iterations; i++){
+  //     this->update_bc(a_e, homogeneous);
 
-//     for (int iphase = 0; iphase < m_phases; iphase++){
-//       mfalias::aliasMF(*m_alias[0], iphase, a_e);
-//       mfalias::aliasMF(*m_alias[1], iphase, a_residual);
+  //     for (int iphase = 0; iphase < m_phases; iphase++){
+  //       mfalias::aliasMF(*m_alias[0], iphase, a_e);
+  //       mfalias::aliasMF(*m_alias[1], iphase, a_residual);
 
-//       m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
-//     }
-//   }
-// #endif
+  //       m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
+  //     }
+  //   }
+  // #endif
 
   const bool homogeneous = true;
   
@@ -923,7 +925,7 @@ void mfconductivityop::levelJacobi(LevelData<MFCellFAB>&       a_phi,
     mfalias::aliasMF(*m_alias[1], iphase, a_rhs);
 
 #if 1 // This is the only way we can make it converge for now
-    // m_ebops[iphase]->relaxPoiJac(*m_alias[0], *m_alias[1], 1);
+      // m_ebops[iphase]->relaxPoiJac(*m_alias[0], *m_alias[1], 1);
     m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
     //m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
     /// m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
@@ -1216,3 +1218,4 @@ int mfconductivityop::refToCoarser(){
 #endif
   return m_ref_to_coarser;
 }
+#include "CD_NamespaceFooter.H"

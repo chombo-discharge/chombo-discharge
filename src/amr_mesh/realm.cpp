@@ -7,6 +7,8 @@
 
 #include "realm.H"
 
+#include "CD_NamespaceHeader.H"
+
 const std::string realm::primal = "primal";
 
 template <class T>
@@ -476,3 +478,4 @@ AMRMask& realm::get_mask(const std::string a_mask, const int a_buffer){
 
   return m_masks.at(std::pair<std::string, int>(a_mask, a_buffer));
 }
+#include "CD_NamespaceFooter.H"

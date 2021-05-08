@@ -18,6 +18,7 @@
 
 #define ITO_PLASMA_PHYSICS_DEBUG 0
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::ito_plasma;
 
 inline
@@ -791,16 +792,16 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   
   // Reconcile particles
   this->reconcile_particles(a_particles,
-  			    newParticleCount,
-  			    oldParticleCount,
-  			    a_cellPos,
+			    newParticleCount,
+			    oldParticleCount,
+			    a_cellPos,
 			    a_centroidPos,
-  			    a_lo,
-  			    a_hi,
+			    a_lo,
+			    a_hi,
 			    a_bndryCentroid,
-  			    a_bndryNormal,
-  			    a_dx,
-  			    a_kappa);
+			    a_bndryNormal,
+			    a_dx,
+			    a_kappa);
 
   // Generate new photons
   this->reconcile_photons(a_newPhotons, newPhotonCount, a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
@@ -1500,5 +1501,6 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
     this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

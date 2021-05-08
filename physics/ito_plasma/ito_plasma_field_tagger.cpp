@@ -10,6 +10,7 @@
 
 #include <EBArith.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::ito_plasma;
 
 ito_plasma_field_tagger::ito_plasma_field_tagger(){
@@ -175,3 +176,4 @@ void ito_plasma_field_tagger::compute_tracers(){
 
   this->deallocate_storage(); // No reason to keep the extra storage lying around...
 }
+#include "CD_NamespaceFooter.H"

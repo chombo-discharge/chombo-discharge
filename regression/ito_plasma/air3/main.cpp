@@ -18,6 +18,7 @@ Real potential_curve(const Real a_time){
   return g_potential;
 }
 
+using namespace ChomboDischarge;
 using namespace physics::ito_plasma;
 
 int main(int argc, char* argv[]){
@@ -33,10 +34,10 @@ int main(int argc, char* argv[]){
   // Get potential from input script 
   std::string basename; 
   {
-     ParmParse pp("air3");
-     pp.get("potential", g_potential);
-     pp.get("basename",  basename);
-     setPoutBaseName(basename);
+    ParmParse pp("air3");
+    pp.get("potential", g_potential);
+    pp.get("basename",  basename);
+    setPoutBaseName(basename);
   }
 
 
@@ -66,7 +67,7 @@ int main(int argc, char* argv[]){
   timestepper->set_rte(rte);
 
   // Set potential 
-timestepper->set_potential(potential_curve);
+  timestepper->set_potential(potential_curve);
 
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
@@ -89,7 +90,7 @@ timestepper->set_potential(potential_curve);
     physics->advance_particles(particles, photons, 1.E-10);
 
     avg += 1.0*particles[0];
-//    std::cout << particles << std::endl;
+    //    std::cout << particles << std::endl;
   }
   avg = avg/num;
   //  std::cout << avg << std::endl;
@@ -100,4 +101,4 @@ timestepper->set_potential(potential_curve);
   CH_TIMER_REPORT();
   MPI_Finalize();
 #endif
-}
+#include "CD_NamespaceFooter.H"

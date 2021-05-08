@@ -7,6 +7,8 @@
 
 #include "real_box.H"
 
+#include "CD_NamespaceHeader.H"
+  
 real_box::real_box(){
   m_lo = RealVect::Zero;
   m_hi = RealVect::Zero;
@@ -72,9 +74,9 @@ bool real_box::intersect(const real_box& a_box) const {
   const RealVect HI = a_box.get_hi();
 
   if (   LO[0] < m_hi[0] && HI[0] > m_lo[0]  //  Input x-edges either to left or righ
-      && LO[1] < m_hi[1] && HI[1] > m_lo[1]
+	 && LO[1] < m_hi[1] && HI[1] > m_lo[1]
 #if CH_SPACEDIM==3
-      && LO[2] < m_hi[2] && HI[2] > m_lo[2]
+	 && LO[2] < m_hi[2] && HI[2] > m_lo[2]
 #endif
 	 ){
     return true;
@@ -101,11 +103,11 @@ bool real_box::is_point_inside(const RealVect a_point) const {
   bool ret = false;
 
   if(   a_point[0] >= m_lo[0] && a_point[0] <= m_hi[0] 
-     && a_point[1] >= m_lo[1] && a_point[1] <= m_hi[1]
+	&& a_point[1] >= m_lo[1] && a_point[1] <= m_hi[1]
 #if CH_SPACEDIM==3
-     && a_point[2] >= m_lo[2] && a_point[2] <= m_hi[2]
+	&& a_point[2] >= m_lo[2] && a_point[2] <= m_hi[2]
 #endif
-     ){
+	){
     ret = true;
   }
 
@@ -132,3 +134,4 @@ bool real_box::is_box_inside(const real_box& a_box) const {
 
   return inside;
 }
+#include "CD_NamespaceFooter.H"

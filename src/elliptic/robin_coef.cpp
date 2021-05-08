@@ -7,8 +7,12 @@
 
 #include "robin_coef.H"
 
+#include "CD_NamespaceHeader.H"
+
 robin_coef::robin_coef(){
 }
 
 robin_coef::~robin_coef(){
 }
+
+#include "CD_NamespaceFooter.H"

@@ -8,7 +8,7 @@
 #include "EBParticleInterp.H"
 #include "EBParticleInterpF_F.H"
 
-
+#include "CD_NamespaceHeader.H"
 EBParticleInterp::EBParticleInterp(){
 }
 
@@ -196,10 +196,10 @@ void EBParticleInterp::interpolateParticle(Real&             a_particleField,
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
   if(m_ebisbox->isIrregular(iv)){
     FORT_NGP_INTERPOLATE_SCALAR(CHF_REAL(a_particleField),
-  				CHF_CONST_FRA1(a_field,0),
-  				CHF_CONST_REALVECT(a_prob_lo),
-  				CHF_CONST_REALVECT(a_dx),
-  				CHF_CONST_REALVECT(a_position));
+				CHF_CONST_FRA1(a_field,0),
+				CHF_CONST_REALVECT(a_prob_lo),
+				CHF_CONST_REALVECT(a_dx),
+				CHF_CONST_REALVECT(a_position));
   }
   else{
     switch (a_interpType) {
@@ -254,10 +254,10 @@ void EBParticleInterp::interpolateParticle(RealVect&         a_particleField,
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side.
   if(m_ebisbox->isIrregular(iv)){
     FORT_NGP_INTERPOLATE_VECTOR(CHF_REALVECT(a_particleField),
-  				CHF_CONST_FRA(a_field),
-  				CHF_CONST_REALVECT(a_prob_lo),
-  				CHF_CONST_REALVECT(a_dx),
-  				CHF_CONST_REALVECT(a_position));
+				CHF_CONST_FRA(a_field),
+				CHF_CONST_REALVECT(a_prob_lo),
+				CHF_CONST_REALVECT(a_dx),
+				CHF_CONST_REALVECT(a_position));
   }
   else{
     switch (a_interpType) {
@@ -295,4 +295,4 @@ void EBParticleInterp::interpolateParticle(RealVect&         a_particleField,
     }
   }
 }
-  
+#include "CD_NamespaceFooter.H"

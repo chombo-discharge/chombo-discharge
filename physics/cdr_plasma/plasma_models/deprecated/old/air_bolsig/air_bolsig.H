@@ -22,40 +22,40 @@
 
   By default, the gas is electrically neutral with initial data supplied through an equal mixture of electrons and positive ions. The class supports uniform distributions, seeds, and random distributions of the initial ionization. Some kinetic things that are not accessible through BOLSIG can be controlled directly here. The following options are available for this class:
 
-      air_bolsig.transport_file                = transport_data.txt    # Transport data file
-      air_bolsig.gas_temperature               = 300                   # Gas temperature (K)
-      air_bolsig.gas_N2_frac                   = 0.8                   # Mixing fraction of nitrogen
-      air_bolsig.gas_O2_frac                   = 0.2                   # Mixing fraction of oxygen
-      air_bolsig.gas_pressure                  = 1.0                   # Gas pressure
-      air_bolsig.gas_quenching_pressure        = 0.03947               # Quenching pressure for photo-emission
-      air_bolsig.ionization_rate               = 1.E9                  # Background ionization (events/s)
-      air_bolsig.electron_diffusion            = true                  # Electron diffusion on. Options are true/false
-      air_bolsig.electron_recombination        = 5.E-14                # Electron recombination rate
-      air_bolsig.electron_detachment           = 1.E-18                # Electron detachment rate
-      air_bolsig.ion_recombination             = 2.07E-12              # Ion recombination rate
-      air_bolsig.positive_species_mobility     = 2.E-4                 # Positive species mobility
-      air_bolsig.negative_species_mobility     = 2.E-4                 # Negative species mobility
-      air_bolsig.excitation_efficiency         = 0.6                   # Impact excitation efficiency
-      air_bolsig.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
-      air_bolsig.electrode_townsend2           = 1.E-6                 # Townsend coefficient on electrodes
-      air_bolsig.electrode_quantum_efficiency  = 1.E-6                 # Quantum efficiency on electrodes
-      air_bolsig.dielectric_townsend2          = 1.E-6                 # Townsend coefficient on dielectrics
-      air_bolsig.dielectric_quantum_efficiency = 1.E-6                 # Quantum efficiency on dielectrics
-      air_bolsig.dielectric_work_function      = 2.0                   # Dielectric work function (ev)
-      air_bolsig.uniform_density               = 1.E10                 # Initial background ionization
-      air_bolsig.seed_density                  = 0.E16                 # Initial seed ionization
-      air_bolsig.seed_radius                   = 1E-3                  # Initial seed radius
-      air_bolsig.seed_position                 = 0. 0. 0.              # Initial seed position
-      air_bolsig.noise_amplitude               = 0.0                   # Initial noise amplitude
-      air_bolsig.noise_octaves                 = 1                     # Initial noise octaves
-      air_bolsig.noise_persistence             = 0.5                   # Reduction factor between each noise octave
-      air_bolsig.noise_frequency               = 1.0 1.0 1.0           # Spatial noise frequency
-      air_bolsig.photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
-      air_bolsig.photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
-      air_bolsig.photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
-      air_bolsig.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
-      air_bolsig.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
-      air_bolsig.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
+  air_bolsig.transport_file                = transport_data.txt    # Transport data file
+  air_bolsig.gas_temperature               = 300                   # Gas temperature (K)
+  air_bolsig.gas_N2_frac                   = 0.8                   # Mixing fraction of nitrogen
+  air_bolsig.gas_O2_frac                   = 0.2                   # Mixing fraction of oxygen
+  air_bolsig.gas_pressure                  = 1.0                   # Gas pressure
+  air_bolsig.gas_quenching_pressure        = 0.03947               # Quenching pressure for photo-emission
+  air_bolsig.ionization_rate               = 1.E9                  # Background ionization (events/s)
+  air_bolsig.electron_diffusion            = true                  # Electron diffusion on. Options are true/false
+  air_bolsig.electron_recombination        = 5.E-14                # Electron recombination rate
+  air_bolsig.electron_detachment           = 1.E-18                # Electron detachment rate
+  air_bolsig.ion_recombination             = 2.07E-12              # Ion recombination rate
+  air_bolsig.positive_species_mobility     = 2.E-4                 # Positive species mobility
+  air_bolsig.negative_species_mobility     = 2.E-4                 # Negative species mobility
+  air_bolsig.excitation_efficiency         = 0.6                   # Impact excitation efficiency
+  air_bolsig.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
+  air_bolsig.electrode_townsend2           = 1.E-6                 # Townsend coefficient on electrodes
+  air_bolsig.electrode_quantum_efficiency  = 1.E-6                 # Quantum efficiency on electrodes
+  air_bolsig.dielectric_townsend2          = 1.E-6                 # Townsend coefficient on dielectrics
+  air_bolsig.dielectric_quantum_efficiency = 1.E-6                 # Quantum efficiency on dielectrics
+  air_bolsig.dielectric_work_function      = 2.0                   # Dielectric work function (ev)
+  air_bolsig.uniform_density               = 1.E10                 # Initial background ionization
+  air_bolsig.seed_density                  = 0.E16                 # Initial seed ionization
+  air_bolsig.seed_radius                   = 1E-3                  # Initial seed radius
+  air_bolsig.seed_position                 = 0. 0. 0.              # Initial seed position
+  air_bolsig.noise_amplitude               = 0.0                   # Initial noise amplitude
+  air_bolsig.noise_octaves                 = 1                     # Initial noise octaves
+  air_bolsig.noise_persistence             = 0.5                   # Reduction factor between each noise octave
+  air_bolsig.noise_frequency               = 1.0 1.0 1.0           # Spatial noise frequency
+  air_bolsig.photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
+  air_bolsig.photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
+  air_bolsig.photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
+  air_bolsig.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
+  air_bolsig.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
+  air_bolsig.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
       
 */
 class air_bolsig : public plasma_kinetics {
@@ -70,8 +70,8 @@ public:
   */
   virtual ~air_bolsig();
 
-// ====================================================================================================
-// NEW FUNCTION SIGNATURES
+  // ====================================================================================================
+  // NEW FUNCTION SIGNATURES
 
   /*!
     @brief Compute cdr diffusion coefficients
@@ -159,8 +159,8 @@ public:
   }
 
 
-// NEW FUNCTION SIGNATURES END
-// ====================================================================================================
+  // NEW FUNCTION SIGNATURES END
+  // ====================================================================================================
 
   /*!
     @brief Compute the velocity for an ion
@@ -780,5 +780,5 @@ protected:
     Real m_pO2;
   };
 
-};
+#include "CD_NamespaceFooter.H"
 #endif

@@ -11,6 +11,8 @@
 
 #include <BaseIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief profile_plane_if function
 */
@@ -57,4 +59,5 @@ protected:
 
   bool m_fluidInside;
 };
+#include "CD_NamespaceFooter.H"
 #endif

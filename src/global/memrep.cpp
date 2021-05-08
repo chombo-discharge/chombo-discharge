@@ -11,6 +11,8 @@
 #include <memtrack.H>
 #include <memusage.H>
 
+#include "CD_NamespaceHeader.H"
+
 void memrep::get_max_min_memory(){
   Real max_peak, min_peak, min_unfreed, max_unfreed;
 
@@ -18,9 +20,9 @@ void memrep::get_max_min_memory(){
 
   pout() << "memrep::get_max_min_memory:" 
 	 << "\t max peak = "       << 1.0*max_peak
-         << "\t min peak = "    << 1.0*min_peak
-         << "\t max unfreed = " << 1.0*max_unfreed
-         << "\t min unfreed = " << 1.0*min_unfreed << endl;
+	 << "\t min peak = "    << 1.0*min_peak
+	 << "\t max unfreed = " << 1.0*max_unfreed
+	 << "\t min unfreed = " << 1.0*min_unfreed << endl;
 }
 
 void memrep::get_max_min_memory(Real& a_max_peak, Real& a_min_peak, Real& a_min_unfreed, Real& a_max_unfreed){
@@ -74,3 +76,4 @@ void memrep::get_memory(Vector<Real>& a_peak, Vector<Real>& a_unfreed){
   delete unfreed;
   delete peak;
 }
+#include "CD_NamespaceFooter.H"

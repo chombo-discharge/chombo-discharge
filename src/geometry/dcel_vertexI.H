@@ -13,6 +13,7 @@
 #include "dcel_face.H"
 #include "dcel_iterator.H"
 
+#include "CD_NamespaceHeader.H"
 namespace dcel {
 
   template <class T>
@@ -243,5 +244,6 @@ namespace dcel {
     return d.dot(d);
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

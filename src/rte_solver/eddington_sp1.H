@@ -25,6 +25,8 @@
 
 #include <random>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. Also includes stochastically drawn photons. 
 */
@@ -408,4 +410,5 @@ protected:
   virtual void parse_gmg_settings(); // Parses solver parameters for geometric multigrid
   virtual void parse_reflection();   // Parse reflection coefficient
 };
+#include "CD_NamespaceFooter.H"
 #endif

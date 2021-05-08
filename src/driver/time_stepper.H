@@ -12,6 +12,8 @@
 #include "amr_mesh.H"
 #include "mfis.H"
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Time code for output
 */
@@ -122,5 +124,6 @@ protected:
   */
   RefCountedPtr<computational_geometry> m_compgeom;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

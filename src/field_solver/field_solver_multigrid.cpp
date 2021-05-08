@@ -26,6 +26,9 @@
 
 #define POISSON_MF_GMG_TIMER 0
 
+#include "CD_NamespaceHeader.H"
+
+
 field_solver_multigrid::field_solver_multigrid(){
   m_needs_setup = true;
   m_has_mg_stuff = false;
@@ -200,7 +203,7 @@ void field_solver_multigrid::parse_gmg_settings(){
   }
   else if(str == "gmres"){
     m_bottomsolver = 2;
-    }
+  }
   else{
     MayDay::Abort("field_solver_multigrid::parse_gmg_settings - unknown bottom solver requested");
   }
@@ -728,19 +731,19 @@ void field_solver_multigrid::set_face_perm(EBFluxFAB&                a_perm,
       const IntVect iv = bit();
       const RealVect pos     = a_origin + a_dx*RealVect(iv) + 0.5*a_dx*RealVect(BASISV(dir));
 
-	Real dist   = 1.E99;
-	int closest = 0;
-	for (int i = 0; i < a_dielectrics.size(); i++){
-	  const RefCountedPtr<BaseIF> func = a_dielectrics[i].get_function();
+      Real dist   = 1.E99;
+      int closest = 0;
+      for (int i = 0; i < a_dielectrics.size(); i++){
+	const RefCountedPtr<BaseIF> func = a_dielectrics[i].get_function();
 
-	  const Real cur_dist = func->value(pos);
+	const Real cur_dist = func->value(pos);
 	
-	  if(cur_dist <= dist){
-	    dist = cur_dist;
-	    closest = i;
-	  }
+	if(cur_dist <= dist){
+	  dist = cur_dist;
+	  closest = i;
 	}
-	perm_fab(iv, comp) = a_dielectrics[closest].get_permittivity(pos);
+      }
+      perm_fab(iv, comp) = a_dielectrics[closest].get_permittivity(pos);
     }
     
 
@@ -1102,3 +1105,4 @@ MFAMRIVData& field_solver_multigrid::get_bco_irreg(){
 void field_solver_multigrid::set_needs_setup(const bool& a_needs_setup){
   m_needs_setup = a_needs_setup;
 }
+#include "CD_NamespaceFooter.H"

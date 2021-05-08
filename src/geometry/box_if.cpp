@@ -12,6 +12,8 @@
 #include <UnionIF.H>
 #include <IntersectionIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 box_if::box_if(const RealVect& a_loCorner, 
 	       const RealVect& a_hiCorner,
 	       const bool&     a_fluidInside){
@@ -52,3 +54,4 @@ Real box_if::value(const RealVect& a_pos) const{
 BaseIF* box_if::newImplicitFunction() const{
   return (BaseIF*) (new box_if(m_loCorner, m_hiCorner, m_fluidInside));
 }
+#include "CD_NamespaceFooter.H"

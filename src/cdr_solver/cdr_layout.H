@@ -10,6 +10,8 @@
 
 #include "cdr_solver.H"
 
+#include "CD_NamespaceHeader.H"
+
 template <class T>
 class cdr_iterator;
 
@@ -318,5 +320,6 @@ public:
   ~cdr_factory();
   RefCountedPtr<cdr_layout<T> > new_layout(const Vector<RefCountedPtr<cdr_species> > a_species) const;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

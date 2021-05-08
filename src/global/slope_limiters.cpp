@@ -8,6 +8,7 @@
 #include "slope_limiters.H"
 #include "data_ops.H"
 
+#include "CD_NamespaceHeader.H"
 
 Real slope_limiters::koren(const Real a_slopeL, const Real a_slopeR){
   Real slope = 0.0;
@@ -84,3 +85,4 @@ Real slope_limiters::van_leer(const Real a_slopeL, const Real a_slopeR){
   }
   return slope;
 }
+#include "CD_NamespaceFooter.H"

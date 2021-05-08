@@ -20,7 +20,7 @@
 #include <iterator>
 #include <sstream>
 
-
+#include "CD_NamespaceHeader.H"
 namespace dcel {
 
   template <class T>
@@ -58,8 +58,8 @@ namespace dcel {
   template <class T>
   inline
   void parser::PLY<T>::readHeaderASCII(int&           a_numVertices,
-						 int&           a_numFaces,
-						 std::ifstream& a_inputstream) {
+				       int&           a_numFaces,
+				       std::ifstream& a_inputstream) {
 
     std::string str1;
     std::string str2;
@@ -102,8 +102,8 @@ namespace dcel {
   template <class T>
   inline
   void parser::PLY<T>::readVerticesASCII(std::vector<std::shared_ptr<vertex> >& a_vertices,
-						   const int                              a_numVertices,
-						   std::ifstream&                         a_inputstream) {
+					 const int                              a_numVertices,
+					 std::ifstream&                         a_inputstream) {
 
     Vec3T<T> pos;
     T& x = pos[0];
@@ -133,10 +133,10 @@ namespace dcel {
   template <class T>
   inline
   void dcel::parser::PLY<T>::readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
-						      std::vector<std::shared_ptr<edge> >&   a_edges,
-						      std::vector<std::shared_ptr<vertex> >& a_vertices,
-						      const int                              a_numFaces,
-						      std::ifstream&                         a_inputstream) {
+					    std::vector<std::shared_ptr<edge> >&   a_edges,
+					    std::vector<std::shared_ptr<vertex> >& a_vertices,
+					    const int                              a_numFaces,
+					    std::ifstream&                         a_inputstream) {
     int numVertices;
     std::vector<int> vertexIndices;
 
@@ -227,4 +227,5 @@ namespace dcel {
     }
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

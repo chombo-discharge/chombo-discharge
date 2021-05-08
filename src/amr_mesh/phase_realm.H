@@ -17,7 +17,6 @@
 #include "ebcoarseaverage.H"
 #include "DomainFluxIFFAB.H"
 #include "DomainFluxIFFABFactory.H"
-#include "EBLevelConcentrationRedist.H"
 #include "particle_container.H"
 #include "EBGhostCloud.H"
 #include "noncons_div.H"
@@ -35,6 +34,8 @@
 #include <EBFineToCoarRedist.H>
 #include <EBPWLFineInterp.H>
 #include <ProblemDomain.H>
+
+#include "CD_NamespaceHeader.H"
 
 // These are operator that can be defined.
 static const std::string s_eb_gradient     = "eb_gradient";
@@ -204,5 +205,6 @@ protected:
   void define_noncons_sten();                                      // Make stencils for nonconservative averaging
   void define_levelset(const int a_lmin, const int a_numGhost);    // Define levelset
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

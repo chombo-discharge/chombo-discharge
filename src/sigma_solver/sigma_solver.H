@@ -11,6 +11,8 @@
 #include "computational_geometry.H"
 #include "amr_mesh.H"
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Surface charge solver
 */
@@ -221,5 +223,6 @@ protected:
   bool m_plot_phi;
   
 };
+#include "CD_NamespaceFooter.H"
 #endif
 

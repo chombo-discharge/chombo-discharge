@@ -12,6 +12,7 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::ito_plasma;
 
 ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_physics){
@@ -712,7 +713,7 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
 }
 
 void ito_plasma_godunov::setup_runtime_storage(){
-    CH_TIME("ito_plasma_godunov::setup_runtime_storage");
+  CH_TIME("ito_plasma_godunov::setup_runtime_storage");
   if(m_verbosity > 5){
     pout() << m_name + "::setup_runtime_storage" << endl;
   }
@@ -1636,3 +1637,4 @@ void ito_plasma_godunov::trapezoidal_corrector(const Real a_dt){
     }
   }
 }
+#include "CD_NamespaceFooter.H"

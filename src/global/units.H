@@ -8,6 +8,7 @@
 #ifndef _UNITS_
 #define _UNITS_
 
+#include "CD_NamespaceHeader.H"
 /*!
   @brief Various SI units
 */
@@ -67,6 +68,6 @@ namespace units {
     @brief Electron mass
   */
   const static Real s_me = 9.109383E-31;
-
 }
+#include "CD_NamespaceFooter.H"
 #endif

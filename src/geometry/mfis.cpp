@@ -11,7 +11,7 @@
 
 #include <AllRegularService.H>
 
-
+#include "CD_NamespaceHeader.H"
 
 mfis::mfis(){
   m_ebis.resize(phase::num_phases);
@@ -126,6 +126,5 @@ IntVectSet mfis::interface_region(const ProblemDomain& a_domain) const {
 
   return ret;
 #endif
-
-
 }
+#include "CD_NamespaceFooter.H"

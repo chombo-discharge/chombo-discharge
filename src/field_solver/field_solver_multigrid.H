@@ -21,6 +21,8 @@
 #include <GMRESSolver.H>
 #include <BaseBCFuncEval.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Implementation of field_solver which uses a two-phase geometric multigrid solver
 */
@@ -79,7 +81,7 @@ public:
   */
   virtual void parse_options() override;
 
-    /*!
+  /*!
     @brief Parse runtime options
   */
   virtual void parse_runtime_options() override;
@@ -134,7 +136,7 @@ public:
   */
   virtual void set_botsolver_smooth(const int a_smooth);
 
-    /*!
+  /*!
     @brief Allocate internal storage
   */
   virtual void allocate_internals();
@@ -441,4 +443,5 @@ public:
   virtual void define_mg_levels();
 
 };
+#include "CD_NamespaceFooter.H"
 #endif

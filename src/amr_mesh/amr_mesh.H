@@ -18,7 +18,6 @@
 #include "ebcoarseaverage.H"
 #include "DomainFluxIFFAB.H"
 #include "DomainFluxIFFABFactory.H"
-#include "EBLevelConcentrationRedist.H"
 #include "particle_container.H"
 #include "EBGhostCloud.H"
 #include "noncons_div.H"
@@ -38,7 +37,8 @@
 #include <ProblemDomain.H>
 
 
-
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Class for handling spatial operations for streamer equations.
   @details This class handles most (if not all) spatial operations. Examples are grid generation, coarsening of data, interpolation of data, memory allocations etc. 
@@ -71,7 +71,7 @@ public:
   */
   void parse_options();
 
-    /*!
+  /*!
     @brief Parse options
   */
   void parse_runtime_options();
@@ -1056,9 +1056,9 @@ protected:
     @brief Define realms
   */
   void define_realms();
-
 };
+#include "CD_NamespaceFooter.H"
 
-#include "amr_meshI.H"
+#include "amr_meshImplem.H"
 
 #endif

@@ -12,6 +12,7 @@
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 morrow_bourdon::morrow_bourdon(){
@@ -422,13 +423,13 @@ Vector<Real> morrow_bourdon::compute_cdr_electrode_fluxes(const Real         a_t
 
 
 Vector<Real> morrow_bourdon::compute_cathode_flux(const Vector<Real> a_extrapolated_fluxes,
-						const Vector<Real> a_ion_densities,
-						const Vector<Real> a_ion_velocities,
-						const Vector<Real> a_photon_fluxes,
-						const RealVect     a_E,
-						const RealVect     a_pos,
-						const RealVect     a_normal,
-						const Real         a_time) const{
+						  const Vector<Real> a_ion_densities,
+						  const Vector<Real> a_ion_velocities,
+						  const Vector<Real> a_photon_fluxes,
+						  const RealVect     a_E,
+						  const RealVect     a_pos,
+						  const RealVect     a_normal,
+						  const Real         a_time) const{
   Vector<Real> fluxes(m_num_cdr_species);
 
   // Set everything to outflow
@@ -449,13 +450,13 @@ Vector<Real> morrow_bourdon::compute_cathode_flux(const Vector<Real> a_extrapola
 }
 
 Vector<Real> morrow_bourdon::compute_anode_flux(const Vector<Real> a_extrapolated_fluxes,
-					      const Vector<Real> a_ion_densities,
-					      const Vector<Real> a_ion_velocities,
-					      const Vector<Real> a_photon_fluxes,
-					      const RealVect     a_E,
-					      const RealVect     a_pos,
-					      const RealVect     a_normal,
-					      const Real         a_time) const{
+						const Vector<Real> a_ion_densities,
+						const Vector<Real> a_ion_velocities,
+						const Vector<Real> a_photon_fluxes,
+						const RealVect     a_E,
+						const RealVect     a_pos,
+						const RealVect     a_normal,
+						const Real         a_time) const{
   Vector<Real> fluxes(m_num_cdr_species);
 
   // Set to outflux
@@ -468,15 +469,15 @@ Vector<Real> morrow_bourdon::compute_anode_flux(const Vector<Real> a_extrapolate
 }
 
 Vector<Real> morrow_bourdon::compute_cdr_domain_fluxes(const Real           a_time,
-						     const RealVect       a_pos,
-						     const int            a_dir,
-						     const Side::LoHiSide a_side,
-						     const RealVect       a_E,
-						     const Vector<Real>   a_cdr_densities,
-						     const Vector<Real>   a_cdr_velocities,
-						     const Vector<Real>   a_cdr_gradients,
-						     const Vector<Real>   a_rte_fluxes,
-						     const Vector<Real>   a_extrap_cdr_fluxes) const{
+						       const RealVect       a_pos,
+						       const int            a_dir,
+						       const Side::LoHiSide a_side,
+						       const RealVect       a_E,
+						       const Vector<Real>   a_cdr_densities,
+						       const Vector<Real>   a_cdr_velocities,
+						       const Vector<Real>   a_cdr_gradients,
+						       const Vector<Real>   a_rte_fluxes,
+						       const Vector<Real>   a_extrap_cdr_fluxes) const{
   Vector<Real> fluxes(m_num_cdr_species, 0.0); 
 
   int idx;
@@ -585,7 +586,7 @@ morrow_bourdon::negative_species::negative_species(){
 
   ParmParse pp("morrow_bourdon");
     
-    // Turn off ion mobility
+  // Turn off ion mobility
   std::string str;
   pp.get("mobile_ions", str); m_mobile = (str == "true") ? true : false;
 }
@@ -662,3 +663,4 @@ Real morrow_bourdon::photon_three::get_kappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 
 }
+#include "CD_NamespaceFooter.H"

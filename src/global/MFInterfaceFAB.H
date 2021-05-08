@@ -16,6 +16,8 @@
 #include <BaseIVFAB.H>
 #include <IntVectSet.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class for holding BaseIVFAB<T> on the interface between two phases. 
 */
@@ -105,12 +107,12 @@ public:
     }
   }
 
-
 protected:
 
   Vector<BaseIVFAB<T>* > m_phase;
 
   IntVectSet m_ivs;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

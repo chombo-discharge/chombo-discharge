@@ -10,6 +10,7 @@
 
 #include "ito_plasma_field_tagger.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace ito_plasma {
   
@@ -28,9 +29,9 @@ namespace physics {
 	@brief Constructor
       */
       ito_plasma_streamer_tagger(const RefCountedPtr<ito_plasma_physics>&     a_physics,
-		      const RefCountedPtr<ito_plasma_stepper>&     a_timestepper,
-		      const RefCountedPtr<amr_mesh>&               a_amr,
-		      const RefCountedPtr<computational_geometry>& a_compgeom);
+				 const RefCountedPtr<ito_plasma_stepper>&     a_timestepper,
+				 const RefCountedPtr<amr_mesh>&               a_amr,
+				 const RefCountedPtr<computational_geometry>& a_compgeom);
 
       /*!
 	@brief Destructor
@@ -108,4 +109,5 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

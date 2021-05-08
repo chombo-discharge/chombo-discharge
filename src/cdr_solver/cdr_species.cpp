@@ -7,6 +7,8 @@
 
 #include "cdr_species.H"
 
+#include "CD_NamespaceHeader.H"
+  
 cdr_species::cdr_species(){
   m_name         = "default_cdr_species";
   m_unit         = "default_unit";
@@ -83,3 +85,4 @@ DepositionType::Which cdr_species::get_deposition() {
 List<Particle>& cdr_species::get_initial_particles() {
   return m_initial_particles;
 }
+#include "CD_NamespaceFooter.H"

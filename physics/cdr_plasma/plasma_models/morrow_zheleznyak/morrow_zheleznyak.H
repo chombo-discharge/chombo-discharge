@@ -12,6 +12,7 @@
 
 #include <random>
 
+#include "CD_NamespaceHeader.H"
 namespace physics::cdr_plasma {
   
   /*!
@@ -293,4 +294,5 @@ namespace physics::cdr_plasma {
   };
 
 }
+#include "CD_NamespaceFooter.H"
 #endif

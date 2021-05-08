@@ -10,6 +10,8 @@
 
 #include "computational_geometry.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class that defines an electrode rod and a dielectric (some shapes supported)
 */
@@ -29,5 +31,6 @@ protected:
   RefCountedPtr<BaseIF> get_sphere();
   RefCountedPtr<BaseIF> get_perlin_box();
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

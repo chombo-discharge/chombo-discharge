@@ -16,6 +16,8 @@
 #include <EBArith.H>
 #include <EBAlias.H>
 
+#include "CD_NamespaceHeader.H"
+
 cdr_solver::cdr_solver(){
   m_name       = "cdr_solver";
   m_class_name = "cdr_solver";
@@ -1941,10 +1943,10 @@ Real cdr_solver::compute_advection_diffusion_dt(){
 	  const EBFaceFAB& diffco         = (*m_diffco[lvl])[dit()][dir];
 	  const BaseFab<Real>& diffco_fab = diffco.getSingleValuedFAB();
 	  FORT_ADVECTION_DIFFUSION_DT_ONE(CHF_FRA1(dt_fab, comp),
-	  				  CHF_CONST_FRA1(diffco_fab, comp),
-	  				  CHF_CONST_REAL(dx),
-	  				  CHF_CONST_INT(dir),
-	  				  CHF_BOX(box));
+					  CHF_CONST_FRA1(diffco_fab, comp),
+					  CHF_CONST_REAL(dx),
+					  CHF_CONST_INT(dir),
+					  CHF_BOX(box));
 	}
 
 	// Add the advective contribution so that dt_fab = (|Vx|+|Vy|+|Vz|)/dx + 2*d*D/(dx*dx)
@@ -2252,37 +2254,37 @@ void cdr_solver::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCel
   }
 
   if(m_diffusive){
-  const int comp  = 0;
-  const int ncomp = 1;
+    const int comp  = 0;
+    const int ncomp = 1;
 
-  this->fill_GWN(m_scratchFluxTwo, 1.0);                         // Gaussian White Noise = W/sqrt(dV)
-  this->smooth_heaviside_faces(m_scratchFluxOne, a_cell_states); // m_scratchFluxOne = phis
-  data_ops::multiply(m_scratchFluxOne, m_diffco);                // m_scratchFluxOne = D*phis
-  data_ops::scale(m_scratchFluxOne, 2.0);                        // m_scratchFluxOne = 2*D*phis
-  data_ops::square_root(m_scratchFluxOne);                       // m_scratchFluxOne = sqrt(2*D*phis)
+    this->fill_GWN(m_scratchFluxTwo, 1.0);                         // Gaussian White Noise = W/sqrt(dV)
+    this->smooth_heaviside_faces(m_scratchFluxOne, a_cell_states); // m_scratchFluxOne = phis
+    data_ops::multiply(m_scratchFluxOne, m_diffco);                // m_scratchFluxOne = D*phis
+    data_ops::scale(m_scratchFluxOne, 2.0);                        // m_scratchFluxOne = 2*D*phis
+    data_ops::square_root(m_scratchFluxOne);                       // m_scratchFluxOne = sqrt(2*D*phis)
 
 #if 0 // Debug
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    for (int dir = 0; dir <SpaceDim; dir++){
-      Real max, min;
-      EBLevelDataOps::getMaxMin(max, min, *m_scratchFluxOne[lvl], 0, dir);
-      if(min < 0.0 || max < 0.0){
-	MayDay::Abort("cdr_solver::GWN_diffusion_source - negative face value");
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      for (int dir = 0; dir <SpaceDim; dir++){
+	Real max, min;
+	EBLevelDataOps::getMaxMin(max, min, *m_scratchFluxOne[lvl], 0, dir);
+	if(min < 0.0 || max < 0.0){
+	  MayDay::Abort("cdr_solver::GWN_diffusion_source - negative face value");
+	}
       }
     }
-  }
 #endif
   
-  data_ops::multiply(m_scratchFluxOne, m_scratchFluxTwo);                     // Holds random, cell-centered flux
-  this->conservative_divergence(a_ransource, m_scratchFluxOne, m_eb_zero); 
+    data_ops::multiply(m_scratchFluxOne, m_scratchFluxTwo);                     // Holds random, cell-centered flux
+    this->conservative_divergence(a_ransource, m_scratchFluxOne, m_eb_zero); 
   
 #if 0 // Debug
-  m_amr->average_down(a_ransource, m_realm, m_phase);
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    if(EBLevelDataOps::checkNANINF(*a_ransource[lvl])){
-      MayDay::Abort("cdr_solver::GWN_diffusion_source - something is wrong");
+    m_amr->average_down(a_ransource, m_realm, m_phase);
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      if(EBLevelDataOps::checkNANINF(*a_ransource[lvl])){
+	MayDay::Abort("cdr_solver::GWN_diffusion_source - something is wrong");
+      }
     }
-  }
 #endif
   }
   else{
@@ -2480,3 +2482,4 @@ void cdr_solver::parse_plotmode(){
     m_plot_numbers = true;
   }
 }
+#include "CD_NamespaceFooter.H"

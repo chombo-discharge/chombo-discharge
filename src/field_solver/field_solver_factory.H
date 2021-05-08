@@ -8,6 +8,8 @@
 
 #include "field_solver.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Factory class for poisson solvers. Used to instantiate any field_solver-derived class
 */
@@ -18,6 +20,7 @@ public:
   ~field_solver_factory();
   RefCountedPtr<field_solver> new_solver() const;
 };
+#include "CD_NamespaceFooter.H"
 
 #include "field_solver_factoryI.H"
 

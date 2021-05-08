@@ -14,6 +14,8 @@
 #include <EBISLayout.H>
 #include <DataIndex.H>
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Factory class for DomainFluxIFFAB
 */
@@ -29,5 +31,7 @@ private:
   EBISLayout    m_ebisl;
   ProblemDomain m_domain;
 };
+  
+#include "CD_NamespaceFooter.H"
 
 #endif

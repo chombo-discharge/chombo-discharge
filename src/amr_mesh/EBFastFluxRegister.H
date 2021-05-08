@@ -14,6 +14,8 @@
 class EBCoarToFineRedist;
 class EBCoarToCoarRedist;
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Class that does refluxing and interaction with redistribution classes. 
 */
@@ -101,6 +103,7 @@ private:
   
   EBFastFluxRegister(const EBFastFluxRegister& out) = delete;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif
 

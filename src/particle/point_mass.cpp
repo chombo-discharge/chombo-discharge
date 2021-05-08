@@ -7,6 +7,8 @@
 
 #include "point_mass.H"
 
+#include "CD_NamespaceHeader.H"
+  
 point_mass::point_mass(){
 
 }
@@ -39,3 +41,4 @@ point_mass::point_mass(const std::vector<point_mass>& a_point_masses){
 point_mass::~point_mass(){
 
 }
+#include "CD_NamespaceFooter.H"

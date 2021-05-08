@@ -10,7 +10,9 @@
 
 #include "cdr_layout.H"
 
- /*!
+#include "CD_NamespaceHeader.H"
+
+/*!
   @brief Iterator class for cdr_layout
 */
 template <class T>
@@ -65,7 +67,7 @@ public:
 
   /*!
     @brief Ok or not
-   */
+  */
   virtual bool ok();
   
   /*!
@@ -102,7 +104,7 @@ protected:
 
   /*!
     @brief Number of solvers
-   */
+  */
   int m_num;;
 
   /*!
@@ -126,6 +128,7 @@ protected:
   Vector<EBAMRCellData*> m_celldata;
 
 };
+#include "CD_NamespaceFooter.H"
 
 #include "cdr_iteratorI.H"
 

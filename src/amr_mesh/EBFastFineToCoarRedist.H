@@ -9,6 +9,8 @@
 
 #include <EBFineToCoarRedist.H>
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief EBFineToCoarRedist with faster define function
 */
@@ -39,5 +41,6 @@ protected:
   
   
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

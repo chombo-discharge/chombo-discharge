@@ -357,7 +357,7 @@ void strang2::advance_diffusion(const Real a_time, const Real a_dt){
   if(m_do_diffusion){
     this->advance_tga_diffusion(a_time, a_dt);   // This is the 2nd order update
     //    this->advance_euler_diffusion(a_time, a_dt); // This is the embedded formula 1st order update, it uses the solution from
-                                                 // advance_tga_diffusion as initial guess in order to optimize.
+    // advance_tga_diffusion as initial guess in order to optimize.
   }
 }
 
@@ -1377,7 +1377,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     pout() << "strang2::advance_rk54" << endl;
   }
 
-    // The tables for this scheme are
+  // The tables for this scheme are
   // alpha            
   // -----------------
   // a00
@@ -2528,4 +2528,4 @@ void strang2::update_rte(const Real a_time){
   if(m_do_rte){
     this->advance_rte_stationary(a_time);
   }
-}
+#include "CD_NamespaceFooter.H"

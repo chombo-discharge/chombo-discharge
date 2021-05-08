@@ -26,6 +26,8 @@ using std::endl;
 #include "CH_Timer.H"
 #include "NeighborIterator.H"
 
+#include "CD_NamespaceHeader.H"
+
 EBFastFluxRegister::EBFastFluxRegister(){
 
 }
@@ -40,7 +42,7 @@ EBFastFluxRegister::EBFastFluxRegister(const DisjointBoxLayout& a_dblFine,
 				       const EBIndexSpace*      ebisPtr,
 				       const bool               a_forceNoEBCF){
   define(a_dblFine, a_dblCoar, a_ebislFine, a_ebislCoar,
-         a_domainCoar, a_nref, a_nvar, ebisPtr, a_forceNoEBCF);
+	 a_domainCoar, a_nref, a_nvar, ebisPtr, a_forceNoEBCF);
 }
 
 EBFastFluxRegister::EBFastFluxRegister(const EBLevelGrid& a_eblgFine,
@@ -100,9 +102,9 @@ void EBFastFluxRegister::define(const EBLevelGrid&       a_eblgFine,
 
   //  pout() << "before regular define" << endl;
   m_levelFluxReg->define(a_eblgFine.getDBL(),
-                         a_eblgCoar.getDBL(),
-                         a_eblgFine.getDomain(),
-                         a_refRat, a_nvar);
+			 a_eblgCoar.getDBL(),
+			 a_eblgFine.getDomain(),
+			 a_refRat, a_nvar);
   if (a_forceNoEBCF){
     m_hasEBCF = false;
   }
@@ -265,3 +267,4 @@ void EBFastFluxRegister::defineMasks(){
     }
   }
 }
+#include "CD_NamespaceFooter.H"

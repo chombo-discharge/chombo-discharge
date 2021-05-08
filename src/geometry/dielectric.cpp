@@ -7,6 +7,8 @@
 
 #include "dielectric.H"
 
+#include "CD_NamespaceHeader.H"
+  
 dielectric::dielectric(){
 }
   
@@ -47,3 +49,4 @@ Real dielectric::get_permittivity(const RealVect a_pos) const {
     return m_variablepermittivity(a_pos);
   }
 }
+#include "CD_NamespaceFooter.H"

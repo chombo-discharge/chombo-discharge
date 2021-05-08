@@ -8,9 +8,9 @@
 #ifndef _ITO_PLASMA_PHYSICS_LFA_
 #define _ITO_PLASMA_PHYSICS_LFA_
 
-
 #include "ito_plasma_physics.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace ito_plasma {
 
@@ -75,6 +75,7 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #include "ito_plasma_physicsI.H"
 

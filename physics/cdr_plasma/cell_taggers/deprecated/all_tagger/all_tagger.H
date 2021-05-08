@@ -44,6 +44,6 @@ public:
 		   const Vector<RealVect>& a_grad_tracer){
     return true;
   }
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

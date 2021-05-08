@@ -12,6 +12,8 @@
 
 #include <EBAdvectLevelIntegrator.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Godunov implementation for advection. 
 */
@@ -33,7 +35,7 @@ public:
   */
   virtual void parse_options() override;
 
-    /*!
+  /*!
     @brief Parse options
   */
   virtual void parse_runtime_options() override;
@@ -80,5 +82,6 @@ protected:
   */
   virtual void parse_slopelim();     // Parses slope limiter settings
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

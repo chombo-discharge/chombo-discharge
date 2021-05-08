@@ -9,6 +9,8 @@
 
 #include "EBCoarToFineRedist.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief EBFineToCoarRedist with faster define function
 */
@@ -35,8 +37,7 @@ protected:
   void gatherBroadcast(  IntVectSet& a_set);
   void gatherSetsCedFine(IntVectSet& a_setsCedFine);
   void gatherSetsCoar(   IntVectSet& a_setsCoar);
-
-
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

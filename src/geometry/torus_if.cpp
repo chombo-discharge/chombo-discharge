@@ -7,7 +7,8 @@
 
 #include "torus_if.H"
 
-
+#include "CD_NamespaceHeader.H"
+  
 torus_if::torus_if(const RealVect a_center, const Real a_majorRadius, const Real a_minorRadius, const bool a_fluidInside){
   m_center      = a_center;
   m_majorRadius = a_majorRadius;
@@ -57,4 +58,4 @@ BaseIF* torus_if::newImplicitFunction() const{
   return (BaseIF*) new torus_if(m_center, m_majorRadius, m_minorRadius, m_fluidInside);
 }
 
-
+#include "CD_NamespaceFooter.H"

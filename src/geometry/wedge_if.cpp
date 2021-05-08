@@ -15,6 +15,8 @@
 #include "cylinder_if.H"
 #include "new_sphere_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 wedge_if::wedge_if(const int      a_dir,
 		   const Real     a_angle,
 		   const Real     a_curv,
@@ -83,3 +85,4 @@ Real wedge_if::value(const RealVect& a_pos) const {
 BaseIF* wedge_if::newImplicitFunction() const {
   return static_cast<BaseIF*> (new wedge_if(*this));
 }
+#include "CD_NamespaceFooter.H"

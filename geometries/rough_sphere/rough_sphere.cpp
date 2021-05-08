@@ -16,6 +16,8 @@
 
 #include "perlin_sphere_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 rough_sphere::rough_sphere(){
   this->set_eps0(1.0);
 
@@ -59,3 +61,4 @@ rough_sphere::rough_sphere(){
 rough_sphere::~rough_sphere(){
   
 }
+#include "CD_NamespaceFooter.H"

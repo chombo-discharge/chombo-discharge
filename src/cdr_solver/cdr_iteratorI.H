@@ -10,6 +10,8 @@
 
 #include "cdr_iterator.H"
 
+#include "CD_NamespaceHeader.H"
+
 template <class T>
 cdr_iterator<T>::cdr_iterator(){
   CH_TIME("cdr_iterator<T>::cdr_iterator");
@@ -128,5 +130,6 @@ EBAMRCellData& cdr_iterator<T>::get_data() {
   CH_assert(m_isolver < m_num);
   return *m_celldata[m_isolver];
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

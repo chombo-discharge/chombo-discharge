@@ -13,6 +13,7 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 typedef godunov::cdr_storage     cdr_storage;
@@ -340,7 +341,7 @@ Real godunov::advance(const Real a_dt){
 	   << "RTE adv.  = " << 100.*t_rte/t_tot << "%" << endl
 	   << "Poisson   = " << 100.*t_pois/t_tot << "%" << endl
 	   << "Ecomp     = " << 100.*t_filE/t_tot << "%" << endl
-      	   << "post      = " << 100.*t_post/t_tot << "%" << endl
+	   << "post      = " << 100.*t_post/t_tot << "%" << endl
 	   << "Vel       = " << 100.*t_filV/t_tot << "%" << endl
 	   << "Dco       = " << 100.*t_filD/t_tot << "%" << endl
 	   << "TOTAL = " << t_tot << "seconds" << endl;
@@ -553,13 +554,13 @@ void godunov::compute_cdr_eb_fluxes(){
 
   const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
   cdr_plasma_stepper::compute_cdr_fluxes(cdr_fluxes,
-				   extrap_cdr_fluxes,
-				   extrap_cdr_densities,
-				   extrap_cdr_velocities,
-				   extrap_cdr_gradients,
-				   extrap_rte_fluxes,
-				   E,
-				   m_time);
+					 extrap_cdr_fluxes,
+					 extrap_cdr_densities,
+					 extrap_cdr_velocities,
+					 extrap_cdr_gradients,
+					 extrap_rte_fluxes,
+					 E,
+					 m_time);
 }
 
 void godunov::compute_cdr_domain_states(){
@@ -659,13 +660,13 @@ void godunov::compute_cdr_domain_fluxes(){
 
   // This fills the solvers' domain fluxes
   cdr_plasma_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
-					  extrap_cdr_fluxes,
-					  extrap_cdr_densities,
-					  extrap_cdr_velocities,
-					  extrap_cdr_gradients,
-					  extrap_rte_fluxes,
-					  E,
-					  m_time);
+						extrap_cdr_fluxes,
+						extrap_cdr_densities,
+						extrap_cdr_velocities,
+						extrap_cdr_gradients,
+						extrap_rte_fluxes,
+						E,
+						m_time);
 }
 
 void godunov::compute_sigma_flux(){
@@ -1144,3 +1145,4 @@ void godunov::extrap_source(const Real a_dt){
     }
   }
 }
+#include "CD_NamespaceFooter.H"

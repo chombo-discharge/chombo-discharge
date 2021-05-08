@@ -15,6 +15,8 @@
 
 #include "BinItem.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers
 */
@@ -116,5 +118,6 @@ protected:
 };
 
 std::ostream & operator<<(std::ostream& ostr, const simple_ito_particle& p);
+#include "CD_NamespaceFooter.H"
 
 #endif

@@ -10,343 +10,343 @@ extern "C"
 
 #ifndef GUARDVECTOR_LENGTH 
 #define GUARDVECTOR_LENGTH 
-// Prototype for Fortran procedure vector_length ...
-//
-void FORTRAN_NAME( VECTOR_LENGTH ,vector_length )(
-      CHFp_FRA1(dst)
-      ,CHFp_CONST_FRA(src)
-      ,CHFp_CONST_FRA1(mask)
-      ,CHFp_BOX(region) );
+  // Prototype for Fortran procedure vector_length ...
+  //
+  void FORTRAN_NAME( VECTOR_LENGTH ,vector_length )(
+						    CHFp_FRA1(dst)
+						    ,CHFp_CONST_FRA(src)
+						    ,CHFp_CONST_FRA1(mask)
+						    ,CHFp_BOX(region) );
 
 #define FORT_VECTOR_LENGTH FORTRAN_NAME( inlineVECTOR_LENGTH, inlineVECTOR_LENGTH)
 #define FORTNT_VECTOR_LENGTH FORTRAN_NAME( VECTOR_LENGTH, vector_length)
 
-inline void FORTRAN_NAME(inlineVECTOR_LENGTH, inlineVECTOR_LENGTH)(
-      CHFp_FRA1(dst)
-      ,CHFp_CONST_FRA(src)
-      ,CHFp_CONST_FRA1(mask)
-      ,CHFp_BOX(region) )
-{
- CH_TIMELEAF("FORT_VECTOR_LENGTH");
- FORTRAN_NAME( VECTOR_LENGTH ,vector_length )(
-      CHFt_FRA1(dst)
-      ,CHFt_CONST_FRA(src)
-      ,CHFt_CONST_FRA1(mask)
-      ,CHFt_BOX(region) );
-}
+  inline void FORTRAN_NAME(inlineVECTOR_LENGTH, inlineVECTOR_LENGTH)(
+								     CHFp_FRA1(dst)
+								     ,CHFp_CONST_FRA(src)
+								     ,CHFp_CONST_FRA1(mask)
+								     ,CHFp_BOX(region) )
+  {
+    CH_TIMELEAF("FORT_VECTOR_LENGTH");
+    FORTRAN_NAME( VECTOR_LENGTH ,vector_length )(
+						 CHFt_FRA1(dst)
+						 ,CHFt_CONST_FRA(src)
+						 ,CHFt_CONST_FRA1(mask)
+						 ,CHFt_BOX(region) );
+  }
 #endif  // GUARDVECTOR_LENGTH 
 
 #ifndef GUARDFLOOR 
 #define GUARDFLOOR 
-// Prototype for Fortran procedure floor ...
-//
-void FORTRAN_NAME( FLOOR ,floor )(
-      CHFp_FRA(src)
-      ,CHFp_CONST_INT(ncomps)
-      ,CHFp_CONST_REAL(value)
-      ,CHFp_BOX(region) );
+  // Prototype for Fortran procedure floor ...
+  //
+  void FORTRAN_NAME( FLOOR ,floor )(
+				    CHFp_FRA(src)
+				    ,CHFp_CONST_INT(ncomps)
+				    ,CHFp_CONST_REAL(value)
+				    ,CHFp_BOX(region) );
 
 #define FORT_FLOOR FORTRAN_NAME( inlineFLOOR, inlineFLOOR)
 #define FORTNT_FLOOR FORTRAN_NAME( FLOOR, floor)
 
-inline void FORTRAN_NAME(inlineFLOOR, inlineFLOOR)(
-      CHFp_FRA(src)
-      ,CHFp_CONST_INT(ncomps)
-      ,CHFp_CONST_REAL(value)
-      ,CHFp_BOX(region) )
-{
- CH_TIMELEAF("FORT_FLOOR");
- FORTRAN_NAME( FLOOR ,floor )(
-      CHFt_FRA(src)
-      ,CHFt_CONST_INT(ncomps)
-      ,CHFt_CONST_REAL(value)
-      ,CHFt_BOX(region) );
-}
+  inline void FORTRAN_NAME(inlineFLOOR, inlineFLOOR)(
+						     CHFp_FRA(src)
+						     ,CHFp_CONST_INT(ncomps)
+						     ,CHFp_CONST_REAL(value)
+						     ,CHFp_BOX(region) )
+  {
+    CH_TIMELEAF("FORT_FLOOR");
+    FORTRAN_NAME( FLOOR ,floor )(
+				 CHFt_FRA(src)
+				 ,CHFt_CONST_INT(ncomps)
+				 ,CHFt_CONST_REAL(value)
+				 ,CHFt_BOX(region) );
+  }
 #endif  // GUARDFLOOR 
 
 #ifndef GUARDMAX_MIN_NORM 
 #define GUARDMAX_MIN_NORM 
-// Prototype for Fortran procedure max_min_norm ...
-//
-void FORTRAN_NAME( MAX_MIN_NORM ,max_min_norm )(
-      CHFp_REAL(max_val)
-      ,CHFp_REAL(min_val)
-      ,CHFp_CONST_FRA(src)
-      ,CHFp_CONST_FRA1(mask)
-      ,CHFp_CONST_INT(ncomps)
-      ,CHFp_BOX(box) );
+  // Prototype for Fortran procedure max_min_norm ...
+  //
+  void FORTRAN_NAME( MAX_MIN_NORM ,max_min_norm )(
+						  CHFp_REAL(max_val)
+						  ,CHFp_REAL(min_val)
+						  ,CHFp_CONST_FRA(src)
+						  ,CHFp_CONST_FRA1(mask)
+						  ,CHFp_CONST_INT(ncomps)
+						  ,CHFp_BOX(box) );
 
 #define FORT_MAX_MIN_NORM FORTRAN_NAME( inlineMAX_MIN_NORM, inlineMAX_MIN_NORM)
 #define FORTNT_MAX_MIN_NORM FORTRAN_NAME( MAX_MIN_NORM, max_min_norm)
 
-inline void FORTRAN_NAME(inlineMAX_MIN_NORM, inlineMAX_MIN_NORM)(
-      CHFp_REAL(max_val)
-      ,CHFp_REAL(min_val)
-      ,CHFp_CONST_FRA(src)
-      ,CHFp_CONST_FRA1(mask)
-      ,CHFp_CONST_INT(ncomps)
-      ,CHFp_BOX(box) )
-{
- CH_TIMELEAF("FORT_MAX_MIN_NORM");
- FORTRAN_NAME( MAX_MIN_NORM ,max_min_norm )(
-      CHFt_REAL(max_val)
-      ,CHFt_REAL(min_val)
-      ,CHFt_CONST_FRA(src)
-      ,CHFt_CONST_FRA1(mask)
-      ,CHFt_CONST_INT(ncomps)
-      ,CHFt_BOX(box) );
-}
+  inline void FORTRAN_NAME(inlineMAX_MIN_NORM, inlineMAX_MIN_NORM)(
+								   CHFp_REAL(max_val)
+								   ,CHFp_REAL(min_val)
+								   ,CHFp_CONST_FRA(src)
+								   ,CHFp_CONST_FRA1(mask)
+								   ,CHFp_CONST_INT(ncomps)
+								   ,CHFp_BOX(box) )
+  {
+    CH_TIMELEAF("FORT_MAX_MIN_NORM");
+    FORTRAN_NAME( MAX_MIN_NORM ,max_min_norm )(
+					       CHFt_REAL(max_val)
+					       ,CHFt_REAL(min_val)
+					       ,CHFt_CONST_FRA(src)
+					       ,CHFt_CONST_FRA1(mask)
+					       ,CHFt_CONST_INT(ncomps)
+					       ,CHFt_BOX(box) );
+  }
 #endif  // GUARDMAX_MIN_NORM 
 
 #ifndef GUARDDOT_PRODUCT 
 #define GUARDDOT_PRODUCT 
-// Prototype for Fortran procedure dot_product ...
-//
-void FORTRAN_NAME( DOT_PRODUCT ,dot_product )(
-      CHFp_FRA1(result)
-      ,CHFp_CONST_FRA(data1)
-      ,CHFp_CONST_FRA(data2)
-      ,CHFp_CONST_INT(ncomps)
-      ,CHFp_BOX(box) );
+  // Prototype for Fortran procedure dot_product ...
+  //
+  void FORTRAN_NAME( DOT_PRODUCT ,dot_product )(
+						CHFp_FRA1(result)
+						,CHFp_CONST_FRA(data1)
+						,CHFp_CONST_FRA(data2)
+						,CHFp_CONST_INT(ncomps)
+						,CHFp_BOX(box) );
 
 #define FORT_DOT_PRODUCT FORTRAN_NAME( inlineDOT_PRODUCT, inlineDOT_PRODUCT)
 #define FORTNT_DOT_PRODUCT FORTRAN_NAME( DOT_PRODUCT, dot_product)
 
-inline void FORTRAN_NAME(inlineDOT_PRODUCT, inlineDOT_PRODUCT)(
-      CHFp_FRA1(result)
-      ,CHFp_CONST_FRA(data1)
-      ,CHFp_CONST_FRA(data2)
-      ,CHFp_CONST_INT(ncomps)
-      ,CHFp_BOX(box) )
-{
- CH_TIMELEAF("FORT_DOT_PRODUCT");
- FORTRAN_NAME( DOT_PRODUCT ,dot_product )(
-      CHFt_FRA1(result)
-      ,CHFt_CONST_FRA(data1)
-      ,CHFt_CONST_FRA(data2)
-      ,CHFt_CONST_INT(ncomps)
-      ,CHFt_BOX(box) );
-}
+  inline void FORTRAN_NAME(inlineDOT_PRODUCT, inlineDOT_PRODUCT)(
+								 CHFp_FRA1(result)
+								 ,CHFp_CONST_FRA(data1)
+								 ,CHFp_CONST_FRA(data2)
+								 ,CHFp_CONST_INT(ncomps)
+								 ,CHFp_BOX(box) )
+  {
+    CH_TIMELEAF("FORT_DOT_PRODUCT");
+    FORTRAN_NAME( DOT_PRODUCT ,dot_product )(
+					     CHFt_FRA1(result)
+					     ,CHFt_CONST_FRA(data1)
+					     ,CHFt_CONST_FRA(data2)
+					     ,CHFt_CONST_INT(ncomps)
+					     ,CHFt_BOX(box) );
+  }
 #endif  // GUARDDOT_PRODUCT 
 
 #ifndef GUARDVECTOR_LENGTH2 
 #define GUARDVECTOR_LENGTH2 
-// Prototype for Fortran procedure vector_length2 ...
-//
-void FORTRAN_NAME( VECTOR_LENGTH2 ,vector_length2 )(
-      CHFp_FRA1(dst)
-      ,CHFp_CONST_FRA(src)
-      ,CHFp_CONST_FRA1(mask)
-      ,CHFp_BOX(region) );
+  // Prototype for Fortran procedure vector_length2 ...
+  //
+  void FORTRAN_NAME( VECTOR_LENGTH2 ,vector_length2 )(
+						      CHFp_FRA1(dst)
+						      ,CHFp_CONST_FRA(src)
+						      ,CHFp_CONST_FRA1(mask)
+						      ,CHFp_BOX(region) );
 
 #define FORT_VECTOR_LENGTH2 FORTRAN_NAME( inlineVECTOR_LENGTH2, inlineVECTOR_LENGTH2)
 #define FORTNT_VECTOR_LENGTH2 FORTRAN_NAME( VECTOR_LENGTH2, vector_length2)
 
-inline void FORTRAN_NAME(inlineVECTOR_LENGTH2, inlineVECTOR_LENGTH2)(
-      CHFp_FRA1(dst)
-      ,CHFp_CONST_FRA(src)
-      ,CHFp_CONST_FRA1(mask)
-      ,CHFp_BOX(region) )
-{
- CH_TIMELEAF("FORT_VECTOR_LENGTH2");
- FORTRAN_NAME( VECTOR_LENGTH2 ,vector_length2 )(
-      CHFt_FRA1(dst)
-      ,CHFt_CONST_FRA(src)
-      ,CHFt_CONST_FRA1(mask)
-      ,CHFt_BOX(region) );
-}
+  inline void FORTRAN_NAME(inlineVECTOR_LENGTH2, inlineVECTOR_LENGTH2)(
+								       CHFp_FRA1(dst)
+								       ,CHFp_CONST_FRA(src)
+								       ,CHFp_CONST_FRA1(mask)
+								       ,CHFp_BOX(region) )
+  {
+    CH_TIMELEAF("FORT_VECTOR_LENGTH2");
+    FORTRAN_NAME( VECTOR_LENGTH2 ,vector_length2 )(
+						   CHFt_FRA1(dst)
+						   ,CHFt_CONST_FRA(src)
+						   ,CHFt_CONST_FRA1(mask)
+						   ,CHFt_BOX(region) );
+  }
 #endif  // GUARDVECTOR_LENGTH2 
 
 #ifndef GUARDLAPLACIAN 
 #define GUARDLAPLACIAN 
-// Prototype for Fortran procedure laplacian ...
-//
-void FORTRAN_NAME( LAPLACIAN ,laplacian )(
-      CHFp_FRA1(lapl)
-      ,CHFp_CONST_FRA1(data)
-      ,CHFp_BOX(region) );
+  // Prototype for Fortran procedure laplacian ...
+  //
+  void FORTRAN_NAME( LAPLACIAN ,laplacian )(
+					    CHFp_FRA1(lapl)
+					    ,CHFp_CONST_FRA1(data)
+					    ,CHFp_BOX(region) );
 
 #define FORT_LAPLACIAN FORTRAN_NAME( inlineLAPLACIAN, inlineLAPLACIAN)
 #define FORTNT_LAPLACIAN FORTRAN_NAME( LAPLACIAN, laplacian)
 
-inline void FORTRAN_NAME(inlineLAPLACIAN, inlineLAPLACIAN)(
-      CHFp_FRA1(lapl)
-      ,CHFp_CONST_FRA1(data)
-      ,CHFp_BOX(region) )
-{
- CH_TIMELEAF("FORT_LAPLACIAN");
- FORTRAN_NAME( LAPLACIAN ,laplacian )(
-      CHFt_FRA1(lapl)
-      ,CHFt_CONST_FRA1(data)
-      ,CHFt_BOX(region) );
-}
+  inline void FORTRAN_NAME(inlineLAPLACIAN, inlineLAPLACIAN)(
+							     CHFp_FRA1(lapl)
+							     ,CHFp_CONST_FRA1(data)
+							     ,CHFp_BOX(region) )
+  {
+    CH_TIMELEAF("FORT_LAPLACIAN");
+    FORTRAN_NAME( LAPLACIAN ,laplacian )(
+					 CHFt_FRA1(lapl)
+					 ,CHFt_CONST_FRA1(data)
+					 ,CHFt_BOX(region) );
+  }
 #endif  // GUARDLAPLACIAN 
 
 #ifndef GUARDFLASH_ERROR 
 #define GUARDFLASH_ERROR 
-// Prototype for Fortran procedure flash_error ...
-//
-void FORTRAN_NAME( FLASH_ERROR ,flash_error )(
-      CHFp_FRA1(lapl)
-      ,CHFp_CONST_FRA1(data)
-      ,CHFp_CONST_REAL(eps)
-      ,CHFp_BOX(region) );
+  // Prototype for Fortran procedure flash_error ...
+  //
+  void FORTRAN_NAME( FLASH_ERROR ,flash_error )(
+						CHFp_FRA1(lapl)
+						,CHFp_CONST_FRA1(data)
+						,CHFp_CONST_REAL(eps)
+						,CHFp_BOX(region) );
 
 #define FORT_FLASH_ERROR FORTRAN_NAME( inlineFLASH_ERROR, inlineFLASH_ERROR)
 #define FORTNT_FLASH_ERROR FORTRAN_NAME( FLASH_ERROR, flash_error)
 
-inline void FORTRAN_NAME(inlineFLASH_ERROR, inlineFLASH_ERROR)(
-      CHFp_FRA1(lapl)
-      ,CHFp_CONST_FRA1(data)
-      ,CHFp_CONST_REAL(eps)
-      ,CHFp_BOX(region) )
-{
- CH_TIMELEAF("FORT_FLASH_ERROR");
- FORTRAN_NAME( FLASH_ERROR ,flash_error )(
-      CHFt_FRA1(lapl)
-      ,CHFt_CONST_FRA1(data)
-      ,CHFt_CONST_REAL(eps)
-      ,CHFt_BOX(region) );
-}
+  inline void FORTRAN_NAME(inlineFLASH_ERROR, inlineFLASH_ERROR)(
+								 CHFp_FRA1(lapl)
+								 ,CHFp_CONST_FRA1(data)
+								 ,CHFp_CONST_REAL(eps)
+								 ,CHFp_BOX(region) )
+  {
+    CH_TIMELEAF("FORT_FLASH_ERROR");
+    FORTRAN_NAME( FLASH_ERROR ,flash_error )(
+					     CHFt_FRA1(lapl)
+					     ,CHFt_CONST_FRA1(data)
+					     ,CHFt_CONST_REAL(eps)
+					     ,CHFt_BOX(region) );
+  }
 #endif  // GUARDFLASH_ERROR 
 
 #ifndef GUARDGEN_LAPLACIAN 
 #define GUARDGEN_LAPLACIAN 
-// Prototype for Fortran procedure gen_laplacian ...
-//
-void FORTRAN_NAME( GEN_LAPLACIAN ,gen_laplacian )(
-      CHFp_FRA1(lapl)
-      ,CHFp_CONST_FRA1(data)
-      ,CHFp_BOX(region) );
+  // Prototype for Fortran procedure gen_laplacian ...
+  //
+  void FORTRAN_NAME( GEN_LAPLACIAN ,gen_laplacian )(
+						    CHFp_FRA1(lapl)
+						    ,CHFp_CONST_FRA1(data)
+						    ,CHFp_BOX(region) );
 
 #define FORT_GEN_LAPLACIAN FORTRAN_NAME( inlineGEN_LAPLACIAN, inlineGEN_LAPLACIAN)
 #define FORTNT_GEN_LAPLACIAN FORTRAN_NAME( GEN_LAPLACIAN, gen_laplacian)
 
-inline void FORTRAN_NAME(inlineGEN_LAPLACIAN, inlineGEN_LAPLACIAN)(
-      CHFp_FRA1(lapl)
-      ,CHFp_CONST_FRA1(data)
-      ,CHFp_BOX(region) )
-{
- CH_TIMELEAF("FORT_GEN_LAPLACIAN");
- FORTRAN_NAME( GEN_LAPLACIAN ,gen_laplacian )(
-      CHFt_FRA1(lapl)
-      ,CHFt_CONST_FRA1(data)
-      ,CHFt_BOX(region) );
-}
+  inline void FORTRAN_NAME(inlineGEN_LAPLACIAN, inlineGEN_LAPLACIAN)(
+								     CHFp_FRA1(lapl)
+								     ,CHFp_CONST_FRA1(data)
+								     ,CHFp_BOX(region) )
+  {
+    CH_TIMELEAF("FORT_GEN_LAPLACIAN");
+    FORTRAN_NAME( GEN_LAPLACIAN ,gen_laplacian )(
+						 CHFt_FRA1(lapl)
+						 ,CHFt_CONST_FRA1(data)
+						 ,CHFt_BOX(region) );
+  }
 #endif  // GUARDGEN_LAPLACIAN 
 
 #ifndef GUARDSQUARE_ROOT 
 #define GUARDSQUARE_ROOT 
-// Prototype for Fortran procedure square_root ...
-//
-void FORTRAN_NAME( SQUARE_ROOT ,square_root )(
-      CHFp_FRA1(data)
-      ,CHFp_CONST_INT(dir)
-      ,CHFp_BOX(facebox) );
+  // Prototype for Fortran procedure square_root ...
+  //
+  void FORTRAN_NAME( SQUARE_ROOT ,square_root )(
+						CHFp_FRA1(data)
+						,CHFp_CONST_INT(dir)
+						,CHFp_BOX(facebox) );
 
 #define FORT_SQUARE_ROOT FORTRAN_NAME( inlineSQUARE_ROOT, inlineSQUARE_ROOT)
 #define FORTNT_SQUARE_ROOT FORTRAN_NAME( SQUARE_ROOT, square_root)
 
-inline void FORTRAN_NAME(inlineSQUARE_ROOT, inlineSQUARE_ROOT)(
-      CHFp_FRA1(data)
-      ,CHFp_CONST_INT(dir)
-      ,CHFp_BOX(facebox) )
-{
- CH_TIMELEAF("FORT_SQUARE_ROOT");
- FORTRAN_NAME( SQUARE_ROOT ,square_root )(
-      CHFt_FRA1(data)
-      ,CHFt_CONST_INT(dir)
-      ,CHFt_BOX(facebox) );
-}
+  inline void FORTRAN_NAME(inlineSQUARE_ROOT, inlineSQUARE_ROOT)(
+								 CHFp_FRA1(data)
+								 ,CHFp_CONST_INT(dir)
+								 ,CHFp_BOX(facebox) )
+  {
+    CH_TIMELEAF("FORT_SQUARE_ROOT");
+    FORTRAN_NAME( SQUARE_ROOT ,square_root )(
+					     CHFt_FRA1(data)
+					     ,CHFt_CONST_INT(dir)
+					     ,CHFt_BOX(facebox) );
+  }
 #endif  // GUARDSQUARE_ROOT 
 
 #ifndef GUARDAVERAGE_FACE_TO_CELL 
 #define GUARDAVERAGE_FACE_TO_CELL 
-// Prototype for Fortran procedure average_face_to_cell ...
-//
-void FORTRAN_NAME( AVERAGE_FACE_TO_CELL ,average_face_to_cell )(
-      CHFp_FRA(cellreg)
-      ,CHFp_CONST_FRA(facereg)
-      ,CHFp_CONST_INT(dir)
-      ,CHFp_CONST_INT(ncomps)
-      ,CHFp_BOX(box) );
+  // Prototype for Fortran procedure average_face_to_cell ...
+  //
+  void FORTRAN_NAME( AVERAGE_FACE_TO_CELL ,average_face_to_cell )(
+								  CHFp_FRA(cellreg)
+								  ,CHFp_CONST_FRA(facereg)
+								  ,CHFp_CONST_INT(dir)
+								  ,CHFp_CONST_INT(ncomps)
+								  ,CHFp_BOX(box) );
 
 #define FORT_AVERAGE_FACE_TO_CELL FORTRAN_NAME( inlineAVERAGE_FACE_TO_CELL, inlineAVERAGE_FACE_TO_CELL)
 #define FORTNT_AVERAGE_FACE_TO_CELL FORTRAN_NAME( AVERAGE_FACE_TO_CELL, average_face_to_cell)
 
-inline void FORTRAN_NAME(inlineAVERAGE_FACE_TO_CELL, inlineAVERAGE_FACE_TO_CELL)(
-      CHFp_FRA(cellreg)
-      ,CHFp_CONST_FRA(facereg)
-      ,CHFp_CONST_INT(dir)
-      ,CHFp_CONST_INT(ncomps)
-      ,CHFp_BOX(box) )
-{
- CH_TIMELEAF("FORT_AVERAGE_FACE_TO_CELL");
- FORTRAN_NAME( AVERAGE_FACE_TO_CELL ,average_face_to_cell )(
-      CHFt_FRA(cellreg)
-      ,CHFt_CONST_FRA(facereg)
-      ,CHFt_CONST_INT(dir)
-      ,CHFt_CONST_INT(ncomps)
-      ,CHFt_BOX(box) );
-}
+  inline void FORTRAN_NAME(inlineAVERAGE_FACE_TO_CELL, inlineAVERAGE_FACE_TO_CELL)(
+										   CHFp_FRA(cellreg)
+										   ,CHFp_CONST_FRA(facereg)
+										   ,CHFp_CONST_INT(dir)
+										   ,CHFp_CONST_INT(ncomps)
+										   ,CHFp_BOX(box) )
+  {
+    CH_TIMELEAF("FORT_AVERAGE_FACE_TO_CELL");
+    FORTRAN_NAME( AVERAGE_FACE_TO_CELL ,average_face_to_cell )(
+							       CHFt_FRA(cellreg)
+							       ,CHFt_CONST_FRA(facereg)
+							       ,CHFt_CONST_INT(dir)
+							       ,CHFt_CONST_INT(ncomps)
+							       ,CHFt_BOX(box) );
+  }
 #endif  // GUARDAVERAGE_FACE_TO_CELL 
 
 #ifndef GUARDINVERT 
 #define GUARDINVERT 
-// Prototype for Fortran procedure invert ...
-//
-void FORTRAN_NAME( INVERT ,invert )(
-      CHFp_FRA(data)
-      ,CHFp_CONST_INT(ncomps)
-      ,CHFp_BOX(region) );
+  // Prototype for Fortran procedure invert ...
+  //
+  void FORTRAN_NAME( INVERT ,invert )(
+				      CHFp_FRA(data)
+				      ,CHFp_CONST_INT(ncomps)
+				      ,CHFp_BOX(region) );
 
 #define FORT_INVERT FORTRAN_NAME( inlineINVERT, inlineINVERT)
 #define FORTNT_INVERT FORTRAN_NAME( INVERT, invert)
 
-inline void FORTRAN_NAME(inlineINVERT, inlineINVERT)(
-      CHFp_FRA(data)
-      ,CHFp_CONST_INT(ncomps)
-      ,CHFp_BOX(region) )
-{
- CH_TIMELEAF("FORT_INVERT");
- FORTRAN_NAME( INVERT ,invert )(
-      CHFt_FRA(data)
-      ,CHFt_CONST_INT(ncomps)
-      ,CHFt_BOX(region) );
-}
+  inline void FORTRAN_NAME(inlineINVERT, inlineINVERT)(
+						       CHFp_FRA(data)
+						       ,CHFp_CONST_INT(ncomps)
+						       ,CHFp_BOX(region) )
+  {
+    CH_TIMELEAF("FORT_INVERT");
+    FORTRAN_NAME( INVERT ,invert )(
+				   CHFt_FRA(data)
+				   ,CHFt_CONST_INT(ncomps)
+				   ,CHFt_BOX(region) );
+  }
 #endif  // GUARDINVERT 
 
 #ifndef GUARDFILTER_SMOOTH 
 #define GUARDFILTER_SMOOTH 
-// Prototype for Fortran procedure filter_smooth ...
-//
-void FORTRAN_NAME( FILTER_SMOOTH ,filter_smooth )(
-      CHFp_FRA1(lhs)
-      ,CHFp_CONST_FRA1(rhs)
-      ,CHFp_CONST_INT(stride)
-      ,CHFp_CONST_REAL(alpha)
-      ,CHFp_BOX(box) );
+  // Prototype for Fortran procedure filter_smooth ...
+  //
+  void FORTRAN_NAME( FILTER_SMOOTH ,filter_smooth )(
+						    CHFp_FRA1(lhs)
+						    ,CHFp_CONST_FRA1(rhs)
+						    ,CHFp_CONST_INT(stride)
+						    ,CHFp_CONST_REAL(alpha)
+						    ,CHFp_BOX(box) );
 
 #define FORT_FILTER_SMOOTH FORTRAN_NAME( inlineFILTER_SMOOTH, inlineFILTER_SMOOTH)
 #define FORTNT_FILTER_SMOOTH FORTRAN_NAME( FILTER_SMOOTH, filter_smooth)
 
-inline void FORTRAN_NAME(inlineFILTER_SMOOTH, inlineFILTER_SMOOTH)(
-      CHFp_FRA1(lhs)
-      ,CHFp_CONST_FRA1(rhs)
-      ,CHFp_CONST_INT(stride)
-      ,CHFp_CONST_REAL(alpha)
-      ,CHFp_BOX(box) )
-{
- CH_TIMELEAF("FORT_FILTER_SMOOTH");
- FORTRAN_NAME( FILTER_SMOOTH ,filter_smooth )(
-      CHFt_FRA1(lhs)
-      ,CHFt_CONST_FRA1(rhs)
-      ,CHFt_CONST_INT(stride)
-      ,CHFt_CONST_REAL(alpha)
-      ,CHFt_BOX(box) );
-}
+  inline void FORTRAN_NAME(inlineFILTER_SMOOTH, inlineFILTER_SMOOTH)(
+								     CHFp_FRA1(lhs)
+								     ,CHFp_CONST_FRA1(rhs)
+								     ,CHFp_CONST_INT(stride)
+								     ,CHFp_CONST_REAL(alpha)
+								     ,CHFp_BOX(box) )
+  {
+    CH_TIMELEAF("FORT_FILTER_SMOOTH");
+    FORTRAN_NAME( FILTER_SMOOTH ,filter_smooth )(
+						 CHFt_FRA1(lhs)
+						 ,CHFt_CONST_FRA1(rhs)
+						 ,CHFt_CONST_INT(stride)
+						 ,CHFt_CONST_REAL(alpha)
+						 ,CHFt_BOX(box) );
+  }
 #endif  // GUARDFILTER_SMOOTH 
 
-}
+#include "CD_NamespaceFooter.H"
 
 #endif

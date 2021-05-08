@@ -15,8 +15,9 @@
 
 #include "DirichletPoissonEBBC.H"
 #include "BaseBCValue.H"
-#include "NamespaceHeader.H"
 
+#include "CD_NamespaceHeader.H"
+  
 ///
 /**
  */
@@ -25,26 +26,26 @@ class dirichletconductivityebbc: public ConductivityBaseEBBC
 public:
   ///
   virtual void define(const LayoutData<IntVectSet>& a_cfivs,
-                      const Real&                   a_factor);
+		      const Real&                   a_factor);
 
   ///
   virtual void applyEBFlux(EBCellFAB&                    a_lphi,
-                           const EBCellFAB&              a_phi,
-                           VoFIterator&                  a_vofit,
-                           const LayoutData<IntVectSet>& a_cfivs,
-                           const DataIndex&              a_dit,
-                           const RealVect&               a_probLo,
-                           const RealVect&               a_dx,
-                           const Real&                   a_factor,
-                           const bool&                   a_useHomogeneous,
-                           const Real&                   a_time);
+			   const EBCellFAB&              a_phi,
+			   VoFIterator&                  a_vofit,
+			   const LayoutData<IntVectSet>& a_cfivs,
+			   const DataIndex&              a_dit,
+			   const RealVect&               a_probLo,
+			   const RealVect&               a_dx,
+			   const Real&                   a_factor,
+			   const bool&                   a_useHomogeneous,
+			   const Real&                   a_time);
 
   ///
   dirichletconductivityebbc(const ProblemDomain& a_domain,
-                            const EBISLayout&    a_layout,
-                            const RealVect&      a_dx,
-                            const IntVect*       a_ghostCellsPhi,
-                            const IntVect*       a_ghostCellsRhs):ConductivityBaseEBBC()
+			    const EBISLayout&    a_layout,
+			    const RealVect&      a_dx,
+			    const IntVect*       a_ghostCellsPhi,
+			    const IntVect*       a_ghostCellsRhs):ConductivityBaseEBBC()
 
   {
     m_bc.construct(a_domain, a_layout, a_dx, a_ghostCellsPhi, a_ghostCellsRhs);
@@ -77,15 +78,15 @@ public:
 
   ///
   virtual void getEBFlux(Real&                         a_flux,
-                         const VolIndex&               a_vof,
-                         const LevelData<EBCellFAB>&   a_phi,
-                         const LayoutData<IntVectSet>& a_cfivs,
-                         const DataIndex&              a_dit,
-                         const RealVect&               a_probLo,
-                         const RealVect&               a_dx,
-                         const bool&                   a_useHomogeneous,
-                         const Real&                   a_time,
-                         const pair<int,Real>*         a_cacheHint=0 );
+			 const VolIndex&               a_vof,
+			 const LevelData<EBCellFAB>&   a_phi,
+			 const LayoutData<IntVectSet>& a_cfivs,
+			 const DataIndex&              a_dit,
+			 const RealVect&               a_probLo,
+			 const RealVect&               a_dx,
+			 const bool&                   a_useHomogeneous,
+			 const Real&                   a_time,
+			 const pair<int,Real>*         a_cacheHint=0 );
 
 
 private:
@@ -116,10 +117,10 @@ public:
 
   ///
   virtual dirichletconductivityebbc* create(const ProblemDomain& a_domain,
-                                            const EBISLayout&    a_layout,
-                                            const RealVect&      a_dx,
-                                            const IntVect*       a_ghostCellsPhi=0,
-                                            const IntVect*       a_ghostCellsRhs=0);
+					    const EBISLayout&    a_layout,
+					    const RealVect&      a_dx,
+					    const IntVect*       a_ghostCellsPhi=0,
+					    const IntVect*       a_ghostCellsRhs=0);
 
 private:
   bool m_onlyHomogeneous;
@@ -130,6 +131,5 @@ private:
   RefCountedPtr<LevelData<BaseIVFAB<Real> > >m_data;
   bool m_dataBased;
 };
-
-#include "NamespaceFooter.H"
+#include "CD_NamespaceFooter.H"
 #endif

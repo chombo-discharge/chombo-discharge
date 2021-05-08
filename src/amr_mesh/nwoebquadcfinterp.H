@@ -40,8 +40,9 @@
 #include "CornerCopier.H"
 #include "EBCFData.H"
 #include "EBQuadCFInterp.H"
-#include "NamespaceHeader.H"
 
+#include "CD_NamespaceHeader.H"
+  
 /// Quadratic coarse-fine interpolation utility 
 class nwoebquadcfinterp
 {
@@ -49,15 +50,15 @@ public:
 
   ///
   nwoebquadcfinterp(const DisjointBoxLayout&           a_gridsFine,
-                    const DisjointBoxLayout&           a_gridsCoar,
-                    const EBISLayout&                  a_ebislFine,
-                    const EBISLayout&                  a_ebislCoar,
-                    const ProblemDomain&               a_domainCoar,
-                    const int&                         a_nref,
-                    const int&                         a_nvar,
-                    const Real&                        a_dxFine,
-                    const int&                         a_ghost,
-                    const LayoutData<IntVectSet>&      a_cfivs,
+		    const DisjointBoxLayout&           a_gridsCoar,
+		    const EBISLayout&                  a_ebislFine,
+		    const EBISLayout&                  a_ebislCoar,
+		    const ProblemDomain&               a_domainCoar,
+		    const int&                         a_nref,
+		    const int&                         a_nvar,
+		    const Real&                        a_dxFine,
+		    const int&                         a_ghost,
+		    const LayoutData<IntVectSet>&      a_cfivs,
 		    const RefCountedPtr<EBIndexSpace>& a_ebisPtr);
 
   ///
@@ -69,8 +70,8 @@ public:
      Coarse / Fine interpolation operator.
   */
   void coarseFineInterp(LevelData<EBCellFAB>&       a_phif,
-                        const LevelData<EBCellFAB>& a_phic,
-                        int isrc, int idst, int inco);
+			const LevelData<EBCellFAB>& a_phic,
+			int isrc, int idst, int inco);
 
 
   ///
@@ -80,7 +81,7 @@ public:
      but with all coarse-level data set to 0.
   */
   void coarseFineInterpH(LevelData<EBCellFAB>& a_phif,
-                        int isrc, int idst, int inco);
+			 int isrc, int idst, int inco);
 
 
 protected:
@@ -91,19 +92,19 @@ protected:
   
   void
   getStencils(Vector<RefCountedPtr< BaseStencil> >  & a_stencils, 
-              Vector<RefCountedPtr< BaseIndex  > >  & a_baseDstVoFs,
-              const IntVectSet                      & a_cfivs,
-              const EBISBox                         & a_ebisFine,
-              const EBISBox                         & a_ebisCoFi,
-              const DataIndex                       & a_dit);
+	      Vector<RefCountedPtr< BaseIndex  > >  & a_baseDstVoFs,
+	      const IntVectSet                      & a_cfivs,
+	      const EBISBox                         & a_ebisFine,
+	      const EBISBox                         & a_ebisCoFi,
+	      const DataIndex                       & a_dit);
 
 
   void
   getStencil(VoFStencil           & a_stencil,
-             const VolIndex       & a_vofFine,
-             const EBISBox        & a_ebisFine,
-             const EBISBox        & a_ebisCoFi,
-             const DataIndex      & a_dit);
+	     const VolIndex       & a_vofFine,
+	     const EBISBox        & a_ebisFine,
+	     const EBISBox        & a_ebisCoFi,
+	     const DataIndex      & a_dit);
 
   DisjointBoxLayout m_gridsFine;
   DisjointBoxLayout m_gridsCoar;
@@ -140,6 +141,6 @@ private:
   }
 
 };
+#include "CD_NamespaceFooter.H"
 
-#include "NamespaceFooter.H"
 #endif

@@ -5,43 +5,49 @@
   @date Aug. 207
 */
 
+#ifndef _CD_IrregAmrStencilImplem_H_
+#define _CD_IrregAmrStencilImplem_H_
+
 #include "irreg_amr_stencil.H"
 #include "centroid_interp.H"
 #include "eb_centroid_interp.H"
 
+#include "CD_NamespaceHeader.H"
 
-template <class T> irreg_amr_stencil<T>::irreg_amr_stencil(){
+template <class T>
+irreg_amr_stencil<T>::irreg_amr_stencil(){
   CH_TIME("irreg_amr_stencil::irreg_amr_stencil");
   m_defined = false;
 }
 
-//
-template<class T> irreg_amr_stencil<T>::irreg_amr_stencil(const Vector<DisjointBoxLayout>& a_grids,
-							  const Vector<EBISLayout>&        a_ebisl,
-							  const Vector<ProblemDomain>&     a_domains,
-							  const Vector<Real>&              a_dx,
-							  const int                        a_finestLevel,
-							  const int                        a_order,
-							  const int                        a_radius,
-							  const stencil_type               a_type){
+template<class T>
+irreg_amr_stencil<T>::irreg_amr_stencil(const Vector<DisjointBoxLayout>& a_grids,
+					const Vector<EBISLayout>&        a_ebisl,
+					const Vector<ProblemDomain>&     a_domains,
+					const Vector<Real>&              a_dx,
+					const int                        a_finestLevel,
+					const int                        a_order,
+					const int                        a_radius,
+					const stencil_type               a_type){
   CH_TIME("irreg_amr_stencil::irreg_amr_stencil");
   
   this->define(a_grids, a_ebisl, a_domains, a_dx, a_finestLevel, a_order, a_radius, a_type);
 }
 
-template <class T> irreg_amr_stencil<T>::~irreg_amr_stencil(){
+template <class T>
+irreg_amr_stencil<T>::~irreg_amr_stencil(){
   CH_TIME("irreg_amr_stencil::~irreg_amr_stencil");
 }
 
-//
-template<class T> void irreg_amr_stencil<T>::define(const Vector<DisjointBoxLayout>& a_grids,
-						    const Vector<EBISLayout>&        a_ebisl,
-						    const Vector<ProblemDomain>&     a_domains,
-						    const Vector<Real>&              a_dx,
-						    const int                        a_finestLevel,
-						    const int                        a_order,
-						    const int                        a_radius,
-						    const stencil_type               a_type){
+template<class T>
+void irreg_amr_stencil<T>::define(const Vector<DisjointBoxLayout>& a_grids,
+				  const Vector<EBISLayout>&        a_ebisl,
+				  const Vector<ProblemDomain>&     a_domains,
+				  const Vector<Real>&              a_dx,
+				  const int                        a_finestLevel,
+				  const int                        a_order,
+				  const int                        a_radius,
+				  const stencil_type               a_type){
   CH_TIME("irreg_amr_stencil::define");
 
   m_finest_level = a_finestLevel;
@@ -72,11 +78,11 @@ template<class T> void irreg_amr_stencil<T>::define(const Vector<DisjointBoxLayo
   m_defined = true;
 }
 
-//
-template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>&       a_dst,
-						   const LevelData<EBCellFAB>& a_src,
-						   const int                   a_lvl,
-						   const bool                  a_limit) const {
+template<class T>
+void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>&       a_dst,
+				 const LevelData<EBCellFAB>& a_src,
+				 const int                   a_lvl,
+				 const bool                  a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   const DisjointBoxLayout& dbl  = m_grids[a_lvl];
@@ -105,13 +111,13 @@ template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>&       a
       const VoFStencil& vofSten = stencils(vof, 0);
 
       for (int comp = 0; comp < nComp; comp++){
-    	dst_fab(vof, comp) = 0.;
+	dst_fab(vof, comp) = 0.;
 
-    	for (int i = 0; i < vofSten.size(); i++){
-    	  const VolIndex& ivof = vofSten.vof(i);
-    	  const Real& iweight  = vofSten.weight(i);
-    	  dst_fab(vof,comp) += src_fab(ivof, comp)*iweight;
-    	}
+	for (int i = 0; i < vofSten.size(); i++){
+	  const VolIndex& ivof = vofSten.vof(i);
+	  const Real& iweight  = vofSten.weight(i);
+	  dst_fab(vof,comp) += src_fab(ivof, comp)*iweight;
+	}
 
 
 	if(a_limit){ // Limit 
@@ -123,10 +129,10 @@ template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>&       a
   }
 }
 
-//
-template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>& a_data,
-						   const int             a_lvl,
-						   const bool            a_limit) const {
+template<class T>
+void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>& a_data,
+				 const int             a_lvl,
+				 const bool            a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   const DisjointBoxLayout& dbl = m_grids[a_lvl];
@@ -156,13 +162,13 @@ template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>& a_data,
       const VoFStencil& vofSten = stencils(vof, 0);
 
       for (int comp = 0; comp < nComp; comp++){
-    	data(vof, comp) = 0.;
+	data(vof, comp) = 0.;
 
-    	for (int i = 0; i < vofSten.size(); i++){
-    	  const VolIndex& ivof = vofSten.vof(i);
-    	  const Real& iweight  = vofSten.weight(i);
-    	  data(vof,comp) += cpy(ivof, comp)*iweight;
-    	}
+	for (int i = 0; i < vofSten.size(); i++){
+	  const VolIndex& ivof = vofSten.vof(i);
+	  const Real& iweight  = vofSten.weight(i);
+	  data(vof,comp) += cpy(ivof, comp)*iweight;
+	}
 
 	if(a_limit){ // Limit extrapolation
 	  const bool signChange = data(vof, comp)*cpy(vof, comp) < 0.;
@@ -173,14 +179,13 @@ template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>& a_data,
   }
 }
 
-//
-template<class T> void irreg_amr_stencil<T>::apply(LevelData<BaseIVFAB<Real> >& a_dst,
-						   const LevelData<EBCellFAB>&  a_src,
-						   const int                    a_lvl,
-						   const bool                   a_limit) const {
+template<class T>
+void irreg_amr_stencil<T>::apply(LevelData<BaseIVFAB<Real> >& a_dst,
+				 const LevelData<EBCellFAB>&  a_src,
+				 const int                    a_lvl,
+				 const bool                   a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
-  //
   const DisjointBoxLayout& dbl = m_grids[a_lvl];
   const EBISLayout& ebisl      = m_ebisl[a_lvl];
   const irreg_stencil& irrSten  = *m_stencils[a_lvl];
@@ -223,8 +228,9 @@ template<class T> void irreg_amr_stencil<T>::apply(LevelData<BaseIVFAB<Real> >& 
   }
 }
 
-template<class T> void irreg_amr_stencil<T>::apply(EBAMRCellData& a_data,
-						   const bool   a_limit) const {
+template<class T>
+void irreg_amr_stencil<T>::apply(EBAMRCellData& a_data,
+				 const bool   a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -232,10 +238,10 @@ template<class T> void irreg_amr_stencil<T>::apply(EBAMRCellData& a_data,
   }
 }
 
-//
-template<class T> void irreg_amr_stencil<T>::apply(EBAMRCellData&       a_dst,
-						   const EBAMRCellData& a_src,
-						   const bool         a_limit) const {
+template<class T>
+void irreg_amr_stencil<T>::apply(EBAMRCellData&       a_dst,
+				 const EBAMRCellData& a_src,
+				 const bool         a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -243,10 +249,10 @@ template<class T> void irreg_amr_stencil<T>::apply(EBAMRCellData&       a_dst,
   }
 }
 
-//
-template<class T> void irreg_amr_stencil<T>::apply(EBAMRIVData&         a_dst,
-						   const EBAMRCellData& a_src,
-						   const bool         a_limit) const {
+template<class T>
+void irreg_amr_stencil<T>::apply(EBAMRIVData&         a_dst,
+				 const EBAMRCellData& a_src,
+				 const bool         a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -254,10 +260,10 @@ template<class T> void irreg_amr_stencil<T>::apply(EBAMRIVData&         a_dst,
   }
 }
 
-//
-template<class T> void irreg_amr_stencil<T>::apply(Vector<EBAMRIVData*>&         a_dst,
-						   const Vector<EBAMRCellData*>& a_src,
-						   const bool                  a_limit) const {
+template<class T>
+void irreg_amr_stencil<T>::apply(Vector<EBAMRIVData*>&         a_dst,
+				 const Vector<EBAMRCellData*>& a_src,
+				 const bool                  a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   const int dstSize = a_dst.size();
@@ -272,8 +278,9 @@ template<class T> void irreg_amr_stencil<T>::apply(Vector<EBAMRIVData*>&        
   }
 }
 
-template<class T> void irreg_amr_stencil<T>::apply(Vector<EBAMRCellData*>& a_data,
-						   const bool            a_limit) const {
+template<class T>
+void irreg_amr_stencil<T>::apply(Vector<EBAMRCellData*>& a_data,
+				 const bool            a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   const int dstSize = a_data.size();
@@ -283,9 +290,10 @@ template<class T> void irreg_amr_stencil<T>::apply(Vector<EBAMRCellData*>& a_dat
   }
 }
 
-template<class T> void irreg_amr_stencil<T>::apply(Vector<EBAMRCellData*>&       a_dst,
-						   const Vector<EBAMRCellData*>& a_src,
-						   const bool                  a_limit) const {
+template<class T>
+void irreg_amr_stencil<T>::apply(Vector<EBAMRCellData*>&       a_dst,
+				 const Vector<EBAMRCellData*>& a_src,
+				 const bool                  a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   const int dstSize = a_dst.size();
@@ -303,3 +311,6 @@ template<class T> void irreg_amr_stencil<T>::apply(Vector<EBAMRCellData*>&      
 template class irreg_amr_stencil<centroid_interp>;
 template class irreg_amr_stencil<eb_centroid_interp>;
 // template class irreg_amr_stencil<IrregCenterInterpolationStencil>;
+#include "CD_NamespaceFooter.H"
+
+#endif

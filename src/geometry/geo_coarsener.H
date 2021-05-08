@@ -13,6 +13,8 @@
 #include <Vector.H>
 #include <IntVectSet.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Utility class for removing geometrically tagged cells
   @details This class is an optimization class for coarsening of EBs. The usage of this class is simple; the user defines m_coarsen_boxes and a level for each coarsening box. These are passed to plasma_engine which will remove geometric tags in those regions (above the level specified)
@@ -62,4 +64,5 @@ protected:
   */
   Vector<int> m_inverse;
 };
+#include "CD_NamespaceFooter.H"
 #endif

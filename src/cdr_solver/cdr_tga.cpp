@@ -15,6 +15,8 @@
 #include <NeumannConductivityDomainBC.H>
 #include <BRMeshRefine.H>
 
+#include "CD_NamespaceHeader.H"
+
 cdr_tga::cdr_tga() : cdr_solver() {
   m_name         = "cdr_tga";
   m_class_name   = "cdr_tga";
@@ -796,3 +798,4 @@ void cdr_tga::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     write_data(a_output, a_comp, m_scratch, false);
   }
 }
+#include "CD_NamespaceFooter.H"

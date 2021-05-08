@@ -123,7 +123,7 @@ air7::air7(){
     }
   }
 
-    { // Boundary condition at wall. 0 = extrap, 1 = wall
+  { // Boundary condition at wall. 0 = extrap, 1 = wall
     m_wallbc.resize(2*SpaceDim, 0); 
     ParmParse pp("air7");
     for (int dir = 0; dir < SpaceDim; dir++){
@@ -484,8 +484,8 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   const air7::photon_two*   photon2 = static_cast<air7::photon_two*>   (&(*m_photons[m_photon2_idx]));
   const air7::photon_three* photon3 = static_cast<air7::photon_three*> (&(*m_photons[m_photon3_idx]));
   p = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
-								    + photon2->get_A()*a_rte_densities[m_photon2_idx]
-								    + photon3->get_A()*a_rte_densities[m_photon3_idx]);
+							     + photon2->get_A()*a_rte_densities[m_photon2_idx]
+							     + photon3->get_A()*a_rte_densities[m_photon3_idx]);
   products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
 
   source[m_electron_idx] += products;
@@ -692,4 +692,4 @@ Real air7::stochastic_reaction(const Real a_S, const Real a_vol, const Real a_dt
   }
 
   return value;
-}
+#include "CD_NamespaceFooter.H"
