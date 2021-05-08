@@ -298,23 +298,29 @@ namespace ChomboDischarge{
     for (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt){
       ret.emplace(ivsIt(), VoFStencil());
     }
-  
+
     if(a_derivs.numPts() > 0){
 
-      const int M = LeastSquares::getTaylorExpansionSize(a_order);
+      const int M = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts(); // This is because some unknowns have been eliminated. 
       const int K = a_displacements.size();
 
-      if(K < M) MayDay::Abort("LeastSquares::computeInterpolationStencil -- not enough equations to achieve desired order!");
+      const IntVectSet isect = a_derivs & a_knownTerms;
+
+      if(K < M)            MayDay::Abort("LeastSquares::computeInterpolationStencil -- not enough equations to achieve desired order!");
+      if(!isect.isEmpty()) MayDay::Abort("LeastSquares::computeInterpolation - you have specified the same terms as both unknown and known");
+
 
       // Build the A-matrix in column major order so we can use LaPackUtils::computePseudoInverse.
       // Use of multi-indices makes higher-order Taylor series a walk in the park. 
       int i = 0;
       Vector<Real> linA    (K*M, 0.0);
       Vector<Real> linAplus(M*K, 0.0);
-      for (MultiIndex mi(a_order); mi.ok(); ++mi){
-    
-	for (int k = 0; k < K; k++){
-	  linA[i] = a_weights[k]*mi.pow(a_displacements[k])/mi.factorial(); i++;
+      for (MultiIndex mi(a_order); mi.ok(); ++mi){ // Columns
+
+	if(!a_knownTerms.contains(mi.getCurrentIndex())){ // Add column if it is an unknown in the lsq system. 
+	  for (int k = 0; k < K; k++){ // Rows
+	    linA[i] = a_weights[k]*mi.pow(a_displacements[k])/mi.factorial(); i++;
+	  }
 	}
       }
  
