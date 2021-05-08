@@ -108,4 +108,4 @@ bool gradient_tagger::refine_cell(const RealVect         a_pos,
   }
 
   return refine;
-}
+#include "CD_NamespaceFooter.H"

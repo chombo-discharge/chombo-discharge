@@ -397,6 +397,6 @@ protected:
     @brief k2
   */
   EBAMRIVData m_k2;
-};
+#include "CD_NamespaceFooter.H"
 #endif
    

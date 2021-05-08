@@ -10,11 +10,14 @@
 
 #include "computational_geometry.H"
 
+#include "CD_NamespaceHeader.H"
+
 class tesselation : public computational_geometry {
 public:
 
   tesselation();
   ~tesselation();
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

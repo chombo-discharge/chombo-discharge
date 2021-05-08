@@ -11,6 +11,8 @@
 #include "particle_containerI.H"
 #include "NeighborIterator.H"
 
+#include "CD_NamespaceHeader.H"
+  
 template <class P>
 particle_container<P>::particle_container(){
   m_is_defined  = false;
@@ -812,12 +814,12 @@ void particle_container<P>::copy_halo_particles(const int a_level, const LevelDa
     List<P>& halo_particles   = (*m_halo_particles[a_level])[dit()].listItems();
     
     for (ListIterator<P> lit(particles); lit.ok(); ++lit){
-	const RealVect x = lit().position();
-	const IntVect iv(D_DECL((int)floor((x[0] - m_prob_lo[0])/dx[0]),
-				(int)floor((x[1] - m_prob_lo[1])/dx[1]),
-				(int)floor((x[2] - m_prob_lo[2])/dx[2])));
+      const RealVect x = lit().position();
+      const IntVect iv(D_DECL((int)floor((x[0] - m_prob_lo[0])/dx[0]),
+			      (int)floor((x[1] - m_prob_lo[1])/dx[1]),
+			      (int)floor((x[2] - m_prob_lo[2])/dx[2])));
 	
-	if(mask(iv)) halo_particles.add(lit());
+      if(mask(iv)) halo_particles.add(lit());
     }
   }
 }
@@ -866,5 +868,6 @@ void particle_container<P>::clear_non_halo_particles() const {
     m_non_halo_particles[lvl]->clear();
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

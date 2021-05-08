@@ -7,6 +7,8 @@
 
 #include "robinconductivityebbcfactory.H"
 
+#include "CD_NamespaceHeader.H"
+
 robinconductivityebbcfactory::robinconductivityebbcfactory(const RealVect a_origin){
   this->set_type(stencil_type::taylor);
   this->set_coefs(1., 1., 0.);
@@ -89,3 +91,4 @@ robinconductivityebbc* robinconductivityebbcfactory::create(const ProblemDomain&
 
   return fresh;
 }
+#include "CD_NamespaceFooter.H"

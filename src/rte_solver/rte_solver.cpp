@@ -10,6 +10,8 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+
 rte_solver::rte_solver(){
   m_name       = "rte_solver";
   m_class_name = "rte_solver";
@@ -332,3 +334,4 @@ EBAMRIVData& rte_solver::get_kappa_eb(){
 RefCountedPtr<rte_species>& rte_solver::get_species(){
   return m_rte_species;
 }
+#include "CD_NamespaceFooter.H"

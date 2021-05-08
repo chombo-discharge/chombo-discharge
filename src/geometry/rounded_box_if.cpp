@@ -11,6 +11,8 @@
 #include <SmoothUnion.H>
 #include <TransformIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 rounded_box_if::rounded_box_if(const RealVect a_loCorner,
 			       const RealVect a_hiCorner,
 			       const Real     a_curv,
@@ -66,3 +68,4 @@ Real rounded_box_if::value(const RealVect& a_point) const{
 BaseIF* rounded_box_if::newImplicitFunction() const{
   return static_cast<BaseIF*> (new rounded_box_if(*this));
 }
+#include "CD_NamespaceFooter.H"

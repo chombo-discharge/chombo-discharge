@@ -11,6 +11,8 @@
 #include "Vec.H"
 #include <vector>
 
+#include "CD_NamespaceHeader.H"
+
 namespace BoundingVolumes {
   
   enum class BoundingVolumeAlgorithm {
@@ -142,6 +144,7 @@ namespace BoundingVolumes {
   template <class T>
   T getOverlappingVolume(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
 }
+#include "CD_NamespaceFooter.H"
 
 #include "BoundingVolumesI.H"
 

@@ -9,6 +9,8 @@
 #include "rod_if.H"
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+  
 electrode_array::electrode_array(){
   ParmParse pp("electrode_array");
 
@@ -50,3 +52,4 @@ electrode_array::electrode_array(){
 electrode_array::~electrode_array(){
 
 }
+#include "CD_NamespaceFooter.H"

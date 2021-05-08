@@ -18,6 +18,8 @@
 #include <memory>
 #include <vector>
 
+#include "CD_NamespaceHeader.H"
+
 namespace dcel {
 
   template <class T> class vertexT;
@@ -148,8 +150,8 @@ namespace dcel {
     inline
     bool isPointInsideFace(const Vec3& a_p) const noexcept;
   };
-
 }
+#include "CD_NamespaceFooter.H"
 
 #include "dcel_faceI.H"
 

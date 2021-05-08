@@ -11,6 +11,8 @@
 #include <RealVect.H> 
 #include <BaseIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Declaration of a two-sheet hyperboloid. 
   @details The implicit function used for the single sheet is
@@ -72,4 +74,5 @@ protected:
   */
   bool m_inside;
 };
+#include "CD_NamespaceFooter.H"
 #endif

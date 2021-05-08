@@ -26,6 +26,8 @@
 #include "EBLoadBalance.H"
 #include "NamespaceHeader.H"
 
+#include "CD_NamespaceHeader.H"
+
 /************************************/
 void
 ebcoarseaverage::setDefaultValues()
@@ -45,25 +47,25 @@ ebcoarseaverage::~ebcoarseaverage()
 }
 /************************************/
 ebcoarseaverage::ebcoarseaverage(const DisjointBoxLayout& a_dblFine,
-                                 const DisjointBoxLayout& a_dblCoar,
-                                 const EBISLayout& a_ebislFine,
-                                 const EBISLayout& a_ebislCoar,
-                                 const ProblemDomain& a_domainCoar,
-                                 const int& a_nref,
-                                 const int& a_nvar,
-                                 const EBIndexSpace* ebisPtr)
+				 const DisjointBoxLayout& a_dblCoar,
+				 const EBISLayout& a_ebislFine,
+				 const EBISLayout& a_ebislCoar,
+				 const ProblemDomain& a_domainCoar,
+				 const int& a_nref,
+				 const int& a_nvar,
+				 const EBIndexSpace* ebisPtr)
 {
   setDefaultValues();
 
   define(a_dblFine, a_dblCoar, a_ebislFine, a_ebislCoar,
-         a_domainCoar, a_nref, a_nvar, ebisPtr);
+	 a_domainCoar, a_nref, a_nvar, ebisPtr);
 }
 /************************************/
 ebcoarseaverage::ebcoarseaverage(const EBLevelGrid& a_eblgFine,
-                                 const EBLevelGrid& a_eblgCoar,
-                                 const EBLevelGrid& a_eblgCoFi,
-                                 const int& a_nref,
-                                 const int& a_nvar)
+				 const EBLevelGrid& a_eblgCoar,
+				 const EBLevelGrid& a_eblgCoFi,
+				 const int& a_nref,
+				 const int& a_nvar)
 {
   setDefaultValues();
 
@@ -72,13 +74,13 @@ ebcoarseaverage::ebcoarseaverage(const EBLevelGrid& a_eblgFine,
 /************************************/
 void
 ebcoarseaverage::define(const DisjointBoxLayout& a_dblFine,
-                        const DisjointBoxLayout& a_dblCoar,
-                        const EBISLayout& a_ebislFine,
-                        const EBISLayout& a_ebislCoar,
-                        const ProblemDomain& a_domainCoar,
-                        const int& a_nref,
-                        const int& a_nvar,
-                        const EBIndexSpace* ebisPtr)
+			const DisjointBoxLayout& a_dblCoar,
+			const EBISLayout& a_ebislFine,
+			const EBISLayout& a_ebislCoar,
+			const ProblemDomain& a_domainCoar,
+			const int& a_nref,
+			const int& a_nvar,
+			const EBIndexSpace* ebisPtr)
 {
   CH_TIME("ebcoarseaverage::define");
   CH_assert(ebisPtr->isDefined());
@@ -105,28 +107,28 @@ ebcoarseaverage::define(const DisjointBoxLayout& a_dblFine,
       //no need for gathers here because the meta data is global
       int numPtsLayout = 0;
       for (LayoutIterator lit = a_dblFine.layoutIterator(); lit.ok(); ++lit)
-        {
-          numPtsLayout += a_dblFine.get(lit()).numPts();
-        }
+	{
+	  numPtsLayout += a_dblFine.get(lit()).numPts();
+	}
       bool coveringDomain = (numPtsDom == numPtsLayout);
       if (coveringDomain)
-        {
-          m_useFineBuffer = true;
-          int maxBoxSize = 4*a_nref;
-          Vector<Box> boxes;
-          Vector<int> procs;
-          domainSplit(fineDomBox, boxes, maxBoxSize);
-          mortonOrdering(boxes);
-          LoadBalance(procs, boxes);
-          DisjointBoxLayout dblBufFine(boxes, procs);
+	{
+	  m_useFineBuffer = true;
+	  int maxBoxSize = 4*a_nref;
+	  Vector<Box> boxes;
+	  Vector<int> procs;
+	  domainSplit(fineDomBox, boxes, maxBoxSize);
+	  mortonOrdering(boxes);
+	  LoadBalance(procs, boxes);
+	  DisjointBoxLayout dblBufFine(boxes, procs);
 
-          eblgFine = EBLevelGrid(dblBufFine, domainFine, 2, eblgCoar.getEBIS());
-        }
+	  eblgFine = EBLevelGrid(dblBufFine, domainFine, 2, eblgCoar.getEBIS());
+	}
       else
-        {
-          pout() << "ebcoarseaverage::input layout is not coarsenable and does not cover the domain--bailing out" << endl;
-          MayDay::Error();
-        }
+	{
+	  pout() << "ebcoarseaverage::input layout is not coarsenable and does not cover the domain--bailing out" << endl;
+	  MayDay::Error();
+	}
     }
 
   coarsen(eblgCoFi, eblgFine, a_nref);
@@ -135,10 +137,10 @@ ebcoarseaverage::define(const DisjointBoxLayout& a_dblFine,
 /************************************/
 void
 ebcoarseaverage::define(const EBLevelGrid& a_eblgFine,
-                        const EBLevelGrid& a_eblgCoar,
-                        const EBLevelGrid& a_eblgCoFi,
-                        const int& a_nref,
-                        const int& a_nvar)
+			const EBLevelGrid& a_eblgCoar,
+			const EBLevelGrid& a_eblgCoFi,
+			const int& a_nref,
+			const int& a_nvar)
 {
   CH_TIME("ebcoarseaverage::define(EBLG)");
   CH_assert(a_nref > 0);
@@ -166,9 +168,9 @@ ebcoarseaverage::define(const EBLevelGrid& a_eblgFine,
     {
       m_irregSetsFine.define(m_eblgFine.getDBL());
       for (DataIterator dit = m_eblgFine.getDBL().dataIterator(); dit.ok(); ++dit)
-        {
-          m_irregSetsFine[dit()] = m_eblgFine.getEBISL()[dit()].getIrregIVS(m_eblgFine.getDBL().get(dit()));
-        }
+	{
+	  m_irregSetsFine[dit()] = m_eblgFine.getEBISL()[dit()].getIrregIVS(m_eblgFine.getDBL().get(dit()));
+	}
     }
 }
 /************************************/
@@ -180,8 +182,8 @@ ebcoarseaverage::isDefined() const
 /************************************/
 void
 ebcoarseaverage::average(LevelData<EBCellFAB>& a_coarData,
-                         const LevelData<EBCellFAB>& a_fineData,
-                         const Interval& a_variables)
+			 const LevelData<EBCellFAB>& a_fineData,
+			 const Interval& a_variables)
 {
   CH_TIME("ebcoarseaverage::average(LD<EBCellFAB>)");
   LevelData<EBCellFAB> coarFiData;
@@ -193,8 +195,8 @@ ebcoarseaverage::average(LevelData<EBCellFAB>& a_coarData,
     coarFiData.define(  m_eblgCoFi.getDBL(), m_nComp, IntVect::Zero, factCoFi);
     if (m_useFineBuffer)
       {
-        EBCellFactory    factFine(m_eblgFine.getEBISL());
-        fineBuffer.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, factFine);
+	EBCellFactory    factFine(m_eblgFine.getEBISL());
+	fineBuffer.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, factFine);
       }
   }
 
@@ -208,19 +210,19 @@ ebcoarseaverage::average(LevelData<EBCellFAB>& a_coarData,
     CH_TIME("averaging");
     for (DataIterator dit = m_eblgFine.getDBL().dataIterator(); dit.ok(); ++dit)
       {
-        const EBCellFAB* fineFAB = NULL;
-        if (m_useFineBuffer)
-          {
-            fineFAB = &fineBuffer[dit()];
-          }
-        else
-          {
-            fineFAB = &a_fineData[dit()];
-          }
-        averageFAB(coarFiData[dit()],
-                   *fineFAB,
-                   dit(),
-                   a_variables);
+	const EBCellFAB* fineFAB = NULL;
+	if (m_useFineBuffer)
+	  {
+	    fineFAB = &fineBuffer[dit()];
+	  }
+	else
+	  {
+	    fineFAB = &a_fineData[dit()];
+	  }
+	averageFAB(coarFiData[dit()],
+		   *fineFAB,
+		   dit(),
+		   a_variables);
       }
   }
   {
@@ -231,8 +233,8 @@ ebcoarseaverage::average(LevelData<EBCellFAB>& a_coarData,
 /************************************/
 void
 ebcoarseaverage::average(LevelData<EBFluxFAB>&       a_coarData,
-                         const LevelData<EBFluxFAB>& a_fineData,
-                         const Interval& a_variables)
+			 const LevelData<EBFluxFAB>& a_fineData,
+			 const Interval& a_variables)
 {
   CH_TIME("ebcoarseaverage::average(LD<EBFluxFAB>)");
   LevelData<EBFluxFAB> coarFiData;
@@ -244,8 +246,8 @@ ebcoarseaverage::average(LevelData<EBFluxFAB>&       a_coarData,
     coarFiData.define(  m_eblgCoFi.getDBL(), m_nComp, IntVect::Zero, factCoFi);
     if (m_useFineBuffer)
       {
-        EBFluxFactory    factFine(m_eblgFine.getEBISL());
-        fineBuffer.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, factFine);
+	EBFluxFactory    factFine(m_eblgFine.getEBISL());
+	fineBuffer.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, factFine);
       }
   }
 
@@ -259,26 +261,26 @@ ebcoarseaverage::average(LevelData<EBFluxFAB>&       a_coarData,
     CH_TIME("averaging");
     for (DataIterator dit = m_eblgFine.getDBL().dataIterator(); dit.ok(); ++dit)
       {
-        const EBFluxFAB* fineFABPtr = NULL;
-        if (m_useFineBuffer)
-          {
-            fineFABPtr = &fineBuffer[dit()];
-          }
-        else
-          {
-            fineFABPtr = &a_fineData[dit()];
-          }
-        EBFluxFAB&       cofiFAB = coarFiData[dit()];
-        const EBFluxFAB& fineFAB = *fineFABPtr;
-        for (int idir = 0; idir < SpaceDim; idir++)
-          {
-            averageFAB(cofiFAB[idir],
-                       fineFAB[idir],
-                       dit(),
-                       a_variables,
-                       idir);
+	const EBFluxFAB* fineFABPtr = NULL;
+	if (m_useFineBuffer)
+	  {
+	    fineFABPtr = &fineBuffer[dit()];
+	  }
+	else
+	  {
+	    fineFABPtr = &a_fineData[dit()];
+	  }
+	EBFluxFAB&       cofiFAB = coarFiData[dit()];
+	const EBFluxFAB& fineFAB = *fineFABPtr;
+	for (int idir = 0; idir < SpaceDim; idir++)
+	  {
+	    averageFAB(cofiFAB[idir],
+		       fineFAB[idir],
+		       dit(),
+		       a_variables,
+		       idir);
 
-          }
+	  }
       }
   }
   {
@@ -289,8 +291,8 @@ ebcoarseaverage::average(LevelData<EBFluxFAB>&       a_coarData,
 /************************************/
 void
 ebcoarseaverage::average(LevelData<BaseIVFAB<Real> >&        a_coarData,
-                         const LevelData<BaseIVFAB<Real> >&  a_fineData,
-                         const Interval&                     a_variables)
+			 const LevelData<BaseIVFAB<Real> >&  a_fineData,
+			 const Interval&                     a_variables)
 {
   CH_TIME("ebcoarseaverage::average(LD<BaseIVFAB>)");
   LevelData<BaseIVFAB<Real> > coarFiData;
@@ -302,39 +304,39 @@ ebcoarseaverage::average(LevelData<BaseIVFAB<Real> >&        a_coarData,
     coarFiData.define(m_eblgCoFi.getDBL(), m_nComp, IntVect::Zero, factCoFi);
     if (m_useFineBuffer)
       {
-        BaseIVFactory<Real> factFine(m_eblgFine.getEBISL(), m_irregSetsFine);
-        coarFiData.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, factFine);
+	BaseIVFactory<Real> factFine(m_eblgFine.getEBISL(), m_irregSetsFine);
+	coarFiData.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, factFine);
       }
   }
 
   if (m_useFineBuffer)
-  {
-    CH_TIME("fine_copy");
-    a_fineData.copyTo(a_variables, fineBuffer, a_variables);
-  }
+    {
+      CH_TIME("fine_copy");
+      a_fineData.copyTo(a_variables, fineBuffer, a_variables);
+    }
 
   {
     CH_TIME("averaging");
     int ifnerg = 0;
     for (DataIterator dit = m_eblgFine.getDBL().dataIterator(); dit.ok(); ++dit)
       {
-        const BaseIVFAB<Real>* fineFABPtr = NULL;
-        if (m_useFineBuffer)
-          {
-            fineFABPtr = &fineBuffer[dit()];
-          }
-        else
-          {
-            fineFABPtr = &a_fineData[dit()];
-          }
-        BaseIVFAB<Real>&       cofiFAB = coarFiData[dit()];
-        const BaseIVFAB<Real>& fineFAB = *fineFABPtr;
-        averageFAB(cofiFAB,
-                   fineFAB,
-                   dit(),
-                   a_variables);
+	const BaseIVFAB<Real>* fineFABPtr = NULL;
+	if (m_useFineBuffer)
+	  {
+	    fineFABPtr = &fineBuffer[dit()];
+	  }
+	else
+	  {
+	    fineFABPtr = &a_fineData[dit()];
+	  }
+	BaseIVFAB<Real>&       cofiFAB = coarFiData[dit()];
+	const BaseIVFAB<Real>& fineFAB = *fineFABPtr;
+	averageFAB(cofiFAB,
+		   fineFAB,
+		   dit(),
+		   a_variables);
 
-        ifnerg++;
+	ifnerg++;
       }
   }
   {
@@ -345,8 +347,8 @@ ebcoarseaverage::average(LevelData<BaseIVFAB<Real> >&        a_coarData,
 /************************************/
 void
 ebcoarseaverage::conservative_average(LevelData<BaseIVFAB<Real> >&        a_coarData,
-                         const LevelData<BaseIVFAB<Real> >&  a_fineData,
-                         const Interval&                     a_variables)
+				      const LevelData<BaseIVFAB<Real> >&  a_fineData,
+				      const Interval&                     a_variables)
 {
   CH_TIME("ebcoarseaverage::average(LD<BaseIVFAB>)");
   LevelData<BaseIVFAB<Real> > coarFiData;
@@ -358,39 +360,39 @@ ebcoarseaverage::conservative_average(LevelData<BaseIVFAB<Real> >&        a_coar
     coarFiData.define(m_eblgCoFi.getDBL(), m_nComp, IntVect::Zero, factCoFi);
     if (m_useFineBuffer)
       {
-        BaseIVFactory<Real> factFine(m_eblgFine.getEBISL(), m_irregSetsFine);
-        coarFiData.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, factFine);
+	BaseIVFactory<Real> factFine(m_eblgFine.getEBISL(), m_irregSetsFine);
+	coarFiData.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, factFine);
       }
   }
 
   if (m_useFineBuffer)
-  {
-    CH_TIME("fine_copy");
-    a_fineData.copyTo(a_variables, fineBuffer, a_variables);
-  }
+    {
+      CH_TIME("fine_copy");
+      a_fineData.copyTo(a_variables, fineBuffer, a_variables);
+    }
 
   {
     CH_TIME("averaging");
     int ifnerg = 0;
     for (DataIterator dit = m_eblgFine.getDBL().dataIterator(); dit.ok(); ++dit)
       {
-        const BaseIVFAB<Real>* fineFABPtr = NULL;
-        if (m_useFineBuffer)
-          {
-            fineFABPtr = &fineBuffer[dit()];
-          }
-        else
-          {
-            fineFABPtr = &a_fineData[dit()];
-          }
-        BaseIVFAB<Real>&       cofiFAB = coarFiData[dit()];
-        const BaseIVFAB<Real>& fineFAB = *fineFABPtr;
-        conservative_averageFAB(cofiFAB,
-                   fineFAB,
-                   dit(),
-                   a_variables);
+	const BaseIVFAB<Real>* fineFABPtr = NULL;
+	if (m_useFineBuffer)
+	  {
+	    fineFABPtr = &fineBuffer[dit()];
+	  }
+	else
+	  {
+	    fineFABPtr = &a_fineData[dit()];
+	  }
+	BaseIVFAB<Real>&       cofiFAB = coarFiData[dit()];
+	const BaseIVFAB<Real>& fineFAB = *fineFABPtr;
+	conservative_averageFAB(cofiFAB,
+				fineFAB,
+				dit(),
+				a_variables);
 
-        ifnerg++;
+	ifnerg++;
       }
   }
   {
@@ -401,9 +403,9 @@ ebcoarseaverage::conservative_average(LevelData<BaseIVFAB<Real> >&        a_coar
 /************************************/
 void
 ebcoarseaverage::averageFAB(EBCellFAB&       a_coar,
-                            const EBCellFAB& a_fine,
-                            const DataIndex& a_datInd,
-                            const Interval&  a_variables) const
+			    const EBCellFAB& a_fine,
+			    const DataIndex& a_datInd,
+			    const Interval&  a_variables) const
 {
   CH_TIME("ebcoarseaverage::averageFAB(EBCellFAB)");
   CH_assert(isDefined());
@@ -421,13 +423,13 @@ ebcoarseaverage::averageFAB(EBCellFAB&       a_coar,
 #endif
 
   for (int ivar = a_variables.begin();
-      ivar <= a_variables.end(); ivar++)
+       ivar <= a_variables.end(); ivar++)
     {
       FORT_EBAVERAGE(CHF_FRA1(coarRegFAB,ivar),
-                     CHF_CONST_FRA1(fineRegFAB,ivar),
-                     CHF_BOX(coarBox),
-                     CHF_CONST_INT(m_refRat),
-                     CHF_BOX(refbox));
+		     CHF_CONST_FRA1(fineRegFAB,ivar),
+		     CHF_BOX(coarBox),
+		     CHF_CONST_INT(m_refRat),
+		     CHF_BOX(refbox));
     }
 
   //overwrite irregular cells
@@ -445,57 +447,57 @@ ebcoarseaverage::averageFAB(EBCellFAB&       a_coar,
     cellVolCoar *= dxCoar;
 
   for (VoFIterator vofitCoar(coarIrregIVS, ebisBoxCoar.getEBGraph());
-      vofitCoar.ok(); ++vofitCoar)
+       vofitCoar.ok(); ++vofitCoar)
     {
       const VolIndex& coarVoF = vofitCoar();
       Vector<VolIndex> fineVoFs =
-        m_eblgCoFi.getEBISL().refine(coarVoF, m_refRat, a_datInd);
+	m_eblgCoFi.getEBISL().refine(coarVoF, m_refRat, a_datInd);
 
       Real volCoar = cellVolCoar*ebisBoxCoar.volFrac(coarVoF);
       for (int ivar = a_variables.begin();
-          ivar <= a_variables.end(); ivar++)
-        {
-          Real dataVal = 0.0;
-          if (volCoar > 0.)
-            {
-              for (int ifine = 0; ifine < fineVoFs.size(); ifine++)
-                {
-                  const VolIndex& fineVoF = fineVoFs[ifine];
-                  //fine cell volume is normalized to one...
-                  Real volFine  = ebisBoxFine.volFrac(fineVoF);
-                  Real fineVal =  a_fine(fineVoF, ivar);
-                  if (volFine > 0.)
-                    {
-                      dataVal += fineVal*volFine;
-                    }
-                }
-              dataVal /= volCoar;
-            }
-          else
-            {
-              //if there is no real volume, just take the ave
-              //of fine values
-              for (int ifine = 0; ifine < fineVoFs.size(); ifine++)
-                {
-                  const VolIndex& fineVoF = fineVoFs[ifine];
-                  Real fineVal =  a_fine(fineVoF, ivar);
-                  dataVal += fineVal;
-                }
-              if (fineVoFs.size() > 0)
-                {
-                  dataVal /= Real(fineVoFs.size());
-                }
-            }
-          a_coar(coarVoF, ivar) = dataVal;
-        }
+	   ivar <= a_variables.end(); ivar++)
+	{
+	  Real dataVal = 0.0;
+	  if (volCoar > 0.)
+	    {
+	      for (int ifine = 0; ifine < fineVoFs.size(); ifine++)
+		{
+		  const VolIndex& fineVoF = fineVoFs[ifine];
+		  //fine cell volume is normalized to one...
+		  Real volFine  = ebisBoxFine.volFrac(fineVoF);
+		  Real fineVal =  a_fine(fineVoF, ivar);
+		  if (volFine > 0.)
+		    {
+		      dataVal += fineVal*volFine;
+		    }
+		}
+	      dataVal /= volCoar;
+	    }
+	  else
+	    {
+	      //if there is no real volume, just take the ave
+	      //of fine values
+	      for (int ifine = 0; ifine < fineVoFs.size(); ifine++)
+		{
+		  const VolIndex& fineVoF = fineVoFs[ifine];
+		  Real fineVal =  a_fine(fineVoF, ivar);
+		  dataVal += fineVal;
+		}
+	      if (fineVoFs.size() > 0)
+		{
+		  dataVal /= Real(fineVoFs.size());
+		}
+	    }
+	  a_coar(coarVoF, ivar) = dataVal;
+	}
     }
 }
 /***/
 void
 ebcoarseaverage::averageFAB(BaseIVFAB<Real>&       a_coar,
-                            const BaseIVFAB<Real>& a_fine,
-                            const DataIndex&       a_datInd,
-                            const Interval&        a_variables) const
+			    const BaseIVFAB<Real>& a_fine,
+			    const DataIndex&       a_datInd,
+			    const Interval&        a_variables) const
 {
   CH_assert(isDefined());
   //recall that datInd is from the fine layout.
@@ -505,37 +507,37 @@ ebcoarseaverage::averageFAB(BaseIVFAB<Real>&       a_coar,
   const IntVectSet& fineIrregIVS = a_fine.getIVS();
 
   for (VoFIterator vofitCoar(coarIrregIVS, ebisBoxCoar.getEBGraph());
-      vofitCoar.ok(); ++vofitCoar)
+       vofitCoar.ok(); ++vofitCoar)
     {
       const VolIndex& coarVoF = vofitCoar();
       Vector<VolIndex> fineVoFs =
-        m_eblgCoFi.getEBISL().refine(coarVoF, m_refRat, a_datInd);
+	m_eblgCoFi.getEBISL().refine(coarVoF, m_refRat, a_datInd);
 
       for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++)
-        {
-          int  numVoFs = 0;
-          Real areaTot = 0;
-          Real dataVal = 0;
-          for (int ifine = 0; ifine < fineVoFs.size(); ifine++)
-            {
-              const VolIndex& fineVoF = fineVoFs[ifine];
-              if (fineIrregIVS.contains(fineVoF.gridIndex()))
-                {
-                  Real bndryArea = ebisBoxFine.bndryArea(fineVoF);
-                  if (bndryArea > 0)
-                    {
-                      areaTot += bndryArea;
-                      numVoFs++;
-                      dataVal += bndryArea*a_fine(fineVoF, ivar);
-                    }
-                }
-            }
-          if (areaTot > 0)
-            {
-              dataVal /= areaTot;
-            }
-          a_coar(coarVoF, ivar) = dataVal;
-        }
+	{
+	  int  numVoFs = 0;
+	  Real areaTot = 0;
+	  Real dataVal = 0;
+	  for (int ifine = 0; ifine < fineVoFs.size(); ifine++)
+	    {
+	      const VolIndex& fineVoF = fineVoFs[ifine];
+	      if (fineIrregIVS.contains(fineVoF.gridIndex()))
+		{
+		  Real bndryArea = ebisBoxFine.bndryArea(fineVoF);
+		  if (bndryArea > 0)
+		    {
+		      areaTot += bndryArea;
+		      numVoFs++;
+		      dataVal += bndryArea*a_fine(fineVoF, ivar);
+		    }
+		}
+	    }
+	  if (areaTot > 0)
+	    {
+	      dataVal /= areaTot;
+	    }
+	  a_coar(coarVoF, ivar) = dataVal;
+	}
     }
 }
 
@@ -556,43 +558,43 @@ ebcoarseaverage::conservative_averageFAB(BaseIVFAB<Real>&       a_coar,
   const int nref2 = pow(m_refRat, SpaceDim-1);
 
   for (VoFIterator vofitCoar(coarIrregIVS, ebisBoxCoar.getEBGraph());
-      vofitCoar.ok(); ++vofitCoar)
+       vofitCoar.ok(); ++vofitCoar)
     {
       const VolIndex& coarVoF = vofitCoar();
       Vector<VolIndex> fineVoFs =
-        m_eblgCoFi.getEBISL().refine(coarVoF, m_refRat, a_datInd);
+	m_eblgCoFi.getEBISL().refine(coarVoF, m_refRat, a_datInd);
 
       for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++)
-        {
-          int  numVoFs = 0;
-          Real areaTot = 0;
-          Real dataVal = 0;
-          for (int ifine = 0; ifine < fineVoFs.size(); ifine++)
-            {
-              const VolIndex& fineVoF = fineVoFs[ifine];
-              if (fineIrregIVS.contains(fineVoF.gridIndex()))
-                {
-                  Real bndryArea = ebisBoxFine.bndryArea(fineVoF);
-                  if (bndryArea > 0)
-                    {
-                      areaTot += bndryArea;
-                      numVoFs++;
+	{
+	  int  numVoFs = 0;
+	  Real areaTot = 0;
+	  Real dataVal = 0;
+	  for (int ifine = 0; ifine < fineVoFs.size(); ifine++)
+	    {
+	      const VolIndex& fineVoF = fineVoFs[ifine];
+	      if (fineIrregIVS.contains(fineVoF.gridIndex()))
+		{
+		  Real bndryArea = ebisBoxFine.bndryArea(fineVoF);
+		  if (bndryArea > 0)
+		    {
+		      areaTot += bndryArea;
+		      numVoFs++;
 		      dataVal += bndryArea*a_fine(fineVoF, ivar);
-                    }
-                }
-            }
+		    }
+		}
+	    }
 	  const Real safety = 1.E-8;
 	  a_coar(coarVoF, ivar) = dataVal/(nref2*(safety + ebisBoxCoar.bndryArea(coarVoF)));
-        }
+	}
     }
 }
 /************************************/
 void
 ebcoarseaverage::averageFAB(EBFaceFAB&       a_coar,
-                            const EBFaceFAB& a_fine,
-                            const DataIndex& a_datInd,
-                            const Interval&  a_variables,
-                            const int&       a_dir) const
+			    const EBFaceFAB& a_fine,
+			    const DataIndex& a_datInd,
+			    const Interval&  a_variables,
+			    const int&       a_dir) const
 {
   CH_TIME("ebcoarseaverage::averageFAB(EBFaceFAB)");
   CH_assert(isDefined());
@@ -601,7 +603,7 @@ ebcoarseaverage::averageFAB(EBFaceFAB&       a_coar,
   BaseFab<Real>& coarRegFAB =  a_coar.getSingleValuedFAB();
   const BaseFab<Real>& fineRegFAB = a_fine.getSingleValuedFAB();
   Box refbox(IntVect::Zero,
-             (m_refRat-1)*IntVect::Unit);
+	     (m_refRat-1)*IntVect::Unit);
   refbox.surroundingNodes(a_dir);
   const Box& coarDBLBox = m_eblgCoFi.getDBL().get(a_datInd);
   Box coarFaceBox = coarDBLBox;
@@ -614,14 +616,14 @@ ebcoarseaverage::averageFAB(EBFaceFAB&       a_coar,
 #endif
 
   for (int ivar = a_variables.begin();
-      ivar <= a_variables.end(); ivar++)
+       ivar <= a_variables.end(); ivar++)
     {
       FORT_EBAVERAGEFACE(CHF_FRA1(coarRegFAB,ivar),
-                         CHF_CONST_FRA1(fineRegFAB,ivar),
-                         CHF_BOX(coarFaceBox),
-                         CHF_CONST_INT(m_refRat),
-                         CHF_BOX(refbox),
-                         CHF_CONST_INT(a_dir));
+			 CHF_CONST_FRA1(fineRegFAB,ivar),
+			 CHF_BOX(coarFaceBox),
+			 CHF_CONST_INT(m_refRat),
+			 CHF_BOX(refbox),
+			 CHF_CONST_INT(a_dir));
     }
 
   //overwrite irregular cells
@@ -639,53 +641,53 @@ ebcoarseaverage::averageFAB(EBFaceFAB&       a_coar,
     faceAreaCoar *= dxCoar;
 
   for (FaceIterator faceitCoar(coarIrregIVS, ebisBoxCoar.getEBGraph(),a_dir,
-                              FaceStop::SurroundingWithBoundary);
-      faceitCoar.ok(); ++faceitCoar)
+			       FaceStop::SurroundingWithBoundary);
+       faceitCoar.ok(); ++faceitCoar)
     {
       const FaceIndex& coarFace = faceitCoar();
       Vector<FaceIndex> fineFaces = m_eblgCoFi.getEBISL().refine(coarFace,m_refRat,a_datInd);
 
       Real areaCoar = faceAreaCoar*ebisBoxCoar.areaFrac(coarFace);
       for (int ivar = a_variables.begin();
-          ivar <= a_variables.end(); ivar++)
-        {
-          Real dataVal = 0.0;
-          if (areaCoar > 0.)
-            {
-              for (int ifine = 0; ifine < fineFaces.size(); ifine++)
-                {
-                  const FaceIndex& fineFace = fineFaces[ifine];
-                  //fine face area is normalized to one...
-                  Real areaFine  = ebisBoxFine.areaFrac(fineFace);
-                  Real fineVal =  a_fine(fineFace, ivar);
-                  if (areaFine > 0.)
-                    {
-                      dataVal += fineVal*areaFine;
-                    }
-                }
-              dataVal /= areaCoar;
-            }
-          else
-            {
-              //if there is no real area, just take the ave
-              //of fine values
-              for (int ifine = 0; ifine < fineFaces.size(); ifine++)
-                {
-                  const FaceIndex& fineFace = fineFaces[ifine];
-                  Real fineVal =  a_fine(fineFace, ivar);
-                  dataVal += fineVal;
-                }
-              if (fineFaces.size() > 0)
-                {
-                  dataVal /= Real(fineFaces.size());
-                }
-            }
+	   ivar <= a_variables.end(); ivar++)
+	{
+	  Real dataVal = 0.0;
+	  if (areaCoar > 0.)
+	    {
+	      for (int ifine = 0; ifine < fineFaces.size(); ifine++)
+		{
+		  const FaceIndex& fineFace = fineFaces[ifine];
+		  //fine face area is normalized to one...
+		  Real areaFine  = ebisBoxFine.areaFrac(fineFace);
+		  Real fineVal =  a_fine(fineFace, ivar);
+		  if (areaFine > 0.)
+		    {
+		      dataVal += fineVal*areaFine;
+		    }
+		}
+	      dataVal /= areaCoar;
+	    }
+	  else
+	    {
+	      //if there is no real area, just take the ave
+	      //of fine values
+	      for (int ifine = 0; ifine < fineFaces.size(); ifine++)
+		{
+		  const FaceIndex& fineFace = fineFaces[ifine];
+		  Real fineVal =  a_fine(fineFace, ivar);
+		  dataVal += fineVal;
+		}
+	      if (fineFaces.size() > 0)
+		{
+		  dataVal /= Real(fineFaces.size());
+		}
+	    }
 
-          a_coar(coarFace, ivar) = dataVal;
-        }
+	  a_coar(coarFace, ivar) = dataVal;
+	}
     }
 }
 
-
+#include "CD_NamespaceFooter.H"
 /************************************/
 #include "NamespaceFooter.H"

@@ -12,6 +12,7 @@
 
 #include <iostream>
 
+#include "CD_NamespaceHeader.H"
 namespace dcel {
 
   template <class T>
@@ -205,4 +206,5 @@ namespace dcel {
     return ret;
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

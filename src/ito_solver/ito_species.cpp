@@ -7,6 +7,8 @@
 
 #include "ito_species.H"
 
+#include "CD_NamespaceHeader.H"
+
 ito_species::ito_species(){
   m_name = "ito_species.H";
 }
@@ -50,3 +52,4 @@ Real ito_species::mobility(const Real a_energy) const {
 Real ito_species::diffusion(const Real a_energy) const {
   return 0.0;
 }
+#include "CD_NamespaceFooter.H"

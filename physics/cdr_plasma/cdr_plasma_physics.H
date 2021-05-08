@@ -15,6 +15,7 @@
 #include "cdr_species.H"
 #include "rte_species.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace cdr_plasma {
   
@@ -261,4 +262,5 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

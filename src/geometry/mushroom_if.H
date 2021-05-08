@@ -11,6 +11,8 @@
 #include <BaseIF.H>
 #include <RealVect.H>
 
+#include "CD_NamespaceHeader.H"
+
 class mushroom_if : public BaseIF {
 public:  
 
@@ -34,4 +36,5 @@ protected:
 
     
 };
+#include "CD_NamespaceFooter.H"
 #endif

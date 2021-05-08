@@ -849,6 +849,6 @@ Vector<Real> air_eed::compute_cdr_fluxes(const Real         a_time,
 
 Real air_eed::initial_sigma(const Real a_time, const RealVect a_pos) const {
   return 0.0;
-}
+#include "CD_NamespaceFooter.H"
 
 

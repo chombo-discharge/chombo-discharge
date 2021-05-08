@@ -19,6 +19,7 @@
 #define USE_FAST_VELOCITIES 0
 #define USE_FAST_DIFFUSION  1
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 Real cdr_plasma_stepper::s_constant_one(const RealVect a_pos){
@@ -1270,14 +1271,14 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a
     }
 
     const Vector<Real> coeffs = m_physics->compute_cdr_diffusion_coefficients(a_time,
-    									      pos,
-    									      E,
-    									      cdr_densities);
+									      pos,
+									      E,
+									      cdr_densities);
 
     for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
       if(solver_it()->is_diffusive()){
-    	tmp.getSingleValuedFAB()(iv,idx) = coeffs[idx];
+	tmp.getSingleValuedFAB()(iv,idx) = coeffs[idx];
       }
     }
   }
@@ -2614,18 +2615,18 @@ void cdr_plasma_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_p
       const Box& box          = dbl.get(dit());
       
       for (int dir = 0; dir < SpaceDim; dir++){
-      	EBFaceFAB& E_face = (*a_E_face[lvl])[dit()][dir];
+	EBFaceFAB& E_face = (*a_E_face[lvl])[dit()][dir];
 	E_face.setVal(0.0);
 
-      	EBLevelDataOps::averageCellToFace(E_face,
-      					  E_cell,
-      					  ebgraph,
-      					  box,
-      					  0,
-      					  dir,
-      					  domain,
-      					  dir,
-      					  dir);
+	EBLevelDataOps::averageCellToFace(E_face,
+					  E_cell,
+					  ebgraph,
+					  box,
+					  0,
+					  dir,
+					  domain,
+					  dir,
+					  dir);
       }
 
     }
@@ -4359,7 +4360,8 @@ void cdr_plasma_stepper::print_step_report(){
     str = " (Restricted by a hardcap)";
   }
   pout() << "                                   mode  = " << str << endl
-         << "                                   cfl   = " << m_dt/cfl_dt << endl
+	 << "                                   cfl   = " << m_dt/cfl_dt << endl
 	 << "                                   Emax  = " << Emax << endl
 	 << "                                   n_max = " << nmax << "(" + solver_max + ")" << endl;
 }
+#include "CD_NamespaceFooter.H"

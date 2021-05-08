@@ -10,7 +10,8 @@
 
 #include <BaseIF.H>
 
-
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Class for defining a two- or three-dimensional box with arbitrary centroid and orientation.
 */
@@ -65,5 +66,6 @@ protected:
   */
   bool m_fluidInside;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

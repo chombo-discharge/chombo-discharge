@@ -6,10 +6,11 @@
 */
 
 #include "noncons_div.H"
-#include "stencil_ops.H"
+#include "CD_VofUtils.H"
 
 #include "EBArith.H"
 
+#include "CD_NamespaceHeader.H"
 
 noncons_div::noncons_div() : irreg_stencil(){
   CH_TIME("noncons_div::noncons_div");
@@ -46,8 +47,8 @@ void noncons_div::build_stencil(VoFStencil&              a_sten,
   a_sten.clear();
 
   Real norm = 0.;
-  Vector<VolIndex> vofs;
-  EBArith::getAllVoFsInMonotonePath(vofs, a_vof, a_ebisbox, m_radius);
+
+  const Vector<VolIndex> vofs = VofUtils::getAllConnectedVofsInRadius(a_vof, a_ebisbox, m_radius, IntVectSet());
   for (int i = 0; i < vofs.size(); i++){
     if(vofs[i] != a_vof){
       const VolIndex& ivof = vofs[i];
@@ -60,3 +61,4 @@ void noncons_div::build_stencil(VoFStencil&              a_sten,
 
   a_sten *= 1./norm;
 }
+#include "CD_NamespaceFooter.H"

@@ -10,6 +10,8 @@
 
 #include <EBArith.H>
 
+#include "CD_NamespaceHeader.H"
+
 sigma_solver::sigma_solver(){
 
   this->set_verbosity(-1);
@@ -149,18 +151,18 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
       const EBGraph& ebgraph = fine_state.getEBGraph();
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-    	const VolIndex& fine_vof = vofit();
-    	const VolIndex  coar_vof = fine_ebisl.coarsen(fine_vof, nref, dit());
+	const VolIndex& fine_vof = vofit();
+	const VolIndex  coar_vof = fine_ebisl.coarsen(fine_vof, nref, dit());
 	const Real coarArea      = coar_ebisbox.bndryArea(coar_vof);
 	
-    	// Same sigma for all refined cells such that charge is conserved. 
-    	const Vector<VolIndex> refined_vofs = coar_ebisl.refine(coar_vof, nref, dit());
-    	Real fineArea = 0.0;
-    	for (int i = 0; i < refined_vofs.size(); i++){
+	// Same sigma for all refined cells such that charge is conserved. 
+	const Vector<VolIndex> refined_vofs = coar_ebisl.refine(coar_vof, nref, dit());
+	Real fineArea = 0.0;
+	for (int i = 0; i < refined_vofs.size(); i++){
 	  fineArea += fine_ebisbox.bndryArea(refined_vofs[i]);
-    	}
+	}
 
-    	// Initialize conserved charge
+	// Initialize conserved charge
 	if(fineArea > 0.0 && coarArea > 0.0){
 	  fine_state(fine_vof, comp) = coar_state(coar_vof, comp)*nref*coarArea/fineArea;
 	}
@@ -440,3 +442,4 @@ EBAMRIVData& sigma_solver::get_state(){
 EBAMRIVData& sigma_solver::get_flux(){
   return m_flux;
 }
+#include "CD_NamespaceFooter.H"

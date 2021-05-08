@@ -17,6 +17,8 @@
 #include <Stencils.H>
 #include <EBISBox.H>
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Class matching the surface potential with multifluid poisson
 */
@@ -69,7 +71,7 @@ public:
 			const LevelData<MFCellFAB>&        a_phi,
 			const bool                         a_homogeneous);
 
-    /*!
+  /*!
     @brief Match the boundary condition
   */
   virtual void match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
@@ -124,7 +126,7 @@ public:
   */
   virtual LayoutData<MFInterfaceFAB<Real> >& get_weights();
 
-    /*!
+  /*!
     @brief Get weights
   */
   virtual LayoutData<MFInterfaceFAB<Real> >& get_avgWeights();
@@ -134,7 +136,7 @@ public:
   */
   virtual LayoutData<MFInterfaceFAB<Real> >& get_bco();
 
-    /*!
+  /*!
     @brief Get b-coefficient on each side
   */
   virtual LayoutData<MFInterfaceFAB<Real> >& get_avgBco();
@@ -291,6 +293,7 @@ protected:
   inline
   void compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit);
 };
+#include "CD_NamespaceFooter.H"
 
 #include "jump_bcI.H"
 

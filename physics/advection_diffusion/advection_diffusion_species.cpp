@@ -10,6 +10,7 @@
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::advection_diffusion;
 
 advection_diffusion_species::advection_diffusion_species(){
@@ -38,3 +39,4 @@ Real advection_diffusion_species::initial_data(const RealVect a_pos, const Real 
 
   return m_blob_amplitude*exp(-0.5*d2*d2/(r2*r2));
 }
+#include "CD_NamespaceFooter.H"

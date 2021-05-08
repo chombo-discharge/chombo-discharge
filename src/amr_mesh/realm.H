@@ -12,6 +12,8 @@
 #include "mfis.H"
 #include "MFLevelGrid.H"
 
+#include "CD_NamespaceHeader.H"
+
 static const std::string s_particle_halo         = "particle_halo";
 static const std::string s_particle_valid_region = "pvr";
 
@@ -143,4 +145,5 @@ protected:
 
   
 };
+#include "CD_NamespaceFooter.H"
 #endif

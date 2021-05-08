@@ -13,6 +13,8 @@
 
 #include "BoxType.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Derived version of GeometryShop that load balances based on the cut cells themselves. The internals of this class
   is basically the same as GeometryShop, with the exception that this class will generate an internal map of the computational
@@ -149,5 +151,6 @@ protected:
   */
   bool isCovered(const Box a_box, const RealVect m_origin, const Real a_dx);
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

@@ -7,6 +7,8 @@
 
 #include "photon.H"
 
+#include "CD_NamespaceHeader.H"
+  
 photon::photon() : BinItem(){
 
 }
@@ -44,7 +46,7 @@ bool photon::operator == (const photon* a_p) const{ return (*this == *a_p); }
 bool photon::operator != (const photon& a_p) const{ return !(*this == a_p); }
 bool photon::operator == (const photon& a_p) const {
   return ( m_position  == a_p.m_position &&
-           m_velocity  == a_p.m_velocity &&
+	   m_velocity  == a_p.m_velocity &&
 	   m_kappa     == a_p.m_kappa &&
 	   m_mass    == a_p.m_mass);
 }
@@ -92,3 +94,4 @@ void photon::linearIn(void* buf){
   buffer++;
   m_mass = *buffer;
 }
+#include "CD_NamespaceFooter.H"

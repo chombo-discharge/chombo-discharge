@@ -10,6 +10,8 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+
 rough_rod::rough_rod(){
   this->set_eps0(1.0);
 
@@ -46,3 +48,4 @@ rough_rod::rough_rod(){
 rough_rod::~rough_rod(){
   
 }
+#include "CD_NamespaceFooter.H"

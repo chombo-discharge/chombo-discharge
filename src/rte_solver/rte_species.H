@@ -10,6 +10,8 @@
 
 #include "RealVect.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Declaration of a class that defines a group within the multigroup approximation
   @details This is a lightweight class - it just holds a name for the group and the kappa for the group
@@ -93,5 +95,6 @@ protected:
   */
   Real (*m_varscatter)(const RealVect a_pos);
 };
+#include "CD_NamespaceFooter.H"
 #endif
   

@@ -9,6 +9,7 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 streamer_tagger::streamer_tagger(){
@@ -93,3 +94,4 @@ bool streamer_tagger::refine_cell(const RealVect         a_pos,
 
   return refine1 || refine2;
 }
+#include "CD_NamespaceFooter.H"

@@ -14,6 +14,8 @@
 
 #include <BaseDomainBC.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Factory class for generating Robin boundary condition on domain faces
 */
@@ -72,5 +74,6 @@ protected:
 
   bool m_func_coeff;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

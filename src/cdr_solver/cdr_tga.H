@@ -21,6 +21,8 @@
 #include <time.h>
 #include <chrono>
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Extension class of cdr_solver that uses ebconductivityop for diffusion part. Can also solve for stochastic diffusion
 */
@@ -318,4 +320,5 @@ protected:
   */
   virtual void parse_gmg_settings();
 };
+#include "CD_NamespaceFooter.H"
 #endif

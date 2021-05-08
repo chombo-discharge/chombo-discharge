@@ -9,6 +9,8 @@
 
 #include <ParmParse.H>
 
+using namespace ChomboDischarge;
+
 int main(int argc, char* argv[]){
 
 #ifdef CH_MPI
@@ -88,9 +90,9 @@ int main(int argc, char* argv[]){
   outputPar.open ("output_particles.dat");
 
 #if CH_SPACEDIM==2
-    inputPar << "x" << "\t" << "y" << "\t" << "color" << "\n";
+  inputPar << "x" << "\t" << "y" << "\t" << "color" << "\n";
 #else
-    inputPar << "x" << "\t" << "y" << "\t" << "z" << "\t" << "color" << "\n";
+  inputPar << "x" << "\t" << "y" << "\t" << "z" << "\t" << "color" << "\n";
 #endif
 
   for (const auto& p : inputParticles){
@@ -127,4 +129,4 @@ int main(int argc, char* argv[]){
   CH_TIMER_REPORT();
   MPI_Finalize();
 #endif
-}
+#include "CD_NamespaceFooter.H"

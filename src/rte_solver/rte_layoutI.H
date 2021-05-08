@@ -11,6 +11,8 @@
 #include "rte_iterator.H"
 #include "rte_layout.H"
 
+#include "CD_NamespaceHeader.H"
+
 template <class T>
 rte_layout<T>::rte_layout(const Vector<RefCountedPtr<rte_species> >& a_rte_species){
   m_species = a_rte_species;
@@ -324,9 +326,9 @@ phase::which_phase rte_layout<T>::get_phase(){
 
   phase::which_phase p;
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
-   RefCountedPtr<T>& solver = solver_it();
-   p = solver->get_phase();
- }
+    RefCountedPtr<T>& solver = solver_it();
+    p = solver->get_phase();
+  }
 
   return p;
 }
@@ -401,5 +403,6 @@ RefCountedPtr<rte_layout<T> > rte_factory<T, S>::new_layout(const Vector<RefCoun
 
   return rte;
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

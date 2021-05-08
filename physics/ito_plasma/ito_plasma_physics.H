@@ -28,6 +28,7 @@
 #include "photo_reaction.H"
 #include "lookup_table.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace ito_plasma {
 
@@ -572,7 +573,7 @@ namespace physics {
 
       /*!
 	@brief Do a tau-step with a subset of reactions. You must update the reaction rates before entering this routine! Propensities are not
-	       recomputed with this version. 
+	recomputed with this version. 
       */
       inline
       void tau_step(Vector<long long>&      a_particles,
@@ -631,7 +632,7 @@ namespace physics {
 
       /*!
 	@brief Do an SSA-step with all reactions. You must update the reaction rates before entering this routine! This computes all propensities and
-	       then calls the other version. 
+	then calls the other version. 
       */
       inline
       void ssa_step(Vector<long long>&  a_particles,
@@ -702,7 +703,7 @@ namespace physics {
     };
   }
 }
-
+#include "CD_NamespaceFooter.H"
 #include "ito_plasma_physicsI.H"
 
 #endif

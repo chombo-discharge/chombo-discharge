@@ -10,6 +10,8 @@
 
 #include "computational_geometry.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief This is a class that defines a coaxial cable geometry 
 */
@@ -18,5 +20,6 @@ public:
   coaxial_cable();
   ~coaxial_cable();
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

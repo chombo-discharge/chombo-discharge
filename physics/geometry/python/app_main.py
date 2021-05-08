@@ -19,6 +19,7 @@ def write_template(args):
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
 
+    mainf.write("using namespace ChomboDischarge;\n")
     mainf.write("using namespace physics::geometry;\n\n")
     mainf.write("int main(int argc, char* argv[]){\n")
 

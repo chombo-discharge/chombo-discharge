@@ -1,33 +1,37 @@
 /*!
-  @file stencil_ops.cpp
-  @brief Implementation of stencil_ops.H
+  @file   LinearStencil.cpp
+  @brief  Implementation of LinearStencil.H
   @author Robert Marskar
-  @date Jan. 2018
+  @date   Jan. 2018
 */
 
-#include "stencil_ops.H"
+#include "LinearStencil.H"
 
-Real stencil_ops::tolerance = 1.E-3;
+#define DEBUG_LINEARSTENCIL 1
 
-#define DEBUG_STENCIL_OPS 1
+#include "CD_NamespaceHeader.H"
+  
+Real LinearStencil::tolerance = 1.E-6;
 
-bool stencil_ops::get_linear_interp_stencil(VoFStencil&          a_stencil, 
-					    const RealVect&      a_centroid,
-					    const VolIndex&      a_vof,
-					    const ProblemDomain& a_domain,
-					    const EBISBox&       a_ebisbox){
+
+
+bool LinearStencil::getLinearInterpStencil(VoFStencil&          a_stencil, 
+					   const RealVect&      a_centroid,
+					   const VolIndex&      a_vof,
+					   const ProblemDomain& a_domain,
+					   const EBISBox&       a_ebisbox){
   bool do_interp     = true;
   bool found_stencil = false;
 
-  if(a_centroid.vectorLength() < stencil_ops::tolerance){
+  if(a_centroid.vectorLength() < LinearStencil::tolerance){
     do_interp = false;
   }
 
   if(do_interp){
 #if CH_SPACEDIM == 2
-    found_stencil = stencil_ops::compute_interp_stencil_2D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, 99);
+    found_stencil = LinearStencil::computeInterpStencil2D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, 99);
 #elif CH_SPACEDIM == 3
-    found_stencil = stencil_ops::compute_interp_stencil_3D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox);
+    found_stencil = LinearStencil::computeInterpStencil3D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox);
 #endif
   }
   else{ 
@@ -39,13 +43,13 @@ bool stencil_ops::get_linear_interp_stencil(VoFStencil&          a_stencil,
   return found_stencil;
 }
 
-bool stencil_ops::compute_interp_stencil_1D(VoFStencil&          a_stencil,
-					    const RealVect&      a_centroid,
-					    const VolIndex&      a_vof, 
-					    const ProblemDomain& a_domain,
-					    const EBISBox&       a_ebisbox,
-					    const int            a_interp_dir){
-  CH_TIME("stencil_ops::compute_interp_stencil1D");
+bool LinearStencil::computeInterpStencil1D(VoFStencil&          a_stencil,
+					   const RealVect&      a_centroid,
+					   const VolIndex&      a_vof, 
+					   const ProblemDomain& a_domain,
+					   const EBISBox&       a_ebisbox,
+					   const int            a_interp_dir){
+  CH_TIME("LinearStencil::computeInterpStencil1D");
 
   bool found_stencil = false;
   
@@ -54,7 +58,7 @@ bool stencil_ops::compute_interp_stencil_1D(VoFStencil&          a_stencil,
   const Real x         = a_centroid[a_interp_dir]*HiLoInterp;   // Interpolation distance always positive
 
   a_stencil.clear();
-  const bool really1D = (x > stencil_ops::tolerance) ? true : false;
+  const bool really1D = (x > LinearStencil::tolerance) ? true : false;
 
   if(really1D){
     // Check if vof1 is available
@@ -92,27 +96,27 @@ bool stencil_ops::compute_interp_stencil_1D(VoFStencil&          a_stencil,
     found_stencil = true;
   }
 
-#if DEBUG_STENCIL_OPS // Debug hho. Check for negative weights and that the sum equals 1
+#if DEBUG_LINEARSTENCIL // Debug hho. Check for negative weights and that the sum equals 1
   Real sumweights = 0.0;
   for (int i = 0; i < a_stencil.size(); i++){
     const Real w = a_stencil.weight(i);
-    if(w < 0.0) MayDay::Warning("stencil_ops::compute_interp_stencil_1d - linear negative weight");
+    if(w < 0.0) MayDay::Warning("LinearStencil::computeInterpStencil1d - linear negative weight");
     sumweights += w;
   }
-  if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Warning("stencil_ops::compute_interp_stencil_1d - sum of weights are not 1");
+  if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Warning("LinearStencil::computeInterpStencil1d - sum of weights are not 1");
 #endif
 
   return found_stencil;
 }
 
 
-bool stencil_ops::compute_interp_stencil_2D(VoFStencil&          a_stencil,
-					    const RealVect&      a_centroid,
-					    const VolIndex&      a_vof,
-					    const ProblemDomain& a_domain,
-					    const EBISBox&       a_ebisbox,
-					    const int            a_nointerp_dir){
-  CH_TIME("stencil_ops::compute_interp_stencil2D");
+bool LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
+					   const RealVect&      a_centroid,
+					   const VolIndex&      a_vof,
+					   const ProblemDomain& a_domain,
+					   const EBISBox&       a_ebisbox,
+					   const int            a_nointerp_dir){
+  CH_TIME("LinearStencil::computeInterpStencil2D");
   CH_assert(SpaceDim == 2 || SpaceDim == 3);
 
   // This code is a bit convoluted because of the many pathological cases that may happen with multi-valued cells. For example
@@ -164,7 +168,7 @@ bool stencil_ops::compute_interp_stencil_2D(VoFStencil&          a_stencil,
 #endif
 
   bool really2D = true;
-  if(Abs(a_centroid[dir0]) <= stencil_ops::tolerance || Abs(a_centroid[dir1]) < stencil_ops::tolerance){
+  if(Abs(a_centroid[dir0]) <= LinearStencil::tolerance || Abs(a_centroid[dir1]) < LinearStencil::tolerance){
     really2D = false;
   }
 
@@ -192,22 +196,22 @@ bool stencil_ops::compute_interp_stencil_2D(VoFStencil&          a_stencil,
       found_stencil = false;
     }
     else if(canInterpDir0 && !canInterpDir1){
-      found_stencil = stencil_ops::compute_interp_stencil_1D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, dir0);
+      found_stencil = LinearStencil::computeInterpStencil1D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, dir0);
     }
     else if(!canInterpDir0 &&  canInterpDir1){
-      found_stencil = stencil_ops::compute_interp_stencil_1D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, dir1);
+      found_stencil = LinearStencil::computeInterpStencil1D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, dir1);
     }
     else{ // OK, we know we can interpolate in both directions from a_vof. Let's check if we can find a bilinear stencil now
     
       // 1. First, starting on a_vof, compute the linear interpolation stencil in 1D along dir0 and dir1
       VoFStencil curStenDir0;
       VoFStencil curStenDir1;
-      const bool foundFirstStencil0 = stencil_ops::compute_interp_stencil_1D(curStenDir0,a_centroid,a_vof,a_domain,a_ebisbox,dir0);
-      const bool foundFirstStencil1 = stencil_ops::compute_interp_stencil_1D(curStenDir1,a_centroid,a_vof,a_domain,a_ebisbox,dir1);
+      const bool foundFirstStencil0 = LinearStencil::computeInterpStencil1D(curStenDir0,a_centroid,a_vof,a_domain,a_ebisbox,dir0);
+      const bool foundFirstStencil1 = LinearStencil::computeInterpStencil1D(curStenDir1,a_centroid,a_vof,a_domain,a_ebisbox,dir1);
 
-#if STENCIL_OPS_DEBUG
+#if LINEARSTENCIL_DEBUG
       if(!foundFirstStencil0 || !foundFirstStencil1){ // If we made it into this loop, this shouldn't happen
-	MayDay::Warning("stencil_ops::compute_interp_stencil_2D - logic bust");
+	MayDay::Warning("LinearStencil::computeInterpStencil2D - logic bust");
       }
 #endif
 
@@ -224,7 +228,7 @@ bool stencil_ops::compute_interp_stencil_2D(VoFStencil&          a_stencil,
     
       for (int i = 0; i<otherVoFsInDir1.size(); i++){
 	VoFStencil sten;
-	const bool found = stencil_ops::compute_interp_stencil_1D(sten,a_centroid,otherVoFsInDir1[i],a_domain,a_ebisbox,dir0);
+	const bool found = LinearStencil::computeInterpStencil1D(sten,a_centroid,otherVoFsInDir1[i],a_domain,a_ebisbox,dir0);
       
 	if(found){
 	  foundSecondStencil0 = true;
@@ -234,7 +238,7 @@ bool stencil_ops::compute_interp_stencil_2D(VoFStencil&          a_stencil,
       }
       for (int i = 0; i<otherVoFsInDir0.size(); i++){
 	VoFStencil sten;
-	const bool found = stencil_ops::compute_interp_stencil_1D(sten,a_centroid,otherVoFsInDir0[i],a_domain,a_ebisbox,dir1);
+	const bool found = LinearStencil::computeInterpStencil1D(sten,a_centroid,otherVoFsInDir0[i],a_domain,a_ebisbox,dir1);
       
 	if(found){
 	  foundSecondStencil1 = true;
@@ -250,64 +254,64 @@ bool stencil_ops::compute_interp_stencil_2D(VoFStencil&          a_stencil,
       if(numStencilsAdded0 > 0) otherVoFsInterpStencilDir0 *= 1./numStencilsAdded0;
       if(numStencilsAdded1 > 0) otherVoFsInterpStencilDir1 *= 1./numStencilsAdded1;
     
-#if DEBUG_STENCIL_OPS // Debug, all stencils should have positive weights with weights summing to 1 at this point. 
+#if DEBUG_LINEARSTENCIL // Debug, all stencils should have positive weights with weights summing to 1 at this point. 
       Real s0 = 0.0;
       Real s1 = 0.0;
       for (int i = 0; i < curStenDir0.size(); i++){
 	const Real w = curStenDir0.weight(i);
 	s0 += w;
-	if(w < 0.0) MayDay::Warning("stencil_ops::compute_interp_stencil_2D - bilinear negative weight in curStenDir0");
+	if(w < 0.0) MayDay::Warning("LinearStencil::computeInterpStencil2D - bilinear negative weight in curStenDir0");
       }
       for (int i = 0; i < curStenDir1.size(); i++){
 	const Real w = curStenDir1.weight(i);
 	s1 += w;
-	if(w < 0.0) MayDay::Warning("stencil_ops::compute_interp_stencil_2D - bilinear negative weight in curStenDir1");
+	if(w < 0.0) MayDay::Warning("LinearStencil::computeInterpStencil2D - bilinear negative weight in curStenDir1");
       }
-      if((s0 - 1.0) > 1.E-5) MayDay::Warning("stencil_ops::compute_interp_stencil2D - curStenDir0 weights do not sum to 1");
-      if((s1 - 1.0) > 1.E-5) MayDay::Warning("stencil_ops::compute_interp_stencil2D - curStenDir1 weights do not sum to 1");
+      if((s0 - 1.0) > 1.E-5) MayDay::Warning("LinearStencil::computeInterpStencil2D - curStenDir0 weights do not sum to 1");
+      if((s1 - 1.0) > 1.E-5) MayDay::Warning("LinearStencil::computeInterpStencil2D - curStenDir1 weights do not sum to 1");
 
       s0 = 0.0;
       s1 = 0.0;
       for (int i = 0; i < otherVoFsInterpStencilDir0.size(); i++){
 	const Real w = otherVoFsInterpStencilDir0.weight(i);
 	s0 += w;
-	if(w < 0.0) MayDay::Warning("stencil_ops::compute_interp_stencil_2D - bilinear negative weight in otherVoFsDir0");
+	if(w < 0.0) MayDay::Warning("LinearStencil::computeInterpStencil2D - bilinear negative weight in otherVoFsDir0");
       }
       for (int i = 0; i < otherVoFsInterpStencilDir1.size(); i++){
 	const Real w = otherVoFsInterpStencilDir1.weight(i);
 	s1 += w;
-	if(w < 0.0) MayDay::Warning("stencil_ops::compute_interp_stencil_2D - bilinear negative weight in otherVoFsDir1");
+	if(w < 0.0) MayDay::Warning("LinearStencil::computeInterpStencil2D - bilinear negative weight in otherVoFsDir1");
       }
-      if((s0 - 1.0) > 1.E-5) MayDay::Warning("stencil_ops::compute_interp_stencil2D - otherVoFsDir0 weights do not sum to 1");
-      if((s1 - 1.0) > 1.E-5) MayDay::Warning("stencil_ops::compute_interp_stencil2D - otherVoFsDir1 weights do not sum to 1");
+      if((s0 - 1.0) > 1.E-5) MayDay::Warning("LinearStencil::computeInterpStencil2D - otherVoFsDir0 weights do not sum to 1");
+      if((s1 - 1.0) > 1.E-5) MayDay::Warning("LinearStencil::computeInterpStencil2D - otherVoFsDir1 weights do not sum to 1");
 #endif
 
       // 4. We might only be able to find one of the stencils
       a_stencil.clear();
       if(foundFirstStencil0 && !foundFirstStencil1){ // It shouldn't be possible for this to happen
-#if DEBUG_STENCIL_OPS
-	MayDay::Warning("stencil_ops::compute_interp_stencil2D - logic bust, foundFirstStencil0 && !foundFirstStencil1");
+#if DEBUG_LINEARSTENCIL
+	MayDay::Warning("LinearStencil::computeInterpStencil2D - logic bust, foundFirstStencil0 && !foundFirstStencil1");
 #endif
 	a_stencil += curStenDir0;
 	found_stencil = true;
       }
       else if(!foundFirstStencil0 && foundFirstStencil1){ // It shouldn't be possible for this to happen
-#if DEBUG_STENCIL_OPS
-	MayDay::Warning("stencil_ops::compute_interp_stencil2D - logic bust, !foundFirstStencil0 && foundFirstStencil1");
+#if DEBUG_LINEARSTENCIL
+	MayDay::Warning("LinearStencil::computeInterpStencil2D - logic bust, !foundFirstStencil0 && foundFirstStencil1");
 #endif
 	a_stencil += curStenDir1;
 	found_stencil = true;
       }
       else if(!foundFirstStencil0 && !foundFirstStencil1){ // Might already have covered this case but not sure
-#if DEBUG_STENCIL_OPS
-	MayDay::Warning("stencil_ops::compute_interp_stencil2D - logic bust, thought this case was covered");
+#if DEBUG_LINEARSTENCIL
+	MayDay::Warning("LinearStencil::computeInterpStencil2D - logic bust, thought this case was covered");
 #endif
 	a_stencil.add(a_vof, 1.0);
 	found_stencil = false;
       }
       else if(foundFirstStencil0 && foundFirstStencil1 && !(foundSecondStencil0 || foundSecondStencil1)){
-#if DEBUG_STENCIL_OPS
-	MayDay::Warning("stencil_ops::compute_interp_stencil2D - could not find stencil BC or CD. Defaulting to linear stencil");
+#if DEBUG_LINEARSTENCIL
+	MayDay::Warning("LinearStencil::computeInterpStencil2D - could not find stencil BC or CD. Defaulting to linear stencil");
 #endif
 	// Here, we could find stencil AB and AD but not BC or CD. This shouldn't happen but if it does, we default to 1D
 	// interpolation along the axis with the largest displacement. 
@@ -341,44 +345,44 @@ bool stencil_ops::compute_interp_stencil_2D(VoFStencil&          a_stencil,
     }
   }
   else{ // Not really 2D code
-    const bool interpDir0 = (Abs(a_centroid[dir0]) > stencil_ops::tolerance) ? true : false;
-    const bool interpDir1 = (Abs(a_centroid[dir1]) > stencil_ops::tolerance) ? true : false;
+    const bool interpDir0 = (Abs(a_centroid[dir0]) > LinearStencil::tolerance) ? true : false;
+    const bool interpDir1 = (Abs(a_centroid[dir1]) > LinearStencil::tolerance) ? true : false;
 
     a_stencil.clear();
     if(!interpDir0){// Interp along dir1.
-      found_stencil = stencil_ops::compute_interp_stencil_1D(a_stencil,a_centroid,a_vof,a_domain,a_ebisbox,dir1); 
+      found_stencil = LinearStencil::computeInterpStencil1D(a_stencil,a_centroid,a_vof,a_domain,a_ebisbox,dir1); 
     }
     else if(!interpDir1){
-      found_stencil = stencil_ops::compute_interp_stencil_1D(a_stencil,a_centroid,a_vof,a_domain,a_ebisbox,dir0); 
+      found_stencil = LinearStencil::computeInterpStencil1D(a_stencil,a_centroid,a_vof,a_domain,a_ebisbox,dir0); 
     }
     else if(!interpDir0 && !interpDir1){
       a_stencil.add(a_vof, 1.0);
       found_stencil = true;
     }
     else{
-      MayDay::Warning("stencil_ops::compute_interp_stencil_2d - logic bust");
+      MayDay::Warning("LinearStencil::computeInterpStencil2d - logic bust");
     }
   }
 
-#if DEBUG_STENCIL_OPS
-    Real sumweights = 0.0;
-    for (int i = 0; i < a_stencil.size(); i++){
-      const Real w = a_stencil.weight(i);
-      if(w < 0.0) MayDay::Warning("stencil_ops::compute_interp_stencil_2D - bilinear negative weight");
-      sumweights += w;
-    }
-    if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Warning("stencil_ops::compute_interp_stencil_2D - weights do not sum to 1");
+#if DEBUG_LINEARSTENCIL
+  Real sumweights = 0.0;
+  for (int i = 0; i < a_stencil.size(); i++){
+    const Real w = a_stencil.weight(i);
+    if(w < 0.0) MayDay::Warning("LinearStencil::computeInterpStencil2D - bilinear negative weight");
+    sumweights += w;
+  }
+  if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Warning("LinearStencil::computeInterpStencil2D - weights do not sum to 1");
 #endif
 
   return found_stencil;
 }
 
-bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
-					    const RealVect&      a_centroid,
-					    const VolIndex&      a_vof,
-					    const ProblemDomain& a_domain,
-					    const EBISBox&       a_ebisbox){
-  CH_TIME("compute_interp_stencil_3D");
+bool LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
+					   const RealVect&      a_centroid,
+					   const VolIndex&      a_vof,
+					   const ProblemDomain& a_domain,
+					   const EBISBox&       a_ebisbox){
+  CH_TIME("computeInterpStencil3D");
   CH_assert(SpaceDim == 3);
   
   
@@ -388,7 +392,7 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
 
 
   // Check if centroid lies in one of the coordinate planes connecting cell centers
-  const Real tol = stencil_ops::tolerance;
+  const Real tol = LinearStencil::tolerance;
   bool really3D = true;
   if(Abs(a_centroid[0]) <= tol || Abs(a_centroid[1]) <= tol || Abs(a_centroid[2]) <= tol){
     really3D = false;
@@ -399,7 +403,7 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
   // code when we get the chance.
   if(really3D){
 
-    //    MayDay::Warning("stencil_ops::compute_interp_stencil_3D - fix this code");
+    //    MayDay::Warning("LinearStencil::computeInterpStencil3D - fix this code");
     const int HiLoInterpDir   = a_centroid[interpDir3D] > 0. ? 1 : -1;
     const Side::LoHiSide side = (a_centroid[interpDir3D] > 0.) ? Side::Hi : Side::Lo;
 
@@ -416,12 +420,12 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
     // This is the bilinear stencil in the xy-plane of this VoF. This will always return true (right..?) because
     // of how we handle pathological cases for 2D
     VoFStencil stenThisPlane;
-    const bool foundFirstStencil  = stencil_ops::compute_interp_stencil_2D(stenThisPlane,
-									   a_centroid,
-									   a_vof,
-									   a_domain,
-									   a_ebisbox,
-									   interpDir3D);
+    const bool foundFirstStencil  = LinearStencil::computeInterpStencil2D(stenThisPlane,
+									  a_centroid,
+									  a_vof,
+									  a_domain,
+									  a_ebisbox,
+									  interpDir3D);
 
 
     // This code tries to compute a bilinear stencil in the xy plane but for the cell (i,j,k+-1). There can be multiple if
@@ -433,12 +437,12 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
     const Vector<VolIndex> otherVoFs = a_ebisbox.getVoFs(a_vof, interpDir3D, side, 1); 
     for (int ivof = 0; ivof < otherVoFs.size(); ivof++){
       VoFStencil otherStencil;
-      const bool foundOtherStencil = stencil_ops::compute_interp_stencil_2D(otherStencil,
-									    a_centroid,
-									    otherVoFs[ivof],
-									    a_domain,
-									    a_ebisbox,
-									    interpDir3D);
+      const bool foundOtherStencil = LinearStencil::computeInterpStencil2D(otherStencil,
+									   a_centroid,
+									   otherVoFs[ivof],
+									   a_domain,
+									   a_ebisbox,
+									   interpDir3D);
 
       if(foundOtherStencil){
 	foundSecondStencil = true;
@@ -495,16 +499,16 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
       found_stencil = false;
     }
     else{
-      MayDay::Warning("stencil_ops::compute_interp_stencil_3d - logic bust");
+      MayDay::Warning("LinearStencil::computeInterpStencil3d - logic bust");
     }
   }
   else if(!really3D){ // Find a direction in which we shouldn't interpolate and get a 2D stencil. This might be several
-                      // directions but that is taken care of in the 2D computation. 
+    // directions but that is taken care of in the 2D computation. 
     int noInterpDir = 0;
     for (int dir = 0; dir < SpaceDim; dir++){
       noInterpDir = Abs(a_centroid[dir]) <= tol ? dir : noInterpDir;
     }
-    found_stencil = compute_interp_stencil_2D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, noInterpDir);
+    found_stencil = computeInterpStencil2D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, noInterpDir);
   }
 
   // This can happen if the EB cuts a domain "corner" and the normal points outwards. This will cause the above code
@@ -517,16 +521,16 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
     found_stencil = false;
   }
 
-#if DEBUG_STENCIL_OPS
+#if DEBUG_LINEARSTENCIL
   Real sumweights = 0.0;
   for (int i = 0; i < a_stencil.size(); i++){
     const Real w = a_stencil.weight(i);
-    if(w < 0.0) MayDay::Warning("stencil_ops::compute_interp_stencil_3d - trilinear stencil weight < 0.0");
+    if(w < 0.0) MayDay::Warning("LinearStencil::computeInterpStencil3d - trilinear stencil weight < 0.0");
     sumweights += w;
   }
-  if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Warning("stencil_ops::compute_interp_stencil_3d - sum of weights not equal to one");
+  if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Warning("LinearStencil::computeInterpStencil3d - sum of weights not equal to one");
 #endif
   
   return found_stencil;
 }
-
+#include "CD_NamespaceFooter.H"

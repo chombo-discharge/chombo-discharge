@@ -10,6 +10,7 @@
 
 #include <EBArith.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 cdr_plasma_field_tagger::cdr_plasma_field_tagger(){
@@ -175,3 +176,4 @@ void cdr_plasma_field_tagger::compute_tracers(){
 
   this->deallocate_storage(); // No reason to keep the extra storage lying around...
 }
+#include "CD_NamespaceFooter.H"

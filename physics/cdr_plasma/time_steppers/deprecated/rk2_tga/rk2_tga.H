@@ -190,7 +190,7 @@ protected:
   */
   virtual void compute_sigma_flux_into_scratch();
 
-    /*!
+  /*!
     @brief Compute k1 and intermediate state for cdr equations
   */
   virtual void advance_advection_source_cdr_k1(const Real a_dt);
@@ -219,6 +219,6 @@ protected:
     @brief Stationary RTE advance
   */
   virtual void advance_rte_stationary(const Real a_time);
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

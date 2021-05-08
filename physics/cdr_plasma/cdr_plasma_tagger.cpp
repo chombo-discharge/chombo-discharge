@@ -13,6 +13,7 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 cdr_plasma_tagger::cdr_plasma_tagger(){
@@ -357,3 +358,4 @@ void cdr_plasma_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_t
     }
   }
 }
+#include "CD_NamespaceFooter.H"

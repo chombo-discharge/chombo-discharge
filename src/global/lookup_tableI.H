@@ -12,6 +12,8 @@
 
 #include <iostream>
 
+#include "CD_NamespaceHeader.H"
+
 inline
 void lookup_table::add_entry(const Real& a_x, const Real& a_y){
   m_x.push_back(a_x);
@@ -180,5 +182,6 @@ void lookup_table::make_uniform(const int a_num_entries){
   m_y  = new_y;
   m_num_entries = a_num_entries;
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

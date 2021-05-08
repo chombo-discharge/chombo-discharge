@@ -1245,5 +1245,5 @@ RealVect morrow_jiang::random_direction3D(){
   const Real z = 1 - 2*r;
 
   return RealVect(x,y,z);
-}
+#include "CD_NamespaceFooter.H"
 #endif

@@ -15,6 +15,8 @@
 
 #define DEBUG 0
 
+#include "CD_NamespaceHeader.H"
+
 bool ScanShop::s_irregularBalance = true;
 bool ScanShop::s_recursive        = true;
 int ScanShop::s_grow              = 4;
@@ -32,7 +34,7 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
   m_baseif = &a_localGeom;
   m_hasScanLevel = false;
 
-    // EBISLevel doesn't give resolution, origin, and problem domains through makeGrids, so we
+  // EBISLevel doesn't give resolution, origin, and problem domains through makeGrids, so we
   // need to construct these here, and then extract the proper resolution when we actually do makeGrids
   ScanShop::makeDomains(a_dx, a_origin, a_finestDomain, a_scanLevel);
 }
@@ -451,7 +453,7 @@ void ScanShop::printNumBoxesLevel(const int a_level){
   if(procID() == 0){
     std::cout << "ScanShop::printNumBoxesLevel on domain = " << m_domains[a_level] << "\n"
 	      << "\t Regular boxes = " << numRegular << "\n"
-      	      << "\t Covered boxes = " << numCovered << "\n"
+	      << "\t Covered boxes = " << numCovered << "\n"
 	      << "\t CutCell boxes = " << numCutCell << "\n"
 	      << std::endl;
   }
@@ -523,3 +525,4 @@ void ScanShop::gatherBoxesParallel(Vector<Box>& a_boxes){
   delete recv_buffer;
   delete send_buffer;
 }
+#include "CD_NamespaceFooter.H"

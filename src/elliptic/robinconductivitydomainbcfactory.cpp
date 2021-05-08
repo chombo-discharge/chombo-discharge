@@ -5,13 +5,13 @@
   @date   Jan. 2018
 */
 
-
 #include "robinconductivitydomainbcfactory.H"
+
+#include "CD_NamespaceHeader.H"
 
 robinconductivitydomainbcfactory::robinconductivitydomainbcfactory(){
   this->set_coefs(1., 1., 0.);
 }
-
 
 robinconductivitydomainbcfactory::~robinconductivitydomainbcfactory(){
 
@@ -50,7 +50,6 @@ void robinconductivitydomainbcfactory::set_coefs(const EBAMRFluxData& a_aco,
   m_data_coeff  = true;
 }
 
-
 BaseDomainBC* robinconductivitydomainbcfactory::create(const ProblemDomain& a_domain,
 						       const EBISLayout&    a_ebisl,
 						       const RealVect&      a_dx){
@@ -75,6 +74,6 @@ BaseDomainBC* robinconductivitydomainbcfactory::create(const ProblemDomain& a_do
     MayDay::Abort("robinconductivityebbcfactory::create - must set coefficients first");
   }
 
-
   return static_cast<BaseDomainBC*> (fresh);
 }
+#include "CD_NamespaceFooter.H"

@@ -16,6 +16,7 @@
 #include <vector>
 #include <memory>
 
+#include "CD_NamespaceHeader.H"
 namespace dcel {
 
   template <class T> class vertexT;
@@ -117,6 +118,7 @@ namespace dcel {
 
   };
 }
+#include "CD_NamespaceFooter.H"
 
 #include "dcel_vertexI.H"
 

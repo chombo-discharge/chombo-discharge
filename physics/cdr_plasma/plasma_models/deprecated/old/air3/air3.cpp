@@ -89,23 +89,23 @@ air3::~air3(){
 }
 
 void air3::get_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2frac, Real& a_N2frac){
-    ParmParse pp("air3");
-    a_p = 1.0;
-    pp.query("gas_pressure", a_p); // Only get to adjust pressure for now.
+  ParmParse pp("air3");
+  a_p = 1.0;
+  pp.query("gas_pressure", a_p); // Only get to adjust pressure for now.
     
-    //    pp.query("gas_temperature", a_Tg);
-    //    pp.query("gas_O2_frac", a_O2frac);
-    //    pp.query("gas_N2_frac", a_N2frac);
+  //    pp.query("gas_temperature", a_Tg);
+  //    pp.query("gas_O2_frac", a_O2frac);
+  //    pp.query("gas_N2_frac", a_N2frac);
 
-    a_Tg = 300.;
-    a_O2frac = 0.21;
-    a_N2frac = 0.79; 
+  a_Tg = 300.;
+  a_O2frac = 0.21;
+  a_N2frac = 0.79; 
 
-    const Real tot_frac = a_O2frac + a_N2frac; 
-    a_p      = a_p*units::s_atm2pascal;
-    a_O2frac = a_O2frac/tot_frac; // Normalize to one
-    a_N2frac = a_N2frac/tot_frac;
-    a_N      = a_p*units::s_Na/(a_Tg*units::s_R);
+  const Real tot_frac = a_O2frac + a_N2frac; 
+  a_p      = a_p*units::s_atm2pascal;
+  a_O2frac = a_O2frac/tot_frac; // Normalize to one
+  a_N2frac = a_N2frac/tot_frac;
+  a_N      = a_p*units::s_Na/(a_Tg*units::s_R);
 }
 
 Vector<Real> air3::compute_cdr_diffusion_coefficients(const Real&         a_time,
@@ -393,4 +393,4 @@ Real air3::compute_townsend_attachment(const Real a_EbyN) const {
   }
 
   return eta*m_N;
-}
+#include "CD_NamespaceFooter.H"

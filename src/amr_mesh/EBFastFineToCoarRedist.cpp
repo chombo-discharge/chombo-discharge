@@ -10,6 +10,8 @@
 
 #define EBFASTF2C_DEBUG 0
 
+#include "CD_NamespaceHeader.H"
+
 EBFastFineToCoarRedist::EBFastFineToCoarRedist() : EBFineToCoarRedist(){
 
 }
@@ -220,3 +222,4 @@ void EBFastFineToCoarRedist::gatherSetsRefCoar(IntVectSet& a_setsRefCoar){
   }
   gatherBroadcast(a_setsRefCoar);
 }
+#include "CD_NamespaceFooter.H"

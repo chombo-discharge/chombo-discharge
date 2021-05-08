@@ -15,8 +15,9 @@
 #include "CH_Timer.H"
 #include "ebconductivityopfactory.H"
 #include "EBCoarseAverage.H"
-#include "NamespaceHeader.H"
 
+#include "CD_NamespaceHeader.H"
+  
 int ebconductivityopfactory::s_testRef = 2; // Bogus
 int ebconductivityopfactory::s_maxBoxSize = 32;
 
@@ -35,21 +36,21 @@ void coarsen_stuff(LevelData<EBCellFAB>               & a_acoefCoar,
 
   Interval interv(0, 0);
   if (a_refToDepth == 1){
-      a_acoefFine.     copyTo(interv,  a_acoefCoar,     interv);
-      a_bcoefFine.     copyTo(interv,  a_bcoefCoar,     interv);
-      a_bcoefFineIrreg.copyTo(interv,  a_bcoefCoarIrreg,interv);
-    }
+    a_acoefFine.     copyTo(interv,  a_acoefCoar,     interv);
+    a_bcoefFine.     copyTo(interv,  a_bcoefCoar,     interv);
+    a_bcoefFineIrreg.copyTo(interv,  a_bcoefCoarIrreg,interv);
+  }
   else{
-      EBCoarseAverage averageOp(a_eblgFine.getDBL(),    a_eblgCoar.getDBL(),
-                                a_eblgFine.getEBISL(),  a_eblgCoar.getEBISL(),
-                                a_eblgCoar.getDomain(), a_refToDepth, 1,
-                                a_eblgCoar.getEBIS());
+    EBCoarseAverage averageOp(a_eblgFine.getDBL(),    a_eblgCoar.getDBL(),
+			      a_eblgFine.getEBISL(),  a_eblgCoar.getEBISL(),
+			      a_eblgCoar.getDomain(), a_refToDepth, 1,
+			      a_eblgCoar.getEBIS());
 
-      //MayDay::Warning("might want to figure out what harmonic averaging is in this context");
-      averageOp.average( a_acoefCoar     ,  a_acoefFine     , interv);
-      averageOp.average( a_bcoefCoar     ,  a_bcoefFine     , interv);
-      averageOp.average( a_bcoefCoarIrreg,  a_bcoefFineIrreg, interv);
-    }
+    //MayDay::Warning("might want to figure out what harmonic averaging is in this context");
+    averageOp.average( a_acoefCoar     ,  a_acoefFine     , interv);
+    averageOp.average( a_bcoefCoar     ,  a_bcoefFine     , interv);
+    averageOp.average( a_bcoefCoarIrreg,  a_bcoefFineIrreg, interv);
+  }
   a_acoefCoar.exchange(Interval(0,0));
   a_bcoefCoar.exchange(Interval(0,0));
   a_bcoefCoarIrreg.exchange(Interval(0,0));
@@ -62,14 +63,14 @@ int ebconductivityopfactory::refToFiner(const ProblemDomain& a_domain) const {
   int retval = -1;
   bool found = false;
   for (int ilev = 0; ilev < m_eblgs.size(); ilev++){
-      if (m_eblgs[ilev].getDomain() == a_domain){
-          retval = m_refRatio[ilev];
-          found = true;
-        }
+    if (m_eblgs[ilev].getDomain() == a_domain){
+      retval = m_refRatio[ilev];
+      found = true;
     }
+  }
   if (!found){
-      MayDay::Error("ebconductivityopfactory::refToFiner - Domain not found in AMR hierarchy");
-    }
+    MayDay::Error("ebconductivityopfactory::refToFiner - Domain not found in AMR hierarchy");
+  }
   return retval;
 }
 
@@ -266,39 +267,39 @@ ebconductivityop* ebconductivityopfactory::MGnewOp(const ProblemDomain& a_domain
   }
   else{
     int icoar = 1;
-      for (int idep = 0; idep < a_depth; idep++){
-	icoar *= 2;
-      }
-      //    refToDepth = icoar;
-      const ProblemDomain domainFine = m_eblgs[ref].getDomain();
-      ProblemDomain domainBoxMGLevel = coarsen(domainFine, icoar);
-      bool foundMGLevel = false;
-      int numMGLevels = m_eblgsMG[ref].size();
-      for (int img = 0; img < numMGLevels; img++){
-	if (m_eblgsMG[ref][img].getDomain() == domainBoxMGLevel){
-	  eblgMGLevel = m_eblgsMG[ref][img];
-	  acoef = m_acoefMG[ref][img];
-	  bcoef = m_bcoefMG[ref][img];
-	  bcoefIrreg  = m_bcoefIrregMG[ref][img];
-	  foundMGLevel = true;
+    for (int idep = 0; idep < a_depth; idep++){
+      icoar *= 2;
+    }
+    //    refToDepth = icoar;
+    const ProblemDomain domainFine = m_eblgs[ref].getDomain();
+    ProblemDomain domainBoxMGLevel = coarsen(domainFine, icoar);
+    bool foundMGLevel = false;
+    int numMGLevels = m_eblgsMG[ref].size();
+    for (int img = 0; img < numMGLevels; img++){
+      if (m_eblgsMG[ref][img].getDomain() == domainBoxMGLevel){
+	eblgMGLevel = m_eblgsMG[ref][img];
+	acoef = m_acoefMG[ref][img];
+	bcoef = m_bcoefMG[ref][img];
+	bcoefIrreg  = m_bcoefIrregMG[ref][img];
+	foundMGLevel = true;
 	  
-	  hasCoarMGObjects = ((img+1) < (numMGLevels));
-	  if (hasCoarMGObjects){
-	    eblgCoarMG = m_eblgsMG[ref][img+1];
-	  }
-	  break;
+	hasCoarMGObjects = ((img+1) < (numMGLevels));
+	if (hasCoarMGObjects){
+	  eblgCoarMG = m_eblgsMG[ref][img+1];
 	}
+	break;
       }
-      bool coarsenable = foundMGLevel;
+    }
+    bool coarsenable = foundMGLevel;
 
-      dxMGLevel = m_dx[ref];
-      dxMGLevel *= Real(icoar);
+    dxMGLevel = m_dx[ref];
+    dxMGLevel *= Real(icoar);
       
-      if (!coarsenable){
-	//not coarsenable.
-	//return null
-	return NULL;
-      }
+    if (!coarsenable){
+      //not coarsenable.
+      //return null
+      return NULL;
+    }
   }
 
   ConductivityBaseEBBC*     viscEBBC  = (ConductivityBaseEBBC*)         m_ebBCFactory->create(eblgMGLevel.getDomain(),
@@ -323,9 +324,9 @@ ebconductivityop* ebconductivityopfactory::MGnewOp(const ProblemDomain& a_domain
   ebconductivityop* newOp = NULL;
   // Time-independent A coefficient.
   newOp = new ebconductivityop(EBLevelGrid(), eblgMGLevel, EBLevelGrid(), eblgCoarMG, quadCFI, fastFR,
-                               dombc, ebbc, dxMGLevel, dxCoar, bogRef, bogRef, hasFine, hasCoar,
-                               hasCoarMGObjects, layoutChanged, m_alpha, m_beta,
-                               acoef, bcoef, bcoefIrreg, m_ghostCellsPhi, m_ghostCellsRhs, m_relaxType);
+			       dombc, ebbc, dxMGLevel, dxCoar, bogRef, bogRef, hasFine, hasCoar,
+			       hasCoarMGObjects, layoutChanged, m_alpha, m_beta,
+			       acoef, bcoef, bcoefIrreg, m_ghostCellsPhi, m_ghostCellsRhs, m_relaxType);
 
   return newOp;
 
@@ -368,14 +369,14 @@ ebconductivityop* ebconductivityopfactory::AMRnewOp(const ProblemDomain& a_domai
     eblgCoarMG = m_eblgsMG[ref][1];
   }
   ConductivityBaseEBBC*     viscEBBC  = (ConductivityBaseEBBC*)     m_ebBCFactory->create(    m_eblgs[ref].getDomain(),
-                                                                                              m_eblgs[ref].getEBISL(), dxMGLevel*RealVect::Unit,
-                                                                                              &m_ghostCellsPhi, &m_ghostCellsRhs);
+											      m_eblgs[ref].getEBISL(), dxMGLevel*RealVect::Unit,
+											      &m_ghostCellsPhi, &m_ghostCellsRhs);
   if (m_dataBased){
     viscEBBC->setData(m_data[ref]);
   }
 
   ConductivityBaseDomainBC* viscDomBC = (ConductivityBaseDomainBC*) m_domainBCFactory->create(m_eblgs[ref].getDomain(),
-                                                                                              m_eblgs[ref].getEBISL(), dxMGLevel*RealVect::Unit);
+											      m_eblgs[ref].getEBISL(), dxMGLevel*RealVect::Unit);
   RefCountedPtr<ConductivityBaseEBBC>      ebbc(viscEBBC);
   RefCountedPtr<ConductivityBaseDomainBC> dombc(viscDomBC);
 
@@ -387,10 +388,10 @@ ebconductivityop* ebconductivityopfactory::AMRnewOp(const ProblemDomain& a_domai
   ebconductivityop* newOp = NULL;
 
   newOp = new ebconductivityop(eblgFine, eblgMGLevel, eblgCoar, eblgCoarMG, m_quadCFI[ref], m_fastFR[ref],
-                               dombc, ebbc,  dxMGLevel,dxCoar, refToFiner, refToCoarser,
-                               hasFine, hasCoar, hasCoarMGObjects,  layoutChanged,
-                               m_alpha, m_beta, m_acoef[ref], m_bcoef[ref], m_bcoefIrreg[ref],
-                               m_ghostCellsPhi, m_ghostCellsRhs, m_relaxType);
+			       dombc, ebbc,  dxMGLevel,dxCoar, refToFiner, refToCoarser,
+			       hasFine, hasCoar, hasCoarMGObjects,  layoutChanged,
+			       m_alpha, m_beta, m_acoef[ref], m_bcoef[ref], m_bcoefIrreg[ref],
+			       m_ghostCellsPhi, m_ghostCellsRhs, m_relaxType);
 
   return newOp;
 }
@@ -402,5 +403,4 @@ void ebconductivityopfactory::reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclai
 void ebconductivityopfactory::AMRreclaim(ebconductivityop* a_reclaim){
   delete a_reclaim;
 }
-
-#include "NamespaceFooter.H"
+#include "CD_NamespaceFooter.H"

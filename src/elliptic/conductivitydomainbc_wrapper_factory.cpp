@@ -5,8 +5,9 @@
   @date   June 2018
 */
 
-
 #include "conductivitydomainbc_wrapper_factory.H"
+
+#include "CD_NamespaceHeader.H"
 
 conductivitydomainbc_wrapper_factory::conductivitydomainbc_wrapper_factory(){
   m_hasbc = false;
@@ -43,3 +44,4 @@ conductivitydomainbc_wrapper* conductivitydomainbc_wrapper_factory::create(const
     
   return fresh;
 }
+#include "CD_NamespaceFooter.H"

@@ -13,17 +13,10 @@
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 
+#include "CD_NamespaceHeader.H"
+
 namespace physics {
   namespace cdr_plasma {
-  
-    extern "C" void dgesv_(int*    N,
-			   int*    NRHS,
-			   double* A,
-			   int*    LDA,
-			   int*    IPIV,
-			   double* B,
-			   int*    LDB,
-			   int*    INFO);
 
     /*!
       @brief Class for evolving plasma equations with a multirate method using semi-implicit spectral deferred corrections
@@ -227,4 +220,5 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

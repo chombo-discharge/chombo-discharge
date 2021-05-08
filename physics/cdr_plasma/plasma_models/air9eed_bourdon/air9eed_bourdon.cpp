@@ -18,6 +18,7 @@
 #include <PolyGeom.H>
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 std::string air9eed_bourdon::s_bolsig_energy_E = "Energy (eV) 	Electric field / N (Td)";
@@ -169,7 +170,7 @@ void air9eed_bourdon::read_file_entries(lookup_table& a_table, const std::string
     if(read_line){
       std::istringstream iss(line);
       if (!(iss >> x >> y)) {
-    	continue;
+	continue;
       }
       a_table.add_entry(x, y);
     }
@@ -205,7 +206,7 @@ void air9eed_bourdon::read_electron_mobility(){
 
 void air9eed_bourdon::read_townsend(){
   
- // Read file entries
+  // Read file entries
   read_file_entries(m_alpha_townsend, air9eed_bourdon::s_bolsig_townsend);
 
   // Scale with density and make a uniform table (there's no guarantee that BOLSIG output is uniform!)
@@ -724,7 +725,7 @@ Real air9eed_bourdon::compute_e_O2_to_e_O2(const Real a_energy)          const {
   return k;
 } // TABLE
 
-// Electron losses
+  // Electron losses
 Real air9eed_bourdon::compute_e_N2_ionization_loss()              const {return 15.6;}
 Real air9eed_bourdon::compute_e_O2_ionization_loss()              const {return 12.07;}
 Real air9eed_bourdon::compute_e_O2_dissociation_loss_c1()         const {return 5.58;}
@@ -868,3 +869,4 @@ Vector<Real> air9eed_bourdon::compute_cathode_fluxes(const Real         a_time,
   // 
   //  MayDay::Abort("air9eed_bourdon::compute_cathode_fluxes - negative streamer BC not implemented");
 }
+#include "CD_NamespaceFooter.H"

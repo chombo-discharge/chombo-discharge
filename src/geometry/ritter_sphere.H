@@ -10,6 +10,8 @@
 
 #include "RealVect.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class for computing a bounding sphere for a set of points by using Ritter's method
 */
@@ -69,4 +71,6 @@ protected:
   */
   RealVect m_center;
 };
+#include "CD_NamespaceFooter.H"
+
 #endif

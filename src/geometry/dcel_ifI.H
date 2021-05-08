@@ -12,6 +12,8 @@
 
 #include "dcel_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 using namespace dcel;
 
 template <class T>
@@ -49,6 +51,7 @@ template <class T>
 BaseIF* dcel_if<T>::newImplicitFunction() const {
   return static_cast<BaseIF*> (new dcel_if(*this));
 }
+#include "CD_NamespaceFooter.H"
 
 #endif
 

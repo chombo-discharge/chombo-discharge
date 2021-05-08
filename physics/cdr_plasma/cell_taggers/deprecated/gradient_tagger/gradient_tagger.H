@@ -105,5 +105,5 @@ protected:
     @brief Relative cut-off. If magnitude falls below this, don't refine. 
   */
   Real m_cutoff;
-};
+#include "CD_NamespaceFooter.H"
 #endif

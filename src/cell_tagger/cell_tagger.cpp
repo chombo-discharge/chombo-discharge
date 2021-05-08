@@ -11,6 +11,8 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+
 cell_tagger::cell_tagger(){
   CH_TIME("cell_tagger::cell_tagger");
   m_verbosity = 10;
@@ -107,3 +109,4 @@ bool cell_tagger::inside_tag_box(const RealVect a_pos){
 
   return do_this_refine;
 }
+#include "CD_NamespaceFooter.H"

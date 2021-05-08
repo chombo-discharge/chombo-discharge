@@ -7,6 +7,8 @@
 
 #include "electrode.H"
 
+#include "CD_NamespaceHeader.H"
+
 electrode::electrode(){
 }
   
@@ -34,3 +36,4 @@ const bool& electrode::is_live() const {
 const Real& electrode::get_fraction() const {
   return m_fraction;
 }
+#include "CD_NamespaceFooter.H"

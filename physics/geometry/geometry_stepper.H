@@ -10,6 +10,7 @@
 
 #include "time_stepper.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace geometry {
     
@@ -54,5 +55,6 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

@@ -954,4 +954,4 @@ void air6_mc8::network_rre(Vector<Real>&          a_particle_sources,
 			   const Real             a_time,
 			   const Real             a_kappa) const{
   MayDay::Abort("air6_mc8::network_rre - not implemented (yet)");
-}
+#include "CD_NamespaceFooter.H"

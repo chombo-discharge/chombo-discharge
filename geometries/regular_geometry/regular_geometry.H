@@ -10,6 +10,8 @@
 
 #include "computational_geometry.H"
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief This class implements an empty geometry
 */
@@ -19,5 +21,6 @@ public:
   regular_geometry();
   ~regular_geometry();
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

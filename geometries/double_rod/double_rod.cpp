@@ -10,6 +10,8 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+
 double_rod::double_rod(){
   this->set_eps0(1.0);
 
@@ -53,3 +55,4 @@ double_rod::double_rod(){
 double_rod::~double_rod(){
   
 }
+#include "CD_NamespaceFooter.H"

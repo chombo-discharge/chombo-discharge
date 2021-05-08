@@ -1,6 +1,6 @@
 /*!
   @file   slope_limiters.H
-  @brief  Static class with various slope limiters
+  @brief   class with various slope limiters
   @author Robert Marskar
   @date   Feb. 2018
 */
@@ -10,38 +10,38 @@
 
 #include "REAL.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
-  @brief Class with various slope limiters. Static, so just use slope_limiters::blah()
+  @brief Class with various slope limiters. , so just use slope_limiters::blah()
 */
-class slope_limiters {
-public:
+namespace slope_limiters {
 
   /*!
     @brief Koren limiter
   */
-  static Real koren(const Real a_slopeL, const Real a_slopeR);
+  Real koren(const Real a_slopeL, const Real a_slopeR);
 
   /*!
     @brief minmod limiter
   */
-  static Real minmod(const Real a_slopeL, const Real a_slopeR);
+  Real minmod(const Real a_slopeL, const Real a_slopeR);
 
   /*!
     @brief Superbee limiter
   */
-  static Real superbee(const Real a_slopeL, const Real a_slopeR);
+  Real superbee(const Real a_slopeL, const Real a_slopeR);
 
   /*!
     @brief Van Leer limiter
   */
-  static Real van_leer(const Real a_slopeL, const Real a_slopeR);
-
-protected:
+  Real van_leer(const Real a_slopeL, const Real a_slopeR);
 
   /*!
     @brief Maxmod limiter
   */
-  static Real maxmod(const Real a_slopeL, const Real a_slopeR);
+  Real maxmod(const Real a_slopeL, const Real a_slopeR);
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

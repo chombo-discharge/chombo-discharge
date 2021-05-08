@@ -12,6 +12,7 @@
 #include "field_solver.H"
 #include "sigma_solver.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace poisson {
 
@@ -85,7 +86,7 @@ namespace physics {
     };
   }
 }
-
+#include "CD_NamespaceFooter.H"
 #include "field_stepperI.H"
 
 #endif

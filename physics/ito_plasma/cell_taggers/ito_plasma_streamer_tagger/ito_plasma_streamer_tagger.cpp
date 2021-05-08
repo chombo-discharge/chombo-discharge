@@ -9,6 +9,9 @@
 
 #include <ParmParse.H>
 
+
+#include "CD_NamespaceHeader.H"
+  
 using namespace physics::ito_plasma;
 
 ito_plasma_streamer_tagger::ito_plasma_streamer_tagger(){
@@ -106,3 +109,4 @@ bool ito_plasma_streamer_tagger::refine_cell(const RealVect         a_pos,
 
   return refine1 || refine2;
 }
+#include "CD_NamespaceFooter.H"

@@ -11,7 +11,11 @@
 #include "advection_diffusion_species.H"
 #include "data_ops.H"
 
+#include "CD_NamespaceHeader.H"
+  
 using namespace physics::advection_diffusion;
+
+
 
 advection_diffusion_stepper::advection_diffusion_stepper(){
   ParmParse pp("advection_diffusion");
@@ -292,3 +296,4 @@ void advection_diffusion_stepper::regrid(const int a_lmin, const int a_old_fines
 
 void advection_diffusion_stepper::post_regrid() {
 }
+#include "CD_NamespaceFooter.H"

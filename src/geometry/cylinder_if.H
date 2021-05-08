@@ -10,6 +10,8 @@
 
 #include <BaseIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Declaration of a cylinder IF class
 */
@@ -83,7 +85,6 @@ protected:
     @brief Inside or outside domain
   */
   bool m_fluidInside;
-
-    
 };
+#include "CD_NamespaceFooter.H"
 #endif

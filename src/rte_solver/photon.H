@@ -15,6 +15,8 @@
 
 #include "BinItem.H"
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief photon class
 */
@@ -54,6 +56,7 @@ protected:
   Real     m_mass;
   RealVect m_velocity;
 };
+#include "CD_NamespaceFooter.H"
 
 
 #endif 

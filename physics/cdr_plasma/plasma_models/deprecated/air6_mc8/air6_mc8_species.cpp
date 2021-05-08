@@ -143,4 +143,4 @@ air6_mc8::phot_b1v1_X1v1::phot_b1v1_X1v1(){
   
   m_kappa = 1./(m_kappa*p);
 
-}
+#include "CD_NamespaceFooter.H"

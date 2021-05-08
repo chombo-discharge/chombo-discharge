@@ -14,6 +14,8 @@
 #include "EBLevelDataOpsF_F.H"
 #include "PolyGeom.H"
 
+#include "CD_NamespaceHeader.H"
+
 void data_ops::average_cell_to_face(EBAMRFluxData&               a_facedata,
 				    const EBAMRCellData&         a_celldata,
 				    const Vector<ProblemDomain>& a_domains){
@@ -584,7 +586,7 @@ void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& 
     FORT_MAX_MIN_NORM(CHF_REAL(a_max),
 		      CHF_REAL(a_min),
 		      CHF_CONST_FRA(data_reg),
-      		      CHF_CONST_FRA1(mask, 0),
+		      CHF_CONST_FRA1(mask, 0),
 		      CHF_CONST_INT(ncomp),
 		      CHF_BOX(box));
 
@@ -835,7 +837,7 @@ void data_ops::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
     const int ncomp = a_lhs.nComp();
 
 #if 1 // Optimized code. 
-    // Regular cells. This also does ghost cells
+      // Regular cells. This also does ghost cells
     BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();
     FORT_FLOOR(CHF_FRA(lhs_reg),
 	       CHF_CONST_INT(ncomp),
@@ -851,7 +853,7 @@ void data_ops::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
       }
     }
 #else // Other code
-    // Irregular and multivalued cells
+      // Irregular and multivalued cells
     for (VoFIterator vofit(IntVectSet(box), ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       for (int comp = 0; comp < a_lhs.nComp(); comp++){
@@ -1671,3 +1673,4 @@ void data_ops::compute_particle_weights(unsigned long long&      a_weight,
     a_num       = (a_remainder == 0) ? a_ppc : a_ppc - 1;
   }
 }
+#include "CD_NamespaceFooter.H"

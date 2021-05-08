@@ -11,6 +11,8 @@
 #include <BaseIF.H>
 #include <algorithm>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @class perlin_if
   @brief Class that implements an improved Perlin noise function
@@ -130,6 +132,7 @@ protected:
   */
   Real grad(const int hash, const double x, const double y, const double z) const;
 };
+#include "CD_NamespaceFooter.H"
 
 
 #endif

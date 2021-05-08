@@ -7,6 +7,7 @@
 
 #include "geometry_stepper.H"
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::geometry;
 
 // ctor/dtor
@@ -43,4 +44,4 @@ void geometry_stepper::deallocate() {}
 void geometry_stepper::pre_regrid(const int a_lmin, const int a_old_finest_level) {}
 void geometry_stepper::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {}
 void geometry_stepper::post_regrid() {}
-
+#include "CD_NamespaceFooter.H"

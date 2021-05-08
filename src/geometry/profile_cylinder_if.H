@@ -9,6 +9,8 @@
 
 #include <BaseIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief profile_cylinder_if function
 */
@@ -39,4 +41,5 @@ protected:
 
   RefCountedPtr<BaseIF> m_baseif;
 };
+#include "CD_NamespaceFooter.H"
 #endif

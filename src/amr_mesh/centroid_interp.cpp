@@ -1,17 +1,21 @@
 /*!
-  @file centroid_interp.cpp
-  @brief Implementation of centroid_interp.H
+  @file   centroid_interp.cpp
+  @brief  Implementation of centroid_interp.H
   @author Robert Marskar
-  @date Nov. 2017
+  @date   Nov. 2017
 */
 
 #include "centroid_interp.H"
-#include "stencil_ops.H"
+#include "LinearStencil.H"
+#include "CD_LeastSquares.H"
 
 #include "EBArith.H"
 
-Real centroid_interp::s_tolerance      = 1.E-8;
-bool centroid_interp::s_quadrant_based = true;   // Use quadrant based stencils for least squares
+#define DEBUG_CENTROID_INTERP 1
+
+#include "CD_NamespaceHeader.H"
+
+Real centroid_interp::s_tolerance = 1.E-8;
 
 centroid_interp::centroid_interp() : irreg_stencil(){
   CH_TIME("centroid_interp::centroid_interp");
@@ -46,10 +50,8 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
   
   bool found_stencil = false;
 
-  // Find the preferred stencil type
   if(m_stencil_type == stencil_type::linear){
-    const RealVect centroid = a_ebisbox.centroid(a_vof);
-    found_stencil = stencil_ops::get_linear_interp_stencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+    found_stencil = LinearStencil::getLinearInterpStencil(a_sten, a_ebisbox.centroid(a_vof), a_vof, a_domain, a_ebisbox);
   }
   else if(m_stencil_type == stencil_type::taylor){
     found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
@@ -64,26 +66,13 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
     MayDay::Abort("centroid_interp::build_stencil - Unsupported stencil type");
   }
 
-  // If we couldn't find a stencil, just take the cell center to be the "interpolation". 
-#if 0
-  if(!found_stencil){
-    const RealVect centroid = a_ebisbox.centroid(a_vof);
-    found_stencil = stencil_ops::get_linear_interp_stencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
-  }
-  if(!found_stencil){
-    found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
-  }
-  if(!found_stencil){
-    found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
-  }
-#endif
-
-  if(!found_stencil){ // Drop to zeroth order. 
+  // Drop to zeroth order if we couldn't find a stencil. 
+  if(!found_stencil){ 
     a_sten.clear();
     a_sten.add(a_vof, 1.0);
   }
 
-#if 1 // Debug
+#if DEBUG_CENTROID_INTERP
   for (int i = 0; i < a_sten.size(); i++){
     const Real w = a_sten.weight(i);
     if(w < 0.0) MayDay::Warning("centroid_interp::build_stencils - I got negative weights!!!");
@@ -106,7 +95,6 @@ bool centroid_interp::get_taylor_stencil(VoFStencil&              a_sten,
   const RealVect& centroid = a_ebisbox.centroid(a_vof);
   IntVectSet* cfivs        = const_cast<IntVectSet*>(&a_cfivs);
 
-
   int order;               
   if(m_order == 1){
     order = EBArith::getFirstOrderExtrapolationStencil(a_sten, centroid*a_dx, a_dx*RealVect::Unit, a_vof, a_ebisbox, -1, cfivs, comp);
@@ -118,7 +106,7 @@ bool centroid_interp::get_taylor_stencil(VoFStencil&              a_sten,
     MayDay::Abort("centroid_interp::get_taylor_stencil - bad order requested. Only first and second order is supported");
   }
 
-  return order > 0;
+  return (order > 0);
 }
 
 bool centroid_interp::get_lsq_grad_stencil(VoFStencil&              a_sten,
@@ -129,63 +117,19 @@ bool centroid_interp::get_lsq_grad_stencil(VoFStencil&              a_sten,
 					   const Box&               a_box,
 					   const Real&              a_dx,
 					   const IntVectSet&        a_cfivs){
-  CH_TIME("centroid_interp::get_lsq_grad_stencil");
 
-#if CH_SPACEDIM == 2
-  const int minStenSize = 3;
-#elif CH_SPACEDIM== 3
-  const int minStenSize = 7;
-#endif
+  const int weightingPower = 0;
+  
+  a_sten = LeastSquares::getInterpolationStencilUsingAllVofsInRadius(LeastSquares::CellPosition::Centroid,
+								     LeastSquares::CellPosition::Center,
+								     a_vof,
+								     a_ebisbox,
+								     a_dx,
+								     weightingPower,
+								     m_radius,
+								     m_order);
 
-  a_sten.clear();
-    
-  Real weight              = 0;
-  const int comp           = 0;
-  const RealVect& centroid = a_ebisbox.centroid(a_vof);
-  const RealVect normal    = centroid/centroid.vectorLength();
-
-  // Find the quadrant that the normal points into
-  IntVect quadrant;
-  for (int dir = 0; dir < SpaceDim; dir++){
-    quadrant[dir] = (normal[dir] < 0) ? -1 : 1;
-  }
-
-  // Quadrant or monotone-path based stencils
-  if(s_quadrant_based){
-    EBArith::getLeastSquaresGradSten(a_sten,               // Find a stencil for the gradient at the cell center
-				     weight,
-				     normal,
-				     RealVect::Zero,
-				     quadrant,
-				     a_vof,
-				     a_ebisbox,
-				     a_dx*RealVect::Unit,
-				     a_domain,
-				     comp);
-  }
-  else{
-    EBArith::getLeastSquaresGradStenAllVoFsRad(a_sten,               // Find a stencil for the gradient at the cell center
-					       weight,
-					       normal,
-					       RealVect::Zero,
-					       a_vof,
-					       a_ebisbox,
-					       a_dx*RealVect::Unit,
-					       a_domain,
-					       comp,
-					       m_radius);
-  }
-
-  if(a_sten.size() >= minStenSize){         // Do a Taylor expansion phi_centroid = phi_cell + grad_cell*(x_centroid - x_cell)
-    a_sten.add(a_vof, weight);
-    a_sten *= m_dx*centroid.vectorLength();
-    a_sten.add(a_vof, 1.0);
-      
-    return true;
-  }
-  else{
-    return false;
-  }
+  return (a_sten.size() > 0);
 }
 
 bool centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
@@ -196,11 +140,8 @@ bool centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
 				      const Box&               a_box,
 				      const Real&              a_dx,
 				      const IntVectSet&        a_cfivs){
-
   a_sten.clear();
   a_sten.add(a_vof, 1.0);
-
-  const Real thresh = 1.E-5;
   
   const RealVect centroid = a_ebisbox.centroid(a_vof);
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -211,25 +152,21 @@ bool centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
     EBArith::getVoFsDir(hasHi, hiVoF, hasHigher, higherVoF, a_ebisbox, a_vof, dir, Side::Hi, (IntVectSet*) &a_cfivs);
 
     if(hasLo || hasHi){
-      if(centroid[dir] > thresh && hasHi){ // Deriv is to the right
+      if(centroid[dir] > s_tolerance && hasHi){ // Deriv is to the right
 	a_sten.add(hiVoF,  centroid[dir]);
 	a_sten.add(a_vof, -centroid[dir]);
       }
-      else if(centroid[dir] < -thresh && hasLo){ // Deriv is to the left
+      else if(centroid[dir] < -s_tolerance && hasLo){ // Deriv is to the left
 	a_sten.add(loVoF, -centroid[dir]);
 	a_sten.add(a_vof,  centroid[dir]);
       }
-      else if(Abs(centroid[dir]) < thresh){
+      else if(Abs(centroid[dir]) < s_tolerance){
 	// No deriv in this direction
       }
-#if 0
-      else{ // Logic bust, shouldn't happen
-	MayDay::Abort("centroid_interp::get_pwl_stencil - logic bust, shouldn't happen");
-      }
-#endif
     }
   }
 
 
   return true;
 }
+#include "CD_NamespaceFooter.H"

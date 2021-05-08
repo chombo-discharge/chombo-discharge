@@ -15,6 +15,8 @@
 #include <PlaneIF.H>
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+
 rod_dielectric::rod_dielectric(){
   m_dielectrics.resize(0);
   m_electrodes.resize(0);
@@ -149,3 +151,4 @@ RefCountedPtr<BaseIF> rod_dielectric::get_perlin_box(){
 
   return RefCountedPtr<BaseIF> (new perlin_slab_if(p,n, xyz, freq, octaves, amp, persist, curv, reseed, false));
 }
+#include "CD_NamespaceFooter.H"

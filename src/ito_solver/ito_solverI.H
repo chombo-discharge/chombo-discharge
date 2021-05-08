@@ -27,6 +27,8 @@
 
 #include <chrono>
 
+#include "CD_NamespaceHeader.H"
+
 inline
 Real ito_solver::sign(const Real& a) const{
   return (a > 0) - (a < 0);
@@ -367,6 +369,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&              
   a_particles.clear_halo_particles();
   a_particles.clear_non_halo_particles();
 }
+#include "CD_NamespaceFooter.H"
 
 
 #endif

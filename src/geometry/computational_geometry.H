@@ -19,6 +19,8 @@
 #include "mfis.H"
 #include "real_box.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Switch when representing embedded boundaries
 */
@@ -116,8 +118,8 @@ public:
   virtual void build_geometries(const ProblemDomain   a_finestDomain,
 				const RealVect        a_origin,
 				const Real            a_finestDx,
-  				const int             a_nCellMax = -1,
-  				const int             a_maxCoarsen = -1);
+				const int             a_nCellMax = -1,
+				const int             a_maxCoarsen = -1);
 
   /*!
     @brief Build geometries from files
@@ -184,4 +186,5 @@ protected:
 				   const Real          a_dx);
 
 };
+#include "CD_NamespaceFooter.H"
 #endif

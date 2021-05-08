@@ -12,6 +12,7 @@
 #include "cell_tagger.H"
 #include "cdr_plasma_stepper.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace cdr_plasma {
   
@@ -189,4 +190,5 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

@@ -8,6 +8,7 @@
 
 #include <chrono>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 air7_zheleznyak::electron::electron(){
@@ -153,3 +154,4 @@ Real air7_zheleznyak::uv_photon::get_random_kappa() const {
   const Real f = m_f1 + (*m_udist01)(*m_rng)*(m_f2 - m_f1);
   return m_K1*pow(m_K2/m_K1, (f-m_f1)/(m_f2-m_f1));
 }
+#include "CD_NamespaceFooter.H"

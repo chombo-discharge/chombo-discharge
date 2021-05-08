@@ -206,4 +206,4 @@ Vector<Real> air2::compute_cdr_dielectric_fluxes(const Real         a_time,
 
 Real air2::initial_sigma(const Real a_time, const RealVect a_pos) const {
   return 0.0;
-}
+#include "CD_NamespaceFooter.H"

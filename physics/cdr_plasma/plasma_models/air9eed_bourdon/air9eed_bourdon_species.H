@@ -10,6 +10,7 @@
 #ifndef _AIR9EED_BOURDON_SPECIES_
 #define _AIR9EED_BOURDON_SPECIES_
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace cdr_plasma {
 
@@ -403,5 +404,6 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

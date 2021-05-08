@@ -8,6 +8,8 @@
 
 #include "field_solver_factory.H"
 
+#include "CD_NamespaceHeader.H"
+
 template <class T>
 field_solver_factory<T>::field_solver_factory(){
 }
@@ -21,5 +23,6 @@ template <class T>
 RefCountedPtr<field_solver> field_solver_factory<T>::new_solver() const {
   return RefCountedPtr<field_solver> (new T);
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

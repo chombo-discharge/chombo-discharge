@@ -11,6 +11,7 @@
 #include "dcel_face.H"
 #include "dcel_iterator.H"
 
+#include "CD_NamespaceHeader.H"
 namespace dcel {
 
   template <class T>
@@ -306,13 +307,14 @@ namespace dcel {
       for (const auto& e : m_edges){
 	const T curDist2 = e->unsignedDistance2(a_x0);
 
-    	retval = (curDist2 < retval) ? curDist2 : retval;
+	retval = (curDist2 < retval) ? curDist2 : retval;
       }
     }
 
     return retval;
   }
 }
+#include "CD_NamespaceFooter.H"
 
 
 #endif

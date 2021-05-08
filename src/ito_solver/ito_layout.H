@@ -10,6 +10,8 @@
 
 #include "ito_solver.H"
 
+#include "CD_NamespaceHeader.H"
+  
 template <class T>
 class ito_iterator;
 
@@ -65,7 +67,7 @@ public:
   */
   virtual void parse_options();
 
-    /*!
+  /*!
     @brief Parse options for all solvers
   */
   virtual void parse_runtime_options();
@@ -295,6 +297,7 @@ public:
   ~ito_factory();
   RefCountedPtr<ito_layout<T> > new_layout(const Vector<RefCountedPtr<ito_species> > a_species) const;
 };
+#include "CD_NamespaceFooter.H"
 
 #include "ito_layoutI.H"
 

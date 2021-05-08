@@ -11,6 +11,8 @@
 #include <RealVect.H>
 #include <memory>
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Class the describes a single kd-tree node.
 */
@@ -81,6 +83,7 @@ protected:
   std::vector<std::shared_ptr<bvh_node<T> > > m_leaves;
   std::vector<std::shared_ptr<bvh_node<T> > > m_new_leaves;
 };
+#include "CD_NamespaceFooter.H"
 
 #include "bvhI.H"
 

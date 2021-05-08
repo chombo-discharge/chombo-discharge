@@ -12,7 +12,8 @@
 #include <PlaneIF.H>
 #include <TransformIF.H>
 
-
+#include "CD_NamespaceHeader.H"
+  
 perlin_slab_if::perlin_slab_if(const RealVect a_ccPoint,
 			       const RealVect a_normal,
 			       const RealVect a_xyz,
@@ -86,3 +87,4 @@ Real perlin_slab_if::value(const RealVect& a_pos) const {
 BaseIF* perlin_slab_if::newImplicitFunction() const {
   return (BaseIF*) new perlin_slab_if(*this);
 }
+#include "CD_NamespaceFooter.H"

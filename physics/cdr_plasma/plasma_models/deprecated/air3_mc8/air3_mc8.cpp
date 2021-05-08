@@ -488,7 +488,7 @@ void air3_mc8::advance_reaction_network(Vector<Real>&          a_particle_source
 					const Real             a_dt,
 					const Real             a_time,
 					const Real             a_kappa) const{
-    Vector<Real>     cdr_src(m_num_species, 0.0);
+  Vector<Real>     cdr_src(m_num_species, 0.0);
   Vector<Real>     rte_src(m_num_photons, 0.0);
   Vector<Real>     cdr_phi(m_num_species, 0.0);
   Vector<Real>     rte_phi(m_num_photons, 0.0);
@@ -886,4 +886,4 @@ Real air3_mc8::compute_alpha_eff(const RealVect a_E) const{
   const Real eta   = m_e_eta.get_entry(E);
 
   return (alpha-eta);
-}
+#include "CD_NamespaceFooter.H"

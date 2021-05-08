@@ -8,6 +8,8 @@
 #include <PolyGeom.H>
 
 #include "cylinder_if.H"
+    
+#include "CD_NamespaceHeader.H"
 
 cylinder_if::cylinder_if(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside){
   m_endPoint1    = a_center1;
@@ -71,4 +73,4 @@ Real cylinder_if::value(const RealVect& a_point) const{
 BaseIF* cylinder_if::newImplicitFunction() const{
   return (BaseIF*) (new cylinder_if(m_endPoint1, m_endPoint2, m_radius, m_fluidInside));
 }
-
+#include "CD_NamespaceFooter.H"

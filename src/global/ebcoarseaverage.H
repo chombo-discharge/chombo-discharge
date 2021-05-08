@@ -28,13 +28,14 @@
 #include "NamespaceHeader.H"
 class EBIndexSpace;
 
+#include "CD_NamespaceHeader.H"
 /// replaces coarse level data with an average of fine level data.
 /**
    This class replaces data at a coarse level of refinement with an
    average of data at a finer level of refinement, in areas where fine
    data is present.  Coarse level data is not modified where fine
    level data is not present.
-  */
+*/
 class ebcoarseaverage
 {
 public:
@@ -53,13 +54,13 @@ public:
      Equivalent to default construction followed by define().
   */
   ebcoarseaverage(const DisjointBoxLayout& dblFine,
-                  const DisjointBoxLayout& dblCoar,
-                  const EBISLayout& ebislFine,
-                  const EBISLayout& ebislCoar,
-                  const ProblemDomain& domainCoar,
-                  const int& nref,
-                  const int& nvar,
-                  const EBIndexSpace* ebisPtr);
+		  const DisjointBoxLayout& dblCoar,
+		  const EBISLayout& ebislFine,
+		  const EBISLayout& ebislCoar,
+		  const ProblemDomain& domainCoar,
+		  const int& nref,
+		  const int& nvar,
+		  const EBIndexSpace* ebisPtr);
 
   ///
   /**
@@ -67,23 +68,23 @@ public:
      Equivalent to default construction followed by define().
   */
   ebcoarseaverage(const EBLevelGrid& a_eblgFine,
-                  const EBLevelGrid& a_eblgCoar,
-                  const EBLevelGrid& a_eblgCoFi,
-                  const int& nref,
-                  const int& nvar);
+		  const EBLevelGrid& a_eblgCoar,
+		  const EBLevelGrid& a_eblgCoFi,
+		  const int& nref,
+		  const int& nvar);
   ///
   /**
      Defines this object.  Existing information is overriden.
 
   */
   void define(const DisjointBoxLayout& dblFine,
-              const DisjointBoxLayout& dblCoar,
-              const EBISLayout& ebislFine,
-              const EBISLayout& ebislCoar,
-              const ProblemDomain& domainCoar,
-              const int& nref,
-              const int& nvar,
-              const EBIndexSpace* ebisPtr);
+	      const DisjointBoxLayout& dblCoar,
+	      const EBISLayout& ebislFine,
+	      const EBISLayout& ebislCoar,
+	      const ProblemDomain& domainCoar,
+	      const int& nref,
+	      const int& nvar,
+	      const EBIndexSpace* ebisPtr);
 
   ///
   /**
@@ -91,10 +92,10 @@ public:
 
   */
   void define(const EBLevelGrid& a_eblgFine,
-              const EBLevelGrid& a_eblgCoar,
-              const EBLevelGrid& a_eblgCoFi,
-              const int& nref,
-              const int& nvar);
+	      const EBLevelGrid& a_eblgCoar,
+	      const EBLevelGrid& a_eblgCoFi,
+	      const int& nref,
+	      const int& nvar);
   ///
   /**
      Returns true if this object was created with the defining
@@ -117,19 +118,19 @@ public:
   */
   void
   average(LevelData<EBCellFAB>&       a_coarData,
-          const LevelData<EBCellFAB>& a_fineData,
-          const Interval&             a_variables);
+	  const LevelData<EBCellFAB>& a_fineData,
+	  const Interval&             a_variables);
 
   void
   average(LevelData<EBFluxFAB>&       a_coarData,
-          const LevelData<EBFluxFAB>& a_fineData,
-          const Interval&             a_variables);
+	  const LevelData<EBFluxFAB>& a_fineData,
+	  const Interval&             a_variables);
 
 
   void
   average(LevelData<BaseIVFAB<Real> >&       a_coarData,
-          const LevelData<BaseIVFAB<Real> >& a_fineData,
-          const Interval&                    a_variables);
+	  const LevelData<BaseIVFAB<Real> >& a_fineData,
+	  const Interval&                    a_variables);
 
   void
   conservative_average(LevelData<BaseIVFAB<Real> >&       a_coarData,
@@ -139,22 +140,22 @@ public:
 protected:
   void
   averageFAB(EBCellFAB&       a_coar,
-             const EBCellFAB& a_fine,
-             const DataIndex& a_datInd,
-             const Interval&  a_variables) const;
+	     const EBCellFAB& a_fine,
+	     const DataIndex& a_datInd,
+	     const Interval&  a_variables) const;
 
   void
   averageFAB(EBFaceFAB&       a_coar,
-             const EBFaceFAB& a_fine,
-             const DataIndex& a_datInd,
-             const Interval&  a_variables,
-             const int&       a_dir) const;
+	     const EBFaceFAB& a_fine,
+	     const DataIndex& a_datInd,
+	     const Interval&  a_variables,
+	     const int&       a_dir) const;
 
   void
   averageFAB(BaseIVFAB<Real>&       a_coar,
-             const BaseIVFAB<Real>& a_fine,
-             const DataIndex&       a_datInd,
-             const Interval&        a_variables) const;
+	     const BaseIVFAB<Real>& a_fine,
+	     const DataIndex&       a_datInd,
+	     const Interval&        a_variables) const;
 
   void
   conservative_averageFAB(BaseIVFAB<Real>&       a_coar,
@@ -183,7 +184,7 @@ protected:
   int m_nComp;
 
 private:
-    //disallowed for all the usual reasons
+  //disallowed for all the usual reasons
   ebcoarseaverage(const ebcoarseaverage& ebcin)
   {
     MayDay::Error("ebca 2 invalid operator");
@@ -194,6 +195,7 @@ private:
   }
 
 };
+#include "CD_NamespaceFooter.H"
 
 #include "NamespaceFooter.H"
 #endif

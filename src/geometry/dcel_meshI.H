@@ -14,6 +14,7 @@
 #include "dcel_edge.H"
 #include "dcel_face.H"
 
+#include "CD_NamespaceHeader.H"
 namespace dcel {
 
   template <class T>
@@ -337,5 +338,6 @@ namespace dcel {
     return closest->signedDistance(a_point);
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

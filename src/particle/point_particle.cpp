@@ -7,6 +7,8 @@
 
 #include "point_particle.H"
 
+#include "CD_NamespaceHeader.H"
+  
 point_particle::point_particle() : BinItem(){
 }
 
@@ -64,3 +66,4 @@ void point_particle::linearIn(void* buf){
 
   m_mass = *buffer;
 }
+#include "CD_NamespaceFooter.H"

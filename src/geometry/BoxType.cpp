@@ -6,6 +6,8 @@
 
 #include "BoxType.H"
 
+#include "CD_NamespaceHeader.H"
+
 int BoxType::preAllocatable(){
   return 2;
 }
@@ -96,3 +98,5 @@ BoxTypeFactory::~BoxTypeFactory(){
 BoxType* BoxTypeFactory::create(const Box& a_box, int a_ncomps, const DataIndex& a_dit) const{
   return new BoxType();
 }
+
+#include "CD_NamespaceFooter.H"

@@ -10,6 +10,8 @@
 
 #include "computational_geometry.H"
 
+#include "CD_NamespaceHeader.H"
+
 class vessel : public computational_geometry {
 public:
   vessel();
@@ -30,4 +32,6 @@ protected:
   bool m_shroom;
   bool m_rod;
 };
+#include "CD_NamespaceFooter.H"
+
 #endif

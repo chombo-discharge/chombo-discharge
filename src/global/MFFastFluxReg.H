@@ -12,6 +12,8 @@
 #include <RefCountedPtr.H>
 #include <EBFluxRegister.H>
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Class for filling ghost cells alà EBFasterFR for multiphase
 */
@@ -76,5 +78,6 @@ protected:
   Vector<RefCountedPtr<EBFluxRegister> > m_fastfr;
   
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

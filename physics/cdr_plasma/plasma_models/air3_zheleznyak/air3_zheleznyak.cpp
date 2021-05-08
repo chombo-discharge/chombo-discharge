@@ -18,6 +18,7 @@
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 std::string air3_zheleznyak::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
@@ -70,7 +71,7 @@ void air3_zheleznyak::read_file_entries(lookup_table& a_table, const std::string
     if(read_line){
       std::istringstream iss(line);
       if (!(iss >> x >> y)) {
-    	continue;
+	continue;
       }
       a_table.add_entry(x, y);
     }
@@ -772,3 +773,4 @@ Real air3_zheleznyak::excitation_rates(const Real a_E) const{
 Real air3_zheleznyak::sergey_factor(const Real a_O2frac) const{
   return 3E-2 + 0.4*pow(a_O2frac, 0.6);
 }
+#include "CD_NamespaceFooter.H"

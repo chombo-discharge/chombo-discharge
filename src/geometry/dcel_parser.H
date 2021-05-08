@@ -17,8 +17,8 @@
 #include <memory>
 #include <map>
 
+#include "CD_NamespaceHeader.H"
 namespace dcel {
-
   namespace parser {
   
     /*!
@@ -90,6 +90,7 @@ namespace dcel {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #include "dcel_parserI.H"
 

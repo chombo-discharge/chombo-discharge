@@ -9,6 +9,8 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+
 ritter_sphere::ritter_sphere(){
   m_radius = 0.0;
   m_center = RealVect::Zero;
@@ -101,3 +103,4 @@ Real ritter_sphere::dist(const RealVect a_x0) const{
 RealVect ritter_sphere::get_center() const {
   return m_center;
 }
+#include "CD_NamespaceFooter.H"

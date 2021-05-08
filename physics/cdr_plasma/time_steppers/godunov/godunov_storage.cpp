@@ -8,6 +8,7 @@
 #include "godunov.H"
 #include "godunov_storage.H"
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 godunov::cdr_storage::cdr_storage(){
@@ -153,3 +154,4 @@ void godunov::sigma_storage::allocate_storage(){
 void godunov::sigma_storage::deallocate_storage(){
   m_amr->deallocate(m_scratch);
 }
+#include "CD_NamespaceFooter.H"

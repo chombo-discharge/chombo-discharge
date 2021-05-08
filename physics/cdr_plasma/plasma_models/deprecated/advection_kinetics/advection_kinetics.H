@@ -94,6 +94,6 @@ public:
 protected:
 
   bool m_outflow;
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

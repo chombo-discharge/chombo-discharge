@@ -10,6 +10,7 @@
 
 #include <chrono>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 air7_stephens::electron::electron(){
@@ -211,3 +212,4 @@ air7_stephens::phot_b1v1_X1v1::phot_b1v1_X1v1(){
   
   m_kappa = 1./(m_kappa*p);
 }
+#include "CD_NamespaceFooter.H"

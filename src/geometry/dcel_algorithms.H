@@ -8,6 +8,8 @@
 #ifndef _DCEL_ALGORITHMS_H_
 #define _DCEL_ALGORITHMS_H_
 
+#include "CD_NamespaceHeader.H"
+
 namespace dcel {
 
   enum class InsideOutsideAlgorithm {
@@ -26,7 +28,7 @@ namespace dcel {
     Direct2,
     KdTree
   };
-
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

@@ -12,6 +12,7 @@
 #include "ito_solver.H"
 #include "ito_layout.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace brownian_walker {
 
@@ -101,4 +102,5 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

@@ -10,6 +10,8 @@
 #include <ParmParse.H>
 #include <sstream>
 
+#include "CD_NamespaceHeader.H"
+
 geo_coarsener::geo_coarsener(){
   m_coarsen_boxes.resize(0);
   m_coarsen_levels.resize(0);
@@ -134,3 +136,4 @@ Vector<real_box> geo_coarsener::get_coarsen_boxes(){
 Vector<int> geo_coarsener::get_coarsen_levels(){
   return m_coarsen_levels;
 }
+#include "CD_NamespaceFooter.H"

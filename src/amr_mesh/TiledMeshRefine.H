@@ -11,6 +11,8 @@
 #include <ProblemDomain.H>
 #include <Box.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class for generation AMR boxes using tiling
 */
@@ -53,5 +55,6 @@ protected:
   void makeBoxesFromTiles(Vector<Box>& a_levelBoxes, const IntVectSet& a_levelTiles, const ProblemDomain& a_levelDomain);
 
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

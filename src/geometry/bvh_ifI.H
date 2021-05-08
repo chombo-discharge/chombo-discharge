@@ -14,6 +14,8 @@
 
 #include <chrono>
 
+#include "CD_NamespaceHeader.H"
+
 using namespace dcel;
 using namespace BVH;
 using namespace std::chrono;
@@ -67,6 +69,7 @@ template <class T, class BV>
 BaseIF* bvh_if<T, BV>::newImplicitFunction() const {
   return static_cast<BaseIF*> (new bvh_if(*this));
 }
+#include "CD_NamespaceFooter.H"
 
 #endif
 

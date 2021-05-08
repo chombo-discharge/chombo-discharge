@@ -10,6 +10,7 @@
 
 #include <ParmParse.H> 
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::brownian_walker;
 
 brownian_walker_tagger::brownian_walker_tagger(RefCountedPtr<ito_solver>& a_solver,
@@ -38,3 +39,4 @@ void brownian_walker_tagger::parse_options(){
 bool brownian_walker_tagger::tag_cells(EBAMRTags& a_tags){
   return true;
 }
+#include "CD_NamespaceFooter.H"

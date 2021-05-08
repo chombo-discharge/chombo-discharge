@@ -11,6 +11,8 @@
 #include "EBAverageF_F.H"
 #include "EBAlias.H"
 
+#include "CD_NamespaceHeader.H"
+  
 EBGhostCloud::EBGhostCloud(){
 
 }
@@ -168,3 +170,4 @@ BoxLayoutData<FArrayBox>& EBGhostCloud::getFiCoBuffer() {
 const EBLevelGrid& EBGhostCloud::getEblgFiCo() const {
   return m_eblgFiCo;
 }
+#include "CD_NamespaceFooter.H"

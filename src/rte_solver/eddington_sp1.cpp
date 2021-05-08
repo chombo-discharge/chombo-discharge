@@ -18,7 +18,9 @@
 #include <chrono>
 #include <time.h>
 
-#define eddington_sp1_feature 1 // Comment Feb. 14 2018: I think we can keep this - it appears to produce the correct physics. 
+#define eddington_sp1_feature 1 // Comment Feb. 14 2018: I think we can keep this - it appears to produce the correct physics.
+
+#include "CD_NamespaceHeader.H"
 
 eddington_sp1::eddington_sp1() : rte_solver() {
   m_name = "eddington_sp1";
@@ -337,7 +339,7 @@ void eddington_sp1::register_operators(){
     pout() << m_name + "::register_operators" << endl;
   }
 
-    if(m_amr.isNull()){
+  if(m_amr.isNull()){
     MayDay::Abort("eddington_sp1::register_operators - need to set amr_mesh!");
   }
   else{
@@ -744,7 +746,7 @@ void eddington_sp1::setup_multigrid(){
     botsolver = &m_bicgstab;
   }
 
-    // Make m_gmg_type into an int for multigrid
+  // Make m_gmg_type into an int for multigrid
   int gmg_type;
   if(m_gmg_type == amrmg::full){
     gmg_type = 0;
@@ -769,7 +771,7 @@ void eddington_sp1::setup_multigrid(){
   m_gmg_solver->m_imin    = m_gmg_min_iter;
   m_gmg_solver->m_verbosity = m_gmg_verbosity;
 
-    // Dummies for init
+  // Dummies for init
   const int ncomp = 1;
   EBAMRCellData dummy1, dummy2;
   m_amr->allocate(dummy1, m_realm, m_phase, ncomp);
@@ -1048,3 +1050,4 @@ void eddington_sp1::set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, co
   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::robin));
   m_wallbc[idx]->set_value(a_value);
 }
+#include "CD_NamespaceFooter.H"

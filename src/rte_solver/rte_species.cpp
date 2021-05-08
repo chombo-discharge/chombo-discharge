@@ -7,6 +7,8 @@
 
 #include "rte_species.H"
 
+#include "CD_NamespaceHeader.H"
+  
 rte_species::rte_species(){
   this->define("default_photon", 1.0);
 
@@ -61,3 +63,4 @@ Real rte_species::get_scatter(const RealVect a_pos) const{
     return m_varscatter(a_pos);
   }
 }
+#include "CD_NamespaceFooter.H"

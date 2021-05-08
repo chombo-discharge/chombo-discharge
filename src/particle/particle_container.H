@@ -17,6 +17,8 @@
 #include <DisjointBoxLayout.H>
 #include "BaseEBCellFAB.H"
 
+#include "CD_NamespaceHeader.H"
+  
 template <class P>
 using AMRParticles     = Vector<RefCountedPtr<ParticleData<P> > >;
 
@@ -30,7 +32,7 @@ using AMRPVR           = Vector<RefCountedPtr<ParticleValidRegion> >;
 
 /*!
   @brief Templated class for holding particles on an AMR hierarchy with particle remapping
-template <class P>
+  template <class P>
 */
 template <class P>
 class particle_container {
@@ -113,7 +115,7 @@ public:
   */
   void clear_halo_particles() const;
 
-    /*!
+  /*!
     @brief Frees up halo particles
   */
   void clear_non_halo_particles() const;
@@ -153,7 +155,7 @@ public:
   */
   const AMRParticles<P>& get_halo_particles() const;
 
-    /*!
+  /*!
     @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
   */
   AMRParticles<P>& get_non_halo_particles();
@@ -324,7 +326,7 @@ public:
   */
   size_t get_num_halo_local() const;
 
-    /*!
+  /*!
     @brief Get the number particles in the halo cells. 
   */
   size_t get_num_halo_global() const;
@@ -398,7 +400,7 @@ protected:
 
   /*!
     @brief Cache particles. Use during pre-regrid operations, and for transferring particles between coarse and fine before
-           deposition steps. 
+    deposition steps. 
   */
   Vector<List<P> > m_cache_particles;
 
@@ -409,13 +411,13 @@ protected:
 
   /*!
     @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
-           refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
+    refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
   */
   mutable AMRParticles<P> m_halo_particles;
 
-    /*!
+  /*!
     @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
-           refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
+    refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
   */
   mutable AMRParticles<P> m_non_halo_particles;
 
@@ -441,10 +443,11 @@ protected:
 
   /*!
     @brief Special remapping function in case particles have moved across more than one refinement level. Used
-           for getting those particles and putting them in the correct data holder. 
+    for getting those particles and putting them in the correct data holder. 
   */
   void remap_lost_particles();
 };
+#include "CD_NamespaceFooter.H"
 
 #include "particle_containerI.H"
 

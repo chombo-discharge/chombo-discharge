@@ -6,6 +6,8 @@
 
 #include "TiledMeshRefine.H"
 
+#include "CD_NamespaceHeader.H"
+
 TiledMeshRefine::TiledMeshRefine(){
 
 }
@@ -229,3 +231,4 @@ void TiledMeshRefine::makeBoxesFromTiles(Vector<Box>&         a_levelBoxes,
     a_levelBoxes.push_back(Box(lo,hi));
   }
 }
+#include "CD_NamespaceFooter.H"

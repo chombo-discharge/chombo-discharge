@@ -15,6 +15,7 @@
 
 #include <chrono>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 morrow_zheleznyak::morrow_zheleznyak(){
@@ -1177,3 +1178,5 @@ RealVect morrow_zheleznyak::random_direction3D(){
   return RealVect(x,y,z);
 }
 #endif
+
+#include "CD_NamespaceFooter.H"

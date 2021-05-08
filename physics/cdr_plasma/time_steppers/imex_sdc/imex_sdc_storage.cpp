@@ -8,6 +8,7 @@
 #include "imex_sdc.H"
 #include "imex_sdc_storage.H"
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 imex_sdc::cdr_storage::cdr_storage(){
@@ -210,3 +211,4 @@ void imex_sdc::sigma_storage::deallocate_storage(){
     m_amr->deallocate(m_Fold[m]);
   }
 }
+#include "CD_NamespaceFooter.H"

@@ -13,6 +13,7 @@
 #include "cylinder_if.H"
 #include "graded_perlin_sphere_if.H"
 
+#include "CD_NamespaceHeader.H"
 
 /*!
   @brief perlin_rod_if function
@@ -60,4 +61,5 @@ protected:
   */
   RefCountedPtr<BaseIF> m_baseif;
 };
+#include "CD_NamespaceFooter.H"
 #endif

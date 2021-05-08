@@ -7,6 +7,8 @@
   
 #include "hyperboloid_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 hyperboloid_if::hyperboloid_if(const RealVect& a_radii, const RealVect& a_center, const bool& a_inside){
   m_radii  = a_radii;
   m_center = a_center;
@@ -46,3 +48,4 @@ BaseIF* hyperboloid_if::newImplicitFunction() const{
   hyperboloid_if* hyperboloidPtr = new hyperboloid_if(m_radii,m_center,m_inside);
   return static_cast<BaseIF*> (hyperboloidPtr);
 }
+#include "CD_NamespaceFooter.H"

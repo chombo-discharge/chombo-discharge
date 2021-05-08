@@ -5,10 +5,12 @@
   @date Jan. 2018
 */
 
-#ifndef _LOAD_BALANCE_
-#define _LOAD_BALANCE_
+#ifndef _CD_LoadBalance_H_
+#define _CD_LoadBalance_H_
 
 #include "mfis.H"
+
+#include "CD_NamespaceHeader.H"
 
 /*!
   @brief Enum for sorting boxes
@@ -60,7 +62,7 @@ public:
   template <typename T>
   static void sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const box_sorting a_which);
 
-    /*!
+  /*!
     @brief Load balancing. Loads are box volumes. 
   */
   static void make_balance(Vector<int>& a_levelRanks, const Vector<Box>& a_levelBoxes);
@@ -140,6 +142,7 @@ protected:
   static int maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last);
 
 };
+#include "CD_NamespaceFooter.H"
 
 #include "load_balanceI.H"
 

@@ -10,6 +10,8 @@
 #include "Box.H"
 #include "LevelData.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class for describing if a box is cut, regular, or covered
 */
@@ -113,5 +115,6 @@ public:
 
   virtual BoxType* create(const Box& a_box, int a_ncomps, const DataIndex& a_dit) const;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

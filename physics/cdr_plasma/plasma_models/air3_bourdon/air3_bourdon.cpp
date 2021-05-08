@@ -11,6 +11,7 @@
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 std::string air3_bourdon::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
@@ -116,7 +117,7 @@ void air3_bourdon::read_file_entries(lookup_table& a_table, const std::string a_
     if(read_line){
       std::istringstream iss(line);
       if (!(iss >> x >> y)) {
-    	continue;
+	continue;
       }
       a_table.add_entry(x, y);
     }
@@ -251,8 +252,8 @@ void air3_bourdon::advance_reaction_network(Vector<Real>&          a_particle_so
   const air3_bourdon::photon_three* photon3 = static_cast<air3_bourdon::photon_three*> (&(*m_rte_species[m_pho3_idx]));
 
   const Real Sph = m_photoi_eff*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_photon_densities[m_pho1_idx]
-						       + photon2->get_A()*a_photon_densities[m_pho2_idx]
-						       + photon3->get_A()*a_photon_densities[m_pho3_idx]);
+							  + photon2->get_A()*a_photon_densities[m_pho2_idx]
+							  + photon3->get_A()*a_photon_densities[m_pho3_idx]);
   Se += Sph;
   Sp += Sph;
 
@@ -403,3 +404,4 @@ Real air3_bourdon::compute_alpha(const RealVect a_E) const{
 
   return alpha;
 }
+#include "CD_NamespaceFooter.H"

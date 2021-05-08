@@ -15,6 +15,7 @@
 #include <functional>
 #include <map>
 
+#include "CD_NamespaceHeader.H"
 namespace dcel {
 
   template <class T> class vertexT;
@@ -119,6 +120,7 @@ namespace dcel {
     void printWarnings(const std::map<std::string, int>& a_warnings) const noexcept;
   };
 }
+#include "CD_NamespaceFooter.H"
 
 #include "dcel_meshI.H"
 

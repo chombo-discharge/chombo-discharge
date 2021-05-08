@@ -15,6 +15,8 @@
 #include <DirichletConductivityDomainBC.H>
 #include <NeumannConductivityDomainBC.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Wrapper class for imposing Dirichlet and Neumann on individual domain edges (faces in 3D)
   @details This class does not (currently) do Robin boundary conditions, although it can probably be extended to take care of 
@@ -56,14 +58,14 @@ public:
     @brief Get face flux
   */
   virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux,
-                           const BaseFab<Real>&  a_phi,
-                           const RealVect&       a_probLo,
-                           const RealVect&       a_dx,
-                           const int&            a_idir,
-                           const Side::LoHiSide& a_side,
-                           const DataIndex&      a_dit,
-                           const Real&           a_time,
-                           const bool&           a_useHomogeneous);
+			   const BaseFab<Real>&  a_phi,
+			   const RealVect&       a_probLo,
+			   const RealVect&       a_dx,
+			   const int&            a_idir,
+			   const Side::LoHiSide& a_side,
+			   const DataIndex&      a_dit,
+			   const Real&           a_time,
+			   const bool&           a_useHomogeneous);
 
   /*! 
     @brief Get face flux
@@ -84,18 +86,18 @@ public:
     @brief Get gradient
   */
   virtual void getFaceGradPhi(Real&                 a_faceFlux,
-                              const FaceIndex&      a_face,
-                              const int&            a_comp,
-                              const EBCellFAB&      a_phi,
-                              const RealVect&       a_probLo,
-                              const RealVect&       a_dx,
-                              const int&            a_idir,
-                              const Side::LoHiSide& a_side,
-                              const DataIndex&      a_dit,
-                              const Real&           a_time,
-                              const bool&           a_useAreaFrac,
-                              const RealVect&       a_centroid,
-                              const bool&           a_useHomogeneous);
+			      const FaceIndex&      a_face,
+			      const int&            a_comp,
+			      const EBCellFAB&      a_phi,
+			      const RealVect&       a_probLo,
+			      const RealVect&       a_dx,
+			      const int&            a_idir,
+			      const Side::LoHiSide& a_side,
+			      const DataIndex&      a_dit,
+			      const Real&           a_time,
+			      const bool&           a_useAreaFrac,
+			      const RealVect&       a_centroid,
+			      const bool&           a_useHomogeneous);
   
   /*!
     @brief Ghost filling. This is for NWO.
@@ -125,4 +127,5 @@ protected:
   bool m_defined;
 
 };
+#include "CD_NamespaceFooter.H"
 #endif

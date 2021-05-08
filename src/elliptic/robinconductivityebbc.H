@@ -13,6 +13,8 @@
 
 #include <BaseEBBC.H>
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Boundary condition class for Robin type boundary conditions on embedded boundaries
 */
@@ -121,5 +123,6 @@ protected:
 
   virtual bool get_lsq_sten(VoFStencil& a_stencil, const VolIndex& a_vof, const EBISBox& a_ebisbox, const ProblemDomain& a_domain);
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

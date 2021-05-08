@@ -1,9 +1,0 @@
-#====================================================================================================
-# ABB_SWITCH CLASS OPTIONS
-#
-# Note, you must take the PLY mesh file with you to the execution folder. In the geometries_prebuilt
-# directory, it is named abb_switch.ply
-# ====================================================================================================
-abb_switch.mesh_file    = switch.ply
-abb_switch.tree_depth   = 10
-abb_switch.max_elements = 10

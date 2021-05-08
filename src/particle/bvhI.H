@@ -17,6 +17,8 @@ using namespace std::chrono;
 #define BVH_RESERVE_SIZE 2048
 #define BVH_DEBUG 0
 
+#include "CD_NamespaceHeader.H"
+
 template <class T>
 bvh_node<T>::bvh_node(){
   m_data.reserve(BVH_RESERVE_SIZE);
@@ -371,5 +373,5 @@ inline void bvh_tree<T>::build_tree(const int a_firstDir, const int a_numLeaves)
     keepSplitting = N < a_numLeaves && can_split;
   }
 }
-
+#include "CD_NamespaceFooter.H"
 #endif

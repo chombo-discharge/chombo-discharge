@@ -84,5 +84,5 @@ protected:
     @brief Threshold for ionization coarsening
   */
   Real m_coar_alpha;
-};
+#include "CD_NamespaceFooter.H"
 #endif

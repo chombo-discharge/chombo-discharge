@@ -13,6 +13,8 @@
 
 #include "perlin_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief perlin_sphere_if function
 */
@@ -76,4 +78,6 @@ protected:
   */
   RefCountedPtr<BaseIF> m_perlinIF;
 };
+#include "CD_NamespaceFooter.H"
+
 #endif

@@ -7,7 +7,8 @@
 
 #include "perlin_sphere_if.H"
 
-//
+#include "CD_NamespaceHeader.H"
+  
 perlin_sphere_if::perlin_sphere_if(const Real&     a_rad,
 				   const RealVect& a_center,
 				   const bool&     a_inside,
@@ -88,3 +89,4 @@ Real perlin_sphere_if::value(const RealVect& a_pos) const {
 BaseIF* perlin_sphere_if::newImplicitFunction() const {
   return static_cast<BaseIF*> (new perlin_sphere_if(*this));
 }
+#include "CD_NamespaceFooter.H"

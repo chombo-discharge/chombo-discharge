@@ -10,6 +10,7 @@
 #include <ParmParse.H>
 #include <EBEllipticLoadBalance.H>
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace poisson {
   
@@ -69,6 +70,7 @@ namespace physics {
       m_poisson->set_computational_geometry(m_compgeom);
       m_poisson->set_potential(s_potential_one);
       m_poisson->set_realm(m_realm);
+      m_poisson->set_time(0, 0.0, 0.0);
 
       // Setup sigma
       m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
@@ -201,11 +203,11 @@ namespace physics {
 
     template <class T>
     void field_stepper<T>::load_balance_boxes(Vector<Vector<int> >&            a_procs,
-						Vector<Vector<Box> >&            a_boxes,
-						const std::string                a_realm,
-						const Vector<DisjointBoxLayout>& a_grids,
-						const int                        a_lmin,
-						const int                        a_finest_level){
+					      Vector<Vector<Box> >&            a_boxes,
+					      const std::string                a_realm,
+					      const Vector<DisjointBoxLayout>& a_grids,
+					      const int                        a_lmin,
+					      const int                        a_finest_level){
       if(m_load_balance){
 	constexpr int num_apply = 50;
 	
@@ -270,3 +272,4 @@ namespace physics {
     }
   }
 }
+#include "CD_NamespaceFooter.H"

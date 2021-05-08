@@ -6,9 +6,13 @@
 */
 
 #include "jump_bc.H"
+#include "CD_LeastSquares.H"
 
 #include <EBArith.H>
+#include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+  
 bool jump_bc::s_quadrant_based = true;
 int  jump_bc::s_lsq_radius     = 1;
 
@@ -209,7 +213,7 @@ void jump_bc::define_vofiter(){
 }
 
 void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
-  CH_TIME("jump_bc::build_stencils");
+  CH_TIME("jump_bc::set_bco");
 
   const int comp = 0;
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
@@ -349,7 +353,7 @@ void jump_bc::build_stencils(){
   }
 }
 
- void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
+void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 		       const LevelData<BaseIVFAB<Real> >& a_jump,
 		       const LevelData<MFCellFAB>&        a_phi,
 		       const bool                         a_homogeneous){
@@ -359,11 +363,11 @@ void jump_bc::build_stencils(){
   this->match_bc(a_phibc, a_jump, a_phi, dit, a_homogeneous);
 }
 
- void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
-			const LevelData<BaseIVFAB<Real> >& a_jump,
-			const LevelData<MFCellFAB>&        a_phi,
-			DataIterator&                      a_dit,
-			const bool                         a_homogeneous){
+void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
+		       const LevelData<BaseIVFAB<Real> >& a_jump,
+		       const LevelData<MFCellFAB>&        a_phi,
+		       DataIterator&                      a_dit,
+		       const bool                         a_homogeneous){
   CH_TIME("jump_bc::match_bc(1)");
 
   for (a_dit.reset(); a_dit.ok(); ++a_dit){
@@ -459,3 +463,4 @@ LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_inhomo(){
 LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_homog(){
   return m_homog;
 }
+#include "CD_NamespaceFooter.H"

@@ -18,18 +18,20 @@
 #include "EBLevelDataOps.H"
 #include "NamespaceHeader.H"
 
+#include "CD_NamespaceHeader.H"
+
 /***********************/
 nwoebquadcfinterp::
 nwoebquadcfinterp(const DisjointBoxLayout&           a_gridsFine,
-                  const DisjointBoxLayout&           a_gridsCoar,
-                  const EBISLayout&                  a_ebislFine,
-                  const EBISLayout&                  a_ebislCoar,
-                  const ProblemDomain&               a_domainCoar,
-                  const int&                         a_nref,
-                  const int&                         a_nvar,
-                  const Real&                        a_dxFine,
-                  const int&                         a_ghost,
-                  const LayoutData<IntVectSet>&      a_cfivs,
+		  const DisjointBoxLayout&           a_gridsCoar,
+		  const EBISLayout&                  a_ebislFine,
+		  const EBISLayout&                  a_ebislCoar,
+		  const ProblemDomain&               a_domainCoar,
+		  const int&                         a_nref,
+		  const int&                         a_nvar,
+		  const Real&                        a_dxFine,
+		  const int&                         a_ghost,
+		  const LayoutData<IntVectSet>&      a_cfivs,
 		  const RefCountedPtr<EBIndexSpace>& a_ebisPtr)            
 {
   m_gridsFine  =  a_gridsFine ;          
@@ -78,18 +80,18 @@ defineStencils(const LayoutData<IntVectSet>&  a_cfivs)
       EBCellFAB& coarProxy = m_bufferCoFi[dit()];
       EBCellFAB& fineProxy = proxyLevel[dit()];
       m_stencil[dit()] = RefCountedPtr<AggStencil <EBCellFAB, EBCellFAB>  >
-        (new AggStencil<EBCellFAB, EBCellFAB >(baseDstVoFs, baseSten, coarProxy, fineProxy));
+	(new AggStencil<EBCellFAB, EBCellFAB >(baseDstVoFs, baseSten, coarProxy, fineProxy));
     }
 }
 /***********************/
 void
 nwoebquadcfinterp::
 getStencils(Vector<RefCountedPtr< BaseStencil> >  & a_stencils, 
-            Vector<RefCountedPtr< BaseIndex  > >  & a_baseDstVoFs,
-            const IntVectSet                      & a_cfivs,
-            const EBISBox                         & a_ebisFine,
-            const EBISBox                         & a_ebisCoFi,
-            const DataIndex                       & a_dit)
+	    Vector<RefCountedPtr< BaseIndex  > >  & a_baseDstVoFs,
+	    const IntVectSet                      & a_cfivs,
+	    const EBISBox                         & a_ebisFine,
+	    const EBISBox                         & a_ebisCoFi,
+	    const DataIndex                       & a_dit)
 {
   VoFIterator vofit(a_cfivs, a_ebisFine.getEBGraph());
   const Vector<VolIndex>& volvec = vofit.getVector();
@@ -107,10 +109,10 @@ getStencils(Vector<RefCountedPtr< BaseStencil> >  & a_stencils,
 void
 nwoebquadcfinterp::
 getStencil(VoFStencil           & a_stencil,
-           const VolIndex       & a_vofFine,
-           const EBISBox        & a_ebisFine,
-           const EBISBox        & a_ebisCoFi,
-           const DataIndex      & a_dit)
+	   const VolIndex       & a_vofFine,
+	   const EBISBox        & a_ebisFine,
+	   const EBISBox        & a_ebisCoFi,
+	   const DataIndex      & a_dit)
 {
   VolIndex fineVoF = a_vofFine;
   Real dxFine = m_dxFine;  Real dxCoar = m_nref*m_dxFine;
@@ -131,8 +133,8 @@ getStencil(VoFStencil           & a_stencil,
 void 
 nwoebquadcfinterp::
 coarseFineInterp(LevelData<EBCellFAB>&       a_phif,
-                 const LevelData<EBCellFAB>& a_phic,
-                 const int                   a_isrc,
+		 const LevelData<EBCellFAB>& a_phic,
+		 const int                   a_isrc,
 		 const int                   a_idst,
 		 const int                   a_inco)
 {
@@ -145,8 +147,8 @@ coarseFineInterp(LevelData<EBCellFAB>&       a_phif,
     {
       //false is for increment only
       m_stencil[dit[ibox]]->apply(a_phif[dit[ibox]],
-                                  m_bufferCoFi[dit[ibox]],
-                                  a_isrc, a_idst, a_inco, false);
+				  m_bufferCoFi[dit[ibox]],
+				  a_isrc, a_idst, a_inco, false);
     }
 }
 
@@ -154,7 +156,7 @@ coarseFineInterp(LevelData<EBCellFAB>&       a_phif,
 void 
 nwoebquadcfinterp::
 coarseFineInterpH(LevelData<EBCellFAB>& a_phif,
-                  const int             a_isrc,
+		  const int             a_isrc,
 		  const int             a_idst,
 		  const int             a_inco)
 {
@@ -166,10 +168,11 @@ coarseFineInterpH(LevelData<EBCellFAB>& a_phif,
     {
       //false is for increment only
       m_stencil[dit[ibox]]->apply(a_phif[dit[ibox]],
-                                  m_bufferCoFi[dit[ibox]],
-                                  a_isrc, a_idst, a_inco, false);
+				  m_bufferCoFi[dit[ibox]],
+				  a_isrc, a_idst, a_inco, false);
     }
 
 }
+#include "CD_NamespaceFooter.H"
 
 #include "NamespaceFooter.H"

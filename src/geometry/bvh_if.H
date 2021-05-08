@@ -16,6 +16,8 @@
 
 #include <BaseIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 using namespace dcel;
 using namespace BVH;
 
@@ -47,6 +49,7 @@ protected:
   
   bool m_flipInside;
 };
+#include "CD_NamespaceFooter.H"
 
 #include "bvh_ifI.H"
 

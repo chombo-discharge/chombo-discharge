@@ -4,6 +4,7 @@
 #include "rte_stepper.H"
 #include "ParmParse.H"
 
+using namespace ChomboDischarge;
 using namespace physics::rte;
 
 int main(int argc, char* argv[]){
@@ -24,7 +25,7 @@ int main(int argc, char* argv[]){
 
   // Set up basic Poisson, potential = 1 
   auto timestepper = RefCountedPtr<rte_stepper<eddington_sp1> >
-     (new rte_stepper<eddington_sp1>());
+    (new rte_stepper<eddington_sp1>());
 
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
@@ -34,4 +35,4 @@ int main(int argc, char* argv[]){
   CH_TIMER_REPORT();
   MPI_Finalize();
 #endif
-}
+#include "CD_NamespaceFooter.H"

@@ -65,9 +65,9 @@ public:
   }
 
   Vector<Real> advection_kinetics::compute_rte_source_terms(const Real&         a_time,
-							  const RealVect&     a_pos,
-							  const RealVect&     a_E,
-							  const Vector<Real>& a_cdr_densities) const {
+							    const RealVect&     a_pos,
+							    const RealVect&     a_E,
+							    const Vector<Real>& a_cdr_densities) const {
     return Vector<Real>(m_num_photons, 0.0);
   }
 
@@ -108,4 +108,4 @@ public:
     RealVect m_center;
     Real m_L;
   };
-};
+#include "CD_NamespaceFooter.H"

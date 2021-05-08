@@ -10,6 +10,8 @@
 
 #include "BVH.H"
 
+#include "CD_NamespaceHeader.H"
+
 namespace BVH {
 
   int reguCalls = 0;
@@ -178,7 +180,7 @@ namespace BVH {
   template <class T, class P, class BV>
   inline
   void NodeT<T, P, BV>::topDownSortAndPartitionPrimitives(const StopFunction&      a_stopFunc,
-								    const PartitionFunction& a_partFunc,
+							  const PartitionFunction& a_partFunc,
 							  const BVConstructor&     a_bvFunc) noexcept {
     const bool stopSplitting = a_stopFunc(*this);
 
@@ -506,5 +508,6 @@ namespace BVH {
     return closestPrimitive->signedDistance(a_point);
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

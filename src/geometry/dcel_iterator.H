@@ -10,6 +10,7 @@
 
 #include <memory>
 
+#include "CD_NamespaceHeader.H"
 namespace dcel {
   
   template <class T> class vertexT;
@@ -66,6 +67,7 @@ namespace dcel {
     std::shared_ptr<edge> m_curEdge; // Current edge
   };
 }
+#include "CD_NamespaceFooter.H"
 
 #include "dcel_iteratorI.H"
 

@@ -107,4 +107,4 @@ public:
     RealVect m_center;
     Real m_L;
   };
-};
+#include "CD_NamespaceFooter.H"

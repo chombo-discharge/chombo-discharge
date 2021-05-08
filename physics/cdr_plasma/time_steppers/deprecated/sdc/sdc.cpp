@@ -1011,7 +1011,7 @@ void sdc::advance_sigma(const int a_m, const bool a_corrector){
     pout() << "sdc::advance_sigma" << endl;
   }
 
-    // Add in the lagged terms for sigma. As above, m=0 and corrector is a special case where we just use the old slopes.
+  // Add in the lagged terms for sigma. As above, m=0 and corrector is a special case where we just use the old slopes.
   EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
   const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
   const EBAMRIVData& Fsig_m = m_sigma_scratch->get_Fold()[a_m]; // Here, we should be able to use either Fold or Fnew
@@ -2164,10 +2164,10 @@ EBAMRIVData& sdc::get_sigmak(const int a_m){
 }
 
 void sdc::write_step_profile(const Real a_dt,
-			       const Real a_error,
-			       const int  a_substeps,
-			       const int  a_corrections,
-			       const int  a_rejections){
+			     const Real a_error,
+			     const int  a_substeps,
+			     const int  a_corrections,
+			     const int  a_rejections){
   CH_TIME("sissdc::write_step_profile");
   if(m_verbosity > 5){
     pout() << "sdc::write_step_profile" << endl;
@@ -2265,4 +2265,4 @@ void sdc::restore_solvers(){
 
     data_ops::copy(state, previous);
   }
-}
+#include "CD_NamespaceFooter.H"

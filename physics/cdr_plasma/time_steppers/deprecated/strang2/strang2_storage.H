@@ -168,6 +168,6 @@ protected:
   EBAMRIVData m_error;           // Error
 
   Vector<EBAMRIVData*> m_extra_storage;
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

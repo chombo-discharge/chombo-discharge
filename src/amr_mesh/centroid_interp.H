@@ -1,16 +1,17 @@
 /*!
-  @file centroid_interp.H
-  @brief Implementation of irreg_stencil that interpolates from cell centers to cell centroids
+  @file   centroid_interp.H
+  @brief  Implementation of irreg_stencil that interpolates from cell centers to cell centroids
   @author Robert Marskar
-  @date Aug. 2017
+  @date   Aug. 2017
 */
 
-
-#ifndef _CENTROID_INTERP_
-#define _CENTROID_INTERP_
+#ifndef _CD_CentroidInterp_H_
+#define _CD_CentroidInterp_H_
 
 #include "irreg_stencil.H"
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Class for holding stencils on irregular cells over a single AMR level
 */
@@ -49,11 +50,6 @@ public:
     @brief Tolerance
   */
   static Real s_tolerance;
-
-  /*!
-    @brief Use quadrant based stencils for least squares
-  */
-  static bool s_quadrant_based;
   
 protected:
   
@@ -67,7 +63,7 @@ protected:
 			     const EBISBox&           a_ebisbox,
 			     const Box&               a_box,
 			     const Real&              a_dx,
-			     const IntVectSet&        a_cfivs);
+			     const IntVectSet&        a_cfivs) override;
 
   /*!
     @brief Get a Taylor-based stencil
@@ -93,7 +89,7 @@ protected:
 				    const Real&              a_dx,
 				    const IntVectSet&        a_cfivs);
 
-    /*!
+  /*!
     @brief Get a least-squares based first order stencil
   */
   virtual bool get_pwl_stencil(VoFStencil&              a_sten,
@@ -106,4 +102,6 @@ protected:
 			       const IntVectSet&        a_cfivs);
   
 };
+#include "CD_NamespaceFooter.H"
+
 #endif

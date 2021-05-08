@@ -18,25 +18,25 @@
   Class options
   -------------
 
-      air3.quenching_pressure            = 0.03947               # Quenching pressure for photo-emission
-      air3.electron_diffusion            = true                  # Turn off electron diffusion (debugging only)
-      air3.ion_mobility                  = 2.E-4                 # Ion mobility
-      air3.excitation_efficiency         = 0.6                   # Impact excitation efficiency
-      air3.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
-      air3.electrode_townsend2           = 1.E-2                 # Townsend coefficient on electrodes
-      air3.electrode_quantum_efficiency  = 1.E-2                 # Quantum efficiency on electrodes
-      air3.dielectric_townsend2          = 1.E-1                 # Townsend coefficient on dielectrics
-      air3.dielectric_quantum_efficiency = 1.E-1                 # Quantum efficiency on dielectrics
-      air3.initial_ionization            = 1.E10                 # Initial background ionization
-      air3.photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
-      air3.photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
-      air3.photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
-      air3.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
-      air3.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
-      air3.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
-      air3.electron_recombination        = 5.E-14                # Electron-ion recombination rate
-      air3.ion_recombination             = 2.E-12                # Ion-ion recombination rate
-      air3.electron_detachment           = 1.E-18                # Electron detachment rate
+  air3.quenching_pressure            = 0.03947               # Quenching pressure for photo-emission
+  air3.electron_diffusion            = true                  # Turn off electron diffusion (debugging only)
+  air3.ion_mobility                  = 2.E-4                 # Ion mobility
+  air3.excitation_efficiency         = 0.6                   # Impact excitation efficiency
+  air3.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
+  air3.electrode_townsend2           = 1.E-2                 # Townsend coefficient on electrodes
+  air3.electrode_quantum_efficiency  = 1.E-2                 # Quantum efficiency on electrodes
+  air3.dielectric_townsend2          = 1.E-1                 # Townsend coefficient on dielectrics
+  air3.dielectric_quantum_efficiency = 1.E-1                 # Quantum efficiency on dielectrics
+  air3.initial_ionization            = 1.E10                 # Initial background ionization
+  air3.photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
+  air3.photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
+  air3.photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
+  air3.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
+  air3.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
+  air3.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
+  air3.electron_recombination        = 5.E-14                # Electron-ion recombination rate
+  air3.ion_recombination             = 2.E-12                # Ion-ion recombination rate
+  air3.electron_detachment           = 1.E-18                # Electron detachment rate
 
 */
 class air3 : public plasma_kinetics {
@@ -254,5 +254,5 @@ protected:
 				  const Vector<Real>& a_extrap_cdr_fluxes,
 				  const Real&         a_townsend,
 				  const Real&         a_quantum_efficiency) const;
-};
+#include "CD_NamespaceFooter.H"
 #endif

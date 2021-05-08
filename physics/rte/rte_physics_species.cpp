@@ -9,6 +9,7 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::rte;
 
 rte_physics_species::rte_physics_species(){
@@ -24,3 +25,4 @@ rte_physics_species::rte_physics_species(){
 rte_physics_species::~rte_physics_species(){
 
 }
+#include "CD_NamespaceFooter.H"

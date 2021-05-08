@@ -7,6 +7,8 @@
 
 #include "MFQuadCFInterp.H"
 
+#include "CD_NamespaceHeader.H"
+
 MFQuadCFInterp::MFQuadCFInterp(){
 }
 
@@ -32,3 +34,5 @@ EBQuadCFInterp& MFQuadCFInterp::get_quadcfi(const int a_phase) {
 const EBQuadCFInterp& MFQuadCFInterp::get_quadcfi(const int a_phase) const {
   return *m_quadcfi[a_phase];
 }
+
+#include "CD_NamespaceFooter.H"

@@ -13,6 +13,8 @@
 
 #include <RefCountedPtr.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class that holds appropriate coefficients for Robin implementation of the Larsen boundary condition
 */
@@ -54,5 +56,6 @@ protected:
     
   Real m_r2;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

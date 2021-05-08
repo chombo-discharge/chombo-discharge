@@ -17,6 +17,8 @@
 #include "dcel_BVH.H"
 #include "bvh_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 using namespace dcel;
 
 using precision = float;
@@ -74,3 +76,4 @@ tesselation::tesselation(){
 tesselation::~tesselation(){
   
 }
+#include "CD_NamespaceFooter.H"

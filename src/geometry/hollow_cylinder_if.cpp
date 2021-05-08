@@ -13,6 +13,8 @@
 #include <UnionIF.H>
 #include <IntersectionIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 hollow_cylinder_if::hollow_cylinder_if(const RealVect a_center1,
 				       const RealVect a_center2,
 				       const Real     a_majorRadius,
@@ -50,3 +52,4 @@ Real hollow_cylinder_if::value(const RealVect& a_point) const{
 BaseIF* hollow_cylinder_if::newImplicitFunction() const{
   return (BaseIF*) (new hollow_cylinder_if(*this));
 }
+#include "CD_NamespaceFooter.H"

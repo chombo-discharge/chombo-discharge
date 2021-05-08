@@ -23,6 +23,7 @@
 /*!
   @brief Namespace for cdr plasma physics
 */
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace cdr_plasma {
   
@@ -1113,4 +1114,5 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

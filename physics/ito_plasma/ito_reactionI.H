@@ -12,6 +12,7 @@
 
 #define ITO_REACTION_DEBUG 0
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::ito_plasma;
 
 inline
@@ -193,6 +194,6 @@ const Real ito_reaction::get_energy_change(const int a_idx) const {
 
   return ret;
 }
-  
+#include "CD_NamespaceFooter.H"
 
 #endif

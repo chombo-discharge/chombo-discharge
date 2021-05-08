@@ -1019,4 +1019,4 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
 
 Real rk2::restrict_dt(){
   return 1.E99;
-}
+#include "CD_NamespaceFooter.H"

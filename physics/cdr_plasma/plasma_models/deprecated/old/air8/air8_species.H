@@ -367,6 +367,6 @@ protected:
     @brief O2-fraction
   */
   Real m_pO2;
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

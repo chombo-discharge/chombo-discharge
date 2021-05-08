@@ -10,6 +10,7 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::ito_plasma;
 
 ito_plasma_air3::ito_plasma_air3(){
@@ -302,3 +303,4 @@ Real ito_plasma_air3::photonZ::get_kappa(const RealVect a_pos) const {
   const Real f = m_f1 + (*m_udist01)(*m_rng)*(m_f2 - m_f1);
   return m_K1*pow(m_K2/m_K1, (f-m_f1)/(m_f2-m_f1));
 }
+#include "CD_NamespaceFooter.H"

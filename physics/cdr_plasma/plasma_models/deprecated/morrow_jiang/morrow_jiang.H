@@ -293,6 +293,6 @@ protected:
     std::uniform_real_distribution<Real>* m_udist01;
   };
 
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

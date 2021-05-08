@@ -13,6 +13,7 @@
 #include <memory>
 #include <vector>
 
+#include "CD_NamespaceHeader.H"
 namespace dcel {
     
   template <class T>
@@ -64,6 +65,7 @@ namespace dcel {
     std::vector<Vec2> m_points;
   };
 }
+#include "CD_NamespaceFooter.H"
 
 #include "dcel_polyI.H"
 

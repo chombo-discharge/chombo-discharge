@@ -11,6 +11,8 @@
 #include <RealVect.H>
 #include <BaseIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief A box with rounded corners and edges
 */
@@ -58,5 +60,6 @@ protected:
   bool m_fluidInside;
   RefCountedPtr<BaseIF> m_baseif;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

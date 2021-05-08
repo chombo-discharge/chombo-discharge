@@ -11,6 +11,7 @@
 #include <BaseIF.H>
 #include <RefCountedPtr.H>
 
+#include "CD_NamespaceHeader.H"
 /*!
   @brief dielectric class. Simple tuple.
 */
@@ -66,6 +67,6 @@ protected:
   Real (*m_variablepermittivity)(const RealVect a_pos);
   
   bool m_constant;
-
 };
+#include "CD_NamespaceFooter.H"
 #endif

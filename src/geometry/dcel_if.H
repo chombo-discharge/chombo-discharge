@@ -14,6 +14,8 @@
 
 #include <BaseIF.H>
 
+#include "CD_NamespaceHeader.H"
+
 using namespace dcel;
 
 template <class T>
@@ -38,6 +40,7 @@ protected:
   
   bool m_flipInside;
 };
+#include "CD_NamespaceFooter.H"
 
 #include "dcel_ifI.H"
 

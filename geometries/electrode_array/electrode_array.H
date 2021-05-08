@@ -10,6 +10,8 @@
 
 #include "computational_geometry.H"
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief This is a class that defines an array of electrodes.
 */
@@ -23,5 +25,5 @@ protected:
 
 
 };
-
+#include "CD_NamespaceFooter.H"
 #endif

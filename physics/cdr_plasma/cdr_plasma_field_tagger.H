@@ -10,6 +10,7 @@
 
 #include "cdr_plasma_tagger.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace cdr_plasma {
   
@@ -109,4 +110,5 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 #endif

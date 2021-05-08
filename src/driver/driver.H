@@ -20,6 +20,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Main class for time/space advancement of streamer equations. This class runs a timestepper and controls input/output, 
   regrid intervals etc. 
@@ -657,4 +659,5 @@ protected:
   */
   void rebuildParmParse() const;
 };
+#include "CD_NamespaceFooter.H"
 #endif

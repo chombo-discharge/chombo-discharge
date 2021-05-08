@@ -223,4 +223,4 @@ void strang2::sigma_storage::deallocate_extra_storage(){
   }
   m_extra_storage.resize(0);
   m_has_extra = false;
-}
+#include "CD_NamespaceFooter.H"

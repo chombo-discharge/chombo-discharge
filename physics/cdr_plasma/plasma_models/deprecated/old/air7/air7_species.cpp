@@ -402,5 +402,5 @@ Real air7::photon_three::get_A() const {
 
 Real air7::photon_three::get_pO2() const {
   return m_pO2;
-}
+#include "CD_NamespaceFooter.H"
 

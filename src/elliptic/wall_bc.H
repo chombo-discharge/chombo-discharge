@@ -11,6 +11,8 @@
 #include <LoHiSide.H>
 #include <RealVect.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Types of wall boundary conditions for various solvers. I hate this structure. 
   @todo This should be moved somewhere else and wall_bc should be a separate file. Maybe we should call it poisson_domain_bc.
@@ -126,5 +128,6 @@ protected:
   */
   wallbc::which_bc m_which;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

@@ -13,6 +13,8 @@
 #include "amr_mesh.H"
 #include "real_box.H"
 
+#include "CD_NamespaceHeader.H"
+  
 using EBAMRTags = Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > >;
 
 /*!
@@ -108,5 +110,6 @@ protected:
   */
   virtual void parse_verbosity();
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

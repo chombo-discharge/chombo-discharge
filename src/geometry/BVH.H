@@ -15,6 +15,8 @@
 #include <functional>
 #include <queue>
 
+#include "CD_NamespaceHeader.H"
+
 namespace BVH {
 
   template <class T, class P, class BV>
@@ -181,6 +183,7 @@ namespace BVH {
     void pruneUnordered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept;
   };
 }
+#include "CD_NamespaceFooter.H"
 
 #include "BVHI.H"
 

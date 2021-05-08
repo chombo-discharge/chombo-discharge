@@ -21,6 +21,8 @@
 #include "box_if.H"
 #include "rounded_box_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 rod_plane_profile::rod_plane_profile(){
   if(SpaceDim == 3) MayDay::Abort("rod_plane_profile::rod_plane_profile - this is currently for 2D only");
   std::string str;
@@ -145,3 +147,4 @@ BaseIF* rod_plane_profile::getBaseIF_square(){
 
   return new rounded_box_if(lo, hi, curv, true);
 }
+#include "CD_NamespaceFooter.H"

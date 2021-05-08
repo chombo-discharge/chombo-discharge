@@ -15,6 +15,8 @@
 #include "Vector.H"
 #include "RealVect.H"
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Deposition type
 */
@@ -163,6 +165,7 @@ protected:
   RealVect m_prob_lo;
   bool m_irr_ngp; // Force NGP deposition in cut-cells. 
 };
+#include "CD_NamespaceFooter.H"
 
 #include "EBParticleInterpI.H"
 

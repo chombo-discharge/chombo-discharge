@@ -13,7 +13,9 @@
 #include <BinItem.H>
 #include <MeshInterp.H>
 
-#include "ito_particle.H" 
+#include "ito_particle.H"
+
+#include "CD_NamespaceHeader.H"
 
 /*!
   @brief Metadata class that parses for ito_solver
@@ -100,5 +102,6 @@ protected:
   ito_species();
 
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

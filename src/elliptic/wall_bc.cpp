@@ -7,6 +7,8 @@
 
 #include "wall_bc.H"
 
+#include "CD_NamespaceHeader.H"
+
 wall_bc::wall_bc(const int a_dir, const Side::LoHiSide a_side, wallbc::which_bc a_which){
   m_dir   = a_dir;
   m_side  = a_side;
@@ -58,3 +60,4 @@ int wall_bc::map_bc(const int a_dir, const Side::LoHiSide a_side) {
 
   return 2*a_dir + iside;
 }
+#include "CD_NamespaceFooter.H"

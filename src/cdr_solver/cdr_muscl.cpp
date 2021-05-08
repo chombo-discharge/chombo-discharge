@@ -13,6 +13,8 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+
 cdr_muscl::cdr_muscl(){
   m_class_name = "cdr_muscl";
   m_name = "cdr_muscl";
@@ -419,3 +421,4 @@ void cdr_muscl::compute_bndry_outflow(LevelData<EBFluxFAB>&       a_flux,
     }
   }
 }
+#include "CD_NamespaceFooter.H"

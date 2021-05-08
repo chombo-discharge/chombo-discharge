@@ -10,6 +10,8 @@
 
 #include "computational_geometry.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Geometry class which defines an electrode blade and a dielectric slab with various surface profiles. 
 */
@@ -32,5 +34,6 @@ protected:
   BaseIF* getBaseIF_circle();
   BaseIF* getBaseIF_square();
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

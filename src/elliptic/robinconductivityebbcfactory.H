@@ -14,6 +14,8 @@
 
 #include <BaseEBBC.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Factory class for generating Robin boundary conditions \f$a\phi + b\partial_n\phi = g\f$, where \f$n\f$ is the EB unit normal. 
 */
@@ -40,7 +42,7 @@ public:
   */
   virtual void set_coefs(RefCountedPtr<robin_coef> a_robinco);
 
-    /*!
+  /*!
     @brief Set constant coefficients
   */
   virtual void set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs);
@@ -87,5 +89,6 @@ protected:
 
   bool m_func_coeff;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

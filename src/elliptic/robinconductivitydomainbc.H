@@ -14,6 +14,8 @@
 #include <BaseDomainBC.H>
 #include <ConductivityBaseDomainBC.H>
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Boundary condition class for Robin type boundary conditions
 */
@@ -114,4 +116,5 @@ protected:
 
   bool m_func_coeff;  
 };
+#include "CD_NamespaceFooter.H"
 #endif

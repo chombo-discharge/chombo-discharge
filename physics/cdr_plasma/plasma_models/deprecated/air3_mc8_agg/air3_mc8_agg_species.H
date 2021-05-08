@@ -81,6 +81,6 @@ protected:
   Vector<Real> m_kappas;
 
   int draw_photon_type() const;
-};
+#include "CD_NamespaceFooter.H"
 
 #endif

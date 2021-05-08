@@ -11,6 +11,8 @@
 
 #include "irreg_stencil.H"
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class for holding stencils on irregular cells over a single AMR level
 */
@@ -60,4 +62,6 @@ protected:
 			     const IntVectSet&        a_cfivs);
   
 };
+  
+#include "CD_NamespaceFooter.H"
 #endif

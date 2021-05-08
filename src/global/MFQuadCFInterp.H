@@ -11,6 +11,8 @@
 #include <RefCountedPtr.H>
 #include <EBQuadCFInterp.H>
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief Class for filling ghost cells alà EBQuadCFInterp for multiphase
 */
@@ -61,5 +63,6 @@ protected:
   Vector<RefCountedPtr<EBQuadCFInterp> > m_quadcfi;
   
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

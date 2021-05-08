@@ -7,6 +7,7 @@
 
 #include "godunov_particle.H"
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::ito_plasma;
 
 godunov_particle::godunov_particle() : BinItem(){
@@ -66,3 +67,4 @@ void godunov_particle::linearIn(void* buf){
 
   m_mass = *buffer;
 }
+#include "CD_NamespaceFooter.H"

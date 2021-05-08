@@ -28,6 +28,8 @@
 #include <EBQuadCFInterp.H>
 #include <MFCellFAB.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Factory class for generationg mfconductivityop's. 
   @details The jump condition is of the Neumann type in the form
@@ -400,5 +402,5 @@ private:
     MayDay::Error("mfconductivityopfactory:: invalid constructor");
   }
 };
-
+#include "CD_NamespaceFooter.H"
 #endif

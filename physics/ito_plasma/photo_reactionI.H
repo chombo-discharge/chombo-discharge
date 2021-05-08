@@ -10,6 +10,7 @@
 
 #include "photo_reaction.H"
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::ito_plasma;
 
 inline
@@ -26,5 +27,6 @@ inline
 const std::deque<std::pair<int, Real> >& photo_reaction::get_target_energies() const{
   return m_energies;
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

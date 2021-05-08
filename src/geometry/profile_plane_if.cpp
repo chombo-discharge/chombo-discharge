@@ -18,6 +18,8 @@
 #include "box_if.H"
 #include "rounded_box_if.H"
 
+#include "CD_NamespaceHeader.H"
+
 profile_plane_if::profile_plane_if(const RealVect  a_point,
 				   const Real      a_width,
 				   const BaseIF*   a_impFunc,
@@ -93,3 +95,4 @@ Real profile_plane_if::value(const RealVect& a_pos) const{
 BaseIF* profile_plane_if::newImplicitFunction() const{
   return static_cast<BaseIF*> (new profile_plane_if(*this));
 }
+#include "CD_NamespaceFooter.H"

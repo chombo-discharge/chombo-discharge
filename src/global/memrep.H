@@ -10,6 +10,8 @@
 
 #include "RealVect.H"
 
+#include "CD_NamespaceHeader.H"
+
 class memrep {
 public:
   
@@ -19,5 +21,7 @@ public:
 
   static void get_memory(Vector<Real>& a_peak, Vector<Real>& a_unfreed);
 };
+
+#include "CD_NamespaceFooter.H"
 
 #endif

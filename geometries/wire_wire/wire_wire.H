@@ -12,6 +12,8 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief This is a class that defines a wire-wire geometry
 */
@@ -25,5 +27,6 @@ protected:
 
   void addWire(ParmParse& a_pp);
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

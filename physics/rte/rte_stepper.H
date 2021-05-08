@@ -11,6 +11,7 @@
 #include "time_stepper.H"
 #include "rte_solver.H"
 
+#include "CD_NamespaceHeader.H"
 namespace physics {
   namespace rte {
 
@@ -74,6 +75,7 @@ namespace physics {
     };
   }
 }
+#include "CD_NamespaceFooter.H"
 
 #include "rte_stepperI.H"
 

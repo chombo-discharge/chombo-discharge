@@ -24,6 +24,8 @@
 
 #define MC_PHOTO_DEBUG 0
 
+#include "CD_NamespaceHeader.H"
+
 mc_photo::mc_photo(){
   m_name       = "mc_photo";
   m_class_name = "mc_photo";
@@ -823,10 +825,10 @@ void mc_photo::generate_photons(particle_container<photon>& a_photons, const EBA
       const AMRPVR& pvr = a_photons.get_pvr();
       const int ref_ratio = m_amr->get_ref_rat()[lvl-1];
       collectValidParticles(photons[lvl]->outcast(),
-      			    *photons[lvl-1],
-      			    pvr[lvl]->mask(),
-      			    dx*RealVect::Unit,
-      			    ref_ratio,
+			    *photons[lvl-1],
+			    pvr[lvl]->mask(),
+			    dx*RealVect::Unit,
+			    ref_ratio,
 			    false,
 			    prob_lo);
       photons[lvl]->outcast().clear(); 
@@ -1359,7 +1361,7 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
   if(procID() == 0){
     std::cout << "photons before = " << photonsBefore << "\n"
 	      << "bulk photons = " << bulkPhotons << "\n"
-      	      << "eb photons = " << ebPhotons << "\n"
+	      << "eb photons = " << ebPhotons << "\n"
 	      << "dom photons = " << domPhotons << "\n"
 	      << "photons after = " << domPhotons+ebPhotons+bulkPhotons << "\n" << std::endl;
   }
@@ -1392,7 +1394,7 @@ void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_phot
   //
   //       Remap a_bulk_photons, a_eb_photons, a_domain_photons, a_photons
 
-    // Low and high corners
+  // Low and high corners
   const RealVect prob_lo = m_amr->get_prob_lo();
   const RealVect prob_hi = m_amr->get_prob_hi();
 
@@ -1523,9 +1525,9 @@ void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_phot
 
   if(procID() == 0){
     std::cout << "photons before = " << photonsBefore << "\n"
-      	      << "photons after = " << afterPhotons << "\n"
+	      << "photons after = " << afterPhotons << "\n"
 	      << "bulk photons = " << bulkPhotons << "\n"
-      	      << "eb photons = " << ebPhotons << "\n"
+	      << "eb photons = " << ebPhotons << "\n"
 	      << "dom photons = " << domPhotons << "\n"
 	      << "total = " << domPhotons+ebPhotons+bulkPhotons+afterPhotons << "\n" << std::endl;
   }
@@ -1661,3 +1663,4 @@ particle_container<photon>& mc_photo::get_source_photons(){
 
   return m_source_photons;
 }
+#include "CD_NamespaceFooter.H"

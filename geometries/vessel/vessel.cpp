@@ -12,6 +12,8 @@
 
 #include <ParmParse.H>
 
+#include "CD_NamespaceHeader.H"
+
 vessel::vessel(){
   ParmParse pp("vessel");
 
@@ -51,4 +53,4 @@ vessel::vessel(){
 vessel::~vessel(){
 
 }
-
+#include "CD_NamespaceFooter.H"

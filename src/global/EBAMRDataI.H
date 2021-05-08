@@ -10,6 +10,8 @@
 
 #include "EBAMRData.H"
 
+#include "CD_NamespaceHeader.H"
+
 template <typename T>
 EBAMRData<T>::EBAMRData(){
 }
@@ -130,7 +132,8 @@ typedef EBAMRData<EBFaceFAB>        EBAMRFaceData;  // Face-centered in a single
 typedef EBAMRData<BaseIVFAB<Real> > EBAMRIVData;    // Data on irregular data centroids
 typedef EBAMRData<DomainFluxIFFAB>  EBAMRIFData;    // Data on domain phases
 typedef EBAMRData<BaseFab<bool> >   EBAMRBool;      // For holding bool at every cell
-typedef EBAMRData<FArrayBox>        EBAMRFAB;       // Just regular grid data. 
+typedef EBAMRData<FArrayBox>        EBAMRFAB;       // Just regular grid data.
+#include "CD_NamespaceFooter.H"
 
 #endif
 

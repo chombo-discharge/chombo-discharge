@@ -13,13 +13,15 @@
 
 #include <PolyGeom.H>
 
+#include "CD_NamespaceHeader.H"
+
 inline
 bool particle_ops::domain_intersection(const RealVect& a_oldPos,
-					  const RealVect& a_newPos,
-					  const RealVect& a_path,
-					  const RealVect& a_prob_lo,
-					  const RealVect& a_prob_hi,
-					  Real&           a_s){
+				       const RealVect& a_newPos,
+				       const RealVect& a_path,
+				       const RealVect& a_prob_lo,
+				       const RealVect& a_prob_hi,
+				       Real&           a_s){
 
   // TLDR: This code does a boundary intersection test and returns where on the interval [oldPos, newPos] the intersection
   //       happened.
@@ -127,5 +129,6 @@ bool particle_ops::eb_intersection_raycast(const RefCountedPtr<BaseIF>& impfunc,
 
   return ret;
 }
+#include "CD_NamespaceFooter.H"
 
 #endif

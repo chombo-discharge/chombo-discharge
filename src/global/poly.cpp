@@ -8,6 +8,8 @@
 
 #include <PolyGeom.H>
 
+#include "CD_NamespaceHeader.H"
+
 RealVect poly::brent_root_finder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1, const RealVect& a_point2){
   const Real tol = PolyGeom::getTolerance();
 
@@ -148,3 +150,4 @@ RealVect poly::brent_root_finder(const RefCountedPtr<BaseIF>& a_impFunc, const R
     
   return bPt + a_point1;
 }
+#include "CD_NamespaceFooter.H"

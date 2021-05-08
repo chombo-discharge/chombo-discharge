@@ -13,6 +13,8 @@
 
 #include <SmoothIntersection.H>
 
+#include "CD_NamespaceHeader.H"
+
 mushroom_if::mushroom_if(const RealVect a_center,
 			 const Real     a_R,
 			 const Real     a_r,
@@ -55,4 +57,4 @@ Real mushroom_if::value(const RealVect& a_pos) const{
 BaseIF* mushroom_if::newImplicitFunction() const{
   return static_cast<BaseIF*> (new mushroom_if(*this));
 }
-  
+#include "CD_NamespaceFooter.H"

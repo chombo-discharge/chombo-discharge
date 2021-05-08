@@ -10,6 +10,8 @@
 
 #include "RealVect.H"
 
+#include "CD_NamespaceHeader.H"
+  
 /*!
   @brief  Declaration of a simple class for storing a point with mass 
 */
@@ -76,5 +78,6 @@ public:
   Real     m_mass;  // How many points does this this point_mass represent
   Real     m_energy;
 };
+#include "CD_NamespaceFooter.H"
 
 #endif

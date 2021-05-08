@@ -13,6 +13,8 @@
 
 #include <ConductivityBaseDomainBC.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class for generating conductivitydomainbc_wrapper objects
   @details This class does not (currently) do Robin boundary conditions, although it can probably be extended to take care of 
@@ -51,4 +53,5 @@ protected:
   Vector<RefCountedPtr<robin_coef> >     m_robinco;     // Robin coefficients for Robin
 
 };
+#include "CD_NamespaceFooter.H"
 #endif

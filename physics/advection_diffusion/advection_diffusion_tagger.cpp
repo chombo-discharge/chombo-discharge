@@ -11,6 +11,7 @@
 
 #include <ParmParse.H> 
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::advection_diffusion;
 
 advection_diffusion_tagger::advection_diffusion_tagger(RefCountedPtr<cdr_solver>& a_solver,
@@ -113,3 +114,4 @@ bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
 #endif
   return found_tags;
 }
+#include "CD_NamespaceFooter.H"

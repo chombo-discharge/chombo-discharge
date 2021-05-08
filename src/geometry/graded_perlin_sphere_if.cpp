@@ -9,7 +9,8 @@
 
 #include "graded_perlin_sphere_if.H"
 
-//
+#include "CD_NamespaceHeader.H"
+
 graded_perlin_sphere_if::graded_perlin_sphere_if(const Real&     a_rad,
 						 const RealVect& a_center,
 						 const bool&     a_inside,
@@ -18,13 +19,13 @@ graded_perlin_sphere_if::graded_perlin_sphere_if(const Real&     a_rad,
 						 const Real&     a_persistence,
 						 const int&      a_octaves,
 						 const bool&     a_reseed) : perlin_sphere_if(a_rad,
-											    a_center,
-											    a_inside,
-											    a_noiseAmp,
-											    a_noiseFreq,
-											    a_persistence,
-											    a_octaves,
-											    a_reseed){
+											      a_center,
+											      a_inside,
+											      a_noiseAmp,
+											      a_noiseFreq,
+											      a_persistence,
+											      a_octaves,
+											      a_reseed){
 }
 
 //
@@ -88,3 +89,4 @@ Real graded_perlin_sphere_if::value(const RealVect& a_pos) const {
 BaseIF* graded_perlin_sphere_if::newImplicitFunction() const {
   return static_cast<BaseIF*> (new graded_perlin_sphere_if(*this));
 }
+#include "CD_NamespaceFooter.H"

@@ -5,6 +5,7 @@
 
 #include <chrono>
 
+#include "CD_NamespaceHeader.H"
 using namespace physics::cdr_plasma;
 
 air3_bourdon::electron::electron(){
@@ -104,3 +105,4 @@ air3_bourdon::photon_three::photon_three(){
   
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
+#include "CD_NamespaceFooter.H"

@@ -10,6 +10,8 @@
 
 #include <RealVect.H>
 
+#include "CD_NamespaceHeader.H"
+
 /*!
   @brief Class for looking up and interpolation (x,y) data. 
 */
@@ -23,7 +25,7 @@ public:
 
   /*!
     @brief Copy constructor with scalability
-   */
+  */
   lookup_table(const lookup_table& a_table);
 
   /*!
@@ -107,7 +109,7 @@ protected:
 
   /*!
     @brief A base resolution for the electric field tabulations (we assumed that the rates were mapped out linearly)
-   */
+  */
   Real m_dx;
 
   /*!
@@ -125,6 +127,7 @@ protected:
   */
   std::vector<Real> m_y;
 };
+#include "CD_NamespaceFooter.H"
 
 #include "lookup_tableI.H"
 

@@ -12,6 +12,8 @@
 #include "TransformIF.H"
 #include <SmoothUnion.H>
 
+#include "CD_NamespaceHeader.H"
+
 profile_cylinder_if::profile_cylinder_if(const RealVect  a_endPoint1,
 					 const RealVect  a_endPoint2,
 					 const Real      a_cylinderRadius,
@@ -98,3 +100,4 @@ Real profile_cylinder_if::value(const RealVect& a_pos) const{
 BaseIF* profile_cylinder_if::newImplicitFunction() const{
   return static_cast<BaseIF*> (new profile_cylinder_if(*this));
 }
+#include "CD_NamespaceFooter.H"

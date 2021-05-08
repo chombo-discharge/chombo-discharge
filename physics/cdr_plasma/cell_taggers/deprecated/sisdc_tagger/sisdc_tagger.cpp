@@ -115,4 +115,4 @@ bool sisdc_tagger::refine_cell(const RealVect&         a_pos,
   const bool refine_magn = a_tracer[1] > m_mag_thresh;
   
   return refine_err || refine_magn || refine_curv;
-}
+#include "CD_NamespaceFooter.H"
