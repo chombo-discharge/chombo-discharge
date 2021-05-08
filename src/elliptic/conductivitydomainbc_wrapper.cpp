@@ -167,6 +167,8 @@ void conductivitydomainbc_wrapper::fillPhiGhost(FArrayBox&     a_phi,
   Box grownBox = a_valid;
   grownBox.grow(1);
 
+  MayDay::Abort("conductivitydomainbc_wrapper::fillPhiGhost -- how did this get called..?");
+
   for (int idir=0; idir<CH_SPACEDIM; ++idir)
     {
       for(SideIterator sit; sit.ok(); ++sit)
