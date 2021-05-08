@@ -146,7 +146,7 @@ namespace LeastSquares {
 				      const EBISBox&  a_ebisbox,
 				      const Real&     a_dx,
 				      const int       a_p);
-
+  
   /*!
     @brief Assuming that a_stencil is a gradient stencil, project it along a direction. 
     @param[in] a_stencil Stencil describing a gradient. 
@@ -250,6 +250,14 @@ namespace LeastSquares {
 
   /*!
     @brief Get an interpolation stencil to a point in a cell with a specified order and radius. 
+    @param[in] a_cellPos       Position in the cell of the starting Vof.
+    @param[in] a_otherCellsPos Positions in the other cells.
+    @param[in] a_startVof      The vof to compute for.
+    @param[in] a_ebisbox       EBISBox.
+    @param[in] a_dx            Grid resolution.
+    @param[in] a_p             Power factor for weights.
+    @param[in] a_radius        Stencil radius.
+    @param[in] a_order         Interpolation order. 
   */
   VoFStencil getInterpolationStencilUsingAllVofsInRadius(const CellPosition a_cellPos,
 							 const CellPosition a_otherCellsPos,
@@ -259,7 +267,7 @@ namespace LeastSquares {
 							 const int          a_p,
 							 const int          a_radius,
 							 const int          a_order);
-  
+
 
 };
 #include "CD_NamespaceFooter.H"
