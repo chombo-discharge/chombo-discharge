@@ -99,22 +99,6 @@ namespace ChomboDischarge{
     return ret;
   }
 
-  void LeastSquares::removeEquations(Vector<VolIndex>& a_allVofs, Vector<RealVect>& a_displacements, const Real a_tolerance){
-
-    Vector<VolIndex> newVofs;
-    Vector<RealVect> newDeltas;
-
-    for (int i = 0; i < a_allVofs.size(); i++){
-      if(a_displacements[i].vectorLength() > a_tolerance){
-	newVofs.push_back(a_allVofs[i]);
-	newDeltas.push_back(a_displacements[i]);
-      }
-    }
-
-    a_allVofs       = newVofs;
-    a_displacements = newDeltas;
-  }
-
   VoFStencil LeastSquares::computeGradStenOrderOne(const Vector<VolIndex>& a_allVofs,
 						   const Vector<RealVect>& a_displacements,
 						   const int&              a_p){
@@ -278,9 +262,11 @@ namespace ChomboDischarge{
     VoFStencil ret;
   
     const IntVect deriv = IntVect::Zero;
-    const IntVectSet ivs(deriv);
+    const IntVectSet derivs(deriv);
 
-    std::map<IntVect, VoFStencil> allStens = LeastSquares::computeInterpolationStencil(ivs, a_allVofs, a_displacements, a_weights, a_order);
+    const IntVectSet knownTerms = IntVectSet();
+
+    std::map<IntVect, VoFStencil> allStens = LeastSquares::computeInterpolationStencil(derivs, knownTerms, a_allVofs, a_displacements, a_weights, a_order);
 
     ret = allStens.at(deriv);
 
@@ -288,6 +274,7 @@ namespace ChomboDischarge{
   }
 
   std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const IntVectSet&       a_derivs,
+									  const IntVectSet&       a_knownTerms,
 									  const Vector<VolIndex>& a_allVofs,
 									  const Vector<RealVect>& a_displacements,
 									  const int               a_p,
@@ -295,11 +282,12 @@ namespace ChomboDischarge{
 
     const Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
 
-    return LeastSquares::computeInterpolationStencil(a_derivs, a_allVofs, a_displacements, weights, a_order);
+    return LeastSquares::computeInterpolationStencil(a_derivs, a_knownTerms, a_allVofs, a_displacements, weights, a_order);
     
   }
 
   std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const IntVectSet&       a_derivs,
+									  const IntVectSet&       a_knownTerms,
 									  const Vector<VolIndex>& a_allVofs,
 									  const Vector<RealVect>& a_displacements,
 									  const Vector<Real>&     a_weights,

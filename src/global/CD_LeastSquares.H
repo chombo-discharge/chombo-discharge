@@ -95,11 +95,6 @@ namespace LeastSquares {
 				    const Real&             a_dx);
 
   /*!
-    @brief Removes equations from LSQ system if displacement length is shorter than a_tolerance.
-  */
-  void removeEquations(Vector<VolIndex>& a_allVofs, Vector<RealVect>& a_displacements, const Real a_tolerance);
-
-  /*!
     @brief Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The weights
     are given as 1/||x1-x0||^a where a is the power. 
     @param[in] a_displacements Displacement vectors, i.e. (x1-x0,x2-x0, x3-x0,...,(xN-x0)^T. 
@@ -212,8 +207,11 @@ namespace LeastSquares {
     @details This is the general version which lets the caller specify why derivatives he wants out of the interpolation. The user
     specifies this via a_derivs where each IntVect represent a differentiation. E.g. IntVect(0,0,0) is just f, IntVect(1,0,0) = d/dx,
     IntVect(1,1,2) = (d^4)/(dx dy dz^2) and so on. The stencils for the directional derivatives are coded onto the return map. E.g.
-    if a_derivs contains IntVect(1,0,0) the stencil for d/dx is found in map.at(IntVect(1,0,0)). 
-    @param[in] a_derives       Specification of which derivates. 
+    if a_derivs contains IntVect(1,0,0) the stencil for d/dx is found in map.at(IntVect(1,0,0)). The user can solve a smaller system
+    if some of the terms in the expansion are known, typically used when computing an approximation to the gradient at a point in space
+    where the scalar value is known. He or she will need to find his own way of using these together with the returned stencils. 
+    @param[in] a_derives       Specification of which terms to obtain from the series.
+    @param[in] a_knownTerms    Which terms in the Taylor series are known, and will be eliminated from the least squares system. 
     @param[in] a_allVofs       Vofs to include in the interpolation method. 
     @param[in] a_displacements Displacement vectors from the Vofs to the interpolation point
     @param[in] a_p             Weighting order for the least squares system. Must be > 0 to have an effect. 
@@ -222,6 +220,7 @@ namespace LeastSquares {
     @note This calls the more general version. 
   */
   std::map<IntVect, VoFStencil> computeInterpolationStencil(const IntVectSet&       a_derivs,
+							    const IntVectSet&       a_knownTerms,
 							    const Vector<VolIndex>& a_allVofs,
 							    const Vector<RealVect>& a_displacements,
 							    const int               a_p,
@@ -232,8 +231,11 @@ namespace LeastSquares {
     @details This is the general version which lets the caller specify why derivatives he wants out of the interpolation. The user
     specifies this via a_derivs where each IntVect represent a differentiation. E.g. IntVect(0,0,0) is just f, IntVect(1,0,0) = d/dx,
     IntVect(1,1,2) = (d^4)/(dx dy dz^2) and so on. The stencils for the directional derivatives are coded onto the return map. E.g.
-    if a_derivs contains IntVect(1,0,0) the stencil for d/dx is found in map.at(IntVect(1,0,0)). 
-    @param[in] a_derives       Specification of which derivates. 
+    if a_derivs contains IntVect(1,0,0) the stencil for d/dx is found in map.at(IntVect(1,0,0)). The user can solve a smaller system
+    if some of the terms in the expansion are known, typically used when computing an approximation to the gradient at a point in space
+    where the scalar value is known. 
+    @param[in] a_derives       Specification of which unknowns in the Taylor series will be returned.
+    @param[in] a_knownTerms    Which terms in the Taylor series are known. 
     @param[in] a_allVofs       Vofs to include in the interpolation method. 
     @param[in] a_displacements Displacement vectors from the Vofs to the interpolation point
     @param[in] a_weights       Weights for the least squares system. 
@@ -243,6 +245,7 @@ namespace LeastSquares {
     @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. 
   */
   std::map<IntVect, VoFStencil> computeInterpolationStencil(const IntVectSet&       a_derivs,
+							    const IntVectSet&       a_knownTerms,
 							    const Vector<VolIndex>& a_allVofs,
 							    const Vector<RealVect>& a_displacements,
 							    const Vector<Real>&     a_weights,
