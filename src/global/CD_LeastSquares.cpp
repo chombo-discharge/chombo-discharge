@@ -187,9 +187,6 @@ namespace ChomboDischarge{
     
 	bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order); // This routine eliminates a_vof from the system of equations!
       }
-      // else{
-      // 	MayDay::Abort("LeastSquares::getBndryGradSten -- not enough equations to satisfy order requirement");
-      // }
     }
 
     return bndrySten;
