@@ -76,9 +76,9 @@ field_solver_multigrid.kappa_source = true           # Volume weighted space cha
 field_solver_multigrid.auto_tune         = false     # Do some auto-tuning
 field_solver_multigrid.gmg_coarsen       = 4         # Number of coarsenings to use before level aggregation	
 field_solver_multigrid.gmg_verbosity     = 10        # GMG verbosity
-field_solver_multigrid.gmg_pre_smooth    = 12        # Number of relaxations in downsweep
-field_solver_multigrid.gmg_post_smooth   = 12        # Number of relaxations in upsweep
-field_solver_multigrid.gmg_bott_smooth   = 12        # NUmber of relaxations before dropping to bottom solver
+field_solver_multigrid.gmg_pre_smooth    = 24        # Number of relaxations in downsweep
+field_solver_multigrid.gmg_post_smooth   = 24        # Number of relaxations in upsweep
+field_solver_multigrid.gmg_bott_smooth   = 24        # NUmber of relaxations before dropping to bottom solver
 field_solver_multigrid.gmg_min_iter      = 5         # Minimum number of iterations
 field_solver_multigrid.gmg_max_iter      = 32        # Maximum number of iterations
 field_solver_multigrid.gmg_tolerance     = 1.E-10    # Residue tolerance
@@ -86,7 +86,7 @@ field_solver_multigrid.gmg_hang          = 0.2       # Solver hang
 field_solver_multigrid.gmg_bottom_drop   = 8         # Bottom drop
 field_solver_multigrid.gmg_bc_order      = 1         # Boundary condition order for multigrid
 field_solver_multigrid.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
-field_solver_multigrid.gmg_bottom_relax  = 12        # Number of relaxations in bottom solve ('simple' solver only)
+field_solver_multigrid.gmg_bottom_relax  = 24        # Number of relaxations in bottom solve ('simple' solver only)
 field_solver_multigrid.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now
 field_solver_multigrid.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
 
@@ -108,13 +108,13 @@ rod_dielectric.electrode.endpoint2       =  0.3  0.5           # Other endpoint
 rod_dielectric.electrode.radius          = 0.1           # Electrode radius
 rod_dielectric.electrode.live            = true          # Live or not
 
-rod_dielectric.dielectric.on             = false         # Use dielectric or not
+rod_dielectric.dielectric.on             = true         # Use dielectric or not
 rod_dielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'.
-rod_dielectric.dielectric.permittivity   = 4             # Dielectric permittivity
+rod_dielectric.dielectric.permittivity   = 10             # Dielectric permittivity
 
 # Subsettings for sphere
 rod_dielectric.sphere.center             = 0.5 -0.5      # Sphere center
-rod_dielectric.sphere.radius             = 0.1           # Radius
+rod_dielectric.sphere.radius             = 0.2           # Radius
 
 
 # ====================================================================================================
@@ -124,5 +124,5 @@ field_stepper.verbosity    = -1              # Verbosity
 field_stepper.realm        = primal          # Primal realm	
 field_stepper.load_balance = false           # Load balance or not
 field_stepper.box_sorting  = morton          # Box sorting algorithm
-field_stepper.init_rho     = 1E-10           # Space charge density
-field_stepper.init_sigma   = 1E-10           # Surface charge density
+field_stepper.init_rho     = 0E-10           # Space charge density
+field_stepper.init_sigma   = 0E-10           # Surface charge density

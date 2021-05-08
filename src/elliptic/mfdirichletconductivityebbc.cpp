@@ -310,7 +310,7 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
     a_weight = 0.0;
   }
 
-#if 1 // Test LeastSquares
+#if 0 // Test LeastSquares
   ParmParse pp("lsq");
 
   int p = 0;
