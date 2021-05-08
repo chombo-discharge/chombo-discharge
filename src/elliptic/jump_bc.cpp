@@ -92,40 +92,6 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
       }
     }
   }
-
-#if 1 // Test LeastSquares
-  ParmParse pp("lsq");
-
-  int p = 0;
-  int order = 1;
-  bool useLSQ = false;
-  pp.query("use", useLSQ);
-  pp.query("p", p);
-  pp.query("order", order);
-  
-
-  if(useLSQ){
-    VoFStencil mySten = LeastSquares::getBndryGradSten(a_vof, a_ebisbox, m_dx, p, order);
-
-    if(mySten.size() == 0){
-      if(order > 1){
-    	mySten = LeastSquares::getBndryGradSten(a_vof, a_ebisbox, m_dx, p, 1);
-      }
-
-      if(mySten.size() == 0){
-    	std::cout << "did not find lsq gradient stencil" << std::endl;
-      }
-    }
-
-    // This is how you do the weights for the boundary point
-    if(mySten.size() > 0){
-      a_stencil =  LeastSquares::projectGradSten(mySten, -normal);
-      a_weight  = -LeastSquares::sumAllWeights(a_stencil);
-    }
-  }
-#endif
-
-
 }
 
 bool jump_bc::get_second_order_sten(Real&             a_weight,
