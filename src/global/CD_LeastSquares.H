@@ -103,44 +103,53 @@ namespace LeastSquares {
   Vector<Real> makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow);
 
   /*!
-    @brief Get a least squares gradient stencil solution for a system of first-order Taylor extrapolation for computing the gradient at a point.
+    @brief Get a least squares gradient stencil solution for computing the gradient at a point. This routine eliminates the value in the point where
+    the gradient is computed (which is assumed to be known.)
     @param[in] a_allVofs       Vofs for which the displacement vectors were computed. 
     @param[in] a_displacements Displacement vectors from Vofs to the interpolation point
-    @param[in] a_weights       Weights for each system of equations. 
+    @param[in] a_p             Weighting exponent for system
+    @param[in] a_order         Desired order. 
     @note This computes weights using makeDiagWeights(a_displacements, a_p) and then calls the other version. 
     @return Stencil for obtaining the gradient in a point. Stencils for each direction are put in the VoFStencil.variable(i). 
   */
-  VoFStencil computeGradStenOrderOne(const Vector<VolIndex>& a_allVofs,
-				     const Vector<RealVect>& a_displacements,
-				     const int&              a_p);
+  VoFStencil computeGradSten(const Vector<VolIndex>& a_allVofs,
+			     const Vector<RealVect>& a_displacements,
+			     const int               a_p,
+			     const int               a_order);
 
   /*!
     @brief Get a least squares gradient stencil solution for a system of first-order Taylor extrapolation for computing the gradient at a point.
+    @details This routine eliminates the value in the point where the gradient is computed (which is assumed to be known.)
     @param[in] a_allVofs       Vofs for which the displacement vectors were computed. 
     @param[in] a_displacements Displacement vectors from Vofs to the interpolation point
     @param[in] a_weights       Weights for each system of equations. 
+    @param[in] a_order         Interpolation order
     @return Stencil for obtaining the gradient in a point. Stencils for each direction are put in the VoFStencil.variable(i). 
     @note This routine will cause a run-time error if you have less than SpaceDim equations, which is the minimum number of equations needed for obtaining a gradient. 
     However, the routine does *not* check if the inputs are degenerate. 
   */
-  VoFStencil computeGradStenOrderOne(const Vector<VolIndex>& a_allVofs,
-				     const Vector<RealVect>& a_displacements,
-				     const Vector<Real>&     a_weights);
+  VoFStencil computeGradSten(const Vector<VolIndex>& a_allVofs,
+			     const Vector<RealVect>& a_displacements,
+			     const Vector<Real>&     a_weights,
+			     const int               a_order);
   
   /*!
-    @brief Compute a least squares gradient stencil on the EB centroid
+    @brief Compute a least squares gradient stencil on the EB centroid with specified order. 
+    @details This routine eliminates the value on the boundary and the user will have to fetch the weight for this point from the returned stencil.
     @param[in]  a_vof Input vof
     @param[in]  a_ebisbox ebisbox
     @param[in]  a_dx Resolution
     @param[in]  a_p Scaling
+    @param[in]  a_order
     @return     Returns a least squares stencil for evaluating the a first order approximation to the normal derivative on the boundary centroid. 
     @details    This will first try to get all Vofs defined in the quadrant defined by the normal vector, i.e. 3 cells in 2D and up to 7 cells in 3D. If that
     does not work the routine will try to fetch a symmetric stencil. If that does not work it will get all Vofs within a certain radius. 
   */
-  VoFStencil getBndryGradStenOrderOne(const VolIndex& a_vof,
-				      const EBISBox&  a_ebisbox,
-				      const Real&     a_dx,
-				      const int       a_p);
+  VoFStencil getBndryGradSten(const VolIndex& a_vof,
+			      const EBISBox&  a_ebisbox,
+			      const Real&     a_dx,
+			      const int       a_p,
+			      const int       a_order);
   
   /*!
     @brief Assuming that a_stencil is a gradient stencil, project it along a direction. 

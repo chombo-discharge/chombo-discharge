@@ -314,17 +314,21 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
   ParmParse pp("lsq");
 
   int p = 0;
+  int order = 1;
   bool useLSQ = false;
   pp.query("use", useLSQ);
   pp.query("p", p);
+  pp.query("order", order);
+  
 
   if(useLSQ){
-    const VoFStencil mySten = LeastSquares::getBndryGradStenOrderOne(a_vof, a_ebisbox, m_dx[0], p);
+    const VoFStencil mySten = LeastSquares::getBndryGradSten(a_vof, a_ebisbox, m_dx[0], p, order);
 
     if(mySten.size() == 0){
       std::cout << "did not find lsq gradient stencil" << std::endl;
     }
 
+    // This is how you do the weights for the boundary point
     a_stencil =  LeastSquares::projectGradSten(mySten, -normal);
     a_weight  = -LeastSquares::sumAllWeights(a_stencil);
   }

@@ -99,17 +99,19 @@ namespace ChomboDischarge{
     return ret;
   }
 
-  VoFStencil LeastSquares::computeGradStenOrderOne(const Vector<VolIndex>& a_allVofs,
-						   const Vector<RealVect>& a_displacements,
-						   const int&              a_p){
+  VoFStencil LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
+					   const Vector<RealVect>& a_displacements,
+					   const int               a_p,
+					   const int               a_order){
     Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
 
-    return LeastSquares::computeGradStenOrderOne(a_allVofs, a_displacements, weights);
+    return LeastSquares::computeGradSten(a_allVofs, a_displacements, weights, a_order);
   }
 
-  VoFStencil LeastSquares::computeGradStenOrderOne(const Vector<VolIndex>& a_allVofs,
-						   const Vector<RealVect>& a_displacements,
-						   const Vector<Real>&     a_weights){
+  VoFStencil LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
+					   const Vector<RealVect>& a_displacements,
+					   const Vector<Real>&     a_weights,
+					   const int               a_order){
 
 
     // TLDR: This routine 
@@ -121,7 +123,7 @@ namespace ChomboDischarge{
     IntVectSet knowns;
     knowns |= IntVect::Zero;
 
-    std::map<IntVect, VoFStencil> taylorTerms = LeastSquares::computeInterpolationStencil(derivs, knowns, a_allVofs, a_displacements, a_weights, 1);
+    std::map<IntVect, VoFStencil> taylorTerms = LeastSquares::computeInterpolationStencil(derivs, knowns, a_allVofs, a_displacements, a_weights, a_order);
 
     VoFStencil sten;
     for (const auto& m : taylorTerms){
@@ -144,18 +146,18 @@ namespace ChomboDischarge{
 
   }
 
-  VoFStencil LeastSquares::getBndryGradStenOrderOne(const VolIndex& a_vof,
-						    const EBISBox&  a_ebisbox,
-						    const Real&     a_dx,
-						    const int       a_p){
+  VoFStencil LeastSquares::getBndryGradSten(const VolIndex& a_vof,
+					    const EBISBox&  a_ebisbox,
+					    const Real&     a_dx,
+					    const int       a_p,
+					    const int       a_order){
     VoFStencil bndrySten;
 
     const bool addStartingVof = false;
     const RealVect normal     = a_ebisbox.normal(a_vof);
 
     if(normal != RealVect::Zero){ // Can only do this if we actual have a normal vector. 
-      const int radius = 1;
-      const int order  = 1;
+      const int radius = a_order;
       const int numTaylorTerms = SpaceDim; // Must have at least SpaceDim equations to be able to get the stencil. 
 
       // Get Vofs, try to use quadrants but if the normal is aligned with the grid just get a "symmetric" stencil. 
@@ -177,7 +179,7 @@ namespace ChomboDischarge{
 									      a_ebisbox,
 									      a_dx);
     
-	bndrySten = LeastSquares::computeGradStenOrderOne(allVofs, displacements, a_p);
+	bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order);
       }
     }
 
