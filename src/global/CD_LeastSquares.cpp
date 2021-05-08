@@ -157,8 +157,9 @@ namespace ChomboDischarge{
     const RealVect normal     = a_ebisbox.normal(a_vof);
 
     if(normal != RealVect::Zero){ // Can only do this if we actual have a normal vector. 
-      const int radius = a_order;
-      const int numTaylorTerms = SpaceDim; // Must have at least SpaceDim equations to be able to get the stencil. 
+      const int radius      = a_order;
+      const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - 1; 
+
 
       // Get Vofs, try to use quadrants but if the normal is aligned with the grid just get a "symmetric" stencil. 
       Vector<VolIndex> allVofs;
@@ -171,7 +172,7 @@ namespace ChomboDischarge{
       }
 
       // Now build the stencil. 
-      if(allVofs.size() >= numTaylorTerms){
+      if(allVofs.size() >= numUnknowns){
 	const Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
 									      CellPosition::Center,
 									      a_vof,
@@ -179,7 +180,10 @@ namespace ChomboDischarge{
 									      a_ebisbox,
 									      a_dx);
     
-	bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order);
+	bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order); // This routine eliminates a_vof from the system of equations!
+      }
+      else{
+	MayDay::Abort("LeastSquares::getBndryGradSten -- not enough equations to satisfy order requirement");
       }
     }
 
