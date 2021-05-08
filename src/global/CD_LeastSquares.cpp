@@ -171,6 +171,11 @@ namespace ChomboDischarge{
 	allVofs = VofUtils::getAllVofsSymmetric(a_vof, a_ebisbox, cardinal.first, cardinal.second, radius, addStartingVof);
       }
 
+      // If we couldn't get enough cells using quadrants. Do this. 
+      if(allVofs.size() < numUnknowns){
+	allVofs = VofUtils::getAllConnectedVofsInRadius(a_vof, a_ebisbox, radius, IntVectSet());
+      }
+
       // Now build the stencil. 
       if(allVofs.size() >= numUnknowns){
 	const Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
@@ -182,9 +187,9 @@ namespace ChomboDischarge{
     
 	bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order); // This routine eliminates a_vof from the system of equations!
       }
-      else{
-	MayDay::Abort("LeastSquares::getBndryGradSten -- not enough equations to satisfy order requirement");
-      }
+      // else{
+      // 	MayDay::Abort("LeastSquares::getBndryGradSten -- not enough equations to satisfy order requirement");
+      // }
     }
 
     return bndrySten;
