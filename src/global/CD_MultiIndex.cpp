@@ -15,7 +15,7 @@ MultiIndex::MultiIndex(const int a_order){
 void MultiIndex::define(const int a_order){
   m_order = a_order;
 
-  // Make indices and define maps. 
+  // Make indices and define maps.
   makeIndices();
   makeMaps();
   reset();
@@ -135,7 +135,7 @@ void MultiIndex::makeIndices() {
 	cur = next;
       }
 #if CH_SPACEDIM==3
-      else if(norm(cur) > m_order){
+      else if(norm(next) > m_order){
 	IntVect next = IntVect(D_DECL(0, 0, cur[2]+1));
 	if(norm(next) <= m_order){
 	  cur = next;
@@ -162,6 +162,6 @@ void MultiIndex::makeMaps(){
   for (const auto& lm : m_mapToLinearIndex){
     m_mapToMultiIndex.emplace(lm.second, lm.first);
   }
-#include "CD_NamespaceFooter.H"
+}
 
 #include "CD_NamespaceFooter.H"

@@ -308,4 +308,5 @@ void LaPackUtils::deLinearizeMatrix(std::vector<std::vector<double> >& a_A,
     std::cerr << "LaPackUtils::deLinearizeMatrix - unknown specification of matrix storage\n";
   }
 }
+
 #include "CD_NamespaceFooter.H"
