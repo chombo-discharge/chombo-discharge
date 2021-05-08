@@ -28,7 +28,6 @@
 
 #include "CD_NamespaceHeader.H"
 
-
 field_solver_multigrid::field_solver_multigrid(){
   m_needs_setup = true;
   m_has_mg_stuff = false;
@@ -53,7 +52,6 @@ void field_solver_multigrid::parse_options(){
 }
 
 void field_solver_multigrid::parse_runtime_options(){
-  parse_domain_bc();
   parse_plot_vars();
   parse_gmg_settings();
   parse_kappa_source();
@@ -75,83 +73,7 @@ void field_solver_multigrid::parse_autotune(){
   m_autotune = (str == "true") ? true : false;
 }
 
-void field_solver_multigrid::parse_domain_bc(){
-  ParmParse pp(m_class_name.c_str());
 
-  this->allocate_wall_bc();
-
-  // Check each side in each direction
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      const Side::LoHiSide side = sit();
-	
-      std::string str_dir;
-      if(dir == 0){
-	str_dir = "x";
-      }
-      else if(dir == 1){
-	str_dir = "y";
-      }
-      else if(dir == 2){
-	str_dir = "z";
-      }
-
-      // Get dir/side and set accordingly
-      if(side == Side::Lo){
-	std::string type;
-	std::string bc_string = "bc_" + str_dir + "_low";
-	pp.get(bc_string.c_str(), type);
-	if(type == "dirichlet_ground"){
-	  this->set_dirichlet_wall_bc(dir, Side::Lo, potential::ground);
-	}
-	else if(type == "dirichlet_live"){
-	  this->set_dirichlet_wall_bc(dir, Side::Lo, potential::live);
-	}
-	else if(type == "neumann"){
-	  this->set_neumann_wall_bc(dir, Side::Lo, 0.0);
-	}
-	else if(type == "robin"){
-	  this->set_robin_wall_bc(dir, Side::Lo, 0.0);
-	}
-	else {
-	  std::string error = "field_solver_multigrid::field_solver_multigrid - unknown bc requested for " + bc_string;
-	  MayDay::Abort(error.c_str());
-	}
-      }
-      else if(side == Side::Hi){
-	std::string type;
-	std::string bc_string = "bc_" + str_dir + "_high";
-	pp.get(bc_string.c_str(), type);
-	if(type == "dirichlet_ground"){
-	  this->set_dirichlet_wall_bc(dir, Side::Hi, potential::ground);
-	}
-	else if(type == "dirichlet_live"){
-	  this->set_dirichlet_wall_bc(dir, Side::Hi, potential::live);
-	}
-	else if(type == "neumann"){
-	  this->set_neumann_wall_bc(dir, Side::Hi, 0.0);
-	}
-	else if(type == "robin"){
-	  this->set_robin_wall_bc(dir, Side::Hi, 0.0);
-	}
-	else {
-	  std::string error = "field_solver_multigrid::field_solver_multigrid - unknown bc requested for " + bc_string;
-	  MayDay::Abort(error.c_str());
-	}
-      }
-    }
-  }
-
-  // Set default distribution on domain edges
-  m_wall_func_x_lo = field_solver::s_constant_one;
-  m_wall_func_x_hi = field_solver::s_constant_one;
-  m_wall_func_y_lo = field_solver::s_constant_one;
-  m_wall_func_y_hi = field_solver::s_constant_one;
-#if CH_SPACEDIM==3
-  m_wall_func_z_lo = field_solver::s_constant_one;
-  m_wall_func_z_hi = field_solver::s_constant_one;
-#endif
-}
 
 void field_solver_multigrid::parse_plot_vars(){
   ParmParse pp(m_class_name.c_str());
@@ -1105,4 +1027,5 @@ MFAMRIVData& field_solver_multigrid::get_bco_irreg(){
 void field_solver_multigrid::set_needs_setup(const bool& a_needs_setup){
   m_needs_setup = a_needs_setup;
 }
+
 #include "CD_NamespaceFooter.H"

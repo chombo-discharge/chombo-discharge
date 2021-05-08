@@ -433,7 +433,6 @@ protected:
 
   // Option parsing functions
   virtual void parse_autotune();     // Parse autotuning
-  virtual void parse_domain_bc();    // Parse domain boundary conditions
   virtual void parse_plot_vars();    // Parse plot variables
   virtual void parse_gmg_settings(); // Parse geometric multigrid settings
   virtual void parse_kappa_source(); // Parse source scaling

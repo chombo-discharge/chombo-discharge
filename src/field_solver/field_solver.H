@@ -444,6 +444,11 @@ protected:
     @brief Allocate data holders for wall bcs so they can be set
   */
   virtual void allocate_wall_bc();
+
+  /*!
+    @brief Parse domain BCs
+  */
+  virtual void parse_domain_bc();
 };
 #include "CD_NamespaceFooter.H"
 
