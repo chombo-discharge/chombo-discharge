@@ -10,6 +10,7 @@
 
 #include "computational_geometry.H"
 #include "amr_mesh.H"
+#include "CD_ElectrostaticDomainBc.H"
 #include "wall_bc.H"
 
 #include "CD_NamespaceHeader.H"
@@ -399,6 +400,11 @@ protected:
     @brief Time
   */
   Real m_time;
+
+  /*!
+    @brief Domain boundary conditions for field_solver
+  */
+  ElectrostaticDomainBc m_domainBc;
 
   /*!
     @brief Set potential function pointer
