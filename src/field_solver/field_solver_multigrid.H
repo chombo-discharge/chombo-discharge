@@ -11,6 +11,7 @@
 #include "field_solver.H"
 #include "mfconductivityopfactory.H"
 #include "dirichlet_func.H"
+#include "CD_ElectrostaticDomainBcFuncEval.H"
 
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
