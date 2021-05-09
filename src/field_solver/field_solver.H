@@ -455,6 +455,17 @@ protected:
     @brief Parse domain BCs
   */
   virtual void parse_domain_bc();
+
+  /*!
+    @brief Parse domain Bcs
+    @details This reads from file 
+  */
+  virtual void parseDomainBc();
+
+  /*!
+    @brief Shortcut for making a boundary condition string. This just returns m_class_name.bc.direction.side
+  */
+  virtual std::string makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
 };
 #include "CD_NamespaceFooter.H"
 

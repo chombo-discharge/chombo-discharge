@@ -53,7 +53,7 @@ public:
   ElectrostaticDomainBc();
 
   /*!
-    @brief Destructor. 
+    @brief Destructor. This 
   */
   virtual ~ElectrostaticDomainBc();
 

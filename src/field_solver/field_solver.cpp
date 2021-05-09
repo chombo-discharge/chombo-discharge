@@ -560,11 +560,66 @@ void field_solver::set_output_variables(){
   }
 }
 
+std::string field_solver::makeBcString(const int a_dir, const Side::LoHiSide a_side) const {
+  CH_TIME("field_solver::makeBcString");
+  if(m_verbosity > 5){
+    pout() << "field_solver::makeBcString" << endl;
+  }
+
+  std::string strDir;
+  std::string strSide;
+  
+  if(a_dir == 0){
+    strDir = "x";
+  }
+  else if(a_dir == 1){
+    strDir = "y";
+  }
+  else if(a_dir == 1){
+    strDir = "z";
+  }
+
+  if(a_side == Side::Lo){
+    strSide = "lo";
+  }
+  else if(a_side == Side::Hi){
+    strSide = "hi";
+  }
+
+  const std::string ret = std::string("bc.") + strDir + std::string(".") + strSide;
+
+  return ret;
+}
+
+void field_solver::parseDomainBc(){
+  CH_TIME("field_solver::parseDomainBc");
+  if(m_verbosity > 5){
+    pout() << "field_solver::parseDomainBc" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+
+      const auto wall = std::make_pair(dir, sit());
+
+      const std::string bcString = this->makeBcString(dir, sit());
+
+      
+      
+
+    }
+  }
+}
+
 void field_solver::parse_domain_bc(){
   CH_TIME("field_solver::parse_domain_bc");
   if(m_verbosity > 5){
     pout() << "field_solver::parse_domain_bc" << endl;
   }
+
+  this->parseDomainBc();
 
   ParmParse pp(m_class_name.c_str());
 

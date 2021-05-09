@@ -30,5 +30,4 @@ ElectrostaticDomainBc::Bc ElectrostaticDomainBc::getBc(const Wall a_wall) const{
   return m_bcFunctions.at(a_wall);
 }
 
-
 #include "CD_NamespaceFooter.H"
