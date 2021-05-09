@@ -31,6 +31,11 @@ public:
   };
 
   /*!
+    @brief Default function for space-time dependence of domain boundary conditions. 
+  */
+  static Real s_defaultDomainBcFunction(const RealVect a_position, const Real a_time);
+
+  /*!
     @brief Potential of one...
   */
   static Real s_potential_one(const Real a_time);
@@ -461,6 +466,11 @@ protected:
     @details This reads from file 
   */
   virtual void parseDomainBc();
+
+  /*!
+    @brief Returns BC type based on string
+  */
+  virtual ElectrostaticDomainBc::BcType parseBcString(const std::string a_str) const;
 
   /*!
     @brief Shortcut for making a boundary condition string. This just returns m_class_name.bc.direction.side

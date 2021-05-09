@@ -20,6 +20,10 @@
 
 #include "CD_NamespaceHeader.H"
 
+Real field_solver::s_defaultDomainBcFunction(const RealVect a_position, const Real a_time){
+  return 1.0;
+}
+
 Real field_solver::s_potential_one(const Real a_time){
   return 1.0;
 }
@@ -591,24 +595,58 @@ std::string field_solver::makeBcString(const int a_dir, const Side::LoHiSide a_s
   return ret;
 }
 
+ElectrostaticDomainBc::BcType field_solver::parseBcString(const std::string a_str) const {
+  CH_TIME("field_solver::parseBcString");
+  if(m_verbosity > 5){
+    pout() << "field_solver::parseBcString" << endl;
+  }
+
+  ElectrostaticDomainBc::BcType ret;
+
+  if(a_str == "dirichlet"){
+    ret = ElectrostaticDomainBc::BcType::Dirichlet;
+  }
+  else if(a_str == "neumann"){
+    ret = ElectrostaticDomainBc::BcType::Neumann;
+  }
+  else{
+    MayDay::Abort("ElectrostaticDomainBc::BcType - unknown BC type!");
+  }
+
+  return ret;
+}
+
 void field_solver::parseDomainBc(){
   CH_TIME("field_solver::parseDomainBc");
   if(m_verbosity > 5){
     pout() << "field_solver::parseDomainBc" << endl;
   }
-
+  
   ParmParse pp(m_class_name.c_str());
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
 
-      const auto wall = std::make_pair(dir, sit());
-
       const std::string bcString = this->makeBcString(dir, sit());
 
-      
-      
+      const int num = pp.countval(bcString.c_str());
 
+      if(num == 2){
+	Real val;
+	std::string str;
+
+	pp.get(bcString.c_str(), str, 0);
+	pp.get(bcString.c_str(), val, 1);
+
+	ElectrostaticDomainBc::BcType     bcType = parseBcString(str);
+	ElectrostaticDomainBc::BcFunction bcFunc = field_solver::s_defaultDomainBcFunction;
+
+	m_domainBc.setBc(std::make_pair(dir, sit()), std::make_pair(bcType, bcFunc));
+      }
+      else{
+	const std::string errorString = "field_solver::parseDomainBc -- bad or no input parameter for " + bcString;
+	MayDay::Abort(errorString.c_str());
+      }
     }
   }
 }

@@ -126,3 +126,10 @@ field_stepper.load_balance = false           # Load balance or not
 field_stepper.box_sorting  = morton          # Box sorting algorithm
 field_stepper.init_rho     = 0E-10           # Space charge density
 field_stepper.init_sigma   = 0E-10           # Surface charge density
+
+field_solver_multigrid.bc.x.lo = dirichlet 1.0
+field_solver_multigrid.bc.x.hi = dirichlet 1.0
+field_solver_multigrid.bc.y.lo = dirichlet 1.0
+field_solver_multigrid.bc.y.hi = dirichlet 1.0
+field_solver_multigrid.bc.z.lo = dirichlet 1.0
+field_solver_multigrid.bc.z.hi = dirichlet 1.0
