@@ -146,7 +146,8 @@ ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::~Electrostatic
 }
 
 Real ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::value(const RealVect& a_point, const int& a_comp) const {
-  return m_bcFunc(a_point, 0.0);
+  constexpr Real dummyDt = 0.0;
+  return m_bcFunc(a_point, dummyDt); // If everything has been done correctly, m_bcFunc will have captured m_time in field_solver by reference and not require anything else. 
 }
 
 Real ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::derivative(const RealVect& a_point, const int& a_comp, const int& a_derivDir) const {
