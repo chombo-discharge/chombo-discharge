@@ -8,9 +8,9 @@
 #include "CD_ConductivityElectrostaticDomainBcFactory.H"
 #include "CD_NamespaceHeader.H"
 
-ConductivityElectrostaticDomainBcFactory::ConductivityElectrostaticDomainBcFactory(const WallBcFuncs& a_bcFunctions, const WallBcTypes& a_bcTypes){
-  m_bcFunctions = a_bcFunctions;
-  m_bcTypes     = a_bcTypes;
+ConductivityElectrostaticDomainBcFactory::ConductivityElectrostaticDomainBcFactory(const ElectrostaticDomainBc& a_domainBc, const RealVect a_probLo){
+  m_domainBc = a_domainBc;
+  m_probLo   = a_probLo;
 }
 
 ConductivityElectrostaticDomainBcFactory::~ConductivityElectrostaticDomainBcFactory(){
@@ -18,8 +18,7 @@ ConductivityElectrostaticDomainBcFactory::~ConductivityElectrostaticDomainBcFact
 }
 
 ConductivityElectrostaticDomainBc* ConductivityElectrostaticDomainBcFactory::create(const ProblemDomain& a_domain, const EBISLayout& a_ebisl, const RealVect& a_dx) {
-
-  return new ConductivityElectrostaticDomainBc(m_bcFunctions, m_bcTypes);
+  return new ConductivityElectrostaticDomainBc(m_domainBc, m_probLo);
 }
 
 #include "CD_NamespaceFooter.H"

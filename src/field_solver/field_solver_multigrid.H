@@ -384,20 +384,6 @@ protected:
   */
   Vector<RefCountedPtr<BaseBCFuncEval> > m_wall_bcfunc;
 
-    /*!
-    @brief This structure is necessary for passing the general electrostatic domain boundary conditions to something which is parsable by Chombo and EBConductivityOp.
-    @details This is passed into an operator factory which constructs the BCs using individual function pointer on each side. Different Neumann/Dirichlet BCs are constructred
-    on individual domain sides. 
-  */
-  std::map<ElectrostaticDomainBc::Wall, ElectrostaticDomainBc::BcType> m_multigridDomainBcTypes;
-
-  /*!
-    @brief This structure is necessary for passing the general electrostatic domain boundary conditions to something which is parsable by Chombo and EBConductivityOp
-    @details This is passed into an operator factory which constructs the BCs using individual function pointer on each side. Different Neumann/Dirichlet BCs are constructred
-    on individual domain sides. 
-  */
-  std::map<ElectrostaticDomainBc::Wall, std::shared_ptr<ElectrostaticDomainBcFuncEval> > m_multigridDomainBcFunctions;
-
   /*!
     @brief Coarsened MG grids
   */

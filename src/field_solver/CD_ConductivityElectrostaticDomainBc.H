@@ -20,12 +20,12 @@
   @brief Class which interfaces a boundary condition wrapper to ConductivityBaseDomainBC.
   @details This class provides the functionality for setting Dirichlet and Neumann boundary conditions individually on each domain side, with different function. The
   boundary conditions are supplied by reference, so that the user can update the time for which the boundary condition is evaluated (through ElectrostaticDomainBcFuncEval).
+  @note This class rolls DirichletConductivityDomainBC and NeumannConductivityDomainBC, and calls the flux functions from those. We have thought about bypassing those
+  objects completely by just reimplementing those functinos here. That would make ElectrostaticDomainBcFuncEval pretty redundant and could roll ElectrostaticDomainBc::BcFunc
+  directly. 
 */
 class ConductivityElectrostaticDomainBc : public ConductivityBaseDomainBC {
 public:
-
-  using WallBcFuncs = std::map<ElectrostaticDomainBc::Wall, std::shared_ptr<ElectrostaticDomainBcFuncEval> >;
-  using WallBcTypes = std::map<ElectrostaticDomainBc::Wall, ElectrostaticDomainBc::BcType>;
 
   /*!
     @brief Constructor. This does nothing. 
@@ -33,11 +33,9 @@ public:
   ConductivityElectrostaticDomainBc() = delete;
 
   /*!
-    @brief Full constructor which instantiates everything. 
-    @details The injection of the function on the domain sides is done by reference since field_solvers may choose to use different time-dependence for his boundary conditions. 
-    @param[in] a_electrostaticBCs Specification of boundary conditions. 
+    @brief Full constructor
   */
-  ConductivityElectrostaticDomainBc(const WallBcFuncs& a_electrostaticBcs, const WallBcTypes& a_bcTypes);
+  ConductivityElectrostaticDomainBc(const ElectrostaticDomainBc& a_domainBc, const RealVect a_probLo);
 
   /*!
     @brief Destructor. This does nothing.
@@ -128,12 +126,6 @@ protected:
     @brief Flag for checking if coefficients have been set. 
   */
   bool m_hasCoeff;
-
-  /*!
-    @brief Boundary condition functions.
-    @details Constructed during setBcFunctions.
-  */
-  std::map<ElectrostaticDomainBc::Wall, std::shared_ptr<ElectrostaticDomainBcFuncEval> > m_bcFunctions;
 
   /*!
     @brief Boundary condition objects.

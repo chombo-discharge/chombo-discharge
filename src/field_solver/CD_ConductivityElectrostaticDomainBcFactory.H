@@ -21,34 +21,22 @@
 /*!
   @brief Class which interfaces a boundary condition wrapper to ConductivityBaseDomainBC.
   @details This class provides the functionality for setting Dirichlet and Neumann boundary conditions individually on each domain side, with different function. The
-  boundary conditions are supplied by reference, so that the user can update the time for which the boundary condition is evaluated (through ElectrostaticDomainBcFuncEval).
+  boundary conditions are supplied by std::function which captures field_solver::m_time, so they should automatically use the correct time for the BC evaluation. 
 */
 class ConductivityElectrostaticDomainBcFactory : public BaseDomainBCFactory {
 public:
 
   /*!
-    @brief Alias for easily associating a function (a BaseBCFuncEval) with a domain side.
-  */
-  using WallBcFuncs = std::map<ElectrostaticDomainBc::Wall, std::shared_ptr<ElectrostaticDomainBcFuncEval> >;
-
-  /*!
-    @brief Alias for easily associating a boundary condition type (an ElectrostaticDomainBC::BcType) with a domain side.
-  */
-  using WallBcTypes = std::map<ElectrostaticDomainBc::Wall, ElectrostaticDomainBc::BcType>;
-
-  /*!
-    @brief Constructor. This does nothing. 
+    @brief Weak construction is disallowed because it muddies the interface. 
   */
   ConductivityElectrostaticDomainBcFactory() = delete;
 
   /*!
     @brief Full constructor which instantiates the factory. 
-    @param[in] a_bcFunctions Boundary condition functions on each domain side. 
-    @param[in] a_bcTypes     Boundary condition types on each domain side. 
-    @details The injection of the function on the domain sides is done by pointer since field_solvers may choose to use different time-dependence for his boundary conditions. 
-    @param[in] a_electrostaticBCs Specification of boundary conditions. 
+    @param[in] a_domainBc Domain boundary conditions.
+    @param[in] a_probLo   Lower-left corner of the computational domain. 
   */
-  ConductivityElectrostaticDomainBcFactory(const WallBcFuncs& a_bcFunctions, const WallBcTypes& a_bcTypes);
+  ConductivityElectrostaticDomainBcFactory(const ElectrostaticDomainBc& a_domainBc, const RealVect a_probLo);
 
   /*!
     @brief Destructor. This does nothing.
@@ -64,14 +52,14 @@ public:
 protected:
   
   /*! 
-    @brief Boundary condition functions
+    @brief Domain boundary conditions.
   */
-  WallBcFuncs m_bcFunctions;
+  ElectrostaticDomainBc m_domainBc;
 
   /*!
-    @brief Boundary condition types
+    @brief Lower-left corner of computational domain
   */
-  WallBcTypes m_bcTypes;
+  RealVect m_probLo;
 };
 
 #include "CD_NamespaceFooter.H"

@@ -11,31 +11,36 @@
 #include "CD_ConductivityElectrostaticDomainBc.H"
 #include "CD_NamespaceHeader.H"
 
-ConductivityElectrostaticDomainBc::ConductivityElectrostaticDomainBc(const WallBcFuncs& a_bcFunctions, const WallBcTypes& a_bcTypes){
+ConductivityElectrostaticDomainBc::ConductivityElectrostaticDomainBc(const ElectrostaticDomainBc& a_domainBc, const RealVect a_probLo){
   m_hasCoeff = false;
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
-      const ElectrostaticDomainBc::Wall curWall = std::make_pair(dir, sit());
+      const ElectrostaticDomainBc::Wall curWall       = std::make_pair(dir, sit());
+      const ElectrostaticDomainBc::BcType&     bcType = a_domainBc.getBc(curWall).first;
+      const ElectrostaticDomainBc::BcFunction& bcFunc = a_domainBc.getBc(curWall).second;
 
-      // Make the bounadry condition type. 
-      const auto& bcType = a_bcTypes.at(curWall);
+      // Generate a BC object using Chombos BC data holders. 
       switch (bcType) {
       case ElectrostaticDomainBc::BcType::Dirichlet:
-	m_conductivityBaseDomainBcObjects.emplace(curWall, std::shared_ptr<ConductivityBaseDomainBC>(new DirichletConductivityDomainBC()));
+	m_conductivityBaseDomainBcObjects.emplace(curWall, std::make_shared<DirichletConductivityDomainBC>());
 	break;
       case ElectrostaticDomainBc::BcType::Neumann:
-	m_conductivityBaseDomainBcObjects.emplace(curWall, std::shared_ptr<ConductivityBaseDomainBC>(new NeumannConductivityDomainBC()));
+	m_conductivityBaseDomainBcObjects.emplace(curWall, std::make_shared<NeumannConductivityDomainBC>());
 	break;
       default:
 	MayDay::Abort("ConductivityElectrostaticDomainBc -- unsupported boundary condition passed into ConductivityElectrostaticDomainBc");
       }
+      
 
-      // Set the associated pointer.
-      const std::shared_ptr<ElectrostaticDomainBcFuncEval>& curFunc = a_bcFunctions.at(curWall);
-      std::shared_ptr<ConductivityBaseDomainBC>& curObject    = m_conductivityBaseDomainBcObjects.at(curWall);
+      // Strange but true thing -- RefCountedPtr is an abomination from before the days of C++11. In this case we pass in
+      // std::shared_ptr through ElectrostaticDomainBc (like God intended), but the Chombo interface uses RefCountedPtr. Both
+      // classes will try to delete the bare pointer, so we call neverDelete() to make sure that only std::shared_ptr gets this responsibility. 
+      RefCountedPtr<BaseBCFuncEval> func = RefCountedPtr<BaseBCFuncEval> (new ElectrostaticDomainBcFuncEval(bcFunc, a_probLo));
+      func.neverDelete(); 
 
-      curObject->setFunction(RefCountedPtr<BaseBCFuncEval> (&(*curFunc)));
+      std::shared_ptr<ConductivityBaseDomainBC>& curObject = m_conductivityBaseDomainBcObjects.at(curWall);
+      curObject->setFunction(func);
     }
   }
 }

@@ -64,9 +64,9 @@ void field_solver_multigrid::parse_options(){
 #if FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE
   parseDomainBc();
   this->set_Potential(testPotential);
-  const auto wall = std::make_pair(0, Side::Lo);
-  const auto bc = m_domainBc.getBc(wall);
-  std::cout << bc.second(RealVect::Zero, 4.0) << std::endl;
+  // const auto wall = std::make_pair(0, Side::Lo);
+  // const auto bc = m_domainBc.getBc(wall);
+  // std::cout << bc.second(RealVect::Zero, 4.0) << std::endl;
 #endif
 }
 
@@ -931,21 +931,23 @@ void field_solver_multigrid::setup_operator_factory(){
   }
 
 #if FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE // Make the new map
-  m_multigridDomainBcFunctions.clear();
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      const ElectrostaticDomainBc::Wall curWall = std::make_pair(dir, sit());
+  // m_multigridDomainBcFunctions.clear();
+  // for (int dir = 0; dir < SpaceDim; dir++){
+  //   for (SideIterator sit; sit.ok(); ++sit){
+  //     const ElectrostaticDomainBc::Wall curWall = std::make_pair(dir, sit());
 
-      const ElectrostaticDomainBc::BcType     bcType = m_domainBc.getBc(curWall).first;
-      const ElectrostaticDomainBc::BcFunction bcFunc = m_domainBc.getBc(curWall).second;
+  //     const ElectrostaticDomainBc::BcType&     bcType = m_domainBc.getBc(curWall).first;
+  //     const ElectrostaticDomainBc::BcFunction& bcFunc = m_domainBc.getBc(curWall).second;
 
-      m_multigridDomainBcTypes.emplace(curWall, bcType);
-      m_multigridDomainBcFunctions.emplace(curWall, std::make_shared<ElectrostaticDomainBcFuncEval>(bcFunc, m_amr->get_prob_lo()));
-    }
-  }
+  //     m_multigridDomainBcTypes.emplace(curWall, bcType);
+  //     m_multigridDomainBcFunctions.emplace(curWall, std::make_shared<ElectrostaticDomainBcFuncEval>(bcFunc, m_amr->get_prob_lo()));
+  //   }
+  // }
 
-  auto fact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_multigridDomainBcFunctions,
-														    m_multigridDomainBcTypes));
+  //  auto fact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_multigridDomainBcFunctions,
+  //														    m_multigridDomainBcTypes));
+
+  auto fact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_domainBc, m_amr->get_prob_lo()));
 #endif
 
   // Create factory and set potential
