@@ -8,8 +8,9 @@
 #include "CD_ElectrostaticDomainBcFuncEval.H"
 #include "CD_NamespaceHeader.H"
 
-ElectrostaticDomainBcFuncEval::ElectrostaticDomainBcFuncEval(){
-  m_isFunctionSet = false;
+ElectrostaticDomainBcFuncEval::ElectrostaticDomainBcFuncEval(const ElectrostaticDomainBc::BcFunction& a_bcFunc, const RealVect a_probLo){
+  m_bcFunc = a_bcFunc;
+  m_probLo = a_probLo;
 }
 
 ElectrostaticDomainBcFuncEval::~ElectrostaticDomainBcFuncEval(){
@@ -19,14 +20,7 @@ void ElectrostaticDomainBcFuncEval::setTime(const Real a_time){
   m_time = a_time;
 }
 
-void ElectrostaticDomainBcFuncEval::setFunction(ElectrostaticDomainBc::BcFunction a_bcFunc){
-  m_bcFunc        = a_bcFunc;
-  m_isFunctionSet = true;
-}
-
 Real ElectrostaticDomainBcFuncEval::value(const RealVect& a_point, const int& a_comp) const {
-  if(!m_isFunctionSet) MayDay::Abort("ElectrostaticDomainBcFuncEval -- function has not been set!");
-  
   return m_bcFunc(a_point, m_time);
 }
 

@@ -22,26 +22,28 @@ class ElectrostaticDomainBcFuncEval : public BaseBCFuncEval {
 public:
   
   /*!
-    @brief Initializing constructor. This does nothing. 
+    @brief Deleted initializing constructor. 
   */
-  ElectrostaticDomainBcFuncEval();
+  ElectrostaticDomainBcFuncEval() = delete;
+
+  /*!
+    @brief Full constructor. 
+    @param[in] a_bcFunc The boundary condition function.
+    @param[in] a_probLo Lower-left corner of computational domain. 
+    @note The origin is sent in because EBConductivityOp calls the boundary condition function with no origin. So, this evaluation of BaseBCFuncEval rectifies that.
+  */
+  ElectrostaticDomainBcFuncEval(const ElectrostaticDomainBc::BcFunction& a_bcFunc, const RealVect a_probLo);
 
   /*!
     @brief Destructor. This does nothing. 
   */
-  virtual ~ElectrostaticDomainBcFuncEval();
+  ~ElectrostaticDomainBcFuncEval();
 
   /*!
     @brief Set time
     @param[in] a_time Time for when the bcFunc value is updated. 
   */
   void setTime(const Real a_time);
-
-  /*!
-    @brief Set function
-    @param[in] a_bcFunc Boundary condition function. 
-  */
-  void setFunction(ElectrostaticDomainBc::BcFunction a_bcFunc);
 
   /*!
     @brief Return functional evaluation in space and time of the boundary condition.
@@ -67,11 +69,11 @@ protected:
     @brief Time for the domain boundary function
   */
   Real m_time;
-
+  
   /*!
-    @brief Flag for checking if functino has been set or not
+    @brief Lower left corner of computational boundary. 
   */
-  bool m_isFunctionSet;
+  RealVect m_probLo;
 
   /*!
     @brief Space- and time-dependent boundary condition function. 

@@ -1,0 +1,133 @@
+/*!
+  @file   CD_ConductivityElectrostaticDomainBc.H
+  @brief  Boundary condition class for using EBConductivityOp in field_solver_multigrid
+  @author Robert Marskar
+  @date   May 2021
+*/
+
+#ifndef _CD_ConductivityElectrostaticDomainBc_H_
+#define _CD_ConductivityElectrostaticDomainBc_H_
+
+#include <memory>
+
+#include <BaseDomainBC.H>
+
+#include "CD_ElectrostaticDomainBc.H"
+#include "CD_ElectrostaticDomainBcFuncEval.H"
+#include "CD_NamespaceHeader.H"
+
+/*!
+  @brief Class which interfaces a boundary condition wrapper to ConductivityBaseDomainBC.
+  @details This class provides the functionality for setting Dirichlet and Neumann boundary conditions individually on each domain side, with different function. The
+  boundary conditions are supplied by reference, so that the user can update the time for which the boundary condition is evaluated (through ElectrostaticDomainBcFuncEval).
+*/
+class ConductivityElectrostaticDomainBc : public ConductivityBaseDomainBC {
+public:
+
+  using WallBcFuncs = std::map<ElectrostaticDomainBc::Wall, std::shared_ptr<ElectrostaticDomainBcFuncEval> >;
+  using WallBcTypes = std::map<ElectrostaticDomainBc::Wall, ElectrostaticDomainBc::BcType>;
+
+  /*!
+    @brief Constructor. This does nothing. 
+  */
+  ConductivityElectrostaticDomainBc() = delete;
+
+  /*!
+    @brief Full constructor which instantiates everything. 
+    @details The injection of the function on the domain sides is done by reference since field_solvers may choose to use different time-dependence for his boundary conditions. 
+    @param[in] a_electrostaticBCs Specification of boundary conditions. 
+  */
+  ConductivityElectrostaticDomainBc(const WallBcFuncs& a_electrostaticBcs, const WallBcTypes& a_bcTypes);
+
+  /*!
+    @brief Destructor. This does nothing.
+  */
+  ~ConductivityElectrostaticDomainBc();
+  
+  /*! 
+    @brief Get the face flux on a domain side and direction. 
+    @details This will evaluate m_
+  */
+  void getFaceFlux(BaseFab<Real>&        a_faceFlux,
+		   const BaseFab<Real>&  a_phi,
+		   const RealVect&       a_probLo,
+		   const RealVect&       a_dx,
+		   const int&            a_idir,
+		   const Side::LoHiSide& a_side,
+		   const DataIndex&      a_dit,
+		   const Real&           a_time,
+		   const bool&           a_useHomogeneous) override final;
+
+  /*! 
+    @brief Get face flux
+  */
+  void getFaceFlux(Real&                 a_faceFlux,
+		   const VolIndex&       a_vof, 
+		   const int&            a_comp, 
+		   const EBCellFAB&      a_phi, 
+		   const RealVect&       a_probLo, 
+		   const RealVect&       a_dx, 
+		   const int&            a_idir, 
+		   const Side::LoHiSide& a_side, 
+		   const DataIndex&      a_dit, 
+		   const Real&           a_time, 
+		   const bool&           a_useHomogeneous) override final;
+  
+  /*!
+    @brief Get gradient
+  */
+  void getFaceGradPhi(Real&                 a_faceFlux,
+		      const FaceIndex&      a_face,
+		      const int&            a_comp,
+		      const EBCellFAB&      a_phi,
+		      const RealVect&       a_probLo,
+		      const RealVect&       a_dx,
+		      const int&            a_idir,
+		      const Side::LoHiSide& a_side,
+		      const DataIndex&      a_dit,
+		      const Real&           a_time,
+		      const bool&           a_useAreaFrac,
+		      const RealVect&       a_centroid,
+		      const bool&           a_useHomogeneous) override final;
+  
+  /*!
+    @brief Ghost filling. This is for NWO.
+  */
+  void fillPhiGhost(FArrayBox&     a_phi,
+		    const Box&     a_valid,
+		    const Box&     a_domain,
+		    Real           a_dx,
+		    bool           a_homogeneous) override final;
+
+  
+protected:
+  
+  /*!
+    @brief Flag for checking if coefficients have been set. 
+  */
+  bool m_hasCoeff;
+
+  /*!
+    @brief Boundary condition functions.
+    @details Constructed during setBcFunctions.
+  */
+  std::map<ElectrostaticDomainBc::Wall, std::shared_ptr<ElectrostaticDomainBcFuncEval> > m_bcFunctions;
+
+  /*!
+    @brief Boundary condition objects.
+    @details Constructed during setBcFunctions.
+  */
+  std::map<ElectrostaticDomainBc::Wall, std::shared_ptr<ConductivityBaseDomainBC> > m_conductivityBaseDomainBcObjects;
+
+  /*!
+    @brief Set coefficients. This is simply done to ensure that the boundary condition object has access to the b-coefficient. 
+    @details In EBConductivityOp, the boundary conditions need to know about the b-coefficient when BCs are supplied (for evaluating the flux). This function
+    provides that functionality. 
+  */
+  void setCoefficients();
+
+};
+
+#include "CD_NamespaceFooter.H"
+
+#endif
