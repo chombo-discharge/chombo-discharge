@@ -11,6 +11,7 @@
 #include "computational_geometry.H"
 #include "amr_mesh.H"
 #include "CD_ElectrostaticDomainBc.H"
+#include "CD_ElectrostaticEbBc.H"
 #include "CD_NamespaceHeader.H"
 
 /*!
