@@ -16,46 +16,40 @@ ElectrostaticEbBc::~ElectrostaticEbBc(){
 
 }
 
-void ElectrostaticEbBc::addEbBc(const std::shared_ptr<electrode>& a_electrode, const BcFunction& a_bcFunction){
-  if(m_bcFunctions.find(a_electrode) == m_bcFunctions.end()){ // 
-    this->setEbBc(a_electrode, a_bcFunction);
-  }
-  else{
-    m_bcFunctions.emplace(a_electrode, a_bcFunction);
-  }
+void ElectrostaticEbBc::addEbBc(const electrode& a_electrode, const BcFunction& a_bcFunction){
+  m_bcFunctions.emplace_back(std::make_pair(a_electrode, a_bcFunction));
 }
 
-void ElectrostaticEbBc::setEbBc(const std::shared_ptr<electrode>& a_electrode, const BcFunction& a_bcFunction){
-  if(m_bcFunctions.find(a_electrode) != m_bcFunctions.end()){
-    m_bcFunctions.at(a_electrode) = a_bcFunction;
+void ElectrostaticEbBc::setEbBc(const int a_electrode, const BcFunction& a_bcFunction){
+  if(a_electrode < 0 || a_electrode > m_bcFunctions.size()){
+    MayDay::Abort("ElectrostaticEbBc::setEbBc -- index is out of range!");
   }
-  else{
-    MayDay::Abort("ElectrostaticEbBc::setEbBc -- electrode was not found! You need to add it first!");
-  }
+  
+  m_bcFunctions[a_electrode].second = a_bcFunction;
 }
 
 
-ElectrostaticEbBc::BcFunction& ElectrostaticEbBc::getBc(const std::shared_ptr<electrode>& a_electrode){
-  if(m_bcFunctions.find(a_electrode) == m_bcFunctions.end()){
-    MayDay::Abort("ElectrostaticEbBc::getBc -- electrode was not found! You need to add it first!");
+ElectrostaticEbBc::BcFunction& ElectrostaticEbBc::getBc(const int a_electrode){
+  if(a_electrode < 0 || a_electrode > m_bcFunctions.size()){
+    MayDay::Abort("ElectrostaticEbBc::getBc -- index is out of range!");
   }
 
-  return m_bcFunctions.at(a_electrode);
+  return m_bcFunctions[a_electrode].second;
 }
 
-const ElectrostaticEbBc::BcFunction& ElectrostaticEbBc::getBc(const std::shared_ptr<electrode>& a_electrode) const {
-  if(m_bcFunctions.find(a_electrode) == m_bcFunctions.end()){
-    MayDay::Abort("ElectrostaticEbBc::getBc -- electrode was not found! You need to add it first!");
+const ElectrostaticEbBc::BcFunction& ElectrostaticEbBc::getBc(const int a_electrode) const {
+  if(a_electrode < 0 || a_electrode > m_bcFunctions.size()){
+    MayDay::Abort("ElectrostaticEbBc::getBc -- index is out of range!");
   }
 
-  return m_bcFunctions.at(a_electrode);
+  return m_bcFunctions[a_electrode].second;
 }
 
-std::map<std::shared_ptr<electrode>, ElectrostaticEbBc::BcFunction>& ElectrostaticEbBc::getBcs(){
+std::vector<std::pair<electrode, ElectrostaticEbBc::BcFunction> >& ElectrostaticEbBc::getBcs(){
   return m_bcFunctions;
 }
 
-const std::map<std::shared_ptr<electrode>, ElectrostaticEbBc::BcFunction>& ElectrostaticEbBc::getBcs() const {
+const std::vector<std::pair<electrode, ElectrostaticEbBc::BcFunction> >&  ElectrostaticEbBc::getBcs() const {
   return m_bcFunctions;
 }
 

@@ -9,7 +9,7 @@
 #define _CD_ElectrostaticEbBc_H_
 
 #include <functional>
-#include <map>
+#include <vector>
 
 #include <RealVect.H>
 
@@ -46,47 +46,47 @@ public:
     @details This appends an EbBc to the end of m_bcFunctions. 
     @note If the boundary condition already exists for a_electrode, it will be overwritten. 
   */
-  void addEbBc(const std::shared_ptr<electrode>& a_electrode, const BcFunction& a_bcFunction);
+  void addEbBc(const electrode& a_electrode, const BcFunction& a_bcFunction);
 
   /*!
     @brief Set the potential for a_electrode to be given by a_bcFunction
-    @param[in] a_electrode The electrode.
+    @param[in] a_electrode The electrode index in the vector. 
     @param[in] a_bcFunction Boundary condition function.
   */
-  void setEbBc(const std::shared_ptr<electrode>& a_electrode, const BcFunction& a_bcFunction);
+  void setEbBc(const int a_electrode, const BcFunction& a_bcFunction);
 
   /*!
     @brief Return boundary condition associated with a particular electrode.
     @param[in] a_electrode Electrode
     @return Boundary condition associated with a_electrode. 
   */
-  BcFunction& getBc(const std::shared_ptr<electrode>& a_electrode);
+  BcFunction& getBc(const int a_electrode);
 
   /*!
     @brief Return boundary condition associated with a particular electrode.
     @param[in] a_electrode Electrode
     @return Boundary condition associated with a_electrode.
   */
-  const BcFunction& getBc(const std::shared_ptr<electrode>& a_electrode) const;
+  const BcFunction& getBc(const int a_electrode) const;
 
   /*!
     @brief Get all boundary conditions
     @return Returns modifiable version of m_bcFunctions
   */
-  std::map<std::shared_ptr<electrode>, BcFunction>& getBcs();
+  std::vector<std::pair<electrode, BcFunction> >& getBcs();
 
     /*!
     @brief Get all boundary conditions
     @return Returns non-modifiable version of m_bcFunctions
   */
-  const std::map<std::shared_ptr<electrode>, BcFunction>& getBcs() const;
+  const std::vector<std::pair<electrode, BcFunction> >& getBcs() const;
 
 protected:
 
   /*!
     @brief Data structure which holds electrode and associated potential functions. 
   */
-  std::map<std::shared_ptr<electrode>, BcFunction> m_bcFunctions;
+  std::vector<std::pair<electrode, BcFunction> > m_bcFunctions;
 };
 
 #include "CD_NamespaceFooter.H"
