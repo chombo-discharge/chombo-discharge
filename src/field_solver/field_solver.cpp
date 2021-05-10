@@ -29,6 +29,7 @@ Real field_solver::s_potential_one(const Real a_time){
 }
 
 Real field_solver::s_constant_one(const RealVect a_pos){
+  pout() << "field_solver::s_constant_one -- should be deprecated" << endl;
   return 1.0;
 }
 
@@ -93,17 +94,6 @@ void field_solver::allocate_internals(){
   data_ops::set_value(m_sigma,  0.0);
   data_ops::set_value(m_resid,  0.0);
   data_ops::set_value(m_E,  0.0);
-}
-
-void field_solver::allocate_wall_bc(){
-  CH_TIME("field_solver::field_solver(full)");
-  if(m_verbosity > 5){
-    pout() << "field_solver::field_solver(full)" << endl;
-  }
-  m_wallbc.resize(2*SpaceDim);
-  for (int i = 0; i < 2*SpaceDim; i++){
-    m_wallbc[i] = RefCountedPtr<wall_bc> (NULL);
-  }
 }
 
 void field_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
@@ -326,24 +316,6 @@ void field_solver::regrid(const int a_lmin, const int a_old_finest, const int a_
   this->compute_E();
 }
 
-void field_solver::sanity_check(){
-  CH_TIME("field_solver::sanity_check");
-  if(m_verbosity > 4){
-    pout() << "field_solver::sanity_check" << endl;
-  }
-
-  CH_assert(!m_compgeom.isNull());
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sideit; sideit.ok(); ++sideit){
-      if(m_wallbc[wall_bc::map_bc(dir, sideit())].isNull()){
-	pout() << "field_solver::sanity_check() - bc is null at coord = " << dir << ", side = " << sideit() << endl;
-	MayDay::Abort("field_solver::sanity_check() failed. Wall BC has not been set properly");
-      }
-    }
-  }
-}
-
 void field_solver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
   CH_TIME("field_solver::set_computational_geometry");
   if(m_verbosity > 5){
@@ -373,84 +345,8 @@ void field_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   m_amr = a_amr;
 }
 
-void field_solver::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential a_live){
-  CH_TIME("field_solver::set_dirichlet_wall_bc");
-  if(m_verbosity > 5){
-    pout() << "field_solver::set_dirichlet_wall_bc" << endl;
-  }
-
-  const int idx = wall_bc::map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::dirichlet));
-  if(a_live == potential::live){
-    m_wallbc[idx]->set_live(true);
-  }
-  else{
-    m_wallbc[idx]->set_live(false);
-  }
-}
-
-void field_solver::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
-  CH_TIME("field_solver::set_neumann_wall_bc");
-  if(m_verbosity > 5){
-    pout() << "field_solver::set_neumann_wall_bc" << endl;
-  }
-
-  const int idx = wall_bc::map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::neumann));
-  m_wallbc[idx]->set_value(a_value);
-}
-
-void field_solver::set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
-  CH_TIME("field_solver::set_robin_wall_bc");
-  if(m_verbosity > 5){
-    pout() << "field_solver::set_robin_wall_bc" << endl;
-  }
-
-  const int idx = wall_bc::map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::robin));
-  m_wallbc[idx]->set_value(a_value);
-}
-
-void field_solver::set_potential(Real (*a_potential)(const Real a_time)){
+void field_solver::set_potential(std::function<Real(const Real a_time)>& a_potential){
   m_potential = a_potential;
-}
-
-void field_solver::set_Potential(std::function<Real(const Real a_time)> a_potential){
-  m_Potential = a_potential;
-}
-
-void field_solver::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("field_solver::set_poisson_wall_func");
-  if(m_verbosity > 4){
-    pout() << "field_solver::set_poisson_wall_func" << endl;
-  }
-
-  if(a_dir == 0){
-    if(a_side == Side::Lo){
-      m_wall_func_x_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_x_hi = a_func;
-    }
-  }
-  else if(a_dir == 1){
-    if(a_side == Side::Lo){
-      m_wall_func_y_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_y_hi = a_func;
-    }
-  }
-#if CH_SPACEDIM==3
-  else if(a_dir == 2){
-    if(a_side == Side::Lo){
-      m_wall_func_z_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_z_hi = a_func;
-    }
-  }
-#endif
 }
 
 void field_solver::set_domain_bc_wall_function(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction a_function){
@@ -646,10 +542,10 @@ void field_solver::set_default_domain_bc_functions(){
   }
 }
 
-void field_solver::parseDomainBc(){
-  CH_TIME("field_solver::parseDomainBc");
+void field_solver::parse_domain_bc(){
+  CH_TIME("field_solver::parse_domain_bc");
   if(m_verbosity > 5){
-    pout() << "field_solver::parseDomainBc" << endl;
+    pout() << "field_solver::parse_domain_bc" << endl;
   }
   
   
@@ -698,7 +594,7 @@ void field_solver::parseDomainBc(){
 	switch (bcType){
 	case ElectrostaticDomainBc::BcType::Dirichlet:
 	  curFunc = [&, val] (const RealVect a_pos, const Real a_time){
-	    return bcFunc(a_pos, m_time)*m_Potential(m_time)*val;
+	    return bcFunc(a_pos, m_time)*m_potential(m_time)*val;
 	  };
 	  break;
 	case ElectrostaticDomainBc::BcType::Neumann:
@@ -718,89 +614,6 @@ void field_solver::parseDomainBc(){
       m_domainBc.setBc(curWall, std::make_pair(bcType, curFunc));
     }
   }
-}
-
-void field_solver::parse_domain_bc(){
-  CH_TIME("field_solver::parse_domain_bc");
-  if(m_verbosity > 5){
-    pout() << "field_solver::parse_domain_bc" << endl;
-  }
-
-  ParmParse pp(m_class_name.c_str());
-
-  this->allocate_wall_bc();
-
-  // Check each side in each direction
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      const Side::LoHiSide side = sit();
-	
-      std::string str_dir;
-      if(dir == 0){
-	str_dir = "x";
-      }
-      else if(dir == 1){
-	str_dir = "y";
-      }
-      else if(dir == 2){
-	str_dir = "z";
-      }
-
-      // Get dir/side and set accordingly
-      if(side == Side::Lo){
-	std::string type;
-	std::string bc_string = "bc_" + str_dir + "_low";
-	pp.get(bc_string.c_str(), type);
-	if(type == "dirichlet_ground"){
-	  this->set_dirichlet_wall_bc(dir, Side::Lo, potential::ground);
-	}
-	else if(type == "dirichlet_live"){
-	  this->set_dirichlet_wall_bc(dir, Side::Lo, potential::live);
-	}
-	else if(type == "neumann"){
-	  this->set_neumann_wall_bc(dir, Side::Lo, 0.0);
-	}
-	else if(type == "robin"){
-	  this->set_robin_wall_bc(dir, Side::Lo, 0.0);
-	}
-	else {
-	  std::string error = "field_solver_multigrid::field_solver_multigrid - unknown bc requested for " + bc_string;
-	  MayDay::Abort(error.c_str());
-	}
-      }
-      else if(side == Side::Hi){
-	std::string type;
-	std::string bc_string = "bc_" + str_dir + "_high";
-	pp.get(bc_string.c_str(), type);
-	if(type == "dirichlet_ground"){
-	  this->set_dirichlet_wall_bc(dir, Side::Hi, potential::ground);
-	}
-	else if(type == "dirichlet_live"){
-	  this->set_dirichlet_wall_bc(dir, Side::Hi, potential::live);
-	}
-	else if(type == "neumann"){
-	  this->set_neumann_wall_bc(dir, Side::Hi, 0.0);
-	}
-	else if(type == "robin"){
-	  this->set_robin_wall_bc(dir, Side::Hi, 0.0);
-	}
-	else {
-	  std::string error = "field_solver_multigrid::field_solver_multigrid - unknown bc requested for " + bc_string;
-	  MayDay::Abort(error.c_str());
-	}
-      }
-    }
-  }
-
-  // Set default distribution on domain edges
-  m_wall_func_x_lo = field_solver::s_constant_one;
-  m_wall_func_x_hi = field_solver::s_constant_one;
-  m_wall_func_y_lo = field_solver::s_constant_one;
-  m_wall_func_y_hi = field_solver::s_constant_one;
-#if CH_SPACEDIM==3
-  m_wall_func_z_lo = field_solver::s_constant_one;
-  m_wall_func_z_hi = field_solver::s_constant_one;
-#endif
 }
 
 void field_solver::write_plot_file(){
@@ -893,8 +706,6 @@ void field_solver::post_checkpoint(){
   if(m_verbosity > 5){
     pout() << "field_solver::post_checkpoint" << endl;
   }
-
-  
 }
 
 void field_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
@@ -1045,15 +856,6 @@ Vector<std::string> field_solver::get_plotvar_names() const {
 
 Real field_solver::get_time() const{
   return m_time;
-}
-
-
-wall_bc& field_solver::get_wall_bc(const int a_dir, Side::LoHiSide a_side) const{
-  CH_TIME("field_solver::get_wall_bc");
-  if(m_verbosity > 5){
-    pout() << "field_solver::get_wall_bc" << endl;
-  }
-  return *m_wallbc[wall_bc::map_bc(a_dir, a_side)];
 }
 
 MFAMRCellData& field_solver::get_state(){

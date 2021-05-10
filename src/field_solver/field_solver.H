@@ -37,12 +37,12 @@ public:
   static Real s_defaultDomainBcFunction(const RealVect a_position, const Real a_time);
 
   /*!
-    @brief Potential of one...
+    @brief Potential of one.
   */
   static Real s_potential_one(const Real a_time);
 
   /*!
-    @brief Factor of one....
+    @brief Factor of one. About to get properly deprecated. 
   */
   static Real s_constant_one(const RealVect a_pos);
 
@@ -140,21 +140,6 @@ public:
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
   /*!
-    @brief Set const value Dirichlet wall BC
-  */
-  virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential a_live);
-
-  /*!
-    @brief Set constant value Neumann wall BC
-  */
-  virtual void set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
-
-  /*!
-    @Set Set constant value Robin wall bc
-  */
-  virtual void set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
-
-  /*!
     @brief Set which variables to output
   */
   virtual void set_output_variables();
@@ -190,11 +175,6 @@ public:
   virtual void write_mfdata(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp);
 
   /*!
-    @brief Sanity check
-  */
-  virtual void sanity_check();
-
-  /*!
     @brief Set realm
   */
   virtual void set_realm(const std::string a_realm);
@@ -210,19 +190,9 @@ public:
   virtual void set_verbosity(const int a_verbosity);
 
   /*!
-    @brief Set potential at current time. 
-  */
-  virtual void set_potential(Real (*a_potential)(const Real a_time));
-
-  /*!
-    @brief Set wall potential distribution. This is efffective for dirichlet_map only
-  */
-  virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
-
-  /*!
     @brief Set potential dependence in time. 
   */
-  virtual void set_Potential(std::function<Real(const Real a_time)> a_potential);
+  virtual void set_potential(std::function<Real(const Real a_time)>& a_potential);
   
   /*!
     @brief Boundary condition function on a wall. 
@@ -431,65 +401,19 @@ protected:
   std::map<ElectrostaticDomainBc::Wall, ElectrostaticDomainBc::BcFunction> m_domainBcFunctions;
 
   /*!
-    @brief Set potential function pointer
-  */
-  Real (*m_potential)(const Real a_time);
-
-  /*!
     @brief Potential function. 
   */
   std::function<Real(const Real a_time)> m_Potential;
 
   /*!
-    @brief Function pointer for potential on domain walls (dirichlet)
-  */
-  Real (*m_wall_func_x_lo)(const RealVect a_pos);
-
-  /*!
-    @brief Function pointer for potential on domain walls (dirichlet)
-  */
-  Real (*m_wall_func_x_hi)(const RealVect a_pos);
-
-  /*!
-    @brief Function pointer for potential on domain walls (dirichlet)
-  */
-  Real (*m_wall_func_y_lo)(const RealVect a_pos);
-
-  /*!
-    @brief Function pointer for potential on domain walls (dirichlet)
-  */
-  Real (*m_wall_func_y_hi)(const RealVect a_pos);
-
-  /*!
-    @brief Function pointer for potential on domain walls (dirichlet)
-  */
-  Real (*m_wall_func_z_lo)(const RealVect a_pos);
-
-  /*!
-    @brief Function pointer for potential on domain walls (dirichlet)
-  */
-  Real (*m_wall_func_z_hi)(const RealVect a_pos);
-
-  /*!
     @brief Set the mfis
   */
   virtual void set_mfis(const RefCountedPtr<mfis>& a_mfis);
-  
-  /*!
-    @brief Allocate data holders for wall bcs so they can be set
-  */
-  virtual void allocate_wall_bc();
 
   /*!
     @brief Parse domain BCs
   */
   virtual void parse_domain_bc();
-
-  /*!
-    @brief Parse domain Bcs
-    @details This reads from file 
-  */
-  virtual void parseDomainBc();
 
   /*!
     @brief Set default BC functions. This sets all the m_domainBcFunction objects to s_defaultDomainBcFunction (returns 1 everywhere). 
