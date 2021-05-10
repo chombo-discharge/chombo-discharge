@@ -35,6 +35,7 @@ Real field_solver::s_constant_one(const RealVect a_pos){
 field_solver::field_solver(){
   m_class_name = "field_solver";
   this->set_verbosity(-1);
+  
 
   m_realm = realm::primal;
 }
@@ -448,6 +449,13 @@ void field_solver::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a
 #endif
 }
 
+void field_solver::set_wall_function(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction a_function){
+  CH_TIME("field_solver::set_wall_function");
+  if(m_verbosity > 4){
+    pout() << "field_solver::set_wall_function" << endl;
+  }
+}
+
 void field_solver::set_verbosity(const int a_verbosity){
   CH_TIME("field_solver::set_verbosity");
   m_verbosity = a_verbosity;
@@ -616,6 +624,20 @@ ElectrostaticDomainBc::BcType field_solver::parseBcString(const std::string a_st
   return ret;
 }
 
+void field_solver::setDefaultDomainBcFunctions(){
+  CH_TIME("field_solver::setDefaultDomainBcFunctions");
+  if(m_verbosity > 5){
+    pout() << "field_solver::setDefaultDomainBcFunctions" << endl;
+  }
+
+  m_domainBcFunctions.clear();
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      m_domainBcFunctions.emplace(std::make_pair(dir, sit()), field_solver::s_defaultDomainBcFunction);
+    }
+  }
+}
+
 void field_solver::parseDomainBc(){
   CH_TIME("field_solver::parseDomainBc");
   if(m_verbosity > 5){
@@ -626,6 +648,8 @@ void field_solver::parseDomainBc(){
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
+
+      const ElectrostaticDomainBc::Wall curWall = std::make_pair(dir, sit());
 
       const std::string bcString = this->makeBcString(dir, sit());
 
@@ -638,10 +662,10 @@ void field_solver::parseDomainBc(){
 	pp.get(bcString.c_str(), str, 0);
 	pp.get(bcString.c_str(), val, 1);
 
-	ElectrostaticDomainBc::BcType     bcType = parseBcString(str);
-	ElectrostaticDomainBc::BcFunction bcFunc = field_solver::s_defaultDomainBcFunction;
+	ElectrostaticDomainBc::BcType     bcType = this->parseBcString(str);
+	ElectrostaticDomainBc::BcFunction bcFunc = m_domainBcFunctions.at(curWall);
 
-	m_domainBc.setBc(std::make_pair(dir, sit()), std::make_pair(bcType, bcFunc));
+	m_domainBc.setBc(curWall, std::make_pair(bcType, bcFunc));
       }
       else{
 	const std::string errorString = "field_solver::parseDomainBc -- bad or no input parameter for " + bcString;
@@ -656,8 +680,6 @@ void field_solver::parse_domain_bc(){
   if(m_verbosity > 5){
     pout() << "field_solver::parse_domain_bc" << endl;
   }
-
-  this->parseDomainBc();
 
   ParmParse pp(m_class_name.c_str());
 

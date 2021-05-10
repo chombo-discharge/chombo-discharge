@@ -21,6 +21,7 @@
 class field_solver {
 public:
 
+  
   /*!
     @brief Silly enum for describing the potential at domain faces
   */
@@ -219,6 +220,14 @@ public:
   virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
 
   /*!
+    @brief Boundary condition function on a wall. 
+    @param[in] a_dir Coordinate direction.
+    @param[in] a_side Side in the coordinate direction.
+    @param[in] a_function Boundary condition function.
+  */
+  virtual void set_wall_function(const int a_dir, const Side::LoHiSide a_side, ElectrostaticDomainBc::BcFunction a_function);
+
+  /*!
     @brief Set potential in covered electrode cells
   */
   virtual void set_covered_potential(EBAMRCellData& a_phi, const int a_comp, const Real a_time);
@@ -412,6 +421,11 @@ protected:
   ElectrostaticDomainBc m_domainBc;
 
   /*!
+    @brief Domain BC functions
+  */
+  std::map<ElectrostaticDomainBc::Wall, ElectrostaticDomainBc::BcFunction> m_domainBcFunctions;
+
+  /*!
     @brief Set potential function pointer
   */
   Real (*m_potential)(const Real a_time);
@@ -466,6 +480,11 @@ protected:
     @details This reads from file 
   */
   virtual void parseDomainBc();
+
+  /*!
+    @brief Set default BC functions. This sets all the m_domainBcFunction objects to s_defaultDomainBcFunction (returns 1 everywhere). 
+  */
+  virtual void setDefaultDomainBcFunctions();
 
   /*!
     @brief Returns BC type based on string

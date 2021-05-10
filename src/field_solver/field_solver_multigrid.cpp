@@ -33,6 +33,8 @@ field_solver_multigrid::field_solver_multigrid(){
   m_needs_setup = true;
   m_has_mg_stuff = false;
   m_class_name  = "field_solver_multigrid";
+
+  this->setDefaultDomainBcFunctions();
 }
 
 field_solver_multigrid::~field_solver_multigrid(){
@@ -44,7 +46,7 @@ Real field_solver_multigrid::s_constant_one(const RealVect a_pos){
 }
 
 void field_solver_multigrid::parse_options(){
-
+  parseDomainBc();
   parse_autotune();
   parse_domain_bc();
   parse_plot_vars();
