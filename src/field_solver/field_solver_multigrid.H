@@ -97,6 +97,11 @@ public:
   virtual void set_potential(Real (*a_potential)(const Real a_time));
 
   /*!
+    @brief Not really supposed to be overridden, but WIP
+  */
+  virtual void set_potential(std::function<Real(const Real a_time)>& a_potential) override;
+
+  /*!
     @brief Regrid function
   */
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
@@ -377,11 +382,6 @@ protected:
     @brief Potential function
   */
   RefCountedPtr<dirichlet_func> m_bcfunc;
-
-  /*!
-    @brief Mapped potential functions
-  */
-  Vector<RefCountedPtr<BaseBCFuncEval> > m_wall_bcfunc;
 
   /*!
     @brief Coarsened MG grids

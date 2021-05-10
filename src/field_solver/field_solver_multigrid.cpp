@@ -29,14 +29,6 @@
 
 #include "CD_NamespaceHeader.H"
 
-#define FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE 1
-
-#if FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE
-Real testPotential(const Real a_time){
-  return 1.0;
-}
-#endif
-
 field_solver_multigrid::field_solver_multigrid(){
   m_needs_setup = true;
   m_has_mg_stuff = false;
@@ -61,13 +53,6 @@ void field_solver_multigrid::parse_options(){
   parse_kappa_source();
 
 
-#if FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE
-  parseDomainBc();
-  this->set_Potential(testPotential);
-  // const auto wall = std::make_pair(0, Side::Lo);
-  // const auto bc = m_domainBc.getBc(wall);
-  // std::cout << bc.second(RealVect::Zero, 4.0) << std::endl;
-#endif
 }
 
 void field_solver_multigrid::parse_runtime_options(){
@@ -362,34 +347,20 @@ void field_solver_multigrid::set_potential(Real (*a_potential)(const Real a_time
   const RealVect origin  = m_amr->get_prob_lo();
 
   m_bcfunc = RefCountedPtr<dirichlet_func>(new dirichlet_func(m_potential, s_constant_one, origin));
+}
 
-  const int ixlo = wall_bc::map_bc(0, Side::Lo);
-  const int ixhi = wall_bc::map_bc(0, Side::Hi);
-  const int iylo = wall_bc::map_bc(1, Side::Lo);
-  const int iyhi = wall_bc::map_bc(1, Side::Hi);
-#if CH_SPACEDIM==3
-  const int izlo = wall_bc::map_bc(2, Side::Lo);
-  const int izhi = wall_bc::map_bc(2, Side::Hi);
-#endif
+void field_solver::multigrid::set_potential(std::function<Real(const Real a_time)>& a_potential) {
+  m_potential = a_potential;
 
-  m_wall_bcfunc.resize(2*SpaceDim);
-  m_wall_bcfunc[ixlo] = RefCountedPtr<BaseBCFuncEval>(new dirichlet_func(m_potential, m_wall_func_x_lo, origin));
-  m_wall_bcfunc[ixhi] = RefCountedPtr<BaseBCFuncEval>(new dirichlet_func(m_potential, m_wall_func_x_hi, origin));
-  m_wall_bcfunc[iylo] = RefCountedPtr<BaseBCFuncEval>(new dirichlet_func(m_potential, m_wall_func_y_lo, origin));
-  m_wall_bcfunc[iyhi] = RefCountedPtr<BaseBCFuncEval>(new dirichlet_func(m_potential, m_wall_func_y_hi, origin));
-#if CH_SPACEDIM==3
-  m_wall_bcfunc[izlo] = RefCountedPtr<BaseBCFuncEval>(new dirichlet_func(m_potential, m_wall_func_z_lo, origin));
-  m_wall_bcfunc[izhi] = RefCountedPtr<BaseBCFuncEval>(new dirichlet_func(m_potential, m_wall_func_z_hi, origin));
-#endif
+  const RealVect origin  = m_amr->get_prob_lo();
+
+  m_bcfunc = RefCountedPtr<dirichlet_func>(new dirichlet_func(m_potential, s_constant_one, origin));
 }
 
 void field_solver_multigrid::set_time(const int a_step, const Real a_time, const Real a_dt){
   field_solver::set_time(a_step, a_time, a_dt);
   m_bcfunc->set_time(a_time);
-  for (int i = 0; i < m_wall_bcfunc.size(); i++){
-    dirichlet_func* func = static_cast<dirichlet_func*> (&(*m_wall_bcfunc[i]));
-    func->set_time(a_time);
-  }
+
   
   if(!m_opfact.isNull()){
     m_opfact->set_time(&m_time);
@@ -893,22 +864,12 @@ void field_solver_multigrid::setup_operator_factory(){
   }
 
   // Appropriate coefficients for poisson equation
-  const Real alpha =  1.0; // Aco is zero. 
+  const Real alpha =  1.0; // Recall that Aco is zero so put anything you want here. 
   const Real beta  = -1.0;
-
-  RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory> (NULL);
 
   const IntVect ghost_phi = this->query_ghost()*IntVect::Unit;
   const IntVect ghost_rhs = this->query_ghost()*IntVect::Unit;
 
-  conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
-  RefCountedPtr<dirichlet_func> pot = RefCountedPtr<dirichlet_func> (new dirichlet_func(m_potential,
-											s_constant_one,
-											RealVect::Zero));
-  
-  bcfact->set_wallbc(m_wallbc);
-  bcfact->set_potentials(m_wall_bcfunc);
-  domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 
   Vector<MFLevelGrid> mg_levelgrids;
   for (int lvl = 0; lvl < m_mg_mflg.size(); lvl++){
@@ -930,25 +891,7 @@ void field_solver_multigrid::setup_operator_factory(){
     relax_type = 2;
   }
 
-#if FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE // Make the new map
-  // m_multigridDomainBcFunctions.clear();
-  // for (int dir = 0; dir < SpaceDim; dir++){
-  //   for (SideIterator sit; sit.ok(); ++sit){
-  //     const ElectrostaticDomainBc::Wall curWall = std::make_pair(dir, sit());
-
-  //     const ElectrostaticDomainBc::BcType&     bcType = m_domainBc.getBc(curWall).first;
-  //     const ElectrostaticDomainBc::BcFunction& bcFunc = m_domainBc.getBc(curWall).second;
-
-  //     m_multigridDomainBcTypes.emplace(curWall, bcType);
-  //     m_multigridDomainBcFunctions.emplace(curWall, std::make_shared<ElectrostaticDomainBcFuncEval>(bcFunc, m_amr->get_prob_lo()));
-  //   }
-  // }
-
-  //  auto fact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_multigridDomainBcFunctions,
-  //														    m_multigridDomainBcTypes));
-
-  auto fact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_domainBc, m_amr->get_prob_lo()));
-#endif
+  auto domfact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_domainBc, m_amr->get_prob_lo()));
 
   // Create factory and set potential
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
@@ -965,11 +908,7 @@ void field_solver_multigrid::setup_operator_factory(){
 										 m_length_scale,
 										 dx[0]*m_length_scale,
 										 domains[0],
-#if  FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE
-										 fact,
-#else
 										 domfact,
-#endif
 										 origin,
 										 ghost_phi,
 										 ghost_rhs,
