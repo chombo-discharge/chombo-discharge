@@ -404,13 +404,10 @@ protected:
   */
   Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
 
-
-
   /*!
     @brief Need to override this in order to pass in the correct time to boundary conditions
   */
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
-
 
   /*!
     @brief Set face-centered permittivities
@@ -429,8 +426,6 @@ protected:
 			   const RealVect&           a_origin,
 			   const Real&               a_dx,
 			   const Vector<dielectric>& a_dielectrics);
-
-
 
   // Option parsing functions
   virtual void parse_autotune();     // Parse autotuning

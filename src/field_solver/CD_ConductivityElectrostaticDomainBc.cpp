@@ -112,23 +112,7 @@ void ConductivityElectrostaticDomainBc::getFaceGradPhi(Real&                 a_f
 						       const RealVect&       a_centroid,
 						       const bool&           a_useHomogeneous) {
 
-  if(!m_hasCoeff) this->setCoefficients();
-
-  auto& bcPtr = m_conductivityBaseDomainBcObjects.at(std::make_pair(a_idir, a_side));
-  
-  bcPtr->getFaceGradPhi(a_faceFlux,
-			a_face,
-			a_comp,
-			a_phi,
-			a_probLo,
-			a_dx,
-			a_idir,
-			a_side,
-			a_dit,
-			a_time,
-			a_useAreaFrac,
-			a_centroid,
-			a_useHomogeneous);
+  MayDay::Abort("ConductivityElectrostaticDomainBc::getFaceGradPhi -- calling this is an error. How did it get called?");
 }
 
 

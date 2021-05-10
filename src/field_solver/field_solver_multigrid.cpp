@@ -5,16 +5,6 @@
   @date Nov. 2017
 */
 
-#include "field_solver_multigrid.H"
-#include "dirichlet_func.H"
-#include "data_ops.H"
-#include "MFQuadCFInterp.H"
-#include "MFInterfaceFAB.H"
-#include "jump_bc.H"
-#include "amr_mesh.H"
-#include "conductivitydomainbc_wrapper_factory.H"
-#include "units.H"
-
 #include <Stencils.H>
 #include <MFCellFAB.H>
 #include <LayoutData.H>
@@ -23,6 +13,17 @@
 #include <DirichletConductivityEBBC.H>
 #include <ParmParse.H>
 #include <BRMeshRefine.H>
+
+#include "field_solver_multigrid.H"
+#include "dirichlet_func.H"
+#include "data_ops.H"
+#include "MFQuadCFInterp.H"
+#include "MFInterfaceFAB.H"
+#include "jump_bc.H"
+#include "amr_mesh.H"
+#include "conductivitydomainbc_wrapper_factory.H"
+#include "CD_ConductivityElectrostaticDomainBcFactory.H"
+#include "units.H"
 
 #define POISSON_MF_GMG_TIMER 0
 

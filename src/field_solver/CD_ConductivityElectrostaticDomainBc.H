@@ -46,7 +46,17 @@ public:
   
   /*! 
     @brief Get the face flux on a domain side and direction. 
-    @details This will evaluate m_
+    @details This is used for getting the conventional face flux. 
+    @param[in] a_faceFlux       Regular face flux.
+    @param[in] a_phi            Phi.
+    @param[in] a_probLo         Lower-left corner of computational domain. 
+    @param[in] a_dx             Resolution.
+    @param[in] a_idir           Coordinate direction.
+    @param[in] a_side           Lo/Hi side in coordinate direction.
+    @param[in] a_dit            DataIndex for current box being evaluated. 
+    @param[in] a_time           Time. 
+    @param[in] a_useHomogeneous Use homogeneous BC or not. 
+    @note Because of EBConductivityOp a_time and a_probLo are both zero, and these are instead passed in through the actual BC function objects. 
   */
   void getFaceFlux(BaseFab<Real>&        a_faceFlux,
 		   const BaseFab<Real>&  a_phi,
@@ -59,7 +69,19 @@ public:
 		   const bool&           a_useHomogeneous) override final;
 
   /*! 
-    @brief Get face flux
+    @brief Get the face flux on a domain side and direction. 
+    @details This is used for getting the domain flux in irregular cells that are also cut-cells. 
+    @param[in] a_faceFlux       Flux
+    @param[in] a_vof            VolIndex being evaluated. 
+    @param[in] a_comp           Component
+    @param[in] a_probLo         Lower-left corner of computational domain. 
+    @param[in] a_dx             Grid resolution.
+    @param[in] a_idir           Coordinate direction.
+    @param[in] a_side           Lo or Hi side in coordinate direction.
+    @param[in] a_dit            Box currently being evaluated. 
+    @param[in] a_time           Time
+    @param[in] a_useHomogeneous Use homogeneous BC or not. 
+    @note Because of EBConductivityOp a_time and a_probLo are both zero, and these are instead passed in through the actual BC function objects. 
   */
   void getFaceFlux(Real&                 a_faceFlux,
 		   const VolIndex&       a_vof, 
@@ -74,7 +96,7 @@ public:
 		   const bool&           a_useHomogeneous) override final;
   
   /*!
-    @brief Get gradient
+    @brief This function is not documented because it is not used in EBConductivityOp. It issues an error if it is called. 
   */
   void getFaceGradPhi(Real&                 a_faceFlux,
 		      const FaceIndex&      a_face,
@@ -91,7 +113,7 @@ public:
 		      const bool&           a_useHomogeneous) override final;
   
   /*!
-    @brief Ghost filling. This is for NWO.
+    @brief This function is not documented because it is not used in EBConductivityOp. It issues an error if it is called. 
   */
   void fillPhiGhost(FArrayBox&     a_phi,
 		    const Box&     a_valid,
