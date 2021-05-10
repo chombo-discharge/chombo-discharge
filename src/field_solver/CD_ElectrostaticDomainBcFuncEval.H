@@ -32,7 +32,7 @@ public:
     @param[in] a_probLo Lower-left corner of computational domain. 
     @note The origin is sent in because EBConductivityOp calls the boundary condition function with no origin. So, this evaluation of BaseBCFuncEval rectifies that.
   */
-  ElectrostaticDomainBcFuncEval(const ElectrostaticDomainBc::BcFunction& a_bcFunc, const RealVect a_probLo);
+  ElectrostaticDomainBcFuncEval(const ElectrostaticDomainBc::BcFunction a_bcFunc, const RealVect a_probLo);
 
   /*!
     @brief Destructor. This does nothing. 

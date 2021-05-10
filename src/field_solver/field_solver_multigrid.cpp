@@ -33,7 +33,7 @@
 
 #if FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE
 Real testPotential(const Real a_time){
-  return 1.23456*a_time;
+  return 1.0;
 }
 #endif
 
@@ -930,6 +930,24 @@ void field_solver_multigrid::setup_operator_factory(){
     relax_type = 2;
   }
 
+#if FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE // Make the new map
+  m_multigridDomainBcFunctions.clear();
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const ElectrostaticDomainBc::Wall curWall = std::make_pair(dir, sit());
+
+      const ElectrostaticDomainBc::BcType     bcType = m_domainBc.getBc(curWall).first;
+      const ElectrostaticDomainBc::BcFunction bcFunc = m_domainBc.getBc(curWall).second;
+
+      m_multigridDomainBcTypes.emplace(curWall, bcType);
+      m_multigridDomainBcFunctions.emplace(curWall, std::make_shared<ElectrostaticDomainBcFuncEval>(bcFunc, m_amr->get_prob_lo()));
+    }
+  }
+
+  auto fact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_multigridDomainBcFunctions,
+														    m_multigridDomainBcTypes));
+#endif
+
   // Create factory and set potential
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
 										 mflg,
@@ -945,7 +963,11 @@ void field_solver_multigrid::setup_operator_factory(){
 										 m_length_scale,
 										 dx[0]*m_length_scale,
 										 domains[0],
+#if  FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE
+										 fact,
+#else
 										 domfact,
+#endif
 										 origin,
 										 ghost_phi,
 										 ghost_rhs,

@@ -8,7 +8,7 @@
 #include "CD_ElectrostaticDomainBcFuncEval.H"
 #include "CD_NamespaceHeader.H"
 
-ElectrostaticDomainBcFuncEval::ElectrostaticDomainBcFuncEval(const ElectrostaticDomainBc::BcFunction& a_bcFunc, const RealVect a_probLo){
+ElectrostaticDomainBcFuncEval::ElectrostaticDomainBcFuncEval(const ElectrostaticDomainBc::BcFunction a_bcFunc, const RealVect a_probLo){
   m_bcFunc = a_bcFunc;
   m_probLo = a_probLo;
 }
