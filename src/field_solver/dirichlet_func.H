@@ -9,6 +9,7 @@
 #ifndef _DIRICHLET_FUNC_
 #define _DIRICHLET_FUNC_
 
+#include <functional>
 #include <BaseBCFuncEval.H>
 
 #include "CD_NamespaceHeader.H"
@@ -19,10 +20,15 @@
 class dirichlet_func : public BaseBCFuncEval {
 public:
 
+  dirichlet_func() = delete;
+  
+
   /*!
-    @brief New constructor
+    @brief blablabla, not gonna use this anyways
   */
-  dirichlet_func(Real (*a_potential)(const Real a_time), Real (*a_func)(const RealVect a_pos), const RealVect a_origin);
+  dirichlet_func(std::function<Real(const Real a_time)>& a_Potential){
+    m_Potential = a_Potential;
+  }
 
   /*!
     @brief Destructor
@@ -55,6 +61,8 @@ protected:
     @brief Spatial distribution
   */
   Real (*m_func)(const RealVect a_pos);
+
+  std::function<Real(const Real)> m_Potential;
 
   /*!
     @brief Time

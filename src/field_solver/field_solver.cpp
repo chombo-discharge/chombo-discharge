@@ -28,11 +28,6 @@ Real field_solver::s_potential_one(const Real a_time){
   return 1.0;
 }
 
-Real field_solver::s_constant_one(const RealVect a_pos){
-  pout() << "field_solver::s_constant_one -- should be deprecated" << endl;
-  return 1.0;
-}
-
 field_solver::field_solver(){
   m_class_name = "field_solver";
   this->set_verbosity(-1);
@@ -345,7 +340,7 @@ void field_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   m_amr = a_amr;
 }
 
-void field_solver::set_potential(std::function<Real(const Real a_time)>& a_potential){
+void field_solver::set_potential(std::function<Real(const Real a_time)> a_potential){
   m_potential = a_potential;
 }
 

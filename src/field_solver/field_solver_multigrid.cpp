@@ -34,7 +34,7 @@ field_solver_multigrid::field_solver_multigrid(){
   m_has_mg_stuff = false;
   m_class_name  = "field_solver_multigrid";
 
-  this->set_default_domain_bc_functions();
+  this->set_default_domain_bc_functions(); // Need to do this at some point...
 }
 
 field_solver_multigrid::~field_solver_multigrid(){
@@ -51,8 +51,6 @@ void field_solver_multigrid::parse_options(){
   parse_plot_vars();
   parse_gmg_settings();
   parse_kappa_source();
-
-
 }
 
 void field_solver_multigrid::parse_runtime_options(){
@@ -341,20 +339,14 @@ int field_solver_multigrid::query_ghost() const {
   return 3; // Need this many cells
 }
 
-void field_solver_multigrid::set_potential(Real (*a_potential)(const Real a_time)){
-  field_solver::set_potential(a_potential);
-
-  const RealVect origin  = m_amr->get_prob_lo();
-
-  m_bcfunc = RefCountedPtr<dirichlet_func>(new dirichlet_func(m_potential, s_constant_one, origin));
-}
-
-void field_solver::multigrid::set_potential(std::function<Real(const Real a_time)>& a_potential) {
+void field_solver_multigrid::set_potential(std::function<Real(const Real a_time)> a_potential) {
+  std::cout << "field_solver_multigrid::set_potential - need to purge dirichlet_func" << std::endl;
   m_potential = a_potential;
 
   const RealVect origin  = m_amr->get_prob_lo();
 
-  m_bcfunc = RefCountedPtr<dirichlet_func>(new dirichlet_func(m_potential, s_constant_one, origin));
+  //  m_bcfunc = RefCountedPtr<dirichlet_func>(new dirichlet_func(m_potential, s_constant_one, origin));
+  m_bcfunc = RefCountedPtr<dirichlet_func>(new dirichlet_func(m_potential));
 }
 
 void field_solver_multigrid::set_time(const int a_step, const Real a_time, const Real a_dt){

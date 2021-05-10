@@ -11,8 +11,6 @@
 #include "computational_geometry.H"
 #include "amr_mesh.H"
 #include "CD_ElectrostaticDomainBc.H"
-#include "wall_bc.H"
-
 #include "CD_NamespaceHeader.H"
 
 /*!
@@ -40,11 +38,6 @@ public:
     @brief Potential of one.
   */
   static Real s_potential_one(const Real a_time);
-
-  /*!
-    @brief Factor of one. About to get properly deprecated. 
-  */
-  static Real s_constant_one(const RealVect a_pos);
 
   /*!
     @brief Constructor
@@ -192,7 +185,7 @@ public:
   /*!
     @brief Set potential dependence in time. 
   */
-  virtual void set_potential(std::function<Real(const Real a_time)>& a_potential);
+  virtual void set_potential(std::function<Real(const Real a_time)> a_potential);
   
   /*!
     @brief Boundary condition function on a wall. 
@@ -236,11 +229,6 @@ public:
     @brief Get output plot names
   */
   virtual Vector<std::string> get_plotvar_names() const;
-
-  /*!
-    @brief Get Poisson BC at specified domain wall
-  */
-  virtual wall_bc& get_wall_bc(const int a_dir, Side::LoHiSide a_side) const;
 
   /*!
     @brief Get the realm
@@ -301,12 +289,7 @@ protected:
   RefCountedPtr<amr_mesh> m_amr;
 
   /*!
-    @brief Wall boundary conditions for Poisson equation. Must be set by the plasma engine. 
-  */
-  Vector<RefCountedPtr<wall_bc> > m_wallbc;
-
-  /*!
-    @brief Cached state used for regridding. DO NOT TOUCH!
+    @brief Cached state used for regridding. 
   */
   MFAMRCellData m_cache;
 
@@ -403,7 +386,7 @@ protected:
   /*!
     @brief Potential function. 
   */
-  std::function<Real(const Real a_time)> m_Potential;
+  std::function<Real(const Real a_time)> m_potential;
 
   /*!
     @brief Set the mfis
