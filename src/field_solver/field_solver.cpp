@@ -698,12 +698,12 @@ void field_solver::parseDomainBc(){
 	switch (bcType){
 	case ElectrostaticDomainBc::BcType::Dirichlet:
 	  curFunc = [=] (const RealVect a_pos, const Real a_time){
-	    return bcFunc(a_pos, m_time)*m_Potential(m_time)*val;
+	    return bcFunc(a_pos, a_time)*m_Potential(m_time)*val;
 	  };
 	  break;
 	case ElectrostaticDomainBc::BcType::Neumann:
 	  curFunc = [=] (const RealVect a_pos, const Real a_time){
-	    return bcFunc(a_pos, m_time)*val;
+	    return bcFunc(a_pos, a_time)*val;
 	  };
 	  break;
 	default:

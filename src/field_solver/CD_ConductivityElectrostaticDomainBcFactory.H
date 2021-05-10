@@ -14,7 +14,6 @@
 #include <ConductivityBaseDomainBC.H>
 
 #include "CD_ElectrostaticDomainBc.H"
-#include "CD_ElectrostaticDomainBcFuncEval.H"
 #include "CD_ConductivityElectrostaticDomainBc.H"
 #include "CD_NamespaceHeader.H"
 

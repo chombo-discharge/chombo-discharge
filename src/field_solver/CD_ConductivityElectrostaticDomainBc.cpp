@@ -137,4 +137,24 @@ void ConductivityElectrostaticDomainBc::setCoefficients(){
   m_hasCoeff = true;
 }
 
+ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::ElectrostaticDomainBcFuncEval(const ElectrostaticDomainBc::BcFunction a_bcFunc, const RealVect a_probLo){
+  m_bcFunc = a_bcFunc;
+  m_probLo = a_probLo;
+}
+
+ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::~ElectrostaticDomainBcFuncEval(){
+}
+
+void ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::setTime(const Real a_time){
+  m_time = a_time;
+}
+
+Real ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::value(const RealVect& a_point, const int& a_comp) const {
+  return m_bcFunc(a_point, m_time);
+}
+
+Real ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::derivative(const RealVect& a_point, const int& a_comp, const int& a_derivDir) const {
+  MayDay::Abort("ElectrostaticDomainBcFuncEval::derivative -- calling this is an error. How did you get here?");
+}
+
 #include "CD_NamespaceFooter.H"

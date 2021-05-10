@@ -27,6 +27,8 @@ int main(int argc, char* argv[]){
   auto timestepper = RefCountedPtr<field_stepper<field_solver_multigrid> >
     (new field_stepper<field_solver_multigrid>());
 
+  timestepper->set_time(5.0);
+
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
   engine->setup_and_run(input_file);
