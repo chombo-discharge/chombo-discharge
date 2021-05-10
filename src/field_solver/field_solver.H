@@ -220,12 +220,17 @@ public:
   virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
 
   /*!
+    @brief Set potential dependence in time. 
+  */
+  virtual void set_Potential(std::function<Real(const Real a_time)> a_potential);
+  
+  /*!
     @brief Boundary condition function on a wall. 
     @param[in] a_dir Coordinate direction.
     @param[in] a_side Side in the coordinate direction.
     @param[in] a_function Boundary condition function.
   */
-  virtual void set_wall_function(const int a_dir, const Side::LoHiSide a_side, ElectrostaticDomainBc::BcFunction a_function);
+  virtual void set_domain_bc_wall_function(const int a_dir, const Side::LoHiSide a_side, ElectrostaticDomainBc::BcFunction a_function);
 
   /*!
     @brief Set potential in covered electrode cells
@@ -431,6 +436,11 @@ protected:
   Real (*m_potential)(const Real a_time);
 
   /*!
+    @brief Potential function. 
+  */
+  std::function<Real(const Real a_time)> m_Potential;
+
+  /*!
     @brief Function pointer for potential on domain walls (dirichlet)
   */
   Real (*m_wall_func_x_lo)(const RealVect a_pos);
@@ -484,17 +494,17 @@ protected:
   /*!
     @brief Set default BC functions. This sets all the m_domainBcFunction objects to s_defaultDomainBcFunction (returns 1 everywhere). 
   */
-  virtual void setDefaultDomainBcFunctions();
+  virtual void set_default_domain_bc_functions();
 
   /*!
     @brief Returns BC type based on string
   */
-  virtual ElectrostaticDomainBc::BcType parseBcString(const std::string a_str) const;
+  virtual ElectrostaticDomainBc::BcType parse_bc_string(const std::string a_str) const;
 
   /*!
     @brief Shortcut for making a boundary condition string. This just returns m_class_name.bc.direction.side
   */
-  virtual std::string makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
+  virtual std::string make_bc_string(const int a_dir, const Side::LoHiSide a_side) const;
 };
 #include "CD_NamespaceFooter.H"
 

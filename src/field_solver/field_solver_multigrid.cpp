@@ -29,12 +29,20 @@
 
 #include "CD_NamespaceHeader.H"
 
+#define FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE 1
+
+#if FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE
+Real testPotential(const Real a_time){
+  return 1.23456*a_time;
+}
+#endif
+
 field_solver_multigrid::field_solver_multigrid(){
   m_needs_setup = true;
   m_has_mg_stuff = false;
   m_class_name  = "field_solver_multigrid";
 
-  this->setDefaultDomainBcFunctions();
+  this->set_default_domain_bc_functions();
 }
 
 field_solver_multigrid::~field_solver_multigrid(){
@@ -46,12 +54,20 @@ Real field_solver_multigrid::s_constant_one(const RealVect a_pos){
 }
 
 void field_solver_multigrid::parse_options(){
-  parseDomainBc();
   parse_autotune();
   parse_domain_bc();
   parse_plot_vars();
   parse_gmg_settings();
   parse_kappa_source();
+
+
+#if FIELD_SOLVER_MULTIGRID_DEVELOPMENT_CODE
+  parseDomainBc();
+  this->set_Potential(testPotential);
+  const auto wall = std::make_pair(0, Side::Lo);
+  const auto bc = m_domainBc.getBc(wall);
+  std::cout << bc.second(RealVect::Zero, 4.0) << std::endl;
+#endif
 }
 
 void field_solver_multigrid::parse_runtime_options(){
@@ -558,7 +574,7 @@ void field_solver_multigrid::set_gmg_solver_parameters(relax      a_relax_type,
   m_gmg_eps         = a_eps;
   m_gmg_hang        = a_hang;
 
-  ParmParse pp("poisson_multifluid");
+  ParmParse pp(m_class_name.c_str());
 
   pp.query("gmg_verbosity",   m_gmg_verbosity);
   pp.query("gmg_pre_smooth",  m_gmg_pre_smooth);

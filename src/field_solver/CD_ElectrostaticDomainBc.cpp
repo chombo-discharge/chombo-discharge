@@ -23,7 +23,7 @@ void ElectrostaticDomainBc::setBc(const Wall a_wall, const Bc a_func){
 }
 
 ElectrostaticDomainBc::Bc ElectrostaticDomainBc::getBc(const Wall a_wall) const{
-  if(m_bcFunctions.find(a_wall) != m_bcFunctions.end()){
+  if(m_bcFunctions.find(a_wall) == m_bcFunctions.end()){
     MayDay::Abort("ElectrostaticDomainBc::getBc -- BC not found. Perhaps you've forgotten to set it...?");
   }
 

@@ -415,6 +415,10 @@ void field_solver::set_potential(Real (*a_potential)(const Real a_time)){
   m_potential = a_potential;
 }
 
+void field_solver::set_Potential(std::function<Real(const Real a_time)> a_potential){
+  m_Potential = a_potential;
+}
+
 void field_solver::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
   CH_TIME("field_solver::set_poisson_wall_func");
   if(m_verbosity > 4){
@@ -449,11 +453,15 @@ void field_solver::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a
 #endif
 }
 
-void field_solver::set_wall_function(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction a_function){
+void field_solver::set_domain_bc_wall_function(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction a_function){
   CH_TIME("field_solver::set_wall_function");
   if(m_verbosity > 4){
     pout() << "field_solver::set_wall_function" << endl;
   }
+
+  const ElectrostaticDomainBc::Wall curWall = std::make_pair(a_dir, a_side);
+
+  m_domainBcFunctions.at(curWall) = a_function;
 }
 
 void field_solver::set_verbosity(const int a_verbosity){
@@ -572,10 +580,10 @@ void field_solver::set_output_variables(){
   }
 }
 
-std::string field_solver::makeBcString(const int a_dir, const Side::LoHiSide a_side) const {
-  CH_TIME("field_solver::makeBcString");
+std::string field_solver::make_bc_string(const int a_dir, const Side::LoHiSide a_side) const {
+  CH_TIME("field_solver::make_bc_string");
   if(m_verbosity > 5){
-    pout() << "field_solver::makeBcString" << endl;
+    pout() << "field_solver::make_bc_string" << endl;
   }
 
   std::string strDir;
@@ -603,10 +611,10 @@ std::string field_solver::makeBcString(const int a_dir, const Side::LoHiSide a_s
   return ret;
 }
 
-ElectrostaticDomainBc::BcType field_solver::parseBcString(const std::string a_str) const {
-  CH_TIME("field_solver::parseBcString");
+ElectrostaticDomainBc::BcType field_solver::parse_bc_string(const std::string a_str) const {
+  CH_TIME("field_solver::parse_bc_string");
   if(m_verbosity > 5){
-    pout() << "field_solver::parseBcString" << endl;
+    pout() << "field_solver::parse_bc_string" << endl;
   }
 
   ElectrostaticDomainBc::BcType ret;
@@ -624,10 +632,10 @@ ElectrostaticDomainBc::BcType field_solver::parseBcString(const std::string a_st
   return ret;
 }
 
-void field_solver::setDefaultDomainBcFunctions(){
-  CH_TIME("field_solver::setDefaultDomainBcFunctions");
+void field_solver::set_default_domain_bc_functions(){
+  CH_TIME("field_solver::set_default_domain_bc_functions");
   if(m_verbosity > 5){
-    pout() << "field_solver::setDefaultDomainBcFunctions" << endl;
+    pout() << "field_solver::set_default_domain_bc_functions" << endl;
   }
 
   m_domainBcFunctions.clear();
@@ -644,33 +652,70 @@ void field_solver::parseDomainBc(){
     pout() << "field_solver::parseDomainBc" << endl;
   }
   
+  
   ParmParse pp(m_class_name.c_str());
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
 
       const ElectrostaticDomainBc::Wall curWall = std::make_pair(dir, sit());
-
-      const std::string bcString = this->makeBcString(dir, sit());
-
+      const std::string bcString = this->make_bc_string(dir, sit());
       const int num = pp.countval(bcString.c_str());
 
-      if(num == 2){
+      std::string str;
+
+      ElectrostaticDomainBc::BcType      bcType;
+      ElectrostaticDomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(curWall);
+
+      std::function<Real(const RealVect, const Real)> curFunc;
+
+      if(num == 1){
+	pp.get(bcString.c_str(), str, 0);
+
+	curFunc = [=] (const RealVect a_pos, const Real a_time) {
+	  return bcFunc(a_pos, a_time);
+	};
+
+	if(str == "dirichlet_custom"){
+	  bcType  = ElectrostaticDomainBc::BcType::Dirichlet;
+	}
+	else if(str == "neumann_custom"){
+	  bcType  = ElectrostaticDomainBc::BcType::Neumann;
+	}
+	else{
+	  MayDay::Abort("field_solver::parseDomainBc -- got only one argument but this argument was not dirichlet_custom. Maybe you have the wrong BC specification?");
+	}
+      }
+      else if(num == 2){
 	Real val;
-	std::string str;
 
 	pp.get(bcString.c_str(), str, 0);
 	pp.get(bcString.c_str(), val, 1);
 
-	ElectrostaticDomainBc::BcType     bcType = this->parseBcString(str);
-	ElectrostaticDomainBc::BcFunction bcFunc = m_domainBcFunctions.at(curWall);
+	bcType = this->parse_bc_string(str);
 
-	m_domainBc.setBc(curWall, std::make_pair(bcType, bcFunc));
+	// Build a function computing the value at the boundary. 
+	switch (bcType){
+	case ElectrostaticDomainBc::BcType::Dirichlet:
+	  curFunc = [=] (const RealVect a_pos, const Real a_time){
+	    return bcFunc(a_pos, a_time)*m_Potential(a_time)*val;
+	  };
+	  break;
+	case ElectrostaticDomainBc::BcType::Neumann:
+	  curFunc = [=] (const RealVect a_pos, const Real a_time){
+	    return bcFunc(a_pos, a_time)*val;
+	  };
+	  break;
+	default:
+	  MayDay::Abort("field_solver::parseDomainBc -- unsupported boundary condition requested!");
+	}
       }
       else{
 	const std::string errorString = "field_solver::parseDomainBc -- bad or no input parameter for " + bcString;
 	MayDay::Abort(errorString.c_str());
       }
+
+      m_domainBc.setBc(curWall, std::make_pair(bcType, curFunc));
     }
   }
 }
