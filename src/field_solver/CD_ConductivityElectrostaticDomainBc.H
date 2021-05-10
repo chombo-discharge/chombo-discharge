@@ -167,12 +167,6 @@ private:
     ~ElectrostaticDomainBcFuncEval();
 
     /*!
-      @brief Set time
-      @param[in] a_time Time for when the bcFunc value is updated. 
-    */
-    void setTime(const Real a_time);
-
-    /*!
       @brief Return functional evaluation in space and time of the boundary condition.
       @param[in] a_point Point in space
       @param[in] a_comp  Component. 
@@ -191,11 +185,6 @@ private:
     Real derivative(const RealVect& a_point, const int& a_comp, const int& a_derivDir) const override final;
 
   protected:
-
-    /*!
-      @brief Time for the domain boundary function
-    */
-    Real m_time;
   
     /*!
       @brief Lower left corner of computational boundary. 

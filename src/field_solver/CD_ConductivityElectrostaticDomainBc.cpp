@@ -145,12 +145,8 @@ ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::ElectrostaticD
 ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::~ElectrostaticDomainBcFuncEval(){
 }
 
-void ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::setTime(const Real a_time){
-  m_time = a_time;
-}
-
 Real ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::value(const RealVect& a_point, const int& a_comp) const {
-  return m_bcFunc(a_point, m_time);
+  return m_bcFunc(a_point, 0.0);
 }
 
 Real ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::derivative(const RealVect& a_point, const int& a_comp, const int& a_derivDir) const {
