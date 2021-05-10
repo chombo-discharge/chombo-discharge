@@ -129,7 +129,7 @@ field_stepper.init_sigma   = 0E-10           # Surface charge density
 
 field_solver_multigrid.bc.x.lo = neumann 0.0
 field_solver_multigrid.bc.x.hi = neumann 0.0
-field_solver_multigrid.bc.y.lo = dirichlet 0.0
-field_solver_multigrid.bc.y.hi = dirichlet 4.0
+field_solver_multigrid.bc.y.lo = dirichlet 0.5
+field_solver_multigrid.bc.y.hi = dirichlet 1.0
 field_solver_multigrid.bc.z.lo = dirichlet 0.0
 field_solver_multigrid.bc.z.hi = dirichlet 0.0

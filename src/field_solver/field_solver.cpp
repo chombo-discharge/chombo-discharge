@@ -672,8 +672,8 @@ void field_solver::parseDomainBc(){
       if(num == 1){
 	pp.get(bcString.c_str(), str, 0);
 
-	curFunc = [=] (const RealVect a_pos, const Real a_time) {
-	  return bcFunc(a_pos, a_time);
+	curFunc = [&] (const RealVect a_pos, const Real a_time) {
+	  return bcFunc(a_pos, m_time);
 	};
 
 	if(str == "dirichlet_custom"){
@@ -697,13 +697,13 @@ void field_solver::parseDomainBc(){
 	// Build a function computing the value at the boundary. 
 	switch (bcType){
 	case ElectrostaticDomainBc::BcType::Dirichlet:
-	  curFunc = [=] (const RealVect a_pos, const Real a_time){
-	    return bcFunc(a_pos, a_time)*m_Potential(m_time)*val;
+	  curFunc = [&, val] (const RealVect a_pos, const Real a_time){
+	    return bcFunc(a_pos, m_time)*m_Potential(m_time)*val;
 	  };
 	  break;
 	case ElectrostaticDomainBc::BcType::Neumann:
-	  curFunc = [=] (const RealVect a_pos, const Real a_time){
-	    return bcFunc(a_pos, a_time)*val;
+	  curFunc = [&, val] (const RealVect a_pos, const Real a_time){
+	    return bcFunc(a_pos, m_time)*val;
 	  };
 	  break;
 	default:
