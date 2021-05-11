@@ -96,9 +96,8 @@ void ito_plasma_stepper::setup_poisson(){
   m_poisson->parse_options();
   m_poisson->set_amr(m_amr);
   m_poisson->set_computational_geometry(m_compgeom);
-  m_poisson->set_potential(m_potential); // Needs to happen AFTER set_poisson_wall_func
+  m_poisson->set_potential(m_potential); 
   m_poisson->set_realm(m_fluid_realm);
-  m_poisson->sanity_check();
 }
 
 void ito_plasma_stepper::setup_rte(){
@@ -860,7 +859,7 @@ void ito_plasma_stepper::set_rte(RefCountedPtr<rte_layout<mc_photo> >& a_rte){
   m_rte = a_rte;
 }
 
-void ito_plasma_stepper::set_potential(Real (*a_potential)(const Real a_time)){
+void ito_plasma_stepper::set_potential(const std::function<Real(const Real a_time)>& a_potential){
   CH_TIME("ito_plasma_stepper::set_potential");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::set_potential" << endl;

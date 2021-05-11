@@ -33,8 +33,6 @@ cdr_plasma_stepper::cdr_plasma_stepper(){
   m_phase = phase::gas;
   m_realm = realm::primal;
   m_subcycle = false;
-
-  set_poisson_wall_func(s_constant_one);
 }
 
 cdr_plasma_stepper::cdr_plasma_stepper(RefCountedPtr<cdr_plasma_physics>& a_physics) : cdr_plasma_stepper() {
@@ -3459,7 +3457,7 @@ void cdr_plasma_stepper::set_cdr_plasma_physics(const RefCountedPtr<cdr_plasma_p
   m_physics = a_physics;
 }
 
-void cdr_plasma_stepper::set_potential(Real (*a_potential)(const Real a_time)){
+void cdr_plasma_stepper::set_potential(std::function<Real(const Real a_time)> a_potential){
   CH_TIME("cdr_plasma_stepper::set_potential");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::set_potential" << endl;
@@ -3723,19 +3721,7 @@ void cdr_plasma_stepper::setup_poisson(){
   m_poisson->set_amr(m_amr);
   m_poisson->set_computational_geometry(m_compgeom);
   m_poisson->set_realm(m_realm);
-
-  m_poisson->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
-  m_poisson->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
-  m_poisson->set_poisson_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
-  m_poisson->set_poisson_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
-#if CH_SPACEDIM==3
-  m_poisson->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
-  m_poisson->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
-#endif
   m_poisson->set_potential(m_potential); // Needs to happen AFTER set_poisson_wall_func
-
-  m_poisson->sanity_check();
-  //  m_poisson->allocate_internals();
 }
 
 void cdr_plasma_stepper::setup_rte(){
@@ -4267,53 +4253,6 @@ void cdr_plasma_stepper::post_checkpoint_setup(){
   // Fill solvers with important stuff
   this->compute_cdr_velocities();
   this->compute_cdr_diffusion();
-}
-
-void cdr_plasma_stepper::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("cdr_plasma_stepper::set_poisson_wall_func(dir, side, func)");
-  if(m_verbosity > 4){
-    pout() << "cdr_plasma_stepper::set_poisson_wall_func(dir, side, func)" << endl;
-  }
-
-  if(a_dir == 0){
-    if(a_side == Side::Lo){
-      m_wall_func_x_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_x_hi = a_func;
-    }
-  }
-  else if(a_dir == 1){
-    if(a_side == Side::Lo){
-      m_wall_func_y_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_y_hi = a_func;
-    }
-  }
-#if CH_SPACEDIM==3
-  else if(a_dir == 2){
-    if(a_side == Side::Lo){
-      m_wall_func_z_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_z_hi = a_func;
-    }
-  }
-#endif
-}
-
-void cdr_plasma_stepper::set_poisson_wall_func(Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("cdr_plasma_stepper::set_poisson_wall_func(func)");
-  if(m_verbosity > 4){
-    pout() << "cdr_plasma_stepper::set_poisson_wall_func(func)" << endl;
-  }
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      this->set_poisson_wall_func(dir, sit(), a_func);
-    }
-  }
 }
 
 void cdr_plasma_stepper::print_step_report(){
