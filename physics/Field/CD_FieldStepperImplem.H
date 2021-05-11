@@ -1,11 +1,11 @@
 /*!
-  @file   field_stepperI.H
-  @brief  Implementation of the field_stepper
+  @file   FieldStepperI.H
+  @brief  Implementation of the FieldStepper
   @author Robert Marskar
   @data   March 2020
 */
 
-#include "field_stepper.H"
+#include "CD_FieldStepper.H"
 
 #include <ParmParse.H>
 #include <EBEllipticLoadBalance.H>
@@ -15,20 +15,20 @@ namespace physics {
   namespace poisson {
   
     template <typename T>
-    Real field_stepper<T>::s_constant_one(const RealVect a_pos){
+    Real FieldStepper<T>::s_constant_one(const RealVect a_pos){
       return 1.0;
     }
 
     template <typename T>
-    Real field_stepper<T>::s_potential_one(const Real a_time){
+    Real FieldStepper<T>::s_potential_one(const Real a_time){
       return 1.0;
     }
 
     template <class T>
-    field_stepper<T>::field_stepper(){
+    FieldStepper<T>::FieldStepper(){
       m_verbosity = -1;
 
-      ParmParse pp("field_stepper");
+      ParmParse pp("FieldStepper");
 
       std::string str;
 
@@ -50,19 +50,19 @@ namespace physics {
 	m_boxsort = box_sorting::morton;
       }
       else {
-	MayDay::Abort("field_stepper::field_stepper - unknown box sorting method requested for argument 'box_sorting'");
+	MayDay::Abort("FieldStepper::FieldStepper - unknown box sorting method requested for argument 'box_sorting'");
       }
     }
 
     template <class T>
-    field_stepper<T>::~field_stepper(){
+    FieldStepper<T>::~FieldStepper(){
 
     }
 
     template <class T>
-    void field_stepper<T>::setup_solvers(){
+    void FieldStepper<T>::setup_solvers(){
       // Poisson setup
-      m_poisson = RefCountedPtr<field_solver> (new T());
+      m_poisson = RefCountedPtr<FieldSolver> (new T());
       m_poisson->set_verbosity(m_verbosity);
       m_poisson->parse_options();
       m_poisson->set_amr(m_amr);
@@ -81,24 +81,24 @@ namespace physics {
     }
 
     template <class T>
-    void field_stepper<T>::register_operators(){
+    void FieldStepper<T>::register_operators(){
       m_poisson->register_operators();
     }
 
     template <class T>
-    void field_stepper<T>::register_realms(){
+    void FieldStepper<T>::register_realms(){
       m_amr->register_realm(m_realm);
     }
 
     template <class T>
-    void field_stepper<T>::allocate() {
+    void FieldStepper<T>::allocate() {
       m_poisson->allocate_internals();
       m_sigma->allocate_internals();
     }
 
     template <class T>
-    void field_stepper<T>::initial_data(){
-      ParmParse pp("field_stepper");
+    void FieldStepper<T>::initial_data(){
+      ParmParse pp("FieldStepper");
       pp.get("init_rho",   m_init_rho);
       pp.get("init_sigma", m_init_sigma);
 
@@ -112,7 +112,7 @@ namespace physics {
     }
 
     template <class T>
-    void field_stepper<T>::solve_poisson(){
+    void FieldStepper<T>::solve_poisson(){
       MFAMRCellData& state = m_poisson->get_state();  
       MFAMRCellData& rho   = m_poisson->get_source();
       EBAMRIVData& sigma   = m_sigma->get_state();
@@ -126,40 +126,40 @@ namespace physics {
       m_poisson->compute_E();
 
       if(!converged){
-	MayDay::Warning("field_stepper<T>::advance - did not converge");
+	MayDay::Warning("FieldStepper<T>::advance - did not converge");
       }
     }
     
     template <class T>
-    void field_stepper<T>::post_initialize() {
+    void FieldStepper<T>::post_initialize() {
       this->solve_poisson();
     }
 
     template <class T>
-    void field_stepper<T>::post_regrid(){
+    void FieldStepper<T>::post_regrid(){
       this->solve_poisson();
     }
 
     template<class T>
-    Real field_stepper<T>::advance(const Real a_dt){
-      MayDay::Abort("field_stepper<T>::advance - callling this is an error. Please set driver.max_steps = 0");
+    Real FieldStepper<T>::advance(const Real a_dt){
+      MayDay::Abort("FieldStepper<T>::advance - callling this is an error. Please set driver.max_steps = 0");
       return 1.E99;
     }
 
     template <class T>
-    void field_stepper<T>::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
-      MayDay::Abort("field_stepper<T>::read_checkpoint_data - checkpointing not supported for this class");
+    void FieldStepper<T>::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
+      MayDay::Abort("FieldStepper<T>::read_checkpoint_data - checkpointing not supported for this class");
     }
 
     template <class T>
-    int field_stepper<T>::get_num_plot_vars() const{
+    int FieldStepper<T>::get_num_plot_vars() const{
       int ncomp = m_poisson->get_num_plotvars();
       ncomp += m_sigma->get_num_plotvars();
       return ncomp;
     }
 
     template <class T>
-    void field_stepper<T>::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const{
+    void FieldStepper<T>::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const{
       a_plotvar_names.append(m_poisson->get_plotvar_names());
       m_poisson->write_plot_data(a_output, a_icomp);
 
@@ -168,26 +168,26 @@ namespace physics {
     }
 
     template <class T>
-    void field_stepper<T>::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
+    void FieldStepper<T>::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
       m_step = a_step;
       m_time = a_time;
       m_dt   = a_dt;
     }
 
     template <class T>
-    void field_stepper<T>::pre_regrid(const int a_lbase, const int a_old_finest_level){
+    void FieldStepper<T>::pre_regrid(const int a_lbase, const int a_old_finest_level){
       m_poisson->pre_regrid(a_lbase, a_old_finest_level);
       m_sigma->pre_regrid(a_lbase, a_old_finest_level);
     }
 
     template <class T>
-    void field_stepper<T>::deallocate(){
+    void FieldStepper<T>::deallocate(){
       m_poisson->deallocate_internals();
       m_sigma->deallocate_internals();
     }
 
     template <class T>
-    void field_stepper<T>::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+    void FieldStepper<T>::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
       m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
       m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
 
@@ -196,12 +196,12 @@ namespace physics {
     }
 
     template <class T>
-    bool field_stepper<T>::load_balance_realm(const std::string a_realm) const {
+    bool FieldStepper<T>::load_balance_realm(const std::string a_realm) const {
       return m_load_balance ? true : false;
     }
 
     template <class T>
-    void field_stepper<T>::load_balance_boxes(Vector<Vector<int> >&            a_procs,
+    void FieldStepper<T>::load_balance_boxes(Vector<Vector<int> >&            a_procs,
 					      Vector<Vector<Box> >&            a_boxes,
 					      const std::string                a_realm,
 					      const Vector<DisjointBoxLayout>& a_grids,
@@ -213,7 +213,7 @@ namespace physics {
 	a_procs.resize(1+a_finest_level);
 	a_boxes.resize(1+a_finest_level);
 
-	field_solver_multigrid* solver = (field_solver_multigrid*) (&(*m_poisson));
+	FieldSolverMultigrid* solver = (FieldSolverMultigrid*) (&(*m_poisson));
 
 	MFAMRCellData dummy1, dummy2;
 

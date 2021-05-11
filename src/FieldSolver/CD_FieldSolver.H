@@ -1,5 +1,5 @@
 /*!
-  @file field_solver.H
+  @file FieldSolver.H
   @brief Abstract multi-phase Poisson solver
   @author Robert Marskar
   @date Nov. 2017
@@ -17,7 +17,7 @@
 /*!
   @brief Abstract Poisson solver class. Boundary conditions are passed through this class. 
 */
-class field_solver {
+class FieldSolver {
 public:
 
   
@@ -43,12 +43,12 @@ public:
   /*!
     @brief Constructor
   */
-  field_solver();
+  FieldSolver();
 
   /*!
     @brief Constructor
   */
-  virtual ~field_solver();
+  virtual ~FieldSolver();
 
   /*!
     @brief Solve Poisson equation
@@ -380,7 +380,7 @@ protected:
   Real m_time;
 
   /*!
-    @brief Domain boundary conditions for field_solver
+    @brief Domain boundary conditions for FieldSolver
   */
   ElectrostaticDomainBc m_domainBc;
 

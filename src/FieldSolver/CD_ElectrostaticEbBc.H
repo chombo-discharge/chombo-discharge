@@ -18,7 +18,7 @@
 
 /*!
   @brief Class which maps boundary condition types to a side and direction. 
-  @details This class is meant to hold boundary conditions for use in various field_solver code. It provides no functionality otherwise,
+  @details This class is meant to hold boundary conditions for use in various FieldSolver code. It provides no functionality otherwise,
   and has no dependencies, other than standard C++14. 
 */
 class ElectrostaticEbBc {

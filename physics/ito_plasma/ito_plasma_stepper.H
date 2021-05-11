@@ -16,7 +16,7 @@
 #include "point_particle.H"
 #include "rte_layout.H"
 #include "mc_photo.H"
-#include "field_solver.H"
+#include "CD_FieldSolver.H"
 #include "sigma_solver.H"
 
 #include "CD_NamespaceHeader.H"
@@ -123,7 +123,7 @@ namespace physics {
 
       // Set routines
       void set_ito(RefCountedPtr<ito_layout<ito_solver> >& a_cdr);
-      void set_poisson(RefCountedPtr<field_solver>& a_poisson);
+      void set_poisson(RefCountedPtr<FieldSolver>& a_poisson);
       void set_rte(RefCountedPtr<rte_layout<mc_photo> >& a_rte);
       void set_potential(const std::function<Real(const Real a_time)>& a_potential);
 
@@ -343,7 +343,7 @@ namespace physics {
       RefCountedPtr<ito_plasma_physics> m_physics;
       RefCountedPtr<ito_layout<ito_solver> > m_ito;
       RefCountedPtr<rte_layout<mc_photo> > m_rte;
-      RefCountedPtr<field_solver> m_poisson;
+      RefCountedPtr<FieldSolver> m_poisson;
       RefCountedPtr<sigma_solver> m_sigma;
 
       // Filters that can be applied. 

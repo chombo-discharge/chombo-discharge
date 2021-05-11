@@ -27,7 +27,7 @@ src_dirs = $(DISCHARGE_HOME)/src \
 	$(DISCHARGE_HOME)/src/global \
 	$(DISCHARGE_HOME)/src/driver \
 	$(DISCHARGE_HOME)/src/particle \
-	$(DISCHARGE_HOME)/src/field_solver \
+	$(DISCHARGE_HOME)/src/FieldSolver \
 	$(DISCHARGE_HOME)/src/rte_solver \
 	$(DISCHARGE_HOME)/src/sigma_solver \
 	$(DISCHARGE_HOME)/geometries/rod_dielectric\

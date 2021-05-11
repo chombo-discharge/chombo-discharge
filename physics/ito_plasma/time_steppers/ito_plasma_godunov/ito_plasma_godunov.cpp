@@ -8,7 +8,7 @@
 #include "ito_plasma_godunov.H"
 #include "data_ops.H"
 #include "units.H"
-#include "field_solver_multigrid.H"
+#include "CD_FieldSolverMultigrid.H"
 
 #include <ParmParse.H>
 
@@ -1004,7 +1004,7 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
     pout() << m_name + "::setup_semi_implicit_poisson" << endl;
   }
 
-  field_solver_multigrid* poisson = (field_solver_multigrid*) (&(*m_poisson));
+  FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_poisson));
 
   // Set coefficients as usual
   poisson->set_coefficients();
@@ -1046,7 +1046,7 @@ void ito_plasma_godunov::setup_standard_poisson(){
     pout() << m_name + "::setup_standard_poisson" << endl;
   }
 
-  field_solver_multigrid* poisson = (field_solver_multigrid*) (&(*m_poisson));
+  FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_poisson));
 
   // Set coefficients as usual
   poisson->set_coefficients();

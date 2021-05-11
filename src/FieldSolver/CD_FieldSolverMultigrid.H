@@ -1,5 +1,5 @@
 /*!
-  @file field_solver_multigrid.H
+  @file FieldSolverMultigrid.H
   @brief Geometric multigrid multifluid poisson solver
   @author Robert Marskar
   @date Nov. 2017
@@ -8,7 +8,7 @@
 #ifndef _FIELD_SOLVER_MULTIGRID_
 #define _FIELD_SOLVER_MULTIGRID_
 
-#include "field_solver.H"
+#include "CD_FieldSolver.H"
 #include "mfconductivityopfactory.H"
 
 #include <AMRMultiGrid.H>
@@ -23,9 +23,9 @@
 #include "CD_NamespaceHeader.H"
 
 /*!
-  @brief Implementation of field_solver which uses a two-phase geometric multigrid solver
+  @brief Implementation of FieldSolver which uses a two-phase geometric multigrid solver
 */
-class field_solver_multigrid : public field_solver {
+class FieldSolverMultigrid : public FieldSolver {
 protected:
 
   /*!
@@ -55,12 +55,12 @@ public:
   /*!
     @brief Constructor
   */
-  field_solver_multigrid();
+  FieldSolverMultigrid();
 
   /*!
     @brief Constructor
   */
-  virtual ~field_solver_multigrid();
+  virtual ~FieldSolverMultigrid();
 
   /*!
     @brief Override this one for testing purposes. 

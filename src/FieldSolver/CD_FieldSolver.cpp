@@ -1,12 +1,12 @@
 /*!
-  @file   field_solver.cpp
-  @brief  Implementation of field_solver.H
+  @file   FieldSolver.cpp
+  @brief  Implementation of FieldSolver.H
   @author Robert Marskar
   @date   Nov. 2017
   @todo   set_covered_potential is buggy and breaks when we don't have dielectrics. Fix this. 
 */
 
-#include "field_solver.H"
+#include "CD_FieldSolver.H"
 #include "MFAliasFactory.H"
 #include "mfalias.H"
 #include "data_ops.H"
@@ -20,47 +20,47 @@
 
 #include "CD_NamespaceHeader.H"
 
-Real field_solver::s_defaultDomainBcFunction(const RealVect a_position, const Real a_time){
+Real FieldSolver::s_defaultDomainBcFunction(const RealVect a_position, const Real a_time){
   return 1.0;
 }
 
-Real field_solver::s_potential_one(const Real a_time){
+Real FieldSolver::s_potential_one(const Real a_time){
   return 1.0;
 }
 
-field_solver::field_solver(){
-  m_class_name = "field_solver";
+FieldSolver::FieldSolver(){
+  m_class_name = "FieldSolver";
   this->set_verbosity(-1);
   
 
   m_realm = realm::primal;
 }
 
-field_solver::~field_solver(){
+FieldSolver::~FieldSolver(){
   
 }
 
-bool field_solver::solve(const bool a_zerophi) {
+bool FieldSolver::solve(const bool a_zerophi) {
   return this->solve(m_state, m_source, a_zerophi);
 }
 
-bool field_solver::solve(MFAMRCellData& a_state, const bool a_zerophi){
+bool FieldSolver::solve(MFAMRCellData& a_state, const bool a_zerophi){
   return this->solve(a_state, m_source, a_zerophi);
 }
 
-void field_solver::compute_E(){
-  CH_TIME("field_solver::compute_E()");
+void FieldSolver::compute_E(){
+  CH_TIME("FieldSolver::compute_E()");
   if(m_verbosity > 5){
-    pout() << "field_solver::compute_E()" << endl;
+    pout() << "FieldSolver::compute_E()" << endl;
   }
 
   this->compute_E(m_E, m_state);
 }
 
-void field_solver::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
-  CH_TIME("field_solver::compute_E(mfamrcell, mfamrcell)");
+void FieldSolver::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
+  CH_TIME("FieldSolver::compute_E(mfamrcell, mfamrcell)");
   if(m_verbosity > 5){
-    pout() << "field_solver::compute_E(mfamrcell, mfamrcell)" << endl;
+    pout() << "FieldSolver::compute_E(mfamrcell, mfamrcell)" << endl;
   }
 
   m_amr->compute_gradient(a_E, a_potential, m_realm);
@@ -70,10 +70,10 @@ void field_solver::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potentia
   m_amr->interp_ghost(a_E, m_realm);
 }
 
-void field_solver::allocate_internals(){
-  CH_TIME("field_solver::allocate_internals");
+void FieldSolver::allocate_internals(){
+  CH_TIME("FieldSolver::allocate_internals");
   if(m_verbosity > 5){
-    pout() << "field_solver::allocate_internals" << endl;
+    pout() << "FieldSolver::allocate_internals" << endl;
   }
 
   const int ncomp = 1;
@@ -91,10 +91,10 @@ void field_solver::allocate_internals(){
   data_ops::set_value(m_E,  0.0);
 }
 
-void field_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
-  CH_TIME("field_solver::pre_regrid");
+void FieldSolver::pre_regrid(const int a_lbase, const int a_old_finest_level){
+  CH_TIME("FieldSolver::pre_regrid");
   if(m_verbosity > 5){
-    pout() << "field_solver::pre_regrid" << endl;
+    pout() << "FieldSolver::pre_regrid" << endl;
   }
 
   const int ncomp = 1;
@@ -106,10 +106,10 @@ void field_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
   }
 }
 
-void field_solver::compute_D(MFAMRCellData& a_D, const MFAMRCellData& a_E){
-  CH_TIME("field_solver::compute_D");
+void FieldSolver::compute_D(MFAMRCellData& a_D, const MFAMRCellData& a_E){
+  CH_TIME("FieldSolver::compute_D");
   if(m_verbosity > 5){
-    pout() << "field_solver::compute_D" << endl;
+    pout() << "FieldSolver::compute_D" << endl;
   }
 
   const Vector<dielectric>& dielectrics = m_compgeom->get_dielectrics();
@@ -171,10 +171,10 @@ void field_solver::compute_D(MFAMRCellData& a_D, const MFAMRCellData& a_E){
   }
 }
 
-Real field_solver::compute_U(const MFAMRCellData& a_E){
-  CH_TIME("field_solver::compute_U");
+Real FieldSolver::compute_U(const MFAMRCellData& a_E){
+  CH_TIME("FieldSolver::compute_U");
   if(m_verbosity > 5){
-    pout() << "field_solver::compute_U" << endl;
+    pout() << "FieldSolver::compute_U" << endl;
   }
 
   MFAMRCellData D, EdotD;   
@@ -204,10 +204,10 @@ Real field_solver::compute_U(const MFAMRCellData& a_E){
   return 0.5*(U_g + U_s);
 }
 
-Real field_solver::compute_capacitance(){
-  CH_TIME("field_solver::compute_capacitance");
+Real FieldSolver::compute_capacitance(){
+  CH_TIME("FieldSolver::compute_capacitance");
   if(m_verbosity > 5){
-    pout() << "field_solver::compute_capacitance" << endl;
+    pout() << "FieldSolver::compute_capacitance" << endl;
   }
 
   // TLDR; We MUST compute the energy density with the Laplace field, so no sources here...
@@ -235,17 +235,17 @@ Real field_solver::compute_capacitance(){
   // U = 0.5*CV^2
   const Real pot = m_potential(m_time);
   if(pot == 0.0){
-    MayDay::Abort("field_solver::compute_capacitance - error, can't compute energy density with V = 0");
+    MayDay::Abort("FieldSolver::compute_capacitance - error, can't compute energy density with V = 0");
   }
   C = 2.0*U/(pot*pot);
 
   return C;
 }
 
-void field_solver::deallocate_internals(){
-  CH_TIME("field_solver::deallocate_internals");
+void FieldSolver::deallocate_internals(){
+  CH_TIME("FieldSolver::deallocate_internals");
   if(m_verbosity > 5){
-    pout() << "field_solver::deallocate_internals" << endl;
+    pout() << "FieldSolver::deallocate_internals" << endl;
   }
   m_amr->deallocate(m_state);
   m_amr->deallocate(m_source);
@@ -253,10 +253,10 @@ void field_solver::deallocate_internals(){
   m_amr->deallocate(m_sigma);
 }
 
-void field_solver::regrid(const int a_lmin, const int a_old_finest, const int a_new_finest){
-  CH_TIME("field_solver::regrid");
+void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_new_finest){
+  CH_TIME("FieldSolver::regrid");
   if(m_verbosity > 5){
-    pout() << "field_solver::regrid" << endl;
+    pout() << "FieldSolver::regrid" << endl;
   }
 
   const int comp  = 0;
@@ -311,10 +311,10 @@ void field_solver::regrid(const int a_lmin, const int a_old_finest, const int a_
   this->compute_E();
 }
 
-void field_solver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
-  CH_TIME("field_solver::set_computational_geometry");
+void FieldSolver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
+  CH_TIME("FieldSolver::set_computational_geometry");
   if(m_verbosity > 5){
-    pout() << "field_solver::set_computational_geometry" << endl;
+    pout() << "FieldSolver::set_computational_geometry" << endl;
   }
 
   m_compgeom = a_compgeom;
@@ -324,32 +324,32 @@ void field_solver::set_computational_geometry(const RefCountedPtr<computational_
   this->set_default_eb_bc_functions();
 }
 
-void field_solver::set_mfis(const RefCountedPtr<mfis>& a_mfis){
-  CH_TIME("field_solver::set_mfis");
+void FieldSolver::set_mfis(const RefCountedPtr<mfis>& a_mfis){
+  CH_TIME("FieldSolver::set_mfis");
   if(m_verbosity > 5){
-    pout() << "field_solver::set_mfis" << endl;
+    pout() << "FieldSolver::set_mfis" << endl;
   }
 
   m_mfis = a_mfis;
 }
 
-void field_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
-  CH_TIME("field_solver::set_amr");
+void FieldSolver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+  CH_TIME("FieldSolver::set_amr");
   if(m_verbosity > 5){
-    pout() << "field_solver::set_amr" << endl;
+    pout() << "FieldSolver::set_amr" << endl;
   }
 
   m_amr = a_amr;
 }
 
-void field_solver::set_potential(std::function<Real(const Real a_time)> a_potential){
+void FieldSolver::set_potential(std::function<Real(const Real a_time)> a_potential){
   m_potential = a_potential;
 }
 
-void field_solver::set_domain_bc_wall_function(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function){
-  CH_TIME("field_solver::set_wall_function");
+void FieldSolver::set_domain_bc_wall_function(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function){
+  CH_TIME("FieldSolver::set_wall_function");
   if(m_verbosity > 4){
-    pout() << "field_solver::set_wall_function" << endl;
+    pout() << "FieldSolver::set_wall_function" << endl;
   }
 
   const ElectrostaticDomainBc::Wall curWall = std::make_pair(a_dir, a_side);
@@ -357,28 +357,28 @@ void field_solver::set_domain_bc_wall_function(const int a_dir, const Side::LoHi
   m_domainBcFunctions.at(curWall) = a_function;
 }
 
-void field_solver::set_electrode_dirichlet_function(const int a_electrode, const ElectrostaticEbBc::BcFunction& a_function){
-  CH_TIME("field_solver::set_electrode_dirichlet_functions");
+void FieldSolver::set_electrode_dirichlet_function(const int a_electrode, const ElectrostaticEbBc::BcFunction& a_function){
+  CH_TIME("FieldSolver::set_electrode_dirichlet_functions");
   if(m_verbosity > 5){
-    pout() << "field_solver::set_electrode_dirichlet_functions" << endl;
+    pout() << "FieldSolver::set_electrode_dirichlet_functions" << endl;
   }
 
   m_ebBc.setEbBc(a_electrode, a_function);
 }
 
-void field_solver::set_verbosity(const int a_verbosity){
-  CH_TIME("field_solver::set_verbosity");
+void FieldSolver::set_verbosity(const int a_verbosity){
+  CH_TIME("FieldSolver::set_verbosity");
   m_verbosity = a_verbosity;
 
   if(m_verbosity > 4){
-    pout() << "field_solver::set_verbosity" << endl;
+    pout() << "FieldSolver::set_verbosity" << endl;
   }
 }
 
-void field_solver::set_time(const int a_step, const Real a_time, const Real a_dt) {
-  CH_TIME("field_solver::set_time");
+void FieldSolver::set_time(const int a_step, const Real a_time, const Real a_dt) {
+  CH_TIME("FieldSolver::set_time");
   if(m_verbosity > 5){
-    pout() << "field_solver::set_time" << endl;
+    pout() << "FieldSolver::set_time" << endl;
   }
   
   m_step = a_step;
@@ -386,27 +386,27 @@ void field_solver::set_time(const int a_step, const Real a_time, const Real a_dt
   m_dt   = a_dt;
 }
 
-void field_solver::set_realm(const std::string a_realm){
-  CH_TIME("field_solver::set_realm");
+void FieldSolver::set_realm(const std::string a_realm){
+  CH_TIME("FieldSolver::set_realm");
   if(m_verbosity > 5){
-    pout() << "field_solver::set_realm" << endl;
+    pout() << "FieldSolver::set_realm" << endl;
   }  
   m_realm = a_realm;
 }
 
-const std::string field_solver::get_realm() const{
-  CH_TIME("field_solver::get_realm");
+const std::string FieldSolver::get_realm() const{
+  CH_TIME("FieldSolver::get_realm");
   if(m_verbosity > 5){
-    pout() << "field_solver::get_realm" << endl;
+    pout() << "FieldSolver::get_realm" << endl;
   }
   
   return m_realm;
 }
 
-void field_solver::set_covered_potential(EBAMRCellData& a_phi, const int a_comp, const Real a_time){
-  CH_TIME("field_solver::set_covered_potential");
+void FieldSolver::set_covered_potential(EBAMRCellData& a_phi, const int a_comp, const Real a_time){
+  CH_TIME("FieldSolver::set_covered_potential");
   if(m_verbosity > 5){
-    pout() << "field_solver::set_covered_potential" << endl;
+    pout() << "FieldSolver::set_covered_potential" << endl;
   }
 
 
@@ -458,10 +458,10 @@ void field_solver::set_covered_potential(EBAMRCellData& a_phi, const int a_comp,
   }
 }
 
-void field_solver::set_output_variables(){
-  CH_TIME("field_solver::set_output_variables");
+void FieldSolver::set_output_variables(){
+  CH_TIME("FieldSolver::set_output_variables");
   if(m_verbosity > 5){
-    pout() << "field_solver::set_output_variables" << endl;
+    pout() << "FieldSolver::set_output_variables" << endl;
   }
 
   m_plot_phi = false;
@@ -469,7 +469,7 @@ void field_solver::set_output_variables(){
   m_plot_E   = false;
   m_plot_res = false;
 
-  ParmParse pp("field_solver");
+  ParmParse pp("FieldSolver");
   const int num = pp.countval("plt_vars");
   Vector<std::string> str(num);
   pp.getarr("plt_vars", str, 0, num);
@@ -482,10 +482,10 @@ void field_solver::set_output_variables(){
   }
 }
 
-std::string field_solver::make_bc_string(const int a_dir, const Side::LoHiSide a_side) const {
-  CH_TIME("field_solver::make_bc_string");
+std::string FieldSolver::make_bc_string(const int a_dir, const Side::LoHiSide a_side) const {
+  CH_TIME("FieldSolver::make_bc_string");
   if(m_verbosity > 5){
-    pout() << "field_solver::make_bc_string" << endl;
+    pout() << "FieldSolver::make_bc_string" << endl;
   }
 
   std::string strDir;
@@ -513,10 +513,10 @@ std::string field_solver::make_bc_string(const int a_dir, const Side::LoHiSide a
   return ret;
 }
 
-ElectrostaticDomainBc::BcType field_solver::parse_bc_string(const std::string a_str) const {
-  CH_TIME("field_solver::parse_bc_string");
+ElectrostaticDomainBc::BcType FieldSolver::parse_bc_string(const std::string a_str) const {
+  CH_TIME("FieldSolver::parse_bc_string");
   if(m_verbosity > 5){
-    pout() << "field_solver::parse_bc_string" << endl;
+    pout() << "FieldSolver::parse_bc_string" << endl;
   }
 
   ElectrostaticDomainBc::BcType ret;
@@ -534,24 +534,24 @@ ElectrostaticDomainBc::BcType field_solver::parse_bc_string(const std::string a_
   return ret;
 }
 
-void field_solver::set_default_domain_bc_functions(){
-  CH_TIME("field_solver::set_default_domain_bc_functions");
+void FieldSolver::set_default_domain_bc_functions(){
+  CH_TIME("FieldSolver::set_default_domain_bc_functions");
   if(m_verbosity > 5){
-    pout() << "field_solver::set_default_domain_bc_functions" << endl;
+    pout() << "FieldSolver::set_default_domain_bc_functions" << endl;
   }
 
   m_domainBcFunctions.clear();
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
-      m_domainBcFunctions.emplace(std::make_pair(dir, sit()), field_solver::s_defaultDomainBcFunction);
+      m_domainBcFunctions.emplace(std::make_pair(dir, sit()), FieldSolver::s_defaultDomainBcFunction);
     }
   }
 }
 
-void field_solver::set_default_eb_bc_functions() {
-  CH_TIME("field_solver::set_default_eb_bc_functions");
+void FieldSolver::set_default_eb_bc_functions() {
+  CH_TIME("FieldSolver::set_default_eb_bc_functions");
   if(m_verbosity > 5){
-    pout() << "field_solver::set_default_eb_bc_functions" << endl;
+    pout() << "FieldSolver::set_default_eb_bc_functions" << endl;
   }
 
   const Vector<electrode> electrodes = m_compgeom->get_electrodes();
@@ -571,10 +571,10 @@ void field_solver::set_default_eb_bc_functions() {
 }
 
 
-void field_solver::parse_domain_bc(){
-  CH_TIME("field_solver::parse_domain_bc");
+void FieldSolver::parse_domain_bc(){
+  CH_TIME("FieldSolver::parse_domain_bc");
   if(m_verbosity > 5){
-    pout() << "field_solver::parse_domain_bc" << endl;
+    pout() << "FieldSolver::parse_domain_bc" << endl;
   }
   
   
@@ -608,7 +608,7 @@ void field_solver::parse_domain_bc(){
 	  bcType  = ElectrostaticDomainBc::BcType::Neumann;
 	}
 	else{
-	  MayDay::Abort("field_solver::parseDomainBc -- got only one argument but this argument was not dirichlet_custom. Maybe you have the wrong BC specification?");
+	  MayDay::Abort("FieldSolver::parseDomainBc -- got only one argument but this argument was not dirichlet_custom. Maybe you have the wrong BC specification?");
 	}
       }
       else if(num == 2){
@@ -632,11 +632,11 @@ void field_solver::parse_domain_bc(){
 	  };
 	  break;
 	default:
-	  MayDay::Abort("field_solver::parseDomainBc -- unsupported boundary condition requested!");
+	  MayDay::Abort("FieldSolver::parseDomainBc -- unsupported boundary condition requested!");
 	}
       }
       else{
-	const std::string errorString = "field_solver::parseDomainBc -- bad or no input parameter for " + bcString;
+	const std::string errorString = "FieldSolver::parseDomainBc -- bad or no input parameter for " + bcString;
 	MayDay::Abort(errorString.c_str());
       }
 
@@ -645,10 +645,10 @@ void field_solver::parse_domain_bc(){
   }
 }
 
-void field_solver::write_plot_file(){
-  CH_TIME("field_solver::write_plot_file");
+void FieldSolver::write_plot_file(){
+  CH_TIME("FieldSolver::write_plot_file");
   if(m_verbosity > 5){
-    pout() << "field_solver::write_plot_file" << endl;
+    pout() << "FieldSolver::write_plot_file" << endl;
   }
 
   // Number of output components and their names
@@ -665,7 +665,7 @@ void field_solver::write_plot_file(){
 
   // Filename
   char file_char[1000];
-  sprintf(file_char, "%s.step%07d.%dd.hdf5", "field_solver", m_step, SpaceDim);
+  sprintf(file_char, "%s.step%07d.%dd.hdf5", "FieldSolver", m_step, SpaceDim);
 
   // Alias
   Vector<LevelData<EBCellFAB>* > output_ptr(1+m_amr->get_finest_level());
@@ -688,10 +688,10 @@ void field_solver::write_plot_file(){
 	      IntVect::Unit);
 }
 
-void field_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("field_solver::write_checkpoint_level");
+void FieldSolver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("FieldSolver::write_checkpoint_level");
   if(m_verbosity > 5){
-    pout() << "field_solver::write_checkpoint_level" << endl;
+    pout() << "FieldSolver::write_checkpoint_level" << endl;
   }
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
@@ -709,10 +709,10 @@ void field_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_leve
   if(!ebis_sol.isNull()) write(a_handle, state_sol, "poisson_s");
 }
 
-void field_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("field_solver::read_checkpoint_level");
+void FieldSolver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("FieldSolver::read_checkpoint_level");
   if(m_verbosity > 5){
-    pout() << "field_solver::read_checkpoint_level" << endl;
+    pout() << "FieldSolver::read_checkpoint_level" << endl;
   }
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
@@ -730,17 +730,17 @@ void field_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level
   if(!ebis_sol.isNull()) read<EBCellFAB>(a_handle, state_sol, "poisson_s", m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
 }
 
-void field_solver::post_checkpoint(){
-  CH_TIME("field_solver::post_checkpoint");
+void FieldSolver::post_checkpoint(){
+  CH_TIME("FieldSolver::post_checkpoint");
   if(m_verbosity > 5){
-    pout() << "field_solver::post_checkpoint" << endl;
+    pout() << "FieldSolver::post_checkpoint" << endl;
   }
 }
 
-void field_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("field_solver::write_plot_level");
+void FieldSolver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("FieldSolver::write_plot_level");
   if(m_verbosity > 5){
-    pout() << "field_solver::write_plot_level" << endl;
+    pout() << "FieldSolver::write_plot_level" << endl;
   }
 
   // Add phi to output
@@ -756,10 +756,10 @@ void field_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
 }
 
-void field_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp){
-  CH_TIME("field_solver::write_mfdata");
+void FieldSolver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp){
+  CH_TIME("FieldSolver::write_mfdata");
   if(m_verbosity > 5){
-    pout() << "field_solver::write_mfdata" << endl;
+    pout() << "FieldSolver::write_mfdata" << endl;
   }
 
   const int ncomp = a_data[0]->nComp();
@@ -846,10 +846,10 @@ void field_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MFAM
   a_comp += ncomp;
 }
 
-int field_solver::get_num_plotvars() const {
-  CH_TIME("field_solver::get_num_plotvars");
+int FieldSolver::get_num_plotvars() const {
+  CH_TIME("FieldSolver::get_num_plotvars");
   if(m_verbosity > 5){
-    pout() << "field_solver::get_num_plotvars" << endl;
+    pout() << "FieldSolver::get_num_plotvars" << endl;
   }
 
   int num_output = 0;
@@ -862,10 +862,10 @@ int field_solver::get_num_plotvars() const {
   return num_output;
 }
 
-Vector<std::string> field_solver::get_plotvar_names() const {
-  CH_TIME("field_solver::get_plotvar_names");
+Vector<std::string> FieldSolver::get_plotvar_names() const {
+  CH_TIME("FieldSolver::get_plotvar_names");
   if(m_verbosity > 5){
-    pout() << "field_solver::get_plotvar_names" << endl;
+    pout() << "FieldSolver::get_plotvar_names" << endl;
   }
   Vector<std::string> names(0);
   
@@ -883,23 +883,23 @@ Vector<std::string> field_solver::get_plotvar_names() const {
   return names;
 }
 
-Real field_solver::get_time() const{
+Real FieldSolver::get_time() const{
   return m_time;
 }
 
-MFAMRCellData& field_solver::get_state(){
+MFAMRCellData& FieldSolver::get_state(){
   return m_state;
 }
 
-MFAMRCellData& field_solver::get_E(){
+MFAMRCellData& FieldSolver::get_E(){
   return m_E;
 }
 
-MFAMRCellData& field_solver::get_source(){
+MFAMRCellData& FieldSolver::get_source(){
   return m_source;
 }
 
-MFAMRCellData& field_solver::get_resid(){
+MFAMRCellData& FieldSolver::get_resid(){
   return m_resid;
 }
 

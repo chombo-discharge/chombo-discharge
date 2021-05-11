@@ -1,6 +1,6 @@
 /*!
   @file   CD_ConductivityElectrostaticDomainBc.H
-  @brief  Boundary condition class for using EBConductivityOp in field_solver_multigrid
+  @brief  Boundary condition class for using EBConductivityOp in FieldSolverMultigrid
   @author Robert Marskar
   @date   May 2021
 */
@@ -143,7 +143,7 @@ private:
 
   /*!
     @brief Class which interfaces from more general boundary condition specification to something usable by the current Chombo multigrid solvers 
-    that field_solver_multigrid uses. 
+    that FieldSolverMultigrid uses. 
   */
   class ElectrostaticDomainBcFuncEval : public BaseBCFuncEval {
   public:
@@ -180,7 +180,7 @@ private:
       @param[in] a_point    Position in space
       @param[in] a_comp     Component in elliptic equation.
       @param[in] a_derivDir Derivative direction.
-      @return Throws an error if called since this function is not used in field_solver_multigrid code. 
+      @return Throws an error if called since this function is not used in FieldSolverMultigrid code. 
     */
     Real derivative(const RealVect& a_point, const int& a_comp, const int& a_derivDir) const override final;
 

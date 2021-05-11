@@ -1,5 +1,5 @@
 /*!
-  @file   field_stepper.H
+  @file   FieldStepper.H
   @brief  time_stepper class for only solving the Poisson equation (with surface charge)
   @author Robert Marskar
   @data   March 2020
@@ -9,7 +9,7 @@
 #define _FIELD_STEPPER_
 
 #include "time_stepper.H"
-#include "field_solver.H"
+#include "CD_FieldSolver.H"
 #include "sigma_solver.H"
 
 #include "CD_NamespaceHeader.H"
@@ -20,14 +20,14 @@ namespace physics {
       @brief Class that just solves the poisson equation
     */
     template <class T>
-    class field_stepper : public time_stepper{
+    class FieldStepper : public time_stepper{
     public:
 
       static Real s_constant_one(const RealVect a_pos);
       static Real s_potential_one(const Real a_time);
 
-      field_stepper();
-      ~field_stepper();
+      FieldStepper();
+      ~FieldStepper();
 
       // Stuff below here is derived from time_stepper.
       // ----------------------------------------------
@@ -76,7 +76,7 @@ namespace physics {
       bool m_load_balance;
       box_sorting m_boxsort;
 
-      RefCountedPtr<field_solver> m_poisson;
+      RefCountedPtr<FieldSolver> m_poisson;
       RefCountedPtr<sigma_solver>   m_sigma;
 
       std::string m_realm;
@@ -87,6 +87,6 @@ namespace physics {
   }
 }
 #include "CD_NamespaceFooter.H"
-#include "field_stepperI.H"
+#include "CD_FieldStepperImplem.H"
 
 #endif

@@ -66,29 +66,29 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 # FIELD_SOLVER_MULTIGRID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
-field_solver_multigrid.bc.x.lo   = neumann 0.0          # Bc type.
-field_solver_multigrid.bc.x.hi   = neumann 0.0          # Bc type.
-field_solver_multigrid.bc.y.lo   = dirichlet 0.0     # Bc type.
-field_solver_multigrid.bc.y.hi   = dirichlet 1.0     # Bc type.
-field_solver_multigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
-field_solver_multigrid.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)
+FieldSolverMultigrid.bc.x.lo   = neumann 0.0          # Bc type.
+FieldSolverMultigrid.bc.x.hi   = neumann 0.0          # Bc type.
+FieldSolverMultigrid.bc.y.lo   = dirichlet 0.0     # Bc type.
+FieldSolverMultigrid.bc.y.hi   = dirichlet 1.0     # Bc type.
+FieldSolverMultigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+FieldSolverMultigrid.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)
 
-field_solver_multigrid.auto_tune         = false     # Do some auto-tuning
-field_solver_multigrid.gmg_coarsen       = 4         # Number of coarsenings to use before level aggregation	
-field_solver_multigrid.gmg_verbosity     = 10        # GMG verbosity
-field_solver_multigrid.gmg_pre_smooth    = 10        # Number of relaxations in downsweep
-field_solver_multigrid.gmg_post_smooth   = 10        # Number of relaxations in upsweep
-field_solver_multigrid.gmg_bott_smooth   = 10        # NUmber of relaxations before dropping to bottom solver
-field_solver_multigrid.gmg_min_iter      = 5         # Minimum number of iterations
-field_solver_multigrid.gmg_max_iter      = 32        # Maximum number of iterations
-field_solver_multigrid.gmg_tolerance     = 1.E-10    # Residue tolerance
-field_solver_multigrid.gmg_hang          = 0.2       # Solver hang
-field_solver_multigrid.gmg_bottom_drop   = 4         # Bottom drop
-field_solver_multigrid.gmg_bc_order      = 2         # Boundary condition order for multigrid
-field_solver_multigrid.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
-field_solver_multigrid.gmg_bottom_relax  = 12        # Number of relaxations in bottom solve ('simple' solver only)
-field_solver_multigrid.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now
-field_solver_multigrid.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
+FieldSolverMultigrid.auto_tune         = false     # Do some auto-tuning
+FieldSolverMultigrid.gmg_coarsen       = 4         # Number of coarsenings to use before level aggregation	
+FieldSolverMultigrid.gmg_verbosity     = 10        # GMG verbosity
+FieldSolverMultigrid.gmg_pre_smooth    = 10        # Number of relaxations in downsweep
+FieldSolverMultigrid.gmg_post_smooth   = 10        # Number of relaxations in upsweep
+FieldSolverMultigrid.gmg_bott_smooth   = 10        # NUmber of relaxations before dropping to bottom solver
+FieldSolverMultigrid.gmg_min_iter      = 5         # Minimum number of iterations
+FieldSolverMultigrid.gmg_max_iter      = 32        # Maximum number of iterations
+FieldSolverMultigrid.gmg_tolerance     = 1.E-10    # Residue tolerance
+FieldSolverMultigrid.gmg_hang          = 0.2       # Solver hang
+FieldSolverMultigrid.gmg_bottom_drop   = 4         # Bottom drop
+FieldSolverMultigrid.gmg_bc_order      = 2         # Boundary condition order for multigrid
+FieldSolverMultigrid.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+FieldSolverMultigrid.gmg_bottom_relax  = 12        # Number of relaxations in bottom solve ('simple' solver only)
+FieldSolverMultigrid.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now
+FieldSolverMultigrid.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
@@ -120,9 +120,9 @@ rod_dielectric.sphere.radius             = 0.1           # Radius
 # ====================================================================================================
 # FIELD_STEPPER CLASS OPTIONS
 # ====================================================================================================
-field_stepper.verbosity    = -1              # Verbosity
-field_stepper.realm        = primal          # Primal realm	
-field_stepper.load_balance = false           # Load balance or not
-field_stepper.box_sorting  = morton          # Box sorting algorithm
-field_stepper.init_rho     = 1E-10           # Space charge density
-field_stepper.init_sigma   = 1E-10           # Surface charge density
+FieldStepper.verbosity    = -1              # Verbosity
+FieldStepper.realm        = primal          # Primal realm	
+FieldStepper.load_balance = false           # Load balance or not
+FieldStepper.box_sorting  = morton          # Box sorting algorithm
+FieldStepper.init_rho     = 1E-10           # Space charge density
+FieldStepper.init_sigma   = 1E-10           # Surface charge density

@@ -1,6 +1,6 @@
 /*!
   @file   CD_ElectrostaticDomainBc.H
-  @brief  Simple data holder for holding domain boundary condition types for field_solver
+  @brief  Simple data holder for holding domain boundary condition types for FieldSolver
   @author Robert Marskar
   @date   May 2021
 */
@@ -18,7 +18,7 @@
 
 /*!
   @brief Class which maps boundary condition types to a side and direction. 
-  @details This class is simply meant to hold boundary conditions for use in various field_solver code. It provides no functionality otherwise,
+  @details This class is simply meant to hold boundary conditions for use in various FieldSolver code. It provides no functionality otherwise,
   and has no dependencies, other than standard C++14. 
 */
 class ElectrostaticDomainBc {

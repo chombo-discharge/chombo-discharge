@@ -20,7 +20,7 @@
 /*!
   @brief Class which interfaces a boundary condition wrapper to ConductivityBaseDomainBC.
   @details This class provides the functionality for setting Dirichlet and Neumann boundary conditions individually on each domain side, with different function. The
-  boundary conditions are supplied by std::function which captures field_solver::m_time, so they should automatically use the correct time for the BC evaluation. 
+  boundary conditions are supplied by std::function which captures FieldSolver::m_time, so they should automatically use the correct time for the BC evaluation. 
 */
 class ConductivityElectrostaticDomainBcFactory : public BaseDomainBCFactory {
 public:

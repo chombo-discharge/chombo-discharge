@@ -1,7 +1,7 @@
 #include "driver.H"
 #include "geo_coarsener.H"
-#include "field_solver_factoryI.H"
-#include "field_solver_multigrid.H"
+#include "CD_FieldSolverFactoryImplem.H"
+#include "CD_FieldSolverMultigrid.H"
 #include "ito_layout.H"
 #include "ito_solver.H"
 #include "rte_layout.H"
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new ito_plasma_streamer_tagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
-  auto poi_fact = new field_solver_factory<field_solver_multigrid>();
+  auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
   auto ito_fact = new ito_factory<ito_solver, ito_solver>();
   auto rte_fact = new rte_factory<mc_photo, mc_photo>();
 
