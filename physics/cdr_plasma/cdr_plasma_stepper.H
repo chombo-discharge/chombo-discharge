@@ -8,6 +8,10 @@
 #ifndef _CDR_PLASMA_STEPPER_
 #define _CDR_PLASMA_STEPPER_
 
+#include <functional>
+
+#include <RealVect.H>
+
 #include "computational_geometry.H"
 #include "cdr_plasma_physics.H"
 #include "amr_mesh.H"
@@ -17,8 +21,6 @@
 #include "field_solver.H"
 #include "sigma_solver.H"
 #include "time_stepper.H"
-
-#include <RealVect.H>
 
 /*!
   @brief Namespace for cdr plasma physics
@@ -56,8 +58,6 @@ namespace physics {
       virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const;
       virtual void write_J(EBAMRCellData& a_output, int& a_comp) const;
       virtual void post_checkpoint_setup();
-      virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
-      virtual void set_poisson_wall_func(Real (*a_func)(const RealVect a_pos));
       virtual void print_step_report() override;
       virtual void register_operators() override;
       virtual void allocate() override;
@@ -822,7 +822,7 @@ namespace physics {
       /*!
 	@brief Set potential
       */
-      virtual void set_potential(Real (*a_potential)(const Real a_time));
+      virtual void set_potential(std::function<Real(const Real a_time)> a_potential);
 
       /*!
 	@brief RTE advance using data existing in other solvers
@@ -996,39 +996,7 @@ namespace physics {
       /*!
 	@brief Set the potential
       */
-      Real (*m_potential)(const Real a_time);
-
-      /*!
-	@brief Function pointer for Poisson BC on domain walls
-      */
-      Real (*m_wall_func_x_lo)(const RealVect a_pos);
-
-      /*!
-	@brief Function pointer for Poisson BC on domain walls
-      */
-      Real (*m_wall_func_x_hi)(const RealVect a_pos);
-
-      /*!
-	@brief Function pointer for Poisson BC on domain walls
-      */
-      Real (*m_wall_func_y_lo)(const RealVect a_pos);
-
-      /*!
-	@brief Function pointer for Poisson BC on domain walls
-      */
-      Real (*m_wall_func_y_hi)(const RealVect a_pos);
-
-#if CH_SPACEDIM==3
-      /*!
-	@brief Function pointer for Poisson BC on domain walls
-      */
-      Real (*m_wall_func_z_lo)(const RealVect a_pos);
-
-      /*!
-	@brief Function pointer for Poisson BC on domain walls
-      */
-      Real (*m_wall_func_z_hi)(const RealVect a_pos);
-#endif
+      std::function<Real(const Real a_time) > m_potential;
   
       /*!
 	@brief Minimum allowed time step

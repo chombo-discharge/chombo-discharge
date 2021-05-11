@@ -8,6 +8,8 @@
 #ifndef _ITO_PLASMA_STEPPER_
 #define _ITO_PLASMA_STEPPER_
 
+#include <functional>
+
 #include "time_stepper.H"
 #include "ito_plasma_physics.H"
 #include "ito_layout.H"
@@ -18,6 +20,7 @@
 #include "sigma_solver.H"
 
 #include "CD_NamespaceHeader.H"
+
 namespace physics {
   namespace ito_plasma {
 
@@ -122,7 +125,7 @@ namespace physics {
       void set_ito(RefCountedPtr<ito_layout<ito_solver> >& a_cdr);
       void set_poisson(RefCountedPtr<field_solver>& a_poisson);
       void set_rte(RefCountedPtr<rte_layout<mc_photo> >& a_rte);
-      void set_potential(Real (*a_potential)(const Real a_time));
+      void set_potential(const std::function<Real(const Real a_time)>& a_potential);
 
       // Get routines
       Real get_time() const;
@@ -346,7 +349,7 @@ namespace physics {
       // Filters that can be applied. 
       std::deque<std::tuple<Real, int, int> > m_filters;
 
-      Real (*m_potential)(const Real a_time);
+      std::function<Real(const Real a_time)> m_potential;
 
       bool m_regrid_superparticles;
       bool m_load_balance;
