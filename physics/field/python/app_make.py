@@ -45,7 +45,7 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/src/field_solver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/particle \\\n')
     makef.write('\t$(DISCHARGE_HOME)/geometries/' + args.geometry + '\\\n')
-    makef.write('\t$(DISCHARGE_HOME)/physics/poisson \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/physics/field \\\n')
     makef.write('\n')
 
     makef.write('\n')
