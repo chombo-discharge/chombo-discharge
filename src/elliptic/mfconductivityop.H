@@ -93,11 +93,6 @@ public:
   */
   virtual void set_time(Real* a_time);
 
-  /*!
-    @brief Set the non-matched boundary conditions
-  */
-  virtual void set_electrodes(const Vector<electrode>& a_electrodes, const RefCountedPtr<BaseBCFuncEval> a_potential);
-
     /*!
     @brief Electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions
   */

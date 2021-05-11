@@ -252,19 +252,10 @@ void mfconductivityop::set_time(Real* a_time){
   m_time = a_time;
 }
 
-void mfconductivityop::set_electrodes(const Vector<electrode>& a_electrodes, const RefCountedPtr<BaseBCFuncEval> a_potential){
-#if verb
-  pout() << "mfconductivityop::set_electrodes"<< endl;
-#endif
-
-  m_electrodes = a_electrodes;
-  m_potential  = a_potential;
-
-  this->set_bc_from_levelset();
-}
-
 void mfconductivityop::setDirichletEbBc(const ElectrostaticEbBc& a_ebbc){
   m_electrostaticEbBc = a_ebbc;
+
+  this->set_bc_from_levelset();
 }
 
 void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneous){
@@ -302,51 +293,8 @@ void mfconductivityop::set_bc_from_levelset(){
   pout() << "mfconductivityop::set_bc_from_levelset"<< endl;
 #endif
 
-  //  std::cout << *m_time << std::endl;
-#if 1 // Old code
+
   const int comp = 0;
-
-  const Real physDx = m_dx/m_lengthScale;
-  
-  for (int iphase = 0; iphase < m_phases; iphase++){
-    LevelData<BaseIVFAB<Real> >& val = *m_dirival[iphase];
-
-    for (DataIterator dit = val.dataIterator(); dit.ok(); ++dit){
-      const IntVectSet& ivs  = val[dit()].getIVS();
-      const EBGraph& ebgraph = val[dit()].getEBGraph();
-
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const RealVect pos  = EBArith::getVofLocation(vof, physDx, m_origin);
-
-	if(m_electrodes.size() > 0){
-	  int  func = 0;
-	  Real dist = m_electrodes[0].get_function()->value(pos);
-
-	  for (int i = 1; i < m_electrodes.size(); i++){
-	    Real cur_val = (m_electrodes[i].get_function())->value(pos);
-	    if(Abs(cur_val) < Abs(dist)){
-	      func  = i;
-	      dist  = cur_val;
-	    }
-	  }
-
-
-	  Real potential;
-	  if(m_electrodes[func].is_live()){
-	    potential = m_potential->value(pos, comp);
-	    potential *= m_electrodes[func].get_fraction();
-	  }
-	  else{
-	    potential = 0.0;
-	  }
-	  val[dit()](vof, comp) = potential;
-	}
-      }
-    }
-  }
-#else // New code
-    const int comp = 0;
 
   const Real physDx = m_dx/m_lengthScale;
   
@@ -383,7 +331,6 @@ void mfconductivityop::set_bc_from_levelset(){
       }
     }
   }
-#endif
 }
 
 void mfconductivityop::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneous){

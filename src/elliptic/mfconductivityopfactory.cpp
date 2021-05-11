@@ -570,14 +570,6 @@ void mfconductivityopfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a
 #endif
 }
 
-void mfconductivityopfactory::set_electrodes(const Vector<electrode>&            a_electrodes,
-					     const RefCountedPtr<BaseBCFuncEval> a_potential){
-  CH_TIME("mfconductivityopfactory::set_electrodes");
-  
-  m_electrodes = a_electrodes;
-  m_potential  = a_potential;
-}
-
 void mfconductivityopfactory::setDirichletEbBc(const ElectrostaticEbBc& a_ebbc){
   m_electrostaticEbBc = a_ebbc;
 }
@@ -776,7 +768,6 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
 
   oper->set_time(m_time);
   oper->set_jump(jump);
-  oper->set_electrodes(m_electrodes, m_potential);
   oper->setDirichletEbBc(m_electrostaticEbBc);
 
 #if verb
@@ -931,7 +922,6 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
 #endif
   oper->set_time(m_time);
   oper->set_jump(jump);
-  oper->set_electrodes(m_electrodes, m_potential);
   oper->setDirichletEbBc(m_electrostaticEbBc);
 
 #if 0 // Debug-stop

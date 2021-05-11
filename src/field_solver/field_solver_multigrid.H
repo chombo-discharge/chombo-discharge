@@ -10,7 +10,6 @@
 
 #include "field_solver.H"
 #include "mfconductivityopfactory.H"
-#include "dirichlet_func.H"
 
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
@@ -90,11 +89,6 @@ public:
     @brief Automatic tuning of the Poisson solver
   */
   virtual void auto_tune();
-
-  /*!
-    @brief Not really supposed to be overridden, but WIP
-  */
-  virtual void set_potential(std::function<Real(const Real a_time)> a_potential) override;
 
   /*!
     @brief Regrid function
@@ -374,11 +368,6 @@ protected:
   MFSimpleSolver m_mfsolver;
 
   /*!
-    @brief Potential function
-  */
-  RefCountedPtr<dirichlet_func> m_bcfunc;
-
-  /*!
     @brief Coarsened MG grids
   */
   Vector<DisjointBoxLayout> m_mg_grids;
@@ -397,11 +386,6 @@ protected:
     @brief EBLevelgrids for the multigrid pre-coarsening
   */
   Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
-
-  /*!
-    @brief Need to override this in order to pass in the correct time to boundary conditions
-  */
-  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Set face-centered permittivities

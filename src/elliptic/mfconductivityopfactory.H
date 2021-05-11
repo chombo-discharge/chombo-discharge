@@ -26,7 +26,6 @@
 #include "MFLevelGrid.H"
 #include "MFQuadCFInterp.H"
 #include "data_ops.H"
-#include "electrode.H"
 #include "CD_ElectrostaticEbBc.H"
 
 
@@ -127,11 +126,6 @@ public:
     @brief Set simplified jump condition
   */
   virtual void set_jump(const Real& a_sigma, const Real& a_scale);
-
-  /*!
-    @brief Electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions
-  */
-  virtual void set_electrodes(const Vector<electrode>& a_electrodes, const RefCountedPtr<BaseBCFuncEval> m_potential);
 
   /*!
     @brief Electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions

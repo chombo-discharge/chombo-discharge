@@ -15,7 +15,6 @@
 #include <BRMeshRefine.H>
 
 #include "field_solver_multigrid.H"
-#include "dirichlet_func.H"
 #include "data_ops.H"
 #include "MFQuadCFInterp.H"
 #include "MFInterfaceFAB.H"
@@ -337,26 +336,6 @@ bool field_solver_multigrid::solve(MFAMRCellData&       a_state,
 
 int field_solver_multigrid::query_ghost() const {
   return 3; // Need this many cells
-}
-
-void field_solver_multigrid::set_potential(std::function<Real(const Real a_time)> a_potential) {
-  std::cout << "field_solver_multigrid::set_potential - need to purge dirichlet_func" << std::endl;
-  m_potential = a_potential;
-
-  const RealVect origin  = m_amr->get_prob_lo();
-
-  //  m_bcfunc = RefCountedPtr<dirichlet_func>(new dirichlet_func(m_potential, s_constant_one, origin));
-  m_bcfunc = RefCountedPtr<dirichlet_func>(new dirichlet_func(m_potential));
-}
-
-void field_solver_multigrid::set_time(const int a_step, const Real a_time, const Real a_dt){
-  field_solver::set_time(a_step, a_time, a_dt);
-  m_bcfunc->set_time(a_time);
-
-  
-  if(!m_opfact.isNull()){
-    m_opfact->set_time(&m_time);
-  }
 }
 
 void field_solver_multigrid::auto_tune(){
@@ -909,8 +888,6 @@ void field_solver_multigrid::setup_operator_factory(){
 										 m_bottom_drop,
 										 1 + finest_level,
 										 mg_levelgrids));
-  CH_assert(!m_bcfunc.isNull());
-  m_opfact->set_electrodes(m_compgeom->get_electrodes(), m_bcfunc);
   m_opfact->setDirichletEbBc(m_ebBc);
 }
 
