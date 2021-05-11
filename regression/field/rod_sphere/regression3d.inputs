@@ -66,12 +66,12 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 # FIELD_SOLVER_MULTIGRID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
-field_solver_multigrid.bc_x_low  = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver_multigrid.bc_x_high = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver_multigrid.bc_y_low  = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver_multigrid.bc_y_high = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver_multigrid.bc_z_low  = dirichlet_ground  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver_multigrid.bc_z_high = dirichlet_live    # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+field_solver_multigrid.bc.x.lo   = neumann 0.0          # Bc type.
+field_solver_multigrid.bc.x.hi   = neumann 0.0          # Bc type.
+field_solver_multigrid.bc.y.lo   = neumann 0.0          # Bc type.
+field_solver_multigrid.bc.y.hi   = neumann 0.0          # Bc type.
+field_solver_multigrid.bc.z.lo   = dirichlet 0.0     # Bc type.
+field_solver_multigrid.bc.z.hi   = dirichlet 1.0     # Bc type.
 field_solver_multigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 field_solver_multigrid.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)	
 
