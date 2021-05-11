@@ -14,9 +14,9 @@ def write_template(args):
     main_filename = app_dir + "/" + args.filename + ".cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include "driver.H"\n')
-    mainf.write('#include "' + args.field_solver + '.H"\n')
+    mainf.write('#include "CD_' + args.field_solver + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
-    mainf.write('#include "field_stepper.H"\n')
+    mainf.write('#include "CD_FieldStepper.H"\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
 
@@ -45,12 +45,9 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Set up basic Poisson, potential = 1 \n")
-    mainf.write("  auto timestepper = RefCountedPtr<field_stepper<" + args.field_solver + "> >\n")
-    mainf.write("     (new field_stepper<" + args.field_solver + ">());\n")
+    mainf.write("  auto timestepper = RefCountedPtr<FieldStepper<" + args.field_solver + "> >\n")
+    mainf.write("     (new FieldStepper<" + args.field_solver + ">());\n")
     mainf.write("\n")
-
-
-
     
     mainf.write("  // Set up the driver and run it\n")
     mainf.write("  RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));\n")
