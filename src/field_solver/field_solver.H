@@ -197,6 +197,11 @@ public:
   virtual void set_domain_bc_wall_function(const int a_dir, const Side::LoHiSide a_side, ElectrostaticDomainBc::BcFunction a_function);
 
   /*!
+    @brief Set embedded boundary Dirichlet function on a specific electrode 
+  */
+  virtual void set_electrode_dirichlet_function(const int a_electrode, const ElectrostaticEbBc::BcFunction& a_function);
+
+  /*!
     @brief Set potential in covered electrode cells
   */
   virtual void set_covered_potential(EBAMRCellData& a_phi, const int a_comp, const Real a_time);
@@ -380,9 +385,19 @@ protected:
   ElectrostaticDomainBc m_domainBc;
 
   /*!
+    @brief Dirichlet boundary conditions on electrodes
+  */
+  ElectrostaticEbBc m_ebBc;
+
+  /*!
     @brief Domain BC functions
   */
   std::map<ElectrostaticDomainBc::Wall, ElectrostaticDomainBc::BcFunction> m_domainBcFunctions;
+
+  /*!
+    @brief BC functions (Dirichlet) on the electrodes
+  */
+  std::vector<std::pair<electrode, ElectrostaticEbBc::BcFunction> > m_electrodeBcFunctions;
 
   /*!
     @brief Potential function. 
@@ -403,6 +418,11 @@ protected:
     @brief Set default BC functions. This sets all the m_domainBcFunction objects to s_defaultDomainBcFunction (returns 1 everywhere). 
   */
   virtual void set_default_domain_bc_functions();
+
+  /*!
+    @brief Set default Dirichlet boundary conditions on the embedded boundaries
+  */
+  virtual void set_default_eb_bc_functions();
 
   /*!
     @brief Returns BC type based on string

@@ -40,6 +40,11 @@ public:
   virtual ~ElectrostaticEbBc();
 
   /*!
+    @brief Clears the object. 
+  */
+  void clear();
+
+  /*!
     @brief Add a boundary condition
     @param[in] a_electrode  The electrode.
     @param[in] a_bcFunction Boundary condition function.

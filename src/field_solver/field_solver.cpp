@@ -320,6 +320,8 @@ void field_solver::set_computational_geometry(const RefCountedPtr<computational_
   m_compgeom = a_compgeom;
 
   this->set_mfis(m_compgeom->get_mfis());
+
+  this->set_default_eb_bc_functions();
 }
 
 void field_solver::set_mfis(const RefCountedPtr<mfis>& a_mfis){
@@ -353,6 +355,16 @@ void field_solver::set_domain_bc_wall_function(const int a_dir, const Side::LoHi
   const ElectrostaticDomainBc::Wall curWall = std::make_pair(a_dir, a_side);
 
   m_domainBcFunctions.at(curWall) = a_function;
+}
+
+
+void field_solver::set_electrode_dirichlet_function(const int a_electrode, const ElectrostaticEbBc::BcFunction& a_function){
+  CH_TIME("field_solver::set_electrode_dirichlet_functions");
+  if(m_verbosity > 5){
+    pout() << "field_solver::set_electrode_dirichlet_functions" << endl;
+  }
+
+  m_ebBc.setEbBc(a_electrode, a_function);
 }
 
 void field_solver::set_verbosity(const int a_verbosity){
@@ -536,6 +548,27 @@ void field_solver::set_default_domain_bc_functions(){
     }
   }
 }
+
+void field_solver::set_default_eb_bc_functions() {
+  CH_TIME("field_solver::set_default_eb_bc_functions");
+  if(m_verbosity > 5){
+    pout() << "field_solver::set_default_eb_bc_functions" << endl;
+  }
+
+  const Vector<electrode> electrodes = m_compgeom->get_electrodes();
+
+  for (int i = 0; i < electrodes.size(); i++){
+    const electrode& elec = electrodes[i];
+
+    ElectrostaticEbBc::BcFunction curFunc = [&](const RealVect a_position, const Real a_time){
+      Real val = (elec.is_live()) ? 1.0 : 0.0;
+      return m_potential(m_time)*val*elec.get_fraction();
+    };
+
+    m_ebBc.addEbBc(elec, curFunc);
+  }
+}
+
 
 void field_solver::parse_domain_bc(){
   CH_TIME("field_solver::parse_domain_bc");
