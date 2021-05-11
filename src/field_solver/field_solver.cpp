@@ -497,7 +497,7 @@ std::string field_solver::make_bc_string(const int a_dir, const Side::LoHiSide a
   else if(a_dir == 1){
     strDir = "y";
   }
-  else if(a_dir == 1){
+  else if(a_dir == 2){
     strDir = "z";
   }
 
