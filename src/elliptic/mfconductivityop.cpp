@@ -5,16 +5,18 @@
   @date Dec. 2017
 */
 
-#include "mfdirichletconductivityebbc.H"
-#include "mfconductivityop.H"
-#include "mfalias.H"
-#include "data_ops.H"
+
 
 #include <EBArith.H>
 #include <DirichletConductivityDomainBC.H>
 #include <MFLevelDataOps.H>
 #include <BaseIVFactory.H>
 #include <EBAMRDataOps.H>
+
+#include "mfdirichletconductivityebbc.H"
+#include "mfconductivityop.H"
+#include "mfalias.H"
+#include "data_ops.H"
 
 #include "CD_NamespaceHeader.H"
   
@@ -259,6 +261,10 @@ void mfconductivityop::set_electrodes(const Vector<electrode>& a_electrodes, con
   m_potential  = a_potential;
 
   this->set_bc_from_levelset();
+}
+
+void mfconductivityop::setDirichletEbBc(const ElectrostaticEbBc& a_ebbc){
+  m_electrostaticEbBc = a_ebbc;
 }
 
 void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneous){

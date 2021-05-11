@@ -8,14 +8,6 @@
 #ifndef _MFCONDUCTIVITYOPFACTORY_
 #define _MFCONDUCTIVITYOPFACTORY_
 
-#include "mfconductivityop.H"
-#include "mfis.H"
-#include "mfalias.H"
-#include "MFLevelGrid.H"
-#include "MFQuadCFInterp.H"
-#include "data_ops.H"
-#include "electrode.H" 
-
 #include <EBLevelDataOps.H>
 #include <AMRMultiGrid.H>
 #include <MFAliasFactory.H>
@@ -27,6 +19,17 @@
 #include <EBIndexSpace.H>
 #include <EBQuadCFInterp.H>
 #include <MFCellFAB.H>
+
+#include "mfconductivityop.H"
+#include "mfis.H"
+#include "mfalias.H"
+#include "MFLevelGrid.H"
+#include "MFQuadCFInterp.H"
+#include "data_ops.H"
+#include "electrode.H"
+#include "CD_ElectrostaticEbBc.H"
+
+
 
 #include "CD_NamespaceHeader.H"
 
@@ -131,6 +134,11 @@ public:
   virtual void set_electrodes(const Vector<electrode>& a_electrodes, const RefCountedPtr<BaseBCFuncEval> m_potential);
 
   /*!
+    @brief Electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions
+  */
+  virtual void setDirichletEbBc(const ElectrostaticEbBc& a_ebbc);
+
+  /*!
     @brief Average down the surface charge on AMR levels
   */
   virtual void average_down_amr();
@@ -196,6 +204,11 @@ protected:
     @brief Potential function
   */
   RefCountedPtr<BaseBCFuncEval> m_potential;
+
+  /*!
+    @brief Dirichlet functions on the embedded boundaries. 
+  */
+  ElectrostaticEbBc m_electrostaticEbBc;
 
   /*!
     @brief a-coefficients

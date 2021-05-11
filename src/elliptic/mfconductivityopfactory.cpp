@@ -578,6 +578,10 @@ void mfconductivityopfactory::set_electrodes(const Vector<electrode>&           
   m_potential  = a_potential;
 }
 
+void mfconductivityopfactory::setDirichletEbBc(const ElectrostaticEbBc& a_ebbc){
+  m_electrostaticEbBc = a_ebbc;
+}
+
 int mfconductivityopfactory::refToFiner(const ProblemDomain& a_domain) const{
   int retval = -1;
   bool found = false;
@@ -773,6 +777,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
   oper->set_time(m_time);
   oper->set_jump(jump);
   oper->set_electrodes(m_electrodes, m_potential);
+  oper->setDirichletEbBc(m_electrostaticEbBc);
 
 #if verb
   pout() << "done defining oper" << endl;
@@ -927,6 +932,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
   oper->set_time(m_time);
   oper->set_jump(jump);
   oper->set_electrodes(m_electrodes, m_potential);
+  oper->setDirichletEbBc(m_electrostaticEbBc);
 
 #if 0 // Debug-stop
   MayDay::Abort("mfconductivityopfactory::AMRnewOp - implementation is not finished!");

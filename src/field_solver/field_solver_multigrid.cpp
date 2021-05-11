@@ -911,6 +911,7 @@ void field_solver_multigrid::setup_operator_factory(){
 										 mg_levelgrids));
   CH_assert(!m_bcfunc.isNull());
   m_opfact->set_electrodes(m_compgeom->get_electrodes(), m_bcfunc);
+  m_opfact->setDirichletEbBc(m_ebBc);
 }
 
 void field_solver_multigrid::setup_solver(){

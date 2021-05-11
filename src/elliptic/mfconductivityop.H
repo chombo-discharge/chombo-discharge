@@ -8,14 +8,7 @@
 #ifndef _MFCONDUCTIVITYOP_
 #define _MFCONDUCTIVITYOP_
 
-#include "mfis.H"
-#include "jump_bc.H"
-#include "MFLevelGrid.H"
-#include "electrode.H"
-#include "MFQuadCFInterp.H"
-#include "MFFastFluxReg.H"
-#include "ebconductivityop.H"
-#include "mfdirichletconductivityebbc.H"
+
 
 #include <LevelDataOps.H>
 #include <RefCountedPtr.H>
@@ -26,6 +19,16 @@
 //#include <EBConductivityOp.H>
 #include <DirichletConductivityEBBC.H>
 #include <AMRTGA.H>
+
+#include "mfis.H"
+#include "jump_bc.H"
+#include "MFLevelGrid.H"
+#include "electrode.H"
+#include "MFQuadCFInterp.H"
+#include "MFFastFluxReg.H"
+#include "ebconductivityop.H"
+#include "mfdirichletconductivityebbc.H"
+#include "CD_ElectrostaticEbBc.H"
 
 #include "CD_NamespaceHeader.H"
 
@@ -94,6 +97,11 @@ public:
     @brief Set the non-matched boundary conditions
   */
   virtual void set_electrodes(const Vector<electrode>& a_electrodes, const RefCountedPtr<BaseBCFuncEval> a_potential);
+
+    /*!
+    @brief Electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions
+  */
+  virtual void setDirichletEbBc(const ElectrostaticEbBc& a_ebbc);
 
   /*!
     @brief Update boundary conditions before relaxation
@@ -398,6 +406,11 @@ protected:
     @brief Potential function
   */
   RefCountedPtr<BaseBCFuncEval> m_potential;
+
+  /*!
+    @brief Dirichlet functions on the electrode embedded boundaries. 
+  */
+  ElectrostaticEbBc m_electrostaticEbBc;
 
   /*!
     @brief EB operators
