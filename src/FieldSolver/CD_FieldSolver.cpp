@@ -223,8 +223,9 @@ Real FieldSolver::computeCapacitance(){
   // TLDR; We MUST compute the energy density with the Laplace field, so no sources here...
   Real C;
 
-  MFAMRCellData phi, source;
-  EBAMRIVData sigma;
+  MFAMRCellData phi;
+  MFAMRCellData source;
+  EBAMRIVData   sigma;
 
   m_amr->allocate(phi,    m_realm, 1);
   m_amr->allocate(source, m_realm, 1);
@@ -408,6 +409,8 @@ void FieldSolver::setCoveredPotential(EBAMRCellData& a_phi, const int a_comp, co
   if(m_verbosity > 5){
     pout() << "FieldSolver::setCoveredPotential" << endl;
   }
+
+  MayDay::Abort("FieldSolver::setCoveredPotential -- stop, function needs to be revised");
 
   const Vector<electrode>& electrodes = m_compgeom->get_electrodes();
 
