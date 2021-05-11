@@ -5,16 +5,6 @@
   @date Nov. 2017
 */
 
-#include "field_solver_multigrid.H"
-#include "dirichlet_func.H"
-#include "data_ops.H"
-#include "MFQuadCFInterp.H"
-#include "MFInterfaceFAB.H"
-#include "jump_bc.H"
-#include "amr_mesh.H"
-#include "conductivitydomainbc_wrapper_factory.H"
-#include "units.H"
-
 #include <Stencils.H>
 #include <MFCellFAB.H>
 #include <LayoutData.H>
@@ -24,15 +14,26 @@
 #include <ParmParse.H>
 #include <BRMeshRefine.H>
 
+#include "field_solver_multigrid.H"
+#include "data_ops.H"
+#include "MFQuadCFInterp.H"
+#include "MFInterfaceFAB.H"
+#include "jump_bc.H"
+#include "amr_mesh.H"
+#include "conductivitydomainbc_wrapper_factory.H"
+#include "CD_ConductivityElectrostaticDomainBcFactory.H"
+#include "units.H"
+
 #define POISSON_MF_GMG_TIMER 0
 
 #include "CD_NamespaceHeader.H"
-
 
 field_solver_multigrid::field_solver_multigrid(){
   m_needs_setup = true;
   m_has_mg_stuff = false;
   m_class_name  = "field_solver_multigrid";
+
+  this->set_default_domain_bc_functions(); // Need to do this at some point...
 }
 
 field_solver_multigrid::~field_solver_multigrid(){
@@ -44,7 +45,6 @@ Real field_solver_multigrid::s_constant_one(const RealVect a_pos){
 }
 
 void field_solver_multigrid::parse_options(){
-
   parse_autotune();
   parse_domain_bc();
   parse_plot_vars();
@@ -53,7 +53,6 @@ void field_solver_multigrid::parse_options(){
 }
 
 void field_solver_multigrid::parse_runtime_options(){
-  parse_domain_bc();
   parse_plot_vars();
   parse_gmg_settings();
   parse_kappa_source();
@@ -75,83 +74,7 @@ void field_solver_multigrid::parse_autotune(){
   m_autotune = (str == "true") ? true : false;
 }
 
-void field_solver_multigrid::parse_domain_bc(){
-  ParmParse pp(m_class_name.c_str());
 
-  this->allocate_wall_bc();
-
-  // Check each side in each direction
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      const Side::LoHiSide side = sit();
-	
-      std::string str_dir;
-      if(dir == 0){
-	str_dir = "x";
-      }
-      else if(dir == 1){
-	str_dir = "y";
-      }
-      else if(dir == 2){
-	str_dir = "z";
-      }
-
-      // Get dir/side and set accordingly
-      if(side == Side::Lo){
-	std::string type;
-	std::string bc_string = "bc_" + str_dir + "_low";
-	pp.get(bc_string.c_str(), type);
-	if(type == "dirichlet_ground"){
-	  this->set_dirichlet_wall_bc(dir, Side::Lo, potential::ground);
-	}
-	else if(type == "dirichlet_live"){
-	  this->set_dirichlet_wall_bc(dir, Side::Lo, potential::live);
-	}
-	else if(type == "neumann"){
-	  this->set_neumann_wall_bc(dir, Side::Lo, 0.0);
-	}
-	else if(type == "robin"){
-	  this->set_robin_wall_bc(dir, Side::Lo, 0.0);
-	}
-	else {
-	  std::string error = "field_solver_multigrid::field_solver_multigrid - unknown bc requested for " + bc_string;
-	  MayDay::Abort(error.c_str());
-	}
-      }
-      else if(side == Side::Hi){
-	std::string type;
-	std::string bc_string = "bc_" + str_dir + "_high";
-	pp.get(bc_string.c_str(), type);
-	if(type == "dirichlet_ground"){
-	  this->set_dirichlet_wall_bc(dir, Side::Hi, potential::ground);
-	}
-	else if(type == "dirichlet_live"){
-	  this->set_dirichlet_wall_bc(dir, Side::Hi, potential::live);
-	}
-	else if(type == "neumann"){
-	  this->set_neumann_wall_bc(dir, Side::Hi, 0.0);
-	}
-	else if(type == "robin"){
-	  this->set_robin_wall_bc(dir, Side::Hi, 0.0);
-	}
-	else {
-	  std::string error = "field_solver_multigrid::field_solver_multigrid - unknown bc requested for " + bc_string;
-	  MayDay::Abort(error.c_str());
-	}
-      }
-    }
-  }
-
-  // Set default distribution on domain edges
-  m_wall_func_x_lo = field_solver::s_constant_one;
-  m_wall_func_x_hi = field_solver::s_constant_one;
-  m_wall_func_y_lo = field_solver::s_constant_one;
-  m_wall_func_y_hi = field_solver::s_constant_one;
-#if CH_SPACEDIM==3
-  m_wall_func_z_lo = field_solver::s_constant_one;
-  m_wall_func_z_hi = field_solver::s_constant_one;
-#endif
-}
 
 void field_solver_multigrid::parse_plot_vars(){
   ParmParse pp(m_class_name.c_str());
@@ -415,46 +338,6 @@ int field_solver_multigrid::query_ghost() const {
   return 3; // Need this many cells
 }
 
-void field_solver_multigrid::set_potential(Real (*a_potential)(const Real a_time)){
-  field_solver::set_potential(a_potential);
-
-  const RealVect origin  = m_amr->get_prob_lo();
-
-  m_bcfunc = RefCountedPtr<dirichlet_func>(new dirichlet_func(m_potential, s_constant_one, origin));
-
-  const int ixlo = wall_bc::map_bc(0, Side::Lo);
-  const int ixhi = wall_bc::map_bc(0, Side::Hi);
-  const int iylo = wall_bc::map_bc(1, Side::Lo);
-  const int iyhi = wall_bc::map_bc(1, Side::Hi);
-#if CH_SPACEDIM==3
-  const int izlo = wall_bc::map_bc(2, Side::Lo);
-  const int izhi = wall_bc::map_bc(2, Side::Hi);
-#endif
-
-  m_wall_bcfunc.resize(2*SpaceDim);
-  m_wall_bcfunc[ixlo] = RefCountedPtr<BaseBCFuncEval>(new dirichlet_func(m_potential, m_wall_func_x_lo, origin));
-  m_wall_bcfunc[ixhi] = RefCountedPtr<BaseBCFuncEval>(new dirichlet_func(m_potential, m_wall_func_x_hi, origin));
-  m_wall_bcfunc[iylo] = RefCountedPtr<BaseBCFuncEval>(new dirichlet_func(m_potential, m_wall_func_y_lo, origin));
-  m_wall_bcfunc[iyhi] = RefCountedPtr<BaseBCFuncEval>(new dirichlet_func(m_potential, m_wall_func_y_hi, origin));
-#if CH_SPACEDIM==3
-  m_wall_bcfunc[izlo] = RefCountedPtr<BaseBCFuncEval>(new dirichlet_func(m_potential, m_wall_func_z_lo, origin));
-  m_wall_bcfunc[izhi] = RefCountedPtr<BaseBCFuncEval>(new dirichlet_func(m_potential, m_wall_func_z_hi, origin));
-#endif
-}
-
-void field_solver_multigrid::set_time(const int a_step, const Real a_time, const Real a_dt){
-  field_solver::set_time(a_step, a_time, a_dt);
-  m_bcfunc->set_time(a_time);
-  for (int i = 0; i < m_wall_bcfunc.size(); i++){
-    dirichlet_func* func = static_cast<dirichlet_func*> (&(*m_wall_bcfunc[i]));
-    func->set_time(a_time);
-  }
-  
-  if(!m_opfact.isNull()){
-    m_opfact->set_time(&m_time);
-  }
-}
-
 void field_solver_multigrid::auto_tune(){
   CH_TIME("field_solver_multigrid::auto_tune");
   if(m_verbosity > 5){
@@ -633,7 +516,7 @@ void field_solver_multigrid::set_gmg_solver_parameters(relax      a_relax_type,
   m_gmg_eps         = a_eps;
   m_gmg_hang        = a_hang;
 
-  ParmParse pp("poisson_multifluid");
+  ParmParse pp(m_class_name.c_str());
 
   pp.query("gmg_verbosity",   m_gmg_verbosity);
   pp.query("gmg_pre_smooth",  m_gmg_pre_smooth);
@@ -952,22 +835,12 @@ void field_solver_multigrid::setup_operator_factory(){
   }
 
   // Appropriate coefficients for poisson equation
-  const Real alpha =  1.0; // Aco is zero. 
+  const Real alpha =  1.0; // Recall that Aco is zero so put anything you want here. 
   const Real beta  = -1.0;
-
-  RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory> (NULL);
 
   const IntVect ghost_phi = this->query_ghost()*IntVect::Unit;
   const IntVect ghost_rhs = this->query_ghost()*IntVect::Unit;
 
-  conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
-  RefCountedPtr<dirichlet_func> pot = RefCountedPtr<dirichlet_func> (new dirichlet_func(m_potential,
-											s_constant_one,
-											RealVect::Zero));
-  
-  bcfact->set_wallbc(m_wallbc);
-  bcfact->set_potentials(m_wall_bcfunc);
-  domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 
   Vector<MFLevelGrid> mg_levelgrids;
   for (int lvl = 0; lvl < m_mg_mflg.size(); lvl++){
@@ -988,6 +861,8 @@ void field_solver_multigrid::setup_operator_factory(){
   else if(m_gmg_relax_type == relax::gsrb_fast){
     relax_type = 2;
   }
+
+  auto domfact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_domainBc, m_amr->get_prob_lo()));
 
   // Create factory and set potential
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
@@ -1013,8 +888,7 @@ void field_solver_multigrid::setup_operator_factory(){
 										 m_bottom_drop,
 										 1 + finest_level,
 										 mg_levelgrids));
-  CH_assert(!m_bcfunc.isNull());
-  m_opfact->set_electrodes(m_compgeom->get_electrodes(), m_bcfunc);
+  m_opfact->setDirichletEbBc(m_ebBc);
 }
 
 void field_solver_multigrid::setup_solver(){
@@ -1105,4 +979,5 @@ MFAMRIVData& field_solver_multigrid::get_bco_irreg(){
 void field_solver_multigrid::set_needs_setup(const bool& a_needs_setup){
   m_needs_setup = a_needs_setup;
 }
+
 #include "CD_NamespaceFooter.H"

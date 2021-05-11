@@ -10,8 +10,8 @@
 
 #include "computational_geometry.H"
 #include "amr_mesh.H"
-#include "wall_bc.H"
-
+#include "CD_ElectrostaticDomainBc.H"
+#include "CD_ElectrostaticEbBc.H"
 #include "CD_NamespaceHeader.H"
 
 /*!
@@ -20,6 +20,7 @@
 class field_solver {
 public:
 
+  
   /*!
     @brief Silly enum for describing the potential at domain faces
   */
@@ -30,14 +31,14 @@ public:
   };
 
   /*!
-    @brief Potential of one...
+    @brief Default function for space-time dependence of domain boundary conditions. 
   */
-  static Real s_potential_one(const Real a_time);
+  static Real s_defaultDomainBcFunction(const RealVect a_position, const Real a_time);
 
   /*!
-    @brief Factor of one....
+    @brief Potential of one.
   */
-  static Real s_constant_one(const RealVect a_pos);
+  static Real s_potential_one(const Real a_time);
 
   /*!
     @brief Constructor
@@ -133,21 +134,6 @@ public:
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
   /*!
-    @brief Set const value Dirichlet wall BC
-  */
-  virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential a_live);
-
-  /*!
-    @brief Set constant value Neumann wall BC
-  */
-  virtual void set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
-
-  /*!
-    @Set Set constant value Robin wall bc
-  */
-  virtual void set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
-
-  /*!
     @brief Set which variables to output
   */
   virtual void set_output_variables();
@@ -183,11 +169,6 @@ public:
   virtual void write_mfdata(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp);
 
   /*!
-    @brief Sanity check
-  */
-  virtual void sanity_check();
-
-  /*!
     @brief Set realm
   */
   virtual void set_realm(const std::string a_realm);
@@ -203,14 +184,22 @@ public:
   virtual void set_verbosity(const int a_verbosity);
 
   /*!
-    @brief Set potential at current time. 
+    @brief Set potential dependence in time. 
   */
-  virtual void set_potential(Real (*a_potential)(const Real a_time));
+  virtual void set_potential(std::function<Real(const Real a_time)> a_potential);
+  
+  /*!
+    @brief Boundary condition function on a wall. 
+    @param[in] a_dir Coordinate direction.
+    @param[in] a_side Side in the coordinate direction.
+    @param[in] a_function Boundary condition function.
+  */
+  virtual void set_domain_bc_wall_function(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function);
 
   /*!
-    @brief Set wall potential distribution. This is efffective for dirichlet_map only
+    @brief Set embedded boundary Dirichlet function on a specific electrode 
   */
-  virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
+  virtual void set_electrode_dirichlet_function(const int a_electrode, const ElectrostaticEbBc::BcFunction& a_function);
 
   /*!
     @brief Set potential in covered electrode cells
@@ -246,11 +235,6 @@ public:
     @brief Get output plot names
   */
   virtual Vector<std::string> get_plotvar_names() const;
-
-  /*!
-    @brief Get Poisson BC at specified domain wall
-  */
-  virtual wall_bc& get_wall_bc(const int a_dir, Side::LoHiSide a_side) const;
 
   /*!
     @brief Get the realm
@@ -311,12 +295,7 @@ protected:
   RefCountedPtr<amr_mesh> m_amr;
 
   /*!
-    @brief Wall boundary conditions for Poisson equation. Must be set by the plasma engine. 
-  */
-  Vector<RefCountedPtr<wall_bc> > m_wallbc;
-
-  /*!
-    @brief Cached state used for regridding. DO NOT TOUCH!
+    @brief Cached state used for regridding. 
   */
   MFAMRCellData m_cache;
 
@@ -401,49 +380,59 @@ protected:
   Real m_time;
 
   /*!
-    @brief Set potential function pointer
+    @brief Domain boundary conditions for field_solver
   */
-  Real (*m_potential)(const Real a_time);
+  ElectrostaticDomainBc m_domainBc;
 
   /*!
-    @brief Function pointer for potential on domain walls (dirichlet)
+    @brief Dirichlet boundary conditions on electrodes
   */
-  Real (*m_wall_func_x_lo)(const RealVect a_pos);
+  ElectrostaticEbBc m_ebBc;
 
   /*!
-    @brief Function pointer for potential on domain walls (dirichlet)
+    @brief Domain BC functions
   */
-  Real (*m_wall_func_x_hi)(const RealVect a_pos);
+  std::map<ElectrostaticDomainBc::Wall, ElectrostaticDomainBc::BcFunction> m_domainBcFunctions;
 
   /*!
-    @brief Function pointer for potential on domain walls (dirichlet)
+    @brief BC functions (Dirichlet) on the electrodes
   */
-  Real (*m_wall_func_y_lo)(const RealVect a_pos);
+  std::vector<std::pair<electrode, ElectrostaticEbBc::BcFunction> > m_electrodeBcFunctions;
 
   /*!
-    @brief Function pointer for potential on domain walls (dirichlet)
+    @brief Potential function. 
   */
-  Real (*m_wall_func_y_hi)(const RealVect a_pos);
-
-  /*!
-    @brief Function pointer for potential on domain walls (dirichlet)
-  */
-  Real (*m_wall_func_z_lo)(const RealVect a_pos);
-
-  /*!
-    @brief Function pointer for potential on domain walls (dirichlet)
-  */
-  Real (*m_wall_func_z_hi)(const RealVect a_pos);
+  std::function<Real(const Real a_time)> m_potential;
 
   /*!
     @brief Set the mfis
   */
   virtual void set_mfis(const RefCountedPtr<mfis>& a_mfis);
-  
+
   /*!
-    @brief Allocate data holders for wall bcs so they can be set
+    @brief Parse domain BCs
   */
-  virtual void allocate_wall_bc();
+  virtual void parse_domain_bc();
+
+  /*!
+    @brief Set default BC functions. This sets all the m_domainBcFunction objects to s_defaultDomainBcFunction (returns 1 everywhere). 
+  */
+  virtual void set_default_domain_bc_functions();
+
+  /*!
+    @brief Set default Dirichlet boundary conditions on the embedded boundaries
+  */
+  virtual void set_default_eb_bc_functions();
+
+  /*!
+    @brief Returns BC type based on string
+  */
+  virtual ElectrostaticDomainBc::BcType parse_bc_string(const std::string a_str) const;
+
+  /*!
+    @brief Shortcut for making a boundary condition string. This just returns m_class_name.bc.direction.side
+  */
+  virtual std::string make_bc_string(const int a_dir, const Side::LoHiSide a_side) const;
 };
 #include "CD_NamespaceFooter.H"
 

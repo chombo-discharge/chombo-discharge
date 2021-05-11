@@ -22,7 +22,13 @@ electrode::~electrode(){
 
 void electrode::define(RefCountedPtr<BaseIF> a_baseif, bool a_live, Real a_fraction){
   m_tuple    = std::pair<RefCountedPtr<BaseIF>, bool>(a_baseif, a_live);
-  m_fraction = a_fraction;
+
+  if(a_live){
+    m_fraction = a_fraction;
+  }
+  else{
+    m_fraction = 0.0;
+  }
 }
 
 const RefCountedPtr<BaseIF>& electrode::get_function() const {

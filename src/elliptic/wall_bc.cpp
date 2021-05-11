@@ -26,7 +26,6 @@ void wall_bc::set_live(bool a_live){
   m_live = a_live;
 }
 
-
 void wall_bc::set_function(Real (*a_func)(const RealVect a_pos)){
   m_func = a_func;
 }
@@ -60,4 +59,5 @@ int wall_bc::map_bc(const int a_dir, const Side::LoHiSide a_side) {
 
   return 2*a_dir + iside;
 }
+
 #include "CD_NamespaceFooter.H"

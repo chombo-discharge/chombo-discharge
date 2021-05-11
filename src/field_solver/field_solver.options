@@ -1,10 +1,10 @@
 # ====================================================================================================
 # FIELD_SOLVER CLASS OPTIONS
 # ====================================================================================================
-field_solver.bc_x_low  = neumann               # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver.bc_x_high = neumann               # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver.bc_y_low  = dirichlet_ground      # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver.bc_y_high = dirichlet_live        # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver.bc_z_low  = neumann               # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
-field_solver.bc_z_high = neumann               # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+field_solver.bc_x_low  = neumann 0.0           # Bc type.
+field_solver.bc_x_high = neumann 0.0           # Bc type.
+field_solver.bc_y_low  = dirichlet 0.0         # Bc type.
+field_solver.bc_y_high = dirichlet 1.0         # Bc type.
+field_solver.bc_z_low  = neumann 0.0           # Bc type.
+field_solver.bc_z_high = neumann 0.0           # Bc type.
 field_solver.plt_vars  = phi rho E             # Plot variables. Possible vars are 'phi', 'rho', 'E', 'resid'

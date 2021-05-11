@@ -5,16 +5,18 @@
   @date Dec. 2017
 */
 
-#include "mfdirichletconductivityebbc.H"
-#include "mfconductivityop.H"
-#include "mfalias.H"
-#include "data_ops.H"
+
 
 #include <EBArith.H>
 #include <DirichletConductivityDomainBC.H>
 #include <MFLevelDataOps.H>
 #include <BaseIVFactory.H>
 #include <EBAMRDataOps.H>
+
+#include "mfdirichletconductivityebbc.H"
+#include "mfconductivityop.H"
+#include "mfalias.H"
+#include "data_ops.H"
 
 #include "CD_NamespaceHeader.H"
   
@@ -250,13 +252,8 @@ void mfconductivityop::set_time(Real* a_time){
   m_time = a_time;
 }
 
-void mfconductivityop::set_electrodes(const Vector<electrode>& a_electrodes, const RefCountedPtr<BaseBCFuncEval> a_potential){
-#if verb
-  pout() << "mfconductivityop::set_electrodes"<< endl;
-#endif
-
-  m_electrodes = a_electrodes;
-  m_potential  = a_potential;
+void mfconductivityop::setDirichletEbBc(const ElectrostaticEbBc& a_ebbc){
+  m_electrostaticEbBc = a_ebbc;
 
   this->set_bc_from_levelset();
 }
@@ -296,7 +293,6 @@ void mfconductivityop::set_bc_from_levelset(){
   pout() << "mfconductivityop::set_bc_from_levelset"<< endl;
 #endif
 
-  //  std::cout << *m_time << std::endl;
 
   const int comp = 0;
 
@@ -313,28 +309,24 @@ void mfconductivityop::set_bc_from_levelset(){
 	const VolIndex& vof = vofit();
 	const RealVect pos  = EBArith::getVofLocation(vof, physDx, m_origin);
 
-	if(m_electrodes.size() > 0){
-	  int  func = 0;
-	  Real dist = m_electrodes[0].get_function()->value(pos);
+	const std::vector<std::pair<electrode, ElectrostaticEbBc::BcFunction> >& electrodeBcs = m_electrostaticEbBc.getBcs();
+	
+	if(electrodeBcs.size() > 0){
+	  int  func = -1;
+	  Real dist = std::numeric_limits<Real>::infinity();
 
-	  for (int i = 1; i < m_electrodes.size(); i++){
-	    Real cur_val = (m_electrodes[i].get_function())->value(pos);
-	    if(Abs(cur_val) < Abs(dist)){
+	  for (int i = 0; i < electrodeBcs.size(); i++){
+	    Real cur_val = (electrodeBcs[i].first.get_function())->value(pos);
+	    if(std::abs(cur_val) < std::abs(dist)){
 	      func  = i;
 	      dist  = cur_val;
 	    }
 	  }
 
 
-	  Real potential;
-	  if(m_electrodes[func].is_live()){
-	    potential = m_potential->value(pos, comp);
-	    potential *= m_electrodes[func].get_fraction();
-	  }
-	  else{
-	    potential = 0.0;
-	  }
-	  val[dit()](vof, comp) = potential;
+	  ElectrostaticEbBc::BcFunction bcFunction = electrodeBcs[func].second;
+	  
+	  val[dit()](vof, comp) = bcFunction(pos, 0.0);
 	}
       }
     }

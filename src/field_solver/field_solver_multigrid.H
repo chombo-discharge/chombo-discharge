@@ -10,7 +10,6 @@
 
 #include "field_solver.H"
 #include "mfconductivityopfactory.H"
-#include "dirichlet_func.H"
 
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
@@ -90,11 +89,6 @@ public:
     @brief Automatic tuning of the Poisson solver
   */
   virtual void auto_tune();
-
-  /*!
-    @brief Set potential
-  */
-  virtual void set_potential(Real (*a_potential)(const Real a_time));
 
   /*!
     @brief Regrid function
@@ -374,16 +368,6 @@ protected:
   MFSimpleSolver m_mfsolver;
 
   /*!
-    @brief Potential function
-  */
-  RefCountedPtr<dirichlet_func> m_bcfunc;
-
-  /*!
-    @brief Mapped potential functions
-  */
-  Vector<RefCountedPtr<BaseBCFuncEval> > m_wall_bcfunc;
-
-  /*!
     @brief Coarsened MG grids
   */
   Vector<DisjointBoxLayout> m_mg_grids;
@@ -403,14 +387,6 @@ protected:
   */
   Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
 
-
-
-  /*!
-    @brief Need to override this in order to pass in the correct time to boundary conditions
-  */
-  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
-
-
   /*!
     @brief Set face-centered permittivities
   */
@@ -429,11 +405,8 @@ protected:
 			   const Real&               a_dx,
 			   const Vector<dielectric>& a_dielectrics);
 
-
-
   // Option parsing functions
   virtual void parse_autotune();     // Parse autotuning
-  virtual void parse_domain_bc();    // Parse domain boundary conditions
   virtual void parse_plot_vars();    // Parse plot variables
   virtual void parse_gmg_settings(); // Parse geometric multigrid settings
   virtual void parse_kappa_source(); // Parse source scaling

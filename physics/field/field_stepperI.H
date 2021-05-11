@@ -52,7 +52,6 @@ namespace physics {
       else {
 	MayDay::Abort("field_stepper::field_stepper - unknown box sorting method requested for argument 'box_sorting'");
       }
-
     }
 
     template <class T>
