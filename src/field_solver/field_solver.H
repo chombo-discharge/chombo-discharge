@@ -194,7 +194,7 @@ public:
     @param[in] a_side Side in the coordinate direction.
     @param[in] a_function Boundary condition function.
   */
-  virtual void set_domain_bc_wall_function(const int a_dir, const Side::LoHiSide a_side, ElectrostaticDomainBc::BcFunction a_function);
+  virtual void set_domain_bc_wall_function(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function);
 
   /*!
     @brief Set embedded boundary Dirichlet function on a specific electrode 

@@ -303,7 +303,7 @@ void mfconductivityop::set_bc_from_levelset(){
 #endif
 
   //  std::cout << *m_time << std::endl;
-
+#if 1 // Old code
   const int comp = 0;
 
   const Real physDx = m_dx/m_lengthScale;
@@ -345,6 +345,45 @@ void mfconductivityop::set_bc_from_levelset(){
       }
     }
   }
+#else // New code
+    const int comp = 0;
+
+  const Real physDx = m_dx/m_lengthScale;
+  
+  for (int iphase = 0; iphase < m_phases; iphase++){
+    LevelData<BaseIVFAB<Real> >& val = *m_dirival[iphase];
+
+    for (DataIterator dit = val.dataIterator(); dit.ok(); ++dit){
+      const IntVectSet& ivs  = val[dit()].getIVS();
+      const EBGraph& ebgraph = val[dit()].getEBGraph();
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const RealVect pos  = EBArith::getVofLocation(vof, physDx, m_origin);
+
+	const std::vector<std::pair<electrode, ElectrostaticEbBc::BcFunction> >& electrodeBcs = m_electrostaticEbBc.getBcs();
+	
+	if(electrodeBcs.size() > 0){
+	  int  func = -1;
+	  Real dist = std::numeric_limits<Real>::infinity();
+
+	  for (int i = 0; i < electrodeBcs.size(); i++){
+	    Real cur_val = (electrodeBcs[i].first.get_function())->value(pos);
+	    if(std::abs(cur_val) < std::abs(dist)){
+	      func  = i;
+	      dist  = cur_val;
+	    }
+	  }
+
+
+	  ElectrostaticEbBc::BcFunction bcFunction = electrodeBcs[func].second;
+	  
+	  val[dit()](vof, comp) = bcFunction(pos, 0.0);
+	}
+      }
+    }
+  }
+#endif
 }
 
 void mfconductivityop::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneous){

@@ -346,7 +346,7 @@ void field_solver::set_potential(std::function<Real(const Real a_time)> a_potent
   m_potential = a_potential;
 }
 
-void field_solver::set_domain_bc_wall_function(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction a_function){
+void field_solver::set_domain_bc_wall_function(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function){
   CH_TIME("field_solver::set_wall_function");
   if(m_verbosity > 4){
     pout() << "field_solver::set_wall_function" << endl;
@@ -356,7 +356,6 @@ void field_solver::set_domain_bc_wall_function(const int a_dir, const Side::LoHi
 
   m_domainBcFunctions.at(curWall) = a_function;
 }
-
 
 void field_solver::set_electrode_dirichlet_function(const int a_electrode, const ElectrostaticEbBc::BcFunction& a_function){
   CH_TIME("field_solver::set_electrode_dirichlet_functions");
@@ -560,9 +559,11 @@ void field_solver::set_default_eb_bc_functions() {
   for (int i = 0; i < electrodes.size(); i++){
     const electrode& elec = electrodes[i];
 
-    ElectrostaticEbBc::BcFunction curFunc = [&](const RealVect a_position, const Real a_time){
-      Real val = (elec.is_live()) ? 1.0 : 0.0;
-      return m_potential(m_time)*val*elec.get_fraction();
+    Real val  = (elec.is_live()) ? 1.0 : 0.0;
+    Real frac = elec.get_fraction();
+    
+    ElectrostaticEbBc::BcFunction curFunc = [&, val, frac](const RealVect a_position, const Real a_time){
+      return m_potential(m_time)*val*frac;
     };
 
     m_ebBc.addEbBc(elec, curFunc);
