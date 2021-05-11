@@ -12,18 +12,18 @@ done
 for i in `find . -name "*.H" -type f`; do
     sed -i 's/field_solver_multigrid/FieldSolverMultigrid/g' $i
     sed -i 's/field_solver/FieldSolver/g' $i
+    sed -i 's/field_stepper/FieldStepper/g' $i
 done
 for i in `find . -name "*.cpp" -type f`; do
     sed -i 's/field_solver_multigrid/FieldSolverMultigrid/g' $i
     sed -i 's/field_solver/FieldSolver/g' $i
+    sed -i 's/field_stepper/FieldStepper/g' $i
 done
 for i in `find . -name "*.inputs" -type f`; do
     sed -i 's/field_solver_multigrid/FieldSolverMultigrid/g' $i
-    sed -i 's/field_solver/FieldSolver/g' $i
 done
 for i in `find . -name "*.options" -type f`; do
     sed -i 's/field_solver_multigrid/FieldSolverMultigrid/g' $i
-    sed -i 's/field_solver/FieldSolver/g' $i
 done
 
 # Update gnumakefiles everywhere
