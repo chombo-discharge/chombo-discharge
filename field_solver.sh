@@ -15,14 +15,15 @@ done
 # Rename field_solver_multigrid to FieldSolverMultigrid and field_solver to FieldSolver
 for i in `find . -name "*.H" -type f`; do
     sed -i 's/field_solver_multigrid/FieldSolverMultigrid/g' $i
-    sed -i 's/field_solver/FieldSolver/g' $i
     sed -i 's/field_solver_factory/FieldSolverFactory/g' $i
     sed -i 's/field_stepper/FieldStepper/g' $i
+    sed -i 's/field_solver/FieldSolver/g' $i
 done
 for i in `find . -name "*.cpp" -type f`; do
     sed -i 's/field_solver_multigrid/FieldSolverMultigrid/g' $i
-    sed -i 's/field_solver/FieldSolver/g' $i
+    sed -i 's/field_solver_factory/FieldSolverFactory/g' $i
     sed -i 's/field_stepper/FieldStepper/g' $i
+    sed -i 's/field_solver/FieldSolver/g' $i
 done
 for i in `find . -name "*.inputs" -type f`; do
     sed -i 's/field_solver_multigrid/FieldSolverMultigrid/g' $i
@@ -46,6 +47,12 @@ mv src/field_solver/field_solver_multigrid.options src/field_solver/CD_FieldSolv
 
 mv src/field_solver/field_solver_factory.H src/field_solver/CD_FieldSolverFactory.H
 mv src/field_solver/field_solver_factoryI.H src/field_solver/CD_FieldSolverFactoryImplem.H
+
+mv physics/field physics/Field
+mv physics/field_stepper.H physics/CD_FieldStepper.H
+mv physics/field_stepper.cpp physics/CD_FieldStepper.cpp
+mv physics/field_stepperI.H physics/CD_FieldStepperImplem.H
+
 
 # Move field_solver folder to FieldSolver folder
 mv src/field_solver src/FieldSolver
