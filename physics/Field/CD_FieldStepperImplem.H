@@ -33,7 +33,7 @@ namespace physics {
       std::string str;
 
       pp.get("load_balance", m_load_balance);
-      pp.get("box_sorting", str);
+      pp.get("box_sorting",  str);
       pp.get("realm",       m_realm);
       pp.get("verbosity",   m_verbosity);
       
@@ -61,15 +61,16 @@ namespace physics {
 
     template <class T>
     void FieldStepper<T>::setup_solvers(){
+      
       // Poisson setup
       m_poisson = RefCountedPtr<FieldSolver> (new T());
-      m_poisson->set_verbosity(m_verbosity);
-      m_poisson->parse_options();
-      m_poisson->set_amr(m_amr);
-      m_poisson->set_computational_geometry(m_compgeom);
-      m_poisson->set_potential(s_potential_one);
-      m_poisson->set_realm(m_realm);
-      m_poisson->set_time(0, 0.0, 0.0);
+      m_poisson->setVerbosity(m_verbosity);
+      m_poisson->parseOptions();
+      m_poisson->setAmr(m_amr);
+      m_poisson->setComputationalGeometry(m_compgeom);
+      m_poisson->setVoltage(FieldSolver::s_voltageOne);
+      m_poisson->setRealm(m_realm);
+      m_poisson->setTime(0, 0.0, 0.0);
 
       // Setup sigma
       m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
@@ -82,7 +83,7 @@ namespace physics {
 
     template <class T>
     void FieldStepper<T>::register_operators(){
-      m_poisson->register_operators();
+      m_poisson->registerOperators();
     }
 
     template <class T>
@@ -92,7 +93,7 @@ namespace physics {
 
     template <class T>
     void FieldStepper<T>::allocate() {
-      m_poisson->allocate_internals();
+      m_poisson->allocateInternals();
       m_sigma->allocate_internals();
     }
 
@@ -102,8 +103,8 @@ namespace physics {
       pp.get("init_rho",   m_init_rho);
       pp.get("init_sigma", m_init_sigma);
 
-      MFAMRCellData& state = m_poisson->get_state();  
-      MFAMRCellData& rho   = m_poisson->get_source();
+      MFAMRCellData& state = m_poisson->getPotential();  
+      MFAMRCellData& rho   = m_poisson->getRho();
       EBAMRIVData& sigma   = m_sigma->get_state();
 
       data_ops::set_value(state, 0.0);
@@ -113,17 +114,14 @@ namespace physics {
 
     template <class T>
     void FieldStepper<T>::solve_poisson(){
-      MFAMRCellData& state = m_poisson->get_state();  
-      MFAMRCellData& rho   = m_poisson->get_source();
+      
+      MFAMRCellData& state = m_poisson->getPotential();  
+      MFAMRCellData& rho   = m_poisson->getRho();
       EBAMRIVData& sigma   = m_sigma->get_state();
 
-      const Real t0 = MPI_Wtime();
       const bool converged = m_poisson->solve(state, rho, sigma);
-      const Real t1 = MPI_Wtime();
-      // if(procID() == 0){
-      // 	std::cout << t1 - t0 << std::endl;
-      // }
-      m_poisson->compute_E();
+      
+      m_poisson->computeElectricField();
 
       if(!converged){
 	MayDay::Warning("FieldStepper<T>::advance - did not converge");
@@ -153,15 +151,15 @@ namespace physics {
 
     template <class T>
     int FieldStepper<T>::get_num_plot_vars() const{
-      int ncomp = m_poisson->get_num_plotvars();
+      int ncomp = m_poisson->getNumberOfPlotVariables();
       ncomp += m_sigma->get_num_plotvars();
       return ncomp;
     }
 
     template <class T>
     void FieldStepper<T>::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const{
-      a_plotvar_names.append(m_poisson->get_plotvar_names());
-      m_poisson->write_plot_data(a_output, a_icomp);
+      a_plotvar_names.append(m_poisson->getPlotVariableNames());
+      m_poisson->writePlotData(a_output, a_icomp);
 
       a_plotvar_names.append(m_sigma->get_plotvar_names());
       m_sigma->write_plot_data(a_output, a_icomp);
@@ -172,17 +170,19 @@ namespace physics {
       m_step = a_step;
       m_time = a_time;
       m_dt   = a_dt;
+
+      m_poisson->setTime(a_step, a_time, a_dt);
     }
 
     template <class T>
     void FieldStepper<T>::pre_regrid(const int a_lbase, const int a_old_finest_level){
-      m_poisson->pre_regrid(a_lbase, a_old_finest_level);
+      m_poisson->preRegrid(a_lbase, a_old_finest_level);
       m_sigma->pre_regrid(a_lbase, a_old_finest_level);
     }
 
     template <class T>
     void FieldStepper<T>::deallocate(){
-      m_poisson->deallocate_internals();
+      m_poisson->deallocateInternals();
       m_sigma->deallocate_internals();
     }
 
@@ -228,9 +228,9 @@ namespace physics {
 	m_amr->regrid_operators(a_lmin, a_finest_level, 1);
 
 	// Set up the operator factor and fetch it.
-	solver->set_coefficients();
-	solver->setup_operator_factory();
-	RefCountedPtr<mfconductivityopfactory>& factory = solver->get_opfact();
+	solver->setMultigridCoefficients();
+	solver->setupOperatorFactory();
+	RefCountedPtr<mfconductivityopfactory>& factory = solver->getOperatorFactory();
 
 	// Go through each level and load balance. 
 	for (int lvl = 0; lvl <= a_finest_level; lvl++){

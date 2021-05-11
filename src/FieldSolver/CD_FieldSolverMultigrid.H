@@ -48,7 +48,10 @@ protected:
   
 public:
 
-  RefCountedPtr<mfconductivityopfactory>& get_opfact(){
+  /*!
+    @brief Added because of CD_FieldStepper, which uses the operator factory to generate computational loads.
+  */
+  RefCountedPtr<mfconductivityopfactory>& getOperatorFactory(){
     return m_opfact;
   }
 
@@ -63,47 +66,37 @@ public:
   virtual ~FieldSolverMultigrid();
 
   /*!
-    @brief Override this one for testing purposes. 
-  */
-  virtual bool solve(const bool a_zerophi = false);
-
-  /*!
     @brief Solve Poisson onto state 
   */
   virtual bool solve(MFAMRCellData&       a_state,
 		     const MFAMRCellData& a_rho,
 		     const EBAMRIVData&   a_sigma,
-		     const bool           a_zerophi = false);
+		     const bool           a_zerophi = false) override;
 
   /*!
     @brief parse options
   */
-  virtual void parse_options() override;
+  virtual void parseOptions() override;
 
   /*!
     @brief Parse runtime options
   */
-  virtual void parse_runtime_options() override;
-
-  /*!
-    @brief Automatic tuning of the Poisson solver
-  */
-  virtual void auto_tune();
+  virtual void parseRuntimeOptions() override;
 
   /*!
     @brief Regrid function
   */
-  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
 
   /*!
     @brief Register operators for AMR
   */
-  virtual void register_operators();
+  virtual void registerOperators() override;
 
   /*!
     @brief Set solver parameters. These are normally good for this class. 
   */
-  virtual void set_gmg_solver_parameters(relax      a_relax_type  = relax::gsrb_fast,
+  virtual void setMultigridSettings(relax      a_relax_type  = relax::gsrb_fast,
 					 amrmg      a_gmg_type    = amrmg::vcycle,
 					 const int  a_verbosity   = 100,
 					 const int  a_pre_smooth  = 16,
@@ -118,109 +111,99 @@ public:
     @brief Set the bottom solver.  
     @param[in] a_which_solver Solver type. 0 = smoother, 1 = BiCGStab
   */
-  virtual void set_bottom_solver(const int a_which_solver);
+  virtual void setBottomSolver(const int a_which_solver);
 
   /*!
     @brief Set the depth for bottom drop
   */
-  virtual void set_bottom_drop(const int a_bottom_drop);
+  virtual void setBottomDrop(const int a_bottom_drop);
 
   /*!
     @brief Set number of smoothing for the bottom solver (simplified solver only)
   */
-  virtual void set_botsolver_smooth(const int a_smooth);
+  virtual void setSmoothingsForBottomSolver(const int a_smooth);
 
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocate_internals();
+  virtual void allocateInternals() override;
 
   /*!
     @brief Post checkpoint stuff. 
   */
-  virtual void post_checkpoint() override;
+  virtual void postCheckpoint() override;
 
   /*!
     @brief Get a-coefficient
   */
-  virtual MFAMRCellData& get_aco();
+  virtual MFAMRCellData& getACoefficient();
 
   /*!
     @brief Get b-coefficient
   */
-  virtual MFAMRFluxData& get_bco();
+  virtual MFAMRFluxData& getBCoefficient();
 
   /*!
     @brief Get irregular b coefficient
   */
-  virtual MFAMRIVData& get_bco_irreg();
-
-  /*!
-    @brief Return require number of ghost cells. 
-  */
-  virtual int query_ghost() const;
+  virtual MFAMRIVData& getBCoefficientIrreg();
 
   /*!
     @brief Set up the geometric multigrid solver 
   */
-  virtual void setup_gmg();
+  virtual void setupMultigrid();
   
   /*!
     @brief Set coefficients
   */
-  virtual void set_coefficients();
+  virtual void setMultigridCoefficients();
 
   /*!
     @brief Set up the operator factory
   */
-  virtual void setup_operator_factory();
+  virtual void setupOperatorFactory();
 
   /*!
     @brief Set up AMRMultiGrid
   */
-  virtual void setup_solver();
+  virtual void setupMultigridSolver();
 
   /*!
     @brief Check if solver needs setup
   */
-  virtual void set_needs_setup(const bool& a_needs_setup);
+  virtual void setNeedsMultigridSetup(const bool& a_needs_setup);
 
   /*!
     @brief Set the permittivities
   */
-  virtual void set_permittivities(const Vector<dielectric>& a_dielectrics);
+  virtual void setPermittivities(const Vector<dielectric>& a_dielectrics);
   
 protected:
 
   /*!
     @brief Relaxation type for gmg
   */
-  relax m_gmg_relax_type;
+  relax m_multigridRelaxMethod;
 
   /*!
     @brief GMG multigrid type
   */
-  amrmg m_gmg_type;
-
-  /*!
-    @brief Returns one. Used for mapping boundary conditions
-  */
-  static Real s_constant_one(const RealVect a_pos);
+  amrmg m_multigridType;
 
   /*!
     @brief Scale by kappa or not
   */
-  bool m_kappa_source;
+  bool m_kappaSource;
 
   /*!
     @brief Needs setup
   */
-  bool m_needs_setup;
+  bool m_needsMultigridSetup;
 
   /*!
     @brief
   */
-  bool m_has_mg_stuff;
+  bool m_hasDeeperMultigridLevels;
 
   /*!
     @brief Number of coarsening levels for multigrid
@@ -230,77 +213,72 @@ protected:
   /*!
     @brief Verbosity for geometric multigrid
   */
-  int m_gmg_verbosity;
+  int m_multigridVerbosity;
 
   /*!
     @brief Number of smoothings before averaging
   */
-  int m_gmg_pre_smooth;
+  int m_multigridPreSmoothg;
 
   /*!
     @brief Number of smoothings before averaging
   */
-  int m_gmg_post_smooth;
+  int m_multigridPostSmooth;
 
   /*!
     @brief Number of smoothing before bottom solver
   */
-  int m_gmg_bot_smooth;
+  int m_multigridBottomSmooth;
 
   /*!
     @brief Maximum number of iterations
   */
-  int m_gmg_max_iter;
+  int m_multigridMaxIterations;
 
   /*!
     @brief Minimum number of iterations
   */
-  int m_gmg_min_iter;
+  int m_multigridMinIterations;
 
   /*!
     @brief Bottom solver type
   */
-  int m_bottomsolver;
+  int m_bottomSolver;
 
   /*!
     @brief Number of smoothing for bottom solver
   */
-  int m_numsmooth;
+  int m_numSmoothingsForSimpleSolver;
 
   /*!
     @brief Set bottom drop depth
   */
-  int m_bottom_drop;
+  int m_numCellsBottomDrop;
 
   /*!
     @brief Set bc order 
   */
-  int m_bc_order;
+  int m_multigridBcOrder;
 
   /*!
     @brief Length scale for the Poisson equation
   */
-  Real m_length_scale;
+  Real m_lengthScale;
 
   /*!
     @brief Target residue. If they residue is greater than this, we have a problematic cell. 
   */
-  Real m_converged_resid;
+  Real m_convergedResidue;
 
   /*!
     @brief 
   */
-  Real m_gmg_eps;
+  Real m_multigridTolerance;
   
   /*!
     @brief 
   */
-  Real m_gmg_hang;
-
-  /*!
-    @brief 
-  */
-  Real m_gmg_norm_thresh;
+  Real m_multigridHang;
 
   /*!
     @brief Operator factory
@@ -310,17 +288,17 @@ protected:
   /*!
     @brief b-coefficient
   */
-  MFAMRCellData m_aco;
+  MFAMRCellData m_aCoefficient;
 
   /*!
     @brief b-coefficient
   */
-  MFAMRFluxData m_bco;
+  MFAMRFluxData m_bCoefficient;
 
   /*!
     @brief b-coefficient
   */
-  MFAMRIVData m_bco_irreg;
+  MFAMRIVData m_bCoefficientIrreg;
 
   /*!
     @brief Zero
@@ -330,17 +308,17 @@ protected:
   /*!
     @brief Scaled soruce
   */
-  MFAMRCellData m_scaled_source;
+  MFAMRCellData m_scaledSource;
 
   /*!
     @brief Sigma
   */
-  EBAMRIVData m_scaled_sigma;
+  EBAMRIVData m_scaledSigma;
 
   /*!
     @brief Geometric multigrid solver
   */
-  AMRMultiGrid<LevelData<MFCellFAB> > m_gmg_solver;
+  AMRMultiGrid<LevelData<MFCellFAB> > m_multigridSolver;
 
   /*!
     @brief Conjugate gradient solver bottom MG level
@@ -353,16 +331,6 @@ protected:
   GMRESSolver<LevelData<MFCellFAB> > m_gmres;
 
   /*!
-    @brief Geometric multigrid solver
-  */
-  AMRMultiGrid<LevelData<EBCellFAB> > m_cond_solver;
-
-  /*!
-    @brief Conjugate gradient solver bottom MG level
-  */
-  BiCGStabSolver<LevelData<EBCellFAB> > m_cond_bicgstab;
-
-  /*!
     @brief multi-fluid simple solver
   */
   MFSimpleSolver m_mfsolver;
@@ -370,12 +338,12 @@ protected:
   /*!
     @brief Coarsened MG grids
   */
-  Vector<DisjointBoxLayout> m_mg_grids;
+  Vector<DisjointBoxLayout> m_deeperMultigridGrids;
 
   /*!
     @brief Coarsened problem domains
   */
-  Vector<ProblemDomain> m_mg_domains;
+  Vector<ProblemDomain> m_deeperMultigridDomains;
 
   /*!
     @brief Coarsened EBLevelGrids
@@ -390,7 +358,7 @@ protected:
   /*!
     @brief Set face-centered permittivities
   */
-  virtual void set_face_perm(EBFluxFAB&                a_perm,
+  virtual void setFacePermittivities(EBFluxFAB&                a_perm,
 			     const Box&                a_box,
 			     const RealVect&           a_origin,
 			     const Real&               a_dx,
@@ -399,21 +367,25 @@ protected:
   /*!
     @brief Set EB-centered permittivities
   */
-  virtual void set_eb_perm(BaseIVFAB<Real>&          a_perm,
+  virtual void setEbPermittivities(BaseIVFAB<Real>&          a_perm,
 			   const Box&                a_box,
 			   const RealVect&           a_origin,
 			   const Real&               a_dx,
 			   const Vector<dielectric>& a_dielectrics);
 
-  // Option parsing functions
-  virtual void parse_autotune();     // Parse autotuning
-  virtual void parse_plot_vars();    // Parse plot variables
-  virtual void parse_gmg_settings(); // Parse geometric multigrid settings
-  virtual void parse_kappa_source(); // Parse source scaling
+  /*!
+    @brief Parse multigrid settings
+  */
+  virtual void parseMultigridSettings();
+
+  /*!
+    @brief Parse m_kappaSource
+  */
+  virtual void parseKappaSource(); 
 
   // Define mg levels
 public:
-  virtual void define_mg_levels();
+  virtual void defineDeeperMultigridLevels();
 
 };
 #include "CD_NamespaceFooter.H"

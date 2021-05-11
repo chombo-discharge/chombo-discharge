@@ -5,13 +5,14 @@
   @date Nov. 2017
 */
 
-#ifndef _FIELD_SOLVER_
-#define _FIELD_SOLVER_
+#ifndef FieldSolver_H
+#define FieldSolver_H
 
 #include "computational_geometry.H"
 #include "amr_mesh.H"
 #include "CD_ElectrostaticDomainBc.H"
 #include "CD_ElectrostaticEbBc.H"
+
 #include "CD_NamespaceHeader.H"
 
 /*!
@@ -19,17 +20,7 @@
 */
 class FieldSolver {
 public:
-
   
-  /*!
-    @brief Silly enum for describing the potential at domain faces
-  */
-  enum class potential {
-    ground,
-    live,
-    mapped // Not supported yet...?
-  };
-
   /*!
     @brief Default function for space-time dependence of domain boundary conditions. 
   */
@@ -38,7 +29,7 @@ public:
   /*!
     @brief Potential of one.
   */
-  static Real s_potential_one(const Real a_time);
+  static Real s_voltageOne(const Real a_time);
 
   /*!
     @brief Constructor
@@ -71,47 +62,42 @@ public:
   /*!
     @brief Cell-centered E-field computation
   */
-  virtual void compute_E();
+  virtual void computeElectricField();
 
   /*!
     @brief Cell-centered E-field computation
   */
-  virtual void compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
+  virtual void computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
   
   /*!
     @brief Parse options
   */
-  virtual void parse_options() = 0;
+  virtual void parseOptions() = 0;
 
   /*!
     @brief Parse runtime options
   */
-  virtual void parse_runtime_options() = 0;
+  virtual void parseRuntimeOptions() = 0;
   
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocate_internals();
-
-  /*!
-    @brief Automatic tuning of solver
-  */
-  virtual void auto_tune() = 0;
+  virtual void allocateInternals();
 
   /*!
     @brief Cache state before regridding
   */
-  virtual void pre_regrid(const int a_lbase, const int a_old_finest_level);
+  virtual void preRegrid(const int a_lbase, const int a_old_finest_level);
 
   /*!
     @brief Compute displacement field from E
   */
-  virtual void compute_D(MFAMRCellData& a_D, const MFAMRCellData& a_E);
+  virtual void computeDisplacementField(MFAMRCellData& a_D, const MFAMRCellData& a_E);
 
   /*!
     @brief Deallocate internal storage
   */
-  virtual void deallocate_internals();
+  virtual void deallocateInternals();
 
   /*!
     @brief Regrid method. 
@@ -121,72 +107,67 @@ public:
   /*!
     @brief Register operators for AMR
   */
-  virtual void register_operators() = 0;
+  virtual void registerOperators() = 0;
 
   /*!
     @brief Set the computational geometry
   */
-  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
+  virtual void setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_compgeom);
   
   /*!
     @brief Set the amr object
   */
-  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
-
-  /*!
-    @brief Set which variables to output
-  */
-  virtual void set_output_variables();
+  virtual void setAmr(const RefCountedPtr<amr_mesh>& a_amr);
 
   /*!
     @brief Write plot file
   */
-  virtual void write_plot_file();
+  virtual void writePlotFile();
 
   /*!
     @brief Write checkpoint data into handle
   */
-  virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const;
+  virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
 
   /*!
     @brief Read checkpoint data from handle
   */
-  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
+  virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 
   /*!
     @brief Post checkpoint things
   */
-  virtual void post_checkpoint();
+  virtual void postCheckpoint();
 
   /*!
     @brief Write output data to a_output
   */
-  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write mf-data to output
   */
-  virtual void write_mfdata(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp);
+  virtual void writeMultifluidData(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp);
 
   /*!
     @brief Set realm
   */
-  virtual void set_realm(const std::string a_realm);
+  virtual void setRealm(const std::string a_realm);
 
   /*!
     @brief Get current time
   */
-  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
+  virtual void setTime(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Set verbosity.
   */
-  virtual void set_verbosity(const int a_verbosity);
+  virtual void setVerbosity(const int a_verbosity);
 
   /*!
     @brief Set potential dependence in time. 
   */
-  virtual void set_potential(std::function<Real(const Real a_time)> a_potential);
+  virtual void setVoltage(std::function<Real(const Real a_time)> a_voltage);
   
   /*!
     @brief Boundary condition function on a wall. 
@@ -194,78 +175,72 @@ public:
     @param[in] a_side Side in the coordinate direction.
     @param[in] a_function Boundary condition function.
   */
-  virtual void set_domain_bc_wall_function(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function);
+  virtual void setDomainBcWallFunction(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function);
 
   /*!
     @brief Set embedded boundary Dirichlet function on a specific electrode 
   */
-  virtual void set_electrode_dirichlet_function(const int a_electrode, const ElectrostaticEbBc::BcFunction& a_function);
+  virtual void setElectrodeDirichletFunction(const int a_electrode, const ElectrostaticEbBc::BcFunction& a_function);
 
   /*!
     @brief Set potential in covered electrode cells
   */
-  virtual void set_covered_potential(EBAMRCellData& a_phi, const int a_comp, const Real a_time);
-
-  /*!
-    @brief Query the required number of ghost cells
-  */
-  virtual int query_ghost() const = 0;
+  virtual void setCoveredPotential(EBAMRCellData& a_phi, const int a_comp, const Real a_time);
 
   /*!
     @brief Get number of output fields
   */
-  virtual int get_num_plotvars() const;
+  virtual int getNumberOfPlotVariables() const;
 
   /*!
     @brief Get current time
   */
-  virtual Real get_time() const;
+  virtual Real getTime() const;
 
   /*!
     @brief Compute the capacitance. This assumes that m_state is a current solution to your Poisson problem!
   */
-  virtual Real compute_capacitance();
+  virtual Real computeCapacitance();
 
   /*!
     @brief Compute energy density U = 0.5*int(E.dot.D dV)
   */
-  virtual Real compute_U(const MFAMRCellData& a_E);
+  virtual Real computeEnergyDensity(const MFAMRCellData& a_electricField);
 
   /*!
     @brief Get output plot names
   */
-  virtual Vector<std::string> get_plotvar_names() const;
+  virtual Vector<std::string> getPlotVariableNames() const;
 
   /*!
     @brief Get the realm
   */
-  const std::string get_realm() const;
+  const std::string getRealm() const;
   
   /*!
     @brief Get multifluid state
   */
-  MFAMRCellData& get_state();
+  MFAMRCellData& getPotential();
 
   /*!
     @brief Get electric field
   */
-  MFAMRCellData& get_E();
+  MFAMRCellData& getElectricField();
 
   /*!
     @brief Get E-field on specific phase
   */
-  EBAMRCellData& get_E(const phase::which_phase a_phase);
+  EBAMRCellData& getElectricField(const phase::which_phase a_phase);
 
   /*!
-    @brief Get multifluid source
+    @brief Get space charge density. 
   */
-  MFAMRCellData& get_source();
+  MFAMRCellData& getRho();
 
   /*!
     @brief Get the residue
   */
-  MFAMRCellData& get_resid();
-
+  MFAMRCellData& getResidue();
   
 protected:
 
@@ -277,7 +252,7 @@ protected:
   /*!
     @brief Class name
   */
-  std::string m_class_name;
+  std::string m_className;
 
   /*!
     @brief MFindex space
@@ -302,62 +277,57 @@ protected:
   /*!
     @brief State data (i.e. the potential)
   */
-  MFAMRCellData m_state;
+  MFAMRCellData m_potential;
 
   /*!
     @brief E-field
   */
-  MFAMRCellData m_E;
+  MFAMRCellData m_electricField;
 
   /*!
-    @brief State data 
+    @brief Space charge density. 
   */
-  MFAMRCellData m_source;
+  MFAMRCellData m_rho;
 
   /*!
     @brief Gas-side E-field
   */
-  EBAMRCellData m_E_gas;
+  EBAMRCellData m_electricFieldGasSide;
 
   /*!
     @brief Solid-side E-field
   */
-  EBAMRCellData m_E_sol;
+  EBAMRCellData m_electricFieldSolidSide;
 
   /*!
-    @brief Surface source
+    @brief Surface charge density. 
   */
   EBAMRIVData m_sigma;
 
   /*!
-    @brief Final residue
+    @brief Residue after solving Poisson equation. 
   */
-  MFAMRCellData m_resid;
-
-  /*!
-    @brief Automatic tuning
-  */
-  bool m_autotune;
+  MFAMRCellData m_residue;
 
   /*!
     @brief Output state
   */
-  bool m_plot_phi;
+  bool m_plotPotential;
 
   /*!
     @brief Output rhs
   */
-  bool m_plot_rho;
+  bool m_plotRho;
 
   /*!
     @brief Output electric field
   */
-  bool m_plot_E;
+  bool m_plotElectricField;
 
   /*!
     @brief Output GMG residue
   */
-  bool m_plot_res;
+  bool m_plotResidue;
 
   /*!
     @brief Verbosity
@@ -367,7 +337,7 @@ protected:
   /*!
     @brief Time step
   */
-  int m_step;
+  int m_timeStep;
 
   /*!
     @brief Time step increment
@@ -402,38 +372,39 @@ protected:
   /*!
     @brief Potential function. 
   */
-  std::function<Real(const Real a_time)> m_potential;
+  std::function<Real(const Real a_time)> m_voltage;
 
   /*!
-    @brief Set the mfis
+    @brief Set which variables to output
   */
-  virtual void set_mfis(const RefCountedPtr<mfis>& a_mfis);
+  virtual void parsePlotVariables();
 
   /*!
     @brief Parse domain BCs
   */
-  virtual void parse_domain_bc();
+  virtual void parseDomainBc();
 
   /*!
     @brief Set default BC functions. This sets all the m_domainBcFunction objects to s_defaultDomainBcFunction (returns 1 everywhere). 
   */
-  virtual void set_default_domain_bc_functions();
+  virtual void setDefaultDomainBcFunctions();
 
   /*!
     @brief Set default Dirichlet boundary conditions on the embedded boundaries
   */
-  virtual void set_default_eb_bc_functions();
+  virtual void setDefaultEbBcFunctions();
 
   /*!
     @brief Returns BC type based on string
   */
-  virtual ElectrostaticDomainBc::BcType parse_bc_string(const std::string a_str) const;
+  virtual ElectrostaticDomainBc::BcType parseBcString(const std::string a_str) const;
 
   /*!
     @brief Shortcut for making a boundary condition string. This just returns m_class_name.bc.direction.side
   */
-  virtual std::string make_bc_string(const int a_dir, const Side::LoHiSide a_side) const;
+  virtual std::string makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
 };
+
 #include "CD_NamespaceFooter.H"
 
 #endif
