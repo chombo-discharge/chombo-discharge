@@ -1,29 +1,18 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file AmrMesh.H
-  @brief Declaration of a class that holds grids and useful EBAMR operators (for both phases)
+  @file   AmrMesh.H
+  @brief  Declaration of core class for handling AMR-related operations (with embedded boundaries)
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#ifndef _AMR_MESH_
-#define _AMR_MESH_
+#ifndef CD_AmrMesh_H
+#define CD_AmrMesh_H
 
-#include "EBAMRData.H"
-#include "computational_geometry.H"
-#include "mfis.H"
-#include "irreg_amr_stencil.H"
-#include "load_balance.H"
-#include "nwoebquadcfinterp.H"
-#include "MFLevelGrid.H"
-#include "ebcoarseaverage.H"
-#include "DomainFluxIFFAB.H"
-#include "DomainFluxIFFABFactory.H"
-#include "particle_container.H"
-#include "EBGhostCloud.H"
-#include "noncons_div.H"
-#include "realm.H"
-#include "load_balance.H"
-
+// Chombo includes
 #include <DisjointBoxLayout.H>
 #include <ebcoarseaverage.H>
 #include <EBFluxRegister.H>
@@ -36,8 +25,23 @@
 #include <EBPWLFineInterp.H>
 #include <ProblemDomain.H>
 
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <EBAMRData.H>
+#include <computational_geometry.H>
+#include <mfis.H>
+#include <irreg_amr_stencil.H>
+#include <load_balance.H>
+#include <nwoebquadcfinterp.H>
+#include <MFLevelGrid.H>
+#include <ebcoarseaverage.H>
+#include <DomainFluxIFFAB.H>
+#include <DomainFluxIFFABFactory.H>
+#include <particle_container.H>
+#include <EBGhostCloud.H>
+#include <noncons_div.H>
+#include <realm.H>
+#include <load_balance.H>
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief Class for handling spatial operations for streamer equations.
@@ -49,9 +53,9 @@ protected:
   /*!
     @brief Silly enum for default ghost interpolation
   */
-  enum class ghost_interpolation {
-    pwl,
-    quad,
+  enum class GhostInterpolation {
+    PiecewiseLinear,
+    Quadratic
   };
   
 public:
@@ -915,7 +919,7 @@ protected:
   /*!
     @brief Interpolation type
   */
-  ghost_interpolation m_ghostCellInterpolationMethod;
+  GhostInterpolation m_ghostCellInterpolationMethod;
 
   /*!
     @brief Coarsest box where we compute
@@ -1077,7 +1081,8 @@ protected:
   */
   void define_realms();
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_AmrMeshImplem.H>
 

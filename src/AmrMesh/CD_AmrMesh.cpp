@@ -800,10 +800,10 @@ void AmrMesh::parseGhostInterpolation(){
   ParmParse pp("AmrMesh");
   pp.get("ghost_interp", interp_type);
   if(interp_type == "pwl"){
-    m_ghostCellInterpolationMethod = ghost_interpolation::pwl;
+    m_ghostCellInterpolationMethod = GhostInterpolation::PiecewiseLinear;
   }
   else if(interp_type == "quad"){
-    m_ghostCellInterpolationMethod = ghost_interpolation::quad;
+    m_ghostCellInterpolationMethod = GhostInterpolation::Quadratic;
   }
   else{
     MayDay::Abort("AmrMesh::parseGhostInterpolation - unknown ghost interpolation requested");
@@ -1308,10 +1308,10 @@ void AmrMesh::interpGhost(EBAMRCellData& a_data, const std::string a_realm, cons
     MayDay::Abort(str.c_str());
   }  
 
-  if(m_ghostCellInterpolationMethod == ghost_interpolation::pwl){
+  if(m_ghostCellInterpolationMethod == GhostInterpolation::PiecewiseLinear){
     this->interpGhost_pwl(a_data, a_realm, a_phase);
   }
-  else if(m_ghostCellInterpolationMethod == ghost_interpolation::quad){
+  else if(m_ghostCellInterpolationMethod == GhostInterpolation::Quadratic){
     this->interpGhost_quad(a_data, a_realm, a_phase);
   }
   else{
@@ -1339,12 +1339,12 @@ void AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
     const int ncomps      = a_fineData.nComp();
     const Interval interv = Interval(0, ncomps-1);
     
-    if(m_ghostCellInterpolationMethod == ghost_interpolation::pwl){
+    if(m_ghostCellInterpolationMethod == GhostInterpolation::PiecewiseLinear){
       AggEBPWLFillPatch& fillpatch = *m_realms[a_realm]->getFillPatch(a_phase)[a_fineLevel];
     
       fillpatch.interpolate(a_fineData, a_coarData, a_coarData, 0.0, 0.0, 0.0, interv);
     }
-    else if(m_ghostCellInterpolationMethod == ghost_interpolation::quad){
+    else if(m_ghostCellInterpolationMethod == GhostInterpolation::Quadratic){
       nwoebquadcfinterp& quadcfi = *m_realms[a_realm]->getNWOEBQuadCFInterp(a_phase)[a_fineLevel];
       quadcfi.coarseFineInterp(a_fineData, a_coarData, 0, 0, ncomps);
     }
