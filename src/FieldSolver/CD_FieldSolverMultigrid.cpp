@@ -285,6 +285,8 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_state,
   pout() << "Total time: " << T << endl;
 #endif
 
+  this->computeElectricField();
+
   return converged;
 }
 

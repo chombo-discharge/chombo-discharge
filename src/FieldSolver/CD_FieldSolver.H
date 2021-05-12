@@ -242,15 +242,6 @@ public:
   virtual void setElectrodeDirichletFunction(const int a_electrode, const ElectrostaticEbBc::BcFunction& a_function);
 
   /*!
-    @brief Set potential in covered electrode cells. This sets the potential in the output holder to the one found from the electrodes. 
-    @param[in] a_phi  Output data holder. 
-    @param[in] a_comp Component in data holder
-    @param[in] a_time Time
-    @note Currently broken and issues an error. 
-  */
-  virtual void setCoveredPotential(EBAMRCellData& a_phi, const int a_comp, const Real a_time);
-
-  /*!
     @brief Get number of output fields.
   */
   virtual int getNumberOfPlotVariables() const;

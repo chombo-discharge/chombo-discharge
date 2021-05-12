@@ -296,19 +296,8 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
     const RefCountedPtr<EBIndexSpace>& ebis = m_mfis->get_ebis(cur_phase);
 
     if(!ebis.isNull()){
-#if 0
-      EBAMRCellData potential_phase;
-      EBAMRCellData scratch_phase;
-
-      m_amr->allocate_ptr(potential_phase);
-      m_amr->allocate_ptr(scratch_phase);
-      
-      m_amr->alias(potential_phase, cur_phase, m_potential);
-      m_amr->alias(scratch_phase,   cur_phase, m_cache, Min(a_old_finest, a_new_finest));
-#else
       EBAMRCellData potential_phase = m_amr->alias(cur_phase, m_potential);
       EBAMRCellData scratch_phase   = m_amr->alias(cur_phase, m_cache);
-#endif
 
       Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_realm, cur_phase);
 
@@ -416,62 +405,6 @@ const std::string FieldSolver::getRealm() const{
   return m_realm;
 }
 
-void FieldSolver::setCoveredPotential(EBAMRCellData& a_phi, const int a_comp, const Real a_time){
-  CH_TIME("FieldSolver::setCoveredPotential");
-  if(m_verbosity > 5){
-    pout() << "FieldSolver::setCoveredPotential" << endl;
-  }
-
-  MayDay::Abort("FieldSolver::setCoveredPotential -- stop, function needs to be revised");
-
-  const Vector<electrode>& electrodes = m_compgeom->get_electrodes();
-
-  if(electrodes.size() > 0){
-    const int finest_level = m_amr->get_finest_level();
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-      const EBISLayout& ebisl_gas  = m_amr->get_ebisl(m_realm, phase::gas)[lvl];
-      const EBISLayout& ebisl_sol  = m_amr->get_ebisl(m_realm, phase::solid)[lvl];
-      const Real dx                = m_amr->get_dx()[lvl];
-
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	EBCellFAB& phi = (*a_phi[lvl])[dit()];
-	const EBISBox& ebisbox_gas = ebisl_gas[dit()];
-	const EBISBox& ebisbox_sol = ebisl_sol[dit()];
-
-	if(!ebisbox_gas.isAllRegular() && !ebisbox_sol.isAllRegular()){
-	  const Box box = dbl.get(dit());
-	  FArrayBox& fbox = (*a_phi[lvl])[dit()].getFArrayBox();
-
-	  for (BoxIterator bit(box); bit.ok(); ++bit){
-	    const IntVect& iv  = bit();
-	    const RealVect pos = m_amr->get_prob_lo() + dx*RealVect(iv)*RealVect::Unit;
-
-	    if(ebisbox_gas.isCovered(iv) && ebisbox_sol.isCovered(iv)){
-	      int closest;
-	      Real dist = 1.E99;
-	      for (int i = 0; i < electrodes.size(); i++){
-		const Real cur_dist = electrodes[i].get_function()->value(pos);
-		if(Abs(cur_dist) < dist){
-		  dist = Abs(cur_dist);
-		  closest = i;
-		}
-	      }
-
-	      if(electrodes[closest].is_live()){
-		fbox(iv, a_comp) = electrodes[closest].get_fraction()*m_voltage(a_time);
-	      }
-	      else{
-		fbox(iv, a_comp) = 0.0;
-	      }
-	    }
-	  }
-	}
-      }
-    }
-  }
-}
-
 void FieldSolver::parsePlotVariables(){
   CH_TIME("FieldSolver::parsePlotVariables");
   if(m_verbosity > 5){
@@ -485,14 +418,17 @@ void FieldSolver::parsePlotVariables(){
 
   ParmParse pp(m_className.c_str());
   const int num = pp.countval("plt_vars");
-  Vector<std::string> str(num);
-  pp.getarr("plt_vars", str, 0, num);
 
-  for (int i = 0; i < num; i++){
-    if(     str[i] == "phi")   m_plotPotential     = true;
-    else if(str[i] == "rho")   m_plotRho           = true;
-    else if(str[i] == "resid") m_plotResidue       = true;
-    else if(str[i] == "E")     m_plotElectricField = true;
+  if(num > 0){
+    Vector<std::string> str(num);
+    pp.getarr("plt_vars", str, 0, num);
+
+    for (int i = 0; i < num; i++){
+      if(     str[i] == "phi")   m_plotPotential     = true;
+      else if(str[i] == "rho")   m_plotRho           = true;
+      else if(str[i] == "resid") m_plotResidue       = true;
+      else if(str[i] == "E")     m_plotElectricField = true;
+    }
   }
 }
 
@@ -646,6 +582,7 @@ void FieldSolver::parseDomainBc(){
 	  break;
 	default:
 	  MayDay::Abort("FieldSolver::parseDomainBc -- unsupported boundary condition requested!");
+	  break;
 	}
       }
       else{
@@ -757,15 +694,19 @@ void FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
   }
 
   // Add phi to output
-  if(m_plotPotential) writeMultifluidData(a_output, a_comp, m_potential,  true);
-  if(m_plotRho) {
-    writeMultifluidData(a_output, a_comp, m_rho, false);
-    data_ops::set_covered_value(a_output, a_comp-1, 0.0); // We wrote m_rho to a_comp and then increment by one. Undo that. 
+  if(m_plotPotential) {
+    this->writeMultifluidData(a_output, a_comp, m_potential,  true);
   }
-  if(m_plotResidue) writeMultifluidData(a_output, a_comp, m_residue,  false);
+  if(m_plotRho) {
+    this->writeMultifluidData(a_output, a_comp, m_rho, false);
+    //    data_ops::set_covered_value(a_output, a_comp-1, 0.0); // Why was this here? If the dielectric side contains charge, it should not be here. 
+  }
+  if(m_plotResidue) {
+    this->writeMultifluidData(a_output, a_comp, m_residue,  false);
+  }
   if(m_plotElectricField) {
-    this->computeElectricField();
-    writeMultifluidData(a_output, a_comp, m_electricField, true);
+    //    this->computeElectricField();
+    this->writeMultifluidData(a_output, a_comp, m_electricField, true);
   }
 }
 
