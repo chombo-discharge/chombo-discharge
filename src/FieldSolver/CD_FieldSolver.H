@@ -58,7 +58,7 @@ public:
   /*!
     @brief Solve Poisson equation onto a_state using m_rho, and m_sigma as right-hand sides. 
     @param[inout] a_potential Potential
-    @param[in] a_zeroPhi Set a_potential to zero before calling other function. 
+    @param[in]    a_zeroPhi Set a_potential to zero before calling other function. 
     @return True if we found a solution and false otherwise. 
     @note This is just a wrapper which calls the other version. 
   */
@@ -67,9 +67,9 @@ public:
   /*!
     @brief Solves Poisson equation onto a_state using a_rho and a_sigma as right-hand sides. 
     @param[inout] a_potential Potential
-    @param[in] a_rho Space charge density
-    @param[in] a_sigma Surface charge density. 
-    @param[in] a_zeroPhi Set a_potential to zero first. 
+    @param[in]    a_rho Space charge density
+    @param[in]    a_sigma Surface charge density. 
+    @param[in]    a_zeroPhi Set a_potential to zero first. 
     @return True if we found a solution and false otherwise. 
     @note a_sigma must be defined on the gas phase. 
   */

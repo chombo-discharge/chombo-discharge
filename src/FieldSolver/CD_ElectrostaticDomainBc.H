@@ -38,12 +38,12 @@ public:
   using BcFunction = std::function<Real(const RealVect a_position, const Real a_time) >;
 
   /*!
-    @brief Shortcut for mapping a direction and side.
+    @brief Alias for mapping a direction and side.
   */
   using Wall = std::pair<int, Side::LoHiSide>;
   
   /*!
-    @brief Shortcut for mapping a bctype and function. 
+    @brief Alias for mapping a bctype and function. 
   */
   using Bc = std::pair<BcType, BcFunction>;
   

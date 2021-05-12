@@ -1,12 +1,12 @@
 /*!
-  @file FieldSolverMultigrid.H
-  @brief Geometric multigrid multifluid poisson solver
+  @file   FieldSolverMultigrid.H
+  @brief  Geometric multigrid multifluid poisson solver
   @author Robert Marskar
-  @date Nov. 2017
+  @date   Nov. 2017
 */
 
-#ifndef _FIELD_SOLVER_MULTIGRID_
-#define _FIELD_SOLVER_MULTIGRID_
+#ifndef FieldSolverMultigrid_H
+#define FieldSolverMultigrid_H
 
 #include "CD_FieldSolver.H"
 #include "mfconductivityopfactory.H"
@@ -29,21 +29,30 @@ class FieldSolverMultigrid : public FieldSolver {
 protected:
 
   /*!
-    @brief Silly enum for switching between relaxation methods.
+    @brief Enum class for supported bottom solvers in multigrid.
   */
-  enum class relax{
-    jacobi,
-    gauss_seidel,
-    gsrb_fast
+  enum class BottomSolver {
+    Simple,
+    BiCGStab,
+    GMRES
   };
 
   /*!
-    @brief Silly enum for switching between multigrid cycling
+    @brief Enum for supported relaxation methods in multigrid. 
   */
-  enum class amrmg{
-    full,
-    vcycle,
-    fcycle,
+  enum class RelaxationMethod {
+    Jacobi,
+    GaussSeidel,
+    GSRBFast
+  };
+
+  /*!
+    @brief Enum for multigrid cycle types. 
+  */
+  enum class MultigridType{
+    FAS,
+    VCycle,
+    FCycle,
   };
   
 public:
@@ -66,87 +75,47 @@ public:
   virtual ~FieldSolverMultigrid();
 
   /*!
-    @brief Solve Poisson onto state 
+    @brief Solves Poisson equation onto a_state using a_rho and a_sigma as right-hand sides. 
+    @param[inout] a_potential Potential
+    @param[in] a_rho Space charge density
+    @param[in] a_sigma Surface charge density. 
+    @param[in] a_zeroPhi Set a_potential to zero first. 
+    @return True if we found a solution and false otherwise. 
+    @note a_sigma must be defined on the gas phase. 
   */
-  virtual bool solve(MFAMRCellData&       a_state,
+  virtual bool solve(MFAMRCellData&       a_potential,
 		     const MFAMRCellData& a_rho,
 		     const EBAMRIVData&   a_sigma,
 		     const bool           a_zerophi = false) override;
 
   /*!
-    @brief parse options
+    @brief Parse all class options from command-line or input script. 
   */
   virtual void parseOptions() override;
 
   /*!
-    @brief Parse runtime options
+    @brief Parse runtime options from command line or input script. 
   */
   virtual void parseRuntimeOptions() override;
 
-  /*!
-    @brief Regrid function
+    /*!
+    @brief Regrid method. 
+    @param[in] a_lmin           Coarsest level where grids did not change. 
+    @param[in] a_oldFinestLevel Previous finest AMR level
+    @param[in] a_newFinestLevel New finest AMR level. 
+    @details This linearly interpolates (with limiters) m_potential to the new grids and recomputes the electric field (from the interpolated potential). 
   */
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
 
   /*!
-    @brief Register operators for AMR
+    @brief Registers required operators for AMR for this class. 
   */
   virtual void registerOperators() override;
 
   /*!
-    @brief Set solver parameters. These are normally good for this class. 
-  */
-  virtual void setMultigridSettings(relax      a_relax_type  = relax::gsrb_fast,
-					 amrmg      a_gmg_type    = amrmg::vcycle,
-					 const int  a_verbosity   = 100,
-					 const int  a_pre_smooth  = 16,
-					 const int  a_post_smooth = 16,
-					 const int  a_bot_smooth  = 16,
-					 const int  a_max_iter    = 32,
-					 const int  a_min_iter    = 5,
-					 const Real a_eps         = 1.E-6,
-					 const Real a_hang        = 0.2);
-
-  /*!
-    @brief Set the bottom solver.  
-    @param[in] a_which_solver Solver type. 0 = smoother, 1 = BiCGStab
-  */
-  virtual void setBottomSolver(const int a_which_solver);
-
-  /*!
-    @brief Set the depth for bottom drop
-  */
-  virtual void setBottomDrop(const int a_bottom_drop);
-
-  /*!
-    @brief Set number of smoothing for the bottom solver (simplified solver only)
-  */
-  virtual void setSmoothingsForBottomSolver(const int a_smooth);
-
-  /*!
-    @brief Allocate internal storage
+    @brief Allocates internal storage. 
   */
   virtual void allocateInternals() override;
-
-  /*!
-    @brief Post checkpoint stuff. 
-  */
-  virtual void postCheckpoint() override;
-
-  /*!
-    @brief Get a-coefficient
-  */
-  virtual MFAMRCellData& getACoefficient();
-
-  /*!
-    @brief Get b-coefficient
-  */
-  virtual MFAMRFluxData& getBCoefficient();
-
-  /*!
-    @brief Get irregular b coefficient
-  */
-  virtual MFAMRIVData& getBCoefficientIrreg();
 
   /*!
     @brief Set up the geometric multigrid solver 
@@ -154,12 +123,13 @@ public:
   virtual void setupMultigrid();
   
   /*!
-    @brief Set coefficients
+    @brief Set multigrid coefficients. 
+    @details This sets the face-centered permittivities and the diagonal term (to zero). 
   */
   virtual void setMultigridCoefficients();
 
   /*!
-    @brief Set up the operator factory
+    @brief Set up the multigrid operator factory
   */
   virtual void setupOperatorFactory();
 
@@ -169,26 +139,22 @@ public:
   virtual void setupMultigridSolver();
 
   /*!
-    @brief Check if solver needs setup
+    @brief Set whether multigrid will be set up again before the next solve. 
+    @param[in] a_needsSetup If true, multigrid will be set up before the next solve. 
   */
-  virtual void setNeedsMultigridSetup(const bool& a_needs_setup);
-
-  /*!
-    @brief Set the permittivities
-  */
-  virtual void setPermittivities(const Vector<dielectric>& a_dielectrics);
+  virtual void setNeedsMultigridSetup(const bool a_needsSetup);
   
 protected:
 
   /*!
     @brief Relaxation type for gmg
   */
-  relax m_multigridRelaxMethod;
+  RelaxationMethod m_multigridRelaxMethod;
 
   /*!
     @brief GMG multigrid type
   */
-  amrmg m_multigridType;
+  MultigridType m_multigridType;
 
   /*!
     @brief Scale by kappa or not
@@ -208,7 +174,7 @@ protected:
   /*!
     @brief Number of coarsening levels for multigrid
   */
-  int m_mg_coarsen;
+  int m_numCoarseningsBeforeAggregation;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -243,7 +209,9 @@ protected:
   /*!
     @brief Bottom solver type
   */
-  int m_bottomSolver;
+  //  int m_bottomSolver;
+
+  BottomSolver m_bottomSolver;
 
   /*!
     @brief Number of smoothing for bottom solver
@@ -281,7 +249,7 @@ protected:
   Real m_multigridHang;
 
   /*!
-    @brief Operator factory
+    @brief Multigrid operator factory. 
   */
   RefCountedPtr<mfconductivityopfactory> m_opfact;
   
@@ -356,22 +324,37 @@ protected:
   Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
 
   /*!
+    @brief Get a-coefficient
+  */
+  virtual MFAMRCellData& getACoefficient();
+
+  /*!
+    @brief Get b-coefficient
+  */
+  virtual MFAMRFluxData& getBCoefficient();
+
+  /*!
+    @brief Get irregular b coefficient
+  */
+  virtual MFAMRIVData& getBCoefficientIrreg();
+
+  /*!
     @brief Set face-centered permittivities
   */
   virtual void setFacePermittivities(EBFluxFAB&                a_perm,
-			     const Box&                a_box,
-			     const RealVect&           a_origin,
-			     const Real&               a_dx,
-			     const Vector<dielectric>& a_dielectrics);
+				     const Box&                a_box,
+				     const RealVect&           a_origin,
+				     const Real&               a_dx,
+				     const Vector<dielectric>& a_dielectrics);
 
   /*!
     @brief Set EB-centered permittivities
   */
   virtual void setEbPermittivities(BaseIVFAB<Real>&          a_perm,
-			   const Box&                a_box,
-			   const RealVect&           a_origin,
-			   const Real&               a_dx,
-			   const Vector<dielectric>& a_dielectrics);
+				   const Box&                a_box,
+				   const RealVect&           a_origin,
+				   const Real&               a_dx,
+				   const Vector<dielectric>& a_dielectrics);
 
   /*!
     @brief Parse multigrid settings
@@ -381,12 +364,20 @@ protected:
   /*!
     @brief Parse m_kappaSource
   */
-  virtual void parseKappaSource(); 
+  virtual void parseKappaSource();
 
-  // Define mg levels
-public:
+    /*!
+    @brief Set the permittivities
+  */
+  virtual void setPermittivities(const Vector<dielectric>& a_dielectrics);
+  
+  /*!
+    @brief Define the deeper multigrid levels (the ones that live below the AMR levels)
+  */
   virtual void defineDeeperMultigridLevels();
 
 };
+
 #include "CD_NamespaceFooter.H"
+
 #endif
