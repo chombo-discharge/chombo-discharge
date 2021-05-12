@@ -879,7 +879,6 @@ void AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags,
   }
 }
 
-
 void AmrMesh::regridAmr(const Vector<Vector<int> >& a_procs, const Vector<Vector<Box> >& a_boxes, const int a_lmin){
   CH_TIME("AmrMesh::regridAmr(procs, boxes, level)");
   if(m_verbosity > 1){

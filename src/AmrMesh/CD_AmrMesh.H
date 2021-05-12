@@ -7,7 +7,8 @@
   @file   AmrMesh.H
   @brief  Declaration of core class for handling AMR-related operations (with embedded boundaries)
   @author Robert Marskar
-  @todo a_lmax is a dead parameter in buildGrids. Fix this and the dependencies. 
+  @todo   a_lmax is a dead parameter in buildGrids. Fix this and the dependencies. 
+  @todo   a_regsize is a dead parameter which should be removed. 
 */
 
 #ifndef CD_AmrMesh_H
@@ -740,21 +741,21 @@ public:
     @param[in] a_lmin Finest grid level which is allowed to change. 
     @param[in] a_regsize Redistribution register size. 
     @param[in] a_hardcap Grid generation hardcap. 
-    @todo a_regsize is a dead parameter which should be removed. 
+
   */
   void regrid(const Vector<IntVectSet>& a_tags,
-	      const int a_lmin,
-	      const int a_lmax,
-	      const int a_regsize=1, 
-	      const int a_hardcap=-1);
+	      const int                 a_lmin,
+	      const int                 a_lmax,
+	      const int                 a_regsize=1, 
+	      const int                 a_hardcap=-1);
 
   /*!
     @brief Regrid AMR. This builds the grids and sets them. 
   */
   void regridAmr(const Vector<IntVectSet>& a_tags,
-		 const int a_lmin,
-		 const int a_lmax,
-		 const int a_hardcap=-1);
+		 const int                 a_lmin,
+		 const int                 a_lmax,
+		 const int                 a_hardcap=-1);
 
   /*!
     @brief Regrid AMR. This takes a set of grids. 
