@@ -99,7 +99,7 @@ public:
   Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid();
   Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors();
   Vector<RefCountedPtr<LayoutData<VoFIterator> > >& getVofIterator();
-  irreg_amr_stencil<centroid_interp>& getCentroidInterpolationStencils();
+  irreg_amr_stencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils();
   irreg_amr_stencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils();
   irreg_amr_stencil<noncons_div>& getNonConservativeDivergenceStencils();
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten();
@@ -181,7 +181,7 @@ protected:
   Vector<RefCountedPtr<EBFineToCoarRedist> > m_fine_to_coar_redist;
 
   // Various stencils for irregular cells
-  RefCountedPtr<irreg_amr_stencil<centroid_interp> > m_centroid_interp;
+  RefCountedPtr<irreg_amr_stencil<CentroidInterpolationStencil> > m_CentroidInterpolationStencil;
   RefCountedPtr<irreg_amr_stencil<EbCentroidInterpolationStencil> > m_EbCentroidInterpolationStencil;
   RefCountedPtr<irreg_amr_stencil<noncons_div> > m_noncons_div;
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradsten;

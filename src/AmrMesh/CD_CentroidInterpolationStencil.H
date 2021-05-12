@@ -4,28 +4,28 @@
  */
 
 /*!
-  @file   EbCentroidInterpolationStencil.H
-  @brief  Declaration of IrregStencil-derived class that can from cell centers to embedded boundary centroids. 
+  @file   CentroidInterpolationStencil.H
+  @brief  Implementation of IrregStencil that interpolates from cell centers to cell centroids
   @author Robert Marskar
 */
 
-#ifndef CD_EbCentroidInterpolationStencil_H
-#define CD_EbCentroidInterpolationStencil_H
+#ifndef CD_CentroidInterpolationStencil_H_
+#define CD_CentroidInterpolationStencil_H_
 
 // Our includes
 #include <CD_IrregStencil.H>
 #include <CD_NamespaceHeader.H>
-
+  
 /*!
-  @brief Class which can take cell-centered data and interpolate it to embedded boundary centroids. 
+  @brief Class which can take cell-centered data and interpolate it to cell centroids. 
 */
-class EbCentroidInterpolationStencil : public IrregStencil {
+class CentroidInterpolationStencil : public IrregStencil {
 public:
 
   /*!
     @brief Disallowed weak constructor. 
   */
-  EbCentroidInterpolationStencil() = delete;
+  CentroidInterpolationStencil() = delete;
 
   /*!
     @brief Full constructor. Subsequently calls define
@@ -37,19 +37,19 @@ public:
     @param[in] a_radius Radius for least squares
     @param[in] a_type   Stencil type
   */
-  EbCentroidInterpolationStencil(const DisjointBoxLayout&        a_dbl,
-				 const EBISLayout&               a_ebisl,
-				 const ProblemDomain&            a_domain,
-				 const Real&                     a_dx,
-				 const int                       a_order,
-				 const int                       a_radius,
-				 const IrregStencil::StencilType a_type);
+  CentroidInterpolationStencil(const DisjointBoxLayout&        a_dbl,
+			       const EBISLayout&               a_ebisl,
+			       const ProblemDomain&            a_domain,
+			       const Real&                     a_dx,
+			       const int                       a_order,
+			       const int                       a_radius,
+			       const IrregStencil::StencilType a_type);
 
   /*!
     @brief Destructor
   */
-  ~EbCentroidInterpolationStencil();
-
+  ~CentroidInterpolationStencil();
+  
 protected:
   
   /*!
@@ -66,15 +66,13 @@ protected:
   */
   virtual void buildStencil(VoFStencil&              a_sten,
 			    const VolIndex&          a_vof,
-			    const DisjointBoxLayout& a_grids,
+			    const DisjointBoxLayout& a_dbl,
 			    const ProblemDomain&     a_domain,
 			    const EBISBox&           a_ebisbox,
 			    const Box&               a_box,
 			    const Real&              a_dx,
 			    const IntVectSet&        a_cfivs) override;
 
-private:
-  
   /*!
     @brief Build the interpolation stencils using Taylor series. 
     @param[out] a_sten    Returned stencil
@@ -87,14 +85,14 @@ private:
     @param[in]  a_cfivs   Coarse-fine interface
     @details This tries to compute up to second order derivatives for use in a Taylor series. 
   */
-  bool getTaylorExtrapolationStencil(VoFStencil&              a_sten,
-				     const VolIndex&          a_vof,
-				     const DisjointBoxLayout& a_dbl,
-				     const ProblemDomain&     a_domain,
-				     const EBISBox&           a_ebisbox,
-				     const Box&               a_box,
-				     const Real&              a_dx,
-				     const IntVectSet&        a_cfivs);
+  virtual bool getTaylorExtrapolationStencil(VoFStencil&              a_sten,
+					     const VolIndex&          a_vof,
+					     const DisjointBoxLayout& a_dbl,
+					     const ProblemDomain&     a_domain,
+					     const EBISBox&           a_ebisbox,
+					     const Box&               a_box,
+					     const Real&              a_dx,
+					     const IntVectSet&        a_cfivs);
 
   /*!
     @brief Build the interpolation stencils using least squares interpolation.
@@ -108,14 +106,14 @@ private:
     @param[in]  a_cfivs   Coarse-fine interface
     @details This defines an overdetermined system of equations, using a large neighborhood of cells, which is solved with weighted least squarse. 
   */
-  bool getLeastSquaresInterpolationStencil(VoFStencil&              a_sten,
-					   const VolIndex&          a_vof,
-					   const DisjointBoxLayout& a_dbl,
-					   const ProblemDomain&     a_domain,
-					   const EBISBox&           a_ebisbox,
-					   const Box&               a_box,
-					   const Real&              a_dx,
-					   const IntVectSet&        a_cfivs);
+  virtual bool getLeastSquaresStencil(VoFStencil&              a_sten,
+				      const VolIndex&          a_vof,
+				      const DisjointBoxLayout& a_dbl,
+				      const ProblemDomain&     a_domain,
+				      const EBISBox&           a_ebisbox,
+				      const Box&               a_box,
+				      const Real&              a_dx,
+				      const IntVectSet&        a_cfivs);
 
   /*!
     @brief Build the interpolation stencils using piecewise linear reconstruction. 
@@ -128,14 +126,15 @@ private:
     @param[in]  a_dx      Grid resolution
     @param[in]  a_cfivs   Coarse-fine interface
   */
-  bool getPiecewiseLinearStencil(VoFStencil&              a_sten,
-				 const VolIndex&          a_vof,
-				 const DisjointBoxLayout& a_dbl,
-				 const ProblemDomain&     a_domain,
-				 const EBISBox&           a_ebisbox,
-				 const Box&               a_box,
-				 const Real&              a_dx,
-				 const IntVectSet&        a_cfivs);
+  virtual bool getPiecewiseLinearStencil(VoFStencil&              a_sten,
+					 const VolIndex&          a_vof,
+					 const DisjointBoxLayout& a_dbl,
+					 const ProblemDomain&     a_domain,
+					 const EBISBox&           a_ebisbox,
+					 const Box&               a_box,
+					 const Real&              a_dx,
+					 const IntVectSet&        a_cfivs);
+  
 };
 
 #include <CD_NamespaceFooter.H>

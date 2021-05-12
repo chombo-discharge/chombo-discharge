@@ -1428,7 +1428,7 @@ void AmrMesh::interpToCentroids(EBAMRCellData& a_data, const std::string a_realm
     MayDay::Abort(str.c_str());
   }
   
-  irreg_amr_stencil<centroid_interp>& stencil = m_realms[a_realm]->getCentroidInterpolationStencils(a_phase);
+  irreg_amr_stencil<CentroidInterpolationStencil>& stencil = m_realms[a_realm]->getCentroidInterpolationStencils(a_phase);
   stencil.apply(a_data);
 }
 
@@ -1938,7 +1938,7 @@ Vector<RefCountedPtr<EBFineToCoarRedist> >&  AmrMesh::getFineToCoarRedist(const 
   return m_realms[a_realm]->getFineToCoarRedist(a_phase);
 }
 
-const irreg_amr_stencil<centroid_interp>& AmrMesh::getCentroidInterpolationStencils(const std::string        a_realm,
+const irreg_amr_stencil<CentroidInterpolationStencil>& AmrMesh::getCentroidInterpolationStencils(const std::string        a_realm,
 										    const phase::which_phase a_phase) const {
   return m_realms[a_realm]->getCentroidInterpolationStencils(a_phase);
 }

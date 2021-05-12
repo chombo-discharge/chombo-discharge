@@ -54,6 +54,9 @@ void IrregStencil::define(const DisjointBoxLayout&         a_dbl,
   
   const int ncomp = 1;
 
+  LayoutData<IntVectSet> cfivs;
+  EBArith::defineCFIVS(cfivs, a_dbl, a_domain);
+
   m_stencils.define(m_dbl);
   for (DataIterator dit = m_dbl.dataIterator(); dit.ok(); ++dit){
     const Box&     box     = m_dbl.get(dit());
@@ -66,7 +69,7 @@ void IrregStencil::define(const DisjointBoxLayout&         a_dbl,
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       VoFStencil& stencil = (*m_stencils[dit()])(vof, 0);
-      this->buildStencil(stencil, vof, m_dbl, m_domain, ebisbox, box, m_dx, IntVectSet());// Can respect the CFIVS if we want to, but we dont. cfivs[dit()]);
+      this->buildStencil(stencil, vof, m_dbl, m_domain, ebisbox, box, m_dx, cfivs[dit()]);
 
 #if 0 // Safety test
       Real sum = 0.0;

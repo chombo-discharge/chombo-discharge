@@ -987,7 +987,7 @@ void eddington_sp1::write_plot_file(){
   }
 
   // Transform to centroid-centered
-  const irreg_amr_stencil<centroid_interp>& sten = m_amr->getCentroidInterpolationStencils(m_realm, phase::gas);
+  const irreg_amr_stencil<CentroidInterpolationStencil>& sten = m_amr->getCentroidInterpolationStencils(m_realm, phase::gas);
   sten.apply(output);
 
   // Alias this stuff

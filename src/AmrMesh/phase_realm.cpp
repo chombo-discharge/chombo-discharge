@@ -742,8 +742,8 @@ void phase_realm::define_irreg_sten(){
     const int order = 1;
     const int rad   = 1;
 
-    m_centroid_interp = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
-      (new irreg_amr_stencil<centroid_interp>(m_grids,
+    m_CentroidInterpolationStencil = RefCountedPtr<irreg_amr_stencil<CentroidInterpolationStencil> >
+      (new irreg_amr_stencil<CentroidInterpolationStencil>(m_grids,
 					      m_ebisl,
 					      m_domains,
 					      m_dx,
@@ -828,8 +828,8 @@ Vector<RefCountedPtr<LayoutData<VoFIterator> > >& phase_realm::getVofIterator() 
   return m_vofiter;
 }
 
-irreg_amr_stencil<centroid_interp>& phase_realm::getCentroidInterpolationStencils() {
-  return *m_centroid_interp;
+irreg_amr_stencil<CentroidInterpolationStencil>& phase_realm::getCentroidInterpolationStencils() {
+  return *m_CentroidInterpolationStencil;
 }
 
 irreg_amr_stencil<EbCentroidInterpolationStencil>& phase_realm::getEbCentroidInterpolationStencilStencils() {

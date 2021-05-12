@@ -47,6 +47,8 @@ void EbCentroidInterpolationStencil::buildStencil(VoFStencil&              a_ste
 
   bool foundStencil = false;
 
+  IntVectSet noCFIVS = IntVectSet();
+
   // Try to build the preferred stencil.
   switch (m_stencilType) {
   case IrregStencil::StencilType::Linear: {
@@ -55,15 +57,15 @@ void EbCentroidInterpolationStencil::buildStencil(VoFStencil&              a_ste
     break;
   }
   case IrregStencil::StencilType::TaylorExtrapolation: {
-    foundStencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+    foundStencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
     break;
   }
   case IrregStencil::StencilType::LeastSquares: {
-    foundStencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+    foundStencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
     break;
   }
   case IrregStencil::StencilType::PiecewiseLinear: {
-    foundStencil = this->getPiecewiseLinearStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+    foundStencil = this->getPiecewiseLinearStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
     break;
   }
   default: {
@@ -78,10 +80,10 @@ void EbCentroidInterpolationStencil::buildStencil(VoFStencil&              a_ste
     foundStencil = LinearStencil::getLinearInterpStencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
   }
   if(!foundStencil){
-    foundStencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+    foundStencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
   }
   if(!foundStencil){
-    foundStencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+    foundStencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
   }
 
   if(!foundStencil){ // Drop to zeroth order.

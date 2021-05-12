@@ -283,7 +283,7 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
 
 
   // Stencils for extrapolating things to cell centroids
-  const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->get_phase());
+  const irreg_amr_stencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->get_phase());
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
   const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[a_lvl];
@@ -1167,7 +1167,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&
   const int ncomp        = 1;
   const int num_species  = m_physics->get_num_cdr_species();
 
-  const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->get_phase());
+  const irreg_amr_stencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->get_phase());
 
   // Call the level version
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];

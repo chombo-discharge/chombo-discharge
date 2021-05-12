@@ -405,7 +405,7 @@ Vector<RefCountedPtr<LayoutData<VoFIterator> > >& realm::getVofIterator(const ph
   return m_realms[a_phase]->getVofIterator();
 }
 
-irreg_amr_stencil<centroid_interp>& realm::getCentroidInterpolationStencils(const phase::which_phase a_phase) {
+irreg_amr_stencil<CentroidInterpolationStencil>& realm::getCentroidInterpolationStencils(const phase::which_phase a_phase) {
   return m_realms[a_phase]->getCentroidInterpolationStencils();
 }
 
