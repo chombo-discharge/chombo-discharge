@@ -21,7 +21,7 @@ def write_template(args):
     mainf.write("\n")
 
     mainf.write("using namespace ChomboDischarge;\n")
-    mainf.write("using namespace physics::poisson;\n\n")
+    mainf.write("using namespace Physics::Electrostatics;\n\n")
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")

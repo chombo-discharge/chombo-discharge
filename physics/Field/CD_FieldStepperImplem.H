@@ -1,18 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   FieldStepperI.H
-  @brief  Implementation of the FieldStepper
+  @file   FieldStepperImplem.H
+  @brief  Implementation of FieldStepper.H
   @author Robert Marskar
-  @data   March 2020
 */
 
-#include "CD_FieldStepper.H"
+#ifndef CD_FieldStepperImplem_H
+#define CD_FieldStepperImplem_H
 
+// Chombo includes
 #include <ParmParse.H>
 #include <EBEllipticLoadBalance.H>
 
-#include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace poisson {
+// Our includes
+#include <CD_FieldStepper.H>
+#include <CD_NamespaceHeader.H>
+
+namespace Physics {
+  namespace Electrostatics {
   
     template <typename T>
     Real FieldStepper<T>::s_constant_one(const RealVect a_pos){
@@ -271,4 +280,7 @@ namespace physics {
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
+#endif

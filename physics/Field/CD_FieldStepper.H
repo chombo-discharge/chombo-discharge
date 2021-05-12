@@ -1,26 +1,31 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   FieldStepper.H
+  @file   CD_FieldStepper.H
   @brief  time_stepper class for only solving the Poisson equation (with surface charge)
   @author Robert Marskar
-  @data   March 2020
 */
 
-#ifndef _FIELD_STEPPER_
-#define _FIELD_STEPPER_
+#ifndef CD_FieldStepper_H
+#define CD_FieldStepper_H
 
-#include "time_stepper.H"
-#include "CD_FieldSolver.H"
-#include "sigma_solver.H"
+// Our includes
+#include <time_stepper.H>
+#include <sigma_solver.H>
+#include <CD_FieldSolver.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace poisson {
+namespace Physics {
+  namespace Electrostatics {
 
     /*!
       @brief Class that just solves the poisson equation
     */
     template <class T>
-    class FieldStepper : public time_stepper{
+    class FieldStepper : public time_stepper {
     public:
 
       static Real s_constant_one(const RealVect a_pos);
@@ -69,7 +74,6 @@ namespace physics {
 
       // Solve routine
       void solve_poisson();
-      
 
     protected:
 
@@ -86,7 +90,9 @@ namespace physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
-#include "CD_FieldStepperImplem.H"
+
+#include <CD_NamespaceFooter.H>
+
+#include <CD_FieldStepperImplem.H>
 
 #endif
