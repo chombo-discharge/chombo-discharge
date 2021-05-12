@@ -2,7 +2,7 @@ include $(CHOMBO_HOME)/mk/Make.defs
 
 USE_EB=TRUE
 USE_MF=TRUE
-DIM=2
+DIM=3
 
 
 # Base file containing int main()
@@ -25,9 +25,11 @@ src_dirs = $(DISCHARGE_HOME)/src \
 	$(DISCHARGE_HOME)/src/rte_solver \
 	$(DISCHARGE_HOME)/src/sigma_solver \
 	$(DISCHARGE_HOME)/src/global \
-	$(DISCHARGE_HOME)/src/particle \
 	$(DISCHARGE_HOME)/src/FieldSolver \
-	$(DISCHARGE_HOME)/geometries/rod_dielectric\
-	$(DISCHARGE_HOME)/physics/Field \
+	$(DISCHARGE_HOME)/src/particle \
+	$(DISCHARGE_HOME)/geometries/mechanical_shaft\
+	$(DISCHARGE_HOME)/Physics/Electrostatics \
+
 
 include $(CHOMBO_HOME)/mk/Make.example
+
