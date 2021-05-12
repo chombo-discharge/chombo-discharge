@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   EbCentroidInterpolation.H
+  @file   EbCentroidInterpolationStencil.H
   @brief  Declaration of IrregStencil-derived class that can from cell centers to embedded boundary centroids. 
   @author Robert Marskar
 */
@@ -19,13 +19,13 @@
 /*!
   @brief Class which can take cell-centered data and interpolate it to embedded boundary centroids. 
 */
-class EbCentroidInterpolation : public IrregStencil {
+class EbCentroidInterpolationStencil : public IrregStencil {
 public:
 
   /*!
     @brief Constructor. 
   */
-  EbCentroidInterpolation() = delete;
+  EbCentroidInterpolationStencil() = delete;
 
   /*!
     @brief Full constructor. Subsequently calls define
@@ -37,18 +37,18 @@ public:
     @param[in] a_radius Radius for least squares
     @param[in] a_type   Stencil type
   */
-  EbCentroidInterpolation(const DisjointBoxLayout&        a_dbl,
-			  const EBISLayout&               a_ebisl,
-			  const ProblemDomain&            a_domain,
-			  const Real&                     a_dx,
-			  const int                       a_order,
-			  const int                       a_radius,
-			  const IrregStencil::StencilType a_type);
+  EbCentroidInterpolationStencil(const DisjointBoxLayout&        a_dbl,
+				 const EBISLayout&               a_ebisl,
+				 const ProblemDomain&            a_domain,
+				 const Real&                     a_dx,
+				 const int                       a_order,
+				 const int                       a_radius,
+				 const IrregStencil::StencilType a_type);
 
   /*!
     @brief Destructor
   */
-  ~EbCentroidInterpolation();
+  ~EbCentroidInterpolationStencil();
 
 protected:
   

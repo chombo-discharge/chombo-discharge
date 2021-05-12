@@ -832,7 +832,7 @@ void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCell
 
   const int finest_level = m_amr->getFinestLevel();
   
-  const irreg_amr_stencil<EbCentroidInterpolation>& sten = m_amr->getEbCentroidInterpolationStencils(m_realm, m_phase);
+  const irreg_amr_stencil<EbCentroidInterpolationStencil>& sten = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_phase);
   for(int lvl = 0; lvl <= finest_level; lvl++){
     sten.apply(*a_ebflux[lvl], *a_state[lvl], lvl, true);
   }

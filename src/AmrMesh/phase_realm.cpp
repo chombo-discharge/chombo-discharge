@@ -752,8 +752,8 @@ void phase_realm::define_irreg_sten(){
 					      rad,
 					      m_centroidStencilType));
       
-    m_EbCentroidInterpolation = RefCountedPtr<irreg_amr_stencil<EbCentroidInterpolation> >
-      (new irreg_amr_stencil<EbCentroidInterpolation>(m_grids,
+    m_EbCentroidInterpolationStencil = RefCountedPtr<irreg_amr_stencil<EbCentroidInterpolationStencil> >
+      (new irreg_amr_stencil<EbCentroidInterpolationStencil>(m_grids,
 						 m_ebisl,
 						 m_domains,
 						 m_dx,
@@ -832,8 +832,8 @@ irreg_amr_stencil<centroid_interp>& phase_realm::getCentroidInterpolationStencil
   return *m_centroid_interp;
 }
 
-irreg_amr_stencil<EbCentroidInterpolation>& phase_realm::getEbCentroidInterpolationStencils() {
-  return *m_EbCentroidInterpolation;
+irreg_amr_stencil<EbCentroidInterpolationStencil>& phase_realm::getEbCentroidInterpolationStencilStencils() {
+  return *m_EbCentroidInterpolationStencil;
 }
 
 Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& phase_realm::get_gradsten(){

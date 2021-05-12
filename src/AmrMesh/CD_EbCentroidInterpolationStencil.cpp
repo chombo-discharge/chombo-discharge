@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   EbCentroidInterpolation.cpp
-  @brief  Implementation of EbCentroidInterpolation.H
+  @file   EbCentroidInterpolationStencil.cpp
+  @brief  Implementation of EbCentroidInterpolationStencil.H
   @author Robert Marskar
 */
 
@@ -13,37 +13,37 @@
 #include <EBArith.H>
 
 // Our includes
-#include <CD_EbCentroidInterpolation.H>
+#include <CD_EbCentroidInterpolationStencil.H>
 #include <LinearStencil.H>
 #include <CD_LeastSquares.H>
 #include <CD_NamespaceHeader.H>
 
-EbCentroidInterpolation::EbCentroidInterpolation(const DisjointBoxLayout&        a_dbl,
-						 const EBISLayout&               a_ebisl,
-						 const ProblemDomain&            a_domain,
-						 const Real&                     a_dx,
-						 const int                       a_order,
-						 const int                       a_radius,
-						 const IrregStencil::StencilType a_type) : IrregStencil() {
+EbCentroidInterpolationStencil::EbCentroidInterpolationStencil(const DisjointBoxLayout&        a_dbl,
+							       const EBISLayout&               a_ebisl,
+							       const ProblemDomain&            a_domain,
+							       const Real&                     a_dx,
+							       const int                       a_order,
+							       const int                       a_radius,
+							       const IrregStencil::StencilType a_type) : IrregStencil() {
 
-  CH_TIME("EbCentroidInterpolation::EbCentroidInterpolation");
+  CH_TIME("EbCentroidInterpolationStencil::EbCentroidInterpolationStencil");
 
   this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius, a_type);
 }
 
-EbCentroidInterpolation::~EbCentroidInterpolation(){
-  CH_TIME("EbCentroidInterpolation::~EbCentroidInterpolation");
+EbCentroidInterpolationStencil::~EbCentroidInterpolationStencil(){
+  CH_TIME("EbCentroidInterpolationStencil::~EbCentroidInterpolationStencil");
 }
 
-void EbCentroidInterpolation::buildStencil(VoFStencil&              a_sten,
-					   const VolIndex&          a_vof,
-					   const DisjointBoxLayout& a_dbl,
-					   const ProblemDomain&     a_domain,
-					   const EBISBox&           a_ebisbox,
-					   const Box&               a_box,
-					   const Real&              a_dx,
-					   const IntVectSet&        a_cfivs){
-  CH_TIME("EbCentroidInterpolation::buildStencil");
+void EbCentroidInterpolationStencil::buildStencil(VoFStencil&              a_sten,
+						  const VolIndex&          a_vof,
+						  const DisjointBoxLayout& a_dbl,
+						  const ProblemDomain&     a_domain,
+						  const EBISBox&           a_ebisbox,
+						  const Box&               a_box,
+						  const Real&              a_dx,
+						  const IntVectSet&        a_cfivs){
+  CH_TIME("EbCentroidInterpolationStencil::buildStencil");
 
   bool foundStencil = false;
 
@@ -67,7 +67,7 @@ void EbCentroidInterpolation::buildStencil(VoFStencil&              a_sten,
     break;
   }
   default: {
-    MayDay::Abort("EbCentroidInterpolation::buildStencil - Unsupported stencil type");
+    MayDay::Abort("EbCentroidInterpolationStencil::buildStencil - Unsupported stencil type");
     break;
   }
   }
@@ -90,15 +90,15 @@ void EbCentroidInterpolation::buildStencil(VoFStencil&              a_sten,
   }
 }
 
-bool EbCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&              a_sten,
-							    const VolIndex&          a_vof,
-							    const DisjointBoxLayout& a_dbl,
-							    const ProblemDomain&     a_domain,
-							    const EBISBox&           a_ebisbox,
-							    const Box&               a_box,
-							    const Real&              a_dx,
-							    const IntVectSet&        a_cfivs){
-  CH_TIME("EbCentroidInterpolation::getTaylorExtrapolationStencil");
+bool EbCentroidInterpolationStencil::getTaylorExtrapolationStencil(VoFStencil&              a_sten,
+								   const VolIndex&          a_vof,
+								   const DisjointBoxLayout& a_dbl,
+								   const ProblemDomain&     a_domain,
+								   const EBISBox&           a_ebisbox,
+								   const Box&               a_box,
+								   const Real&              a_dx,
+								   const IntVectSet&        a_cfivs){
+  CH_TIME("EbCentroidInterpolationStencil::getTaylorExtrapolationStencil");
   
   const int comp           = 0;
   const RealVect& centroid = a_ebisbox.bndryCentroid(a_vof);
@@ -111,21 +111,21 @@ bool EbCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&         
     EBArith::getExtrapolationStencil(a_sten, centroid*a_dx, a_dx*RealVect::Unit, a_vof, a_ebisbox, -1, cfivs, comp);
   }
   else {
-    MayDay::Abort("EbCentroidInterpolation::getTaylorExtrapolationStencil - bad order requested. Only first and second order is supported");
+    MayDay::Abort("EbCentroidInterpolationStencil::getTaylorExtrapolationStencil - bad order requested. Only first and second order is supported");
   }
 
   return a_sten.size() > 0;
 }
 
-bool EbCentroidInterpolation::getLeastSquaresInterpolationStencil(VoFStencil&              a_sten,
-								  const VolIndex&          a_vof,
-								  const DisjointBoxLayout& a_dbl,
-								  const ProblemDomain&     a_domain,
-								  const EBISBox&           a_ebisbox,
-								  const Box&               a_box,
-								  const Real&              a_dx,
-								  const IntVectSet&        a_cfivs){
-  CH_TIME("EbCentroidInterpolation::getLeastSquaresInterpolationStencil");
+bool EbCentroidInterpolationStencil::getLeastSquaresInterpolationStencil(VoFStencil&              a_sten,
+									 const VolIndex&          a_vof,
+									 const DisjointBoxLayout& a_dbl,
+									 const ProblemDomain&     a_domain,
+									 const EBISBox&           a_ebisbox,
+									 const Box&               a_box,
+									 const Real&              a_dx,
+									 const IntVectSet&        a_cfivs){
+  CH_TIME("EbCentroidInterpolationStencil::getLeastSquaresInterpolationStencil");
 
   const int weightingPower = 0;
   
@@ -141,14 +141,14 @@ bool EbCentroidInterpolation::getLeastSquaresInterpolationStencil(VoFStencil&   
   return (a_sten.size() > 0);
 }
 
-bool EbCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&              a_sten,
-							const VolIndex&          a_vof,
-							const DisjointBoxLayout& a_dbl,
-							const ProblemDomain&     a_domain,
-							const EBISBox&           a_ebisbox,
-							const Box&               a_box,
-							const Real&              a_dx,
-							const IntVectSet&        a_cfivs){
+bool EbCentroidInterpolationStencil::getPiecewiseLinearStencil(VoFStencil&              a_sten,
+							       const VolIndex&          a_vof,
+							       const DisjointBoxLayout& a_dbl,
+							       const ProblemDomain&     a_domain,
+							       const EBISBox&           a_ebisbox,
+							       const Box&               a_box,
+							       const Real&              a_dx,
+							       const IntVectSet&        a_cfivs){
 
   a_sten.clear();
   a_sten.add(a_vof, 1.0);

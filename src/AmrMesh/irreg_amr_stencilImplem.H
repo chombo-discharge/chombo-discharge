@@ -10,7 +10,7 @@
 
 #include "irreg_amr_stencil.H"
 #include "centroid_interp.H"
-#include "CD_EbCentroidInterpolation.H"
+#include "CD_EbCentroidInterpolationStencil.H"
 
 #include "CD_NamespaceHeader.H"
 
@@ -309,7 +309,7 @@ void irreg_amr_stencil<T>::apply(Vector<EBAMRCellData*>&       a_dst,
 }
 
 template class irreg_amr_stencil<centroid_interp>;
-template class irreg_amr_stencil<EbCentroidInterpolation>;
+template class irreg_amr_stencil<EbCentroidInterpolationStencil>;
 // template class irreg_amr_stencil<IrregCenterInterpolationStencil>;
 #include "CD_NamespaceFooter.H"
 

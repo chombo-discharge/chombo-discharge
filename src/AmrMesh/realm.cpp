@@ -409,8 +409,8 @@ irreg_amr_stencil<centroid_interp>& realm::getCentroidInterpolationStencils(cons
   return m_realms[a_phase]->getCentroidInterpolationStencils();
 }
 
-irreg_amr_stencil<EbCentroidInterpolation>& realm::getEbCentroidInterpolationStencils(const phase::which_phase a_phase) {
-  return m_realms[a_phase]->getEbCentroidInterpolationStencils();
+irreg_amr_stencil<EbCentroidInterpolationStencil>& realm::getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) {
+  return m_realms[a_phase]->getEbCentroidInterpolationStencilStencils();
 }
 
 irreg_amr_stencil<noncons_div>& realm::getNonConservativeDivergenceStencils(const phase::which_phase a_phase) {
