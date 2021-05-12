@@ -19,17 +19,6 @@
 #include "CD_NamespaceHeader.H"
 
 /*!
-  @brief Stencil types
-*/
-enum class stencil_type {
-  linear,
-  taylor,
-  ray,
-  lsq,
-  pwl
-};
-
-/*!
   @brief Class for holding stencils on irregular cells over a single AMR level
 */
 class irreg_stencil {
