@@ -34,7 +34,7 @@ noncons_div::~noncons_div(){
   CH_TIME("noncons_div::~noncons_div");
 }
 
-void noncons_div::build_stencil(VoFStencil&              a_sten,
+void noncons_div::buildStencil(VoFStencil&              a_sten,
 				const VolIndex&          a_vof,
 				const DisjointBoxLayout& a_dbl,
 				const ProblemDomain&     a_domain,
@@ -42,7 +42,7 @@ void noncons_div::build_stencil(VoFStencil&              a_sten,
 				const Box&               a_box,
 				const Real&              a_dx,
 				const IntVectSet&        a_cfivs){
-  CH_TIME("noncons_div::build_stencil");
+  CH_TIME("noncons_div::buildStencil");
   
   a_sten.clear();
 

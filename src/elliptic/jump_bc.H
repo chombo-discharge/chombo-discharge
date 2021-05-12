@@ -258,7 +258,7 @@ protected:
   /*!
     @brief Build stencils for matching
   */
-  virtual void build_stencils();
+  virtual void buildStencils();
 
   /*!
     @brief Get a second order stencil 

@@ -46,7 +46,7 @@ void centroid_interp::buildStencil(VoFStencil&              a_sten,
 				   const Box&               a_box,
 				   const Real&              a_dx,
 				   const IntVectSet&        a_cfivs){
-  CH_TIME("centroid_interp::build_stencil");
+  CH_TIME("centroid_interp::buildStencil");
   
   bool found_stencil = false;
 
@@ -63,7 +63,7 @@ void centroid_interp::buildStencil(VoFStencil&              a_sten,
     found_stencil = this->get_pwl_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
   else{
-    MayDay::Abort("centroid_interp::build_stencil - Unsupported stencil type");
+    MayDay::Abort("centroid_interp::buildStencil - Unsupported stencil type");
   }
 
   // Drop to zeroth order if we couldn't find a stencil. 
@@ -75,7 +75,7 @@ void centroid_interp::buildStencil(VoFStencil&              a_sten,
 #if DEBUG_CENTROID_INTERP
   for (int i = 0; i < a_sten.size(); i++){
     const Real w = a_sten.weight(i);
-    if(w < 0.0) MayDay::Warning("centroid_interp::build_stencils - I got negative weights!!!");
+    if(w < 0.0) MayDay::Warning("centroid_interp::buildStencils - I got negative weights!!!");
   }
 #endif
 }

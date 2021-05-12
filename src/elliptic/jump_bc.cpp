@@ -187,7 +187,7 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
 
     this->define_vofiter();
     this->set_bco(a_bco);
-    this->build_stencils();
+    this->buildStencils();
   }
 
   m_defined = true;
@@ -230,8 +230,8 @@ void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
   }
 }
 
-void jump_bc::build_stencils(){
-  CH_TIME("jump_bc::build_stencils");
+void jump_bc::buildStencils(){
+  CH_TIME("jump_bc::buildStencils");
 
   const int comp = 0;
 
@@ -306,8 +306,8 @@ void jump_bc::build_stencils(){
 
 
 #if DEBUG_JUMP
-	if(std::isnan(curWeight)) MayDay::Abort("jumpc_bc::build_stencils - got NaN weight");
-	if(std::isnan(curBco))    MayDay::Abort("jumpc_bc::build_stencils - got NaN bco");
+	if(std::isnan(curWeight)) MayDay::Abort("jumpc_bc::buildStencils - got NaN weight");
+	if(std::isnan(curBco))    MayDay::Abort("jumpc_bc::buildStencils - got NaN bco");
 #endif
       }
     }
@@ -344,7 +344,7 @@ void jump_bc::build_stencils(){
       const Real factor = 1.0/(bco1*w1 + bco2*w2);
 
 #if DEBUG_JUMP
-      if(std::isnan(factor)) MayDay::Abort("jump_bc::build_stencils -- factor is NaN");
+      if(std::isnan(factor)) MayDay::Abort("jump_bc::buildStencils -- factor is NaN");
 #endif
 
       factor1(vof0, 0) = factor;

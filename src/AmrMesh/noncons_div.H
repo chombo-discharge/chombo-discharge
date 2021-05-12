@@ -52,7 +52,7 @@ protected:
   /*!
     @brief Build the interpolation stencils
   */
-  virtual void build_stencil(VoFStencil&              a_sten,
+  virtual void buildStencil(VoFStencil&              a_sten,
 			     const VolIndex&          a_vof,
 			     const DisjointBoxLayout& a_dbl,
 			     const ProblemDomain&     a_domain,

@@ -67,7 +67,7 @@ void EbCentroidInterpolation::buildStencil(VoFStencil&              a_sten,
     break;
   }
   default: {
-    MayDay::Abort("EbCentroidInterpolation::build_stencil - Unsupported stencil type");
+    MayDay::Abort("EbCentroidInterpolation::buildStencil - Unsupported stencil type");
     break;
   }
   }
