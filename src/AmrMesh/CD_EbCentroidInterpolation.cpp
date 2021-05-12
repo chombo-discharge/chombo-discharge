@@ -45,44 +45,46 @@ void EbCentroidInterpolation::build_stencil(VoFStencil&              a_sten,
 					    const IntVectSet&        a_cfivs){
   CH_TIME("EbCentroidInterpolation::build_stencil");
 
-  
-  bool found_stencil = false;
+  bool foundStencil = false;
 
-  // Find the preferred stencil type
-  if(m_stencilType == stencil_type::linear){
+  // Try to build the preferred stencil.
+  switch (m_stencilType) {
+  case stencil_type::linear: {
     const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
-    found_stencil = LinearStencil::getLinearInterpStencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+    foundStencil = LinearStencil::getLinearInterpStencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+    break;
   }
-  else if(m_stencilType == stencil_type::taylor){
-    found_stencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  case stencil_type::taylor: {
+    foundStencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+    break;
   }
-  else if(m_stencilType == stencil_type::lsq){
-    found_stencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  case stencil_type::lsq: {
+    foundStencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+    break;
   }
-  else if(m_stencilType == stencil_type::pwl){
-    found_stencil = this->getPiecewiseLinearStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  case stencil_type::pwl: {
+    foundStencil = this->getPiecewiseLinearStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+    break;
   }
-  else{
+  default: {
     MayDay::Abort("EbCentroidInterpolation::build_stencil - Unsupported stencil type");
+    break;
+  }
   }
 
   // If we couldn't find a stencil, try other types in this order
-  if(!found_stencil){
+  if(!foundStencil){
     const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
-    found_stencil = LinearStencil::getLinearInterpStencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+    foundStencil = LinearStencil::getLinearInterpStencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
   }
-  if(!found_stencil){
-    found_stencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  if(!foundStencil){
+    foundStencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
-  if(!found_stencil){
-    found_stencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  if(!foundStencil){
+    foundStencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
 
-#if 0 // Only meant for testing but left in place: This code averages several neighbors over the EB. Only ment for testing so far
-  found_stencil = this->get_ebavg_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
-#endif
-
-  if(!found_stencil){ // Drop to zeroth order.
+  if(!foundStencil){ // Drop to zeroth order.
     a_sten.clear();
     a_sten.add(a_vof, 1.0);
   }
@@ -113,7 +115,6 @@ bool EbCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&         
   }
 
   return a_sten.size() > 0;
-
 }
 
 bool EbCentroidInterpolation::getLeastSquaresInterpolationStencil(VoFStencil&              a_sten,
@@ -171,13 +172,10 @@ bool EbCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&             
 	a_sten.add(loVoF, -centroid[dir]);
 	a_sten.add(a_vof,  centroid[dir]);
       }
-      else if(Abs(centroid[dir]) < thresh){
-	// No deriv in this direction
-      }
     }
   }
 
-  return true;
+  return a_sten.size() > 1;
 }
 
 #include <CD_NamespaceFooter.H>

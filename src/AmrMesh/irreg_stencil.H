@@ -35,6 +35,13 @@ enum class stencil_type {
 class irreg_stencil {
 public:
 
+  enum class StencilType {
+    Linear,
+    TaylorExtrapolation,
+    LeastSquarse,
+    PiecewiseLinear
+  };
+
   /*!
     @brief Constructor. You must subseqently call define. No strong construction for this class since buildStencils is pure virtual
   */
