@@ -5,7 +5,7 @@
 
 /*!
   @file   EbCentroidInterpolation.H
-  @brief  Implementation of IrregStencil that interpolates from cell centers to cell centroids
+  @brief  Declaration of IrregStencil-derived class that can from cell centers to embedded boundary centroids. 
   @author Robert Marskar
 */
 
