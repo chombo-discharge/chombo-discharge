@@ -879,29 +879,6 @@ void AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags,
   }
 }
 
-void AmrMesh::regridAmr(const Vector<Vector<int> >& a_procs, const Vector<Vector<Box> >& a_boxes, const int a_lmin){
-  CH_TIME("AmrMesh::regridAmr(procs, boxes, level)");
-  if(m_verbosity > 1){
-    pout() << "AmrMesh::regridAmr(procs, boxes, level)" << endl;
-  }
-
-  // TLDR: This is the version that reads boxes. AmrMesh makes the grids by using the patch volume as load,
-  //       and those grids are then sent to the various realms. 
-  
-  for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
-    m_grids[lvl] = DisjointBoxLayout();
-    m_grids[lvl].define(a_boxes[lvl], a_procs[lvl], m_domains[lvl]);
-    m_grids[lvl].close(); 
-  }
-
-  this->defineRealms();
-
-  // Regrid the base on every realm. This includes EBLevelGrid,  neighbors, and vof iterators. 
-  for (auto& r : m_realms){
-    r.second->regrid_base(a_lmin);
-  }
-}
-
 void AmrMesh::regridOperators(const int a_lmin,
 			      const int a_lmax,
 			      const int a_regsize){
@@ -1799,11 +1776,11 @@ int AmrMesh::getMaxBoxSize(){
   return m_maxBoxSize;
 }
 
-int AmrMesh::get_buffer(){
+int AmrMesh::getBrBuffer(){
   return m_bufferSizeBR;
 }
 
-int AmrMesh::get_max_ebis_box_size(){
+int AmrMesh::getMaxEbisBoxSize(){
   return m_maxEbisBoxSize;
 }
 

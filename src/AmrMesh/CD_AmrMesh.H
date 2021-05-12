@@ -737,11 +737,11 @@ public:
 
   /*!
     @brief Regrid function. Generate new grids and operators.
-    @param[in] a_tags Tags 
-    @param[in] a_lmin Finest grid level which is allowed to change. 
+    @param[in] a_tags    Cell tags which will generate the grid. 
+    @param[in] a_lmin    Coarsest grid level allowed to change. 
+    @param[in] a_lmax    Dead parameter. 
     @param[in] a_regsize Redistribution register size. 
     @param[in] a_hardcap Grid generation hardcap. 
-
   */
   void regrid(const Vector<IntVectSet>& a_tags,
 	      const int                 a_lmin,
@@ -750,7 +750,11 @@ public:
 	      const int                 a_hardcap=-1);
 
   /*!
-    @brief Regrid AMR. This builds the grids and sets them. 
+    @brief Regrid AMR. This versions generates the grids and realms, but not the operator. 
+    @param[in] a_tags    Cell tags which will generate the grid. 
+    @param[in] a_lmin    Coarsest grid level allowed to change. 
+    @param[in] a_lmax    Dead parameter. 
+    @param[in] a_hardcap Grid generation hardcap. 
   */
   void regridAmr(const Vector<IntVectSet>& a_tags,
 		 const int                 a_lmin,
@@ -758,32 +762,34 @@ public:
 		 const int                 a_hardcap=-1);
 
   /*!
-    @brief Regrid AMR. This takes a set of grids. 
-    @todo Remove. 
+    @brief Define a realm. This generates the grids for the ralm, but not the operators. 
+    @param[in] a_realm Realm name
+    @param[in] a_procs Processor IDs
+    @param[in] a_boxes Grid boxes
+    @param[in] a_lmin  Coarsest level allowed to change. 
   */
-  void regridAmr(const Vector<Vector<int> >& a_procs, const Vector<Vector<Box> >& a_boxes, const int a_lmin);
-
-  /*!
-    @brief Define a realm
-  */
-  void regridRealm(const std::string a_realm,
+  void regridRealm(const std::string           a_realm,
 		   const Vector<Vector<int> >& a_procs,
 		   const Vector<Vector<Box> >& a_boxes,
-		   const int a_lmin);
+		   const int                   a_lmin);
 
   /*!
-    @brief Set grids from boxes and computational loads
+    @brief Set grids from boxes and computational loads.
+    @param[in] a_boxes Grid boxes
+    @param[in] a_loads Computational loads
+    @details This will run a load balancing algorithm and set m_grids accordingly. 
   */
   void setGrids(const Vector<Vector<Box> >& a_boxes, const std::map<std::string, Vector<Vector<long int> > >& a_loads);
 
   /*!
-    @brief Regrid AMR operators
+    @brief Regrid AMR operators. This is done for all realms. 
+    @param[in] a_lmin    Coarsest grid level that has changed. 
+    @param[in] a_lmax    Dead parameter. 
+    @param[in] a_regsize Dead parameter
   */
   void regridOperators(const int a_lmin,
 		       const int a_lmax,
 		       const int a_regsize=1);
-
-
 
   /*!
     @brief Do a sanity check to make sure everything is set up correctly
@@ -796,77 +802,72 @@ public:
   bool getEbCf();
 
   /*!
-    @brief Get refinement ratios
+    @brief Get finest grid level. 
   */
   int getFinestLevel();
 
   /*!
-    @brief Get irregular cell growth
+    @brief Get irregular cell growth.
   */
   int getIrregTagGrowth();
 
   /*!
-    @brief Get maximum amr depth
+    @brief Get maximum permitted amr depth.
   */
   int getMaxAmrDepth();
 
   /*!
-    @brief Get maximum simulation depth
+    @brief Get maximum permitted simulation depth.
   */
   int getMaxSimulationDepth();
 
   /*!
-    @brief Get maximum  depth
-  */
-  int getRefineAllLevelsDepth();
-
-  /*!
-    @brief Get blocking factor
+    @brief Get blocking factor (i.e. the smallest possible box).
   */
   int getBlockingFactor();
 
   /*!
-    @brief Get maximum box size
+    @brief Get maximum permitted box size
   */
   int getMaxBoxSize();
 
   /*!
-    @brief Return bffer
+    @brief Return buffer for B-R mesh refinement algorithm. 
   */
-  int get_buffer();
+  int getBrBuffer();
 
   /*!
-    @brief Get maximum box size for EBIS generation
+    @brief Get maximum box size for EBIS generation. 
   */
-  int get_max_ebis_box_size();
+  int getMaxEbisBoxSize();
 
   /*!
-    @brief Get number of ghost cells
+    @brief Get the default number of ghost cells
   */
   int getNumberOfGhostCells();
 
   /*!
-    @brief Get number of ghost cells used for EB
+    @brief Get number of ghost cells used for EB grid generation. 
   */
   int getNumberOfEbGhostCells();
 
   /*!
-    @brief Get redistribution radius
+    @brief Get default redistribution radius
   */
   int getRedistributionRadius();
   
   /*!
-    @brief Get finest level
+    @brief Get resolution on the finest grid level. 
   */
   Real getFinestDx();
 
   /*!
-    @brief Get origin
+    @brief Get lower-left corner of computational domain. 
   */
   RealVect getProbLo();
 
   /*!
-    @brief Get high end
+    @brief Get upper-left corner of computational domain. 
   */
   RealVect getProbHi();
 
@@ -876,7 +877,7 @@ public:
   ProblemDomain getFinestDomain();
 
   /*!
-    @brief Get resolutions
+    @brief Get spatial resolutions
   */
   Vector<Real>& getDx();
 
@@ -887,8 +888,11 @@ public:
 
   /*!
     @brief Get refinement factor between two levels
+    @param[in] a_level1 First level
+    @param[in] a_level2 Second level
+    @details This will work correctly in reverse as well.
   */
-  int getRefinementRatio(const int a_level1, const int a_level2);
+  int getRefinementRatio(const int a_level1, const int a_level2) const ;
 
   /*!
     @brief Get implicit function
@@ -1155,11 +1159,6 @@ protected:
     @brief Maximum allowed depth for simulation
   */
   int m_maxSimulationDepth;
-
-  /*!
-    @brief Uniform refinement depth
-  */
-  int m_refineAllLevelsDepth;
 
   /*!
     @brief Max box size
