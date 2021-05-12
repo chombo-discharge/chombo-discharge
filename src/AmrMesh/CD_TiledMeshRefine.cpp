@@ -1,18 +1,19 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   TiledMeshRefine.cpp
-  @brief  Implementation of TiledMeshRefine
+  @file   CD_TiledMeshRefine.cpp
+  @brief  Implementation of CD_TiledMeshRefine.H
   @author Robert Marskar
 */
 
-#include "TiledMeshRefine.H"
+// Our includes
+#include <CD_TiledMeshRefine.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-
-TiledMeshRefine::TiledMeshRefine(){
-
-}
-
-TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain, const Vector<int> a_refRatios, const IntVect& a_tileSize){
+TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain, const Vector<int>& a_refRatios, const IntVect& a_tileSize){
 
   m_refRatios      = a_refRatios;
   m_tileSize       = a_tileSize;
@@ -33,7 +34,7 @@ TiledMeshRefine::~TiledMeshRefine(){
 
 }
 
-void TiledMeshRefine::sanityCheck(){
+void TiledMeshRefine::sanityCheck() const {
   CH_TIME("TiledMeshRefine::sanityCheck");
 
   for (int lvl = 0; lvl < m_vectDomains.size(); lvl++){
@@ -54,7 +55,7 @@ int TiledMeshRefine::regrid(Vector<Vector<Box> >&       a_newGrids,
 			    const Vector<IntVectSet>&   a_tags,
 			    const int                   a_baseLevel,
 			    const int                   a_topLevel,
-			    const Vector<Vector<Box> >& a_oldGrids){
+			    const Vector<Vector<Box> >& a_oldGrids) const {
 
   // Validate data
   // CH_assert( a_topLevel >= 0 );
@@ -130,7 +131,7 @@ void TiledMeshRefine::makeLevelTiles(IntVectSet&          a_levelTiles,
 				     const IntVectSet&    a_coarLevelTags,
 				     const ProblemDomain& a_levelDomain,
 				     const int            a_refFine,
-				     const int            a_refCoar){
+				     const int            a_refCoar) const {
   CH_TIME("TiledMeshRefine::makeLevelTiles");
 
   // Lo/Hi corners and number of tiles in each direction
@@ -214,7 +215,7 @@ void TiledMeshRefine::makeLevelTiles(IntVectSet&          a_levelTiles,
 
 void TiledMeshRefine::makeBoxesFromTiles(Vector<Box>&         a_levelBoxes,
 					 const IntVectSet&    a_levelTiles,
-					 const ProblemDomain& a_levelDomain){
+					 const ProblemDomain& a_levelDomain) const {
   CH_TIME("TiledMeshRefine::makeBoxesFromTiles");
 
   a_levelBoxes.resize(0);
@@ -231,4 +232,5 @@ void TiledMeshRefine::makeBoxesFromTiles(Vector<Box>&         a_levelBoxes,
     a_levelBoxes.push_back(Box(lo,hi));
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
