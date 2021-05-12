@@ -31,7 +31,7 @@
 #include <EBAMRData.H>
 #include <computational_geometry.H>
 #include <mfis.H>
-#include <irreg_amr_stencil.H>
+#include <CD_IrregAmrStencil.H>
 #include <load_balance.H>
 #include <nwoebquadcfinterp.H>
 #include <MFLevelGrid.H>
@@ -1045,7 +1045,7 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const irreg_amr_stencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils(const std::string a_realm,
+  const IrregAmrStencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils(const std::string a_realm,
 									     const phase::which_phase a_phase) const;
 
   /*!
@@ -1053,7 +1053,7 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const irreg_amr_stencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils(const std::string        a_realm,
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils(const std::string        a_realm,
 										  const phase::which_phase a_phase) const;
 
   /*!
@@ -1061,7 +1061,7 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const irreg_amr_stencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const;
+  const IrregAmrStencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get copier

@@ -405,15 +405,15 @@ Vector<RefCountedPtr<LayoutData<VoFIterator> > >& realm::getVofIterator(const ph
   return m_realms[a_phase]->getVofIterator();
 }
 
-irreg_amr_stencil<CentroidInterpolationStencil>& realm::getCentroidInterpolationStencils(const phase::which_phase a_phase) {
+IrregAmrStencil<CentroidInterpolationStencil>& realm::getCentroidInterpolationStencils(const phase::which_phase a_phase) {
   return m_realms[a_phase]->getCentroidInterpolationStencils();
 }
 
-irreg_amr_stencil<EbCentroidInterpolationStencil>& realm::getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) {
+IrregAmrStencil<EbCentroidInterpolationStencil>& realm::getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) {
   return m_realms[a_phase]->getEbCentroidInterpolationStencilStencils();
 }
 
-irreg_amr_stencil<NonConservativeDivergenceStencil>& realm::getNonConservativeDivergenceStencils(const phase::which_phase a_phase) {
+IrregAmrStencil<NonConservativeDivergenceStencil>& realm::getNonConservativeDivergenceStencils(const phase::which_phase a_phase) {
   return m_realms[a_phase]->getNonConservativeDivergenceStencils();
 }
 

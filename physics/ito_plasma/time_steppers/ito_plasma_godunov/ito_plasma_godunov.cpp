@@ -988,7 +988,7 @@ void ito_plasma_godunov::compute_face_conductivity(){
   // This code extrapolates the conductivity to the EB. This should actually be the EB centroid but since the stencils
   // for EB extrapolation can be a bit nasty (e.g. negative weights), we do the centroid instead and take that as an approximation.
 #if 0
-  const irreg_amr_stencil<CentroidInterpolationStencil>& ebsten = m_amr->getCentroidInterpolationStencils(m_fluid_realm, m_phase);
+  const IrregAmrStencil<CentroidInterpolationStencil>& ebsten = m_amr->getCentroidInterpolationStencils(m_fluid_realm, m_phase);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     ebsten.apply(m_conduct_eb, m_conduct_cell, lvl);
   }

@@ -1715,7 +1715,7 @@ void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAM
   const std::string cur_realm = a_depositionNC.get_realm();
 
   if(m_blend_conservation){
-    irreg_amr_stencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(cur_realm, m_phase);
+    IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(cur_realm, m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else{

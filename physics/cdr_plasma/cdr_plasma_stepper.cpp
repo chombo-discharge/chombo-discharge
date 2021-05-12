@@ -283,7 +283,7 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
 
 
   // Stencils for extrapolating things to cell centroids
-  const irreg_amr_stencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->get_phase());
+  const IrregAmrStencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->get_phase());
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
   const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[a_lvl];
@@ -1167,7 +1167,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&
   const int ncomp        = 1;
   const int num_species  = m_physics->get_num_cdr_species();
 
-  const irreg_amr_stencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->get_phase());
+  const IrregAmrStencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->get_phase());
 
   // Call the level version
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
@@ -2477,7 +2477,7 @@ void cdr_plasma_stepper::compute_cdr_diffusion(){
     cdr_extrap[idx] = new EBAMRIVData();  // This must be deleted
     m_amr->allocate(*cdr_extrap[idx], m_realm, m_cdr->get_phase(), ncomp);
 
-    const irreg_amr_stencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_cdr->get_phase());
+    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_cdr->get_phase());
     stencil.apply(*cdr_extrap[idx], *cdr_states[idx]);
   }
   
@@ -2512,7 +2512,7 @@ void cdr_plasma_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, co
     cdr_extrap[idx] = new EBAMRIVData();  // This must be deleted
     m_amr->allocate(*cdr_extrap[idx], m_realm, m_cdr->get_phase(), ncomp);
 
-    const irreg_amr_stencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_cdr->get_phase());
+    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_cdr->get_phase());
     stencil.apply(*cdr_extrap[idx], *cdr_states[idx]);
   }
   
@@ -2620,7 +2620,7 @@ void cdr_plasma_stepper::compute_E(EBAMRIVData& a_E_eb, const phase::which_phase
   CH_assert(a_E_eb[0]->nComp()   == SpaceDim);
   CH_assert(a_E_cell[0]->nComp() == SpaceDim);
 
-  const irreg_amr_stencil<EbCentroidInterpolationStencil>& interp_stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
   interp_stencil.apply(a_E_eb, a_E_cell);
 }
 
@@ -2700,7 +2700,7 @@ void cdr_plasma_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&      
   m_amr->allocate(eb_vel, m_realm, a_phase, SpaceDim);
   m_amr->allocate(eb_phi, m_realm, a_phase, 1);
 
-  const irreg_amr_stencil<EbCentroidInterpolationStencil>& interp_stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
 
   //  for (int i = 0; i < a_fluxes.size(); i++){
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -3005,7 +3005,7 @@ void cdr_plasma_stepper::extrapolate_to_eb(EBAMRIVData& a_extrap, const phase::w
     pout() << "cdr_plasma_stepper::extrapolate_to_eb" << endl;
   }
 
-  const irreg_amr_stencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     extrapolate_to_eb(*a_extrap[lvl], a_phase, *a_data[lvl], lvl);
@@ -3021,7 +3021,7 @@ void cdr_plasma_stepper::extrapolate_to_eb(LevelData<BaseIVFAB<Real> >& a_extrap
     pout() << "cdr_plasma_stepper::extrapolate_to_eb(level)" << endl;
   }
 
-  const irreg_amr_stencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
   stencils.apply(a_extrap, a_data, a_lvl);
 }
 

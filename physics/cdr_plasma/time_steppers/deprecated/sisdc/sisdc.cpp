@@ -2942,7 +2942,7 @@ void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a
   const Real dx                = m_amr->getDx()[a_lvl];
 
   // Stencils for extrapolating things to cell centroids
-  const irreg_amr_stencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_cdr->get_phase());
+  const IrregAmrStencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_cdr->get_phase());
 
   // We must have the gradient of E. This block of code does that. 
   EBAMRCellData grad_E, E_norm;

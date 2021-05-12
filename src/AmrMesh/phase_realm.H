@@ -10,7 +10,7 @@
 
 #include "computational_geometry.H"
 #include "mfis.H"
-#include "irreg_amr_stencil.H"
+#include "CD_IrregAmrStencil.H"
 #include "load_balance.H"
 #include "nwoebquadcfinterp.H"
 #include "MFLevelGrid.H"
@@ -20,6 +20,8 @@
 #include "particle_container.H"
 #include "EBGhostCloud.H"
 #include "CD_NonConservativeDivergenceStencil.H"
+#include "CD_EbCentroidInterpolationStencil.H"
+#include "CD_CentroidInterpolationStencil.H"
 #include "EBFastFluxRegister.H"
 
 #include <DisjointBoxLayout.H>
@@ -99,9 +101,9 @@ public:
   Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid();
   Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors();
   Vector<RefCountedPtr<LayoutData<VoFIterator> > >& getVofIterator();
-  irreg_amr_stencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils();
-  irreg_amr_stencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils();
-  irreg_amr_stencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils();
+  IrregAmrStencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils();
+  IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils();
+  IrregAmrStencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils();
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten();
 
   Vector<RefCountedPtr<ebcoarseaverage> >& getCoarseAverage();
@@ -181,9 +183,9 @@ protected:
   Vector<RefCountedPtr<EBFineToCoarRedist> > m_fine_to_coar_redist;
 
   // Various stencils for irregular cells
-  RefCountedPtr<irreg_amr_stencil<CentroidInterpolationStencil> > m_CentroidInterpolationStencil;
-  RefCountedPtr<irreg_amr_stencil<EbCentroidInterpolationStencil> > m_EbCentroidInterpolationStencil;
-  RefCountedPtr<irreg_amr_stencil<NonConservativeDivergenceStencil> > m_NonConservativeDivergenceStencil;
+  RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil> > m_CentroidInterpolationStencil;
+  RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil> > m_EbCentroidInterpolationStencil;
+  RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil> > m_NonConservativeDivergenceStencil;
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradsten;
 
   // Base defines

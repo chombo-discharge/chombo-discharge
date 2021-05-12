@@ -1247,7 +1247,7 @@ void cdr_solver::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCe
   }
 
   if(m_blend_conservation){
-    const irreg_amr_stencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
+    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
     stencils.apply(a_div_nc, a_divG);
   }
   else{

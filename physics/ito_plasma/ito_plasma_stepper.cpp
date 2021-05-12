@@ -991,7 +991,7 @@ void ito_plasma_stepper::compute_E(EBAMRIVData& a_E_eb,  const phase::which_phas
   CH_assert(a_E_eb[0]->nComp()   == SpaceDim);
   CH_assert(a_E_cell[0]->nComp() == SpaceDim);
 
-  const irreg_amr_stencil<EbCentroidInterpolationStencil>& interp_stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_fluid_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_fluid_realm, a_phase);
   interp_stencil.apply(a_E_eb, a_E_cell);
 }
 

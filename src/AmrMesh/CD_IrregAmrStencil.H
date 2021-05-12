@@ -1,50 +1,69 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file irreg_amr_stencil.H
-  @brief Class for holding stencils on irregular over an entire AMR hierarchy
+  @file   IrregAmrStencil.H
+  @brief  Class for holding stencils on irregular over an entire AMR hierarchy
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#ifndef _IRREG_AMR_STENCIL_
-#define _IRREG_AMR_STENCIL_
+#ifndef CD_IrregAmrStencil_H
+#define CD_IrregAmrStencil_H
 
-#include "EBAMRData.H"
-#include "CD_IrregStencil.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <EBAMRData.H>
+#include <CD_IrregStencil.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for holding stencils on irregular cells over an entire AMR hierarchy
   @note This class holds a single stencil on each irregular cells. When you apply the stencil to a data holder, the same stencil will be applied to all the components of that holder. 
 */
-template <class T> class irreg_amr_stencil {
+template <class T> class IrregAmrStencil {
 public:
 
   /*!
     @brief Empty constructor. You must subsequently call define. 
   */
-  irreg_amr_stencil();
+  IrregAmrStencil();
 
   /*!
     @brief Full constructor. Subsequently calls define
+    @param[in] a_grids       AMR grids
+    @param[in] a_ebis        EBIS layouts on each level
+    @param[in] a_domains     Domains on each level
+    @param[in] a_dx          Resolutions on each level
+    @param[in] a_finestLevel Finest AMR level
+    @param[in] a_order       Stencil order
+    @param[in] a_radius      Stencil radius
+    @param[in] a_type        Stencil type
   */
-  irreg_amr_stencil(const Vector<DisjointBoxLayout>& a_grids,
-		    const Vector<EBISLayout>&        a_ebisl,
-		    const Vector<ProblemDomain>&     a_domains,
-		    const Vector<Real>&              a_dx,
-		    const int                        a_finest_level,
-		    const int                        a_order,
-		    const int                        a_radius,
-		    const IrregStencil::StencilType               a_type);
+  IrregAmrStencil(const Vector<DisjointBoxLayout>& a_grids,
+		  const Vector<EBISLayout>&        a_ebisl,
+		  const Vector<ProblemDomain>&     a_domains,
+		  const Vector<Real>&              a_dx,
+		  const int                        a_finestLevel,
+		  const int                        a_order,
+		  const int                        a_radius,
+		  const IrregStencil::StencilType  a_type);
 
   /*!
     @brief Destructor
   */
-  virtual ~irreg_amr_stencil();
-  
+  virtual ~IrregAmrStencil();
 
   /*!
     @brief Define function
+    @param[in] a_grids       AMR grids
+    @param[in] a_ebis        EBIS layouts on each level
+    @param[in] a_domains     Domains on each level
+    @param[in] a_dx          Resolutions on each level
+    @param[in] a_finestLevel Finest AMR level
+    @param[in] a_order       Stencil order
+    @param[in] a_radius      Stencil radius
+    @param[in] a_type        Stencil type
   */
   virtual void define(const Vector<DisjointBoxLayout>& a_grids,
 		      const Vector<EBISLayout>&        a_ebisl,
@@ -53,7 +72,7 @@ public:
 		      const int                        a_finest_level,
 		      const int                        a_order,
 		      const int                        a_radius,
-		      const IrregStencil::StencilType               a_type);
+		      const IrregStencil::StencilType  a_type);
 
   /*!
     @brief Apply the stencils to an existing data holder. 
@@ -216,8 +235,9 @@ protected:
   */
   IrregStencil::StencilType m_stencilType;
 };
-#include "CD_NamespaceFooter.H"
 
-#include "irreg_amr_stencilImplem.H"
+#include <CD_NamespaceFooter.H>
+
+#include <CD_IrregAmrStencilImplem.H>
 
 #endif

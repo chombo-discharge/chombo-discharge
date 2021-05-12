@@ -742,8 +742,8 @@ void phase_realm::define_irreg_sten(){
     const int order = 1;
     const int rad   = 1;
 
-    m_CentroidInterpolationStencil = RefCountedPtr<irreg_amr_stencil<CentroidInterpolationStencil> >
-      (new irreg_amr_stencil<CentroidInterpolationStencil>(m_grids,
+    m_CentroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil> >
+      (new IrregAmrStencil<CentroidInterpolationStencil>(m_grids,
 					      m_ebisl,
 					      m_domains,
 					      m_dx,
@@ -752,8 +752,8 @@ void phase_realm::define_irreg_sten(){
 					      rad,
 					      m_centroidStencilType));
       
-    m_EbCentroidInterpolationStencil = RefCountedPtr<irreg_amr_stencil<EbCentroidInterpolationStencil> >
-      (new irreg_amr_stencil<EbCentroidInterpolationStencil>(m_grids,
+    m_EbCentroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil> >
+      (new IrregAmrStencil<EbCentroidInterpolationStencil>(m_grids,
 						 m_ebisl,
 						 m_domains,
 						 m_dx,
@@ -777,8 +777,8 @@ void phase_realm::define_noncons_sten(){
     const int rad   = m_redistributionRadius;
 
     
-    m_NonConservativeDivergenceStencil = RefCountedPtr<irreg_amr_stencil<NonConservativeDivergenceStencil> >
-      (new irreg_amr_stencil<NonConservativeDivergenceStencil>(m_grids,
+    m_NonConservativeDivergenceStencil = RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil> >
+      (new IrregAmrStencil<NonConservativeDivergenceStencil>(m_grids,
 					  m_ebisl,
 					  m_domains,
 					  m_dx,
@@ -828,11 +828,11 @@ Vector<RefCountedPtr<LayoutData<VoFIterator> > >& phase_realm::getVofIterator() 
   return m_vofiter;
 }
 
-irreg_amr_stencil<CentroidInterpolationStencil>& phase_realm::getCentroidInterpolationStencils() {
+IrregAmrStencil<CentroidInterpolationStencil>& phase_realm::getCentroidInterpolationStencils() {
   return *m_CentroidInterpolationStencil;
 }
 
-irreg_amr_stencil<EbCentroidInterpolationStencil>& phase_realm::getEbCentroidInterpolationStencilStencils() {
+IrregAmrStencil<EbCentroidInterpolationStencil>& phase_realm::getEbCentroidInterpolationStencilStencils() {
   return *m_EbCentroidInterpolationStencil;
 }
 
@@ -843,7 +843,7 @@ Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& phase_realm::get_gr
 
 // Throw errors if the operator does not exist
 
-irreg_amr_stencil<NonConservativeDivergenceStencil>& phase_realm::getNonConservativeDivergenceStencils() {
+IrregAmrStencil<NonConservativeDivergenceStencil>& phase_realm::getNonConservativeDivergenceStencils() {
   if(!this->query_operator(s_eb_NonConservativeDivergenceStencil)) MayDay::Abort("phase_realm::get_non_cons_div_stencils - operator not registered!");
   
   return *m_NonConservativeDivergenceStencil;
