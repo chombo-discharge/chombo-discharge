@@ -19,7 +19,7 @@
 #include "DomainFluxIFFABFactory.H"
 #include "particle_container.H"
 #include "EBGhostCloud.H"
-#include "noncons_div.H"
+#include "CD_NonConservativeDivergenceStencil.H"
 #include "EBFastFluxRegister.H"
 
 #include <DisjointBoxLayout.H>
@@ -49,7 +49,7 @@ static const std::string s_eb_flux_reg     = "eb_flux_reg";
 static const std::string s_eb_redist       = "eb_redist";
 static const std::string s_eb_copier       = "eb_copier";
 static const std::string s_eb_ghostcloud   = "eb_ghostcloud";
-static const std::string s_eb_noncons_div  = "eb_non_cons_div";
+static const std::string s_eb_NonConservativeDivergenceStencil  = "eb_non_cons_div";
 static const std::string s_levelset        = "levelset";
 
 /*!
@@ -101,7 +101,7 @@ public:
   Vector<RefCountedPtr<LayoutData<VoFIterator> > >& getVofIterator();
   irreg_amr_stencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils();
   irreg_amr_stencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils();
-  irreg_amr_stencil<noncons_div>& getNonConservativeDivergenceStencils();
+  irreg_amr_stencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils();
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten();
 
   Vector<RefCountedPtr<ebcoarseaverage> >& getCoarseAverage();
@@ -183,7 +183,7 @@ protected:
   // Various stencils for irregular cells
   RefCountedPtr<irreg_amr_stencil<CentroidInterpolationStencil> > m_CentroidInterpolationStencil;
   RefCountedPtr<irreg_amr_stencil<EbCentroidInterpolationStencil> > m_EbCentroidInterpolationStencil;
-  RefCountedPtr<irreg_amr_stencil<noncons_div> > m_noncons_div;
+  RefCountedPtr<irreg_amr_stencil<NonConservativeDivergenceStencil> > m_NonConservativeDivergenceStencil;
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradsten;
 
   // Base defines

@@ -582,7 +582,7 @@ void mc_photo::registerOperators(){
     m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
     m_amr->registerOperator(s_eb_mg_interp,    m_realm, m_phase);
     m_amr->registerOperator(s_eb_redist,       m_realm, m_phase);
-    m_amr->registerOperator(s_eb_noncons_div,  m_realm, m_phase);
+    m_amr->registerOperator(s_eb_NonConservativeDivergenceStencil,  m_realm, m_phase);
     m_amr->registerOperator(s_eb_copier,       m_realm, m_phase);
     if(m_pvr_buffer <= 0){
       m_amr->registerOperator(s_eb_ghostcloud, m_realm, m_phase);
@@ -1058,7 +1058,7 @@ void mc_photo::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRC
   }
 
   if(m_blend_conservation){
-    const irreg_amr_stencil<noncons_div>& stencils = m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
+    const irreg_amr_stencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else{

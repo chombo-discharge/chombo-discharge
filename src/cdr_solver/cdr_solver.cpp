@@ -938,14 +938,14 @@ void cdr_solver::initial_data_particles(){
 
 void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
 				   EBAMRIVData&       a_mass_diff,
-				   const EBAMRIVData& a_noncons_div){
+				   const EBAMRIVData& a_NonConservativeDivergenceStencil){
   CH_TIME("cdr_solver::hybrid_divergence(AMR)");
   if(m_verbosity > 5){
     pout() << m_name + "::hybrid_divergence(AMR)" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    hybrid_divergence(*a_hybrid_div[lvl], *a_mass_diff[lvl], *a_noncons_div[lvl], lvl);
+    hybrid_divergence(*a_hybrid_div[lvl], *a_mass_diff[lvl], *a_NonConservativeDivergenceStencil[lvl], lvl);
   }
 }
 
@@ -1247,7 +1247,7 @@ void cdr_solver::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCe
   }
 
   if(m_blend_conservation){
-    const irreg_amr_stencil<noncons_div>& stencils = m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
+    const irreg_amr_stencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
     stencils.apply(a_div_nc, a_divG);
   }
   else{
@@ -1360,7 +1360,7 @@ void cdr_solver::registerOperators(){
     m_amr->registerOperator(s_eb_flux_reg,     m_realm, m_phase);
     m_amr->registerOperator(s_eb_redist,       m_realm, m_phase);
     m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
-    m_amr->registerOperator(s_eb_noncons_div,  m_realm, m_phase);
+    m_amr->registerOperator(s_eb_NonConservativeDivergenceStencil,  m_realm, m_phase);
   }
 }
 

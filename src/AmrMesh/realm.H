@@ -83,7 +83,7 @@ public:
   Vector<RefCountedPtr<LayoutData<VoFIterator> > >& getVofIterator(const phase::which_phase a_phase);
   irreg_amr_stencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils(const phase::which_phase a_phase);
   irreg_amr_stencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase);
-  irreg_amr_stencil<noncons_div>& getNonConservativeDivergenceStencils(const phase::which_phase a_phase);
+  irreg_amr_stencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils(const phase::which_phase a_phase);
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten(const phase::which_phase a_phase);
 
   // Get functions for stuff that are specific to phase, but is not necessarily const

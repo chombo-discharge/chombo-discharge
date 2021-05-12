@@ -40,7 +40,7 @@
 #include <DomainFluxIFFABFactory.H>
 #include <particle_container.H>
 #include <EBGhostCloud.H>
-#include <noncons_div.H>
+#include <CD_NonConservativeDivergenceStencil.H>
 #include <realm.H>
 #include <load_balance.H>
 #include <CD_NamespaceHeader.H>
@@ -1061,7 +1061,7 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const irreg_amr_stencil<noncons_div>& getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const;
+  const irreg_amr_stencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get copier

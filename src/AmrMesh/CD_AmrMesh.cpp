@@ -1948,7 +1948,7 @@ const irreg_amr_stencil<EbCentroidInterpolationStencil>& AmrMesh::getEbCentroidI
   return m_realms[a_realm]->getEbCentroidInterpolationStencilStencils(a_phase);
 }
 
-const irreg_amr_stencil<noncons_div>& AmrMesh::getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const{
+const irreg_amr_stencil<NonConservativeDivergenceStencil>& AmrMesh::getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const{
   return m_realms[a_realm]->getNonConservativeDivergenceStencils(a_phase);
 }
 

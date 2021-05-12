@@ -455,7 +455,7 @@ void ito_solver::registerOperators(){
     m_amr->registerOperator(s_eb_mg_interp,    m_realm, m_phase);
     m_amr->registerOperator(s_eb_copier,       m_realm, m_phase);
     m_amr->registerOperator(s_eb_ghostcloud,   m_realm, m_phase);
-    m_amr->registerOperator(s_eb_noncons_div,  m_realm, m_phase);
+    m_amr->registerOperator(s_eb_NonConservativeDivergenceStencil,  m_realm, m_phase);
     
     if(m_redistribute)    m_amr->registerOperator(s_eb_redist,  m_realm, m_phase);
     if(m_halo_buffer > 0) m_amr->registerMask(s_particle_halo, m_halo_buffer, m_realm);
@@ -1715,7 +1715,7 @@ void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAM
   const std::string cur_realm = a_depositionNC.get_realm();
 
   if(m_blend_conservation){
-    irreg_amr_stencil<noncons_div>& stencils = m_amr->getNonConservativeDivergenceStencils(cur_realm, m_phase);
+    irreg_amr_stencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(cur_realm, m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else{

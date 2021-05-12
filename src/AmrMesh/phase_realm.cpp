@@ -126,7 +126,7 @@ void phase_realm::registerOperator(const std::string a_operator){
        a_operator.compare(s_eb_pwl_interp)   == 0 ||
        a_operator.compare(s_eb_flux_reg)     == 0 ||
        a_operator.compare(s_eb_redist)       == 0 ||
-       a_operator.compare(s_eb_noncons_div)  == 0 ||
+       a_operator.compare(s_eb_NonConservativeDivergenceStencil)  == 0 ||
        a_operator.compare(s_eb_copier)       == 0 ||
        a_operator.compare(s_eb_ghostcloud)   == 0 ||
        a_operator.compare(s_eb_gradient)     == 0 ||
@@ -770,15 +770,15 @@ void phase_realm::define_noncons_sten(){
     pout() << "phase_realm::define_noncons_sten" << endl;
   }
 
-  const bool do_this_operator = this->query_operator(s_eb_noncons_div);
+  const bool do_this_operator = this->query_operator(s_eb_NonConservativeDivergenceStencil);
 
   if(do_this_operator){
     const int order = 1; // Dummy argument
     const int rad   = m_redistributionRadius;
 
     
-    m_noncons_div = RefCountedPtr<irreg_amr_stencil<noncons_div> >
-      (new irreg_amr_stencil<noncons_div>(m_grids,
+    m_NonConservativeDivergenceStencil = RefCountedPtr<irreg_amr_stencil<NonConservativeDivergenceStencil> >
+      (new irreg_amr_stencil<NonConservativeDivergenceStencil>(m_grids,
 					  m_ebisl,
 					  m_domains,
 					  m_dx,
@@ -843,10 +843,10 @@ Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& phase_realm::get_gr
 
 // Throw errors if the operator does not exist
 
-irreg_amr_stencil<noncons_div>& phase_realm::getNonConservativeDivergenceStencils() {
-  if(!this->query_operator(s_eb_noncons_div)) MayDay::Abort("phase_realm::get_non_cons_div_stencils - operator not registered!");
+irreg_amr_stencil<NonConservativeDivergenceStencil>& phase_realm::getNonConservativeDivergenceStencils() {
+  if(!this->query_operator(s_eb_NonConservativeDivergenceStencil)) MayDay::Abort("phase_realm::get_non_cons_div_stencils - operator not registered!");
   
-  return *m_noncons_div;
+  return *m_NonConservativeDivergenceStencil;
 }
 
 EBAMRFAB& phase_realm::getLevelset() {

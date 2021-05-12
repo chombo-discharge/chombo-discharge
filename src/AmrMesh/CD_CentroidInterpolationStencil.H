@@ -9,8 +9,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_CentroidInterpolationStencil_H_
-#define CD_CentroidInterpolationStencil_H_
+#ifndef CD_CentroidInterpolationStencil_H
+#define CD_CentroidInterpolationStencil_H
 
 // Our includes
 #include <CD_IrregStencil.H>

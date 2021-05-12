@@ -726,7 +726,7 @@ protected:
   */
   virtual void hybrid_divergence(EBAMRCellData&       a_divF,
 				 EBAMRIVData&         a_mass_diff,
-				 const EBAMRIVData&   a_noncons_div);
+				 const EBAMRIVData&   a_NonConservativeDivergenceStencil);
 
   
   /*!
