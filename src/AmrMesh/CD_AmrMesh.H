@@ -1094,9 +1094,9 @@ protected:
   /*!
     @brief Enum for having understandable notation for grid generation
   */
-  enum GridGenerationMethod{
-    berger_rigoustous = 0,
-    tiled             = 1,
+  enum class GridGenerationMethod{
+    BergerRigoutsous,
+    Tiled,
   };
 
   /*!
@@ -1242,7 +1242,7 @@ protected:
   /*!
     @brief Radius for centroid interpolation stencil
   */
-  int m_centroid_sten_rad;
+  int m_centroidStencilRadius;
 
   /*!
     @brief Order for interpolation stencilst to EB
@@ -1252,7 +1252,7 @@ protected:
   /*!
     @brief Radius for EB interpolation stencil
   */
-  int m_eb_sten_rad;
+  int m_ebCentroidStencilRadius;
 
   /*!
     @brief Stencil order for irregular stencils

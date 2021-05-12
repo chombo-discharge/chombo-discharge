@@ -38,7 +38,7 @@ AmrMesh::AmrMesh(){
   m_hasGrids    = false;
 
 #if 1
-  // This is a fucking HACK! I have no idea why this work, and we should check that out. But, for some reason
+  // I have no idea why this work, and we should check that out. But, for some reason
   // if we use refinement of 4, without a 2 at the end (even if this is NOT used anywhere?!?!?), we get memory
   // leaks through define_eblevelgrid() in the setMaxCoarseningRatio stuff. I don't know if this leak is real,
   // but that's what valgrind tells me....
@@ -932,11 +932,11 @@ void AmrMesh::buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int
 
     // Berger-Rigoutsos grid generation
     int new_finest_level;
-    if(m_gridGenerationMethod == GridGenerationMethod::berger_rigoustous){
+    if(m_gridGenerationMethod == GridGenerationMethod::BergerRigoutsous){
       BRMeshRefine mesh_refine(m_domains[0], m_refinementRatios, m_fillRatioBR, m_blockingFactor, m_bufferSizeBR, m_maxBoxSize);
       new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
     }
-    else if (m_gridGenerationMethod == GridGenerationMethod::tiled){
+    else if (m_gridGenerationMethod == GridGenerationMethod::Tiled){
       TiledMeshRefine mesh_refine(m_domains[0], m_refinementRatios, m_blockingFactor*IntVect::Unit);
       new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
     }
@@ -1590,10 +1590,10 @@ void AmrMesh::parsegridGeneration(){
   std::string str;
   pp.get("grid_algorithm", str);
   if(str == "br"){
-    m_gridGenerationMethod = GridGenerationMethod::berger_rigoustous;
+    m_gridGenerationMethod = GridGenerationMethod::BergerRigoutsous;
   }
   else if(str == "tiled"){
-    m_gridGenerationMethod = GridGenerationMethod::tiled;
+    m_gridGenerationMethod = GridGenerationMethod::Tiled;
   }
   else{
     MayDay::Abort("AmrMesh::parsegridGeneration - unknown grid generation method requested");
@@ -1666,7 +1666,7 @@ void AmrMesh::parseCentroidStencils(){
 
 
   // Maybe, in the future, we can change these but the user should not care about these (yet)
-  m_centroid_sten_rad   = 1;
+  m_centroidStencilRadius   = 1;
   m_centroidStencilOrder = 1;
 
   if(str == "linear"){
@@ -1692,8 +1692,8 @@ void AmrMesh::parseEbCentroidStencils(){
   pp.get("eb_sten", str);
   
   // Maybe, in the future, we can change these but the user should not care about these (yet)
-  m_eb_sten_rad   = 1;
-  m_ebCentroidStencilOrder = 1;
+  m_ebCentroidStencilRadius = 1;
+  m_ebCentroidStencilOrder  = 1;
 
   if(str == "linear"){
     m_ebCentroidStencilType = stencil_type::linear;

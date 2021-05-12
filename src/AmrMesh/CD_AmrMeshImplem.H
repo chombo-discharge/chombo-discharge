@@ -1,14 +1,19 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   AmrMeshImplem.H
   @brief  Implementation of AmrMesh.H
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#ifndef _CD_AmrMeshImplem_H_
-#define _CD_AmrMeshImplem_H_
+#ifndef CD_AmrMeshImplem_H
+#define CD_AmrMeshImplem_H
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
   
 template<typename T>
 void AmrMesh::deallocate(Vector<T*>& a_data){
@@ -92,8 +97,8 @@ void AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, co
 
 template <typename T>
 void AmrMesh::allocate(particle_container<T>& a_container,
-			const int              a_buffer,
-			const std::string      a_realm){
+		       const int              a_buffer,
+		       const std::string      a_realm){
   CH_TIME("AmrMesh::allocate(container, buffer, realm)");
   if(m_verbosity > 5){
     pout() << "AmrMesh::allocate(container, buffer, realm)" << endl;
@@ -155,6 +160,6 @@ void AmrMesh::allocatePointer(EBAMRData<T>& a_data, const int a_finestLevel){
   return this->allocatePointer(a_data.get_data(), a_finestLevel);
 }
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
 
 #endif

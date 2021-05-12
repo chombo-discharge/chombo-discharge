@@ -10,17 +10,10 @@
 
 #include "mfis.H"
 
+#include "CD_BoxSorting.H"
 #include "CD_NamespaceHeader.H"
 
-/*!
-  @brief Enum for sorting boxes
-*/
-enum class BoxSorting {
-  none,
-  std,
-  shuffle,
-  morton
-};
+
 
 /*!
   @brief Static class that does various kinds of load-balancing
