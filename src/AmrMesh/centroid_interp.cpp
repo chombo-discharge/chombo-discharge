@@ -17,7 +17,7 @@
 
 Real centroid_interp::s_tolerance = 1.E-8;
 
-centroid_interp::centroid_interp() : irreg_stencil(){
+centroid_interp::centroid_interp() : IrregStencil(){
   CH_TIME("centroid_interp::centroid_interp");
 }
 
@@ -27,7 +27,7 @@ centroid_interp::centroid_interp(const DisjointBoxLayout&       a_dbl,
 				 const Real&                    a_dx,
 				 const int                      a_order,
 				 const int                      a_radius,
-				 const stencil_type             a_type) : irreg_stencil(){
+				 const IrregStencil::StencilType             a_type) : IrregStencil(){
 
   CH_TIME("centroid_interp::centroid_interp");
 
@@ -38,28 +38,28 @@ centroid_interp::~centroid_interp(){
   CH_TIME("centroid_interp::~centroid_interp");
 }
 
-void centroid_interp::build_stencil(VoFStencil&              a_sten,
-				    const VolIndex&          a_vof,
-				    const DisjointBoxLayout& a_dbl,
-				    const ProblemDomain&     a_domain,
-				    const EBISBox&           a_ebisbox,
-				    const Box&               a_box,
-				    const Real&              a_dx,
-				    const IntVectSet&        a_cfivs){
+void centroid_interp::buildStencil(VoFStencil&              a_sten,
+				   const VolIndex&          a_vof,
+				   const DisjointBoxLayout& a_dbl,
+				   const ProblemDomain&     a_domain,
+				   const EBISBox&           a_ebisbox,
+				   const Box&               a_box,
+				   const Real&              a_dx,
+				   const IntVectSet&        a_cfivs){
   CH_TIME("centroid_interp::build_stencil");
   
   bool found_stencil = false;
 
-  if(m_stencilType == stencil_type::linear){
+  if(m_stencilType == IrregStencil::StencilType::Linear){
     found_stencil = LinearStencil::getLinearInterpStencil(a_sten, a_ebisbox.centroid(a_vof), a_vof, a_domain, a_ebisbox);
   }
-  else if(m_stencilType == stencil_type::taylor){
+  else if(m_stencilType == IrregStencil::StencilType::TaylorExtrapolation){
     found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
-  else if(m_stencilType == stencil_type::lsq){
+  else if(m_stencilType == IrregStencil::StencilType::LeastSquares){
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
-  else if(m_stencilType == stencil_type::pwl){
+  else if(m_stencilType == IrregStencil::StencilType::PiecewiseLinear){
     found_stencil = this->get_pwl_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
   else{

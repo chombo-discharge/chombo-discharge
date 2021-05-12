@@ -8,7 +8,7 @@
 #ifndef _ROBINCONDUCTIVITYEBBC_
 #define _ROBINCONDUCTIVITYEBBC_
 
-#include "irreg_stencil.H"
+#include "CD_IrregStencil.H"
 #include "robin_coef.H"
 
 #include <BaseEBBC.H>
@@ -44,7 +44,7 @@ public:
   /*!
     @brief Set bc order
   */
-  virtual void set_type(const stencil_type a_type);
+  virtual void set_type(const IrregStencil::StencilType a_type);
 
   /*!
     @brief Make it virtual
@@ -91,7 +91,7 @@ protected:
 
   LayoutData<BaseIVFAB<VoFStencil> > m_bcstencils;
 
-  stencil_type m_type;
+  IrregStencil::StencilType m_type;
 
   RealVect m_dx;
 

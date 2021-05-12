@@ -692,7 +692,7 @@ void eddington_sp1::setup_operator_factory(){
   // EBBC
   m_ebfact  = RefCountedPtr<robinconductivityebbcfactory> (new robinconductivityebbcfactory(origin));
   m_ebfact->set_coefs(m_robinco);
-  m_ebfact->set_type(stencil_type::lsq);
+  m_ebfact->set_type(IrregStencil::StencilType::LeastSquares);
 
   //  Make relaxation type into int code
   int relax_type = 0;

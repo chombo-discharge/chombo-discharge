@@ -50,15 +50,15 @@ void robinconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const 
       
       bool found_stencil = false;
       
-      if(m_type == stencil_type::taylor){
+      if(m_type == IrregStencil::StencilType::TaylorExtrapolation){
 	found_stencil = this->get_taylor_sten(stencil, vof, ebisbox, cfivs);
       }
-      else if(m_type == stencil_type::lsq){
+      else if(m_type == IrregStencil::StencilType::LeastSquares){
 	found_stencil = this->get_lsq_sten(stencil, vof, ebisbox, domain);
       }
 
       // Second last resort is least squares, but if we've already tried this, skip it. 
-      if(!found_stencil && m_type != stencil_type::lsq){
+      if(!found_stencil && m_type != IrregStencil::StencilType::LeastSquares){
 	found_stencil = this->get_lsq_sten(stencil, vof, ebisbox, domain);
       }
 
@@ -159,8 +159,8 @@ bool robinconductivityebbc::get_lsq_sten(VoFStencil&          a_stencil,
   return found_stencil;
 }
 
-void robinconductivityebbc::set_type(const stencil_type a_type){
-  if(a_type == stencil_type::taylor || a_type == stencil_type::lsq){
+void robinconductivityebbc::set_type(const IrregStencil::StencilType a_type){
+  if(a_type == IrregStencil::StencilType::TaylorExtrapolation || a_type == IrregStencil::StencilType::LeastSquares){
     m_type = a_type;
   }
   else{

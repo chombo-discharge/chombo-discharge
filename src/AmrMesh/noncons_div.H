@@ -1,6 +1,6 @@
 /*!
   @file   noncons_div.H
-  @brief  Implementation of irreg_stencil that can perform the nonconservative divergence averaging
+  @brief  Implementation of IrregStencil that can perform the nonconservative divergence averaging
   @author Robert Marskar
   @date   April 2020
 */
@@ -9,14 +9,14 @@
 #ifndef _NONCONS_DIV_
 #define _NONCONS_DIV_
 
-#include "irreg_stencil.H"
+#include "CD_IrregStencil.H"
 
 #include "CD_NamespaceHeader.H"
 
 /*!
   @brief Class for holding stencils on irregular cells over a single AMR level
 */
-class noncons_div : public irreg_stencil {
+class noncons_div : public IrregStencil {
 public:
 
   /*!
@@ -40,7 +40,7 @@ public:
 	      const Real&                    a_dx,
 	      const int                      a_order,
 	      const int                      a_radius,
-	      const stencil_type             a_type);
+	      const IrregStencil::StencilType             a_type);
 
   /*!
     @brief Destructor

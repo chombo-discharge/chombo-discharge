@@ -1,6 +1,6 @@
 /*!
   @file   centroid_interp.H
-  @brief  Implementation of irreg_stencil that interpolates from cell centers to cell centroids
+  @brief  Implementation of IrregStencil that interpolates from cell centers to cell centroids
   @author Robert Marskar
   @date   Aug. 2017
 */
@@ -8,14 +8,14 @@
 #ifndef _CD_CentroidInterp_H_
 #define _CD_CentroidInterp_H_
 
-#include "irreg_stencil.H"
+#include "CD_IrregStencil.H"
 
 #include "CD_NamespaceHeader.H"
   
 /*!
   @brief Class for holding stencils on irregular cells over a single AMR level
 */
-class centroid_interp : public irreg_stencil {
+class centroid_interp : public IrregStencil {
 public:
 
   /*!
@@ -39,7 +39,7 @@ public:
 		  const Real&                    a_dx,
 		  const int                      a_order,
 		  const int                      a_radius,
-		  const stencil_type             a_type);
+		  const IrregStencil::StencilType             a_type);
 
   /*!
     @brief Destructor
@@ -56,14 +56,14 @@ protected:
   /*!
     @brief Build the interpolation stencils
   */
-  virtual void build_stencil(VoFStencil&              a_sten,
-			     const VolIndex&          a_vof,
-			     const DisjointBoxLayout& a_dbl,
-			     const ProblemDomain&     a_domain,
-			     const EBISBox&           a_ebisbox,
-			     const Box&               a_box,
-			     const Real&              a_dx,
-			     const IntVectSet&        a_cfivs) override;
+  virtual void buildStencil(VoFStencil&              a_sten,
+			    const VolIndex&          a_vof,
+			    const DisjointBoxLayout& a_dbl,
+			    const ProblemDomain&     a_domain,
+			    const EBISBox&           a_ebisbox,
+			    const Box&               a_box,
+			    const Real&              a_dx,
+			    const IntVectSet&        a_cfivs) override;
 
   /*!
     @brief Get a Taylor-based stencil

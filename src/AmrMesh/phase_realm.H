@@ -73,8 +73,8 @@ public:
 	      const int a_num_ghost,
 	      const int a_lsf_ghost,
 	      const int a_redist_rad,
-	      const stencil_type a_centroid_stencil,
-	      const stencil_type a_eb_stencil,
+	      const IrregStencil::StencilType a_centroid_stencil,
+	      const IrregStencil::StencilType a_eb_stencil,
 	      const bool a_ebcf,
 	      const RefCountedPtr<BaseIF>&       a_baseif,
 	      const RefCountedPtr<EBIndexSpace>& a_ebis);
@@ -133,8 +133,8 @@ protected:
   int m_numLsfGhostCells;
   int m_redistributionRadius;
   RealVect m_probLo;
-  stencil_type m_centroidStencilType;
-  stencil_type m_ebCentroidStencilType;
+  IrregStencil::StencilType m_centroidStencilType;
+  IrregStencil::StencilType m_ebCentroidStencilType;
   Vector<Real> m_dx;
   Vector<int> m_refinementRatios;
 

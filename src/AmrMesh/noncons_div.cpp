@@ -12,7 +12,7 @@
 
 #include "CD_NamespaceHeader.H"
 
-noncons_div::noncons_div() : irreg_stencil(){
+noncons_div::noncons_div() : IrregStencil(){
   CH_TIME("noncons_div::noncons_div");
 }
 
@@ -22,12 +22,12 @@ noncons_div::noncons_div(const DisjointBoxLayout&       a_dbl,
 			 const Real&                    a_dx,
 			 const int                      a_order,
 			 const int                      a_radius,
-			 const stencil_type             a_type) : irreg_stencil(){
+			 const IrregStencil::StencilType             a_type) : IrregStencil() { 
 
   CH_TIME("noncons_div::noncons_div");
 
   // Order and radius are dummy arguments. 
-  this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius, stencil_type::linear);
+  this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius, IrregStencil::StencilType::Linear);
 }
 
 noncons_div::~noncons_div(){

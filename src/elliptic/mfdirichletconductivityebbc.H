@@ -163,7 +163,7 @@ protected:
   /*!
     @brief Stencils on irregular cells
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_irreg_stencils;
+  LayoutData<BaseIVFAB<VoFStencil> > m_IrregStencils;
 
   /*!
     @brief Stencils on matching cells

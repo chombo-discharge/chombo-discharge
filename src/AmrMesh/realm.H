@@ -44,8 +44,8 @@ public:
 	      const int a_lsf_ghost,
 	      const int a_redist_rad,
 	      const bool a_ebcf,
-	      const stencil_type a_centroid_stencil,
-	      const stencil_type a_eb_stencil,
+	      const IrregStencil::StencilType a_centroid_stencil,
+	      const IrregStencil::StencilType a_eb_stencil,
 	      const std::map<phase::which_phase, RefCountedPtr<BaseIF> > a_baseif,
 	      const RefCountedPtr<mfis>& a_mfis);
 

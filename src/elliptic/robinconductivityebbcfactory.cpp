@@ -10,7 +10,7 @@
 #include "CD_NamespaceHeader.H"
 
 robinconductivityebbcfactory::robinconductivityebbcfactory(const RealVect a_origin){
-  this->set_type(stencil_type::taylor);
+  this->set_type(IrregStencil::StencilType::TaylorExtrapolation);
   this->set_coefs(1., 1., 0.);
 
   m_origin = a_origin;
@@ -19,8 +19,8 @@ robinconductivityebbcfactory::robinconductivityebbcfactory(const RealVect a_orig
 robinconductivityebbcfactory::~robinconductivityebbcfactory(){
 }
 
-void robinconductivityebbcfactory::set_type(const stencil_type a_type){
-  if(a_type == stencil_type::taylor || a_type == stencil_type::lsq){
+void robinconductivityebbcfactory::set_type(const IrregStencil::StencilType a_type){
+  if(a_type == IrregStencil::StencilType::TaylorExtrapolation || a_type == IrregStencil::StencilType::LeastSquares){
     m_type = a_type;
   }
   else{

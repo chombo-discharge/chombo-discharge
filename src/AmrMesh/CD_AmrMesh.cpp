@@ -1666,20 +1666,20 @@ void AmrMesh::parseCentroidStencils(){
 
 
   // Maybe, in the future, we can change these but the user should not care about these (yet)
-  m_centroidStencilRadius   = 1;
-  m_centroidStencilOrder = 1;
+  m_centroidStencilRadius = 1;
+  m_centroidStencilOrder  = 1;
 
   if(str == "linear"){
-    m_centroidStencilType = stencil_type::linear;
+    m_centroidStencilType = IrregStencil::StencilType::Linear;
   }
   else if(str == "taylor"){
-    m_centroidStencilType = stencil_type::taylor;
+    m_centroidStencilType = IrregStencil::StencilType::TaylorExtrapolation;
   }
   else if(str == "lsq"){
-    m_centroidStencilType = stencil_type::lsq;
+    m_centroidStencilType = IrregStencil::StencilType::LeastSquares;
   }
   else if(str == "pwl"){
-    m_centroidStencilType = stencil_type::pwl;
+    m_centroidStencilType = IrregStencil::StencilType::PiecewiseLinear;
   }
   else{
     MayDay::Abort("AmrMesh::parseCentroidStencils - unknown stencil requested");
@@ -1696,16 +1696,16 @@ void AmrMesh::parseEbCentroidStencils(){
   m_ebCentroidStencilOrder  = 1;
 
   if(str == "linear"){
-    m_ebCentroidStencilType = stencil_type::linear;
+    m_ebCentroidStencilType = IrregStencil::StencilType::Linear;
   }
   else if(str == "taylor"){
-    m_ebCentroidStencilType = stencil_type::taylor;
+    m_ebCentroidStencilType = IrregStencil::StencilType::TaylorExtrapolation;
   }
   else if(str == "lsq"){
-    m_ebCentroidStencilType = stencil_type::lsq;
+    m_ebCentroidStencilType = IrregStencil::StencilType::LeastSquares;
   }
   else if(str == "pwl"){
-    m_ebCentroidStencilType = stencil_type::pwl;
+    m_ebCentroidStencilType = IrregStencil::StencilType::PiecewiseLinear;
   }
   else{
     MayDay::Abort("AmrMesh::parseEbCentroidStencils - unknown stencil requested");

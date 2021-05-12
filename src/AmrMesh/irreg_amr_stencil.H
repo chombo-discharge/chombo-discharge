@@ -9,7 +9,7 @@
 #define _IRREG_AMR_STENCIL_
 
 #include "EBAMRData.H"
-#include "irreg_stencil.H"
+#include "CD_IrregStencil.H"
 
 #include "CD_NamespaceHeader.H"
 
@@ -35,7 +35,7 @@ public:
 		    const int                        a_finest_level,
 		    const int                        a_order,
 		    const int                        a_radius,
-		    const stencil_type               a_type);
+		    const IrregStencil::StencilType               a_type);
 
   /*!
     @brief Destructor
@@ -53,7 +53,7 @@ public:
 		      const int                        a_finest_level,
 		      const int                        a_order,
 		      const int                        a_radius,
-		      const stencil_type               a_type);
+		      const IrregStencil::StencilType               a_type);
 
   /*!
     @brief Apply the stencils to an existing data holder. 
@@ -152,7 +152,7 @@ public:
     @brief Get the stencils over an AMR level
     @param[in] a_lvl AMR level
   */
-  const irreg_stencil& operator[](const int& a_lvl) const {
+  const IrregStencil& operator[](const int& a_lvl) const {
     return *m_stencils[a_lvl];
   }
 
@@ -160,7 +160,7 @@ public:
     @brief Get the stencils over an AMR level
     @param[in] a_lvl AMR level
   */
-  irreg_stencil& operator[](const int& a_lvl) {
+  IrregStencil& operator[](const int& a_lvl) {
     return *m_stencils[a_lvl];
   }
 
@@ -189,7 +189,7 @@ protected:
   /*!
     @brief Stencils
   */
-  Vector<RefCountedPtr<irreg_stencil> > m_stencils;
+  Vector<RefCountedPtr<IrregStencil> > m_stencils;
 
   /*!
     @brief Stencils defined or not
@@ -214,7 +214,7 @@ protected:
   /*!
     @brief Stencil type
   */
-  stencil_type m_stencilType;
+  IrregStencil::StencilType m_stencilType;
 };
 #include "CD_NamespaceFooter.H"
 

@@ -35,7 +35,7 @@ mfdirichletconductivityebbc::~mfdirichletconductivityebbc(){
 }
 
 LayoutData<BaseIVFAB<VoFStencil> >* mfdirichletconductivityebbc::getFluxStencil(int ivar){
-  return &m_irreg_stencils;
+  return &m_IrregStencils;
 }
 
 void mfdirichletconductivityebbc::set_jump_object(const RefCountedPtr<jump_bc> a_jumpbc){
@@ -80,7 +80,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
 
   m_irreg_weights.define(dbl);
   m_matching_weights.define(dbl);
-  m_irreg_stencils.define(dbl);
+  m_IrregStencils.define(dbl);
   m_matching_stencils.define(dbl);
   m_vofit_irreg.define(dbl);
   m_vofit_diri.define(dbl);
@@ -112,7 +112,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     match_ivs = m_ivs[dit()];
 
     m_irreg_weights[dit()].define(irreg_ivs,  ebgraph, num_comps);
-    m_irreg_stencils[dit()].define(irreg_ivs, ebgraph, num_comps);
+    m_IrregStencils[dit()].define(irreg_ivs, ebgraph, num_comps);
 
     vofit_irreg.define(irreg_ivs, ebgraph);
     vofit_diri.define(diri_ivs, ebgraph);
@@ -123,7 +123,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       const VolIndex& vof   = vofit_irreg();
 
       Real& cur_weight        = m_irreg_weights[dit()](vof, comp);
-      VoFStencil& cur_stencil = m_irreg_stencils[dit()](vof, comp);
+      VoFStencil& cur_stencil = m_IrregStencils[dit()](vof, comp);
 
       bool drop_order = false;
 
@@ -151,7 +151,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       const VolIndex vof0(vof.gridIndex(), 0); // Multi-cell averages stored on first component
 
       // Everything that comes from jump_bc is from vof0, as it should!!!
-      VoFStencil& cur_stencil     = m_irreg_stencils[dit()](vof, comp);
+      VoFStencil& cur_stencil     = m_IrregStencils[dit()](vof, comp);
       const VoFStencil& jump_sten = avgStens.get_ivfab(m_phase)(vof0, comp);
       const Real cur_weight       = m_irreg_weights[dit()](vof, comp); 
       const Real wp               = avgWeights.get_ivfab(m_phase)(vof0, comp);
@@ -199,7 +199,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       const Real& area_frac = ebisbox.bndryArea(vof);
       const Real factor     = m_beta*(*m_bcoe)[dit()](vof, comp)*area_frac*a_factor;
       
-      VoFStencil& cur_stencil = m_irreg_stencils[dit()](vof, comp);
+      VoFStencil& cur_stencil = m_IrregStencils[dit()](vof, comp);
       cur_stencil *= factor;
 
       if(mfdirichletconductivityebbc::s_areaFracWeighted){

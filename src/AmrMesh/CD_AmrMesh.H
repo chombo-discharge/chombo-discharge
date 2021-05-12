@@ -1127,17 +1127,17 @@ protected:
   /*!
     @brief Stencil type
   */
-  stencil_type m_stencilType;
+  IrregStencil::StencilType m_stencilType;
 
   /*!
     @brief Stencil type for centroid interpolation
   */
-  stencil_type m_centroidStencilType;
+  IrregStencil::StencilType m_centroidStencilType;
 
   /*!
     @brief Stencil type for EB interpolation
   */
-  stencil_type m_ebCentroidStencilType;
+  IrregStencil::StencilType m_ebCentroidStencilType;
 
   /*!
     @brief Interpolation type

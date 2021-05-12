@@ -9,7 +9,7 @@
 #define _ROBINCONDUCTIVITYEBBCFACTORY_
 
 #include "EBAMRData.H"
-#include "irreg_stencil.H"
+#include "CD_IrregStencil.H"
 #include "robinconductivityebbc.H"
 
 #include <BaseEBBC.H>
@@ -35,7 +35,7 @@ public:
   /*!
     @brief Set bc order
   */
-  virtual void set_type(const stencil_type a_type);
+  virtual void set_type(const IrregStencil::StencilType a_type);
 
   /*!
     @brief Function based coefficients and right hand sides
@@ -65,7 +65,7 @@ public:
 
 protected:
 
-  stencil_type m_type;
+  IrregStencil::StencilType m_type;
 
   RealVect m_origin;
 

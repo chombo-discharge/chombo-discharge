@@ -5,7 +5,7 @@
 
 /*!
   @file   EbCentroidInterpolation.H
-  @brief  Implementation of irreg_stencil that interpolates from cell centers to cell centroids
+  @brief  Implementation of IrregStencil that interpolates from cell centers to cell centroids
   @author Robert Marskar
 */
 
@@ -13,13 +13,13 @@
 #define CD_EbCentroidInterp_H
 
 // Our includes
-#include <irreg_stencil.H>
+#include <CD_IrregStencil.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class which can take cell-centered data and interpolate it to embedded boundary centroids. 
 */
-class EbCentroidInterpolation : public irreg_stencil {
+class EbCentroidInterpolation : public IrregStencil {
 public:
 
   /*!
@@ -29,21 +29,21 @@ public:
 
   /*!
     @brief Full constructor. Subsequently calls define
-    @param[in] a_dbl Grids
-    @param[in] a_ebisl EBIS layout
+    @param[in] a_dbl    Grids
+    @param[in] a_ebisl  EBIS layout
     @param[in] a_domain Problem domain
-    @param[in] a_dx Resolutions
-    @param[in] a_order Interpolation order
+    @param[in] a_dx     Resolutions
+    @param[in] a_order  Interpolation order
     @param[in] a_radius Radius for least squares
-    @param[in] a_type Stencil type
+    @param[in] a_type   Stencil type
   */
-  EbCentroidInterpolation(const DisjointBoxLayout& a_dbl,
-			  const EBISLayout&        a_ebisl,
-			  const ProblemDomain&     a_domain,
-			  const Real&              a_dx,
-			  const int                a_order,
-			  const int                a_radius,
-			  const stencil_type       a_type);
+  EbCentroidInterpolation(const DisjointBoxLayout&        a_dbl,
+			  const EBISLayout&               a_ebisl,
+			  const ProblemDomain&            a_domain,
+			  const Real&                     a_dx,
+			  const int                       a_order,
+			  const int                       a_radius,
+			  const IrregStencil::StencilType a_type);
 
   /*!
     @brief Destructor
@@ -64,14 +64,14 @@ protected:
     @param[in]  a_cfivs   Coarse-fine interface
     @details This calls one of the other function for computing the stencil. 
   */
-  virtual void build_stencil(VoFStencil&              a_sten,
-			     const VolIndex&          a_vof,
-			     const DisjointBoxLayout& a_grids,
-			     const ProblemDomain&     a_domain,
-			     const EBISBox&           a_ebisbox,
-			     const Box&               a_box,
-			     const Real&              a_dx,
-			     const IntVectSet&        a_cfivs) override;
+  virtual void buildStencil(VoFStencil&              a_sten,
+			    const VolIndex&          a_vof,
+			    const DisjointBoxLayout& a_grids,
+			    const ProblemDomain&     a_domain,
+			    const EBISBox&           a_ebisbox,
+			    const Box&               a_box,
+			    const Real&              a_dx,
+			    const IntVectSet&        a_cfivs) override;
 
 private:
   

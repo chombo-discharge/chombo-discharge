@@ -28,7 +28,7 @@ irreg_amr_stencil<T>::irreg_amr_stencil(const Vector<DisjointBoxLayout>& a_grids
 					const int                        a_finestLevel,
 					const int                        a_order,
 					const int                        a_radius,
-					const stencil_type               a_type){
+					const IrregStencil::StencilType               a_type){
   CH_TIME("irreg_amr_stencil::irreg_amr_stencil");
   
   this->define(a_grids, a_ebisl, a_domains, a_dx, a_finestLevel, a_order, a_radius, a_type);
@@ -47,7 +47,7 @@ void irreg_amr_stencil<T>::define(const Vector<DisjointBoxLayout>& a_grids,
 				  const int                        a_finestLevel,
 				  const int                        a_order,
 				  const int                        a_radius,
-				  const stencil_type               a_type){
+				  const IrregStencil::StencilType               a_type){
   CH_TIME("irreg_amr_stencil::define");
 
   m_finestLevel = a_finestLevel;
@@ -66,7 +66,7 @@ void irreg_amr_stencil<T>::define(const Vector<DisjointBoxLayout>& a_grids,
     m_ebisl[lvl]   = a_ebisl[lvl];
     m_domains[lvl] = a_domains[lvl];
     m_dx[lvl]      = a_dx[lvl];
-    m_stencils[lvl] = RefCountedPtr<irreg_stencil>(new T(m_grids[lvl],
+    m_stencils[lvl] = RefCountedPtr<IrregStencil>(new T(m_grids[lvl],
 							 m_ebisl[lvl],
 							 m_domains[lvl],
 							 m_dx[lvl],
@@ -87,7 +87,7 @@ void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>&       a_dst,
 
   const DisjointBoxLayout& dbl  = m_grids[a_lvl];
   const EBISLayout& ebisl       = m_ebisl[a_lvl];
-  const irreg_stencil& irr_sten = *m_stencils[a_lvl];
+  const IrregStencil& irr_sten = *m_stencils[a_lvl];
   const int nComp               = a_dst.nComp();
 
   DataIterator dit = dbl.dataIterator();
@@ -137,7 +137,7 @@ void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>& a_data,
 
   const DisjointBoxLayout& dbl = m_grids[a_lvl];
   const EBISLayout& ebisl      = m_ebisl[a_lvl];
-  const irreg_stencil& irrSten  = *m_stencils[a_lvl];
+  const IrregStencil& irrSten  = *m_stencils[a_lvl];
   const int nComp              = a_data.nComp();
 
   DataIterator dit = dbl.dataIterator();
@@ -188,7 +188,7 @@ void irreg_amr_stencil<T>::apply(LevelData<BaseIVFAB<Real> >& a_dst,
 
   const DisjointBoxLayout& dbl = m_grids[a_lvl];
   const EBISLayout& ebisl      = m_ebisl[a_lvl];
-  const irreg_stencil& irrSten  = *m_stencils[a_lvl];
+  const IrregStencil& irrSten  = *m_stencils[a_lvl];
   const int nComp              = a_dst.nComp();
 
   DataIterator dit = dbl.dataIterator();

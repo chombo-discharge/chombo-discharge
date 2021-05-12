@@ -18,13 +18,13 @@
 #include <CD_LeastSquares.H>
 #include <CD_NamespaceHeader.H>
 
-EbCentroidInterpolation::EbCentroidInterpolation(const DisjointBoxLayout&       a_dbl,
-						 const EBISLayout&              a_ebisl,
-						 const ProblemDomain&           a_domain,
-						 const Real&                    a_dx,
-						 const int                      a_order,
-						 const int                      a_radius,
-						 const stencil_type             a_type) : irreg_stencil(){
+EbCentroidInterpolation::EbCentroidInterpolation(const DisjointBoxLayout&        a_dbl,
+						 const EBISLayout&               a_ebisl,
+						 const ProblemDomain&            a_domain,
+						 const Real&                     a_dx,
+						 const int                       a_order,
+						 const int                       a_radius,
+						 const IrregStencil::StencilType a_type) : IrregStencil() {
 
   CH_TIME("EbCentroidInterpolation::EbCentroidInterpolation");
 
@@ -35,34 +35,34 @@ EbCentroidInterpolation::~EbCentroidInterpolation(){
   CH_TIME("EbCentroidInterpolation::~EbCentroidInterpolation");
 }
 
-void EbCentroidInterpolation::build_stencil(VoFStencil&              a_sten,
-					    const VolIndex&          a_vof,
-					    const DisjointBoxLayout& a_dbl,
-					    const ProblemDomain&     a_domain,
-					    const EBISBox&           a_ebisbox,
-					    const Box&               a_box,
-					    const Real&              a_dx,
-					    const IntVectSet&        a_cfivs){
-  CH_TIME("EbCentroidInterpolation::build_stencil");
+void EbCentroidInterpolation::buildStencil(VoFStencil&              a_sten,
+					   const VolIndex&          a_vof,
+					   const DisjointBoxLayout& a_dbl,
+					   const ProblemDomain&     a_domain,
+					   const EBISBox&           a_ebisbox,
+					   const Box&               a_box,
+					   const Real&              a_dx,
+					   const IntVectSet&        a_cfivs){
+  CH_TIME("EbCentroidInterpolation::buildStencil");
 
   bool foundStencil = false;
 
   // Try to build the preferred stencil.
   switch (m_stencilType) {
-  case stencil_type::linear: {
+  case IrregStencil::StencilType::Linear: {
     const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
     foundStencil = LinearStencil::getLinearInterpStencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
     break;
   }
-  case stencil_type::taylor: {
+  case IrregStencil::StencilType::TaylorExtrapolation: {
     foundStencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
     break;
   }
-  case stencil_type::lsq: {
+  case IrregStencil::StencilType::LeastSquares: {
     foundStencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
     break;
   }
-  case stencil_type::pwl: {
+  case IrregStencil::StencilType::PiecewiseLinear: {
     foundStencil = this->getPiecewiseLinearStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
     break;
   }
