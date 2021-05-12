@@ -33,7 +33,7 @@
 #include <mfis.H>
 #include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
-#include <nwoebquadcfinterp.H>
+#include <CD_NwoEbQuadCfInterp.H>
 #include <MFLevelGrid.H>
 #include <ebcoarseaverage.H>
 #include <DomainFluxIFFAB.H>
@@ -984,7 +984,7 @@ public:
   /*!
     @brief Get the ghost cell interpolation utility
   */
-  Vector<RefCountedPtr<nwoebquadcfinterp> >& getNWOEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<NwoEbQuadCfInterp> >& getNWOEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the old interpolation utility (needed for EBConductivityOps)

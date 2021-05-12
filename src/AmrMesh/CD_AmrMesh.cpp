@@ -1328,7 +1328,7 @@ void AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
       fillpatch.interpolate(a_fineData, a_coarData, a_coarData, 0.0, 0.0, 0.0, interv);
     }
     else if(m_ghostCellInterpolationMethod == GhostInterpolation::Quadratic){
-      nwoebquadcfinterp& quadcfi = *m_realms[a_realm]->getNWOEBQuadCFInterp(a_phase)[a_fineLevel];
+      NwoEbQuadCfInterp& quadcfi = *m_realms[a_realm]->getNWOEBQuadCFInterp(a_phase)[a_fineLevel];
       quadcfi.coarseFineInterp(a_fineData, a_coarData, 0, 0, ncomps);
     }
     else{
@@ -1382,7 +1382,7 @@ void AmrMesh::interpGhostQuad(EBAMRCellData& a_data, const std::string a_realm, 
     const int ncomps = a_data[lvl]->nComp();
     const Interval interv(0, ncomps -1);
 
-    nwoebquadcfinterp& quadcfi = *m_realms[a_realm]->getNWOEBQuadCFInterp(a_phase)[lvl];
+    NwoEbQuadCfInterp& quadcfi = *m_realms[a_realm]->getNWOEBQuadCFInterp(a_phase)[lvl];
 
     quadcfi.coarseFineInterp(*a_data[lvl], *a_data[lvl-1], 0, 0, ncomps);
   }
@@ -1895,7 +1895,7 @@ Vector<RefCountedPtr<EBGhostCloud> >& AmrMesh::getGhostCloud(const std::string a
   return m_realms[a_realm]->getGhostCloud(a_phase);
 }
 
-Vector<RefCountedPtr<nwoebquadcfinterp> >& AmrMesh::getNWOEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase){
+Vector<RefCountedPtr<NwoEbQuadCfInterp> >& AmrMesh::getNWOEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->getNWOEBQuadCFInterp(a_phase);
 }
 

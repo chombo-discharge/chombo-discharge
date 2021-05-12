@@ -8,32 +8,32 @@
  */
 #endif
 
-#include "nwoebquadcfinterp.H"
+#include <CD_NwoEbQuadCfInterp.H>
 
-#include "LayoutIterator.H"
-#include "DataIterator.H"
-#include "EBAlias.H"
-#include "EBArith.H"
-#include "EBCellFactory.H"
-#include "EBLevelDataOps.H"
-#include "NamespaceHeader.H"
+// Chombo includes
+#include <LayoutIterator.H>
+#include <DataIterator.H>
+#include <EBAlias.H>
+#include <EBArith.H>
+#include <EBCellFactory.H>
+#include <EBLevelDataOps.H>
+#include <NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
-/***********************/
-nwoebquadcfinterp::
-nwoebquadcfinterp(const DisjointBoxLayout&           a_gridsFine,
-		  const DisjointBoxLayout&           a_gridsCoar,
-		  const EBISLayout&                  a_ebislFine,
-		  const EBISLayout&                  a_ebislCoar,
-		  const ProblemDomain&               a_domainCoar,
-		  const int&                         a_nref,
-		  const int&                         a_nvar,
-		  const Real&                        a_dxFine,
-		  const int&                         a_ghost,
-		  const LayoutData<IntVectSet>&      a_cfivs,
-		  const RefCountedPtr<EBIndexSpace>& a_ebisPtr)            
-{
+
+NwoEbQuadCfInterp::NwoEbQuadCfInterp(const DisjointBoxLayout&           a_gridsFine,
+				     const DisjointBoxLayout&           a_gridsCoar,
+				     const EBISLayout&                  a_ebislFine,
+				     const EBISLayout&                  a_ebislCoar,
+				     const ProblemDomain&               a_domainCoar,
+				     const int&                         a_nref,
+				     const int&                         a_nvar,
+				     const Real&                        a_dxFine,
+				     const int&                         a_ghost,
+				     const LayoutData<IntVectSet>&      a_cfivs,
+				     const RefCountedPtr<EBIndexSpace>& a_ebisPtr){
   m_gridsFine  =  a_gridsFine ;          
   m_gridsCoar  =  a_gridsCoar ;     
   m_ebislFine  =  a_ebislFine ;      
@@ -45,8 +45,12 @@ nwoebquadcfinterp(const DisjointBoxLayout&           a_gridsFine,
   m_ghost      =  a_ghost;
   defineInternals(a_cfivs, a_ebisPtr);
 }
+
+NwoEbQuadCfInterp::~NwoEbQuadCfInterp() {
+
+}
 void 
-nwoebquadcfinterp::
+NwoEbQuadCfInterp::
 defineInternals(const LayoutData<IntVectSet>&  a_cfivs, const RefCountedPtr<EBIndexSpace>& a_ebisPtr)             
 {
   m_gridsCoFi= DisjointBoxLayout();
@@ -63,7 +67,7 @@ defineInternals(const LayoutData<IntVectSet>&  a_cfivs, const RefCountedPtr<EBIn
   defineStencils(a_cfivs);
 }
 void 
-nwoebquadcfinterp::
+NwoEbQuadCfInterp::
 defineStencils(const LayoutData<IntVectSet>&  a_cfivs)             
 {
   EBCellFactory fact(m_ebislFine);
@@ -85,7 +89,7 @@ defineStencils(const LayoutData<IntVectSet>&  a_cfivs)
 }
 /***********************/
 void
-nwoebquadcfinterp::
+NwoEbQuadCfInterp::
 getStencils(Vector<RefCountedPtr< BaseStencil> >  & a_stencils, 
 	    Vector<RefCountedPtr< BaseIndex  > >  & a_baseDstVoFs,
 	    const IntVectSet                      & a_cfivs,
@@ -107,7 +111,7 @@ getStencils(Vector<RefCountedPtr< BaseStencil> >  & a_stencils,
 }
 /***********************/
 void
-nwoebquadcfinterp::
+NwoEbQuadCfInterp::
 getStencil(VoFStencil           & a_stencil,
 	   const VolIndex       & a_vofFine,
 	   const EBISBox        & a_ebisFine,
@@ -131,7 +135,7 @@ getStencil(VoFStencil           & a_stencil,
 }  
 /***********************/
 void 
-nwoebquadcfinterp::
+NwoEbQuadCfInterp::
 coarseFineInterp(LevelData<EBCellFAB>&       a_phif,
 		 const LevelData<EBCellFAB>& a_phic,
 		 const int                   a_isrc,
@@ -154,7 +158,7 @@ coarseFineInterp(LevelData<EBCellFAB>&       a_phif,
 
 /***********************/
 void 
-nwoebquadcfinterp::
+NwoEbQuadCfInterp::
 coarseFineInterpH(LevelData<EBCellFAB>& a_phif,
 		  const int             a_isrc,
 		  const int             a_idst,
@@ -173,6 +177,5 @@ coarseFineInterpH(LevelData<EBCellFAB>& a_phif,
     }
 
 }
-#include "CD_NamespaceFooter.H"
 
-#include "NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>

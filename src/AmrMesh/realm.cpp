@@ -429,7 +429,7 @@ Vector<RefCountedPtr<EBGhostCloud> >& realm::getGhostCloud(const phase::which_ph
   return m_realms[a_phase]->getGhostCloud();
 }
 
-Vector<RefCountedPtr<nwoebquadcfinterp> >& realm::getNWOEBQuadCFInterp(const phase::which_phase a_phase){
+Vector<RefCountedPtr<NwoEbQuadCfInterp> >& realm::getNWOEBQuadCFInterp(const phase::which_phase a_phase){
   return m_realms[a_phase]->getNWOEBQuadCFInterp();
 }
 

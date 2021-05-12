@@ -98,7 +98,7 @@ void phase_realm::regridOperators(const int a_lmin, const int a_lmax, const int 
 
   if(m_defined){
     this->define_eb_coar_ave(a_lmin);             // Define ebcoarseaverage on both phases
-    this->define_eb_quad_cfi(a_lmin);             // Define nwoebquadcfinterp on both phases.
+    this->define_eb_quad_cfi(a_lmin);             // Define NwoEbQuadCfInterp on both phases.
     this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
     this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
     this->define_ebmg_interp(a_lmin);             // Define interpolator used for e.g. multigrid (or piecewise constant)
@@ -333,7 +333,7 @@ void phase_realm::define_eb_quad_cfi(const int a_lmin){
       if(has_coar){
 	const LayoutData<IntVectSet>& cfivs = *m_eblg[lvl]->getCFIVS();
 
-	m_quadcfi[lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
+	m_quadcfi[lvl] = RefCountedPtr<NwoEbQuadCfInterp> (new NwoEbQuadCfInterp(m_grids[lvl],
 										 m_grids[lvl-1],
 										 m_ebisl[lvl],
 										 m_ebisl[lvl-1],
@@ -867,7 +867,7 @@ Vector<RefCountedPtr<EBGhostCloud> >& phase_realm::getGhostCloud() {
   return m_ghostclouds;
 }
 
-Vector<RefCountedPtr<nwoebquadcfinterp> >& phase_realm::getNWOEBQuadCFInterp() {
+Vector<RefCountedPtr<NwoEbQuadCfInterp> >& phase_realm::getNWOEBQuadCFInterp() {
   if(!this->query_operator(s_eb_quad_cfi)) MayDay::Abort("phase_realm::getNWOEBQuadCFInterp - operator not registered!");
   
   return m_quadcfi;

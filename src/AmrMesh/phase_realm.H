@@ -12,7 +12,7 @@
 #include "mfis.H"
 #include "CD_IrregAmrStencil.H"
 #include "CD_LoadBalancing.H"
-#include "nwoebquadcfinterp.H"
+#include "CD_NwoEbQuadCfInterp.H"
 #include "MFLevelGrid.H"
 #include "ebcoarseaverage.H"
 #include "DomainFluxIFFAB.H"
@@ -108,7 +108,7 @@ public:
 
   Vector<RefCountedPtr<ebcoarseaverage> >& getCoarseAverage();
   Vector<RefCountedPtr<EBGhostCloud> >& getGhostCloud();
-  Vector<RefCountedPtr<nwoebquadcfinterp> >& getNWOEBQuadCFInterp();
+  Vector<RefCountedPtr<NwoEbQuadCfInterp> >& getNWOEBQuadCFInterp();
   Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp();
   Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch();
   Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator();
@@ -170,7 +170,7 @@ protected:
 
   // Various operators
   Vector<RefCountedPtr<ebcoarseaverage> > m_coarave;
-  Vector<RefCountedPtr<nwoebquadcfinterp> > m_quadcfi;
+  Vector<RefCountedPtr<NwoEbQuadCfInterp> > m_quadcfi;
   Vector<RefCountedPtr<EBGhostCloud> > m_ghostclouds;
   Vector<RefCountedPtr<EBQuadCFInterp> > m_old_quadcfi;
   Vector<RefCountedPtr<AggEBPWLFillPatch> > m_pwl_fillpatch;
