@@ -1,31 +1,36 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   EBFastCoarToFineRedist.cpp
-  @brief  Implementation of EBFastCoarToFineRedist
+  @file   EbFastCoarToFineRedist.cpp
+  @brief  Implementation of EbFastCoarToFineRedist.H
   @author Robert Marskar
 */
 
-#include "EBFastCoarToFineRedist.H"
+// Our includes
+#include <CD_EbFastCoarToFineRedist.H>
+#include <CD_NamespaceHeader.H>
 
 #define EBFASTC2F_DEBUG 0
 
-#include "CD_NamespaceHeader.H"
-
-EBFastCoarToFineRedist::EBFastCoarToFineRedist() : EBCoarToFineRedist(){
+EbFastCoarToFineRedist::EbFastCoarToFineRedist() : EBCoarToFineRedist(){
 
 }
 
-EBFastCoarToFineRedist::~EBFastCoarToFineRedist(){
+EbFastCoarToFineRedist::~EbFastCoarToFineRedist(){
 
 }
 
-void EBFastCoarToFineRedist::define(const EBLevelGrid&                      a_eblgFine,
+void EbFastCoarToFineRedist::define(const EBLevelGrid&                      a_eblgFine,
 				    const EBLevelGrid&                      a_eblgCoar,
 				    const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
 				    const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
 				    const int&                              a_nref,
 				    const int&                              a_nvar,
 				    const int&                              a_redistRad){
-  CH_TIME("EBFastCoarToFineRedist::define");
+  CH_TIME("EbFastCoarToFineRedist::define");
 
   //from here we can assume the redistRad == 1
   m_isDefined  = true;
@@ -44,8 +49,7 @@ void EBFastCoarToFineRedist::define(const EBLevelGrid&                      a_eb
   const EBIndexSpace* const ebisPtr = a_eblgFine.getEBIS();
   CH_assert(ebisPtr->isDefined());
   int nghost = 3*m_redistRad;
-  ebisPtr->fillEBISLayout(m_ebislCedFine, m_gridsCedFine,
-			  m_domainCoar, nghost);
+  ebisPtr->fillEBISLayout(m_ebislCedFine, m_gridsCedFine, m_domainCoar, nghost);
   m_ebislCedFine.setMaxRefinementRatio(m_refRat, ebisPtr);
 
   //define the intvectsets over which the objects live
@@ -54,50 +58,50 @@ void EBFastCoarToFineRedist::define(const EBLevelGrid&                      a_eb
 
   // Make sets
   IntVectSet globalCFIVS;
-  makeCedFineSets(globalCFIVS, a_neighborsFine);
-  makeCoarSets(   globalCFIVS, a_neighborsCoar);
+  this->makeCedFineSets(globalCFIVS, a_neighborsFine);
+  this->makeCoarSets(   globalCFIVS, a_neighborsCoar);
 
   // Define data holders and reset buffers
-  defineDataHolders();
-  setToZero();
+  this->defineDataHolders();
+  this->setToZero();
 
 #if EBFASTFC2F_DEBUG // This debugging hook calls the original function and checks that the sets completely overlap. 
   IntVectSet newCedFineSet, oldCedFineSet;
   IntVectSet newCoarSet,    oldCoarSet;
   
-  gatherSetsCedFine(newCedFineSet);
-  gatherSetsCoar(   newCoarSet);
+  this->gatherSetsCedFine(newCedFineSet);
+  this->gatherSetsCoar(   newCoarSet);
 
   // Call old define
   EBCoarToFineRedist::define(a_eblgFine, a_eblgCoar, a_nref, a_nvar, a_redistRad);
-  gatherSetsCedFine(oldCedFineSet);
-  gatherSetsCoar(   oldCoarSet);
+  this->gatherSetsCedFine(oldCedFineSet);
+  this->gatherSetsCoar(   oldCoarSet);
 
   const IntVectSet diffSet1 = newCedFineSet - oldCedFineSet;
   const IntVectSet diffSet2 = oldCedFineSet - newCedFineSet;
   const IntVectSet diffSet3 = newCoarSet    - oldCoarSet;
   const IntVectSet diffSet4 = oldCoarSet    - newCoarSet;
 
-  if(diffSet1.numPts() != 0) MayDay::Abort("EBFastCoarToFineRedist::define - diffSet1 not empty");
-  if(diffSet2.numPts() != 0) MayDay::Abort("EBFastCoarToFineRedist::define - diffSet2 not empty");
-  if(diffSet3.numPts() != 0) MayDay::Abort("EBFastCoarToFineRedist::define - diffSet3 not empty");
-  if(diffSet4.numPts() != 0) MayDay::Abort("EBFastCoarToFineRedist::define - diffSet4 not empty");
+  if(diffSet1.numPts() != 0) MayDay::Abort("EbFastCoarToFineRedist::define - diffSet1 not empty");
+  if(diffSet2.numPts() != 0) MayDay::Abort("EbFastCoarToFineRedist::define - diffSet2 not empty");
+  if(diffSet3.numPts() != 0) MayDay::Abort("EbFastCoarToFineRedist::define - diffSet3 not empty");
+  if(diffSet4.numPts() != 0) MayDay::Abort("EbFastCoarToFineRedist::define - diffSet4 not empty");
 #endif
 }
 
-void EBFastCoarToFineRedist::makeCedFineSets(IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine){
-  CH_TIME("EBFastCoarToFineRedist::makeCedFineSets");
+void EbFastCoarToFineRedist::makeCedFineSets(IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine){
+  CH_TIME("EbFastCoarToFineRedist::makeCedFineSets");
 
   a_cfivs.makeEmpty();
   for (DataIterator dit = m_gridsCedFine.dataIterator(); dit.ok(); ++dit){
     const Box& box = m_gridsCedFine.get(dit());
-    Box grownBox = grow(box, m_redistRad);
-    grownBox &= m_domainCoar;
+    Box grownBox   = grow(box, m_redistRad);
+    grownBox      &= m_domainCoar;
 
     IntVectSet boxCFIVS(grownBox);
     boxCFIVS -= box;
 
-    m_setsCedFine[dit()] = m_ebislCedFine[dit()].getIrregIVS(grownBox);
+    m_setsCedFine[dit()]  = m_ebislCedFine[dit()].getIrregIVS(grownBox);
     m_setsCedFine[dit()] -= box;
 
     // Subtract off cells from the coarsened fine grid
@@ -116,18 +120,18 @@ void EBFastCoarToFineRedist::makeCedFineSets(IntVectSet& a_cfivs, const LayoutDa
 }
 
 
-void EBFastCoarToFineRedist::makeCoarSets(const IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar){
-  CH_TIME("EBFastCoarToFineRedist::makeCoarSets");
+void EbFastCoarToFineRedist::makeCoarSets(const IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar){
+  CH_TIME("EbFastCoarToFineRedist::makeCoarSets");
 
   // We have a global view of the CFIVS so there's not much to this...
   for (DataIterator dit = m_gridsCoar.dataIterator(); dit.ok(); ++dit){
     const Box& coarBox = m_gridsCoar.get(dit());
-    m_setsCoar[dit()] = m_ebislCoar[dit()].getIrregIVS(coarBox);
+    m_setsCoar[dit()]  = m_ebislCoar[dit()].getIrregIVS(coarBox);
     m_setsCoar[dit()] &= a_cfivs;
   }
 }
 
-void EBFastCoarToFineRedist::gatherBroadcast(IntVectSet& a_set){
+void EbFastCoarToFineRedist::gatherBroadcast(IntVectSet& a_set){
   CH_TIME("EBFastCoarToFine::gatherBroadcast");
 #ifdef CH_MPI
   Vector<IntVectSet> procSet;
@@ -143,23 +147,24 @@ void EBFastCoarToFineRedist::gatherBroadcast(IntVectSet& a_set){
 #endif
 }
 
-void EBFastCoarToFineRedist::gatherSetsCedFine(IntVectSet& a_setsCedFine){
-  CH_TIME("EBFastCoarToFineRedist::gatherSetsCedFine");
+void EbFastCoarToFineRedist::gatherSetsCedFine(IntVectSet& a_setsCedFine){
+  CH_TIME("EbFastCoarToFineRedist::gatherSetsCedFine");
 
   a_setsCedFine.makeEmpty();
   for (DataIterator dit = m_gridsCedFine.dataIterator(); dit.ok(); ++dit){
     a_setsCedFine |= m_setsCedFine[dit()];
   }
-  gatherBroadcast(a_setsCedFine);
+  this->gatherBroadcast(a_setsCedFine);
 }
 
-void EBFastCoarToFineRedist::gatherSetsCoar(IntVectSet& a_setsCoar){
-  CH_TIME("EBFastCoarToFineRedist::gatherSetsCoar");
+void EbFastCoarToFineRedist::gatherSetsCoar(IntVectSet& a_setsCoar){
+  CH_TIME("EbFastCoarToFineRedist::gatherSetsCoar");
 
   a_setsCoar.makeEmpty();
   for (DataIterator dit = m_gridsCoar.dataIterator(); dit.ok(); ++dit){
     a_setsCoar |= m_setsCoar[dit()];
   }
-  gatherBroadcast(a_setsCoar);
+  this->gatherBroadcast(a_setsCoar);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

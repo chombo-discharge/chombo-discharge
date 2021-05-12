@@ -24,7 +24,7 @@
 #include <load_balance.H>
 #include <gradientF_F.H>
 #include <EBFastFineToCoarRedist.H>
-#include <EBFastCoarToFineRedist.H>
+#include <CD_EbFastCoarToFineRedist.H>
 #include <CD_EbFastCoarToCoarRedist.H>
 #include <DomainFluxIFFABFactory.H>
 #include <TiledMeshRefine.H>

@@ -16,8 +16,8 @@
 #include "EBCoarToCoarRedist.H"
 
 // Our includes
-
 #include <CD_NamespaceHeader.H>
+
 /*!
   @brief EBFineToCoarRedist with faster define function
 */
