@@ -6,7 +6,7 @@
 */
 
 #include "phase_realm.H"
-#include "EBFastFineToCoarRedist.H"
+#include "CD_EbFastFineToCoarRedist.H"
 #include "CD_EbFastCoarToFineRedist.H"
 #include "CD_EbFastCoarToCoarRedist.H"
 #include "load_balance.H"
@@ -559,7 +559,7 @@ void phase_realm::define_redist_oper(const int a_lmin, const int a_regsize){
 	  //       need to update this if lvl >= a_lmin
 	  if(lvl >= a_lmin){
 
-	    auto redist = RefCountedPtr<EBFastFineToCoarRedist> (new EBFastFineToCoarRedist());
+	    auto redist = RefCountedPtr<EbFastFineToCoarRedist> (new EbFastFineToCoarRedist());
 	    redist->define(*m_eblg[lvl],
 			   *m_eblg[lvl-1],
 			   *m_neighbors[lvl],

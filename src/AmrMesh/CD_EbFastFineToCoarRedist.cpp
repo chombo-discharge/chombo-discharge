@@ -1,39 +1,42 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   EBFastFineToCoarRedist.cpp
-  @brief  Implementation of EBFastFineToCoarRedist
+  @file   CD_EbFastFineToCoarRedist.cpp
+  @brief  Implementation of EbFastFineToCoarRedist
   @author Robert Marskar
 */
 
-#include "EBFastFineToCoarRedist.H"
-
-#include <EBArith.H>
+// Our includes
+#include <CD_EbFastFineToCoarRedist.H>
+#include <CD_NamespaceHeader.H>
 
 #define EBFASTF2C_DEBUG 0
 
-#include "CD_NamespaceHeader.H"
-
-EBFastFineToCoarRedist::EBFastFineToCoarRedist() : EBFineToCoarRedist(){
+EbFastFineToCoarRedist::EbFastFineToCoarRedist() : EBFineToCoarRedist(){
 
 }
 
-EBFastFineToCoarRedist::~EBFastFineToCoarRedist(){
+EbFastFineToCoarRedist::~EbFastFineToCoarRedist(){
 
 }
 
-void EBFastFineToCoarRedist::define(const EBLevelGrid&                      a_eblgFine,
+void EbFastFineToCoarRedist::define(const EBLevelGrid&                      a_eblgFine,
 				    const EBLevelGrid&                      a_eblgCoar,
 				    const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
 				    const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
-				    const int&                              a_nref,
-				    const int&                              a_nvar,
+				    const int&                              a_nRef,
+				    const int&                              a_nVar,
 				    const int&                              a_redistRad){
-  CH_TIME("EBFastFineToCoarRedist::define");
+  CH_TIME("EbFastFineToCoarRedist::define");
 
   const int comp  = 0;
   const int ncomp = 1;
   m_isDefined = true;
-  m_nComp     = a_nvar;
-  m_refRat    = a_nref;
+  m_nComp     = a_nVar;
+  m_refRat    = a_nRef;
   m_redistRad = a_redistRad;
   m_domainCoar= a_eblgCoar.getDomain().domainBox();
   m_gridsFine = a_eblgFine.getDBL();
@@ -73,39 +76,39 @@ void EBFastFineToCoarRedist::define(const EBLevelGrid&                      a_eb
   fineShellMask.copyTo(refCoarShellMask);
   refCoarShellMask.exchange();
 
-  makeFineSets(fineShellMask);
-  makeCoarSets(refCoarShellMask);
+  this->makeFineSets(fineShellMask);
+  this->makeCoarSets(refCoarShellMask);
 
-  defineDataHolders();
-  setToZero();
+  this->defineDataHolders();
+  this->setToZero();
 
 #if EBFASTF2C_DEBUG // This debugging hook calls the original function and checks that the sets completely overlap. 
   IntVectSet newFineSet,    oldFineSet;
   IntVectSet newRefCoarSet, oldRefCoarSet;
   
-  gatherSetsFine(newFineSet);
-  gatherSetsRefCoar(newRefCoarSet);
+  this->gatherSetsFine(newFineSet);
+  this->gatherSetsRefCoar(newRefCoarSet);
 
   // Call old define
-  EBFineToCoarRedist::define(a_eblgFine, a_eblgCoar, a_nref, a_nvar, a_redistRad);
-  gatherSetsFine(oldFineSet);
-  gatherSetsRefCoar(oldRefCoarSet);
+  EBFineToCoarRedist::define(a_eblgFine, a_eblgCoar, a_nRef, a_nVar, a_redistRad);
+  this->gatherSetsFine(oldFineSet);
+  this->gatherSetsRefCoar(oldRefCoarSet);
 
   const IntVectSet diffSet1 = newFineSet    - oldFineSet;
   const IntVectSet diffSet2 = oldFineSet    - newFineSet;
   const IntVectSet diffSet3 = newRefCoarSet - oldRefCoarSet;
   const IntVectSet diffSet4 = oldRefCoarSet - newRefCoarSet;
 
-  if(diffSet1.numPts() != 0) MayDay::Abort("EBFastFineToCoarRedist::define - diffSet1 not empty");
-  if(diffSet2.numPts() != 0) MayDay::Abort("EBFastFineToCoarRedist::define - diffSet2 not empty");
-  if(diffSet3.numPts() != 0) MayDay::Abort("EBFastFineToCoarRedist::define - diffSet3 not empty");
-  if(diffSet4.numPts() != 0) MayDay::Abort("EBFastFineToCoarRedist::define - diffSet4 not empty");
+  if(diffSet1.numPts() != 0) MayDay::Abort("EbFastFineToCoarRedist::define - diffSet1 not empty");
+  if(diffSet2.numPts() != 0) MayDay::Abort("EbFastFineToCoarRedist::define - diffSet2 not empty");
+  if(diffSet3.numPts() != 0) MayDay::Abort("EbFastFineToCoarRedist::define - diffSet3 not empty");
+  if(diffSet4.numPts() != 0) MayDay::Abort("EbFastFineToCoarRedist::define - diffSet4 not empty");
 #endif
 }
 
-void EBFastFineToCoarRedist::makeFineMask(LevelData<BaseFab<bool> >&              a_fineShellMask,
+void EbFastFineToCoarRedist::makeFineMask(LevelData<BaseFab<bool> >&              a_fineShellMask,
 					  const LayoutData<Vector<LayoutIndex> >& a_neighborsFine){
-  CH_TIME("EBFastFineToCoarRedist::makeFineMask");
+  CH_TIME("EbFastFineToCoarRedist::makeFineMask");
 
   const int comp = 0;
   
@@ -140,8 +143,8 @@ void EBFastFineToCoarRedist::makeFineMask(LevelData<BaseFab<bool> >&            
   }
 }
 
-void EBFastFineToCoarRedist::makeFineSets(const LevelData<BaseFab<bool> >& a_fineMask){
-  CH_TIME("EBFastFineToCoarRedist::makeFineSets");
+void EbFastFineToCoarRedist::makeFineSets(const LevelData<BaseFab<bool> >& a_fineMask){
+  CH_TIME("EbFastFineToCoarRedist::makeFineSets");
 
   const int comp = 0;
   
@@ -161,8 +164,8 @@ void EBFastFineToCoarRedist::makeFineSets(const LevelData<BaseFab<bool> >& a_fin
   }
 }
 
-void EBFastFineToCoarRedist::makeCoarSets(const LevelData<BaseFab<bool> >& a_refCoarMask){
-  CH_TIME("EBFastFineToCoarRedist::makeCoarSets");
+void EbFastFineToCoarRedist::makeCoarSets(const LevelData<BaseFab<bool> >& a_refCoarMask){
+  CH_TIME("EbFastFineToCoarRedist::makeCoarSets");
 
   const int comp = 0;
 
@@ -187,8 +190,8 @@ void EBFastFineToCoarRedist::makeCoarSets(const LevelData<BaseFab<bool> >& a_ref
   }
 }
 
-void EBFastFineToCoarRedist::gatherBroadcast(IntVectSet& a_set){
-  CH_TIME("EBFastFineToCoarRedist::gatherBroadcast");
+void EbFastFineToCoarRedist::gatherBroadcast(IntVectSet& a_set){
+  CH_TIME("EbFastFineToCoarRedist::gatherBroadcast");
 #ifdef CH_MPI
   Vector<IntVectSet> procSet;
   const int destProc = uniqueProc(SerialTask::compute);
@@ -203,23 +206,26 @@ void EBFastFineToCoarRedist::gatherBroadcast(IntVectSet& a_set){
 #endif
 }
 
-void EBFastFineToCoarRedist::gatherSetsFine(IntVectSet& a_setsFine){
-  CH_TIME("EBFastFineToCoarRedist::gatherSetsFine");
+void EbFastFineToCoarRedist::gatherSetsFine(IntVectSet& a_setsFine){
+  CH_TIME("EbFastFineToCoarRedist::gatherSetsFine");
 
   a_setsFine.makeEmpty();
   for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
     a_setsFine |= m_setsFine[dit()];
   }
-  gatherBroadcast(a_setsFine);
+  
+  this->gatherBroadcast(a_setsFine);
 }
 
-void EBFastFineToCoarRedist::gatherSetsRefCoar(IntVectSet& a_setsRefCoar){
-  CH_TIME("EBFastFineToCoarRedist::gatherSetsRefCoar");
+void EbFastFineToCoarRedist::gatherSetsRefCoar(IntVectSet& a_setsRefCoar){
+  CH_TIME("EbFastFineToCoarRedist::gatherSetsRefCoar");
 
   a_setsRefCoar.makeEmpty();
   for (DataIterator dit = m_gridsRefCoar.dataIterator(); dit.ok(); ++dit){
     a_setsRefCoar |= m_setsRefCoar[dit()];
   }
-  gatherBroadcast(a_setsRefCoar);
+  
+  this->gatherBroadcast(a_setsRefCoar);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

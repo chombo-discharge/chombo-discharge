@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   EbFastCoarToCoarRedist.H
+  @file   CD_EbFastCoarToCoarRedist.H
   @brief  New EBFineToCoarRedist class with faster define function
   @author Robert Marskar
 */

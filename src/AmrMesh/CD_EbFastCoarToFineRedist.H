@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   EbFastCoarToFineRedist.H
+  @file   CD_EbFastCoarToFineRedist.H
   @brief  New EBCoarToFineRedist with much faster define functions
   @author Robert Marskar
 */
@@ -48,8 +48,8 @@ public:
 	      const EBLevelGrid&                      a_eblgCoar,
 	      const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
 	      const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
-	      const int&                              a_nref,
-	      const int&                              a_nvar,
+	      const int&                              a_nRef,
+	      const int&                              a_nVar,
 	      const int&                              a_redistRad);
 
 protected:

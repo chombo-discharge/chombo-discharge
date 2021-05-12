@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   EbFastCoarToFineRedist.cpp
+  @file   CD_EbFastCoarToFineRedist.cpp
   @brief  Implementation of EbFastCoarToFineRedist.H
   @author Robert Marskar
 */
@@ -27,15 +27,15 @@ void EbFastCoarToFineRedist::define(const EBLevelGrid&                      a_eb
 				    const EBLevelGrid&                      a_eblgCoar,
 				    const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
 				    const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
-				    const int&                              a_nref,
-				    const int&                              a_nvar,
+				    const int&                              a_nRef,
+				    const int&                              a_nVar,
 				    const int&                              a_redistRad){
   CH_TIME("EbFastCoarToFineRedist::define");
 
   //from here we can assume the redistRad == 1
   m_isDefined  = true;
-  m_nComp      = a_nvar;
-  m_refRat     = a_nref;
+  m_nComp      = a_nVar;
+  m_refRat     = a_nRef;
   m_domainCoar = a_eblgCoar.getDomain().domainBox();
   m_gridsFine  = a_eblgFine.getDBL();
   m_gridsCoar  = a_eblgCoar.getDBL();
@@ -73,7 +73,7 @@ void EbFastCoarToFineRedist::define(const EBLevelGrid&                      a_eb
   this->gatherSetsCoar(   newCoarSet);
 
   // Call old define
-  EBCoarToFineRedist::define(a_eblgFine, a_eblgCoar, a_nref, a_nvar, a_redistRad);
+  EBCoarToFineRedist::define(a_eblgFine, a_eblgCoar, a_nRef, a_nVar, a_redistRad);
   this->gatherSetsCedFine(oldCedFineSet);
   this->gatherSetsCoar(   oldCoarSet);
 

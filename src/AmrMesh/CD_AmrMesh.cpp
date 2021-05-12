@@ -23,7 +23,7 @@
 #include <mfalias.H>
 #include <load_balance.H>
 #include <gradientF_F.H>
-#include <EBFastFineToCoarRedist.H>
+#include <CD_EbFastFineToCoarRedist.H>
 #include <CD_EbFastCoarToFineRedist.H>
 #include <CD_EbFastCoarToCoarRedist.H>
 #include <DomainFluxIFFABFactory.H>

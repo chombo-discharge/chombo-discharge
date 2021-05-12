@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   EbFastCoarToCoarRedist.cpp
+  @file   CD_EbFastCoarToCoarRedist.cpp
   @brief  Implementation of EbFastCoarToCoarRedist
   @author Robert Marskar
 */
