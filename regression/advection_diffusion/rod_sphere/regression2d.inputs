@@ -24,7 +24,7 @@ AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 AmrMesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
-AmrMesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
+AmrMesh.LoadBalancing    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
 AmrMesh.ebcf            = false       # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
@@ -43,7 +43,7 @@ driver.start_time                      = 0             # Start time (fresh simul
 driver.stop_time                       = 100.0         # Stop time
 driver.max_steps                       = 20            # Maximum number of steps
 driver.geometry_only                   = false         # Special option that ONLY plots the geometry
-driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+driver.ebis_memory_LoadBalancing        = false         # Use memory as loads for EBIS generation
 driver.write_memory                    = false         # Write MPI memory report
 driver.write_loads                     = false         # Write (accumulated) computational loads
 driver.output_directory                = ./            # Output directory

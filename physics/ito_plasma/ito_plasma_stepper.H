@@ -87,8 +87,8 @@ namespace physics {
       virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
       void post_regrid() override;
-      bool load_balance_realm(const std::string a_realm) const override;
-      void load_balance_boxes(Vector<Vector<int> >&            a_procs,
+      bool LoadBalancing_realm(const std::string a_realm) const override;
+      void LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
 			      Vector<Vector<Box> >&            a_boxes,
 			      const std::string                a_realm,
 			      const Vector<DisjointBoxLayout>& a_grids,
@@ -352,14 +352,14 @@ namespace physics {
       std::function<Real(const Real a_time)> m_potential;
 
       bool m_regrid_superparticles;
-      bool m_load_balance;
+      bool m_LoadBalancing;
       bool m_nwo_reactions; // For switching between the old and new reaction algorithms.
       bool m_filter_rho;
       
       int m_ppc;
       int m_halo_buffer;
       int m_pvr_buffer;
-      int m_load_balance_idx;
+      int m_LoadBalancing_idx;
       
       Real m_load_ppc;
       Real m_max_cells_hop;
@@ -409,7 +409,7 @@ namespace physics {
 
 
       // Do load balancing of the particle realm. 
-      void load_balance_particle_realm(Vector<Vector<int> >&            a_procs,
+      void LoadBalancing_particle_realm(Vector<Vector<int> >&            a_procs,
 				       Vector<Vector<Box> >&            a_boxes,
 				       const std::string                a_realm,
 				       const Vector<DisjointBoxLayout>& a_grids,

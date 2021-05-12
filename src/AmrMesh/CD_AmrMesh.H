@@ -32,7 +32,7 @@
 #include <computational_geometry.H>
 #include <mfis.H>
 #include <CD_IrregAmrStencil.H>
-#include <load_balance.H>
+#include <CD_LoadBalancing.H>
 #include <nwoebquadcfinterp.H>
 #include <MFLevelGrid.H>
 #include <ebcoarseaverage.H>
@@ -42,7 +42,7 @@
 #include <EBGhostCloud.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <realm.H>
-#include <load_balance.H>
+#include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
   
 /*!

@@ -1,20 +1,26 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file load_balance.cpp
-  @details Implementatino of load_balance.H
-  @author Robert Marskar
-  @date Jan. 2018
+  @file    CD_LoadBalancing.cpp
+  @details Implementation of CD_LoadBalancing.H
+  @author  Robert Marskar
 */
 
-#include "load_balance.H"
-#include "EBEllipticLoadBalance.H"
+// Chombo includes
+#include <EBEllipticLoadBalance.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_LoadBalancing.H>
+#include <CD_NamespaceHeader.H>
 
-void load_balance::make_balance(Vector<int>& a_levelRanks, const Vector<Box>& a_levelBoxes){
-  LoadBalance(a_levelRanks, a_levelBoxes);
+void LoadBalancing::makeBalance(Vector<int>& a_ranks, const Vector<Box>& a_boxes){
+  LoadBalance(a_ranks, a_boxes);
 }
 
-void load_balance::round_robin(Vector<int>& a_ranks, const Vector<Box>& a_boxes){
+void LoadBalancing::roundRobin(Vector<int>& a_ranks, const Vector<Box>& a_boxes){
 
   const int nProcs = numProc();
   const int nBoxes = a_boxes.size();
@@ -25,13 +31,13 @@ void load_balance::round_robin(Vector<int>& a_ranks, const Vector<Box>& a_boxes)
   }
 }
 
-void load_balance::sort(Vector<Box>& a_boxes, const BoxSorting a_which){
+void LoadBalancing::sort(Vector<Box>& a_boxes, const BoxSorting a_which){
   Vector<int> dummy(a_boxes.size(), 0);
 
-  load_balance::sort(a_boxes, dummy, a_which);
+  LoadBalancing::sort(a_boxes, dummy, a_which);
 }
 
-void load_balance::gather_boxes(Vector<Box>& a_boxes){
+void LoadBalancing::gatherBoxes(Vector<Box>& a_boxes){
 
   // TLDR: This code does a gather operation on the loads and boxes. They are gather globally in this way:
   //       (BoxesForMPIRank=0, BoxesForMPIRank=1, BoxesForMPIRank=2, ....)
@@ -97,7 +103,7 @@ void load_balance::gather_boxes(Vector<Box>& a_boxes){
 
 }
 
-void load_balance::gather_loads(Vector<Real>& a_loads){
+void LoadBalancing::gatherLoads(Vector<Real>& a_loads){
 
   // TLDR: This code does a gather operation on the loads. They are gather globally in this way:
   //       (LoadsForRank=0, LoadsForRank=1, LoadsForRank2=2, ....)
@@ -141,7 +147,7 @@ void load_balance::gather_loads(Vector<Real>& a_loads){
   delete send_buffer;
 }
 
-void load_balance::gather_loads(Vector<int>& a_loads){
+void LoadBalancing::gatherLoads(Vector<int>& a_loads){
 
   // TLDR: This code does a gather operation on the loads. They are gather globally in this way:
   //       (LoadsForRank=0, LoadsForRank=1, LoadsForRank2=2, ....)
@@ -185,12 +191,12 @@ void load_balance::gather_loads(Vector<int>& a_loads){
   delete send_buffer;
 }
 
-void load_balance::gather_boxes_and_loads(Vector<Box>& a_boxes, Vector<int>& a_loads){
-  load_balance::gather_boxes(a_boxes);
-  load_balance::gather_loads(a_loads);
+void LoadBalancing::gatherBoxes_and_loads(Vector<Box>& a_boxes, Vector<int>& a_loads){
+  LoadBalancing::gatherBoxes(a_boxes);
+  LoadBalancing::gatherLoads(a_loads);
 }
 
-int load_balance::maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last){
+int LoadBalancing::maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last){
   int maxSize = 0;
   for (std::vector<Box>::iterator p= a_first; p<a_last; ++p)
     {
@@ -212,4 +218,5 @@ int load_balance::maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::
   bits++;
   return bits;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

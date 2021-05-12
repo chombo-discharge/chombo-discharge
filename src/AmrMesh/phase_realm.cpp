@@ -6,7 +6,7 @@
 */
 
 #include "phase_realm.H"
-#include "load_balance.H"
+#include "CD_LoadBalancing.H"
 #include "CD_EbFastFineToCoarRedist.H"
 #include "CD_EbFastCoarToFineRedist.H"
 #include "CD_EbFastCoarToCoarRedist.H"

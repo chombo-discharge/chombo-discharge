@@ -11,7 +11,7 @@
 #include "computational_geometry.H"
 #include "mfis.H"
 #include "CD_IrregAmrStencil.H"
-#include "load_balance.H"
+#include "CD_LoadBalancing.H"
 #include "nwoebquadcfinterp.H"
 #include "MFLevelGrid.H"
 #include "ebcoarseaverage.H"

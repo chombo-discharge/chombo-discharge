@@ -62,8 +62,8 @@ namespace Physics {
       bool need_to_regrid() override {return false;}
       void pre_regrid(const int a_lbase, const int a_finest_level) override;
       void deallocate() override;
-      bool load_balance_realm(const std::string a_realm) const override;
-      void load_balance_boxes(Vector<Vector<int> >&            a_procs,
+      bool LoadBalancing_realm(const std::string a_realm) const override;
+      void LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
 			      Vector<Vector<Box> >&            a_boxes,
 			      const std::string                a_realm,
 			      const Vector<DisjointBoxLayout>& a_grids,
@@ -77,7 +77,7 @@ namespace Physics {
 
     protected:
 
-      bool m_load_balance;
+      bool m_LoadBalancing;
       BoxSorting m_boxSort;
 
       RefCountedPtr<FieldSolver> m_fieldSolver;

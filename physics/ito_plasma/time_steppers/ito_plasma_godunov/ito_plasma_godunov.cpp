@@ -130,8 +130,8 @@ void ito_plasma_godunov::parseOptions() {
   pp.get("relax_factor",   m_relax_factor);
   pp.get("regrid_super",   m_regrid_superparticles);
   pp.get("algorithm",      str);
-  pp.get("load_balance",   m_load_balance);
-  pp.get("load_index",     m_load_balance_idx);
+  pp.get("LoadBalancing",   m_LoadBalancing);
+  pp.get("load_index",     m_LoadBalancing_idx);
   pp.get("min_dt",         m_min_dt);
   pp.get("max_dt",         m_max_dt);
   pp.get("halo_buffer",    m_halo_buffer);
@@ -209,8 +209,8 @@ void ito_plasma_godunov::parseRuntimeOptions() {
   pp.get("relax_factor",   m_relax_factor);
   pp.get("regrid_super",   m_regrid_superparticles);
   pp.get("algorithm",      str);
-  pp.get("load_balance",   m_load_balance);
-  pp.get("load_index",     m_load_balance_idx);
+  pp.get("LoadBalancing",   m_LoadBalancing);
+  pp.get("load_index",     m_LoadBalancing_idx);
   pp.get("min_dt",         m_min_dt);
   pp.get("max_dt",         m_max_dt);
   pp.get("filter_rho",     m_filter_rho);

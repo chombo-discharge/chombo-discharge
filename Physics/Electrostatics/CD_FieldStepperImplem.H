@@ -41,7 +41,7 @@ namespace Physics {
 
       std::string str;
 
-      pp.get("load_balance", m_load_balance);
+      pp.get("LoadBalancing", m_LoadBalancing);
       pp.get("BoxSorting",  str);
       pp.get("realm",       m_realm);
       pp.get("verbosity",   m_verbosity);
@@ -205,18 +205,18 @@ namespace Physics {
     }
 
     template <class T>
-    bool FieldStepper<T>::load_balance_realm(const std::string a_realm) const {
-      return m_load_balance ? true : false;
+    bool FieldStepper<T>::LoadBalancing_realm(const std::string a_realm) const {
+      return m_LoadBalancing ? true : false;
     }
 
     template <class T>
-    void FieldStepper<T>::load_balance_boxes(Vector<Vector<int> >&            a_procs,
+    void FieldStepper<T>::LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
 					      Vector<Vector<Box> >&            a_boxes,
 					      const std::string                a_realm,
 					      const Vector<DisjointBoxLayout>& a_grids,
 					      const int                        a_lmin,
 					      const int                        a_finest_level){
-      if(m_load_balance){
+      if(m_LoadBalancing){
 	constexpr int num_apply = 50;
 	
 	a_procs.resize(1+a_finest_level);
@@ -265,7 +265,7 @@ namespace Physics {
 	  a_boxes[lvl] = dit.getBoxes();
 
 	  // Do the desired sorting
-	  load_balance::sort(a_boxes[lvl], loads, m_boxSort);
+	  LoadBalancing::sort(a_boxes[lvl], loads, m_boxSort);
 
 	  // Bah - need long long for LoadBalance
 	  Vector<long long> lloads(loads.size());
@@ -274,7 +274,7 @@ namespace Physics {
 	  }
 	  
 	  // Do the friggin load balancing. 
-	  load_balance::make_balance(a_procs[lvl], lloads, a_boxes[lvl]);
+	  LoadBalancing::makeBalance(a_procs[lvl], lloads, a_boxes[lvl]);
 	}
       }
     }

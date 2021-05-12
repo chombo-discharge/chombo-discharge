@@ -32,8 +32,8 @@ namespace physics {
       void post_initialize() override;
 
       // Load balancing
-      bool load_balance_realm(const std::string a_realm) const override;
-      void load_balance_boxes(Vector<Vector<int> >&            a_procs,
+      bool LoadBalancing_realm(const std::string a_realm) const override;
+      void LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
 			      Vector<Vector<Box> >&            a_boxes,
 			      const std::string                a_realm,
 			      const Vector<DisjointBoxLayout>& a_grids,
@@ -81,7 +81,7 @@ namespace physics {
       phase::which_phase m_phase;
 
       // Load balance or not
-      bool m_load_balance;
+      bool m_LoadBalancing;
 
       // Ito solver & species
       RefCountedPtr<ito_solver>  m_solver;

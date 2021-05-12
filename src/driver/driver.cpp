@@ -593,12 +593,12 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   // Load balance and regrid the various realms
   const std::vector<std::string>& realms = m_amr->getRealms();
   for (const auto& str : realms){
-    if(m_timestepper->load_balance_realm(str)){
+    if(m_timestepper->LoadBalancing_realm(str)){
       
       Vector<Vector<int> > procs;
       Vector<Vector<Box> > boxes;
       
-      m_timestepper->load_balance_boxes(procs, boxes, str, m_amr->getProxyGrids(), a_lmin, new_finest_level);
+      m_timestepper->LoadBalancing_boxes(procs, boxes, str, m_amr->getProxyGrids(), a_lmin, new_finest_level);
 
       m_amr->regridRealm(str, procs, boxes, a_lmin);
     }
@@ -975,7 +975,7 @@ void driver::parseOptions(){
   pp.get("num_plot_ghost",           m_num_plot_ghost);
   pp.get("allow_coarsening",         m_allow_coarsen);
   pp.get("geometry_only",            m_geometry_only);
-  pp.get("ebis_memory_load_balance", m_ebis_memory_load_balance);
+  pp.get("ebis_memory_LoadBalancing", m_ebis_memory_LoadBalancing);
   pp.get("max_steps",                m_max_steps);
   pp.get("start_time",               m_start_time);
   pp.get("stop_time",                m_stop_time);
@@ -1222,7 +1222,7 @@ void driver::setup_geometry_only(){
 
   this->sanityCheck();
 
-  if(m_ebis_memory_load_balance){
+  if(m_ebis_memory_LoadBalancing){
     EBIndexSpace::s_useMemoryLoadBalance = true;
   }
   else {
@@ -1278,7 +1278,7 @@ void driver::setup_fresh(const int a_init_regrids){
 
   this->sanityCheck();                                    // Sanity check before doing anything expensive
 
-  if(m_ebis_memory_load_balance){
+  if(m_ebis_memory_LoadBalancing){
     EBIndexSpace::s_useMemoryLoadBalance = true;
   }
   else {
@@ -1331,7 +1331,7 @@ void driver::setup_fresh(const int a_init_regrids){
   this->cache_tags(m_tags);
   m_timestepper->pre_regrid(lmin, lmax);
   for (const auto& str : m_amr->getRealms()){
-    if(m_timestepper->load_balance_realm(str)){
+    if(m_timestepper->LoadBalancing_realm(str)){
       
       Vector<Vector<int> > procs;
       Vector<Vector<Box> > boxes;
@@ -1339,7 +1339,7 @@ void driver::setup_fresh(const int a_init_regrids){
       const int lmin   = 0;
       const int lmax = m_amr->getFinestLevel(); 
       
-      m_timestepper->load_balance_boxes(procs, boxes, str, m_amr->getProxyGrids(), lmin, lmax);
+      m_timestepper->LoadBalancing_boxes(procs, boxes, str, m_amr->getProxyGrids(), lmin, lmax);
 
       m_amr->regridRealm(str, procs, boxes, lmin);
     }

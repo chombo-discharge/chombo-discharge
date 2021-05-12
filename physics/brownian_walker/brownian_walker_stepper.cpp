@@ -27,7 +27,7 @@ brownian_walker_stepper::brownian_walker_stepper(){
   pp.get("verbosity",      m_verbosity);
   pp.get("ppc",            m_ppc);
   pp.get("max_cells_hop",  m_max_cells_hop);
-  pp.get("load_balance",   m_load_balance);
+  pp.get("LoadBalancing",   m_LoadBalancing);
 }
 
 brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver) : brownian_walker_stepper() {
@@ -45,7 +45,7 @@ void brownian_walker_stepper::parseRuntimeOptions() {
   pp.get("verbosity",      m_verbosity);
   pp.get("ppc",            m_ppc);
   pp.get("max_cells_hop",  m_max_cells_hop);
-  pp.get("load_balance",   m_load_balance);
+  pp.get("LoadBalancing",   m_LoadBalancing);
   
   m_solver->parseRuntimeOptions();
 }
@@ -95,33 +95,33 @@ void brownian_walker_stepper::set_velocity(){
   m_amr->interpGhost(vel, m_realm, m_phase);
 }
 
-bool brownian_walker_stepper::load_balance_realm(const std::string a_realm) const {
-  CH_TIME("brownian_walker_stepper::load_balance_realm");
+bool brownian_walker_stepper::LoadBalancing_realm(const std::string a_realm) const {
+  CH_TIME("brownian_walker_stepper::LoadBalancing_realm");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::load_balance_realm" << endl;
+    pout() << "brownian_walker_stepper::LoadBalancing_realm" << endl;
   }
 
   bool ret = false;
 
-  if(m_load_balance && a_realm == m_realm){
+  if(m_LoadBalancing && a_realm == m_realm){
     ret = true;
   }
 
   return ret;
 }
 
-void brownian_walker_stepper::load_balance_boxes(Vector<Vector<int> >&            a_procs,
+void brownian_walker_stepper::LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
 						 Vector<Vector<Box> >&            a_boxes,
 						 const std::string                a_realm,
 						 const Vector<DisjointBoxLayout>& a_grids,
 						 const int                        a_lmin,
 						 const int                        a_finest_level){
-  CH_TIME("brownian_walker_stepper::load_balance_boxes");
+  CH_TIME("brownian_walker_stepper::LoadBalancing_boxes");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::load_balance_boxes" << endl;
+    pout() << "brownian_walker_stepper::LoadBalancing_boxes" << endl;
   }
   
-  if(m_load_balance && a_realm == m_realm){
+  if(m_LoadBalancing && a_realm == m_realm){
     particle_container<ito_particle>& particles = m_solver->get_particles(ito_solver::which_container::bulk);
   
     particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finest_level);
@@ -155,7 +155,7 @@ void brownian_walker_stepper::load_balance_boxes(Vector<Vector<int> >&          
     particles.pre_regrid(a_lmin);
   }
   else{
-    MayDay::Abort("brownian_walker_stepper::load_balance_boxes - logic bust");
+    MayDay::Abort("brownian_walker_stepper::LoadBalancing_boxes - logic bust");
   }
 }
 

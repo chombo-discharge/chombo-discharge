@@ -21,7 +21,7 @@
 // Our includes
 #include <CD_AmrMesh.H>
 #include <mfalias.H>
-#include <load_balance.H>
+#include <CD_LoadBalancing.H>
 #include <CD_gradientF_F.H>
 #include <CD_EbFastFineToCoarRedist.H>
 #include <CD_EbFastCoarToFineRedist.H>
@@ -961,13 +961,13 @@ void AmrMesh::buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int
 
   // Morton order the boxes.
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    load_balance::sort(new_boxes[lvl], m_boxSort);
+    LoadBalancing::sort(new_boxes[lvl], m_boxSort);
   }
 
   // Load balance boxes with patch volume as load proxy. 
   Vector<Vector<int> > pid(1 + m_finestLevel);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    load_balance::make_balance(pid[lvl], new_boxes[lvl]);
+    LoadBalancing::makeBalance(pid[lvl], new_boxes[lvl]);
   }
 
   // Define grids. If a_lmin=0 every grid is new, otherwise keep old grids up to but not including a_lmin
@@ -1538,7 +1538,7 @@ void AmrMesh::setGrids(const Vector<Vector<Box> >& a_boxes, const std::map<std::
 
     // Do load balancing. 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-      load_balance::make_balance(pids[lvl], cur_loads[lvl], a_boxes[lvl]);
+      LoadBalancing::makeBalance(pids[lvl], cur_loads[lvl], a_boxes[lvl]);
     }
 
     this->regridRealm(cur_realm, pids, a_boxes, lmin);

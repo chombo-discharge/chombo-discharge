@@ -74,8 +74,8 @@ public:
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
 
   virtual bool need_to_regrid();
-  virtual bool load_balance_realm(const std::string a_realm) const;
-  virtual void load_balance_boxes(Vector<Vector<int> >&            a_procs,
+  virtual bool LoadBalancing_realm(const std::string a_realm) const;
+  virtual void LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
 				  Vector<Vector<Box> >&            a_boxes,
 				  const std::string                a_realm,
 				  const Vector<DisjointBoxLayout>& a_grids,

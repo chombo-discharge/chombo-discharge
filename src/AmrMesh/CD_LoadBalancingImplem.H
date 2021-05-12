@@ -1,44 +1,50 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file    load_balanceI.H
-  @details Implementation of load_balance.H
+  @file    CD_LoadBalancingImplem.H
+  @details Implementation of CD_LoadBalancing.H
   @author  Robert Marskar
-  @date    Jan. 2018
 */
 
-#ifndef _CD_LoadBalanceImplem_H_
-#define _CD_LoadBalanceImplem_H_
+#ifndef CD_LoadBalanceImplem_H
+#define CD_LoadBalanceImplem_H
 
-#include "load_balance.H"
-
-#include "BoxLayout.H"
-
+// Std includes
 #include <algorithm>
 #include <random>
 #include <chrono>
 
-#include "CD_NamespaceHeader.H"
+// Chombo includes
+#include <BoxLayout.H>
+
+// Our includes
+#include <CD_LoadBalancing.H>
+#include <CD_NamespaceHeader.H>
 
 template <class T>
-void load_balance::make_balance(Vector<int>& a_levelRanks, const Vector<T>& a_loads, const Vector<Box>& a_levelBoxes) {
-  LoadBalance(a_levelRanks, a_loads, a_levelBoxes);
+void LoadBalancing::makeBalance(Vector<int>& a_ranks, const Vector<T>& a_loads, const Vector<Box>& a_boxes) {
+  LoadBalance(a_ranks, a_loads, a_boxes);
 }
 
 template <class T>
-void load_balance::level_by_level(Vector<Vector<int> >&       a_procs,
-				  const Vector<Vector<T> >&   a_loads,
-				  const Vector<Vector<Box> >& a_boxes){
+void LoadBalancing::balanceLevelByLevel(Vector<Vector<int> >&       a_procs,
+					const Vector<Vector<T> >&   a_loads,
+					const Vector<Vector<Box> >& a_boxes){
 
   const int nlevels = a_boxes.size();
 
   for (int lvl = 0; lvl < nlevels; lvl++){
-    load_balance::make_balance(a_procs[lvl], a_loads[lvl], a_boxes[lvl]);
+    LoadBalancing::makeBalance(a_procs[lvl], a_loads[lvl], a_boxes[lvl]);
   }
 }
 
 template <class T>
-void load_balance::hierarchy(Vector<Vector<int> >&       a_procs,
-			     const Vector<Vector<T> >&   a_loads,
-			     const Vector<Vector<Box> >& a_boxes){
+void LoadBalancing::hierarchy(Vector<Vector<int> >&       a_procs,
+			      const Vector<Vector<T> >&   a_loads,
+			      const Vector<Vector<Box> >& a_boxes){
 
   const int nlevels = a_procs.size();
   
@@ -64,7 +70,7 @@ void load_balance::hierarchy(Vector<Vector<int> >&       a_procs,
   }
 
   // Do global load balancing
-  load_balance::make_balance(allProcs, allLoads, allBoxes);
+  LoadBalancing::makeBalance(allProcs, allLoads, allBoxes);
 
   // Resize the a_procs vector to correct size.
   a_procs.resize(nlevels);
@@ -85,7 +91,7 @@ void load_balance::hierarchy(Vector<Vector<int> >&       a_procs,
 }
 
 template <class T>
-std::vector<std::pair<Box, T> > load_balance::packPairs(Vector<Box>& a_boxes, Vector<T>& a_loads){
+std::vector<std::pair<Box, T> > LoadBalancing::packPairs(const Vector<Box>& a_boxes, const Vector<T>& a_loads){
   
   std::vector<std::pair<Box, T> > vec;
   for (int i = 0; i < a_boxes.size(); i++){
@@ -96,7 +102,7 @@ std::vector<std::pair<Box, T> > load_balance::packPairs(Vector<Box>& a_boxes, Ve
 }
 
 template <class T>
-void load_balance::unpackPairs(Vector<Box>& a_boxes, Vector<T>& a_loads, const std::vector<std::pair<Box, T> >& a_pairs){
+void LoadBalancing::unpackPairs(Vector<Box>& a_boxes, Vector<T>& a_loads, const std::vector<std::pair<Box, T> >& a_pairs){
 
   // Reconstruct boxes and loads
   a_boxes.resize(0);
@@ -108,35 +114,35 @@ void load_balance::unpackPairs(Vector<Box>& a_boxes, Vector<T>& a_loads, const s
 }
 
 template <typename T>
-void load_balance::sort(Vector<Vector<Box> >& a_boxes, Vector<Vector<T> >& a_loads, const BoxSorting a_which){
+void LoadBalancing::sort(Vector<Vector<Box> >& a_boxes, Vector<Vector<T> >& a_loads, const BoxSorting a_which){
   for (int lvl = 0; lvl < a_boxes.size(); lvl++){
-    load_balance::sort(a_boxes[lvl], a_loads[lvl], a_which);
+    LoadBalancing::sort(a_boxes[lvl], a_loads[lvl], a_which);
   }
 }
 
 template <typename T>
-void load_balance::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a_which){
+void LoadBalancing::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a_which){
 
   switch(a_which){
   case BoxSorting::none:
     break;
   case BoxSorting::std:
-    load_balance::std_sort(a_boxes, a_loads);
+    LoadBalancing::standardSort(a_boxes, a_loads);
     break;
   case BoxSorting::shuffle:
-    load_balance::shuffle_sort(a_boxes, a_loads);
+    LoadBalancing::shuffleSort(a_boxes, a_loads);
     break;
   case BoxSorting::morton:
-    load_balance::morton_sort(a_boxes, a_loads);
+    LoadBalancing::mortonSort(a_boxes, a_loads);
     break;
   default:
-    MayDay::Abort("load_balance::sort_boxes - unknown algorithm requested");
+    MayDay::Abort("LoadBalancing::sort_boxes - unknown algorithm requested");
     break;
   }
 }
 
 template <class T>
-void load_balance::std_sort(Vector<Box>& a_boxes, Vector<T>& a_loads){
+void LoadBalancing::standardSort(Vector<Box>& a_boxes, Vector<T>& a_loads){
   std::vector<std::pair<Box, T> > vec = packPairs(a_boxes, a_loads);
 
   // Call std::sort, using box1 < box2 lambda as sorting criterion. 
@@ -152,7 +158,7 @@ void load_balance::std_sort(Vector<Box>& a_boxes, Vector<T>& a_loads){
 }
 
 template <class T>
-void load_balance::shuffle_sort(Vector<Box>& a_boxes, Vector<T>& a_loads){
+void LoadBalancing::shuffleSort(Vector<Box>& a_boxes, Vector<T>& a_loads){
   auto vec = packPairs(a_boxes, a_loads);
 
   // Set up RNG
@@ -171,7 +177,7 @@ void load_balance::shuffle_sort(Vector<Box>& a_boxes, Vector<T>& a_loads){
 }
 
 template <class T>
-void load_balance::morton_sort(Vector<Box>& a_boxes, Vector<T>& a_loads){
+void LoadBalancing::mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads){
   auto vec = packPairs(a_boxes, a_loads);
   
   // Get max bits
@@ -192,7 +198,7 @@ void load_balance::morton_sort(Vector<Box>& a_boxes, Vector<T>& a_loads){
 }
 
 template <class T>
-bool load_balance::mortonComparator(const int a_maxBits, const std::pair<Box,T>& a_lhs, const std::pair<Box, T>& a_rhs){
+bool LoadBalancing::mortonComparator(const int a_maxBits, const std::pair<Box,T>& a_lhs, const std::pair<Box, T>& a_rhs){
   
   const Box& lbox = a_lhs.first;
   const Box& rbox = a_rhs.first;
@@ -211,6 +217,7 @@ bool load_balance::mortonComparator(const int a_maxBits, const std::pair<Box,T>&
 	      
   return false;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

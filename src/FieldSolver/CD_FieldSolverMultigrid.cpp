@@ -515,7 +515,7 @@ void FieldSolverMultigrid::defineDeeperMultigridLevels(){
       Vector<int> proc_assign;
       domainSplit(coar, boxes, max_box_size, blocking_factor);
       mortonOrdering(boxes);
-      load_balance::make_balance(proc_assign, boxes);
+      LoadBalancing::makeBalance(proc_assign, boxes);
 
       // Add problem domain and grid
       m_deeperMultigridDomains.push_back(coar);

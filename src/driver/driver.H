@@ -357,7 +357,7 @@ protected:
   /*!
     @brief Use memory as load balance for EBIS
   */
-  bool m_ebis_memory_load_balance;
+  bool m_ebis_memory_LoadBalancing;
 
   /*!
     @brief Plot tagged cells
