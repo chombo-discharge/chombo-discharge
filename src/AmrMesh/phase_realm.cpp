@@ -6,10 +6,10 @@
 */
 
 #include "phase_realm.H"
+#include "load_balance.H"
 #include "CD_EbFastFineToCoarRedist.H"
 #include "CD_EbFastCoarToFineRedist.H"
 #include "CD_EbFastCoarToCoarRedist.H"
-#include "load_balance.H"
 #include "CD_EbFastFluxRegister.H"
 
 #include <EBArith.H>
