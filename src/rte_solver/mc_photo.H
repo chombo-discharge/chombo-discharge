@@ -503,7 +503,7 @@ protected:
   /*!
     @brief Random Poisson trial
   */
-  int random_poisson(const Real a_mean);
+  int random_fieldSolver(const Real a_mean);
 
   /*!
     @brief Random exponential trial

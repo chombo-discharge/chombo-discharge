@@ -699,7 +699,7 @@ int mc_photo::query_ghost() const {
   return 3;
 }
 
-int mc_photo::random_poisson(const Real a_mean){
+int mc_photo::random_fieldSolver(const Real a_mean){
   if(a_mean < m_poiss_exp_swap){
     std::poisson_distribution<int> pdist(a_mean);
     return pdist(*m_rng);
@@ -928,7 +928,7 @@ int mc_photo::draw_photons(const Real a_source, const Real a_volume, const Real 
   // Draw a number of photons with the desired algorithm
   if(m_photogen == photon_generation::stochastic){
     const Real mean = a_source*factor;
-    num_photons = random_poisson(mean);
+    num_photons = random_fieldSolver(mean);
   }
   else if(m_photogen == photon_generation::deterministic){
     num_photons = round(a_source*factor);

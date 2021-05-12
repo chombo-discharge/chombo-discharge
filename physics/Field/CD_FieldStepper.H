@@ -76,7 +76,7 @@ namespace physics {
       bool m_load_balance;
       box_sorting m_boxsort;
 
-      RefCountedPtr<FieldSolver> m_poisson;
+      RefCountedPtr<FieldSolver> m_fieldSolver;
       RefCountedPtr<sigma_solver>   m_sigma;
 
       std::string m_realm;

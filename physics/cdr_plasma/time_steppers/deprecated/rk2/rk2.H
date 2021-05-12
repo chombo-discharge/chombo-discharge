@@ -71,7 +71,7 @@ protected:
   /*!
     @brief Scratch storage
   */
-  RefCountedPtr<poisson_storage> m_poisson_scratch;
+  RefCountedPtr<poisson_storage> m_fieldSolver_scratch;
 
   /*!
     @brief Scratch storage

@@ -608,7 +608,7 @@ Real sisdc::advance(const Real a_dt){
 	  sisdc::compute_E_into_scratch();
 	  sisdc::compute_cdr_gradients();
 	  sisdc::compute_cdr_velo(m_time);
-	  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+	  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 	  sisdc::compute_cdr_sources(m_time);
 	}
       }
@@ -634,7 +634,7 @@ Real sisdc::advance(const Real a_dt){
   const Real t2 = MPI_Wtime();
   sisdc::compute_cdr_velo(m_time + actual_dt);
   const Real t3 = MPI_Wtime();
-  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
   const Real t4 = MPI_Wtime();
 
   // In case we're using FHD, we need to tell the kinetics module about the time step before computign sources
@@ -1772,8 +1772,8 @@ void sisdc::allocate_cdr_storage(){
 
 void sisdc::allocate_poisson_storage(){
   const int ncomp = 1;
-  m_poisson_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->get_phase(), ncomp));
-  m_poisson_scratch->allocate_storage(m_p);
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->get_phase(), ncomp));
+  m_fieldSolver_scratch->allocate_storage(m_p);
 }
 
 void sisdc::allocate_rte_storage(){
@@ -1815,8 +1815,8 @@ void sisdc::deallocate_internals(){
   m_cdr_scratch.resize(0);
   m_rte_scratch.resize(0);
 
-  m_poisson_scratch->deallocate_storage();
-  m_poisson_scratch = RefCountedPtr<poisson_storage>(0);
+  m_fieldSolver_scratch->deallocate_storage();
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage>(0);
   
   m_sigma_scratch->deallocate_storage();
   m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
@@ -1828,12 +1828,12 @@ void sisdc::compute_E_into_scratch(){
     pout() << "sisdc::compute_E_into_scratch" << endl;
   }
   
-  EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
-  EBAMRFluxData& E_face = m_poisson_scratch->get_E_face();
-  EBAMRIVData&   E_eb   = m_poisson_scratch->get_E_eb();
-  EBAMRIFData&   E_dom  = m_poisson_scratch->get_E_domain();
+  EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
+  EBAMRFluxData& E_face = m_fieldSolver_scratch->get_E_face();
+  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->get_E_eb();
+  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->get_E_domain();
 
-  const MFAMRCellData& phi = m_poisson->get_state();
+  const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
   sisdc::compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
   sisdc::compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
@@ -1883,7 +1883,7 @@ void sisdc::compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real 
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  sisdc::compute_cdr_velocities(velocities, a_states, m_poisson_scratch->get_E_cell(), a_time);
+  sisdc::compute_cdr_velocities(velocities, a_states, m_fieldSolver_scratch->get_E_cell(), a_time);
 }
 
 void sisdc::compute_cdr_eb_states(){
@@ -2077,7 +2077,7 @@ void sisdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Rea
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
-  const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
+  const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
   time_stepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
@@ -2147,7 +2147,7 @@ void sisdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, co
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 
-  const EBAMRIFData& E = m_poisson_scratch->get_E_domain();
+  const EBAMRIFData& E = m_fieldSolver_scratch->get_E_domain();
 
   // This fills the solvers' domain fluxes
   time_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
@@ -2197,7 +2197,7 @@ void sisdc::compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Re
   
   Vector<EBAMRCellData*> cdr_sources = m_cdr->get_sources();
   Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
-  EBAMRCellData& E                   = m_poisson_scratch->get_E_cell();
+  EBAMRCellData& E                   = m_fieldSolver_scratch->get_E_cell();
 
   Vector<EBAMRCellData*> cdr_gradients;
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -2230,8 +2230,8 @@ void sisdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAM
   
   if(m_do_poisson){ // Solve Poisson equation
     if((m_step +1) % m_fast_poisson == 0){
-      time_stepper::solve_poisson(m_poisson->get_state(),
-				  m_poisson->get_source(),
+      time_stepper::solve_poisson(m_fieldSolver->getPotential(),
+				  m_fieldSolver->getRho(),
 				  a_densities,
 				  a_sigma,
 				  centering::cell_center);
@@ -2253,7 +2253,7 @@ void sisdc::update_stationary_rte(const Real a_time){
 	Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
 	Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
 
-	EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+	EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 
 	const Real dummy_dt = 0.0;
 	this->solve_rte(rte_states, rte_sources, cdr_states, E, a_time, dummy_dt, centering::cell_center);
@@ -2274,7 +2274,7 @@ void sisdc::update_stationary_rte(const Vector<EBAMRCellData*>& a_cdr_states, co
 	Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
 	Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
 
-	EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+	EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 
 	const Real dummy_dt = 0.0;
 	this->solve_rte(rte_states, rte_sources, a_cdr_states, E, a_time, dummy_dt, centering::cell_center);
@@ -2297,7 +2297,7 @@ void sisdc::integrate_rte(const Real a_dt, const int a_m, const bool a_lagged_te
 	Vector<EBAMRCellData*>  rte_states  = m_rte->get_states();
 	Vector<EBAMRCellData*>  rte_sources = m_rte->get_sources();
 	Vector<EBAMRCellData*>  cdr_states  = sisdc::get_cdr_phik(a_m);
-	EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+	EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 	this->solve_rte(rte_states, rte_sources, cdr_states, E, time, a_dt, centering::cell_center);
 #if 1 // Debug
 	MayDay::Abort("sisdc::integrate_rte - shouldn't happen");
@@ -2312,7 +2312,7 @@ void sisdc::update_diffusion_coefficients(){
   if(m_verbosity > 5){
     pout() << "sisdc::update_diffusion_coefficients" << endl;
   }
-  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 }
 
 Vector<EBAMRCellData*> sisdc::get_cdr_errors(){
@@ -2902,7 +2902,7 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
   }
 
   // Electric field at boundary
-  const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
+  const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
   
   // Update the stinking EB fluxes
   time_stepper::compute_cdr_fluxes(solver_eb_fluxes,
@@ -2948,7 +2948,7 @@ void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a
   EBAMRCellData grad_E, E_norm;
   m_amr->allocate(grad_E, m_cdr->get_phase(), SpaceDim);  // Allocate storage for grad(|E|)
   m_amr->allocate(E_norm, m_cdr->get_phase(), 1);         // Allocate storage for |E|
-  const EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+  const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
   data_ops::vector_length(*E_norm[a_lvl], *E[a_lvl]);            // Compute |E| on this level
   m_amr->compute_gradient(*grad_E[a_lvl], *E_norm[a_lvl], a_lvl);// Compute grad(|E|) on this level
 
@@ -3204,8 +3204,8 @@ void sisdc::store_solvers(){
   // Poisson and RTE here. 
 
   // Poisson
-  MFAMRCellData& previous    = m_poisson_scratch->get_previous();
-  const MFAMRCellData& state = m_poisson->get_state();
+  MFAMRCellData& previous    = m_fieldSolver_scratch->get_previous();
+  const MFAMRCellData& state = m_fieldSolver->getPotential();
   data_ops::copy(previous, state);
 
   // RTE
@@ -3230,8 +3230,8 @@ void sisdc::restore_solvers(){
   // Poisson and RTE here. 
 
   // Poisson
-  MFAMRCellData& state = m_poisson->get_state();
-  const MFAMRCellData& previous    = m_poisson_scratch->get_previous();
+  MFAMRCellData& state = m_fieldSolver->getPotential();
+  const MFAMRCellData& previous    = m_fieldSolver_scratch->get_previous();
 
   data_ops::copy(state, previous);
 

@@ -196,8 +196,8 @@ void rk2_tga::allocate_cdr_storage(){
 
 void rk2_tga::allocate_poisson_storage(){
   const int ncomp = 1;
-  m_poisson_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->get_phase(), ncomp));
-  m_poisson_scratch->allocate_storage();
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->get_phase(), ncomp));
+  m_fieldSolver_scratch->allocate_storage();
 }
 
 void rk2_tga::allocate_rte_storage(){
@@ -234,7 +234,7 @@ void rk2_tga::deallocate_internals(){
     m_rte_scratch[idx]->deallocate_storage();
   }
 
-  m_poisson_scratch->deallocate_storage();
+  m_fieldSolver_scratch->deallocate_storage();
   m_sigma_scratch->deallocate_storage();
 }
 
@@ -255,8 +255,8 @@ void rk2_tga::cache_solutions(){
   }
 
   {// Cache Poisson solution
-    MFAMRCellData& cache = m_poisson_scratch->get_cache();
-    data_ops::copy(cache, m_poisson->get_state());
+    MFAMRCellData& cache = m_fieldSolver_scratch->get_cache();
+    data_ops::copy(cache, m_fieldSolver->getPotential());
   }
 
   // Cache RTE solutions
@@ -322,11 +322,11 @@ void rk2_tga::compute_E_into_scratch(){
     pout() << "rk2_tga::compute_E_into_scratch" << endl;
   }
   
-  EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
-  EBAMRFluxData& E_face = m_poisson_scratch->get_E_face();
-  EBAMRIVData&   E_eb   = m_poisson_scratch->get_E_eb();
+  EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
+  EBAMRFluxData& E_face = m_fieldSolver_scratch->get_E_face();
+  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->get_E_eb();
 
-  const MFAMRCellData& phi = m_poisson->get_state();
+  const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
   this->compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
   this->compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
@@ -341,7 +341,7 @@ void rk2_tga::compute_cdr_velo(const Real a_time){
 
   Vector<EBAMRCellData*> states     = m_cdr->get_states();
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  this->compute_cdr_velocities(velocities, states, m_poisson_scratch->get_E_cell(), a_time);
+  this->compute_cdr_velocities(velocities, states, m_fieldSolver_scratch->get_E_cell(), a_time);
 }
 
 void rk2_tga::compute_cdr_eb_states(){
@@ -412,7 +412,7 @@ void rk2_tga::compute_cdr_fluxes(const Real a_time){
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
-  const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
+  const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
 
   time_stepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
@@ -598,7 +598,7 @@ void rk2_tga::compute_cdr_sources_into_scratch(const Real a_time){
   Vector<EBAMRCellData*> cdr_sources = m_cdr->get_sources();
   Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
   Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
-  EBAMRCellData& E                   = m_poisson_scratch->get_E_cell();
+  EBAMRCellData& E                   = m_fieldSolver_scratch->get_E_cell();
 
   this->compute_cdr_sources(cdr_sources, cdr_states, rte_states, E, a_time, centering::cell_center);
 }
@@ -614,7 +614,7 @@ void rk2_tga::advance_rte_stationary(const Real a_time){
     Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
     Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
 
-    EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+    EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 
     const Real dummy_dt = 0.0;
     this->solve_rte(rte_states, rte_sources, cdr_states, E, a_time, dummy_dt, centering::cell_center);

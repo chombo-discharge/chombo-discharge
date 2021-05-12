@@ -55,7 +55,7 @@ protected:
 
   Vector<RefCountedPtr<cdr_storage> > m_cdr_scratch;
   Vector<RefCountedPtr<rte_storage> > m_rte_scratch;
-  RefCountedPtr<poisson_storage>      m_poisson_scratch;
+  RefCountedPtr<poisson_storage>      m_fieldSolver_scratch;
   RefCountedPtr<sigma_storage>        m_sigma_scratch;
 
   // Extra storage outside of solver storage

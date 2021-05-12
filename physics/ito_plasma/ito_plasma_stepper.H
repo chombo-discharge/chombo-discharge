@@ -343,7 +343,7 @@ namespace physics {
       RefCountedPtr<ito_plasma_physics> m_physics;
       RefCountedPtr<ito_layout<ito_solver> > m_ito;
       RefCountedPtr<rte_layout<mc_photo> > m_rte;
-      RefCountedPtr<FieldSolver> m_poisson;
+      RefCountedPtr<FieldSolver> m_fieldSolver;
       RefCountedPtr<sigma_solver> m_sigma;
 
       // Filters that can be applied. 

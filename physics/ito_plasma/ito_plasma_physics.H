@@ -241,7 +241,7 @@ namespace physics {
       int m_num_ito_species;
       int m_num_rte_species;
       int m_ppc;
-      int m_poisson_switch;
+      int m_fieldSolver_switch;
       int m_init_weights;
       int m_Ncrit;
       int m_NSSA;

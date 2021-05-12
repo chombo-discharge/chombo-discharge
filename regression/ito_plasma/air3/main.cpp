@@ -57,7 +57,7 @@ int main(int argc, char* argv[]){
   auto rte_fact = new rte_factory<mc_photo, mc_photo>();
 
   // Instantiate solvers
-  auto poi = poi_fact->new_solver();
+  auto poi = poi_fact->newSolver();
   auto cdr = ito_fact->new_layout(physics->get_ito_species());
   auto rte = rte_fact->new_layout(physics->get_rte_species());
 

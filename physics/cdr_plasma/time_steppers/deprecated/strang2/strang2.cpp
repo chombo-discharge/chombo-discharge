@@ -260,7 +260,7 @@ Real strang2::advance(const Real a_dt){
   this->compute_cdr_gradients();
   this->compute_cdr_velo(m_time);
   this->compute_cdr_sources(m_time);
-  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 #endif
 
   this->backup_solutions(); // Store old solution. This stores the old solutions in storage->m_backup
@@ -324,7 +324,7 @@ Real strang2::advance(const Real a_dt){
   this->compute_cdr_gradients();
   this->compute_cdr_sources(m_time + a_dt);
   this->compute_cdr_velo(m_time + a_dt);
-  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 
   // Print diagnostics
   if(m_print_diagno){
@@ -445,7 +445,7 @@ Real strang2::advance_one_step(const Real a_time, const Real a_dt){
     // Last embedded diffusive step tep
     if(m_do_diffusion){
       if(m_consistent_E) this->update_poisson();
-      time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+      time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
       this->advance_diffusion(a_time, a_dt);
     }
 
@@ -459,7 +459,7 @@ Real strang2::advance_one_step(const Real a_time, const Real a_dt){
   // Diffusion advance
   if(m_do_diffusion){
     if(m_compute_D){
-      time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+      time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
     }
     this->advance_diffusion(a_time, a_dt);
   }
@@ -1834,8 +1834,8 @@ void strang2::allocate_cdr_storage(){
 
 void strang2::allocate_poisson_storage(){
   const int ncomp = 1;
-  m_poisson_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_rk_order, m_amr, m_cdr->get_phase(), ncomp));
-  m_poisson_scratch->allocate_storage();
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_rk_order, m_amr, m_cdr->get_phase(), ncomp));
+  m_fieldSolver_scratch->allocate_storage();
 }
 
 void strang2::allocate_rte_storage(){
@@ -1877,8 +1877,8 @@ void strang2::deallocate_internals(){
   m_cdr_scratch.resize(0);
   m_rte_scratch.resize(0);
 
-  m_poisson_scratch->deallocate_storage();
-  m_poisson_scratch = RefCountedPtr<poisson_storage>(0);
+  m_fieldSolver_scratch->deallocate_storage();
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage>(0);
   
   m_sigma_scratch->deallocate_storage();
   m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
@@ -1901,8 +1901,8 @@ void strang2::backup_solutions(){
   }
 
   {// Backup Poisson solution
-    MFAMRCellData& backup = m_poisson_scratch->get_backup();
-    data_ops::copy(backup, m_poisson->get_state());
+    MFAMRCellData& backup = m_fieldSolver_scratch->get_backup();
+    data_ops::copy(backup, m_fieldSolver->getPotential());
   }
 
   // Backup RTE solutions
@@ -1938,8 +1938,8 @@ void strang2::revert_backup(){
   }
 
   {// Revert Poisson solution
-    const MFAMRCellData& backup = m_poisson_scratch->get_backup();
-    data_ops::copy(m_poisson->get_state(), backup);
+    const MFAMRCellData& backup = m_fieldSolver_scratch->get_backup();
+    data_ops::copy(m_fieldSolver->getPotential(), backup);
   }
 
   // Revert RTE solutions
@@ -2029,8 +2029,8 @@ void strang2::copy_solvers_to_cache(){
   }
 
   { // Cache the Poisson solution
-    const MFAMRCellData& state = m_poisson->get_state();
-    MFAMRCellData& cache       = m_poisson_scratch->get_cache();
+    const MFAMRCellData& state = m_fieldSolver->getPotential();
+    MFAMRCellData& cache       = m_fieldSolver_scratch->get_cache();
     data_ops::copy(cache, state);
   }
 
@@ -2069,8 +2069,8 @@ void strang2::copy_cache_to_solvers(){
   }
 
   { // Uncache the Poisson solution
-    MFAMRCellData& state       = m_poisson->get_state();
-    const MFAMRCellData& cache = m_poisson_scratch->get_cache();
+    MFAMRCellData& state       = m_fieldSolver->getPotential();
+    const MFAMRCellData& cache = m_fieldSolver_scratch->get_cache();
     data_ops::copy(state, cache);
   }
 
@@ -2088,12 +2088,12 @@ void strang2::compute_E_into_scratch(){
     pout() << "strang2::compute_E_into_scratch" << endl;
   }
   
-  EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
-  EBAMRFluxData& E_face = m_poisson_scratch->get_E_face();
-  EBAMRIVData&   E_eb   = m_poisson_scratch->get_E_eb();
-  EBAMRIFData&   E_dom  = m_poisson_scratch->get_E_domain();
+  EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
+  EBAMRFluxData& E_face = m_fieldSolver_scratch->get_E_face();
+  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->get_E_eb();
+  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->get_E_domain();
 
-  const MFAMRCellData& phi = m_poisson->get_state();
+  const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
   this->compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
   this->compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
@@ -2118,7 +2118,7 @@ void strang2::compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Rea
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  this->compute_cdr_velocities(velocities, a_states, m_poisson_scratch->get_E_cell(), a_time);
+  this->compute_cdr_velocities(velocities, a_states, m_fieldSolver_scratch->get_E_cell(), a_time);
 }
 
 void strang2::compute_cdr_eb_states(){
@@ -2312,7 +2312,7 @@ void strang2::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const R
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
-  const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
+  const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
   time_stepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
@@ -2382,7 +2382,7 @@ void strang2::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, 
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 
-  const EBAMRIFData& E = m_poisson_scratch->get_E_domain();
+  const EBAMRIFData& E = m_fieldSolver_scratch->get_E_domain();
 
   // This fills the solvers' domain fluxes
   time_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
@@ -2432,7 +2432,7 @@ void strang2::compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const 
   
   Vector<EBAMRCellData*> cdr_sources = m_cdr->get_sources();
   Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
-  EBAMRCellData& E                   = m_poisson_scratch->get_E_cell();
+  EBAMRCellData& E                   = m_fieldSolver_scratch->get_E_cell();
 
   Vector<EBAMRCellData*> cdr_gradients;
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -2454,7 +2454,7 @@ void strang2::advance_rte_stationary(const Real a_time){
     Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
     Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
 
-    EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+    EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 
     const Real dummy_dt = 0.0;
     this->solve_rte(rte_states, rte_sources, cdr_states, E, a_time, dummy_dt, centering::cell_center);

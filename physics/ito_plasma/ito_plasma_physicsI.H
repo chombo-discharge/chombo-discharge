@@ -552,7 +552,7 @@ long long ito_plasma_physics::poisson_reaction(const Real a_propensity, const Re
   long long value = 0;
   const Real mean = a_propensity*a_dt;
 
-  if(mean < m_poisson_switch){
+  if(mean < m_fieldSolver_switch){
     std::poisson_distribution<long long> dist(mean);
     value = dist(m_rng);
   }

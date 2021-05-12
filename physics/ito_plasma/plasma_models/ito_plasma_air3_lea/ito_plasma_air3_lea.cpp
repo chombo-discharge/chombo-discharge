@@ -36,7 +36,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   // Algorithm stuff
   std::string str;
   pp.get("react_ppc",      m_ppc);
-  pp.get("poisson_switch", m_poisson_switch);
+  pp.get("poisson_switch", m_fieldSolver_switch);
   pp.get("Ncrit",          m_Ncrit);
   pp.get("prop_eps",       m_eps);
   pp.get("NSSA",           m_NSSA);

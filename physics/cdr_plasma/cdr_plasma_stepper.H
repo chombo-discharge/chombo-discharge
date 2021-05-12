@@ -296,7 +296,7 @@ namespace physics {
       virtual void compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
 
       /*!
-	@brief Compute the cell-centered electric field on a specific phase using whatever is available in m_poisson
+	@brief Compute the cell-centered electric field on a specific phase using whatever is available in m_fieldSolver
       */
       virtual void compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase);
 
@@ -986,7 +986,7 @@ namespace physics {
       /*!
 	@brief Poisson solver
       */
-      RefCountedPtr<FieldSolver> m_poisson;
+      RefCountedPtr<FieldSolver> m_fieldSolver;
 
       /*!
 	@brief Surface charge solver

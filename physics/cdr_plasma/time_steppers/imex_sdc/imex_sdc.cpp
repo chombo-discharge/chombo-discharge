@@ -98,7 +98,7 @@ void imex_sdc::parse_runtime_options(){
 
   m_cdr->parse_runtime_options();
   m_rte->parse_runtime_options();
-  m_poisson->parse_runtime_options();
+  m_fieldSolver->parseRuntimeOptions();
 }
 
 void imex_sdc::parse_nodes(){
@@ -563,7 +563,7 @@ Real imex_sdc::advance(const Real a_dt){
 	  imex_sdc::compute_E_into_scratch();
 	  imex_sdc::compute_cdr_gradients();
 	  imex_sdc::compute_cdr_velo(m_time);
-	  cdr_plasma_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+	  cdr_plasma_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 	}
       }
     }
@@ -580,7 +580,7 @@ Real imex_sdc::advance(const Real a_dt){
   // Always recompute velocities and diffusion coefficients before the next time step. The Poisson and RTE equations
   // have been updated when we come in here. 
   imex_sdc::compute_cdr_velo(m_time + actual_dt);
-  cdr_plasma_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  cdr_plasma_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 
 
   // Profile step
@@ -1316,8 +1316,8 @@ void imex_sdc::allocate_cdr_storage(){
 
 void imex_sdc::allocate_poisson_storage(){
   const int ncomp = 1;
-  m_poisson_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_realm, m_cdr->get_phase(), ncomp));
-  m_poisson_scratch->allocate_storage(m_p);
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_realm, m_cdr->get_phase(), ncomp));
+  m_fieldSolver_scratch->allocate_storage(m_p);
 }
 
 void imex_sdc::allocate_rte_storage(){
@@ -1359,8 +1359,8 @@ void imex_sdc::deallocate_internals(){
   m_cdr_scratch.resize(0);
   m_rte_scratch.resize(0);
 
-  m_poisson_scratch->deallocate_storage();
-  m_poisson_scratch = RefCountedPtr<poisson_storage>(0);
+  m_fieldSolver_scratch->deallocate_storage();
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage>(0);
   
   m_sigma_scratch->deallocate_storage();
   m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
@@ -1372,12 +1372,12 @@ void imex_sdc::compute_E_into_scratch(){
     pout() << "imex_sdc::compute_E_into_scratch" << endl;
   }
   
-  EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
-  EBAMRFluxData& E_face = m_poisson_scratch->get_E_face();
-  EBAMRIVData&   E_eb   = m_poisson_scratch->get_E_eb();
-  EBAMRIFData&   E_dom  = m_poisson_scratch->get_E_domain();
+  EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
+  EBAMRFluxData& E_face = m_fieldSolver_scratch->get_E_face();
+  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->get_E_eb();
+  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->get_E_domain();
 
-  const MFAMRCellData& phi = m_poisson->get_state();
+  const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
   imex_sdc::compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
   imex_sdc::compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
@@ -1427,7 +1427,7 @@ void imex_sdc::compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Re
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  imex_sdc::compute_cdr_velocities(velocities, a_states, m_poisson_scratch->get_E_cell(), a_time);
+  imex_sdc::compute_cdr_velocities(velocities, a_states, m_fieldSolver_scratch->get_E_cell(), a_time);
 }
 
 void imex_sdc::compute_cdr_eb_states(){
@@ -1621,7 +1621,7 @@ void imex_sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const 
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
-  const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
+  const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
   cdr_plasma_stepper::compute_cdr_fluxes(cdr_fluxes,
 					 extrap_cdr_fluxes,
 					 extrap_cdr_densities,
@@ -1691,7 +1691,7 @@ void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states,
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 
-  const EBAMRIFData& E = m_poisson_scratch->get_E_domain();
+  const EBAMRIFData& E = m_fieldSolver_scratch->get_E_domain();
 
   // This fills the solvers' domain fluxes
   cdr_plasma_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
@@ -1735,7 +1735,7 @@ void imex_sdc::compute_reaction_network(const int a_m, const Real a_time, const 
 
   const Vector<EBAMRCellData*> cdr_densities = get_cdr_phik(a_m);
   const Vector<EBAMRCellData*> rte_densities = m_rte->get_states();
-  const EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+  const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 
   cdr_plasma_stepper::advance_reaction_network(cdr_sources, rte_sources, cdr_densities, rte_densities, E, a_time, a_dt);
 }
@@ -1762,8 +1762,8 @@ void imex_sdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const E
   
   if(m_do_poisson){ // Solve Poisson equation
     if((m_step +1) % m_fast_poisson == 0){
-      cdr_plasma_stepper::solve_poisson(m_poisson->get_state(),
-					m_poisson->get_source(),
+      cdr_plasma_stepper::solve_poisson(m_fieldSolver->getPotential(),
+					m_fieldSolver->getRho(),
 					a_densities,
 					a_sigma,
 					centering::cell_center);
@@ -1813,7 +1813,7 @@ void imex_sdc::update_diffusion_coefficients(){
   if(m_verbosity > 5){
     pout() << "imex_sdc::update_diffusion_coefficients" << endl;
   }
-  cdr_plasma_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  cdr_plasma_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 }
 
 Vector<EBAMRCellData*> imex_sdc::get_cdr_errors(){
@@ -1914,8 +1914,8 @@ void imex_sdc::store_solvers(){
     // Poisson and RTE here.
 
     // Poisson
-    MFAMRCellData& previous    = m_poisson_scratch->get_previous();
-    const MFAMRCellData& state = m_poisson->get_state();
+    MFAMRCellData& previous    = m_fieldSolver_scratch->get_previous();
+    const MFAMRCellData& state = m_fieldSolver->getPotential();
     data_ops::copy(previous, state);
 
     // RTE
@@ -1941,8 +1941,8 @@ void imex_sdc::restore_solvers(){
   // Poisson and RTE here. 
 
   // Poisson
-  MFAMRCellData& state = m_poisson->get_state();
-  const MFAMRCellData& previous    = m_poisson_scratch->get_previous();
+  MFAMRCellData& state = m_fieldSolver->getPotential();
+  const MFAMRCellData& previous    = m_fieldSolver_scratch->get_previous();
 
   data_ops::copy(state, previous);
 

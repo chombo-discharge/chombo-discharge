@@ -68,7 +68,7 @@ void euler_maruyama::parse_runtime_options(){
 
   m_cdr->parse_runtime_options();
   m_rte->parse_runtime_options();
-  m_poisson->parse_runtime_options();
+  m_fieldSolver->parseRuntimeOptions();
 }
 
 void euler_maruyama::parse_diffusion(){
@@ -344,8 +344,8 @@ void euler_maruyama::allocate_internals(){
   }
 
   // Allocate Poisson storage
-  m_poisson_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->get_phase(), ncomp));
-  m_poisson_scratch->allocate_storage();
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->get_phase(), ncomp));
+  m_fieldSolver_scratch->allocate_storage();
   
   // Allocate sigma storage
   m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_cdr->get_phase(), ncomp));
@@ -373,8 +373,8 @@ void euler_maruyama::deallocate_internals(){
   m_cdr_scratch.resize(0);
   m_rte_scratch.resize(0);
 
-  m_poisson_scratch->deallocate_storage();
-  m_poisson_scratch = RefCountedPtr<poisson_storage>(0);
+  m_fieldSolver_scratch->deallocate_storage();
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage>(0);
   
   m_sigma_scratch->deallocate_storage();
   m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
@@ -386,11 +386,11 @@ void euler_maruyama::compute_E_into_scratch(){
     pout() << "euler_maruyama::compute_E_into_scratch" << endl;
   }
   
-  EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
-  EBAMRIVData&   E_eb   = m_poisson_scratch->get_E_eb();
-  EBAMRIFData&   E_dom  = m_poisson_scratch->get_E_domain();
+  EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
+  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->get_E_eb();
+  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->get_E_domain();
 
-  const MFAMRCellData& phi = m_poisson->get_state();
+  const MFAMRCellData& phi = m_fieldSolver->getPotential();
 
   time_stepper::compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
   time_stepper::compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
@@ -499,7 +499,7 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
-  const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
+  const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
   time_stepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
@@ -602,7 +602,7 @@ void euler_maruyama::compute_cdr_domain_fluxes(){
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 
-  const EBAMRIFData& E = m_poisson_scratch->get_E_domain();
+  const EBAMRIFData& E = m_fieldSolver_scratch->get_E_domain();
 
   // This fills the solvers' domain fluxes
   time_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
@@ -648,7 +648,7 @@ void euler_maruyama::compute_reaction_network(const Real a_dt){
   Vector<EBAMRCellData*> cdr_phi = m_cdr->get_states();
   Vector<EBAMRCellData*> rte_src = m_rte->get_sources();
   Vector<EBAMRCellData*> rte_phi = m_rte->get_states();
-  const EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+  const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 
   Vector<EBAMRCellData*> cdr_grad;
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -776,7 +776,7 @@ void euler_maruyama::compute_cdr_velo(const Real a_time){
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  time_stepper::compute_cdr_velocities(velocities, m_cdr->get_states(), m_poisson_scratch->get_E_cell(), a_time);
+  time_stepper::compute_cdr_velocities(velocities, m_cdr->get_states(), m_fieldSolver_scratch->get_E_cell(), a_time);
 }
 
 void euler_maruyama::compute_cdr_diffco(const Real a_time){
@@ -785,7 +785,7 @@ void euler_maruyama::compute_cdr_diffco(const Real a_time){
     pout() << "euler_maruaya::compute_cdr_diffco" << endl;
   }
 
-  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 }
 
 void euler_maruyama::compute_dt(Real& a_dt, time_code::which_code& a_timecode){

@@ -90,7 +90,7 @@ void ito_plasma_godunov::allocate(){
 
   m_ito->allocate_internals();
   m_rte->allocate_internals();
-  m_poisson->allocate_internals();
+  m_fieldSolver->allocateInternals();
   m_sigma->allocate_internals();
 
   // Now allocate for the conductivity particles and rho^dagger particles
@@ -270,7 +270,7 @@ void ito_plasma_godunov::parse_runtime_options() {
 
   //
   m_ito->parse_runtime_options();
-  m_poisson->parse_runtime_options();
+  m_fieldSolver->parseRuntimeOptions();
   m_rte->parse_runtime_options();
 }
 
@@ -593,7 +593,7 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   
   MPI_Barrier(Chombo_MPI::comm);
   poisson_time -= MPI_Wtime();
-  m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  m_fieldSolver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
   poisson_time += MPI_Wtime();
 
   MPI_Barrier(Chombo_MPI::comm);
@@ -1004,7 +1004,7 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
     pout() << m_name + "::setup_semi_implicit_poisson" << endl;
   }
 
-  FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_poisson));
+  FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_fieldSolver));
 
   // Set coefficients as usual
   poisson->set_coefficients();
@@ -1046,7 +1046,7 @@ void ito_plasma_godunov::setup_standard_poisson(){
     pout() << m_name + "::setup_standard_poisson" << endl;
   }
 
-  FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_poisson));
+  FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_fieldSolver));
 
   // Set coefficients as usual
   poisson->set_coefficients();

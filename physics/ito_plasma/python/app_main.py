@@ -98,7 +98,7 @@ def write_template(args):
     mainf.write("\n")
     
     mainf.write("  // Instantiate solvers\n")
-    mainf.write("  auto poi = poi_fact->new_solver();\n");
+    mainf.write("  auto poi = poi_fact->newSolver();\n");
     mainf.write("  auto cdr = ito_fact->new_layout(physics->get_ito_species());\n");
     mainf.write("  auto rte = rte_fact->new_layout(physics->get_rte_species());\n");
     mainf.write("\n")

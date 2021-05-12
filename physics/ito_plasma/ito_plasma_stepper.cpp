@@ -92,12 +92,12 @@ void ito_plasma_stepper::setup_poisson(){
     pout() << "ito_plasma_stepper::setup_poisson" << endl;
   }
 
-  m_poisson->set_verbosity(m_verbosity);
-  m_poisson->parse_options();
-  m_poisson->set_amr(m_amr);
-  m_poisson->set_computational_geometry(m_compgeom);
-  m_poisson->set_potential(m_potential); 
-  m_poisson->set_realm(m_fluid_realm);
+  m_fieldSolver->setVerbosity(m_verbosity);
+  m_fieldSolver->parseOptions();
+  m_fieldSolver->setAmr(m_amr);
+  m_fieldSolver->setComputationalGeometry(m_compgeom);
+  m_fieldSolver->setVoltage(m_potential); 
+  m_fieldSolver->setRealm(m_fluid_realm);
 }
 
 void ito_plasma_stepper::setup_rte(){
@@ -153,7 +153,7 @@ void ito_plasma_stepper::allocate() {
 
   m_ito->allocate_internals();
   m_rte->allocate_internals();
-  m_poisson->allocate_internals();
+  m_fieldSolver->allocateInternals();
   m_sigma->allocate_internals();
 }
 
@@ -245,20 +245,20 @@ void ito_plasma_stepper::post_checkpoint_poisson(){
   }
 
   // Do some post checkpointing stuff. 
-  m_poisson->post_checkpoint();
+  m_fieldSolver->post_checkpoint();
   
   // Do ghost cells and then compute E
-  MFAMRCellData& state = m_poisson->get_state();
+  MFAMRCellData& state = m_fieldSolver->getPotential();
 
   m_amr->average_down(state, m_fluid_realm);
   m_amr->interp_ghost(state, m_fluid_realm);
 
-  m_poisson->compute_E();    // Solver checkpoints the potential. Now compute the field.
+  m_fieldSolver->compute_E();    // Solver checkpoints the potential. Now compute the field.
 
   // Interpolate the fields to centroids
   EBAMRCellData E;
   m_amr->allocate_ptr(E);
-  m_amr->alias(E, m_phase, m_poisson->get_E());
+  m_amr->alias(E, m_phase, m_fieldSolver->get_E());
   
   // Fluid realm
   m_fluid_E.copy(E);
@@ -293,7 +293,7 @@ void ito_plasma_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a
     solver->write_checkpoint_level(a_handle, a_lvl);
   }
 
-  m_poisson->write_checkpoint_level(a_handle, a_lvl);
+  m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
   m_sigma->write_checkpoint_level(a_handle, a_lvl);
 }
 
@@ -313,7 +313,7 @@ void ito_plasma_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_
     solver->read_checkpoint_level(a_handle, a_lvl);
   }
 
-  m_poisson->read_checkpoint_level(a_handle, a_lvl);
+  m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
   m_sigma->read_checkpoint_level(a_handle, a_lvl);
 }
 
@@ -324,8 +324,8 @@ void ito_plasma_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::st
   }
 
   // Poisson solver copies over its output data
-  a_plotvar_names.append(m_poisson->get_plotvar_names());
-  m_poisson->write_plot_data(a_output, a_icomp);
+  a_plotvar_names.append(m_fieldSolver->getPlotVariableNames());
+  m_fieldSolver->writePlotData(a_output, a_icomp);
 
   // Surface charge solver writes
   a_plotvar_names.append(m_sigma->get_plotvar_names());
@@ -424,7 +424,7 @@ void ito_plasma_stepper::synchronize_solver_times(const int a_step, const Real a
   m_dt   = a_dt;
 
   m_ito->set_time(a_step,     a_time, a_dt);
-  m_poisson->set_time(a_step, a_time, a_dt);
+  m_fieldSolver->setTime(a_step, a_time, a_dt);
   m_rte->set_time(a_step,     a_time, a_dt);
   m_sigma->set_time(a_step,   a_time, a_dt);
 }
@@ -739,7 +739,7 @@ void ito_plasma_stepper::register_operators(){
   }
 
   m_ito->register_operators();
-  m_poisson->register_operators();
+  m_fieldSolver->registerOperators();
   m_rte->register_operators();
   m_sigma->register_operators();
 
@@ -753,7 +753,7 @@ void ito_plasma_stepper::pre_regrid(const int a_lmin, const int a_old_finest_lev
   }
 
   m_ito->pre_regrid(a_lmin,     a_old_finest_level);
-  m_poisson->pre_regrid(a_lmin, a_old_finest_level);
+  m_fieldSolver->preRegrid(a_lmin, a_old_finest_level);
   m_rte->pre_regrid(a_lmin,     a_old_finest_level);
   m_sigma->pre_regrid(a_lmin,   a_old_finest_level);
 }
@@ -778,7 +778,7 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, 
 
   // Regrid solvers
   m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
-  m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  m_fieldSolver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
   m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
   m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
 
@@ -824,7 +824,7 @@ int ito_plasma_stepper::get_num_plot_vars() const {
     ncomp += solver->get_num_plotvars();
   }
 
-  ncomp += m_poisson->get_num_plotvars();
+  ncomp += m_fieldSolver->getNumberOfPlotVariables();
   ncomp += m_sigma->get_num_plotvars();
   ncomp += SpaceDim; // For plotting the current density
   ncomp += 1;        // For plotting the number of particles per cell
@@ -847,7 +847,7 @@ void ito_plasma_stepper::set_poisson(RefCountedPtr<FieldSolver>& a_poisson){
     pout() << "ito_plasma_stepper::set_poisson" << endl;
   }
 
-  m_poisson = a_poisson;
+  m_fieldSolver = a_poisson;
 }
 
 void ito_plasma_stepper::set_rte(RefCountedPtr<rte_layout<mc_photo> >& a_rte){
@@ -877,7 +877,7 @@ Real ito_plasma_stepper::compute_Emax(const phase::which_phase a_phase) {
   // Get a handle to the E-field
   EBAMRCellData Ephase;
   m_amr->allocate_ptr(Ephase);
-  m_amr->alias(Ephase, m_phase, m_poisson->get_E());
+  m_amr->alias(Ephase, m_phase, m_fieldSolver->get_E());
 
   // Interpolate to centroids
   EBAMRCellData E;
@@ -920,7 +920,7 @@ void ito_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase 
     pout() << "ito_plasma_stepper::compute_E(ebamrcell, phase" << endl;
   }
 
-  this->compute_E(a_E, a_phase, m_poisson->get_state());
+  this->compute_E(a_E, a_phase, m_fieldSolver->getPotential());
 }
 
 void ito_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
@@ -1001,7 +1001,7 @@ void ito_plasma_stepper::compute_rho(){
     pout() << "ito_plasma_stepper::compute_rho()" << endl;
   }
   
-  this->compute_rho(m_poisson->get_source(), m_ito->get_densities());
+  this->compute_rho(m_fieldSolver->getRho(), m_ito->get_densities());
 }
 
 void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities){
@@ -1184,7 +1184,7 @@ Real ito_plasma_stepper::compute_relaxation_time(const int a_level, const DataIn
   // Get a handle to the E-field
   EBAMRCellData amrE;
   m_amr->allocate_ptr(amrE);
-  m_amr->alias(amrE, m_phase, m_poisson->get_E());
+  m_amr->alias(amrE, m_phase, m_fieldSolver->get_E());
   
   const EBCellFAB& E = (*amrE[a_level])[a_dit];
   const EBCellFAB& J = (*m_J[a_level])[a_dit];
@@ -1217,18 +1217,18 @@ bool ito_plasma_stepper::solve_poisson(){
   this->compute_rho();
 
   // Solves the Poisson equation
-  const bool converged = m_poisson->solve(m_poisson->get_state(),
-					  m_poisson->get_source(),
+  const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(),
+					  m_fieldSolver->getRho(),
 					  m_sigma->get_state(),
 					  false);
 
   // Computes cell-centered E onto storage in the field solver
-  m_poisson->compute_E();
+  m_fieldSolver->compute_E();
 
   // Code below here interpolates E to centroids on both realms
   EBAMRCellData E;
   m_amr->allocate_ptr(E);
-  m_amr->alias(E, m_phase, m_poisson->get_E());
+  m_amr->alias(E, m_phase, m_fieldSolver->get_E());
   
   // Fluid realm
   m_fluid_E.copy(E);
@@ -1256,11 +1256,11 @@ bool ito_plasma_stepper::solve_poisson(MFAMRCellData&                a_potential
 
   this->compute_rho(a_rho, a_densities);
 
-  const bool converged = m_poisson->solve(a_potential,
+  const bool converged = m_fieldSolver->solve(a_potential,
 					  a_rho,
 					  a_sigma,
 					  false);
-  m_poisson->compute_E();
+  m_fieldSolver->compute_E();
   
   return converged;
 }

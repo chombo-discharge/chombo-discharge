@@ -57,7 +57,7 @@ void cdr_plasma_stepper::register_operators(){
   }
   
   m_cdr->register_operators();
-  m_poisson->register_operators();
+  m_fieldSolver->registerOperators();
   m_rte->register_operators();
   m_sigma->register_operators();
 }
@@ -85,8 +85,8 @@ bool cdr_plasma_stepper::solve_poisson(){
   }
 
   this->compute_rho();
-  const bool converged = m_poisson->solve(m_poisson->get_state(),
-					  m_poisson->get_source(),
+  const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(),
+					  m_fieldSolver->getRho(),
 					  m_sigma->get_state(),
 					  false);
 
@@ -105,7 +105,7 @@ bool cdr_plasma_stepper::solve_poisson(MFAMRCellData&                a_potential
 
   this->compute_rho(a_rhs, a_densities, a_centering);
 
-  const bool converged = m_poisson->solve(a_potential, a_rhs, a_sigma, false);
+  const bool converged = m_fieldSolver->solve(a_potential, a_rhs, a_sigma, false);
 
   return converged;
 }
@@ -137,7 +137,7 @@ void cdr_plasma_stepper::advance_reaction_network(const Real a_time, const Real 
   // Compute the electric field
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, m_cdr->get_phase(), SpaceDim);
-  this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
+  this->compute_E(E, m_cdr->get_phase(), m_fieldSolver->getPotential());
 
 
   Vector<EBAMRCellData*> particle_sources = m_cdr->get_sources();
@@ -2441,7 +2441,7 @@ void cdr_plasma_stepper::pre_regrid(const int a_lmin, const int a_finest_level){
 
   // Solvers do pre-regridding shit. 
   m_cdr->pre_regrid(a_lmin, a_finest_level);
-  m_poisson->pre_regrid(a_lmin, a_finest_level);
+  m_fieldSolver->preRegrid(a_lmin, a_finest_level);
   m_rte->pre_regrid(a_lmin, a_finest_level);
   m_sigma->pre_regrid(a_lmin, a_finest_level);
 }
@@ -2462,7 +2462,7 @@ void cdr_plasma_stepper::compute_cdr_velocities(){
   // Compute the electric field (again)
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, m_cdr->get_phase(), SpaceDim);
-  this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
+  this->compute_E(E, m_cdr->get_phase(), m_fieldSolver->getPotential());
 
   Vector<EBAMRCellData*> states     = m_cdr->get_states();
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
@@ -2484,7 +2484,7 @@ void cdr_plasma_stepper::compute_cdr_diffusion(){
   m_amr->allocate(E_cell, m_realm, m_cdr->get_phase(), SpaceDim);
   m_amr->allocate(E_eb,   m_realm, m_cdr->get_phase(), SpaceDim);
   
-  this->compute_E(E_cell, m_cdr->get_phase(), m_poisson->get_state());
+  this->compute_E(E_cell, m_cdr->get_phase(), m_fieldSolver->getPotential());
   this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);
 
   Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
@@ -2570,7 +2570,7 @@ void cdr_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase 
     pout() << "cdr_plasma_stepper::compute_E(ebamrcell, phase)" << endl;
   }
 
-  this->compute_E(a_E, a_phase, m_poisson->get_state());
+  this->compute_E(a_E, a_phase, m_fieldSolver->getPotential());
 }
 
 void cdr_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
@@ -2655,7 +2655,7 @@ void cdr_plasma_stepper::compute_Emax(Real& a_Emax, const phase::which_phase a_p
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, a_phase, SpaceDim);
 
-  this->compute_E(E, a_phase, m_poisson->get_state());
+  this->compute_E(E, a_phase, m_fieldSolver->getPotential());
   m_amr->interpolate_to_centroids(E, m_realm, a_phase);
 
   Real max, min;
@@ -2919,7 +2919,7 @@ void cdr_plasma_stepper::compute_rho(){
     densities.push_back(&(solver->get_state()));
   }
 
-  this->compute_rho(m_poisson->get_source(), densities, centering::cell_center);
+  this->compute_rho(m_fieldSolver->getRho(), densities, centering::cell_center);
 }
 
 void cdr_plasma_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase){
@@ -3002,7 +3002,7 @@ void cdr_plasma_stepper::deallocate_solver_internals(){
 
   m_cdr->deallocate_internals();
   m_rte->deallocate_internals();
-  m_poisson->deallocate_internals();
+  m_fieldSolver->deallocateInternals();
   m_sigma->deallocate_internals();
 }
 
@@ -3170,7 +3170,7 @@ void cdr_plasma_stepper::set_poisson(RefCountedPtr<FieldSolver>& a_poisson){
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::set_poisson" << endl;
   }
-  m_poisson = a_poisson;
+  m_fieldSolver = a_poisson;
 }
 
 void cdr_plasma_stepper::set_rte(RefCountedPtr<rte_layout<rte_solver>>& a_rte){
@@ -3369,16 +3369,7 @@ void cdr_plasma_stepper::regrid(const int a_lmin, const int a_old_finest, const 
   // If we don't converge, try new Poisson solver settings
   if(!converged){ 
     if(m_verbosity > 0){
-      pout() << "driver::regrid - Poisson solver failed to converge. Trying to auto-tune new settings." << endl;
-    }
-	  
-    m_poisson->auto_tune();
-    converged = this->solve_poisson();
-
-    if(!converged){
-      if(m_verbosity > 0){
-	pout() << "cdr_plasma_stepper::post_regrid - Poisson solver fails to converge" << endl;
-      }
+      pout() << "driver::regrid - Poisson solver failed to converge." << endl;
     }
   }
 
@@ -3403,7 +3394,7 @@ void cdr_plasma_stepper::regrid_solvers(const int a_lmin, const int a_old_finest
   }
 
   m_cdr->regrid(a_lmin,     a_old_finest, a_new_finest);
-  m_poisson->regrid(a_lmin, a_old_finest, a_new_finest);
+  m_fieldSolver->regrid(a_lmin, a_old_finest, a_new_finest);
   m_rte->regrid(a_lmin,     a_old_finest, a_new_finest);
   m_sigma->regrid(a_lmin,   a_old_finest, a_new_finest);
 }
@@ -3576,8 +3567,8 @@ void cdr_plasma_stepper::set_solver_verbosity(){
   if(!m_cdr.isNull()){
     m_cdr->set_verbosity(m_solver_verbosity);
   }
-  if(!m_poisson.isNull()){
-    m_poisson->set_verbosity(m_solver_verbosity);
+  if(!m_fieldSolver.isNull()){
+    m_fieldSolver->setVerbosity(m_solver_verbosity);
   }
   if(!m_rte.isNull()){
     m_rte->set_verbosity(m_solver_verbosity);
@@ -3705,7 +3696,7 @@ void cdr_plasma_stepper::setup_cdr(){
 
 void cdr_plasma_stepper::allocate() {
   m_cdr->allocate_internals();
-  m_poisson->allocate_internals();
+  m_fieldSolver->allocateInternals();
   m_rte->allocate_internals();
   m_sigma->allocate_internals();
 }
@@ -3716,12 +3707,12 @@ void cdr_plasma_stepper::setup_poisson(){
     pout() << "cdr_plasma_stepper::setup_poisson" << endl;
   }
 
-  m_poisson->set_verbosity(m_solver_verbosity);
-  m_poisson->parse_options();
-  m_poisson->set_amr(m_amr);
-  m_poisson->set_computational_geometry(m_compgeom);
-  m_poisson->set_realm(m_realm);
-  m_poisson->set_potential(m_potential); // Needs to happen AFTER set_poisson_wall_func
+  m_fieldSolver->setVerbosity(m_solver_verbosity);
+  m_fieldSolver->parseOptions();
+  m_fieldSolver->setAmr(m_amr);
+  m_fieldSolver->setComputationalGeometry(m_compgeom);
+  m_fieldSolver->setRealm(m_realm);
+  m_fieldSolver->setVoltage(m_potential); // Needs to happen AFTER set_poisson_wall_func
 }
 
 void cdr_plasma_stepper::setup_rte(){
@@ -3761,7 +3752,7 @@ void cdr_plasma_stepper::solver_dump(){
   }
 
   m_cdr->write_plot_file();
-  m_poisson->write_plot_file();
+  m_fieldSolver->writePlotFile();
   m_rte->write_plot_file();
 }
 
@@ -3775,7 +3766,7 @@ void cdr_plasma_stepper::solve_rte(const Real a_dt){
 
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, rte_phase, SpaceDim);
-  this->compute_E(E, rte_phase, m_poisson->get_state());
+  this->compute_E(E, rte_phase, m_fieldSolver->getPotential());
 
   Vector<EBAMRCellData*> states     = m_rte->get_states();
   Vector<EBAMRCellData*> rhs        = m_rte->get_sources();
@@ -3820,7 +3811,7 @@ void cdr_plasma_stepper::synchronize_solver_times(const int a_step, const Real a
   m_dt   = a_dt;
 
   m_cdr->set_time(a_step,     a_time, a_dt);
-  m_poisson->set_time(a_step, a_time, a_dt);
+  m_fieldSolver->setTime(a_step, a_time, a_dt);
   m_rte->set_time(a_step,     a_time, a_dt);
   m_sigma->set_time(a_step,   a_time, a_dt);
 }
@@ -3987,7 +3978,7 @@ Real cdr_plasma_stepper::compute_ohmic_induction_current(){
   m_amr->allocate(E,     m_realm, m_cdr->get_phase(), SpaceDim);
   m_amr->allocate(JdotE, m_realm, m_cdr->get_phase(), SpaceDim);
 
-  this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
+  this->compute_E(E, m_cdr->get_phase(), m_fieldSolver->getPotential());
   this->compute_J(J);
 
   // Compute J.dot.E 
@@ -4021,7 +4012,7 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
 
   data_ops::set_value(dt, 1.234567E89);
 
-  this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
+  this->compute_E(E, m_cdr->get_phase(), m_fieldSolver->getPotential());
   this->compute_J(J);
 
   // Find the largest electric field in each direction
@@ -4102,7 +4093,7 @@ RefCountedPtr<cdr_layout<cdr_solver>>& cdr_plasma_stepper::get_cdr(){
 }
 
 RefCountedPtr<FieldSolver>& cdr_plasma_stepper::get_poisson(){
-  return m_poisson;
+  return m_fieldSolver;
 }
 
 RefCountedPtr<rte_layout<rte_solver>>& cdr_plasma_stepper::get_rte(){
@@ -4132,7 +4123,7 @@ void cdr_plasma_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a
     solver->write_checkpoint_level(a_handle, a_lvl);
   }
 
-  m_poisson->write_checkpoint_level(a_handle, a_lvl);
+  m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
   m_sigma->write_checkpoint_level(a_handle, a_lvl);
 }
 
@@ -4152,7 +4143,7 @@ void cdr_plasma_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_
     solver->read_checkpoint_level(a_handle, a_lvl);
   }
 
-  m_poisson->read_checkpoint_level(a_handle, a_lvl);
+  m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
   m_sigma->read_checkpoint_level(a_handle, a_lvl);
 }
 
@@ -4173,7 +4164,7 @@ int cdr_plasma_stepper::get_num_plot_vars() const{
     ncomp += solver->get_num_plotvars();
   }
 
-  ncomp += m_poisson->get_num_plotvars();
+  ncomp += m_fieldSolver->getNumberOfPlotVariables();
   ncomp += m_sigma->get_num_plotvars();
   ncomp += SpaceDim; // For plotting the current density
 
@@ -4187,8 +4178,8 @@ void cdr_plasma_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::st
   }
 
   // Poisson solver copies over its output data
-  a_plotvar_names.append(m_poisson->get_plotvar_names());
-  m_poisson->write_plot_data(a_output, a_icomp);
+  a_plotvar_names.append(m_fieldSolver->getPlotVariableNames());
+  m_fieldSolver->writePlotData(a_output, a_icomp);
 
   // Surface charge solver writes
   a_plotvar_names.append(m_sigma->get_plotvar_names());
