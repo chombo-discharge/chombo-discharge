@@ -692,6 +692,9 @@ void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, EBAMRFluxDat
 
     a_cons_div[lvl]->exchange();
   }
+
+  m_amr->averageDown(a_cons_div, m_realm, m_phase);
+  m_amr->interpGhost(a_cons_div, m_realm, m_phase);
 }
 
 void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl){
