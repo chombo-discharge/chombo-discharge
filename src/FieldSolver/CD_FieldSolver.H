@@ -465,11 +465,15 @@ protected:
 
   /*!
     @brief Returns BC type based on string.
+    @param[in] a_str Boundary condition string. Must be "dirichlet number", "neumann number", "dirichlet_custom" or "neumann_custom"
   */
   virtual ElectrostaticDomainBc::BcType parseBcString(const std::string a_str) const;
 
   /*!
-    @brief Shortcut for making a boundary condition string. This just returns m_class_name.bc.direction.side. 
+    @brief Shortcut for making a boundary condition string. 
+    @param[in] a_dir  Direction.
+    @param[in] a_side Coordinate side. 
+    @return Returns string of type m_class_name.bc.direction.side. 
   */
   virtual std::string makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
 };

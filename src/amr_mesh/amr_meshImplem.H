@@ -133,9 +133,28 @@ void amr_mesh::allocate_ptr(Vector<RefCountedPtr<T> >& a_data){
 }
 
 template <typename T>
+void amr_mesh::allocate_ptr(Vector<RefCountedPtr<T> >& a_data, const int a_finestLevel){
+  CH_TIME("amr_mesh::allocate_ptr");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate_ptr" << endl;
+  }
+
+  a_data.resize(1 + a_finestLevel);
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++){
+    a_data[lvl] = RefCountedPtr<T> (new T());
+  }
+}
+
+template <typename T>
 void amr_mesh::allocate_ptr(EBAMRData<T>& a_data){
   return this->allocate_ptr(a_data.get_data());
 }
+
+template <typename T>
+void amr_mesh::allocate_ptr(EBAMRData<T>& a_data, const int a_finestLevel){
+  return this->allocate_ptr(a_data.get_data(), a_finestLevel);
+}
+
 #include "CD_NamespaceFooter.H"
 
 #endif

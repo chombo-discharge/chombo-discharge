@@ -56,9 +56,12 @@ EBAMRCellData amr_mesh::alias(const phase::which_phase a_phase, const MFAMRCellD
   }
 
   EBAMRCellData ret;
-  allocate_ptr(ret);
 
-  alias(ret, a_phase, a_mfdata);
+  const int finestLevel = a_mfdata.size() - 1;
+
+  allocate_ptr(ret, finestLevel);
+
+  alias(ret, a_phase, a_mfdata, finestLevel);
 
   return ret;
 }
@@ -70,9 +73,12 @@ EBAMRFluxData amr_mesh::alias(const phase::which_phase a_phase, const MFAMRFluxD
   }
 
   EBAMRFluxData ret;
-  allocate_ptr(ret);
 
-  alias(ret, a_phase, a_mfdata);
+  const int finestLevel = a_mfdata.size() - 1;
+  
+  allocate_ptr(ret, finestLevel);
+
+  alias(ret, a_phase, a_mfdata, finestLevel);
 
   return ret;
 }
@@ -94,16 +100,29 @@ EBAMRIVData amr_mesh::alias(const phase::which_phase a_phase, const MFAMRIVData&
 void amr_mesh::alias(EBAMRCellData&           a_data,
 		     const phase::which_phase a_phase,
 		     const MFAMRCellData&     a_mfdata,
-		     const int                a_finest_level){
+		     const int                a_finestLevel){
   CH_TIME("amr_mesh::alias(hardcap)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::alias(hardcap)" << endl;
   }
 
-  for (int lvl = 0; lvl <= a_finest_level; lvl++){
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++){
     mfalias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
   }
+}
 
+void amr_mesh::alias(EBAMRFluxData&           a_data,
+		     const phase::which_phase a_phase,
+		     const MFAMRFluxData&     a_mfdata,
+		     const int                a_finestLevel){
+  CH_TIME("amr_mesh::alias(hardcap)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::alias(hardcap)" << endl;
+  }
+
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++){
+    mfalias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
+  }
 }
 
 void amr_mesh::alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata){

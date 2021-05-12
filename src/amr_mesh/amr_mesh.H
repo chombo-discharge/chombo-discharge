@@ -126,11 +126,23 @@ public:
   template <typename T>
   void allocate_ptr(Vector<RefCountedPtr<T> >& a_data);
 
+    /*!
+    @brief Allocate pointer but not memory
+  */
+  template <typename T>
+  void allocate_ptr(Vector<RefCountedPtr<T> >& a_data, const int a_finestLevel);
+
   /*!
     @brief Allocate pointer but not memory
   */
   template <typename T>
   void allocate_ptr(EBAMRData<T>& a_data);
+
+    /*!
+    @brief Allocate pointer but not memory
+  */
+  template <typename T>
+  void allocate_ptr(EBAMRData<T>& a_data, const int a_finestLevel);
 
   /*!
     @brief Register an operator over a realm. This if for operators that are defined for a specific phase only. 
@@ -158,7 +170,15 @@ public:
   void alias(EBAMRCellData&           a_data,
 	     const phase::which_phase a_phase,
 	     const MFAMRCellData&     a_mfdata,
-	     const int                a_finest_level);
+	     const int                a_finestLevel);
+
+    /*!
+    @brief Alias an entire hierarchy of data. 
+  */
+  void alias(EBAMRFluxData&           a_data,
+	     const phase::which_phase a_phase,
+	     const MFAMRFluxData&     a_mfdata,
+	     const int                a_finestLevel);
 
   /*!
     @brief Alias an entire hierarchy of data

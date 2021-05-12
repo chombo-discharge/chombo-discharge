@@ -30,9 +30,9 @@ Real FieldSolver::s_voltageOne(const Real a_time){
 
 FieldSolver::FieldSolver(){
   m_className = "FieldSolver";
-  this->setVerbosity(-1);
+  m_realm     = realm::primal;
 
-  m_realm = realm::primal;
+  this->setVerbosity(-1);
 }
 
 FieldSolver::~FieldSolver(){
@@ -44,8 +44,10 @@ bool FieldSolver::solve(const bool a_zerophi) {
   if(m_verbosity > 5){
     pout() << "FieldSolver::solve(bool)" << endl;
   }
+
+  const bool converged = this->solve(m_potential, m_rho, a_zerophi);
   
-  return this->solve(m_potential, m_rho, a_zerophi);
+  return converged;
 }
 
 bool FieldSolver::solve(MFAMRCellData& a_potential, const bool a_zerophi){
@@ -53,8 +55,10 @@ bool FieldSolver::solve(MFAMRCellData& a_potential, const bool a_zerophi){
   if(m_verbosity > 5){
     pout() << "FieldSolver::solve(MFAMRCellData, bool)" << endl;
   }
-  
-  return this->solve(a_potential, m_rho, a_zerophi);
+
+  const bool converged = this->solve(a_potential, m_rho, a_zerophi);
+
+  return converged;
 }
 
 void FieldSolver::computeElectricField(){
@@ -136,7 +140,8 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
     mfalias::aliasMF(E_gas,   phase::gas, E);
     E_gas.localCopyTo(D_gas);
     data_ops::scale(D_gas,   units::s_eps0);
-    
+
+    // For the solid phase, we multiply by epsilon. 
     if(m_mfis->num_phases() > 1){
       mfalias::aliasMF(D_solid, phase::solid, D);
       mfalias::aliasMF(E_solid, phase::solid, E);
@@ -157,18 +162,20 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
 	    const VolIndex& vof = vofit();
 	    const RealVect& pos = EBArith::getVofLocation(vof, origin, dx);
 
-	    Real dist = 1.E99;
-	    int closest = 0;
+	    Real dist = std::numeric_limits<Real>::infinity();
+	    int closest;
+	    
 	    for (int i = 0; i < dielectrics.size(); i++){
 	      const RefCountedPtr<BaseIF> func = dielectrics[i].get_function();
 
 	      const Real cur_dist = func->value(pos);
 	
-	      if(cur_dist <= dist){
-		dist = cur_dist;
+	      if(std::abs(cur_dist) <= std::abs(dist)){
+		dist    = cur_dist;
 		closest = i;
 	      }
 	    }
+	    
 	    const Real eps = dielectrics[closest].get_permittivity(pos);
 
 	    for (int comp = 0; comp < dg.nComp(); comp++){
@@ -235,7 +242,7 @@ Real FieldSolver::computeCapacitance(){
   data_ops::set_value(source, 0.0);
   data_ops::set_value(sigma,  0.0);
 
-  solve(phi, source, sigma);
+  this->solve(phi, source, sigma);
 
   // Solve and compute energy density
   MFAMRCellData E;
@@ -289,14 +296,19 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
     const RefCountedPtr<EBIndexSpace>& ebis = m_mfis->get_ebis(cur_phase);
 
     if(!ebis.isNull()){
-    
-      EBAMRCellData scratch_phase;
+#if 0
       EBAMRCellData potential_phase;
+      EBAMRCellData scratch_phase;
 
-      m_amr->allocate_ptr(scratch_phase);
       m_amr->allocate_ptr(potential_phase);
-      m_amr->alias(potential_phase,   cur_phase, m_potential);
-      m_amr->alias(scratch_phase, cur_phase, m_cache, Min(a_old_finest, a_new_finest));
+      m_amr->allocate_ptr(scratch_phase);
+      
+      m_amr->alias(potential_phase, cur_phase, m_potential);
+      m_amr->alias(scratch_phase,   cur_phase, m_cache, Min(a_old_finest, a_new_finest));
+#else
+      EBAMRCellData potential_phase = m_amr->alias(cur_phase, m_potential);
+      EBAMRCellData scratch_phase   = m_amr->alias(cur_phase, m_cache);
+#endif
 
       Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_realm, cur_phase);
 
@@ -855,10 +867,10 @@ int FieldSolver::getNumberOfPlotVariables() const {
 
   int num_output = 0;
 
-  if(m_plotPotential) num_output = num_output + 1;
-  if(m_plotRho) num_output = num_output + 1;
-  if(m_plotResidue) num_output = num_output + 1;
-  if(m_plotElectricField)   num_output = num_output + SpaceDim;
+  if(m_plotPotential)     num_output = num_output + 1;
+  if(m_plotRho)           num_output = num_output + 1;
+  if(m_plotResidue)       num_output = num_output + 1;
+  if(m_plotElectricField) num_output = num_output + SpaceDim;
 
   return num_output;
 }
