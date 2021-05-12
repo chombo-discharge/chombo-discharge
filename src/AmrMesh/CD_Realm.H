@@ -7,7 +7,6 @@
   @file   CD_Realm.H
   @brief  Declaration of the Realm class. 
   @author Robert Marskar
-  @date   July 2020
 */
 
 #ifndef CD_Realm_H
@@ -84,7 +83,7 @@ public:
   const Vector<ProblemDomain>& getDomains() const;
   Vector<RefCountedPtr<MFLevelGrid> >& getMFLevelGrid();
   
-  const RefCountedPtr<EBIndexSpace>& get_ebis(const phase::which_phase a_phase);
+  const RefCountedPtr<EBIndexSpace>& getEBIndexSpace(const phase::which_phase a_phase);
   Vector<EBISLayout>& getEBISLayout(const phase::which_phase a_phase);
   Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid(const phase::which_phase a_phase);
   Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors(const phase::which_phase a_phase);
@@ -92,7 +91,7 @@ public:
   IrregAmrStencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils(const phase::which_phase a_phase);
   IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase);
   IrregAmrStencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& getGradientStencils(const phase::which_phase a_phase);
 
   // Get functions for stuff that are specific to phase, but is not necessarily const
   Vector<RefCountedPtr<ebcoarseaverage> >& getCoarseAverage(const phase::which_phase a_phase);

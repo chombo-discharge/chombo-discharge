@@ -119,7 +119,7 @@ void rte_solver::set_computational_geometry(const RefCountedPtr<computational_ge
 
   const RefCountedPtr<mfis> mfis = m_compgeom->get_mfis();
   
-  this->set_ebis(mfis->get_ebis(m_phase));
+  this->set_ebis(mfis->getEBIndexSpace(m_phase));
 }
 
 void rte_solver::set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis){

@@ -88,7 +88,7 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
     pout() << "sigma_solver::regrid" << endl;
   }
 
-  const RefCountedPtr<EBIndexSpace> ebis = m_multifluidIndexSpace->get_ebis(m_phase);
+  const RefCountedPtr<EBIndexSpace> ebis = m_multifluidIndexSpace->getEBIndexSpace(m_phase);
 
   const int ebghost = 4; // m_amr->getNumberOfEbGhostCells();
   const int comp  = 0;

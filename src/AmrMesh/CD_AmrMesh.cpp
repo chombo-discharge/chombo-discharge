@@ -350,8 +350,8 @@ void AmrMesh::allocate(MFAMRCellData& a_data, const std::string a_Realm, const i
 
   a_data.resize(1 + m_finestLevel);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_Realms[a_Realm]->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_Realms[a_Realm]->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_Realms[a_Realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_Realms[a_Realm]->getEBIndexSpace(phase::solid);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_Realms[a_Realm]->getGrids()[lvl];
@@ -390,8 +390,8 @@ void AmrMesh::allocate(MFAMRFluxData& a_data, const std::string a_Realm, const i
 
   a_data.resize(1 + m_finestLevel);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_Realms[a_Realm]->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_Realms[a_Realm]->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_Realms[a_Realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_Realms[a_Realm]->getEBIndexSpace(phase::solid);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_Realms[a_Realm]->getGrids()[lvl];
@@ -428,8 +428,8 @@ void AmrMesh::allocate(MFAMRIVData& a_data, const std::string a_Realm, const int
 
   a_data.resize(1 + m_finestLevel);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_Realms[a_Realm]->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_Realms[a_Realm]->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_Realms[a_Realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_Realms[a_Realm]->getEBIndexSpace(phase::solid);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_Realms[a_Realm]->getGrids()[lvl];
@@ -639,8 +639,8 @@ void AmrMesh::reallocate(MFAMRCellData& a_data, const int a_lmin){
 
   const int lmin = Max(0, a_lmin+1);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_Realms[a_Realm]->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_Realms[a_Realm]->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_Realms[a_Realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_Realms[a_Realm]->getEBIndexSpace(phase::solid);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
     Vector<EBISLayout> ebisl(nphases);
@@ -679,8 +679,8 @@ void AmrMesh::reallocate(MFAMRFluxData& a_data, const int a_lmin){
 
   a_data.resize(1 + m_finestLevel);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_Realms[a_Realm]->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_Realms[a_Realm]->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_Realms[a_Realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_Realms[a_Realm]->getEBIndexSpace(phase::solid);
 
   const int lmin = Max(0, a_lmin+1);
 
@@ -720,8 +720,8 @@ void AmrMesh::reallocate(MFAMRIVData& a_data, const int a_lmin){
 
   a_data.resize(1 + m_finestLevel);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_Realms[a_Realm]->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_Realms[a_Realm]->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_Realms[a_Realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_Realms[a_Realm]->getEBIndexSpace(phase::solid);
 
   const int lmin = Max(0, a_lmin+1);
 
@@ -1035,7 +1035,7 @@ void AmrMesh::computeGradient(LevelData<EBCellFAB>&       a_gradient,
 		  CHF_CONST_REAL(dx),
 		  CHF_BOX(region));
 
-    BaseIVFAB<VoFStencil>& grad_stencils = (*m_Realms[a_Realm]->get_gradsten(a_phase)[a_lvl])[dit()];
+    BaseIVFAB<VoFStencil>& grad_stencils = (*m_Realms[a_Realm]->getGradientStencils(a_phase)[a_lvl])[dit()];
 
     for (VoFIterator vofit(grad_stencils.getIVS(), ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof    = vofit();
@@ -1159,8 +1159,8 @@ void AmrMesh::averageDown(MFAMRFluxData& a_data, const std::string a_Realm){
     MayDay::Abort(str.c_str());
   }
 
-  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_Realms[a_Realm]->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_Realms[a_Realm]->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_Realms[a_Realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_Realms[a_Realm]->getEBIndexSpace(phase::solid);
 
   // Alias the data to regular EBFluxFABs
   EBAMRFluxData alias_g(1 + m_finestLevel);
@@ -1189,8 +1189,8 @@ void AmrMesh::averageDown(MFAMRCellData& a_data, const std::string a_Realm){
     MayDay::Abort(str.c_str());
   }
 
-  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_Realms[a_Realm]->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_Realms[a_Realm]->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_Realms[a_Realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_Realms[a_Realm]->getEBIndexSpace(phase::solid);
   
   EBAMRCellData alias_g(1 + m_finestLevel);
   EBAMRCellData alias_s(1 + m_finestLevel);
@@ -1352,8 +1352,8 @@ void AmrMesh::interpGhost(MFAMRCellData& a_data, const std::string a_Realm){
   EBAMRCellData alias_g(1 + m_finestLevel);
   EBAMRCellData alias_s(1 + m_finestLevel);
 
-  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_Realms[a_Realm]->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_Realms[a_Realm]->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_Realms[a_Realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_Realms[a_Realm]->getEBIndexSpace(phase::solid);
   
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     alias_g[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
@@ -1824,8 +1824,8 @@ Vector<IntVectSet> AmrMesh::getIrregularTags() const {
 
   Vector<IntVectSet> tags(m_maxAmrDepth);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   CH_assert(ebis_gas != NULL);
 

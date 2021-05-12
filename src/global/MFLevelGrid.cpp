@@ -22,7 +22,7 @@ MFLevelGrid::MFLevelGrid(const DisjointBoxLayout&          a_dbl,
   m_multifluidIndexSpace = a_mfis;
   m_eblg.resize(0);
   for (int i = 0; i < a_mfis->num_phases(); i++){
-    m_eblg.push_back(EBLevelGrid(a_dbl, a_domain, a_ebghost, a_mfis->get_ebis(i)));
+    m_eblg.push_back(EBLevelGrid(a_dbl, a_domain, a_ebghost, a_mfis->getEBIndexSpace(i)));
   }
 }
 

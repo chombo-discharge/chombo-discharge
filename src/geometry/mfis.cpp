@@ -56,19 +56,19 @@ void mfis::define(const Box                     & a_domain,
   }
 }
   
-const RefCountedPtr<EBIndexSpace>& mfis::get_ebis(const phase::which_phase a_phase) const {
+const RefCountedPtr<EBIndexSpace>& mfis::getEBIndexSpace(const phase::which_phase a_phase) const {
   return m_ebis[a_phase];
 }
 
-const RefCountedPtr<EBIndexSpace>& mfis::get_ebis(const int a_phase) const {
+const RefCountedPtr<EBIndexSpace>& mfis::getEBIndexSpace(const int a_phase) const {
   return m_ebis[a_phase];
 }
 
-RefCountedPtr<EBIndexSpace>& mfis::get_ebis(const phase::which_phase a_phase){
+RefCountedPtr<EBIndexSpace>& mfis::getEBIndexSpace(const phase::which_phase a_phase){
   return m_ebis[a_phase];
 }
 
-RefCountedPtr<EBIndexSpace>& mfis::get_ebis(const int a_phase){
+RefCountedPtr<EBIndexSpace>& mfis::getEBIndexSpace(const int a_phase){
   return m_ebis[a_phase];
 }
 

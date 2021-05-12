@@ -298,7 +298,7 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
       cur_phase = phase::solid;
     }
 
-    const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->get_ebis(cur_phase);
+    const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->getEBIndexSpace(cur_phase);
 
     if(!ebis.isNull()){
       EBAMRCellData potential_phase = m_amr->alias(cur_phase, m_potential);
@@ -649,8 +649,8 @@ void FieldSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) 
     pout() << "FieldSolver::writeCheckpointLevel" << endl;
   }
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   // Used for aliasing phases
   LevelData<EBCellFAB> potential_gas;
@@ -670,8 +670,8 @@ void FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
     pout() << "FieldSolver::readCheckpointLevel" << endl;
   }
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   // Used for aliasing phases
   LevelData<EBCellFAB> potential_gas;
@@ -723,8 +723,8 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
 
   const int ncomp = a_data[0]->nComp();
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   // Allocate some scratch data that we can use
   EBAMRCellData scratch;

@@ -103,8 +103,8 @@ void computational_geometry::build_geometries(const ProblemDomain   a_finestDoma
 void computational_geometry::build_geo_from_files(const std::string&   a_gas_file,
 						  const std::string&   a_sol_file){
 
-  RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->get_ebis(phase::gas);
-  RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->get_ebis(phase::solid);
+  RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   // Define gas phase
   HDF5Handle gas_handle(a_gas_file.c_str(), HDF5Handle::OPEN_RDONLY);

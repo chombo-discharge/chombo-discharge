@@ -1,13 +1,17 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   Realm.cpp
-  @brief  Implementation of Realm.H
+  @file   CD_Realm.cpp
+  @brief  Implementation of CD_Realm.H
   @author Robert Marskar
-  @date   July 2020
 */
 
-#include "CD_Realm.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_Realm.H>
+#include <CD_NamespaceHeader.H>
 
 const std::string Realm::Primal = "primal";
 
@@ -65,8 +69,8 @@ void Realm::define(const Vector<DisjointBoxLayout>& a_grids,
   m_multifluidIndexSpace = a_mfis;
   m_finestLevel = a_finest_level;
   
-  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   m_Realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finest_level, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
 			       a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::gas), ebis_gas);
@@ -133,8 +137,8 @@ void Realm::define_mflevelgrid(const int a_lmin){
   PhaseRealm& gas = this->get_Realm(phase::gas);
   PhaseRealm& sol = this->get_Realm(phase::solid);
 
-  const RefCountedPtr<EBIndexSpace>& ebis_gas = gas.get_ebis();
-  const RefCountedPtr<EBIndexSpace>& ebis_sol = sol.get_ebis();
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = gas.getEBIndexSpace();
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = sol.getEBIndexSpace();
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     Vector<EBLevelGrid> eblgs;
@@ -384,9 +388,9 @@ Vector<RefCountedPtr<MFLevelGrid> >& Realm::getMFLevelGrid(){
   return m_mflg;
 }
 
-const RefCountedPtr<EBIndexSpace>& Realm::get_ebis(const phase::which_phase a_phase) {
+const RefCountedPtr<EBIndexSpace>& Realm::getEBIndexSpace(const phase::which_phase a_phase) {
 
-  return m_Realms[a_phase]->get_ebis();
+  return m_Realms[a_phase]->getEBIndexSpace();
 }
 
 Vector<EBISLayout>& Realm::getEBISLayout(const phase::which_phase a_phase) {
@@ -417,8 +421,8 @@ IrregAmrStencil<NonConservativeDivergenceStencil>& Realm::getNonConservativeDive
   return m_Realms[a_phase]->getNonConservativeDivergenceStencils();
 }
 
-Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& Realm::get_gradsten(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->get_gradsten();
+Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& Realm::getGradientStencils(const phase::which_phase a_phase){
+  return m_Realms[a_phase]->getGradientStencils();
 }
 
 Vector<RefCountedPtr<ebcoarseaverage> >& Realm::getCoarseAverage(const phase::which_phase a_phase){
@@ -490,4 +494,5 @@ AMRMask& Realm::getMask(const std::string a_mask, const int a_buffer){
 
   return m_masks.at(std::pair<std::string, int>(a_mask, a_buffer));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

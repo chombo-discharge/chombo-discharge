@@ -96,7 +96,7 @@ public:
   bool queryOperator(const std::string a_operator);
 
   // Get functions
-  const RefCountedPtr<EBIndexSpace>& get_ebis();
+  const RefCountedPtr<EBIndexSpace>& getEBIndexSpace();
   Vector<int>& getRefinementRatios();
   Vector<Real>& getDx();
   Vector<DisjointBoxLayout>& getGrids();
@@ -109,7 +109,7 @@ public:
   IrregAmrStencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils();
   IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils();
   IrregAmrStencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils();
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten();
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& getGradientStencils();
 
   Vector<RefCountedPtr<ebcoarseaverage> >& getCoarseAverage();
   Vector<RefCountedPtr<EBGhostCloud> >& getGhostCloud();

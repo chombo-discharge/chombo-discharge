@@ -795,7 +795,7 @@ void PhaseRealm::define_noncons_sten(){
   }
 }
 
-const RefCountedPtr<EBIndexSpace>& PhaseRealm::get_ebis() {
+const RefCountedPtr<EBIndexSpace>& PhaseRealm::getEBIndexSpace() {
   return m_ebis;
 }
 
@@ -842,8 +842,8 @@ IrregAmrStencil<EbCentroidInterpolationStencil>& PhaseRealm::getEbCentroidInterp
   return *m_EbCentroidInterpolationStencil;
 }
 
-Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& PhaseRealm::get_gradsten(){
-  if(!this->queryOperator(s_eb_gradient)) MayDay::Abort("PhaseRealm::get_gradsten - operator not registered!");
+Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& PhaseRealm::getGradientStencils(){
+  if(!this->queryOperator(s_eb_gradient)) MayDay::Abort("PhaseRealm::getGradientStencils - operator not registered!");
   return m_gradsten;
 }
 
