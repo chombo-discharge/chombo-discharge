@@ -97,10 +97,10 @@ void rte_solver::set_phase(const phase::which_phase a_phase){
   m_phase = a_phase;
 }
 
-void rte_solver::sanity_check(){
-  CH_TIME("rte_solver::sanity_check");
+void rte_solver::sanityCheck(){
+  CH_TIME("rte_solver::sanityCheck");
   if(m_verbosity > 5){
-    pout() << m_name + "::sanity_check" << endl;
+    pout() << m_name + "::sanityCheck" << endl;
   }
 
   CH_assert(!m_compgeom.isNull());
@@ -131,7 +131,7 @@ void rte_solver::set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis){
   m_ebis = a_ebis;
 }
 
-void rte_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+void rte_solver::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
   CH_TIME("rte_solver::set_amr");
   if(m_verbosity > 5){
     pout() << m_name + "::set_amr" << endl;
@@ -177,14 +177,14 @@ void rte_solver::set_source(const EBAMRCellData& a_source){
     pout() << m_name + "::set_source(ebamrcell)" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     a_source[lvl]->localCopyTo(*m_source[lvl]);
   }
 
-  m_amr->average_down(m_source, m_realm, m_phase);
-  m_amr->interp_ghost(m_source, m_realm, m_phase);
+  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
 void rte_solver::set_source(const Real a_source){
@@ -193,7 +193,7 @@ void rte_solver::set_source(const Real a_source){
     pout() << m_name + "::set_source(constant)" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     for (int comp = 0; comp < m_source[lvl]->nComp(); comp++){
@@ -201,8 +201,8 @@ void rte_solver::set_source(const Real a_source){
     }
   }
 
-  m_amr->average_down(m_source, m_realm, m_phase);
-  m_amr->interp_ghost(m_source, m_realm, m_phase);
+  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
 void rte_solver::set_plot_variables(){
@@ -277,13 +277,13 @@ void rte_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
 
   // Interp if we should
   if(a_interp){
-    m_amr->interpolate_to_centroids(scratch, m_realm, phase::gas);
+    m_amr->InterpToCentroids(scratch, m_realm, phase::gas);
   }
 
-  m_amr->average_down(scratch, m_realm, m_phase);
-  m_amr->interp_ghost(scratch, m_realm, m_phase);
+  m_amr->averageDown(scratch, m_realm, m_phase);
+  m_amr->interpGhost(scratch, m_realm, m_phase);
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     if(a_output.get_realm() == m_realm){
       scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
     }

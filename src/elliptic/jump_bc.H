@@ -154,7 +154,7 @@ public:
 
 protected:
 
-  RefCountedPtr<mfis> m_mfis;
+  RefCountedPtr<mfis> m_multifluidIndexSpace;
 
   /*!
     @brief Level grid

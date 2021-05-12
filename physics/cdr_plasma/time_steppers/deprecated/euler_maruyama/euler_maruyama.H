@@ -8,7 +8,7 @@
 #ifndef _EULER_MARUYAMA_
 #define _EULER_MARUYAMA_
 
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 #include "time_stepper.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"

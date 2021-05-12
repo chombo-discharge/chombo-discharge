@@ -23,7 +23,7 @@ morrow_tagger::~morrow_tagger(){
 }
 
 void morrow_tagger::parse_options(){
-  parse_verbosity();
+  parseVerbosity();
   parse_boxes();
   parse_buffer();
 

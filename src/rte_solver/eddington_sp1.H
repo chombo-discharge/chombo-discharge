@@ -106,7 +106,7 @@ public:
   /*!
     @brief Register operators
   */
-  virtual void register_operators();
+  virtual void registerOperators();
 
   /*!
     @brief Set reflection coefficients. These must be obtained by integrals over the reflectivity.
@@ -404,7 +404,7 @@ protected:
   virtual void setup_euler();
 
   // Parse options functions
-  virtual void parse_domain_bc();    // Parses domain BC options
+  virtual void parseDomain_bc();    // Parses domain BC options
   virtual void parse_stationary();   // Parse stationary solver
   virtual void parse_plot_vars();    // Parses plot variables
   virtual void parse_gmg_settings(); // Parses solver parameters for geometric multigrid

@@ -12,7 +12,7 @@ sisdc::cdr_storage::cdr_storage(){
 
 }
 
-sisdc::cdr_storage::cdr_storage(const RefCountedPtr<amr_mesh>& a_amr,
+sisdc::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
 				const phase::which_phase       a_phase,
 				const int                      a_ncomp){
   m_amr       = a_amr;
@@ -97,7 +97,7 @@ sisdc::poisson_storage::poisson_storage(){
 
 }
 
-sisdc::poisson_storage::poisson_storage(const RefCountedPtr<amr_mesh>& a_amr,
+sisdc::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
 					const phase::which_phase       a_phase,
 					const int                      a_ncomp){
   m_amr    = a_amr;
@@ -131,7 +131,7 @@ sisdc::rte_storage::rte_storage(){
 
 }
 
-sisdc::rte_storage::rte_storage(const RefCountedPtr<amr_mesh>& a_amr,
+sisdc::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
 				const phase::which_phase       a_phase,
 				const int                      a_ncomp){
   m_amr    = a_amr;
@@ -163,7 +163,7 @@ sisdc::sigma_storage::sigma_storage(){
 
 }
 
-sisdc::sigma_storage::sigma_storage(const RefCountedPtr<amr_mesh>& a_amr,
+sisdc::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
 				    const phase::which_phase       a_phase,
 				    const int                      a_ncomp){
   m_amr    = a_amr;

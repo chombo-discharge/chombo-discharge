@@ -14,7 +14,7 @@
 
 // Our includes
 #include <computational_geometry.H>
-#include <amr_mesh.H>
+#include <CD_AmrMesh.H>
 #include <CD_ElectrostaticDomainBc.H>
 #include <CD_ElectrostaticEbBc.H>
 
@@ -153,9 +153,9 @@ public:
   
   /*!
     @brief Set the amr object. 
-    @param[in] a_amr amr_mesh object. 
+    @param[in] a_amr AmrMesh object. 
   */
-  virtual void setAmr(const RefCountedPtr<amr_mesh>& a_amr);
+  virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Write plot file
@@ -321,7 +321,7 @@ protected:
   /*!
     @brief MFindex space
   */
-  RefCountedPtr<mfis> m_mfis;
+  RefCountedPtr<mfis> m_multifluidIndexSpace;
 
   /*!
     @brief Computational geometry. Needed for passing in BCs on EBs. 
@@ -331,7 +331,7 @@ protected:
   /*!
     @brief AMR; needed for grid stuff
   */
-  RefCountedPtr<amr_mesh> m_amr;
+  RefCountedPtr<AmrMesh> m_amr;
 
   /*!
     @brief Cached state used for regridding. 

@@ -8,7 +8,7 @@
 #ifndef _ITO_SOLVER_
 #define _ITO_SOLVER_
 
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 #include "computational_geometry.H"
 #include "ito_species.H"
 #include "ito_particle.H"
@@ -357,7 +357,7 @@ public:
   /*!
     @brief Register operators
   */
-  virtual void register_operators();
+  virtual void registerOperators();
 
   /*!
     @brief Set computational geometry
@@ -367,7 +367,7 @@ public:
   /*!
     @brief Set the amr object
   */
-  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+  virtual void set_amr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Set phase
@@ -757,7 +757,7 @@ protected:
   /*!
     @brief AMR; needed for grid stuff
   */
-  RefCountedPtr<amr_mesh> m_amr;
+  RefCountedPtr<AmrMesh> m_amr;
 
   /*!
     @brief Species

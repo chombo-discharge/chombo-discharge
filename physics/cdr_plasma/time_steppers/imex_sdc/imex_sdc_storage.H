@@ -9,7 +9,7 @@
 #define _IMEX_SDC_STORAGE_
 
 #include "imex_sdc.H"
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 
 #include <RefCountedPtr.H>
 
@@ -21,7 +21,7 @@ namespace physics {
     public:
 
       cdr_storage();
-      cdr_storage(const RefCountedPtr<amr_mesh>& a_amr,
+      cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
 		  const std::string              a_realm,
 		  const phase::which_phase       a_phase,
 		  const int m_ncomp);
@@ -59,7 +59,7 @@ namespace physics {
     protected:
 
       std::string m_realm;
-      RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
+      RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components
       int m_p;                       // IMEX_SDC order
@@ -95,7 +95,7 @@ namespace physics {
     public:
 
       poisson_storage();
-      poisson_storage(const RefCountedPtr<amr_mesh>& a_amr,
+      poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
 		      const std::string              a_realm,
 		      const phase::which_phase       a_phase,
 		      const int                      a_ncomp);
@@ -113,7 +113,7 @@ namespace physics {
     protected:
 
       std::string m_realm;
-      RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
+      RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components
       int m_p;                   // IMEX_SDC order
@@ -129,7 +129,7 @@ namespace physics {
     public:
 
       rte_storage();
-      rte_storage(const RefCountedPtr<amr_mesh>& a_amr,
+      rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
 		  const std::string              a_realm,
 		  const phase::which_phase       a_phase,
 		  const int                      a_ncomp);
@@ -145,7 +145,7 @@ namespace physics {
     protected:
 
       std::string m_realm;
-      RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
+      RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components
       int m_p;                   // IMEX_SDC order
@@ -159,7 +159,7 @@ namespace physics {
     public:
 
       sigma_storage();
-      sigma_storage(const RefCountedPtr<amr_mesh>& a_amr,
+      sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
 		    const std::string              a_realm,
 		    const phase::which_phase       a_phase,
 		    const int                      a_ncomp);
@@ -178,7 +178,7 @@ namespace physics {
     protected:
     
       std::string m_realm;
-      RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
+      RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components
       int m_p;                   // IMEX_SDC order

@@ -19,7 +19,7 @@ all: all-test
 
 base_dir = .
 src_dirs = $(DISCHARGE_HOME)/src \
-	$(DISCHARGE_HOME)/src/amr_mesh \
+	$(DISCHARGE_HOME)/src/AmrMesh \
 	$(DISCHARGE_HOME)/src/cdr_solver \
 	$(DISCHARGE_HOME)/src/cell_tagger \
 	$(DISCHARGE_HOME)/src/elliptic \

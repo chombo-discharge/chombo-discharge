@@ -123,8 +123,8 @@ void cdr_solver::allocate_internals(){
     data_ops::set_value(m_velo_cell,  0.0);
   }
   else{
-    m_amr->allocate_ptr(m_velo_face);
-    m_amr->allocate_ptr(m_velo_cell);
+    m_amr->allocatePointer(m_velo_face);
+    m_amr->allocatePointer(m_velo_cell);
   }
 
   // Only allocate memory for diffusion coefficients if we need it. Otherwise, allocate a NULL pointer that we can
@@ -139,9 +139,9 @@ void cdr_solver::allocate_internals(){
     data_ops::set_value(m_diffco_eb,  0.0);
   }
   else{
-    m_amr->allocate_ptr(m_aco);
-    m_amr->allocate_ptr(m_diffco);
-    m_amr->allocate_ptr(m_diffco_eb);
+    m_amr->allocatePointer(m_aco);
+    m_amr->allocatePointer(m_diffco);
+    m_amr->allocatePointer(m_diffco_eb);
   }
 
   // Allocate stuff for holding fluxes
@@ -200,9 +200,9 @@ void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCe
     pout() << m_name + "::average_velo_to_faces" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::average_cell_to_face(*a_velo_face[lvl], *a_velo_cell[lvl], m_amr->get_domains()[lvl]);
+    data_ops::average_cell_to_face(*a_velo_face[lvl], *a_velo_cell[lvl], m_amr->getDomains()[lvl]);
     a_velo_face[lvl]->exchange();
   }
 }
@@ -214,7 +214,7 @@ void cdr_solver::pre_regrid(const int a_lmin, const int a_old_finest_level){
   }
 
   const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   
   m_amr->allocate(m_cache_state,  m_realm, m_phase, ncomp);
   m_amr->allocate(m_cache_source, m_realm, m_phase, ncomp);
@@ -233,15 +233,15 @@ void cdr_solver::coarse_fine_increment(const EBAMRIVData& a_mass_diff){
 
   const int comp  = 0;
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   const Interval interv(0,0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
 
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < 0;
@@ -276,17 +276,17 @@ void cdr_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
 
   const int comp         = 0;
   const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   const Interval interv(comp, comp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx       = m_amr->get_dx()[lvl];
+    const Real dx       = m_amr->getDx()[lvl];
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
 
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
     
     if(has_coar){
       fine2coar_redist->redistribute(*a_state[lvl-1], interv);
@@ -317,7 +317,7 @@ void cdr_solver::compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const E
   this->increment_flux_register(a_G);                      // Increment flux register
   this->increment_redist(m_mass_diff);                     // Increment level redistribution register
 
-  const bool ebcf = m_amr->get_ebcf();
+  const bool ebcf = m_amr->getEbCf();
   if(ebcf){ // If we have EBCF, much more work with the CF interface
     this->coarse_fine_increment(m_mass_diff);             // Compute C2F, F2C, and C2C mass transfers
     this->increment_redist_flux();                        // Tell flux register about whats going on
@@ -348,7 +348,7 @@ void cdr_solver::inject_ebflux(EBAMRCellData& a_phi, const EBAMRIVData& a_ebG, c
   this->hybrid_divergence(m_scratch, m_mass_diff, m_divG_nc); // Hybrid divergence
   this->increment_redist(m_mass_diff);                        // Increment redistribution register
 
-  const bool ebcf = m_amr->get_ebcf();
+  const bool ebcf = m_amr->getEbCf();
   if(ebcf){ // Much more work with the EBCF interface. *Sigh*
     this->coarse_fine_increment(m_mass_diff);                // Compute C2F, F2C, and C2C mass transfers
     this->increment_redist_flux();                           // Tell flux register about whats going on
@@ -374,10 +374,10 @@ void cdr_solver::conservative_divergence_eb(EBAMRCellData& a_consdiv, const EBAM
 
   const int comp = 0;
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       EBCellFAB& divG            = (*a_consdiv[lvl])[dit()];
@@ -385,7 +385,7 @@ void cdr_solver::conservative_divergence_eb(EBAMRCellData& a_consdiv, const EBAM
       const BaseIVFAB<Real>& flx = (*a_ebflux[lvl])[dit()];
 
       divG.setVal(0.0);
-      VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
       for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real area     = ebisbox.bndryArea(vof);
@@ -407,10 +407,10 @@ void cdr_solver::compute_divG_irreg(LevelData<EBCellFAB>&              a_divG,
   const int comp  = 0;
   const int ncomp = 1;
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_lvl];
-  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[a_lvl];
-  const Real dx                = m_amr->get_dx()[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
+  const Real dx                = m_amr->getDx()[a_lvl];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box          = dbl.get(dit());
@@ -419,7 +419,7 @@ void cdr_solver::compute_divG_irreg(LevelData<EBCellFAB>&              a_divG,
     EBCellFAB& divG               = a_divG[dit()];
     const BaseIVFAB<Real>& ebflux = a_ebflux[dit()];
 
-    VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[a_lvl])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const Real area     = ebisbox.bndryArea(vof);
@@ -461,16 +461,16 @@ void cdr_solver::compute_flux(EBAMRFluxData&       a_flux,
 
   const int comp  = 0;
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
 
 #if 1 // New code
     compute_flux(*a_flux[lvl], *a_face_state[lvl], *a_face_vel[lvl], *a_domain_flux[lvl], lvl);
 #else // Old code (that we know works)
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
@@ -538,9 +538,9 @@ void cdr_solver::compute_flux(LevelData<EBFluxFAB>&              a_flux,
   const int comp  = 0;
   const int ncomp = 1;
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_lvl];
-  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box          = dbl.get(dit());
@@ -602,7 +602,7 @@ void cdr_solver::compute_diffusion_flux(EBAMRFluxData& a_flux, const EBAMRCellDa
     pout() << m_name + "::compute_diffusion_flux" << endl;
   }
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     this->compute_diffusion_flux(*a_flux[lvl], *a_state[lvl], lvl);
   }
 }
@@ -618,8 +618,8 @@ void cdr_solver::compute_diffusion_flux(LevelData<EBFluxFAB>& a_flux, const Leve
   const int comp  = 0;
   const int ncomp = 1;
 
-  const Real dx                = m_amr->get_dx()[a_lvl];
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_lvl];
+  const Real dx                = m_amr->getDx()[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& cellbox = dbl.get(dit());
@@ -676,14 +676,14 @@ void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, EBAMRFluxDat
 
   const int comp  = 0;
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     a_flux[lvl]->exchange();
     
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     this->consdiv_regular(*a_cons_div[lvl], *a_flux[lvl], lvl);
     this->setup_flux_interpolant(*a_flux[lvl], lvl);                 // Copy face-centered fluxes in a_flux to m_interpolant
@@ -706,9 +706,9 @@ void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<E
   const int comp  = 0;
   const int ncomp = 1;
 
-  const DisjointBoxLayout dbl = m_amr->get_grids(m_realm)[a_lvl];
-  const ProblemDomain domain  = m_amr->get_domains()[a_lvl];
-  const Real dx               = m_amr->get_dx()[a_lvl];
+  const DisjointBoxLayout dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const ProblemDomain domain  = m_amr->getDomains()[a_lvl];
+  const Real dx               = m_amr->getDx()[a_lvl];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     EBCellFAB& divJ         = a_divJ[dit()];
@@ -727,7 +727,7 @@ void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<E
 		       CHF_BOX(box));
     }
 
-    VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[a_lvl])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       divJ(vof, comp) = 0.0;
@@ -745,16 +745,16 @@ void cdr_solver::define_interp_stencils(){
 
   const int comp            = 0;
   const int ncomp           = 1;
-  const int finest_level    = m_amr->get_finest_level();
+  const int finest_level    = m_amr->getFinestLevel();
   FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
   
   for (int dir = 0; dir < SpaceDim; dir++){
     (m_interp_stencils[dir]).resize(1 + finest_level);
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-      const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const ProblemDomain& domain  = m_amr->getDomains()[lvl];
+      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
       m_interp_stencils[dir][lvl] = RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > >
 	(new LayoutData<BaseIFFAB<FaceStencil> >(dbl));
@@ -790,18 +790,18 @@ void cdr_solver::increment_redist_flux(){
 
   const int comp         = 0;
   const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   const Interval interv(comp, comp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx       = m_amr->get_dx()[lvl];
+    const Real dx       = m_amr->getDx()[lvl];
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
     
     if(has_fine){
-      RefCountedPtr<EBFluxRegister>& fluxreg = m_amr->get_flux_reg(m_realm, m_phase)[lvl];
-      RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_realm, m_phase)[lvl];
-      RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_realm, m_phase)[lvl];
+      RefCountedPtr<EBFluxRegister>& fluxreg = m_amr->getFluxRegister(m_realm, m_phase)[lvl];
+      RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
+      RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
       
       const Real scale = -dx;
 
@@ -832,8 +832,8 @@ void cdr_solver::initial_data(){
     initial_data_distribution();
   }
 
-  m_amr->average_down(m_state, m_realm, m_phase);
-  m_amr->interp_ghost(m_state, m_realm, m_phase);
+  m_amr->averageDown(m_state, m_realm, m_phase);
+  m_amr->interpGhost(m_state, m_realm, m_phase);
 }
 
 void cdr_solver::initial_data_distribution(){
@@ -842,14 +842,14 @@ void cdr_solver::initial_data_distribution(){
     pout() << m_name + "::initial_data_distribution" << endl;
   }
 
-  const RealVect origin  = m_amr->get_prob_lo();
-  const int finest_level = m_amr->get_finest_level();
+  const RealVect origin  = m_amr->getProbLo();
+  const int finest_level = m_amr->getFinestLevel();
 
   // Copy this
   data_ops::copy(m_scratch, m_state);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx = m_amr->get_dx()[lvl];
+    const Real dx = m_amr->getDx()[lvl];
 
     for (DataIterator dit = m_state[lvl]->dataIterator(); dit.ok(); ++dit){
       EBCellFAB& state         = (*m_state[lvl])[dit()];
@@ -871,11 +871,11 @@ void cdr_solver::initial_data_distribution(){
       }
 
       // Irreg and multicells
-      VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
       for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real kappa    = ebisbox.volFrac(vof);
-	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->get_dx()[lvl]*RealVect::Unit, origin);
+	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->getDx()[lvl]*RealVect::Unit, origin);
 	
 	for (int comp = 0; comp < state.nComp(); comp++){
 	  state(vof, comp) = scratch(vof, comp) + m_species->initial_data(pos, m_time);
@@ -884,8 +884,8 @@ void cdr_solver::initial_data_distribution(){
     }
   }
 
-  m_amr->average_down(m_state, m_realm, m_phase);
-  m_amr->interp_ghost(m_state, m_realm, m_phase);
+  m_amr->averageDown(m_state, m_realm, m_phase);
+  m_amr->interpGhost(m_state, m_realm, m_phase);
 
   data_ops::set_covered_value(m_state, 0, 0.0);
 }
@@ -911,12 +911,12 @@ void cdr_solver::initial_data_particles(){
     data_ops::set_value(m_state, 0.0);
   
     // Deposit onto mseh
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const RealVect dx            = m_amr->get_dx()[lvl]*RealVect::Unit;
-      const RealVect origin        = m_amr->get_prob_lo();
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-      const ProblemDomain& dom     = m_amr->get_domains()[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const RealVect dx            = m_amr->getDx()[lvl]*RealVect::Unit;
+      const RealVect origin        = m_amr->getProbLo();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const ProblemDomain& dom     = m_amr->getDomains()[lvl];
+      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     
       // 2. Deposit this levels particles and exchange ghost cells
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -928,8 +928,8 @@ void cdr_solver::initial_data_particles(){
     }
 
 #if CH_SPACEDIM==2 // Only do this scaling for planar cartesian
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const Real dx = m_amr->get_dx()[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const Real dx = m_amr->getDx()[lvl];
       data_ops::scale(*m_state[lvl], 1./dx);
     }
 #endif
@@ -944,7 +944,7 @@ void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
     pout() << m_name + "::hybrid_divergence(AMR)" << endl;
   }
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     hybrid_divergence(*a_hybrid_div[lvl], *a_mass_diff[lvl], *a_noncons_div[lvl], lvl);
   }
 }
@@ -961,9 +961,9 @@ void cdr_solver::hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
   const int comp  = 0;
   const int ncomp = 1;
   
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_lvl];
-  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
     
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     EBCellFAB& divH               = a_divF_H[dit()];  // On input, this contains kappa*div(F)
@@ -973,7 +973,7 @@ void cdr_solver::hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
     const Box box          = dbl.get(dit());
     const EBISBox& ebisbox = ebisl[dit()];
 
-    VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[a_lvl])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const Real kappa    = ebisbox.volFrac(vof);
@@ -996,23 +996,23 @@ void cdr_solver::reset_redist_weights(const EBAMRCellData& a_state){
 
   const int comp  = 0;
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    EBLevelRedist& redist = *m_amr->get_level_redist(m_realm, m_phase)[lvl];
+    EBLevelRedist& redist = *m_amr->getLevelRedist(m_realm, m_phase)[lvl];
     redist.resetWeights(*a_state[lvl], comp);
 
-    if(m_amr->get_ebcf()){
+    if(m_amr->getEbCf()){
       const bool has_coar = lvl > 0;
       const bool has_fine = lvl < finest_level;
 
       if(has_coar){
-	EBFineToCoarRedist& fine2coar = *m_amr->get_fine_to_coar_redist(m_realm, m_phase)[lvl];
+	EBFineToCoarRedist& fine2coar = *m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
 	fine2coar.resetWeights(*a_state[lvl-1], comp);
       }
       if(has_fine){
-	EBCoarToCoarRedist& coar2coar = *m_amr->get_coar_to_coar_redist(m_realm, m_phase)[lvl];
-	EBCoarToFineRedist& coar2fine = *m_amr->get_coar_to_fine_redist(m_realm, m_phase)[lvl];
+	EBCoarToCoarRedist& coar2coar = *m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
+	EBCoarToFineRedist& coar2fine = *m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
 
 	coar2coar.resetWeights(*a_state[lvl], comp);
 	coar2fine.resetWeights(*a_state[lvl], comp);
@@ -1030,11 +1030,11 @@ void cdr_solver::hyperbolic_redistribution(EBAMRCellData& a_divF, const EBAMRIVD
 
   const int comp  = 0;
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   const Interval interv(comp, comp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_realm, m_phase)[lvl]);
+    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
     level_redist.redistribute(*a_divF[lvl], interv);
     level_redist.setToZero();
   }
@@ -1050,9 +1050,9 @@ void cdr_solver::interpolate_flux_to_centroids(LevelData<EBFluxFAB>& a_flux, con
   const int ncomp = 1;
   const Interval interv(comp, comp);
   
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_lvl];
-  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
 
   const FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
 
@@ -1099,9 +1099,9 @@ void cdr_solver::reset_flux_register(){
     pout() << m_name + "::reset_flux_register" << endl;
   }
   
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   
-  Vector<RefCountedPtr<EBFluxRegister> >& fluxreg = m_amr->get_flux_reg(m_realm, m_phase);
+  Vector<RefCountedPtr<EBFluxRegister> >& fluxreg = m_amr->getFluxRegister(m_realm, m_phase);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const bool has_fine = lvl < finest_level;
@@ -1120,15 +1120,15 @@ void cdr_solver::increment_flux_register(const EBAMRFluxData& a_face_state, cons
 
   const int comp  = 0;
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   const Interval interv(comp, comp);
 
-  Vector<RefCountedPtr<EBFluxRegister> >& fluxreg = m_amr->get_flux_reg(m_realm, m_phase);
+  Vector<RefCountedPtr<EBFluxRegister> >& fluxreg = m_amr->getFluxRegister(m_realm, m_phase);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
@@ -1176,15 +1176,15 @@ void cdr_solver::increment_flux_register(const EBAMRFluxData& a_flux){
 
   const int comp  = 0;
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   const Interval interv(comp, comp);
 
-  Vector<RefCountedPtr<EBFluxRegister> >& fluxreg = m_amr->get_flux_reg(m_realm, m_phase);
+  Vector<RefCountedPtr<EBFluxRegister> >& fluxreg = m_amr->getFluxRegister(m_realm, m_phase);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
@@ -1225,13 +1225,13 @@ void cdr_solver::increment_redist(const EBAMRIVData& a_mass_diff){
 
   const int comp  = 0;
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   const Interval interv(comp, comp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     
-    EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_realm, m_phase)[lvl]);
+    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
     level_redist.setToZero();
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1247,7 +1247,7 @@ void cdr_solver::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCe
   }
 
   if(m_blend_conservation){
-    irreg_amr_stencil<noncons_div>& stencils = m_amr->get_noncons_div_stencils(m_realm, m_phase);
+    irreg_amr_stencil<noncons_div>& stencils = m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
     stencils.apply(a_div_nc, a_divG);
   }
   else{
@@ -1267,7 +1267,7 @@ void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
 
   this->allocate_internals();
 
-  Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_realm, m_phase);
+  Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(m_realm, m_phase);
 
   // These levels have not changed
   for (int lvl = 0; lvl <= Max(0,a_lmin-1); lvl++){
@@ -1286,11 +1286,11 @@ void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   }
 
   //  data_ops::floor(m_state, 0.0);
-  m_amr->average_down(m_state, m_realm, m_phase);
-  m_amr->interp_ghost(m_state, m_realm, m_phase);
+  m_amr->averageDown(m_state, m_realm, m_phase);
+  m_amr->interpGhost(m_state, m_realm, m_phase);
 
-  m_amr->average_down(m_source, m_realm, m_phase);
-  m_amr->interp_ghost(m_source, m_realm, m_phase);
+  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->interpGhost(m_source, m_realm, m_phase);
 
 }
 
@@ -1302,13 +1302,13 @@ void cdr_solver::reflux(EBAMRCellData& a_state){
   
   const int comp  = 0;
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   const Interval interv(comp, comp);
 
-  Vector<RefCountedPtr<EBFluxRegister > >& fluxreg = m_amr->get_flux_reg(m_realm, m_phase);
+  Vector<RefCountedPtr<EBFluxRegister > >& fluxreg = m_amr->getFluxRegister(m_realm, m_phase);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx       = m_amr->get_dx()[lvl];
+    const Real dx       = m_amr->getDx()[lvl];
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
 
@@ -1321,10 +1321,10 @@ void cdr_solver::reflux(EBAMRCellData& a_state){
   }
 }
 
-void cdr_solver::sanity_check(){
-  CH_TIME("cdr_solver::sanity_check");
+void cdr_solver::sanityCheck(){
+  CH_TIME("cdr_solver::sanityCheck");
   if(m_verbosity > 5){
-    pout() << m_name + "::sanity_check" << endl;
+    pout() << m_name + "::sanityCheck" << endl;
   }
 
   CH_assert(!m_compgeom.isNull());
@@ -1333,7 +1333,7 @@ void cdr_solver::sanity_check(){
   CH_assert(!m_ebis.isNull());
 }
 
-void cdr_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+void cdr_solver::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
   CH_TIME("cdr_solver::set_amr");
   if(m_verbosity > 5){
     pout() << m_name + "::set_amr" << endl;
@@ -1343,24 +1343,24 @@ void cdr_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
 
 }
 
-void cdr_solver::register_operators(){
-  CH_TIME("cdr_solver::register_operators");
+void cdr_solver::registerOperators(){
+  CH_TIME("cdr_solver::registerOperators");
   if(m_verbosity > 5){
-    pout() << m_name + "::register_operators" << endl;
+    pout() << m_name + "::registerOperators" << endl;
   }
 
   if(m_amr.isNull()){
-    MayDay::Abort("cdr_solver::register_operators - need to set amr_mesh!");
+    MayDay::Abort("cdr_solver::registerOperators - need to set AmrMesh!");
   }
   else{
-    m_amr->register_operator(s_eb_coar_ave,     m_realm, m_phase);
-    m_amr->register_operator(s_eb_quad_cfi,     m_realm, m_phase);
-    m_amr->register_operator(s_eb_fill_patch,   m_realm, m_phase);
-    m_amr->register_operator(s_eb_pwl_interp,   m_realm, m_phase);
-    m_amr->register_operator(s_eb_flux_reg,     m_realm, m_phase);
-    m_amr->register_operator(s_eb_redist,       m_realm, m_phase);
-    m_amr->register_operator(s_eb_irreg_interp, m_realm, m_phase);
-    m_amr->register_operator(s_eb_noncons_div,  m_realm, m_phase);
+    m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
+    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, m_phase);
+    m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
+    m_amr->registerOperator(s_eb_pwl_interp,   m_realm, m_phase);
+    m_amr->registerOperator(s_eb_flux_reg,     m_realm, m_phase);
+    m_amr->registerOperator(s_eb_redist,       m_realm, m_phase);
+    m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
+    m_amr->registerOperator(s_eb_noncons_div,  m_realm, m_phase);
   }
 }
 
@@ -1391,15 +1391,15 @@ void cdr_solver::set_diffco(const EBAMRFluxData& a_diffco, const EBAMRIVData& a_
     pout() << m_name + "::set_diffco(ebamrflux, ebamriv)" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     a_diffco[lvl]->localCopyTo(*m_diffco[lvl]);
     a_diffco_eb[lvl]->localCopyTo(*m_diffco_eb[lvl]);
   }
 
-  m_amr->average_down(m_diffco,    m_realm, m_phase);
-  m_amr->average_down(m_diffco_eb, m_realm, m_phase);
+  m_amr->averageDown(m_diffco,    m_realm, m_phase);
+  m_amr->averageDown(m_diffco_eb, m_realm, m_phase);
 }
 
 void cdr_solver::set_diffco(const Real a_diffco){
@@ -1408,7 +1408,7 @@ void cdr_solver::set_diffco(const Real a_diffco){
     pout() << m_name + "::set_diffco(real)" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::set_value(*m_diffco[lvl],    a_diffco);
@@ -1417,8 +1417,8 @@ void cdr_solver::set_diffco(const Real a_diffco){
     m_diffco[lvl]->exchange();
   }
 
-  m_amr->average_down(m_diffco,    m_realm, m_phase);
-  m_amr->average_down(m_diffco_eb, m_realm, m_phase);
+  m_amr->averageDown(m_diffco,    m_realm, m_phase);
+  m_amr->averageDown(m_diffco_eb, m_realm, m_phase);
 }
 
 void cdr_solver::set_ebflux(const EBAMRIVData& a_ebflux){
@@ -1428,7 +1428,7 @@ void cdr_solver::set_ebflux(const EBAMRIVData& a_ebflux){
   }
 
   const int comp         = 0;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   const Interval interv(comp, comp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -1442,7 +1442,7 @@ void cdr_solver::set_ebflux(const Real a_ebflux){
     pout() << m_name + "::set_ebflux(constant)" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::set_value(*m_ebflux[lvl], a_ebflux);
   }
@@ -1484,14 +1484,14 @@ void cdr_solver::set_source(const EBAMRCellData& a_source){
     pout() << m_name + "::set_source" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     a_source[lvl]->localCopyTo(*m_source[lvl]);
   }
 
-  m_amr->average_down(m_source, m_realm, m_phase);
-  m_amr->interp_ghost(m_source, m_realm, m_phase);
+  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
 void cdr_solver::set_source(const Real a_source){
@@ -1501,14 +1501,14 @@ void cdr_solver::set_source(const Real a_source){
   }
 
   const int comp = 0;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::set_value(*m_source[lvl], a_source, comp);
   }
 
-  m_amr->average_down(m_source, m_realm, m_phase);
-  m_amr->interp_ghost(m_source, m_realm, m_phase);
+  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
 void cdr_solver::set_time(const int a_step, const Real a_time, const Real a_dt) {
@@ -1528,14 +1528,14 @@ void cdr_solver::set_velocity(const EBAMRCellData& a_velo){
     pout() << m_name + "::set_velocity" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     a_velo[lvl]->localCopyTo(*m_velo_cell[lvl]);
   }
 
-  m_amr->average_down(m_velo_cell, m_realm, m_phase);
-  m_amr->interp_ghost(m_velo_cell, m_realm, m_phase);
+  m_amr->averageDown(m_velo_cell, m_realm, m_phase);
+  m_amr->interpGhost(m_velo_cell, m_realm, m_phase);
 }
 
 void cdr_solver::set_velocity(const RealVect a_velo){
@@ -1544,7 +1544,7 @@ void cdr_solver::set_velocity(const RealVect a_velo){
     pout() << m_name + "::set_velocity" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     for (int dir = 0; dir < SpaceDim; dir++){
@@ -1554,8 +1554,8 @@ void cdr_solver::set_velocity(const RealVect a_velo){
     m_velo_cell[lvl]->exchange();
   }
 
-  m_amr->average_down(m_velo_cell, m_realm, m_phase);
-  m_amr->interp_ghost(m_velo_cell, m_realm, m_phase);
+  m_amr->averageDown(m_velo_cell, m_realm, m_phase);
+  m_amr->interpGhost(m_velo_cell, m_realm, m_phase);
 }
 
 void cdr_solver::set_phase(const phase::which_phase a_phase){
@@ -1585,9 +1585,9 @@ void cdr_solver::setup_flux_interpolant(const LevelData<EBFluxFAB>& a_flux, cons
   const int ncomp = 1;
   const int comp  = 0;
   
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_lvl];
-  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
 
   for (int dir = 0; dir < SpaceDim; dir++){
     
@@ -1666,15 +1666,15 @@ void cdr_solver::write_plot_file(){
   Vector<Real> covered_values(ncomps, 0.0);
   string fname(file_char);
   writeEBHDF5(fname,
-	      m_amr->get_grids(m_realm),
+	      m_amr->getGrids(m_realm),
 	      output_ptr,
 	      names,
-	      m_amr->get_domains()[0].domainBox(),
-	      m_amr->get_dx()[0],
+	      m_amr->getDomains()[0].domainBox(),
+	      m_amr->getDx()[0],
 	      m_dt,
 	      m_time,
-	      m_amr->get_ref_rat(),
-	      m_amr->get_finest_level() + 1,
+	      m_amr->getRefinementRatios(),
+	      m_amr->getFinestLevel() + 1,
 	      true,
 	      covered_values,
 	      IntVect::Unit);
@@ -1694,7 +1694,7 @@ void cdr_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   // Plot diffusion coefficients
   if(m_plot_dco && m_diffusive) { // Need to compute the cell-centerd stuff first
     data_ops::set_value(m_scratch, 0.0);
-    data_ops::average_face_to_cell(m_scratch, m_diffco, m_amr->get_domains());
+    data_ops::average_face_to_cell(m_scratch, m_diffco, m_amr->getDomains());
     write_data(a_output, a_comp, m_scratch,   false);
   }
 
@@ -1733,14 +1733,14 @@ void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
   data_ops::copy(scratch, a_data);
 
   if(a_interp){
-    m_amr->interpolate_to_centroids(scratch, m_realm, phase::gas);
+    m_amr->InterpToCentroids(scratch, m_realm, phase::gas);
   }
 
-  m_amr->average_down(scratch, m_realm, m_phase);
-  m_amr->interp_ghost(scratch, m_realm, m_phase);
+  m_amr->averageDown(scratch, m_realm, m_phase);
+  m_amr->interpGhost(scratch, m_realm, m_phase);
 
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     if(m_realm == a_output.get_realm()){
       scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
     }
@@ -1771,8 +1771,8 @@ void cdr_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
     pout() << m_name + "::read_checkpoint_level" << endl;
   }
 
-  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
-  read<EBCellFAB>(a_handle, *m_source[a_level], m_name+"_src", m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_source[a_level], m_name+"_src", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
 }
 
 Real cdr_solver::compute_advection_dt(){
@@ -1788,10 +1788,10 @@ Real cdr_solver::compute_advection_dt(){
 
     data_ops::set_value(m_scratch, min_dt);
     
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-      const Real dx                = m_amr->get_dx()[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real dx                = m_amr->getDx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	EBCellFAB& dt          = (*m_scratch[lvl])[dit()];
@@ -1806,7 +1806,7 @@ Real cdr_solver::compute_advection_dt(){
 			  CHF_BOX(box));
 
 
-	VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
 	
@@ -1844,10 +1844,10 @@ Real cdr_solver::compute_diffusion_dt(){
 
     data_ops::set_value(m_scratch, min_dt);
 
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-      const Real dx                = m_amr->get_dx()[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real dx                = m_amr->getDx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	EBCellFAB& dt                   = (*m_scratch[lvl])[dit()];
@@ -1869,7 +1869,7 @@ Real cdr_solver::compute_diffusion_dt(){
 	}
 
 	// Irregular faces. 
-	VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex vof = vofit();
 
@@ -1921,10 +1921,10 @@ Real cdr_solver::compute_advection_diffusion_dt(){
 
     data_ops::set_value(m_scratch, 0.0);
 
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-      const Real dx                = m_amr->get_dx()[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real dx                = m_amr->getDx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	EBCellFAB& dt                   = (*m_scratch[lvl])[dit()];
@@ -1962,7 +1962,7 @@ Real cdr_solver::compute_advection_diffusion_dt(){
 
 
 	// Irregular cells
-	VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex vof = vofit();
 
@@ -2016,11 +2016,11 @@ Real cdr_solver::compute_source_dt(const Real a_max, const Real a_tolerance){
   Real min_dt = 1.E99;
 
   if(a_max > 0.0){
-    const int finest_level = m_amr->get_finest_level();
+    const int finest_level = m_amr->getFinestLevel();
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-      const Real dx                = m_amr->get_dx()[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real dx                = m_amr->getDx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const EBCellFAB& state  = (*m_state[lvl])[dit()];
@@ -2038,7 +2038,7 @@ Real cdr_solver::compute_source_dt(const Real a_max, const Real a_tolerance){
 		       CHF_CONST_REAL(a_max),
 		       CHF_BOX(box));
 
-	VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[lvl])[dit()];
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex vof = vofit();
 
@@ -2076,8 +2076,8 @@ Real cdr_solver::compute_mass(){
 
   Real mass = 0.;
   const int base = 0;
-  const Real dx = m_amr->get_dx()[base];
-  m_amr->average_down(m_state, m_realm, m_phase);
+  const Real dx = m_amr->getDx()[base];
+  m_amr->averageDown(m_state, m_realm, m_phase);
   
   data_ops::kappa_sum(mass, *m_state[base]);
   mass *= pow(dx, SpaceDim);
@@ -2144,7 +2144,7 @@ EBAMRIFData& cdr_solver::get_domainflux(){
   return m_domainflux;
 }
 
-void cdr_solver::parse_domain_bc(){
+void cdr_solver::parseDomain_bc(){
   ParmParse pp(m_class_name.c_str());
 
   std::string str;
@@ -2162,7 +2162,7 @@ void cdr_solver::parse_domain_bc(){
     set_domain_bc(cdr_bc::extrap);
   }
   else{
-    MayDay::Abort("cdr_solver::parse_domain_bc - unknown BC requested");
+    MayDay::Abort("cdr_solver::parseDomain_bc - unknown BC requested");
   }
 }
 
@@ -2225,13 +2225,13 @@ void cdr_solver::define_interpolant(){
     //    Vector<RefCountedPtr<LevelData<BaseIFFAB<Real> > > > interpolant = m_interpolant[SpaceDim];
     //    Vector<RefCountedPtr<LayoutData<BaseIFFAB<Real> > > > grown_sets = m_interp_sets[SpaceDim];
 
-    m_interpolant[dir].resize(1 + m_amr->get_finest_level());
-    m_interp_sets[dir].resize(1 + m_amr->get_finest_level());
+    m_interpolant[dir].resize(1 + m_amr->getFinestLevel());
+    m_interp_sets[dir].resize(1 + m_amr->getFinestLevel());
     
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-      const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const ProblemDomain& domain  = m_amr->getDomains()[lvl];
       
       (m_interpolant[dir])[lvl] = RefCountedPtr<LevelData<BaseIFFAB<Real> > > (new LevelData<BaseIFFAB<Real> >());
       (m_interp_sets[dir])[lvl] = RefCountedPtr<LayoutData<IntVectSet> > (new LayoutData<IntVectSet>());
@@ -2264,7 +2264,7 @@ void cdr_solver::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCel
     data_ops::square_root(m_scratchFluxOne);                       // m_scratchFluxOne = sqrt(2*D*phis)
 
 #if 0 // Debug
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       for (int dir = 0; dir <SpaceDim; dir++){
 	Real max, min;
 	EBLevelDataOps::getMaxMin(max, min, *m_scratchFluxOne[lvl], 0, dir);
@@ -2279,8 +2279,8 @@ void cdr_solver::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCel
     this->conservative_divergence(a_ransource, m_scratchFluxOne, m_eb_zero); 
   
 #if 0 // Debug
-    m_amr->average_down(a_ransource, m_realm, m_phase);
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    m_amr->averageDown(a_ransource, m_realm, m_phase);
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       if(EBLevelDataOps::checkNANINF(*a_ransource[lvl])){
 	MayDay::Abort("cdr_solver::GWN_diffusion_source - something is wrong");
       }
@@ -2300,13 +2300,13 @@ void cdr_solver::smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAM
 
   const int comp  = 0;
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
     const Real vol               = pow(dx, SpaceDim);
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -2408,14 +2408,14 @@ void cdr_solver::fill_GWN(EBAMRFluxData& a_noise, const Real a_sigma){
 
   const int comp  = 0;
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   std::normal_distribution<double> GWN(0.0, a_sigma);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
     const Real vol               = pow(dx, SpaceDim);
     const Real ivol              = sqrt(1./vol);
     

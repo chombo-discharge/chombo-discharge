@@ -71,7 +71,7 @@ void ito_plasma_godunov::write_conductivity(EBAMRCellData& a_output, int& a_icom
   const Interval src_interv(0, 0);
   const Interval dst_interv(a_icomp, a_icomp);
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     if(m_conduct_cell.get_realm() == a_output.get_realm()){
       m_conduct_cell[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
     }
@@ -169,16 +169,16 @@ void ito_plasma_godunov::parse_options() {
   // Box sorting for load balancing
   pp.get("box_sorting", str);
   if( str == "none"){
-    m_boxsort = box_sorting::none;
+    m_boxSort = box_sorting::none;
   }
   else if( str == "std"){
-    m_boxsort = box_sorting::std;
+    m_boxSort = box_sorting::std;
   }
   else if(str == "shuffle"){
-    m_boxsort = box_sorting::shuffle;
+    m_boxSort = box_sorting::shuffle;
   }
   else if(str == "morton"){
-    m_boxsort = box_sorting::morton;
+    m_boxSort = box_sorting::morton;
   }
   else {
     MayDay::Abort("ito_plasma_godunov::parse_options - unknown box sorting method requested for argument 'box_sorting'");
@@ -246,16 +246,16 @@ void ito_plasma_godunov::parse_runtime_options() {
   // Box sorting for load balancing
   pp.get("box_sorting", str);
   if( str == "none"){
-    m_boxsort = box_sorting::none;
+    m_boxSort = box_sorting::none;
   }
   else if( str == "std"){
-    m_boxsort = box_sorting::std;
+    m_boxSort = box_sorting::std;
   }
   else if(str == "shuffle"){
-    m_boxsort = box_sorting::shuffle;
+    m_boxSort = box_sorting::shuffle;
   }
   else if(str == "morton"){
-    m_boxsort = box_sorting::morton;
+    m_boxSort = box_sorting::morton;
   }
   else {
     MayDay::Abort("ito_plasma_godunov::parse_options - unknown box sorting method requested for argument 'box_sorting'");
@@ -552,7 +552,7 @@ void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_lev
 
   // Copy conductivity to scratch storage
   const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   m_amr->allocate(m_cache,  m_fluid_realm, m_phase, ncomp);
   for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
     m_conduct_cell[lvl]->localCopyTo(*m_cache[lvl]);
@@ -615,10 +615,10 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   // We need to remap/regrid the stored particles as well.
   MPI_Barrier(Chombo_MPI::comm);
   gdnv_time -= MPI_Wtime();
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_particle_realm);
-  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
-  const Vector<Real>& dx                 = m_amr->get_dx();
-  const Vector<int>& ref_rat             = m_amr->get_ref_rat();
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_particle_realm);
+  const Vector<ProblemDomain>& domains   = m_amr->getDomains();
+  const Vector<Real>& dx                 = m_amr->getDx();
+  const Vector<int>& ref_rat             = m_amr->getRefinementRatios();
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
@@ -741,8 +741,8 @@ void ito_plasma_godunov::set_old_positions(){
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
     
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particle_realm)[lvl];
       ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -957,19 +957,19 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
 	data_ops::set_covered_value(m_fluid_scratch1, 0.0, 0);
 	data_ops::filter_smooth(a_conductivity, m_fluid_scratch1, stride, alpha);
 
-	m_amr->average_down(a_conductivity, m_fluid_realm, m_phase);
-	m_amr->interp_ghost(a_conductivity, m_fluid_realm, m_phase);
+	m_amr->averageDown(a_conductivity, m_fluid_realm, m_phase);
+	m_amr->interpGhost(a_conductivity, m_fluid_realm, m_phase);
       }
     }
   }
 
   data_ops::scale(a_conductivity, units::s_Qe);
 
-  m_amr->average_down(a_conductivity,     m_fluid_realm, m_phase);
-  m_amr->interp_ghost_pwl(a_conductivity, m_fluid_realm, m_phase);
+  m_amr->averageDown(a_conductivity,     m_fluid_realm, m_phase);
+  m_amr->interpGhost_pwl(a_conductivity, m_fluid_realm, m_phase);
 
   // See if this helps....
-  m_amr->interpolate_to_centroids(a_conductivity, m_fluid_realm, m_phase);
+  m_amr->InterpToCentroids(a_conductivity, m_fluid_realm, m_phase);
 
 }
 
@@ -983,13 +983,13 @@ void ito_plasma_godunov::compute_face_conductivity(){
   data_ops::set_value(m_conduct_eb,   0.0);
 
   // This code does averaging from cell to face. 
-  data_ops::average_cell_to_face_allcomps(m_conduct_face, m_conduct_cell, m_amr->get_domains());
+  data_ops::average_cell_to_face_allcomps(m_conduct_face, m_conduct_cell, m_amr->getDomains());
 
   // This code extrapolates the conductivity to the EB. This should actually be the EB centroid but since the stencils
   // for EB extrapolation can be a bit nasty (e.g. negative weights), we do the centroid instead and take that as an approximation.
 #if 0
-  const irreg_amr_stencil<centroid_interp>& ebsten = m_amr->get_centroid_interp_stencils(m_fluid_realm, m_phase);
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  const irreg_amr_stencil<centroid_interp>& ebsten = m_amr->getCentroidInterpolationStencils(m_fluid_realm, m_phase);
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     ebsten.apply(m_conduct_eb, m_conduct_cell, lvl);
   }
 #else
@@ -1016,8 +1016,8 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
   EBAMRFluxData bco_gas;
   EBAMRIVData   bco_irr_gas;
   
-  m_amr->allocate_ptr(bco_gas);
-  m_amr->allocate_ptr(bco_irr_gas);
+  m_amr->allocatePointer(bco_gas);
+  m_amr->allocatePointer(bco_irr_gas);
   
   m_amr->alias(bco_gas,     phase::gas, bco);
   m_amr->alias(bco_irr_gas, phase::gas, bco_irr);
@@ -1031,8 +1031,8 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
   data_ops::incr(bco_gas,     m_conduct_face, 1.0);
   data_ops::incr(bco_irr_gas, m_conduct_eb,   1.0);
 
-  m_amr->average_down(bco_gas,     m_fluid_realm, phase::gas);
-  m_amr->average_down(bco_irr_gas, m_fluid_realm, phase::gas);
+  m_amr->averageDown(bco_gas,     m_fluid_realm, phase::gas);
+  m_amr->averageDown(bco_irr_gas, m_fluid_realm, phase::gas);
 
   // Set up the multigrid solver
   poisson->setup_operator_factory();
@@ -1072,8 +1072,8 @@ void ito_plasma_godunov::copy_conductivity_particles(Vector<particle_container<g
     const int idx = solver_it.index();
     const int q   = species->get_charge();
 
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particle_realm)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const List<ito_particle>& ito_parts = solver->get_particles(ito_solver::which_container::bulk)[lvl][dit()].listItems();
@@ -1107,8 +1107,8 @@ void ito_plasma_godunov::copy_rho_dagger_particles(Vector<particle_container<god
     const int idx = solver_it.index();
     const int q   = species->get_charge();
 
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_particle_realm)[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particle_realm)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const List<ito_particle>& ito_parts = solver->get_particles(ito_solver::which_container::bulk)[lvl][dit()].listItems();
@@ -1334,8 +1334,8 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_contai
     const Real f = mobile    ? 1.0 : 0.0; // Multiplication factor for mobility
     const Real g = diffusive ? 1.0 : 0.0; // Multiplication factor for diffusion
     
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particle_realm)[lvl];
       ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1390,8 +1390,8 @@ void ito_plasma_godunov::step_euler_maruyama(const Real a_dt){
     
     if(mobile || diffusive){
       
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particle_realm)[lvl];
 	ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1479,8 +1479,8 @@ void ito_plasma_godunov::pre_trapezoidal_predictor(Vector<particle_container<god
     const Real f = mobile    ? 1.0 : 0.0; // Multiplication factor for mobility
     const Real g = diffusive ? 1.0 : 0.0; // Multiplication factor for diffusion
     
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particle_realm)[lvl];
       ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1527,8 +1527,8 @@ void ito_plasma_godunov::trapezoidal_predictor(const Real a_dt){
     
     if(mobile || diffusive){
       
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particle_realm)[lvl];
 	ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1568,8 +1568,8 @@ void ito_plasma_godunov::pre_trapezoidal_corrector(Vector<particle_container<god
     const Real f = mobile    ? 1.0 : 0.0; // Multiplication factor for mobility
     const Real g = diffusive ? 1.0 : 0.0; // Multiplication factor for diffusion
     
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particle_realm)[lvl];
       ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1614,8 +1614,8 @@ void ito_plasma_godunov::trapezoidal_corrector(const Real a_dt){
     
     if(mobile || diffusive){
       
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	const DisjointBoxLayout& dbl          = m_amr->get_grids(m_particle_realm)[lvl];
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+	const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particle_realm)[lvl];
 	ParticleData<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

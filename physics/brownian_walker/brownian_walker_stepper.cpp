@@ -85,14 +85,14 @@ void brownian_walker_stepper::set_velocity(){
   }
   m_solver->set_mobility(1.0);
   
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){
     this->set_velocity(lvl);
   }
 
   EBAMRCellData& vel = m_solver->get_velo_func();
-  m_amr->average_down(vel, m_realm, m_phase);
-  m_amr->interp_ghost(vel, m_realm, m_phase);
+  m_amr->averageDown(vel, m_realm, m_phase);
+  m_amr->interpGhost(vel, m_realm, m_phase);
 }
 
 bool brownian_walker_stepper::load_balance_realm(const std::string a_realm) const {
@@ -124,7 +124,7 @@ void brownian_walker_stepper::load_balance_boxes(Vector<Vector<int> >&          
   if(m_load_balance && a_realm == m_realm){
     particle_container<ito_particle>& particles = m_solver->get_particles(ito_solver::which_container::bulk);
   
-    particles.regrid(a_grids, m_amr->get_domains(), m_amr->get_dx(), m_amr->get_ref_rat(), a_lmin, a_finest_level);
+    particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finest_level);
 
     a_procs.resize(1 + a_finest_level);
     a_boxes.resize(1 + a_finest_level);
@@ -166,7 +166,7 @@ void brownian_walker_stepper::set_velocity(const int a_level){
   }
 
   // TLDR: This code goes down to each cell on grid level a_level and sets the velocity to omega*r
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box = dbl.get(dit());
 
@@ -178,7 +178,7 @@ void brownian_walker_stepper::set_velocity(const int a_level){
     // Regular cells
     for (BoxIterator bit(box); bit.ok(); ++bit){
       const IntVect iv = bit();
-      const RealVect pos = m_amr->get_prob_lo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->get_dx()[a_level];
+      const RealVect pos = m_amr->getProbLo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->getDx()[a_level];
 
       const Real r     = sqrt(pos[0]*pos[0] + pos[1]*pos[1]);
       const Real theta = atan2(pos[1],pos[0]);
@@ -191,12 +191,12 @@ void brownian_walker_stepper::set_velocity(const int a_level){
     const EBISBox& ebisbox = vel.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-    VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[a_level])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
 
       const VolIndex vof = vofit();
       const IntVect iv   = vof.gridIndex();
-      const RealVect pos = m_amr->get_prob_lo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->get_dx()[a_level];
+      const RealVect pos = m_amr->getProbLo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->getDx()[a_level];
 
       const Real r     = sqrt(pos[0]*pos[0] + pos[1]*pos[1]);
       const Real theta = atan2(pos[1],pos[0]);
@@ -323,7 +323,7 @@ void brownian_walker_stepper::pre_regrid(const int a_lbase, const int a_old_fine
 
   // TLDR: base is the finest level that DOES NOT CHANGE
   const int base = 0;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   
   m_solver->pre_regrid(base, finest_level);
 }
@@ -352,22 +352,22 @@ void brownian_walker_stepper::setup_solvers() {
   m_solver->set_realm(m_realm);
 }
 
-void brownian_walker_stepper::register_realms() {
-  CH_TIME("brownian_walker_stepper::register_realms");
+void brownian_walker_stepper::registerRealms() {
+  CH_TIME("brownian_walker_stepper::registerRealms");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::register_realms" << endl;
+    pout() << "brownian_walker_stepper::registerRealms" << endl;
   }
 
-  m_amr->register_realm(m_realm);
+  m_amr->registerRealm(m_realm);
 }
 
-void brownian_walker_stepper::register_operators() {
-  CH_TIME("brownian_walker_stepper::register_operators");
+void brownian_walker_stepper::registerOperators() {
+  CH_TIME("brownian_walker_stepper::registerOperators");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::register_operators" << endl;
+    pout() << "brownian_walker_stepper::registerOperators" << endl;
   }
 
-  m_solver->register_operators();
+  m_solver->registerOperators();
 }
 
 void brownian_walker_stepper::allocate() {
@@ -380,17 +380,17 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
     pout() << "brownian_walker_stepper::advance" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
-  const RealVect origin  = m_amr->get_prob_lo();
+  const int finest_level = m_amr->getFinestLevel();
+  const RealVect origin  = m_amr->getProbLo();
   
   //  m_solver->remap();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const RealVect dx                     = m_amr->get_dx()[lvl]*RealVect::Unit;
-    const DisjointBoxLayout& dbl          = m_amr->get_grids(m_realm)[lvl];
+    const RealVect dx                     = m_amr->getDx()[lvl]*RealVect::Unit;
+    const DisjointBoxLayout& dbl          = m_amr->getGrids(m_realm)[lvl];
     ParticleData<ito_particle>& particles = m_solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
-    const EBISLayout& ebisl = m_amr->get_ebisl(m_realm, m_solver->get_phase())[lvl];
+    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_solver->get_phase())[lvl];
 
     if(m_solver->is_mobile() || m_solver->is_diffusive()){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

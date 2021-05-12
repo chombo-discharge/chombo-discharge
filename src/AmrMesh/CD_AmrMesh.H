@@ -1,5 +1,5 @@
 /*!
-  @file amr_mesh.H
+  @file AmrMesh.H
   @brief Declaration of a class that holds grids and useful EBAMR operators (for both phases)
   @author Robert Marskar
   @date Nov. 2017
@@ -43,7 +43,7 @@
   @brief Class for handling spatial operations for streamer equations.
   @details This class handles most (if not all) spatial operations. Examples are grid generation, coarsening of data, interpolation of data, memory allocations etc. 
 */
-class amr_mesh {
+class AmrMesh {
 protected:
   
   /*!
@@ -59,12 +59,12 @@ public:
   /*!
     @brief Constructor
   */
-  amr_mesh();
+  AmrMesh();
 
   /*!
     @brief Destructor
   */
-  ~amr_mesh();
+  ~AmrMesh();
 
   /*!
     @brief Parse options
@@ -124,45 +124,45 @@ public:
     @brief Allocate pointer but not memory
   */
   template <typename T>
-  void allocate_ptr(Vector<RefCountedPtr<T> >& a_data);
+  void allocatePointer(Vector<RefCountedPtr<T> >& a_data);
 
     /*!
     @brief Allocate pointer but not memory
   */
   template <typename T>
-  void allocate_ptr(Vector<RefCountedPtr<T> >& a_data, const int a_finestLevel);
+  void allocatePointer(Vector<RefCountedPtr<T> >& a_data, const int a_finestLevel);
 
   /*!
     @brief Allocate pointer but not memory
   */
   template <typename T>
-  void allocate_ptr(EBAMRData<T>& a_data);
+  void allocatePointer(EBAMRData<T>& a_data);
 
     /*!
     @brief Allocate pointer but not memory
   */
   template <typename T>
-  void allocate_ptr(EBAMRData<T>& a_data, const int a_finestLevel);
+  void allocatePointer(EBAMRData<T>& a_data, const int a_finestLevel);
 
   /*!
     @brief Register an operator over a realm. This if for operators that are defined for a specific phase only. 
   */
-  void register_operator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase);
+  void registerOperator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Register a particle halo on a realm. 
   */
-  void register_mask(const std::string a_mask, const int a_buffer, const std::string a_realm);
+  void registerMask(const std::string a_mask, const int a_buffer, const std::string a_realm);
 
   /*!
     @brief Query if a realm exists
   */
-  bool query_realm(const std::string a_realm);
+  bool queryRealm(const std::string a_realm);
 
   /*!
     @brief Register a new realm
   */
-  void register_realm(const std::string a_realm);
+  void registerRealm(const std::string a_realm);
 
   /*!
     @brief Alias an entire hierarchy of data. 
@@ -213,7 +213,7 @@ public:
   /*!
     @brief Compute gradient on level
   */
-  void compute_gradient(LevelData<EBCellFAB>&       a_gradient,
+  void computeGradient(LevelData<EBCellFAB>&       a_gradient,
 			const LevelData<EBCellFAB>& a_phi,
 			const std::string           a_realm,
 			const phase::which_phase    a_phase,
@@ -223,7 +223,7 @@ public:
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
   */
-  void compute_gradient(EBAMRCellData&           a_gradient,
+  void computeGradient(EBAMRCellData&           a_gradient,
 			const EBAMRCellData&     a_phi,
 			const std::string        a_realm,  
 			const phase::which_phase a_phase);
@@ -233,7 +233,7 @@ public:
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
   */
-  void compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm);
+  void computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm);
 
   /*!
     @brief Allocate a data holder over a specific realm
@@ -334,52 +334,52 @@ public:
   /*!
     @brief Average down both phases on specific realm
   */
-  void average_down(MFAMRCellData& a_data, const std::string a_realm);
+  void averageDown(MFAMRCellData& a_data, const std::string a_realm);
 
   /*!
     @brief Average down on specific realm
   */
-  void average_down(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Average down level
   */
-  void average_down(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lvl);
+  void averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lvl);
 
   /*!
     @brief Average down both phases on specific realm
   */
-  void average_down(MFAMRFluxData& a_data, const std::string a_realm);
+  void averageDown(MFAMRFluxData& a_data, const std::string a_realm);
 
   /*!
     @brief Average down on specific realm
   */
-  void average_down(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void averageDown(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Average down on realm
   */
-  void average_down(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void averageDown(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Average down on realm
   */
-  void conservative_average(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Build new grids. This also load balances. 
   */
-  void build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap = -1);
+  void buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap = -1);
 
   /*!
     @brief Interpolate ghost vectors over a realm
   */
-  void interp_ghost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void interpGhost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Interpolate ghost cells. Realm, phase, and level version.
   */
-  void interp_ghost(LevelData<EBCellFAB>&       a_fineData,
+  void interpGhost(LevelData<EBCellFAB>&       a_fineData,
 		    const LevelData<EBCellFAB>& a_coarData,
 		    const int                   a_level,
 		    const std::string           a_realm,
@@ -388,67 +388,67 @@ public:
   /*!
     @brief Interpolate ghost cells over a realm
   */
-  void interp_ghost(MFAMRCellData& a_data, const std::string a_realm);
+  void interpGhost(MFAMRCellData& a_data, const std::string a_realm);
 
   /*!
     @brief Fill ghost cells using quadratic interpolation
   */
-  void interp_ghost_quad(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void interpGhost_quad(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Fill ghost cells using piecewise linear interpolation. Specific realm. 
   */
-  void interp_ghost_pwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void interpGhost_pwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Interpolate data to centroids on realm
   */
-  void interpolate_to_centroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void InterpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
   
   /*!
     @brief Set mfis
   */
-  void set_mfis(const RefCountedPtr<mfis>& a_mfis);
+  void setMultifluidIndexSpace(const RefCountedPtr<mfis>& a_mfis);
 
   /*!
     @brief Set implicit function
   */
-  void set_baseif(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseif);
+  void setBaseImplicitFunction(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseif);
 
   /*!
     @brief Parse domain
   */
-  void parse_domain();
+  void parseDomain();
 
   /*!
     @brief Set ghost cell interpolation type. Either piecewise linear or quadratic. 
   */
-  void parse_ghost_interpolation();
+  void parseGhostInterpolation();
 
   /*!
     @brief Build domains
   */
-  void build_domains();
+  void buildDomains();
 
   /*!
     @brief Parse the grid generation algorithm
   */
-  void parse_grid_generation();
+  void parsegridGeneration();
 
   /*!
     @brief Set verbosity
   */
-  void parse_verbosity();
+  void parseVerbosity();
 
   /*!
     @brief Set coarsest level box; this is the coarsest domain (well, except for lower levels GMG)
   */
-  void parse_coarsest_num_cells();
+  void parseCoarsestLevelNumCells();
 
   /*!
     @brief Maximum AMR depth
   */
-  void parse_max_amr_depth();
+  void parseMaxAmrDepth();
 
   /*!
     @brief Set maximum simulation depth. 
@@ -456,94 +456,94 @@ public:
   void parse_max_simulation_depth();
 
   /*!
-    @brief Tell amr_mesh to forget about ebcf (user must guarantee that this is the case)
+    @brief Tell AmrMesh to forget about ebcf (user must guarantee that this is the case)
   */
-  void parse_ebcf();
+  void parseEbCf();
 
   /*!
     @brief Set refinement ratio
   */
-  void parse_refinement_ratio();
+  void parseRefinementRatios();
 
   /*!
     @brief Set refinement ratios
   */
-  void set_refinement_ratios(const Vector<int> a_ref_ratios);
+  void setRefinementRatios(const Vector<int> a_ref_ratios);
 
   /*!
     @brief Set buffer size
   */
-  void parse_buffer_size();
+  void parseBrBufferSize();
 
   /*!
     @brief Set irregular growth
   */
-  void parse_irreg_growth();
+  void parseIrregTagGrowth();
 
   /*!
     @brief Set fill ratio
   */
-  void parse_fill_ratio();
+  void parseBrFillRatio();
 
   /*!
     @brief Set the finest level
   */
-  void set_finest_level(const int a_finest_level);
+  void setFinestLevel(const int a_finest_level);
 
   /*!
     @brief Set the maximum box size
   */
-  void parse_max_box_size();
+  void parseMaxBoxSize();
 
   /*!
     @brief Set the maximum EBIS generation box size
   */
-  void parse_max_ebis_box_size();
+  void parseMaxEbisBoxSize();
 
   /*!
     @brief Set the blocking factor
   */
-  void parse_blocking_factor();
+  void parseBlockingFactor();
 
   /*!
     @brief Set number of ghost cells for eb stuff
   */ 
-  void parse_eb_ghost();
+  void parseEbGhostCells();
 
   /*!
     @brief Set number of ghost cells 
   */ 
-  void parse_num_ghost();
+  void parseNumGhostCells();
 
   /*!
     @brief Set redistribution radius
   */
-  void parse_redist_rad();
+  void parseRedistributionRadius();
 
   /*!
     @brief Parse centroid interpolation stencils
   */
-  void parse_centroid_stencils();
+  void parseCentroidStencils();
 
   /*!
     @brief Parse EB interpolation (or extrapolation) stencils
   */
-  void parse_eb_stencils();
+  void parseEbCentroidStencils();
 
   /*!
     @brief Set preferred stencil type
   */
-  void set_irreg_sten_type(const stencil_type a_type);
+  void setIrregularInterpolationStencilType(const stencil_type a_type);
 
   /*!
     @brief Set irregular stencil order
   */
-  void set_irreg_sten_order(const int a_irreg_sten_order);
+  void setIrregularInterpolationStencilOrder(const int a_irreg_sten_order);
 
   /*!
     @brief Set maximum stencil radius for irregular stencils
   */
-  void set_irreg_sten_radius(const int a_irreg_sten_radius);
+  void setIrregularInterpolationStencilRadius(const int a_irreg_sten_radius);
 
   /*!
     @brief Regrid function. Generate new grids. 
@@ -558,7 +558,7 @@ public:
   /*!
     @brief Regrid AMR. This builds the grids and sets them. 
   */
-  void regrid_amr(const Vector<IntVectSet>& a_tags,
+  void regridAmr(const Vector<IntVectSet>& a_tags,
 		  const int a_lmin,
 		  const int a_lmax,
 		  const int a_hardcap=123456);
@@ -567,12 +567,12 @@ public:
     @brief Regrid AMR. This takes a set of grids. 
     @todo Remove. 
   */
-  void regrid_amr(const Vector<Vector<int> >& a_procs, const Vector<Vector<Box> >& a_boxes, const int a_lmin);
+  void regridAmr(const Vector<Vector<int> >& a_procs, const Vector<Vector<Box> >& a_boxes, const int a_lmin);
 
   /*!
     @brief Define a realm
   */
-  void regrid_realm(const std::string a_realm,
+  void regridRealm(const std::string a_realm,
 		    const Vector<Vector<int> >& a_procs,
 		    const Vector<Vector<Box> >& a_boxes,
 		    const int a_lmin);
@@ -580,12 +580,12 @@ public:
   /*!
     @brief Set grids from boxes and computational loads
   */
-  void set_grids(const Vector<Vector<Box> >& a_boxes, const std::map<std::string, Vector<Vector<long int> > >& a_loads);
+  void setGrids(const Vector<Vector<Box> >& a_boxes, const std::map<std::string, Vector<Vector<long int> > >& a_loads);
 
   /*!
     @brief Regrid AMR operators
   */
-  void regrid_operators(const int a_lmin,
+  void regridOperators(const int a_lmin,
 			const int a_lmax,
 			const int a_regsize=1);
 
@@ -594,47 +594,47 @@ public:
   /*!
     @brief Do a sanity check to make sure everything is set up correctly
   */
-  void sanity_check();
+  void sanityCheck();
 
   /*!
     @brief True if there is ebcf crossing
   */
-  bool get_ebcf();
+  bool getEbCf();
 
   /*!
     @brief Get refinement ratios
   */
-  int get_finest_level();
+  int getFinestLevel();
 
   /*!
     @brief Get irregular cell growth
   */
-  int get_irreg_growth();
+  int getIrregTagGrowth();
 
   /*!
     @brief Get maximum amr depth
   */
-  int get_max_amr_depth();
+  int getMaxAmrDepth();
 
   /*!
     @brief Get maximum simulation depth
   */
-  int get_max_sim_depth();
+  int getMaxSimulationDepth();
 
   /*!
     @brief Get maximum  depth
   */
-  int get_refine_all_depth();
+  int getRefineAllLevelsDepth();
 
   /*!
     @brief Get blocking factor
   */
-  int get_blocking_factor();
+  int getBlockingFactor();
 
   /*!
     @brief Get maximum box size
   */
-  int get_max_box_size();
+  int getMaxBoxSize();
 
   /*!
     @brief Return bffer
@@ -649,218 +649,218 @@ public:
   /*!
     @brief Get number of ghost cells
   */
-  int get_num_ghost();
+  int getNumberOfGhostCells();
 
   /*!
     @brief Get number of ghost cells used for EB
   */
-  int get_eb_ghost();
+  int getNumberOfEbGhostCells();
 
   /*!
     @brief Get redistribution radius
   */
-  int get_redist_rad();
+  int getRedistributionRadius();
   
   /*!
     @brief Get finest level
   */
-  Real get_finest_dx();
+  Real getFinestDx();
 
   /*!
     @brief Get origin
   */
-  RealVect get_prob_lo();
+  RealVect getProbLo();
 
   /*!
     @brief Get high end
   */
-  RealVect get_prob_hi();
+  RealVect getProbHi();
 
   /*!
     @brief Get finest domain
   */
-  ProblemDomain get_finest_domain();
+  ProblemDomain getFinestDomain();
 
   /*!
     @brief Get resolutions
   */
-  Vector<Real>& get_dx();
+  Vector<Real>& getDx();
 
   /*!
     @brief Get refinement ratios
   */
-  Vector<int>& get_ref_rat();
+  Vector<int>& getRefinementRatios();
 
   /*!
     @brief Get refinement factor between two levels
   */
-  int get_refinement_ratio(const int a_level1, const int a_level2);
+  int getRefinementRatio(const int a_level1, const int a_level2);
 
   /*!
     @brief Get implicit function
   */
-  const RefCountedPtr<BaseIF>& get_baseif(const phase::which_phase a_phase);
+  const RefCountedPtr<BaseIF>& getBaseImplicitFunction(const phase::which_phase a_phase);
 
   /*!
     @brief Get ALL irregular tags
   */
-  Vector<IntVectSet> get_irreg_tags() const;
+  Vector<IntVectSet> getIrregularTags() const;
 
   /*!
     @brief Get the grids
   */
-  Vector<DisjointBoxLayout>& get_proxy_grids();
+  Vector<DisjointBoxLayout>& getProxyGrids();
 
   /*!
     @brief Get the grids
   */
-  Vector<DisjointBoxLayout>& get_grids(const std::string a_realm);
+  Vector<DisjointBoxLayout>& getGrids(const std::string a_realm);
 
   /*!
     @brief Get domains
   */
-  Vector<ProblemDomain>& get_domains();
+  Vector<ProblemDomain>& getDomains();
 
   /*!
     @brief Get mask
   */
-  AMRMask& get_mask(const std::string a_mask, const int a_buffer, const std::string a_realm);
+  AMRMask& getMask(const std::string a_mask, const int a_buffer, const std::string a_realm);
 
   /*!
     @brief Get the EBLevelGrid 
   */
-  Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase);
   
   /*!
     @brief Get the EBISLayouts
   */
-  Vector<EBISLayout>& get_ebisl(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<EBISLayout>& getEBISLayout(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the EBLevelGrid 
   */
-  Vector<RefCountedPtr<MFLevelGrid> >& get_mflg(const std::string a_realm);
+  Vector<RefCountedPtr<MFLevelGrid> >& getMFLevelGrid(const std::string a_realm);
 
   /*!
     @brief Get the vof iterator
   */
-  Vector<RefCountedPtr<LayoutData<VoFIterator> > > get_vofit(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<VoFIterator> > > getVofIterator(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get neighbor boxes
   */
-  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors(const std::string a_realm,
+  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors(const std::string a_realm,
 									   const phase::which_phase a_phase);
 
   /*!
     @brief Get levelset function
   */
-  EBAMRFAB& get_levelset(const std::string a_realm, const phase::which_phase a_phase);
+  EBAMRFAB& getLevelset(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the coarsening utility
   */
-  Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<ebcoarseaverage> >& getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the ghost cloud particle magic
   */
-  Vector<RefCountedPtr<EBGhostCloud> >& get_ghostcloud(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBGhostCloud> >& getGhostCloud(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the ghost cell interpolation utility
   */
-  Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<nwoebquadcfinterp> >& getNWOEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the old interpolation utility (needed for EBConductivityOps)
   */
-  Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get piecewise linear ghost cell interpolator
   */
-  Vector<RefCountedPtr<AggEBPWLFillPatch> >& get_fillpatch(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get interpolator 
   */
-  Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get interpolator 
   */
-  Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBMGInterp> >& getEBMGInterp(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get flux register
   */
-  Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFluxRegister> >&  getFluxRegister(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get redistribution
   */
-  Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBLevelRedist> >&  getLevelRedist(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get coar-to-fine redistribution
   */
-  Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist(const std::string        a_realm,
+  Vector<RefCountedPtr<EBCoarToFineRedist> >&  getCoarToFineRedist(const std::string        a_realm,
 								       const phase::which_phase a_phase);
   
   /*!
     @brief Get coar-to-coar redistribution
   */
-  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist(const std::string        a_realm,
+  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  getCoarToCoarRedist(const std::string        a_realm,
 								       const phase::which_phase a_phase);
 
   /*!
     @brief Get coar-to-coar redistribution
   */
-  Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(const std::string        a_realm,
+  Vector<RefCountedPtr<EBFineToCoarRedist> >&  getFineToCoarRedist(const std::string        a_realm,
 								       const phase::which_phase a_phase);
   
   /*!
     @brief Get interpolation stencils
   */
-  irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(const std::string a_realm,
+  irreg_amr_stencil<centroid_interp>& getCentroidInterpolationStencils(const std::string a_realm,
 								   const phase::which_phase a_phase);
 
   /*!
     @brief Get interpolation stencils
   */
-  irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(const std::string        a_realm,
+  irreg_amr_stencil<eb_centroid_interp>& getEbCentroidInterpolationStencils(const std::string        a_realm,
 									 const phase::which_phase a_phase);
 
   /*!
     @brief Get Nonconservative divergence stencils
   */
-  irreg_amr_stencil<noncons_div>& get_noncons_div_stencils(const std::string a_realm, const phase::which_phase a_phase);
+  irreg_amr_stencil<noncons_div>& getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get copier
   */
-  Vector<RefCountedPtr<Copier> >& get_copier(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<Copier> >& getCopier(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get reverse copier
   */
-  Vector<RefCountedPtr<Copier> >& get_reverse_copier(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<Copier> >& getReverseCopier(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Build tiles from a box
   */
-  Vector<Box> make_tiles(const Box a_box, const IntVect a_tilesize);
+  Vector<Box> makeTiles(const Box a_box, const IntVect a_tilesize);
 
   /*!
     @brief Get the name of all realms
   */
-  std::vector<std::string> get_realms() const;
+  std::vector<std::string> getRealms() const;
 
   /*!
     @brief Get box sorting method
   */
-  box_sorting get_box_sorting() const;
+  box_sorting getBoxSorting() const;
   
 protected:
 
@@ -885,52 +885,52 @@ protected:
   /*!
     @brief Grid generation method
   */
-  grid_generation m_gridgen;
+  grid_generation m_gridGenerationMethod;
 
   /*!
     @brief Box sorting
   */
-  box_sorting m_boxsort;
+  box_sorting m_boxSort;
 
   /*!
     @brief mfis
   */
-  RefCountedPtr<mfis> m_mfis;
+  RefCountedPtr<mfis> m_multifluidIndexSpace;
 
   /*!
     @brief Stencil type
   */
-  stencil_type m_stencil_type;
+  stencil_type m_stencilType;
 
   /*!
     @brief Stencil type for centroid interpolation
   */
-  stencil_type m_centroid_stencil;
+  stencil_type m_centroidStencilType;
 
   /*!
     @brief Stencil type for EB interpolation
   */
-  stencil_type m_eb_stencil;
+  stencil_type m_ebCentroidStencilType;
 
   /*!
     @brief Interpolation type
   */
-  ghost_interpolation m_interp_type;
+  ghost_interpolation m_ghostCellInterpolationMethod;
 
   /*!
     @brief Coarsest box where we compute
   */
-  IntVect m_num_cells;
+  IntVect m_numCells;
 
   /*!
     @brief Fill ratio
   */
-  Real m_fill_ratio;
+  Real m_fillRatioBR;
 
   /*!
     @brief Domain simulation corner
   */
-  RealVect m_prob_lo;
+  RealVect m_probLo;
 
   /*!
     @brief Domain simulation corner
@@ -940,7 +940,7 @@ protected:
   /*!
     @brief Refinement ratio
   */
-  int m_ref_ratio;
+  int m_refRatio;
 
   /*!
     @brief Verbosity
@@ -950,72 +950,72 @@ protected:
   /*!
     @brief Finest level
   */
-  int m_finest_level;
+  int m_finestLevel;
 
   /*!
     @brief Maximum amr depth
   */
-  int m_max_amr_depth;
+  int m_maxAmrDepth;
 
   /*!
     @brief Maximum allowed depth for simulation
   */
-  int m_max_sim_depth;
+  int m_maxSimulationDepth;
 
   /*!
     @brief Uniform refinement depth
   */
-  int m_refine_all_depth;
+  int m_refineAllLevelsDepth;
 
   /*!
     @brief Max box size
   */
-  int m_max_box_size;
+  int m_maxBoxSize;
 
   /*!
     @brief Maximum box size for EBIS generation
   */
-  int m_max_ebis_box_size;
+  int m_maxEbisBoxSize;
 
   /*!
     @brief Set buffer size
   */
-  int m_buffer_size;
+  int m_bufferSizeBR;
 
   /*!
     @brief How much to grow irregular cells
   */
-  int m_irreg_growth;
+  int m_irregTagGrowth;
 
   /*!
     @brief Blocking factor
   */
-  int m_blocking_factor;
+  int m_blockingFactor;
 
   /*!
     @brief Number of ghost cells to use for eb stuff
   */
-  int m_ebghost;
+  int m_numEbGhostsCells;
 
   /*!
     @brief Number of ghost cells
   */
-  int m_num_ghost;
+  int m_numGhostCells;
 
   /*!
     @brief Number of ghost cells to use when writing level-set to grid
   */
-  int m_lsf_ghost;
+  int m_numLsfGhostCells;
 
   /*!
     @brief Redistribution radius
   */
-  int m_redist_rad;
+  int m_redistributionRadius;
 
   /*!
     @brief Order for interpolation stencils to centroids
   */
-  int m_centroid_sten_order;
+  int m_centroidStencilOrder;
 
   /*!
     @brief Radius for centroid interpolation stencil
@@ -1025,7 +1025,7 @@ protected:
   /*!
     @brief Order for interpolation stencilst to EB
   */
-  int m_eb_sten_order;
+  int m_ebCentroidStencilOrder;
 
   /*!
     @brief Radius for EB interpolation stencil
@@ -1035,22 +1035,22 @@ protected:
   /*!
     @brief Stencil order for irregular stencils
   */
-  int m_irreg_sten_order;
+  int m_irregStenOrder;
 
   /*!
     @brief radius for irregular stencils
   */
-  int m_irreg_sten_radius;
+  int m_irregStenRadius;
 
   /*!
     @brief Grids have EB x CF crossing
   */
-  bool m_ebcf;
+  bool m_hasEbCf;
 
   /*!
     @brief Has grids or not
   */
-  bool m_has_grids;
+  bool m_hasGrids;
 
   /*!
     @brief Grids
@@ -1065,7 +1065,7 @@ protected:
   /*!
     @brief AMR resolutions
   */
-  Vector<int> m_ref_ratios;
+  Vector<int> m_refinementRatios;
 
   /*!
     @brief Level resolutions
@@ -1079,6 +1079,6 @@ protected:
 };
 #include "CD_NamespaceFooter.H"
 
-#include "amr_meshImplem.H"
+#include <CD_AmrMeshImplem.H>
 
 #endif

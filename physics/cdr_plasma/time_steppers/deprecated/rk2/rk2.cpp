@@ -284,7 +284,7 @@ void rk2::compute_cdr_eb_states_at_start_of_time_step(){
   }
 
   this->extrapolate_to_eb(eb_states,          m_cdr->get_phase(), cdr_states);
-  this->compute_gradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
+  this->computeGradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
 
 }
 
@@ -429,8 +429,8 @@ void rk2::advance_cdr_k1(const Real a_dt){
     data_ops::incr(phi, state, 1.0);
     data_ops::incr(phi, k1,    m_alpha*a_dt);
 
-    m_amr->average_down(phi, m_cdr->get_phase());
-    m_amr->interp_ghost(phi, m_cdr->get_phase());
+    m_amr->averageDown(phi, m_cdr->get_phase());
+    m_amr->interpGhost(phi, m_cdr->get_phase());
 
     data_ops::floor(phi, 0.0);
   }
@@ -451,7 +451,7 @@ void rk2::advance_sigma_k1(const Real a_dt){
   data_ops::incr(phi, state, 1.0);
   data_ops::incr(phi, k1,    m_alpha*a_dt);
 
-  m_amr->average_down(phi, m_cdr->get_phase());
+  m_amr->averageDown(phi, m_cdr->get_phase());
   
   m_sigma->reset_cells(k1);
   m_sigma->reset_cells(phi);
@@ -595,8 +595,8 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
     data_ops::incr(scratch_phi, state, 0.5);
     data_ops::incr(scratch_phi, phi, 0.5);
 
-    m_amr->average_down(scratch_phi);
-    m_amr->interp_ghost(scratch_phi);
+    m_amr->averageDown(scratch_phi);
+    m_amr->interpGhost(scratch_phi);
 
     this->compute_E(scratch_E, m_cdr->get_phase(), scratch_phi);
   
@@ -623,7 +623,7 @@ void rk2::compute_cdr_eb_states_after_k1(){
   }
 
   this->extrapolate_to_eb(eb_states,          m_cdr->get_phase(), cdr_states);
-  this->compute_gradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
+  this->computeGradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
 }
 
 void rk2::compute_cdr_velo_after_k1(const Real a_dt){
@@ -821,8 +821,8 @@ void rk2::advance_cdr_k2(const Real a_dt){
     data_ops::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha)));
     data_ops::incr(state, k2, a_dt*1./(2.*m_alpha));
 
-    m_amr->average_down(state, m_cdr->get_phase());
-    m_amr->interp_ghost(state, m_cdr->get_phase());
+    m_amr->averageDown(state, m_cdr->get_phase());
+    m_amr->interpGhost(state, m_cdr->get_phase());
 
     data_ops::floor(state, 0.0);
   }
@@ -842,7 +842,7 @@ void rk2::advance_sigma_k2(const Real a_dt){
   data_ops::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha)));
   data_ops::incr(state, k2, a_dt*1./(2.*m_alpha));
 
-  m_amr->average_down(state, m_cdr->get_phase());
+  m_amr->averageDown(state, m_cdr->get_phase());
   m_sigma->reset_cells(state);
 }
 
@@ -1008,8 +1008,8 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
     data_ops::incr(phi, state, 0.5);
     data_ops::incr(phi, scratch_phi, 0.5);
     
-    m_amr->average_down(phi);
-    m_amr->interp_ghost(phi);
+    m_amr->averageDown(phi);
+    m_amr->interpGhost(phi);
     
     this->compute_E(scratch_E, m_cdr->get_phase(), phi);
     

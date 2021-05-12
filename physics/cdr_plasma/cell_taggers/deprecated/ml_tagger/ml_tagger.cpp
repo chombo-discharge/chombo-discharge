@@ -23,7 +23,7 @@ ml_tagger::~ml_tagger(){
 }
 
 void ml_tagger::parse_options(){
-  parse_verbosity();
+  parseVerbosity();
   parse_boxes();
   parse_buffer();
 

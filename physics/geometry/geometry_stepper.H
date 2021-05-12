@@ -31,8 +31,8 @@ namespace physics {
       virtual void post_checkpoint_setup() override;
 
       // Registration routines
-      virtual void register_realms() override;
-      virtual void register_operators() override;
+      virtual void registerRealms() override;
+      virtual void registerOperators() override;
 
       // IO routines
       virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;

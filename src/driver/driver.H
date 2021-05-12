@@ -12,7 +12,7 @@
 
 #include "computational_geometry.H"
 #include "time_stepper.H"
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 #include "cell_tagger.H"
 #include "mfis.H"
 #include "geo_coarsener.H"
@@ -34,7 +34,7 @@ public:
   */
   driver(const RefCountedPtr<computational_geometry>& a_compgeom,
 	 const RefCountedPtr<time_stepper>&           a_timestepper,
-	 const RefCountedPtr<amr_mesh>&               a_amr,
+	 const RefCountedPtr<AmrMesh>&               a_amr,
 	 const RefCountedPtr<cell_tagger>&            a_celltagger = RefCountedPtr<cell_tagger>(NULL),
 	 const RefCountedPtr<geo_coarsener>&          a_geocoarsen = RefCountedPtr<geo_coarsener>(NULL));
 
@@ -87,12 +87,12 @@ protected:
   /*!
     @brief Index space
   */
-  RefCountedPtr<mfis> m_mfis;
+  RefCountedPtr<mfis> m_multifluidIndexSpace;
 
   /*!
     @brief AMR
   */
-  RefCountedPtr<amr_mesh> m_amr;
+  RefCountedPtr<AmrMesh> m_amr;
 
   /*!
     @brief Geometry
@@ -377,12 +377,12 @@ protected:
   /*!
     @brief Set amr
   */
-  void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+  void set_amr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Sanity check
   */
-  void sanity_check();
+  void sanityCheck();
 
   /*!
     @brief Parse geometrical refinement

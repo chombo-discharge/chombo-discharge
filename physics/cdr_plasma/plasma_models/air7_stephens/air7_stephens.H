@@ -250,7 +250,7 @@ namespace physics {
       void parse_excitations();
       void parse_temperature();
       void parse_see();
-      void parse_domain_bc();
+      void parseDomain_bc();
       void parse_chemistry();
       void instantiate_species();
       void init_rng();

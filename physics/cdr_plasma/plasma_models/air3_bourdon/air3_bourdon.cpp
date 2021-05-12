@@ -86,7 +86,7 @@ air3_bourdon::air3_bourdon() {
 
 
   // Parse domain boundary conditions. 
-  parse_domain_bc();
+  parseDomain_bc();
 
   // Instantiate species. 
   instantiate_species();
@@ -147,7 +147,7 @@ void air3_bourdon::instantiate_species(){
   m_rte_species[m_pho3_idx] = RefCountedPtr<rte_species> (new air3_bourdon::photon_three());
 }
 
-void air3_bourdon::parse_domain_bc(){
+void air3_bourdon::parseDomain_bc(){
 
   ParmParse pp("air3_bourdon");
   std::string str;

@@ -133,7 +133,7 @@ public:
 	  const Interval&                    a_variables);
 
   void
-  conservative_average(LevelData<BaseIVFAB<Real> >&       a_coarData,
+  conservativeAverage(LevelData<BaseIVFAB<Real> >&       a_coarData,
 		       const LevelData<BaseIVFAB<Real> >& a_fineData,
 		       const Interval&                    a_variables);
 
@@ -158,7 +158,7 @@ protected:
 	     const Interval&        a_variables) const;
 
   void
-  conservative_averageFAB(BaseIVFAB<Real>&       a_coar,
+  conservativeAverageFAB(BaseIVFAB<Real>&       a_coar,
 			  const BaseIVFAB<Real>& a_fine,
 			  const DataIndex&       a_datInd,
 			  const Interval&        a_variables) const;

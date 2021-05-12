@@ -33,7 +33,7 @@ void euler_maruyama::parse_options(){
     pout() << "euler_maruyama::parse_options" << endl;
   }
 
-  parse_verbosity();
+  parseVerbosity();
   parse_solver_verbosity();
   parse_fast_poisson();
   parse_cfl();
@@ -53,7 +53,7 @@ void euler_maruyama::parse_runtime_options(){
     pout() << "euler_maruyama::parse_runtime_options" << endl;
   }
 
-  parse_verbosity();
+  parseVerbosity();
   parse_solver_verbosity();
   parse_fast_poisson();
   parse_cfl();
@@ -409,9 +409,9 @@ void euler_maruyama::compute_cdr_gradients(){
     RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
 
     EBAMRCellData& grad = storage->get_gradient();
-    m_amr->compute_gradient(grad, solver->get_state(), phase::gas);
-    m_amr->average_down(grad, m_cdr->get_phase());
-    m_amr->interp_ghost(grad, m_cdr->get_phase());
+    m_amr->computeGradient(grad, solver->get_state(), phase::gas);
+    m_amr->averageDown(grad, m_cdr->get_phase());
+    m_amr->interpGhost(grad, m_cdr->get_phase());
   }
 }
 
@@ -739,8 +739,8 @@ void euler_maruyama::advance_cdr(const Real a_dt){
       }
     }
 
-    m_amr->average_down(phi, m_cdr->get_phase());
-    m_amr->interp_ghost(phi, m_cdr->get_phase());
+    m_amr->averageDown(phi, m_cdr->get_phase());
+    m_amr->interpGhost(phi, m_cdr->get_phase());
   }
 }
 

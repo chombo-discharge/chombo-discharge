@@ -135,12 +135,12 @@ public:
   /*!
     @brief Average down the surface charge on AMR levels
   */
-  virtual void average_down_amr();
+  virtual void averageDown_amr();
 
   /*!
     @brief Average down the surface charge on lower levels of multigrid
   */
-  virtual void average_down_mg();
+  virtual void averageDown_mg();
 
   /*!
     @brief Reclaim
@@ -192,7 +192,7 @@ protected:
   /*!
     @brief Index spaces
   */
-  RefCountedPtr<mfis> m_mfis;
+  RefCountedPtr<mfis> m_multifluidIndexSpace;
 
   /*!
     @brief Potential function
@@ -362,7 +362,7 @@ protected:
   /*!
     @brief Internal stuff
   */
-  int m_max_box_size;
+  int m_maxBoxSize;
 
   /*!
     @brief Relaxation type

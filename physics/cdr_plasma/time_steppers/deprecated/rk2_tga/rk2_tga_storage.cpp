@@ -12,7 +12,7 @@ rk2_tga::cdr_storage::cdr_storage(){
 
 }
 
-rk2_tga::cdr_storage::cdr_storage(const RefCountedPtr<amr_mesh>& a_amr,
+rk2_tga::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
 				  const phase::which_phase       a_phase,
 				  const int                      a_ncomp){
   m_amr   = a_amr;
@@ -51,7 +51,7 @@ rk2_tga::poisson_storage::poisson_storage(){
 
 }
 
-rk2_tga::poisson_storage::poisson_storage(const RefCountedPtr<amr_mesh>& a_amr,
+rk2_tga::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
 					  const phase::which_phase       a_phase,
 					  const int                      a_ncomp){
   m_amr   = a_amr;
@@ -81,7 +81,7 @@ rk2_tga::rte_storage::rte_storage(){
 
 }
 
-rk2_tga::rte_storage::rte_storage(const RefCountedPtr<amr_mesh>& a_amr,
+rk2_tga::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
 				  const phase::which_phase       a_phase,
 				  const int                      a_ncomp){
   m_amr   = a_amr;
@@ -107,7 +107,7 @@ rk2_tga::sigma_storage::sigma_storage(){
 
 }
 
-rk2_tga::sigma_storage::sigma_storage(const RefCountedPtr<amr_mesh>& a_amr,
+rk2_tga::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
 				      const phase::which_phase       a_phase,
 				      const int                      a_ncomp){
   m_amr   = a_amr;

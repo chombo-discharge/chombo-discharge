@@ -79,8 +79,8 @@ namespace physics {
       void print_step_report() override;
 
       // Registration routines
-      void register_realms() override;
-      void register_operators() override;
+      void registerRealms() override;
+      void registerOperators() override;
       
       // Regrid routines. 
       void deallocate() override;
@@ -338,7 +338,7 @@ namespace physics {
       std::string m_name;
       phase::which_phase m_phase;
 
-      box_sorting m_boxsort;
+      box_sorting m_boxSort;
       
       RefCountedPtr<ito_plasma_physics> m_physics;
       RefCountedPtr<ito_layout<ito_solver> > m_ito;

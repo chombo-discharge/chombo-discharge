@@ -132,7 +132,7 @@ protected:
   /*!
     @brief Multifluid index spaces
   */
-  RefCountedPtr<mfis> m_mfis;
+  RefCountedPtr<mfis> m_multifluidIndexSpace;
 
   /*!
     @brief Background permittivity

@@ -9,7 +9,7 @@
 #define _SIGMA_SOLVER_
 
 #include "computational_geometry.H"
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 
 #include "CD_NamespaceHeader.H"
   
@@ -67,7 +67,7 @@ public:
   /*!
     @brief Register operators
   */
-  virtual void register_operators();
+  virtual void registerOperators();
   
   /*!
     @brief Reset data holder on cells
@@ -77,7 +77,7 @@ public:
   /*!
     @brief Set the amr object
   */
-  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+  virtual void set_amr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Set computational geometry
@@ -165,7 +165,7 @@ protected:
   /*!
     @brief Index spaces
   */
-  RefCountedPtr<mfis> m_mfis;
+  RefCountedPtr<mfis> m_multifluidIndexSpace;
 
   /*!
     @brief Computational geometry
@@ -175,7 +175,7 @@ protected:
   /*!
     @brief AMR; needed for grid stuff
   */
-  RefCountedPtr<amr_mesh> m_amr;
+  RefCountedPtr<AmrMesh> m_amr;
 
   /*!
     @brief State

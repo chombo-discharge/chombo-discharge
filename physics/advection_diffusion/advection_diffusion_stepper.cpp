@@ -58,7 +58,7 @@ void advection_diffusion_stepper::setup_solvers(){
   m_solver->set_phase(m_phase);
   m_solver->set_amr(m_amr);
   m_solver->set_computational_geometry(m_compgeom);
-  m_solver->sanity_check();
+  m_solver->sanityCheck();
   m_solver->set_realm(m_realm);
   
   if(!m_solver->is_mobile() && !m_solver->is_diffusive()){
@@ -69,12 +69,12 @@ void advection_diffusion_stepper::setup_solvers(){
 void advection_diffusion_stepper::post_initialize() {
 }
 
-void advection_diffusion_stepper::register_realms() {
-  m_amr->register_realm(m_realm);
+void advection_diffusion_stepper::registerRealms() {
+  m_amr->registerRealm(m_realm);
 }
 
-void advection_diffusion_stepper::register_operators(){
-  m_solver->register_operators();
+void advection_diffusion_stepper::registerOperators(){
+  m_solver->registerOperators();
 }
 
 void advection_diffusion_stepper::allocate() {
@@ -101,20 +101,20 @@ void advection_diffusion_stepper::initial_data(){
 }
 
 void advection_diffusion_stepper::set_velocity(){
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){
     this->set_velocity(lvl);
   }
 
   EBAMRCellData& vel = m_solver->get_velo_cell();
-  m_amr->average_down(vel, m_realm, m_phase);
-  m_amr->interp_ghost(vel, m_realm, m_phase);
+  m_amr->averageDown(vel, m_realm, m_phase);
+  m_amr->interpGhost(vel, m_realm, m_phase);
 }
 
 void advection_diffusion_stepper::set_velocity(const int a_level){
   // TLDR: This code goes down to each cell on grid level a_level and sets the velocity to omega*r
     
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box = dbl.get(dit());
 
@@ -126,7 +126,7 @@ void advection_diffusion_stepper::set_velocity(const int a_level){
     // Regular cells
     for (BoxIterator bit(box); bit.ok(); ++bit){
       const IntVect iv = bit();
-      const RealVect pos = m_amr->get_prob_lo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->get_dx()[a_level];
+      const RealVect pos = m_amr->getProbLo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->getDx()[a_level];
 
       const Real r     = sqrt(pos[0]*pos[0] + pos[1]*pos[1]);
       const Real theta = atan2(pos[1],pos[0]);
@@ -136,12 +136,12 @@ void advection_diffusion_stepper::set_velocity(const int a_level){
     }
 
     // Irregular and multicells
-    VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[a_level])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
 
       const VolIndex vof = vofit();
       const IntVect iv   = vof.gridIndex();
-      const RealVect pos = m_amr->get_prob_lo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->get_dx()[a_level];
+      const RealVect pos = m_amr->getProbLo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->getDx()[a_level];
 
       const Real r     = sqrt(pos[0]*pos[0] + pos[1]*pos[1]);
       const Real theta = atan2(pos[1],pos[0]);
@@ -221,13 +221,13 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
       data_ops::incr(state, m_k1, a_dt);
     }
   
-    m_amr->average_down(state, m_realm, m_phase);
-    m_amr->interp_ghost(state, m_realm, m_phase);
+    m_amr->averageDown(state, m_realm, m_phase);
+    m_amr->interpGhost(state, m_realm, m_phase);
   }
   else if(m_integrator == 1){
     m_solver->compute_divF(m_k1, state, a_dt);
     data_ops::incr(state, m_k1, -a_dt);
-    m_amr->average_down(state, m_realm, m_phase);
+    m_amr->averageDown(state, m_realm, m_phase);
 
     if(m_solver->is_diffusive()){
       data_ops::copy(m_k2, state); // Now holds phiOld - dt*div(F)
@@ -239,8 +239,8 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
       m_solver->advance_euler(state, m_k2, m_k1, a_dt);
     }
 
-    m_amr->average_down(state, m_realm, m_phase);
-    m_amr->average_down(state, m_realm, m_phase);
+    m_amr->averageDown(state, m_realm, m_phase);
+    m_amr->averageDown(state, m_realm, m_phase);
   }
   else{
     MayDay::Abort("advection_diffusion_stepper - unknown integrator requested");

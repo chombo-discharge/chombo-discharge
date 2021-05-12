@@ -20,7 +20,7 @@ air_eed_tagger::~air_eed_tagger(){
 }
 
 void air_eed_tagger::parse_options(){
-  parse_verbosity();
+  parseVerbosity();
   parse_boxes();
   parse_buffer();
 

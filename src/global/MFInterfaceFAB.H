@@ -51,7 +51,7 @@ public:
   */
   virtual void define(const MFLevelGrid& a_mflg, const DataIndex& a_dit){
 
-    const DisjointBoxLayout& dbl    = a_mflg.get_grids();
+    const DisjointBoxLayout& dbl    = a_mflg.getGrids();
     const ProblemDomain& domain     = a_mflg.get_domain();
     const RefCountedPtr<mfis>& mfis = a_mflg.get_mfis();
     const int num_phases            = mfis->num_phases();
@@ -60,7 +60,7 @@ public:
     m_phase.resize(num_phases, NULL);
     
     for (int i = 0; i < num_phases; i++){
-      const EBLevelGrid& eblg = a_mflg.get_eblg(i);
+      const EBLevelGrid& eblg = a_mflg.getEBLevelGrid(i);
       const EBISLayout& ebisl = eblg.getEBISL();
       m_phase[i] = new BaseIVFAB<T>(m_ivs, ebisl[a_dit].getEBGraph(), 1);
     }

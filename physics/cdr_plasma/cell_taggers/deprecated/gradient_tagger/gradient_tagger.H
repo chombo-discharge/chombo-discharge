@@ -32,7 +32,7 @@ public:
   */
   virtual void define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 		      const RefCountedPtr<time_stepper>&           a_timestepper,
-		      const RefCountedPtr<amr_mesh>&               a_amr,
+		      const RefCountedPtr<AmrMesh>&               a_amr,
 		      const RefCountedPtr<computational_geometry>& a_compgeom,
 		      const RefCountedPtr<physical_domain>&        a_physdom);
 

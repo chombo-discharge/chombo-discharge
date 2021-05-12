@@ -14,7 +14,7 @@
 
 #include "computational_geometry.H"
 #include "cdr_plasma_physics.H"
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 #include "mfis.H"
 #include "cdr_layout.H"
 #include "rte_layout.H"
@@ -59,10 +59,10 @@ namespace physics {
       virtual void write_J(EBAMRCellData& a_output, int& a_comp) const;
       virtual void post_checkpoint_setup();
       virtual void print_step_report() override;
-      virtual void register_operators() override;
+      virtual void registerOperators() override;
       virtual void allocate() override;
       virtual void post_initialize() override;
-      virtual void register_realms() override;
+      virtual void registerRealms() override;
       virtual void post_regrid() override;
 
       /*!
@@ -490,14 +490,14 @@ namespace physics {
 	@brief Compute the gradient at the boundary (we also take the dot product w.r.t. to the normal vector)
 	@note This version computes the gradients from phi
       */
-      virtual void compute_gradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
+      virtual void computeGradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
 					   const phase::which_phase&     a_phase,
 					   const Vector<EBAMRCellData*>& a_phi);
 
       /*!
 	@brief Compute gradients at domain faces
       */
-      virtual void compute_gradients_at_domain_faces(Vector<EBAMRIFData*>&         a_grad,
+      virtual void computeGradients_at_domain_faces(Vector<EBAMRIFData*>&         a_grad,
 						     const phase::which_phase&     a_phase,
 						     const Vector<EBAMRCellData*>& a_phi);
 
@@ -737,7 +737,7 @@ namespace physics {
       /*!
 	@brief Do a sanity check
       */
-      virtual void sanity_check();
+      virtual void sanityCheck();
 
       /*!
 	@brief Set fast rte
@@ -941,7 +941,7 @@ namespace physics {
 
 
       // Various parsing functions that are common to many derived classes
-      virtual void parse_verbosity();
+      virtual void parseVerbosity();
       virtual void parse_solver_verbosity();
       virtual void parse_cfl();
       virtual void parse_relax_time();
@@ -966,7 +966,7 @@ namespace physics {
       /*!
 	@brief Index space
       */
-      RefCountedPtr<mfis> m_mfis;
+      RefCountedPtr<mfis> m_multifluidIndexSpace;
 
       /*!
 	@brief Plasma kinetics
@@ -1076,7 +1076,7 @@ namespace physics {
       bool m_interp_sources;
 
       /*!
-	@brief Check if solver does subcyling. If it does, we need to tell amr_mesh to make some extra storage for us
+	@brief Check if solver does subcyling. If it does, we need to tell AmrMesh to make some extra storage for us
       */
       bool m_subcycle;
     };

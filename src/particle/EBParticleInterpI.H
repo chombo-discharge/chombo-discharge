@@ -17,7 +17,7 @@ void EBParticleInterp::deposit(const List<P>& a_particleList, FArrayBox& a_rho, 
     const RealVect& this_x = this_particle.position();
     const Real& this_m     = this_particle.mass();
     depositParticle(a_rho, 
-		    m_prob_lo, 
+		    m_probLo, 
 		    m_dx, 
 		    this_x, 
 		    this_m, 
@@ -32,7 +32,7 @@ void EBParticleInterp::deposit2(const List<P>& a_particleList, FArrayBox& a_rho,
     const RealVect& this_x = this_particle.position();
     const Real& this_m     = this_particle.mass();
     depositParticle2(a_rho, 
-		     m_prob_lo, 
+		     m_probLo, 
 		     m_dx, 
 		     this_x, 
 		     this_m, 
@@ -47,7 +47,7 @@ void EBParticleInterp::deposit4(const List<P>& a_particleList, FArrayBox& a_rho,
     const RealVect& this_x = this_particle.position();
     const Real& this_m     = this_particle.mass();
     depositParticle4(a_rho, 
-		     m_prob_lo, 
+		     m_probLo, 
 		     m_dx, 
 		     this_x, 
 		     this_m, 
@@ -64,7 +64,7 @@ void EBParticleInterp::interpolateDiffusion(List<P>&              a_particleList
     P& p = lit();
     interpolateParticle(particleDiffusion,
 			a_diffusionField,
-			m_prob_lo,
+			m_probLo,
 			m_dx,
 			p.position(),
 			a_interpType);
@@ -81,7 +81,7 @@ void EBParticleInterp::interpolateMobility(List<P>&              a_particleList,
     P& p = lit();
     interpolateParticle(particleMobility,
 			a_mobilityField,
-			m_prob_lo,
+			m_probLo,
 			m_dx,
 			p.position(),
 			a_interpType);
@@ -98,7 +98,7 @@ void EBParticleInterp::interpolateVelocity(List<P>&              a_particleList,
     P& p = lit();
     interpolateParticle(particleVelocity,
 			a_velocityField,
-			m_prob_lo,
+			m_probLo,
 			m_dx,
 			p.position(),
 			a_interpType);
@@ -115,7 +115,7 @@ void EBParticleInterp::interpolateAcceleration(List<P>&              a_particleL
     P& p = lit();
     interpolateParticle(particleAcceleration,
 			a_accelerationField,
-			m_prob_lo,
+			m_probLo,
 			m_dx,
 			p.position(),
 			a_interpType);

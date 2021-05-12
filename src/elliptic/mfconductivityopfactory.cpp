@@ -41,7 +41,7 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
   CH_assert(a_mflg[0].num_phases() <= 2); 
 
   m_num_levels = (a_num_levels > 0) ? a_num_levels : a_grids.size();
-  m_mfis       = a_mfis;
+  m_multifluidIndexSpace       = a_mfis;
   m_mflg       = a_mflg;
   m_mfquadcfi  = a_mfquadcfi;
   m_mffluxreg  = a_mffluxreg;
@@ -146,7 +146,7 @@ void mfconductivityopfactory::define_multigrid_stuff(){
       bool at_amr_lvl  = true;
       ProblemDomain cur_domain = m_domains[lvl];
 
-      has_coarser = m_test_ref < m_max_box_size;
+      has_coarser = m_test_ref < m_maxBoxSize;
 
       if(!has_coarser){
 	m_has_mg_objects[lvl] = false;
@@ -166,8 +166,8 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 	// Check if we have coarser stuff
 	if(lvl == 0 && imgsize <= m_mg_mflg.size()){
 	  has_coarser    = true;
-	  grid_coar_mg   = m_mg_mflg[imgsize-1].get_eblg(0).getDBL();
-	  domain_coar_mg = m_mg_mflg[imgsize-1].get_eblg(0).getDomain();
+	  grid_coar_mg   = m_mg_mflg[imgsize-1].getEBLevelGrid(0).getDBL();
+	  domain_coar_mg = m_mg_mflg[imgsize-1].getEBLevelGrid(0).getDomain();
 	  layout_changed = true; // Different proc layout for these
 	}
 	else{ // Just coarsen the grids in a "regular way"
@@ -176,7 +176,7 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 						   fine_grid,      // Fine/current level
 						   domain_fine,    // Fine/current domain
 						   mg_refi,        // Refinement factor
-						   m_max_box_size, // 
+						   m_maxBoxSize, // 
 						   layout_changed, // May or may not become different
 						   m_test_ref);    //
 	  if(domain_coar_mg.size()[0] < m_test_ref){
@@ -248,18 +248,18 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 	  const int ebghost = 4; // Ghost cells for MG, using 4 since that allows refinement of 4
 	  const int   ghost = 1; // Ghost cells for MG levels
 
-	  m_mflg_mg[lvl].push_back(MFLevelGrid(grid_coar_mg, domain_coar_mg, ebghost, m_mfis));
+	  m_mflg_mg[lvl].push_back(MFLevelGrid(grid_coar_mg, domain_coar_mg, ebghost, m_multifluidIndexSpace));
 
 	  const int img = m_mflg_mg[lvl].size() - 1; // Last one added, i.e. the coarsest that we have so far
 
 	  const MFLevelGrid& mflg_coar = m_mflg_mg[lvl][img  ];    // Coarsened EBLevelGrids for all phases
 	  const MFLevelGrid& mflg_fine = m_mflg_mg[lvl][img-1];    // Fine EBLevelGrids for all phases
 
-	  //	    Vector<EBISLayout> ebisl_coar = mflg_coar.get_ebisl();  // Need this stuff for factories. 
+	  //	    Vector<EBISLayout> ebisl_coar = mflg_coar.getEBISLayout();  // Need this stuff for factories. 
 	  Vector<int> comps;
 	  Vector<EBISLayout> ebisl_coar;
 	  for (int i = 0; i < mflg_coar.num_phases(); i++){
-	    const EBLevelGrid& eblg = mflg_coar.get_eblg(i);
+	    const EBLevelGrid& eblg = mflg_coar.getEBLevelGrid(i);
 	    const EBISLayout& ebisl = eblg.getEBISL();
 	    ebisl_coar.push_back(ebisl);
 	    comps.push_back(ncomps);
@@ -269,8 +269,8 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 	  // Averaging operator for m_jump_mg
 	  const int ncomp      = 1;
 	  const int main_phase = 0;
-	  const EBLevelGrid& eblg_fine = mflg_fine.get_eblg(main_phase);
-	  const EBLevelGrid& eblg_coar = mflg_coar.get_eblg(main_phase);
+	  const EBLevelGrid& eblg_fine = mflg_fine.getEBLevelGrid(main_phase);
+	  const EBLevelGrid& eblg_coar = mflg_coar.getEBLevelGrid(main_phase);
 	  RefCountedPtr<ebcoarseaverage> aveop(new ebcoarseaverage(eblg_fine.getDBL(),    eblg_coar.getDBL(),
 								   eblg_fine.getEBISL(),  eblg_coar.getEBISL(),
 								   eblg_coar.getDomain(), mg_refi, ncomp,
@@ -348,8 +348,8 @@ void mfconductivityopfactory::coarsen_coefficients(LevelData<MFCellFAB>&        
   }
   else {
     for (int i = 0; i < a_mflg_coar.num_phases(); i++){
-      const EBLevelGrid& eblg_coar = a_mflg_coar.get_eblg(i);
-      const EBLevelGrid& eblg_fine = a_mflg_fine.get_eblg(i);
+      const EBLevelGrid& eblg_coar = a_mflg_coar.getEBLevelGrid(i);
+      const EBLevelGrid& eblg_fine = a_mflg_fine.getEBLevelGrid(i);
       ebcoarseaverage aveop(eblg_fine.getDBL(),    eblg_coar.getDBL(),
 			    eblg_fine.getEBISL(),  eblg_coar.getEBISL(),
 			    eblg_coar.getDomain(), a_ref_to_depth, ncomp,
@@ -397,7 +397,7 @@ void mfconductivityopfactory::set_time(Real* a_time){
 }
 
 void mfconductivityopfactory::set_max_box_size(const int a_max_box_size){
-  m_max_box_size = a_max_box_size;
+  m_maxBoxSize = a_max_box_size;
 }
 
 void mfconductivityopfactory::reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim){
@@ -420,7 +420,7 @@ void mfconductivityopfactory::define_jump_stuff(){
   const int main_phase = 0; // Interface region is the intersection between gas-side irregular cells and solid phase cells
     
   for (int lvl = 0; lvl < m_num_levels; lvl++){
-    const EBLevelGrid& eblg  = m_mflg[lvl].get_eblg(main_phase);
+    const EBLevelGrid& eblg  = m_mflg[lvl].getEBLevelGrid(main_phase);
     const EBISLayout& ebisl = eblg.getEBISL();
 
     m_jumpcells[lvl] = RefCountedPtr<LayoutData<IntVectSet> > (new LayoutData<IntVectSet> (m_grids[lvl]));
@@ -444,8 +444,8 @@ void mfconductivityopfactory::define_jump_stuff(){
     const bool has_coar = lvl > 0;
 
     if(has_coar){
-      const EBLevelGrid& eblg_fine = m_mflg[lvl].get_eblg(main_phase);
-      const EBLevelGrid& eblg_coar = m_mflg[lvl-1].get_eblg(main_phase);
+      const EBLevelGrid& eblg_fine = m_mflg[lvl].getEBLevelGrid(main_phase);
+      const EBLevelGrid& eblg_coar = m_mflg[lvl-1].getEBLevelGrid(main_phase);
       const int ref_ratio          = m_ref_rat[lvl-1];
 	
       m_aveop[lvl] = RefCountedPtr<ebcoarseaverage> (new ebcoarseaverage(eblg_fine.getDBL(),    eblg_coar.getDBL(),
@@ -456,8 +456,8 @@ void mfconductivityopfactory::define_jump_stuff(){
   }
 }
 
-void mfconductivityopfactory::average_down_amr(){
-  CH_TIME("mfconductivityopfactory::average_down_amr");
+void mfconductivityopfactory::averageDown_amr(){
+  CH_TIME("mfconductivityopfactory::averageDown_amr");
     
   const int ncomp        = 0;
   const Interval interv  = Interval(0, ncomp -1);
@@ -466,13 +466,13 @@ void mfconductivityopfactory::average_down_amr(){
   for (int lvl = finest_level; lvl > 0; lvl--){ // Average down AMR levels
     m_aveop[lvl]->average(*m_jump[lvl-1], *m_jump[lvl], interv);
 #if verb // Debug
-    pout() << "mfconductivityopfactory::average_down_amr from AMR level = " << lvl << " and onto AMR level = " << lvl - 1 << endl;
+    pout() << "mfconductivityopfactory::averageDown_amr from AMR level = " << lvl << " and onto AMR level = " << lvl - 1 << endl;
 #endif
   }
 }
 
-void mfconductivityopfactory::average_down_mg(){
-  CH_TIME("mfconductivityopfactory::average_down_mg");
+void mfconductivityopfactory::averageDown_mg(){
+  CH_TIME("mfconductivityopfactory::averageDown_mg");
 
   const int ncomp        = 0;
   const Interval interv  = Interval(0, ncomp -1);
@@ -486,7 +486,7 @@ void mfconductivityopfactory::average_down_mg(){
 
       for (int img = finest_mg_level+1; img <= coarsest_mg_level; img++){ 
 #if verb // DEBUG
-	pout() << "mfconductivityopfactory::average_down_mg from AMR level = " << lvl
+	pout() << "mfconductivityopfactory::averageDown_mg from AMR level = " << lvl
 	       << " from MG level = " << img-1
 	       << " to   MG level = " << img 
 	       << " fine domain = " << m_domains_mg[lvl][img-1]
@@ -495,18 +495,18 @@ void mfconductivityopfactory::average_down_mg(){
 #endif
 #if 0 // Debug
 	if(m_aveop_mg[lvl][img].isNull()){
-	  MayDay::Abort("mfconductivityopfactory::average_down_mg - aveop is NULL");
+	  MayDay::Abort("mfconductivityopfactory::averageDown_mg - aveop is NULL");
 	}
 #endif
 	m_aveop_mg[lvl][img]->average(*jump_mg[img], *jump_mg[img-1], interv); // Average down onto level img
 #if verb
-	pout() << "mfconductivityopfactory::average_down_mg - done" << endl;
+	pout() << "mfconductivityopfactory::averageDown_mg - done" << endl;
 #endif
       }
     }
   }
 #if verb // DEBUG
-  pout() << "mfconductivityopfactory::average_down_mg - done exit " << endl;
+  pout() << "mfconductivityopfactory::averageDown_mg - done exit " << endl;
 #endif
 }
 
@@ -529,8 +529,8 @@ void mfconductivityopfactory::set_jump(const Real& a_sigma, const Real& a_scale)
   //   EBLevelDataOps::setVal(*m_jump[lvl], a_sigma);
   //   data_ops::scale(*m_jump[lvl], a_scale);
   // }
-  // this->average_down_amr();
-  // this->average_down_mg();
+  // this->averageDown_amr();
+  // this->averageDown_mg();
 
   data_ops::set_value(m_jump, a_sigma*a_scale);
   for (int i = 0; i < m_jump_mg.size(); i++){
@@ -562,8 +562,8 @@ void mfconductivityopfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a
     m_jump[lvl]->exchange();
   }
 
-  this->average_down_amr();
-  this->average_down_mg();
+  this->averageDown_amr();
+  this->averageDown_mg();
 
 #if verb
   pout() << "mfconductivityopfactory::set_jump(data based) - done" << endl;
@@ -737,7 +737,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
 #if verb
   pout() << "defining oper" << endl;
 #endif
-  oper->define(m_mfis,           // Set from factory
+  oper->define(m_multifluidIndexSpace,           // Set from factory
 	       m_dombc,          // Set from factory
 	       aco,              // Set to m_aco[ref] (for AMR) or m_aco_mg[ref][img] for MG
 	       bco,              // Set to m_bco[ref] (for AMR) or m_bco_mg[ref][img] for MG
@@ -889,7 +889,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
 #endif
   mfconductivityop* oper = new mfconductivityop();
 
-  oper->define(m_mfis,
+  oper->define(m_multifluidIndexSpace,
 	       m_dombc,
 	       aco,
 	       bco,

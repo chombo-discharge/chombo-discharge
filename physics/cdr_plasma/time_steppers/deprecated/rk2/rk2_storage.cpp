@@ -12,7 +12,7 @@ rk2::cdr_storage::cdr_storage(){
 
 }
 
-rk2::cdr_storage::cdr_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
+rk2::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
   m_amr   = a_amr;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
@@ -52,7 +52,7 @@ rk2::poisson_storage::poisson_storage(){
 
 }
 
-rk2::poisson_storage::poisson_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
+rk2::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
   m_amr   = a_amr;
   m_ncomp = a_ncomp;
   m_phase = a_phase;
@@ -88,7 +88,7 @@ rk2::rte_storage::rte_storage(){
 
 }
 
-rk2::rte_storage::rte_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
+rk2::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
   m_amr   = a_amr;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
@@ -112,7 +112,7 @@ rk2::sigma_storage::sigma_storage(){
 
 }
 
-rk2::sigma_storage::sigma_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
+rk2::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
   m_amr   = a_amr;
   m_phase = a_phase;
   m_ncomp = a_ncomp;

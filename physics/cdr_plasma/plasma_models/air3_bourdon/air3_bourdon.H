@@ -137,7 +137,7 @@ namespace physics {
 
 
       void read_file_entries(lookup_table& a_table, const std::string a_string);
-      void parse_domain_bc();
+      void parseDomain_bc();
       void instantiate_species();
 
 

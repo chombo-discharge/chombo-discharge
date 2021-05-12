@@ -42,7 +42,7 @@ air_eed::air_eed() {
   parse_lfa();
   parse_photoi();
   parse_see();
-  parse_domain_bc();
+  parseDomain_bc();
   parse_chemistry();
 
   init_rng();                 // Initialize random number generators
@@ -430,7 +430,7 @@ RealVect air_eed::random_direction3D(){
 }
 #endif
 
-void air_eed::parse_domain_bc(){
+void air_eed::parseDomain_bc(){
 
   ParmParse pp("air_eed");
   std::string str;

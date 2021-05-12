@@ -39,7 +39,7 @@ morrow_zheleznyak::morrow_zheleznyak(){
   // Parse some basic settings
   parse_gas_params();
   parse_see();
-  parse_domain_bc();
+  parseDomain_bc();
   parse_ebbc();
   parse_reaction_settings();
   parse_alpha_corr();
@@ -937,7 +937,7 @@ void morrow_zheleznyak::parse_see(){
   pp.get("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
 }
 
-void morrow_zheleznyak::parse_domain_bc(){
+void morrow_zheleznyak::parseDomain_bc(){
 
   ParmParse pp("morrow_zheleznyak");
   std::string str;

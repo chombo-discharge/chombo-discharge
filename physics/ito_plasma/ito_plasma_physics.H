@@ -368,7 +368,7 @@ namespace physics {
 	@brief Check that all weights are > 0
       */
       inline
-      void sanity_check(const List<ito_particle>& a_lit) const;
+      void sanityCheck(const List<ito_particle>& a_lit) const;
 
       /*!
 	@brief Check that all weights are > 0

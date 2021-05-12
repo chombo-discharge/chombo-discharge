@@ -23,15 +23,15 @@ void MFQuadCFInterp::define(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quad
   m_quadcfi = a_quadcfi;
 }
 
-const RefCountedPtr<EBQuadCFInterp>& MFQuadCFInterp::get_quadcfi_ptr(const int a_phase) const {
+const RefCountedPtr<EBQuadCFInterp>& MFQuadCFInterp::getNWOEBQuadCFInterp_ptr(const int a_phase) const {
   return m_quadcfi[a_phase];
 }
 
-EBQuadCFInterp& MFQuadCFInterp::get_quadcfi(const int a_phase) {
+EBQuadCFInterp& MFQuadCFInterp::getNWOEBQuadCFInterp(const int a_phase) {
   return *m_quadcfi[a_phase];
 }
 
-const EBQuadCFInterp& MFQuadCFInterp::get_quadcfi(const int a_phase) const {
+const EBQuadCFInterp& MFQuadCFInterp::getNWOEBQuadCFInterp(const int a_phase) const {
   return *m_quadcfi[a_phase];
 }
 

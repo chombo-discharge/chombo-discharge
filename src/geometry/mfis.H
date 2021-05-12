@@ -96,7 +96,7 @@ protected:
   /*!
     @brief MFIndexSpace
   */
-  RefCountedPtr<MFIndexSpace> m_mfis;
+  RefCountedPtr<MFIndexSpace> m_multifluidIndexSpace;
 };
 #include "CD_NamespaceFooter.H"
 

@@ -19,7 +19,7 @@ morrow_jiang::morrow_jiang(){
   instantiate_species();
   parse_gas_params();
   parse_see();
-  parse_domain_bc();
+  parseDomain_bc();
   parse_reaction_settings();
   
   init_rng();
@@ -939,7 +939,7 @@ void morrow_jiang::parse_see(){
   pp.get("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
 }
 
-void morrow_jiang::parse_domain_bc(){
+void morrow_jiang::parseDomain_bc(){
 
   ParmParse pp("morrow_jiang");
   std::string str;

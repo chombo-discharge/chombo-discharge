@@ -136,8 +136,8 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_mflg   = a_mflg;
   m_dx     = a_dx;
   m_domain = m_mflg.get_domain();
-  m_mfis   = m_mflg.get_mfis();
-  m_grids  = m_mflg.get_grids();
+  m_multifluidIndexSpace   = m_mflg.get_mfis();
+  m_grids  = m_mflg.getGrids();
   m_order  = a_order;
   m_cfivs  = a_cfivs;
 
@@ -158,7 +158,7 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   int num = 0;
 
   // If we only have one phase, there are no jump cells and we don't need to do anything. 
-  if(m_mfis->num_phases() > 1){
+  if(m_multifluidIndexSpace->num_phases() > 1){
     for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
       MFInterfaceFAB<Real>& bco            = m_bco[dit()];
       MFInterfaceFAB<Real>& weights        = m_weights[dit()];
@@ -217,7 +217,7 @@ void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
 
   const int comp = 0;
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
-    for (int iphase = 0; iphase < m_mfis->num_phases(); iphase ++){
+    for (int iphase = 0; iphase < m_multifluidIndexSpace->num_phases(); iphase ++){
 
       BaseIVFAB<Real>& bco             = m_bco[dit()].get_ivfab(iphase);
       const BaseIVFAB<Real>& bco_irreg = a_bco[dit()].get_ivfab(iphase);
@@ -236,7 +236,7 @@ void jump_bc::build_stencils(){
   const int comp = 0;
 
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
-    for (int iphase = 0; iphase < m_mfis->num_phases(); iphase ++){
+    for (int iphase = 0; iphase < m_multifluidIndexSpace->num_phases(); iphase ++){
 
       BaseIVFAB<Real>& bco               = m_bco[dit()].get_ivfab(iphase);
       BaseIVFAB<Real>& avgBco            = m_avgBco[dit()].get_ivfab(iphase);
@@ -248,7 +248,7 @@ void jump_bc::build_stencils(){
       avgBco.setVal(0.0);
       avgWeights.setVal(0.0);
 
-      const EBLevelGrid& eblg = m_mflg.get_eblg(iphase);
+      const EBLevelGrid& eblg = m_mflg.getEBLevelGrid(iphase);
       const EBISLayout ebisl  = eblg.getEBISL();
 
       const EBISBox& ebisbox  = ebisl[dit()];
@@ -380,7 +380,7 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 void jump_bc::compute_dphidn(Vector<LevelData<BaseIVFAB<Real> > >&       a_dphidn,
 			     const Vector<LevelData<BaseIVFAB<Real> > >& a_phibc,
 			     const LevelData<MFCellFAB>&                 a_phi){
-  for (int iphase = 0; iphase < m_mfis->num_phases(); iphase++){
+  for (int iphase = 0; iphase < m_multifluidIndexSpace->num_phases(); iphase++){
     this->compute_dphidn(a_dphidn[iphase], a_phibc[iphase], a_phi, iphase);
   }
 }

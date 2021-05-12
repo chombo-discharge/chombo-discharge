@@ -27,7 +27,7 @@ cdr_muscl::~cdr_muscl(){
 void cdr_muscl::parse_options(){
   parse_rng_seed();     // Parses RNG seed
   parse_plotmode();     // Parses plot mode
-  parse_domain_bc();    // Parses domain BC options
+  parseDomain_bc();    // Parses domain BC options
   parse_slopelim();     // Parses slope limiter settings
   parse_plot_vars();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
@@ -43,7 +43,7 @@ void cdr_muscl::parse_runtime_options(){
   }
 
   parse_plotmode();     // Parses plot mode
-  parse_domain_bc();    // Parses domain BC options
+  parseDomain_bc();    // Parses domain BC options
   parse_slopelim();     // Parses slope limiter settings
   parse_plot_vars();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
@@ -81,7 +81,7 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
 
   const int comp         = 0;
   const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
 
   // Need to overwrite ghost cells, so I do that here.
@@ -90,15 +90,15 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
   data_ops::set_value(copy_state, 0.0);
   data_ops::incr(copy_state, a_state, 1.0);
 
-  m_amr->average_down(copy_state,     m_realm, m_phase);
-  m_amr->interp_ghost_pwl(copy_state, m_realm, m_phase);
+  m_amr->averageDown(copy_state,     m_realm, m_phase);
+  m_amr->interpGhost_pwl(copy_state, m_realm, m_phase);
 
   data_ops::set_value(a_face_state, 0.0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       EBFluxFAB& face_state  = (*a_face_state[lvl])[dit()];
@@ -332,10 +332,10 @@ void cdr_muscl::compute_bndry_outflow(LevelData<EBFluxFAB>&       a_flux,
   const int comp  = 0;
   const int ncomp = 1;
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_lvl];
-  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[a_lvl];
-  const Real dx                = m_amr->get_dx()[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
+  const Real dx                = m_amr->getDx()[a_lvl];
   const Real zero              = 0.0;
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

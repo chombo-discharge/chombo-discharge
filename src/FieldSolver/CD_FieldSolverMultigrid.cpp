@@ -19,7 +19,7 @@
 #include <MFQuadCFInterp.H>
 #include <MFInterfaceFAB.H>
 #include <jump_bc.H>
-#include <amr_mesh.H>
+#include <CD_AmrMesh.H>
 #include <CD_ConductivityElectrostaticDomainBcFactory.H>
 #include <units.H>
 #include <CD_NamespaceHeader.H>
@@ -157,7 +157,7 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_state,
   const Real t0 = MPI_Wtime();
 
   const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
 
   const Real t1 = MPI_Wtime();
@@ -191,7 +191,7 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_state,
   EBAMRCellData srcGas = m_amr->alias(phase::gas,   m_scaledSource);
   EBAMRCellData srcSol = m_amr->alias(phase::solid, m_scaledSource);
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     EBLevelDataOps::checkNANINF(*phiGas[lvl]);
     EBLevelDataOps::checkNANINF(*phiSol[lvl]);
 
@@ -256,8 +256,8 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_state,
 
   m_multigridSolver.revert(phi, rhs, finest_level, 0);
 
-  m_amr->average_down(a_state, m_realm);
-  m_amr->interp_ghost(a_state, m_realm);
+  m_amr->averageDown(a_state, m_realm);
+  m_amr->interpGhost(a_state, m_realm);
 
   const Real t5 = MPI_Wtime();
 
@@ -294,21 +294,21 @@ void FieldSolverMultigrid::registerOperators(){
   }
 
   if(m_amr.isNull()){
-    MayDay::Abort("FieldSolverMultigrid::registerOperators - need to set amr_mesh!");
+    MayDay::Abort("FieldSolverMultigrid::registerOperators - need to set AmrMesh!");
   }
   else{
-    m_amr->register_operator(s_eb_coar_ave,     m_realm, phase::gas);
-    m_amr->register_operator(s_eb_coar_ave,     m_realm, phase::solid);
-    m_amr->register_operator(s_eb_fill_patch,   m_realm, phase::gas);
-    m_amr->register_operator(s_eb_fill_patch,   m_realm, phase::solid);
-    m_amr->register_operator(s_eb_pwl_interp,   m_realm, phase::gas);
-    m_amr->register_operator(s_eb_pwl_interp,   m_realm, phase::solid);
-    m_amr->register_operator(s_eb_quad_cfi,     m_realm, phase::gas);
-    m_amr->register_operator(s_eb_quad_cfi,     m_realm, phase::solid);
-    m_amr->register_operator(s_eb_irreg_interp, m_realm, phase::gas);
-    m_amr->register_operator(s_eb_irreg_interp, m_realm, phase::solid);
-    m_amr->register_operator(s_eb_flux_reg,     m_realm, phase::gas);
-    m_amr->register_operator(s_eb_flux_reg,     m_realm, phase::solid);
+    m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::solid);
+    m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::solid);
+    m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::solid);
+    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::solid);
+    m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::solid);
+    m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::solid);
   }
 }
 
@@ -340,12 +340,12 @@ void FieldSolverMultigrid::setPermittivities(const Vector<dielectric>& a_dielect
   }
 
   if(a_dielectrics.size() > 0){
-    const RealVect origin  = m_amr->get_prob_lo();
-    const Vector<Real> dx  = m_amr->get_dx();
-    const int finest_level = m_amr->get_finest_level();
+    const RealVect origin  = m_amr->getProbLo();
+    const Vector<Real> dx  = m_amr->getDx();
+    const int finest_level = m_amr->getFinestLevel();
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       
       LevelData<EBFluxFAB> bco;
       LevelData<BaseIVFAB<Real> > bcoIrreg;
@@ -473,8 +473,8 @@ void FieldSolverMultigrid::defineDeeperMultigridLevels(){
     pout() << "FieldSolverMultigrid::defineDeeperMultigridLevels" << endl;
   }
 
-  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->get_ebis(phase::solid);
 
   const int coar_ref = 2;
   
@@ -487,11 +487,11 @@ void FieldSolverMultigrid::defineDeeperMultigridLevels(){
   m_mg_eblg[phase::gas].resize(0);
   m_mg_eblg[phase::solid].resize(0);
 
-  // Get some stuff from amr_mesh on how to decompose the levels
-  const Vector<ProblemDomain>& domains = m_amr->get_domains();
-  const int max_box_size               = m_amr->get_max_box_size();
-  const int blocking_factor            = m_amr->get_blocking_factor();
-  const int num_ebghost                = m_amr->get_eb_ghost();
+  // Get some stuff from AmrMesh on how to decompose the levels
+  const Vector<ProblemDomain>& domains = m_amr->getDomains();
+  const int max_box_size               = m_amr->getMaxBoxSize();
+  const int blocking_factor            = m_amr->getBlockingFactor();
+  const int num_numEbGhostsCells                = m_amr->getNumberOfEbGhostCells();
 
   int num_coar       = 0;
   bool has_coar      = true;
@@ -526,13 +526,13 @@ void FieldSolverMultigrid::defineDeeperMultigridLevels(){
       if(!ebis_gas.isNull()){
 	m_mg_eblg[phase::gas].push_back(RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_deeperMultigridGrids[idx],
 										    m_deeperMultigridDomains[idx],
-										    num_ebghost,
+										    num_numEbGhostsCells,
 										    ebis_gas)));
       }
       if(!ebis_sol.isNull()){
 	m_mg_eblg[phase::solid].push_back(RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_deeperMultigridGrids[idx],
 										      m_deeperMultigridDomains[idx],
-										      num_ebghost,
+										      num_numEbGhostsCells,
 										      ebis_sol)));
       }
 
@@ -541,7 +541,7 @@ void FieldSolverMultigrid::defineDeeperMultigridLevels(){
       if(!ebis_gas.isNull()) eblgs.push_back(*m_mg_eblg[phase::gas][idx]);
       if(!ebis_sol.isNull()) eblgs.push_back(*m_mg_eblg[phase::solid][idx]);
       
-      m_mg_mflg.push_back(RefCountedPtr<MFLevelGrid> (new MFLevelGrid(m_mfis, eblgs)));
+      m_mg_mflg.push_back(RefCountedPtr<MFLevelGrid> (new MFLevelGrid(m_multifluidIndexSpace, eblgs)));
 
       // Next iterate
       fine = coar;
@@ -577,16 +577,16 @@ void FieldSolverMultigrid::setupOperatorFactory(){
     pout() << "FieldSolverMultigrid::setupOperatorFactory" << endl;
   }
 
-  const int nphases                      = m_mfis->num_phases();
-  const int finest_level                 = m_amr->get_finest_level();
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
-  const Vector<int>& refinement_ratios   = m_amr->get_ref_rat();
-  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
-  const Vector<Real>& dx                 = m_amr->get_dx();
-  const RealVect& origin                 = m_amr->get_prob_lo();
+  const int nphases                      = m_multifluidIndexSpace->num_phases();
+  const int finest_level                 = m_amr->getFinestLevel();
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
+  const Vector<int>& refinement_ratios   = m_amr->getRefinementRatios();
+  const Vector<ProblemDomain>& domains   = m_amr->getDomains();
+  const Vector<Real>& dx                 = m_amr->getDx();
+  const RealVect& origin                 = m_amr->getProbLo();
 
-  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->get_ebis(phase::solid);
 
   // This stuff is needed for the operator factory
   Vector<MFLevelGrid>    mflg(1 + finest_level);
@@ -597,16 +597,16 @@ void FieldSolverMultigrid::setupOperatorFactory(){
     Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(nphases);
     Vector<RefCountedPtr<EBFluxRegister> > fluxreg_phases(nphases);
 
-    if(!ebis_gas.isNull()) eblg_phases[phase::gas]      = *(m_amr->get_eblg(m_realm, phase::gas)[lvl]);
-    if(!ebis_sol.isNull()) eblg_phases[phase::solid]    = *(m_amr->get_eblg(m_realm, phase::solid)[lvl]);
+    if(!ebis_gas.isNull()) eblg_phases[phase::gas]      = *(m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl]);
+    if(!ebis_sol.isNull()) eblg_phases[phase::solid]    = *(m_amr->getEBLevelGrid(m_realm, phase::solid)[lvl]);
 
-    if(!ebis_gas.isNull()) quadcfi_phases[phase::gas]   = (m_amr->get_old_quadcfi(m_realm, phase::gas)[lvl]);
-    if(!ebis_sol.isNull()) quadcfi_phases[phase::solid] = (m_amr->get_old_quadcfi(m_realm, phase::solid)[lvl]);
+    if(!ebis_gas.isNull()) quadcfi_phases[phase::gas]   = (m_amr->getEBQuadCFInterp(m_realm, phase::gas)[lvl]);
+    if(!ebis_sol.isNull()) quadcfi_phases[phase::solid] = (m_amr->getEBQuadCFInterp(m_realm, phase::solid)[lvl]);
 
-    if(!ebis_gas.isNull()) fluxreg_phases[phase::gas]   = (m_amr->get_flux_reg(m_realm, phase::gas)[lvl]);
-    if(!ebis_sol.isNull()) fluxreg_phases[phase::solid] = (m_amr->get_flux_reg(m_realm, phase::solid)[lvl]);
+    if(!ebis_gas.isNull()) fluxreg_phases[phase::gas]   = (m_amr->getFluxRegister(m_realm, phase::gas)[lvl]);
+    if(!ebis_sol.isNull()) fluxreg_phases[phase::solid] = (m_amr->getFluxRegister(m_realm, phase::solid)[lvl]);
     
-    mflg[lvl].define(m_mfis, eblg_phases);
+    mflg[lvl].define(m_multifluidIndexSpace, eblg_phases);
     mfquadcfi[lvl].define(quadcfi_phases);
     mffluxreg[lvl].define(fluxreg_phases);
   }
@@ -615,8 +615,8 @@ void FieldSolverMultigrid::setupOperatorFactory(){
   const Real alpha =  1.0; // Recall that Aco is zero so put anything you want here. 
   const Real beta  = -1.0;
 
-  const IntVect ghost_phi = m_amr->get_num_ghost()*IntVect::Unit;
-  const IntVect ghost_rhs = m_amr->get_num_ghost()*IntVect::Unit;
+  const IntVect ghost_phi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+  const IntVect ghost_rhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
   Vector<MFLevelGrid> mg_levelgrids;
   for (int lvl = 0; lvl < m_mg_mflg.size(); lvl++){
@@ -638,10 +638,10 @@ void FieldSolverMultigrid::setupOperatorFactory(){
     relax_type = 2;
   }
 
-  auto domfact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_domainBc, m_amr->get_prob_lo()));
+  auto domfact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_domainBc, m_amr->getProbLo()));
 
   // Create factory and set potential
-  m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
+  m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_multifluidIndexSpace,
 										 mflg,
 										 mfquadcfi,
 										 mffluxreg,
@@ -675,8 +675,8 @@ void FieldSolverMultigrid::setupMultigridSolver(){
     pout() << "FieldSolverMultigrid::setupMultigridSolver" << endl;
   }
 
-  const int finest_level       = m_amr->get_finest_level();
-  const ProblemDomain coar_dom = m_amr->get_domains()[0];
+  const int finest_level       = m_amr->getFinestLevel();
+  const ProblemDomain coar_dom = m_amr->getDomains()[0];
 
   // Select bottom solver
   LinearSolver<LevelData<MFCellFAB> >* botsolver = NULL;
@@ -687,7 +687,7 @@ void FieldSolverMultigrid::setupMultigridSolver(){
   }
   else if(m_bottomSolver == BottomSolver::BiCGStab){
     botsolver = &m_bicgstab;
-    if(m_mfis->num_phases() == 2){ // BiCGStab doesn't work with multifluid (yet)
+    if(m_multifluidIndexSpace->num_phases() == 2){ // BiCGStab doesn't work with multifluid (yet)
       botsolver = &m_mfsolver;
       
       if(m_verbosity > 0){

@@ -9,7 +9,7 @@
 #define _CDR_SOLVER_
 
 #include "computational_geometry.H"
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 #include "cdr_species.H"
 
 #include <random>
@@ -150,12 +150,12 @@ public:
   /*!
     @brief Register operators for AMR operations
   */
-  virtual void register_operators();
+  virtual void registerOperators();
 
   /*!
     @brief Sanity check
   */
-  virtual void sanity_check();
+  virtual void sanityCheck();
 
   /*!
     @brief Set the realm
@@ -175,7 +175,7 @@ public:
   /*!
     @brief Set the amr object
   */
-  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+  virtual void set_amr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Set domain bc type
@@ -446,7 +446,7 @@ protected:
   /*!
     @brief AMR; needed for grid stuff
   */
-  RefCountedPtr<amr_mesh> m_amr;
+  RefCountedPtr<AmrMesh> m_amr;
 
   /*!
     @brief Stencils for interpolating flux to centroids
@@ -822,7 +822,7 @@ protected:
   /*!
     @brief Parses domain BC options
   */
-  virtual void parse_domain_bc();    // Parses domain BC options
+  virtual void parseDomain_bc();    // Parses domain BC options
 
   /*!
     @brief Parses plot variables

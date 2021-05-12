@@ -50,16 +50,16 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
   
   bool found_stencil = false;
 
-  if(m_stencil_type == stencil_type::linear){
+  if(m_stencilType == stencil_type::linear){
     found_stencil = LinearStencil::getLinearInterpStencil(a_sten, a_ebisbox.centroid(a_vof), a_vof, a_domain, a_ebisbox);
   }
-  else if(m_stencil_type == stencil_type::taylor){
+  else if(m_stencilType == stencil_type::taylor){
     found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
-  else if(m_stencil_type == stencil_type::lsq){
+  else if(m_stencilType == stencil_type::lsq){
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
-  else if(m_stencil_type == stencil_type::pwl){
+  else if(m_stencilType == stencil_type::pwl){
     found_stencil = this->get_pwl_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
   else{

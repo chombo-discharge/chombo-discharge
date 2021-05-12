@@ -14,7 +14,7 @@
 using namespace physics::brownian_walker;
 
 brownian_walker_tagger::brownian_walker_tagger(RefCountedPtr<ito_solver>& a_solver,
-					       RefCountedPtr<amr_mesh>&   a_amr){
+					       RefCountedPtr<AmrMesh>&   a_amr){
   m_solver    = a_solver;
   m_amr       = a_amr;
   m_name      = "brownian_walker";

@@ -271,7 +271,7 @@ void ito_plasma_physics::remove_particles(List<ito_particle>& a_particles,
   
   if(a_numParticlesToRemove > zero){
 #if ITO_PLASMA_PHYSICS_DEBUG // Debug
-    this->sanity_check(a_particles);
+    this->sanityCheck(a_particles);
 
     const long long weightBefore = this->get_total_weight(a_particles);
 #endif
@@ -290,7 +290,7 @@ void ito_plasma_physics::remove_particles(List<ito_particle>& a_particles,
     this->reconcile_weights(a_particles, particleWeights);                              // Reconcile particle weights
 
 #if ITO_PLASMA_PHYSICS_DEBUG // Debug
-    this->sanity_check(a_particles);
+    this->sanityCheck(a_particles);
     const long long weightAfter = this->get_total_weight(a_particles);
 
     if(weightBefore - weightAfter != a_numParticlesToRemove){
@@ -329,14 +329,14 @@ void ito_plasma_physics::set_mean_particle_energy(List<ito_particle>& a_particle
 }
 
 inline
-void ito_plasma_physics::sanity_check(const List<ito_particle>& a_particles) const{
+void ito_plasma_physics::sanityCheck(const List<ito_particle>& a_particles) const{
 
   ListIterator<ito_particle> lit(a_particles);
   
   for (lit.begin(); lit.ok(); ++lit){
     const Real w = lit().mass();
 
-    if(w < 1.0) MayDay::Abort("ito_plasma_physics::sanity_check - can't have w < 1!!!!");
+    if(w < 1.0) MayDay::Abort("ito_plasma_physics::sanityCheck - can't have w < 1!!!!");
   }
 }
 

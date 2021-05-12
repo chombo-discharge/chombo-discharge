@@ -29,7 +29,7 @@ cdr_plasma_tagger::cdr_plasma_tagger(){
 
 cdr_plasma_tagger::cdr_plasma_tagger(const RefCountedPtr<cdr_plasma_physics>&     a_physics,
 				     const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
-				     const RefCountedPtr<amr_mesh>&               a_amr,
+				     const RefCountedPtr<AmrMesh>&               a_amr,
 				     const RefCountedPtr<computational_geometry>& a_compgeom) : cdr_plasma_tagger() {
   this->define(a_physics, a_timestepper, a_amr, a_compgeom);
 }
@@ -40,7 +40,7 @@ cdr_plasma_tagger::~cdr_plasma_tagger(){
 
 void cdr_plasma_tagger::define(const RefCountedPtr<cdr_plasma_physics>&     a_physics,
 			       const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
-			       const RefCountedPtr<amr_mesh>&               a_amr,
+			       const RefCountedPtr<AmrMesh>&               a_amr,
 			       const RefCountedPtr<computational_geometry>& a_compgeom){
   CH_TIME("cdr_plasma_tagger::define");
   if(m_verbosity > 5){
@@ -111,7 +111,7 @@ void cdr_plasma_tagger::write_plot_data(EBAMRCellData& a_output, Vector<std::str
     const Interval src_interv(0, 0);
     const Interval dst_interv(a_icomp, a_icomp);
     
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       tracer[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
       data_ops::set_covered_value(*a_output[lvl], a_icomp, 0.0);
     }
@@ -130,10 +130,10 @@ bool cdr_plasma_tagger::tag_cells(EBAMRTags& a_tags){
 
   bool got_new_tags = false;
 
-  const RealVect origin      = m_amr->get_prob_lo();
+  const RealVect origin      = m_amr->getProbLo();
   const Real time            = m_timestepper->get_time();
-  const int finest_level     = m_amr->get_finest_level();
-  const int max_depth        = m_amr->get_max_amr_depth();
+  const int finest_level     = m_amr->getFinestLevel();
+  const int max_depth        = m_amr->getMaxAmrDepth();
   const int finest_tag_level = (finest_level == max_depth) ? max_depth - 1 : finest_level; // Never tag on max_amr_depth
 
   if(m_num_tracers > 0){
@@ -142,9 +142,9 @@ bool cdr_plasma_tagger::tag_cells(EBAMRTags& a_tags){
     compute_tracers();
     
     for (int lvl = 0; lvl <= finest_tag_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm,m_phase)[lvl];
-      const Real dx                = m_amr->get_dx()[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm,m_phase)[lvl];
+      const Real dx                = m_amr->getDx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const Box box          = dbl.get(dit());

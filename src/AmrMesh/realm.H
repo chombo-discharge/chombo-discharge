@@ -37,7 +37,7 @@ public:
 	      const Vector<ProblemDomain>& a_domains,
 	      const Vector<int>& a_ref_rat,
 	      const Vector<Real>& a_dx,
-	      const RealVect a_prob_lo,
+	      const RealVect a_probLo,
 	      const int a_finest_level,
 	      const int a_ebghost,
 	      const int a_num_ghost,
@@ -54,69 +54,69 @@ public:
   static void copy(Vector<RefCountedPtr<LevelData<T> > >& a_dst, const Vector<RefCountedPtr<LevelData<T> > >& a_src);
 
   // Base and operator regrid
-  void set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
+  void setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
   void regrid_base(const int a_lmin);
-  void regrid_operators(const int a_lmin, const int a_lmax, const int a_regsize);
+  void regridOperators(const int a_lmin, const int a_lmax, const int a_regsize);
 
   // Register and query operator
-  void register_operator(const std::string a_operator, const phase::which_phase a_phase);
+  void registerOperator(const std::string a_operator, const phase::which_phase a_phase);
   bool query_operator(const std::string a_operator, const phase::which_phase a_phase);
 
   // Register and query masks
-  void register_mask(const std::string a_mask, const int a_buffer);
+  void registerMask(const std::string a_mask, const int a_buffer);
   bool query_mask(const std::string a_mask, const int a_buffer) const;
 
   // Get functions for neutral stuff
-  Vector<int>& get_ref_rat();
-  Vector<Real>& get_dx();
-  Vector<DisjointBoxLayout>& get_grids();
-  Vector<ProblemDomain>& get_domains();
-  Vector<RefCountedPtr<MFLevelGrid> >& get_mflg();
+  Vector<int>& getRefinementRatios();
+  Vector<Real>& getDx();
+  Vector<DisjointBoxLayout>& getGrids();
+  Vector<ProblemDomain>& getDomains();
+  Vector<RefCountedPtr<MFLevelGrid> >& getMFLevelGrid();
   
   const RefCountedPtr<EBIndexSpace>& get_ebis(const phase::which_phase a_phase);
-  Vector<EBISLayout>& get_ebisl(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& get_vofit(const phase::which_phase a_phase);
-  irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(const phase::which_phase a_phase);
-  irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(const phase::which_phase a_phase);
-  irreg_amr_stencil<noncons_div>& get_noncons_div_stencils(const phase::which_phase a_phase);
+  Vector<EBISLayout>& getEBISLayout(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& getVofIterator(const phase::which_phase a_phase);
+  irreg_amr_stencil<centroid_interp>& getCentroidInterpolationStencils(const phase::which_phase a_phase);
+  irreg_amr_stencil<eb_centroid_interp>& getEbCentroidInterpolationStencils(const phase::which_phase a_phase);
+  irreg_amr_stencil<noncons_div>& getNonConservativeDivergenceStencils(const phase::which_phase a_phase);
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten(const phase::which_phase a_phase);
 
   // Get functions for stuff that are specific to phase, but is not necessarily const
-  Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<EBGhostCloud> >& get_ghostcloud(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<AggEBPWLFillPatch> >& get_fillpatch(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<Copier> >& get_copier(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<Copier> >& get_reverse_copier(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<ebcoarseaverage> >& getCoarseAverage(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBGhostCloud> >& getGhostCloud(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<nwoebquadcfinterp> >& getNWOEBQuadCFInterp(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBMGInterp> >& getEBMGInterp(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFluxRegister> >&  getFluxRegister(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBLevelRedist> >&  getLevelRedist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBCoarToFineRedist> >&  getCoarToFineRedist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  getCoarToCoarRedist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFineToCoarRedist> >&  getFineToCoarRedist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<Copier> >& getCopier(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<Copier> >& getReverseCopier(const phase::which_phase a_phase);
 
-  EBAMRFAB& get_levelset(const phase::which_phase a_phase);
+  EBAMRFAB& getLevelset(const phase::which_phase a_phase);
 
-  AMRMask& get_mask(const std::string a_mask, const int a_buffer);
+  AMRMask& getMask(const std::string a_mask, const int a_buffer);
   
 protected:
 
   bool m_defined;
   int m_verbosity;
-  int m_finest_level;
+  int m_finestLevel;
 
-  RealVect m_prob_lo;
+  RealVect m_probLo;
 
   Vector<Real> m_dx;
-  Vector<int> m_ref_ratios;
+  Vector<int> m_refinementRatios;
   Vector<DisjointBoxLayout> m_grids;
   Vector<ProblemDomain> m_domains;
   Vector<RefCountedPtr<MFLevelGrid> > m_mflg;
-  RefCountedPtr<mfis> m_mfis;
+  RefCountedPtr<mfis> m_multifluidIndexSpace;
 
   // Phase realms and implicit functions
   std::map<phase::which_phase, RefCountedPtr<phase_realm> > m_realms;

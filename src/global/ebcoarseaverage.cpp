@@ -346,7 +346,7 @@ ebcoarseaverage::average(LevelData<BaseIVFAB<Real> >&        a_coarData,
 }
 /************************************/
 void
-ebcoarseaverage::conservative_average(LevelData<BaseIVFAB<Real> >&        a_coarData,
+ebcoarseaverage::conservativeAverage(LevelData<BaseIVFAB<Real> >&        a_coarData,
 				      const LevelData<BaseIVFAB<Real> >&  a_fineData,
 				      const Interval&                     a_variables)
 {
@@ -387,7 +387,7 @@ ebcoarseaverage::conservative_average(LevelData<BaseIVFAB<Real> >&        a_coar
 	  }
 	BaseIVFAB<Real>&       cofiFAB = coarFiData[dit()];
 	const BaseIVFAB<Real>& fineFAB = *fineFABPtr;
-	conservative_averageFAB(cofiFAB,
+	conservativeAverageFAB(cofiFAB,
 				fineFAB,
 				dit(),
 				a_variables);
@@ -543,7 +543,7 @@ ebcoarseaverage::averageFAB(BaseIVFAB<Real>&       a_coar,
 
 /***/
 void
-ebcoarseaverage::conservative_averageFAB(BaseIVFAB<Real>&       a_coar,
+ebcoarseaverage::conservativeAverageFAB(BaseIVFAB<Real>&       a_coar,
 					 const BaseIVFAB<Real>& a_fine,
 					 const DataIndex&       a_datInd,
 					 const Interval&        a_variables) const

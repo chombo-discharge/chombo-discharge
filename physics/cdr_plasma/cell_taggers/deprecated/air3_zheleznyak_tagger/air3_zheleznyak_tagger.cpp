@@ -20,7 +20,7 @@ air3_zheleznyak_tagger::~air3_zheleznyak_tagger(){
 }
 
 void air3_zheleznyak_tagger::parse_options(){
-  parse_verbosity();
+  parseVerbosity();
   parse_boxes();
   parse_buffer();
 

@@ -42,7 +42,7 @@ air7_zheleznyak::air7_zheleznyak() {
   parse_eta();
   parse_temperature();
   parse_see();
-  parse_domain_bc();
+  parseDomain_bc();
   init_rng();                 // Initialize random number generators
 }
 
@@ -247,7 +247,7 @@ void air7_zheleznyak::instantiate_species(){
 
 }
 
-void air7_zheleznyak::parse_domain_bc(){
+void air7_zheleznyak::parseDomain_bc(){
 
   ParmParse pp("air7_zheleznyak");
   std::string str;

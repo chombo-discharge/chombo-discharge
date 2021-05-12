@@ -46,7 +46,7 @@ air7_stephens::air7_stephens() {
   parse_photoi();
   parse_temperature();
   parse_see();
-  parse_domain_bc();
+  parseDomain_bc();
   init_rng();                 // Initialize random number generators
 }
 
@@ -327,7 +327,7 @@ void air7_stephens::instantiate_species(){
 
 }
 
-void air7_stephens::parse_domain_bc(){
+void air7_stephens::parseDomain_bc(){
 
   ParmParse pp("air7_stephens");
   std::string str;

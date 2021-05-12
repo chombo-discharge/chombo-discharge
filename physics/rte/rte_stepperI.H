@@ -127,13 +127,13 @@ bool rte_stepper<T>::need_to_regrid() {
 }
 
 template <typename T>
-void rte_stepper<T>::register_realms() {
-  m_amr->register_realm(m_realm);
+void rte_stepper<T>::registerRealms() {
+  m_amr->registerRealm(m_realm);
 }
 
 template <typename T>
-void rte_stepper<T>::register_operators() {
-  m_solver->register_operators();
+void rte_stepper<T>::registerOperators() {
+  m_solver->registerOperators();
 }
 
 template <typename T>
@@ -162,13 +162,13 @@ template <typename T>
 void rte_stepper<T>::set_gaussian_source(){
 
   EBAMRCellData& source = m_solver->get_source();
-  const RealVect prob_lo = m_amr->get_prob_lo();
+  const RealVect prob_lo = m_amr->getProbLo();
 
   //
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
 
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

@@ -186,7 +186,7 @@ public:
   /*!
     @brief Register operators
   */
-  virtual void register_operators();
+  virtual void registerOperators();
 
   /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
@@ -607,7 +607,7 @@ protected:
   /*!
     @brief Parse domain BCs
   */
-  void parse_domain_bc();
+  void parseDomain_bc();
 
   /*!
     @brief Parse PVR buffer

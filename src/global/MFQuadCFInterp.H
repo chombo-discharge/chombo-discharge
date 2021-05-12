@@ -42,17 +42,17 @@ public:
   /*!
     @brief Get interpolation utility
   */
-  const RefCountedPtr<EBQuadCFInterp>& get_quadcfi_ptr(const int a_phase) const;
+  const RefCountedPtr<EBQuadCFInterp>& getNWOEBQuadCFInterp_ptr(const int a_phase) const;
 
   /*!
     @brief get interpolation utility for phase
   */
-  EBQuadCFInterp& get_quadcfi(const int a_phase);
+  EBQuadCFInterp& getNWOEBQuadCFInterp(const int a_phase);
 
   /*!
     @brief get interpolation utility for phase
   */
-  const EBQuadCFInterp& get_quadcfi(const int a_phase) const;
+  const EBQuadCFInterp& getNWOEBQuadCFInterp(const int a_phase) const;
   
 protected:
 

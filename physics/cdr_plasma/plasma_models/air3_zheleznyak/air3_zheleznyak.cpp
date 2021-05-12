@@ -39,7 +39,7 @@ air3_zheleznyak::air3_zheleznyak() {
   parse_alpha();
   parse_eta();
   parse_see();
-  parse_domain_bc();
+  parseDomain_bc();
 
   init_rng();                 // Initialize random number generators
   
@@ -356,7 +356,7 @@ RealVect air3_zheleznyak::random_direction3D(){
 }
 #endif
 
-void air3_zheleznyak::parse_domain_bc(){
+void air3_zheleznyak::parseDomain_bc(){
 
   ParmParse pp("air3_zheleznyak");
   std::string str;

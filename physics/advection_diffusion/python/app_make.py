@@ -34,7 +34,7 @@ def write_template(args):
     makef.write('\n')
     makef.write('base_dir = .\n')
     makef.write('src_dirs = $(DISCHARGE_HOME)/src \\\n')
-    makef.write('\t$(DISCHARGE_HOME)/src/amr_mesh \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/AmrMesh \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/cdr_solver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/cell_tagger \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/driver \\\n')

@@ -76,7 +76,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
   
   const int num_alias  = 6;
 
-  m_mfis = a_mfis;
+  m_multifluidIndexSpace = a_mfis;
   m_ncomp = 1;
   m_relax = a_relax_type;
   m_domain = a_domain;
@@ -93,7 +93,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
   m_origin = a_origin;
   m_dx = a_dx;
   m_dirival.resize(num_phases);
-  m_multifluid = m_mfis->num_phases() > 1;
+  m_multifluid = m_multifluidIndexSpace->num_phases() > 1;
   m_lengthScale = a_lengthScale;
 
   if(a_has_mg){
@@ -105,7 +105,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
   }
 
   // Object for matching boundary conditions. Native EBBC is data-based Dirichlet
-  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.get_eblg(0)).getCFIVS()));
+  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.getEBLevelGrid(0)).getCFIVS()));
 
   Vector<EBISLayout> layouts(num_phases);
   Vector<int> comps(num_phases);;
@@ -114,7 +114,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
   
   for (int iphase = 0; iphase < num_phases; iphase++){
 
-    const EBLevelGrid& eblg      = a_mflg.get_eblg(iphase);
+    const EBLevelGrid& eblg      = a_mflg.getEBLevelGrid(iphase);
     const EBISLayout&  ebisl     = eblg.getEBISL();
 
     layouts[iphase] = ebisl;
@@ -126,20 +126,20 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
     EBLevelGrid eblg_mg;
 
     if(a_has_fine){
-      eblg_fine = a_mflg_fine.get_eblg(iphase);
+      eblg_fine = a_mflg_fine.getEBLevelGrid(iphase);
     }
     if(a_has_coar){
-      eblg_coar = a_mflg_coar.get_eblg(iphase);
+      eblg_coar = a_mflg_coar.getEBLevelGrid(iphase);
     }
     if(a_has_mg){
-      eblg_mg   = a_mflg_coar_mg.get_eblg(iphase);
+      eblg_mg   = a_mflg_coar_mg.getEBLevelGrid(iphase);
     }
 
 
     RefCountedPtr<EBFluxRegister> fastFR;
     RefCountedPtr<EBQuadCFInterp> quadcfi;
     if(a_has_coar){
-      quadcfi = a_quadcfi.get_quadcfi_ptr(iphase);
+      quadcfi = a_quadcfi.getNWOEBQuadCFInterp_ptr(iphase);
       CH_assert(!quadcfi.isNull());
     }
     if(a_has_fine){
@@ -935,12 +935,12 @@ void mfconductivityop::createCoarser(LevelData<MFCellFAB>&       a_coarse,
   pout() << "mfconductivityop::createCoarser"<< endl;
 #endif
 
-  DisjointBoxLayout dbl = m_mflg_coar_mg.get_grids();
+  DisjointBoxLayout dbl = m_mflg_coar_mg.getGrids();
 
   Vector<int> comps(m_phases, m_ncomp);
   Vector<EBISLayout> ebisl(m_phases);
   for (int iphase = 0; iphase < m_phases; iphase++){
-    ebisl[iphase] = m_mflg_coar_mg.get_eblg(iphase).getEBISL();
+    ebisl[iphase] = m_mflg_coar_mg.getEBLevelGrid(iphase).getEBISL();
   }
 
   MFCellFactory factory(ebisl, comps);

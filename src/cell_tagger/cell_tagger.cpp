@@ -82,8 +82,8 @@ void cell_tagger::parse_buffer(){
   m_buffer = Max(0, m_buffer);
 }
 
-void cell_tagger::parse_verbosity(){
-  CH_TIME("cell_tagger::parse_verbosity");
+void cell_tagger::parseVerbosity(){
+  CH_TIME("cell_tagger::parseVerbosity");
 
   ParmParse pp(m_name.c_str());
   pp.get("verbosity", m_verbosity);

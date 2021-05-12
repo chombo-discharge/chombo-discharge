@@ -9,7 +9,7 @@
 #define _SISDC_STORAGE_
 
 #include "sisdc.H"
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 
 #include <RefCountedPtr.H>
 
@@ -17,7 +17,7 @@ class sisdc::cdr_storage {
 public:
 
   cdr_storage();
-  cdr_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  cdr_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~cdr_storage();
 
   void allocate_storage(const int a_p);
@@ -51,7 +51,7 @@ public:
   
 protected:
 
-  RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
+  RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
   int m_p;                       // SISDC order
@@ -87,7 +87,7 @@ class sisdc::poisson_storage {
 public:
 
   poisson_storage();
-  poisson_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  poisson_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~poisson_storage();
 
   void allocate_storage(const int a_p);
@@ -101,7 +101,7 @@ public:
 
 protected:
 
-  RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
+  RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
   int m_p;                   // SISDC order
@@ -117,7 +117,7 @@ class sisdc::rte_storage {
 public:
 
   rte_storage();
-  rte_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  rte_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~rte_storage();
 
   void allocate_storage(const int a_p);
@@ -129,7 +129,7 @@ public:
 
 protected:
 
-  RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
+  RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
   int m_p;                   // SISDC order
@@ -143,7 +143,7 @@ class sisdc::sigma_storage {
 public:
 
   sigma_storage();
-  sigma_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  sigma_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~sigma_storage();
   
   void allocate_storage(const int a_p);
@@ -159,7 +159,7 @@ public:
   
 protected:
 
-  RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
+  RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
   int m_p;                   // SISDC order

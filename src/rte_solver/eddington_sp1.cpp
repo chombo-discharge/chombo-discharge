@@ -44,7 +44,7 @@ void eddington_sp1::parse_options(){
     pout() << m_name + "::parse_options" << endl;
   }
   
-  parse_domain_bc();    // Parses domain BC options
+  parseDomain_bc();    // Parses domain BC options
   parse_stationary();   // Parse stationary solver
   parse_plot_vars();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
@@ -61,10 +61,10 @@ void eddington_sp1::parse_runtime_options(){
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
 }
 
-void eddington_sp1::parse_domain_bc(){
-  CH_TIME("eddington_sp1::parse_domain_bc");
+void eddington_sp1::parseDomain_bc(){
+  CH_TIME("eddington_sp1::parseDomain_bc");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_domain_bc" << endl;
+    pout() << m_name + "::parseDomain_bc" << endl;
   }
 
   allocate_wall_bc();
@@ -252,7 +252,7 @@ void eddington_sp1::pre_regrid(const int a_base, const int a_old_finest_level){
   }
 
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   m_amr->allocate(m_cache, m_realm, m_phase, ncomp);
 
@@ -314,7 +314,7 @@ void eddington_sp1::regrid(const int a_lmin, const int a_old_finest_level, const
 
   this->allocate_internals();
 
-  Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_realm, m_phase);
+  Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(m_realm, m_phase);
 
   // These levels have not changed
   for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
@@ -333,22 +333,22 @@ void eddington_sp1::regrid(const int a_lmin, const int a_old_finest_level, const
   m_needs_setup = true;
 }
 
-void eddington_sp1::register_operators(){
-  CH_TIME("eddington_sp1::register_operators");
+void eddington_sp1::registerOperators(){
+  CH_TIME("eddington_sp1::registerOperators");
   if(m_verbosity > 5){
-    pout() << m_name + "::register_operators" << endl;
+    pout() << m_name + "::registerOperators" << endl;
   }
 
   if(m_amr.isNull()){
-    MayDay::Abort("eddington_sp1::register_operators - need to set amr_mesh!");
+    MayDay::Abort("eddington_sp1::registerOperators - need to set AmrMesh!");
   }
   else{
-    m_amr->register_operator(s_eb_coar_ave,     m_realm, m_phase);
-    m_amr->register_operator(s_eb_fill_patch,   m_realm, m_phase);
-    m_amr->register_operator(s_eb_flux_reg,     m_realm, m_phase);
-    m_amr->register_operator(s_eb_quad_cfi,     m_realm, m_phase);
-    m_amr->register_operator(s_eb_gradient,     m_realm, m_phase);
-    m_amr->register_operator(s_eb_irreg_interp, m_realm, m_phase);
+    m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
+    m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
+    m_amr->registerOperator(s_eb_flux_reg,     m_realm, m_phase);
+    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, m_phase);
+    m_amr->registerOperator(s_eb_gradient,     m_realm, m_phase);
+    m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
   }
 }
 
@@ -359,7 +359,7 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
   }
 
   const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   if(m_needs_setup){
     this->setup_gmg();
@@ -435,8 +435,8 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
     data_ops::copy(a_state, m_resid);
   }
 
-  m_amr->average_down(a_state, m_realm, m_phase);
-  m_amr->interp_ghost(a_state, m_realm, m_phase);
+  m_amr->averageDown(a_state, m_realm, m_phase);
+  m_amr->interpGhost(a_state, m_realm, m_phase);
 
   data_ops::floor(a_state, 0.0);
 
@@ -500,23 +500,23 @@ void eddington_sp1::set_aco_and_bco(){
     data_ops::set_value(m_bco_irreg, 1./kap);
   }
   else{ // If kappa is not constant, we need to go through each cell to determine it
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const RealVect origin = m_amr->get_prob_lo();
-      const Real dx         = m_amr->get_dx()[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const RealVect origin = m_amr->getProbLo();
+      const Real dx         = m_amr->getDx()[lvl];
     
       LevelData<EBCellFAB>& aco            = *m_aco[lvl];
       LevelData<EBFluxFAB>& bco            = *m_bco[lvl];
       LevelData<BaseIVFAB<Real> >& bco_irr = *m_bco_irreg[lvl];
 
       for (DataIterator dit = aco.dataIterator(); dit.ok(); ++dit){
-	const Box box = (m_amr->get_grids(m_realm)[lvl]).get(dit());
+	const Box box = (m_amr->getGrids(m_realm)[lvl]).get(dit());
 	this->set_aco_and_bco_box(aco[dit()], bco_irr[dit()], box, origin, dx, lvl, dit());
       }
     }
 
-    m_amr->average_down(m_aco, m_realm, m_phase);
-    m_amr->interp_ghost(m_aco, m_realm, m_phase);
-    data_ops::average_cell_to_face_allcomps(m_bco, m_aco, m_amr->get_domains()); // Average aco onto face
+    m_amr->averageDown(m_aco, m_realm, m_phase);
+    m_amr->interpGhost(m_aco, m_realm, m_phase);
+    data_ops::average_cell_to_face_allcomps(m_bco, m_aco, m_amr->getDomains()); // Average aco onto face
     data_ops::invert(m_bco); // Make m_bco = 1./kappa
   }
 
@@ -560,7 +560,7 @@ void eddington_sp1::set_aco_and_bco_box(EBCellFAB&       a_aco,
 
 
   // Irregular stuff
-  VoFIterator& vofit = (*m_amr->get_vofit(m_realm, m_phase)[a_lvl])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
 
@@ -586,11 +586,11 @@ void eddington_sp1::define_mg_levels(){
   m_mg_grids.resize(0);
   m_mg_levelgrids.resize(0);
 
-  // Get some stuff from amr_mesh on how to decompose the levels
-  const Vector<ProblemDomain>& domains = m_amr->get_domains();
-  const int max_box_size               = m_amr->get_max_box_size();
-  const int blocking_factor            = m_amr->get_blocking_factor();
-  const int num_ebghost                = m_amr->get_eb_ghost();
+  // Get some stuff from AmrMesh on how to decompose the levels
+  const Vector<ProblemDomain>& domains = m_amr->getDomains();
+  const int max_box_size               = m_amr->getMaxBoxSize();
+  const int blocking_factor            = m_amr->getBlockingFactor();
+  const int num_numEbGhostsCells                = m_amr->getNumberOfEbGhostCells();
 
   int num_coar       = 0;
   bool has_coar      = true;
@@ -624,7 +624,7 @@ void eddington_sp1::define_mg_levels(){
       const int idx = m_mg_grids.size() - 1; // Last element added
       m_mg_levelgrids.push_back(EBLevelGrid(m_mg_grids[idx],
 					    m_mg_domains[idx],
-					    num_ebghost,
+					    num_numEbGhostsCells,
 					    m_ebis));
 
       // Next iterate
@@ -643,22 +643,22 @@ void eddington_sp1::setup_operator_factory(){
     pout() << m_name + "::setup_operator_factory" << endl;
   }
 
-  const int finest_level                 = m_amr->get_finest_level();
-  const int ghost                        = m_amr->get_num_ghost();
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
-  const Vector<int>& refinement_ratios   = m_amr->get_ref_rat();
-  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
-  const Vector<Real>& dx                 = m_amr->get_dx();
-  const RealVect& origin                 = m_amr->get_prob_lo();
-  const Vector<EBISLayout>& ebisl        = m_amr->get_ebisl(m_realm, m_phase);
+  const int finest_level                 = m_amr->getFinestLevel();
+  const int ghost                        = m_amr->getNumberOfGhostCells();
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
+  const Vector<int>& refinement_ratios   = m_amr->getRefinementRatios();
+  const Vector<ProblemDomain>& domains   = m_amr->getDomains();
+  const Vector<Real>& dx                 = m_amr->getDx();
+  const RealVect& origin                 = m_amr->getProbLo();
+  const Vector<EBISLayout>& ebisl        = m_amr->getEBISLayout(m_realm, m_phase);
   
-  const Vector<RefCountedPtr<EBQuadCFInterp> >& quadcfi  = m_amr->get_old_quadcfi(m_realm, m_phase);
-  const Vector<RefCountedPtr<EBFluxRegister> >& fastFR   = m_amr->get_flux_reg(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBQuadCFInterp> >& quadcfi  = m_amr->getEBQuadCFInterp(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBFluxRegister> >& fastFR   = m_amr->getFluxRegister(m_realm, m_phase);
 
   Vector<EBLevelGrid> levelgrids;
 
   for (int lvl = 0; lvl <= finest_level; lvl++){ 
-    levelgrids.push_back(*(m_amr->get_eblg(m_realm, m_phase)[lvl])); // amr_mesh uses RefCounted levelgrids. EBConductivityOp does not. 
+    levelgrids.push_back(*(m_amr->getEBLevelGrid(m_realm, m_phase)[lvl])); // AmrMesh uses RefCounted levelgrids. EBConductivityOp does not. 
   }
 
 #if 0
@@ -733,8 +733,8 @@ void eddington_sp1::setup_multigrid(){
     pout() << m_name + "::setup_multigrid" << endl;
   }
 
-  const int finest_level       = m_amr->get_finest_level();
-  const ProblemDomain coar_dom = m_amr->get_domains()[0];
+  const int finest_level       = m_amr->getFinestLevel();
+  const ProblemDomain coar_dom = m_amr->getDomains()[0];
 
   // Select bottom solver
   LinearSolver<LevelData<EBCellFAB> >* botsolver = NULL;
@@ -794,9 +794,9 @@ void eddington_sp1::setup_tga(){
     pout() << m_name + "::setup_tga" << endl;
   }
   
-  const int finest_level       = m_amr->get_finest_level();
-  const ProblemDomain coar_dom = m_amr->get_domains()[0];
-  const Vector<int> ref_rat    = m_amr->get_ref_rat();
+  const int finest_level       = m_amr->getFinestLevel();
+  const ProblemDomain coar_dom = m_amr->getDomains()[0];
+  const Vector<int> ref_rat    = m_amr->getRefinementRatios();
 
   m_tgasolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
     (new AMRTGA<LevelData<EBCellFAB> > (m_gmg_solver, *m_opfact, coar_dom, ref_rat, 1 + finest_level, m_gmg_solver->m_verbosity));
@@ -814,9 +814,9 @@ void eddington_sp1::setup_euler(){
     pout() << m_name + "::setup_euler" << endl;
   }
 
-  const int finest_level       = m_amr->get_finest_level();
-  const ProblemDomain coar_dom = m_amr->get_domains()[0];
-  const Vector<int> ref_rat    = m_amr->get_ref_rat();
+  const int finest_level       = m_amr->getFinestLevel();
+  const ProblemDomain coar_dom = m_amr->getDomains()[0];
+  const Vector<int> ref_rat    = m_amr->getRefinementRatios();
 
   m_eulersolver = RefCountedPtr<EBBackwardEuler> 
     (new EBBackwardEuler (m_gmg_solver, *m_opfact, coar_dom, ref_rat, 1 + finest_level, m_gmg_solver->m_verbosity));
@@ -830,14 +830,14 @@ void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCell
     pout() << m_name + "::compute_boundary_flux" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   
-  irreg_amr_stencil<eb_centroid_interp>& sten = m_amr->get_eb_centroid_interp_stencils(m_realm, m_phase);
+  irreg_amr_stencil<eb_centroid_interp>& sten = m_amr->getEbCentroidInterpolationStencils(m_realm, m_phase);
   for(int lvl = 0; lvl <= finest_level; lvl++){
     sten.apply(*a_ebflux[lvl], *a_state[lvl], lvl, true);
   }
 
-  m_amr->average_down(a_ebflux, m_realm, m_phase);
+  m_amr->averageDown(a_ebflux, m_realm, m_phase);
 
   data_ops::scale(a_ebflux, 0.5*units::s_c0);
 }
@@ -849,11 +849,11 @@ void eddington_sp1::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCe
   }
 
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const int ncomp = a_data[lvl]->nComp();
       
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const EBCellFAB& data         = (*a_data[lvl])[dit()];
@@ -913,16 +913,16 @@ void eddington_sp1::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_s
     pout() << m_name + "::compute_flux" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
-  m_amr->compute_gradient(a_flux, a_state, m_realm, m_phase); // flux = grad(phi)
+  m_amr->computeGradient(a_flux, a_state, m_realm, m_phase); // flux = grad(phi)
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::divide_scalar(*a_flux[lvl], *m_aco[lvl]);   // flux = grad(phi)/(c*kappa)
     data_ops::scale(*a_flux[lvl], -units::s_c0*units::s_c0/3.0);  // flux = -c*grad(phi)/3.
   }
 
-  m_amr->average_down(a_flux, m_realm, m_phase);
-  m_amr->interp_ghost(a_flux, m_realm, m_phase);
+  m_amr->averageDown(a_flux, m_realm, m_phase);
+  m_amr->interpGhost(a_flux, m_realm, m_phase);
 }
 
 
@@ -932,7 +932,7 @@ void eddington_sp1::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellD
     pout() << m_name + "::compute_density" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Interval interv(0,0);
@@ -987,7 +987,7 @@ void eddington_sp1::write_plot_file(){
   }
 
   // Transform to centroid-centered
-  irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(m_realm, phase::gas);
+  irreg_amr_stencil<centroid_interp>& sten = m_amr->getCentroidInterpolationStencils(m_realm, phase::gas);
   sten.apply(output);
 
   // Alias this stuff
@@ -997,15 +997,15 @@ void eddington_sp1::write_plot_file(){
   Vector<Real> covered_values(ncomps, 0.0);
   string fname(file_char);
   writeEBHDF5(fname,
-	      m_amr->get_grids(m_realm),
+	      m_amr->getGrids(m_realm),
 	      output_ptr,
 	      names,
-	      m_amr->get_domains()[0].domainBox(),
-	      m_amr->get_dx()[0],
+	      m_amr->getDomains()[0].domainBox(),
+	      m_amr->getDx()[0],
 	      m_dt,
 	      m_time,
-	      m_amr->get_ref_rat(),
-	      m_amr->get_finest_level() + 1,
+	      m_amr->getRefinementRatios(),
+	      m_amr->getFinestLevel() + 1,
 	      true,
 	      covered_values);
 }
@@ -1026,7 +1026,7 @@ void eddington_sp1::read_checkpoint_level(HDF5Handle& a_handle, const int a_leve
     pout() << m_name + "::read_checkpoint_level" << endl;
   }
 
-  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids(m_realm)[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
 }
 
 void eddington_sp1::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){

@@ -34,7 +34,7 @@ computational_geometry::computational_geometry(){
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
   
-  m_mfis = RefCountedPtr<mfis> (new mfis());
+  m_multifluidIndexSpace = RefCountedPtr<mfis> (new mfis());
 }
 
 computational_geometry::~computational_geometry(){}
@@ -60,7 +60,7 @@ const Real& computational_geometry::get_eps0() const {
 }
 
 const RefCountedPtr<mfis>& computational_geometry::get_mfis() const {
-  return m_mfis;
+  return m_multifluidIndexSpace;
 }
 
 void computational_geometry::set_dielectrics(Vector<dielectric>& a_dielectrics){
@@ -86,7 +86,7 @@ void computational_geometry::build_geometries(const ProblemDomain   a_finestDoma
   this->build_gas_geoserv(geoservers[phase::gas],     a_finestDomain, a_origin, a_finestDx);
   this->build_solid_geoserv(geoservers[phase::solid], a_finestDomain, a_origin, a_finestDx);
 
-  m_mfis->define(a_finestDomain.domainBox(), // Define MF
+  m_multifluidIndexSpace->define(a_finestDomain.domainBox(), // Define MF
 		 a_origin,
 		 a_finestDx,
 		 geoservers,
@@ -103,8 +103,8 @@ void computational_geometry::build_geometries(const ProblemDomain   a_finestDoma
 void computational_geometry::build_geo_from_files(const std::string&   a_gas_file,
 						  const std::string&   a_sol_file){
 
-  RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
-  RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
+  RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->get_ebis(phase::gas);
+  RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->get_ebis(phase::solid);
 
   // Define gas phase
   HDF5Handle gas_handle(a_gas_file.c_str(), HDF5Handle::OPEN_RDONLY);

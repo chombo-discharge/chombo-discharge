@@ -15,31 +15,31 @@ EBParticleInterp::EBParticleInterp(){
 EBParticleInterp::EBParticleInterp(const Box&      a_domain,
 				   const EBISBox&  a_ebisbox,
 				   const RealVect& a_dx,
-				   const RealVect& a_prob_lo,
+				   const RealVect& a_probLo,
 				   const bool      a_force_irreg_ngp){
-  this->define(a_domain, a_ebisbox, a_dx, a_prob_lo, a_force_irreg_ngp);
+  this->define(a_domain, a_ebisbox, a_dx, a_probLo, a_force_irreg_ngp);
 }
 
 void EBParticleInterp::define(const Box&      a_domain,
 			      const EBISBox&  a_ebisbox,
 			      const RealVect& a_dx,
-			      const RealVect& a_prob_lo,
+			      const RealVect& a_probLo,
 			      const bool      a_force_irreg_ngp){
   m_domain  = a_domain;
   m_ebisbox = &a_ebisbox;
-  m_prob_lo = a_prob_lo;
+  m_probLo = a_probLo;
   m_dx      = a_dx;
   m_irr_ngp = a_force_irreg_ngp;
 }
 
 void EBParticleInterp::depositParticle(FArrayBox&       a_rho,
-				       const RealVect&  a_prob_lo,
+				       const RealVect&  a_probLo,
 				       const RealVect&  a_dx,
 				       const RealVect&  a_position,
 				       const Real&      a_mass,
 				       const DepositionType::Which a_interpType){
 
-  const RealVect rv = (a_position - a_prob_lo)/a_dx;
+  const RealVect rv = (a_position - a_probLo)/a_dx;
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
   const bool multi_valued = m_ebisbox->isMultiValued(iv);
@@ -51,7 +51,7 @@ void EBParticleInterp::depositParticle(FArrayBox&       a_rho,
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
   if(m_irr_ngp && !regular){
     FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
-			    CHF_CONST_REALVECT(a_prob_lo),
+			    CHF_CONST_REALVECT(a_probLo),
 			    CHF_CONST_REALVECT(a_dx),
 			    CHF_CONST_REALVECT(a_position),
 			    CHF_CONST_REAL(a_mass));
@@ -60,28 +60,28 @@ void EBParticleInterp::depositParticle(FArrayBox&       a_rho,
     switch (a_interpType){
     case DepositionType::NGP:
       FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
-			      CHF_CONST_REALVECT(a_prob_lo),
+			      CHF_CONST_REALVECT(a_probLo),
 			      CHF_CONST_REALVECT(a_dx),
 			      CHF_CONST_REALVECT(a_position),
 			      CHF_CONST_REAL(a_mass));
       break;
     case DepositionType::CIC:
       FORT_CIC_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
-			      CHF_CONST_REALVECT(a_prob_lo),
+			      CHF_CONST_REALVECT(a_probLo),
 			      CHF_CONST_REALVECT(a_dx),
 			      CHF_CONST_REALVECT(a_position),
 			      CHF_CONST_REAL(a_mass));
       break;
     case DepositionType::TSC:
       FORT_TSC_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
-			      CHF_CONST_REALVECT(a_prob_lo),
+			      CHF_CONST_REALVECT(a_probLo),
 			      CHF_CONST_REALVECT(a_dx),
 			      CHF_CONST_REALVECT(a_position),
 			      CHF_CONST_REAL(a_mass));
       break;
     case DepositionType::W4:
       FORT_W4_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
-			     CHF_CONST_REALVECT(a_prob_lo),
+			     CHF_CONST_REALVECT(a_probLo),
 			     CHF_CONST_REALVECT(a_dx),
 			     CHF_CONST_REALVECT(a_position),
 			     CHF_CONST_REAL(a_mass));
@@ -93,13 +93,13 @@ void EBParticleInterp::depositParticle(FArrayBox&       a_rho,
 }
 
 void EBParticleInterp::depositParticle2(FArrayBox&       a_rho,
-					const RealVect&  a_prob_lo,
+					const RealVect&  a_probLo,
 					const RealVect&  a_dx,
 					const RealVect&  a_position,
 					const Real&      a_mass,
 					const DepositionType::Which a_interpType){
 
-  const RealVect rv = (a_position - a_prob_lo)/a_dx;
+  const RealVect rv = (a_position - a_probLo)/a_dx;
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
   if(m_ebisbox->isMultiValued(iv)){
@@ -109,7 +109,7 @@ void EBParticleInterp::depositParticle2(FArrayBox&       a_rho,
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
   if(m_ebisbox->isIrregular(iv)){
     FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
-			    CHF_CONST_REALVECT(a_prob_lo),
+			    CHF_CONST_REALVECT(a_probLo),
 			    CHF_CONST_REALVECT(a_dx),
 			    CHF_CONST_REALVECT(a_position),
 			    CHF_CONST_REAL(a_mass));
@@ -118,14 +118,14 @@ void EBParticleInterp::depositParticle2(FArrayBox&       a_rho,
     switch (a_interpType){
     case DepositionType::NGP:
       FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
-			      CHF_CONST_REALVECT(a_prob_lo),
+			      CHF_CONST_REALVECT(a_probLo),
 			      CHF_CONST_REALVECT(a_dx),
 			      CHF_CONST_REALVECT(a_position),
 			      CHF_CONST_REAL(a_mass));
       break;
     case DepositionType::CIC:
       FORT_CIC_DEPOSIT_SCALAR2(CHF_FRA1(a_rho, 0),
-			       CHF_CONST_REALVECT(a_prob_lo),
+			       CHF_CONST_REALVECT(a_probLo),
 			       CHF_CONST_REALVECT(a_dx),
 			       CHF_CONST_REALVECT(a_position),
 			       CHF_CONST_REAL(a_mass));
@@ -137,13 +137,13 @@ void EBParticleInterp::depositParticle2(FArrayBox&       a_rho,
 }
 
 void EBParticleInterp::depositParticle4(FArrayBox&       a_rho,
-					const RealVect&  a_prob_lo,
+					const RealVect&  a_probLo,
 					const RealVect&  a_dx,
 					const RealVect&  a_position,
 					const Real&      a_mass,
 					const DepositionType::Which a_interpType){
 
-  const RealVect rv = (a_position - a_prob_lo)/a_dx;
+  const RealVect rv = (a_position - a_probLo)/a_dx;
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
   if(m_ebisbox->isMultiValued(iv)){
@@ -153,7 +153,7 @@ void EBParticleInterp::depositParticle4(FArrayBox&       a_rho,
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
   if(m_ebisbox->isIrregular(iv)){
     FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
-			    CHF_CONST_REALVECT(a_prob_lo),
+			    CHF_CONST_REALVECT(a_probLo),
 			    CHF_CONST_REALVECT(a_dx),
 			    CHF_CONST_REALVECT(a_position),
 			    CHF_CONST_REAL(a_mass));
@@ -162,14 +162,14 @@ void EBParticleInterp::depositParticle4(FArrayBox&       a_rho,
     switch (a_interpType){
     case DepositionType::NGP:
       FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
-			      CHF_CONST_REALVECT(a_prob_lo),
+			      CHF_CONST_REALVECT(a_probLo),
 			      CHF_CONST_REALVECT(a_dx),
 			      CHF_CONST_REALVECT(a_position),
 			      CHF_CONST_REAL(a_mass));
       break;
     case DepositionType::CIC:
       FORT_CIC_DEPOSIT_SCALAR4(CHF_FRA1(a_rho, 0),
-			       CHF_CONST_REALVECT(a_prob_lo),
+			       CHF_CONST_REALVECT(a_probLo),
 			       CHF_CONST_REALVECT(a_dx),
 			       CHF_CONST_REALVECT(a_position),
 			       CHF_CONST_REAL(a_mass));
@@ -182,11 +182,11 @@ void EBParticleInterp::depositParticle4(FArrayBox&       a_rho,
 
 void EBParticleInterp::interpolateParticle(Real&             a_particleField,
 					   const FArrayBox&  a_field,
-					   const RealVect&   a_prob_lo,
+					   const RealVect&   a_probLo,
 					   const RealVect&   a_dx,
 					   const RealVect&   a_position,
 					   const DepositionType::Which a_interpType){
-  const RealVect rv = (a_position - a_prob_lo)/a_dx;
+  const RealVect rv = (a_position - a_probLo)/a_dx;
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
   if(m_ebisbox->isMultiValued(iv)){
@@ -197,7 +197,7 @@ void EBParticleInterp::interpolateParticle(Real&             a_particleField,
   if(m_ebisbox->isIrregular(iv)){
     FORT_NGP_INTERPOLATE_SCALAR(CHF_REAL(a_particleField),
 				CHF_CONST_FRA1(a_field,0),
-				CHF_CONST_REALVECT(a_prob_lo),
+				CHF_CONST_REALVECT(a_probLo),
 				CHF_CONST_REALVECT(a_dx),
 				CHF_CONST_REALVECT(a_position));
   }
@@ -206,7 +206,7 @@ void EBParticleInterp::interpolateParticle(Real&             a_particleField,
     case DepositionType::NGP:
       FORT_NGP_INTERPOLATE_SCALAR(CHF_REAL(a_particleField),
 				  CHF_CONST_FRA1(a_field,0),
-				  CHF_CONST_REALVECT(a_prob_lo),
+				  CHF_CONST_REALVECT(a_probLo),
 				  CHF_CONST_REALVECT(a_dx),
 				  CHF_CONST_REALVECT(a_position));
 
@@ -214,21 +214,21 @@ void EBParticleInterp::interpolateParticle(Real&             a_particleField,
     case DepositionType::CIC:
       FORT_CIC_INTERPOLATE_SCALAR(CHF_REAL(a_particleField),
 				  CHF_CONST_FRA1(a_field,0),
-				  CHF_CONST_REALVECT(a_prob_lo),
+				  CHF_CONST_REALVECT(a_probLo),
 				  CHF_CONST_REALVECT(a_dx),
 				  CHF_CONST_REALVECT(a_position));
       break;
     case DepositionType::TSC:
       FORT_TSC_INTERPOLATE_SCALAR(CHF_REAL(a_particleField),
 				  CHF_CONST_FRA1(a_field,0),
-				  CHF_CONST_REALVECT(a_prob_lo),
+				  CHF_CONST_REALVECT(a_probLo),
 				  CHF_CONST_REALVECT(a_dx),
 				  CHF_CONST_REALVECT(a_position));
       break;
     case DepositionType::W4:
       FORT_W4_INTERPOLATE_SCALAR(CHF_REAL(a_particleField),
 				 CHF_CONST_FRA1(a_field,0),
-				 CHF_CONST_REALVECT(a_prob_lo),
+				 CHF_CONST_REALVECT(a_probLo),
 				 CHF_CONST_REALVECT(a_dx),
 				 CHF_CONST_REALVECT(a_position));
       break;
@@ -240,11 +240,11 @@ void EBParticleInterp::interpolateParticle(Real&             a_particleField,
 
 void EBParticleInterp::interpolateParticle(RealVect&         a_particleField,
 					   const FArrayBox&  a_field,
-					   const RealVect&   a_prob_lo,
+					   const RealVect&   a_probLo,
 					   const RealVect&   a_dx,
 					   const RealVect&   a_position,
 					   const DepositionType::Which a_interpType){
-  const RealVect rv = (a_position - a_prob_lo)/a_dx;
+  const RealVect rv = (a_position - a_probLo)/a_dx;
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
   if(m_ebisbox->isMultiValued(iv)){
@@ -255,7 +255,7 @@ void EBParticleInterp::interpolateParticle(RealVect&         a_particleField,
   if(m_ebisbox->isIrregular(iv)){
     FORT_NGP_INTERPOLATE_VECTOR(CHF_REALVECT(a_particleField),
 				CHF_CONST_FRA(a_field),
-				CHF_CONST_REALVECT(a_prob_lo),
+				CHF_CONST_REALVECT(a_probLo),
 				CHF_CONST_REALVECT(a_dx),
 				CHF_CONST_REALVECT(a_position));
   }
@@ -264,7 +264,7 @@ void EBParticleInterp::interpolateParticle(RealVect&         a_particleField,
     case DepositionType::NGP:
       FORT_NGP_INTERPOLATE_VECTOR(CHF_REALVECT(a_particleField),
 				  CHF_CONST_FRA(a_field),
-				  CHF_CONST_REALVECT(a_prob_lo),
+				  CHF_CONST_REALVECT(a_probLo),
 				  CHF_CONST_REALVECT(a_dx),
 				  CHF_CONST_REALVECT(a_position));
 
@@ -272,21 +272,21 @@ void EBParticleInterp::interpolateParticle(RealVect&         a_particleField,
     case DepositionType::CIC:
       FORT_CIC_INTERPOLATE_VECTOR(CHF_REALVECT(a_particleField),
 				  CHF_CONST_FRA(a_field),
-				  CHF_CONST_REALVECT(a_prob_lo),
+				  CHF_CONST_REALVECT(a_probLo),
 				  CHF_CONST_REALVECT(a_dx),
 				  CHF_CONST_REALVECT(a_position));
       break;
     case DepositionType::TSC:
       FORT_TSC_INTERPOLATE_VECTOR(CHF_REALVECT(a_particleField),
 				  CHF_CONST_FRA(a_field),
-				  CHF_CONST_REALVECT(a_prob_lo),
+				  CHF_CONST_REALVECT(a_probLo),
 				  CHF_CONST_REALVECT(a_dx),
 				  CHF_CONST_REALVECT(a_position));
       break;
     case DepositionType::W4:
       FORT_W4_INTERPOLATE_VECTOR(CHF_REALVECT(a_particleField),
 				 CHF_CONST_FRA(a_field),
-				 CHF_CONST_REALVECT(a_prob_lo),
+				 CHF_CONST_REALVECT(a_probLo),
 				 CHF_CONST_REALVECT(a_dx),
 				 CHF_CONST_REALVECT(a_position));
       break;

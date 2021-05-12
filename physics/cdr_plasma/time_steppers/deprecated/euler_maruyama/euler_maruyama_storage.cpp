@@ -12,7 +12,7 @@ euler_maruyama::cdr_storage::cdr_storage(){
 
 }
 
-euler_maruyama::cdr_storage::cdr_storage(const RefCountedPtr<amr_mesh>& a_amr,
+euler_maruyama::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
 					 const phase::which_phase       a_phase,
 					 const int                      a_ncomp){
   m_amr   = a_amr;
@@ -66,7 +66,7 @@ euler_maruyama::poisson_storage::poisson_storage(){
 
 }
 
-euler_maruyama::poisson_storage::poisson_storage(const RefCountedPtr<amr_mesh>& a_amr,
+euler_maruyama::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
 						 const phase::which_phase a_phase,
 						 const int a_ncomp){
   m_amr   = a_amr;
@@ -94,7 +94,7 @@ euler_maruyama::rte_storage::rte_storage(){
 
 }
 
-euler_maruyama::rte_storage::rte_storage(const RefCountedPtr<amr_mesh>& a_amr,
+euler_maruyama::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
 					 const phase::which_phase a_phase,
 					 const int a_ncomp){
   m_amr   = a_amr;
@@ -120,7 +120,7 @@ euler_maruyama::sigma_storage::sigma_storage(){
 
 }
 
-euler_maruyama::sigma_storage::sigma_storage(const RefCountedPtr<amr_mesh>& a_amr,
+euler_maruyama::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
 					     const phase::which_phase a_phase,
 					     const int a_ncomp){
   m_amr   = a_amr;

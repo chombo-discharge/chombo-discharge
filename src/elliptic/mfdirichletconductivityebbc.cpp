@@ -48,9 +48,9 @@ void mfdirichletconductivityebbc::setOrder(int a_order){
 
 void mfdirichletconductivityebbc::define_ivs(const MFLevelGrid& a_mflg){
     
-  m_ivs.define(a_mflg.get_grids());
+  m_ivs.define(a_mflg.getGrids());
 
-  const DisjointBoxLayout& dbl = a_mflg.get_grids();
+  const DisjointBoxLayout& dbl = a_mflg.getGrids();
 
   int num = 0;
   m_ivs.define(dbl);

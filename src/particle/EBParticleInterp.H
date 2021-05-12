@@ -43,12 +43,12 @@ public:
   /*!
     @brief Full constructor
   */
-  EBParticleInterp(const Box& a_domain, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_prob_lo, const bool a_force_irreg_ngp);
+  EBParticleInterp(const Box& a_domain, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo, const bool a_force_irreg_ngp);
 
   /*!
     @brief Define function
   */
-  void define(const Box& a_domain, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_prob_lo, const bool a_force_irreg_ngp);                     
+  void define(const Box& a_domain, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo, const bool a_force_irreg_ngp);                     
 
   /*!
     @brief Deposit particle mass onto the mesh using a standard cloud width. 
@@ -144,7 +144,7 @@ protected:
   */
   void interpolateParticle(Real&             a_particleField,
 			   const FArrayBox&  a_field,
-			   const RealVect&   a_prob_lo,
+			   const RealVect&   a_probLo,
 			   const RealVect&   a_dx,
 			   const RealVect&   a_position,
 			   const DepositionType::Which a_deposition);
@@ -154,7 +154,7 @@ protected:
   */
   void interpolateParticle(RealVect&         a_particleField,
 			   const FArrayBox&  a_field,
-			   const RealVect&   a_prob_lo,
+			   const RealVect&   a_probLo,
 			   const RealVect&   a_dx,
 			   const RealVect&   a_position,
 			   const DepositionType::Which a_deposition);
@@ -162,7 +162,7 @@ protected:
   Box      m_domain;
   const EBISBox* m_ebisbox;
   RealVect m_dx;
-  RealVect m_prob_lo;
+  RealVect m_probLo;
   bool m_irr_ngp; // Force NGP deposition in cut-cells. 
 };
 #include "CD_NamespaceFooter.H"

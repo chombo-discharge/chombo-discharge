@@ -9,7 +9,7 @@
 #define _EULER_MARUYAMA_STORAGE_
 
 #include "euler_maruyama.H"
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 
 #include <RefCountedPtr.H>
 
@@ -17,7 +17,7 @@ class euler_maruyama::cdr_storage {
 public:
 
   cdr_storage();
-  cdr_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  cdr_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~cdr_storage();
 
   void allocate_storage();
@@ -41,7 +41,7 @@ public:
   
 protected:
 
-  RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
+  RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
 
@@ -66,7 +66,7 @@ class euler_maruyama::poisson_storage {
 public:
 
   poisson_storage();
-  poisson_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  poisson_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~poisson_storage();
 
   void allocate_storage();
@@ -78,7 +78,7 @@ public:
 
 protected:
 
-  RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
+  RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
 
@@ -91,7 +91,7 @@ class euler_maruyama::rte_storage {
 public:
 
   rte_storage();
-  rte_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  rte_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~rte_storage();
 
   void allocate_storage();
@@ -102,7 +102,7 @@ public:
 
 protected:
 
-  RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
+  RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
 
@@ -114,7 +114,7 @@ class euler_maruyama::sigma_storage {
 public:
 
   sigma_storage();
-  sigma_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  sigma_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~sigma_storage();
   
   void allocate_storage();
@@ -122,7 +122,7 @@ public:
   
 protected:
 
-  RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
+  RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
 #include "CD_NamespaceFooter.H"

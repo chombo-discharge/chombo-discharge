@@ -15,7 +15,7 @@
 using namespace physics::advection_diffusion;
 
 advection_diffusion_tagger::advection_diffusion_tagger(RefCountedPtr<cdr_solver>& a_solver,
-						       RefCountedPtr<amr_mesh>&   a_amr){
+						       RefCountedPtr<AmrMesh>&   a_amr){
   m_solver    = a_solver;
   m_amr       = a_amr;
   m_name      = "advection_diffusion";
@@ -50,23 +50,23 @@ bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
   const EBAMRCellData& state = m_solver->get_state();
 
   // Compute the gradient, vec = grad(phi)
-  m_amr->compute_gradient(vec, state, m_realm, phase::gas); // vec = grad(phi)
+  m_amr->computeGradient(vec, state, m_realm, phase::gas); // vec = grad(phi)
   data_ops::vector_length(sca, vec);                        // sca = |grad(phi)|
   data_ops::set_covered_value(sca, 0, 0.0);                 // covered cell values are set to 0.0
 
   bool found_tags = false;
 
   // Never tag on max_amr_depth
-  const int finest_level     = m_amr->get_finest_level();
-  const int max_depth        = m_amr->get_max_amr_depth();
+  const int finest_level     = m_amr->getFinestLevel();
+  const int max_depth        = m_amr->getMaxAmrDepth();
   const int finest_tag_level = (finest_level == max_depth) ? max_depth - 1 : finest_level; // Never tag on max_amr_depth
 
   for (int lvl = 0; lvl <= finest_tag_level; lvl++){
-    data_ops::scale(*sca[lvl], m_amr->get_dx()[lvl]); // sca = |grad(phi)|*dx
+    data_ops::scale(*sca[lvl], m_amr->getDx()[lvl]); // sca = |grad(phi)|*dx
 
     const Real SAFETY = 1.E-6;
     
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const EBCellFAB& c   = (*sca[lvl])[dit()];
       const EBCellFAB& phi = (*state[lvl])[dit()];

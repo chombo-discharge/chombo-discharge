@@ -122,14 +122,14 @@ void ito_layout<T>::regrid(const int a_lmin, const int a_old_finest_level, const
 }
 
 template <class T>
-void ito_layout<T>::register_operators(){
+void ito_layout<T>::registerOperators(){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->register_operators();
+    iter()->registerOperators();
   }
 }
 
 template <class T>
-void ito_layout<T>::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+void ito_layout<T>::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
     iter()->set_amr(a_amr);
   }

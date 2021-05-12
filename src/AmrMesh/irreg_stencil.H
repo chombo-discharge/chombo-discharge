@@ -118,7 +118,7 @@ protected:
   /*!
     @brief Stencil type
   */
-  stencil_type m_stencil_type;
+  stencil_type m_stencilType;
 
   /*!
     @brief Domain

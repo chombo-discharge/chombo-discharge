@@ -8,7 +8,7 @@
 #ifndef _RK2_TGA_
 #define _RK2_TGA_
 
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 #include "time_stepper.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"

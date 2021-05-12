@@ -37,7 +37,7 @@ void realm::define(const Vector<DisjointBoxLayout>& a_grids,
 		   const Vector<ProblemDomain>& a_domains,
 		   const Vector<int>& a_ref_rat,
 		   const Vector<Real>& a_dx,
-		   const RealVect a_prob_lo,
+		   const RealVect a_probLo,
 		   const int a_finest_level,
 		   const int a_ebghost,
 		   const int a_num_ghost,
@@ -55,36 +55,36 @@ void realm::define(const Vector<DisjointBoxLayout>& a_grids,
 
 
 
-  m_ref_ratios = a_ref_rat;
+  m_refinementRatios = a_ref_rat;
   m_dx = a_dx;
   m_grids = a_grids;
   m_domains = a_domains;
   m_baseif = a_baseif;
 
-  m_prob_lo = a_prob_lo;
-  m_mfis = a_mfis;
-  m_finest_level = a_finest_level;
+  m_probLo = a_probLo;
+  m_multifluidIndexSpace = a_mfis;
+  m_finestLevel = a_finest_level;
   
-  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->get_ebis(phase::solid);
 
-  m_realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, m_prob_lo, a_finest_level, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
+  m_realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finest_level, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
 			       a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::gas), ebis_gas);
 
-  m_realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, m_prob_lo, a_finest_level, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
+  m_realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finest_level, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
 				 a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::solid), ebis_sol);
 
 
 }
 
-void realm::set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level){
-  CH_TIME("realm::set_grids");
+void realm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level){
+  CH_TIME("realm::setGrids");
   if(m_verbosity > 5){
-    pout() << "realm::set_grids" << endl;
+    pout() << "realm::setGrids" << endl;
   }
 
   for (auto& r : m_realms){
-    r.second->set_grids(a_grids, a_finest_level);
+    r.second->setGrids(a_grids, a_finest_level);
   }
 }
 
@@ -100,14 +100,14 @@ void realm::regrid_base(const int a_lmin){
   this->define_mflevelgrid(a_lmin);
 }
 
-void realm::regrid_operators(const int a_lmin, const int a_lmax, const int a_regsize){
-  CH_TIME("realm::regrid_operators");
+void realm::regridOperators(const int a_lmin, const int a_lmax, const int a_regsize){
+  CH_TIME("realm::regridOperators");
   if(m_verbosity > 5){
-    pout() << "realm::regrid_operators" << endl;
+    pout() << "realm::regridOperators" << endl;
   }
 
   for (auto& r : m_realms){
-    r.second->regrid_operators(a_lmin, a_lmax, a_regsize);
+    r.second->regridOperators(a_lmin, a_lmax, a_regsize);
   }
   this->define_masks(a_lmin);
 }
@@ -128,7 +128,7 @@ void realm::define_mflevelgrid(const int a_lmin){
     pout() << "realm::define_mflevelgrid" << endl;
   }
 
-  m_mflg.resize(1 + m_finest_level);
+  m_mflg.resize(1 + m_finestLevel);
 
   phase_realm& gas = this->get_realm(phase::gas);
   phase_realm& sol = this->get_realm(phase::solid);
@@ -136,13 +136,13 @@ void realm::define_mflevelgrid(const int a_lmin){
   const RefCountedPtr<EBIndexSpace>& ebis_gas = gas.get_ebis();
   const RefCountedPtr<EBIndexSpace>& ebis_sol = sol.get_ebis();
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     Vector<EBLevelGrid> eblgs;
 
-    if(!ebis_gas.isNull()) eblgs.push_back(*(gas.get_eblg()[lvl]));
-    if(!ebis_sol.isNull()) eblgs.push_back(*(sol.get_eblg()[lvl]));
+    if(!ebis_gas.isNull()) eblgs.push_back(*(gas.getEBLevelGrid()[lvl]));
+    if(!ebis_sol.isNull()) eblgs.push_back(*(sol.getEBLevelGrid()[lvl]));
 
-    m_mflg[lvl] = RefCountedPtr<MFLevelGrid> (new MFLevelGrid(m_mfis, eblgs));
+    m_mflg[lvl] = RefCountedPtr<MFLevelGrid> (new MFLevelGrid(m_multifluidIndexSpace, eblgs));
   }
 }
 
@@ -164,9 +164,9 @@ void realm::define_halo_masks(const int a_lmin){
 
       AMRMask& mask = m.second;
 
-      mask.resize(1 + m_finest_level);
+      mask.resize(1 + m_finestLevel);
 
-      for (int lvl = 0; lvl < m_finest_level; lvl++){
+      for (int lvl = 0; lvl < m_finestLevel; lvl++){
 	const DisjointBoxLayout& gridsCoar = m_grids[lvl];
 	const DisjointBoxLayout& gridsFine = m_grids[lvl+1];
 
@@ -183,7 +183,7 @@ void realm::define_halo_masks(const int a_lmin){
 			       gridsCoar,
 			       gridsFine,
 			       buffer,
-			       m_ref_ratios[lvl]);
+			       m_refinementRatios[lvl]);
       }
     }
   }
@@ -303,13 +303,13 @@ void realm::define_halo_mask(LevelData<BaseFab<bool> >& a_coarMask,
   }
 }
 
-void realm::register_operator(const std::string a_operator, const phase::which_phase a_phase){
-  CH_TIME("realm::register_operator(operator, phase)");
+void realm::registerOperator(const std::string a_operator, const phase::which_phase a_phase){
+  CH_TIME("realm::registerOperator(operator, phase)");
   if(m_verbosity > 5){
-    pout() << "realm::register_operator(operator, phase)" << endl;
+    pout() << "realm::registerOperator(operator, phase)" << endl;
   }
   
-  m_realms[a_phase]->register_operator(a_operator);
+  m_realms[a_phase]->registerOperator(a_operator);
 }
 
 bool realm::query_operator(const std::string a_operator, const phase::which_phase a_phase) {
@@ -321,10 +321,10 @@ bool realm::query_operator(const std::string a_operator, const phase::which_phas
   return m_realms[a_phase]->query_operator(a_operator);
 }
 
-void realm::register_mask(const std::string a_mask, const int a_buffer){
-  CH_TIME("realm::register_mask(mask, buffer)");
+void realm::registerMask(const std::string a_mask, const int a_buffer){
+  CH_TIME("realm::registerMask(mask, buffer)");
   if(m_verbosity > 5){
-    pout() << "realm::register_mask(mask, buffer)" << endl;
+    pout() << "realm::registerMask(mask, buffer)" << endl;
   }
 
   m_masks.emplace(std::pair<string, int>(a_mask, a_buffer), AMRMask());
@@ -352,23 +352,23 @@ phase_realm& realm::get_realm(const phase::which_phase a_phase){
   return *m_realms[a_phase];
 }
 
-Vector<int>& realm::get_ref_rat() {
-  return m_ref_ratios;
+Vector<int>& realm::getRefinementRatios() {
+  return m_refinementRatios;
 }
 
-Vector<Real>& realm::get_dx() {
+Vector<Real>& realm::getDx() {
   return m_dx;
 }
 
-Vector<DisjointBoxLayout>& realm::get_grids() {
+Vector<DisjointBoxLayout>& realm::getGrids() {
   return m_grids;
 }
 
-Vector<ProblemDomain>& realm::get_domains() {
+Vector<ProblemDomain>& realm::getDomains() {
   return m_domains;
 }
 
-Vector<RefCountedPtr<MFLevelGrid> >& realm::get_mflg(){
+Vector<RefCountedPtr<MFLevelGrid> >& realm::getMFLevelGrid(){
   return m_mflg;
 }
 
@@ -377,102 +377,102 @@ const RefCountedPtr<EBIndexSpace>& realm::get_ebis(const phase::which_phase a_ph
   return m_realms[a_phase]->get_ebis();
 }
 
-Vector<EBISLayout>& realm::get_ebisl(const phase::which_phase a_phase) {
-  return m_realms[a_phase]->get_ebisl();
+Vector<EBISLayout>& realm::getEBISLayout(const phase::which_phase a_phase) {
+  return m_realms[a_phase]->getEBISLayout();
 }
 
-Vector<RefCountedPtr<EBLevelGrid> >& realm::get_eblg(const phase::which_phase a_phase) {
-  return m_realms[a_phase]->get_eblg();
+Vector<RefCountedPtr<EBLevelGrid> >& realm::getEBLevelGrid(const phase::which_phase a_phase) {
+  return m_realms[a_phase]->getEBLevelGrid();
 }
 
-Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& realm::get_neighbors(const phase::which_phase a_phase) {
-  return m_realms[a_phase]->get_neighbors();
+Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& realm::getNeighbors(const phase::which_phase a_phase) {
+  return m_realms[a_phase]->getNeighbors();
 }
 
-Vector<RefCountedPtr<LayoutData<VoFIterator> > >& realm::get_vofit(const phase::which_phase a_phase) {
-  return m_realms[a_phase]->get_vofit();
+Vector<RefCountedPtr<LayoutData<VoFIterator> > >& realm::getVofIterator(const phase::which_phase a_phase) {
+  return m_realms[a_phase]->getVofIterator();
 }
 
-irreg_amr_stencil<centroid_interp>& realm::get_centroid_interp_stencils(const phase::which_phase a_phase) {
-  return m_realms[a_phase]->get_centroid_interp_stencils();
+irreg_amr_stencil<centroid_interp>& realm::getCentroidInterpolationStencils(const phase::which_phase a_phase) {
+  return m_realms[a_phase]->getCentroidInterpolationStencils();
 }
 
-irreg_amr_stencil<eb_centroid_interp>& realm::get_eb_centroid_interp_stencils(const phase::which_phase a_phase) {
-  return m_realms[a_phase]->get_eb_centroid_interp_stencils();
+irreg_amr_stencil<eb_centroid_interp>& realm::getEbCentroidInterpolationStencils(const phase::which_phase a_phase) {
+  return m_realms[a_phase]->getEbCentroidInterpolationStencils();
 }
 
-irreg_amr_stencil<noncons_div>& realm::get_noncons_div_stencils(const phase::which_phase a_phase) {
-  return m_realms[a_phase]->get_noncons_div_stencils();
+irreg_amr_stencil<noncons_div>& realm::getNonConservativeDivergenceStencils(const phase::which_phase a_phase) {
+  return m_realms[a_phase]->getNonConservativeDivergenceStencils();
 }
 
 Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& realm::get_gradsten(const phase::which_phase a_phase){
   return m_realms[a_phase]->get_gradsten();
 }
 
-Vector<RefCountedPtr<ebcoarseaverage> >& realm::get_coarave(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_coarave();
+Vector<RefCountedPtr<ebcoarseaverage> >& realm::getCoarseAverage(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getCoarseAverage();
 }
 
-Vector<RefCountedPtr<EBGhostCloud> >& realm::get_ghostcloud(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_ghostcloud();
+Vector<RefCountedPtr<EBGhostCloud> >& realm::getGhostCloud(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getGhostCloud();
 }
 
-Vector<RefCountedPtr<nwoebquadcfinterp> >& realm::get_quadcfi(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_quadcfi();
+Vector<RefCountedPtr<nwoebquadcfinterp> >& realm::getNWOEBQuadCFInterp(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getNWOEBQuadCFInterp();
 }
 
-Vector<RefCountedPtr<EBQuadCFInterp> >& realm::get_old_quadcfi(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_old_quadcfi();
+Vector<RefCountedPtr<EBQuadCFInterp> >& realm::getEBQuadCFInterp(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getEBQuadCFInterp();
 }
 
-Vector<RefCountedPtr<AggEBPWLFillPatch> >& realm::get_fillpatch(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_fillpatch();
+Vector<RefCountedPtr<AggEBPWLFillPatch> >& realm::getFillPatch(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getFillPatch();
 }
 
-Vector<RefCountedPtr<EBPWLFineInterp> >& realm::get_eb_pwl_interp(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_eb_pwl_interp();
+Vector<RefCountedPtr<EBPWLFineInterp> >& realm::getPwlInterpolator(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getPwlInterpolator();
 }
 
-Vector<RefCountedPtr<EBMGInterp> >& realm::get_eb_mg_interp(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_eb_mg_interp();
+Vector<RefCountedPtr<EBMGInterp> >& realm::getEBMGInterp(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getEBMGInterp();
 }
 
-Vector<RefCountedPtr<EBFluxRegister> >&  realm::get_flux_reg(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_flux_reg();
+Vector<RefCountedPtr<EBFluxRegister> >&  realm::getFluxRegister(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getFluxRegister();
 }
 
-Vector<RefCountedPtr<EBLevelRedist> >&  realm::get_level_redist(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_level_redist();
+Vector<RefCountedPtr<EBLevelRedist> >&  realm::getLevelRedist(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getLevelRedist();
 }
 
-Vector<RefCountedPtr<EBCoarToFineRedist> >&  realm::get_coar_to_fine_redist(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_coar_to_fine_redist();
+Vector<RefCountedPtr<EBCoarToFineRedist> >&  realm::getCoarToFineRedist(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getCoarToFineRedist();
 }
 
-Vector<RefCountedPtr<EBCoarToCoarRedist> >&  realm::get_coar_to_coar_redist(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_coar_to_coar_redist();
+Vector<RefCountedPtr<EBCoarToCoarRedist> >&  realm::getCoarToCoarRedist(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getCoarToCoarRedist();
 }
 
-Vector<RefCountedPtr<EBFineToCoarRedist> >&  realm::get_fine_to_coar_redist(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_fine_to_coar_redist();
+Vector<RefCountedPtr<EBFineToCoarRedist> >&  realm::getFineToCoarRedist(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getFineToCoarRedist();
 }
 
-Vector<RefCountedPtr<Copier> >& realm::get_copier(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_copier();
+Vector<RefCountedPtr<Copier> >& realm::getCopier(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getCopier();
 }
 
-Vector<RefCountedPtr<Copier> >& realm::get_reverse_copier(const phase::which_phase a_phase){
-  return m_realms[a_phase]->get_reverse_copier();
+Vector<RefCountedPtr<Copier> >& realm::getReverseCopier(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getReverseCopier();
 }
 
-EBAMRFAB& realm::get_levelset(const phase::which_phase a_phase) {
-  return m_realms[a_phase]->get_levelset();
+EBAMRFAB& realm::getLevelset(const phase::which_phase a_phase) {
+  return m_realms[a_phase]->getLevelset();
 }
 
-AMRMask& realm::get_mask(const std::string a_mask, const int a_buffer){
+AMRMask& realm::getMask(const std::string a_mask, const int a_buffer){
 
   if(!this->query_mask(a_mask, a_buffer)){
-    std::string str = "realm::get_mask - could not find mask '" + a_mask + "'";
+    std::string str = "realm::getMask - could not find mask '" + a_mask + "'";
     MayDay::Abort(str.c_str());
   }
 

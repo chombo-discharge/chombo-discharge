@@ -47,16 +47,16 @@ namespace Physics {
       pp.get("verbosity",   m_verbosity);
       
       if( str == "none"){
-	m_boxsort = box_sorting::none;
+	m_boxSort = box_sorting::none;
       }
       if( str == "std"){
-	m_boxsort = box_sorting::std;
+	m_boxSort = box_sorting::std;
       }
       else if(str == "shuffle"){
-	m_boxsort = box_sorting::shuffle;
+	m_boxSort = box_sorting::shuffle;
       }
       else if(str == "morton"){
-	m_boxsort = box_sorting::morton;
+	m_boxSort = box_sorting::morton;
       }
       else {
 	MayDay::Abort("FieldStepper::FieldStepper - unknown box sorting method requested for argument 'box_sorting'");
@@ -91,13 +91,13 @@ namespace Physics {
     }
 
     template <class T>
-    void FieldStepper<T>::register_operators(){
+    void FieldStepper<T>::registerOperators(){
       m_fieldSolver->registerOperators();
     }
 
     template <class T>
-    void FieldStepper<T>::register_realms(){
-      m_amr->register_realm(m_realm);
+    void FieldStepper<T>::registerRealms(){
+      m_amr->registerRealm(m_realm);
     }
 
     template <class T>
@@ -229,12 +229,12 @@ namespace Physics {
 	m_amr->allocate(dummy1, m_realm, 1);
 	m_amr->allocate(dummy2, m_realm, 1);
 
-	const Vector<ProblemDomain>& domains = m_amr->get_domains();
+	const Vector<ProblemDomain>& domains = m_amr->getDomains();
 
-	// We need to make amr_mesh restore some operators that we need. This is overkill because we only need
+	// We need to make AmrMesh restore some operators that we need. This is overkill because we only need
 	// operators for ghost cell interpolation....
 
-	m_amr->regrid_operators(a_lmin, a_finest_level, 1);
+	m_amr->regridOperators(a_lmin, a_finest_level, 1);
 
 	// Set up the operator factor and fetch it.
 	solver->setMultigridCoefficients();
@@ -260,12 +260,12 @@ namespace Physics {
 	  dit.disableTime();
 	  dit.mergeTime();
 
-	  // Now do the load balancing. When we do this, the boxes are standard-sorted! I.e. the new mesh ignores the desired sorting from amr_mesh
+	  // Now do the load balancing. When we do this, the boxes are standard-sorted! I.e. the new mesh ignores the desired sorting from AmrMesh
 	  Vector<unsigned long long> loads = dit.getTime();
 	  a_boxes[lvl] = dit.getBoxes();
 
 	  // Do the desired sorting
-	  load_balance::sort(a_boxes[lvl], loads, m_boxsort);
+	  load_balance::sort(a_boxes[lvl], loads, m_boxSort);
 
 	  // Bah - need long long for LoadBalance
 	  Vector<long long> lloads(loads.size());

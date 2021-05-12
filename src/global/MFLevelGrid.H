@@ -67,17 +67,17 @@ public:
   /*!
     @brief Get the grids
   */
-  virtual DisjointBoxLayout get_grids() const;
+  virtual DisjointBoxLayout getGrids() const;
     
   /*!
     @brief Get phase
   */
-  virtual EBLevelGrid& get_eblg(int a_phase);
+  virtual EBLevelGrid& getEBLevelGrid(int a_phase);
 
   /*!
     @brief Get phase
   */
-  virtual const EBLevelGrid& get_eblg(int a_phase) const;
+  virtual const EBLevelGrid& getEBLevelGrid(int a_phase) const;
 
   /*!
     @brief Get interface region between two phases.
@@ -98,7 +98,7 @@ public:
 			      const int        a_phase2 = 1) const;
 private:
 
-  RefCountedPtr<mfis> m_mfis;
+  RefCountedPtr<mfis> m_multifluidIndexSpace;
 
   Vector<EBLevelGrid> m_eblg;
 };

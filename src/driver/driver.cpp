@@ -25,7 +25,7 @@
 
 driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
 	       const RefCountedPtr<time_stepper>&           a_timestepper,
-	       const RefCountedPtr<amr_mesh>&               a_amr,
+	       const RefCountedPtr<AmrMesh>&               a_amr,
 	       const RefCountedPtr<cell_tagger>&            a_celltagger,
 	       const RefCountedPtr<geo_coarsener>&          a_geocoarsen){
   CH_TIME("driver::driver(full)");
@@ -37,8 +37,8 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   set_geo_coarsen(a_geocoarsen);                       // Set geo coarsener
 
   // AMR does its thing
-  m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
-  m_amr->build_domains();                // Build domains and resolutions, nothing else
+  m_amr->sanityCheck();                 // Sanity check, make sure everything is set up correctly
+  m_amr->buildDomains();                // Build domains and resolutions, nothing else
 
   // Parse some class options
   parse_options();
@@ -53,8 +53,8 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
 
   // Always register this realm and these operators. 
   m_realm = realm::primal;
-  m_amr->register_realm(m_realm);
-  m_amr->register_operator(s_eb_pwl_interp, m_realm, phase::gas); // For output
+  m_amr->registerRealm(m_realm);
+  m_amr->registerOperator(s_eb_pwl_interp, m_realm, phase::gas); // For output
 }
 
 driver::~driver(){
@@ -71,7 +71,7 @@ int driver::get_num_plot_vars() const {
 
   if(m_plot_tags)     num_output = num_output + 1;
   if(m_plot_ranks)    {
-    const int num_realms = m_amr->get_realms().size();
+    const int num_realms = m_amr->getRealms().size();
     num_output = num_output + num_realms;
   }
   if(m_plot_levelset) num_output = num_output + 2;
@@ -90,7 +90,7 @@ Vector<std::string> driver::get_plotvar_names() const {
   if(m_plot_tags) names.push_back("cell_tags");
   if(m_plot_ranks) {
     const std::string base = "_rank";
-    for (const auto& str : m_amr->get_realms()){
+    for (const auto& str : m_amr->getRealms()){
       const std::string id = str + base;
       names.push_back(id);
     }
@@ -110,13 +110,13 @@ void driver::allocate_internals(){
   }
   
   const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   const IntVect ghost    = IntVect::Zero;
 
   m_tags.resize(1 + finest_level);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     m_tags[lvl] = RefCountedPtr<LayoutData<DenseIntVectSet> > (new LayoutData<DenseIntVectSet>(dbl));
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -133,14 +133,14 @@ void driver::cache_tags(const EBAMRTags& a_tags){
   }
 
   const int ncomp         = 1;
-  const int finest_level  = m_amr->get_finest_level();
+  const int finest_level  = m_amr->getFinestLevel();
   const int ghost         = 0;
 
   m_amr->allocate(m_cached_tags, m_realm, ncomp, ghost);
   m_cached_tags.resize(1+finest_level);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
     // Copy tags onto boolean mask
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -171,17 +171,17 @@ void driver::get_geom_tags(){
     pout() << "driver::get_geom_tags" << endl;
   }
 
-  const int maxdepth = m_amr->get_max_amr_depth();
+  const int maxdepth = m_amr->getMaxAmrDepth();
 
   m_geom_tags.resize(maxdepth);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->get_ebis(phase::solid);
 
   CH_assert(ebis_gas != NULL);
 
   for (int lvl = 0; lvl < maxdepth; lvl++){ // Don't need tags on maxdepth, we will never generate grids below that.
-    const ProblemDomain& cur_dom = m_amr->get_domains()[lvl];
+    const ProblemDomain& cur_dom = m_amr->getDomains()[lvl];
     const int which_level = ebis_gas->getLevel(cur_dom);
 
     IntVectSet cond_tags;
@@ -196,7 +196,7 @@ void driver::get_geom_tags(){
       cond_tags = ebis_gas->irregCells(which_level);
       if(!ebis_sol.isNull()){
 	cond_tags |= ebis_sol->irregCells(which_level);
-	cond_tags -= m_mfis->interface_region(cur_dom);
+	cond_tags -= m_multifluidIndexSpace->interface_region(cur_dom);
       }
     }
 
@@ -217,7 +217,7 @@ void driver::get_geom_tags(){
     // Gas-dielectric interface cells
     if(m_gas_dielectric_interface_tag_depth > lvl){
       if(!ebis_sol.isNull()){
-	gas_diel_tags = m_mfis->interface_region(cur_dom);
+	gas_diel_tags = m_multifluidIndexSpace->interface_region(cur_dom);
       }
     }
 
@@ -225,7 +225,7 @@ void driver::get_geom_tags(){
     if(m_gas_conductor_interface_tag_depth > lvl){ 
       gas_solid_tags = ebis_gas->irregCells(which_level);
       if(!ebis_sol.isNull()){
-	gas_solid_tags -= m_mfis->interface_region(cur_dom);
+	gas_solid_tags -= m_multifluidIndexSpace->interface_region(cur_dom);
       }
     }
 
@@ -237,7 +237,7 @@ void driver::get_geom_tags(){
 	// Do the intersection with the conductor cells
 	IntVectSet tmp = ebis_gas->irregCells(which_level);
 	tmp |= ebis_sol->irregCells(which_level);
-	tmp -= m_mfis->interface_region(cur_dom);
+	tmp -= m_multifluidIndexSpace->interface_region(cur_dom);
 
 	solid_tags &= tmp;
       }
@@ -254,12 +254,12 @@ void driver::get_geom_tags(){
 
   // Remove tags using the geocoarsener if we have it
   if(!m_geocoarsen.isNull()){
-    m_geocoarsen->coarsen_tags(m_geom_tags, m_amr->get_dx(), m_amr->get_prob_lo());
+    m_geocoarsen->coarsen_tags(m_geom_tags, m_amr->getDx(), m_amr->getProbLo());
   }
 
   // Grow tags. This is an ad-hoc fix that prevents ugly grid near EBs (i.e. cases where only ghost cells are used
   // for elliptic equations)
-  const int growth = m_amr->get_irreg_growth();
+  const int growth = m_amr->getIrregTagGrowth();
   for (int lvl = 0; lvl < maxdepth; lvl++){
     m_geom_tags[lvl].grow(growth);
   }
@@ -294,7 +294,7 @@ void driver::get_loads_and_boxes(long long& a_myPoints,
   a_my_level_points.resize(1 + a_finestLevel);
   a_total_level_points.resize(1 + a_finestLevel);
 
-  const int ghost = m_amr->get_num_ghost();
+  const int ghost = m_amr->getNumberOfGhostCells();
 
   for (int lvl = 0; lvl <= a_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = a_grids[lvl];
@@ -378,10 +378,10 @@ void driver::grid_report(){
 
   pout() << endl;
 
-  const int finest_level                 = m_amr->get_finest_level();
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
-  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
-  const Vector<Real> dx                  = m_amr->get_dx();
+  const int finest_level                 = m_amr->getFinestLevel();
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
+  const Vector<ProblemDomain>& domains   = m_amr->getDomains();
+  const Vector<Real> dx                  = m_amr->getDx();
 
   // Grid stuff goes into here
   long long totPoints;
@@ -420,18 +420,18 @@ void driver::grid_report(){
 #endif
 
   // Some stuff
-  const ProblemDomain coarsest_domain = m_amr->get_domains()[0];
-  const ProblemDomain finest_domain   = m_amr->get_domains()[finest_level];
+  const ProblemDomain coarsest_domain = m_amr->getDomains()[0];
+  const ProblemDomain finest_domain   = m_amr->getDomains()[finest_level];
   const Box finestBox   = finest_domain.domainBox();
   const Box coarsestBox = coarsest_domain.domainBox();
-  Vector<int> refRat = m_amr->get_ref_rat();
+  Vector<int> refRat = m_amr->getRefinementRatios();
   Vector<int> ref_rat(finest_level);
   for (int lvl = 0; lvl < finest_level; lvl++){
     ref_rat[lvl] = refRat[lvl];
   }
 
   // Get boxes for each realm
-  const std::vector<std::string> realms = m_amr->get_realms();
+  const std::vector<std::string> realms = m_amr->getRealms();
   for (auto str : realms){
     this->get_loads_and_boxes(myPoints,
 			      myPointsGhosts,
@@ -444,7 +444,7 @@ void driver::grid_report(){
 			      my_level_points,
 			      total_level_points,
 			      finest_level,
-			      m_amr->get_grids(str));
+			      m_amr->getGrids(str));
   }
 
   // Begin writing a report. 
@@ -485,7 +485,7 @@ void driver::grid_report(){
 			      my_level_points,
 			      total_level_points,
 			      finest_level,
-			      m_amr->get_grids(str));
+			      m_amr->getGrids(str));
     pout() << "\t\t\t        Realm = " << str << endl
 	   << "\t\t\t\t        Proc. # of valid cells = " << number_fmt(myPoints) << endl
 	   << "\t\t\t\t        Including ghost cells  = " << number_fmt(myPointsGhosts) << endl
@@ -547,7 +547,7 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   // 4.  Free up m_tags for safety because it will be regridded anyways. 
   // 5.  Cache solver states
   // 6.  Deallocate internal storage for solver. This should free up a bunch of memory. 
-  // 7.  Regrid amr_mesh - this shouldn't cause any extra memory issues
+  // 7.  Regrid AmrMesh - this shouldn't cause any extra memory issues
   // 8.  Regrid driver - this
   // 9.  Regrid the cell tagger. I'm not explicitly releasing storage from here since it's so small.
   // 10. Solve elliptic equations and fill solvers
@@ -577,7 +577,7 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
 
   // Store things that need to be regridded
   this->cache_tags(m_tags);              // Cache m_tags because after regrid, ownership will change
-  m_timestepper->pre_regrid(a_lmin, m_amr->get_finest_level());
+  m_timestepper->pre_regrid(a_lmin, m_amr->getFinestLevel());
 
   // Deallocate unnecessary storage
   this->deallocate_internals();          // Deallocate internal storage for driver
@@ -586,28 +586,28 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   const Real cell_tags = MPI_Wtime();    // Timer
 
   // Regrid AMR. Only levels [lmin, lmax] are allowed to change. 
-  const int old_finest_level = m_amr->get_finest_level();
-  m_amr->regrid_amr(tags, a_lmin, a_lmax);
-  const int new_finest_level = m_amr->get_finest_level();
+  const int old_finest_level = m_amr->getFinestLevel();
+  m_amr->regridAmr(tags, a_lmin, a_lmax);
+  const int new_finest_level = m_amr->getFinestLevel();
 
   // Load balance and regrid the various realms
-  const std::vector<std::string>& realms = m_amr->get_realms();
+  const std::vector<std::string>& realms = m_amr->getRealms();
   for (const auto& str : realms){
     if(m_timestepper->load_balance_realm(str)){
       
       Vector<Vector<int> > procs;
       Vector<Vector<Box> > boxes;
       
-      m_timestepper->load_balance_boxes(procs, boxes, str, m_amr->get_proxy_grids(), a_lmin, new_finest_level);
+      m_timestepper->load_balance_boxes(procs, boxes, str, m_amr->getProxyGrids(), a_lmin, new_finest_level);
 
-      m_amr->regrid_realm(str, procs, boxes, a_lmin);
+      m_amr->regridRealm(str, procs, boxes, a_lmin);
     }
   }
 
 
   // Regrid the operators
   const int regsize = m_timestepper->get_redistribution_regsize();
-  m_amr->regrid_operators(a_lmin, a_lmax, regsize);
+  m_amr->regridOperators(a_lmin, a_lmax, regsize);
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
   // Regrid driver, timestepper, and celltagger
@@ -646,7 +646,7 @@ void driver::regrid_internals(const int a_old_finest_level, const int a_new_fine
 
   // Copy cached tags back over to m_tags
   for (int lvl = 0; lvl <= Min(a_old_finest_level, a_new_finest_level); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     
     // Copy mask
     LevelData<BaseFab<bool> > tmp;
@@ -740,8 +740,8 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
     m_wallclock_start = MPI_Wtime();
 
     while(m_time < a_end_time && m_step < a_max_steps && !last_step){
-      const int max_sim_depth = m_amr->get_max_sim_depth();
-      const int max_amr_depth = m_amr->get_max_amr_depth();
+      const int max_sim_depth = m_amr->getMaxSimulationDepth();
+      const int max_amr_depth = m_amr->getMaxAmrDepth();
 
       // This is the regrid test. We do some dummy tests first and then do the recursive/non-recursive stuff
       // inside the loop. 
@@ -754,7 +754,7 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	  // We'll regrid levels lmin through lmax. As always, new grids on level l are generated through tags
 	  // on levels (l-1);
 	  const int lmin = 0;
-	  const int lmax = m_amr->get_finest_level();
+	  const int lmax = m_amr->getFinestLevel();
 
 #if 0 // Debug test
 	  const Real t0 = MPI_Wtime();
@@ -920,7 +920,7 @@ void driver::set_computational_geometry(const RefCountedPtr<computational_geomet
     pout() << "driver::set_computational_geometry" << endl;
   }
   m_compgeom = a_compgeom;
-  m_mfis     = a_compgeom->get_mfis();
+  m_multifluidIndexSpace     = a_compgeom->get_mfis();
 }
 
 void driver::set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper){
@@ -1046,7 +1046,7 @@ void driver::parse_geometry_generation(){
   if(m_geometry_generation == "chombo-discharge"){ // Need to activate some flags that trigger the correct code. 
     computational_geometry::s_use_new_gshop = true;
     EBISLevel::s_distributedData            = true;
-    computational_geometry::s_ScanDomain = m_amr->get_domains()[m_geo_scan_level];
+    computational_geometry::s_ScanDomain = m_amr->getDomains()[m_geo_scan_level];
   }
   else if(m_geometry_generation == "chombo"){
   }
@@ -1063,7 +1063,7 @@ void driver::parse_geo_refinement(){
 
   ParmParse pp("driver");
 
-  const int max_depth = m_amr->get_max_amr_depth();
+  const int max_depth = m_amr->getMaxAmrDepth();
 
   int depth0;
 
@@ -1171,14 +1171,14 @@ void driver::create_output_directories(){
 
 
 
-void driver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+void driver::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
   CH_TIME("driver::set_amr");
   if(m_verbosity > 5){
     pout() << "driver::set_amr" << endl;
   }
 
   m_amr = a_amr;
-  m_amr->set_mfis(m_compgeom->get_mfis());
+  m_amr->setMultifluidIndexSpace(m_compgeom->get_mfis());
 
 }
 
@@ -1220,7 +1220,7 @@ void driver::setup_geometry_only(){
     pout() << "driver::setup_geometry_only" << endl;
   }
 
-  this->sanity_check();
+  this->sanityCheck();
 
   if(m_ebis_memory_load_balance){
     EBIndexSpace::s_useMemoryLoadBalance = true;
@@ -1230,16 +1230,16 @@ void driver::setup_geometry_only(){
   }
 
   const Real t0 = MPI_Wtime();
-  m_compgeom->build_geometries(m_amr->get_finest_domain(),
-			       m_amr->get_prob_lo(),
-			       m_amr->get_finest_dx(),
+  m_compgeom->build_geometries(m_amr->getFinestDomain(),
+			       m_amr->getProbLo(),
+			       m_amr->getFinestDx(),
 			       m_amr->get_max_ebis_box_size());
   const Real t1 = MPI_Wtime();
   if(procID() == 0) std::cout << "geotime = " << t1 - t0 << std::endl;
 
   // Set implicit functions now. 
-  m_amr->set_baseif(phase::gas,   m_compgeom->get_gas_if());
-  m_amr->set_baseif(phase::solid, m_compgeom->get_sol_if());
+  m_amr->setBaseImplicitFunction(phase::gas,   m_compgeom->get_gas_if());
+  m_amr->setBaseImplicitFunction(phase::solid, m_compgeom->get_sol_if());
 
   if(m_write_memory){
     this->write_memory_usage();
@@ -1251,14 +1251,14 @@ void driver::setup_geometry_only(){
     this->write_memory_usage();
   }
 
-  //  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
+  //  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to AmrMesh before grid gen.
   
   Vector<IntVectSet> tags = m_geom_tags;
   const int a_lmin = 0;
   const int a_lmax = m_geom_tag_depth+1;
-  //  m_amr->build_grids(tags, a_lmin, a_lmax);//m_geom_tag_depth);
+  //  m_amr->buildGrids(tags, a_lmin, a_lmax);//m_geom_tag_depth);
   //  m_amr->define_eblevelgrid(a_lmin);
-  m_amr->regrid_amr(m_geom_tags, a_lmin, a_lmax);       // Regrid using geometric tags for now
+  m_amr->regridAmr(m_geom_tags, a_lmin, a_lmax);       // Regrid using geometric tags for now
 
   if(m_verbosity > 0){
     this->grid_report();
@@ -1276,7 +1276,7 @@ void driver::setup_fresh(const int a_init_regrids){
     pout() << "driver::setup_fresh" << endl;
   }
 
-  this->sanity_check();                                    // Sanity check before doing anything expensive
+  this->sanityCheck();                                    // Sanity check before doing anything expensive
 
   if(m_ebis_memory_load_balance){
     EBIndexSpace::s_useMemoryLoadBalance = true;
@@ -1285,19 +1285,19 @@ void driver::setup_fresh(const int a_init_regrids){
     EBIndexSpace::s_useMemoryLoadBalance = false;
   }
 
-  m_compgeom->build_geometries(m_amr->get_finest_domain(),
-			       m_amr->get_prob_lo(),
-			       m_amr->get_finest_dx(),
+  m_compgeom->build_geometries(m_amr->getFinestDomain(),
+			       m_amr->getProbLo(),
+			       m_amr->getFinestDx(),
 			       m_amr->get_max_ebis_box_size());
 
 
   // Register realms
   m_timestepper->set_amr(m_amr);
-  m_timestepper->register_realms();
+  m_timestepper->registerRealms();
 
   // Set implicit functions now. 
-  m_amr->set_baseif(phase::gas,   m_compgeom->get_gas_if());
-  m_amr->set_baseif(phase::solid, m_compgeom->get_sol_if());
+  m_amr->setBaseImplicitFunction(phase::gas,   m_compgeom->get_gas_if());
+  m_amr->setBaseImplicitFunction(phase::solid, m_compgeom->get_sol_if());
 
   // Get geometry tags
   this->get_geom_tags();
@@ -1308,8 +1308,8 @@ void driver::setup_fresh(const int a_init_regrids){
   // When we're setting up fresh, we need to regrid everything from the base level
   // and upwards. We have tags on m_geom_tag_depth, so that is our current finest level. 
   const int lmin = 0;
-  m_amr->regrid_amr(m_geom_tags, lmin, m_geom_tag_depth, m_geom_tag_depth);
-  const int lmax = m_amr->get_finest_level();
+  m_amr->regridAmr(m_geom_tags, lmin, m_geom_tag_depth, m_geom_tag_depth);
+  const int lmax = m_amr->getFinestLevel();
 
   // Allocate internal storage 
   this->allocate_internals();
@@ -1320,8 +1320,8 @@ void driver::setup_fresh(const int a_init_regrids){
   // time_stepper setup
   m_timestepper->setup_solvers();                                 // Instantiate solvers
   m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);  // Sync solver times
-  m_timestepper->register_operators();
-  m_amr->regrid_operators(lmin, lmax, regsize);
+  m_timestepper->registerOperators();
+  m_amr->regridOperators(lmin, lmax, regsize);
   m_timestepper->allocate();
 
   // Fill solves with initial data
@@ -1330,21 +1330,21 @@ void driver::setup_fresh(const int a_init_regrids){
   // We now load balance and define operators and stuff like that. 
   this->cache_tags(m_tags);
   m_timestepper->pre_regrid(lmin, lmax);
-  for (const auto& str : m_amr->get_realms()){
+  for (const auto& str : m_amr->getRealms()){
     if(m_timestepper->load_balance_realm(str)){
       
       Vector<Vector<int> > procs;
       Vector<Vector<Box> > boxes;
 
       const int lmin   = 0;
-      const int lmax = m_amr->get_finest_level(); 
+      const int lmax = m_amr->getFinestLevel(); 
       
-      m_timestepper->load_balance_boxes(procs, boxes, str, m_amr->get_proxy_grids(), lmin, lmax);
+      m_timestepper->load_balance_boxes(procs, boxes, str, m_amr->getProxyGrids(), lmin, lmax);
 
-      m_amr->regrid_realm(str, procs, boxes, lmin);
+      m_amr->regridRealm(str, procs, boxes, lmin);
     }
   }
-  m_amr->regrid_operators(lmin, lmax, regsize);                        // Regrid operators again.
+  m_amr->regridOperators(lmin, lmax, regsize);                        // Regrid operators again.
   this->regrid_internals(lmax, lmax);          // Regrid internals for driver.
   m_timestepper->regrid(lmin, lmax, lmax);   // Regrid solvers.
 
@@ -1368,7 +1368,7 @@ void driver::setup_fresh(const int a_init_regrids){
     }
 
     const int lmin = 1;
-    const int lmax = m_amr->get_finest_level();
+    const int lmax = m_amr->getFinestLevel();
     this->regrid(lmin, lmax, true);
 
     if(m_verbosity > 0){
@@ -1387,22 +1387,22 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
 
 
 
-  this->sanity_check();                                    // Sanity check before doing anything expensive
+  this->sanityCheck();                                    // Sanity check before doing anything expensive
 
-  m_compgeom->build_geometries(m_amr->get_finest_domain(),
-			       m_amr->get_prob_lo(),
-			       m_amr->get_finest_dx(),
+  m_compgeom->build_geometries(m_amr->getFinestDomain(),
+			       m_amr->getProbLo(),
+			       m_amr->getFinestDx(),
 			       m_amr->get_max_ebis_box_size());
 
   this->get_geom_tags();       // Get geometric tags.
 
   m_timestepper->set_amr(m_amr);                         // Set amr
-  m_timestepper->register_realms();                      // Register realms
+  m_timestepper->registerRealms();                      // Register realms
   m_timestepper->set_computational_geometry(m_compgeom); // Set computational geometry
 
   // Set implicit functions now. 
-  m_amr->set_baseif(phase::gas,   m_compgeom->get_gas_if());
-  m_amr->set_baseif(phase::solid, m_compgeom->get_sol_if());
+  m_amr->setBaseImplicitFunction(phase::gas,   m_compgeom->get_gas_if());
+  m_amr->setBaseImplicitFunction(phase::solid, m_compgeom->get_sol_if());
 
   // Read checkpoint file
   this->read_checkpoint_file(a_restart_file); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
@@ -1426,7 +1426,7 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
     }
 
     const int lmin = 1;
-    const int lmax = m_amr->get_finest_level();
+    const int lmax = m_amr->getFinestLevel();
     this->regrid(lmin, lmax, false);
 
     if(m_verbosity > 0){
@@ -1450,10 +1450,10 @@ void driver::check_restart_file(const std::string a_restart_file) const {
   }
 }
 
-void driver::sanity_check(){
-  CH_TIME("driver::sanity_check");
+void driver::sanityCheck(){
+  CH_TIME("driver::sanityCheck");
   if(m_verbosity > 4){
-    pout() << "driver::sanity_check" << endl;
+    pout() << "driver::sanityCheck" << endl;
   }
 
   CH_assert(!m_timestepper.isNull());
@@ -1473,10 +1473,10 @@ void driver::step_report(const Real a_start_time, const Real a_end_time, const i
   m_timestepper->print_step_report();
 
   // Get the total number of poitns across all levels
-  const int finest_level                 = m_amr->get_finest_level();
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
-  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
-  const Vector<Real>& dx                 = m_amr->get_dx();
+  const int finest_level                 = m_amr->getFinestLevel();
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
+  const Vector<ProblemDomain>& domains   = m_amr->getDomains();
+  const Vector<Real>& dx                 = m_amr->getDx();
   long long totalPoints = 0;
   long long uniformPoints = (domains[finest_level].domainBox()).numPts();
   
@@ -1604,7 +1604,7 @@ int driver::get_finest_tag_level(const EBAMRTags& a_cell_tags) const{
 
   int finest_tag_level = -1;
   for (int lvl = 0; lvl < a_cell_tags.size(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const DenseIntVectSet& tags = (*a_cell_tags[lvl])[dit()];
@@ -1635,7 +1635,7 @@ bool driver::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){
 
   // Note that when we regrid we add at most one level at a time. This means that if we have a
   // simulation with AMR depth l and we want to add a level l+1, we need tags on levels 0 through l.
-  const int finest_level  = m_amr->get_finest_level();
+  const int finest_level  = m_amr->getFinestLevel();
   a_all_tags.resize(1 + finest_level, IntVectSet());
 
   if(!m_celltagger.isNull()){
@@ -1668,14 +1668,14 @@ bool driver::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){
   else{
     // Loop only goes to the current finest level because we only add one level at a time
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      if(lvl < m_amr->get_max_amr_depth()){ // Geometric tags don't exist on amr_mesh.m_max_amr_depth
+      if(lvl < m_amr->getMaxAmrDepth()){ // Geometric tags don't exist on AmrMesh.m_maxAmrDepth
 	a_all_tags[lvl] |= m_geom_tags[lvl];
       }
     }
   }
 
-#if 0 // Debug - if this fails, you have tags on m_amr->m_max_amr_depth and something has gone wrong. 
-  if(finest_level == m_amr->get_max_amr_depth()){
+#if 0 // Debug - if this fails, you have tags on m_amr->m_maxAmrDepth and something has gone wrong. 
+  if(finest_level == m_amr->getMaxAmrDepth()){
     for (int lvl = 0; lvl <= finest_level; lvl++){
       pout() << "level = " << lvl << "\t num_pts = " << a_all_tags[lvl].numPts() << endl;
     }
@@ -1745,14 +1745,14 @@ void driver::write_computational_loads(){
 
   // Get sum of all loads on all realms
   std::map<std::string, Vector<long int> > realmLoads;
-  for (const auto& r : m_amr->get_realms()){
+  for (const auto& r : m_amr->getRealms()){
 
     // Compute total loads on each rank.
     Vector<long int> sumLoads(nProc, 0L);
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const Vector<long int> boxLoads = m_timestepper->get_checkpoint_loads(r, lvl);
 
-      const DisjointBoxLayout& dbl = m_amr->get_grids(r)[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(r)[lvl];
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	sumLoads[procID()] += boxLoads[dit().intCode()];
       }
@@ -1821,11 +1821,11 @@ void driver::write_geometry(){
   this->write_levelset(output, icomp);
 
   //
-  const int finest_level                 = m_amr->get_finest_level();
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids(m_realm);
-  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
-  const Vector<Real>& dx                 = m_amr->get_dx();
-  const Vector<int>& ref_rat             = m_amr->get_ref_rat();
+  const int finest_level                 = m_amr->getFinestLevel();
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
+  const Vector<ProblemDomain>& domains   = m_amr->getDomains();
+  const Vector<Real>& dx                 = m_amr->getDx();
+  const Vector<int>& ref_rat             = m_amr->getRefinementRatios();
 
   Vector<LevelData<EBCellFAB>*> output_ptr(1 + finest_level);
   m_amr->alias(output_ptr, output);
@@ -1957,23 +1957,23 @@ void driver::write_plot_file(const std::string a_filename){
   }
 									       
   // Data file aliasing, because Chombo IO wants dumb pointers. 
-  Vector<LevelData<EBCellFAB>* > output_ptr(1 + m_amr->get_finest_level());
+  Vector<LevelData<EBCellFAB>* > output_ptr(1 + m_amr->getFinestLevel());
   m_amr->alias(output_ptr, output);
 
   // Restrict plot depth if need be
   int plot_depth;
   if(m_max_plot_depth < 0){
-    plot_depth = m_amr->get_finest_level();
+    plot_depth = m_amr->getFinestLevel();
   }
   else{
-    plot_depth = Min(m_max_plot_depth, m_amr->get_finest_level());
+    plot_depth = Min(m_max_plot_depth, m_amr->getFinestLevel());
   }
 
   // Interpolate ghost cells. This might be important if we use multiple realms. 
   for (int icomp = 0; icomp < ncomp; icomp++){
     const Interval interv(icomp, icomp);
     
-    for (int lvl = 1; lvl <= m_amr->get_finest_level(); lvl++){
+    for (int lvl = 1; lvl <= m_amr->getFinestLevel(); lvl++){
 
       LevelData<EBCellFAB> fineAlias;
       LevelData<EBCellFAB> coarAlias;
@@ -1981,7 +1981,7 @@ void driver::write_plot_file(const std::string a_filename){
       aliasLevelData(fineAlias, output_ptr[lvl],   interv);
       aliasLevelData(coarAlias, output_ptr[lvl-1], interv);
 
-      m_amr->interp_ghost(fineAlias, coarAlias, lvl, m_realm, phase::gas);
+      m_amr->interpGhost(fineAlias, coarAlias, lvl, m_realm, phase::gas);
     }
   }
 
@@ -2000,14 +2000,14 @@ void driver::write_plot_file(const std::string a_filename){
 
   // Write. 
   writeEBHDF5(a_filename, 
-	      m_amr->get_grids(m_realm),
+	      m_amr->getGrids(m_realm),
 	      output_ptr,
 	      names, 
-	      m_amr->get_domains()[0],
-	      m_amr->get_dx()[0], 
+	      m_amr->getDomains()[0],
+	      m_amr->getDx()[0], 
 	      m_dt,
 	      m_time,
-	      m_amr->get_ref_rat(),
+	      m_amr->getRefinementRatios(),
 	      plot_depth + 1,
 	      false,
 	      Vector<Real>(),
@@ -2047,9 +2047,9 @@ void driver::write_tags(EBAMRCellData& a_output, int& a_comp){
   data_ops::set_value(tags, 0.0);
     
   // Set tagged cells = 1
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const DenseIntVectSet& ivs = (*m_tags[lvl])[dit()];
@@ -2070,7 +2070,7 @@ void driver::write_tags(EBAMRCellData& a_output, int& a_comp){
 
   const Interval src_interv(0, 0);
   const Interval dst_interv(a_comp, a_comp);
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     tags[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
   }
 
@@ -2083,7 +2083,7 @@ void driver::write_ranks(EBAMRCellData& a_output, int& a_comp){
     pout() << "driver::write_ranks" << endl;
   }
 
-  for (const auto& r : m_amr->get_realms()){
+  for (const auto& r : m_amr->getRealms()){
     EBAMRCellData scratch;
     m_amr->allocate(scratch, r, phase::gas, 1);
 
@@ -2091,7 +2091,7 @@ void driver::write_ranks(EBAMRCellData& a_output, int& a_comp){
 
     const Interval src(0,0);
     const Interval dst(a_comp, a_comp);
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       scratch[lvl]->copyTo(src, *a_output[lvl], dst);
     }
 
@@ -2108,11 +2108,11 @@ void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){
   const RefCountedPtr<BaseIF>& lsf1 = m_compgeom->get_gas_if();
   const RefCountedPtr<BaseIF>& lsf2 = m_compgeom->get_sol_if();
 
-  const RealVect prob_lo = m_amr->get_prob_lo();
+  const RealVect prob_lo = m_amr->getProbLo();
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(a_output.get_realm())[lvl];
-    const Real dx = m_amr->get_dx()[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(a_output.get_realm())[lvl];
+    const Real dx = m_amr->getDx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       FArrayBox& fab = (*a_output[lvl])[dit()].getFArrayBox();
@@ -2142,7 +2142,7 @@ void driver::write_checkpoint_file(){
     pout() << "driver::write_checkpoint_file" << endl;
   }
   
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   int finest_chk_level  = Min(m_max_chk_depth, finest_level);
   if(m_max_chk_depth < 0){
     finest_chk_level = finest_level;
@@ -2150,14 +2150,14 @@ void driver::write_checkpoint_file(){
 
   // Write header. 
   HDF5HeaderData header;
-  header.m_real["coarsest_dx"] = m_amr->get_dx()[0];
+  header.m_real["coarsest_dx"] = m_amr->getDx()[0];
   header.m_real["time"]        = m_time;
   header.m_real["dt"]          = m_dt;
   header.m_int["step"]         = m_step;
   header.m_int["finest_level"] = finest_level;
 
   // Write realm names.
-  for (auto r : m_amr->get_realms()){
+  for (auto r : m_amr->getRealms()){
     header.m_string[r] = r;
   }
 
@@ -2180,7 +2180,7 @@ void driver::write_checkpoint_file(){
     handle_out.setGroupToLevel(lvl);
 
     // write amr grids
-    write(handle_out, m_amr->get_grids(m_realm)[lvl]); // write AMR grids
+    write(handle_out, m_amr->getGrids(m_realm)[lvl]); // write AMR grids
 
     // time stepper checkpoints data
     m_timestepper->write_checkpoint_data(handle_out, lvl); 
@@ -2216,13 +2216,13 @@ void driver::write_checkpoint_tags(HDF5Handle& a_handle, const int a_level){
   }
 
   // Create some scratch data = 0 which can grok
-  EBCellFactory fact(m_amr->get_ebisl(m_realm, phase::gas)[a_level]);
-  LevelData<EBCellFAB> scratch(m_amr->get_grids(m_realm)[a_level], 1, 3*IntVect::Unit, fact);
+  EBCellFactory fact(m_amr->getEBISLayout(m_realm, phase::gas)[a_level]);
+  LevelData<EBCellFAB> scratch(m_amr->getGrids(m_realm)[a_level], 1, 3*IntVect::Unit, fact);
   data_ops::set_value(scratch, 0.0);
 
   // Set tags = 1
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
     
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box = dbl.get(dit());
@@ -2249,14 +2249,14 @@ void driver::write_checkpoint_realm_loads(HDF5Handle& a_handle, const int a_leve
     pout() << "driver::write_checkpoint_realm_loads" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
 
   // Make some storage. 
   LevelData<FArrayBox> scratch(dbl, 1, 3*IntVect::Unit);
 
   // Get loads. 
-  for (auto r : m_amr->get_realms()){
+  for (auto r : m_amr->getRealms()){
     const Vector<long int> loads = m_timestepper->get_checkpoint_loads(r, a_level);
 
     // Set loads on an FArrayBox
@@ -2279,7 +2279,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   }
 
   // Time stepper can register realms immediately. 
-  m_timestepper->register_realms();
+  m_timestepper->registerRealms();
 
   // Read the header that was written by new_read_checkpoint_file
   HDF5Handle handle_in(a_restart_file, HDF5Handle::OPEN_RDONLY);
@@ -2302,7 +2302,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
 
   // Get then names of the realms that will be used for simulations.
   std::map<std::string, Vector<Vector<long int > > > sim_loads;
-  for (const auto& irealm : m_amr->get_realms()){
+  for (const auto& irealm : m_amr->getRealms()){
     sim_loads.emplace(irealm, Vector<Vector<long int> >());
   }
 
@@ -2316,7 +2316,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   }
 
   // Abort if base resolution has changed. 
-  if(!coarsest_dx == m_amr->get_dx()[0]){
+  if(!coarsest_dx == m_amr->getDx()[0]){
     MayDay::Abort("driver::read_checkpoint_file - coarsest_dx != dx[0], did you change the base level resolution?!?");
   }
 
@@ -2375,15 +2375,15 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
 #endif
   }
 
-  // Define amr_mesh and realms. 
-  m_amr->set_finest_level(finest_level); 
-  m_amr->set_grids(boxes, sim_loads);
+  // Define AmrMesh and realms. 
+  m_amr->setFinestLevel(finest_level); 
+  m_amr->setGrids(boxes, sim_loads);
   
   // Instantiate solvers and register operators
   const int regsize = m_timestepper->get_redistribution_regsize();
   m_timestepper->setup_solvers();
-  m_timestepper->register_operators();
-  m_amr->regrid_operators(base_level, finest_level, regsize);
+  m_timestepper->registerOperators();
+  m_amr->regridOperators(base_level, finest_level, regsize);
   m_timestepper->allocate();
 
   // Allocate internal stuff (e.g. space for tags)
@@ -2392,7 +2392,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
 
 
   // Go through level by level and have solvers extract their data
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     handle_in.setGroupToLevel(lvl);
 
     // time stepper reads in data
@@ -2412,8 +2412,8 @@ void driver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
     pout() << "driver::read_checkpoint_level" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, phase::gas)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
 
   // Some scratch data we can use
   EBCellFactory fact(ebisl);

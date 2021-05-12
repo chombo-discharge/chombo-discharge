@@ -9,7 +9,7 @@
 #define _RK2_TGA_STORAGE_
 
 #include "rk2_tga.H"
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 
 #include <RefCountedPtr.H>
 
@@ -29,7 +29,7 @@ public:
   /*!
     @brief Constructor
   */
-  cdr_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  cdr_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
 
   /*!
     @brief Destructor
@@ -100,7 +100,7 @@ protected:
   /*!
     @brief AMR mesh
   */
-  RefCountedPtr<amr_mesh> m_amr;
+  RefCountedPtr<AmrMesh> m_amr;
 
   /*!
     @brief Phase
@@ -163,7 +163,7 @@ public:
   /*!
     @brief Full constructor
   */
-  poisson_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  poisson_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
 
   /*!
     @brief Destructor
@@ -213,7 +213,7 @@ protected:
   /*!
     @brief AMR mesh
   */
-  RefCountedPtr<amr_mesh> m_amr;
+  RefCountedPtr<AmrMesh> m_amr;
 
   /*!
     @brief Phase
@@ -261,7 +261,7 @@ public:
   /*!
     @brief Constructor
   */
-  rte_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  rte_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
 
   /*!
     @brief Destructor
@@ -297,7 +297,7 @@ protected:
   /*!
     @brief AMR mesh
   */
-  RefCountedPtr<amr_mesh> m_amr;
+  RefCountedPtr<AmrMesh> m_amr;
 
   /*!
     @brief Phase
@@ -328,7 +328,7 @@ public:
   /*!
     @brief Constructor
   */
-  sigma_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  sigma_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
 
   /*!
     @brief Destructor
@@ -371,7 +371,7 @@ protected:
   /*!
     @brief AMR mesh
   */
-  RefCountedPtr<amr_mesh> m_amr;
+  RefCountedPtr<AmrMesh> m_amr;
 
   /*!
     @brief Phase

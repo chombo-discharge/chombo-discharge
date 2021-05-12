@@ -33,7 +33,7 @@ namespace physics {
       */
       ito_plasma_tagger(const RefCountedPtr<ito_plasma_physics>&     a_physics,
 			const RefCountedPtr<ito_plasma_stepper>&     a_timestepper,
-			const RefCountedPtr<amr_mesh>&               a_amr,
+			const RefCountedPtr<AmrMesh>&               a_amr,
 			const RefCountedPtr<computational_geometry>& a_compgeom);
 
       /*!
@@ -45,12 +45,12 @@ namespace physics {
 	@brief Define function
 	@param[in] a_physics     Plasma kinetics
 	@param[in] a_timestepper Time stepper
-	@param[in] a_amr         amr_mesh instance
+	@param[in] a_amr         AmrMesh instance
 	@param[in] a_compgeom    Computational geometry
       */
       virtual void define(const RefCountedPtr<ito_plasma_physics>&     a_physics,
 			  const RefCountedPtr<ito_plasma_stepper>&     a_timestepper,
-			  const RefCountedPtr<amr_mesh>&               a_amr,
+			  const RefCountedPtr<AmrMesh>&               a_amr,
 			  const RefCountedPtr<computational_geometry>& a_compgeom);
 
 
@@ -122,9 +122,9 @@ namespace physics {
       RefCountedPtr<ito_plasma_stepper> m_timestepper;
 
       /*!
-	@brief amr_mesh. Needed for computing tracer stuff
+	@brief AmrMesh. Needed for computing tracer stuff
       */
-      RefCountedPtr<amr_mesh> m_amr;
+      RefCountedPtr<AmrMesh> m_amr;
 
       /*!
 	@brief Computational geometry. Needed for what exactly?

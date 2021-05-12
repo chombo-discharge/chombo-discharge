@@ -32,7 +32,7 @@ void cdr_gdnv::parse_options(){
     pout() << m_name + "::parse_options" << endl;
   }
   
-  parse_domain_bc();     // Parses domain BC options
+  parseDomain_bc();     // Parses domain BC options
   parse_slopelim();      // Parses slope limiter settings
   parse_plot_vars();     // Parses plot variables
   parse_plotmode();      // Parse plot mdoe
@@ -52,7 +52,7 @@ void cdr_gdnv::parse_runtime_options(){
   parse_plot_vars();
   parse_plotmode();
   parse_gmg_settings();
-  parse_domain_bc();
+  parseDomain_bc();
   parse_extrap_source();
   parse_conservation();
 }
@@ -83,17 +83,17 @@ void cdr_gdnv::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCell
     pout() << m_name + "::average_velo_to_faces" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::average_cell_to_face(*a_velo_face[lvl], *a_velo_cell[lvl], m_amr->get_domains()[lvl]);
+    data_ops::average_cell_to_face(*a_velo_face[lvl], *a_velo_cell[lvl], m_amr->getDomains()[lvl]);
     a_velo_face[lvl]->exchange();
   }
 
   // Fix up boundary velocities to ensure no influx. This is (probably) the easiest way to handle this for cdr_gdnv
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
       EBFluxFAB& velo = (*a_velo_face[lvl])[dit()];
@@ -147,12 +147,12 @@ void cdr_gdnv::allocate_internals(){
   }
 
   if(m_mobile){
-    const Vector<RefCountedPtr<EBLevelGrid> >& eblgs = m_amr->get_eblg(m_realm, m_phase);
-    const Vector<DisjointBoxLayout>& grids           = m_amr->get_grids(m_realm);
-    const Vector<int>& ref_ratios                    = m_amr->get_ref_rat();
-    const Vector<Real>& dx                           = m_amr->get_dx();
-    const int finest_level                           = m_amr->get_finest_level();
-    const bool has_ebcf                              = m_amr->get_ebcf();
+    const Vector<RefCountedPtr<EBLevelGrid> >& eblgs = m_amr->getEBLevelGrid(m_realm, m_phase);
+    const Vector<DisjointBoxLayout>& grids           = m_amr->getGrids(m_realm);
+    const Vector<int>& ref_ratios                    = m_amr->getRefinementRatios();
+    const Vector<Real>& dx                           = m_amr->getDx();
+    const int finest_level                           = m_amr->getFinestLevel();
+    const bool has_ebcf                              = m_amr->getEbCf();
     m_level_advect.resize(1 + finest_level);
   
     for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -192,31 +192,31 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
   if(m_extrap_source && a_extrap_dt > 0.0){
 #if 0 // R.M. April 2020 - disabling this for now. 
     if(m_diffusive){
-      const int finest_level = m_amr->get_finest_level();
+      const int finest_level = m_amr->getFinestLevel();
       Vector<LevelData<EBCellFAB>* > scratchAlias, stateAlias;
       m_amr->alias(scratchAlias, m_scratch);
       m_amr->alias(stateAlias,   a_state);
       m_gmg_solver->computeAMROperator(scratchAlias, stateAlias, finest_level, 0, false);
 
       // computeAMROperator fucks my ghost cells. 
-      m_amr->interp_ghost_pwl(const_cast<EBAMRCellData&> (a_state), m_realm, m_phase);
+      m_amr->interpGhost_pwl(const_cast<EBAMRCellData&> (a_state), m_realm, m_phase);
     }
 #endif
 
     data_ops::copy(m_scratch, m_source);
-    m_amr->average_down(m_scratch,     m_realm, m_phase);
-    m_amr->interp_ghost_pwl(m_scratch, m_realm, m_phase);
+    m_amr->averageDown(m_scratch,     m_realm, m_phase);
+    m_amr->interpGhost_pwl(m_scratch, m_realm, m_phase);
   }
   else{
     data_ops::set_value(m_scratch, 0.0);
   }
 
   // Extrapolate face-centered state on every level
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
 
     for (DataIterator dit = dbl.dataIterator();dit.ok(); ++dit){
 

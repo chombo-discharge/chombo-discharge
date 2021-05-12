@@ -30,7 +30,7 @@ namespace physics {
       */
       streamer_tagger(const RefCountedPtr<cdr_plasma_physics>&     a_physics,
 		      const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
-		      const RefCountedPtr<amr_mesh>&               a_amr,
+		      const RefCountedPtr<AmrMesh>&               a_amr,
 		      const RefCountedPtr<computational_geometry>& a_compgeom);
 
       /*!

@@ -8,7 +8,7 @@
 #ifndef _rk2_
 #define _rk2_
 
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 #include "time_stepper.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"

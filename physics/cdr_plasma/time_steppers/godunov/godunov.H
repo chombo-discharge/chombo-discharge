@@ -8,7 +8,7 @@
 #ifndef _GODUNOV_
 #define _GODUNOV_
 
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 #include "cdr_plasma_stepper.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"

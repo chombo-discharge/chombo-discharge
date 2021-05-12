@@ -10,7 +10,7 @@
 
 #include "cell_tagger.H"
 #include "cdr_solver.H"
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 
 #include "CD_NamespaceHeader.H"
 namespace physics {
@@ -23,7 +23,7 @@ namespace physics {
     public:
 
       advection_diffusion_tagger(RefCountedPtr<cdr_solver>& a_solver,
-				 RefCountedPtr<amr_mesh>&   a_amr);
+				 RefCountedPtr<AmrMesh>&   a_amr);
       ~advection_diffusion_tagger();
 
       void regrid();
@@ -34,7 +34,7 @@ namespace physics {
       std::string m_realm;
       
       RefCountedPtr<cdr_solver> m_solver;
-      RefCountedPtr<amr_mesh>   m_amr;
+      RefCountedPtr<AmrMesh>   m_amr;
 
     private:
       advection_diffusion_tagger(){

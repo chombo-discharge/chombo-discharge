@@ -55,8 +55,8 @@ namespace Physics {
       void print_step_report() override {};
 
       // Registration routines
-      void register_realms() override;
-      void register_operators() override;
+      void registerRealms() override;
+      void registerOperators() override;
 
       // Regrid routines
       bool need_to_regrid() override {return false;}
@@ -78,7 +78,7 @@ namespace Physics {
     protected:
 
       bool m_load_balance;
-      box_sorting m_boxsort;
+      box_sorting m_boxSort;
 
       RefCountedPtr<FieldSolver> m_fieldSolver;
       RefCountedPtr<sigma_solver>   m_sigma;

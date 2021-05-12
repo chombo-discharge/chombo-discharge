@@ -40,8 +40,8 @@ void sisdc_tagger::compute_tracers(){
   }
 
   const int comp = 0;
-  const int max_amr_depth = m_amr->get_max_amr_depth();
-  const int finest_level  = m_amr->get_finest_level();
+  const int max_amr_depth = m_amr->getMaxAmrDepth();
+  const int finest_level  = m_amr->getFinestLevel();
 
   // Get electron density and error
   sisdc* stepper = (sisdc*) (&(*m_timestepper));
@@ -61,15 +61,15 @@ void sisdc_tagger::compute_tracers(){
   m_timestepper->compute_E(E, phase::gas);
 
   data_ops::vector_length(m_tracer[1], E);
-  m_amr->interpolate_to_centroids(m_tracer[1], m_phase);
+  m_amr->InterpToCentroids(m_tracer[1], m_phase);
   data_ops::get_max_min(Emax, Emin, m_tracer[1], 0);
   data_ops::scale(m_tracer[1], 1./Emax);
 
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids()[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_phase)[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box& box         = dbl.get(dit());

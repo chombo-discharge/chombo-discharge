@@ -9,7 +9,7 @@
 #define _RTE_SOLVER_
 
 #include "computational_geometry.H"
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 #include "rte_species.H"
 
 #include "CD_NamespaceHeader.H"
@@ -88,7 +88,7 @@ public:
   /*!
     @brief Set the amr object
   */
-  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+  virtual void set_amr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Set phase
@@ -119,7 +119,7 @@ public:
   /*!
     @brief Sanity check
   */
-  virtual void sanity_check();
+  virtual void sanityCheck();
 
   /*!
     @brief Check if solver is stationary
@@ -172,7 +172,7 @@ public:
   /*!
     @brief Register operators
   */
-  virtual void register_operators() = 0;
+  virtual void registerOperators() = 0;
 
   /*!
     @brief Fill solver with initial data. By default, this sets internal data to zero. 
@@ -285,7 +285,7 @@ protected:
   /*!
     @brief AMR; needed for grid stuff
   */
-  RefCountedPtr<amr_mesh> m_amr;
+  RefCountedPtr<AmrMesh> m_amr;
 
   /*!
     @brief Phase

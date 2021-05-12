@@ -231,7 +231,7 @@ protected:
   void parse_eta();
   void parse_photoi();
   void parse_see();
-  void parse_domain_bc();
+  void parseDomain_bc();
   void parse_chemistry();
   void parse_initial_particles();
   void instantiate_species();

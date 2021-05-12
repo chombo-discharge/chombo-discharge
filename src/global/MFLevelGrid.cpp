@@ -19,7 +19,7 @@ MFLevelGrid::MFLevelGrid(const DisjointBoxLayout&          a_dbl,
 			 const ProblemDomain&              a_domain,
 			 const int                         a_ebghost,
 			 const RefCountedPtr<mfis>&        a_mfis){
-  m_mfis = a_mfis;
+  m_multifluidIndexSpace = a_mfis;
   m_eblg.resize(0);
   for (int i = 0; i < a_mfis->num_phases(); i++){
     m_eblg.push_back(EBLevelGrid(a_dbl, a_domain, a_ebghost, a_mfis->get_ebis(i)));
@@ -42,27 +42,27 @@ int MFLevelGrid::num_phases() const {
 
 void MFLevelGrid::define(const RefCountedPtr<mfis>& a_mfis,
 			 const Vector<EBLevelGrid>& a_eblg){
-  m_mfis = a_mfis;
+  m_multifluidIndexSpace = a_mfis;
   m_eblg = a_eblg;
 }
 
 const RefCountedPtr<mfis>& MFLevelGrid::get_mfis() const {
-  return m_mfis;
+  return m_multifluidIndexSpace;
 }
 
 ProblemDomain MFLevelGrid::get_domain() const {
   return m_eblg[0].getDomain();
 }
 
-DisjointBoxLayout MFLevelGrid::get_grids() const {
+DisjointBoxLayout MFLevelGrid::getGrids() const {
   return m_eblg[0].getDBL();
 }
 
-EBLevelGrid& MFLevelGrid::get_eblg(int a_phase){
+EBLevelGrid& MFLevelGrid::getEBLevelGrid(int a_phase){
   return m_eblg[a_phase];
 }
 
-const EBLevelGrid& MFLevelGrid::get_eblg(int a_phase) const {
+const EBLevelGrid& MFLevelGrid::getEBLevelGrid(int a_phase) const {
   return m_eblg[a_phase];
 }
 
@@ -73,9 +73,9 @@ IntVectSet MFLevelGrid::interface_region(const Box&       a_box,
 
   IntVectSet ret;
     
-  if(m_mfis->num_phases() == 2){
-    const EBLevelGrid& eblg1 = this->get_eblg(a_phase1);
-    const EBLevelGrid& eblg2 = this->get_eblg(a_phase2);
+  if(m_multifluidIndexSpace->num_phases() == 2){
+    const EBLevelGrid& eblg1 = this->getEBLevelGrid(a_phase1);
+    const EBLevelGrid& eblg2 = this->getEBLevelGrid(a_phase2);
       
     const EBISBox& ebisbox1  = eblg1.getEBISL()[a_dit];
     const EBISBox& ebisbox2  = eblg2.getEBISL()[a_dit];
@@ -94,9 +94,9 @@ bool MFLevelGrid::interface_pair(IntVect&             a_iv,
 				 const int            a_phase2) const {
   bool found_iv = false;
 
-  if(m_mfis->num_phases() == 2){
-    const EBLevelGrid& eblg1 = this->get_eblg(a_phase1);
-    const EBLevelGrid& eblg2 = this->get_eblg(a_phase2);
+  if(m_multifluidIndexSpace->num_phases() == 2){
+    const EBLevelGrid& eblg1 = this->getEBLevelGrid(a_phase1);
+    const EBLevelGrid& eblg2 = this->getEBLevelGrid(a_phase2);
       
     const EBISBox& ebisbox1  = eblg1.getEBISL()[a_dit];
     const EBISBox& ebisbox2  = eblg2.getEBISL()[a_dit];

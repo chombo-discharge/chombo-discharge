@@ -209,12 +209,12 @@ protected:
   /*!
     @brief Finest level
   */
-  int m_finest_level;
+  int m_finestLevel;
 
   /*!
     @brief Stencil type
   */
-  stencil_type m_stencil_type;
+  stencil_type m_stencilType;
 };
 #include "CD_NamespaceFooter.H"
 

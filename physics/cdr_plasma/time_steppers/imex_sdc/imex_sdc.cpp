@@ -47,7 +47,7 @@ void imex_sdc::parse_options(){
   }
 
   // Regular stuff from cdr_plasma_stepper that we almost always need
-  parse_verbosity();
+  parseVerbosity();
   parse_solver_verbosity();
   parse_cfl();
   parse_relax_time();
@@ -76,7 +76,7 @@ void imex_sdc::parse_runtime_options(){
   }
 
   // Regular stuff from cdr_plasma_stepper that we almost always need
-  parse_verbosity();
+  parseVerbosity();
   parse_solver_verbosity();
   parse_cfl();
   parse_relax_time();
@@ -641,8 +641,8 @@ void imex_sdc::compute_FD_0(){
 	solver->compute_divD(FD_0, phi_0);
 
 	// Shouldn't be necesary
-	m_amr->average_down(FD_0, m_realm, m_cdr->get_phase());
-	m_amr->interp_ghost(FD_0, m_realm, m_cdr->get_phase());
+	m_amr->averageDown(FD_0, m_realm, m_cdr->get_phase());
+	m_amr->interpGhost(FD_0, m_realm, m_cdr->get_phase());
       }
       else{
 	data_ops::set_value(FD_0, 0.0);
@@ -802,8 +802,8 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
       data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
 
       // This shouldn't be necessary
-      m_amr->average_down(phi_m1, m_realm, m_cdr->get_phase());
-      m_amr->interp_ghost(phi_m1, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(phi_m1, m_realm, m_cdr->get_phase());
+      m_amr->interpGhost(phi_m1, m_realm, m_cdr->get_phase());
 
       if(a_lagged_terms){ // Back up the old slope first, we will need it for the lagged term
 	data_ops::copy(scratch, FAR_m);
@@ -815,8 +815,8 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
       data_ops::scale(FAR_m, 1./m_dtm[a_m]);    // :
 
       // Shouldn't be necessary
-      m_amr->average_down(FAR_m, m_realm, m_cdr->get_phase());
-      m_amr->interp_ghost(FAR_m, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(FAR_m, m_realm, m_cdr->get_phase());
+      m_amr->interpGhost(FAR_m, m_realm, m_cdr->get_phase());
     }
 
     // Now add in the lagged advection-reaction and quadrature terms. This is a bit weird, but we did overwrite
@@ -890,8 +890,8 @@ void imex_sdc::integrate_advection(const Real a_dt, const int a_m, const bool a_
       data_ops::copy(phi_m1, phi_m);
       data_ops::incr(phi_m1, scratch, -m_dtm[a_m]);
       data_ops::floor(phi_m1, 0.0);
-      m_amr->average_down(phi_m1, m_realm, m_cdr->get_phase());
-      m_amr->interp_ghost(phi_m1, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(phi_m1, m_realm, m_cdr->get_phase());
+      m_amr->interpGhost(phi_m1, m_realm, m_cdr->get_phase());
 
     }
     else{
@@ -937,8 +937,8 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
 	const EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];      // FD_(m+1)^k. Lagged term.
 	data_ops::incr(init_soln, FD_m1k, -m_dtm[a_m]);
       }
-      m_amr->average_down(init_soln, m_realm, m_cdr->get_phase());
-      m_amr->interp_ghost(init_soln, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(init_soln, m_realm, m_cdr->get_phase());
+      m_amr->interpGhost(init_soln, m_realm, m_cdr->get_phase());
       data_ops::copy(phi_m1, phi_m);
 
       // Solve
@@ -948,8 +948,8 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
       else{
 	solver->advance_euler(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
       }
-      m_amr->average_down(phi_m1, m_realm, m_cdr->get_phase());
-      m_amr->interp_ghost(phi_m1, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(phi_m1, m_realm, m_cdr->get_phase());
+      m_amr->interpGhost(phi_m1, m_realm, m_cdr->get_phase());
       data_ops::floor(phi_m1, 0.0);
 
       // Update the operator slope
@@ -959,8 +959,8 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
       data_ops::incr(FD_m1k, init_soln, -1.0);
       data_ops::scale(FD_m1k, 1./m_dtm[a_m]);
 
-      m_amr->average_down(FD_m1k, m_realm, m_cdr->get_phase());
-      m_amr->interp_ghost(FD_m1k, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(FD_m1k, m_realm, m_cdr->get_phase());
+      m_amr->interpGhost(FD_m1k, m_realm, m_cdr->get_phase());
     }
     else{
       EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];
@@ -1022,8 +1022,8 @@ void imex_sdc::reconcile_integrands(){
       }
 
       // Shouldn't be necessary
-      m_amr->average_down(F_m, m_realm, m_cdr->get_phase());
-      m_amr->interp_ghost(F_m, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(F_m, m_realm, m_cdr->get_phase());
+      m_amr->interpGhost(F_m, m_realm, m_cdr->get_phase());
     }
   }
 
@@ -1087,8 +1087,8 @@ void imex_sdc::finalize_errors(){
       // Compute norms. Only coarsest level
       Real Lerr, Lphi;
       const int lvl = 0;
-      data_ops::norm(Lerr, *error[lvl], m_amr->get_domains()[lvl], m_error_norm);
-      data_ops::norm(Lphi, *phi_p[lvl], m_amr->get_domains()[lvl], m_error_norm);
+      data_ops::norm(Lerr, *error[lvl], m_amr->getDomains()[lvl], m_error_norm);
+      data_ops::norm(Lphi, *phi_p[lvl], m_amr->getDomains()[lvl], m_error_norm);
 
       if(Lphi > 0.0){
 	m_cdr_error[idx] = Lerr/Lphi;
@@ -1204,8 +1204,8 @@ void imex_sdc::compute_dt(Real& a_dt, time_code& a_timecode){
   Real dt = 1.E99;
 
   int Nref = 1;
-  for (int lvl = 0; lvl < m_amr->get_finest_level(); lvl++){
-    Nref = Nref*m_amr->get_ref_rat()[lvl];
+  for (int lvl = 0; lvl < m_amr->getFinestLevel(); lvl++){
+    Nref = Nref*m_amr->getRefinementRatios()[lvl];
   }
   const Real max_gl_dist = imex_sdc::get_max_node_distance();
   m_dt_cfl = m_cdr->compute_advection_dt();
@@ -1405,9 +1405,9 @@ void imex_sdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states){
     const int idx = solver_it.index();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
     EBAMRCellData& grad = storage->get_gradient();
-    m_amr->compute_gradient(grad, *a_states[idx], m_realm, m_cdr->get_phase());
-    //    m_amr->average_down(grad, m_realm, m_cdr->get_phase());
-    m_amr->interp_ghost(grad, m_realm, m_cdr->get_phase());
+    m_amr->computeGradient(grad, *a_states[idx], m_realm, m_cdr->get_phase());
+    //    m_amr->averageDown(grad, m_realm, m_cdr->get_phase());
+    m_amr->interpGhost(grad, m_realm, m_cdr->get_phase());
   }
 }
 

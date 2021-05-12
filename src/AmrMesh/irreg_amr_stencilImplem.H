@@ -50,18 +50,18 @@ void irreg_amr_stencil<T>::define(const Vector<DisjointBoxLayout>& a_grids,
 				  const stencil_type               a_type){
   CH_TIME("irreg_amr_stencil::define");
 
-  m_finest_level = a_finestLevel;
+  m_finestLevel = a_finestLevel;
   m_radius       = a_radius;
   m_order        = a_order;
-  m_stencil_type = a_type;
+  m_stencilType = a_type;
 
-  m_grids.resize(m_finest_level + 1);
-  m_ebisl.resize(m_finest_level + 1);
-  m_domains.resize(m_finest_level + 1);
-  m_dx.resize(m_finest_level + 1);
-  m_stencils.resize(m_finest_level + 1);
+  m_grids.resize(m_finestLevel + 1);
+  m_ebisl.resize(m_finestLevel + 1);
+  m_domains.resize(m_finestLevel + 1);
+  m_dx.resize(m_finestLevel + 1);
+  m_stencils.resize(m_finestLevel + 1);
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     m_grids[lvl]   = a_grids[lvl];
     m_ebisl[lvl]   = a_ebisl[lvl];
     m_domains[lvl] = a_domains[lvl];
@@ -72,7 +72,7 @@ void irreg_amr_stencil<T>::define(const Vector<DisjointBoxLayout>& a_grids,
 							 m_dx[lvl],
 							 m_order,
 							 m_radius,
-							 m_stencil_type));
+							 m_stencilType));
   }
   
   m_defined = true;
@@ -233,7 +233,7 @@ void irreg_amr_stencil<T>::apply(EBAMRCellData& a_data,
 				 const bool   a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     irreg_amr_stencil::apply(*a_data[lvl], lvl, a_limit);
   }
 }
@@ -244,7 +244,7 @@ void irreg_amr_stencil<T>::apply(EBAMRCellData&       a_dst,
 				 const bool         a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     irreg_amr_stencil::apply(*a_dst[lvl], *a_src[lvl], lvl, a_limit);
   }
 }
@@ -255,7 +255,7 @@ void irreg_amr_stencil<T>::apply(EBAMRIVData&         a_dst,
 				 const bool         a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     irreg_amr_stencil::apply(*a_dst[lvl], *a_src[lvl], lvl, a_limit);
   }
 }

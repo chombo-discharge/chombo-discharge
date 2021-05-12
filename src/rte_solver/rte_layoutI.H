@@ -114,7 +114,7 @@ void rte_layout<T>::deallocate_internals(){
 }
 
 template <class T>
-void rte_layout<T>::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+void rte_layout<T>::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
   CH_TIME("rte_layout<T>::set_amr");
   if(m_verbosity > 5){
     pout() << "rte_layout<T>::set_amr" << endl;
@@ -168,15 +168,15 @@ void rte_layout<T>::set_verbosity(const int a_verbosity){
 }
 
 template <class T>
-void rte_layout<T>::sanity_check(){
-  CH_TIME("rte_layout<T>::sanity_check");
+void rte_layout<T>::sanityCheck(){
+  CH_TIME("rte_layout<T>::sanityCheck");
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::sanity_check" << endl;
+    pout() << "rte_layout<T>::sanityCheck" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->sanity_check();
+    solver->sanityCheck();
   }
 }
 
@@ -207,15 +207,15 @@ void rte_layout<T>::regrid(const int a_lmin, const int a_old_finest_level, const
 }
 
 template <class T>
-void rte_layout<T>::register_operators(){
-  CH_TIME("rte_layout<T>::register_operators");
+void rte_layout<T>::registerOperators(){
+  CH_TIME("rte_layout<T>::registerOperators");
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::register_operators" << endl;
+    pout() << "rte_layout<T>::registerOperators" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->register_operators();
+    solver->registerOperators();
   }
 }
 

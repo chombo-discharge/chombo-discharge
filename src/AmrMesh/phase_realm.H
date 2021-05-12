@@ -67,7 +67,7 @@ public:
 	      const Vector<ProblemDomain>& a_domains,
 	      const Vector<int>& a_ref_rat,
 	      const Vector<Real>& a_dx,
-	      const RealVect a_prob_lo,
+	      const RealVect a_probLo,
 	      const int a_finest_level,
 	      const int a_ebghost,
 	      const int a_num_ghost,
@@ -80,62 +80,62 @@ public:
 	      const RefCountedPtr<EBIndexSpace>& a_ebis);
 
   // Base and operator regrid
-  void set_grids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
+  void setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
   void regrid_base(const int a_lmin);
-  void regrid_operators(const int a_lmin, const int a_lmax, const int a_regsize);
+  void regridOperators(const int a_lmin, const int a_lmax, const int a_regsize);
 
   // Register and query operator
-  void register_operator(const std::string a_operator);
+  void registerOperator(const std::string a_operator);
   bool query_operator(const std::string a_operator);
 
   // Get functions
   const RefCountedPtr<EBIndexSpace>& get_ebis();
-  Vector<int>& get_ref_rat();
-  Vector<Real>& get_dx();
-  Vector<DisjointBoxLayout>& get_grids();
-  Vector<ProblemDomain>& get_domains();
-  Vector<EBISLayout>& get_ebisl();
-  Vector<RefCountedPtr<EBLevelGrid> >& get_eblg();
-  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors();
-  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& get_vofit();
-  irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils();
-  irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils();
-  irreg_amr_stencil<noncons_div>& get_noncons_div_stencils();
+  Vector<int>& getRefinementRatios();
+  Vector<Real>& getDx();
+  Vector<DisjointBoxLayout>& getGrids();
+  Vector<ProblemDomain>& getDomains();
+  Vector<EBISLayout>& getEBISLayout();
+  Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid();
+  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors();
+  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& getVofIterator();
+  irreg_amr_stencil<centroid_interp>& getCentroidInterpolationStencils();
+  irreg_amr_stencil<eb_centroid_interp>& getEbCentroidInterpolationStencils();
+  irreg_amr_stencil<noncons_div>& getNonConservativeDivergenceStencils();
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& get_gradsten();
 
-  Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave();
-  Vector<RefCountedPtr<EBGhostCloud> >& get_ghostcloud();
-  Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi();
-  Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi();
-  Vector<RefCountedPtr<AggEBPWLFillPatch> >& get_fillpatch();
-  Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp();
-  Vector<RefCountedPtr<EBMGInterp> >& get_eb_mg_interp();
-  Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg();
-  Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist();
-  Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist();
-  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist();
-  Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist();
-  Vector<RefCountedPtr<Copier> >& get_copier();
-  Vector<RefCountedPtr<Copier> >& get_reverse_copier();
-  EBAMRFAB& get_levelset();
+  Vector<RefCountedPtr<ebcoarseaverage> >& getCoarseAverage();
+  Vector<RefCountedPtr<EBGhostCloud> >& getGhostCloud();
+  Vector<RefCountedPtr<nwoebquadcfinterp> >& getNWOEBQuadCFInterp();
+  Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp();
+  Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch();
+  Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator();
+  Vector<RefCountedPtr<EBMGInterp> >& getEBMGInterp();
+  Vector<RefCountedPtr<EBFluxRegister> >&  getFluxRegister();
+  Vector<RefCountedPtr<EBLevelRedist> >&  getLevelRedist();
+  Vector<RefCountedPtr<EBCoarToFineRedist> >&  getCoarToFineRedist();
+  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  getCoarToCoarRedist();
+  Vector<RefCountedPtr<EBFineToCoarRedist> >&  getFineToCoarRedist();
+  Vector<RefCountedPtr<Copier> >& getCopier();
+  Vector<RefCountedPtr<Copier> >& getReverseCopier();
+  EBAMRFAB& getLevelset();
   
 protected:
 
   bool m_empty;
   bool m_defined;
-  bool m_ebcf;
-  int m_finest_level;
+  bool m_hasEbCf;
+  int m_finestLevel;
   int m_mg_coarsen;
   int m_verbosity;
-  int m_num_ghost;
-  int m_ebghost;
-  int m_lsf_ghost;
-  int m_redist_rad;
-  RealVect m_prob_lo;
-  stencil_type m_centroid_stencil;
-  stencil_type m_eb_stencil;
+  int m_numGhostCells;
+  int m_numEbGhostsCells;
+  int m_numLsfGhostCells;
+  int m_redistributionRadius;
+  RealVect m_probLo;
+  stencil_type m_centroidStencilType;
+  stencil_type m_ebCentroidStencilType;
   Vector<Real> m_dx;
-  Vector<int> m_ref_ratios;
+  Vector<int> m_refinementRatios;
 
   RefCountedPtr<EBIndexSpace> m_ebis;
   RefCountedPtr<BaseIF> m_baseif;

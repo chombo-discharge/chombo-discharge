@@ -9,7 +9,7 @@
 #define _TIME_STEPPER_
 
 #include "computational_geometry.H"
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 #include "mfis.H"
 
 #include "CD_NamespaceHeader.H"
@@ -49,8 +49,8 @@ public:
   virtual int get_redistribution_regsize() const;
 
   // Registration routines
-  virtual void register_realms() = 0;
-  virtual void register_operators() = 0;
+  virtual void registerRealms() = 0;
+  virtual void registerOperators() = 0;
 
   // Runtime options
   virtual void parse_runtime_options();
@@ -84,7 +84,7 @@ public:
   virtual void post_regrid() = 0;
 
   // Set routines
-  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+  virtual void set_amr(const RefCountedPtr<AmrMesh>& a_amr);
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
 
 protected:
@@ -117,7 +117,7 @@ protected:
   /*!
     @brief AMR
   */
-  RefCountedPtr<amr_mesh> m_amr;
+  RefCountedPtr<AmrMesh> m_amr;
 
   /*!
     @brief Physical domain

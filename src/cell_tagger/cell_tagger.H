@@ -10,7 +10,7 @@
 #define _CELL_TAGGER_
 
 #include "computational_geometry.H"
-#include "amr_mesh.H"
+#include "CD_AmrMesh.H"
 #include "real_box.H"
 
 #include "CD_NamespaceHeader.H"
@@ -108,7 +108,7 @@ protected:
   /*!
     @brief Set verbosity
   */
-  virtual void parse_verbosity();
+  virtual void parseVerbosity();
 };
 #include "CD_NamespaceFooter.H"
 

@@ -54,8 +54,8 @@ void streamer_tagger::compute_tracers(){
   }
 
   const int comp = 0;
-  const int max_amr_depth = m_amr->get_max_amr_depth();
-  const int finest_level  = m_amr->get_finest_level();
+  const int max_amr_depth = m_amr->getMaxAmrDepth();
+  const int finest_level  = m_amr->getFinestLevel();
   
   while (m_thresh1.size() <= max_amr_depth){
     m_thresh1.push_back(m_thresh1.back());
@@ -76,15 +76,15 @@ void streamer_tagger::compute_tracers(){
   EBAMRCellData Efield;
   m_amr->allocate(Efield,  m_phase, SpaceDim);
   m_timestepper->compute_E(Efield, m_phase);
-  m_amr->allocate_ptr(rho);
+  m_amr->allocatePointer(rho);
   m_amr->alias(rho, phase::gas, m_timestepper->get_poisson()->get_source());
 
   // Compute the electric field magnitude
   EBAMRCellData Emag;
   m_amr->allocate(Emag, m_phase, 1);
   data_ops::vector_length(Emag, Efield);
-  m_amr->average_down(Emag, m_phase);
-  m_amr->interp_ghost(Emag, m_phase);
+  m_amr->averageDown(Emag, m_phase);
+  m_amr->interpGhost(Emag, m_phase);
 
 
 
@@ -114,10 +114,10 @@ void streamer_tagger::compute_tracers(){
   //   data_ops::set_value(m_tracer[1], 0.0);
   // }
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids()[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_phase)[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box& box         = dbl.get(dit());
@@ -164,10 +164,10 @@ void streamer_tagger::compute_tracers(){
 
   // Compute gradient of the tracer
   for (int i = 0; i < m_num_tracers; i++){
-    m_amr->average_down(m_tracer[i], m_phase);
-    m_amr->interp_ghost(m_tracer[i], m_phase);
-    m_amr->compute_gradient(m_grad_tracer[i], m_tracer[i]);
-    m_amr->average_down(m_grad_tracer[i], m_phase);
+    m_amr->averageDown(m_tracer[i], m_phase);
+    m_amr->interpGhost(m_tracer[i], m_phase);
+    m_amr->computeGradient(m_grad_tracer[i], m_tracer[i]);
+    m_amr->averageDown(m_grad_tracer[i], m_phase);
   }
 }
 

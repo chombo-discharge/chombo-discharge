@@ -15,7 +15,7 @@ def write_template(args):
     optf.write(args.app_name + ".basename  = pout\n")
     optf.write('\n')
 
-    options_files = [args.discharge_home + "/src/amr_mesh/amr_mesh.options", \
+    options_files = [args.discharge_home + "/src/AmrMesh/AmrMesh.options", \
                      args.discharge_home + "/src/driver/driver.options", \
                      args.discharge_home + "/src/FieldSolver/CD_" + args.field_solver + ".options",\
                      args.discharge_home + "/src/ito_solver/" + args.ito_solver + ".options",\

@@ -52,7 +52,7 @@ void sigma_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
   }
 
   const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
   
   m_amr->allocate(m_cache, m_realm, m_phase, ncomp);
   data_ops::set_value(m_cache, 0.0);
@@ -67,7 +67,7 @@ void sigma_solver::compute_rhs(EBAMRIVData& a_rhs){
   if(m_verbosity > 5){
     pout() << "sigma_solver::compute_rhs" << endl;
   }
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl ++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl ++){
     m_flux[lvl]->localCopyTo(*a_rhs[lvl]);
   }
 }
@@ -88,9 +88,9 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
     pout() << "sigma_solver::regrid" << endl;
   }
 
-  const RefCountedPtr<EBIndexSpace> ebis = m_mfis->get_ebis(m_phase);
+  const RefCountedPtr<EBIndexSpace> ebis = m_multifluidIndexSpace->get_ebis(m_phase);
 
-  const int ebghost = 4; // m_amr->get_eb_ghost();
+  const int ebghost = 4; // m_amr->getNumberOfEbGhostCells();
   const int comp  = 0;
   const int ncomp = 1;
   const Interval interv(comp, comp);
@@ -106,11 +106,11 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
 
   // These levels have changed
   for (int lvl = Max(1,a_lmin); lvl <= a_new_finest_level; lvl++){
-    const DisjointBoxLayout& fine_grid = m_amr->get_grids(m_realm)[lvl];
-    const ProblemDomain& fine_domain   = m_amr->get_domains()[lvl];
-    const ProblemDomain& coar_domain   = m_amr->get_domains()[lvl-1];
-    const EBISLayout& fine_ebisl       = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-    const int nref                     = m_amr->get_ref_rat()[lvl-1];
+    const DisjointBoxLayout& fine_grid = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain& fine_domain   = m_amr->getDomains()[lvl];
+    const ProblemDomain& coar_domain   = m_amr->getDomains()[lvl-1];
+    const EBISLayout& fine_ebisl       = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const int nref                     = m_amr->getRefinementRatios()[lvl-1];
     
     // Fill a coarsened grid and a coarsened ebisl
     EBISLayout coar_ebisl;
@@ -181,17 +181,17 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
   this->reset_cells(m_state);
 }
 
-void sigma_solver::register_operators(){
-  CH_TIME("sigma_solver::register_operators");
+void sigma_solver::registerOperators(){
+  CH_TIME("sigma_solver::registerOperators");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::register_operators" << endl;
+    pout() << "sigma_solver::registerOperators" << endl;
   }
 
   if(m_amr.isNull()){
-    MayDay::Abort("sigma_solver::register_operators - need to set amr_mesh!");
+    MayDay::Abort("sigma_solver::registerOperators - need to set AmrMesh!");
   }
   else{
-    m_amr->register_operator(s_eb_coar_ave, m_realm, m_phase);
+    m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
   }
 }
 
@@ -201,12 +201,12 @@ void sigma_solver::reset_cells(EBAMRIVData& a_data){
     pout() << "sigma_solver::reset_cells" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
-    const MFLevelGrid& mflg      = *m_amr->get_mflg(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
+    const MFLevelGrid& mflg      = *m_amr->getMFLevelGrid(m_realm)[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
@@ -226,7 +226,7 @@ void sigma_solver::reset_cells(EBAMRIVData& a_data){
   }
 }
 
-void sigma_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+void sigma_solver::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
   CH_TIME("sigma_solver::set_amr");
   if(m_verbosity > 5){
     pout() << "sigma_solver::set_amr" << endl;
@@ -242,7 +242,7 @@ void sigma_solver::set_computational_geometry(const RefCountedPtr<computational_
   }
 
   m_compgeom = a_compgeom;
-  m_mfis     = m_compgeom->get_mfis();
+  m_multifluidIndexSpace     = m_compgeom->get_mfis();
 }
 
 void sigma_solver::set_phase(phase::which_phase a_phase){
@@ -260,7 +260,7 @@ void sigma_solver::set_sigma(const EBAMRIVData& a_sigma){
     pout() << "sigma_solver::set_sigma(ebamrivdata)" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     a_sigma[lvl]->localCopyTo(*m_state[lvl]);
@@ -275,7 +275,7 @@ void sigma_solver::set_sigma(const Real a_sigma){
     pout() << "sigma_solver::set_sigma(constant)" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::set_value(*m_state[lvl], a_sigma);
@@ -312,8 +312,8 @@ void sigma_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_leve
     pout() << "sigma_solver::write_checkpoint_level" << endl;
   }
 
-  EBCellFactory fact(m_amr->get_ebisl(m_realm, phase::gas)[a_level]);
-  LevelData<EBCellFAB> scratch(m_amr->get_grids(m_realm)[a_level], 1, 3*IntVect::Unit, fact);
+  EBCellFactory fact(m_amr->getEBISLayout(m_realm, phase::gas)[a_level]);
+  LevelData<EBCellFAB> scratch(m_amr->getGrids(m_realm)[a_level], 1, 3*IntVect::Unit, fact);
   data_ops::set_value(scratch, 0.0);
   data_ops::incr(scratch, *m_state[a_level], 1.0);
 
@@ -327,8 +327,8 @@ void sigma_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level
     pout() << "sigma_solver::read_checkpoint_level" << endl;
   }
 
-  const EBISLayout& ebisl = m_amr->get_ebisl(m_realm, phase::gas)[a_level];
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[a_level];
+  const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
   
   EBCellFactory fact(ebisl);
   LevelData<EBCellFAB> scratch(dbl, 1, 3*IntVect::Unit, fact);
@@ -354,7 +354,7 @@ void sigma_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   // Write sigma
   data_ops::set_value(scratch, 0.0);
   data_ops::incr(scratch, m_state, 1.0);
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
   }
   a_comp++;
@@ -362,7 +362,7 @@ void sigma_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   // Write flux
   data_ops::set_value(scratch, 0.0);
   data_ops::incr(scratch, m_flux, 1.0);
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
   }
   a_comp++;
@@ -407,14 +407,14 @@ Real sigma_solver::compute_charge(){
     pout() << "sigma_solver::compute_charge" << endl;
   }
 
-  m_amr->average_down(m_state, m_realm, m_phase);
+  m_amr->averageDown(m_state, m_realm, m_phase);
 
   Real charge = 0.0;
 
   const int comp               = 0;
-  const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[0];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[0];
-  const Real dx                = m_amr->get_dx()[0];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[0];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[0];
+  const Real dx                = m_amr->getDx()[0];
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const EBISBox& ebisbox = ebisl[dit()];

@@ -181,7 +181,7 @@ namespace physics {
       void parse_alpha();
       void parse_eta();
       void parse_see();
-      void parse_domain_bc();
+      void parseDomain_bc();
       void parse_initial_particles();
       void parse_chemistry();
       void instantiate_species();

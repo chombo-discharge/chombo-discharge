@@ -1,29 +1,29 @@
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-amr_mesh.lo_corner       = -1 -1 -1    # Low corner of problem domain
-amr_mesh.hi_corner       =  1  1  1    # High corner of problem domain
-amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 2           # Maximum amr depth
-amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
-amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
-amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
-amr_mesh.buffer_size     = 2           # Number of cells between grid levels
-amr_mesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-amr_mesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
-amr_mesh.blocking_factor = 4           # Default blocking factor (16 in 3D)
-amr_mesh.max_box_size    = 16          # Maximum allowed box size
-amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
-amr_mesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
-amr_mesh.num_ghost       = 3           # Number of ghost cells. Default is 3
-amr_mesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
-amr_mesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
-amr_mesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
-amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
-amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
-amr_mesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
-amr_mesh.ebcf            = false       # If you have EBCF crossing, this must be true. 
+AmrMesh.lo_corner       = -1 -1 -1    # Low corner of problem domain
+AmrMesh.hi_corner       =  1  1  1    # High corner of problem domain
+AmrMesh.verbosity       = -1          # Controls verbosity. 
+AmrMesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
+AmrMesh.max_amr_depth   = 2           # Maximum amr depth
+AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
+AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
+AmrMesh.irreg_growth    = 2           # How much to grow irregular tagged cells
+AmrMesh.buffer_size     = 2           # Number of cells between grid levels
+AmrMesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
+AmrMesh.blocking_factor = 4           # Default blocking factor (16 in 3D)
+AmrMesh.max_box_size    = 16          # Maximum allowed box size
+AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
+AmrMesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
+AmrMesh.num_ghost       = 3           # Number of ghost cells. Default is 3
+AmrMesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
+AmrMesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
+AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
+AmrMesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
+AmrMesh.ebcf            = false       # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
 # DRIVER OPTIONS

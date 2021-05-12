@@ -364,7 +364,7 @@ void rk2_tga::compute_cdr_eb_states(){
   }
 
   this->extrapolate_to_eb(eb_states,          m_cdr->get_phase(), cdr_states);
-  this->compute_gradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
+  this->computeGradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
 }
 
 void rk2_tga::compute_cdr_fluxes(const Real a_time){
@@ -467,8 +467,8 @@ void rk2_tga::advance_advection_source_cdr_k1(const Real a_dt){
     // Make phi = phi + k1*alpha*dt
     data_ops::incr(phi, k1, m_alpha*a_dt);
 
-    m_amr->average_down(phi, m_cdr->get_phase());
-    m_amr->interp_ghost(phi, m_cdr->get_phase());
+    m_amr->averageDown(phi, m_cdr->get_phase());
+    m_amr->interpGhost(phi, m_cdr->get_phase());
 
     data_ops::floor(phi, 0.0);
   }
@@ -488,7 +488,7 @@ void rk2_tga::advance_advection_sigma_k1(const Real a_dt){
   // Make phi = phi + k1*alpha*dt
   data_ops::incr(phi, k1,    m_alpha*a_dt);
 
-  m_amr->average_down(phi, m_cdr->get_phase());
+  m_amr->averageDown(phi, m_cdr->get_phase());
   
   m_sigma->reset_cells(k1);
   m_sigma->reset_cells(phi);
@@ -524,8 +524,8 @@ void rk2_tga::advance_advection_source_cdr_k2(const Real a_dt){
     data_ops::incr(state, k1, k1_factor);
     data_ops::incr(state, k2, k2_factor);
 
-    m_amr->average_down(state, m_cdr->get_phase());
-    m_amr->interp_ghost(state, m_cdr->get_phase());
+    m_amr->averageDown(state, m_cdr->get_phase());
+    m_amr->interpGhost(state, m_cdr->get_phase());
 
     data_ops::floor(state, 0.0);
   }
@@ -552,7 +552,7 @@ void rk2_tga::advance_advection_sigma_k2(const Real a_dt){
   data_ops::incr(state, k1, k1_factor);
   data_ops::incr(state, k2, k2_factor);
 
-  m_amr->average_down(state, m_cdr->get_phase());
+  m_amr->averageDown(state, m_cdr->get_phase());
   m_sigma->reset_cells(state);
 }
 

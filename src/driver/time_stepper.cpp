@@ -10,7 +10,7 @@
 
 #include "CD_NamespaceHeader.H"
 
-void time_stepper::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+void time_stepper::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
   CH_TIME("time_stepper::set_amr");
   if(m_verbosity > 5){
     pout() << "time_stepper::set_amr" << endl;
@@ -59,7 +59,7 @@ Vector<long int> time_stepper::get_checkpoint_loads(const std::string a_realm, c
     pout() << "time_stepper::get_checkpoint_loads" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->get_grids(a_realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(a_realm)[a_level];
   const Vector<Box>& a_boxes = dbl.boxArray();
 
   Vector<long int> loads(a_boxes.size(), 0L);

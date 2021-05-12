@@ -17,7 +17,7 @@ public:
   inline bool domain_intersection(const RealVect& a_oldPos,
 				  const RealVect& a_newPos,
 				  const RealVect& a_path,
-				  const RealVect& a_prob_lo,
+				  const RealVect& a_probLo,
 				  const RealVect& a_prob_hi,
 				  Real&           a_s);
 

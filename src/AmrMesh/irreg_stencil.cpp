@@ -45,7 +45,7 @@ void irreg_stencil::define(const DisjointBoxLayout&       a_dbl,
   m_dx           = a_dx;
   m_radius       = a_radius;
   m_order        = a_order;
-  m_stencil_type = a_type;
+  m_stencilType = a_type;
   
   const int ncomp = 1;
 

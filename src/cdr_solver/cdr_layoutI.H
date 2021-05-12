@@ -151,20 +151,20 @@ void cdr_layout<T>::regrid(const int a_lmin, const int a_old_finest_level, const
 }
 
 template <class T>
-void cdr_layout<T>::register_operators(){
-  CH_TIME("cdr_layout<T>::register_operators");
+void cdr_layout<T>::registerOperators(){
+  CH_TIME("cdr_layout<T>::registerOperators");
   if(m_verbosity > 5){
-    pout() << "cdr_layout<T>::register_operators" << endl;
+    pout() << "cdr_layout<T>::registerOperators" << endl;
   }
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->register_operators();
+    solver->registerOperators();
   }
 }
 
 template <class T>
-void cdr_layout<T>::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+void cdr_layout<T>::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
   CH_TIME("cdr_layout<T>::set_amr");
   if(m_verbosity > 5){
     pout() << "cdr_layout<T>::set_amr" << endl;
@@ -232,15 +232,15 @@ void cdr_layout<T>::set_bc(cdr_bc::which_bc a_bc){
 }
 
 template <class T>
-void cdr_layout<T>::sanity_check(){
-  CH_TIME("cdr_layout<T>::sanity_check");
+void cdr_layout<T>::sanityCheck(){
+  CH_TIME("cdr_layout<T>::sanityCheck");
   if(m_verbosity > 5){
-    pout() << "cdr_layout<T>::sanity_check" << endl;
+    pout() << "cdr_layout<T>::sanityCheck" << endl;
   }
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->sanity_check();
+    solver->sanityCheck();
   }
 }
 

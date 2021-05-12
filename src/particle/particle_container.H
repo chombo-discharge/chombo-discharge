@@ -51,7 +51,7 @@ public:
 		     const Vector<ProblemDomain>&     a_domains,
 		     const Vector<Real>&              a_dx,
 		     const Vector<int>&               a_ref_rat,
-		     const RealVect&                  a_prob_lo,
+		     const RealVect&                  a_probLo,
 		     const int                        a_blocking_factor,
 		     const int                        a_finest_level,
 		     const int                        a_pvr_buffer,
@@ -69,7 +69,7 @@ public:
 	      const Vector<ProblemDomain>&     a_domains,
 	      const Vector<Real>&              a_dx,
 	      const Vector<int>&               a_ref_rat,
-	      const RealVect&                  a_prob_lo,
+	      const RealVect&                  a_probLo,
 	      const int                        a_blocking_factor,
 	      const int                        a_finest_level,
 	      const int                        a_pvr_buffer,
@@ -128,7 +128,7 @@ public:
   /*!
     @brief Get finest level
   */
-  int get_finest_level() const;
+  int getFinestLevel() const;
 
   /*!
     @brief Get the realm
@@ -183,7 +183,7 @@ public:
   /*!
     @brief Get grids
   */
-  const Vector<DisjointBoxLayout>& get_grids() const;
+  const Vector<DisjointBoxLayout>& getGrids() const;
 
   /*!
     @brief Get data on a level
@@ -351,7 +351,7 @@ protected:
   /*!
     @brief Blocking factor, aka grid size. 
   */
-  int m_blocking_factor;  // Blocking facto
+  int m_blockingFactor;  // Blocking facto
 
   /*!
     @brief PVR buffer - to be deprecated...
@@ -361,12 +361,12 @@ protected:
   /*!
     @brief Finest grid level
   */
-  int m_finest_level;
+  int m_finestLevel;
 
   /*!
     @brief Lower left corner of the problem domain (aka the "origin")
   */
-  RealVect m_prob_lo;
+  RealVect m_probLo;
 
   /*!
     @brief Check if particle container is defined

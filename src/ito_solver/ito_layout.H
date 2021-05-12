@@ -135,12 +135,12 @@ public:
   /*!
     @brief Register operators
   */
-  virtual void register_operators();
+  virtual void registerOperators();
 
   /*!
     @brief Set amr
   */
-  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+  virtual void set_amr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Set the computational geometry

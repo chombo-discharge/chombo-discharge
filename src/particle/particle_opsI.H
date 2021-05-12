@@ -19,7 +19,7 @@ inline
 bool particle_ops::domain_intersection(const RealVect& a_oldPos,
 				       const RealVect& a_newPos,
 				       const RealVect& a_path,
-				       const RealVect& a_prob_lo,
+				       const RealVect& a_probLo,
 				       const RealVect& a_prob_hi,
 				       Real&           a_s){
 
@@ -32,7 +32,7 @@ bool particle_ops::domain_intersection(const RealVect& a_oldPos,
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
       const Side::LoHiSide side = sit();
-      const RealVect wallPoint  = (side == Side::Lo) ? a_prob_lo : a_prob_hi; // A point on the domain side
+      const RealVect wallPoint  = (side == Side::Lo) ? a_probLo : a_prob_hi; // A point on the domain side
       const RealVect n0         = sign(side)*RealVect(BASISV(dir));           // Normal vector pointing OUT of the domain
       const Real norm_path      = PolyGeom::dot(n0, a_path);                  // Component relative to wall
 

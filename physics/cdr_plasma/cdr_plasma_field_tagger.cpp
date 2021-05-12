@@ -56,14 +56,14 @@ void cdr_plasma_field_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_gra
 
   m_timestepper->compute_E(a_E, m_phase);
   data_ops::vector_length(m_scratch, a_E);
-  m_amr->compute_gradient(a_grad_E, m_scratch, m_realm, phase::gas);
+  m_amr->computeGradient(a_grad_E, m_scratch, m_realm, phase::gas);
 
-  m_amr->average_down(a_grad_E, m_realm, m_phase);
-  m_amr->interp_ghost(a_grad_E, m_realm, m_phase);
+  m_amr->averageDown(a_grad_E, m_realm, m_phase);
+  m_amr->interpGhost(a_grad_E, m_realm, m_phase);
   
   // Interpolate to centroids
-  m_amr->interpolate_to_centroids(a_E,      m_realm, m_phase);
-  m_amr->interpolate_to_centroids(a_grad_E, m_realm, m_phase);
+  m_amr->InterpToCentroids(a_E,      m_realm, m_phase);
+  m_amr->InterpToCentroids(a_grad_E, m_realm, m_phase);
 }
 
 void cdr_plasma_field_tagger::compute_tracers(){
@@ -74,7 +74,7 @@ void cdr_plasma_field_tagger::compute_tracers(){
 
   this->allocate_storage();
   
-  const RealVect origin = m_amr->get_prob_lo();
+  const RealVect origin = m_amr->getProbLo();
   const Real time       = m_timestepper->get_time();
 
   // Compute electric field on volumetric centroids
@@ -87,10 +87,10 @@ void cdr_plasma_field_tagger::compute_tracers(){
   data_ops::get_max_min_norm(E_max,        E_min,        m_E);
   data_ops::get_max_min_norm(grad_E_max,   grad_E_min,   m_grad_E);
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_realm, m_phase)[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box& box         = dbl.get(dit());
@@ -164,14 +164,14 @@ void cdr_plasma_field_tagger::compute_tracers(){
 
 
   for (int i = 0; i < m_num_tracers; i++){
-    m_amr->average_down(m_tracer[i], m_realm, m_phase);
-    m_amr->interp_ghost(m_tracer[i], m_realm, m_phase);
+    m_amr->averageDown(m_tracer[i], m_realm, m_phase);
+    m_amr->interpGhost(m_tracer[i], m_realm, m_phase);
   }
 
   // Compute gradient of tracers
   for (int i = 0; i < m_num_tracers; i++){
-    m_amr->compute_gradient(m_grad_tracer[i], m_tracer[i], m_realm, phase::gas);
-    m_amr->average_down(m_grad_tracer[i], m_realm, m_phase);
+    m_amr->computeGradient(m_grad_tracer[i], m_tracer[i], m_realm, phase::gas);
+    m_amr->averageDown(m_grad_tracer[i], m_realm, m_phase);
   }
 
   this->deallocate_storage(); // No reason to keep the extra storage lying around...

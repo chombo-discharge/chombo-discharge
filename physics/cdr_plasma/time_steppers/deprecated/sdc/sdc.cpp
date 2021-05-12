@@ -38,7 +38,7 @@ void sdc::parse_options(){
   }
 
   // Regular stuff from time_stepper that we almost always need
-  parse_verbosity();
+  parseVerbosity();
   parse_solver_verbosity();
   parse_cfl();
   parse_relax_time();
@@ -878,11 +878,11 @@ void sdc::compute_semi_implicit_mobilities(const int a_m, const bool a_corrector
       data_ops::scale(cell_mob, q*dtm*units::s_Qe/units::s_eps0);
 
       // Get valid ghost cells before averaging
-      m_amr->average_down(cell_mob, phase::gas);
-      m_amr->interp_ghost(cell_mob, phase::gas);
+      m_amr->averageDown(cell_mob, phase::gas);
+      m_amr->interpGhost(cell_mob, phase::gas);
 
       // Compute face-centered "mobility"
-      data_ops::average_cell_to_face_allcomps(face_mob, cell_mob, m_amr->get_domains());
+      data_ops::average_cell_to_face_allcomps(face_mob, cell_mob, m_amr->getDomains());
 
       // Compute EB-centered mobility
       time_stepper::extrapolate_to_eb(eb_mob, phase::gas, cell_mob);
@@ -908,7 +908,7 @@ void sdc::compute_semi_implicit_rho(const int a_m,  const bool a_corrector){
 
   // Get handle to gas-side rho
   EBAMRCellData rho_gas;
-  m_amr->allocate_ptr(rho_gas); 
+  m_amr->allocatePointer(rho_gas); 
   m_amr->alias(rho_gas, phase::gas, src);
 
   // This is the time step from m->m+1
@@ -956,7 +956,7 @@ void sdc::compute_semi_implicit_rho(const int a_m,  const bool a_corrector){
 
   // Now do the scaling
   data_ops::scale(rho_gas, units::s_Qe);
-  m_amr->interpolate_to_centroids(rho_gas, phase::gas);
+  m_amr->InterpToCentroids(rho_gas, phase::gas);
 }
 
 void sdc::set_semi_implicit_permittivities(){
@@ -977,8 +977,8 @@ void sdc::set_semi_implicit_permittivities(){
   EBAMRFluxData bco_gas;
   EBAMRIVData   bco_irr_gas;
   
-  m_amr->allocate_ptr(bco_gas);
-  m_amr->allocate_ptr(bco_irr_gas);
+  m_amr->allocatePointer(bco_gas);
+  m_amr->allocatePointer(bco_irr_gas);
   
   m_amr->alias(bco_gas,     phase::gas, bco);
   m_amr->alias(bco_irr_gas, phase::gas, bco_irr);
@@ -1221,8 +1221,8 @@ void sdc::reconcile_integrands(){
       }
 
       // Shouldn't be necessary
-      m_amr->average_down(F_m, m_cdr->get_phase());
-      m_amr->interp_ghost(F_m, m_cdr->get_phase());
+      m_amr->averageDown(F_m, m_cdr->get_phase());
+      m_amr->interpGhost(F_m, m_cdr->get_phase());
     }
   }
 
@@ -1295,8 +1295,8 @@ void sdc::finalize_errors(){
       // Compute norms. Only coarsest level
       Real Lerr, Lphi;
       const int lvl = 0;
-      data_ops::norm(Lerr, *error[lvl], m_amr->get_domains()[lvl], m_error_norm);
-      data_ops::norm(Lphi, *phi_p[lvl], m_amr->get_domains()[lvl], m_error_norm);
+      data_ops::norm(Lerr, *error[lvl], m_amr->getDomains()[lvl], m_error_norm);
+      data_ops::norm(Lphi, *phi_p[lvl], m_amr->getDomains()[lvl], m_error_norm);
 
       if(Lphi > 0.0){
 	m_cdr_error[idx] = Lerr/Lphi;
@@ -1412,8 +1412,8 @@ void sdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   Real dt = 1.E99;
 
   int Nref = 1;
-  for (int lvl = 0; lvl < m_amr->get_finest_level(); lvl++){
-    Nref = Nref*m_amr->get_ref_rat()[lvl];
+  for (int lvl = 0; lvl < m_amr->getFinestLevel(); lvl++){
+    Nref = Nref*m_amr->getRefinementRatios()[lvl];
   }
   const Real max_gl_dist = sdc::get_max_node_distance();
   m_dt_cfl = m_cdr->compute_cfl_dt();
@@ -1549,7 +1549,7 @@ void sdc::regrid_internals(const int a_lmin, const int a_old_finest_level, const
 
 
     // Get the interpolator from amr
-    Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(phase::gas);
+    Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(phase::gas);
     
 
     // These levels have not changed and can be copied
@@ -1565,8 +1565,8 @@ void sdc::regrid_internals(const int a_lmin, const int a_old_finest_level, const
       }
     }
 
-    m_amr->average_down(FR0, phase::gas);
-    m_amr->interp_ghost(FR0, phase::gas);
+    m_amr->averageDown(FR0, phase::gas);
+    m_amr->interpGhost(FR0, phase::gas);
 
 
     m_amr->deallocate(m_cache_FR0[idx]);
@@ -1688,9 +1688,9 @@ void sdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states){
     const int idx = solver_it.get_solver();
     RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
     EBAMRCellData& grad = storage->get_gradient();
-    m_amr->compute_gradient(grad, *a_states[idx], m_cdr->get_phase());
-    //    m_amr->average_down(grad, m_cdr->get_phase());
-    m_amr->interp_ghost(grad, m_cdr->get_phase());
+    m_amr->computeGradient(grad, *a_states[idx], m_cdr->get_phase());
+    //    m_amr->averageDown(grad, m_cdr->get_phase());
+    m_amr->interpGhost(grad, m_cdr->get_phase());
   }
 }
 

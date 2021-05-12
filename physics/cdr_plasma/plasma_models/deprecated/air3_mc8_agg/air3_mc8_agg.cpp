@@ -36,7 +36,7 @@ air3_mc8_agg::air3_mc8_agg() {
   parse_eta();
   parse_photoi();
   parse_see();
-  parse_domain_bc();
+  parseDomain_bc();
 
   init_rng();                 // Initialize random number generators
   
@@ -354,7 +354,7 @@ RealVect air3_mc8_agg::random_direction3D(){
 }
 #endif
 
-void air3_mc8_agg::parse_domain_bc(){
+void air3_mc8_agg::parseDomain_bc(){
 
   ParmParse pp("air3_mc8_agg");
   std::string str;

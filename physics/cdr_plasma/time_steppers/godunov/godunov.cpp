@@ -42,7 +42,7 @@ void godunov::parse_options(){
     pout() << "godunov::parse_options" << endl;
   }
 
-  parse_verbosity();
+  parseVerbosity();
   parse_solver_verbosity();
   parse_fast_poisson();
   parse_fast_rte();
@@ -65,7 +65,7 @@ void godunov::parse_runtime_options(){
     pout() << "godunov::parse_runtime_options" << endl;
   }
 
-  parse_verbosity();
+  parseVerbosity();
   parse_solver_verbosity();
   parse_fast_poisson();
   parse_fast_rte();
@@ -461,9 +461,9 @@ void godunov::compute_cdr_gradients(){
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
     EBAMRCellData& grad = storage->get_gradient();
-    m_amr->compute_gradient(grad, solver->get_state(), m_realm, phase::gas);
-    m_amr->average_down(grad, m_realm, m_cdr->get_phase());
-    m_amr->interp_ghost(grad, m_realm, m_cdr->get_phase());
+    m_amr->computeGradient(grad, solver->get_state(), m_realm, phase::gas);
+    m_amr->averageDown(grad, m_realm, m_cdr->get_phase());
+    m_amr->interpGhost(grad, m_realm, m_cdr->get_phase());
   }
 }
 
@@ -841,8 +841,8 @@ void godunov::advance_transport_euler(const Real a_dt){
 	}
       }
 
-      m_amr->average_down(phi, m_realm, m_cdr->get_phase());
-      m_amr->interp_ghost(phi, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_realm, m_cdr->get_phase());
+      m_amr->interpGhost(phi, m_realm, m_cdr->get_phase());
     }
   }
 
@@ -903,8 +903,8 @@ void godunov::advance_transport_rk2(const Real a_dt){
 
     data_ops::floor(phi, 0.0);
 
-    m_amr->average_down(phi, m_realm, m_cdr->get_phase());
-    m_amr->interp_ghost(phi, m_realm, m_cdr->get_phase());
+    m_amr->averageDown(phi, m_realm, m_cdr->get_phase());
+    m_amr->interpGhost(phi, m_realm, m_cdr->get_phase());
 
     // Compute k1 from phi^(k+1) = phi^k + k1
     data_ops::incr(k1, phi, -1.0);
@@ -988,8 +988,8 @@ void godunov::advance_transport_rk2(const Real a_dt){
 
     data_ops::floor(phi, 0.0);
 
-    m_amr->average_down(phi, m_realm, m_cdr->get_phase());
-    m_amr->interp_ghost(phi, m_realm, m_cdr->get_phase());
+    m_amr->averageDown(phi, m_realm, m_cdr->get_phase());
+    m_amr->interpGhost(phi, m_realm, m_cdr->get_phase());
 
     if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
       if(m_debug){
@@ -1116,8 +1116,8 @@ void godunov::post_step(){
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver> solver = solver_it();
 
-    m_amr->average_down(solver->get_state(), m_realm, m_cdr->get_phase());
-    m_amr->interp_ghost(solver->get_state(), m_realm, m_cdr->get_phase());
+    m_amr->averageDown(solver->get_state(), m_realm, m_cdr->get_phase());
+    m_amr->interpGhost(solver->get_state(), m_realm, m_cdr->get_phase());
   }
 }
 
