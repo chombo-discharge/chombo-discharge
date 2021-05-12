@@ -1,13 +1,17 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_ElectrostaticDomainBc.cpp
   @brief  Implementation of CD_ElectrostaticDomainBc.H
   @author Robert Marskar
-  @date   May 2021
 */
 
-#include "CD_ElectrostaticDomainBc.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ElectrostaticDomainBc.H>
+#include <CD_NamespaceHeader.H>
 
 ElectrostaticDomainBc::ElectrostaticDomainBc() {
   m_bcFunctions.clear();
@@ -30,4 +34,4 @@ ElectrostaticDomainBc::Bc ElectrostaticDomainBc::getBc(const Wall a_wall) const{
   return m_bcFunctions.at(a_wall);
 }
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>

@@ -1,20 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_ElectrostaticEbBc.H
-  @brief  Data holder for holding the potential at electrodes. 
+  @brief  Data holder for holding the voltage at electrodes.
   @author Robert Marskar
-  @date   May 2021
 */
 
-#ifndef _CD_ElectrostaticEbBc_H_
-#define _CD_ElectrostaticEbBc_H_
+#ifndef CD_ElectrostaticEbBc_H
+#define CD_ElectrostaticEbBc_H
 
+// Std includes
 #include <functional>
 #include <vector>
 
+// Chombo includes
 #include <RealVect.H>
 
-#include "electrode.H"
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <electrode.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class which maps boundary condition types to a side and direction. 
@@ -94,6 +101,6 @@ protected:
   std::vector<std::pair<electrode, BcFunction> > m_bcFunctions;
 };
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
 
 #endif

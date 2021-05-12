@@ -1,12 +1,17 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_ElectrostaticEbBc.cpp
   @brief  Implementation of CD_ElectrostaticEbBc.H
   @author Robert Marskar
-  @date   May 2021
 */
 
-#include "CD_ElectrostaticEbBc.H"
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ElectrostaticEbBc.H>
+#include <CD_NamespaceHeader.H>
 
 ElectrostaticEbBc::ElectrostaticEbBc(){
 
@@ -57,4 +62,4 @@ const std::vector<std::pair<electrode, ElectrostaticEbBc::BcFunction> >&  Electr
   return m_bcFunctions;
 }
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>

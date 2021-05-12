@@ -1,19 +1,24 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file FieldSolver.H
-  @brief Abstract multi-phase Poisson solver
+  @file   FieldSolver.H
+  @brief  Contains declaration of an abstract electrostatic field solver. 
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#ifndef FieldSolver_H
-#define FieldSolver_H
+#ifndef CD_FieldSolver_H
+#define CD_FieldSolver_H
 
-#include "computational_geometry.H"
-#include "amr_mesh.H"
-#include "CD_ElectrostaticDomainBc.H"
-#include "CD_ElectrostaticEbBc.H"
+// Our includes
+#include <computational_geometry.H>
+#include <amr_mesh.H>
+#include <CD_ElectrostaticDomainBc.H>
+#include <CD_ElectrostaticEbBc.H>
 
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Abstract electrostatic field solver class. This class contains an interface to a solve routine, data holders, and interface to boundary conditions.
@@ -469,6 +474,6 @@ protected:
   virtual std::string makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
 };
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
 
 #endif

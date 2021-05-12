@@ -1,15 +1,21 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_ConductivityElectrostaticDomainBc.cpp
   @brief  Implementation of CD_ConductivityElectrostaticDomainBc.H
   @author Robert Marskar
-  @date   May 2021
 */
 
+// Chombo includes
 #include <DirichletConductivityDomainBC.H>
 #include <NeumannConductivityDomainBC.H>
 
-#include "CD_ConductivityElectrostaticDomainBc.H"
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ConductivityElectrostaticDomainBc.H>
+#include <CD_NamespaceHeader.H>
 
 ConductivityElectrostaticDomainBc::ConductivityElectrostaticDomainBc(const ElectrostaticDomainBc& a_domainBc, const RealVect a_probLo){
   m_hasCoeff = false;
@@ -31,7 +37,6 @@ ConductivityElectrostaticDomainBc::ConductivityElectrostaticDomainBc(const Elect
       default:
 	MayDay::Abort("ConductivityElectrostaticDomainBc -- unsupported boundary condition passed into ConductivityElectrostaticDomainBc");
       }
-      
 
       // Strange but true thing -- RefCountedPtr is an abomination from before the days of C++11. In this case we pass in
       // std::shared_ptr through ElectrostaticDomainBc (like God intended), but the Chombo interface uses RefCountedPtr. Both
@@ -154,4 +159,4 @@ Real ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::derivativ
   MayDay::Abort("ElectrostaticDomainBcFuncEval::derivative -- calling this is an error. How did you get here?");
 }
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>

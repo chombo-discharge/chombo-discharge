@@ -1,20 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_ElectrostaticDomainBc.H
   @brief  Simple data holder for holding domain boundary condition types for FieldSolver
   @author Robert Marskar
-  @date   May 2021
 */
 
-#ifndef _CD_ElectrostaticDomainBc_H_
-#define _CD_ElectrostaticDomainBc_H_
+#ifndef CD_ElectrostaticDomainBc_H
+#define CD_ElectrostaticDomainBc_H
 
+// Std include
 #include <functional>
 #include <map>
 
+// Chombo includes
 #include <RealVect.H>
 #include <LoHiSide.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class which maps boundary condition types to a side and direction. 
@@ -82,6 +89,6 @@ protected:
 
 };
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
 
 #endif

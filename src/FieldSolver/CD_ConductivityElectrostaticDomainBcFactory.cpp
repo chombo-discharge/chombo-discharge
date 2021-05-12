@@ -1,12 +1,17 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_ConductivityElectrostaticDomainBcFactory.cpp
   @brief  Implementation of ConductivityElectrostaticDomainBcFactory.H
   @author Robert Marskar
-  @date   May 2021
 */
 
-#include "CD_ConductivityElectrostaticDomainBcFactory.H"
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ConductivityElectrostaticDomainBcFactory.H>
+#include <CD_NamespaceHeader.H>
 
 ConductivityElectrostaticDomainBcFactory::ConductivityElectrostaticDomainBcFactory(const ElectrostaticDomainBc& a_domainBc, const RealVect a_probLo){
   m_domainBc = a_domainBc;
@@ -21,4 +26,4 @@ ConductivityElectrostaticDomainBc* ConductivityElectrostaticDomainBcFactory::cre
   return new ConductivityElectrostaticDomainBc(m_domainBc, m_probLo);
 }
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>

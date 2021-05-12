@@ -1,32 +1,30 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file FieldSolverMultigrid.cpp
-  @brief Implementation of FieldSolverMultigrid.H
+  @file   FieldSolverMultigrid.cpp
+  @brief  Implementation of FieldSolverMultigrid.H
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#include <Stencils.H>
-#include <MFCellFAB.H>
-#include <LayoutData.H>
-#include <MFLevelDataOps.H>
-#include <DirichletConductivityDomainBC.H>
-#include <DirichletConductivityEBBC.H>
+// Chombo includes
 #include <ParmParse.H>
 #include <BRMeshRefine.H>
 
-#include "CD_FieldSolverMultigrid.H"
-#include "data_ops.H"
-#include "MFQuadCFInterp.H"
-#include "MFInterfaceFAB.H"
-#include "jump_bc.H"
-#include "amr_mesh.H"
-#include "conductivitydomainbc_wrapper_factory.H"
-#include "CD_ConductivityElectrostaticDomainBcFactory.H"
-#include "units.H"
+// Our includes
+#include <CD_FieldSolverMultigrid.H>
+#include <data_ops.H>
+#include <MFQuadCFInterp.H>
+#include <MFInterfaceFAB.H>
+#include <jump_bc.H>
+#include <amr_mesh.H>
+#include <CD_ConductivityElectrostaticDomainBcFactory.H>
+#include <units.H>
+#include <CD_NamespaceHeader.H>
 
 #define POISSON_MF_GMG_TIMER 0
-
-#include "CD_NamespaceHeader.H"
 
 FieldSolverMultigrid::FieldSolverMultigrid(){
   m_needsMultigridSetup      = true;
@@ -759,4 +757,4 @@ void FieldSolverMultigrid::setNeedsMultigridSetup(const bool a_needsSetup){
   m_needsMultigridSetup = a_needsSetup;
 }
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>

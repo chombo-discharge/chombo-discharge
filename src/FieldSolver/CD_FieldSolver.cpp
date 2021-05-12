@@ -1,24 +1,29 @@
-/*!
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
+/*! 
   @file   FieldSolver.cpp
   @brief  Implementation of FieldSolver.H
   @author Robert Marskar
-  @date   Nov. 2017
-  @todo   set_covered_potential is buggy and breaks when we don't have dielectrics. Fix this. 
 */
 
-#include "CD_FieldSolver.H"
-#include "MFAliasFactory.H"
-#include "mfalias.H"
-#include "data_ops.H"
-#include "units.H"
-
-#include <EBArith.H>
+// Std includes
 #include <iostream>
+
+// Chombo includes
+#include <EBArith.H>
 #include <ParmParse.H>
 #include <MFAMRIO.H>
 #include <EBAMRIO.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_FieldSolver.H>
+#include <mfalias.H>
+#include <data_ops.H>
+#include <units.H>
+#include <CD_NamespaceHeader.H>
 
 Real FieldSolver::s_defaultDomainBcFunction(const RealVect a_position, const Real a_time){
   return 1.0;
@@ -857,4 +862,4 @@ MFAMRCellData& FieldSolver::getResidue(){
   return m_residue;
 }
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>

@@ -1,26 +1,31 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   FieldSolverMultigrid.H
-  @brief  Geometric multigrid multifluid poisson solver
+  @brief  Implementation of FieldSolver which uses geometric multigrid.
   @author Robert Marskar
-  @date   Nov. 2017
 */
 
-#ifndef FieldSolverMultigrid_H
-#define FieldSolverMultigrid_H
+#ifndef CD_FieldSolverMultigrid_H
+#define CD_FieldSolverMultigrid_H
 
-#include "CD_FieldSolver.H"
-#include "mfconductivityopfactory.H"
-
+// Chombo includes
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
-#include <EBConductivityOpFactory.H>
 #include <BaseDomainBC.H>
 #include <BaseEBBC.H>
 #include <MFSimpleSolver.H>
 #include <GMRESSolver.H>
 #include <BaseBCFuncEval.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_FieldSolver.H>
+#include <mfconductivityopfactory.H>
+
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Implementation of FieldSolver which uses a two-phase geometric multigrid solver
@@ -375,9 +380,9 @@ protected:
     @brief Define the deeper multigrid levels (the ones that live below the AMR levels)
   */
   virtual void defineDeeperMultigridLevels();
-
+  
 };
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
 
 #endif

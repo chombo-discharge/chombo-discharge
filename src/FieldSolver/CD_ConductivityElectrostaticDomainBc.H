@@ -1,19 +1,26 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_ConductivityElectrostaticDomainBc.H
   @brief  Boundary condition class for using EBConductivityOp in FieldSolverMultigrid
   @author Robert Marskar
-  @date   May 2021
 */
 
-#ifndef _CD_ConductivityElectrostaticDomainBc_H_
-#define _CD_ConductivityElectrostaticDomainBc_H_
+#ifndef CD_ConductivityElectrostaticDomainBc_H
+#define CD_ConductivityElectrostaticDomainBc_H
 
+// Std includes
 #include <memory>
 
+// Chombo includes
 #include <BaseDomainBC.H>
 
-#include "CD_ElectrostaticDomainBc.H"
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ElectrostaticDomainBc.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class which interfaces a boundary condition wrapper to ConductivityBaseDomainBC.
@@ -199,6 +206,6 @@ private:
   };
 };
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
 
 #endif

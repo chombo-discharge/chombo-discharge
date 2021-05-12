@@ -1,21 +1,25 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_ConductivityElectrostaticDomainBcFactory.H
   @brief  Contains declarations and documentation for a factory class for ConductivityElectrostaticDomainBc
   @author Robert Marskar
-  @date   May 2021
 */
 
-#ifndef _CD_ConductivityElectrostaticDomainBcFactory_H_
-#define _CD_ConductivityElectrostaticDomainBcFactory_H_
+#ifndef CD_ConductivityElectrostaticDomainBcFactory_H
+#define CD_ConductivityElectrostaticDomainBcFactory_H
 
-#include <memory>
-
+// Chombo includes
 #include <BaseDomainBC.H>
 #include <ConductivityBaseDomainBC.H>
 
-#include "CD_ElectrostaticDomainBc.H"
-#include "CD_ConductivityElectrostaticDomainBc.H"
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ElectrostaticDomainBc.H>
+#include <CD_ConductivityElectrostaticDomainBc.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class which interfaces a boundary condition wrapper to ConductivityBaseDomainBC.
@@ -61,6 +65,6 @@ protected:
   RealVect m_probLo;
 };
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
 
 #endif
