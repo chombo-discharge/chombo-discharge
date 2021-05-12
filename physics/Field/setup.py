@@ -19,7 +19,7 @@ parser.add_argument('-discharge_home',  type=str,  help="Source code base direct
 parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-app", default="./mini_apps")
 parser.add_argument('-app_name',        type=str,  help="Mini app name. An error message is issued if the name already exists")
 parser.add_argument('-filename',        type=str,  help="File name of main file", default="main")
-parser.add_argument('-field_solver',    type=str,  help="Poisson solver implementation", default="FieldSolverMultiGrid")
+parser.add_argument('-field_solver',    type=str,  help="Poisson solver implementation", default="FieldSolverMultigrid")
 parser.add_argument('-geometry',        type=str,  help="Geometry class", default="regular_geometry")
 
 args = parser.parse_args()
