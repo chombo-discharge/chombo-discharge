@@ -1,38 +1,43 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   EBFastCoarToCoarRedist.cpp
-  @brief  Implementation of EBFastCoarToCoarRedist
+  @file   EbFastCoarToCoarRedist.cpp
+  @brief  Implementation of EbFastCoarToCoarRedist
   @author Robert Marskar
 */
 
-#include "EBFastCoarToCoarRedist.H"
+// Our includes
+#include <CD_EbFastCoarToCoarRedist.H>
+#include <CD_NamespaceHeader.H>
 
 #define EBFASTC2C_DEBUG 0
 
-#include "CD_NamespaceHeader.H"
-
-EBFastCoarToCoarRedist::EBFastCoarToCoarRedist() : EBCoarToCoarRedist(){
+EbFastCoarToCoarRedist::EbFastCoarToCoarRedist() : EBCoarToCoarRedist(){
 
 }
 
-EBFastCoarToCoarRedist::~EBFastCoarToCoarRedist(){
+EbFastCoarToCoarRedist::~EbFastCoarToCoarRedist(){
 
 }
 
-void EBFastCoarToCoarRedist::define(const EBLevelGrid&                      a_eblgFine,
+void EbFastCoarToCoarRedist::define(const EBLevelGrid&                      a_eblgFine,
 				    const EBLevelGrid&                      a_eblgCoar,
 				    const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
 				    const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
-				    const int&                              a_nref,
-				    const int&                              a_nvar,
+				    const int&                              a_nRef,
+				    const int&                              a_nVar,
 				    const int&                              a_redistRad){
-  CH_TIME("EBFastCoarToCoarRedist::define");
+  CH_TIME("EbFastCoarToCoarRedist::define");
 
   const int comp  = 0;
   const int ncomp = 1;
 
   m_isDefined  = true;
-  m_nComp      =  a_nvar;
-  m_refRat     =  a_nref;
+  m_nComp      =  a_nVar;
+  m_refRat     =  a_nRef;
   m_redistRad  =  a_redistRad;
   m_domainCoar =  a_eblgCoar.getDomain().domainBox();
   m_gridsCoar  =  a_eblgCoar.getDBL();
@@ -82,7 +87,7 @@ void EBFastCoarToCoarRedist::define(const EBLevelGrid&                      a_eb
 #if EBFASTC2C_DEBUG // Original function
   IntVectSet newDefineSet, oldDefineSet;
   gatherCoarSet(newDefineSet);
-  EBCoarToCoarRedist::define(a_eblgFine, a_eblgCoar, a_nref, a_nvar, a_redistRad);
+  EBCoarToCoarRedist::define(a_eblgFine, a_eblgCoar, a_nRef, a_nVar, a_redistRad);
   gatherCoarSet(oldDefineSet);
 
   const IntVectSet diffSet1 = newDefineSet - oldDefineSet;
@@ -93,8 +98,8 @@ void EBFastCoarToCoarRedist::define(const EBLevelGrid&                      a_eb
 #endif
 }
 
-void EBFastCoarToCoarRedist::gatherBroadcast(IntVectSet& a_set){
-  CH_TIME("EBFastCoarToCoarRedist::gatherBroadcast");
+void EbFastCoarToCoarRedist::gatherBroadcast(IntVectSet& a_set){
+  CH_TIME("EbFastCoarToCoarRedist::gatherBroadcast");
 #ifdef CH_MPI
   Vector<IntVectSet> procSet;
   const int destProc = uniqueProc(SerialTask::compute);
@@ -109,8 +114,8 @@ void EBFastCoarToCoarRedist::gatherBroadcast(IntVectSet& a_set){
 #endif
 }
 
-void EBFastCoarToCoarRedist::gatherCoarSet(IntVectSet& a_coarSet){
-  CH_TIME("EBFastCoarToCoarRedist::gatherCoarSet");
+void EbFastCoarToCoarRedist::gatherCoarSet(IntVectSet& a_coarSet){
+  CH_TIME("EbFastCoarToCoarRedist::gatherCoarSet");
 
   a_coarSet.makeEmpty();
   for (DataIterator dit = m_gridsCoar.dataIterator(); dit.ok(); ++dit){
@@ -118,4 +123,5 @@ void EBFastCoarToCoarRedist::gatherCoarSet(IntVectSet& a_coarSet){
   }
   gatherBroadcast(a_coarSet);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
