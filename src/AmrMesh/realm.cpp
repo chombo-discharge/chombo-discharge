@@ -360,11 +360,23 @@ Vector<Real>& realm::getDx() {
   return m_dx;
 }
 
+const Vector<Real>& realm::getDx() const {
+  return m_dx;
+}
+
 Vector<DisjointBoxLayout>& realm::getGrids() {
   return m_grids;
 }
 
+const Vector<DisjointBoxLayout>& realm::getGrids() const {
+  return m_grids;
+}
+
 Vector<ProblemDomain>& realm::getDomains() {
+  return m_domains;
+}
+
+const Vector<ProblemDomain>& realm::getDomains() const {
   return m_domains;
 }
 

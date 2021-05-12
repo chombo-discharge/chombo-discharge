@@ -805,6 +805,10 @@ Vector<DisjointBoxLayout>& phase_realm::getGrids() {
   return m_grids;
 }
 
+const Vector<DisjointBoxLayout>& phase_realm::getGrids() const {
+  return m_grids;
+}
+
 Vector<ProblemDomain>& phase_realm::getDomains() {
   return m_domains;
 }

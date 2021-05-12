@@ -1233,7 +1233,7 @@ void driver::setup_geometry_only(){
   m_compgeom->build_geometries(m_amr->getFinestDomain(),
 			       m_amr->getProbLo(),
 			       m_amr->getFinestDx(),
-			       m_amr->get_max_ebis_box_size());
+			       m_amr->getMaxEbisBoxSize());
   const Real t1 = MPI_Wtime();
   if(procID() == 0) std::cout << "geotime = " << t1 - t0 << std::endl;
 
@@ -1288,7 +1288,7 @@ void driver::setup_fresh(const int a_init_regrids){
   m_compgeom->build_geometries(m_amr->getFinestDomain(),
 			       m_amr->getProbLo(),
 			       m_amr->getFinestDx(),
-			       m_amr->get_max_ebis_box_size());
+			       m_amr->getMaxEbisBoxSize());
 
 
   // Register realms
@@ -1392,7 +1392,7 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
   m_compgeom->build_geometries(m_amr->getFinestDomain(),
 			       m_amr->getProbLo(),
 			       m_amr->getFinestDx(),
-			       m_amr->get_max_ebis_box_size());
+			       m_amr->getMaxEbisBoxSize());
 
   this->get_geom_tags();       // Get geometric tags.
 

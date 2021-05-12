@@ -93,6 +93,7 @@ public:
   Vector<int>& getRefinementRatios();
   Vector<Real>& getDx();
   Vector<DisjointBoxLayout>& getGrids();
+  const Vector<DisjointBoxLayout>& getGrids() const;
   Vector<ProblemDomain>& getDomains();
   Vector<EBISLayout>& getEBISLayout();
   Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid();
@@ -155,7 +156,7 @@ protected:
   // Neighbors
   Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > > m_neighbors;
 
-  // Iterator for vofs
+  // Iterator for vofs. 
   Vector<RefCountedPtr<LayoutData<VoFIterator> > > m_vofiter;
 
   // Copiers

@@ -590,7 +590,7 @@ void eddington_sp1::define_mg_levels(){
   const Vector<ProblemDomain>& domains = m_amr->getDomains();
   const int max_box_size               = m_amr->getMaxBoxSize();
   const int blocking_factor            = m_amr->getBlockingFactor();
-  const int num_numEbGhostsCells                = m_amr->getNumberOfEbGhostCells();
+  const int num_numEbGhostsCells       = m_amr->getNumberOfEbGhostCells();
 
   int num_coar       = 0;
   bool has_coar      = true;
@@ -832,7 +832,7 @@ void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCell
 
   const int finest_level = m_amr->getFinestLevel();
   
-  irreg_amr_stencil<eb_centroid_interp>& sten = m_amr->getEbCentroidInterpolationStencils(m_realm, m_phase);
+  const irreg_amr_stencil<eb_centroid_interp>& sten = m_amr->getEbCentroidInterpolationStencils(m_realm, m_phase);
   for(int lvl = 0; lvl <= finest_level; lvl++){
     sten.apply(*a_ebflux[lvl], *a_state[lvl], lvl, true);
   }
@@ -987,7 +987,7 @@ void eddington_sp1::write_plot_file(){
   }
 
   // Transform to centroid-centered
-  irreg_amr_stencil<centroid_interp>& sten = m_amr->getCentroidInterpolationStencils(m_realm, phase::gas);
+  const irreg_amr_stencil<centroid_interp>& sten = m_amr->getCentroidInterpolationStencils(m_realm, phase::gas);
   sten.apply(output);
 
   // Alias this stuff

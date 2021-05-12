@@ -1058,7 +1058,7 @@ void mc_photo::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRC
   }
 
   if(m_blend_conservation){
-    irreg_amr_stencil<noncons_div>& stencils = m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
+    const irreg_amr_stencil<noncons_div>& stencils = m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else{

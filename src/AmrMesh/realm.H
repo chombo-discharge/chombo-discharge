@@ -69,8 +69,11 @@ public:
   // Get functions for neutral stuff
   Vector<int>& getRefinementRatios();
   Vector<Real>& getDx();
+  const Vector<Real>& getDx() const;
   Vector<DisjointBoxLayout>& getGrids();
+  const Vector<DisjointBoxLayout>& getGrids() const;
   Vector<ProblemDomain>& getDomains();
+  const Vector<ProblemDomain>& getDomains() const;
   Vector<RefCountedPtr<MFLevelGrid> >& getMFLevelGrid();
   
   const RefCountedPtr<EBIndexSpace>& get_ebis(const phase::which_phase a_phase);

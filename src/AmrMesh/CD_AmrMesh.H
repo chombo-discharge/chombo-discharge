@@ -198,7 +198,7 @@ public:
     @param[in] a_realm Name of the realm. 
     @return True if the realm exists and false otherwise. 
   */
-  bool queryRealm(const std::string a_realm);
+  bool queryRealm(const std::string a_realm) const;
 
   /*!
     @brief Register a new realm
@@ -794,97 +794,97 @@ public:
   /*!
     @brief Do a sanity check to make sure everything is set up correctly
   */
-  void sanityCheck();
+  void sanityCheck() const;
 
   /*!
     @brief True if there is ebcf crossing
   */
-  bool getEbCf();
+  bool getEbCf() const;
 
   /*!
     @brief Get finest grid level. 
   */
-  int getFinestLevel();
+  int getFinestLevel() const;
 
   /*!
     @brief Get irregular cell growth.
   */
-  int getIrregTagGrowth();
+  int getIrregTagGrowth() const;
 
   /*!
     @brief Get maximum permitted amr depth.
   */
-  int getMaxAmrDepth();
+  int getMaxAmrDepth() const;
 
   /*!
     @brief Get maximum permitted simulation depth.
   */
-  int getMaxSimulationDepth();
+  int getMaxSimulationDepth() const;
 
   /*!
     @brief Get blocking factor (i.e. the smallest possible box).
   */
-  int getBlockingFactor();
+  int getBlockingFactor() const;
 
   /*!
     @brief Get maximum permitted box size
   */
-  int getMaxBoxSize();
+  int getMaxBoxSize() const;
 
   /*!
     @brief Return buffer for B-R mesh refinement algorithm. 
   */
-  int getBrBuffer();
+  int getBrBuffer() const;
 
   /*!
     @brief Get maximum box size for EBIS generation. 
   */
-  int getMaxEbisBoxSize();
+  int getMaxEbisBoxSize() const;
 
   /*!
     @brief Get the default number of ghost cells
   */
-  int getNumberOfGhostCells();
+  int getNumberOfGhostCells() const;
 
   /*!
     @brief Get number of ghost cells used for EB grid generation. 
   */
-  int getNumberOfEbGhostCells();
+  int getNumberOfEbGhostCells() const;
 
   /*!
     @brief Get default redistribution radius
   */
-  int getRedistributionRadius();
+  int getRedistributionRadius() const;
   
   /*!
     @brief Get resolution on the finest grid level. 
   */
-  Real getFinestDx();
+  Real getFinestDx() const;
 
   /*!
     @brief Get lower-left corner of computational domain. 
   */
-  RealVect getProbLo();
+  RealVect getProbLo() const;
 
   /*!
     @brief Get upper-left corner of computational domain. 
   */
-  RealVect getProbHi();
+  RealVect getProbHi() const;
 
   /*!
     @brief Get finest domain
   */
-  ProblemDomain getFinestDomain();
+  ProblemDomain getFinestDomain() const;
 
   /*!
     @brief Get spatial resolutions
   */
-  Vector<Real>& getDx();
+  const Vector<Real>& getDx() const;
 
   /*!
     @brief Get refinement ratios
   */
-  Vector<int>& getRefinementRatios();
+  const Vector<int>& getRefinementRatios() const;
 
   /*!
     @brief Get refinement factor between two levels
@@ -895,65 +895,81 @@ public:
   int getRefinementRatio(const int a_level1, const int a_level2) const ;
 
   /*!
-    @brief Get implicit function
+    @brief Get implicit function for a specific phase
+    @param[in] a_phase Phase 8gas or solid)
   */
-  const RefCountedPtr<BaseIF>& getBaseImplicitFunction(const phase::which_phase a_phase);
+  const RefCountedPtr<BaseIF>& getBaseImplicitFunction(const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get ALL irregular tags
+    @brief Get all irregular tags.
+    @details This collects the tags form EBIndexSpace, and the tags are local to each rank.
   */
   Vector<IntVectSet> getIrregularTags() const;
 
   /*!
-    @brief Get the grids
+    @brief Get the "proxy" grids in AmrMesh.
+    @details Returns m_grids
   */
-  Vector<DisjointBoxLayout>& getProxyGrids();
+  const Vector<DisjointBoxLayout>& getProxyGrids() const;
 
   /*!
     @brief Get the grids
   */
-  Vector<DisjointBoxLayout>& getGrids(const std::string a_realm);
+  const Vector<DisjointBoxLayout>& getGrids(const std::string a_realm) const;
 
   /*!
     @brief Get domains
   */
-  Vector<ProblemDomain>& getDomains();
+  const Vector<ProblemDomain>& getDomains() const;
 
   /*!
-    @brief Get mask
+    @brief Get a registered mask.
+    @param[in] a_mask   Mask name
+    @param[in] a_buffer Buffer (used when registering mask)
+    @param[in] a_realm  Realm name
   */
-  AMRMask& getMask(const std::string a_mask, const int a_buffer, const std::string a_realm);
+  const AMRMask& getMask(const std::string a_mask, const int a_buffer, const std::string a_realm) const;
 
   /*!
-    @brief Get the EBLevelGrid 
+    @brief Get the EBLevelGrid for a realm and phase
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase);
+  const Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase) const;
   
   /*!
-    @brief Get the EBISLayouts
+    @brief Get EBISLayouts for a realm and phase
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<EBISLayout>& getEBISLayout(const std::string a_realm, const phase::which_phase a_phase);
+  const Vector<EBISLayout>& getEBISLayout(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get the EBLevelGrid 
+    @brief Get EBISLayouts for a realm
+    @param[in] a_realm Realm name
   */
-  Vector<RefCountedPtr<MFLevelGrid> >& getMFLevelGrid(const std::string a_realm);
+  const Vector<RefCountedPtr<MFLevelGrid> >& getMFLevelGrid(const std::string a_realm) const;
 
   /*!
-    @brief Get the vof iterator
+    @brief Get vof iterators for a realm and phase. This has the capability of iterating through cut-cells. 
+    @details Not const because we need to reset the vofiterator
   */
-  Vector<RefCountedPtr<LayoutData<VoFIterator> > > getVofIterator(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& getVofIterator(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Get neighbor boxes
+    @brief Get neighboring boxes
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors(const std::string a_realm,
-									  const phase::which_phase a_phase);
+  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors(const std::string        a_realm,
+										const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get levelset function
+    @brief Get levelset function, allocated over a grid for a realm and phase
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  EBAMRFAB& getLevelset(const std::string a_realm, const phase::which_phase a_phase);
+  const EBAMRFAB& getLevelset(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the coarsening utility
@@ -1001,62 +1017,75 @@ public:
   Vector<RefCountedPtr<EBLevelRedist> >&  getLevelRedist(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Get coar-to-fine redistribution
+    @brief Get coar-to-fine redistribution for a realm and phase
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
   Vector<RefCountedPtr<EBCoarToFineRedist> >&  getCoarToFineRedist(const std::string        a_realm,
 								   const phase::which_phase a_phase);
   
   /*!
-    @brief Get coar-to-coar redistribution
+    @brief Get coar-to-coar redistribution objects
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
   Vector<RefCountedPtr<EBCoarToCoarRedist> >&  getCoarToCoarRedist(const std::string        a_realm,
 								   const phase::which_phase a_phase);
 
   /*!
-    @brief Get coar-to-coar redistribution
+    @brief Get coar-to-coar redistribution redistribution objects
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
   Vector<RefCountedPtr<EBFineToCoarRedist> >&  getFineToCoarRedist(const std::string        a_realm,
 								   const phase::which_phase a_phase);
   
   /*!
-    @brief Get interpolation stencils
+    @brief Get interpolation stencils for going from cell center to cell centroid
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  irreg_amr_stencil<centroid_interp>& getCentroidInterpolationStencils(const std::string a_realm,
-								       const phase::which_phase a_phase);
+  const irreg_amr_stencil<centroid_interp>& getCentroidInterpolationStencils(const std::string a_realm,
+									     const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get interpolation stencils
+    @brief Get interpolation stencils for going from cell center to cell boundary centroid
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  irreg_amr_stencil<eb_centroid_interp>& getEbCentroidInterpolationStencils(const std::string        a_realm,
-									    const phase::which_phase a_phase);
+  const irreg_amr_stencil<eb_centroid_interp>& getEbCentroidInterpolationStencils(const std::string        a_realm,
+										  const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get Nonconservative divergence stencils
+    @brief Get the nonconservative divergence stencils
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  irreg_amr_stencil<noncons_div>& getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase);
+  const irreg_amr_stencil<noncons_div>& getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get copier
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
   Vector<RefCountedPtr<Copier> >& getCopier(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get reverse copier
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
   Vector<RefCountedPtr<Copier> >& getReverseCopier(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Build tiles from a box
-  */
-  Vector<Box> makeTiles(const Box a_box, const IntVect a_tilesize);
-
-  /*!
     @brief Get the name of all realms
+    @return Names of all realms
   */
   std::vector<std::string> getRealms() const;
 
   /*!
     @brief Get box sorting method
+    @return Box sorting method.
   */
   BoxSorting getBoxSorting() const;
   
@@ -1073,7 +1102,7 @@ protected:
   /*!
     @brief These are all the realms
   */
-  std::map<std::string, RefCountedPtr<realm> > m_realms;
+  mutable std::map<std::string, RefCountedPtr<realm> > m_realms;
 
   /*!
     @brief Implicit functions

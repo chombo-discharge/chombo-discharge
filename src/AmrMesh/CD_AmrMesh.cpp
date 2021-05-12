@@ -1712,7 +1712,7 @@ void AmrMesh::parseEbCentroidStencils(){
   }
 }
 
-void AmrMesh::sanityCheck(){
+void AmrMesh::sanityCheck() const {
   CH_TIME("AmrMesh::sanityCheck");
   if(m_verbosity > 1){
     pout() << "AmrMesh::sanityCheck" << endl;
@@ -1728,63 +1728,63 @@ void AmrMesh::sanityCheck(){
   CH_assert(m_bufferSizeBR > 0);
 }
 
-bool AmrMesh::getEbCf(){
+bool AmrMesh::getEbCf() const {
   return m_hasEbCf;
 }
 
-RealVect AmrMesh::getProbLo(){
+RealVect AmrMesh::getProbLo() const {
   return m_probLo;
 }
 
-RealVect AmrMesh::getProbHi(){
+RealVect AmrMesh::getProbHi() const {
   return m_prob_hi;
 }
 
-int AmrMesh::getFinestLevel(){
+int AmrMesh::getFinestLevel() const {
   return m_finestLevel;
 }
 
-int AmrMesh::getIrregTagGrowth(){
+int AmrMesh::getIrregTagGrowth() const {
   return m_irregTagGrowth;
 }
 
-int AmrMesh::getMaxAmrDepth(){
+int AmrMesh::getMaxAmrDepth() const {
   return m_maxAmrDepth;
 }
 
-int AmrMesh::getMaxSimulationDepth(){
+int AmrMesh::getMaxSimulationDepth() const {
   return m_maxSimulationDepth;
 }
 
-int AmrMesh::getNumberOfGhostCells(){
+int AmrMesh::getNumberOfGhostCells() const {
   return m_numGhostCells;
 }
 
-int AmrMesh::getNumberOfEbGhostCells(){
+int AmrMesh::getNumberOfEbGhostCells() const {
   return m_numEbGhostsCells;
 }
 
-int AmrMesh::getRedistributionRadius(){
+int AmrMesh::getRedistributionRadius() const {
   return m_redistributionRadius;
 }
 
-int AmrMesh::getBlockingFactor(){
+int AmrMesh::getBlockingFactor() const {
   return m_blockingFactor;
 }
 
-int AmrMesh::getMaxBoxSize(){
+int AmrMesh::getMaxBoxSize() const {
   return m_maxBoxSize;
 }
 
-int AmrMesh::getBrBuffer(){
+int AmrMesh::getBrBuffer() const {
   return m_bufferSizeBR;
 }
 
-int AmrMesh::getMaxEbisBoxSize(){
+int AmrMesh::getMaxEbisBoxSize() const {
   return m_maxEbisBoxSize;
 }
 
-int AmrMesh::getRefinementRatio(const int a_level1, const int a_level2){
+int AmrMesh::getRefinementRatio(const int a_level1, const int a_level2) const {
   int coarLevel = Min(a_level1, a_level2);
   int fineLevel = Max(a_level1, a_level2);
 
@@ -1796,23 +1796,23 @@ int AmrMesh::getRefinementRatio(const int a_level1, const int a_level2){
   return ref;
 }
 
-ProblemDomain AmrMesh::getFinestDomain(){
+ProblemDomain AmrMesh::getFinestDomain() const {
   return m_domains[m_maxAmrDepth];
 }
 
-Real AmrMesh::getFinestDx(){
+Real AmrMesh::getFinestDx() const {
   return m_dx[m_maxAmrDepth];
 }
 
-Vector<Real>& AmrMesh::getDx(){
+const Vector<Real>& AmrMesh::getDx() const {
   return m_dx;
 }
 
-Vector<int>& AmrMesh::getRefinementRatios(){
+const Vector<int>& AmrMesh::getRefinementRatios() const {
   return m_refinementRatios;
 }
 
-const RefCountedPtr<BaseIF>& AmrMesh::getBaseImplicitFunction(const phase::which_phase a_phase){
+const RefCountedPtr<BaseIF>& AmrMesh::getBaseImplicitFunction(const phase::which_phase a_phase) const {
   return m_baseif.at(a_phase);
 }
 
@@ -1841,48 +1841,49 @@ Vector<IntVectSet> AmrMesh::getIrregularTags() const {
   return tags;
 }
 
-Vector<ProblemDomain>& AmrMesh::getDomains(){
+const Vector<ProblemDomain>& AmrMesh::getDomains() const {
   return m_domains;
 }
 
-Vector<DisjointBoxLayout>& AmrMesh::getProxyGrids(){
+const Vector<DisjointBoxLayout>& AmrMesh::getProxyGrids() const {
   return m_grids;
 }
 
-Vector<DisjointBoxLayout>& AmrMesh::getGrids(const std::string a_realm){
+const Vector<DisjointBoxLayout>& AmrMesh::getGrids(const std::string a_realm) const {
   if(!this->queryRealm(a_realm)) {
     std::string str = "AmrMesh::getGrids - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
+  
   return m_realms[a_realm]->getGrids();
 }
 
-Vector<EBISLayout>& AmrMesh::getEBISLayout(const std::string a_realm, const phase::which_phase a_phase){
+const Vector<EBISLayout>& AmrMesh::getEBISLayout(const std::string a_realm, const phase::which_phase a_phase) const{
   return m_realms[a_realm]->getEBISLayout(a_phase);
 }
 
-Vector<RefCountedPtr<LayoutData<VoFIterator> > > AmrMesh::getVofIterator(const std::string a_realm, const phase::which_phase a_phase){
+Vector<RefCountedPtr<LayoutData<VoFIterator> > >& AmrMesh::getVofIterator(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->getVofIterator(a_phase);
 }
 
-Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& AmrMesh::getNeighbors(const std::string a_realm,
-										 const phase::which_phase a_phase){
+const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& AmrMesh::getNeighbors(const std::string a_realm,
+										       const phase::which_phase a_phase) const{
   return m_realms[a_realm]->getNeighbors(a_phase);
 }
 
-AMRMask& AmrMesh::getMask(const std::string a_mask, const int a_buffer, const std::string a_realm) {
+const AMRMask& AmrMesh::getMask(const std::string a_mask, const int a_buffer, const std::string a_realm) const {
   return m_realms[a_realm]->getMask(a_mask, a_buffer);
 }
 
-Vector<RefCountedPtr<EBLevelGrid> >& AmrMesh::getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase){
+const Vector<RefCountedPtr<EBLevelGrid> >& AmrMesh::getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase) const{
   return m_realms[a_realm]->getEBLevelGrid(a_phase);
 }
 
-Vector<RefCountedPtr<MFLevelGrid> >& AmrMesh::getMFLevelGrid(const std::string a_realm){
+const Vector<RefCountedPtr<MFLevelGrid> >& AmrMesh::getMFLevelGrid(const std::string a_realm) const {
   return m_realms[a_realm]->getMFLevelGrid();
 }
 
-EBAMRFAB& AmrMesh::getLevelset(const std::string a_realm, const phase::which_phase a_phase){
+const EBAMRFAB& AmrMesh::getLevelset(const std::string a_realm, const phase::which_phase a_phase) const {
   return m_realms[a_realm]->getLevelset(a_phase);
 }
 
@@ -1937,17 +1938,17 @@ Vector<RefCountedPtr<EBFineToCoarRedist> >&  AmrMesh::getFineToCoarRedist(const 
   return m_realms[a_realm]->getFineToCoarRedist(a_phase);
 }
 
-irreg_amr_stencil<centroid_interp>& AmrMesh::getCentroidInterpolationStencils(const std::string        a_realm,
-									      const phase::which_phase a_phase){
+const irreg_amr_stencil<centroid_interp>& AmrMesh::getCentroidInterpolationStencils(const std::string        a_realm,
+										    const phase::which_phase a_phase) const {
   return m_realms[a_realm]->getCentroidInterpolationStencils(a_phase);
 }
 
-irreg_amr_stencil<eb_centroid_interp>& AmrMesh::getEbCentroidInterpolationStencils(const std::string        a_realm,
-										   const phase::which_phase a_phase){
+const irreg_amr_stencil<eb_centroid_interp>& AmrMesh::getEbCentroidInterpolationStencils(const std::string        a_realm,
+											 const phase::which_phase a_phase) const {
   return m_realms[a_realm]->getEbCentroidInterpolationStencils(a_phase);
 }
 
-irreg_amr_stencil<noncons_div>& AmrMesh::getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase){
+const irreg_amr_stencil<noncons_div>& AmrMesh::getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const{
   return m_realms[a_realm]->getNonConservativeDivergenceStencils(a_phase);
 }
 
@@ -1959,47 +1960,7 @@ Vector<RefCountedPtr<Copier> >& AmrMesh::getReverseCopier(const std::string a_re
   return m_realms[a_realm]->getReverseCopier(a_phase);
 }
 
-Vector<Box> AmrMesh::makeTiles(const Box a_box, const IntVect a_tilesize){
-  MayDay::Abort("AmrMesh::make_Tiles - stop, where is this code used...?");
-  // Modify the input tilesize to something sensible
-  IntVect tilesize = a_tilesize;
-  for (int dir = 0; dir < SpaceDim; dir++){
-    if(tilesize[dir] > a_box.size(dir)){
-      tilesize[dir] = a_box.size(dir);
-    }
-  }
-
-  // Compute number of tiles along each coordinate
-  Vector<int> num_tiles_dir(SpaceDim);
-  for (int dir = 0; dir < SpaceDim; dir++){
-    if(a_box.size(dir)%tilesize[dir] == 0){
-      num_tiles_dir[dir] = a_box.size(dir)/tilesize[dir];
-    }
-    else{
-      MayDay::Abort("AmrMesh::makeTiles - logic bust when building tiles. Tile size was not divisible by blocking factor");
-    }
-  }
-
-  // Make the tiles
-  Vector<Box> tiles;
-#if CH_SPACEDIM==3
-  for (int k = 0; k < num_tiles_dir[2]; k++){
-#endif
-    for (int j = 0; j < num_tiles_dir[1]; j++){
-      for (int i = 0; i < num_tiles_dir[0]; i++){
-	const IntVect ivlo = a_box.smallEnd() + IntVect(D_DECL(i,j,k))*tilesize;
-	const IntVect ivhi = a_box.smallEnd() + IntVect(D_DECL(i+1,j+1,k+1))*tilesize - IntVect::Unit;
-	tiles.push_back(Box(ivlo, ivhi));
-      }
-    }
-#if CH_SPACEDIM==3
-  }
-#endif
-
-  return tiles;
-}
-
-bool AmrMesh::queryRealm(const std::string a_realm){
+bool AmrMesh::queryRealm(const std::string a_realm) const {
   CH_TIME("AmrMesh::queryRealm");
   if(m_verbosity > 5){
     pout() << "AmrMesh::queryRealm" << endl;

@@ -321,39 +321,17 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
     
     // This does all cells
 #if USE_FAST_REACTIONS
-    ParmParse pp ("cache_blocking");
+    advance_reaction_network_reg_fast(particle_sources,
+				      photon_sources,
+				      particle_densities,
+				      particle_gradients,
+				      photon_densities,
+				      a_E[dit()],
+				      a_time,
+				      a_dt,
+				      dx,
+				      dbl.get(dit()));
 
-    int block_loops = 0;
-    pp.query("tile_loops", block_loops);
-    if(block_loops == 0){
-      advance_reaction_network_reg_fast(particle_sources,
-					photon_sources,
-					particle_densities,
-					particle_gradients,
-					photon_densities,
-					a_E[dit()],
-					a_time,
-					a_dt,
-					dx,
-					dbl.get(dit()));
-    }
-    else{
-      Vector<int> tilesize(SpaceDim);
-      pp.getarr("tile_size", tilesize, 0, SpaceDim);
-      Vector<Box> boxes = m_amr->makeTiles(dbl.get(dit()), IntVect(D_DECL(tilesize[0], tilesize[1], tilesize[2])));
-      for (int ibox = 0; ibox < boxes.size(); ibox++){
-	advance_reaction_network_reg_fast(particle_sources,
-					  photon_sources,
-					  particle_densities,
-					  particle_gradients,
-					  photon_densities,
-					  a_E[dit()],
-					  a_time,
-					  a_dt,
-					  dx,
-					  boxes[ibox]);
-      }
-    }
 #else
     advance_reaction_network_reg(particle_sources,
 				 photon_sources,
