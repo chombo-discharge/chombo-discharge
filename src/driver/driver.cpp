@@ -51,10 +51,10 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   m_time          = 0.0;
   m_dt            = 0.0;
 
-  // Always register this realm and these operators. 
-  m_realm = realm::primal;
-  m_amr->registerRealm(m_realm);
-  m_amr->registerOperator(s_eb_pwl_interp, m_realm, phase::gas); // For output
+  // Always register this Realm and these operators. 
+  m_Realm = Realm::Primal;
+  m_amr->registerRealm(m_Realm);
+  m_amr->registerOperator(s_eb_pwl_interp, m_Realm, phase::gas); // For output
 }
 
 driver::~driver(){
@@ -71,8 +71,8 @@ int driver::get_num_plot_vars() const {
 
   if(m_plot_tags)     num_output = num_output + 1;
   if(m_plot_ranks)    {
-    const int num_realms = m_amr->getRealms().size();
-    num_output = num_output + num_realms;
+    const int num_Realms = m_amr->getRealms().size();
+    num_output = num_output + num_Realms;
   }
   if(m_plot_levelset) num_output = num_output + 2;
 
@@ -116,7 +116,7 @@ void driver::allocate_internals(){
   m_tags.resize(1 + finest_level);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     m_tags[lvl] = RefCountedPtr<LayoutData<DenseIntVectSet> > (new LayoutData<DenseIntVectSet>(dbl));
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -136,11 +136,11 @@ void driver::cache_tags(const EBAMRTags& a_tags){
   const int finest_level  = m_amr->getFinestLevel();
   const int ghost         = 0;
 
-  m_amr->allocate(m_cached_tags, m_realm, ncomp, ghost);
+  m_amr->allocate(m_cached_tags, m_Realm, ncomp, ghost);
   m_cached_tags.resize(1+finest_level);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
 
     // Copy tags onto boolean mask
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -379,7 +379,7 @@ void driver::grid_report(){
   pout() << endl;
 
   const int finest_level                 = m_amr->getFinestLevel();
-  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_Realm);
   const Vector<ProblemDomain>& domains   = m_amr->getDomains();
   const Vector<Real> dx                  = m_amr->getDx();
 
@@ -430,9 +430,9 @@ void driver::grid_report(){
     ref_rat[lvl] = refRat[lvl];
   }
 
-  // Get boxes for each realm
-  const std::vector<std::string> realms = m_amr->getRealms();
-  for (auto str : realms){
+  // Get boxes for each Realm
+  const std::vector<std::string> Realms = m_amr->getRealms();
+  for (auto str : Realms){
     this->get_loads_and_boxes(myPoints,
 			      myPointsGhosts,
 			      myBoxes,
@@ -472,8 +472,8 @@ void driver::grid_report(){
 	 << "\t\t\t        Total # of boxes (lvl) = " << number_fmt(total_level_boxes) << endl
 	 << "\t\t\t        Total # of cells (lvl) = " << number_fmt(total_level_points) << endl;
 
-  // Do a local report for each realm
-  for (auto str : realms){
+  // Do a local report for each Realm
+  for (auto str : Realms){
     this->get_loads_and_boxes(myPoints,
 			      myPointsGhosts,
 			      myBoxes,
@@ -590,10 +590,10 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   m_amr->regridAmr(tags, a_lmin, a_lmax);
   const int new_finest_level = m_amr->getFinestLevel();
 
-  // Load balance and regrid the various realms
-  const std::vector<std::string>& realms = m_amr->getRealms();
-  for (const auto& str : realms){
-    if(m_timestepper->LoadBalancing_realm(str)){
+  // Load balance and regrid the various Realms
+  const std::vector<std::string>& Realms = m_amr->getRealms();
+  for (const auto& str : Realms){
+    if(m_timestepper->LoadBalancing_Realm(str)){
       
       Vector<Vector<int> > procs;
       Vector<Vector<Box> > boxes;
@@ -646,7 +646,7 @@ void driver::regrid_internals(const int a_old_finest_level, const int a_new_fine
 
   // Copy cached tags back over to m_tags
   for (int lvl = 0; lvl <= Min(a_old_finest_level, a_new_finest_level); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     
     // Copy mask
     LevelData<BaseFab<bool> > tmp;
@@ -1291,7 +1291,7 @@ void driver::setup_fresh(const int a_init_regrids){
 			       m_amr->getMaxEbisBoxSize());
 
 
-  // Register realms
+  // Register Realms
   m_timestepper->set_amr(m_amr);
   m_timestepper->registerRealms();
 
@@ -1331,7 +1331,7 @@ void driver::setup_fresh(const int a_init_regrids){
   this->cache_tags(m_tags);
   m_timestepper->pre_regrid(lmin, lmax);
   for (const auto& str : m_amr->getRealms()){
-    if(m_timestepper->LoadBalancing_realm(str)){
+    if(m_timestepper->LoadBalancing_Realm(str)){
       
       Vector<Vector<int> > procs;
       Vector<Vector<Box> > boxes;
@@ -1397,7 +1397,7 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
   this->get_geom_tags();       // Get geometric tags.
 
   m_timestepper->set_amr(m_amr);                         // Set amr
-  m_timestepper->registerRealms();                      // Register realms
+  m_timestepper->registerRealms();                      // Register Realms
   m_timestepper->set_computational_geometry(m_compgeom); // Set computational geometry
 
   // Set implicit functions now. 
@@ -1474,7 +1474,7 @@ void driver::step_report(const Real a_start_time, const Real a_end_time, const i
 
   // Get the total number of poitns across all levels
   const int finest_level                 = m_amr->getFinestLevel();
-  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_Realm);
   const Vector<ProblemDomain>& domains   = m_amr->getDomains();
   const Vector<Real>& dx                 = m_amr->getDx();
   long long totalPoints = 0;
@@ -1604,7 +1604,7 @@ int driver::get_finest_tag_level(const EBAMRTags& a_cell_tags) const{
 
   int finest_tag_level = -1;
   for (int lvl = 0; lvl < a_cell_tags.size(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const DenseIntVectSet& tags = (*a_cell_tags[lvl])[dit()];
@@ -1743,8 +1743,8 @@ void driver::write_computational_loads(){
   sprintf(file_char, "%s.loads.step%07d.%dd.dat", prefix.c_str(), m_step, SpaceDim);
   std::string fname(file_char);
 
-  // Get sum of all loads on all realms
-  std::map<std::string, Vector<long int> > realmLoads;
+  // Get sum of all loads on all Realms
+  std::map<std::string, Vector<long int> > RealmLoads;
   for (const auto& r : m_amr->getRealms()){
 
     // Compute total loads on each rank.
@@ -1765,7 +1765,7 @@ void driver::write_computational_loads(){
     sumLoads = tmp;
 #endif
 
-    realmLoads.emplace(r, sumLoads);
+    RealmLoads.emplace(r, sumLoads);
   }
 
   // Write header
@@ -1778,7 +1778,7 @@ void driver::write_computational_loads(){
     // Write header
     std::stringstream ss;
     ss << std::left << std::setw(width) << "# Rank";
-    for (auto r : realmLoads){
+    for (auto r : RealmLoads){
       ss << std::left << std::setw(width) << r.first;
     }
     f << ss.str() << endl;
@@ -1788,7 +1788,7 @@ void driver::write_computational_loads(){
       std::stringstream ds;
 
       ds << std::left << std::setw(width) << irank;
-      for (auto r : realmLoads){
+      for (auto r : RealmLoads){
 	ds << std::left << std::setw(width) << r.second[irank];
       }
       f << ds.str() << std::endl;
@@ -1808,7 +1808,7 @@ void driver::write_geometry(){
   const int ncomp = 2;
 
   EBAMRCellData output;
-  m_amr->allocate(output, m_realm, phase::gas, ncomp);
+  m_amr->allocate(output, m_Realm, phase::gas, ncomp);
   data_ops::set_value(output, 0.0);
 
   // Names
@@ -1822,7 +1822,7 @@ void driver::write_geometry(){
 
   //
   const int finest_level                 = m_amr->getFinestLevel();
-  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_Realm);
   const Vector<ProblemDomain>& domains   = m_amr->getDomains();
   const Vector<Real>& dx                 = m_amr->getDx();
   const Vector<int>& ref_rat             = m_amr->getRefinementRatios();
@@ -1936,8 +1936,8 @@ void driver::write_plot_file(const std::string a_filename){
   ncomp += this->get_num_plot_vars();
 
   // Allocate storage
-  m_amr->allocate(output,  m_realm, phase::gas, ncomp);
-  m_amr->allocate(scratch, m_realm, phase::gas, 1);
+  m_amr->allocate(output,  m_Realm, phase::gas, ncomp);
+  m_amr->allocate(scratch, m_Realm, phase::gas, 1);
   data_ops::set_value(output, 0.0);
   data_ops::set_value(scratch, 0.0);
 
@@ -1969,7 +1969,7 @@ void driver::write_plot_file(const std::string a_filename){
     plot_depth = Min(m_max_plot_depth, m_amr->getFinestLevel());
   }
 
-  // Interpolate ghost cells. This might be important if we use multiple realms. 
+  // Interpolate ghost cells. This might be important if we use multiple Realms. 
   for (int icomp = 0; icomp < ncomp; icomp++){
     const Interval interv(icomp, icomp);
     
@@ -1981,7 +1981,7 @@ void driver::write_plot_file(const std::string a_filename){
       aliasLevelData(fineAlias, output_ptr[lvl],   interv);
       aliasLevelData(coarAlias, output_ptr[lvl-1], interv);
 
-      m_amr->interpGhost(fineAlias, coarAlias, lvl, m_realm, phase::gas);
+      m_amr->interpGhost(fineAlias, coarAlias, lvl, m_Realm, phase::gas);
     }
   }
 
@@ -2000,7 +2000,7 @@ void driver::write_plot_file(const std::string a_filename){
 
   // Write. 
   writeEBHDF5(a_filename, 
-	      m_amr->getGrids(m_realm),
+	      m_amr->getGrids(m_Realm),
 	      output_ptr,
 	      names, 
 	      m_amr->getDomains()[0],
@@ -2043,13 +2043,13 @@ void driver::write_tags(EBAMRCellData& a_output, int& a_comp){
   
   // Alloc some temporary storage
   EBAMRCellData tags;
-  m_amr->allocate(tags, m_realm, phase::gas, 1);
+  m_amr->allocate(tags, m_Realm, phase::gas, 1);
   data_ops::set_value(tags, 0.0);
     
   // Set tagged cells = 1
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, phase::gas)[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const DenseIntVectSet& ivs = (*m_tags[lvl])[dit()];
@@ -2111,7 +2111,7 @@ void driver::write_levelset(EBAMRCellData& a_output, int& a_comp){
   const RealVect prob_lo = m_amr->getProbLo();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(a_output.get_realm())[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(a_output.get_Realm())[lvl];
     const Real dx = m_amr->getDx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -2156,7 +2156,7 @@ void driver::write_checkpoint_file(){
   header.m_int["step"]         = m_step;
   header.m_int["finest_level"] = finest_level;
 
-  // Write realm names.
+  // Write Realm names.
   for (auto r : m_amr->getRealms()){
     header.m_string[r] = r;
   }
@@ -2180,7 +2180,7 @@ void driver::write_checkpoint_file(){
     handle_out.setGroupToLevel(lvl);
 
     // write amr grids
-    write(handle_out, m_amr->getGrids(m_realm)[lvl]); // write AMR grids
+    write(handle_out, m_amr->getGrids(m_Realm)[lvl]); // write AMR grids
 
     // time stepper checkpoints data
     m_timestepper->write_checkpoint_data(handle_out, lvl); 
@@ -2205,7 +2205,7 @@ void driver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   }
 
   this->write_checkpoint_tags(a_handle, a_level);
-  this->write_checkpoint_realm_loads(a_handle, a_level);
+  this->write_checkpoint_Realm_loads(a_handle, a_level);
 
 }
 
@@ -2216,13 +2216,13 @@ void driver::write_checkpoint_tags(HDF5Handle& a_handle, const int a_level){
   }
 
   // Create some scratch data = 0 which can grok
-  EBCellFactory fact(m_amr->getEBISLayout(m_realm, phase::gas)[a_level]);
-  LevelData<EBCellFAB> scratch(m_amr->getGrids(m_realm)[a_level], 1, 3*IntVect::Unit, fact);
+  EBCellFactory fact(m_amr->getEBISLayout(m_Realm, phase::gas)[a_level]);
+  LevelData<EBCellFAB> scratch(m_amr->getGrids(m_Realm)[a_level], 1, 3*IntVect::Unit, fact);
   data_ops::set_value(scratch, 0.0);
 
   // Set tags = 1
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[a_level];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, phase::gas)[a_level];
     
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box = dbl.get(dit());
@@ -2243,14 +2243,14 @@ void driver::write_checkpoint_tags(HDF5Handle& a_handle, const int a_level){
   write(a_handle, scratch, "tagged_cells");
 }
 
-void driver::write_checkpoint_realm_loads(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("driver::write_checkpoint_realm_loads");
+void driver::write_checkpoint_Realm_loads(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("driver::write_checkpoint_Realm_loads");
   if(m_verbosity > 5){
-    pout() << "driver::write_checkpoint_realm_loads" << endl;
+    pout() << "driver::write_checkpoint_Realm_loads" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[a_level];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, phase::gas)[a_level];
 
   // Make some storage. 
   LevelData<FArrayBox> scratch(dbl, 1, 3*IntVect::Unit);
@@ -2278,7 +2278,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
     pout() << "driver::read_checkpoint_file" << endl;
   }
 
-  // Time stepper can register realms immediately. 
+  // Time stepper can register Realms immediately. 
   m_timestepper->registerRealms();
 
   // Read the header that was written by new_read_checkpoint_file
@@ -2294,21 +2294,21 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   const int base_level   = 0;
   const int finest_level = header.m_int["finest_level"];
 
-  // Get the names of the realms that were checkpointed. This is a part of the HDF header. 
+  // Get the names of the Realms that were checkpointed. This is a part of the HDF header. 
   std::map<std::string, Vector<Vector<long int > > > chk_loads;
   for (auto s : header.m_string){
     chk_loads.emplace(s.second, Vector<Vector<long int> >());
   }
 
-  // Get then names of the realms that will be used for simulations.
+  // Get then names of the Realms that will be used for simulations.
   std::map<std::string, Vector<Vector<long int > > > sim_loads;
-  for (const auto& irealm : m_amr->getRealms()){
-    sim_loads.emplace(irealm, Vector<Vector<long int> >());
+  for (const auto& iRealm : m_amr->getRealms()){
+    sim_loads.emplace(iRealm, Vector<Vector<long int> >());
   }
 
-  // Print checkpointed realm names. 
+  // Print checkpointed Realm names. 
   if(m_verbosity > 2){
-    pout() << "driver::read_checkpoint_file - checked realms are: ";
+    pout() << "driver::read_checkpoint_file - checked Realms are: ";
     for (auto r : chk_loads){
       pout() << '"' << r.first << '"' << "\t";
     }
@@ -2334,48 +2334,48 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
 
   // Read in the computational loads from the HDF5 file. 
   for (auto& r : chk_loads){
-    const std::string& realm_name = r.first;
-    Vector<Vector<long int> >& realm_loads = r.second;
+    const std::string& Realm_name = r.first;
+    Vector<Vector<long int> >& Realm_loads = r.second;
 
-    realm_loads.resize(1 + finest_level);
+    Realm_loads.resize(1 + finest_level);
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      realm_loads[lvl].resize(boxes[lvl].size(), 0L);
+      Realm_loads[lvl].resize(boxes[lvl].size(), 0L);
 
-      this->read_checkpoint_realm_loads(realm_loads[lvl], handle_in, realm_name, lvl);
+      this->read_checkpoint_Realm_loads(Realm_loads[lvl], handle_in, Realm_name, lvl);
     }
   }
 
 
-  // In case we restart with more or fewer realms, we need to decide how to assign the computational loads. If the realm was a new realm we may
-  // not have the computational loads for that. In that case we take the computational loads from the primal realm. 
+  // In case we restart with more or fewer Realms, we need to decide how to assign the computational loads. If the Realm was a new Realm we may
+  // not have the computational loads for that. In that case we take the computational loads from the primal Realm. 
   for (auto& s : sim_loads){
 
-    const std::string&         cur_realm = s.first;
+    const std::string&         cur_Realm = s.first;
     Vector<Vector<long int> >& cur_loads = s.second;
 
 #if 0 // Original code
     for (const auto& c : chk_loads){
-      if(cur_realm == c.first){
+      if(cur_Realm == c.first){
 	cur_loads = c.second;
       }
       else{
-	cur_loads = chk_loads.at(realm::primal);
+	cur_loads = chk_loads.at(Realm::Primal);
       }
     }
 #else
 
     bool found_checked_loads = false;
     for (const auto& c : chk_loads){
-      if(cur_realm == c.first){
+      if(cur_Realm == c.first){
 	found_checked_loads = true;
       }
     }
 
-    cur_loads = (found_checked_loads) ? chk_loads.at(cur_realm) : chk_loads.at(realm::primal);
+    cur_loads = (found_checked_loads) ? chk_loads.at(cur_Realm) : chk_loads.at(Realm::Primal);
 #endif
   }
 
-  // Define AmrMesh and realms. 
+  // Define AmrMesh and Realms. 
   m_amr->setFinestLevel(finest_level); 
   m_amr->setGrids(boxes, sim_loads);
   
@@ -2412,8 +2412,8 @@ void driver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
     pout() << "driver::read_checkpoint_level" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[a_level];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, phase::gas)[a_level];
 
   // Some scratch data we can use
   EBCellFactory fact(ebisl);
@@ -2443,14 +2443,14 @@ void driver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   }
 }
 
-void driver::read_checkpoint_realm_loads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_realm, const int a_level){
-  CH_TIME("driver::read_checkpoint_realm_loads(...)");
+void driver::read_checkpoint_Realm_loads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_Realm, const int a_level){
+  CH_TIME("driver::read_checkpoint_Realm_loads(...)");
   if(m_verbosity > 5){
-    pout() << "driver::read_checkpoint_realm_loads(...)" << endl;
+    pout() << "driver::read_checkpoint_Realm_loads(...)" << endl;
   }
 
   // HDF identifier.
-  const std::string str = a_realm + "_loads";
+  const std::string str = a_Realm + "_loads";
 
   // Read into an FArrayBox.
   FArrayBox fab;

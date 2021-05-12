@@ -132,7 +132,7 @@ protected:
   /*!
     @brief
   */
-  std::string m_realm;
+  std::string m_Realm;
 
   /*!
     @brief Geometry generation method
@@ -590,9 +590,9 @@ protected:
   void write_checkpoint_tags(HDF5Handle& a_handle, const int a_level);
 
   /*!
-    @brief Write checkpoint realm loads
+    @brief Write checkpoint Realm loads
   */
-  void write_checkpoint_realm_loads(HDF5Handle& a_handle, const int a_level);
+  void write_checkpoint_Realm_loads(HDF5Handle& a_handle, const int a_level);
 
   /*!
     @brief Write checkpoint data
@@ -600,9 +600,9 @@ protected:
   void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
 
   /*!
-    @brief Read realm loads. 
+    @brief Read Realm loads. 
   */
-  void read_checkpoint_realm_loads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_realm, const int a_level);
+  void read_checkpoint_Realm_loads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_Realm, const int a_level);
 
   /*!
     @brief Write vector data to a HDF5Header. This writes up to a_step

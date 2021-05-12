@@ -37,7 +37,7 @@ void cdr_tga::advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_o
     // Create a source term = S = 0.0;
     const int ncomp = 1;
     EBAMRCellData src;
-    m_amr->allocate(src, m_realm, m_phase, ncomp);
+    m_amr->allocate(src, m_Realm, m_phase, ncomp);
     data_ops::set_value(src, 0.0);
 
     // Call version with source term
@@ -69,7 +69,7 @@ void cdr_tga::advance_euler(EBAMRCellData&       a_new_state,
     // Set convergence metric. Make zero = 0 and m_scratch = phi^k + dt*S^k. Then
     // compute the residue L(zero) - m_scratch which sets the convergence metric. 
     EBAMRCellData zero;
-    m_amr->allocate(zero, m_realm, m_phase, ncomp);
+    m_amr->allocate(zero, m_Realm, m_phase, ncomp);
     data_ops::set_value(zero, 0.0);
     data_ops::copy(m_scratch, a_old_state);
     data_ops::incr(m_scratch, a_source, a_dt);
@@ -117,7 +117,7 @@ void cdr_tga::advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old
     // Dummy source term
     const int ncomp = 1;
     EBAMRCellData src;
-    m_amr->allocate(src, m_realm, m_phase, ncomp);
+    m_amr->allocate(src, m_Realm, m_phase, ncomp);
     data_ops::set_value(src, 0.0);
 
     // Call other version
@@ -407,19 +407,19 @@ void cdr_tga::setup_operator_factory(){
 
   const int finest_level                 = m_amr->getFinestLevel();
   const int ghost                        = m_amr->getNumberOfGhostCells();
-  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_Realm);
   const Vector<int>& refinement_ratios   = m_amr->getRefinementRatios();
   const Vector<ProblemDomain>& domains   = m_amr->getDomains();
   const Vector<Real>& dx                 = m_amr->getDx();
   const RealVect& origin                 = m_amr->getProbLo();
-  const Vector<EBISLayout>& ebisl        = m_amr->getEBISLayout(m_realm, m_phase);
+  const Vector<EBISLayout>& ebisl        = m_amr->getEBISLayout(m_Realm, m_phase);
   
-  const Vector<RefCountedPtr<EBQuadCFInterp> >& quadcfi  = m_amr->getEBQuadCFInterp(m_realm, m_phase);
-  const Vector<RefCountedPtr<EBFluxRegister> >& fastFR   = m_amr->getFluxRegister(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBQuadCFInterp> >& quadcfi  = m_amr->getEBQuadCFInterp(m_Realm, m_phase);
+  const Vector<RefCountedPtr<EBFluxRegister> >& fastFR   = m_amr->getFluxRegister(m_Realm, m_phase);
 
   Vector<EBLevelGrid> levelgrids;
   for (int lvl = 0; lvl <= finest_level; lvl++){ 
-    levelgrids.push_back(*(m_amr->getEBLevelGrid(m_realm, m_phase)[lvl])); // EBConductivityOp does not not refcounted operators
+    levelgrids.push_back(*(m_amr->getEBLevelGrid(m_Realm, m_phase)[lvl])); // EBConductivityOp does not not refcounted operators
   }
 
   // Appropriate coefficients. These don't matter right now. 
@@ -564,7 +564,7 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, EBAMRCellData& a_state, const 
   const int ncomp = 1;
 
   // Fill ghost cells
-  m_amr->interpGhostPwl(a_state, m_realm, m_phase);
+  m_amr->interpGhostPwl(a_state, m_Realm, m_phase);
 
   if(m_mobile || m_diffusive){
 
@@ -577,7 +577,7 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, EBAMRCellData& a_state, const 
 
     // Compute advection flux. This is mostly the same as compute_divF
     if(m_mobile){
-      m_amr->interpGhostPwl(m_velo_cell, m_realm, m_phase);
+      m_amr->interpGhostPwl(m_velo_cell, m_Realm, m_phase);
       
       this->average_velo_to_faces(); // Update m_velo_face from m_velo_cell
       this->advect_to_faces(m_face_states, a_state, a_extrap_dt); // Advect to faces
@@ -619,8 +619,8 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, EBAMRCellData& a_state, const 
   if(m_mobile){
 
     // Fill ghost cells
-    m_amr->interpGhostPwl(a_state,     m_realm, m_phase);
-    m_amr->interpGhostPwl(m_velo_cell, m_realm, m_phase);
+    m_amr->interpGhostPwl(a_state,     m_Realm, m_phase);
+    m_amr->interpGhostPwl(m_velo_cell, m_Realm, m_phase);
 
     if(m_redist_mass_weighted){
       this->reset_redist_weights(a_state);
@@ -661,7 +661,7 @@ void cdr_tga::compute_divD(EBAMRCellData& a_divD, EBAMRCellData& a_state, const 
     const int ncomp = 1;
 
     // Fill ghost cells
-    m_amr->interpGhostPwl(a_state, m_realm, m_phase);
+    m_amr->interpGhostPwl(a_state, m_Realm, m_phase);
 
     if(m_redist_mass_weighted){
       this->reset_redist_weights(a_state);
@@ -678,8 +678,8 @@ void cdr_tga::compute_divD(EBAMRCellData& a_divD, EBAMRCellData& a_state, const 
     }
     this->compute_divG(a_divD, m_scratchFluxOne, *ebflux); // General face-centered flux to divergence magic.
 
-    m_amr->averageDown(a_divD, m_realm, m_phase);
-    m_amr->interpGhost(a_divD, m_realm, m_phase);
+    m_amr->averageDown(a_divD, m_Realm, m_phase);
+    m_amr->interpGhost(a_divD, m_Realm, m_phase);
   }
   else{
     data_ops::set_value(a_divD, 0.0);

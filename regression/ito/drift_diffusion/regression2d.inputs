@@ -135,7 +135,7 @@ rod_dielectric.sphere.radius             = 0.15          # Radius
 # from a Gaussian distribution. 
 # ====================================================================================================
 brownian_walker.verbosity      = -1      # Verbosity
-brownian_walker.realm          = primal  # Realm
+brownian_walker.Realm          = primal  # Realm
 brownian_walker.diffusion      = true    # Turn on/off diffusion
 brownian_walker.advection      = true    # Turn on/off advection
 brownian_walker.blob_amplitude = 1.0     # Blob amplitude

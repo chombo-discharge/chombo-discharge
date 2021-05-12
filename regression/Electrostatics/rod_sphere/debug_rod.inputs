@@ -121,7 +121,7 @@ rod_dielectric.sphere.radius             = 0.2           # Radius
 # FIELD_STEPPER CLASS OPTIONS
 # ====================================================================================================
 FieldStepper.verbosity    = -1              # Verbosity
-FieldStepper.realm        = primal          # Primal realm	
+FieldStepper.Realm        = primal          # Primal Realm	
 FieldStepper.LoadBalancing = false           # Load balance or not
 FieldStepper.BoxSorting  = morton          # Box sorting algorithm
 FieldStepper.init_rho     = 0E-10           # Space charge density

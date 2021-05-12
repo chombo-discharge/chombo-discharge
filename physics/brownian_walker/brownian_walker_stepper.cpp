@@ -21,7 +21,7 @@ brownian_walker_stepper::brownian_walker_stepper(){
 
   m_phase = phase::gas;
 
-  pp.get("realm",          m_realm);
+  pp.get("Realm",          m_Realm);
   pp.get("diffco",         m_diffco);
   pp.get("omega",          m_omega);
   pp.get("verbosity",      m_verbosity);
@@ -91,19 +91,19 @@ void brownian_walker_stepper::set_velocity(){
   }
 
   EBAMRCellData& vel = m_solver->get_velo_func();
-  m_amr->averageDown(vel, m_realm, m_phase);
-  m_amr->interpGhost(vel, m_realm, m_phase);
+  m_amr->averageDown(vel, m_Realm, m_phase);
+  m_amr->interpGhost(vel, m_Realm, m_phase);
 }
 
-bool brownian_walker_stepper::LoadBalancing_realm(const std::string a_realm) const {
-  CH_TIME("brownian_walker_stepper::LoadBalancing_realm");
+bool brownian_walker_stepper::LoadBalancing_Realm(const std::string a_Realm) const {
+  CH_TIME("brownian_walker_stepper::LoadBalancing_Realm");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::LoadBalancing_realm" << endl;
+    pout() << "brownian_walker_stepper::LoadBalancing_Realm" << endl;
   }
 
   bool ret = false;
 
-  if(m_LoadBalancing && a_realm == m_realm){
+  if(m_LoadBalancing && a_Realm == m_Realm){
     ret = true;
   }
 
@@ -112,7 +112,7 @@ bool brownian_walker_stepper::LoadBalancing_realm(const std::string a_realm) con
 
 void brownian_walker_stepper::LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
 						 Vector<Vector<Box> >&            a_boxes,
-						 const std::string                a_realm,
+						 const std::string                a_Realm,
 						 const Vector<DisjointBoxLayout>& a_grids,
 						 const int                        a_lmin,
 						 const int                        a_finest_level){
@@ -121,7 +121,7 @@ void brownian_walker_stepper::LoadBalancing_boxes(Vector<Vector<int> >&         
     pout() << "brownian_walker_stepper::LoadBalancing_boxes" << endl;
   }
   
-  if(m_LoadBalancing && a_realm == m_realm){
+  if(m_LoadBalancing && a_Realm == m_Realm){
     particle_container<ito_particle>& particles = m_solver->get_particles(ito_solver::which_container::bulk);
   
     particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finest_level);
@@ -166,7 +166,7 @@ void brownian_walker_stepper::set_velocity(const int a_level){
   }
 
   // TLDR: This code goes down to each cell on grid level a_level and sets the velocity to omega*r
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[a_level];
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box = dbl.get(dit());
 
@@ -191,7 +191,7 @@ void brownian_walker_stepper::set_velocity(const int a_level){
     const EBISBox& ebisbox = vel.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_Realm, m_phase)[a_level])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
 
       const VolIndex vof = vofit();
@@ -349,7 +349,7 @@ void brownian_walker_stepper::setup_solvers() {
   m_solver->set_species(m_species);
   m_solver->set_phase(m_phase);
   m_solver->set_computational_geometry(m_compgeom);
-  m_solver->set_realm(m_realm);
+  m_solver->set_Realm(m_Realm);
 }
 
 void brownian_walker_stepper::registerRealms() {
@@ -358,7 +358,7 @@ void brownian_walker_stepper::registerRealms() {
     pout() << "brownian_walker_stepper::registerRealms" << endl;
   }
 
-  m_amr->registerRealm(m_realm);
+  m_amr->registerRealm(m_Realm);
 }
 
 void brownian_walker_stepper::registerOperators() {
@@ -387,10 +387,10 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RealVect dx                     = m_amr->getDx()[lvl]*RealVect::Unit;
-    const DisjointBoxLayout& dbl          = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl          = m_amr->getGrids(m_Realm)[lvl];
     ParticleData<ito_particle>& particles = m_solver->get_particles(ito_solver::which_container::bulk)[lvl];
 
-    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_solver->get_phase())[lvl];
+    const EBISLayout& ebisl = m_amr->getEBISLayout(m_Realm, m_solver->get_phase())[lvl];
 
     if(m_solver->is_mobile() || m_solver->is_diffusive()){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

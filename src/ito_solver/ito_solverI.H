@@ -116,8 +116,8 @@ void ito_solver::deposit_particles(EBAMRCellData&               a_state,
   }
 
   // Average down and interpolate
-  m_amr->averageDown(a_state, m_realm, m_phase);
-  m_amr->interpGhost(a_state, m_realm, m_phase);
+  m_amr->averageDown(a_state, m_Realm, m_phase);
+  m_amr->interpGhost(a_state, m_Realm, m_phase);
 }
 
 template <class T>
@@ -170,17 +170,17 @@ void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->getDx()[lvl];
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     const ProblemDomain& dom     = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const RefCountedPtr<EBLevelGrid>& eblg = m_amr->getEBLevelGrid(m_realm, m_phase)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, m_phase)[lvl];
+    const RefCountedPtr<EBLevelGrid>& eblg = m_amr->getEBLevelGrid(m_Realm, m_phase)[lvl];
 
     const bool has_coar = (lvl > 0);
     const bool has_fine = (lvl < finest_level);
 
     // 1. If we have a coarser level whose cloud extends beneath this level, interpolate that result here first. 
     if(has_coar){
-      RefCountedPtr<EBMGInterp>& interp = m_amr->getEBMGInterp(m_realm, m_phase)[lvl];
+      RefCountedPtr<EBMGInterp>& interp = m_amr->getEBMGInterp(m_Realm, m_phase)[lvl];
       interp->pwcInterp(*a_state[lvl], *m_scratch[lvl-1], interv);
     }
 
@@ -194,7 +194,7 @@ void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a
     }
 
     // This code adds contributions from ghost cells into the valid region
-    const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_realm, m_phase)[lvl];
+    const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_Realm, m_phase)[lvl];
     LDaddOp<FArrayBox> addOp;
     LevelData<FArrayBox> aliasFAB;
     aliasEB(aliasFAB, *a_state[lvl]);
@@ -225,8 +225,8 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
 
   data_ops::set_value(a_state,    0.0);
 
-  //  const EBAMRBool& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
-  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
+  //  const EBAMRBool& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_Realm);
+  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_Realm);
   a_particles.copy_halo_particles(mask);
     
   const AMRParticles<T>& particles          = a_particles.get_particles();
@@ -235,9 +235,9 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->getDx()[lvl];
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     const ProblemDomain& dom     = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, m_phase)[lvl];
 
     const bool has_coar = (lvl > 0);
     const bool has_fine = (lvl < finest_level);
@@ -251,7 +251,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
     }
 
     // 2. Exchange ghost cells on this level. 
-    const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_realm, m_phase)[lvl];
+    const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_Realm, m_phase)[lvl];
     LDaddOp<FArrayBox> addOp;
     LevelData<FArrayBox> aliasFAB;
     aliasEB(aliasFAB, *a_state[lvl]);
@@ -260,7 +260,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
     // 3. Deposition into ghost cells across the fine boundary should end up on the coarse level. Add that
     //    mass to the coarse level right now. 
     if(has_coar) {
-      EBGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
+      EBGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_Realm, m_phase)[lvl]);
       ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
     }
 
@@ -269,7 +269,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
     //    that the mass ends up on the fine level. 
     if(has_coar){
       const int refRat = m_amr->getRefinementRatios()[lvl-1];
-      EBGhostCloud& ghostcloud         = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
+      EBGhostCloud& ghostcloud         = *(m_amr->getGhostCloud(m_Realm, m_phase)[lvl]);
       BoxLayoutData<FArrayBox>& buffer = ghostcloud.getFiCoBuffer();
       const EBLevelGrid& eblgFiCo      = ghostcloud.getEblgFiCo();
       
@@ -317,7 +317,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&              
 
   data_ops::set_value(a_state,    0.0);
 
-  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
+  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_Realm);
 
   a_particles.copy_halo_particles(mask);
   a_particles.copy_non_halo_particles(mask);
@@ -328,9 +328,9 @@ void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&              
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->getDx()[lvl];
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     const ProblemDomain& dom     = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, m_phase)[lvl];
 
     const bool has_coar = (lvl > 0);
     const bool has_fine = (lvl < finest_level);
@@ -345,12 +345,12 @@ void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&              
 
     // 2. Deposition into ghost cells across the fine boundary should end up on the coarse level. 
     if(has_coar) {
-      EBGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
+      EBGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_Realm, m_phase)[lvl]);
       ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
     }
 
     // 3. Exchange ghost cells on this level. 
-    const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_realm, m_phase)[lvl];
+    const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_Realm, m_phase)[lvl];
     LDaddOp<FArrayBox> addOp;
     LevelData<FArrayBox> aliasFAB;
     aliasEB(aliasFAB, *a_state[lvl]);

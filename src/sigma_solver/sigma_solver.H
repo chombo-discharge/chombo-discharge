@@ -30,14 +30,14 @@ public:
   ~sigma_solver();
 
   /*!
-    @brief Get the realm
+    @brief Get the Realm
   */
-  const std::string get_realm() const;
+  const std::string get_Realm() const;
 
   /*!
-    @brief Set the realm
+    @brief Set the Realm
   */
-  virtual void set_realm(const std::string a_realm); 
+  virtual void set_Realm(const std::string a_Realm); 
 
   /*!
     @brief Allocate internal storage
@@ -160,7 +160,7 @@ protected:
   /*!
     @brief Realm
   */
-  std::string m_realm;
+  std::string m_Realm;
 
   /*!
     @brief Index spaces

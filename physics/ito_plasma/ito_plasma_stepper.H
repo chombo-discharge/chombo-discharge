@@ -70,7 +70,7 @@ namespace physics {
       void write_J(EBAMRCellData& a_output, int& a_icomp) const;
       void write_num_particles_per_patch(EBAMRCellData& a_output, int& a_icomp) const;
       int  get_num_plot_vars() const override;
-      Vector<long int> get_checkpoint_loads(const std::string a_realm, const int a_level) const override;
+      Vector<long int> get_checkpoint_loads(const std::string a_Realm, const int a_level) const override;
   
       // Advance routines
       virtual Real advance(const Real a_dt) = 0;
@@ -87,10 +87,10 @@ namespace physics {
       virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
       virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
       void post_regrid() override;
-      bool LoadBalancing_realm(const std::string a_realm) const override;
+      bool LoadBalancing_Realm(const std::string a_Realm) const override;
       void LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
 			      Vector<Vector<Box> >&            a_boxes,
-			      const std::string                a_realm,
+			      const std::string                a_Realm,
 			      const Vector<DisjointBoxLayout>& a_grids,
 			      const int                        a_lmin,
 			      const int                        a_finest_level) override;
@@ -219,7 +219,7 @@ namespace physics {
       // Routines for computing diffusion coefficients in the LEA
       void compute_ito_diffusion_lea();
 
-      // Routines for computing the number of particles per cell. This is done on the particle realm. 
+      // Routines for computing the number of particles per cell. This is done on the particle Realm. 
       void compute_reactive_particles_per_cell(EBAMRCellData& a_ppc);
       void compute_reactive_particles_per_cell(LevelData<EBCellFAB>& a_ppc, const int a_level);
       void compute_reactive_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox);
@@ -324,7 +324,7 @@ namespace physics {
       void sort_domain_photons_by_cell();
       void sort_domain_photons_by_patch();
 
-      // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle realm.
+      // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle Realm.
       void compute_EdotJ_source(const Real a_dt);
       void compute_EdotJ_source();
       void compute_EdotJ_source_nwo();
@@ -333,8 +333,8 @@ namespace physics {
 
     protected:
 
-      std::string m_fluid_realm;     // Realm for Poisson and sigma solver. Defaults to realm::primal
-      std::string m_particle_realm;  // Realm for particles. Defaults to realm::primal
+      std::string m_fluid_Realm;     // Realm for Poisson and sigma solver. Defaults to Realm::Primal
+      std::string m_particle_Realm;  // Realm for particles. Defaults to Realm::Primal
       std::string m_name;
       phase::which_phase m_phase;
 
@@ -367,25 +367,25 @@ namespace physics {
       Real m_min_dt;
       Real m_max_dt;
 
-      // Storage for current density. This is defined over the particle realm. 
+      // Storage for current density. This is defined over the particle Realm. 
       EBAMRCellData m_J;
-      mutable EBAMRCellData m_fluid_scratch1;     // Scratch storage on the fluid realm with 1 component
-      mutable EBAMRCellData m_fluid_scratchD;     // Scratch storage on the fluid realm with SpaceDim components
+      mutable EBAMRCellData m_fluid_scratch1;     // Scratch storage on the fluid Realm with 1 component
+      mutable EBAMRCellData m_fluid_scratchD;     // Scratch storage on the fluid Realm with SpaceDim components
 
-      mutable EBAMRCellData m_particle_scratch1;  // Scratch storage on the particle realm with 1 component
-      mutable EBAMRCellData m_particle_scratchD;  // Scratch storage on the particle realm with SpaceDim components
+      mutable EBAMRCellData m_particle_scratch1;  // Scratch storage on the particle Realm with 1 component
+      mutable EBAMRCellData m_particle_scratchD;  // Scratch storage on the particle Realm with SpaceDim components
 
-      mutable Vector<EBAMRCellData> m_fscratch1; // Scratch storage with a single component for all species. On the fluid realm. 
-      mutable Vector<EBAMRCellData> m_fscratch2; // Scratch storage with a single component for all species. On the fluid realm.
+      mutable Vector<EBAMRCellData> m_fscratch1; // Scratch storage with a single component for all species. On the fluid Realm. 
+      mutable Vector<EBAMRCellData> m_fscratch2; // Scratch storage with a single component for all species. On the fluid Realm.
 
       EBAMRCellData m_particle_ppc; // For holding the number of particles per cell for all species. Contains compoents = number of species
-      EBAMRCellData m_particle_ypc; // For holding the number of generated photons per cell on the particle realm.
-      EBAMRCellData m_particle_eps; // For holding the mean energy on the particle realm
-      EBAMRCellData m_particle_old; // For holding the mean energy on the particle realm
+      EBAMRCellData m_particle_ypc; // For holding the number of generated photons per cell on the particle Realm.
+      EBAMRCellData m_particle_eps; // For holding the mean energy on the particle Realm
+      EBAMRCellData m_particle_old; // For holding the mean energy on the particle Realm
       
       EBAMRCellData m_fluid_ppc;    // For holding the number of particles per cell for all species. Contains compoents = number of species
-      EBAMRCellData m_fluid_ypc;    // For holding the number of generated photons per cell on the fluid realm.
-      EBAMRCellData m_fluid_eps;    // For holding the mean energy on the particle realm
+      EBAMRCellData m_fluid_ypc;    // For holding the number of generated photons per cell on the fluid Realm.
+      EBAMRCellData m_fluid_eps;    // For holding the mean energy on the particle Realm
 
       // Storage for the electric field on 
       EBAMRCellData m_fluid_E;
@@ -408,10 +408,10 @@ namespace physics {
       void print_timer_tail();
 
 
-      // Do load balancing of the particle realm. 
-      void LoadBalancing_particle_realm(Vector<Vector<int> >&            a_procs,
+      // Do load balancing of the particle Realm. 
+      void LoadBalancing_particle_Realm(Vector<Vector<int> >&            a_procs,
 				       Vector<Vector<Box> >&            a_boxes,
-				       const std::string                a_realm,
+				       const std::string                a_Realm,
 				       const Vector<DisjointBoxLayout>& a_grids,
 				       const int                        a_lmin,
 				       const int                        a_finest_level);

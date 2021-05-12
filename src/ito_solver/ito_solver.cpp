@@ -43,15 +43,15 @@ std::string ito_solver::get_name(){
   return m_name;
 }
 
-const std::string ito_solver::get_realm() const{
-  return m_realm;
+const std::string ito_solver::get_Realm() const{
+  return m_Realm;
 }
 
-void ito_solver::set_realm(const std::string a_realm){
-  m_realm = a_realm;
+void ito_solver::set_Realm(const std::string a_Realm){
+  m_Realm = a_Realm;
 
-  // This is for later, in case we want to move averaging/interpolating onto a different realm. 
-  m_fluid_realm = m_realm;
+  // This is for later, in case we want to move averaging/interpolating onto a different Realm. 
+  m_fluid_Realm = m_Realm;
 }
 
 RefCountedPtr<ito_species>& ito_solver::get_species(){
@@ -450,15 +450,15 @@ void ito_solver::registerOperators(){
     MayDay::Abort("cdr_solver::registerOperators - need to set AmrMesh!");
   }
   else{
-    m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
-    m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
-    m_amr->registerOperator(s_eb_mg_interp,    m_realm, m_phase);
-    m_amr->registerOperator(s_eb_copier,       m_realm, m_phase);
-    m_amr->registerOperator(s_eb_ghostcloud,   m_realm, m_phase);
-    m_amr->registerOperator(s_eb_NonConservativeDivergenceStencil,  m_realm, m_phase);
+    m_amr->registerOperator(s_eb_coar_ave,     m_Realm, m_phase);
+    m_amr->registerOperator(s_eb_fill_patch,   m_Realm, m_phase);
+    m_amr->registerOperator(s_eb_mg_interp,    m_Realm, m_phase);
+    m_amr->registerOperator(s_eb_copier,       m_Realm, m_phase);
+    m_amr->registerOperator(s_eb_ghostcloud,   m_Realm, m_phase);
+    m_amr->registerOperator(s_noncons_div,  m_Realm, m_phase);
     
-    if(m_redistribute)    m_amr->registerOperator(s_eb_redist,  m_realm, m_phase);
-    if(m_halo_buffer > 0) m_amr->registerMask(s_particle_halo, m_halo_buffer, m_realm);
+    if(m_redistribute)    m_amr->registerOperator(s_eb_redist,  m_Realm, m_phase);
+    if(m_halo_buffer > 0) m_amr->registerMask(s_particle_halo, m_halo_buffer, m_Realm);
   }
 }
 
@@ -581,8 +581,8 @@ void ito_solver::remove_covered_particles_if(particle_container<ito_particle>& a
   const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_compgeom->get_gas_if() : m_compgeom->get_sol_if();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, m_phase)[lvl];
     const Real dx                = m_amr->getDx()[lvl];
     const Real tol               = a_tol*dx;
 
@@ -612,8 +612,8 @@ void ito_solver::transfer_covered_particles_if(particle_container<ito_particle>&
   const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_compgeom->get_gas_if() : m_compgeom->get_sol_if();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, m_phase)[lvl];
     const Real dx                = m_amr->getDx()[lvl];
     const Real tol               = a_tol*dx;
 
@@ -645,8 +645,8 @@ void ito_solver::remove_covered_particles_discrete(particle_container<ito_partic
   const RealVect prob_lo = m_amr->getProbLo();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, m_phase)[lvl];
     const Real dx                = m_amr->getDx()[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -697,8 +697,8 @@ void ito_solver::remove_covered_particles_voxels(particle_container<ito_particle
   const RealVect prob_lo = m_amr->getProbLo();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, m_phase)[lvl];
     const Real dx                = m_amr->getDx()[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -829,10 +829,10 @@ void ito_solver::intersect_particles_if(particle_container<ito_particle>& a_part
   const RefCountedPtr<BaseIF>& impfunc = m_amr->getBaseImplicitFunction(m_phase);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    for (DataIterator dit = m_amr->getGrids(m_realm)[lvl]; dit.ok(); ++dit){
+    for (DataIterator dit = m_amr->getGrids(m_Realm)[lvl]; dit.ok(); ++dit){
 
       const Real     dx      = m_amr->getDx()[lvl];
-      const EBISBox& ebisbox = m_amr->getEBISLayout(m_realm, m_phase)[lvl][dit()];
+      const EBISBox& ebisbox = m_amr->getEBISLayout(m_Realm, m_phase)[lvl][dit()];
 
       List<ito_particle>& particles    = a_particles[lvl][dit()].listItems();
       List<ito_particle>& ebParticles  = a_eb_particles[lvl][dit()].listItems();
@@ -934,7 +934,7 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   }
 
   // Particle data regrids
-  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_Realm);
   const Vector<ProblemDomain>& domains   = m_amr->getDomains();
   const Vector<Real>& dx                 = m_amr->getDx();
   const Vector<int>& ref_rat             = m_amr->getRefinementRatios();
@@ -965,15 +965,15 @@ void ito_solver::allocate_internals(){
   
   const int ncomp = 1;
 
-  m_amr->allocate(m_state,         m_realm, m_phase, ncomp);
-  m_amr->allocate(m_scratch,       m_realm, m_phase, ncomp);
-  m_amr->allocate(m_mobility_func, m_realm, m_phase, ncomp);
-  m_amr->allocate(m_depositionNC,  m_realm, m_phase, ncomp);
-  m_amr->allocate(m_massDiff,      m_realm, m_phase, ncomp);
+  m_amr->allocate(m_state,         m_Realm, m_phase, ncomp);
+  m_amr->allocate(m_scratch,       m_Realm, m_phase, ncomp);
+  m_amr->allocate(m_mobility_func, m_Realm, m_phase, ncomp);
+  m_amr->allocate(m_depositionNC,  m_Realm, m_phase, ncomp);
+  m_amr->allocate(m_massDiff,      m_Realm, m_phase, ncomp);
 
   // Only allocate memory for velocity if we actually have a mobile solver
   if(m_mobile){
-    m_amr->allocate(m_velo_func, m_realm, m_phase, SpaceDim);
+    m_amr->allocate(m_velo_func, m_Realm, m_phase, SpaceDim);
   }
   else{ 
     m_amr->allocatePointer(m_velo_func);
@@ -981,7 +981,7 @@ void ito_solver::allocate_internals(){
 
   // Only allocate memory if we actually have a diffusion solver
   if(m_diffusive){
-    m_amr->allocate(m_diffco_cell, m_realm, m_phase, 1);
+    m_amr->allocate(m_diffco_cell, m_Realm, m_phase, 1);
   }
   else{
     m_amr->allocatePointer(m_diffco_cell);
@@ -995,7 +995,7 @@ void ito_solver::allocate_internals(){
   m_particle_containers.emplace(which_container::scratch, particle_container<ito_particle>());
 
   for (auto& container : m_particle_containers){
-    m_amr->allocate(container.second, m_pvr_buffer, m_realm);
+    m_amr->allocate(container.second, m_pvr_buffer, m_Realm);
   }
 }
 
@@ -1026,14 +1026,14 @@ void ito_solver::write_checkpoint_level_particles(HDF5Handle& a_handle, const in
   const int halo        = 0;
   const std::string str = m_name + "_particles";
 
-  particle_container<simple_ito_particle> realmParticles;
-  m_amr->allocate(realmParticles,  m_pvr_buffer, m_realm);
+  particle_container<simple_ito_particle> RealmParticles;
+  m_amr->allocate(RealmParticles,  m_pvr_buffer, m_Realm);
 
   const particle_container<ito_particle>& myParticles = this->get_particles(which_container::bulk);
 
   // Make ito_particle into simple_ito_particle. This saves a shitload of disk space. 
-  for (DataIterator dit(m_amr->getGrids(m_realm)[a_level]); dit.ok(); ++dit){
-    List<simple_ito_particle>& other_particles = (realmParticles[a_level])[dit()].listItems();
+  for (DataIterator dit(m_amr->getGrids(m_Realm)[a_level]); dit.ok(); ++dit){
+    List<simple_ito_particle>& other_particles = (RealmParticles[a_level])[dit()].listItems();
 
     other_particles.clear();
       
@@ -1042,7 +1042,7 @@ void ito_solver::write_checkpoint_level_particles(HDF5Handle& a_handle, const in
     }
   }
 
-  writeParticlesToHDF(a_handle, realmParticles[a_level], str);
+  writeParticlesToHDF(a_handle, RealmParticles[a_level], str);
 }
 
 void ito_solver::write_checkpoint_level_fluid(HDF5Handle& a_handle, const int a_level) const {
@@ -1053,8 +1053,8 @@ void ito_solver::write_checkpoint_level_fluid(HDF5Handle& a_handle, const int a_
 
   const std::string str = m_name + "_particles";
 
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_level];
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, m_phase)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[a_level];
     
   const int comp     = 0;
   const int ncomp    = 1;
@@ -1096,7 +1096,7 @@ void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   }
 
   // Read state vector
-  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->getGrids(m_Realm)[a_level], Interval(0,0), false);
 
   // Read particles.
   const std::string str = m_name + "_particles";
@@ -1104,13 +1104,13 @@ void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
 
     // Get simple_ito_particles from data file
     Vector<RefCountedPtr<ParticleData<simple_ito_particle> > > simpleParticles;
-    m_amr->allocate(simpleParticles, m_realm);
+    m_amr->allocate(simpleParticles, m_Realm);
     readParticlesFromHDF(a_handle, *simpleParticles[a_level], str);
 
     particle_container<ito_particle>& particles = m_particle_containers.at(which_container::bulk);
 
     // Make simple_ito_particles into ito_ particles
-    for (DataIterator dit(m_amr->getGrids(m_realm)[a_level]); dit.ok(); ++dit){
+    for (DataIterator dit(m_amr->getGrids(m_Realm)[a_level]); dit.ok(); ++dit){
       List<ito_particle>& particlesDit = particles[a_level][dit()].listItems();
       
       for (ListIterator<simple_ito_particle> lit((*simpleParticles[a_level])[dit()].listItems()); lit.ok(); ++lit){
@@ -1122,8 +1122,8 @@ void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
 
     // Read particles per cell
     EBAMRCellData ppc;
-    m_amr->allocate(ppc, m_realm, m_phase, 1, 0);
-    read<EBCellFAB>(a_handle, *ppc[a_level], str, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
+    m_amr->allocate(ppc, m_Realm, m_phase, 1, 0);
+    read<EBCellFAB>(a_handle, *ppc[a_level], str, m_amr->getGrids(m_Realm)[a_level], Interval(0,0), false);
     
     // Restart particles
     this->restart_particles(*ppc[a_level], a_level);
@@ -1140,13 +1140,13 @@ void ito_solver::restart_particles(LevelData<EBCellFAB>& a_num_particles, const 
   const Real dx          = m_amr->getDx()[a_level];
   const RealVect prob_lo = m_amr->getProbLo();
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[a_level];
 
   particle_container<ito_particle>& particles = m_particle_containers.at(which_container::bulk);
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box           = dbl.get(dit());
-    const EBISBox& ebisbox   = m_amr->getEBISLayout(m_realm, m_phase)[a_level][dit()];
+    const EBISBox& ebisbox   = m_amr->getEBISLayout(m_Realm, m_phase)[a_level][dit()];
     const BaseFab<Real>& ppc = a_num_particles[dit()].getSingleValuedFAB();
 
     // Clear just to be safe
@@ -1188,7 +1188,7 @@ void ito_solver::restart_particles(LevelData<EBCellFAB>& a_num_particles, const 
     }
 
     // Do irregular cells
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_Realm, m_phase)[a_level])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const IntVect iv    = vof.gridIndex();
@@ -1240,7 +1240,7 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     const Interval dst(a_comp, a_comp);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      if(m_realm == a_output.get_realm()){
+      if(m_Realm == a_output.get_Realm()){
 	m_state[lvl]->localCopyTo(src, *a_output[lvl], dst);
       }
       else{
@@ -1257,7 +1257,7 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     const Interval dst(a_comp, a_comp);
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      if(m_realm == a_output.get_realm()){
+      if(m_Realm == a_output.get_Realm()){
 	m_diffco_cell[lvl]->localCopyTo(src, *a_output[lvl], dst);
       }
       else{
@@ -1275,7 +1275,7 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     const Interval dst(a_comp, a_comp + ncomp-1);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      if(m_realm == a_output.get_realm()){
+      if(m_Realm == a_output.get_Realm()){
 	m_velo_func[lvl]->localCopyTo(src, *a_output[lvl], dst);
       }
       else{
@@ -1332,19 +1332,19 @@ void ito_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
 
   // Copy data onto scratch
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, ncomp);
+  m_amr->allocate(scratch, m_Realm, m_phase, ncomp);
   data_ops::copy(scratch, a_data);
 
   // Interp if we should
   if(a_interp){
-    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
+    m_amr->interpToCentroids(scratch, m_Realm, phase::gas);
   }
 
-  m_amr->averageDown(scratch, m_realm, m_phase);
-  m_amr->interpGhost(scratch, m_realm, m_phase);
+  m_amr->averageDown(scratch, m_Realm, m_phase);
+  m_amr->interpGhost(scratch, m_Realm, m_phase);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    if(m_realm == a_output.get_realm()){
+    if(m_Realm == a_output.get_Realm()){
       scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
     }
     else{
@@ -1364,7 +1364,7 @@ void ito_solver::set_mass_to_conductivity(particle_container<ito_particle>& a_pa
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
 
@@ -1384,7 +1384,7 @@ void ito_solver::unset_mass_to_conductivity(particle_container<ito_particle>& a_
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
 
@@ -1403,7 +1403,7 @@ void ito_solver::set_mass_to_diffusivity(particle_container<ito_particle>& a_par
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
 
@@ -1423,7 +1423,7 @@ void ito_solver::unset_mass_to_diffusivity(particle_container<ito_particle>& a_p
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
 
@@ -1442,7 +1442,7 @@ void ito_solver::set_mass_to_energy(particle_container<ito_particle>& a_particle
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
 
@@ -1462,7 +1462,7 @@ void ito_solver::unset_mass_to_energy(particle_container<ito_particle>& a_partic
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
 
@@ -1573,7 +1573,7 @@ void ito_solver::compute_average_mobility(EBAMRCellData& a_state, particle_conta
   data_ops::set_value(a_state, 0.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const BinFab<ito_particle>& particles = a_particles.get_cell_particles(lvl, dit());
@@ -1615,7 +1615,7 @@ void ito_solver::compute_average_diffusion(EBAMRCellData& a_state, particle_cont
   data_ops::set_value(a_state, 0.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const BinFab<ito_particle>& particles = a_particles.get_cell_particles(lvl, dit());
@@ -1657,7 +1657,7 @@ void ito_solver::compute_average_energy(EBAMRCellData& a_state, particle_contain
   data_ops::set_value(a_state, 0.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const BinFab<ito_particle>& particles = a_particles.get_cell_particles(lvl, dit());
@@ -1712,10 +1712,10 @@ void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAM
     pout() << m_name + "::deposit_nonConservative" << endl;
   }
 
-  const std::string cur_realm = a_depositionNC.get_realm();
+  const std::string cur_Realm = a_depositionNC.get_Realm();
 
   if(m_blend_conservation){
-    IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(cur_realm, m_phase);
+    IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(cur_Realm, m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else{
@@ -1729,16 +1729,16 @@ void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mas
     pout() << m_name + "::deposit_hybrid" << endl;
   }
 
-  const std::string cur_realm = a_depositionH.get_realm();
+  const std::string cur_Realm = a_depositionH.get_Realm();
 
   const int comp  = 0;
   const int ncomp = 1;
 
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(cur_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(cur_Realm)[lvl];
     const ProblemDomain& domain  = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(cur_realm, m_phase)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(cur_Realm, m_phase)[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       EBCellFAB& divH               = (*a_depositionH[lvl])[dit()];  // On input, this contains kappa*depositionWeights
@@ -1746,7 +1746,7 @@ void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mas
       const BaseIVFAB<Real>& divNC  = (*a_depositionNC[lvl])[dit()]; 
       const EBISBox& ebisbox        = ebisl[dit()];
 
-      VoFIterator& vofit = (*m_amr->getVofIterator(cur_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(cur_Realm, m_phase)[lvl])[dit()];
       for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real kappa    = ebisbox.volFrac(vof);
@@ -1770,7 +1770,7 @@ void ito_solver::increment_redist(const EBAMRIVData& a_mass_diff){
     pout() << m_name + "::increment_redist" << endl;
   }
 
-  const std::string cur_realm = a_mass_diff.get_realm();
+  const std::string cur_Realm = a_mass_diff.get_Realm();
 
   const int comp  = 0;
   const int ncomp = 1;
@@ -1778,9 +1778,9 @@ void ito_solver::increment_redist(const EBAMRIVData& a_mass_diff){
   const Interval interv(comp, comp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(cur_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(cur_Realm)[lvl];
     
-    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(cur_realm, m_phase)[lvl]);
+    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(cur_Realm, m_phase)[lvl]);
     level_redist.setToZero();
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1795,7 +1795,7 @@ void ito_solver::level_redistribution(EBAMRCellData& a_state){
     pout() << m_name + "::level_redistribution" << endl;
   }
 
-  const std::string cur_realm = a_state.get_realm();
+  const std::string cur_Realm = a_state.get_Realm();
 
   const int comp  = 0;
   const int ncomp = 1;
@@ -1803,7 +1803,7 @@ void ito_solver::level_redistribution(EBAMRCellData& a_state){
   const Interval interv(comp, comp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(cur_realm, m_phase)[lvl]);
+    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(cur_Realm, m_phase)[lvl]);
     level_redist.redistribute(*a_state[lvl], interv);
     level_redist.setToZero();
   }
@@ -1815,7 +1815,7 @@ void ito_solver::coarse_fine_increment(const EBAMRIVData& a_mass_diff){
     pout() << m_name + "::coarse_fine_increment" << endl;
   }
 
-  const std::string cur_realm = a_mass_diff.get_realm();
+  const std::string cur_Realm = a_mass_diff.get_Realm();
 
   const int comp  = 0;
   const int ncomp = 1;
@@ -1823,11 +1823,11 @@ void ito_solver::coarse_fine_increment(const EBAMRIVData& a_mass_diff){
   const Interval interv(0,0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(cur_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(cur_Realm)[lvl];
 
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(cur_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(cur_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(cur_realm, m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(cur_Realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(cur_Realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(cur_Realm, m_phase)[lvl];
 
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < 0;
@@ -1861,7 +1861,7 @@ void ito_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
     pout() << m_name + "::coarse_fine_redistribution" << endl;
   }
 
-  const std::string cur_realm = a_state.get_realm();
+  const std::string cur_Realm = a_state.get_Realm();
 
   const int comp         = 0;
   const int ncomp        = 1;
@@ -1874,9 +1874,9 @@ void ito_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
 
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(cur_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(cur_realm, m_phase)[lvl];
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(cur_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(cur_Realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(cur_Realm, m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(cur_Realm, m_phase)[lvl];
     if(has_coar){
       fine2coar_redist->redistribute(*a_state[lvl-1], interv);
       fine2coar_redist->setToZero();
@@ -2031,7 +2031,7 @@ void ito_solver::set_mobility(const Real a_mobility){
   particle_container<ito_particle>& particles = this->get_particles(which_container::bulk);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       List<ito_particle>& particlesDit = particles[lvl][dit()].listItems();
@@ -2051,7 +2051,7 @@ void ito_solver::interpolate_velocities(){
 
   if(m_mobile){
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	this->interpolate_velocities(lvl, dit());
@@ -2074,7 +2074,7 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
     const FArrayBox& vel_fab   = velo_func.getFArrayBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->getProbLo();
-    const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
+    const Box box              = m_amr->getGrids(m_Realm)[a_lvl][a_dit];
 
     List<ito_particle>& particleList = particles[a_lvl][a_dit].listItems();
 
@@ -2100,12 +2100,12 @@ void ito_solver::interpolate_mobilities(){
 
     if(m_mobility_interp == mobility_interp::velocity){
       data_ops::vector_length(m_scratch, m_velo_func); // Compute |E| (or whatever other function you've decided to provide).
-      m_amr->averageDown(m_scratch, m_realm, m_phase);
-      m_amr->interpGhost(m_scratch, m_realm, m_phase);
+      m_amr->averageDown(m_scratch, m_Realm, m_phase);
+      m_amr->interpGhost(m_scratch, m_Realm, m_phase);
     }
       
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
       
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	this->interpolate_mobilities(lvl, dit());
@@ -2144,7 +2144,7 @@ void ito_solver::interpolate_mobilities_mu(const int a_lvl, const DataIndex& a_d
     const FArrayBox& mob_fab   = mob_func.getFArrayBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->getProbLo();
-    const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
+    const Box box              = m_amr->getGrids(m_Realm)[a_lvl][a_dit];
 
     List<ito_particle>& particleList = particles[a_lvl][a_dit].listItems();
     EBParticleInterp meshInterp(box, ebisbox, dx, origin, m_irreg_ngp_interpolation);
@@ -2167,7 +2167,7 @@ void ito_solver::interpolate_mobilities_vel(const int a_lvl, const DataIndex& a_
     const FArrayBox& mob_fab   = mob_func.getFArrayBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->getProbLo();
-    const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
+    const Box box              = m_amr->getGrids(m_Realm)[a_lvl][a_dit];
 
     FArrayBox& scratch = (*m_scratch[a_lvl])[a_dit].getFArrayBox();
 
@@ -2201,7 +2201,7 @@ void ito_solver::update_mobilities(){
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       this->update_mobilities(lvl, dit());
@@ -2236,7 +2236,7 @@ void ito_solver::interpolate_diffusion(){
 
   if(m_diffusive){
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	this->interpolate_diffusion(lvl, dit());
@@ -2259,7 +2259,7 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
     const FArrayBox& dco_fab   = dco_cell.getFArrayBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->getProbLo();
-    const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
+    const Box box              = m_amr->getGrids(m_Realm)[a_lvl][a_dit];
 
     List<ito_particle>& particleList = particles[a_lvl][a_dit].listItems();
 
@@ -2275,7 +2275,7 @@ void ito_solver::update_diffusion(){
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       this->update_diffusion(lvl, dit());
@@ -2327,7 +2327,7 @@ Real ito_solver::compute_dt(const int a_lvl) const{
 
   Real dt = 1.E99;
   
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[a_lvl];
   const Real dx = m_amr->getDx()[a_lvl];
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -2427,7 +2427,7 @@ Real ito_solver::compute_min_dt(const Real a_maxCellsToMove, const int a_lvl) co
 
   Real dt = 1.E99;
   
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[a_lvl];
   const Real dx = m_amr->getDx()[a_lvl];
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -2591,7 +2591,7 @@ Real ito_solver::compute_drift_dt(const int a_lvl) const {
 
   Real dt = 1.E99;
   
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[a_lvl];
   const RealVect dx = m_amr->getDx()[a_lvl]*RealVect::Unit;
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -2713,7 +2713,7 @@ Real ito_solver::compute_diffusion_dt(const int a_lvl) const{
   
   Real dt = 1.E99;
   
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[a_lvl];
   const RealVect dx = m_amr->getDx()[a_lvl]*RealVect::Unit;
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -2846,7 +2846,7 @@ void ito_solver::make_superparticles(const which_container a_container, const in
   particle_container<ito_particle>& particles = this->get_particles(a_container);
   
   const int comp = 0;
-  //  const Box box  = m_amr->getGrids(m_realm)[a_level].get(a_dit);
+  //  const Box box  = m_amr->getGrids(m_Realm)[a_level].get(a_dit);
 
   const Box box  = particles.getGrids()[a_level][a_dit];
 

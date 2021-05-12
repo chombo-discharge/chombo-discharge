@@ -66,13 +66,13 @@ void EBAMRData<T>::push_back(RefCountedPtr<LevelData<T> >& a_levelData){
 }
 
 template <typename T>
-const std::string EBAMRData<T>::get_realm() const{
-  return m_realm;
+const std::string EBAMRData<T>::get_Realm() const{
+  return m_Realm;
 }
 
 template <typename T>
-void EBAMRData<T>::set_realm(const std::string a_realm){
-  m_realm = a_realm;
+void EBAMRData<T>::set_Realm(const std::string a_Realm){
+  m_Realm = a_Realm;
 }
 
 template <typename T>
@@ -82,7 +82,7 @@ void EBAMRData<T>::copy(const EBAMRData<T>& a_other){
     RefCountedPtr<LevelData<T> >& src       = m_data[lvl];
     const RefCountedPtr<LevelData<T> >& dst = a_other[lvl];
     if(!src.isNull() && !dst.isNull()){
-      if(m_realm == a_other.get_realm()){
+      if(m_Realm == a_other.get_Realm()){
 	dst->localCopyTo(*src);
       }
       else{
@@ -100,7 +100,7 @@ void EBAMRData<T>::copy(const Interval a_srcInterval, const EBAMRData<T>& a_othe
     const RefCountedPtr<LevelData<T> >& dst = a_other[lvl];
     
     if(!src.isNull() && !dst.isNull()){
-      if(m_realm == a_other.get_realm()){
+      if(m_Realm == a_other.get_Realm()){
 	dst->localCopyTo(a_srcInterval, *src, a_dstInterval);
       }
       else{

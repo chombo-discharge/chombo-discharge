@@ -66,26 +66,26 @@ void AmrMesh::alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data){
 }
 
 template <typename T>
-void AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_realm){
-  CH_TIME("AmrMesh::allocate(particle_data, realm)");
+void AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_Realm){
+  CH_TIME("AmrMesh::allocate(particle_data, Realm)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::allocate(particle_data, realm)" << endl;
+    pout() << "AmrMesh::allocate(particle_data, Realm)" << endl;
   }
 
-  if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::allocate(particle_data, realm) - could not find realm '" + a_realm + "'";
+  if(!this->queryRealm(a_Realm)) {
+    std::string str = "AmrMesh::allocate(particle_data, Realm) - could not find Realm '" + a_Realm + "'";
     MayDay::Abort(str.c_str());
   }
 
   if(m_maxBoxSize != m_blockingFactor){
-    MayDay::Abort("AmrMesh::allocate(particle_data, realm) - only constant box sizes supported for particle methods");
+    MayDay::Abort("AmrMesh::allocate(particle_data, Realm) - only constant box sizes supported for particle methods");
   }
   
   a_particles.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
-    const ProblemDomain& domain  = m_realms[a_realm]->getDomains()[lvl];
+    const DisjointBoxLayout& dbl = m_Realms[a_Realm]->getGrids()[lvl];
+    const ProblemDomain& domain  = m_Realms[a_Realm]->getDomains()[lvl];
     const Real dx = m_dx[lvl];
     a_particles[lvl] = RefCountedPtr<ParticleData<T> > (new ParticleData<T>(dbl,
 									    domain,
@@ -98,30 +98,30 @@ void AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, co
 template <typename T>
 void AmrMesh::allocate(particle_container<T>& a_container,
 		       const int              a_buffer,
-		       const std::string      a_realm){
-  CH_TIME("AmrMesh::allocate(container, buffer, realm)");
+		       const std::string      a_Realm){
+  CH_TIME("AmrMesh::allocate(container, buffer, Realm)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::allocate(container, buffer, realm)" << endl;
+    pout() << "AmrMesh::allocate(container, buffer, Realm)" << endl;
   }
   
-  if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::allocate(container, buffer, realm) - could not find realm '" + a_realm + "'";
+  if(!this->queryRealm(a_Realm)) {
+    std::string str = "AmrMesh::allocate(container, buffer, Realm) - could not find Realm '" + a_Realm + "'";
     MayDay::Abort(str.c_str());
   }
 
   if(m_maxBoxSize != m_blockingFactor){
-    MayDay::Abort("AmrMesh::allocate(container, buffer, realm) - only constant box sizes are supported for particle methods");
+    MayDay::Abort("AmrMesh::allocate(container, buffer, Realm) - only constant box sizes are supported for particle methods");
   }
   
-  a_container.define(m_realms[a_realm]->getGrids(),
-		     m_realms[a_realm]->getDomains(),
-		     m_realms[a_realm]->getDx(),
-		     m_realms[a_realm]->getRefinementRatios(),
+  a_container.define(m_Realms[a_Realm]->getGrids(),
+		     m_Realms[a_Realm]->getDomains(),
+		     m_Realms[a_Realm]->getDx(),
+		     m_Realms[a_Realm]->getRefinementRatios(),
 		     m_probLo,
 		     m_blockingFactor,
 		     m_finestLevel,
 		     a_buffer,
-		     a_realm);
+		     a_Realm);
 }
 
 template <typename T>

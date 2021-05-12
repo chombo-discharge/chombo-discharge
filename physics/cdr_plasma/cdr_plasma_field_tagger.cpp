@@ -32,9 +32,9 @@ void cdr_plasma_field_tagger::allocate_storage(){
     pout() << m_name + "::allocate_storage" << endl;
   }
 
-  m_amr->allocate(m_scratch,  m_realm, m_phase, 1);
-  m_amr->allocate(m_E,        m_realm, m_phase, SpaceDim);
-  m_amr->allocate(m_grad_E,   m_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_scratch,  m_Realm, m_phase, 1);
+  m_amr->allocate(m_E,        m_Realm, m_phase, SpaceDim);
+  m_amr->allocate(m_grad_E,   m_Realm, m_phase, SpaceDim);
 }
 
 void cdr_plasma_field_tagger::deallocate_storage(){
@@ -56,14 +56,14 @@ void cdr_plasma_field_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_gra
 
   m_timestepper->compute_E(a_E, m_phase);
   data_ops::vector_length(m_scratch, a_E);
-  m_amr->computeGradient(a_grad_E, m_scratch, m_realm, phase::gas);
+  m_amr->computeGradient(a_grad_E, m_scratch, m_Realm, phase::gas);
 
-  m_amr->averageDown(a_grad_E, m_realm, m_phase);
-  m_amr->interpGhost(a_grad_E, m_realm, m_phase);
+  m_amr->averageDown(a_grad_E, m_Realm, m_phase);
+  m_amr->interpGhost(a_grad_E, m_Realm, m_phase);
   
   // Interpolate to centroids
-  m_amr->interpToCentroids(a_E,      m_realm, m_phase);
-  m_amr->interpToCentroids(a_grad_E, m_realm, m_phase);
+  m_amr->interpToCentroids(a_E,      m_Realm, m_phase);
+  m_amr->interpToCentroids(a_grad_E, m_Realm, m_phase);
 }
 
 void cdr_plasma_field_tagger::compute_tracers(){
@@ -88,8 +88,8 @@ void cdr_plasma_field_tagger::compute_tracers(){
   data_ops::get_max_min_norm(grad_E_max,   grad_E_min,   m_grad_E);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, m_phase)[lvl];
     const Real dx                = m_amr->getDx()[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -164,14 +164,14 @@ void cdr_plasma_field_tagger::compute_tracers(){
 
 
   for (int i = 0; i < m_num_tracers; i++){
-    m_amr->averageDown(m_tracer[i], m_realm, m_phase);
-    m_amr->interpGhost(m_tracer[i], m_realm, m_phase);
+    m_amr->averageDown(m_tracer[i], m_Realm, m_phase);
+    m_amr->interpGhost(m_tracer[i], m_Realm, m_phase);
   }
 
   // Compute gradient of tracers
   for (int i = 0; i < m_num_tracers; i++){
-    m_amr->computeGradient(m_grad_tracer[i], m_tracer[i], m_realm, phase::gas);
-    m_amr->averageDown(m_grad_tracer[i], m_realm, m_phase);
+    m_amr->computeGradient(m_grad_tracer[i], m_tracer[i], m_Realm, phase::gas);
+    m_amr->averageDown(m_grad_tracer[i], m_Realm, m_phase);
   }
 
   this->deallocate_storage(); // No reason to keep the extra storage lying around...

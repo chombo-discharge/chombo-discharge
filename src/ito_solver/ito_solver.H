@@ -70,14 +70,14 @@ public:
   virtual std::string get_name();
 
   /*!
-    @brief Get realm
+    @brief Get Realm
   */
-  virtual const std::string get_realm() const;
+  virtual const std::string get_Realm() const;
 
   /*!
-    @brief Set realm
+    @brief Set Realm
   */
-  virtual void set_realm(const std::string a_realm);
+  virtual void set_Realm(const std::string a_Realm);
 
   /*!
     @brief Parse options
@@ -736,13 +736,13 @@ protected:
   /*!
     @brief Realm
   */
-  std::string m_realm;
+  std::string m_Realm;
 
   /*!
-    @brief Fluid realm
-    @note This is for later, in case we want to move redistribution and averaging/ghost cell interpolating onto a different realm. 
+    @brief Fluid Realm
+    @note This is for later, in case we want to move redistribution and averaging/ghost cell interpolating onto a different Realm. 
   */
-  std::string m_fluid_realm;
+  std::string m_fluid_Realm;
 
   /*!
     @brief Boundary volume hierarchy merging tree

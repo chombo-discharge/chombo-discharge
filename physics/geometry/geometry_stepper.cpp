@@ -24,7 +24,7 @@ void geometry_stepper::post_checkpoint_setup() {};
 // Registration routines
 void geometry_stepper::registerRealms(){}
 void geometry_stepper::registerOperators(){ 
-  m_amr->registerOperator(s_eb_fill_patch, realm::primal, phase::gas); // Need for averaging down ghost cells in driver output routine
+  m_amr->registerOperator(s_eb_fill_patch, Realm::Primal, phase::gas); // Need for averaging down ghost cells in driver output routine
 }
 
 // IO routines

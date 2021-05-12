@@ -22,7 +22,7 @@ rte_stepper<T>::rte_stepper(){
   Vector<Real> v;
 
   pp.get   ("verbosity",      m_verbosity);
-  pp.get   ("realm",          m_realm);
+  pp.get   ("Realm",          m_Realm);
   pp.get   ("blob_amplitude", m_blob_amplitude);
   pp.get   ("blob_radius",    m_blob_radius);
   pp.getarr("blob_center",    v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
@@ -43,7 +43,7 @@ void rte_stepper<T>::setup_solvers(){
   m_solver->set_phase(phase::gas);
   m_solver->set_amr(m_amr);
   m_solver->set_computational_geometry(m_compgeom);
-  m_solver->set_realm(m_realm);
+  m_solver->set_Realm(m_Realm);
 }
 
 template <typename T>
@@ -128,7 +128,7 @@ bool rte_stepper<T>::need_to_regrid() {
 
 template <typename T>
 void rte_stepper<T>::registerRealms() {
-  m_amr->registerRealm(m_realm);
+  m_amr->registerRealm(m_Realm);
 }
 
 template <typename T>
@@ -166,8 +166,8 @@ void rte_stepper<T>::set_gaussian_source(){
 
   //
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, phase::gas)[lvl];
     const Real dx                = m_amr->getDx()[lvl];
 
 

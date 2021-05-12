@@ -48,14 +48,14 @@ public:
   virtual ito_iterator<T> iterator();
 
   /*!
-    @brief Get realm
+    @brief Get Realm
   */
-  virtual const std::string get_realm() const;
+  virtual const std::string get_Realm() const;
 
   /*!
-    @brief Set realm
+    @brief Set Realm
   */
-  virtual void set_realm(const std::string a_realm);
+  virtual void set_Realm(const std::string a_Realm);
 
   /*!
     @brief Define function
@@ -258,7 +258,7 @@ protected:
   /*!
     @brief Realm
   */
-  std::string m_realm;
+  std::string m_Realm;
   
   /*!
     @brief Solvers

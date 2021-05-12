@@ -48,7 +48,7 @@ public:
 
   /*!
     @brief Constructor
-    @details This sets the class name to "FieldSolver" and the realm to realm::primal. 
+    @details This sets the class name to "FieldSolver" and the Realm to Realm::Primal. 
   */
   virtual ~FieldSolver();
 
@@ -203,10 +203,10 @@ public:
   virtual void writeMultifluidData(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp);
 
   /*!
-    @brief Set realm
-    @param[in] a_realm Realm identifier. 
+    @brief Set Realm
+    @param[in] a_Realm Realm identifier. 
   */
-  virtual void setRealm(const std::string a_realm);
+  virtual void setRealm(const std::string a_Realm);
 
   /*!
     @brief Set time for this solver.
@@ -277,7 +277,7 @@ public:
   virtual Vector<std::string> getPlotVariableNames() const;
 
   /*!
-    @brief Get the realm where this solver is registered. 
+    @brief Get the Realm where this solver is registered. 
   */
   const std::string getRealm() const;
   
@@ -311,7 +311,7 @@ protected:
   /*!
     @brief Realm
   */
-  std::string m_realm;
+  std::string m_Realm;
   
   /*!
     @brief Class name

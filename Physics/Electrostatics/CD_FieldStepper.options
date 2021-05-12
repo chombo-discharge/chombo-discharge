@@ -2,7 +2,7 @@
 # FIELD_STEPPER CLASS OPTIONS
 # ====================================================================================================
 FieldStepper.verbosity    = -1              # Verbosity
-FieldStepper.realm        = primal          # Primal realm
+FieldStepper.Realm        = primal          # Primal Realm
 FieldStepper.LoadBalancing = false           # Load balance or not.
 FieldStepper.BoxSorting  = morton          # If you load balance you can redo the box sorting. 
 FieldStepper.init_rho     = 0.0             # Space charge density

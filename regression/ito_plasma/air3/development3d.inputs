@@ -209,7 +209,7 @@ rod_dielectric.sphere.radius             = 1.0           # Radius
 ito_plasma_godunov.verbosity      = -10            # Verbosity
 ito_plasma_godunov.min_dt         = 1.E-10         # Minimum dt
 ito_plasma_godunov.max_dt         = 1.E-10         # Maximum dt
-ito_plasma_godunov.particle_realm = particle       # Particle realm. Default is primal
+ito_plasma_godunov.particle_Realm = particle       # Particle Realm. Default is primal
 ito_plasma_godunov.BoxSorting    = none         # Box sorting for load balancing. 'none', 'shuffle', 'std', 'morton'
 ito_plasma_godunov.LoadBalancing   = true           # Load balance or not
 ito_plasma_godunov.load_index     = 0              # Which species to use for load balancing (-1 => all)

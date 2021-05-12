@@ -98,7 +98,7 @@ namespace physics {
       /*!
 	@brief Realm
       */
-      std::string m_realm;
+      std::string m_Realm;
       
       /*!
 	@brief Phase

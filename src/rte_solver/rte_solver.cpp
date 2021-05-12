@@ -25,8 +25,8 @@ std::string rte_solver::get_name(){
   return m_name;
 }
 
-const std::string rte_solver::get_realm() const {
-  return m_realm;
+const std::string rte_solver::get_Realm() const {
+  return m_Realm;
 }
 
 Vector<std::string> rte_solver::get_plotvar_names() const {
@@ -69,13 +69,13 @@ bool rte_solver::advance(const Real a_dt, EBAMRCellData& a_state, const bool a_z
   return converged;
 }
 
-void rte_solver::set_realm(const std::string a_realm){
-  CH_TIME("rte_solver::set_realm");
+void rte_solver::set_Realm(const std::string a_Realm){
+  CH_TIME("rte_solver::set_Realm");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_realm" << endl;
+    pout() << m_name + "::set_Realm" << endl;
   }
 
-  m_realm = a_realm;
+  m_Realm = a_Realm;
 }
 
 void rte_solver::set_rte_species(const RefCountedPtr<rte_species> a_rte_species){
@@ -183,8 +183,8 @@ void rte_solver::set_source(const EBAMRCellData& a_source){
     a_source[lvl]->localCopyTo(*m_source[lvl]);
   }
 
-  m_amr->averageDown(m_source, m_realm, m_phase);
-  m_amr->interpGhost(m_source, m_realm, m_phase);
+  m_amr->averageDown(m_source, m_Realm, m_phase);
+  m_amr->interpGhost(m_source, m_Realm, m_phase);
 }
 
 void rte_solver::set_source(const Real a_source){
@@ -201,8 +201,8 @@ void rte_solver::set_source(const Real a_source){
     }
   }
 
-  m_amr->averageDown(m_source, m_realm, m_phase);
-  m_amr->interpGhost(m_source, m_realm, m_phase);
+  m_amr->averageDown(m_source, m_Realm, m_phase);
+  m_amr->interpGhost(m_source, m_Realm, m_phase);
 }
 
 void rte_solver::set_plot_variables(){
@@ -272,19 +272,19 @@ void rte_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
 
   // Copy data onto scratch
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, ncomp);
+  m_amr->allocate(scratch, m_Realm, m_phase, ncomp);
   data_ops::copy(scratch, a_data);
 
   // Interp if we should
   if(a_interp){
-    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
+    m_amr->interpToCentroids(scratch, m_Realm, phase::gas);
   }
 
-  m_amr->averageDown(scratch, m_realm, m_phase);
-  m_amr->interpGhost(scratch, m_realm, m_phase);
+  m_amr->averageDown(scratch, m_Realm, m_phase);
+  m_amr->interpGhost(scratch, m_Realm, m_phase);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    if(a_output.get_realm() == m_realm){
+    if(a_output.get_Realm() == m_Realm){
       scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
     }
     else{

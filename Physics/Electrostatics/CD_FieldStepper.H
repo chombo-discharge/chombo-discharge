@@ -62,10 +62,10 @@ namespace Physics {
       bool need_to_regrid() override {return false;}
       void pre_regrid(const int a_lbase, const int a_finest_level) override;
       void deallocate() override;
-      bool LoadBalancing_realm(const std::string a_realm) const override;
+      bool LoadBalancing_Realm(const std::string a_Realm) const override;
       void LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
 			      Vector<Vector<Box> >&            a_boxes,
-			      const std::string                a_realm,
+			      const std::string                a_Realm,
 			      const Vector<DisjointBoxLayout>& a_grids,
 			      const int                        a_lmin,
 			      const int                        a_finest_level) override;
@@ -83,7 +83,7 @@ namespace Physics {
       RefCountedPtr<FieldSolver> m_fieldSolver;
       RefCountedPtr<sigma_solver>   m_sigma;
 
-      std::string m_realm;
+      std::string m_Realm;
 
       Real m_init_rho;
       Real m_init_sigma;

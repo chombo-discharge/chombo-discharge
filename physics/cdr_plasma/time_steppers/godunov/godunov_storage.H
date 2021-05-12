@@ -22,7 +22,7 @@ namespace physics {
 
       cdr_storage();
       cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		  const std::string              a_realm,
+		  const std::string              a_Realm,
 		  const phase::which_phase       a_phase,
 		  const int m_ncomp);
     
@@ -50,7 +50,7 @@ namespace physics {
       EBAMRIFData& get_domain_grad(){   return m_scratchIF4; }
   
     protected:
-      std::string             m_realm;
+      std::string             m_Realm;
       RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components
@@ -79,7 +79,7 @@ namespace physics {
 
       poisson_storage();
       poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		      const std::string              a_realm,
+		      const std::string              a_Realm,
 		      const phase::which_phase       a_phase,
 		      const int m_ncomp);
       ~poisson_storage();
@@ -92,7 +92,7 @@ namespace physics {
       EBAMRIFData& get_E_domain()      {return m_E_dom;    }
 
     protected:
-      std::string m_realm;
+      std::string m_Realm;
       RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components
@@ -107,7 +107,7 @@ namespace physics {
 
       rte_storage();
       rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		  const std::string              a_realm,
+		  const std::string              a_Realm,
 		  const phase::which_phase       a_phase,
 		  const int                      a_ncomp);
       ~rte_storage();
@@ -120,7 +120,7 @@ namespace physics {
 
     protected:
 
-      std::string m_realm;
+      std::string m_Realm;
       RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components
@@ -134,7 +134,7 @@ namespace physics {
 
       sigma_storage();
       sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		    const std::string              a_realm,
+		    const std::string              a_Realm,
 		    const phase::which_phase       a_phase,
 		    const int                      a_ncomp);
       ~sigma_storage();
@@ -146,7 +146,7 @@ namespace physics {
   
     protected:
 
-      std::string m_realm;
+      std::string m_Realm;
       RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components

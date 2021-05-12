@@ -158,9 +158,9 @@ public:
   virtual void sanityCheck();
 
   /*!
-    @brief Set the realm
+    @brief Set the Realm
   */
-  virtual void set_realm(const std::string a_realm);
+  virtual void set_Realm(const std::string a_Realm);
 
   /*!
     @brief Set species
@@ -311,9 +311,9 @@ public:
   virtual void reset_redist_weights(const EBAMRCellData& a_state);
 
   /*!
-    @brief Get the realm
+    @brief Get the Realm
   */
-  virtual const std::string get_realm() const;
+  virtual const std::string get_Realm() const;
 
   /*!
     @brief Get solver name
@@ -491,7 +491,7 @@ protected:
   /*!
     @brief Realm
   */
-  std::string m_realm;
+  std::string m_Realm;
 
   /*!
     @brief State data (i.e. the ion density)

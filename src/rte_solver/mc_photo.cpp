@@ -408,18 +408,18 @@ void mc_photo::allocate_internals(){
   const int ncomp  = 1;
 
   // Allocate mesh data
-  m_amr->allocate(m_state,        m_realm, m_phase, ncomp); 
-  m_amr->allocate(m_source,       m_realm, m_phase, ncomp);
-  m_amr->allocate(m_scratch,      m_realm, m_phase, ncomp);
-  m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
-  m_amr->allocate(m_massDiff,     m_realm, m_phase, ncomp);
+  m_amr->allocate(m_state,        m_Realm, m_phase, ncomp); 
+  m_amr->allocate(m_source,       m_Realm, m_phase, ncomp);
+  m_amr->allocate(m_scratch,      m_Realm, m_phase, ncomp);
+  m_amr->allocate(m_depositionNC, m_Realm, m_phase, ncomp);
+  m_amr->allocate(m_massDiff,     m_Realm, m_phase, ncomp);
 
   // Allocate particle data holders
-  m_amr->allocate(m_photons,        m_pvr_buffer, m_realm);
-  m_amr->allocate(m_bulk_photons,   m_pvr_buffer, m_realm);
-  m_amr->allocate(m_eb_photons,     m_pvr_buffer, m_realm);
-  m_amr->allocate(m_domain_photons, m_pvr_buffer, m_realm);
-  m_amr->allocate(m_source_photons, m_pvr_buffer, m_realm);
+  m_amr->allocate(m_photons,        m_pvr_buffer, m_Realm);
+  m_amr->allocate(m_bulk_photons,   m_pvr_buffer, m_Realm);
+  m_amr->allocate(m_eb_photons,     m_pvr_buffer, m_Realm);
+  m_amr->allocate(m_domain_photons, m_pvr_buffer, m_Realm);
+  m_amr->allocate(m_source_photons, m_pvr_buffer, m_Realm);
 }
 
 void mc_photo::pre_regrid(const int a_lmin, const int a_old_finest_level){
@@ -463,7 +463,7 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
   m_amr->reallocate(m_massDiff,     m_phase, a_lmin);
 
   // Particle data regrids
-  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_Realm);
   const Vector<ProblemDomain>& domains   = m_amr->getDomains();
   const Vector<Real>& dx                 = m_amr->getDx();
   const Vector<int>& ref_rat             = m_amr->getRefinementRatios();
@@ -578,17 +578,17 @@ void mc_photo::registerOperators(){
     MayDay::Abort("mc_photo::registerOperators - need to set AmrMesh!");
   }
   else{
-    m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
-    m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
-    m_amr->registerOperator(s_eb_mg_interp,    m_realm, m_phase);
-    m_amr->registerOperator(s_eb_redist,       m_realm, m_phase);
-    m_amr->registerOperator(s_eb_NonConservativeDivergenceStencil,  m_realm, m_phase);
-    m_amr->registerOperator(s_eb_copier,       m_realm, m_phase);
+    m_amr->registerOperator(s_eb_coar_ave,     m_Realm, m_phase);
+    m_amr->registerOperator(s_eb_fill_patch,   m_Realm, m_phase);
+    m_amr->registerOperator(s_eb_mg_interp,    m_Realm, m_phase);
+    m_amr->registerOperator(s_eb_redist,       m_Realm, m_phase);
+    m_amr->registerOperator(s_noncons_div,  m_Realm, m_phase);
+    m_amr->registerOperator(s_eb_copier,       m_Realm, m_phase);
     if(m_pvr_buffer <= 0){
-      m_amr->registerOperator(s_eb_ghostcloud, m_realm, m_phase);
+      m_amr->registerOperator(s_eb_ghostcloud, m_Realm, m_phase);
     }
     if(m_halo_buffer > 0){
-      m_amr->registerMask(s_particle_halo, m_halo_buffer, m_realm);
+      m_amr->registerMask(s_particle_halo, m_halo_buffer, m_Realm);
     }
   }
 }
@@ -650,7 +650,7 @@ void mc_photo::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   }
 
   // Read state vector
-  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->getGrids(m_Realm)[a_level], Interval(0,0), false);
 
   // Read particles. Should be implemented
   std::string str = m_name + "_particles";
@@ -814,7 +814,7 @@ void mc_photo::generate_photons(particle_container<photon>& a_photons, const EBA
   AMRParticles<photon>& photons = a_photons.get_particles();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     const ProblemDomain& dom     = m_amr->getDomains()[lvl];
     const Real dx                = m_amr->getDx()[lvl];
     const Real vol               = pow(dx, SpaceDim);
@@ -874,7 +874,7 @@ void mc_photo::generate_photons(particle_container<photon>& a_photons, const EBA
 	}
 
 	// Irregular and multicells
-	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_Realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
 	  const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, prob_lo);
@@ -986,8 +986,8 @@ void mc_photo::deposit_photons(EBAMRCellData&               a_state,
   }
 
   // Average down and interpolate
-  m_amr->averageDown(a_state, m_realm, m_phase);
-  m_amr->interpGhost(a_state, m_realm, m_phase);
+  m_amr->averageDown(a_state, m_Realm, m_phase);
+  m_amr->interpGhost(a_state, m_Realm, m_phase);
 }
 
 void mc_photo::deposit_kappaConservative(EBAMRCellData&              a_state,
@@ -1009,17 +1009,17 @@ void mc_photo::deposit_kappaConservative(EBAMRCellData&              a_state,
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->getDx()[lvl];
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     const ProblemDomain& dom     = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const RefCountedPtr<EBLevelGrid>& eblg = m_amr->getEBLevelGrid(m_realm, m_phase)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, m_phase)[lvl];
+    const RefCountedPtr<EBLevelGrid>& eblg = m_amr->getEBLevelGrid(m_Realm, m_phase)[lvl];
 
     const bool has_coar = (lvl > 0);
     const bool has_fine = (lvl < finest_level);
 
     // 1. If we have a coarser level whose cloud extends beneath this level, interpolate that result here first. 
     if(has_coar && m_pvr_buffer > 0){
-      RefCountedPtr<EBMGInterp>& interp = m_amr->getEBMGInterp(m_realm, m_phase)[lvl];
+      RefCountedPtr<EBMGInterp>& interp = m_amr->getEBMGInterp(m_Realm, m_phase)[lvl];
       interp->pwcInterp(*a_state[lvl], *m_scratch[lvl-1], interv);
     }
     
@@ -1033,7 +1033,7 @@ void mc_photo::deposit_kappaConservative(EBAMRCellData&              a_state,
     }
 
     // This code adds contributions from ghost cells into the valid region
-    const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_realm, m_phase)[lvl];
+    const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_Realm, m_phase)[lvl];
     LDaddOp<FArrayBox> addOp;
     LevelData<FArrayBox> aliasFAB;
     aliasEB(aliasFAB, *a_state[lvl]);
@@ -1045,7 +1045,7 @@ void mc_photo::deposit_kappaConservative(EBAMRCellData&              a_state,
       a_state[lvl]->localCopyTo(*m_scratch[lvl]);
     }
     else if(m_pvr_buffer <= 0 && has_coar){
-      EBGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
+      EBGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_Realm, m_phase)[lvl]);
       ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
     }
   }
@@ -1058,7 +1058,7 @@ void mc_photo::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRC
   }
 
   if(m_blend_conservation){
-    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
+    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(m_Realm, m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else{
@@ -1076,9 +1076,9 @@ void mc_photo::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_
   const int ncomp = 1;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     const ProblemDomain& domain  = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, m_phase)[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       EBCellFAB& divH               = (*a_depositionH[lvl])[dit()];  // On input, this contains kappa*depositionWeights
@@ -1090,7 +1090,7 @@ void mc_photo::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_Realm, m_phase)[lvl])[dit()];
       for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real kappa    = ebisbox.volFrac(vof);
@@ -1119,9 +1119,9 @@ void mc_photo::increment_redist(const EBAMRIVData& a_mass_diff){
   const Interval interv(comp, comp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     
-    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
+    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_Realm, m_phase)[lvl]);
     level_redist.setToZero();
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1142,7 +1142,7 @@ void mc_photo::level_redistribution(EBAMRCellData& a_state){
   const Interval interv(comp, comp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
+    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_Realm, m_phase)[lvl]);
     level_redist.redistribute(*a_state[lvl], interv);
     level_redist.setToZero();
   }
@@ -1160,11 +1160,11 @@ void mc_photo::coarse_fine_increment(const EBAMRIVData& a_mass_diff){
   const Interval interv(0,0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
 
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_Realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_Realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_Realm, m_phase)[lvl];
 
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < 0;
@@ -1207,9 +1207,9 @@ void mc_photo::coarse_fine_redistribution(EBAMRCellData& a_state){
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
 
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_Realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_Realm, m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_Realm, m_phase)[lvl];
     
     if(has_coar){
       fine2coar_redist->redistribute(*a_state[lvl-1], interv);
@@ -1269,7 +1269,7 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
 #endif
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     const Real dx                = m_amr->getDx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1416,7 +1416,7 @@ void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_phot
 
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     const Real dx = m_amr->getDx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

@@ -1,29 +1,18 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   phase_realm.H
-  @brief  Declaration of the phase_realm class
+  @file   CD_PhaseRealm.H
+  @brief  Declaration of the PhaseRealm class
   @author Robert Marskar
-  @date   July 2020
 */
 
-#ifndef _PHASE_REALM_H_
-#define _PHASE_REALM_H_
+#ifndef CD_PhaseRealm_H
+#define CD_PhaseRealm_H
 
-#include "computational_geometry.H"
-#include "mfis.H"
-#include "CD_IrregAmrStencil.H"
-#include "CD_LoadBalancing.H"
-#include "CD_NwoEbQuadCfInterp.H"
-#include "MFLevelGrid.H"
-#include "ebcoarseaverage.H"
-#include "DomainFluxIFFAB.H"
-#include "DomainFluxIFFABFactory.H"
-#include "particle_container.H"
-#include "EBGhostCloud.H"
-#include "CD_NonConservativeDivergenceStencil.H"
-#include "CD_EbCentroidInterpolationStencil.H"
-#include "CD_CentroidInterpolationStencil.H"
-#include "CD_EbFastFluxRegister.H"
-
+// Chombo includes
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
 #include <ebcoarseaverage.H>
@@ -37,7 +26,23 @@
 #include <EBPWLFineInterp.H>
 #include <ProblemDomain.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <computational_geometry.H>
+#include <mfis.H>
+#include <CD_IrregAmrStencil.H>
+#include <CD_LoadBalancing.H>
+#include <CD_NwoEbQuadCfInterp.H>
+#include <MFLevelGrid.H>
+#include <ebcoarseaverage.H>
+#include <DomainFluxIFFAB.H>
+#include <DomainFluxIFFABFactory.H>
+#include <particle_container.H>
+#include <EBGhostCloud.H>
+#include <CD_NonConservativeDivergenceStencil.H>
+#include <CD_EbCentroidInterpolationStencil.H>
+#include <CD_CentroidInterpolationStencil.H>
+#include <CD_EbFastFluxRegister.H>
+#include <CD_NamespaceHeader.H>
 
 // These are operator that can be defined.
 static const std::string s_eb_gradient     = "eb_gradient";
@@ -51,18 +56,18 @@ static const std::string s_eb_flux_reg     = "eb_flux_reg";
 static const std::string s_eb_redist       = "eb_redist";
 static const std::string s_eb_copier       = "eb_copier";
 static const std::string s_eb_ghostcloud   = "eb_ghostcloud";
-static const std::string s_eb_NonConservativeDivergenceStencil  = "eb_non_cons_div";
+static const std::string s_noncons_div  = "eb_non_cons_div";
 static const std::string s_levelset        = "levelset";
 
 /*!
-  @brief Class that holds important things for an AMR phase_realm. I.e. grids, operators, etc. 
+  @brief Class that holds important things for an AMR PhaseRealm. I.e. grids, operators, etc. 
 */
-class phase_realm {
+class PhaseRealm {
 public:
 
   // ctor, dtor
-  phase_realm();
-  ~phase_realm();
+  PhaseRealm();
+  ~PhaseRealm();
 
   // Define function
   void define(const Vector<DisjointBoxLayout>& a_grids,
@@ -83,12 +88,12 @@ public:
 
   // Base and operator regrid
   void setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
-  void regrid_base(const int a_lmin);
+  void regridBase(const int a_lmin);
   void regridOperators(const int a_lmin, const int a_lmax, const int a_regsize);
 
   // Register and query operator
   void registerOperator(const std::string a_operator);
-  bool query_operator(const std::string a_operator);
+  bool queryOperator(const std::string a_operator);
 
   // Get functions
   const RefCountedPtr<EBIndexSpace>& get_ebis();
@@ -208,6 +213,7 @@ protected:
   void define_noncons_sten();                                      // Make stencils for nonconservative averaging
   void define_levelset(const int a_lmin, const int a_numGhost);    // Define levelset
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

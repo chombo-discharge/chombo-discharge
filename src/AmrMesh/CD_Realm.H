@@ -1,36 +1,44 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   realm.H
-  @brief  Multi-fluid realms
+  @file   CD_Realm.H
+  @brief  Declaration of the Realm class. 
   @author Robert Marskar
   @date   July 2020
 */
 
-#ifndef _REALM_H_
-#define _REALM_H_
+#ifndef CD_Realm_H
+#define CD_Realm_H
 
-#include "phase_realm.H"
-#include "mfis.H"
-#include "MFLevelGrid.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_PhaseRealm.H>
+#include <mfis.H>
+#include <MFLevelGrid.H>
+#include <CD_NamespaceHeader.H>
 
 static const std::string s_particle_halo         = "particle_halo";
 static const std::string s_particle_valid_region = "pvr";
 
+/*!
+  @brief Alias for cutting down on the typic of booleans defined over AMR grids. 
+*/
 using AMRMask = Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >;
 
 /*!
-  @brief Class for holding multifluid realms, which are the realms that we actually use. 
+  @brief Class for holding multifluid Realms, which are the Realms that we actually use. 
 */
-class realm {
+class Realm {
 public:
 
-  // Identifier for default realm
-  const static std::string primal;
+  // Identifier for default Realm
+  const static std::string Primal;
 
   // ctor, dtor
-  realm();
-  ~realm();
+  Realm();
+  ~Realm();
 
   // Define function
   void define(const Vector<DisjointBoxLayout>& a_grids,
@@ -49,22 +57,22 @@ public:
 	      const std::map<phase::which_phase, RefCountedPtr<BaseIF> > a_baseif,
 	      const RefCountedPtr<mfis>& a_mfis);
 
-  // realm copy function
+  // Realm copy function
   template <class T>
   static void copy(Vector<RefCountedPtr<LevelData<T> > >& a_dst, const Vector<RefCountedPtr<LevelData<T> > >& a_src);
 
   // Base and operator regrid
   void setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
-  void regrid_base(const int a_lmin);
+  void regridBase(const int a_lmin);
   void regridOperators(const int a_lmin, const int a_lmax, const int a_regsize);
 
   // Register and query operator
   void registerOperator(const std::string a_operator, const phase::which_phase a_phase);
-  bool query_operator(const std::string a_operator, const phase::which_phase a_phase);
+  bool queryOperator(const std::string a_operator, const phase::which_phase a_phase);
 
   // Register and query masks
   void registerMask(const std::string a_mask, const int a_buffer);
-  bool query_mask(const std::string a_mask, const int a_buffer) const;
+  bool queryMask(const std::string a_mask, const int a_buffer) const;
 
   // Get functions for neutral stuff
   Vector<int>& getRefinementRatios();
@@ -121,8 +129,8 @@ protected:
   Vector<RefCountedPtr<MFLevelGrid> > m_mflg;
   RefCountedPtr<mfis> m_multifluidIndexSpace;
 
-  // Phase realms and implicit functions
-  std::map<phase::which_phase, RefCountedPtr<phase_realm> > m_realms;
+  // Phase Realms and implicit functions
+  std::map<phase::which_phase, RefCountedPtr<PhaseRealm> > m_Realms;
   std::map<phase::which_phase, RefCountedPtr<BaseIF> > m_baseif;
 
   // Map for checking which masks are present. 
@@ -142,11 +150,10 @@ protected:
 			const int                  a_buffer,
 			const int                  a_ref_rat);
 
-  // Get realm
-  phase_realm& get_realm(const phase::which_phase a_phase);
-
-
-  
+  // Get Realm
+  PhaseRealm& get_Realm(const phase::which_phase a_phase);
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

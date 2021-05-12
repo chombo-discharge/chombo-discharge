@@ -30,16 +30,16 @@ rte_iterator<T> rte_layout<T>::iterator(){
 }
 
 template <class T>
-const std::string rte_layout<T>::get_realm() const{
-  return m_realm;
+const std::string rte_layout<T>::get_Realm() const{
+  return m_Realm;
 }
 
 template <class T>
-void rte_layout<T>::set_realm(const std::string a_realm){
-  m_realm = a_realm;
+void rte_layout<T>::set_Realm(const std::string a_Realm){
+  m_Realm = a_Realm;
 
   for (auto solver_it = this->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->set_realm(m_realm);
+    solver_it()->set_Realm(m_Realm);
   }
 }
 

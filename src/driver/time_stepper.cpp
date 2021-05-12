@@ -53,13 +53,13 @@ void time_stepper::parseRuntimeOptions() {
   }
 }
 
-Vector<long int> time_stepper::get_checkpoint_loads(const std::string a_realm, const int a_level) const {
+Vector<long int> time_stepper::get_checkpoint_loads(const std::string a_Realm, const int a_level) const {
   CH_TIME("time_stepper::get_checkpoint_loads");
   if(m_verbosity > 5){
     pout() << "time_stepper::get_checkpoint_loads" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(a_realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(a_Realm)[a_level];
   const Vector<Box>& a_boxes = dbl.boxArray();
 
   Vector<long int> loads(a_boxes.size(), 0L);
@@ -70,10 +70,10 @@ Vector<long int> time_stepper::get_checkpoint_loads(const std::string a_realm, c
   return loads;
 }
 
-bool time_stepper::LoadBalancing_realm(const std::string a_realm) const {
-  CH_TIME("time_stepper::LoadBalancing_realm");
+bool time_stepper::LoadBalancing_Realm(const std::string a_Realm) const {
+  CH_TIME("time_stepper::LoadBalancing_Realm");
   if(m_verbosity > 5){
-    pout() << "time_stepper::LoadBalancing_realm" << endl;
+    pout() << "time_stepper::LoadBalancing_Realm" << endl;
   }
 
   return false;
@@ -81,7 +81,7 @@ bool time_stepper::LoadBalancing_realm(const std::string a_realm) const {
 
 void time_stepper::LoadBalancing_boxes(Vector<Vector<int> >&             a_procs,
 				      Vector<Vector<Box> >&             a_boxes,
-				      const std::string                 a_realm,              
+				      const std::string                 a_Realm,              
 				      const Vector<DisjointBoxLayout>&  a_grids,
 				      const int                         a_lmin,
 				      const int                         a_finest_level){

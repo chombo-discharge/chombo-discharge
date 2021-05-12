@@ -45,14 +45,14 @@ public:
   virtual cdr_iterator<T> iterator();
 
   /*!
-    @brief Get the realm
+    @brief Get the Realm
   */
-  virtual const std::string get_realm() const;
+  virtual const std::string get_Realm() const;
 
   /*!
     @brief Set
   */
-  virtual void set_realm(const std::string a_realm);
+  virtual void set_Realm(const std::string a_Realm);
 
   /*!
     @brief Parse class options
@@ -275,7 +275,7 @@ protected:
   /*!
     @brief Realm
   */
-  std::string m_realm;
+  std::string m_Realm;
 
   /*!
     @brief Solvers

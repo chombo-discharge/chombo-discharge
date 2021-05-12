@@ -36,9 +36,9 @@ public:
   virtual std::string get_name();
 
   /*!
-    @brief Get realm
+    @brief Get Realm
   */
-  virtual const std::string get_realm() const;
+  virtual const std::string get_Realm() const;
 
   /*!
     @brief Parse options
@@ -71,9 +71,9 @@ public:
   virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false) = 0;
 
   /*!
-    @brief Set realm
+    @brief Set Realm
   */
-  virtual void set_realm(const std::string a_realm);
+  virtual void set_Realm(const std::string a_Realm);
 
   /*!
     @brief Set the photon group
@@ -265,7 +265,7 @@ protected:
   /*!
     @brief Realm
   */
-  std::string m_realm;
+  std::string m_Realm;
 
   /*!
     @brief Phase 

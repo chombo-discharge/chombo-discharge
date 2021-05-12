@@ -20,7 +20,7 @@ advection_diffusion_tagger::advection_diffusion_tagger(RefCountedPtr<cdr_solver>
   m_amr       = a_amr;
   m_name      = "advection_diffusion";
   m_verbosity = -1;
-  m_realm     = a_solver->get_realm();
+  m_Realm     = a_solver->get_Realm();
 }
 
 
@@ -44,13 +44,13 @@ bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
   EBAMRCellData sca;
   EBAMRCellData vec;
 
-  m_amr->allocate(sca, m_realm, phase::gas, 1);
-  m_amr->allocate(vec, m_realm, phase::gas, SpaceDim);
+  m_amr->allocate(sca, m_Realm, phase::gas, 1);
+  m_amr->allocate(vec, m_Realm, phase::gas, SpaceDim);
 
   const EBAMRCellData& state = m_solver->get_state();
 
   // Compute the gradient, vec = grad(phi)
-  m_amr->computeGradient(vec, state, m_realm, phase::gas); // vec = grad(phi)
+  m_amr->computeGradient(vec, state, m_Realm, phase::gas); // vec = grad(phi)
   data_ops::vector_length(sca, vec);                        // sca = |grad(phi)|
   data_ops::set_covered_value(sca, 0, 0.0);                 // covered cell values are set to 0.0
 
@@ -66,7 +66,7 @@ bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
 
     const Real SAFETY = 1.E-6;
     
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const EBCellFAB& c   = (*sca[lvl])[dit()];
       const EBCellFAB& phi = (*state[lvl])[dit()];

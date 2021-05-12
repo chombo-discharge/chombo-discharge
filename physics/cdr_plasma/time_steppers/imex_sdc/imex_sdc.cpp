@@ -641,8 +641,8 @@ void imex_sdc::compute_FD_0(){
 	solver->compute_divD(FD_0, phi_0);
 
 	// Shouldn't be necesary
-	m_amr->averageDown(FD_0, m_realm, m_cdr->get_phase());
-	m_amr->interpGhost(FD_0, m_realm, m_cdr->get_phase());
+	m_amr->averageDown(FD_0, m_Realm, m_cdr->get_phase());
+	m_amr->interpGhost(FD_0, m_Realm, m_cdr->get_phase());
       }
       else{
 	data_ops::set_value(FD_0, 0.0);
@@ -802,8 +802,8 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
       data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
 
       // This shouldn't be necessary
-      m_amr->averageDown(phi_m1, m_realm, m_cdr->get_phase());
-      m_amr->interpGhost(phi_m1, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(phi_m1, m_Realm, m_cdr->get_phase());
+      m_amr->interpGhost(phi_m1, m_Realm, m_cdr->get_phase());
 
       if(a_lagged_terms){ // Back up the old slope first, we will need it for the lagged term
 	data_ops::copy(scratch, FAR_m);
@@ -815,8 +815,8 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
       data_ops::scale(FAR_m, 1./m_dtm[a_m]);    // :
 
       // Shouldn't be necessary
-      m_amr->averageDown(FAR_m, m_realm, m_cdr->get_phase());
-      m_amr->interpGhost(FAR_m, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(FAR_m, m_Realm, m_cdr->get_phase());
+      m_amr->interpGhost(FAR_m, m_Realm, m_cdr->get_phase());
     }
 
     // Now add in the lagged advection-reaction and quadrature terms. This is a bit weird, but we did overwrite
@@ -890,8 +890,8 @@ void imex_sdc::integrate_advection(const Real a_dt, const int a_m, const bool a_
       data_ops::copy(phi_m1, phi_m);
       data_ops::incr(phi_m1, scratch, -m_dtm[a_m]);
       data_ops::floor(phi_m1, 0.0);
-      m_amr->averageDown(phi_m1, m_realm, m_cdr->get_phase());
-      m_amr->interpGhost(phi_m1, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(phi_m1, m_Realm, m_cdr->get_phase());
+      m_amr->interpGhost(phi_m1, m_Realm, m_cdr->get_phase());
 
     }
     else{
@@ -937,8 +937,8 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
 	const EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];      // FD_(m+1)^k. Lagged term.
 	data_ops::incr(init_soln, FD_m1k, -m_dtm[a_m]);
       }
-      m_amr->averageDown(init_soln, m_realm, m_cdr->get_phase());
-      m_amr->interpGhost(init_soln, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(init_soln, m_Realm, m_cdr->get_phase());
+      m_amr->interpGhost(init_soln, m_Realm, m_cdr->get_phase());
       data_ops::copy(phi_m1, phi_m);
 
       // Solve
@@ -948,8 +948,8 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
       else{
 	solver->advance_euler(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
       }
-      m_amr->averageDown(phi_m1, m_realm, m_cdr->get_phase());
-      m_amr->interpGhost(phi_m1, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(phi_m1, m_Realm, m_cdr->get_phase());
+      m_amr->interpGhost(phi_m1, m_Realm, m_cdr->get_phase());
       data_ops::floor(phi_m1, 0.0);
 
       // Update the operator slope
@@ -959,8 +959,8 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
       data_ops::incr(FD_m1k, init_soln, -1.0);
       data_ops::scale(FD_m1k, 1./m_dtm[a_m]);
 
-      m_amr->averageDown(FD_m1k, m_realm, m_cdr->get_phase());
-      m_amr->interpGhost(FD_m1k, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(FD_m1k, m_Realm, m_cdr->get_phase());
+      m_amr->interpGhost(FD_m1k, m_Realm, m_cdr->get_phase());
     }
     else{
       EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];
@@ -1022,8 +1022,8 @@ void imex_sdc::reconcile_integrands(){
       }
 
       // Shouldn't be necessary
-      m_amr->averageDown(F_m, m_realm, m_cdr->get_phase());
-      m_amr->interpGhost(F_m, m_realm, m_cdr->get_phase());
+      m_amr->averageDown(F_m, m_Realm, m_cdr->get_phase());
+      m_amr->interpGhost(F_m, m_Realm, m_cdr->get_phase());
     }
   }
 
@@ -1309,14 +1309,14 @@ void imex_sdc::allocate_cdr_storage(){
   
   for (cdr_iterator<cdr_solver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_realm, m_cdr->get_phase(), ncomp));
+    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_Realm, m_cdr->get_phase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage(m_p);
   }
 }
 
 void imex_sdc::allocate_poisson_storage(){
   const int ncomp = 1;
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_realm, m_cdr->get_phase(), ncomp));
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_Realm, m_cdr->get_phase(), ncomp));
   m_fieldSolver_scratch->allocate_storage(m_p);
 }
 
@@ -1327,14 +1327,14 @@ void imex_sdc::allocate_rte_storage(){
   
   for (rte_iterator<rte_solver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_realm, m_rte->get_phase(), ncomp));
+    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_Realm, m_rte->get_phase(), ncomp));
     m_rte_scratch[idx]->allocate_storage(m_p);
   }
 }
 
 void imex_sdc::allocate_sigma_storage(){
   const int ncomp = 1;
-  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_realm, m_cdr->get_phase(), ncomp));
+  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_Realm, m_cdr->get_phase(), ncomp));
   m_sigma_scratch->allocate_storage(m_p);
 }
 
@@ -1405,9 +1405,9 @@ void imex_sdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states){
     const int idx = solver_it.index();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
     EBAMRCellData& grad = storage->get_gradient();
-    m_amr->computeGradient(grad, *a_states[idx], m_realm, m_cdr->get_phase());
-    //    m_amr->averageDown(grad, m_realm, m_cdr->get_phase());
-    m_amr->interpGhost(grad, m_realm, m_cdr->get_phase());
+    m_amr->computeGradient(grad, *a_states[idx], m_Realm, m_cdr->get_phase());
+    //    m_amr->averageDown(grad, m_Realm, m_cdr->get_phase());
+    m_amr->interpGhost(grad, m_Realm, m_cdr->get_phase());
   }
 }
 
@@ -1461,7 +1461,7 @@ void imex_sdc::compute_cdr_eb_states(){
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_realm, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(eb_gradient, m_Realm, m_cdr->get_phase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
     imex_sdc::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
     imex_sdc::project_flux(*eb_gradients[i], eb_gradient);
@@ -1496,7 +1496,7 @@ void imex_sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states){
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_realm, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(eb_gradient, m_Realm, m_cdr->get_phase(), SpaceDim);
   for (int i = 0; i < a_states.size(); i++){
     imex_sdc::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
     imex_sdc::project_flux(*eb_gradients[i], eb_gradient);
@@ -1529,7 +1529,7 @@ void imex_sdc::compute_cdr_domain_states(){
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIFData grad;
-  m_amr->allocate(grad, m_realm, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(grad, m_Realm, m_cdr->get_phase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
     imex_sdc::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
     imex_sdc::project_domain(*domain_gradients[i], grad);
@@ -1560,7 +1560,7 @@ void imex_sdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_states)
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIFData grad;
-  m_amr->allocate(grad, m_realm, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(grad, m_Realm, m_cdr->get_phase(), SpaceDim);
   for (int i = 0; i < a_states.size(); i++){
     this->extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
     this->project_domain(*domain_gradients[i], grad);

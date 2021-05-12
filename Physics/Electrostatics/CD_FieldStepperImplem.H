@@ -43,7 +43,7 @@ namespace Physics {
 
       pp.get("LoadBalancing", m_LoadBalancing);
       pp.get("BoxSorting",  str);
-      pp.get("realm",       m_realm);
+      pp.get("Realm",       m_Realm);
       pp.get("verbosity",   m_verbosity);
       
       if( str == "none"){
@@ -78,7 +78,7 @@ namespace Physics {
       m_fieldSolver->setAmr(m_amr);
       m_fieldSolver->setComputationalGeometry(m_compgeom);
       m_fieldSolver->setVoltage(FieldSolver::s_voltageOne);
-      m_fieldSolver->setRealm(m_realm);
+      m_fieldSolver->setRealm(m_Realm);
       m_fieldSolver->setTime(0, 0.0, 0.0);
 
       // Setup sigma
@@ -86,7 +86,7 @@ namespace Physics {
       m_sigma->set_verbosity(m_verbosity);
       m_sigma->set_amr(m_amr);
       m_sigma->set_computational_geometry(m_compgeom);
-      m_sigma->set_realm(m_realm);
+      m_sigma->set_Realm(m_Realm);
 
     }
 
@@ -97,7 +97,7 @@ namespace Physics {
 
     template <class T>
     void FieldStepper<T>::registerRealms(){
-      m_amr->registerRealm(m_realm);
+      m_amr->registerRealm(m_Realm);
     }
 
     template <class T>
@@ -205,14 +205,14 @@ namespace Physics {
     }
 
     template <class T>
-    bool FieldStepper<T>::LoadBalancing_realm(const std::string a_realm) const {
+    bool FieldStepper<T>::LoadBalancing_Realm(const std::string a_Realm) const {
       return m_LoadBalancing ? true : false;
     }
 
     template <class T>
     void FieldStepper<T>::LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
 					      Vector<Vector<Box> >&            a_boxes,
-					      const std::string                a_realm,
+					      const std::string                a_Realm,
 					      const Vector<DisjointBoxLayout>& a_grids,
 					      const int                        a_lmin,
 					      const int                        a_finest_level){
@@ -226,8 +226,8 @@ namespace Physics {
 
 	MFAMRCellData dummy1, dummy2;
 
-	m_amr->allocate(dummy1, m_realm, 1);
-	m_amr->allocate(dummy2, m_realm, 1);
+	m_amr->allocate(dummy1, m_Realm, 1);
+	m_amr->allocate(dummy2, m_Realm, 1);
 
 	const Vector<ProblemDomain>& domains = m_amr->getDomains();
 
