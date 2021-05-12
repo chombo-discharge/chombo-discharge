@@ -169,16 +169,16 @@ void ito_plasma_godunov::parseOptions() {
   // Box sorting for load balancing
   pp.get("BoxSorting", str);
   if( str == "none"){
-    m_boxSort = BoxSorting::none;
+    m_boxSort = BoxSorting::None;
   }
   else if( str == "std"){
-    m_boxSort = BoxSorting::std;
+    m_boxSort = BoxSorting::Std;
   }
   else if(str == "shuffle"){
-    m_boxSort = BoxSorting::shuffle;
+    m_boxSort = BoxSorting::Shuffle;
   }
   else if(str == "morton"){
-    m_boxSort = BoxSorting::morton;
+    m_boxSort = BoxSorting::Morton;
   }
   else {
     MayDay::Abort("ito_plasma_godunov::parseOptions - unknown box sorting method requested for argument 'BoxSorting'");
@@ -246,16 +246,16 @@ void ito_plasma_godunov::parseRuntimeOptions() {
   // Box sorting for load balancing
   pp.get("BoxSorting", str);
   if( str == "none"){
-    m_boxSort = BoxSorting::none;
+    m_boxSort = BoxSorting::None;
   }
   else if( str == "std"){
-    m_boxSort = BoxSorting::std;
+    m_boxSort = BoxSorting::Std;
   }
   else if(str == "shuffle"){
-    m_boxSort = BoxSorting::shuffle;
+    m_boxSort = BoxSorting::Shuffle;
   }
   else if(str == "morton"){
-    m_boxSort = BoxSorting::morton;
+    m_boxSort = BoxSorting::Morton;
   }
   else {
     MayDay::Abort("ito_plasma_godunov::parseOptions - unknown box sorting method requested for argument 'BoxSorting'");

@@ -124,15 +124,15 @@ template <typename T>
 void LoadBalancing::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a_which){
 
   switch(a_which){
-  case BoxSorting::none:
+  case BoxSorting::None:
     break;
-  case BoxSorting::std:
+  case BoxSorting::Std:
     LoadBalancing::standardSort(a_boxes, a_loads);
     break;
-  case BoxSorting::shuffle:
+  case BoxSorting::Shuffle:
     LoadBalancing::shuffleSort(a_boxes, a_loads);
     break;
-  case BoxSorting::morton:
+  case BoxSorting::Morton:
     LoadBalancing::mortonSort(a_boxes, a_loads);
     break;
   default:

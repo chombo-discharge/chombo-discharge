@@ -47,16 +47,16 @@ namespace Physics {
       pp.get("verbosity",   m_verbosity);
       
       if( str == "none"){
-	m_boxSort = BoxSorting::none;
+	m_boxSort = BoxSorting::None;
       }
       if( str == "std"){
-	m_boxSort = BoxSorting::std;
+	m_boxSort = BoxSorting::Std;
       }
       else if(str == "shuffle"){
-	m_boxSort = BoxSorting::shuffle;
+	m_boxSort = BoxSorting::Shuffle;
       }
       else if(str == "morton"){
-	m_boxSort = BoxSorting::morton;
+	m_boxSort = BoxSorting::Morton;
       }
       else {
 	MayDay::Abort("FieldStepper::FieldStepper - unknown box sorting method requested for argument 'BoxSorting'");

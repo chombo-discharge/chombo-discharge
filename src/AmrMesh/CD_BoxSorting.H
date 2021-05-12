@@ -12,14 +12,18 @@
 #ifndef CD_BoxSorting_H
 #define CD_BoxSorting_H
 
+#include <CD_NamespaceHeader.H>
+
 /*!
   @brief Enum for sorting boxes
 */
 enum class BoxSorting {
-  none,
-  std,
-  shuffle,
-  morton
+  None,
+  Std,
+  Shuffle,
+  Morton
 };
+
+#include <CD_NamespaceFooter.H>
 
 #endif
