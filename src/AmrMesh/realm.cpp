@@ -409,7 +409,7 @@ irreg_amr_stencil<centroid_interp>& realm::getCentroidInterpolationStencils(cons
   return m_realms[a_phase]->getCentroidInterpolationStencils();
 }
 
-irreg_amr_stencil<eb_centroid_interp>& realm::getEbCentroidInterpolationStencils(const phase::which_phase a_phase) {
+irreg_amr_stencil<EbCentroidInterpolation>& realm::getEbCentroidInterpolationStencils(const phase::which_phase a_phase) {
   return m_realms[a_phase]->getEbCentroidInterpolationStencils();
 }
 

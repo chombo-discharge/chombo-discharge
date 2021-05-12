@@ -1053,7 +1053,7 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const irreg_amr_stencil<eb_centroid_interp>& getEbCentroidInterpolationStencils(const std::string        a_realm,
+  const irreg_amr_stencil<EbCentroidInterpolation>& getEbCentroidInterpolationStencils(const std::string        a_realm,
 										  const phase::which_phase a_phase) const;
 
   /*!

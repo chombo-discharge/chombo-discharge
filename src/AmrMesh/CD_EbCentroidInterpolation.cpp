@@ -1,0 +1,183 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
+/*!
+  @file   EbCentroidInterpolation.cpp
+  @brief  Implementation of EbCentroidInterpolation.H
+  @author Robert Marskar
+*/
+
+// Chombo includes
+#include <EBArith.H>
+
+// Our includes
+#include <CD_EbCentroidInterpolation.H>
+#include <LinearStencil.H>
+#include <CD_LeastSquares.H>
+#include <CD_NamespaceHeader.H>
+
+EbCentroidInterpolation::EbCentroidInterpolation(const DisjointBoxLayout&       a_dbl,
+						 const EBISLayout&              a_ebisl,
+						 const ProblemDomain&           a_domain,
+						 const Real&                    a_dx,
+						 const int                      a_order,
+						 const int                      a_radius,
+						 const stencil_type             a_type) : irreg_stencil(){
+
+  CH_TIME("EbCentroidInterpolation::EbCentroidInterpolation");
+
+  this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius, a_type);
+}
+
+EbCentroidInterpolation::~EbCentroidInterpolation(){
+  CH_TIME("EbCentroidInterpolation::~EbCentroidInterpolation");
+}
+
+void EbCentroidInterpolation::build_stencil(VoFStencil&              a_sten,
+					    const VolIndex&          a_vof,
+					    const DisjointBoxLayout& a_dbl,
+					    const ProblemDomain&     a_domain,
+					    const EBISBox&           a_ebisbox,
+					    const Box&               a_box,
+					    const Real&              a_dx,
+					    const IntVectSet&        a_cfivs){
+  CH_TIME("EbCentroidInterpolation::build_stencil");
+
+  
+  bool found_stencil = false;
+
+  // Find the preferred stencil type
+  if(m_stencilType == stencil_type::linear){
+    const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
+    found_stencil = LinearStencil::getLinearInterpStencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+  }
+  else if(m_stencilType == stencil_type::taylor){
+    found_stencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  }
+  else if(m_stencilType == stencil_type::lsq){
+    found_stencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  }
+  else if(m_stencilType == stencil_type::pwl){
+    found_stencil = this->getPiecewiseLinearStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  }
+  else{
+    MayDay::Abort("EbCentroidInterpolation::build_stencil - Unsupported stencil type");
+  }
+
+  // If we couldn't find a stencil, try other types in this order
+  if(!found_stencil){
+    const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
+    found_stencil = LinearStencil::getLinearInterpStencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+  }
+  if(!found_stencil){
+    found_stencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  }
+  if(!found_stencil){
+    found_stencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  }
+
+#if 0 // Only meant for testing but left in place: This code averages several neighbors over the EB. Only ment for testing so far
+  found_stencil = this->get_ebavg_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+#endif
+
+  if(!found_stencil){ // Drop to zeroth order.
+    a_sten.clear();
+    a_sten.add(a_vof, 1.0);
+  }
+}
+
+bool EbCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&              a_sten,
+							    const VolIndex&          a_vof,
+							    const DisjointBoxLayout& a_dbl,
+							    const ProblemDomain&     a_domain,
+							    const EBISBox&           a_ebisbox,
+							    const Box&               a_box,
+							    const Real&              a_dx,
+							    const IntVectSet&        a_cfivs){
+  CH_TIME("EbCentroidInterpolation::getTaylorExtrapolationStencil");
+  
+  const int comp           = 0;
+  const RealVect& centroid = a_ebisbox.bndryCentroid(a_vof);
+  IntVectSet* cfivs        = const_cast<IntVectSet*>(&a_cfivs);
+  
+  if(m_order == 1){
+    EBArith::getFirstOrderExtrapolationStencil(a_sten, centroid*a_dx, a_dx*RealVect::Unit, a_vof, a_ebisbox, -1, cfivs, comp);
+  }
+  else if(m_order == 2){
+    EBArith::getExtrapolationStencil(a_sten, centroid*a_dx, a_dx*RealVect::Unit, a_vof, a_ebisbox, -1, cfivs, comp);
+  }
+  else {
+    MayDay::Abort("EbCentroidInterpolation::getTaylorExtrapolationStencil - bad order requested. Only first and second order is supported");
+  }
+
+  return a_sten.size() > 0;
+
+}
+
+bool EbCentroidInterpolation::getLeastSquaresInterpolationStencil(VoFStencil&              a_sten,
+								  const VolIndex&          a_vof,
+								  const DisjointBoxLayout& a_dbl,
+								  const ProblemDomain&     a_domain,
+								  const EBISBox&           a_ebisbox,
+								  const Box&               a_box,
+								  const Real&              a_dx,
+								  const IntVectSet&        a_cfivs){
+  CH_TIME("EbCentroidInterpolation::getLeastSquaresInterpolationStencil");
+
+  const int weightingPower = 0;
+  
+  a_sten = LeastSquares::getInterpolationStencilUsingAllVofsInRadius(LeastSquares::CellPosition::Boundary,
+								     LeastSquares::CellPosition::Center,
+								     a_vof,
+								     a_ebisbox,
+								     a_dx,
+								     weightingPower,
+								     m_radius,
+								     m_order);
+
+  return (a_sten.size() > 0);
+}
+
+bool EbCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&              a_sten,
+							const VolIndex&          a_vof,
+							const DisjointBoxLayout& a_dbl,
+							const ProblemDomain&     a_domain,
+							const EBISBox&           a_ebisbox,
+							const Box&               a_box,
+							const Real&              a_dx,
+							const IntVectSet&        a_cfivs){
+
+  a_sten.clear();
+  a_sten.add(a_vof, 1.0);
+
+  constexpr Real thresh = 1.E-8;
+  
+  const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
+  for (int dir = 0; dir < SpaceDim; dir++){
+
+    bool hasLo, hasLower, hasHi, hasHigher;
+    VolIndex loVoF, lowerVoF, hiVoF, higherVoF;
+    EBArith::getVoFsDir(hasLo, loVoF, hasLower, lowerVoF,   a_ebisbox, a_vof, dir, Side::Lo, (IntVectSet*) &a_cfivs);
+    EBArith::getVoFsDir(hasHi, hiVoF, hasHigher, higherVoF, a_ebisbox, a_vof, dir, Side::Hi, (IntVectSet*) &a_cfivs);
+
+    if(hasLo || hasHi){
+      if(centroid[dir] > thresh && hasHi){ // Deriv is to the right
+	a_sten.add(hiVoF,  centroid[dir]);
+	a_sten.add(a_vof, -centroid[dir]);
+      }
+      else if(centroid[dir] < -thresh && hasLo){ // Deriv is to the left
+	a_sten.add(loVoF, -centroid[dir]);
+	a_sten.add(a_vof,  centroid[dir]);
+      }
+      else if(Abs(centroid[dir]) < thresh){
+	// No deriv in this direction
+      }
+    }
+  }
+
+  return true;
+}
+
+#include <CD_NamespaceFooter.H>
