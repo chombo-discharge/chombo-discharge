@@ -41,12 +41,12 @@ public:
   /*!
     @brief Parse class options
   */
-  virtual void parse_options() = 0;
+  virtual void parseOptions() = 0;
 
   /*!
     @brief Parse class options
   */
-  virtual void parse_runtime_options();
+  virtual void parseRuntimeOptions();
 
   /*!
     @brief Tag cells

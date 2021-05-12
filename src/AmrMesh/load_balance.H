@@ -15,7 +15,7 @@
 /*!
   @brief Enum for sorting boxes
 */
-enum class box_sorting {
+enum class BoxSorting {
   none,
   std,
   shuffle,
@@ -54,13 +54,13 @@ public:
     @brief Sort boxes and loads over a hierarchy
   */
   template <typename T>
-  static void sort(Vector<Vector<Box> >& a_boxes, Vector<Vector<T> >& a_loads, const box_sorting a_which);
+  static void sort(Vector<Vector<Box> >& a_boxes, Vector<Vector<T> >& a_loads, const BoxSorting a_which);
   
   /*!
     @brief Main sorting function for sorting boxes and loads
   */
   template <typename T>
-  static void sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const box_sorting a_which);
+  static void sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a_which);
 
   /*!
     @brief Load balancing. Loads are box volumes. 
@@ -76,7 +76,7 @@ public:
     @brief Main sorting function for sorting boxes and loads
     @details This just calls the other version. 
   */
-  static void sort(Vector<Box>& a_boxes, const box_sorting a_which);
+  static void sort(Vector<Box>& a_boxes, const BoxSorting a_which);
 
   /*!
     @brief Gather boxes

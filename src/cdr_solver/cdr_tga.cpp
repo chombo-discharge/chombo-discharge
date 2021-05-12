@@ -564,7 +564,7 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, EBAMRCellData& a_state, const 
   const int ncomp = 1;
 
   // Fill ghost cells
-  m_amr->interpGhost_pwl(a_state, m_realm, m_phase);
+  m_amr->interpGhostPwl(a_state, m_realm, m_phase);
 
   if(m_mobile || m_diffusive){
 
@@ -577,7 +577,7 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, EBAMRCellData& a_state, const 
 
     // Compute advection flux. This is mostly the same as compute_divF
     if(m_mobile){
-      m_amr->interpGhost_pwl(m_velo_cell, m_realm, m_phase);
+      m_amr->interpGhostPwl(m_velo_cell, m_realm, m_phase);
       
       this->average_velo_to_faces(); // Update m_velo_face from m_velo_cell
       this->advect_to_faces(m_face_states, a_state, a_extrap_dt); // Advect to faces
@@ -619,8 +619,8 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, EBAMRCellData& a_state, const 
   if(m_mobile){
 
     // Fill ghost cells
-    m_amr->interpGhost_pwl(a_state,     m_realm, m_phase);
-    m_amr->interpGhost_pwl(m_velo_cell, m_realm, m_phase);
+    m_amr->interpGhostPwl(a_state,     m_realm, m_phase);
+    m_amr->interpGhostPwl(m_velo_cell, m_realm, m_phase);
 
     if(m_redist_mass_weighted){
       this->reset_redist_weights(a_state);
@@ -661,7 +661,7 @@ void cdr_tga::compute_divD(EBAMRCellData& a_divD, EBAMRCellData& a_state, const 
     const int ncomp = 1;
 
     // Fill ghost cells
-    m_amr->interpGhost_pwl(a_state, m_realm, m_phase);
+    m_amr->interpGhostPwl(a_state, m_realm, m_phase);
 
     if(m_redist_mass_weighted){
       this->reset_redist_weights(a_state);

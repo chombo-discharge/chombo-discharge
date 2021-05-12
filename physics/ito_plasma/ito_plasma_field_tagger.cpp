@@ -62,8 +62,8 @@ void ito_plasma_field_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_gra
   m_amr->interpGhost(a_grad_E, m_realm, m_phase);
   
   // Interpolate to centroids
-  m_amr->InterpToCentroids(a_E,      m_realm, m_phase);
-  m_amr->InterpToCentroids(a_grad_E, m_realm, m_phase);
+  m_amr->interpToCentroids(a_E,      m_realm, m_phase);
+  m_amr->interpToCentroids(a_grad_E, m_realm, m_phase);
 }
 
 void ito_plasma_field_tagger::compute_tracers(){

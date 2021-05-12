@@ -54,16 +54,16 @@ void ito_layout<T>::define(const Vector<RefCountedPtr<ito_species> >& a_species)
 }
 
 template <class T>
-void ito_layout<T>::parse_options(){
+void ito_layout<T>::parseOptions(){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->parse_options();
+    iter()->parseOptions();
   }
 }
 
 template <class T>
-void ito_layout<T>::parse_runtime_options(){
+void ito_layout<T>::parseRuntimeOptions(){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->parse_runtime_options();
+    iter()->parseRuntimeOptions();
   }
 }
 

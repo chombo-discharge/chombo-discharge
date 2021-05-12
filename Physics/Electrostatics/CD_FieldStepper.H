@@ -78,7 +78,7 @@ namespace Physics {
     protected:
 
       bool m_load_balance;
-      box_sorting m_boxSort;
+      BoxSorting m_boxSort;
 
       RefCountedPtr<FieldSolver> m_fieldSolver;
       RefCountedPtr<sigma_solver>   m_sigma;

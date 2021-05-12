@@ -39,7 +39,7 @@ void rte_stepper<T>::setup_solvers(){
   m_solver = RefCountedPtr<rte_solver> (new T());
   m_solver->set_verbosity(m_verbosity);
   m_solver->set_rte_species(m_species);
-  m_solver->parse_options();
+  m_solver->parseOptions();
   m_solver->set_phase(phase::gas);
   m_solver->set_amr(m_amr);
   m_solver->set_computational_geometry(m_compgeom);
@@ -47,12 +47,12 @@ void rte_stepper<T>::setup_solvers(){
 }
 
 template <typename T>
-void rte_stepper<T>::parse_runtime_options() {
+void rte_stepper<T>::parseRuntimeOptions() {
   ParmParse pp("rte_stepper");
 
   pp.get   ("verbosity", m_verbosity);
       
-  m_solver->parse_runtime_options();
+  m_solver->parseRuntimeOptions();
 }
 
 template <typename T>

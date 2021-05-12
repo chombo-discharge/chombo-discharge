@@ -35,7 +35,7 @@ int cell_tagger::get_buffer(){
   return m_buffer;
 }
 
-void cell_tagger::parse_runtime_options(){
+void cell_tagger::parseRuntimeOptions(){
 
 }
 

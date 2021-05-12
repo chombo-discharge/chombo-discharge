@@ -57,7 +57,7 @@ void ito_plasma_stepper::setup_solvers(){
   }
 
   // Parse class options
-  this->parse_options();
+  this->parseOptions();
 
   // Set up solvers
   this->setup_ito();
@@ -79,7 +79,7 @@ void ito_plasma_stepper::setup_ito(){
   }
 
   m_ito->set_verbosity(m_verbosity);
-  m_ito->parse_options();
+  m_ito->parseOptions();
   m_ito->set_amr(m_amr);
   m_ito->set_phase(m_phase);
   m_ito->set_computational_geometry(m_compgeom);
@@ -107,7 +107,7 @@ void ito_plasma_stepper::setup_rte(){
   }
 
   m_rte->set_verbosity(m_verbosity);
-  m_rte->parse_options();
+  m_rte->parseOptions();
   m_rte->set_phase(m_phase);
   m_rte->set_amr(m_amr);
   m_rte->set_computational_geometry(m_compgeom);
@@ -263,14 +263,14 @@ void ito_plasma_stepper::post_checkpoint_poisson(){
   // Fluid realm
   m_fluid_E.copy(E);
   m_amr->averageDown(m_fluid_E,             m_fluid_realm, m_phase);
-  m_amr->interpGhost_pwl(m_fluid_E,         m_fluid_realm, m_phase);
-  m_amr->InterpToCentroids(m_fluid_E, m_fluid_realm, m_phase);
+  m_amr->interpGhostPwl(m_fluid_E,         m_fluid_realm, m_phase);
+  m_amr->interpToCentroids(m_fluid_E, m_fluid_realm, m_phase);
 
   // Particle realm
   m_particle_E.copy(E);
   m_amr->averageDown(m_particle_E,             m_particle_realm, m_phase);
-  m_amr->interpGhost_pwl(m_particle_E,         m_particle_realm, m_phase);
-  m_amr->InterpToCentroids(m_particle_E, m_particle_realm, m_phase);
+  m_amr->interpGhostPwl(m_particle_E,         m_particle_realm, m_phase);
+  m_amr->interpToCentroids(m_particle_E, m_particle_realm, m_phase);
 
   // Compute maximum E
   // const Real Emax = this->compute_Emax(m_phase);
@@ -883,7 +883,7 @@ Real ito_plasma_stepper::compute_Emax(const phase::which_phase a_phase) {
   EBAMRCellData E;
   m_amr->allocate(E, m_fluid_realm, m_phase, SpaceDim);
   data_ops::copy(E, Ephase);
-  m_amr->InterpToCentroids(E, m_fluid_realm, m_phase);
+  m_amr->interpToCentroids(E, m_fluid_realm, m_phase);
 
   Real max, min;
   data_ops::get_max_min_norm(max, min, E);
@@ -1060,7 +1060,7 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
   }
 
   // Interpolate to centroids
-  m_amr->InterpToCentroids(rhoPhase, m_fluid_realm, m_phase);
+  m_amr->interpToCentroids(rhoPhase, m_fluid_realm, m_phase);
 }
 
 void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity){
@@ -1102,10 +1102,10 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, con
   data_ops::scale(a_conductivity, units::s_Qe);
 
   m_amr->averageDown(a_conductivity, m_fluid_realm, m_phase);
-  m_amr->interpGhost_pwl(a_conductivity, m_fluid_realm, m_phase);
+  m_amr->interpGhostPwl(a_conductivity, m_fluid_realm, m_phase);
 
   // See if this helps....
-  m_amr->InterpToCentroids(a_conductivity, m_fluid_realm, m_phase);
+  m_amr->interpToCentroids(a_conductivity, m_fluid_realm, m_phase);
 }
 
 void ito_plasma_stepper::compute_J(EBAMRCellData& a_J, const Real a_dt){
@@ -1233,14 +1233,14 @@ bool ito_plasma_stepper::solve_poisson(){
   // Fluid realm
   m_fluid_E.copy(E);
   m_amr->averageDown(m_fluid_E, m_fluid_realm, m_phase);
-  m_amr->interpGhost_pwl(m_fluid_E, m_fluid_realm, m_phase);
-  m_amr->InterpToCentroids(m_fluid_E, m_fluid_realm, m_phase);
+  m_amr->interpGhostPwl(m_fluid_E, m_fluid_realm, m_phase);
+  m_amr->interpToCentroids(m_fluid_E, m_fluid_realm, m_phase);
 
   // Particle realm
   m_particle_E.copy(E);
   m_amr->averageDown(m_particle_E, m_particle_realm, m_phase);
-  m_amr->interpGhost_pwl(m_particle_E, m_particle_realm, m_phase);
-  m_amr->InterpToCentroids(m_particle_E, m_particle_realm, m_phase);
+  m_amr->interpGhostPwl(m_particle_E, m_particle_realm, m_phase);
+  m_amr->interpToCentroids(m_particle_E, m_particle_realm, m_phase);
     
   return converged;
 }

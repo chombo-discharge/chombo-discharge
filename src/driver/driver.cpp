@@ -41,7 +41,7 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   m_amr->buildDomains();                // Build domains and resolutions, nothing else
 
   // Parse some class options
-  parse_options();
+  parseOptions();
 
   // Create output directories. 
   create_output_directories();
@@ -869,11 +869,11 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 
       // Rebuild input parameters
       this->rebuildParmParse();
-      this->parse_runtime_options();
-      m_amr->parse_runtime_options();
-      m_timestepper->parse_runtime_options();
+      this->parseRuntimeOptions();
+      m_amr->parseRuntimeOptions();
+      m_timestepper->parseRuntimeOptions();
       if(!m_celltagger.isNull()){
-	m_celltagger->parse_runtime_options();
+	m_celltagger->parseRuntimeOptions();
       }
     }
   }
@@ -939,7 +939,7 @@ void driver::set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger){
 
   m_celltagger = a_celltagger;
   if(!a_celltagger.isNull()){
-    m_celltagger->parse_options();
+    m_celltagger->parseOptions();
   }
 }
 
@@ -951,14 +951,14 @@ void driver::set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen){
   m_geocoarsen = a_geocoarsen;
 }
 
-void driver::parse_options(){
-  CH_TIME("driver::parse_options");
+void driver::parseOptions(){
+  CH_TIME("driver::parseOptions");
 
   ParmParse pp("driver");
 
   pp.get("verbosity",                m_verbosity);
   if(m_verbosity > 5){
-    pout() << "driver::parse_options" << endl;
+    pout() << "driver::parseOptions" << endl;
   }
   
   pp.get("regrid_interval",          m_regrid_interval);
@@ -990,14 +990,14 @@ void driver::parse_options(){
   parse_geo_refinement();
 }
 
-void driver::parse_runtime_options(){
-  CH_TIME("driver::parse_runtime_options");
+void driver::parseRuntimeOptions(){
+  CH_TIME("driver::parseRuntimeOptions");
 
   ParmParse pp("driver");
 
   pp.get("verbosity",                m_verbosity);
   if(m_verbosity > 5){
-    pout() << "driver::parse_runtime_options" << endl;
+    pout() << "driver::parseRuntimeOptions" << endl;
   }
   pp.get("write_memory",             m_write_memory);
   pp.get("write_loads",              m_write_loads);

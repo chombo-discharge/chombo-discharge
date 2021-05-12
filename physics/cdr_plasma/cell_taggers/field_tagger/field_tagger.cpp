@@ -28,7 +28,7 @@ field_tagger::~field_tagger(){
 
 }
 
-void field_tagger::parse_options(){
+void field_tagger::parseOptions(){
   parseVerbosity();
   parse_boxes();
   parse_buffer();

@@ -31,10 +31,10 @@ sdc::~sdc(){
 
 }
 
-void sdc::parse_options(){
-  CH_TIME("sdc::parse_options");
+void sdc::parseOptions(){
+  CH_TIME("sdc::parseOptions");
   if(m_verbosity > 5){
-    pout() << "sdc::parse_options" << endl;
+    pout() << "sdc::parseOptions" << endl;
   }
 
   // Regular stuff from time_stepper that we almost always need
@@ -956,7 +956,7 @@ void sdc::compute_semi_implicit_rho(const int a_m,  const bool a_corrector){
 
   // Now do the scaling
   data_ops::scale(rho_gas, units::s_Qe);
-  m_amr->InterpToCentroids(rho_gas, phase::gas);
+  m_amr->interpToCentroids(rho_gas, phase::gas);
 }
 
 void sdc::set_semi_implicit_permittivities(){

@@ -22,7 +22,7 @@ air2_tagger::~air2_tagger(){
 
 }
 
-void air2_tagger::parse_options(){
+void air2_tagger::parseOptions(){
   parseVerbosity();
   parse_boxes();
   parse_buffer();

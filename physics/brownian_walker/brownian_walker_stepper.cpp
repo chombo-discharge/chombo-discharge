@@ -38,7 +38,7 @@ brownian_walker_stepper::~brownian_walker_stepper(){
 
 }
 
-void brownian_walker_stepper::parse_runtime_options() {
+void brownian_walker_stepper::parseRuntimeOptions() {
 
   ParmParse pp("brownian_walker");
   
@@ -47,7 +47,7 @@ void brownian_walker_stepper::parse_runtime_options() {
   pp.get("max_cells_hop",  m_max_cells_hop);
   pp.get("load_balance",   m_load_balance);
   
-  m_solver->parse_runtime_options();
+  m_solver->parseRuntimeOptions();
 }
 
 void brownian_walker_stepper::initial_data(){
@@ -344,7 +344,7 @@ void brownian_walker_stepper::setup_solvers() {
   m_species = RefCountedPtr<ito_species> (new brownian_walker_species());
 
   m_solver->set_verbosity(m_verbosity);
-  m_solver->parse_options();
+  m_solver->parseOptions();
   m_solver->set_amr(m_amr);
   m_solver->set_species(m_species);
   m_solver->set_phase(m_phase);

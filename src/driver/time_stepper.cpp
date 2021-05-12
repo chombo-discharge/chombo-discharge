@@ -46,10 +46,10 @@ int time_stepper::get_redistribution_regsize() const {
   return 1;
 }
 
-void time_stepper::parse_runtime_options() {
-  CH_TIME("time_stepper::parse_runtime_options");
+void time_stepper::parseRuntimeOptions() {
+  CH_TIME("time_stepper::parseRuntimeOptions");
   if(m_verbosity > 5){
-    pout() << "time_stepper::parse_runtime_options" << endl;
+    pout() << "time_stepper::parseRuntimeOptions" << endl;
   }
 }
 

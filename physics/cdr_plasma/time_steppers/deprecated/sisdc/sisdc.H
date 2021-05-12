@@ -45,7 +45,7 @@ public:
   void init_source_terms();
   void regrid_internals();
   void deallocate_internals();
-  void parse_options();
+  void parseOptions();
   bool need_to_regrid();
 
   Vector<EBAMRCellData*> get_cdr_errors();

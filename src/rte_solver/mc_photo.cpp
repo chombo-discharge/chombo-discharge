@@ -76,10 +76,10 @@ bool mc_photo::is_instantaneous(){
   return m_instantaneous;
 }
 
-void mc_photo::parse_options(){
-  CH_TIME("mc_photo::parse_options");
+void mc_photo::parseOptions(){
+  CH_TIME("mc_photo::parseOptions");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_options" << endl;
+    pout() << m_name + "::parseOptions" << endl;
   }
   
   this->parse_rng();
@@ -95,10 +95,10 @@ void mc_photo::parse_options(){
   this->parse_conservation();
 }
 
-void mc_photo::parse_runtime_options(){
-  CH_TIME("mc_photo::parse_runtime_options");
+void mc_photo::parseRuntimeOptions(){
+  CH_TIME("mc_photo::parseRuntimeOptions");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_runtime_options" << endl;
+    pout() << m_name + "::parseRuntimeOptions" << endl;
   }
   
   this->parse_pseudophotons();

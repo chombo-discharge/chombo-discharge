@@ -26,10 +26,10 @@ cdr_gdnv::~cdr_gdnv(){
 
 }
 
-void cdr_gdnv::parse_options(){
-  CH_TIME("cdr_gdnv::parse_options");
+void cdr_gdnv::parseOptions(){
+  CH_TIME("cdr_gdnv::parseOptions");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_options" << endl;
+    pout() << m_name + "::parseOptions" << endl;
   }
   
   parseDomain_bc();     // Parses domain BC options
@@ -42,10 +42,10 @@ void cdr_gdnv::parse_options(){
   parse_conservation();  // Nonlinear divergence blending
 }
 
-void cdr_gdnv::parse_runtime_options(){
-  CH_TIME("cdr_gdnv::parse_runtime_options");
+void cdr_gdnv::parseRuntimeOptions(){
+  CH_TIME("cdr_gdnv::parseRuntimeOptions");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_runtime_options" << endl;
+    pout() << m_name + "::parseRuntimeOptions" << endl;
   }
 
   parse_slopelim();
@@ -199,13 +199,13 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
       m_gmg_solver->computeAMROperator(scratchAlias, stateAlias, finest_level, 0, false);
 
       // computeAMROperator fucks my ghost cells. 
-      m_amr->interpGhost_pwl(const_cast<EBAMRCellData&> (a_state), m_realm, m_phase);
+      m_amr->interpGhostPwl(const_cast<EBAMRCellData&> (a_state), m_realm, m_phase);
     }
 #endif
 
     data_ops::copy(m_scratch, m_source);
     m_amr->averageDown(m_scratch,     m_realm, m_phase);
-    m_amr->interpGhost_pwl(m_scratch, m_realm, m_phase);
+    m_amr->interpGhostPwl(m_scratch, m_realm, m_phase);
   }
   else{
     data_ops::set_value(m_scratch, 0.0);

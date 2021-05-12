@@ -33,12 +33,12 @@ public:
   /*!
     @brief Parse options
   */
-  virtual void parse_options() override;
+  virtual void parseOptions() override;
 
   /*!
     @brief Parse options
   */
-  virtual void parse_runtime_options() override;
+  virtual void parseRuntimeOptions() override;
 
   /*!
     @brief Query number of ghost cells

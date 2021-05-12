@@ -57,12 +57,12 @@ public:
   /*!
     @brief Parse class options
   */
-  virtual void parse_options();
+  virtual void parseOptions();
 
   /*!
     @brief Parse runtime options
   */
-  virtual void parse_runtime_options();
+  virtual void parseRuntimeOptions();
 
   /*!
     @brief Add solver

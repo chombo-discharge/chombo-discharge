@@ -29,7 +29,7 @@ streamer_tagger::streamer_tagger(const RefCountedPtr<cdr_plasma_physics>&     a_
   this->define(a_physics, a_timestepper, a_amr, a_compgeom);
 }
 
-void streamer_tagger::parse_options(){
+void streamer_tagger::parseOptions(){
   parseVerbosity();
   parse_boxes();
   parse_buffer();

@@ -31,7 +31,7 @@ ito_plasma_streamer_tagger::ito_plasma_streamer_tagger(const RefCountedPtr<ito_p
   this->define(a_physics, a_timestepper, a_amr, a_compgeom);
 }
 
-void ito_plasma_streamer_tagger::parse_options(){
+void ito_plasma_streamer_tagger::parseOptions(){
   parseVerbosity();
   parse_boxes();
   parse_buffer();
@@ -44,7 +44,7 @@ void ito_plasma_streamer_tagger::parse_options(){
   pp.get("max_coarsen_lvl",   m_max_coarsen_level);
 }
 
-void ito_plasma_streamer_tagger::parse_runtime_options(){
+void ito_plasma_streamer_tagger::parseRuntimeOptions(){
   parseVerbosity();
   parse_boxes();
   parse_buffer();

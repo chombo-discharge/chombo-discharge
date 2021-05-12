@@ -19,7 +19,7 @@ air7_zheleznyak_tagger::~air7_zheleznyak_tagger(){
 
 }
 
-void air7_zheleznyak_tagger::parse_options(){
+void air7_zheleznyak_tagger::parseOptions(){
   parseVerbosity();
   parse_boxes();
   parse_buffer();

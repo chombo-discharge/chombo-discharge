@@ -25,7 +25,7 @@ void load_balance::round_robin(Vector<int>& a_ranks, const Vector<Box>& a_boxes)
   }
 }
 
-void load_balance::sort(Vector<Box>& a_boxes, const box_sorting a_which){
+void load_balance::sort(Vector<Box>& a_boxes, const BoxSorting a_which){
   Vector<int> dummy(a_boxes.size(), 0);
 
   load_balance::sort(a_boxes, dummy, a_which);

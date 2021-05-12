@@ -58,10 +58,10 @@ RefCountedPtr<ito_species>& ito_solver::get_species(){
   return m_species;
 }
 
-void ito_solver::parse_options(){
-  CH_TIME("ito_solver::parse_options");
+void ito_solver::parseOptions(){
+  CH_TIME("ito_solver::parseOptions");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_options" << endl;
+    pout() << m_name + "::parseOptions" << endl;
   }
 
   this->parse_superparticles();
@@ -76,10 +76,10 @@ void ito_solver::parse_options(){
   this->parse_checkpointing();
 }
 
-void ito_solver::parse_runtime_options(){
-  CH_TIME("ito_solver::parse_runtime_options");
+void ito_solver::parseRuntimeOptions(){
+  CH_TIME("ito_solver::parseRuntimeOptions");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_runtime_options" << endl;
+    pout() << m_name + "::parseRuntimeOptions" << endl;
   }
 
   this->parse_superparticles();
@@ -1337,7 +1337,7 @@ void ito_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
 
   // Interp if we should
   if(a_interp){
-    m_amr->InterpToCentroids(scratch, m_realm, phase::gas);
+    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
   }
 
   m_amr->averageDown(scratch, m_realm, m_phase);

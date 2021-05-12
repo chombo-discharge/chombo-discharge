@@ -333,7 +333,7 @@ void full_tagger::compute_cdr_densities(Vector<EBAMRCellData>& a_cdr_densities){
     // Interpolate density to centroid
     data_ops::set_value(m_scratch, 0.0);
     data_ops::incr(m_scratch, solver->get_state(), 1.0);
-    m_amr->InterpToCentroids(m_scratch, m_phase);
+    m_amr->interpToCentroids(m_scratch, m_phase);
 
     // Copy to member data holder
     const int idx = solver_it.get_solver();
@@ -372,8 +372,8 @@ void full_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
   m_amr->interpGhost(a_grad_E, m_phase);
   
   // Interpolate to centroids
-  m_amr->InterpToCentroids(a_E,      m_phase);
-  m_amr->InterpToCentroids(a_grad_E, m_phase);
+  m_amr->interpToCentroids(a_E,      m_phase);
+  m_amr->interpToCentroids(a_grad_E, m_phase);
 }
 
 void full_tagger::compute_rho(EBAMRCellData& a_rho, EBAMRCellData& a_grad_rho){
@@ -387,8 +387,8 @@ void full_tagger::compute_rho(EBAMRCellData& a_rho, EBAMRCellData& a_grad_rho){
   m_amr->computeGradient(a_grad_rho, a_rho, phase::gas);
 
   // Transform to centroids
-  m_amr->InterpToCentroids(a_rho,      m_phase);
-  m_amr->InterpToCentroids(a_grad_rho, m_phase);
+  m_amr->interpToCentroids(a_rho,      m_phase);
+  m_amr->interpToCentroids(a_grad_rho, m_phase);
 }
 
 void full_tagger::compute_rte_densities(Vector<EBAMRCellData>& a_rte_densities){
@@ -405,7 +405,7 @@ void full_tagger::compute_rte_densities(Vector<EBAMRCellData>& a_rte_densities){
     // Interpolate density to centroid
     data_ops::set_value(m_scratch, 0.0);
     data_ops::incr(m_scratch, solver->get_state(), 1.0);
-    m_amr->InterpToCentroids(m_scratch, m_phase);
+    m_amr->interpToCentroids(m_scratch, m_phase);
 
     // Copy to member data holder
     const int idx = solver_it.get_solver();

@@ -42,24 +42,24 @@ namespace Physics {
       std::string str;
 
       pp.get("load_balance", m_load_balance);
-      pp.get("box_sorting",  str);
+      pp.get("BoxSorting",  str);
       pp.get("realm",       m_realm);
       pp.get("verbosity",   m_verbosity);
       
       if( str == "none"){
-	m_boxSort = box_sorting::none;
+	m_boxSort = BoxSorting::none;
       }
       if( str == "std"){
-	m_boxSort = box_sorting::std;
+	m_boxSort = BoxSorting::std;
       }
       else if(str == "shuffle"){
-	m_boxSort = box_sorting::shuffle;
+	m_boxSort = BoxSorting::shuffle;
       }
       else if(str == "morton"){
-	m_boxSort = box_sorting::morton;
+	m_boxSort = BoxSorting::morton;
       }
       else {
-	MayDay::Abort("FieldStepper::FieldStepper - unknown box sorting method requested for argument 'box_sorting'");
+	MayDay::Abort("FieldStepper::FieldStepper - unknown box sorting method requested for argument 'BoxSorting'");
       }
     }
 

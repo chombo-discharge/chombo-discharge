@@ -38,10 +38,10 @@ int eddington_sp1::query_ghost() const{
   return 3;
 }
 
-void eddington_sp1::parse_options(){
-  CH_TIME("eddington_sp1::parse_options");
+void eddington_sp1::parseOptions(){
+  CH_TIME("eddington_sp1::parseOptions");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_options" << endl;
+    pout() << m_name + "::parseOptions" << endl;
   }
   
   parseDomain_bc();    // Parses domain BC options
@@ -50,10 +50,10 @@ void eddington_sp1::parse_options(){
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
 }
 
-void eddington_sp1::parse_runtime_options(){
-  CH_TIME("eddington_sp1::parse_runtime_options");
+void eddington_sp1::parseRuntimeOptions(){
+  CH_TIME("eddington_sp1::parseRuntimeOptions");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_runtime_options" << endl;
+    pout() << m_name + "::parseRuntimeOptions" << endl;
   }
   
   parse_stationary();   // Parse stationary solver

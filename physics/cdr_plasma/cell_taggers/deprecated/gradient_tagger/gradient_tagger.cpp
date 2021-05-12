@@ -27,7 +27,7 @@ void gradient_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_plas
   m_num_tracers = a_plaskin->get_num_species();
 }
 
-void gradient_tagger::parse_options(){
+void gradient_tagger::parseOptions(){
   parseVerbosity();
   parse_boxes();
   parse_buffer();

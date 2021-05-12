@@ -61,7 +61,7 @@ namespace physics {
       /*!
 	@brief Parse class options
       */
-      virtual void parse_options() = 0;
+      virtual void parseOptions() = 0;
 
       /*!
 	@brief

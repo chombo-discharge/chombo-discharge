@@ -30,10 +30,10 @@ sisdc::~sisdc(){
 
 }
 
-void sisdc::parse_options(){
-  CH_TIME("sisdc::parse_options");
+void sisdc::parseOptions(){
+  CH_TIME("sisdc::parseOptions");
   if(m_verbosity > 5){
-    pout() << "sisdc::parse_options" << endl;
+    pout() << "sisdc::parseOptions" << endl;
   }
 
   // Regular stuff from time_stepper that we almost always need

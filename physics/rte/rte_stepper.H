@@ -45,7 +45,7 @@ namespace physics {
       void print_step_report() override;
 
       // Runtime options
-      void parse_runtime_options() override;
+      void parseRuntimeOptions() override;
 
       // Registration routines
       void registerRealms() override;

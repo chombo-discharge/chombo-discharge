@@ -19,7 +19,7 @@ AmrMesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
 AmrMesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
 AmrMesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-AmrMesh.box_sorting     = morton      # Morton sorting
+AmrMesh.BoxSorting     = morton      # Morton sorting
 AmrMesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 32          # Maximum allowed box size
@@ -210,7 +210,7 @@ ito_plasma_godunov.verbosity      = -10            # Verbosity
 ito_plasma_godunov.min_dt         = 1.E-10         # Minimum dt
 ito_plasma_godunov.max_dt         = 1.E-10         # Maximum dt
 ito_plasma_godunov.particle_realm = particle       # Particle realm. Default is primal
-ito_plasma_godunov.box_sorting    = none         # Box sorting for load balancing. 'none', 'shuffle', 'std', 'morton'
+ito_plasma_godunov.BoxSorting    = none         # Box sorting for load balancing. 'none', 'shuffle', 'std', 'morton'
 ito_plasma_godunov.load_balance   = true           # Load balance or not
 ito_plasma_godunov.load_index     = 0              # Which species to use for load balancing (-1 => all)
 ito_plasma_godunov.load_ppc       = 0              # Load estimate per cell (in addition to ppc)

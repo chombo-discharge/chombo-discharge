@@ -108,25 +108,25 @@ void load_balance::unpackPairs(Vector<Box>& a_boxes, Vector<T>& a_loads, const s
 }
 
 template <typename T>
-void load_balance::sort(Vector<Vector<Box> >& a_boxes, Vector<Vector<T> >& a_loads, const box_sorting a_which){
+void load_balance::sort(Vector<Vector<Box> >& a_boxes, Vector<Vector<T> >& a_loads, const BoxSorting a_which){
   for (int lvl = 0; lvl < a_boxes.size(); lvl++){
     load_balance::sort(a_boxes[lvl], a_loads[lvl], a_which);
   }
 }
 
 template <typename T>
-void load_balance::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const box_sorting a_which){
+void load_balance::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a_which){
 
   switch(a_which){
-  case box_sorting::none:
+  case BoxSorting::none:
     break;
-  case box_sorting::std:
+  case BoxSorting::std:
     load_balance::std_sort(a_boxes, a_loads);
     break;
-  case box_sorting::shuffle:
+  case BoxSorting::shuffle:
     load_balance::shuffle_sort(a_boxes, a_loads);
     break;
-  case box_sorting::morton:
+  case BoxSorting::morton:
     load_balance::morton_sort(a_boxes, a_loads);
     break;
   default:

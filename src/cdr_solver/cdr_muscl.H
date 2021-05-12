@@ -37,12 +37,12 @@ public:
   /*!
     @brief Parse options
   */
-  virtual void parse_options() override;
+  virtual void parseOptions() override;
 
   /*!
     @brief Parse options
   */
-  virtual void parse_runtime_options() override;
+  virtual void parseRuntimeOptions() override;
 
   /*!
     @brief Pure advective advance. Calling this is an error - SG currently only works with MOL methods.

@@ -35,7 +35,7 @@ public:
   /*!
     @brief Parse options
   */
-  virtual void parse_options() = 0;
+  virtual void parseOptions() = 0;
   
 protected:
 

@@ -62,12 +62,12 @@ namespace physics {
       /*!
 	@brief Parse class options
       */
-      virtual void parse_options() = 0;
+      virtual void parseOptions() = 0;
 
       /*!
 	@brief Parse class options
       */
-      virtual void parse_runtime_options() = 0;
+      virtual void parseRuntimeOptions() = 0;
 
       /*!
 	@brief

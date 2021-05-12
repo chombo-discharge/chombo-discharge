@@ -36,10 +36,10 @@ godunov::~godunov(){
 
 }
 
-void godunov::parse_options(){
-  CH_TIME("godunov::parse_options");
+void godunov::parseOptions(){
+  CH_TIME("godunov::parseOptions");
   if(m_verbosity > 5){
-    pout() << "godunov::parse_options" << endl;
+    pout() << "godunov::parseOptions" << endl;
   }
 
   parseVerbosity();
@@ -59,10 +59,10 @@ void godunov::parse_options(){
   parse_fhd();
 }
 
-void godunov::parse_runtime_options(){
-  CH_TIME("godunov::parse_runtime_options");
+void godunov::parseRuntimeOptions(){
+  CH_TIME("godunov::parseRuntimeOptions");
   if(m_verbosity > 5){
-    pout() << "godunov::parse_runtime_options" << endl;
+    pout() << "godunov::parseRuntimeOptions" << endl;
   }
 
   parseVerbosity();
@@ -81,8 +81,8 @@ void godunov::parse_runtime_options(){
   parse_debug();
   parse_fhd();
 
-  m_cdr->parse_runtime_options();
-  m_rte->parse_runtime_options();
+  m_cdr->parseRuntimeOptions();
+  m_rte->parseRuntimeOptions();
   m_fieldSolver->parseRuntimeOptions();
 }
 

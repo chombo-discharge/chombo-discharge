@@ -26,7 +26,7 @@ namespace physics {
       ~brownian_walker_tagger();
 
       void regrid() override;
-      void parse_options() override;
+      void parseOptions() override;
       bool tag_cells(EBAMRTags& a_tags) override;
 
     protected:

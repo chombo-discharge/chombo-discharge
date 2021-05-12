@@ -1733,7 +1733,7 @@ void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
   data_ops::copy(scratch, a_data);
 
   if(a_interp){
-    m_amr->InterpToCentroids(scratch, m_realm, phase::gas);
+    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
   }
 
   m_amr->averageDown(scratch, m_realm, m_phase);

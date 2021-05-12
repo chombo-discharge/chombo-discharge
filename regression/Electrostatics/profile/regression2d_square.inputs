@@ -11,7 +11,7 @@ AmrMesh.fill_ratio      = 0.5         # Fill ratio for grid generation
 AmrMesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm  = br       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-AmrMesh.box_sorting     = morton      # 'none', 'std_sort', 'shuffle', or 'morton'
+AmrMesh.BoxSorting     = morton      # 'none', 'std_sort', 'shuffle', or 'morton'
 AmrMesh.blocking_factor = 8          # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
@@ -145,7 +145,7 @@ rod_plane_profile.square_depth = 440.01231231E-6
 FieldStepper.verbosity    = -1              # Verbosity
 FieldStepper.realm        = primal          # Primal realm
 FieldStepper.load_balance = false           # Load balance or not.
-FieldStepper.box_sorting  = shuffle         # If you load balance you can redo the box sorting. 
+FieldStepper.BoxSorting  = shuffle         # If you load balance you can redo the box sorting. 
 FieldStepper.init_rho     = 0.0             # Space charge density
 FieldStepper.init_sigma   = 0.0             # Surface charge density
 

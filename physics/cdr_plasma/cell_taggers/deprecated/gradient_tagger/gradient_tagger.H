@@ -39,7 +39,7 @@ public:
   /*!
     @brief Parse options
   */
-  virtual void parse_options();
+  virtual void parseOptions();
 
   /*!
     @brief Build tracer field

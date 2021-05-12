@@ -65,12 +65,12 @@ public:
   /*!
     @brief Parse options for all solvers
   */
-  virtual void parse_options();
+  virtual void parseOptions();
 
   /*!
     @brief Parse options for all solvers
   */
-  virtual void parse_runtime_options();
+  virtual void parseRuntimeOptions();
 
   /*!
     @brief Set PVR buffer for all solvers

@@ -61,7 +61,7 @@ void sisdc_tagger::compute_tracers(){
   m_timestepper->compute_E(E, phase::gas);
 
   data_ops::vector_length(m_tracer[1], E);
-  m_amr->InterpToCentroids(m_tracer[1], m_phase);
+  m_amr->interpToCentroids(m_tracer[1], m_phase);
   data_ops::get_max_min(Emax, Emin, m_tracer[1], 0);
   data_ops::scale(m_tracer[1], 1./Emax);
 

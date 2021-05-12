@@ -38,14 +38,14 @@ advection_diffusion_stepper::advection_diffusion_stepper(RefCountedPtr<cdr_solve
 advection_diffusion_stepper::~advection_diffusion_stepper(){
 }
 
-void advection_diffusion_stepper::parse_runtime_options() {
+void advection_diffusion_stepper::parseRuntimeOptions() {
   ParmParse pp("advection_diffusion");
 
   pp.get("verbosity",  m_verbosity);
   pp.get("cfl",        m_cfl);
   pp.get("integrator", m_integrator);
 
-  m_solver->parse_runtime_options();
+  m_solver->parseRuntimeOptions();
 }
 
 void advection_diffusion_stepper::setup_solvers(){
@@ -54,7 +54,7 @@ void advection_diffusion_stepper::setup_solvers(){
   // Solver setup
   m_solver->set_verbosity(m_verbosity);
   m_solver->set_species(m_species);
-  m_solver->parse_options();
+  m_solver->parseOptions();
   m_solver->set_phase(m_phase);
   m_solver->set_amr(m_amr);
   m_solver->set_computational_geometry(m_compgeom);

@@ -32,7 +32,7 @@ void advection_diffusion_tagger::regrid(){
   pout() << "regridding cell tagger" << endl;
 }
 
-void advection_diffusion_tagger::parse_options(){
+void advection_diffusion_tagger::parseOptions(){
   ParmParse pp(m_name.c_str());
   pp.get("refine_curv", m_refi_curv);
   pp.get("refine_magn", m_refi_magn);

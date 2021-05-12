@@ -787,7 +787,7 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
   m_amr->averageDown(scratch, m_realm, phase::gas);
   m_amr->interpGhost(scratch, m_realm, phase::gas);
   if(a_interp){
-    m_amr->InterpToCentroids(scratch, m_realm, phase::gas);
+    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
   }
 
   const Interval src_interv(0, ncomp-1);

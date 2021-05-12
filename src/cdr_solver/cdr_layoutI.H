@@ -60,28 +60,28 @@ void cdr_layout<T>::add_solver(RefCountedPtr<T> a_solver){
 }
 
 template <class T>
-void cdr_layout<T>::parse_options(){
-  CH_TIME("cdr_layout<T>::parse_options");
+void cdr_layout<T>::parseOptions(){
+  CH_TIME("cdr_layout<T>::parseOptions");
   if(m_verbosity > 6){
-    pout() << "cdr_layout<T>::parse_options" << endl;
+    pout() << "cdr_layout<T>::parseOptions" << endl;
   }
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->parse_options();
+    solver->parseOptions();
   }
 }
 
 template <class T>
-void cdr_layout<T>::parse_runtime_options(){
-  CH_TIME("cdr_layout<T>::parse_runtime_options");
+void cdr_layout<T>::parseRuntimeOptions(){
+  CH_TIME("cdr_layout<T>::parseRuntimeOptions");
   if(m_verbosity > 6){
-    pout() << "cdr_layout<T>::parse_runtime_options" << endl;
+    pout() << "cdr_layout<T>::parseRuntimeOptions" << endl;
   }
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->parse_runtime_options();
+    solver->parseRuntimeOptions();
   }
 }
 

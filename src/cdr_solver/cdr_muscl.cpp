@@ -24,7 +24,7 @@ cdr_muscl::~cdr_muscl(){
 
 }
 
-void cdr_muscl::parse_options(){
+void cdr_muscl::parseOptions(){
   parse_rng_seed();     // Parses RNG seed
   parse_plotmode();     // Parses plot mode
   parseDomain_bc();    // Parses domain BC options
@@ -36,10 +36,10 @@ void cdr_muscl::parse_options(){
   m_extrap_source = false; // This class can't extrapolate with source term (yet)
 }
 
-void cdr_muscl::parse_runtime_options(){
-  CH_TIME("cdr_muscl::parse_runtime_options");
+void cdr_muscl::parseRuntimeOptions(){
+  CH_TIME("cdr_muscl::parseRuntimeOptions");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_runtime_options" << endl;
+    pout() << m_name + "::parseRuntimeOptions" << endl;
   }
 
   parse_plotmode();     // Parses plot mode
@@ -91,7 +91,7 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
   data_ops::incr(copy_state, a_state, 1.0);
 
   m_amr->averageDown(copy_state,     m_realm, m_phase);
-  m_amr->interpGhost_pwl(copy_state, m_realm, m_phase);
+  m_amr->interpGhostPwl(copy_state, m_realm, m_phase);
 
   data_ops::set_value(a_face_state, 0.0);
 

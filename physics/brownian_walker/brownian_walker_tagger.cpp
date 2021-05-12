@@ -29,7 +29,7 @@ void brownian_walker_tagger::regrid(){
 
 }
 
-void brownian_walker_tagger::parse_options(){
+void brownian_walker_tagger::parseOptions(){
   ParmParse pp(m_name.c_str());
   pp.get("refine_magn", m_refi_magn);
   

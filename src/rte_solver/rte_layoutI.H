@@ -49,28 +49,28 @@ void rte_layout<T>::add_solver(RefCountedPtr<T> a_solver){
 }
 
 template <class T>
-void rte_layout<T>::parse_options(){
-  CH_TIME("rte_layout<T>::parse_options");
+void rte_layout<T>::parseOptions(){
+  CH_TIME("rte_layout<T>::parseOptions");
   if(m_verbosity > 6){
-    pout() << "rte_layout<T>::parse_options" << endl;
+    pout() << "rte_layout<T>::parseOptions" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->parse_options();
+    solver->parseOptions();
   }
 }
 
 template <class T>
-void rte_layout<T>::parse_runtime_options(){
-  CH_TIME("rte_layout<T>::parse_runtime_options");
+void rte_layout<T>::parseRuntimeOptions(){
+  CH_TIME("rte_layout<T>::parseRuntimeOptions");
   if(m_verbosity > 6){
-    pout() << "rte_layout<T>::parse_runtime_options" << endl;
+    pout() << "rte_layout<T>::parseRuntimeOptions" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->parse_runtime_options();
+    solver->parseRuntimeOptions();
   }
 }
 

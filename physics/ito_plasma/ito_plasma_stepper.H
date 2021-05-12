@@ -47,8 +47,8 @@ namespace physics {
       ~ito_plasma_stepper();
 
       // Setup routines
-      virtual void parse_options() = 0;
-      virtual void parse_runtime_options() = 0;
+      virtual void parseOptions() = 0;
+      virtual void parseRuntimeOptions() = 0;
       virtual void allocate_internals() = 0;
       virtual void setup_solvers() override;
       virtual void allocate() override;
@@ -338,7 +338,7 @@ namespace physics {
       std::string m_name;
       phase::which_phase m_phase;
 
-      box_sorting m_boxSort;
+      BoxSorting m_boxSort;
       
       RefCountedPtr<ito_plasma_physics> m_physics;
       RefCountedPtr<ito_layout<ito_solver> > m_ito;

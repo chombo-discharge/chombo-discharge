@@ -19,7 +19,7 @@ air3_mc8_tagger::~air3_mc8_tagger(){
 
 }
 
-void air3_mc8_tagger::parse_options(){
+void air3_mc8_tagger::parseOptions(){
   parseVerbosity();
   parse_boxes();
   parse_buffer();

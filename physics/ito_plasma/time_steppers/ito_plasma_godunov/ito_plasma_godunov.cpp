@@ -114,10 +114,10 @@ void ito_plasma_godunov::allocate(){
   }
 }
 
-void ito_plasma_godunov::parse_options() {
-  CH_TIME("ito_plasma_godunov::parse_options");
+void ito_plasma_godunov::parseOptions() {
+  CH_TIME("ito_plasma_godunov::parseOptions");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_options" << endl;
+    pout() << m_name + "::parseOptions" << endl;
   }
 
   ParmParse pp(m_name.c_str());
@@ -148,7 +148,7 @@ void ito_plasma_godunov::parse_options() {
     m_algorithm = which_algorithm::trapezoidal;
   }
   else{
-    MayDay::Abort("ito_plasma_godunov::parse_options - unknown algorithm requested");
+    MayDay::Abort("ito_plasma_godunov::parseOptions - unknown algorithm requested");
   }
 
   // Dt limitation
@@ -163,25 +163,25 @@ void ito_plasma_godunov::parse_options() {
     m_whichDt = which_dt::advection_diffusion;
   }
   else{
-    MayDay::Abort("ito_plasma_godunov::parse_options - unknown 'which_dt' requested");
+    MayDay::Abort("ito_plasma_godunov::parseOptions - unknown 'which_dt' requested");
   }
 
   // Box sorting for load balancing
-  pp.get("box_sorting", str);
+  pp.get("BoxSorting", str);
   if( str == "none"){
-    m_boxSort = box_sorting::none;
+    m_boxSort = BoxSorting::none;
   }
   else if( str == "std"){
-    m_boxSort = box_sorting::std;
+    m_boxSort = BoxSorting::std;
   }
   else if(str == "shuffle"){
-    m_boxSort = box_sorting::shuffle;
+    m_boxSort = BoxSorting::shuffle;
   }
   else if(str == "morton"){
-    m_boxSort = box_sorting::morton;
+    m_boxSort = BoxSorting::morton;
   }
   else {
-    MayDay::Abort("ito_plasma_godunov::parse_options - unknown box sorting method requested for argument 'box_sorting'");
+    MayDay::Abort("ito_plasma_godunov::parseOptions - unknown box sorting method requested for argument 'BoxSorting'");
   }
 
   // Parse filterse
@@ -193,10 +193,10 @@ void ito_plasma_godunov::parse_options() {
   
 }
 
-void ito_plasma_godunov::parse_runtime_options() {
-  CH_TIME("ito_plasma_godunov::parse_runtime_options");
+void ito_plasma_godunov::parseRuntimeOptions() {
+  CH_TIME("ito_plasma_godunov::parseRuntimeOptions");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_runtime_options" << endl;
+    pout() << m_name + "::parseRuntimeOptions" << endl;
   }
 
   ParmParse pp(m_name.c_str());
@@ -225,7 +225,7 @@ void ito_plasma_godunov::parse_runtime_options() {
     m_algorithm = which_algorithm::trapezoidal;
   }
   else{
-    MayDay::Abort("ito_plasma_godunov::parse_options - unknown algorithm requested");
+    MayDay::Abort("ito_plasma_godunov::parseOptions - unknown algorithm requested");
   }
 
   // Dt limitation
@@ -240,25 +240,25 @@ void ito_plasma_godunov::parse_runtime_options() {
     m_whichDt = which_dt::advection_diffusion;
   }
   else{
-    MayDay::Abort("ito_plasma_godunov::parse_options - unknown 'which_dt' requested");
+    MayDay::Abort("ito_plasma_godunov::parseOptions - unknown 'which_dt' requested");
   }
 
   // Box sorting for load balancing
-  pp.get("box_sorting", str);
+  pp.get("BoxSorting", str);
   if( str == "none"){
-    m_boxSort = box_sorting::none;
+    m_boxSort = BoxSorting::none;
   }
   else if( str == "std"){
-    m_boxSort = box_sorting::std;
+    m_boxSort = BoxSorting::std;
   }
   else if(str == "shuffle"){
-    m_boxSort = box_sorting::shuffle;
+    m_boxSort = BoxSorting::shuffle;
   }
   else if(str == "morton"){
-    m_boxSort = box_sorting::morton;
+    m_boxSort = BoxSorting::morton;
   }
   else {
-    MayDay::Abort("ito_plasma_godunov::parse_options - unknown box sorting method requested for argument 'box_sorting'");
+    MayDay::Abort("ito_plasma_godunov::parseOptions - unknown box sorting method requested for argument 'BoxSorting'");
   }
 
   // Parse filterse
@@ -269,9 +269,9 @@ void ito_plasma_godunov::parse_runtime_options() {
   this->setup_runtime_storage();
 
   //
-  m_ito->parse_runtime_options();
+  m_ito->parseRuntimeOptions();
   m_fieldSolver->parseRuntimeOptions();
-  m_rte->parse_runtime_options();
+  m_rte->parseRuntimeOptions();
 }
 
 void ito_plasma_godunov::allocate_internals(){
@@ -966,10 +966,10 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
   data_ops::scale(a_conductivity, units::s_Qe);
 
   m_amr->averageDown(a_conductivity,     m_fluid_realm, m_phase);
-  m_amr->interpGhost_pwl(a_conductivity, m_fluid_realm, m_phase);
+  m_amr->interpGhostPwl(a_conductivity, m_fluid_realm, m_phase);
 
   // See if this helps....
-  m_amr->InterpToCentroids(a_conductivity, m_fluid_realm, m_phase);
+  m_amr->interpToCentroids(a_conductivity, m_fluid_realm, m_phase);
 
 }
 

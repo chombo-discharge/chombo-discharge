@@ -27,7 +27,7 @@ namespace physics {
       ~advection_diffusion_tagger();
 
       void regrid();
-      void parse_options();
+      void parseOptions();
       bool tag_cells(EBAMRTags& a_tags);
 
     protected:

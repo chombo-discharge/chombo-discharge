@@ -27,10 +27,10 @@ euler_maruyama::~euler_maruyama(){
 
 }
 
-void euler_maruyama::parse_options(){
-  CH_TIME("euler_maruyama::parse_options");
+void euler_maruyama::parseOptions(){
+  CH_TIME("euler_maruyama::parseOptions");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::parse_options" << endl;
+    pout() << "euler_maruyama::parseOptions" << endl;
   }
 
   parseVerbosity();
@@ -47,10 +47,10 @@ void euler_maruyama::parse_options(){
   parse_debug();
 }
 
-void euler_maruyama::parse_runtime_options(){
-  CH_TIME("euler_maruyama::parse_runtime_options");
+void euler_maruyama::parseRuntimeOptions(){
+  CH_TIME("euler_maruyama::parseRuntimeOptions");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::parse_runtime_options" << endl;
+    pout() << "euler_maruyama::parseRuntimeOptions" << endl;
   }
 
   parseVerbosity();
@@ -66,8 +66,8 @@ void euler_maruyama::parse_runtime_options(){
   parse_floor();
   parse_debug();
 
-  m_cdr->parse_runtime_options();
-  m_rte->parse_runtime_options();
+  m_cdr->parseRuntimeOptions();
+  m_rte->parseRuntimeOptions();
   m_fieldSolver->parseRuntimeOptions();
 }
 

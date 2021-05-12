@@ -61,12 +61,12 @@ public:
   /*!
     @brief Parse options
   */
-  void parse_options();
+  void parseOptions();
 
   /*!
     @brief Parse runtime options
   */
-  void parse_runtime_options();
+  void parseRuntimeOptions();
 
 protected:
 

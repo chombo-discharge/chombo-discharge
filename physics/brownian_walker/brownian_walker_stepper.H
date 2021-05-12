@@ -58,7 +58,7 @@ namespace physics {
       void registerRealms() override;
 
       // Runtime options
-      void parse_runtime_options() override;
+      void parseRuntimeOptions() override;
 
       // Regrid routines
       bool need_to_regrid() override;

@@ -30,8 +30,8 @@ public:
 
   // Pure functions that must be overwritten
   Real advance(const Real a_dt) override;
-  void parse_options() override;
-  void parse_runtime_options() override;
+  void parseOptions() override;
+  void parseRuntimeOptions() override;
   void init();
   void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
   void allocate_internals() override;

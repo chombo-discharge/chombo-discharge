@@ -2077,7 +2077,7 @@ void cdr_plasma_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, phase::gas, SpaceDim);
   data_ops::copy(E, a_E);
-  m_amr->InterpToCentroids(E, m_realm, phase::gas);
+  m_amr->interpToCentroids(E, m_realm, phase::gas);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
 
@@ -2656,7 +2656,7 @@ void cdr_plasma_stepper::compute_Emax(Real& a_Emax, const phase::which_phase a_p
   m_amr->allocate(E, m_realm, a_phase, SpaceDim);
 
   this->compute_E(E, a_phase, m_fieldSolver->getPotential());
-  m_amr->InterpToCentroids(E, m_realm, a_phase);
+  m_amr->interpToCentroids(E, m_realm, a_phase);
 
   Real max, min;
   data_ops::get_max_min_norm(max, min, E);
@@ -2990,7 +2990,7 @@ void cdr_plasma_stepper::compute_rho(MFAMRCellData&                 a_rho,
 
   // Transform to centroids
   if(a_centering == centering::cell_center){
-    m_amr->InterpToCentroids(rho_gas, m_realm, phase::gas);
+    m_amr->interpToCentroids(rho_gas, m_realm, phase::gas);
   }
 }
 
@@ -3186,7 +3186,7 @@ void cdr_plasma_stepper::setup_solvers(){
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::setup_solvers" << endl;
   }
-  parse_options();
+  parseOptions();
   this->sanityCheck();
 
   // Make solvers
@@ -3686,7 +3686,7 @@ void cdr_plasma_stepper::setup_cdr(){
   }
 
   m_cdr->set_verbosity(m_solver_verbosity);
-  m_cdr->parse_options();
+  m_cdr->parseOptions();
   m_cdr->set_amr(m_amr);
   m_cdr->set_computational_geometry(m_compgeom);
   m_cdr->set_phase(phase::gas);
@@ -3722,7 +3722,7 @@ void cdr_plasma_stepper::setup_rte(){
   }
 
   m_rte->set_verbosity(m_solver_verbosity);
-  m_rte->parse_options();
+  m_rte->parseOptions();
   m_rte->set_phase(phase::gas);
   m_rte->set_amr(m_amr);
   m_rte->set_computational_geometry(m_compgeom);

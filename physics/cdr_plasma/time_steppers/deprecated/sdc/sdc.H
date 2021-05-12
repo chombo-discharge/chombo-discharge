@@ -46,7 +46,7 @@ public:
   void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
   void allocate_internals();
   void deallocate_internals();
-  void parse_options();
+  void parseOptions();
   bool need_to_regrid();
 
   Vector<EBAMRCellData*> get_cdr_errors();

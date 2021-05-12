@@ -53,7 +53,7 @@ public:
   virtual void registerOperators() = 0;
 
   // Runtime options
-  virtual void parse_runtime_options();
+  virtual void parseRuntimeOptions();
 
   // IO routines
   virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const = 0;

@@ -40,10 +40,10 @@ imex_sdc::~imex_sdc(){
 
 }
 
-void imex_sdc::parse_options(){
-  CH_TIME("imex_sdc::parse_options");
+void imex_sdc::parseOptions(){
+  CH_TIME("imex_sdc::parseOptions");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::parse_options" << endl;
+    pout() << "imex_sdc::parseOptions" << endl;
   }
 
   // Regular stuff from cdr_plasma_stepper that we almost always need
@@ -69,10 +69,10 @@ void imex_sdc::parse_options(){
   imex_sdc::setup_qmj(m_p);
 }
 
-void imex_sdc::parse_runtime_options(){
-  CH_TIME("imex_sdc::parse_runtime_options");
+void imex_sdc::parseRuntimeOptions(){
+  CH_TIME("imex_sdc::parseRuntimeOptions");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::parse_runtime_options" << endl;
+    pout() << "imex_sdc::parseRuntimeOptions" << endl;
   }
 
   // Regular stuff from cdr_plasma_stepper that we almost always need
@@ -96,8 +96,8 @@ void imex_sdc::parse_runtime_options(){
   imex_sdc::setup_quadrature_nodes(m_p);
   imex_sdc::setup_qmj(m_p);
 
-  m_cdr->parse_runtime_options();
-  m_rte->parse_runtime_options();
+  m_cdr->parseRuntimeOptions();
+  m_rte->parseRuntimeOptions();
   m_fieldSolver->parseRuntimeOptions();
 }
 

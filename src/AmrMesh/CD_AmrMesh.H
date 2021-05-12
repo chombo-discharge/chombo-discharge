@@ -7,6 +7,7 @@
   @file   AmrMesh.H
   @brief  Declaration of core class for handling AMR-related operations (with embedded boundaries)
   @author Robert Marskar
+  @todo a_lmax is a dead parameter in buildGrids. Fix this and the dependencies. 
 */
 
 #ifndef CD_AmrMesh_H
@@ -51,7 +52,7 @@ class AmrMesh {
 protected:
   
   /*!
-    @brief Silly enum for default ghost interpolation
+    @brief Enum for specifying how to interpolate ghost cells. 
   */
   enum class GhostInterpolation {
     PiecewiseLinear,
@@ -71,113 +72,157 @@ public:
   ~AmrMesh();
 
   /*!
-    @brief Parse options
+    @brief Parse options. Called during the constructor. 
   */
-  void parse_options();
+  void parseOptions();
 
   /*!
-    @brief Parse options
+    @brief Parse runtime options. 
   */
-  void parse_runtime_options();
+  void parseRuntimeOptions();
 
   /*!
-    @brief Deallocate data. You should never need this, smart pointers are you friends :)
+    @brief Deallocate data. 
+    @param[inout] a_data Data to be deleted. 
+    @details You should never have to do this, as smart pointer are our friends. 
   */
   template<typename T>
   void deallocate(Vector<T*>& a_data);
 
   /*!
-    @brief Deallocate data
+    @brief Deallocate smart pointer data.
+    @param[inout] a_data Data to be deallocated. 
   */
   template<typename T>
   void deallocate(Vector<RefCountedPtr<T> >& a_data);
 
   /*!
-    @brief Deallocate data
+    @brief Deallocate data.
+    @param[inout] a_data Data to be deallocated.
   */
   template<typename T>
   void deallocate(EBAMRData<T>& a_data);
 
   /*!
     @brief Turn smart-pointer data structure into regular-pointer data structure
+    @param[out] a_alias Aliased data
+    @param[in] a_data  Smart-pointer data
+    @details This fetches the bare pointer from a_data and sets it in a_alias. 
   */
   template<typename T>
   void alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data);
 
   /*!
     @brief Turn smart-pointer data structure into regular-pointer data structure
+    @param[out] a_alias Aliased data
+    @param[in]  a_data  Smart-pointer data
+    @details This fetches the bare pointer from a_data and sets it in a_alias. 
   */
   template<typename T, typename S>
   void alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data);
 
   /*!
     @brief Template class for generic allocation of particles
+    @param[out] a_particles Particle data holder. 
+    @param[out] a_realm     Realm on which the particles will be allocated. 
   */
   template <typename T >
   void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_realm);
 
   /*!
     @brief Allocate a particle container
+    @param[out] a_container Particle container to be allocated
+    @param[in]  a_pvrBuffer The particle valid region buffer. 
+    @param[out] a_realm     Realm on which the particles will be allocated. 
+    @details Particles that live within a_pvrBuffer on the fine side of the refinement boundary will be mapped to the coarse leve. 
   */
   template <typename T>
   void allocate(particle_container<T>& a_container,
-		const int              a_pvr_buffer,
+		const int              a_pvrBuffer,
 		const std::string      a_realm);
 
   /*!
-    @brief Allocate pointer but not memory
+    @brief Allocate pointer but not any memory.
+    @param[out] a_data Data structure for which pointers will be constructed. 
+    @details This sets all the elements in the vector to be RefCountedPtr<T>(nullptr)
   */
   template <typename T>
   void allocatePointer(Vector<RefCountedPtr<T> >& a_data);
 
-    /*!
-    @brief Allocate pointer but not memory
+  /*!
+    @brief Allocate pointer but not any memory.
+    @param[out] a_data       Data structure for which pointers will be constructed. 
+    @param[in] a_finestLevel Finest grid level on which a_data will be defined. 
+    @details This sets all the elements in the vector to be RefCountedPtr<T>(nullptr)
   */
   template <typename T>
   void allocatePointer(Vector<RefCountedPtr<T> >& a_data, const int a_finestLevel);
 
   /*!
-    @brief Allocate pointer but not memory
+    @brief Allocate pointer but not any memory.
+    @param[out] a_data Data structure for which pointers will be constructed. 
+    @details This sets all the elements in the vector to be RefCountedPtr<T>(nullptr)
   */
   template <typename T>
   void allocatePointer(EBAMRData<T>& a_data);
 
-    /*!
-    @brief Allocate pointer but not memory
+  /*!
+    @brief Allocate pointer but not any memory.
+    @param[out] a_data       Data structure for which pointers will be constructed. 
+    @param[in] a_finestLevel Finest grid level on which a_data will be defined. 
+    @details This sets all the elements in the vector to be RefCountedPtr<T>(nullptr)
   */
   template <typename T>
   void allocatePointer(EBAMRData<T>& a_data, const int a_finestLevel);
 
   /*!
-    @brief Register an operator over a realm. This if for operators that are defined for a specific phase only. 
+    @brief Register an operator over a realm and a phase. 
+    @param[in] a_operator Operator to be registered. 
+    @param[in] a_realm    Realm name
+    @param[in] a_phase    Phase (gas or solid). 
   */
   void registerOperator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Register a particle halo on a realm. 
+    @brief Register a boolean mask over a realm. 
+    @param[in] a_mask     Mask name to be registered. 
+    @param[in] a_phase    Phase (gas or solid). 
+    @param[in] a_buffer   Relevant buffer for the mask.
+    @note The meaning of a_buffer differs for different masks. 
   */
   void registerMask(const std::string a_mask, const int a_buffer, const std::string a_realm);
 
   /*!
     @brief Query if a realm exists
+    @param[in] a_realm Name of the realm. 
+    @return True if the realm exists and false otherwise. 
   */
   bool queryRealm(const std::string a_realm);
 
   /*!
     @brief Register a new realm
+    @param[in] a_realm Realm name
   */
   void registerRealm(const std::string a_realm);
 
   /*!
-    @brief Alias an entire hierarchy of data. 
+    @brief Alias multifluid data up to a specified level. 
+    @param[out] a_data        Single-phased data on specific phase
+    @param[in]  a_phase       Phase (gas or solid).
+    @param[in]  a_mfdata      Multifluid data to be aliased
+    @param[in]  a_finestLevel Maximum grid level for aliasing operation. 
   */
   void alias(EBAMRCellData&           a_data,
 	     const phase::which_phase a_phase,
 	     const MFAMRCellData&     a_mfdata,
 	     const int                a_finestLevel);
 
-    /*!
-    @brief Alias an entire hierarchy of data. 
+  /*!
+    @brief Alias multifluid data up to a specified level. 
+    @param[out] a_data        Single-phased data on specific phase
+    @param[in]  a_phase       Phase (gas or solid).
+    @param[in]  a_mfdata      Multifluid data to be aliased
+    @param[in]  a_finestLevel Maximum grid level for aliasing operation. 
   */
   void alias(EBAMRFluxData&           a_data,
 	     const phase::which_phase a_phase,
@@ -185,244 +230,397 @@ public:
 	     const int                a_finestLevel);
 
   /*!
-    @brief Alias an entire hierarchy of data
+    @brief Alias an entire hiearchy of multifluid data. 
+    @param[out] a_data        Single-phased data on specific phase
+    @param[in]  a_phase       Phase (gas or solid).
+    @param[in]  a_mfdata      Multifluid data to be aliased
   */
   void alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata);
 
   /*!
-    @brief Alias an entire hierarchy of data
+    @brief Alias an entire hiearchy of multifluid data. 
+    @param[out] a_data        Single-phased data on specific phase
+    @param[in]  a_phase       Phase (gas or solid).
+    @param[in]  a_mfdata      Multifluid data to be aliased
   */
   void alias(EBAMRFluxData& a_data, const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata);
 
   /*!
-    @brief Alias an entire hierarchy of data
+    @brief Alias an entire hiearchy of multifluid data. 
+    @param[out] a_data        Single-phased data on specific phase
+    @param[in]  a_phase       Phase (gas or solid).
+    @param[in]  a_mfdata      Multifluid data to be aliased
   */
   void alias(EBAMRIVData& a_data, const phase::which_phase a_phase, const MFAMRIVData& a_mfdata);
 
   /*!
-    @brief Alias data on phase. 
+    @brief Alias an entire hiearchy of multifluid data. 
+    @param[in]  a_phase       Phase (gas or solid).
+    @param[in]  a_mfdata      Multifluid data to be aliased
+    @return A single-phase alias of the multifluid data, having the same size as the input data. 
   */
   EBAMRCellData alias(const phase::which_phase a_phase, const MFAMRCellData& a_mfdata);
 
   /*!
-    @brief Alias data on phase. 
+    @brief Alias an entire hiearchy of multifluid data. 
+    @param[in]  a_phase       Phase (gas or solid).
+    @param[in]  a_mfdata      Multifluid data to be aliased
+    @return A single-phase alias of the multifluid data, having the same size as the input data. 
   */
   EBAMRFluxData alias(const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata);
 
   /*!
-    @brief Alias data on phase. 
+    @brief Alias an entire hiearchy of multifluid data. 
+    @param[in]  a_phase       Phase (gas or solid).
+    @param[in]  a_mfdata      Multifluid data to be aliased
+    @return A single-phase alias of the multifluid data, having the same size as the input data. 
   */
   EBAMRIVData alias(const phase::which_phase a_phase, const MFAMRIVData& a_mfdata);
 
   /*!
-    @brief Compute gradient on level
+    @brief Compute cell-centered gradient for a grid level.
+    @param[out] a_gradient Cell centered gradient. 
+    @param[in]  a_phi      The scalar for which the gradient is computed. 
+    @param[in]  a_realm    Name of the realm where the data lives. 
+    @param[in]  a_phase    Phase on which the data lives. 
+    @param[in]  a_lvl      Grid level where the data lives. 
+    @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
+    ghost cells updated before using this routine. 
   */
   void computeGradient(LevelData<EBCellFAB>&       a_gradient,
-			const LevelData<EBCellFAB>& a_phi,
-			const std::string           a_realm,
-			const phase::which_phase    a_phase,
-			const int                   a_lvl);
-  /*!
-    @brief Compute cell-centered gradient. 
-    @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
-    nor are ghost cells updated. 
-  */
-  void computeGradient(EBAMRCellData&           a_gradient,
-			const EBAMRCellData&     a_phi,
-			const std::string        a_realm,  
-			const phase::which_phase a_phase);
+		       const LevelData<EBCellFAB>& a_phi,
+		       const std::string           a_realm,
+		       const phase::which_phase    a_phase,
+		       const int                   a_lvl);
 
   /*!
-    @brief Compute cell-centered gradient. 
-    @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
-    nor are ghost cells updated. 
+    @brief Compute cell-centered gradient over an AMR hierarchy. 
+    @param[out] a_gradient Cell centered gradient. 
+    @param[in]  a_phi      The scalar for which the gradient is computed. 
+    @param[in]  a_realm    Name of the realm where the data lives. 
+    @param[in]  a_phase    Phase on which the data lives. 
+    @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
+    ghost cells updated before using this routine. 
+  */
+  void computeGradient(EBAMRCellData&           a_gradient,
+		       const EBAMRCellData&     a_phi,
+		       const std::string        a_realm,  
+		       const phase::which_phase a_phase);
+
+  /*!
+    @brief Compute cell-centered gradient over an AMR hierarchy. 
+    @param[out] a_gradient Cell centered gradient. 
+    @param[in]  a_phi      The scalar for which the gradient is computed. 
+    @param[in]  a_realm    Name of the realm where the data lives. 
+    @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
+    ghost cells updated before using this routine. 
   */
   void computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm);
 
   /*!
     @brief Allocate a data holder over a specific realm
+    @param[out] a_data
+    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_phase  Phase (gas or solid)
+    @param[in]  a_nComp  Number of components in a_data
+    @param[in]  a_nGhost Number of ghost cells for a_data
+    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
   void allocate(EBAMRCellData&           a_data,
 		const std::string        a_realm,
 		const phase::which_phase a_phase,
-		const int                a_ncomp,
-		const int                a_ghost = -1);
+		const int                a_nComp,
+		const int                a_nGhost = -1);
 
   /*!
     @brief Allocate a data holder over a specific realm
+    @param[out] a_data
+    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_phase  Phase (gas or solid)
+    @param[in]  a_nComp  Number of components in a_data
+    @param[in]  a_nGhost Number of ghost cells for a_data
+    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
   void allocate(EBAMRFluxData&           a_data,
 		const std::string        a_realm,
 		const phase::which_phase a_phase,
-		const int                a_ncomp,
-		const int                a_ghost = -1);
+		const int                a_nComp,
+		const int                a_nGhost = -1);
 
   /*!
     @brief Allocate a data holder over a specific realm
+    @param[out] a_data
+    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_phase  Phase (gas or solid)
+    @param[in]  a_nComp  Number of components in a_data
+    @param[in]  a_nGhost Number of ghost cells for a_data
+    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
   void allocate(EBAMRIVData&             a_data,
 		const std::string        a_realm,
 		const phase::which_phase a_phase,
-		const int                a_ncomp,
-		const int                a_ghost = -1);
+		const int                a_nComp,
+		const int                a_nGhost = -1);
 
   /*!
     @brief Allocate a data holder over a specific realm
+    @param[out] a_data
+    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_nComp  Number of components in a_data
+    @param[in]  a_nGhost Number of ghost cells for a_data
+    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
   void allocate(EBAMRIFData&             a_data,
 		const std::string        a_realm,
 		const phase::which_phase a_phase,
-		const int                a_ncomp,
-		const int                a_ghost = -1);
+		const int                a_nComp,
+		const int                a_nGhost = -1);
 
   /*!
     @brief Allocate Boolean data over a specific realm
+    @param[out] a_data
+    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_nComp  Number of components in a_data
+    @param[in]  a_nGhost Number of ghost cells for a_data
+    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
-  void allocate(EBAMRBool& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost);
+  void allocate(EBAMRBool& a_data, const std::string a_realm, const int a_nComp, const int a_nGhost = -1);
   
   /*!
-    @brief Allocate a data holder over a specific realm
+    @brief Allocate a data holder over a specific realm.
+    @param[out] a_data
+    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_nComp  Number of components in a_data
+    @param[in]  a_nGhost Number of ghost cells for a_data
+    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
-  void allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
+  void allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_nComp, const int a_nGhost = -1);
 
   /*!
     @brief Allocate a data holder over a specific realm.
+    @param[out] a_data
+    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_nComp  Number of components in a_data
+    @param[in]  a_nGhost Number of ghost cells for a_data
+    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
   void allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Allocate a data holder over a specific realm
+    @param[out] a_data
+    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_nComp  Number of components in a_data
+    @param[in]  a_nGhost Number of ghost cells for a_data
+    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
   void allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Reallocate data. 
+    @param[out] a_data  Data to be reallocated
+    @param[in]  a_phase Phase over the reallocation.
+    @param[in]  a_lmin  The lowest grid level that will be reallocated. 
+    @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
   void reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data. 
+    @param[out] a_data  Data to be reallocated
+    @param[in]  a_phase Phase over the reallocation.
+    @param[in]  a_lmin  The lowest grid level that will be reallocated. 
+    @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
   void reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
-    @brief Reallocate data above a_base
+    @brief Reallocate data. 
+    @param[out] a_data  Data to be reallocated
+    @param[in]  a_phase Phase over the reallocation.
+    @param[in]  a_lmin  The lowest grid level that will be reallocated. 
+    @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
   void reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
-    @brief Reallocate data above a_base
+    @brief Reallocate data. 
+    @param[out] a_data  Data to be reallocated
+    @param[in]  a_phase Phase over the reallocation.
+    @param[in]  a_lmin  The lowest grid level that will be reallocated. 
+    @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
   void reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
-    @brief Reallocate data above a_base
+    @brief Reallocate data. 
+    @param[out] a_data  Data to be reallocated
+    @param[in]  a_lmin  The lowest grid level that will be reallocated. 
+    @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
   void reallocate(EBAMRBool& a_data, const int a_lmin);
 
   /*!
-    @brief Reallocate data above a_base
+    @brief Reallocate data. 
+    @param[out] a_data  Data to be reallocated
+    @param[in]  a_lmin  The lowest grid level that will be reallocated. 
+    @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
   void reallocate(MFAMRCellData& a_data, const int a_lmin);
 
   /*!
-    @brief Reallocate data above a_base
+    @brief Reallocate data. 
+    @param[out] a_data  Data to be reallocated
+    @param[in]  a_lmin  The lowest grid level that will be reallocated. 
+    @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
   void reallocate(MFAMRFluxData& a_data, const int a_lmin);
   
   /*!
-    @brief Reallocate data above a_base
+    @brief Reallocate data. 
+    @param[out] a_data  Data to be reallocated
+    @param[in]  a_lmin  The lowest grid level that will be reallocated. 
+    @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
   void reallocate(MFAMRIVData& a_data, const int a_lmin);
 
   /*!
-    @brief Average down both phases on specific realm
+    @brief Average down multifluid data over a realm. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
   */
   void averageDown(MFAMRCellData& a_data, const std::string a_realm);
 
   /*!
-    @brief Average down on specific realm
-  */
-  void averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Average down level
-  */
-  void averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lvl);
-
-  /*!
-    @brief Average down both phases on specific realm
+    @brief Average down multifluid data over a realm. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
   */
   void averageDown(MFAMRFluxData& a_data, const std::string a_realm);
 
   /*!
-    @brief Average down on specific realm
+    @brief Average down on specific realm and phase. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+
+  /*!
+    @brief Average down on specific realm and phase. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+    @param[in]    a_level The coarse level.
+    @details This coarsens data from level a_lvl+1 to level a_lvl
+  */
+  void averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lvl);
+
+  /*!
+    @brief Average down on specific realm and phase. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
   */
   void averageDown(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Average down on realm
+    @brief Average down on specific realm and phase. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
   */
   void averageDown(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Average down on realm
+    @brief Do conservative coarsening for data defined on cut-cells. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
   */
   void conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Build new grids. This also load balances. 
+    @brief Build new internal AMR grids.
+    @param[inout] a_tags Sets of cell tags used for the grid generation.
+    @param[in]    a_lmin The finest grid level which does not change. 
+    @param[in]    a_lmax This is a dead parameter
+    @param[in]    a_hardcap Hardcap for the maximum grid level which can be generated. If a_hardcap < 0 there is no restriction beyond the AmrMesh restrictions.
+    @details This will call the specified grid generation method and fill m_grids with the new grids. 
   */
   void buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap = -1);
 
   /*!
-    @brief Interpolate ghost vectors over a realm
+    @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation metho. 
+    @param[inout] a_data  Data to be interpolated.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
   */
   void interpGhost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Interpolate ghost cells. Realm, phase, and level version.
+    @brief Interpolate ghost cells over a realm, using the default ghost cell interpolation method on a specific level. 
+    @param[inout] a_fineData Fine grid data
+    @param[inout] a_coarData Coarse grid data
+    @param[in]    a_level    The grid level corresponding to a_fineData
+    @param[in]    a_realm    Realm name
+    @param[in]    a_phase    Phase (gas or solid)
   */
   void interpGhost(LevelData<EBCellFAB>&       a_fineData,
-		    const LevelData<EBCellFAB>& a_coarData,
-		    const int                   a_level,
-		    const std::string           a_realm,
-		    const phase::which_phase    a_phase);
+		   const LevelData<EBCellFAB>& a_coarData,
+		   const int                   a_level,
+		   const std::string           a_realm,
+		   const phase::which_phase    a_phase);
 
   /*!
-    @brief Interpolate ghost cells over a realm
+    @brief Interpolate ghost cells over a realm. Calls the default ghost cell interpolation method. 
+    @param[inout] a_data  Data to be interpolated
+    @param[in]    a_realm Realm name
   */
   void interpGhost(MFAMRCellData& a_data, const std::string a_realm);
 
   /*!
-    @brief Fill ghost cells using quadratic interpolation
+    @brief Interpolate ghost cells over a realm and phase. This uses quadratic interpolation.
+    @param[inout] a_data  Data to be interpolated
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
   */
-  void interpGhost_quad(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void interpGhostQuad(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Fill ghost cells using piecewise linear interpolation. Specific realm. 
+    @brief Interpolate ghost cells over a realm and phase. This uses piecewise linear interpolation.
+    @param[inout] a_data  Data to be interpolated
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
   */
-  void interpGhost_pwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void interpGhostPwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Interpolate data to centroids on realm
+    @brief Interpolate data to centroids on realm and phase
+    @param[inout] a_data  Data to be interpolated
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+    @details This leaves regular data intact, while the values in irregular are replaced by the corresponding interpolation to centroids. 
   */
-  void InterpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
   
   /*!
-    @brief Set mfis
+    @brief Sets multifluid index space. 
+    @param[in] a_mfis Multifluid index space wrapper. 
   */
   void setMultifluidIndexSpace(const RefCountedPtr<mfis>& a_mfis);
 
   /*!
-    @brief Set implicit function
+    @brief Set implicit function for a specific phase. Need e.g. for level-sets. 
+    @param[in] a_phase  Phase
+    @param[in] a_baseif The level-set function describing the phase. 
   */
   void setBaseImplicitFunction(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseif);
 
   /*!
-    @brief Parse domain
+    @brief Parse the low/high corners of the computational domain. 
   */
-  void parseDomain();
+  void parseProbLoHiCorners();
 
   /*!
     @brief Set ghost cell interpolation type. Either piecewise linear or quadratic. 
@@ -435,57 +633,57 @@ public:
   void buildDomains();
 
   /*!
-    @brief Parse the grid generation algorithm
+    @brief Parse the grid generation algorithm. 
   */
   void parsegridGeneration();
 
   /*!
-    @brief Set verbosity
+    @brief Parse the verbosity for AmrMesh. 
   */
   void parseVerbosity();
 
   /*!
-    @brief Set coarsest level box; this is the coarsest domain (well, except for lower levels GMG)
+    @brief Parse the coarsest domain grid.
   */
   void parseCoarsestLevelNumCells();
 
   /*!
-    @brief Maximum AMR depth
+    @brief Parse the maximum permitted AMR depth
   */
   void parseMaxAmrDepth();
 
   /*!
     @brief Set maximum simulation depth. 
   */
-  void parse_max_simulation_depth();
+  void parseMaxSimulationDepth();
 
   /*!
-    @brief Tell AmrMesh to forget about ebcf (user must guarantee that this is the case)
+    @brief Parse whether or not AmrMesh to forget about ebcf (user must guarantee that this is the case)
   */
   void parseEbCf();
 
   /*!
-    @brief Set refinement ratio
+    @brief Parse refinement ratios
   */
   void parseRefinementRatios();
 
   /*!
-    @brief Set refinement ratios
+    @brief Set the refinement ratios
   */
   void setRefinementRatios(const Vector<int> a_ref_ratios);
 
   /*!
-    @brief Set buffer size
+    @brief Parse buffer size for Berger-Rigoutsous grid algorithm. 
   */
   void parseBrBufferSize();
 
   /*!
-    @brief Set irregular growth
+    @brief Parse how much to grow cut-cell geometric tags. 
   */
   void parseIrregTagGrowth();
 
   /*!
-    @brief Set fill ratio
+    @brief Parse the Berger-Rigoutsos fill ratio. 
   */
   void parseBrFillRatio();
 
@@ -495,32 +693,34 @@ public:
   void setFinestLevel(const int a_finest_level);
 
   /*!
-    @brief Set the maximum box size
+    @brief Parse the maximum permitted box size. 
   */
   void parseMaxBoxSize();
 
   /*!
-    @brief Set the maximum EBIS generation box size
+    @brief Parse the maximum permitted box size. 
+    @details Only relevant for the grid generation step. 
   */
   void parseMaxEbisBoxSize();
 
   /*!
-    @brief Set the blocking factor
+    @brief Parse the B-R blocking factor. For tiled mesh refinement this parses the tile size. 
   */
   void parseBlockingFactor();
 
   /*!
-    @brief Set number of ghost cells for eb stuff
+    @brief Parse number of ghost cells for eb stuff
+    @details Only matters for the grid generation step. 
   */ 
   void parseEbGhostCells();
 
   /*!
-    @brief Set number of ghost cells 
+    @brief Parse the number of ghost cells 
   */ 
   void parseNumGhostCells();
 
   /*!
-    @brief Set redistribution radius
+    @brief Parse the default redistribution radius
   */
   void parseRedistributionRadius();
 
@@ -535,37 +735,26 @@ public:
   void parseEbCentroidStencils();
 
   /*!
-    @brief Set preferred stencil type
-  */
-  void setIrregularInterpolationStencilType(const stencil_type a_type);
-
-  /*!
-    @brief Set irregular stencil order
-  */
-  void setIrregularInterpolationStencilOrder(const int a_irreg_sten_order);
-
-  /*!
-    @brief Set maximum stencil radius for irregular stencils
-  */
-  void setIrregularInterpolationStencilRadius(const int a_irreg_sten_radius);
-
-  /*!
-    @brief Regrid function. Generate new grids. 
-    @details lmin is the finest level that changed. 
+    @brief Regrid function. Generate new grids and operators.
+    @param[in] a_tags Tags 
+    @param[in] a_lmin Finest grid level which is allowed to change. 
+    @param[in] a_regsize Redistribution register size. 
+    @param[in] a_hardcap Grid generation hardcap. 
+    @todo a_regsize is a dead parameter which should be removed. 
   */
   void regrid(const Vector<IntVectSet>& a_tags,
 	      const int a_lmin,
 	      const int a_lmax,
 	      const int a_regsize=1, 
-	      const int a_hardcap=123456);
+	      const int a_hardcap=-1);
 
   /*!
     @brief Regrid AMR. This builds the grids and sets them. 
   */
   void regridAmr(const Vector<IntVectSet>& a_tags,
-		  const int a_lmin,
-		  const int a_lmax,
-		  const int a_hardcap=123456);
+		 const int a_lmin,
+		 const int a_lmax,
+		 const int a_hardcap=-1);
 
   /*!
     @brief Regrid AMR. This takes a set of grids. 
@@ -577,9 +766,9 @@ public:
     @brief Define a realm
   */
   void regridRealm(const std::string a_realm,
-		    const Vector<Vector<int> >& a_procs,
-		    const Vector<Vector<Box> >& a_boxes,
-		    const int a_lmin);
+		   const Vector<Vector<int> >& a_procs,
+		   const Vector<Vector<Box> >& a_boxes,
+		   const int a_lmin);
 
   /*!
     @brief Set grids from boxes and computational loads
@@ -590,8 +779,8 @@ public:
     @brief Regrid AMR operators
   */
   void regridOperators(const int a_lmin,
-			const int a_lmax,
-			const int a_regsize=1);
+		       const int a_lmax,
+		       const int a_regsize=1);
 
 
 
@@ -754,7 +943,7 @@ public:
     @brief Get neighbor boxes
   */
   Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors(const std::string a_realm,
-									   const phase::which_phase a_phase);
+									  const phase::which_phase a_phase);
 
   /*!
     @brief Get levelset function
@@ -810,31 +999,31 @@ public:
     @brief Get coar-to-fine redistribution
   */
   Vector<RefCountedPtr<EBCoarToFineRedist> >&  getCoarToFineRedist(const std::string        a_realm,
-								       const phase::which_phase a_phase);
+								   const phase::which_phase a_phase);
   
   /*!
     @brief Get coar-to-coar redistribution
   */
   Vector<RefCountedPtr<EBCoarToCoarRedist> >&  getCoarToCoarRedist(const std::string        a_realm,
-								       const phase::which_phase a_phase);
+								   const phase::which_phase a_phase);
 
   /*!
     @brief Get coar-to-coar redistribution
   */
   Vector<RefCountedPtr<EBFineToCoarRedist> >&  getFineToCoarRedist(const std::string        a_realm,
-								       const phase::which_phase a_phase);
+								   const phase::which_phase a_phase);
   
   /*!
     @brief Get interpolation stencils
   */
   irreg_amr_stencil<centroid_interp>& getCentroidInterpolationStencils(const std::string a_realm,
-								   const phase::which_phase a_phase);
+								       const phase::which_phase a_phase);
 
   /*!
     @brief Get interpolation stencils
   */
   irreg_amr_stencil<eb_centroid_interp>& getEbCentroidInterpolationStencils(const std::string        a_realm,
-									 const phase::which_phase a_phase);
+									    const phase::which_phase a_phase);
 
   /*!
     @brief Get Nonconservative divergence stencils
@@ -864,14 +1053,14 @@ public:
   /*!
     @brief Get box sorting method
   */
-  box_sorting getBoxSorting() const;
+  BoxSorting getBoxSorting() const;
   
 protected:
 
   /*!
     @brief Enum for having understandable notation for grid generation
   */
-  enum grid_generation{
+  enum GridGenerationMethod{
     berger_rigoustous = 0,
     tiled             = 1,
   };
@@ -889,12 +1078,12 @@ protected:
   /*!
     @brief Grid generation method
   */
-  grid_generation m_gridGenerationMethod;
+  GridGenerationMethod m_gridGenerationMethod;
 
   /*!
     @brief Box sorting
   */
-  box_sorting m_boxSort;
+  BoxSorting m_boxSort;
 
   /*!
     @brief mfis
@@ -1079,7 +1268,7 @@ protected:
   /*!
     @brief Define realms
   */
-  void define_realms();
+  void defineRealms();
 };
 
 #include <CD_NamespaceFooter.H>
