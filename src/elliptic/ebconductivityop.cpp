@@ -11,7 +11,7 @@
 #include "LoadBalance.H"
 #include "EBArith.H"
 #include "EBAMRPoissonOp.H"
-#include "EBFastFluxRegister.H"
+#include "CD_EbFastFluxRegister.H"
 
 #include "ebconductivityop.H"
 #include "EBQuadCFInterp.H"
@@ -696,7 +696,7 @@ defineStencils()
     {
       int ncomp = 1;
       if(m_ext_fastFR.isNull()){
-	m_fastFR = RefCountedPtr<EBFluxRegister> (new EBFastFluxRegister(m_eblgFine, m_eblg, m_refToFine, ncomp, s_forceNoEBCF));
+	m_fastFR = RefCountedPtr<EBFluxRegister> (new EbFastFluxRegister(m_eblgFine, m_eblg, m_refToFine, ncomp, s_forceNoEBCF));
       }
       else{
 	m_fastFR = m_ext_fastFR;

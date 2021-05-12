@@ -22,7 +22,7 @@
 #include "CD_NonConservativeDivergenceStencil.H"
 #include "CD_EbCentroidInterpolationStencil.H"
 #include "CD_CentroidInterpolationStencil.H"
-#include "EBFastFluxRegister.H"
+#include "CD_EbFastFluxRegister.H"
 
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>

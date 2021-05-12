@@ -1,38 +1,46 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   EBFastFluxRegister.cpp
-  @brief  Implementation of EBFastFluxRegister.H
+  @file   CD_EbFastFluxRegister.cpp
+  @brief  Implementation of CD_EbFastFluxRegister.H
   @author Robert Marskar
-  @date   Aug. 2020
 */
 
+// Std includes
 #include <iostream>
+#include <iomanip>
+
+// Chombo includes
+#include <EBArith.H>
+#include <LayoutIterator.H>
+#include <BaseIVFactory.H>
+#include <EBCoarToCoarRedist.H>
+#include <EBCoarToFineRedist.H>
+#include <VoFIterator.H>
+#include <FaceIterator.H>
+#include <EBIndexSpace.H>
+#include <parstream.H>
+#include <EBLevelDataOps.H>
+#include <CH_Timer.H>
+#include <NeighborIterator.H>
+
+// Our includes
+#include <CD_EbFastFluxRegister.H>
+#include <CD_NamespaceHeader.H>
+
 using std::cout;
 using std::cin;
 using std::cerr;
 using std::endl;
-#include <iomanip>
-#include "EBArith.H"
-#include "EBFastFluxRegister.H"
-#include "LayoutIterator.H"
-#include "BaseIVFactory.H"
-#include "EBCoarToCoarRedist.H"
-#include "EBCoarToFineRedist.H"
-#include "VoFIterator.H"
-#include "FaceIterator.H"
-#include "EBIndexSpace.H"
-#include "parstream.H"
-#include "EBLevelDataOps.H"
 
-#include "CH_Timer.H"
-#include "NeighborIterator.H"
-
-#include "CD_NamespaceHeader.H"
-
-EBFastFluxRegister::EBFastFluxRegister(){
+EbFastFluxRegister::EbFastFluxRegister(){
 
 }
 
-EBFastFluxRegister::EBFastFluxRegister(const DisjointBoxLayout& a_dblFine,
+EbFastFluxRegister::EbFastFluxRegister(const DisjointBoxLayout& a_dblFine,
 				       const DisjointBoxLayout& a_dblCoar,
 				       const EBISLayout&        a_ebislFine,
 				       const EBISLayout&        a_ebislCoar,
@@ -41,24 +49,24 @@ EBFastFluxRegister::EBFastFluxRegister(const DisjointBoxLayout& a_dblFine,
 				       const int&               a_nvar,
 				       const EBIndexSpace*      ebisPtr,
 				       const bool               a_forceNoEBCF){
-  define(a_dblFine, a_dblCoar, a_ebislFine, a_ebislCoar,
-	 a_domainCoar, a_nref, a_nvar, ebisPtr, a_forceNoEBCF);
+  this->define(a_dblFine, a_dblCoar, a_ebislFine, a_ebislCoar,
+	       a_domainCoar, a_nref, a_nvar, ebisPtr, a_forceNoEBCF);
 }
 
-EBFastFluxRegister::EBFastFluxRegister(const EBLevelGrid& a_eblgFine,
+EbFastFluxRegister::EbFastFluxRegister(const EBLevelGrid& a_eblgFine,
 				       const EBLevelGrid& a_eblgCoar,
 				       const int&         a_nref,
 				       const int&         a_nvar,
 				       const bool         a_forceNoEBCF){
-  define(a_eblgFine, a_eblgCoar, a_nref, a_nvar, a_forceNoEBCF);
+  this->define(a_eblgFine, a_eblgCoar, a_nref, a_nvar, a_forceNoEBCF);
 }
 
 
-EBFastFluxRegister::~EBFastFluxRegister(){
+EbFastFluxRegister::~EbFastFluxRegister(){
 
 }
 
-void EBFastFluxRegister::define(const DisjointBoxLayout& a_gridsFine,
+void EbFastFluxRegister::define(const DisjointBoxLayout& a_gridsFine,
 				const DisjointBoxLayout& a_gridsCoar,
 				const EBISLayout&        a_ebislFine,
 				const EBISLayout&        a_ebislCoar,
@@ -72,16 +80,15 @@ void EBFastFluxRegister::define(const DisjointBoxLayout& a_gridsFine,
   EBLevelGrid eblgFine(a_gridsFine, a_ebislFine,   domainFine);
 
   // Call other version. 
-  define(eblgFine, eblgCoar, a_nref, a_nvar, a_forceNoEBCF);
-
+  this->define(eblgFine, eblgCoar, a_nref, a_nvar, a_forceNoEBCF);
 }
 
-void EBFastFluxRegister::define(const EBLevelGrid&       a_eblgFine,
+void EbFastFluxRegister::define(const EBLevelGrid&       a_eblgFine,
 				const EBLevelGrid&       a_eblgCoar,
 				const int&               a_refRat,
 				const int&               a_nvar,
 				const bool               a_forceNoEBCF){
-  CH_TIME("EBFastFluxRegister::define");
+  CH_TIME("EbFastFluxRegister::define");
   
   clear();
   m_refRat   = a_refRat;
@@ -89,7 +96,7 @@ void EBFastFluxRegister::define(const EBLevelGrid&       a_eblgFine,
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
   if (!m_eblgFine.coarsenable(a_refRat)){
-    MayDay::Error("EBFastFluxRegister::define: dbl not coarsenable by refrat");
+    MayDay::Error("EbFastFluxRegister::define: dbl not coarsenable by refrat");
   }
 
   coarsen(m_eblgCoFi, a_eblgFine, a_refRat);
@@ -113,18 +120,18 @@ void EBFastFluxRegister::define(const EBLevelGrid&       a_eblgFine,
   }
 
   //if no EBCF--nothing happens here but calls to level flux register
-  if (m_hasEBCF){
-    defineMasks();
-    fastDefineSetsAndIterators();
-    defineBuffers();
+  if(m_hasEBCF){
+    this->defineMasks();
+    this->fastDefineSetsAndIterators();
+    this->defineBuffers();
   }
   
   //set all registers to zero to start.
-  setToZero();
+  this->setToZero();
   m_isDefined = true;
 }
 
-void EBFastFluxRegister::fastDefineSetsAndIterators(){
+void EbFastFluxRegister::fastDefineSetsAndIterators(){
   CH_TIME("EBFsatFluxRegister::fastDefineSetsAndIterators");
   
   for (int idir = 0; idir < SpaceDim; idir++){
@@ -183,8 +190,8 @@ void EBFastFluxRegister::fastDefineSetsAndIterators(){
   }
 }
 
-void EBFastFluxRegister::defineMasks(){
-  CH_TIME("EBFastFluxRegister::defineMasks");
+void EbFastFluxRegister::defineMasks(){
+  CH_TIME("EbFastFluxRegister::defineMasks");
 
   // TLDR: This code computes the coarse cells (i.e. mask) on the outside of the CFIVS on the coarse grid.
   //       We do this by using a mask on the CoFi grid. The boxes on that grid are grown by 1 cell in each direction
@@ -267,4 +274,5 @@ void EBFastFluxRegister::defineMasks(){
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
