@@ -1503,10 +1503,10 @@ void sdc::cache_internals(){
   }
 }
 
-void sdc::allocate_internals(){
-  CH_TIME("sdc::allocate_internals");
+void sdc::allocateInternals(){
+  CH_TIME("sdc::allocateInternals");
   if(m_verbosity > 5){
-    pout() << "sdc::allocate_internals" << endl;
+    pout() << "sdc::allocateInternals" << endl;
   }
   
   m_cdr_error.resize(m_plaskin->get_num_species());
@@ -1530,10 +1530,10 @@ void sdc::allocate_internals(){
   sdc::setup_qmj(m_p);
 }
 
-void sdc::regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
-  CH_TIME("sdc::regrid_internals");
+void sdc::regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
+  CH_TIME("sdc::regridInternals");
   if(m_verbosity > 5){
-    pout() << "sdc::regrid_internals" << endl;
+    pout() << "sdc::regridInternals" << endl;
   }
 
   const int comp  = 0;
@@ -1558,9 +1558,9 @@ void sdc::regrid_internals(const int a_lmin, const int a_old_finest_level, const
     }
 
     // These levels have changed and need to be interpolated. End by copying regions that didn't change
-    for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
+    for (int lvl = a_lmin; lvl <= a_newFinestLevel; lvl++){
       interpolator[lvl]->interpolate(*FR0[lvl], *FR0[lvl-1], interv);
-      if(lvl <= Min(a_old_finest_level, a_new_finest_level)){
+      if(lvl <= Min(a_oldFinestLevel, a_newFinestLevel)){
 	m_cache_FR0[idx][lvl]->copyTo(*FR0[lvl]);
       }
     }
@@ -1612,10 +1612,10 @@ void sdc::allocate_sigma_storage(){
   m_sigma_scratch->allocate_storage(m_p);
 }
 
-void sdc::deallocate_internals(){
-  CH_TIME("sdc::deallocate_internals");
+void sdc::deallocateInternals(){
+  CH_TIME("sdc::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "sdc::deallocate_internals" << endl;
+    pout() << "sdc::deallocateInternals" << endl;
   }
 
   m_amr->deallocate(m_scratch1);

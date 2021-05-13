@@ -24,8 +24,8 @@ namespace physics {
       ~ito_plasma_godunov();
 
       // IO routines
-      int get_num_plot_vars() const override;
-      void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
+      int getNumberOfPlotVariables() const override;
+      void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
       void write_conductivity(EBAMRCellData& a_output, int& a_icomp) const;
 
       // Advance routines
@@ -36,11 +36,11 @@ namespace physics {
       void allocate() override;
       void parseOptions() override;
       void parseRuntimeOptions() override;
-      void allocate_internals() override;
+      void allocateInternals() override;
 
       // Regrid routines
-      void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
-      void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+      void pre_regrid(const int a_lmin, const int a_oldFinestLevel) override;
+      void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
 
     protected:

@@ -36,7 +36,7 @@ def write_template(args):
     makef.write('src_dirs = $(DISCHARGE_HOME)/src \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/AmrMesh \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/cell_tagger \\\n')
-    makef.write('\t$(DISCHARGE_HOME)/src/driver \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/Driver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/geometry \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/global \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/particle \\\n')

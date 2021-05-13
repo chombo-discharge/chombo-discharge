@@ -43,9 +43,9 @@ public:
 
   void init();
   void cache_internals();
-  void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
-  void allocate_internals();
-  void deallocate_internals();
+  void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
+  void allocateInternals();
+  void deallocateInternals();
   void parseOptions();
   bool need_to_regrid();
 

@@ -46,7 +46,7 @@ void eddington_sp1::parseOptions(){
   
   parseDomain_bc();    // Parses domain BC options
   parse_stationary();   // Parse stationary solver
-  parse_plot_vars();    // Parses plot variables
+  parsePlotVariables();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
 }
 
@@ -57,7 +57,7 @@ void eddington_sp1::parseRuntimeOptions(){
   }
   
   parse_stationary();   // Parse stationary solver
-  parse_plot_vars();    // Parses plot variables
+  parsePlotVariables();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
 }
 
@@ -141,10 +141,10 @@ void eddington_sp1::parse_stationary(){
   m_use_tga = (str == "true") ? true : false;
 }
 
-void eddington_sp1::parse_plot_vars(){
-  CH_TIME("eddington_sp1::parse_plot_vars");
+void eddington_sp1::parsePlotVariables(){
+  CH_TIME("eddington_sp1::parsePlotVariables");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_plot_vars" << endl;
+    pout() << m_name + "::parsePlotVariables" << endl;
   }
 
   m_plot_phi = false;
@@ -245,7 +245,7 @@ void eddington_sp1::allocate_wall_bc(){
   }
 }
 
-void eddington_sp1::pre_regrid(const int a_base, const int a_old_finest_level){
+void eddington_sp1::pre_regrid(const int a_base, const int a_oldFinestLevel){
   CH_TIME("eddington_sp1::pre_regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::pre_regrid" << endl;
@@ -271,10 +271,10 @@ void eddington_sp1::set_reflection_coefficients(const Real a_r1, const Real a_r2
   m_r2 = a_r2;
 }
 
-void eddington_sp1::allocate_internals(){
-  CH_TIME("eddington_sp1::allocate_internals");
+void eddington_sp1::allocateInternals(){
+  CH_TIME("eddington_sp1::allocateInternals");
   if(m_verbosity > 5){
-    pout() << m_name + "::allocate_internals" << endl;
+    pout() << m_name + "::allocateInternals" << endl;
   }
   
   const int ncomp = 1;
@@ -293,7 +293,7 @@ void eddington_sp1::allocate_internals(){
   this->set_aco_and_bco();
 }
 
-void eddington_sp1::deallocate_internals(){
+void eddington_sp1::deallocateInternals(){
   m_amr->deallocate(m_aco);
   m_amr->deallocate(m_bco);
   m_amr->deallocate(m_bco_irreg);
@@ -302,7 +302,7 @@ void eddington_sp1::deallocate_internals(){
   m_amr->deallocate(m_resid);
 }
 
-void eddington_sp1::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
+void eddington_sp1::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
   CH_TIME("eddington_sp1::regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::regrid" << endl;
@@ -312,7 +312,7 @@ void eddington_sp1::regrid(const int a_lmin, const int a_old_finest_level, const
   const int ncomp = 1;
   const Interval interv(comp, comp);
 
-  this->allocate_internals();
+  this->allocateInternals();
 
   Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(m_Realm, m_phase);
 
@@ -322,10 +322,10 @@ void eddington_sp1::regrid(const int a_lmin, const int a_old_finest_level, const
   }
 
   // These levels have changed
-  for (int lvl = Max(1,a_lmin); lvl <= a_new_finest_level; lvl++){
+  for (int lvl = Max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
     interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
 
-    if(lvl <= a_old_finest_level){
+    if(lvl <= a_oldFinestLevel){
       m_cache[lvl]->copyTo(*m_state[lvl]);
     }
   }
@@ -940,10 +940,10 @@ void eddington_sp1::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellD
   }
 }
 
-void eddington_sp1::write_plot_file(){
-  CH_TIME("eddington_sp1::write_plot_file");
+void eddington_sp1::writePlotFile(){
+  CH_TIME("eddington_sp1::writePlotFile");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_plot_file" << endl;
+    pout() << m_name + "::writePlotFile" << endl;
   }
 
   char file_char[1000];
@@ -1010,20 +1010,20 @@ void eddington_sp1::write_plot_file(){
 	      covered_values);
 }
 
-void eddington_sp1::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("eddington_sp1::write_checkpoint_level");
+void eddington_sp1::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("eddington_sp1::writeCheckpointLevel");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_checkpoint_level" << endl;
+    pout() << m_name + "::writeCheckpointLevel" << endl;
   }
 
   // Write state vector
   write(a_handle, *m_state[a_level], m_name);
 }
 
-void eddington_sp1::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("eddington_sp1::read_checkpoint_level");
+void eddington_sp1::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("eddington_sp1::readCheckpointLevel");
   if(m_verbosity > 5){
-    pout() << m_name + "::read_checkpoint_level" << endl;
+    pout() << m_name + "::readCheckpointLevel" << endl;
   }
 
   read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->getGrids(m_Realm)[a_level], Interval(0,0), false);

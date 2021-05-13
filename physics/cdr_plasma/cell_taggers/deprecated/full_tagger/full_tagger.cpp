@@ -35,8 +35,8 @@ void full_tagger::allocate_storage(){
   const int vec_ncomp = SpaceDim;
 
 
-  RefCountedPtr<cdr_layout> cdr = m_timestepper->get_cdr();
-  RefCountedPtr<rte_layout> rte = m_timestepper->get_rte();
+  RefCountedPtr<cdr_layout> cdr = m_timeStepper->get_cdr();
+  RefCountedPtr<rte_layout> rte = m_timeStepper->get_rte();
 
   m_amr->allocate(m_scratch,  m_phase, sca_ncomp);
   m_amr->allocate(m_E,        m_phase, vec_ncomp);
@@ -66,8 +66,8 @@ void full_tagger::deallocate_storage(){
     pout() << m_name + "::deallocate_storage" << endl;
   }
 
-  RefCountedPtr<cdr_layout> cdr = m_timestepper->get_cdr();
-  RefCountedPtr<rte_layout> rte = m_timestepper->get_rte();
+  RefCountedPtr<cdr_layout> cdr = m_timeStepper->get_cdr();
+  RefCountedPtr<rte_layout> rte = m_timeStepper->get_rte();
 
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_E);
@@ -96,12 +96,12 @@ void full_tagger::compute_tracers(){
   this->allocate_storage();
   
   const RealVect origin = m_amr->getProbLo();
-  const Real time       = m_timestepper->get_time();
+  const Real time       = m_timeStepper->get_time();
   const int num_species = m_physics->get_num_cdr_species();
   const int num_photons = m_physics->get_num_rte_species();
 
-  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
-  RefCountedPtr<rte_layout>& rte = m_timestepper->get_rte();
+  RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
+  RefCountedPtr<rte_layout>& rte = m_timeStepper->get_rte();
 
 
   // This is all computes on volumetric centroids
@@ -325,7 +325,7 @@ void full_tagger::compute_cdr_densities(Vector<EBAMRCellData>& a_cdr_densities){
     pout() << m_name + "::compute_cdr_densities" << endl;
   }
 
-  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
+  RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
 
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
@@ -348,7 +348,7 @@ void full_tagger::compute_cdr_gradients(Vector<EBAMRCellData>& a_cdr_gradients){
     pout() << m_name + "::compute_cdr_gradients" << endl;
   }
 
-  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
+  RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
     
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
@@ -364,7 +364,7 @@ void full_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
     pout() << m_name + "::compute_E" << endl;
   }
 
-  m_timestepper->compute_E(a_E, m_phase);
+  m_timeStepper->compute_E(a_E, m_phase);
   data_ops::vector_length(m_scratch, a_E);
   m_amr->computeGradient(a_grad_E, m_scratch, phase::gas);
 
@@ -383,7 +383,7 @@ void full_tagger::compute_rho(EBAMRCellData& a_rho, EBAMRCellData& a_grad_rho){
   }
 
   // Compute cell-centered rho and its gradient
-  m_timestepper->compute_rho(a_rho, m_phase);
+  m_timeStepper->compute_rho(a_rho, m_phase);
   m_amr->computeGradient(a_grad_rho, a_rho, phase::gas);
 
   // Transform to centroids
@@ -397,7 +397,7 @@ void full_tagger::compute_rte_densities(Vector<EBAMRCellData>& a_rte_densities){
     pout() << m_name + "::compute_rte_densities" << endl;
   }
 
-  RefCountedPtr<rte_layout>& rte = m_timestepper->get_rte();
+  RefCountedPtr<rte_layout>& rte = m_timeStepper->get_rte();
 
   for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_solver>& solver = solver_it();

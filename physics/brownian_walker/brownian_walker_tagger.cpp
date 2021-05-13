@@ -36,7 +36,7 @@ void brownian_walker_tagger::parseOptions(){
   parse_buffer(); // Derived from cell_tagger
 }
 
-bool brownian_walker_tagger::tag_cells(EBAMRTags& a_tags){
+bool brownian_walker_tagger::tagCells(EBAMRTags& a_tags){
   return true;
 }
 #include "CD_NamespaceFooter.H"

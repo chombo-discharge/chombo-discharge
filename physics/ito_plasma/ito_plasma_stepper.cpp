@@ -66,7 +66,7 @@ void ito_plasma_stepper::setup_solvers(){
   this->setup_sigma();
 
   // Allocate internal stuff
-  this->allocate_internals();
+  this->allocateInternals();
 
   // Set the particle buffers for the Ito solver
   this->set_particle_buffers();
@@ -80,9 +80,9 @@ void ito_plasma_stepper::setup_ito(){
 
   m_ito->set_verbosity(m_verbosity);
   m_ito->parseOptions();
-  m_ito->set_amr(m_amr);
+  m_ito->setAmr(m_amr);
   m_ito->set_phase(m_phase);
-  m_ito->set_computational_geometry(m_compgeom);
+  m_ito->setComputationalGeometry(m_computationalGeometry);
   m_ito->set_Realm(m_particle_Realm);
 }
 
@@ -95,7 +95,7 @@ void ito_plasma_stepper::setup_poisson(){
   m_fieldSolver->setVerbosity(m_verbosity);
   m_fieldSolver->parseOptions();
   m_fieldSolver->setAmr(m_amr);
-  m_fieldSolver->setComputationalGeometry(m_compgeom);
+  m_fieldSolver->setComputationalGeometry(m_computationalGeometry);
   m_fieldSolver->setVoltage(m_potential); 
   m_fieldSolver->setRealm(m_fluid_Realm);
 }
@@ -109,8 +109,8 @@ void ito_plasma_stepper::setup_rte(){
   m_rte->set_verbosity(m_verbosity);
   m_rte->parseOptions();
   m_rte->set_phase(m_phase);
-  m_rte->set_amr(m_amr);
-  m_rte->set_computational_geometry(m_compgeom);
+  m_rte->setAmr(m_amr);
+  m_rte->setComputationalGeometry(m_computationalGeometry);
   m_rte->set_Realm(m_particle_Realm);
   m_rte->sanityCheck();
 }
@@ -122,9 +122,9 @@ void ito_plasma_stepper::setup_sigma(){
   }
 
   m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
-  m_sigma->set_amr(m_amr);
+  m_sigma->setAmr(m_amr);
   m_sigma->set_verbosity(m_verbosity);
-  m_sigma->set_computational_geometry(m_compgeom);
+  m_sigma->setComputationalGeometry(m_computationalGeometry);
   m_sigma->set_Realm(m_fluid_Realm);
 }
 
@@ -151,10 +151,10 @@ void ito_plasma_stepper::allocate() {
     pout() << "ito_plasma_stepper::allocate" << endl;
   }
 
-  m_ito->allocate_internals();
-  m_rte->allocate_internals();
+  m_ito->allocateInternals();
+  m_rte->allocateInternals();
   m_fieldSolver->allocateInternals();
-  m_sigma->allocate_internals();
+  m_sigma->allocateInternals();
 }
 
 void ito_plasma_stepper::post_initialize(){
@@ -228,7 +228,7 @@ void ito_plasma_stepper::post_checkpoint_setup(){
   }
 
   //this->solve_poisson();
-  this->allocate_internals();
+  this->allocateInternals();
 
   m_ito->remap();
   
@@ -285,16 +285,16 @@ void ito_plasma_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a
 
   for (ito_iterator<ito_solver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<ito_solver>& solver = solver_it();
-    solver->write_checkpoint_level(a_handle, a_lvl);
+    solver->writeCheckpointLevel(a_handle, a_lvl);
   }
 
   for (rte_iterator<mc_photo> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<mc_photo>& solver = solver_it();
-    solver->write_checkpoint_level(a_handle, a_lvl);
+    solver->writeCheckpointLevel(a_handle, a_lvl);
   }
 
   m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
-  m_sigma->write_checkpoint_level(a_handle, a_lvl);
+  m_sigma->writeCheckpointLevel(a_handle, a_lvl);
 }
 
 void ito_plasma_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
@@ -305,22 +305,22 @@ void ito_plasma_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_
 
   for (ito_iterator<ito_solver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
-    solver->read_checkpoint_level(a_handle, a_lvl);
+    solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
   for (rte_iterator<mc_photo> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<mc_photo>& solver = solver_it();
-    solver->read_checkpoint_level(a_handle, a_lvl);
+    solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
   m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
-  m_sigma->read_checkpoint_level(a_handle, a_lvl);
+  m_sigma->readCheckpointLevel(a_handle, a_lvl);
 }
 
-void ito_plasma_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
-  CH_TIME("ito_plasma_stepper::write_plot_data");
+void ito_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
+  CH_TIME("ito_plasma_stepper::writePlotData");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::write_plot_data" << endl;
+    pout() << "ito_plasma_stepper::writePlotData" << endl;
   }
 
   // Poisson solver copies over its output data
@@ -329,20 +329,20 @@ void ito_plasma_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::st
 
   // Surface charge solver writes
   a_plotvar_names.append(m_sigma->get_plotvar_names());
-  m_sigma->write_plot_data(a_output, a_icomp);
+  m_sigma->writePlotData(a_output, a_icomp);
 
   // Ito solvers copy their output data
   for (ito_iterator<ito_solver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
     a_plotvar_names.append(solver->get_plotvar_names());
-    solver->write_plot_data(a_output, a_icomp);
+    solver->writePlotData(a_output, a_icomp);
   }
 
   // RTE solvers copy their output data
   for (rte_iterator<mc_photo> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<mc_photo>& solver = solver_it();
     a_plotvar_names.append(solver->get_plotvar_names());
-    solver->write_plot_data(a_output, a_icomp);
+    solver->writePlotData(a_output, a_icomp);
   }
 
   // Write the current to the output
@@ -429,10 +429,10 @@ void ito_plasma_stepper::synchronize_solver_times(const int a_step, const Real a
   m_sigma->set_time(a_step,   a_time, a_dt);
 }
 
-void ito_plasma_stepper::print_step_report(){
-  CH_TIME("ito_plasma_stepper::print_step_report");
+void ito_plasma_stepper::print_stepReport(){
+  CH_TIME("ito_plasma_stepper::print_stepReport");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::print_step_report" << endl;
+    pout() << "ito_plasma_stepper::print_stepReport" << endl;
   }
 
   const Real Emax = this->compute_Emax(m_phase);
@@ -746,16 +746,16 @@ void ito_plasma_stepper::registerOperators(){
   m_amr->registerMask("particle_halo", m_halo_buffer, m_particle_Realm);
 }
   
-void ito_plasma_stepper::pre_regrid(const int a_lmin, const int a_old_finest_level){
+void ito_plasma_stepper::pre_regrid(const int a_lmin, const int a_oldFinestLevel){
   CH_TIME("ito_plasma_stepper::pre_regrid");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::pre_regrid" << endl;
   }
 
-  m_ito->pre_regrid(a_lmin,     a_old_finest_level);
-  m_fieldSolver->preRegrid(a_lmin, a_old_finest_level);
-  m_rte->pre_regrid(a_lmin,     a_old_finest_level);
-  m_sigma->pre_regrid(a_lmin,   a_old_finest_level);
+  m_ito->pre_regrid(a_lmin,     a_oldFinestLevel);
+  m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
+  m_rte->pre_regrid(a_lmin,     a_oldFinestLevel);
+  m_sigma->pre_regrid(a_lmin,   a_oldFinestLevel);
 }
 
 void ito_plasma_stepper::deallocate(){
@@ -767,20 +767,20 @@ void ito_plasma_stepper::deallocate(){
   // Don't deallocate anything. 
 }
 
-void ito_plasma_stepper::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+void ito_plasma_stepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
   CH_TIME("ito_plasma_stepper::regrid");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::regrid" << endl;
   }
 
   // Allocate new memory
-  this->allocate_internals();
+  this->allocateInternals();
 
   // Regrid solvers
-  m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
-  m_fieldSolver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
-  m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
-  m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
+  m_ito->regrid(a_lmin,     a_oldFinestLevel, a_newFinestLevel);
+  m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_rte->regrid(a_lmin,     a_oldFinestLevel, a_newFinestLevel);
+  m_sigma->regrid(a_lmin,   a_oldFinestLevel, a_newFinestLevel);
 
   if(m_regrid_superparticles){
     m_ito->sort_particles_by_cell( ito_solver::which_container::bulk);
@@ -806,10 +806,10 @@ void ito_plasma_stepper::post_regrid(){
 
 }
 
-int ito_plasma_stepper::get_num_plot_vars() const {
-  CH_TIME("ito_plasma_stepper::get_num_plot_vars");
+int ito_plasma_stepper::getNumberOfPlotVariables() const {
+  CH_TIME("ito_plasma_stepper::getNumberOfPlotVariables");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::get_num_plot_vars" << endl;
+    pout() << "ito_plasma_stepper::getNumberOfPlotVariables" << endl;
   }
 
   int ncomp = 0;

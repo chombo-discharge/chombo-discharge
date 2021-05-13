@@ -1,4 +1,4 @@
-#include "driver.H"
+#include "CD_Driver.H"
 #include "mc_photo.H"
 #include "rod_dielectric.H"
 #include "rte_stepper.H"
@@ -27,9 +27,9 @@ int main(int argc, char* argv[]){
   auto timestepper = RefCountedPtr<rte_stepper<mc_photo> >
     (new rte_stepper<mc_photo>());
 
-  // Set up the driver and run it
-  RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
-  engine->setup_and_run(input_file);
+  // Set up the Driver and run it
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+  engine->setupAndRun(input_file);
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

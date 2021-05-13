@@ -66,7 +66,7 @@ void ito_solver::parseOptions(){
 
   this->parse_superparticles();
   this->parse_rng();
-  this->parse_plot_vars();
+  this->parsePlotVariables();
   this->parse_deposition();
   this->parse_bisect_step();
   this->parse_pvr_buffer();
@@ -84,7 +84,7 @@ void ito_solver::parseRuntimeOptions(){
 
   this->parse_superparticles();
   this->parse_rng();
-  this->parse_plot_vars();
+  this->parsePlotVariables();
   this->parse_deposition();
   this->parse_bisect_step();
   this->parse_diffusion_hop();
@@ -127,10 +127,10 @@ void ito_solver::parse_rng(){
   m_udist0d = RAN::uniform_int_distribution<int>(0, SpaceDim-1);
 }
 
-void ito_solver::parse_plot_vars(){
-  CH_TIME("mc_photo::parse_plot_vars");
+void ito_solver::parsePlotVariables(){
+  CH_TIME("mc_photo::parsePlotVariables");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_plot_vars" << endl;
+    pout() << m_name + "::parsePlotVariables" << endl;
   }
 
   m_plot_phi = false;
@@ -422,19 +422,19 @@ size_t ito_solver::get_num_particles(const which_container a_container, const bo
   return N;
 }
 
-void ito_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
-  CH_TIME("ito_solver::set_computational_geometry");
+void ito_solver::setComputationalGeometry(const RefCountedPtr<computational_geometry> a_computationalGeometry){
+  CH_TIME("ito_solver::setComputationalGeometry");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_computational_geometry" << endl;
+    pout() << m_name + "::setComputationalGeometry" << endl;
   }
   
-  m_compgeom = a_compgeom;
+  m_computationalGeometry = a_computationalGeometry;
 }
 
-void ito_solver::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("ito_solver::set_amr");
+void ito_solver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
+  CH_TIME("ito_solver::setAmr");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_amr" << endl;
+    pout() << m_name + "::setAmr" << endl;
   }
 
   m_amr = a_amr;
@@ -578,7 +578,7 @@ void ito_solver::remove_covered_particles_if(particle_container<ito_particle>& a
     pout() << m_name + "::remove_covered_particles_if(particles)" << endl;
   }
 
-  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_compgeom->get_gas_if() : m_compgeom->get_sol_if();
+  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_computationalGeometry->get_gas_if() : m_computationalGeometry->get_sol_if();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
@@ -609,7 +609,7 @@ void ito_solver::transfer_covered_particles_if(particle_container<ito_particle>&
     pout() << m_name + "::transfer_covered_particles_if(container, container, tolerance)" << endl;
   }
 
-  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_compgeom->get_gas_if() : m_compgeom->get_sol_if();
+  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_computationalGeometry->get_gas_if() : m_computationalGeometry->get_sol_if();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
@@ -904,7 +904,7 @@ void ito_solver::intersect_particles_if(particle_container<ito_particle>& a_part
   }
 }
 
-void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+void ito_solver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
   CH_TIME("ito_solver::regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::regrid" << endl;
@@ -941,7 +941,7 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
 
   for (auto& container : m_particle_containers){
     particle_container<ito_particle>& particles = container.second;
-    particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+    particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
   }
 }
 
@@ -957,10 +957,10 @@ void ito_solver::set_species(RefCountedPtr<ito_species> a_species){
   m_mobile    = m_species->is_mobile();
 }
 
-void ito_solver::allocate_internals(){
-  CH_TIME("ito_solver::allocate_internals");
+void ito_solver::allocateInternals(){
+  CH_TIME("ito_solver::allocateInternals");
   if(m_verbosity > 5){
-    pout() << m_name + "::allocate_internals" << endl;
+    pout() << m_name + "::allocateInternals" << endl;
   }
   
   const int ncomp = 1;
@@ -999,10 +999,10 @@ void ito_solver::allocate_internals(){
   }
 }
 
-void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("ito_solver::write_checkpoint_level");
+void ito_solver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("ito_solver::writeCheckpointLevel");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_checkpoint_level" << endl;
+    pout() << m_name + "::writeCheckpointLevel" << endl;
   }
 
   // Write state. 
@@ -1010,17 +1010,17 @@ void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level)
 
   // Write particles.
   if(m_checkpointing == which_checkpoint::particles){
-    this->write_checkpoint_level_particles(a_handle, a_level);
+    this->writeCheckpointLevel_particles(a_handle, a_level);
   }
   else{ // In this case we need to write the number of physical particles in a grid cell. 
-    this->write_checkpoint_level_fluid(a_handle, a_level);
+    this->writeCheckpointLevel_fluid(a_handle, a_level);
   }
 }
 
-void ito_solver::write_checkpoint_level_particles(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("ito_solver::write_checkpoint_level_particles");
+void ito_solver::writeCheckpointLevel_particles(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("ito_solver::writeCheckpointLevel_particles");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_checkpoint_level_particles" << endl;
+    pout() << m_name + "::writeCheckpointLevel_particles" << endl;
   }
 
   const int halo        = 0;
@@ -1045,10 +1045,10 @@ void ito_solver::write_checkpoint_level_particles(HDF5Handle& a_handle, const in
   writeParticlesToHDF(a_handle, RealmParticles[a_level], str);
 }
 
-void ito_solver::write_checkpoint_level_fluid(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("ito_solver::write_checkpoint_level_fluid");
+void ito_solver::writeCheckpointLevel_fluid(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("ito_solver::writeCheckpointLevel_fluid");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_checkpoint_level_fluid" << endl;
+    pout() << m_name + "::writeCheckpointLevel_fluid" << endl;
   }
 
   const std::string str = m_name + "_particles";
@@ -1089,10 +1089,10 @@ void ito_solver::write_checkpoint_level_fluid(HDF5Handle& a_handle, const int a_
   write(a_handle, particleNumbers, str);
 }
 
-void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("ito_solver::read_checkpoint_level");
+void ito_solver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("ito_solver::readCheckpointLevel");
   if(m_verbosity > 5){
-    pout() << m_name + "::read_checkpoint_level" << endl;
+    pout() << m_name + "::readCheckpointLevel" << endl;
   }
 
   // Read state vector
@@ -1228,10 +1228,10 @@ void ito_solver::restart_particles(LevelData<EBCellFAB>& a_num_particles, const 
   }
 }
 
-void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("ito_solver::write_plot_data");
+void ito_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("ito_solver::writePlotData");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_plot_data" << endl;
+    pout() << m_name + "::writePlotData" << endl;
   }
 
   // Write phi
@@ -1936,7 +1936,7 @@ bool ito_solver::is_diffusive() const{
   return m_diffusive;
 }
 
-void ito_solver::pre_regrid(const int a_base, const int a_old_finest_level){
+void ito_solver::pre_regrid(const int a_base, const int a_oldFinestLevel){
   CH_TIME("ito_solver::pre_regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::pre_regrid" << endl;

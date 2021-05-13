@@ -49,7 +49,7 @@ namespace physics {
       // Setup routines
       virtual void parseOptions() = 0;
       virtual void parseRuntimeOptions() = 0;
-      virtual void allocate_internals() = 0;
+      virtual void allocateInternals() = 0;
       virtual void setup_solvers() override;
       virtual void allocate() override;
       virtual void initial_data() override;
@@ -66,17 +66,17 @@ namespace physics {
       // IO routines
       void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
       void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
-      virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
+      virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
       void write_J(EBAMRCellData& a_output, int& a_icomp) const;
       void write_num_particles_per_patch(EBAMRCellData& a_output, int& a_icomp) const;
-      int  get_num_plot_vars() const override;
+      int  getNumberOfPlotVariables() const override;
       Vector<long int> get_checkpoint_loads(const std::string a_Realm, const int a_level) const override;
   
       // Advance routines
       virtual Real advance(const Real a_dt) = 0;
       virtual void compute_dt(Real& a_dt, time_code& a_timecode) override;
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
-      void print_step_report() override;
+      void print_stepReport() override;
 
       // Registration routines
       void registerRealms() override;
@@ -84,8 +84,8 @@ namespace physics {
       
       // Regrid routines. 
       void deallocate() override;
-      virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
-      virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+      virtual void pre_regrid(const int a_lmin, const int a_oldFinestLevel) override;
+      virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       void post_regrid() override;
       bool LoadBalancing_Realm(const std::string a_Realm) const override;
       void LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,

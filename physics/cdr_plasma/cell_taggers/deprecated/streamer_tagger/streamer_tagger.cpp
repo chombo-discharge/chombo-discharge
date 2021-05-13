@@ -67,17 +67,17 @@ void streamer_tagger::compute_tracers(){
 
 
   // Get electron stuff
-  EBAMRCellData& ne  = (m_timestepper->get_cdr())->get_solvers()[m_electron_idx]->get_state();
-  EBAMRCellData& Se  = (m_timestepper->get_cdr())->get_solvers()[m_electron_idx]->get_source();
-  EBAMRCellData& ve  = (m_timestepper->get_cdr())->get_solvers()[m_electron_idx]->get_velo_cell();
+  EBAMRCellData& ne  = (m_timeStepper->get_cdr())->get_solvers()[m_electron_idx]->get_state();
+  EBAMRCellData& Se  = (m_timeStepper->get_cdr())->get_solvers()[m_electron_idx]->get_source();
+  EBAMRCellData& ve  = (m_timeStepper->get_cdr())->get_solvers()[m_electron_idx]->get_velo_cell();
 
   // Compute the electric field
   EBAMRCellData rho;
   EBAMRCellData Efield;
   m_amr->allocate(Efield,  m_phase, SpaceDim);
-  m_timestepper->compute_E(Efield, m_phase);
+  m_timeStepper->compute_E(Efield, m_phase);
   m_amr->allocatePointer(rho);
-  m_amr->alias(rho, phase::gas, m_timestepper->get_poisson()->get_source());
+  m_amr->alias(rho, phase::gas, m_timeStepper->get_poisson()->get_source());
 
   // Compute the electric field magnitude
   EBAMRCellData Emag;

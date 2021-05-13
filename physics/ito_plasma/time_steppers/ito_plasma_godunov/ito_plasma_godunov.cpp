@@ -36,26 +36,26 @@ ito_plasma_godunov::~ito_plasma_godunov(){
 
 }
 
-int ito_plasma_godunov::get_num_plot_vars() const {
-  CH_TIME("ito_plasma_godunov::get_num_plot_vars");
+int ito_plasma_godunov::getNumberOfPlotVariables() const {
+  CH_TIME("ito_plasma_godunov::getNumberOfPlotVariables");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::get_num_plot_vars" << endl;
+    pout() << "ito_plasma_godunov::getNumberOfPlotVariables" << endl;
   }
 
-  int ncomp = ito_plasma_stepper::get_num_plot_vars();
+  int ncomp = ito_plasma_stepper::getNumberOfPlotVariables();
 
   ncomp++; // Add conductivity
 
   return ncomp;
 }
 
-void ito_plasma_godunov::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
+void ito_plasma_godunov::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
   CH_TIME("ito_plasma_godunov::write_conductivity");
   if(m_verbosity > 5){
     pout() << "ito_plasma_godunov::write_conductivity" << endl;
   }
 
-  ito_plasma_stepper::write_plot_data(a_output, a_plotvar_names, a_icomp);
+  ito_plasma_stepper::writePlotData(a_output, a_plotvar_names, a_icomp);
 
   // Do conductivity
   this->write_conductivity(a_output, a_icomp);
@@ -88,10 +88,10 @@ void ito_plasma_godunov::allocate(){
     pout() << "ito_plasma_godunov::allocate" << endl;
   }
 
-  m_ito->allocate_internals();
-  m_rte->allocate_internals();
+  m_ito->allocateInternals();
+  m_rte->allocateInternals();
   m_fieldSolver->allocateInternals();
-  m_sigma->allocate_internals();
+  m_sigma->allocateInternals();
 
   // Now allocate for the conductivity particles and rho^dagger particles
   const int num_ito_species = m_physics->get_num_ito_species();
@@ -274,10 +274,10 @@ void ito_plasma_godunov::parseRuntimeOptions() {
   m_rte->parseRuntimeOptions();
 }
 
-void ito_plasma_godunov::allocate_internals(){
-  CH_TIME("ito_plasma_godunov::allocate_internals");
+void ito_plasma_godunov::allocateInternals(){
+  CH_TIME("ito_plasma_godunov::allocateInternals");
   if(m_verbosity > 5){
-    pout() << m_name + "::allocate_internals" << endl;
+    pout() << m_name + "::allocateInternals" << endl;
   }
 
   const int num_ito_species = m_physics->get_num_ito_species();
@@ -541,20 +541,20 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
 #endif
 }
 
-void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_level){
+void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_oldFinestLevel){
   CH_TIME("ito_plasma_godunov::pre_regrid");
   if(m_verbosity > 5){
     pout() << "ito_plasma_godunov::pre_regrid" << endl;
   }
 
-  ito_plasma_stepper::pre_regrid(a_lmin, a_old_finest_level);
+  ito_plasma_stepper::pre_regrid(a_lmin, a_oldFinestLevel);
 
 
   // Copy conductivity to scratch storage
   const int ncomp        = 1;
   const int finest_level = m_amr->getFinestLevel();
   m_amr->allocate(m_cache,  m_fluid_Realm, m_phase, ncomp);
-  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+  for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++){
     m_conduct_cell[lvl]->localCopyTo(*m_cache[lvl]);
   }
 
@@ -566,7 +566,7 @@ void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_old_finest_lev
   }
 }
 
-void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
+void ito_plasma_godunov::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
   CH_TIME("ito_plasma_godunov::regrid");
   if(m_verbosity > 5){
     pout() << "ito_plasma_godunov::regrid" << endl;
@@ -588,28 +588,28 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
   // Regrid solvers
   total_time -= MPI_Wtime();
   ito_time -= MPI_Wtime();
-  m_ito->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  m_ito->regrid(a_lmin,     a_oldFinestLevel, a_newFinestLevel);
   ito_time += MPI_Wtime();
   
   MPI_Barrier(Chombo_MPI::comm);
   poisson_time -= MPI_Wtime();
-  m_fieldSolver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   poisson_time += MPI_Wtime();
 
   MPI_Barrier(Chombo_MPI::comm);
   rte_time -= MPI_Wtime();
-  m_rte->regrid(a_lmin,     a_old_finest_level, a_new_finest_level);
+  m_rte->regrid(a_lmin,     a_oldFinestLevel, a_newFinestLevel);
   rte_time += MPI_Wtime();
 
   MPI_Barrier(Chombo_MPI::comm);
   sigma_time -= MPI_Wtime();
-  m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
+  m_sigma->regrid(a_lmin,   a_oldFinestLevel, a_newFinestLevel);
   sigma_time += MPI_Wtime();
 
   // Allocate internal memory for ito_plasma_godunov now....
   MPI_Barrier(Chombo_MPI::comm);
   internal_time -= MPI_Wtime();
-  this->allocate_internals();
+  this->allocateInternals();
   internal_time += MPI_Wtime();
 
   // We need to remap/regrid the stored particles as well.
@@ -622,8 +622,8 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_old_finest_level, 
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_rho_dagger_particles[idx]->regrid(  grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-    m_conductivity_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+    m_rho_dagger_particles[idx]->regrid(  grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+    m_conductivity_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
   }
   gdnv_time += MPI_Wtime();
   

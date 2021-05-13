@@ -68,7 +68,7 @@ geo_coarsener::~geo_coarsener(){
 void geo_coarsener::coarsen_tags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_origin) const {
   CH_TIME("geo_coarsener::coarsen_tags");
   if(!(m_coarsen_boxes.size() == m_coarsen_levels.size())){
-    pout() << "geo_coarsener::coarsen_tags - m_geocoarsen is not well defined. Skipping the coarsening step" << endl;
+    pout() << "geo_coarsener::coarsen_tags - m_geoCoarsen is not well defined. Skipping the coarsening step" << endl;
   }
   else{
     if(m_coarsen_boxes.size() > 0){

@@ -56,8 +56,8 @@ void advection_diffusion_stepper::setup_solvers(){
   m_solver->set_species(m_species);
   m_solver->parseOptions();
   m_solver->set_phase(m_phase);
-  m_solver->set_amr(m_amr);
-  m_solver->set_computational_geometry(m_compgeom);
+  m_solver->setAmr(m_amr);
+  m_solver->setComputationalGeometry(m_computationalGeometry);
   m_solver->sanityCheck();
   m_solver->set_Realm(m_Realm);
   
@@ -78,7 +78,7 @@ void advection_diffusion_stepper::registerOperators(){
 }
 
 void advection_diffusion_stepper::allocate() {
-  m_solver->allocate_internals();
+  m_solver->allocateInternals();
 
   m_amr->allocate(m_tmp, m_Realm, m_phase, 1);
   m_amr->allocate(m_k1,  m_Realm, m_phase, 1);
@@ -153,11 +153,11 @@ void advection_diffusion_stepper::set_velocity(const int a_level){
 }
 
 void advection_diffusion_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const {
-  m_solver->write_checkpoint_level(a_handle, a_lvl);
+  m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
 
 void advection_diffusion_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
-  m_solver->read_checkpoint_level(a_handle, a_lvl);
+  m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
 
 void advection_diffusion_stepper::post_checkpoint_setup(){
@@ -172,15 +172,15 @@ void advection_diffusion_stepper::post_checkpoint_setup(){
   }
 }
 
-int advection_diffusion_stepper::get_num_plot_vars() const{
+int advection_diffusion_stepper::getNumberOfPlotVariables() const{
   return m_solver->get_num_plotvars();
 }
 
-void advection_diffusion_stepper::write_plot_data(EBAMRCellData&       a_output,
+void advection_diffusion_stepper::writePlotData(EBAMRCellData&       a_output,
 						  Vector<std::string>& a_plotvar_names,
 						  int&                 a_icomp) const {
   a_plotvar_names.append(m_solver->get_plotvar_names());
-  m_solver->write_plot_data(a_output, a_icomp);
+  m_solver->writePlotData(a_output, a_icomp);
 }
 
 void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
@@ -257,7 +257,7 @@ void advection_diffusion_stepper::synchronize_solver_times(const int a_step, con
   m_solver->set_time(a_step, a_time, a_dt);
 }
 
-void advection_diffusion_stepper::print_step_report(){
+void advection_diffusion_stepper::print_stepReport(){
 
 }
 
@@ -265,18 +265,18 @@ bool advection_diffusion_stepper::need_to_regrid(){
   return false;
 }
 
-void advection_diffusion_stepper::pre_regrid(const int a_lbase, const int a_old_finest_level){
-  m_solver->pre_regrid(a_lbase, a_old_finest_level);
+void advection_diffusion_stepper::pre_regrid(const int a_lbase, const int a_oldFinestLevel){
+  m_solver->pre_regrid(a_lbase, a_oldFinestLevel);
 }
 
 void advection_diffusion_stepper::deallocate(){
-  m_solver->deallocate_internals();
+  m_solver->deallocateInternals();
 }
 
-void advection_diffusion_stepper::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+void advection_diffusion_stepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
 
   // Regrid CDR solver
-  m_solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_solver->set_source(0.0);
   m_solver->set_ebflux(0.0);
   m_solver->set_domain_flux(0.0);

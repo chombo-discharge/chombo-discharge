@@ -1,4 +1,4 @@
-#include "driver.H"
+#include "CD_Driver.H"
 #include "CD_FieldSolverMultigrid.H"
 #include "rod_plane_profile.H"
 #include "CD_FieldStepper.H"
@@ -27,9 +27,9 @@ int main(int argc, char* argv[]){
   auto timestepper = RefCountedPtr<FieldStepper<FieldSolverMultigrid> >
     (new FieldStepper<FieldSolverMultigrid>());
 
-  // Set up the driver and run it
-  RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
-  engine->setup_and_run(input_file);
+  // Set up the Driver and run it
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+  engine->setupAndRun(input_file);
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

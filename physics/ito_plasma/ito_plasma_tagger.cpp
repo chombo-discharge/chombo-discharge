@@ -29,10 +29,10 @@ ito_plasma_tagger::ito_plasma_tagger(){
 }
 
 ito_plasma_tagger::ito_plasma_tagger(const RefCountedPtr<ito_plasma_physics>&     a_physics,
-				     const RefCountedPtr<ito_plasma_stepper>&     a_timestepper,
+				     const RefCountedPtr<ito_plasma_stepper>&     a_timeStepper,
 				     const RefCountedPtr<AmrMesh>&               a_amr,
-				     const RefCountedPtr<computational_geometry>& a_compgeom) : ito_plasma_tagger() {
-  this->define(a_physics, a_timestepper, a_amr, a_compgeom);
+				     const RefCountedPtr<computational_geometry>& a_computationalGeometry) : ito_plasma_tagger() {
+  this->define(a_physics, a_timeStepper, a_amr, a_computationalGeometry);
 }
 
 ito_plasma_tagger::~ito_plasma_tagger(){
@@ -40,18 +40,18 @@ ito_plasma_tagger::~ito_plasma_tagger(){
 }
 
 void ito_plasma_tagger::define(const RefCountedPtr<ito_plasma_physics>&     a_physics,
-			       const RefCountedPtr<ito_plasma_stepper>&     a_timestepper,
+			       const RefCountedPtr<ito_plasma_stepper>&     a_timeStepper,
 			       const RefCountedPtr<AmrMesh>&               a_amr,
-			       const RefCountedPtr<computational_geometry>& a_compgeom){
+			       const RefCountedPtr<computational_geometry>& a_computationalGeometry){
   CH_TIME("ito_plasma_tagger::define");
   if(m_verbosity > 5){
     pout() << m_name + "::define" << endl;
   }
 
   m_physics     = a_physics;
-  m_timestepper = a_timestepper;
+  m_timeStepper = a_timeStepper;
   m_amr         = a_amr;
-  m_compgeom    = a_compgeom;
+  m_computationalGeometry    = a_computationalGeometry;
 }
 
 void ito_plasma_tagger::regrid(){
@@ -79,10 +79,10 @@ void ito_plasma_tagger::set_phase(const phase::which_phase a_phase){
   m_phase = a_phase;
 }
 
-int ito_plasma_tagger::get_num_plot_vars(){
-  CH_TIME("ito_plasma_tagger::get_num_plot_vars_cells");
+int ito_plasma_tagger::getNumberOfPlotVariables(){
+  CH_TIME("ito_plasma_tagger::getNumberOfPlotVariables_cells");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_num_plot_vars" << endl;
+    pout() << m_name + "::getNumberOfPlotVariables" << endl;
   }
   
   return m_num_tracers;
@@ -92,10 +92,10 @@ Vector<EBAMRCellData>& ito_plasma_tagger::get_tracer_fields() {
   return m_tracer;
 }
 
-void ito_plasma_tagger::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) {
-  CH_TIME("ito_plasma_tagger::write_plot_data");
+void ito_plasma_tagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) {
+  CH_TIME("ito_plasma_tagger::writePlotData");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_plot_data" << endl;
+    pout() << m_name + "::writePlotData" << endl;
   }
 
   this->compute_tracers();
@@ -122,16 +122,16 @@ void ito_plasma_tagger::write_plot_data(EBAMRCellData& a_output, Vector<std::str
   }
 }
 
-bool ito_plasma_tagger::tag_cells(EBAMRTags& a_tags){
-  CH_TIME("ito_plasma_tagger::tag_cells");
+bool ito_plasma_tagger::tagCells(EBAMRTags& a_tags){
+  CH_TIME("ito_plasma_tagger::tagCells");
   if(m_verbosity > 5){
-    pout() << m_name + "::tag_cells" << endl;
+    pout() << m_name + "::tagCells" << endl;
   }
 
   bool got_new_tags = false;
 
   const RealVect origin      = m_amr->getProbLo();
-  const Real time            = m_timestepper->get_time();
+  const Real time            = m_timeStepper->get_time();
   const int finest_level     = m_amr->getFinestLevel();
   const int max_depth        = m_amr->getMaxAmrDepth();
   const int finest_tag_level = (finest_level == max_depth) ? max_depth - 1 : finest_level; // Never tag on max_amr_depth

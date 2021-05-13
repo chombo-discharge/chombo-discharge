@@ -162,7 +162,7 @@ void euler_maruyama::parse_debug(){
 }
 
 bool euler_maruyama::need_to_regrid(){
-  CH_TIME("euler_maruyama::deallocate_internals");
+  CH_TIME("euler_maruyama::deallocateInternals");
   if(m_verbosity > 5){
     pout() << "euler_maruyama::need_to_regrid" << endl;
   }
@@ -308,19 +308,19 @@ void euler_maruyama::init(){
   // No need to do anything in this routine yet
 }
 
-void euler_maruyama::regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
-  CH_TIME("euler_maruyama::regrid_internals");
+void euler_maruyama::regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
+  CH_TIME("euler_maruyama::regridInternals");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::regrid_internals" << endl;
+    pout() << "euler_maruyama::regridInternals" << endl;
   }
 
   // These aren't the droids you're looking for. 
 }
 
-void euler_maruyama::allocate_internals(){
-  CH_TIME("euler_maruyama::allocate_internals");
+void euler_maruyama::allocateInternals(){
+  CH_TIME("euler_maruyama::allocateInternals");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::allocate_internals" << endl;
+    pout() << "euler_maruyama::allocateInternals" << endl;
   }
 
   const int ncomp       = 1;
@@ -352,10 +352,10 @@ void euler_maruyama::allocate_internals(){
   m_sigma_scratch->allocate_storage();
 }
 
-void euler_maruyama::deallocate_internals(){
-  CH_TIME("euler_maruyama::deallocate_internals");
+void euler_maruyama::deallocateInternals(){
+  CH_TIME("euler_maruyama::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::deallocate_internals" << endl;
+    pout() << "euler_maruyama::deallocateInternals" << endl;
   }
 
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){

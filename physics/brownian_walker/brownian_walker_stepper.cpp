@@ -219,7 +219,7 @@ void brownian_walker_stepper::write_checkpoint_data(HDF5Handle& a_handle, const 
     pout() << "brownian_walker_stepper::write_checkpoint_data" << endl;
   }
 
-  m_solver->write_checkpoint_level(a_handle, a_lvl);
+  m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
 
 void brownian_walker_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) {
@@ -228,7 +228,7 @@ void brownian_walker_stepper::read_checkpoint_data(HDF5Handle& a_handle, const i
     pout() << "brownian_walker_stepper::read_checkpoint_data" << endl;
   }
   
-  m_solver->read_checkpoint_level(a_handle, a_lvl);
+  m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
 
 void brownian_walker_stepper::post_checkpoint_setup() {
@@ -253,22 +253,22 @@ void brownian_walker_stepper::post_checkpoint_setup() {
   }
 }
 
-int brownian_walker_stepper::get_num_plot_vars() const {
-  CH_TIME("brownian_walker_stepper::get_num_plot_vars");
+int brownian_walker_stepper::getNumberOfPlotVariables() const {
+  CH_TIME("brownian_walker_stepper::getNumberOfPlotVariables");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::get_num_plot_vars" << endl;
+    pout() << "brownian_walker_stepper::getNumberOfPlotVariables" << endl;
   }
 
   return m_solver->get_num_plotvars();
 }
 
-void brownian_walker_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
-  CH_TIME("brownian_walker_stepper::write_plot_data");
+void brownian_walker_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
+  CH_TIME("brownian_walker_stepper::writePlotData");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::write_plot_data" << endl;
+    pout() << "brownian_walker_stepper::writePlotData" << endl;
   }
   a_plotvar_names.append(m_solver->get_plotvar_names());
-  m_solver->write_plot_data(a_output, a_icomp);
+  m_solver->writePlotData(a_output, a_icomp);
 }
 
 void brownian_walker_stepper::compute_dt(Real& a_dt, time_code& a_timecode) {
@@ -297,10 +297,10 @@ void brownian_walker_stepper::synchronize_solver_times(const int a_step, const R
   m_dt   = a_dt;
 }
 
-void brownian_walker_stepper::print_step_report() {
-  CH_TIME("brownian_walker_stepper::print_step_report");
+void brownian_walker_stepper::print_stepReport() {
+  CH_TIME("brownian_walker_stepper::print_stepReport");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::print_step_report" << endl;
+    pout() << "brownian_walker_stepper::print_stepReport" << endl;
   }
 
   // Do nothing
@@ -315,7 +315,7 @@ bool brownian_walker_stepper::need_to_regrid() {
   return false;
 }
 
-void brownian_walker_stepper::pre_regrid(const int a_lbase, const int a_old_finest_level){
+void brownian_walker_stepper::pre_regrid(const int a_lbase, const int a_oldFinestLevel){
   CH_TIME("brownian_walker_stepper::pre_regrid");
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::pre_regrid" << endl;
@@ -345,10 +345,10 @@ void brownian_walker_stepper::setup_solvers() {
 
   m_solver->set_verbosity(m_verbosity);
   m_solver->parseOptions();
-  m_solver->set_amr(m_amr);
+  m_solver->setAmr(m_amr);
   m_solver->set_species(m_species);
   m_solver->set_phase(m_phase);
-  m_solver->set_computational_geometry(m_compgeom);
+  m_solver->setComputationalGeometry(m_computationalGeometry);
   m_solver->set_Realm(m_Realm);
 }
 
@@ -371,7 +371,7 @@ void brownian_walker_stepper::registerOperators() {
 }
 
 void brownian_walker_stepper::allocate() {
-  m_solver->allocate_internals(); // Allocate some internal storage
+  m_solver->allocateInternals(); // Allocate some internal storage
 }
 
 Real brownian_walker_stepper::advance(const Real a_dt) {
@@ -438,10 +438,10 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	  // This is the implicit function
 	  RefCountedPtr<BaseIF> func;
 	  if(m_solver->get_phase() == phase::gas){
-	    func = m_compgeom->get_gas_if();
+	    func = m_computationalGeometry->get_gas_if();
 	  }
 	  else {
-	    func = m_compgeom->get_sol_if();
+	    func = m_computationalGeometry->get_sol_if();
 	  }
 
 	  for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
@@ -484,13 +484,13 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
   return a_dt;
 }
 
-void brownian_walker_stepper::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
+void brownian_walker_stepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
   CH_TIME("brownian_walker_stepper::regrid");
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::regrid" << endl;
   }
 
-  m_solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   if(m_solver->is_diffusive()){
     m_solver->set_diffco_func(m_diffco);
   }

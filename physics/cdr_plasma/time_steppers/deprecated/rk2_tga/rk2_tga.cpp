@@ -124,10 +124,10 @@ Real rk2_tga::advance(const Real a_dt){
   return a_dt;
 }
 
-void rk2_tga::regrid_internals(){
-  CH_TIME("time_stepper::regrid_internals");
+void rk2_tga::regridInternals(){
+  CH_TIME("time_stepper::regridInternals");
   if(m_verbosity > 5){
-    pout() << "time_stepper::regrid_internals" << endl;
+    pout() << "time_stepper::regridInternals" << endl;
   }
   
   this->allocate_cdr_storage();
@@ -218,10 +218,10 @@ void rk2_tga::allocate_sigma_storage(){
   m_sigma_scratch->allocate_storage();
 }
 
-void rk2_tga::deallocate_internals(){
-  CH_TIME("time_stepper::deallocate_internals");
+void rk2_tga::deallocateInternals(){
+  CH_TIME("time_stepper::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "time_stepper::deallocate_internals" << endl;
+    pout() << "time_stepper::deallocateInternals" << endl;
   }
   
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){

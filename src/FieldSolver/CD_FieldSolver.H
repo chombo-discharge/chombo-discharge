@@ -147,9 +147,9 @@ public:
 
   /*!
     @brief Set the computational geometry
-    @param[in] a_compgeom Computational geometry. 
+    @param[in] a_computationalGeometry Computational geometry. 
   */
-  virtual void setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_compgeom);
+  virtual void setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry);
   
   /*!
     @brief Set the amr object. 
@@ -326,7 +326,7 @@ protected:
   /*!
     @brief Computational geometry. Needed for passing in BCs on EBs. 
   */
-  RefCountedPtr<computational_geometry> m_compgeom;
+  RefCountedPtr<computational_geometry> m_computationalGeometry;
 
   /*!
     @brief AMR; needed for grid stuff

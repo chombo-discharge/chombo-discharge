@@ -103,21 +103,21 @@ void rte_solver::sanityCheck(){
     pout() << m_name + "::sanityCheck" << endl;
   }
 
-  CH_assert(!m_compgeom.isNull());
+  CH_assert(!m_computationalGeometry.isNull());
   CH_assert(!m_amr.isNull());
   CH_assert(!m_rte_species.isNull());
   CH_assert(!m_ebis.isNull());
 }
 
-void rte_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
-  CH_TIME("rte_solver::set_computational_geometry");
+void rte_solver::setComputationalGeometry(const RefCountedPtr<computational_geometry> a_computationalGeometry){
+  CH_TIME("rte_solver::setComputationalGeometry");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_computational_geometry" << endl;
+    pout() << m_name + "::setComputationalGeometry" << endl;
   }
   
-  m_compgeom = a_compgeom;
+  m_computationalGeometry = a_computationalGeometry;
 
-  const RefCountedPtr<mfis> mfis = m_compgeom->get_mfis();
+  const RefCountedPtr<mfis> mfis = m_computationalGeometry->get_mfis();
   
   this->set_ebis(mfis->getEBIndexSpace(m_phase));
 }
@@ -131,10 +131,10 @@ void rte_solver::set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis){
   m_ebis = a_ebis;
 }
 
-void rte_solver::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("rte_solver::set_amr");
+void rte_solver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
+  CH_TIME("rte_solver::setAmr");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_amr" << endl;
+    pout() << m_name + "::setAmr" << endl;
   }
 
   m_amr = a_amr;
@@ -248,10 +248,10 @@ void rte_solver::initial_data() {
   data_ops::set_value(m_state, 0.0);
 }
 
-void rte_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("rte_solver::write_plot_data");
+void rte_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("rte_solver::writePlotData");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_plot_data" << endl;
+    pout() << m_name + "::writePlotData" << endl;
   }
 
   if(m_plot_phi) write_data(a_output, a_comp, m_state,  true);

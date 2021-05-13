@@ -28,7 +28,7 @@ namespace physics {
 
       void regrid();
       void parseOptions();
-      bool tag_cells(EBAMRTags& a_tags);
+      bool tagCells(EBAMRTags& a_tags);
 
     protected:
       std::string m_Realm;

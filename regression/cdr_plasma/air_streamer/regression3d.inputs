@@ -34,37 +34,37 @@ AmrMesh.ebcf            = true        # If you have EBCF crossing, this must be 
 # ====================================================================================================
 # DRIVER OPTIONS
 # ====================================================================================================
-driver.verbosity                       = 2                # Engine verbosity
-driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
-driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
-driver.ebis_memory_LoadBalancing        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
-driver.plot_interval                   = 10               # Plot interval
-driver.checkpoint_interval             = 10               # Checkpoint interval
-driver.regrid_interval                 = 10               # Regrid interval
-driver.write_regrid_files              = false            # Write regrid files or not.
-driver.write_restart_files             = false            # Write restart files or not
-driver.initial_regrids                 = 0                # Number of initial regrids
-driver.start_time                      = 0                # Start time (fresh simulations only)
-driver.stop_time                       = 10.E-0           # Stop time
-driver.max_steps                       = 100              # Maximum number of steps
-driver.geometry_only                   = false            # Special option that ONLY plots the geometry
-driver.write_memory                    = false            # Write MPI memory report
-driver.write_loads                     = false            # Write (accumulated) computational loads
-driver.output_directory                = ./               # Output directory
-driver.output_names                    = simulation       # Simulation output names
-driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
-driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
-driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
-driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
-driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
-driver.allow_coarsening                = true             # Allows removal of grid levels according to cell_tagger
-driver.refine_geometry                 = -1               # Refine geometry, -1 => Refine all the way down
-driver.refine_electrodes               = -1               # Refine electrode surfaces. -1 => equal to refine_geometry
-driver.refine_dielectrics              = -1               # Refine dielectric surfaces. -1 => equal to refine_geometry
-driver.refine_electrode_gas_interface  = -1               # Refine electrode-gas interfaces. -1 => ----"----- 
-driver.refine_dielectric_gas_interface = -1               # Refine dielectric-gas interfaces. -1 => ----"-----
-driver.refine_solid_gas_interface      = -1               # Refine solid-gas interfaces. -1 => ----"-----  
-driver.refine_solid_solid_interface    = -1               # Refine solid-solid interfaces. -1 => ----"----- 
+Driver.verbosity                       = 2                # Engine verbosity
+Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
+Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
+Driver.ebis_memory_LoadBalancing        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
+Driver.plot_interval                   = 10               # Plot interval
+Driver.checkpoint_interval             = 10               # Checkpoint interval
+Driver.regrid_interval                 = 10               # Regrid interval
+Driver.writeRegridFiles              = false            # Write regrid files or not.
+Driver.writeRestartFiles             = false            # Write restart files or not
+Driver.initial_regrids                 = 0                # Number of initial regrids
+Driver.start_time                      = 0                # Start time (fresh simulations only)
+Driver.stop_time                       = 10.E-0           # Stop time
+Driver.max_steps                       = 100              # Maximum number of steps
+Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
+Driver.write_memory                    = false            # Write MPI memory report
+Driver.write_loads                     = false            # Write (accumulated) computational loads
+Driver.output_directory                = ./               # Output directory
+Driver.output_names                    = simulation       # Simulation output names
+Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
+Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
+Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
+Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
+Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
+Driver.allow_coarsening                = true             # Allows removal of grid levels according to cell_tagger
+Driver.refine_geometry                 = -1               # Refine geometry, -1 => Refine all the way down
+Driver.refine_electrodes               = -1               # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = -1               # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.refine_electrode_gas_interface  = -1               # Refine electrode-gas interfaces. -1 => ----"----- 
+Driver.refine_dielectric_gas_interface = -1               # Refine dielectric-gas interfaces. -1 => ----"-----
+Driver.refine_solid_gas_interface      = -1               # Refine solid-gas interfaces. -1 => ----"-----  
+Driver.refine_solid_solid_interface    = -1               # Refine solid-solid interfaces. -1 => ----"----- 
 
 
 # ====================================================================================================

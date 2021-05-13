@@ -1275,19 +1275,19 @@ void imex_sdc::compute_dt(Real& a_dt, time_code& a_timecode){
 #endif
 }
 
-void imex_sdc::regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
-  CH_TIME("imex_sdc::regrid_internals");
+void imex_sdc::regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
+  CH_TIME("imex_sdc::regridInternals");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::regrid_internals" << endl;
+    pout() << "imex_sdc::regridInternals" << endl;
   }
 
   // Nothing to see here
 }
 
-void imex_sdc::allocate_internals(){
-  CH_TIME("imex_sdc::allocate_internals");
+void imex_sdc::allocateInternals(){
+  CH_TIME("imex_sdc::allocateInternals");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::allocate_internals" << endl;
+    pout() << "imex_sdc::allocateInternals" << endl;
   }
 
   m_cdr_error.resize(m_physics->get_num_cdr_species());
@@ -1338,10 +1338,10 @@ void imex_sdc::allocate_sigma_storage(){
   m_sigma_scratch->allocate_storage(m_p);
 }
 
-void imex_sdc::deallocate_internals(){
-  CH_TIME("imex_sdc::deallocate_internals");
+void imex_sdc::deallocateInternals(){
+  CH_TIME("imex_sdc::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::deallocate_internals" << endl;
+    pout() << "imex_sdc::deallocateInternals" << endl;
   }
 
   for (cdr_iterator<cdr_solver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){

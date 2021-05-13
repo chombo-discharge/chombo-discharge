@@ -83,16 +83,16 @@ public:
   /*!
     @brief Set computational geometry
   */
-  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
+  virtual void setComputationalGeometry(const RefCountedPtr<computational_geometry> a_computationalGeometry);
 
   /*!
     @brief Set the amr object
   */
-  virtual void set_amr(const RefCountedPtr<AmrMesh>& a_amr);
+  virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Set phase
-    @details This must be done BEFORE callilng set_computational_geometry
+    @details This must be done BEFORE callilng setComputationalGeometry
   */
   virtual void set_phase(phase::which_phase a_phase = phase::gas);
 
@@ -152,22 +152,22 @@ public:
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocate_internals() = 0;
+  virtual void allocateInternals() = 0;
 
   /*!
     @brief Deallocate internal storage
   */
-  virtual void deallocate_internals() = 0;
+  virtual void deallocateInternals() = 0;
 
   /*!
     @brief Pre regrid
   */
-  virtual void pre_regrid(const int a_lbase, const int a_old_finest_level) = 0;
+  virtual void pre_regrid(const int a_lbase, const int a_oldFinestLevel) = 0;
 
   /*!
     @brief Regrid function
   */
-  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
+  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
 
   /*!
     @brief Register operators
@@ -193,12 +193,12 @@ public:
   /*!
     @brief Write plot file
   */
-  virtual void write_plot_file() = 0;
+  virtual void writePlotFile() = 0;
 
   /*!
     @brief Write output data to a_output
   */
-  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write data to output. Convenience function. 
@@ -208,12 +208,12 @@ public:
   /*!
     @brief Write checkpoint data into handle
   */
-  virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const = 0;
+  virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const = 0;
 
   /*!
     @brief Read checkpoint data from handle
   */
-  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level) = 0;
+  virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level) = 0;
 
   /*!
     @brief Return required number of ghost cells
@@ -280,7 +280,7 @@ protected:
   /*!
     @brief Computational geometry. 
   */
-  RefCountedPtr<computational_geometry> m_compgeom;
+  RefCountedPtr<computational_geometry> m_computationalGeometry;
 
   /*!
     @brief AMR; needed for grid stuff

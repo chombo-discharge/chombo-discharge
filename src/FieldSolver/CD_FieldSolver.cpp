@@ -109,7 +109,7 @@ void FieldSolver::allocateInternals(){
   data_ops::set_value(m_electricField, 0.0);
 }
 
-void FieldSolver::preRegrid(const int a_lbase, const int a_old_finest_level){
+void FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
   CH_TIME("FieldSolver::preRegrid");
   if(m_verbosity > 5){
     pout() << "FieldSolver::preRegrid" << endl;
@@ -120,7 +120,7 @@ void FieldSolver::preRegrid(const int a_lbase, const int a_old_finest_level){
   
   m_amr->allocate(m_cache, m_Realm, ncomp);
   
-  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+  for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++){
     m_potential[lvl]->localCopyTo(*m_cache[lvl]);
   }
 }
@@ -131,7 +131,7 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
     pout() << "FieldSolver::computeDisplacementField" << endl;
   }
 
-  const Vector<dielectric>& dielectrics = m_compgeom->get_dielectrics();
+  const Vector<dielectric>& dielectrics = m_computationalGeometry->get_dielectrics();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     LevelData<MFCellFAB>& D = *a_displacementField[lvl];
@@ -328,14 +328,14 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
   this->computeElectricField();
 }
 
-void FieldSolver::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_compgeom){
+void FieldSolver::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
   CH_TIME("FieldSolver::setComputationalGeometry");
   if(m_verbosity > 5){
     pout() << "FieldSolver::setComputationalGeometry" << endl;
   }
 
-  m_compgeom = a_compgeom;
-  m_multifluidIndexSpace     = m_compgeom->get_mfis();
+  m_computationalGeometry = a_computationalGeometry;
+  m_multifluidIndexSpace     = m_computationalGeometry->get_mfis();
 
   this->setDefaultEbBcFunctions();
 }
@@ -509,7 +509,7 @@ void FieldSolver::setDefaultEbBcFunctions() {
     pout() << "FieldSolver::setDefaultEbBcFunctions" << endl;
   }
 
-  const Vector<electrode> electrodes = m_compgeom->get_electrodes();
+  const Vector<electrode> electrodes = m_computationalGeometry->get_electrodes();
 
   for (int i = 0; i < electrodes.size(); i++){
     const electrode& elec = electrodes[i];

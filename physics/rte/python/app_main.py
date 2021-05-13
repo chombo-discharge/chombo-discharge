@@ -13,7 +13,7 @@ def write_template(args):
         # Write main file. This should be a separate routine. 
     main_filename = app_dir + "/" + args.filename + ".cpp"
     mainf = open(main_filename, "w")
-    mainf.write('#include "driver.H"\n')
+    mainf.write('#include "CD_Driver.H"\n')
     mainf.write('#include "' + args.rte_solver + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "rte_stepper.H"\n')
@@ -52,9 +52,9 @@ def write_template(args):
 
 
     
-    mainf.write("  // Set up the driver and run it\n")
-    mainf.write("  RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));\n")
-    mainf.write("  engine->setup_and_run(input_file);\n");
+    mainf.write("  // Set up the Driver and run it\n")
+    mainf.write("  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));\n")
+    mainf.write("  engine->setupAndRun(input_file);\n");
     mainf.write("\n")
 
     if args.use_mpi:

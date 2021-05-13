@@ -10,22 +10,22 @@
 
 #include "CD_NamespaceHeader.H"
 
-void time_stepper::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("time_stepper::set_amr");
+void time_stepper::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
+  CH_TIME("time_stepper::setAmr");
   if(m_verbosity > 5){
-    pout() << "time_stepper::set_amr" << endl;
+    pout() << "time_stepper::setAmr" << endl;
   }
 
   m_amr = a_amr;
 }
 
-void time_stepper::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
-  CH_TIME("time_stepper::set_computational_geometry");
+void time_stepper::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
+  CH_TIME("time_stepper::setComputationalGeometry");
   if(m_verbosity > 5){
-    pout() << "time_stepper::set_computational_geometry" << endl;
+    pout() << "time_stepper::setComputationalGeometry" << endl;
   }
 
-  m_compgeom = a_compgeom;
+  m_computationalGeometry = a_computationalGeometry;
 }
 
 bool time_stepper::need_to_regrid(){

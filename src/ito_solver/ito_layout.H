@@ -85,7 +85,7 @@ public:
   /*!
     @brief Allocate internals for all solvers
   */
-  virtual void allocate_internals();
+  virtual void allocateInternals();
 
   /*!
     @brief Add solver
@@ -130,7 +130,7 @@ public:
   /*!
     @brief Regrid method. 
   */
-  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
   /*!
     @brief Register operators
@@ -140,16 +140,16 @@ public:
   /*!
     @brief Set amr
   */
-  virtual void set_amr(const RefCountedPtr<AmrMesh>& a_amr);
+  virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Set the computational geometry
   */
-  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
+  virtual void setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry);
 
   /*!
     @brief Set phase
-    @details This must be done BEFORE callilng set_computational_geometry
+    @details This must be done BEFORE callilng setComputationalGeometry
   */
   virtual void set_phase(phase::which_phase a_phase);
 

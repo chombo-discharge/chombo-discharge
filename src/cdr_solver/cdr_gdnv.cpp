@@ -34,7 +34,7 @@ void cdr_gdnv::parseOptions(){
   
   parseDomain_bc();     // Parses domain BC options
   parse_slopelim();      // Parses slope limiter settings
-  parse_plot_vars();     // Parses plot variables
+  parsePlotVariables();     // Parses plot variables
   parse_plotmode();      // Parse plot mdoe
   parse_gmg_settings();  // Parses solver parameters for geometric multigrid
   parse_extrap_source(); // Parse source term extrapolation for time-centering advective comps
@@ -49,7 +49,7 @@ void cdr_gdnv::parseRuntimeOptions(){
   }
 
   parse_slopelim();
-  parse_plot_vars();
+  parsePlotVariables();
   parse_plotmode();
   parse_gmg_settings();
   parseDomain_bc();
@@ -134,13 +134,13 @@ void cdr_gdnv::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCell
   }
 }
 
-void cdr_gdnv::allocate_internals(){
-  CH_TIME("cdr_solver::allocate_internals");
+void cdr_gdnv::allocateInternals(){
+  CH_TIME("cdr_solver::allocateInternals");
   if(m_verbosity > 5){
-    pout() << m_name + "::allocate_internals" << endl;
+    pout() << m_name + "::allocateInternals" << endl;
   }
 
-  cdr_solver::allocate_internals();
+  cdr_solver::allocateInternals();
 
   if(m_diffusive){
     this->setup_gmg();

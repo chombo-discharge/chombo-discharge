@@ -54,7 +54,7 @@ void ito_plasma_field_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_gra
     pout() << m_name + "::compute_E" << endl;
   }
 
-  m_timestepper->compute_E(a_E, m_phase);
+  m_timeStepper->compute_E(a_E, m_phase);
   data_ops::vector_length(m_scratch, a_E);
   m_amr->computeGradient(a_grad_E, m_scratch, m_Realm, phase::gas);
 
@@ -75,7 +75,7 @@ void ito_plasma_field_tagger::compute_tracers(){
   this->allocate_storage();
   
   const RealVect origin = m_amr->getProbLo();
-  const Real time       = m_timestepper->get_time();
+  const Real time       = m_timeStepper->get_time();
 
   // Compute electric field on volumetric centroids
   this->compute_E(m_E, m_grad_E);

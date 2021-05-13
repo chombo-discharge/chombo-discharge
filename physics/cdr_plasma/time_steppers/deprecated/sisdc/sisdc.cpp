@@ -1739,10 +1739,10 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 #endif
 }
 
-void sisdc::regrid_internals(){
-  CH_TIME("sisdc::regrid_internals");
+void sisdc::regridInternals(){
+  CH_TIME("sisdc::regridInternals");
   if(m_verbosity > 5){
-    pout() << "sisdc::regrid_internals" << endl;
+    pout() << "sisdc::regridInternals" << endl;
   }
 
   m_accum_cfl = 0.0;
@@ -1794,10 +1794,10 @@ void sisdc::allocate_sigma_storage(){
   m_sigma_scratch->allocate_storage(m_p);
 }
 
-void sisdc::deallocate_internals(){
-  CH_TIME("sisdc::deallocate_internals");
+void sisdc::deallocateInternals(){
+  CH_TIME("sisdc::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "sisdc::deallocate_internals" << endl;
+    pout() << "sisdc::deallocateInternals" << endl;
   }
 
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){

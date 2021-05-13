@@ -19,7 +19,7 @@ base_dir = .
 src_dirs = $(DISCHARGE_HOME)/src \
 	$(DISCHARGE_HOME)/src/AmrMesh \
 	$(DISCHARGE_HOME)/src/cell_tagger \
-	$(DISCHARGE_HOME)/src/driver \
+	$(DISCHARGE_HOME)/src/Driver \
 	$(DISCHARGE_HOME)/src/elliptic \
 	$(DISCHARGE_HOME)/src/geometry \
 	$(DISCHARGE_HOME)/src/rte_solver \

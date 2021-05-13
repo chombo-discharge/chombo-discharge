@@ -43,8 +43,8 @@ public:
   Real advance(const Real a_dt);
 
   void init_source_terms();
-  void regrid_internals();
-  void deallocate_internals();
+  void regridInternals();
+  void deallocateInternals();
   void parseOptions();
   bool need_to_regrid();
 

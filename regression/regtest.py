@@ -212,14 +212,14 @@ for test in config.sections():
             # Set up the run command
             # --------------------------------------------------
             runCommand = args.run   + " -np "                  + str(cores) + " " + executable + " " + input
-            runCommand = runCommand + " driver.output_names="  + str(output)
-            runCommand = runCommand + " driver.plot_interval=" + str(nplot)
-            runCommand = runCommand + " driver.checkpoint_interval=" + str(nplot)
-            runCommand = runCommand + " driver.max_steps="     + str(nsteps)
+            runCommand = runCommand + " Driver.output_names="  + str(output)
+            runCommand = runCommand + " Driver.plot_interval=" + str(nplot)
+            runCommand = runCommand + " Driver.checkpoint_interval=" + str(nplot)
+            runCommand = runCommand + " Driver.max_steps="     + str(nsteps)
             if args.benchmark:
-                runCommand = runCommand + " driver.restart=0"
+                runCommand = runCommand + " Driver.restart=0"
             else:
-                runCommand = runCommand + " driver.restart="     + str(restart)
+                runCommand = runCommand + " Driver.restart="     + str(restart)
             if not args.silent:
                 print("\t Executing with '" + str(runCommand) + "'")
 

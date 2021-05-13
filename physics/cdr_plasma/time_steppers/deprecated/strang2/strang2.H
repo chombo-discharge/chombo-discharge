@@ -35,8 +35,8 @@ public:
   Real advance(const Real a_dt);
   Real advance_single(const Real a_dt);
   
-  void regrid_internals();
-  void deallocate_internals();
+  void regridInternals();
+  void deallocateInternals();
   
 protected:
 

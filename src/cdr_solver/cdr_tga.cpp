@@ -744,10 +744,10 @@ void cdr_tga::parse_gmg_settings(){
   }
 }
 
-void cdr_tga::write_plot_data(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("cdr_tga::write_plot_data");
+void cdr_tga::writePlotData(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("cdr_tga::writePlotData");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_plot_data" << endl;
+    pout() << m_name + "::writePlotData" << endl;
   }
 
   if(m_plot_phi) {

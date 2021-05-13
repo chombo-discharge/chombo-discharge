@@ -56,12 +56,12 @@ public:
   /*!
     @brief Deallocate storage
   */
-  virtual void deallocate_internals();
+  virtual void deallocateInternals();
 
   /*!
     @brief Regrid internals
   */
-  virtual void regrid_internals();
+  virtual void regridInternals();
 
   /*!
     @brief Compute dt

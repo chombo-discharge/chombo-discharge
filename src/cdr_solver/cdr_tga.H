@@ -161,7 +161,7 @@ public:
   /*!
     @brief Write plot data
   */
-  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
 
 protected:
 

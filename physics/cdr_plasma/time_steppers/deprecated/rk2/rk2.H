@@ -54,12 +54,12 @@ public:
   /*!
     @brief Regrid internals
   */
-  virtual void regrid_internals();
+  virtual void regridInternals();
 
   /*!
     @brief Deallocate internal storage
   */
-  virtual void deallocate_internals();
+  virtual void deallocateInternals();
   
 protected:
 

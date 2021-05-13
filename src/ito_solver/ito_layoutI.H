@@ -82,9 +82,9 @@ void ito_layout<T>::set_halo_buffer(const int a_buffer){
 }
 
 template <class T>
-void ito_layout<T>::allocate_internals(){
+void ito_layout<T>::allocateInternals(){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->allocate_internals();
+    iter()->allocateInternals();
   }
 }
 
@@ -115,9 +115,9 @@ void ito_layout<T>::initial_data(){
 }
 
 template <class T>
-void ito_layout<T>::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+void ito_layout<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+    iter()->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   }
 }
 
@@ -129,16 +129,16 @@ void ito_layout<T>::registerOperators(){
 }
 
 template <class T>
-void ito_layout<T>::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
+void ito_layout<T>::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->set_amr(a_amr);
+    iter()->setAmr(a_amr);
   }
 }
 
 template <class T>
-void ito_layout<T>::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
+void ito_layout<T>::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->set_computational_geometry(a_compgeom);
+    iter()->setComputationalGeometry(a_computationalGeometry);
   }
 }
 

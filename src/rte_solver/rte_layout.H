@@ -65,22 +65,22 @@ public:
   /*!
     @brief Allocate internal storage for solvers
   */
-  virtual void allocate_internals();
+  virtual void allocateInternals();
 
   /*!
     @brief Pre regrid stuff
   */
-  virtual void pre_regrid(const int a_base, const int a_old_finest_level);
+  virtual void pre_regrid(const int a_base, const int a_oldFinestLevel);
 
   /*!
     @brief Deallocate internal storage for solvers
   */
-  virtual void deallocate_internals();
+  virtual void deallocateInternals();
 
   /*!
     @brief Regrid method. 
   */
-  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
   /*!
     @brief Register operators
@@ -90,12 +90,12 @@ public:
   /*!
     @brief Set amr
   */
-  virtual void set_amr(const RefCountedPtr<AmrMesh>& a_amr);
+  virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Set the computational geometry
   */
-  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
+  virtual void setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry);
 
   /*!
     @brief Do a sanity check
@@ -104,7 +104,7 @@ public:
 
   /*!
     @brief Set phase
-    @details This must be done BEFORE callilng set_computational_geometry
+    @details This must be done BEFORE callilng setComputationalGeometry
   */
   virtual void set_phase(phase::which_phase a_phase = phase::gas);
 
@@ -136,7 +136,7 @@ public:
   /*!
     @brief Convenience function. All solvers write plot files
   */
-  virtual void write_plot_file();
+  virtual void writePlotFile();
 
   /*!
     @brief Convenience function. Call advance method for each solver

@@ -1,4 +1,4 @@
-#include "driver.H"
+#include "CD_Driver.H"
 #include "ito_solver.H"
 #include "rod_dielectric.H"
 #include "brownian_walker_stepper.H"
@@ -28,9 +28,9 @@ int main(int argc, char* argv[]){
   RefCountedPtr<time_stepper> timestepper = RefCountedPtr<time_stepper> (new brownian_walker_stepper(solver));
   RefCountedPtr<cell_tagger> tagger       = RefCountedPtr<cell_tagger>  (new brownian_walker_tagger(solver, amr));
 
-  // Set up the driver and run it
-  RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
-  engine->setup_and_run(input_file);
+  // Set up the Driver and run it
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+  engine->setupAndRun(input_file);
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

@@ -44,7 +44,7 @@ void sisdc_tagger::compute_tracers(){
   const int finest_level  = m_amr->getFinestLevel();
 
   // Get electron density and error
-  sisdc* stepper = (sisdc*) (&(*m_timestepper));
+  sisdc* stepper = (sisdc*) (&(*m_timeStepper));
   EBAMRCellData& ne_err  = *(stepper->get_cdr_errors()[m_cdr_idx]);
   EBAMRCellData& ne      = *stepper->get_cdr()->get_states()[m_cdr_idx];
 
@@ -58,7 +58,7 @@ void sisdc_tagger::compute_tracers(){
   // Compute the electric field and take the magnitude onto tracer1. Also scale it. 
   EBAMRCellData E;
   m_amr->allocate(E, phase::gas, SpaceDim);
-  m_timestepper->compute_E(E, phase::gas);
+  m_timeStepper->compute_E(E, phase::gas);
 
   data_ops::vector_length(m_tracer[1], E);
   m_amr->interpToCentroids(m_tracer[1], m_phase);

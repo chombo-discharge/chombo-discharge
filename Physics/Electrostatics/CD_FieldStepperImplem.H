@@ -76,7 +76,7 @@ namespace Physics {
       m_fieldSolver->setVerbosity(m_verbosity);
       m_fieldSolver->parseOptions();
       m_fieldSolver->setAmr(m_amr);
-      m_fieldSolver->setComputationalGeometry(m_compgeom);
+      m_fieldSolver->setComputationalGeometry(m_computationalGeometry);
       m_fieldSolver->setVoltage(FieldSolver::s_voltageOne);
       m_fieldSolver->setRealm(m_Realm);
       m_fieldSolver->setTime(0, 0.0, 0.0);
@@ -84,8 +84,8 @@ namespace Physics {
       // Setup sigma
       m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
       m_sigma->set_verbosity(m_verbosity);
-      m_sigma->set_amr(m_amr);
-      m_sigma->set_computational_geometry(m_compgeom);
+      m_sigma->setAmr(m_amr);
+      m_sigma->setComputationalGeometry(m_computationalGeometry);
       m_sigma->set_Realm(m_Realm);
 
     }
@@ -103,7 +103,7 @@ namespace Physics {
     template <class T>
     void FieldStepper<T>::allocate() {
       m_fieldSolver->allocateInternals();
-      m_sigma->allocate_internals();
+      m_sigma->allocateInternals();
     }
 
     template <class T>
@@ -149,7 +149,7 @@ namespace Physics {
 
     template<class T>
     Real FieldStepper<T>::advance(const Real a_dt){
-      MayDay::Abort("FieldStepper<T>::advance - callling this is an error. Please set driver.max_steps = 0");
+      MayDay::Abort("FieldStepper<T>::advance - callling this is an error. Please set Driver.max_steps = 0");
       return 1.E99;
     }
 
@@ -159,19 +159,19 @@ namespace Physics {
     }
 
     template <class T>
-    int FieldStepper<T>::get_num_plot_vars() const{
+    int FieldStepper<T>::getNumberOfPlotVariables() const{
       int ncomp = m_fieldSolver->getNumberOfPlotVariables();
       ncomp += m_sigma->get_num_plotvars();
       return ncomp;
     }
 
     template <class T>
-    void FieldStepper<T>::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const{
+    void FieldStepper<T>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const{
       a_plotvar_names.append(m_fieldSolver->getPlotVariableNames());
       m_fieldSolver->writePlotData(a_output, a_icomp);
 
       a_plotvar_names.append(m_sigma->get_plotvar_names());
-      m_sigma->write_plot_data(a_output, a_icomp);
+      m_sigma->writePlotData(a_output, a_icomp);
     }
 
     template <class T>
@@ -184,21 +184,21 @@ namespace Physics {
     }
 
     template <class T>
-    void FieldStepper<T>::pre_regrid(const int a_lbase, const int a_old_finest_level){
-      m_fieldSolver->preRegrid(a_lbase, a_old_finest_level);
-      m_sigma->pre_regrid(a_lbase, a_old_finest_level);
+    void FieldStepper<T>::pre_regrid(const int a_lbase, const int a_oldFinestLevel){
+      m_fieldSolver->preRegrid(a_lbase, a_oldFinestLevel);
+      m_sigma->pre_regrid(a_lbase, a_oldFinestLevel);
     }
 
     template <class T>
     void FieldStepper<T>::deallocate(){
       m_fieldSolver->deallocateInternals();
-      m_sigma->deallocate_internals();
+      m_sigma->deallocateInternals();
     }
 
     template <class T>
-    void FieldStepper<T>::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
-      m_fieldSolver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
-      m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
+    void FieldStepper<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
+      m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+      m_sigma->regrid(a_lmin,   a_oldFinestLevel, a_newFinestLevel);
 
       // No solve here. That is done in post_regrid for this class. 
       //      m_fieldSolver->solve();

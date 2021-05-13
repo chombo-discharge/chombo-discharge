@@ -45,14 +45,14 @@ namespace Physics {
       void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override{}
       void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
       void post_checkpoint_setup() override {}
-      int get_num_plot_vars() const override;
-      void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
+      int getNumberOfPlotVariables() const override;
+      void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
 
       // Advance routines
       void compute_dt(Real& a_dt, time_code& a_timecode) override {a_dt = 0.0;}
       Real advance(const Real a_dt) override;
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
-      void print_step_report() override {};
+      void print_stepReport() override {};
 
       // Registration routines
       void registerRealms() override;
@@ -69,7 +69,7 @@ namespace Physics {
 			      const Vector<DisjointBoxLayout>& a_grids,
 			      const int                        a_lmin,
 			      const int                        a_finest_level) override;
-      void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+      void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       void post_regrid() override;
 
       // Solve routine

@@ -1805,10 +1805,10 @@ void strang2::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   m_timecode = a_timecode;
 }
 
-void strang2::regrid_internals(){
-  CH_TIME("strang2::regrid_internals");
+void strang2::regridInternals(){
+  CH_TIME("strang2::regridInternals");
   if(m_verbosity > 5){
-    pout() << "strang2::regrid_internals" << endl;
+    pout() << "strang2::regridInternals" << endl;
   }
 
   m_cdr_error.resize(m_plaskin->get_num_species());
@@ -1856,10 +1856,10 @@ void strang2::allocate_sigma_storage(){
   m_sigma_scratch->allocate_storage();
 }
 
-void strang2::deallocate_internals(){
-  CH_TIME("strang2::deallocate_internals");
+void strang2::deallocateInternals(){
+  CH_TIME("strang2::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "strang2::deallocate_internals" << endl;
+    pout() << "strang2::deallocateInternals" << endl;
   }
   
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){

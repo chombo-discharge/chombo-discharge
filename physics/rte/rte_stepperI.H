@@ -41,8 +41,8 @@ void rte_stepper<T>::setup_solvers(){
   m_solver->set_rte_species(m_species);
   m_solver->parseOptions();
   m_solver->set_phase(phase::gas);
-  m_solver->set_amr(m_amr);
-  m_solver->set_computational_geometry(m_compgeom);
+  m_solver->setAmr(m_amr);
+  m_solver->setComputationalGeometry(m_computationalGeometry);
   m_solver->set_Realm(m_Realm);
 }
 
@@ -57,7 +57,7 @@ void rte_stepper<T>::parseRuntimeOptions() {
 
 template <typename T>
 void rte_stepper<T>::allocate() {
-  m_solver->allocate_internals();
+  m_solver->allocateInternals();
 }
 
 template <typename T>
@@ -73,12 +73,12 @@ void rte_stepper<T>::post_initialize(){
 
 template <typename T>
 void rte_stepper<T>::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const {
-  m_solver->write_checkpoint_level(a_handle, a_lvl);
+  m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
 
 template <typename T>
 void rte_stepper<T>::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
-  m_solver->read_checkpoint_level(a_handle, a_lvl);
+  m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
 
 template <typename T>
@@ -87,14 +87,14 @@ void rte_stepper<T>::post_checkpoint_setup() {
 }
 
 template <typename T>
-int rte_stepper<T>::get_num_plot_vars() const {
+int rte_stepper<T>::getNumberOfPlotVariables() const {
   return m_solver->get_num_plotvars();
 }
 
 template <typename T>
-void rte_stepper<T>::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
+void rte_stepper<T>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
   a_plotvar_names.append(m_solver->get_plotvar_names());
-  m_solver->write_plot_data(a_output, a_icomp);
+  m_solver->writePlotData(a_output, a_icomp);
 }
 
 template <typename T>
@@ -117,7 +117,7 @@ void rte_stepper<T>::synchronize_solver_times(const int a_step, const Real a_tim
 }
 
 template <typename T>
-void rte_stepper<T>::print_step_report() {
+void rte_stepper<T>::print_stepReport() {
 }
 
 // Regrid routines
@@ -137,18 +137,18 @@ void rte_stepper<T>::registerOperators() {
 }
 
 template <typename T>
-void rte_stepper<T>::pre_regrid(const int a_base, const int a_old_finest_level) {
-  m_solver->pre_regrid(a_base, a_old_finest_level);
+void rte_stepper<T>::pre_regrid(const int a_base, const int a_oldFinestLevel) {
+  m_solver->pre_regrid(a_base, a_oldFinestLevel);
 }
 
 template <typename T>
 void rte_stepper<T>::deallocate() {
-  m_solver->deallocate_internals();
+  m_solver->deallocateInternals();
 }
 
 template <typename T>
-void rte_stepper<T>::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
-  m_solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+void rte_stepper<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
+  m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
   // Do the rest of the setup
   this->set_gaussian_source();

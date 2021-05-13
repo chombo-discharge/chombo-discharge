@@ -90,7 +90,7 @@ void mc_photo::parseOptions(){
   this->parse_bisect_step();
   this->parseDomain_bc();
   this->parse_pvr_buffer();
-  this->parse_plot_vars();
+  this->parsePlotVariables();
   this->parse_instantaneous();
   this->parse_conservation();
 }
@@ -108,7 +108,7 @@ void mc_photo::parseRuntimeOptions(){
   this->parse_bisect_step();
   this->parseDomain_bc();
   this->parse_pvr_buffer();
-  this->parse_plot_vars();
+  this->parsePlotVariables();
   this->parse_instantaneous();
   this->parse_conservation();
 }
@@ -340,10 +340,10 @@ void mc_photo::parse_pvr_buffer(){
   pp.get("halo_buffer",  m_halo_buffer);
 }
 
-void mc_photo::parse_plot_vars(){
-  CH_TIME("mc_photo::parse_plot_vars");
+void mc_photo::parsePlotVariables(){
+  CH_TIME("mc_photo::parsePlotVariables");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_plot_vars" << endl;
+    pout() << m_name + "::parsePlotVariables" << endl;
   }
 
   m_plot_phi       = false;
@@ -399,10 +399,10 @@ void mc_photo::clear(AMRParticles<photon>& a_photons){
   }
 }
   
-void mc_photo::allocate_internals(){
-  CH_TIME("mc_photo::allocate_internals");
+void mc_photo::allocateInternals(){
+  CH_TIME("mc_photo::allocateInternals");
   if(m_verbosity > 5){
-    pout() << m_name + "::allocate_internals" << endl;
+    pout() << m_name + "::allocateInternals" << endl;
   }
 
   const int ncomp  = 1;
@@ -422,7 +422,7 @@ void mc_photo::allocate_internals(){
   m_amr->allocate(m_source_photons, m_pvr_buffer, m_Realm);
 }
 
-void mc_photo::pre_regrid(const int a_lmin, const int a_old_finest_level){
+void mc_photo::pre_regrid(const int a_lmin, const int a_oldFinestLevel){
   CH_TIME("mc_photo::pre_regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::pre_grid" << endl;
@@ -435,10 +435,10 @@ void mc_photo::pre_regrid(const int a_lmin, const int a_old_finest_level){
   m_source_photons.pre_regrid(a_lmin);  // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
 }
 
-void mc_photo::deallocate_internals(){
-  CH_TIME("mc_photo::deallocate_internals");
+void mc_photo::deallocateInternals(){
+  CH_TIME("mc_photo::deallocateInternals");
   if(m_verbosity > 5){ 
-    pout() << m_name + "::deallocate_internals" << endl;
+    pout() << m_name + "::deallocateInternals" << endl;
   }
 
   // Don't deallocate, instead, reallocate. 
@@ -449,7 +449,7 @@ void mc_photo::deallocate_internals(){
   // m_amr->deallocate(m_massDiff);
 }
 
-void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+void mc_photo::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
   CH_TIME("mc_photo::regrid");
   if(m_verbosity > 5){ 
     pout() << m_name + "::regrid" << endl;
@@ -468,11 +468,11 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
   const Vector<Real>& dx                 = m_amr->getDx();
   const Vector<int>& ref_rat             = m_amr->getRefinementRatios();
 
-  m_photons.regrid(       grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_bulk_photons.regrid(  grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_eb_photons.regrid(    grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_domain_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_source_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_photons.regrid(       grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_bulk_photons.regrid(  grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_eb_photons.regrid(    grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_domain_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_source_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
 
   // Deposit
   this->deposit_photons();
@@ -620,19 +620,19 @@ void mc_photo::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& 
   MayDay::Abort("mc_photo::compute_density - Calling this is an error");
 }
 
-void mc_photo::write_plot_file(){
-  CH_TIME("mc_photo::write_plot_file");
+void mc_photo::writePlotFile(){
+  CH_TIME("mc_photo::writePlotFile");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_plot_file" << endl;
+    pout() << m_name + "::writePlotFile" << endl;
   }
 
-  MayDay::Abort("mc_photo::write_plot_file - not implemented");
+  MayDay::Abort("mc_photo::writePlotFile - not implemented");
 }
 
-void mc_photo::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("mc_photo::write_checkpoint_level");
+void mc_photo::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("mc_photo::writeCheckpointLevel");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_checkpoint_level" << endl;
+    pout() << m_name + "::writeCheckpointLevel" << endl;
   }
 
   // Write state vector
@@ -643,10 +643,10 @@ void mc_photo::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) c
   writeParticlesToHDF(a_handle, m_photons[a_level], str);
 }
 
-void mc_photo::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("mc_photo::read_checkpoint_level");
+void mc_photo::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("mc_photo::readCheckpointLevel");
   if(m_verbosity > 5){
-    pout() << m_name + "::read_checkpoint_level" << endl;
+    pout() << m_name + "::readCheckpointLevel" << endl;
   }
 
   // Read state vector
@@ -1258,10 +1258,10 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
   // This is the implicit function used for intersection tests
   RefCountedPtr<BaseIF> impfunc;
   if(m_phase == phase::gas){
-    impfunc = m_compgeom->get_gas_if();
+    impfunc = m_computationalGeometry->get_gas_if();
   }
   else{
-    impfunc = m_compgeom->get_sol_if();
+    impfunc = m_computationalGeometry->get_sol_if();
   }
 
 #if MC_PHOTO_DEBUG // Debug
@@ -1404,10 +1404,10 @@ void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_phot
   // This is the implicit function used for intersection tests
   RefCountedPtr<BaseIF> impfunc;
   if(m_phase == phase::gas){
-    impfunc = m_compgeom->get_gas_if();
+    impfunc = m_computationalGeometry->get_gas_if();
   }
   else{
-    impfunc = m_compgeom->get_sol_if();
+    impfunc = m_computationalGeometry->get_sol_if();
   }
 
 #if MC_PHOTO_DEBUG // Debug
@@ -1585,10 +1585,10 @@ int mc_photo::count_outcast(const AMRParticles<photon>& a_photons) const {
   return num_outcast;
 }
 
-void mc_photo::write_plot_data(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("mc_photo::write_plot_data");
+void mc_photo::writePlotData(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("mc_photo::writePlotData");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_plot_data" << endl;
+    pout() << m_name + "::writePlotData" << endl;
   }
 
   if(m_plot_phi) {

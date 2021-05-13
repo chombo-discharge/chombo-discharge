@@ -40,7 +40,7 @@ void advection_diffusion_tagger::parseOptions(){
   parse_buffer(); // Derived from cell
 }
 
-bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
+bool advection_diffusion_tagger::tagCells(EBAMRTags& a_tags){
   EBAMRCellData sca;
   EBAMRCellData vec;
 

@@ -110,7 +110,7 @@ public:
     @param[in] a_newFinestLevel New finest AMR level. 
     @details This linearly interpolates (with limiters) m_potential to the new grids and recomputes the electric field (from the interpolated potential). 
   */
-  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
   /*!
     @brief Registers required operators for AMR for this class. 

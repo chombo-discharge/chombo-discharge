@@ -92,10 +92,10 @@ int cdr_solver::get_num_plotvars() const {
   return num_output;
 }
 
-void cdr_solver::allocate_internals(){
-  CH_TIME("cdr_solver::allocate_internals");
+void cdr_solver::allocateInternals(){
+  CH_TIME("cdr_solver::allocateInternals");
   if(m_verbosity > 5){
-    pout() << m_name + "::allocate_internals" << endl;
+    pout() << m_name + "::allocateInternals" << endl;
   }
 
   CH_assert(m_phase == phase::gas);
@@ -166,10 +166,10 @@ void cdr_solver::allocate_internals(){
   this->define_interpolant();
 }
 
-void cdr_solver::deallocate_internals(){
-  CH_TIME("cdr_solver::deallocate_internals");
+void cdr_solver::deallocateInternals(){
+  CH_TIME("cdr_solver::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << m_name + "::deallocate_internals" << endl;
+    pout() << m_name + "::deallocateInternals" << endl;
   }
 
   m_amr->deallocate(m_state);
@@ -207,7 +207,7 @@ void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCe
   }
 }
 
-void cdr_solver::pre_regrid(const int a_lmin, const int a_old_finest_level){
+void cdr_solver::pre_regrid(const int a_lmin, const int a_oldFinestLevel){
   CH_TIME("cdr_solver::pre_regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::pre_regrid" << endl;
@@ -219,7 +219,7 @@ void cdr_solver::pre_regrid(const int a_lmin, const int a_old_finest_level){
   m_amr->allocate(m_cache_state,  m_Realm, m_phase, ncomp);
   m_amr->allocate(m_cache_source, m_Realm, m_phase, ncomp);
   
-  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+  for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++){
     m_state[lvl]->localCopyTo(*m_cache_state[lvl]);
     m_source[lvl]->localCopyTo(*m_cache_source[lvl]);
   }
@@ -1258,7 +1258,7 @@ void cdr_solver::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCe
   }
 }
 
-void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+void cdr_solver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
   CH_TIME("cdr_solver::regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::regrid" << endl;
@@ -1268,7 +1268,7 @@ void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   const int ncomp = 1;
   const Interval interv(comp, comp);
 
-  this->allocate_internals();
+  this->allocateInternals();
 
   Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(m_Realm, m_phase);
 
@@ -1279,10 +1279,10 @@ void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   }
 
   // These levels have changed
-  for (int lvl = Max(1,a_lmin); lvl <= a_new_finest_level; lvl++){
+  for (int lvl = Max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
     interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
     interpolator[lvl]->interpolate(*m_source[lvl], *m_source[lvl-1], interv);
-    if(lvl <= Min(a_old_finest_level, a_new_finest_level)){
+    if(lvl <= Min(a_oldFinestLevel, a_newFinestLevel)){
       m_cache_state[lvl]->copyTo(*m_state[lvl]);
       m_cache_source[lvl]->copyTo(*m_source[lvl]);
     }
@@ -1330,16 +1330,16 @@ void cdr_solver::sanityCheck(){
     pout() << m_name + "::sanityCheck" << endl;
   }
 
-  CH_assert(!m_compgeom.isNull());
+  CH_assert(!m_computationalGeometry.isNull());
   CH_assert(!m_amr.isNull());
   CH_assert(!m_species.isNull());
   CH_assert(!m_ebis.isNull());
 }
 
-void cdr_solver::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("cdr_solver::set_amr");
+void cdr_solver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
+  CH_TIME("cdr_solver::setAmr");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_amr" << endl;
+    pout() << m_name + "::setAmr" << endl;
   }
 
   m_amr = a_amr;
@@ -1376,14 +1376,14 @@ void cdr_solver::set_domain_bc(const cdr_bc::which_bc a_bctype){
   m_dombc = a_bctype;
 }
 
-void cdr_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
-  CH_TIME("cdr_solver::set_computational_geometry");
+void cdr_solver::setComputationalGeometry(const RefCountedPtr<computational_geometry> a_computationalGeometry){
+  CH_TIME("cdr_solver::setComputationalGeometry");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_computational_geometry" << endl;
+    pout() << m_name + "::setComputationalGeometry" << endl;
   }
-  m_compgeom = a_compgeom;
+  m_computationalGeometry = a_computationalGeometry;
 
-  const RefCountedPtr<mfis> mfis = m_compgeom->get_mfis();
+  const RefCountedPtr<mfis> mfis = m_computationalGeometry->get_mfis();
   
   this->set_ebis(mfis->getEBIndexSpace(m_phase));
 }
@@ -1638,10 +1638,10 @@ void cdr_solver::set_plot_variables(){
   }
 }
 
-void cdr_solver::write_plot_file(){
-  CH_TIME("cdr_solver::write_plot_file");
+void cdr_solver::writePlotFile(){
+  CH_TIME("cdr_solver::writePlotFile");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_plot_file" << endl;
+    pout() << m_name + "::writePlotFile" << endl;
   }
 
 
@@ -1656,7 +1656,7 @@ void cdr_solver::write_plot_file(){
 
   // Copy internal data to be plotted over to 'output'
   int icomp = 0;
-  write_plot_data(output, icomp);
+  writePlotData(output, icomp);
 
   // Filename
   char file_char[100];
@@ -1683,10 +1683,10 @@ void cdr_solver::write_plot_file(){
 	      IntVect::Unit);
 }
 
-void cdr_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("cdr_solver::write_plot_data");
+void cdr_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("cdr_solver::writePlotData");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_plot_data" << endl;
+    pout() << m_name + "::writePlotData" << endl;
   }
 
   // Plot state
@@ -1757,10 +1757,10 @@ void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
   a_comp += ncomp;
 }
 
-void cdr_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("cdr_solver::write_checkpoint_level");
+void cdr_solver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("cdr_solver::writeCheckpointLevel");
   if(m_verbosity > 5){
-    pout() << m_name + "::write_checkpoint_level" << endl;
+    pout() << m_name + "::writeCheckpointLevel" << endl;
   }
 
   // Write state vector
@@ -1768,10 +1768,10 @@ void cdr_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level)
   write(a_handle, *m_source[a_level],   m_name+"_src");
 }
 
-void cdr_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("cdr_solver::read_checkpoint_level");
+void cdr_solver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("cdr_solver::readCheckpointLevel");
   if(m_verbosity > 5){
-    pout() << m_name + "::read_checkpoint_level" << endl;
+    pout() << m_name + "::readCheckpointLevel" << endl;
   }
 
   read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->getGrids(m_Realm)[a_level], Interval(0,0), false);
@@ -2194,7 +2194,7 @@ void cdr_solver::parse_conservation(){
   pp.get("blend_conservation",   m_blend_conservation);
 }
 
-void cdr_solver::parse_plot_vars(){
+void cdr_solver::parsePlotVariables(){
   ParmParse pp(m_class_name.c_str());
   const int num = pp.countval("plt_vars");
   Vector<std::string> str(num);

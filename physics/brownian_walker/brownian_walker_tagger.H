@@ -27,7 +27,7 @@ namespace physics {
 
       void regrid() override;
       void parseOptions() override;
-      bool tag_cells(EBAMRTags& a_tags) override;
+      bool tagCells(EBAMRTags& a_tags) override;
 
     protected:
       RefCountedPtr<ito_solver> m_solver;

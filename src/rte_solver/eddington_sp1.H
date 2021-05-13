@@ -81,7 +81,7 @@ public:
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocate_internals();
+  virtual void allocateInternals();
 
   /*!
     @brief Allocate wall bc
@@ -91,17 +91,17 @@ public:
   /*!
     @brief Cache state
   */
-  virtual void pre_regrid(const int a_base, const int a_old_finest_level);
+  virtual void pre_regrid(const int a_base, const int a_oldFinestLevel);
 
   /*!
     @brief Deallocate internal storage
   */
-  virtual void deallocate_internals();
+  virtual void deallocateInternals();
 
   /*!
     @brief Regrid function for this class
   */
-  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
   /*!
     @brief Register operators
@@ -138,17 +138,17 @@ public:
   /*!
     @brief Write plot file
   */
-  virtual void write_plot_file();
+  virtual void writePlotFile();
 
   /*!
     @brief Write checkpoint data into handle
   */
-  virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const;
+  virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
 
   /*!
     @brief Read checkpoint data from handle
   */
-  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
+  virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 
   /*!
     @brief Return required number of ghost cells
@@ -406,7 +406,7 @@ protected:
   // Parse options functions
   virtual void parseDomain_bc();    // Parses domain BC options
   virtual void parse_stationary();   // Parse stationary solver
-  virtual void parse_plot_vars();    // Parses plot variables
+  virtual void parsePlotVariables();    // Parses plot variables
   virtual void parse_gmg_settings(); // Parses solver parameters for geometric multigrid
   virtual void parse_reflection();   // Parse reflection coefficient
 };

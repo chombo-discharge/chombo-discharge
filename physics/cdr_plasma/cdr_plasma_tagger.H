@@ -31,9 +31,9 @@ namespace physics {
 	@brief Full constructor
       */
       cdr_plasma_tagger(const RefCountedPtr<cdr_plasma_physics>&     a_physics,
-			const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
+			const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
 			const RefCountedPtr<AmrMesh>&               a_amr,
-			const RefCountedPtr<computational_geometry>& a_compgeom);
+			const RefCountedPtr<computational_geometry>& a_computationalGeometry);
 
       /*!
 	@brief Destructor
@@ -43,14 +43,14 @@ namespace physics {
       /*!
 	@brief Define function
 	@param[in] a_physics     Plasma kinetics
-	@param[in] a_timestepper Time stepper
+	@param[in] a_timeStepper Time stepper
 	@param[in] a_amr         AmrMesh instance
-	@param[in] a_compgeom    Computational geometry
+	@param[in] a_computationalGeometry    Computational geometry
       */
       virtual void define(const RefCountedPtr<cdr_plasma_physics>&     a_physics,
-			  const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
+			  const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
 			  const RefCountedPtr<AmrMesh>&               a_amr,
-			  const RefCountedPtr<computational_geometry>& a_compgeom);
+			  const RefCountedPtr<computational_geometry>& a_computationalGeometry);
 
 
       /*!
@@ -66,7 +66,7 @@ namespace physics {
       /*!
 	@brief
       */
-      virtual int get_num_plot_vars();
+      virtual int getNumberOfPlotVariables();
 
       /*!
 	@brief Regrid storage for tracer field
@@ -76,7 +76,7 @@ namespace physics {
       /*!
 	@brief Tag cells
       */
-      virtual bool tag_cells(EBAMRTags& a_tags);
+      virtual bool tagCells(EBAMRTags& a_tags);
 
       /*!
 	@brief Set phase
@@ -91,7 +91,7 @@ namespace physics {
       /*!
 	@brief Write plot data
       */
-      virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp);
+      virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp);
 
     protected:
 
@@ -113,7 +113,7 @@ namespace physics {
       /*!
 	@brief Time stepper
       */
-      RefCountedPtr<cdr_plasma_stepper> m_timestepper;
+      RefCountedPtr<cdr_plasma_stepper> m_timeStepper;
 
       /*!
 	@brief AmrMesh. Needed for computing tracer stuff
@@ -123,7 +123,7 @@ namespace physics {
       /*!
 	@brief Computational geometry. Needed for what exactly?
       */
-      RefCountedPtr<computational_geometry> m_compgeom;
+      RefCountedPtr<computational_geometry> m_computationalGeometry;
 
       /*!
 	@brief Number of tracer fields

@@ -29,7 +29,7 @@ void cdr_muscl::parseOptions(){
   parse_plotmode();     // Parses plot mode
   parseDomain_bc();    // Parses domain BC options
   parse_slopelim();     // Parses slope limiter settings
-  parse_plot_vars();    // Parses plot variables
+  parsePlotVariables();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
   parse_conservation();  // Nonlinear divergence blending
 
@@ -45,7 +45,7 @@ void cdr_muscl::parseRuntimeOptions(){
   parse_plotmode();     // Parses plot mode
   parseDomain_bc();    // Parses domain BC options
   parse_slopelim();     // Parses slope limiter settings
-  parse_plot_vars();    // Parses plot variables
+  parsePlotVariables();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
   parse_conservation();  // Nonlinear divergence blending
 
@@ -122,8 +122,8 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
   }
 }
 
-void cdr_muscl::allocate_internals(){
-  cdr_solver::allocate_internals();
+void cdr_muscl::allocateInternals(){
+  cdr_solver::allocateInternals();
 
   if(m_diffusive){
     this->setup_gmg();

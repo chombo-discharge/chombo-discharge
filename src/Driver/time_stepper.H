@@ -58,20 +58,20 @@ public:
   // IO routines
   virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const = 0;
   virtual void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) = 0;
-  virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const = 0;
-  virtual int  get_num_plot_vars() const = 0;
+  virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const = 0;
+  virtual int  getNumberOfPlotVariables() const = 0;
   virtual Vector<long int> get_checkpoint_loads(const std::string a_Realm, const int a_level) const;
 
   // Advance routines
   virtual void compute_dt(Real& a_dt, time_code& a_timecode) = 0;
   virtual Real advance(const Real a_dt) = 0;
   virtual void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) = 0;
-  virtual void print_step_report() = 0;
+  virtual void print_stepReport() = 0;
 
   // Regrid routines
   virtual void deallocate() = 0;
-  virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) = 0;
-  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
+  virtual void pre_regrid(const int a_lmin, const int a_oldFinestLevel) = 0;
+  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
 
   virtual bool need_to_regrid();
   virtual bool LoadBalancing_Realm(const std::string a_Realm) const;
@@ -84,8 +84,8 @@ public:
   virtual void post_regrid() = 0;
 
   // Set routines
-  virtual void set_amr(const RefCountedPtr<AmrMesh>& a_amr);
-  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
+  virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
+  virtual void setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry);
 
 protected:
 
@@ -122,7 +122,7 @@ protected:
   /*!
     @brief Physical domain
   */
-  RefCountedPtr<computational_geometry> m_compgeom;
+  RefCountedPtr<computational_geometry> m_computationalGeometry;
 };
 #include "CD_NamespaceFooter.H"
 

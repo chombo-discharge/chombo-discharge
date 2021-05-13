@@ -27,7 +27,7 @@ cell_tagger::~cell_tagger(){
 
 }
 
-int cell_tagger::get_num_plot_vars(){
+int cell_tagger::getNumberOfPlotVariables(){
   return 0;
 }
 
@@ -89,10 +89,10 @@ void cell_tagger::parseVerbosity(){
   pp.get("verbosity", m_verbosity);
 }
 
-void cell_tagger::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp){
-  CH_TIME("cell_tagger::write_plot_data");
+void cell_tagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp){
+  CH_TIME("cell_tagger::writePlotData");
   if(m_verbosity > 3){
-    pout() << "cell_tagger::write_plot_data" << endl;
+    pout() << "cell_tagger::writePlotData" << endl;
   }
 }
 

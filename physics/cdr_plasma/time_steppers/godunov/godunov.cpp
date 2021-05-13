@@ -209,7 +209,7 @@ void godunov::parse_fhd(){
 }
 
 bool godunov::need_to_regrid(){
-  CH_TIME("godunov::deallocate_internals");
+  CH_TIME("godunov::deallocateInternals");
   if(m_verbosity > 5){
     pout() << "godunov::need_to_regrid" << endl;
   }
@@ -360,19 +360,19 @@ void godunov::init(){
   // No need to do anything in this routine yet
 }
 
-void godunov::regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
-  CH_TIME("godunov::regrid_internals");
+void godunov::regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
+  CH_TIME("godunov::regridInternals");
   if(m_verbosity > 5){
-    pout() << "godunov::regrid_internals" << endl;
+    pout() << "godunov::regridInternals" << endl;
   }
 
   // Nothing to see here
 }
 
-void godunov::allocate_internals(){
-  CH_TIME("godunov::allocate_internals");
+void godunov::allocateInternals(){
+  CH_TIME("godunov::allocateInternals");
   if(m_verbosity > 5){
-    pout() << "godunov::allocate_internals" << endl;
+    pout() << "godunov::allocateInternals" << endl;
   }
 
   const int ncomp       = 1;
@@ -404,10 +404,10 @@ void godunov::allocate_internals(){
   m_sigma_scratch->allocate_storage();
 }
 
-void godunov::deallocate_internals(){
-  CH_TIME("godunov::deallocate_internals");
+void godunov::deallocateInternals(){
+  CH_TIME("godunov::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "godunov::deallocate_internals" << endl;
+    pout() << "godunov::deallocateInternals" << endl;
   }
 
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){

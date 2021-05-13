@@ -32,10 +32,10 @@ void sigma_solver::set_Realm(const std::string a_Realm){
   m_Realm = a_Realm;
 }
 
-void sigma_solver::allocate_internals(){
-  CH_TIME("sigma_solver::allocate_internals");
+void sigma_solver::allocateInternals(){
+  CH_TIME("sigma_solver::allocateInternals");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::allocate_internals" << endl;
+    pout() << "sigma_solver::allocateInternals" << endl;
   }
 
   const int comp  = 0;
@@ -45,7 +45,7 @@ void sigma_solver::allocate_internals(){
   m_amr->allocate(m_flux,  m_Realm, m_phase, ncomp);
 }
 
-void sigma_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
+void sigma_solver::pre_regrid(const int a_lbase, const int a_oldFinestLevel){
   CH_TIME("sigma_solver::pre_regrid");
   if(m_verbosity > 5){
     pout() << "sigma_solver::pre_regrid" << endl;
@@ -57,7 +57,7 @@ void sigma_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
   m_amr->allocate(m_cache, m_Realm, m_phase, ncomp);
   data_ops::set_value(m_cache, 0.0);
   
-  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+  for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++){
     m_state[lvl]->localCopyTo(*m_cache[lvl]);
   }
 }
@@ -72,17 +72,17 @@ void sigma_solver::compute_rhs(EBAMRIVData& a_rhs){
   }
 }
 
-void sigma_solver::deallocate_internals(){
-  CH_TIME("sigma_solver::deallocate_internals");
+void sigma_solver::deallocateInternals(){
+  CH_TIME("sigma_solver::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::deallocate_internals" << endl;
+    pout() << "sigma_solver::deallocateInternals" << endl;
   }
   
   m_amr->deallocate(m_state);
   m_amr->deallocate(m_flux);
 }
 
-void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+void sigma_solver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
   CH_TIME("sigma_solver::regrid");
   if(m_verbosity > 5){
     pout() << "sigma_solver::regrid" << endl;
@@ -95,7 +95,7 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
   const int ncomp = 1;
   const Interval interv(comp, comp);
 
-  this->allocate_internals();
+  this->allocateInternals();
 
   data_ops::set_value(m_state, 0.0);
 
@@ -105,7 +105,7 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
   }
 
   // These levels have changed
-  for (int lvl = Max(1,a_lmin); lvl <= a_new_finest_level; lvl++){
+  for (int lvl = Max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
     const DisjointBoxLayout& fine_grid = m_amr->getGrids(m_Realm)[lvl];
     const ProblemDomain& fine_domain   = m_amr->getDomains()[lvl];
     const ProblemDomain& coar_domain   = m_amr->getDomains()[lvl-1];
@@ -173,7 +173,7 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
     }
 
     // If data already exists, it takes precedence
-    if (lvl <= a_old_finest_level){
+    if (lvl <= a_oldFinestLevel){
       m_cache[lvl]->copyTo(*m_state[lvl]);
     }
   }
@@ -226,23 +226,23 @@ void sigma_solver::reset_cells(EBAMRIVData& a_data){
   }
 }
 
-void sigma_solver::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("sigma_solver::set_amr");
+void sigma_solver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
+  CH_TIME("sigma_solver::setAmr");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::set_amr" << endl;
+    pout() << "sigma_solver::setAmr" << endl;
   }
 
   m_amr = a_amr;
 }
 
-void sigma_solver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
-  CH_TIME("sigma_solver::set_computational_geometry");
+void sigma_solver::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
+  CH_TIME("sigma_solver::setComputationalGeometry");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::set_computational_geometry" << endl;
+    pout() << "sigma_solver::setComputationalGeometry" << endl;
   }
 
-  m_compgeom = a_compgeom;
-  m_multifluidIndexSpace     = m_compgeom->get_mfis();
+  m_computationalGeometry = a_computationalGeometry;
+  m_multifluidIndexSpace     = m_computationalGeometry->get_mfis();
 }
 
 void sigma_solver::set_phase(phase::which_phase a_phase){
@@ -306,10 +306,10 @@ void sigma_solver::set_time(const int a_step, const Real a_time, const Real a_dt
   m_dt   = a_dt;
 }
 
-void sigma_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("sigma_solver::write_checkpoint_level");
+void sigma_solver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("sigma_solver::writeCheckpointLevel");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::write_checkpoint_level" << endl;
+    pout() << "sigma_solver::writeCheckpointLevel" << endl;
   }
 
   EBCellFactory fact(m_amr->getEBISLayout(m_Realm, phase::gas)[a_level]);
@@ -321,10 +321,10 @@ void sigma_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_leve
   write(a_handle, scratch, "sigma");
 }
 
-void sigma_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("sigma_solver::read_checkpoint_level");
+void sigma_solver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("sigma_solver::readCheckpointLevel");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::read_checkpoint_level" << endl;
+    pout() << "sigma_solver::readCheckpointLevel" << endl;
   }
 
   const EBISLayout& ebisl = m_amr->getEBISLayout(m_Realm, phase::gas)[a_level];
@@ -340,10 +340,10 @@ void sigma_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level
   data_ops::incr(*m_state[a_level], scratch, 1.0);
 }
 
-void sigma_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("sigma_solver::write_plot_data");
+void sigma_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("sigma_solver::writePlotData");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::write_plot_data" << endl;
+    pout() << "sigma_solver::writePlotData" << endl;
   }
 
 

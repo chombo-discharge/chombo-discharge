@@ -51,14 +51,14 @@ namespace physics {
       */
       static Real s_constant_one(const RealVect a_pos);
 
-      // New functions for new driver interface
+      // New functions for new Driver interface
       virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const;
       virtual void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl);
-      virtual int get_num_plot_vars() const;
-      virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const;
+      virtual int getNumberOfPlotVariables() const;
+      virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const;
       virtual void write_J(EBAMRCellData& a_output, int& a_comp) const;
       virtual void post_checkpoint_setup();
-      virtual void print_step_report() override;
+      virtual void print_stepReport() override;
       virtual void registerOperators() override;
       virtual void allocate() override;
       virtual void post_initialize() override;
@@ -95,12 +95,12 @@ namespace physics {
       /*!
 	@brief Allocate internal storage
       */
-      virtual void allocate_internals() = 0;
+      virtual void allocateInternals() = 0;
 
       /*!
 	@brief Deallocate internals
       */
-      virtual void deallocate_internals() = 0;
+      virtual void deallocateInternals() = 0;
 
       /*!
 	@brief Parse options.
@@ -120,13 +120,13 @@ namespace physics {
       /*!
 	@brief pre_regrid internal storage
       */
-      virtual void pre_regrid_internals(const int a_lbase, const int a_finest_level);
+      virtual void pre_regridInternals(const int a_lbase, const int a_finest_level);
 
       /*!
 	@brief Deallocation function
       */
       virtual void deallocate(){
-	this->deallocate_internals();
+	this->deallocateInternals();
 	this->deallocate_solver_internals();
       }
 
@@ -717,17 +717,17 @@ namespace physics {
       /*!
 	@brief Regrid
       */
-      virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+      virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
       /*!
 	@brief Regrid internal storage. This MUST be overwritten.
       */
-      virtual void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
+      virtual void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
 
       /*!
 	@brief Regrid individual solvers
       */
-      virtual void regrid_solvers(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+      virtual void regrid_solvers(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
       /*!
 	@brief Set data defined over dielectric cells to zero

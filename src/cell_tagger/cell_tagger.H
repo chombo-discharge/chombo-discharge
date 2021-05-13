@@ -51,17 +51,17 @@ public:
   /*!
     @brief Tag cells
   */
-  virtual bool tag_cells(EBAMRTags& a_tags) = 0;
+  virtual bool tagCells(EBAMRTags& a_tags) = 0;
 
   /*!
     @brief Get number of tracer fields
   */
-  virtual int get_num_plot_vars();
+  virtual int getNumberOfPlotVariables();
 
   /*!
     @brief Write plot data
   */
-  virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp);
+  virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp);
 
   /*!
     @brief Get tag buffer

@@ -57,7 +57,7 @@ public:
   /*!
     @brief Allocate internal stuff
   */
-  virtual void allocate_internals() override;
+  virtual void allocateInternals() override;
 
 protected:
 

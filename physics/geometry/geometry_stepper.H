@@ -37,19 +37,19 @@ namespace physics {
       // IO routines
       virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
       virtual void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
-      virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
-      virtual int  get_num_plot_vars() const override;
+      virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
+      virtual int  getNumberOfPlotVariables() const override;
 
       // Advance routines
       virtual void compute_dt(Real& a_dt, time_code& a_timecode) override;
       virtual Real advance(const Real a_dt) override;
       virtual void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
-      virtual void print_step_report() override;
+      virtual void print_stepReport() override;
 
       // Regrid routines
       virtual void deallocate() override;
-      virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) override;
-      virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+      virtual void pre_regrid(const int a_lmin, const int a_oldFinestLevel) override;
+      virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       virtual void post_regrid() override;
 
     };

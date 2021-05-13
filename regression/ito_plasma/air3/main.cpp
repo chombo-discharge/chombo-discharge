@@ -1,4 +1,4 @@
-#include "driver.H"
+#include "CD_Driver.H"
 #include "geo_coarsener.H"
 #include "CD_FieldSolverFactoryImplem.H"
 #include "CD_FieldSolverMultigrid.H"
@@ -69,10 +69,10 @@ int main(int argc, char* argv[]){
   // Set potential 
   timestepper->set_potential(potential_curve);
 
-  // Set up the driver and run it
-  RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
+  // Set up the Driver and run it
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
 #if 1 // Original code
-  engine->setup_and_run(input_file);
+  engine->setupAndRun(input_file);
 #else
   const RealVect E = 1.E7*RealVect(BASISV(0));
   physics->update_reaction_rates(E, 1.0, 1.0);

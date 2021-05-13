@@ -80,10 +80,10 @@ void rk2::allocate_sigma_storage(){
   m_sigma_scratch->allocate_storage();
 }
 
-void rk2::deallocate_internals(){
-  CH_TIME("rk2::deallocate_internals");
+void rk2::deallocateInternals(){
+  CH_TIME("rk2::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "rk2::deallocate_internals" << endl;
+    pout() << "rk2::deallocateInternals" << endl;
   }
 
   m_fieldSolver_scratch->deallocate_storage();
@@ -100,10 +100,10 @@ void rk2::deallocate_internals(){
   }
 }
 
-void rk2::regrid_internals(){
-  CH_TIME("rk2::regrid_internals");
+void rk2::regridInternals(){
+  CH_TIME("rk2::regridInternals");
   if(m_verbosity > 5){
-    pout() << "rk2::regrid_internals" << endl;
+    pout() << "rk2::regridInternals" << endl;
   }
   
   this->allocate_cdr_storage();

@@ -278,12 +278,12 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_state,
   return converged;
 }
 
-void FieldSolverMultigrid::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+void FieldSolverMultigrid::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
   CH_TIME("FieldSolverMultigrid::regrid");
   if(m_verbosity > 5){
     pout() << "FieldSolverMultigrid::regrid" << endl;
   }
-  FieldSolver::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  FieldSolver::regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_needsMultigridSetup = true;
 }
 
@@ -320,7 +320,7 @@ void FieldSolverMultigrid::setMultigridCoefficients(){
 
   const int ncomps = 1;
   const int ghosts = 1;
-  const Real eps0  = m_compgeom->get_eps0();
+  const Real eps0  = m_computationalGeometry->get_eps0();
   
   m_amr->allocate(m_aCoefficient,      m_Realm, ncomps);
   m_amr->allocate(m_bCoefficient,      m_Realm, ncomps);
@@ -330,7 +330,7 @@ void FieldSolverMultigrid::setMultigridCoefficients(){
   data_ops::set_value(m_bCoefficient,      eps0); // Will override this later
   data_ops::set_value(m_bCoefficientIrreg, eps0); // Will override this later
 
-  this->setPermittivities(m_compgeom->get_dielectrics());
+  this->setPermittivities(m_computationalGeometry->get_dielectrics());
 }
 
 void FieldSolverMultigrid::setPermittivities(const Vector<dielectric>& a_dielectrics){

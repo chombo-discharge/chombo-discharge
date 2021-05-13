@@ -102,12 +102,12 @@ public:
   /*!
     @brief Regrid solver
   */
-  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocate_internals();
+  virtual void allocateInternals();
 
   /*!
     @brief Clear a particle container
@@ -362,12 +362,12 @@ public:
   /*!
     @brief Set computational geometry
   */
-  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
+  virtual void setComputationalGeometry(const RefCountedPtr<computational_geometry> a_computationalGeometry);
 
   /*!
     @brief Set the amr object
   */
-  virtual void set_amr(const RefCountedPtr<AmrMesh>& a_amr);
+  virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Set phase
@@ -387,7 +387,7 @@ public:
   /*!
     @brief Write plot data
   */
-  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write data to output. Convenience function. 
@@ -397,22 +397,22 @@ public:
   /*!
     @brief Write checkpoint data into handle
   */
-  virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const;
+  virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
 
   /*!
     @brief Checkpoint particles
   */
-  virtual void write_checkpoint_level_particles(HDF5Handle& a_handle, const int a_level) const;
+  virtual void writeCheckpointLevel_particles(HDF5Handle& a_handle, const int a_level) const;
 
   /*!
     @brief Checkpoint particles
   */
-  virtual void write_checkpoint_level_fluid(HDF5Handle& a_handle, const int a_level) const;
+  virtual void writeCheckpointLevel_fluid(HDF5Handle& a_handle, const int a_level) const;
 
   /*!
     @brief Read checkpoint data from handle
   */
-  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
+  virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 
   /*!
     @brief Set the species
@@ -422,7 +422,7 @@ public:
   /*!
     @brief Cache the particles
   */
-  virtual void pre_regrid(const int a_base, const int a_old_finest_level);
+  virtual void pre_regrid(const int a_base, const int a_oldFinestLevel);
 
   /*!
     @brief Add particles. Level and patch version. 
@@ -752,7 +752,7 @@ protected:
   /*!
     @brief Computational geometry. 
   */
-  RefCountedPtr<computational_geometry> m_compgeom;
+  RefCountedPtr<computational_geometry> m_computationalGeometry;
 
   /*!
     @brief AMR; needed for grid stuff
@@ -1028,7 +1028,7 @@ protected:
   /*!
     @brief Parse plot variables
   */
-  void parse_plot_vars();
+  void parsePlotVariables();
 
   /*!
     @brief Parse diffusion hop

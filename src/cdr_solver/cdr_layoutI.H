@@ -86,33 +86,33 @@ void cdr_layout<T>::parseRuntimeOptions(){
 }
 
 template <class T>
-void cdr_layout<T>::allocate_internals(){
-  CH_TIME("cdr_layout<T>::allocate_internals");
+void cdr_layout<T>::allocateInternals(){
+  CH_TIME("cdr_layout<T>::allocateInternals");
   if(m_verbosity > 6){
-    pout() << "cdr_layout<T>::allocate_internals" << endl;
+    pout() << "cdr_layout<T>::allocateInternals" << endl;
   }
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->allocate_internals();
+    solver->allocateInternals();
   }
 }
 
 template <class T>
-void cdr_layout<T>::deallocate_internals(){
-  CH_TIME("cdr_layout<T>::deallocate_internals");
+void cdr_layout<T>::deallocateInternals(){
+  CH_TIME("cdr_layout<T>::deallocateInternals");
   if(m_verbosity > 6){
-    pout() << "cdr_layout<T>::deallocate_internals" << endl;
+    pout() << "cdr_layout<T>::deallocateInternals" << endl;
   }
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->deallocate_internals();
+    solver->deallocateInternals();
   }
 }
 
 template <class T>
-void cdr_layout<T>::pre_regrid(const int a_lbase, const int a_old_finest_level){
+void cdr_layout<T>::pre_regrid(const int a_lbase, const int a_oldFinestLevel){
   CH_TIME("cdr_layout<T>::pre_regrid");
   if(m_verbosity > 6){
     pout() << "cdr_layout<T>::pre_regrid" << endl;
@@ -120,7 +120,7 @@ void cdr_layout<T>::pre_regrid(const int a_lbase, const int a_old_finest_level){
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->pre_regrid(a_lbase, a_old_finest_level);
+    solver->pre_regrid(a_lbase, a_oldFinestLevel);
   }
 }
 
@@ -138,7 +138,7 @@ void cdr_layout<T>::initial_data(){
 }
 
 template <class T>
-void cdr_layout<T>::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+void cdr_layout<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
   CH_TIME("cdr_layout<T>::regrid");
   if(m_verbosity > 5){
     pout() << "cdr_layout<T>::regrid" << endl;
@@ -146,7 +146,7 @@ void cdr_layout<T>::regrid(const int a_lmin, const int a_old_finest_level, const
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+    solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   }
 }
 
@@ -164,28 +164,28 @@ void cdr_layout<T>::registerOperators(){
 }
 
 template <class T>
-void cdr_layout<T>::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("cdr_layout<T>::set_amr");
+void cdr_layout<T>::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
+  CH_TIME("cdr_layout<T>::setAmr");
   if(m_verbosity > 5){
-    pout() << "cdr_layout<T>::set_amr" << endl;
+    pout() << "cdr_layout<T>::setAmr" << endl;
   }
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->set_amr(a_amr);
+    solver->setAmr(a_amr);
   }
 }
 
 template <class T>
-void cdr_layout<T>::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
-  CH_TIME("cdr_layout<T>::set_computational_geometry");
+void cdr_layout<T>::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
+  CH_TIME("cdr_layout<T>::setComputationalGeometry");
   if(m_verbosity > 5){
-    pout() << "cdr_layout<T>::set_computational_geometry" << endl;
+    pout() << "cdr_layout<T>::setComputationalGeometry" << endl;
   }
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->set_computational_geometry(a_compgeom);
+    solver->setComputationalGeometry(a_computationalGeometry);
   }
 }
 
@@ -362,15 +362,15 @@ void cdr_layout<T>::set_ebflux(const Real a_ebflux){
 }
 
 template <class T>
-void cdr_layout<T>::write_plot_file(){
-  CH_TIME("cdr_layout<T>::write_plot_file");
+void cdr_layout<T>::writePlotFile(){
+  CH_TIME("cdr_layout<T>::writePlotFile");
   if(m_verbosity > 5){
-    pout() << "cdr_layout<T>::write_plot_file" << endl;
+    pout() << "cdr_layout<T>::writePlotFile" << endl;
   }
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->write_plot_file();
+    solver->writePlotFile();
   }
 }
 

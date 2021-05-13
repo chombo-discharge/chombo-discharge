@@ -23,7 +23,7 @@ src_dirs = $(DISCHARGE_HOME)/src \
 	$(DISCHARGE_HOME)/src/elliptic \
 	$(DISCHARGE_HOME)/src/geometry \
 	$(DISCHARGE_HOME)/src/global \
-	$(DISCHARGE_HOME)/src/driver \
+	$(DISCHARGE_HOME)/src/Driver \
 	$(DISCHARGE_HOME)/src/particle \
 	$(DISCHARGE_HOME)/src/FieldSolver \
 	$(DISCHARGE_HOME)/src/rte_solver \

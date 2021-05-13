@@ -40,9 +40,9 @@ namespace physics {
       Real advance(const Real a_dt);
 
       void init();
-      void allocate_internals() override;
-      void deallocate_internals() override;
-      void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
+      void allocateInternals() override;
+      void deallocateInternals() override;
+      void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       void parseOptions() override;
       void parseRuntimeOptions() override;
       bool need_to_regrid() override;

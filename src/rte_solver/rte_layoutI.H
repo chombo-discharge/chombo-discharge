@@ -75,15 +75,15 @@ void rte_layout<T>::parseRuntimeOptions(){
 }
 
 template <class T>
-void rte_layout<T>::allocate_internals(){
-  CH_TIME("rte_layout<T>::allocate_internals");
+void rte_layout<T>::allocateInternals(){
+  CH_TIME("rte_layout<T>::allocateInternals");
   if(m_verbosity > 6){
-    pout() << "rte_layout<T>::allocate_internals" << endl;
+    pout() << "rte_layout<T>::allocateInternals" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->allocate_internals();
+    solver->allocateInternals();
   }
 }
 
@@ -101,41 +101,41 @@ void rte_layout<T>::pre_regrid(const int a_base, const int a_finest_level){
 }
 
 template <class T>
-void rte_layout<T>::deallocate_internals(){
-  CH_TIME("rte_layout<T>::deallocate_internals");
+void rte_layout<T>::deallocateInternals(){
+  CH_TIME("rte_layout<T>::deallocateInternals");
   if(m_verbosity > 6){
-    pout() << "rte_layout<T>::deallocate_internals" << endl;
+    pout() << "rte_layout<T>::deallocateInternals" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->deallocate_internals();
+    solver->deallocateInternals();
   }
 }
 
 template <class T>
-void rte_layout<T>::set_amr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("rte_layout<T>::set_amr");
+void rte_layout<T>::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
+  CH_TIME("rte_layout<T>::setAmr");
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::set_amr" << endl;
+    pout() << "rte_layout<T>::setAmr" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->set_amr(a_amr);
+    solver->setAmr(a_amr);
   }
 }
 
 template <class T>
-void rte_layout<T>::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
-  CH_TIME("rte_layout<T>::set_computational_geometry");
+void rte_layout<T>::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
+  CH_TIME("rte_layout<T>::setComputationalGeometry");
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::set_computational_geometry" << endl;
+    pout() << "rte_layout<T>::setComputationalGeometry" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->set_computational_geometry(a_compgeom);
+    solver->setComputationalGeometry(a_computationalGeometry);
   }
 }
 
@@ -194,7 +194,7 @@ void rte_layout<T>::set_time(const int a_step, const Real a_time, const Real a_d
 }
 
 template <class T>
-void rte_layout<T>::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+void rte_layout<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
   CH_TIME("rte_layout<T>::regrid");
   if(m_verbosity > 5){
     pout() << "rte_layout<T>::regrid" << endl;
@@ -202,7 +202,7 @@ void rte_layout<T>::regrid(const int a_lmin, const int a_old_finest_level, const
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+    solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   }
 }
 
@@ -259,15 +259,15 @@ void rte_layout<T>::set_stationary(const bool a_stationary){
 }
 
 template <class T>
-void rte_layout<T>::write_plot_file(){
-  CH_TIME("rte_layout<T>::write_plot_file");
+void rte_layout<T>::writePlotFile(){
+  CH_TIME("rte_layout<T>::writePlotFile");
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::write_plot_file" << endl;
+    pout() << "rte_layout<T>::writePlotFile" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->write_plot_file();
+    solver->writePlotFile();
   }
 }
 

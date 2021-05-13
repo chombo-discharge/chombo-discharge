@@ -18,11 +18,11 @@ gradient_tagger::~gradient_tagger(){
 }
 
 void gradient_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
-			     const RefCountedPtr<time_stepper>&           a_timestepper,
+			     const RefCountedPtr<time_stepper>&           a_timeStepper,
 			     const RefCountedPtr<AmrMesh>&               a_amr,
-			     const RefCountedPtr<computational_geometry>& a_compgeom,
+			     const RefCountedPtr<computational_geometry>& a_computationalGeometry,
 			     const RefCountedPtr<physical_domain>&        a_physdom){
-  cell_tagger::define(a_plaskin, a_timestepper, a_amr, a_compgeom, a_physdom);
+  cell_tagger::define(a_plaskin, a_timeStepper, a_amr, a_computationalGeometry, a_physdom);
 
   m_num_tracers = a_plaskin->get_num_species();
 }

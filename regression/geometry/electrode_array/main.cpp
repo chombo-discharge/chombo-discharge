@@ -1,4 +1,4 @@
-#include "driver.H"
+#include "CD_Driver.H"
 #include "electrode_array.H"
 #include "geometry_stepper.H"
 #include "ParmParse.H"
@@ -25,9 +25,9 @@ int main(int argc, char* argv[]){
   // Set up basic geometry stepper = 1 
   auto timestepper = RefCountedPtr<geometry_stepper> (new geometry_stepper());
 
-  // Set up the driver and run it
-  RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));
-  engine->setup_and_run(input_file);
+  // Set up the Driver and run it
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+  engine->setupAndRun(input_file);
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

@@ -110,19 +110,19 @@ bool cdr_plasma_stepper::solve_poisson(MFAMRCellData&                a_potential
   return converged;
 }
 
-void cdr_plasma_stepper::allocate_internals(){
-  CH_TIME("cdr_plasma_stepper::allocate_internals"); 
+void cdr_plasma_stepper::allocateInternals(){
+  CH_TIME("cdr_plasma_stepper::allocateInternals"); 
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::allocate_internals" << endl;
+    pout() << "cdr_plasma_stepper::allocateInternals" << endl;
   }
 
   /// Do nothing
 }
 
-void cdr_plasma_stepper::deallocate_internals(){
-  CH_TIME("cdr_plasma_stepper::deallocate_internals"); 
+void cdr_plasma_stepper::deallocateInternals(){
+  CH_TIME("cdr_plasma_stepper::deallocateInternals"); 
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::deallocate_internals" << endl;
+    pout() << "cdr_plasma_stepper::deallocateInternals" << endl;
   }
 
   /// Do nothing
@@ -2424,10 +2424,10 @@ void cdr_plasma_stepper::pre_regrid(const int a_lmin, const int a_finest_level){
   m_sigma->pre_regrid(a_lmin, a_finest_level);
 }
 
-void cdr_plasma_stepper::pre_regrid_internals(const int a_lbase, const int a_finest_level){
-  CH_TIME("cdr_plasma_stepper::pre_regrid_internals");
+void cdr_plasma_stepper::pre_regridInternals(const int a_lbase, const int a_finest_level){
+  CH_TIME("cdr_plasma_stepper::pre_regridInternals");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::pre_regrid_internals" << endl;
+    pout() << "cdr_plasma_stepper::pre_regridInternals" << endl;
   }
 }
 
@@ -2978,10 +2978,10 @@ void cdr_plasma_stepper::deallocate_solver_internals(){
     pout() << "cdr_plasma_stepper::deallocate_solver_internals" << endl;
   }
 
-  m_cdr->deallocate_internals();
-  m_rte->deallocate_internals();
+  m_cdr->deallocateInternals();
+  m_rte->deallocateInternals();
   m_fieldSolver->deallocateInternals();
-  m_sigma->deallocate_internals();
+  m_sigma->deallocateInternals();
 }
 
 void cdr_plasma_stepper::extrapolate_to_eb(Vector<EBAMRIVData*>&         a_extrap,
@@ -3176,7 +3176,7 @@ void cdr_plasma_stepper::setup_solvers(){
   this->set_solver_verbosity();
 
   // Allocate internal memory
-  this->allocate_internals();
+  this->allocateInternals();
 }
 
 void cdr_plasma_stepper::initial_data(){
@@ -3337,9 +3337,9 @@ void cdr_plasma_stepper::regrid(const int a_lmin, const int a_old_finest, const 
     pout() << "cdr_plasma_stepper::regrid" << endl;
   }
 
-  this->allocate_internals(); // Allocate memory for time stepper
+  this->allocateInternals(); // Allocate memory for time stepper
   this->regrid_solvers(a_lmin, a_old_finest, a_new_finest);
-  this->regrid_internals(a_lmin, a_old_finest, a_new_finest);
+  this->regridInternals(a_lmin, a_old_finest, a_new_finest);
 
   // Solvers have been regridded. Now resolve the Poisson equation with the new data
   bool converged = this->solve_poisson();
@@ -3347,7 +3347,7 @@ void cdr_plasma_stepper::regrid(const int a_lmin, const int a_old_finest, const 
   // If we don't converge, try new Poisson solver settings
   if(!converged){ 
     if(m_verbosity > 0){
-      pout() << "driver::regrid - Poisson solver failed to converge." << endl;
+      pout() << "Driver::regrid - Poisson solver failed to converge." << endl;
     }
   }
 
@@ -3412,7 +3412,7 @@ void cdr_plasma_stepper::sanityCheck(){
     pout() << "cdr_plasma_stepper::sanityCheck" << endl;
   }
 
-  CH_assert(!m_compgeom.isNull());
+  CH_assert(!m_computationalGeometry.isNull());
   CH_assert(!m_amr.isNull());
   CH_assert(!m_physics.isNull());
 }
@@ -3665,18 +3665,18 @@ void cdr_plasma_stepper::setup_cdr(){
 
   m_cdr->set_verbosity(m_solver_verbosity);
   m_cdr->parseOptions();
-  m_cdr->set_amr(m_amr);
-  m_cdr->set_computational_geometry(m_compgeom);
+  m_cdr->setAmr(m_amr);
+  m_cdr->setComputationalGeometry(m_computationalGeometry);
   m_cdr->set_phase(phase::gas);
   m_cdr->sanityCheck();
   m_cdr->set_Realm(m_Realm);
 }
 
 void cdr_plasma_stepper::allocate() {
-  m_cdr->allocate_internals();
+  m_cdr->allocateInternals();
   m_fieldSolver->allocateInternals();
-  m_rte->allocate_internals();
-  m_sigma->allocate_internals();
+  m_rte->allocateInternals();
+  m_sigma->allocateInternals();
 }
 
 void cdr_plasma_stepper::setup_poisson(){
@@ -3688,7 +3688,7 @@ void cdr_plasma_stepper::setup_poisson(){
   m_fieldSolver->setVerbosity(m_solver_verbosity);
   m_fieldSolver->parseOptions();
   m_fieldSolver->setAmr(m_amr);
-  m_fieldSolver->setComputationalGeometry(m_compgeom);
+  m_fieldSolver->setComputationalGeometry(m_computationalGeometry);
   m_fieldSolver->setRealm(m_Realm);
   m_fieldSolver->setVoltage(m_potential); // Needs to happen AFTER set_poisson_wall_func
 }
@@ -3702,11 +3702,11 @@ void cdr_plasma_stepper::setup_rte(){
   m_rte->set_verbosity(m_solver_verbosity);
   m_rte->parseOptions();
   m_rte->set_phase(phase::gas);
-  m_rte->set_amr(m_amr);
-  m_rte->set_computational_geometry(m_compgeom);
+  m_rte->setAmr(m_amr);
+  m_rte->setComputationalGeometry(m_computationalGeometry);
   m_rte->sanityCheck();
   m_rte->set_Realm(m_Realm);
-  //  m_rte->allocate_internals();
+  //  m_rte->allocateInternals();
 }
 
 void cdr_plasma_stepper::setup_sigma(){
@@ -3716,11 +3716,11 @@ void cdr_plasma_stepper::setup_sigma(){
   }
 
   m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
-  m_sigma->set_amr(m_amr);
+  m_sigma->setAmr(m_amr);
   m_sigma->set_verbosity(m_solver_verbosity);
-  m_sigma->set_computational_geometry(m_compgeom);
+  m_sigma->setComputationalGeometry(m_computationalGeometry);
   m_sigma->set_Realm(m_Realm);
-  //  m_sigma->allocate_internals();
+  //  m_sigma->allocateInternals();
 }
 
 void cdr_plasma_stepper::solver_dump(){
@@ -3729,9 +3729,9 @@ void cdr_plasma_stepper::solver_dump(){
     pout() << "cdr_plasma_stepper::solver_dump" << endl;
   }
 
-  m_cdr->write_plot_file();
+  m_cdr->writePlotFile();
   m_fieldSolver->writePlotFile();
-  m_rte->write_plot_file();
+  m_rte->writePlotFile();
 }
 
 void cdr_plasma_stepper::solve_rte(const Real a_dt){
@@ -4082,53 +4082,53 @@ RefCountedPtr<sigma_solver>& cdr_plasma_stepper::get_sigma(){
   return m_sigma;
 }
 
-// New functions for driver
+// New functions for Driver
 void cdr_plasma_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const{
-  CH_TIME("driver::write_checkpoint_data");
+  CH_TIME("Driver::write_checkpoint_data");
   if(m_verbosity > 3){
-    pout() << "driver::write_checkpoint_data" << endl;
+    pout() << "Driver::write_checkpoint_data" << endl;
   }
 
   // CDR solvers checkpoint their data
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->write_checkpoint_level(a_handle, a_lvl);
+    solver->writeCheckpointLevel(a_handle, a_lvl);
   }
 
   // RTE solvers checkpoint their data
   for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<rte_solver>& solver = solver_it();
-    solver->write_checkpoint_level(a_handle, a_lvl);
+    solver->writeCheckpointLevel(a_handle, a_lvl);
   }
 
   m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
-  m_sigma->write_checkpoint_level(a_handle, a_lvl);
+  m_sigma->writeCheckpointLevel(a_handle, a_lvl);
 }
 
 void cdr_plasma_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
-  CH_TIME("driver::read_checkpoint_data");
+  CH_TIME("Driver::read_checkpoint_data");
   if(m_verbosity > 3){
-    pout() << "driver::read_checkpoint_data" << endl;
+    pout() << "Driver::read_checkpoint_data" << endl;
   }
 
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->read_checkpoint_level(a_handle, a_lvl);
+    solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
   for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_solver>& solver = solver_it();
-    solver->read_checkpoint_level(a_handle, a_lvl);
+    solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
   m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
-  m_sigma->read_checkpoint_level(a_handle, a_lvl);
+  m_sigma->readCheckpointLevel(a_handle, a_lvl);
 }
 
-int cdr_plasma_stepper::get_num_plot_vars() const{
-  CH_TIME("cdr_plasma_stepper::get_num_plot_vars");
+int cdr_plasma_stepper::getNumberOfPlotVariables() const{
+  CH_TIME("cdr_plasma_stepper::getNumberOfPlotVariables");
   if(m_verbosity > 3){
-    pout() << "cdr_plasma_stepper::get_num_plot_vars" << endl;
+    pout() << "cdr_plasma_stepper::getNumberOfPlotVariables" << endl;
   }
   int ncomp = 0;
   
@@ -4149,10 +4149,10 @@ int cdr_plasma_stepper::get_num_plot_vars() const{
   return ncomp;
 }
 
-void cdr_plasma_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
-  CH_TIME("cdr_plasma_stepper::write_plot_data");
+void cdr_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
+  CH_TIME("cdr_plasma_stepper::writePlotData");
   if(m_verbosity > 3){
-    pout() << "cdr_plasma_stepper::write_plot_data" << endl;
+    pout() << "cdr_plasma_stepper::writePlotData" << endl;
   }
 
   // Poisson solver copies over its output data
@@ -4161,20 +4161,20 @@ void cdr_plasma_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::st
 
   // Surface charge solver writes
   a_plotvar_names.append(m_sigma->get_plotvar_names());
-  m_sigma->write_plot_data(a_output, a_icomp);
+  m_sigma->writePlotData(a_output, a_icomp);
 
   // CDR solvers copy their output data
   for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     a_plotvar_names.append(solver->get_plotvar_names());
-    solver->write_plot_data(a_output, a_icomp);
+    solver->writePlotData(a_output, a_icomp);
   }
 
   // RTE solvers copy their output data
   for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_solver>& solver = solver_it();
     a_plotvar_names.append(solver->get_plotvar_names());
-    solver->write_plot_data(a_output, a_icomp);
+    solver->writePlotData(a_output, a_icomp);
   }
 
   // Write the current to the output
@@ -4217,17 +4217,17 @@ void cdr_plasma_stepper::post_checkpoint_setup(){
     const Real dummy_dt = 0.0;
     this->solve_rte(dummy_dt); // Argument does not matter, it's a stationary solver.
   }
-  this->allocate_internals();  // Prepare internal storage for time stepper
+  this->allocateInternals();  // Prepare internal storage for time stepper
 
   // Fill solvers with important stuff
   this->compute_cdr_velocities();
   this->compute_cdr_diffusion();
 }
 
-void cdr_plasma_stepper::print_step_report(){
-  CH_TIME("cdr_plasma_stepper::print_step_report");
+void cdr_plasma_stepper::print_stepReport(){
+  CH_TIME("cdr_plasma_stepper::print_stepReport");
   if(m_verbosity > 4){
-    pout() << "cdr_plasma_stepper::print_step_report" << endl;
+    pout() << "cdr_plasma_stepper::print_stepReport" << endl;
   }
 
   // Compute the maximum electric field
@@ -4255,7 +4255,7 @@ void cdr_plasma_stepper::print_step_report(){
     str = " (Restricted by diffusion)";
   }
   else if(m_timecode == time_code::source){
-    MayDay::Abort("driver::step_report - shouldn't happen, source term has been taken out of the design");
+    MayDay::Abort("Driver::stepReport - shouldn't happen, source term has been taken out of the design");
     str = " (Restricted by source term)";
   }
   else if(m_timecode == time_code::relaxation_time){
