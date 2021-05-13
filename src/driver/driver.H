@@ -330,11 +330,6 @@ protected:
   bool m_write_loads;
 
   /*!
-    @brief Potential has been set
-  */
-  bool m_potential_set;
-
-  /*!
     @brief Restart or not
   */
   bool m_restart;
