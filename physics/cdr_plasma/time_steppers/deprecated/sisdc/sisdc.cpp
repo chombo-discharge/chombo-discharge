@@ -3162,7 +3162,7 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
       // there's a (-a_dt) in all the stuff below. This design choice was made because I am, in fact, an ass.
 
       // Compute the nonconservative and hybrid divergences (hybrid put on storage for divF_c, which is lost)
-      gdnv->nonconservativeDivergenceNoKappaDivision(a_nonConservativeDivergence, a_facePhi, a_lvl);
+      gdnv->nonConservativeDivergence(a_nonConservativeDivergence, a_facePhi, a_lvl);
       gdnv->hybridDivergence(a_divF_c, a_massDifference, a_nonConservativeDivergence, a_lvl); // Puts hybrid in a_divF_c. mass_diff as usual without dt,
       data_ops::scale(a_massDifference, -a_dt);                              // Sign convention
 

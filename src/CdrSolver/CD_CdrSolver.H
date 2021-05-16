@@ -67,9 +67,9 @@ public:
     @param[in]    a_dt     Time step
   */
   virtual void advanceTGA(EBAMRCellData&       a_newPhi,
-			   const EBAMRCellData& a_oldPhi,
-			   const EBAMRCellData& a_source,
-			   const Real           a_dt) = 0;
+			  const EBAMRCellData& a_oldPhi,
+			  const EBAMRCellData& a_source,
+			  const Real           a_dt) = 0;
 
   /*!
     @brief Implicit diffusion Euler advance without source term.
@@ -88,9 +88,9 @@ public:
     @details This solves the implicit diffusino equation equation a_newPhi - a_oldPhi = dt*Laplacian(a_newPhi) + a_source. 
   */
   virtual void advanceEuler(EBAMRCellData&       a_newPhi,
-			     const EBAMRCellData& a_oldPhi,
-			     const EBAMRCellData& a_source,
-			     const Real           a_dt) = 0;
+			    const EBAMRCellData& a_oldPhi,
+			    const EBAMRCellData& a_source,
+			    const Real           a_dt) = 0;
 
   /*!
     @brief Compute div(J) where J = nV - D*grad(n) explicitly
@@ -804,33 +804,39 @@ protected:
   /*!
     @brief Compute the conservative divergence with the assumption that only the eb-flux is non-zero
   */
-  virtual void conservativeDivergenceNoKappaDivision_eb(EBAMRCellData& a_conservativeDivergence, const EBAMRIVData& a_ebFlux);
+  virtual void conservativeDivergenceNoKappaDivisionOnlyEbFlux(EBAMRCellData& a_conservativeDivergence, const EBAMRIVData& a_ebFlux);
 
   /*!
     @brief Compute the non-conservative divergence
   */
-  virtual void nonconservativeDivergenceNoKappaDivision(EBAMRIVData& a_nonConservativeDivergence, const EBAMRCellData& a_divG);
+  virtual void nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, const EBAMRCellData& a_divG);
 
   /*!
     @brief Use the non-conservative divergence to make the conservative divergence hold the hybrid divergence
+    @param[inout] a_hybridDivergence          On input, contains the conservative divergence (without kappa division). Contains hybrid divergence on output.
+    @param[out]   a_massDifference            Mass difference between updating with hybrid divergence and true divergence
+    @param[in]    a_nonConservativeDivergence Non-conservative divergence.
   */
-  virtual void hybridDivergence(EBAMRCellData&       a_divF,
-				 EBAMRIVData&         a_massDifference,
-				 const EBAMRIVData&   a_NonConservativeDivergenceStencil);
+  virtual void hybridDivergence(EBAMRCellData&       a_hybridDivergence,
+				EBAMRIVData&         a_massDifference,
+				const EBAMRIVData&   a_nonConservativeDivergence);
 
+  /*!
+    @brief Make the hybrid divergence. On the way in, a_hybridDivergence must hold the conservative divergence
+    @param[inout] a_hybridDivergence          On input, contains the conservative divergence (without kappa division). Contains hybrid divergence on output.
+    @param[out]   a_massDifference            Mass difference between updating with hybrid divergence and true divergence
+    @param[in]    a_nonConservativeDivergence Non-conservative divergence.
+    @param[in]    a_lvl                       Grid level. 
+  */
+  virtual void hybridDivergence(LevelData<EBCellFAB>&              a_hybridDivergence,
+				LevelData<BaseIVFAB<Real> >&       a_massDifference,
+				const LevelData<BaseIVFAB<Real> >& a_nonConservativeDivergence,
+				const int                          a_lvl);
   
   /*!
     @brief Conservative divergence over regular cells
   */
   virtual void consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
-
-  /*!
-    @brief Make the hybrid divergence. On the way in, a_hybridDivergence must hold the conservative divergence
-  */
-  virtual void hybridDivergence(LevelData<EBCellFAB>&              a_hybridDivergence,
-				 LevelData<BaseIVFAB<Real> >&       a_massDifference,
-				 const LevelData<BaseIVFAB<Real> >& a_nonConservativeDivergence,
-				 const int                          a_lvl);
 
   /*!
     @brief Compute flux interpolant
@@ -846,8 +852,8 @@ protected:
     @brief Compute div(F) on irregular cells
   */
   virtual void computeDivergenceIrregular(LevelData<EBCellFAB>&              a_divG,
-				  const LevelData<BaseIVFAB<Real> >& a_ebFlux,
-				  const int                          a_lvl);
+					  const LevelData<BaseIVFAB<Real> >& a_ebFlux,
+					  const int                          a_lvl);
 
   /*!
     @brief Increment flux registers. 

@@ -312,7 +312,7 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
   data_ops::set_value(a_divG, 0.0);
   
   this->conservativeDivergenceNoKappaDivision(a_divG, a_G, a_ebFlux);       // Make the conservative divergence.
-  this->nonconservativeDivergenceNoKappaDivision(m_nonConservativeDivG, a_divG);     // Non-conservative divergence
+  this->nonConservativeDivergence(m_nonConservativeDivG, a_divG);     // Non-conservative divergence
   this->hybridDivergence(a_divG, m_massDifference, m_nonConservativeDivG); // a_divG becomes hybrid divergence. Mass diff computed. 
   this->incrementFluxRegister(a_G);                      // Increment flux register
   this->incrementRedist(m_massDifference);                     // Increment level redistribution register
@@ -343,8 +343,8 @@ void CdrSolver::injectEbFlux(EBAMRCellData& a_phi, const EBAMRIVData& a_ebFlux, 
     this->setRedistWeights(a_phi);
   }
 
-  this->conservativeDivergenceNoKappaDivision_eb(m_scratch, a_ebFlux);         // Compute conservative divergence, but only EB
-  this->nonconservativeDivergenceNoKappaDivision(m_nonConservativeDivG, m_scratch);     // Blend with volume fraction
+  this->conservativeDivergenceNoKappaDivisionOnlyEbFlux(m_scratch, a_ebFlux);         // Compute conservative divergence, but only EB
+  this->nonConservativeDivergence(m_nonConservativeDivG, m_scratch);     // Blend with volume fraction
   this->hybridDivergence(m_scratch, m_massDifference, m_nonConservativeDivG); // Hybrid divergence
   this->incrementRedist(m_massDifference);                        // Increment redistribution register
 
@@ -364,7 +364,7 @@ void CdrSolver::injectEbFlux(EBAMRCellData& a_phi, const EBAMRIVData& a_ebFlux, 
   data_ops::incr(a_phi, m_scratch, -a_dt);
 }
 
-void CdrSolver::conservativeDivergenceNoKappaDivision_eb(EBAMRCellData& a_conservativeDivergence, const EBAMRIVData& a_ebFlux){
+void CdrSolver::conservativeDivergenceNoKappaDivisionOnlyEbFlux(EBAMRCellData& a_conservativeDivergence, const EBAMRIVData& a_ebFlux){
   CH_TIME("CdrSolver::injectEbFlux");
   if(m_verbosity > 5){
     pout() << m_name + "::injectEbFlux" << endl;
@@ -941,14 +941,14 @@ void CdrSolver::initialDataParticles(){
 
 void CdrSolver::hybridDivergence(EBAMRCellData&     a_hybrid_div,
 				   EBAMRIVData&       a_massDifference,
-				   const EBAMRIVData& a_NonConservativeDivergenceStencil){
+				   const EBAMRIVData& a_nonConservativeDivergence){
   CH_TIME("CdrSolver::hybridDivergence(AMR)");
   if(m_verbosity > 5){
     pout() << m_name + "::hybridDivergence(AMR)" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    hybridDivergence(*a_hybrid_div[lvl], *a_massDifference[lvl], *a_NonConservativeDivergenceStencil[lvl], lvl);
+    hybridDivergence(*a_hybrid_div[lvl], *a_massDifference[lvl], *a_nonConservativeDivergence[lvl], lvl);
   }
 }
 
@@ -1243,10 +1243,10 @@ void CdrSolver::incrementRedist(const EBAMRIVData& a_massDifference){
   }
 }
 
-void CdrSolver::nonconservativeDivergenceNoKappaDivision(EBAMRIVData& a_nonConservativeDivergence, const EBAMRCellData& a_divG){
-  CH_TIME("CdrSolver::nonconservativeDivergenceNoKappaDivision");
+void CdrSolver::nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, const EBAMRCellData& a_divG){
+  CH_TIME("CdrSolver::nonConservativeDivergence");
   if(m_verbosity > 5){
-    pout() << m_name + "::nonconservativeDivergenceNoKappaDivision" << endl;
+    pout() << m_name + "::nonConservativeDivergence" << endl;
   }
 
   if(m_blendConservation){

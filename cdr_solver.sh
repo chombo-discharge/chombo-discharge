@@ -163,4 +163,8 @@ for i in `find . -type f \( -iname \*.H -o -iname \*.cpp -o -iname \*.py -o -ina
     sed -i 's/m_Realm/m_realm/g' $i
     sed -i 's/m_EbZero/m_ebZero/g' $i
     sed -i 's/m_faceCenteredDiffusionCoefficient_eb/m_ebCenteredDiffusionCoefficient/g' $i
+    sed -i 's/m_faceCenteredDiffusionCoefficient_eb/m_ebCenteredDiffusionCoefficient/g' $i
+    sed -i 's/conservativeDivergenceNoKappaDivision_eb/conservativeDivergenceNoKappaDivisionOnlyEbFlux/g' $i
+    sed -i 's/nonconservativeDivergenceNoKappaDivision/nonConservativeDivergence/g' $i
+    sed -i 's/a_NonConservativeDivergenceStencil/a_nonConservativeDivergence/g' $i
 done
