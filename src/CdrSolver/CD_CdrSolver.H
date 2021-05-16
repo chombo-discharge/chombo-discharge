@@ -838,22 +838,34 @@ protected:
 				const int                          a_lvl);
   
   /*!
-    @brief Conservative divergence over regular cells
+    @brief Compute the conservative divergence over regular cells
+    @param[out] a_divJ Conservative divergence. Not kappa-divided. 
+    @param[in]  a_flux Face-centered fluxes
+    @param[in]  a_lvl  Grid level
   */
-  virtual void consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
+  virtual void conservativeDivergenceRegular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
 
   /*!
     @brief Compute flux interpolant
+    @param[in] a_flux The flux to be interpolated to face centroids
+    @param[in] a_lvl  Grid level
+    @details This fills m_interpolant
   */
   virtual void setupFluxInterpolant(const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
 
   /*!
     @brief Interpolate flux to centroids
+    @param[out] a_flux Centroid fluxes
+    @param[in]  a_lvl  Grid level
+    @details This interpolates face fluxes to centroids and puts the result in a_flux and m_interpolant. 
   */
   virtual void interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const int a_lvl);
 
   /*!
-    @brief Compute div(F) on irregular cells
+    @brief Compute conservative divergence on irregular cells (not kappa divided)
+    @param[out] a_divG   Conservative divergence (not kappa divided)
+    @param[in]  a_ebFlux EB flux
+    @param[in]  a_lvl    Grid level
   */
   virtual void computeDivergenceIrregular(LevelData<EBCellFAB>&              a_divG,
 					  const LevelData<BaseIVFAB<Real> >& a_ebFlux,
@@ -861,11 +873,14 @@ protected:
 
   /*!
     @brief Increment flux registers. 
+    @param[in] a_facePhi      Face-centered phi
+    @param[in] a_faceVelocity Face-centered velocities
   */
   virtual void incrementFluxRegister(const EBAMRFluxData& a_facePhi, const EBAMRFluxData& a_faceVelocity);
 
   /*!
     @brief Increment flux registers
+    @param[in] a_flux Face centered fluxes
   */
   virtual void incrementFluxRegister(const EBAMRFluxData& a_flux);
 

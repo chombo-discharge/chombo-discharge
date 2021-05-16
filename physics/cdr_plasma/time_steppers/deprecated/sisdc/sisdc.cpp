@@ -3144,7 +3144,7 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
       const Real extr_dt = m_extrap_advect ? 2.0*m_extrap_dt*a_dt : 0.0;
       gdnv->advect_to_faces(a_facePhi, state_m1, coar_old, coar_new, a_time, a_coar_time_old,a_coar_time_new, a_lvl, extr_dt);
       gdnv->new_computeFlux(a_flux, a_facePhi, a_lvl);
-      gdnv->consdiv_regular(a_divF_c, a_flux, a_lvl);
+      gdnv->conservativeDivergenceRegular(a_divF_c, a_flux, a_lvl);
 
       // Set up flux interpolant and compute conservative flux on irregular cells
       LevelData<BaseIFFAB<Real> > flux_interp[SpaceDim];

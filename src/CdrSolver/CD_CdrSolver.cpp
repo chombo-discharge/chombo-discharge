@@ -685,7 +685,7 @@ void CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservat
     const ProblemDomain& domain  = m_amr->getDomains()[lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
-    this->consdiv_regular(*a_conservativeDivergence[lvl], *a_flux[lvl], lvl);
+    this->conservativeDivergenceRegular(*a_conservativeDivergence[lvl], *a_flux[lvl], lvl);
     this->setupFluxInterpolant(*a_flux[lvl], lvl);                 // Copy face-centered fluxes in a_flux to m_interpolant
     this->interpolateFluxToFaceCentroids(*a_flux[lvl], lvl);          // Interpolate fluxes w m_interpolant. Copy 2 a_flux
     this->computeDivergenceIrregular(*a_conservativeDivergence[lvl], *a_ebFlux[lvl], lvl); // Recompute divergence on irregular cells
@@ -697,10 +697,10 @@ void CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservat
   m_amr->interpGhost(a_conservativeDivergence, m_realm, m_phase);
 }
 
-void CdrSolver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl){
-  CH_TIME("CdrSolver::consdiv_regular");
+void CdrSolver::conservativeDivergenceRegular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl){
+  CH_TIME("CdrSolver::conservativeDivergenceRegular");
   if(m_verbosity > 5){
-    pout() << m_name + "::consdiv_regular" << endl;
+    pout() << m_name + "::conservativeDivergenceRegular" << endl;
   }
 
   CH_assert(a_divJ.nComp() == 1);
