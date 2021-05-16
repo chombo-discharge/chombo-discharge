@@ -657,7 +657,7 @@ protected:
   /*!
     @brief Return the finest tag level
   */
-  int get_finest_tag_level(const EBAMRTags& a_cellTags) const;
+  int getFinestTagLevel(const EBAMRTags& a_cellTags) const;
 
   /*!
     @brief Rebuild Parmparse

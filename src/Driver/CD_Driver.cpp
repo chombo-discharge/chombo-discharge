@@ -1599,10 +1599,10 @@ void Driver::stepReport(const Real a_startTime, const Real a_endTime, const int 
 
 }
 
-int Driver::get_finest_tag_level(const EBAMRTags& a_cellTags) const{
-  CH_TIME("Driver::get_finest_tag_level");
+int Driver::getFinestTagLevel(const EBAMRTags& a_cellTags) const{
+  CH_TIME("Driver::getFinestTagLevel");
   if(m_verbosity > 5){
-    pout() << "Driver::get_finest_tag_level" << endl;
+    pout() << "Driver::getFinestTagLevel" << endl;
   }
 
   int finest_tag_level = -1;
@@ -1660,7 +1660,7 @@ bool Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags){
   }
 
   // Add geometric tags.
-  int tag_level = this->get_finest_tag_level(a_cellTags);
+  int tag_level = this->getFinestTagLevel(a_cellTags);
   if(m_allowCoarsening){
     for (int lvl = 0; lvl <= finest_level; lvl++){
       if(lvl <= tag_level){
