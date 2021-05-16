@@ -1115,62 +1115,6 @@ void CdrSolver::reset_flux_register(){
   
 }
 
-void CdrSolver::incrementFluxRegister(const EBAMRFluxData& a_facePhi, const EBAMRFluxData& a_faceVelocity){
-  CH_TIME("CdrSolver::incrementFluxRegister");
-  if(m_verbosity > 5){
-    pout() << m_name + "::incrementFluxRegister" << endl;
-  }
-
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
-
-  Vector<RefCountedPtr<EBFluxRegister> >& fluxreg = m_amr->getFluxRegister(m_realm, m_phase);
-  
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    
-    const bool has_coar = lvl > 0;
-    const bool has_fine = lvl < finest_level;
-
-    if(has_fine){
-      fluxreg[lvl]->setToZero();
-    }
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBISBox& ebisbox = ebisl[dit()];
-      const Box box          = dbl.get(dit());
-      
-      for (int dir = 0; dir < SpaceDim; dir++){
-	const Real scale     = 1.;
-	const EBFaceFAB& phi = (*a_facePhi[lvl])[dit()][dir];
-	const EBFaceFAB& vel = (*a_faceVelocity[lvl])[dit()][dir];
-
-	// Compute flux
-	EBFaceFAB flux(ebisbox, box, dir, ncomp);
-	flux.setVal(0.0);
-	flux += phi;
-	flux *= vel;
-
-	// Increment flux register for irregular/regular. Add both from coarse to fine and from fine to coarse
-	if(has_fine){
-	  for (SideIterator sit; sit.ok(); ++sit){
-	    fluxreg[lvl]->incrementCoarseBoth(flux, scale, dit(), interv, dir, sit());
-	  }
-	}
-	if(has_coar){
-	  for (SideIterator sit; sit.ok(); ++sit){
-	    fluxreg[lvl-1]->incrementFineBoth(flux, scale, dit(), interv, dir, sit());
-	  }
-	}
-      }
-    }
-  }
-}
-
 void CdrSolver::incrementFluxRegister(const EBAMRFluxData& a_flux){
   CH_TIME("CdrSolver::incrementFluxRegister(flux)");
   if(m_verbosity > 5){

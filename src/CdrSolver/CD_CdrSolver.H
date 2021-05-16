@@ -872,13 +872,6 @@ protected:
 					  const int                          a_lvl);
 
   /*!
-    @brief Increment flux registers. 
-    @param[in] a_facePhi      Face-centered phi
-    @param[in] a_faceVelocity Face-centered velocities
-  */
-  virtual void incrementFluxRegister(const EBAMRFluxData& a_facePhi, const EBAMRFluxData& a_faceVelocity);
-
-  /*!
     @brief Increment flux registers
     @param[in] a_flux Face centered fluxes
   */
