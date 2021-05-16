@@ -83,7 +83,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
   m_phases = num_phases;
   m_ebops.resize(num_phases);
   m_ebbc.resize(num_phases);
-  m_acoeffs.resize(num_phases);
+  m_aCoefficienteffs.resize(num_phases);
   m_bcoeffs.resize(num_phases);
   m_bcoeffs_irr.resize(num_phases);
   m_alias.resize(num_alias);
@@ -148,7 +148,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 
 
     // Coefficients
-    m_acoeffs[iphase]     = RefCountedPtr<LevelData<EBCellFAB> >        (new LevelData<EBCellFAB>());
+    m_aCoefficienteffs[iphase]     = RefCountedPtr<LevelData<EBCellFAB> >        (new LevelData<EBCellFAB>());
     m_bcoeffs[iphase]     = RefCountedPtr<LevelData<EBFluxFAB> >        (new LevelData<EBFluxFAB>());
     m_bcoeffs_irr[iphase] = RefCountedPtr<LevelData<BaseIVFAB<Real> > > (new LevelData<BaseIVFAB<Real> >());
 
@@ -186,11 +186,11 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
     EBLevelDataOps::setVal(*m_dirival[iphase], 0.0);
     m_ebbc[iphase]->setData(m_dirival[iphase]);
 
-    mfalias::aliasMF(*m_acoeffs[iphase],     iphase, *a_aco);
+    mfalias::aliasMF(*m_aCoefficienteffs[iphase],     iphase, *a_aco);
     mfalias::aliasMF(*m_bcoeffs[iphase],     iphase, *a_bco);
     mfalias::aliasMF(*m_bcoeffs_irr[iphase], iphase, *a_bco_irreg);
 
-    const RefCountedPtr<LevelData<EBCellFAB> >&        aco     = m_acoeffs[iphase];
+    const RefCountedPtr<LevelData<EBCellFAB> >&        aco     = m_aCoefficienteffs[iphase];
     const RefCountedPtr<LevelData<EBFluxFAB> >&        bco     = m_bcoeffs[iphase];
     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& bco_irr = m_bcoeffs_irr[iphase];
     const RefCountedPtr<mfdirichletconductivityebbc>&  ebbc    = m_ebbc[iphase];
@@ -248,7 +248,7 @@ void mfconductivityop::set_jump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > 
   m_jump = a_jump;
 }
 
-void mfconductivityop::set_time(Real* a_time){
+void mfconductivityop::setTime(Real* a_time){
   m_time = a_time;
 }
 

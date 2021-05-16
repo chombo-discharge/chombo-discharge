@@ -45,12 +45,12 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
   m_mflg       = a_mflg;
   m_mfquadcfi  = a_mfquadcfi;
   m_mffluxreg  = a_mffluxreg;
-  m_aco        = a_aco;
+  m_aCoefficient        = a_aco;
   m_bco        = a_bco;
   m_bco_irreg  = a_bco_irreg;
   m_alpha      = a_alpha;
   m_beta       = a_beta;
-  m_dombc      = a_dombc;
+  m_domainBc      = a_dombc;
   m_ref_rat    = a_ref_rat;
   m_grids      = a_grids;
   m_ghost_phi  = a_ghost_phi;
@@ -102,7 +102,7 @@ mfconductivityopfactory::~mfconductivityopfactory(){
 
 void mfconductivityopfactory::define_multigrid_stuff(){
   CH_TIME("mfconductivityopfactory::define_multigrid_stuff");
-  m_aco_mg.resize(m_num_levels);
+  m_aCoefficient_mg.resize(m_num_levels);
   m_bco_mg.resize(m_num_levels);
   m_bco_irreg_mg.resize(m_num_levels);
   m_mflg_mg.resize(m_num_levels);
@@ -122,7 +122,7 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 
       const int mg_refi = 2;             // MultiGrid uses VCycling, refinement of 2. 
 
-      m_aco_mg[lvl].resize(0);            // aco for all MG levels at this level
+      m_aCoefficient_mg[lvl].resize(0);            // aco for all MG levels at this level
       m_bco_mg[lvl].resize(0);            // bco for all MG levels at this level
       m_bco_irreg_mg[lvl].resize(0);      // bco for all MG levels at this level
       m_mflg_mg[lvl].resize(0);           // MFLevelGrids for all MG levels at this level
@@ -132,7 +132,7 @@ void mfconductivityopfactory::define_multigrid_stuff(){
       m_aveop_mg[lvl].resize(0);          //
       m_jump_mg[lvl].resize(0);           // sigma for all MG levels at this AMR level
 
-      m_aco_mg[lvl].push_back(m_aco[lvl]);                         // MG depth 0 is the AMR level, the stuff 
+      m_aCoefficient_mg[lvl].push_back(m_aCoefficient[lvl]);                         // MG depth 0 is the AMR level, the stuff 
       m_bco_mg[lvl].push_back(m_bco[lvl]);                         // below will be coarsened versions
       m_bco_irreg_mg[lvl].push_back(m_bco_irreg[lvl]);             // 
       m_mflg_mg[lvl].push_back(m_mflg[lvl]);                       // 
@@ -306,12 +306,12 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 				     *bco_irreg_coar,
 				     mflg_coar,
 				     mflg_fine,
-				     *m_aco_mg[lvl][img-1],
+				     *m_aCoefficient_mg[lvl][img-1],
 				     *m_bco_mg[lvl][img-1],
 				     *m_bco_irreg_mg[lvl][img-1],
 				     mg_refi);
 
-	  m_aco_mg[lvl].push_back(aco_coar);
+	  m_aCoefficient_mg[lvl].push_back(aco_coar);
 	  m_bco_mg[lvl].push_back(bco_coar);
 	  m_bco_irreg_mg[lvl].push_back(bco_irreg_coar);
 	  m_aveop_mg[lvl].push_back(aveop);
@@ -392,7 +392,7 @@ void mfconductivityopfactory::set_relax_type(const int a_relax_type){
   m_relax_type = a_relax_type;
 }
 
-void mfconductivityopfactory::set_time(Real* a_time){
+void mfconductivityopfactory::setTime(Real* a_time){
   m_time = a_time;
 }
 
@@ -667,7 +667,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
   
 
   if(a_depth == 0){ // this is an AMR level
-    aco       = m_aco[ref];
+    aco       = m_aCoefficient[ref];
     bco       = m_bco[ref];
     bco_irreg = m_bco_irreg[ref];
     jump      = m_jump[ref];
@@ -704,7 +704,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
 	mflg = m_mflg_mg[ref][img];
 	domain = m_domains_mg[ref][img];
 
-	aco       = m_aco_mg[ref][img];
+	aco       = m_aCoefficient_mg[ref][img];
 	bco       = m_bco_mg[ref][img];
 	bco_irreg = m_bco_irreg_mg[ref][img];
 	jump      = m_jump_mg[ref][img];
@@ -738,8 +738,8 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
   pout() << "defining oper" << endl;
 #endif
   oper->define(m_multifluidIndexSpace,           // Set from factory
-	       m_dombc,          // Set from factory
-	       aco,              // Set to m_aco[ref] (for AMR) or m_aco_mg[ref][img] for MG
+	       m_domainBc,          // Set from factory
+	       aco,              // Set to m_aCoefficient[ref] (for AMR) or m_aCoefficient_mg[ref][img] for MG
 	       bco,              // Set to m_bco[ref] (for AMR) or m_bco_mg[ref][img] for MG
 	       bco_irreg,        // Set to m_bco_irreg[ref] (for AMR) or m_bco_irreg_mg[ref][img] for MG
 	       quadcfi,          // Set to m_mfquadcfi[ref] (for AMR). Undefined for MG.
@@ -766,7 +766,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
 	       beta,             // Set to m_beta
 	       m_origin);        // Origin
 
-  oper->set_time(m_time);
+  oper->setTime(m_time);
   oper->set_jump(jump);
   oper->setDirichletEbBc(m_electrostaticEbBc);
 
@@ -812,7 +812,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
   
 
   // All this shit must be set.
-  RefCountedPtr<LevelData<MFCellFAB> >   aco       = m_aco[ref];
+  RefCountedPtr<LevelData<MFCellFAB> >   aco       = m_aCoefficient[ref];
   RefCountedPtr<LevelData<MFFluxFAB> >   bco       = m_bco[ref];
   RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg = m_bco_irreg[ref];
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump = m_jump[ref];
@@ -890,7 +890,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
   mfconductivityop* oper = new mfconductivityop();
 
   oper->define(m_multifluidIndexSpace,
-	       m_dombc,
+	       m_domainBc,
 	       aco,
 	       bco,
 	       bco_irreg,
@@ -920,7 +920,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
 #if verb
   pout() << "setting jump" << endl;
 #endif
-  oper->set_time(m_time);
+  oper->setTime(m_time);
   oper->set_jump(jump);
   oper->setDirichletEbBc(m_electrostaticEbBc);
 

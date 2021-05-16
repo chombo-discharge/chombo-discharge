@@ -37,7 +37,7 @@ public:
   /*!
     @brief Return name
   */
-  std::string get_name() const;
+  std::string getName() const;
 
   /*!
     @brief Return charge
@@ -47,12 +47,12 @@ public:
   /*!
     @brief Return diffusive or not
   */
-  bool is_diffusive() const;
+  bool isDiffusive() const;
 
   /*!
     @brief Mobile ito_species or not
   */
-  bool is_mobile() const;
+  bool isMobile() const;
 
   /*!
     @brief Compute the mobility. This is mostly used for the LEA. 
@@ -84,12 +84,12 @@ protected:
   /*!
     @brief Diffusive ito_species or not
   */
-  bool m_diffusive;
+  bool m_isDiffusive;
 
   /*!
     @brief Mobile ito_species or not
   */
-  bool m_mobile;
+  bool m_isMobile;
 
   /*!
     @brief Initial particles

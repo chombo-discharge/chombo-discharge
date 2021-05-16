@@ -26,7 +26,7 @@ sisdc_tagger::sisdc_tagger(){
   pp.query("curv_thresh",      m_curv_thresh);
   pp.query("magnitude_thresh", m_mag_thresh);
 
-  this->set_phase(phase::gas);
+  this->setPhase(phase::gas);
 }
 
 sisdc_tagger::~sisdc_tagger(){
@@ -46,7 +46,7 @@ void sisdc_tagger::compute_tracers(){
   // Get electron density and error
   sisdc* stepper = (sisdc*) (&(*m_timeStepper));
   EBAMRCellData& ne_err  = *(stepper->get_cdr_errors()[m_cdr_idx]);
-  EBAMRCellData& ne      = *stepper->get_cdr()->get_states()[m_cdr_idx];
+  EBAMRCellData& ne      = *stepper->get_cdr()->getPhis()[m_cdr_idx];
 
   // Get maximum and minimum stuff
   Real err_max,  err_min, Emax, Emin;

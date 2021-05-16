@@ -99,15 +99,15 @@ protected:
 
   RefCountedPtr<robin_coef> m_robinco;
   
-  Real m_aco;
+  Real m_aCoefficient;
   Real m_bco;
   Real m_rhs;
 
-  Real (*m_acofunc)(const RealVect a_pos);
+  Real (*m_aCoefficientfunc)(const RealVect a_pos);
   Real (*m_bcofunc)(const RealVect a_pos);
   Real (*m_rhsfunc)(const RealVect a_pos);
 
-  RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_acodata;
+  RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_aCoefficientdata;
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_bcodata;
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_rhsdata;
 

@@ -150,7 +150,7 @@ protected:
 			const int                  a_ref_rat);
 
   // Get Realm
-  PhaseRealm& get_Realm(const phase::which_phase a_phase);
+  PhaseRealm& getRealm(const phase::which_phase a_phase);
 };
 
 #include <CD_NamespaceFooter.H>

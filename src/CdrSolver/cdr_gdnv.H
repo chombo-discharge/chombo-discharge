@@ -43,7 +43,7 @@ public:
   /*!
     @brief Query number of ghost cells
   */
-  virtual int query_ghost() const override;
+  virtual int queryGhost() const override;
 
   /*!
     @brief Allocate internal stuff
@@ -53,19 +53,19 @@ public:
   /*!
     @brief Average velocities to faces
   */
-  virtual void average_velo_to_faces() override;
+  virtual void averageVelocityToFaces() override;
 
   /*!
     @brief Call parent function: Then fix no influx
   */
-  virtual void average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell) override;
+  virtual void averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCellData& a_cellVelocity) override;
 
 protected:
 
   /*!
     @brief Godunov face extrapolation method for advection
   */
-  virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt) override;
+  virtual void advect_to_faces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
 
   /*!
     @brief Level advect integrator

@@ -10,7 +10,7 @@ def write_template(args):
     # Write plasma kinetics options
     options_files = [args.discharge_home + "/src/AmrMesh/AmrMesh.options", \
                      args.discharge_home + "/src/Driver/Driver.options", \
-                     args.discharge_home + "/src/cdr_solver/" + args.cdr_solver + ".options",\
+                     args.discharge_home + "/src/CdrSolver/" + args.CdrSolver + ".options",\
                      args.discharge_home + "/src/geometry/geo_coarsener.options", \
                      args.discharge_home + "/geometries/" + args.geometry + "/" + args.geometry + ".options", \
                      args.discharge_home + "/physics/advection_diffusion/advection_diffusion_stepper.options"]

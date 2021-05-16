@@ -14,7 +14,7 @@ air3::electron::electron(){
   m_name      = "electron density";
   m_unit      = "m-3";
   m_charge    = -1;
-  m_diffusive = true;
+  m_isDiffusive = true;
 
   {// Get initial parameter
     ParmParse pp("air3");
@@ -24,7 +24,7 @@ air3::electron::electron(){
     if(pp.contains("electron_diffusion")){
       pp.get("electron_diffusion", str);
       if(str == "false"){
-	m_diffusive = false;
+	m_isDiffusive = false;
       }
     }
   }
@@ -38,7 +38,7 @@ air3::positive_species::positive_species(){
   m_name   = "positive species density";
   m_unit   = "m-3";
   m_charge = 1;
-  m_diffusive = false;
+  m_isDiffusive = false;
 
   {
     ParmParse pp("air3");
@@ -55,7 +55,7 @@ air3::negative_species::negative_species(){
   m_name   = "negative species density";
   m_unit   = "m-3";
   m_charge = -1;
-  m_diffusive = false;
+  m_isDiffusive = false;
 }
 
 air3::negative_species::~negative_species(){

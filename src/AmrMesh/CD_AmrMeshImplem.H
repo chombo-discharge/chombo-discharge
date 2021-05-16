@@ -66,14 +66,14 @@ void AmrMesh::alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data){
 }
 
 template <typename T>
-void AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_Realm){
+void AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_realm){
   CH_TIME("AmrMesh::allocate(particle_data, Realm)");
   if(m_verbosity > 5){
     pout() << "AmrMesh::allocate(particle_data, Realm)" << endl;
   }
 
-  if(!this->queryRealm(a_Realm)) {
-    std::string str = "AmrMesh::allocate(particle_data, Realm) - could not find Realm '" + a_Realm + "'";
+  if(!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::allocate(particle_data, Realm) - could not find Realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -84,8 +84,8 @@ void AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, co
   a_particles.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    const DisjointBoxLayout& dbl = m_Realms[a_Realm]->getGrids()[lvl];
-    const ProblemDomain& domain  = m_Realms[a_Realm]->getDomains()[lvl];
+    const DisjointBoxLayout& dbl = m_Realms[a_realm]->getGrids()[lvl];
+    const ProblemDomain& domain  = m_Realms[a_realm]->getDomains()[lvl];
     const Real dx = m_dx[lvl];
     a_particles[lvl] = RefCountedPtr<ParticleData<T> > (new ParticleData<T>(dbl,
 									    domain,
@@ -98,14 +98,14 @@ void AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, co
 template <typename T>
 void AmrMesh::allocate(particle_container<T>& a_container,
 		       const int              a_buffer,
-		       const std::string      a_Realm){
+		       const std::string      a_realm){
   CH_TIME("AmrMesh::allocate(container, buffer, Realm)");
   if(m_verbosity > 5){
     pout() << "AmrMesh::allocate(container, buffer, Realm)" << endl;
   }
   
-  if(!this->queryRealm(a_Realm)) {
-    std::string str = "AmrMesh::allocate(container, buffer, Realm) - could not find Realm '" + a_Realm + "'";
+  if(!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::allocate(container, buffer, Realm) - could not find Realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -113,15 +113,15 @@ void AmrMesh::allocate(particle_container<T>& a_container,
     MayDay::Abort("AmrMesh::allocate(container, buffer, Realm) - only constant box sizes are supported for particle methods");
   }
   
-  a_container.define(m_Realms[a_Realm]->getGrids(),
-		     m_Realms[a_Realm]->getDomains(),
-		     m_Realms[a_Realm]->getDx(),
-		     m_Realms[a_Realm]->getRefinementRatios(),
+  a_container.define(m_Realms[a_realm]->getGrids(),
+		     m_Realms[a_realm]->getDomains(),
+		     m_Realms[a_realm]->getDx(),
+		     m_Realms[a_realm]->getRefinementRatios(),
 		     m_probLo,
 		     m_blockingFactor,
 		     m_finestLevel,
 		     a_buffer,
-		     a_Realm);
+		     a_realm);
 }
 
 template <typename T>

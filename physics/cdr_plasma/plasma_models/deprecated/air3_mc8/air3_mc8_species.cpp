@@ -8,8 +8,8 @@ air3_mc8::electron::electron(){
   std::string str;
   Vector<Real> vec(SpaceDim);
   
-  pp.get("mobile_electrons", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_electrons", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_electrons", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive = (str == "true") ? true : false;
 
   pp.get("uniform_density", m_uniform_density);
   pp.get("seed_density", m_seed_density);
@@ -24,8 +24,8 @@ air3_mc8::M_plus::M_plus(){
   std::string str;
   Vector<Real> vec(SpaceDim);
   
-  pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 
   pp.get("uniform_density", m_uniform_density);
   pp.get("seed_density", m_seed_density);
@@ -39,8 +39,8 @@ air3_mc8::M_minus::M_minus(){
   ParmParse pp("air3_mc8");
   std::string str;
   
-  pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
 Real air3_mc8::electron::initialData(const RealVect a_pos, const Real a_time) const{

@@ -22,12 +22,12 @@ typedef godunov::rte_storage     rte_storage;
 typedef godunov::sigma_storage   sigma_storage;
 
 godunov::godunov(){
-  m_class_name = "godunov";
+  m_className = "godunov";
   m_extrap_advect = true;
 }
 
 godunov::godunov(RefCountedPtr<cdr_plasma_physics>& a_physics){
-  m_class_name    = "godunov";
+  m_className    = "godunov";
   m_physics       = a_physics;
   m_extrap_advect = true;
 }
@@ -140,7 +140,7 @@ void godunov::parse_advection(){
     pout() << "godunov::parse_advection" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("extrap_advect", str);
@@ -161,7 +161,7 @@ void godunov::parse_floor(){
     pout() << "godunov::parse_floor" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("floor_cdr", str);
@@ -182,7 +182,7 @@ void godunov::parse_debug(){
     pout() << "godunov::parse_debug" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("debug", str);
@@ -203,7 +203,7 @@ void godunov::parse_fhd(){
     pout() << "godunov::parse_fhd" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   pp.get("fhd", m_fhd);
 }
@@ -217,7 +217,7 @@ bool godunov::needToRegrid(){
   return false;
 }
 
-RefCountedPtr<cdr_storage>& godunov::get_cdr_storage(const cdr_iterator<cdr_solver>& a_solverit){
+RefCountedPtr<cdr_storage>& godunov::get_cdr_storage(const cdr_iterator<CdrSolver>& a_solverit){
   return m_cdr_scratch[a_solverit.index()];
 }
 
@@ -240,7 +240,7 @@ Real godunov::advance(const Real a_dt){
     pout() << "godunov::advance" << endl;
   }
 
-  // INFO: When we enter here, the cdr_solver have updated ghost cells (either linear or quadratic) and should have been
+  // INFO: When we enter here, the CdrSolver have updated ghost cells (either linear or quadratic) and should have been
   // filled with velocities and diffusion coefficients.
   // 
   // We must still do:
@@ -275,7 +275,7 @@ Real godunov::advance(const Real a_dt){
   t0 = MPI_Wtime();
   godunov::compute_E_into_scratch();       // Compute the electric field
   godunov::compute_cdr_gradients();        // Compute cdr gradients
-  godunov::extrap_source(a_dt);            // If we used advective extrapolation, BCs are more work. 
+  godunov::extrapolateSourceTerm(a_dt);            // If we used advective extrapolation, BCs are more work. 
   godunov::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
   godunov::compute_cdr_eb_fluxes();        // Extrapolate cell-centered fluxes to EB centroids
   godunov::compute_cdr_domain_states();    // Extrapolate cell-centered states to domain edges
@@ -290,7 +290,7 @@ Real godunov::advance(const Real a_dt){
   t_tran = t1 - t0;
   
   t0 = MPI_Wtime();
-  if((m_step +1) % m_fast_poisson == 0){
+  if((m_timeStep +1) % m_fast_poisson == 0){
     cdr_plasma_stepper::solve_poisson();         // Update the Poisson equation
   }
   t1 = MPI_Wtime();
@@ -309,7 +309,7 @@ Real godunov::advance(const Real a_dt){
 
   // Move photons
   t0 = MPI_Wtime();
-  if((m_step +1) % m_fast_rte == 0){
+  if((m_timeStep +1) % m_fast_rte == 0){
     godunov::advance_rte(a_dt);              // Update RTE equations
   }
   t1 = MPI_Wtime();
@@ -381,7 +381,7 @@ void godunov::allocateInternals(){
 
   // Allocate cdr storage
   m_cdr_scratch.resize(num_species);
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_Realm, m_cdr->get_phase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
@@ -410,7 +410,7 @@ void godunov::deallocateInternals(){
     pout() << "godunov::deallocateInternals" << endl;
   }
 
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_cdr_scratch[idx]->deallocate_storage();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
@@ -455,13 +455,13 @@ void godunov::compute_cdr_gradients(){
     pout() << "godunov::compute_cdr_gradients" << endl;
   }
 
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    RefCountedPtr<cdr_solver>& solver = solver_it();
+    RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
     EBAMRCellData& grad = storage->get_gradient();
-    m_amr->computeGradient(grad, solver->get_state(), m_Realm, phase::gas);
+    m_amr->computeGradient(grad, solver->getPhi(), m_Realm, phase::gas);
     m_amr->averageDown(grad, m_Realm, m_cdr->get_phase());
     m_amr->interpGhost(grad, m_Realm, m_cdr->get_phase());
   }
@@ -478,8 +478,8 @@ void godunov::compute_cdr_eb_states(){
   Vector<EBAMRIVData*>   eb_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
     cdr_states.push_back(&(storage->get_extrap()));
@@ -491,7 +491,7 @@ void godunov::compute_cdr_eb_states(){
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
   cdr_plasma_stepper::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     data_ops::floor(*eb_states[idx], 0.0);
   }
@@ -519,9 +519,9 @@ void godunov::compute_cdr_eb_fluxes(){
   Vector<EBAMRIVData*> extrap_cdr_gradients;
   Vector<EBAMRIVData*> extrap_rte_fluxes;
 
-  cdr_fluxes = m_cdr->get_ebflux();
+  cdr_fluxes = m_cdr->getEbFlux();
 
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIVData& dens_eb = storage->get_eb_state();
@@ -548,7 +548,7 @@ void godunov::compute_cdr_eb_fluxes(){
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
-    solver->compute_boundary_flux(flux_eb, solver->get_state());
+    solver->compute_boundary_flux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
@@ -575,7 +575,7 @@ void godunov::compute_cdr_domain_states(){
   Vector<EBAMRCellData*> cdr_gradients;
   
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
     cdr_states.push_back(&(storage->get_extrap()));
@@ -590,10 +590,10 @@ void godunov::compute_cdr_domain_states(){
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIFData grad;
   m_amr->allocate(grad, m_Realm, m_cdr->get_phase(), SpaceDim);
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<CdrSolver>& solver = solver_it();
     const int idx = solver_it.index();
-    if(solver->is_mobile()){
+    if(solver->isMobile()){
       cdr_plasma_stepper::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[idx]);
       cdr_plasma_stepper::project_domain(*domain_gradients[idx], grad);
     }
@@ -620,9 +620,9 @@ void godunov::compute_cdr_domain_fluxes(){
   Vector<EBAMRCellData*> cdr_velocities;
   Vector<EBAMRCellData*> cdr_gradients;
 
-  cdr_fluxes = m_cdr->get_domainflux();
+  cdr_fluxes = m_cdr->getDomainFlux();
   cdr_velocities = m_cdr->get_velocities();
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIFData& dens_domain = storage->get_domain_state();
@@ -652,7 +652,7 @@ void godunov::compute_cdr_domain_fluxes(){
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIFData& domain_flux = storage->get_domain_flux();
-    solver->compute_domain_flux(domain_flux, solver->get_state());
+    solver->compute_domain_flux(domain_flux, solver->getPhi());
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 
@@ -679,9 +679,9 @@ void godunov::compute_sigma_flux(){
   data_ops::set_value(flux, 0.0);
 
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<cdr_species>& spec  = solver_it.get_species();
-    const EBAMRIVData& solver_flux          = solver->get_ebflux();
+    const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
     data_ops::incr(flux, solver_flux, spec->get_charge()*units::s_Qe);
   }
@@ -698,14 +698,14 @@ void godunov::compute_reaction_network(const Real a_dt){
   // We have already computed E and the gradients of the CDR equations, so we will call the
   // cdr_plasma_stepper version where all that crap is inputs. Saves memory and flops. 
 
-  Vector<EBAMRCellData*> cdr_src = m_cdr->get_sources();
-  Vector<EBAMRCellData*> cdr_phi = m_cdr->get_states();
-  Vector<EBAMRCellData*> rte_src = m_rte->get_sources();
-  Vector<EBAMRCellData*> rte_phi = m_rte->get_states();
+  Vector<EBAMRCellData*> cdr_src = m_cdr->getSources();
+  Vector<EBAMRCellData*> cdr_phi = m_cdr->getPhis();
+  Vector<EBAMRCellData*> rte_src = m_rte->getSources();
+  Vector<EBAMRCellData*> rte_phi = m_rte->getPhis();
   const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 
   Vector<EBAMRCellData*> cdr_grad;
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
     EBAMRCellData& gradient = storage->get_gradient();
@@ -716,11 +716,11 @@ void godunov::compute_reaction_network(const Real a_dt){
   cdr_plasma_stepper::advance_reaction_network(cdr_src, rte_src, cdr_phi, cdr_grad, rte_phi, E, m_time, a_dt);
 
   // Make phi = phi + S*dt
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver>& solver = solver_it();
 
-    EBAMRCellData& phi = solver->get_state();
-    const EBAMRCellData& src = solver->get_source();
+    EBAMRCellData& phi = solver->getPhi();
+    const EBAMRCellData& src = solver->getSource();
 
     data_ops::incr(phi, src, a_dt);
     if(m_floor){
@@ -730,12 +730,12 @@ void godunov::compute_reaction_network(const Real a_dt){
 #if 0
     if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
       if(m_debug){
-	const Real mass_before = solver->compute_mass();
+	const Real mass_before = solver->computeMass();
 	data_ops::floor(phi, 0.0);
-	const Real mass_after = solver->compute_mass();
+	const Real mass_after = solver->computeMass();
 	const Real rel_mass = (mass_after-mass_before)/mass_before;
 	pout() << "godunov::compute_reaction_network - injecting relative "
-	       << solver->get_name() << " mass = " << rel_mass << endl;
+	       << solver->getName() << " mass = " << rel_mass << endl;
       }
       else{
 	data_ops::floor(phi, 0.0);
@@ -769,42 +769,42 @@ void godunov::advance_transport_euler(const Real a_dt){
   }
 
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<CdrSolver>& solver   = solver_it();
 
-    if(solver->is_mobile() || solver->is_diffusive()){
+    if(solver->isMobile() || solver->isDiffusive()){
       RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
-      EBAMRCellData& phi = solver->get_state();
-      EBAMRCellData& src = solver->get_source();
+      EBAMRCellData& phi = solver->getPhi();
+      EBAMRCellData& src = solver->getSource();
     
       EBAMRCellData& scratch  = storage->get_scratch();
       EBAMRCellData& scratch2 = storage->get_scratch2();
 
       // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-      const Real extrap_dt = (m_extrap_advect && solver->extrap_source()) ? a_dt : 0.0;
+      const Real extrap_dt = (m_extrap_advect && solver->extrapolateSourceTerm()) ? a_dt : 0.0;
       if(!m_implicit_diffusion){
-	solver->compute_divJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
+	solver->computeDivJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
       }
       else{
-	solver->compute_divF(scratch, phi, extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
+	solver->computeDivF(scratch, phi, extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
       }
       data_ops::scale(scratch, -1.0);     // scratch = -[div(F/J)]
       data_ops::scale(scratch, a_dt);     // scratch = [-div(F/J)]*dt
       data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J)
 
       // Add random flux
-      if(m_fhd && solver->is_diffusive()){
-	solver->GWN_diffusion_source(scratch2, phi);
+      if(m_fhd && solver->isDiffusive()){
+	solver->gwnDiffusionSource(scratch2, phi);
 	data_ops::incr(phi, scratch2, a_dt);
       }
 
       if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
 	if(m_debug){
-	  const Real mass_before = solver->compute_mass();
+	  const Real mass_before = solver->computeMass();
 	  data_ops::floor(phi, 0.0);
-	  const Real mass_after = solver->compute_mass();
+	  const Real mass_after = solver->computeMass();
 	  const Real rel_mass = (mass_after-mass_before)/mass_before;
-	  pout() << "godunov::advance_cdr - injecting relative " << solver->get_name() << " mass = " << rel_mass << endl;
+	  pout() << "godunov::advance_cdr - injecting relative " << solver->getName() << " mass = " << rel_mass << endl;
 	}
 	else{
 	  data_ops::floor(phi, 0.0);
@@ -820,19 +820,19 @@ void godunov::advance_transport_euler(const Real a_dt){
 	//
 	// This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
 	// so we just use that for simplicity
-	if(solver->is_diffusive()){
+	if(solver->isDiffusive()){
 	  data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
 	  data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
-	  solver->advance_euler(phi, scratch, scratch2, a_dt);
+	  solver->advanceEuler(phi, scratch, scratch2, a_dt);
 
 	  if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
 	    if(m_debug){
-	      const Real mass_before = solver->compute_mass();
+	      const Real mass_before = solver->computeMass();
 	      data_ops::floor(phi, 0.0);
-	      const Real mass_after = solver->compute_mass();
+	      const Real mass_after = solver->computeMass();
 	      const Real rel_mass = (mass_after-mass_before)/mass_before;
 	      pout() << "godunov::advance_cdr (implicit diffusion) - inecting relative  "
-		     << solver->get_name() << " mass = " << rel_mass << endl;
+		     << solver->getName() << " mass = " << rel_mass << endl;
 	    }
 	    else{
 	      data_ops::floor(phi, 0.0);
@@ -847,7 +847,7 @@ void godunov::advance_transport_euler(const Real a_dt){
   }
 
   // Advance the sigma equation
-  EBAMRIVData& sigma = m_sigma->get_state();
+  EBAMRIVData& sigma = m_sigma->getPhi();
   const EBAMRIVData& rhs = m_sigma->get_flux();
   data_ops::incr(sigma, rhs, a_dt);
 }
@@ -860,23 +860,23 @@ void godunov::advance_transport_rk2(const Real a_dt){
 
   // 1. Compute the "k1" coefficient. This is equivalent to using a semi-implicit
   //    euler method as the predictor for Heun's method
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
-    EBAMRCellData& phi     = solver->get_state();
+    EBAMRCellData& phi     = solver->getPhi();
     EBAMRCellData& scratch = storage->get_scratch();
     EBAMRCellData& k1      = storage->get_scratch3();
 
     data_ops::copy(k1, phi);
 
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-    const Real extrap_dt = (m_extrap_advect && solver->extrap_source()) ? a_dt : 0.0;
+    const Real extrap_dt = (m_extrap_advect && solver->extrapolateSourceTerm()) ? a_dt : 0.0;
     if(!m_implicit_diffusion){
-      solver->compute_divJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
+      solver->computeDivJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
     }
     else{
-      solver->compute_divF(scratch, phi, extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
+      solver->computeDivF(scratch, phi, extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
     }
     data_ops::scale(scratch, -1.0);     // scratch = -[div(F/J)]
     data_ops::scale(scratch, a_dt);     // scratch = [-div(F/J)]*dt
@@ -892,12 +892,12 @@ void godunov::advance_transport_rk2(const Real a_dt){
       //
       // This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
       // so we just use that for simplicity
-      if(solver->is_diffusive()){
+      if(solver->isDiffusive()){
 	EBAMRCellData& scratch2 = storage->get_scratch2();
 	
 	data_ops::copy(scratch, phi);       // Make scratch = phiOld - dt*div(F/J)
 	data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
-	solver->advance_euler(phi, scratch, scratch2, a_dt);
+	solver->advanceEuler(phi, scratch, scratch2, a_dt);
       }
     }
 
@@ -913,7 +913,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
 
   // Update the sigma equation
   {
-    EBAMRIVData& sigma = m_sigma->get_state();
+    EBAMRIVData& sigma = m_sigma->getPhi();
     EBAMRIVData& k1    = m_sigma_scratch->get_scratch();
     data_ops::copy(k1, sigma);
 
@@ -927,7 +927,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
   }
 
   // 2. Compute the electric field and update boundary conditions and kinetic coefficients
-  if((m_step +1) % m_fast_poisson == 0){
+  if((m_timeStep +1) % m_fast_poisson == 0){
     cdr_plasma_stepper::solve_poisson();         // Update the Poisson equation
     godunov::compute_E_into_scratch();       // Update electric fields too
   }
@@ -936,7 +936,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
   godunov::post_step();
   
   godunov::compute_cdr_gradients();        // Recompute cdr gradients after reaction advance (these might have changed)
-  godunov::extrap_source(a_dt);            // BCs are more work with advective extrapolation
+  godunov::extrapolateSourceTerm(a_dt);            // BCs are more work with advective extrapolation
   godunov::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
   godunov::compute_cdr_eb_fluxes();        // Extrapolate cell-centered fluxes to EB centroids
   godunov::compute_cdr_domain_states();    // Extrapolate cell-centered states to domain edges
@@ -944,18 +944,18 @@ void godunov::advance_transport_rk2(const Real a_dt){
   godunov::compute_sigma_flux();           // Update charge flux for sigma solver
 
   // 3. Perform final advance, which will be the solution to 
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
-    EBAMRCellData& phi      = solver->get_state();
+    EBAMRCellData& phi      = solver->getPhi();
     EBAMRCellData& scratch  = storage->get_scratch();
     const EBAMRCellData& k1 = storage->get_scratch3();
 
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
     const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
     if(!m_implicit_diffusion){
-      solver->compute_divJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
+      solver->computeDivJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
       data_ops::scale(scratch, -1.0);
       data_ops::scale(scratch, a_dt);
       // Now make phiNew = phiOld + 0.5*(k1+k2)*dt but since phi = phiOld + k1, just do
@@ -965,7 +965,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
       data_ops::incr(phi, scratch, 0.5);
     }
     else{ // Implicit diffusion is a bit more tricky
-      solver->compute_divF(scratch, phi, extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
+      solver->computeDivF(scratch, phi, extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
       data_ops::scale(scratch, -a_dt);     // scratch = [-div(F)]*dt
 
       // Solve the stinking diffusion equation. This is weird but we want to solve phiNew = phiOld + 0.5*dt*(k1+f(phiNew)),
@@ -976,13 +976,13 @@ void godunov::advance_transport_rk2(const Real a_dt){
       data_ops::incr(phi, k1, -0.5);     // phi = phiOld + 0.5*k1
       data_ops::incr(phi, scratch, 0.5); // phi = phiOld + 0.5*(k1 - div(F))
       
-      if(solver->is_diffusive()){
+      if(solver->isDiffusive()){
 	EBAMRCellData& scratch2 = storage->get_scratch2();
 	
 	data_ops::copy(scratch, phi);       // Weird-ass initial solution, as explained above
 	data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
 	
-	solver->advance_euler(phi, scratch, scratch2, a_dt);
+	solver->advanceEuler(phi, scratch, scratch2, a_dt);
       }
     }
 
@@ -993,11 +993,11 @@ void godunov::advance_transport_rk2(const Real a_dt){
 
     if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
       if(m_debug){
-	const Real mass_before = solver->compute_mass();
+	const Real mass_before = solver->computeMass();
 	data_ops::floor(phi, 0.0);
-	const Real mass_after = solver->compute_mass();
+	const Real mass_after = solver->computeMass();
 	const Real rel_mass = (mass_after-mass_before)/mass_before;
-	pout() << "godunov::advance_transport_rk2 - injecting relative " << solver->get_name() << " mass = " << rel_mass << endl;
+	pout() << "godunov::advance_transport_rk2 - injecting relative " << solver->getName() << " mass = " << rel_mass << endl;
       }
       else{
 	data_ops::floor(phi, 0.0);
@@ -1006,7 +1006,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
   }
 
   { // Do the final sigma advance
-    EBAMRIVData& sigma     = m_sigma->get_state();
+    EBAMRIVData& sigma     = m_sigma->getPhi();
     const EBAMRIVData& rhs = m_sigma->get_flux();
     const EBAMRIVData& k1  = m_sigma_scratch->get_scratch();
     data_ops::incr(sigma, k1, -0.5);
@@ -1034,7 +1034,7 @@ void godunov::compute_cdr_velo(const Real a_time){
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  cdr_plasma_stepper::compute_cdr_velocities(velocities, m_cdr->get_states(), m_fieldSolver_scratch->get_E_cell(), a_time);
+  cdr_plasma_stepper::compute_cdr_velocities(velocities, m_cdr->getPhis(), m_fieldSolver_scratch->get_E_cell(), a_time);
 }
 
 void godunov::compute_cdr_diffco(const Real a_time){
@@ -1054,20 +1054,20 @@ void godunov::computeDt(Real& a_dt, TimeCode& a_timeCode){
 
   // Restrict by advection or advection-diffusion. 
   if(m_whichDiffusion == whichDiffusion::Explicit){
-    m_dt_cfl   = m_cdr->compute_advection_diffusion_dt();
+    m_dt_cfl   = m_cdr->computeAdvectionDiffusionDt();
     
     a_timeCode = TimeCode::AdvectionDiffusion;
     a_dt       = m_cfl*m_dt_cfl;
   }
   else if(m_whichDiffusion == whichDiffusion::Implicit){
-    m_dt_cfl   = m_cdr->compute_advection_dt();
+    m_dt_cfl   = m_cdr->computeAdvectionDt();
     a_timeCode = TimeCode::Advection;
 
     a_dt = m_cfl*m_dt_cfl;
   }
   else if (m_whichDiffusion == whichDiffusion::Automatic){
-    const Real advection_dt = m_cdr->compute_advection_dt();
-    const Real diffusion_dt = m_cdr->compute_diffusion_dt();
+    const Real advection_dt = m_cdr->computeAdvectionDt();
+    const Real diffusion_dt = m_cdr->computeDiffusionDt();
 
     if(diffusion_dt < advection_dt){
       m_implicit_diffusion = true;
@@ -1079,7 +1079,7 @@ void godunov::computeDt(Real& a_dt, TimeCode& a_timeCode){
     else {
       m_implicit_diffusion = false;
 
-      m_dt_cfl   = m_cdr->compute_advection_diffusion_dt();
+      m_dt_cfl   = m_cdr->computeAdvectionDiffusionDt();
       a_dt       = m_cfl*m_dt_cfl;
       a_timeCode = TimeCode::AdvectionDiffusion;
     }
@@ -1113,34 +1113,34 @@ void godunov::post_step(){
     pout() << "godunov::post_step" << endl;
   }
 
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver> solver = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver> solver = solver_it();
 
-    m_amr->averageDown(solver->get_state(), m_Realm, m_cdr->get_phase());
-    m_amr->interpGhost(solver->get_state(), m_Realm, m_cdr->get_phase());
+    m_amr->averageDown(solver->getPhi(), m_Realm, m_cdr->get_phase());
+    m_amr->interpGhost(solver->getPhi(), m_Realm, m_cdr->get_phase());
   }
 }
 
-void godunov::extrap_source(const Real a_dt){
-  CH_TIME("godunov::extrap_source");
+void godunov::extrapolateSourceTerm(const Real a_dt){
+  CH_TIME("godunov::extrapolateSourceTerm");
   if(m_verbosity > 5){
-    pout() << "godunov::extrap_source" << endl;
+    pout() << "godunov::extrapolateSourceTerm" << endl;
   }
 
   // TLDR: If we extrapolate the advective derivative and include the source term in the extrapolation,
   //       the boundary conditions should be computed from phi + 0.5*source*dt rather than just phi.
 
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
-    const EBAMRCellData& state  = solver->get_state();
-    const EBAMRCellData& source = solver->get_source();
+    const EBAMRCellData& state  = solver->getPhi();
+    const EBAMRCellData& source = solver->getSource();
 
     EBAMRCellData& extrap = storage->get_extrap();
 
     data_ops::copy(extrap, state);
-    if(m_extrap_advect && solver->extrap_source()) {
+    if(m_extrap_advect && solver->extrapolateSourceTerm()) {
       data_ops::incr(extrap, source, 0.5*a_dt);
     }
   }

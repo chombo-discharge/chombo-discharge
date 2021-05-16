@@ -63,7 +63,7 @@ namespace physics {
       int m_photonZ_idx;
 
       // Mobile ions or not
-      bool m_mobile_ions;
+      bool m_isMobile_ions;
 
       // Ion mobility
       Real m_ion_mu;

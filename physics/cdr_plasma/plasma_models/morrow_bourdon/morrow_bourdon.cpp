@@ -516,8 +516,8 @@ Real morrow_bourdon::initial_sigma(const Real a_time, const RealVect a_pos) cons
 morrow_bourdon::electron::electron(){
   m_name      = "electron";
   m_charge    = -1;
-  m_diffusive = true;
-  m_mobile    = true;
+  m_isDiffusive = true;
+  m_isMobile    = true;
   m_unit      = "m-3";
 
 
@@ -528,10 +528,10 @@ morrow_bourdon::electron::electron(){
   pp.get("seed_radius",        m_seed_radius);
   pp.get("electron_diffusion", str);
   if(str == "true"){
-    m_diffusive = true;
+    m_isDiffusive = true;
   }
   else if(str == "false"){
-    m_diffusive = false;
+    m_isDiffusive = false;
   }
   Vector<Real> pos(SpaceDim);
   pp.getarr("seed_position", pos, 0, SpaceDim);
@@ -551,8 +551,8 @@ Real morrow_bourdon::electron::initialData(const RealVect a_pos, const Real a_ti
 morrow_bourdon::positive_species::positive_species(){
   m_name      = "positive_species";
   m_charge    = 1;
-  m_diffusive = false;
-  m_mobile    = true;
+  m_isDiffusive = false;
+  m_isMobile    = true;
   m_unit      = "m-3";
 
   Vector<Real> pos(SpaceDim);
@@ -562,7 +562,7 @@ morrow_bourdon::positive_species::positive_species(){
   pp.get("uniform_density",  m_uniform_density);
   pp.get("seed_density",     m_seed_density);
   pp.get("seed_radius",      m_seed_radius);
-  pp.get("mobile_ions", str); m_mobile = (str == "true") ? true : false;
+  pp.get("mobile_ions", str); m_isMobile = (str == "true") ? true : false;
   pp.getarr("seed_position", pos, 0, SpaceDim);  m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
 
@@ -580,15 +580,15 @@ Real morrow_bourdon::positive_species::initialData(const RealVect a_pos, const R
 morrow_bourdon::negative_species::negative_species(){
   m_name      = "negative_species";
   m_charge    = -1;
-  m_diffusive = false;
-  m_mobile    = true;
+  m_isDiffusive = false;
+  m_isMobile    = true;
   m_unit      = "m-3";
 
   ParmParse pp("morrow_bourdon");
     
   // Turn off ion mobility
   std::string str;
-  pp.get("mobile_ions", str); m_mobile = (str == "true") ? true : false;
+  pp.get("mobile_ions", str); m_isMobile = (str == "true") ? true : false;
 }
 
 morrow_bourdon::negative_species::~negative_species(){

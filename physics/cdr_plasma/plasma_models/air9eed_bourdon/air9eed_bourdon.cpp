@@ -108,9 +108,9 @@ void air9eed_bourdon::parse_transport(){
 
   std::string str;
 
-  pp.get("diffusive_electrons", str); m_diffusive_electrons = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str);      m_diffusive_ions      = (str == "true") ? true : false;
-  pp.get("mobile_ions", str);         m_mobile_ions         = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive_electrons = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str);      m_isDiffusive_ions      = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);         m_isMobile_ions         = (str == "true") ? true : false;
 
   pp.get("ion_mobility", m_ion_mobility);
 
@@ -270,7 +270,7 @@ Vector<RealVect> air9eed_bourdon::compute_cdr_velocities(const Real         a_ti
 
   velocities[m_eed_idx]      = this->compute_eed_mobility(electron_energy)*(-a_E);
   velocities[m_electron_idx] = this->compute_e_mobility(electron_energy)*(-a_E);
-  if(m_mobile_ions){
+  if(m_isMobile_ions){
     velocities[m_N2plus_idx]   = this->compute_N2plus_mobility(EbyN)*a_E;
     velocities[m_N4plus_idx]   = this->compute_N4plus_mobility(EbyN)*a_E;
     velocities[m_O2plus_idx]   = this->compute_O2plus_mobility(EbyN)*a_E;

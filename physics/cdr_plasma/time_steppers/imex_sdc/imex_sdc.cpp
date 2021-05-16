@@ -28,7 +28,7 @@ typedef imex_sdc::rte_storage     rte_storage;
 typedef imex_sdc::sigma_storage   sigma_storage;
 
 imex_sdc::imex_sdc(){
-  m_class_name = "imex_sdc";
+  m_className = "imex_sdc";
   m_subcycle   = false;
 }
 
@@ -107,7 +107,7 @@ void imex_sdc::parse_nodes(){
     pout() << "imex_sdc::parse_nodes" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   std::string str;
   
   pp.get("quad_nodes", str);
@@ -141,7 +141,7 @@ void imex_sdc::parse_diffusion_coupling(){
     pout() << "imex_sdc::parse_diffusion_coupling" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   
   std::string str;
 
@@ -155,7 +155,7 @@ void imex_sdc::parse_adaptive_options(){
     pout() << "imex_sdc::parse_adaptive_options" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   std::string str;
 
   pp.get("error_norm",       m_error_norm);
@@ -180,7 +180,7 @@ void imex_sdc::parse_debug_options(){
     pout() << "imex_sdc::parse_debug_options" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   std::string str;
 
   pp.get("compute_D", str); m_compute_D = (str == "true") ? true : false;
@@ -204,7 +204,7 @@ void imex_sdc::parse_advection_options(){
     pout() << "imex_sdc::parse_advection_options" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   std::string str;
 
   m_extrap_dt = 0.5;  // Relic of an ancient past. I don't see any reason why extrapolating to anything but the half interval
@@ -213,7 +213,7 @@ void imex_sdc::parse_advection_options(){
   pp.get("extrap_advect", str); m_extrap_advect = (str == "true") ? true : false;
 }
 
-RefCountedPtr<cdr_storage>& imex_sdc::get_cdr_storage(const cdr_iterator<cdr_solver>& a_solverit){
+RefCountedPtr<cdr_storage>& imex_sdc::get_cdr_storage(const cdr_iterator<CdrSolver>& a_solverit){
   return m_cdr_scratch[a_solverit.index()];
 }
 
@@ -477,11 +477,11 @@ void imex_sdc::copy_phi_p_to_cdr(){
     pout() << "imex_sdc::copy_phi_p_to_cdr" << endl;
   }
 
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>&  solver  = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver>&  solver  = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
-    EBAMRCellData& phi = solver->get_state();
+    EBAMRCellData& phi = solver->getPhi();
     const EBAMRCellData& phip = storage->get_phi()[m_p];
     data_ops::copy(phi, phip);
   }
@@ -493,7 +493,7 @@ void imex_sdc::copy_sigma_p_to_sigma(){
     pout() << "imex_sdc::copy_sigma_p_to_sigma" << endl;
   }
 
-  EBAMRIVData& sigma        = m_sigma->get_state();
+  EBAMRIVData& sigma        = m_sigma->getPhi();
   const EBAMRIVData& sigmap = m_sigma_scratch->get_sigma()[m_p];
   data_ops::copy(sigma, sigmap);
 }
@@ -601,12 +601,12 @@ void imex_sdc::copy_cdr_to_phi_m0(){
   }
 
   // CDR solvers
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>&  solver  = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver>&  solver  = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
     
     EBAMRCellData& phi0 = storage->get_phi()[0];
-    const EBAMRCellData& phi = solver->get_state();
+    const EBAMRCellData& phi = solver->getPhi();
     data_ops::copy(phi0, phi);
   }
 }
@@ -619,7 +619,7 @@ void imex_sdc::copy_sigma_to_sigma_m0(){
 
   // Copy sigma to starting state
   EBAMRIVData& sigma0      = m_sigma_scratch->get_sigma()[0];
-  const EBAMRIVData& sigma = m_sigma->get_state();
+  const EBAMRIVData& sigma = m_sigma->getPhi();
   data_ops::copy(sigma0, sigma);
 }
 
@@ -630,15 +630,15 @@ void imex_sdc::compute_FD_0(){
   }
 
   if(m_k > 0){ // We only need this if we're actually doing any corrections....
-    for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver>& solver   = solver_it();
+    for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
     
       EBAMRCellData& phi_0 = storage->get_phi()[0]; // phi_0
       EBAMRCellData& FD_0  = storage->get_FD()[0];  // FD(phi_0)
     
-      if(solver->is_diffusive()){
-	solver->compute_divD(FD_0, phi_0);
+      if(solver->isDiffusive()){
+	solver->computeDivD(FD_0, phi_0);
 
 	// Shouldn't be necesary
 	m_amr->averageDown(FD_0, m_Realm, m_cdr->get_phase());
@@ -775,8 +775,8 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
   // If this is the corrector and m=0, we skipped the advection advance because we can use the precomputed
   // advection-reaction operator slope. In this case phi_(m+1) is bogus and we need to recompute it. Otherwise,
   // phi_(m+1) = phi_m + dtm*FA_m, and we just increment with the reaction operator. 
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
     // phi_(m+1) = phi_M
@@ -796,7 +796,7 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
     }
     else{ // If we made it here, phi_(m+1) = phi_m + dtm*FA(phi_m) through the integrate_advection routine
       EBAMRCellData& FAR_m     = storage->get_FAR()[a_m]; // Currently the old slope
-      EBAMRCellData& src = solver->get_source();    // Updated source
+      EBAMRCellData& src = solver->getSource();    // Updated source
 
       // Increment swith source and then compute slope. This has already been done 
       data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
@@ -875,17 +875,17 @@ void imex_sdc::integrate_advection(const Real a_dt, const int a_m, const bool a_
   }
 
   // Advance cdr equations
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
     EBAMRCellData& phi_m1  = storage->get_phi()[a_m+1];
     EBAMRCellData& scratch = storage->get_scratch();
     EBAMRCellData& phi_m   = storage->get_phi()[a_m];
 
-    if(solver->is_mobile()){
+    if(solver->isMobile()){
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
-      solver->compute_divF(scratch, phi_m, extrap_dt);                           // scratch =  Div(v_m*phi_m^(k+1))
+      solver->computeDivF(scratch, phi_m, extrap_dt);                           // scratch =  Div(v_m*phi_m^(k+1))
     
       data_ops::copy(phi_m1, phi_m);
       data_ops::incr(phi_m1, scratch, -m_dtm[a_m]);
@@ -919,11 +919,11 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
   // phi_(m+1)^(k+1) = phi_(m)^(k+1,\ast) + dtm*FD_(m+1)^(k+1) + sources. 
   //
   // This routine does not modify FD_(m+1)^k. This is replaced by FD_(m+1)^(k+1) later on. 
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
     
-    if(solver->is_diffusive()){
+    if(solver->isDiffusive()){
       EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1]; // Advected solution. Possibly with lagged terms. 
       const EBAMRCellData& phi_m = storage->get_phi()[a_m];
 
@@ -943,10 +943,10 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
 
       // Solve
       if(m_use_tga){
-	solver->advance_tga(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
+	solver->advanceTGA(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
       }
       else{
-	solver->advance_euler(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
+	solver->advanceEuler(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
       }
       m_amr->averageDown(phi_m1, m_Realm, m_cdr->get_phase());
       m_amr->interpGhost(phi_m1, m_Realm, m_cdr->get_phase());
@@ -990,19 +990,19 @@ void imex_sdc::reconcile_integrands(){
   imex_sdc::compute_sigma_flux();
 
   // Now compute FAR_p - that wasn't done when we integrated
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
     const int idx = solver_it.index();
 
     // This has not been computed yet. Do it.
     EBAMRCellData& FAR_p     = storage->get_FAR()[m_p];
     EBAMRCellData& phi_p     = *cdr_densities_p[idx] ;
-    const EBAMRCellData& src = solver->get_source();
+    const EBAMRCellData& src = solver->getSource();
 
-    if(solver->is_mobile()){
+    if(solver->isMobile()){
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[m_p-1] : 0.0; // Factor of 2 because of EBPatchAdvect
-      solver->compute_divF(FAR_p, phi_p, extrap_dt);       // FAR_p =  Div(v_p*phi_p)
+      solver->computeDivF(FAR_p, phi_p, extrap_dt);       // FAR_p =  Div(v_p*phi_p)
       data_ops::scale(FAR_p, -1.0);                        // FAR_p = -Div(v_p*phi_p)
     }
     else{
@@ -1017,7 +1017,7 @@ void imex_sdc::reconcile_integrands(){
       EBAMRCellData& FAR_m = storage->get_FAR()[m];
 
       data_ops::copy(F_m, FAR_m);
-      if(solver->is_diffusive()){
+      if(solver->isDiffusive()){
 	data_ops::incr(F_m, FD_m, 1.0);
       }
 
@@ -1043,8 +1043,8 @@ void imex_sdc::initialize_errors(){
     pout() << "imex_sdc::corrector_initialize_errors" << endl;
   }
 
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
     const int idx = solver_it.index();
     
@@ -1073,8 +1073,8 @@ void imex_sdc::finalize_errors(){
   const Real safety = 1.E-20;
 
   m_max_error = 0.0;
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
     const int idx = solver_it.index();
 
@@ -1208,7 +1208,7 @@ void imex_sdc::computeDt(Real& a_dt, TimeCode& a_timeCode){
     Nref = Nref*m_amr->getRefinementRatios()[lvl];
   }
   const Real max_gl_dist = imex_sdc::get_max_node_distance();
-  m_dt_cfl = m_cdr->compute_advection_dt();
+  m_dt_cfl = m_cdr->computeAdvectionDt();
 
   Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
   
@@ -1307,7 +1307,7 @@ void imex_sdc::allocate_cdr_storage(){
 
   m_cdr_scratch.resize(num_species);
   
-  for (cdr_iterator<cdr_solver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_Realm, m_cdr->get_phase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage(m_p);
@@ -1344,7 +1344,7 @@ void imex_sdc::deallocateInternals(){
     pout() << "imex_sdc::deallocateInternals" << endl;
   }
 
-  for (cdr_iterator<cdr_solver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_cdr_scratch[idx]->deallocate_storage();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
@@ -1392,20 +1392,20 @@ void imex_sdc::compute_cdr_gradients(){
     pout() << "imex_sdc::compute_cdr_gradients" << endl;
   }
 
-  imex_sdc::compute_cdr_gradients(m_cdr->get_states());
+  imex_sdc::compute_cdr_gradients(m_cdr->getPhis());
 }
 
-void imex_sdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states){
+void imex_sdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis){
   CH_TIME("imex_sdc::compute_cdr_gradients");
   if(m_verbosity > 5){
     pout() << "imex_sdc::compute_cdr_gradients" << endl;
   }
 
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
     EBAMRCellData& grad = storage->get_gradient();
-    m_amr->computeGradient(grad, *a_states[idx], m_Realm, m_cdr->get_phase());
+    m_amr->computeGradient(grad, *a_phis[idx], m_Realm, m_cdr->get_phase());
     //    m_amr->averageDown(grad, m_Realm, m_cdr->get_phase());
     m_amr->interpGhost(grad, m_Realm, m_cdr->get_phase());
   }
@@ -1417,17 +1417,17 @@ void imex_sdc::compute_cdr_velo(const Real a_time){
     pout() << "imex_sdc::compute_cdr_velo" << endl;
   }
 
-  imex_sdc::compute_cdr_velo(m_cdr->get_states(), a_time);
+  imex_sdc::compute_cdr_velo(m_cdr->getPhis(), a_time);
 }
 
-void imex_sdc::compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time){
+void imex_sdc::compute_cdr_velo(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
   CH_TIME("imex_sdc::compute_cdr_velo(Vector<EBAMRCellData*>, Real)");
   if(m_verbosity > 5){
     pout() << "imex_sdc::compute_cdr_velo(Vector<EBAMRCellData*>, Real)" << endl;
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  imex_sdc::compute_cdr_velocities(velocities, a_states, m_fieldSolver_scratch->get_E_cell(), a_time);
+  imex_sdc::compute_cdr_velocities(velocities, a_phis, m_fieldSolver_scratch->get_E_cell(), a_time);
 }
 
 void imex_sdc::compute_cdr_eb_states(){
@@ -1441,11 +1441,11 @@ void imex_sdc::compute_cdr_eb_states(){
   Vector<EBAMRCellData*> cdr_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
 
-    cdr_states.push_back(&(solver->get_state()));
+    cdr_states.push_back(&(solver->getPhi()));
     eb_states.push_back(&(storage->get_eb_state()));
     eb_gradients.push_back(&(storage->get_eb_grad()));
     cdr_gradients.push_back(&(storage->get_gradient())); // Should already have been computed
@@ -1454,7 +1454,7 @@ void imex_sdc::compute_cdr_eb_states(){
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
   imex_sdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     data_ops::floor(*eb_states[idx], 0.0);
   }
@@ -1468,7 +1468,7 @@ void imex_sdc::compute_cdr_eb_states(){
   }
 }
 
-void imex_sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states){
+void imex_sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
   CH_TIME("imex_sdc::compute_cdr_eb_states(vec)");
   if(m_verbosity > 5){
     pout() << "imex_sdc::compute_cdr_eb_states(vec)" << endl;
@@ -1478,7 +1478,7 @@ void imex_sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states){
   Vector<EBAMRIVData*>   eb_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
 
     eb_states.push_back(&(storage->get_eb_state()));
@@ -1488,8 +1488,8 @@ void imex_sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  imex_sdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), a_states);
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  imex_sdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), a_phis);
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     data_ops::floor(*eb_states[idx], 0.0);
   }
@@ -1497,7 +1497,7 @@ void imex_sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states){
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIVData eb_gradient;
   m_amr->allocate(eb_gradient, m_Realm, m_cdr->get_phase(), SpaceDim);
-  for (int i = 0; i < a_states.size(); i++){
+  for (int i = 0; i < a_phis.size(); i++){
     imex_sdc::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
     imex_sdc::project_flux(*eb_gradients[i], eb_gradient);
   }
@@ -1514,11 +1514,11 @@ void imex_sdc::compute_cdr_domain_states(){
   Vector<EBAMRCellData*> cdr_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
 
-    cdr_states.push_back(&(solver->get_state()));
+    cdr_states.push_back(&(solver->getPhi()));
     domain_states.push_back(&(storage->get_domain_state()));
     domain_gradients.push_back(&(storage->get_domain_grad()));
     cdr_gradients.push_back(&(storage->get_gradient())); // Should already be computed
@@ -1536,7 +1536,7 @@ void imex_sdc::compute_cdr_domain_states(){
   }
 }
 
-void imex_sdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_states){
+void imex_sdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
   CH_TIME("imex_sdc::compute_cdr_domain_states");
   if(m_verbosity > 5){
     pout() << "imex_sdc::compute_cdr_domain_states" << endl;
@@ -1546,8 +1546,8 @@ void imex_sdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_states)
   Vector<EBAMRIFData*>   domain_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     domain_states.push_back(&(storage->get_domain_state()));
@@ -1556,12 +1556,12 @@ void imex_sdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_states)
   }
 
   // Extrapolate states to the domain faces
-  this->extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), a_states);
+  this->extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), a_phis);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIFData grad;
   m_amr->allocate(grad, m_Realm, m_cdr->get_phase(), SpaceDim);
-  for (int i = 0; i < a_states.size(); i++){
+  for (int i = 0; i < a_phis.size(); i++){
     this->extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
     this->project_domain(*domain_gradients[i], grad);
   }
@@ -1573,10 +1573,10 @@ void imex_sdc::compute_cdr_fluxes(const Real a_time){
     pout() << "imex_sdc::compute_cdr_fluxes" << endl;
   }
 
-  this->compute_cdr_fluxes(m_cdr->get_states(), a_time);
+  this->compute_cdr_fluxes(m_cdr->getPhis(), a_time);
 }
 
-void imex_sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time){
+void imex_sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
   CH_TIME("imex_sdc::compute_cdr_fluxes(Vector<EBAMRCellData*>, Real)");
   if(m_verbosity > 5){
     pout() << "imex_sdc::compute_cdr_fluxes(Vector<EBAMRCellData*>, Real)" << endl;
@@ -1589,9 +1589,9 @@ void imex_sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const 
   Vector<EBAMRIVData*> extrap_cdr_gradients;
   Vector<EBAMRIVData*> extrap_rte_fluxes;
 
-  cdr_fluxes = m_cdr->get_ebflux();
+  cdr_fluxes = m_cdr->getEbFlux();
 
-  for (cdr_iterator<cdr_solver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIVData& dens_eb = storage->get_eb_state();
@@ -1608,7 +1608,7 @@ void imex_sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const 
 
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
-  cdr_plasma_stepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_states, cdr_velocities, m_cdr->get_phase());
+  cdr_plasma_stepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_phis, cdr_velocities, m_cdr->get_phase());
   cdr_plasma_stepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
 
   // Compute RTE flux on the boundary
@@ -1617,7 +1617,7 @@ void imex_sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const 
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
-    solver->compute_boundary_flux(flux_eb, solver->get_state());
+    solver->compute_boundary_flux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
@@ -1638,10 +1638,10 @@ void imex_sdc::compute_cdr_domain_fluxes(const Real a_time){
     pout() << "imex_sdc::compute_cdr_domain_fluxes" << endl;
   }
 
-  this->compute_cdr_domain_fluxes(m_cdr->get_states(), a_time);
+  this->compute_cdr_domain_fluxes(m_cdr->getPhis(), a_time);
 }
 
-void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time){
+void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
   CH_TIME("imex_sdc::compute_cdr_domain_fluxes(Vector<EBAMRCellData*>, Real)");
   if(m_verbosity > 5){
     pout() << "imex_sdc::compute_cdr_domain_fluxes(Vector<EBAMRCellData*>, Real)" << endl;
@@ -1657,9 +1657,9 @@ void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states,
   Vector<EBAMRCellData*> cdr_velocities;
   Vector<EBAMRCellData*> cdr_gradients;
 
-  cdr_fluxes = m_cdr->get_domainflux();
+  cdr_fluxes = m_cdr->getDomainFlux();
   cdr_velocities = m_cdr->get_velocities();
-  for (cdr_iterator<cdr_solver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIFData& dens_domain = storage->get_domain_state();
@@ -1676,9 +1676,9 @@ void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states,
   }
 
   // Compute extrapolated velocities and fluxes at the domain faces
-  this->extrapolate_to_domain_faces(extrap_cdr_densities,         m_cdr->get_phase(), a_states);
+  this->extrapolate_to_domain_faces(extrap_cdr_densities,         m_cdr->get_phase(), a_phis);
   this->extrapolate_velo_to_domain_faces(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
-  this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,     a_states,           cdr_velocities, m_cdr->get_phase());
+  this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,     a_phis,           cdr_velocities, m_cdr->get_phase());
   this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
 
   // Compute RTE flux on domain faces
@@ -1687,7 +1687,7 @@ void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states,
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIFData& domain_flux = storage->get_domain_flux();
-    solver->compute_domain_flux(domain_flux, solver->get_state());
+    solver->compute_domain_flux(domain_flux, solver->getPhi());
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 
@@ -1713,10 +1713,10 @@ void imex_sdc::compute_sigma_flux(){
   EBAMRIVData& flux = m_sigma->get_flux();
   data_ops::set_value(flux, 0.0);
 
-  for (cdr_iterator<cdr_solver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
+  for (cdr_iterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<cdr_species>& spec  = solver_it.get_species();
-    const EBAMRIVData& solver_flux          = solver->get_ebflux();
+    const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
     data_ops::incr(flux, solver_flux, spec->get_charge()*units::s_Qe);
   }
@@ -1730,11 +1730,11 @@ void imex_sdc::compute_reaction_network(const int a_m, const Real a_time, const 
     pout() << "imex_sdc::compute_reaction_network";
   }
 
-  Vector<EBAMRCellData*> cdr_sources = m_cdr->get_sources();
-  Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
+  Vector<EBAMRCellData*> cdr_sources = m_cdr->getSources();
+  Vector<EBAMRCellData*> rte_sources = m_rte->getSources();
 
   const Vector<EBAMRCellData*> cdr_densities = get_cdr_phik(a_m);
-  const Vector<EBAMRCellData*> rte_densities = m_rte->get_states();
+  const Vector<EBAMRCellData*> rte_densities = m_rte->getPhis();
   const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 
   cdr_plasma_stepper::advance_reaction_network(cdr_sources, rte_sources, cdr_densities, rte_densities, E, a_time, a_dt);
@@ -1747,7 +1747,7 @@ void imex_sdc::update_poisson(){
   }
   
   if(m_do_poisson){ // Solve Poisson equation
-    if((m_step +1) % m_fast_poisson == 0){
+    if((m_timeStep +1) % m_fast_poisson == 0){
       cdr_plasma_stepper::solve_poisson();
       this->compute_E_into_scratch();
     }
@@ -1761,7 +1761,7 @@ void imex_sdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const E
   }
   
   if(m_do_poisson){ // Solve Poisson equation
-    if((m_step +1) % m_fast_poisson == 0){
+    if((m_timeStep +1) % m_fast_poisson == 0){
       cdr_plasma_stepper::solve_poisson(m_fieldSolver->getPotential(),
 					m_fieldSolver->getRho(),
 					a_densities,
@@ -1779,7 +1779,7 @@ void imex_sdc::integrate_rte_transient(const Real a_dt){
   }
 
   if(m_do_rte){
-    if((m_step + 1) % m_fast_rte == 0){
+    if((m_timeStep + 1) % m_fast_rte == 0){
       if(!(m_rte->is_stationary())){
 	for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	  RefCountedPtr<rte_solver>& solver = solver_it();
@@ -1797,7 +1797,7 @@ void imex_sdc::integrate_rte_stationary(){
   }
 
   if(m_do_rte){
-    if((m_step + 1) % m_fast_rte == 0){
+    if((m_timeStep + 1) % m_fast_rte == 0){
       if((m_rte->is_stationary())){
 	for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	  RefCountedPtr<rte_solver>& solver = solver_it();
@@ -1823,7 +1823,7 @@ Vector<EBAMRCellData*> imex_sdc::get_cdr_errors(){
   }
   
   Vector<EBAMRCellData*> ret;
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
     ret.push_back(&(storage->get_error()));
   }
@@ -1838,7 +1838,7 @@ Vector<EBAMRCellData*> imex_sdc::get_cdr_phik(const int a_m){
   }
   
   Vector<EBAMRCellData*> ret;
-  for (cdr_iterator<cdr_solver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
     ret.push_back(&(storage->get_phi()[a_m]));
   }
@@ -1891,7 +1891,7 @@ void imex_sdc::write_step_profile(const Real a_dt,
 	<< endl;
     }
 
-    f << std::left << std::setw(width) << m_step << "\t"
+    f << std::left << std::setw(width) << m_timeStep << "\t"
       << std::left << std::setw(width) << m_time << "\t"            
       << std::left << std::setw(width) << a_dt << "\t"        
       << std::left << std::setw(width) << a_substeps << "\t"
@@ -1924,7 +1924,7 @@ void imex_sdc::store_solvers(){
       const RefCountedPtr<rte_solver>& solver = solver_it();
 
       EBAMRCellData& previous = storage->get_previous();
-      const EBAMRCellData& state = solver->get_state();
+      const EBAMRCellData& state = solver->getPhi();
 
       data_ops::copy(previous, state);
     }
@@ -1952,7 +1952,7 @@ void imex_sdc::restore_solvers(){
     RefCountedPtr<rte_solver>& solver = solver_it();
 
     EBAMRCellData& previous = storage->get_previous();
-    EBAMRCellData& state = solver->get_state();
+    EBAMRCellData& state = solver->getPhi();
 
     data_ops::copy(state, previous);
   }

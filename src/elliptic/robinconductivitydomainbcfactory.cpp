@@ -18,7 +18,7 @@ robinconductivitydomainbcfactory::~robinconductivitydomainbcfactory(){
 }
 
 void robinconductivitydomainbcfactory::set_coefs(const Real a_aco, const Real a_bco, const Real a_rhs){
-  m_aco = a_aco;
+  m_aCoefficient = a_aco;
   m_bco = a_bco;
   m_rhs = a_rhs;
 
@@ -41,7 +41,7 @@ void robinconductivitydomainbcfactory::set_coefs(const EBAMRFluxData& a_aco,
 
   MayDay::Abort("robinconductivitydomainbcfactory::set_coefs - data based coefficients not supported (yet)");
 
-  m_acodata = a_aco;
+  m_aCoefficientdata = a_aco;
   m_bcodata = a_bco;
   m_rhsdata = a_rhs;
 
@@ -57,16 +57,16 @@ BaseDomainBC* robinconductivitydomainbcfactory::create(const ProblemDomain& a_do
   robinconductivitydomainbc* fresh = new robinconductivitydomainbc();
 
   if(m_const_coeff){
-    fresh->set_coefs(m_aco, m_bco, m_rhs);
+    fresh->set_coefs(m_aCoefficient, m_bco, m_rhs);
   }
   else if(m_func_coeff){
 
     fresh->set_coefs(m_robinco);
   }
   else if(m_data_coeff){
-    for (int lvl = 0; lvl < m_acodata.size(); lvl++){
-      if(a_domain == (m_acodata[lvl]->disjointBoxLayout()).physDomain()){
-	fresh->set_coefs(m_acodata[lvl], m_bcodata[lvl], m_rhsdata[lvl]);
+    for (int lvl = 0; lvl < m_aCoefficientdata.size(); lvl++){
+      if(a_domain == (m_aCoefficientdata[lvl]->disjointBoxLayout()).physDomain()){
+	fresh->set_coefs(m_aCoefficientdata[lvl], m_bcodata[lvl], m_rhsdata[lvl]);
       }
     }
   }

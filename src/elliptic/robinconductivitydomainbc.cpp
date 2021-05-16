@@ -29,7 +29,7 @@ void robinconductivitydomainbc::set_coefs(RefCountedPtr<robin_coef> a_robinco){
 }
 
 void robinconductivitydomainbc::set_coefs(const Real a_aco, const Real a_bco, const Real a_rhs){
-  m_aco = a_aco;
+  m_aCoefficient = a_aco;
   m_bco = a_bco;
   m_rhs = a_rhs;
 
@@ -42,7 +42,7 @@ void robinconductivitydomainbc::set_coefs(const RefCountedPtr<LevelData<EBFluxFA
 					  const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
 					  const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs){
   MayDay::Abort("robinconductivitydomainbc::set_coefs - data-based not supported (yet)");
-  m_acodata = a_aco;
+  m_aCoefficientdata = a_aco;
   m_bcodata = a_bco;
   m_rhsdata = a_rhs;
 
@@ -85,7 +85,7 @@ void robinconductivitydomainbc::getFaceFlux(BaseFab<Real>&        a_faceFlux,
     const RealVect pos = a_probLo + a_dx*(RealVect(iv) - iside*0.5*RealVect(BASISV(a_idir)));
     Real aco, bco, rhs;
     if(m_const_coeff){
-      aco = m_aco;
+      aco = m_aCoefficient;
       bco = m_bco;
       rhs = m_rhs;
     }
@@ -243,7 +243,7 @@ void robinconductivitydomainbc::getFaceGradPhi(Real&                 a_faceFlux,
   Real aco, bco, rhs;
   const RealVect pos = a_probLo + a_dx*(RealVect(iv) - iside*0.5*RealVect(BASISV(a_idir)));
   if(m_const_coeff){
-    aco = m_aco;
+    aco = m_aCoefficient;
     bco = m_bco;
     rhs = m_rhs;
   }

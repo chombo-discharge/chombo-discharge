@@ -15,8 +15,8 @@ air3_bourdon::electron::electron(){
   std::string str;
   Vector<Real> vec(SpaceDim);
   
-  pp.get("mobile_electrons",    m_mobile);    
-  pp.get("diffusive_electrons", m_diffusive);
+  pp.get("mobile_electrons",    m_isMobile);    
+  pp.get("diffusive_electrons", m_isDiffusive);
   pp.get("uniform_density",     m_uniform_density);
   pp.get("seed_density",        m_seed_density);
   pp.get("seed_radius",         m_seed_rad);
@@ -31,8 +31,8 @@ air3_bourdon::M_plus::M_plus(){
   std::string str;
   Vector<Real> vec(SpaceDim);
   
-  pp.get("mobile_ions",     m_mobile);    
-  pp.get("diffusive_ions",  m_diffusive);
+  pp.get("mobile_ions",     m_isMobile);    
+  pp.get("diffusive_ions",  m_isDiffusive);
   pp.get("uniform_density", m_uniform_density);
   pp.get("seed_density",    m_seed_density);
   pp.get("seed_radius",     m_seed_rad);
@@ -46,8 +46,8 @@ air3_bourdon::M_minus::M_minus(){
   ParmParse pp("air3_bourdon");
   std::string str;
   
-  pp.get("mobile_ions",    m_mobile);    
-  pp.get("diffusive_ions", m_diffusive);
+  pp.get("mobile_ions",    m_isMobile);    
+  pp.get("diffusive_ions", m_isDiffusive);
 }
 
 Real air3_bourdon::electron::initialData(const RealVect a_pos, const Real a_time) const{

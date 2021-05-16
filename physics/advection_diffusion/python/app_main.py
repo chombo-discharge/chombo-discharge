@@ -14,7 +14,7 @@ def write_template(args):
     main_filename = app_dir + "/" + args.filename + ".cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include "CD_Driver.H"\n')
-    mainf.write('#include "' + args.cdr_solver + '.H"\n')
+    mainf.write('#include "' + args.CdrSolver + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "' + args.stepper + '.H"\n')
     mainf.write('#include "advection_diffusion_tagger.H"\n')
@@ -46,7 +46,7 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Set up basic advection_diffusion \n")
-    mainf.write("  RefCountedPtr<cdr_solver> solver        = RefCountedPtr<cdr_solver>   (new " + args.cdr_solver + "());\n")
+    mainf.write("  RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new " + args.CdrSolver + "());\n")
     mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new " + args.stepper + "(solver));\n")
     mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new advection_diffusion_tagger(solver, amr));\n")
     mainf.write("\n")

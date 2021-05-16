@@ -33,7 +33,7 @@ ito_plasma_air3::ito_plasma_air3(){
   pp.getarr("blob_center",     v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
 
   // Mobile ions or not
-  pp.get("mobile_ions",  m_mobile_ions);
+  pp.get("mobile_ions",  m_isMobile_ions);
   pp.get("ion_mobility", m_ion_mu);
 
   // Photostuff
@@ -230,8 +230,8 @@ Real ito_plasma_air3::photo_rate(const Real a_E) const {
 }
 
 ito_plasma_air3::electron::electron(){
-  m_mobile    = true;
-  m_diffusive = true;
+  m_isMobile    = true;
+  m_isDiffusive = true;
   m_name      = "electron";
   m_charge    = -1;
 }
@@ -241,14 +241,14 @@ ito_plasma_air3::electron::~electron(){
 }
 
 ito_plasma_air3::positive::positive(){
-  m_mobile    = false;
-  m_diffusive = false;
+  m_isMobile    = false;
+  m_isDiffusive = false;
   m_name      = "positive";
   m_charge    = 1;
 
   ParmParse pp("ito_plasma_air3");
-  pp.get("mobile_ions", m_mobile);
-  pp.get("mobile_ions", m_diffusive);
+  pp.get("mobile_ions", m_isMobile);
+  pp.get("mobile_ions", m_isDiffusive);
 }  
 
 ito_plasma_air3::positive::~positive(){
@@ -256,15 +256,15 @@ ito_plasma_air3::positive::~positive(){
 }
 
 ito_plasma_air3::negative::negative(){
-  m_mobile    = false;
-  m_diffusive = false;
+  m_isMobile    = false;
+  m_isDiffusive = false;
   m_name      = "negative";
   m_charge    = -1;
 
   
   ParmParse pp("ito_plasma_air3");
-  pp.get("mobile_ions", m_mobile);
-  pp.get("mobile_ions", m_diffusive);
+  pp.get("mobile_ions", m_isMobile);
+  pp.get("mobile_ions", m_isDiffusive);
 }  
 
 ito_plasma_air3::negative::~negative(){

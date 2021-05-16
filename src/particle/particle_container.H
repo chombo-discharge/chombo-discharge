@@ -55,7 +55,7 @@ public:
 		     const int                        a_blocking_factor,
 		     const int                        a_finestLevel,
 		     const int                        a_pvr_buffer,
-		     const std::string                a_Realm);
+		     const std::string                a_realm);
 
   /*!
     @brief Destructor
@@ -73,7 +73,7 @@ public:
 	      const int                        a_blocking_factor,
 	      const int                        a_finestLevel,
 	      const int                        a_pvr_buffer,
-	      const std::string                a_Realm);
+	      const std::string                a_realm);
 
   /*!
     @brief Regrid function. a_base is the coarsest grid level which did NOT change
@@ -133,7 +133,7 @@ public:
   /*!
     @brief Get the Realm
   */
-  const std::string get_Realm() const;
+  const std::string getRealm() const;
 
   /*!
     @brief Get all particles on all levels

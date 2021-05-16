@@ -1254,7 +1254,7 @@ void Driver::setupGeometryOnly(){
     this->writeMemoryUsage();
   }
 
-  //  m_amr->set_num_ghost(m_timeStepper->query_ghost()); // Query solvers for ghost cells. Give it to AmrMesh before grid gen.
+  //  m_amr->set_num_ghost(m_timeStepper->queryGhost()); // Query solvers for ghost cells. Give it to AmrMesh before grid gen.
   
   Vector<IntVectSet> tags = m_geomTags;
   const int a_lmin = 0;
@@ -2114,7 +2114,7 @@ void Driver::writeLevelset(EBAMRCellData& a_output, int& a_comp){
   const RealVect prob_lo = m_amr->getProbLo();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(a_output.get_Realm())[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(a_output.getRealm())[lvl];
     const Real dx = m_amr->getDx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -2446,14 +2446,14 @@ void Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   }
 }
 
-void Driver::readCheckpointRealmLoads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_Realm, const int a_level){
+void Driver::readCheckpointRealmLoads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_realm, const int a_level){
   CH_TIME("Driver::readCheckpointRealmLoads(...)");
   if(m_verbosity > 5){
     pout() << "Driver::readCheckpointRealmLoads(...)" << endl;
   }
 
   // HDF identifier.
-  const std::string str = a_Realm + "_loads";
+  const std::string str = a_realm + "_loads";
 
   // Read into an FArrayBox.
   FArrayBox fab;

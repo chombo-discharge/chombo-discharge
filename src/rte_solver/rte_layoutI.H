@@ -30,16 +30,16 @@ rte_iterator<T> rte_layout<T>::iterator(){
 }
 
 template <class T>
-const std::string rte_layout<T>::get_Realm() const{
+const std::string rte_layout<T>::getRealm() const{
   return m_Realm;
 }
 
 template <class T>
-void rte_layout<T>::set_Realm(const std::string a_Realm){
-  m_Realm = a_Realm;
+void rte_layout<T>::setRealm(const std::string a_realm){
+  m_Realm = a_realm;
 
   for (auto solver_it = this->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->set_Realm(m_Realm);
+    solver_it()->setRealm(m_Realm);
   }
 }
 
@@ -140,30 +140,30 @@ void rte_layout<T>::setComputationalGeometry(const RefCountedPtr<computational_g
 }
 
 template <class T>
-void rte_layout<T>::set_phase(phase::which_phase a_phase){
-  CH_TIME("rte_layout<T>::set_phase");
+void rte_layout<T>::setPhase(phase::which_phase a_phase){
+  CH_TIME("rte_layout<T>::setPhase");
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::set_phase" << endl;
+    pout() << "rte_layout<T>::setPhase" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->set_phase(a_phase);
+    solver->setPhase(a_phase);
   }
 }
 
 template <class T>
-void rte_layout<T>::set_verbosity(const int a_verbosity){
-  CH_TIME("rte_layout<T>::set_verbosity");
+void rte_layout<T>::setVerbosity(const int a_verbosity){
+  CH_TIME("rte_layout<T>::setVerbosity");
 
   m_verbosity = a_verbosity;
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::set_verbosity" << endl;
+    pout() << "rte_layout<T>::setVerbosity" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->set_verbosity(a_verbosity);
+    solver->setVerbosity(a_verbosity);
   }
 }
 
@@ -181,15 +181,15 @@ void rte_layout<T>::sanityCheck(){
 }
 
 template <class T>
-void rte_layout<T>::set_time(const int a_step, const Real a_time, const Real a_dt) {
-  CH_TIME("rte_layout<T>::set_time");
+void rte_layout<T>::setTime(const int a_step, const Real a_time, const Real a_dt) {
+  CH_TIME("rte_layout<T>::setTime");
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::set_time" << endl;
+    pout() << "rte_layout<T>::setTime" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->set_time(a_step, a_time, a_dt);
+    solver->setTime(a_step, a_time, a_dt);
   }
 }
 
@@ -220,28 +220,28 @@ void rte_layout<T>::registerOperators(){
 }
 
 template <class T>
-void rte_layout<T>::set_source(const EBAMRCellData& a_source){
-  CH_TIME("rte_layout<T>::set_source(ebamrcell)");
+void rte_layout<T>::setSource(const EBAMRCellData& a_source){
+  CH_TIME("rte_layout<T>::setSource(ebamrcell)");
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::set_source(ebamrcell)" << endl;
+    pout() << "rte_layout<T>::setSource(ebamrcell)" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->set_source(a_source);
+    solver->setSource(a_source);
   }
 }
 
 template <class T>
-void rte_layout<T>::set_source(const Real a_source){
-  CH_TIME("rte_layout<T>::set_source(constant)");
+void rte_layout<T>::setSource(const Real a_source){
+  CH_TIME("rte_layout<T>::setSource(constant)");
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::set_source(constant)" << endl;
+    pout() << "rte_layout<T>::setSource(constant)" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->set_source(a_source);
+    solver->setSource(a_source);
   }
 }
 
@@ -280,7 +280,7 @@ void rte_layout<T>::advance(const Real a_dt){
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->advance(a_dt, solver->get_state(), solver->get_source());
+    solver->advance(a_dt, solver->getPhi(), solver->getSource());
   }
 }
 
@@ -344,34 +344,34 @@ Vector<RefCountedPtr<rte_species> >& rte_layout<T>::get_species(){
 }
 
 template <class T>
-Vector<EBAMRCellData*> rte_layout<T>::get_sources(){
-  CH_TIME("rte_layout<T>::get_sources");
+Vector<EBAMRCellData*> rte_layout<T>::getSources(){
+  CH_TIME("rte_layout<T>::getSources");
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::get_sources" << endl;
+    pout() << "rte_layout<T>::getSources" << endl;
   }
 
   Vector<EBAMRCellData*> sources;
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    sources.push_back(&(solver->get_source()));
+    sources.push_back(&(solver->getSource()));
   }
 
   return sources;
 }
 
 template <class T>
-Vector<EBAMRCellData*> rte_layout<T>::get_states(){
-  CH_TIME("rte_layout<T>::get_states");
+Vector<EBAMRCellData*> rte_layout<T>::getPhis(){
+  CH_TIME("rte_layout<T>::getPhis");
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::get_states" << endl;
+    pout() << "rte_layout<T>::getPhis" << endl;
   }
 
   Vector<EBAMRCellData*> states;
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    states.push_back(&(solver->get_state()));
+    states.push_back(&(solver->getPhi()));
   }
 
   return states;
@@ -396,8 +396,8 @@ RefCountedPtr<rte_layout<T> > rte_factory<T, S>::new_layout(const Vector<RefCoun
   for (int i = 0; i < a_species.size(); i++){
     auto solver = RefCountedPtr<T> (static_cast<T*> (new S()));
     solver->set_rte_species(spe[i]);
-    solver->set_phase(phase::gas);
-    solver->set_verbosity(-1);
+    solver->setPhase(phase::gas);
+    solver->setVerbosity(-1);
     rte->add_solver(solver);
   }
 

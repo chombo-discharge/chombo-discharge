@@ -328,11 +328,11 @@ void full_tagger::compute_cdr_densities(Vector<EBAMRCellData>& a_cdr_densities){
   RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
 
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
+    RefCountedPtr<CdrSolver>& solver = solver_it();
 
     // Interpolate density to centroid
     data_ops::set_value(m_scratch, 0.0);
-    data_ops::incr(m_scratch, solver->get_state(), 1.0);
+    data_ops::incr(m_scratch, solver->getPhi(), 1.0);
     m_amr->interpToCentroids(m_scratch, m_phase);
 
     // Copy to member data holder
@@ -351,10 +351,10 @@ void full_tagger::compute_cdr_gradients(Vector<EBAMRCellData>& a_cdr_gradients){
   RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
     
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
+    RefCountedPtr<CdrSolver>& solver = solver_it();
 
     const int idx = solver_it.get_solver();    
-    m_amr->computeGradient(a_cdr_gradients[idx], solver->get_state(), phase::gas);
+    m_amr->computeGradient(a_cdr_gradients[idx], solver->getPhi(), phase::gas);
   }
 }
 
@@ -404,7 +404,7 @@ void full_tagger::compute_rte_densities(Vector<EBAMRCellData>& a_rte_densities){
 
     // Interpolate density to centroid
     data_ops::set_value(m_scratch, 0.0);
-    data_ops::incr(m_scratch, solver->get_state(), 1.0);
+    data_ops::incr(m_scratch, solver->getPhi(), 1.0);
     m_amr->interpToCentroids(m_scratch, m_phase);
 
     // Copy to member data holder

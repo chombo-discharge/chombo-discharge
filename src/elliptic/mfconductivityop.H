@@ -91,7 +91,7 @@ public:
   /*!
     @brief Set time
   */
-  virtual void set_time(Real* a_time);
+  virtual void setTime(Real* a_time);
 
     /*!
     @brief Electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions
@@ -415,7 +415,7 @@ protected:
   /*!
     @brief a-coefficients for each phase
   */
-  Vector<RefCountedPtr<LevelData<EBCellFAB> > > m_acoeffs;
+  Vector<RefCountedPtr<LevelData<EBCellFAB> > > m_aCoefficienteffs;
 
   /*!
     @brief b-coefficients for each phase

@@ -18,7 +18,7 @@ def write_template(args):
     options_files = [args.discharge_home + "/src/AmrMesh/AmrMesh.options", \
                      args.discharge_home + "/src/Driver/Driver.options", \
                      args.discharge_home + "/src/FieldSolver/CD_" + args.field_solver + ".options",\
-                     args.discharge_home + "/src/cdr_solver/" + args.cdr_solver + ".options",\
+                     args.discharge_home + "/src/CdrSolver/" + args.CdrSolver + ".options",\
                      args.discharge_home + "/src/rte_solver/" + args.rte_solver + ".options",\
                      args.discharge_home + "/src/geometry/geo_coarsener.options", \
                      args.discharge_home + "/geometries/" + args.geometry + "/" + args.geometry + ".options", \

@@ -497,8 +497,8 @@ Real morrow_fhd::initial_sigma(const Real a_time, const RealVect& a_pos) const{
 morrow_fhd::electron::electron(){
   m_name      = "electron";
   m_charge    = -1;
-  m_diffusive = true;
-  m_mobile    = true;
+  m_isDiffusive = true;
+  m_isMobile    = true;
   m_unit      = "m-3";
 
   Vector<Real> pos(SpaceDim);
@@ -508,7 +508,7 @@ morrow_fhd::electron::electron(){
   pp.get("uniform_density",     m_uniform_density);
   pp.get("seed_density",        m_seed_density);
   pp.get("seed_radius",         m_seed_radius);
-  pp.get("diffusive_electrons", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive = (str == "true") ? true : false;
 
   pp.getarr("seed_position", pos, 0, SpaceDim); m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
@@ -516,8 +516,8 @@ morrow_fhd::electron::electron(){
 morrow_fhd::positive_species::positive_species(){
   m_name      = "positive_species";
   m_charge    = 1;
-  m_diffusive = false;
-  m_mobile    = false;
+  m_isDiffusive = false;
+  m_isMobile    = false;
   m_unit      = "m-3";
 
   Vector<Real> pos(SpaceDim);
@@ -528,7 +528,7 @@ morrow_fhd::positive_species::positive_species(){
   pp.get("seed_density",        m_seed_density);
   pp.get("seed_radius",         m_seed_radius);
   
-  pp.get("mobile_ions",    str); m_mobile    = (str == "true") ? true : false;
+  pp.get("mobile_ions",    str); m_isMobile    = (str == "true") ? true : false;
 
   pp.getarr("seed_position", pos, 0, SpaceDim); m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
@@ -536,14 +536,14 @@ morrow_fhd::positive_species::positive_species(){
 morrow_fhd::negative_species::negative_species(){
   m_name      = "negative_species";
   m_charge    = -1;
-  m_diffusive = false;
-  m_mobile    = false;
+  m_isDiffusive = false;
+  m_isMobile    = false;
   m_unit      = "m-3";
 
   std::string str;
 
   ParmParse pp("morrow_fhd");
-  pp.get("mobile_ions",    str); m_mobile    = (str == "true") ? true : false;
+  pp.get("mobile_ions",    str); m_isMobile    = (str == "true") ? true : false;
 }
 
 morrow_fhd::electron::~electron(){

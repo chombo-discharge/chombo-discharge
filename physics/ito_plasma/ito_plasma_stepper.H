@@ -70,7 +70,7 @@ namespace physics {
       void write_J(EBAMRCellData& a_output, int& a_icomp) const;
       void write_num_particles_per_patch(EBAMRCellData& a_output, int& a_icomp) const;
       int  getNumberOfPlotVariables() const override;
-      Vector<long int> getCheckpointLoads(const std::string a_Realm, const int a_level) const override;
+      Vector<long int> getCheckpointLoads(const std::string a_realm, const int a_level) const override;
   
       // Advance routines
       virtual Real advance(const Real a_dt) = 0;
@@ -87,10 +87,10 @@ namespace physics {
       virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
       virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       void postRegrid() override;
-      bool loadBalanceThisRealm(const std::string a_Realm) const override;
+      bool loadBalanceThisRealm(const std::string a_realm) const override;
       void loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
 			      Vector<Vector<Box> >&            a_boxes,
-			      const std::string                a_Realm,
+			      const std::string                a_realm,
 			      const Vector<DisjointBoxLayout>& a_grids,
 			      const int                        a_lmin,
 			      const int                        a_finestLevel) override;
@@ -119,7 +119,7 @@ namespace physics {
 				      const Real                        a_tolerance);
 
       // Internal routines
-      void set_verbosity(const int a_verbosity);
+      void setVerbosity(const int a_verbosity);
 
       // Set routines
       void set_ito(RefCountedPtr<ito_layout<ito_solver> >& a_cdr);
@@ -199,16 +199,16 @@ namespace physics {
       // These routines compute the diffusion coefficients by computing D(E)
       // as a mesh variable, and then interpolating that to the particle position. 
       void compute_ito_diffusion_lfa();
-      void compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&       a_diffco,
+      void compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&       a_diffusionCoefficient,
 				     const Vector<EBAMRCellData*>& a_densities,
 				     const EBAMRCellData&          a_E,
 				     const Real                    a_time);
-      void compute_ito_diffusion_lfa(Vector<LevelData<EBCellFAB>* >&       a_diffco,
+      void compute_ito_diffusion_lfa(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient,
 				     const Vector<LevelData<EBCellFAB>* >& a_densities,
 				     const LevelData<EBCellFAB>&           a_E,
 				     const int                             a_level,
 				     const Real                            a_time);
-      void compute_ito_diffusion_lfa(Vector<EBCellFAB*>&       a_diffco,
+      void compute_ito_diffusion_lfa(Vector<EBCellFAB*>&       a_diffusionCoefficient,
 				     const Vector<EBCellFAB*>& a_densities,
 				     const EBCellFAB&          a_E,
 				     const int                 a_level,
@@ -411,7 +411,7 @@ namespace physics {
       // Do load balancing of the particle Realm. 
       void LoadBalancing_particle_Realm(Vector<Vector<int> >&            a_procs,
 				       Vector<Vector<Box> >&            a_boxes,
-				       const std::string                a_Realm,
+				       const std::string                a_realm,
 				       const Vector<DisjointBoxLayout>& a_grids,
 				       const int                        a_lmin,
 				       const int                        a_finestLevel);

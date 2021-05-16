@@ -132,7 +132,7 @@ public:
   {
     m_alpha       = a_alpha      ;
     m_beta        = a_beta       ;
-    m_acoef       = a_acoef      ;
+    m_aCoefficientef       = a_acoef      ;
     m_bcoef       = a_bcoef      ;
     m_bcoefIrreg  = a_bcoefIrreg ;
   }
@@ -145,13 +145,13 @@ protected:
   Vector< Vector<EBLevelGrid> >                                   m_eblgsMG;
 
   //! Time-independent A multigrid coefficients
-  Vector< Vector< RefCountedPtr<LevelData<EBCellFAB> > > >        m_acoefMG;
+  Vector< Vector< RefCountedPtr<LevelData<EBCellFAB> > > >        m_aCoefficientefMG;
 
   //! Beginning-of-step (time-dependent) A multigrid coefficients
-  Vector< Vector< RefCountedPtr<LevelData<EBCellFAB> > > >        m_acoefMG0;
+  Vector< Vector< RefCountedPtr<LevelData<EBCellFAB> > > >        m_aCoefficientefMG0;
 
   //! End-of-step (time-dependent) A multigrid coefficients
-  Vector< Vector< RefCountedPtr<LevelData<EBCellFAB> > > >        m_acoefMG1;
+  Vector< Vector< RefCountedPtr<LevelData<EBCellFAB> > > >        m_aCoefficientefMG1;
 
   Vector< Vector< RefCountedPtr<LevelData<EBFluxFAB> > > >        m_bcoefMG;
   Vector< Vector< RefCountedPtr<LevelData<BaseIVFAB<Real> > > > > m_bcoefIrregMG;
@@ -165,7 +165,7 @@ protected:
   Real                                                 m_beta;
 
   //! Time-independent A coefficients.
-  Vector<RefCountedPtr<LevelData<EBCellFAB> > >        m_acoef;
+  Vector<RefCountedPtr<LevelData<EBCellFAB> > >        m_aCoefficientef;
 
 
   Vector<RefCountedPtr<LevelData<EBFluxFAB> > >        m_bcoef;

@@ -38,7 +38,7 @@ void rte_species::define(const std::string a_name, Real (*a_kappa)(const RealVec
   m_constant = false;
 }
 
-std::string rte_species::get_name() const{
+std::string rte_species::getName() const{
   return m_name;
 }
 

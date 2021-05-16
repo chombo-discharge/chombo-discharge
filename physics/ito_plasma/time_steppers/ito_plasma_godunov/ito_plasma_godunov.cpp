@@ -72,7 +72,7 @@ void ito_plasma_godunov::write_conductivity(EBAMRCellData& a_output, int& a_icom
   const Interval dst_interv(a_icomp, a_icomp);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    if(m_conduct_cell.get_Realm() == a_output.get_Realm()){
+    if(m_conduct_cell.getRealm() == a_output.getRealm()){
       m_conduct_cell[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
     }
     else {
@@ -396,7 +396,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   // Make superparticles. 
   MPI_Barrier(Chombo_MPI::comm);
   super_time = -MPI_Wtime();
-  if((m_step+1) % m_merge_interval == 0 && m_merge_interval > 0){
+  if((m_timeStep+1) % m_merge_interval == 0 && m_merge_interval > 0){
     m_ito->make_superparticles(ito_solver::which_container::bulk, m_ppc);
   }
   super_time += MPI_Wtime();
@@ -536,7 +536,7 @@ void ito_plasma_godunov::computeDt(Real& a_dt, TimeCode& a_timeCode){
 			      << "\t relax dt = " << m_dt_relax
 			      << "\t factor = " << a_dt/m_dt_relax
 			      << "\t CFL = " << a_dt/dtCFL
-			      << "\t avgCFL = " << m_avg_cfl/(1+m_step)
+			      << "\t avgCFL = " << m_avg_cfl/(1+m_timeStep)
 			      << std::endl;
 #endif
 }
@@ -771,8 +771,8 @@ void ito_plasma_godunov::remap_godunov_particles(Vector<particle_container<godun
 
     const int idx = solver_it.index();
 
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
+    const bool mobile    = solver->isMobile();
+    const bool diffusive = solver->isDiffusive();
     const bool charged   = species->get_charge() != 0;
 
     switch(a_which_particles) {
@@ -818,34 +818,34 @@ void ito_plasma_godunov::deposit_godunov_particles(const Vector<particle_contain
 
     const int idx = solver_it.index();
 
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
+    const bool mobile    = solver->isMobile();
+    const bool diffusive = solver->isDiffusive();
     const bool charged   = species->get_charge() != 0;
 
     switch(a_which_particles) {
     case which_particles::all:
-      solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      solver->deposit_particles(solver->getPhi(), *a_particles[idx]);
       break;
     case which_particles::all_mobile:
-      if(mobile) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      if(mobile) solver->deposit_particles(solver->getPhi(), *a_particles[idx]);
       break;
     case which_particles::all_diffusive:
-      if(diffusive) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      if(diffusive) solver->deposit_particles(solver->getPhi(), *a_particles[idx]);
       break;
     case which_particles::charged_mobile:
-      if(charged && mobile) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      if(charged && mobile) solver->deposit_particles(solver->getPhi(), *a_particles[idx]);
       break;
     case which_particles::charged_diffusive:
-      if(charged && diffusive) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      if(charged && diffusive) solver->deposit_particles(solver->getPhi(), *a_particles[idx]);
       break;
     case which_particles::all_mobile_or_diffusive:
-      if(mobile || diffusive) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      if(mobile || diffusive) solver->deposit_particles(solver->getPhi(), *a_particles[idx]);
       break;
     case which_particles::charged_and_mobile_or_diffusive:
-      if(charged && (mobile || diffusive)) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      if(charged && (mobile || diffusive)) solver->deposit_particles(solver->getPhi(), *a_particles[idx]);
       break;
     case which_particles::stationary:
-      if(!mobile && !diffusive) solver->deposit_particles(solver->get_state(), *a_particles[idx]);
+      if(!mobile && !diffusive) solver->deposit_particles(solver->getPhi(), *a_particles[idx]);
       break;
     default:
       MayDay::Abort("ito_plasma_godunov::deposit_godunov_particles - logic bust");
@@ -865,8 +865,8 @@ void ito_plasma_godunov::clear_godunov_particles(const Vector<particle_container
 
     const int idx = solver_it.index();
 
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
+    const bool mobile    = solver->isMobile();
+    const bool diffusive = solver->isDiffusive();
     const bool charged   = species->get_charge() != 0;
 
     switch(a_which_particles) {
@@ -927,13 +927,13 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
     const int idx = solver_it.index();
     const int q   = species->get_charge();
 
-    if(q != 0 && solver->is_mobile()){
+    if(q != 0 && solver->isMobile()){
       data_ops::set_value(m_particle_scratch1, 0.0);
 #if 1 // Original code
       solver->deposit_particles(m_particle_scratch1, *a_particles[idx]); // The particles should have "masses" = m*mu
 #else
       const EBAMRCellData& mu  = solver->get_mobility_func();
-      const EBAMRCellData& phi = solver->get_state();
+      const EBAMRCellData& phi = solver->getPhi();
       data_ops::copy(m_particle_scratch1, mu);
       data_ops::multiply(m_particle_scratch1, phi);
 #endif
@@ -1079,7 +1079,7 @@ void ito_plasma_godunov::copy_conductivity_particles(Vector<particle_container<g
 	const List<ito_particle>& ito_parts = solver->get_particles(ito_solver::which_container::bulk)[lvl][dit()].listItems();
 	List<godunov_particle>& gdnv_parts  = (*a_conductivity_particles[idx])[lvl][dit()].listItems();
 
-	if(q != 0 && solver->is_mobile()){
+	if(q != 0 && solver->isMobile()){
 	  for (ListIterator<ito_particle> lit(ito_parts); lit.ok(); ++lit){
 	    const ito_particle& p = lit();
 	    const RealVect& pos   = p.position();
@@ -1328,8 +1328,8 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<particle_contai
 
     const int idx = solver_it.index();
 
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
+    const bool mobile    = solver->isMobile();
+    const bool diffusive = solver->isDiffusive();
 
     const Real f = mobile    ? 1.0 : 0.0; // Multiplication factor for mobility
     const Real g = diffusive ? 1.0 : 0.0; // Multiplication factor for diffusion
@@ -1382,8 +1382,8 @@ void ito_plasma_godunov::step_euler_maruyama(const Real a_dt){
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
 
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
+    const bool mobile    = solver->isMobile();
+    const bool diffusive = solver->isDiffusive();
 
     const Real f = mobile    ? 1.0 : 0.0;
     const Real g = diffusive ? 1.0 : 0.0;
@@ -1473,8 +1473,8 @@ void ito_plasma_godunov::pre_trapezoidal_predictor(Vector<particle_container<god
 
     const int idx = solver_it.index();
 
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
+    const bool mobile    = solver->isMobile();
+    const bool diffusive = solver->isDiffusive();
 
     const Real f = mobile    ? 1.0 : 0.0; // Multiplication factor for mobility
     const Real g = diffusive ? 1.0 : 0.0; // Multiplication factor for diffusion
@@ -1519,8 +1519,8 @@ void ito_plasma_godunov::trapezoidal_predictor(const Real a_dt){
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
 
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
+    const bool mobile    = solver->isMobile();
+    const bool diffusive = solver->isDiffusive();
 
     const Real f = mobile    ? 1.0 : 0.0;
     const Real g = diffusive ? 1.0 : 0.0;
@@ -1562,8 +1562,8 @@ void ito_plasma_godunov::pre_trapezoidal_corrector(Vector<particle_container<god
 
     const int idx = solver_it.index();
 
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
+    const bool mobile    = solver->isMobile();
+    const bool diffusive = solver->isDiffusive();
 
     const Real f = mobile    ? 1.0 : 0.0; // Multiplication factor for mobility
     const Real g = diffusive ? 1.0 : 0.0; // Multiplication factor for diffusion
@@ -1606,8 +1606,8 @@ void ito_plasma_godunov::trapezoidal_corrector(const Real a_dt){
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
 
-    const bool mobile    = solver->is_mobile();
-    const bool diffusive = solver->is_diffusive();
+    const bool mobile    = solver->isMobile();
+    const bool diffusive = solver->isDiffusive();
 
     const Real f = mobile    ? 1.0 : 0.0;
     const Real g = diffusive ? 1.0 : 0.0;

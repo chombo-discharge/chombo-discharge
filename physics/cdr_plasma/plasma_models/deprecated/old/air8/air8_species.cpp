@@ -15,8 +15,8 @@ air8::electron::electron(){
   m_name   = "electron density";
   m_unit   = "m-3";
   m_charge = -1;
-  m_diffusive = true;
-  m_mobile = true;
+  m_isDiffusive = true;
+  m_isMobile = true;
 
   {// Get initial parameter
     ParmParse pp("air8");
@@ -32,8 +32,8 @@ air8::N2plus::N2plus() {
   m_name   = "N2plus";
   m_unit   = "m-3";
   m_charge = 1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   Real Tg, p, N, O2frac, N2frac;
   air8::get_gas_parameters(Tg, p, N, O2frac, N2frac);
@@ -45,10 +45,10 @@ air8::N2plus::N2plus() {
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }
@@ -61,18 +61,18 @@ air8::N4plus::N4plus(){
   m_name   = "N4plus";
   m_unit   = "m-3";
   m_charge = 1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   std::string str;
   ParmParse pp("air8");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }
@@ -85,8 +85,8 @@ air8::O2plus::O2plus(){
   m_name   = "O2plus";
   m_unit   = "m-3";
   m_charge = 1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   Real Tg, p, N, O2frac, N2frac;
   air8::get_gas_parameters(Tg, p, N, O2frac, N2frac);
@@ -98,10 +98,10 @@ air8::O2plus::O2plus(){
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }
@@ -114,18 +114,18 @@ air8::O4plus::O4plus(){
   m_name   = "O4plus";
   m_unit   = "m-3";
   m_charge = 1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   std::string str;
   ParmParse pp("air8");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }
@@ -138,18 +138,18 @@ air8::O2plusN2::O2plusN2() {
   m_name   = "O2plusN2";
   m_unit   = "m-3";
   m_charge = 1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   std::string str;
   ParmParse pp("air8");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }
@@ -162,18 +162,18 @@ air8::O2minus::O2minus(){
   m_name   = "O2minus";
   m_unit   = "m-3";
   m_charge = -1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   std::string str;
   ParmParse pp("air8");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }
@@ -186,18 +186,18 @@ air8::Ominus::Ominus(){
   m_name   = "Ominus";
   m_unit   = "m-3";
   m_charge = -1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   std::string str;
   ParmParse pp("air8");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }

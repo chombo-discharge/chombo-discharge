@@ -67,7 +67,7 @@ public:
   /*!
     @brief Sets the Realm for this object
   */
-  void set_Realm(const std::string a_Realm);
+  void setRealm(const std::string a_realm);
 
   /*!
     @brief Get size of m_data
@@ -109,7 +109,7 @@ public:
   /*!
     @brief Returns the string identifier for whatever Realm this data is supposed to be allocated over. 
   */
-  const std::string get_Realm() const;
+  const std::string getRealm() const;
   
 protected:
 

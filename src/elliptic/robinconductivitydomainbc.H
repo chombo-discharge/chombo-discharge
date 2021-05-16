@@ -98,13 +98,13 @@ protected:
   
   RefCountedPtr<robin_coef> m_robinco;
 
-  Real m_aco;
+  Real m_aCoefficient;
 
   Real m_bco;
   
   Real m_rhs;
 
-  RefCountedPtr<LevelData<EBFluxFAB> > m_acodata;
+  RefCountedPtr<LevelData<EBFluxFAB> > m_aCoefficientdata;
 
   RefCountedPtr<LevelData<EBFluxFAB> > m_bcodata;
   

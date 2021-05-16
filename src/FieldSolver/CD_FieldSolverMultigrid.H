@@ -80,7 +80,7 @@ public:
   virtual ~FieldSolverMultigrid();
 
   /*!
-    @brief Solves Poisson equation onto a_state using a_rho and a_sigma as right-hand sides. 
+    @brief Solves Poisson equation onto a_phi using a_rho and a_sigma as right-hand sides. 
     @param[inout] a_potential Potential
     @param[in] a_rho Space charge density
     @param[in] a_sigma Surface charge density. 

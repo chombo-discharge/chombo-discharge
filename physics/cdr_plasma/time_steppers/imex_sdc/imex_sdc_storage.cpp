@@ -16,11 +16,11 @@ imex_sdc::cdr_storage::cdr_storage(){
 }
 
 imex_sdc::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
-				   const std::string              a_Realm,
+				   const std::string              a_realm,
 				   const phase::which_phase       a_phase,
 				   const int                      a_ncomp){
   m_amr   = a_amr;
-  m_Realm = a_Realm;
+  m_Realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
@@ -103,11 +103,11 @@ imex_sdc::poisson_storage::poisson_storage(){
 }
 
 imex_sdc::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
-					   const std::string              a_Realm,
+					   const std::string              a_realm,
 					   const phase::which_phase       a_phase,
 					   const int                      a_ncomp){
   m_amr   = a_amr;
-  m_Realm = a_Realm;
+  m_Realm = a_realm;
   m_ncomp = a_ncomp;
   m_phase = a_phase;
 }
@@ -139,11 +139,11 @@ imex_sdc::rte_storage::rte_storage(){
 }
 
 imex_sdc::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
-				   const std::string              a_Realm,
+				   const std::string              a_realm,
 				   const phase::which_phase       a_phase,
 				   const int                      a_ncomp){
   m_amr   = a_amr;
-  m_Realm = a_Realm;
+  m_Realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
@@ -171,11 +171,11 @@ imex_sdc::sigma_storage::sigma_storage(){
 }
 
 imex_sdc::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
-				       const std::string              a_Realm,
+				       const std::string              a_realm,
 				       const phase::which_phase       a_phase,
 				       const int                      a_ncomp){
   m_amr   = a_amr;
-  m_Realm = a_Realm;
+  m_Realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }

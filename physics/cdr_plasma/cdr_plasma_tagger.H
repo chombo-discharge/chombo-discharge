@@ -81,7 +81,7 @@ namespace physics {
       /*!
 	@brief Set phase
       */
-      virtual void set_phase(const phase::which_phase a_phase);
+      virtual void setPhase(const phase::which_phase a_phase);
 
       /*!
 	@brief Tracer fields

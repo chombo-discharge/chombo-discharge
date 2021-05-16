@@ -101,10 +101,10 @@ namespace physics {
       Vector<int> m_wallbc; // Wall boundary conditions
 
       bool m_alpha_corr;          // Alpha correction
-      bool m_mobile_electrons;    // Mobile electrons or not
-      bool m_mobile_ions;         // Mobile ions or not
-      bool m_diffusive_ions;      // Diffusive ions or not
-      bool m_diffusive_electrons; // Diffusive electrons or not
+      bool m_isMobile_electrons;    // Mobile electrons or not
+      bool m_isMobile_ions;         // Mobile ions or not
+      bool m_isDiffusive_ions;      // Diffusive ions or not
+      bool m_isDiffusive_electrons; // Diffusive electrons or not
   
       int m_uniform_entries; // # of entries in uniform-made BOLSIG tables
 
@@ -137,7 +137,7 @@ namespace physics {
 
 
       void read_file_entries(lookup_table& a_table, const std::string a_string);
-      void parseDomain_bc();
+      void parseDomainBc();
       void instantiate_species();
 
 

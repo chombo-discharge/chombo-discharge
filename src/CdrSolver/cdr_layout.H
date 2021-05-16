@@ -1,6 +1,6 @@
 /*!
   @file   cdr_layout.H
-  @brief  Declaration of a class that holds a set of cdr_solvers
+  @brief  Declaration of a class that holds a set of CdrSolvers
   @author Robert Marskar
   @date   Jan. 2018
 */
@@ -8,7 +8,7 @@
 #ifndef _CDR_LAYOUT_
 #define _CDR_LAYOUT_
 
-#include "cdr_solver.H"
+#include "CD_CdrSolver.H"
 
 #include "CD_NamespaceHeader.H"
 
@@ -16,7 +16,7 @@ template <class T>
 class cdr_iterator;
 
 /*!
-  @brief Class for holding a set of cdr_solvers. 
+  @brief Class for holding a set of CdrSolvers. 
 */
 template <class T>
 class cdr_layout {
@@ -47,12 +47,12 @@ public:
   /*!
     @brief Get the Realm
   */
-  virtual const std::string get_Realm() const;
+  virtual const std::string getRealm() const;
 
   /*!
     @brief Set
   */
-  virtual void set_Realm(const std::string a_Realm);
+  virtual void setRealm(const std::string a_realm);
 
   /*!
     @brief Parse class options
@@ -118,7 +118,7 @@ public:
     @brief Set phase
     @details This must be done BEFORE callilng setComputationalGeometry
   */
-  virtual void set_phase(phase::which_phase a_phase = phase::gas);
+  virtual void setPhase(phase::which_phase a_phase = phase::gas);
 
   /*!
     @brief Set phase
@@ -128,52 +128,52 @@ public:
   /*!
     @brief Set verbosity.
   */
-  virtual void set_verbosity(const int a_verbosity);
+  virtual void setVerbosity(const int a_verbosity);
 
   /*!
     @brief Set time
   */
-  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
+  virtual void setTime(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Convenience function. Set velocity for all species. Mostly used for debugging.
   */
-  virtual void set_velocity(const EBAMRCellData& a_velo);
+  virtual void setVelocity(const EBAMRCellData& a_velo);
 
   /*!
     @brief Convenience function. Set constant velocity for all species. Mostly used for debugging. 
   */
-  virtual void set_velocity(const RealVect a_velo);
+  virtual void setVelocity(const RealVect a_velo);
 
   /*!
     @brief Convenience function. Set diffusion coefficients for all species. Mostly used for debugging. 
   */
-  virtual void set_diffco(const EBAMRFluxData& a_diffco, const EBAMRIVData& a_diffco_eb);
+  virtual void setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoefficient, const EBAMRIVData& a_ebDiffusionCoefficient);
 
   /*!
     @brief Convenience function. Set constant diffusion coefficients for all species. Mostly used for debugging. 
   */
-  virtual void set_diffco(const Real a_diffco);
+  virtual void setDiffusionCoefficient(const Real a_diffusionCoefficient);
 
   /*!
     @brief Convenience function. Set source terms for all species. Mostly used for debugging. 
   */
-  virtual void set_source(const EBAMRCellData& a_source);
+  virtual void setSource(const EBAMRCellData& a_source);
 
   /*!
     @brief Convenience function. Set constant source terms for all species. Mostly used for debugging. 
   */
-  virtual void set_source(const Real a_source);
+  virtual void setSource(const Real a_source);
 
   /*!
     @brief Convenience function. Set the EB flux for all species. Mostly used for debugging. 
   */
-  virtual void set_ebflux(const EBAMRIVData& a_ebflux);
+  virtual void setEbFlux(const EBAMRIVData& a_ebFlux);
 
   /*!
     @brief Convenience function.Set the EB flux for all species. Mostly used for debugging. 
   */
-  virtual void set_ebflux(const Real a_ebflux);
+  virtual void setEbFlux(const Real a_ebFlux);
 
   /*!
     @brief Convenience function. All solvers write plot files
@@ -183,22 +183,22 @@ public:
   /*!
     @brief Get largest possible time step for advection part
   */
-  virtual Real compute_advection_dt();
+  virtual Real computeAdvectionDt();
 
   /*!
     @brief Get largest possible time step for diffusion part
   */
-  virtual Real compute_diffusion_dt();
+  virtual Real computeDiffusionDt();
 
   /*!
     @brief Get largest possible time step for diffusion part
   */
-  virtual Real compute_advection_diffusion_dt();
+  virtual Real computeAdvectionDiffusionDt();
 
   /*!
     @brief Get largest possible time step for source term
   */
-  virtual Real compute_source_dt(const Real a_tolerance, const bool a_elec_only);
+  virtual Real computeSourceDt(const Real a_tolerance, const bool a_elec_only);
 
   /*!
     @brief Compute total charge in computational region
@@ -208,17 +208,17 @@ public:
   /*!
     @brief Compute mass for every species
   */
-  virtual Vector<Real> compute_mass();
+  virtual Vector<Real> computeMass();
 
   /*!
     @brief Compute charge for each species
   */
-  virtual Vector<Real> compute_charge();
+  virtual Vector<Real> computeCharge();
 
   /*!
     @brief Get all names
   */
-  virtual Vector<std::string> get_names();
+  virtual Vector<std::string> getNames();
 
   /*!
     @brief Get solvers
@@ -233,12 +233,12 @@ public:
   /*!
     @brief Get all source terms
   */
-  virtual Vector<EBAMRCellData*> get_sources();
+  virtual Vector<EBAMRCellData*> getSources();
 
   /*!
     @brief Get all states
   */
-  virtual Vector<EBAMRCellData*> get_states();
+  virtual Vector<EBAMRCellData*> getPhis();
 
   /*!
     @brief Get all velocities
@@ -248,7 +248,7 @@ public:
   /*!
     @brief Get all diffusion coefficients
   */
-  virtual Vector<EBAMRFluxData*> get_diffco_face();
+  virtual Vector<EBAMRFluxData*> getFaceCenteredDiffusionCoefficient();
 
   /*!
     @brief Get all diffusion coefficients
@@ -258,12 +258,12 @@ public:
   /*!
     @brief Get the EB flux
   */
-  virtual Vector<EBAMRIVData*> get_ebflux();
+  virtual Vector<EBAMRIVData*> getEbFlux();
 
   /*!
     @brief Get domain fluxes
   */
-  virtual Vector<EBAMRIFData*> get_domainflux();
+  virtual Vector<EBAMRIFData*> getDomainFlux();
 
   /*!
     @brief Get mass redistribution
@@ -280,7 +280,7 @@ protected:
   /*!
     @brief Solvers
   */
-  Vector<RefCountedPtr<cdr_solver> > m_solvers;
+  Vector<RefCountedPtr<CdrSolver> > m_solvers;
 
   /*!
     @brief Species
@@ -311,7 +311,7 @@ protected:
 /*!
   @brief Factory class for cdr_layout. 
   @details Factory class is very simple; since we don't want to template cdr_layout2 we use a factory to instantiate solvers of 
-  any cdr_solver inherited class, and then return a layout with the casted classes. That's about it. 
+  any CdrSolver inherited class, and then return a layout with the casted classes. That's about it. 
 */
 template <class T, class S>
 class cdr_factory {

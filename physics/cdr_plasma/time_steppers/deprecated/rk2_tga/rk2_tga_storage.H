@@ -14,7 +14,7 @@
 #include <RefCountedPtr.H>
 
 /*!
-  @brief Class for handling extra data allocations that are necessary to advance a cdr_solver in an rk2_tga context. 
+  @brief Class for handling extra data allocations that are necessary to advance a CdrSolver in an rk2_tga context. 
   @details This class needs storage for the intermediate state, k1, k2, and 3 irregular data holders for extrapolated fluxes,
   extrapolated densities, and extrapolates velocities. 
 */

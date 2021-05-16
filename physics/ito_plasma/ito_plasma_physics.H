@@ -318,7 +318,7 @@ namespace physics {
 	@brief Compute total charge in a cell
       */
       inline
-      long long compute_charge(const Vector<List<ito_particle>* >& a_particles) const;
+      long long computeCharge(const Vector<List<ito_particle>* >& a_particles) const;
 
 
       /*!

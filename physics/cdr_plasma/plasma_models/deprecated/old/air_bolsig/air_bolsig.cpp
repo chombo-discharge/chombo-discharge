@@ -469,7 +469,7 @@ air_bolsig::electron::electron(){
   m_name      = "electron density";
   m_unit      = "m-3";
   m_charge    = -1;
-  m_diffusive = false;
+  m_isDiffusive = false;
 
   m_uniform_density = 1.0;
   m_seed_density    = 0.0;
@@ -486,10 +486,10 @@ air_bolsig::electron::electron(){
     pp.query("noise_amplitude", m_noise_density);
     pp.query("electron_diffusion", str);
     if(str == "true"){
-      m_diffusive = true;
+      m_isDiffusive = true;
     }
     else if(str == "false"){
-      m_diffusive = false;
+      m_isDiffusive = false;
     }
     if(pp.contains("seed_position")){
       Vector<Real> pos(SpaceDim);
@@ -507,8 +507,8 @@ air_bolsig::positive_species::positive_species(){
   m_name      = "positive_species density";
   m_unit      = "m-3";
   m_charge    = 1;
-  m_diffusive = false;
-  m_mobile    = false;
+  m_isDiffusive = false;
+  m_isMobile    = false;
 
   m_uniform_density = 1.0;
   m_seed_density    = 0.0;
@@ -538,8 +538,8 @@ air_bolsig::negative_species::negative_species(){
   m_name      = "negative_species density";
   m_unit      = "m-3";
   m_charge    = -1;
-  m_diffusive = false;
-  m_mobile    = false;
+  m_isDiffusive = false;
+  m_isMobile    = false;
 }
 
 air_bolsig::negative_species::~negative_species(){

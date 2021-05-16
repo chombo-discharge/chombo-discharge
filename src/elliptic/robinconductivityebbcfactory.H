@@ -71,13 +71,13 @@ protected:
 
   RefCountedPtr<robin_coef> m_robinco;
 
-  Real m_aco;
+  Real m_aCoefficient;
 
   Real m_bco;
   
   Real m_rhs;
 
-  EBAMRIVData m_acodata;
+  EBAMRIVData m_aCoefficientdata;
 
   EBAMRIVData m_bcodata;
   

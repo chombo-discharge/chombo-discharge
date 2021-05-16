@@ -346,7 +346,7 @@ namespace physics {
 	@details The way we do this is that we compute the diffusion coefficients on cell centers, and then we average that
 	onto cell faces. 
       */
-      virtual void compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffco_face,
+      virtual void compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffusionCoefficient_face,
 					   const Vector<EBAMRCellData*>& a_cdr_densities,
 					   const EBAMRCellData&          a_E,
 					   const Real&                   a_time);
@@ -354,7 +354,7 @@ namespace physics {
       /*!
 	@brief Compute diffusion coefficients on cell centers. Calls the level version. 
       */
-      virtual void compute_cdr_diffco_cell(Vector<EBAMRCellData>&        a_diffco_cell,
+      virtual void compute_cdr_diffco_cell(Vector<EBAMRCellData>&        a_diffusionCoefficient_cell,
 					   const Vector<EBAMRCellData*>& a_cdr_densities,
 					   const EBAMRCellData&          a_E,
 					   const Real&                   a_time);
@@ -362,7 +362,7 @@ namespace physics {
       /*!
 	@brief Compute diffusion coefficients on cell centers. Regular cells. 
       */
-      virtual void compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a_diffco_cell,
+      virtual void compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
 					       const Vector<EBCellFAB*>& a_cdr_densities,
 					       const EBCellFAB&          a_E,
 					       const Box                 a_box,
@@ -372,7 +372,7 @@ namespace physics {
       /*!
 	@brief Compute diffusion coefficients on cell centers. Fast version that calls dimension versions
       */
-      virtual void compute_cdr_diffco_cell_reg_fast(Vector<EBCellFAB*>&       a_diffco_cell,
+      virtual void compute_cdr_diffco_cell_reg_fast(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
 						    const Vector<EBCellFAB*>& a_cdr_densities,
 						    const EBCellFAB&          a_E,
 						    const Box                 a_box,
@@ -382,7 +382,7 @@ namespace physics {
       /*!
 	@brief Compute diffusion coefficients on cell centers. Fast version that calls dimension versions
       */
-      virtual void compute_cdr_diffco_cell_reg_fast2D(Vector<EBCellFAB*>&       a_diffco_cell,
+      virtual void compute_cdr_diffco_cell_reg_fast2D(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
 						      const Vector<EBCellFAB*>& a_cdr_densities,
 						      const EBCellFAB&          a_E,
 						      const Box                 a_box,
@@ -392,7 +392,7 @@ namespace physics {
       /*!
 	@brief Compute diffusion coefficients on cell centers. Fast version that calls dimension versions
       */
-      virtual void compute_cdr_diffco_cell_reg_fast3D(Vector<EBCellFAB*>&       a_diffco_cell,
+      virtual void compute_cdr_diffco_cell_reg_fast3D(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
 						      const Vector<EBCellFAB*>& a_cdr_densities,
 						      const EBCellFAB&          a_E,
 						      const Box                 a_box,
@@ -402,7 +402,7 @@ namespace physics {
       /*!
 	@brief Compute diffusion coefficients on cell centers. Regular cells. 
       */
-      virtual void compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&           a_diffco_cell,
+      virtual void compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&           a_diffusionCoefficient_cell,
 						 const Vector<EBCellFAB*>&    a_cdr_densities,
 						 const EBCellFAB&             a_E,
 						 const Box                    a_box,
@@ -415,7 +415,7 @@ namespace physics {
       /*!
 	@brief Compute diffusion coefficients. Level version. 
       */
-      virtual void compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&       a_diffco_cell,
+      virtual void compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient_cell,
 					   const Vector<LevelData<EBCellFAB>* >& a_cdr_densities,
 					   const LevelData<EBCellFAB>&           a_E,
 					   const int                             a_lvl,
@@ -424,7 +424,7 @@ namespace physics {
       /*!
 	@brief Compute diffusion coefficients on the EB. 
       */
-      virtual void compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_diffco_face,
+      virtual void compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_diffusionCoefficient_face,
 					 const Vector<EBAMRIVData*>& a_cdr_densities,
 					 const EBAMRIVData&          a_E,
 					 const Real&                 a_time);
@@ -432,7 +432,7 @@ namespace physics {
       /*!
 	@brief Compute diffusion coefficients on the EB. Level version. 
       */
-      virtual void compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> >* >&       a_diffco_eb,
+      virtual void compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> >* >&       a_ebDiffusionCoefficient,
 					 const Vector<LevelData<BaseIVFAB<Real> >* >& a_cdr_densities,
 					 const LevelData<BaseIVFAB<Real> >&           a_E,
 					 const Real&                                  a_time,
@@ -587,11 +587,11 @@ namespace physics {
       /*!
 	@brief Compute flux
       */
-      virtual void compute_flux(EBAMRCellData&       a_flux,
+      virtual void computeFlux(EBAMRCellData&       a_flux,
 				const EBAMRCellData& a_density,
 				const EBAMRCellData& a_velocity);
 
-      virtual void compute_flux(LevelData<EBCellFAB>&       a_flux,
+      virtual void computeFlux(LevelData<EBCellFAB>&       a_flux,
 				const LevelData<EBCellFAB>& a_density,
 				const LevelData<EBCellFAB>& a_velocity,
 				const int                   a_lvl);
@@ -599,7 +599,7 @@ namespace physics {
       /*!
 	@brief Compute charge flux. 
       */
-      virtual void compute_charge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>& a_cdr_flxues);
+      virtual void computeCharge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>& a_cdr_flxues);
 
 
       /*!
@@ -752,7 +752,7 @@ namespace physics {
       /*!
 	@brief Set type of source term computation
       */
-      virtual void set_source_computation();
+      virtual void setSource_computation();
 
       /*!
 	@brief Set hardcap on the time step
@@ -777,12 +777,12 @@ namespace physics {
       /*!
 	@brief Set source growth
       */
-      virtual void set_source_growth(const Real a_src_growth);
+      virtual void setSource_growth(const Real a_src_growth);
 
       /*!
 	@brief Set source growth
       */
-      virtual void set_source_growth_tolerance(const Real a_src_tolerance);
+      virtual void setSource_growth_tolerance(const Real a_src_tolerance);
 
       /*!
 	@brief Set plasma kinetics
@@ -832,7 +832,7 @@ namespace physics {
       /*!
 	@brief Set the cdr layout
       */
-      virtual void set_cdr(RefCountedPtr<cdr_layout<cdr_solver> >& a_cdr);
+      virtual void set_cdr(RefCountedPtr<cdr_layout<CdrSolver> >& a_cdr);
 
       /*!
 	@brief Set the Poisson solver
@@ -848,7 +848,7 @@ namespace physics {
 	@brief General RTE advance routine
 	@details This computes the source terms at the specified time and then advances the solution
       */
-      virtual void solve_rte(Vector<EBAMRCellData*>&       a_states,
+      virtual void solve_rte(Vector<EBAMRCellData*>&       a_phis,
 			     Vector<EBAMRCellData*>&       a_rhs,
 			     const Vector<EBAMRCellData*>& a_cdr_states,
 			     const EBAMRCellData&          a_E,
@@ -864,7 +864,7 @@ namespace physics {
       /*!
 	@brief Query about necessary number of ghost cells. This collects that from the individual solvers. 
       */
-      virtual int query_ghost();
+      virtual int queryGhost();
 
       /*!
 	@brief Compute the ohmic current on electrodes
@@ -914,7 +914,7 @@ namespace physics {
       /*!
 	@brief Get cdr solvers
       */
-      virtual RefCountedPtr<cdr_layout<cdr_solver> >& get_cdr();
+      virtual RefCountedPtr<cdr_layout<CdrSolver> >& get_cdr();
 
       /*!
 	@brief Get cdr solvers
@@ -961,7 +961,7 @@ namespace physics {
       /*!
 	@brief Time stepper class name
       */
-      std::string m_class_name;
+      std::string m_className;
 
       /*!
 	@brief Index space
@@ -976,7 +976,7 @@ namespace physics {
       /*!
 	@brief CDR solvers
       */
-      RefCountedPtr<cdr_layout<cdr_solver> > m_cdr;
+      RefCountedPtr<cdr_layout<CdrSolver> > m_cdr;
 
       /*!
 	@brief Radiative transfer solvers

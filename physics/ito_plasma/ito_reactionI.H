@@ -61,7 +61,7 @@ void ito_reaction::jump_state(Vector<long long>& a_particles,
 inline
 void ito_reaction::jump_energy(Vector<Real>& a_energies, const Vector<Real>& a_mean_energies, const long long a_num_reactions) const {
   for (const auto& r : m_energy_jumps){
-    if(this->get_state_change(r.first) < 0) { // Consuming reaction, this eats a_mean_energies.  
+    if(this->getPhi_change(r.first) < 0) { // Consuming reaction, this eats a_mean_energies.  
       a_energies[r.first] -= a_mean_energies[r.first]*a_num_reactions;
     }
     else{
@@ -78,7 +78,7 @@ void ito_reaction::jump_energy(Vector<Real>&       a_energies,
 			       const Real          a_dt) const {
 
   for (const auto& r : m_energy_jumps){
-    if(this->get_state_change(r.first) < 0) { // Consuming reaction, this eats a_mean_energies.  
+    if(this->getPhi_change(r.first) < 0) { // Consuming reaction, this eats a_mean_energies.  
       a_energies[r.first] -= a_mean_energies[r.first]*a_num_reactions;
     }
     else{
@@ -135,21 +135,21 @@ void ito_reaction::compute_state_change() {
 
   // Consumed species
   for (const auto& r : m_reactants){
-    if(m_stateChange.find(r) == m_stateChange.end()){
-      m_stateChange.emplace(r, -1);
+    if(m_phiChange.find(r) == m_phiChange.end()){
+      m_phiChange.emplace(r, -1);
     }
     else{
-      m_stateChange[r]--;
+      m_phiChange[r]--;
     }
   }
 
   // Produced species
   for (const auto& r : m_particle_products){
-    if(m_stateChange.find(r) == m_stateChange.end()){
-      m_stateChange.emplace(r, +1);
+    if(m_phiChange.find(r) == m_phiChange.end()){
+      m_phiChange.emplace(r, +1);
     }
     else{
-      m_stateChange[r]++;
+      m_phiChange[r]++;
     }
   }
 }
@@ -164,16 +164,16 @@ void ito_reaction::compute_energy_change() {
 }
 
 inline
-const std::map<int, int>& ito_reaction::get_state_change() const {
-  return m_stateChange;
+const std::map<int, int>& ito_reaction::getPhi_change() const {
+  return m_phiChange;
 }
 
 inline
-const int ito_reaction::get_state_change(const int a_idx) const {
+const int ito_reaction::getPhi_change(const int a_idx) const {
   int ret = 0;
   
-  if(m_stateChange.find(a_idx) != m_stateChange.end()){
-    ret = m_stateChange.at(a_idx);
+  if(m_phiChange.find(a_idx) != m_phiChange.end()){
+    ret = m_phiChange.at(a_idx);
   }
 
   return ret;

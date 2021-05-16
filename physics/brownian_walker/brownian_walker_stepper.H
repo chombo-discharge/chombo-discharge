@@ -32,10 +32,10 @@ namespace physics {
       void postInitialize() override;
 
       // Load balancing
-      bool loadBalanceThisRealm(const std::string a_Realm) const override;
+      bool loadBalanceThisRealm(const std::string a_realm) const override;
       void loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
 			      Vector<Vector<Box> >&            a_boxes,
-			      const std::string                a_Realm,
+			      const std::string                a_realm,
 			      const Vector<DisjointBoxLayout>& a_grids,
 			      const int                        a_lmin,
 			      const int                        a_finestLevel) override;
@@ -88,7 +88,7 @@ namespace physics {
       RefCountedPtr<ito_species> m_species;
 
       // Diffusion coefficient and velocity
-      Real m_diffco;
+      Real m_faceCenteredDiffusionCoefficient;
       Real m_omega;
 
       // Particles per cell
@@ -97,8 +97,8 @@ namespace physics {
       // Maximum hops and stuff like that
       Real m_max_cells_hop;
 
-      void set_velocity();
-      void set_velocity(const int a_level);
+      void setVelocity();
+      void setVelocity(const int a_level);
     };
   }
 }

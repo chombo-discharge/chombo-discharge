@@ -65,17 +65,17 @@ air8::air8(){
   }
 
   { // Mobile ions
-    m_mobile_ions = true;
+    m_isMobile_ions = true;
     std::string str;
 
     ParmParse pp("air8");
     if(pp.contains("mobile_ions")){
       pp.get("mobile_ions", str);
       if(str == "true"){
-	m_mobile_ions = true;
+	m_isMobile_ions = true;
       }
       else if(str == "false"){
-	m_mobile_ions = false;
+	m_isMobile_ions = false;
       }
     }
   }
@@ -223,7 +223,7 @@ Vector<RealVect> air8::compute_cdr_velocities(const Real&         a_time,
 #endif
   const Real EbyN             = (a_E/(m_N*units::s_Td)).vectorLength();
   velocities[m_electron_idx]   = -a_E*this->compute_electron_mobility(EbyN);
-  if(m_mobile_ions){
+  if(m_isMobile_ions){
     velocities[m_N2plus_idx]   =  a_E*this->compute_N2plus_mobility(EbyN);
     velocities[m_N4plus_idx]   =  a_E*this->compute_N4plus_mobility(EbyN);
     velocities[m_O2plus_idx]   =  a_E*this->compute_O2plus_mobility(EbyN);

@@ -42,7 +42,7 @@ air_eed::air_eed() {
   parse_lfa();
   parse_photoi();
   parse_see();
-  parseDomain_bc();
+  parseDomainBc();
   parse_chemistry();
 
   init_rng();                 // Initialize random number generators
@@ -108,10 +108,10 @@ void air_eed::parse_transport(){
 
   std::string str;
 
-  pp.get("mobile_electrons", str);    m_mobile_electrons    = (str == "true") ? true : false;
-  pp.get("diffusive_electrons", str); m_diffusive_electrons = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str);      m_diffusive_ions      = (str == "true") ? true : false;
-  pp.get("mobile_ions", str);         m_mobile_ions         = (str == "true") ? true : false;
+  pp.get("mobile_electrons", str);    m_isMobile_electrons    = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive_electrons = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str);      m_isDiffusive_ions      = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);         m_isMobile_ions         = (str == "true") ? true : false;
   pp.get("ion_mobility", m_ion_mobility);
   pp.get("photoi_gain", m_photoi_gain);
 
@@ -430,7 +430,7 @@ RealVect air_eed::random_direction3D(){
 }
 #endif
 
-void air_eed::parseDomain_bc(){
+void air_eed::parseDomainBc(){
 
   ParmParse pp("air_eed");
   std::string str;

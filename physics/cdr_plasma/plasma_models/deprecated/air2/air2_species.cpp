@@ -16,8 +16,8 @@ air2::electron::electron(){
   m_name      = "electron density";
   m_unit      = "m-3";
   m_charge    = -1;
-  m_diffusive = true;
-  m_mobile    = true;
+  m_isDiffusive = true;
+  m_isMobile    = true;
 
   ParmParse pp("air2");
   Vector<Real> vec(SpaceDim);
@@ -35,8 +35,8 @@ air2::positive_ion::positive_ion() {
   m_name      = "positive_ion";
   m_unit      = "m-3";
   m_charge    = 1;
-  m_diffusive = false;
-  m_mobile    = false;
+  m_isDiffusive = false;
+  m_isMobile    = false;
 
   ParmParse pp("air2");
   Vector<Real> vec(SpaceDim);

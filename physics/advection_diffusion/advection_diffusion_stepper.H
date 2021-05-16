@@ -9,7 +9,7 @@
 #define _ADVECTION_DIFFUSION_STEPPER_
 
 #include "CD_TimeStepper.H"
-#include "cdr_solver.H"
+#include "CD_CdrSolver.H"
 
 #include "CD_NamespaceHeader.H"
 namespace physics {
@@ -22,7 +22,7 @@ namespace physics {
     public:
 
       advection_diffusion_stepper();
-      advection_diffusion_stepper(RefCountedPtr<cdr_solver>& a_solver);
+      advection_diffusion_stepper(RefCountedPtr<CdrSolver>& a_solver);
       ~advection_diffusion_stepper();
 
       // Setup routines
@@ -70,12 +70,12 @@ namespace physics {
       phase::which_phase m_phase;
 
       // CDR solver & species
-      RefCountedPtr<cdr_solver>  m_solver;
+      RefCountedPtr<CdrSolver>  m_solver;
       RefCountedPtr<cdr_species> m_species;
 
       // Diffusion coefficient and velocity
       Real m_cfl;
-      Real m_diffco;
+      Real m_faceCenteredDiffusionCoefficient;
       Real m_omega;
 
       // Use stochastic diffusion
@@ -87,8 +87,8 @@ namespace physics {
       // Verbosity
       int m_verbosity;
 
-      void set_velocity();
-      void set_velocity(const int a_level);
+      void setVelocity();
+      void setVelocity(const int a_level);
 
     private:
 

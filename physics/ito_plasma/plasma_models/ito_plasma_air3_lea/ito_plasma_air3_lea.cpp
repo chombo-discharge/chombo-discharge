@@ -206,8 +206,8 @@ Real ito_plasma_air3_lea::photo_rate(const Real a_E) const {
 
 ito_plasma_air3_lea::electron::electron(const lookup_table& a_mobility, const lookup_table& a_diffusion) : m_mobility(a_mobility),
 													   m_diffusion(a_diffusion) {
-  m_mobile    = true;
-  m_diffusive = true;
+  m_isMobile    = true;
+  m_isDiffusive = true;
   m_name      = "electron";
   m_charge    = -1;
 													   }
@@ -227,8 +227,8 @@ Real ito_plasma_air3_lea::electron::diffusion(const Real a_energy) const {
 }
 
 ito_plasma_air3_lea::positive::positive(){
-  m_mobile    = false;
-  m_diffusive = false;
+  m_isMobile    = false;
+  m_isDiffusive = false;
   m_name      = "positive";
   m_charge    = 1;
 }  
@@ -238,8 +238,8 @@ ito_plasma_air3_lea::positive::~positive(){
 }
 
 ito_plasma_air3_lea::negative::negative(){
-  m_mobile    = false;
-  m_diffusive = false;
+  m_isMobile    = false;
+  m_isDiffusive = false;
   m_name      = "negative";
   m_charge    = -1;
 }  

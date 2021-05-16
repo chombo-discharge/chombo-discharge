@@ -14,13 +14,13 @@
 #include "CD_NamespaceHeader.H"
 using namespace physics::advection_diffusion;
 
-advection_diffusion_tagger::advection_diffusion_tagger(RefCountedPtr<cdr_solver>& a_solver,
+advection_diffusion_tagger::advection_diffusion_tagger(RefCountedPtr<CdrSolver>& a_solver,
 						       RefCountedPtr<AmrMesh>&   a_amr){
   m_solver    = a_solver;
   m_amr       = a_amr;
   m_name      = "advection_diffusion";
   m_verbosity = -1;
-  m_Realm     = a_solver->get_Realm();
+  m_Realm     = a_solver->getRealm();
 }
 
 
@@ -47,7 +47,7 @@ bool advection_diffusion_tagger::tagCells(EBAMRTags& a_tags){
   m_amr->allocate(sca, m_Realm, phase::gas, 1);
   m_amr->allocate(vec, m_Realm, phase::gas, SpaceDim);
 
-  const EBAMRCellData& state = m_solver->get_state();
+  const EBAMRCellData& state = m_solver->getPhi();
 
   // Compute the gradient, vec = grad(phi)
   m_amr->computeGradient(vec, state, m_Realm, phase::gas); // vec = grad(phi)

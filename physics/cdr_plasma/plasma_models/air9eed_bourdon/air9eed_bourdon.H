@@ -139,9 +139,9 @@ namespace physics {
 
       std::string m_transport_file;
 
-      bool m_mobile_ions;
-      bool m_diffusive_ions;
-      bool m_diffusive_electrons;
+      bool m_isMobile_ions;
+      bool m_isDiffusive_ions;
+      bool m_isDiffusive_electrons;
 
       int m_uniform_tables;
 

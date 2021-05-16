@@ -99,7 +99,7 @@ ebconductivityopfactory:: ebconductivityopfactory(const Vector<EBLevelGrid>&    
   m_fastFR        = a_fastFR;
   m_ghostCellsRhs = a_ghostCellsRhs;
   m_ghostCellsPhi = a_ghostCellsPhi;
-  m_acoef         = a_acoef;
+  m_aCoefficientef         = a_acoef;
   m_bcoef         = a_bcoef;
   m_bcoefIrreg    = a_bcoefIrreg;
   m_alpha         = a_alpha;
@@ -128,7 +128,7 @@ ebconductivityopfactory:: ebconductivityopfactory(const Vector<EBLevelGrid>&    
   m_beta = a_beta;
 
   m_eblgsMG.resize(m_numLevels);
-  m_acoefMG.resize(m_numLevels);
+  m_aCoefficientefMG.resize(m_numLevels);
   m_bcoefMG.resize(m_numLevels);
   m_bcoefIrregMG.resize(m_numLevels);
   m_hasMGObjects.resize(m_numLevels);
@@ -138,11 +138,11 @@ ebconductivityopfactory:: ebconductivityopfactory(const Vector<EBLevelGrid>&    
 
       int mgRef = 2;
       m_eblgsMG[ilev]     .resize(0);
-      m_acoefMG[ilev]     .resize(0);
+      m_aCoefficientefMG[ilev]     .resize(0);
       m_bcoefMG[ilev]     .resize(0);
       m_bcoefIrregMG[ilev].resize(0);
       m_eblgsMG[ilev]     .push_back(m_eblgs[ilev]);
-      m_acoefMG[ilev]     .push_back(m_acoef[ilev]);
+      m_aCoefficientefMG[ilev]     .push_back(m_aCoefficientef[ilev]);
       m_bcoefMG[ilev]     .push_back(m_bcoef[ilev]);
       m_bcoefIrregMG[ilev].push_back(m_bcoefIrreg[ilev]);
 
@@ -199,10 +199,10 @@ ebconductivityopfactory:: ebconductivityopfactory(const Vector<EBLevelGrid>&    
 	  RefCountedPtr<LevelData<EBFluxFAB> >        bcoefCoar(new LevelData<EBFluxFAB>(            eblgCoar.getDBL(), 1, nghost*IntVect::Unit, ebfluxfact) );
 
 	  // Coarsen coefficients
-	  coarsen_stuff(*acoefCoar, *bcoefCoar, *bcoefIrregCoar, eblgFine, eblgCoar, *m_acoefMG[ilev][img-1], *m_bcoefMG[ilev][img-1], *m_bcoefIrregMG[ilev][img-1], mgRef);
+	  coarsen_stuff(*acoefCoar, *bcoefCoar, *bcoefIrregCoar, eblgFine, eblgCoar, *m_aCoefficientefMG[ilev][img-1], *m_bcoefMG[ilev][img-1], *m_bcoefIrregMG[ilev][img-1], mgRef);
 
 	  // Move them to appropriate multigrid level
-	  m_acoefMG[ilev].push_back(acoefCoar);
+	  m_aCoefficientefMG[ilev].push_back(acoefCoar);
 	  m_bcoefMG[ilev].push_back(bcoefCoar);
 	  m_bcoefIrregMG[ilev].push_back(bcoefIrregCoar);
 	}
@@ -253,7 +253,7 @@ ebconductivityop* ebconductivityopfactory::MGnewOp(const ProblemDomain& a_domain
   if (a_depth == 0){
     eblgMGLevel    = m_eblgs[ref];
 
-    acoef = m_acoef[ref];
+    acoef = m_aCoefficientef[ref];
 
     bcoef          = m_bcoef[ref];
     bcoefIrreg     = m_bcoefIrreg[ref];
@@ -278,7 +278,7 @@ ebconductivityop* ebconductivityopfactory::MGnewOp(const ProblemDomain& a_domain
     for (int img = 0; img < numMGLevels; img++){
       if (m_eblgsMG[ref][img].getDomain() == domainBoxMGLevel){
 	eblgMGLevel = m_eblgsMG[ref][img];
-	acoef = m_acoefMG[ref][img];
+	acoef = m_aCoefficientefMG[ref][img];
 	bcoef = m_bcoefMG[ref][img];
 	bcoefIrreg  = m_bcoefIrregMG[ref][img];
 	foundMGLevel = true;
@@ -390,7 +390,7 @@ ebconductivityop* ebconductivityopfactory::AMRnewOp(const ProblemDomain& a_domai
   newOp = new ebconductivityop(eblgFine, eblgMGLevel, eblgCoar, eblgCoarMG, m_quadCFI[ref], m_fastFR[ref],
 			       dombc, ebbc,  dxMGLevel,dxCoar, refToFiner, refToCoarser,
 			       hasFine, hasCoar, hasCoarMGObjects,  layoutChanged,
-			       m_alpha, m_beta, m_acoef[ref], m_bcoef[ref], m_bcoefIrreg[ref],
+			       m_alpha, m_beta, m_aCoefficientef[ref], m_bcoef[ref], m_bcoefIrreg[ref],
 			       m_ghostCellsPhi, m_ghostCellsRhs, m_relaxType);
 
   return newOp;

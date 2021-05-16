@@ -18,8 +18,8 @@ air9eed_bourdon::eed::eed(){
   m_name      = "eed";
   m_unit      = "eVm-3";
   m_charge    = 0;
-  m_diffusive = true;
-  m_mobile    = true;
+  m_isDiffusive = true;
+  m_isMobile    = true;
 
   // Get gas parameters
   Real Tg, p, N, O2frac, N2frac;
@@ -34,8 +34,8 @@ air9eed_bourdon::electron::electron(){
   m_name   = "electron";
   m_unit   = "m-3";
   m_charge = -1;
-  m_diffusive = true;
-  m_mobile = true;
+  m_isDiffusive = true;
+  m_isMobile = true;
 
   {// Get initial parameter
     ParmParse pp("air9eed_bourdon");
@@ -51,8 +51,8 @@ air9eed_bourdon::N2plus::N2plus() {
   m_name   = "N2plus";
   m_unit   = "m-3";
   m_charge = 1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   Real Tg, p, N, O2frac, N2frac;
   air9eed_bourdon::parse_gas_parameters(Tg, p, N, O2frac, N2frac);
@@ -64,10 +64,10 @@ air9eed_bourdon::N2plus::N2plus() {
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }
@@ -80,18 +80,18 @@ air9eed_bourdon::N4plus::N4plus(){
   m_name   = "N4plus";
   m_unit   = "m-3";
   m_charge = 1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   std::string str;
   ParmParse pp("air9eed_bourdon");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }
@@ -104,8 +104,8 @@ air9eed_bourdon::O2plus::O2plus(){
   m_name   = "O2plus";
   m_unit   = "m-3";
   m_charge = 1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   Real Tg, p, N, O2frac, N2frac;
   air9eed_bourdon::parse_gas_parameters(Tg, p, N, O2frac, N2frac);
@@ -117,10 +117,10 @@ air9eed_bourdon::O2plus::O2plus(){
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }
@@ -133,18 +133,18 @@ air9eed_bourdon::O4plus::O4plus(){
   m_name   = "O4plus";
   m_unit   = "m-3";
   m_charge = 1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   std::string str;
   ParmParse pp("air9eed_bourdon");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }
@@ -157,18 +157,18 @@ air9eed_bourdon::O2plusN2::O2plusN2() {
   m_name   = "O2plusN2";
   m_unit   = "m-3";
   m_charge = 1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   std::string str;
   ParmParse pp("air9eed_bourdon");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }
@@ -181,18 +181,18 @@ air9eed_bourdon::O2minus::O2minus(){
   m_name   = "O2minus";
   m_unit   = "m-3";
   m_charge = -1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   std::string str;
   ParmParse pp("air9eed_bourdon");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }
@@ -205,18 +205,18 @@ air9eed_bourdon::Ominus::Ominus(){
   m_name   = "Ominus";
   m_unit   = "m-3";
   m_charge = -1;
-  m_diffusive = false;
-  m_mobile = true;
+  m_isDiffusive = false;
+  m_isMobile = true;
 
   std::string str;
   ParmParse pp("air9eed_bourdon");
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
     if(str == "true"){
-      m_mobile = true;
+      m_isMobile = true;
     }
     else if(str == "false"){
-      m_mobile = false;
+      m_isMobile = false;
     }
   }
 }

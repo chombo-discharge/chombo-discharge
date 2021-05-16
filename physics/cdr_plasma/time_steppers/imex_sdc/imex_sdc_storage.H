@@ -22,7 +22,7 @@ namespace physics {
 
       cdr_storage();
       cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		  const std::string              a_Realm,
+		  const std::string              a_realm,
 		  const phase::which_phase       a_phase,
 		  const int m_ncomp);
       ~cdr_storage();
@@ -96,7 +96,7 @@ namespace physics {
 
       poisson_storage();
       poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		      const std::string              a_Realm,
+		      const std::string              a_realm,
 		      const phase::which_phase       a_phase,
 		      const int                      a_ncomp);
       ~poisson_storage();
@@ -130,7 +130,7 @@ namespace physics {
 
       rte_storage();
       rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		  const std::string              a_Realm,
+		  const std::string              a_realm,
 		  const phase::which_phase       a_phase,
 		  const int                      a_ncomp);
       ~rte_storage();
@@ -160,7 +160,7 @@ namespace physics {
 
       sigma_storage();
       sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		    const std::string              a_Realm,
+		    const std::string              a_realm,
 		    const phase::which_phase       a_phase,
 		    const int                      a_ncomp);
       ~sigma_storage();

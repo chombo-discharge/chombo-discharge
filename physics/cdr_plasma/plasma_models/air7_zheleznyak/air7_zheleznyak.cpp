@@ -42,7 +42,7 @@ air7_zheleznyak::air7_zheleznyak() {
   parse_eta();
   parse_temperature();
   parse_see();
-  parseDomain_bc();
+  parseDomainBc();
   init_rng();                 // Initialize random number generators
 }
 
@@ -119,10 +119,10 @@ void air7_zheleznyak::parse_transport(){
   std::string str;
 
   pp.get("use_alpha_corr", str);      m_alpha_corr          = (str == "true") ? true : false;
-  pp.get("mobile_electrons", str);    m_mobile_electrons    = (str == "true") ? true : false;
-  pp.get("diffusive_electrons", str); m_diffusive_electrons = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str);      m_diffusive_ions      = (str == "true") ? true : false;
-  pp.get("mobile_ions", str);         m_mobile_ions         = (str == "true") ? true : false;
+  pp.get("mobile_electrons", str);    m_isMobile_electrons    = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive_electrons = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str);      m_isDiffusive_ions      = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);         m_isMobile_ions         = (str == "true") ? true : false;
   
   pp.get("ion_mobility", m_ion_mobility);
 
@@ -247,7 +247,7 @@ void air7_zheleznyak::instantiate_species(){
 
 }
 
-void air7_zheleznyak::parseDomain_bc(){
+void air7_zheleznyak::parseDomainBc(){
 
   ParmParse pp("air7_zheleznyak");
   std::string str;
@@ -591,7 +591,7 @@ Vector<Real> air7_zheleznyak::compute_cdr_diffusion_coefficients(const Real     
 
   Vector<Real> dco(m_num_cdr_species, 0.0);
   dco[m_elec_idx] = m_e_diffco.get_entry(a_E.vectorLength());
-  if(m_diffusive_ions){
+  if(m_isDiffusive_ions){
     dco[m_N2plus_idx]   = m_ion_diffusion;
     dco[m_O2plus_idx]   = m_ion_diffusion;
     dco[m_N4plus_idx]   = m_ion_diffusion;
@@ -611,7 +611,7 @@ Vector<RealVect> air7_zheleznyak::compute_cdr_velocities(const Real         a_ti
   Vector<RealVect> vel(m_num_cdr_species, RealVect::Zero);
 
   vel[m_elec_idx] = -a_E*m_e_mobility.get_entry(a_E.vectorLength());
-  if(m_mobile_ions){
+  if(m_isMobile_ions){
     vel[m_N2plus_idx]   =  a_E*m_ion_mobility;
     vel[m_O2plus_idx]   =  a_E*m_ion_mobility;
     vel[m_N4plus_idx]   =  a_E*m_ion_mobility;

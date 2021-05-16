@@ -14,22 +14,22 @@
 
 sigma_solver::sigma_solver(){
 
-  this->set_verbosity(-1);
-  this->set_phase(phase::gas);
+  this->setVerbosity(-1);
+  this->setPhase(phase::gas);
   this->set_plot_variables();
-  this->set_Realm(Realm::Primal);
+  this->setRealm(Realm::Primal);
 }
 
 sigma_solver::~sigma_solver(){
 
 }
 
-const std::string sigma_solver::get_Realm() const {
+const std::string sigma_solver::getRealm() const {
   return m_Realm;
 }
 
-void sigma_solver::set_Realm(const std::string a_Realm){
-  m_Realm = a_Realm;
+void sigma_solver::setRealm(const std::string a_realm){
+  m_Realm = a_realm;
 }
 
 void sigma_solver::allocateInternals(){
@@ -41,7 +41,7 @@ void sigma_solver::allocateInternals(){
   const int comp  = 0;
   const int ncomp = 1;
   
-  m_amr->allocate(m_state, m_Realm, m_phase, ncomp);
+  m_amr->allocate(m_phi, m_Realm, m_phase, ncomp);
   m_amr->allocate(m_flux,  m_Realm, m_phase, ncomp);
 }
 
@@ -58,7 +58,7 @@ void sigma_solver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
   data_ops::set_value(m_cache, 0.0);
   
   for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++){
-    m_state[lvl]->localCopyTo(*m_cache[lvl]);
+    m_phi[lvl]->localCopyTo(*m_cache[lvl]);
   }
 }
 
@@ -78,7 +78,7 @@ void sigma_solver::deallocateInternals(){
     pout() << "sigma_solver::deallocateInternals" << endl;
   }
   
-  m_amr->deallocate(m_state);
+  m_amr->deallocate(m_phi);
   m_amr->deallocate(m_flux);
 }
 
@@ -97,11 +97,11 @@ void sigma_solver::regrid(const int a_lmin, const int a_oldFinestLevel, const in
 
   this->allocateInternals();
 
-  data_ops::set_value(m_state, 0.0);
+  data_ops::set_value(m_phi, 0.0);
 
   // These levels have never changed
   for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
-    m_cache[lvl]->copyTo(*m_state[lvl]); 
+    m_cache[lvl]->copyTo(*m_phi[lvl]); 
   }
 
   // These levels have changed
@@ -133,16 +133,16 @@ void sigma_solver::regrid(const int a_lmin, const int a_oldFinestLevel, const in
 
     // Allocate storage for coarsened data
     BaseIVFactory<Real> ivfact(coar_ebisl, sets);
-    LevelData<BaseIVFAB<Real> > coarsened_fine_data(coar_grid, ncomp, m_state[0]->ghostVect(), ivfact);
+    LevelData<BaseIVFAB<Real> > coarsened_fine_data(coar_grid, ncomp, m_phi[0]->ghostVect(), ivfact);
 
     //
     EBLevelDataOps::setVal(coarsened_fine_data, 0.0);
-    m_state[lvl-1]->copyTo(coarsened_fine_data);
+    m_phi[lvl-1]->copyTo(coarsened_fine_data);
 
 
     // Loop through coarse grid and interpolate to fine grid
     for (DataIterator dit = coar_grid.dataIterator(); dit.ok(); ++dit){
-      BaseIVFAB<Real>& fine_state       = (*m_state[lvl])[dit()];
+      BaseIVFAB<Real>& fine_state       = (*m_phi[lvl])[dit()];
       const BaseIVFAB<Real>& coar_state = coarsened_fine_data[dit()];
       const EBISBox& coar_ebisbox       = coar_ebisl[dit()];
       const EBISBox& fine_ebisbox       = fine_ebisl[dit()];
@@ -174,11 +174,11 @@ void sigma_solver::regrid(const int a_lmin, const int a_oldFinestLevel, const in
 
     // If data already exists, it takes precedence
     if (lvl <= a_oldFinestLevel){
-      m_cache[lvl]->copyTo(*m_state[lvl]);
+      m_cache[lvl]->copyTo(*m_phi[lvl]);
     }
   }
 
-  this->reset_cells(m_state);
+  this->reset_cells(m_phi);
 }
 
 void sigma_solver::registerOperators(){
@@ -245,10 +245,10 @@ void sigma_solver::setComputationalGeometry(const RefCountedPtr<computational_ge
   m_multifluidIndexSpace     = m_computationalGeometry->get_mfis();
 }
 
-void sigma_solver::set_phase(phase::which_phase a_phase){
-  CH_TIME("sigma_solver::set_phase");
+void sigma_solver::setPhase(phase::which_phase a_phase){
+  CH_TIME("sigma_solver::setPhase");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::set_phase" << endl;
+    pout() << "sigma_solver::setPhase" << endl;
   }
 
   m_phase = a_phase;
@@ -263,10 +263,10 @@ void sigma_solver::set_sigma(const EBAMRIVData& a_sigma){
   const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_sigma[lvl]->localCopyTo(*m_state[lvl]);
+    a_sigma[lvl]->localCopyTo(*m_phi[lvl]);
   }
 
-  this->reset_cells(m_state);
+  this->reset_cells(m_phi);
 }
 
 void sigma_solver::set_sigma(const Real a_sigma){
@@ -278,30 +278,30 @@ void sigma_solver::set_sigma(const Real a_sigma){
   const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::set_value(*m_state[lvl], a_sigma);
+    data_ops::set_value(*m_phi[lvl], a_sigma);
   }
 
-  this->reset_cells(m_state);
+  this->reset_cells(m_phi);
 }
 
-void sigma_solver::set_verbosity(const int a_verbosity){
-  CH_TIME("sigma_solver::set_verbosity");
+void sigma_solver::setVerbosity(const int a_verbosity){
+  CH_TIME("sigma_solver::setVerbosity");
   m_verbosity = a_verbosity;
   
   if(m_verbosity > 5){
-    pout() << "sigma_solver::set_verbosity" << endl;
+    pout() << "sigma_solver::setVerbosity" << endl;
   }
   
 
 }
 
-void sigma_solver::set_time(const int a_step, const Real a_time, const Real a_dt){
-  CH_TIME("sigma_solver::set_time");
+void sigma_solver::setTime(const int a_step, const Real a_time, const Real a_dt){
+  CH_TIME("sigma_solver::setTime");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::set_time" << endl;
+    pout() << "sigma_solver::setTime" << endl;
   }
   
-  m_step = a_step;
+  m_timeStep = a_step;
   m_time = a_time;
   m_dt   = a_dt;
 }
@@ -315,7 +315,7 @@ void sigma_solver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level)
   EBCellFactory fact(m_amr->getEBISLayout(m_Realm, phase::gas)[a_level]);
   LevelData<EBCellFAB> scratch(m_amr->getGrids(m_Realm)[a_level], 1, 3*IntVect::Unit, fact);
   data_ops::set_value(scratch, 0.0);
-  data_ops::incr(scratch, *m_state[a_level], 1.0);
+  data_ops::incr(scratch, *m_phi[a_level], 1.0);
 
   // Write state vector
   write(a_handle, scratch, "sigma");
@@ -336,8 +336,8 @@ void sigma_solver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   read<EBCellFAB>(a_handle, scratch, "sigma", dbl, Interval(0,0), false);
 
 		     
-  data_ops::set_value(*m_state[a_level], 0.0);
-  data_ops::incr(*m_state[a_level], scratch, 1.0);
+  data_ops::set_value(*m_phi[a_level], 0.0);
+  data_ops::incr(*m_phi[a_level], scratch, 1.0);
 }
 
 void sigma_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
@@ -353,7 +353,7 @@ void sigma_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
 
   // Write sigma
   data_ops::set_value(scratch, 0.0);
-  data_ops::incr(scratch, m_state, 1.0);
+  data_ops::incr(scratch, m_phi, 1.0);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
   }
@@ -374,13 +374,13 @@ void sigma_solver::set_plot_variables(){
     pout() << "sigma_solver::set_plot_variables" << endl;
   }
 
-  m_plot_phi = true;
+  m_plotPhi = true;
 }
 
-int sigma_solver::get_num_plotvars(){
-  CH_TIME("sigma_solver::get_num_plotvars");
+int sigma_solver::getNumberOfPlotVariables(){
+  CH_TIME("sigma_solver::getNumberOfPlotVariables");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::get_num_plotvars" << endl;
+    pout() << "sigma_solver::getNumberOfPlotVariables" << endl;
   }
   
   return 2;
@@ -388,9 +388,9 @@ int sigma_solver::get_num_plotvars(){
   
   
 Vector<std::string> sigma_solver::get_plotVariableNames() const{
-  CH_TIME("sigma_solver::get_num_plotvars");
+  CH_TIME("sigma_solver::getNumberOfPlotVariables");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::get_num_plotvars" << endl;
+    pout() << "sigma_solver::getNumberOfPlotVariables" << endl;
   }
   Vector<std::string> ret(2);
 
@@ -401,13 +401,13 @@ Vector<std::string> sigma_solver::get_plotVariableNames() const{
 }
 
 
-Real sigma_solver::compute_charge(){
-  CH_TIME("sigma_solver::compute_charge");
+Real sigma_solver::computeCharge(){
+  CH_TIME("sigma_solver::computeCharge");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::compute_charge" << endl;
+    pout() << "sigma_solver::computeCharge" << endl;
   }
 
-  m_amr->averageDown(m_state, m_Realm, m_phase);
+  m_amr->averageDown(m_phi, m_Realm, m_phase);
 
   Real charge = 0.0;
 
@@ -426,7 +426,7 @@ Real sigma_solver::compute_charge(){
       const VolIndex& vof = vofit();
       const Real& area    = ebisbox.bndryArea(vof);
 
-      charge += area*(*m_state[0])[dit()](vof, comp);
+      charge += area*(*m_phi[0])[dit()](vof, comp);
     }
   }
 
@@ -435,8 +435,8 @@ Real sigma_solver::compute_charge(){
   return charge*dx;
 }
 
-EBAMRIVData& sigma_solver::get_state(){
-  return m_state;
+EBAMRIVData& sigma_solver::getPhi(){
+  return m_phi;
 }
 
 EBAMRIVData& sigma_solver::get_flux(){

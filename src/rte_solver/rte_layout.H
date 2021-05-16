@@ -40,12 +40,12 @@ public:
   /*!
     @brief Get Realm
   */
-  virtual const std::string get_Realm() const;
+  virtual const std::string getRealm() const;
 
   /*!
     @brief Set Realm
   */
-  virtual void set_Realm(const std::string a_Realm);
+  virtual void setRealm(const std::string a_realm);
 
   /*!
     @brief Add solver
@@ -106,27 +106,27 @@ public:
     @brief Set phase
     @details This must be done BEFORE callilng setComputationalGeometry
   */
-  virtual void set_phase(phase::which_phase a_phase = phase::gas);
+  virtual void setPhase(phase::which_phase a_phase = phase::gas);
 
   /*!
     @brief Set verbosity.
   */
-  virtual void set_verbosity(const int a_verbosity);
+  virtual void setVerbosity(const int a_verbosity);
 
   /*!
     @brief Set time
   */
-  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
+  virtual void setTime(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Convenience function. Set source terms for all species. Mostly used for debugging. 
   */
-  virtual void set_source(const EBAMRCellData& a_source);
+  virtual void setSource(const EBAMRCellData& a_source);
 
   /*!
     @brief Convenience function. Set constant source terms for all species. Mostly used for debugging. 
   */
-  virtual void set_source(const Real a_source);
+  virtual void setSource(const Real a_source);
 
   /*!
     @brief Turn on/off stationary
@@ -172,12 +172,12 @@ public:
   /*!
     @brief Get all source terms
   */
-  virtual Vector<EBAMRCellData*> get_sources();
+  virtual Vector<EBAMRCellData*> getSources();
 
   /*!
     @brief Get all states
   */
-  virtual Vector<EBAMRCellData*> get_states();
+  virtual Vector<EBAMRCellData*> getPhis();
 
 protected:
 

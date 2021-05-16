@@ -18,7 +18,7 @@ ExtrapAdvectBCFactory s_physibc;
 #include "CD_NamespaceHeader.H"
 
 cdr_gdnv::cdr_gdnv() : cdr_tga() {
-  m_class_name = "cdr_gdnv";
+  m_className = "cdr_gdnv";
   m_name       = "cdr_gdnv";
 }
 
@@ -32,14 +32,14 @@ void cdr_gdnv::parseOptions(){
     pout() << m_name + "::parseOptions" << endl;
   }
   
-  parseDomain_bc();     // Parses domain BC options
+  parseDomainBc();     // Parses domain BC options
   parse_slopelim();      // Parses slope limiter settings
   parsePlotVariables();     // Parses plot variables
-  parse_plotmode();      // Parse plot mdoe
+  parsePlotMode();      // Parse plot mdoe
   parse_gmg_settings();  // Parses solver parameters for geometric multigrid
-  parse_extrap_source(); // Parse source term extrapolation for time-centering advective comps
-  parse_rng_seed();      // Get a seed
-  parse_conservation();  // Nonlinear divergence blending
+  parseExtrapolateSourceTerm(); // Parse source term extrapolation for time-centering advective comps
+  parseRngSeed();      // Get a seed
+  parseDivergenceComputation();  // Nonlinear divergence blending
 }
 
 void cdr_gdnv::parseRuntimeOptions(){
@@ -50,43 +50,43 @@ void cdr_gdnv::parseRuntimeOptions(){
 
   parse_slopelim();
   parsePlotVariables();
-  parse_plotmode();
+  parsePlotMode();
   parse_gmg_settings();
-  parseDomain_bc();
-  parse_extrap_source();
-  parse_conservation();
+  parseDomainBc();
+  parseExtrapolateSourceTerm();
+  parseDivergenceComputation();
 }
 
 void cdr_gdnv::parse_slopelim(){
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("limit_slopes", str);
   m_slopelim = (str == "true") ? true : false;
 }
 
-int cdr_gdnv::query_ghost() const {
+int cdr_gdnv::queryGhost() const {
   return 3;
 }
 
-void cdr_gdnv::average_velo_to_faces(){
-  CH_TIME("cdr_gdnv::average_velo_to_faces(public, full)");
+void cdr_gdnv::averageVelocityToFaces(){
+  CH_TIME("cdr_gdnv::averageVelocityToFaces(public, full)");
   if(m_verbosity > 5){
-    pout() << m_name + "::average_velo_to_faces(public, full)" << endl;
+    pout() << m_name + "::averageVelocityToFaces(public, full)" << endl;
   }
-  this->average_velo_to_faces(m_velo_face, m_velo_cell); // Average velocities to face centers for all levels
+  this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity); // Average velocities to face centers for all levels
 }
 
-void cdr_gdnv::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell){
-  CH_TIME("cdr_gdnv::average_velo_to_faces");
+void cdr_gdnv::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCellData& a_cellVelocity){
+  CH_TIME("cdr_gdnv::averageVelocityToFaces");
   if(m_verbosity > 5){
-    pout() << m_name + "::average_velo_to_faces" << endl;
+    pout() << m_name + "::averageVelocityToFaces" << endl;
   }
 
   const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::average_cell_to_face(*a_velo_face[lvl], *a_velo_cell[lvl], m_amr->getDomains()[lvl]);
-    a_velo_face[lvl]->exchange();
+    data_ops::average_cell_to_face(*a_faceVelocity[lvl], *a_cellVelocity[lvl], m_amr->getDomains()[lvl]);
+    a_faceVelocity[lvl]->exchange();
   }
 
   // Fix up boundary velocities to ensure no influx. This is (probably) the easiest way to handle this for cdr_gdnv
@@ -96,7 +96,7 @@ void cdr_gdnv::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCell
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm, m_phase)[lvl];
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-      EBFluxFAB& velo = (*a_velo_face[lvl])[dit()];
+      EBFluxFAB& velo = (*a_faceVelocity[lvl])[dit()];
       for (int dir = 0; dir < SpaceDim; dir++){
 	for (SideIterator sit; sit.ok(); ++sit){
 	  Box box   = dbl.get(dit());
@@ -135,18 +135,18 @@ void cdr_gdnv::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCell
 }
 
 void cdr_gdnv::allocateInternals(){
-  CH_TIME("cdr_solver::allocateInternals");
+  CH_TIME("CdrSolver::allocateInternals");
   if(m_verbosity > 5){
     pout() << m_name + "::allocateInternals" << endl;
   }
 
-  cdr_solver::allocateInternals();
+  CdrSolver::allocateInternals();
 
-  if(m_diffusive){
+  if(m_isDiffusive){
     this->setup_gmg();
   }
 
-  if(m_mobile){
+  if(m_isMobile){
     const Vector<RefCountedPtr<EBLevelGrid> >& eblgs = m_amr->getEBLevelGrid(m_Realm, m_phase);
     const Vector<DisjointBoxLayout>& grids           = m_amr->getGrids(m_Realm);
     const Vector<int>& ref_ratios                    = m_amr->getRefinementRatios();
@@ -182,24 +182,24 @@ void cdr_gdnv::allocateInternals(){
   }
 }
   
-void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt){
+void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt){
   CH_TIME("cdr_gdnv::advect_to_faces");
   if(m_verbosity > 5){
     pout() << m_name + "::advect_to_faces" << endl;
   }
 
   // Compute source for extrapolation
-  if(m_extrap_source && a_extrap_dt > 0.0){
+  if(m_extrapolateSourceTerm && a_extrapDt > 0.0){
 #if 0 // R.M. April 2020 - disabling this for now. 
-    if(m_diffusive){
+    if(m_isDiffusive){
       const int finest_level = m_amr->getFinestLevel();
       Vector<LevelData<EBCellFAB>* > scratchAlias, stateAlias;
       m_amr->alias(scratchAlias, m_scratch);
-      m_amr->alias(stateAlias,   a_state);
+      m_amr->alias(stateAlias,   a_phi);
       m_gmg_solver->computeAMROperator(scratchAlias, stateAlias, finest_level, 0, false);
 
       // computeAMROperator fucks my ghost cells. 
-      m_amr->interpGhostPwl(const_cast<EBAMRCellData&> (a_state), m_Realm, m_phase);
+      m_amr->interpGhostPwl(const_cast<EBAMRCellData&> (a_phi), m_Realm, m_phase);
     }
 #endif
 
@@ -220,10 +220,10 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
 
     for (DataIterator dit = dbl.dataIterator();dit.ok(); ++dit){
 
-      EBFluxFAB& extrap_state   = (*a_face_state[lvl])[dit()];
-      const EBCellFAB& state    = (*a_state[lvl])[dit()];
-      const EBCellFAB& cell_vel = (*m_velo_cell[lvl])[dit()];
-      const EBFluxFAB& face_vel = (*m_velo_face[lvl])[dit()];
+      EBFluxFAB& extrap_state   = (*a_facePhi[lvl])[dit()];
+      const EBCellFAB& state    = (*a_phi[lvl])[dit()];
+      const EBCellFAB& cell_vel = (*m_cellVelocity[lvl])[dit()];
+      const EBFluxFAB& face_vel = (*m_faceVelocity[lvl])[dit()];
       const EBCellFAB& source   = (*m_scratch[lvl])[dit()];
       const EBISBox& ebisbox    = ebisl[dit()];
       const Box& box            = dbl.get(dit());
@@ -236,7 +236,7 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
       ebpatchad.setEBPhysIBC(s_physibc);
       ebpatchad.setCurComp(0);
 
-      ebpatchad.extrapolateBCG(extrap_state, state, source, dit(), time, a_extrap_dt);
+      ebpatchad.extrapolateBCG(extrap_state, state, source, dit(), time, a_extrapDt);
     }
   }
 }

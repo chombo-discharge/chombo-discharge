@@ -117,8 +117,8 @@ advection_kinetics::phi_advect::phi_advect() {
 
   m_name      = "phi";
   m_unit      = "m-3";
-  m_diffusive = false;
-  m_mobile    = true;
+  m_isDiffusive = false;
+  m_isMobile    = true;
   m_charge    = 1;
   m_pulse     = "square";
   
@@ -139,7 +139,7 @@ advection_kinetics::phi_advect::phi_advect() {
     if(pp.contains("mobile")){
       pp.get("mobile", str);
       if(str == "false"){
-	m_mobile = false;
+	m_isMobile = false;
       }
     }
     if(pp.contains("pulse_shape")){

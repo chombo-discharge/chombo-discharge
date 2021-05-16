@@ -7,8 +7,8 @@ air6_mc8::electron::electron(){
   ParmParse pp("air6_mc8");
   std::string str;
   
-  pp.get("mobile_electrons", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_electrons", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_electrons", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
 air6_mc8::M_plus::M_plus(){
@@ -17,8 +17,8 @@ air6_mc8::M_plus::M_plus(){
   ParmParse pp("air6_mc8");
   std::string str;
   
-  pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
 air6_mc8::M_minus::M_minus(){
@@ -27,26 +27,26 @@ air6_mc8::M_minus::M_minus(){
   ParmParse pp("air6_mc8");
   std::string str;
   
-  pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
 air6_mc8::N2_c4v0::N2_c4v0(){
   m_name      = "N2_c4v0";
-  m_mobile    = false;
-  m_diffusive = false;
+  m_isMobile    = false;
+  m_isDiffusive = false;
 }
 
 air6_mc8::N2_c4v1::N2_c4v1(){
   m_name      = "N2_c4v1";
-  m_mobile    = false;
-  m_diffusive = false;
+  m_isMobile    = false;
+  m_isDiffusive = false;
 }
 
 air6_mc8::N2_b1v1::N2_b1v1(){
   m_name      = "N2_b1v1";
-  m_mobile    = false;
-  m_diffusive = false;
+  m_isMobile    = false;
+  m_isDiffusive = false;
 }
 
 air6_mc8::phot_c4v0_X1v0::phot_c4v0_X1v0(){

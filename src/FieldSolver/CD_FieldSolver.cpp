@@ -393,12 +393,12 @@ void FieldSolver::setTime(const int a_timeStep, const Real a_time, const Real a_
   m_dt       = a_dt;
 }
 
-void FieldSolver::setRealm(const std::string a_Realm){
+void FieldSolver::setRealm(const std::string a_realm){
   CH_TIME("FieldSolver::setRealm");
   if(m_verbosity > 5){
     pout() << "FieldSolver::setRealm" << endl;
   }  
-  m_Realm = a_Realm;
+  m_Realm = a_realm;
 }
 
 const std::string FieldSolver::getRealm() const{
@@ -794,7 +794,7 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
   const Interval dst_interv(a_comp, a_comp + ncomp - 1);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    if(m_Realm == a_output.get_Realm()){
+    if(m_Realm == a_output.getRealm()){
       scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
     }
     else{

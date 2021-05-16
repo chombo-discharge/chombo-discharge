@@ -9,7 +9,7 @@
 #define _ADVECTION_DIFFUSION_TAGGER_
 
 #include "CD_CellTagger.H"
-#include "cdr_solver.H"
+#include "CD_CdrSolver.H"
 #include "CD_AmrMesh.H"
 
 #include "CD_NamespaceHeader.H"
@@ -22,7 +22,7 @@ namespace physics {
     class advection_diffusion_tagger : public CellTagger {
     public:
 
-      advection_diffusion_tagger(RefCountedPtr<cdr_solver>& a_solver,
+      advection_diffusion_tagger(RefCountedPtr<CdrSolver>& a_solver,
 				 RefCountedPtr<AmrMesh>&   a_amr);
       ~advection_diffusion_tagger();
 
@@ -33,7 +33,7 @@ namespace physics {
     protected:
       std::string m_Realm;
       
-      RefCountedPtr<cdr_solver> m_solver;
+      RefCountedPtr<CdrSolver> m_solver;
       RefCountedPtr<AmrMesh>   m_amr;
 
     private:

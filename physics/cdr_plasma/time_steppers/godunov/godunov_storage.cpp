@@ -16,11 +16,11 @@ godunov::cdr_storage::cdr_storage(){
 }
 
 godunov::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
-				  const std::string              a_Realm,
+				  const std::string              a_realm,
 				  const phase::which_phase       a_phase,
 				  const int                      a_ncomp){
   m_amr   = a_amr;
-  m_Realm = a_Realm;
+  m_Realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
@@ -76,13 +76,13 @@ godunov::poisson_storage::poisson_storage(){
 }
 
 godunov::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
-					  const std::string              a_Realm,
+					  const std::string              a_realm,
 					  const phase::which_phase       a_phase,
 					  const int                      a_ncomp){
   m_amr   = a_amr;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
-  m_Realm = a_Realm;
+  m_Realm = a_realm;
 }
 
 godunov::poisson_storage::~poisson_storage(){
@@ -106,11 +106,11 @@ godunov::rte_storage::rte_storage(){
 }
 
 godunov::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
-				  const std::string              a_Realm,
+				  const std::string              a_realm,
 				  const phase::which_phase       a_phase,
 				  const int                      a_ncomp){
   m_amr   = a_amr;
-  m_Realm = a_Realm;
+  m_Realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
@@ -134,11 +134,11 @@ godunov::sigma_storage::sigma_storage(){
 }
 
 godunov::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
-				      const std::string              a_Realm,
+				      const std::string              a_realm,
 				      const phase::which_phase       a_phase,
 				      const int                      a_ncomp){
   m_amr   = a_amr;
-  m_Realm = a_Realm;
+  m_Realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }

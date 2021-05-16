@@ -79,8 +79,8 @@ air7::air7(){
 
   { // Mobile ions
     m_ion_mobility   = 2.E-4;
-    m_mobile_ions    = true;
-    m_diffusive_ions = true;
+    m_isMobile_ions    = true;
+    m_isDiffusive_ions = true;
     std::string str;
 
     ParmParse pp("air7");
@@ -88,19 +88,19 @@ air7::air7(){
     if(pp.contains("mobile_ions")){
       pp.get("mobile_ions", str);
       if(str == "true"){
-	m_mobile_ions = true;
+	m_isMobile_ions = true;
       }
       else if(str == "false"){
-	m_mobile_ions = false;
+	m_isMobile_ions = false;
       }
     }
     if(pp.contains("diffusive_ions")){
       pp.get("diffusive_ions", str);
       if(str == "true"){
-	m_diffusive_ions = true;
+	m_isDiffusive_ions = true;
       }
       else if(str == "false"){
-	m_diffusive_ions = false;
+	m_isDiffusive_ions = false;
       }
     }
     if(pp.contains("use_fhd")){
@@ -288,7 +288,7 @@ Vector<Real> air7::compute_cdr_diffusion_coefficients(const Real&         a_time
 
   const Real EbyN        = (a_E/(m_N*units::s_Td)).vectorLength();
   diffco[m_electron_idx] = this->compute_electron_diffco(EbyN);
-  if(m_diffusive_ions){
+  if(m_isDiffusive_ions){
     diffco[m_N2plus_idx]   = this->compute_N2plus_diffco(m_Tg);
     diffco[m_N4plus_idx]   = this->compute_N4plus_diffco(m_Tg);
     diffco[m_O2plus_idx]   = this->compute_O2plus_diffco(m_Tg);
@@ -308,7 +308,7 @@ Vector<RealVect> air7::compute_cdr_velocities(const Real&         a_time,
 
   const Real EbyN             = (a_E/(m_N*units::s_Td)).vectorLength();
   velocities[m_electron_idx]   = -a_E*this->compute_electron_mobility(EbyN);
-  if(m_mobile_ions){
+  if(m_isMobile_ions){
     velocities[m_N2plus_idx]   =  a_E*this->compute_N2plus_mobility(EbyN);
     velocities[m_N4plus_idx]   =  a_E*this->compute_N4plus_mobility(EbyN);
     velocities[m_O2plus_idx]   =  a_E*this->compute_O2plus_mobility(EbyN);

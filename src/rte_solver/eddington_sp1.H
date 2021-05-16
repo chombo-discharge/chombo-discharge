@@ -64,9 +64,9 @@ public:
   virtual ~eddington_sp1();
 
   /*!
-    @brief Advance RTE onto state a_state
+    @brief Advance RTE onto state a_phi
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false);
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi = false);
 
   /*!
     @brief Parse class options
@@ -116,24 +116,24 @@ public:
   /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
   */
-  virtual void compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state);
+  virtual void compute_boundary_flux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi);
 
   /*!
     @brief Compute the domain flux. For Eddington, the domain flux is = c*phi/2
   */
-  virtual void compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_state);
+  virtual void compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi);
 
   /*!
     @brief Compute the flux
-    @details For diffusive models, the flux will be something like grad(a_state). For higher-order models, the flux 
-    will be contained in a_state (somehow);
+    @details For diffusive models, the flux will be something like grad(a_phi). For higher-order models, the flux 
+    will be contained in a_phi (somehow);
   */
-  virtual void compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_state);
+  virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi);
 
   /*!
     @brief Get isotropic part. 
   */
-  virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state);
+  virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi);
 
   /*!
     @brief Write plot file
@@ -153,7 +153,7 @@ public:
   /*!
     @brief Return required number of ghost cells
   */
-  virtual int query_ghost() const;
+  virtual int queryGhost() const;
 
 protected:
   
@@ -330,7 +330,7 @@ protected:
   /*!
     @brief a-coefficient
   */
-  EBAMRCellData m_aco;
+  EBAMRCellData m_aCoefficient;
 
   /*!
     @brief b-coefficient
@@ -404,7 +404,7 @@ protected:
   virtual void setup_euler();
 
   // Parse options functions
-  virtual void parseDomain_bc();    // Parses domain BC options
+  virtual void parseDomainBc();    // Parses domain BC options
   virtual void parse_stationary();   // Parse stationary solver
   virtual void parsePlotVariables();    // Parses plot variables
   virtual void parse_gmg_settings(); // Parses solver parameters for geometric multigrid

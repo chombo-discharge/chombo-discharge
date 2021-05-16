@@ -29,7 +29,7 @@ def write_template(args):
     mainf.write('#include "CD_FieldSolverFactory.H"\n')
     mainf.write('#include "CD_' + args.field_solver + '.H"\n')
     mainf.write('#include "cdr_layoutI.H"\n')
-    mainf.write('#include "' + args.cdr_solver + '.H"\n')
+    mainf.write('#include "' + args.CdrSolver + '.H"\n')
     mainf.write('#include "rte_layoutI.H"\n')
     mainf.write('#include "' + args.rte_solver + '.H"\n')
     mainf.write('#include "' + args.physics + '.H"\n')
@@ -92,7 +92,7 @@ def write_template(args):
 
     mainf.write("  // Create solver factories\n")
     mainf.write("  auto poi_fact = new FieldSolverFactory<" + args.field_solver + ">();\n")
-    mainf.write("  auto cdr_fact = new cdr_factory<cdr_solver, " + args.cdr_solver + ">();\n")
+    mainf.write("  auto cdr_fact = new cdr_factory<CdrSolver, " + args.CdrSolver + ">();\n")
     mainf.write("  auto rte_fact = new rte_factory<rte_solver, " + args.rte_solver + ">();\n")
     mainf.write("\n")
     

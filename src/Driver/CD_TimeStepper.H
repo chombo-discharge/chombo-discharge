@@ -232,7 +232,7 @@ protected:
   /*!
     @brief Time step
   */
-  int m_step;
+  int m_timeStep;
   
   /*!
     @brief TIme

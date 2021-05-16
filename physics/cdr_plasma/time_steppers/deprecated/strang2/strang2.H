@@ -117,8 +117,8 @@ protected:
   void advance_rk54(const Real a_time, const Real a_dt);
   
   void advance_diffusion(const Real a_time, const Real a_dt);
-  void advance_euler_diffusion(const Real a_time, const Real a_dt);
-  void advance_tga_diffusion(const Real a_time, const Real a_dt);
+  void advanceEuler_diffusion(const Real a_time, const Real a_dt);
+  void advanceTGA_diffusion(const Real a_time, const Real a_dt);
 
   void update_poisson();
   void update_rte(const Real a_time);
@@ -127,19 +127,19 @@ protected:
 
   void compute_E_into_scratch();
   void compute_cdr_eb_states();
-  void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states);
+  void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis);
   void compute_cdr_domain_states();
-  void compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_states);
+  void compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis);
   void compute_cdr_gradients();
-  void compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states);
+  void compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis);
   void compute_cdr_fluxes(const Real a_time);
-  void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+  void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void compute_cdr_domain_fluxes(const Real a_time);
-  void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+  void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void compute_cdr_velo(const Real a_time);
-  void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+  void compute_cdr_velo(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void compute_cdr_sources(const Real a_time);
-  void compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+  void compute_cdr_sources(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void computeDt(Real& a_dt, TimeCode::which_code& a_timeCode);
   void compute_sigma_flux();
   void store_solvers();

@@ -39,10 +39,10 @@ public:
   virtual ~mc_photo();
 
   /*!
-    @brief Advance RTE and deposit photons on a_state
+    @brief Advance RTE and deposit photons on a_phi
     @details This routine switches between stationary and transient solvers depending on what you ask for. 
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false);
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi = false);
 
   /*!
     @brief Instantaneous solver or not
@@ -92,14 +92,14 @@ public:
   /*!
     @brief Deposit photons
   */
-  virtual void deposit_photons(EBAMRCellData&                    a_state,
+  virtual void deposit_photons(EBAMRCellData&                    a_phi,
 			       const particle_container<photon>& a_particles,
 			       const DepositionType::Which&      a_deposition);
 
   /*!
     @brief Deposit photons
   */
-  virtual void deposit_photons(EBAMRCellData&               a_state,
+  virtual void deposit_photons(EBAMRCellData&               a_phi,
 			       const AMRParticles<photon>&  a_photons,
 			       const DepositionType::Which& a_deposition);
 
@@ -191,24 +191,24 @@ public:
   /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
   */
-  virtual void compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state);
+  virtual void compute_boundary_flux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi);
 
   /*!
     @brief Compute the domain flux. For Eddington, the domain flux is = c*phi/2
   */
-  virtual void compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_state);
+  virtual void compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi);
 
   /*!
     @brief Compute the flux
-    @details For diffusive models, the flux will be something like grad(a_state). For higher-order models, the flux 
-    will be contained in a_state (somehow);
+    @details For diffusive models, the flux will be something like grad(a_phi). For higher-order models, the flux 
+    will be contained in a_phi (somehow);
   */
-  virtual void compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_state);
+  virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi);
 
   /*!
     @brief Get isotropic part. 
   */
-  virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state);
+  virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi);
 
   /*!
     @brief Clear data holder
@@ -273,12 +273,12 @@ public:
   /*!
     @brief Get number of output fields
   */
-  virtual int get_num_plotvars() const;
+  virtual int getNumberOfPlotVariables() const;
 
   /*!
     @brief Return required number of ghost cells
   */
-  virtual int query_ghost() const;
+  virtual int queryGhost() const;
 
   /*!
     @brief Count number of photons in particle list
@@ -313,7 +313,7 @@ public:
   /*!
     @brief Get source photons
   */
-  virtual particle_container<photon>& get_source_photons();
+  virtual particle_container<photon>& getSource_photons();
   
 protected:
 
@@ -338,7 +338,7 @@ protected:
   /*!
     @brief Flag for blending the deposition clouds with the nonconservative divergence
   */
-  bool m_blend_conservation;
+  bool m_blendConservation;
 
   /*!
     @brief If true, the NUMBER of of photons will be deposited in each cell
@@ -348,7 +348,7 @@ protected:
   /*!
     @brief Switch for plotting numbers or densities
   */
-  bool m_plot_numbers;
+  bool m_plotNumbers;
 
   /*!
     @brief Check if m_photons should be plotted
@@ -363,7 +363,7 @@ protected:
   /*!
     @brief Check if source_bulk_photons should be plotted
   */
-  bool m_plot_src_phot;
+  bool m_plotSource_phot;
 
   /*!
     @brief Check if m_eb_photons should be plotted
@@ -530,7 +530,7 @@ protected:
   /*!
     @brief This computes the "conservative" deposition, multiplied by kappa
   */
-  void deposit_kappaConservative(EBAMRCellData&              a_state,
+  void deposit_kappaConservative(EBAMRCellData&              a_phi,
 				 const AMRParticles<photon>& a_particles,
 				 const DepositionType::Which a_deposition);
 
@@ -542,27 +542,27 @@ protected:
   /*!
     @brief Make the hybrid deposition. Also compute the mass difference
   */
-  void deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_diff, const EBAMRIVData& a_depositionNC);
+  void deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
 
   /*!
     @brief Increment redistribution objects with mass to be redistributed
   */
-  void increment_redist(const EBAMRIVData& a_mass_diff);
+  void incrementRedist(const EBAMRIVData& a_massDifference);
 
   /*!
     @brief Do redistribution on all levels, no coarse-fine stuff
   */
-  void level_redistribution(EBAMRCellData& a_state);
+  void level_redistribution(EBAMRCellData& a_phi);
 
   /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
   */
-  void coarse_fine_increment(const EBAMRIVData& m_mass_diff);
+  void coarseFineIncrement(const EBAMRIVData& m_massDifference);
 
   /*!
     @brief Do coarse-fine redistribution
   */
-  void coarse_fine_redistribution(EBAMRCellData& a_state);
+  void coarseFineRedistribution(EBAMRCellData& a_phi);
 
   /*!
     @brief Parse RNG options
@@ -572,7 +572,7 @@ protected:
   /*!
     @brief Parse the conservation
   */
-  void parse_conservation();
+  void parseDivergenceComputation();
 
   /*!
     @brief Parse pseudophotons
@@ -607,7 +607,7 @@ protected:
   /*!
     @brief Parse domain BCs
   */
-  void parseDomain_bc();
+  void parseDomainBc();
 
   /*!
     @brief Parse PVR buffer

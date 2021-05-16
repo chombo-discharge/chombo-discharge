@@ -39,7 +39,7 @@ air3_zheleznyak::air3_zheleznyak() {
   parse_alpha();
   parse_eta();
   parse_see();
-  parseDomain_bc();
+  parseDomainBc();
 
   init_rng();                 // Initialize random number generators
   
@@ -119,10 +119,10 @@ void air3_zheleznyak::parse_transport(){
   std::string str;
 
   pp.get("use_alpha_corr", str);      m_alpha_corr          = (str == "true") ? true : false;
-  pp.get("mobile_electrons", str);    m_mobile_electrons    = (str == "true") ? true : false;
-  pp.get("diffusive_electrons", str); m_diffusive_electrons = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str);      m_diffusive_ions      = (str == "true") ? true : false;
-  pp.get("mobile_ions", str);         m_mobile_ions         = (str == "true") ? true : false;
+  pp.get("mobile_electrons", str);    m_isMobile_electrons    = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive_electrons = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str);      m_isDiffusive_ions      = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);         m_isMobile_ions         = (str == "true") ? true : false;
   
   pp.get("ion_mobility", m_ion_mobility);
 
@@ -356,7 +356,7 @@ RealVect air3_zheleznyak::random_direction3D(){
 }
 #endif
 
-void air3_zheleznyak::parseDomain_bc(){
+void air3_zheleznyak::parseDomainBc(){
 
   ParmParse pp("air3_zheleznyak");
   std::string str;

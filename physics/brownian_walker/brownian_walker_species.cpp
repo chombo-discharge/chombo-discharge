@@ -20,8 +20,8 @@ brownian_walker_species::brownian_walker_species() : m_rng(), m_gauss(0., 1.) {
   Vector<Real> v;
 
   pp.get   ("seed",           m_seed);
-  pp.get   ("diffusion",      m_diffusive);
-  pp.get   ("advection",      m_mobile);
+  pp.get   ("diffusion",      m_isDiffusive);
+  pp.get   ("advection",      m_isMobile);
   pp.get   ("blob_amplitude", m_blob_amplitude);
   pp.get   ("blob_radius",    m_blob_radius);
   pp.getarr("blob_center",    v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));

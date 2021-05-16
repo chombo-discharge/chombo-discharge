@@ -147,7 +147,7 @@ void ito_plasma_physics::check_charge_conservation(const Vector<long long>& a_ol
 }
 
 inline
-long long ito_plasma_physics::compute_charge(const Vector<List<ito_particle>* >& a_particles) const {
+long long ito_plasma_physics::computeCharge(const Vector<List<ito_particle>* >& a_particles) const {
 
   long long ret = 0;
   for (int i = 0; i < a_particles.size(); i++){
@@ -741,7 +741,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
 						  const Real                    a_kappa, 
 						  const Real                    a_dt) {
 #if ITO_PLASMA_PHYSICS_DEBUG
-  const long long Qbefore = this->compute_charge(a_particles);
+  const long long Qbefore = this->computeCharge(a_particles);
 #endif
 
 
@@ -815,7 +815,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
 #if ITO_PLASMA_PHYSICS_DEBUG // Debug code
   this->check_charge_conservation(oldParticleCount, newParticleCount);
 
-  const long long Qafter = this->compute_charge(a_particles);
+  const long long Qafter = this->computeCharge(a_particles);
 
   constexpr long long zero = 0;
   if(Qbefore - Qafter != zero){
@@ -836,7 +836,7 @@ ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<long long>
   
   for (const auto& r : m_reactions){
 
-    const std::map<int, int>& stateChange = r.second.get_state_change();
+    const std::map<int, int>& stateChange = r.second.getPhi_change();
 
     long long Lj    = std::numeric_limits<long long>::max();
     bool consuming  = false;
@@ -951,7 +951,7 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<long long>& a_partic
 	for (const auto& R : reactions){
 	  const Real& ap        = R.first;     // Reaction propensity.
 	  const ito_reaction& r = *(R.second); // Reaction. 
-	  const int muIJ        = r.get_state_change(reactant); // State change of reactant due to current reaction
+	  const int muIJ        = r.getPhi_change(reactant); // State change of reactant due to current reaction
 
 	  mu     += muIJ * ap;
 	  sigma2 += muIJ * muIJ * ap;

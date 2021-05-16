@@ -19,7 +19,7 @@ morrow_jiang::morrow_jiang(){
   instantiate_species();
   parse_gas_params();
   parse_see();
-  parseDomain_bc();
+  parseDomainBc();
   parse_reaction_settings();
   
   init_rng();
@@ -741,8 +741,8 @@ Real morrow_jiang::initial_sigma(const Real a_time, const RealVect a_pos) const{
 morrow_jiang::electron::electron(){
   m_name      = "electron";
   m_charge    = -1;
-  m_diffusive = true;
-  m_mobile    = true;
+  m_isDiffusive = true;
+  m_isMobile    = true;
   m_unit      = "m-3";
 
   Vector<Real> pos(SpaceDim);
@@ -752,7 +752,7 @@ morrow_jiang::electron::electron(){
   pp.get("uniform_density",     m_uniform_density);
   pp.get("seed_density",        m_seed_density);
   pp.get("seed_radius",         m_seed_radius);
-  pp.get("diffusive_electrons", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive = (str == "true") ? true : false;
 
   pp.getarr("seed_position", pos, 0, SpaceDim); m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
@@ -760,8 +760,8 @@ morrow_jiang::electron::electron(){
 morrow_jiang::positive_species::positive_species(){
   m_name      = "positive_species";
   m_charge    = 1;
-  m_diffusive = false;
-  m_mobile    = false;
+  m_isDiffusive = false;
+  m_isMobile    = false;
   m_unit      = "m-3";
 
   Vector<Real> pos(SpaceDim);
@@ -771,7 +771,7 @@ morrow_jiang::positive_species::positive_species(){
   pp.get("uniform_density", m_uniform_density);
   pp.get("seed_density",    m_seed_density);
   pp.get("seed_radius",     m_seed_radius);
-  pp.get("mobile_ions",     str); m_mobile    = (str == "true") ? true : false;
+  pp.get("mobile_ions",     str); m_isMobile    = (str == "true") ? true : false;
 
   pp.getarr("seed_position", pos, 0, SpaceDim); m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
@@ -779,21 +779,21 @@ morrow_jiang::positive_species::positive_species(){
 morrow_jiang::negative_species::negative_species(){
   m_name      = "negative_species";
   m_charge    = -1;
-  m_diffusive = false;
-  m_mobile    = false;
+  m_isDiffusive = false;
+  m_isMobile    = false;
   m_unit      = "m-3";
 
   std::string str;
 
   ParmParse pp("morrow_jiang");
-  pp.get("mobile_ions",    str); m_mobile    = (str == "true") ? true : false;
+  pp.get("mobile_ions",    str); m_isMobile    = (str == "true") ? true : false;
 }
 
 morrow_jiang::excited_species::excited_species(){
   m_name      = "excited_species";
   m_charge    = 0;
-  m_diffusive = false;
-  m_mobile    = false;
+  m_isDiffusive = false;
+  m_isMobile    = false;
   m_unit      = "m-3";
 }
 
@@ -939,7 +939,7 @@ void morrow_jiang::parse_see(){
   pp.get("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
 }
 
-void morrow_jiang::parseDomain_bc(){
+void morrow_jiang::parseDomainBc(){
 
   ParmParse pp("morrow_jiang");
   std::string str;

@@ -13,6 +13,6 @@ godunov.fast_poisson     = 1         # Solve Poisson every this time steps. Most
 godunov.fast_rte         = 1         # Solve RTE every this time steps. Mostly for debugging.
 godunov.fhd              = false     # Set to true if you want to add a stochastic diffusion flux
 godunov.source_comp      = interp    # Interpolated 'interp' or cell-average 'cell_ave' for source computations
-godunov.extrap_advect    = true      # Use time-extrapolation capabilities (if they exist) in the cdr_solver
+godunov.extrap_advect    = true      # Use time-extrapolation capabilities (if they exist) in the CdrSolver
 godunov.floor_cdr        = true      # Floor CDR solvers to avoid negative densities
 godunov.debug            = false     # Turn on debugging messages. Also monitors mass if it was injected into the system. 

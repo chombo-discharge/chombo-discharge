@@ -73,7 +73,7 @@ namespace physics {
       whichTransport m_whichTransport;
 
       // Get functions for storage
-      RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator<cdr_solver>& a_solverit);
+      RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator<CdrSolver>& a_solverit);
       RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator<rte_solver>& a_solverit);
 
       Real restrict_dt();
@@ -93,7 +93,7 @@ namespace physics {
       void advance_transport_rk2(const Real a_dt);
       void advance_rte(const Real a_dt);
       void post_step();
-      void extrap_source(const Real a_dt);
+      void extrapolateSourceTerm(const Real a_dt);
     
       void compute_cdr_velo(const Real a_time);
       void compute_cdr_diffco(const Real a_time);

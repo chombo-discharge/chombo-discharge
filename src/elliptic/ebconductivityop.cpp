@@ -80,7 +80,7 @@ ebconductivityop(const EBLevelGrid &                                  a_eblgFine
   m_dxFine(),
   m_dx(a_dx),
   m_dxCoar(a_dxCoar),
-  m_acoef(a_acoef),
+  m_aCoefficientef(a_acoef),
   m_bcoef(a_bcoef),
   m_bcoIrreg(a_bcoIrreg),
   m_alpha(a_alpha),
@@ -227,8 +227,8 @@ finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator,
   Interval interv(0, 0); // All data is scalar.
   EBLevelGrid eblgCoar = m_eblg;
   EBLevelGrid eblgFine = op.m_eblg;
-  LevelData<EBCellFAB>& acoefCoar = *m_acoef;
-  const LevelData<EBCellFAB>& acoefFine = *(op.m_acoef);
+  LevelData<EBCellFAB>& acoefCoar = *m_aCoefficientef;
+  const LevelData<EBCellFAB>& acoefFine = *(op.m_aCoefficientef);
   LevelData<EBFluxFAB>& bcoefCoar = *m_bcoef;
   const LevelData<EBFluxFAB>& bcoefFine = *(op.m_bcoef);
   LevelData<BaseIVFAB<Real> >& bcoefCoarIrreg = *m_bcoIrreg;
@@ -284,7 +284,7 @@ calculateAlphaWeight()
 	  {
 	    const VolIndex& VoF = vofit();
 	    Real volFrac = m_eblg.getEBISL()[dit[mybox]].volFrac(VoF);
-	    Real alphaWeight = (*m_acoef)[dit[mybox]](VoF, 0);
+	    Real alphaWeight = (*m_aCoefficientef)[dit[mybox]](VoF, 0);
 	    alphaWeight *= volFrac;
 	    if(s_areaFracWeighted){
 	      alphaWeight *= m_eblg.getEBISL()[dit[mybox]].areaFracScaling(VoF);
@@ -446,7 +446,7 @@ diagonalScale(LevelData<EBCellFAB> & a_rhs,
 #pragma omp for
     for(int mybox=0; mybox<nbox; mybox++)
       {
-	a_rhs[dit[mybox]] *= (*m_acoef)[dit[mybox]];
+	a_rhs[dit[mybox]] *= (*m_aCoefficientef)[dit[mybox]];
       }
   }
 
@@ -472,7 +472,7 @@ divideByIdentityCoef(LevelData<EBCellFAB> & a_rhs)
 #pragma omp for
     for(int mybox=0; mybox<nbox; mybox++)
       {
-	a_rhs[dit[mybox]] /= (*m_acoef)[dit[mybox]];
+	a_rhs[dit[mybox]] /= (*m_aCoefficientef)[dit[mybox]];
       }
   }
 }
@@ -494,7 +494,7 @@ calculateRelaxationCoefficient()
 	const Box& grid = m_eblg.getDBL().get(dit[mybox]);
       
 	// For time-independent acoef, initialize lambda = alpha * acoef.
-	const EBCellFAB& acofab = (*m_acoef)[dit[mybox]];
+	const EBCellFAB& acofab = (*m_aCoefficientef)[dit[mybox]];
 	m_relCoef[dit[mybox]].setVal(0.);
 	m_relCoef[dit[mybox]].plus(acofab, 0, 0, 1);
 	m_relCoef[dit[mybox]]*= m_alpha;
@@ -672,7 +672,7 @@ defineStencils()
 
 	    //add in identity term
 	    Real volFrac = ebisBox.volFrac(VoF);
-	    Real alphaWeight = (*m_acoef)[dit[mybox]](VoF, 0);
+	    Real alphaWeight = (*m_aCoefficientef)[dit[mybox]](VoF, 0);
 	    alphaWeight *= volFrac;
 	    if(s_areaFracWeighted){
 	      alphaWeight *= ebisBox.areaFracScaling(VoF);
@@ -1103,7 +1103,7 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
       const EBISBox& ebisbox = phi.getEBISBox();
 
       if(!ebisbox.isAllCovered()){
-	a_lhs[a_dit()].mult((*m_acoef)[a_dit()], 0, 0, 1);
+	a_lhs[a_dit()].mult((*m_aCoefficientef)[a_dit()], 0, 0, 1);
 
 	Box loBox[SpaceDim],hiBox[SpaceDim];
 	int hasLo[SpaceDim],hasHi[SpaceDim];
@@ -1657,7 +1657,7 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
 		BaseFab<Real>      & reguPhi =      (a_phi[dit[mybox]]).getSingleValuedFAB();
 		const BaseFab<Real>& reguRHS =     (a_rhs[dit[mybox]] ).getSingleValuedFAB();
 		const BaseFab<Real>& relCoef = (m_relCoef[dit[mybox]] ).getSingleValuedFAB();
-		const BaseFab<Real>& regACoe =((*m_acoef)[dit[mybox]] ).getSingleValuedFAB();
+		const BaseFab<Real>& regACoe =((*m_aCoefficientef)[dit[mybox]] ).getSingleValuedFAB();
 		const BaseFab<Real>* regBCoe[3];
 		//need three coeffs because this has to work in 3d
 		//this is my klunky way to make the call dimension-independent

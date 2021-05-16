@@ -83,10 +83,10 @@ namespace Physics {
 
       // Setup sigma
       m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
-      m_sigma->set_verbosity(m_verbosity);
+      m_sigma->setVerbosity(m_verbosity);
       m_sigma->setAmr(m_amr);
       m_sigma->setComputationalGeometry(m_computationalGeometry);
-      m_sigma->set_Realm(m_Realm);
+      m_sigma->setRealm(m_Realm);
 
     }
 
@@ -114,7 +114,7 @@ namespace Physics {
 
       MFAMRCellData& state = m_fieldSolver->getPotential();  
       MFAMRCellData& rho   = m_fieldSolver->getRho();
-      EBAMRIVData& sigma   = m_sigma->get_state();
+      EBAMRIVData& sigma   = m_sigma->getPhi();
 
       data_ops::set_value(state, 0.0);
       data_ops::set_value(rho,   m_init_rho);
@@ -126,7 +126,7 @@ namespace Physics {
       
       MFAMRCellData& state = m_fieldSolver->getPotential();  
       MFAMRCellData& rho   = m_fieldSolver->getRho();
-      EBAMRIVData& sigma   = m_sigma->get_state();
+      EBAMRIVData& sigma   = m_sigma->getPhi();
 
       const bool converged = m_fieldSolver->solve(state, rho, sigma);
       
@@ -161,7 +161,7 @@ namespace Physics {
     template <class T>
     int FieldStepper<T>::getNumberOfPlotVariables() const{
       int ncomp = m_fieldSolver->getNumberOfPlotVariables();
-      ncomp += m_sigma->get_num_plotvars();
+      ncomp += m_sigma->getNumberOfPlotVariables();
       return ncomp;
     }
 
@@ -176,7 +176,7 @@ namespace Physics {
 
     template <class T>
     void FieldStepper<T>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt){
-      m_step = a_step;
+      m_timeStep = a_step;
       m_time = a_time;
       m_dt   = a_dt;
 
@@ -205,14 +205,14 @@ namespace Physics {
     }
 
     template <class T>
-    bool FieldStepper<T>::loadBalanceThisRealm(const std::string a_Realm) const {
+    bool FieldStepper<T>::loadBalanceThisRealm(const std::string a_realm) const {
       return m_LoadBalancing ? true : false;
     }
 
     template <class T>
     void FieldStepper<T>::loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
 					      Vector<Vector<Box> >&            a_boxes,
-					      const std::string                a_Realm,
+					      const std::string                a_realm,
 					      const Vector<DisjointBoxLayout>& a_grids,
 					      const int                        a_lmin,
 					      const int                        a_finestLevel){

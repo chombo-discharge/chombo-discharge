@@ -61,7 +61,7 @@ public:
   virtual bool solve(const bool a_zeroPhi = false);
 
   /*!
-    @brief Solve Poisson equation onto a_state using m_rho, and m_sigma as right-hand sides. 
+    @brief Solve Poisson equation onto a_phi using m_rho, and m_sigma as right-hand sides. 
     @param[inout] a_potential Potential
     @param[in]    a_zeroPhi Set a_potential to zero before calling other function. 
     @return True if we found a solution and false otherwise. 
@@ -70,7 +70,7 @@ public:
   virtual bool solve(MFAMRCellData& a_potential, const bool a_zerophi = false);
 
   /*!
-    @brief Solves Poisson equation onto a_state using a_rho and a_sigma as right-hand sides. 
+    @brief Solves Poisson equation onto a_phi using a_rho and a_sigma as right-hand sides. 
     @param[inout] a_potential Potential
     @param[in]    a_rho Space charge density
     @param[in]    a_sigma Surface charge density. 
@@ -78,7 +78,7 @@ public:
     @return True if we found a solution and false otherwise. 
     @note a_sigma must be defined on the gas phase. 
   */
-  virtual bool solve(MFAMRCellData&       a_state,
+  virtual bool solve(MFAMRCellData&       a_phi,
 		     const MFAMRCellData& a_rho,
 		     const EBAMRIVData&   a_sigma,
 		     const bool           a_zerophi = false) = 0;
@@ -204,9 +204,9 @@ public:
 
   /*!
     @brief Set Realm
-    @param[in] a_Realm Realm identifier. 
+    @param[in] a_realm Realm identifier. 
   */
-  virtual void setRealm(const std::string a_Realm);
+  virtual void setRealm(const std::string a_realm);
 
   /*!
     @brief Set time for this solver.
@@ -469,7 +469,7 @@ protected:
     @brief Shortcut for making a boundary condition string. 
     @param[in] a_dir  Direction.
     @param[in] a_side Coordinate side. 
-    @return Returns string of type m_class_name.bc.direction.side. 
+    @return Returns string of type m_className.bc.direction.side. 
   */
   virtual std::string makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
 };

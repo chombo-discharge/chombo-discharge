@@ -22,7 +22,7 @@ brownian_walker_stepper::brownian_walker_stepper(){
   m_phase = phase::gas;
 
   pp.get("Realm",          m_Realm);
-  pp.get("diffco",         m_diffco);
+  pp.get("diffco",         m_faceCenteredDiffusionCoefficient);
   pp.get("omega",          m_omega);
   pp.get("verbosity",      m_verbosity);
   pp.get("ppc",            m_ppc);
@@ -63,11 +63,11 @@ void brownian_walker_stepper::initialData(){
     m_solver->sort_particles_by_patch(ito_solver::which_container::bulk);
   }
 
-  if(m_solver->is_diffusive()){
-    m_solver->set_diffco_func(m_diffco);
+  if(m_solver->isDiffusive()){
+    m_solver->setDiffusionCoefficient_func(m_faceCenteredDiffusionCoefficient);
   }
-  if(m_solver->is_mobile()){
-    this->set_velocity();
+  if(m_solver->isMobile()){
+    this->setVelocity();
   }
 }
 
@@ -78,16 +78,16 @@ void brownian_walker_stepper::postInitialize(){
   }
 }
 
-void brownian_walker_stepper::set_velocity(){
-  CH_TIME("brownian_walker_stepper::set_velocity");
+void brownian_walker_stepper::setVelocity(){
+  CH_TIME("brownian_walker_stepper::setVelocity");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::set_velocity" << endl;
+    pout() << "brownian_walker_stepper::setVelocity" << endl;
   }
   m_solver->set_mobility(1.0);
   
   const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    this->set_velocity(lvl);
+    this->setVelocity(lvl);
   }
 
   EBAMRCellData& vel = m_solver->get_velo_func();
@@ -95,7 +95,7 @@ void brownian_walker_stepper::set_velocity(){
   m_amr->interpGhost(vel, m_Realm, m_phase);
 }
 
-bool brownian_walker_stepper::loadBalanceThisRealm(const std::string a_Realm) const {
+bool brownian_walker_stepper::loadBalanceThisRealm(const std::string a_realm) const {
   CH_TIME("brownian_walker_stepper::loadBalanceThisRealm");
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::loadBalanceThisRealm" << endl;
@@ -103,7 +103,7 @@ bool brownian_walker_stepper::loadBalanceThisRealm(const std::string a_Realm) co
 
   bool ret = false;
 
-  if(m_LoadBalancing && a_Realm == m_Realm){
+  if(m_LoadBalancing && a_realm == m_Realm){
     ret = true;
   }
 
@@ -112,7 +112,7 @@ bool brownian_walker_stepper::loadBalanceThisRealm(const std::string a_Realm) co
 
 void brownian_walker_stepper::loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
 						 Vector<Vector<Box> >&            a_boxes,
-						 const std::string                a_Realm,
+						 const std::string                a_realm,
 						 const Vector<DisjointBoxLayout>& a_grids,
 						 const int                        a_lmin,
 						 const int                        a_finestLevel){
@@ -121,7 +121,7 @@ void brownian_walker_stepper::loadBalanceBoxes(Vector<Vector<int> >&            
     pout() << "brownian_walker_stepper::loadBalanceBoxes" << endl;
   }
   
-  if(m_LoadBalancing && a_Realm == m_Realm){
+  if(m_LoadBalancing && a_realm == m_Realm){
     particle_container<ito_particle>& particles = m_solver->get_particles(ito_solver::which_container::bulk);
   
     particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
@@ -159,10 +159,10 @@ void brownian_walker_stepper::loadBalanceBoxes(Vector<Vector<int> >&            
   }
 }
 
-void brownian_walker_stepper::set_velocity(const int a_level){
-  CH_TIME("brownian_walker_stepper::set_velocity(level)");
+void brownian_walker_stepper::setVelocity(const int a_level){
+  CH_TIME("brownian_walker_stepper::setVelocity(level)");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::set_velocity(level)" << endl;
+    pout() << "brownian_walker_stepper::setVelocity(level)" << endl;
   }
 
   // TLDR: This code goes down to each cell on grid level a_level and sets the velocity to omega*r
@@ -245,11 +245,11 @@ void brownian_walker_stepper::postCheckpointSetup() {
   }
   m_solver->deposit_particles();
 
-  if(m_solver->is_diffusive()){
-    m_solver->set_diffco_func(m_diffco);
+  if(m_solver->isDiffusive()){
+    m_solver->setDiffusionCoefficient_func(m_faceCenteredDiffusionCoefficient);
   }
-  if(m_solver->is_mobile()){
-    this->set_velocity();
+  if(m_solver->isMobile()){
+    this->setVelocity();
   }
 }
 
@@ -259,7 +259,7 @@ int brownian_walker_stepper::getNumberOfPlotVariables() const {
     pout() << "brownian_walker_stepper::getNumberOfPlotVariables" << endl;
   }
 
-  return m_solver->get_num_plotvars();
+  return m_solver->getNumberOfPlotVariables();
 }
 
 void brownian_walker_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
@@ -290,9 +290,9 @@ void brownian_walker_stepper::synchronizeSolverTimes(const int a_step, const Rea
     pout() << "brownian_walker_stepper::synchronizeSolverTimes" << endl;
   }
   
-  m_solver->set_time(a_step, a_time, a_dt);
+  m_solver->setTime(a_step, a_time, a_dt);
 
-  m_step = a_step;
+  m_timeStep = a_step;
   m_time = a_time;
   m_dt   = a_dt;
 }
@@ -343,13 +343,13 @@ void brownian_walker_stepper::setup_solvers() {
 
   m_species = RefCountedPtr<ito_species> (new brownian_walker_species());
 
-  m_solver->set_verbosity(m_verbosity);
+  m_solver->setVerbosity(m_verbosity);
   m_solver->parseOptions();
   m_solver->setAmr(m_amr);
-  m_solver->set_species(m_species);
-  m_solver->set_phase(m_phase);
+  m_solver->setSpecies(m_species);
+  m_solver->setPhase(m_phase);
   m_solver->setComputationalGeometry(m_computationalGeometry);
-  m_solver->set_Realm(m_Realm);
+  m_solver->setRealm(m_Realm);
 }
 
 void brownian_walker_stepper::registerRealms() {
@@ -392,7 +392,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
     const EBISLayout& ebisl = m_amr->getEBISLayout(m_Realm, m_solver->get_phase())[lvl];
 
-    if(m_solver->is_mobile() || m_solver->is_diffusive()){
+    if(m_solver->isMobile() || m_solver->isDiffusive()){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	// Create a copy. 
@@ -405,7 +405,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	ListIterator<ito_particle> litC(particleCopy);
 
 	// Half Euler step and evaluate velocity at half step
-	if(m_solver->is_mobile()){
+	if(m_solver->isMobile()){
 	  for (lit.rewind(); lit; ++lit){ 
 	    ito_particle& p = particleList[lit];
 	    p.position() += 0.5*p.velocity()*a_dt;
@@ -422,7 +422,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	}
 
 	// Add a diffusion hop
-	if(m_solver->is_diffusive()){
+	if(m_solver->isDiffusive()){
 	  for (lit.rewind(); lit; ++lit){ 
 	    ito_particle& p = particleList[lit];
 	    const RealVect ran = m_solver->random_gaussian();
@@ -491,11 +491,11 @@ void brownian_walker_stepper::regrid(const int a_lmin, const int a_oldFinestLeve
   }
 
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-  if(m_solver->is_diffusive()){
-    m_solver->set_diffco_func(m_diffco);
+  if(m_solver->isDiffusive()){
+    m_solver->setDiffusionCoefficient_func(m_faceCenteredDiffusionCoefficient);
   }
-  if(m_solver->is_mobile()){
-    this->set_velocity();
+  if(m_solver->isMobile()){
+    this->setVelocity();
   }
 
   if(m_ppc > 0){

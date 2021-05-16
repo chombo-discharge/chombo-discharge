@@ -165,7 +165,7 @@ public:
   /*!
     @brief Set time
   */
-  virtual void set_time(Real* a_time);
+  virtual void setTime(Real* a_time);
 
   /*!
     @brief Factory method
@@ -207,7 +207,7 @@ protected:
   /*!
     @brief a-coefficients
   */
-  MFAMRCellData m_aco;
+  MFAMRCellData m_aCoefficient;
 
   /*!
     @brief b-coefficients
@@ -302,7 +302,7 @@ protected:
   /*!
     @brief a-coefficient for multigrid
   */
-  Vector<MFAMRCellData> m_aco_mg;
+  Vector<MFAMRCellData> m_aCoefficient_mg;
 
   /*!
     @brief b-coefficient for multigrid
@@ -342,7 +342,7 @@ protected:
   /*!
     @brief Domain boundary conditions
   */
-  RefCountedPtr<BaseDomainBCFactory> m_dombc;
+  RefCountedPtr<BaseDomainBCFactory> m_domainBc;
 
   /*!
     @brief Number of AMR levels

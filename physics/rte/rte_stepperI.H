@@ -37,13 +37,13 @@ void rte_stepper<T>::setup_solvers(){
 
   // Solver setup
   m_solver = RefCountedPtr<rte_solver> (new T());
-  m_solver->set_verbosity(m_verbosity);
+  m_solver->setVerbosity(m_verbosity);
   m_solver->set_rte_species(m_species);
   m_solver->parseOptions();
-  m_solver->set_phase(phase::gas);
+  m_solver->setPhase(phase::gas);
   m_solver->setAmr(m_amr);
   m_solver->setComputationalGeometry(m_computationalGeometry);
-  m_solver->set_Realm(m_Realm);
+  m_solver->setRealm(m_Realm);
 }
 
 template <typename T>
@@ -88,7 +88,7 @@ void rte_stepper<T>::postCheckpointSetup() {
 
 template <typename T>
 int rte_stepper<T>::getNumberOfPlotVariables() const {
-  return m_solver->get_num_plotvars();
+  return m_solver->getNumberOfPlotVariables();
 }
 
 template <typename T>
@@ -111,7 +111,7 @@ Real rte_stepper<T>::advance(const Real a_dt) {
 
 template <typename T>
 void rte_stepper<T>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) {
-  m_step = a_step;
+  m_timeStep = a_step;
   m_time = a_time;
   m_dt   = a_dt;
 }
@@ -161,7 +161,7 @@ void rte_stepper<T>::postRegrid(){
 template <typename T>
 void rte_stepper<T>::set_gaussian_source(){
 
-  EBAMRCellData& source = m_solver->get_source();
+  EBAMRCellData& source = m_solver->getSource();
   const RealVect prob_lo = m_amr->getProbLo();
 
   //

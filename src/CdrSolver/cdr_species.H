@@ -1,6 +1,6 @@
 /*!
   @file   cdr_species.H
-  @brief  Declaration of a cdr_species class that passes in names and initial data to the cdr_solver
+  @brief  Declaration of a cdr_species class that passes in names and initial data to the CdrSolver
   @author Robert Marskar
   @date   Jan. 2018
 */
@@ -44,7 +44,7 @@ public:
   /*!
     @brief Return name
   */
-  virtual std::string get_name() const;
+  virtual std::string getName() const;
 
   /*!
     @brief Return unit
@@ -59,12 +59,12 @@ public:
   /*!
     @brief Return diffusive or not
   */
-  virtual bool is_diffusive() const;
+  virtual bool isDiffusive() const;
 
   /*!
     @brief Mobile cdr_species or not
   */
-  virtual bool is_mobile() const;
+  virtual bool isMobile() const;
 
   /*!
     @brief Flag cdr_species for output to the plasma solver
@@ -111,12 +111,12 @@ protected:
   /*!
     @brief Diffusive cdr_species or not
   */
-  bool m_diffusive;
+  bool m_isDiffusive;
 
   /*!
     @brief Mobile cdr_species or not
   */
-  bool m_mobile;
+  bool m_isMobile;
 
   /*!
     @brief Force output of cdr_species. This is relevant for plasma_engine only. 

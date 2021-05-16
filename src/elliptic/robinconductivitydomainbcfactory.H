@@ -56,13 +56,13 @@ protected:
 
   RefCountedPtr<robin_coef> m_robinco;
 
-  Real m_aco;
+  Real m_aCoefficient;
 
   Real m_bco;
   
   Real m_rhs;
 
-  EBAMRFluxData m_acodata;
+  EBAMRFluxData m_aCoefficientdata;
 
   EBAMRFluxData m_bcodata;
   

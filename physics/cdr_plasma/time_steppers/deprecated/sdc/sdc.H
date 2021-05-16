@@ -165,8 +165,8 @@ protected:
   void sweep_semi_implicit(const Real a_dt, const Real a_time, const bool a_lagged_terms);
 
   // Explicit divergence routines
-  void compute_divD(const int a_m, const bool a_corrector);
-  void compute_divF(const int a_m, const bool a_corrector);
+  void computeDivD(const int a_m, const bool a_corrector);
+  void computeDivF(const int a_m, const bool a_corrector);
 
   // Advance routine for SDC step
   void substep_rte(const int a_m, const bool a_corrector);
@@ -206,17 +206,17 @@ protected:
   void compute_reaction_network(const int a_m, const Real a_time, const Real a_dt, const bool a_corrector);
   void compute_E_into_scratch();
   void compute_cdr_eb_states();
-  void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states);
+  void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis);
   void compute_cdr_domain_states();
-  void compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_states);
+  void compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis);
   void compute_cdr_gradients();
-  void compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states);
+  void compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis);
   void compute_cdr_fluxes(const Real a_time);
-  void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+  void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void compute_cdr_domain_fluxes(const Real a_time);
-  void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+  void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void compute_cdr_velo(const Real a_time);
-  void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+  void compute_cdr_velo(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void computeDt(Real& a_dt, TimeCode::which_code& a_timeCode);
   void compute_sigma_flux();
 

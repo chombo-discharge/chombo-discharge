@@ -188,7 +188,7 @@ protected:
 
   void parse_gas_params();
   void parse_see();
-  void parseDomain_bc();
+  void parseDomainBc();
   void parse_reaction_settings();
   void parse_initial_particles();
   void instantiate_species();

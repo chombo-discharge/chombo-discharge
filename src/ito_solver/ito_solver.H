@@ -67,17 +67,17 @@ public:
   /*!
     @brief Get solver name
   */
-  virtual std::string get_name();
+  virtual std::string getName();
 
   /*!
     @brief Get Realm
   */
-  virtual const std::string get_Realm() const;
+  virtual const std::string getRealm() const;
 
   /*!
     @brief Set Realm
   */
-  virtual void set_Realm(const std::string a_Realm);
+  virtual void setRealm(const std::string a_realm);
 
   /*!
     @brief Parse options
@@ -170,13 +170,13 @@ public:
     @brief Deposit conductivities
     @details This deposits weight*mobility (not multiplied by charge)
   */
-  virtual void deposit_conductivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
+  virtual void deposit_conductivity(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Deposit conductivities
     @details This deposits weight*mobility (not multiplied by charge)
   */
-  virtual void deposit_conductivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void deposit_conductivity(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
 
   /*!
     @brief Deposit diffusivity
@@ -188,13 +188,13 @@ public:
     @brief Deposit diffusivities
     @details This deposits weight*D (not multiplied by charge)
   */
-  virtual void deposit_diffusivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
+  virtual void deposit_diffusivity(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Deposit diffusivity
     @details This deposits weight*D (not multiplied by charge)
   */
-  virtual void deposit_diffusivity(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void deposit_diffusivity(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
 
   /*!
     @brief Deposit diffusivity
@@ -206,29 +206,29 @@ public:
     @brief Deposit energy
     @details This deposits weight*energy
   */
-  virtual void deposit_energy_density(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
+  virtual void deposit_energy_density(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Deposit energy
     @details This deposits weight*energy
   */
-  virtual void deposit_energy_density(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void deposit_energy_density(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
 
   /*!
     @brief Compute average mobility. Must sort the particles by cell first. 
     
   */
-  virtual void compute_average_mobility(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
+  virtual void compute_average_mobility(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Compute average diffusion. Must sort the particles by cell first. 
   */
-  virtual void compute_average_diffusion(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
+  virtual void compute_average_diffusion(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Compute average energy. Must sort the particles by cell first. 
   */
-  virtual void compute_average_energy(EBAMRCellData& a_state, particle_container<ito_particle>& a_particles);
+  virtual void compute_average_energy(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Deposit particles
@@ -241,16 +241,16 @@ public:
   virtual void deposit_particles(const which_container a_container);
 
   /*!
-    @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
+    @brief Deposit the particles onto a_phi. The result is put on the a_comp compoennt
   */
   template <class T>
-  void deposit_particles(EBAMRCellData& a_state, const particle_container<T>& a_particles);
+  void deposit_particles(EBAMRCellData& a_phi, const particle_container<T>& a_particles);
 
   /*!
-    @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
+    @brief Deposit the particles onto a_phi. The result is put on the a_comp compoennt
   */
   template <class T>
-  void deposit_particles(EBAMRCellData& a_state, const particle_container<T>& a_particles, const DepositionType::Which  a_deposition);
+  void deposit_particles(EBAMRCellData& a_phi, const particle_container<T>& a_particles, const DepositionType::Which  a_deposition);
 
   /*!
     @brief Deposit the total weight of the particles in the grid cells
@@ -327,7 +327,7 @@ public:
   /*!
     @brief Get number of plot variables
   */
-  virtual int get_num_plotvars() const;
+  virtual int getNumberOfPlotVariables() const;
 
   /*!
     @brief Get PVR buffer
@@ -372,17 +372,17 @@ public:
   /*!
     @brief Set phase
   */
-  virtual void set_phase(phase::which_phase a_phase);
+  virtual void setPhase(phase::which_phase a_phase);
 
   /*!
     @brief Set verbosity.
   */
-  virtual void set_verbosity(const int a_verbosity);
+  virtual void setVerbosity(const int a_verbosity);
 
   /*!
     @brief Get current time
   */
-  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
+  virtual void setTime(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Write plot data
@@ -392,7 +392,7 @@ public:
   /*!
     @brief Write data to output. Convenience function. 
   */
-  virtual void write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
+  virtual void writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
 
   /*!
     @brief Write checkpoint data into handle
@@ -417,7 +417,7 @@ public:
   /*!
     @brief Set the species
   */
-  virtual void set_species(RefCountedPtr<ito_species> a_species);
+  virtual void setSpecies(RefCountedPtr<ito_species> a_species);
 
   /*!
     @brief Cache the particles
@@ -432,12 +432,12 @@ public:
   /*!
     @brief Check if solver is mobile
   */
-  virtual bool is_mobile() const;
+  virtual bool isMobile() const;
   
   /*!
     @brief Check if solver is diffusive
   */
-  virtual bool is_diffusive() const;
+  virtual bool isDiffusive() const;
 
   /*!
     @brief Get a general particle container
@@ -457,7 +457,7 @@ public:
   /*!
     @brief Get state
   */
-  virtual EBAMRCellData& get_state();
+  virtual EBAMRCellData& getPhi();
 
   /*!
     @brief Get cell-centered velocity
@@ -482,12 +482,12 @@ public:
   /*!
     @brief Set diffusion coefficient
   */
-  virtual void set_diffco_func(const Real a_diffco);
+  virtual void setDiffusionCoefficient_func(const Real a_diffusionCoefficient);
 
   /*!
     @brief Set velocity
   */
-  virtual void set_velocity_func(const RealVect a_vel);
+  virtual void setVelocity_func(const RealVect a_vel);
 
   /*!
     @brief Sets constant mobility for all particles
@@ -663,7 +663,7 @@ public:
   /*!
     @brief Compute diffusion dt as dx*maxCellsToMove/(sqrt(2D)*eps) on all levels
   */
-  Vector<Real> compute_diffusion_dt(const Real a_maxCellsToMove) const;
+  Vector<Real> computeDiffusionDt(const Real a_maxCellsToMove) const;
 
   /*!
     @brief Compute the diffusive dt
@@ -673,17 +673,17 @@ public:
   /*!
     @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on all levels
   */
-  Vector<Real> compute_diffusion_dt() const;
+  Vector<Real> computeDiffusionDt() const;
 
   /*!
     @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on one level
   */
-  Real compute_diffusion_dt(const int a_lvl) const;
+  Real computeDiffusionDt(const int a_lvl) const;
 
   /*!
     @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on one level and one patch
   */
-  Real compute_diffusion_dt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const;
+  Real computeDiffusionDt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const;
 
   /*!
     @brief Get deposition method
@@ -777,7 +777,7 @@ protected:
   /*!
     @brief Class name
   */
-  std::string m_class_name;
+  std::string m_className;
 
   /*!
     @brief RNG engine
@@ -828,7 +828,7 @@ protected:
   /*!
     @brief Time step
   */
-  int m_step;
+  int m_timeStep;
 
   /*!
     @brief Buffer for PVR
@@ -888,32 +888,32 @@ protected:
   /*!
     @brief Flag for blending the deposition clouds with the nonconservative divergence
   */
-  bool m_blend_conservation;
+  bool m_blendConservation;
 
   /*!
     @brief Solver is diffusive
   */
-  bool m_diffusive;
+  bool m_isDiffusive;
 
   /*!
     @brief Also solve for advection/convection
   */
-  bool m_mobile;
+  bool m_isMobile;
 
   /*!
     @brief Output state
   */
-  bool m_plot_phi;
+  bool m_plotPhi;
 
   /*!
     @brief Output state
   */
-  bool m_plot_vel;
+  bool m_plotVelocity;
 
   /*!
     @brief Output state
   */
-  bool m_plot_dco;
+  bool m_plotDiffusionCoefficient;
 
   /*!
     @brief Plot particles
@@ -963,7 +963,7 @@ protected:
   /*!
     @brief Deposited particles
   */
-  EBAMRCellData m_state;
+  EBAMRCellData m_phi;
 
   /*!
     @brief Scratch data
@@ -983,7 +983,7 @@ protected:
   /*!
     @brief Diffusion-centerer field used for interpolating diffusion coefficients
   */
-  EBAMRCellData m_diffco_cell;
+  EBAMRCellData m_faceCenteredDiffusionCoefficient_cell;
 
   /*!
     @brief Scratch storage for holding the non-conservative deposition
@@ -1043,7 +1043,7 @@ protected:
   /*!
     @brief Parse the conservation
   */
-  void parse_conservation();
+  void parseDivergenceComputation();
 
   /*!
     @brief Parse checkpointing method
@@ -1054,7 +1054,7 @@ protected:
     @brief This computes the "conservative" deposition, multiplied by kappa
   */
   template <class T>
-  void deposit_kappaConservative(EBAMRCellData&               a_state,
+  void deposit_kappaConservative(EBAMRCellData&               a_phi,
 				 const particle_container<T>& a_particles,
 				 const DepositionType::Which  a_deposition);
 
@@ -1063,7 +1063,7 @@ protected:
     interpolated to fine levels. 
   */
   template <class T>
-  void deposit_kappaConservativeWithPVR(EBAMRCellData&               a_state,
+  void deposit_kappaConservativeWithPVR(EBAMRCellData&               a_phi,
 					const particle_container<T>& a_particles,
 					const DepositionType::Which  a_deposition);
 
@@ -1072,7 +1072,7 @@ protected:
     levels
   */
   template <class T>
-  void deposit_kappaConservativeNoPVR_native(EBAMRCellData&               a_state,
+  void deposit_kappaConservativeNoPVR_native(EBAMRCellData&               a_phi,
 					     const particle_container<T>& a_particles,
 					     const DepositionType::Which  a_deposition);
 
@@ -1081,7 +1081,7 @@ protected:
     levels
   */
   template <class T>
-  void deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&               a_state,
+  void deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&               a_phi,
 					  const particle_container<T>& a_particles,
 					  const DepositionType::Which  a_deposition);
 
@@ -1093,27 +1093,27 @@ protected:
   /*!
     @brief Make the hybrid deposition. Also compute the mass difference
   */
-  void deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_diff, const EBAMRIVData& a_depositionNC);
+  void deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
 
   /*!
     @brief Increment redistribution objects with mass to be redistributed
   */
-  void increment_redist(const EBAMRIVData& a_mass_diff);
+  void incrementRedist(const EBAMRIVData& a_massDifference);
 
   /*!
     @brief Do redistribution on all levels, no coarse-fine stuff
   */
-  void level_redistribution(EBAMRCellData& a_state);
+  void level_redistribution(EBAMRCellData& a_phi);
 
   /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
   */
-  void coarse_fine_increment(const EBAMRIVData& m_mass_diff);
+  void coarseFineIncrement(const EBAMRIVData& m_massDifference);
 
   /*!
     @brief Do coarse-fine redistribution
   */
-  void coarse_fine_redistribution(EBAMRCellData& a_state);
+  void coarseFineRedistribution(EBAMRCellData& a_phi);
 
   /*!
     @brief Superparticle merging with BVH trees

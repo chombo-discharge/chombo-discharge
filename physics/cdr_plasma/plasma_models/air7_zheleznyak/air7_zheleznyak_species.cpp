@@ -18,8 +18,8 @@ air7_zheleznyak::electron::electron(){
   std::string str;
   Vector<Real> vec(SpaceDim);
   
-  pp.get("mobile_electrons", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_electrons", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_electrons", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive = (str == "true") ? true : false;
 
   pp.get("uniform_density", m_uniform_density);
   pp.get("seed_density", m_seed_density);
@@ -34,8 +34,8 @@ air7_zheleznyak::N2plus::N2plus(){
   std::string str;
   Vector<Real> vec(SpaceDim);
   
-  pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 
   pp.get("frac_N2", m_frac);
   pp.get("uniform_density", m_uniform_density);
@@ -51,8 +51,8 @@ air7_zheleznyak::O2plus::O2plus(){
   std::string str;
   Vector<Real> vec(SpaceDim);
   
-  pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 
   pp.get("frac_O2", m_frac);
   pp.get("uniform_density", m_uniform_density);
@@ -67,8 +67,8 @@ air7_zheleznyak::N4plus::N4plus(){
   ParmParse pp("air7_zheleznyak");
   std::string str;
   
-  pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
 air7_zheleznyak::O4plus::O4plus(){
@@ -77,8 +77,8 @@ air7_zheleznyak::O4plus::O4plus(){
   ParmParse pp("air7_zheleznyak");
   std::string str;
   
-  pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
 air7_zheleznyak::O2plusN2::O2plusN2(){
@@ -87,8 +87,8 @@ air7_zheleznyak::O2plusN2::O2plusN2(){
   ParmParse pp("air7_zheleznyak");
   std::string str;
   
-  pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
 air7_zheleznyak::O2minus::O2minus(){
@@ -97,8 +97,8 @@ air7_zheleznyak::O2minus::O2minus(){
   ParmParse pp("air7_zheleznyak");
   std::string str;
   
-  pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
 Real air7_zheleznyak::electron::initialData(const RealVect a_pos, const Real a_time) const{

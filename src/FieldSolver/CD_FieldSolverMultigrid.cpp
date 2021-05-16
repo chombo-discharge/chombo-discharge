@@ -139,7 +139,7 @@ void FieldSolverMultigrid::allocateInternals(){
   data_ops::set_value(m_zero, 0.0);
 }
 
-bool FieldSolverMultigrid::solve(MFAMRCellData&       a_state,
+bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 				 const MFAMRCellData& a_source,
 				 const EBAMRIVData&   a_sigma,
 				 const bool           a_zerophi){
@@ -185,8 +185,8 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_state,
 #endif
 
 #if 0 // Check NaN/Inf input
-  EBAMRCellData phiGas = m_amr->alias(phase::gas,   a_state);
-  EBAMRCellData phiSol = m_amr->alias(phase::solid, a_state);
+  EBAMRCellData phiGas = m_amr->alias(phase::gas,   a_phi);
+  EBAMRCellData phiSol = m_amr->alias(phase::solid, a_phi);
 
   EBAMRCellData srcGas = m_amr->alias(phase::gas,   m_scaledSource);
   EBAMRCellData srcSol = m_amr->alias(phase::solid, m_scaledSource);
@@ -202,7 +202,7 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_state,
 
   // Aliasing
   Vector<LevelData<MFCellFAB>* > phi, cpy, rhs, res, zero;
-  m_amr->alias(phi,     a_state);
+  m_amr->alias(phi,     a_phi);
   m_amr->alias(rhs,     m_scaledSource);
   m_amr->alias(res,     m_residue);
   m_amr->alias(zero,    m_zero);
@@ -232,7 +232,7 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_state,
   // Solver hang. Try again. 
   if(!converged){
     this->setupMultigrid();
-    data_ops::set_value(a_state, 0.0);
+    data_ops::set_value(a_phi, 0.0);
     m_multigridSolver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
 
     const int status = m_multigridSolver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
@@ -256,8 +256,8 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_state,
 
   m_multigridSolver.revert(phi, rhs, finest_level, 0);
 
-  m_amr->averageDown(a_state, m_Realm);
-  m_amr->interpGhost(a_state, m_Realm);
+  m_amr->averageDown(a_phi, m_Realm);
+  m_amr->interpGhost(a_phi, m_Realm);
 
   const Real t5 = MPI_Wtime();
 

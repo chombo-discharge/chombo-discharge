@@ -24,7 +24,7 @@
 
 eddington_sp1::eddington_sp1() : rte_solver() {
   m_name = "eddington_sp1";
-  m_class_name = "eddington_sp1";
+  m_className = "eddington_sp1";
 
   m_verbosity  = -1;
   m_needs_setup = true;
@@ -34,7 +34,7 @@ eddington_sp1::eddington_sp1() : rte_solver() {
 eddington_sp1::~eddington_sp1(){
 }
 
-int eddington_sp1::query_ghost() const{
+int eddington_sp1::queryGhost() const{
   return 3;
 }
 
@@ -44,7 +44,7 @@ void eddington_sp1::parseOptions(){
     pout() << m_name + "::parseOptions" << endl;
   }
   
-  parseDomain_bc();    // Parses domain BC options
+  parseDomainBc();    // Parses domain BC options
   parse_stationary();   // Parse stationary solver
   parsePlotVariables();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
@@ -61,16 +61,16 @@ void eddington_sp1::parseRuntimeOptions(){
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
 }
 
-void eddington_sp1::parseDomain_bc(){
-  CH_TIME("eddington_sp1::parseDomain_bc");
+void eddington_sp1::parseDomainBc(){
+  CH_TIME("eddington_sp1::parseDomainBc");
   if(m_verbosity > 5){
-    pout() << m_name + "::parseDomain_bc" << endl;
+    pout() << m_name + "::parseDomainBc" << endl;
   }
 
   allocate_wall_bc();
 
   // Get BC from input script
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
@@ -131,7 +131,7 @@ void eddington_sp1::parse_stationary(){
     pout() << m_name + "::parse_stationary" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   std::string str;
   
   pp.get("stationary", str);
@@ -147,22 +147,22 @@ void eddington_sp1::parsePlotVariables(){
     pout() << m_name + "::parsePlotVariables" << endl;
   }
 
-  m_plot_phi = false;
-  m_plot_src = false;
+  m_plotPhi = false;
+  m_plotSource = false;
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   const int num = pp.countval("plt_vars");
   Vector<std::string> str(num);
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++){
-    if(     str[i] == "phi") m_plot_phi = true;
-    else if(str[i] == "src") m_plot_src = true;
+    if(     str[i] == "phi") m_plotPhi = true;
+    else if(str[i] == "src") m_plotSource = true;
   }
 }
 
 void eddington_sp1::parse_gmg_settings(){
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   std::string str;
 
@@ -225,7 +225,7 @@ void eddington_sp1::parse_reflection(){
     pout() << m_name + "::parse_reflectivity" << endl;
   }
   
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   Real r;
   pp.get("reflectivity", r);
@@ -257,7 +257,7 @@ void eddington_sp1::preRegrid(const int a_base, const int a_oldFinestLevel){
   m_amr->allocate(m_cache, m_Realm, m_phase, ncomp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    m_state[lvl]->localCopyTo(*m_cache[lvl]);
+    m_phi[lvl]->localCopyTo(*m_cache[lvl]);
   }
 }
 
@@ -279,25 +279,25 @@ void eddington_sp1::allocateInternals(){
   
   const int ncomp = 1;
 
-  m_amr->allocate(m_aco,       m_Realm, m_phase, ncomp);
+  m_amr->allocate(m_aCoefficient,       m_Realm, m_phase, ncomp);
   m_amr->allocate(m_bco,       m_Realm, m_phase, ncomp);
   m_amr->allocate(m_bco_irreg, m_Realm, m_phase, ncomp);
-  m_amr->allocate(m_state,     m_Realm, m_phase, ncomp);
+  m_amr->allocate(m_phi,     m_Realm, m_phase, ncomp);
   m_amr->allocate(m_source,    m_Realm, m_phase, ncomp);
   m_amr->allocate(m_resid,     m_Realm, m_phase, ncomp);
 
   data_ops::set_value(m_resid,  0.0);
-  data_ops::set_value(m_state,  0.0);
+  data_ops::set_value(m_phi,  0.0);
   data_ops::set_value(m_source, 0.0);
 
   this->set_aco_and_bco();
 }
 
 void eddington_sp1::deallocateInternals(){
-  m_amr->deallocate(m_aco);
+  m_amr->deallocate(m_aCoefficient);
   m_amr->deallocate(m_bco);
   m_amr->deallocate(m_bco_irreg);
-  m_amr->deallocate(m_state);
+  m_amr->deallocate(m_phi);
   m_amr->deallocate(m_source);
   m_amr->deallocate(m_resid);
 }
@@ -318,15 +318,15 @@ void eddington_sp1::regrid(const int a_lmin, const int a_oldFinestLevel, const i
 
   // These levels have not changed
   for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
-    m_cache[lvl]->copyTo(*m_state[lvl]); // Base level should never change, but ownership might
+    m_cache[lvl]->copyTo(*m_phi[lvl]); // Base level should never change, but ownership might
   }
 
   // These levels have changed
   for (int lvl = Max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
-    interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
+    interpolator[lvl]->interpolate(*m_phi[lvl], *m_phi[lvl-1], interv);
 
     if(lvl <= a_oldFinestLevel){
-      m_cache[lvl]->copyTo(*m_state[lvl]);
+      m_cache[lvl]->copyTo(*m_phi[lvl]);
     }
   }
 
@@ -352,7 +352,7 @@ void eddington_sp1::registerOperators(){
   }
 }
 
-bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi){
+bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi){
   CH_TIME("eddington_sp1::advance(ebamrcell, ebamrcell)");
   if(m_verbosity > 5){
     pout() << m_name + "::advance(ebamrcell, ebamrcell)" << endl;
@@ -385,7 +385,7 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
   }
 
   Vector<LevelData<EBCellFAB>* > phi, rhs, res, zero;
-  m_amr->alias(phi,  a_state);
+  m_amr->alias(phi,  a_phi);
   m_amr->alias(rhs,  source);
   m_amr->alias(res,  m_resid);
   m_amr->alias(zero, dummy);
@@ -408,7 +408,7 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
     }
     m_gmg_solver->revert(phi, rhs, finest_level, 0);
 
-    data_ops::set_covered_value(a_state, 0, 0.0);
+    data_ops::set_covered_value(a_phi, 0, 0.0);
   }
   else{
     if(m_use_tga){
@@ -432,13 +432,13 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
     }
 
     // We solve onto res, copy back to state
-    data_ops::copy(a_state, m_resid);
+    data_ops::copy(a_phi, m_resid);
   }
 
-  m_amr->averageDown(a_state, m_Realm, m_phase);
-  m_amr->interpGhost(a_state, m_Realm, m_phase);
+  m_amr->averageDown(a_phi, m_Realm, m_phase);
+  m_amr->interpGhost(a_phi, m_Realm, m_phase);
 
-  data_ops::floor(a_state, 0.0);
+  data_ops::floor(a_phi, 0.0);
 
   return converged;
 }
@@ -479,7 +479,7 @@ void eddington_sp1::set_coefficients(){
   const int ncomp = 1;
   const int ghost = 3;
 
-  m_amr->allocate(m_aco,        m_Realm, m_phase, ncomp, ghost);
+  m_amr->allocate(m_aCoefficient,        m_Realm, m_phase, ncomp, ghost);
   m_amr->allocate(m_bco,        m_Realm, m_phase, ncomp, ghost);
   m_amr->allocate(m_bco_irreg,  m_Realm, m_phase, ncomp, ghost);
 
@@ -495,7 +495,7 @@ void eddington_sp1::set_aco_and_bco(){
   // This loop fills aco with kappa and bco_irreg with 1./kappa
   if(m_rte_species->constant_kappa()){
     const Real kap = m_rte_species->get_kappa(RealVect::Zero);
-    data_ops::set_value(m_aco, kap);
+    data_ops::set_value(m_aCoefficient, kap);
     data_ops::set_value(m_bco, 1./kap);
     data_ops::set_value(m_bco_irreg, 1./kap);
   }
@@ -504,7 +504,7 @@ void eddington_sp1::set_aco_and_bco(){
       const RealVect origin = m_amr->getProbLo();
       const Real dx         = m_amr->getDx()[lvl];
     
-      LevelData<EBCellFAB>& aco            = *m_aco[lvl];
+      LevelData<EBCellFAB>& aco            = *m_aCoefficient[lvl];
       LevelData<EBFluxFAB>& bco            = *m_bco[lvl];
       LevelData<BaseIVFAB<Real> >& bco_irr = *m_bco_irreg[lvl];
 
@@ -514,18 +514,18 @@ void eddington_sp1::set_aco_and_bco(){
       }
     }
 
-    m_amr->averageDown(m_aco, m_Realm, m_phase);
-    m_amr->interpGhost(m_aco, m_Realm, m_phase);
-    data_ops::average_cell_to_face_allcomps(m_bco, m_aco, m_amr->getDomains()); // Average aco onto face
+    m_amr->averageDown(m_aCoefficient, m_Realm, m_phase);
+    m_amr->interpGhost(m_aCoefficient, m_Realm, m_phase);
+    data_ops::average_cell_to_face_allcomps(m_bco, m_aCoefficient, m_amr->getDomains()); // Average aco onto face
     data_ops::invert(m_bco); // Make m_bco = 1./kappa
   }
 
 #if eddington_sp1_feature // Different scaling for the RTE
-  data_ops::scale(m_aco,       1.0);       // aco = c*kappa
+  data_ops::scale(m_aCoefficient,       1.0);       // aco = c*kappa
   data_ops::scale(m_bco,       1.0/(3.0)); // bco = c/(3*kappa)
   data_ops::scale(m_bco_irreg, 1.0/(3.0)); // bco = c/(3*kappa)
 #else // Original code before different scaling
-  data_ops::scale(m_aco,       units::s_c0);       // aco = c*kappa
+  data_ops::scale(m_aCoefficient,       units::s_c0);       // aco = c*kappa
   data_ops::scale(m_bco,       units::s_c0/(3.0)); // bco = c/(3*kappa)
   data_ops::scale(m_bco_irreg, units::s_c0/(3.0)); // bco = c/(3*kappa)
 #endif
@@ -712,7 +712,7 @@ void eddington_sp1::setup_operator_factory(){
 										 fastFR,
 										 alpha,
 										 beta,
-										 m_aco.get_data(),
+										 m_aCoefficient.get_data(),
 										 m_bco.get_data(),
 										 m_bco_irreg.get_data(),
 										 dx[0],
@@ -803,7 +803,7 @@ void eddington_sp1::setup_tga(){
 
   // Must init gmg for TGA
   Vector<LevelData<EBCellFAB>* > phi, rhs;
-  m_amr->alias(phi, m_state);
+  m_amr->alias(phi, m_phi);
   m_amr->alias(rhs, m_source);
   m_gmg_solver->init(phi, rhs, finest_level, 0);
 }
@@ -824,7 +824,7 @@ void eddington_sp1::setup_euler(){
   // Note: If this crashes, try to init gmg first
 }
 
-void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state){
+void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi){
   CH_TIME("eddington_sp1::compute_boundary_flux");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_boundary_flux" << endl;
@@ -834,12 +834,12 @@ void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCell
   
   const IrregAmrStencil<EbCentroidInterpolationStencil>& sten = m_amr->getEbCentroidInterpolationStencilStencils(m_Realm, m_phase);
   for(int lvl = 0; lvl <= finest_level; lvl++){
-    sten.apply(*a_ebflux[lvl], *a_state[lvl], lvl, true);
+    sten.apply(*a_ebFlux[lvl], *a_phi[lvl], lvl, true);
   }
 
-  m_amr->averageDown(a_ebflux, m_Realm, m_phase);
+  m_amr->averageDown(a_ebFlux, m_Realm, m_phase);
 
-  data_ops::scale(a_ebflux, 0.5*units::s_c0);
+  data_ops::scale(a_ebFlux, 0.5*units::s_c0);
 }
 
 void eddington_sp1::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_data){
@@ -907,17 +907,17 @@ void eddington_sp1::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCe
   }
 }
 
-void eddington_sp1::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_state){
-  CH_TIME("eddington_sp1::compute_flux");
+void eddington_sp1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi){
+  CH_TIME("eddington_sp1::computeFlux");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_flux" << endl;
+    pout() << m_name + "::computeFlux" << endl;
   }
 
   const int finest_level = m_amr->getFinestLevel();
 
-  m_amr->computeGradient(a_flux, a_state, m_Realm, m_phase); // flux = grad(phi)
+  m_amr->computeGradient(a_flux, a_phi, m_Realm, m_phase); // flux = grad(phi)
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::divide_scalar(*a_flux[lvl], *m_aco[lvl]);   // flux = grad(phi)/(c*kappa)
+    data_ops::divide_scalar(*a_flux[lvl], *m_aCoefficient[lvl]);   // flux = grad(phi)/(c*kappa)
     data_ops::scale(*a_flux[lvl], -units::s_c0*units::s_c0/3.0);  // flux = -c*grad(phi)/3.
   }
 
@@ -926,7 +926,7 @@ void eddington_sp1::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_s
 }
 
 
-void eddington_sp1::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state){
+void eddington_sp1::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi){
   CH_TIME("eddington_sp1::compute_density");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_density" << endl;
@@ -936,7 +936,7 @@ void eddington_sp1::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellD
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Interval interv(0,0);
-    a_state[lvl]->localCopyTo(interv, *a_isotropic[lvl], interv);
+    a_phi[lvl]->localCopyTo(interv, *a_isotropic[lvl], interv);
   }
 }
 
@@ -947,7 +947,7 @@ void eddington_sp1::writePlotFile(){
   }
 
   char file_char[1000];
-  sprintf(file_char, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_step, SpaceDim);
+  sprintf(file_char, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_timeStep, SpaceDim);
 
   const int ncomps = 3 + SpaceDim;
   Vector<string> names(ncomps);
@@ -967,7 +967,7 @@ void eddington_sp1::writePlotFile(){
   // Compute the flux
   EBAMRCellData flux;
   m_amr->allocate(flux, m_Realm, m_phase, SpaceDim);
-  this->compute_flux(flux, m_state);
+  this->computeFlux(flux, m_phi);
 
   // Allocate output storage
   EBAMRCellData output;
@@ -975,7 +975,7 @@ void eddington_sp1::writePlotFile(){
 
 
   for (int lvl = 0; lvl < output.size(); lvl++){
-    LevelData<EBCellFAB>& state  = *m_state[lvl];
+    LevelData<EBCellFAB>& state  = *m_phi[lvl];
     LevelData<EBCellFAB>& source = *m_source[lvl];
     LevelData<EBCellFAB>& flx    = *flux[lvl];
     LevelData<EBCellFAB>& res    = *m_resid[lvl];
@@ -1017,7 +1017,7 @@ void eddington_sp1::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level
   }
 
   // Write state vector
-  write(a_handle, *m_state[a_level], m_name);
+  write(a_handle, *m_phi[a_level], m_name);
 }
 
 void eddington_sp1::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
@@ -1026,7 +1026,7 @@ void eddington_sp1::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
     pout() << m_name + "::readCheckpointLevel" << endl;
   }
 
-  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->getGrids(m_Realm)[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_Realm)[a_level], Interval(0,0), false);
 }
 
 void eddington_sp1::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){

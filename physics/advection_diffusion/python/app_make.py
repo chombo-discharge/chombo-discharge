@@ -35,7 +35,7 @@ def write_template(args):
     makef.write('base_dir = .\n')
     makef.write('src_dirs = $(DISCHARGE_HOME)/src \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/AmrMesh \\\n')
-    makef.write('\t$(DISCHARGE_HOME)/src/cdr_solver \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/CdrSolver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/CellTagger \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/Driver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/elliptic \\\n')

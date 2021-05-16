@@ -19,7 +19,7 @@ typedef euler_maruyama::rte_storage     rte_storage;
 typedef euler_maruyama::sigma_storage   sigma_storage;
 
 euler_maruyama::euler_maruyama(){
-  m_class_name = "euler_maruyama";
+  m_className = "euler_maruyama";
   m_extrap_advect = true;
 }
 
@@ -104,7 +104,7 @@ void euler_maruyama::parse_advection(){
     pout() << "euler_maruyama::parse_advection" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("extrap_advect", str);
@@ -125,7 +125,7 @@ void euler_maruyama::parse_floor(){
     pout() << "euler_maruyama::parse_floor" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("floor_cdr", str);
@@ -146,7 +146,7 @@ void euler_maruyama::parse_debug(){
     pout() << "euler_maruyama::parse_debug" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("debug", str);
@@ -258,7 +258,7 @@ Real euler_maruyama::advance(const Real a_dt){
   t_sig = t1 - t0;
   
   t0 = MPI_Wtime();
-  if((m_step +1) % m_fast_poisson == 0){
+  if((m_timeStep +1) % m_fast_poisson == 0){
     TimeStepper::solve_poisson();                  // Update the Poisson equation
   }
   t1 = MPI_Wtime();
@@ -405,11 +405,11 @@ void euler_maruyama::compute_cdr_gradients(){
 
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    RefCountedPtr<cdr_solver>& solver = solver_it();
+    RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
 
     EBAMRCellData& grad = storage->get_gradient();
-    m_amr->computeGradient(grad, solver->get_state(), phase::gas);
+    m_amr->computeGradient(grad, solver->getPhi(), phase::gas);
     m_amr->averageDown(grad, m_cdr->get_phase());
     m_amr->interpGhost(grad, m_cdr->get_phase());
   }
@@ -421,14 +421,14 @@ void euler_maruyama::compute_cdr_eb_states(){
     pout() << "euler_maruyama::compute_cdr_eb_states" << endl;
   }
 
-  Vector<EBAMRCellData*> cdr_states = m_cdr->get_states();
+  Vector<EBAMRCellData*> cdr_states = m_cdr->getPhis();
   
   Vector<EBAMRIVData*>   eb_gradients;
   Vector<EBAMRIVData*>   eb_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
 
     eb_states.push_back(&(storage->get_eb_state()));
@@ -459,7 +459,7 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
     pout() << "euler_maruyama::compute_cdr_eb_fluxes()";
   }
 
-  Vector<EBAMRCellData*> states = m_cdr->get_states();
+  Vector<EBAMRCellData*> states = m_cdr->getPhis();
 
   Vector<EBAMRIVData*> cdr_fluxes;
   Vector<EBAMRIVData*> extrap_cdr_fluxes;
@@ -468,7 +468,7 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
   Vector<EBAMRIVData*> extrap_cdr_gradients;
   Vector<EBAMRIVData*> extrap_rte_fluxes;
 
-  cdr_fluxes = m_cdr->get_ebflux();
+  cdr_fluxes = m_cdr->getEbFlux();
 
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
@@ -495,7 +495,7 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
-    solver->compute_boundary_flux(flux_eb, solver->get_state());
+    solver->compute_boundary_flux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
@@ -522,10 +522,10 @@ void euler_maruyama::compute_cdr_domain_states(){
   Vector<EBAMRCellData*> cdr_gradients;
   
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
 
-    cdr_states.push_back(&(solver->get_state()));
+    cdr_states.push_back(&(solver->getPhi()));
     domain_states.push_back(&(storage->get_domain_state()));
     domain_gradients.push_back(&(storage->get_domain_grad()));
     cdr_gradients.push_back(&(storage->get_gradient())); // Should already be computed
@@ -538,9 +538,9 @@ void euler_maruyama::compute_cdr_domain_states(){
   EBAMRIFData grad;
   m_amr->allocate(grad, m_cdr->get_phase(), SpaceDim);
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const RefCountedPtr<CdrSolver>& solver = solver_it();
     const int idx = solver_it.index();
-    if(solver->is_mobile()){
+    if(solver->isMobile()){
       TimeStepper::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[idx]);
       TimeStepper::project_domain(*domain_gradients[idx], grad);
     }
@@ -556,7 +556,7 @@ void euler_maruyama::compute_cdr_domain_fluxes(){
     pout() << "euler_maruyama::compute_cdr_domain_fluxes()" << endl;
   }
 
-  Vector<EBAMRCellData*> states = m_cdr->get_states();
+  Vector<EBAMRCellData*> states = m_cdr->getPhis();
 
   Vector<EBAMRIFData*>   cdr_fluxes;
   Vector<EBAMRIFData*>   extrap_cdr_fluxes;
@@ -568,7 +568,7 @@ void euler_maruyama::compute_cdr_domain_fluxes(){
   Vector<EBAMRCellData*> cdr_velocities;
   Vector<EBAMRCellData*> cdr_gradients;
 
-  cdr_fluxes = m_cdr->get_domainflux();
+  cdr_fluxes = m_cdr->getDomainFlux();
   cdr_velocities = m_cdr->get_velocities();
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
@@ -598,7 +598,7 @@ void euler_maruyama::compute_cdr_domain_fluxes(){
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIFData& domain_flux = storage->get_domain_flux();
-    solver->compute_domain_flux(domain_flux, solver->get_state());
+    solver->compute_domain_flux(domain_flux, solver->getPhi());
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 
@@ -625,9 +625,9 @@ void euler_maruyama::compute_sigma_flux(){
   data_ops::set_value(flux, 0.0);
 
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<species>& spec      = solver_it.get_species();
-    const EBAMRIVData& solver_flux          = solver->get_ebflux();
+    const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
     data_ops::incr(flux, solver_flux, spec->get_charge()*units::s_Qe);
   }
@@ -644,10 +644,10 @@ void euler_maruyama::compute_reaction_network(const Real a_dt){
   // We have already computed E and the gradients of the CDR equations, so we will call the
   // TimeStepper version where all that crap is inputs. Saves memory and flops. 
 
-  Vector<EBAMRCellData*> cdr_src = m_cdr->get_sources();
-  Vector<EBAMRCellData*> cdr_phi = m_cdr->get_states();
-  Vector<EBAMRCellData*> rte_src = m_rte->get_sources();
-  Vector<EBAMRCellData*> rte_phi = m_rte->get_states();
+  Vector<EBAMRCellData*> cdr_src = m_cdr->getSources();
+  Vector<EBAMRCellData*> cdr_phi = m_cdr->getPhis();
+  Vector<EBAMRCellData*> rte_src = m_rte->getSources();
+  Vector<EBAMRCellData*> rte_phi = m_rte->getPhis();
   const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 
   Vector<EBAMRCellData*> cdr_grad;
@@ -669,11 +669,11 @@ void euler_maruyama::advance_cdr(const Real a_dt){
   }
 
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
 
-    EBAMRCellData& phi = solver->get_state();
-    EBAMRCellData& src = solver->get_source();
+    EBAMRCellData& phi = solver->getPhi();
+    EBAMRCellData& src = solver->getSource();
     
     EBAMRCellData& scratch  = storage->get_scratch();
     EBAMRCellData& scratch2 = storage->get_scratch2();
@@ -681,10 +681,10 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
     const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
     if(!m_implicit_diffusion){
-      solver->compute_divJ(scratch, phi, extrap_dt);
+      solver->computeDivJ(scratch, phi, extrap_dt);
     }
     else{
-      solver->compute_divF(scratch, phi, extrap_dt);
+      solver->computeDivF(scratch, phi, extrap_dt);
     }
     data_ops::scale(scratch, -1.0);
 
@@ -697,11 +697,11 @@ void euler_maruyama::advance_cdr(const Real a_dt){
 
     if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
       if(m_debug){
-	const Real mass_before = solver->compute_mass();
+	const Real mass_before = solver->computeMass();
 	data_ops::floor(phi, 0.0);
-	const Real mass_after = solver->compute_mass();
+	const Real mass_after = solver->computeMass();
 	const Real rel_mass = (mass_after-mass_before)/mass_before;
-	pout() << "euler_maruayma::injecting relative " << solver->get_name() << " mass = " << rel_mass << endl;
+	pout() << "euler_maruayma::injecting relative " << solver->getName() << " mass = " << rel_mass << endl;
       }
       else{
 	data_ops::floor(phi, 0.0);
@@ -717,20 +717,20 @@ void euler_maruyama::advance_cdr(const Real a_dt){
       //
       // This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
       // so we just use that for simplicity
-      if(solver->is_diffusive()){
+      if(solver->isDiffusive()){
 	data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
 	data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
-	solver->advance_euler(phi, scratch, scratch2, a_dt);
+	solver->advanceEuler(phi, scratch, scratch2, a_dt);
 
 	solver->make_non_negative(phi);
 
 	if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
 	  if(m_debug){
-	    const Real mass_before = solver->compute_mass();
+	    const Real mass_before = solver->computeMass();
 	    data_ops::floor(phi, 0.0);
-	    const Real mass_after = solver->compute_mass();
+	    const Real mass_after = solver->computeMass();
 	    const Real rel_mass = (mass_after-mass_before)/mass_before;
-	    pout() << "euler_maruayma::injecting relative " << solver->get_name() << " mass = " << rel_mass << endl;
+	    pout() << "euler_maruayma::injecting relative " << solver->getName() << " mass = " << rel_mass << endl;
 	  }
 	  else{
 	    data_ops::floor(phi, 0.0);
@@ -764,7 +764,7 @@ void euler_maruyama::advance_sigma(const Real a_dt){
   }
 
   // Advance the sigma equation
-  EBAMRIVData& sigma = m_sigma->get_state();
+  EBAMRIVData& sigma = m_sigma->getPhi();
   const EBAMRIVData& rhs = m_sigma->get_flux();
   data_ops::incr(sigma, rhs, a_dt);
 }
@@ -776,7 +776,7 @@ void euler_maruyama::compute_cdr_velo(const Real a_time){
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  TimeStepper::compute_cdr_velocities(velocities, m_cdr->get_states(), m_fieldSolver_scratch->get_E_cell(), a_time);
+  TimeStepper::compute_cdr_velocities(velocities, m_cdr->getPhis(), m_fieldSolver_scratch->get_E_cell(), a_time);
 }
 
 void euler_maruyama::compute_cdr_diffco(const Real a_time){

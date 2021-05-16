@@ -70,10 +70,10 @@ void cdr_plasma_tagger::regrid(){
   }
 }
 
-void cdr_plasma_tagger::set_phase(const phase::which_phase a_phase){
-  CH_TIME("cdr_plasma_tagger::set_phase");
+void cdr_plasma_tagger::setPhase(const phase::which_phase a_phase){
+  CH_TIME("cdr_plasma_tagger::setPhase");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_phase" << endl;
+    pout() << m_name + "::setPhase" << endl;
   }
   
   m_phase = a_phase;

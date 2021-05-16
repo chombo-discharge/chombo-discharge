@@ -12,8 +12,8 @@ air_eed::eed::eed(){
   Vector<Real> vec(SpaceDim);
 
   pp.get("init_energy", m_init_energy);
-  pp.get("mobile_electrons", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_electrons", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_electrons", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive = (str == "true") ? true : false;
   pp.get("uniform_density", m_uniform_density);
   pp.get("seed_density", m_seed_density);
   pp.get("seed_radius",   m_seed_rad);
@@ -27,8 +27,8 @@ air_eed::electron::electron(){
   std::string str;
   Vector<Real> vec(SpaceDim);
   
-  pp.get("mobile_electrons", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_electrons", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_electrons", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive = (str == "true") ? true : false;
   pp.get("uniform_density", m_uniform_density);
   pp.get("seed_density", m_seed_density);
   pp.get("seed_radius",   m_seed_rad);
@@ -42,8 +42,8 @@ air_eed::M_plus::M_plus(){
   std::string str;
   Vector<Real> vec(SpaceDim);
     
-  pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
   pp.get("uniform_density", m_uniform_density);
   pp.get("seed_density", m_seed_density);
   pp.get("seed_radius",   m_seed_rad);
@@ -56,8 +56,8 @@ air_eed::M_minus::M_minus(){
   ParmParse pp("air_eed");
   std::string str;
   
-  pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
-  pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
+  pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
 air_eed::agg_photon::agg_photon(){

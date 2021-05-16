@@ -25,7 +25,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());
 
   // Set up basic advection_diffusion 
-  RefCountedPtr<cdr_solver> solver        = RefCountedPtr<cdr_solver>   (new cdr_gdnv());
+  RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new cdr_gdnv());
   RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new advection_diffusion_stepper(solver));
   RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new advection_diffusion_tagger(solver, amr));
 

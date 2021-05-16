@@ -32,12 +32,12 @@ public:
   /*!
     @brief Get the Realm
   */
-  const std::string get_Realm() const;
+  const std::string getRealm() const;
 
   /*!
     @brief Set the Realm
   */
-  virtual void set_Realm(const std::string a_Realm); 
+  virtual void setRealm(const std::string a_realm); 
 
   /*!
     @brief Allocate internal storage
@@ -88,7 +88,7 @@ public:
     @brief Set phase
     @details This must be done BEFORE callilng setComputationalGeometry
   */
-  virtual void set_phase(phase::which_phase a_phase = phase::gas);
+  virtual void setPhase(phase::which_phase a_phase = phase::gas);
 
   /*!
     @brief Convenience function. Set the surface charge
@@ -103,12 +103,12 @@ public:
   /*!
     @brief Set verbosity.
   */
-  virtual void set_verbosity(const int a_verbosity);
+  virtual void setVerbosity(const int a_verbosity);
 
   /*!
     @brief Get current time
   */
-  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
+  virtual void setTime(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Write checkpoint data into handle
@@ -133,7 +133,7 @@ public:
   /*!
     @brief Number of variables to be plotted
   */
-  virtual int get_num_plotvars();
+  virtual int getNumberOfPlotVariables();
 
   /*!
     @brief Get output plot names
@@ -143,12 +143,12 @@ public:
   /*!
     @brief Compute total charge
   */
-  virtual Real compute_charge();
+  virtual Real computeCharge();
 
   /*!
     @brief Get internal state
   */
-  virtual EBAMRIVData& get_state();
+  virtual EBAMRIVData& getPhi();
 
   /*!
     @brief Get internal state
@@ -180,7 +180,7 @@ protected:
   /*!
     @brief State
   */
-  EBAMRIVData m_state;
+  EBAMRIVData m_phi;
 
   /*!
     @brief Cached state for regridding. DO NOT TOUCH!
@@ -205,7 +205,7 @@ protected:
   /*!
     @brief Time step
   */
-  int m_step;
+  int m_timeStep;
 
   /*!
     @brief Current time
@@ -220,7 +220,7 @@ protected:
   /*!
     @brief Output sigma
   */
-  bool m_plot_phi;
+  bool m_plotPhi;
   
 };
 #include "CD_NamespaceFooter.H"

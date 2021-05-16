@@ -33,12 +33,12 @@ public:
   /*!
     @brief Get solver name
   */
-  virtual std::string get_name();
+  virtual std::string getName();
 
   /*!
     @brief Get Realm
   */
-  virtual const std::string get_Realm() const;
+  virtual const std::string getRealm() const;
 
   /*!
     @brief Parse options
@@ -63,17 +63,17 @@ public:
   /*!
     @brief Advance method
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi = false);
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const bool a_zerophi = false);
 
   /*!
-    @brief Advance RTE onto isotropic state a_state
+    @brief Advance RTE onto isotropic state a_phi
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false) = 0;
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi = false) = 0;
 
   /*!
     @brief Set Realm
   */
-  virtual void set_Realm(const std::string a_Realm);
+  virtual void setRealm(const std::string a_realm);
 
   /*!
     @brief Set the photon group
@@ -94,12 +94,12 @@ public:
     @brief Set phase
     @details This must be done BEFORE callilng setComputationalGeometry
   */
-  virtual void set_phase(phase::which_phase a_phase = phase::gas);
+  virtual void setPhase(phase::which_phase a_phase = phase::gas);
 
   /*!
     @brief Set verbosity.
   */
-  virtual void set_verbosity(const int a_verbosity);
+  virtual void setVerbosity(const int a_verbosity);
 
   /*!
     @brief Set which variables to output
@@ -109,7 +109,7 @@ public:
   /*!
     @brief Get current time
   */
-  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
+  virtual void setTime(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Set stationary solver or not
@@ -127,27 +127,27 @@ public:
   virtual bool is_stationary();
 
   /*!
-    @brief Compute the boundary flux given a state (a_state will be different for different RTE approximations)
+    @brief Compute the boundary flux given a state (a_phi will be different for different RTE approximations)
   */
-  virtual void compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state) = 0;
+  virtual void compute_boundary_flux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) = 0;
 
   /*!
-    @brief Compute the domain flux given a state (a_state will be different for different RTE approximations)
+    @brief Compute the domain flux given a state (a_phi will be different for different RTE approximations)
   */
-  virtual void compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_state) = 0;
+  virtual void compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Compute the flux
-    @details For diffusive models, the flux will be something like grad(a_state). For higher-order models, the flux 
-    will be contained in a_state (somehow);
+    @details For diffusive models, the flux will be something like grad(a_phi). For higher-order models, the flux 
+    will be contained in a_phi (somehow);
   */
-  virtual void compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_state) = 0;
+  virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Get isotropic part. 
     @details This is normally just a copy, but I need the function signature in order to have a clear plasma-coupling interface
   */
-  virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state) = 0;
+  virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Allocate internal storage
@@ -183,12 +183,12 @@ public:
   /*!
     @brief Set source term
   */
-  virtual void set_source(const EBAMRCellData& a_source);
+  virtual void setSource(const EBAMRCellData& a_source);
 
   /*!
     @brief Set source
   */
-  virtual void set_source(const Real a_source);
+  virtual void setSource(const Real a_source);
 
   /*!
     @brief Write plot file
@@ -203,7 +203,7 @@ public:
   /*!
     @brief Write data to output. Convenience function. 
   */
-  virtual void write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
+  virtual void writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
 
   /*!
     @brief Write checkpoint data into handle
@@ -218,12 +218,12 @@ public:
   /*!
     @brief Return required number of ghost cells
   */
-  virtual int query_ghost() const = 0;
+  virtual int queryGhost() const = 0;
 
   /*!
     @brief Get number of output fields
   */
-  virtual int get_num_plotvars() const;
+  virtual int getNumberOfPlotVariables() const;
 
   /*!
     @brief Get time
@@ -238,12 +238,12 @@ public:
   /*!
     @brief Get multifluid state
   */
-  virtual EBAMRCellData& get_state();
+  virtual EBAMRCellData& getPhi();
 
   /*!
     @brief Get multifluid source
   */
-  virtual EBAMRCellData& get_source();
+  virtual EBAMRCellData& getSource();
 
   /*!
     @brief Set the absorption coefficient
@@ -300,7 +300,7 @@ protected:
   /*!
     @brief Class name
   */
-  std::string m_class_name;
+  std::string m_className;
 
   /*!
     @brief Cached state used for regridding
@@ -312,7 +312,7 @@ protected:
     @details For diffusive models, this will only contain the isotropic density. For higher order models, this should also
     include the flux, Eddigton tensor etc.
   */
-  EBAMRCellData m_state;
+  EBAMRCellData m_phi;
 
   /*!
     @brief Source term 
@@ -349,12 +349,12 @@ protected:
   /*!
     @brief Output state
   */
-  bool m_plot_phi;
+  bool m_plotPhi;
 
   /*!
     @brief Output source term
   */
-  bool m_plot_src;
+  bool m_plotSource;
 
   /*!
     @brief
@@ -364,12 +364,12 @@ protected:
   /*!
     @brief Time step
   */
-  int m_step;
+  int m_timeStep;
 
   /*!
     @brief Set ebis
   */
-  void set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis);
+  void setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis);
 };
 #include "CD_NamespaceFooter.H"
 

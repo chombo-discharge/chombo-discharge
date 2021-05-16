@@ -134,8 +134,8 @@ void Realm::define_mflevelgrid(const int a_lmin){
 
   m_mflg.resize(1 + m_finestLevel);
 
-  PhaseRealm& gas = this->get_Realm(phase::gas);
-  PhaseRealm& sol = this->get_Realm(phase::solid);
+  PhaseRealm& gas = this->getRealm(phase::gas);
+  PhaseRealm& sol = this->getRealm(phase::solid);
 
   const RefCountedPtr<EBIndexSpace>& ebis_gas = gas.getEBIndexSpace();
   const RefCountedPtr<EBIndexSpace>& ebis_sol = sol.getEBIndexSpace();
@@ -352,7 +352,7 @@ bool Realm::queryMask(const std::string a_mask, const int a_buffer) const {
   return ret;
 }
 
-PhaseRealm& Realm::get_Realm(const phase::which_phase a_phase){
+PhaseRealm& Realm::getRealm(const phase::which_phase a_phase){
   return *m_Realms[a_phase];
 }
 

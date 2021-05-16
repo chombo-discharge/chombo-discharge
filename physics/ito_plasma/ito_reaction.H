@@ -153,13 +153,13 @@ namespace physics {
 	@brief Get the state change. You need to iterate through this map. 
       */
       inline
-      const std::map<int, int>& get_state_change() const;
+      const std::map<int, int>& getPhi_change() const;
 
       /*!
 	@brief Get the state change for a particular species
       */
       inline
-      const int get_state_change(const int a_idx) const;
+      const int getPhi_change(const int a_idx) const;
 
       /*!
 	@brief Get the energy change. You need to iterate through this map. 
@@ -183,7 +183,7 @@ namespace physics {
       std::list<int> m_photon_products;                // Photon products
       std::list<std::pair<int, Real> > m_energy_jumps; // Energy changes
 
-      std::map<int, int>  m_stateChange;  // Change in species due to firing of one reaction. First index is species, second is change. 
+      std::map<int, int>  m_phiChange;  // Change in species due to firing of one reaction. First index is species, second is change. 
       std::map<int, Real> m_energyChange; // Change in energyk due to firing of one reaction. First index is species, second is change. 
 
       /*!

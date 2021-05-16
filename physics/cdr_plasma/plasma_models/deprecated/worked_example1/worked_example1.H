@@ -79,8 +79,8 @@ public:
   public:
     my_species(){
       m_name      = "my_species";
-      m_diffusive = false;
-      m_mobile    = true;
+      m_isDiffusive = false;
+      m_isMobile    = true;
       m_charge    = 1;
 
       {

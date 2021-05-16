@@ -210,19 +210,19 @@ protected:
   // Aux functions
   void compute_E_into_scratch();
   void compute_cdr_eb_states();
-  void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states);
+  void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis);
   void compute_cdr_domain_states();
-  void compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_states);
+  void compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis);
   void compute_cdr_gradients();
-  void compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states);
+  void compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis);
   void compute_cdr_fluxes(const Real a_time);
-  void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+  void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void compute_cdr_domain_fluxes(const Real a_time);
-  void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+  void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void compute_cdr_velo(const Real a_time);
-  void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+  void compute_cdr_velo(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void compute_cdr_sources(const Real a_time);
-  void compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+  void compute_cdr_sources(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void computeDt(Real& a_dt, TimeCode::which_code& a_timeCode);
   void compute_sigma_flux();
 
@@ -241,25 +241,25 @@ protected:
   // All the routines required for the subcycling advection routines
   void reset_finer_flux_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finestLevel);
   void reset_redist_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finestLevel);
-  void update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff, const int a_solver, const int a_lvl);
+  void update_redist_register(const LevelData<BaseIVFAB<Real> >& a_massDifference, const int a_solver, const int a_lvl);
   void update_flux_registers(LevelData<EBFluxFAB>& a_flux,
 			     const int             a_solver,
 			     const int             a_lvl,
 			     const int             a_coarsest_level,
 			     const int             a_finestLevel,
 			     const Real            a_dt);
-  void update_coarse_fine_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff,
+  void update_coarse_fine_register(const LevelData<BaseIVFAB<Real> >& a_massDifference,
 				   const int a_solver,
 				   const int a_lvl,
 				   const int a_coarsest_level,
 				   const int a_finestLevel);
-  void reflux_level(EBAMRCellData& a_state,
+  void reflux_level(EBAMRCellData& a_phi,
 		    const int      a_solver,
 		    const int      a_lvl,
 		    const int      a_coarsest_level,
 		    const int      a_finestLevel,
 		    const Real     a_scale);
-  void redist_level(LevelData<EBCellFAB>&       a_state,
+  void redist_level(LevelData<EBCellFAB>&       a_phi,
 		    const int                   a_solver,   
 		    const LevelData<EBCellFAB>& a_weights,
 		    const int                   a_lvl);
@@ -267,11 +267,11 @@ protected:
 
   
   void subcycle_advect_amr(EBAMRFluxData& a_flux,
-			   EBAMRFluxData& a_face_states,
+			   EBAMRFluxData& a_facePhi,
 			   EBAMRCellData& a_divF_c,
 			   EBAMRCellData& a_weights,
-			   EBAMRIVData&   a_divF_nc,
-			   EBAMRIVData&   a_mass_diff,
+			   EBAMRIVData&   a_nonConservativeDivergence,
+			   EBAMRIVData&   a_massDifference,
 			   Vector<Real>&  a_tnew,
 			   Vector<Real>&  a_told,
 			   const int      a_m,
@@ -288,11 +288,11 @@ protected:
   void subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coarsest_level, const int a_finestLevel);
   
   void subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
-				LevelData<EBFluxFAB>&        a_face_states,
+				LevelData<EBFluxFAB>&        a_facePhi,
 				LevelData<EBCellFAB>&        a_divF_c,
 				LevelData<EBCellFAB>&        a_weights,
-				LevelData<BaseIVFAB<Real> >& a_mass_diff,
-				LevelData<BaseIVFAB<Real> >& a_divF_nc,
+				LevelData<BaseIVFAB<Real> >& a_massDifference,
+				LevelData<BaseIVFAB<Real> >& a_nonConservativeDivergence,
 				const int                    a_m,
 				const int                    a_lvl,
 				const int                    a_coarsest_level,

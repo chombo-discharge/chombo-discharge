@@ -39,7 +39,7 @@ morrow_zheleznyak::morrow_zheleznyak(){
   // Parse some basic settings
   parse_gas_params();
   parse_see();
-  parseDomain_bc();
+  parseDomainBc();
   parse_ebbc();
   parse_reaction_settings();
   parse_alpha_corr();
@@ -791,8 +791,8 @@ Real morrow_zheleznyak::initial_sigma(const Real a_time, const RealVect a_pos) c
 morrow_zheleznyak::electron::electron(){
   m_name      = "electron";
   m_charge    = -1;
-  m_diffusive = true;
-  m_mobile    = true;
+  m_isDiffusive = true;
+  m_isMobile    = true;
   m_unit      = "m-3";
 
   Vector<Real> pos(SpaceDim);
@@ -802,7 +802,7 @@ morrow_zheleznyak::electron::electron(){
   pp.get("uniform_density",     m_uniform_density);
   pp.get("seed_density",        m_seed_density);
   pp.get("seed_radius",         m_seed_radius);
-  pp.get("diffusive_electrons", str); m_diffusive = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive = (str == "true") ? true : false;
 
   pp.getarr("seed_position", pos, 0, SpaceDim); m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
@@ -810,8 +810,8 @@ morrow_zheleznyak::electron::electron(){
 morrow_zheleznyak::positive_species::positive_species(){
   m_name      = "positive_species";
   m_charge    = 1;
-  m_diffusive = false;
-  m_mobile    = false;
+  m_isDiffusive = false;
+  m_isMobile    = false;
   m_unit      = "m-3";
 
   Vector<Real> pos(SpaceDim);
@@ -821,7 +821,7 @@ morrow_zheleznyak::positive_species::positive_species(){
   pp.get("uniform_density", m_uniform_density);
   pp.get("seed_density",    m_seed_density);
   pp.get("seed_radius",     m_seed_radius);
-  pp.get("mobile_ions",     str); m_mobile    = (str == "true") ? true : false;
+  pp.get("mobile_ions",     str); m_isMobile    = (str == "true") ? true : false;
 
   pp.getarr("seed_position", pos, 0, SpaceDim); m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
@@ -829,14 +829,14 @@ morrow_zheleznyak::positive_species::positive_species(){
 morrow_zheleznyak::negative_species::negative_species(){
   m_name      = "negative_species";
   m_charge    = -1;
-  m_diffusive = false;
-  m_mobile    = false;
+  m_isDiffusive = false;
+  m_isMobile    = false;
   m_unit      = "m-3";
 
   std::string str;
 
   ParmParse pp("morrow_zheleznyak");
-  pp.get("mobile_ions",    str); m_mobile    = (str == "true") ? true : false;
+  pp.get("mobile_ions",    str); m_isMobile    = (str == "true") ? true : false;
 }
 
 morrow_zheleznyak::electron::~electron(){
@@ -937,7 +937,7 @@ void morrow_zheleznyak::parse_see(){
   pp.get("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
 }
 
-void morrow_zheleznyak::parseDomain_bc(){
+void morrow_zheleznyak::parseDomainBc(){
 
   ParmParse pp("morrow_zheleznyak");
   std::string str;

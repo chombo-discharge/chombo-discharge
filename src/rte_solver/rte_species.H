@@ -46,7 +46,7 @@ public:
   /*!
     @brief Get group name
   */
-  virtual std::string get_name() const;
+  virtual std::string getName() const;
 
   /*!
     @brief Constant kappa or not

@@ -28,7 +28,7 @@
 
 mc_photo::mc_photo(){
   m_name       = "mc_photo";
-  m_class_name = "mc_photo";
+  m_className = "mc_photo";
 
   m_stationary = false;
 }
@@ -37,7 +37,7 @@ mc_photo::~mc_photo(){
 
 }
 
-bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi){
+bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi){
   CH_TIME("mc_photo::advance");
   if(m_verbosity > 5){
     pout() << m_name + "::advance" << endl;
@@ -67,7 +67,7 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   }
 
   // Deposit volumetric photons. 
-  this->deposit_photons(a_state, m_bulk_photons, m_deposition);
+  this->deposit_photons(a_phi, m_bulk_photons, m_deposition);
   
   return true;
 }
@@ -88,11 +88,11 @@ void mc_photo::parseOptions(){
   this->parse_source_type();
   this->parse_deposition();
   this->parse_bisect_step();
-  this->parseDomain_bc();
+  this->parseDomainBc();
   this->parse_pvr_buffer();
   this->parsePlotVariables();
   this->parse_instantaneous();
-  this->parse_conservation();
+  this->parseDivergenceComputation();
 }
 
 void mc_photo::parseRuntimeOptions(){
@@ -106,22 +106,22 @@ void mc_photo::parseRuntimeOptions(){
   this->parse_source_type();
   this->parse_deposition();
   this->parse_bisect_step();
-  this->parseDomain_bc();
+  this->parseDomainBc();
   this->parse_pvr_buffer();
   this->parsePlotVariables();
   this->parse_instantaneous();
-  this->parse_conservation();
+  this->parseDivergenceComputation();
 }
 
-void mc_photo::parse_conservation(){
-  CH_TIME("mc_photo::parse_conservation");
+void mc_photo::parseDivergenceComputation(){
+  CH_TIME("mc_photo::parseDivergenceComputation");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_conservation" << endl;
+    pout() << m_name + "::parseDivergenceComputation" << endl;
   }
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
-  pp.get("blend_conservation", m_blend_conservation);
+  pp.get("blend_conservation", m_blendConservation);
 }
 
 void mc_photo::parse_rng(){
@@ -131,7 +131,7 @@ void mc_photo::parse_rng(){
   }
 
   // Seed the RNG
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   pp.get("seed", m_seed);
   pp.get("poiss_exp_swap", m_poiss_exp_swap);
   if(m_seed < 0) {
@@ -150,7 +150,7 @@ void mc_photo::parse_instantaneous(){
     pout() << m_name + "::parse_instantaneous" << endl;
   }
   
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   pp.get("instantaneous", m_instantaneous);
 }
@@ -161,7 +161,7 @@ void mc_photo::parse_pseudophotons(){
     pout() << m_name + "::parse_pseudophotons" << endl;
   }
   
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   
   pp.get("max_photons", m_max_photons);
   if(m_max_photons <= 0){ // = -1 => no restriction
@@ -175,7 +175,7 @@ void mc_photo::parse_photogen(){
     pout() << m_name + "::parse_photogen" << endl;
   }
   
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("photon_generation", str);
@@ -197,7 +197,7 @@ void mc_photo::parse_source_type(){
     pout() << m_name + "::parse_source_type" << endl;
   }
   
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("source_type", str);
@@ -215,7 +215,7 @@ void mc_photo::parse_source_type(){
     m_src_type = source_type::per_s;
   }
   else{
-    MayDay::Abort("mc_photo::set_source_type - unknown source type requested");
+    MayDay::Abort("mc_photo::setSource_type - unknown source type requested");
   }
 }
 
@@ -225,7 +225,7 @@ void mc_photo::parse_deposition(){
     pout() << m_name + "::parse_deposition" << endl;
   }
   
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("deposition", str);
@@ -252,10 +252,10 @@ void mc_photo::parse_deposition(){
   }
 
   pp.get("plot_deposition", str);
-  m_plot_numbers = false;
+  m_plotNumbers = false;
   if(str == "num"){
     m_plot_deposition = DepositionType::NGP;
-    m_plot_numbers = true;
+    m_plotNumbers = true;
   }
   else if(str == "ngp"){
     m_plot_deposition = DepositionType::NGP;
@@ -280,14 +280,14 @@ void mc_photo::parse_bisect_step(){
     pout() << m_name + "::parse_bisect_step" << endl;
   }
   
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   pp.get("bisect_step", m_bisect_step);
 }
 
-void mc_photo::parseDomain_bc(){
-  CH_TIME("mc_photo::parseDomain_bc");
+void mc_photo::parseDomainBc(){
+  CH_TIME("mc_photo::parseDomainBc");
   if(m_verbosity > 5){
-    pout() << m_name + "::parseDomain_bc" << endl;
+    pout() << m_name + "::parseDomainBc" << endl;
   }
   
   m_domainbc.resize(2*SpaceDim);
@@ -296,7 +296,7 @@ void mc_photo::parseDomain_bc(){
       const Side::LoHiSide side = sit();
       const int idx = domainbc_map(dir, side);
 
-      ParmParse pp(m_class_name.c_str());
+      ParmParse pp(m_className.c_str());
       std::string str_dir;
       if(dir == 0){
 	str_dir = "x";
@@ -322,7 +322,7 @@ void mc_photo::parseDomain_bc(){
 	m_domainbc[idx] = wallbc::wall;
       }
       else {
-	std::string error = "mc_photo::set_domain_bc - unsupported boundary condition requested: " + bc_string;
+	std::string error = "mc_photo::setDomainBc - unsupported boundary condition requested: " + bc_string;
 	MayDay::Abort(error.c_str());
       }
     }
@@ -335,7 +335,7 @@ void mc_photo::parse_pvr_buffer(){
     pout() << m_name + "::parse_pvr_buffer" << endl;
   }
   
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   pp.get("pvr_buffer",   m_pvr_buffer);
   pp.get("halo_buffer",  m_halo_buffer);
 }
@@ -346,27 +346,27 @@ void mc_photo::parsePlotVariables(){
     pout() << m_name + "::parsePlotVariables" << endl;
   }
 
-  m_plot_phi       = false;
-  m_plot_src       = false;
+  m_plotPhi       = false;
+  m_plotSource       = false;
   m_plot_phot      = false;
   m_plot_bulk_phot = false;
   m_plot_eb_phot   = false;
   m_plot_dom_phot  = false;
-  m_plot_src_phot  = false;
+  m_plotSource_phot  = false;
 
-  ParmParse pp(m_class_name.c_str());
+  ParmParse pp(m_className.c_str());
   const int num = pp.countval("plt_vars");
   Vector<std::string> str(num);
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++){
-    if(     str[i] == "phi")       m_plot_phi       = true;
-    else if(str[i] == "src")       m_plot_src       = true;
+    if(     str[i] == "phi")       m_plotPhi       = true;
+    else if(str[i] == "src")       m_plotSource       = true;
     else if(str[i] == "phot")      m_plot_phot      = true;
     else if(str[i] == "bulk_phot") m_plot_bulk_phot = true;
     else if(str[i] == "eb_phot")   m_plot_eb_phot   = true;
     else if(str[i] == "dom_phot")  m_plot_dom_phot  = true;
-    else if(str[i] == "src_phot")  m_plot_src_phot  = true;
+    else if(str[i] == "src_phot")  m_plotSource_phot  = true;
   }
 }
 
@@ -408,7 +408,7 @@ void mc_photo::allocateInternals(){
   const int ncomp  = 1;
 
   // Allocate mesh data
-  m_amr->allocate(m_state,        m_Realm, m_phase, ncomp); 
+  m_amr->allocate(m_phi,        m_Realm, m_phase, ncomp); 
   m_amr->allocate(m_source,       m_Realm, m_phase, ncomp);
   m_amr->allocate(m_scratch,      m_Realm, m_phase, ncomp);
   m_amr->allocate(m_depositionNC, m_Realm, m_phase, ncomp);
@@ -442,7 +442,7 @@ void mc_photo::deallocateInternals(){
   }
 
   // Don't deallocate, instead, reallocate. 
-  // m_amr->deallocate(m_state);
+  // m_amr->deallocate(m_phi);
   // m_amr->deallocate(m_source);
   // m_amr->deallocate(m_scratch);
   // m_amr->deallocate(m_depositionNC);
@@ -456,7 +456,7 @@ void mc_photo::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_
   }
 
   // Mesh data regrids
-  m_amr->reallocate(m_state,        m_phase, a_lmin); 
+  m_amr->reallocate(m_phi,        m_phase, a_lmin); 
   m_amr->reallocate(m_source,       m_phase, a_lmin);
   m_amr->reallocate(m_scratch,      m_phase, a_lmin);
   m_amr->reallocate(m_depositionNC, m_phase, a_lmin);
@@ -593,16 +593,16 @@ void mc_photo::registerOperators(){
   }
 }
 
-void mc_photo::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state){
+void mc_photo::compute_boundary_flux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi){
   CH_TIME("mc_photo::compute_boundary_flux");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_boundary_flux" << endl;
   }
 
-  data_ops::set_value(a_ebflux, 0.0);
+  data_ops::set_value(a_ebFlux, 0.0);
 }
 
-void mc_photo::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_state){
+void mc_photo::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi){
   CH_TIME("mc_photo::compute_domain_flux");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_domain_flux" << endl;
@@ -611,12 +611,12 @@ void mc_photo::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellDat
   data_ops::set_value(a_domainflux, 0.0);
 }
 
-void mc_photo::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_state){
-  const std::string str = "mc_photo::compute_flux - Fluid flux can't be computed with discrete photons. Calling this is an error";
+void mc_photo::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi){
+  const std::string str = "mc_photo::computeFlux - Fluid flux can't be computed with discrete photons. Calling this is an error";
   MayDay::Abort(str.c_str());
 }
 
-void mc_photo::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state){
+void mc_photo::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi){
   MayDay::Abort("mc_photo::compute_density - Calling this is an error");
 }
 
@@ -636,7 +636,7 @@ void mc_photo::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) con
   }
 
   // Write state vector
-  write(a_handle, *m_state[a_level], m_name);
+  write(a_handle, *m_phi[a_level], m_name);
 
   // Write particles. Must be implemented.
   std::string str = m_name + "_particles";
@@ -650,7 +650,7 @@ void mc_photo::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   }
 
   // Read state vector
-  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->getGrids(m_Realm)[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_Realm)[a_level], Interval(0,0), false);
 
   // Read particles. Should be implemented
   std::string str = m_name + "_particles";
@@ -665,37 +665,37 @@ Vector<std::string> mc_photo::get_plotVariableNames() const {
   
   Vector<std::string> names(0);
   
-  if(m_plot_phi)       names.push_back(m_name + " phi");
-  if(m_plot_src)       names.push_back(m_name + " source");
+  if(m_plotPhi)       names.push_back(m_name + " phi");
+  if(m_plotSource)       names.push_back(m_name + " source");
   if(m_plot_phot)      names.push_back(m_name + " photons");
   if(m_plot_bulk_phot) names.push_back(m_name + " bulk_photons");
   if(m_plot_eb_phot)   names.push_back(m_name + " eb_photons");
   if(m_plot_dom_phot)  names.push_back(m_name + " domain_photons");
-  if(m_plot_src_phot)  names.push_back(m_name + " source_photons");
+  if(m_plotSource_phot)  names.push_back(m_name + " source_photons");
 
   return names;
 }
 
-int mc_photo::get_num_plotvars() const{
-  CH_TIME("mc_photo::get_num_plotvars");
+int mc_photo::getNumberOfPlotVariables() const{
+  CH_TIME("mc_photo::getNumberOfPlotVariables");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_num_plotvars" << endl;
+    pout() << m_name + "::getNumberOfPlotVariables" << endl;
   }
 
   int num_output = 0;
 
-  if(m_plot_phi)       num_output = num_output + 1;
-  if(m_plot_src)       num_output = num_output + 1;
+  if(m_plotPhi)       num_output = num_output + 1;
+  if(m_plotSource)       num_output = num_output + 1;
   if(m_plot_phot)      num_output = num_output + 1;
   if(m_plot_bulk_phot) num_output = num_output + 1;
   if(m_plot_eb_phot)   num_output = num_output + 1;
   if(m_plot_dom_phot)  num_output = num_output + 1;
-  if(m_plot_src_phot)  num_output = num_output + 1;
+  if(m_plotSource_phot)  num_output = num_output + 1;
 
   return num_output;
 }
 
-int mc_photo::query_ghost() const {
+int mc_photo::queryGhost() const {
   return 3;
 }
 
@@ -946,10 +946,10 @@ void mc_photo::deposit_photons(){
     pout() << m_name + "::deposit_photons" << endl;
   }
 
-  this->deposit_photons(m_state, m_photons, m_deposition);
+  this->deposit_photons(m_phi, m_photons, m_deposition);
 }
 
-void mc_photo::deposit_photons(EBAMRCellData&                    a_state,
+void mc_photo::deposit_photons(EBAMRCellData&                    a_phi,
 			       const particle_container<photon>& a_photons,
 			       const DepositionType::Which&      a_deposition){
   CH_TIME("mc_photo::deposit_photons(particle_container)");
@@ -957,10 +957,10 @@ void mc_photo::deposit_photons(EBAMRCellData&                    a_state,
     pout() << m_name + "::deposit_photons(particle_container)" << endl;
   }
 
-  this->deposit_photons(a_state, a_photons.get_particles(), a_deposition);
+  this->deposit_photons(a_phi, a_photons.get_particles(), a_deposition);
 }
 
-void mc_photo::deposit_photons(EBAMRCellData&               a_state,
+void mc_photo::deposit_photons(EBAMRCellData&               a_phi,
 			       const AMRParticles<photon>&  a_photons,
 			       const DepositionType::Which& a_deposition){
   CH_TIME("mc_photo::deposit_photons(AMRParticles)");
@@ -969,28 +969,28 @@ void mc_photo::deposit_photons(EBAMRCellData&               a_state,
   }
 
            
-  this->deposit_kappaConservative(a_state, a_photons, a_deposition); // a_state contains only weights, i.e. not divided by kappa
-  this->deposit_nonConservative(m_depositionNC, a_state);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
-  this->deposit_hybrid(a_state, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
-  this->increment_redist(m_massDiff);                                 // Increment level redistribution register
+  this->deposit_kappaConservative(a_phi, a_photons, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
+  this->deposit_nonConservative(m_depositionNC, a_phi);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
+  this->deposit_hybrid(a_phi, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
+  this->incrementRedist(m_massDiff);                                 // Increment level redistribution register
 
   // Do the redistribution magic
   const bool ebcf = m_amr->getEbCf();
   if(ebcf){ // Mucho stuff to do here...
-    this->coarse_fine_increment(m_massDiff);       // Compute C2F, F2C, and C2C mass transfers
-    this->level_redistribution(a_state);           // Level redistribution. Weights is a dummy parameter
-    this->coarse_fine_redistribution(a_state);     // Do the coarse-fine redistribution
+    this->coarseFineIncrement(m_massDiff);       // Compute C2F, F2C, and C2C mass transfers
+    this->level_redistribution(a_phi);           // Level redistribution. Weights is a dummy parameter
+    this->coarseFineRedistribution(a_phi);     // Do the coarse-fine redistribution
   }
   else{ // Very simple, redistribute this level.
-    this->level_redistribution(a_state);
+    this->level_redistribution(a_phi);
   }
 
   // Average down and interpolate
-  m_amr->averageDown(a_state, m_Realm, m_phase);
-  m_amr->interpGhost(a_state, m_Realm, m_phase);
+  m_amr->averageDown(a_phi, m_Realm, m_phase);
+  m_amr->interpGhost(a_phi, m_Realm, m_phase);
 }
 
-void mc_photo::deposit_kappaConservative(EBAMRCellData&              a_state,
+void mc_photo::deposit_kappaConservative(EBAMRCellData&              a_phi,
 					 const AMRParticles<photon>& a_photons,
 					 const DepositionType::Which a_deposition){
   CH_TIME("mc_photo::deposit_kappaConservative");
@@ -1004,7 +1004,7 @@ void mc_photo::deposit_kappaConservative(EBAMRCellData&              a_state,
   const RealVect origin  = m_amr->getProbLo();
   const int finest_level = m_amr->getFinestLevel();
 
-  data_ops::set_value(a_state,    0.0);
+  data_ops::set_value(a_phi,    0.0);
   data_ops::set_value(m_scratch,  0.0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -1020,7 +1020,7 @@ void mc_photo::deposit_kappaConservative(EBAMRCellData&              a_state,
     // 1. If we have a coarser level whose cloud extends beneath this level, interpolate that result here first. 
     if(has_coar && m_pvr_buffer > 0){
       RefCountedPtr<EBMGInterp>& interp = m_amr->getEBMGInterp(m_Realm, m_phase)[lvl];
-      interp->pwcInterp(*a_state[lvl], *m_scratch[lvl-1], interv);
+      interp->pwcInterp(*a_phi[lvl], *m_scratch[lvl-1], interv);
     }
     
     // 2. Deposit this levels photons. Note that this will deposit into ghost cells, which must later
@@ -1029,24 +1029,24 @@ void mc_photo::deposit_kappaConservative(EBAMRCellData&              a_state,
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
       EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, true);
-      interp.deposit((*a_photons[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
+      interp.deposit((*a_photons[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
     // This code adds contributions from ghost cells into the valid region
     const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_Realm, m_phase)[lvl];
     LDaddOp<FArrayBox> addOp;
     LevelData<FArrayBox> aliasFAB;
-    aliasEB(aliasFAB, *a_state[lvl]);
+    aliasEB(aliasFAB, *a_phi[lvl]);
     aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
 
     // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
     //    interpolation of "hanging clouds"
     if(has_fine){
-      a_state[lvl]->localCopyTo(*m_scratch[lvl]);
+      a_phi[lvl]->localCopyTo(*m_scratch[lvl]);
     }
     else if(m_pvr_buffer <= 0 && has_coar){
       EBGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_Realm, m_phase)[lvl]);
-      ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
+      ghostcloud.addFineGhostsToCoarse(*a_phi[lvl-1], *a_phi[lvl]);
     }
   }
 }
@@ -1057,7 +1057,7 @@ void mc_photo::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRC
     pout() << m_name + "::deposit_nonConservative" << endl;
   }
 
-  if(m_blend_conservation){
+  if(m_blendConservation){
     const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(m_Realm, m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
@@ -1066,7 +1066,7 @@ void mc_photo::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRC
   }
 }
 
-void mc_photo::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_diff, const EBAMRIVData& a_depositionNC){
+void mc_photo::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC){
   CH_TIME("mc_photo::deposit_hybrid");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_hybrid" << endl;
@@ -1082,7 +1082,7 @@ void mc_photo::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       EBCellFAB& divH               = (*a_depositionH[lvl])[dit()];  // On input, this contains kappa*depositionWeights
-      BaseIVFAB<Real>& deltaM       = (*a_mass_diff[lvl])[dit()];
+      BaseIVFAB<Real>& deltaM       = (*a_massDifference[lvl])[dit()];
       const BaseIVFAB<Real>& divNC  = (*a_depositionNC[lvl])[dit()]; 
 
       const Box box          = dbl.get(dit());
@@ -1098,7 +1098,7 @@ void mc_photo::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_
 	const Real dnc      = divNC(vof, comp);
 
 	// Note that if dc - kappa*dnc can be negative, i.e. we may end up STEALING mass
-	// from other cells. This is why there is a flag m_blend_conservation which always
+	// from other cells. This is why there is a flag m_blendConservation which always
 	// gives positive definite results. 
 	divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
 	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa. 
@@ -1107,10 +1107,10 @@ void mc_photo::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_
   }
 }
 
-void mc_photo::increment_redist(const EBAMRIVData& a_mass_diff){
-  CH_TIME("mc_photo::increment_redist");
+void mc_photo::incrementRedist(const EBAMRIVData& a_massDifference){
+  CH_TIME("mc_photo::incrementRedist");
   if(m_verbosity > 5){
-    pout() << m_name + "::increment_redist" << endl;
+    pout() << m_name + "::incrementRedist" << endl;
   }
 
   const int comp  = 0;
@@ -1125,12 +1125,12 @@ void mc_photo::increment_redist(const EBAMRIVData& a_mass_diff){
     level_redist.setToZero();
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      level_redist.increment((*a_mass_diff[lvl])[dit()], dit(), interv);
+      level_redist.increment((*a_massDifference[lvl])[dit()], dit(), interv);
     }
   }
 }
 
-void mc_photo::level_redistribution(EBAMRCellData& a_state){
+void mc_photo::level_redistribution(EBAMRCellData& a_phi){
   CH_TIME("mc_photo::level_redistribution");
   if(m_verbosity > 5){
     pout() << m_name + "::level_redistribution" << endl;
@@ -1143,15 +1143,15 @@ void mc_photo::level_redistribution(EBAMRCellData& a_state){
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_Realm, m_phase)[lvl]);
-    level_redist.redistribute(*a_state[lvl], interv);
+    level_redist.redistribute(*a_phi[lvl], interv);
     level_redist.setToZero();
   }
 }
 
-void mc_photo::coarse_fine_increment(const EBAMRIVData& a_mass_diff){
-  CH_TIME("mc_photo::coarse_fine_increment");
+void mc_photo::coarseFineIncrement(const EBAMRIVData& a_massDifference){
+  CH_TIME("mc_photo::coarseFineIncrement");
   if(m_verbosity > 5){
-    pout() << m_name + "::coarse_fine_increment" << endl;
+    pout() << m_name + "::coarseFineIncrement" << endl;
   }
 
   const int comp  = 0;
@@ -1180,21 +1180,21 @@ void mc_photo::coarse_fine_increment(const EBAMRIVData& a_mass_diff){
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       if(has_coar){
-	fine2coar_redist->increment((*a_mass_diff[lvl])[dit()], dit(), interv);
+	fine2coar_redist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
       }
 
       if(has_fine){
-	coar2fine_redist->increment((*a_mass_diff[lvl])[dit()], dit(), interv);
-	coar2coar_redist->increment((*a_mass_diff[lvl])[dit()], dit(), interv);
+	coar2fine_redist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
+	coar2coar_redist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
       }
     }
   }
 }
 
-void mc_photo::coarse_fine_redistribution(EBAMRCellData& a_state){
-  CH_TIME("mc_photo::coarse_fine_redistribution");
+void mc_photo::coarseFineRedistribution(EBAMRCellData& a_phi){
+  CH_TIME("mc_photo::coarseFineRedistribution");
   if(m_verbosity > 5){
-    pout() << m_name + "::coarse_fine_redistribution" << endl;
+    pout() << m_name + "::coarseFineRedistribution" << endl;
   }
 
   const int comp         = 0;
@@ -1212,13 +1212,13 @@ void mc_photo::coarse_fine_redistribution(EBAMRCellData& a_state){
     RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_Realm, m_phase)[lvl];
     
     if(has_coar){
-      fine2coar_redist->redistribute(*a_state[lvl-1], interv);
+      fine2coar_redist->redistribute(*a_phi[lvl-1], interv);
       fine2coar_redist->setToZero();
     }
 
     if(has_fine){
-      coar2fine_redist->redistribute(*a_state[lvl+1], interv);
-      coar2coar_redist->redistribute(*a_state[lvl],   interv);
+      coar2fine_redist->redistribute(*a_phi[lvl+1], interv);
+      coar2coar_redist->redistribute(*a_phi[lvl],   interv);
 
       coar2fine_redist->setToZero();
       coar2coar_redist->setToZero();
@@ -1591,31 +1591,31 @@ void mc_photo::writePlotData(EBAMRCellData& a_output, int& a_comp){
     pout() << m_name + "::writePlotData" << endl;
   }
 
-  if(m_plot_phi) {
-    this->write_data(a_output, a_comp, m_state,  false);
+  if(m_plotPhi) {
+    this->writeData(a_output, a_comp, m_phi,  false);
   }
-  if(m_plot_src) {
-    this->write_data(a_output, a_comp, m_source, false);
+  if(m_plotSource) {
+    this->writeData(a_output, a_comp, m_source, false);
   }
   if(m_plot_phot){
     this->deposit_photons(m_scratch, m_photons.get_particles(), m_plot_deposition);
-    this->write_data(a_output, a_comp, m_scratch,  false);
+    this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_bulk_phot){
     this->deposit_photons(m_scratch, m_bulk_photons.get_particles(), m_plot_deposition);
-    this->write_data(a_output, a_comp, m_scratch,  false);
+    this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_eb_phot){
     this->deposit_photons(m_scratch, m_eb_photons.get_particles(), m_plot_deposition);
-    this->write_data(a_output, a_comp, m_scratch,  false);
+    this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_dom_phot){
     this->deposit_photons(m_scratch, m_domain_photons.get_particles(), m_plot_deposition);
-    this->write_data(a_output, a_comp, m_scratch,  false);
+    this->writeData(a_output, a_comp, m_scratch,  false);
   }
-  if(m_plot_src_phot){
+  if(m_plotSource_phot){
     this->deposit_photons(m_scratch, m_source_photons.get_particles(), m_plot_deposition);
-    this->write_data(a_output, a_comp, m_scratch,  false);
+    this->writeData(a_output, a_comp, m_scratch,  false);
   }
 }
 
@@ -1655,10 +1655,10 @@ particle_container<photon>& mc_photo::get_domain_photons(){
   return m_domain_photons;
 }
 
-particle_container<photon>& mc_photo::get_source_photons(){
-  CH_TIME("mc_photo::get_source_photons");
+particle_container<photon>& mc_photo::getSource_photons(){
+  CH_TIME("mc_photo::getSource_photons");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_source_photons" << endl;
+    pout() << m_name + "::getSource_photons" << endl;
   }
 
   return m_source_photons;

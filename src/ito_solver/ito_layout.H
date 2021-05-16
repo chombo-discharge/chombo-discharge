@@ -50,12 +50,12 @@ public:
   /*!
     @brief Get Realm
   */
-  virtual const std::string get_Realm() const;
+  virtual const std::string getRealm() const;
 
   /*!
     @brief Set Realm
   */
-  virtual void set_Realm(const std::string a_Realm);
+  virtual void setRealm(const std::string a_realm);
 
   /*!
     @brief Define function
@@ -151,17 +151,17 @@ public:
     @brief Set phase
     @details This must be done BEFORE callilng setComputationalGeometry
   */
-  virtual void set_phase(phase::which_phase a_phase);
+  virtual void setPhase(phase::which_phase a_phase);
 
   /*!
     @brief Set verbosity.
   */
-  virtual void set_verbosity(const int a_verbosity);
+  virtual void setVerbosity(const int a_verbosity);
 
   /*!
     @brief Set time
   */
-  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
+  virtual void setTime(const int a_step, const Real a_time, const Real a_dt);
   
   /*!
     @brief Sort the m_particles container by cell

@@ -32,7 +32,7 @@ public:
   /*!
     @brief Query number of ghost cells
   */
-  virtual int query_ghost() const override;
+  virtual int queryGhost() const override;
 
   /*!
     @brief Parse options
@@ -47,12 +47,12 @@ public:
   /*!
     @brief Pure advective advance. Calling this is an error - SG currently only works with MOL methods.
   */
-  virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt);
+  virtual void advance_advect(EBAMRCellData& a_phi, const Real a_dt);
 
   /*!
     @brief MUSCL advection to faces
   */
-  virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt) override;
+  virtual void advect_to_faces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
 
   /*!
     @brief Allocate internal stuff
@@ -70,7 +70,7 @@ protected:
     @brief Compute slopes
   */
   virtual void compute_slopes(EBCellFAB&           a_deltaC,
-			      const EBCellFAB&     a_state,
+			      const EBCellFAB&     a_phi,
 			      const Box&           a_box,
 			      const ProblemDomain& a_domain,
 			      const int            a_level,
@@ -84,9 +84,9 @@ protected:
   /*!
     @brief Riemann solve (just choose the upwind side)
   */
-  virtual void upwind(EBFluxFAB&           a_face_states,
+  virtual void upwind(EBFluxFAB&           a_facePhi,
 		      const EBCellFAB&     a_slopes,
-		      const EBCellFAB&     a_state,
+		      const EBCellFAB&     a_phi,
 		      const EBFluxFAB&     a_velo,
 		      const ProblemDomain& a_domain,
 		      const Box&           a_box,

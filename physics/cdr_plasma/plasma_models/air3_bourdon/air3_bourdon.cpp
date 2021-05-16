@@ -30,10 +30,10 @@ air3_bourdon::air3_bourdon() {
   pp.get("transport_file",                m_transport_file);
   pp.get("uniform_tables",                m_uniform_entries);
   pp.get("use_alpha_corr",                m_alpha_corr);      
-  pp.get("mobile_electrons",              m_mobile_electrons);    
-  pp.get("diffusive_electrons",           m_diffusive_electrons);
-  pp.get("diffusive_ions",                m_diffusive_ions);
-  pp.get("mobile_ions",                   m_mobile_ions);
+  pp.get("mobile_electrons",              m_isMobile_electrons);    
+  pp.get("diffusive_electrons",           m_isDiffusive_electrons);
+  pp.get("diffusive_ions",                m_isDiffusive_ions);
+  pp.get("mobile_ions",                   m_isMobile_ions);
   pp.get("ion_mobility",                  m_ion_mobility);
 
   pp.get("excitation_efficiency",         m_photoexc_eff);
@@ -86,7 +86,7 @@ air3_bourdon::air3_bourdon() {
 
 
   // Parse domain boundary conditions. 
-  parseDomain_bc();
+  parseDomainBc();
 
   // Instantiate species. 
   instantiate_species();
@@ -147,7 +147,7 @@ void air3_bourdon::instantiate_species(){
   m_rte_species[m_pho3_idx] = RefCountedPtr<rte_species> (new air3_bourdon::photon_three());
 }
 
-void air3_bourdon::parseDomain_bc(){
+void air3_bourdon::parseDomainBc(){
 
   ParmParse pp("air3_bourdon");
   std::string str;

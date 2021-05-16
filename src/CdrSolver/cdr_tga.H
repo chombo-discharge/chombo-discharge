@@ -1,6 +1,6 @@
 /*!
   @file   cdr_tga.H
-  @brief  Extensions of cdr_solver which use ebconductivityop and TGA for diffusion parts
+  @brief  Extensions of CdrSolver which use ebconductivityop and TGA for diffusion parts
   @author Robert Marskar
   @date   Jan. 2018
 */
@@ -8,7 +8,7 @@
 #ifndef _CDR_TGA_
 #define _CDR_TGA_
 
-#include "cdr_solver.H"
+#include "CD_CdrSolver.H"
 #include "ebconductivityopfactory.H"
 
 #include <AMRMultiGrid.H>
@@ -24,9 +24,9 @@
 #include "CD_NamespaceHeader.H"
   
 /*!
-  @brief Extension class of cdr_solver that uses ebconductivityop for diffusion part. Can also solve for stochastic diffusion
+  @brief Extension class of CdrSolver that uses ebconductivityop for diffusion part. Can also solve for stochastic diffusion
 */
-class cdr_tga : public cdr_solver {
+class cdr_tga : public CdrSolver {
 protected:
 
   /*!
@@ -72,25 +72,25 @@ public:
   /*!
     @brief Compute div(nv - D*grad(n)) explicitly
   */
-  virtual void compute_divJ(EBAMRCellData& a_divJ,
-			    EBAMRCellData& a_state,
-			    const Real     a_extrap_dt,
-			    const bool     a_ebflux = true);
+  virtual void computeDivJ(EBAMRCellData& a_divJ,
+			    EBAMRCellData& a_phi,
+			    const Real     a_extrapDt,
+			    const bool     a_ebFlux = true);
 
   /*!
     @brief Compute div(v*phi) explicitly
   */
-  virtual void compute_divF(EBAMRCellData& a_divF,
-			    EBAMRCellData& a_state,
-			    const Real     a_extrap_dt,
-			    const bool     a_ebflux = true);
+  virtual void computeDivF(EBAMRCellData& a_divF,
+			    EBAMRCellData& a_phi,
+			    const Real     a_extrapDt,
+			    const bool     a_ebFlux = true);
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
   */
-  virtual void compute_divD(EBAMRCellData& a_diffusive_term,
-			    EBAMRCellData& a_state,
-			    const bool     a_ebflux = false);
+  virtual void computeDivD(EBAMRCellData& a_divD,
+			    EBAMRCellData& a_phi,
+			    const bool     a_ebFlux = false);
 
   /*!
     @brief Set implicit diffusion solver solver parameters. These are normally good for this class. 
@@ -130,31 +130,31 @@ public:
   /*!
     @brief Query number of ghost cells
   */
-  virtual int query_ghost() const = 0;
+  virtual int queryGhost() const = 0;
 
   /*!
     @brief Implicit diffusion TGA advance with source terms
   */
-  virtual void advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
+  virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt);
 
   /*!
     @brief Implicit diffusion TGA advance with source terms
   */
-  virtual void advance_tga(EBAMRCellData&       a_new_state,
-			   const EBAMRCellData& a_old_state,
+  virtual void advanceTGA(EBAMRCellData&       a_newPhi,
+			   const EBAMRCellData& a_oldPhi,
 			   const EBAMRCellData& a_source,
 			   const Real           a_dt);
 
   /*!
     @brief Implicit diffusion Euler advance without source terms
   */
-  virtual void advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
+  virtual void advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt);
 
   /*!
     @brief Implicit diffusion Euler advance with source terms
   */
-  virtual void advance_euler(EBAMRCellData&       a_new_state,
-			     const EBAMRCellData& a_old_state,
+  virtual void advanceEuler(EBAMRCellData&       a_newPhi,
+			     const EBAMRCellData& a_oldPhi,
 			     const EBAMRCellData& a_source,
 			     const Real           a_dt);
 
@@ -283,7 +283,7 @@ protected:
   /*!
     @brief Advection-only extrapolation to faces
   */
-  virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
+  virtual void advect_to_faces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) = 0;
 
   /*!
     @brief Set up geometric multigrid

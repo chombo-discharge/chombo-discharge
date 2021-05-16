@@ -126,7 +126,7 @@ public:
   virtual void resetACoefficient(RefCountedPtr<LevelData<EBCellFAB> >& a_acoef)
   {
 
-    m_acoef = a_acoef;
+    m_aCoefficientef = a_acoef;
     calculateAlphaWeight();
     calculateRelaxationCoefficient();
   }
@@ -577,7 +577,7 @@ protected:
 
   //! "Current" (time-interpolated) value of the a coefficient. For a
   //! time-independent a coefficient, this is where the coefficient lives.
-  RefCountedPtr<LevelData<EBCellFAB> >          m_acoef;
+  RefCountedPtr<LevelData<EBCellFAB> >          m_aCoefficientef;
 
   //! "Current" (time-interpolated) value of the b coefficient. For a
   //! time-independent a coefficient, this is where the coefficient lives.
