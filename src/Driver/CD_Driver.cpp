@@ -587,7 +587,6 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 
   // Deallocate unnecessary storage
   this->deallocateInternals();          // Deallocate internal storage for Driver
-  m_timeStepper->deallocate();           // Deallocate storage for TimeStepper
   
   const Real cell_tags = MPI_Wtime();    // Timer
 
@@ -883,8 +882,6 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
       }
     }
   }
-
-  m_timeStepper->deallocate();
 
   if(m_verbosity > 0){
     this->gridReport();
