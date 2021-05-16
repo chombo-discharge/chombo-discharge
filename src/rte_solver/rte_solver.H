@@ -53,7 +53,7 @@ public:
   /*!
     @brief Get output plot names
   */
-  virtual Vector<std::string> get_plotVariableNames() const;
+  virtual Vector<std::string> getPlotVariableNames() const;
   
   /*!
     @brief Advance equation one time step

@@ -7,11 +7,9 @@
   @file   CD_CdrSolver.cpp
   @brief  Implementation of CD_CdrSolver.H
   @author Robert Marskar
-  @todo   The diffusive dt computations use a faceiterator box. This should be replaced by fortran routines (or internal ebcell fa functions)
 */
 
 // Chombo includes
-
 #include <ParmParse.H>
 #include <EBAMRIO.H>
 #include <EBArith.H>
@@ -47,17 +45,17 @@ void CdrSolver::setRealm(const std::string a_realm) {
   m_realm = a_realm;
 }
 
-Vector<std::string> CdrSolver::get_plotVariableNames() const {
-  CH_TIME("CdrSolver::get_plotVariableNames");
+Vector<std::string> CdrSolver::getPlotVariableNames() const {
+  CH_TIME("CdrSolver::getPlotVariableNames");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_plotVariableNames" << endl;
+    pout() << m_name + "::getPlotVariableNames" << endl;
   }
   
   Vector<std::string> names(0);
   
-  if(m_plotPhi) names.push_back(m_name + " phi");
+  if(m_plotPhi)                                   names.push_back(m_name + " phi");
   if(m_plotDiffusionCoefficient && m_isDiffusive) names.push_back(m_name + " diffusion_coefficient");
-  if(m_plotSource) names.push_back(m_name + " source");
+  if(m_plotSource)                                names.push_back(m_name + " source");
   if(m_plotVelocity && m_isMobile){
     names.push_back("x-Velocity " + m_name);
     names.push_back("y-Velocity " + m_name);
@@ -65,9 +63,7 @@ Vector<std::string> CdrSolver::get_plotVariableNames() const {
       names.push_back("z-Velocity " + m_name);
     }
   }
-  if(m_plotEbFlux && m_isMobile){
-    names.push_back(m_name + " eb_flux");
-  }
+  if(m_plotEbFlux && m_isMobile) names.push_back(m_name + " eb_flux");
   
   return names;
 }
@@ -89,11 +85,11 @@ int CdrSolver::getNumberOfPlotVariables() const {
 
   int num_output = 0;
 
-  if(m_plotPhi)                num_output = num_output + 1;
+  if(m_plotPhi)                                   num_output = num_output + 1;
   if(m_plotDiffusionCoefficient && m_isDiffusive) num_output = num_output + 1;
-  if(m_plotSource)                num_output = num_output + 1;
-  if(m_plotVelocity && m_isMobile)    num_output = num_output + SpaceDim;
-  if(m_plotEbFlux && m_isMobile)    num_output = num_output + 1;
+  if(m_plotSource)                                num_output = num_output + 1;
+  if(m_plotVelocity && m_isMobile)                num_output = num_output + SpaceDim;
+  if(m_plotEbFlux && m_isMobile)                  num_output = num_output + 1;
 
   return num_output;
 }
@@ -104,26 +100,24 @@ void CdrSolver::allocateInternals(){
     pout() << m_name + "::allocateInternals" << endl;
   }
 
-  CH_assert(m_phase == phase::gas);
-
   const int sca = 1;
   const int vec = SpaceDim;
 
   // This is allocated no matter what. 
-  m_amr->allocate(m_phi,   m_realm, m_phase, sca);
+  m_amr->allocate(m_phi,     m_realm, m_phase, sca);
   m_amr->allocate(m_source,  m_realm, m_phase, sca);
   m_amr->allocate(m_scratch, m_realm, m_phase, sca);
   
   data_ops::set_value(m_phi,      0.0);
-  data_ops::set_value(m_source,     0.0);
-  data_ops::set_value(m_scratch,    0.0);
+  data_ops::set_value(m_source,   0.0);
+  data_ops::set_value(m_scratch,  0.0);
 
   // Only allocate memory for cell-centered and face-centered velocities if the solver is mobile. Otherwise, allocate
   // a NULL pointer that we can pass around in TimeStepper in order to handle special cases
   if(m_isMobile){
-    m_amr->allocate(m_faceVelocity,   m_realm, m_phase, sca);
-    m_amr->allocate(m_cellVelocity,   m_realm, m_phase, vec);
-    m_amr->allocate(m_faceStates, m_realm, m_phase, sca);
+    m_amr->allocate(m_faceVelocity, m_realm, m_phase, sca);
+    m_amr->allocate(m_cellVelocity, m_realm, m_phase, vec);
+    m_amr->allocate(m_faceStates,   m_realm, m_phase, sca);
     
     data_ops::set_value(m_faceVelocity,  0.0);
     data_ops::set_value(m_cellVelocity,  0.0);
@@ -136,13 +130,13 @@ void CdrSolver::allocateInternals(){
   // Only allocate memory for diffusion coefficients if we need it. Otherwise, allocate a NULL pointer that we can
   // pass around in TimeStepper in order to handle special cases
   if(m_isDiffusive){
-    m_amr->allocate(m_aCoefficient,       m_realm, m_phase, sca);
-    m_amr->allocate(m_faceCenteredDiffusionCoefficient,    m_realm, m_phase, sca);
-    m_amr->allocate(m_ebCenteredDiffusionCoefficient, m_realm, m_phase, sca);
+    m_amr->allocate(m_aCoefficient,                     m_realm, m_phase, sca);
+    m_amr->allocate(m_faceCenteredDiffusionCoefficient, m_realm, m_phase, sca);
+    m_amr->allocate(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase, sca);
     
-    data_ops::set_value(m_aCoefficient,        0.0);
-    data_ops::set_value(m_faceCenteredDiffusionCoefficient,     0.0);
-    data_ops::set_value(m_ebCenteredDiffusionCoefficient,  0.0);
+    data_ops::set_value(m_aCoefficient,                     0.0);
+    data_ops::set_value(m_faceCenteredDiffusionCoefficient, 0.0);
+    data_ops::set_value(m_ebCenteredDiffusionCoefficient,   0.0);
   }
   else{
     m_amr->allocatePointer(m_aCoefficient);
@@ -157,11 +151,11 @@ void CdrSolver::allocateInternals(){
   }
 
   // These don't consume (much) memory so just allocate them 
-  m_amr->allocate(m_ebFlux,     m_realm, m_phase, sca);
-  m_amr->allocate(m_ebZero,    m_realm, m_phase, sca);
-  m_amr->allocate(m_domainFlux, m_realm, m_phase, sca);
-  m_amr->allocate(m_massDifference,  m_realm, m_phase, sca);
-  m_amr->allocate(m_nonConservativeDivG,    m_realm, m_phase, sca);
+  m_amr->allocate(m_ebFlux,              m_realm, m_phase, sca);
+  m_amr->allocate(m_ebZero,              m_realm, m_phase, sca);
+  m_amr->allocate(m_domainFlux,          m_realm, m_phase, sca);
+  m_amr->allocate(m_massDifference,      m_realm, m_phase, sca);
+  m_amr->allocate(m_nonConservativeDivG, m_realm, m_phase, sca);
   
   data_ops::set_value(m_ebFlux,     0.0);
   data_ops::set_value(m_ebZero,     0.0);
@@ -222,7 +216,7 @@ void CdrSolver::preRegrid(const int a_lmin, const int a_oldFinestLevel){
   const int ncomp        = 1;
   const int finest_level = m_amr->getFinestLevel();
   
-  m_amr->allocate(m_cachePhi,  m_realm, m_phase, ncomp);
+  m_amr->allocate(m_cachePhi,    m_realm, m_phase, ncomp);
   m_amr->allocate(m_cacheSource, m_realm, m_phase, ncomp);
   
   for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++){
@@ -317,23 +311,23 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
 
   data_ops::set_value(a_divG, 0.0);
   
-  this->conservativeDivergenceNoKappaDivision(a_divG, a_G, a_ebFlux);       // Make the conservative divergence.
-  this->nonConservativeDivergence(m_nonConservativeDivG, a_divG);     // Non-conservative divergence
+  this->conservativeDivergenceNoKappaDivision(a_divG, a_G, a_ebFlux);      // Make the conservative divergence.
+  this->nonConservativeDivergence(m_nonConservativeDivG, a_divG);          // Non-conservative divergence
   this->hybridDivergence(a_divG, m_massDifference, m_nonConservativeDivG); // a_divG becomes hybrid divergence. Mass diff computed. 
-  this->incrementFluxRegister(a_G);                      // Increment flux register
-  this->incrementRedist(m_massDifference);                     // Increment level redistribution register
+  this->incrementFluxRegister(a_G);                                        // Increment flux register
+  this->incrementRedist(m_massDifference);                                 // Increment level redistribution register
 
   const bool ebcf = m_amr->getEbCf();
   if(ebcf){ // If we have EBCF, much more work with the CF interface
-    this->coarseFineIncrement(m_massDifference);             // Compute C2F, F2C, and C2C mass transfers
-    this->incrementRedistFlux();                        // Tell flux register about whats going on
+    this->coarseFineIncrement(m_massDifference);              // Compute C2F, F2C, and C2C mass transfers
+    this->incrementRedistFlux();                              // Tell flux register about whats going on
     this->hyperbolicRedistribution(a_divG, m_massDifference); // Level redistribution. Weights is a dummy parameter
-    this->coarseFineRedistribution(a_divG);             // Do the coarse-fine redistribution
-    this->reflux(a_divG);                                 // Reflux
+    this->coarseFineRedistribution(a_divG);                   // Do the coarse-fine redistribution
+    this->reflux(a_divG);                                     // Reflux
   }
   else{ // Much simpler if we don't have EBCF
     this->hyperbolicRedistribution(a_divG, m_massDifference); // Level redistribution. Weights is a dummy parameter
-    this->reflux(a_divG);                                 // Reflux
+    this->reflux(a_divG);                                     // Reflux
   }
 }
 
@@ -349,18 +343,18 @@ void CdrSolver::injectEbFlux(EBAMRCellData& a_phi, const EBAMRIVData& a_ebFlux, 
     this->setRedistWeights(a_phi);
   }
 
-  this->conservativeDivergenceNoKappaDivisionOnlyEbFlux(m_scratch, a_ebFlux);         // Compute conservative divergence, but only EB
-  this->nonConservativeDivergence(m_nonConservativeDivG, m_scratch);     // Blend with volume fraction
-  this->hybridDivergence(m_scratch, m_massDifference, m_nonConservativeDivG); // Hybrid divergence
-  this->incrementRedist(m_massDifference);                        // Increment redistribution register
+  this->conservativeDivergenceNoKappaDivisionOnlyEbFlux(m_scratch, a_ebFlux);  // Compute conservative divergence, but only EB
+  this->nonConservativeDivergence(m_nonConservativeDivG, m_scratch);           // Blend with volume fraction
+  this->hybridDivergence(m_scratch, m_massDifference, m_nonConservativeDivG);  // Hybrid divergence
+  this->incrementRedist(m_massDifference);                                     // Increment redistribution register
 
   const bool ebcf = m_amr->getEbCf();
   if(ebcf){ // Much more work with the EBCF interface. *Sigh*
-    this->coarseFineIncrement(m_massDifference);                // Compute C2F, F2C, and C2C mass transfers
-    this->incrementRedistFlux();                           // Tell flux register about whats going on
+    this->coarseFineIncrement(m_massDifference);                 // Compute C2F, F2C, and C2C mass transfers
+    this->incrementRedistFlux();                                 // Tell flux register about whats going on
     this->hyperbolicRedistribution(m_scratch, m_massDifference); // Level redistribution. 
-    this->coarseFineRedistribution(m_scratch);             // Do the coarse-fine redistribution
-    this->reflux(m_scratch);                                 // Reflux
+    this->coarseFineRedistribution(m_scratch);                   // Do the coarse-fine redistribution
+    this->reflux(m_scratch);                                     // Reflux
   }
   else{
     this->hyperbolicRedistribution(m_scratch, m_massDifference);
@@ -403,8 +397,8 @@ void CdrSolver::conservativeDivergenceNoKappaDivisionOnlyEbFlux(EBAMRCellData& a
 }
 
 void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_divG,
-				    const LevelData<BaseIVFAB<Real> >& a_ebFlux,
-				    const int                          a_lvl){
+					   const LevelData<BaseIVFAB<Real> >& a_ebFlux,
+					   const int                          a_lvl){
   CH_TIME("CdrSolver::computeDivergenceIrregular");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivergenceIrregular" << endl;
@@ -457,9 +451,9 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
 }
 
 void CdrSolver::computeFlux(EBAMRFluxData&       a_flux,
-			      const EBAMRFluxData& a_facePhi,
-			      const EBAMRFluxData& a_faceVelocity,
-			      const EBAMRIFData&   a_domainFlux){
+			    const EBAMRFluxData& a_facePhi,
+			    const EBAMRFluxData& a_faceVelocity,
+			    const EBAMRIFData&   a_domainFlux){
   CH_TIME("CdrSolver::computeFlux");
   if(m_verbosity > 5){
     pout() << m_name + "::computeFlux" << endl;
@@ -472,7 +466,7 @@ void CdrSolver::computeFlux(EBAMRFluxData&       a_flux,
   for (int lvl = 0; lvl <= finest_level; lvl++){
 
 #if 1 // New code
-    computeFlux(*a_flux[lvl], *a_facePhi[lvl], *a_faceVelocity[lvl], *a_domainFlux[lvl], lvl);
+    this->computeFlux(*a_flux[lvl], *a_facePhi[lvl], *a_faceVelocity[lvl], *a_domainFlux[lvl], lvl);
 #else // Old code (that we know works)
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const ProblemDomain& domain  = m_amr->getDomains()[lvl];
@@ -536,10 +530,10 @@ void CdrSolver::computeFlux(EBAMRFluxData&       a_flux,
 }
 
 void CdrSolver::computeFlux(LevelData<EBFluxFAB>&              a_flux,
-			      const LevelData<EBFluxFAB>&        a_facePhi,
-			      const LevelData<EBFluxFAB>&        a_faceVelocity,
-			      const LevelData<DomainFluxIFFAB>&  a_domainFlux,
-			      const int                          a_lvl){
+			    const LevelData<EBFluxFAB>&        a_facePhi,
+			    const LevelData<EBFluxFAB>&        a_faceVelocity,
+			    const LevelData<DomainFluxIFFAB>&  a_domainFlux,
+			    const int                          a_lvl){
 
   const int comp  = 0;
   const int ncomp = 1;
@@ -612,8 +606,6 @@ void CdrSolver::computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData&
     this->computeDiffusionFlux(*a_flux[lvl], *a_phi[lvl], lvl);
   }
 }
-
-
 
 void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const int a_lvl){
   CH_TIME("CdrSolver::computeDiffusionFlux(level)");
@@ -692,9 +684,9 @@ void CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservat
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     this->conservativeDivergenceRegular(*a_conservativeDivergence[lvl], *a_flux[lvl], lvl);
-    this->setupFluxInterpolant(*a_flux[lvl], lvl);                 // Copy face-centered fluxes in a_flux to m_interpolant
-    this->interpolateFluxToFaceCentroids(*a_flux[lvl], lvl);          // Interpolate fluxes w m_interpolant. Copy 2 a_flux
-    this->computeDivergenceIrregular(*a_conservativeDivergence[lvl], *a_ebFlux[lvl], lvl); // Recompute divergence on irregular cells
+    this->setupFluxInterpolant(*a_flux[lvl], lvl);                                           // Copy face-centered fluxes in a_flux to m_interpolant
+    this->interpolateFluxToFaceCentroids(*a_flux[lvl], lvl);                                 // Interpolate fluxes w m_interpolant. Copy 2 a_flux
+    this->computeDivergenceIrregular(*a_conservativeDivergence[lvl], *a_ebFlux[lvl], lvl);   // Recompute divergence on irregular cells
 
     a_conservativeDivergence[lvl]->exchange();
   }
@@ -946,8 +938,8 @@ void CdrSolver::initialDataParticles(){
 }
 
 void CdrSolver::hybridDivergence(EBAMRCellData&     a_hybrid_div,
-				   EBAMRIVData&       a_massDifference,
-				   const EBAMRIVData& a_nonConservativeDivergence){
+				 EBAMRIVData&       a_massDifference,
+				 const EBAMRIVData& a_nonConservativeDivergence){
   CH_TIME("CdrSolver::hybridDivergence(AMR)");
   if(m_verbosity > 5){
     pout() << m_name + "::hybridDivergence(AMR)" << endl;
@@ -959,9 +951,9 @@ void CdrSolver::hybridDivergence(EBAMRCellData&     a_hybrid_div,
 }
 
 void CdrSolver::hybridDivergence(LevelData<EBCellFAB>&              a_hybridDivergence,
-				   LevelData<BaseIVFAB<Real> >&       a_massDifference,
-				   const LevelData<BaseIVFAB<Real> >& a_nonConservativeDivergence,
-				   const int                          a_lvl){
+				 LevelData<BaseIVFAB<Real> >&       a_massDifference,
+				 const LevelData<BaseIVFAB<Real> >& a_nonConservativeDivergence,
+				 const int                          a_lvl){
   CH_TIME("CdrSolver::hybridDivergence(level)");
   if(m_verbosity > 5){
     pout() << m_name + "::hybridDivergence(level)" << endl;
@@ -1027,7 +1019,6 @@ void CdrSolver::setRedistWeights(const EBAMRCellData& a_phi){
 	coar2fine.resetWeights(*a_phi[lvl], comp);
       }
     }
-
   }
 }
 
@@ -1244,7 +1235,6 @@ void CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
 
   m_amr->averageDown(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
-
 }
 
 void CdrSolver::reflux(EBAMRCellData& a_phi){
@@ -1573,7 +1563,7 @@ void CdrSolver::writePlotFile(){
 
   // Number of output components and their names
   const int ncomps = getNumberOfPlotVariables();
-  const Vector<std::string> names = get_plotVariableNames();
+  const Vector<std::string> names = getPlotVariableNames();
 
   // Allocate storage
   EBAMRCellData output;
@@ -1582,7 +1572,7 @@ void CdrSolver::writePlotFile(){
 
   // Copy internal data to be plotted over to 'output'
   int icomp = 0;
-  writePlotData(output, icomp);
+  this->writePlotData(output, icomp);
 
   // Filename
   char file_char[100];
@@ -1617,31 +1607,31 @@ void CdrSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
 
   // Plot state
   if(m_plotPhi) {
-    writeData(a_output, a_comp, m_phi, true);
+    this->writeData(a_output, a_comp, m_phi, true);
   }
 
   // Plot diffusion coefficients
   if(m_plotDiffusionCoefficient && m_isDiffusive) { // Need to compute the cell-centerd stuff first
     data_ops::set_value(m_scratch, 0.0);
     data_ops::average_face_to_cell(m_scratch, m_faceCenteredDiffusionCoefficient, m_amr->getDomains());
-    writeData(a_output, a_comp, m_scratch,   false);
+    this->writeData(a_output, a_comp, m_scratch,   false);
   }
 
   // Plot source terms
   if(m_plotSource) {
-    writeData(a_output, a_comp, m_source,    false);
+    this->writeData(a_output, a_comp, m_source, false);
   }
 
   // Plot velocities
   if(m_plotVelocity && m_isMobile) {
-    writeData(a_output, a_comp, m_cellVelocity, false);
+    this->writeData(a_output, a_comp, m_cellVelocity, false);
   }
 
   // Plot EB fluxes
   if(m_plotEbFlux && m_isMobile){
     data_ops::set_value(m_scratch, 0.0);
     data_ops::incr(m_scratch, m_ebFlux, 1.0);
-    writeData(a_output, a_comp, m_scratch, false);
+    this->writeData(a_output, a_comp, m_scratch, false);
   }
 }
 
@@ -1748,7 +1738,6 @@ Real CdrSolver::computeAdvectionDt(){
 	}
       }
     }
-
 
     Real maxVal = std::numeric_limits<Real>::max();
     
@@ -2126,18 +2115,18 @@ void CdrSolver::parsePlotVariables(){
   Vector<std::string> str(num);
   pp.getarr("plt_vars", str, 0, num);
 
-  m_plotPhi = false;
-  m_plotVelocity = false;
+  m_plotPhi                  = false;
+  m_plotVelocity             = false;
   m_plotDiffusionCoefficient = false;
-  m_plotSource = false;
-  m_plotEbFlux = false;
+  m_plotSource               = false;
+  m_plotEbFlux               = false;
   
   for (int i = 0; i < num; i++){
-    if(     str[i] == "phi")    m_plotPhi = true;
-    else if(str[i] == "vel")    m_plotVelocity = true;
+    if(     str[i] == "phi")    m_plotPhi                  = true;
+    else if(str[i] == "vel")    m_plotVelocity             = true;
     else if(str[i] == "dco")    m_plotDiffusionCoefficient = true; 
-    else if(str[i] == "src")    m_plotSource = true;
-    else if(str[i] == "ebflux") m_plotEbFlux = true;
+    else if(str[i] == "src")    m_plotSource               = true;
+    else if(str[i] == "ebflux") m_plotEbFlux               = true;
   }
 }
 
@@ -2411,4 +2400,5 @@ void CdrSolver::parsePlotMode(){
     m_plotNumbers = true;
   }
 }
+
 #include <CD_NamespaceFooter.H>

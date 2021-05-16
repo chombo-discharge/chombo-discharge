@@ -4160,20 +4160,20 @@ void cdr_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::stri
   m_fieldSolver->writePlotData(a_output, a_icomp);
 
   // Surface charge solver writes
-  a_plotVariableNames.append(m_sigma->get_plotVariableNames());
+  a_plotVariableNames.append(m_sigma->getPlotVariableNames());
   m_sigma->writePlotData(a_output, a_icomp);
 
   // CDR solvers copy their output data
   for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
-    a_plotVariableNames.append(solver->get_plotVariableNames());
+    a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
 
   // RTE solvers copy their output data
   for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_solver>& solver = solver_it();
-    a_plotVariableNames.append(solver->get_plotVariableNames());
+    a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
 

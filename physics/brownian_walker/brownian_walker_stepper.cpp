@@ -267,7 +267,7 @@ void brownian_walker_stepper::writePlotData(EBAMRCellData& a_output, Vector<std:
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::writePlotData" << endl;
   }
-  a_plotVariableNames.append(m_solver->get_plotVariableNames());
+  a_plotVariableNames.append(m_solver->getPlotVariableNames());
   m_solver->writePlotData(a_output, a_icomp);
 }
 

@@ -170,7 +170,7 @@ namespace Physics {
       a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
       m_fieldSolver->writePlotData(a_output, a_icomp);
 
-      a_plotVariableNames.append(m_sigma->get_plotVariableNames());
+      a_plotVariableNames.append(m_sigma->getPlotVariableNames());
       m_sigma->writePlotData(a_output, a_icomp);
     }
 

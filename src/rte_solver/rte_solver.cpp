@@ -29,10 +29,10 @@ const std::string rte_solver::getRealm() const {
   return m_realm;
 }
 
-Vector<std::string> rte_solver::get_plotVariableNames() const {
-  CH_TIME("rte_solver::get_plotVariableNames");
+Vector<std::string> rte_solver::getPlotVariableNames() const {
+  CH_TIME("rte_solver::getPlotVariableNames");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_plotVariableNames" << endl;
+    pout() << m_name + "::getPlotVariableNames" << endl;
   }
   
   Vector<std::string> names(0);

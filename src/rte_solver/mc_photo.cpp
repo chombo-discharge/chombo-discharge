@@ -657,10 +657,10 @@ void mc_photo::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   readParticlesFromHDF(a_handle, m_photons[a_level], str);
 }
 
-Vector<std::string> mc_photo::get_plotVariableNames() const {
-  CH_TIME("mc_photo::get_plotVariableNames");
+Vector<std::string> mc_photo::getPlotVariableNames() const {
+  CH_TIME("mc_photo::getPlotVariableNames");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_plotVariableNames" << endl;
+    pout() << m_name + "::getPlotVariableNames" << endl;
   }
   
   Vector<std::string> names(0);

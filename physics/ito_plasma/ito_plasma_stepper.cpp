@@ -328,20 +328,20 @@ void ito_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::stri
   m_fieldSolver->writePlotData(a_output, a_icomp);
 
   // Surface charge solver writes
-  a_plotVariableNames.append(m_sigma->get_plotVariableNames());
+  a_plotVariableNames.append(m_sigma->getPlotVariableNames());
   m_sigma->writePlotData(a_output, a_icomp);
 
   // Ito solvers copy their output data
   for (ito_iterator<ito_solver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
-    a_plotVariableNames.append(solver->get_plotVariableNames());
+    a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
 
   // RTE solvers copy their output data
   for (rte_iterator<mc_photo> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<mc_photo>& solver = solver_it();
-    a_plotVariableNames.append(solver->get_plotVariableNames());
+    a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
 

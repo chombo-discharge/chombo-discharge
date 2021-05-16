@@ -168,5 +168,6 @@ for i in `find . -type f \( -iname \*.H -o -iname \*.cpp -o -iname \*.py -o -ina
     # sed -i 's/nonconservativeDivergenceNoKappaDivision/nonConservativeDivergence/g' $i
     # sed -i 's/a_NonConservativeDivergenceStencil/a_nonConservativeDivergence/g' $i
 #    sed -i 's/consdiv_regular/conservativeDivergenceRegular/g' $i
-    sed -i 's/reset_flux_register/resetFluxRegister/g' $i
+    #    sed -i 's/reset_flux_register/resetFluxRegister/g' $i
+    sed -i 's/get_plotVariableNames/getPlotVariableNames/g' $i
 done

@@ -312,10 +312,10 @@ void ito_solver::parse_checkpointing(){
   }
 }
 
-Vector<std::string> ito_solver::get_plotVariableNames() const {
-  CH_TIME("ito_solver::get_plotVariableNames");
+Vector<std::string> ito_solver::getPlotVariableNames() const {
+  CH_TIME("ito_solver::getPlotVariableNames");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_plotVariableNames" << endl;
+    pout() << m_name + "::getPlotVariableNames" << endl;
   }
 
   Vector<std::string> names(0);

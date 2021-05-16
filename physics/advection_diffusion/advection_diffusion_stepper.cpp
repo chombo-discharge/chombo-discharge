@@ -179,7 +179,7 @@ int advection_diffusion_stepper::getNumberOfPlotVariables() const{
 void advection_diffusion_stepper::writePlotData(EBAMRCellData&       a_output,
 						  Vector<std::string>& a_plotVariableNames,
 						  int&                 a_icomp) const {
-  a_plotVariableNames.append(m_solver->get_plotVariableNames());
+  a_plotVariableNames.append(m_solver->getPlotVariableNames());
   m_solver->writePlotData(a_output, a_icomp);
 }
 

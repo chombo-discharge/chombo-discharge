@@ -387,7 +387,7 @@ int sigma_solver::getNumberOfPlotVariables(){
 }
   
   
-Vector<std::string> sigma_solver::get_plotVariableNames() const{
+Vector<std::string> sigma_solver::getPlotVariableNames() const{
   CH_TIME("sigma_solver::getNumberOfPlotVariables");
   if(m_verbosity > 5){
     pout() << "sigma_solver::getNumberOfPlotVariables" << endl;

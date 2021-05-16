@@ -93,7 +93,7 @@ int rte_stepper<T>::getNumberOfPlotVariables() const {
 
 template <typename T>
 void rte_stepper<T>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
-  a_plotVariableNames.append(m_solver->get_plotVariableNames());
+  a_plotVariableNames.append(m_solver->getPlotVariableNames());
   m_solver->writePlotData(a_output, a_icomp);
 }
 
