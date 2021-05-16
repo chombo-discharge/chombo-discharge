@@ -1102,7 +1102,7 @@ protected:
   /*!
     @brief These are all the Realms
   */
-  mutable std::map<std::string, RefCountedPtr<Realm> > m_Realms;
+  mutable std::map<std::string, RefCountedPtr<Realm> > m_realms;
 
   /*!
     @brief Implicit functions

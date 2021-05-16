@@ -26,7 +26,7 @@ std::string rte_solver::getName(){
 }
 
 const std::string rte_solver::getRealm() const {
-  return m_Realm;
+  return m_realm;
 }
 
 Vector<std::string> rte_solver::get_plotVariableNames() const {
@@ -75,7 +75,7 @@ void rte_solver::setRealm(const std::string a_realm){
     pout() << m_name + "::setRealm" << endl;
   }
 
-  m_Realm = a_realm;
+  m_realm = a_realm;
 }
 
 void rte_solver::set_rte_species(const RefCountedPtr<rte_species> a_rte_species){
@@ -183,8 +183,8 @@ void rte_solver::setSource(const EBAMRCellData& a_source){
     a_source[lvl]->localCopyTo(*m_source[lvl]);
   }
 
-  m_amr->averageDown(m_source, m_Realm, m_phase);
-  m_amr->interpGhost(m_source, m_Realm, m_phase);
+  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
 void rte_solver::setSource(const Real a_source){
@@ -201,8 +201,8 @@ void rte_solver::setSource(const Real a_source){
     }
   }
 
-  m_amr->averageDown(m_source, m_Realm, m_phase);
-  m_amr->interpGhost(m_source, m_Realm, m_phase);
+  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
 void rte_solver::set_plot_variables(){
@@ -272,19 +272,19 @@ void rte_solver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCell
 
   // Copy data onto scratch
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_Realm, m_phase, ncomp);
+  m_amr->allocate(scratch, m_realm, m_phase, ncomp);
   data_ops::copy(scratch, a_data);
 
   // Interp if we should
   if(a_interp){
-    m_amr->interpToCentroids(scratch, m_Realm, phase::gas);
+    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
   }
 
-  m_amr->averageDown(scratch, m_Realm, m_phase);
-  m_amr->interpGhost(scratch, m_Realm, m_phase);
+  m_amr->averageDown(scratch, m_realm, m_phase);
+  m_amr->interpGhost(scratch, m_realm, m_phase);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    if(a_output.getRealm() == m_Realm){
+    if(a_output.getRealm() == m_realm){
       scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
     }
     else{

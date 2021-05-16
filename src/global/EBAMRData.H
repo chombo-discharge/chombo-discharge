@@ -116,7 +116,7 @@ protected:
   /*!
     @brief Identifier for Realm
   */
-  std::string m_Realm;
+  std::string m_realm;
 
   /*!
     @brief Underlying data

@@ -51,7 +51,7 @@ void cdr_plasma_tagger::define(const RefCountedPtr<cdr_plasma_physics>&     a_ph
   m_timeStepper = a_timeStepper;
   m_amr         = a_amr;
   m_computationalGeometry    = a_computationalGeometry;
-  m_Realm       = Realm::Primal;
+  m_realm       = Realm::Primal;
 }
 
 void cdr_plasma_tagger::regrid(){
@@ -64,8 +64,8 @@ void cdr_plasma_tagger::regrid(){
     m_tracer.resize(m_num_tracers);
     m_grad_tracer.resize(m_num_tracers);
     for (int i = 0; i < m_num_tracers; i++){
-      m_amr->allocate(m_tracer[i],      m_Realm, m_phase, 1);
-      m_amr->allocate(m_grad_tracer[i], m_Realm, m_phase, SpaceDim);
+      m_amr->allocate(m_tracer[i],      m_realm, m_phase, 1);
+      m_amr->allocate(m_grad_tracer[i], m_realm, m_phase, SpaceDim);
     }
   }
 }
@@ -142,8 +142,8 @@ bool cdr_plasma_tagger::tagCells(EBAMRTags& a_tags){
     compute_tracers();
     
     for (int lvl = 0; lvl <= finest_tag_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_Realm,m_phase)[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm,m_phase)[lvl];
       const Real dx                = m_amr->getDx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

@@ -43,7 +43,7 @@ namespace Physics {
 
       pp.get("LoadBalancing", m_LoadBalancing);
       pp.get("BoxSorting",  str);
-      pp.get("Realm",       m_Realm);
+      pp.get("Realm",       m_realm);
       pp.get("verbosity",   m_verbosity);
       
       if( str == "none"){
@@ -78,7 +78,7 @@ namespace Physics {
       m_fieldSolver->setAmr(m_amr);
       m_fieldSolver->setComputationalGeometry(m_computationalGeometry);
       m_fieldSolver->setVoltage(FieldSolver::s_voltageOne);
-      m_fieldSolver->setRealm(m_Realm);
+      m_fieldSolver->setRealm(m_realm);
       m_fieldSolver->setTime(0, 0.0, 0.0);
 
       // Setup sigma
@@ -86,7 +86,7 @@ namespace Physics {
       m_sigma->setVerbosity(m_verbosity);
       m_sigma->setAmr(m_amr);
       m_sigma->setComputationalGeometry(m_computationalGeometry);
-      m_sigma->setRealm(m_Realm);
+      m_sigma->setRealm(m_realm);
 
     }
 
@@ -97,7 +97,7 @@ namespace Physics {
 
     template <class T>
     void FieldStepper<T>::registerRealms(){
-      m_amr->registerRealm(m_Realm);
+      m_amr->registerRealm(m_realm);
     }
 
     template <class T>
@@ -226,8 +226,8 @@ namespace Physics {
 
 	MFAMRCellData dummy1, dummy2;
 
-	m_amr->allocate(dummy1, m_Realm, 1);
-	m_amr->allocate(dummy2, m_Realm, 1);
+	m_amr->allocate(dummy1, m_realm, 1);
+	m_amr->allocate(dummy2, m_realm, 1);
 
 	const Vector<ProblemDomain>& domains = m_amr->getDomains();
 

@@ -42,12 +42,12 @@ cdr_iterator<T> cdr_layout<T>::iterator() {
 
 template <class T>
 const std::string cdr_layout<T>::getRealm() const{
-  return m_Realm;
+  return m_realm;
 }
 
 template <class T>
 void cdr_layout<T>::setRealm(const std::string a_realm){
-  m_Realm = a_realm;
+  m_realm = a_realm;
 
   for (auto solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->setRealm(a_realm);

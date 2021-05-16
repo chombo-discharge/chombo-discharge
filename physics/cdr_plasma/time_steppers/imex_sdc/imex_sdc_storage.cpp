@@ -20,7 +20,7 @@ imex_sdc::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
 				   const phase::which_phase       a_phase,
 				   const int                      a_ncomp){
   m_amr   = a_amr;
-  m_Realm = a_realm;
+  m_realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
@@ -32,26 +32,26 @@ imex_sdc::cdr_storage::~cdr_storage(){
 void imex_sdc::cdr_storage::allocate_storage(const int a_p){
   m_p = a_p;
 
-  m_amr->allocate(m_scratch,  m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_scratch2, m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_error,    m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_old,      m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_divF,     m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_gradient, m_Realm, m_phase, SpaceDim);
-  m_amr->allocate(m_scratchD, m_Realm, m_phase, SpaceDim);
+  m_amr->allocate(m_scratch,  m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratch2, m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_error,    m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_old,      m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_divF,     m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_gradient, m_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_scratchD, m_realm, m_phase, SpaceDim);
 
-  m_amr->allocate(m_scratchIVs, m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_scratchIVD, m_Realm, m_phase, SpaceDim);
+  m_amr->allocate(m_scratchIVs, m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIVD, m_realm, m_phase, SpaceDim);
 
-  m_amr->allocate(m_scratchIV1, m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_scratchIV2, m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_scratchIV3, m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_scratchIV4, m_Realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIV1, m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIV2, m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIV3, m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIV4, m_realm, m_phase, m_ncomp);
 
-  m_amr->allocate(m_scratchIF1, m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_scratchIF2, m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_scratchIF3, m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_scratchIF4, m_Realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIF1, m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIF2, m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIF3, m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIF4, m_realm, m_phase, m_ncomp);
 
   m_phi.resize(1+m_p);
   m_FAR.resize(1+m_p);
@@ -59,10 +59,10 @@ void imex_sdc::cdr_storage::allocate_storage(const int a_p){
   m_F.resize(1+m_p);
 
   for (int m = 0; m <= m_p; m++){
-    m_amr->allocate(m_phi[m], m_Realm, m_phase, m_ncomp);
-    m_amr->allocate(m_FAR[m], m_Realm, m_phase, m_ncomp);
-    m_amr->allocate(m_FD[m],  m_Realm, m_phase, m_ncomp);
-    m_amr->allocate(m_F[m],   m_Realm, m_phase, m_ncomp);
+    m_amr->allocate(m_phi[m], m_realm, m_phase, m_ncomp);
+    m_amr->allocate(m_FAR[m], m_realm, m_phase, m_ncomp);
+    m_amr->allocate(m_FD[m],  m_realm, m_phase, m_ncomp);
+    m_amr->allocate(m_F[m],   m_realm, m_phase, m_ncomp);
   }
 }
 
@@ -107,7 +107,7 @@ imex_sdc::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
 					   const phase::which_phase       a_phase,
 					   const int                      a_ncomp){
   m_amr   = a_amr;
-  m_Realm = a_realm;
+  m_realm = a_realm;
   m_ncomp = a_ncomp;
   m_phase = a_phase;
 }
@@ -119,11 +119,11 @@ imex_sdc::poisson_storage::~poisson_storage(){
 void imex_sdc::poisson_storage::allocate_storage(const int a_p){
   m_p = a_p;
   
-  m_amr->allocate(m_previous, m_Realm, m_ncomp);
-  m_amr->allocate(m_E_cell,   m_Realm, m_phase, SpaceDim);
-  m_amr->allocate(m_E_face,   m_Realm, m_phase, SpaceDim);
-  m_amr->allocate(m_E_eb,     m_Realm, m_phase, SpaceDim);
-  m_amr->allocate(m_E_dom,    m_Realm, m_phase, SpaceDim);
+  m_amr->allocate(m_previous, m_realm, m_ncomp);
+  m_amr->allocate(m_E_cell,   m_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_E_face,   m_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_E_eb,     m_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_E_dom,    m_realm, m_phase, SpaceDim);
 }
 
 void imex_sdc::poisson_storage::deallocate_storage(){
@@ -143,7 +143,7 @@ imex_sdc::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
 				   const phase::which_phase       a_phase,
 				   const int                      a_ncomp){
   m_amr   = a_amr;
-  m_Realm = a_realm;
+  m_realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
@@ -155,9 +155,9 @@ imex_sdc::rte_storage::~rte_storage(){
 void imex_sdc::rte_storage::allocate_storage(const int a_p){
   m_p = a_p;
   
-  m_amr->allocate(m_previous,   m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_scratchIV,  m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_scratchIF,  m_Realm, m_phase, m_ncomp);
+  m_amr->allocate(m_previous,   m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIV,  m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIF,  m_realm, m_phase, m_ncomp);
 }
 
 void imex_sdc::rte_storage::deallocate_storage(){
@@ -175,7 +175,7 @@ imex_sdc::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
 				       const phase::which_phase       a_phase,
 				       const int                      a_ncomp){
   m_amr   = a_amr;
-  m_Realm = a_realm;
+  m_realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
@@ -187,17 +187,17 @@ imex_sdc::sigma_storage::~sigma_storage(){
 void imex_sdc::sigma_storage::allocate_storage(const int a_p){
   m_p = a_p;
   
-  m_amr->allocate(m_scratch, m_Realm, m_phase, m_ncomp);
-  m_amr->allocate(m_error,   m_Realm, m_phase, m_ncomp);
+  m_amr->allocate(m_scratch, m_realm, m_phase, m_ncomp);
+  m_amr->allocate(m_error,   m_realm, m_phase, m_ncomp);
 
   m_sigma.resize(1+m_p);
   m_Fnew.resize(1+m_p);
   m_Fold.resize(1+m_p);
 
   for (int m = 0; m <= m_p; m++){
-    m_amr->allocate(m_sigma[m], m_Realm, m_phase, m_ncomp);
-    m_amr->allocate(m_Fnew[m],  m_Realm, m_phase, m_ncomp);
-    m_amr->allocate(m_Fold[m],  m_Realm, m_phase, m_ncomp);
+    m_amr->allocate(m_sigma[m], m_realm, m_phase, m_ncomp);
+    m_amr->allocate(m_Fnew[m],  m_realm, m_phase, m_ncomp);
+    m_amr->allocate(m_Fold[m],  m_realm, m_phase, m_ncomp);
   }
 }
 

@@ -258,7 +258,7 @@ protected:
   /*!
     @brief Realm
   */
-  std::string m_Realm;
+  std::string m_realm;
   
   /*!
     @brief Solvers

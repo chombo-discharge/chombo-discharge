@@ -83,7 +83,7 @@ namespace Physics {
       RefCountedPtr<FieldSolver> m_fieldSolver;
       RefCountedPtr<sigma_solver>   m_sigma;
 
-      std::string m_Realm;
+      std::string m_realm;
 
       Real m_init_rho;
       Real m_init_sigma;

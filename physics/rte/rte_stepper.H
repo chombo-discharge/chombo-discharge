@@ -60,7 +60,7 @@ namespace physics {
 
     protected:
 
-      std::string m_Realm;
+      std::string m_realm;
 
       // Solver and species
       RefCountedPtr<rte_solver>  m_solver;

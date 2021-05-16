@@ -346,7 +346,7 @@ protected:
   /*!
     @brief Realm on which the particle_container is defined
   */
-  std::string m_Realm;
+  std::string m_realm;
   
   /*!
     @brief Blocking factor, aka grid size. 

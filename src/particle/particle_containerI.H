@@ -56,7 +56,7 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   m_probLo         = a_probLo;
   m_finestLevel    = a_finestLevel;
   m_buffer          = a_pvr_buffer;
-  m_Realm           = a_realm;
+  m_realm           = a_realm;
   m_blockingFactor = a_blocking_factor;
 
   m_dx.resize(1 + m_finestLevel);
@@ -131,7 +131,7 @@ int particle_container<P>::getFinestLevel() const {
 
 template <class P>
 const std::string particle_container<P>::getRealm() const {
-  return m_Realm;
+  return m_realm;
 }
 
 template <class P>
@@ -400,7 +400,7 @@ template <class P>
 void particle_container<P>::add_particles(const particle_container<P>& a_otherContainer){
   if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
 
-  if(m_Realm == a_otherContainer.getRealm()){
+  if(m_realm == a_otherContainer.getRealm()){
     for (int lvl = 0; lvl <= m_finestLevel; lvl++){
       const DisjointBoxLayout& dbl = m_grids[lvl];
 
@@ -434,7 +434,7 @@ template <class P>
 void particle_container<P>::add_particles_destructive(particle_container<P>& a_otherContainer){
   if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
 
-  if(m_Realm == a_otherContainer.getRealm()){
+  if(m_realm == a_otherContainer.getRealm()){
     for (int lvl = 0; lvl <= m_finestLevel; lvl++){
       const DisjointBoxLayout& dbl = m_grids[lvl];
 

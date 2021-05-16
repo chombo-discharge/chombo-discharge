@@ -84,8 +84,8 @@ void AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, co
   a_particles.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    const DisjointBoxLayout& dbl = m_Realms[a_realm]->getGrids()[lvl];
-    const ProblemDomain& domain  = m_Realms[a_realm]->getDomains()[lvl];
+    const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
+    const ProblemDomain& domain  = m_realms[a_realm]->getDomains()[lvl];
     const Real dx = m_dx[lvl];
     a_particles[lvl] = RefCountedPtr<ParticleData<T> > (new ParticleData<T>(dbl,
 									    domain,
@@ -113,10 +113,10 @@ void AmrMesh::allocate(particle_container<T>& a_container,
     MayDay::Abort("AmrMesh::allocate(container, buffer, Realm) - only constant box sizes are supported for particle methods");
   }
   
-  a_container.define(m_Realms[a_realm]->getGrids(),
-		     m_Realms[a_realm]->getDomains(),
-		     m_Realms[a_realm]->getDx(),
-		     m_Realms[a_realm]->getRefinementRatios(),
+  a_container.define(m_realms[a_realm]->getGrids(),
+		     m_realms[a_realm]->getDomains(),
+		     m_realms[a_realm]->getDx(),
+		     m_realms[a_realm]->getRefinementRatios(),
 		     m_probLo,
 		     m_blockingFactor,
 		     m_finestLevel,

@@ -22,7 +22,7 @@ advection_diffusion_stepper::advection_diffusion_stepper(){
 
   m_phase = phase::gas;
 
-  pp.get("Realm",      m_Realm);
+  pp.get("Realm",      m_realm);
   pp.get("verbosity",  m_verbosity); 
   pp.get("fhd",        m_fhd); 
   pp.get("diffco",     m_faceCenteredDiffusionCoefficient);
@@ -59,7 +59,7 @@ void advection_diffusion_stepper::setup_solvers(){
   m_solver->setAmr(m_amr);
   m_solver->setComputationalGeometry(m_computationalGeometry);
   m_solver->sanityCheck();
-  m_solver->setRealm(m_Realm);
+  m_solver->setRealm(m_realm);
   
   if(!m_solver->isMobile() && !m_solver->isDiffusive()){
     MayDay::Abort("advection_diffusion_stepper::setup_solvers - can't turn off both advection AND diffusion");
@@ -70,7 +70,7 @@ void advection_diffusion_stepper::postInitialize() {
 }
 
 void advection_diffusion_stepper::registerRealms() {
-  m_amr->registerRealm(m_Realm);
+  m_amr->registerRealm(m_realm);
 }
 
 void advection_diffusion_stepper::registerOperators(){
@@ -80,9 +80,9 @@ void advection_diffusion_stepper::registerOperators(){
 void advection_diffusion_stepper::allocate() {
   m_solver->allocateInternals();
 
-  m_amr->allocate(m_tmp, m_Realm, m_phase, 1);
-  m_amr->allocate(m_k1,  m_Realm, m_phase, 1);
-  m_amr->allocate(m_k2,  m_Realm, m_phase, 1);
+  m_amr->allocate(m_tmp, m_realm, m_phase, 1);
+  m_amr->allocate(m_k1,  m_realm, m_phase, 1);
+  m_amr->allocate(m_k2,  m_realm, m_phase, 1);
 }
 
 void advection_diffusion_stepper::initialData(){
@@ -107,14 +107,14 @@ void advection_diffusion_stepper::setVelocity(){
   }
 
   EBAMRCellData& vel = m_solver->getCellCenteredVelocity();
-  m_amr->averageDown(vel, m_Realm, m_phase);
-  m_amr->interpGhost(vel, m_Realm, m_phase);
+  m_amr->averageDown(vel, m_realm, m_phase);
+  m_amr->interpGhost(vel, m_realm, m_phase);
 }
 
 void advection_diffusion_stepper::setVelocity(const int a_level){
   // TLDR: This code goes down to each cell on grid level a_level and sets the velocity to omega*r
     
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box = dbl.get(dit());
 
@@ -136,7 +136,7 @@ void advection_diffusion_stepper::setVelocity(const int a_level){
     }
 
     // Irregular and multicells
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_Realm, m_phase)[a_level])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
 
       const VolIndex vof = vofit();
@@ -221,13 +221,13 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
       data_ops::incr(state, m_k1, a_dt);
     }
   
-    m_amr->averageDown(state, m_Realm, m_phase);
-    m_amr->interpGhost(state, m_Realm, m_phase);
+    m_amr->averageDown(state, m_realm, m_phase);
+    m_amr->interpGhost(state, m_realm, m_phase);
   }
   else if(m_integrator == 1){
     m_solver->computeDivF(m_k1, state, a_dt);
     data_ops::incr(state, m_k1, -a_dt);
-    m_amr->averageDown(state, m_Realm, m_phase);
+    m_amr->averageDown(state, m_realm, m_phase);
 
     if(m_solver->isDiffusive()){
       data_ops::copy(m_k2, state); // Now holds phiOld - dt*div(F)
@@ -239,8 +239,8 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
       m_solver->advanceEuler(state, m_k2, m_k1, a_dt);
     }
 
-    m_amr->averageDown(state, m_Realm, m_phase);
-    m_amr->averageDown(state, m_Realm, m_phase);
+    m_amr->averageDown(state, m_realm, m_phase);
+    m_amr->averageDown(state, m_realm, m_phase);
   }
   else{
     MayDay::Abort("advection_diffusion_stepper - unknown integrator requested");
@@ -289,9 +289,9 @@ void advection_diffusion_stepper::regrid(const int a_lmin, const int a_oldFinest
 
 
   // Allocate memory for RK steps
-  m_amr->allocate(m_tmp, m_Realm, m_phase, 1);
-  m_amr->allocate(m_k1,  m_Realm, m_phase, 1);
-  m_amr->allocate(m_k2,  m_Realm, m_phase, 1);
+  m_amr->allocate(m_tmp, m_realm, m_phase, 1);
+  m_amr->allocate(m_k1,  m_realm, m_phase, 1);
+  m_amr->allocate(m_k2,  m_realm, m_phase, 1);
 }
 
 void advection_diffusion_stepper::postRegrid() {

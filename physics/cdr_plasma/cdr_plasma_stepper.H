@@ -936,7 +936,7 @@ namespace physics {
       /*!
 	@brief Realm
       */
-      std::string m_Realm;
+      std::string m_realm;
 
 
 

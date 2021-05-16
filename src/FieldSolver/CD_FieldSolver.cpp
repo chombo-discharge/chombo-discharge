@@ -35,7 +35,7 @@ Real FieldSolver::s_voltageOne(const Real a_time){
 
 FieldSolver::FieldSolver(){
   m_className = "FieldSolver";
-  m_Realm     = Realm::Primal;
+  m_realm     = Realm::Primal;
 
   this->setVerbosity(-1);
 }
@@ -81,11 +81,11 @@ void FieldSolver::computeElectricField(MFAMRCellData& a_electricField, const MFA
     pout() << "FieldSolver::computeElectricField(MFAMRCellData, MFAMRCellData)" << endl;
   }
 
-  m_amr->computeGradient(a_electricField, a_potential, m_Realm);
+  m_amr->computeGradient(a_electricField, a_potential, m_realm);
   data_ops::scale(a_electricField, -1.0);
 
-  m_amr->averageDown(a_electricField, m_Realm);
-  m_amr->interpGhost(a_electricField, m_Realm);
+  m_amr->averageDown(a_electricField, m_realm);
+  m_amr->interpGhost(a_electricField, m_realm);
 }
 
 void FieldSolver::allocateInternals(){
@@ -96,11 +96,11 @@ void FieldSolver::allocateInternals(){
 
   const int ncomp = 1;
 
-  m_amr->allocate(m_potential,     m_Realm, ncomp);
-  m_amr->allocate(m_rho,           m_Realm, ncomp);
-  m_amr->allocate(m_residue,       m_Realm, ncomp);
-  m_amr->allocate(m_sigma,         m_Realm, phase::gas, ncomp);
-  m_amr->allocate(m_electricField, m_Realm, SpaceDim);
+  m_amr->allocate(m_potential,     m_realm, ncomp);
+  m_amr->allocate(m_rho,           m_realm, ncomp);
+  m_amr->allocate(m_residue,       m_realm, ncomp);
+  m_amr->allocate(m_sigma,         m_realm, phase::gas, ncomp);
+  m_amr->allocate(m_electricField, m_realm, SpaceDim);
 
   data_ops::set_value(m_potential,     0.0);
   data_ops::set_value(m_rho,           0.0);
@@ -118,7 +118,7 @@ void FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
   const int ncomp = 1;
   const int finest_level = m_amr->getFinestLevel();
   
-  m_amr->allocate(m_cache, m_Realm, ncomp);
+  m_amr->allocate(m_cache, m_realm, ncomp);
   
   for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++){
     m_potential[lvl]->localCopyTo(*m_cache[lvl]);
@@ -157,7 +157,7 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
       if(dielectrics.size() > 0){
 	const RealVect dx            = m_amr->getDx()[lvl]*RealVect::Unit;
 	const RealVect origin        = m_amr->getProbLo();
-	const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
+	const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	  EBCellFAB& dg = D_gas[dit()];
@@ -200,8 +200,8 @@ Real FieldSolver::computeEnergyDensity(const MFAMRCellData& a_electricField){
   }
 
   MFAMRCellData D, EdotD;   
-  m_amr->allocate(D, m_Realm, SpaceDim);
-  m_amr->allocate(EdotD, m_Realm, 1);
+  m_amr->allocate(D, m_realm, SpaceDim);
+  m_amr->allocate(EdotD, m_realm, 1);
   this->computeDisplacementField(D, a_electricField);
   data_ops::dot_prod(EdotD, D, a_electricField);
 
@@ -212,14 +212,14 @@ Real FieldSolver::computeEnergyDensity(const MFAMRCellData& a_electricField){
   EBAMRCellData data_g;
   m_amr->allocatePointer(data_g);
   m_amr->alias(data_g, phase::gas, EdotD);
-  m_amr->averageDown(data_g, m_Realm, phase::gas);
+  m_amr->averageDown(data_g, m_realm, phase::gas);
   data_ops::norm(U_g, *data_g[0], m_amr->getDomains()[0], 1);
 
   if(m_multifluidIndexSpace->num_phases() > 1){
     EBAMRCellData data_s;
     m_amr->allocatePointer(data_s);
     m_amr->alias(data_s, phase::solid, EdotD);
-    m_amr->averageDown(data_s, m_Realm, phase::solid);
+    m_amr->averageDown(data_s, m_realm, phase::solid);
     data_ops::norm(U_s, *data_s[0], m_amr->getDomains()[0], 1);
   }
 
@@ -239,9 +239,9 @@ Real FieldSolver::computeCapacitance(){
   MFAMRCellData source;
   EBAMRIVData   sigma;
 
-  m_amr->allocate(phi,    m_Realm, 1);
-  m_amr->allocate(source, m_Realm, 1);
-  m_amr->allocate(sigma,  m_Realm, phase::gas, 1);
+  m_amr->allocate(phi,    m_realm, 1);
+  m_amr->allocate(source, m_realm, 1);
+  m_amr->allocate(sigma,  m_realm, phase::gas, 1);
 
   data_ops::set_value(phi,    0.0);
   data_ops::set_value(source, 0.0);
@@ -251,8 +251,8 @@ Real FieldSolver::computeCapacitance(){
 
   // Solve and compute energy density
   MFAMRCellData E;
-  m_amr->allocate(E, m_Realm, SpaceDim);
-  m_amr->computeGradient(E, phi, m_Realm); // -E
+  m_amr->allocate(E, m_realm, SpaceDim);
+  m_amr->computeGradient(E, phi, m_realm); // -E
   const Real U = this->computeEnergyDensity(E); // Energy density
 
   // U = 0.5*CV^2
@@ -304,7 +304,7 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
       EBAMRCellData potential_phase = m_amr->alias(cur_phase, m_potential);
       EBAMRCellData scratch_phase   = m_amr->alias(cur_phase, m_cache);
 
-      Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(m_Realm, cur_phase);
+      Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(m_realm, cur_phase);
 
       // These levels have not changed
       for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
@@ -321,8 +321,8 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
     }
   }
 
-  m_amr->averageDown(m_potential, m_Realm);
-  m_amr->interpGhost(m_potential, m_Realm);
+  m_amr->averageDown(m_potential, m_realm);
+  m_amr->interpGhost(m_potential, m_realm);
 
   // Now recompute E
   this->computeElectricField();
@@ -398,7 +398,7 @@ void FieldSolver::setRealm(const std::string a_realm){
   if(m_verbosity > 5){
     pout() << "FieldSolver::setRealm" << endl;
   }  
-  m_Realm = a_realm;
+  m_realm = a_realm;
 }
 
 const std::string FieldSolver::getRealm() const{
@@ -407,7 +407,7 @@ const std::string FieldSolver::getRealm() const{
     pout() << "FieldSolver::getRealm" << endl;
   }
   
-  return m_Realm;
+  return m_realm;
 }
 
 void FieldSolver::parsePlotVariables(){
@@ -612,7 +612,7 @@ void FieldSolver::writePlotFile(){
 
   // Allocate storage for output
   EBAMRCellData output;
-  m_amr->allocate(output, m_Realm, phase::gas, ncomps);
+  m_amr->allocate(output, m_realm, phase::gas, ncomps);
 
   // Copy internal data to be plotted over to 'output'
   int icomp = 0;
@@ -629,7 +629,7 @@ void FieldSolver::writePlotFile(){
   Vector<Real> covered_values(ncomps, 0.0);
   string fname(file_char);
   writeEBHDF5(fname,
-	      m_amr->getGrids(m_Realm),
+	      m_amr->getGrids(m_realm),
 	      output_ptr,
 	      names,
 	      m_amr->getDomains()[0].domainBox(),
@@ -681,8 +681,8 @@ void FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   if(!ebis_sol.isNull()) mfalias::aliasMF(potential_sol,  phase::solid, *m_potential[a_level]);
   
   // Read data
-  if(!ebis_gas.isNull()) read<EBCellFAB>(a_handle, potential_gas, "poisson_g", m_amr->getGrids(m_Realm)[a_level], Interval(0,0), false);
-  if(!ebis_sol.isNull()) read<EBCellFAB>(a_handle, potential_sol, "poisson_s", m_amr->getGrids(m_Realm)[a_level], Interval(0,0), false);
+  if(!ebis_gas.isNull()) read<EBCellFAB>(a_handle, potential_gas, "poisson_g", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
+  if(!ebis_sol.isNull()) read<EBCellFAB>(a_handle, potential_sol, "poisson_s", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
 }
 
 void FieldSolver::postCheckpoint(){
@@ -728,7 +728,7 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
 
   // Allocate some scratch data that we can use
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_Realm, phase::gas, ncomp);
+  m_amr->allocate(scratch, m_realm, phase::gas, ncomp);
 
   //
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -784,17 +784,17 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
   }
 
   // Average down shit and interpolate to centroids
-  m_amr->averageDown(scratch, m_Realm, phase::gas);
-  m_amr->interpGhost(scratch, m_Realm, phase::gas);
+  m_amr->averageDown(scratch, m_realm, phase::gas);
+  m_amr->interpGhost(scratch, m_realm, phase::gas);
   if(a_interp){
-    m_amr->interpToCentroids(scratch, m_Realm, phase::gas);
+    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
   }
 
   const Interval src_interv(0, ncomp-1);
   const Interval dst_interv(a_comp, a_comp + ncomp - 1);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    if(m_Realm == a_output.getRealm()){
+    if(m_realm == a_output.getRealm()){
       scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
     }
     else{

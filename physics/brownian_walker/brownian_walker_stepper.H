@@ -75,7 +75,7 @@ namespace physics {
     protected:
 
       // Realm
-      std::string m_Realm; 
+      std::string m_realm; 
 
       // Phase
       phase::which_phase m_phase;

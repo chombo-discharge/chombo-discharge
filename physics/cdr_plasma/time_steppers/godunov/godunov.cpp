@@ -383,7 +383,7 @@ void godunov::allocateInternals(){
   m_cdr_scratch.resize(num_species);
   for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_Realm, m_cdr->get_phase(), ncomp));
+    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_realm, m_cdr->get_phase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
   }
 
@@ -391,16 +391,16 @@ void godunov::allocateInternals(){
   m_rte_scratch.resize(num_photons);
   for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_Realm, m_rte->get_phase(), ncomp));
+    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_realm, m_rte->get_phase(), ncomp));
     m_rte_scratch[idx]->allocate_storage();
   }
 
   // Allocate Poisson storage
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_Realm, m_cdr->get_phase(), ncomp));
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_realm, m_cdr->get_phase(), ncomp));
   m_fieldSolver_scratch->allocate_storage();
   
   // Allocate sigma storage
-  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_Realm, m_cdr->get_phase(), ncomp));
+  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_realm, m_cdr->get_phase(), ncomp));
   m_sigma_scratch->allocate_storage();
 }
 
@@ -461,9 +461,9 @@ void godunov::compute_cdr_gradients(){
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
     EBAMRCellData& grad = storage->get_gradient();
-    m_amr->computeGradient(grad, solver->getPhi(), m_Realm, phase::gas);
-    m_amr->averageDown(grad, m_Realm, m_cdr->get_phase());
-    m_amr->interpGhost(grad, m_Realm, m_cdr->get_phase());
+    m_amr->computeGradient(grad, solver->getPhi(), m_realm, phase::gas);
+    m_amr->averageDown(grad, m_realm, m_cdr->get_phase());
+    m_amr->interpGhost(grad, m_realm, m_cdr->get_phase());
   }
 }
 
@@ -498,7 +498,7 @@ void godunov::compute_cdr_eb_states(){
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_Realm, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(eb_gradient, m_realm, m_cdr->get_phase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
     cdr_plasma_stepper::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
     cdr_plasma_stepper::project_flux(*eb_gradients[i], eb_gradient);
@@ -589,7 +589,7 @@ void godunov::compute_cdr_domain_states(){
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIFData grad;
-  m_amr->allocate(grad, m_Realm, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(grad, m_realm, m_cdr->get_phase(), SpaceDim);
   for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const int idx = solver_it.index();
@@ -841,8 +841,8 @@ void godunov::advance_transport_euler(const Real a_dt){
 	}
       }
 
-      m_amr->averageDown(phi, m_Realm, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_Realm, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_realm, m_cdr->get_phase());
+      m_amr->interpGhost(phi, m_realm, m_cdr->get_phase());
     }
   }
 
@@ -903,8 +903,8 @@ void godunov::advance_transport_rk2(const Real a_dt){
 
     data_ops::floor(phi, 0.0);
 
-    m_amr->averageDown(phi, m_Realm, m_cdr->get_phase());
-    m_amr->interpGhost(phi, m_Realm, m_cdr->get_phase());
+    m_amr->averageDown(phi, m_realm, m_cdr->get_phase());
+    m_amr->interpGhost(phi, m_realm, m_cdr->get_phase());
 
     // Compute k1 from phi^(k+1) = phi^k + k1
     data_ops::incr(k1, phi, -1.0);
@@ -988,8 +988,8 @@ void godunov::advance_transport_rk2(const Real a_dt){
 
     data_ops::floor(phi, 0.0);
 
-    m_amr->averageDown(phi, m_Realm, m_cdr->get_phase());
-    m_amr->interpGhost(phi, m_Realm, m_cdr->get_phase());
+    m_amr->averageDown(phi, m_realm, m_cdr->get_phase());
+    m_amr->interpGhost(phi, m_realm, m_cdr->get_phase());
 
     if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
       if(m_debug){
@@ -1116,8 +1116,8 @@ void godunov::post_step(){
   for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver> solver = solver_it();
 
-    m_amr->averageDown(solver->getPhi(), m_Realm, m_cdr->get_phase());
-    m_amr->interpGhost(solver->getPhi(), m_Realm, m_cdr->get_phase());
+    m_amr->averageDown(solver->getPhi(), m_realm, m_cdr->get_phase());
+    m_amr->interpGhost(solver->getPhi(), m_realm, m_cdr->get_phase());
   }
 }
 

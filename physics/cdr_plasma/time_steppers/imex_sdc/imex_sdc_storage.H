@@ -58,7 +58,7 @@ namespace physics {
   
     protected:
 
-      std::string m_Realm;
+      std::string m_realm;
       RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components
@@ -112,7 +112,7 @@ namespace physics {
 
     protected:
 
-      std::string m_Realm;
+      std::string m_realm;
       RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components
@@ -144,7 +144,7 @@ namespace physics {
 
     protected:
 
-      std::string m_Realm;
+      std::string m_realm;
       RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components
@@ -177,7 +177,7 @@ namespace physics {
 
     protected:
     
-      std::string m_Realm;
+      std::string m_realm;
       RefCountedPtr<AmrMesh> m_amr; // Needed for allocation. Will allocate
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components

@@ -132,9 +132,9 @@ void FieldSolverMultigrid::allocateInternals(){
 
   const int ncomp = 1;
 
-  m_amr->allocate(m_zero,         m_Realm, ncomp);
-  m_amr->allocate(m_scaledSource, m_Realm, ncomp);
-  m_amr->allocate(m_scaledSigma,  m_Realm, phase::gas, ncomp);
+  m_amr->allocate(m_zero,         m_realm, ncomp);
+  m_amr->allocate(m_scaledSource, m_realm, ncomp);
+  m_amr->allocate(m_scaledSigma,  m_realm, phase::gas, ncomp);
 
   data_ops::set_value(m_zero, 0.0);
 }
@@ -256,8 +256,8 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 
   m_multigridSolver.revert(phi, rhs, finest_level, 0);
 
-  m_amr->averageDown(a_phi, m_Realm);
-  m_amr->interpGhost(a_phi, m_Realm);
+  m_amr->averageDown(a_phi, m_realm);
+  m_amr->interpGhost(a_phi, m_realm);
 
   const Real t5 = MPI_Wtime();
 
@@ -297,18 +297,18 @@ void FieldSolverMultigrid::registerOperators(){
     MayDay::Abort("FieldSolverMultigrid::registerOperators - need to set AmrMesh!");
   }
   else{
-    m_amr->registerOperator(s_eb_coar_ave,     m_Realm, phase::gas);
-    m_amr->registerOperator(s_eb_coar_ave,     m_Realm, phase::solid);
-    m_amr->registerOperator(s_eb_fill_patch,   m_Realm, phase::gas);
-    m_amr->registerOperator(s_eb_fill_patch,   m_Realm, phase::solid);
-    m_amr->registerOperator(s_eb_pwl_interp,   m_Realm, phase::gas);
-    m_amr->registerOperator(s_eb_pwl_interp,   m_Realm, phase::solid);
-    m_amr->registerOperator(s_eb_quad_cfi,     m_Realm, phase::gas);
-    m_amr->registerOperator(s_eb_quad_cfi,     m_Realm, phase::solid);
-    m_amr->registerOperator(s_eb_irreg_interp, m_Realm, phase::gas);
-    m_amr->registerOperator(s_eb_irreg_interp, m_Realm, phase::solid);
-    m_amr->registerOperator(s_eb_flux_reg,     m_Realm, phase::gas);
-    m_amr->registerOperator(s_eb_flux_reg,     m_Realm, phase::solid);
+    m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::solid);
+    m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::solid);
+    m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::solid);
+    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::solid);
+    m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::solid);
+    m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::solid);
   }
 }
 
@@ -322,9 +322,9 @@ void FieldSolverMultigrid::setMultigridCoefficients(){
   const int ghosts = 1;
   const Real eps0  = m_computationalGeometry->get_eps0();
   
-  m_amr->allocate(m_aCoefficient,      m_Realm, ncomps);
-  m_amr->allocate(m_bCoefficient,      m_Realm, ncomps);
-  m_amr->allocate(m_bCoefficientIrreg, m_Realm, ncomps);
+  m_amr->allocate(m_aCoefficient,      m_realm, ncomps);
+  m_amr->allocate(m_bCoefficient,      m_realm, ncomps);
+  m_amr->allocate(m_bCoefficientIrreg, m_realm, ncomps);
 
   data_ops::set_value(m_aCoefficient,      0.0);  // Always zero for poisson equation, but that is done from alpha. 
   data_ops::set_value(m_bCoefficient,      eps0); // Will override this later
@@ -345,7 +345,7 @@ void FieldSolverMultigrid::setPermittivities(const Vector<dielectric>& a_dielect
     const int finest_level = m_amr->getFinestLevel();
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_Realm)[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       
       LevelData<EBFluxFAB> bco;
       LevelData<BaseIVFAB<Real> > bcoIrreg;
@@ -579,7 +579,7 @@ void FieldSolverMultigrid::setupOperatorFactory(){
 
   const int nphases                      = m_multifluidIndexSpace->num_phases();
   const int finest_level                 = m_amr->getFinestLevel();
-  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_Realm);
+  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
   const Vector<int>& refinement_ratios   = m_amr->getRefinementRatios();
   const Vector<ProblemDomain>& domains   = m_amr->getDomains();
   const Vector<Real>& dx                 = m_amr->getDx();
@@ -597,14 +597,14 @@ void FieldSolverMultigrid::setupOperatorFactory(){
     Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(nphases);
     Vector<RefCountedPtr<EBFluxRegister> > fluxreg_phases(nphases);
 
-    if(!ebis_gas.isNull()) eblg_phases[phase::gas]      = *(m_amr->getEBLevelGrid(m_Realm, phase::gas)[lvl]);
-    if(!ebis_sol.isNull()) eblg_phases[phase::solid]    = *(m_amr->getEBLevelGrid(m_Realm, phase::solid)[lvl]);
+    if(!ebis_gas.isNull()) eblg_phases[phase::gas]      = *(m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl]);
+    if(!ebis_sol.isNull()) eblg_phases[phase::solid]    = *(m_amr->getEBLevelGrid(m_realm, phase::solid)[lvl]);
 
-    if(!ebis_gas.isNull()) quadcfi_phases[phase::gas]   = (m_amr->getEBQuadCFInterp(m_Realm, phase::gas)[lvl]);
-    if(!ebis_sol.isNull()) quadcfi_phases[phase::solid] = (m_amr->getEBQuadCFInterp(m_Realm, phase::solid)[lvl]);
+    if(!ebis_gas.isNull()) quadcfi_phases[phase::gas]   = (m_amr->getEBQuadCFInterp(m_realm, phase::gas)[lvl]);
+    if(!ebis_sol.isNull()) quadcfi_phases[phase::solid] = (m_amr->getEBQuadCFInterp(m_realm, phase::solid)[lvl]);
 
-    if(!ebis_gas.isNull()) fluxreg_phases[phase::gas]   = (m_amr->getFluxRegister(m_Realm, phase::gas)[lvl]);
-    if(!ebis_sol.isNull()) fluxreg_phases[phase::solid] = (m_amr->getFluxRegister(m_Realm, phase::solid)[lvl]);
+    if(!ebis_gas.isNull()) fluxreg_phases[phase::gas]   = (m_amr->getFluxRegister(m_realm, phase::gas)[lvl]);
+    if(!ebis_sol.isNull()) fluxreg_phases[phase::solid] = (m_amr->getFluxRegister(m_realm, phase::solid)[lvl]);
     
     mflg[lvl].define(m_multifluidIndexSpace, eblg_phases);
     mfquadcfi[lvl].define(quadcfi_phases);
@@ -727,8 +727,8 @@ void FieldSolverMultigrid::setupMultigridSolver(){
   // Dummies for init
   const int ncomp = 1;
   MFAMRCellData dummy1, dummy2;
-  m_amr->allocate(dummy1, m_Realm, ncomp);
-  m_amr->allocate(dummy2, m_Realm, ncomp);
+  m_amr->allocate(dummy1, m_realm, ncomp);
+  m_amr->allocate(dummy2, m_realm, ncomp);
   data_ops::set_value(dummy1, 0.0);
   data_ops::set_value(dummy2, 0.0);
 

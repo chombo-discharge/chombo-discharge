@@ -29,8 +29,8 @@ Realm::Realm(){
   m_verbosity = -1;
 
   // Just empty points until define() is called
-  m_Realms.emplace(phase::gas,   RefCountedPtr<PhaseRealm> (new PhaseRealm()));
-  m_Realms.emplace(phase::solid, RefCountedPtr<PhaseRealm> (new PhaseRealm()));
+  m_realms.emplace(phase::gas,   RefCountedPtr<PhaseRealm> (new PhaseRealm()));
+  m_realms.emplace(phase::solid, RefCountedPtr<PhaseRealm> (new PhaseRealm()));
 }
 
 Realm::~Realm(){
@@ -72,10 +72,10 @@ void Realm::define(const Vector<DisjointBoxLayout>& a_grids,
   const RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
-  m_Realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finestLevel, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
+  m_realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finestLevel, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
 			       a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::gas), ebis_gas);
 
-  m_Realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finestLevel, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
+  m_realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finestLevel, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
 				 a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::solid), ebis_sol);
 
 
@@ -87,7 +87,7 @@ void Realm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_fines
     pout() << "Realm::setGrids" << endl;
   }
 
-  for (auto& r : m_Realms){
+  for (auto& r : m_realms){
     r.second->setGrids(a_grids, a_finestLevel);
   }
 }
@@ -98,7 +98,7 @@ void Realm::regridBase(const int a_lmin){
     pout() << "Realm::regridBase" << endl;
   }
   
-  for (auto& r : m_Realms){
+  for (auto& r : m_realms){
     r.second->regridBase(a_lmin);
   }
   this->define_mflevelgrid(a_lmin);
@@ -110,7 +110,7 @@ void Realm::regridOperators(const int a_lmin, const int a_lmax, const int a_regs
     pout() << "Realm::regridOperators" << endl;
   }
 
-  for (auto& r : m_Realms){
+  for (auto& r : m_realms){
     r.second->regridOperators(a_lmin, a_lmax, a_regsize);
   }
   this->define_masks(a_lmin);
@@ -313,7 +313,7 @@ void Realm::registerOperator(const std::string a_operator, const phase::which_ph
     pout() << "Realm::registerOperator(operator, phase)" << endl;
   }
   
-  m_Realms[a_phase]->registerOperator(a_operator);
+  m_realms[a_phase]->registerOperator(a_operator);
 }
 
 bool Realm::queryOperator(const std::string a_operator, const phase::which_phase a_phase) {
@@ -322,7 +322,7 @@ bool Realm::queryOperator(const std::string a_operator, const phase::which_phase
     pout() << "Realm::queryOperator" << endl;
   }
   
-  return m_Realms[a_phase]->queryOperator(a_operator);
+  return m_realms[a_phase]->queryOperator(a_operator);
 }
 
 void Realm::registerMask(const std::string a_mask, const int a_buffer){
@@ -353,7 +353,7 @@ bool Realm::queryMask(const std::string a_mask, const int a_buffer) const {
 }
 
 PhaseRealm& Realm::getRealm(const phase::which_phase a_phase){
-  return *m_Realms[a_phase];
+  return *m_realms[a_phase];
 }
 
 Vector<int>& Realm::getRefinementRatios() {
@@ -390,99 +390,99 @@ Vector<RefCountedPtr<MFLevelGrid> >& Realm::getMFLevelGrid(){
 
 const RefCountedPtr<EBIndexSpace>& Realm::getEBIndexSpace(const phase::which_phase a_phase) {
 
-  return m_Realms[a_phase]->getEBIndexSpace();
+  return m_realms[a_phase]->getEBIndexSpace();
 }
 
 Vector<EBISLayout>& Realm::getEBISLayout(const phase::which_phase a_phase) {
-  return m_Realms[a_phase]->getEBISLayout();
+  return m_realms[a_phase]->getEBISLayout();
 }
 
 Vector<RefCountedPtr<EBLevelGrid> >& Realm::getEBLevelGrid(const phase::which_phase a_phase) {
-  return m_Realms[a_phase]->getEBLevelGrid();
+  return m_realms[a_phase]->getEBLevelGrid();
 }
 
 Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& Realm::getNeighbors(const phase::which_phase a_phase) {
-  return m_Realms[a_phase]->getNeighbors();
+  return m_realms[a_phase]->getNeighbors();
 }
 
 Vector<RefCountedPtr<LayoutData<VoFIterator> > >& Realm::getVofIterator(const phase::which_phase a_phase) {
-  return m_Realms[a_phase]->getVofIterator();
+  return m_realms[a_phase]->getVofIterator();
 }
 
 IrregAmrStencil<CentroidInterpolationStencil>& Realm::getCentroidInterpolationStencils(const phase::which_phase a_phase) {
-  return m_Realms[a_phase]->getCentroidInterpolationStencils();
+  return m_realms[a_phase]->getCentroidInterpolationStencils();
 }
 
 IrregAmrStencil<EbCentroidInterpolationStencil>& Realm::getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) {
-  return m_Realms[a_phase]->getEbCentroidInterpolationStencilStencils();
+  return m_realms[a_phase]->getEbCentroidInterpolationStencilStencils();
 }
 
 IrregAmrStencil<NonConservativeDivergenceStencil>& Realm::getNonConservativeDivergenceStencils(const phase::which_phase a_phase) {
-  return m_Realms[a_phase]->getNonConservativeDivergenceStencils();
+  return m_realms[a_phase]->getNonConservativeDivergenceStencils();
 }
 
 Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& Realm::getGradientStencils(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getGradientStencils();
+  return m_realms[a_phase]->getGradientStencils();
 }
 
 Vector<RefCountedPtr<ebcoarseaverage> >& Realm::getCoarseAverage(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getCoarseAverage();
+  return m_realms[a_phase]->getCoarseAverage();
 }
 
 Vector<RefCountedPtr<EBGhostCloud> >& Realm::getGhostCloud(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getGhostCloud();
+  return m_realms[a_phase]->getGhostCloud();
 }
 
 Vector<RefCountedPtr<NwoEbQuadCfInterp> >& Realm::getNWOEBQuadCFInterp(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getNWOEBQuadCFInterp();
+  return m_realms[a_phase]->getNWOEBQuadCFInterp();
 }
 
 Vector<RefCountedPtr<EBQuadCFInterp> >& Realm::getEBQuadCFInterp(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getEBQuadCFInterp();
+  return m_realms[a_phase]->getEBQuadCFInterp();
 }
 
 Vector<RefCountedPtr<AggEBPWLFillPatch> >& Realm::getFillPatch(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getFillPatch();
+  return m_realms[a_phase]->getFillPatch();
 }
 
 Vector<RefCountedPtr<EBPWLFineInterp> >& Realm::getPwlInterpolator(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getPwlInterpolator();
+  return m_realms[a_phase]->getPwlInterpolator();
 }
 
 Vector<RefCountedPtr<EBMGInterp> >& Realm::getEBMGInterp(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getEBMGInterp();
+  return m_realms[a_phase]->getEBMGInterp();
 }
 
 Vector<RefCountedPtr<EBFluxRegister> >&  Realm::getFluxRegister(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getFluxRegister();
+  return m_realms[a_phase]->getFluxRegister();
 }
 
 Vector<RefCountedPtr<EBLevelRedist> >&  Realm::getLevelRedist(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getLevelRedist();
+  return m_realms[a_phase]->getLevelRedist();
 }
 
 Vector<RefCountedPtr<EBCoarToFineRedist> >&  Realm::getCoarToFineRedist(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getCoarToFineRedist();
+  return m_realms[a_phase]->getCoarToFineRedist();
 }
 
 Vector<RefCountedPtr<EBCoarToCoarRedist> >&  Realm::getCoarToCoarRedist(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getCoarToCoarRedist();
+  return m_realms[a_phase]->getCoarToCoarRedist();
 }
 
 Vector<RefCountedPtr<EBFineToCoarRedist> >&  Realm::getFineToCoarRedist(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getFineToCoarRedist();
+  return m_realms[a_phase]->getFineToCoarRedist();
 }
 
 Vector<RefCountedPtr<Copier> >& Realm::getCopier(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getCopier();
+  return m_realms[a_phase]->getCopier();
 }
 
 Vector<RefCountedPtr<Copier> >& Realm::getReverseCopier(const phase::which_phase a_phase){
-  return m_Realms[a_phase]->getReverseCopier();
+  return m_realms[a_phase]->getReverseCopier();
 }
 
 EBAMRFAB& Realm::getLevelset(const phase::which_phase a_phase) {
-  return m_Realms[a_phase]->getLevelset();
+  return m_realms[a_phase]->getLevelset();
 }
 
 AMRMask& Realm::getMask(const std::string a_mask, const int a_buffer){

@@ -129,7 +129,7 @@ protected:
   RefCountedPtr<mfis> m_multifluidIndexSpace;
 
   // Phase Realms and implicit functions
-  std::map<phase::which_phase, RefCountedPtr<PhaseRealm> > m_Realms;
+  std::map<phase::which_phase, RefCountedPtr<PhaseRealm> > m_realms;
   std::map<phase::which_phase, RefCountedPtr<BaseIF> > m_baseif;
 
   // Map for checking which masks are present. 

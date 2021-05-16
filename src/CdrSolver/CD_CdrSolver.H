@@ -563,7 +563,7 @@ protected:
   /*!
     @brief Realm
   */
-  std::string m_Realm;
+  std::string m_realm;
 
   /*!
     @brief State data (i.e. the ion density)
@@ -613,7 +613,7 @@ protected:
   /*!
     @brief Zero flux
   */
-  EBAMRIVData m_EbZero;
+  EBAMRIVData m_ebZero;
 
   /*!
     @brief Cached state vector for regrid. DO NOT TOUCH!
@@ -658,7 +658,7 @@ protected:
   /*!
     @brief Diffusion coefficients (can
   */
-  EBAMRIVData m_faceCenteredDiffusionCoefficient_eb;
+  EBAMRIVData m_ebCenteredDiffusionCoefficient;
 
   /*!
     @brief Verbosity
@@ -747,38 +747,57 @@ protected:
 
   /*!
     @brief Average cell-centered velocities to face centers
+    @param[out] a_faceVelocity Face-centered velocities
+    @param[in]  a_cellVelocity Cell-centered velocities
   */
   virtual void averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCellData& a_cellVelocity);
 
   /*!
-    @brief Set up face-centered advection flux
+    @brief Set up face-centered advection flux.
+    @param[out] a_flux         Face-centered fluxes
+    @param[in]  a_facePhi      Face-centered state
+    @param[in]  a_faceVelocity Face-centered velocities
+    @param[in]  a_domainFlux   Domain flux
   */
   virtual void computeFlux(EBAMRFluxData&       a_flux,
-			    const EBAMRFluxData& a_facePhi,
-			    const EBAMRFluxData& a_faceVelocity,
-			    const EBAMRIFData&   a_domainFlux);
+			   const EBAMRFluxData& a_facePhi,
+			   const EBAMRFluxData& a_faceVelocity,
+			   const EBAMRIFData&   a_domainFlux);
 
   /*!
-    @brief Set up face-centered advection flux
+    @brief Set up face-centered advection flux on a grid level
+    @param[out] a_flux         Face-centered fluxes
+    @param[in]  a_facePhi      Face-centered state
+    @param[in]  a_faceVelocity Face-centered velocities
+    @param[in]  a_domainFlux   Domain flux
+    @param[in]  a_level        Grid level
   */
   virtual void computeFlux(LevelData<EBFluxFAB>&              a_flux,
-			    const LevelData<EBFluxFAB>&        a_facePhi,
-			    const LevelData<EBFluxFAB>&        a_faceVelocity,
-			    const LevelData<DomainFluxIFFAB>&  a_domainFlux,
-			    const int                          a_lvl);
+			   const LevelData<EBFluxFAB>&        a_facePhi,
+			   const LevelData<EBFluxFAB>&        a_faceVelocity,
+			   const LevelData<DomainFluxIFFAB>&  a_domainFlux,
+			   const int                          a_lvl);
 
   /*!
     @brief Compute the face-centered diffusion flux
+    @param[out] a_flux Face-centered flux
+    @param[in]  a_phi  Cell centered phi
   */
   virtual void computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData& a_phi);
 
   /*!
-    @brief Compute the face-centered difufsion flux
+    @brief Compute the face-centered diffusion flux
+    @param[out] a_flux Face-centered flux
+    @param[in]  a_phi  Cell centered phi
+    @param[in]  a_lvl  Grid level
   */
   virtual void computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const int a_lvl);
 
   /*!
     @brief Compute conservative divergence from fluxes. 
+    @param[out] a_conservativeDivergence Conservative divergence computed as div(F) using finite volumes. Not divided by kappa. 
+    @param[in]  a_flux                   Face-centered fluxes. Includes domain fluxes.
+    @param[in]  a_ebFlux                 EB flux. 
   */
   virtual void conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservativeDivergence, EBAMRFluxData& a_flux, const EBAMRIVData& a_ebFlux);
 
@@ -786,7 +805,6 @@ protected:
     @brief Compute the conservative divergence with the assumption that only the eb-flux is non-zero
   */
   virtual void conservativeDivergenceNoKappaDivision_eb(EBAMRCellData& a_conservativeDivergence, const EBAMRIVData& a_ebFlux);
-
 
   /*!
     @brief Compute the non-conservative divergence
