@@ -249,7 +249,7 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
   return a_dt;
 }
 
-void advection_diffusion_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
+void advection_diffusion_stepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt){
   m_step = a_step;
   m_time = a_time;
   m_dt   = a_dt;
@@ -257,7 +257,7 @@ void advection_diffusion_stepper::synchronize_solver_times(const int a_step, con
   m_solver->set_time(a_step, a_time, a_dt);
 }
 
-void advection_diffusion_stepper::print_stepReport(){
+void advection_diffusion_stepper::printStepReport(){
 
 }
 

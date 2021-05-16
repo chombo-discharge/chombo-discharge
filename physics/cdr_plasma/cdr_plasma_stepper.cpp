@@ -3778,10 +3778,10 @@ void cdr_plasma_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
   }
 }
 
-void cdr_plasma_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
-  CH_TIME("cdr_plasma_stepper::synchronize_solver_times");
+void cdr_plasma_stepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt){
+  CH_TIME("cdr_plasma_stepper::synchronizeSolverTimes");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::synchronize_solver_times" << endl;
+    pout() << "cdr_plasma_stepper::synchronizeSolverTimes" << endl;
   }
 
   m_step = a_step;
@@ -4224,10 +4224,10 @@ void cdr_plasma_stepper::postCheckpointSetup(){
   this->compute_cdr_diffusion();
 }
 
-void cdr_plasma_stepper::print_stepReport(){
-  CH_TIME("cdr_plasma_stepper::print_stepReport");
+void cdr_plasma_stepper::printStepReport(){
+  CH_TIME("cdr_plasma_stepper::printStepReport");
   if(m_verbosity > 4){
-    pout() << "cdr_plasma_stepper::print_stepReport" << endl;
+    pout() << "cdr_plasma_stepper::printStepReport" << endl;
   }
 
   // Compute the maximum electric field

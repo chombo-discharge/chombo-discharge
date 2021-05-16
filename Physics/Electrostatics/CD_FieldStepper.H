@@ -51,8 +51,8 @@ namespace Physics {
       // Advance routines
       void computeDt(Real& a_dt, TimeCode& a_timeCode) override {a_dt = 0.0;}
       Real advance(const Real a_dt) override;
-      void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
-      void print_stepReport() override {};
+      void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
+      void printStepReport() override {};
 
       // Registration routines
       void registerRealms() override;

@@ -35,33 +35,109 @@ public:
   */
   virtual ~TimeStepper();
 
-  // Set routines
+  /*!
+    @brief Set AmrMesh
+    @param[in] a_amr AmrMesh
+  */
   void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
+
+  /*!
+    @brief Set the computational geometry
+    @param[in] a_computationalGeometry The computational geometry....
+  */
   void setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry);
 
-  // Setup routines
+  // SETUP ROUTINES BELOW HERE
+  // -------------------------
+  /*!
+    @brief Set up solvers
+  */
   virtual void setup_solvers() = 0;
+
+  /*!
+    @brief Allocate memory for time stepper
+  */
   virtual void allocate() = 0;
+
+  /*!
+    @brief Fill solvers with initial data
+  */
   virtual void initialData() = 0;
+
+  /*!
+    @brief Post-initialize operations to be performed after filling solvers with initialData (e.g.: Solve the Poisson equation).
+  */
   virtual void postInitialize() = 0;
+
+  /*!
+    @brief Post-initialize operations to be performed after filling solvers with data read from checkpoint files. 
+  */
   virtual void postCheckpointSetup() = 0;
+
+  // REGISTRATION ROUTINES BELOW HERE
+  // --------------------------------
+  /*!
+    @brief Get the redistribution register size
+    @todo Remove this routine and everything that goes along with it. 
+  */
   virtual int getRedistributionRegSize() const;
 
-  // Registration routines
+  /*!
+    @brief Register realms to be used for the simulation
+  */
   virtual void registerRealms() = 0;
+
+  /*!
+    @brief Register operators to be used for the simulation
+  */
   virtual void registerOperators() = 0;
 
-  // Runtime options
+  /*!
+    @brief Parse runtime options
+  */
   virtual void parseRuntimeOptions();
 
-  // IO routines
+  // IO ROUTINES BELOW HERE
+  // ----------------------
+  /*!
+    @brief Write checkpoint data to file
+    @param[inout] a_handle HDF5 handle
+    @param[in]    a_lvl    Grid level
+  */
   virtual void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const = 0;
+
+  /*!
+    @brief Read checkpoint data from file
+    @param[inout] a_handle HDF5 handle
+    @param[in]    a_lvl    Grid level
+  */
   virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) = 0;
+
+  /*!
+    @brief Write plot data to file
+    @param[inout] a_output Output data holder
+    @param[in]    Plot variable names
+    @param[inout] a_icomp Current component to write to 
+  */
   virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const = 0;
+
+  /*!
+    @brief Get the number of plot variables for this time stepper. 
+    @details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
+    @return Returns number of plot variables that will be written during writePlotData
+  */
   virtual int  getNumberOfPlotVariables() const = 0;
+
+  /*!
+    @brief Get computational loads to be checkpointed.
+    @param[in] a_realm Realm
+    @param[in] a_level Grid level
+    @return Returns computational loads for each box on grid level a_level. 
+  */
   virtual Vector<long int> getCheckpointLoads(const std::string a_realm, const int a_level) const;
 
-  // ADVANCE ROUTINES
+  // ADVANCE ROUTINES BELOW HERE
+  // ---------------------------
   /*!
     @brief Compute a time step
     @param[out] a_dt       Time step to be used.
@@ -83,14 +159,15 @@ public:
     @param[in] a_time Time (in seconds)
     @param[in] a_dt   Time step that was used. 
   */
-  virtual void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) = 0;
+  virtual void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) = 0;
 
   /*!
     @brief Print a step report. This is called by Driver at every time step and you can output any information you like.
   */
-  virtual void print_stepReport() = 0;
+  virtual void printStepReport() = 0;
 
-  // REGRID ROUTINES
+  // REGRID ROUTINES BELOW HERE
+  // --------------------------
   /*!
     @brief Perform pre-regrid operations.
     @details This should include all copying all data which should be interpolated to the new grids. It can also include deallocating memory in case the regrid

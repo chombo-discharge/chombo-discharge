@@ -43,8 +43,8 @@ namespace physics {
       // Advance routines
       virtual void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
       virtual Real advance(const Real a_dt) override;
-      virtual void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
-      virtual void print_stepReport() override;
+      virtual void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
+      virtual void printStepReport() override;
 
       // Regrid routines
       virtual void deallocate() override;

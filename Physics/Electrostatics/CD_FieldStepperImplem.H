@@ -175,7 +175,7 @@ namespace Physics {
     }
 
     template <class T>
-    void FieldStepper<T>::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
+    void FieldStepper<T>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt){
       m_step = a_step;
       m_time = a_time;
       m_dt   = a_dt;

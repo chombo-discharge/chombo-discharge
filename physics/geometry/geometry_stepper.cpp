@@ -36,8 +36,8 @@ int  geometry_stepper::getNumberOfPlotVariables() const {return 0;}
 // Advance routines
 void geometry_stepper::computeDt(Real& a_dt, TimeCode& a_timeCode) {a_dt = 0.0;}
 Real geometry_stepper::advance(const Real a_dt) {return 1.0;}
-void geometry_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {}
-void geometry_stepper::print_stepReport() {}
+void geometry_stepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) {}
+void geometry_stepper::printStepReport() {}
 
 // Regrid routines
 void geometry_stepper::deallocate() {}

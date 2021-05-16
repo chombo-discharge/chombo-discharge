@@ -284,10 +284,10 @@ void brownian_walker_stepper::computeDt(Real& a_dt, TimeCode& a_timeCode) {
   a_dt = m_max_cells_hop*m_solver->computeDt();
 }
 
-void brownian_walker_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
-  CH_TIME("brownian_walker_stepper::synchronize_solver_times");
+void brownian_walker_stepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) {
+  CH_TIME("brownian_walker_stepper::synchronizeSolverTimes");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::synchronize_solver_times" << endl;
+    pout() << "brownian_walker_stepper::synchronizeSolverTimes" << endl;
   }
   
   m_solver->set_time(a_step, a_time, a_dt);
@@ -297,10 +297,10 @@ void brownian_walker_stepper::synchronize_solver_times(const int a_step, const R
   m_dt   = a_dt;
 }
 
-void brownian_walker_stepper::print_stepReport() {
-  CH_TIME("brownian_walker_stepper::print_stepReport");
+void brownian_walker_stepper::printStepReport() {
+  CH_TIME("brownian_walker_stepper::printStepReport");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::print_stepReport" << endl;
+    pout() << "brownian_walker_stepper::printStepReport" << endl;
   }
 
   // Do nothing

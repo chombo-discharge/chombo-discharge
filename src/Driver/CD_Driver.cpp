@@ -732,7 +732,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
     }
 
     m_timeStepper->computeDt(m_dt, m_timeCode);
-    m_timeStepper->synchronize_solver_times(m_timeStep, m_time, m_dt);
+    m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);
 
     bool last_step     = false;
     bool first_step    = true;
@@ -828,7 +828,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
       m_dt    = actual_dt;
       m_time += actual_dt;
       m_timeStep += 1;
-      m_timeStepper->synchronize_solver_times(m_timeStep, m_time, m_dt);
+      m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);
 
       if(Abs(m_time - a_endTime) < m_dt*1.E-5){
 	last_step = true;
@@ -1322,7 +1322,7 @@ void Driver::setupFresh(const int a_initialRegrids){
 
   // TimeStepper setup
   m_timeStepper->setup_solvers();                                 // Instantiate solvers
-  m_timeStepper->synchronize_solver_times(m_timeStep, m_time, m_dt);  // Sync solver times
+  m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);  // Sync solver times
   m_timeStepper->registerOperators();
   m_amr->regridOperators(lmin, lmax, regsize);
   m_timeStepper->allocate();
@@ -1473,7 +1473,7 @@ void Driver::stepReport(const Real a_startTime, const Real a_endTime, const int 
 	 << "                                   Time  = " << m_time << endl
 	 << "                                   dt    = " << m_dt << endl;
 
-  m_timeStepper->print_stepReport();
+  m_timeStepper->printStepReport();
 
   // Get the total number of poitns across all levels
   const int finest_level                 = m_amr->getFinestLevel();

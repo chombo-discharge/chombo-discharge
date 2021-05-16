@@ -58,7 +58,7 @@ namespace physics {
       virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const;
       virtual void write_J(EBAMRCellData& a_output, int& a_comp) const;
       virtual void postCheckpointSetup();
-      virtual void print_stepReport() override;
+      virtual void printStepReport() override;
       virtual void registerOperators() override;
       virtual void allocate() override;
       virtual void postInitialize() override;
@@ -859,7 +859,7 @@ namespace physics {
       /*!
 	@brief Synchronize solver times
       */
-      virtual void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt);
+      virtual void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt);
 
       /*!
 	@brief Query about necessary number of ghost cells. This collects that from the individual solvers. 

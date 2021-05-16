@@ -110,14 +110,14 @@ Real rte_stepper<T>::advance(const Real a_dt) {
 }
 
 template <typename T>
-void rte_stepper<T>::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
+void rte_stepper<T>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) {
   m_step = a_step;
   m_time = a_time;
   m_dt   = a_dt;
 }
 
 template <typename T>
-void rte_stepper<T>::print_stepReport() {
+void rte_stepper<T>::printStepReport() {
 }
 
 // Regrid routines

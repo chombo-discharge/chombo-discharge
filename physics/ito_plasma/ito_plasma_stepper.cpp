@@ -413,10 +413,10 @@ void ito_plasma_stepper::write_num_particles_per_patch(EBAMRCellData& a_output, 
   a_icomp += 1;
 }
 
-void ito_plasma_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
-  CH_TIME("ito_plasma_stepper::synchronize_solver_times");
+void ito_plasma_stepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt){
+  CH_TIME("ito_plasma_stepper::synchronizeSolverTimes");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::synchronize_solver_times" << endl;
+    pout() << "ito_plasma_stepper::synchronizeSolverTimes" << endl;
   }
 
   m_step = a_step;
@@ -429,10 +429,10 @@ void ito_plasma_stepper::synchronize_solver_times(const int a_step, const Real a
   m_sigma->set_time(a_step,   a_time, a_dt);
 }
 
-void ito_plasma_stepper::print_stepReport(){
-  CH_TIME("ito_plasma_stepper::print_stepReport");
+void ito_plasma_stepper::printStepReport(){
+  CH_TIME("ito_plasma_stepper::printStepReport");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::print_stepReport" << endl;
+    pout() << "ito_plasma_stepper::printStepReport" << endl;
   }
 
   const Real Emax = this->compute_Emax(m_phase);

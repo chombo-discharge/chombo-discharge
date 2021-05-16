@@ -40,8 +40,8 @@ namespace physics {
       // Advance routines
       void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
 
-      void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
-      void print_stepReport() override;
+      void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
+      void printStepReport() override;
 
       //
       void parseRuntimeOptions() override;
