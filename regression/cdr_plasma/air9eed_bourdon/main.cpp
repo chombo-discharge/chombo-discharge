@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
   // Set up physics 
   RefCountedPtr<cdr_plasma_physics> physics      = RefCountedPtr<cdr_plasma_physics> (new air9eed_bourdon());
   RefCountedPtr<cdr_plasma_stepper> timestepper  = RefCountedPtr<cdr_plasma_stepper> (new godunov(physics));
-  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new streamer_tagger(physics, timestepper, amr, compgeom));
+  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new streamer_tagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();

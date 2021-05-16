@@ -21,8 +21,8 @@ air7_zheleznyak_tagger::~air7_zheleznyak_tagger(){
 
 void air7_zheleznyak_tagger::parseOptions(){
   parseVerbosity();
-  parse_boxes();
-  parse_buffer();
+  parseBoxes();
+  parseBuffer();
 
   ParmParse pp(m_name.c_str());
   pp.get("coarsen_curvature", m_coar_curv);

@@ -229,7 +229,7 @@ void ito_plasma_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tag
     const RealVect pos = a_origin + a_dx*RealVect(iv) + 0.5*a_dx*RealVect::Unit;
     
     // If position is inside any of the tagging boxes, we can refine
-    if(inside_tag_box(pos) && a_ebisbox.isRegular(iv)){
+    if(insideTagBox(pos) && a_ebisbox.isRegular(iv)){
       
       // Build point-wise tracer fields
       Vector<Real>     tr(m_num_tracers); 
@@ -257,7 +257,7 @@ void ito_plasma_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tag
     const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
 
     // If position is inside any of the tagging boxes, we can refine
-    if(inside_tag_box(pos)){
+    if(insideTagBox(pos)){
       
       // Build point-wise tracer fields
       Vector<Real>     tr(m_num_tracers); 
@@ -303,7 +303,7 @@ void ito_plasma_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_t
     const RealVect pos = a_origin + a_dx*RealVect(iv);
     
     // If position is inside any of the tagging boxes, we can refine
-    const bool inside = inside_tag_box(pos);
+    const bool inside = insideTagBox(pos);
     if(!inside){
       a_coarsened_tags |= iv;
     }
@@ -335,7 +335,7 @@ void ito_plasma_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_t
     const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
 
     // If position is inside any of the tagging boxes, we can refine
-    const bool inside = inside_tag_box(pos);
+    const bool inside = insideTagBox(pos);
     if(!inside){
       a_coarsened_tags |= vof.gridIndex();
     }

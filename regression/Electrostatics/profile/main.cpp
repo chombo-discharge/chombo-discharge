@@ -21,7 +21,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_plane_profile());
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
   RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());
-  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);
+  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);
 
   // Set up basic Poisson, potential = 1 
   auto timestepper = RefCountedPtr<FieldStepper<FieldSolverMultigrid> >

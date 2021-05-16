@@ -33,8 +33,8 @@ ito_plasma_streamer_tagger::ito_plasma_streamer_tagger(const RefCountedPtr<ito_p
 
 void ito_plasma_streamer_tagger::parseOptions(){
   parseVerbosity();
-  parse_boxes();
-  parse_buffer();
+  parseBoxes();
+  parseBuffer();
 
   ParmParse pp(m_name.c_str());
   pp.get("coarsen_curvature", m_coar_curv);
@@ -46,8 +46,8 @@ void ito_plasma_streamer_tagger::parseOptions(){
 
 void ito_plasma_streamer_tagger::parseRuntimeOptions(){
   parseVerbosity();
-  parse_boxes();
-  parse_buffer();
+  parseBoxes();
+  parseBuffer();
 
   ParmParse pp(m_name.c_str());
   pp.get("coarsen_curvature", m_coar_curv);

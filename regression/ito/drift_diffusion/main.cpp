@@ -26,7 +26,7 @@ int main(int argc, char* argv[]){
   // Set up basic brownian_walker 
   RefCountedPtr<ito_solver> solver        = RefCountedPtr<ito_solver>   (new ito_solver());
   RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new brownian_walker_stepper(solver));
-  RefCountedPtr<cell_tagger> tagger       = RefCountedPtr<cell_tagger>  (new brownian_walker_tagger(solver, amr));
+  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new brownian_walker_tagger(solver, amr));
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));

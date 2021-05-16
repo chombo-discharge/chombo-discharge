@@ -22,15 +22,15 @@ void gradient_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_plas
 			     const RefCountedPtr<AmrMesh>&               a_amr,
 			     const RefCountedPtr<computational_geometry>& a_computationalGeometry,
 			     const RefCountedPtr<physical_domain>&        a_physdom){
-  cell_tagger::define(a_plaskin, a_timeStepper, a_amr, a_computationalGeometry, a_physdom);
+  CellTagger::define(a_plaskin, a_timeStepper, a_amr, a_computationalGeometry, a_physdom);
 
   m_num_tracers = a_plaskin->get_num_species();
 }
 
 void gradient_tagger::parseOptions(){
   parseVerbosity();
-  parse_boxes();
-  parse_buffer();
+  parseBoxes();
+  parseBuffer();
 
   ParmParse pp(m_name.c_str());
   pp.get("coarsen_curvature", m_coar_curv);

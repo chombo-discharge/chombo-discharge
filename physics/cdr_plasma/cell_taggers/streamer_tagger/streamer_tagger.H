@@ -1,6 +1,6 @@
 /*!
   @file   streamer_tagger.H
-  @brief  Implementation of cell_tagger that tags cells based on the gradient of the electric field
+  @brief  Implementation of CellTagger that tags cells based on the gradient of the electric field
   @author Robert Marskar
   @date   Feb. 2018
 */

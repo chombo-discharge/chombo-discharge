@@ -33,7 +33,7 @@ void brownian_walker_tagger::parseOptions(){
   ParmParse pp(m_name.c_str());
   pp.get("refine_magn", m_refi_magn);
   
-  parse_buffer(); // Derived from cell_tagger
+  parseBuffer(); // Derived from CellTagger
 }
 
 bool brownian_walker_tagger::tagCells(EBAMRTags& a_tags){

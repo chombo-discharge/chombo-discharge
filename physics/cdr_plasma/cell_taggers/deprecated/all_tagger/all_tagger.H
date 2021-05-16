@@ -8,12 +8,12 @@
 #ifndef _ALL_TAGGER_
 #define _ALL_TAGGER_
 
-#include "cell_tagger.H"
+#include "CD_CellTagger.H"
 
 /*!
   @brief Class that tags all cells
 */
-class all_tagger : public cell_tagger {
+class all_tagger : public CellTagger {
 public:
 
   /*!

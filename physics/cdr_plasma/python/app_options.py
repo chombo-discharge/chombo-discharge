@@ -25,8 +25,8 @@ def write_template(args):
                      args.discharge_home + "/physics/cdr_plasma/timesteppers/" + args.TimeStepper + "/" + args.TimeStepper + ".options", \
                      args.discharge_home + "/physics/cdr_plasma/plasma_models/" + args.physics + "/" + args.physics + ".options"]
 
-    if not args.cell_tagger == "none":
-        options_files.append(args.discharge_home + "/physics/cdr_plasma/cell_taggers/" + args.cell_tagger + "/" + args.cell_tagger + ".options")
+    if not args.CellTagger == "none":
+        options_files.append(args.discharge_home + "/physics/cdr_plasma/CellTaggers/" + args.CellTagger + "/" + args.CellTagger + ".options")
         
     for opt in options_files:
         if os.path.exists(opt):

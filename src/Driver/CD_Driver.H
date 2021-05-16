@@ -23,7 +23,7 @@
 #include <computational_geometry.H>
 #include <CD_TimeStepper.H>
 #include <CD_AmrMesh.H>
-#include <cell_tagger.H>
+#include <CD_CellTagger.H>
 #include <mfis.H>
 #include <geo_coarsener.H>
 #include <CD_NamespaceHeader.H>
@@ -51,7 +51,7 @@ public:
   Driver(const RefCountedPtr<computational_geometry>& a_computationalGeometry,
 	 const RefCountedPtr<TimeStepper>&           a_timeStepper,
 	 const RefCountedPtr<AmrMesh>&                a_amr,
-	 const RefCountedPtr<cell_tagger>&            a_cellTagger = RefCountedPtr<cell_tagger>(NULL),
+	 const RefCountedPtr<CellTagger>&            a_cellTagger = RefCountedPtr<CellTagger>(NULL),
 	 const RefCountedPtr<geo_coarsener>&          a_geoCoarsen = RefCountedPtr<geo_coarsener>(NULL));
 
   /*!
@@ -116,7 +116,7 @@ protected:
   /*!
     @brief Cell tagger
   */
-  RefCountedPtr<cell_tagger> m_cellTagger;
+  RefCountedPtr<CellTagger> m_cellTagger;
 
   /*!
     @brief Geometric coarsener
@@ -512,7 +512,7 @@ protected:
   /*!
     @brief Set the cell tagger
   */
-  void setCellTagger(const RefCountedPtr<cell_tagger>& a_cellTagger);
+  void setCellTagger(const RefCountedPtr<CellTagger>& a_cellTagger);
 
   /*!
     @brief Set the geo coarsener

@@ -31,8 +31,8 @@ streamer_tagger::streamer_tagger(const RefCountedPtr<cdr_plasma_physics>&     a_
 
 void streamer_tagger::parseOptions(){
   parseVerbosity();
-  parse_boxes();
-  parse_buffer();
+  parseBoxes();
+  parseBuffer();
 
   ParmParse pp(m_name.c_str());
   pp.get("coarsen_curvature", m_coar_curv);

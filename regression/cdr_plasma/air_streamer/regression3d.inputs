@@ -57,7 +57,7 @@ Driver.max_chk_depth                   = -1               # Restrict chechkpoint
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
 Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
-Driver.allow_coarsening                = true             # Allows removal of grid levels according to cell_tagger
+Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
 Driver.refine_geometry                 = -1               # Refine geometry, -1 => Refine all the way down
 Driver.refine_electrodes               = -1               # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = -1               # Refine dielectric surfaces. -1 => equal to refine_geometry

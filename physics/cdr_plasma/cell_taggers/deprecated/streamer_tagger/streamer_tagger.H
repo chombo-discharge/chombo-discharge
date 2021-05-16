@@ -8,13 +8,13 @@
 #ifndef _STREAMER_TAGGER_H
 #define _STREAMER_TAGGER_H
 
-#include "cell_tagger.H"
+#include "CD_CellTagger.H"
 
 /*!
   @brief Class that tags streamer heads based on the electron source term. 
   @note  The electrons must be the first class that is defined in the cdr solver layout
 */
-class streamer_tagger : public cell_tagger {
+class streamer_tagger : public CellTagger {
 public:
   
   streamer_tagger();

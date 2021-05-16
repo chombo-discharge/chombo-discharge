@@ -24,8 +24,8 @@ air2_tagger::~air2_tagger(){
 
 void air2_tagger::parseOptions(){
   parseVerbosity();
-  parse_boxes();
-  parse_buffer();
+  parseBoxes();
+  parseBuffer();
 
   ParmParse pp(m_name.c_str());
   Vector<Real> v;

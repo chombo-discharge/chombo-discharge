@@ -36,7 +36,7 @@ def write_template(args):
     makef.write('src_dirs = $(DISCHARGE_HOME)/src \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/AmrMesh \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/cdr_solver \\\n')
-    makef.write('\t$(DISCHARGE_HOME)/src/cell_tagger \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/src/CellTagger \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/elliptic \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/geometry \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/global \\\n')
@@ -48,8 +48,8 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/src/sigma_solver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/geometries/' + args.geometry + '\\\n')
     makef.write('\t$(DISCHARGE_HOME)/physics/ito_plasma \\\n')
-    if not args.cell_tagger == "none":
-        makef.write('\t$(DISCHARGE_HOME)/physics/ito_plasma/cell_taggers/'  + args.cell_tagger + '\\\n')
+    if not args.CellTagger == "none":
+        makef.write('\t$(DISCHARGE_HOME)/physics/ito_plasma/CellTaggers/'  + args.CellTagger + '\\\n')
     makef.write('\t$(DISCHARGE_HOME)/physics/ito_plasma/timesteppers/' + args.TimeStepper + '\\\n')
     makef.write('\t$(DISCHARGE_HOME)/physics/ito_plasma/plasma_models/' + args.physics + '\n')
     makef.write('\n')

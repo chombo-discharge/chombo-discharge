@@ -8,7 +8,7 @@
 #ifndef _BROWNIAN_WALKER_TAGGER_
 #define _BROWNIAN_WALKER_TAGGER_
 
-#include "cell_tagger.H"
+#include "CD_CellTagger.H"
 #include "ito_solver.H"
 #include "CD_AmrMesh.H"
 
@@ -19,7 +19,7 @@ namespace physics {
     /*!
       @brief Abstract class for tagging cells across an AMR hierarchy
     */
-    class brownian_walker_tagger : public cell_tagger {
+    class brownian_walker_tagger : public CellTagger {
     public:
 
       brownian_walker_tagger(RefCountedPtr<ito_solver>& a_solver, RefCountedPtr<AmrMesh>& a_amr);

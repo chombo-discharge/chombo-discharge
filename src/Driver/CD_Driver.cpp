@@ -32,7 +32,7 @@
 Driver::Driver(const RefCountedPtr<computational_geometry>& a_computationalGeometry,
 	       const RefCountedPtr<TimeStepper>&           a_timeStepper,
 	       const RefCountedPtr<AmrMesh>&               a_amr,
-	       const RefCountedPtr<cell_tagger>&            a_cellTagger,
+	       const RefCountedPtr<CellTagger>&            a_cellTagger,
 	       const RefCountedPtr<geo_coarsener>&          a_geoCoarsen){
   CH_TIME("Driver::Driver(full)");
 
@@ -543,7 +543,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 
   // We need to be careful with memory allocations here. Therefore we do:
   // --------------------------------------------------------------------
-  // 1.  Tag cells, this calls cell_tagger which allocates and deallocate its own storage so 
+  // 1.  Tag cells, this calls CellTagger which allocates and deallocate its own storage so 
   //     there's a peak in memory consumption here. We have to eat this one because we
   //     potentially need all the solver data for tagging, so that data can't be touched.
   //     If we don't get new tags, we exit this routine already here. 
@@ -934,7 +934,7 @@ void Driver::setTimeStepper(const RefCountedPtr<TimeStepper>& a_timeStepper){
   m_timeStepper = a_timeStepper;
 }
 
-void Driver::setCellTagger(const RefCountedPtr<cell_tagger>& a_cellTagger){
+void Driver::setCellTagger(const RefCountedPtr<CellTagger>& a_cellTagger){
   CH_TIME("Driver::setCellTagger");
   if(m_verbosity > 5){
     pout() << "Driver::setCellTagger" << endl;
@@ -1354,7 +1354,7 @@ void Driver::setupFresh(const int a_initialRegrids){
   // Do post initialize stuff
   m_timeStepper->postInitialize();
 
-  // cell_tagger
+  // CellTagger
   if(!m_cellTagger.isNull()){
     m_cellTagger->regrid();
   }
@@ -1413,7 +1413,7 @@ void Driver::setupForRestart(const int a_initialRegrids, const std::string a_res
   // Time stepper does post checkpoint setup
   m_timeStepper->postCheckpointSetup();
   
-  // Prepare storage for cell_tagger
+  // Prepare storage for CellTagger
   if(!m_cellTagger.isNull()){
     m_cellTagger->regrid();         
   }
@@ -1654,7 +1654,7 @@ bool Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags){
 
     // Grow tags with cell taggers buffer
     if(!m_cellTagger.isNull()){
-      const int buf = m_cellTagger->get_buffer();
+      const int buf = m_cellTagger->getBuffer();
       a_allTags[lvl].grow(buf);
     }
   }

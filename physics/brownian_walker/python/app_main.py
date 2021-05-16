@@ -48,7 +48,7 @@ def write_template(args):
     mainf.write("  // Set up basic brownian_walker \n")
     mainf.write("  RefCountedPtr<ito_solver> solver        = RefCountedPtr<ito_solver>   (new " + args.ito_solver + "());\n")
     mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new " + args.stepper + "(solver));\n")
-    mainf.write("  RefCountedPtr<cell_tagger> tagger       = RefCountedPtr<cell_tagger>  (new brownian_walker_tagger(solver, amr));\n")
+    mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new brownian_walker_tagger(solver, amr));\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")

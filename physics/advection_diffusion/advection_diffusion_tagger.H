@@ -8,7 +8,7 @@
 #ifndef _ADVECTION_DIFFUSION_TAGGER_
 #define _ADVECTION_DIFFUSION_TAGGER_
 
-#include "cell_tagger.H"
+#include "CD_CellTagger.H"
 #include "cdr_solver.H"
 #include "CD_AmrMesh.H"
 
@@ -19,7 +19,7 @@ namespace physics {
     /*!
       @brief Abstract class for tagging cells across an AMR hierarchy
     */
-    class advection_diffusion_tagger : public cell_tagger {
+    class advection_diffusion_tagger : public CellTagger {
     public:
 
       advection_diffusion_tagger(RefCountedPtr<cdr_solver>& a_solver,

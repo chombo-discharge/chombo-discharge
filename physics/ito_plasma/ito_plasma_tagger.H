@@ -9,7 +9,7 @@
 #ifndef _ITO_PLASMA_TAGGER_
 #define _ITO_PLASMA_TAGGER_
 
-#include "cell_tagger.H"
+#include "CD_CellTagger.H"
 #include "ito_plasma_stepper.H"
 #include "ito_plasma_physics.H"
 
@@ -20,7 +20,7 @@ namespace physics {
     /*!
       @brief Abstract class for tagging cells across an AMR hierarchy
     */
-    class ito_plasma_tagger : public cell_tagger{
+    class ito_plasma_tagger : public CellTagger{
     public:
 
       /*!

@@ -9,7 +9,7 @@
 #ifndef _CDR_PLASMA_TAGGER_
 #define _CDR_PLASMA_TAGGER_
 
-#include "cell_tagger.H"
+#include "CD_CellTagger.H"
 #include "cdr_plasma_stepper.H"
 
 #include "CD_NamespaceHeader.H"
@@ -19,7 +19,7 @@ namespace physics {
     /*!
       @brief Abstract class for tagging cells across an AMR hierarchy
     */
-    class cdr_plasma_tagger : public cell_tagger{
+    class cdr_plasma_tagger : public CellTagger{
     public:
 
       /*!

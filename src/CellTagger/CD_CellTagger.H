@@ -1,40 +1,42 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   cell_tagger.H
+  @file   CD_CellTagger.H
   @brief  Class for tagging cells across an AMR hierarchy
   @author Robert Marskar
-  @date   Nov. 2017
-  @todo   Rename to cell_tagger. 
 */
 
-#ifndef _CELL_TAGGER_
-#define _CELL_TAGGER_
+#ifndef CD_CellTagger_H
+#define CD_CellTagger_H
 
-#include "computational_geometry.H"
-#include "CD_AmrMesh.H"
-#include "real_box.H"
-
-#include "CD_NamespaceHeader.H"
-  
-using EBAMRTags = Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > >;
+// Our includes
+#include <computational_geometry.H>
+#include <real_box.H>
+#include <CD_AmrMesh.H>
+#include <CD_EBAMRTags.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Abstract class for tagging cells across an AMR hierarchy
 */
-class cell_tagger {
+class CellTagger {
 public:
 
   /*!
     @brief Weak constructor, must subsequently call define
   */
-  cell_tagger();
+  CellTagger();
 
   /*!
     @brief Destructor
   */
-  virtual ~cell_tagger();
+  virtual ~CellTagger();
 
   /*!
-    @brief Regrid storage for tracer field
+    @brief Regrid function for cell tagger (in case it uses transient storage to do things)
   */
   virtual void regrid() = 0;
 
@@ -50,23 +52,28 @@ public:
 
   /*!
     @brief Tag cells
+    @param[out] a_tags Tags on grid levels
   */
   virtual bool tagCells(EBAMRTags& a_tags) = 0;
 
   /*!
     @brief Get number of tracer fields
+    @return Returns number of plot variables that CellTagger will write to plot files. 
   */
   virtual int getNumberOfPlotVariables();
 
   /*!
     @brief Write plot data
+    @param[inout] a_output Output data holder
+    @param[inout] a_plotVariableNames Plot variable names
+    @param[inout] a_icomp Starting variable in a_output where we begin appending data.
   */
   virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp);
 
   /*!
     @brief Get tag buffer
   */
-  int get_buffer();
+  int getBuffer();
 
 protected:
 
@@ -88,28 +95,29 @@ protected:
   /*!
     @brief Boxes used for tagging
   */
-  Vector<real_box> m_tagboxes;
+  Vector<real_box> m_tagBoxes;
 
   /*!
     @brief Check if a point is inside a tagging box
   */
-  bool inside_tag_box(const RealVect a_pos);
+  bool insideTagBox(const RealVect a_pos);
 
   /*!
     @brief Parse boxes
   */
-  virtual void parse_boxes();
+  virtual void parseBoxes();
 
   /*!
     @brief Parse buffer
   */
-  virtual void parse_buffer();
+  virtual void parseBuffer();
 
   /*!
     @brief Set verbosity
   */
   virtual void parseVerbosity();
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

@@ -24,8 +24,8 @@ ml_tagger::~ml_tagger(){
 
 void ml_tagger::parseOptions(){
   parseVerbosity();
-  parse_boxes();
-  parse_buffer();
+  parseBoxes();
+  parseBuffer();
 
   ParmParse pp(m_name.c_str());
   pp.get("coarsen_curvature", m_coar_curv);

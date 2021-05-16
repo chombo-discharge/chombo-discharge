@@ -37,7 +37,7 @@ void advection_diffusion_tagger::parseOptions(){
   pp.get("refine_curv", m_refi_curv);
   pp.get("refine_magn", m_refi_magn);
   
-  parse_buffer(); // Derived from cell
+  parseBuffer(); // Derived from cell
 }
 
 bool advection_diffusion_tagger::tagCells(EBAMRTags& a_tags){

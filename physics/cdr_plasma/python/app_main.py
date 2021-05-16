@@ -6,14 +6,14 @@ def write_template(args):
     geofile = args.discharge_home + "/geometries" + "/" + args.geometry + "/" + args.geometry + ".H"
     tsfile  = args.discharge_home + "/physics/cdr_plasma/timesteppers" + "/" + args.TimeStepper + "/" + args.TimeStepper + ".H"
     kinfile = args.discharge_home + "/physics/cdr_plasma/plasma_models" + "/" + args.physics + "/" + args.physics + ".H"
-    tagfile = args.discharge_home + "/physics/cdr_plasma/cell_taggers" +  "/" + args.cell_tagger + "/" + args.cell_tagger + ".H"
+    tagfile = args.discharge_home + "/physics/cdr_plasma/CellTaggers" +  "/" + args.CellTagger + "/" + args.CellTagger + ".H"
     if not os.path.exists(geofile):
         print 'Could not find ' + geofile
     if not os.path.exists(tsfile):
         print 'Could not find ' + tsfile
     if not os.path.exists(kinfile):
         print 'Could not find ' + kinfile
-    if not os.path.exists(tagfile) and args.cell_tagger != "none":
+    if not os.path.exists(tagfile) and args.CellTagger != "none":
         print 'Could not find ' + tagfile
                     
     # Create app directory if it does not exist
@@ -35,8 +35,8 @@ def write_template(args):
     mainf.write('#include "' + args.physics + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "' + args.TimeStepper + '.H"\n')
-    if not args.cell_tagger == "none":
-        mainf.write('#include "' + args.cell_tagger + '.H"\n')
+    if not args.CellTagger == "none":
+        mainf.write('#include "' + args.CellTagger + '.H"\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
     
@@ -83,10 +83,10 @@ def write_template(args):
     mainf.write("  // Set up physics \n")
     mainf.write("  RefCountedPtr<cdr_plasma_physics> physics      = RefCountedPtr<cdr_plasma_physics> (new " + args.physics + "());\n")
     mainf.write("  RefCountedPtr<cdr_plasma_stepper> timestepper  = RefCountedPtr<cdr_plasma_stepper> (new " + args.TimeStepper + "(physics));\n")
-    if args.cell_tagger != "none":
-        mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new " + args.cell_tagger + "(physics, timestepper, amr, compgeom));\n")
+    if args.CellTagger != "none":
+        mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new " + args.CellTagger + "(physics, timestepper, amr, compgeom));\n")
     else:
-        mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);\n")
+        mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);\n")
 
     mainf.write("\n")
 

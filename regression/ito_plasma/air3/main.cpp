@@ -49,7 +49,7 @@ int main(int argc, char* argv[]){
   // Set up physics 
   RefCountedPtr<ito_plasma_physics> physics      = RefCountedPtr<ito_plasma_physics> (new ito_plasma_air3());
   RefCountedPtr<ito_plasma_stepper> timestepper  = RefCountedPtr<ito_plasma_stepper> (new ito_plasma_godunov(physics));
-  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new ito_plasma_streamer_tagger(physics, timestepper, amr, compgeom));
+  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new ito_plasma_streamer_tagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
