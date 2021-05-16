@@ -1,26 +1,32 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   CdrSolver.cpp
-  @brief  Implementation of CdrSolver.H
+  @file   CD_CdrSolver.cpp
+  @brief  Implementation of CD_CdrSolver.H
   @author Robert Marskar
-  @date   Nov. 2017
   @todo   The diffusive dt computations use a faceiterator box. This should be replaced by fortran routines (or internal ebcell fa functions)
 */
 
-#include "CD_CdrSolver.H"
-#include <CD_CdrSolverF_F.H>
-#include "cdr_fhdF_F.H"
-#include "data_ops.H"
+// Chombo includes
 
 #include <ParmParse.H>
 #include <EBAMRIO.H>
 #include <EBArith.H>
 #include <EBAlias.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrSolver.H>
+#include <CD_CdrSolverF_F.H>
+#include <cdr_fhdF_F.H>
+#include <data_ops.H>
+#include <CD_NamespaceHeader.H>
 
 CdrSolver::CdrSolver(){
   m_name       = "CdrSolver";
-  m_className = "CdrSolver";
+  m_className  = "CdrSolver";
 
   this->setRealm(Realm::Primal);
 }
@@ -2405,4 +2411,4 @@ void CdrSolver::parsePlotMode(){
     m_plotNumbers = true;
   }
 }
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
