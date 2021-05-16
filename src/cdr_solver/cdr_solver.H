@@ -140,7 +140,7 @@ public:
   /*!
     @brief Pre-regrid
   */
-  virtual void pre_regrid(const int a_lbase, const int a_oldFinestLevel);
+  virtual void preRegrid(const int a_lbase, const int a_oldFinestLevel);
 
   /*!
     @brief Deallocate internal storage
@@ -246,17 +246,17 @@ public:
   /*!
     @brief Fill internal state with initial data
   */
-  virtual void initial_data();
+  virtual void initialData();
 
   /*!
     @brief Fill initial data from a distribution function
   */
-  virtual void initial_data_distribution();
+  virtual void initialData_distribution();
 
   /*!
     @brief Fill initial data from particles
   */
-  virtual void initial_data_particles();
+  virtual void initialData_particles();
 
   /*!
     @brief Inject the EB flux. 
@@ -323,7 +323,7 @@ public:
   /*!
     @brief Get output plot names
   */
-  virtual Vector<std::string> get_plotvar_names() const;
+  virtual Vector<std::string> get_plotVariableNames() const;
 
   /*!
     @brief Get the ghost cell requirement

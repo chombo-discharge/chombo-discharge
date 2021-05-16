@@ -97,7 +97,7 @@ namespace physics {
       /*!
 	@brief Write plot data
       */
-      virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp);
+      virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp);
 
     protected:
 

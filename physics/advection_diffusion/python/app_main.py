@@ -47,7 +47,7 @@ def write_template(args):
     mainf.write("\n")
     mainf.write("  // Set up basic advection_diffusion \n")
     mainf.write("  RefCountedPtr<cdr_solver> solver        = RefCountedPtr<cdr_solver>   (new " + args.cdr_solver + "());\n")
-    mainf.write("  RefCountedPtr<time_stepper> timestepper = RefCountedPtr<time_stepper> (new " + args.stepper + "(solver));\n")
+    mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new " + args.stepper + "(solver));\n")
     mainf.write("  RefCountedPtr<cell_tagger> tagger       = RefCountedPtr<cell_tagger>  (new advection_diffusion_tagger(solver, amr));\n")
     mainf.write("\n")
     

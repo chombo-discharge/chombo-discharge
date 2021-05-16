@@ -228,7 +228,7 @@ protected:
     electron();
     ~electron();
 
-    Real initial_data(const RealVect a_pos, const Real a_time) const;
+    Real initialData(const RealVect a_pos, const Real a_time) const;
 
     Real m_uniform_density;
     Real m_seed_density;
@@ -242,7 +242,7 @@ protected:
     positive_species();
     ~positive_species();
 
-    Real initial_data(const RealVect a_pos, const Real a_time) const;
+    Real initialData(const RealVect a_pos, const Real a_time) const;
 
     Real m_uniform_density;
     Real m_seed_density;
@@ -254,7 +254,7 @@ protected:
   public:
     negative_species();
     ~negative_species();
-    Real initial_data(const RealVect a_pos, const Real a_time) const;
+    Real initialData(const RealVect a_pos, const Real a_time) const;
   };
 
   class excited_species : public species {
@@ -262,7 +262,7 @@ protected:
     excited_species();
     ~excited_species();
 
-    Real initial_data(const RealVect a_pos, const Real a_time) const;
+    Real initialData(const RealVect a_pos, const Real a_time) const;
 
     Real m_uniform_density;
     Real m_seed_density;

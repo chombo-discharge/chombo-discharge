@@ -20,7 +20,7 @@
 #include "rte_layout.H"
 #include "CD_FieldSolver.H"
 #include "sigma_solver.H"
-#include "time_stepper.H"
+#include "CD_TimeStepper.H"
 
 /*!
   @brief Namespace for cdr plasma physics
@@ -32,7 +32,7 @@ namespace physics {
     /*!
       @brief Abstract class for evolving plasma equations in time
     */
-    class cdr_plasma_stepper : public time_stepper {
+    class cdr_plasma_stepper : public TimeStepper {
     protected:
 
       /*!
@@ -52,18 +52,18 @@ namespace physics {
       static Real s_constant_one(const RealVect a_pos);
 
       // New functions for new Driver interface
-      virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const;
-      virtual void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl);
+      virtual void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const;
+      virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl);
       virtual int getNumberOfPlotVariables() const;
-      virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const;
+      virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const;
       virtual void write_J(EBAMRCellData& a_output, int& a_comp) const;
-      virtual void post_checkpoint_setup();
+      virtual void postCheckpointSetup();
       virtual void print_stepReport() override;
       virtual void registerOperators() override;
       virtual void allocate() override;
-      virtual void post_initialize() override;
+      virtual void postInitialize() override;
       virtual void registerRealms() override;
-      virtual void post_regrid() override;
+      virtual void postRegrid() override;
 
       /*!
 	@brief Constructor
@@ -115,12 +115,12 @@ namespace physics {
       /*!
 	@brief New caching function for regridding
       */
-      virtual void pre_regrid(const int a_lbase, const int a_finest_level);
+      virtual void preRegrid(const int a_lbase, const int a_finestLevel);
 
       /*!
-	@brief pre_regrid internal storage
+	@brief preRegrid internal storage
       */
-      virtual void pre_regridInternals(const int a_lbase, const int a_finest_level);
+      virtual void preRegridInternals(const int a_lbase, const int a_finestLevel);
 
       /*!
 	@brief Deallocation function
@@ -288,7 +288,7 @@ namespace physics {
       /*!
 	@brief Compute the time step and how it was restricted
       */
-      virtual void compute_dt(Real& a_dt, time_code& a_timecode) = 0;
+      virtual void computeDt(Real& a_dt, TimeCode& a_timeCode) = 0;
 
       /*!
 	@brief Compute the cell-centered electric field on both phases
@@ -692,7 +692,7 @@ namespace physics {
       /*!
 	@brief Fill all solvers with initial data
       */
-      virtual void initial_data();
+      virtual void initialData();
 
       /*!
 	@brief Initialize sigma
@@ -1065,7 +1065,7 @@ namespace physics {
 
       /*!
 	@brief Do source term time step restriction only for electrons
-	@details If this one is true, compute_dt passes information down the toolchain to only compute the source term
+	@details If this one is true, computeDt passes information down the toolchain to only compute the source term
 	restriction time for the first species defined in the plasma kinetics
       */
       bool m_src_elec_only;

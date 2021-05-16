@@ -53,13 +53,13 @@ air3_zheleznyak::M_minus::M_minus(){
   pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
 }
 
-Real air3_zheleznyak::electron::initial_data(const RealVect a_pos, const Real a_time) const{
+Real air3_zheleznyak::electron::initialData(const RealVect a_pos, const Real a_time) const{
   const Real factor = (a_pos - m_seed_pos).vectorLength();
 
   return m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad));
 }
 
-Real air3_zheleznyak::M_plus::initial_data(const RealVect a_pos, const Real a_time) const{
+Real air3_zheleznyak::M_plus::initialData(const RealVect a_pos, const Real a_time) const{
   const Real factor = (a_pos - m_seed_pos).vectorLength();
 
   return m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad));

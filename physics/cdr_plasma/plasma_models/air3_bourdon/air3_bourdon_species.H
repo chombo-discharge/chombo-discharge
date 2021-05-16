@@ -12,7 +12,7 @@ namespace physics {
     public:
       electron();
       ~electron() {}
-      Real initial_data(const RealVect a_pos, const Real a_time) const;
+      Real initialData(const RealVect a_pos, const Real a_time) const;
 
     protected:
       Real m_uniform_density;
@@ -25,7 +25,7 @@ namespace physics {
     public:
       M_plus();
       ~M_plus(){}
-      Real initial_data(const RealVect a_pos, const Real a_time) const;
+      Real initialData(const RealVect a_pos, const Real a_time) const;
     protected:
       Real m_uniform_density;
       Real m_seed_density;
@@ -37,7 +37,7 @@ namespace physics {
     public:
       M_minus();
       ~M_minus(){}
-      Real initial_data(const RealVect a_pos, const Real a_time) const {return 0.0;}
+      Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
     };
 
     class air3_bourdon::photon_one : public rte_species {

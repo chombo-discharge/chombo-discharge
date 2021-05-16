@@ -69,7 +69,7 @@ public:
 		      const Vector<EBISLayout>&        a_ebisl,
 		      const Vector<ProblemDomain>&     a_domains,
 		      const Vector<Real>&              a_dx,
-		      const int                        a_finest_level,
+		      const int                        a_finestLevel,
 		      const int                        a_order,
 		      const int                        a_radius,
 		      const IrregStencil::StencilType  a_type);

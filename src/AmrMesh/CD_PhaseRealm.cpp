@@ -39,7 +39,7 @@ void PhaseRealm::define(const Vector<DisjointBoxLayout>& a_grids,
 			const Vector<int>& a_ref_rat,
 			const Vector<Real>& a_dx,
 			const RealVect a_probLo,
-			const int a_finest_level,
+			const int a_finestLevel,
 			const int a_ebghost,
 			const int a_num_ghost,
 			const int a_lsf_ghost,
@@ -51,7 +51,7 @@ void PhaseRealm::define(const Vector<DisjointBoxLayout>& a_grids,
 			const RefCountedPtr<EBIndexSpace>& a_ebis){
 
   m_ebis = a_ebis;
-  m_finestLevel = a_finest_level;
+  m_finestLevel = a_finestLevel;
   m_grids = a_grids;
   m_domains = a_domains;
   m_refinementRatios = a_ref_rat;
@@ -71,7 +71,7 @@ void PhaseRealm::define(const Vector<DisjointBoxLayout>& a_grids,
   }
 }
 
-void PhaseRealm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level){
+void PhaseRealm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel){
   CH_TIME("PhaseRealm::setGrids");
   if(m_verbosity > 5){
     pout() << "PhaseRealm::setGrids" << endl;
@@ -79,7 +79,7 @@ void PhaseRealm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_
 
   if(m_defined){
     m_grids = a_grids;
-    m_finestLevel = a_finest_level;
+    m_finestLevel = a_finestLevel;
   }
 }
 

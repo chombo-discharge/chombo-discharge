@@ -53,7 +53,7 @@ public:
 		     const Vector<int>&               a_ref_rat,
 		     const RealVect&                  a_probLo,
 		     const int                        a_blocking_factor,
-		     const int                        a_finest_level,
+		     const int                        a_finestLevel,
 		     const int                        a_pvr_buffer,
 		     const std::string                a_Realm);
 
@@ -71,7 +71,7 @@ public:
 	      const Vector<int>&               a_ref_rat,
 	      const RealVect&                  a_probLo,
 	      const int                        a_blocking_factor,
-	      const int                        a_finest_level,
+	      const int                        a_finestLevel,
 	      const int                        a_pvr_buffer,
 	      const std::string                a_Realm);
 
@@ -88,7 +88,7 @@ public:
   /*!
     @brief Cache particles in a pre-regrid form. a_base is the coarsest grid level which will NOT change
   */
-  void pre_regrid(const int a_base);
+  void preRegrid(const int a_base);
 
   /*!
     @brief Copy particles to halo
@@ -434,12 +434,12 @@ protected:
   /*!
     @brief Setup function for the particle valid region
   */
-  void setup_pvr(const int a_base, const int a_finest_level);
+  void setup_pvr(const int a_base, const int a_finestLevel);
 
   /*!
     @brief Setup function for the particle data (m_particles and m_halo_particles)
   */
-  void setup_particle_data(const int a_base, const int a_finest_level);
+  void setup_particle_data(const int a_base, const int a_finestLevel);
 
   /*!
     @brief Special remapping function in case particles have moved across more than one refinement level. Used

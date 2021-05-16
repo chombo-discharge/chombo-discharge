@@ -41,8 +41,8 @@ namespace physics {
       void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       void allocateInternals() override;
       void deallocateInternals() override;
-      void compute_dt(Real& a_dt, time_code& a_timecode) override;
-      bool need_to_regrid() override;
+      void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
+      bool needToRegrid() override;
 
     protected:
 

@@ -41,10 +41,10 @@ void cdr_solver::set_Realm(const std::string a_Realm) {
   m_Realm = a_Realm;
 }
 
-Vector<std::string> cdr_solver::get_plotvar_names() const {
-  CH_TIME("cdr_solver::get_plotvar_names");
+Vector<std::string> cdr_solver::get_plotVariableNames() const {
+  CH_TIME("cdr_solver::get_plotVariableNames");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_plotvar_names" << endl;
+    pout() << m_name + "::get_plotVariableNames" << endl;
   }
   
   Vector<std::string> names(0);
@@ -113,7 +113,7 @@ void cdr_solver::allocateInternals(){
   data_ops::set_value(m_scratch,    0.0);
 
   // Only allocate memory for cell-centered and face-centered velocities if the solver is mobile. Otherwise, allocate
-  // a NULL pointer that we can pass around in time_stepper in order to handle special cases
+  // a NULL pointer that we can pass around in TimeStepper in order to handle special cases
   if(m_mobile){
     m_amr->allocate(m_velo_face,   m_Realm, m_phase, sca);
     m_amr->allocate(m_velo_cell,   m_Realm, m_phase, vec);
@@ -128,7 +128,7 @@ void cdr_solver::allocateInternals(){
   }
 
   // Only allocate memory for diffusion coefficients if we need it. Otherwise, allocate a NULL pointer that we can
-  // pass around in time_stepper in order to handle special cases
+  // pass around in TimeStepper in order to handle special cases
   if(m_diffusive){
     m_amr->allocate(m_aco,       m_Realm, m_phase, sca);
     m_amr->allocate(m_diffco,    m_Realm, m_phase, sca);
@@ -207,10 +207,10 @@ void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCe
   }
 }
 
-void cdr_solver::pre_regrid(const int a_lmin, const int a_oldFinestLevel){
-  CH_TIME("cdr_solver::pre_regrid");
+void cdr_solver::preRegrid(const int a_lmin, const int a_oldFinestLevel){
+  CH_TIME("cdr_solver::preRegrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::pre_regrid" << endl;
+    pout() << m_name + "::preRegrid" << endl;
   }
 
   const int ncomp        = 1;
@@ -815,10 +815,10 @@ void cdr_solver::increment_redist_flux(){
   }
 }
 
-void cdr_solver::initial_data(){
-  CH_TIME("cdr_solver::initial_data");
+void cdr_solver::initialData(){
+  CH_TIME("cdr_solver::initialData");
   if(m_verbosity > 5){
-    pout() << m_name + "::initial_data" << endl;
+    pout() << m_name + "::initialData" << endl;
   }
 
   const bool deposit_function  = m_species->init_with_function();
@@ -827,22 +827,22 @@ void cdr_solver::initial_data(){
   data_ops::set_value(m_state, 0.0);
   
   if(deposit_particles){
-    initial_data_particles();
+    initialData_particles();
   }
 
   // Increment with function values if this is also called for
   if(deposit_function){
-    initial_data_distribution();
+    initialData_distribution();
   }
 
   m_amr->averageDown(m_state, m_Realm, m_phase);
   m_amr->interpGhost(m_state, m_Realm, m_phase);
 }
 
-void cdr_solver::initial_data_distribution(){
-  CH_TIME("cdr_solver::initial_data_distribution");
+void cdr_solver::initialData_distribution(){
+  CH_TIME("cdr_solver::initialData_distribution");
   if(m_verbosity > 5){
-    pout() << m_name + "::initial_data_distribution" << endl;
+    pout() << m_name + "::initialData_distribution" << endl;
   }
 
   const RealVect origin  = m_amr->getProbLo();
@@ -869,7 +869,7 @@ void cdr_solver::initial_data_distribution(){
 	const RealVect pos = origin + RealVect(iv)*dx + 0.5*dx*RealVect::Unit;
 
 	for (int comp = 0; comp < state.nComp(); comp++){
-	  reg_state(iv, comp) = reg_scratch(iv, comp) + m_species->initial_data(pos, m_time);
+	  reg_state(iv, comp) = reg_scratch(iv, comp) + m_species->initialData(pos, m_time);
 	}
       }
 
@@ -881,7 +881,7 @@ void cdr_solver::initial_data_distribution(){
 	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->getDx()[lvl]*RealVect::Unit, origin);
 	
 	for (int comp = 0; comp < state.nComp(); comp++){
-	  state(vof, comp) = scratch(vof, comp) + m_species->initial_data(pos, m_time);
+	  state(vof, comp) = scratch(vof, comp) + m_species->initialData(pos, m_time);
 	}
       }
     }
@@ -893,10 +893,10 @@ void cdr_solver::initial_data_distribution(){
   data_ops::set_covered_value(m_state, 0, 0.0);
 }
 
-void cdr_solver::initial_data_particles(){
-  CH_TIME("cdr_solver::initial_data_particles");
+void cdr_solver::initialData_particles(){
+  CH_TIME("cdr_solver::initialData_particles");
   if(m_verbosity > 5){
-    pout() << m_name + "::initial_data_particles" << endl;
+    pout() << m_name + "::initialData_particles" << endl;
   }
 
   const int halo_buffer = 0;
@@ -1647,7 +1647,7 @@ void cdr_solver::writePlotFile(){
 
   // Number of output components and their names
   const int ncomps = get_num_plotvars();
-  const Vector<std::string> names = get_plotvar_names();
+  const Vector<std::string> names = get_plotVariableNames();
 
   // Allocate storage
   EBAMRCellData output;

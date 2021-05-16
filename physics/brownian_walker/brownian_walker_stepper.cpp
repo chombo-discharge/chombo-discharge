@@ -50,13 +50,13 @@ void brownian_walker_stepper::parseRuntimeOptions() {
   m_solver->parseRuntimeOptions();
 }
 
-void brownian_walker_stepper::initial_data(){
-  CH_TIME("brownian_walker_stepper::initial_data");
+void brownian_walker_stepper::initialData(){
+  CH_TIME("brownian_walker_stepper::initialData");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::initial_data" << endl;
+    pout() << "brownian_walker_stepper::initialData" << endl;
   }
   
-  m_solver->initial_data();
+  m_solver->initialData();
   if(m_ppc > 0){
     m_solver->sort_particles_by_cell(ito_solver::which_container::bulk);
     m_solver->make_superparticles(ito_solver::which_container::bulk,m_ppc);
@@ -71,10 +71,10 @@ void brownian_walker_stepper::initial_data(){
   }
 }
 
-void brownian_walker_stepper::post_initialize(){
-  CH_TIME("brownian_walker_stepper::post_initialize");
+void brownian_walker_stepper::postInitialize(){
+  CH_TIME("brownian_walker_stepper::postInitialize");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::post_initialize" << endl;
+    pout() << "brownian_walker_stepper::postInitialize" << endl;
   }
 }
 
@@ -95,10 +95,10 @@ void brownian_walker_stepper::set_velocity(){
   m_amr->interpGhost(vel, m_Realm, m_phase);
 }
 
-bool brownian_walker_stepper::LoadBalancing_Realm(const std::string a_Realm) const {
-  CH_TIME("brownian_walker_stepper::LoadBalancing_Realm");
+bool brownian_walker_stepper::loadBalanceThisRealm(const std::string a_Realm) const {
+  CH_TIME("brownian_walker_stepper::loadBalanceThisRealm");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::LoadBalancing_Realm" << endl;
+    pout() << "brownian_walker_stepper::loadBalanceThisRealm" << endl;
   }
 
   bool ret = false;
@@ -110,24 +110,24 @@ bool brownian_walker_stepper::LoadBalancing_Realm(const std::string a_Realm) con
   return ret;
 }
 
-void brownian_walker_stepper::LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
+void brownian_walker_stepper::loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
 						 Vector<Vector<Box> >&            a_boxes,
 						 const std::string                a_Realm,
 						 const Vector<DisjointBoxLayout>& a_grids,
 						 const int                        a_lmin,
-						 const int                        a_finest_level){
-  CH_TIME("brownian_walker_stepper::LoadBalancing_boxes");
+						 const int                        a_finestLevel){
+  CH_TIME("brownian_walker_stepper::loadBalanceBoxes");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::LoadBalancing_boxes" << endl;
+    pout() << "brownian_walker_stepper::loadBalanceBoxes" << endl;
   }
   
   if(m_LoadBalancing && a_Realm == m_Realm){
     particle_container<ito_particle>& particles = m_solver->get_particles(ito_solver::which_container::bulk);
   
-    particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finest_level);
+    particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
 
-    a_procs.resize(1 + a_finest_level);
-    a_boxes.resize(1 + a_finest_level);
+    a_procs.resize(1 + a_finestLevel);
+    a_boxes.resize(1 + a_finestLevel);
   
     // Compute loads on each level
     for (int lvl = 0; lvl < a_lmin; lvl++){
@@ -135,7 +135,7 @@ void brownian_walker_stepper::LoadBalancing_boxes(Vector<Vector<int> >&         
       a_boxes[lvl] = a_grids[lvl].boxArray();
     }
 
-    for (int lvl = a_lmin; lvl <= a_finest_level; lvl++){
+    for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++){
       Vector<long int> loads;
       a_boxes[lvl] = a_grids[lvl].boxArray();
     
@@ -152,10 +152,10 @@ void brownian_walker_stepper::LoadBalancing_boxes(Vector<Vector<int> >&         
     }
 
     // Put particles back
-    particles.pre_regrid(a_lmin);
+    particles.preRegrid(a_lmin);
   }
   else{
-    MayDay::Abort("brownian_walker_stepper::LoadBalancing_boxes - logic bust");
+    MayDay::Abort("brownian_walker_stepper::loadBalanceBoxes - logic bust");
   }
 }
 
@@ -213,28 +213,28 @@ void brownian_walker_stepper::set_velocity(const int a_level){
   }
 }
 
-void brownian_walker_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const{
-  CH_TIME("brownian_walker_stepper::write_checkpoint_data");
+void brownian_walker_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const{
+  CH_TIME("brownian_walker_stepper::writeCheckpointData");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::write_checkpoint_data" << endl;
+    pout() << "brownian_walker_stepper::writeCheckpointData" << endl;
   }
 
   m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
 
-void brownian_walker_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) {
-  CH_TIME("brownian_walker_stepper::read_checkpoint_data");
+void brownian_walker_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl) {
+  CH_TIME("brownian_walker_stepper::readCheckpointData");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::read_checkpoint_data" << endl;
+    pout() << "brownian_walker_stepper::readCheckpointData" << endl;
   }
   
   m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
 
-void brownian_walker_stepper::post_checkpoint_setup() {
-  CH_TIME("brownian_walker_stepper::post_checkpoint_setup");
+void brownian_walker_stepper::postCheckpointSetup() {
+  CH_TIME("brownian_walker_stepper::postCheckpointSetup");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::post_checkpoint_setup" << endl;
+    pout() << "brownian_walker_stepper::postCheckpointSetup" << endl;
   }
 
   m_solver->remap();
@@ -262,26 +262,26 @@ int brownian_walker_stepper::getNumberOfPlotVariables() const {
   return m_solver->get_num_plotvars();
 }
 
-void brownian_walker_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
+void brownian_walker_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
   CH_TIME("brownian_walker_stepper::writePlotData");
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::writePlotData" << endl;
   }
-  a_plotvar_names.append(m_solver->get_plotvar_names());
+  a_plotVariableNames.append(m_solver->get_plotVariableNames());
   m_solver->writePlotData(a_output, a_icomp);
 }
 
-void brownian_walker_stepper::compute_dt(Real& a_dt, time_code& a_timecode) {
-  CH_TIME("brownian_walker_stepper::compute_dt");
+void brownian_walker_stepper::computeDt(Real& a_dt, TimeCode& a_timeCode) {
+  CH_TIME("brownian_walker_stepper::computeDt");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::compute_dt" << endl;
+    pout() << "brownian_walker_stepper::computeDt" << endl;
   }
 
   m_solver->set_mobility(1.0); 
   m_solver->interpolate_velocities();
   m_solver->interpolate_diffusion();
 
-  a_dt = m_max_cells_hop*m_solver->compute_dt();
+  a_dt = m_max_cells_hop*m_solver->computeDt();
 }
 
 void brownian_walker_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
@@ -311,21 +311,21 @@ void brownian_walker_stepper::print_stepReport() {
   
 }
 
-bool brownian_walker_stepper::need_to_regrid() {
+bool brownian_walker_stepper::needToRegrid() {
   return false;
 }
 
-void brownian_walker_stepper::pre_regrid(const int a_lbase, const int a_oldFinestLevel){
-  CH_TIME("brownian_walker_stepper::pre_regrid");
+void brownian_walker_stepper::preRegrid(const int a_lbase, const int a_oldFinestLevel){
+  CH_TIME("brownian_walker_stepper::preRegrid");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::pre_regrid" << endl;
+    pout() << "brownian_walker_stepper::preRegrid" << endl;
   }
 
   // TLDR: base is the finest level that DOES NOT CHANGE
   const int base = 0;
   const int finest_level = m_amr->getFinestLevel();
   
-  m_solver->pre_regrid(base, finest_level);
+  m_solver->preRegrid(base, finest_level);
 }
 
 void brownian_walker_stepper::deallocate() {
@@ -507,10 +507,10 @@ void brownian_walker_stepper::regrid(const int a_lmin, const int a_oldFinestLeve
   }
 }
 
-void brownian_walker_stepper::post_regrid(){
-  CH_TIME("brownian_walker_stepper::post_regrid");
+void brownian_walker_stepper::postRegrid(){
+  CH_TIME("brownian_walker_stepper::postRegrid");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::post_regrid" << endl;
+    pout() << "brownian_walker_stepper::postRegrid" << endl;
   }
 }
 #include "CD_NamespaceFooter.H"

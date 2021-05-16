@@ -125,15 +125,15 @@ air3::photon_three::~photon_three(){
 
 }
 
-Real air3::electron::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air3::electron::initialData(const RealVect a_pos, const Real a_time) const {
   return m_initial_ionization;
 }
 
-Real air3::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air3::positive_species::initialData(const RealVect a_pos, const Real a_time) const {
   return m_initial_ionization;
 }
 
-Real air3::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air3::negative_species::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 

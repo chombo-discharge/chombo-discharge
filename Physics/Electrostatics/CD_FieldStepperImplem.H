@@ -107,7 +107,7 @@ namespace Physics {
     }
 
     template <class T>
-    void FieldStepper<T>::initial_data(){
+    void FieldStepper<T>::initialData(){
       ParmParse pp("FieldStepper");
       pp.get("init_rho",   m_init_rho);
       pp.get("init_sigma", m_init_sigma);
@@ -138,12 +138,12 @@ namespace Physics {
     }
     
     template <class T>
-    void FieldStepper<T>::post_initialize() {
+    void FieldStepper<T>::postInitialize() {
       this->solve_poisson();
     }
 
     template <class T>
-    void FieldStepper<T>::post_regrid(){
+    void FieldStepper<T>::postRegrid(){
       this->solve_poisson();
     }
 
@@ -154,8 +154,8 @@ namespace Physics {
     }
 
     template <class T>
-    void FieldStepper<T>::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
-      MayDay::Abort("FieldStepper<T>::read_checkpoint_data - checkpointing not supported for this class");
+    void FieldStepper<T>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
+      MayDay::Abort("FieldStepper<T>::readCheckpointData - checkpointing not supported for this class");
     }
 
     template <class T>
@@ -166,11 +166,11 @@ namespace Physics {
     }
 
     template <class T>
-    void FieldStepper<T>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const{
-      a_plotvar_names.append(m_fieldSolver->getPlotVariableNames());
+    void FieldStepper<T>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const{
+      a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
       m_fieldSolver->writePlotData(a_output, a_icomp);
 
-      a_plotvar_names.append(m_sigma->get_plotvar_names());
+      a_plotVariableNames.append(m_sigma->get_plotVariableNames());
       m_sigma->writePlotData(a_output, a_icomp);
     }
 
@@ -184,9 +184,9 @@ namespace Physics {
     }
 
     template <class T>
-    void FieldStepper<T>::pre_regrid(const int a_lbase, const int a_oldFinestLevel){
+    void FieldStepper<T>::preRegrid(const int a_lbase, const int a_oldFinestLevel){
       m_fieldSolver->preRegrid(a_lbase, a_oldFinestLevel);
-      m_sigma->pre_regrid(a_lbase, a_oldFinestLevel);
+      m_sigma->preRegrid(a_lbase, a_oldFinestLevel);
     }
 
     template <class T>
@@ -200,27 +200,27 @@ namespace Physics {
       m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
       m_sigma->regrid(a_lmin,   a_oldFinestLevel, a_newFinestLevel);
 
-      // No solve here. That is done in post_regrid for this class. 
+      // No solve here. That is done in postRegrid for this class. 
       //      m_fieldSolver->solve();
     }
 
     template <class T>
-    bool FieldStepper<T>::LoadBalancing_Realm(const std::string a_Realm) const {
+    bool FieldStepper<T>::loadBalanceThisRealm(const std::string a_Realm) const {
       return m_LoadBalancing ? true : false;
     }
 
     template <class T>
-    void FieldStepper<T>::LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
+    void FieldStepper<T>::loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
 					      Vector<Vector<Box> >&            a_boxes,
 					      const std::string                a_Realm,
 					      const Vector<DisjointBoxLayout>& a_grids,
 					      const int                        a_lmin,
-					      const int                        a_finest_level){
+					      const int                        a_finestLevel){
       if(m_LoadBalancing){
 	constexpr int num_apply = 50;
 	
-	a_procs.resize(1+a_finest_level);
-	a_boxes.resize(1+a_finest_level);
+	a_procs.resize(1+a_finestLevel);
+	a_boxes.resize(1+a_finestLevel);
 
 	FieldSolverMultigrid* solver = (FieldSolverMultigrid*) (&(*m_fieldSolver));
 
@@ -234,7 +234,7 @@ namespace Physics {
 	// We need to make AmrMesh restore some operators that we need. This is overkill because we only need
 	// operators for ghost cell interpolation....
 
-	m_amr->regridOperators(a_lmin, a_finest_level, 1);
+	m_amr->regridOperators(a_lmin, a_finestLevel, 1);
 
 	// Set up the operator factor and fetch it.
 	solver->setMultigridCoefficients();
@@ -242,7 +242,7 @@ namespace Physics {
 	RefCountedPtr<mfconductivityopfactory>& factory = solver->getOperatorFactory();
 
 	// Go through each level and load balance. 
-	for (int lvl = 0; lvl <= a_finest_level; lvl++){
+	for (int lvl = 0; lvl <= a_finestLevel; lvl++){
 	  // Make an operator
 	  auto oper = RefCountedPtr<mfconductivityop> ((mfconductivityop*) factory->MGnewOp(domains[lvl], 0, false));
 

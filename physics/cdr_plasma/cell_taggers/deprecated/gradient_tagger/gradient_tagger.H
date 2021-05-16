@@ -31,7 +31,7 @@ public:
     @details I'm overriding this so I can fetch the number of species from plasma kinetics
   */
   virtual void define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
-		      const RefCountedPtr<time_stepper>&           a_timeStepper,
+		      const RefCountedPtr<TimeStepper>&           a_timeStepper,
 		      const RefCountedPtr<AmrMesh>&               a_amr,
 		      const RefCountedPtr<computational_geometry>& a_computationalGeometry,
 		      const RefCountedPtr<physical_domain>&        a_physdom);

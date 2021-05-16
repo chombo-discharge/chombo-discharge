@@ -10,7 +10,7 @@ class air_eed::eed : public species {
 public:
   eed();
   ~eed() {}
-  Real initial_data(const RealVect a_pos, const Real a_time) const;
+  Real initialData(const RealVect a_pos, const Real a_time) const;
 protected:
 
   Real     m_init_energy;
@@ -24,7 +24,7 @@ class air_eed::electron : public species {
 public:
   electron();
   ~electron() {}
-  Real initial_data(const RealVect a_pos, const Real a_time) const;
+  Real initialData(const RealVect a_pos, const Real a_time) const;
 protected:
   
   Real m_uniform_density;
@@ -37,7 +37,7 @@ class air_eed::M_plus : public species {
 public:
   M_plus();
   ~M_plus(){}
-  Real initial_data(const RealVect a_pos, const Real a_time) const;
+  Real initialData(const RealVect a_pos, const Real a_time) const;
 protected:
   Real m_uniform_density;
   Real m_seed_density;
@@ -49,7 +49,7 @@ class air_eed::M_minus : public species {
 public:
   M_minus();
   ~M_minus(){}
-  Real initial_data(const RealVect a_pos, const Real a_time) const {return 0.0;}
+  Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
 };
 
 class air_eed::agg_photon : public photon_group {

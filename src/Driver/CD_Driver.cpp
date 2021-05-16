@@ -30,7 +30,7 @@
 #include <CD_NamespaceHeader.H>
 
 Driver::Driver(const RefCountedPtr<computational_geometry>& a_computationalGeometry,
-	       const RefCountedPtr<time_stepper>&           a_timeStepper,
+	       const RefCountedPtr<TimeStepper>&           a_timeStepper,
 	       const RefCountedPtr<AmrMesh>&               a_amr,
 	       const RefCountedPtr<cell_tagger>&            a_cellTagger,
 	       const RefCountedPtr<geo_coarsener>&          a_geoCoarsen){
@@ -547,7 +547,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
   //     there's a peak in memory consumption here. We have to eat this one because we
   //     potentially need all the solver data for tagging, so that data can't be touched.
   //     If we don't get new tags, we exit this routine already here. 
-  // 2.  Deallocate internal storage for the time_stepper - this frees up a bunch of memory that
+  // 2.  Deallocate internal storage for the TimeStepper - this frees up a bunch of memory that
   //     we don't need since we won't advance until after regridding anyways. 
   // 3.  Cache tags, this doubles up on the memory for m_tags but that shouldn't matter.
   // 4.  Free up m_tags for safety because it will be regridded anyways. 
@@ -567,7 +567,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 
   if(!got_new_tags){
     if(a_useInitialData){
-      m_timeStepper->initial_data();
+      m_timeStepper->initialData();
     }
 
     if(m_verbosity > 1){
@@ -583,28 +583,28 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 
   // Store things that need to be regridded
   this->cacheTags(m_tags);              // Cache m_tags because after regrid, ownership will change
-  m_timeStepper->pre_regrid(a_lmin, m_amr->getFinestLevel());
+  m_timeStepper->preRegrid(a_lmin, m_amr->getFinestLevel());
 
   // Deallocate unnecessary storage
   this->deallocateInternals();          // Deallocate internal storage for Driver
-  m_timeStepper->deallocate();           // Deallocate storage for time_stepper
+  m_timeStepper->deallocate();           // Deallocate storage for TimeStepper
   
   const Real cell_tags = MPI_Wtime();    // Timer
 
   // Regrid AMR. Only levels [lmin, lmax] are allowed to change. 
-  const int old_finest_level = m_amr->getFinestLevel();
+  const int old_finestLevel = m_amr->getFinestLevel();
   m_amr->regridAmr(tags, a_lmin, a_lmax);
-  const int new_finest_level = m_amr->getFinestLevel();
+  const int new_finestLevel = m_amr->getFinestLevel();
 
   // Load balance and regrid the various Realms
   const std::vector<std::string>& Realms = m_amr->getRealms();
   for (const auto& str : Realms){
-    if(m_timeStepper->LoadBalancing_Realm(str)){
+    if(m_timeStepper->loadBalanceThisRealm(str)){
       
       Vector<Vector<int> > procs;
       Vector<Vector<Box> > boxes;
       
-      m_timeStepper->LoadBalancing_boxes(procs, boxes, str, m_amr->getProxyGrids(), a_lmin, new_finest_level);
+      m_timeStepper->loadBalanceBoxes(procs, boxes, str, m_amr->getProxyGrids(), a_lmin, new_finestLevel);
 
       m_amr->regridRealm(str, procs, boxes, a_lmin);
     }
@@ -612,15 +612,15 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 
 
   // Regrid the operators
-  const int regsize = m_timeStepper->get_redistribution_regsize();
+  const int regsize = m_timeStepper->getRedistributionRegSize();
   m_amr->regridOperators(a_lmin, a_lmax, regsize);
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
   // Regrid Driver, timestepper, and celltagger
-  this->regridInternals(old_finest_level, new_finest_level);          // Regrid internals for Driver
-  m_timeStepper->regrid(a_lmin, old_finest_level, new_finest_level);   // Regrid solvers
+  this->regridInternals(old_finestLevel, new_finestLevel);          // Regrid internals for Driver
+  m_timeStepper->regrid(a_lmin, old_finestLevel, new_finestLevel);   // Regrid solvers
   if(a_useInitialData){
-    m_timeStepper->initial_data();
+    m_timeStepper->initialData();
   }
 
   // Regrid cell tagger if we have one. 
@@ -628,8 +628,8 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
     m_cellTagger->regrid();             
   }
 
-  // If it wants to, time_stepper can do a post_regrid operation. 
-  m_timeStepper->post_regrid();
+  // If it wants to, TimeStepper can do a postRegrid operation. 
+  m_timeStepper->postRegrid();
 
   const Real solver_regrid = MPI_Wtime(); // Timer
 
@@ -732,7 +732,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
       m_timeStep = 0;
     }
 
-    m_timeStepper->compute_dt(m_dt, m_timecode);
+    m_timeStepper->computeDt(m_dt, m_timeCode);
     m_timeStepper->synchronize_solver_times(m_timeStep, m_time, m_dt);
 
     bool last_step     = false;
@@ -753,7 +753,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
       // inside the loop. 
       const bool can_regrid        = max_sim_depth > 0 && max_amr_depth > 0;
       const bool check_step        = m_timeStep%m_regridInterval == 0 && m_regridInterval > 0;
-      const bool check_timeStepper = m_timeStepper->need_to_regrid() && m_regridInterval > 0;
+      const bool check_timeStepper = m_timeStepper->needToRegrid() && m_regridInterval > 0;
       if(can_regrid && (check_step || check_timeStepper)){
 	if(!first_step){
 
@@ -788,7 +788,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
       }
 
       if(!first_step){
-	m_timeStepper->compute_dt(m_dt, m_timecode);
+	m_timeStepper->computeDt(m_dt, m_timeCode);
       }
 
       if(first_step){
@@ -929,7 +929,7 @@ void Driver::setComputationalGeometry(const RefCountedPtr<computational_geometry
   m_multifluidIndexSpace     = a_computationalGeometry->get_mfis();
 }
 
-void Driver::setTimeStepper(const RefCountedPtr<time_stepper>& a_timeStepper){
+void Driver::setTimeStepper(const RefCountedPtr<TimeStepper>& a_timeStepper){
   CH_TIME("Driver::setTimeStepper");
   if(m_verbosity > 5){
     pout() << "Driver::setTimeStepper" << endl;
@@ -1309,7 +1309,7 @@ void Driver::setupFresh(const int a_initialRegrids){
   this->getGeometryTags();
   
   // Determine the redistribution register size
-  const int regsize = m_timeStepper->get_redistribution_regsize();
+  const int regsize = m_timeStepper->getRedistributionRegSize();
 
   // When we're setting up fresh, we need to regrid everything from the base level
   // and upwards. We have tags on m_geometricTagsDepth, so that is our current finest level. 
@@ -1320,10 +1320,10 @@ void Driver::setupFresh(const int a_initialRegrids){
   // Allocate internal storage 
   this->allocateInternals();
 
-  // Provide time_stepper with geometry in case it needs it. 
+  // Provide TimeStepper with geometry in case it needs it. 
   m_timeStepper->setComputationalGeometry(m_computationalGeometry);       // Set computational geometry
 
-  // time_stepper setup
+  // TimeStepper setup
   m_timeStepper->setup_solvers();                                 // Instantiate solvers
   m_timeStepper->synchronize_solver_times(m_timeStep, m_time, m_dt);  // Sync solver times
   m_timeStepper->registerOperators();
@@ -1331,13 +1331,13 @@ void Driver::setupFresh(const int a_initialRegrids){
   m_timeStepper->allocate();
 
   // Fill solves with initial data
-  m_timeStepper->initial_data();                                  // Fill solvers with initial data
+  m_timeStepper->initialData();                                  // Fill solvers with initial data
 
   // We now load balance and define operators and stuff like that. 
   this->cacheTags(m_tags);
-  m_timeStepper->pre_regrid(lmin, lmax);
+  m_timeStepper->preRegrid(lmin, lmax);
   for (const auto& str : m_amr->getRealms()){
-    if(m_timeStepper->LoadBalancing_Realm(str)){
+    if(m_timeStepper->loadBalanceThisRealm(str)){
       
       Vector<Vector<int> > procs;
       Vector<Vector<Box> > boxes;
@@ -1345,7 +1345,7 @@ void Driver::setupFresh(const int a_initialRegrids){
       const int lmin   = 0;
       const int lmax = m_amr->getFinestLevel(); 
       
-      m_timeStepper->LoadBalancing_boxes(procs, boxes, str, m_amr->getProxyGrids(), lmin, lmax);
+      m_timeStepper->loadBalanceBoxes(procs, boxes, str, m_amr->getProxyGrids(), lmin, lmax);
 
       m_amr->regridRealm(str, procs, boxes, lmin);
     }
@@ -1355,7 +1355,7 @@ void Driver::setupFresh(const int a_initialRegrids){
   m_timeStepper->regrid(lmin, lmax, lmax);   // Regrid solvers.
 
   // Do post initialize stuff
-  m_timeStepper->post_initialize();
+  m_timeStepper->postInitialize();
 
   // cell_tagger
   if(!m_cellTagger.isNull()){
@@ -1414,7 +1414,7 @@ void Driver::setupForRestart(const int a_initialRegrids, const std::string a_res
   this->readCheckpointFile(a_restartFile); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
 
   // Time stepper does post checkpoint setup
-  m_timeStepper->post_checkpoint_setup();
+  m_timeStepper->postCheckpointSetup();
   
   // Prepare storage for cell_tagger
   if(!m_cellTagger.isNull()){
@@ -1756,7 +1756,7 @@ void Driver::writeComputationalLoads(){
     // Compute total loads on each rank.
     Vector<long int> sumLoads(nProc, 0L);
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const Vector<long int> boxLoads = m_timeStepper->get_checkpoint_loads(r, lvl);
+      const Vector<long int> boxLoads = m_timeStepper->getCheckpointLoads(r, lvl);
 
       const DisjointBoxLayout& dbl = m_amr->getGrids(r)[lvl];
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -2189,7 +2189,7 @@ void Driver::writeCheckpointFile(){
     write(handle_out, m_amr->getGrids(m_realm)[lvl]); // write AMR grids
 
     // time stepper checkpoints data
-    m_timeStepper->write_checkpoint_data(handle_out, lvl); 
+    m_timeStepper->writeCheckpointData(handle_out, lvl); 
 
     // Driver checkpoints internal data
     this->writeCheckpointLevel(handle_out, lvl); 
@@ -2263,7 +2263,7 @@ void Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level){
 
   // Get loads. 
   for (auto r : m_amr->getRealms()){
-    const Vector<long int> loads = m_timeStepper->get_checkpoint_loads(r, a_level);
+    const Vector<long int> loads = m_timeStepper->getCheckpointLoads(r, a_level);
 
     // Set loads on an FArrayBox
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -2386,7 +2386,7 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   m_amr->setGrids(boxes, sim_loads);
   
   // Instantiate solvers and register operators
-  const int regsize = m_timeStepper->get_redistribution_regsize();
+  const int regsize = m_timeStepper->getRedistributionRegSize();
   m_timeStepper->setup_solvers();
   m_timeStepper->registerOperators();
   m_amr->regridOperators(base_level, finest_level, regsize);
@@ -2402,7 +2402,7 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
     handle_in.setGroupToLevel(lvl);
 
     // time stepper reads in data
-    m_timeStepper->read_checkpoint_data(handle_in, lvl);
+    m_timeStepper->readCheckpointData(handle_in, lvl);
 
     // Read in internal data
     readCheckpointLevel(handle_in, lvl);

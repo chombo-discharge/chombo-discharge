@@ -161,10 +161,10 @@ void euler_maruyama::parse_debug(){
   }
 }
 
-bool euler_maruyama::need_to_regrid(){
+bool euler_maruyama::needToRegrid(){
   CH_TIME("euler_maruyama::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::need_to_regrid" << endl;
+    pout() << "euler_maruyama::needToRegrid" << endl;
   }
 
   return false;
@@ -259,7 +259,7 @@ Real euler_maruyama::advance(const Real a_dt){
   
   t0 = MPI_Wtime();
   if((m_step +1) % m_fast_poisson == 0){
-    time_stepper::solve_poisson();                  // Update the Poisson equation
+    TimeStepper::solve_poisson();                  // Update the Poisson equation
   }
   t1 = MPI_Wtime();
   t_pois = t1 - t0;
@@ -392,9 +392,9 @@ void euler_maruyama::compute_E_into_scratch(){
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
 
-  time_stepper::compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
-  time_stepper::compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
-  time_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell); // Domain centered field
+  TimeStepper::compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
+  TimeStepper::compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
+  TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell); // Domain centered field
 }
 
 void euler_maruyama::compute_cdr_gradients(){
@@ -438,7 +438,7 @@ void euler_maruyama::compute_cdr_eb_states(){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  time_stepper::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
+  TimeStepper::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     data_ops::floor(*eb_states[idx], 0.0);
@@ -448,8 +448,8 @@ void euler_maruyama::compute_cdr_eb_states(){
   EBAMRIVData eb_gradient;
   m_amr->allocate(eb_gradient, m_cdr->get_phase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    time_stepper::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
-    time_stepper::project_flux(*eb_gradients[i], eb_gradient);
+    TimeStepper::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
+    TimeStepper::project_flux(*eb_gradients[i], eb_gradient);
   }
 }
 
@@ -486,8 +486,8 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
 
   // Compute extrapolated fluxes and velocities at the EB
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
-  time_stepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, states, cdr_velocities, m_cdr->get_phase());
-  time_stepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
+  TimeStepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, states, cdr_velocities, m_cdr->get_phase());
+  TimeStepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -500,7 +500,7 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
   }
 
   const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
-  time_stepper::compute_cdr_fluxes(cdr_fluxes,
+  TimeStepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
 				   extrap_cdr_velocities,
@@ -532,7 +532,7 @@ void euler_maruyama::compute_cdr_domain_states(){
   }
 
   // Extrapolate states to the domain faces
-  time_stepper::extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), cdr_states);
+  TimeStepper::extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), cdr_states);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIFData grad;
@@ -541,8 +541,8 @@ void euler_maruyama::compute_cdr_domain_states(){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
     const int idx = solver_it.index();
     if(solver->is_mobile()){
-      time_stepper::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[idx]);
-      time_stepper::project_domain(*domain_gradients[idx], grad);
+      TimeStepper::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[idx]);
+      TimeStepper::project_domain(*domain_gradients[idx], grad);
     }
     else{
       data_ops::set_value(*domain_gradients[idx], 0.0);
@@ -605,7 +605,7 @@ void euler_maruyama::compute_cdr_domain_fluxes(){
   const EBAMRIFData& E = m_fieldSolver_scratch->get_E_domain();
 
   // This fills the solvers' domain fluxes
-  time_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
+  TimeStepper::compute_cdr_domain_fluxes(cdr_fluxes,
 					  extrap_cdr_fluxes,
 					  extrap_cdr_densities,
 					  extrap_cdr_velocities,
@@ -642,7 +642,7 @@ void euler_maruyama::compute_reaction_network(const Real a_dt){
   }
 
   // We have already computed E and the gradients of the CDR equations, so we will call the
-  // time_stepper version where all that crap is inputs. Saves memory and flops. 
+  // TimeStepper version where all that crap is inputs. Saves memory and flops. 
 
   Vector<EBAMRCellData*> cdr_src = m_cdr->get_sources();
   Vector<EBAMRCellData*> cdr_phi = m_cdr->get_states();
@@ -658,8 +658,8 @@ void euler_maruyama::compute_reaction_network(const Real a_dt){
     cdr_grad.push_back(&gradient);
   }
 
-  //  time_stepper::advance_reaction_network(m_time, a_dt);
-  time_stepper::advance_reaction_network(cdr_src, rte_src, cdr_phi, cdr_grad, rte_phi, E, m_time, a_dt);
+  //  TimeStepper::advance_reaction_network(m_time, a_dt);
+  TimeStepper::advance_reaction_network(cdr_src, rte_src, cdr_phi, cdr_grad, rte_phi, E, m_time, a_dt);
 }
 
 void euler_maruyama::advance_cdr(const Real a_dt){
@@ -776,7 +776,7 @@ void euler_maruyama::compute_cdr_velo(const Real a_time){
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  time_stepper::compute_cdr_velocities(velocities, m_cdr->get_states(), m_fieldSolver_scratch->get_E_cell(), a_time);
+  TimeStepper::compute_cdr_velocities(velocities, m_cdr->get_states(), m_fieldSolver_scratch->get_E_cell(), a_time);
 }
 
 void euler_maruyama::compute_cdr_diffco(const Real a_time){
@@ -785,13 +785,13 @@ void euler_maruyama::compute_cdr_diffco(const Real a_time){
     pout() << "euler_maruaya::compute_cdr_diffco" << endl;
   }
 
-  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 }
 
-void euler_maruyama::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
-  CH_TIME("euler_maruyama::compute_dt");
+void euler_maruyama::computeDt(Real& a_dt, TimeCode::which_code& a_timeCode){
+  CH_TIME("euler_maruyama::computeDt");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_dt" << endl;
+    pout() << "euler_maruyama::computeDt" << endl;
   }
 
   Real dt = 1.E99;
@@ -800,23 +800,23 @@ void euler_maruyama::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   const Real dt_cfl = m_cfl*m_dt_cfl;
   if(dt_cfl < dt){
     dt = dt_cfl;
-    a_timecode = time_code::cfl;
+    a_timeCode = TimeCode::cfl;
   }
 
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
     dt = dt_relax;
-    a_timecode = time_code::relaxation_time;
+    a_timeCode = TimeCode::RelaxationTime;
   }
 
   if(dt < m_min_dt){
     dt = m_min_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   if(dt > m_max_dt){
     dt = m_max_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   // Diffusion step step constraint. If diffusion dt is the shortest scale, 
@@ -824,7 +824,7 @@ void euler_maruyama::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     const Real dt_diffusion = m_cdr->compute_diffusive_dt();
     if(dt_diffusion < dt){
       dt = dt_diffusion;
-      a_timecode = time_code::diffusion;
+      a_timeCode = TimeCode::Diffusion;
     }
   }
   else if(m_whichDiffusion == whichDiffusion::Automatic){ // If explicit diffusion dt is the shortest, go implicit

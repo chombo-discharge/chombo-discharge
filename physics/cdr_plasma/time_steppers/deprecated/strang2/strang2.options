@@ -20,7 +20,7 @@
 # As a rule, we do not support first order Runge-Kutta schemes because they would destroy the second
 # order convergence of the Strang splitting. 
 #
-# Note that if you use fixed time stepping then the CFL number from time_stepper is overridden
+# Note that if you use fixed time stepping then the CFL number from TimeStepper is overridden
 # and taken as strang2_maxcfl, which allows you to run at a specified CFL. If you use adaptive
 # stepping (development feature).
 #

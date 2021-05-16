@@ -171,7 +171,7 @@ public:
   /*!
     @brief Stuff to do before a regrid
   */
-  virtual void pre_regrid(const int a_base, const int a_oldFinestLevel);
+  virtual void preRegrid(const int a_base, const int a_oldFinestLevel);
 
   /*!
     @brief Deallocate internal storage
@@ -248,7 +248,7 @@ public:
   /*!
     @brief Get output plot names
   */
-  virtual Vector<std::string> get_plotvar_names() const;
+  virtual Vector<std::string> get_plotVariableNames() const;
 
   /*!
     @brief Get PVR buffer

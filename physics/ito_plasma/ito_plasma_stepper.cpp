@@ -157,18 +157,18 @@ void ito_plasma_stepper::allocate() {
   m_sigma->allocateInternals();
 }
 
-void ito_plasma_stepper::post_initialize(){
+void ito_plasma_stepper::postInitialize(){
 
 }
 
-void ito_plasma_stepper::initial_data(){
-  CH_TIME("ito_plasma_stepper::initial_data");
+void ito_plasma_stepper::initialData(){
+  CH_TIME("ito_plasma_stepper::initialData");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::initial_data" << endl;
+    pout() << "ito_plasma_stepper::initialData" << endl;
   }
 
-  m_ito->initial_data(); // This deposits, of course. 
-  m_rte->initial_data();
+  m_ito->initialData(); // This deposits, of course. 
+  m_rte->initialData();
   this->initial_sigma();
 
   m_ito->sort_particles_by_cell( ito_solver::which_container::bulk);
@@ -221,10 +221,10 @@ void ito_plasma_stepper::initial_sigma(){
   m_sigma->reset_cells(sigma);
 }
 
-void ito_plasma_stepper::post_checkpoint_setup(){
-  CH_TIME("ito_plasma_stepper::post_checkpoint_setup");
+void ito_plasma_stepper::postCheckpointSetup(){
+  CH_TIME("ito_plasma_stepper::postCheckpointSetup");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::post_checkpoint_setup" << endl;
+    pout() << "ito_plasma_stepper::postCheckpointSetup" << endl;
   }
 
   //this->solve_poisson();
@@ -277,10 +277,10 @@ void ito_plasma_stepper::post_checkpoint_poisson(){
   // std::cout << Emax << std::endl;
 }
 
-void ito_plasma_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const {
-  CH_TIME("ito_plasma_stepper::write_checkpoint_data");
+void ito_plasma_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
+  CH_TIME("ito_plasma_stepper::writeCheckpointData");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::write_checkpoint_data" << endl;
+    pout() << "ito_plasma_stepper::writeCheckpointData" << endl;
   }
 
   for (ito_iterator<ito_solver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -297,10 +297,10 @@ void ito_plasma_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a
   m_sigma->writeCheckpointLevel(a_handle, a_lvl);
 }
 
-void ito_plasma_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
-  CH_TIME("ito_plasma_stepper::read_checkpoint_data");
+void ito_plasma_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
+  CH_TIME("ito_plasma_stepper::readCheckpointData");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::read_checkpoint_data" << endl;
+    pout() << "ito_plasma_stepper::readCheckpointData" << endl;
   }
 
   for (ito_iterator<ito_solver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -317,45 +317,45 @@ void ito_plasma_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_
   m_sigma->readCheckpointLevel(a_handle, a_lvl);
 }
 
-void ito_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
+void ito_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
   CH_TIME("ito_plasma_stepper::writePlotData");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::writePlotData" << endl;
   }
 
   // Poisson solver copies over its output data
-  a_plotvar_names.append(m_fieldSolver->getPlotVariableNames());
+  a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
   m_fieldSolver->writePlotData(a_output, a_icomp);
 
   // Surface charge solver writes
-  a_plotvar_names.append(m_sigma->get_plotvar_names());
+  a_plotVariableNames.append(m_sigma->get_plotVariableNames());
   m_sigma->writePlotData(a_output, a_icomp);
 
   // Ito solvers copy their output data
   for (ito_iterator<ito_solver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver = solver_it();
-    a_plotvar_names.append(solver->get_plotvar_names());
+    a_plotVariableNames.append(solver->get_plotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
 
   // RTE solvers copy their output data
   for (rte_iterator<mc_photo> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<mc_photo>& solver = solver_it();
-    a_plotvar_names.append(solver->get_plotvar_names());
+    a_plotVariableNames.append(solver->get_plotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
 
   // Write the current to the output
   this->write_J(a_output, a_icomp);
-  a_plotvar_names.push_back("x-J");
-  a_plotvar_names.push_back("y-J");
+  a_plotVariableNames.push_back("x-J");
+  a_plotVariableNames.push_back("y-J");
   if(SpaceDim == 3){
-    a_plotvar_names.push_back("z-J");
+    a_plotVariableNames.push_back("z-J");
   }
 
   // Write the number of particles per patch
   this->write_num_particles_per_patch(a_output, a_icomp);
-  a_plotvar_names.push_back("particles_per_patch");
+  a_plotVariableNames.push_back("particles_per_patch");
 }
 
 void ito_plasma_stepper::write_J(EBAMRCellData& a_output, int& a_icomp) const{
@@ -463,17 +463,17 @@ void ito_plasma_stepper::print_stepReport(){
 
   // How was the time step restricted
   std::string str;
-  switch(m_timecode){
-  case time_code::physics:
+  switch(m_timeCode){
+  case TimeCode::Physics:
     str = "dt restricted by 'physics'";
     break;
-  case time_code::advection:
+  case TimeCode::Advection:
     str = "dt restricted by 'advection'";
     break;
-  case time_code::relaxation_time:
+  case TimeCode::RelaxationTime:
     str = "dt restricted by 'relaxation time'";
     break;
-  case time_code::hardcap:
+  case TimeCode::Hardcap:
     str = "dt restricted by 'hardcap'";
     break;
   default:
@@ -672,7 +672,7 @@ void ito_plasma_stepper::print_timer_tail(){
 }
 
 void ito_plasma_stepper::parse_filters(){
-  CH_TIME("ito_plasma_stepper::compute_dt");
+  CH_TIME("ito_plasma_stepper::computeDt");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::parse_filters" << endl;
   }
@@ -710,15 +710,15 @@ void ito_plasma_stepper::parse_filters(){
   }
 }
 
-void ito_plasma_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
-  CH_TIME("ito_plasma_stepper::compute_dt");
+void ito_plasma_stepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
+  CH_TIME("ito_plasma_stepper::computeDt");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_dt" << endl;
+    pout() << "ito_plasma_stepper::computeDt" << endl;
   }
   
-  a_dt = m_ito->compute_dt();
+  a_dt = m_ito->computeDt();
   a_dt = a_dt*m_max_cells_hop;
-  a_timecode = time_code::advection;
+  a_timeCode = TimeCode::Advection;
   
 }
 
@@ -746,16 +746,16 @@ void ito_plasma_stepper::registerOperators(){
   m_amr->registerMask("particle_halo", m_halo_buffer, m_particle_Realm);
 }
   
-void ito_plasma_stepper::pre_regrid(const int a_lmin, const int a_oldFinestLevel){
-  CH_TIME("ito_plasma_stepper::pre_regrid");
+void ito_plasma_stepper::preRegrid(const int a_lmin, const int a_oldFinestLevel){
+  CH_TIME("ito_plasma_stepper::preRegrid");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::pre_regrid" << endl;
+    pout() << "ito_plasma_stepper::preRegrid" << endl;
   }
 
-  m_ito->pre_regrid(a_lmin,     a_oldFinestLevel);
+  m_ito->preRegrid(a_lmin,     a_oldFinestLevel);
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
-  m_rte->pre_regrid(a_lmin,     a_oldFinestLevel);
-  m_sigma->pre_regrid(a_lmin,   a_oldFinestLevel);
+  m_rte->preRegrid(a_lmin,     a_oldFinestLevel);
+  m_sigma->preRegrid(a_lmin,   a_oldFinestLevel);
 }
 
 void ito_plasma_stepper::deallocate(){
@@ -802,7 +802,7 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   this->compute_ito_diffusion();
 }
 
-void ito_plasma_stepper::post_regrid(){
+void ito_plasma_stepper::postRegrid(){
 
 }
 
@@ -2909,7 +2909,7 @@ Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<E
 	densities[idx] = basefab(iv, comp);
       }
 
-      const Real cellDt = m_physics->compute_dt(e, pos, densities);
+      const Real cellDt = m_physics->computeDt(e, pos, densities);
 
       minDt = Min(minDt, cellDt);
     }
@@ -2929,7 +2929,7 @@ Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<E
       densities[idx] = (*a_densities[idx])(vof, comp);
     }
 
-    const Real cellDt = m_physics->compute_dt(e, pos, densities);
+    const Real cellDt = m_physics->computeDt(e, pos, densities);
 
     minDt = Min(minDt, cellDt);
   }
@@ -3085,10 +3085,10 @@ void ito_plasma_stepper::sort_domain_photons_by_patch(){
 
 }
 
-bool ito_plasma_stepper::LoadBalancing_Realm(const std::string a_Realm) const{
-  CH_TIME("time_stepper::LoadBalancing_Realm");
+bool ito_plasma_stepper::loadBalanceThisRealm(const std::string a_Realm) const{
+  CH_TIME("TimeStepper::loadBalanceThisRealm");
   if(m_verbosity > 5){
-    pout() << "time_stepper::LoadBalancing_Realm" << endl;
+    pout() << "TimeStepper::loadBalanceThisRealm" << endl;
   }
 
   bool ret = false;
@@ -3100,29 +3100,29 @@ bool ito_plasma_stepper::LoadBalancing_Realm(const std::string a_Realm) const{
   return ret;
 }
 
-void ito_plasma_stepper::LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
+void ito_plasma_stepper::loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
 					    Vector<Vector<Box> >&            a_boxes,
 					    const std::string                a_Realm,
 					    const Vector<DisjointBoxLayout>& a_grids,
 					    const int                        a_lmin,
-					    const int                        a_finest_level){
-  CH_TIME("ito_plasma_stepper::LoadBalancing_boxes");
+					    const int                        a_finestLevel){
+  CH_TIME("ito_plasma_stepper::loadBalanceBoxes");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper_stepper::LoadBalancing_boxes" << endl;
+    pout() << "ito_plasma_stepper_stepper::loadBalanceBoxes" << endl;
   }
 
   if(m_LoadBalancing && a_Realm == m_particle_Realm){
-    this->LoadBalancing_particle_Realm(a_procs, a_boxes, a_Realm, a_grids, a_lmin, a_finest_level);
+    this->LoadBalancing_particle_Realm(a_procs, a_boxes, a_Realm, a_grids, a_lmin, a_finestLevel);
   }
   else{
-    MayDay::Abort("ito_plasma_stepper::LoadBalancing_boxes - shouldn't happen, how did you get here..?");
+    MayDay::Abort("ito_plasma_stepper::loadBalanceBoxes - shouldn't happen, how did you get here..?");
   }
 }
 
-Vector<long int> ito_plasma_stepper::get_checkpoint_loads(const std::string a_Realm, const int a_level) const {
-  CH_TIME("ito_plasma_stepper::get_checkpoint_loads(...)");
+Vector<long int> ito_plasma_stepper::getCheckpointLoads(const std::string a_Realm, const int a_level) const {
+  CH_TIME("ito_plasma_stepper::getCheckpointLoads(...)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper_stepper::get_checkpoint_loads(...)" << endl;
+    pout() << "ito_plasma_stepper_stepper::getCheckpointLoads(...)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(a_Realm)[a_level];
@@ -3150,7 +3150,7 @@ Vector<long int> ito_plasma_stepper::get_checkpoint_loads(const std::string a_Re
     }
   }
   else{
-    loads = time_stepper::get_checkpoint_loads(a_Realm, a_level);
+    loads = TimeStepper::getCheckpointLoads(a_Realm, a_level);
   }
 
   return loads;
@@ -3161,17 +3161,17 @@ void ito_plasma_stepper::LoadBalancing_particle_Realm(Vector<Vector<int> >&     
 						     const std::string                a_Realm,
 						     const Vector<DisjointBoxLayout>& a_grids,
 						     const int                        a_lmin,
-						     const int                        a_finest_level){
+						     const int                        a_finestLevel){
   CH_TIME("ito_plasma_stepper::LoadBalancing_particle_Realm(...)");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper_stepper::LoadBalancing_particle_Realm(...)" << endl;
   }
   
   // Decompose the DisjointBoxLayout
-  a_procs.resize(1 + a_finest_level);
-  a_boxes.resize(1 + a_finest_level);
+  a_procs.resize(1 + a_finestLevel);
+  a_boxes.resize(1 + a_finestLevel);
   
-  for (int lvl = a_lmin; lvl <= a_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++){
     a_procs[lvl] = a_grids[lvl].procIDs();
     a_boxes[lvl] = a_grids[lvl].boxArray();
   }
@@ -3183,7 +3183,7 @@ void ito_plasma_stepper::LoadBalancing_particle_Realm(Vector<Vector<int> >&     
   for (int i = 0; i < lb_solvers.size(); i++){
     particle_container<ito_particle>& particles = lb_solvers[i]->get_particles(ito_solver::which_container::bulk);
     
-    particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finest_level);
+    particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
 
     // If we make superparticles during regrids, do it here so we can better estimate the computational loads for each patch. This way, if a grid is removed the realistic
     // load estimate of the underlying grid(s) is improved.
@@ -3195,9 +3195,9 @@ void ito_plasma_stepper::LoadBalancing_particle_Realm(Vector<Vector<int> >&     
   }
 
   // Get loads on each level
-  Vector<Vector<long int> > loads(1 + a_finest_level);
-  for (int lvl = 0; lvl <= a_finest_level; lvl++){
-    loads[lvl] = this->get_checkpoint_loads(a_Realm, lvl);
+  Vector<Vector<long int> > loads(1 + a_finestLevel);
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++){
+    loads[lvl] = this->getCheckpointLoads(a_Realm, lvl);
   }
 
 
@@ -3209,7 +3209,7 @@ void ito_plasma_stepper::LoadBalancing_particle_Realm(Vector<Vector<int> >&     
   // Go back to "pre-regrid" mode so we can get particles to the correct patches after load balancing. 
   for (int i = 0; i < lb_solvers.size(); i++){
     particle_container<ito_particle>& particles = lb_solvers[i]->get_particles(ito_solver::which_container::bulk);
-    particles.pre_regrid(a_lmin);
+    particles.preRegrid(a_lmin);
   }
 }
 

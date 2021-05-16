@@ -101,16 +101,16 @@ void ito_layout<T>::interpolate_velocities(){
 }
 
 template <class T>
-void ito_layout<T>::pre_regrid(const int a_lbase, const int a_finest_level){
+void ito_layout<T>::preRegrid(const int a_lbase, const int a_finestLevel){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->pre_regrid(a_lbase, a_finest_level);
+    iter()->preRegrid(a_lbase, a_finestLevel);
   }
 }
 
 template <class T>
-void ito_layout<T>::initial_data(){
+void ito_layout<T>::initialData(){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->initial_data();
+    iter()->initialData();
   }
 }
 
@@ -219,11 +219,11 @@ size_t ito_layout<T>::get_num_particles(const ito_solver::which_container a_cont
 }
 
 template <class T>
-Real ito_layout<T>::compute_dt(){
+Real ito_layout<T>::computeDt(){
   Real minDt = 1.E99;
 
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    const Real thisDt = iter()->compute_dt();
+    const Real thisDt = iter()->computeDt();
     minDt = Min(minDt, thisDt);
   }
   

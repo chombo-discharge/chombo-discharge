@@ -269,35 +269,35 @@ air8::photon_three::~photon_three(){
 
 }
 
-Real air8::electron::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air8::electron::initialData(const RealVect a_pos, const Real a_time) const {
   return m_initial_ionization;
 }
 
-Real air8::N2plus::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air8::N2plus::initialData(const RealVect a_pos, const Real a_time) const {
   return m_initial_ionization;
 }
 
-Real air8::N4plus::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air8::N4plus::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 
-Real air8::O2plus::initial_data(const RealVect a_pos, const Real a_time) const{
+Real air8::O2plus::initialData(const RealVect a_pos, const Real a_time) const{
   return m_initial_ionization;
 }
 
-Real air8::O4plus::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air8::O4plus::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 
-Real air8::O2plusN2::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air8::O2plusN2::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 
-Real air8::O2minus::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air8::O2minus::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 
-Real air8::Ominus::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air8::Ominus::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 

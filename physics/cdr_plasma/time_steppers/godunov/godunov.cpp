@@ -208,10 +208,10 @@ void godunov::parse_fhd(){
   pp.get("fhd", m_fhd);
 }
 
-bool godunov::need_to_regrid(){
+bool godunov::needToRegrid(){
   CH_TIME("godunov::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "godunov::need_to_regrid" << endl;
+    pout() << "godunov::needToRegrid" << endl;
   }
 
   return false;
@@ -1046,22 +1046,22 @@ void godunov::compute_cdr_diffco(const Real a_time){
   cdr_plasma_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 }
 
-void godunov::compute_dt(Real& a_dt, time_code& a_timecode){
-  CH_TIME("godunov::compute_dt");
+void godunov::computeDt(Real& a_dt, TimeCode& a_timeCode){
+  CH_TIME("godunov::computeDt");
   if(m_verbosity > 5){
-    pout() << "godunov::compute_dt" << endl;
+    pout() << "godunov::computeDt" << endl;
   }
 
   // Restrict by advection or advection-diffusion. 
   if(m_whichDiffusion == whichDiffusion::Explicit){
     m_dt_cfl   = m_cdr->compute_advection_diffusion_dt();
     
-    a_timecode = time_code::advection_diffusion;
+    a_timeCode = TimeCode::AdvectionDiffusion;
     a_dt       = m_cfl*m_dt_cfl;
   }
   else if(m_whichDiffusion == whichDiffusion::Implicit){
     m_dt_cfl   = m_cdr->compute_advection_dt();
-    a_timecode = time_code::advection;
+    a_timeCode = TimeCode::Advection;
 
     a_dt = m_cfl*m_dt_cfl;
   }
@@ -1074,14 +1074,14 @@ void godunov::compute_dt(Real& a_dt, time_code& a_timecode){
 
       m_dt_cfl   = advection_dt;
       a_dt       = m_cfl*m_dt_cfl;
-      a_timecode = time_code::advection;
+      a_timeCode = TimeCode::Advection;
     }
     else {
       m_implicit_diffusion = false;
 
       m_dt_cfl   = m_cdr->compute_advection_diffusion_dt();
       a_dt       = m_cfl*m_dt_cfl;
-      a_timecode = time_code::advection_diffusion;
+      a_timeCode = TimeCode::AdvectionDiffusion;
     }
 
     m_dt_cfl = a_dt/m_cfl;
@@ -1091,20 +1091,20 @@ void godunov::compute_dt(Real& a_dt, time_code& a_timecode){
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < a_dt){
     a_dt = dt_relax;
-    a_timecode = time_code::relaxation_time;
+    a_timeCode = TimeCode::RelaxationTime;
   }
 
   if(a_dt < m_min_dt){
     a_dt = m_min_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   if(a_dt > m_max_dt){
     a_dt = m_max_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
-  m_timecode = a_timecode;
+  m_timeCode = a_timeCode;
 }
 
 void godunov::post_step(){

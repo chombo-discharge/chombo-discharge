@@ -736,7 +736,7 @@ Real air9eed_bourdon::compute_e_N2_scattering_loss()              const {return 
 
 Real air9eed_bourdon::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
-  return m_init_eed.get_entry(EbyN)*m_cdr_species[m_electron_idx]->initial_data(a_pos, a_time);
+  return m_init_eed.get_entry(EbyN)*m_cdr_species[m_electron_idx]->initialData(a_pos, a_time);
 }
 
 Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,

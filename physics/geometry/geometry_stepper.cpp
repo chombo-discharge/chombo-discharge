@@ -17,9 +17,9 @@ geometry_stepper::~geometry_stepper(){};
 // Setup routines
 void geometry_stepper::setup_solvers() {};
 void geometry_stepper::allocate() {};
-void geometry_stepper::initial_data() {};
-void geometry_stepper::post_initialize() {};
-void geometry_stepper::post_checkpoint_setup() {};
+void geometry_stepper::initialData() {};
+void geometry_stepper::postInitialize() {};
+void geometry_stepper::postCheckpointSetup() {};
 
 // Registration routines
 void geometry_stepper::registerRealms(){}
@@ -28,20 +28,20 @@ void geometry_stepper::registerOperators(){
 }
 
 // IO routines
-void geometry_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const {}
-void geometry_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) {}
-void geometry_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {}
+void geometry_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {}
+void geometry_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl) {}
+void geometry_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {}
 int  geometry_stepper::getNumberOfPlotVariables() const {return 0;}
 
 // Advance routines
-void geometry_stepper::compute_dt(Real& a_dt, time_code& a_timecode) {a_dt = 0.0;}
+void geometry_stepper::computeDt(Real& a_dt, TimeCode& a_timeCode) {a_dt = 0.0;}
 Real geometry_stepper::advance(const Real a_dt) {return 1.0;}
 void geometry_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {}
 void geometry_stepper::print_stepReport() {}
 
 // Regrid routines
 void geometry_stepper::deallocate() {}
-void geometry_stepper::pre_regrid(const int a_lmin, const int a_oldFinestLevel) {}
+void geometry_stepper::preRegrid(const int a_lmin, const int a_oldFinestLevel) {}
 void geometry_stepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {}
-void geometry_stepper::post_regrid() {}
+void geometry_stepper::postRegrid() {}
 #include "CD_NamespaceFooter.H"

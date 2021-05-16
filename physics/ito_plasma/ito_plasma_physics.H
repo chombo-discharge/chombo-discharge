@@ -57,7 +57,7 @@ namespace physics {
       /*!
 	@brief Compute a time step
       */
-      virtual Real compute_dt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const = 0;
+      virtual Real computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const = 0;
 
       /*!
 	@brief Compute Townsend ionization length

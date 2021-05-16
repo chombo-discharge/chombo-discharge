@@ -432,7 +432,7 @@ Real air_bolsig::initial_sigma(const Real a_time, const RealVect& a_pos) const {
   return 0.0;
 }
 
-Real air_bolsig::electron::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air_bolsig::electron::initialData(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
@@ -440,7 +440,7 @@ Real air_bolsig::electron::initial_data(const RealVect a_pos, const Real a_time)
   return seed + m_uniform_density + noise;
 }
 
-Real air_bolsig::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air_bolsig::positive_species::initialData(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
@@ -448,7 +448,7 @@ Real air_bolsig::positive_species::initial_data(const RealVect a_pos, const Real
   return seed + m_uniform_density + noise;
 }
 
-Real air_bolsig::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air_bolsig::negative_species::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.;
 }
 

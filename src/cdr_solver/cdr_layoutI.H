@@ -112,28 +112,28 @@ void cdr_layout<T>::deallocateInternals(){
 }
 
 template <class T>
-void cdr_layout<T>::pre_regrid(const int a_lbase, const int a_oldFinestLevel){
-  CH_TIME("cdr_layout<T>::pre_regrid");
+void cdr_layout<T>::preRegrid(const int a_lbase, const int a_oldFinestLevel){
+  CH_TIME("cdr_layout<T>::preRegrid");
   if(m_verbosity > 6){
-    pout() << "cdr_layout<T>::pre_regrid" << endl;
+    pout() << "cdr_layout<T>::preRegrid" << endl;
   }
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->pre_regrid(a_lbase, a_oldFinestLevel);
+    solver->preRegrid(a_lbase, a_oldFinestLevel);
   }
 }
 
 template <class T>
-void cdr_layout<T>::initial_data(){
-  CH_TIME("cdr_layout<T>::initial_data");
+void cdr_layout<T>::initialData(){
+  CH_TIME("cdr_layout<T>::initialData");
   if(m_verbosity > 6){
-    pout() << "cdr_layout<T>::initial_data" << endl;
+    pout() << "cdr_layout<T>::initialData" << endl;
   }
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->initial_data();
+    solver->initialData();
   }
 }
 

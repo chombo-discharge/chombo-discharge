@@ -541,7 +541,7 @@ morrow_bourdon::electron::electron(){
 morrow_bourdon::electron::~electron(){
 }
 
-Real morrow_bourdon::electron::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_bourdon::electron::initialData(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
 
@@ -569,7 +569,7 @@ morrow_bourdon::positive_species::positive_species(){
 morrow_bourdon::positive_species::~positive_species(){
 }
 
-Real morrow_bourdon::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_bourdon::positive_species::initialData(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   
@@ -594,7 +594,7 @@ morrow_bourdon::negative_species::negative_species(){
 morrow_bourdon::negative_species::~negative_species(){
 }
 
-Real morrow_bourdon::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_bourdon::negative_species::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.;
 }
 

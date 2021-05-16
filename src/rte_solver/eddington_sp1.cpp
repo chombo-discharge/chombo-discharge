@@ -245,10 +245,10 @@ void eddington_sp1::allocate_wall_bc(){
   }
 }
 
-void eddington_sp1::pre_regrid(const int a_base, const int a_oldFinestLevel){
-  CH_TIME("eddington_sp1::pre_regrid");
+void eddington_sp1::preRegrid(const int a_base, const int a_oldFinestLevel){
+  CH_TIME("eddington_sp1::preRegrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::pre_regrid" << endl;
+    pout() << m_name + "::preRegrid" << endl;
   }
 
   const int ncomp = 1;

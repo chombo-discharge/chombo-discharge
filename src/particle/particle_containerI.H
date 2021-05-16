@@ -26,11 +26,11 @@ particle_container<P>::particle_container(const Vector<DisjointBoxLayout>& a_gri
 					  const Vector<int>&               a_ref_rat,
 					  const RealVect&                  a_probLo,
 					  const int                        a_blocking_factor,
-					  const int                        a_finest_level,
+					  const int                        a_finestLevel,
 					  const int                        a_pvr_buffer,
 					  const std::string                a_Realm){
 
-  this->define(a_grids, a_domains, a_dx, a_ref_rat, a_probLo, a_blocking_factor, a_finest_level, a_pvr_buffer, a_Realm);
+  this->define(a_grids, a_domains, a_dx, a_ref_rat, a_probLo, a_blocking_factor, a_finestLevel, a_pvr_buffer, a_Realm);
 
 
 }
@@ -47,14 +47,14 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
 				   const Vector<int>&               a_ref_rat,
 				   const RealVect&                  a_probLo,
 				   const int                        a_blocking_factor,
-				   const int                        a_finest_level,
+				   const int                        a_finestLevel,
 				   const int                        a_pvr_buffer,
 				   const std::string                a_Realm){
   m_grids           = a_grids;
   m_domains         = a_domains;
   m_ref_rat         = a_ref_rat;
   m_probLo         = a_probLo;
-  m_finestLevel    = a_finest_level;
+  m_finestLevel    = a_finestLevel;
   m_buffer          = a_pvr_buffer;
   m_Realm           = a_Realm;
   m_blockingFactor = a_blocking_factor;
@@ -75,9 +75,9 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
 }
 
 template <class P>
-void particle_container<P>::setup_pvr(const int a_base, const int a_finest_level){
-  m_pvr.resize(1 + a_finest_level);
-  for (int lvl = a_base; lvl <= a_finest_level; lvl++){
+void particle_container<P>::setup_pvr(const int a_base, const int a_finestLevel){
+  m_pvr.resize(1 + a_finestLevel);
+  for (int lvl = a_base; lvl <= a_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_grids[lvl];
     const ProblemDomain& domain  = m_domains[lvl];
 
@@ -94,13 +94,13 @@ void particle_container<P>::setup_pvr(const int a_base, const int a_finest_level
 }
 
 template <class P>
-void particle_container<P>::setup_particle_data(const int a_base, const int a_finest_level){
-  m_particles.resize(1 + a_finest_level);
-  m_halo_particles.resize(1 + a_finest_level);
-  m_non_halo_particles.resize(1 + a_finest_level);
-  m_cell_particles.resize(1 + a_finest_level);
+void particle_container<P>::setup_particle_data(const int a_base, const int a_finestLevel){
+  m_particles.resize(1 + a_finestLevel);
+  m_halo_particles.resize(1 + a_finestLevel);
+  m_non_halo_particles.resize(1 + a_finestLevel);
+  m_cell_particles.resize(1 + a_finestLevel);
   
-  for (int lvl = a_base; lvl <= a_finest_level; lvl++){
+  for (int lvl = a_base; lvl <= a_finestLevel; lvl++){
     m_particles[lvl] = RefCountedPtr<ParticleData<P> > (new ParticleData<P>(m_grids[lvl],
 									    m_domains[lvl],
 									    m_blockingFactor,
@@ -584,7 +584,7 @@ void particle_container<P>::levelRemap(const int a_lvl){
 }
 
 template <class P>
-void particle_container<P>::pre_regrid(const int a_lmin){
+void particle_container<P>::preRegrid(const int a_lmin){
   CH_assert(m_is_defined);
   if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
 

@@ -9,7 +9,7 @@
 #define _RK2_TGA_
 
 #include "CD_AmrMesh.H"
-#include "time_stepper.H"
+#include "CD_TimeStepper.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 
@@ -29,7 +29,7 @@
   rk2_tga.turn_off_rte       = false  # Turn off RTE, debugging only
 
 */
-class rk2_tga : public time_stepper {
+class rk2_tga : public TimeStepper {
 public:
 
   // Forward declare nested classes. I don't want to clutter this file. 
@@ -66,7 +66,7 @@ public:
   /*!
     @brief Compute dt
   */
-  virtual void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
+  virtual void computeDt(Real& a_dt, TimeCode::which_code& a_timeCode);
 
 protected:
 

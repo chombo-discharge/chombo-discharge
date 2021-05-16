@@ -221,10 +221,10 @@ RefCountedPtr<rte_storage>& imex_sdc::get_rte_storage(const rte_iterator<rte_sol
   return m_rte_scratch[a_solverit.index()];
 }
 
-bool imex_sdc::need_to_regrid(){
-  CH_TIME("imex_sdc::need_to_regrid");
+bool imex_sdc::needToRegrid(){
+  CH_TIME("imex_sdc::needToRegrid");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::need_to_regrid" << endl;
+    pout() << "imex_sdc::needToRegrid" << endl;
   }
 
   return false;
@@ -1195,10 +1195,10 @@ void imex_sdc::adaptive_report(const Real a_first_dt, const Real a_dt, const Rea
   pout() << "\n";
 }
 
-void imex_sdc::compute_dt(Real& a_dt, time_code& a_timecode){
-  CH_TIME("imex_sdc::compute_dt");
+void imex_sdc::computeDt(Real& a_dt, TimeCode& a_timeCode){
+  CH_TIME("imex_sdc::computeDt");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_dt" << endl;
+    pout() << "imex_sdc::computeDt" << endl;
   }
 
   Real dt = 1.E99;
@@ -1216,7 +1216,7 @@ void imex_sdc::compute_dt(Real& a_dt, time_code& a_timecode){
   if(!m_adaptive_dt){
     if(dt_cfl < dt){
       dt = m_cfl*dt_cfl;
-      a_timecode = time_code::advection;
+      a_timeCode = TimeCode::Advection;
     }
   }
   else{
@@ -1235,7 +1235,7 @@ void imex_sdc::compute_dt(Real& a_dt, time_code& a_timecode){
 
     if(new_dt < dt){
       dt = new_dt;
-      a_timecode = time_code::error;
+      a_timeCode = TimeCode::Error;
     }
   }
 
@@ -1244,33 +1244,33 @@ void imex_sdc::compute_dt(Real& a_dt, time_code& a_timecode){
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
     dt = dt_relax;
-    a_timecode = time_code::relaxation_time;
+    a_timeCode = TimeCode::RelaxationTime;
   }
 
   const Real dt_restrict = this->restrict_dt();
   if(dt_restrict < dt){
     dt = dt_restrict;
-    a_timecode = time_code::restricted;
+    a_timeCode = TimeCode::Restricted;
   }
 
   if(dt < m_min_dt){
     dt = m_min_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   if(dt > m_max_dt){
     dt = m_max_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   a_dt = dt;
 
   // Copy the time code, it is needed for diagnostics
-  m_timecode = a_timecode;
+  m_timeCode = a_timeCode;
 
 #if 0 // Debug
   if(procID() == 0){
-    std::cout << "compute_dt = " << a_dt << "\t m_new_dt = " << m_new_dt << std::endl; 
+    std::cout << "computeDt = " << a_dt << "\t m_new_dt = " << m_new_dt << std::endl; 
   }
 #endif
 }

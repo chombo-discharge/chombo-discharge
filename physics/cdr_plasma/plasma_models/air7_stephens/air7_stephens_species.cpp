@@ -103,17 +103,17 @@ air7_stephens::O2minus::O2minus(){
   pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
 }
 
-Real air7_stephens::electron::initial_data(const RealVect a_pos, const Real a_time) const{
+Real air7_stephens::electron::initialData(const RealVect a_pos, const Real a_time) const{
   const Real factor = (a_pos - m_seed_pos).vectorLength();
   return m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad));
 }
 
-Real air7_stephens::N2plus::initial_data(const RealVect a_pos, const Real a_time) const{
+Real air7_stephens::N2plus::initialData(const RealVect a_pos, const Real a_time) const{
   const Real factor = (a_pos - m_seed_pos).vectorLength();
   return m_frac*(m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad)));
 }
 
-Real air7_stephens::O2plus::initial_data(const RealVect a_pos, const Real a_time) const{
+Real air7_stephens::O2plus::initialData(const RealVect a_pos, const Real a_time) const{
   const Real factor = (a_pos - m_seed_pos).vectorLength();
   return m_frac*(m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad)));
 }

@@ -148,7 +148,7 @@ void ito_plasma_air3_lea::read_tables(){
   m_tables["alpha_lfa"].scale_y(m_N);
 }
 
-Real ito_plasma_air3_lea::compute_dt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const {
+Real ito_plasma_air3_lea::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const {
   return 1.E99;
 }
 

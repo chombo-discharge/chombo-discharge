@@ -18,7 +18,7 @@ namespace physics {
     public:
       electron();
       ~electron() {}
-      Real initial_data(const RealVect a_pos, const Real a_time) const;
+      Real initialData(const RealVect a_pos, const Real a_time) const;
 
     protected:
       Real m_uniform_density;
@@ -31,7 +31,7 @@ namespace physics {
     public:
       N2plus();
       ~N2plus(){}
-      Real initial_data(const RealVect a_pos, const Real a_time) const;
+      Real initialData(const RealVect a_pos, const Real a_time) const;
     protected:
       Real m_frac;
       Real m_uniform_density;
@@ -44,7 +44,7 @@ namespace physics {
     public:
       O2plus();
       ~O2plus(){}
-      Real initial_data(const RealVect a_pos, const Real a_time) const;
+      Real initialData(const RealVect a_pos, const Real a_time) const;
     protected:
       Real m_frac;
       Real m_uniform_density;
@@ -57,7 +57,7 @@ namespace physics {
     public:
       N4plus();
       ~N4plus(){}
-      Real initial_data(const RealVect a_pos, const Real a_time) const{return 0.0;}
+      Real initialData(const RealVect a_pos, const Real a_time) const{return 0.0;}
     protected:
     };
 
@@ -65,7 +65,7 @@ namespace physics {
     public:
       O4plus();
       ~O4plus(){}
-      Real initial_data(const RealVect a_pos, const Real a_time) const{return 0.0;}
+      Real initialData(const RealVect a_pos, const Real a_time) const{return 0.0;}
     protected:
     };
 
@@ -73,7 +73,7 @@ namespace physics {
     public:
       O2plusN2();
       ~O2plusN2(){}
-      Real initial_data(const RealVect a_pos, const Real a_time) const {return 0.0;}
+      Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
     protected:
     };
 
@@ -81,7 +81,7 @@ namespace physics {
     public:
       O2minus();
       ~O2minus(){}
-      Real initial_data(const RealVect a_pos, const Real a_time) const {return 0.0;}
+      Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
     };
 
     class air7_stephens::phot_c4v0_X1v0 : public rte_species {

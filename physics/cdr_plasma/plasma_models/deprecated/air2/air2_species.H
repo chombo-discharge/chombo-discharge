@@ -14,7 +14,7 @@ class air2::electron : public species {
 public:
   electron();
   ~electron();
-  Real initial_data(const RealVect a_pos, const Real a_time) const;
+  Real initialData(const RealVect a_pos, const Real a_time) const;
 protected:
   Real     m_initial_ionization;
   Real     m_seed_density;
@@ -26,7 +26,7 @@ class air2::positive_ion : public species {
 public:
   positive_ion();
   ~positive_ion();
-  Real initial_data(const RealVect a_pos, const Real a_time) const;
+  Real initialData(const RealVect a_pos, const Real a_time) const;
 protected:
 
   Real     m_initial_ionization;

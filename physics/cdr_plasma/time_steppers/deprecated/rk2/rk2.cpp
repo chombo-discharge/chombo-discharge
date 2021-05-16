@@ -22,7 +22,7 @@ typedef rk2::poisson_storage poisson_storage;
 typedef rk2::rte_storage     rte_storage;
 typedef rk2::sigma_storage   sigma_storage;
 
-rk2::rk2() : time_stepper() {
+rk2::rk2() : TimeStepper() {
   m_alpha = 1.0;
 
   {

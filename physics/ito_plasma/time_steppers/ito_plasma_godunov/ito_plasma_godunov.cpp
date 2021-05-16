@@ -49,17 +49,17 @@ int ito_plasma_godunov::getNumberOfPlotVariables() const {
   return ncomp;
 }
 
-void ito_plasma_godunov::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
+void ito_plasma_godunov::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
   CH_TIME("ito_plasma_godunov::write_conductivity");
   if(m_verbosity > 5){
     pout() << "ito_plasma_godunov::write_conductivity" << endl;
   }
 
-  ito_plasma_stepper::writePlotData(a_output, a_plotvar_names, a_icomp);
+  ito_plasma_stepper::writePlotData(a_output, a_plotVariableNames, a_icomp);
 
   // Do conductivity
   this->write_conductivity(a_output, a_icomp);
-  a_plotvar_names.push_back("conductivity");
+  a_plotVariableNames.push_back("conductivity");
 }
 
 void ito_plasma_godunov::write_conductivity(EBAMRCellData& a_output, int& a_icomp) const {
@@ -488,10 +488,10 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   return a_dt;
 }
 
-void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
-  CH_TIME("ito_plasma_godunov::compute_dt");
+void ito_plasma_godunov::computeDt(Real& a_dt, TimeCode& a_timeCode){
+  CH_TIME("ito_plasma_godunov::computeDt");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::compute_dt" << endl;
+    pout() << "ito_plasma_godunov::computeDt" << endl;
   }
 
   a_dt = 1.E99;
@@ -503,34 +503,34 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
     a_dt = m_ito->compute_diffusive_dt();
   }
   else if(m_whichDt == which_dt::advection_diffusion){
-    a_dt = m_ito->compute_dt();
+    a_dt = m_ito->computeDt();
   }
     
   a_dt = a_dt*m_max_cells_hop;
-  a_timecode = time_code::advection;
+  a_timeCode = TimeCode::Advection;
 
 
   // Physics-based restriction
   const Real physicsDt = this->compute_physics_dt();
   if(physicsDt < a_dt){
     a_dt = physicsDt;
-    a_timecode = time_code::physics;
+    a_timeCode = TimeCode::Physics;
   }
 
   if(a_dt < m_min_dt){
     a_dt = m_min_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   if(a_dt > m_max_dt){
     a_dt = m_max_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
-  m_timecode = a_timecode;
+  m_timeCode = a_timeCode;
 
 #if 0 // Debug code
-  const Real dtCFL = m_ito->compute_dt();
+  const Real dtCFL = m_ito->computeDt();
   m_avg_cfl += a_dt/dtCFL;
   if(procID() == 0) std::cout << "dt = " << a_dt
 			      << "\t relax dt = " << m_dt_relax
@@ -541,13 +541,13 @@ void ito_plasma_godunov::compute_dt(Real& a_dt, time_code& a_timecode){
 #endif
 }
 
-void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_oldFinestLevel){
-  CH_TIME("ito_plasma_godunov::pre_regrid");
+void ito_plasma_godunov::preRegrid(const int a_lmin, const int a_oldFinestLevel){
+  CH_TIME("ito_plasma_godunov::preRegrid");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::pre_regrid" << endl;
+    pout() << "ito_plasma_godunov::preRegrid" << endl;
   }
 
-  ito_plasma_stepper::pre_regrid(a_lmin, a_oldFinestLevel);
+  ito_plasma_stepper::preRegrid(a_lmin, a_oldFinestLevel);
 
 
   // Copy conductivity to scratch storage
@@ -561,8 +561,8 @@ void ito_plasma_godunov::pre_regrid(const int a_lmin, const int a_oldFinestLevel
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
       
-    m_conductivity_particles[idx]->pre_regrid(a_lmin);
-    m_rho_dagger_particles[idx]->pre_regrid(a_lmin);
+    m_conductivity_particles[idx]->preRegrid(a_lmin);
+    m_rho_dagger_particles[idx]->preRegrid(a_lmin);
   }
 }
 

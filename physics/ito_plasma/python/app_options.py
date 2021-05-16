@@ -22,7 +22,7 @@ def write_template(args):
                      args.discharge_home + "/src/rte_solver/mc_photo.options",\
                      args.discharge_home + "/src/geometry/geo_coarsener.options", \
                      args.discharge_home + "/geometries/" + args.geometry + "/" + args.geometry + ".options", \
-                     args.discharge_home + "/physics/ito_plasma/time_steppers/" + args.time_stepper + "/" + args.time_stepper + ".options", \
+                     args.discharge_home + "/physics/ito_plasma/timesteppers/" + args.TimeStepper + "/" + args.TimeStepper + ".options", \
                      args.discharge_home + "/physics/ito_plasma/plasma_models/" + args.physics + "/" + args.physics + ".options"]
 
     if not args.cell_tagger == "none":

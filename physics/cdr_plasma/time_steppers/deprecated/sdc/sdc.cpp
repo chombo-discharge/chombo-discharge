@@ -37,7 +37,7 @@ void sdc::parseOptions(){
     pout() << "sdc::parseOptions" << endl;
   }
 
-  // Regular stuff from time_stepper that we almost always need
+  // Regular stuff from TimeStepper that we almost always need
   parseVerbosity();
   parse_solver_verbosity();
   parse_cfl();
@@ -192,10 +192,10 @@ RefCountedPtr<rte_storage>& sdc::get_rte_storage(const rte_iterator& a_solverit)
   return m_rte_scratch[a_solverit.get_solver()];
 }
 
-bool sdc::need_to_regrid(){
-  CH_TIME("sdc::need_to_regrid");
+bool sdc::needToRegrid(){
+  CH_TIME("sdc::needToRegrid");
   if(m_verbosity > 5){
-    pout() << "sdc::need_to_regrid" << endl;
+    pout() << "sdc::needToRegrid" << endl;
   }
 
   return false;
@@ -567,7 +567,7 @@ Real sdc::advance(const Real a_dt){
 	  sdc::compute_E_into_scratch();
 	  sdc::compute_cdr_gradients();
 	  sdc::compute_cdr_velo(m_time);
-	  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+	  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 	}
       }
     }
@@ -589,7 +589,7 @@ Real sdc::advance(const Real a_dt){
   // Always recompute velocities and diffusion coefficients before the next time step. The Poisson and RTE equations
   // have been updated when we come in here. 
   sdc::compute_cdr_velo(m_time + actual_dt);
-  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 
 
   // Profile step
@@ -885,7 +885,7 @@ void sdc::compute_semi_implicit_mobilities(const int a_m, const bool a_corrector
       data_ops::average_cell_to_face_allcomps(face_mob, cell_mob, m_amr->getDomains());
 
       // Compute EB-centered mobility
-      time_stepper::extrapolate_to_eb(eb_mob, phase::gas, cell_mob);
+      TimeStepper::extrapolate_to_eb(eb_mob, phase::gas, cell_mob);
     }
   }
   
@@ -1403,10 +1403,10 @@ void sdc::adaptive_report(const Real a_first_dt, const Real a_dt, const Real a_n
   pout() << "\n";
 }
 
-void sdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
-  CH_TIME("sdc::compute_dt");
+void sdc::computeDt(Real& a_dt, TimeCode::which_code& a_timeCode){
+  CH_TIME("sdc::computeDt");
   if(m_verbosity > 5){
-    pout() << "sdc::compute_dt" << endl;
+    pout() << "sdc::computeDt" << endl;
   }
 
   Real dt = 1.E99;
@@ -1424,7 +1424,7 @@ void sdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   if(!m_adaptive_dt){
     if(dt_cfl < dt){
       dt = m_cfl*dt_cfl;
-      a_timecode = time_code::cfl;
+      a_timeCode = TimeCode::cfl;
     }
   }
   else{
@@ -1443,7 +1443,7 @@ void sdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
     if(new_dt < dt){
       dt = new_dt;
-      a_timecode = time_code::error;
+      a_timeCode = TimeCode::Error;
     }
   }
 
@@ -1452,33 +1452,33 @@ void sdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
     dt = dt_relax;
-    a_timecode = time_code::relaxation_time;
+    a_timeCode = TimeCode::RelaxationTime;
   }
 
   const Real dt_restrict = this->restrict_dt();
   if(dt_restrict < dt){
     dt = dt_restrict;
-    a_timecode = time_code::restricted;
+    a_timeCode = TimeCode::Restricted;
   }
 
   if(dt < m_min_dt){
     dt = m_min_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   if(dt > m_max_dt){
     dt = m_max_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   a_dt = dt;
 
   // Copy the time code, it is needed for diagnostics
-  m_timecode = a_timecode;
+  m_timeCode = a_timeCode;
 
 #if 0 // Debug
   if(procID() == 0){
-    std::cout << "compute_dt = " << a_dt << "\t m_new_dt = " << m_new_dt << std::endl; 
+    std::cout << "computeDt = " << a_dt << "\t m_new_dt = " << m_new_dt << std::endl; 
   }
 #endif
 }
@@ -1666,7 +1666,7 @@ void sdc::compute_E_into_scratch(){
   sdc::compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
   sdc::compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
 
-  time_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
+  TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
 }
 
 void sdc::compute_cdr_gradients(){
@@ -1891,8 +1891,8 @@ void sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Real 
 
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
-  time_stepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_states, cdr_velocities, m_cdr->get_phase());
-  time_stepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
+  TimeStepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_states, cdr_velocities, m_cdr->get_phase());
+  TimeStepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -1905,7 +1905,7 @@ void sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Real 
   }
 
   const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
-  time_stepper::compute_cdr_fluxes(cdr_fluxes,
+  TimeStepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
 				   extrap_cdr_velocities,
@@ -1977,7 +1977,7 @@ void sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, cons
   const EBAMRIFData& E = m_fieldSolver_scratch->get_E_domain();
 
   // This fills the solvers' domain fluxes
-  time_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
+  TimeStepper::compute_cdr_domain_fluxes(cdr_fluxes,
 					  extrap_cdr_fluxes,
 					  extrap_cdr_densities,
 					  extrap_cdr_velocities,
@@ -2031,7 +2031,7 @@ void sdc::compute_reaction_network(const int a_m, const Real a_time, const Real 
   const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 
 
-  time_stepper::advance_reaction_network(cdr_sources, rte_sources, cdr_densities, rte_densities, E, a_time, a_dt);
+  TimeStepper::advance_reaction_network(cdr_sources, rte_sources, cdr_densities, rte_densities, E, a_time, a_dt);
 }
 
 void sdc::update_poisson(){
@@ -2042,7 +2042,7 @@ void sdc::update_poisson(){
   
   if(m_do_poisson){ // Solve Poisson equation
     if((m_step +1) % m_fast_poisson == 0){
-      time_stepper::solve_poisson();
+      TimeStepper::solve_poisson();
       this->compute_E_into_scratch();
     }
   }
@@ -2056,7 +2056,7 @@ void sdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRI
   
   if(m_do_poisson){ // Solve Poisson equation
     if((m_step +1) % m_fast_poisson == 0){
-      time_stepper::solve_poisson(m_fieldSolver->getPotential(),
+      TimeStepper::solve_poisson(m_fieldSolver->getPotential(),
 				  m_fieldSolver->getRho(),
 				  a_densities,
 				  a_sigma,
@@ -2107,7 +2107,7 @@ void sdc::update_diffusion_coefficients(){
   if(m_verbosity > 5){
     pout() << "sdc::update_diffusion_coefficients" << endl;
   }
-  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 }
 
 Vector<EBAMRCellData*> sdc::get_cdr_errors(){

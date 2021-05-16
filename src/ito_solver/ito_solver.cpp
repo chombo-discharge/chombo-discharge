@@ -312,10 +312,10 @@ void ito_solver::parse_checkpointing(){
   }
 }
 
-Vector<std::string> ito_solver::get_plotvar_names() const {
-  CH_TIME("ito_solver::get_plotvar_names");
+Vector<std::string> ito_solver::get_plotVariableNames() const {
+  CH_TIME("ito_solver::get_plotVariableNames");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_plotvar_names" << endl;
+    pout() << m_name + "::get_plotVariableNames" << endl;
   }
 
   Vector<std::string> names(0);
@@ -490,10 +490,10 @@ void ito_solver::set_time(const int a_step, const Real a_time, const Real a_dt) 
   m_dt   = a_dt;
 }
 
-void ito_solver::initial_data(){
-  CH_TIME("ito_solver::initial_data");
+void ito_solver::initialData(){
+  CH_TIME("ito_solver::initialData");
   if(m_verbosity > 5){
-    pout() << m_name + "::initial_data" << endl;
+    pout() << m_name + "::initialData" << endl;
   }
 
   particle_container<ito_particle>& particles = m_particle_containers.at(which_container::bulk);
@@ -1936,16 +1936,16 @@ bool ito_solver::is_diffusive() const{
   return m_diffusive;
 }
 
-void ito_solver::pre_regrid(const int a_base, const int a_oldFinestLevel){
-  CH_TIME("ito_solver::pre_regrid");
+void ito_solver::preRegrid(const int a_base, const int a_oldFinestLevel){
+  CH_TIME("ito_solver::preRegrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::pre_regrid" << endl;
+    pout() << m_name + "::preRegrid" << endl;
   }
 
   for (auto& container : m_particle_containers){
     particle_container<ito_particle>& particles = container.second;
 
-    particles.pre_regrid(a_base);
+    particles.preRegrid(a_base);
   }
 }
 
@@ -2304,25 +2304,25 @@ void ito_solver::update_diffusion(const int a_level, const DataIndex a_dit){
 
 
 
-Real ito_solver::compute_dt() const {
-  CH_TIME("ito_solver::compute_dt(allAMRlevels)");
+Real ito_solver::computeDt() const {
+  CH_TIME("ito_solver::computeDt(allAMRlevels)");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_dt(allAMRlevels)" << endl;
+    pout() << m_name + "::computeDt(allAMRlevels)" << endl;
   }
 
   Real dt = 1.E99;
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const Real levelDt = this->compute_dt(lvl);
+    const Real levelDt = this->computeDt(lvl);
     dt = Min(dt, levelDt);
   }
 
   return dt;
 }
 
-Real ito_solver::compute_dt(const int a_lvl) const{
-  CH_TIME("ito_solver::compute_dt(lvl)");
+Real ito_solver::computeDt(const int a_lvl) const{
+  CH_TIME("ito_solver::computeDt(lvl)");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_dt(lvl)" << endl;
+    pout() << m_name + "::computeDt(lvl)" << endl;
   }
 
   Real dt = 1.E99;
@@ -2331,7 +2331,7 @@ Real ito_solver::compute_dt(const int a_lvl) const{
   const Real dx = m_amr->getDx()[a_lvl];
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Real boxDt = this->compute_dt(a_lvl, dit(), dx);
+    const Real boxDt = this->computeDt(a_lvl, dit(), dx);
     dt = Min(dt, boxDt);
   }
 
@@ -2339,7 +2339,7 @@ Real ito_solver::compute_dt(const int a_lvl) const{
   Real tmp = 1.;
   int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("ito_solver::compute_dt(lvl) - communication error on norm");
+    MayDay::Error("ito_solver::computeDt(lvl) - communication error on norm");
   }
   dt = tmp;
 #endif  
@@ -2348,10 +2348,10 @@ Real ito_solver::compute_dt(const int a_lvl) const{
 }
   
 
-Real ito_solver::compute_dt(const int a_lvl, const DataIndex a_dit, const Real a_dx) const{
-  CH_TIME("ito_solver::compute_dt(lvl, dit, dx)");
+Real ito_solver::computeDt(const int a_lvl, const DataIndex a_dit, const Real a_dx) const{
+  CH_TIME("ito_solver::computeDt(lvl, dit, dx)");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_dt(lvl, dit, dx)" << endl;
+    pout() << m_name + "::computeDt(lvl, dit, dx)" << endl;
   }
 
   Real dt = 1.E99;
@@ -2439,7 +2439,7 @@ Real ito_solver::compute_min_dt(const Real a_maxCellsToMove, const int a_lvl) co
   Real tmp = 1.;
   int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("ito_solver::compute_dt(lvl) - communication error on norm");
+    MayDay::Error("ito_solver::computeDt(lvl) - communication error on norm");
   }
   dt = tmp;
 #endif  

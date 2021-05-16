@@ -61,28 +61,28 @@ void rte_stepper<T>::allocate() {
 }
 
 template <typename T>
-void rte_stepper<T>::initial_data(){
-  m_solver->initial_data();
+void rte_stepper<T>::initialData(){
+  m_solver->initialData();
 
   this->set_gaussian_source();
 }
 
 template <typename T>
-void rte_stepper<T>::post_initialize(){
+void rte_stepper<T>::postInitialize(){
 }
 
 template <typename T>
-void rte_stepper<T>::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const {
+void rte_stepper<T>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
   m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
 
 template <typename T>
-void rte_stepper<T>::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
+void rte_stepper<T>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
   m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
 
 template <typename T>
-void rte_stepper<T>::post_checkpoint_setup() {
+void rte_stepper<T>::postCheckpointSetup() {
   this->set_gaussian_source();
 }
 
@@ -92,13 +92,13 @@ int rte_stepper<T>::getNumberOfPlotVariables() const {
 }
 
 template <typename T>
-void rte_stepper<T>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
-  a_plotvar_names.append(m_solver->get_plotvar_names());
+void rte_stepper<T>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
+  a_plotVariableNames.append(m_solver->get_plotVariableNames());
   m_solver->writePlotData(a_output, a_icomp);
 }
 
 template <typename T>
-void rte_stepper<T>::compute_dt(Real& a_dt, time_code& a_timecode) {
+void rte_stepper<T>::computeDt(Real& a_dt, TimeCode& a_timeCode) {
   a_dt = 1.E-10;
 }
 
@@ -122,7 +122,7 @@ void rte_stepper<T>::print_stepReport() {
 
 // Regrid routines
 template <typename T>
-bool rte_stepper<T>::need_to_regrid() {
+bool rte_stepper<T>::needToRegrid() {
   return false;
 }
 
@@ -137,8 +137,8 @@ void rte_stepper<T>::registerOperators() {
 }
 
 template <typename T>
-void rte_stepper<T>::pre_regrid(const int a_base, const int a_oldFinestLevel) {
-  m_solver->pre_regrid(a_base, a_oldFinestLevel);
+void rte_stepper<T>::preRegrid(const int a_base, const int a_oldFinestLevel) {
+  m_solver->preRegrid(a_base, a_oldFinestLevel);
 }
 
 template <typename T>
@@ -155,7 +155,7 @@ void rte_stepper<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const 
 }
 
 template <typename T>
-void rte_stepper<T>::post_regrid(){
+void rte_stepper<T>::postRegrid(){
 }
 
 template <typename T>

@@ -813,25 +813,25 @@ morrow_jiang::excited_species::~excited_species(){
   
 }
 
-Real morrow_jiang::electron::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_jiang::electron::initialData(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
 
   return m_uniform_density + seed;
 }
 
-Real morrow_jiang::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_jiang::positive_species::initialData(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   
   return m_uniform_density + seed;
 }
 
-Real morrow_jiang::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_jiang::negative_species::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.;
 }
 
-Real morrow_jiang::excited_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_jiang::excited_species::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.;
 }
 

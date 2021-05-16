@@ -50,7 +50,7 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/physics/ito_plasma \\\n')
     if not args.cell_tagger == "none":
         makef.write('\t$(DISCHARGE_HOME)/physics/ito_plasma/cell_taggers/'  + args.cell_tagger + '\\\n')
-    makef.write('\t$(DISCHARGE_HOME)/physics/ito_plasma/time_steppers/' + args.time_stepper + '\\\n')
+    makef.write('\t$(DISCHARGE_HOME)/physics/ito_plasma/timesteppers/' + args.TimeStepper + '\\\n')
     makef.write('\t$(DISCHARGE_HOME)/physics/ito_plasma/plasma_models/' + args.physics + '\n')
     makef.write('\n')
 

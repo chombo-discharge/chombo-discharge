@@ -260,7 +260,7 @@ Real strang2::advance(const Real a_dt){
   this->compute_cdr_gradients();
   this->compute_cdr_velo(m_time);
   this->compute_cdr_sources(m_time);
-  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 #endif
 
   this->backup_solutions(); // Store old solution. This stores the old solutions in storage->m_backup
@@ -324,7 +324,7 @@ Real strang2::advance(const Real a_dt){
   this->compute_cdr_gradients();
   this->compute_cdr_sources(m_time + a_dt);
   this->compute_cdr_velo(m_time + a_dt);
-  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 
   // Print diagnostics
   if(m_print_diagno){
@@ -445,7 +445,7 @@ Real strang2::advance_one_step(const Real a_time, const Real a_dt){
     // Last embedded diffusive step tep
     if(m_do_diffusion){
       if(m_consistent_E) this->update_poisson();
-      time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+      TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
       this->advance_diffusion(a_time, a_dt);
     }
 
@@ -459,7 +459,7 @@ Real strang2::advance_one_step(const Real a_time, const Real a_dt){
   // Diffusion advance
   if(m_do_diffusion){
     if(m_compute_D){
-      time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+      TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
     }
     this->advance_diffusion(a_time, a_dt);
   }
@@ -1756,10 +1756,10 @@ void strang2::compute_errors(){
   m_max_error = this->get_max_error();
 }
 
-void strang2::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
-  CH_TIME("strang2::compute_dt");
+void strang2::computeDt(Real& a_dt, TimeCode::which_code& a_timeCode){
+  CH_TIME("strang2::computeDt");
   if(m_verbosity > 5){
-    pout() << "strang2::compute_dt" << endl;
+    pout() << "strang2::computeDt" << endl;
   }
 
   Real dt = 1.E99;
@@ -1768,41 +1768,41 @@ void strang2::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   const Real dt_cfl = m_cfl*m_dt_cfl;
   if(dt_cfl < dt){
     dt = dt_cfl;
-    a_timecode = time_code::cfl;
+    a_timeCode = TimeCode::cfl;
   }
 
   const Real dt_src = m_src_growth*m_cdr->compute_source_dt(m_src_tolerance, m_src_elec_only);
   if(dt_src < dt){
     dt = dt_src;
-    a_timecode = time_code::source;
+    a_timeCode = TimeCode::Source;
   }
 
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
     dt = dt_relax;
-    a_timecode = time_code::relaxation_time;
+    a_timeCode = TimeCode::RelaxationTime;
   }
 
   const Real dt_restrict = this->restrict_dt();
   if(dt_restrict < dt){
     dt = dt_restrict;
-    a_timecode = time_code::restricted;
+    a_timeCode = TimeCode::Restricted;
   }
 
   if(dt < m_min_dt){
     dt = m_min_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   if(dt > m_max_dt){
     dt = m_max_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   a_dt = dt;
 
   // Copy the time code, it is needed for diagnostics
-  m_timecode = a_timecode;
+  m_timeCode = a_timeCode;
 }
 
 void strang2::regridInternals(){
@@ -2099,7 +2099,7 @@ void strang2::compute_E_into_scratch(){
   this->compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
   this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
 
-  time_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
+  TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
 }
 
 void strang2::compute_cdr_velo(const Real a_time){
@@ -2313,7 +2313,7 @@ void strang2::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const R
   }
 
   const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
-  time_stepper::compute_cdr_fluxes(cdr_fluxes,
+  TimeStepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
 				   extrap_cdr_velocities,
@@ -2385,7 +2385,7 @@ void strang2::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, 
   const EBAMRIFData& E = m_fieldSolver_scratch->get_E_domain();
 
   // This fills the solvers' domain fluxes
-  time_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
+  TimeStepper::compute_cdr_domain_fluxes(cdr_fluxes,
 					  extrap_cdr_fluxes,
 					  extrap_cdr_densities,
 					  extrap_cdr_velocities,
@@ -2440,7 +2440,7 @@ void strang2::compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const 
     cdr_gradients.push_back(&(storage->get_gradient())); // These should already have been computed
   }
 
-  time_stepper::compute_cdr_sources(cdr_sources, a_states, cdr_gradients, rte_states, E, a_time, centering::cell_center);
+  TimeStepper::compute_cdr_sources(cdr_sources, a_states, cdr_gradients, rte_states, E, a_time, centering::cell_center);
 }
 
 void strang2::advance_rte_stationary(const Real a_time){
@@ -2514,7 +2514,7 @@ void strang2::update_poisson(){
   
   if(m_do_poisson){ // Solve Poisson equation
     if((m_step +1) % m_fast_poisson == 0){
-      time_stepper::solve_poisson();
+      TimeStepper::solve_poisson();
       this->compute_E_into_scratch();
     }
   }

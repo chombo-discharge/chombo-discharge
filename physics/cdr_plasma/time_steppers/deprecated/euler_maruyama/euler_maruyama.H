@@ -9,14 +9,14 @@
 #define _EULER_MARUYAMA_
 
 #include "CD_AmrMesh.H"
-#include "time_stepper.H"
+#include "CD_TimeStepper.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 
 /*!
   @brief Class for evolving plasma equations using the Euler-Maruyama scheme
 */
-class euler_maruyama : public time_stepper {
+class euler_maruyama : public TimeStepper {
 public:
   
   // Forward declare nested classes. I don't want to clutter this file.
@@ -36,8 +36,8 @@ public:
   void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
   void allocateInternals() override;
   void deallocateInternals() override;
-  void compute_dt(Real& a_dt, time_code::which_code& a_timecode) override;
-  bool need_to_regrid() override;
+  void computeDt(Real& a_dt, TimeCode::which_code& a_timeCode) override;
+  bool needToRegrid() override;
 
 protected:
 

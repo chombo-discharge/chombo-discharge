@@ -158,7 +158,7 @@ advection_kinetics::phi_advect::~phi_advect() {
 
 }
 
-Real advection_kinetics::phi_advect::initial_data(const RealVect a_pos, const Real a_time) const {
+Real advection_kinetics::phi_advect::initialData(const RealVect a_pos, const Real a_time) const {
 
   const RealVect new_pos = a_pos - m_center;
 

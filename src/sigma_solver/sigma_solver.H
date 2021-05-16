@@ -47,7 +47,7 @@ public:
   /*!
     @brief Cache state for regridding
   */
-  virtual void pre_regrid(const int a_lbase, const int a_oldFinestLevel);
+  virtual void preRegrid(const int a_lbase, const int a_oldFinestLevel);
 
   /*!
     @brief Compute the right-hand side
@@ -138,7 +138,7 @@ public:
   /*!
     @brief Get output plot names
   */
-  virtual Vector<std::string> get_plotvar_names() const;
+  virtual Vector<std::string> get_plotVariableNames() const;
 
   /*!
     @brief Compute total charge

@@ -29,10 +29,10 @@ const std::string rte_solver::get_Realm() const {
   return m_Realm;
 }
 
-Vector<std::string> rte_solver::get_plotvar_names() const {
-  CH_TIME("rte_solver::get_plotvar_names");
+Vector<std::string> rte_solver::get_plotVariableNames() const {
+  CH_TIME("rte_solver::get_plotVariableNames");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_plotvar_names" << endl;
+    pout() << m_name + "::get_plotVariableNames" << endl;
   }
   
   Vector<std::string> names(0);
@@ -239,10 +239,10 @@ int rte_solver::get_num_plotvars() const {
   return num_output;
 }
 
-void rte_solver::initial_data() {
-  CH_TIME("rte_solver::initial_data");
+void rte_solver::initialData() {
+  CH_TIME("rte_solver::initialData");
   if(m_verbosity > 5){
-    pout() << m_name + "::initial_data" << endl;
+    pout() << m_name + "::initialData" << endl;
   }
   
   data_ops::set_value(m_state, 0.0);

@@ -1,6 +1,6 @@
 /*!
   @file   rte_stepper.H
-  @brief  time_stepper class for only solving the Rte equation (with surface charge)
+  @brief  TimeStepper class for only solving the Rte equation (with surface charge)
   @author Robert Marskar
   @date   May 2020
 */
@@ -8,7 +8,7 @@
 #ifndef _RTE_STEPPER_
 #define _RTE_STEPPER_
 
-#include "time_stepper.H"
+#include "CD_TimeStepper.H"
 #include "rte_solver.H"
 
 #include "CD_NamespaceHeader.H"
@@ -19,27 +19,27 @@ namespace physics {
       @brief Class that just solves the rte equation using the rte_solver advance method
     */
     template <class T>
-    class rte_stepper : public time_stepper {
+    class rte_stepper : public TimeStepper {
     public:
       rte_stepper();
       ~rte_stepper();
 
-      // Stuff below here is derived from time_stepper.
+      // Stuff below here is derived from TimeStepper.
       // ----------------------------------------------
       void setup_solvers() override;
-      void initial_data() override;
+      void initialData() override;
       void allocate() override;
-      void post_initialize() override;
+      void postInitialize() override;
 
       // IO routines
-      void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
-      void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
-      void post_checkpoint_setup() override;
+      void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+      void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+      void postCheckpointSetup() override;
       int getNumberOfPlotVariables() const override;
-      void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
+      void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
 
       // Advance routines
-      void compute_dt(Real& a_dt, time_code& a_timecode) override;
+      void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
       Real advance(const Real a_dt) override;
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
       void print_stepReport() override;
@@ -52,11 +52,11 @@ namespace physics {
       void registerOperators() override;
 
       // Regrid routines
-      bool need_to_regrid() override;
-      void pre_regrid(const int a_lmin, const int a_oldFinestLevel) override;
+      bool needToRegrid() override;
+      void preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
       void deallocate() override;
       void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
-      void post_regrid() override;
+      void postRegrid() override;
 
     protected:
 

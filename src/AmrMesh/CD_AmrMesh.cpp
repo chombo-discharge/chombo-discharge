@@ -931,20 +931,20 @@ void AmrMesh::buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int
     }
 
     // Berger-Rigoutsos grid generation
-    int new_finest_level;
+    int new_finestLevel;
     if(m_gridGenerationMethod == GridGenerationMethod::BergerRigoutsous){
       BRMeshRefine mesh_refine(m_domains[0], m_refinementRatios, m_fillRatioBR, m_blockingFactor, m_bufferSizeBR, m_maxBoxSize);
-      new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
+      new_finestLevel = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
     }
     else if (m_gridGenerationMethod == GridGenerationMethod::Tiled){
       TiledMeshRefine mesh_refine(m_domains[0], m_refinementRatios, m_blockingFactor*IntVect::Unit);
-      new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
+      new_finestLevel = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
     }
     else{
       MayDay::Abort("AmrMesh::regrid - logic bust, regridding with unknown regrid algorithm");
     }
     
-    m_finestLevel = Min(new_finest_level, m_maxAmrDepth); // Don't exceed m_maxAmrDepth
+    m_finestLevel = Min(new_finestLevel, m_maxAmrDepth); // Don't exceed m_maxAmrDepth
     m_finestLevel = Min(m_finestLevel,   m_maxSimulationDepth); // Don't exceed maximum simulation depth
     m_finestLevel = Min(m_finestLevel,   hardcap);         // Don't exceed hardcap
   }
@@ -1516,8 +1516,8 @@ void AmrMesh::parseBrFillRatio(){
   }
 }
 
-void AmrMesh::setFinestLevel(const int a_finest_level){
-  m_finestLevel = a_finest_level;
+void AmrMesh::setFinestLevel(const int a_finestLevel){
+  m_finestLevel = a_finestLevel;
   m_finestLevel = Min(m_finestLevel, m_maxAmrDepth); // Don't exceed m_maxAmrDepth
   m_finestLevel = Min(m_finestLevel, m_maxSimulationDepth); // Don't exceed maximum simulation depth
 }

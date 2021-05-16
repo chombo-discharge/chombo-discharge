@@ -558,21 +558,21 @@ morrow_fhd::negative_species::~negative_species(){
   
 }
 
-Real morrow_fhd::electron::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_fhd::electron::initialData(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
 
   return m_uniform_density + seed;
 }
 
-Real morrow_fhd::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_fhd::positive_species::initialData(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   
   return m_uniform_density + seed;
 }
 
-Real morrow_fhd::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_fhd::negative_species::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.;
 }
 

@@ -66,7 +66,7 @@ Driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # The mc_photo class is intended as a flexible RTE solver that may interface into several descriptions.
 # Because of that we allow several deposition types, e.g. cloud-in-cell if one wants to compute photoionization
 # profiles with less noise. If one wants the photoionization profile (which is what gets passed around
-# in the time_stepper framework) to contain just the number of photons in a cell, one would use
+# in the TimeStepper framework) to contain just the number of photons in a cell, one would use
 # deposition_type = num. This is useful for SSA type algorithms. 
 #
 # Since the photoproduction source term is filled externally, and the filling of this depends on the

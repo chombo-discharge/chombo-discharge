@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_FieldStepper.H
-  @brief  time_stepper class for only solving the Poisson equation (with surface charge)
+  @brief  TimeStepper class for only solving the Poisson equation (with surface charge)
   @author Robert Marskar
 */
 
@@ -13,7 +13,7 @@
 #define CD_FieldStepper_H
 
 // Our includes
-#include <time_stepper.H>
+#include <CD_TimeStepper.H>
 #include <sigma_solver.H>
 #include <CD_FieldSolver.H>
 #include <CD_NamespaceHeader.H>
@@ -25,7 +25,7 @@ namespace Physics {
       @brief Class that just solves the poisson equation
     */
     template <class T>
-    class FieldStepper : public time_stepper {
+    class FieldStepper : public TimeStepper {
     public:
 
       static Real s_constant_one(const RealVect a_pos);
@@ -34,22 +34,22 @@ namespace Physics {
       FieldStepper();
       ~FieldStepper();
 
-      // Stuff below here is derived from time_stepper.
+      // Stuff below here is derived from TimeStepper.
       // ----------------------------------------------
       void setup_solvers() override;
-      void initial_data() override;
-      void post_initialize() override;
+      void initialData() override;
+      void postInitialize() override;
       void allocate() override;
 
       // IO routines
-      void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override{}
-      void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
-      void post_checkpoint_setup() override {}
+      void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override{}
+      void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+      void postCheckpointSetup() override {}
       int getNumberOfPlotVariables() const override;
-      void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
+      void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
 
       // Advance routines
-      void compute_dt(Real& a_dt, time_code& a_timecode) override {a_dt = 0.0;}
+      void computeDt(Real& a_dt, TimeCode& a_timeCode) override {a_dt = 0.0;}
       Real advance(const Real a_dt) override;
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
       void print_stepReport() override {};
@@ -59,18 +59,18 @@ namespace Physics {
       void registerOperators() override;
 
       // Regrid routines
-      bool need_to_regrid() override {return false;}
-      void pre_regrid(const int a_lbase, const int a_finest_level) override;
+      bool needToRegrid() override {return false;}
+      void preRegrid(const int a_lbase, const int a_finestLevel) override;
       void deallocate() override;
-      bool LoadBalancing_Realm(const std::string a_Realm) const override;
-      void LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
+      bool loadBalanceThisRealm(const std::string a_Realm) const override;
+      void loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
 			      Vector<Vector<Box> >&            a_boxes,
 			      const std::string                a_Realm,
 			      const Vector<DisjointBoxLayout>& a_grids,
 			      const int                        a_lmin,
-			      const int                        a_finest_level) override;
+			      const int                        a_finestLevel) override;
       void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
-      void post_regrid() override;
+      void postRegrid() override;
 
       // Solve routine
       void solve_poisson();

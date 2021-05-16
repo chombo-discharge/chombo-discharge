@@ -32,7 +32,7 @@ advection_diffusion_species::~advection_diffusion_species(){
 
 }
 
-Real advection_diffusion_species::initial_data(const RealVect a_pos, const Real a_time) const{
+Real advection_diffusion_species::initialData(const RealVect a_pos, const Real a_time) const{
   const RealVect d = a_pos - m_blob_center;
   const Real d2 = PolyGeom::dot(d,d);
   const Real r2 = m_blob_radius*m_blob_radius;

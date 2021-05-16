@@ -95,12 +95,12 @@ public:
   /*!
     @brief Cache states before regrid step
   */
-  virtual void pre_regrid(const int a_lbase, const int a_finest_level);
+  virtual void preRegrid(const int a_lbase, const int a_finestLevel);
 
   /*!
     @brief Initial data
   */
-  virtual void initial_data();
+  virtual void initialData();
 
   /*!
     @brief All solvers deposit their particles
@@ -181,7 +181,7 @@ public:
   /*!
     @brief Compute dt
   */
-  virtual Real compute_dt();
+  virtual Real computeDt();
 
   /*!
     @brief Compute the classical advection time step

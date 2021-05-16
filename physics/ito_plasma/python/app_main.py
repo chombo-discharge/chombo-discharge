@@ -4,7 +4,7 @@ import sys
 def write_template(args):
     # Make sure that every class can be found where they should
     geofile = args.discharge_home + "/geometries" + "/" + args.geometry + "/" + args.geometry + ".H"
-    tsfile  = args.discharge_home + "/physics/ito_plasma/time_steppers" + "/" + args.time_stepper + "/" + args.time_stepper + ".H"
+    tsfile  = args.discharge_home + "/physics/ito_plasma/timesteppers" + "/" + args.TimeStepper + "/" + args.TimeStepper + ".H"
     kinfile = args.discharge_home + "/physics/ito_plasma/plasma_models" + "/" + args.physics + "/" + args.physics + ".H"
     tagfile = args.discharge_home + "/physics/ito_plasma/cell_taggers" +  "/" + args.cell_tagger + "/" + args.cell_tagger + ".H"
     if not os.path.exists(geofile):
@@ -35,7 +35,7 @@ def write_template(args):
     mainf.write('#include "mc_photo.H"\n')
     mainf.write('#include "' + args.physics + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
-    mainf.write('#include "' + args.time_stepper + '.H"\n')
+    mainf.write('#include "' + args.TimeStepper + '.H"\n')
     if not args.cell_tagger == "none":
         mainf.write('#include "' + args.cell_tagger + '.H"\n')
     mainf.write('#include "ParmParse.H"\n')
@@ -83,7 +83,7 @@ def write_template(args):
     mainf.write("\n")
     mainf.write("  // Set up physics \n")
     mainf.write("  RefCountedPtr<ito_plasma_physics> physics      = RefCountedPtr<ito_plasma_physics> (new " + args.physics + "());\n")
-    mainf.write("  RefCountedPtr<ito_plasma_stepper> timestepper  = RefCountedPtr<ito_plasma_stepper> (new " + args.time_stepper + "(physics));\n")
+    mainf.write("  RefCountedPtr<ito_plasma_stepper> timestepper  = RefCountedPtr<ito_plasma_stepper> (new " + args.TimeStepper + "(physics));\n")
     if args.cell_tagger != "none":
         mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new " + args.cell_tagger + "(physics, timestepper, amr, compgeom));\n")
     else:
@@ -103,7 +103,7 @@ def write_template(args):
     mainf.write("  auto rte = rte_fact->new_layout(physics->get_rte_species());\n");
     mainf.write("\n")
 
-    mainf.write("  // Send solvers to time_stepper \n")
+    mainf.write("  // Send solvers to TimeStepper \n")
     mainf.write("  timestepper->set_poisson(poi);\n");
     mainf.write("  timestepper->set_ito(cdr);\n");
     mainf.write("  timestepper->set_rte(rte);\n");

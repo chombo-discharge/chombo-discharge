@@ -61,7 +61,7 @@ int main(int argc, char* argv[]){
   auto cdr = ito_fact->new_layout(physics->get_ito_species());
   auto rte = rte_fact->new_layout(physics->get_rte_species());
 
-  // Send solvers to time_stepper 
+  // Send solvers to TimeStepper 
   timestepper->set_poisson(poi);
   timestepper->set_ito(cdr);
   timestepper->set_rte(rte);

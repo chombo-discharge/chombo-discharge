@@ -92,12 +92,12 @@ public:
   /*!
     @brief Get output plot names
   */
-  virtual Vector<std::string> get_plotvar_names() const;
+  virtual Vector<std::string> get_plotVariableNames() const;
 
   /*!
     @brief Set the initial data
   */
-  virtual void initial_data();
+  virtual void initialData();
 
   /*!
     @brief Regrid solver
@@ -422,7 +422,7 @@ public:
   /*!
     @brief Cache the particles
   */
-  virtual void pre_regrid(const int a_base, const int a_oldFinestLevel);
+  virtual void preRegrid(const int a_base, const int a_oldFinestLevel);
 
   /*!
     @brief Add particles. Level and patch version. 
@@ -598,17 +598,17 @@ public:
   /*!
     @brief Compute min dt
   */
-  Real compute_dt() const;
+  Real computeDt() const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
-  Real compute_dt(const int a_lvl) const;
+  Real computeDt(const int a_lvl) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
-  Real compute_dt(const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
+  Real computeDt(const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 

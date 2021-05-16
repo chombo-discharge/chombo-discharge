@@ -97,7 +97,7 @@ public:
 
     }
 
-    Real initial_data(const RealVect a_pos, const Real a_time) const{
+    Real initialData(const RealVect a_pos, const Real a_time) const{
       const Real diff  = (a_pos - m_center).vectorLength();;
       const Real diff2 = diff*diff;
       return exp(-diff2/(2*m_L*m_L));

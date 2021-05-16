@@ -19,7 +19,7 @@ namespace physics {
       advection_diffusion_species();
       ~advection_diffusion_species();
 
-      Real initial_data(const RealVect a_pos, const Real a_time) const;
+      Real initialData(const RealVect a_pos, const Real a_time) const;
     protected:
       Real     m_blob_radius;
       Real     m_blob_amplitude;

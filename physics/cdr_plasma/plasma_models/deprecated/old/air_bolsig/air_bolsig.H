@@ -456,7 +456,7 @@ protected:
     /*!
       @brief Implementation of initial data
     */
-    virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+    virtual Real initialData(const RealVect a_pos, const Real a_time) const;
 
     /*!
       @brief Set the noise function
@@ -512,7 +512,7 @@ protected:
     /*!
       @brief Implementation of initial data
     */
-    virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+    virtual Real initialData(const RealVect a_pos, const Real a_time) const;
 
     /*!
       @brief Set the noise function
@@ -568,7 +568,7 @@ protected:
     /*!
       @brief Implementation of initial data
     */
-    virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+    virtual Real initialData(const RealVect a_pos, const Real a_time) const;
 
     /*!
       @brief Set the noise function

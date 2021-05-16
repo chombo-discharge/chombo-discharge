@@ -288,39 +288,39 @@ air9eed_bourdon::photon_three::~photon_three(){
 
 }
 
-Real air9eed_bourdon::eed::initial_data(const RealVect a_pos, const Real a_time) const{
+Real air9eed_bourdon::eed::initialData(const RealVect a_pos, const Real a_time) const{
   return 1.E10;
 }
 
-Real air9eed_bourdon::electron::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air9eed_bourdon::electron::initialData(const RealVect a_pos, const Real a_time) const {
   return m_initial_ionization;
 }
 
-Real air9eed_bourdon::N2plus::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air9eed_bourdon::N2plus::initialData(const RealVect a_pos, const Real a_time) const {
   return m_initial_ionization;
 }
 
-Real air9eed_bourdon::N4plus::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air9eed_bourdon::N4plus::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 
-Real air9eed_bourdon::O2plus::initial_data(const RealVect a_pos, const Real a_time) const{
+Real air9eed_bourdon::O2plus::initialData(const RealVect a_pos, const Real a_time) const{
   return m_initial_ionization;
 }
 
-Real air9eed_bourdon::O4plus::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air9eed_bourdon::O4plus::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 
-Real air9eed_bourdon::O2plusN2::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air9eed_bourdon::O2plusN2::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 
-Real air9eed_bourdon::O2minus::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air9eed_bourdon::O2minus::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 
-Real air9eed_bourdon::Ominus::initial_data(const RealVect a_pos, const Real a_time) const {
+Real air9eed_bourdon::Ominus::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 

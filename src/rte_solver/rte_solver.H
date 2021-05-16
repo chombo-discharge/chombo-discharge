@@ -53,7 +53,7 @@ public:
   /*!
     @brief Get output plot names
   */
-  virtual Vector<std::string> get_plotvar_names() const;
+  virtual Vector<std::string> get_plotVariableNames() const;
   
   /*!
     @brief Advance equation one time step
@@ -162,7 +162,7 @@ public:
   /*!
     @brief Pre regrid
   */
-  virtual void pre_regrid(const int a_lbase, const int a_oldFinestLevel) = 0;
+  virtual void preRegrid(const int a_lbase, const int a_oldFinestLevel) = 0;
 
   /*!
     @brief Regrid function
@@ -178,7 +178,7 @@ public:
     @brief Fill solver with initial data. By default, this sets internal data to zero. 
     @details Only relevant for non-stationary solvers
   */
-  virtual void initial_data();
+  virtual void initialData();
 
   /*!
     @brief Set source term

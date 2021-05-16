@@ -83,35 +83,35 @@ int TiledMeshRefine::regrid(Vector<Vector<Box> >&       a_newGrids,
 #endif
   //  pout() << "done with allreduce, top level = " << topLevel << endl;
 
-  int new_finest_level;
+  int new_finestLevel;
   if(topLevel >= a_baseLevel){   // We have something that can change
-    new_finest_level = 1 + topLevel;
+    new_finestLevel = 1 + topLevel;
 
     // Extra level of empty tiles so we can use makeLevelTiles for all levels
-    Vector<IntVectSet> tiles(2+new_finest_level, IntVectSet()); 
+    Vector<IntVectSet> tiles(2+new_finestLevel, IntVectSet()); 
 
     // Make tiles on all levels above a_baseLevel
-    for (int lvl = new_finest_level; lvl > a_baseLevel; lvl--){
+    for (int lvl = new_finestLevel; lvl > a_baseLevel; lvl--){
       //      pout() << "making tiles on level = " << lvl << endl;
       makeLevelTiles(tiles[lvl], tiles[lvl+1], a_tags[lvl-1], m_vectDomains[lvl], m_refRatios[lvl], m_refRatios[lvl-1]);
     }
 
     // Make tiles into boxes
-    a_newGrids.resize(1+new_finest_level);
+    a_newGrids.resize(1+new_finestLevel);
     for (int lvl = 0; lvl <= a_baseLevel; lvl++){
       //      pout() << "copying old grids on level = " << lvl << endl;
       a_newGrids[lvl] = a_oldGrids[lvl];
     }
 
-    for (int lvl = a_baseLevel+1; lvl <= new_finest_level; lvl++){
+    for (int lvl = a_baseLevel+1; lvl <= new_finestLevel; lvl++){
       //      pout() << "making boxes from tiles on level = " << lvl << endl;
       makeBoxesFromTiles(a_newGrids[lvl], tiles[lvl], m_vectDomains[lvl]);
     }
 
-    //    std::cout << new_finest_level << std::endl;
+    //    std::cout << new_finestLevel << std::endl;
   }
   else{ // If we don't have any tags, just return the old boxes
-    new_finest_level = a_baseLevel;
+    new_finestLevel = a_baseLevel;
     a_newGrids.resize(a_oldGrids.size());
     for (int lvl = 0; lvl <= a_baseLevel; lvl++){
       a_newGrids[lvl] = a_oldGrids[lvl];
@@ -122,7 +122,7 @@ int TiledMeshRefine::regrid(Vector<Vector<Box> >&       a_newGrids,
 
   //  MayDay::Abort("TiledMeshRefine::regrid - not implemented");
   //  pout() << "TiledMeshRefine::regrid - done" << endl;
-  return new_finest_level;
+  return new_finestLevel;
 }
 
 

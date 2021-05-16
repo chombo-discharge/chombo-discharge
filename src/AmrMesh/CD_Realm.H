@@ -45,7 +45,7 @@ public:
 	      const Vector<int>& a_ref_rat,
 	      const Vector<Real>& a_dx,
 	      const RealVect a_probLo,
-	      const int a_finest_level,
+	      const int a_finestLevel,
 	      const int a_ebghost,
 	      const int a_num_ghost,
 	      const int a_lsf_ghost,
@@ -61,7 +61,7 @@ public:
   static void copy(Vector<RefCountedPtr<LevelData<T> > >& a_dst, const Vector<RefCountedPtr<LevelData<T> > >& a_src);
 
   // Base and operator regrid
-  void setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level);
+  void setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel);
   void regridBase(const int a_lmin);
   void regridOperators(const int a_lmin, const int a_lmax, const int a_regsize);
 

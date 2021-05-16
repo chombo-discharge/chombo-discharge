@@ -25,12 +25,12 @@ namespace physics {
 
       // IO routines
       int getNumberOfPlotVariables() const override;
-      void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
+      void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
       void write_conductivity(EBAMRCellData& a_output, int& a_icomp) const;
 
       // Advance routines
       Real advance(const Real a_dt) override;
-      void compute_dt(Real& a_dt, time_code& a_timecode) override;
+      void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
 
       // Setup routines
       void allocate() override;
@@ -39,7 +39,7 @@ namespace physics {
       void allocateInternals() override;
 
       // Regrid routines
-      void pre_regrid(const int a_lmin, const int a_oldFinestLevel) override;
+      void preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
       void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
 

@@ -26,7 +26,7 @@ int main(int argc, char* argv[]){
 
   // Set up basic advection_diffusion 
   RefCountedPtr<cdr_solver> solver        = RefCountedPtr<cdr_solver>   (new cdr_gdnv());
-  RefCountedPtr<time_stepper> timestepper = RefCountedPtr<time_stepper> (new advection_diffusion_stepper(solver));
+  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new advection_diffusion_stepper(solver));
   RefCountedPtr<cell_tagger> tagger       = RefCountedPtr<cell_tagger>  (new advection_diffusion_tagger(solver, amr));
 
   // Set up the Driver and run it

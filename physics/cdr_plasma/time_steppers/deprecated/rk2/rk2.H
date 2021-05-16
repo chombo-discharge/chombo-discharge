@@ -9,7 +9,7 @@
 #define _rk2_
 
 #include "CD_AmrMesh.H"
-#include "time_stepper.H"
+#include "CD_TimeStepper.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 
@@ -23,7 +23,7 @@
   rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method
 
 */
-class rk2 : public time_stepper {
+class rk2 : public TimeStepper {
 public:
   
   // Forward declare nested classes. I don't want to clutter this file.

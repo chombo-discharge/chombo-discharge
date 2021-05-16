@@ -10,7 +10,7 @@
 
 #include <functional>
 
-#include "time_stepper.H"
+#include "CD_TimeStepper.H"
 #include "ito_plasma_physics.H"
 #include "ito_layout.H"
 #include "point_particle.H"
@@ -36,7 +36,7 @@ namespace physics {
       stationary,
     };
 
-    class ito_plasma_stepper : public time_stepper {
+    class ito_plasma_stepper : public TimeStepper {
     public:
 
       static Real s_constant_one(const RealVect a_pos);
@@ -52,11 +52,11 @@ namespace physics {
       virtual void allocateInternals() = 0;
       virtual void setup_solvers() override;
       virtual void allocate() override;
-      virtual void initial_data() override;
+      virtual void initialData() override;
       virtual void initial_sigma();
-      virtual void post_checkpoint_setup() override;
+      virtual void postCheckpointSetup() override;
       virtual void post_checkpoint_poisson();
-      virtual void post_initialize() override;
+      virtual void postInitialize() override;
       
       void setup_ito();
       void setup_poisson();
@@ -64,17 +64,17 @@ namespace physics {
       void setup_sigma();
   
       // IO routines
-      void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const override;
-      void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) override;
-      virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const override;
+      void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+      void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+      virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
       void write_J(EBAMRCellData& a_output, int& a_icomp) const;
       void write_num_particles_per_patch(EBAMRCellData& a_output, int& a_icomp) const;
       int  getNumberOfPlotVariables() const override;
-      Vector<long int> get_checkpoint_loads(const std::string a_Realm, const int a_level) const override;
+      Vector<long int> getCheckpointLoads(const std::string a_Realm, const int a_level) const override;
   
       // Advance routines
       virtual Real advance(const Real a_dt) = 0;
-      virtual void compute_dt(Real& a_dt, time_code& a_timecode) override;
+      virtual void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) override;
       void print_stepReport() override;
 
@@ -84,16 +84,16 @@ namespace physics {
       
       // Regrid routines. 
       void deallocate() override;
-      virtual void pre_regrid(const int a_lmin, const int a_oldFinestLevel) override;
+      virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
       virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
-      void post_regrid() override;
-      bool LoadBalancing_Realm(const std::string a_Realm) const override;
-      void LoadBalancing_boxes(Vector<Vector<int> >&            a_procs,
+      void postRegrid() override;
+      bool loadBalanceThisRealm(const std::string a_Realm) const override;
+      void loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
 			      Vector<Vector<Box> >&            a_boxes,
 			      const std::string                a_Realm,
 			      const Vector<DisjointBoxLayout>& a_grids,
 			      const int                        a_lmin,
-			      const int                        a_finest_level) override;
+			      const int                        a_finestLevel) override;
 
 
       // Particle handling routines.
@@ -414,7 +414,7 @@ namespace physics {
 				       const std::string                a_Realm,
 				       const Vector<DisjointBoxLayout>& a_grids,
 				       const int                        a_lmin,
-				       const int                        a_finest_level);
+				       const int                        a_finestLevel);
       
       Vector<RefCountedPtr<ito_solver> > get_lb_solvers() const;
     };

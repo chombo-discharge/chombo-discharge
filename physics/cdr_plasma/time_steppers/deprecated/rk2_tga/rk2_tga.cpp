@@ -125,9 +125,9 @@ Real rk2_tga::advance(const Real a_dt){
 }
 
 void rk2_tga::regridInternals(){
-  CH_TIME("time_stepper::regridInternals");
+  CH_TIME("TimeStepper::regridInternals");
   if(m_verbosity > 5){
-    pout() << "time_stepper::regridInternals" << endl;
+    pout() << "TimeStepper::regridInternals" << endl;
   }
   
   this->allocate_cdr_storage();
@@ -136,10 +136,10 @@ void rk2_tga::regridInternals(){
   this->allocate_sigma_storage();
 }
 
-void rk2_tga::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
-  CH_TIME("time_stepper::compute_dt");
+void rk2_tga::computeDt(Real& a_dt, TimeCode::which_code& a_timeCode){
+  CH_TIME("TimeStepper::computeDt");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_dt" << endl;
+    pout() << "TimeStepper::computeDt" << endl;
   }
 
   Real dt = 1.E99;
@@ -148,35 +148,35 @@ void rk2_tga::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   const Real dt_cfl = m_cfl*m_dt_cfl;
   if(dt_cfl < dt){
     dt = dt_cfl;
-    a_timecode = time_code::cfl;
+    a_timeCode = TimeCode::cfl;
   }
 
   const Real dt_src = m_src_growth*m_cdr->compute_source_dt(m_src_tolerance, m_src_elec_only);
   if(dt_src < dt){
     dt = dt_src;
-    a_timecode = time_code::source;
+    a_timeCode = TimeCode::Source;
   }
 
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
     dt = dt_relax;
-    a_timecode = time_code::relaxation_time;
+    a_timeCode = TimeCode::RelaxationTime;
   }
 
   const Real dt_restrict = this->restrict_dt();
   if(dt_restrict < dt){
     dt = dt_restrict;
-    a_timecode = time_code::restricted;
+    a_timeCode = TimeCode::Restricted;
   }
 
   if(dt < m_min_dt){
     dt = m_min_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   if(dt > m_max_dt){
     dt = m_max_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   a_dt = dt;
@@ -219,9 +219,9 @@ void rk2_tga::allocate_sigma_storage(){
 }
 
 void rk2_tga::deallocateInternals(){
-  CH_TIME("time_stepper::deallocateInternals");
+  CH_TIME("TimeStepper::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "time_stepper::deallocateInternals" << endl;
+    pout() << "TimeStepper::deallocateInternals" << endl;
   }
   
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
@@ -414,7 +414,7 @@ void rk2_tga::compute_cdr_fluxes(const Real a_time){
 
   const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
 
-  time_stepper::compute_cdr_fluxes(cdr_fluxes,
+  TimeStepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
 				   extrap_cdr_velocities,

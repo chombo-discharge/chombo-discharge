@@ -42,7 +42,7 @@ cdr_species::~cdr_species(){
 
 }
 
-Real cdr_species::initial_data(const RealVect a_pos, const Real a_time) const{
+Real cdr_species::initialData(const RealVect a_pos, const Real a_time) const{
   return 0.;
 }
 

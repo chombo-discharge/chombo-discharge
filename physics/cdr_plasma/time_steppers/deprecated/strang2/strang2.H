@@ -9,7 +9,7 @@
 #define _STRANG2_
 
 #include "CD_AmrMesh.H"
-#include "time_stepper.H"
+#include "CD_TimeStepper.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 
@@ -17,7 +17,7 @@
   @brief Class for evolving plasma equations with a multirate method using strongly stability preserving
   Runge-Kutta methods. 
 */
-class strang2 : public time_stepper {
+class strang2 : public TimeStepper {
 public:
   
   // Forward declare nested classes. I don't want to clutter this file.
@@ -88,7 +88,7 @@ protected:
   bool m_consistent_E;
   bool m_consistent_rte;
 
-  time_code::which_code m_timecode;
+  TimeCode::which_code m_timeCode;
 
   RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
   RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
@@ -140,7 +140,7 @@ protected:
   void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_cdr_sources(const Real a_time);
   void compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Real a_time);
-  void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
+  void computeDt(Real& a_dt, TimeCode::which_code& a_timeCode);
   void compute_sigma_flux();
   void store_solvers();
   void restore_solvers();

@@ -29,7 +29,7 @@ public:
   /*!
     @brief Initial data
   */
-  virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+  virtual Real initialData(const RealVect a_pos, const Real a_time) const;
   
 protected:
 
@@ -59,7 +59,7 @@ public:
   /*!
     @brief Initial data
   */
-  virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+  virtual Real initialData(const RealVect a_pos, const Real a_time) const;
   
 protected:
   
@@ -85,7 +85,7 @@ public:
   /*!
     @brief Initial data
   */
-  virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+  virtual Real initialData(const RealVect a_pos, const Real a_time) const;
 };
 
 /*!

@@ -21,7 +21,7 @@
 
 // Our includes
 #include <computational_geometry.H>
-#include <time_stepper.H>
+#include <CD_TimeStepper.H>
 #include <CD_AmrMesh.H>
 #include <cell_tagger.H>
 #include <mfis.H>
@@ -43,13 +43,13 @@ public:
   /*!
     @brief Full constructor. 
     @param[in] a_computationalGeometry Computational geometry. 
-    @param[in] a_time_stepper          The time stepper
+    @param[in] a_TimeStepper          The time stepper
     @param[in] a_amr                   AmrMesh core class. 
     @param[in] a_cellTagger            Cell tagger which flags cell for refinement. 
     @param[in] a_geoCoarsen            geo_coarsen class which can remove tags along the geometry. 
   */
   Driver(const RefCountedPtr<computational_geometry>& a_computationalGeometry,
-	 const RefCountedPtr<time_stepper>&           a_timeStepper,
+	 const RefCountedPtr<TimeStepper>&           a_timeStepper,
 	 const RefCountedPtr<AmrMesh>&                a_amr,
 	 const RefCountedPtr<cell_tagger>&            a_cellTagger = RefCountedPtr<cell_tagger>(NULL),
 	 const RefCountedPtr<geo_coarsener>&          a_geoCoarsen = RefCountedPtr<geo_coarsener>(NULL));
@@ -111,7 +111,7 @@ protected:
   /*!
     @brief Time stepper
   */
-  RefCountedPtr<time_stepper> m_timeStepper;
+  RefCountedPtr<TimeStepper> m_timeStepper;
 
   /*!
     @brief Cell tagger
@@ -126,7 +126,7 @@ protected:
   /*!
     @brief Time code
   */
-  time_code m_timecode;
+  TimeCode m_timeCode;
 
   /*!
     @brief Memory report mode
@@ -507,7 +507,7 @@ protected:
   /*!
     @brief Set the time stepper
   */
-  void setTimeStepper(const RefCountedPtr<time_stepper>& a_timeStepper);
+  void setTimeStepper(const RefCountedPtr<TimeStepper>& a_timeStepper);
 
   /*!
     @brief Set the cell tagger

@@ -422,17 +422,17 @@ void mc_photo::allocateInternals(){
   m_amr->allocate(m_source_photons, m_pvr_buffer, m_Realm);
 }
 
-void mc_photo::pre_regrid(const int a_lmin, const int a_oldFinestLevel){
-  CH_TIME("mc_photo::pre_regrid");
+void mc_photo::preRegrid(const int a_lmin, const int a_oldFinestLevel){
+  CH_TIME("mc_photo::preRegrid");
   if(m_verbosity > 5){
     pout() << m_name + "::pre_grid" << endl;
   }
 
-  m_photons.pre_regrid(a_lmin);         // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_bulk_photons.pre_regrid(a_lmin);    // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_eb_photons.pre_regrid(a_lmin);      // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_domain_photons.pre_regrid(a_lmin);  // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_source_photons.pre_regrid(a_lmin);  // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_photons.preRegrid(a_lmin);         // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_bulk_photons.preRegrid(a_lmin);    // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_eb_photons.preRegrid(a_lmin);      // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_domain_photons.preRegrid(a_lmin);  // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_source_photons.preRegrid(a_lmin);  // TLDR: This moves photons from l >= a_lmin to Max(a_lmin-1,0)
 }
 
 void mc_photo::deallocateInternals(){
@@ -657,10 +657,10 @@ void mc_photo::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   readParticlesFromHDF(a_handle, m_photons[a_level], str);
 }
 
-Vector<std::string> mc_photo::get_plotvar_names() const {
-  CH_TIME("mc_photo::get_plotvar_names");
+Vector<std::string> mc_photo::get_plotVariableNames() const {
+  CH_TIME("mc_photo::get_plotVariableNames");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_plotvar_names" << endl;
+    pout() << m_name + "::get_plotVariableNames" << endl;
   }
   
   Vector<std::string> names(0);

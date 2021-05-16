@@ -80,7 +80,7 @@ public:
 
     ~phi_advect();
 
-    Real initial_data(const RealVect a_pos, const Real a_time) const;
+    Real initialData(const RealVect a_pos, const Real a_time) const;
     
   protected:
 

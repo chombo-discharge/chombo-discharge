@@ -23,7 +23,7 @@ parser.add_argument('-field_solver',    type=str,  help="Poisson solver implemen
 parser.add_argument('-ito_solver',      type=str,  help="CDR solver implementation", default="ito_solver")
 parser.add_argument('-physics',         type=str,  help="Plasma kinetics class", default="")
 parser.add_argument('-geometry',        type=str,  help="Geometry class", default="regular_geometry")
-parser.add_argument('-time_stepper',    type=str,  help="Time stepping method", default="ito_plasma_godunov")
+parser.add_argument('-TimeStepper',    type=str,  help="Time stepping method", default="ito_plasma_godunov")
 parser.add_argument('-cell_tagger',     type=str,  help="Cell tagging method", default="none")
 
 args = parser.parse_args()

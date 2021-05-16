@@ -29,7 +29,7 @@ namespace physics {
       ito_plasma_air3();
       ~ito_plasma_air3();
 
-      Real compute_dt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const override;
+      Real computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const override;
 
       Real compute_alpha(const RealVect a_E) const override;
 

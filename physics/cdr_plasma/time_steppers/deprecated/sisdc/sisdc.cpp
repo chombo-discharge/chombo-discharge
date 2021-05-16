@@ -36,7 +36,7 @@ void sisdc::parseOptions(){
     pout() << "sisdc::parseOptions" << endl;
   }
 
-  // Regular stuff from time_stepper that we almost always need
+  // Regular stuff from TimeStepper that we almost always need
   parseVerbosity();
   parse_solver_verbosity();
   parse_cfl();
@@ -243,10 +243,10 @@ RefCountedPtr<rte_storage>& sisdc::get_rte_storage(const rte_iterator& a_solveri
   return m_rte_scratch[a_solverit.get_solver()];
 }
 
-bool sisdc::need_to_regrid(){
-  CH_TIME("sisdc::need_to_regrid");
+bool sisdc::needToRegrid(){
+  CH_TIME("sisdc::needToRegrid");
   if(m_verbosity > 5){
-    pout() << "sisdc::need_to_regrid" << endl;
+    pout() << "sisdc::needToRegrid" << endl;
   }
   const bool regrid = m_accum_cfl > m_regrid_cfl;
   if(regrid) m_accum_cfl = 0.0;
@@ -278,7 +278,7 @@ void sisdc::init_source_terms(){
     pout() << "sisdc::init_source_terms" << endl;
   }
   
-  time_stepper::init_source_terms();
+  TimeStepper::init_source_terms();
 }
 
 void sisdc::setup_quadrature_nodes(const int a_p){
@@ -608,7 +608,7 @@ Real sisdc::advance(const Real a_dt){
 	  sisdc::compute_E_into_scratch();
 	  sisdc::compute_cdr_gradients();
 	  sisdc::compute_cdr_velo(m_time);
-	  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+	  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 	  sisdc::compute_cdr_sources(m_time);
 	}
       }
@@ -634,13 +634,13 @@ Real sisdc::advance(const Real a_dt){
   const Real t2 = MPI_Wtime();
   sisdc::compute_cdr_velo(m_time + actual_dt);
   const Real t3 = MPI_Wtime();
-  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
   const Real t4 = MPI_Wtime();
 
   // In case we're using FHD, we need to tell the kinetics module about the time step before computign sources
   Real next_dt;
-  time_code::which_code dummy;
-  compute_dt(next_dt, dummy);
+  TimeCode::which_code dummy;
+  computeDt(next_dt, dummy);
   m_plaskin->set_dt(next_dt);
   sisdc::compute_cdr_sources(m_time + actual_dt);
   if(!m_rte->is_stationary()){
@@ -1642,10 +1642,10 @@ void sisdc::adaptive_report(const Real a_first_dt, const Real a_dt, const Real a
   pout() << "\n";
 }
 
-void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
-  CH_TIME("sisdc::compute_dt");
+void sisdc::computeDt(Real& a_dt, TimeCode::which_code& a_timeCode){
+  CH_TIME("sisdc::computeDt");
   if(m_verbosity > 5){
-    pout() << "sisdc::compute_dt" << endl;
+    pout() << "sisdc::computeDt" << endl;
   }
 
   Real dt = 1.E99;
@@ -1665,7 +1665,7 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   if(!m_adaptive_dt){
     if(dt_cfl < dt){
       dt = m_cfl*dt_cfl;
-      a_timecode = time_code::cfl;
+      a_timeCode = TimeCode::cfl;
     }
   }
   else{
@@ -1693,7 +1693,7 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
     if(new_dt < dt){
       dt = new_dt;
-      a_timecode = time_code::error;
+      a_timeCode = TimeCode::Error;
     }
   }
 
@@ -1708,33 +1708,33 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
     dt = dt_relax;
-    a_timecode = time_code::relaxation_time;
+    a_timeCode = TimeCode::RelaxationTime;
   }
 
   const Real dt_restrict = this->restrict_dt();
   if(dt_restrict < dt){
     dt = dt_restrict;
-    a_timecode = time_code::restricted;
+    a_timeCode = TimeCode::Restricted;
   }
 
   if(dt < m_min_dt){
     dt = m_min_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   if(dt > m_max_dt){
     dt = m_max_dt;
-    a_timecode = time_code::hardcap;
+    a_timeCode = TimeCode::Hardcap;
   }
 
   a_dt = dt;
 
   // Copy the time code, it is needed for diagnostics
-  m_timecode = a_timecode;
+  m_timeCode = a_timeCode;
 
 #if 0 // Debug
   if(procID() == 0){
-    std::cout << "compute_dt = " << a_dt << "\t m_new_dt = " << m_new_dt << std::endl; 
+    std::cout << "computeDt = " << a_dt << "\t m_new_dt = " << m_new_dt << std::endl; 
   }
 #endif
 }
@@ -1839,7 +1839,7 @@ void sisdc::compute_E_into_scratch(){
   sisdc::compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
   sisdc::compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
 
-  time_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
+  TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
 }
 
 void sisdc::compute_cdr_gradients(){
@@ -2064,8 +2064,8 @@ void sisdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Rea
 
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
-  time_stepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_states, cdr_velocities, m_cdr->get_phase());
-  time_stepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
+  TimeStepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_states, cdr_velocities, m_cdr->get_phase());
+  TimeStepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -2078,7 +2078,7 @@ void sisdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Rea
   }
 
   const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
-  time_stepper::compute_cdr_fluxes(cdr_fluxes,
+  TimeStepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
 				   extrap_cdr_velocities,
@@ -2150,7 +2150,7 @@ void sisdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, co
   const EBAMRIFData& E = m_fieldSolver_scratch->get_E_domain();
 
   // This fills the solvers' domain fluxes
-  time_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
+  TimeStepper::compute_cdr_domain_fluxes(cdr_fluxes,
 					  extrap_cdr_fluxes,
 					  extrap_cdr_densities,
 					  extrap_cdr_velocities,
@@ -2205,7 +2205,7 @@ void sisdc::compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Re
     cdr_gradients.push_back(&(storage->get_gradient())); // These should already have been computed
   }
 
-  time_stepper::compute_cdr_sources(cdr_sources, a_states, cdr_gradients, rte_states, E, a_time, centering::cell_center);
+  TimeStepper::compute_cdr_sources(cdr_sources, a_states, cdr_gradients, rte_states, E, a_time, centering::cell_center);
 }
 
 void sisdc::update_poisson(){
@@ -2216,7 +2216,7 @@ void sisdc::update_poisson(){
   
   if(m_do_poisson){ // Solve Poisson equation
     if((m_step +1) % m_fast_poisson == 0){
-      time_stepper::solve_poisson();
+      TimeStepper::solve_poisson();
       this->compute_E_into_scratch();
     }
   }
@@ -2230,7 +2230,7 @@ void sisdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAM
   
   if(m_do_poisson){ // Solve Poisson equation
     if((m_step +1) % m_fast_poisson == 0){
-      time_stepper::solve_poisson(m_fieldSolver->getPotential(),
+      TimeStepper::solve_poisson(m_fieldSolver->getPotential(),
 				  m_fieldSolver->getRho(),
 				  a_densities,
 				  a_sigma,
@@ -2312,7 +2312,7 @@ void sisdc::update_diffusion_coefficients(){
   if(m_verbosity > 5){
     pout() << "sisdc::update_diffusion_coefficients" << endl;
   }
-  time_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 }
 
 Vector<EBAMRCellData*> sisdc::get_cdr_errors(){
@@ -2404,21 +2404,21 @@ void sisdc::write_step_profile(const Real a_dt,
 
 void sisdc::reset_finer_flux_registers_level(const int a_lvl,
 					     const int a_coarsest_level,
-					     const int a_finest_level){
+					     const int a_finestLevel){
   CH_TIME("sisdc::reset_flux_registers_level");
   if(m_verbosity > 5){
     pout() << "sisdc::reset_flux_registers_level" << endl;
   }
 
   const phase::which_phase phase = m_cdr->get_phase();
-  const bool has_fine = a_lvl < a_finest_level;
+  const bool has_fine = a_lvl < a_finestLevel;
   if(has_fine){
     EBFluxRegister* fluxreg_fine = m_amr->getFluxRegister(phase)[a_lvl];
     fluxreg_fine->setToZero();
   }
 }
 
-void sisdc::reset_redist_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finest_level){
+void sisdc::reset_redist_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finestLevel){
   CH_TIME("sisdc::reset_redist_registers_level");
   if(m_verbosity > 5){
     pout() << "sisdc::reset_redist_registers_level" << endl;
@@ -2429,7 +2429,7 @@ void sisdc::reset_redist_registers_level(const int a_lvl, const int a_coarsest_l
   level_redist.setToZero();
 
   if(m_amr->getEbCf()){
-    const bool has_fine = a_lvl < a_finest_level;
+    const bool has_fine = a_lvl < a_finestLevel;
     const bool has_coar = a_lvl > a_coarsest_level;
 
     RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_cdr->get_phase())[a_lvl];
@@ -2451,11 +2451,11 @@ void sisdc::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
 				  const int             a_solver,
 				  const int             a_lvl,
 				  const int             a_coarsest_level,
-				  const int             a_finest_level,
+				  const int             a_finestLevel,
 				  const Real            a_dt){
 
   // Increment the coarser flux register and initialize the finer flux register. a_flux holds phi*vel which we can use
-  const bool has_fine = a_lvl < a_finest_level;
+  const bool has_fine = a_lvl < a_finestLevel;
   const bool has_coar = a_lvl > a_coarsest_level;
 
   const phase::which_phase phase = m_cdr->get_phase();
@@ -2531,7 +2531,7 @@ void sisdc::update_coarse_fine_register(const LevelData<BaseIVFAB<Real> >& a_mas
 					const int a_solver,
 					const int a_lvl,
 					const int a_coarsest_level,
-					const int a_finest_level){
+					const int a_finestLevel){
   CH_TIME("cdr_solver::update_redist_register");
   if(m_verbosity > 5){
     pout() << "sisdc::::update_redist_register" << endl;
@@ -2540,7 +2540,7 @@ void sisdc::update_coarse_fine_register(const LevelData<BaseIVFAB<Real> >& a_mas
   const Interval interv(a_solver, a_solver);
   const DisjointBoxLayout& dbl = m_amr->getGrids()[a_lvl];
   const bool has_coar = a_lvl > a_coarsest_level;
-  const bool has_fine = a_lvl < a_finest_level;
+  const bool has_fine = a_lvl < a_finestLevel;
 
   if(has_coar || has_fine){
 
@@ -2583,7 +2583,7 @@ void sisdc::reflux_level(EBAMRCellData& a_state,
 			 const int      a_solver,
 			 const int      a_lvl,
 			 const int      a_coarsest_level,
-			 const int      a_finest_level,
+			 const int      a_finestLevel,
 			 const Real     a_scale){
   CH_TIME("sisdc::reflux_level");
   if(m_verbosity > 5){
@@ -2719,7 +2719,7 @@ void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
 				const int      a_m,
 				const int      a_lvl,
 				const int      a_coarsest_level,
-				const int      a_finest_level,
+				const int      a_finestLevel,
 				const Real     a_dt){
   CH_TIME("sisdc::subcycle_advect_amr");
   if(m_verbosity > 5){
@@ -2729,7 +2729,7 @@ void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
   Real coar_time_old = 0.0;
   Real coar_time_new = 0.0;
 
-  const bool has_fine = a_lvl < a_finest_level;
+  const bool has_fine = a_lvl < a_finestLevel;
   const bool has_coar = a_lvl > a_coarsest_level;
 
   if(has_coar){
@@ -2739,8 +2739,8 @@ void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
 
   // Prepare level solve
   sisdc::subcycle_copy_current_to_old_states(a_m, a_lvl);
-  sisdc::reset_finer_flux_registers_level(a_lvl, a_coarsest_level, a_finest_level);
-  sisdc::reset_redist_registers_level(a_lvl, a_coarsest_level, a_finest_level);
+  sisdc::reset_finer_flux_registers_level(a_lvl, a_coarsest_level, a_finestLevel);
+  sisdc::reset_redist_registers_level(a_lvl, a_coarsest_level, a_finestLevel);
 
   // Level solve. Update boundary conditions and source terms on this level
   sisdc::subcycle_update_transport_bc(a_m, a_lvl, a_tnew[a_lvl]);
@@ -2756,7 +2756,7 @@ void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
 				  a_m,
 				  a_lvl,
 				  a_coarsest_level,
-				  a_finest_level,
+				  a_finestLevel,
 				  coar_time_old,
 				  coar_time_new,
 				  a_tnew[a_lvl],
@@ -2777,7 +2777,7 @@ void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
     }
     else{ // Now advance a_lvl+1
       int tref = 1;
-      for (int lvl = a_coarsest_level; lvl < a_finest_level; lvl++){
+      for (int lvl = a_coarsest_level; lvl < a_finestLevel; lvl++){
       	tref *= m_amr->getRefinementRatios()[lvl];
       }
       
@@ -2809,12 +2809,12 @@ void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
 
     for (int i = 0; i < nref; i++){
       sisdc::subcycle_advect_amr(a_flux, a_face_states, a_divF_c, a_weights, a_divF_nc, a_mass_diff,
-				 a_tnew, a_told, a_m, a_lvl+1, a_coarsest_level, a_finest_level, dt_ref);
+				 a_tnew, a_told, a_m, a_lvl+1, a_coarsest_level, a_finestLevel, dt_ref);
     }
 
 
     // Finer level has caught up. Sync levels
-    sisdc::subcycle_sync_levels(a_m, a_lvl, a_coarsest_level, a_finest_level);
+    sisdc::subcycle_sync_levels(a_m, a_lvl, a_coarsest_level, a_finestLevel);
   }
 }
 
@@ -2870,25 +2870,25 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
     m_amr->computeGradient(*cell_gradients[idx], *cell_states[idx], a_lvl);
     
     // 2. Extrapolate cell-centered gradient to the EB
-    time_stepper::extrapolate_to_eb(scratchIV_D, m_cdr->get_phase(), *cell_gradients[idx], a_lvl);
+    TimeStepper::extrapolate_to_eb(scratchIV_D, m_cdr->get_phase(), *cell_gradients[idx], a_lvl);
 
     // 3. Dot EB-centered gradient with normal vector
-    time_stepper::project_flux(*eb_gradients[idx], scratchIV_D, a_lvl);
+    TimeStepper::project_flux(*eb_gradients[idx], scratchIV_D, a_lvl);
     
     // 4. Extrapolate the cell-centered states to the EB
-    time_stepper::extrapolate_to_eb(*eb_states[idx], m_cdr->get_phase(), *cell_states[idx], a_lvl);
+    TimeStepper::extrapolate_to_eb(*eb_states[idx], m_cdr->get_phase(), *cell_states[idx], a_lvl);
 
     // 5. Extrapolate cell-centered velocities to the EB
-    time_stepper::extrapolate_to_eb(scratchIV_D, m_cdr->get_phase(), *cell_velocities[idx], a_lvl);
+    TimeStepper::extrapolate_to_eb(scratchIV_D, m_cdr->get_phase(), *cell_velocities[idx], a_lvl);
 
     // 6. Project normal velocity
-    time_stepper::project_flux(*eb_velocities[idx], scratchIV_D, a_lvl);
+    TimeStepper::project_flux(*eb_velocities[idx], scratchIV_D, a_lvl);
 
     // 7. Compute the extrapolated flux at the boundary
     cell_velocities[idx]->localCopyTo(scratchD);
     data_ops::multiply_scalar(scratchD, *cell_states[idx]);
-    time_stepper::extrapolate_to_eb(scratchIV_D, m_cdr->get_phase(), scratchD, a_lvl);
-    time_stepper::project_flux(*eb_fluxes[idx], scratchIV_D, a_lvl);
+    TimeStepper::extrapolate_to_eb(scratchIV_D, m_cdr->get_phase(), scratchD, a_lvl);
+    TimeStepper::project_flux(*eb_fluxes[idx], scratchIV_D, a_lvl);
   }
 
   // Radiative transfer fluxes at boundary
@@ -2905,7 +2905,7 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
   const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
   
   // Update the stinking EB fluxes
-  time_stepper::compute_cdr_fluxes(solver_eb_fluxes,
+  TimeStepper::compute_cdr_fluxes(solver_eb_fluxes,
 				   eb_fluxes,
 				   eb_states,
 				   eb_velocities,
@@ -2979,7 +2979,7 @@ void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a
     const EBCellFAB& gE = (*grad_E[a_lvl])[dit()];
 
     // This does all cells
-    time_stepper::compute_cdr_sources_reg(sources,
+    TimeStepper::compute_cdr_sources_reg(sources,
 					  cdr_densities,
 					  cdr_gradients,
 					  rte_densities,
@@ -2990,7 +2990,7 @@ void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a
 					  dx);
 
     // Have to redo irregular cells
-    time_stepper::compute_cdr_sources_irreg(sources,
+    TimeStepper::compute_cdr_sources_irreg(sources,
 					    cdr_densities,
 					    cdr_gradients,
 					    rte_densities,
@@ -3003,7 +3003,7 @@ void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a
   }
 }
 
-void sisdc::subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coarsest_level, const int a_finest_level){
+void sisdc::subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coarsest_level, const int a_finestLevel){
   CH_TIME("sisdc::subcycle_sync_levels");
   if(m_verbosity > 5){
     pout() << "sisdc::subcycle_sync_levels" << endl;
@@ -3023,13 +3023,13 @@ void sisdc::subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coa
     // Reflux state
     if(solver->is_mobile()){
       m_amr->averageDown(state, m_cdr->get_phase(), a_lvl);
-      sisdc::reflux_level(state, solver_idx, a_lvl, a_coarsest_level, a_finest_level, 1.0);
+      sisdc::reflux_level(state, solver_idx, a_lvl, a_coarsest_level, a_finestLevel, 1.0);
       // EBCF related code. 
       if(m_amr->getEbCf()){
 	const Interval inter0(0,0);
 	const Interval interv(solver_idx, solver_idx);
 	
-	const bool has_fine = a_lvl < a_finest_level;
+	const bool has_fine = a_lvl < a_finestLevel;
 	const bool has_coar = a_lvl > a_coarsest_level;
 
 	// Bah, extra storage becase redistribution registers don't let me use different for mass diffs and target FAB
@@ -3101,7 +3101,7 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
 				     const int                    a_m,
 				     const int                    a_lvl,
 				     const int                    a_coarsest_level,
-				     const int                    a_finest_level,
+				     const int                    a_finestLevel,
 				     const Real                   a_coar_time_old,
 				     const Real                   a_coar_time_new,
 				     const Real                   a_time,
@@ -3119,7 +3119,7 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
 
   const bool ebcf     = m_amr->getEbCf();
   const bool has_coar = a_lvl > a_coarsest_level;
-  const bool has_fine = a_lvl < a_finest_level;
+  const bool has_fine = a_lvl < a_finestLevel;
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int solver_idx = solver_it.get_solver();
@@ -3168,12 +3168,12 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
 
       // Update flux and redistribution registers
       gdnv->new_compute_flux(a_flux, a_face_states, a_lvl);
-      sisdc::update_flux_registers(a_flux, solver_idx, a_lvl, a_coarsest_level, a_finest_level, a_dt);
+      sisdc::update_flux_registers(a_flux, solver_idx, a_lvl, a_coarsest_level, a_finestLevel, a_dt);
       sisdc::update_redist_register(a_mass_diff, solver_idx, a_lvl);
 
       // If we have EBCF, we must update those as well
       if(ebcf){
-	sisdc::update_coarse_fine_register(a_mass_diff, solver_idx, a_lvl, a_coarsest_level, a_finest_level);
+	sisdc::update_coarse_fine_register(a_mass_diff, solver_idx, a_lvl, a_coarsest_level, a_finestLevel);
       }
       
       if(m_cdr->get_mass_redist()){

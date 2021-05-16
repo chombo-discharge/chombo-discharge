@@ -154,7 +154,7 @@ void ito_plasma_air3::read_tables(){
   m_tables["Te"].scale_y(2.0*units::s_Qe/(3.0*units::s_kb));
 }
 
-Real ito_plasma_air3::compute_dt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const {
+Real ito_plasma_air3::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const {
   const Real alpha = this->compute_alpha(a_E);
   const Real velo  = this->compute_electron_velocity(a_E).vectorLength();
 

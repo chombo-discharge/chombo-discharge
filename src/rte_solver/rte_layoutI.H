@@ -88,15 +88,15 @@ void rte_layout<T>::allocateInternals(){
 }
 
 template <class T>
-void rte_layout<T>::pre_regrid(const int a_base, const int a_finest_level){
-  CH_TIME("rte_layout<T>::pre_regrid");
+void rte_layout<T>::preRegrid(const int a_base, const int a_finestLevel){
+  CH_TIME("rte_layout<T>::preRegrid");
   if(m_verbosity > 6){
-    pout() << "rte_layout<T>::pre_regrid" << endl;
+    pout() << "rte_layout<T>::preRegrid" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->pre_regrid(a_base, a_finest_level);
+    solver->preRegrid(a_base, a_finestLevel);
   }
 }
 
@@ -285,15 +285,15 @@ void rte_layout<T>::advance(const Real a_dt){
 }
 
 template <class T>
-void rte_layout<T>::initial_data(){
-  CH_TIME("rte_layout<T>::initial_data");
+void rte_layout<T>::initialData(){
+  CH_TIME("rte_layout<T>::initialData");
   if(m_verbosity > 6){
-    pout() << "rte_layout<T>::initial_data" << endl;
+    pout() << "rte_layout<T>::initialData" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->initial_data();
+    solver->initialData();
   }
 }
 

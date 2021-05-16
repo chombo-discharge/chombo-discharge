@@ -92,7 +92,7 @@ Vector<EBAMRCellData>& ito_plasma_tagger::get_tracer_fields() {
   return m_tracer;
 }
 
-void ito_plasma_tagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) {
+void ito_plasma_tagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) {
   CH_TIME("ito_plasma_tagger::writePlotData");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotData" << endl;
@@ -117,7 +117,7 @@ void ito_plasma_tagger::writePlotData(EBAMRCellData& a_output, Vector<std::strin
     }
 
     // Add component and name
-    a_plotvar_names.push_back(one+two);
+    a_plotVariableNames.push_back(one+two);
     a_icomp++;
   }
 }

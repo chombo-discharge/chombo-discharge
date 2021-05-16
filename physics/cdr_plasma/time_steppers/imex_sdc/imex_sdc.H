@@ -45,7 +45,7 @@ namespace physics {
       void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       void parseOptions() override;
       void parseRuntimeOptions() override;
-      bool need_to_regrid() override;
+      bool needToRegrid() override;
 
       Vector<EBAMRCellData*> get_cdr_errors();
   
@@ -194,7 +194,7 @@ namespace physics {
       void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
       void compute_cdr_velo(const Real a_time);
       void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
-      void compute_dt(Real& a_dt, time_code& a_timecode);
+      void computeDt(Real& a_dt, TimeCode& a_timeCode);
       void compute_sigma_flux();
 
       //

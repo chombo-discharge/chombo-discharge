@@ -66,7 +66,7 @@ void advection_diffusion_stepper::setup_solvers(){
   }
 }
 
-void advection_diffusion_stepper::post_initialize() {
+void advection_diffusion_stepper::postInitialize() {
 }
 
 void advection_diffusion_stepper::registerRealms() {
@@ -85,8 +85,8 @@ void advection_diffusion_stepper::allocate() {
   m_amr->allocate(m_k2,  m_Realm, m_phase, 1);
 }
 
-void advection_diffusion_stepper::initial_data(){
-  m_solver->initial_data();       // Fill initial through the cdr species
+void advection_diffusion_stepper::initialData(){
+  m_solver->initialData();       // Fill initial through the cdr species
 
   m_solver->set_source(0.0);
   m_solver->set_ebflux(0.0);
@@ -152,15 +152,15 @@ void advection_diffusion_stepper::set_velocity(const int a_level){
   }
 }
 
-void advection_diffusion_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const {
+void advection_diffusion_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
   m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
 
-void advection_diffusion_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
+void advection_diffusion_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
   m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
 
-void advection_diffusion_stepper::post_checkpoint_setup(){
+void advection_diffusion_stepper::postCheckpointSetup(){
   m_solver->set_source(0.0);
   m_solver->set_ebflux(0.0);
   m_solver->set_domain_flux(0.0);
@@ -177,27 +177,27 @@ int advection_diffusion_stepper::getNumberOfPlotVariables() const{
 }
 
 void advection_diffusion_stepper::writePlotData(EBAMRCellData&       a_output,
-						  Vector<std::string>& a_plotvar_names,
+						  Vector<std::string>& a_plotVariableNames,
 						  int&                 a_icomp) const {
-  a_plotvar_names.append(m_solver->get_plotvar_names());
+  a_plotVariableNames.append(m_solver->get_plotVariableNames());
   m_solver->writePlotData(a_output, a_icomp);
 }
 
-void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code& a_timecode){
+void advection_diffusion_stepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
   if(m_integrator == 0){      // Explicit diffusion. 
     const Real dt = m_solver->compute_advection_diffusion_dt();
     
     a_dt       = m_cfl*dt;
-    a_timecode = time_code::advection_diffusion;
+    a_timeCode = TimeCode::AdvectionDiffusion;
   }
   else if(m_integrator == 1){ // Implicit diffusion
     const Real dt = m_solver->compute_advection_dt();
 
     a_dt       = m_cfl*dt;
-    a_timecode = time_code::advection;
+    a_timeCode = TimeCode::Advection;
   }
   else{
-    MayDay::Abort("advection_diffusion_stepper::compute_dt - logic bust");
+    MayDay::Abort("advection_diffusion_stepper::computeDt - logic bust");
   }
 }
 
@@ -261,12 +261,12 @@ void advection_diffusion_stepper::print_stepReport(){
 
 }
 
-bool advection_diffusion_stepper::need_to_regrid(){
+bool advection_diffusion_stepper::needToRegrid(){
   return false;
 }
 
-void advection_diffusion_stepper::pre_regrid(const int a_lbase, const int a_oldFinestLevel){
-  m_solver->pre_regrid(a_lbase, a_oldFinestLevel);
+void advection_diffusion_stepper::preRegrid(const int a_lbase, const int a_oldFinestLevel){
+  m_solver->preRegrid(a_lbase, a_oldFinestLevel);
 }
 
 void advection_diffusion_stepper::deallocate(){
@@ -294,6 +294,6 @@ void advection_diffusion_stepper::regrid(const int a_lmin, const int a_oldFinest
   m_amr->allocate(m_k2,  m_Realm, m_phase, 1);
 }
 
-void advection_diffusion_stepper::post_regrid() {
+void advection_diffusion_stepper::postRegrid() {
 }
 #include "CD_NamespaceFooter.H"

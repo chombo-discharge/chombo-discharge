@@ -45,10 +45,10 @@ void sigma_solver::allocateInternals(){
   m_amr->allocate(m_flux,  m_Realm, m_phase, ncomp);
 }
 
-void sigma_solver::pre_regrid(const int a_lbase, const int a_oldFinestLevel){
-  CH_TIME("sigma_solver::pre_regrid");
+void sigma_solver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
+  CH_TIME("sigma_solver::preRegrid");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::pre_regrid" << endl;
+    pout() << "sigma_solver::preRegrid" << endl;
   }
 
   const int ncomp = 1;
@@ -387,7 +387,7 @@ int sigma_solver::get_num_plotvars(){
 }
   
   
-Vector<std::string> sigma_solver::get_plotvar_names() const{
+Vector<std::string> sigma_solver::get_plotVariableNames() const{
   CH_TIME("sigma_solver::get_num_plotvars");
   if(m_verbosity > 5){
     pout() << "sigma_solver::get_num_plotvars" << endl;

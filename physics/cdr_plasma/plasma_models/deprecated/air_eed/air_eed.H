@@ -88,7 +88,7 @@ public:
   Real compute_electron_energy(const Real a_electron_energy, const Real a_electron_density) const;
 
   Real init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
-    return m_lfa.get_entry(a_E.vectorLength())*m_species[m_elec_idx]->initial_data(a_pos, a_time);
+    return m_lfa.get_entry(a_E.vectorLength())*m_species[m_elec_idx]->initialData(a_pos, a_time);
   }
   
 protected:

@@ -231,7 +231,7 @@ namespace physics::cdr_plasma {
       electron();
       ~electron();
 
-      Real initial_data(const RealVect a_pos, const Real a_time) const;
+      Real initialData(const RealVect a_pos, const Real a_time) const;
 
       Real m_uniform_density;
       Real m_seed_density;
@@ -245,7 +245,7 @@ namespace physics::cdr_plasma {
       positive_species();
       ~positive_species();
 
-      Real initial_data(const RealVect a_pos, const Real a_time) const;
+      Real initialData(const RealVect a_pos, const Real a_time) const;
 
       Real m_uniform_density;
       Real m_seed_density;
@@ -259,7 +259,7 @@ namespace physics::cdr_plasma {
       negative_species();
       ~negative_species();
     
-      Real initial_data(const RealVect a_pos, const Real a_time) const;
+      Real initialData(const RealVect a_pos, const Real a_time) const;
       Real m_uniform_density;
     
       Real m_seed_density;

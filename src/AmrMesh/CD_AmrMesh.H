@@ -691,7 +691,7 @@ public:
   /*!
     @brief Set the finest level
   */
-  void setFinestLevel(const int a_finest_level);
+  void setFinestLevel(const int a_finestLevel);
 
   /*!
     @brief Parse the maximum permitted box size. 

@@ -91,7 +91,7 @@ public:
   /*!
     @brief Cache state
   */
-  virtual void pre_regrid(const int a_base, const int a_oldFinestLevel);
+  virtual void preRegrid(const int a_base, const int a_oldFinestLevel);
 
   /*!
     @brief Deallocate internal storage

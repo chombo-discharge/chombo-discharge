@@ -9,7 +9,7 @@
 #define _SDC_
 
 #include "CD_AmrMesh.H"
-#include "time_stepper.H"
+#include "CD_TimeStepper.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 
@@ -25,7 +25,7 @@ extern "C" void dgesv_(int*    N,
 /*!
   @brief Class for evolving plasma equations with a multirate method using semi-implicit spectral deferred corrections
 */
-class sdc : public time_stepper {
+class sdc : public TimeStepper {
 public:
   
   // Forward declare nested classes. I don't want to clutter this file.
@@ -47,7 +47,7 @@ public:
   void allocateInternals();
   void deallocateInternals();
   void parseOptions();
-  bool need_to_regrid();
+  bool needToRegrid();
 
   Vector<EBAMRCellData*> get_cdr_errors();
   
@@ -117,7 +117,7 @@ protected:
   Vector<Real> m_tm;
   Vector<Real> m_dtm;
 
-  time_code::which_code m_timecode;
+  TimeCode::which_code m_timeCode;
 
   std::string m_which_nodes;
 
@@ -217,7 +217,7 @@ protected:
   void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_cdr_velo(const Real a_time);
   void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
-  void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
+  void computeDt(Real& a_dt, TimeCode::which_code& a_timeCode);
   void compute_sigma_flux();
 
   //

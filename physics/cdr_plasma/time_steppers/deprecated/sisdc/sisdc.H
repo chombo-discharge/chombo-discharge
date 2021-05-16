@@ -9,7 +9,7 @@
 #define _SISDC_
 
 #include "CD_AmrMesh.H"
-#include "time_stepper.H"
+#include "CD_TimeStepper.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 
@@ -25,7 +25,7 @@ extern "C" void dgesv_(int*    N,
 /*!
   @brief Class for evolving plasma equations with a multirate method using semi-implicit spectral deferred corrections
 */
-class sisdc : public time_stepper {
+class sisdc : public TimeStepper {
 public:
   
   // Forward declare nested classes. I don't want to clutter this file.
@@ -46,7 +46,7 @@ public:
   void regridInternals();
   void deallocateInternals();
   void parseOptions();
-  bool need_to_regrid();
+  bool needToRegrid();
 
   Vector<EBAMRCellData*> get_cdr_errors();
   
@@ -122,7 +122,7 @@ protected:
   Vector<Real> m_tm;
   Vector<Real> m_dtm;
 
-  time_code::which_code m_timecode;
+  TimeCode::which_code m_timeCode;
 
   std::string m_which_nodes;
 
@@ -223,7 +223,7 @@ protected:
   void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_cdr_sources(const Real a_time);
   void compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Real a_time);
-  void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
+  void computeDt(Real& a_dt, TimeCode::which_code& a_timeCode);
   void compute_sigma_flux();
 
   //
@@ -239,25 +239,25 @@ protected:
 			  const int  a_rejections);
 
   // All the routines required for the subcycling advection routines
-  void reset_finer_flux_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finest_level);
-  void reset_redist_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finest_level);
+  void reset_finer_flux_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finestLevel);
+  void reset_redist_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finestLevel);
   void update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff, const int a_solver, const int a_lvl);
   void update_flux_registers(LevelData<EBFluxFAB>& a_flux,
 			     const int             a_solver,
 			     const int             a_lvl,
 			     const int             a_coarsest_level,
-			     const int             a_finest_level,
+			     const int             a_finestLevel,
 			     const Real            a_dt);
   void update_coarse_fine_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff,
 				   const int a_solver,
 				   const int a_lvl,
 				   const int a_coarsest_level,
-				   const int a_finest_level);
+				   const int a_finestLevel);
   void reflux_level(EBAMRCellData& a_state,
 		    const int      a_solver,
 		    const int      a_lvl,
 		    const int      a_coarsest_level,
-		    const int      a_finest_level,
+		    const int      a_finestLevel,
 		    const Real     a_scale);
   void redist_level(LevelData<EBCellFAB>&       a_state,
 		    const int                   a_solver,   
@@ -277,7 +277,7 @@ protected:
 			   const int      a_m,
 			   const int      a_lvl,
 			   const int      a_coarsest_lvl,
-			   const int      a_finest_level,
+			   const int      a_finestLevel,
 			   const Real     a_dt);
 
   void subcycle_compute_advection_velocities();
@@ -285,7 +285,7 @@ protected:
   void subcycle_copy_current_to_old_states(const int a_m, const int a_lvl);
   void subcycle_update_transport_bc(const int a_m, const int a_lvl, const Real a_time);
   void subcycle_update_sources(const int a_m, const int a_lvl, const Real a_time); 
-  void subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coarsest_level, const int a_finest_level);
+  void subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coarsest_level, const int a_finestLevel);
   
   void subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
 				LevelData<EBFluxFAB>&        a_face_states,
@@ -296,7 +296,7 @@ protected:
 				const int                    a_m,
 				const int                    a_lvl,
 				const int                    a_coarsest_level,
-				const int                    a_finest_level,
+				const int                    a_finestLevel,
 				const Real                   a_coar_time_old,
 				const Real                   a_coar_time_new,
 				const Real                   a_time,

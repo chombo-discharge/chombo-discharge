@@ -82,12 +82,12 @@ public:
   /*!
     @brief Cache states before regrid step
   */
-  virtual void pre_regrid(const int a_lbase, const int a_finest_level);
+  virtual void preRegrid(const int a_lbase, const int a_finestLevel);
 
   /*!
     @brief Initial data
   */
-  virtual void initial_data();
+  virtual void initialData();
 
   /*!
     @brief Regrid method. 

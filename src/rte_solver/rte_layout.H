@@ -70,7 +70,7 @@ public:
   /*!
     @brief Pre regrid stuff
   */
-  virtual void pre_regrid(const int a_base, const int a_oldFinestLevel);
+  virtual void preRegrid(const int a_base, const int a_oldFinestLevel);
 
   /*!
     @brief Deallocate internal storage for solvers
@@ -147,7 +147,7 @@ public:
     @brief Fill with initial data
     @details Only relevant for transient solvers
   */
-  virtual void initial_data();
+  virtual void initialData();
 
   /*!
     @brief Check if solvers are stationary

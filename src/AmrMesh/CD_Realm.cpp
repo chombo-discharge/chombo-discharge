@@ -42,7 +42,7 @@ void Realm::define(const Vector<DisjointBoxLayout>& a_grids,
 		   const Vector<int>& a_ref_rat,
 		   const Vector<Real>& a_dx,
 		   const RealVect a_probLo,
-		   const int a_finest_level,
+		   const int a_finestLevel,
 		   const int a_ebghost,
 		   const int a_num_ghost,
 		   const int a_lsf_ghost,
@@ -67,28 +67,28 @@ void Realm::define(const Vector<DisjointBoxLayout>& a_grids,
 
   m_probLo = a_probLo;
   m_multifluidIndexSpace = a_mfis;
-  m_finestLevel = a_finest_level;
+  m_finestLevel = a_finestLevel;
   
   const RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
-  m_Realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finest_level, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
+  m_Realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finestLevel, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
 			       a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::gas), ebis_gas);
 
-  m_Realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finest_level, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
+  m_Realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finestLevel, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
 				 a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::solid), ebis_sol);
 
 
 }
 
-void Realm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finest_level){
+void Realm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel){
   CH_TIME("Realm::setGrids");
   if(m_verbosity > 5){
     pout() << "Realm::setGrids" << endl;
   }
 
   for (auto& r : m_Realms){
-    r.second->setGrids(a_grids, a_finest_level);
+    r.second->setGrids(a_grids, a_finestLevel);
   }
 }
 
