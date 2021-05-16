@@ -1,43 +1,37 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file CdrSolver.H
-  @brief Declaration of an abstract class for evolving cdr equations
+  @file   CD_CdrSolver.H
+  @brief  Declaration of an abstract class for solving scalar convection-diffusion-reaction problems. 
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#ifndef _CDR_SOLVER_
-#define _CDR_SOLVER_
+#ifndef CD_CdrSolver_H
+#define CD_CdrSolver_H
 
-#include "computational_geometry.H"
-#include "CD_AmrMesh.H"
-#include "cdr_species.H"
-
+// Std includes
 #include <random>
 #include <time.h>
 #include <chrono>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_AmrMesh.H>
+#include <computational_geometry.H>
+#include <cdr_species.H>
+#include <cdr_bc.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Boundary condition types for the CDR solvers
-*/
-namespace cdr_bc {
-  enum which_bc {
-    external = 0,
-    wall     = 1,
-    outflow  = 2,
-    extrap   = 3,
-  };
-};
-
-/*!
-  @brief Abstract class for cdr-equations. This is (almost) a whole solver. 
+  @brief Abstract class for cdr-equations. 
 */
 class CdrSolver {
 public:
 
   /*!
-    @brief Default constructor. Stay away.
+    @brief Default constructor. 
   */
   CdrSolver();
 
@@ -57,12 +51,20 @@ public:
   virtual void parseRuntimeOptions() = 0;
 
   /*!
-    @brief Implicit diffusion TGA advance without source terms
+    @brief Implicit diffusion TGA advance without source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_dt     Time step
+    @note This version does not use a source term. 
   */
   virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) = 0;
 
   /*!
-    @brief Implicit diffusion TGA advance with source terms
+    @brief Implicit diffusion TGA advance with source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_source Source (at t+dt/2)
+    @param[in]    a_dt     Time step
   */
   virtual void advanceTGA(EBAMRCellData&       a_newPhi,
 			   const EBAMRCellData& a_oldPhi,
@@ -70,12 +72,20 @@ public:
 			   const Real           a_dt) = 0;
 
   /*!
-    @brief Implicit diffusion Euler advance without source terms
+    @brief Implicit diffusion Euler advance without source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_dt     Time step
   */
   virtual void advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) = 0;
 
   /*!
-    @brief Implicit diffusion Euler advance with source terms
+    @brief Implicit diffusion Euler advance with source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_source Source term. 
+    @param[in]    a_dt     Time step
+    @details This solves the implicit diffusino equation equation a_newPhi - a_oldPhi = dt*Laplacian(a_newPhi) + a_source. 
   */
   virtual void advanceEuler(EBAMRCellData&       a_newPhi,
 			     const EBAMRCellData& a_oldPhi,
@@ -83,54 +93,72 @@ public:
 			     const Real           a_dt) = 0;
 
   /*!
-    @brief Compute div(nv - D*grad(n)) explicitly
+    @brief Compute div(J) where J = nV - D*grad(n) explicitly
+    @param[out] a_divJ      Divergence term, including redistribution magic. 
+    @param[in]  a_phi       Cell-centered state
+    @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_useEbFlux If true, the embedded boundary flux will be included in div(J)
     @note a_phi is non-const because ghost cells will be re-filled
   */
   virtual void computeDivJ(EBAMRCellData& a_divJ,
-			    EBAMRCellData& a_phi,
-			    const Real     a_extrapDt,
-			    const bool     a_ebFlux = true) = 0;
+			   EBAMRCellData& a_phi,
+			   const Real     a_extrapDt,
+			   const bool     a_useEbFlux = true) = 0;
 
   /*!
     @brief Compute div(v*phi) explicitly
+    @param[out] a_divF      Divergence term, including redistribution magic. 
+    @param[in]  a_phi       Cell-centered state
+    @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_useEbFlux If true, the embedded boundary flux will be included in div(F)
     @note a_phi is non-const because ghost cells will be re-filled
   */
   virtual void computeDivF(EBAMRCellData&  a_divF,
-			    EBAMRCellData&  a_phi,
-			    const Real      a_extrapDt,
-			    const bool      a_ebFlux = true) = 0;
+			   EBAMRCellData&  a_phi,
+			   const Real      a_extrapDt,
+			   const bool      a_ebFlux = true) = 0;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
+    @param[out] a_divF      Divergence term, including redistribution magic. 
+    @param[in]  a_phi       Cell-centered state
+    @param[in]  a_useEbFlux If true, the embedded boundary flux will be included in div(D)
     @note a_phi is non-const because ghost cells will be re-filled
   */
   virtual void computeDivD(EBAMRCellData& a_divD,
-			    EBAMRCellData& a_phi,
-			    const bool     a_ebFlux = false) = 0;
+			   EBAMRCellData& a_phi,
+			   const bool     a_ebFlux = false) = 0;
 
   /*!
     @brief Compute div(G) where G is a general face-centered flux on face centers and EB centers
     @param[in]    a_divG div(G). This includes redistribution
-    @param[inout] a_G Must contain face-centered fluxes on input. Contains face-centroid fluxes on output. 
+    @param[inout] a_G Vector field which contains face-centered fluxes on input. Contains face-centroid fluxes on output. 
     @param[in]    a_ebFlux Flux on the EB centroids
     @note If you also want charge injection through the domain sides, you must put those in a_G before entering this routine
   */
   virtual void computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebFlux);
 
   /*!
-    @brief Random source for diffusion
+    @brief Compute a random gaussian white noise source term. 
+    @param[out] a_noiseSource Source term
+    @param[in]  a_cellPhi     Cell-centered states
   */
   virtual void gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData& a_cellPhi);
 
   /*!
-    @brief Smoothed face average
+    @brief Use Heaviside smoothing for computing face-centered states. 
+    @param[out] a_facePhi Face centered state
+    @param[in]  a_cellPhi Cell-centered states
+    @note This is only intended to be used with FHD functionality. 
   */
   virtual void smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi);
 
   /*!
     @brief Gaussian noise field
+    @param[out] a_noise Gaussian white nosie
+    @param[out] a_sigma Standard deviation
   */
-  virtual void fillGwn(EBAMRFluxData& a_noise, const Real a_mean);
+  virtual void fillGwn(EBAMRFluxData& a_noise, const Real a_sigma);
 
   /*!
     @brief Average velocities to faces
@@ -138,7 +166,9 @@ public:
   virtual void averageVelocityToFaces();
 
   /*!
-    @brief Pre-regrid
+    @brief Perform pre-regrid operations. 
+    @param[in] a_lbase          Coarsest level that changed.
+    @param[in] a_oldFinestLevel Previous finest level.
   */
   virtual void preRegrid(const int a_lbase, const int a_oldFinestLevel);
 
@@ -153,93 +183,118 @@ public:
   virtual void registerOperators();
 
   /*!
-    @brief Sanity check
+    @brief Do a sanity check
   */
   virtual void sanityCheck();
 
   /*!
-    @brief Set the Realm
+    @brief Set the realm for this solver.
+    @param[in] a_realm Realm identifier
   */
   virtual void setRealm(const std::string a_realm);
 
   /*!
     @brief Set species
+    @param[in] a_species Species. 
   */
   virtual void setSpecies(const RefCountedPtr<cdr_species> a_species);
   
   /*!
     @brief Set computational geometry
+    @param[in] a_computationalGeometry The computational geometry.
   */
   virtual void setComputationalGeometry(const RefCountedPtr<computational_geometry> a_computationalGeometry);
 
   /*!
     @brief Set the amr object
+    @param[in] a_amr AmrMesh object. 
   */
   virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
-    @brief Set domain bc type
+    @brief Set domain bc type.
+    @param[in] a_bcType Boundary condition type. 
   */
-  virtual void setDomainBc(const cdr_bc::which_bc a_bctype);
+  virtual void setDomainBc(const cdr_bc::which_bc a_bcType);
 
   /*!
-    @brief Set phase
-    @details This must be done BEFORE callilng setComputationalGeometry
+    @brief Set phase.
+    @param[in] a_phase Phse.
   */
   virtual void setPhase(phase::which_phase a_phase = phase::gas);
 
   /*!
     @brief Set verbosity.
+    @param[in] a_verbosity Verbosity level. 
   */
   virtual void setVerbosity(const int a_verbosity);
 
   /*!
-    @brief Get current time
+    @brief Set the time for this solver. 
+    @param[in] a_step Time step number
+    @param[in] a_time Time (in seconds)
+    @param[in] a_dt   Time step increment
   */
   virtual void setTime(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Set velocity
+    @param[in] a_velo Cell centered velocities. 
+    @details This copies a_velo onto m_cellCenteredVelocities. 
   */
   virtual void setVelocity(const EBAMRCellData& a_velo);
 
   /*!
     @brief Set constant velocity
+    @param[in] a_velo Velocity
+    @details This sets the cell centered velocity to be a_velo in every grid cell. 
   */
   virtual void setVelocity(const RealVect a_velo);
 
   /*!
     @brief Set diffusion coefficients
+    @param[in] a_diffusionCoefficient   Face-centered diffusion coefficient. 
+    @param[in] a_ebDiffusionCoefficient EB-centered diffusion coefficient. 
   */
   virtual void setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoefficient, const EBAMRIVData& a_ebDiffusionCoefficient);
 
   /*!
-    @brief Set constant
+    @brief Set diffusion coefficient to be constant
+    @param[in] a_diffusionCoefficient Global diffusion coefficient. 
+    @details This sets the diffusion coefficient to be constant on both faces and EB faces. 
   */
   virtual void setDiffusionCoefficient(const Real a_diffusionCoefficient);
 
   /*!
     @brief Set source terms
+    @param[in] a_source Source term.
+    @details This sets m_source to be equal to a_source
   */
   virtual void setSource(const EBAMRCellData& a_source);
 
   /*!
     @brief Set constant source terms
+    @param[in] a_source Source term.
   */
   virtual void setSource(const Real a_source);
 
   /*!
     @brief Set the EB flux
+    @param[in] a_ebFlux Flux on EB centroids. 
   */
   virtual void setEbFlux(const EBAMRIVData& a_ebFlux);
 
   /*!
-    @brief Set the EB flux
+    @brief Set the EB flux.
+    @param[in] a_ebFlux Flux on EB centroids. 
+    @details This sets a constant EB-flux on all EBs. 
   */
   virtual void setEbFlux(const Real a_ebFlux);
 
   /*!
     @brief Set the domain flux
+    @param[in] a_domainFlux Domain flux
+    @details This sets a constant domain flux on all domain faces. 
   */
   virtual void setDomainFlux(const Real a_domainFlux);
 
@@ -259,7 +314,10 @@ public:
   virtual void initialDataParticles();
 
   /*!
-    @brief Inject the EB flux. 
+    @brief Inject the EB flux. This includes redistribution magic. 
+    @param[inout] a_phi    Cell-centered states
+    @param[in]    a_ebFlux EB flux. 
+    @param[in]    a_dt     Time step. 
     @details This routine is equivalent to an update phi^(k+1) = phi^k - dt*div(G)
     where G is non-zero only on the EB
   */
@@ -277,46 +335,57 @@ public:
 
   /*!
     @brief Write output data to a_output
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
   */
   virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write data to output. Convenience function. 
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in]    a_data   Data to write. 
+    @param[in]    a_interp If true, a_data will be interpolated to cell centroids before writing to a_output. 
   */
   virtual void writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
 
   /*!
     @brief Write checkpoint data into handle
+    @paramo[out] a_handle HDF5 handle.
+    @param[in]   a_level Grid level
   */
   virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
 
   /*!
     @brief Read checkpoint data from handle
+    @param[in] a_handle HDF5 handle.
+    @param[in] const int a_level Grid level
   */
   virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 
   /*!
-    @brief Regrid internals
+    @brief Regrid this solver. 
+    @param[in] a_lmin           Coarsest level where grids did not change. 
+    @param[in] a_oldFinestLevel Previous finest AMR level
+    @param[in] a_newFinestLevel New finest AMR level. 
+    @details This linearly interpolates (with limiters) m_potential to the new grids and recomputes the electric field (from the interpolated potential). 
   */
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
   /*!
-    @brief Set which variables to output
+    @brief Set redistribution weights
+    @param[in] a_weights Weights to use for redistribution (e.g. mass)
   */
-  virtual void set_plot_variables();
+  virtual void setRedistWeights(const EBAMRCellData& a_weights);
 
   /*!
-    @brief Reset redistribution weights
-  */
-  virtual void setRedistWeights(const EBAMRCellData& a_phi);
-
-  /*!
-    @brief Get the Realm
+    @brief Get the realm where this solver is registered. 
   */
   virtual const std::string getRealm() const;
 
   /*!
     @brief Get solver name
+    @note Not necessarily equal to class name (we can have many CdrSolvers instantiated). 
   */
   virtual std::string getName();
 
@@ -352,6 +421,9 @@ public:
 
   /*!
     @brief Compute the largest possible source time step (for explicit methods
+    @param[in] a_max       Maximum value of m_phi
+    @param[in] a_tolerance Tolerance
+    @details This computes dt = phi/source, but only for cells where phi lies within a_tolerance*a_max (and source > 0)
   */
   virtual Real computeSourceDt(const Real a_max, const Real a_tolerance);
   
@@ -381,7 +453,7 @@ public:
   virtual bool extrapolateSourceTerm() const;
   
   /*!
-    @brief Get the internal state
+    @brief Get the cell-centered phi
   */
   virtual EBAMRCellData& getPhi();
 
@@ -849,6 +921,7 @@ protected:
   */
   virtual void parseExtrapolateSourceTerm();
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

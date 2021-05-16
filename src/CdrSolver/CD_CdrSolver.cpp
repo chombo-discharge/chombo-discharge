@@ -1614,30 +1614,6 @@ void CdrSolver::setupFluxInterpolant(const LevelData<EBFluxFAB>& a_flux, const i
   }
 }
 
-void CdrSolver::set_plot_variables(){
-  CH_TIME("CdrSolver::set_plot_variables");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_plot_variables" << endl;
-  }
-
-  m_plotPhi = false;
-  m_plotVelocity = false;
-  m_plotDiffusionCoefficient = false;
-  m_plotSource = false;
-
-  ParmParse pp("CdrSolver");
-  const int num = pp.countval("plt_vars");
-  Vector<std::string> str(num);
-  pp.getarr("plt_vars", str, 0, num);
-
-  for (int i = 0; i < num; i++){
-    if(     str[i] == "phi") m_plotPhi = true;
-    else if(str[i] == "vel") m_plotVelocity = true;
-    else if(str[i] == "dco") m_plotDiffusionCoefficient = true; 
-    else if(str[i] == "src") m_plotSource = true;
-  }
-}
-
 void CdrSolver::writePlotFile(){
   CH_TIME("CdrSolver::writePlotFile");
   if(m_verbosity > 5){
