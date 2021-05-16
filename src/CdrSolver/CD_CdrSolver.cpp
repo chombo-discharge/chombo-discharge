@@ -1096,10 +1096,10 @@ void CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, con
   }
 }
 
-void CdrSolver::reset_flux_register(){
-  CH_TIME("CdrSolver::reset_flux_register");
+void CdrSolver::resetFluxRegister(){
+  CH_TIME("CdrSolver::resetFluxRegister");
   if(m_verbosity > 5){
-    pout() << m_name + "::reset_flux_register" << endl;
+    pout() << m_name + "::resetFluxRegister" << endl;
   }
   
   const int finest_level = m_amr->getFinestLevel();

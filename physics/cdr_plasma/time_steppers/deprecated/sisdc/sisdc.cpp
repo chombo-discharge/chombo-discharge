@@ -2405,9 +2405,9 @@ void sisdc::write_step_profile(const Real a_dt,
 void sisdc::reset_finer_flux_registers_level(const int a_lvl,
 					     const int a_coarsest_level,
 					     const int a_finestLevel){
-  CH_TIME("sisdc::reset_flux_registers_level");
+  CH_TIME("sisdc::resetFluxRegisters_level");
   if(m_verbosity > 5){
-    pout() << "sisdc::reset_flux_registers_level" << endl;
+    pout() << "sisdc::resetFluxRegisters_level" << endl;
   }
 
   const phase::which_phase phase = m_cdr->get_phase();

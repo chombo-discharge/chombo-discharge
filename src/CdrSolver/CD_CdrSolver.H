@@ -880,17 +880,21 @@ protected:
   /*!
     @brief Reset the flux register
   */
-  virtual void reset_flux_register();
+  virtual void resetFluxRegister();
 
   /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
+    @param[in] a_massDifference Mass difference
   */
   virtual void coarseFineIncrement(const EBAMRIVData& m_massDifference);
 
   /*!
-    @brief Do mass redistribution
+    @brief Do mass redistribution on each level. 
+    @param[inout] a_stableDivergence Hybrid divergence on input, stable and conservative divergence on output. 
+    @param[in]    a_massDifference Mass difference
+    @details This does not account for distribution across refinement boundaries (need the other routines for that). 
   */
-  virtual void hyperbolicRedistribution(EBAMRCellData& a_stableDivergence, const EBAMRIVData&   a_massDifference);
+  virtual void hyperbolicRedistribution(EBAMRCellData& a_stableDivergence, const EBAMRIVData& a_massDifference);
 
   /*!
     @brief Increment redistribution flux registers
@@ -898,44 +902,48 @@ protected:
   virtual void incrementRedistFlux();
 
   /*!
-    @brief Increment redistribution objects with mass to be redistributed
+    @brief Increment redistribution objects with mass to be redistributed.
+    @param[in] a_massDifference Mass to be redistributed. 
   */
   virtual void incrementRedist(const EBAMRIVData& a_massDifference);
 
   /*!
     @brief Do coarse-fine redistribution
+    @param[inout] a_phi On output, this will be incremented with redistributed mass across refinement boundaries. 
   */
   virtual void coarseFineRedistribution(EBAMRCellData& a_phi);
 
   /*!
-    @brief Reflux state
+    @brief Reflux across refinement boundaries, using whatever is inside the flux registers. 
+    @param[inout] a_phi Cell-centered state
   */
   virtual void reflux(EBAMRCellData& a_phi);
 
   /*!
     @brief Set ebis
+    @param[in] a_ebis EBIndexspace
   */
   virtual void setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis);
 
   /*!
-    @brief Define stencils
+    @brief Define stencils for doing face-centered to face-centroid-centered states. 
   */
   virtual void defineInterpolationStencils();
 
   /*!
-    @brief Define interpolant
+    @brief Define interpolant for holding the face-interpolated results. 
   */
   virtual void defineInterpolant();
 
   /*!
     @brief Parses domain BC options
   */
-  virtual void parseDomainBc();    // Parses domain BC options
+  virtual void parseDomainBc();    
 
   /*!
     @brief Parses plot variables
   */
-  virtual void parsePlotVariables();    // Parses plot variables
+  virtual void parsePlotVariables();    
 
   /*!
     @brief Parse random number generator
