@@ -803,11 +803,15 @@ protected:
 
   /*!
     @brief Compute the conservative divergence with the assumption that only the eb-flux is non-zero
+    @param[out] a_conservativeDivergence Conservative divergence.
+    @param[in]  a_ebFlux                 EB flux
   */
   virtual void conservativeDivergenceNoKappaDivisionOnlyEbFlux(EBAMRCellData& a_conservativeDivergence, const EBAMRIVData& a_ebFlux);
 
   /*!
     @brief Compute the non-conservative divergence
+    @param[out] a_nonConservativeDivergence Non-conservative divergence.
+    @param[in]  a_divG                      Conservative divergence.
   */
   virtual void nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, const EBAMRCellData& a_divG);
 
