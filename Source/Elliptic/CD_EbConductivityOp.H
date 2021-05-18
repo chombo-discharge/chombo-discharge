@@ -54,7 +54,7 @@ void THIS_IS_AN_ERROR_MESSAGE(void)
 
 #include <CD_NamespaceHeader.H>
   
-class mfconductivityop;
+class MfConductivityOp;
 
 //! \class EbConductivityOp
 //! This class implements an operator that solves the equation
@@ -63,7 +63,7 @@ class mfconductivityop;
 class EbConductivityOp: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
 {
 
-  friend mfconductivityop;
+  friend MfConductivityOp;
   
 public:
 

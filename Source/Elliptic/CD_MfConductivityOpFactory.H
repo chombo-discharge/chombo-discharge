@@ -1,13 +1,18 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file mfconductivityopfactory.H
-  @brief Factory class for creating multifluid helmholtz operators
+  @file   CD_MfConductivityOpFactory.H
+  @brief  Factory class for creating multifluid helmholtz operators
   @author Robert Marskar
-  @todo Move implementations to mfconductivityopfactory.H
 */
 
-#ifndef _MFCONDUCTIVITYOPFACTORY_
-#define _MFCONDUCTIVITYOPFACTORY_
+#ifndef CD_MfConductivityOpFactory_H
+#define CD_MfConductivityOpFactory_H
 
+// Chombo includes
 #include <EBLevelDataOps.H>
 #include <AMRMultiGrid.H>
 #include <MFAliasFactory.H>
@@ -20,27 +25,25 @@
 #include <EBQuadCFInterp.H>
 #include <MFCellFAB.H>
 
-#include "mfconductivityop.H"
-#include "mfis.H"
-#include "mfalias.H"
-#include "MFLevelGrid.H"
-#include "MFQuadCFInterp.H"
-#include "data_ops.H"
-#include "CD_ElectrostaticEbBc.H"
-
-
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_MfConductivityOp.H>
+#include <mfis.H>
+#include <mfalias.H>
+#include <MFLevelGrid.H>
+#include <MFQuadCFInterp.H>
+#include <data_ops.H>
+#include <CD_ElectrostaticEbBc.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Factory class for generationg mfconductivityop's. 
+  @brief Factory class for generationg MfConductivityOp's. 
   @details The jump condition is of the Neumann type in the form
   \f[
   a\partial_n\phi_1 - b\partial_n\phi_2 = c\sigma,
   \f]
   where \f$a\f$, \f$b\f$ and \f$c\f$ are variables.  
 */
-class mfconductivityopfactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
+class MfConductivityOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
 public:
   
   /*!
@@ -48,7 +51,7 @@ public:
     @note This class generates its own EBConductivityOps as well as it's own interpolation utilities. 
     @details This class only supports two-phase solutions with single components
   */
-  mfconductivityopfactory(const RefCountedPtr<mfis>&                a_mfis,
+  MfConductivityOpFactory(const RefCountedPtr<mfis>&                a_mfis,
 			  const Vector<MFLevelGrid>&                a_mflg,
 			  const Vector<MFQuadCFInterp>&             a_mfquadcfi,
 			  const Vector<MFFastFluxReg>&              a_mffluxreg,
@@ -75,7 +78,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~mfconductivityopfactory();
+  ~MfConductivityOpFactory();
 
   /*!
     @brief Set when to drop to the bottom solver
@@ -150,7 +153,7 @@ public:
   /*!
     @brief Reclaim
   */
-  virtual void AMRreclaim(mfconductivityop* a_reclaim);
+  virtual void AMRreclaim(MfConductivityOp* a_reclaim);
 
   /*!
     @brief Define things for lower levels of multigrid
@@ -405,9 +408,9 @@ private:
   /*!
     @brief Disallowed weak constructor
   */
-  mfconductivityopfactory(){
-    MayDay::Error("mfconductivityopfactory:: invalid constructor");
-  }
+  MfConductivityOpFactory() = delete;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

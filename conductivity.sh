@@ -1,18 +1,18 @@
 # Inclusion guards
 for i in `find . -type f \( -iname \*.H -o -iname \*.cpp -o -iname \*.py \)`; do
-    sed -i 's/\#include \"ebconductivityop.H\"/\#include <CD_EbConductivityOp.H>/g' $i
-    sed -i 's/\#include \"ebconductivityopfactory.H\"/\#include <CD_EbConductivityOpFactory.H>/g' $i
-    sed -i 's/\#include <ebconductivityop.H>/\#include <CD_EbConductivityOp.H>/g' $i
-    sed -i 's/\#include <ebconductivityopfactory.H>/\#include <CD_EbConductivityOpFactory.H>/g' $i
+    sed -i 's/\#include \"mfconductivityop.H\"/\#include <CD_MfConductivityOp.H>/g' $i
+    sed -i 's/\#include \"mfconductivityopfactory.H\"/\#include <CD_MfConductivityOpFactory.H>/g' $i
+    sed -i 's/\#include <mfconductivityop.H>/\#include <CD_MfConductivityOp.H>/g' $i
+    sed -i 's/\#include <mfconductivityopfactory.H>/\#include <CD_MfConductivityOpFactory.H>/g' $i
 done
 
 for i in `find . -type f \( -iname \*.H -o -iname \*.cpp -o -iname \*.py -o -iname \*.inputs -o -iname \*.options \)`; do
-    sed -i 's/ebconductivityopfactory/EbConductivityOpFactory/g' $i
-    sed -i 's/ebconductivityop/EbConductivityOp/g' $i
+    sed -i 's/mfconductivityopfactory/MfConductivityOpFactory/g' $i
+    sed -i 's/mfconductivityop/MfConductivityOp/g' $i
 done
 
 # Move files
-mv Source/Elliptic/ebconductivityopfactory.H   Source/Elliptic/CD_EbConductivityOpFactory.H
-mv Source/Elliptic/ebconductivityopfactory.cpp Source/Elliptic/CD_EbConductivityOpFactory.cpp
-mv Source/Elliptic/ebconductivityop.H          Source/Elliptic/CD_EbConductivityOp.H
-mv Source/Elliptic/ebconductivityop.cpp        Source/Elliptic/CD_EbConductivityOp.cpp
+mv Source/Elliptic/mfconductivityopfactory.H   Source/Elliptic/CD_MfConductivityOpFactory.H
+mv Source/Elliptic/mfconductivityopfactory.cpp Source/Elliptic/CD_MfConductivityOpFactory.cpp
+mv Source/Elliptic/mfconductivityop.H          Source/Elliptic/CD_MfConductivityOp.H
+mv Source/Elliptic/mfconductivityop.cpp        Source/Elliptic/CD_MfConductivityOp.cpp

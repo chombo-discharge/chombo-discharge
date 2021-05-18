@@ -1,53 +1,55 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file mfconductivityop.H
-  @brief Declaration of multifluid helmholtz operator for embedment in AMRMultiGrid
+  @file   CD_MfConductivityOp.H
+  @brief  Declaration of multifluid helmholtz operator for embedding in AMRMultiGrid
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#ifndef _MFCONDUCTIVITYOP_
-#define _MFCONDUCTIVITYOP_
+#ifndef CD_MfConductivityOp_H
+#define CD_MfConductivityOp_H
 
-
-
+// Chombo includes
 #include <LevelDataOps.H>
 #include <RefCountedPtr.H>
 #include <MFCellFAB.H>
 #include <MFFluxFAB.H>
 #include <BaseDomainBC.H>
 #include <BaseEBBC.H>
-//#include <EBConductivityOp.H>
 #include <DirichletConductivityEBBC.H>
 #include <AMRTGA.H>
 
-#include "mfis.H"
-#include "jump_bc.H"
-#include "MFLevelGrid.H"
-#include "electrode.H"
-#include "MFQuadCFInterp.H"
-#include "MFFastFluxReg.H"
+// Our includes
+#include <mfis.H>
+#include <jump_bc.H>
+#include <MFLevelGrid.H>
+#include <electrode.H>
+#include <MFQuadCFInterp.H>
+#include <MFFastFluxReg.H>
 #include <CD_EbConductivityOp.H>
-#include "mfdirichletconductivityebbc.H"
-#include "CD_ElectrostaticEbBc.H"
-
-#include "CD_NamespaceHeader.H"
+#include <mfdirichletconductivityebbc.H>
+#include <CD_ElectrostaticEbBc.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Operator class for solving the variable-coefficient Helmholtz equation with multigrid in two phases
 */
-class mfconductivityop : public TGAHelmOp<LevelData<MFCellFAB> >{
+class MfConductivityOp : public TGAHelmOp<LevelData<MFCellFAB> >{
 public:
 
   /*!
     @brief Constructor
   */
-  mfconductivityop();
+  MfConductivityOp();
   
 
   /*!
     @brief Destructor
   */
-  virtual ~mfconductivityop();
+  virtual ~MfConductivityOp();
 
   /*!
     @brief Define function
@@ -552,9 +554,8 @@ protected:
     @brief Is this a multifluid solver?
   */
   bool m_multifluid;
-  
-private:
-  
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

@@ -1,17 +1,21 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   mfconductivityopfactory.cpp
-  @brief  Implementation of mfconductivityopfactory.H
+  @file   CD_MfConductivityOpFactory.cpp
+  @brief  Implementation of CD_MfConductivityOpFactory.H
   @author Robert Marskar
-  @date   Dec. 2017
 */
 
-#include "mfconductivityopfactory.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_MfConductivityOpFactory.H>
+#include <CD_NamespaceHeader.H>
   
 #define verb 0
 
-mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&                a_mfis,
+MfConductivityOpFactory::MfConductivityOpFactory(const RefCountedPtr<mfis>&                a_mfis,
 						 const Vector<MFLevelGrid>&                a_mflg,
 						 const Vector<MFQuadCFInterp>&             a_mfquadcfi,
 						 const Vector<MFFastFluxReg>&              a_mffluxreg,
@@ -35,7 +39,7 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
 						 const int                                 a_num_levels,
 						 const Vector<MFLevelGrid>&                a_mg_mflg){
 #if verb
-  pout() << "mfconductivityopfactory::mfconductivityopfactory" << endl;
+  pout() << "MfConductivityOpFactory::MfConductivityOpFactory" << endl;
 #endif
 
   CH_assert(a_mflg[0].num_phases() <= 2); 
@@ -96,12 +100,12 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
 #endif
 }
 
-mfconductivityopfactory::~mfconductivityopfactory(){
+MfConductivityOpFactory::~MfConductivityOpFactory(){
 
 }
 
-void mfconductivityopfactory::define_multigrid_stuff(){
-  CH_TIME("mfconductivityopfactory::define_multigrid_stuff");
+void MfConductivityOpFactory::define_multigrid_stuff(){
+  CH_TIME("MfConductivityOpFactory::define_multigrid_stuff");
   m_aCoefficient_mg.resize(m_num_levels);
   m_bco_mg.resize(m_num_levels);
   m_bco_irreg_mg.resize(m_num_levels);
@@ -327,7 +331,7 @@ void mfconductivityopfactory::define_multigrid_stuff(){
   }
 }
 
-void mfconductivityopfactory::coarsen_coefficients(LevelData<MFCellFAB>&         a_aco_coar,
+void MfConductivityOpFactory::coarsen_coefficients(LevelData<MFCellFAB>&         a_aco_coar,
 						   LevelData<MFFluxFAB>&         a_bco_coar,
 						   LevelData<MFBaseIVFAB>&       a_bco_irreg_coar,
 						   const MFLevelGrid&            a_mflg_coar,
@@ -380,36 +384,36 @@ void mfconductivityopfactory::coarsen_coefficients(LevelData<MFCellFAB>&        
   }
 }
 
-void mfconductivityopfactory::set_ebbc_order(const int a_ebbc_order){
+void MfConductivityOpFactory::set_ebbc_order(const int a_ebbc_order){
   m_ebbc_order = a_ebbc_order;
 }
 
-void mfconductivityopfactory::set_bottom_drop(const int a_bottom_drop){
+void MfConductivityOpFactory::set_bottom_drop(const int a_bottom_drop){
   m_test_ref = a_bottom_drop;
 }
 
-void mfconductivityopfactory::set_relax_type(const int a_relax_type){
+void MfConductivityOpFactory::set_relax_type(const int a_relax_type){
   m_relax_type = a_relax_type;
 }
 
-void mfconductivityopfactory::setTime(Real* a_time){
+void MfConductivityOpFactory::setTime(Real* a_time){
   m_time = a_time;
 }
 
-void mfconductivityopfactory::set_max_box_size(const int a_max_box_size){
+void MfConductivityOpFactory::set_max_box_size(const int a_max_box_size){
   m_maxBoxSize = a_max_box_size;
 }
 
-void mfconductivityopfactory::reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim){
+void MfConductivityOpFactory::reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim){
   delete a_reclaim;
 }
 
-void mfconductivityopfactory::AMRreclaim(mfconductivityop* a_reclaim){
+void MfConductivityOpFactory::AMRreclaim(MfConductivityOp* a_reclaim){
   delete a_reclaim;
 }
 
-void mfconductivityopfactory::define_jump_stuff(){
-  CH_TIME("mfconductivityopfactory::define_jump_cells");
+void MfConductivityOpFactory::define_jump_stuff(){
+  CH_TIME("MfConductivityOpFactory::define_jump_cells");
 
   m_aveop.resize(m_num_levels);
   m_jump.resize(m_num_levels);
@@ -456,8 +460,8 @@ void mfconductivityopfactory::define_jump_stuff(){
   }
 }
 
-void mfconductivityopfactory::averageDown_amr(){
-  CH_TIME("mfconductivityopfactory::averageDown_amr");
+void MfConductivityOpFactory::averageDown_amr(){
+  CH_TIME("MfConductivityOpFactory::averageDown_amr");
     
   const int ncomp        = 0;
   const Interval interv  = Interval(0, ncomp -1);
@@ -466,13 +470,13 @@ void mfconductivityopfactory::averageDown_amr(){
   for (int lvl = finest_level; lvl > 0; lvl--){ // Average down AMR levels
     m_aveop[lvl]->average(*m_jump[lvl-1], *m_jump[lvl], interv);
 #if verb // Debug
-    pout() << "mfconductivityopfactory::averageDown_amr from AMR level = " << lvl << " and onto AMR level = " << lvl - 1 << endl;
+    pout() << "MfConductivityOpFactory::averageDown_amr from AMR level = " << lvl << " and onto AMR level = " << lvl - 1 << endl;
 #endif
   }
 }
 
-void mfconductivityopfactory::averageDown_mg(){
-  CH_TIME("mfconductivityopfactory::averageDown_mg");
+void MfConductivityOpFactory::averageDown_mg(){
+  CH_TIME("MfConductivityOpFactory::averageDown_mg");
 
   const int ncomp        = 0;
   const Interval interv  = Interval(0, ncomp -1);
@@ -486,7 +490,7 @@ void mfconductivityopfactory::averageDown_mg(){
 
       for (int img = finest_mg_level+1; img <= coarsest_mg_level; img++){ 
 #if verb // DEBUG
-	pout() << "mfconductivityopfactory::averageDown_mg from AMR level = " << lvl
+	pout() << "MfConductivityOpFactory::averageDown_mg from AMR level = " << lvl
 	       << " from MG level = " << img-1
 	       << " to   MG level = " << img 
 	       << " fine domain = " << m_domains_mg[lvl][img-1]
@@ -495,23 +499,23 @@ void mfconductivityopfactory::averageDown_mg(){
 #endif
 #if 0 // Debug
 	if(m_aveop_mg[lvl][img].isNull()){
-	  MayDay::Abort("mfconductivityopfactory::averageDown_mg - aveop is NULL");
+	  MayDay::Abort("MfConductivityOpFactory::averageDown_mg - aveop is NULL");
 	}
 #endif
 	m_aveop_mg[lvl][img]->average(*jump_mg[img], *jump_mg[img-1], interv); // Average down onto level img
 #if verb
-	pout() << "mfconductivityopfactory::averageDown_mg - done" << endl;
+	pout() << "MfConductivityOpFactory::averageDown_mg - done" << endl;
 #endif
       }
     }
   }
 #if verb // DEBUG
-  pout() << "mfconductivityopfactory::averageDown_mg - done exit " << endl;
+  pout() << "MfConductivityOpFactory::averageDown_mg - done exit " << endl;
 #endif
 }
 
-void mfconductivityopfactory::reset_jump(){
-  CH_TIME("mfconductivityopfactory::reset_jump()");
+void MfConductivityOpFactory::reset_jump(){
+  CH_TIME("MfConductivityOpFactory::reset_jump()");
 
   data_ops::set_value(m_jump, 0.0);
   for (int i = 0; i < m_jump_mg.size(); i++){
@@ -519,11 +523,11 @@ void mfconductivityopfactory::reset_jump(){
   }
 }
 
-void mfconductivityopfactory::set_jump(const Real& a_sigma, const Real& a_scale){
-  CH_TIME("mfconductivityopfactory::set_jump(scalar)");
+void MfConductivityOpFactory::set_jump(const Real& a_sigma, const Real& a_scale){
+  CH_TIME("MfConductivityOpFactory::set_jump(scalar)");
 
 #if verb
-  pout() << "mfconductivityopfactory::set_jump" << endl;
+  pout() << "MfConductivityOpFactory::set_jump" << endl;
 #endif
   // for (int lvl = 0; lvl < m_num_levels; lvl++){
   //   EBLevelDataOps::setVal(*m_jump[lvl], a_sigma);
@@ -537,14 +541,14 @@ void mfconductivityopfactory::set_jump(const Real& a_sigma, const Real& a_scale)
     data_ops::set_value(m_jump_mg[i], a_sigma*a_scale);
   }
 #if verb
-  pout() << "mfconductivityopfactory::set_jump - done" << endl;
+  pout() << "MfConductivityOpFactory::set_jump - done" << endl;
 #endif
 }
 
-void mfconductivityopfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a_scale){
-  CH_TIME("mfconductivityopfactory::set_jump(data based)");
+void MfConductivityOpFactory::set_jump(const EBAMRIVData& a_sigma, const Real& a_scale){
+  CH_TIME("MfConductivityOpFactory::set_jump(data based)");
 #if verb
-  pout() << "mfconductivityopfactory::set_jump(data based)" << endl;
+  pout() << "MfConductivityOpFactory::set_jump(data based)" << endl;
 #endif
 
   //  reset_jump(); Shouldn't be necessary
@@ -566,15 +570,15 @@ void mfconductivityopfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a
   this->averageDown_mg();
 
 #if verb
-  pout() << "mfconductivityopfactory::set_jump(data based) - done" << endl;
+  pout() << "MfConductivityOpFactory::set_jump(data based) - done" << endl;
 #endif
 }
 
-void mfconductivityopfactory::setDirichletEbBc(const ElectrostaticEbBc& a_ebbc){
+void MfConductivityOpFactory::setDirichletEbBc(const ElectrostaticEbBc& a_ebbc){
   m_electrostaticEbBc = a_ebbc;
 }
 
-int mfconductivityopfactory::refToFiner(const ProblemDomain& a_domain) const{
+int MfConductivityOpFactory::refToFiner(const ProblemDomain& a_domain) const{
   int retval = -1;
   bool found = false;
 
@@ -586,18 +590,18 @@ int mfconductivityopfactory::refToFiner(const ProblemDomain& a_domain) const{
   }
   
   if(!found){
-    MayDay::Error("mfconductivityopfactory::refToFiner - domain not found in AMR hierarchy");
+    MayDay::Error("MfConductivityOpFactory::refToFiner - domain not found in AMR hierarchy");
   }
   
   return retval;
 }
 
-MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const ProblemDomain& a_domain_fine,
+MGLevelOp<LevelData<MFCellFAB> >* MfConductivityOpFactory::MGnewOp(const ProblemDomain& a_domain_fine,
 								   int                  a_depth,
 								   bool                 a_homo_only){
-  CH_TIME("mfconductivityopfactory::MGnewOp");
+  CH_TIME("MfConductivityOpFactory::MGnewOp");
 #if verb // Test
-  pout() << "mfconductivityopfactory::MGnewOp" << endl;
+  pout() << "MfConductivityOpFactory::MGnewOp" << endl;
 #endif
   int ref    = -1;
   bool found = false;
@@ -611,7 +615,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
   }
 
   if(!found){
-    MayDay::Abort("mfconductivityopfactory::MGnewOp - no corresponding starting level to a_domain_fine");
+    MayDay::Abort("MfConductivityOpFactory::MGnewOp - no corresponding starting level to a_domain_fine");
   }
   
 
@@ -732,7 +736,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
   pout() << "creating oper" << endl;
 #endif
 
-  mfconductivityop* oper = new mfconductivityop();
+  MfConductivityOp* oper = new MfConductivityOp();
 
 #if verb
   pout() << "defining oper" << endl;
@@ -778,18 +782,18 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
   
 
 #if 0 // Debug-stop
-  MayDay::Abort("mfconductivityopfactory::mgnewop - implementation is not finished!");
+  MayDay::Abort("MfConductivityOpFactory::mgnewop - implementation is not finished!");
 #endif
 #if verb
-  pout() << "mfconductivityopfactory::MGnewOp - returning new op" << endl;
+  pout() << "MfConductivityOpFactory::MGnewOp - returning new op" << endl;
 #endif
   return static_cast<MGLevelOp<LevelData<MFCellFAB> >* > (oper);
 }
 
-AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const ProblemDomain& a_domain_fine){
-  CH_TIME("mfconductivityopfactory::AMRnewOp");
+AMRLevelOp<LevelData<MFCellFAB> >* MfConductivityOpFactory::AMRnewOp(const ProblemDomain& a_domain_fine){
+  CH_TIME("MfConductivityOpFactory::AMRnewOp");
 #if verb
-  pout() << "mfconductivityopfactory::AMRnewOp" << endl;
+  pout() << "MfConductivityOpFactory::AMRnewOp" << endl;
 #endif
   int ref    = -1;
   bool found = false;
@@ -807,7 +811,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
 #endif
 
   if(!found){
-    MayDay::Abort("mfconductivityopfactory::AMRnewOp - no corresponding starting level to a_domain_fine");
+    MayDay::Abort("MfConductivityOpFactory::AMRnewOp - no corresponding starting level to a_domain_fine");
   }
   
 
@@ -887,7 +891,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
 #if verb
   pout() << "creating oper" << endl;
 #endif
-  mfconductivityop* oper = new mfconductivityop();
+  MfConductivityOp* oper = new MfConductivityOp();
 
   oper->define(m_multifluidIndexSpace,
 	       m_domainBc,
@@ -925,11 +929,12 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
   oper->setDirichletEbBc(m_electrostaticEbBc);
 
 #if 0 // Debug-stop
-  MayDay::Abort("mfconductivityopfactory::AMRnewOp - implementation is not finished!");
+  MayDay::Abort("MfConductivityOpFactory::AMRnewOp - implementation is not finished!");
 #endif
 #if verb
-  pout() << "mfconductivityopfactory::AMRnewOp - returning new op" << endl;
+  pout() << "MfConductivityOpFactory::AMRnewOp - returning new op" << endl;
 #endif
   return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (oper);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

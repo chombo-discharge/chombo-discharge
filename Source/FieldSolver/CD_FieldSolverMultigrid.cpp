@@ -641,7 +641,7 @@ void FieldSolverMultigrid::setupOperatorFactory(){
   auto domfact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_domainBc, m_amr->getProbLo()));
 
   // Create factory and set potential
-  m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_multifluidIndexSpace,
+  m_opfact = RefCountedPtr<MfConductivityOpFactory> (new MfConductivityOpFactory(m_multifluidIndexSpace,
 										 mflg,
 										 mfquadcfi,
 										 mffluxreg,

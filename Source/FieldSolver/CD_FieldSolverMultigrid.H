@@ -23,7 +23,7 @@
 
 // Our includes
 #include <CD_FieldSolver.H>
-#include <mfconductivityopfactory.H>
+#include <CD_MfConductivityOpFactory.H>
 
 #include <CD_NamespaceHeader.H>
 
@@ -65,7 +65,7 @@ public:
   /*!
     @brief Added because of CD_FieldStepper, which uses the operator factory to generate computational loads.
   */
-  RefCountedPtr<mfconductivityopfactory>& getOperatorFactory(){
+  RefCountedPtr<MfConductivityOpFactory>& getOperatorFactory(){
     return m_opfact;
   }
 
@@ -256,7 +256,7 @@ protected:
   /*!
     @brief Multigrid operator factory. 
   */
-  RefCountedPtr<mfconductivityopfactory> m_opfact;
+  RefCountedPtr<MfConductivityOpFactory> m_opfact;
   
   /*!
     @brief b-coefficient
