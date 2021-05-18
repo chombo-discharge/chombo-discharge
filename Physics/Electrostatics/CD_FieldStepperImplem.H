@@ -42,9 +42,9 @@ namespace Physics {
       std::string str;
 
       pp.get("load_balance", m_loadBalance);
-      pp.get("BoxSorting",  str);
-      pp.get("Realm",       m_realm);
-      pp.get("verbosity",   m_verbosity);
+      pp.get("box_sorting",  str);
+      pp.get("realm",        m_realm);
+      pp.get("verbosity",    m_verbosity);
       
       if( str == "none"){
 	m_boxSort = BoxSorting::None;
