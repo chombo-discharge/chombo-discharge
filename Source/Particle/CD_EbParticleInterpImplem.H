@@ -1,17 +1,21 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   EBParticleInterpI.H
-  @brief  Implementatoin of EBParticleInterp.H
+  @file   CD_EbParticleInterpImplem.H
+  @brief  Implementatoin of CD_EbParticleInterp.H
   @author Robert Marskar
-  @date   April 2020
 */
 
-#ifndef _EBPARTICLEINTERPI_H_
-#define _EBPARTICLEINTERPI_H_
+#ifndef CD_EbParticleInterpImplem_H
+#define CD_EbParticleInterpImplem_H
 
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
   
 template <class P>
-void EBParticleInterp::deposit(const List<P>& a_particleList, FArrayBox& a_rho, DepositionType::Which a_interpType){
+void EbParticleInterp::deposit(const List<P>& a_particleList, FArrayBox& a_rho, DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
     const P& this_particle = lit();
     const RealVect& this_x = this_particle.position();
@@ -26,7 +30,7 @@ void EBParticleInterp::deposit(const List<P>& a_particleList, FArrayBox& a_rho, 
 }
 
 template <class P>
-void EBParticleInterp::deposit2(const List<P>& a_particleList, FArrayBox& a_rho, DepositionType::Which a_interpType){
+void EbParticleInterp::deposit2(const List<P>& a_particleList, FArrayBox& a_rho, DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
     const P& this_particle = lit();
     const RealVect& this_x = this_particle.position();
@@ -41,7 +45,7 @@ void EBParticleInterp::deposit2(const List<P>& a_particleList, FArrayBox& a_rho,
 }
 
 template <class P>
-void EBParticleInterp::deposit4(const List<P>& a_particleList, FArrayBox& a_rho, DepositionType::Which a_interpType){
+void EbParticleInterp::deposit4(const List<P>& a_particleList, FArrayBox& a_rho, DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
     const P& this_particle = lit();
     const RealVect& this_x = this_particle.position();
@@ -56,7 +60,7 @@ void EBParticleInterp::deposit4(const List<P>& a_particleList, FArrayBox& a_rho,
 }
 
 template <class P>
-void EBParticleInterp::interpolateDiffusion(List<P>&              a_particleList,
+void EbParticleInterp::interpolateDiffusion(List<P>&              a_particleList,
 					    const FArrayBox&      a_diffusionField,
 					    DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
@@ -73,7 +77,7 @@ void EBParticleInterp::interpolateDiffusion(List<P>&              a_particleList
 }
 
 template <class P>
-void EBParticleInterp::interpolateMobility(List<P>&              a_particleList,
+void EbParticleInterp::interpolateMobility(List<P>&              a_particleList,
 					   const FArrayBox&      a_mobilityField,
 					   DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
@@ -90,7 +94,7 @@ void EBParticleInterp::interpolateMobility(List<P>&              a_particleList,
 }
   
 template <class P>
-void EBParticleInterp::interpolateVelocity(List<P>&              a_particleList,
+void EbParticleInterp::interpolateVelocity(List<P>&              a_particleList,
 					   const FArrayBox&      a_velocityField,
 					   DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
@@ -107,7 +111,7 @@ void EBParticleInterp::interpolateVelocity(List<P>&              a_particleList,
 }
 
 template <class P>
-void EBParticleInterp::interpolateAcceleration(List<P>&              a_particleList,
+void EbParticleInterp::interpolateAcceleration(List<P>&              a_particleList,
 					       const FArrayBox&      a_accelerationField,
 					       DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
@@ -122,6 +126,7 @@ void EBParticleInterp::interpolateAcceleration(List<P>&              a_particleL
     p.setAcceleration(particleAcceleration);
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

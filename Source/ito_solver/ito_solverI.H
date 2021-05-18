@@ -12,7 +12,7 @@
 #include "simple_ito_particle.H"
 #include "ito_solver.H"
 #include "data_ops.H"
-#include "EBParticleInterp.H"
+#include <CD_EbParticleInterp.H>
 #include "units.H"
 #include <CD_EbGhostCloud.H>
 #include "ito_layout.H"
@@ -189,7 +189,7 @@ void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
+      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
       interp.deposit((*particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
@@ -246,7 +246,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
+      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
       interp.deposit((*particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
@@ -278,7 +278,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
 	const EBISBox& ebisbox = eblgFiCo.getEBISL()[dit()];
 
 	buffer[dit()].setVal(0.0);
-	EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
+	EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
 
 	if(refRat == 2){
 	  interp.deposit2((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition);
@@ -339,7 +339,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&              
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
+      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
       interp.deposit((*non_halo_particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
@@ -360,7 +360,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&              
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, DepositionType::NGP);
+      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, DepositionType::NGP);
       interp.deposit((*halo_particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), DepositionType::NGP);
     }    
   }

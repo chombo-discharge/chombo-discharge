@@ -1,18 +1,23 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   EBParticleInterp.cpp
-  @brief  Implementationof EBParticleInterp.H
+  @file   CD_EbParticleInterp.cpp
+  @brief  Implementationof CD_EbParticleInterp.H
   @author Robert Marskar
-  @date   April 2020
 */
 
-#include "EBParticleInterp.H"
-#include "EBParticleInterpF_F.H"
+// Our includes
+#include <CD_EbParticleInterp.H>
+#include <CD_EbParticleInterpF_F.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-EBParticleInterp::EBParticleInterp(){
+EbParticleInterp::EbParticleInterp(){
 }
 
-EBParticleInterp::EBParticleInterp(const Box&      a_domain,
+EbParticleInterp::EbParticleInterp(const Box&      a_domain,
 				   const EBISBox&  a_ebisbox,
 				   const RealVect& a_dx,
 				   const RealVect& a_probLo,
@@ -20,7 +25,7 @@ EBParticleInterp::EBParticleInterp(const Box&      a_domain,
   this->define(a_domain, a_ebisbox, a_dx, a_probLo, a_force_irreg_ngp);
 }
 
-void EBParticleInterp::define(const Box&      a_domain,
+void EbParticleInterp::define(const Box&      a_domain,
 			      const EBISBox&  a_ebisbox,
 			      const RealVect& a_dx,
 			      const RealVect& a_probLo,
@@ -32,7 +37,7 @@ void EBParticleInterp::define(const Box&      a_domain,
   m_irr_ngp = a_force_irreg_ngp;
 }
 
-void EBParticleInterp::depositParticle(FArrayBox&       a_rho,
+void EbParticleInterp::depositParticle(FArrayBox&       a_rho,
 				       const RealVect&  a_probLo,
 				       const RealVect&  a_dx,
 				       const RealVect&  a_position,
@@ -46,7 +51,7 @@ void EBParticleInterp::depositParticle(FArrayBox&       a_rho,
   const bool irregular    = m_ebisbox->isIrregular(iv);
   const bool regular      = !multi_valued && !irregular;
 
-  if(multi_valued) MayDay::Abort("EBParticleInterp::depositParticle - multivalued cells not supported (yet)");
+  if(multi_valued) MayDay::Abort("EbParticleInterp::depositParticle - multivalued cells not supported (yet)");
 
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
   if(m_irr_ngp && !regular){
@@ -92,7 +97,7 @@ void EBParticleInterp::depositParticle(FArrayBox&       a_rho,
   }
 }
 
-void EBParticleInterp::depositParticle2(FArrayBox&       a_rho,
+void EbParticleInterp::depositParticle2(FArrayBox&       a_rho,
 					const RealVect&  a_probLo,
 					const RealVect&  a_dx,
 					const RealVect&  a_position,
@@ -103,7 +108,7 @@ void EBParticleInterp::depositParticle2(FArrayBox&       a_rho,
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
   if(m_ebisbox->isMultiValued(iv)){
-    MayDay::Abort("EBParticleInterp::depositParticle2 - multivalued cells not supported (yet)");
+    MayDay::Abort("EbParticleInterp::depositParticle2 - multivalued cells not supported (yet)");
   }
 
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
@@ -136,7 +141,7 @@ void EBParticleInterp::depositParticle2(FArrayBox&       a_rho,
   }
 }
 
-void EBParticleInterp::depositParticle4(FArrayBox&       a_rho,
+void EbParticleInterp::depositParticle4(FArrayBox&       a_rho,
 					const RealVect&  a_probLo,
 					const RealVect&  a_dx,
 					const RealVect&  a_position,
@@ -147,7 +152,7 @@ void EBParticleInterp::depositParticle4(FArrayBox&       a_rho,
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
   if(m_ebisbox->isMultiValued(iv)){
-    MayDay::Abort("EBParticleInterp::depositParticle2 - multivalued cells not supported (yet)");
+    MayDay::Abort("EbParticleInterp::depositParticle2 - multivalued cells not supported (yet)");
   }
 
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
@@ -180,7 +185,7 @@ void EBParticleInterp::depositParticle4(FArrayBox&       a_rho,
   }
 }
 
-void EBParticleInterp::interpolateParticle(Real&             a_particleField,
+void EbParticleInterp::interpolateParticle(Real&             a_particleField,
 					   const FArrayBox&  a_field,
 					   const RealVect&   a_probLo,
 					   const RealVect&   a_dx,
@@ -190,7 +195,7 @@ void EBParticleInterp::interpolateParticle(Real&             a_particleField,
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
   if(m_ebisbox->isMultiValued(iv)){
-    MayDay::Abort("EBParticleInterp::depositParticle - multivalued cells not supported (yet)");
+    MayDay::Abort("EbParticleInterp::depositParticle - multivalued cells not supported (yet)");
   }
 
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
@@ -233,12 +238,12 @@ void EBParticleInterp::interpolateParticle(Real&             a_particleField,
 				 CHF_CONST_REALVECT(a_position));
       break;
     default:
-      MayDay::Error("EBParticleInterp::interpolateParticle(RealVect) - Invalid interpolation type.");
+      MayDay::Error("EbParticleInterp::interpolateParticle(RealVect) - Invalid interpolation type.");
     }
   }
 }
 
-void EBParticleInterp::interpolateParticle(RealVect&         a_particleField,
+void EbParticleInterp::interpolateParticle(RealVect&         a_particleField,
 					   const FArrayBox&  a_field,
 					   const RealVect&   a_probLo,
 					   const RealVect&   a_dx,
@@ -248,7 +253,7 @@ void EBParticleInterp::interpolateParticle(RealVect&         a_particleField,
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
   if(m_ebisbox->isMultiValued(iv)){
-    MayDay::Abort("EBParticleInterp::depositParticle - multivalued cells not supported (yet)");
+    MayDay::Abort("EbParticleInterp::depositParticle - multivalued cells not supported (yet)");
   }
 
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side.
@@ -291,8 +296,9 @@ void EBParticleInterp::interpolateParticle(RealVect&         a_particleField,
 				 CHF_CONST_REALVECT(a_position));
       break;
     default:
-      MayDay::Error("EBParticleInterp::interpolateParticle(RealVect) - Invalid interpolation type.");
+      MayDay::Error("EbParticleInterp::interpolateParticle(RealVect) - Invalid interpolation type.");
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

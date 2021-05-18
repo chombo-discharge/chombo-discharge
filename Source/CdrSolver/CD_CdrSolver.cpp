@@ -923,7 +923,7 @@ void CdrSolver::initialDataParticles(){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const Box box          = dbl.get(dit());
 	const EBISBox& ebisbox = ebisl[dit()];
-	EBParticleInterp interp(box, ebisbox, dx, origin, true);
+	EbParticleInterp interp(box, ebisbox, dx, origin, true);
 	interp.deposit(particles[lvl][dit()].listItems(), (*m_phi[lvl])[dit()].getFArrayBox(), DepositionType::NGP);
       }
     }

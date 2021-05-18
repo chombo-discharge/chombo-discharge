@@ -15,7 +15,7 @@
 // Chombo includes
 #include <RealVect.H>
 #include <Particle.H>
-#include <EBParticleInterp.H>
+#include <CD_EbParticleInterp.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>

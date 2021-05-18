@@ -12,7 +12,7 @@
 #include "computational_geometry.H"
 #include "ito_species.H"
 #include "ito_particle.H"
-#include "EBParticleInterp.H"
+#include <CD_EbParticleInterp.H>
 #include "particle_container.H"
 #include "bvh.H"
 #include "point_mass.H"

@@ -1,21 +1,28 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   EBParticleInterp.H
-  @brief  My clunky attempt at deposition particles in an EB context
+  @file   CD_EbParticleInterp.H
+  @brief  Particle deposition code
   @author Robert Marskar
   @date   April 2020
 */
 
-#ifndef _EBMESHINTERP_
-#define _EBMESHINTERP_
+#ifndef CD_EbParticleInterp_H
+#define CD_EbParticleInterp_H
 
-#include "Box.H"
-#include "EBISBox.H"
-#include "FArrayBox.H"
-#include "REAL.H"
-#include "Vector.H"
-#include "RealVect.H"
+// CHombo includes
+#include <Box.H>
+#include <EBISBox.H>
+#include <FArrayBox.H>
+#include <REAL.H>
+#include <Vector.H>
+#include <RealVect.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief Deposition type
@@ -32,18 +39,18 @@ namespace DepositionType {
 /*!
   @brief Currently a shameless rip-off of MeshInterp.H
 */
-class EBParticleInterp{
+class EbParticleInterp{
 public:
 
   /*!
     @brief ctor
   */
-  EBParticleInterp();
+  EbParticleInterp();
 
   /*!
     @brief Full constructor
   */
-  EBParticleInterp(const Box& a_domain, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo, const bool a_force_irreg_ngp);
+  EbParticleInterp(const Box& a_domain, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo, const bool a_force_irreg_ngp);
 
   /*!
     @brief Define function
@@ -165,8 +172,9 @@ protected:
   RealVect m_probLo;
   bool m_irr_ngp; // Force NGP deposition in cut-cells. 
 };
-#include "CD_NamespaceFooter.H"
 
-#include "EBParticleInterpI.H"
+#include <CD_NamespaceFooter.H>
+
+#include <CD_EbParticleInterpImplem.H>
 
 #endif

@@ -9,7 +9,7 @@
 #define _MC_PHOTO_
 
 #include "rte_solver.H"
-#include "EBParticleInterp.H"
+#include <CD_EbParticleInterp.H>
 #include "particle_container.H"
 #include <CD_WallBc.H>
 #include "photon.H"
