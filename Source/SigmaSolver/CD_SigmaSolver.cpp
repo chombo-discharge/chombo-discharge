@@ -1,41 +1,44 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   sigma_solver.cpp
-  @brief  Implementation of sigma_solver.H
+  @file   CD_SigmaSolver.cpp
+  @brief  Implementation of CD_SigmaSolver.H
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#include "sigma_solver.H"
-#include "data_ops.H"
-
+// Chombo includes
 #include <EBArith.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_SigmaSolver.H>
+#include <data_ops.H>
+#include <CD_NamespaceHeader.H>
 
-sigma_solver::sigma_solver(){
-
+SigmaSolver::SigmaSolver(){
   this->setVerbosity(-1);
   this->setPhase(phase::gas);
-  this->set_plot_variables();
   this->setRealm(Realm::Primal);
 }
 
-sigma_solver::~sigma_solver(){
+SigmaSolver::~SigmaSolver(){
 
 }
 
-const std::string sigma_solver::getRealm() const {
+const std::string SigmaSolver::getRealm() const {
   return m_realm;
 }
 
-void sigma_solver::setRealm(const std::string a_realm){
+void SigmaSolver::setRealm(const std::string a_realm){
   m_realm = a_realm;
 }
 
-void sigma_solver::allocateInternals(){
-  CH_TIME("sigma_solver::allocateInternals");
+void SigmaSolver::allocateInternals(){
+  CH_TIME("SigmaSolver::allocateInternals");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::allocateInternals" << endl;
+    pout() << "SigmaSolver::allocateInternals" << endl;
   }
 
   const int comp  = 0;
@@ -45,10 +48,10 @@ void sigma_solver::allocateInternals(){
   m_amr->allocate(m_flux,  m_realm, m_phase, ncomp);
 }
 
-void sigma_solver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
-  CH_TIME("sigma_solver::preRegrid");
+void SigmaSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
+  CH_TIME("SigmaSolver::preRegrid");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::preRegrid" << endl;
+    pout() << "SigmaSolver::preRegrid" << endl;
   }
 
   const int ncomp = 1;
@@ -62,30 +65,30 @@ void sigma_solver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
   }
 }
 
-void sigma_solver::compute_rhs(EBAMRIVData& a_rhs){
-  CH_TIME("sigma_solver::compute_rhs");
+void SigmaSolver::computeRHS(EBAMRIVData& a_rhs){
+  CH_TIME("SigmaSolver::computeRHS");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::compute_rhs" << endl;
+    pout() << "SigmaSolver::computeRHS" << endl;
   }
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl ++){
     m_flux[lvl]->localCopyTo(*a_rhs[lvl]);
   }
 }
 
-void sigma_solver::deallocateInternals(){
-  CH_TIME("sigma_solver::deallocateInternals");
+void SigmaSolver::deallocateInternals(){
+  CH_TIME("SigmaSolver::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::deallocateInternals" << endl;
+    pout() << "SigmaSolver::deallocateInternals" << endl;
   }
   
   m_amr->deallocate(m_phi);
   m_amr->deallocate(m_flux);
 }
 
-void sigma_solver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
-  CH_TIME("sigma_solver::regrid");
+void SigmaSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
+  CH_TIME("SigmaSolver::regrid");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::regrid" << endl;
+    pout() << "SigmaSolver::regrid" << endl;
   }
 
   const RefCountedPtr<EBIndexSpace> ebis = m_multifluidIndexSpace->getEBIndexSpace(m_phase);
@@ -178,27 +181,27 @@ void sigma_solver::regrid(const int a_lmin, const int a_oldFinestLevel, const in
     }
   }
 
-  this->reset_cells(m_phi);
+  this->resetCells(m_phi);
 }
 
-void sigma_solver::registerOperators(){
-  CH_TIME("sigma_solver::registerOperators");
+void SigmaSolver::registerOperators(){
+  CH_TIME("SigmaSolver::registerOperators");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::registerOperators" << endl;
+    pout() << "SigmaSolver::registerOperators" << endl;
   }
 
   if(m_amr.isNull()){
-    MayDay::Abort("sigma_solver::registerOperators - need to set AmrMesh!");
+    MayDay::Abort("SigmaSolver::registerOperators - need to set AmrMesh!");
   }
   else{
     m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
   }
 }
 
-void sigma_solver::reset_cells(EBAMRIVData& a_data){
-  CH_TIME("sigma_solver::reset_cells");
+void SigmaSolver::resetCells(EBAMRIVData& a_data){
+  CH_TIME("SigmaSolver::resetCells");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::reset_cells" << endl;
+    pout() << "SigmaSolver::resetCells" << endl;
   }
 
   const int finest_level = m_amr->getFinestLevel();
@@ -226,38 +229,38 @@ void sigma_solver::reset_cells(EBAMRIVData& a_data){
   }
 }
 
-void sigma_solver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("sigma_solver::setAmr");
+void SigmaSolver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
+  CH_TIME("SigmaSolver::setAmr");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::setAmr" << endl;
+    pout() << "SigmaSolver::setAmr" << endl;
   }
 
   m_amr = a_amr;
 }
 
-void sigma_solver::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
-  CH_TIME("sigma_solver::setComputationalGeometry");
+void SigmaSolver::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
+  CH_TIME("SigmaSolver::setComputationalGeometry");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::setComputationalGeometry" << endl;
+    pout() << "SigmaSolver::setComputationalGeometry" << endl;
   }
 
   m_computationalGeometry = a_computationalGeometry;
   m_multifluidIndexSpace     = m_computationalGeometry->get_mfis();
 }
 
-void sigma_solver::setPhase(phase::which_phase a_phase){
-  CH_TIME("sigma_solver::setPhase");
+void SigmaSolver::setPhase(phase::which_phase a_phase){
+  CH_TIME("SigmaSolver::setPhase");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::setPhase" << endl;
+    pout() << "SigmaSolver::setPhase" << endl;
   }
 
   m_phase = a_phase;
 }
 
-void sigma_solver::set_sigma(const EBAMRIVData& a_sigma){
-  CH_TIME("sigma_solver::set_sigma(ebamrivdata)");
+void SigmaSolver::setSigma(const EBAMRIVData& a_sigma){
+  CH_TIME("SigmaSolver::setSigma(ebamrivdata)");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::set_sigma(ebamrivdata)" << endl;
+    pout() << "SigmaSolver::setSigma(ebamrivdata)" << endl;
   }
 
   const int finest_level = m_amr->getFinestLevel();
@@ -266,13 +269,13 @@ void sigma_solver::set_sigma(const EBAMRIVData& a_sigma){
     a_sigma[lvl]->localCopyTo(*m_phi[lvl]);
   }
 
-  this->reset_cells(m_phi);
+  this->resetCells(m_phi);
 }
 
-void sigma_solver::set_sigma(const Real a_sigma){
-  CH_TIME("sigma_solver::set_sigma(constant)");
+void SigmaSolver::setSigma(const Real a_sigma){
+  CH_TIME("SigmaSolver::setSigma(constant)");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::set_sigma(constant)" << endl;
+    pout() << "SigmaSolver::setSigma(constant)" << endl;
   }
 
   const int finest_level = m_amr->getFinestLevel();
@@ -281,24 +284,24 @@ void sigma_solver::set_sigma(const Real a_sigma){
     data_ops::set_value(*m_phi[lvl], a_sigma);
   }
 
-  this->reset_cells(m_phi);
+  this->resetCells(m_phi);
 }
 
-void sigma_solver::setVerbosity(const int a_verbosity){
-  CH_TIME("sigma_solver::setVerbosity");
+void SigmaSolver::setVerbosity(const int a_verbosity){
+  CH_TIME("SigmaSolver::setVerbosity");
   m_verbosity = a_verbosity;
   
   if(m_verbosity > 5){
-    pout() << "sigma_solver::setVerbosity" << endl;
+    pout() << "SigmaSolver::setVerbosity" << endl;
   }
   
 
 }
 
-void sigma_solver::setTime(const int a_step, const Real a_time, const Real a_dt){
-  CH_TIME("sigma_solver::setTime");
+void SigmaSolver::setTime(const int a_step, const Real a_time, const Real a_dt){
+  CH_TIME("SigmaSolver::setTime");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::setTime" << endl;
+    pout() << "SigmaSolver::setTime" << endl;
   }
   
   m_timeStep = a_step;
@@ -306,10 +309,10 @@ void sigma_solver::setTime(const int a_step, const Real a_time, const Real a_dt)
   m_dt   = a_dt;
 }
 
-void sigma_solver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("sigma_solver::writeCheckpointLevel");
+void SigmaSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("SigmaSolver::writeCheckpointLevel");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::writeCheckpointLevel" << endl;
+    pout() << "SigmaSolver::writeCheckpointLevel" << endl;
   }
 
   EBCellFactory fact(m_amr->getEBISLayout(m_realm, phase::gas)[a_level]);
@@ -321,10 +324,10 @@ void sigma_solver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level)
   write(a_handle, scratch, "sigma");
 }
 
-void sigma_solver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("sigma_solver::readCheckpointLevel");
+void SigmaSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("SigmaSolver::readCheckpointLevel");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::readCheckpointLevel" << endl;
+    pout() << "SigmaSolver::readCheckpointLevel" << endl;
   }
 
   const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
@@ -340,10 +343,10 @@ void sigma_solver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   data_ops::incr(*m_phi[a_level], scratch, 1.0);
 }
 
-void sigma_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("sigma_solver::writePlotData");
+void SigmaSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("SigmaSolver::writePlotData");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::writePlotData" << endl;
+    pout() << "SigmaSolver::writePlotData" << endl;
   }
 
 
@@ -368,29 +371,20 @@ void sigma_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
   a_comp++;
 }
 
-void sigma_solver::set_plot_variables(){
-  CH_TIME("sigma_solver::set_plot_variables");
+int SigmaSolver::getNumberOfPlotVariables(){
+  CH_TIME("SigmaSolver::getNumberOfPlotVariables");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::set_plot_variables" << endl;
-  }
-
-  m_plotPhi = true;
-}
-
-int sigma_solver::getNumberOfPlotVariables(){
-  CH_TIME("sigma_solver::getNumberOfPlotVariables");
-  if(m_verbosity > 5){
-    pout() << "sigma_solver::getNumberOfPlotVariables" << endl;
+    pout() << "SigmaSolver::getNumberOfPlotVariables" << endl;
   }
   
   return 2;
 }
   
   
-Vector<std::string> sigma_solver::getPlotVariableNames() const{
-  CH_TIME("sigma_solver::getNumberOfPlotVariables");
+Vector<std::string> SigmaSolver::getPlotVariableNames() const{
+  CH_TIME("SigmaSolver::getNumberOfPlotVariables");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::getNumberOfPlotVariables" << endl;
+    pout() << "SigmaSolver::getNumberOfPlotVariables" << endl;
   }
   Vector<std::string> ret(2);
 
@@ -401,10 +395,10 @@ Vector<std::string> sigma_solver::getPlotVariableNames() const{
 }
 
 
-Real sigma_solver::computeCharge(){
-  CH_TIME("sigma_solver::computeCharge");
+Real SigmaSolver::computeCharge(){
+  CH_TIME("SigmaSolver::computeCharge");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::computeCharge" << endl;
+    pout() << "SigmaSolver::computeCharge" << endl;
   }
 
   m_amr->averageDown(m_phi, m_realm, m_phase);
@@ -435,11 +429,12 @@ Real sigma_solver::computeCharge(){
   return charge*dx;
 }
 
-EBAMRIVData& sigma_solver::getPhi(){
+EBAMRIVData& SigmaSolver::getPhi(){
   return m_phi;
 }
 
-EBAMRIVData& sigma_solver::get_flux(){
+EBAMRIVData& SigmaSolver::getFlux(){
   return m_flux;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

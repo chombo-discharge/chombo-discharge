@@ -903,7 +903,7 @@ void imex_sdc::integrate_advection(const Real a_dt, const int a_m, const bool a_
   EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
   EBAMRIVData& Fsig_new      = m_sigma_scratch->get_Fnew()[a_m];
   const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
-  m_sigma->compute_rhs(Fsig_new); // Fills Fsig_new with BCs from CDR solvers
+  m_sigma->computeRHS(Fsig_new); // Fills Fsig_new with BCs from CDR solvers
   data_ops::copy(sigma_m1, sigma_m);
   data_ops::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
 }
@@ -1029,7 +1029,7 @@ void imex_sdc::reconcile_integrands(){
 
   // Compute Fsig_p - that wasn't done either
   EBAMRIVData& Fnew_p = m_sigma_scratch->get_Fnew()[m_p];
-  m_sigma->compute_rhs(Fnew_p);
+  m_sigma->computeRHS(Fnew_p);
   for (int m = 0; m <= m_p; m++){
     EBAMRIVData& Fold_m = m_sigma_scratch->get_Fold()[m];
     EBAMRIVData& Fnew_m = m_sigma_scratch->get_Fnew()[m];
@@ -1710,7 +1710,7 @@ void imex_sdc::compute_sigma_flux(){
     pout() << "imex_sdc::compute_sigma_flux" << endl;
   }
 
-  EBAMRIVData& flux = m_sigma->get_flux();
+  EBAMRIVData& flux = m_sigma->getFlux();
   data_ops::set_value(flux, 0.0);
 
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
@@ -1721,7 +1721,7 @@ void imex_sdc::compute_sigma_flux(){
     data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
-  m_sigma->reset_cells(flux);
+  m_sigma->resetCells(flux);
 }
 
 void imex_sdc::compute_reaction_network(const int a_m, const Real a_time, const Real a_dt){

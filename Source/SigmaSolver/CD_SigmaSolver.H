@@ -1,33 +1,37 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file sigma_solver.H
+  @file   CD_SigmaSolver.H
   @brief  Declaration of a surface charge solver
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#ifndef _SIGMA_SOLVER_
-#define _SIGMA_SOLVER_
+#ifndef CD_SigmaSolver_H
+#define CD_SigmaSolver_H
 
-#include "computational_geometry.H"
-#include "CD_AmrMesh.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <computational_geometry.H>
+#include <CD_AmrMesh.H>
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief Surface charge solver
 */
-class sigma_solver {
+class SigmaSolver {
 public:
 
   /*!
     @brief Constructor
   */
-  sigma_solver();
+  SigmaSolver();
 
   /*!
     @brief Destructor
   */
-  ~sigma_solver();
+  ~SigmaSolver();
 
   /*!
     @brief Get the Realm
@@ -52,7 +56,7 @@ public:
   /*!
     @brief Compute the right-hand side
   */
-  virtual void compute_rhs(EBAMRIVData& a_rhs);
+  virtual void computeRHS(EBAMRIVData& a_rhs);
 
   /*!
     @brief Deallocate internal storage
@@ -72,7 +76,7 @@ public:
   /*!
     @brief Reset data holder on cells
   */
-  virtual void reset_cells(EBAMRIVData& a_data);
+  virtual void resetCells(EBAMRIVData& a_data);
 
   /*!
     @brief Set the amr object
@@ -93,12 +97,12 @@ public:
   /*!
     @brief Convenience function. Set the surface charge
   */
-  virtual void set_sigma(const EBAMRIVData& a_sigma);
+  virtual void setSigma(const EBAMRIVData& a_sigma);
 
   /*!
     @brief Convenience function. Set the surface charge. 
   */
-  virtual void set_sigma(const Real a_sigma);
+  virtual void setSigma(const Real a_sigma);
 
   /*!
     @brief Set verbosity.
@@ -126,11 +130,6 @@ public:
   virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
 
   /*!
-    @brief Set variables to be plotted
-  */
-  virtual void set_plot_variables();
-
-  /*!
     @brief Number of variables to be plotted
   */
   virtual int getNumberOfPlotVariables();
@@ -153,7 +152,7 @@ public:
   /*!
     @brief Get internal state
   */
-  virtual EBAMRIVData& get_flux();
+  virtual EBAMRIVData& getFlux();
   
 protected:
 
@@ -223,6 +222,8 @@ protected:
   bool m_plotPhi;
   
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif
 

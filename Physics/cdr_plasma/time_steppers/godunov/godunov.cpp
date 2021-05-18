@@ -675,7 +675,7 @@ void godunov::compute_sigma_flux(){
     pout() << "godunov::compute_sigma_flux" << endl;
   }
 
-  EBAMRIVData& flux = m_sigma->get_flux();
+  EBAMRIVData& flux = m_sigma->getFlux();
   data_ops::set_value(flux, 0.0);
 
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -686,7 +686,7 @@ void godunov::compute_sigma_flux(){
     data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
-  m_sigma->reset_cells(flux);
+  m_sigma->resetCells(flux);
 }
 
 void godunov::compute_reaction_network(const Real a_dt){
@@ -848,7 +848,7 @@ void godunov::advance_transport_euler(const Real a_dt){
 
   // Advance the sigma equation
   EBAMRIVData& sigma = m_sigma->getPhi();
-  const EBAMRIVData& rhs = m_sigma->get_flux();
+  const EBAMRIVData& rhs = m_sigma->getFlux();
   data_ops::incr(sigma, rhs, a_dt);
 }
 
@@ -918,7 +918,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
     data_ops::copy(k1, sigma);
 
     // Advance
-    const EBAMRIVData& rhs = m_sigma->get_flux();
+    const EBAMRIVData& rhs = m_sigma->getFlux();
     data_ops::incr(sigma, rhs, a_dt);
 
     // Compute k1 from sigma^(k+1) = sigma^k + k1*dt
@@ -1007,7 +1007,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
 
   { // Do the final sigma advance
     EBAMRIVData& sigma     = m_sigma->getPhi();
-    const EBAMRIVData& rhs = m_sigma->get_flux();
+    const EBAMRIVData& rhs = m_sigma->getFlux();
     const EBAMRIVData& k1  = m_sigma_scratch->get_scratch();
     data_ops::incr(sigma, k1, -0.5);
     data_ops::incr(sigma, rhs, 0.5*a_dt);

@@ -393,7 +393,7 @@ void rk2::compute_sigma_flux_at_start_of_time_step(){
     pout() << "rk2::compute_sigma_flux_at_start_of_time_step" << endl;
   }
 
-  EBAMRIVData& flux = m_sigma->get_flux();
+  EBAMRIVData& flux = m_sigma->getFlux();
   data_ops::set_value(flux, 0.0);
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
@@ -404,7 +404,7 @@ void rk2::compute_sigma_flux_at_start_of_time_step(){
     data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
-  m_sigma->reset_cells(flux);
+  m_sigma->resetCells(flux);
 }
 
 void rk2::advance_cdr_k1(const Real a_dt){
@@ -423,7 +423,7 @@ void rk2::advance_cdr_k1(const Real a_dt){
     const EBAMRCellData& state = solver->getPhi();
 
     data_ops::set_value(k1, 0.0);
-    solver->compute_rhs(k1, state, a_dt);
+    solver->computeRHS(k1, state, a_dt);
 
     data_ops::set_value(phi, 0.0);
     data_ops::incr(phi, state, 1.0);
@@ -446,15 +446,15 @@ void rk2::advance_sigma_k1(const Real a_dt){
   
   EBAMRIVData& k1  = m_sigma_scratch->get_k1();
   EBAMRIVData& phi = m_sigma_scratch->get_phi();
-  m_sigma->compute_rhs(k1);
+  m_sigma->computeRHS(k1);
   data_ops::set_value(phi,   0.0);
   data_ops::incr(phi, state, 1.0);
   data_ops::incr(phi, k1,    m_alpha*a_dt);
 
   m_amr->averageDown(phi, m_cdr->get_phase());
   
-  m_sigma->reset_cells(k1);
-  m_sigma->reset_cells(phi);
+  m_sigma->resetCells(k1);
+  m_sigma->resetCells(phi);
 }
 
 void rk2::solve_poisson_k1(){
@@ -778,7 +778,7 @@ void rk2::compute_sigma_flux_after_k1(){
     pout() << "rk2::compute_sigma_flux_after_k1" << endl;
   }
 
-  EBAMRIVData& flux = m_sigma->get_flux();
+  EBAMRIVData& flux = m_sigma->getFlux();
   data_ops::set_value(flux, 0.0);
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
@@ -789,7 +789,7 @@ void rk2::compute_sigma_flux_after_k1(){
     data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
-  m_sigma->reset_cells(flux);
+  m_sigma->resetCells(flux);
 }
 
 void rk2::advance_cdr_k2(const Real a_dt){
@@ -808,7 +808,7 @@ void rk2::advance_cdr_k2(const Real a_dt){
     EBAMRCellData& phi     = storage->get_phi();
     EBAMRCellData& scratch = storage->get_scratch();
 
-    solver->compute_rhs(k2, phi, a_dt);
+    solver->computeRHS(k2, phi, a_dt);
 
     // For transient RTE solvers I need the source term at half time steps. Since the internal state
     // inside the solver will be overwritten, I take a backup into rk2_storage.scratch
@@ -836,14 +836,14 @@ void rk2::advance_sigma_k2(const Real a_dt){
   
   EBAMRIVData& k1  = m_sigma_scratch->get_k1();
   EBAMRIVData& k2  = m_sigma_scratch->get_k2();
-  m_sigma->compute_rhs(k2);
+  m_sigma->computeRHS(k2);
 
   EBAMRIVData& state = m_sigma->getPhi();
   data_ops::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha)));
   data_ops::incr(state, k2, a_dt*1./(2.*m_alpha));
 
   m_amr->averageDown(state, m_cdr->get_phase());
-  m_sigma->reset_cells(state);
+  m_sigma->resetCells(state);
 }
 
 void rk2::solve_poisson_k2(){

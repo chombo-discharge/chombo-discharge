@@ -19,7 +19,7 @@
 #include "cdr_layout.H"
 #include "rte_layout.H"
 #include "CD_FieldSolver.H"
-#include "sigma_solver.H"
+#include "CD_SigmaSolver.H"
 #include "CD_TimeStepper.H"
 
 /*!
@@ -929,7 +929,7 @@ namespace physics {
       /*!
 	@brief Get sigma solver
       */
-      virtual RefCountedPtr<sigma_solver>& get_sigma();
+      virtual RefCountedPtr<SigmaSolver>& get_sigma();
   
     protected:
 
@@ -991,7 +991,7 @@ namespace physics {
       /*!
 	@brief Surface charge solver
       */
-      RefCountedPtr<sigma_solver> m_sigma;
+      RefCountedPtr<SigmaSolver> m_sigma;
 
       /*!
 	@brief Set the potential

@@ -2660,7 +2660,7 @@ void cdr_plasma_stepper::computeCharge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVD
     data_ops::incr(a_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
-  m_sigma->reset_cells(a_flux);
+  m_sigma->resetCells(a_flux);
 }
 
 void cdr_plasma_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fluxes,
@@ -3242,7 +3242,7 @@ void cdr_plasma_stepper::initial_sigma(){
   }
 
   m_amr->averageDown(sigma, m_realm, phase::gas);
-  m_sigma->reset_cells(sigma);
+  m_sigma->resetCells(sigma);
 }
 
 void cdr_plasma_stepper::project_flux(LevelData<BaseIVFAB<Real> >&       a_projected_flux,
@@ -3715,7 +3715,7 @@ void cdr_plasma_stepper::setup_sigma(){
     pout() << "cdr_plasma_stepper::setup_sigma" << endl;
   }
 
-  m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
+  m_sigma = RefCountedPtr<SigmaSolver> (new SigmaSolver());
   m_sigma->setAmr(m_amr);
   m_sigma->setVerbosity(m_solver_verbosity);
   m_sigma->setComputationalGeometry(m_computationalGeometry);
@@ -3861,7 +3861,7 @@ Real cdr_plasma_stepper::compute_dielectric_current(){
     data_ops::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
-  m_sigma->reset_cells(charge_flux);
+  m_sigma->resetCells(charge_flux);
   m_amr->conservativeAverage(charge_flux, m_realm, m_cdr->get_phase());
 
   const int compute_lvl = 0;
@@ -4078,7 +4078,7 @@ RefCountedPtr<rte_layout<rte_solver>>& cdr_plasma_stepper::get_rte(){
   return m_rte;
 }
 
-RefCountedPtr<sigma_solver>& cdr_plasma_stepper::get_sigma(){
+RefCountedPtr<SigmaSolver>& cdr_plasma_stepper::get_sigma(){
   return m_sigma;
 }
 

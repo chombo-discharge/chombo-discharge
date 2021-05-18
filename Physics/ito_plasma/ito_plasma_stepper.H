@@ -17,7 +17,7 @@
 #include "rte_layout.H"
 #include "mc_photo.H"
 #include "CD_FieldSolver.H"
-#include "sigma_solver.H"
+#include "CD_SigmaSolver.H"
 
 #include "CD_NamespaceHeader.H"
 
@@ -344,7 +344,7 @@ namespace physics {
       RefCountedPtr<ito_layout<ito_solver> > m_ito;
       RefCountedPtr<rte_layout<mc_photo> > m_rte;
       RefCountedPtr<FieldSolver> m_fieldSolver;
-      RefCountedPtr<sigma_solver> m_sigma;
+      RefCountedPtr<SigmaSolver> m_sigma;
 
       // Filters that can be applied. 
       std::deque<std::tuple<Real, int, int> > m_filters;

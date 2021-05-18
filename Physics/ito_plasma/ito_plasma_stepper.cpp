@@ -121,7 +121,7 @@ void ito_plasma_stepper::setup_sigma(){
     pout() << "ito_plasma_stepper::setup_sigma" << endl;
   }
 
-  m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
+  m_sigma = RefCountedPtr<SigmaSolver> (new SigmaSolver());
   m_sigma->setAmr(m_amr);
   m_sigma->setVerbosity(m_verbosity);
   m_sigma->setComputationalGeometry(m_computationalGeometry);
@@ -218,7 +218,7 @@ void ito_plasma_stepper::initial_sigma(){
   }
 
   m_amr->averageDown(sigma, m_fluid_Realm, phase::gas);
-  m_sigma->reset_cells(sigma);
+  m_sigma->resetCells(sigma);
 }
 
 void ito_plasma_stepper::postCheckpointSetup(){

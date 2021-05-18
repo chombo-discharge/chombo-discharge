@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_TimeStepper.H>
-#include <sigma_solver.H>
+#include <CD_SigmaSolver.H>
 #include <CD_FieldSolver.H>
 #include <CD_NamespaceHeader.H>
 
@@ -80,7 +80,7 @@ namespace Physics {
       BoxSorting m_boxSort;
 
       RefCountedPtr<FieldSolver> m_fieldSolver;
-      RefCountedPtr<sigma_solver>   m_sigma;
+      RefCountedPtr<SigmaSolver>   m_sigma;
 
       std::string m_realm;
 

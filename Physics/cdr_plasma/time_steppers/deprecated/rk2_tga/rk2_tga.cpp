@@ -430,7 +430,7 @@ void rk2_tga::compute_sigma_flux_into_scratch(){
     pout() << "rk2_tga::compute_sigma_flux_into_scratch" << endl;
   }
 
-  EBAMRIVData& flux = m_sigma->get_flux();
+  EBAMRIVData& flux = m_sigma->getFlux();
   data_ops::set_value(flux, 0.0);
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
@@ -441,7 +441,7 @@ void rk2_tga::compute_sigma_flux_into_scratch(){
     data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
-  m_sigma->reset_cells(flux);
+  m_sigma->resetCells(flux);
 }
 
 void rk2_tga::advance_advection_source_cdr_k1(const Real a_dt){
@@ -483,15 +483,15 @@ void rk2_tga::advance_advection_sigma_k1(const Real a_dt){
   EBAMRIVData& phi = m_sigma->getPhi();
   EBAMRIVData& k1  = m_sigma_scratch->get_k1();
   
-  m_sigma->compute_rhs(k1);
+  m_sigma->computeRHS(k1);
 
   // Make phi = phi + k1*alpha*dt
   data_ops::incr(phi, k1,    m_alpha*a_dt);
 
   m_amr->averageDown(phi, m_cdr->get_phase());
   
-  m_sigma->reset_cells(k1);
-  m_sigma->reset_cells(phi);
+  m_sigma->resetCells(k1);
+  m_sigma->resetCells(phi);
 }
 
 void rk2_tga::advance_advection_source_cdr_k2(const Real a_dt){
@@ -539,7 +539,7 @@ void rk2_tga::advance_advection_sigma_k2(const Real a_dt){
   
   const EBAMRIVData& k1  = m_sigma_scratch->get_k1();
   EBAMRIVData& k2        = m_sigma_scratch->get_k2();
-  m_sigma->compute_rhs(k2);
+  m_sigma->computeRHS(k2);
 
   EBAMRIVData& state       = m_sigma->getPhi();
 
@@ -553,7 +553,7 @@ void rk2_tga::advance_advection_sigma_k2(const Real a_dt){
   data_ops::incr(state, k2, k2_factor);
 
   m_amr->averageDown(state, m_cdr->get_phase());
-  m_sigma->reset_cells(state);
+  m_sigma->resetCells(state);
 }
 
 void rk2_tga::advance_diffusion(const Real a_dt){

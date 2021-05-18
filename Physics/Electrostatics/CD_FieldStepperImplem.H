@@ -82,7 +82,7 @@ namespace Physics {
       m_fieldSolver->setTime(0, 0.0, 0.0);
 
       // Setup sigma
-      m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
+      m_sigma = RefCountedPtr<SigmaSolver> (new SigmaSolver());
       m_sigma->setVerbosity(m_verbosity);
       m_sigma->setAmr(m_amr);
       m_sigma->setComputationalGeometry(m_computationalGeometry);

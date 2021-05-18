@@ -720,7 +720,7 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
 
     EBAMRIVData& sigma = m_sigma->getPhi(); // sigma^i
     EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::incr(sigma, rhs, beta*a_dt); // sigma^(i+1) = sigma^i + [1/(s-1)]*dt*F^i
 
     if(m_consistent_E)   this->update_poisson();
@@ -762,7 +762,7 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
     EBAMRIVData& sigma     = m_sigma->getPhi();            // sigma^3
     EBAMRIVData& rhs       = m_sigma_scratch->get_scratch();
     const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::scale(sigma, alpha);           // sigma^(n+1) = (s-1/s)*sigma^i
     data_ops::incr(sigma, pre, sinv);        // sigma^(n+1) = (1/s)*sigma^n + (s-1/s)*sigma^i
     data_ops::incr(sigma, rhs, sinv*a_dt);   // sigma^(n+1) = (1/s)*sigma^n + (s-1/s)*sigma^i + (1/s)*dt*L(sigma^i)
@@ -817,7 +817,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
 
     EBAMRIVData& sigma = m_sigma->getPhi();
     EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::incr(sigma, rhs, a_dt); // sigma^1 = sigma^n + dt*F^n
   }
 
@@ -859,7 +859,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
     EBAMRIVData& sigma = m_sigma->getPhi();           // u^1
     EBAMRIVData& rhs = m_sigma_scratch->get_scratch();   // Storage for right hand side
     EBAMRIVData& pre = m_sigma_scratch->get_previous();  // u^n
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::incr(sigma, rhs, a_dt);  // sigma = u^1 + dt*L(u^1)
     data_ops::incr(sigma, pre, 3.0);   // sigma = 3*u^n + u^1 + dt*L(u^1)
     data_ops::scale(sigma, 0.25);      // sigma = 0.25*[3*u^n + u^1 + dt*L(u^1)]
@@ -906,7 +906,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
     EBAMRIVData& sigma = m_sigma->getPhi();           // u^2
     EBAMRIVData& rhs = m_sigma_scratch->get_scratch();   // Storage for right hand side
     EBAMRIVData& pre = m_sigma_scratch->get_previous();  // u^n
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::incr(sigma, rhs, a_dt);  // sigma = u^2 + dt*L(u^2)
     data_ops::scale(sigma, 2.0);       // sigma = 2*u^2 + 2*dt*L(u^2)
     data_ops::incr(sigma, pre, 1.0);   // sigma = u^n + 2*u^2 + 2*dt*L(u^2)
@@ -968,7 +968,7 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
 
     EBAMRIVData& sigma = m_sigma->getPhi(); // sigma^i
     EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::incr(sigma, rhs, 0.5*a_dt); // sigma^(i+1) = sigma^i + 0.5*dt*F^i
 
     if(m_consistent_E)   this->update_poisson();
@@ -1012,7 +1012,7 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
     EBAMRIVData& sigma     = m_sigma->getPhi();            // sigma^2
     EBAMRIVData& rhs       = m_sigma_scratch->get_scratch();
     const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::scale(sigma, 2.0);            // sigma^(n+1) = 2*sigma^2
     data_ops::incr(sigma, pre, 4.0);        // sigma^(n+1) = 4*sigma^n + 2*sigma^2
     data_ops::incr(sigma, rhs, a_dt);       // sigma^(n+1) = 4*sigma^n + 2*sigma^2 + dt*F^2
@@ -1053,7 +1053,7 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
 
     EBAMRIVData& sigma = m_sigma->getPhi(); // sigma^i
     EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::incr(sigma, rhs, 0.5*a_dt); // sigma^(i+1) = sigma^i + 0.5*dt*F^i
   }
 }
@@ -1150,7 +1150,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     EBAMRIVData& sigma  = m_sigma->getPhi(); // sigma^n
     EBAMRIVData& rhs    = *(m_sigma_scratch->get_extra_storage()[2]); // L(sigma^n)
     EBAMRIVData& sigma1 = *(m_sigma_scratch->get_extra_storage()[0]); // Will become sigma^1
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::incr(sigma, rhs, a_dt*b00);   // sigma^1 = sigma^n + dt*b00*L(sigma^n)
     data_ops::set_value(sigma1, 0.0);
     data_ops::incr(sigma1, sigma, 1.0);     // Backup of sigma^1
@@ -1193,7 +1193,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     EBAMRIVData& sigma  = m_sigma->getPhi(); // sigma^1
     EBAMRIVData& rhs    = *(m_sigma_scratch->get_extra_storage()[3]); // Will become L(sigma^1)
     EBAMRIVData& sigma2 = *(m_sigma_scratch->get_extra_storage()[1]); // Will become sigma^1
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::incr(sigma, rhs, a_dt*b11);   // sigma^2 = sigma^1 + dt*b11*L(sigma^n)
     data_ops::set_value(sigma2, 0.0);
     data_ops::incr(sigma2, sigma, 1.0);     // Backup of sigma^1
@@ -1237,7 +1237,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     EBAMRIVData& sigma  = m_sigma->getPhi();            // sigma^2
     EBAMRIVData& rhs    = m_sigma_scratch->get_scratch();  // RHS
     EBAMRIVData& pre    = m_sigma_scratch->get_previous(); // sigma^n
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::scale(sigma, a22);                           // sigma^3 = a2*sigma^2
     data_ops::incr(sigma, pre, a20);                       // sigma^3 = a20*sigma^n + a22*sigma^2
     data_ops::incr(sigma, rhs, a_dt*b22);                  // sigma^3 = a20*sigma^n + a22*sigma^2 + b22*dt*L(sigma^2)
@@ -1287,7 +1287,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     const EBAMRIVData& pre     = m_sigma_scratch->get_previous();    // sigma^n
     const EBAMRIVData& sigma1  = *(m_sigma_scratch->get_extra_storage()[0]); // sigma^1
     const EBAMRIVData& Lsigman = *(m_sigma_scratch->get_extra_storage()[2]); // L(sigma^n)
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::scale(sigma, a33);                // sigma^4 = a33*sigma^3
     data_ops::incr(sigma,  pre,     a30);       // sigma^4 = a30*sigma^n + a33*sigma^3
     data_ops::incr(sigma,  sigma1,  a31);       // sigma^4 = a30*sigma^n + a31*sigma^1 + a33*sigma^3
@@ -1345,7 +1345,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     const EBAMRIVData& sigma2  = *(m_sigma_scratch->get_extra_storage()[1]); // sigma^2
     const EBAMRIVData& Lsigman = *(m_sigma_scratch->get_extra_storage()[2]); // L(sigma^n)
     const EBAMRIVData& Lsigma1 = *(m_sigma_scratch->get_extra_storage()[3]); // L(sigma^n)
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::scale(sigma, a44);                // sigma^(n+1) = a44*sigma^4
     data_ops::incr(sigma,  pre,     a40);       // sigma^(n+1) += a40*sigma^n
     data_ops::incr(sigma,  sigma1,  a41);       // sigma^(n+1) += a41*sigma^1
@@ -1456,7 +1456,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
 
     EBAMRIVData& sigma  = m_sigma->getPhi();           // sigma^n
     EBAMRIVData& rhs    = m_sigma_scratch->get_scratch(); // rhs
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::incr(sigma, rhs, a_dt*b00);   // sigma^1 = sigma^n + dt*b00*L(sigma^n)
 
     if(m_consistent_E)   this->update_poisson();
@@ -1501,7 +1501,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     EBAMRIVData& rhs       = m_sigma_scratch->get_scratch(); // RHS
     EBAMRIVData& sigma2    = *(m_sigma_scratch->get_extra_storage()[0]); // Will become sigma^2
     const EBAMRIVData& pre = m_sigma_scratch->get_previous();
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::scale(sigma, a11);            // sigma^2 = a11*sigma^1
     data_ops::incr(sigma, pre, a10);        // sigma^2 = a10*sigma^n + a11*sigma^1
     data_ops::incr(sigma, rhs, a_dt*b11);   // sigma^2 = a10*sigma^n + a11*sigma^1 + dt*b11*L(sigma^n)
@@ -1550,7 +1550,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     EBAMRIVData& rhs       = m_sigma_scratch->get_scratch();  // RHS
     EBAMRIVData& sigma3    = *(m_sigma_scratch->get_extra_storage()[1]); // Becomes sigma^3
     const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::scale(sigma, a22);                           // sigma^3 = a2*sigma^2
     data_ops::incr(sigma, pre, a20);                       // sigma^3 = a20*sigma^n + a22*sigma^2
     data_ops::incr(sigma, rhs, a_dt*b22);                  // sigma^3 = a20*sigma^n + a22*sigma^2 + b22*dt*L(sigma^2)
@@ -1596,7 +1596,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     EBAMRIVData& sigma         = m_sigma->getPhi();                       // sigma^3
     EBAMRIVData& rhs           = *(m_sigma_scratch->get_extra_storage()[2]); // Becomes L(sigma^3) after RHS computation
     const EBAMRIVData& pre     = m_sigma_scratch->get_previous();            // sigma^n
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::scale(sigma, a33);            // sigma^4 = a33*sigma^3
     data_ops::incr(sigma,  pre, a30);       // sigma^4 = a30*sigma^n + a33*sigma^3
     data_ops::incr(sigma,  rhs, a_dt*b33);  // sigma^3 = a30*sigma^n + a33*sigma^3 + b33*dt*L(u^3)
@@ -1650,7 +1650,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     const EBAMRIVData& sigma2  = *(m_sigma_scratch->get_extra_storage()[0]); // sigma^1
     const EBAMRIVData& sigma3  = *(m_sigma_scratch->get_extra_storage()[1]); // sigma^2
     const EBAMRIVData& Lsigma3 = *(m_sigma_scratch->get_extra_storage()[2]); // L(sigma^3)
-    m_sigma->compute_rhs(rhs);
+    m_sigma->computeRHS(rhs);
     data_ops::scale(sigma, a44);                // sigma^(n+1)  = a44*sigma^4
     data_ops::incr(sigma,  pre,     a40);       // sigma^(n+1)  = a40*sigma^n + a44*sigma^4
     data_ops::incr(sigma,  sigma2,  a42);       // sigma^(n+1)  = a40*sigma^n + a42*sigma^2 + a44*sigma^4
@@ -2401,7 +2401,7 @@ void strang2::compute_sigma_flux(){
     pout() << "strang2::compute_sigma_flux" << endl;
   }
 
-  EBAMRIVData& flux = m_sigma->get_flux();
+  EBAMRIVData& flux = m_sigma->getFlux();
   data_ops::set_value(flux, 0.0);
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
@@ -2412,7 +2412,7 @@ void strang2::compute_sigma_flux(){
     data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
-  m_sigma->reset_cells(flux);
+  m_sigma->resetCells(flux);
 }
 
 void strang2::compute_cdr_sources(const Real a_time){

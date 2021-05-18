@@ -27,7 +27,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/particle \
 	$(DISCHARGE_HOME)/Source/FieldSolver \
 	$(DISCHARGE_HOME)/Source/rte_solver \
-	$(DISCHARGE_HOME)/Source/sigma_solver \
+	$(DISCHARGE_HOME)/Source/SigmaSolver \
 	$(DISCHARGE_HOME)/Geometries/rod_dielectric\
 	$(DISCHARGE_HOME)/Physics/cdr_plasma \
 	$(DISCHARGE_HOME)/Physics/cdr_plasma/cell_taggers/streamer_tagger\
