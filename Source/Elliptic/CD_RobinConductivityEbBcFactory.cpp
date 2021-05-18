@@ -13,7 +13,7 @@
 #include <CD_NamespaceHeader.H>
 
 RobinConductivityEbBcFactory::RobinConductivityEbBcFactory(const RealVect a_origin){
-  this->set_type(IrregStencil::StencilType::TaylorExtrapolation);
+  this->setStencilType(IrregStencil::StencilType::TaylorExtrapolation);
   this->setCoefficients(1., 1., 0.);
 
   m_origin = a_origin;
@@ -22,7 +22,7 @@ RobinConductivityEbBcFactory::RobinConductivityEbBcFactory(const RealVect a_orig
 RobinConductivityEbBcFactory::~RobinConductivityEbBcFactory(){
 }
 
-void RobinConductivityEbBcFactory::set_type(const IrregStencil::StencilType a_type){
+void RobinConductivityEbBcFactory::setStencilType(const IrregStencil::StencilType a_type){
   if(a_type == IrregStencil::StencilType::TaylorExtrapolation || a_type == IrregStencil::StencilType::LeastSquares){
     m_type = a_type;
   }
@@ -90,7 +90,7 @@ RobinConductivityEbBc* RobinConductivityEbBcFactory::create(const ProblemDomain&
     MayDay::Abort("RobinConductivityEbBcFactory::create - must set coefficients first");
   }
 
-  fresh->set_type(m_type);
+  fresh->setStencilType(m_type);
 
   return fresh;
 }

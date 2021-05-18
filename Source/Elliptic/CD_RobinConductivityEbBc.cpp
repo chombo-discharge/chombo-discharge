@@ -159,7 +159,7 @@ bool RobinConductivityEbBc::get_lsq_sten(VoFStencil&          a_stencil,
   return found_stencil;
 }
 
-void RobinConductivityEbBc::set_type(const IrregStencil::StencilType a_type){
+void RobinConductivityEbBc::setStencilType(const IrregStencil::StencilType a_type){
   if(a_type == IrregStencil::StencilType::TaylorExtrapolation || a_type == IrregStencil::StencilType::LeastSquares){
     m_type = a_type;
   }

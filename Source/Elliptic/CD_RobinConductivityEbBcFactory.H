@@ -41,7 +41,7 @@ public:
   /*!
     @brief Set bc order
   */
-  virtual void set_type(const IrregStencil::StencilType a_type);
+  virtual void setStencilType(const IrregStencil::StencilType a_type);
 
   /*!
     @brief Function based coefficients and right hand sides
