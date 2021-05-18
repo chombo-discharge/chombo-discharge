@@ -18,7 +18,7 @@
 // Our includes
 #include <CD_CdrSolver.H>
 #include <CD_CdrSolverF_F.H>
-#include <cdr_fhdF_F.H>
+#include <CD_CdrFhdF_F.H>
 #include <data_ops.H>
 #include <CD_NamespaceHeader.H>
 

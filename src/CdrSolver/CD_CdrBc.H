@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   CdrBc.H
+  @file   CD_CdrBc.H
   @brief  Declaration of boundary condition enum for cdr solver. 
   @author Robert Marskar
 */
