@@ -41,7 +41,7 @@ namespace Physics {
 
       std::string str;
 
-      pp.get("LoadBalancing", m_LoadBalancing);
+      pp.get("load_balance", m_loadBalance);
       pp.get("BoxSorting",  str);
       pp.get("Realm",       m_realm);
       pp.get("verbosity",   m_verbosity);
@@ -190,12 +190,6 @@ namespace Physics {
     }
 
     template <class T>
-    void FieldStepper<T>::deallocate(){
-      m_fieldSolver->deallocateInternals();
-      m_sigma->deallocateInternals();
-    }
-
-    template <class T>
     void FieldStepper<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
       m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
       m_sigma->regrid(a_lmin,   a_oldFinestLevel, a_newFinestLevel);
@@ -206,7 +200,7 @@ namespace Physics {
 
     template <class T>
     bool FieldStepper<T>::loadBalanceThisRealm(const std::string a_realm) const {
-      return m_LoadBalancing ? true : false;
+      return m_loadBalance ? true : false;
     }
 
     template <class T>
@@ -216,7 +210,7 @@ namespace Physics {
 					      const Vector<DisjointBoxLayout>& a_grids,
 					      const int                        a_lmin,
 					      const int                        a_finestLevel){
-      if(m_LoadBalancing){
+      if(m_loadBalance){
 	constexpr int num_apply = 50;
 	
 	a_procs.resize(1+a_finestLevel);
