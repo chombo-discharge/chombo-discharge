@@ -33,7 +33,7 @@ public:
   */
   virtual ~ConductivityDomainBcWrapperFactory();
 
-  virtual void setWallBc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc);
+  virtual void setWallBc(const Vector<RefCountedPtr<WallBc> >& a_wallbc);
   virtual void setPotentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials);
   virtual void setRobinCoefficients(const Vector<RefCountedPtr<RobinCoefficients> >& a_robinco);
 
@@ -48,7 +48,7 @@ protected:
 
   bool m_hasbc;
 
-  Vector<RefCountedPtr<wall_bc> >        m_wallbc;      // BC identifier
+  Vector<RefCountedPtr<WallBc> >        m_wallbc;      // BC identifier
   Vector<RefCountedPtr<BaseBCFuncEval> > m_potentials;  // Wall potential
   Vector<RefCountedPtr<RobinCoefficients> >     m_robinco;     // Robin coefficients for Robin
 

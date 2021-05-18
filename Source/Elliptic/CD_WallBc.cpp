@@ -1,36 +1,36 @@
 /*!
-  @file wall_bc.cpp
-  @brief Implementation of wall_bc.H
+  @file WallBc.cpp
+  @brief Implementation of WallBc.H
   @author Robert Marskar
   @date Nov. 2017
 */
 
-#include "wall_bc.H"
+#include <CD_WallBc.H>
 
 #include "CD_NamespaceHeader.H"
 
-wall_bc::wall_bc(const int a_dir, const Side::LoHiSide a_side, wallbc::which_bc a_which){
+WallBc::WallBc(const int a_dir, const Side::LoHiSide a_side, wallbc::which_bc a_which){
   m_dir   = a_dir;
   m_side  = a_side;
   m_which = a_which;
 }
 
-wall_bc::~wall_bc(){
+WallBc::~WallBc(){
 }
 
-void wall_bc::set_value(Real a_value){
+void WallBc::set_value(Real a_value){
   m_value = a_value;
 }
 
-void wall_bc::set_live(bool a_live){
+void WallBc::set_live(bool a_live){
   m_live = a_live;
 }
 
-void wall_bc::set_function(Real (*a_func)(const RealVect a_pos)){
+void WallBc::set_function(Real (*a_func)(const RealVect a_pos)){
   m_func = a_func;
 }
 
-Real wall_bc::get_value(){
+Real WallBc::get_value(){
   Real value = 0.0;
   
   if(m_which == wallbc::dirichlet){
@@ -46,15 +46,15 @@ Real wall_bc::get_value(){
   return value;
 }
 
-bool wall_bc::is_live(){
+bool WallBc::is_live(){
   return m_live;
 }
 
-wallbc::which_bc wall_bc::which_bc(){
+wallbc::which_bc WallBc::which_bc(){
   return m_which;
 }
 
-int wall_bc::map_bc(const int a_dir, const Side::LoHiSide a_side) {
+int WallBc::map_bc(const int a_dir, const Side::LoHiSide a_side) {
   const int iside = (a_side == Side::Lo) ? 0 : 1;
 
   return 2*a_dir + iside;

@@ -8,7 +8,7 @@
 #ifndef _CONDUCTIVITYDOMAINBC_WRAPPER_
 #define _CONDUCTIVITYDOMAINBC_WRAPPER_
 
-#include "wall_bc.H"
+#include <CD_WallBc.H>
 #include <CD_RobinCoefficients.H>
 
 #include <BaseDomainBC.H>
@@ -47,7 +47,7 @@ public:
   /*!
     @brief Set bc types. This should come through the factory. 
   */
-  virtual void setWallBc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc);
+  virtual void setWallBc(const Vector<RefCountedPtr<WallBc> >& a_wallbc);
 
   /*!
     @brief Set Robin coefficients

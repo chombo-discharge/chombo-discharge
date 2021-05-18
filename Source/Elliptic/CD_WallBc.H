@@ -1,5 +1,5 @@
 /*!
-  @file wall_bc.H
+  @file WallBc.H
   @brief Indexing class for BCs on domain edges
   @author Robert Marskar
   @date Nov. 2017
@@ -15,7 +15,7 @@
 
 /*!
   @brief Types of wall boundary conditions for various solvers. I hate this structure. 
-  @todo This should be moved somewhere else and wall_bc should be a separate file. Maybe we should call it poisson_domain_bc.
+  @todo This should be moved somewhere else and WallBc should be a separate file. Maybe we should call it poisson_domain_bc.
 */
 namespace wallbc {
   enum which_bc {
@@ -34,18 +34,18 @@ namespace wallbc {
 /*!
   @brief Indexing class of BCs on domain edges. Very lightweight stuff.
 */
-class wall_bc {
+class WallBc {
 public:
 
   /*!
     @brief Create BC of a type
   */
-  wall_bc(const int a_dir, const Side::LoHiSide a_side, wallbc::which_bc a_which);
+  WallBc(const int a_dir, const Side::LoHiSide a_side, wallbc::which_bc a_which);
 
   /*!
     @brief Destructor
   */
-  ~wall_bc();
+  ~WallBc();
 
   /*!
     @brief Mapping of bcs

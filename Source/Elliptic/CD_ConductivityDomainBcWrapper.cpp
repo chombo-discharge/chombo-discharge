@@ -35,11 +35,11 @@ void ConductivityDomainBcWrapper::setRobinCoefficients(const Vector<RefCountedPt
   m_robinco = a_robinco;
 }
 
-void ConductivityDomainBcWrapper::setWallBc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc){
+void ConductivityDomainBcWrapper::setWallBc(const Vector<RefCountedPtr<WallBc> >& a_wallbc){
   for (int i = 0; i < a_wallbc.size(); i++){
     const int dir             = a_wallbc[i]->direction();
     const Side::LoHiSide side = a_wallbc[i]->side();
-    const int idx             = wall_bc::map_bc(dir, side);
+    const int idx             = WallBc::map_bc(dir, side);
       
     if(a_wallbc[i]->which_bc() == wallbc::dirichlet){
       m_bc[idx] = RefCountedPtr<DirichletConductivityDomainBC> (new DirichletConductivityDomainBC());
@@ -87,7 +87,7 @@ void ConductivityDomainBcWrapper::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   if(!m_defined){
     this->setCoefficients(); // I really hate that I have to do this, but there's no entry point in EbHelmholtzOp (yet) that
   }                   // allows me to do this at constructor level
-  const int idx = wall_bc::map_bc(a_idir, a_side);
+  const int idx = WallBc::map_bc(a_idir, a_side);
   m_bc[idx]->getFaceFlux(a_faceFlux,
 			 a_phi,
 			 a_probLo,
@@ -113,7 +113,7 @@ void ConductivityDomainBcWrapper::getFaceFlux(Real&                 a_faceFlux,
   if(!m_defined){
     this->setCoefficients(); // I really hate that I have to do this, but there's no entry point in EbHelmholtzOp (yet) that
   }                   // allows me to do this at constructor level
-  const int idx = wall_bc::map_bc(a_idir, a_side);
+  const int idx = WallBc::map_bc(a_idir, a_side);
   m_bc[idx]->getFaceFlux(a_faceFlux,
 			 a_vof,
 			 a_comp,
@@ -143,7 +143,7 @@ void ConductivityDomainBcWrapper::getFaceGradPhi(Real&                 a_faceFlu
   if(!m_defined){
     this->setCoefficients(); // I really hate that I have to do this, but there's no entry point in EbHelmholtzOp (yet) that
   }                   // allows me to do this at constructor level
-  const int idx = wall_bc::map_bc(a_idir, a_side);
+  const int idx = WallBc::map_bc(a_idir, a_side);
   m_bc[idx]->getFaceGradPhi(a_faceFlux,
 			    a_face,
 			    a_comp,

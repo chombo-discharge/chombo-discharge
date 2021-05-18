@@ -17,7 +17,7 @@ ConductivityDomainBcWrapperFactory::~ConductivityDomainBcWrapperFactory(){
 
 }
 
-void ConductivityDomainBcWrapperFactory::setWallBc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc){
+void ConductivityDomainBcWrapperFactory::setWallBc(const Vector<RefCountedPtr<WallBc> >& a_wallbc){
   m_wallbc = a_wallbc;
   m_hasbc = true;
 }

@@ -11,7 +11,7 @@
 #include "rte_solver.H"
 #include "EBParticleInterp.H"
 #include "particle_container.H"
-#include "wall_bc.H"
+#include <CD_WallBc.H>
 #include "photon.H"
 
 #include <Particle.H>

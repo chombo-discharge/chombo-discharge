@@ -14,7 +14,7 @@
 #include <CD_RobinConductivityEbBcFactory.H>
 #include <CD_RobinConductivityDomainBcFactory.H>
 #include <CD_ConductivityDomainBcWrapperFactory.H>
-#include "wall_bc.H"
+#include <CD_WallBc.H>
 
 #include <AMRMultiGrid.H>
 #include <AMRTGA.H>
@@ -86,7 +86,7 @@ public:
   /*!
     @brief Allocate wall bc
   */
-  virtual void allocate_wall_bc();
+  virtual void allocate_WallBc();
   
   /*!
     @brief Cache state
@@ -310,7 +310,7 @@ protected:
   /*!
     @brief Wall boundary conditions
   */
-  Vector<RefCountedPtr<wall_bc> > m_wallbc;
+  Vector<RefCountedPtr<WallBc> > m_wallbc;
 
   /*!
     @brief MG levelsgrids
@@ -386,12 +386,12 @@ protected:
   /*!
     @brief Set Neumann wall boundary condition
   */
-  virtual void set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
+  virtual void set_neumann_WallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
 
   /*!
     @brief Set Robin wall BC
   */
-  virtual void set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
+  virtual void set_robin_WallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
 
   /*!
     @brief Set up the TGA solver

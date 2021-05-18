@@ -67,7 +67,7 @@ void eddington_sp1::parseDomainBc(){
     pout() << m_name + "::parseDomainBc" << endl;
   }
 
-  allocate_wall_bc();
+  allocate_WallBc();
 
   // Get BC from input script
   ParmParse pp(m_className.c_str());
@@ -93,10 +93,10 @@ void eddington_sp1::parseDomainBc(){
 	if(pp.contains(bc_string.c_str())){
 	  pp.get(bc_string.c_str(), type);
 	  if(type == "neumann"){
-	    this->set_neumann_wall_bc(dir, Side::Lo, 0.0);
+	    this->set_neumann_WallBc(dir, Side::Lo, 0.0);
 	  }
 	  else if(type == "robin"){
-	    this->set_robin_wall_bc(dir, Side::Lo, 0.0);
+	    this->set_robin_WallBc(dir, Side::Lo, 0.0);
 	  }
 	  else {
 	    std::string error = "eddington_sp1::eddington_sp1 - unknown bc requested for " + bc_string;
@@ -110,10 +110,10 @@ void eddington_sp1::parseDomainBc(){
 	if(pp.contains(bc_string.c_str())){
 	  pp.get(bc_string.c_str(), type);
 	  if(type == "neumann"){
-	    this->set_neumann_wall_bc(dir, Side::Hi, 0.0);
+	    this->set_neumann_WallBc(dir, Side::Hi, 0.0);
 	  }
 	  else if(type == "robin"){
-	    this->set_robin_wall_bc(dir, Side::Hi, 0.0);
+	    this->set_robin_WallBc(dir, Side::Hi, 0.0);
 	  }
 	  else {
 	    std::string error = "eddington_sp1::eddington_sp1 - unknown bc requested for " + bc_string;
@@ -234,14 +234,14 @@ void eddington_sp1::parse_reflection(){
   m_r2 = r/(3.0);
 }
 
-void eddington_sp1::allocate_wall_bc(){
-  CH_TIME("eddington_sp1::allocate_wall_bc");
+void eddington_sp1::allocate_WallBc(){
+  CH_TIME("eddington_sp1::allocate_WallBc");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::allocate_wall_bc" << endl;
+    pout() << "eddington_sp1::allocate_WallBc" << endl;
   }
   m_wallbc.resize(2*SpaceDim);
   for (int i = 0; i < 2*SpaceDim; i++){
-    m_wallbc[i] = RefCountedPtr<wall_bc> (NULL);
+    m_wallbc[i] = RefCountedPtr<WallBc> (NULL);
   }
 }
 
@@ -1029,25 +1029,25 @@ void eddington_sp1::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
   read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
 }
 
-void eddington_sp1::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
-  CH_TIME("eddington_sp1::set_neumann_wall_bc");
+void eddington_sp1::set_neumann_WallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
+  CH_TIME("eddington_sp1::set_neumann_WallBc");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::set_neumann_wall_bc" << endl;
+    pout() << "eddington_sp1::set_neumann_WallBc" << endl;
   }
 
-  const int idx = wall_bc::map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::neumann));
+  const int idx = WallBc::map_bc(a_dir, a_side);
+  m_wallbc[idx] = RefCountedPtr<WallBc> (new WallBc(a_dir, a_side, wallbc::neumann));
   m_wallbc[idx]->set_value(a_value);
 }
 
-void eddington_sp1::set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
-  CH_TIME("eddington_sp1::set_robin_wall_bc");
+void eddington_sp1::set_robin_WallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
+  CH_TIME("eddington_sp1::set_robin_WallBc");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::set_robin_wall_bc" << endl;
+    pout() << "eddington_sp1::set_robin_WallBc" << endl;
   }
 
-  const int idx = wall_bc::map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::robin));
+  const int idx = WallBc::map_bc(a_dir, a_side);
+  m_wallbc[idx] = RefCountedPtr<WallBc> (new WallBc(a_dir, a_side, wallbc::robin));
   m_wallbc[idx]->set_value(a_value);
 }
 #include "CD_NamespaceFooter.H"
