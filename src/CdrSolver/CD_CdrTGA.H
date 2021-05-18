@@ -1,50 +1,65 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   CdrTGA.H
+  @file   CD_CdrTGA.H
   @brief  Extensions of CdrSolver which use ebconductivityop and TGA for diffusion parts
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#ifndef _CDR_TGA_
-#define _CDR_TGA_
+#ifndef CD_CdrTGA_H
+#define CD_CdrTGA_H
 
-#include "CD_CdrSolver.H"
-#include "ebconductivityopfactory.H"
+// Std includes
+#include <random>
+#include <time.h>
+#include <chrono>
 
+// Chombo includes
 #include <AMRMultiGrid.H>
 #include <AMRTGA.H>
 #include <BiCGStabSolver.H>
 #include <EBBackwardEuler.H>
 #include <EBSimpleSolver.H>
 
-#include <random>
-#include <time.h>
-#include <chrono>
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <ebconductivityopfactory.H>
+#include <CD_CdrSolver.H>
+#include <CD_NamespaceHeader.H>
   
 /*!
-  @brief Extension class of CdrSolver that uses ebconductivityop for diffusion part. Can also solve for stochastic diffusion
+  @brief Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic diffusion.
 */
 class CdrTGA : public CdrSolver {
 protected:
 
   /*!
-    @brief Silly enum for switching between relaxation methods.
+    @brief Enum class for supported bottom solvers in multigrid.
   */
-  enum class relax{
-    jacobi,
-    gauss_seidel,
-    gsrb_fast
+  enum class BottomSolver {
+    Simple,
+    BiCGStab,
+    GMRES
   };
 
   /*!
-    @brief Silly enum for switching between multigrid cycling
+    @brief Enum for supported relaxation methods in multigrid. 
   */
-  enum class amrmg{
-    full,
-    vcycle,
-    fcycle,
+  enum class RelaxationMethod {
+    Jacobi,
+    GaussSeidel,
+    GSRB,
+  };
+
+  /*!
+    @brief Enum for multigrid cycle types. 
+  */
+  enum class MultigridType {
+    FAS,
+    VCycle,
+    FCycle,
   };
   
 public:
@@ -75,7 +90,7 @@ public:
   virtual void computeDivJ(EBAMRCellData& a_divJ,
 			    EBAMRCellData& a_phi,
 			    const Real     a_extrapDt,
-			    const bool     a_ebFlux = true);
+			    const bool     a_ebFlux = true) override;
 
   /*!
     @brief Compute div(v*phi) explicitly
@@ -83,49 +98,14 @@ public:
   virtual void computeDivF(EBAMRCellData& a_divF,
 			    EBAMRCellData& a_phi,
 			    const Real     a_extrapDt,
-			    const bool     a_ebFlux = true);
+			    const bool     a_ebFlux = true) override;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
   */
   virtual void computeDivD(EBAMRCellData& a_divD,
 			    EBAMRCellData& a_phi,
-			    const bool     a_ebFlux = false);
-
-  /*!
-    @brief Set implicit diffusion solver solver parameters. These are normally good for this class. 
-  */
-  virtual void set_gmg_solver_parameters(relax      a_relax_type  = relax::gsrb_fast,
-					 amrmg      a_gmg_type    = amrmg::vcycle,
-					 const int  a_verbosity   = 10,
-					 const int  a_pre_smooth  = 2,
-					 const int  a_post_smooth = 2,
-					 const int  a_bot_smooth  = 2,
-					 const int  a_max_iter    = 16,
-					 const int  a_min_iter    = 5,
-					 const Real a_eps         = 1.E-8,
-					 const Real a_hang        = 0.2);
-
-  /*!
-    @brief Set the bottom solver.  
-    @param[in] a_whichsolver Solver type. 0 = smoother, 1 = BiCGStab
-  */
-  virtual void set_bottom_solver(const int a_whichsolver);
-
-  /*!
-    @brief Set the depth for bottom drop
-  */
-  virtual void set_bottom_drop(const int a_bottom_drop);
-
-  /*!
-    @brief Set number of smoothing for the bottom solver (simplified solver only)
-  */
-  virtual void set_botsolver_smooth(const int a_smooth);
-
-  /*!
-    @brief Use tga for temporal integration
-  */
-  virtual void set_tga(const bool a_use_tga);
+			    const bool     a_ebFlux = false) override;
 
   /*!
     @brief Query number of ghost cells
@@ -135,28 +115,28 @@ public:
   /*!
     @brief Implicit diffusion TGA advance with source terms
   */
-  virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt);
+  virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) override;
 
   /*!
     @brief Implicit diffusion TGA advance with source terms
   */
   virtual void advanceTGA(EBAMRCellData&       a_newPhi,
-			   const EBAMRCellData& a_oldPhi,
-			   const EBAMRCellData& a_source,
-			   const Real           a_dt);
+			  const EBAMRCellData& a_oldPhi,
+			  const EBAMRCellData& a_source,
+			  const Real           a_dt) override;
 
   /*!
     @brief Implicit diffusion Euler advance without source terms
   */
-  virtual void advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt);
+  virtual void advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) override;
 
   /*!
     @brief Implicit diffusion Euler advance with source terms
   */
   virtual void advanceEuler(EBAMRCellData&       a_newPhi,
-			     const EBAMRCellData& a_oldPhi,
-			     const EBAMRCellData& a_source,
-			     const Real           a_dt);
+			    const EBAMRCellData& a_oldPhi,
+			    const EBAMRCellData& a_source,
+			    const Real           a_dt) override;
 
   /*!
     @brief Write plot data
@@ -168,32 +148,32 @@ protected:
   /*!
     @brief Relaxation type for gmg
   */
-  relax m_gmg_relax_type;
+  RelaxationMethod m_multigridRelaxMethod;
 
   /*!
     @brief GMG multigrid type
   */
-  amrmg m_gmg_type;
+  MultigridType m_multigridType;
   
   /*!
     @brief Geometric multigrid solver
   */
-  RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > m_gmg_solver;
+  RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > m_multigridSolver;
 
   /*!
     @brief TGA solver
   */
-  RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > > m_tgasolver;
+  RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > > m_tgaSolver;
 
   /*!
     @brief Euler solver
   */
-  RefCountedPtr<EBBackwardEuler> m_eulersolver;
+  RefCountedPtr<EBBackwardEuler> m_eulerSolver;
 
   /*!
     @brief Operator factory
   */
-  RefCountedPtr<ebconductivityopfactory> m_opfact;
+  RefCountedPtr<ebconductivityopfactory> m_operatorFactory;
 
   /*!
     @brief Conjugate gradient solver bottom MG level
@@ -203,7 +183,7 @@ protected:
   /*!
     @brief Simple solver
   */
-  EBSimpleSolver m_simple_solver;
+  EBSimpleSolver m_simpleSolver;
 
   /*!
     @brief MG levelsgrids
@@ -213,72 +193,67 @@ protected:
   /*!
     @brief Verbosity for geometric multigrid
   */
-  int m_gmg_verbosity;
+  int m_multigridVerbosity;
 
   /*!
     @brief Pre-coarsening of GMG levels
   */
-  int m_gmg_coarsen;
+  int m_numCoarseningsBeforeAggregation;
 
   /*!
     @brief Number of smoothings before averaging
   */
-  int m_gmg_pre_smooth;
+  int m_multigridPreSmooth;
 
   /*!
     @brief Number of smoothings before averaging
   */
-  int m_gmg_post_smooth;
+  int m_multigridPostSmooth;
 
   /*!
     @brief Number of smoothing before bottom solver
   */
-  int m_gmg_bot_smooth;
+  int m_multigridBottomSmooth;
 
   /*!
     @brief Maximum number of iterations
   */
-  int m_gmg_max_iter;
+  int m_multigridMaxIterations;
 
   /*!
     @brief Minimum number of iterations
   */
-  int m_gmg_min_iter;
+  int m_multigridMinIterations;
 
   /*!
     @brief Bottom solver type
   */
-  int m_bottomsolver;
+  BottomSolver m_bottomSolver;
 
   /*!
     @brief Number of smoothing for bottom solver
   */
-  int m_numsmooth;
+  int m_numSmoothingsForSimpleSolver;
 
   /*!
     @brief Set bottom drop depth
   */
-  int m_bottom_drop;
-
-  /*!
-    @brief Use tga
-  */
-  bool m_use_tga;
+  int m_numCellsBottomDrop;
 
   /*!
     @brief Has deeper MG levels or not
   */
-  bool m_has_mg_stuff;
+  bool m_hasDeeperMultigridLevels;
 
   /*!
-    @brief 
+    @brief Multigrid tolerance
   */
-  Real m_gmg_eps;
+  Real m_multigridTolerance;
   
   /*!
-    @brief 
+    @brief Multigrid hand
   */
-  Real m_gmg_hang;
+  Real m_multigridHang;
 
   /*!
     @brief Advection-only extrapolation to faces
@@ -288,37 +263,39 @@ protected:
   /*!
     @brief Set up geometric multigrid
   */
-  virtual void setup_gmg();
+  virtual void setupMultigrid();
 
   /*!
     @brief Define the GMG levels
   */
-  virtual void define_mg_levels();
+  virtual void defineDeeperMultigridLevels();
 
   /*!
     @brief Setup the operator factory
   */
-  virtual void setup_operator_factory();
+  virtual void setupOperatorFactory();
 
   /*!
     @brief Setup multigrid
   */
-  virtual void setup_multigrid();
+  virtual void setupMultigridSolver();
 
   /*!
     @brief Setup the TGA solver
   */
-  virtual void setup_tga();
+  virtual void setupTGA();
 
   /*!
     @brief Setup the Euler solver
   */
-  virtual void setup_euler();
+  virtual void setupEuler();
 
   /*!
     @brief Parse solver settings for geometric multigrid
   */
-  virtual void parse_gmg_settings();
+  virtual void parseMultigridSettings();
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

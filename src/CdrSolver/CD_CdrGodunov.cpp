@@ -41,7 +41,7 @@ void CdrGodunov::parseOptions(){
   parseSlopeLimiter();           // Parses slope limiter settings
   parsePlotVariables();          // Parses plot variables
   parsePlotMode();               // Parse plot mdoe
-  parse_gmg_settings();          // Parses solver parameters for geometric multigrid
+  parseMultigridSettings();          // Parses solver parameters for geometric multigrid
   parseExtrapolateSourceTerm();  // Parse source term extrapolation for time-centering advective comps
   parseRngSeed();                // Get a seed
   parseDivergenceComputation();  // Nonlinear divergence blending
@@ -56,7 +56,7 @@ void CdrGodunov::parseRuntimeOptions(){
   parseSlopeLimiter();
   parsePlotVariables();
   parsePlotMode();
-  parse_gmg_settings();
+  parseMultigridSettings();
   parseDomainBc();
   parseExtrapolateSourceTerm();
   parseDivergenceComputation();
@@ -148,7 +148,7 @@ void CdrGodunov::allocateInternals(){
   CdrSolver::allocateInternals();
 
   if(m_isDiffusive){
-    this->setup_gmg();
+    this->setupMultigrid();
   }
 
   if(m_isMobile){

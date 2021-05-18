@@ -1,13 +1,15 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   CdrTGA.cpp
+  @file   CD_CdrTGA.cpp
   @brief  Implementation of CdrTGA.H
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#include <CD_CdrTGA.H>
-#include "data_ops.H"
-
+// Chombo includes
 #include <ParmParse.H>
 #include <EBArith.H>
 #include <EBAMRIO.H>
@@ -15,12 +17,15 @@
 #include <NeumannConductivityDomainBC.H>
 #include <BRMeshRefine.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrTGA.H>
+#include <data_ops.H>
+#include <CD_NamespaceHeader.H>
 
 CdrTGA::CdrTGA() : CdrSolver() {
   m_name         = "CdrTGA";
-  m_className   = "CdrTGA";
-  m_has_mg_stuff = false;
+  m_className    = "CdrTGA";
+  m_hasDeeperMultigridLevels = false;
 }
 
 CdrTGA::~CdrTGA(){
@@ -49,16 +54,16 @@ void CdrTGA::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi
 }
 
 void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
-			    const EBAMRCellData& a_oldPhi,
-			    const EBAMRCellData& a_source,
-			    const Real           a_dt){
+			  const EBAMRCellData& a_oldPhi,
+			  const EBAMRCellData& a_source,
+			  const Real           a_dt){
   CH_TIME("CdrTGA::advanceEuler");
   if(m_verbosity > 5){
     pout() << m_name + "::advanceEuler" << endl;
   }
   
   if(m_isDiffusive){
-    this->setup_gmg(); // Set up gmg again since diffusion coefficients might change 
+    this->setupMultigrid(); // Set up gmg again since diffusion coefficients might change 
     
     bool converged = false;
 
@@ -79,11 +84,11 @@ void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
     m_amr->alias(orez, zero);
     m_amr->alias(shr,  m_scratch);
 
-    m_eulersolver->resetAlphaAndBeta(1.0, -a_dt);
+    m_eulerSolver->resetAlphaAndBeta(1.0, -a_dt);
     
-    const Real zero_resid = m_gmg_solver->computeAMRResidual(orez, shr, finest_level, 0);
+    const Real zero_resid = m_multigridSolver->computeAMRResidual(orez, shr, finest_level, 0);
     const Real stopcrit   = zero_resid;
-    m_gmg_solver->m_convergenceMetric = zero_resid;
+    m_multigridSolver->m_convergenceMetric = zero_resid;
 
 
     // Now do the solve. 
@@ -95,8 +100,8 @@ void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
 
     // Euler solve
     data_ops::set_value(m_ebCenteredDiffusionCoefficient, 0.0);
-    m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
-    const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
+    m_eulerSolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
+    const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
       converged = true;
     }
@@ -129,16 +134,16 @@ void CdrTGA::advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, 
 }
 
 void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
-			  const EBAMRCellData& a_oldPhi,
-			  const EBAMRCellData& a_source,
-			  const Real           a_dt){
+			const EBAMRCellData& a_oldPhi,
+			const EBAMRCellData& a_source,
+			const Real           a_dt){
   CH_TIME("CdrTGA::advanceTGA(full)");
   if(m_verbosity > 5){
     pout() << m_name + "::advanceTGA(full)" << endl;
   }
   
   if(m_isDiffusive){
-    this->setup_gmg(); // Set up gmg again since diffusion coefficients might change
+    this->setupMultigrid(); // Set up gmg again since diffusion coefficients might change
     
     bool converged = false;
 
@@ -158,10 +163,10 @@ void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
     data_ops::set_value(m_ebCenteredDiffusionCoefficient, 0.0);
 
     // TGA solve
-    m_tgasolver->resetAlphaAndBeta(alpha, beta);
-    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
+    m_tgaSolver->resetAlphaAndBeta(alpha, beta);
+    m_tgaSolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
 
-    const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
+    const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
       converged = true;
     }
@@ -171,172 +176,27 @@ void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
   }
 }
 
-void CdrTGA::set_bottom_solver(const int a_whichsolver){
-  CH_TIME("CdrTGA::set_bottom_solver");
+void CdrTGA::setupMultigrid(){
+  CH_TIME("CdrTGA::setupMultigrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_bottom_solver" << endl;
+    pout() << m_name + "::setupMultigrid" << endl;
   }
 
-  if(a_whichsolver == 0 || a_whichsolver == 1){
-    m_bottomsolver = a_whichsolver;
+  if(!m_hasDeeperMultigridLevels){
+    this->defineDeeperMultigridLevels();
+    m_hasDeeperMultigridLevels = true;
+  }
+  this->setupOperatorFactory();
+  this->setupMultigridSolver();
 
-    std::string str;
-    ParmParse pp("CdrTGA");
-    pp.get("gmg_bottom_solver", str);
-    if(str == "simple"){
-      m_bottomsolver = 0;
-    }
-    else if(str == "bicgstab"){
-      m_bottomsolver = 1;
-    }
-  }
-  else{
-    MayDay::Abort("CdrTGA::set_bottom_solver - Unsupported solver type requested");
-  }
+  this->setupTGA();
+  this->setupEuler();
 }
 
-void CdrTGA::set_botsolver_smooth(const int a_numsmooth){
-  CH_TIME("CdrTGA::set_botsolver_smooth");
+void CdrTGA::defineDeeperMultigridLevels(){
+  CH_TIME("CdrTGA::defineDeeperMultigridLevels");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_botsolver_smooth" << endl;
-  }
-  CH_assert(a_numsmooth > 0);
-
-
-  ParmParse pp("CdrTGA");
-  pp.query("gmg_bottom_relax", m_numsmooth);
-
-  if(m_numsmooth < 0){
-    m_numsmooth = 0;
-  }
-}
-
-void CdrTGA::set_bottom_drop(const int a_bottom_drop){
-  CH_TIME("CdrTGA::set_bottom_drop");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_bottom_drop" << endl;
-  }
-
-  ParmParse pp("CdrTGA");
-  pp.get("gmg_bottom_drop", m_bottom_drop);
-
-  if(m_bottom_drop < 2){
-    m_bottom_drop = 2;
-  }
-}
-
-void CdrTGA::set_tga(const bool a_use_tga){
-  CH_TIME("CdrTGA::set_tga");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_tga" << endl;
-  }
-  
-  m_use_tga = a_use_tga;
-
-  ParmParse pp("CdrTGA");
-  std::string str;
-  if(pp.contains("use_tga")){
-    pp.get("use_tga", str);
-    if(str == "true"){
-      m_use_tga = true;
-    }
-    else if(str == "false"){
-      m_use_tga = false;
-    }
-  }
-}
-
-void CdrTGA::set_gmg_solver_parameters(relax      a_relax_type,
-					amrmg      a_gmg_type,      
-					const int  a_verbosity,          
-					const int  a_pre_smooth,         
-					const int  a_post_smooth,       
-					const int  a_bot_smooth,         
-					const int  a_max_iter,
-					const int  a_min_iter,
-					const Real a_eps,               
-					const Real a_hang){
-  CH_TIME("CdrTGA::set_gmg_solver_parameters");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_gmg_solver_parameters" << endl;
-  }
-
-  m_gmg_relax_type  = a_relax_type;
-  m_gmg_type        = a_gmg_type;
-  m_gmg_verbosity   = a_verbosity;
-  m_gmg_pre_smooth  = a_pre_smooth;
-  m_gmg_post_smooth = a_post_smooth;
-  m_gmg_bot_smooth  = a_bot_smooth;
-  m_gmg_max_iter    = a_max_iter;
-  m_gmg_min_iter    = a_min_iter;
-  m_gmg_eps         = a_eps;
-  m_gmg_hang        = a_hang;
-
-  ParmParse pp("CdrTGA");
-  std::string str;
-
-
-  pp.get("gmg_verbosity",   m_gmg_verbosity);
-  pp.get("gmg_pre_smooth",  m_gmg_pre_smooth);
-  pp.get("gmg_post_smooth", m_gmg_post_smooth);
-  pp.get("gmg_bott_smooth", m_gmg_bot_smooth);
-  pp.get("gmg_max_iter",    m_gmg_max_iter);
-  pp.get("gmg_min_iter",    m_gmg_min_iter);
-  pp.get("gmg_tolerance",   m_gmg_eps);
-  pp.get("gmg_hang",        m_gmg_hang);
-
-  // Get the relaxation type
-  pp.get("gmg_relax",        str);
-  if(str == "jacobi"){
-    m_gmg_relax_type = relax::jacobi;
-  }
-  else if(str == "gauss_seidel"){
-    m_gmg_relax_type = relax::gauss_seidel;
-  }
-  else if(str == "gsrb"){
-    m_gmg_relax_type = relax::gsrb_fast;
-  }
-  else{
-    MayDay::Abort("CdrTGA::set_gmg_solver_parameters - unknown relaxation method requested");
-  }
-
-  // Get the MG cycle
-  pp.get("gmg_cycle",        str);
-  if(str == "full"){
-    m_gmg_type = amrmg::full;
-  }
-  else if(str == "vvcycle"){
-    m_gmg_type = amrmg::vcycle;
-  }
-  else if(str == "fcycle"){
-    m_gmg_type = amrmg::fcycle;
-  }
-  else{
-    MayDay::Abort("CdrTGA::set_gmg_solver_parameters - unknown MG cycle method requested");
-  }
-}
-
-void CdrTGA::setup_gmg(){
-  CH_TIME("CdrTGA::setup_gmg");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setup_gmg" << endl;
-  }
-
-  if(!m_has_mg_stuff){
-    this->define_mg_levels();
-    m_has_mg_stuff = true;
-  }
-  this->setup_operator_factory();
-  this->setup_multigrid();
-
-  this->setup_tga();
-  this->setup_euler();
-}
-
-void CdrTGA::define_mg_levels(){
-  CH_TIME("CdrTGA::define_mg_levels");
-  if(m_verbosity > 5){
-    pout() << m_name + "::define_mg_levels" << endl;
+    pout() << m_name + "::defineDeeperMultigridLevels" << endl;
   }
 
   const int coar_ref = 2;
@@ -352,14 +212,14 @@ void CdrTGA::define_mg_levels(){
   const Vector<ProblemDomain>& domains = m_amr->getDomains();
   const int max_box_size               = m_amr->getMaxBoxSize();
   const int blocking_factor            = m_amr->getBlockingFactor();
-  const int num_numEbGhostsCells                = m_amr->getNumberOfEbGhostCells();
+  const int numEbGhostsCells                = m_amr->getNumberOfEbGhostCells();
 
   int num_coar       = 0;
   bool has_coar      = true;
   ProblemDomain fine = domains[0];
 
   // Coarsen problem domains and create grids
-  while(num_coar < m_gmg_coarsen || !has_coar){
+  while(num_coar < m_numCoarseningsBeforeAggregation || !has_coar){
 
     // Check if we can coarsen
     const ProblemDomain coar = fine.coarsen(coar_ref);
@@ -386,7 +246,7 @@ void CdrTGA::define_mg_levels(){
       const int idx = m_mg_grids.size() - 1; // Last element added
       m_mg_levelgrids.push_back(EBLevelGrid(m_mg_grids[idx],
 					    m_mg_domains[idx],
-					    num_numEbGhostsCells,
+					    numEbGhostsCells,
 					    m_ebis));
 
       // Next iterate
@@ -399,10 +259,10 @@ void CdrTGA::define_mg_levels(){
   }
 }
 
-void CdrTGA::setup_operator_factory(){
-  CH_TIME("CdrTGA::setup_operator_factory");
+void CdrTGA::setupOperatorFactory(){
+  CH_TIME("CdrTGA::setupOperatorFactory");
   if(m_verbosity > 5){
-    pout() << m_name + "::setup_operator_factory" << endl;
+    pout() << m_name + "::setupOperatorFactory" << endl;
   }
 
   const int finest_level                 = m_amr->getFinestLevel();
@@ -437,13 +297,13 @@ void CdrTGA::setup_operator_factory(){
 
   // Set the relaxation type
   int relax_type = 0;
-  if(m_gmg_relax_type == relax::jacobi){
+  if(m_multigridRelaxMethod == RelaxationMethod::Jacobi){
     relax_type = 0;
   }
-  else if(m_gmg_relax_type == relax::gauss_seidel){
+  else if(m_multigridRelaxMethod == RelaxationMethod::GaussSeidel){
     relax_type = 1;
   }
-  else if(m_gmg_relax_type == relax::gsrb_fast){
+  else if(m_multigridRelaxMethod == RelaxationMethod::GSRB){
     relax_type = 2;
   }
 
@@ -452,7 +312,7 @@ void CdrTGA::setup_operator_factory(){
   // Create operator factory.
   data_ops::set_value(m_aCoefficient, 1.0); // We're usually solving (1 - dt*nabla^2)*phi^(k+1) = phi^k + dt*S^k so aco=1
   data_ops::set_value(m_ebCenteredDiffusionCoefficient, 0.0);
-  m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
+  m_operatorFactory = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
 										 quadcfi,
 										 fastFR,
 										 alpha,
@@ -467,15 +327,15 @@ void CdrTGA::setup_operator_factory(){
 										 ghost*IntVect::Unit,
 										 ghost*IntVect::Unit,
 										 relax_type,
-										 m_bottom_drop,
+										 m_numCellsBottomDrop,
 										 -1,
 										 m_mg_levelgrids));
 }
 
-void CdrTGA::setup_multigrid(){
-  CH_TIME("CdrTGA::setup_multigrid");
+void CdrTGA::setupMultigridSolver(){
+  CH_TIME("CdrTGA::setupMultigrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::setup_multigrid" << endl;
+    pout() << m_name + "::setupMultigrid" << endl;
   }
 
   const int finest_level       = m_amr->getFinestLevel();
@@ -483,73 +343,73 @@ void CdrTGA::setup_multigrid(){
 
   // Select bottom solver
   LinearSolver<LevelData<EBCellFAB> >* botsolver = NULL;
-  if(m_bottomsolver == 0){
-    m_simple_solver.setNumSmooths(m_numsmooth);
-    botsolver = &m_simple_solver;
+  if(m_bottomSolver == BottomSolver::Simple){
+    m_simpleSolver.setNumSmooths(m_numSmoothingsForSimpleSolver);
+    botsolver = &m_simpleSolver;
   }
-  else{
+  else if (m_bottomSolver == BottomSolver::BiCGStab){
     botsolver = &m_bicgstab;
   }
-  m_gmg_solver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
-  m_gmg_solver->m_imin = m_gmg_min_iter;
-  m_gmg_solver->m_verbosity = m_gmg_verbosity;
-  m_gmg_solver->define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
+  m_multigridSolver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
+  m_multigridSolver->m_imin = m_multigridMinIterations;
+  m_multigridSolver->m_verbosity = m_multigridVerbosity;
+  m_multigridSolver->define(coar_dom, *m_operatorFactory, botsolver, 1 + finest_level);
 
-  // Make m_gmg_type into an int for multigrid
+  // Make m_multigridType into an int for multigrid
   int gmg_type;
-  if(m_gmg_type == amrmg::full){
+  if(m_multigridType == MultigridType::FAS){
     gmg_type = 0;
   }
-  else if(m_gmg_type == amrmg::vcycle){
+  else if(m_multigridType == MultigridType::VCycle){
     gmg_type = 1;
   }
-  else if(m_gmg_type == amrmg::fcycle){
+  else if(m_multigridType == MultigridType::FCycle){
     gmg_type = 2;
   }
   
-  m_gmg_solver->setSolverParameters(m_gmg_pre_smooth,
-				    m_gmg_post_smooth,
-				    m_gmg_bot_smooth,
+  m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
+				    m_multigridPostSmooth,
+				    m_multigridBottomSmooth,
 				    gmg_type,
-				    m_gmg_max_iter,
-				    m_gmg_eps,
-				    m_gmg_hang,
+				    m_multigridMaxIterations,
+				    m_multigridTolerance,
+				    m_multigridHang,
 				    1.E-90); // Residue set through other means
 
 }
 
-void CdrTGA::setup_tga(){
-  CH_TIME("CdrTGA::setup_tga");
+void CdrTGA::setupTGA(){
+  CH_TIME("CdrTGA::setupTGA");
   if(m_verbosity > 5){
-    pout() << m_name + "::setup_tga" << endl;
+    pout() << m_name + "::setupTGA" << endl;
   }
   
   const int finest_level       = m_amr->getFinestLevel();
   const ProblemDomain coar_dom = m_amr->getDomains()[0];
   const Vector<int> ref_rat    = m_amr->getRefinementRatios();
 
-  m_tgasolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
-    (new AMRTGA<LevelData<EBCellFAB> > (m_gmg_solver, *m_opfact, coar_dom, ref_rat, 1 + finest_level, m_gmg_solver->m_verbosity));
+  m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
+    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_operatorFactory, coar_dom, ref_rat, 1 + finest_level, m_multigridSolver->m_verbosity));
 
   // Must init gmg for TGA
   Vector<LevelData<EBCellFAB>* > phi, rhs;
   m_amr->alias(phi, m_phi);
   m_amr->alias(rhs, m_source);
-  m_gmg_solver->init(phi, rhs, finest_level, 0);
+  m_multigridSolver->init(phi, rhs, finest_level, 0);
 }
 
-void CdrTGA::setup_euler(){
-  CH_TIME("CdrTGA::setup_euler");
+void CdrTGA::setupEuler(){
+  CH_TIME("CdrTGA::setupEuler");
   if(m_verbosity > 5){
-    pout() << m_name + "::setup_euler" << endl;
+    pout() << m_name + "::setupEuler" << endl;
   }
 
   const int finest_level       = m_amr->getFinestLevel();
   const ProblemDomain coar_dom = m_amr->getDomains()[0];
   const Vector<int> ref_rat    = m_amr->getRefinementRatios();
 
-  m_eulersolver = RefCountedPtr<EBBackwardEuler> 
-    (new EBBackwardEuler (m_gmg_solver, *m_opfact, coar_dom, ref_rat, 1 + finest_level, m_gmg_solver->m_verbosity));
+  m_eulerSolver = RefCountedPtr<EBBackwardEuler> 
+    (new EBBackwardEuler (m_multigridSolver, *m_operatorFactory, coar_dom, ref_rat, 1 + finest_level, m_multigridSolver->m_verbosity));
 
   // Note: If this crashes, try to init gmg first
 }
@@ -686,61 +546,61 @@ void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool
   }
 }
 
-void CdrTGA::parse_gmg_settings(){
+void CdrTGA::parseMultigridSettings(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
   
-  pp.get("gmg_coarsen",     m_gmg_coarsen);
-  pp.get("gmg_verbosity",   m_gmg_verbosity);
-  pp.get("gmg_pre_smooth",  m_gmg_pre_smooth);
-  pp.get("gmg_post_smooth", m_gmg_post_smooth);
-  pp.get("gmg_bott_smooth", m_gmg_bot_smooth);
-  pp.get("gmg_max_iter",    m_gmg_max_iter);
-  pp.get("gmg_min_iter",    m_gmg_min_iter);
-  pp.get("gmg_tolerance",   m_gmg_eps);
-  pp.get("gmg_hang",        m_gmg_hang);
-  pp.get("gmg_bottom_drop", m_bottom_drop);
+  pp.get("gmg_coarsen",     m_numCoarseningsBeforeAggregation);
+  pp.get("gmg_verbosity",   m_multigridVerbosity);
+  pp.get("gmg_pre_smooth",  m_multigridPreSmooth);
+  pp.get("gmg_post_smooth", m_multigridPostSmooth);
+  pp.get("gmg_bott_smooth", m_multigridBottomSmooth);
+  pp.get("gmg_max_iter",    m_multigridMaxIterations);
+  pp.get("gmg_min_iter",    m_multigridMinIterations);
+  pp.get("gmg_tolerance",   m_multigridTolerance);
+  pp.get("gmg_hang",        m_multigridHang);
+  pp.get("gmg_bottom_drop", m_numCellsBottomDrop);
 
   // Bottom solver
   pp.get("gmg_bottom_solver", str);
   if(str == "simple"){
-    m_bottomsolver = 0;
+    m_bottomSolver = BottomSolver::Simple;
   }
   else if(str == "bicgstab"){
-    m_bottomsolver = 1;
+    m_bottomSolver = BottomSolver::BiCGStab;
   }
   else{
-    MayDay::Abort("CdrTGA::parse_gmg_settings - unknown bottom solver requested");
+    MayDay::Abort("CdrTGA::parseMultigridSettings - unknown bottom solver requested");
   }
 
   // Relaxation type
   pp.get("gmg_relax_type", str);
   if(str == "gsrb"){
-    m_gmg_relax_type = relax::gsrb_fast;
+    m_multigridRelaxMethod = RelaxationMethod::GSRB;
   }
   else if(str == "jacobi"){
-    m_gmg_relax_type = relax::jacobi;
+    m_multigridRelaxMethod = RelaxationMethod::Jacobi;
   }
-  else if(str == "gauss_seidel"){
-    m_gmg_relax_type = relax::gauss_seidel;
+  else if(str == "GaussSeidel"){
+    m_multigridRelaxMethod = RelaxationMethod::GaussSeidel;
   }
   else{
-    MayDay::Abort("CdrTGA::parse_gmg_settings - unknown relaxation method requested");
+    MayDay::Abort("CdrTGA::parseMultigridSettings - unknown relaxation method requested");
   }
 
   // Cycle type
   pp.get("gmg_cycle", str);
   if(str == "vcycle"){
-    m_gmg_type = amrmg::vcycle;
+    m_multigridType = MultigridType::VCycle;
   }
   else{
-    MayDay::Abort("CdrTGA::parse_gmg_settings - unknown cycle type requested");
+    MayDay::Abort("CdrTGA::parseMultigridSettings - unknown cycle type requested");
   }
 
   // No lower than 2. 
-  if(m_bottom_drop < 2){
-    m_bottom_drop = 2;
+  if(m_numCellsBottomDrop < 2){
+    m_numCellsBottomDrop = 2;
   }
 }
 
@@ -798,4 +658,5 @@ void CdrTGA::writePlotData(EBAMRCellData& a_output, int& a_comp){
     writeData(a_output, a_comp, m_scratch, false);
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

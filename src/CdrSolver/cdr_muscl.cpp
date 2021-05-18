@@ -30,7 +30,7 @@ void cdr_muscl::parseOptions(){
   parseDomainBc();    // Parses domain BC options
   parseSlopeLimiter();     // Parses slope limiter settings
   parsePlotVariables();    // Parses plot variables
-  parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+  parseMultigridSettings(); // Parses solver parameters for geometric multigrid
   parseDivergenceComputation();  // Nonlinear divergence blending
 
   m_extrapolateSourceTerm = false; // This class can't extrapolate with source term (yet)
@@ -46,7 +46,7 @@ void cdr_muscl::parseRuntimeOptions(){
   parseDomainBc();    // Parses domain BC options
   parseSlopeLimiter();     // Parses slope limiter settings
   parsePlotVariables();    // Parses plot variables
-  parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+  parseMultigridSettings(); // Parses solver parameters for geometric multigrid
   parseDivergenceComputation();  // Nonlinear divergence blending
 
   m_extrapolateSourceTerm = false; // This class can't extrapolate with source term (yet)
@@ -126,7 +126,7 @@ void cdr_muscl::allocateInternals(){
   CdrSolver::allocateInternals();
 
   if(m_isDiffusive){
-    this->setup_gmg();
+    this->setupMultigrid();
   }
 }
 
