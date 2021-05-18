@@ -1,106 +1,53 @@
 /* chombo-discharge
- * This is a copy of Chombos EBConductivityOpFactory and retains Chombo copyrights. 
- * Please refer to Copyright.txt in the Chombo root directory.
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
  */
 
 /*!
   @file   CD_EbHelmholtzOpFactory.H
-  @brief  Declares a copy of Chombos EBConductivityOpFactory
+  @brief  Implementation of CD_EbHelmholtzOpFactory.H
   @author Robert Marskar
 */
 
-#include "LoadBalance.H"
-#include <CD_EbHelmholtzOp.H>
-#include "EBArith.H"
-#include "ParmParse.H"
-#include "CH_Timer.H"
-#include <CD_EbHelmholtzOpFactory.H>
-#include "EBCoarseAverage.H"
+// Chombo includes
+#include <LoadBalance.H>
+#include <EBArith.H>
+#include <ParmParse.H>
+#include <CH_Timer.H>
+#include <EBCoarseAverage.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_EbHelmholtzOp.H>
+#include <CD_EbHelmholtzOpFactory.H>
+#include <CD_NamespaceHeader.H>
   
-int EbHelmholtzOpFactory::s_testRef = 2; // Bogus
 int EbHelmholtzOpFactory::s_maxBoxSize = 32;
 
-//-----------------------------------------------------------------------
-void coarsen_stuff(LevelData<EBCellFAB>               & a_acoefCoar,
-		   LevelData<EBFluxFAB>               & a_bcoefCoar,
-		   LevelData<BaseIVFAB<Real> >        & a_bcoefCoarIrreg,
-		   const EBLevelGrid                  & a_eblgFine,
-		   const EBLevelGrid                  & a_eblgCoar,
-		   const LevelData<EBCellFAB>         & a_acoefFine,
-		   const LevelData<EBFluxFAB>         & a_bcoefFine,
-		   const LevelData<BaseIVFAB<Real> >  & a_bcoefFineIrreg,
-		   const int                          & a_refToDepth)
-{
-  CH_assert(a_refToDepth > 0);
-
-  Interval interv(0, 0);
-  if (a_refToDepth == 1){
-    a_acoefFine.     copyTo(interv,  a_acoefCoar,     interv);
-    a_bcoefFine.     copyTo(interv,  a_bcoefCoar,     interv);
-    a_bcoefFineIrreg.copyTo(interv,  a_bcoefCoarIrreg,interv);
-  }
-  else{
-    EBCoarseAverage averageOp(a_eblgFine.getDBL(),    a_eblgCoar.getDBL(),
-			      a_eblgFine.getEBISL(),  a_eblgCoar.getEBISL(),
-			      a_eblgCoar.getDomain(), a_refToDepth, 1,
-			      a_eblgCoar.getEBIS());
-
-    //MayDay::Warning("might want to figure out what harmonic averaging is in this context");
-    averageOp.average( a_acoefCoar     ,  a_acoefFine     , interv);
-    averageOp.average( a_bcoefCoar     ,  a_bcoefFine     , interv);
-    averageOp.average( a_bcoefCoarIrreg,  a_bcoefFineIrreg, interv);
-  }
-  a_acoefCoar.exchange(Interval(0,0));
-  a_bcoefCoar.exchange(Interval(0,0));
-  a_bcoefCoarIrreg.exchange(Interval(0,0));
-}
-
-EbHelmholtzOpFactory::~EbHelmholtzOpFactory(){
-}
-
-int EbHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
-  int retval = -1;
-  bool found = false;
-  for (int ilev = 0; ilev < m_eblgs.size(); ilev++){
-    if (m_eblgs[ilev].getDomain() == a_domain){
-      retval = m_refRatio[ilev];
-      found = true;
-    }
-  }
-  if (!found){
-    MayDay::Error("EbHelmholtzOpFactory::refToFiner - Domain not found in AMR hierarchy");
-  }
-  return retval;
-}
-
 EbHelmholtzOpFactory:: EbHelmholtzOpFactory(const Vector<EBLevelGrid>&                                  a_eblgs,
-						  const Vector<RefCountedPtr<EBQuadCFInterp> >&               a_quadCFI,
-						  const Vector<RefCountedPtr<EBFluxRegister> >&               a_fastFR,
-						  const Real&                                                 a_alpha,
-						  const Real&                                                 a_beta,
-						  const Vector<RefCountedPtr<LevelData<EBCellFAB> > >&        a_acoef,
-						  const Vector<RefCountedPtr<LevelData<EBFluxFAB> > >&        a_bcoef,
-						  const Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > >& a_bcoefIrreg,
-						  const Real&                                                 a_dxCoarse,
-						  const Vector<int>&                                          a_refRatio,
-						  const RefCountedPtr<BaseDomainBCFactory>&                   a_domainBCFactory,
-						  const RefCountedPtr<BaseEBBCFactory>    &                   a_ebBCFactory,
-						  const IntVect&                                              a_ghostCellsPhi,
-						  const IntVect&                                              a_ghostCellsRhs,
-						  const int &                                                 a_relaxType,
-						  const int&                                                  a_botdrop,
-						  const int                                                   a_numLevels,
-						  const Vector<EBLevelGrid>&                                  a_mg_eblgs){
+					    const Vector<RefCountedPtr<EBQuadCFInterp> >&               a_quadCFI,
+					    const Vector<RefCountedPtr<EBFluxRegister> >&               a_fastFR,
+					    const Real&                                                 a_alpha,
+					    const Real&                                                 a_beta,
+					    const Vector<RefCountedPtr<LevelData<EBCellFAB> > >&        a_acoef,
+					    const Vector<RefCountedPtr<LevelData<EBFluxFAB> > >&        a_bcoef,
+					    const Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > >& a_bcoefIrreg,
+					    const Real&                                                 a_dxCoarse,
+					    const Vector<int>&                                          a_refRatio,
+					    const RefCountedPtr<BaseDomainBCFactory>&                   a_domainBCFactory,
+					    const RefCountedPtr<BaseEBBCFactory>    &                   a_ebBCFactory,
+					    const IntVect&                                              a_ghostCellsPhi,
+					    const IntVect&                                              a_ghostCellsRhs,
+					    const int &                                                 a_relaxType,
+					    const int&                                                  a_botdrop,
+					    const int                                                   a_numLevels,
+					    const Vector<EBLevelGrid>&                                  a_mg_eblgs){
   CH_assert(a_eblgs.size() <= a_refRatio.size());
-  m_dataBased = false;
   m_relaxType = a_relaxType;
   m_quadCFI = a_quadCFI;
   m_fastFR        = a_fastFR;
   m_ghostCellsRhs = a_ghostCellsRhs;
   m_ghostCellsPhi = a_ghostCellsPhi;
-  m_aCoefficientef         = a_acoef;
+  m_aCoefficient         = a_acoef;
   m_bcoef         = a_bcoef;
   m_bcoefIrreg    = a_bcoefIrreg;
   m_alpha         = a_alpha;
@@ -129,7 +76,7 @@ EbHelmholtzOpFactory:: EbHelmholtzOpFactory(const Vector<EBLevelGrid>&          
   m_beta = a_beta;
 
   m_eblgsMG.resize(m_numLevels);
-  m_aCoefficientefMG.resize(m_numLevels);
+  m_aCoefficientMG.resize(m_numLevels);
   m_bcoefMG.resize(m_numLevels);
   m_bcoefIrregMG.resize(m_numLevels);
   m_hasMGObjects.resize(m_numLevels);
@@ -139,11 +86,11 @@ EbHelmholtzOpFactory:: EbHelmholtzOpFactory(const Vector<EBLevelGrid>&          
 
       int mgRef = 2;
       m_eblgsMG[ilev]     .resize(0);
-      m_aCoefficientefMG[ilev]     .resize(0);
+      m_aCoefficientMG[ilev]     .resize(0);
       m_bcoefMG[ilev]     .resize(0);
       m_bcoefIrregMG[ilev].resize(0);
       m_eblgsMG[ilev]     .push_back(m_eblgs[ilev]);
-      m_aCoefficientefMG[ilev]     .push_back(m_aCoefficientef[ilev]);
+      m_aCoefficientMG[ilev]     .push_back(m_aCoefficient[ilev]);
       m_bcoefMG[ilev]     .push_back(m_bcoef[ilev]);
       m_bcoefIrregMG[ilev].push_back(m_bcoefIrreg[ilev]);
 
@@ -200,10 +147,18 @@ EbHelmholtzOpFactory:: EbHelmholtzOpFactory(const Vector<EBLevelGrid>&          
 	  RefCountedPtr<LevelData<EBFluxFAB> >        bcoefCoar(new LevelData<EBFluxFAB>(            eblgCoar.getDBL(), 1, nghost*IntVect::Unit, ebfluxfact) );
 
 	  // Coarsen coefficients
-	  coarsen_stuff(*acoefCoar, *bcoefCoar, *bcoefIrregCoar, eblgFine, eblgCoar, *m_aCoefficientefMG[ilev][img-1], *m_bcoefMG[ilev][img-1], *m_bcoefIrregMG[ilev][img-1], mgRef);
+	  this->coarsenCoefficients(*acoefCoar,
+				    *bcoefCoar,
+				    *bcoefIrregCoar,
+				    eblgFine,
+				    eblgCoar,
+				    *m_aCoefficientMG[ilev][img-1],
+				    *m_bcoefMG[ilev][img-1],
+				    *m_bcoefIrregMG[ilev][img-1],
+				    mgRef);
 
 	  // Move them to appropriate multigrid level
-	  m_aCoefficientefMG[ilev].push_back(acoefCoar);
+	  m_aCoefficientMG[ilev].push_back(acoefCoar);
 	  m_bcoefMG[ilev].push_back(bcoefCoar);
 	  m_bcoefIrregMG[ilev].push_back(bcoefIrregCoar);
 	}
@@ -215,9 +170,62 @@ EbHelmholtzOpFactory:: EbHelmholtzOpFactory(const Vector<EBLevelGrid>&          
   }
 }
 
+EbHelmholtzOpFactory::~EbHelmholtzOpFactory(){
+}
+
+void EbHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>               & a_acoefCoar,
+					       LevelData<EBFluxFAB>               & a_bcoefCoar,
+					       LevelData<BaseIVFAB<Real> >        & a_bcoefCoarIrreg,
+					       const EBLevelGrid                  & a_eblgFine,
+					       const EBLevelGrid                  & a_eblgCoar,
+					       const LevelData<EBCellFAB>         & a_acoefFine,
+					       const LevelData<EBFluxFAB>         & a_bcoefFine,
+					       const LevelData<BaseIVFAB<Real> >  & a_bcoefFineIrreg,
+					       const int                          & a_refToDepth){
+  CH_assert(a_refToDepth > 0);
+
+  const Interval interv(0, 0);
+  if (a_refToDepth == 1){
+    a_acoefFine.     copyTo(interv,  a_acoefCoar,     interv);
+    a_bcoefFine.     copyTo(interv,  a_bcoefCoar,     interv);
+    a_bcoefFineIrreg.copyTo(interv,  a_bcoefCoarIrreg,interv);
+  }
+  else{
+    EBCoarseAverage averageOp(a_eblgFine.getDBL(),    a_eblgCoar.getDBL(),
+			      a_eblgFine.getEBISL(),  a_eblgCoar.getEBISL(),
+			      a_eblgCoar.getDomain(), a_refToDepth, 1,
+			      a_eblgCoar.getEBIS());
+
+    //MayDay::Warning("might want to figure out what harmonic averaging is in this context");
+    averageOp.average( a_acoefCoar     ,  a_acoefFine     , interv);
+    averageOp.average( a_bcoefCoar     ,  a_bcoefFine     , interv);
+    averageOp.average( a_bcoefCoarIrreg,  a_bcoefFineIrreg, interv);
+  }
+  a_acoefCoar.exchange(Interval(0,0));
+  a_bcoefCoar.exchange(Interval(0,0));
+  a_bcoefCoarIrreg.exchange(Interval(0,0));
+}
+
+int EbHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
+  int retval = -1;
+  bool found = false;
+  for (int ilev = 0; ilev < m_eblgs.size(); ilev++){
+    if (m_eblgs[ilev].getDomain() == a_domain){
+      retval = m_refRatio[ilev];
+      found = true;
+    }
+  }
+  if (!found){
+    MayDay::Error("EbHelmholtzOpFactory::refToFiner - Domain not found in AMR hierarchy");
+  }
+  return retval;
+}
+
+
+
 EbHelmholtzOp* EbHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_domainFine,
-						   int                  a_depth,
-						   bool                 a_homoOnly){
+					     int                  a_depth,
+					     bool                 a_homoOnly){
 
   //find out if there is a real starting point here.
   int ref=-1;
@@ -254,7 +262,7 @@ EbHelmholtzOp* EbHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_domainFine,
   if (a_depth == 0){
     eblgMGLevel    = m_eblgs[ref];
 
-    acoef = m_aCoefficientef[ref];
+    acoef = m_aCoefficient[ref];
 
     bcoef          = m_bcoef[ref];
     bcoefIrreg     = m_bcoefIrreg[ref];
@@ -279,7 +287,7 @@ EbHelmholtzOp* EbHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_domainFine,
     for (int img = 0; img < numMGLevels; img++){
       if (m_eblgsMG[ref][img].getDomain() == domainBoxMGLevel){
 	eblgMGLevel = m_eblgsMG[ref][img];
-	acoef = m_aCoefficientefMG[ref][img];
+	acoef = m_aCoefficientMG[ref][img];
 	bcoef = m_bcoefMG[ref][img];
 	bcoefIrreg  = m_bcoefIrregMG[ref][img];
 	foundMGLevel = true;
@@ -325,9 +333,9 @@ EbHelmholtzOp* EbHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_domainFine,
   EbHelmholtzOp* newOp = NULL;
   // Time-independent A coefficient.
   newOp = new EbHelmholtzOp(EBLevelGrid(), eblgMGLevel, EBLevelGrid(), eblgCoarMG, quadCFI, fastFR,
-			       dombc, ebbc, dxMGLevel, dxCoar, bogRef, bogRef, hasFine, hasCoar,
-			       hasCoarMGObjects, layoutChanged, m_alpha, m_beta,
-			       acoef, bcoef, bcoefIrreg, m_ghostCellsPhi, m_ghostCellsRhs, m_relaxType);
+			    dombc, ebbc, dxMGLevel, dxCoar, bogRef, bogRef, hasFine, hasCoar,
+			    hasCoarMGObjects, layoutChanged, m_alpha, m_beta,
+			    acoef, bcoef, bcoefIrreg, m_ghostCellsPhi, m_ghostCellsRhs, m_relaxType);
 
   return newOp;
 
@@ -372,9 +380,6 @@ EbHelmholtzOp* EbHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domainFine)
   ConductivityBaseEBBC*     viscEBBC  = (ConductivityBaseEBBC*)     m_ebBCFactory->create(    m_eblgs[ref].getDomain(),
 											      m_eblgs[ref].getEBISL(), dxMGLevel*RealVect::Unit,
 											      &m_ghostCellsPhi, &m_ghostCellsRhs);
-  if (m_dataBased){
-    viscEBBC->setData(m_data[ref]);
-  }
 
   ConductivityBaseDomainBC* viscDomBC = (ConductivityBaseDomainBC*) m_domainBCFactory->create(m_eblgs[ref].getDomain(),
 											      m_eblgs[ref].getEBISL(), dxMGLevel*RealVect::Unit);
@@ -389,10 +394,10 @@ EbHelmholtzOp* EbHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domainFine)
   EbHelmholtzOp* newOp = NULL;
 
   newOp = new EbHelmholtzOp(eblgFine, eblgMGLevel, eblgCoar, eblgCoarMG, m_quadCFI[ref], m_fastFR[ref],
-			       dombc, ebbc,  dxMGLevel,dxCoar, refToFiner, refToCoarser,
-			       hasFine, hasCoar, hasCoarMGObjects,  layoutChanged,
-			       m_alpha, m_beta, m_aCoefficientef[ref], m_bcoef[ref], m_bcoefIrreg[ref],
-			       m_ghostCellsPhi, m_ghostCellsRhs, m_relaxType);
+			    dombc, ebbc,  dxMGLevel,dxCoar, refToFiner, refToCoarser,
+			    hasFine, hasCoar, hasCoarMGObjects,  layoutChanged,
+			    m_alpha, m_beta, m_aCoefficient[ref], m_bcoef[ref], m_bcoefIrreg[ref],
+			    m_ghostCellsPhi, m_ghostCellsRhs, m_relaxType);
 
   return newOp;
 }
@@ -404,4 +409,5 @@ void EbHelmholtzOpFactory::reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim){
 void EbHelmholtzOpFactory::AMRreclaim(EbHelmholtzOp* a_reclaim){
   delete a_reclaim;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
