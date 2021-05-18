@@ -167,7 +167,7 @@ public:
   /*!
     @brief Get species
   */
-  virtual Vector<RefCountedPtr<rte_species> >& get_species();
+  virtual Vector<RefCountedPtr<rte_species> >& getSpecies();
 
   /*!
     @brief Get all source terms

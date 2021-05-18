@@ -339,7 +339,7 @@ Vector<RefCountedPtr<T> >& rte_layout<T>::get_solvers(){
 }
 
 template <class T>
-Vector<RefCountedPtr<rte_species> >& rte_layout<T>::get_species(){
+Vector<RefCountedPtr<rte_species> >& rte_layout<T>::getSpecies(){
   return m_species;
 }
 

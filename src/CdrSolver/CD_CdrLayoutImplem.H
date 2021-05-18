@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_CdrLayout.H>
-#include <cdr_iterator.H>
+#include <CD_CdrIterator.H>
 #include <units.H>
 #include <data_ops.H>
 #include <CD_NamespaceHeader.H>
@@ -620,17 +620,17 @@ Vector<EBAMRFluxData*> CdrLayout<T>::getFaceCenteredDiffusionCoefficient(){
 }
 
 template <class T>
-Vector<EBAMRIVData*> CdrLayout<T>::getEbDiffusionCoefficients(){
-  CH_TIME("CdrLayout<T>::getEbDiffusionCoefficients");
+Vector<EBAMRIVData*> CdrLayout<T>::getEbCenteredDiffusionCoefficient(){
+  CH_TIME("CdrLayout<T>::getEbCenteredDiffusionCoefficient");
   if(m_verbosity > 5){
-    pout() << "CdrLayout<T>::getEbDiffusionCoefficients" << endl;
+    pout() << "CdrLayout<T>::getEbCenteredDiffusionCoefficient" << endl;
   }
 
   Vector<EBAMRIVData*> diffco_eb;
 
   for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
-    diffco_eb.push_back(&(solver->getEbDiffusionCoefficients()));
+    diffco_eb.push_back(&(solver->getEbCenteredDiffusionCoefficient()));
   }
 
   return diffco_eb;

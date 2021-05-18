@@ -485,7 +485,7 @@ public:
   /*!
     @brief Get the EB-centered diffusion coefficient
   */
-  virtual EBAMRIVData& get_diffco_eb();
+  virtual EBAMRIVData& getEbCenteredDiffusionCoefficient();
 
   /*!
     @brief Get the eb flux data holder

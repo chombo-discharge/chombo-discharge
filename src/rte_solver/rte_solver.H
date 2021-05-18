@@ -258,7 +258,7 @@ public:
   /*!
     @brief Get species
   */
-  virtual RefCountedPtr<rte_species>& get_species();
+  virtual RefCountedPtr<rte_species>& getSpecies();
   
 protected:
 

@@ -52,7 +52,7 @@ public:
   /*!
     @brief Get number of solvers. 
   */
-  virtual int num_solvers();
+  virtual int getNumberOfSolvers();
 
   /*!
     @brief Get current solver number
@@ -82,7 +82,7 @@ public:
   /*!
     @brief Get current ion
   */
-  virtual RefCountedPtr<CdrSpecies>& get_species();
+  virtual RefCountedPtr<CdrSpecies>& getSpecies();
   
 protected:
 
@@ -115,14 +115,10 @@ protected:
     @brief Ions
   */
   Vector<RefCountedPtr<CdrSpecies> > m_species;
-
-  /*!
-    @brief Cell-centered data
-  */
-  Vector<EBAMRCellData*> m_celldata;
-
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_CdrIteratorImplem.H>
 
 #endif

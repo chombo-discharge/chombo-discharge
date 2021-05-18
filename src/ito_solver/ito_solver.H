@@ -452,7 +452,7 @@ public:
   /*!
     @brief Get the species
   */
-  virtual RefCountedPtr<ito_species>& get_species();
+  virtual RefCountedPtr<ito_species>& getSpecies();
 
   /*!
     @brief Get state

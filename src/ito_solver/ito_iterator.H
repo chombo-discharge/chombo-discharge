@@ -48,7 +48,7 @@ public:
   /*!
     @brief Get number of solvers. 
   */
-  virtual int num_solvers();
+  virtual int getNumberOfSolvers();
 
   /*!
     @brief Get current solver number
@@ -78,7 +78,7 @@ public:
   /*!
     @brief Get current ion
   */
-  virtual RefCountedPtr<ito_species>& get_species();
+  virtual RefCountedPtr<ito_species>& getSpecies();
   
 protected:
 

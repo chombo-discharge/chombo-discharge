@@ -1024,7 +1024,7 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
   // Increment each solver
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<ito_solver>& solver   = solver_it();
-    const RefCountedPtr<ito_species>& species = solver->get_species();
+    const RefCountedPtr<ito_species>& species = solver->getSpecies();
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
 
@@ -1083,7 +1083,7 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, con
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
+    RefCountedPtr<ito_species>& species = solver->getSpecies();
     
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -1292,7 +1292,7 @@ void ito_plasma_stepper::intersect_particles(const which_particles             a
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
+    RefCountedPtr<ito_species>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1351,7 +1351,7 @@ void ito_plasma_stepper::remove_covered_particles(const which_particles         
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
+    RefCountedPtr<ito_species>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1411,7 +1411,7 @@ void ito_plasma_stepper::transfer_covered_particles(const which_particles       
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
+    RefCountedPtr<ito_species>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1467,7 +1467,7 @@ void ito_plasma_stepper::remap_particles(const which_particles a_which_particles
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
+    RefCountedPtr<ito_species>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1524,7 +1524,7 @@ void ito_plasma_stepper::deposit_particles(const which_particles a_which_particl
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
+    RefCountedPtr<ito_species>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1571,7 +1571,7 @@ void ito_plasma_stepper::set_ito_velocity_funcs(){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
+    RefCountedPtr<ito_species>& species = solver->getSpecies();
 
     if(solver->isMobile()){
       EBAMRCellData& velo_func = solver->get_velo_func();
@@ -2451,7 +2451,7 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
 
 	bulkPhotons[idx]   = &((*bulkPhotonsFAB[idx])(iv, 0));
 	sourcePhotons[idx] = &((*sourcePhotonsFAB[idx])(iv, 0));
-	photoSpecies[idx]  = solver_it()->get_species();
+	photoSpecies[idx]  = solver_it()->getSpecies();
 	numNewPhotons[idx] = llround(a_newPhotonsPerCell.getSingleValuedFAB()(iv, idx));
 
 	sourcePhotons[idx]->clear();
@@ -2511,7 +2511,7 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
 
       bulkPhotons[idx]   = &((*bulkPhotonsFAB[idx])(iv, 0));
       sourcePhotons[idx] = &((*sourcePhotonsFAB[idx])(iv, 0));
-      photoSpecies[idx]  = solver_it()->get_species();
+      photoSpecies[idx]  = solver_it()->getSpecies();
       numNewPhotons[idx] = llround(a_newPhotonsPerCell(vof, idx));
 
       sourcePhotons[idx]->clear();
@@ -3260,7 +3260,7 @@ void ito_plasma_stepper::compute_EdotJ_source(){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
+    RefCountedPtr<ito_species>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -3307,7 +3307,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
+    RefCountedPtr<ito_species>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -3353,7 +3353,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo2(const Real a_dt){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
-    RefCountedPtr<ito_species>& species = solver->get_species();
+    RefCountedPtr<ito_species>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();

@@ -54,7 +54,7 @@ void ito_solver::setRealm(const std::string a_realm){
   m_fluid_Realm = m_realm;
 }
 
-RefCountedPtr<ito_species>& ito_solver::get_species(){
+RefCountedPtr<ito_species>& ito_solver::getSpecies(){
   return m_species;
 }
 

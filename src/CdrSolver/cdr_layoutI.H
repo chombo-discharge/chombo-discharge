@@ -542,7 +542,7 @@ Vector<RefCountedPtr<T> >& cdr_layout<T>::get_solvers(){
 }
 
 template <class T>
-Vector<RefCountedPtr<CdrSpecies> >& cdr_layout<T>::get_species(){
+Vector<RefCountedPtr<CdrSpecies> >& cdr_layout<T>::getSpecies(){
   return m_species;
 }
 
@@ -615,17 +615,17 @@ Vector<EBAMRFluxData*> cdr_layout<T>::getFaceCenteredDiffusionCoefficient(){
 }
 
 template <class T>
-Vector<EBAMRIVData*> cdr_layout<T>::get_diffco_eb(){
-  CH_TIME("cdr_layout<T>::get_diffco_eb");
+Vector<EBAMRIVData*> cdr_layout<T>::getEbCenteredDiffusionCoefficient(){
+  CH_TIME("cdr_layout<T>::getEbCenteredDiffusionCoefficient");
   if(m_verbosity > 5){
-    pout() << "cdr_layout<T>::get_diffco_eb" << endl;
+    pout() << "cdr_layout<T>::getEbCenteredDiffusionCoefficient" << endl;
   }
 
   Vector<EBAMRIVData*> diffco_eb;
 
   for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
-    diffco_eb.push_back(&(solver->get_diffco_eb()));
+    diffco_eb.push_back(&(solver->getEbCenteredDiffusionCoefficient()));
   }
 
   return diffco_eb;

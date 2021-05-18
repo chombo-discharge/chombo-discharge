@@ -228,7 +228,7 @@ public:
   /*!
     @brief Get species
   */
-  virtual Vector<RefCountedPtr<CdrSpecies> >& get_species();
+  virtual Vector<RefCountedPtr<CdrSpecies> >& getSpecies();
 
   /*!
     @brief Get all source terms
@@ -253,7 +253,7 @@ public:
   /*!
     @brief Get all diffusion coefficients
   */
-  virtual Vector<EBAMRIVData*> get_diffco_eb();
+  virtual Vector<EBAMRIVData*> getEbCenteredDiffusionCoefficient();
 
   /*!
     @brief Get the EB flux

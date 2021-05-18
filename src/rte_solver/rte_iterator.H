@@ -33,7 +33,7 @@ public:
     CH_TIME("rte_iterator::rte_iterator");
     
     m_solvers  = a_layout.get_solvers();
-    m_species  = a_layout.get_species();
+    m_species  = a_layout.getSpecies();
     m_num      = m_solvers.size();
     m_defined  = true;
 
@@ -50,7 +50,7 @@ public:
   /*!
     @brief Get number of solvers
   */
-  virtual int num_solvers(){
+  virtual int getNumberOfSolvers(){
     CH_assert(m_defined);
     return m_num;
   }
@@ -99,7 +99,7 @@ public:
   /*!
     @brief Get current ion
   */
-  virtual RefCountedPtr<rte_species>& get_species() {
+  virtual RefCountedPtr<rte_species>& getSpecies() {
     CH_assert(m_defined == true);
     CH_assert(m_isolver < m_num);
     return m_species[m_isolver];

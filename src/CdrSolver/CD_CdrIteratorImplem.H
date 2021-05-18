@@ -27,7 +27,7 @@ CdrIterator<T>::CdrIterator(cdr_layout<T>& a_layout, const SpeciesIteration a_mo
   CH_TIME("CdrIterator<T>::CdrIterator");
     
   m_solvers  = a_layout.get_solvers();
-  m_species  = a_layout.get_species();
+  m_species  = a_layout.getSpecies();
   m_num      = m_solvers.size();
   m_mode     = a_mode;
   m_defined  = true;
@@ -41,7 +41,7 @@ CdrIterator<T>::~CdrIterator(){
 }
 
 template <class T>
-int CdrIterator<T>::num_solvers(){
+int CdrIterator<T>::getNumberOfSolvers(){
   CH_assert(m_defined);
   return m_num;
 }
@@ -107,7 +107,7 @@ RefCountedPtr<T>& CdrIterator<T>::operator() () {
 }
 
 template <class T>
-RefCountedPtr<CdrSpecies>& CdrIterator<T>::get_species() {
+RefCountedPtr<CdrSpecies>& CdrIterator<T>::getSpecies() {
   CH_assert(m_defined == true);
   CH_assert(m_isolver < m_num);
   return m_species[m_isolver];

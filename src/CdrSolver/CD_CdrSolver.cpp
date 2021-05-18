@@ -2050,7 +2050,7 @@ EBAMRFluxData& CdrSolver::getFaceCenteredDiffusionCoefficient(){
   return m_faceCenteredDiffusionCoefficient;
 }
 
-EBAMRIVData& CdrSolver::get_diffco_eb(){
+EBAMRIVData& CdrSolver::getEbCenteredDiffusionCoefficient(){
   return m_ebCenteredDiffusionCoefficient;
 }
 

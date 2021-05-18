@@ -221,7 +221,7 @@ public:
   /*!
     @brief Get species
   */
-  virtual Vector<RefCountedPtr<ito_species> >& get_species();
+  virtual Vector<RefCountedPtr<ito_species> >& getSpecies();
 
   /*!
     @brief Get all velocity functions

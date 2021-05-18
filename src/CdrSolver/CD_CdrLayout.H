@@ -259,7 +259,7 @@ public:
   /*!
     @brief Get all diffusion coefficients
   */
-  virtual Vector<EBAMRIVData*> getEbDiffusionCoefficients();
+  virtual Vector<EBAMRIVData*> getEbCenteredDiffusionCoefficient();
 
   /*!
     @brief Get the EB flux

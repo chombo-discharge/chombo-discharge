@@ -296,7 +296,7 @@ Vector<RefCountedPtr<T> >& ito_layout<T>::get_solvers(){
 }
 
 template <class T>
-Vector<RefCountedPtr<ito_species> >& ito_layout<T>::get_species(){
+Vector<RefCountedPtr<ito_species> >& ito_layout<T>::getSpecies(){
   return m_species;
 }
 

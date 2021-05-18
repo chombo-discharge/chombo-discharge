@@ -680,7 +680,7 @@ void godunov::compute_sigma_flux(){
 
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const RefCountedPtr<CdrSpecies>& spec  = solver_it.get_species();
+    const RefCountedPtr<CdrSpecies>& spec  = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
     data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);

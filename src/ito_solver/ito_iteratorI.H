@@ -23,7 +23,7 @@ ito_iterator<T>::ito_iterator(ito_layout<T>& a_layout, const SpeciesIteration a_
   CH_TIME("ito_iterator<T>::ito_iterator<T>");
     
   m_solvers  = a_layout.get_solvers();
-  m_species  = a_layout.get_species();
+  m_species  = a_layout.getSpecies();
   m_num      = m_solvers.size();
   m_mode     = a_mode;
   m_defined  = true;
@@ -37,7 +37,7 @@ ito_iterator<T>::~ito_iterator<T>(){
 }
 
 template <class T>
-int ito_iterator<T>::num_solvers(){
+int ito_iterator<T>::getNumberOfSolvers(){
   CH_assert(m_defined);
   return m_num;
 }
@@ -109,7 +109,7 @@ RefCountedPtr<T>& ito_iterator<T>::operator() () {
 }
 
 template <class T>
-RefCountedPtr<ito_species>& ito_iterator<T>::get_species() {
+RefCountedPtr<ito_species>& ito_iterator<T>::getSpecies() {
   CH_assert(m_defined == true);
   CH_assert(m_isolver < m_num);
   return m_species[m_isolver];

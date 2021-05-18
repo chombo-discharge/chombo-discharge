@@ -2482,7 +2482,7 @@ void cdr_plasma_stepper::compute_cdr_diffusion(){
   }
   
   Vector<EBAMRFluxData*> diffco_face = m_cdr->getFaceCenteredDiffusionCoefficient();
-  Vector<EBAMRIVData*> diffco_eb     = m_cdr->get_diffco_eb();
+  Vector<EBAMRIVData*> diffco_eb     = m_cdr->getEbCenteredDiffusionCoefficient();
 
   this->compute_cdr_diffco_face(diffco_face, cdr_states, E_cell, m_time);
   this->compute_cdr_diffco_eb(diffco_eb,     cdr_extrap, E_eb,   m_time);
@@ -2517,7 +2517,7 @@ void cdr_plasma_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, co
   }
   
   Vector<EBAMRFluxData*> diffco_face = m_cdr->getFaceCenteredDiffusionCoefficient();
-  Vector<EBAMRIVData*> diffco_eb     = m_cdr->get_diffco_eb();
+  Vector<EBAMRIVData*> diffco_eb     = m_cdr->getEbCenteredDiffusionCoefficient();
 
   this->compute_cdr_diffco_face(diffco_face, cdr_states, a_E_cell, m_time);
   this->compute_cdr_diffco_eb(diffco_eb,     cdr_extrap, a_E_eb,   m_time);
@@ -2654,7 +2654,7 @@ void cdr_plasma_stepper::computeCharge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVD
 
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const RefCountedPtr<CdrSpecies>& spec      = solver_it.get_species();
+    const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = *a_cdr_fluxes[solver_it.index()];
 
     data_ops::incr(a_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
@@ -2848,7 +2848,7 @@ void cdr_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) c
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<CdrSpecies>& spec      = solver_it.get_species();
+    RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
 
     if(solver->isMobile()){
       const int q                       = spec->getChargeNumber();
@@ -2918,7 +2918,7 @@ void cdr_plasma_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_ph
     // Add volumetric charge 
     for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const EBAMRCellData& density       = *(densities[solver_it.index()]);
-      const RefCountedPtr<CdrSpecies>& spec = solver_it.get_species();
+      const RefCountedPtr<CdrSpecies>& spec = solver_it.getSpecies();
 
       if(spec->getChargeNumber() != 0){
 	data_ops::incr(*a_rho[lvl], *density[lvl], spec->getChargeNumber());
@@ -2952,7 +2952,7 @@ void cdr_plasma_stepper::compute_rho(MFAMRCellData&                 a_rho,
     // Add volumetric charge 
     for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const EBAMRCellData& density       = *(a_densities[solver_it.index()]);
-      const RefCountedPtr<CdrSpecies>& spec = solver_it.get_species();
+      const RefCountedPtr<CdrSpecies>& spec = solver_it.getSpecies();
 
       if(spec->getChargeNumber() != 0){
 	data_ops::incr(*rho_gas[lvl], *density[lvl], spec->getChargeNumber());
@@ -3807,7 +3807,7 @@ Real cdr_plasma_stepper::compute_electrode_current(){
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const RefCountedPtr<CdrSpecies>& spec      = solver_it.get_species();
+    const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
     data_ops::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
@@ -3855,7 +3855,7 @@ Real cdr_plasma_stepper::compute_dielectric_current(){
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const RefCountedPtr<CdrSpecies>& spec      = solver_it.get_species();
+    const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
     data_ops::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
@@ -3905,7 +3905,7 @@ Real cdr_plasma_stepper::compute_domain_current(){
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const RefCountedPtr<CdrSpecies>& spec      = solver_it.get_species();
+    const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
     const EBAMRIFData& solver_flux          = solver->getDomainFlux();
 
     data_ops::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
