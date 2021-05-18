@@ -157,7 +157,7 @@ void JumpBc::matchBc(BaseIVFAB<Real>&                  a_phibc,
     if(std::isnan(apply_sten2)) MayDay::Abort("got sten2 NaN");
 #endif
 
-    // Now make the "inhomogeneous" and "homogeneous" contributions on each side. This gets area weighted in mfdirichletconductivityebbc. 
+    // Now make the "inhomogeneous" and "homogeneous" contributions on each side. This gets area weighted in MfElectrostaticDirichletEbBc. 
     for (int v = 0; v < vofs1.size(); v++){
       const VolIndex vof = vofs1[v];
 

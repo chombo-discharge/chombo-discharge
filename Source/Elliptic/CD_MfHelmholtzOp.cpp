@@ -17,7 +17,7 @@
 #include <EBAMRDataOps.H>
 
 // Our includes
-#include <mfdirichletconductivityebbc.H>
+#include <CD_MfElectrostaticDirichletEbBc.H>
 #include <CD_MfHelmholtzOp.H>
 #include <mfalias.H>
 #include <data_ops.H>
@@ -176,15 +176,15 @@ void MfHelmholtzOp::define(const RefCountedPtr<mfis>&                    a_mfis,
 
 
     // EB BC
-    m_ebbc[iphase] = RefCountedPtr<mfdirichletconductivityebbc> (new mfdirichletconductivityebbc(a_domain,
+    m_ebbc[iphase] = RefCountedPtr<MfElectrostaticDirichletEbBc> (new MfElectrostaticDirichletEbBc(a_domain,
 												 ebisl,
 												 a_dx*RealVect::Unit,
 												 &a_ghost_phi,
 												 &a_ghost_rhs,
 												 iphase));
-    m_ebbc[iphase]->setJump_object(m_jumpbc);
+    m_ebbc[iphase]->setJumpObject(m_jumpbc);
     m_ebbc[iphase]->setOrder(a_order_ebbc);
-    m_ebbc[iphase]->define_ivs(a_mflg);
+    m_ebbc[iphase]->defineIVS(a_mflg);
 
     EBLevelDataOps::setVal(*m_dirival[iphase], 0.0);
     m_ebbc[iphase]->setData(m_dirival[iphase]);
@@ -196,7 +196,7 @@ void MfHelmholtzOp::define(const RefCountedPtr<mfis>&                    a_mfis,
     const RefCountedPtr<LevelData<EBCellFAB> >&        aco     = m_aCoefficienteffs[iphase];
     const RefCountedPtr<LevelData<EBFluxFAB> >&        bco     = m_bcoeffs[iphase];
     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& bco_irr = m_bcoeffs_irr[iphase];
-    const RefCountedPtr<mfdirichletconductivityebbc>&  ebbc    = m_ebbc[iphase];
+    const RefCountedPtr<MfElectrostaticDirichletEbBc>&  ebbc    = m_ebbc[iphase];
 
     const Real alpha = a_alpha;
     const Real beta  = a_beta;

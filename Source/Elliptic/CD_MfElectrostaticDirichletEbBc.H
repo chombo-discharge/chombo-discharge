@@ -1,43 +1,47 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file mfdirichletconductivityebbc.H
-  @brief Declaration of a boundary condition class for doing convential Dirichlet BCs as well as multifluid matching bcs 
-  on selected cells
+  @file   CD_MfElectrostaticDirichletEbBc.H
+  @brief  Declaration of a boundary condition class for doing convential Dirichlet BCs as well as multifluid matching bcs on selected cells. 
   @author Robert Marskar
-  @date Dec. 2017
 */
 
-#ifndef _MFDIRICHLETCONDUCTIVITYEBBC_
-#define _MFDIRICHLETCONDUCTIVITYEBBC_
+#ifndef CD_MfElectrostaticDirichletEbBc_H
+#define CD_MfElectrostaticDirichletEbBc_H
 
-#include "MFLevelGrid.H"
-#include "mfis.H"
-#include <CD_JumpBc.H>
-
+// Chombo includes
 #include <DirichletConductivityEBBC.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <MFLevelGrid.H>
+#include <mfis.H>
+#include <CD_JumpBc.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for doing regular Dirichlet boundary conditions on EBConductivityOps with selected multifluid matching 
   boundary conditions.
   @details This is a simple class that essentially just ignores calls to homogeneous BCs on interface cells. 
 */
-class mfdirichletconductivityebbc : public ConductivityBaseEBBC {
+class MfElectrostaticDirichletEbBc : public ConductivityBaseEBBC {
 public:
   /*!
     @brief Constructor. Implements DirichletConductivityEBBC
   */
-  mfdirichletconductivityebbc(const ProblemDomain& a_domain,
-			      const EBISLayout&    a_ebisl,
-			      const RealVect&      a_dx,
-			      const IntVect*       a_ghost_phi,
-			      const IntVect*       a_ghost_rhs,
-			      const int            a_phase);
+  MfElectrostaticDirichletEbBc(const ProblemDomain& a_domain,
+			       const EBISLayout&    a_ebisl,
+			       const RealVect&      a_dx,
+			       const IntVect*       a_ghost_phi,
+			       const IntVect*       a_ghost_rhs,
+			       const int            a_phase);
   
   /*!
     @brief Destructor
   */
-  virtual ~mfdirichletconductivityebbc();
+  virtual ~MfElectrostaticDirichletEbBc();
 
   /*!
     @brief Switch between quadrant-based and non-quadrant based least squares stencils
@@ -57,7 +61,7 @@ public:
   /*!
     @brief Define interface cells
   */
-  virtual void define_ivs(const MFLevelGrid& a_mflg);
+  virtual void defineIVS(const MFLevelGrid& a_mflg);
 
   /*!
     @brief Define stencils and stuff
@@ -106,7 +110,7 @@ public:
   /*!
     @brief Set the jump object. This is needed for extracting stencils
   */
-  virtual void setJump_object(const RefCountedPtr<JumpBc> a_jumpbc);
+  virtual void setJumpObject(const RefCountedPtr<JumpBc> a_jumpbc);
 
   /*!
     @brief Get stencils for computing the flux
@@ -200,5 +204,7 @@ protected:
   */
   bool m_definedmf;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

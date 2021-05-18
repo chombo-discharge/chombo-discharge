@@ -30,7 +30,7 @@
 #include <MFQuadCFInterp.H>
 #include <MFFastFluxReg.H>
 #include <CD_EbHelmholtzOp.H>
-#include <mfdirichletconductivityebbc.H>
+#include <CD_MfElectrostaticDirichletEbBc.H>
 #include <CD_ElectrostaticEbBc.H>
 #include <CD_NamespaceHeader.H>
 
@@ -473,7 +473,7 @@ protected:
   /*!
     @brief Multifluid boundary conditions
   */
-  Vector<RefCountedPtr<mfdirichletconductivityebbc> > m_ebbc;
+  Vector<RefCountedPtr<MfElectrostaticDirichletEbBc> > m_ebbc;
 
   /*!
     @brief Electrodes

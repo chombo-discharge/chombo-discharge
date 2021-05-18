@@ -1,28 +1,32 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file mfdirichletconductivityebbc.cpp
-  @brief Implementation of mfdiricheltconductivityebbc.H
+  @file   CD_MfElectrostaticDirichletEbBc.cpp
+  @brief  Implementation of CD_MfElectrostaticDirichletEbBc.H
   @author Robert Marskar
-  @date Dec. 2017
 */
 
-#include "CD_LeastSquares.H"
-#include "mfdirichletconductivityebbc.H"
-#include "ParmParse.H"
+#include <CD_LeastSquares.H>
+#include <CD_MfElectrostaticDirichletEbBc.H>
+#include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
-bool mfdirichletconductivityebbc::s_areaFracWeighted = false;
-bool mfdirichletconductivityebbc::s_quadrant_based   = true;
-int  mfdirichletconductivityebbc::s_lsq_radius       = 1;
+bool MfElectrostaticDirichletEbBc::s_areaFracWeighted = false;
+bool MfElectrostaticDirichletEbBc::s_quadrant_based   = true;
+int  MfElectrostaticDirichletEbBc::s_lsq_radius       = 1;
 
 #define DEBUG 0
 
-mfdirichletconductivityebbc::mfdirichletconductivityebbc(const ProblemDomain& a_domain,
-							 const EBISLayout&    a_ebisl,
-							 const RealVect&      a_dx,
-							 const IntVect*       a_phig,
-							 const IntVect*       a_rhsg,
-							 const int            a_phase) {
+MfElectrostaticDirichletEbBc::MfElectrostaticDirichletEbBc(const ProblemDomain& a_domain,
+							   const EBISLayout&    a_ebisl,
+							   const RealVect&      a_dx,
+							   const IntVect*       a_phig,
+							   const IntVect*       a_rhsg,
+							   const int            a_phase) {
   m_domain = a_domain;
   m_ebisl  = a_ebisl;
   m_dx     = a_dx;
@@ -30,23 +34,23 @@ mfdirichletconductivityebbc::mfdirichletconductivityebbc(const ProblemDomain& a_
   m_order  = 1;
 }
 
-mfdirichletconductivityebbc::~mfdirichletconductivityebbc(){
+MfElectrostaticDirichletEbBc::~MfElectrostaticDirichletEbBc(){
 
 }
 
-LayoutData<BaseIVFAB<VoFStencil> >* mfdirichletconductivityebbc::getFluxStencil(int ivar){
+LayoutData<BaseIVFAB<VoFStencil> >* MfElectrostaticDirichletEbBc::getFluxStencil(int ivar){
   return &m_IrregStencils;
 }
 
-void mfdirichletconductivityebbc::setJump_object(const RefCountedPtr<JumpBc> a_jumpbc){
+void MfElectrostaticDirichletEbBc::setJumpObject(const RefCountedPtr<JumpBc> a_jumpbc){
   m_jumpbc = a_jumpbc;
 }
 
-void mfdirichletconductivityebbc::setOrder(int a_order){
+void MfElectrostaticDirichletEbBc::setOrder(int a_order){
   m_order = a_order;
 }
 
-void mfdirichletconductivityebbc::define_ivs(const MFLevelGrid& a_mflg){
+void MfElectrostaticDirichletEbBc::defineIVS(const MFLevelGrid& a_mflg){
     
   m_ivs.define(a_mflg.getGrids());
 
@@ -62,13 +66,13 @@ void mfdirichletconductivityebbc::define_ivs(const MFLevelGrid& a_mflg){
   m_definedmf = true;
 }
 
-void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const Real& a_factor){
+void MfElectrostaticDirichletEbBc::define(const LayoutData<IntVectSet>& a_cfivs, const Real& a_factor){
 
   if(!m_definedmf){
-    MayDay::Error("mfdirichletconductivityebbc::define - must set multifluid cells first!");
+    MayDay::Error("MfElectrostaticDirichletEbBc::define - must set multifluid cells first!");
   }
   else if(!m_coefSet){
-    MayDay::Error("mfdirichletconductivityebbc::define - must call setCoef BEFORE calling define");
+    MayDay::Error("MfElectrostaticDirichletEbBc::define - must call setCoef BEFORE calling define");
   }
   
   const int comp      = 0;
@@ -164,18 +168,18 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
 #if DEBUG // Debug. Check if anything is NaN
       for (int i = 0; i < cur_stencil.size(); i++){
 	const Real weight = cur_stencil.weight(i);
-	if(weight != weight) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN weight in BC stencil");
+	if(weight != weight) MayDay::Abort("MfElectrostaticDirichletEbBc::define - got NaN weight in BC stencil");
       }
       for (int i = 0; i < jump_sten.size(); i++){
 	const Real weight = jump_sten.weight(i);
-	if(weight != weight) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN weight in matching stencil");
+	if(weight != weight) MayDay::Abort("MfElectrostaticDirichletEbBc::define - got NaN weight in matching stencil");
       }
-      if(cur_weight != cur_weight) MayDay::Abort("mfdirichletconductivityebbc::define - cur_weight is NaN");
-      if(bp         != bp)         MayDay::Abort("mfdirichletconductivityebbc::define - bp is NaN");
-      if(bq         != bq)         MayDay::Abort("mfdirichletconductivityebbc::define - bq is NaN");
-      if(wp         != wp)         MayDay::Abort("mfdirichletconductivityebbc::define - wp is NaN");
-      if(wq         != wq)         MayDay::Abort("mfdirichletconductivityebbc::define - wq is NaN");
-      if(factor     != factor)     MayDay::Abort("mfdirichletconductivityebbc::define - factor is NaN");
+      if(cur_weight != cur_weight) MayDay::Abort("MfElectrostaticDirichletEbBc::define - cur_weight is NaN");
+      if(bp         != bp)         MayDay::Abort("MfElectrostaticDirichletEbBc::define - bp is NaN");
+      if(bq         != bq)         MayDay::Abort("MfElectrostaticDirichletEbBc::define - bq is NaN");
+      if(wp         != wp)         MayDay::Abort("MfElectrostaticDirichletEbBc::define - wp is NaN");
+      if(wq         != wq)         MayDay::Abort("MfElectrostaticDirichletEbBc::define - wq is NaN");
+      if(factor     != factor)     MayDay::Abort("MfElectrostaticDirichletEbBc::define - factor is NaN");
 #endif
 
       // Adjust stencil for BC jump
@@ -188,7 +192,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
 #if DEBUG
       for (int i = 0; i < cur_stencil.size(); i++){
 	const Real weight = cur_stencil.weight(i);
-	if(weight != weight) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN weight");
+	if(weight != weight) MayDay::Abort("MfElectrostaticDirichletEbBc::define - got NaN weight");
       }
 #endif
     }
@@ -202,19 +206,19 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       VoFStencil& cur_stencil = m_IrregStencils[dit()](vof, comp);
       cur_stencil *= factor;
 
-      if(mfdirichletconductivityebbc::s_areaFracWeighted){
+      if(MfElectrostaticDirichletEbBc::s_areaFracWeighted){
 	cur_stencil *= ebisbox.areaFracScaling(vof);
       }
     }
   }
 }
 
-bool mfdirichletconductivityebbc::getSecondOrderStencil(Real&             a_weight,
-							VoFStencil&       a_stencil,
-							const VolIndex&   a_vof,
-							const EBISBox&    a_ebisbox,
-							const IntVectSet& a_cfivs){
-  CH_TIME("mfdirichletconductivityebbc::getSecondOrderStencil");
+bool MfElectrostaticDirichletEbBc::getSecondOrderStencil(Real&             a_weight,
+							 VoFStencil&       a_stencil,
+							 const VolIndex&   a_vof,
+							 const EBISBox&    a_ebisbox,
+							 const IntVectSet& a_cfivs){
+  CH_TIME("MfElectrostaticDirichletEbBc::getSecondOrderStencil");
 
   a_stencil.clear();
   bool drop_order = false;
@@ -248,12 +252,12 @@ bool mfdirichletconductivityebbc::getSecondOrderStencil(Real&             a_weig
   return false;
 }
 
-void mfdirichletconductivityebbc::getFirstOrderStencil(Real&             a_weight,
-						       VoFStencil&       a_stencil,
-						       const VolIndex&   a_vof,
-						       const EBISBox&    a_ebisbox,
-						       const IntVectSet& a_cfivs){
-  CH_TIME("mfdirichletconductivityebbc::getFirstOrderStencil");
+void MfElectrostaticDirichletEbBc::getFirstOrderStencil(Real&             a_weight,
+							VoFStencil&       a_stencil,
+							const VolIndex&   a_vof,
+							const EBISBox&    a_ebisbox,
+							const IntVectSet& a_cfivs){
+  CH_TIME("MfElectrostaticDirichletEbBc::getFirstOrderStencil");
 
   const RealVect normal   = a_ebisbox.normal(a_vof);
   const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
@@ -291,10 +295,10 @@ void mfdirichletconductivityebbc::getFirstOrderStencil(Real&             a_weigh
   // Still haven't found a stencil. Approximate using one side only. If both sides do this then we can't solve. 
   if(a_stencil.size() == 0){
 #if DEBUG
-    pout() << "mfdirichletconductivityebbc::get_first_order sten - no sten on domain = "
+    pout() << "MfElectrostaticDirichletEbBc::get_first_order sten - no sten on domain = "
 	   << m_domain << "\t vof = "
 	   << a_vof.gridIndex() << endl;
-    MayDay::Warning("mfdirichletconductivityebbc::getFirstOrderStencil - could not find a stencil. ");
+    MayDay::Warning("MfElectrostaticDirichletEbBc::getFirstOrderStencil - could not find a stencil. ");
 #endif
 
     // Do an approximation for the gradient at the boundary by taking the gradient at the cell center and dotting it with the normal vector
@@ -342,16 +346,16 @@ void mfdirichletconductivityebbc::getFirstOrderStencil(Real&             a_weigh
 
 }
 
-void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,
-					      const EBCellFAB&              a_phi,
-					      VoFIterator&                  a_vofit,
-					      const LayoutData<IntVectSet>& a_cfivs,
-					      const DataIndex&              a_dit,
-					      const RealVect&               a_probLo,
-					      const RealVect&               a_dx,
-					      const Real&                   a_factor,
-					      const bool&                   a_useHomogeneous,
-					      const Real&                   a_time){
+void MfElectrostaticDirichletEbBc::applyEBFlux(EBCellFAB&                    a_lphi,
+					       const EBCellFAB&              a_phi,
+					       VoFIterator&                  a_vofit,
+					       const LayoutData<IntVectSet>& a_cfivs,
+					       const DataIndex&              a_dit,
+					       const RealVect&               a_probLo,
+					       const RealVect&               a_dx,
+					       const Real&                   a_factor,
+					       const bool&                   a_useHomogeneous,
+					       const Real&                   a_time){
 
   const int comp         = 0;
   const int otherphase   = m_phase == 0 ? 1 : 0;
@@ -379,7 +383,7 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
     // other side of the interface (quasi-homogeneous bc). 
     Real flux = beta*weight*value*bco*area_frac*a_factor;
 
-    if(mfdirichletconductivityebbc::s_areaFracWeighted){
+    if(MfElectrostaticDirichletEbBc::s_areaFracWeighted){
       flux *= ebisbox.areaFracScaling(vof);
     }
 
@@ -402,7 +406,7 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
       const Real& weight     = m_irreg_weights[a_dit](vof, comp);
       Real flux              = weight*value*beta*bco*area_frac*a_factor;
 
-      if(mfdirichletconductivityebbc::s_areaFracWeighted){
+      if(MfElectrostaticDirichletEbBc::s_areaFracWeighted){
 	flux *= ebisbox.areaFracScaling(vof);
       }
 
@@ -410,4 +414,5 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
