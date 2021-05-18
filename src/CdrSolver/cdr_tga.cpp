@@ -580,7 +580,7 @@ void cdr_tga::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Rea
       m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
       
       this->averageVelocityToFaces(); // Update m_faceVelocity from m_cellVelocity
-      this->advect_to_faces(m_faceStates, a_phi, a_extrapDt); // Advect to faces
+      this->advectToFaces(m_faceStates, a_phi, a_extrapDt); // Advect to faces
       this->computeFlux(m_scratchFluxTwo, m_faceVelocity, m_faceStates, m_domainFlux);
 
       data_ops::incr(m_scratchFluxOne, m_scratchFluxTwo, 1.0);
@@ -626,7 +626,7 @@ void cdr_tga::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Rea
       this->setRedistWeights(a_phi);
     }
     this->averageVelocityToFaces();
-    this->advect_to_faces(m_faceStates, a_phi, a_extrapDt);          // Face extrapolation to cell-centered faces
+    this->advectToFaces(m_faceStates, a_phi, a_extrapDt);          // Face extrapolation to cell-centered faces
     this->computeFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, m_domainFlux);  // Compute face-centered fluxes
 
     EBAMRIVData* ebflux;

@@ -9,7 +9,7 @@
 #define _CDR_MUSCL_
 
 #include "cdr_tga.H"
-#include "cdr_gdnv.H"
+#include <CD_CdrGodunov.H>
 
 #include "CD_NamespaceHeader.H"
 
@@ -52,7 +52,7 @@ public:
   /*!
     @brief MUSCL advection to faces
   */
-  virtual void advect_to_faces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
+  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
 
   /*!
     @brief Allocate internal stuff
@@ -93,7 +93,7 @@ protected:
 		      const int&           a_level,
 		      const DataIndex&     a_dit);
 
-  virtual void parse_slopelim();     // Parses slope limiter settings
+  virtual void parseSlopeLimiter();     // Parses slope limiter settings
 };
 #include "CD_NamespaceFooter.H"
 #endif

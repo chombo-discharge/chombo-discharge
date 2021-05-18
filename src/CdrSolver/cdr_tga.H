@@ -283,7 +283,7 @@ protected:
   /*!
     @brief Advection-only extrapolation to faces
   */
-  virtual void advect_to_faces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) = 0;
+  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) = 0;
 
   /*!
     @brief Set up geometric multigrid

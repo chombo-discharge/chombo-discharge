@@ -10,7 +10,7 @@
 #include "sisdc_storage.H"
 #include "data_ops.H"
 #include "units.H"
-#include "cdr_gdnv.H"
+#include <CD_CdrGodunov.H>
 
 #include <fstream>
 #include <iostream>
@@ -2677,9 +2677,9 @@ void sisdc::subcycle_compute_advection_velocities(){
 
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
-    cdr_gdnv* gdnv = dynamic_cast<cdr_gdnv*>(&(*solver));
+    CdrGodunov* gdnv = dynamic_cast<CdrGodunov*>(&(*solver));
     if(gdnv == NULL){
-      MayDay::Abort("sisdc::subcycle_compute_advection_velocities - Only cdr_gdnv can subcycle these days...");
+      MayDay::Abort("sisdc::subcycle_compute_advection_velocities - Only CdrGodunov can subcycle these days...");
     }
     else{
       if(solver->isMobile()){
@@ -3131,7 +3131,7 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
 
     if(solver->isMobile()){
       
-      cdr_gdnv* gdnv = (cdr_gdnv*) (&(*solver));
+      CdrGodunov* gdnv = (CdrGodunov*) (&(*solver));
       LevelData<EBCellFAB>* coar_old = NULL;
       LevelData<EBCellFAB>* coar_new = NULL;
 
@@ -3142,7 +3142,7 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
       
       // Advect to faces and compute fluxes on face centers, and compute the conservative divergence on regular cells
       const Real extr_dt = m_extrap_advect ? 2.0*m_extrap_dt*a_dt : 0.0;
-      gdnv->advect_to_faces(a_facePhi, state_m1, coar_old, coar_new, a_time, a_coar_time_old,a_coar_time_new, a_lvl, extr_dt);
+      gdnv->advectToFaces(a_facePhi, state_m1, coar_old, coar_new, a_time, a_coar_time_old,a_coar_time_new, a_lvl, extr_dt);
       gdnv->new_computeFlux(a_flux, a_facePhi, a_lvl);
       gdnv->conservativeDivergenceRegular(a_divF_c, a_flux, a_lvl);
 

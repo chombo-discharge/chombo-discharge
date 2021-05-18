@@ -98,29 +98,29 @@ FieldSolverMultigrid.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi', 
 # ====================================================================================================
 # CDR_GDNV SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
-cdr_gdnv.seed                 = -1                      # Seed. Random seed with seed < 0
-cdr_gdnv.domain_bc            = kinetic                 # 'kinetic', 'wall', 'outflow', or 'extrap'
-cdr_gdnv.mass_redist          = false                   # Mass-weighted redistribution or volume-weighted
-cdr_gdnv.limit_slopes         = true                    # Use slope-limiters for godunov
-cdr_gdnv.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
-cdr_gdnv.extrapolateSourceTerm        = true                    # Flag for including source term for time-extrapolation
-cdr_gdnv.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
-cdr_gdnv.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo
-cdr_gdnv.redist_mass_weighted = false                   # Mass weighted redistribution or not
-cdr_gdnv.gmg_verbosity        = -1                      # GMG verbosity
-cdr_gdnv.gmg_coarsen          = 4                       # Precoarsening of multigrid levels
-cdr_gdnv.gmg_pre_smooth       = 6                       # Number of relaxations in GMG downsweep
-cdr_gdnv.gmg_post_smooth      = 6                       # Number of relaxations in upsweep
-cdr_gdnv.gmg_bott_smooth      = 6                       # NUmber of relaxations before dropping to bottom solver
-cdr_gdnv.gmg_min_iter         = 5                       # Minimum number of iterations
-cdr_gdnv.gmg_max_iter         = 32                      # Maximum number of iterations
-cdr_gdnv.gmg_tolerance        = 1.E-8                   # Residue tolerance
-cdr_gdnv.gmg_hang             = 0.2                     # Solver hang
-cdr_gdnv.gmg_bottom_drop      = 2                       # Bottom drop
-cdr_gdnv.gmg_bottom_solver    = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
-cdr_gdnv.gmg_bottom_relax     = 8                       # Number of relaxations in bottom solve ('simple' solver only)
-cdr_gdnv.gmg_cycle            = vcycle                  # Cycle type. Only 'vcycle' supported for now
-cdr_gdnv.gmg_relax_type       = gsrb                    # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
+CdrGodunov.seed                 = -1                      # Seed. Random seed with seed < 0
+CdrGodunov.domain_bc            = kinetic                 # 'kinetic', 'wall', 'outflow', or 'extrap'
+CdrGodunov.mass_redist          = false                   # Mass-weighted redistribution or volume-weighted
+CdrGodunov.limit_slopes         = true                    # Use slope-limiters for godunov
+CdrGodunov.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
+CdrGodunov.extrapolateSourceTerm        = true                    # Flag for including source term for time-extrapolation
+CdrGodunov.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
+CdrGodunov.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo
+CdrGodunov.redist_mass_weighted = false                   # Mass weighted redistribution or not
+CdrGodunov.gmg_verbosity        = -1                      # GMG verbosity
+CdrGodunov.gmg_coarsen          = 4                       # Precoarsening of multigrid levels
+CdrGodunov.gmg_pre_smooth       = 6                       # Number of relaxations in GMG downsweep
+CdrGodunov.gmg_post_smooth      = 6                       # Number of relaxations in upsweep
+CdrGodunov.gmg_bott_smooth      = 6                       # NUmber of relaxations before dropping to bottom solver
+CdrGodunov.gmg_min_iter         = 5                       # Minimum number of iterations
+CdrGodunov.gmg_max_iter         = 32                      # Maximum number of iterations
+CdrGodunov.gmg_tolerance        = 1.E-8                   # Residue tolerance
+CdrGodunov.gmg_hang             = 0.2                     # Solver hang
+CdrGodunov.gmg_bottom_drop      = 2                       # Bottom drop
+CdrGodunov.gmg_bottom_solver    = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+CdrGodunov.gmg_bottom_relax     = 8                       # Number of relaxations in bottom solve ('simple' solver only)
+CdrGodunov.gmg_cycle            = vcycle                  # Cycle type. Only 'vcycle' supported for now
+CdrGodunov.gmg_relax_type       = gsrb                    # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
 
 
 # ====================================================================================================

@@ -9,7 +9,7 @@
 #include "sdc_storage.H"
 #include "data_ops.H"
 #include "units.H"
-#include "cdr_gdnv.H"
+#include <CD_CdrGodunov.H>
 #include "CD_FieldSolverMultigrid.H"
 
 #include <fstream>

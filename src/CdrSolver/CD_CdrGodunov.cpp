@@ -1,54 +1,59 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file cdr_gdnv.cpp
-  @brief Implementation of cdr_gdnv.H
+  @file   CD_CdrGodunov.cpp
+  @brief  Implementation of CD_CdrGodunov.H
   @author Robert Marskar
-  @date Jan. 2018
 */
 
-#include "cdr_gdnv.H"
-#include "data_ops.H"
-
+// Chombo includes
 #include <ExtrapAdvectBC.H>
-
 #include <EBArith.H>
 #include <ParmParse.H>
+
+// Our includes
+#include <CD_CdrGodunov.H>
+#include <data_ops.H>
 
 ExtrapAdvectBCFactory s_physibc;
 
 #include "CD_NamespaceHeader.H"
 
-cdr_gdnv::cdr_gdnv() : cdr_tga() {
-  m_className = "cdr_gdnv";
-  m_name       = "cdr_gdnv";
+CdrGodunov::CdrGodunov() : cdr_tga() {
+  m_className = "CdrGodunov";
+  m_name       = "CdrGodunov";
 }
 
-cdr_gdnv::~cdr_gdnv(){
+CdrGodunov::~CdrGodunov(){
 
 }
 
-void cdr_gdnv::parseOptions(){
-  CH_TIME("cdr_gdnv::parseOptions");
+void CdrGodunov::parseOptions(){
+  CH_TIME("CdrGodunov::parseOptions");
   if(m_verbosity > 5){
     pout() << m_name + "::parseOptions" << endl;
   }
   
-  parseDomainBc();     // Parses domain BC options
-  parse_slopelim();      // Parses slope limiter settings
-  parsePlotVariables();     // Parses plot variables
-  parsePlotMode();      // Parse plot mdoe
-  parse_gmg_settings();  // Parses solver parameters for geometric multigrid
-  parseExtrapolateSourceTerm(); // Parse source term extrapolation for time-centering advective comps
-  parseRngSeed();      // Get a seed
+  parseDomainBc();               // Parses domain BC options
+  parseSlopeLimiter();           // Parses slope limiter settings
+  parsePlotVariables();          // Parses plot variables
+  parsePlotMode();               // Parse plot mdoe
+  parse_gmg_settings();          // Parses solver parameters for geometric multigrid
+  parseExtrapolateSourceTerm();  // Parse source term extrapolation for time-centering advective comps
+  parseRngSeed();                // Get a seed
   parseDivergenceComputation();  // Nonlinear divergence blending
 }
 
-void cdr_gdnv::parseRuntimeOptions(){
-  CH_TIME("cdr_gdnv::parseRuntimeOptions");
+void CdrGodunov::parseRuntimeOptions(){
+  CH_TIME("CdrGodunov::parseRuntimeOptions");
   if(m_verbosity > 5){
     pout() << m_name + "::parseRuntimeOptions" << endl;
   }
 
-  parse_slopelim();
+  parseSlopeLimiter();
   parsePlotVariables();
   parsePlotMode();
   parse_gmg_settings();
@@ -57,7 +62,7 @@ void cdr_gdnv::parseRuntimeOptions(){
   parseDivergenceComputation();
 }
 
-void cdr_gdnv::parse_slopelim(){
+void CdrGodunov::parseSlopeLimiter(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
@@ -65,20 +70,20 @@ void cdr_gdnv::parse_slopelim(){
   m_slopelim = (str == "true") ? true : false;
 }
 
-int cdr_gdnv::queryGhost() const {
+int CdrGodunov::queryGhost() const {
   return 3;
 }
 
-void cdr_gdnv::averageVelocityToFaces(){
-  CH_TIME("cdr_gdnv::averageVelocityToFaces(public, full)");
+void CdrGodunov::averageVelocityToFaces(){
+  CH_TIME("CdrGodunov::averageVelocityToFaces(public, full)");
   if(m_verbosity > 5){
     pout() << m_name + "::averageVelocityToFaces(public, full)" << endl;
   }
   this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity); // Average velocities to face centers for all levels
 }
 
-void cdr_gdnv::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCellData& a_cellVelocity){
-  CH_TIME("cdr_gdnv::averageVelocityToFaces");
+void CdrGodunov::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCellData& a_cellVelocity){
+  CH_TIME("CdrGodunov::averageVelocityToFaces");
   if(m_verbosity > 5){
     pout() << m_name + "::averageVelocityToFaces" << endl;
   }
@@ -89,7 +94,7 @@ void cdr_gdnv::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMR
     a_faceVelocity[lvl]->exchange();
   }
 
-  // Fix up boundary velocities to ensure no influx. This is (probably) the easiest way to handle this for cdr_gdnv
+  // Fix up boundary velocities to ensure no influx. This is (probably) the easiest way to handle this for CdrGodunov
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const ProblemDomain& domain  = m_amr->getDomains()[lvl];
@@ -134,7 +139,7 @@ void cdr_gdnv::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMR
   }
 }
 
-void cdr_gdnv::allocateInternals(){
+void CdrGodunov::allocateInternals(){
   CH_TIME("CdrSolver::allocateInternals");
   if(m_verbosity > 5){
     pout() << m_name + "::allocateInternals" << endl;
@@ -182,10 +187,10 @@ void cdr_gdnv::allocateInternals(){
   }
 }
   
-void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt){
-  CH_TIME("cdr_gdnv::advect_to_faces");
+void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt){
+  CH_TIME("CdrGodunov::advectToFaces");
   if(m_verbosity > 5){
-    pout() << m_name + "::advect_to_faces" << endl;
+    pout() << m_name + "::advectToFaces" << endl;
   }
 
   // Compute source for extrapolation
@@ -240,4 +245,5 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

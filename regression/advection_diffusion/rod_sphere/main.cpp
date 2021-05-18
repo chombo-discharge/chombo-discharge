@@ -1,5 +1,5 @@
 #include "CD_Driver.H"
-#include "cdr_gdnv.H"
+#include <CD_CdrGodunov.H>
 #include "cdr_muscl.H"
 #include "rod_dielectric.H"
 #include "advection_diffusion_stepper.H"
@@ -25,7 +25,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());
 
   // Set up basic advection_diffusion 
-  RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new cdr_gdnv());
+  RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new CdrGodunov());
   RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new advection_diffusion_stepper(solver));
   RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new advection_diffusion_tagger(solver, amr));
 

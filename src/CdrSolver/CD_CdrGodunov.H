@@ -1,34 +1,39 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file cdr_gdnv.H
-  @brief Godunov solver for CDR equations
+  @file   CD_CdrGodunov.H
+  @brief  Godunov advection interface to CdrSolver
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#ifndef _CDR_GDNV_
-#define _CDR_GDNV_
+#ifndef CD_CdrGodunov_H
+#define CD_CdrGodunov_H
 
-#include "cdr_tga.H"
-
+// Chombo includes
 #include <EBAdvectLevelIntegrator.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <cdr_tga.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Godunov implementation for advection. 
 */
-class cdr_gdnv : public cdr_tga {
+class CdrGodunov : public cdr_tga {
 public:
 
   /*!
     @brief Constructor
   */
-  cdr_gdnv();
+  CdrGodunov();
 
   /*!
     @brief Destructor
   */
-  virtual ~cdr_gdnv();
+  virtual ~CdrGodunov();
 
   /*!
     @brief Parse options
@@ -65,7 +70,7 @@ protected:
   /*!
     @brief Godunov face extrapolation method for advection
   */
-  virtual void advect_to_faces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
+  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
 
   /*!
     @brief Level advect integrator
@@ -80,8 +85,9 @@ protected:
   /*!
     @brief Parses slope limiter options
   */
-  virtual void parse_slopelim();     // Parses slope limiter settings
+  virtual void parseSlopeLimiter();     // Parses slope limiter settings
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

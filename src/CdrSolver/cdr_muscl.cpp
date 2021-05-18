@@ -28,7 +28,7 @@ void cdr_muscl::parseOptions(){
   parseRngSeed();     // Parses RNG seed
   parsePlotMode();     // Parses plot mode
   parseDomainBc();    // Parses domain BC options
-  parse_slopelim();     // Parses slope limiter settings
+  parseSlopeLimiter();     // Parses slope limiter settings
   parsePlotVariables();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
   parseDivergenceComputation();  // Nonlinear divergence blending
@@ -44,7 +44,7 @@ void cdr_muscl::parseRuntimeOptions(){
 
   parsePlotMode();     // Parses plot mode
   parseDomainBc();    // Parses domain BC options
-  parse_slopelim();     // Parses slope limiter settings
+  parseSlopeLimiter();     // Parses slope limiter settings
   parsePlotVariables();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
   parseDivergenceComputation();  // Nonlinear divergence blending
@@ -52,7 +52,7 @@ void cdr_muscl::parseRuntimeOptions(){
   m_extrapolateSourceTerm = false; // This class can't extrapolate with source term (yet)
 }
 
-void cdr_muscl::parse_slopelim(){
+void cdr_muscl::parseSlopeLimiter(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
@@ -73,10 +73,10 @@ void cdr_muscl::advance_advect(EBAMRCellData& a_phi, const Real a_dt){
   MayDay::Abort("cdr_muscl::advance_advect - not implemented (yet)");
 }
 
-void cdr_muscl::advect_to_faces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt){
-  CH_TIME("cdr_muscl::advect_to_faces");
+void cdr_muscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt){
+  CH_TIME("cdr_muscl::advectToFaces");
   if(m_verbosity > 5){
-    pout() << m_name + "::advect_to_faces" << endl;
+    pout() << m_name + "::advectToFaces" << endl;
   }
 
   const int comp         = 0;
