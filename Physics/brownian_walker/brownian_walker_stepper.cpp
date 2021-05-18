@@ -21,13 +21,13 @@ brownian_walker_stepper::brownian_walker_stepper(){
 
   m_phase = phase::gas;
 
-  pp.get("Realm",          m_realm);
+  pp.get("realm",          m_realm);
   pp.get("diffco",         m_faceCenteredDiffusionCoefficient);
   pp.get("omega",          m_omega);
   pp.get("verbosity",      m_verbosity);
   pp.get("ppc",            m_ppc);
   pp.get("max_cells_hop",  m_max_cells_hop);
-  pp.get("LoadBalancing",   m_LoadBalancing);
+  pp.get("load_balance",   m_LoadBalancing);
 }
 
 brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver) : brownian_walker_stepper() {
@@ -45,7 +45,7 @@ void brownian_walker_stepper::parseRuntimeOptions() {
   pp.get("verbosity",      m_verbosity);
   pp.get("ppc",            m_ppc);
   pp.get("max_cells_hop",  m_max_cells_hop);
-  pp.get("LoadBalancing",   m_LoadBalancing);
+  pp.get("load_balance",   m_LoadBalancing);
   
   m_solver->parseRuntimeOptions();
 }
@@ -326,13 +326,6 @@ void brownian_walker_stepper::preRegrid(const int a_lbase, const int a_oldFinest
   const int finest_level = m_amr->getFinestLevel();
   
   m_solver->preRegrid(base, finest_level);
-}
-
-void brownian_walker_stepper::deallocate() {
-  CH_TIME("brownian_walker_stepper::deallocate");
-  if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::deallocate" << endl;
-  }
 }
 
 void brownian_walker_stepper::setup_solvers() {

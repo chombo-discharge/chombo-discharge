@@ -54,7 +54,6 @@ namespace physics {
       // Regrid routines
       bool needToRegrid() override;
       void preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
-      void deallocate() override;
       void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       void postRegrid() override;
 

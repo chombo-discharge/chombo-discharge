@@ -22,7 +22,7 @@ rte_stepper<T>::rte_stepper(){
   Vector<Real> v;
 
   pp.get   ("verbosity",      m_verbosity);
-  pp.get   ("Realm",          m_realm);
+  pp.get   ("realm",          m_realm);
   pp.get   ("blob_amplitude", m_blob_amplitude);
   pp.get   ("blob_radius",    m_blob_radius);
   pp.getarr("blob_center",    v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
@@ -139,11 +139,6 @@ void rte_stepper<T>::registerOperators() {
 template <typename T>
 void rte_stepper<T>::preRegrid(const int a_base, const int a_oldFinestLevel) {
   m_solver->preRegrid(a_base, a_oldFinestLevel);
-}
-
-template <typename T>
-void rte_stepper<T>::deallocate() {
-  m_solver->deallocateInternals();
 }
 
 template <typename T>

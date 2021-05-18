@@ -64,7 +64,6 @@ namespace physics {
       bool needToRegrid() override;
 
       void preRegrid(const int a_lbase, const int a_oldFinestLevel) override;
-      void deallocate() override;
 
       // Pure routines for derived classes
       void setup_solvers() override;
