@@ -17,7 +17,7 @@ def write_template(args):
     mainf.write('#include "' + args.CdrSolver + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "' + args.stepper + '.H"\n')
-    mainf.write('#include "advection_diffusion_tagger.H"\n')
+    mainf.write('#include <CD_AdvectionDiffusionTagger.H>\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
 
@@ -48,7 +48,7 @@ def write_template(args):
     mainf.write("  // Set up basic advection_diffusion \n")
     mainf.write("  RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new " + args.CdrSolver + "());\n")
     mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new " + args.stepper + "(solver));\n")
-    mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new advection_diffusion_tagger(solver, amr));\n")
+    mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new AdvectionDiffusionTagger(solver, amr));\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")

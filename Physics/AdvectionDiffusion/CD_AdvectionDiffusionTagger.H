@@ -1,5 +1,5 @@
 /*!
-  @file   advection_diffusion_tagger.H
+  @file   AdvectionDiffusionTagger.H
   @brief  Class for tagging cells across an AMR hierarchy
   @author Robert Marskar
   @date   Nov. 2017
@@ -19,12 +19,12 @@ namespace physics {
     /*!
       @brief Abstract class for tagging cells across an AMR hierarchy
     */
-    class advection_diffusion_tagger : public CellTagger {
+    class AdvectionDiffusionTagger : public CellTagger {
     public:
 
-      advection_diffusion_tagger(RefCountedPtr<CdrSolver>& a_solver,
+      AdvectionDiffusionTagger(RefCountedPtr<CdrSolver>& a_solver,
 				 RefCountedPtr<AmrMesh>&   a_amr);
-      ~advection_diffusion_tagger();
+      ~AdvectionDiffusionTagger();
 
       void regrid();
       void parseOptions();
@@ -37,8 +37,8 @@ namespace physics {
       RefCountedPtr<AmrMesh>   m_amr;
 
     private:
-      advection_diffusion_tagger(){
-	MayDay::Abort("advection_diffusion_tagger::advection_diffusion_tagger() - disabled constructor");
+      AdvectionDiffusionTagger(){
+	MayDay::Abort("AdvectionDiffusionTagger::AdvectionDiffusionTagger() - disabled constructor");
       }
 
       Real m_refi_curv;

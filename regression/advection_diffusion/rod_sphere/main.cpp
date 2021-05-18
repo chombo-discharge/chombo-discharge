@@ -2,8 +2,8 @@
 #include <CD_CdrGodunov.H>
 #include <CD_CdrMuscl.H>
 #include "rod_dielectric.H"
-#include "advection_diffusion_stepper.H"
-#include "advection_diffusion_tagger.H"
+#include <CD_AdvectionDiffusionStepper.H>
+#include <CD_AdvectionDiffusionTagger.H>
 #include "ParmParse.H"
 
 using namespace ChomboDischarge;
@@ -26,8 +26,8 @@ int main(int argc, char* argv[]){
 
   // Set up basic advection_diffusion 
   RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new CdrGodunov());
-  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new advection_diffusion_stepper(solver));
-  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new advection_diffusion_tagger(solver, amr));
+  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new AdvectionDiffusionStepper(solver));
+  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new AdvectionDiffusionTagger(solver, amr));
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));

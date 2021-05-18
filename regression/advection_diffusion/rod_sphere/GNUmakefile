@@ -22,13 +22,14 @@ src_dirs = $(DISCHARGE_HOME)/src \
 	$(DISCHARGE_HOME)/src/CellTagger \
 	$(DISCHARGE_HOME)/src/Driver \
 	$(DISCHARGE_HOME)/src/elliptic \
+	$(DISCHARGE_HOME)/src/FieldSolver \
 	$(DISCHARGE_HOME)/src/geometry \
 	$(DISCHARGE_HOME)/src/rte_solver \
 	$(DISCHARGE_HOME)/src/sigma_solver \
 	$(DISCHARGE_HOME)/src/particle \
 	$(DISCHARGE_HOME)/src/global \
 	$(DISCHARGE_HOME)/geometries/rod_dielectric\
-	$(DISCHARGE_HOME)/physics/advection_diffusion \
+	$(DISCHARGE_HOME)/Physics/AdvectionDiffusion \
 
 
 include $(CHOMBO_HOME)/mk/Make.example

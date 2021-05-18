@@ -1,14 +1,14 @@
 /*!
-  @file   advection_diffusion_stepper.cpp
-  @brief  Implementation of advection_diffusion_stepper
+  @file   AdvectionDiffusionStepper.cpp
+  @brief  Implementation of AdvectionDiffusionStepper
   @author Robert Marskar
   @data   March 2020
 */
 
 #include <ParmParse.H>
 
-#include "advection_diffusion_stepper.H"
-#include "advection_diffusion_species.H"
+#include <CD_AdvectionDiffusionStepper.H>
+#include <CD_AdvectionDiffusionSpecies.H>
 #include "data_ops.H"
 
 #include "CD_NamespaceHeader.H"
@@ -17,7 +17,7 @@ using namespace physics::advection_diffusion;
 
 
 
-advection_diffusion_stepper::advection_diffusion_stepper(){
+AdvectionDiffusionStepper::AdvectionDiffusionStepper(){
   ParmParse pp("advection_diffusion");
 
   m_phase = phase::gas;
@@ -31,14 +31,14 @@ advection_diffusion_stepper::advection_diffusion_stepper(){
   pp.get("integrator", m_integrator);
 }
 
-advection_diffusion_stepper::advection_diffusion_stepper(RefCountedPtr<CdrSolver>& a_solver) : advection_diffusion_stepper() {
+AdvectionDiffusionStepper::AdvectionDiffusionStepper(RefCountedPtr<CdrSolver>& a_solver) : AdvectionDiffusionStepper() {
   m_solver = a_solver;
 }
 
-advection_diffusion_stepper::~advection_diffusion_stepper(){
+AdvectionDiffusionStepper::~AdvectionDiffusionStepper(){
 }
 
-void advection_diffusion_stepper::parseRuntimeOptions() {
+void AdvectionDiffusionStepper::parseRuntimeOptions() {
   ParmParse pp("advection_diffusion");
 
   pp.get("verbosity",  m_verbosity);
@@ -48,8 +48,8 @@ void advection_diffusion_stepper::parseRuntimeOptions() {
   m_solver->parseRuntimeOptions();
 }
 
-void advection_diffusion_stepper::setup_solvers(){
-  m_species = RefCountedPtr<CdrSpecies> (new advection_diffusion_species());
+void AdvectionDiffusionStepper::setup_solvers(){
+  m_species = RefCountedPtr<CdrSpecies> (new AdvectionDiffusionSpecies());
 
   // Solver setup
   m_solver->setVerbosity(m_verbosity);
@@ -62,22 +62,22 @@ void advection_diffusion_stepper::setup_solvers(){
   m_solver->setRealm(m_realm);
   
   if(!m_solver->isMobile() && !m_solver->isDiffusive()){
-    MayDay::Abort("advection_diffusion_stepper::setup_solvers - can't turn off both advection AND diffusion");
+    MayDay::Abort("AdvectionDiffusionStepper::setup_solvers - can't turn off both advection AND diffusion");
   }
 }
 
-void advection_diffusion_stepper::postInitialize() {
+void AdvectionDiffusionStepper::postInitialize() {
 }
 
-void advection_diffusion_stepper::registerRealms() {
+void AdvectionDiffusionStepper::registerRealms() {
   m_amr->registerRealm(m_realm);
 }
 
-void advection_diffusion_stepper::registerOperators(){
+void AdvectionDiffusionStepper::registerOperators(){
   m_solver->registerOperators();
 }
 
-void advection_diffusion_stepper::allocate() {
+void AdvectionDiffusionStepper::allocate() {
   m_solver->allocateInternals();
 
   m_amr->allocate(m_tmp, m_realm, m_phase, 1);
@@ -85,7 +85,7 @@ void advection_diffusion_stepper::allocate() {
   m_amr->allocate(m_k2,  m_realm, m_phase, 1);
 }
 
-void advection_diffusion_stepper::initialData(){
+void AdvectionDiffusionStepper::initialData(){
   m_solver->initialData();       // Fill initial through the cdr species
 
   m_solver->setSource(0.0);
@@ -100,7 +100,7 @@ void advection_diffusion_stepper::initialData(){
 
 }
 
-void advection_diffusion_stepper::setVelocity(){
+void AdvectionDiffusionStepper::setVelocity(){
   const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){
     this->setVelocity(lvl);
@@ -111,7 +111,7 @@ void advection_diffusion_stepper::setVelocity(){
   m_amr->interpGhost(vel, m_realm, m_phase);
 }
 
-void advection_diffusion_stepper::setVelocity(const int a_level){
+void AdvectionDiffusionStepper::setVelocity(const int a_level){
   // TLDR: This code goes down to each cell on grid level a_level and sets the velocity to omega*r
     
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
@@ -152,15 +152,15 @@ void advection_diffusion_stepper::setVelocity(const int a_level){
   }
 }
 
-void advection_diffusion_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
+void AdvectionDiffusionStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
   m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
 
-void advection_diffusion_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
+void AdvectionDiffusionStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
   m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
 
-void advection_diffusion_stepper::postCheckpointSetup(){
+void AdvectionDiffusionStepper::postCheckpointSetup(){
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
   m_solver->setDomainFlux(0.0);
@@ -172,18 +172,18 @@ void advection_diffusion_stepper::postCheckpointSetup(){
   }
 }
 
-int advection_diffusion_stepper::getNumberOfPlotVariables() const{
+int AdvectionDiffusionStepper::getNumberOfPlotVariables() const{
   return m_solver->getNumberOfPlotVariables();
 }
 
-void advection_diffusion_stepper::writePlotData(EBAMRCellData&       a_output,
+void AdvectionDiffusionStepper::writePlotData(EBAMRCellData&       a_output,
 						  Vector<std::string>& a_plotVariableNames,
 						  int&                 a_icomp) const {
   a_plotVariableNames.append(m_solver->getPlotVariableNames());
   m_solver->writePlotData(a_output, a_icomp);
 }
 
-void advection_diffusion_stepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
+void AdvectionDiffusionStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
   if(m_integrator == 0){      // Explicit diffusion. 
     const Real dt = m_solver->computeAdvectionDiffusionDt();
     
@@ -197,11 +197,11 @@ void advection_diffusion_stepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
     a_timeCode = TimeCode::Advection;
   }
   else{
-    MayDay::Abort("advection_diffusion_stepper::computeDt - logic bust");
+    MayDay::Abort("AdvectionDiffusionStepper::computeDt - logic bust");
   }
 }
 
-Real advection_diffusion_stepper::advance(const Real a_dt){
+Real AdvectionDiffusionStepper::advance(const Real a_dt){
   EBAMRCellData& state = m_solver->getPhi();
   
   if(m_integrator == 0){ //   Use Heun's method
@@ -243,13 +243,13 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
     m_amr->averageDown(state, m_realm, m_phase);
   }
   else{
-    MayDay::Abort("advection_diffusion_stepper - unknown integrator requested");
+    MayDay::Abort("AdvectionDiffusionStepper - unknown integrator requested");
   }
   
   return a_dt;
 }
 
-void advection_diffusion_stepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt){
+void AdvectionDiffusionStepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt){
   m_timeStep = a_step;
   m_time = a_time;
   m_dt   = a_dt;
@@ -257,23 +257,19 @@ void advection_diffusion_stepper::synchronizeSolverTimes(const int a_step, const
   m_solver->setTime(a_step, a_time, a_dt);
 }
 
-void advection_diffusion_stepper::printStepReport(){
+void AdvectionDiffusionStepper::printStepReport(){
 
 }
 
-bool advection_diffusion_stepper::needToRegrid(){
+bool AdvectionDiffusionStepper::needToRegrid(){
   return false;
 }
 
-void advection_diffusion_stepper::preRegrid(const int a_lbase, const int a_oldFinestLevel){
+void AdvectionDiffusionStepper::preRegrid(const int a_lbase, const int a_oldFinestLevel){
   m_solver->preRegrid(a_lbase, a_oldFinestLevel);
 }
 
-void advection_diffusion_stepper::deallocate(){
-  m_solver->deallocateInternals();
-}
-
-void advection_diffusion_stepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
+void AdvectionDiffusionStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
 
   // Regrid CDR solver
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
@@ -294,6 +290,6 @@ void advection_diffusion_stepper::regrid(const int a_lmin, const int a_oldFinest
   m_amr->allocate(m_k2,  m_realm, m_phase, 1);
 }
 
-void advection_diffusion_stepper::postRegrid() {
+void AdvectionDiffusionStepper::postRegrid() {
 }
 #include "CD_NamespaceFooter.H"

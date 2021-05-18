@@ -13,7 +13,7 @@ def write_template(args):
                      args.discharge_home + "/src/CdrSolver/" + args.CdrSolver + ".options",\
                      args.discharge_home + "/src/geometry/geo_coarsener.options", \
                      args.discharge_home + "/geometries/" + args.geometry + "/" + args.geometry + ".options", \
-                     args.discharge_home + "/physics/advection_diffusion/advection_diffusion_stepper.options"]
+                     args.discharge_home + "/Physics/AdvectionDiffusion/AdvectionDiffusionStepper.options"]
 
     for opt in options_files:
         if os.path.exists(opt):

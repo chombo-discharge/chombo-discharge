@@ -1,5 +1,5 @@
 /*!
-  @file   advection_diffusion_stepper.H
+  @file   AdvectionDiffusionStepper.H
   @brief  TimeStepper class for only solving the Advection_Diffusion equation (with surface charge)
   @author Robert Marskar
   @data   March 2020
@@ -18,12 +18,12 @@ namespace physics {
     /*!
       @brief Class that just solves the advection_diffusion equation
     */
-    class advection_diffusion_stepper : public TimeStepper {
+    class AdvectionDiffusionStepper : public TimeStepper {
     public:
 
-      advection_diffusion_stepper();
-      advection_diffusion_stepper(RefCountedPtr<CdrSolver>& a_solver);
-      ~advection_diffusion_stepper();
+      AdvectionDiffusionStepper();
+      AdvectionDiffusionStepper(RefCountedPtr<CdrSolver>& a_solver);
+      ~AdvectionDiffusionStepper();
 
       // Setup routines
       void initialData() override;
@@ -54,7 +54,6 @@ namespace physics {
       bool needToRegrid() override;
 
       void preRegrid(const int a_lbase, const int a_finestLevel) override;
-      void deallocate() override;
 
       // Pure routines for derived classes
       void setup_solvers() override;

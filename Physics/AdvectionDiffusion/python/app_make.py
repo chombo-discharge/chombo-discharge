@@ -45,7 +45,7 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/src/sigma_solver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/src/global \\\n')
     makef.write('\t$(DISCHARGE_HOME)/geometries/' + args.geometry + '\\\n')
-    makef.write('\t$(DISCHARGE_HOME)/physics/advection_diffusion \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/Physics/AdvectionDiffusion \\\n')
     makef.write('\n')
 
     makef.write('\n')

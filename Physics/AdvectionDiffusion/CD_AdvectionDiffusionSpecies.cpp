@@ -1,19 +1,25 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   advection_diffusion_species.cpp
-  @brief  Implementation of advection_diffusion_species.H
+  @file   CD_AdvectionDiffusionSpecies.cpp
+  @brief  Implementation of CD_AdvectionDiffusionSpecies.H
   @author Robert Marskar
-  @date   March 2020
 */
 
-#include "advection_diffusion_species.H"
-
+// Chombo includes
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
-#include "CD_NamespaceHeader.H"
-using namespace physics::advection_diffusion;
+// Our includes
+#include <CD_AdvectionDiffusionSpecies.H>
+#include <CD_NamespaceHeader.H>
 
-advection_diffusion_species::advection_diffusion_species(){
+using namespace Physics::AdvectionDiffusion;
+
+AdvectionDiffusionSpecies::AdvectionDiffusionSpecies(){
 
   ParmParse pp("advection_diffusion");
 
@@ -28,15 +34,16 @@ advection_diffusion_species::advection_diffusion_species(){
   pp.getarr("blob_center",    v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
 }
 
-advection_diffusion_species::~advection_diffusion_species(){
+AdvectionDiffusionSpecies::~AdvectionDiffusionSpecies(){
 
 }
 
-Real advection_diffusion_species::initialData(const RealVect a_pos, const Real a_time) const{
+Real AdvectionDiffusionSpecies::initialData(const RealVect a_pos, const Real a_time) const{
   const RealVect d = a_pos - m_blob_center;
   const Real d2 = PolyGeom::dot(d,d);
   const Real r2 = m_blob_radius*m_blob_radius;
 
   return m_blob_amplitude*exp(-0.5*d2*d2/(r2*r2));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

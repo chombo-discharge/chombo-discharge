@@ -1,12 +1,12 @@
 /*!
-  @file   advection_diffusion_tagger.cpp
-  @brief  Implementation of advection_diffusion_tagger.H
+  @file   AdvectionDiffusionTagger.cpp
+  @brief  Implementation of AdvectionDiffusionTagger.H
   @author Robert Marskar
   @date   Nov. 2017
-  @todo   Rename to advection_diffusion_tagger. 
+  @todo   Rename to AdvectionDiffusionTagger. 
 */
 
-#include "advection_diffusion_tagger.H"
+#include <CD_AdvectionDiffusionTagger.H>
 #include "data_ops.H"
 
 #include <ParmParse.H> 
@@ -14,7 +14,7 @@
 #include "CD_NamespaceHeader.H"
 using namespace physics::advection_diffusion;
 
-advection_diffusion_tagger::advection_diffusion_tagger(RefCountedPtr<CdrSolver>& a_solver,
+AdvectionDiffusionTagger::AdvectionDiffusionTagger(RefCountedPtr<CdrSolver>& a_solver,
 						       RefCountedPtr<AmrMesh>&   a_amr){
   m_solver    = a_solver;
   m_amr       = a_amr;
@@ -24,15 +24,15 @@ advection_diffusion_tagger::advection_diffusion_tagger(RefCountedPtr<CdrSolver>&
 }
 
 
-advection_diffusion_tagger::~advection_diffusion_tagger(){
+AdvectionDiffusionTagger::~AdvectionDiffusionTagger(){
 
 }
 
-void advection_diffusion_tagger::regrid(){
+void AdvectionDiffusionTagger::regrid(){
   pout() << "regridding cell tagger" << endl;
 }
 
-void advection_diffusion_tagger::parseOptions(){
+void AdvectionDiffusionTagger::parseOptions(){
   ParmParse pp(m_name.c_str());
   pp.get("refine_curv", m_refi_curv);
   pp.get("refine_magn", m_refi_magn);
@@ -40,7 +40,7 @@ void advection_diffusion_tagger::parseOptions(){
   parseBuffer(); // Derived from cell
 }
 
-bool advection_diffusion_tagger::tagCells(EBAMRTags& a_tags){
+bool AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags){
   EBAMRCellData sca;
   EBAMRCellData vec;
 
