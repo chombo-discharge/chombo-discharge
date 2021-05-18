@@ -397,58 +397,41 @@ getFaceCenteredFluxStencil(VoFStencil&      a_fluxStencil,
       //the boundary condition handles this one.
     }
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-setAlphaAndBeta(const Real& a_alpha,
-		const Real& a_beta)
-{
+
+void EbHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta){
   CH_TIME("EbHelmholtzOp::setAlphaAndBeta");
+  
   m_alpha = a_alpha;
   m_beta  = a_beta;
-  calculateAlphaWeight(); //need to do this because the a coef has probably been changed under us
-  calculateRelaxationCoefficient();
+  
+  this->calculateAlphaWeight();
+  this->calculateRelaxationCoefficient();
 }
-//-----------------------------------------------------------------------
+
 void
 EbHelmholtzOp::
-setTime(Real a_oldTime, Real a_mu, Real a_dt)
-{
+setTime(Real a_oldTime, Real a_mu, Real a_dt){
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-kappaScale(LevelData<EBCellFAB> & a_rhs)
-{
-  CH_TIME("EbHelmholtzOp::kappaScale");
+
+void EbHelmholtzOp::kappaScale(LevelData<EBCellFAB> & a_rhs){
   EBLevelDataOps::kappaWeight(a_rhs);
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-diagonalScale(LevelData<EBCellFAB> & a_rhs,
-	      bool a_kappaWeighted)
-{
 
+void EbHelmholtzOp::diagonalScale(LevelData<EBCellFAB> & a_rhs, bool a_kappaWeighted){
   CH_TIME("EbHelmholtzOp::diagonalScale");
-  //  dumpLevelPoint(a_rhs, string("EbHelmholtzOp: diagonalScale: phi coming in = "));
-  if (a_kappaWeighted) {
-    EBLevelDataOps::kappaWeight(a_rhs);
 
-  }
+  // Scale by volume fraction if asked. 
+  if(a_kappaWeighted) EBLevelDataOps::kappaWeight(a_rhs);
 
-  //  dumpLevelPoint(a_rhs, string("EbHelmholtzOp: diagonalScale: kappa*phi = "));
-
-  //also have to weight by the coefficient
+  // Scale by a-coefficient and alpha, too. 
   DataIterator dit = m_eblg.getDBL().dataIterator(); 
   int nbox = dit.size();
 #pragma omp parallel
   {
 #pragma omp for
-    for(int mybox=0; mybox<nbox; mybox++)
-      {
-	a_rhs[dit[mybox]] *= (*m_aCoefficientef)[dit[mybox]];
-      }
+    for(int mybox=0; mybox<nbox; mybox++){
+      a_rhs[dit[mybox]] *= (*m_aCoefficientef)[dit[mybox]];
+    }
   }
 
   if(s_areaFracWeighted){
@@ -1244,31 +1227,7 @@ incrOpRegularDir(EBCellFAB&             a_lhs,
 		     CHF_CONST_INT(hasHi),
 		     CHF_CONST_INT(a_dir));
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-dumpFABPoint(const EBCellFAB&       a_lhs,
-	     const DataIndex&       a_datInd,
-	     const string&          a_blab)
-{
-  //  if (EBCellFAB::s_verbose)
-  //    {
-  //      if (m_eblg.getDBL().get(a_datInd).contains(s_ivDebug))
-  //        {
-  //          pout() << a_blab << endl;
-  //          Vector<VolIndex> vofs = m_eblg.getEBISL()[a_datInd].getVoFs(s_ivDebug);
-  //          for (int ivof = 0; ivof < vofs.size(); ivof++)
-  //            {
-  //              pout() << "vof = " << vofs[ivof].gridIndex() << ", " << vofs[ivof].cellIndex() << "--  data =" ;
-  //              for (int ivar = 0; ivar < a_lhs.nComp(); ivar++)
-  //                {
-  //                  pout() << a_lhs(vofs[ivof], ivar) << "  ";
-  //                }
-  //              pout() << endl;
-  //            }
-  //        }
-  //    }
-}
+
 //-----------------------------------------------------------------------
 void
 EbHelmholtzOp::
@@ -1285,14 +1244,12 @@ applyOpIrregular(EBCellFAB&             a_lhs,
   //      stopHere = true;
   //    }
 
-  //  dumpFABPoint(a_lhs, a_datInd, string("EbHelmholtzOp::applyopirr before apply lhs="));
   RealVect vectDx = m_dx*RealVect::Unit;
   //  m_opEBStencil[a_datInd]->apply(a_lhs, a_phi,
   //  m_alphaDiagWeight[a_datInd], m_alpha, m_beta, false, s_ivDebug,
   //  EBCellFAB::s_verbose);
   m_opEBStencil[a_datInd]->apply(a_lhs, a_phi, m_alphaDiagWeight[a_datInd], m_alpha, m_beta, false);
 
-  //  dumpFABPoint(a_lhs, a_datInd, string("EbHelmholtzOp::applyopirr after  apply lhs="));
   const Real factor = m_beta/m_dx; //beta and bcoef handled within applyEBFlux
   m_ebBC->applyEBFlux(a_lhs, a_phi, m_vofIterIrreg[a_datInd], (*m_eblg.getCFIVS()),
 		      a_datInd, RealVect::Zero, vectDx, factor,
@@ -2322,15 +2279,7 @@ AMRResidual(LevelData<EBCellFAB>&       a_residual,
   CH_STOP(t2);
   //  dumpLevelPoint(a_residual, string("EbHelmholtzOp: AMRResidual: resid = "));
 }
-//-----------------------------------------------------------------------
-void EbHelmholtzOp::
-dumpLevelPoint(const LevelData<EBCellFAB>& a_res, const string& a_blab)
-{
-  for (DataIterator dit = m_eblg.getDBL().dataIterator(); dit.ok(); ++dit)
-    {
-      dumpFABPoint(a_res[dit()], dit(), a_blab);
-    }
-}
+
 //-----------------------------------------------------------------------
 void EbHelmholtzOp::
 AMROperator(LevelData<EBCellFAB>&       a_LofPhi,
@@ -2359,7 +2308,6 @@ AMROperator(LevelData<EBCellFAB>&       a_LofPhi,
 #endif
   CH_STOP(t1);
 
-  //  dumpLevelPoint(a_LofPhi, string("EbHelmholtzOp: AMROperator: pre-reflux lphi = "));
   //now reflux to enforce flux-matching from finer levels
   if (m_hasFine)
     {
@@ -2375,7 +2323,6 @@ AMROperator(LevelData<EBCellFAB>&       a_LofPhi,
 
       CH_STOP(t2);
     }
-  //  dumpLevelPoint(a_LofPhi, string("EbHelmholtzOp: AMROperator: post-reflux lphi = "));
 }
 //-----------------------------------------------------------------------
 void
@@ -2750,24 +2697,20 @@ getFlux(FArrayBox&                    a_flux,
 
   a_flux *= m_beta;
 }
-//-----------------------------------------------------------------------
 
-void
-EbHelmholtzOp::
-AMRResidualNC(LevelData<EBCellFAB>&       a_residual,
-	      const LevelData<EBCellFAB>& a_phiFine,
-	      const LevelData<EBCellFAB>& a_phi,
-	      const LevelData<EBCellFAB>& a_rhs,
-	      bool a_homogeneousPhysBC,
-	      AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
-{
+void EbHelmholtzOp::AMRResidualNC(LevelData<EBCellFAB>&              a_residual,
+				  const LevelData<EBCellFAB>&        a_phiFine,
+				  const LevelData<EBCellFAB>&        a_phi,
+				  const LevelData<EBCellFAB>&        a_rhs,
+				  bool                               a_homogeneousPhysBC,
+				  AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) {
   //dummy. there is no coarse when this is called
   CH_assert(a_residual.ghostVect() == m_ghostCellsRHS);
   CH_assert(a_rhs.ghostVect() == m_ghostCellsRHS);
   LevelData<EBCellFAB> phiC;
   AMRResidual(a_residual, a_phiFine, a_phi, phiC, a_rhs, a_homogeneousPhysBC, a_finerOp);
 }
-//-----------------------------------------------------------------------
+
 
 void
 EbHelmholtzOp::
@@ -2787,20 +2730,15 @@ AMRResidualNF(LevelData<EBCellFAB>&       a_residual,
 }
 //-----------------------------------------------------------------------
 
-void
-EbHelmholtzOp::
-AMROperatorNC(LevelData<EBCellFAB>&       a_LofPhi,
-	      const LevelData<EBCellFAB>& a_phiFine,
-	      const LevelData<EBCellFAB>& a_phi,
-	      bool a_homogeneousPhysBC,
-	      AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
-{
+void EbHelmholtzOp::AMROperatorNC(LevelData<EBCellFAB>&              a_LofPhi,
+				  const LevelData<EBCellFAB>&        a_phiFine,
+				  const LevelData<EBCellFAB>&        a_phi,
+				  bool                               a_homogeneousPhysBC,
+				  AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp){
   CH_TIME("ebco::amrOpNC");
-  //dummy. there is no coarse when this is called
   CH_assert(a_LofPhi.ghostVect() == m_ghostCellsRHS);
   LevelData<EBCellFAB> phiC;
-  AMROperator(a_LofPhi, a_phiFine, a_phi, phiC,
-	      a_homogeneousPhysBC, a_finerOp);
+  AMROperator(a_LofPhi, a_phiFine, a_phi, phiC, a_homogeneousPhysBC, a_finerOp);
 }
 //-----------------------------------------------------------------------
 

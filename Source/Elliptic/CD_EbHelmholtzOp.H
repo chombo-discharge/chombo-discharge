@@ -112,8 +112,9 @@ public:
 
   /*!
     @brief Weights by kappa. time and tga have their demands.
+    @param[in] a_rhs Data to be scaled by volume fraction. 
   */
-  virtual void kappaScale(LevelData<EBCellFAB> & a_rhs);
+  void kappaScale(LevelData<EBCellFAB> & a_rhs);
 
   /*!
     @brief Computes a_residual = a_rhs - L(a_phiFine, a_phi)
@@ -152,11 +153,18 @@ public:
 
   /*!
     @brief Set alpha and beta coefficients. Need when e.g. using backward euler discretization. 
+    @param[in] a_alpha alpha-coefficient
+    @param[in] a_beta  beta-coefficient
+    @details This also recomputes relaxation weights.
   */
   void setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) override;
 
-  void diagonalScale(LevelData<EBCellFAB> & a_rhs,
-		     bool a_kappaWeighted);
+  /*!
+    @brief Do diagonal scaling
+    @param[inout] a_rhs Data to be scaled diagonally
+    @param[in]    a_kappaWeighted If true, also multiply by volume fraction.
+  */
+  void diagonalScale(LevelData<EBCellFAB> & a_rhs, bool a_kappaWeighted) override;
 
   void divideByIdentityCoef(LevelData<EBCellFAB> & a_rhs);
 
