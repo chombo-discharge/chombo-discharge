@@ -50,16 +50,12 @@
 #elif CH_SPACEDIM==3
 #define EBAMRPOVC_NUMSTEN 8
 #endif
-  
-class MfConductivityOp;
 
 /*!
   @brief Class which implements an operator that can solve the Helmholtz equation using Chombo's AMRLevelOp interface
 */
 class EbHelmholtzOp : public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB > {
 public:
-  
-  friend MfConductivityOp;
 
   /*!
     @brief Weak constructor is disallowed. 
@@ -225,8 +221,6 @@ public:
   */
   void setTime(Real a_oldTime, Real a_mu, Real a_dt) override;
 
-  //MGOp operations.  no finer or coarser
-
   /*!
     @brief Compute the residual
     @param[out] a_residual          Residual
@@ -234,10 +228,10 @@ public:
     @param[in]  a_rhs               Right-hand side
     @param[in]  a_homogeneousPhysBC Use homogeneous BC or not
   */
-  virtual void residual(LevelData<EBCellFAB>&       a_residual,
-			const LevelData<EBCellFAB>& a_phi,
-			const LevelData<EBCellFAB>& a_rhs,
-			bool                        a_homogeneousPhysBC=false) override;
+  void residual(LevelData<EBCellFAB>&       a_residual,
+		const LevelData<EBCellFAB>& a_phi,
+		const LevelData<EBCellFAB>& a_rhs,
+		bool                        a_homogeneousPhysBC=false) override;
 
   /*!
     @brief Precondition before bottom solver.
@@ -245,126 +239,166 @@ public:
     @param[out] a_phi   Data
     @details This just does a few relaxations.
   */
-  virtual void preCond(LevelData<EBCellFAB>& a_opPhi, const LevelData<EBCellFAB>& a_phi) override;
+  void preCond(LevelData<EBCellFAB>& a_opPhi, const LevelData<EBCellFAB>& a_phi) override;
 
-  ///
-  /**
-     This function assumes that coarse-fine boundary condtions have
-     been dealt with.
+  /*!
+    @brief Apply operator to solution
+    @param[out] a_opPhi             Operator applied to soluion. 
+    @param[in]  a_phi               Cell-centered data on this level
+    @param[in]  a_phiCoarse         Coarser data
+    @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
+    @param[in]  a_homogeneousCFBC   Homogeneous physical coarse-fine boundary conditions or not
+    @param[in]  a_doExchange        Do an exchange operation or not. 
+    @details This function assumes that coarse-fine boundary condtions have been dealt with.
   */
-  virtual void applyOp(LevelData<EBCellFAB>&             a_opPhi,
-		       const LevelData<EBCellFAB>&       a_phi,
-		       const LevelData<EBCellFAB>* const a_phiCoarse,
-		       const bool&                       a_homogeneousPhysBC,
-		       const bool&                       a_homogeneousCFBC,
-		       const bool&                       a_doexchange = true);
+  void applyOp(LevelData<EBCellFAB>&             a_opPhi,
+	       const LevelData<EBCellFAB>&       a_phi,
+	       const LevelData<EBCellFAB>* const a_phiCoarse,
+	       const bool&                       a_homogeneousPhysBC,
+	       const bool&                       a_homogeneousCFBC,
+	       const bool&                       a_doExchange = true);
 
-  ///
-  /**
-     This function assumes that coarse-fine boundary condtions have
-     been dealt with.
+  /*!
+    @brief Apply operator to solution
+    @param[out] a_opPhi             Operator applied to soluion. 
+    @param[in]  a_phi               Cell-centered data on this level
+    @param[in]  a_phiCoarse         Coarser data
+    @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
+    @param[in]  a_homogeneousCFBC   Homogeneous physical coarse-fine boundary conditions or not
+    @param[in]  a_dit               Data iterator
+    @param[in]  a_doExchange        Do an exchange operation or not. 
+    @details This function assumes that coarse-fine boundary condtions have been dealt with.
   */
-  virtual void applyOp(LevelData<EBCellFAB>&             a_opPhi,
-		       const LevelData<EBCellFAB>&       a_phi,
-		       const LevelData<EBCellFAB>* const a_phiCoarse,
-		       const bool&                       a_homogeneousPhysBC,
-		       const bool&                       a_homogeneousCFBC,
-		       DataIterator&                     a_dit,
-		       const bool&                       a_doexchange = true);
+  void applyOp(LevelData<EBCellFAB>&             a_opPhi,
+	       const LevelData<EBCellFAB>&       a_phi,
+	       const LevelData<EBCellFAB>* const a_phiCoarse,
+	       const bool&                       a_homogeneousPhysBC,
+	       const bool&                       a_homogeneousCFBC,
+	       DataIterator&                     a_dit,
+	       const bool&                       a_doExchange = true);
 
-  /// virtual function called by LevelTGA
-  virtual void applyOpNoBoundary(LevelData<EBCellFAB>&        a_opPhi,
-				 const LevelData<EBCellFAB>&  a_phi);
-
-  ///
-  /**
-     this is the linearop function.  CFBC is set to homogeneous.  phic is null
+  /*!
+    @brief Applies operator but without boundary conditions
+    @param[in] a_opPhi L(phi)
+    @param[in] a_phi   Cell-centered data
+    @details Function called by LevelTGA
   */
-  virtual void applyOp(LevelData<EBCellFAB>&             a_opPhi,
-		       const LevelData<EBCellFAB>&       a_phi,
-		       bool                              a_homogeneousPhysBC);
+  void applyOpNoBoundary(LevelData<EBCellFAB>& a_opPhi, const LevelData<EBCellFAB>& a_phi) override;
 
-  ///
-  /**
+  /*!
+    @brief Apply operator
+    @param[out] a_opPhi Operator
+    @param[in]  a_phi   Data
+    @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not. 
+    @details Coarse is null because that's all we can do. 
+  */
+  void applyOp(LevelData<EBCellFAB>& a_opPhi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBC) override;
+
+  /*!
+    @brief Create a clone of data (does not copy)
+    @param[out] a_lhs Clone
+    @param[out] a_rhs Stuff to clone
    */
-  virtual void create(LevelData<EBCellFAB>&       a_lhs,
-		      const LevelData<EBCellFAB>& a_rhs);
+  void create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override;
 
-  ///
-  virtual void createCoarsened(LevelData<EBCellFAB>&       a_lhs,
-			       const LevelData<EBCellFAB>& a_rhs,
-			       const int&                  a_refRat);
+  /*!
+    @brief Create a coarsened version of data
+    @param[out] a_lhs Coarsened data structure
+    @param[in]  a_rhs Data tructure
+    @param[in]  a_refRat Refinement ratio.
+  */
+  void createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) override;
 
-  Real
-  AMRNorm(const LevelData<EBCellFAB>& a_coarResid,
-	  const LevelData<EBCellFAB>& a_fineResid,
-	  const int& a_refRat,
-	  const int& a_ord);
-
-  ///
-  /**
+  /*!
+    @brief Set lhs = rhs
+    @param[out] a_lhs Left hand side
+    @param[in]  a_rhs Data
    */
-  virtual void assign(LevelData<EBCellFAB>&       a_lhs,
-		      const LevelData<EBCellFAB>& a_rhs);
+  void assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override;
 
-  ///
-  /**
-   */
-  virtual Real dotProduct(const LevelData<EBCellFAB>& a_1,
-			  const LevelData<EBCellFAB>& a_2);
+  /*!
+    @brief Compute dot product
+    @param[in] a_1 Data
+    @param[in] a_2 Data
+    @return Dot product, includes kappa. 
+  */
+  Real dotProduct(const LevelData<EBCellFAB>& a_1, const LevelData<EBCellFAB>& a_2) override;
 
-  ///
-  /**
-   */
-  virtual void incr(LevelData<EBCellFAB>&       a_lhs,
-		    const LevelData<EBCellFAB>& a_x,
-		    Real                        a_scale);
+  /*!
+    @brief Increment data
+    @param[inout] a_lhs   Data to be incremented
+    @param[inout] a_x     Incrementation
+    @param[inout] a_scale Incrementation scale
+  */
+  void incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_x, Real a_scale) override;
 
-  ///
-  /**
+  /*!
+    @brief Compute a*x + b*y
+    @param[out] a_lhs Left hand side
+    @param[in]  a_x   Data
+    @param[in]  a_y   Data
+    @param[in]  a_a   Scale
+    @param[in]  a_b   Scale
    */
-  virtual void axby(LevelData<EBCellFAB>&       a_lhs,
-		    const LevelData<EBCellFAB>& a_x,
-		    const LevelData<EBCellFAB>& a_y,
-		    Real                        a_a,
-		    Real                        a_b);
+  void axby(LevelData<EBCellFAB>&       a_lhs,
+	    const LevelData<EBCellFAB>& a_x,
+	    const LevelData<EBCellFAB>& a_y,
+	    Real                        a_a,
+	    Real                        a_b) override;
 
-  ///
-  /**
+  /*!
+    @brief Scale data
+    @param[inout] a_lhs   Data to be scaled
+    @param[in]    a_scale Scaling factor
    */
-  virtual void scale(LevelData<EBCellFAB>& a_lhs,
-		     const Real&           a_scale);
+  void scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale) override;
 
-  ///
-  /**
-   */
-  virtual Real norm(const LevelData<EBCellFAB>& a_rhs,
-		    int                         a_ord);
+  /*!
+    @brief Compute normal of data
+    @param[in] a_rhs Data 
+    @param[in] a_ord Norm order
+  */
+  Real norm(const LevelData<EBCellFAB>& a_rhs, int a_ord) override;
 
-  virtual Real localMaxNorm(const LevelData<EBCellFAB>& a_rhs);
-  ///
-  /**
-   */
-  virtual void setToZero(LevelData<EBCellFAB>& a_lhs);
+  /*!
+    @brief Utility function which computes norm on local data
+    @param[in] a_rhs Data
+  */
+  Real localMaxNorm(const LevelData<EBCellFAB>& a_rhs) override;
 
-  ///
-  /**
+  /*!
+    @brief Set data to zero
+    @param[inout] a_lhs Data
    */
-  virtual void setVal(LevelData<EBCellFAB>& a_lhs, const Real& a_value);
+  void setToZero(LevelData<EBCellFAB>& a_lhs) override;
 
-  ///
-  /**
+  /*!
+    @brief Set constant value in data
+    @param[inout] a_lhs  Data
+    @param[in]    a_value Value
    */
-  virtual void createCoarser(LevelData<EBCellFAB>&       a_coarse,
-			     const LevelData<EBCellFAB>& a_fine,
-			     bool                        a_ghosted);
+  void setVal(LevelData<EBCellFAB>& a_lhs, const Real& a_value); 
 
-  ///
-  /**
+  /*!
+    @brief Create coarser data from fine data
+    @param[out] a_coarse  Coarse leveldata
+    @param[in]  a_fine    Fine leveldata
+    @param[in]  a_ghosted Dummy argument. Does nothing
    */
-  virtual void relax(LevelData<EBCellFAB>&       a_e,
-		     const LevelData<EBCellFAB>& a_residual,
-		     int                         a_iterations);
+  void createCoarser(LevelData<EBCellFAB>&       a_coarse,
+		     const LevelData<EBCellFAB>& a_fine,
+		     bool                        a_ghosted) override;
+
+
+  /*!
+    @brief Relax data
+    @param[inout] a_e          Err
+    @param[in]    a_residual   Resid
+    @param[in]    a_iterations Number of iterations
+  */
+  void relax(LevelData<EBCellFAB>&       a_e,
+	     const LevelData<EBCellFAB>& a_residual,
+	     int                         a_iterations);
 
 
   virtual void relaxGauSai(LevelData<EBCellFAB>&       a_e,

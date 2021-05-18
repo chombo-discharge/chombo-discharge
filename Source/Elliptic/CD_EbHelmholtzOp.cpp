@@ -802,31 +802,25 @@ void EbHelmholtzOp::preCond(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellF
 
   this->relax(a_lhs, a_rhs, 40);
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-applyOp(LevelData<EBCellFAB>&             a_opPhi,
-	const LevelData<EBCellFAB>&       a_phi,
-	bool                              a_homogeneousPhysBC)
-{
+
+void EbHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_opPhi,
+			    const LevelData<EBCellFAB>&       a_phi,
+			    bool                              a_homogeneousPhysBC){
   //homogeneous CFBCs because that is all we can do.
-  applyOp(a_opPhi, a_phi, NULL, a_homogeneousPhysBC, true);
+  this->applyOp(a_opPhi, a_phi, NULL, a_homogeneousPhysBC, true);
 }
-//-----------------------------------------------------------------------
-/***/
-void
-EbHelmholtzOp::
-incrOpRegularAllDirs(Box * a_loBox,
-		     Box * a_hiBox,
-		     int * a_hasLo,
-		     int * a_hasHi,
-		     Box & a_curDblBox,
-		     Box & a_curPhiBox,
-		     int a_nComps,
-		     BaseFab<Real> & a_curOpPhiFAB,
-		     const BaseFab<Real> & a_curPhiFAB,
-		     bool a_homogeneousPhysBC,
-		     const DataIndex& a_dit)
+
+void EbHelmholtzOp::incrOpRegularAllDirs(Box * a_loBox,
+					 Box * a_hiBox,
+					 int * a_hasLo,
+					 int * a_hasHi,
+					 Box & a_curDblBox,
+					 Box & a_curPhiBox,
+					 int a_nComps,
+					 BaseFab<Real> & a_curOpPhiFAB,
+					 const BaseFab<Real> & a_curPhiFAB,
+					 bool a_homogeneousPhysBC,
+					 const DataIndex& a_dit)
 {
   CH_TIME("EbHelmholtzOp::incrOpRegularAllDirs");
   CH_assert(m_domainBC != NULL);
@@ -955,45 +949,35 @@ applyDomainFlux(Box * a_loBox,
     }
 }
 
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-applyOp(LevelData<EBCellFAB>&                    a_lhs,
-	const LevelData<EBCellFAB>&              a_phi,
-	const LevelData<EBCellFAB>* const        a_phiCoar,
-	const bool&                              a_homogeneousPhysBC,
-	const bool&                              a_homogeneousCFBC,
-	const bool&                              a_doexchange)
-{
+void EbHelmholtzOp::applyOp(LevelData<EBCellFAB>&                    a_lhs,
+			    const LevelData<EBCellFAB>&              a_phi,
+			    const LevelData<EBCellFAB>* const        a_phiCoar,
+			    const bool&                              a_homogeneousPhysBC,
+			    const bool&                              a_homogeneousCFBC,
+			    const bool&                              a_doExchange){
   DataIterator dit = a_lhs.dataIterator();
-  this->applyOp(a_lhs, a_phi, a_phiCoar, a_homogeneousPhysBC, a_homogeneousCFBC, dit, a_doexchange);
+  this->applyOp(a_lhs, a_phi, a_phiCoar, a_homogeneousPhysBC, a_homogeneousCFBC, dit, a_doExchange);
 }
 
-void
-EbHelmholtzOp::
-applyOp(LevelData<EBCellFAB>&                    a_lhs,
-	const LevelData<EBCellFAB>&              a_phi,
-	const LevelData<EBCellFAB>* const        a_phiCoar,
-	const bool&                              a_homogeneousPhysBC,
-	const bool&                              a_homogeneousCFBC,
-	DataIterator&                            a_dit,
-	const bool&                              a_doexchange)
-{
+void EbHelmholtzOp::applyOp(LevelData<EBCellFAB>&                    a_lhs,
+			    const LevelData<EBCellFAB>&              a_phi,
+			    const LevelData<EBCellFAB>* const        a_phiCoar,
+			    const bool&                              a_homogeneousPhysBC,
+			    const bool&                              a_homogeneousCFBC,
+			    DataIterator&                            a_dit,
+			    const bool&                              a_doExchange){
   CH_TIME("ebco::applyOp");
-  LevelData<EBCellFAB>& phi = const_cast<LevelData<EBCellFAB>&>(a_phi);
-  if (m_hasCoar && (!s_turnOffBCs))
-    {
-      applyCFBCs(phi, a_phiCoar, a_homogeneousCFBC);
-    }
-  if(a_doexchange){
-    phi.exchange(phi.interval());
-  }
+  
+  LevelData<EBCellFAB>& phi = const_cast<LevelData<EBCellFAB>&>(a_phi); // Please don't hate me. 
+  
+  if(m_hasCoar)    this->applyCFBCs(phi, a_phiCoar, a_homogeneousCFBC);
+  if(a_doExchange) phi.exchange(phi.interval());
 
   EBLevelDataOps::setToZero(a_lhs);
-  incr( a_lhs, a_phi, m_alpha); //this multiplies by alpha
-  
-  for (a_dit.reset(); a_dit.ok(); ++a_dit){
-    {
+  this->incr(a_lhs, a_phi, m_alpha); //this multiplies by alpha
+
+  // Apply the operator
+  for (a_dit.reset(); a_dit.ok(); ++a_dit){{
       EBCellFAB      & phi = (EBCellFAB&)(a_phi[a_dit()]);
       const EBISBox& ebisbox = phi.getEBISBox();
 
@@ -1012,27 +996,22 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
 	int nComps = 1;
 	Box curPhiBox = phiFAB.box();
 
-
-
-	if (!s_turnOffBCs)
-	  {
-	    incrOpRegularAllDirs( loBox, hiBox, hasLo, hasHi,
-				  dblBox, curPhiBox, nComps,
-				  lphFAB,
-				  phiFAB,
-				  a_homogeneousPhysBC,
-				  a_dit());
+	if (!s_turnOffBCs){
+	  incrOpRegularAllDirs( loBox, hiBox, hasLo, hasHi,
+				dblBox, curPhiBox, nComps,
+				lphFAB,
+				phiFAB,
+				a_homogeneousPhysBC,
+				a_dit());
+	}
+	else{
+	  //the all dirs code is wrong for no bcs = true
+	  for (int idir = 0; idir < SpaceDim; idir++){
+	    this->incrOpRegularDir(a_lhs[a_dit()], a_phi[a_dit()], a_homogeneousPhysBC, idir, a_dit());
 	  }
-	else
-	  {
-	    //the all dirs code is wrong for no bcs = true
-	    for (int idir = 0; idir < SpaceDim; idir++)
-	      {
-		incrOpRegularDir(a_lhs[a_dit()], a_phi[a_dit()], a_homogeneousPhysBC, idir, a_dit());
-	      }
-	  }
+	}
 
-	applyOpIrregular(a_lhs[a_dit()], a_phi[a_dit()], a_homogeneousPhysBC, a_dit());
+	this->applyOpIrregular(a_lhs[a_dit()], a_phi[a_dit()], a_homogeneousPhysBC, a_dit());
       }
     }
   }
@@ -1190,39 +1169,26 @@ applyOpIrregular(EBCellFAB&             a_lhs,
 	}
     }
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-applyOpNoBoundary(LevelData<EBCellFAB>&        a_opPhi,
-		  const LevelData<EBCellFAB>&  a_phi)
-{
+
+void EbHelmholtzOp::applyOpNoBoundary(LevelData<EBCellFAB>& a_opPhi, const LevelData<EBCellFAB>&  a_phi) {
   s_turnOffBCs = true;
-  applyOp(a_opPhi, a_phi, true);
+  this->applyOp(a_opPhi, a_phi, true);
   s_turnOffBCs = false;
 }
-//-----------------------------------------------------------------------
 
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-create(LevelData<EBCellFAB>&       a_lhs,
-       const LevelData<EBCellFAB>& a_rhs)
-{
+void EbHelmholtzOp::create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
   CH_TIME("ebco::create");
   int ncomp = a_rhs.nComp();
   EBCellFactory ebcellfact(m_eblg.getEBISL());
   a_lhs.define(m_eblg.getDBL(), ncomp, a_rhs.ghostVect(), ebcellfact);
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-createCoarsened(LevelData<EBCellFAB>&       a_lhs,
-		const LevelData<EBCellFAB>& a_rhs,
-		const int &                 a_refRat)
-{
+
+void EbHelmholtzOp::createCoarsened(LevelData<EBCellFAB>&       a_lhs,
+				    const LevelData<EBCellFAB>& a_rhs,
+				    const int &                 a_refRat){
   CH_TIME("ebco::createCoar");
-  int ncomp = a_rhs.nComp();
-  IntVect ghostVect = a_rhs.ghostVect();
+  const int ncomp         = a_rhs.nComp();
+  const IntVect ghostVect = a_rhs.ghostVect();
 
   CH_assert(m_eblg.getDBL().coarsenable(a_refRat));
 
@@ -1235,131 +1201,84 @@ createCoarsened(LevelData<EBCellFAB>&       a_lhs,
 
   ProblemDomain coarDom = coarsen(m_eblg.getDomain(), a_refRat);
   m_eblg.getEBIS()->fillEBISLayout(ebislCoarsenedFine, dblCoarsenedFine, coarDom , ghostVec[0]);
-  if (m_refToCoar > 1)
-    {
-      ebislCoarsenedFine.setMaxRefinementRatio(m_refToCoar, m_eblg.getEBIS());
-    }
+  if (m_refToCoar > 1){
+    ebislCoarsenedFine.setMaxRefinementRatio(m_refToCoar, m_eblg.getEBIS());
+  }
 
   //create coarsened data
   EBCellFactory ebcellfactCoarsenedFine(ebislCoarsenedFine);
   a_lhs.define(dblCoarsenedFine, ncomp,ghostVec, ebcellfactCoarsenedFine);
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-assign(LevelData<EBCellFAB>&       a_lhs,
-       const LevelData<EBCellFAB>& a_rhs)
-{
-  CH_TIME("ebco::assign");
+
+void EbHelmholtzOp::assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
   EBLevelDataOps::assign(a_lhs,a_rhs);
 }
-//-----------------------------------------------------------------------
-Real
-EbHelmholtzOp::
-dotProduct(const LevelData<EBCellFAB>& a_1,
-	   const LevelData<EBCellFAB>& a_2)
-{
-  CH_TIME("ebco::dotProd");
+
+Real EbHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_1, const LevelData<EBCellFAB>& a_2){
   ProblemDomain domain;
   Real volume;
 
-  return EBLevelDataOps::kappaDotProduct(volume,a_1,a_2,EBLEVELDATAOPS_ALLVOFS,domain);
+  return EBLevelDataOps::kappaDotProduct(volume, a_1, a_2, EBLEVELDATAOPS_ALLVOFS, domain);
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-incr(LevelData<EBCellFAB>&       a_lhs,
-     const LevelData<EBCellFAB>& a_x,
-     Real                        a_scale)
-{
-  CH_TIME("ebco::incr");
+
+
+void EbHelmholtzOp::incr(LevelData<EBCellFAB>&       a_lhs,
+			 const LevelData<EBCellFAB>& a_x,
+			 Real                        a_scale){
   EBLevelDataOps::incr(a_lhs,a_x,a_scale);
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-axby(LevelData<EBCellFAB>&       a_lhs,
-     const LevelData<EBCellFAB>& a_x,
-     const LevelData<EBCellFAB>& a_y,
-     Real                        a_a,
-     Real                        a_b)
-{
-  CH_TIME("ebco::axby");
+
+void EbHelmholtzOp::axby(LevelData<EBCellFAB>&       a_lhs,
+			 const LevelData<EBCellFAB>& a_x,
+			 const LevelData<EBCellFAB>& a_y,
+			 Real                        a_a,
+			 Real                        a_b){
   EBLevelDataOps::axby(a_lhs,a_x,a_y,a_a,a_b);
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-scale(LevelData<EBCellFAB>& a_lhs,
-      const Real&           a_scale)
-{
-  CH_TIME("ebco::scale");
+
+void EbHelmholtzOp::scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale){
   EBLevelDataOps::scale(a_lhs,a_scale);
 }
-//-------------------------------
-Real 
-EbHelmholtzOp::
-norm(const LevelData<EBCellFAB>& a_rhs,
-     int                         a_ord)
-{
-  CH_TIMERS("EbHelmholtzOp::norm");
-  CH_TIMER("mpi_allreduce",t1);
 
+Real EbHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs,
+			 int                         a_ord){
   Real maxNorm = 0.0;
 
-  maxNorm = localMaxNorm(a_rhs);
+  maxNorm = this->localMaxNorm(a_rhs);
 
-  CH_START(t1);
 #ifdef CH_MPI
   Real tmp = 1.;
   int result = MPI_Allreduce(&maxNorm, &tmp, 1, MPI_CH_REAL,
 			     MPI_MAX, Chombo_MPI::comm);
-  if (result != MPI_SUCCESS)
-    { //bark!!!
-      MayDay::Error("sorry, but I had a communcation error on norm");
+  if (result != MPI_SUCCESS){ 
+      MayDay::Error("EbHelmholtzOp::norm - communcation error on norm");
     }
   maxNorm = tmp;
 #endif
-  //  Real volume=1.;
-  //  EBLevelDataOps::gatherBroadCast(maxNorm, volume, 0);
-  CH_STOP(t1);
 
   return maxNorm;
 }
 
-Real 
-EbHelmholtzOp::
-localMaxNorm(const LevelData<EBCellFAB>& a_rhs)
-{
+Real EbHelmholtzOp::localMaxNorm(const LevelData<EBCellFAB>& a_rhs){
   CH_TIME("EBAMRPoissonOp::localMaxNorm");
   return  EBAMRPoissonOp::staticMaxNorm(a_rhs, m_eblg);
   //  ProblemDomain domain;
   //  Real volume;
   //  return EBLevelDataOps::kappaNorm(volume,a_rhs,EBLEVELDATAOPS_ALLVOFS,domain,0);
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-setToZero(LevelData<EBCellFAB>& a_lhs)
-{
-  CH_TIME("ebco::setToZero");
+
+void EbHelmholtzOp::setToZero(LevelData<EBCellFAB>& a_lhs){
   EBLevelDataOps::setToZero(a_lhs);
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-setVal(LevelData<EBCellFAB>& a_lhs, const Real& a_value)
-{
-  CH_TIME("ebco::setVal");
+
+void EbHelmholtzOp::setVal(LevelData<EBCellFAB>& a_lhs, const Real& a_value){
   EBLevelDataOps::setVal(a_lhs, a_value);
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-createCoarser(LevelData<EBCellFAB>&       a_coar,
-	      const LevelData<EBCellFAB>& a_fine,
-	      bool                        a_ghosted)
-{
+
+
+void EbHelmholtzOp::createCoarser(LevelData<EBCellFAB>&       a_coar,
+				  const LevelData<EBCellFAB>& a_fine,
+				  bool                        a_ghosted){
   CH_TIME("ebco::createCoarser");
   CH_assert(a_fine.nComp() == 1);
   const DisjointBoxLayout& dbl = m_eblgCoarMG.getDBL();
@@ -1369,36 +1288,27 @@ createCoarser(LevelData<EBCellFAB>&       a_coar,
   EBISLayout coarEBISL;
 
   const EBIndexSpace* const ebisPtr = m_eblg.getEBIS();
-  ebisPtr->fillEBISLayout(coarEBISL,
-			  dbl, coarDom, nghost);
+  ebisPtr->fillEBISLayout(coarEBISL, dbl, coarDom, nghost);
 
   EBCellFactory ebcellfact(coarEBISL);
   a_coar.define(dbl, 1,a_fine.ghostVect(),ebcellfact);
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-relax(LevelData<EBCellFAB>&       a_phi,
-      const LevelData<EBCellFAB>& a_rhs,
-      int                         a_iterations)
-{
-  CH_TIME("ebco::relax");
-  if (m_relaxType == 0)
-    {
-      relaxPoiJac(a_phi, a_rhs, a_iterations);
-    }
-  else if (m_relaxType == 1)
-    {
-      relaxGauSai(a_phi, a_rhs, a_iterations);
-    }
-  else if (m_relaxType == 2)
-    {
-      relaxGSRBFast(a_phi, a_rhs, a_iterations);
-    }
-  else
-    {
-      MayDay::Error("EbHelmholtzOp::bogus relaxtype");
-    }
+
+void EbHelmholtzOp::relax(LevelData<EBCellFAB>&       a_phi,
+			  const LevelData<EBCellFAB>& a_rhs,
+			  int                         a_iterations){
+  if (m_relaxType == 0){
+    this->relaxPoiJac(a_phi, a_rhs, a_iterations);
+  }
+  else if (m_relaxType == 1){
+    this->relaxGauSai(a_phi, a_rhs, a_iterations);
+  }
+  else if (m_relaxType == 2){
+    this->relaxGSRBFast(a_phi, a_rhs, a_iterations);
+  }
+  else{
+    MayDay::Error("EbHelmholtzOp::bogus relaxtype");
+  }
 }
 
 void EbHelmholtzOp::relax_mf(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, const int a_iterations){
@@ -2395,7 +2305,7 @@ void EbHelmholtzOp::getFlux(EBFluxFAB&                    a_flux,
     ghostedBox &= m_eblg.getDomain();
 
     this->getFlux(a_flux[idir], a_data[a_dit], ghostedBox, a_grid,
-	    m_eblg.getDomain(), m_eblg.getEBISL()[a_dit], m_dx, a_dit, idir);
+		  m_eblg.getDomain(), m_eblg.getEBISL()[a_dit], m_dx, a_dit, idir);
   }
 }
 
@@ -2682,21 +2592,7 @@ AMRRestrict(LevelData<EBCellFAB>&       a_resCoar,
   m_ebAverage.average(a_resCoar, resThisLevel, variables);
 
 }
-//-----------------------------------------------------------------------
-Real
-EbHelmholtzOp::
-AMRNorm(const LevelData<EBCellFAB>& a_coarResid,
-	const LevelData<EBCellFAB>& a_fineResid,
-	const int& a_refRat,
-	const int& a_ord)
 
-{
-  // compute norm over all cells on coarse not covered by finer
-  CH_TIME("EbHelmholtzOp::AMRNorm");
-  MayDay::Error("never called");
-  //return norm of temp
-  return norm(a_coarResid, a_ord);
-}
 //-----------------------------------------------------------------------
 void
 EbHelmholtzOp::
@@ -2734,6 +2630,5 @@ AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
 
   incr(a_residual, lcorr, -1);
 }
-
 
 #include <CD_NamespaceFooter.H>
