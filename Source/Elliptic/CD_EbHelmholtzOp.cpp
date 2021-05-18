@@ -40,32 +40,30 @@ bool EbHelmholtzOp::s_turnOffBCs       = false; //REALLY needs to default to fal
 bool EbHelmholtzOp::s_forceNoEBCF      = false; //REALLY needs to default to false
 bool EbHelmholtzOp::s_areaFracWeighted = false; // Precondition the system with area fractions
 
-//-----------------------------------------------------------------------
-EbHelmholtzOp::
-EbHelmholtzOp(const EBLevelGrid &                                  a_eblgFine,
-		 const EBLevelGrid &                                  a_eblg,
-		 const EBLevelGrid &                                  a_eblgCoar,
-		 const EBLevelGrid &                                  a_eblgCoarMG,
-		 const RefCountedPtr<EBQuadCFInterp>&                 a_quadCFI,
-		 const RefCountedPtr<EBFluxRegister>&                 a_fastFR,
-		 const RefCountedPtr<ConductivityBaseDomainBC>&       a_domainBC,
-		 const RefCountedPtr<ConductivityBaseEBBC>&           a_ebBC,
-		 const Real    &                                      a_dx,
-		 const Real    &                                      a_dxCoar,
-		 const int&                                           a_refToFine,
-		 const int&                                           a_refToCoar,
-		 const bool&                                          a_hasFine,
-		 const bool&                                          a_hasCoar,
-		 const bool&                                          a_hasMGObjects,
-		 const bool&                                          a_layoutChanged,
-		 const Real&                                          a_alpha,
-		 const Real&                                          a_beta,
-		 const RefCountedPtr<LevelData<EBCellFAB> >&          a_acoef,
-		 const RefCountedPtr<LevelData<EBFluxFAB> >&          a_bcoef,
-		 const RefCountedPtr<LevelData<BaseIVFAB<Real> > >&   a_bcoIrreg,
-		 const IntVect&                                       a_ghostCellsPhi,
-		 const IntVect&                                       a_ghostCellsRHS,
-		 const int&                                           a_relaxType)
+EbHelmholtzOp::EbHelmholtzOp(const EBLevelGrid &                                  a_eblgFine,
+			     const EBLevelGrid &                                  a_eblg,
+			     const EBLevelGrid &                                  a_eblgCoar,
+			     const EBLevelGrid &                                  a_eblgCoarMG,
+			     const RefCountedPtr<EBQuadCFInterp>&                 a_quadCFI,
+			     const RefCountedPtr<EBFluxRegister>&                 a_fastFR,
+			     const RefCountedPtr<ConductivityBaseDomainBC>&       a_domainBC,
+			     const RefCountedPtr<ConductivityBaseEBBC>&           a_ebBC,
+			     const Real    &                                      a_dx,
+			     const Real    &                                      a_dxCoar,
+			     const int&                                           a_refToFine,
+			     const int&                                           a_refToCoar,
+			     const bool&                                          a_hasFine,
+			     const bool&                                          a_hasCoar,
+			     const bool&                                          a_hasMGObjects,
+			     const bool&                                          a_layoutChanged,
+			     const Real&                                          a_alpha,
+			     const Real&                                          a_beta,
+			     const RefCountedPtr<LevelData<EBCellFAB> >&          a_acoef,
+			     const RefCountedPtr<LevelData<EBFluxFAB> >&          a_bcoef,
+			     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >&   a_bcoIrreg,
+			     const IntVect&                                       a_ghostCellsPhi,
+			     const IntVect&                                       a_ghostCellsRHS,
+			     const int&                                           a_relaxType)
 : LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // is time-independent
   m_relaxType(a_relaxType),
   m_ghostCellsPhi(a_ghostCellsPhi),
@@ -81,7 +79,7 @@ EbHelmholtzOp(const EBLevelGrid &                                  a_eblgFine,
   m_dxFine(),
   m_dx(a_dx),
   m_dxCoar(a_dxCoar),
-  m_aCoefficientef(a_acoef),
+  m_aCoefficient(a_acoef),
   m_bcoef(a_bcoef),
   m_bcoIrreg(a_bcoIrreg),
   m_alpha(a_alpha),
@@ -117,135 +115,125 @@ EbHelmholtzOp(const EBLevelGrid &                                  a_eblgFine,
 
   m_ext_fastFR = a_fastFR;
 
-  if (m_hasFine)
-    {
-      m_eblgFine       = a_eblgFine;
-      m_dxFine         = m_dx/a_refToFine;
-    }
+  if (m_hasFine){
+    m_eblgFine = a_eblgFine;
+    m_dxFine   = m_dx/a_refToFine;
+  }
 
   EBCellFactory fact(m_eblg.getEBISL());
   m_relCoef.define(m_eblg.getDBL(), 1, IntVect::Zero, fact);
-  if (m_hasCoar)
-    {
-      m_eblgCoar       = a_eblgCoar;
+  if (m_hasCoar){
+    m_eblgCoar       = a_eblgCoar;
 
-      DataIterator dit = m_eblg.getDBL().dataIterator(); 
-      int nbox = dit.size();
-      for (int idir = 0; idir < SpaceDim; idir++)
-	{
-	  m_loCFIVS[idir].define(m_eblg.getDBL());
-	  m_hiCFIVS[idir].define(m_eblg.getDBL());
+    DataIterator dit = m_eblg.getDBL().dataIterator(); 
+    int nbox = dit.size();
+    for (int idir = 0; idir < SpaceDim; idir++)
+      {
+	m_loCFIVS[idir].define(m_eblg.getDBL());
+	m_hiCFIVS[idir].define(m_eblg.getDBL());
 #pragma omp parallel
-	  {
-#pragma omp for
-	    for (int mybox=0;mybox<nbox;mybox++)
-	      {
-		//                pout() << "doing lo cfivs for box " << mybox << endl;
-		m_loCFIVS[idir][dit[mybox]].define(m_eblg.getDomain(), m_eblg.getDBL().get(dit[mybox]),
-						   m_eblg.getDBL(), idir,Side::Lo);
-		//                pout() << "doing hi cfivs for box " << mybox << endl;
-		m_hiCFIVS[idir][dit[mybox]].define(m_eblg.getDomain(), m_eblg.getDBL().get(dit[mybox]),
-						   m_eblg.getDBL(), idir,Side::Hi);
-	      }
-	  }
-	}
-
-      //if this fails, then the AMR grids violate proper nesting.
-      ProblemDomain domainCoarsenedFine;
-      DisjointBoxLayout dblCoarsenedFine;
-
-      int maxBoxSize = 32;
-      bool dumbool;
-      bool hasCoarser = EBAMRPoissonOp::getCoarserLayouts(dblCoarsenedFine,
-							  domainCoarsenedFine,
-							  m_eblg.getDBL(),
-							  m_eblg.getEBISL(),
-							  m_eblg.getDomain(),
-							  m_refToCoar,
-							  m_eblg.getEBIS(),
-							  maxBoxSize, dumbool);
-
-      //should follow from coarsenable
-      if (hasCoarser)
 	{
-	  m_eblgCoarsenedFine = EBLevelGrid(dblCoarsenedFine, domainCoarsenedFine, 4, m_eblg.getEBIS());
-	  m_hasInterpAve = true;
-	  m_ebInterp.define( m_eblg.getDBL(),     m_eblgCoar.getDBL(),
-			     m_eblg.getEBISL(), m_eblgCoar.getEBISL(),
-			     domainCoarsenedFine, m_refToCoar, ncomp, m_eblg.getEBIS(),
-			     a_ghostCellsPhi);
-	  m_ebAverage.define(m_eblg.getDBL(),     m_eblgCoarsenedFine.getDBL(),
-			     m_eblg.getEBISL(), m_eblgCoarsenedFine.getEBISL(),
-			     domainCoarsenedFine, m_refToCoar, ncomp, m_eblg.getEBIS(),
-			     a_ghostCellsRHS);
+#pragma omp for
+	  for (int mybox=0;mybox<nbox;mybox++)
+	    {
+	      //                pout() << "doing lo cfivs for box " << mybox << endl;
+	      m_loCFIVS[idir][dit[mybox]].define(m_eblg.getDomain(), m_eblg.getDBL().get(dit[mybox]),
+						 m_eblg.getDBL(), idir,Side::Lo);
+	      //                pout() << "doing hi cfivs for box " << mybox << endl;
+	      m_hiCFIVS[idir][dit[mybox]].define(m_eblg.getDomain(), m_eblg.getDBL().get(dit[mybox]),
+						 m_eblg.getDBL(), idir,Side::Hi);
+	    }
 	}
+      }
+
+    //if this fails, then the AMR grids violate proper nesting.
+    ProblemDomain domainCoarsenedFine;
+    DisjointBoxLayout dblCoarsenedFine;
+
+    int maxBoxSize = 32;
+    bool dumbool;
+    bool hasCoarser = EBAMRPoissonOp::getCoarserLayouts(dblCoarsenedFine,
+							domainCoarsenedFine,
+							m_eblg.getDBL(),
+							m_eblg.getEBISL(),
+							m_eblg.getDomain(),
+							m_refToCoar,
+							m_eblg.getEBIS(),
+							maxBoxSize, dumbool);
+
+    //should follow from coarsenable
+    if (hasCoarser){
+      m_eblgCoarsenedFine = EBLevelGrid(dblCoarsenedFine, domainCoarsenedFine, 4, m_eblg.getEBIS());
+      m_hasInterpAve = true;
+      m_ebInterp.define( m_eblg.getDBL(),     m_eblgCoar.getDBL(),
+			 m_eblg.getEBISL(), m_eblgCoar.getEBISL(),
+			 domainCoarsenedFine, m_refToCoar, ncomp, m_eblg.getEBIS(),
+			 a_ghostCellsPhi);
+      m_ebAverage.define(m_eblg.getDBL(),     m_eblgCoarsenedFine.getDBL(),
+			 m_eblg.getEBISL(), m_eblgCoarsenedFine.getEBISL(),
+			 domainCoarsenedFine, m_refToCoar, ncomp, m_eblg.getEBIS(),
+			 a_ghostCellsRHS);
     }
+  }
 
   //special mg objects for when we do not have
   //a coarser level or when the refinement to coarse
   //is greater than two
   //flag for when we need special MG objects
-  if (m_hasMGObjects)
-    {
-      int mgRef = 2;
-      m_eblgCoarMG = a_eblgCoarMG;
+  if (m_hasMGObjects){
+    int mgRef = 2;
+    m_eblgCoarMG = a_eblgCoarMG;
 
-      m_ebInterpMG.define( m_eblg.getDBL(),     m_eblgCoarMG.getDBL(),
-			   m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(),
-			   m_eblgCoarMG.getDomain(), mgRef, ncomp, m_eblg.getEBIS(),
-			   a_ghostCellsPhi);
-      m_ebAverageMG.define(m_eblg.getDBL(),     m_eblgCoarMG.getDBL(),
-			   m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(),
-			   m_eblgCoarMG.getDomain() , mgRef, ncomp, m_eblg.getEBIS(),
-			   a_ghostCellsRHS);
+    m_ebInterpMG.define( m_eblg.getDBL(),     m_eblgCoarMG.getDBL(),
+			 m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(),
+			 m_eblgCoarMG.getDomain(), mgRef, ncomp, m_eblg.getEBIS(),
+			 a_ghostCellsPhi);
+    m_ebAverageMG.define(m_eblg.getDBL(),     m_eblgCoarMG.getDBL(),
+			 m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(),
+			 m_eblgCoarMG.getDomain() , mgRef, ncomp, m_eblg.getEBIS(),
+			 a_ghostCellsRHS);
 
-    }
+  }
 
   //define stencils for the operator
-  defineStencils();
+  this->defineStencils();
 }
-//-----------------------------------------------------------------------
-EbHelmholtzOp::
-~EbHelmholtzOp()
-{
+
+EbHelmholtzOp::~EbHelmholtzOp(){
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-fillGrad(const LevelData<EBCellFAB>& a_phi)
-{
+
+void EbHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& a_phi){
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator,
-		     int a_coarseningFactor)
-{
-  const EbHelmholtzOp& op =
-    dynamic_cast<const EbHelmholtzOp&>(a_operator);
+
+void EbHelmholtzOp::finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator, int a_coarseningFactor){
+  const EbHelmholtzOp& op = dynamic_cast<const EbHelmholtzOp&>(a_operator);
 
   // Perform multigrid coarsening on the operator data.
-  Interval interv(0, 0); // All data is scalar.
+  const Interval interv(0, 0); // All data is scalar.
+  
   EBLevelGrid eblgCoar = m_eblg;
   EBLevelGrid eblgFine = op.m_eblg;
-  LevelData<EBCellFAB>& acoefCoar = *m_aCoefficientef;
-  const LevelData<EBCellFAB>& acoefFine = *(op.m_aCoefficientef);
-  LevelData<EBFluxFAB>& bcoefCoar = *m_bcoef;
+  
+  LevelData<EBCellFAB>&       acoefCoar = *m_aCoefficient;
+  const LevelData<EBCellFAB>& acoefFine = *(op.m_aCoefficient);
+  
+  LevelData<EBFluxFAB>&       bcoefCoar = *m_bcoef;
   const LevelData<EBFluxFAB>& bcoefFine = *(op.m_bcoef);
-  LevelData<BaseIVFAB<Real> >& bcoefCoarIrreg = *m_bcoIrreg;
+  
+  LevelData<BaseIVFAB<Real> >&       bcoefCoarIrreg = *m_bcoIrreg;
   const LevelData<BaseIVFAB<Real> >& bcoefFineIrreg = *(op.m_bcoIrreg);
-  if (a_coarseningFactor != 1)
-    {
-      EBCoarseAverage averageOp(eblgFine.getDBL(), eblgCoar.getDBL(),
-				eblgFine.getEBISL(), eblgCoar.getEBISL(),
-				eblgCoar.getDomain(), a_coarseningFactor, 1,
-				eblgCoar.getEBIS());
+  
+  if (a_coarseningFactor != 1) {
+    EBCoarseAverage averageOp(eblgFine.getDBL(), eblgCoar.getDBL(),
+			      eblgFine.getEBISL(), eblgCoar.getEBISL(),
+			      eblgCoar.getDomain(), a_coarseningFactor, 1,
+			      eblgCoar.getEBIS());
 
-      //MayDay::Warning("might want to figure out what harmonic averaging is in this context");
-      averageOp.average(acoefCoar, acoefFine, interv);
-      averageOp.average(bcoefCoar, bcoefFine, interv);
-      averageOp.average(bcoefCoarIrreg, bcoefFineIrreg, interv);
-    }
+    //MayDay::Warning("might want to figure out what harmonic averaging is in this context");
+    averageOp.average(acoefCoar, acoefFine, interv);
+    averageOp.average(bcoefCoar, bcoefFine, interv);
+    averageOp.average(bcoefCoarIrreg, bcoefFineIrreg, interv);
+  }
 
   // Handle parallel domain ghost elements.
   acoefCoar.exchange(interv);
@@ -259,6 +247,7 @@ finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator,
   // Notify any observers of this change.
   notifyObserversOfChange();
 }
+
 //-----------------------------------------------------------------------
 Real
 EbHelmholtzOp::
@@ -285,7 +274,7 @@ calculateAlphaWeight()
 	  {
 	    const VolIndex& VoF = vofit();
 	    Real volFrac = m_eblg.getEBISL()[dit[mybox]].volFrac(VoF);
-	    Real alphaWeight = (*m_aCoefficientef)[dit[mybox]](VoF, 0);
+	    Real alphaWeight = (*m_aCoefficient)[dit[mybox]](VoF, 0);
 	    alphaWeight *= volFrac;
 	    if(s_areaFracWeighted){
 	      alphaWeight *= m_eblg.getEBISL()[dit[mybox]].areaFracScaling(VoF);
@@ -423,44 +412,19 @@ void EbHelmholtzOp::diagonalScale(LevelData<EBCellFAB> & a_rhs, bool a_kappaWeig
   // Scale by volume fraction if asked. 
   if(a_kappaWeighted) EBLevelDataOps::kappaWeight(a_rhs);
 
-  // Scale by a-coefficient and alpha, too. 
-  DataIterator dit = m_eblg.getDBL().dataIterator(); 
-  int nbox = dit.size();
-#pragma omp parallel
-  {
-#pragma omp for
-    for(int mybox=0; mybox<nbox; mybox++){
-      a_rhs[dit[mybox]] *= (*m_aCoefficientef)[dit[mybox]];
-    }
-  }
-
-  if(s_areaFracWeighted){
-    MayDay::Abort("EbHelmholtzOp::diagonalScale - wrong scaling");
-    EBLevelDataOps::areaFracScalingWeight(a_rhs);
-  }
-  //  dumpLevelPoint(a_rhs, string("EbHelmholtzOp: diagonalScale: acoef*kappa*phi = "));
-
-}
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-divideByIdentityCoef(LevelData<EBCellFAB> & a_rhs)
-{
-
-  CH_TIME("EbHelmholtzOp::divideByIdentityCoef");
-
-  DataIterator dit = m_eblg.getDBL().dataIterator(); 
-  int nbox = dit.size();
-#pragma omp parallel
-  {
-#pragma omp for
-    for(int mybox=0; mybox<nbox; mybox++)
-      {
-	a_rhs[dit[mybox]] /= (*m_aCoefficientef)[dit[mybox]];
-      }
+  // Scale by a-coefficient and alpha, too.
+  DataIterator dit = m_eblg.getDBL().dataIterator();
+  for (dit.reset(); dit.ok(); ++dit){
+    a_rhs[dit()] *= (*m_aCoefficient)[dit()];
   }
 }
-//-----------------------------------------------------------------------
+
+void EbHelmholtzOp::divideByIdentityCoef(LevelData<EBCellFAB> & a_rhs){
+  for(DataIterator dit = m_eblg.getDBL().dataIterator(); dit.ok(); ++dit){
+    a_rhs[dit()] /= (*m_aCoefficient)[dit()];
+  }
+}
+
 void
 EbHelmholtzOp::
 calculateRelaxationCoefficient()
@@ -478,7 +442,7 @@ calculateRelaxationCoefficient()
 	const Box& grid = m_eblg.getDBL().get(dit[mybox]);
       
 	// For time-independent acoef, initialize lambda = alpha * acoef.
-	const EBCellFAB& acofab = (*m_aCoefficientef)[dit[mybox]];
+	const EBCellFAB& acofab = (*m_aCoefficient)[dit[mybox]];
 	m_relCoef[dit[mybox]].setVal(0.);
 	m_relCoef[dit[mybox]].plus(acofab, 0, 0, 1);
 	m_relCoef[dit[mybox]]*= m_alpha;
@@ -656,7 +620,7 @@ defineStencils()
 
 	    //add in identity term
 	    Real volFrac = ebisBox.volFrac(VoF);
-	    Real alphaWeight = (*m_aCoefficientef)[dit[mybox]](VoF, 0);
+	    Real alphaWeight = (*m_aCoefficient)[dit[mybox]](VoF, 0);
 	    alphaWeight *= volFrac;
 	    if(s_areaFracWeighted){
 	      alphaWeight *= ebisBox.areaFracScaling(VoF);
@@ -1087,7 +1051,7 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
       const EBISBox& ebisbox = phi.getEBISBox();
 
       if(!ebisbox.isAllCovered()){
-	a_lhs[a_dit()].mult((*m_aCoefficientef)[a_dit()], 0, 0, 1);
+	a_lhs[a_dit()].mult((*m_aCoefficient)[a_dit()], 0, 0, 1);
 
 	Box loBox[SpaceDim],hiBox[SpaceDim];
 	int hasLo[SpaceDim],hasHi[SpaceDim];
@@ -1615,7 +1579,7 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
 		BaseFab<Real>      & reguPhi =      (a_phi[dit[mybox]]).getSingleValuedFAB();
 		const BaseFab<Real>& reguRHS =     (a_rhs[dit[mybox]] ).getSingleValuedFAB();
 		const BaseFab<Real>& relCoef = (m_relCoef[dit[mybox]] ).getSingleValuedFAB();
-		const BaseFab<Real>& regACoe =((*m_aCoefficientef)[dit[mybox]] ).getSingleValuedFAB();
+		const BaseFab<Real>& regACoe =((*m_aCoefficient)[dit[mybox]] ).getSingleValuedFAB();
 		const BaseFab<Real>* regBCoe[3];
 		//need three coeffs because this has to work in 3d
 		//this is my klunky way to make the call dimension-independent
@@ -1776,7 +1740,7 @@ relaxGauSai(LevelData<EBCellFAB>&       a_phi,
 }
 
 void EbHelmholtzOp::lazyGauSai(LevelData<EBCellFAB>&       a_phi,
-				  const LevelData<EBCellFAB>& a_rhs){
+			       const LevelData<EBCellFAB>& a_rhs){
   CH_TIME("EbHelmholtzOp::lazyGauSai");
 
   CH_assert(a_phi.ghostVect() == m_ghostCellsPhi);
@@ -1917,9 +1881,9 @@ gsrbColor(LevelData<EBCellFAB>&       a_phi,
 
 void
 EbHelmholtzOp::nwo_gsrbColor(LevelData<EBCellFAB>&       a_phi,
-				const LevelData<EBCellFAB>& a_lph,
-				const LevelData<EBCellFAB>& a_rhs,
-				const IntVect&              a_color){
+			     const LevelData<EBCellFAB>& a_lph,
+			     const LevelData<EBCellFAB>& a_rhs,
+			     const IntVect&              a_color){
   CH_TIME("EbHelmholtzOp::nwo_gsrbColor");
 
   const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
@@ -1931,11 +1895,11 @@ EbHelmholtzOp::nwo_gsrbColor(LevelData<EBCellFAB>&       a_phi,
 }
 
 void EbHelmholtzOp::gsrbColor(EBCellFAB&       a_phi,
-				 const EBCellFAB& a_lph,
-				 const EBCellFAB& a_rhs,
-				 const Box&       a_box,
-				 const DataIndex& a_dit,
-				 const IntVect&   a_color){
+			      const EBCellFAB& a_lph,
+			      const EBCellFAB& a_rhs,
+			      const Box&       a_box,
+			      const DataIndex& a_dit,
+			      const IntVect&   a_color){
   CH_TIME("EbHelmholtzOp::gsrbColor (ebcellfabs)");
 
   const EBISBox& ebisbox = a_phi.getEBISBox();
@@ -2469,44 +2433,34 @@ getFluxEBCF(EBFaceFAB&                    a_flux,
     }
 }
 
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-getFlux(EBFluxFAB&                    a_flux,
-	const LevelData<EBCellFAB>&   a_data,
-	const Box&                    a_grid,
-	const DataIndex&              a_dit,
-	Real                          a_scale)
-{
+void EbHelmholtzOp::getFlux(EBFluxFAB&                    a_flux,
+			    const LevelData<EBCellFAB>&   a_data,
+			    const Box&                    a_grid,
+			    const DataIndex&              a_dit,
+			    Real                          a_scale){
   CH_TIME("ebco::getflux1");
   a_flux.define(m_eblg.getEBISL()[a_dit], a_grid, 1);
   a_flux.setVal(0.);
-  for (int idir = 0; idir < SpaceDim; idir++)
-    {
-      Box ghostedBox = a_grid;
-      ghostedBox.grow(1);
-      ghostedBox.grow(idir,-1);
-      ghostedBox &= m_eblg.getDomain();
+  for (int idir = 0; idir < SpaceDim; idir++){
+    Box ghostedBox = a_grid;
+    ghostedBox.grow(1);
+    ghostedBox.grow(idir,-1);
+    ghostedBox &= m_eblg.getDomain();
 
-
-      getFlux(a_flux[idir], a_data[a_dit], ghostedBox, a_grid,
-	      m_eblg.getDomain(), m_eblg.getEBISL()[a_dit], m_dx, a_dit, idir);
-
-    }
+    this->getFlux(a_flux[idir], a_data[a_dit], ghostedBox, a_grid,
+	    m_eblg.getDomain(), m_eblg.getEBISL()[a_dit], m_dx, a_dit, idir);
+  }
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-getFlux(EBFaceFAB&                    a_fluxCentroid,
-	const EBCellFAB&              a_phi,
-	const Box&                    a_ghostedBox,
-	const Box&                    a_fabBox,
-	const ProblemDomain&          a_domain,
-	const EBISBox&                a_ebisBox,
-	const Real&                   a_dx,
-	const DataIndex&              a_datInd,
-	const int&                    a_idir)
-{
+
+void EbHelmholtzOp::getFlux(EBFaceFAB&                    a_fluxCentroid,
+			    const EBCellFAB&              a_phi,
+			    const Box&                    a_ghostedBox,
+			    const Box&                    a_fabBox,
+			    const ProblemDomain&          a_domain,
+			    const EBISBox&                a_ebisBox,
+			    const Real&                   a_dx,
+			    const DataIndex&              a_datInd,
+			    const int&                    a_idir){
   CH_TIME("ebco::getFlux2");
   //has some extra cells so...
   a_fluxCentroid.setVal(0.);
@@ -2537,41 +2491,28 @@ getFlux(EBFaceFAB&                    a_fluxCentroid,
 
   a_fluxCentroid.copy(fluxCenter);
 
-  // VolIndex vofdeblo1(IntVect(D_DECL(223, 247,0)), 0);
-  // VolIndex vofdebhi1(IntVect(D_DECL(223, 248,0)), 0);
-  // VolIndex vofdeblo2(IntVect(D_DECL(224, 247,0)), 0);
-  // VolIndex vofdebhi2(IntVect(D_DECL(224, 248,0)), 0);
-  // FaceIndex facedeb1(vofdeblo1, vofdebhi1, 1);
-  // FaceIndex facedeb2(vofdeblo2, vofdebhi2, 1);
-
   IntVectSet ivsCell = a_ebisBox.getIrregIVS(cellBox);
-  if (!ivsCell.isEmpty())
-    {
-      FaceStop::WhichFaces stopCrit = FaceStop::SurroundingNoBoundary;
+  if (!ivsCell.isEmpty()){
+    FaceStop::WhichFaces stopCrit = FaceStop::SurroundingNoBoundary;
 
-      for (FaceIterator faceit(ivsCell, a_ebisBox.getEBGraph(), a_idir,stopCrit);
-	   faceit.ok(); ++faceit)
-	{
-	  const FaceIndex& face = faceit();
-	  Real phiHi = a_phi(face.getVoF(Side::Hi), 0);
-	  Real phiLo = a_phi(face.getVoF(Side::Lo), 0);
-	  Real fluxFace = bcoebff(face, 0)*(phiHi - phiLo)/a_dx;
-	  //          if (EBCellFAB::s_verbose && ((face==facedeb1) || (face==facedeb2)))
-	  //            {
-	  //              pout() << "EbHelmholtzOp::getFlux at "<< face ;
-	  //              pout() << ", phiHi, phiLo, flux = " << phiHi << ", " << phiLo << ", "<< fluxFace << endl;
-	  //            }
-	  fluxCenter(face, 0) = fluxFace;
-	}
-      //interpolate from face centers to face centroids
-      Box cellBox = a_fluxCentroid.getCellRegion();
-      EBArith::interpolateFluxToCentroids(a_fluxCentroid,
-					  fluxCenter,
-					  a_fabBox,
-					  a_ebisBox,
-					  a_domain,
-					  a_idir);
+    for (FaceIterator faceit(ivsCell, a_ebisBox.getEBGraph(), a_idir,stopCrit); faceit.ok(); ++faceit) {
+      const FaceIndex& face = faceit();
+      Real phiHi = a_phi(face.getVoF(Side::Hi), 0);
+      Real phiLo = a_phi(face.getVoF(Side::Lo), 0);
+      Real fluxFace = bcoebff(face, 0)*(phiHi - phiLo)/a_dx;
+
+      fluxCenter(face, 0) = fluxFace;
     }
+    
+    //interpolate from face centers to face centroids
+    Box cellBox = a_fluxCentroid.getCellRegion();
+    EBArith::interpolateFluxToCentroids(a_fluxCentroid,
+					fluxCenter,
+					a_fabBox,
+					a_ebisBox,
+					a_domain,
+					a_idir);
+  }
 
   a_fluxCentroid *= m_beta;
 }
@@ -2846,6 +2787,6 @@ AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
 
   incr(a_residual, lcorr, -1);
 }
-//-----------------------------------------------------------------------
+
 
 #include <CD_NamespaceFooter.H>

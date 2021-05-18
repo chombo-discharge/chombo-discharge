@@ -166,16 +166,45 @@ public:
   */
   void diagonalScale(LevelData<EBCellFAB> & a_rhs, bool a_kappaWeighted) override;
 
-  void divideByIdentityCoef(LevelData<EBCellFAB> & a_rhs);
+  /*!
+    @brief Divide by m_acoefficient
+    @param[in] a_rhs Data to be divided.
+  */
+  void divideByIdentityCoef(LevelData<EBCellFAB> & a_rhs) override;
 
-  void fillGrad(const LevelData<EBCellFAB>& a_phi);
+  /*!
+    @brief Part of the LevelTGA interface
+  */
+  void fillGrad(const LevelData<EBCellFAB>& a_phi) override;
 
+  /*!
+    @brief Compute flux on face centroids
+    @param[out] a_flux  Flux
+    @param[in]  a_data  Data
+    @param[in]  a_grid  Box 
+    @param[in]  a_dit   DataIndex
+    @param[in]  a_scale Flux scaling
+    @details This iterates over the sides and calls the other (directional) version. 
+  */
   void getFlux(EBFluxFAB&                    a_flux,
 	       const LevelData<EBCellFAB>&   a_data,
 	       const Box&                    a_grid,
 	       const DataIndex&              a_dit,
 	       Real                          a_scale);
 
+    /*!
+    @brief Compute flux on face centroids
+    @param[out] a_fluxCentroid Flux ont he centroids
+    @param[in]  a_phi          Data
+    @param[in]  a_ghostedBox   Ghosted box
+    @param[in]  a_fabBox       Grid box
+    @param[in]  a_domain       Problem domain
+    @param[in]  a_ebisBox      EBIS box
+    @param[in]  a_dx           Current grid resolution.
+    @param[in]  a_datInd       Current dataindex
+    @param[in]  a_idir         Flux "direction"
+    @details This computes face-centers first, then interpolates to centroids. 
+  */
   void getFlux(EBFaceFAB&                    a_fluxCentroid,
 	       const EBCellFAB&              a_phi,
 	       const Box&                    a_ghostedBox,
@@ -186,13 +215,23 @@ public:
 	       const DataIndex&              a_datInd,
 	       const int&                    a_idir);
 
-  // This operator may be time-dependent.
-  void setTime(Real a_oldTime, Real a_mu, Real a_dt);
 
-  //! This is called on multigrid operators when their AMR operators
-  //! are altered.
-  void finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator,
-			    int a_coarseningFactor);
+  /*!
+    @brief Set time for this operator
+    @param[in] a_oldTime Old time
+    @param[in] a_mu      Mu
+    @param[in] a_dt      Time step. 
+    @note  This does nothing as time is disabled for EbHelmholtzOp.
+  */
+  void setTime(Real a_oldTime, Real a_mu, Real a_dt) override;
+
+  /*!
+    @brief Finer operator changed
+    @param[in] a_oeprator Finger operator
+    @param[in] a_coarseningFactor Coarsening to this. 
+    @details This is called on multigrid operators when their AMR operators are altered.
+  */
+  void finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator, int a_coarseningFactor) override;
 
   //MGOp operations.  no finer or coarser
 
@@ -587,7 +626,7 @@ protected:
 
   //! "Current" (time-interpolated) value of the a coefficient. For a
   //! time-independent a coefficient, this is where the coefficient lives.
-  RefCountedPtr<LevelData<EBCellFAB> >          m_aCoefficientef;
+  RefCountedPtr<LevelData<EBCellFAB> >          m_aCoefficient;
 
   //! "Current" (time-interpolated) value of the b coefficient. For a
   //! time-independent a coefficient, this is where the coefficient lives.
