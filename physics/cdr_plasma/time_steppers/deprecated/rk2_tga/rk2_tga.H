@@ -10,7 +10,7 @@
 
 #include "CD_AmrMesh.H"
 #include "CD_TimeStepper.H"
-#include "cdr_iterator.H"
+#include <CD_CdrIterator.H>
 #include "rte_iterator.H"
 
 /*!
@@ -118,7 +118,7 @@ protected:
   /*!
     @brief Get storage
   */
-  virtual RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
+  virtual RefCountedPtr<cdr_storage>& get_cdr_storage(const CdrIterator& a_solverit);
 
   /*!
     @brief Get storage

@@ -6,7 +6,7 @@
 */
 
 #include "full_tagger.H"
-#include "cdr_iterator.H"
+#include <CD_CdrIterator.H>
 #include "rte_iterator.H"
 #include "data_ops.H"
 
@@ -48,7 +48,7 @@ void full_tagger::allocate_storage(){
   m_cdr_gradients.resize(m_physics->get_num_CdrSpecies());
   m_rte_densities.resize(m_physics->get_num_rte_species());
 
-  for(cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+  for(CdrIterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_amr->allocate(m_cdr_densities[idx], m_phase, sca_ncomp);
     m_amr->allocate(m_cdr_gradients[idx], m_phase, vec_ncomp);
@@ -75,7 +75,7 @@ void full_tagger::deallocate_storage(){
   m_amr->deallocate(m_rho);
   m_amr->deallocate(m_grad_rho);
 
-  for(cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+  for(CdrIterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_amr->deallocate(m_cdr_densities[idx]);
     m_amr->deallocate(m_cdr_gradients[idx]);
@@ -202,7 +202,7 @@ void full_tagger::compute_tracers(){
 	const RealVect grad_rho = RealVect(D_DECL(grho_reg(iv, 0), grho_reg(iv, 1), grho_reg(iv, 2)));
 
 	// CDR phi and gradients
-	for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+	for (CdrIterator solver_it(*cdr); solver_it.ok(); ++solver_it){
 	  const int idx = solver_it.get_solver();
 	  cdr_phi[idx] = (*cdr_phi_reg[idx])(iv, 0);
 	  cdr_gra[idx] = RealVect(D_DECL((*cdr_gra_reg[idx])(iv, 0), (*cdr_gra_reg[idx])(iv, 1), (*cdr_gra_reg[idx])(iv, 2)));
@@ -258,7 +258,7 @@ void full_tagger::compute_tracers(){
 	const Real rho          = rho_fab(vof, 0);
 	const RealVect grad_rho = RealVect(D_DECL(grho_fab(vof, 0), grho_fab(vof, 1), grho_fab(vof, 2)));
 
-	for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+	for (CdrIterator solver_it(*cdr); solver_it.ok(); ++solver_it){
 	  const int idx = solver_it.get_solver();
 	  const EBCellFAB& density  = *cdr_densities[idx];
 	  const EBCellFAB& gradient = *cdr_gradients[idx];
@@ -327,7 +327,7 @@ void full_tagger::compute_cdr_densities(Vector<EBAMRCellData>& a_cdr_densities){
 
   RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
 
-  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
 
     // Interpolate density to centroid
@@ -350,7 +350,7 @@ void full_tagger::compute_cdr_gradients(Vector<EBAMRCellData>& a_cdr_gradients){
 
   RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
     
-  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
 
     const int idx = solver_it.get_solver();    

@@ -22,7 +22,7 @@ public:
   /*!
     @brief Silly enum for iterating through selected species
   */
-  enum class species_iteration{
+  enum class SpeciesIteration{
     all,
     charged,
     negative,
@@ -38,7 +38,7 @@ public:
   /*!
     @brief Full constructor
   */
-  ito_iterator(ito_layout<T>& a_layout, const species_iteration a_mode = species_iteration::all);
+  ito_iterator(ito_layout<T>& a_layout, const SpeciesIteration a_mode = SpeciesIteration::all);
 
   /*!
     @brief Destructor
@@ -85,7 +85,7 @@ protected:
   /*!
     @brief Which species to iterate over
   */
-  species_iteration m_mode;
+  SpeciesIteration m_mode;
   
   /*!
     @brief 

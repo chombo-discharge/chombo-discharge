@@ -217,7 +217,7 @@ strang2::~strang2(){
 
 }
 
-RefCountedPtr<cdr_storage>& strang2::get_cdr_storage(const cdr_iterator& a_solverit){
+RefCountedPtr<cdr_storage>& strang2::get_cdr_storage(const CdrIterator& a_solverit){
   return m_cdr_scratch[a_solverit.get_solver()];
 }
 
@@ -369,7 +369,7 @@ void strang2::advanceTGA_diffusion(const Real a_time, const Real a_dt){
 
   const int ncomp = 1;
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
       
     EBAMRCellData& phi = solver->getPhi();
@@ -392,7 +392,7 @@ void strang2::advanceEuler_diffusion(const Real a_time, const Real a_dt){
 
   const int ncomp = 1;
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
       
@@ -699,7 +699,7 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -737,7 +737,7 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -795,7 +795,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
   
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     
@@ -834,7 +834,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     
@@ -879,7 +879,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     
@@ -947,7 +947,7 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -986,7 +986,7 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1032,7 +1032,7 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1111,7 +1111,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
 
   // Allocate extra storage on way in
   {
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
       storage->allocate_extra_storage(4);
     }
@@ -1126,7 +1126,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1169,7 +1169,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1212,7 +1212,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1256,7 +1256,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1308,7 +1308,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1363,7 +1363,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
 
   // Deallocate extra storage on way out
   {
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
       storage->deallocate_extra_storage();
     }
@@ -1421,7 +1421,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
 
   // Allocate extra storage on way in
   {
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
       storage->allocate_extra_storage(3);
     }
@@ -1435,7 +1435,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1473,7 +1473,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1522,7 +1522,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1571,7 +1571,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1615,7 +1615,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_sigma_flux();
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1667,7 +1667,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
 
   // Deallocate extra storage on way out
   {
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
       storage->deallocate_extra_storage();
     }
@@ -1690,7 +1690,7 @@ void strang2::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis){
     pout() << "strang2::compute_cdr_gradients" << endl;
   }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     EBAMRCellData& grad = storage->get_gradient();
@@ -1712,7 +1712,7 @@ void strang2::compute_errors(){
   Real max, min, emax, emin;
 
   // CDR errors
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     const int which = solver_it.get_solver();
@@ -1825,7 +1825,7 @@ void strang2::allocate_cdr_storage(){
 
   m_cdr_scratch.resize(num_species);
   
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_rk_order, m_amr, m_cdr->get_phase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
@@ -1862,7 +1862,7 @@ void strang2::deallocateInternals(){
     pout() << "strang2::deallocateInternals" << endl;
   }
   
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_cdr_scratch[idx]->deallocate_storage();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
@@ -1891,7 +1891,7 @@ void strang2::backup_solutions(){
   }
   
   // Backup cdr solutions
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
 
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
@@ -1928,7 +1928,7 @@ void strang2::revert_backup(){
   }
   
   // Revert cdr solutions
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
 
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
@@ -1964,7 +1964,7 @@ void strang2::copy_error_to_solvers(){
     pout() << "strang2::copy_error_to_solvers" << endl;
   }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1986,7 +1986,7 @@ void strang2::copy_solvers_to_error(){
     pout() << "strang2::copy_error_to_solvers" << endl;
   }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -2008,7 +2008,7 @@ void strang2::copy_solvers_to_cache(){
     pout() << "strang2::copy_solvers_to_cache" << endl;
   }
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -2048,7 +2048,7 @@ void strang2::copy_cache_to_solvers(){
     pout() << "strang2::copy_cache_to_solvers" << endl;
   }
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -2132,7 +2132,7 @@ void strang2::compute_cdr_eb_states(){
   Vector<EBAMRCellData*> cdr_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -2145,7 +2145,7 @@ void strang2::compute_cdr_eb_states(){
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
   this->extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
   }
@@ -2169,7 +2169,7 @@ void strang2::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
   Vector<EBAMRIVData*>   eb_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     eb_states.push_back(&(storage->get_eb_state()));
@@ -2180,7 +2180,7 @@ void strang2::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
   this->extrapolate_to_eb(eb_states, m_cdr->get_phase(), a_phis);
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
   }
@@ -2205,7 +2205,7 @@ void strang2::compute_cdr_domain_states(){
   Vector<EBAMRCellData*> cdr_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -2237,7 +2237,7 @@ void strang2::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
   Vector<EBAMRIFData*>   domain_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -2282,7 +2282,7 @@ void strang2::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Rea
 
   cdr_fluxes = m_cdr->getEbFlux();
 
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIVData& dens_eb = storage->get_eb_state();
@@ -2350,7 +2350,7 @@ void strang2::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, co
 
   cdr_fluxes = m_cdr->getDomainFlux();
   cdr_velocities = m_cdr->get_velocities();
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIFData& dens_domain = storage->get_domain_state();
@@ -2404,7 +2404,7 @@ void strang2::compute_sigma_flux(){
   EBAMRIVData& flux = m_sigma->get_flux();
   data_ops::set_value(flux, 0.0);
 
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<species>& spec      = solver_it.get_species();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
@@ -2435,7 +2435,7 @@ void strang2::compute_cdr_sources(const Vector<EBAMRCellData*>& a_phis, const Re
   EBAMRCellData& E                   = m_fieldSolver_scratch->get_E_cell();
 
   Vector<EBAMRCellData*> cdr_gradients;
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     cdr_gradients.push_back(&(storage->get_gradient())); // These should already have been computed
   }
@@ -2468,7 +2468,7 @@ void strang2::store_solvers(){
   }
 
   // Copy solver states into storage->m_previous
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -2491,7 +2491,7 @@ void strang2::restore_solvers(){
     pout() << "strang2::restore_solvers" << endl;
   }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 

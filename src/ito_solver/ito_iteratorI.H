@@ -19,7 +19,7 @@ ito_iterator<T>::ito_iterator(){
 }
 
 template <class T>
-ito_iterator<T>::ito_iterator(ito_layout<T>& a_layout, const species_iteration a_mode){
+ito_iterator<T>::ito_iterator(ito_layout<T>& a_layout, const SpeciesIteration a_mode){
   CH_TIME("ito_iterator<T>::ito_iterator<T>");
     
   m_solvers  = a_layout.get_solvers();
@@ -63,7 +63,7 @@ template <class T>
 void ito_iterator<T>::operator++(){
   CH_assert(m_defined);
 
-  if(m_mode == species_iteration::all){
+  if(m_mode == SpeciesIteration::all){
     m_isolver++;
   }
   else{
@@ -73,25 +73,25 @@ void ito_iterator<T>::operator++(){
       const RefCountedPtr<ito_solver>& solver = m_solvers[isolver];
       const RefCountedPtr<ito_species>& species   = m_species[isolver];
       
-      if(m_mode == species_iteration::charged){
+      if(m_mode == SpeciesIteration::charged){
 	if(species->getChargeNumber() != 0){
 	  m_isolver = isolver;
 	  break;
 	}
       }
-      else if(m_mode == species_iteration::negative){
+      else if(m_mode == SpeciesIteration::negative){
 	if(species->getChargeNumber() < 0){
 	  m_isolver = isolver;
 	  break;
 	}
       }
-      else if(m_mode == species_iteration::positive){
+      else if(m_mode == SpeciesIteration::positive){
 	if(species->getChargeNumber() > 0){
 	  m_isolver = isolver;
 	  break;
 	}
       }
-      else if(m_mode == species_iteration::neutral){
+      else if(m_mode == SpeciesIteration::neutral){
 	if(species->getChargeNumber() == 0){
 	  m_isolver = isolver;
 	  break;

@@ -6,7 +6,7 @@
 */
 
 #include "cdr_plasma_tagger.H"
-#include "cdr_iterator.H"
+#include <CD_CdrIterator.H>
 #include "rte_iterator.H"
 #include "data_ops.H"
 

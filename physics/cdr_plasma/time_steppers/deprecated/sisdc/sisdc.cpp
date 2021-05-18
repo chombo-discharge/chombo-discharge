@@ -235,7 +235,7 @@ void sisdc::parse_advection_options(){
   pp.get("extrap_advect", str); m_extrap_advect = (str == "true") ? true : false;
 }
 
-RefCountedPtr<cdr_storage>& sisdc::get_cdr_storage(const cdr_iterator& a_solverit){
+RefCountedPtr<cdr_storage>& sisdc::get_cdr_storage(const CdrIterator& a_solverit){
   return m_cdr_scratch[a_solverit.get_solver()];
 }
 
@@ -501,7 +501,7 @@ void sisdc::copy_phi_p_to_cdr(){
     pout() << "sisdc::copy_phi_p_to_cdr" << endl;
   }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>&  solver  = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
@@ -677,7 +677,7 @@ void sisdc::copy_cdr_to_phi_m0(){
   }
 
   // CDR solvers
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>&  solver  = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
     
@@ -705,7 +705,7 @@ void sisdc::compute_FD_0(){
     pout() << "sisdc::compute_FD_0" << endl;
   }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
     
@@ -963,7 +963,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
   // If this is the corrector and m=0, we skipped the advection advance because we can use the precomputed
   // advection-reaction operator slope. In this case phi_(m+1) is bogus and we need to recompute it. Otherwise,
   // phi_(m+1) = phi_m + dtm*FA_m, and we just increment with the reaction operator. 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
@@ -1065,7 +1065,7 @@ void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const
   }
 
   // Advance cdr equations
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
@@ -1145,7 +1145,7 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
     }
 
     // First Heun method stage
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
@@ -1194,7 +1194,7 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
     sisdc::compute_sigma_flux();
 
     // Second Heun method stage
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
@@ -1232,7 +1232,7 @@ void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_lag
   // phi_(m+1)^(k+1) = phi_(m)^(k+1,\ast) + dtm*FD_(m+1)^(k+1) + sources. 
   //
   // This routine does not modify FD_(m+1)^k. This is replaced by FD_(m+1)^(k+1) later on. 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     
@@ -1300,7 +1300,7 @@ void sisdc::integrate_AP_advection_reaction(const Real a_dt, const int a_m, cons
 
   // Compute phi_(m+1) = phi_m + dt_m*DivF. If this is the AP predictor, we can store divF. If this is the AP corrector,
   // we can fetch divF from the predictor. 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
@@ -1338,7 +1338,7 @@ void sisdc::integrate_AP_advection_reaction(const Real a_dt, const int a_m, cons
   }
 
   // Add in the reaction operator
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
@@ -1349,7 +1349,7 @@ void sisdc::integrate_AP_advection_reaction(const Real a_dt, const int a_m, cons
   }
 
   // Add in the lagged advection-reaction terms for the CDR equations. 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
@@ -1428,7 +1428,7 @@ void sisdc::reconcile_integrands(){
   sisdc::compute_sigma_flux();
 
   // Now compute FAR_p - that wasn't done when we integrated
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     const int idx = solver_it.get_solver();
@@ -1481,7 +1481,7 @@ void sisdc::initialize_errors(){
     pout() << "sisdc::corrector_initialize_errors" << endl;
   }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     const int idx = solver_it.get_solver();
@@ -1511,7 +1511,7 @@ void sisdc::finalize_errors(){
   const Real safety = 1.E-20;
 
   m_max_error = 0.0;
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     const int idx = solver_it.get_solver();
@@ -1763,7 +1763,7 @@ void sisdc::allocate_cdr_storage(){
 
   m_cdr_scratch.resize(num_species);
   
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_cdr->get_phase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage(m_p);
@@ -1800,7 +1800,7 @@ void sisdc::deallocateInternals(){
     pout() << "sisdc::deallocateInternals" << endl;
   }
 
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_cdr_scratch[idx]->deallocate_storage();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
@@ -1857,7 +1857,7 @@ void sisdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis){
     pout() << "sisdc::compute_cdr_gradients" << endl;
   }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     EBAMRCellData& grad = storage->get_gradient();
@@ -1897,7 +1897,7 @@ void sisdc::compute_cdr_eb_states(){
   Vector<EBAMRCellData*> cdr_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
 
@@ -1910,7 +1910,7 @@ void sisdc::compute_cdr_eb_states(){
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
   sisdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
   }
@@ -1934,7 +1934,7 @@ void sisdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
   Vector<EBAMRIVData*>   eb_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
 
     eb_states.push_back(&(storage->get_eb_state()));
@@ -1945,7 +1945,7 @@ void sisdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
   sisdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), a_phis);
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
   }
@@ -1970,7 +1970,7 @@ void sisdc::compute_cdr_domain_states(){
   Vector<EBAMRCellData*> cdr_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
 
@@ -2002,7 +2002,7 @@ void sisdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
   Vector<EBAMRIFData*>   domain_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -2047,7 +2047,7 @@ void sisdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real 
 
   cdr_fluxes = m_cdr->getEbFlux();
 
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIVData& dens_eb = storage->get_eb_state();
@@ -2115,7 +2115,7 @@ void sisdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, cons
 
   cdr_fluxes = m_cdr->getDomainFlux();
   cdr_velocities = m_cdr->get_velocities();
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIFData& dens_domain = storage->get_domain_state();
@@ -2169,7 +2169,7 @@ void sisdc::compute_sigma_flux(){
   EBAMRIVData& flux = m_sigma->get_flux();
   data_ops::set_value(flux, 0.0);
 
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<species>& spec      = solver_it.get_species();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
@@ -2200,7 +2200,7 @@ void sisdc::compute_cdr_sources(const Vector<EBAMRCellData*>& a_phis, const Real
   EBAMRCellData& E                   = m_fieldSolver_scratch->get_E_cell();
 
   Vector<EBAMRCellData*> cdr_gradients;
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     cdr_gradients.push_back(&(storage->get_gradient())); // These should already have been computed
   }
@@ -2322,7 +2322,7 @@ Vector<EBAMRCellData*> sisdc::get_cdr_errors(){
   }
   
   Vector<EBAMRCellData*> ret;
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     ret.push_back(&(storage->get_error()));
   }
@@ -2337,7 +2337,7 @@ Vector<EBAMRCellData*> sisdc::get_cdr_phik(const int a_m){
   }
   
   Vector<EBAMRCellData*> ret;
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     ret.push_back(&(storage->get_phi()[a_m]));
   }
@@ -2675,7 +2675,7 @@ void sisdc::subcycle_compute_advection_velocities(){
     pout() << "sisdc::subcycle_compute_advection_velocities" << endl;
   }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     CdrGodunov* gdnv = dynamic_cast<CdrGodunov*>(&(*solver));
     if(gdnv == NULL){
@@ -2695,7 +2695,7 @@ void sisdc::subcycle_copy_states(const int a_m){
     pout() << "sisdc::subcycle_copy_states" << endl;
   }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
     const EBAMRCellData& phi_m = storage->get_phi()[a_m];
@@ -2836,7 +2836,7 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
   Vector<LevelData<DomainFluxIFFAB>* >  domain_states;
   Vector<LevelData<DomainFluxIFFAB>* >  domain_gradients;
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
 
@@ -2856,7 +2856,7 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
   }
 
   // Compute all the things that are necessary for BCs
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
 
@@ -2957,7 +2957,7 @@ void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a
     Vector<EBCellFAB*> cdr_densities(num_species);
     Vector<EBCellFAB*> cdr_gradients(num_species);
     Vector<EBCellFAB*> rte_densities(num_photons);
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
       const int idx = solver_it.get_solver();
@@ -3010,7 +3010,7 @@ void sisdc::subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coa
   }
 
   // Finer level has reached this level. Average down solution on this level and reflux mass.
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int solver_idx                = solver_it.get_solver();
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
@@ -3081,7 +3081,7 @@ void sisdc::subcycle_copy_current_to_old_states(const int a_m, const int a_lvl){
     pout() << "sisdc::subcycle_copy_current_to_old_states" << endl;
   }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
 
     EBAMRCellData& old = storage->get_old();
@@ -3121,7 +3121,7 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
   const bool has_coar = a_lvl > a_coarsest_level;
   const bool has_fine = a_lvl < a_finestLevel;
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int solver_idx = solver_it.get_solver();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     RefCountedPtr<CdrSolver>& solver   = solver_it();

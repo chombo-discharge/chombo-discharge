@@ -1,48 +1,54 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   cdr_layout.H
+  @file   CD_CdrLayout.H
   @brief  Declaration of a class that holds a set of CdrSolvers
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#ifndef _CDR_LAYOUT_
-#define _CDR_LAYOUT_
+#ifndef CD_CdrLayout_H
+#define CD_CdrLayout_H
 
-#include "CD_CdrSolver.H"
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrSolver.H>
+#include <CD_NamespaceHeader.H>
 
+// Needs forward declaration.
 template <class T>
-class CdrIterator;
+class cdr_iterator;
 
 /*!
   @brief Class for holding a set of CdrSolvers. 
 */
 template <class T>
-class cdr_layout {
+class CdrLayout {
 public:
 
-  cdr_layout();
+  CdrLayout();
 
   /*!
     @brief Full constructor
   */
-  cdr_layout(const Vector<RefCountedPtr<CdrSpecies> >& a_plaskin);
+  CdrLayout(const Vector<RefCountedPtr<CdrSpecies> >& a_plaskin);
 
   /*!
     @brief Destructor
   */
-  virtual ~cdr_layout();
+  virtual ~CdrLayout();
 
   /*!
     @brief Get phase
   */
-  virtual phase::which_phase get_phase() const;
+  virtual phase::which_phase getPhase() const;
 
   /*!
     @brief Get the iterator
   */
-  virtual CdrIterator<T> iterator();
+  virtual cdr_iterator<T> iterator();
 
   /*!
     @brief Get the Realm
@@ -67,7 +73,7 @@ public:
   /*!
     @brief Add solver
   */
-  virtual void add_solver(RefCountedPtr<T> a_solver);
+  virtual void addSolver(RefCountedPtr<T> a_solver);
 
   /*!
     @brief Allocate internal storage for solvers
@@ -203,7 +209,7 @@ public:
   /*!
     @brief Compute total charge in computational region
   */
-  virtual Real compute_total_charge();
+  virtual Real computeTotalCharge();
 
   /*!
     @brief Compute mass for every species
@@ -223,12 +229,12 @@ public:
   /*!
     @brief Get solvers
   */
-  virtual Vector<RefCountedPtr<T> >& get_solvers();
+  virtual Vector<RefCountedPtr<T> >& getSolvers();
 
   /*!
     @brief Get species
   */
-  virtual Vector<RefCountedPtr<CdrSpecies> >& get_species();
+  virtual Vector<RefCountedPtr<CdrSpecies> >& getSpecies();
 
   /*!
     @brief Get all source terms
@@ -243,7 +249,7 @@ public:
   /*!
     @brief Get all velocities
   */
-  virtual Vector<EBAMRCellData*> get_velocities();
+  virtual Vector<EBAMRCellData*> getVelocities();
 
   /*!
     @brief Get all diffusion coefficients
@@ -253,7 +259,7 @@ public:
   /*!
     @brief Get all diffusion coefficients
   */
-  virtual Vector<EBAMRIVData*> get_diffco_eb();
+  virtual Vector<EBAMRIVData*> getEbDiffusionCoefficients();
 
   /*!
     @brief Get the EB flux
@@ -268,7 +274,7 @@ public:
   /*!
     @brief Get mass redistribution
   */
-  virtual bool get_mass_redist();
+  virtual bool getMassRedist();
 
 protected:
 
@@ -309,17 +315,20 @@ protected:
 };
 
 /*!
-  @brief Factory class for cdr_layout. 
-  @details Factory class is very simple; since we don't want to template cdr_layout2 we use a factory to instantiate solvers of 
+  @brief Factory class for CdrLayout. 
+  @details Factory class is very simple; since we don't want to template CdrLayout2 we use a factory to instantiate solvers of 
   any CdrSolver inherited class, and then return a layout with the casted classes. That's about it. 
 */
 template <class T, class S>
-class cdr_factory {
+class CdrFactory {
 public:
-  cdr_factory();
-  ~cdr_factory();
-  RefCountedPtr<cdr_layout<T> > new_layout(const Vector<RefCountedPtr<CdrSpecies> > a_species) const;
+  CdrFactory();
+  ~CdrFactory();
+  RefCountedPtr<CdrLayout<T> > newLayout(const Vector<RefCountedPtr<CdrSpecies> > a_species) const;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
+#include <CD_CdrLayoutImplem.H>
 
 #endif

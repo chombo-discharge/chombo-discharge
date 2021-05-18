@@ -7,7 +7,7 @@
 
 #include "rk2_tga.H"
 #include "rk2_tga_storage.H"
-#include "cdr_iterator.H"
+#include <CD_CdrIterator.H>
 #include "rte_iterator.H"
 #include "data_ops.H"
 #include "units.H"
@@ -80,7 +80,7 @@ rk2_tga::~rk2_tga(){
 
 }
 
-RefCountedPtr<cdr_storage>& rk2_tga::get_cdr_storage(const cdr_iterator& a_solverit){
+RefCountedPtr<cdr_storage>& rk2_tga::get_cdr_storage(const CdrIterator& a_solverit){
   return m_cdr_scratch[a_solverit.get_solver()];
 }
 
@@ -187,7 +187,7 @@ void rk2_tga::allocate_cdr_storage(){
   const int num_species = m_plaskin->get_num_species();
   m_cdr_scratch.resize(num_species);
   
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_cdr->get_phase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
@@ -224,7 +224,7 @@ void rk2_tga::deallocateInternals(){
     pout() << "TimeStepper::deallocateInternals" << endl;
   }
   
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_cdr_scratch[idx]->deallocate_storage();
   }
@@ -245,7 +245,7 @@ void rk2_tga::cache_solutions(){
   }
   
   // Cache cdr solutions
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
 
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
@@ -354,7 +354,7 @@ void rk2_tga::compute_cdr_eb_states(){
   Vector<EBAMRIVData*>   eb_states;
   Vector<EBAMRCellData*> cdr_states;
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -382,7 +382,7 @@ void rk2_tga::compute_cdr_fluxes(const Real a_time){
 
   cdr_fluxes = m_cdr->getEbFlux();
 
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIVData& dens_eb = storage->get_eb_state();
@@ -433,7 +433,7 @@ void rk2_tga::compute_sigma_flux_into_scratch(){
   EBAMRIVData& flux = m_sigma->get_flux();
   data_ops::set_value(flux, 0.0);
 
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<species>& spec      = solver_it.get_species();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
@@ -450,7 +450,7 @@ void rk2_tga::advance_advection_source_cdr_k1(const Real a_dt){
     pout() << "rk2_tga::advance_advection_source_cdr_k1" << endl;
   }
 
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -500,7 +500,7 @@ void rk2_tga::advance_advection_source_cdr_k2(const Real a_dt){
     pout() << "rk2_tga::advance_advection_source_cdr_k2" << endl;
   }
 
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -564,7 +564,7 @@ void rk2_tga::advance_diffusion(const Real a_dt){
 
   // Diffusive advance for all cdr equations
   bool diffusive_states = false;
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
 
     if(solver->isDiffusive()){
@@ -576,7 +576,7 @@ void rk2_tga::advance_diffusion(const Real a_dt){
   if(diffusive_states){
     m_cdr->setSource(0.0); // This is necessary because advance_diffusion also works with source terms
     this->compute_cdr_diffusion();
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver = solver_it();
 
       solver->advance_diffusion(a_dt);

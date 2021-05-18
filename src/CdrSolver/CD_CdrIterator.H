@@ -1,5 +1,5 @@
 /*!
-  @file   cdr_iterator.H
+  @file   CdrIterator.H
   @brief  Iterator class for cdr_layout
   @author Robert Marskar
   @date   June Dec. 2017
@@ -16,13 +16,13 @@
   @brief Iterator class for cdr_layout
 */
 template <class T>
-class cdr_iterator {
+class CdrIterator {
 public:
 
   /*!
     @brief Silly enum for iterating through selected species
   */
-  enum class species_iteration{
+  enum class SpeciesIteration{
     all,
     charged,
     negative,
@@ -33,22 +33,22 @@ public:
   /*!
     @brief Empty constructor
   */
-  cdr_iterator();
+  CdrIterator();
 
   /*!
     @brief Full constructor
   */
-  cdr_iterator(cdr_layout<T>& a_layout, const species_iteration a_mode = species_iteration::all);
+  CdrIterator(cdr_layout<T>& a_layout, const SpeciesIteration a_mode = SpeciesIteration::all);
 
   /*!
     @brief Full constructor, allows iteration through data
   */
-  cdr_iterator(cdr_layout<T>& a_layout, Vector<EBAMRCellData*> a_data);
+  CdrIterator(cdr_layout<T>& a_layout, Vector<EBAMRCellData*> a_data);
 
   /*!
     @brief Destructor
   */
-  virtual ~cdr_iterator();
+  virtual ~CdrIterator();
 
   /*!
     @brief Get number of solvers. 
@@ -95,7 +95,7 @@ protected:
   /*!
     @brief Which species to iterate over
   */
-  species_iteration m_mode;
+  SpeciesIteration m_mode;
   
   /*!
     @brief 
@@ -130,6 +130,6 @@ protected:
 };
 #include "CD_NamespaceFooter.H"
 
-#include "cdr_iteratorI.H"
+#include <CD_CdrIterator.H>
 
 #endif

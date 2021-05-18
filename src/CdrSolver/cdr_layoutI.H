@@ -9,7 +9,7 @@
 #define _CDR_LAYOUTI_H
 
 #include "cdr_layout.H"
-#include "cdr_iterator.H"
+#include <CD_CdrIterator.H>
 #include "units.H"
 
 #include "CD_NamespaceHeader.H"
@@ -36,8 +36,8 @@ phase::which_phase cdr_layout<T>::get_phase() const{
 }
 
 template <class T>
-cdr_iterator<T> cdr_layout<T>::iterator() {
-  return cdr_iterator<T>(*this);
+CdrIterator<T> cdr_layout<T>::iterator() {
+  return CdrIterator<T>(*this);
 }
 
 template <class T>
@@ -66,7 +66,7 @@ void cdr_layout<T>::parseOptions(){
     pout() << "cdr_layout<T>::parseOptions" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->parseOptions();
   }
@@ -79,7 +79,7 @@ void cdr_layout<T>::parseRuntimeOptions(){
     pout() << "cdr_layout<T>::parseRuntimeOptions" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->parseRuntimeOptions();
   }
@@ -92,7 +92,7 @@ void cdr_layout<T>::allocateInternals(){
     pout() << "cdr_layout<T>::allocateInternals" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->allocateInternals();
   }
@@ -105,7 +105,7 @@ void cdr_layout<T>::deallocateInternals(){
     pout() << "cdr_layout<T>::deallocateInternals" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->deallocateInternals();
   }
@@ -118,7 +118,7 @@ void cdr_layout<T>::preRegrid(const int a_lbase, const int a_oldFinestLevel){
     pout() << "cdr_layout<T>::preRegrid" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->preRegrid(a_lbase, a_oldFinestLevel);
   }
@@ -131,7 +131,7 @@ void cdr_layout<T>::initialData(){
     pout() << "cdr_layout<T>::initialData" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->initialData();
   }
@@ -144,7 +144,7 @@ void cdr_layout<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const i
     pout() << "cdr_layout<T>::regrid" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   }
@@ -157,7 +157,7 @@ void cdr_layout<T>::registerOperators(){
     pout() << "cdr_layout<T>::registerOperators" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->registerOperators();
   }
@@ -170,7 +170,7 @@ void cdr_layout<T>::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
     pout() << "cdr_layout<T>::setAmr" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setAmr(a_amr);
   }
@@ -183,7 +183,7 @@ void cdr_layout<T>::setComputationalGeometry(const RefCountedPtr<computational_g
     pout() << "cdr_layout<T>::setComputationalGeometry" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setComputationalGeometry(a_computationalGeometry);
   }
@@ -198,7 +198,7 @@ void cdr_layout<T>::setPhase(phase::which_phase a_phase){
 
   m_phase = a_phase;
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setPhase(a_phase);
   }
@@ -212,7 +212,7 @@ void cdr_layout<T>::setVerbosity(const int a_verbosity){
     pout() << "cdr_layout<T>::setVerbosity" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setVerbosity(a_verbosity);
   }
@@ -225,7 +225,7 @@ void cdr_layout<T>::set_bc(CdrBc a_bc){
     pout() << "cdr_layout<T>::set_bc" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setDomainBc(a_bc);
   }
@@ -238,7 +238,7 @@ void cdr_layout<T>::sanityCheck(){
     pout() << "cdr_layout<T>::sanityCheck" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->sanityCheck();
   }
@@ -251,7 +251,7 @@ void cdr_layout<T>::setTime(const int a_step, const Real a_time, const Real a_dt
     pout() << "cdr_layout<T>::setTime" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setTime(a_step, a_time, a_dt);
   }
@@ -264,7 +264,7 @@ void cdr_layout<T>::setVelocity(const EBAMRCellData& a_velo){
     pout() << "cdr_layout<T>::setVelocity(ebamrcell)" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setVelocity(a_velo);
   }
@@ -277,7 +277,7 @@ void cdr_layout<T>::setVelocity(const RealVect a_velo){
     pout() << "cdr_layout<T>::setVelocity(constant)" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setVelocity(a_velo);
   }
@@ -290,7 +290,7 @@ void cdr_layout<T>::setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoef
     pout() << "cdr_layout<T>::setDiffusionCoefficient(ebamrflux)" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setDiffusionCoefficient(a_diffusionCoefficient, a_ebDiffusionCoefficient);
   }
@@ -303,7 +303,7 @@ void cdr_layout<T>::setDiffusionCoefficient(const Real a_diffusionCoefficient){
     pout() << "cdr_layout<T>::setDiffusionCoefficient(constant)" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setDiffusionCoefficient(a_diffusionCoefficient);
   }
@@ -316,7 +316,7 @@ void cdr_layout<T>::setSource(const EBAMRCellData& a_source){
     pout() << "cdr_layout<T>::setSource(ebamrcell)" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setSource(a_source);
   }
@@ -329,7 +329,7 @@ void cdr_layout<T>::setSource(const Real a_source){
     pout() << "cdr_layout<T>::setSource(constant)" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setSource(a_source);
   }
@@ -342,7 +342,7 @@ void cdr_layout<T>::setEbFlux(const EBAMRIVData& a_ebFlux){
     pout() << "cdr_layout<T>::setSource(ebamriv)" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setEbFlux(a_ebFlux);
   }
@@ -355,7 +355,7 @@ void cdr_layout<T>::setEbFlux(const Real a_ebFlux){
     pout() << "cdr_layout<T>::setSource(constant)" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->setEbFlux(a_ebFlux);
   }
@@ -368,7 +368,7 @@ void cdr_layout<T>::writePlotFile(){
     pout() << "cdr_layout<T>::writePlotFile" << endl;
   }
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     solver->writePlotFile();
   }
@@ -383,7 +383,7 @@ Real cdr_layout<T>::computeAdvectionDt(){
 
   Real dt = 1.E99;
   
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     const Real this_dt = solver->computeAdvectionDt();
 
@@ -402,7 +402,7 @@ Real cdr_layout<T>::computeDiffusionDt(){
 
   Real dt = 1.E99;
   
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     const Real this_dt = solver->computeDiffusionDt();
 
@@ -421,7 +421,7 @@ Real cdr_layout<T>::computeAdvectionDiffusionDt(){
 
   Real dt = 1.E99;
   
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     const Real this_dt = solver->computeAdvectionDiffusionDt();
 
@@ -441,7 +441,7 @@ Real cdr_layout<T>::computeSourceDt(const Real a_tolerance, const bool a_elec_on
   const int comp = 0;
   
   Real max = 0.0;
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     Real cur_max, cur_min;
     RefCountedPtr<CdrSolver>& solver = solver_it();
     data_ops::get_max_min(cur_max, cur_min, solver->getPhi(), comp);
@@ -453,7 +453,7 @@ Real cdr_layout<T>::computeSourceDt(const Real a_tolerance, const bool a_elec_on
 
   Real dt = 1.E99;
   
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     const Real this_dt = solver->computeSourceDt(max, a_tolerance);
 
@@ -475,7 +475,7 @@ Real cdr_layout<T>::compute_total_charge(){
 
   Real Q = 0.;
   
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     const Real N = solver->computeMass();
 
@@ -494,7 +494,7 @@ Vector<Real> cdr_layout<T>::computeMass(){
 
   Vector<Real> mass;
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     mass.push_back(solver->computeMass());
   }
@@ -511,7 +511,7 @@ Vector<Real> cdr_layout<T>::computeCharge(){
 
   Vector<Real> charge;
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     charge.push_back(solver->computeCharge()*units::s_Qe);
   }
@@ -528,7 +528,7 @@ Vector<std::string> cdr_layout<T>::getNames() {
 
   Vector<std::string> names;
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     names.push_back(solver->getName());
   }
@@ -555,7 +555,7 @@ Vector<EBAMRCellData*> cdr_layout<T>::getPhis(){
 
   Vector<EBAMRCellData*> states;
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     states.push_back(&(solver->getPhi()));
   }
@@ -572,7 +572,7 @@ Vector<EBAMRCellData*> cdr_layout<T>::getSources(){
 
   Vector<EBAMRCellData*> sources;
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     sources.push_back(&(solver->getSource()));
   }
@@ -589,7 +589,7 @@ Vector<EBAMRCellData*> cdr_layout<T>::get_velocities(){
 
   Vector<EBAMRCellData*> velocities;
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     velocities.push_back(&(solver->getCellCenteredVelocity()));
   }
@@ -606,7 +606,7 @@ Vector<EBAMRFluxData*> cdr_layout<T>::getFaceCenteredDiffusionCoefficient(){
 
   Vector<EBAMRFluxData*> diffco;
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     diffco.push_back(&(solver->getFaceCenteredDiffusionCoefficient()));
   }
@@ -623,7 +623,7 @@ Vector<EBAMRIVData*> cdr_layout<T>::get_diffco_eb(){
 
   Vector<EBAMRIVData*> diffco_eb;
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     diffco_eb.push_back(&(solver->get_diffco_eb()));
   }
@@ -640,7 +640,7 @@ Vector<EBAMRIVData*> cdr_layout<T>::getEbFlux(){
 
   Vector<EBAMRIVData*> ebflux;
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     ebflux.push_back(&(solver->getEbFlux()));
   }
@@ -657,7 +657,7 @@ Vector<EBAMRIFData*> cdr_layout<T>::getDomainFlux(){
 
   Vector<EBAMRIFData*> domainflux;
 
-  for (cdr_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     domainflux.push_back(&(solver->getDomainFlux()));
   }

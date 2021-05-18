@@ -170,7 +170,7 @@ bool euler_maruyama::needToRegrid(){
   return false;
 }
 
-RefCountedPtr<cdr_storage>& euler_maruyama::get_cdr_storage(const cdr_iterator& a_solverit){
+RefCountedPtr<cdr_storage>& euler_maruyama::get_cdr_storage(const CdrIterator& a_solverit){
   return m_cdr_scratch[a_solverit.index()];
 }
 
@@ -329,7 +329,7 @@ void euler_maruyama::allocateInternals(){
 
   // Allocate cdr storage
   m_cdr_scratch.resize(num_species);
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_cdr->get_phase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
@@ -358,7 +358,7 @@ void euler_maruyama::deallocateInternals(){
     pout() << "euler_maruyama::deallocateInternals" << endl;
   }
 
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_cdr_scratch[idx]->deallocate_storage();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
@@ -403,7 +403,7 @@ void euler_maruyama::compute_cdr_gradients(){
     pout() << "euler_maruyama::compute_cdr_gradients" << endl;
   }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
@@ -427,7 +427,7 @@ void euler_maruyama::compute_cdr_eb_states(){
   Vector<EBAMRIVData*>   eb_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
 
@@ -439,7 +439,7 @@ void euler_maruyama::compute_cdr_eb_states(){
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
   TimeStepper::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     data_ops::floor(*eb_states[idx], 0.0);
   }
@@ -470,7 +470,7 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
 
   cdr_fluxes = m_cdr->getEbFlux();
 
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIVData& dens_eb = storage->get_eb_state();
@@ -537,7 +537,7 @@ void euler_maruyama::compute_cdr_domain_states(){
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIFData grad;
   m_amr->allocate(grad, m_cdr->get_phase(), SpaceDim);
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const int idx = solver_it.index();
     if(solver->isMobile()){
@@ -570,7 +570,7 @@ void euler_maruyama::compute_cdr_domain_fluxes(){
 
   cdr_fluxes = m_cdr->getDomainFlux();
   cdr_velocities = m_cdr->get_velocities();
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIFData& dens_domain = storage->get_domain_state();
@@ -651,7 +651,7 @@ void euler_maruyama::compute_reaction_network(const Real a_dt){
   const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 
   Vector<EBAMRCellData*> cdr_grad;
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
     EBAMRCellData& gradient = storage->get_gradient();

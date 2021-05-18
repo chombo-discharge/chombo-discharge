@@ -217,7 +217,7 @@ bool godunov::needToRegrid(){
   return false;
 }
 
-RefCountedPtr<cdr_storage>& godunov::get_cdr_storage(const cdr_iterator<CdrSolver>& a_solverit){
+RefCountedPtr<cdr_storage>& godunov::get_cdr_storage(const CdrIterator<CdrSolver>& a_solverit){
   return m_cdr_scratch[a_solverit.index()];
 }
 
@@ -381,7 +381,7 @@ void godunov::allocateInternals(){
 
   // Allocate cdr storage
   m_cdr_scratch.resize(num_species);
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_realm, m_cdr->get_phase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
@@ -410,7 +410,7 @@ void godunov::deallocateInternals(){
     pout() << "godunov::deallocateInternals" << endl;
   }
 
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_cdr_scratch[idx]->deallocate_storage();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
@@ -455,7 +455,7 @@ void godunov::compute_cdr_gradients(){
     pout() << "godunov::compute_cdr_gradients" << endl;
   }
 
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
@@ -478,7 +478,7 @@ void godunov::compute_cdr_eb_states(){
   Vector<EBAMRIVData*>   eb_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
@@ -491,7 +491,7 @@ void godunov::compute_cdr_eb_states(){
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
   cdr_plasma_stepper::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     data_ops::floor(*eb_states[idx], 0.0);
   }
@@ -521,7 +521,7 @@ void godunov::compute_cdr_eb_fluxes(){
 
   cdr_fluxes = m_cdr->getEbFlux();
 
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIVData& dens_eb = storage->get_eb_state();
@@ -590,7 +590,7 @@ void godunov::compute_cdr_domain_states(){
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIFData grad;
   m_amr->allocate(grad, m_realm, m_cdr->get_phase(), SpaceDim);
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const int idx = solver_it.index();
     if(solver->isMobile()){
@@ -622,7 +622,7 @@ void godunov::compute_cdr_domain_fluxes(){
 
   cdr_fluxes = m_cdr->getDomainFlux();
   cdr_velocities = m_cdr->get_velocities();
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
     EBAMRIFData& dens_domain = storage->get_domain_state();
@@ -705,7 +705,7 @@ void godunov::compute_reaction_network(const Real a_dt){
   const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
 
   Vector<EBAMRCellData*> cdr_grad;
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
     EBAMRCellData& gradient = storage->get_gradient();
@@ -716,7 +716,7 @@ void godunov::compute_reaction_network(const Real a_dt){
   cdr_plasma_stepper::advance_reaction_network(cdr_src, rte_src, cdr_phi, cdr_grad, rte_phi, E, m_time, a_dt);
 
   // Make phi = phi + S*dt
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
 
     EBAMRCellData& phi = solver->getPhi();
@@ -860,7 +860,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
 
   // 1. Compute the "k1" coefficient. This is equivalent to using a semi-implicit
   //    euler method as the predictor for Heun's method
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
@@ -944,7 +944,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
   godunov::compute_sigma_flux();           // Update charge flux for sigma solver
 
   // 3. Perform final advance, which will be the solution to 
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
@@ -1113,7 +1113,7 @@ void godunov::post_step(){
     pout() << "godunov::post_step" << endl;
   }
 
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver> solver = solver_it();
 
     m_amr->averageDown(solver->getPhi(), m_realm, m_cdr->get_phase());
@@ -1130,7 +1130,7 @@ void godunov::extrapolateSourceTerm(const Real a_dt){
   // TLDR: If we extrapolate the advective derivative and include the source term in the extrapolation,
   //       the boundary conditions should be computed from phi + 0.5*source*dt rather than just phi.
 
-  for (cdr_iterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 

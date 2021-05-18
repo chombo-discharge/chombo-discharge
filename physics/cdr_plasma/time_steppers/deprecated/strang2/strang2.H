@@ -10,7 +10,7 @@
 
 #include "CD_AmrMesh.H"
 #include "CD_TimeStepper.H"
-#include "cdr_iterator.H"
+#include <CD_CdrIterator.H>
 #include "rte_iterator.H"
 
 /*!
@@ -90,7 +90,7 @@ protected:
 
   TimeCode::which_code m_timeCode;
 
-  RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
+  RefCountedPtr<cdr_storage>& get_cdr_storage(const CdrIterator& a_solverit);
   RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
 
   void allocate_cdr_storage();
