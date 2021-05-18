@@ -27,7 +27,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/global \
 	$(DISCHARGE_HOME)/Source/FieldSolver \
 	$(DISCHARGE_HOME)/Source/particle \
-	$(DISCHARGE_HOME)/geometries/mechanical_shaft\
+	$(DISCHARGE_HOME)/Geometries/mechanical_shaft\
 	$(DISCHARGE_HOME)/Physics/Electrostatics \
 
 

@@ -13,16 +13,16 @@ def write_template(args):
         # Write main file. This should be a separate routine. 
     main_filename = app_dir + "/" + args.filename + ".cpp"
     mainf = open(main_filename, "w")
-    mainf.write('#include <CD_Driver.H>\n')
-    mainf.write('#include <CD_' + args.cdrsolver + '.H>\n')
-    mainf.write('#include <' + args.geometry + '.H>\n')
-    mainf.write('#include <CD_' + args.stepper + '.H>\n')
-    mainf.write('#include <CD_AdvectionDiffusionTagger.H>\n')
-    mainf.write('#include <ParmParse.H>\n')
+    mainf.write('#include "CD_Driver.H"\n')
+    mainf.write('#include "' + args.ito_solver + '.H"\n')
+    mainf.write('#include "' + args.geometry + '.H"\n')
+    mainf.write('#include "' + args.stepper + '.H"\n')
+    mainf.write('#include "brownian_walker_tagger.H"\n')
+    mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
 
     mainf.write("using namespace ChomboDischarge;\n")
-    mainf.write("using namespace Physics::AdvectionDiffusion;\n\n")
+    mainf.write("using namespace physics::brownian_walker;\n\n")
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
@@ -45,10 +45,10 @@ def write_template(args):
 
 
     mainf.write("\n")
-    mainf.write("  // Set up basic AdvectionDiffusion \n")
-    mainf.write("  RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new " + args.cdrsolver + "());\n")
+    mainf.write("  // Set up basic brownian_walker \n")
+    mainf.write("  RefCountedPtr<ito_solver> solver        = RefCountedPtr<ito_solver>   (new " + args.ito_solver + "());\n")
     mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new " + args.stepper + "(solver));\n")
-    mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new AdvectionDiffusionTagger(solver, amr));\n")
+    mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new brownian_walker_tagger(solver, amr));\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")

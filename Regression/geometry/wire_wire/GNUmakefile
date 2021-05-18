@@ -23,8 +23,8 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/geometry \
 	$(DISCHARGE_HOME)/Source/global \
 	$(DISCHARGE_HOME)/Source/particle \
-	$(DISCHARGE_HOME)/physics/geometry \
-	$(DISCHARGE_HOME)/geometries/wire_wire\
+	$(DISCHARGE_HOME)/Physics/geometry \
+	$(DISCHARGE_HOME)/Geometries/wire_wire\
 
 
 include $(CHOMBO_HOME)/mk/Make.example

@@ -28,7 +28,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/sigma_solver \
 	$(DISCHARGE_HOME)/Source/particle \
 	$(DISCHARGE_HOME)/Source/global \
-	$(DISCHARGE_HOME)/geometries/rod_dielectric\
+	$(DISCHARGE_HOME)/Geometries/rod_dielectric\
 	$(DISCHARGE_HOME)/Physics/AdvectionDiffusion \
 
 

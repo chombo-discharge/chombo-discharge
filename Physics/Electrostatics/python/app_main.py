@@ -3,7 +3,7 @@ import sys
 
 def write_template(args):
     # Make sure that every class can be found where they should
-    geofile = args.discharge_home + "/geometries" + "/" + args.geometry + "/" + args.geometry + ".H"
+    geofile = args.discharge_home + "/Geometries" + "/" + args.geometry + "/" + args.geometry + ".H"
                     
     # Create app directory if it does not exist
     app_dir = args.discharge_home + "/" + args.base_dir + "/" + args.app_name

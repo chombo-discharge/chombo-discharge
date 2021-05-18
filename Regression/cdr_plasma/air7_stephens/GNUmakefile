@@ -28,11 +28,11 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/FieldSolver \
 	$(DISCHARGE_HOME)/Source/rte_solver \
 	$(DISCHARGE_HOME)/Source/sigma_solver \
-	$(DISCHARGE_HOME)/geometries/rod_dielectric\
-	$(DISCHARGE_HOME)/physics/cdr_plasma \
-	$(DISCHARGE_HOME)/physics/cdr_plasma/cell_taggers/streamer_tagger\
-	$(DISCHARGE_HOME)/physics/cdr_plasma/time_steppers/godunov\
-	$(DISCHARGE_HOME)/physics/cdr_plasma/plasma_models/air7_stephens
+	$(DISCHARGE_HOME)/Geometries/rod_dielectric\
+	$(DISCHARGE_HOME)/Physics/cdr_plasma \
+	$(DISCHARGE_HOME)/Physics/cdr_plasma/cell_taggers/streamer_tagger\
+	$(DISCHARGE_HOME)/Physics/cdr_plasma/time_steppers/godunov\
+	$(DISCHARGE_HOME)/Physics/cdr_plasma/plasma_models/air7_stephens
 
 
 include $(CHOMBO_HOME)/mk/Make.example

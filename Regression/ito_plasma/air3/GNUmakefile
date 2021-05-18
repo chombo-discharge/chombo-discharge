@@ -29,11 +29,11 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/FieldSolver \
 	$(DISCHARGE_HOME)/Source/rte_solver \
 	$(DISCHARGE_HOME)/Source/sigma_solver \
-	$(DISCHARGE_HOME)/geometries/rod_dielectric\
-	$(DISCHARGE_HOME)/physics/ito_plasma \
-	$(DISCHARGE_HOME)/physics/ito_plasma/cell_taggers/ito_plasma_streamer_tagger\
-	$(DISCHARGE_HOME)/physics/ito_plasma/time_steppers/ito_plasma_godunov\
-	$(DISCHARGE_HOME)/physics/ito_plasma/plasma_models/ito_plasma_air3
+	$(DISCHARGE_HOME)/Geometries/rod_dielectric\
+	$(DISCHARGE_HOME)/Physics/ito_plasma \
+	$(DISCHARGE_HOME)/Physics/ito_plasma/cell_taggers/ito_plasma_streamer_tagger\
+	$(DISCHARGE_HOME)/Physics/ito_plasma/time_steppers/ito_plasma_godunov\
+	$(DISCHARGE_HOME)/Physics/ito_plasma/plasma_models/ito_plasma_air3
 
 
 include $(CHOMBO_HOME)/mk/Make.example

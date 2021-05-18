@@ -13,16 +13,15 @@ def write_template(args):
         # Write main file. This should be a separate routine. 
     main_filename = app_dir + "/" + args.filename + ".cpp"
     mainf = open(main_filename, "w")
-    mainf.write('#include <CD_Driver.H>\n')
-    mainf.write('#include <CD_' + args.cdrsolver + '.H>\n')
-    mainf.write('#include <' + args.geometry + '.H>\n')
-    mainf.write('#include <CD_' + args.stepper + '.H>\n')
-    mainf.write('#include <CD_AdvectionDiffusionTagger.H>\n')
-    mainf.write('#include <ParmParse.H>\n')
+    mainf.write('#include "CD_Driver.H"\n')
+    mainf.write('#include "' + args.rte_solver + '.H"\n')
+    mainf.write('#include "' + args.geometry + '.H"\n')
+    mainf.write('#include "rte_stepper.H"\n')
+    mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
 
     mainf.write("using namespace ChomboDischarge;\n")
-    mainf.write("using namespace Physics::AdvectionDiffusion;\n\n")
+    mainf.write("using namespace physics::rte;\n\n")
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
@@ -42,14 +41,16 @@ def write_template(args):
     mainf.write("  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new " + args.geometry + "());\n")
     mainf.write("  RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());\n")
     mainf.write("  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());\n")
-
+    mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);\n")
 
     mainf.write("\n")
-    mainf.write("  // Set up basic AdvectionDiffusion \n")
-    mainf.write("  RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new " + args.cdrsolver + "());\n")
-    mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new " + args.stepper + "(solver));\n")
-    mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new AdvectionDiffusionTagger(solver, amr));\n")
+    mainf.write("  // Set up basic Poisson, potential = 1 \n")
+    mainf.write("  auto timestepper = RefCountedPtr<rte_stepper<" + args.rte_solver + "> >\n")
+    mainf.write("     (new rte_stepper<" + args.rte_solver + ">());\n")
     mainf.write("\n")
+
+
+
     
     mainf.write("  // Set up the Driver and run it\n")
     mainf.write("  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));\n")

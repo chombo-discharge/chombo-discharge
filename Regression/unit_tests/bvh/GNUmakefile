@@ -28,8 +28,8 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/sigma_solver \
 	$(DISCHARGE_HOME)/Source/global \
 	$(DISCHARGE_HOME)/Source/particle \
-	$(DISCHARGE_HOME)/geometries/rod_sphere\
-	$(DISCHARGE_HOME)/physics/brownian_walker \
+	$(DISCHARGE_HOME)/Geometries/rod_sphere\
+	$(DISCHARGE_HOME)/Physics/brownian_walker \
 
 
 include $(CHOMBO_HOME)/mk/Make.example
