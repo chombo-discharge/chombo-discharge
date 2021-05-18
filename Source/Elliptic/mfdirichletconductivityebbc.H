@@ -106,7 +106,7 @@ public:
   /*!
     @brief Set the jump object. This is needed for extracting stencils
   */
-  virtual void set_jump_object(const RefCountedPtr<jump_bc> a_jumpbc);
+  virtual void setJump_object(const RefCountedPtr<jump_bc> a_jumpbc);
 
   /*!
     @brief Get stencils for computing the flux

@@ -4,42 +4,42 @@
  */
 
 /*!
-  @file   CD_MfConductivityOpFactory.cpp
-  @brief  Implementation of CD_MfConductivityOpFactory.H
+  @file   CD_MfHelmholtzOpFactory.cpp
+  @brief  Implementation of CD_MfHelmholtzOpFactory.H
   @author Robert Marskar
 */
 
 // Our includes
-#include <CD_MfConductivityOpFactory.H>
+#include <CD_MfHelmholtzOpFactory.H>
 #include <CD_NamespaceHeader.H>
   
 #define verb 0
 
-MfConductivityOpFactory::MfConductivityOpFactory(const RefCountedPtr<mfis>&                a_mfis,
-						 const Vector<MFLevelGrid>&                a_mflg,
-						 const Vector<MFQuadCFInterp>&             a_mfquadcfi,
-						 const Vector<MFFastFluxReg>&              a_mffluxreg,
-						 const Vector<int>&                        a_ref_rat,
-						 const Vector<DisjointBoxLayout>&          a_grids,
-						 const MFAMRCellData&                      a_aco,
-						 const MFAMRFluxData&                      a_bco,
-						 const MFAMRIVData&                        a_bco_irreg,
-						 const Real&                               a_alpha,
-						 const Real&                               a_beta,
-						 const Real&                               a_lengthScale,
-						 const Real&                               a_coarsest_dx,
-						 const ProblemDomain&                      a_coarsest_domain,
-						 const RefCountedPtr<BaseDomainBCFactory>& a_dombc,
-						 const RealVect&                           a_origin,
-						 const IntVect&                            a_ghost_phi,
-						 const IntVect&                            a_ghost_rhs,
-						 const int                                 a_order_ebbc,
-						 const int                                 a_relax_type,
-						 const int                                 a_drop_bottom,
-						 const int                                 a_num_levels,
-						 const Vector<MFLevelGrid>&                a_mg_mflg){
+MfHelmholtzOpFactory::MfHelmholtzOpFactory(const RefCountedPtr<mfis>&                a_mfis,
+					   const Vector<MFLevelGrid>&                a_mflg,
+					   const Vector<MFQuadCFInterp>&             a_mfquadcfi,
+					   const Vector<MFFastFluxReg>&              a_mffluxreg,
+					   const Vector<int>&                        a_ref_rat,
+					   const Vector<DisjointBoxLayout>&          a_grids,
+					   const MFAMRCellData&                      a_aco,
+					   const MFAMRFluxData&                      a_bco,
+					   const MFAMRIVData&                        a_bco_irreg,
+					   const Real&                               a_alpha,
+					   const Real&                               a_beta,
+					   const Real&                               a_lengthScale,
+					   const Real&                               a_coarsest_dx,
+					   const ProblemDomain&                      a_coarsest_domain,
+					   const RefCountedPtr<BaseDomainBCFactory>& a_dombc,
+					   const RealVect&                           a_origin,
+					   const IntVect&                            a_ghost_phi,
+					   const IntVect&                            a_ghost_rhs,
+					   const int                                 a_order_ebbc,
+					   const int                                 a_relax_type,
+					   const int                                 a_drop_bottom,
+					   const int                                 a_num_levels,
+					   const Vector<MFLevelGrid>&                a_mg_mflg){
 #if verb
-  pout() << "MfConductivityOpFactory::MfConductivityOpFactory" << endl;
+  pout() << "MfHelmholtzOpFactory::MfHelmholtzOpFactory" << endl;
 #endif
 
   CH_assert(a_mflg[0].num_phases() <= 2); 
@@ -79,14 +79,14 @@ MfConductivityOpFactory::MfConductivityOpFactory(const RefCountedPtr<mfis>&     
 
   const int botdrop  = (a_drop_bottom == -1) ? a_coarsest_domain.size()[0]/4 : a_drop_bottom;
 
-  this->set_ebbc_order(m_ebbc_order); // Default is second order BCs
-  this->set_relax_type(a_relax_type); // Default relaxation type
-  this->set_bottom_drop(botdrop);     // Default bottom drop
-  this->set_max_box_size(32);         // Default max box size
-  this->define_jump_stuff();          // Define jump cell stuff
-  this->define_multigrid_stuff();     // Define things for lower levels of multigrid. Must happen after define_jump_stuff
+  this->setEbBcOrder(m_ebbc_order); // Default is second order BCs
+  this->setRelaxType(a_relax_type); // Default relaxation type
+  this->setBottomDrop(botdrop);     // Default bottom drop
+  this->setMaxBoxSize(32);         // Default max box size
+  this->defineJump();          // Define jump cell stuff
+  this->defineDeeperMultigrid();     // Define things for lower levels of multigrid. Must happen after defineJump
 #if 1
-  this->set_jump(0.0, 1.0);           // Default, no surface charge.
+  this->setJump(0.0, 1.0);           // Default, no surface charge.
 #endif
 
 
@@ -100,12 +100,12 @@ MfConductivityOpFactory::MfConductivityOpFactory(const RefCountedPtr<mfis>&     
 #endif
 }
 
-MfConductivityOpFactory::~MfConductivityOpFactory(){
+MfHelmholtzOpFactory::~MfHelmholtzOpFactory(){
 
 }
 
-void MfConductivityOpFactory::define_multigrid_stuff(){
-  CH_TIME("MfConductivityOpFactory::define_multigrid_stuff");
+void MfHelmholtzOpFactory::defineDeeperMultigrid(){
+  CH_TIME("MfHelmholtzOpFactory::defineDeeperMultigrid");
   m_aCoefficient_mg.resize(m_num_levels);
   m_bco_mg.resize(m_num_levels);
   m_bco_irreg_mg.resize(m_num_levels);
@@ -305,15 +305,15 @@ void MfConductivityOpFactory::define_multigrid_stuff(){
 	    (new LevelData<MFBaseIVFAB>(grid_coar_mg, ncomps, ghost*IntVect::Unit, ivfact));
 	    
 
-	  this->coarsen_coefficients(*aco_coar, // Coarsen coefficients
-				     *bco_coar,
-				     *bco_irreg_coar,
-				     mflg_coar,
-				     mflg_fine,
-				     *m_aCoefficient_mg[lvl][img-1],
-				     *m_bco_mg[lvl][img-1],
-				     *m_bco_irreg_mg[lvl][img-1],
-				     mg_refi);
+	  this->coarsenCoefficients(*aco_coar, // Coarsen coefficients
+				    *bco_coar,
+				    *bco_irreg_coar,
+				    mflg_coar,
+				    mflg_fine,
+				    *m_aCoefficient_mg[lvl][img-1],
+				    *m_bco_mg[lvl][img-1],
+				    *m_bco_irreg_mg[lvl][img-1],
+				    mg_refi);
 
 	  m_aCoefficient_mg[lvl].push_back(aco_coar);
 	  m_bco_mg[lvl].push_back(bco_coar);
@@ -331,7 +331,7 @@ void MfConductivityOpFactory::define_multigrid_stuff(){
   }
 }
 
-void MfConductivityOpFactory::coarsen_coefficients(LevelData<MFCellFAB>&         a_aco_coar,
+void MfHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_aco_coar,
 						   LevelData<MFFluxFAB>&         a_bco_coar,
 						   LevelData<MFBaseIVFAB>&       a_bco_irreg_coar,
 						   const MFLevelGrid&            a_mflg_coar,
@@ -384,36 +384,36 @@ void MfConductivityOpFactory::coarsen_coefficients(LevelData<MFCellFAB>&        
   }
 }
 
-void MfConductivityOpFactory::set_ebbc_order(const int a_ebbc_order){
+void MfHelmholtzOpFactory::setEbBcOrder(const int a_ebbc_order){
   m_ebbc_order = a_ebbc_order;
 }
 
-void MfConductivityOpFactory::set_bottom_drop(const int a_bottom_drop){
+void MfHelmholtzOpFactory::setBottomDrop(const int a_bottom_drop){
   m_test_ref = a_bottom_drop;
 }
 
-void MfConductivityOpFactory::set_relax_type(const int a_relax_type){
+void MfHelmholtzOpFactory::setRelaxType(const int a_relax_type){
   m_relax_type = a_relax_type;
 }
 
-void MfConductivityOpFactory::setTime(Real* a_time){
+void MfHelmholtzOpFactory::setTime(Real* a_time){
   m_time = a_time;
 }
 
-void MfConductivityOpFactory::set_max_box_size(const int a_max_box_size){
+void MfHelmholtzOpFactory::setMaxBoxSize(const int a_max_box_size){
   m_maxBoxSize = a_max_box_size;
 }
 
-void MfConductivityOpFactory::reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim){
+void MfHelmholtzOpFactory::reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim){
   delete a_reclaim;
 }
 
-void MfConductivityOpFactory::AMRreclaim(MfConductivityOp* a_reclaim){
+void MfHelmholtzOpFactory::AMRreclaim(MfHelmholtzOp* a_reclaim){
   delete a_reclaim;
 }
 
-void MfConductivityOpFactory::define_jump_stuff(){
-  CH_TIME("MfConductivityOpFactory::define_jump_cells");
+void MfHelmholtzOpFactory::defineJump(){
+  CH_TIME("MfHelmholtzOpFactory::define_jump_cells");
 
   m_aveop.resize(m_num_levels);
   m_jump.resize(m_num_levels);
@@ -460,8 +460,8 @@ void MfConductivityOpFactory::define_jump_stuff(){
   }
 }
 
-void MfConductivityOpFactory::averageDown_amr(){
-  CH_TIME("MfConductivityOpFactory::averageDown_amr");
+void MfHelmholtzOpFactory::averageDownAmr(){
+  CH_TIME("MfHelmholtzOpFactory::averageDownAmr");
     
   const int ncomp        = 0;
   const Interval interv  = Interval(0, ncomp -1);
@@ -470,13 +470,13 @@ void MfConductivityOpFactory::averageDown_amr(){
   for (int lvl = finest_level; lvl > 0; lvl--){ // Average down AMR levels
     m_aveop[lvl]->average(*m_jump[lvl-1], *m_jump[lvl], interv);
 #if verb // Debug
-    pout() << "MfConductivityOpFactory::averageDown_amr from AMR level = " << lvl << " and onto AMR level = " << lvl - 1 << endl;
+    pout() << "MfHelmholtzOpFactory::averageDownAmr from AMR level = " << lvl << " and onto AMR level = " << lvl - 1 << endl;
 #endif
   }
 }
 
-void MfConductivityOpFactory::averageDown_mg(){
-  CH_TIME("MfConductivityOpFactory::averageDown_mg");
+void MfHelmholtzOpFactory::averageDownMG(){
+  CH_TIME("MfHelmholtzOpFactory::averageDownMG");
 
   const int ncomp        = 0;
   const Interval interv  = Interval(0, ncomp -1);
@@ -490,7 +490,7 @@ void MfConductivityOpFactory::averageDown_mg(){
 
       for (int img = finest_mg_level+1; img <= coarsest_mg_level; img++){ 
 #if verb // DEBUG
-	pout() << "MfConductivityOpFactory::averageDown_mg from AMR level = " << lvl
+	pout() << "MfHelmholtzOpFactory::averageDownMG from AMR level = " << lvl
 	       << " from MG level = " << img-1
 	       << " to   MG level = " << img 
 	       << " fine domain = " << m_domains_mg[lvl][img-1]
@@ -499,23 +499,23 @@ void MfConductivityOpFactory::averageDown_mg(){
 #endif
 #if 0 // Debug
 	if(m_aveop_mg[lvl][img].isNull()){
-	  MayDay::Abort("MfConductivityOpFactory::averageDown_mg - aveop is NULL");
+	  MayDay::Abort("MfHelmholtzOpFactory::averageDownMG - aveop is NULL");
 	}
 #endif
 	m_aveop_mg[lvl][img]->average(*jump_mg[img], *jump_mg[img-1], interv); // Average down onto level img
 #if verb
-	pout() << "MfConductivityOpFactory::averageDown_mg - done" << endl;
+	pout() << "MfHelmholtzOpFactory::averageDownMG - done" << endl;
 #endif
       }
     }
   }
 #if verb // DEBUG
-  pout() << "MfConductivityOpFactory::averageDown_mg - done exit " << endl;
+  pout() << "MfHelmholtzOpFactory::averageDownMG - done exit " << endl;
 #endif
 }
 
-void MfConductivityOpFactory::reset_jump(){
-  CH_TIME("MfConductivityOpFactory::reset_jump()");
+void MfHelmholtzOpFactory::resetJump(){
+  CH_TIME("MfHelmholtzOpFactory::resetJump()");
 
   data_ops::set_value(m_jump, 0.0);
   for (int i = 0; i < m_jump_mg.size(); i++){
@@ -523,35 +523,35 @@ void MfConductivityOpFactory::reset_jump(){
   }
 }
 
-void MfConductivityOpFactory::set_jump(const Real& a_sigma, const Real& a_scale){
-  CH_TIME("MfConductivityOpFactory::set_jump(scalar)");
+void MfHelmholtzOpFactory::setJump(const Real& a_sigma, const Real& a_scale){
+  CH_TIME("MfHelmholtzOpFactory::setJump(scalar)");
 
 #if verb
-  pout() << "MfConductivityOpFactory::set_jump" << endl;
+  pout() << "MfHelmholtzOpFactory::setJump" << endl;
 #endif
   // for (int lvl = 0; lvl < m_num_levels; lvl++){
   //   EBLevelDataOps::setVal(*m_jump[lvl], a_sigma);
   //   data_ops::scale(*m_jump[lvl], a_scale);
   // }
-  // this->averageDown_amr();
-  // this->averageDown_mg();
+  // this->averageDownAmr();
+  // this->averageDownMG();
 
   data_ops::set_value(m_jump, a_sigma*a_scale);
   for (int i = 0; i < m_jump_mg.size(); i++){
     data_ops::set_value(m_jump_mg[i], a_sigma*a_scale);
   }
 #if verb
-  pout() << "MfConductivityOpFactory::set_jump - done" << endl;
+  pout() << "MfHelmholtzOpFactory::setJump - done" << endl;
 #endif
 }
 
-void MfConductivityOpFactory::set_jump(const EBAMRIVData& a_sigma, const Real& a_scale){
-  CH_TIME("MfConductivityOpFactory::set_jump(data based)");
+void MfHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_scale){
+  CH_TIME("MfHelmholtzOpFactory::setJump(data based)");
 #if verb
-  pout() << "MfConductivityOpFactory::set_jump(data based)" << endl;
+  pout() << "MfHelmholtzOpFactory::setJump(data based)" << endl;
 #endif
 
-  //  reset_jump(); Shouldn't be necessary
+  //  resetJump(); Shouldn't be necessary
 
   // Note: copyTo is a little bit volatile since the linearization functions are crap. So, do a direct local instead. 
   for (int lvl = 0; lvl < m_num_levels; lvl++){
@@ -566,19 +566,19 @@ void MfConductivityOpFactory::set_jump(const EBAMRIVData& a_sigma, const Real& a
     m_jump[lvl]->exchange();
   }
 
-  this->averageDown_amr();
-  this->averageDown_mg();
+  this->averageDownAmr();
+  this->averageDownMG();
 
 #if verb
-  pout() << "MfConductivityOpFactory::set_jump(data based) - done" << endl;
+  pout() << "MfHelmholtzOpFactory::setJump(data based) - done" << endl;
 #endif
 }
 
-void MfConductivityOpFactory::setDirichletEbBc(const ElectrostaticEbBc& a_ebbc){
+void MfHelmholtzOpFactory::setDirichletEbBc(const ElectrostaticEbBc& a_ebbc){
   m_electrostaticEbBc = a_ebbc;
 }
 
-int MfConductivityOpFactory::refToFiner(const ProblemDomain& a_domain) const{
+int MfHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const{
   int retval = -1;
   bool found = false;
 
@@ -590,18 +590,18 @@ int MfConductivityOpFactory::refToFiner(const ProblemDomain& a_domain) const{
   }
   
   if(!found){
-    MayDay::Error("MfConductivityOpFactory::refToFiner - domain not found in AMR hierarchy");
+    MayDay::Error("MfHelmholtzOpFactory::refToFiner - domain not found in AMR hierarchy");
   }
   
   return retval;
 }
 
-MGLevelOp<LevelData<MFCellFAB> >* MfConductivityOpFactory::MGnewOp(const ProblemDomain& a_domain_fine,
+MGLevelOp<LevelData<MFCellFAB> >* MfHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_domain_fine,
 								   int                  a_depth,
 								   bool                 a_homo_only){
-  CH_TIME("MfConductivityOpFactory::MGnewOp");
+  CH_TIME("MfHelmholtzOpFactory::MGnewOp");
 #if verb // Test
-  pout() << "MfConductivityOpFactory::MGnewOp" << endl;
+  pout() << "MfHelmholtzOpFactory::MGnewOp" << endl;
 #endif
   int ref    = -1;
   bool found = false;
@@ -615,7 +615,7 @@ MGLevelOp<LevelData<MFCellFAB> >* MfConductivityOpFactory::MGnewOp(const Problem
   }
 
   if(!found){
-    MayDay::Abort("MfConductivityOpFactory::MGnewOp - no corresponding starting level to a_domain_fine");
+    MayDay::Abort("MfHelmholtzOpFactory::MGnewOp - no corresponding starting level to a_domain_fine");
   }
   
 
@@ -736,7 +736,7 @@ MGLevelOp<LevelData<MFCellFAB> >* MfConductivityOpFactory::MGnewOp(const Problem
   pout() << "creating oper" << endl;
 #endif
 
-  MfConductivityOp* oper = new MfConductivityOp();
+  MfHelmholtzOp* oper = new MfHelmholtzOp();
 
 #if verb
   pout() << "defining oper" << endl;
@@ -771,7 +771,7 @@ MGLevelOp<LevelData<MFCellFAB> >* MfConductivityOpFactory::MGnewOp(const Problem
 	       m_origin);        // Origin
 
   oper->setTime(m_time);
-  oper->set_jump(jump);
+  oper->setJump(jump);
   oper->setDirichletEbBc(m_electrostaticEbBc);
 
 #if verb
@@ -782,18 +782,18 @@ MGLevelOp<LevelData<MFCellFAB> >* MfConductivityOpFactory::MGnewOp(const Problem
   
 
 #if 0 // Debug-stop
-  MayDay::Abort("MfConductivityOpFactory::mgnewop - implementation is not finished!");
+  MayDay::Abort("MfHelmholtzOpFactory::mgnewop - implementation is not finished!");
 #endif
 #if verb
-  pout() << "MfConductivityOpFactory::MGnewOp - returning new op" << endl;
+  pout() << "MfHelmholtzOpFactory::MGnewOp - returning new op" << endl;
 #endif
   return static_cast<MGLevelOp<LevelData<MFCellFAB> >* > (oper);
 }
 
-AMRLevelOp<LevelData<MFCellFAB> >* MfConductivityOpFactory::AMRnewOp(const ProblemDomain& a_domain_fine){
-  CH_TIME("MfConductivityOpFactory::AMRnewOp");
+AMRLevelOp<LevelData<MFCellFAB> >* MfHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain_fine){
+  CH_TIME("MfHelmholtzOpFactory::AMRnewOp");
 #if verb
-  pout() << "MfConductivityOpFactory::AMRnewOp" << endl;
+  pout() << "MfHelmholtzOpFactory::AMRnewOp" << endl;
 #endif
   int ref    = -1;
   bool found = false;
@@ -811,7 +811,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* MfConductivityOpFactory::AMRnewOp(const Probl
 #endif
 
   if(!found){
-    MayDay::Abort("MfConductivityOpFactory::AMRnewOp - no corresponding starting level to a_domain_fine");
+    MayDay::Abort("MfHelmholtzOpFactory::AMRnewOp - no corresponding starting level to a_domain_fine");
   }
   
 
@@ -891,7 +891,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* MfConductivityOpFactory::AMRnewOp(const Probl
 #if verb
   pout() << "creating oper" << endl;
 #endif
-  MfConductivityOp* oper = new MfConductivityOp();
+  MfHelmholtzOp* oper = new MfHelmholtzOp();
 
   oper->define(m_multifluidIndexSpace,
 	       m_domainBc,
@@ -925,14 +925,14 @@ AMRLevelOp<LevelData<MFCellFAB> >* MfConductivityOpFactory::AMRnewOp(const Probl
   pout() << "setting jump" << endl;
 #endif
   oper->setTime(m_time);
-  oper->set_jump(jump);
+  oper->setJump(jump);
   oper->setDirichletEbBc(m_electrostaticEbBc);
 
 #if 0 // Debug-stop
-  MayDay::Abort("MfConductivityOpFactory::AMRnewOp - implementation is not finished!");
+  MayDay::Abort("MfHelmholtzOpFactory::AMRnewOp - implementation is not finished!");
 #endif
 #if verb
-  pout() << "MfConductivityOpFactory::AMRnewOp - returning new op" << endl;
+  pout() << "MfHelmholtzOpFactory::AMRnewOp - returning new op" << endl;
 #endif
   return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (oper);
 }

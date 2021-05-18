@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_MfConductivityOp.H
+  @file   CD_MfHelmholtzOp.H
   @brief  Declaration of multifluid helmholtz operator for embedding in AMRMultiGrid
   @author Robert Marskar
 */
 
-#ifndef CD_MfConductivityOp_H
-#define CD_MfConductivityOp_H
+#ifndef CD_MfHelmholtzOp_H
+#define CD_MfHelmholtzOp_H
 
 // Chombo includes
 #include <LevelDataOps.H>
@@ -37,19 +37,19 @@
 /*!
   @brief Operator class for solving the variable-coefficient Helmholtz equation with multigrid in two phases
 */
-class MfConductivityOp : public TGAHelmOp<LevelData<MFCellFAB> >{
+class MfHelmholtzOp : public TGAHelmOp<LevelData<MFCellFAB> >{
 public:
 
   /*!
     @brief Constructor
   */
-  MfConductivityOp();
+  MfHelmholtzOp();
   
 
   /*!
     @brief Destructor
   */
-  virtual ~MfConductivityOp();
+  virtual ~MfHelmholtzOp();
 
   /*!
     @brief Define function
@@ -88,7 +88,7 @@ public:
   /*!
     @brief Set jump condition
   */
-  virtual void set_jump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump);
+  virtual void setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump);
 
   /*!
     @brief Set time

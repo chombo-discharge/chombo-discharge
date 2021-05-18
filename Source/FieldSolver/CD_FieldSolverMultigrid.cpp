@@ -174,13 +174,13 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   // Do the scaled surface charge
   data_ops::copy(m_scaledSigma, a_sigma);
   data_ops::scale(m_scaledSigma, 1./(m_lengthScale*m_lengthScale));
-  m_opfact->set_jump(m_scaledSigma, 1.0/units::s_eps0);
+  m_opfact->setJump(m_scaledSigma, 1.0/units::s_eps0);
 
   const Real t2 = MPI_Wtime();
   
 #if 0 // Debug
   MayDay::Warning("FieldSolverMultigrid::solve - debug mode");
-  m_opfact->set_jump(0.0, 1.0);
+  m_opfact->setJump(0.0, 1.0);
   data_ops::set_value(source, 0.0);
 #endif
 
@@ -641,7 +641,7 @@ void FieldSolverMultigrid::setupOperatorFactory(){
   auto domfact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_domainBc, m_amr->getProbLo()));
 
   // Create factory and set potential
-  m_opfact = RefCountedPtr<MfConductivityOpFactory> (new MfConductivityOpFactory(m_multifluidIndexSpace,
+  m_opfact = RefCountedPtr<MfHelmholtzOpFactory> (new MfHelmholtzOpFactory(m_multifluidIndexSpace,
 										 mflg,
 										 mfquadcfi,
 										 mffluxreg,

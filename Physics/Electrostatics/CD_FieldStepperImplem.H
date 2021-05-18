@@ -233,12 +233,12 @@ namespace Physics {
 	// Set up the operator factor and fetch it.
 	solver->setMultigridCoefficients();
 	solver->setupOperatorFactory();
-	RefCountedPtr<MfConductivityOpFactory>& factory = solver->getOperatorFactory();
+	RefCountedPtr<MfHelmholtzOpFactory>& factory = solver->getOperatorFactory();
 
 	// Go through each level and load balance. 
 	for (int lvl = 0; lvl <= a_finestLevel; lvl++){
 	  // Make an operator
-	  auto oper = RefCountedPtr<MfConductivityOp> ((MfConductivityOp*) factory->MGnewOp(domains[lvl], 0, false));
+	  auto oper = RefCountedPtr<MfHelmholtzOp> ((MfHelmholtzOp*) factory->MGnewOp(domains[lvl], 0, false));
 
 	  // Reset time
 	  TimedDataIterator dit = a_grids[lvl].timedDataIterator();

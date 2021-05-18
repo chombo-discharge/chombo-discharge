@@ -38,7 +38,7 @@ LayoutData<BaseIVFAB<VoFStencil> >* mfdirichletconductivityebbc::getFluxStencil(
   return &m_IrregStencils;
 }
 
-void mfdirichletconductivityebbc::set_jump_object(const RefCountedPtr<jump_bc> a_jumpbc){
+void mfdirichletconductivityebbc::setJump_object(const RefCountedPtr<jump_bc> a_jumpbc){
   m_jumpbc = a_jumpbc;
 }
 

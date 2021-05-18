@@ -4,19 +4,18 @@
  */
 
 /*!
-  @file   CD_MfConductivityOpFactory.H
+  @file   CD_MfHelmholtzOpFactory.H
   @brief  Factory class for creating multifluid helmholtz operators
   @author Robert Marskar
 */
 
-#ifndef CD_MfConductivityOpFactory_H
-#define CD_MfConductivityOpFactory_H
+#ifndef CD_MfHelmholtzOpFactory_H
+#define CD_MfHelmholtzOpFactory_H
 
 // Chombo includes
 #include <EBLevelDataOps.H>
 #include <AMRMultiGrid.H>
 #include <MFAliasFactory.H>
-#include <ebcoarseaverage.H>
 #include <BaseDomainBC.H>
 #include <BaseEBBC.H>
 #include <ProblemDomain.H>
@@ -26,7 +25,8 @@
 #include <MFCellFAB.H>
 
 // Our includes
-#include <CD_MfConductivityOp.H>
+#include <ebcoarseaverage.H>
+#include <CD_MfHelmholtzOp.H>
 #include <mfis.H>
 #include <mfalias.H>
 #include <MFLevelGrid.H>
@@ -36,14 +36,14 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Factory class for generationg MfConductivityOp's. 
+  @brief Factory class for generationg MfHelmholtzOp's. 
   @details The jump condition is of the Neumann type in the form
   \f[
   a\partial_n\phi_1 - b\partial_n\phi_2 = c\sigma,
   \f]
   where \f$a\f$, \f$b\f$ and \f$c\f$ are variables.  
 */
-class MfConductivityOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
+class MfHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
 public:
   
   /*!
@@ -51,7 +51,7 @@ public:
     @note This class generates its own EBConductivityOps as well as it's own interpolation utilities. 
     @details This class only supports two-phase solutions with single components
   */
-  MfConductivityOpFactory(const RefCountedPtr<mfis>&                a_mfis,
+  MfHelmholtzOpFactory(const RefCountedPtr<mfis>&                a_mfis,
 			  const Vector<MFLevelGrid>&                a_mflg,
 			  const Vector<MFQuadCFInterp>&             a_mfquadcfi,
 			  const Vector<MFFastFluxReg>&              a_mffluxreg,
@@ -78,32 +78,32 @@ public:
   /*!
     @brief Destructor
   */
-  ~MfConductivityOpFactory();
+  ~MfHelmholtzOpFactory();
 
   /*!
     @brief Set when to drop to the bottom solver
   */
-  virtual void set_bottom_drop(const int a_bottom_drop);
+  virtual void setBottomDrop(const int a_bottom_drop);
 
   /*!
     @brief Set when to drop to the bottom solver
   */
-  virtual void set_relax_type(const int a_relax_type);
+  virtual void setRelaxType(const int a_relax_type);
 
   /*!
     @brief MG stuff
   */
-  virtual void set_max_box_size(const int a_max_box_size);
+  virtual void setMaxBoxSize(const int a_max_box_size);
 
   /*!
     @brief Set boundary condition order
   */
-  virtual void set_ebbc_order(const int a_order);
+  virtual void setEbBcOrder(const int a_order);
 
   /*!
     @brief Coarsen coefficients for multigrid
   */
-  virtual void coarsen_coefficients(LevelData<MFCellFAB>&         a_aco_coar,
+  virtual void coarsenCoefficients(LevelData<MFCellFAB>&         a_aco_coar,
 				    LevelData<MFFluxFAB>&         a_bco_coar,
 				    LevelData<MFBaseIVFAB>&       a_bco_irreg_coar,
 				    const MFLevelGrid&            a_mflg_coar,
@@ -116,19 +116,19 @@ public:
   /*!
     @brief Reset jump
   */
-  virtual void reset_jump();
+  virtual void resetJump();
   
   /*!
     @brief Set jump conditions. 
     @details This call must be performed before each solve; this call updates the surface charge density on the jump interface, 
     including MG levels. 
   */
-  virtual void set_jump(const EBAMRIVData& a_sigma, const Real& a_scale);
+  virtual void setJump(const EBAMRIVData& a_sigma, const Real& a_scale);
 
   /*!
     @brief Set simplified jump condition
   */
-  virtual void set_jump(const Real& a_sigma, const Real& a_scale);
+  virtual void setJump(const Real& a_sigma, const Real& a_scale);
 
   /*!
     @brief Electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions
@@ -138,12 +138,12 @@ public:
   /*!
     @brief Average down the surface charge on AMR levels
   */
-  virtual void averageDown_amr();
+  virtual void averageDownAmr();
 
   /*!
     @brief Average down the surface charge on lower levels of multigrid
   */
-  virtual void averageDown_mg();
+  virtual void averageDownMG();
 
   /*!
     @brief Reclaim
@@ -153,17 +153,17 @@ public:
   /*!
     @brief Reclaim
   */
-  virtual void AMRreclaim(MfConductivityOp* a_reclaim);
+  virtual void AMRreclaim(MfHelmholtzOp* a_reclaim);
 
   /*!
     @brief Define things for lower levels of multigrid
   */
-  virtual void define_multigrid_stuff();
+  virtual void defineDeeperMultigrid();
 
   /*!
     @brief Allocate internal storage for jump cells on the AMR hierarchy.
   */
-  virtual void define_jump_stuff();
+  virtual void defineJump();
 
   /*!
     @brief Set time
@@ -408,7 +408,7 @@ private:
   /*!
     @brief Disallowed weak constructor
   */
-  MfConductivityOpFactory() = delete;
+  MfHelmholtzOpFactory() = delete;
 };
 
 #include <CD_NamespaceFooter.H>
