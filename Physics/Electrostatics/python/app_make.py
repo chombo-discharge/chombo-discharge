@@ -43,7 +43,7 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/Source/SigmaSolver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/global \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/FieldSolver \\\n')
-    makef.write('\t$(DISCHARGE_HOME)/Source/particle \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/Source/Particle \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Geometries/' + args.geometry + '\\\n')
     makef.write('\t$(DISCHARGE_HOME)/Physics/Electrostatics \\\n')
     makef.write('\n')
