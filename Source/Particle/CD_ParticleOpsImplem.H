@@ -1,27 +1,32 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   particle_ops.H
-  @brief  Declaration of some common useful particle routines that would otherwise be replicated across classes. 
+  @file   CD_ParticleOpsImplem.H
+  @brief  Implementation of CD_ParticleOps.H
   @author Robert Marskar
-  @date   June 2020
 */
 
-#ifndef _PARTICLE_OPSI_H
-#define _PARTICLE_OPSI_H
+#ifndef CD_ParticleOpsImplem_H
+#define CD_ParticleOpsImplem_H
 
-#include "particle_ops.H"
-#include "poly.H"
-
+// Chombo includes
 #include <PolyGeom.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ParticleOps.H>
+#include <poly.H>
+#include <CD_NamespaceHeader.H>
 
 inline
-bool particle_ops::domain_intersection(const RealVect& a_oldPos,
-				       const RealVect& a_newPos,
-				       const RealVect& a_path,
-				       const RealVect& a_probLo,
-				       const RealVect& a_prob_hi,
-				       Real&           a_s){
+bool ParticleOps::domainIntersection(const RealVect& a_oldPos,
+				     const RealVect& a_newPos,
+				     const RealVect& a_path,
+				     const RealVect& a_probLo,
+				     const RealVect& a_prob_hi,
+				     Real&           a_s){
 
   // TLDR: This code does a boundary intersection test and returns where on the interval [oldPos, newPos] the intersection
   //       happened.
@@ -53,12 +58,12 @@ bool particle_ops::domain_intersection(const RealVect& a_oldPos,
 
 
 inline
-bool particle_ops::eb_intersection_bisect(const RefCountedPtr<BaseIF>& a_impfunc,
-					  const RealVect&              a_oldPos,
-					  const RealVect&              a_newPos,
-					  const Real&                  a_pathLen,
-					  const Real&                  a_bisect_step,
-					  Real&                        a_s){
+bool ParticleOps::ebIntersectionBisect(const RefCountedPtr<BaseIF>& a_impfunc,
+				       const RealVect&              a_oldPos,
+				       const RealVect&              a_newPos,
+				       const Real&                  a_pathLen,
+				       const Real&                  a_bisect_step,
+				       Real&                        a_s){
 
   bool retval = false;
   
@@ -89,11 +94,11 @@ bool particle_ops::eb_intersection_bisect(const RefCountedPtr<BaseIF>& a_impfunc
 }
 
 inline
-bool particle_ops::eb_intersection_raycast(const RefCountedPtr<BaseIF>& impfunc,
-					   const RealVect&              x0,
-					   const RealVect&              x1,
-					   const Real&                  tol,
-					   Real&                        s){
+bool ParticleOps::ebIntersectionRaycast(const RefCountedPtr<BaseIF>& impfunc,
+					const RealVect&              x0,
+					const RealVect&              x1,
+					const Real&                  tol,
+					Real&                        s){
   
   bool ret = false;
 
@@ -129,6 +134,7 @@ bool particle_ops::eb_intersection_raycast(const RefCountedPtr<BaseIF>& impfunc,
 
   return ret;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

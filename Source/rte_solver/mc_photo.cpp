@@ -9,7 +9,7 @@
 #include "data_ops.H"
 #include "units.H"
 #include "poly.H"
-#include "particle_ops.H"
+#include <CD_ParticleOps.H>
 
 #include <time.h>
 #include <chrono>
@@ -1321,9 +1321,9 @@ void mc_photo::advance_photons_stationary(ParticleContainer<photon>& a_bulk_phot
 	  bool contact_eb     = false;
 
 	  // Do intersection tests
-	  if(checkDom) contact_domain = particle_ops::domain_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
-	  //	  if(checkEB)  contact_eb = particle_ops::eb_intersection_bisect(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
-	  if(checkEB)  contact_eb = particle_ops::eb_intersection_raycast(impfunc, oldPos, newPos, 1.E-10*dx, eb_s);
+	  if(checkDom) contact_domain = ParticleOps::domainIntersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
+	  //	  if(checkEB)  contact_eb = ParticleOps::ebIntersectionBisect(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
+	  if(checkEB)  contact_eb = ParticleOps::ebIntersectionRaycast(impfunc, oldPos, newPos, 1.E-10*dx, eb_s);
 
 	  // Move the photon to the data holder where it belongs. 
 	  if(!contact_eb && !contact_domain){
@@ -1477,11 +1477,11 @@ void mc_photo::advance_photons_transient(ParticleContainer<photon>& a_bulk_photo
 
 	// Check absorption on EBs and domain
 	if(checkEB){
-	  //	  absorbed_eb = particle_ops::eb_intersection_bisect(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
-	  absorbed_eb = particle_ops::eb_intersection_raycast(impfunc, oldPos, newPos, 1.E-10*dx, eb_s);
+	  //	  absorbed_eb = ParticleOps::ebIntersectionBisect(impfunc, oldPos, newPos, pathLen, m_bisect_step, eb_s);
+	  absorbed_eb = ParticleOps::ebIntersectionRaycast(impfunc, oldPos, newPos, 1.E-10*dx, eb_s);
 	}
 	if(checkDom){
-	  absorbed_domain = particle_ops::domain_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
+	  absorbed_domain = ParticleOps::domainIntersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
 	  dom_s = (absorbed_domain) ? Max(0.0, dom_s - SAFETY) : dom_s;
 	}
 

@@ -14,7 +14,7 @@
 #include "ito_layout.H"
 
 
-#include "particle_ops.H"
+#include <CD_ParticleOps.H>
 
 #include <EBArith.H>
 #include <ParmParse.H>
@@ -871,11 +871,11 @@ void ito_solver::intersect_particles_if(ParticleContainer<ito_particle>& a_parti
 	  bool contact_domain = false;
 	  bool contact_eb     = false;
 	      
-	  if(checkDom) contact_domain = particle_ops::domain_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
+	  if(checkDom) contact_domain = ParticleOps::domainIntersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
 #if 0
-	  if(checkEB)  contact_eb     = particle_ops::eb_intersection_bisect(impfunc, oldPos, newPos, pathLen, dx, eb_s);
+	  if(checkEB)  contact_eb     = ParticleOps::ebIntersectionBisect(impfunc, oldPos, newPos, pathLen, dx, eb_s);
 #else
-	  if(checkEB)  contact_eb     = particle_ops::eb_intersection_raycast(impfunc, oldPos, newPos, 1.E-10*dx, eb_s);
+	  if(checkEB)  contact_eb     = ParticleOps::ebIntersectionRaycast(impfunc, oldPos, newPos, 1.E-10*dx, eb_s);
 #endif
 	  
 	  if(contact_eb || contact_domain){ // Particle trajectory crossed something. 

@@ -17,7 +17,7 @@
 #include <CD_EbGhostCloud.H>
 #include "ito_layout.H"
 
-#include "particle_ops.H"
+#include <CD_ParticleOps.H>
 
 #include <EBArith.H>
 #include <ParmParse.H>
