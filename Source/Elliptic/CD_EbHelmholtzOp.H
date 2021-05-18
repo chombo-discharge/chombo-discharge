@@ -225,29 +225,27 @@ public:
   */
   void setTime(Real a_oldTime, Real a_mu, Real a_dt) override;
 
-  /*!
-    @brief Finer operator changed
-    @param[in] a_oeprator Finger operator
-    @param[in] a_coarseningFactor Coarsening to this. 
-    @details This is called on multigrid operators when their AMR operators are altered.
-  */
-  void finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator, int a_coarseningFactor) override;
-
   //MGOp operations.  no finer or coarser
 
-  ///
-  /**
-   */
+  /*!
+    @brief Compute the residual
+    @param[out] a_residual          Residual
+    @param[in]  a_phi               Cell-centered data
+    @param[in]  a_rhs               Right-hand side
+    @param[in]  a_homogeneousPhysBC Use homogeneous BC or not
+  */
   virtual void residual(LevelData<EBCellFAB>&       a_residual,
 			const LevelData<EBCellFAB>& a_phi,
 			const LevelData<EBCellFAB>& a_rhs,
-			bool                        a_homogeneousPhysBC=false);
+			bool                        a_homogeneousPhysBC=false) override;
 
-  ///
-  /**
-   */
-  virtual void preCond(LevelData<EBCellFAB>&       a_opPhi,
-		       const LevelData<EBCellFAB>& a_phi);
+  /*!
+    @brief Precondition before bottom solver.
+    @param[out] a_opPhi Preconditioned soln
+    @param[out] a_phi   Data
+    @details This just does a few relaxations.
+  */
+  virtual void preCond(LevelData<EBCellFAB>& a_opPhi, const LevelData<EBCellFAB>& a_phi) override;
 
   ///
   /**
@@ -528,13 +526,17 @@ public:
     s_forceNoEBCF = a_forceNoEBCF;
   }
   ///do not call this one unless you really know what you are doing
-  void defineStencils();
+
+  
 protected:
 
   /*!
     @brief Get safety factor
+    @details Returns 1.0
   */
   Real getSafety() const;
+
+  void defineStencils();
   
   void incrOpRegularAllDirs(Box * a_loBox,
 			    Box * a_hiBox,

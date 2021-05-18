@@ -205,57 +205,11 @@ EbHelmholtzOp::~EbHelmholtzOp(){
 void EbHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& a_phi){
 }
 
-void EbHelmholtzOp::finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator, int a_coarseningFactor){
-  const EbHelmholtzOp& op = dynamic_cast<const EbHelmholtzOp&>(a_operator);
 
-  // Perform multigrid coarsening on the operator data.
-  const Interval interv(0, 0); // All data is scalar.
-  
-  EBLevelGrid eblgCoar = m_eblg;
-  EBLevelGrid eblgFine = op.m_eblg;
-  
-  LevelData<EBCellFAB>&       acoefCoar = *m_aCoefficient;
-  const LevelData<EBCellFAB>& acoefFine = *(op.m_aCoefficient);
-  
-  LevelData<EBFluxFAB>&       bcoefCoar = *m_bcoef;
-  const LevelData<EBFluxFAB>& bcoefFine = *(op.m_bcoef);
-  
-  LevelData<BaseIVFAB<Real> >&       bcoefCoarIrreg = *m_bcoIrreg;
-  const LevelData<BaseIVFAB<Real> >& bcoefFineIrreg = *(op.m_bcoIrreg);
-  
-  if (a_coarseningFactor != 1) {
-    EBCoarseAverage averageOp(eblgFine.getDBL(), eblgCoar.getDBL(),
-			      eblgFine.getEBISL(), eblgCoar.getEBISL(),
-			      eblgCoar.getDomain(), a_coarseningFactor, 1,
-			      eblgCoar.getEBIS());
-
-    //MayDay::Warning("might want to figure out what harmonic averaging is in this context");
-    averageOp.average(acoefCoar, acoefFine, interv);
-    averageOp.average(bcoefCoar, bcoefFine, interv);
-    averageOp.average(bcoefCoarIrreg, bcoefFineIrreg, interv);
-  }
-
-  // Handle parallel domain ghost elements.
-  acoefCoar.exchange(interv);
-  bcoefCoar.exchange(interv);
-  bcoefCoarIrreg.exchange(interv);
-
-  // Recompute the relaxation coefficient for the operator.
-  calculateAlphaWeight();
-  calculateRelaxationCoefficient();
-
-  // Notify any observers of this change.
-  notifyObserversOfChange();
+Real EbHelmholtzOp::getSafety() const {
+  return 1.0;
 }
 
-//-----------------------------------------------------------------------
-Real
-EbHelmholtzOp::
-getSafety() const
-{
-  Real safety = 1.0;
-  return safety;
-}
 //-----------------------------------------------------------------------
 void
 EbHelmholtzOp::
@@ -819,7 +773,7 @@ defineEBCFStencils()
 		  for (int iface = 0; iface < stencEBCFCoar.size(); iface++)
 		    {
 		      IntVectSet cfivs; //does not apply here
-		      getFluxStencil(stencEBCFCoar[iface], facesEBCFCoar[iface], dit[mybox]);
+		      this->getFluxStencil(stencEBCFCoar[iface], facesEBCFCoar[iface], dit[mybox]);
 		    }
 		}
 	    }
@@ -827,33 +781,26 @@ defineEBCFStencils()
     }
 }
 
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-residual(LevelData<EBCellFAB>&       a_residual,
-	 const LevelData<EBCellFAB>& a_phi,
-	 const LevelData<EBCellFAB>& a_rhs,
-	 bool                        a_homogeneousPhysBC)
-{
+
+void EbHelmholtzOp::residual(LevelData<EBCellFAB>&       a_residual,
+			     const LevelData<EBCellFAB>& a_phi,
+			     const LevelData<EBCellFAB>& a_rhs,
+			     bool                        a_homogeneousPhysBC){
   CH_TIME("EbHelmholtzOp::residual");
   //this is a multigrid operator so only homogeneous CF BC
   //and null coar level
   CH_assert(a_residual.ghostVect() == m_ghostCellsRHS);
   CH_assert(a_phi.ghostVect() == m_ghostCellsPhi);
-  applyOp(a_residual,a_phi,NULL, a_homogeneousPhysBC, true);
-  axby(a_residual,a_residual,a_rhs,-1.0, 1.0);
+  this->applyOp(a_residual,a_phi,NULL, a_homogeneousPhysBC, true);
+  this->axby(a_residual,a_residual,a_rhs,-1.0, 1.0);
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-preCond(LevelData<EBCellFAB>&       a_lhs,
-	const LevelData<EBCellFAB>& a_rhs)
-{
+
+void EbHelmholtzOp::preCond(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
   CH_TIME("EbHelmholtzOp::preCond");
   EBLevelDataOps::assign(a_lhs, a_rhs);
   EBLevelDataOps::scale(a_lhs, m_relCoef);
 
-  relax(a_lhs, a_rhs, 40);
+  this->relax(a_lhs, a_rhs, 40);
 }
 //-----------------------------------------------------------------------
 void
