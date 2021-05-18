@@ -123,7 +123,7 @@ public:
   /*!
     @brief Set phase
   */
-  virtual void set_bc(cdr_bc::which_bc a_bc);
+  virtual void set_bc(CdrBc a_bc);
 
   /*!
     @brief Set verbosity.
@@ -305,7 +305,7 @@ protected:
   /*!
     @brief
   */
-  cdr_bc::which_bc m_bc_type;
+  CdrBc m_bc_type;
 };
 
 /*!

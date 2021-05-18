@@ -505,17 +505,17 @@ void CdrSolver::computeFlux(EBAMRFluxData&       a_flux,
 	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
 	    const FaceIndex& face = faceit();
 	    
-	    if(m_domainBc == cdr_bc::external){
+	    if(m_domainBc == CdrBc::External){
 	      flx(face, comp) = domflux(face, comp);
 	    }
-	    else if(m_domainBc == cdr_bc::wall){
+	    else if(m_domainBc == CdrBc::Wall){
 	      flx(face, comp) = 0.0;
 	    }
-	    else if(m_domainBc == cdr_bc::outflow){
+	    else if(m_domainBc == CdrBc::Outflow){
 
 	      flx(face, comp) = Max(0.0, sign(sit())*flx(face, comp));
 	    }
-	    else if(m_domainBc == cdr_bc::extrap){
+	    else if(m_domainBc == CdrBc::Extrap){
 	      // Don't do anything, the solver should have extrapolated the face-centered state
 	    }
 	    else {
@@ -575,16 +575,16 @@ void CdrSolver::computeFlux(LevelData<EBFluxFAB>&              a_flux,
 	for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
 	  const FaceIndex& face = faceit();
 	    
-	  if(m_domainBc == cdr_bc::external){
+	  if(m_domainBc == CdrBc::External){
 	    flx(face, comp) = domflux(face, comp);
 	  }
-	  else if(m_domainBc == cdr_bc::wall){
+	  else if(m_domainBc == CdrBc::Wall){
 	    flx(face, comp) = 0.0;
 	  }
-	  else if(m_domainBc == cdr_bc::outflow){
+	  else if(m_domainBc == CdrBc::Outflow){
 	    flx(face, comp) = Max(0.0, sign(sit())*flx(face, comp));
 	  }
-	  else if(m_domainBc == cdr_bc::extrap){
+	  else if(m_domainBc == CdrBc::Extrap){
 	    // Don't do anything, the solver should have extrapolated the face-centered state
 	  }
 	  else {
@@ -1307,7 +1307,7 @@ void CdrSolver::registerOperators(){
   }
 }
 
-void CdrSolver::setDomainBc(const cdr_bc::which_bc a_bctype){
+void CdrSolver::setDomainBc(const CdrBc a_bctype){
   CH_TIME("CdrSolver::setDomainBc");
   if(m_verbosity > 5){
     pout() << m_name + "::setDomainBc" << endl;
@@ -2068,16 +2068,16 @@ void CdrSolver::parseDomainBc(){
   std::string str;
   pp.get("domain_bc", str);
   if(str == "kinetic"){
-    setDomainBc(cdr_bc::external);
+    setDomainBc(CdrBc::External);
   }
   else if(str == "outflow"){
-    setDomainBc(cdr_bc::outflow);
+    setDomainBc(CdrBc::Outflow);
   }
   else if(str == "wall"){
-    setDomainBc(cdr_bc::wall);
+    setDomainBc(CdrBc::Wall);
   }
   else if(str == "extrap"){
-    setDomainBc(cdr_bc::extrap);
+    setDomainBc(CdrBc::Extrap);
   }
   else{
     MayDay::Abort("CdrSolver::parseDomainBc - unknown BC requested");

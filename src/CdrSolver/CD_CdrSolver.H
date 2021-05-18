@@ -21,7 +21,7 @@
 #include <CD_AmrMesh.H>
 #include <computational_geometry.H>
 #include <cdr_species.H>
-#include <cdr_bc.H>
+#include <CD_CdrBc.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -215,7 +215,7 @@ public:
     @brief Set domain bc type.
     @param[in] a_bcType Boundary condition type. 
   */
-  virtual void setDomainBc(const cdr_bc::which_bc a_bcType);
+  virtual void setDomainBc(const CdrBc a_bcType);
 
   /*!
     @brief Set phase.
@@ -548,7 +548,7 @@ protected:
   /*!
     @brief Domain bc condition
   */
-  cdr_bc::which_bc m_domainBc;
+  CdrBc m_domainBc;
 
   /*!
     @brief Name

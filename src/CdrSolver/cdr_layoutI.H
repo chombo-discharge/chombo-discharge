@@ -219,7 +219,7 @@ void cdr_layout<T>::setVerbosity(const int a_verbosity){
 }
 
 template <class T>
-void cdr_layout<T>::set_bc(cdr_bc::which_bc a_bc){
+void cdr_layout<T>::set_bc(CdrBc a_bc){
   CH_TIME("cdr_layout<T>::set_bc");
   if(m_verbosity > 5){
     pout() << "cdr_layout<T>::set_bc" << endl;

@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   cdr_bc.H
+  @file   CdrBc.H
   @brief  Declaration of boundary condition enum for cdr solver. 
   @author Robert Marskar
 */
@@ -18,13 +18,11 @@
 /*!
   @brief Boundary condition types for the CDR solvers
 */
-namespace cdr_bc {
-  enum which_bc {
-    external = 0,
-    wall     = 1,
-    outflow  = 2,
-    extrap   = 3,
-  };
+enum class CdrBc {
+  External,
+  Wall,
+  Outflow,
+  Extrap
 };
 
 #include <CD_NamespaceFooter.H>
