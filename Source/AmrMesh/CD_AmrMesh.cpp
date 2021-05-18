@@ -1891,7 +1891,7 @@ Vector<RefCountedPtr<ebcoarseaverage> >& AmrMesh::getCoarseAverage(const std::st
   return m_realms[a_realm]->getCoarseAverage(a_phase);
 }
 
-Vector<RefCountedPtr<EBGhostCloud> >& AmrMesh::getGhostCloud(const std::string a_realm, const phase::which_phase a_phase){
+Vector<RefCountedPtr<EbGhostCloud> >& AmrMesh::getGhostCloud(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->getGhostCloud(a_phase);
 }
 

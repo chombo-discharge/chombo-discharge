@@ -37,7 +37,7 @@
 #include <DomainFluxIFFAB.H>
 #include <DomainFluxIFFABFactory.H>
 #include <particle_container.H>
-#include <EBGhostCloud.H>
+#include <CD_EbGhostCloud.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_EbCentroidInterpolationStencil.H>
 #include <CD_CentroidInterpolationStencil.H>
@@ -112,7 +112,7 @@ public:
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& getGradientStencils();
 
   Vector<RefCountedPtr<ebcoarseaverage> >& getCoarseAverage();
-  Vector<RefCountedPtr<EBGhostCloud> >& getGhostCloud();
+  Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud();
   Vector<RefCountedPtr<NwoEbQuadCfInterp> >& getNWOEBQuadCFInterp();
   Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp();
   Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch();
@@ -176,7 +176,7 @@ protected:
   // Various operators
   Vector<RefCountedPtr<ebcoarseaverage> > m_coarave;
   Vector<RefCountedPtr<NwoEbQuadCfInterp> > m_quadcfi;
-  Vector<RefCountedPtr<EBGhostCloud> > m_ghostclouds;
+  Vector<RefCountedPtr<EbGhostCloud> > m_ghostclouds;
   Vector<RefCountedPtr<EBQuadCFInterp> > m_old_quadcfi;
   Vector<RefCountedPtr<AggEBPWLFillPatch> > m_pwl_fillpatch;
   Vector<RefCountedPtr<EBPWLFineInterp> > m_pwl_interp;

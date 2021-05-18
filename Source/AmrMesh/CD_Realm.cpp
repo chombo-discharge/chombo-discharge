@@ -429,7 +429,7 @@ Vector<RefCountedPtr<ebcoarseaverage> >& Realm::getCoarseAverage(const phase::wh
   return m_realms[a_phase]->getCoarseAverage();
 }
 
-Vector<RefCountedPtr<EBGhostCloud> >& Realm::getGhostCloud(const phase::which_phase a_phase){
+Vector<RefCountedPtr<EbGhostCloud> >& Realm::getGhostCloud(const phase::which_phase a_phase){
   return m_realms[a_phase]->getGhostCloud();
 }
 

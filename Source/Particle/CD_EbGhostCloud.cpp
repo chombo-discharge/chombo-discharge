@@ -1,23 +1,29 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   EBGhostCloud.cpp
-  @brief  Implementation of EBGhostCloud.H
+  @file   CD_EbGhostCloud.cpp
+  @brief  Implementation of CD_EbGhostCloud.H
   @author Robert Marskar
-  @date   April 2020
 */
 
-#include "EBGhostCloud.H"
-#include "EBGhostCloudF_F.H"
-#include "EBCellFactory.H"
-#include "EBAverageF_F.H"
-#include "EBAlias.H"
+// Chombo includes
+#include <EBCellFactory.H>
+#include <EBAverageF_F.H>
+#include <EBAlias.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_EbGhostCloud.H>
+#include <CD_EbGhostCloudF_F.H>
+#include <CD_NamespaceHeader.H>
   
-EBGhostCloud::EBGhostCloud(){
+EbGhostCloud::EbGhostCloud(){
 
 }
 
-EBGhostCloud::EBGhostCloud(const DisjointBoxLayout& a_gridsCoar,
+EbGhostCloud::EbGhostCloud(const DisjointBoxLayout& a_gridsCoar,
 			   const DisjointBoxLayout& a_gridsFine,
 			   const EBLevelGrid&       a_eblgCoar,
 			   const EBLevelGrid&       a_eblgFine,
@@ -30,11 +36,11 @@ EBGhostCloud::EBGhostCloud(const DisjointBoxLayout& a_gridsCoar,
   this->define(a_gridsCoar, a_gridsFine, a_eblgCoar, a_eblgFine, a_domainCoar, a_domainFine, a_refRat, a_nComp, a_ghostFine);
 }
 
-EBGhostCloud::~EBGhostCloud(){
+EbGhostCloud::~EbGhostCloud(){
 
 }
 
-void EBGhostCloud::define(const DisjointBoxLayout& a_gridsCoar,
+void EbGhostCloud::define(const DisjointBoxLayout& a_gridsCoar,
 			  const DisjointBoxLayout& a_gridsFine,
 			  const EBLevelGrid&       a_eblgCoar,
 			  const EBLevelGrid&       a_eblgFine,
@@ -68,7 +74,7 @@ void EBGhostCloud::define(const DisjointBoxLayout& a_gridsCoar,
   m_isDefined = true;
 }
 
-void EBGhostCloud::makeCoFiStuff(){
+void EbGhostCloud::makeCoFiStuff(){
 
   // TLDR: Coarsen the grids and make a BoxLayout data
   
@@ -88,7 +94,7 @@ void EBGhostCloud::makeCoFiStuff(){
   m_dataCoFi.define(m_gridsCoFi, m_nComp);
 }
 
-void EBGhostCloud::makeFiCoStuff(){
+void EbGhostCloud::makeFiCoStuff(){
 
   DisjointBoxLayout dblFiCo;
   refine(dblFiCo, m_gridsCoar, m_refRat);
@@ -108,7 +114,7 @@ void EBGhostCloud::makeFiCoStuff(){
   m_eblgFiCo.define(dblFiCo, m_domainFine, ghostFiCo, m_eblgFine.getEBIS());
 }
 
-void EBGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData){
+void EbGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData){
   CH_assert(m_isDefined);
   
   // Copy the fine data to scratch and reset interior cells
@@ -151,7 +157,7 @@ void EBGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const
   m_dataCoFi.addTo(interv, coarAlias, interv, m_domainCoar.domainBox());
 }
 
-void EBGhostCloud::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<FArrayBox>& a_fiCoData){
+void EbGhostCloud::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<FArrayBox>& a_fiCoData){
 
   const Interval interv(0, m_nComp-1);
   LevelData<FArrayBox> fineAlias;
@@ -159,15 +165,16 @@ void EBGhostCloud::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const Box
   a_fiCoData.addTo(interv, fineAlias, interv, m_domainFine.domainBox());
 }
 
-const BoxLayoutData<FArrayBox>& EBGhostCloud::getFiCoBuffer() const {
+const BoxLayoutData<FArrayBox>& EbGhostCloud::getFiCoBuffer() const {
   return m_dataFiCo;
 }
 
-BoxLayoutData<FArrayBox>& EBGhostCloud::getFiCoBuffer() {
+BoxLayoutData<FArrayBox>& EbGhostCloud::getFiCoBuffer() {
   return m_dataFiCo;
 }
 
-const EBLevelGrid& EBGhostCloud::getEblgFiCo() const {
+const EBLevelGrid& EbGhostCloud::getEblgFiCo() const {
   return m_eblgFiCo;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

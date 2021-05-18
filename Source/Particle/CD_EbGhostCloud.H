@@ -1,32 +1,38 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   EBGhostCloud
-  @brief  A class for adding coarsened ghost cells to a coarse level
+  @file   CD_EbGhostCloud.H
+  @brief  A class for adding ghost cells from the fine level to the coarse level
   @author Robert Marskar
-  @date   April 2020
 */
 
-#ifndef _EBGHOSTCLOUD_
-#define _EBGHOSTCLOUD_
+#ifndef CD_EbGhostCloud_H
+#define CD_EbGhostCloud_H
 
-#include "DisjointBoxLayout.H"
-#include "EBLevelGrid.H"
-#include "EBCellFAB.H"
-#include "ProblemDomain.H"
+// Chombo includes
+#include <DisjointBoxLayout.H>
+#include <EBLevelGrid.H>
+#include <EBCellFAB.H>
+#include <ProblemDomain.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
-class EBGhostCloud {
+class EbGhostCloud {
 public:
 
   /*!
     @brief Default constructor. Needs to call define
   */
-  EBGhostCloud();
+  EbGhostCloud();
 
   /*!
     @brief Full constructor. Calls define. 
   */
-  EBGhostCloud(const DisjointBoxLayout& a_gridsCoar,
+  EbGhostCloud(const DisjointBoxLayout& a_gridsCoar,
 	       const DisjointBoxLayout& a_gridsFine,
 	       const EBLevelGrid&       a_eblgCoar,
 	       const EBLevelGrid&       a_eblgFine,
@@ -39,7 +45,7 @@ public:
   /*!
     @brief Dtor
   */
-  ~EBGhostCloud();
+  ~EbGhostCloud();
 
   /*!
     @brief Define function
@@ -171,5 +177,7 @@ protected:
   */
   void makeFiCoStuff();
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

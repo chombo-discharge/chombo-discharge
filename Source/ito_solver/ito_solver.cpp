@@ -10,7 +10,7 @@
 #include "data_ops.H"
 #include "EBParticleInterp.H"
 #include "units.H"
-#include "EBGhostCloud.H"
+#include <CD_EbGhostCloud.H>
 #include "ito_layout.H"
 
 

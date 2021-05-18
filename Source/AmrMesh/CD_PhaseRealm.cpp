@@ -720,7 +720,7 @@ void PhaseRealm::define_ghostcloud(const int a_lmin){
       const bool has_coar = lvl > 0;
 
       if(has_coar){
-	m_ghostclouds[lvl] = RefCountedPtr<EBGhostCloud> (new EBGhostCloud(m_grids[lvl-1],
+	m_ghostclouds[lvl] = RefCountedPtr<EbGhostCloud> (new EbGhostCloud(m_grids[lvl-1],
 									   m_grids[lvl],
 									   *m_eblg[lvl-1],
 									   *m_eblg[lvl],
@@ -867,7 +867,7 @@ Vector<RefCountedPtr<ebcoarseaverage> >& PhaseRealm::getCoarseAverage() {
   return m_coarave;
 }
 
-Vector<RefCountedPtr<EBGhostCloud> >& PhaseRealm::getGhostCloud() {
+Vector<RefCountedPtr<EbGhostCloud> >& PhaseRealm::getGhostCloud() {
   if(!this->queryOperator(s_eb_ghostcloud)) MayDay::Abort("PhaseRealm::getGhostCloud - operator not registered!");
   
   return m_ghostclouds;

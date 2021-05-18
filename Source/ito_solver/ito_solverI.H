@@ -14,7 +14,7 @@
 #include "data_ops.H"
 #include "EBParticleInterp.H"
 #include "units.H"
-#include "EBGhostCloud.H"
+#include <CD_EbGhostCloud.H>
 #include "ito_layout.H"
 
 #include "particle_ops.H"
@@ -260,7 +260,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
     // 3. Deposition into ghost cells across the fine boundary should end up on the coarse level. Add that
     //    mass to the coarse level right now. 
     if(has_coar) {
-      EBGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
+      EbGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
       ghostcloud.addFineGhostsToCoarse(*a_phi[lvl-1], *a_phi[lvl]);
     }
 
@@ -269,7 +269,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
     //    that the mass ends up on the fine level. 
     if(has_coar){
       const int refRat = m_amr->getRefinementRatios()[lvl-1];
-      EBGhostCloud& ghostcloud         = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
+      EbGhostCloud& ghostcloud         = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
       BoxLayoutData<FArrayBox>& buffer = ghostcloud.getFiCoBuffer();
       const EBLevelGrid& eblgFiCo      = ghostcloud.getEblgFiCo();
       
@@ -345,7 +345,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&              
 
     // 2. Deposition into ghost cells across the fine boundary should end up on the coarse level. 
     if(has_coar) {
-      EBGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
+      EbGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
       ghostcloud.addFineGhostsToCoarse(*a_phi[lvl-1], *a_phi[lvl]);
     }
 

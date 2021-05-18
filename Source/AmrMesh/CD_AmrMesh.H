@@ -39,7 +39,7 @@
 #include <DomainFluxIFFAB.H>
 #include <DomainFluxIFFABFactory.H>
 #include <particle_container.H>
-#include <EBGhostCloud.H>
+#include <CD_EbGhostCloud.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_Realm.H>
 #include <CD_LoadBalancing.H>
@@ -979,7 +979,7 @@ public:
   /*!
     @brief Get the ghost cloud particle magic
   */
-  Vector<RefCountedPtr<EBGhostCloud> >& getGhostCloud(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the ghost cell interpolation utility
