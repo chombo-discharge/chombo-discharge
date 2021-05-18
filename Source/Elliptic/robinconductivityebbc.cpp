@@ -81,7 +81,7 @@ void robinconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const 
 	bco = m_robinco->bco(pos);
       }
       else if(m_data_coeff){
-	aco = (*m_aCoefficientdata)[dit](vof, comp);
+	aco = (*m_acodata)[dit](vof, comp);
 	bco = (*m_bcodata)[dit](vof, comp);
       }
       else{
@@ -168,7 +168,7 @@ void robinconductivityebbc::set_type(const IrregStencil::StencilType a_type){
   }
 }
 
-void robinconductivityebbc::setCoefficientss(const Real a_aco, const Real a_bco, const Real a_rhs){
+void robinconductivityebbc::setCoefficients(const Real a_aco, const Real a_bco, const Real a_rhs){
   m_aCoefficient = a_aco;
   m_bco = a_bco;
   m_rhs = a_rhs;
@@ -178,7 +178,7 @@ void robinconductivityebbc::setCoefficientss(const Real a_aco, const Real a_bco,
   m_data_coeff  = false;
 }
 
-void robinconductivityebbc::setCoefficientss(const RefCountedPtr<RobinCoefficients> a_robinco){
+void robinconductivityebbc::setCoefficients(const RefCountedPtr<RobinCoefficients> a_robinco){
   m_robinco = a_robinco;
 
   m_const_coeff = false;
@@ -186,10 +186,10 @@ void robinconductivityebbc::setCoefficientss(const RefCountedPtr<RobinCoefficien
   m_data_coeff  = false;
 }
 
-void robinconductivityebbc::setCoefficientss(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_aco,
+void robinconductivityebbc::setCoefficients(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_aco,
 				      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bco,
 				      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_rhs){
-  m_aCoefficientdata = a_aco;
+  m_acodata = a_aco;
   m_bcodata = a_bco;
   m_rhsdata = a_rhs;
 
@@ -230,7 +230,7 @@ void robinconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,
       rhs = m_robinco->rhs(pos);
     }
     else if(m_data_coeff){
-      aco = (*m_aCoefficientdata)[a_dit](vof, comp);
+      aco = (*m_acodata)[a_dit](vof, comp);
       bco = (*m_bcodata)[a_dit](vof, comp);
       rhs = (*m_rhsdata)[a_dit](vof, comp);
     }

@@ -54,17 +54,17 @@ public:
   /*!
     @brief Set constant coefficients
   */
-  virtual void setCoefficientss(const Real a_aco, const Real b_bco, const Real a_rhs);
+  virtual void setCoefficients(const Real a_aco, const Real b_bco, const Real a_rhs);
 
   /*!
     @brief Function based coefficients
   */
-  virtual void setCoefficientss(const RefCountedPtr<RobinCoefficients> a_robinco);
+  virtual void setCoefficients(const RefCountedPtr<RobinCoefficients> a_robinco);
 
   /*!
     @brief Set data-based coefficients
   */
-  virtual void setCoefficientss(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_aco,
+  virtual void setCoefficients(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_aco,
 			 const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bco,
 			 const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_rhs);
 
@@ -107,7 +107,7 @@ protected:
   Real (*m_bcofunc)(const RealVect a_pos);
   Real (*m_rhsfunc)(const RealVect a_pos);
 
-  RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_aCoefficientdata;
+  RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_acodata;
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_bcodata;
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_rhsdata;
 

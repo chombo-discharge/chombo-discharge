@@ -18,13 +18,13 @@
 #include <CD_NamespaceHeader.H>
 
 RobinConductivityDomainBc::RobinConductivityDomainBc(){
-  this->setCoefficientss(1., -1.0, 0);
+  this->setCoefficients(1., -1.0, 0);
 }
 
 RobinConductivityDomainBc::~RobinConductivityDomainBc(){
 }
 
-void RobinConductivityDomainBc::setCoefficientss(RefCountedPtr<RobinCoefficients> a_robinco){
+void RobinConductivityDomainBc::setCoefficients(RefCountedPtr<RobinCoefficients> a_robinco){
   m_robinco = a_robinco;
 
   m_const_coeff = false;
@@ -33,8 +33,8 @@ void RobinConductivityDomainBc::setCoefficientss(RefCountedPtr<RobinCoefficients
 
 }
 
-void RobinConductivityDomainBc::setCoefficientss(const Real a_aco, const Real a_bco, const Real a_rhs){
-  m_aCoefficient = a_aco;
+void RobinConductivityDomainBc::setCoefficients(const Real a_aco, const Real a_bco, const Real a_rhs){
+  m_aco = a_aco;
   m_bco = a_bco;
   m_rhs = a_rhs;
 
@@ -43,11 +43,11 @@ void RobinConductivityDomainBc::setCoefficientss(const Real a_aco, const Real a_
   m_data_coeff  = false;
 }
 
-void RobinConductivityDomainBc::setCoefficientss(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
+void RobinConductivityDomainBc::setCoefficients(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
 						 const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
 						 const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs){
-  MayDay::Abort("RobinConductivityDomainBc::setCoefficientss - data-based not supported (yet)");
-  m_aCoefficientdata = a_aco;
+  MayDay::Abort("RobinConductivityDomainBc::setCoefficients - data-based not supported (yet)");
+  m_acodata = a_aco;
   m_bcodata = a_bco;
   m_rhsdata = a_rhs;
 
@@ -90,7 +90,7 @@ void RobinConductivityDomainBc::getFaceFlux(BaseFab<Real>&        a_faceFlux,
     const RealVect pos = a_probLo + a_dx*(RealVect(iv) - iside*0.5*RealVect(BASISV(a_idir)));
     Real aco, bco, rhs;
     if(m_const_coeff){
-      aco = m_aCoefficient;
+      aco = m_aco;
       bco = m_bco;
       rhs = m_rhs;
     }
@@ -248,7 +248,7 @@ void RobinConductivityDomainBc::getFaceGradPhi(Real&                 a_faceFlux,
   Real aco, bco, rhs;
   const RealVect pos = a_probLo + a_dx*(RealVect(iv) - iside*0.5*RealVect(BASISV(a_idir)));
   if(m_const_coeff){
-    aco = m_aCoefficient;
+    aco = m_aco;
     bco = m_bco;
     rhs = m_rhs;
   }

@@ -679,7 +679,7 @@ void eddington_sp1::setup_operator_factory(){
   // Domain BC
 #if 0
   m_domfact = RefCountedPtr<RobinConductivityDomainBcFactory> (new RobinConductivityDomainBcFactory());
-  m_domfact->setCoefficientss(m_robinco);
+  m_domfact->setCoefficients(m_robinco);
 #else
   RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory>(NULL);
   ConductivityDomainBcWrapperFactory* bcfact = new ConductivityDomainBcWrapperFactory();
@@ -691,7 +691,7 @@ void eddington_sp1::setup_operator_factory(){
 
   // EBBC
   m_ebfact  = RefCountedPtr<robinconductivityebbcfactory> (new robinconductivityebbcfactory(origin));
-  m_ebfact->setCoefficientss(m_robinco);
+  m_ebfact->setCoefficients(m_robinco);
   m_ebfact->set_type(IrregStencil::StencilType::LeastSquares);
 
   //  Make relaxation type into int code

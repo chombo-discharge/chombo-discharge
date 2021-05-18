@@ -40,17 +40,17 @@ public:
   /*!
     @brief Function based coefficients and right hand sides
   */
-  virtual void setCoefficientss(RefCountedPtr<RobinCoefficients> a_robinco);
+  virtual void setCoefficients(RefCountedPtr<RobinCoefficients> a_robinco);
 
   /*!
     @brief Set constant coefficients
   */
-  virtual void setCoefficientss(const Real a_aco, const Real b_bco, const Real a_rhs);
+  virtual void setCoefficients(const Real a_aco, const Real b_bco, const Real a_rhs);
 
   /*!
     @brief Set data-based coefficients
   */
-  virtual void setCoefficientss(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
+  virtual void setCoefficients(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
 				const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
 				const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs);
 
@@ -103,13 +103,13 @@ protected:
   
   RefCountedPtr<RobinCoefficients> m_robinco;
 
-  Real m_aCoefficient;
+  Real m_aco;
 
   Real m_bco;
   
   Real m_rhs;
 
-  RefCountedPtr<LevelData<EBFluxFAB> > m_aCoefficientdata;
+  RefCountedPtr<LevelData<EBFluxFAB> > m_acodata;
 
   RefCountedPtr<LevelData<EBFluxFAB> > m_bcodata;
   

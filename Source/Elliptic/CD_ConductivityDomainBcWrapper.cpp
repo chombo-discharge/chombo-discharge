@@ -59,10 +59,10 @@ void ConductivityDomainBcWrapper::setWallBc(const Vector<RefCountedPtr<wall_bc> 
       // Otherwise, use externally supplied values
       RobinConductivityDomainBc* robinbc = new RobinConductivityDomainBc();
       if(m_robinco[i] == NULL){
-	robinbc->setCoefficientss(1.0, -1.0, 0.0);
+	robinbc->setCoefficients(1.0, -1.0, 0.0);
       }
       else{
-	robinbc->setCoefficientss(m_robinco[i]);
+	robinbc->setCoefficients(m_robinco[i]);
       }
 	    
       m_bc[idx] = RefCountedPtr<RobinConductivityDomainBc> (robinbc);
