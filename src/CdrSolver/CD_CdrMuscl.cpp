@@ -1,58 +1,61 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   cdr_muscl.cpp
-  @brief  Implementation of cdr_muscl.H
+  @file   CD_CdrMuscl.cpp
+  @brief  Implementation of CD_CdrMuscl.H
   @author Robert Marskar
-  @date   Feb. 2018
-  @todo   The slope computation and the upwinding should definitely be done in Fortran....
 */
 
-#include "cdr_muscl.H"
-#include <CD_CdrMusclF_F.H>
-#include "slope_limiters.H"
-#include "data_ops.H"
-
+// Chombo includes
 #include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrMuscl.H>
+#include <CD_CdrMusclF_F.H>
+#include <data_ops.H>
+#include <CD_NamespaceHeader.H>
 
-cdr_muscl::cdr_muscl(){
-  m_className = "cdr_muscl";
-  m_name = "cdr_muscl";
+CdrMuscl::CdrMuscl(){
+  m_className = "CdrMuscl";
+  m_name      = "CdrMuscl";
 }
 
-cdr_muscl::~cdr_muscl(){
+CdrMuscl::~CdrMuscl(){
 
 }
 
-void cdr_muscl::parseOptions(){
-  parseRngSeed();     // Parses RNG seed
-  parsePlotMode();     // Parses plot mode
-  parseDomainBc();    // Parses domain BC options
-  parseSlopeLimiter();     // Parses slope limiter settings
-  parsePlotVariables();    // Parses plot variables
-  parseMultigridSettings(); // Parses solver parameters for geometric multigrid
+void CdrMuscl::parseOptions(){
+  parseRngSeed();                // Parses RNG seed
+  parsePlotMode();               // Parses plot mode
+  parseDomainBc();               // Parses domain BC options
+  parseSlopeLimiter();           // Parses slope limiter settings
+  parsePlotVariables();          // Parses plot variables
+  parseMultigridSettings();      // Parses solver parameters for geometric multigrid
   parseDivergenceComputation();  // Nonlinear divergence blending
 
   m_extrapolateSourceTerm = false; // This class can't extrapolate with source term (yet)
 }
 
-void cdr_muscl::parseRuntimeOptions(){
-  CH_TIME("cdr_muscl::parseRuntimeOptions");
+void CdrMuscl::parseRuntimeOptions(){
+  CH_TIME("CdrMuscl::parseRuntimeOptions");
   if(m_verbosity > 5){
     pout() << m_name + "::parseRuntimeOptions" << endl;
   }
 
-  parsePlotMode();     // Parses plot mode
-  parseDomainBc();    // Parses domain BC options
-  parseSlopeLimiter();     // Parses slope limiter settings
-  parsePlotVariables();    // Parses plot variables
-  parseMultigridSettings(); // Parses solver parameters for geometric multigrid
+  parsePlotMode();               // Parses plot mode
+  parseDomainBc();               // Parses domain BC options
+  parseSlopeLimiter();           // Parses slope limiter settings
+  parsePlotVariables();          // Parses plot variables
+  parseMultigridSettings();      // Parses solver parameters for geometric multigrid
   parseDivergenceComputation();  // Nonlinear divergence blending
 
   m_extrapolateSourceTerm = false; // This class can't extrapolate with source term (yet)
 }
 
-void cdr_muscl::parseSlopeLimiter(){
+void CdrMuscl::parseSlopeLimiter(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
@@ -60,21 +63,21 @@ void cdr_muscl::parseSlopeLimiter(){
   m_slopelim = (str == "true") ? true : false;
 }
 
-int cdr_muscl::queryGhost() const {
+int CdrMuscl::queryGhost() const {
   return 3;
 }
 
-void cdr_muscl::advance_advect(EBAMRCellData& a_phi, const Real a_dt){
-  CH_TIME("cdr_muscl::advance_advect");
+void CdrMuscl::advance_advect(EBAMRCellData& a_phi, const Real a_dt){
+  CH_TIME("CdrMuscl::advance_advect");
   if(m_verbosity > 5){
     pout() << m_name + "::advance_advect" << endl;
   }
 
-  MayDay::Abort("cdr_muscl::advance_advect - not implemented (yet)");
+  MayDay::Abort("CdrMuscl::advance_advect - not implemented (yet)");
 }
 
-void cdr_muscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt){
-  CH_TIME("cdr_muscl::advectToFaces");
+void CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt){
+  CH_TIME("CdrMuscl::advectToFaces");
   if(m_verbosity > 5){
     pout() << m_name + "::advectToFaces" << endl;
   }
@@ -113,16 +116,16 @@ void cdr_muscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_p
       EBCellFAB deltaC(ebisbox, grown_box, SpaceDim); // Cell-centered slopes
       deltaC.setVal(0.0);
       if(m_slopelim){
-	this->compute_slopes(deltaC, state, box, domain, lvl, dit());
+	this->computeSlopes(deltaC, state, box, domain, lvl, dit());
       }
       this->upwind(face_state, deltaC, state, velo, domain, box, lvl, dit());
     }
 
-    this->compute_bndry_outflow(*a_facePhi[lvl], lvl);
+    this->computeBoundaryOutflow(*a_facePhi[lvl], lvl);
   }
 }
 
-void cdr_muscl::allocateInternals(){
+void CdrMuscl::allocateInternals(){
   CdrSolver::allocateInternals();
 
   if(m_isDiffusive){
@@ -130,15 +133,15 @@ void cdr_muscl::allocateInternals(){
   }
 }
 
-void cdr_muscl::compute_slopes(EBCellFAB&           a_deltaC,
+void CdrMuscl::computeSlopes(EBCellFAB&           a_deltaC,
 			       const EBCellFAB&     a_phi,
 			       const Box&           a_box,
 			       const ProblemDomain& a_domain,
 			       const int            a_level,
 			       const DataIndex&     a_dit){
-  CH_TIME("cdr_muscl::compute_slopes");
+  CH_TIME("CdrMuscl::computeSlopes");
   if(m_verbosity > 99){
-    pout() << m_name + "::compute_slopes" << endl;
+    pout() << m_name + "::computeSlopes" << endl;
   }
 
   const int comp         = 0;
@@ -219,7 +222,7 @@ void cdr_muscl::compute_slopes(EBCellFAB&           a_deltaC,
 	dwc = dwl;
       }
       else{
-	MayDay::Abort("cdr_muscl::compute_slopes - missed a case");
+	MayDay::Abort("CdrMuscl::computeSlopes - missed a case");
       }
 
 
@@ -241,7 +244,7 @@ void cdr_muscl::compute_slopes(EBCellFAB&           a_deltaC,
       }
 
       if(dwc != dwc){
-	MayDay::Abort("cdr_muscl::compute_slopes - dwc != dwc.");
+	MayDay::Abort("CdrMuscl::computeSlopes - dwc != dwc.");
       }
 
       a_deltaC(vof, comp) = dwc;
@@ -249,7 +252,7 @@ void cdr_muscl::compute_slopes(EBCellFAB&           a_deltaC,
   }
 }
 
-void cdr_muscl::upwind(EBFluxFAB&           a_facePhi,
+void CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
 		       const EBCellFAB&     a_slopes,
 		       const EBCellFAB&     a_phi,
 		       const EBFluxFAB&     a_velo,
@@ -257,7 +260,7 @@ void cdr_muscl::upwind(EBFluxFAB&           a_facePhi,
 		       const Box&           a_box,
 		       const int&           a_level,
 		       const DataIndex&     a_dit){
-  CH_TIME("cdr_muscl::upwind");
+  CH_TIME("CdrMuscl::upwind");
   if(m_verbosity > 99){
     pout() << m_name + "::upwind" << endl;
   }
@@ -322,7 +325,7 @@ void cdr_muscl::upwind(EBFluxFAB&           a_facePhi,
   }
 }
 
-void cdr_muscl::compute_bndry_outflow(LevelData<EBFluxFAB>&       a_flux,
+void CdrMuscl::computeBoundaryOutflow(LevelData<EBFluxFAB>&       a_flux,
 				      const int                   a_lvl){
   CH_TIME("CdrTGA::compute_sg_flux(lvl)");
   if(m_verbosity > 5){
@@ -421,4 +424,5 @@ void cdr_muscl::compute_bndry_outflow(LevelData<EBFluxFAB>&       a_flux,
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

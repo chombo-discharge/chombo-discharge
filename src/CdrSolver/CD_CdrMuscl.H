@@ -1,33 +1,37 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   cdr_muscl.H
+  @file   CD_CdrMuscl.H
   @brief  Declaration of a muscl class for the convection diffusion reaction equations
   @author Robert Marskar
-  @date   Feb. 2018
 */
 
-#ifndef _CDR_MUSCL_
-#define _CDR_MUSCL_
+#ifndef CD_CdrMuscl_H
+#define CD_CdrMuscl_H
 
+// Our includes
 #include <CD_CdrTGA.H>
 #include <CD_CdrGodunov.H>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class that uses MUSCL discretization for the advective term in the cdr equation
 */
-class cdr_muscl : public CdrTGA {
+class CdrMuscl : public CdrTGA {
 public:
 
   /*!
     @brief Constructor
   */
-  cdr_muscl();
+  CdrMuscl();
 
   /*!
     @brief Destructor
   */
-  virtual ~cdr_muscl();
+  virtual ~CdrMuscl();
 
   /*!
     @brief Query number of ghost cells
@@ -69,7 +73,7 @@ protected:
   /*!
     @brief Compute slopes
   */
-  virtual void compute_slopes(EBCellFAB&           a_deltaC,
+  virtual void computeSlopes(EBCellFAB&           a_deltaC,
 			      const EBCellFAB&     a_phi,
 			      const Box&           a_box,
 			      const ProblemDomain& a_domain,
@@ -79,7 +83,7 @@ protected:
   /*!
     @brief Compute outflow fluxes at the boundary
   */
-  virtual void compute_bndry_outflow(LevelData<EBFluxFAB>& a_flux, const int a_lvl);
+  virtual void computeBoundaryOutflow(LevelData<EBFluxFAB>& a_flux, const int a_lvl);
 
   /*!
     @brief Riemann solve (just choose the upwind side)
@@ -95,5 +99,7 @@ protected:
 
   virtual void parseSlopeLimiter();     // Parses slope limiter settings
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

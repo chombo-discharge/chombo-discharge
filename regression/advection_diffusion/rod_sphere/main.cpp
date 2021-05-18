@@ -1,6 +1,6 @@
 #include "CD_Driver.H"
 #include <CD_CdrGodunov.H>
-#include "cdr_muscl.H"
+#include <CD_CdrMuscl.H>
 #include "rod_dielectric.H"
 #include "advection_diffusion_stepper.H"
 #include "advection_diffusion_tagger.H"
