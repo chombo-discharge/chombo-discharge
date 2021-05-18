@@ -1,28 +1,32 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   AdvectionDiffusionStepper.cpp
-  @brief  Implementation of AdvectionDiffusionStepper
+  @file   CD_AdvectionDiffusionStepper.cpp
+  @brief  Implementation of CD_AdvectionDiffusionStepper.H
   @author Robert Marskar
   @data   March 2020
 */
 
+// Chombo includes
 #include <ParmParse.H>
 
+// Our includes
 #include <CD_AdvectionDiffusionStepper.H>
 #include <CD_AdvectionDiffusionSpecies.H>
-#include "data_ops.H"
-
-#include "CD_NamespaceHeader.H"
+#include <data_ops.H>
+#include <CD_NamespaceHeader.H>
   
-using namespace physics::advection_diffusion;
-
-
+using namespace Physics::AdvectionDiffusion;
 
 AdvectionDiffusionStepper::AdvectionDiffusionStepper(){
-  ParmParse pp("advection_diffusion");
+  ParmParse pp("AdvectionDiffusion");
 
   m_phase = phase::gas;
 
-  pp.get("Realm",      m_realm);
+  pp.get("realm",      m_realm);
   pp.get("verbosity",  m_verbosity); 
   pp.get("fhd",        m_fhd); 
   pp.get("diffco",     m_faceCenteredDiffusionCoefficient);
@@ -39,7 +43,7 @@ AdvectionDiffusionStepper::~AdvectionDiffusionStepper(){
 }
 
 void AdvectionDiffusionStepper::parseRuntimeOptions() {
-  ParmParse pp("advection_diffusion");
+  ParmParse pp("AdvectionDiffusion");
 
   pp.get("verbosity",  m_verbosity);
   pp.get("cfl",        m_cfl);
@@ -292,4 +296,5 @@ void AdvectionDiffusionStepper::regrid(const int a_lmin, const int a_oldFinestLe
 
 void AdvectionDiffusionStepper::postRegrid() {
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

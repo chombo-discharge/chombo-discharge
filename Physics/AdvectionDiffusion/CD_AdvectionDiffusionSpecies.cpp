@@ -21,7 +21,7 @@ using namespace Physics::AdvectionDiffusion;
 
 AdvectionDiffusionSpecies::AdvectionDiffusionSpecies(){
 
-  ParmParse pp("advection_diffusion");
+  ParmParse pp("AdvectionDiffusion");
 
   m_chargeNumber = 0;
   m_name   = "scalar species";

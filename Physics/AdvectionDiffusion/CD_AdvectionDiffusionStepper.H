@@ -1,22 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   AdvectionDiffusionStepper.H
-  @brief  TimeStepper class for only solving the Advection_Diffusion equation (with surface charge)
+  @file   CD_AdvectionDiffusionStepper.H
+  @brief  TimeStepper class for only solving the the advection-diffusion equation
   @author Robert Marskar
-  @data   March 2020
 */
 
-#ifndef _ADVECTION_DIFFUSION_STEPPER_
-#define _ADVECTION_DIFFUSION_STEPPER_
+#ifndef CD_AdvectionDiffusionStepper
+#define CD_AdvectionDiffusionStepper
 
-#include "CD_TimeStepper.H"
-#include "CD_CdrSolver.H"
+// Our includes
+#include <CD_TimeStepper.H>
+#include <CD_CdrSolver.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace advection_diffusion {
+namespace Physics {
+  namespace AdvectionDiffusion {
 
     /*!
-      @brief Class that just solves the advection_diffusion equation
+      @brief Class that just solves the AdvectionDiffusion equation
     */
     class AdvectionDiffusionStepper : public TimeStepper {
     public:
@@ -97,5 +102,7 @@ namespace physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

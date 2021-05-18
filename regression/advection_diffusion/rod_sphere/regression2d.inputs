@@ -145,25 +145,25 @@ rod_dielectric.sphere.radius             = 0.15          # Radius
 # This class does an expcliti AMR advection-diffusion simulation of a super-Gaussian blob with
 # wall flow BCs.
 # ====================================================================================================
-advection_diffusion.verbosity      = -1      # Verbosity
-advection_diffusion.Realm          = primal  # Realm
-advection_diffusion.blob_amplitude = 1.0     # Blob amplitude
-advection_diffusion.blob_radius    = 0.05    # Blob radius
-advection_diffusion.blob_center    = 0 0.25  # Blob center
-advection_diffusion.diffusion      = true    # Turn on/off diffusion
-advection_diffusion.advection      = true    # Turn on/off advection
-advection_diffusion.fhd            = false   # Use FHD or not
+AdvectionDiffusion.verbosity      = -1      # Verbosity
+AdvectionDiffusion.realm          = primal  # Realm
+AdvectionDiffusion.blob_amplitude = 1.0     # Blob amplitude
+AdvectionDiffusion.blob_radius    = 0.05    # Blob radius
+AdvectionDiffusion.blob_center    = 0 0.25  # Blob center
+AdvectionDiffusion.diffusion      = true    # Turn on/off diffusion
+AdvectionDiffusion.advection      = true    # Turn on/off advection
+AdvectionDiffusion.fhd            = false   # Use FHD or not
 
-advection_diffusion.integrator     = 1       # 0 = Heun's method. 1 = IMEX Euler
+AdvectionDiffusion.integrator     = 1       # 0 = Heun's method. 1 = IMEX Euler
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-advection_diffusion.diffco         = 1E-4   # Diffusion coefficient
-advection_diffusion.omega          = 1.0     # Rotation velocity
-advection_diffusion.cfl            = 0.8     # CFL number
+AdvectionDiffusion.diffco         = 1E-4   # Diffusion coefficient
+AdvectionDiffusion.omega          = 1.0     # Rotation velocity
+AdvectionDiffusion.cfl            = 0.8     # CFL number
 
 # Cell tagging stuff
 # ------------------
-advection_diffusion.refine_curv = 0.1          # Refine if curvature exceeds this
-advection_diffusion.refine_magn = 1E-2         # Only tag if magnitude eceeds this
-advection_diffusion.buffer      = 0            # Grow tagged cells     
+AdvectionDiffusion.refine_curv = 0.1          # Refine if curvature exceeds this
+AdvectionDiffusion.refine_magn = 1E-2         # Only tag if magnitude eceeds this
+AdvectionDiffusion.buffer      = 0            # Grow tagged cells     

@@ -22,7 +22,7 @@ def write_template(args):
     mainf.write("\n")
 
     mainf.write("using namespace ChomboDischarge;\n")
-    mainf.write("using namespace physics::advection_diffusion;\n\n")
+    mainf.write("using namespace physics::AdvectionDiffusion;\n\n")
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
@@ -45,7 +45,7 @@ def write_template(args):
 
 
     mainf.write("\n")
-    mainf.write("  // Set up basic advection_diffusion \n")
+    mainf.write("  // Set up basic AdvectionDiffusion \n")
     mainf.write("  RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new " + args.CdrSolver + "());\n")
     mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new " + args.stepper + "(solver));\n")
     mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new AdvectionDiffusionTagger(solver, amr));\n")

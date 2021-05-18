@@ -1,24 +1,29 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   AdvectionDiffusionTagger.cpp
-  @brief  Implementation of AdvectionDiffusionTagger.H
+  @file   CD_AdvectionDiffusionTagger.cpp
+  @brief  Implementation of CD_AdvectionDiffusionTagger.H
   @author Robert Marskar
-  @date   Nov. 2017
-  @todo   Rename to AdvectionDiffusionTagger. 
 */
 
+// Chombo includes
+#include <ParmParse.H>
+
+// Our includes
 #include <CD_AdvectionDiffusionTagger.H>
-#include "data_ops.H"
+#include <data_ops.H>
+#include <CD_NamespaceHeader.H>
 
-#include <ParmParse.H> 
-
-#include "CD_NamespaceHeader.H"
-using namespace physics::advection_diffusion;
+using namespace Physics::AdvectionDiffusion;
 
 AdvectionDiffusionTagger::AdvectionDiffusionTagger(RefCountedPtr<CdrSolver>& a_solver,
-						       RefCountedPtr<AmrMesh>&   a_amr){
+						   RefCountedPtr<AmrMesh>&   a_amr){
   m_solver    = a_solver;
   m_amr       = a_amr;
-  m_name      = "advection_diffusion";
+  m_name      = "AdvectionDiffusion";
   m_verbosity = -1;
   m_realm     = a_solver->getRealm();
 }
@@ -29,7 +34,7 @@ AdvectionDiffusionTagger::~AdvectionDiffusionTagger(){
 }
 
 void AdvectionDiffusionTagger::regrid(){
-  pout() << "regridding cell tagger" << endl;
+
 }
 
 void AdvectionDiffusionTagger::parseOptions(){
@@ -114,4 +119,5 @@ bool AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags){
 #endif
   return found_tags;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

@@ -159,8 +159,8 @@ void ito_plasma_godunov::parseOptions() {
   else if(str == "diffusion"){
     m_whichDt = which_dt::diffusion;
   }
-  else if(str == "advection_diffusion"){
-    m_whichDt = which_dt::advection_diffusion;
+  else if(str == "AdvectionDiffusion"){
+    m_whichDt = which_dt::AdvectionDiffusion;
   }
   else{
     MayDay::Abort("ito_plasma_godunov::parseOptions - unknown 'which_dt' requested");
@@ -236,8 +236,8 @@ void ito_plasma_godunov::parseRuntimeOptions() {
   else if(str == "diffusion"){
     m_whichDt = which_dt::diffusion;
   }
-  else if(str == "advection_diffusion"){
-    m_whichDt = which_dt::advection_diffusion;
+  else if(str == "AdvectionDiffusion"){
+    m_whichDt = which_dt::AdvectionDiffusion;
   }
   else{
     MayDay::Abort("ito_plasma_godunov::parseOptions - unknown 'which_dt' requested");
@@ -502,7 +502,7 @@ void ito_plasma_godunov::computeDt(Real& a_dt, TimeCode& a_timeCode){
   else if(m_whichDt == which_dt::diffusion){
     a_dt = m_ito->compute_diffusive_dt();
   }
-  else if(m_whichDt == which_dt::advection_diffusion){
+  else if(m_whichDt == which_dt::AdvectionDiffusion){
     a_dt = m_ito->computeDt();
   }
     

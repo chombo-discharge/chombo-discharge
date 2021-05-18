@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_AdvectionDiffusionSpecies.H
-  @brief  Simple species for advection_diffusion test problem
+  @brief  Simple species for AdvectionDiffusion test problem
   @author Robert Marskar
 */
 

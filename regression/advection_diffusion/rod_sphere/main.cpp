@@ -7,7 +7,7 @@
 #include "ParmParse.H"
 
 using namespace ChomboDischarge;
-using namespace physics::advection_diffusion;
+using namespace Physics::AdvectionDiffusion;
 
 int main(int argc, char* argv[]){
 
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
   RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());
 
-  // Set up basic advection_diffusion 
+  // Set up basic AdvectionDiffusion 
   RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new CdrGodunov());
   RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new AdvectionDiffusionStepper(solver));
   RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new AdvectionDiffusionTagger(solver, amr));

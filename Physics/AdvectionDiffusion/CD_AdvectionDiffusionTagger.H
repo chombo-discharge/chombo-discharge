@@ -1,20 +1,25 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   AdvectionDiffusionTagger.H
-  @brief  Class for tagging cells across an AMR hierarchy
+  @file   CD_AdvectionDiffusionTagger.H
+  @brief  Tagging class for advection-diffusion physics
   @author Robert Marskar
-  @date   Nov. 2017
 */
 
-#ifndef _ADVECTION_DIFFUSION_TAGGER_
-#define _ADVECTION_DIFFUSION_TAGGER_
+#ifndef CD_AdvectionDiffusionTagger_H
+#define CD_AdvectionDiffusionTagger_H
 
-#include "CD_CellTagger.H"
-#include "CD_CdrSolver.H"
-#include "CD_AmrMesh.H"
+#include <CD_CellTagger.H>
+#include <CD_CdrSolver.H>
+#include <CD_AmrMesh.H>
 
-#include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace advection_diffusion {
+#include <CD_NamespaceHeader.H>
+
+namespace Physics {
+  namespace AdvectionDiffusion {
 
     /*!
       @brief Abstract class for tagging cells across an AMR hierarchy
@@ -26,9 +31,9 @@ namespace physics {
 				 RefCountedPtr<AmrMesh>&   a_amr);
       ~AdvectionDiffusionTagger();
 
-      void regrid();
-      void parseOptions();
-      bool tagCells(EBAMRTags& a_tags);
+      void regrid() override;
+      void parseOptions() override;
+      bool tagCells(EBAMRTags& a_tags) override;
 
     protected:
       std::string m_realm;
@@ -37,14 +42,14 @@ namespace physics {
       RefCountedPtr<AmrMesh>   m_amr;
 
     private:
-      AdvectionDiffusionTagger(){
-	MayDay::Abort("AdvectionDiffusionTagger::AdvectionDiffusionTagger() - disabled constructor");
-      }
+      AdvectionDiffusionTagger() = delete;
 
       Real m_refi_curv;
       Real m_refi_magn;
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

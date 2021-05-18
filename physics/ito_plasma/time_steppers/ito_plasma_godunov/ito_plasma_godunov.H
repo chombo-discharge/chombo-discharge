@@ -55,7 +55,7 @@ namespace physics {
       enum class which_dt {
 	advection,
 	diffusion,
-	advection_diffusion
+	AdvectionDiffusion
       };
 
       // These are things that are used to compute the conductivity. 
