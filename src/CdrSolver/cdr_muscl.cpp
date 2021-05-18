@@ -324,7 +324,7 @@ void cdr_muscl::upwind(EBFluxFAB&           a_facePhi,
 
 void cdr_muscl::compute_bndry_outflow(LevelData<EBFluxFAB>&       a_flux,
 				      const int                   a_lvl){
-  CH_TIME("cdr_tga::compute_sg_flux(lvl)");
+  CH_TIME("CdrTGA::compute_sg_flux(lvl)");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_sg_flux(lvl)" << endl;
   }

@@ -8,7 +8,7 @@
 #ifndef _CDR_MUSCL_
 #define _CDR_MUSCL_
 
-#include "cdr_tga.H"
+#include <CD_CdrTGA.H>
 #include <CD_CdrGodunov.H>
 
 #include "CD_NamespaceHeader.H"
@@ -16,7 +16,7 @@
 /*!
   @brief Class that uses MUSCL discretization for the advective term in the cdr equation
 */
-class cdr_muscl : public cdr_tga {
+class cdr_muscl : public CdrTGA {
 public:
 
   /*!

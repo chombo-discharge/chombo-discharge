@@ -16,13 +16,13 @@
 #include <EBAdvectLevelIntegrator.H>
 
 // Our includes
-#include <cdr_tga.H>
+#include <CD_CdrTGA.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Godunov implementation for advection. 
 */
-class CdrGodunov : public cdr_tga {
+class CdrGodunov : public CdrTGA {
 public:
 
   /*!

@@ -22,7 +22,7 @@ ExtrapAdvectBCFactory s_physibc;
 
 #include "CD_NamespaceHeader.H"
 
-CdrGodunov::CdrGodunov() : cdr_tga() {
+CdrGodunov::CdrGodunov() : CdrTGA() {
   m_className = "CdrGodunov";
   m_name       = "CdrGodunov";
 }

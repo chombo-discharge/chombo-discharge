@@ -1,5 +1,5 @@
 /*!
-  @file   cdr_tga.H
+  @file   CdrTGA.H
   @brief  Extensions of CdrSolver which use ebconductivityop and TGA for diffusion parts
   @author Robert Marskar
   @date   Jan. 2018
@@ -26,7 +26,7 @@
 /*!
   @brief Extension class of CdrSolver that uses ebconductivityop for diffusion part. Can also solve for stochastic diffusion
 */
-class cdr_tga : public CdrSolver {
+class CdrTGA : public CdrSolver {
 protected:
 
   /*!
@@ -52,12 +52,12 @@ public:
   /*!
     @brief Constructor
   */
-  cdr_tga();
+  CdrTGA();
 
   /*!
     @brief Destructor
   */
-  virtual ~cdr_tga();
+  virtual ~CdrTGA();
 
   /*!
     @brief Parse class options

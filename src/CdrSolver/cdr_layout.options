@@ -13,16 +13,16 @@ cdr_fhd.limit_slopes         = true              # Use slope-limiters for goduno
 cdr_fhd.stochastic_diffusion = false             # Stochastic diffusion. 'true' or 'false'
 cdr_fhd.seed = -1
 
-cdr_tga.gmg_verbosity      = -1        # GMG verbosity
-cdr_tga.gmg_pre_smooth     = 3         # Number of relaxations in downsweep
-cdr_tga.gmg_post_smooth    = 3         # Number of relaxations in upsweep
-cdr_tga.gmg_bott_smooth    = 3         # NUmber of relaxations before dropping to bottom solver
-cdr_tga.gmg_min_iter       = 5         # Minimum number of iterations
-cdr_tga.gmg_max_iter       = 32        # Maximum number of iterations
-cdr_tga.gmg_tolerance      = 1.E-6     # Residue tolerance
-cdr_tga.gmg_hang           = 0.2       # Solver hang
-cdr_tga.gmg_bottom_drop    = 16        # Bottom drop
-cdr_tga.gmg_bottom_solver  = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
-cdr_tga.gmg_bottom_relax   = 8         # Number of relaxations in bottom solve ('simple' solver only)
+CdrTGA.gmg_verbosity      = -1        # GMG verbosity
+CdrTGA.gmg_pre_smooth     = 3         # Number of relaxations in downsweep
+CdrTGA.gmg_post_smooth    = 3         # Number of relaxations in upsweep
+CdrTGA.gmg_bott_smooth    = 3         # NUmber of relaxations before dropping to bottom solver
+CdrTGA.gmg_min_iter       = 5         # Minimum number of iterations
+CdrTGA.gmg_max_iter       = 32        # Maximum number of iterations
+CdrTGA.gmg_tolerance      = 1.E-6     # Residue tolerance
+CdrTGA.gmg_hang           = 0.2       # Solver hang
+CdrTGA.gmg_bottom_drop    = 16        # Bottom drop
+CdrTGA.gmg_bottom_solver  = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+CdrTGA.gmg_bottom_relax   = 8         # Number of relaxations in bottom solve ('simple' solver only)
 
 CdrSolver.plt_vars        = phi vel src # Plot variables. Options are 'phi', 'vel', 'dco', 'src'

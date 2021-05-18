@@ -9,7 +9,7 @@
 #include "strang2_storage.H"
 #include "data_ops.H"
 #include "units.H"
-#include "cdr_tga.H"
+#include <CD_CdrTGA.H>
 
 #include <fstream>
 #include <iostream>
@@ -378,7 +378,7 @@ void strang2::advanceTGA_diffusion(const Real a_time, const Real a_dt){
       m_amr->allocate(old_phi, phase::gas, ncomp);
       data_ops::copy(old_phi, phi);
       
-      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
+      CdrTGA* tgasolver = (CdrTGA*) (&(*solver));
       tgasolver->advanceTGA(phi, old_phi, a_dt);
     }
   }
@@ -407,7 +407,7 @@ void strang2::advanceEuler_diffusion(const Real a_time, const Real a_dt){
       data_ops::copy(old_phi, wrong_phi);
       data_ops::copy(wrong_phi, exact_phi);
 
-      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
+      CdrTGA* tgasolver = (CdrTGA*) (&(*solver));
       tgasolver->advanceTGA(wrong_phi, old_phi, a_dt);
     }
   }

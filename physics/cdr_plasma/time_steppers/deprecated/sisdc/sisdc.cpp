@@ -713,7 +713,7 @@ void sisdc::compute_FD_0(){
     EBAMRCellData& FD_0        = storage->get_FD()[0];  // FD(phi_0)
     
     if(solver->isDiffusive()){
-      //      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
+      //      CdrTGA* tgasolver = (CdrTGA*) (&(*solver));
       //tgasolver->computeDivD(FD_0, phi_0);
       solver->computeDivD(FD_0, phi_0);
 

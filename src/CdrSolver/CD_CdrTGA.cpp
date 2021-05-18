@@ -1,11 +1,11 @@
 /*!
-  @file   cdr_tga.cpp
-  @brief  Implementation of cdr_tga.H
+  @file   CdrTGA.cpp
+  @brief  Implementation of CdrTGA.H
   @author Robert Marskar
   @date   Jan. 2018
 */
 
-#include "cdr_tga.H"
+#include <CD_CdrTGA.H>
 #include "data_ops.H"
 
 #include <ParmParse.H>
@@ -17,18 +17,18 @@
 
 #include "CD_NamespaceHeader.H"
 
-cdr_tga::cdr_tga() : CdrSolver() {
-  m_name         = "cdr_tga";
-  m_className   = "cdr_tga";
+CdrTGA::CdrTGA() : CdrSolver() {
+  m_name         = "CdrTGA";
+  m_className   = "CdrTGA";
   m_has_mg_stuff = false;
 }
 
-cdr_tga::~cdr_tga(){
+CdrTGA::~CdrTGA(){
 
 }
 
-void cdr_tga::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
-  CH_TIME("cdr_tga::advanceEuler(no source)");
+void CdrTGA::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
+  CH_TIME("CdrTGA::advanceEuler(no source)");
   if(m_verbosity > 5){
     pout() << m_name + "::advanceEuler(no source)" << endl;
   }
@@ -48,11 +48,11 @@ void cdr_tga::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPh
   }
 }
 
-void cdr_tga::advanceEuler(EBAMRCellData&       a_newPhi,
+void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
 			    const EBAMRCellData& a_oldPhi,
 			    const EBAMRCellData& a_source,
 			    const Real           a_dt){
-  CH_TIME("cdr_tga::advanceEuler");
+  CH_TIME("CdrTGA::advanceEuler");
   if(m_verbosity > 5){
     pout() << m_name + "::advanceEuler" << endl;
   }
@@ -106,8 +106,8 @@ void cdr_tga::advanceEuler(EBAMRCellData&       a_newPhi,
   }
 }
 
-void cdr_tga::advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
-  CH_TIME("cdr_tga::advanceTGA(no source)");
+void CdrTGA::advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
+  CH_TIME("CdrTGA::advanceTGA(no source)");
   if(m_verbosity > 5){
     pout() << m_name + "::advanceTGA(no source)" << endl;
   }
@@ -128,11 +128,11 @@ void cdr_tga::advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi,
   }
 }
 
-void cdr_tga::advanceTGA(EBAMRCellData&       a_newPhi,
+void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
 			  const EBAMRCellData& a_oldPhi,
 			  const EBAMRCellData& a_source,
 			  const Real           a_dt){
-  CH_TIME("cdr_tga::advanceTGA(full)");
+  CH_TIME("CdrTGA::advanceTGA(full)");
   if(m_verbosity > 5){
     pout() << m_name + "::advanceTGA(full)" << endl;
   }
@@ -171,8 +171,8 @@ void cdr_tga::advanceTGA(EBAMRCellData&       a_newPhi,
   }
 }
 
-void cdr_tga::set_bottom_solver(const int a_whichsolver){
-  CH_TIME("cdr_tga::set_bottom_solver");
+void CdrTGA::set_bottom_solver(const int a_whichsolver){
+  CH_TIME("CdrTGA::set_bottom_solver");
   if(m_verbosity > 5){
     pout() << m_name + "::set_bottom_solver" << endl;
   }
@@ -181,7 +181,7 @@ void cdr_tga::set_bottom_solver(const int a_whichsolver){
     m_bottomsolver = a_whichsolver;
 
     std::string str;
-    ParmParse pp("cdr_tga");
+    ParmParse pp("CdrTGA");
     pp.get("gmg_bottom_solver", str);
     if(str == "simple"){
       m_bottomsolver = 0;
@@ -191,19 +191,19 @@ void cdr_tga::set_bottom_solver(const int a_whichsolver){
     }
   }
   else{
-    MayDay::Abort("cdr_tga::set_bottom_solver - Unsupported solver type requested");
+    MayDay::Abort("CdrTGA::set_bottom_solver - Unsupported solver type requested");
   }
 }
 
-void cdr_tga::set_botsolver_smooth(const int a_numsmooth){
-  CH_TIME("cdr_tga::set_botsolver_smooth");
+void CdrTGA::set_botsolver_smooth(const int a_numsmooth){
+  CH_TIME("CdrTGA::set_botsolver_smooth");
   if(m_verbosity > 5){
     pout() << m_name + "::set_botsolver_smooth" << endl;
   }
   CH_assert(a_numsmooth > 0);
 
 
-  ParmParse pp("cdr_tga");
+  ParmParse pp("CdrTGA");
   pp.query("gmg_bottom_relax", m_numsmooth);
 
   if(m_numsmooth < 0){
@@ -211,13 +211,13 @@ void cdr_tga::set_botsolver_smooth(const int a_numsmooth){
   }
 }
 
-void cdr_tga::set_bottom_drop(const int a_bottom_drop){
-  CH_TIME("cdr_tga::set_bottom_drop");
+void CdrTGA::set_bottom_drop(const int a_bottom_drop){
+  CH_TIME("CdrTGA::set_bottom_drop");
   if(m_verbosity > 5){
     pout() << m_name + "::set_bottom_drop" << endl;
   }
 
-  ParmParse pp("cdr_tga");
+  ParmParse pp("CdrTGA");
   pp.get("gmg_bottom_drop", m_bottom_drop);
 
   if(m_bottom_drop < 2){
@@ -225,15 +225,15 @@ void cdr_tga::set_bottom_drop(const int a_bottom_drop){
   }
 }
 
-void cdr_tga::set_tga(const bool a_use_tga){
-  CH_TIME("cdr_tga::set_tga");
+void CdrTGA::set_tga(const bool a_use_tga){
+  CH_TIME("CdrTGA::set_tga");
   if(m_verbosity > 5){
     pout() << m_name + "::set_tga" << endl;
   }
   
   m_use_tga = a_use_tga;
 
-  ParmParse pp("cdr_tga");
+  ParmParse pp("CdrTGA");
   std::string str;
   if(pp.contains("use_tga")){
     pp.get("use_tga", str);
@@ -246,7 +246,7 @@ void cdr_tga::set_tga(const bool a_use_tga){
   }
 }
 
-void cdr_tga::set_gmg_solver_parameters(relax      a_relax_type,
+void CdrTGA::set_gmg_solver_parameters(relax      a_relax_type,
 					amrmg      a_gmg_type,      
 					const int  a_verbosity,          
 					const int  a_pre_smooth,         
@@ -256,7 +256,7 @@ void cdr_tga::set_gmg_solver_parameters(relax      a_relax_type,
 					const int  a_min_iter,
 					const Real a_eps,               
 					const Real a_hang){
-  CH_TIME("cdr_tga::set_gmg_solver_parameters");
+  CH_TIME("CdrTGA::set_gmg_solver_parameters");
   if(m_verbosity > 5){
     pout() << m_name + "::set_gmg_solver_parameters" << endl;
   }
@@ -272,7 +272,7 @@ void cdr_tga::set_gmg_solver_parameters(relax      a_relax_type,
   m_gmg_eps         = a_eps;
   m_gmg_hang        = a_hang;
 
-  ParmParse pp("cdr_tga");
+  ParmParse pp("CdrTGA");
   std::string str;
 
 
@@ -297,7 +297,7 @@ void cdr_tga::set_gmg_solver_parameters(relax      a_relax_type,
     m_gmg_relax_type = relax::gsrb_fast;
   }
   else{
-    MayDay::Abort("cdr_tga::set_gmg_solver_parameters - unknown relaxation method requested");
+    MayDay::Abort("CdrTGA::set_gmg_solver_parameters - unknown relaxation method requested");
   }
 
   // Get the MG cycle
@@ -312,12 +312,12 @@ void cdr_tga::set_gmg_solver_parameters(relax      a_relax_type,
     m_gmg_type = amrmg::fcycle;
   }
   else{
-    MayDay::Abort("cdr_tga::set_gmg_solver_parameters - unknown MG cycle method requested");
+    MayDay::Abort("CdrTGA::set_gmg_solver_parameters - unknown MG cycle method requested");
   }
 }
 
-void cdr_tga::setup_gmg(){
-  CH_TIME("cdr_tga::setup_gmg");
+void CdrTGA::setup_gmg(){
+  CH_TIME("CdrTGA::setup_gmg");
   if(m_verbosity > 5){
     pout() << m_name + "::setup_gmg" << endl;
   }
@@ -333,8 +333,8 @@ void cdr_tga::setup_gmg(){
   this->setup_euler();
 }
 
-void cdr_tga::define_mg_levels(){
-  CH_TIME("cdr_tga::define_mg_levels");
+void CdrTGA::define_mg_levels(){
+  CH_TIME("CdrTGA::define_mg_levels");
   if(m_verbosity > 5){
     pout() << m_name + "::define_mg_levels" << endl;
   }
@@ -399,8 +399,8 @@ void cdr_tga::define_mg_levels(){
   }
 }
 
-void cdr_tga::setup_operator_factory(){
-  CH_TIME("cdr_tga::setup_operator_factory");
+void CdrTGA::setup_operator_factory(){
+  CH_TIME("CdrTGA::setup_operator_factory");
   if(m_verbosity > 5){
     pout() << m_name + "::setup_operator_factory" << endl;
   }
@@ -472,8 +472,8 @@ void cdr_tga::setup_operator_factory(){
 										 m_mg_levelgrids));
 }
 
-void cdr_tga::setup_multigrid(){
-  CH_TIME("cdr_tga::setup_multigrid");
+void CdrTGA::setup_multigrid(){
+  CH_TIME("CdrTGA::setup_multigrid");
   if(m_verbosity > 5){
     pout() << m_name + "::setup_multigrid" << endl;
   }
@@ -518,8 +518,8 @@ void cdr_tga::setup_multigrid(){
 
 }
 
-void cdr_tga::setup_tga(){
-  CH_TIME("cdr_tga::setup_tga");
+void CdrTGA::setup_tga(){
+  CH_TIME("CdrTGA::setup_tga");
   if(m_verbosity > 5){
     pout() << m_name + "::setup_tga" << endl;
   }
@@ -538,8 +538,8 @@ void cdr_tga::setup_tga(){
   m_gmg_solver->init(phi, rhs, finest_level, 0);
 }
 
-void cdr_tga::setup_euler(){
-  CH_TIME("cdr_tga::setup_euler");
+void CdrTGA::setup_euler(){
+  CH_TIME("CdrTGA::setup_euler");
   if(m_verbosity > 5){
     pout() << m_name + "::setup_euler" << endl;
   }
@@ -554,8 +554,8 @@ void cdr_tga::setup_euler(){
   // Note: If this crashes, try to init gmg first
 }
 
-void cdr_tga::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux){
-  CH_TIME("cdr_tga::computeDivJ(divF, state)");
+void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux){
+  CH_TIME("CdrTGA::computeDivJ(divF, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivJ(divF, state)" << endl;
   }
@@ -610,8 +610,8 @@ void cdr_tga::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Rea
   return;
 }
 
-void cdr_tga::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux){
-  CH_TIME("cdr_tga::computeDivF(divF, state)");
+void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux){
+  CH_TIME("CdrTGA::computeDivF(divF, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivF(divF, state)" << endl;
   }
@@ -651,8 +651,8 @@ void cdr_tga::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Rea
 
 }
 
-void cdr_tga::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool a_ebFlux){
-  CH_TIME("cdr_tga::computeDivD");
+void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool a_ebFlux){
+  CH_TIME("CdrTGA::computeDivD");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivD" << endl;
   }
@@ -686,7 +686,7 @@ void cdr_tga::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const boo
   }
 }
 
-void cdr_tga::parse_gmg_settings(){
+void CdrTGA::parse_gmg_settings(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
@@ -711,7 +711,7 @@ void cdr_tga::parse_gmg_settings(){
     m_bottomsolver = 1;
   }
   else{
-    MayDay::Abort("cdr_tga::parse_gmg_settings - unknown bottom solver requested");
+    MayDay::Abort("CdrTGA::parse_gmg_settings - unknown bottom solver requested");
   }
 
   // Relaxation type
@@ -726,7 +726,7 @@ void cdr_tga::parse_gmg_settings(){
     m_gmg_relax_type = relax::gauss_seidel;
   }
   else{
-    MayDay::Abort("cdr_tga::parse_gmg_settings - unknown relaxation method requested");
+    MayDay::Abort("CdrTGA::parse_gmg_settings - unknown relaxation method requested");
   }
 
   // Cycle type
@@ -735,7 +735,7 @@ void cdr_tga::parse_gmg_settings(){
     m_gmg_type = amrmg::vcycle;
   }
   else{
-    MayDay::Abort("cdr_tga::parse_gmg_settings - unknown cycle type requested");
+    MayDay::Abort("CdrTGA::parse_gmg_settings - unknown cycle type requested");
   }
 
   // No lower than 2. 
@@ -744,8 +744,8 @@ void cdr_tga::parse_gmg_settings(){
   }
 }
 
-void cdr_tga::writePlotData(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("cdr_tga::writePlotData");
+void CdrTGA::writePlotData(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("CdrTGA::writePlotData");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotData" << endl;
   }
