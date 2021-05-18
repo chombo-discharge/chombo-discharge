@@ -15,12 +15,12 @@ def write_template(args):
     optf.write(args.app_name + ".basename  = pout\n")
     optf.write('\n')
 
-    options_files = [args.discharge_home + "/src/AmrMesh/AmrMesh.options", \
-                     args.discharge_home + "/src/Driver/Driver.options", \
-                     args.discharge_home + "/src/FieldSolver/CD_" + args.field_solver + ".options",\
-                     args.discharge_home + "/src/ito_solver/" + args.ito_solver + ".options",\
-                     args.discharge_home + "/src/rte_solver/mc_photo.options",\
-                     args.discharge_home + "/src/geometry/geo_coarsener.options", \
+    options_files = [args.discharge_home + "/Source/AmrMesh/AmrMesh.options", \
+                     args.discharge_home + "/Source/Driver/Driver.options", \
+                     args.discharge_home + "/Source/FieldSolver/CD_" + args.field_solver + ".options",\
+                     args.discharge_home + "/Source/ito_solver/" + args.ito_solver + ".options",\
+                     args.discharge_home + "/Source/rte_solver/mc_photo.options",\
+                     args.discharge_home + "/Source/geometry/geo_coarsener.options", \
                      args.discharge_home + "/geometries/" + args.geometry + "/" + args.geometry + ".options", \
                      args.discharge_home + "/physics/ito_plasma/timesteppers/" + args.TimeStepper + "/" + args.TimeStepper + ".options", \
                      args.discharge_home + "/physics/ito_plasma/plasma_models/" + args.physics + "/" + args.physics + ".options"]

@@ -16,13 +16,13 @@ LibNames:= MFElliptic MFTools EBAMRTimeDependent EBAMRElliptic EBAMRTools EBTool
 all: all-test
 
 base_dir = .
-src_dirs = $(DISCHARGE_HOME)/src \
-	$(DISCHARGE_HOME)/src/AmrMesh \
-	$(DISCHARGE_HOME)/src/CellTagger \
-	$(DISCHARGE_HOME)/src/Driver \
-	$(DISCHARGE_HOME)/src/geometry \
-	$(DISCHARGE_HOME)/src/global \
-	$(DISCHARGE_HOME)/src/particle \
+src_dirs = $(DISCHARGE_HOME)/Source \
+	$(DISCHARGE_HOME)/Source/AmrMesh \
+	$(DISCHARGE_HOME)/Source/CellTagger \
+	$(DISCHARGE_HOME)/Source/Driver \
+	$(DISCHARGE_HOME)/Source/geometry \
+	$(DISCHARGE_HOME)/Source/global \
+	$(DISCHARGE_HOME)/Source/particle \
 	$(DISCHARGE_HOME)/physics/geometry \
 	$(DISCHARGE_HOME)/geometries/rough_rod\
 

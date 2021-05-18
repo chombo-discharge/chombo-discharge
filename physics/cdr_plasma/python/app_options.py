@@ -15,12 +15,12 @@ def write_template(args):
     optf.write(args.app_name + ".basename  = pout\n")
     optf.write('\n')
 
-    options_files = [args.discharge_home + "/src/AmrMesh/AmrMesh.options", \
-                     args.discharge_home + "/src/Driver/Driver.options", \
-                     args.discharge_home + "/src/FieldSolver/CD_" + args.field_solver + ".options",\
-                     args.discharge_home + "/src/CdrSolver/" + args.CdrSolver + ".options",\
-                     args.discharge_home + "/src/rte_solver/" + args.rte_solver + ".options",\
-                     args.discharge_home + "/src/geometry/geo_coarsener.options", \
+    options_files = [args.discharge_home + "/Source/AmrMesh/AmrMesh.options", \
+                     args.discharge_home + "/Source/Driver/Driver.options", \
+                     args.discharge_home + "/Source/FieldSolver/CD_" + args.field_solver + ".options",\
+                     args.discharge_home + "/Source/CdrSolver/" + args.CdrSolver + ".options",\
+                     args.discharge_home + "/Source/rte_solver/" + args.rte_solver + ".options",\
+                     args.discharge_home + "/Source/geometry/geo_coarsener.options", \
                      args.discharge_home + "/geometries/" + args.geometry + "/" + args.geometry + ".options", \
                      args.discharge_home + "/physics/cdr_plasma/timesteppers/" + args.TimeStepper + "/" + args.TimeStepper + ".options", \
                      args.discharge_home + "/physics/cdr_plasma/plasma_models/" + args.physics + "/" + args.physics + ".options"]

@@ -16,18 +16,18 @@ LibNames:= MFElliptic MFTools EBAMRTimeDependent EBAMRElliptic EBAMRTools EBTool
 all: all-test
 
 base_dir = .
-src_dirs = $(DISCHARGE_HOME)/src \
-	$(DISCHARGE_HOME)/src/AmrMesh \
-	$(DISCHARGE_HOME)/src/CdrSolver \
-	$(DISCHARGE_HOME)/src/CellTagger \
-	$(DISCHARGE_HOME)/src/Driver \
-	$(DISCHARGE_HOME)/src/elliptic \
-	$(DISCHARGE_HOME)/src/geometry \
-	$(DISCHARGE_HOME)/src/rte_solver \
-	$(DISCHARGE_HOME)/src/ito_solver \
-	$(DISCHARGE_HOME)/src/sigma_solver \
-	$(DISCHARGE_HOME)/src/global \
-	$(DISCHARGE_HOME)/src/particle \
+src_dirs = $(DISCHARGE_HOME)/Source \
+	$(DISCHARGE_HOME)/Source/AmrMesh \
+	$(DISCHARGE_HOME)/Source/CdrSolver \
+	$(DISCHARGE_HOME)/Source/CellTagger \
+	$(DISCHARGE_HOME)/Source/Driver \
+	$(DISCHARGE_HOME)/Source/elliptic \
+	$(DISCHARGE_HOME)/Source/geometry \
+	$(DISCHARGE_HOME)/Source/rte_solver \
+	$(DISCHARGE_HOME)/Source/ito_solver \
+	$(DISCHARGE_HOME)/Source/sigma_solver \
+	$(DISCHARGE_HOME)/Source/global \
+	$(DISCHARGE_HOME)/Source/particle \
 	$(DISCHARGE_HOME)/geometries/rod_dielectric\
 	$(DISCHARGE_HOME)/physics/brownian_walker \
 
