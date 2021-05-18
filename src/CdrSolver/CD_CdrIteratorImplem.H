@@ -1,16 +1,20 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   CdrIteratorI.H
+  @file   CD_CdrIteratorImplem.H
   @brief  Implementation of CdrIterator.H
   @author Robert Marskar
-  @date   June Dec. 2017
 */
 
-#ifndef _CDR_ITERATORI_H_
-#define _CDR_ITERATORI_H_
+#ifndef CD_CdrIteratorImplem_H
+#define CD_CdrIteratorImplem_H
 
+// Our includes
 #include <CD_CdrIterator.H>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 template <class T>
 CdrIterator<T>::CdrIterator(){
@@ -27,21 +31,6 @@ CdrIterator<T>::CdrIterator(cdr_layout<T>& a_layout, const SpeciesIteration a_mo
   m_num      = m_solvers.size();
   m_mode     = a_mode;
   m_defined  = true;
-
-  reset();
-}
-
-template <class T>
-CdrIterator<T>::CdrIterator(cdr_layout<T>& a_layout, Vector<EBAMRCellData*> a_data){
-  CH_TIME("CdrIterator<T>::CdrIterator");
-    
-  m_solvers  = a_layout.get_solvers();
-  m_species  = a_layout.get_species();
-  m_num      = m_solvers.size();
-  m_defined  = true;
-  m_mode     = SpeciesIteration::all;
-
-  m_celldata = a_data;
 
   reset();
 }
@@ -124,12 +113,6 @@ RefCountedPtr<CdrSpecies>& CdrIterator<T>::get_species() {
   return m_species[m_isolver];
 }
 
-template <class T>
-EBAMRCellData& CdrIterator<T>::get_data() {
-  CH_assert(m_defined == true);
-  CH_assert(m_isolver < m_num);
-  return *m_celldata[m_isolver];
-}
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
 
 #endif

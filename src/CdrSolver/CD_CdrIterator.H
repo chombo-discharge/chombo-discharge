@@ -1,16 +1,20 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   CdrIterator.H
-  @brief  Iterator class for cdr_layout
+  @file   CD_CdrIterator.H
+  @brief  Iterator class for CdrLayout
   @author Robert Marskar
-  @date   June Dec. 2017
 */
 
-#ifndef _CDR_ITERATOR_
-#define _CDR_ITERATOR_
+#ifndef CD_CdrIterator_H
+#define CD_CdrIterator_H
 
-#include "cdr_layout.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrLayout.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Iterator class for cdr_layout
@@ -39,11 +43,6 @@ public:
     @brief Full constructor
   */
   CdrIterator(cdr_layout<T>& a_layout, const SpeciesIteration a_mode = SpeciesIteration::all);
-
-  /*!
-    @brief Full constructor, allows iteration through data
-  */
-  CdrIterator(cdr_layout<T>& a_layout, Vector<EBAMRCellData*> a_data);
 
   /*!
     @brief Destructor
@@ -84,11 +83,6 @@ public:
     @brief Get current ion
   */
   virtual RefCountedPtr<CdrSpecies>& get_species();
-
-  /*!
-    @brief Get current data
-  */
-  virtual EBAMRCellData& get_data();
   
 protected:
 
@@ -128,8 +122,7 @@ protected:
   Vector<EBAMRCellData*> m_celldata;
 
 };
-#include "CD_NamespaceFooter.H"
 
-#include <CD_CdrIterator.H>
+#include <CD_NamespaceFooter.H>
 
 #endif
