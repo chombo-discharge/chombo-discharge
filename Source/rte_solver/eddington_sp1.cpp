@@ -9,7 +9,7 @@
 #include "eddington_sp1.H"
 #include "data_ops.H"
 #include "units.H"
-#include "conductivitydomainbc_wrapper.H"
+#include <CD_ConductivityDomainBcWrapper.H>
 
 #include <ParmParse.H>
 #include <EBAMRIO.H>
@@ -454,7 +454,7 @@ void eddington_sp1::setup_gmg(){
     m_has_mg_stuff = true;
   }
   
-  this->set_coefficients();       // Set coefficients, kappa, aco, bco
+  this->setCoefficientsficients();       // Set coefficients, kappa, aco, bco
   this->setup_operator_factory(); // Set the operator factory
   this->setup_multigrid();        // Set up the AMR multigrid solver
 
@@ -470,10 +470,10 @@ void eddington_sp1::setup_gmg(){
   m_needs_setup = false;
 }
 
-void eddington_sp1::set_coefficients(){
-  CH_TIME("eddington_sp1::set_coefficients");
+void eddington_sp1::setCoefficientsficients(){
+  CH_TIME("eddington_sp1::setCoefficientsficients");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_coefficients" << endl;
+    pout() << m_name + "::setCoefficientsficients" << endl;
   }
 
   const int ncomp = 1;
@@ -679,19 +679,19 @@ void eddington_sp1::setup_operator_factory(){
   // Domain BC
 #if 0
   m_domfact = RefCountedPtr<robinconductivitydomainbcfactory> (new robinconductivitydomainbcfactory());
-  m_domfact->set_coefs(m_robinco);
+  m_domfact->setCoefficientss(m_robinco);
 #else
   RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory>(NULL);
-  conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
+  ConductivityDomainBcWrapperFactory* bcfact = new ConductivityDomainBcWrapperFactory();
   Vector<RefCountedPtr<robin_coef> > coefs(2*SpaceDim, m_robinco);
-  bcfact->set_wallbc(m_wallbc);
-  bcfact->set_robin_coefs(coefs);
+  bcfact->setWallBc(m_wallbc);
+  bcfact->setRobinCoefficients(coefs);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 #endif
 
   // EBBC
   m_ebfact  = RefCountedPtr<robinconductivityebbcfactory> (new robinconductivityebbcfactory(origin));
-  m_ebfact->set_coefs(m_robinco);
+  m_ebfact->setCoefficientss(m_robinco);
   m_ebfact->set_type(IrregStencil::StencilType::LeastSquares);
 
   //  Make relaxation type into int code

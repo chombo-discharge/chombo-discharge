@@ -12,7 +12,7 @@ AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-AmrMesh.BoxSorting     = morton      # Box sorting algorithm
+AmrMesh.box_sorting     = morton      # Box sorting algorithm
 AmrMesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
@@ -24,7 +24,7 @@ AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 AmrMesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
-AmrMesh.LoadBalancing    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
+AmrMesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
 AmrMesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
@@ -123,8 +123,8 @@ rod_dielectric.sphere.radius             = 0.1           # Radius
 # FIELD_STEPPER CLASS OPTIONS
 # ====================================================================================================
 FieldStepper.verbosity    = -1              # Verbosity
-FieldStepper.Realm        = primal          # Primal Realm		
-FieldStepper.LoadBalancing = false           # Load balance or not
-FieldStepper.BoxSorting  = morton          # Box sorting algorithm
+FieldStepper.realm        = primal          # Primal Realm		
+FieldStepper.load_balance = false           # Load balance or not
+FieldStepper.box_sorting  = morton          # Box sorting algorithm
 FieldStepper.init_rho     = 0.0             # Space charge density
 FieldStepper.init_sigma   = 1E-10           # Surface charge density

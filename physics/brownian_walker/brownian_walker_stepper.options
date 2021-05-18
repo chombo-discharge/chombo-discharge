@@ -5,7 +5,7 @@
 # from a Gaussian distribution. 
 # ====================================================================================================
 brownian_walker.verbosity      = -1      # Verbosity
-brownian_walker.Realm          = primal  # Realm
+brownian_walker.realm          = primal  # Realm
 brownian_walker.diffusion      = true    # Turn on/off diffusion
 brownian_walker.advection      = true    # Turn on/off advection
 brownian_walker.blob_amplitude = 1.0     # Blob amplitude
@@ -15,7 +15,7 @@ brownian_walker.seed           = 0       # RNG seed
 brownian_walker.num_particles  = 100     # Number of initial particles
 brownian_walker.max_cells_hop  = 1.0     # Maximum cells to move in one time step
 brownian_walker.ppc            = -1      # Particles per cell. <= 0 turns off superparticles
-brownian_walker.LoadBalancing   = true    # Turn on/off particle load balancing
+brownian_walker.load_balance   = true    # Turn on/off particle load balancing
 
 
 # Velocity, diffusion, and CFL

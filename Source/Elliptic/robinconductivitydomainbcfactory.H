@@ -35,17 +35,17 @@ public:
   /*!
     @brief Function based coefficients and right hand sides
   */
-  virtual void set_coefs(RefCountedPtr<robin_coef> a_robinco);
+  virtual void setCoefficientss(RefCountedPtr<robin_coef> a_robinco);
 
   /*!
     @brief Set constant coefficients
   */
-  virtual void set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs);
+  virtual void setCoefficientss(const Real a_aco, const Real b_bco, const Real a_rhs);
 
   /*!
     @brief Set data-based coefficients
   */
-  virtual void set_coefs(const EBAMRFluxData& a_aco, const EBAMRFluxData& a_bco, const EBAMRFluxData& a_rhs);
+  virtual void setCoefficientss(const EBAMRFluxData& a_aco, const EBAMRFluxData& a_bco, const EBAMRFluxData& a_rhs);
 
   /*!
     @brief Create robin boundary condition object

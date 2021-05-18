@@ -12,7 +12,7 @@ AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-AmrMesh.BoxSorting     = morton      # Morton sorting
+AmrMesh.box_sorting     = morton      # Morton sorting
 AmrMesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
@@ -24,7 +24,7 @@ AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 AmrMesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
-AmrMesh.LoadBalancing    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
+AmrMesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
 AmrMesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
@@ -120,7 +120,7 @@ rod_dielectric.sphere.radius             = 0.15          # Radius
 # RTE_STEPPER CLASS OPTIONS
 # ====================================================================================================
 rte_stepper.verbosity      = -1      # Verbosity
-rte_stepper.Realm          = primal  # Realm 
+rte_stepper.realm          = primal  # Realm 
 rte_stepper.kappa          = 0.1     # Inverse absorption coefficient
 rte_stepper.blob_amplitude = 1E2     # Blob amplitude
 rte_stepper.blob_radius    = 0.05    # Blob radius

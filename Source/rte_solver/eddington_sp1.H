@@ -13,7 +13,7 @@
 #include "larsen_coefs.H"
 #include "robinconductivityebbcfactory.H"
 #include "robinconductivitydomainbcfactory.H"
-#include "conductivitydomainbc_wrapper_factory.H"
+#include <CD_ConductivityDomainBcWrapperFactory.H>
 #include "wall_bc.H"
 
 #include <AMRMultiGrid.H>
@@ -350,7 +350,7 @@ protected:
   /*!
     @brief Set kappa
   */
-  virtual void set_coefficients();
+  virtual void setCoefficientsficients();
 
   /*!
     @brief Set the a-coefficient and b-coefficient

@@ -1007,7 +1007,7 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
   FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_fieldSolver));
 
   // Set coefficients as usual
-  poisson->set_coefficients();
+  poisson->setCoefficientsficients();
 
   // Get bco and increment with mobilities
   MFAMRFluxData& bco   = poisson->get_bco();
@@ -1049,7 +1049,7 @@ void ito_plasma_godunov::setup_standard_poisson(){
   FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_fieldSolver));
 
   // Set coefficients as usual
-  poisson->set_coefficients();
+  poisson->setCoefficientsficients();
 
   // Set up the multigrid solver
   poisson->setup_operator_factory();

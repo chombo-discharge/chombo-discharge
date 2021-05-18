@@ -29,7 +29,7 @@ AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 AmrMesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
-AmrMesh.LoadBalancing    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
+AmrMesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
 AmrMesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================

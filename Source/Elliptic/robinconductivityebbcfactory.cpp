@@ -11,7 +11,7 @@
 
 robinconductivityebbcfactory::robinconductivityebbcfactory(const RealVect a_origin){
   this->set_type(IrregStencil::StencilType::TaylorExtrapolation);
-  this->set_coefs(1., 1., 0.);
+  this->setCoefficientss(1., 1., 0.);
 
   m_origin = a_origin;
 }
@@ -28,7 +28,7 @@ void robinconductivityebbcfactory::set_type(const IrregStencil::StencilType a_ty
   }
 }
 
-void robinconductivityebbcfactory::set_coefs(const Real a_aco, const Real a_bco, const Real a_rhs){
+void robinconductivityebbcfactory::setCoefficientss(const Real a_aco, const Real a_bco, const Real a_rhs){
   m_aCoefficient = a_aco;
   m_bco = a_bco;
   m_rhs = a_rhs;
@@ -38,7 +38,7 @@ void robinconductivityebbcfactory::set_coefs(const Real a_aco, const Real a_bco,
   m_data_coeff  = false;
 }
 
-void robinconductivityebbcfactory::set_coefs(const RefCountedPtr<robin_coef> a_robinco){
+void robinconductivityebbcfactory::setCoefficientss(const RefCountedPtr<robin_coef> a_robinco){
   m_robinco = a_robinco;
 
   m_const_coeff = false;
@@ -46,11 +46,11 @@ void robinconductivityebbcfactory::set_coefs(const RefCountedPtr<robin_coef> a_r
   m_data_coeff  = false;
 }
 
-void robinconductivityebbcfactory::set_coefs(const EBAMRIVData& a_aco,
+void robinconductivityebbcfactory::setCoefficientss(const EBAMRIVData& a_aco,
 					     const EBAMRIVData& a_bco,
 					     const EBAMRIVData& a_rhs){
 
-  MayDay::Abort("robinconductivityebbcfactory::set_coefs - data based coefficients not supported (yet)");
+  MayDay::Abort("robinconductivityebbcfactory::setCoefficientss - data based coefficients not supported (yet)");
 
   m_aCoefficientdata = a_aco;
   m_bcodata = a_bco;
@@ -70,16 +70,16 @@ robinconductivityebbc* robinconductivityebbcfactory::create(const ProblemDomain&
   robinconductivityebbc* fresh = new robinconductivityebbc(a_dx, m_origin);
 
   if(m_const_coeff){
-    fresh->set_coefs(m_aCoefficient, m_bco, m_rhs);
+    fresh->setCoefficientss(m_aCoefficient, m_bco, m_rhs);
   }
   else if(m_func_coeff){
 
-    fresh->set_coefs(m_robinco);
+    fresh->setCoefficientss(m_robinco);
   }
   else if(m_data_coeff){
     for (int lvl = 0; lvl < m_aCoefficientdata.size(); lvl++){
       if(a_domain == (m_aCoefficientdata[lvl]->disjointBoxLayout()).physDomain()){
-	fresh->set_coefs(m_aCoefficientdata[lvl], m_bcodata[lvl], m_rhsdata[lvl]);
+	fresh->setCoefficientss(m_aCoefficientdata[lvl], m_bcodata[lvl], m_rhsdata[lvl]);
       }
     }
   }

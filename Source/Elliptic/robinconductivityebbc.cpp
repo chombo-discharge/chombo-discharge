@@ -168,7 +168,7 @@ void robinconductivityebbc::set_type(const IrregStencil::StencilType a_type){
   }
 }
 
-void robinconductivityebbc::set_coefs(const Real a_aco, const Real a_bco, const Real a_rhs){
+void robinconductivityebbc::setCoefficientss(const Real a_aco, const Real a_bco, const Real a_rhs){
   m_aCoefficient = a_aco;
   m_bco = a_bco;
   m_rhs = a_rhs;
@@ -178,7 +178,7 @@ void robinconductivityebbc::set_coefs(const Real a_aco, const Real a_bco, const 
   m_data_coeff  = false;
 }
 
-void robinconductivityebbc::set_coefs(const RefCountedPtr<robin_coef> a_robinco){
+void robinconductivityebbc::setCoefficientss(const RefCountedPtr<robin_coef> a_robinco){
   m_robinco = a_robinco;
 
   m_const_coeff = false;
@@ -186,7 +186,7 @@ void robinconductivityebbc::set_coefs(const RefCountedPtr<robin_coef> a_robinco)
   m_data_coeff  = false;
 }
 
-void robinconductivityebbc::set_coefs(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_aco,
+void robinconductivityebbc::setCoefficientss(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_aco,
 				      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bco,
 				      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_rhs){
   m_aCoefficientdata = a_aco;

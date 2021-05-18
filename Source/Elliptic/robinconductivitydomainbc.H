@@ -35,17 +35,17 @@ public:
   /*!
     @brief Function based coefficients and right hand sides
   */
-  virtual void set_coefs(RefCountedPtr<robin_coef> a_robinco);
+  virtual void setCoefficientss(RefCountedPtr<robin_coef> a_robinco);
 
   /*!
     @brief Set constant coefficients
   */
-  virtual void set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs);
+  virtual void setCoefficientss(const Real a_aco, const Real b_bco, const Real a_rhs);
 
   /*!
     @brief Set data-based coefficients
   */
-  virtual void set_coefs(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
+  virtual void setCoefficientss(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
 			 const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
 			 const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs);
 

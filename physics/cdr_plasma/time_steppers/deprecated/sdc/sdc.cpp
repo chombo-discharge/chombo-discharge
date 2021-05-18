@@ -968,7 +968,7 @@ void sdc::set_semi_implicit_permittivities(){
   FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_fieldSolver));
 
   // Set coefficients as usual
-  poisson->set_coefficients();
+  poisson->setCoefficientsficients();
 
   // Get bco and increment with mobilities
   MFAMRFluxData& bco   = poisson->get_bco();

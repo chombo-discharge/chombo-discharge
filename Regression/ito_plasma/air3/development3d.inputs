@@ -19,7 +19,7 @@ AmrMesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
 AmrMesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
 AmrMesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-AmrMesh.BoxSorting     = morton      # Morton sorting
+AmrMesh.box_sorting     = morton      # Morton sorting
 AmrMesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 32          # Maximum allowed box size
@@ -30,7 +30,7 @@ AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 AmrMesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
-AmrMesh.LoadBalancing    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
+AmrMesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
 AmrMesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
@@ -210,8 +210,8 @@ ito_plasma_godunov.verbosity      = -10            # Verbosity
 ito_plasma_godunov.min_dt         = 1.E-10         # Minimum dt
 ito_plasma_godunov.max_dt         = 1.E-10         # Maximum dt
 ito_plasma_godunov.particle_Realm = particle       # Particle Realm. Default is primal
-ito_plasma_godunov.BoxSorting    = none         # Box sorting for load balancing. 'none', 'shuffle', 'std', 'morton'
-ito_plasma_godunov.LoadBalancing   = true           # Load balance or not
+ito_plasma_godunov.box_sorting    = none         # Box sorting for load balancing. 'none', 'shuffle', 'std', 'morton'
+ito_plasma_godunov.load_balance   = true           # Load balance or not
 ito_plasma_godunov.load_index     = 0              # Which species to use for load balancing (-1 => all)
 ito_plasma_godunov.load_ppc       = 0              # Load estimate per cell (in addition to ppc)
 ito_plasma_godunov.nwo_reactions  = true           # Use or don't use the new reaction algorithm (presumably load balances better)

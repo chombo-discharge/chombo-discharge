@@ -1,41 +1,41 @@
 /*!
-  @file   conductivitydomainbc_wrapper.cpp
-  @brief  Implementation of conductivitydomainbc_wrapper.H
+  @file   ConductivityDomainBcWrapper.cpp
+  @brief  Implementation of ConductivityDomainBcWrapper.H
   @author Robert Marskar
   @date   June. 2018
 */
 
-#include "conductivitydomainbc_wrapper.H"
+#include <CD_ConductivityDomainBcWrapper.H>
 #include "robinconductivitydomainbc.H"
 
 #include "CD_NamespaceHeader.H"
 
-conductivitydomainbc_wrapper::conductivitydomainbc_wrapper(){
+ConductivityDomainBcWrapper::ConductivityDomainBcWrapper(){
   m_bc.resize(2*SpaceDim);
 
   m_defined = false;
 }
 
-conductivitydomainbc_wrapper::~conductivitydomainbc_wrapper(){
+ConductivityDomainBcWrapper::~ConductivityDomainBcWrapper(){
 
 }
 
-void conductivitydomainbc_wrapper::set_coef(){
+void ConductivityDomainBcWrapper::setCoefficients(){
   for (int i = 0; i < m_bc.size(); i++){
     m_bc[i]->setCoef(this->m_eblg, this->m_beta, this->m_bcoef);
   }
   m_defined = true;
 }
 
-void conductivitydomainbc_wrapper::set_potentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials){
+void ConductivityDomainBcWrapper::setPotentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials){
   m_potentials = a_potentials;
 }
 
-void conductivitydomainbc_wrapper::set_robin_coefs(const Vector<RefCountedPtr<robin_coef> >& a_robinco){
+void ConductivityDomainBcWrapper::setRobinCoefficients(const Vector<RefCountedPtr<robin_coef> >& a_robinco){
   m_robinco = a_robinco;
 }
 
-void conductivitydomainbc_wrapper::set_wallbc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc){
+void ConductivityDomainBcWrapper::setWallBc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc){
   for (int i = 0; i < a_wallbc.size(); i++){
     const int dir             = a_wallbc[i]->direction();
     const Side::LoHiSide side = a_wallbc[i]->side();
@@ -59,23 +59,23 @@ void conductivitydomainbc_wrapper::set_wallbc(const Vector<RefCountedPtr<wall_bc
       // Otherwise, use externally supplied values
       robinconductivitydomainbc* robinbc = new robinconductivitydomainbc();
       if(m_robinco[i] == NULL){
-	robinbc->set_coefs(1.0, -1.0, 0.0);
+	robinbc->setCoefficientss(1.0, -1.0, 0.0);
       }
       else{
-	robinbc->set_coefs(m_robinco[i]);
+	robinbc->setCoefficientss(m_robinco[i]);
       }
 	    
       m_bc[idx] = RefCountedPtr<robinconductivitydomainbc> (robinbc);
       m_bc[idx]->setValue(0.0);
     }
     else{
-      MayDay::Abort("conductivitydomainbc_wrapper::set_bc(wall) - unsupported bc type requested");
+      MayDay::Abort("ConductivityDomainBcWrapper::set_bc(wall) - unsupported bc type requested");
     }
 
   }
 }
 
-void conductivitydomainbc_wrapper::getFaceFlux(BaseFab<Real>&        a_faceFlux,
+void ConductivityDomainBcWrapper::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 					       const BaseFab<Real>&  a_phi,
 					       const RealVect&       a_probLo,
 					       const RealVect&       a_dx,
@@ -85,7 +85,7 @@ void conductivitydomainbc_wrapper::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 					       const Real&           a_time,
 					       const bool&           a_useHomogeneous){
   if(!m_defined){
-    this->set_coef(); // I really hate that I have to do this, but there's no entry point in ebconductivityop (yet) that
+    this->setCoefficients(); // I really hate that I have to do this, but there's no entry point in ebconductivityop (yet) that
   }                   // allows me to do this at constructor level
   const int idx = wall_bc::map_bc(a_idir, a_side);
   m_bc[idx]->getFaceFlux(a_faceFlux,
@@ -99,7 +99,7 @@ void conductivitydomainbc_wrapper::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 			 a_useHomogeneous);
 }
 
-void conductivitydomainbc_wrapper::getFaceFlux(Real&                 a_faceFlux,
+void ConductivityDomainBcWrapper::getFaceFlux(Real&                 a_faceFlux,
 					       const VolIndex&       a_vof, 
 					       const int&            a_comp, 
 					       const EBCellFAB&      a_phi, 
@@ -111,7 +111,7 @@ void conductivitydomainbc_wrapper::getFaceFlux(Real&                 a_faceFlux,
 					       const Real&           a_time, 
 					       const bool&           a_useHomogeneous){
   if(!m_defined){
-    this->set_coef(); // I really hate that I have to do this, but there's no entry point in ebconductivityop (yet) that
+    this->setCoefficients(); // I really hate that I have to do this, but there's no entry point in ebconductivityop (yet) that
   }                   // allows me to do this at constructor level
   const int idx = wall_bc::map_bc(a_idir, a_side);
   m_bc[idx]->getFaceFlux(a_faceFlux,
@@ -127,7 +127,7 @@ void conductivitydomainbc_wrapper::getFaceFlux(Real&                 a_faceFlux,
 			 a_useHomogeneous);
 }
 
-void conductivitydomainbc_wrapper::getFaceGradPhi(Real&                 a_faceFlux,
+void ConductivityDomainBcWrapper::getFaceGradPhi(Real&                 a_faceFlux,
 						  const FaceIndex&      a_face,
 						  const int&            a_comp,
 						  const EBCellFAB&      a_phi,
@@ -141,7 +141,7 @@ void conductivitydomainbc_wrapper::getFaceGradPhi(Real&                 a_faceFl
 						  const RealVect&       a_centroid,
 						  const bool&           a_useHomogeneous){
   if(!m_defined){
-    this->set_coef(); // I really hate that I have to do this, but there's no entry point in ebconductivityop (yet) that
+    this->setCoefficients(); // I really hate that I have to do this, but there's no entry point in ebconductivityop (yet) that
   }                   // allows me to do this at constructor level
   const int idx = wall_bc::map_bc(a_idir, a_side);
   m_bc[idx]->getFaceGradPhi(a_faceFlux,
@@ -159,7 +159,7 @@ void conductivitydomainbc_wrapper::getFaceGradPhi(Real&                 a_faceFl
 			    a_useHomogeneous);
 }
 
-void conductivitydomainbc_wrapper::fillPhiGhost(FArrayBox&     a_phi,
+void ConductivityDomainBcWrapper::fillPhiGhost(FArrayBox&     a_phi,
 						const Box&     a_valid,
 						const Box&     a_domain,
 						Real           a_dx,
@@ -167,7 +167,7 @@ void conductivitydomainbc_wrapper::fillPhiGhost(FArrayBox&     a_phi,
   Box grownBox = a_valid;
   grownBox.grow(1);
 
-  MayDay::Abort("conductivitydomainbc_wrapper::fillPhiGhost -- how did this get called..?");
+  MayDay::Abort("ConductivityDomainBcWrapper::fillPhiGhost -- how did this get called..?");
 
   for (int idir=0; idir<CH_SPACEDIM; ++idir)
     {

@@ -13,13 +13,13 @@
 #include "CD_NamespaceHeader.H"
 
 robinconductivitydomainbc::robinconductivitydomainbc(){
-  this->set_coefs(1., -1.0, 0);
+  this->setCoefficientss(1., -1.0, 0);
 }
 
 robinconductivitydomainbc::~robinconductivitydomainbc(){
 }
 
-void robinconductivitydomainbc::set_coefs(RefCountedPtr<robin_coef> a_robinco){
+void robinconductivitydomainbc::setCoefficientss(RefCountedPtr<robin_coef> a_robinco){
   m_robinco = a_robinco;
 
   m_const_coeff = false;
@@ -28,7 +28,7 @@ void robinconductivitydomainbc::set_coefs(RefCountedPtr<robin_coef> a_robinco){
 
 }
 
-void robinconductivitydomainbc::set_coefs(const Real a_aco, const Real a_bco, const Real a_rhs){
+void robinconductivitydomainbc::setCoefficientss(const Real a_aco, const Real a_bco, const Real a_rhs){
   m_aCoefficient = a_aco;
   m_bco = a_bco;
   m_rhs = a_rhs;
@@ -38,10 +38,10 @@ void robinconductivitydomainbc::set_coefs(const Real a_aco, const Real a_bco, co
   m_data_coeff  = false;
 }
 
-void robinconductivitydomainbc::set_coefs(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
+void robinconductivitydomainbc::setCoefficientss(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
 					  const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
 					  const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs){
-  MayDay::Abort("robinconductivitydomainbc::set_coefs - data-based not supported (yet)");
+  MayDay::Abort("robinconductivitydomainbc::setCoefficientss - data-based not supported (yet)");
   m_aCoefficientdata = a_aco;
   m_bcodata = a_bco;
   m_rhsdata = a_rhs;

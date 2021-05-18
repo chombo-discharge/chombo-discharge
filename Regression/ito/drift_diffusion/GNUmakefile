@@ -21,7 +21,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/CdrSolver \
 	$(DISCHARGE_HOME)/Source/CellTagger \
 	$(DISCHARGE_HOME)/Source/Driver \
-	$(DISCHARGE_HOME)/Source/elliptic \
+	$(DISCHARGE_HOME)/Source/Elliptic \
 	$(DISCHARGE_HOME)/Source/geometry \
 	$(DISCHARGE_HOME)/Source/rte_solver \
 	$(DISCHARGE_HOME)/Source/ito_solver \

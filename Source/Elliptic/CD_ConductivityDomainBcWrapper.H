@@ -1,5 +1,5 @@
 /*!
-  @file   conductivitydomainbc_wrapper.H
+  @file   ConductivityDomainBcWrapper.H
   @brief  Declaration of a class that wraps boundary Dirichlet and Neumann boundary conditions on individual domain edges
   @author Robert Marskar
   @date   Jan. 2018
@@ -22,37 +22,37 @@
   @details This class does not (currently) do Robin boundary conditions, although it can probably be extended to take care of 
   those cases as well. 
 */
-class conductivitydomainbc_wrapper : public ConductivityBaseDomainBC {
+class ConductivityDomainBcWrapper : public ConductivityBaseDomainBC {
 public:
   /*!
     @brief Constructor
   */
-  conductivitydomainbc_wrapper();
+  ConductivityDomainBcWrapper();
 
   /*!
     @brief Destructor
   */
-  virtual ~conductivitydomainbc_wrapper();
+  virtual ~ConductivityDomainBcWrapper();
 
   /*!
     @brief Dirichlet and Neumann need to know about bcoef
   */
-  virtual void set_coef();
+  virtual void setCoefficients();
   
   /*!
     @brief Set the potential functions
   */
-  virtual void set_potentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials);
+  virtual void setPotentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials);
 
   /*!
     @brief Set bc types. This should come through the factory. 
   */
-  virtual void set_wallbc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc);
+  virtual void setWallBc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc);
 
   /*!
     @brief Set Robin coefficients
   */
-  virtual void set_robin_coefs(const Vector<RefCountedPtr<robin_coef> >& a_robinco);  
+  virtual void setRobinCoefficients(const Vector<RefCountedPtr<robin_coef> >& a_robinco);  
   
   /*! 
     @brief Get face flux

@@ -1,6 +1,6 @@
 /*!
-  @file   conductivitydomainbc_wrapper_factory.H
-  @brief  Declaration of a factory class for conductivitydomainbc_wrapper
+  @file   ConductivityDomainBcWrapperFactory.H
+  @brief  Declaration of a factory class for ConductivityDomainBcWrapper
   @author Robert Marskar
   @date   Jan. 2018
 */
@@ -8,7 +8,7 @@
 #ifndef _CONDUCTIVITYDOMAINBC_WRAPPER_FACTORY_
 #define _CONDUCTIVITYDOMAINBC_WRAPPER_FACTORY_
 
-#include "conductivitydomainbc_wrapper.H"
+#include <CD_ConductivityDomainBcWrapper.H>
 #include "robin_coef.H"
 
 #include <ConductivityBaseDomainBC.H>
@@ -16,31 +16,31 @@
 #include "CD_NamespaceHeader.H"
 
 /*!
-  @brief Class for generating conductivitydomainbc_wrapper objects
+  @brief Class for generating ConductivityDomainBcWrapper objects
   @details This class does not (currently) do Robin boundary conditions, although it can probably be extended to take care of 
   those cases as well. 
 */
-class conductivitydomainbc_wrapper_factory : public BaseDomainBCFactory {
+class ConductivityDomainBcWrapperFactory : public BaseDomainBCFactory {
 public:
   
   /*!
     @brief Constructor
   */
-  conductivitydomainbc_wrapper_factory();
+  ConductivityDomainBcWrapperFactory();
 
   /*!
     @brief Destructor
   */
-  virtual ~conductivitydomainbc_wrapper_factory();
+  virtual ~ConductivityDomainBcWrapperFactory();
 
-  virtual void set_wallbc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc);
-  virtual void set_potentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials);
-  virtual void set_robin_coefs(const Vector<RefCountedPtr<robin_coef> >& a_robinco);
+  virtual void setWallBc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc);
+  virtual void setPotentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials);
+  virtual void setRobinCoefficients(const Vector<RefCountedPtr<robin_coef> >& a_robinco);
 
   /*!
     @brief Factory method
   */
-  virtual conductivitydomainbc_wrapper* create(const ProblemDomain& a_domain,
+  virtual ConductivityDomainBcWrapper* create(const ProblemDomain& a_domain,
 					       const EBISLayout&    a_ebisl,
 					       const RealVect&      a_dx);
   
