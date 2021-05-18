@@ -478,65 +478,106 @@ public:
 		   bool                               a_homogeneousBC,
 		   AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) override;
 
-  ///
-  /** a_residual = a_rhs - L(a_phi, a_phiCoarse)  */
-  virtual void AMRResidualNF(LevelData<EBCellFAB>& a_residual,
-			     const LevelData<EBCellFAB>& a_phi,
-			     const LevelData<EBCellFAB>& a_phiCoarse,
-			     const LevelData<EBCellFAB>& a_rhs,
-			     bool a_homogeneousBC);
+  /*!
+    @brief Compute residual on finest level
+    @param[out] a_residual      Residual
+    @param[in]  a_phi           Data
+    @param[in]  a_phiCoarse     Coarse data
+    @param[in]  a_rhs           Right-hand side
+    @param[in]  a_homogeneousBC Homogeneous BC or not
+    
+    @details Computes a_residual = a_rhs - L(a_phi, a_phiCoarse)  */
+  void AMRResidualNF(LevelData<EBCellFAB>& a_residual,
+		     const LevelData<EBCellFAB>& a_phi,
+		     const LevelData<EBCellFAB>& a_phiCoarse,
+		     const LevelData<EBCellFAB>& a_rhs,
+		     bool a_homogeneousBC) override;
+
+  /*!
+    @brief AMR operator
+    @param[out] a_LofPhi        L(phi)
+    @param[in]  a_phiFine        Fine phi
+    @param[in]  a_phi           Phi
+    @param[in]  a_phiCoarse     Coarse phi
+    @param[in]  a_homogeneousBC Homogeneous BC or not
+  */
+  void AMROperator(LevelData<EBCellFAB>& a_LofPhi,
+		   const LevelData<EBCellFAB>& a_phiFine,
+		   const LevelData<EBCellFAB>& a_phi,
+		   const LevelData<EBCellFAB>& a_phiCoarse,
+		   bool a_homogeneousBC,
+		   AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) override;
+
+  /*!
+    @brief Apply linear operator assuming no finer level
+    @param[out] a_LofPhi        L(phi)
+    @param[in]  a_phi           Phi
+    @param[in]  a_phiCoarse     Coarse phi
+    @param[in]  a_homogeneousBC Homogeneous BC or not
+  */
+  void AMROperatorNF(LevelData<EBCellFAB>& a_LofPhi,
+		     const LevelData<EBCellFAB>& a_phi,
+		     const LevelData<EBCellFAB>& a_phiCoarse,
+		     bool a_homogeneousBC) override;
 
 
-  ///
-  /** a_residual = a_rhs - L(a_phi, a_phiFine, a_phiCoarse) */
-  virtual void AMROperator(LevelData<EBCellFAB>& a_LofPhi,
-			   const LevelData<EBCellFAB>& a_phiFine,
-			   const LevelData<EBCellFAB>& a_phi,
-			   const LevelData<EBCellFAB>& a_phiCoarse,
-			   bool a_homogeneousBC,
-			   AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp);
+  /*!
+    @brief Restrict residual to coarse
+    @param[out] a_resCoars         Coarse residual
+    @param[out] a_residual         Residual
+    @param[out] a_correction       Correction
+    @param[out] a_coarseCorrection Coarse correction
+    @details Computes resCoarse = I[h-2h] (a_residual - L(a_correction, a_coarseCorrection)) 
+  */
+  void AMRRestrict(LevelData<EBCellFAB>& a_resCoarse,
+		   const LevelData<EBCellFAB>& a_residual,
+		   const LevelData<EBCellFAB>& a_correction,
+		   const LevelData<EBCellFAB>& a_coarseCorrection, 
+		   bool a_skip_res = false ) override;
 
-  ///
-  /** a_residual = a_rhs - L(a_phi, a_phiCoarse)  */
-  virtual void AMROperatorNF(LevelData<EBCellFAB>& a_LofPhi,
-			     const LevelData<EBCellFAB>& a_phi,
-			     const LevelData<EBCellFAB>& a_phiCoarse,
-			     bool a_homogeneousBC);
 
-  ///
-  /** a_resCoarse = I[h-2h] (a_residual - L(a_correction, a_coarseCorrection)) */
-  virtual void AMRRestrict(LevelData<EBCellFAB>& a_resCoarse,
-			   const LevelData<EBCellFAB>& a_residual,
-			   const LevelData<EBCellFAB>& a_correction,
-			   const LevelData<EBCellFAB>& a_coarseCorrection, 
-			   bool a_skip_res = false );
+  /*!
+    @brief Prolong ocrection
+    @param[inout] a_correction       Correction
+    @param[out]   a_coarseCorrection Coarse correction
+    @details Compute a_correction += I[2h->h](a_coarseCorrection) 
+  */
+  void AMRProlong(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_coarseCorrection) override;
 
-  ///
-  /** a_correction += I[2h->h](a_coarseCorrection) */
-  virtual void AMRProlong(LevelData<EBCellFAB>&       a_correction,
-			  const LevelData<EBCellFAB>& a_coarseCorrection);
-
-  ///
-  /** a_residual = a_residual - L(a_correction, a_coarseCorrection) */
-  virtual void AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
+  /*!
+    @brief Update AMR Residual
+    @param[in]  a_residual         Residual
+    @param[out] a_correction       Correction
+    @param[out] a_coarseCorrection Coarse correction
+    @details a_residual = a_residual - L(a_correction, a_coarseCorrection) 
+  */
+  void AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
 				 const LevelData<EBCellFAB>& a_correction,
-				 const LevelData<EBCellFAB>& a_coarseCorrection);
+				 const LevelData<EBCellFAB>& a_coarseCorrection) override;
 
+  /*!
+    @brief Reflux solution
+    @param[inout] a_residual Residual
+    @param[in]    a_phiFine  Fine phi
+    @param[in]    a_phi      Phi
+    @param[in]    a_finerOp  Finer operator
+  */
   void reflux(LevelData<EBCellFAB>& a_residual,
 	      const LevelData<EBCellFAB>& a_phiFine,
 	      const LevelData<EBCellFAB>& a_phi,
 	      AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp);
 
+  /*!
+    @brief Do red-black color magic
+  */
   void gsrbColor(LevelData<EBCellFAB>&       a_phi,
 		 const LevelData<EBCellFAB>& a_lph,
 		 const LevelData<EBCellFAB>& a_rhs,
 		 const IntVect&              a_color);
 
-  void nwo_gsrbColor(LevelData<EBCellFAB>&       a_phi,
-		     const LevelData<EBCellFAB>& a_lph,
-		     const LevelData<EBCellFAB>& a_rhs,
-		     const IntVect&              a_color);
-  
+  /*!
+    @brief Do red-black color magic
+  */
   void gsrbColor(EBCellFAB&       a_phi,
 		 const EBCellFAB& a_lph,
 		 const EBCellFAB& a_rhs,
@@ -544,43 +585,57 @@ public:
 		 const DataIndex& a_dit,
 		 const IntVect&   a_color);
 
+  /*!
+    @brief Get divergence stencil in point
+  */
   void getDivFStencil(VoFStencil&      a_vofStencil,
 		      const VolIndex&  a_vof,
 		      const DataIndex& a_dit);
 
+  /*!
+    @brief Get flux stencil for face
+  */
   void getFluxStencil(VoFStencil&      a_fluxStencil,
 		      const FaceIndex& a_face,
 		      const DataIndex& a_dit);
 
+  /*!
+    @brief Get flux stencil for face
+  */
   void getFaceCenteredFluxStencil(VoFStencil&      a_fluxStencil,
 				  const FaceIndex& a_face,
 				  const DataIndex& a_dit);
 
+  /*!
+    @brief Increment regular operator
+  */
   void incrOpRegularDir(EBCellFAB&             a_lhs,
 			const EBCellFAB&       a_phi,
 			const bool&            a_homogeneous,
 			const int&             a_dir,
 			const DataIndex&       a_datInd);
+
+  /*!
+    @brief Apply operator in irregular cells
+  */
   void applyOpIrregular(EBCellFAB&             a_lhs,
 			const EBCellFAB&       a_phi,
 			const bool&            a_homogeneous,
 			const DataIndex&       a_datInd);
 
-  //this is needed to do wacky things like reset the a coefficient.
-  //not for the faint of heart
-  //but none but the brave deserve the fair
-  const EBLevelGrid& getEBLG() const
-  {
+  /*!
+    @brief Get EBLevelGrid
+  */
+  const EBLevelGrid& getEBLG() const {
     return m_eblg;
   }
-  static void setForceNoEBCF(bool a_forceNoEBCF)
-  {
-    s_forceNoEBCF = a_forceNoEBCF;
-  }
-  ///do not call this one unless you really know what you are doing
-
   
 protected:
+  
+  /*!
+    @brief For turning on/off BCs
+  */
+  static bool s_turnOffBCs;
 
   /*!
     @brief Get safety factor
@@ -588,8 +643,14 @@ protected:
   */
   Real getSafety() const;
 
+  /*!
+    @brief Define all stencils
+  */
   void defineStencils();
-  
+
+  /*!
+    @brief For computing regular amrop
+  */
   void incrOpRegularAllDirs(Box * a_loBox,
 			    Box * a_hiBox,
 			    int * a_hasLo,
@@ -601,7 +662,9 @@ protected:
 			    const BaseFab<Real> & a_curPhiFAB,
 			    bool a_homogeneousPhysBC,
 			    const DataIndex& a_dit);
-
+  /*!
+    @brief Apply domain flux
+  */
   void applyDomainFlux(Box * a_loBox,
 		       Box * a_hiBox,
 		       int * a_hasLo,
@@ -612,31 +675,47 @@ protected:
 		       bool a_homogeneousPhysBC,
 		       const DataIndex& a_dit);
 
+  /*!
+    @brief Gauss-seidel in irregular cells
+  */
   void GSColorAllIrregular(EBCellFAB&                        a_phi,
 			   const EBCellFAB&                  a_rhs,
 			   const int&                        a_icolor,
 			   const DataIndex&                  a_dit);
 
-  static bool                     s_turnOffBCs;
-  static bool                     s_forceNoEBCF;
-  static bool                     s_areaFracWeighted;
-  static IntVect                  s_ivDebug;
-  void dumpFABPoint(const EBCellFAB& a_fab, const DataIndex& a_dit, const string& a_blab);
-  void dumpLevelPoint(const LevelData<EBCellFAB>& a_res, const string& a_blab);
 
-  virtual void calculateAlphaWeight();
-  virtual void calculateRelaxationCoefficient();
+  /*!
+    @brief Calculate diagonal weight
+  */
+  void calculateAlphaWeight();
 
-  void defineColorStencils(Box a_ideBoxLo[SpaceDim],
-			   Box a_ideBoxHi[SpaceDim]);
-  //EBCF gymnastics
+  /*!
+    @brief Calcualte relaxation coefficient
+  */
+  void calculateRelaxationCoefficient();
+
+  /*!
+    @brief Define stencils
+  */
+  void defineColorStencils(Box a_ideBoxLo[SpaceDim], Box a_ideBoxHi[SpaceDim]);
+  
+  /*!
+    @brief Stencils for doing EBCF stuff
+  */
   void defineEBCFStencils();
+
+  /*!
+    @brief Get flux, knowing that there is an EBCF.
+  */
   void getFluxEBCF(EBFaceFAB&                    a_flux,
 		   const EBCellFAB&              a_phi,
 		   const Box&                    a_ghostedBox,
 		   Vector<FaceIndex>&            a_faceitEBCF,
 		   Vector<VoFStencil>&           a_stenEBCF);
 
+  /*!
+    @brief Get flux
+  */
   void getFluxRegOnly(EBFaceFAB&                    a_fluxCentroid,
 		      const EBCellFAB&              a_phi,
 		      const Box&                    a_ghostedBox,
@@ -644,7 +723,7 @@ protected:
 		      const DataIndex&              a_datInd,
 		      const int&                    a_idir);
 
-  //stuff to make EBCF go faster
+  // Stuff to make EBCF go faster
   LayoutData< Vector<FaceIndex>  >   m_faceitCoar[2*SpaceDim];
   LayoutData< Vector<VoFStencil> >  m_stencilCoar[2*SpaceDim];
 
@@ -655,8 +734,6 @@ protected:
   LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxLo[EBAMRPOVC_NUMSTEN][SpaceDim];
   LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxHi[EBAMRPOVC_NUMSTEN][SpaceDim];
   LayoutData<RefCountedPtr<EBStencil> >  m_colorEBStencil[EBAMRPOVC_NUMSTEN];
-
-
 
   int                             m_relaxType;
   const IntVect                   m_ghostCellsPhi;
@@ -723,7 +800,6 @@ protected:
   LayoutData<VoFIterator >                     m_vofIterDomLo[CH_SPACEDIM];
   LayoutData<VoFIterator >                     m_vofIterDomHi[CH_SPACEDIM];
 
-
   // Coarse-fine stencils for homogeneous CFInterp
   LayoutData<CFIVS> m_loCFIVS[SpaceDim];
   LayoutData<CFIVS> m_hiCFIVS[SpaceDim];
@@ -747,15 +823,24 @@ protected:
 
 private:
 
+  /*!
+    @brief Increment flux register
+  */
   void incrementFRCoar(EBFluxRegister&             a_fluxReg,
 		       const LevelData<EBCellFAB>& a_phiFine,
 		       const LevelData<EBCellFAB>& a_phi);
 
+  /*!
+    @brief Increment flux register
+  */
   void incrementFRFine(EBFluxRegister&             a_fluxReg,
 		       const LevelData<EBCellFAB>& a_phiFine,
 		       const LevelData<EBCellFAB>& a_phi,
 		       AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp);
 
+  /*!
+    @brief Compute flux
+  */
   void getFlux(FArrayBox&                    a_flux,
 	       const FArrayBox&              a_phi,
 	       const Box&                    a_faceBox,
@@ -764,24 +849,25 @@ private:
 	       const DataIndex&              a_datInd);
 
 
-
+  /*!
+    @brief Interpolate ghost cells
+  */
   void applyCFBCs(LevelData<EBCellFAB>&             a_phi,
 		  const LevelData<EBCellFAB>* const a_phiCoarse,
 		  bool a_homogeneousCFBC);
 
-
-  void levelJacobi(LevelData<EBCellFAB>&       a_phi,
-		   const LevelData<EBCellFAB>& a_rhs);
-
+  /*!
+    @brief Homogeneous CFBCs
+  */
   void applyHomogeneousCFBCs(LevelData<EBCellFAB>&   a_phi);
 
+  /*!
+    @brief Homogeneous CFBCs
+  */
   void applyHomogeneousCFBCs(EBCellFAB&            a_phi,
 			     const DataIndex&      a_datInd,
 			     int                   a_idir,
 			     Side::LoHiSide        a_hiorlo);
-private:
-
-
 };
 
 #include <CD_NamespaceFooter.H>
