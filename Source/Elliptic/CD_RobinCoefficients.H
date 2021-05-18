@@ -1,31 +1,37 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   robin_coef.H
-  @brief  Declaration of a more general class for parametrizing boundary conditions. 
+  @file   CD_RobinCoefficients.H
+  @brief  Declaration of a Robin coefficients for BC interfacing
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#ifndef _ROBIN_COEF_
-#define _ROBIN_COEF_
+#ifndef CD_RobinCoefficients_H
+#define CD_RobinCoefficients_H
 
-#include "RealVect.H"
+// Chombo includes
+#include <RealVect.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Abstract base class for supplying function-based coefficients to the Robin boundary condition classes. Because BaseBCValue is not enough. 
 */
-class robin_coef {
+class RobinCoefficients {
 public:
   /*!
     @brief Constructor
   */
-  robin_coef();
+  RobinCoefficients();
 
   /*!
     @brief Destructor
   */
-  virtual ~robin_coef();
+  virtual ~RobinCoefficients();
 
   /*!
     @brief Get a-coefficient
@@ -43,7 +49,9 @@ public:
   virtual Real rhs(const RealVect a_pos) const = 0;
   
 protected:
+  
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

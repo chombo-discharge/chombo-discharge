@@ -9,7 +9,7 @@
 #define _CONDUCTIVITYDOMAINBC_WRAPPER_
 
 #include "wall_bc.H"
-#include "robin_coef.H"
+#include <CD_RobinCoefficients.H>
 
 #include <BaseDomainBC.H>
 #include <DirichletConductivityDomainBC.H>
@@ -52,7 +52,7 @@ public:
   /*!
     @brief Set Robin coefficients
   */
-  virtual void setRobinCoefficients(const Vector<RefCountedPtr<robin_coef> >& a_robinco);  
+  virtual void setRobinCoefficients(const Vector<RefCountedPtr<RobinCoefficients> >& a_robinco);  
   
   /*! 
     @brief Get face flux
@@ -119,7 +119,7 @@ protected:
     @brief Potentials
   */
   Vector<RefCountedPtr<BaseBCFuncEval> > m_potentials;
-  Vector<RefCountedPtr<robin_coef> > m_robinco;         // Robin coefficients for Robin
+  Vector<RefCountedPtr<RobinCoefficients> > m_robinco;         // Robin coefficients for Robin
 
   /*!
     @brief Is defined or not

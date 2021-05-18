@@ -9,7 +9,7 @@
 #define _ROBINCONDUCTIVITYEBBC_
 
 #include "CD_IrregStencil.H"
-#include "robin_coef.H"
+#include <CD_RobinCoefficients.H>
 
 #include <BaseEBBC.H>
 
@@ -59,7 +59,7 @@ public:
   /*!
     @brief Function based coefficients
   */
-  virtual void setCoefficientss(const RefCountedPtr<robin_coef> a_robinco);
+  virtual void setCoefficientss(const RefCountedPtr<RobinCoefficients> a_robinco);
 
   /*!
     @brief Set data-based coefficients
@@ -97,7 +97,7 @@ protected:
 
   RealVect m_origin;
 
-  RefCountedPtr<robin_coef> m_robinco;
+  RefCountedPtr<RobinCoefficients> m_robinco;
   
   Real m_aCoefficient;
   Real m_bco;

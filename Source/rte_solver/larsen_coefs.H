@@ -8,7 +8,7 @@
 #ifndef _LARSEN_COEFS_
 #define _LARSEN_COEFS_
 
-#include "robin_coef.H"
+#include <CD_RobinCoefficients.H>
 #include "rte_species.H"
 
 #include <RefCountedPtr.H>
@@ -18,7 +18,7 @@
 /*!
   @brief Class that holds appropriate coefficients for Robin implementation of the Larsen boundary condition
 */
-class larsen_coefs : public robin_coef {
+class larsen_coefs : public RobinCoefficients {
 public:
 
   /*!

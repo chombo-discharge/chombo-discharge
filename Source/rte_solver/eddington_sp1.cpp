@@ -683,7 +683,7 @@ void eddington_sp1::setup_operator_factory(){
 #else
   RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory>(NULL);
   ConductivityDomainBcWrapperFactory* bcfact = new ConductivityDomainBcWrapperFactory();
-  Vector<RefCountedPtr<robin_coef> > coefs(2*SpaceDim, m_robinco);
+  Vector<RefCountedPtr<RobinCoefficients> > coefs(2*SpaceDim, m_robinco);
   bcfact->setWallBc(m_wallbc);
   bcfact->setRobinCoefficients(coefs);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);

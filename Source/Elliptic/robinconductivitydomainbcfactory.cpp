@@ -27,7 +27,7 @@ void robinconductivitydomainbcfactory::setCoefficientss(const Real a_aco, const 
   m_data_coeff  = false;
 }
 
-void robinconductivitydomainbcfactory::setCoefficientss(const RefCountedPtr<robin_coef> a_robinco){
+void robinconductivitydomainbcfactory::setCoefficientss(const RefCountedPtr<RobinCoefficients> a_robinco){
   m_robinco = a_robinco;
 
   m_const_coeff = false;

@@ -19,7 +19,7 @@ robinconductivitydomainbc::robinconductivitydomainbc(){
 robinconductivitydomainbc::~robinconductivitydomainbc(){
 }
 
-void robinconductivitydomainbc::setCoefficientss(RefCountedPtr<robin_coef> a_robinco){
+void robinconductivitydomainbc::setCoefficientss(RefCountedPtr<RobinCoefficients> a_robinco){
   m_robinco = a_robinco;
 
   m_const_coeff = false;

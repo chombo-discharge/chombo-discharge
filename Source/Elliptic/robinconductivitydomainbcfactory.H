@@ -9,7 +9,7 @@
 #define _ROBINCONDUCTIVITYDOMAINBCFACTORY_
 
 #include "EBAMRData.H"
-#include "robin_coef.H"
+#include <CD_RobinCoefficients.H>
 #include "robinconductivitydomainbc.H"
 
 #include <BaseDomainBC.H>
@@ -35,7 +35,7 @@ public:
   /*!
     @brief Function based coefficients and right hand sides
   */
-  virtual void setCoefficientss(RefCountedPtr<robin_coef> a_robinco);
+  virtual void setCoefficientss(RefCountedPtr<RobinCoefficients> a_robinco);
 
   /*!
     @brief Set constant coefficients
@@ -54,7 +54,7 @@ public:
   
 protected:
 
-  RefCountedPtr<robin_coef> m_robinco;
+  RefCountedPtr<RobinCoefficients> m_robinco;
 
   Real m_aCoefficient;
 

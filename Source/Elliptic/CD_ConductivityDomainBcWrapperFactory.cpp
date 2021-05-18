@@ -26,7 +26,7 @@ void ConductivityDomainBcWrapperFactory::setPotentials(const Vector<RefCountedPt
   m_potentials = a_potentials;
 }
 
-void ConductivityDomainBcWrapperFactory::setRobinCoefficients(const Vector<RefCountedPtr<robin_coef> >& a_robinco){
+void ConductivityDomainBcWrapperFactory::setRobinCoefficients(const Vector<RefCountedPtr<RobinCoefficients> >& a_robinco){
   m_robinco = a_robinco;
 }
 

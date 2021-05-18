@@ -178,7 +178,7 @@ void robinconductivityebbc::setCoefficientss(const Real a_aco, const Real a_bco,
   m_data_coeff  = false;
 }
 
-void robinconductivityebbc::setCoefficientss(const RefCountedPtr<robin_coef> a_robinco){
+void robinconductivityebbc::setCoefficientss(const RefCountedPtr<RobinCoefficients> a_robinco){
   m_robinco = a_robinco;
 
   m_const_coeff = false;
