@@ -38,7 +38,7 @@
 #include <ebcoarseaverage.H>
 #include <DomainFluxIFFAB.H>
 #include <DomainFluxIFFABFactory.H>
-#include <particle_container.H>
+#include <CD_ParticleContainer.H>
 #include <CD_EbGhostCloud.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_Realm.H>
@@ -138,7 +138,7 @@ public:
     @details Particles that live within a_pvrBuffer on the fine side of the refinement boundary will be mapped to the coarse leve. 
   */
   template <typename T>
-  void allocate(particle_container<T>& a_container,
+  void allocate(ParticleContainer<T>& a_container,
 		const int              a_pvrBuffer,
 		const std::string      a_realm);
 

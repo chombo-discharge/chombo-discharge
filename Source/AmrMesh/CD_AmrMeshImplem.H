@@ -96,7 +96,7 @@ void AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, co
 }
 
 template <typename T>
-void AmrMesh::allocate(particle_container<T>& a_container,
+void AmrMesh::allocate(ParticleContainer<T>& a_container,
 		       const int              a_buffer,
 		       const std::string      a_realm){
   CH_TIME("AmrMesh::allocate(container, buffer, Realm)");

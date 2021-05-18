@@ -207,7 +207,7 @@ void ito_plasma_physics::reconcile_particles(List<ito_particle>& a_particles,
 
   if(diff > zero){ // Need to add 'diff' mass.
     const long long Diff = (long long) (diff);
-    this->add_particles(a_particles, diff, a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    this->addParticles(a_particles, diff, a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
   }
   else if(diff < zero){ // Need to remove 'diff' mass.
     this->remove_particles(a_particles, -diff);
@@ -234,7 +234,7 @@ void ito_plasma_physics::compute_particle_weights(long long&      a_weight,
 }
 
 inline
-void ito_plasma_physics::add_particles(List<ito_particle>& a_particles,
+void ito_plasma_physics::addParticles(List<ito_particle>& a_particles,
 				       const long long     a_numNewParticles,
 				       const RealVect      a_cellPos,
 				       const RealVect      a_centroidPos,

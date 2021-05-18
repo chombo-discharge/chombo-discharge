@@ -904,9 +904,9 @@ void CdrSolver::initialDataParticles(){
 
   if(init_particles.length() > 0){
 
-    particle_container<Particle> particles;
+    ParticleContainer<Particle> particles;
     m_amr->allocate(particles, pvr_buffer, m_realm);
-    particles.add_particles(m_species->getInitialParticles());
+    particles.addParticles(m_species->getInitialParticles());
 
     // We will deposit onto m_phi, using m_scratch as a scratch holder for interpolation stuff
     data_ops::set_value(m_phi, 0.0);

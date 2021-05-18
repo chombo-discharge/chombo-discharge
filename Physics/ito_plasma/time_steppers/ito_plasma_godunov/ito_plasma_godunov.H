@@ -77,8 +77,8 @@ namespace physics {
       which_algorithm m_algorithm;
       which_dt        m_whichDt;
 
-      Vector<particle_container<godunov_particle>* > m_conductivity_particles; // Used to store the particle that gave the sigma^k
-      Vector<particle_container<godunov_particle>* > m_rho_dagger_particles;   // Used to store the particles that gave rho^dagger
+      Vector<ParticleContainer<godunov_particle>* > m_conductivity_particles; // Used to store the particle that gave the sigma^k
+      Vector<ParticleContainer<godunov_particle>* > m_rho_dagger_particles;   // Used to store the particles that gave rho^dagger
 
       int m_merge_interval; // How often to merge superparticles
 
@@ -87,13 +87,13 @@ namespace physics {
 
       // Global routines
       void set_old_positions();
-      void remap_godunov_particles(Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
-      void deposit_godunov_particles(const Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
-      void clear_godunov_particles(const Vector<particle_container<godunov_particle>* >& a_particles, const which_particles a_which);
+      void remap_godunov_particles(Vector<ParticleContainer<godunov_particle>* >& a_particles, const which_particles a_which);
+      void deposit_godunov_particles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const which_particles a_which);
+      void clear_godunov_particles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const which_particles a_which);
 
       // Routines for semi-implicit Poisson solution
-      void compute_all_conductivities(const Vector<particle_container<godunov_particle>* >& a_particles);
-      void compute_cell_conductivity(EBAMRCellData& a_conductivity, const Vector<particle_container<godunov_particle>* >& a_particles);
+      void compute_all_conductivities(const Vector<ParticleContainer<godunov_particle>* >& a_particles);
+      void compute_cell_conductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<godunov_particle>* >& a_particles);
       void compute_face_conductivity();
       void setup_semi_implicit_poisson(const Real a_dt);
 
@@ -101,20 +101,20 @@ namespace physics {
       void setup_standard_poisson();
 
       // Routines for semi-implicit regridding
-      void copy_conductivity_particles(Vector<particle_container<godunov_particle>* >& a_conductivity_particles);
-      void copy_rho_dagger_particles(Vector<particle_container<godunov_particle>* >& a_rho_dagger_particles);
+      void copy_conductivity_particles(Vector<ParticleContainer<godunov_particle>* >& a_conductivity_particles);
+      void copy_rho_dagger_particles(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger_particles);
       void compute_regrid_conductivity();
       void compute_regrid_rho();
 
       // Specific routines for Euler-Maruyama
       void advance_particles_euler_maruyama(const Real a_dt);
-      void diffuse_particles_euler_maruyama(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void diffuse_particles_euler_maruyama(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
       void step_euler_maruyama(const Real a_dt);
       
       // Specific routines for trapezoidal integration
       void advance_particles_trapezoidal(const Real a_dt);
-      void pre_trapezoidal_predictor(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);
-      void pre_trapezoidal_corrector(Vector<particle_container<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void pre_trapezoidal_predictor(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void pre_trapezoidal_corrector(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
       void trapezoidal_predictor(const Real a_dt);
       void trapezoidal_corrector(const Real a_dt);
     };

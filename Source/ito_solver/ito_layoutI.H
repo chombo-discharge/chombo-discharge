@@ -164,16 +164,16 @@ void ito_layout<T>::setTime(const int a_step, const Real a_time, const Real a_dt
 }
 
 template <class T>
-void ito_layout<T>::sort_particles_by_cell(const ito_solver::which_container a_container){
+void ito_layout<T>::sortParticlesByCell(const ito_solver::which_container a_container){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->sort_particles_by_cell(a_container);
+    iter()->sortParticlesByCell(a_container);
   }
 }
 
 template <class T>
-void ito_layout<T>::sort_particles_by_patch(const ito_solver::which_container a_container){
+void ito_layout<T>::sortParticlesByPatch(const ito_solver::which_container a_container){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->sort_particles_by_patch(a_container);
+    iter()->sortParticlesByPatch(a_container);
   }
 }
 
@@ -351,10 +351,10 @@ Vector<EBAMRCellData*> ito_layout<T>::get_mobility_funcs(){
 }
 
 template <class T>
-Vector<particle_container<ito_particle>* > ito_layout<T>::get_particles(const ito_solver::which_container a_container){
-  Vector<particle_container<ito_particle>* > ret(m_solvers.size(), nullptr);
+Vector<ParticleContainer<ito_particle>* > ito_layout<T>::getParticles(const ito_solver::which_container a_container){
+  Vector<ParticleContainer<ito_particle>* > ret(m_solvers.size(), nullptr);
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    ret[iter.index()] = &(iter()->get_particles(a_container));
+    ret[iter.index()] = &(iter()->getParticles(a_container));
   }
   
   return ret;

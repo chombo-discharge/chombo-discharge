@@ -79,7 +79,7 @@ RealVect ito_solver::random_direction(){
 }
 
 template <class T>
-void ito_solver::deposit_particles(EBAMRCellData& a_phi, const particle_container<T>& a_particles){
+void ito_solver::deposit_particles(EBAMRCellData& a_phi, const ParticleContainer<T>& a_particles){
   CH_TIME("ito_solver::deposit_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_particles" << endl;
@@ -90,7 +90,7 @@ void ito_solver::deposit_particles(EBAMRCellData& a_phi, const particle_containe
 
 template <class T>
 void ito_solver::deposit_particles(EBAMRCellData&               a_phi,
-				   const particle_container<T>& a_particles,
+				   const ParticleContainer<T>& a_particles,
 				   const DepositionType::Which  a_deposition){
   CH_TIME("ito_solver::deposit_particles");
   if(m_verbosity > 5){
@@ -122,7 +122,7 @@ void ito_solver::deposit_particles(EBAMRCellData&               a_phi,
 
 template <class T>
 void ito_solver::deposit_kappaConservative(EBAMRCellData&               a_phi,
-					   const particle_container<T>& a_particles,
+					   const ParticleContainer<T>& a_particles,
 					   const DepositionType::Which  a_deposition){
   CH_TIME("ito_solver::deposit_kappaConservative");
   if(m_verbosity > 5){
@@ -149,7 +149,7 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&               a_phi,
 
 template <class T>
 void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a_phi,
-						  const particle_container<T>& a_particles,
+						  const ParticleContainer<T>& a_particles,
 						  const DepositionType::Which  a_deposition){
   CH_TIME("ito_solver::deposit_kappaConservativeWithPVR");
   if(m_verbosity > 5){
@@ -165,8 +165,8 @@ void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a
   data_ops::set_value(a_phi,    0.0);
   data_ops::set_value(m_scratch,  0.0);
 
-  const AMRParticles<T>& particles      = a_particles.get_particles();
-  const AMRParticles<T>& halo_particles = a_particles.get_halo_particles();
+  const AMRParticles<T>& particles      = a_particles.getParticles();
+  const AMRParticles<T>& halo_particles = a_particles.getMaskParticles();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->getDx()[lvl];
@@ -210,7 +210,7 @@ void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a
 
 template <class T>
 void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&               a_phi,
-						       const particle_container<T>& a_particles,
+						       const ParticleContainer<T>& a_particles,
 						       const DepositionType::Which  a_deposition){
   CH_TIME("ito_solver::deposit_kappaConservativeNoPVR_native");
   if(m_verbosity > 5){
@@ -227,11 +227,11 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
 
   //  const EBAMRBool& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
   const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
-  a_particles.copy_halo_particles(mask);
+  a_particles.copyMaskParticles(mask);
     
-  const AMRParticles<T>& particles          = a_particles.get_particles();
-  const AMRParticles<T>& halo_particles     = a_particles.get_halo_particles();
-  const AMRParticles<T>& non_halo_particles = a_particles.get_non_halo_particles();
+  const AMRParticles<T>& particles          = a_particles.getParticles();
+  const AMRParticles<T>& halo_particles     = a_particles.getMaskParticles();
+  const AMRParticles<T>& non_halo_particles = a_particles.getNonMaskParticles();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->getDx()[lvl];
@@ -297,12 +297,12 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
   }
 
   // Clear halo and non-halo particles
-  a_particles.clear_halo_particles();
+  a_particles.clearMaskParticles();
 }
 
 template <class T>
 void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&               a_phi,
-						    const particle_container<T>& a_particles,
+						    const ParticleContainer<T>& a_particles,
 						    const DepositionType::Which  a_deposition){
   CH_TIME("ito_solver::deposit_kappaConservativeNoPVR_NGP");
   if(m_verbosity > 5){
@@ -319,12 +319,12 @@ void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&              
 
   const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
 
-  a_particles.copy_halo_particles(mask);
-  a_particles.copy_non_halo_particles(mask);
+  a_particles.copyMaskParticles(mask);
+  a_particles.copyNonMaskParticles(mask);
     
-  const AMRParticles<T>& particles          = a_particles.get_particles();
-  const AMRParticles<T>& halo_particles     = a_particles.get_halo_particles();
-  const AMRParticles<T>& non_halo_particles = a_particles.get_non_halo_particles(); 
+  const AMRParticles<T>& particles          = a_particles.getParticles();
+  const AMRParticles<T>& halo_particles     = a_particles.getMaskParticles();
+  const AMRParticles<T>& non_halo_particles = a_particles.getNonMaskParticles(); 
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->getDx()[lvl];
@@ -366,8 +366,8 @@ void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&              
   }
 
   // Clear halo and non-halo particles
-  a_particles.clear_halo_particles();
-  a_particles.clear_non_halo_particles();
+  a_particles.clearMaskParticles();
+  a_particles.clearNonMaskParticles();
 }
 #include "CD_NamespaceFooter.H"
 

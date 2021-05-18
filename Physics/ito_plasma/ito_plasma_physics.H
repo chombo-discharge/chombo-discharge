@@ -341,7 +341,7 @@ namespace physics {
 	@brief Add particles
       */
       inline
-      void add_particles(List<ito_particle>& a_particles,
+      void addParticles(List<ito_particle>& a_particles,
 			 const long long     a_numParticlesToAdd,
 			 const RealVect      a_cellPos,
 			 const RealVect      a_centroidPos,

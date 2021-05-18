@@ -10,7 +10,7 @@
 
 #include "rte_solver.H"
 #include <CD_EbParticleInterp.H>
-#include "particle_container.H"
+#include <CD_ParticleContainer.H>
 #include <CD_WallBc.H>
 #include "photon.H"
 
@@ -52,26 +52,26 @@ public:
   /*!
     @brief Generate photons
   */
-  virtual void generate_photons(particle_container<photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);
+  virtual void generate_photons(ParticleContainer<photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);
 
   /*!
     @brief Move photons and absorb them. 
     @details This is the routine that is used to move photons when the solver is stationary. 
   */
-  virtual void advance_photons_stationary(particle_container<photon>& a_bulk_photons,
-					  particle_container<photon>& a_eb_photons,
-					  particle_container<photon>& a_domain_photons,
-					  particle_container<photon>& a_photons);
+  virtual void advance_photons_stationary(ParticleContainer<photon>& a_bulk_photons,
+					  ParticleContainer<photon>& a_eb_photons,
+					  ParticleContainer<photon>& a_domain_photons,
+					  ParticleContainer<photon>& a_photons);
 
   /*!
     @brief This moves the photons over a time step dt. If a photon is absorbed in the gas, it is put in
     a_bulk_photons. If it is absorbed on the EB, it is put in a_eb_photons etc. 
     @details This is the routine that is used to move photons when the solver is transient. 
   */
-  virtual void advance_photons_transient(particle_container<photon>& a_bulk_photons,
-					 particle_container<photon>& a_eb_photons,
-					 particle_container<photon>& a_domain_photons,
-					 particle_container<photon>& a_ophotons,
+  virtual void advance_photons_transient(ParticleContainer<photon>& a_bulk_photons,
+					 ParticleContainer<photon>& a_eb_photons,
+					 ParticleContainer<photon>& a_domain_photons,
+					 ParticleContainer<photon>& a_ophotons,
 					 const Real                  a_dt);
 
   /*!
@@ -82,7 +82,7 @@ public:
   /*!
     @brief Remap photons
   */
-  virtual void remap(particle_container<photon>& a_photons);
+  virtual void remap(ParticleContainer<photon>& a_photons);
 
   /*!
     @brief Deposit photons
@@ -93,7 +93,7 @@ public:
     @brief Deposit photons
   */
   virtual void deposit_photons(EBAMRCellData&                    a_phi,
-			       const particle_container<photon>& a_particles,
+			       const ParticleContainer<photon>& a_particles,
 			       const DepositionType::Which&      a_deposition);
 
   /*!
@@ -218,7 +218,7 @@ public:
   /*!
     @brief Clear data holder
   */
-  virtual void clear(particle_container<photon>& a_photon);
+  virtual void clear(ParticleContainer<photon>& a_photon);
 
   /*!
     @brief Clear data holder
@@ -253,7 +253,7 @@ public:
   /*!
     @brief Get PVR buffer
   */
-  virtual int get_pvr_buffer() const;
+  virtual int getPVR_buffer() const;
 
   /*!
     @brief Get the halo buffer
@@ -293,27 +293,27 @@ public:
   /*!
     @brief Get photons
   */
-  virtual particle_container<photon>& get_photons();
+  virtual ParticleContainer<photon>& get_photons();
 
   /*!
     @brief Get bulk photons
   */
-  virtual particle_container<photon>& get_bulk_photons();
+  virtual ParticleContainer<photon>& get_bulk_photons();
 
   /*!
     @brief Get EB photons
   */
-  virtual particle_container<photon>& get_eb_photons();
+  virtual ParticleContainer<photon>& get_eb_photons();
 
   /*!
     @brief Get domain photons
   */
-  virtual particle_container<photon>& get_domain_photons();
+  virtual ParticleContainer<photon>& get_domain_photons();
 
   /*!
     @brief Get source photons
   */
-  virtual particle_container<photon>& getSource_photons();
+  virtual ParticleContainer<photon>& getSource_photons();
   
 protected:
 
@@ -463,27 +463,27 @@ protected:
   /*!
     @brief All particles
   */
-  particle_container<photon> m_photons;
+  ParticleContainer<photon> m_photons;
 
   /*!
     @brief Photons absorbed in the volume
   */
-  particle_container<photon> m_bulk_photons;
+  ParticleContainer<photon> m_bulk_photons;
 
   /*!
     @brief This is a particle container for photons that crossed EBs. It is filled during the advance step. 
   */
-  particle_container<photon> m_eb_photons;
+  ParticleContainer<photon> m_eb_photons;
 
   /*!
     @brief This is a particle container for photons that crossed boundaries. It is filled during the advance step. 
   */
-  particle_container<photon> m_domain_photons;
+  ParticleContainer<photon> m_domain_photons;
 
   /*!
     @brief This is a particle container that can be used to add photons directly. 
   */
-  particle_container<photon> m_source_photons;
+  ParticleContainer<photon> m_source_photons;
 
   /*!
     @brief Domain boundary conditions

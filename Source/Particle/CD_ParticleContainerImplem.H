@@ -1,34 +1,40 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   particle_containerI.H
-  @brief  Implementation of particle_container.H
+  @file   CD_ParticleContainerImplem.H
+  @brief  Implementation of CD_ParticleContainer.H
   @author Robert Marskar
-  @date   April 2020
 */
 
-#ifndef _PARTICLE_CONTAINERI_H_
-#define _PARTICLE_CONTAINERI_H_
+#ifndef CD_ParticleContainerImplem_H
+#define CD_ParticleContainerImplem_H
 
-#include "particle_containerI.H"
-#include "NeighborIterator.H"
+// Chombo includes
+#include <NeighborIterator.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ParticleContainer.H>
+#include <CD_NamespaceHeader.H>
   
 template <class P>
-particle_container<P>::particle_container(){
+ParticleContainer<P>::ParticleContainer(){
   m_is_defined  = false;
   m_cell_sorted = false;
 }
 
 template <class P>
-particle_container<P>::particle_container(const Vector<DisjointBoxLayout>& a_grids,
-					  const Vector<ProblemDomain>&     a_domains,
-					  const Vector<Real>&              a_dx,
-					  const Vector<int>&               a_ref_rat,
-					  const RealVect&                  a_probLo,
-					  const int                        a_blocking_factor,
-					  const int                        a_finestLevel,
-					  const int                        a_pvr_buffer,
-					  const std::string                a_realm){
+ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>& a_grids,
+					const Vector<ProblemDomain>&     a_domains,
+					const Vector<Real>&              a_dx,
+					const Vector<int>&               a_ref_rat,
+					const RealVect&                  a_probLo,
+					const int                        a_blocking_factor,
+					const int                        a_finestLevel,
+					const int                        a_pvr_buffer,
+					const std::string                a_realm){
 
   this->define(a_grids, a_domains, a_dx, a_ref_rat, a_probLo, a_blocking_factor, a_finestLevel, a_pvr_buffer, a_realm);
 
@@ -36,20 +42,20 @@ particle_container<P>::particle_container(const Vector<DisjointBoxLayout>& a_gri
 }
 
 template <class P>
-particle_container<P>::~particle_container(){
+ParticleContainer<P>::~ParticleContainer(){
 
 }
 
 template <class P>
-void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
-				   const Vector<ProblemDomain>&     a_domains,
-				   const Vector<Real>&              a_dx,
-				   const Vector<int>&               a_ref_rat,
-				   const RealVect&                  a_probLo,
-				   const int                        a_blocking_factor,
-				   const int                        a_finestLevel,
-				   const int                        a_pvr_buffer,
-				   const std::string                a_realm){
+void ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
+				  const Vector<ProblemDomain>&     a_domains,
+				  const Vector<Real>&              a_dx,
+				  const Vector<int>&               a_ref_rat,
+				  const RealVect&                  a_probLo,
+				  const int                        a_blocking_factor,
+				  const int                        a_finestLevel,
+				  const int                        a_pvr_buffer,
+				  const std::string                a_realm){
   m_grids           = a_grids;
   m_domains         = a_domains;
   m_ref_rat         = a_ref_rat;
@@ -67,15 +73,15 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   const int base = 0;
 
   // Do the define stuff. 
-  this->setup_pvr(base, m_finestLevel);
-  this->setup_particle_data(base, m_finestLevel);
+  this->setupPVR(base, m_finestLevel);
+  this->setupParticleData(base, m_finestLevel);
 
   m_is_defined  = true;
   m_cell_sorted = false;
 }
 
 template <class P>
-void particle_container<P>::setup_pvr(const int a_base, const int a_finestLevel){
+void ParticleContainer<P>::setupPVR(const int a_base, const int a_finestLevel){
   m_pvr.resize(1 + a_finestLevel);
   for (int lvl = a_base; lvl <= a_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_grids[lvl];
@@ -94,7 +100,7 @@ void particle_container<P>::setup_pvr(const int a_base, const int a_finestLevel)
 }
 
 template <class P>
-void particle_container<P>::setup_particle_data(const int a_base, const int a_finestLevel){
+void ParticleContainer<P>::setupParticleData(const int a_base, const int a_finestLevel){
   m_particles.resize(1 + a_finestLevel);
   m_halo_particles.resize(1 + a_finestLevel);
   m_non_halo_particles.resize(1 + a_finestLevel);
@@ -125,141 +131,141 @@ void particle_container<P>::setup_particle_data(const int a_base, const int a_fi
 }
 
 template <class P>
-int particle_container<P>::getFinestLevel() const {
+int ParticleContainer<P>::getFinestLevel() const {
   return m_finestLevel;
 }
 
 template <class P>
-const std::string particle_container<P>::getRealm() const {
+const std::string ParticleContainer<P>::getRealm() const {
   return m_realm;
 }
 
 template <class P>
-const AMRPVR& particle_container<P>::get_pvr() const {
+const AMRPVR& ParticleContainer<P>::getPVR() const {
   return m_pvr;
 }
 
 template <class P>
-const Vector<DisjointBoxLayout>& particle_container<P>::getGrids() const {
+const Vector<DisjointBoxLayout>& ParticleContainer<P>::getGrids() const {
   return m_grids;
 }
 
 template <class P>
-AMRParticles<P>& particle_container<P>::get_particles(){
+AMRParticles<P>& ParticleContainer<P>::getParticles(){
   CH_assert(m_is_defined);
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::get_particles - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::getParticles - particles are sorted by cell!");
   return m_particles;
 }
 
 template <class P>
-const AMRParticles<P>& particle_container<P>::get_particles() const {
+const AMRParticles<P>& ParticleContainer<P>::getParticles() const {
   CH_assert(m_is_defined);
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::get_particles - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::getParticles - particles are sorted by cell!");
   return m_particles;
 }
 
 template <class P>
-AMRParticles<P>& particle_container<P>::get_halo_particles(){
+AMRParticles<P>& ParticleContainer<P>::getMaskParticles(){
   CH_assert(m_is_defined);
   return m_halo_particles;
 }
 
 template <class P>
-const AMRParticles<P>& particle_container<P>::get_halo_particles() const {
+const AMRParticles<P>& ParticleContainer<P>::getMaskParticles() const {
   CH_assert(m_is_defined);
   return m_halo_particles;
 }
 
 template <class P>
-AMRParticles<P>& particle_container<P>::get_non_halo_particles(){
+AMRParticles<P>& ParticleContainer<P>::getNonMaskParticles(){
   CH_assert(m_is_defined);
   return m_non_halo_particles;
 }
 
 template <class P>
-const AMRParticles<P>& particle_container<P>::get_non_halo_particles() const {
+const AMRParticles<P>& ParticleContainer<P>::getNonMaskParticles() const {
   CH_assert(m_is_defined);
   return m_non_halo_particles;
 }
 
 template <class P>
-Vector<List<P> >& particle_container<P>::get_cache_particles() {
-  return m_cache_particles;
+Vector<List<P> >& ParticleContainer<P>::getCacheParticles() {
+  return m_cacheParticles;
 }
 
 template <class P>
-const Vector<List<P> >& particle_container<P>::get_cache_particles() const {
-  return m_cache_particles;
+const Vector<List<P> >& ParticleContainer<P>::getCacheParticles() const {
+  return m_cacheParticles;
 }
 
 template <class P>
-ParticleData<P>& particle_container<P>::operator[](const int a_lvl){
+ParticleData<P>& ParticleContainer<P>::operator[](const int a_lvl){
   CH_assert(m_is_defined);
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::operator[](a_lvl) - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::operator[](a_lvl) - particles are sorted by cell!");
   return *m_particles[a_lvl];
 }
 
 template <class P>
-const ParticleData<P>& particle_container<P>::operator[](const int a_level) const {
+const ParticleData<P>& ParticleContainer<P>::operator[](const int a_level) const {
   CH_assert(m_is_defined);
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::operator[](a_lvl) - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::operator[](a_lvl) - particles are sorted by cell!");
   return *m_particles[a_level];
 }
 
 template <class P>
-AMRCellParticles<P>& particle_container<P>::get_cell_particles(){
-  if(!m_cell_sorted) MayDay::Abort("particle_container<P>::get_cell_particles()- particles are not sorted by cell!");
+AMRCellParticles<P>& ParticleContainer<P>::getCellParticles(){
+  if(!m_cell_sorted) MayDay::Abort("ParticleContainer<P>::getCellParticles()- particles are not sorted by cell!");
   return m_cell_particles;
 }
 
 template <class P>
-const AMRCellParticles<P>& particle_container<P>::get_cell_particles() const{
-  if(!m_cell_sorted) MayDay::Abort("particle_container<P>::get_cell_particles()- particles are not sorted by cell!");
+const AMRCellParticles<P>& ParticleContainer<P>::getCellParticles() const{
+  if(!m_cell_sorted) MayDay::Abort("ParticleContainer<P>::getCellParticles()- particles are not sorted by cell!");
   return m_cell_particles;
 }
   
 template <class P>
-LayoutData<BinFab<P> >& particle_container<P>::get_cell_particles(const int a_level){
-  if(!m_cell_sorted) MayDay::Abort("particle_container<P>::get_cell_particles(level)- particles are not sorted by cell!");
+LayoutData<BinFab<P> >& ParticleContainer<P>::getCellParticles(const int a_level){
+  if(!m_cell_sorted) MayDay::Abort("ParticleContainer<P>::getCellParticles(level)- particles are not sorted by cell!");
   return *m_cell_particles[a_level];
 }
 
 template <class P>
-const LayoutData<BinFab<P> >& particle_container<P>::get_cell_particles(const int a_level) const{
-  if(!m_cell_sorted) MayDay::Abort("particle_container<P>::get_cell_particles(level)- particles are not sorted by cell!");
+const LayoutData<BinFab<P> >& ParticleContainer<P>::getCellParticles(const int a_level) const{
+  if(!m_cell_sorted) MayDay::Abort("ParticleContainer<P>::getCellParticles(level)- particles are not sorted by cell!");
   return *m_cell_particles[a_level];
 }
 
 template <class P>
-void particle_container<P>::get_cell_particles(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit) const {
+void ParticleContainer<P>::getCellParticles(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit) const {
   CH_assert(m_is_defined);
-  if(!m_cell_sorted) MayDay::Abort("particle_container<P>::get_cell_particles - particles are not sorted by cell!");
+  if(!m_cell_sorted) MayDay::Abort("ParticleContainer<P>::getCellParticles - particles are not sorted by cell!");
   
   cellParticles.define(m_grids[a_lvl].get(a_dit),  m_dx[a_lvl], m_probLo);
   cellParticles.addItems((*m_particles[a_lvl])[a_dit].listItems());
 }
 
 template <class P>
-void particle_container<P>::get_cell_particles_destructive(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit){
+void ParticleContainer<P>::getCellParticlesDestructive(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit){
   CH_assert(m_is_defined);
-  if(!m_cell_sorted) MayDay::Abort("particle_container<P>::get_cell_particles_destructive - particles are not sorted by cell!");
+  if(!m_cell_sorted) MayDay::Abort("ParticleContainer<P>::getCellParticlesDestructive - particles are not sorted by cell!");
   
   cellParticles.define(m_grids[a_lvl].get(a_dit),  m_dx[a_lvl], m_probLo);
   cellParticles.addItemsDestructive((*m_particles[a_lvl])[a_dit].listItems());
 }
 
 template <class P>
-BinFab<P>& particle_container<P>::get_cell_particles(const int a_level, const DataIndex a_dit){
+BinFab<P>& ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit){
   return (*m_cell_particles[a_level])[a_dit];
 }
 
 template <class P>
-const BinFab<P>& particle_container<P>::get_cell_particles(const int a_level, const DataIndex a_dit) const{
+const BinFab<P>& ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit) const{
   return (*m_cell_particles[a_level])[a_dit];
 }
 
 template <class P>
-void particle_container<P>::sort_particles_by_cell(){
+void ParticleContainer<P>::sortParticlesByCell(){
   if(!m_cell_sorted){
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -278,7 +284,7 @@ void particle_container<P>::sort_particles_by_cell(){
 }
 
 template <class P>
-void particle_container<P>::sort_particles_by_patch(){
+void ParticleContainer<P>::sortParticlesByPatch(){
   if(m_cell_sorted){
 
     const int comp = 0;
@@ -307,9 +313,9 @@ void particle_container<P>::sort_particles_by_patch(){
 }
 
 template <class P>
-void particle_container<P>::add_particles(const List<P>& a_particles){
+void ParticleContainer<P>::addParticles(const List<P>& a_particles){
   CH_assert(m_is_defined);
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(List<P>) - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(List<P>) - particles are sorted by cell!");
   
   // Put the initial particles on the coarsest grid level
   List<P>& outcastBase = m_particles[0]->outcast();
@@ -331,9 +337,9 @@ void particle_container<P>::add_particles(const List<P>& a_particles){
 }
 
 template <class P>
-void particle_container<P>::add_particles_destructive(List<P>& a_particles){
+void ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles){
   CH_assert(m_is_defined);
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(List<P>) - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(List<P>) - particles are sorted by cell!");
 
   // Put the initial particles on the coarsest grid level
   List<P>& outcastBase = m_particles[0]->outcast();
@@ -355,10 +361,10 @@ void particle_container<P>::add_particles_destructive(List<P>& a_particles){
 }
 
 template <class P>
-void particle_container<P>::add_particles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit){
+void ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit){
   CH_assert(m_is_defined);
   CH_assert(m_grids[a_lvl].get(a_dit) == a_particles.getRegion());
-  if(!m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(BinFab<P>) - particles are not sorted by cell!");
+  if(!m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(BinFab<P>) - particles are not sorted by cell!");
 
   const int comp = 0;
   
@@ -376,10 +382,10 @@ void particle_container<P>::add_particles(const BinFab<P>& a_particles, const in
 }
 
 template <class P>
-void particle_container<P>::add_particles_destructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit){
+void ParticleContainer<P>::addParticlesDestructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit){
   CH_assert(m_is_defined);
   CH_assert(m_grids[a_lvl].get(a_dit) == a_particles.getRegion());
-  if(!m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(BinFab<P>) - particles are not sorted by cell!");
+  if(!m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(BinFab<P>) - particles are not sorted by cell!");
 
   const int comp = 0;
 
@@ -397,8 +403,8 @@ void particle_container<P>::add_particles_destructive(BinFab<P>& a_particles, co
 }
 
 template <class P>
-void particle_container<P>::add_particles(const particle_container<P>& a_otherContainer){
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
+void ParticleContainer<P>::addParticles(const ParticleContainer<P>& a_otherContainer){
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
 
   if(m_realm == a_otherContainer.getRealm()){
     for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -431,8 +437,8 @@ void particle_container<P>::add_particles(const particle_container<P>& a_otherCo
 }
 
 template <class P>
-void particle_container<P>::add_particles_destructive(particle_container<P>& a_otherContainer){
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
+void ParticleContainer<P>::addParticlesDestructive(ParticleContainer<P>& a_otherContainer){
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
 
   if(m_realm == a_otherContainer.getRealm()){
     for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -467,9 +473,9 @@ void particle_container<P>::add_particles_destructive(particle_container<P>& a_o
 }
 
 template <class P>
-void particle_container<P>::cache_particles(particle_container<P>& a_otherContainer){
+void ParticleContainer<P>::cacheParticles(ParticleContainer<P>& a_otherContainer){
   CH_assert(m_is_defined);
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     collectValidParticles(a_otherContainer[lvl],
@@ -484,9 +490,9 @@ void particle_container<P>::cache_particles(particle_container<P>& a_otherContai
 }
 
 template <class P>
-void particle_container<P>::remap(){
+void ParticleContainer<P>::remap(){
   CH_assert(m_is_defined);
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const bool has_coar = lvl > 0;
@@ -528,17 +534,17 @@ void particle_container<P>::remap(){
   // do collect those, too
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     if(m_particles[lvl]->numOutcast() > 0){
-      //      if(procID() == 0) std::cout << "particle_container<P>::remap - outcast list not empty" << std::endl;
-      this->remap_lost_particles();
+      //      if(procID() == 0) std::cout << "ParticleContainer<P>::remap - outcast list not empty" << std::endl;
+      this->remapLostParticles();
       break;
     }
   }
 }
 
 template <class P>
-void particle_container<P>::remap_lost_particles(){
+void ParticleContainer<P>::remapLostParticles(){
   CH_assert(m_is_defined);
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   
   // TLDR: This routine is called because there is a chance that particles might hop across more than one refinement boundary,
   //       and the remap_amr_particles only performs two-level operations. This piece of code is responsible for gathering
@@ -569,47 +575,47 @@ void particle_container<P>::remap_lost_particles(){
 }
 
 template <class P>
-void particle_container<P>::levelRemap(){
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
+void ParticleContainer<P>::levelRemap(){
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     this->levelRemap(lvl);
   }
 }
 
 template <class P>
-void particle_container<P>::levelRemap(const int a_lvl){
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
+void ParticleContainer<P>::levelRemap(const int a_lvl){
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   m_particles[a_lvl]->gatherOutcast();
   m_particles[a_lvl]->remapOutcast();
 }
 
 template <class P>
-void particle_container<P>::preRegrid(const int a_lmin){
+void ParticleContainer<P>::preRegrid(const int a_lmin){
   CH_assert(m_is_defined);
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
 
   // Fill cache particles on each level
-  m_cache_particles.resize(1 + m_finestLevel);
+  m_cacheParticles.resize(1 + m_finestLevel);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    m_cache_particles[lvl].clear();
+    m_cacheParticles[lvl].clear();
     
     for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
       List<P>& p = (*m_particles[lvl])[dit()].listItems();
 
-      m_cache_particles[lvl].catenate(p);
+      m_cacheParticles[lvl].catenate(p);
       p.clear();
     }
   }
 }
 
 template <class P>
-void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
-				   const Vector<ProblemDomain>&     a_domains,
-				   const Vector<Real>&              a_dx,
-				   const Vector<int>&               a_ref_rat,
-				   const int                        a_lmin,
-				   const int                        a_newFinestLevel){
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::regrid(...) - particles are sorted by cell!");
+void ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
+				  const Vector<ProblemDomain>&     a_domains,
+				  const Vector<Real>&              a_dx,
+				  const Vector<int>&               a_ref_rat,
+				  const int                        a_lmin,
+				  const int                        a_newFinestLevel){
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::regrid(...) - particles are sorted by cell!");
 
   // Update this stuff
   m_grids        = a_grids;
@@ -622,16 +628,16 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     m_dx[lvl] = a_dx[lvl]*RealVect::Unit;
   }
   
-  this->setup_pvr(a_lmin, m_finestLevel);
-  this->setup_particle_data(a_lmin, m_finestLevel);
+  this->setupPVR(a_lmin, m_finestLevel);
+  this->setupParticleData(a_lmin, m_finestLevel);
   
-  const int oldFinestLevel = m_cache_particles.size() - 1;
+  const int oldFinestLevel = m_cacheParticles.size() - 1;
 
   // If a level was removed, put the particles on the new finest level
   if(m_finestLevel < oldFinestLevel){
-    List<P>& cacheFinest = m_cache_particles[m_finestLevel];
+    List<P>& cacheFinest = m_cacheParticles[m_finestLevel];
     for (int lvl = m_finestLevel + 1; lvl <= oldFinestLevel; lvl++){
-      List<P>& p = m_cache_particles[lvl];
+      List<P>& p = m_cacheParticles[lvl];
 
       cacheFinest.catenate(p);
       p.clear();
@@ -642,8 +648,8 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     //  for (int lvl = 0; lvl <= oldFinestLevel; lvl++){
     List<P>& outcast = m_particles[lvl]->outcast();
 
-    outcast.catenate(m_cache_particles[lvl]);
-    m_cache_particles[lvl].clear();
+    outcast.catenate(m_cacheParticles[lvl]);
+    m_cacheParticles[lvl].clear();
 
     m_particles[lvl]->remapOutcast();
   }
@@ -664,12 +670,12 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   // Now do remap so that the PVR is respected.
   this->remap();
 
-  m_cache_particles.resize(0);
+  m_cacheParticles.resize(0);
 }
 
 template <class P>
-void particle_container<P>::discard_invalid_particles(){
-  if(m_cell_sorted) MayDay::Abort("particle_container<P>::add_particles(particle_container<P>) - particles are sorted by cell!");  
+void ParticleContainer<P>::discardInvalidParticles(){
+  if(m_cell_sorted) MayDay::Abort("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");  
   // Move particles to the outcast list on the fine level. Then discard that list. 
   for (int lvl = 1; lvl <= m_finestLevel; lvl++){
     collectValidParticles(m_particles[lvl]->outcast(),
@@ -684,7 +690,7 @@ void particle_container<P>::discard_invalid_particles(){
 }
 
 template <class P>
-size_t particle_container<P>::get_num_valid_local() const {
+size_t ParticleContainer<P>::getNumberOfValidParticesLocal() const {
   size_t n = 0;
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -695,7 +701,7 @@ size_t particle_container<P>::get_num_valid_local() const {
 }
 
 template <class P>
-size_t particle_container<P>::get_num_valid_global() const {
+size_t ParticleContainer<P>::getNumberOfValidParticesGlobal() const {
   size_t n = 0;
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -706,7 +712,7 @@ size_t particle_container<P>::get_num_valid_global() const {
 }
 
 template <class P>
-size_t particle_container<P>::get_num_outcast_local() const {
+size_t ParticleContainer<P>::getNumberOfOutcastParticesLocal() const {
   size_t n = 0;
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -717,7 +723,7 @@ size_t particle_container<P>::get_num_outcast_local() const {
 }
 
 template <class P>
-size_t particle_container<P>::get_num_outcast_global() const {
+size_t ParticleContainer<P>::getNumberOfOutcastParticesGlobal() const {
   size_t n = 0;
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -728,7 +734,7 @@ size_t particle_container<P>::get_num_outcast_global() const {
 }
 
 template <class P>
-size_t particle_container<P>::get_num_halo_local() const {
+size_t ParticleContainer<P>::getNumberOfMaskParticesLocal() const {
   size_t n = 0;
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -739,7 +745,7 @@ size_t particle_container<P>::get_num_halo_local() const {
 }
 
 template <class P>
-size_t particle_container<P>::get_num_halo_global() const {
+size_t ParticleContainer<P>::getNumberOfMaskParticesGlobal() const {
   size_t n = 0;
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -750,7 +756,7 @@ size_t particle_container<P>::get_num_halo_global() const {
 }
 
 template <class P>
-Real particle_container<P>::get_weight_valid_local() const {
+Real ParticleContainer<P>::getWeightValidLocal() const {
 
   Real weight = 0.0;
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -767,15 +773,15 @@ Real particle_container<P>::get_weight_valid_local() const {
 }
 
 template <class P>
-Real particle_container<P>::get_weight_valid_global() const{
+Real ParticleContainer<P>::getWeightValidGlobal() const{
 
-  Real weight = this->get_weight_valid_local();
+  Real weight = this->getWeightValidLocal();
 
 #ifdef CH_MPI
   Real tmp = weight;
   int result = MPI_Allreduce(&tmp, &weight, 1, MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("particle_Container<P>::get_weight_valid_global - communication error!");
+    MayDay::Error("particle_Container<P>::getWeightValidGlobal - communication error!");
   }
 #endif
 
@@ -783,25 +789,25 @@ Real particle_container<P>::get_weight_valid_global() const{
 }
 
 template <class P>
-void particle_container<P>::copy_halo_particles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const{
+void ParticleContainer<P>::copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const{
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     if(lvl < m_finestLevel){
-      this->copy_halo_particles(lvl, *a_halo[lvl]);
+      this->copyMaskParticles(lvl, *a_halo[lvl]);
     }
   }
 }
 
 template <class P>
-void particle_container<P>::copy_non_halo_particles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const{
+void ParticleContainer<P>::copyNonMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const{
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     if(lvl < m_finestLevel){
-      this->copy_non_halo_particles(lvl, *a_halo[lvl]);
+      this->copyNonMaskParticles(lvl, *a_halo[lvl]);
     }
   }
 }
 
 template <class P>
-void particle_container<P>::copy_halo_particles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const {
+void ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const {
   
   m_halo_particles[a_level]->clear();
 
@@ -825,7 +831,7 @@ void particle_container<P>::copy_halo_particles(const int a_level, const LevelDa
 }
 
 template <class P>
-void particle_container<P>::copy_non_halo_particles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const {
+void ParticleContainer<P>::copyNonMaskParticles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const {
   
   m_non_halo_particles[a_level]->clear();
 
@@ -849,25 +855,26 @@ void particle_container<P>::copy_non_halo_particles(const int a_level, const Lev
 }
 
 template <class P>
-void particle_container<P>::clear_particles() {
+void ParticleContainer<P>::clearParticles() {
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     m_particles[lvl]->clear();
   }
 }
 
 template <class P>
-void particle_container<P>::clear_halo_particles() const {
+void ParticleContainer<P>::clearMaskParticles() const {
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     m_halo_particles[lvl]->clear();
   }
 }
 
 template <class P>
-void particle_container<P>::clear_non_halo_particles() const {
+void ParticleContainer<P>::clearNonMaskParticles() const {
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     m_non_halo_particles[lvl]->clear();
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

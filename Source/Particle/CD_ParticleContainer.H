@@ -1,13 +1,18 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file particle_container.H
-  @brief Declaration of a class for holding particles on an AMR hierarchy
+  @file   CD_ParticleContainer.H
+  @brief  Declaration of a class for holding particles on an AMR hierarchy
   @author Robert Marskar
-  @date   April 2020
 */
 
-#ifndef _PARTICLE_CONTAINER_
-#define _PARTICLE_CONTAINER_
+#ifndef CD_ParticleContainer_H
+#define CD_ParticleContainer_H
 
+// Chombo includes
 #include <Particle.H>
 #include <ParticleData.H>
 #include <ParticleValidRegion.H>
@@ -17,7 +22,8 @@
 #include <DisjointBoxLayout.H>
 #include "BaseEBCellFAB.H"
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
   
 template <class P>
 using AMRParticles     = Vector<RefCountedPtr<ParticleData<P> > >;
@@ -26,8 +32,6 @@ template <class P>
 using AMRCellParticles = Vector<RefCountedPtr<LayoutData<BinFab<P> > > >;
 
 using AMRPVR           = Vector<RefCountedPtr<ParticleValidRegion> >;
-//using EBAMRPPC         = Vector<RefCountedPtr<BaseEBCellFAB<int> > >;
-
 
 
 /*!
@@ -35,32 +39,32 @@ using AMRPVR           = Vector<RefCountedPtr<ParticleValidRegion> >;
   template <class P>
 */
 template <class P>
-class particle_container {
+class ParticleContainer {
 public:
 
   /*!
     @brief No need for weak construction
   */
-  particle_container();
+  ParticleContainer();
 
   /*!
     @brief Full constructor
     @note It is extremely important that a_grids uses only square blocks for the grids. 
   */
-  particle_container(const Vector<DisjointBoxLayout>& a_grids,
-		     const Vector<ProblemDomain>&     a_domains,
-		     const Vector<Real>&              a_dx,
-		     const Vector<int>&               a_ref_rat,
-		     const RealVect&                  a_probLo,
-		     const int                        a_blocking_factor,
-		     const int                        a_finestLevel,
-		     const int                        a_pvr_buffer,
-		     const std::string                a_realm);
+  ParticleContainer(const Vector<DisjointBoxLayout>& a_grids,
+		    const Vector<ProblemDomain>&     a_domains,
+		    const Vector<Real>&              a_dx,
+		    const Vector<int>&               a_ref_rat,
+		    const RealVect&                  a_probLo,
+		    const int                        a_blocking_factor,
+		    const int                        a_finestLevel,
+		    const int                        a_pvr_buffer,
+		    const std::string                a_realm);
 
   /*!
     @brief Destructor
   */
-  ~particle_container();
+  ~ParticleContainer();
 
   /*!
     @brief Define the container. This will do a clear-out of all particles. 
@@ -93,37 +97,37 @@ public:
   /*!
     @brief Copy particles to halo
   */
-  void copy_halo_particles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const;
+  void copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const;
 
   /*!
     @brief Copy non-halo particles to non-halo storage
   */
-  void copy_non_halo_particles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const;
+  void copyNonMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const;
 
   /*!
     @brief Copy particles to halo. a_level is the coarse level. 
   */
-  void copy_halo_particles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const;
+  void copyMaskParticles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const;
 
   /*!
     @brief Copy non-particles to non-halo data storage. a_level is the coarse level. 
   */
-  void copy_non_halo_particles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const;
+  void copyNonMaskParticles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const;
 
   /*!
     @brief Frees up halo particles
   */
-  void clear_halo_particles() const;
+  void clearMaskParticles() const;
 
   /*!
     @brief Frees up halo particles
   */
-  void clear_non_halo_particles() const;
+  void clearNonMaskParticles() const;
 
   /*!
     @brief Clear all particles
   */
-  void clear_particles();
+  void clearParticles();
 
   /*!
     @brief Get finest level
@@ -138,47 +142,47 @@ public:
   /*!
     @brief Get all particles on all levels
   */
-  AMRParticles<P>& get_particles();
+  AMRParticles<P>& getParticles();
 
   /*!
     @brief Get all particles on a level
   */
-  const AMRParticles<P>& get_particles() const;
+  const AMRParticles<P>& getParticles() const;
 
   /*!
     @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
   */
-  AMRParticles<P>& get_halo_particles();
+  AMRParticles<P>& getMaskParticles();
 
   /*!
     @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
   */
-  const AMRParticles<P>& get_halo_particles() const;
+  const AMRParticles<P>& getMaskParticles() const;
 
   /*!
     @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
   */
-  AMRParticles<P>& get_non_halo_particles();
+  AMRParticles<P>& getNonMaskParticles();
 
   /*!
     @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
   */
-  const AMRParticles<P>& get_non_halo_particles() const;
+  const AMRParticles<P>& getNonMaskParticles() const;
 
   /*!
     @brief Get cache particles
   */
-  Vector<List<P> >& get_cache_particles() ;
+  Vector<List<P> >& getCacheParticles() ;
 
   /*!
     @brief Get cache particles
   */
-  const Vector<List<P> >& get_cache_particles() const;
+  const Vector<List<P> >& getCacheParticles() const;
 
   /*!
     @brief Get PVR
   */
-  const AMRPVR& get_pvr() const;
+  const AMRPVR& getPVR() const;
 
   /*!
     @brief Get grids
@@ -198,82 +202,82 @@ public:
   /*!
     @brief Get cell particles
   */
-  AMRCellParticles<P>& get_cell_particles();
+  AMRCellParticles<P>& getCellParticles();
 
   /*!
     @brief Get cell particles, const version. 
   */
-  const AMRCellParticles<P>& get_cell_particles() const;
+  const AMRCellParticles<P>& getCellParticles() const;
   
   /*!
     @brief Get cell particles
   */
-  LayoutData<BinFab<P> >& get_cell_particles(const int a_level);
+  LayoutData<BinFab<P> >& getCellParticles(const int a_level);
 
   /*!
     @brief Get cell particles, const version. 
   */
-  const LayoutData<BinFab<P> >& get_cell_particles(const int a_level) const;
+  const LayoutData<BinFab<P> >& getCellParticles(const int a_level) const;
 
   /*!
     @brief Get cell particles
   */
-  BinFab<P>& get_cell_particles(const int a_level, const DataIndex a_dit);
+  BinFab<P>& getCellParticles(const int a_level, const DataIndex a_dit);
 
   /*!
     @brief Get cell particles, const version. 
   */
-  const BinFab<P>& get_cell_particles(const int a_level, const DataIndex a_dit) const;
+  const BinFab<P>& getCellParticles(const int a_level, const DataIndex a_dit) const;
 
   /*!
     @brief Get particles and sort them by cell
   */
-  void get_cell_particles(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit) const;
+  void getCellParticles(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit) const;
 
   /*!
     @brief Get particles and sort them by cell
   */
-  void get_cell_particles_destructive(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit);
+  void getCellParticlesDestructive(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit);
 
   /*!
     @brief Sort particles by cell
   */
-  void sort_particles_by_cell();
+  void sortParticlesByCell();
 
   /*!
     @brief Sort particles by cell
   */
-  void sort_particles_by_patch();
+  void sortParticlesByPatch();
 
   /*!
     @brief Add particles to container
   */
-  void add_particles(const List<P>& a_particles);
+  void addParticles(const List<P>& a_particles);
 
   /*!
     @brief Add particles to container destructively
   */
-  void add_particles_destructive(List<P>& a_particles);
+  void addParticlesDestructive(List<P>& a_particles);
 
   /*!
     @brief Add particles to a certain level and patch
   */
-  void add_particles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
+  void addParticles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
 
   /*!
     @brief Add particles to a certain level and patch
   */
-  void add_particles_destructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
+  void addParticlesDestructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
 
   /*!
     @brief Add particles from other container to this one
   */
-  void add_particles(const particle_container<P>& a_otherContainer);
+  void addParticles(const ParticleContainer<P>& a_otherContainer);
 
   /*!
     @brief Add particles from other container to this one. This destroys the particles in the other container. 
   */
-  void add_particles_destructive(particle_container<P>& a_otherContainer);
+  void addParticlesDestructive(ParticleContainer<P>& a_otherContainer);
 
   /*!
     @brief Remap over the entire AMR hierarchy
@@ -294,57 +298,57 @@ public:
     @brief Move the particles to a different container. 
     @note  The grids MUST be the same for both containers
   */
-  void cache_particles(particle_container<P>& a_otherContainer);
+  void cacheParticles(ParticleContainer<P>& a_otherContainer);
 
   /*!
     @brief Discard particles that are under a PVR level
   */
-  void discard_invalid_particles();
+  void discardInvalidParticles();
 
   /*!
     @brief Get local number of particles
   */
-  size_t get_num_valid_local() const;
+  size_t getNumberOfValidParticesLocal() const;
 
   /*!
     @brief Get global number of particles
   */
-  size_t get_num_valid_global() const;
+  size_t getNumberOfValidParticesGlobal() const;
 
   /*!
     @brief Get local number of particles
   */
-  size_t get_num_outcast_local() const;
+  size_t getNumberOfOutcastParticesLocal() const;
 
   /*!
     @brief Get global number of particles
   */
-  size_t get_num_outcast_global() const;
+  size_t getNumberOfOutcastParticesGlobal() const;
 
   /*!
     @brief Get the number particles in the halo cells. 
   */
-  size_t get_num_halo_local() const;
+  size_t getNumberOfMaskParticesLocal() const;
 
   /*!
     @brief Get the number particles in the halo cells. 
   */
-  size_t get_num_halo_global() const;
+  size_t getNumberOfMaskParticesGlobal() const;
 
   /*!
     @brief Get the total weight of all particles. Local version. 
   */
-  Real get_weight_valid_local() const;
+  Real getWeightValidLocal() const;
 
   /*!
     @brief Get the total weight of all particles. Global version
   */
-  Real get_weight_valid_global() const;
+  Real getWeightValidGlobal() const;
 
 protected:
 
   /*!
-    @brief Realm on which the particle_container is defined
+    @brief Realm on which the ParticleContainer is defined
   */
   std::string m_realm;
   
@@ -402,10 +406,10 @@ protected:
     @brief Cache particles. Use during pre-regrid operations, and for transferring particles between coarse and fine before
     deposition steps. 
   */
-  Vector<List<P> > m_cache_particles;
+  Vector<List<P> > m_cacheParticles;
 
   /*!
-    @brief The actual particles that this particle_container represents
+    @brief The actual particles that this ParticleContainer represents
   */
   AMRParticles<P> m_particles;
 
@@ -434,21 +438,22 @@ protected:
   /*!
     @brief Setup function for the particle valid region
   */
-  void setup_pvr(const int a_base, const int a_finestLevel);
+  void setupPVR(const int a_base, const int a_finestLevel);
 
   /*!
     @brief Setup function for the particle data (m_particles and m_halo_particles)
   */
-  void setup_particle_data(const int a_base, const int a_finestLevel);
+  void setupParticleData(const int a_base, const int a_finestLevel);
 
   /*!
     @brief Special remapping function in case particles have moved across more than one refinement level. Used
     for getting those particles and putting them in the correct data holder. 
   */
-  void remap_lost_particles();
+  void remapLostParticles();
 };
-#include "CD_NamespaceFooter.H"
 
-#include "particle_containerI.H"
+#include <CD_NamespaceFooter.H>
+
+#include <CD_ParticleContainerImplem.H>
 
 #endif

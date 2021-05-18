@@ -13,7 +13,7 @@
 #include "ito_species.H"
 #include "ito_particle.H"
 #include <CD_EbParticleInterp.H>
-#include "particle_container.H"
+#include <CD_ParticleContainer.H>
 #include "bvh.H"
 #include "point_mass.H"
 
@@ -117,7 +117,7 @@ public:
   /*!
     @brief Empty particle container
   */
-  virtual void clear(particle_container<ito_particle>& a_particles);
+  virtual void clear(ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Empty particle container
@@ -128,37 +128,37 @@ public:
     @brief Set mass to conductivity
     @details This sets mass = mass*mobility
   */
-  virtual void set_mass_to_conductivity(particle_container<ito_particle>& a_particles);
+  virtual void set_mass_to_conductivity(ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Unset mass to conductivity
     @details This sets mass = mass/mobility
   */
-  virtual void unset_mass_to_conductivity(particle_container<ito_particle>& a_particles);
+  virtual void unset_mass_to_conductivity(ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Set mass to diffusivity
     @details This sets mass = mass*diffusion_coefficient
   */
-  virtual void set_mass_to_diffusivity(particle_container<ito_particle>& a_particles);
+  virtual void set_mass_to_diffusivity(ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Unset mass to diffusivity
     @details This sets mass = mass/diffusion_coefficient
   */
-  virtual void unset_mass_to_diffusivity(particle_container<ito_particle>& a_particles);
+  virtual void unset_mass_to_diffusivity(ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Set mass to energy
     @details This sets mass = mass*particle_energy
   */
-  virtual void set_mass_to_energy(particle_container<ito_particle>& a_particles);
+  virtual void set_mass_to_energy(ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Unset mass to energy
     @details This sets mass = mass/particle_energy
   */
-  virtual void unset_mass_to_energy(particle_container<ito_particle>& a_particles);
+  virtual void unset_mass_to_energy(ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Deposit conductivities
@@ -170,13 +170,13 @@ public:
     @brief Deposit conductivities
     @details This deposits weight*mobility (not multiplied by charge)
   */
-  virtual void deposit_conductivity(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles);
+  virtual void deposit_conductivity(EBAMRCellData& a_phi, ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Deposit conductivities
     @details This deposits weight*mobility (not multiplied by charge)
   */
-  virtual void deposit_conductivity(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void deposit_conductivity(EBAMRCellData& a_phi, ParticleContainer<ito_particle>& a_particles, const DepositionType::Which a_deposition);
 
   /*!
     @brief Deposit diffusivity
@@ -188,13 +188,13 @@ public:
     @brief Deposit diffusivities
     @details This deposits weight*D (not multiplied by charge)
   */
-  virtual void deposit_diffusivity(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles);
+  virtual void deposit_diffusivity(EBAMRCellData& a_phi, ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Deposit diffusivity
     @details This deposits weight*D (not multiplied by charge)
   */
-  virtual void deposit_diffusivity(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void deposit_diffusivity(EBAMRCellData& a_phi, ParticleContainer<ito_particle>& a_particles, const DepositionType::Which a_deposition);
 
   /*!
     @brief Deposit diffusivity
@@ -206,29 +206,29 @@ public:
     @brief Deposit energy
     @details This deposits weight*energy
   */
-  virtual void deposit_energy_density(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles);
+  virtual void deposit_energy_density(EBAMRCellData& a_phi, ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Deposit energy
     @details This deposits weight*energy
   */
-  virtual void deposit_energy_density(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void deposit_energy_density(EBAMRCellData& a_phi, ParticleContainer<ito_particle>& a_particles, const DepositionType::Which a_deposition);
 
   /*!
     @brief Compute average mobility. Must sort the particles by cell first. 
     
   */
-  virtual void compute_average_mobility(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles);
+  virtual void compute_average_mobility(EBAMRCellData& a_phi, ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Compute average diffusion. Must sort the particles by cell first. 
   */
-  virtual void compute_average_diffusion(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles);
+  virtual void compute_average_diffusion(EBAMRCellData& a_phi, ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Compute average energy. Must sort the particles by cell first. 
   */
-  virtual void compute_average_energy(EBAMRCellData& a_phi, particle_container<ito_particle>& a_particles);
+  virtual void compute_average_energy(EBAMRCellData& a_phi, ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Deposit particles
@@ -244,18 +244,18 @@ public:
     @brief Deposit the particles onto a_phi. The result is put on the a_comp compoennt
   */
   template <class T>
-  void deposit_particles(EBAMRCellData& a_phi, const particle_container<T>& a_particles);
+  void deposit_particles(EBAMRCellData& a_phi, const ParticleContainer<T>& a_particles);
 
   /*!
     @brief Deposit the particles onto a_phi. The result is put on the a_comp compoennt
   */
   template <class T>
-  void deposit_particles(EBAMRCellData& a_phi, const particle_container<T>& a_particles, const DepositionType::Which  a_deposition);
+  void deposit_particles(EBAMRCellData& a_phi, const ParticleContainer<T>& a_particles, const DepositionType::Which  a_deposition);
 
   /*!
     @brief Deposit the total weight of the particles in the grid cells
   */
-  virtual void deposit_weights(EBAMRCellData& a_weights, const particle_container<ito_particle>& a_particles);
+  virtual void deposit_weights(EBAMRCellData& a_weights, const ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Remove particles that are inside the EB
@@ -271,7 +271,7 @@ public:
   /*!
     @brief Remove particles that are inside the EB
   */
-  virtual void remove_covered_particles(particle_container<ito_particle>& a_particles, const EB_representation a_representation, const Real a_tol);
+  virtual void remove_covered_particles(ParticleContainer<ito_particle>& a_particles, const EB_representation a_representation, const Real a_tol);
 
   /*!
     @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
@@ -290,8 +290,8 @@ public:
   /*!
     @brief Transfer particles that are inside the EB to another container. 
   */
-  virtual void transfer_covered_particles(particle_container<ito_particle>& a_containerFrom,
-					  particle_container<ito_particle>& a_containerTo,
+  virtual void transfer_covered_particles(ParticleContainer<ito_particle>& a_containerFrom,
+					  ParticleContainer<ito_particle>& a_containerTo,
 					  const EB_representation           a_representation,
 					  const Real                        a_tol);
 					    
@@ -313,9 +313,9 @@ public:
   /*!
     @brief Do boundary intersection tests.
   */
-  virtual void intersect_particles(particle_container<ito_particle>& a_particles,
-				   particle_container<ito_particle>& a_eb_particles,
-				   particle_container<ito_particle>& a_dom_particles,
+  virtual void intersect_particles(ParticleContainer<ito_particle>& a_particles,
+				   ParticleContainer<ito_particle>& a_eb_particles,
+				   ParticleContainer<ito_particle>& a_dom_particles,
 				   const EB_representation           a_representation,
 				   const bool                        a_delete);
 
@@ -332,7 +332,7 @@ public:
   /*!
     @brief Get PVR buffer
   */
-  virtual int get_pvr_buffer() const;
+  virtual int getPVR_buffer() const;
 
   /*!
     @brief Get the halo buffer
@@ -427,7 +427,7 @@ public:
   /*!
     @brief Add particles. Level and patch version. 
   */
-  virtual void add_particles(ListBox<ito_particle>& a_part, const int a_lvl, const DataIndex a_dit, const bool a_destructive);
+  virtual void addParticles(ListBox<ito_particle>& a_part, const int a_lvl, const DataIndex a_dit, const bool a_destructive);
 
   /*!
     @brief Check if solver is mobile
@@ -442,12 +442,12 @@ public:
   /*!
     @brief Get a general particle container
   */
-  virtual particle_container<ito_particle>& get_particles(const which_container a_container);
+  virtual ParticleContainer<ito_particle>& getParticles(const which_container a_container);
 
   /*!
     @brief Get a general particle container
   */
-  virtual const particle_container<ito_particle>& get_particles(const which_container a_container) const;
+  virtual const ParticleContainer<ito_particle>& getParticles(const which_container a_container) const;
 
   /*!
     @brief Get the species
@@ -551,12 +551,12 @@ public:
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sort_particles_by_cell(const which_container a_container);
+  virtual void sortParticlesByCell(const which_container a_container);
 
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sort_particles_by_patch(const which_container a_container);
+  virtual void sortParticlesByPatch(const which_container a_container);
   
   /*!
     @brief Make superparticles
@@ -998,7 +998,7 @@ protected:
   /*!
     @brief Various particle containers with identifiers. 
   */
-  std::map<which_container, particle_container<ito_particle> > m_particle_containers;
+  std::map<which_container, ParticleContainer<ito_particle> > m_ParticleContainers;
 
   /*!
     @brief Parse superparticles
@@ -1055,7 +1055,7 @@ protected:
   */
   template <class T>
   void deposit_kappaConservative(EBAMRCellData&               a_phi,
-				 const particle_container<T>& a_particles,
+				 const ParticleContainer<T>& a_particles,
 				 const DepositionType::Which  a_deposition);
 
   /*!
@@ -1064,7 +1064,7 @@ protected:
   */
   template <class T>
   void deposit_kappaConservativeWithPVR(EBAMRCellData&               a_phi,
-					const particle_container<T>& a_particles,
+					const ParticleContainer<T>& a_particles,
 					const DepositionType::Which  a_deposition);
 
   /*!
@@ -1073,7 +1073,7 @@ protected:
   */
   template <class T>
   void deposit_kappaConservativeNoPVR_native(EBAMRCellData&               a_phi,
-					     const particle_container<T>& a_particles,
+					     const ParticleContainer<T>& a_particles,
 					     const DepositionType::Which  a_deposition);
 
   /*!
@@ -1082,7 +1082,7 @@ protected:
   */
   template <class T>
   void deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&               a_phi,
-					  const particle_container<T>& a_particles,
+					  const ParticleContainer<T>& a_particles,
 					  const DepositionType::Which  a_deposition);
 
   /*!
@@ -1128,29 +1128,29 @@ protected:
   /*!
     @brief Remove particles that are inside the EB using the implicit function
   */
-  void remove_covered_particles_if(particle_container<ito_particle>& a_particles, const Real a_tol);
+  void remove_covered_particles_if(ParticleContainer<ito_particle>& a_particles, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB using the discrete information
   */
-  void remove_covered_particles_discrete(particle_container<ito_particle>& a_particles);
+  void remove_covered_particles_discrete(ParticleContainer<ito_particle>& a_particles);
   
   /*!
     @brief Remove particles only in covered cells. 
   */
-  void remove_covered_particles_voxels(particle_container<ito_particle>& a_particles);
+  void remove_covered_particles_voxels(ParticleContainer<ito_particle>& a_particles);
 
   /*!
     @brief Transfer particles that are inside the EB
   */
-  void transfer_covered_particles_if(particle_container<ito_particle>& a_src, particle_container<ito_particle>& a_dst, const Real a_tol);
+  void transfer_covered_particles_if(ParticleContainer<ito_particle>& a_src, ParticleContainer<ito_particle>& a_dst, const Real a_tol);
 
   /*!
     @brief Do boundary intersection tests with an implicit function
   */
-  void intersect_particles_if(particle_container<ito_particle>& a_particles,
-			      particle_container<ito_particle>& a_eb_particles,
-			      particle_container<ito_particle>& a_domain_particles,
+  void intersect_particles_if(ParticleContainer<ito_particle>& a_particles,
+			      ParticleContainer<ito_particle>& a_eb_particles,
+			      ParticleContainer<ito_particle>& a_domain_particles,
 			      const bool                        a_delete);
 
   /*!

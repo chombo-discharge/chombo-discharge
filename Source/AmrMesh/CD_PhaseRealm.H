@@ -36,7 +36,7 @@
 #include <ebcoarseaverage.H>
 #include <DomainFluxIFFAB.H>
 #include <DomainFluxIFFABFactory.H>
-#include <particle_container.H>
+#include <CD_ParticleContainer.H>
 #include <CD_EbGhostCloud.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_EbCentroidInterpolationStencil.H>

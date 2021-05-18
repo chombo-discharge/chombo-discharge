@@ -166,12 +166,12 @@ public:
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sort_particles_by_cell(const ito_solver::which_container a_ptype);
+  virtual void sortParticlesByCell(const ito_solver::which_container a_ptype);
 
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sort_particles_by_patch(const ito_solver::which_container a_ptype);
+  virtual void sortParticlesByPatch(const ito_solver::which_container a_ptype);
 
   /*!
     @brief Make superparticles
@@ -251,7 +251,7 @@ public:
   /*!
     @brief Get particle containers
   */
-  virtual Vector<particle_container<ito_particle>* > get_particles(const ito_solver::which_container a_ptype);
+  virtual Vector<ParticleContainer<ito_particle>* > getParticles(const ito_solver::which_container a_ptype);
 
 protected:
 

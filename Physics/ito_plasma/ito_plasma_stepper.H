@@ -144,7 +144,7 @@ namespace physics {
 
       // Compute conductivity routines
       void compute_conductivity(EBAMRCellData& a_conductivity);
-      void compute_conductivity(EBAMRCellData& a_conductivity, const Vector<particle_container<ito_particle>* >& a_particles);
+      void compute_conductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<ito_particle>* >& a_particles);
 
       // Compute J routines
       void compute_J(EBAMRCellData& a_J, const Real a_dt);
@@ -191,7 +191,7 @@ namespace physics {
       // Routines for computing mobilities in the LEA. This runs through all the particles and calls a mobility computation function,
       // which you must implement in ito_species
       void compute_ito_mobilities_lea();
-      void compute_ito_mobilities_lea(Vector<particle_container<ito_particle>* >& a_particles);
+      void compute_ito_mobilities_lea(Vector<ParticleContainer<ito_particle>* >& a_particles);
       void compute_ito_mobilities_lea(Vector<ParticleData<ito_particle>* >& a_particles);
 
       // Routines for computing diffusion coefficients.
@@ -271,9 +271,9 @@ namespace physics {
 
       // Old routines for chemistry advances. The physics module will switch between LFA and LEA.
       void advance_reaction_network(const Real a_dt);
-      void advance_reaction_network(Vector<particle_container<ito_particle>* >& a_particles,
-				    Vector<particle_container<photon>* >&       a_photons,
-				    Vector<particle_container<photon>* >&       a_newPhotons,
+      void advance_reaction_network(Vector<ParticleContainer<ito_particle>* >& a_particles,
+				    Vector<ParticleContainer<photon>* >&       a_photons,
+				    Vector<ParticleContainer<photon>* >&       a_newPhotons,
 				    const Vector<EBAMRCellData>&                a_sources,
 				    const EBAMRCellData&                        a_E,
 				    const Real                                  a_dt);

@@ -55,7 +55,7 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellDat
   // Generate new photons and add them to m_photons
   this->clear(m_source_photons);
   this->generate_photons(m_source_photons, a_source, a_dt);
-  m_photons.add_particles(m_source_photons);
+  m_photons.addParticles(m_source_photons);
 
   // Advance stationary or transient
   if(m_instantaneous){
@@ -379,13 +379,13 @@ void mc_photo::clear(){
   this->clear(m_photons);
 }
 
-void mc_photo::clear(particle_container<photon>& a_photon){
-  CH_TIME("mc_photo::clear(particle_container)");
+void mc_photo::clear(ParticleContainer<photon>& a_photon){
+  CH_TIME("mc_photo::clear(ParticleContainer)");
   if(m_verbosity > 5){
-    pout() << m_name + "::clear(particle_container)" << endl;
+    pout() << m_name + "::clear(ParticleContainer)" << endl;
   }
 
-  this->clear(a_photon.get_particles());
+  this->clear(a_photon.getParticles());
 }
 
 void mc_photo::clear(AMRParticles<photon>& a_photons){
@@ -484,7 +484,7 @@ void mc_photo::sort_photons_by_cell(){
     pout() << m_name + "::sort_photons_by_cell()" << endl;
   }
 
-  m_photons.sort_particles_by_cell();
+  m_photons.sortParticlesByCell();
 }
 
 void mc_photo::sort_photons_by_patch(){
@@ -493,7 +493,7 @@ void mc_photo::sort_photons_by_patch(){
     pout() << m_name + "::sort_photons_by_patch()" << endl;
   }
 
-  m_photons.sort_particles_by_patch();
+  m_photons.sortParticlesByPatch();
 }
 
 void mc_photo::sort_bulk_photons_by_cell(){
@@ -502,7 +502,7 @@ void mc_photo::sort_bulk_photons_by_cell(){
     pout() << m_name + "::sort_bulk_photons_by_cell()" << endl;
   }
 
-  m_bulk_photons.sort_particles_by_cell();
+  m_bulk_photons.sortParticlesByCell();
 }
 
 void mc_photo::sort_bulk_photons_by_patch(){
@@ -511,7 +511,7 @@ void mc_photo::sort_bulk_photons_by_patch(){
     pout() << m_name + "::sort_bulk_photons_by_patch()" << endl;
   }
 
-  m_bulk_photons.sort_particles_by_patch();
+  m_bulk_photons.sortParticlesByPatch();
 }
 
 void mc_photo::sort_source_photons_by_cell(){
@@ -520,7 +520,7 @@ void mc_photo::sort_source_photons_by_cell(){
     pout() << m_name + "::sort_source_photons_by_cell()" << endl;
   }
 
-  m_source_photons.sort_particles_by_cell();
+  m_source_photons.sortParticlesByCell();
 }
 
 void mc_photo::sort_source_photons_by_patch(){
@@ -529,7 +529,7 @@ void mc_photo::sort_source_photons_by_patch(){
     pout() << m_name + "::sort_source_photons_by_patch()" << endl;
   }
 
-  m_source_photons.sort_particles_by_patch();
+  m_source_photons.sortParticlesByPatch();
 }
 
 void mc_photo::sort_domain_photons_by_cell(){
@@ -538,7 +538,7 @@ void mc_photo::sort_domain_photons_by_cell(){
     pout() << m_name + "::sort_domain_photons_by_cell()" << endl;
   }
 
-  m_domain_photons.sort_particles_by_cell();
+  m_domain_photons.sortParticlesByCell();
 }
 
 void mc_photo::sort_domain_photons_by_patch(){
@@ -547,7 +547,7 @@ void mc_photo::sort_domain_photons_by_patch(){
     pout() << m_name + "::sort_domain_photons_by_patch()" << endl;
   }
 
-  m_domain_photons.sort_particles_by_patch();
+  m_domain_photons.sortParticlesByPatch();
 }
 
 void mc_photo::sort_eb_photons_by_cell(){
@@ -556,7 +556,7 @@ void mc_photo::sort_eb_photons_by_cell(){
     pout() << m_name + "::sort_eb_photons_by_cell()" << endl;
   }
 
-  m_eb_photons.sort_particles_by_cell();
+  m_eb_photons.sortParticlesByCell();
 }
 
 void mc_photo::sort_eb_photons_by_patch(){
@@ -565,7 +565,7 @@ void mc_photo::sort_eb_photons_by_patch(){
     pout() << m_name + "::sort_eb_photons_by_patch()" << endl;
   }
 
-  m_eb_photons.sort_particles_by_patch();
+  m_eb_photons.sortParticlesByPatch();
 }
 
 void mc_photo::registerOperators(){
@@ -765,10 +765,10 @@ RealVect mc_photo::random_direction3D(){
 }
 #endif
 
-int mc_photo::get_pvr_buffer() const {
-  CH_TIME("mc_photo::get_pvr_buffer");
+int mc_photo::getPVR_buffer() const {
+  CH_TIME("mc_photo::getPVR_buffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_pvr_buffer" << endl;
+    pout() << m_name + "::getPVR_buffer" << endl;
   }
 
   return m_pvr_buffer;
@@ -801,7 +801,7 @@ void mc_photo::set_halo_buffer(const int a_buffer)  {
   m_halo_buffer = a_buffer;
 }
 
-void mc_photo::generate_photons(particle_container<photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt){
+void mc_photo::generate_photons(ParticleContainer<photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt){
   CH_TIME("mc_photo::generate_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::generate_photons" << endl;
@@ -811,7 +811,7 @@ void mc_photo::generate_photons(particle_container<photon>& a_photons, const EBA
   const int finest_level = m_amr->getFinestLevel();
 
   // Put here. 
-  AMRParticles<photon>& photons = a_photons.get_particles();
+  AMRParticles<photon>& photons = a_photons.getParticles();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -822,7 +822,7 @@ void mc_photo::generate_photons(particle_container<photon>& a_photons, const EBA
 
     // If there is a coarser level, remove particles from the overlapping region and regenerate on this level.
     if(has_coar) {
-      const AMRPVR& pvr = a_photons.get_pvr();
+      const AMRPVR& pvr = a_photons.getPVR();
       const int ref_ratio = m_amr->getRefinementRatios()[lvl-1];
       collectValidParticles(photons[lvl]->outcast(),
 			    *photons[lvl-1],
@@ -950,14 +950,14 @@ void mc_photo::deposit_photons(){
 }
 
 void mc_photo::deposit_photons(EBAMRCellData&                    a_phi,
-			       const particle_container<photon>& a_photons,
+			       const ParticleContainer<photon>& a_photons,
 			       const DepositionType::Which&      a_deposition){
-  CH_TIME("mc_photo::deposit_photons(particle_container)");
+  CH_TIME("mc_photo::deposit_photons(ParticleContainer)");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_photons(particle_container)" << endl;
+    pout() << m_name + "::deposit_photons(ParticleContainer)" << endl;
   }
 
-  this->deposit_photons(a_phi, a_photons.get_particles(), a_deposition);
+  this->deposit_photons(a_phi, a_photons.getParticles(), a_deposition);
 }
 
 void mc_photo::deposit_photons(EBAMRCellData&               a_phi,
@@ -1226,10 +1226,10 @@ void mc_photo::coarseFineRedistribution(EBAMRCellData& a_phi){
   }
 }
 
-void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_photons,
-					  particle_container<photon>& a_eb_photons,
-					  particle_container<photon>& a_domain_photons,
-					  particle_container<photon>& a_photons){
+void mc_photo::advance_photons_stationary(ParticleContainer<photon>& a_bulk_photons,
+					  ParticleContainer<photon>& a_eb_photons,
+					  ParticleContainer<photon>& a_domain_photons,
+					  ParticleContainer<photon>& a_photons){
   CH_TIME("mc_photo::advance_photons_stationary");
   if(m_verbosity > 5){
     pout() << m_name + "::advance_photons_stationary" << endl;
@@ -1265,7 +1265,7 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
   }
 
 #if MC_PHOTO_DEBUG // Debug
-  int photonsBefore = this->count_photons(a_photons.get_particles());
+  int photonsBefore = this->count_photons(a_photons.getParticles());
 #endif
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -1354,9 +1354,9 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
   a_domain_photons.remap();
 
 #if MC_PHOTO_DEBUG // Debug
-  int bulkPhotons = this->count_photons(a_bulk_photons.get_particles());
-  int ebPhotons = this->count_photons(a_eb_photons.get_particles());
-  int domPhotons = this->count_photons(a_domain_photons.get_particles());
+  int bulkPhotons = this->count_photons(a_bulk_photons.getParticles());
+  int ebPhotons = this->count_photons(a_eb_photons.getParticles());
+  int domPhotons = this->count_photons(a_domain_photons.getParticles());
 
   if(procID() == 0){
     std::cout << "photons before = " << photonsBefore << "\n"
@@ -1370,10 +1370,10 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
 
 }
 
-void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_photons,
-					 particle_container<photon>& a_eb_photons,
-					 particle_container<photon>& a_domain_photons,
-					 particle_container<photon>& a_photons,
+void mc_photo::advance_photons_transient(ParticleContainer<photon>& a_bulk_photons,
+					 ParticleContainer<photon>& a_eb_photons,
+					 ParticleContainer<photon>& a_domain_photons,
+					 ParticleContainer<photon>& a_photons,
 					 const Real                  a_dt){
   CH_TIME("mc_photo::advance_photons_transient");
   if(m_verbosity > 5){
@@ -1411,7 +1411,7 @@ void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_phot
   }
 
 #if MC_PHOTO_DEBUG // Debug
-  int photonsBefore = this->count_photons(a_photons.get_particles());
+  int photonsBefore = this->count_photons(a_photons.getParticles());
 #endif
 
   
@@ -1518,10 +1518,10 @@ void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_phot
   a_photons.remap();
 
 #if MC_PHOTO_DEBUG // Debug
-  int bulkPhotons = this->count_photons(a_bulk_photons.get_particles());
-  int ebPhotons = this->count_photons(a_eb_photons.get_particles());
-  int domPhotons = this->count_photons(a_domain_photons.get_particles());
-  int afterPhotons = this->count_photons(a_photons.get_particles());
+  int bulkPhotons = this->count_photons(a_bulk_photons.getParticles());
+  int ebPhotons = this->count_photons(a_eb_photons.getParticles());
+  int domPhotons = this->count_photons(a_domain_photons.getParticles());
+  int afterPhotons = this->count_photons(a_photons.getParticles());
 
   if(procID() == 0){
     std::cout << "photons before = " << photonsBefore << "\n"
@@ -1546,7 +1546,7 @@ void mc_photo::remap(){
   this->remap(m_photons);
 }
 
-void mc_photo::remap(particle_container<photon>& a_photons){
+void mc_photo::remap(ParticleContainer<photon>& a_photons){
   CH_TIME("mc_photo::remap(photons)");
   if(m_verbosity > 5){
     pout() << m_name + "::remap(photons)" << endl;
@@ -1598,28 +1598,28 @@ void mc_photo::writePlotData(EBAMRCellData& a_output, int& a_comp){
     this->writeData(a_output, a_comp, m_source, false);
   }
   if(m_plot_phot){
-    this->deposit_photons(m_scratch, m_photons.get_particles(), m_plot_deposition);
+    this->deposit_photons(m_scratch, m_photons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_bulk_phot){
-    this->deposit_photons(m_scratch, m_bulk_photons.get_particles(), m_plot_deposition);
+    this->deposit_photons(m_scratch, m_bulk_photons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_eb_phot){
-    this->deposit_photons(m_scratch, m_eb_photons.get_particles(), m_plot_deposition);
+    this->deposit_photons(m_scratch, m_eb_photons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_dom_phot){
-    this->deposit_photons(m_scratch, m_domain_photons.get_particles(), m_plot_deposition);
+    this->deposit_photons(m_scratch, m_domain_photons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plotSource_phot){
-    this->deposit_photons(m_scratch, m_source_photons.get_particles(), m_plot_deposition);
+    this->deposit_photons(m_scratch, m_source_photons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
 }
 
-particle_container<photon>& mc_photo::get_photons(){
+ParticleContainer<photon>& mc_photo::get_photons(){
   CH_TIME("mc_photo::get_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::get_photons" << endl;
@@ -1628,7 +1628,7 @@ particle_container<photon>& mc_photo::get_photons(){
   return m_photons;
 }
 
-particle_container<photon>& mc_photo::get_bulk_photons(){
+ParticleContainer<photon>& mc_photo::get_bulk_photons(){
   CH_TIME("mc_photo::get_bulk_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::get_bulk_photons" << endl;
@@ -1637,7 +1637,7 @@ particle_container<photon>& mc_photo::get_bulk_photons(){
   return m_bulk_photons;
 }
 
-particle_container<photon>& mc_photo::get_eb_photons(){
+ParticleContainer<photon>& mc_photo::get_eb_photons(){
   CH_TIME("mc_photo::get_eb_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::get_eb_photons" << endl;
@@ -1646,7 +1646,7 @@ particle_container<photon>& mc_photo::get_eb_photons(){
   return m_eb_photons;
 }
 
-particle_container<photon>& mc_photo::get_domain_photons(){
+ParticleContainer<photon>& mc_photo::get_domain_photons(){
   CH_TIME("mc_photo::get_domain_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::get_domain_photons" << endl;
@@ -1655,7 +1655,7 @@ particle_container<photon>& mc_photo::get_domain_photons(){
   return m_domain_photons;
 }
 
-particle_container<photon>& mc_photo::getSource_photons(){
+ParticleContainer<photon>& mc_photo::getSource_photons(){
   CH_TIME("mc_photo::getSource_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::getSource_photons" << endl;
