@@ -158,7 +158,7 @@ Vector<Real> air2::compute_cdr_fluxes(const Real         a_time,
   // Switch for setting drift flux to zero for charge species
   Vector<Real> aj(m_num_species, 0.0);
   for (int i = 0; i < m_num_species; i++){
-    if(data_ops::sgn(m_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
+    if(data_ops::sgn(m_species[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {

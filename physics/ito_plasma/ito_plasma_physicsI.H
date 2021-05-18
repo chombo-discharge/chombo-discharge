@@ -133,7 +133,7 @@ void ito_plasma_physics::check_charge_conservation(const Vector<long long>& a_ol
   long long charge_after = 0;
 
   for (int i = 0; i < a_oldNumParticles.size(); i++){
-    const int q = m_ito_species[i]->get_charge();
+    const int q = m_ito_species[i]->getChargeNumber();
 
     charge_before += a_oldNumParticles[i]*q;
     charge_after  += a_newNumParticles[i]*q;
@@ -151,7 +151,7 @@ long long ito_plasma_physics::computeCharge(const Vector<List<ito_particle>* >& 
 
   long long ret = 0;
   for (int i = 0; i < a_particles.size(); i++){
-    const long long q = (long long) m_ito_species[i]->get_charge();
+    const long long q = (long long) m_ito_species[i]->getChargeNumber();
     
     for (ListIterator<ito_particle> lit(*a_particles[i]); lit.ok(); ++lit){
       const long long w = llround(lit().mass());

@@ -17,7 +17,7 @@ using namespace physics::cdr_plasma;
 air9eed_bourdon::eed::eed(){
   m_name      = "eed";
   m_unit      = "eVm-3";
-  m_charge    = 0;
+  m_chargeNumber    = 0;
   m_isDiffusive = true;
   m_isMobile    = true;
 
@@ -33,7 +33,7 @@ air9eed_bourdon::eed::~eed(){
 air9eed_bourdon::electron::electron(){
   m_name   = "electron";
   m_unit   = "m-3";
-  m_charge = -1;
+  m_chargeNumber = -1;
   m_isDiffusive = true;
   m_isMobile = true;
 
@@ -50,7 +50,7 @@ air9eed_bourdon::electron::~electron(){
 air9eed_bourdon::N2plus::N2plus() {
   m_name   = "N2plus";
   m_unit   = "m-3";
-  m_charge = 1;
+  m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
 
@@ -79,7 +79,7 @@ air9eed_bourdon::N2plus::~N2plus(){
 air9eed_bourdon::N4plus::N4plus(){
   m_name   = "N4plus";
   m_unit   = "m-3";
-  m_charge = 1;
+  m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
 
@@ -103,7 +103,7 @@ air9eed_bourdon::N4plus::~N4plus(){
 air9eed_bourdon::O2plus::O2plus(){
   m_name   = "O2plus";
   m_unit   = "m-3";
-  m_charge = 1;
+  m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
 
@@ -132,7 +132,7 @@ air9eed_bourdon::O2plus::~O2plus(){
 air9eed_bourdon::O4plus::O4plus(){
   m_name   = "O4plus";
   m_unit   = "m-3";
-  m_charge = 1;
+  m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
 
@@ -156,7 +156,7 @@ air9eed_bourdon::O4plus::~O4plus(){
 air9eed_bourdon::O2plusN2::O2plusN2() {
   m_name   = "O2plusN2";
   m_unit   = "m-3";
-  m_charge = 1;
+  m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
 
@@ -180,7 +180,7 @@ air9eed_bourdon::O2plusN2::~O2plusN2(){
 air9eed_bourdon::O2minus::O2minus(){
   m_name   = "O2minus";
   m_unit   = "m-3";
-  m_charge = -1;
+  m_chargeNumber = -1;
   m_isDiffusive = false;
   m_isMobile = true;
 
@@ -204,7 +204,7 @@ air9eed_bourdon::O2minus::~O2minus(){
 air9eed_bourdon::Ominus::Ominus(){
   m_name   = "Ominus";
   m_unit   = "m-3";
-  m_charge = -1;
+  m_chargeNumber = -1;
   m_isDiffusive = false;
   m_isMobile = true;
 

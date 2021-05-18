@@ -85,7 +85,7 @@ namespace physics {
 
 
 
-      class electron : public cdr_species {
+      class electron : public CdrSpecies {
       public:
 
 	electron();
@@ -99,7 +99,7 @@ namespace physics {
 	RealVect m_seed_pos;
       };
 
-      class positive_species : public cdr_species {
+      class positive_species : public CdrSpecies {
       public:
 	positive_species();
 	~positive_species();
@@ -112,7 +112,7 @@ namespace physics {
 	RealVect m_seed_pos;
       };
 
-      class negative_species : public cdr_species {
+      class negative_species : public CdrSpecies {
       public:
 	negative_species();
 	~negative_species();

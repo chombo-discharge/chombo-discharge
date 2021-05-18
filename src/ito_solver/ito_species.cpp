@@ -15,7 +15,7 @@ ito_species::ito_species(){
 
 ito_species::ito_species(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive){
   m_name      = a_name;
-  m_charge    = a_charge;
+  m_chargeNumber    = a_charge;
   m_isMobile    = a_mobile;
   m_isDiffusive = a_diffusive;
 }
@@ -28,8 +28,8 @@ std::string ito_species::getName() const{
   return m_name;
 }
 
-int ito_species::get_charge() const{
-  return m_charge;
+int ito_species::getChargeNumber() const{
+  return m_chargeNumber;
 }
     
 bool ito_species::isDiffusive() const{
@@ -41,8 +41,8 @@ bool ito_species::isMobile() const {
   return m_isMobile;
 }
 
-List<ito_particle>& ito_species::get_initial_particles() {
-  return m_initial_particles;
+List<ito_particle>& ito_species::getInitialParticles() {
+  return m_initialParticles;
 }
 
 Real ito_species::mobility(const Real a_energy) const {

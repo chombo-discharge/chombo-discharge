@@ -1290,7 +1290,7 @@ void imex_sdc::allocateInternals(){
     pout() << "imex_sdc::allocateInternals" << endl;
   }
 
-  m_cdr_error.resize(m_physics->get_num_cdr_species());
+  m_cdr_error.resize(m_physics->get_num_CdrSpecies());
   
   imex_sdc::allocate_cdr_storage();
   imex_sdc::allocate_poisson_storage();
@@ -1303,7 +1303,7 @@ void imex_sdc::allocateInternals(){
 
 void imex_sdc::allocate_cdr_storage(){
   const int ncomp       = 1;
-  const int num_species = m_physics->get_num_cdr_species();
+  const int num_species = m_physics->get_num_CdrSpecies();
 
   m_cdr_scratch.resize(num_species);
   
@@ -1715,10 +1715,10 @@ void imex_sdc::compute_sigma_flux(){
 
   for (cdr_iterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const RefCountedPtr<cdr_species>& spec  = solver_it.get_species();
+    const RefCountedPtr<CdrSpecies>& spec  = solver_it.get_species();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(flux, solver_flux, spec->get_charge()*units::s_Qe);
+    data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->reset_cells(flux);

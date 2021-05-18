@@ -2174,7 +2174,7 @@ void sisdc::compute_sigma_flux(){
     const RefCountedPtr<species>& spec      = solver_it.get_species();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(flux, solver_flux, spec->get_charge()*units::s_Qe);
+    data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->reset_cells(flux);

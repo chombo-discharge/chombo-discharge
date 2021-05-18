@@ -10,7 +10,7 @@ using namespace physics::cdr_plasma;
 
 air3_bourdon::electron::electron(){
   m_name = "electron";
-  m_charge = -1;
+  m_chargeNumber = -1;
   ParmParse pp("air3_bourdon");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -26,7 +26,7 @@ air3_bourdon::electron::electron(){
 
 air3_bourdon::M_plus::M_plus(){
   m_name = "M_plus";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air3_bourdon");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -42,7 +42,7 @@ air3_bourdon::M_plus::M_plus(){
 
 air3_bourdon::M_minus::M_minus(){
   m_name = "M_minus";
-  m_charge = -1;
+  m_chargeNumber = -1;
   ParmParse pp("air3_bourdon");
   std::string str;
   

@@ -44,8 +44,8 @@ void full_tagger::allocate_storage(){
   m_amr->allocate(m_rho,      m_phase, sca_ncomp);
   m_amr->allocate(m_grad_rho, m_phase, vec_ncomp);
 
-  m_cdr_densities.resize(m_physics->get_num_cdr_species());
-  m_cdr_gradients.resize(m_physics->get_num_cdr_species());
+  m_cdr_densities.resize(m_physics->get_num_CdrSpecies());
+  m_cdr_gradients.resize(m_physics->get_num_CdrSpecies());
   m_rte_densities.resize(m_physics->get_num_rte_species());
 
   for(cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
@@ -97,7 +97,7 @@ void full_tagger::compute_tracers(){
   
   const RealVect origin = m_amr->getProbLo();
   const Real time       = m_timeStepper->get_time();
-  const int num_species = m_physics->get_num_cdr_species();
+  const int num_species = m_physics->get_num_CdrSpecies();
   const int num_photons = m_physics->get_num_rte_species();
 
   RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
@@ -135,8 +135,8 @@ void full_tagger::compute_tracers(){
   Vector<Real>     cdr_phi;
   Vector<RealVect> cdr_gra;
   Vector<Real>     rte_phi;
-  cdr_phi.resize(m_physics->get_num_cdr_species());
-  cdr_gra.resize(m_physics->get_num_cdr_species());
+  cdr_phi.resize(m_physics->get_num_CdrSpecies());
+  cdr_gra.resize(m_physics->get_num_CdrSpecies());
   rte_phi.resize(m_physics->get_num_rte_species());
 
   const int finest_level = m_amr->getFinestLevel();

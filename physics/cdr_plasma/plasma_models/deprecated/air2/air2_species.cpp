@@ -15,7 +15,7 @@
 air2::electron::electron(){
   m_name      = "electron density";
   m_unit      = "m-3";
-  m_charge    = -1;
+  m_chargeNumber    = -1;
   m_isDiffusive = true;
   m_isMobile    = true;
 
@@ -34,7 +34,7 @@ air2::electron::~electron(){
 air2::positive_ion::positive_ion() {
   m_name      = "positive_ion";
   m_unit      = "m-3";
-  m_charge    = 1;
+  m_chargeNumber    = 1;
   m_isDiffusive = false;
   m_isMobile    = false;
 

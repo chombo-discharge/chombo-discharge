@@ -18,7 +18,7 @@ namespace physics {
     /*!
       @brief Electron energy distribution
     */
-    class air9eed_bourdon::eed : public cdr_species {
+    class air9eed_bourdon::eed : public CdrSpecies {
     public:
 
       /*!
@@ -47,7 +47,7 @@ namespace physics {
     /*!
       @brief Electron class
     */
-    class air9eed_bourdon::electron : public cdr_species {
+    class air9eed_bourdon::electron : public CdrSpecies {
     public:
 
       /*!
@@ -77,7 +77,7 @@ namespace physics {
     /*!
       @brief N2plus class
     */
-    class air9eed_bourdon::N2plus : public cdr_species {
+    class air9eed_bourdon::N2plus : public CdrSpecies {
     public:
 
       /*!
@@ -103,7 +103,7 @@ namespace physics {
     /*!
       @brief N4plus class
     */
-    class air9eed_bourdon::N4plus : public cdr_species {
+    class air9eed_bourdon::N4plus : public CdrSpecies {
     public:
 
       /*!
@@ -127,7 +127,7 @@ namespace physics {
     /*!
       @brief O2plus class
     */
-    class air9eed_bourdon::O2plus : public cdr_species {
+    class air9eed_bourdon::O2plus : public CdrSpecies {
     public:
 
       /*!
@@ -153,7 +153,7 @@ namespace physics {
     /*!
       @brief O4plus class
     */
-    class air9eed_bourdon::O4plus : public cdr_species {
+    class air9eed_bourdon::O4plus : public CdrSpecies {
     public:
 
       /*!
@@ -177,7 +177,7 @@ namespace physics {
     /*!
       @brief O2plusN2 class
     */
-    class air9eed_bourdon::O2plusN2 : public cdr_species {
+    class air9eed_bourdon::O2plusN2 : public CdrSpecies {
     public:
 
       /*!
@@ -201,7 +201,7 @@ namespace physics {
     /*!
       @brief O2minus class
     */
-    class air9eed_bourdon::O2minus : public cdr_species {
+    class air9eed_bourdon::O2minus : public CdrSpecies {
     public:
 
       /*!
@@ -225,7 +225,7 @@ namespace physics {
     /*!
       @brief Ominus class
     */
-    class air9eed_bourdon::Ominus : public cdr_species {
+    class air9eed_bourdon::Ominus : public CdrSpecies {
     public:
 
       /*!

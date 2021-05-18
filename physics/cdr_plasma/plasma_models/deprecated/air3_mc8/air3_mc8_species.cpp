@@ -3,7 +3,7 @@
 
 air3_mc8::electron::electron(){
   m_name = "electron";
-  m_charge = -1;
+  m_chargeNumber = -1;
   ParmParse pp("air3_mc8");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -19,7 +19,7 @@ air3_mc8::electron::electron(){
 
 air3_mc8::M_plus::M_plus(){
   m_name = "M_plus";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air3_mc8");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -35,7 +35,7 @@ air3_mc8::M_plus::M_plus(){
 
 air3_mc8::M_minus::M_minus(){
   m_name = "M_minus";
-  m_charge = -1;
+  m_chargeNumber = -1;
   ParmParse pp("air3_mc8");
   std::string str;
   

@@ -859,7 +859,7 @@ void sdc::compute_semi_implicit_mobilities(const int a_m, const bool a_corrector
     const RefCountedPtr<CdrSolver>& solver   = solver_it();
     const RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
 
-    const int q      = (solver_it.get_species())->get_charge();
+    const int q      = (solver_it.get_species())->getChargeNumber();
     const int q_sign = q > 0 ? 1 : -1;
 
     if(q != 0 && solver->isMobile()){
@@ -919,7 +919,7 @@ void sdc::compute_semi_implicit_rho(const int a_m,  const bool a_corrector){
     const RefCountedPtr<CdrSolver>& solver   = solver_it();
     const RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
 
-    const int q = (solver_it.get_species())->get_charge();
+    const int q = (solver_it.get_species())->getChargeNumber();
     
     if(q != 0){
 
@@ -988,7 +988,7 @@ void sdc::set_semi_implicit_permittivities(){
     const RefCountedPtr<CdrSolver>& solver   = solver_it();
     const RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
 
-    const int q = (solver_it.get_species())->get_charge();
+    const int q = (solver_it.get_species())->getChargeNumber();
     
     if(q != 0 && solver->isMobile()){
       const EBAMRFluxData& face_mob = storage->get_face_mob();
@@ -2001,7 +2001,7 @@ void sdc::compute_sigma_flux(){
     const RefCountedPtr<species>& spec      = solver_it.get_species();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(flux, solver_flux, spec->get_charge()*units::s_Qe);
+    data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->reset_cells(flux);

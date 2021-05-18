@@ -17,7 +17,7 @@ advection_diffusion_species::advection_diffusion_species(){
 
   ParmParse pp("advection_diffusion");
 
-  m_charge = 0;
+  m_chargeNumber = 0;
   m_name   = "scalar species";
 
   Vector<Real> v;

@@ -688,7 +688,7 @@ public:
   /*!
     @brief Get deposition method
   */
-  DepositionType::Which get_deposition() const;
+  DepositionType::Which getDeposition() const;
 
   /*!
     @brief Return phase

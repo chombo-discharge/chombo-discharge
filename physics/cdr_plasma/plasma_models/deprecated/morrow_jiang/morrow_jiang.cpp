@@ -628,7 +628,7 @@ Vector<Real> morrow_jiang::compute_cdr_fluxes(const Real         a_time,
   // Switch for setting drift flux to zero for charge species
   Vector<Real> aj(m_num_species, 0.0);
   for (int i = 0; i < m_num_species; i++){
-    if(data_ops::sgn(m_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
+    if(data_ops::sgn(m_species[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {
@@ -740,7 +740,7 @@ Real morrow_jiang::initial_sigma(const Real a_time, const RealVect a_pos) const{
 
 morrow_jiang::electron::electron(){
   m_name      = "electron";
-  m_charge    = -1;
+  m_chargeNumber    = -1;
   m_isDiffusive = true;
   m_isMobile    = true;
   m_unit      = "m-3";
@@ -759,7 +759,7 @@ morrow_jiang::electron::electron(){
 
 morrow_jiang::positive_species::positive_species(){
   m_name      = "positive_species";
-  m_charge    = 1;
+  m_chargeNumber    = 1;
   m_isDiffusive = false;
   m_isMobile    = false;
   m_unit      = "m-3";
@@ -778,7 +778,7 @@ morrow_jiang::positive_species::positive_species(){
 
 morrow_jiang::negative_species::negative_species(){
   m_name      = "negative_species";
-  m_charge    = -1;
+  m_chargeNumber    = -1;
   m_isDiffusive = false;
   m_isMobile    = false;
   m_unit      = "m-3";
@@ -791,7 +791,7 @@ morrow_jiang::negative_species::negative_species(){
 
 morrow_jiang::excited_species::excited_species(){
   m_name      = "excited_species";
-  m_charge    = 0;
+  m_chargeNumber    = 0;
   m_isDiffusive = false;
   m_isMobile    = false;
   m_unit      = "m-3";
@@ -1023,9 +1023,9 @@ void morrow_jiang::parse_initial_particles(){
   add_gaussian_excited(exc_p);
   
   // Copy initial particles to various species
-  m_species[m_nelec_idx]->get_initial_particles() = ion_p;
-  m_species[m_nplus_idx]->get_initial_particles() = ion_p;
-  m_species[m_nexci_idx]->get_initial_particles() = exc_p;
+  m_species[m_nelec_idx]->getInitialParticles() = ion_p;
+  m_species[m_nplus_idx]->getInitialParticles() = ion_p;
+  m_species[m_nexci_idx]->getInitialParticles() = exc_p;
 
   // Get the initial deposition scheme
   ParmParse pp("morrow_jiang");
@@ -1046,9 +1046,9 @@ void morrow_jiang::parse_initial_particles(){
     MayDay::Abort("morrow_jiang::parse_initial_particles - unknown deposition type requested");
   }
   
-  m_species[m_nelec_idx]->get_deposition() = deposition;
-  m_species[m_nplus_idx]->get_deposition() = deposition;
-  m_species[m_nexci_idx]->get_deposition() = deposition;
+  m_species[m_nelec_idx]->getDeposition() = deposition;
+  m_species[m_nplus_idx]->getDeposition() = deposition;
+  m_species[m_nexci_idx]->getDeposition() = deposition;
 }
 
 void morrow_jiang::add_uniform_pairs(List<Particle>& a_particles){

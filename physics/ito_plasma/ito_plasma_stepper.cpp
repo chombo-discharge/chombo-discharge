@@ -1026,9 +1026,9 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
     const RefCountedPtr<ito_solver>& solver   = solver_it();
     const RefCountedPtr<ito_species>& species = solver->get_species();
     const int idx = solver_it.index();
-    const int q   = species->get_charge();
+    const int q   = species->getChargeNumber();
 
-    if(species->get_charge() != 0){
+    if(species->getChargeNumber() != 0){
       m_fluid_scratch1.copy(*a_densities[idx]);
       data_ops::incr(rhoPhase, m_fluid_scratch1, q);
     }
@@ -1086,7 +1086,7 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, con
     RefCountedPtr<ito_species>& species = solver->get_species();
     
     const int idx = solver_it.index();
-    const int q   = species->get_charge();
+    const int q   = species->getChargeNumber();
 
     if(Abs(q) > 0 && solver->isMobile()){
       data_ops::set_value(m_particle_scratch1, 0.0);
@@ -1298,7 +1298,7 @@ void ito_plasma_stepper::intersect_particles(const which_particles             a
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
-    const bool charged   = species->get_charge() != 0;
+    const bool charged   = species->getChargeNumber() != 0;
 
     switch(a_which_particles) {
     case which_particles::all:
@@ -1357,7 +1357,7 @@ void ito_plasma_stepper::remove_covered_particles(const which_particles         
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
-    const bool charged   = species->get_charge() != 0;
+    const bool charged   = species->getChargeNumber() != 0;
 
     switch(a_which) {
     case which_particles::all:
@@ -1417,7 +1417,7 @@ void ito_plasma_stepper::transfer_covered_particles(const which_particles       
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
-    const bool charged   = species->get_charge() != 0;
+    const bool charged   = species->getChargeNumber() != 0;
 
     switch(a_which) {
     case which_particles::all:
@@ -1473,7 +1473,7 @@ void ito_plasma_stepper::remap_particles(const which_particles a_which_particles
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
-    const bool charged   = species->get_charge() != 0;
+    const bool charged   = species->getChargeNumber() != 0;
 
     switch(a_which_particles) {
     case which_particles::all:
@@ -1530,7 +1530,7 @@ void ito_plasma_stepper::deposit_particles(const which_particles a_which_particl
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
-    const bool charged   = species->get_charge() != 0;
+    const bool charged   = species->getChargeNumber() != 0;
 
     switch(a_which_particles) {
     case which_particles::all:
@@ -1577,7 +1577,7 @@ void ito_plasma_stepper::set_ito_velocity_funcs(){
       EBAMRCellData& velo_func = solver->get_velo_func();
       velo_func.copy(m_particle_E);
       
-      const int q = species->get_charge();
+      const int q = species->getChargeNumber();
       const int s = (q > 0) - (q < 0);
       
       data_ops::scale(velo_func, s);
@@ -3263,7 +3263,7 @@ void ito_plasma_stepper::compute_EdotJ_source(){
     RefCountedPtr<ito_species>& species = solver->get_species();
 
     const int idx = solver_it.index();
-    const int q   = species->get_charge();
+    const int q   = species->getChargeNumber();
 
     data_ops::set_value(m_energy_sources[idx], 0.0);
 
@@ -3310,7 +3310,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
     RefCountedPtr<ito_species>& species = solver->get_species();
 
     const int idx = solver_it.index();
-    const int q   = species->get_charge();
+    const int q   = species->getChargeNumber();
 
     // Do mobile contribution. Computes Z*e*E*mu*n*E*E
     if(q != 0 && solver->isMobile()){
@@ -3356,14 +3356,14 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo2(const Real a_dt){
     RefCountedPtr<ito_species>& species = solver->get_species();
 
     const int idx = solver_it.index();
-    const int q   = species->get_charge();
+    const int q   = species->getChargeNumber();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
 
     particle_container<ito_particle>& particles = solver->get_particles(ito_solver::which_container::bulk);
 
-    const DepositionType::Which deposition = solver->get_deposition();
+    const DepositionType::Which deposition = solver->getDeposition();
 
     if((mobile || diffusive) && q != 0){
 

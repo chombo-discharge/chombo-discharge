@@ -57,7 +57,7 @@ int main(int argc, char* argv[]){
 
   // Instantiate solvers
   auto poi = poi_fact->newSolver();
-  auto cdr = cdr_fact->new_layout(physics->get_cdr_species());
+  auto cdr = cdr_fact->new_layout(physics->get_CdrSpecies());
   auto rte = rte_fact->new_layout(physics->get_rte_species());
 
   // Send solvers to TimeStepper 

@@ -27,7 +27,7 @@ public:
   /*!
     @brief Full constructor
   */
-  cdr_layout(const Vector<RefCountedPtr<cdr_species> >& a_plaskin);
+  cdr_layout(const Vector<RefCountedPtr<CdrSpecies> >& a_plaskin);
 
   /*!
     @brief Destructor
@@ -228,7 +228,7 @@ public:
   /*!
     @brief Get species
   */
-  virtual Vector<RefCountedPtr<cdr_species> >& get_species();
+  virtual Vector<RefCountedPtr<CdrSpecies> >& get_species();
 
   /*!
     @brief Get all source terms
@@ -285,7 +285,7 @@ protected:
   /*!
     @brief Species
   */
-  Vector<RefCountedPtr<cdr_species> > m_species;
+  Vector<RefCountedPtr<CdrSpecies> > m_species;
 
   /*!
     @brief Verbosity
@@ -318,7 +318,7 @@ class cdr_factory {
 public:
   cdr_factory();
   ~cdr_factory();
-  RefCountedPtr<cdr_layout<T> > new_layout(const Vector<RefCountedPtr<cdr_species> > a_species) const;
+  RefCountedPtr<cdr_layout<T> > new_layout(const Vector<RefCountedPtr<CdrSpecies> > a_species) const;
 };
 #include "CD_NamespaceFooter.H"
 

@@ -74,25 +74,25 @@ void ito_iterator<T>::operator++(){
       const RefCountedPtr<ito_species>& species   = m_species[isolver];
       
       if(m_mode == species_iteration::charged){
-	if(species->get_charge() != 0){
+	if(species->getChargeNumber() != 0){
 	  m_isolver = isolver;
 	  break;
 	}
       }
       else if(m_mode == species_iteration::negative){
-	if(species->get_charge() < 0){
+	if(species->getChargeNumber() < 0){
 	  m_isolver = isolver;
 	  break;
 	}
       }
       else if(m_mode == species_iteration::positive){
-	if(species->get_charge() > 0){
+	if(species->getChargeNumber() > 0){
 	  m_isolver = isolver;
 	  break;
 	}
       }
       else if(m_mode == species_iteration::neutral){
-	if(species->get_charge() == 0){
+	if(species->getChargeNumber() == 0){
 	  m_isolver = isolver;
 	  break;
 	}

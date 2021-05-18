@@ -29,7 +29,7 @@ std::string air9eed_bourdon::s_bolsig_townsend = "Energy (eV)	Townsend ioniz. co
 
 
 air9eed_bourdon::air9eed_bourdon(){
-  m_num_cdr_species = 9;    // 8 reactive ones plus the eed
+  m_num_CdrSpecies = 9;    // 8 reactive ones plus the eed
   m_num_rte_species = 3;    // Bourdon model for photons
   m_eed_solve   = true; // Yes, we're doing an EED solve so we must have a Poisson solution first
   m_eed_index   = 0;    // Index for the EED equation
@@ -118,7 +118,7 @@ void air9eed_bourdon::parse_transport(){
 }
 
 void air9eed_bourdon::instantiate_species(){
-  m_cdr_species.resize(m_num_cdr_species);
+  m_CdrSpecies.resize(m_num_CdrSpecies);
   m_eed_idx      = 0;
   m_electron_idx = 1;
   m_N2plus_idx   = 2;
@@ -129,15 +129,15 @@ void air9eed_bourdon::instantiate_species(){
   m_O2minus_idx  = 7;
   m_Ominus_idx   = 8;
   
-  m_cdr_species[m_eed_idx]      = RefCountedPtr<cdr_species> (new air9eed_bourdon::eed());
-  m_cdr_species[m_electron_idx] = RefCountedPtr<cdr_species> (new air9eed_bourdon::electron());
-  m_cdr_species[m_N2plus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::N2plus());
-  m_cdr_species[m_N4plus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::N4plus());
-  m_cdr_species[m_O2plus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::O2plus());
-  m_cdr_species[m_O4plus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::O4plus());
-  m_cdr_species[m_O2plusN2_idx] = RefCountedPtr<cdr_species> (new air9eed_bourdon::O2plusN2());
-  m_cdr_species[m_O2minus_idx]  = RefCountedPtr<cdr_species> (new air9eed_bourdon::O2minus());
-  m_cdr_species[m_Ominus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::Ominus());
+  m_CdrSpecies[m_eed_idx]      = RefCountedPtr<CdrSpecies> (new air9eed_bourdon::eed());
+  m_CdrSpecies[m_electron_idx] = RefCountedPtr<CdrSpecies> (new air9eed_bourdon::electron());
+  m_CdrSpecies[m_N2plus_idx]   = RefCountedPtr<CdrSpecies> (new air9eed_bourdon::N2plus());
+  m_CdrSpecies[m_N4plus_idx]   = RefCountedPtr<CdrSpecies> (new air9eed_bourdon::N4plus());
+  m_CdrSpecies[m_O2plus_idx]   = RefCountedPtr<CdrSpecies> (new air9eed_bourdon::O2plus());
+  m_CdrSpecies[m_O4plus_idx]   = RefCountedPtr<CdrSpecies> (new air9eed_bourdon::O4plus());
+  m_CdrSpecies[m_O2plusN2_idx] = RefCountedPtr<CdrSpecies> (new air9eed_bourdon::O2plusN2());
+  m_CdrSpecies[m_O2minus_idx]  = RefCountedPtr<CdrSpecies> (new air9eed_bourdon::O2minus());
+  m_CdrSpecies[m_Ominus_idx]   = RefCountedPtr<CdrSpecies> (new air9eed_bourdon::Ominus());
 
   // Instantiate photon solvers
   m_rte_species.resize(m_num_rte_species);
@@ -242,7 +242,7 @@ Vector<Real> air9eed_bourdon::compute_cdr_diffusion_coefficients(const Real     
 								 const RealVect     a_E,
 								 const Vector<Real> a_cdr_densities) const {
 
-  Vector<Real> diffco(m_num_cdr_species, 0.0);
+  Vector<Real> diffco(m_num_CdrSpecies, 0.0);
 
   const Real electron_energy = compute_electron_energy(a_cdr_densities[m_eed_idx], a_cdr_densities[m_electron_idx]);
   const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
@@ -263,7 +263,7 @@ Vector<RealVect> air9eed_bourdon::compute_cdr_velocities(const Real         a_ti
 							 const RealVect     a_pos,
 							 const RealVect     a_E,
 							 const Vector<Real> a_cdr_densities) const {
-  Vector<RealVect> velocities(m_num_cdr_species, RealVect::Zero);
+  Vector<RealVect> velocities(m_num_CdrSpecies, RealVect::Zero);
 
   const Real electron_energy = compute_electron_energy(a_cdr_densities[m_eed_idx], a_cdr_densities[m_electron_idx]);
   const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
@@ -516,7 +516,7 @@ Vector<Real> air9eed_bourdon::compute_cdr_domain_fluxes(const Real           a_t
 							const Vector<Real>   a_cdr_gradients,
 							const Vector<Real>   a_rte_fluxes,
 							const Vector<Real>   a_extrap_cdr_fluxes) const{
-  Vector<Real> fluxes(m_num_cdr_species, 0.0);
+  Vector<Real> fluxes(m_num_CdrSpecies, 0.0);
 
   return a_extrap_cdr_fluxes;
 
@@ -736,7 +736,7 @@ Real air9eed_bourdon::compute_e_N2_scattering_loss()              const {return 
 
 Real air9eed_bourdon::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
-  return m_init_eed.get_entry(EbyN)*m_cdr_species[m_electron_idx]->initialData(a_pos, a_time);
+  return m_init_eed.get_entry(EbyN)*m_CdrSpecies[m_electron_idx]->initialData(a_pos, a_time);
 }
 
 Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
@@ -751,7 +751,7 @@ Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
 						 const Real         a_townsend2,
 						 const Real         a_quantum_efficiency) const {
 
-  Vector<Real> fluxes(m_num_cdr_species, 0.0);
+  Vector<Real> fluxes(m_num_CdrSpecies, 0.0);
 
   
 #if 1 // debug
@@ -770,9 +770,9 @@ Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
 
 
   // Switch for setting drift flux to zero for charge species
-  Vector<Real> aj(m_num_cdr_species, 0.0);
-  for (int i = 0; i < m_num_cdr_species; i++){
-    if(data_ops::sgn(m_cdr_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
+  Vector<Real> aj(m_num_CdrSpecies, 0.0);
+  for (int i = 0; i < m_num_CdrSpecies; i++){
+    if(data_ops::sgn(m_CdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {
@@ -781,7 +781,7 @@ Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
   }
 
   // Drift outflow for now
-  for (int i = 0; i < m_num_cdr_species; i++){
+  for (int i = 0; i < m_num_CdrSpecies; i++){
     //fluxes[i] = Max(0.0, aj[i]*a_extrap_cdr_fluxes[i]);
     //    fluxes[i] = Max(0.0, a_extrap_cdr_fluxes[i]);
   }
@@ -802,7 +802,7 @@ Vector<Real> air9eed_bourdon::compute_cdr_electrode_fluxes(const Real         a_
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
   const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
 
-  Vector<Real> ret(m_num_cdr_species, 0.0);
+  Vector<Real> ret(m_num_CdrSpecies, 0.0);
   if(cathode){
     ret = this->compute_cathode_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients,
 				       a_rte_fluxes, a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
@@ -841,18 +841,18 @@ Vector<Real> air9eed_bourdon::compute_cathode_fluxes(const Real         a_time,
 						     const Real         a_townsend2,
 						     const Real         a_quantum_efficiency) const {
 
-  Vector<Real> ret(m_num_cdr_species, 0.0);
+  Vector<Real> ret(m_num_CdrSpecies, 0.0);
   
   // Drift outflow for positive species. No inflow for the others just yet. 
-  for (int i = 0; i < m_num_cdr_species; i++){
-    ret[i] = (m_cdr_species[i]->get_charge() > 0) ? a_extrap_cdr_fluxes[i] : 0.0;
+  for (int i = 0; i < m_num_CdrSpecies; i++){
+    ret[i] = (m_CdrSpecies[i]->getChargeNumber() > 0) ? a_extrap_cdr_fluxes[i] : 0.0;
   }
 
   // Electron inflow due to ion impingement
   ret[m_electron_idx] = 0.0;
   ret[m_eed_idx] = 0.0;
-  for (int i = 0; i < m_num_cdr_species; i++){
-    const int q = m_cdr_species[i]->get_charge();
+  for (int i = 0; i < m_num_CdrSpecies; i++){
+    const int q = m_CdrSpecies[i]->getChargeNumber();
     if(q > 0){
       const Real flx = a_extrap_cdr_fluxes[i]*m_townsend2_electrode;
       ret[m_electron_idx] -= flx;

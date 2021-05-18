@@ -15,7 +15,7 @@ using namespace physics::cdr_plasma;
 
 air7_stephens::electron::electron(){
   m_name = "electron";
-  m_charge = -1;
+  m_chargeNumber = -1;
   ParmParse pp("air7_stephens");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -31,7 +31,7 @@ air7_stephens::electron::electron(){
 
 air7_stephens::N2plus::N2plus(){
   m_name = "N2plus";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air7_stephens");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -48,7 +48,7 @@ air7_stephens::N2plus::N2plus(){
 
 air7_stephens::O2plus::O2plus(){
   m_name = "O2plus";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air7_stephens");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -65,7 +65,7 @@ air7_stephens::O2plus::O2plus(){
 
 air7_stephens::N4plus::N4plus(){
   m_name = "N4plus";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air7_stephens");
   std::string str;
   
@@ -75,7 +75,7 @@ air7_stephens::N4plus::N4plus(){
 
 air7_stephens::O4plus::O4plus(){
   m_name = "O4plus";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air7_stephens");
   std::string str;
   
@@ -85,7 +85,7 @@ air7_stephens::O4plus::O4plus(){
 
 air7_stephens::O2plusN2::O2plusN2(){
   m_name = "O2plusN2";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air7_stephens");
   std::string str;
   
@@ -95,7 +95,7 @@ air7_stephens::O2plusN2::O2plusN2(){
 
 air7_stephens::O2minus::O2minus(){
   m_name = "O2minus";
-  m_charge = -1;
+  m_chargeNumber = -1;
   ParmParse pp("air7_stephens");
   std::string str;
   

@@ -315,8 +315,8 @@ void air3_mc8::parse_initial_particles(){
   add_gaussian_particles(electron_ion_pairs, round(gaussian_pairs),   weight, rad_pairs,   center_pairs);
   
   // Set initial particles
-  m_species[m_elec_idx]->get_initial_particles() = electron_ion_pairs;
-  m_species[m_plus_idx]->get_initial_particles() = electron_ion_pairs;
+  m_species[m_elec_idx]->getInitialParticles() = electron_ion_pairs;
+  m_species[m_plus_idx]->getInitialParticles() = electron_ion_pairs;
 
   // Set the deposition scheme
   std::string str;
@@ -336,7 +336,7 @@ void air3_mc8::parse_initial_particles(){
   }
   
   for (int i = 0; i < m_num_species; i++){
-    m_species[i]->get_deposition() = deposition;
+    m_species[i]->getDeposition() = deposition;
   }
 }
 
@@ -860,7 +860,7 @@ Vector<Real> air3_mc8::compute_cdr_fluxes(const Real         a_time,
   // Switch for setting drift flux to zero for charge species
   Vector<Real> aj(m_num_species, 0.0);
   for (int i = 0; i < m_num_species; i++){
-    if(data_ops::sgn(m_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
+    if(data_ops::sgn(m_species[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {

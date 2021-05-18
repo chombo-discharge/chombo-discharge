@@ -376,7 +376,7 @@ void godunov::allocateInternals(){
   }
 
   const int ncomp       = 1;
-  const int num_species = m_physics->get_num_cdr_species();
+  const int num_species = m_physics->get_num_CdrSpecies();
   const int num_photons = m_physics->get_num_rte_species();
 
   // Allocate cdr storage
@@ -680,10 +680,10 @@ void godunov::compute_sigma_flux(){
 
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const RefCountedPtr<cdr_species>& spec  = solver_it.get_species();
+    const RefCountedPtr<CdrSpecies>& spec  = solver_it.get_species();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(flux, solver_flux, spec->get_charge()*units::s_Qe);
+    data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->reset_cells(flux);

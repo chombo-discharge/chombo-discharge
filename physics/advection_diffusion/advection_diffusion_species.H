@@ -8,13 +8,13 @@
 #ifndef _ADVECTION_DIFFUSION_SPECIES_
 #define _ADVECTION_DIFFUSION_SPECIES_
 
-#include "cdr_species.H"
+#include <CD_CdrSpecies.H>
 
 #include "CD_NamespaceHeader.H"
 namespace physics {
   namespace advection_diffusion {
 
-    class advection_diffusion_species : public cdr_species {
+    class advection_diffusion_species : public CdrSpecies {
     public:
       advection_diffusion_species();
       ~advection_diffusion_species();

@@ -49,7 +49,7 @@ void advection_diffusion_stepper::parseRuntimeOptions() {
 }
 
 void advection_diffusion_stepper::setup_solvers(){
-  m_species = RefCountedPtr<cdr_species> (new advection_diffusion_species());
+  m_species = RefCountedPtr<CdrSpecies> (new advection_diffusion_species());
 
   // Solver setup
   m_solver->setVerbosity(m_verbosity);

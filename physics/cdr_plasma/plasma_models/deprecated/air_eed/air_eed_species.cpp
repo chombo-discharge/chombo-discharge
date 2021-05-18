@@ -6,7 +6,7 @@
 
 air_eed::eed::eed(){
   m_name = "eed";
-  m_charge = 0;
+  m_chargeNumber = 0;
   ParmParse pp("air_eed");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -22,7 +22,7 @@ air_eed::eed::eed(){
 
 air_eed::electron::electron(){
   m_name = "electron";
-  m_charge = -1;
+  m_chargeNumber = -1;
   ParmParse pp("air_eed");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -37,7 +37,7 @@ air_eed::electron::electron(){
 
 air_eed::M_plus::M_plus(){
   m_name = "M_plus";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air_eed");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -52,7 +52,7 @@ air_eed::M_plus::M_plus(){
 
 air_eed::M_minus::M_minus(){
   m_name = "M_minus";
-  m_charge = -1;
+  m_chargeNumber = -1;
   ParmParse pp("air_eed");
   std::string str;
   

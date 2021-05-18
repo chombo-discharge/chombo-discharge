@@ -294,9 +294,9 @@ void air_eed::parse_initial_particles(){
   }
   
   // Set initial particles
-  m_species[m_eed_idx]->get_initial_particles()  = electron_energies;
-  m_species[m_elec_idx]->get_initial_particles() = electron_ion_pairs;
-  m_species[m_plus_idx]->get_initial_particles() = electron_ion_pairs;
+  m_species[m_eed_idx]->getInitialParticles()  = electron_energies;
+  m_species[m_elec_idx]->getInitialParticles() = electron_ion_pairs;
+  m_species[m_plus_idx]->getInitialParticles() = electron_ion_pairs;
 
   // Set the deposition scheme
   std::string str;
@@ -316,7 +316,7 @@ void air_eed::parse_initial_particles(){
   }
   
   for (int i = 0; i < m_num_species; i++){
-    m_species[i]->get_deposition() = deposition;
+    m_species[i]->getDeposition() = deposition;
   }
 }
 

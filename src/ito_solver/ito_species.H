@@ -42,7 +42,7 @@ public:
   /*!
     @brief Return charge
   */
-  int get_charge() const;
+  int getChargeNumber() const;
     
   /*!
     @brief Return diffusive or not
@@ -67,7 +67,7 @@ public:
   /*!
     @brief Get initial particles
   */
-  List<ito_particle>& get_initial_particles();
+  List<ito_particle>& getInitialParticles();
 
 protected:
 
@@ -79,7 +79,7 @@ protected:
   /*!
     @brief Charge
   */
-  int m_charge;
+  int m_chargeNumber;
 
   /*!
     @brief Diffusive ito_species or not
@@ -94,7 +94,7 @@ protected:
   /*!
     @brief Initial particles
   */
-  List<ito_particle> m_initial_particles;
+  List<ito_particle> m_initialParticles;
 
   /*!
     @brief Weak constructor. 

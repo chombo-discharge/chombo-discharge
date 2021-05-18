@@ -14,7 +14,7 @@ using namespace physics::brownian_walker;
 
 brownian_walker_species::brownian_walker_species() : m_rng(), m_gauss(0., 1.) {
   m_name   = "scalar species";
-  m_charge = 0;
+  m_chargeNumber = 0;
 
   ParmParse pp("brownian_walker");
   Vector<Real> v;
@@ -56,11 +56,11 @@ void brownian_walker_species::draw_initial_particles(){
   }
 
   // Now make the particles
-  m_initial_particles.clear();
+  m_initialParticles.clear();
   for (int i = 0; i < particlesPerRank[procID()]; i++){
     const Real weight  = 1.0;
     const RealVect pos = m_blob_center + random_gaussian();
-    m_initial_particles.add(ito_particle(weight, pos));
+    m_initialParticles.add(ito_particle(weight, pos));
   }
 }
 

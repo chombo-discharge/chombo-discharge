@@ -468,7 +468,7 @@ Real air_bolsig::photon_three::get_kappa(const RealVect a_pos) const {
 air_bolsig::electron::electron(){
   m_name      = "electron density";
   m_unit      = "m-3";
-  m_charge    = -1;
+  m_chargeNumber    = -1;
   m_isDiffusive = false;
 
   m_uniform_density = 1.0;
@@ -506,7 +506,7 @@ air_bolsig::electron::~electron(){
 air_bolsig::positive_species::positive_species(){
   m_name      = "positive_species density";
   m_unit      = "m-3";
-  m_charge    = 1;
+  m_chargeNumber    = 1;
   m_isDiffusive = false;
   m_isMobile    = false;
 
@@ -537,7 +537,7 @@ air_bolsig::positive_species::~positive_species(){
 air_bolsig::negative_species::negative_species(){
   m_name      = "negative_species density";
   m_unit      = "m-3";
-  m_charge    = -1;
+  m_chargeNumber    = -1;
   m_isDiffusive = false;
   m_isMobile    = false;
 }

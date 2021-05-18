@@ -20,7 +20,7 @@
 // Our includes
 #include <CD_AmrMesh.H>
 #include <computational_geometry.H>
-#include <cdr_species.H>
+#include <CD_CdrSpecies.H>
 #include <CD_CdrBc.H>
 #include <CD_NamespaceHeader.H>
 
@@ -197,7 +197,7 @@ public:
     @brief Set species
     @param[in] a_species Species. 
   */
-  virtual void setSpecies(const RefCountedPtr<cdr_species> a_species);
+  virtual void setSpecies(const RefCountedPtr<CdrSpecies> a_species);
   
   /*!
     @brief Set computational geometry
@@ -508,7 +508,7 @@ protected:
   /*!
     @brief Species
   */
-  RefCountedPtr<cdr_species> m_species;
+  RefCountedPtr<CdrSpecies> m_species;
   
   /*!
     @brief Computational geometry

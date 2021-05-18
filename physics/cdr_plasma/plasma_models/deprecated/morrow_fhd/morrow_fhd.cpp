@@ -367,7 +367,7 @@ Vector<Real> morrow_fhd::compute_cdr_fluxes(const Real&         a_time,
   // Switch for setting drift flux to zero for charge species
   Vector<Real> aj(m_num_species, 0.0);
   for (int i = 0; i < m_num_species; i++){
-    if(data_ops::sgn(m_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
+    if(data_ops::sgn(m_species[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {
@@ -496,7 +496,7 @@ Real morrow_fhd::initial_sigma(const Real a_time, const RealVect& a_pos) const{
 
 morrow_fhd::electron::electron(){
   m_name      = "electron";
-  m_charge    = -1;
+  m_chargeNumber    = -1;
   m_isDiffusive = true;
   m_isMobile    = true;
   m_unit      = "m-3";
@@ -515,7 +515,7 @@ morrow_fhd::electron::electron(){
 
 morrow_fhd::positive_species::positive_species(){
   m_name      = "positive_species";
-  m_charge    = 1;
+  m_chargeNumber    = 1;
   m_isDiffusive = false;
   m_isMobile    = false;
   m_unit      = "m-3";
@@ -535,7 +535,7 @@ morrow_fhd::positive_species::positive_species(){
 
 morrow_fhd::negative_species::negative_species(){
   m_name      = "negative_species";
-  m_charge    = -1;
+  m_chargeNumber    = -1;
   m_isDiffusive = false;
   m_isMobile    = false;
   m_unit      = "m-3";

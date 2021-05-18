@@ -401,7 +401,7 @@ void rk2::compute_sigma_flux_at_start_of_time_step(){
     const RefCountedPtr<species>& spec      = solver_it.get_species();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(flux, solver_flux, spec->get_charge()*units::s_Qe);
+    data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->reset_cells(flux);
@@ -786,7 +786,7 @@ void rk2::compute_sigma_flux_after_k1(){
     const RefCountedPtr<species>& spec      = solver_it.get_species();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(flux, solver_flux, spec->get_charge()*units::s_Qe);
+    data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->reset_cells(flux);

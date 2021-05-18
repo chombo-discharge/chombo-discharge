@@ -773,7 +773,7 @@ void ito_plasma_godunov::remap_godunov_particles(Vector<particle_container<godun
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
-    const bool charged   = species->get_charge() != 0;
+    const bool charged   = species->getChargeNumber() != 0;
 
     switch(a_which_particles) {
     case which_particles::all:
@@ -820,7 +820,7 @@ void ito_plasma_godunov::deposit_godunov_particles(const Vector<particle_contain
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
-    const bool charged   = species->get_charge() != 0;
+    const bool charged   = species->getChargeNumber() != 0;
 
     switch(a_which_particles) {
     case which_particles::all:
@@ -867,7 +867,7 @@ void ito_plasma_godunov::clear_godunov_particles(const Vector<particle_container
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
-    const bool charged   = species->get_charge() != 0;
+    const bool charged   = species->getChargeNumber() != 0;
 
     switch(a_which_particles) {
     case which_particles::all:
@@ -925,7 +925,7 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
     RefCountedPtr<ito_species>& species = solver->get_species();
     
     const int idx = solver_it.index();
-    const int q   = species->get_charge();
+    const int q   = species->getChargeNumber();
 
     if(q != 0 && solver->isMobile()){
       data_ops::set_value(m_particle_scratch1, 0.0);
@@ -1070,7 +1070,7 @@ void ito_plasma_godunov::copy_conductivity_particles(Vector<particle_container<g
     const RefCountedPtr<ito_species>& species = solver->get_species();
 
     const int idx = solver_it.index();
-    const int q   = species->get_charge();
+    const int q   = species->getChargeNumber();
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_particle_Realm)[lvl];
@@ -1105,7 +1105,7 @@ void ito_plasma_godunov::copy_rho_dagger_particles(Vector<particle_container<god
     const RefCountedPtr<ito_species>& species = solver->get_species();
 
     const int idx = solver_it.index();
-    const int q   = species->get_charge();
+    const int q   = species->getChargeNumber();
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_particle_Realm)[lvl];

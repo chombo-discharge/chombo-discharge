@@ -12,7 +12,7 @@
 #include <RefCountedPtr.H>
 #include <LoHiSide.H>
 
-#include "cdr_species.H"
+#include <CD_CdrSpecies.H>
 #include "rte_species.H"
 
 #include "CD_NamespaceHeader.H"
@@ -184,8 +184,8 @@ namespace physics {
       /*!
 	@brief Get all ions
       */
-      const Vector<RefCountedPtr<cdr_species> >& get_cdr_species() const { 
-	return m_cdr_species; 
+      const Vector<RefCountedPtr<CdrSpecies> >& get_CdrSpecies() const { 
+	return m_CdrSpecies; 
       }
 
       /*!
@@ -198,8 +198,8 @@ namespace physics {
       /*!
 	@brief Return number of ion equations
       */
-      int get_num_cdr_species() const{
-	return m_cdr_species.size();
+      int get_num_CdrSpecies() const{
+	return m_CdrSpecies.size();
       }
 
       /*!
@@ -243,7 +243,7 @@ namespace physics {
       /*!
 	@brief List of species
       */
-      Vector<RefCountedPtr<cdr_species> > m_cdr_species;
+      Vector<RefCountedPtr<CdrSpecies> > m_CdrSpecies;
 
       /*!
 	@brief List of optical transitions between species
@@ -253,7 +253,7 @@ namespace physics {
       /*!
 	@brief Number of species
       */
-      int m_num_cdr_species;
+      int m_num_CdrSpecies;
 
       /*!
 	@brief Number of RTE species

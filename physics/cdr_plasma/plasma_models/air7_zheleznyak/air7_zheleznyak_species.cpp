@@ -13,7 +13,7 @@ using namespace physics::cdr_plasma;
 
 air7_zheleznyak::electron::electron(){
   m_name = "electron";
-  m_charge = -1;
+  m_chargeNumber = -1;
   ParmParse pp("air7_zheleznyak");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -29,7 +29,7 @@ air7_zheleznyak::electron::electron(){
 
 air7_zheleznyak::N2plus::N2plus(){
   m_name = "N2plus";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air7_zheleznyak");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -46,7 +46,7 @@ air7_zheleznyak::N2plus::N2plus(){
 
 air7_zheleznyak::O2plus::O2plus(){
   m_name = "O2plus";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air7_zheleznyak");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -63,7 +63,7 @@ air7_zheleznyak::O2plus::O2plus(){
 
 air7_zheleznyak::N4plus::N4plus(){
   m_name = "N4plus";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air7_zheleznyak");
   std::string str;
   
@@ -73,7 +73,7 @@ air7_zheleznyak::N4plus::N4plus(){
 
 air7_zheleznyak::O4plus::O4plus(){
   m_name = "O4plus";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air7_zheleznyak");
   std::string str;
   
@@ -83,7 +83,7 @@ air7_zheleznyak::O4plus::O4plus(){
 
 air7_zheleznyak::O2plusN2::O2plusN2(){
   m_name = "O2plusN2";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air7_zheleznyak");
   std::string str;
   
@@ -93,7 +93,7 @@ air7_zheleznyak::O2plusN2::O2plusN2(){
 
 air7_zheleznyak::O2minus::O2minus(){
   m_name = "O2minus";
-  m_charge = -1;
+  m_chargeNumber = -1;
   ParmParse pp("air7_zheleznyak");
   std::string str;
   

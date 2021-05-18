@@ -71,7 +71,7 @@ namespace physics {
 
       // CDR solver & species
       RefCountedPtr<CdrSolver>  m_solver;
-      RefCountedPtr<cdr_species> m_species;
+      RefCountedPtr<CdrSpecies> m_species;
 
       // Diffusion coefficient and velocity
       Real m_cfl;

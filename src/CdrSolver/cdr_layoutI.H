@@ -20,7 +20,7 @@ cdr_layout<T>::cdr_layout(){
 }
 
 template <class T>
-cdr_layout<T>::cdr_layout(const Vector<RefCountedPtr<cdr_species> >& a_species){
+cdr_layout<T>::cdr_layout(const Vector<RefCountedPtr<CdrSpecies> >& a_species){
   m_species = a_species;
   m_solvers.resize(0);
 }
@@ -542,7 +542,7 @@ Vector<RefCountedPtr<T> >& cdr_layout<T>::get_solvers(){
 }
 
 template <class T>
-Vector<RefCountedPtr<cdr_species> >& cdr_layout<T>::get_species(){
+Vector<RefCountedPtr<CdrSpecies> >& cdr_layout<T>::get_species(){
   return m_species;
 }
 
@@ -681,7 +681,7 @@ cdr_factory<T, S>::~cdr_factory(){
 
 
 template <class T, class S>
-RefCountedPtr<cdr_layout<T> > cdr_factory<T, S>::new_layout(const Vector<RefCountedPtr<cdr_species> > a_species) const{
+RefCountedPtr<cdr_layout<T> > cdr_factory<T, S>::new_layout(const Vector<RefCountedPtr<CdrSpecies> > a_species) const{
 
   // Build cdr layout
   auto cdr = RefCountedPtr<cdr_layout<T> > (new cdr_layout<T>(a_species));

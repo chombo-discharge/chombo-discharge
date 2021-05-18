@@ -126,7 +126,7 @@ void air3_bourdon::read_file_entries(lookup_table& a_table, const std::string a_
 }
 
 void air3_bourdon::instantiate_species(){
-  m_num_cdr_species = 3;
+  m_num_CdrSpecies = 3;
   m_num_rte_species = 3;
 
   m_elec_idx = 0;
@@ -136,10 +136,10 @@ void air3_bourdon::instantiate_species(){
   m_pho2_idx = 1;
   m_pho3_idx = 2;
 
-  m_cdr_species.resize(m_num_cdr_species);
-  m_cdr_species[m_elec_idx]  = RefCountedPtr<cdr_species> (new air3_bourdon::electron());
-  m_cdr_species[m_plus_idx]  = RefCountedPtr<cdr_species> (new air3_bourdon::M_plus());
-  m_cdr_species[m_minu_idx]  = RefCountedPtr<cdr_species> (new air3_bourdon::M_minus());
+  m_CdrSpecies.resize(m_num_CdrSpecies);
+  m_CdrSpecies[m_elec_idx]  = RefCountedPtr<CdrSpecies> (new air3_bourdon::electron());
+  m_CdrSpecies[m_plus_idx]  = RefCountedPtr<CdrSpecies> (new air3_bourdon::M_plus());
+  m_CdrSpecies[m_minu_idx]  = RefCountedPtr<CdrSpecies> (new air3_bourdon::M_minus());
 
   m_rte_species.resize(m_num_rte_species);
   m_rte_species[m_pho1_idx] = RefCountedPtr<rte_species> (new air3_bourdon::photon_one());
@@ -272,7 +272,7 @@ Vector<Real> air3_bourdon::compute_cdr_diffusion_coefficients(const Real        
 							      const RealVect     a_E,
 							      const Vector<Real> a_cdr_densities) const {
 
-  Vector<Real> dco(m_num_cdr_species, 0.0);
+  Vector<Real> dco(m_num_CdrSpecies, 0.0);
   dco[m_elec_idx] = m_e_diffco.get_entry(a_E.vectorLength());
   dco[m_plus_idx] = m_ion_diffusion;
   dco[m_minu_idx] = m_ion_diffusion;
@@ -284,7 +284,7 @@ Vector<RealVect> air3_bourdon::compute_cdr_velocities(const Real         a_time,
 						      const RealVect     a_pos,
 						      const RealVect     a_E,
 						      const Vector<Real> a_cdr_densities) const{
-  Vector<RealVect> vel(m_num_cdr_species, RealVect::Zero);
+  Vector<RealVect> vel(m_num_CdrSpecies, RealVect::Zero);
 
   vel[m_elec_idx] = -a_E*m_e_mobility.get_entry(a_E.vectorLength());
   vel[m_plus_idx] =  a_E*m_ion_mobility;
@@ -303,7 +303,7 @@ Vector<Real> air3_bourdon::compute_cdr_domain_fluxes(const Real           a_time
 						     const Vector<Real>   a_cdr_gradients,
 						     const Vector<Real>   a_rte_fluxes,
 						     const Vector<Real>   a_extrap_cdr_fluxes) const{
-  Vector<Real> fluxes(m_num_cdr_species, 0.0);
+  Vector<Real> fluxes(m_num_CdrSpecies, 0.0);
 
   int idx, sgn;
   if(a_side == Side::Lo){
@@ -370,15 +370,15 @@ Vector<Real> air3_bourdon::compute_cdr_fluxes(const Real         a_time,
 					      const Vector<Real> a_extrap_cdr_fluxes,
 					      const Real         a_townsend2,
 					      const Real         a_quantum_efficiency) const{
-  Vector<Real> fluxes(m_num_cdr_species, 0.0);
+  Vector<Real> fluxes(m_num_CdrSpecies, 0.0);
 
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
   const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
 
   // Switch for setting drift flux to zero for charge species
-  Vector<Real> aj(m_num_cdr_species, 0.0);
-  for (int i = 0; i < m_num_cdr_species; i++){
-    if(data_ops::sgn(m_cdr_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
+  Vector<Real> aj(m_num_CdrSpecies, 0.0);
+  for (int i = 0; i < m_num_CdrSpecies; i++){
+    if(data_ops::sgn(m_CdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {
@@ -387,7 +387,7 @@ Vector<Real> air3_bourdon::compute_cdr_fluxes(const Real         a_time,
   }
 
   // Drift outflow for now
-  for (int i = 0; i < m_num_cdr_species; i++){
+  for (int i = 0; i < m_num_CdrSpecies; i++){
     fluxes[i] = aj[i]*a_extrap_cdr_fluxes[i];
   }
 

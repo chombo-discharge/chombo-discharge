@@ -226,7 +226,7 @@ namespace physics::cdr_plasma {
     Real excitation_rates(const Real a_E) const;
     Real sergey_factor(const Real a_O2frac) const;
 
-    class electron : public cdr_species {
+    class electron : public CdrSpecies {
     public:
       electron();
       ~electron();
@@ -240,7 +240,7 @@ namespace physics::cdr_plasma {
       RealVect m_seed_pos;
     };
 
-    class positive_species : public cdr_species {
+    class positive_species : public CdrSpecies {
     public:
       positive_species();
       ~positive_species();
@@ -254,7 +254,7 @@ namespace physics::cdr_plasma {
       RealVect m_seed_pos;
     };
 
-    class negative_species : public cdr_species {
+    class negative_species : public CdrSpecies {
     public:
       negative_species();
       ~negative_species();

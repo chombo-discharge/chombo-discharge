@@ -104,10 +104,10 @@ void morrow_bourdon::parse_bc(){
 }
 
 void morrow_bourdon::instantiate_species(){
-  m_num_cdr_species = 3;
+  m_num_CdrSpecies = 3;
   m_num_rte_species = 3;
 
-  m_cdr_species.resize(m_num_cdr_species);
+  m_CdrSpecies.resize(m_num_CdrSpecies);
   m_rte_species.resize(m_num_rte_species);
 
   m_nelec_idx   = 0;
@@ -118,9 +118,9 @@ void morrow_bourdon::instantiate_species(){
   m_photon2_idx = 1;
   m_photon3_idx = 2;
   
-  m_cdr_species[m_nelec_idx]    = RefCountedPtr<cdr_species> (new morrow_bourdon::electron());
-  m_cdr_species[m_nplus_idx]    = RefCountedPtr<cdr_species> (new morrow_bourdon::positive_species());
-  m_cdr_species[m_nminu_idx]    = RefCountedPtr<cdr_species> (new morrow_bourdon::negative_species());
+  m_CdrSpecies[m_nelec_idx]    = RefCountedPtr<CdrSpecies> (new morrow_bourdon::electron());
+  m_CdrSpecies[m_nplus_idx]    = RefCountedPtr<CdrSpecies> (new morrow_bourdon::positive_species());
+  m_CdrSpecies[m_nminu_idx]    = RefCountedPtr<CdrSpecies> (new morrow_bourdon::negative_species());
   
   m_rte_species[m_photon1_idx]  = RefCountedPtr<rte_species> (new morrow_bourdon::photon_one());
   m_rte_species[m_photon2_idx]  = RefCountedPtr<rte_species> (new morrow_bourdon::photon_two());
@@ -178,7 +178,7 @@ Vector<RealVect> morrow_bourdon::compute_cdr_velocities(const Real         a_tim
 							const RealVect     a_E,
 							const Vector<Real> a_cdr_densities) const {
 
-  Vector<RealVect> velocities(m_num_cdr_species);
+  Vector<RealVect> velocities(m_num_CdrSpecies);
   
   velocities[m_nelec_idx] = compute_ve(a_E);
   velocities[m_nplus_idx] = compute_vp(a_E);
@@ -344,7 +344,7 @@ Vector<Real> morrow_bourdon::compute_cdr_diffusion_coefficients(const Real      
 								const RealVect     a_E,
 								const Vector<Real> a_cdr_densities) const {
 
-  Vector<Real> diffCo(m_num_cdr_species, 0.0);
+  Vector<Real> diffCo(m_num_CdrSpecies, 0.0);
   diffCo[m_nelec_idx] = compute_De(a_E);
   
   return diffCo;
@@ -360,7 +360,7 @@ Vector<Real> morrow_bourdon::compute_cdr_dielectric_fluxes(const Real         a_
 							   const Vector<Real> a_rte_fluxes,
 							   const Vector<Real> a_extrap_cdr_fluxes) const {
   // Outflux of species
-  Vector<Real> fluxes(m_num_cdr_species, 0.0);
+  Vector<Real> fluxes(m_num_CdrSpecies, 0.0);
 
   if(PolyGeom::dot(a_E, a_normal) > 0.0){ // Field points into gas phase
     fluxes[m_nelec_idx] = Max(0.0, a_extrap_cdr_fluxes[m_nelec_idx]); // Outflow for electrons
@@ -392,7 +392,7 @@ Vector<Real> morrow_bourdon::compute_cdr_electrode_fluxes(const Real         a_t
 							  const Vector<Real> a_rte_fluxes,
 							  const Vector<Real> a_extrap_cdr_fluxes) const {
 
-  Vector<Real> fluxes(m_num_cdr_species, 0.0);
+  Vector<Real> fluxes(m_num_CdrSpecies, 0.0);
 
   // Treat anode and cathode differently
   const bool is_cathode = PolyGeom::dot(a_E, a_normal) < 0.;
@@ -430,10 +430,10 @@ Vector<Real> morrow_bourdon::compute_cathode_flux(const Vector<Real> a_extrapola
 						  const RealVect     a_pos,
 						  const RealVect     a_normal,
 						  const Real         a_time) const{
-  Vector<Real> fluxes(m_num_cdr_species);
+  Vector<Real> fluxes(m_num_CdrSpecies);
 
   // Set everything to outflow
-  for (int i = 0; i < m_num_cdr_species; i++){
+  for (int i = 0; i < m_num_CdrSpecies; i++){
     fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
   }
 
@@ -457,10 +457,10 @@ Vector<Real> morrow_bourdon::compute_anode_flux(const Vector<Real> a_extrapolate
 						const RealVect     a_pos,
 						const RealVect     a_normal,
 						const Real         a_time) const{
-  Vector<Real> fluxes(m_num_cdr_species);
+  Vector<Real> fluxes(m_num_CdrSpecies);
 
   // Set to outflux
-  for (int i = 0; i < m_num_cdr_species; i++){
+  for (int i = 0; i < m_num_CdrSpecies; i++){
     fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
   }
   fluxes[m_nplus_idx] = a_extrapolated_fluxes[m_nplus_idx];
@@ -478,7 +478,7 @@ Vector<Real> morrow_bourdon::compute_cdr_domain_fluxes(const Real           a_ti
 						       const Vector<Real>   a_cdr_gradients,
 						       const Vector<Real>   a_rte_fluxes,
 						       const Vector<Real>   a_extrap_cdr_fluxes) const{
-  Vector<Real> fluxes(m_num_cdr_species, 0.0); 
+  Vector<Real> fluxes(m_num_CdrSpecies, 0.0); 
 
   int idx;
   int sgn;
@@ -515,7 +515,7 @@ Real morrow_bourdon::initial_sigma(const Real a_time, const RealVect a_pos) cons
 
 morrow_bourdon::electron::electron(){
   m_name      = "electron";
-  m_charge    = -1;
+  m_chargeNumber    = -1;
   m_isDiffusive = true;
   m_isMobile    = true;
   m_unit      = "m-3";
@@ -550,7 +550,7 @@ Real morrow_bourdon::electron::initialData(const RealVect a_pos, const Real a_ti
 
 morrow_bourdon::positive_species::positive_species(){
   m_name      = "positive_species";
-  m_charge    = 1;
+  m_chargeNumber    = 1;
   m_isDiffusive = false;
   m_isMobile    = true;
   m_unit      = "m-3";
@@ -579,7 +579,7 @@ Real morrow_bourdon::positive_species::initialData(const RealVect a_pos, const R
 
 morrow_bourdon::negative_species::negative_species(){
   m_name      = "negative_species";
-  m_charge    = -1;
+  m_chargeNumber    = -1;
   m_isDiffusive = false;
   m_isMobile    = true;
   m_unit      = "m-3";

@@ -119,7 +119,7 @@ advection_kinetics::phi_advect::phi_advect() {
   m_unit      = "m-3";
   m_isDiffusive = false;
   m_isMobile    = true;
-  m_charge    = 1;
+  m_chargeNumber    = 1;
   m_pulse     = "square";
   
   // Get parameters from input script

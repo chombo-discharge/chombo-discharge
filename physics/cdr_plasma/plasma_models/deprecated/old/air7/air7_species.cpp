@@ -15,7 +15,7 @@
 air7::electron::electron(){
   m_name   = "electron density";
   m_unit   = "m-3";
-  m_charge = -1;
+  m_chargeNumber = -1;
   m_isDiffusive = true;
   m_isMobile = true;
 
@@ -56,7 +56,7 @@ air7::electron::~electron(){
 air7::N2plus::N2plus() {
   m_name   = "N2plus";
   m_unit   = "m-3";
-  m_charge = 1;
+  m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
 
@@ -99,7 +99,7 @@ air7::N2plus::~N2plus(){
 air7::N4plus::N4plus(){
   m_name   = "N4plus";
   m_unit   = "m-3";
-  m_charge = 1;
+  m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
 
@@ -123,7 +123,7 @@ air7::N4plus::~N4plus(){
 air7::O2plus::O2plus(){
   m_name   = "O2plus";
   m_unit   = "m-3";
-  m_charge = 1;
+  m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
 
@@ -166,7 +166,7 @@ air7::O2plus::~O2plus(){
 air7::O4plus::O4plus(){
   m_name   = "O4plus";
   m_unit   = "m-3";
-  m_charge = 1;
+  m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
 
@@ -199,7 +199,7 @@ air7::O4plus::~O4plus(){
 air7::O2plusN2::O2plusN2() {
   m_name   = "O2plusN2";
   m_unit   = "m-3";
-  m_charge = 1;
+  m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
 
@@ -232,7 +232,7 @@ air7::O2plusN2::~O2plusN2(){
 air7::O2minus::O2minus(){
   m_name   = "O2minus";
   m_unit   = "m-3";
-  m_charge = -1;
+  m_chargeNumber = -1;
   m_isDiffusive = false;
   m_isMobile = true;
 

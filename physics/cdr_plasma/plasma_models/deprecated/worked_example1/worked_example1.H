@@ -81,7 +81,7 @@ public:
       m_name      = "my_species";
       m_isDiffusive = false;
       m_isMobile    = true;
-      m_charge    = 1;
+      m_chargeNumber    = 1;
 
       {
 	ParmParse pp("my_kinetics");

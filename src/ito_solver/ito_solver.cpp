@@ -501,7 +501,7 @@ void ito_solver::initialData(){
   particles.clear_particles();
 
   // Add particles, remove the ones that are inside the EB, and then depsit
-  particles.add_particles(m_species->get_initial_particles());
+  particles.add_particles(m_species->getInitialParticles());
   this->remove_covered_particles(particles, EB_representation::implicit_function, 0.0);
   this->deposit_particles(m_phi, particles, m_deposition);
 }
@@ -2779,7 +2779,7 @@ void ito_solver::remap(const which_container a_container){
   particles.remap();
 }
 
-DepositionType::Which ito_solver::get_deposition() const {
+DepositionType::Which ito_solver::getDeposition() const {
   return m_deposition;
 }
 

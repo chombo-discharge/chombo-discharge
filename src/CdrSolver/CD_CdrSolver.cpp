@@ -819,8 +819,8 @@ void CdrSolver::initialData(){
     pout() << m_name + "::initialData" << endl;
   }
 
-  const bool deposit_function  = m_species->init_with_function();
-  const bool deposit_particles = m_species->init_with_particles();
+  const bool deposit_function  = m_species->initializeWithFunction();
+  const bool deposit_particles = m_species->initializeWithParticles();
 
   data_ops::set_value(m_phi, 0.0);
   
@@ -900,13 +900,13 @@ void CdrSolver::initialDataParticles(){
   const int halo_buffer = 0;
   const int pvr_buffer  = 0;
 
-  const List<Particle>& init_particles = m_species->get_initial_particles();
+  const List<Particle>& init_particles = m_species->getInitialParticles();
 
   if(init_particles.length() > 0){
 
     particle_container<Particle> particles;
     m_amr->allocate(particles, pvr_buffer, m_realm);
-    particles.add_particles(m_species->get_initial_particles());
+    particles.add_particles(m_species->getInitialParticles());
 
     // We will deposit onto m_phi, using m_scratch as a scratch holder for interpolation stuff
     data_ops::set_value(m_phi, 0.0);
@@ -1409,7 +1409,7 @@ void CdrSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){
   m_ebis = a_ebis;
 }
 
-void CdrSolver::setSpecies(const RefCountedPtr<cdr_species> a_species){
+void CdrSolver::setSpecies(const RefCountedPtr<CdrSpecies> a_species){
   CH_TIME("CdrSolver::setSpecies");
   if(m_verbosity > 5){
     pout() << m_name + "::setSpecies" << endl;
@@ -2009,7 +2009,7 @@ Real CdrSolver::computeCharge(){
     pout() << m_name + "::computeCharge" << endl;
   }
 
-  const Real Q = this->computeMass()*m_species->get_charge();
+  const Real Q = this->computeMass()*m_species->getChargeNumber();
 
   return Q;
 }

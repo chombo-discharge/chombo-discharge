@@ -13,7 +13,7 @@ using namespace physics::cdr_plasma;
 
 air3_zheleznyak::electron::electron(){
   m_name = "electron";
-  m_charge = -1;
+  m_chargeNumber = -1;
   ParmParse pp("air3_zheleznyak");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -29,7 +29,7 @@ air3_zheleznyak::electron::electron(){
 
 air3_zheleznyak::M_plus::M_plus(){
   m_name = "M_plus";
-  m_charge = 1;
+  m_chargeNumber = 1;
   ParmParse pp("air3_zheleznyak");
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -45,7 +45,7 @@ air3_zheleznyak::M_plus::M_plus(){
 
 air3_zheleznyak::M_minus::M_minus(){
   m_name = "M_minus";
-  m_charge = -1;
+  m_chargeNumber = -1;
   ParmParse pp("air3_zheleznyak");
   std::string str;
   

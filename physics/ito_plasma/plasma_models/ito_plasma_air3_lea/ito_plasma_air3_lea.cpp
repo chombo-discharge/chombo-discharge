@@ -95,9 +95,9 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_seed += procID();
   m_rng   = std::mt19937_64(m_seed);
 
-  List<ito_particle>& electrons = m_ito_species[m_electron_idx]->get_initial_particles();
-  List<ito_particle>& positives = m_ito_species[m_positive_idx]->get_initial_particles();
-  List<ito_particle>& negatives = m_ito_species[m_negative_idx]->get_initial_particles();
+  List<ito_particle>& electrons = m_ito_species[m_electron_idx]->getInitialParticles();
+  List<ito_particle>& positives = m_ito_species[m_positive_idx]->getInitialParticles();
+  List<ito_particle>& negatives = m_ito_species[m_negative_idx]->getInitialParticles();
 
   electrons.clear();
   positives.clear();
@@ -209,7 +209,7 @@ ito_plasma_air3_lea::electron::electron(const lookup_table& a_mobility, const lo
   m_isMobile    = true;
   m_isDiffusive = true;
   m_name      = "electron";
-  m_charge    = -1;
+  m_chargeNumber    = -1;
 													   }
 
 ito_plasma_air3_lea::electron::~electron(){
@@ -230,7 +230,7 @@ ito_plasma_air3_lea::positive::positive(){
   m_isMobile    = false;
   m_isDiffusive = false;
   m_name      = "positive";
-  m_charge    = 1;
+  m_chargeNumber    = 1;
 }  
 
 ito_plasma_air3_lea::positive::~positive(){
@@ -241,7 +241,7 @@ ito_plasma_air3_lea::negative::negative(){
   m_isMobile    = false;
   m_isDiffusive = false;
   m_name      = "negative";
-  m_charge    = -1;
+  m_chargeNumber    = -1;
 }  
 
 ito_plasma_air3_lea::negative::~negative(){

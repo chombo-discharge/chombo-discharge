@@ -8,7 +8,7 @@
 namespace physics {
   namespace cdr_plasma {
 
-    class air3_bourdon::electron : public cdr_species {
+    class air3_bourdon::electron : public CdrSpecies {
     public:
       electron();
       ~electron() {}
@@ -21,7 +21,7 @@ namespace physics {
       RealVect m_seed_pos;
     };
 
-    class air3_bourdon::M_plus : public cdr_species {
+    class air3_bourdon::M_plus : public CdrSpecies {
     public:
       M_plus();
       ~M_plus(){}
@@ -33,7 +33,7 @@ namespace physics {
       RealVect m_seed_pos;
     };
 
-    class air3_bourdon::M_minus : public cdr_species {
+    class air3_bourdon::M_minus : public CdrSpecies {
     public:
       M_minus();
       ~M_minus(){}

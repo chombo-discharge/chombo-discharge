@@ -220,7 +220,7 @@ void air7_zheleznyak::init_rng(){
 }
 
 void air7_zheleznyak::instantiate_species(){
-  m_num_cdr_species = 7;
+  m_num_CdrSpecies = 7;
   m_num_rte_species = 1;
 
   m_elec_idx     = 0;
@@ -233,14 +233,14 @@ void air7_zheleznyak::instantiate_species(){
   
   m_phot_idx         = 0;
 
-  m_cdr_species.resize(m_num_cdr_species);
-  m_cdr_species[m_elec_idx]      = RefCountedPtr<cdr_species>  (new air7_zheleznyak::electron());
-  m_cdr_species[m_N2plus_idx]    = RefCountedPtr<cdr_species> (new air7_zheleznyak::N2plus());
-  m_cdr_species[m_O2plus_idx]    = RefCountedPtr<cdr_species> (new air7_zheleznyak::O2plus());
-  m_cdr_species[m_N4plus_idx]    = RefCountedPtr<cdr_species> (new air7_zheleznyak::N4plus());
-  m_cdr_species[m_O4plus_idx]    = RefCountedPtr<cdr_species> (new air7_zheleznyak::O4plus());
-  m_cdr_species[m_O2plusN2_idx]  = RefCountedPtr<cdr_species> (new air7_zheleznyak::O2plusN2());
-  m_cdr_species[m_O2minus_idx]   = RefCountedPtr<cdr_species> (new air7_zheleznyak::O2minus());
+  m_CdrSpecies.resize(m_num_CdrSpecies);
+  m_CdrSpecies[m_elec_idx]      = RefCountedPtr<CdrSpecies>  (new air7_zheleznyak::electron());
+  m_CdrSpecies[m_N2plus_idx]    = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::N2plus());
+  m_CdrSpecies[m_O2plus_idx]    = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::O2plus());
+  m_CdrSpecies[m_N4plus_idx]    = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::N4plus());
+  m_CdrSpecies[m_O4plus_idx]    = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::O4plus());
+  m_CdrSpecies[m_O2plusN2_idx]  = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::O2plusN2());
+  m_CdrSpecies[m_O2minus_idx]   = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::O2minus());
 
   m_rte_species.resize(m_num_rte_species);
   m_rte_species[m_phot_idx] = RefCountedPtr<rte_species> (new air7_zheleznyak::uv_photon());
@@ -306,15 +306,15 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
 					       const Real             a_dt,
 					       const Real             a_time,
 					       const Real             a_kappa) const{
-  Vector<Real>     cdr_src(m_num_cdr_species, 0.0);
+  Vector<Real>     cdr_src(m_num_CdrSpecies, 0.0);
   Vector<Real>     rte_src(m_num_rte_species, 0.0);
-  Vector<Real>     cdr_phi(m_num_cdr_species, 0.0);
+  Vector<Real>     cdr_phi(m_num_CdrSpecies, 0.0);
   Vector<Real>     rte_phi(m_num_rte_species, 0.0);
-  Vector<RealVect> cdr_grad(m_num_cdr_species, RealVect::Zero);
+  Vector<RealVect> cdr_grad(m_num_CdrSpecies, RealVect::Zero);
 
 
   // Copy starting data
-  for (int i = 0; i < m_num_cdr_species; i++){
+  for (int i = 0; i < m_num_CdrSpecies; i++){
     cdr_phi[i]  = a_particle_densities[i];
     cdr_grad[i] = a_particle_gradients[i];
   }
@@ -333,7 +333,7 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
       advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
 
       // Increment
-      for (int i = 0; i < m_num_cdr_species; i++){
+      for (int i = 0; i < m_num_CdrSpecies; i++){
 	cdr_phi[i] = cdr_phi[i] + cdr_src[i]*dt;
       }
 
@@ -349,7 +349,7 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
       Vector<Real> k1 = cdr_src;
 
       // Euler update to k+1
-      for (int i = 0; i < m_num_cdr_species; i++){
+      for (int i = 0; i < m_num_CdrSpecies; i++){
 	cdr_phi[i] += cdr_src[i]*dt;
 	cdr_phi[i] = Max(0.0, cdr_phi[i]);
       }
@@ -363,7 +363,7 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
       advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
 
       // Funky notation, but checks out
-      for (int i = 0; i < m_num_cdr_species; i++){
+      for (int i = 0; i < m_num_CdrSpecies; i++){
 	cdr_phi[i] = cdr_phi[i] + dt*(0.5*cdr_src[i] - 0.5*k1[i]);
       }
     }
@@ -380,27 +380,27 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
       }
 
       // Compute k2 slope
-      for (int i = 0; i < m_num_cdr_species; i++){
+      for (int i = 0; i < m_num_CdrSpecies; i++){
 	cdr_phi[i] = cdr_phi0[i] + 0.5*dt*k1[i];
       }
       advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k2 = cdr_src;
 
       // Compute k3 slope
-      for (int i = 0; i < m_num_cdr_species; i++){
+      for (int i = 0; i < m_num_CdrSpecies; i++){
 	cdr_phi[i] = cdr_phi0[i] + 0.5*dt*k2[i];
       }
       advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k3 = cdr_src;
 
       // Compute k4 slope
-      for (int i = 0; i < m_num_cdr_species; i++){
+      for (int i = 0; i < m_num_CdrSpecies; i++){
 	cdr_phi[i] = cdr_phi0[i] + dt*k3[i];
       }
       advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k4 = cdr_src;
 
-      for (int i = 0; i < m_num_cdr_species; i++){
+      for (int i = 0; i < m_num_CdrSpecies; i++){
 	cdr_phi[i] = cdr_phi0[i] + dt*(k1[i] + 2*k2[i] + 2*k3[i] + k4[i])/6.;
       }
     }
@@ -413,7 +413,7 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
   }
 
   // Linearize source term
-  for (int i = 0; i < m_num_cdr_species; i++){
+  for (int i = 0; i < m_num_CdrSpecies; i++){
     a_particle_sources[i] = (cdr_phi[i] - a_particle_densities[i])/a_dt;
   }
 
@@ -589,7 +589,7 @@ Vector<Real> air7_zheleznyak::compute_cdr_diffusion_coefficients(const Real     
 								 const RealVect     a_E,
 								 const Vector<Real> a_cdr_densities) const {
 
-  Vector<Real> dco(m_num_cdr_species, 0.0);
+  Vector<Real> dco(m_num_CdrSpecies, 0.0);
   dco[m_elec_idx] = m_e_diffco.get_entry(a_E.vectorLength());
   if(m_isDiffusive_ions){
     dco[m_N2plus_idx]   = m_ion_diffusion;
@@ -608,7 +608,7 @@ Vector<RealVect> air7_zheleznyak::compute_cdr_velocities(const Real         a_ti
 							 const RealVect     a_pos,
 							 const RealVect     a_E,
 							 const Vector<Real> a_cdr_densities) const{
-  Vector<RealVect> vel(m_num_cdr_species, RealVect::Zero);
+  Vector<RealVect> vel(m_num_CdrSpecies, RealVect::Zero);
 
   vel[m_elec_idx] = -a_E*m_e_mobility.get_entry(a_E.vectorLength());
   if(m_isMobile_ions){
@@ -633,7 +633,7 @@ Vector<Real> air7_zheleznyak::compute_cdr_domain_fluxes(const Real           a_t
 							const Vector<Real>   a_cdr_gradients,
 							const Vector<Real>   a_rte_fluxes,
 							const Vector<Real>   a_extrap_cdr_fluxes) const{
-  Vector<Real> fluxes(m_num_cdr_species, 0.0);
+  Vector<Real> fluxes(m_num_CdrSpecies, 0.0);
 
   int idx, sgn;
   if(a_side == Side::Lo){
@@ -700,11 +700,11 @@ Vector<Real> air7_zheleznyak::compute_cdr_fluxes(const Real         a_time,
 						 const Vector<Real> a_extrap_cdr_fluxes,
 						 const Real         a_townsend2,
 						 const Real         a_quantum_efficiency) const{
-  Vector<Real> fluxes(m_num_cdr_species, 0.0);
+  Vector<Real> fluxes(m_num_CdrSpecies, 0.0);
 
 
   // Drift outflow for now
-  for (int i = 0; i < m_num_cdr_species; i++){
+  for (int i = 0; i < m_num_CdrSpecies; i++){
     fluxes[i] = Max(0.0, a_extrap_cdr_fluxes[i]);
   }
 

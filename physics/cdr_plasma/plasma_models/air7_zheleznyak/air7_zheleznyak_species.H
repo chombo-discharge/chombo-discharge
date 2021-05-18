@@ -14,7 +14,7 @@
 namespace physics {
   namespace cdr_plasma {
   
-    class air7_zheleznyak::electron : public cdr_species {
+    class air7_zheleznyak::electron : public CdrSpecies {
     public:
       electron();
       ~electron() {}
@@ -27,7 +27,7 @@ namespace physics {
       RealVect m_seed_pos;
     };
 
-    class air7_zheleznyak::N2plus : public cdr_species {
+    class air7_zheleznyak::N2plus : public CdrSpecies {
     public:
       N2plus();
       ~N2plus(){}
@@ -40,7 +40,7 @@ namespace physics {
       RealVect m_seed_pos;
     };
 
-    class air7_zheleznyak::O2plus : public cdr_species {
+    class air7_zheleznyak::O2plus : public CdrSpecies {
     public:
       O2plus();
       ~O2plus(){}
@@ -53,7 +53,7 @@ namespace physics {
       RealVect m_seed_pos;
     };
 
-    class air7_zheleznyak::N4plus : public cdr_species {
+    class air7_zheleznyak::N4plus : public CdrSpecies {
     public:
       N4plus();
       ~N4plus(){}
@@ -61,7 +61,7 @@ namespace physics {
     protected:
     };
 
-    class air7_zheleznyak::O4plus : public cdr_species {
+    class air7_zheleznyak::O4plus : public CdrSpecies {
     public:
       O4plus();
       ~O4plus(){}
@@ -69,7 +69,7 @@ namespace physics {
     protected:
     };
 
-    class air7_zheleznyak::O2plusN2 : public cdr_species {
+    class air7_zheleznyak::O2plusN2 : public CdrSpecies {
     public:
       O2plusN2();
       ~O2plusN2(){}
@@ -77,7 +77,7 @@ namespace physics {
     protected:
     };
 
-    class air7_zheleznyak::O2minus : public cdr_species {
+    class air7_zheleznyak::O2minus : public CdrSpecies {
     public:
       O2minus();
       ~O2minus(){}
