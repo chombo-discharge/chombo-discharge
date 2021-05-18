@@ -1,6 +1,6 @@
 #include "CD_Driver.H"
 #include "bvh.H"
-#include "point_mass.H"
+#include <CD_PointMass.H>
 
 #include <iostream>
 #include <fstream>
@@ -41,14 +41,14 @@ int main(int argc, char* argv[]){
 
 
   // Create initial particles
-  std::vector<point_mass> inputParticles(0);
+  std::vector<PointMass> inputParticles(0);
   Real Mass = 0.0;
   while(inputParticles.size() < num_points){
     const RealVect pos = RealVect(D_DECL(ranFloat(rng), ranFloat(rng), ranFloat(rng)));
     const Real mass    = 1.0*ranInt(rng);
 
     if(pos[1] < pos[0]+0.25){
-      inputParticles.push_back(point_mass(pos, mass, 0.0));
+      inputParticles.push_back(PointMass(pos, mass, 0.0));
       Mass += mass;
     }
   }
@@ -59,24 +59,24 @@ int main(int argc, char* argv[]){
   const RealVect bigPos3 = RealVect(D_DECL(0.75, 0.75, .5));
   const Real bigMass = 1000.;
   Mass += 3*bigMass;
-  inputParticles.push_back(point_mass(bigPos1, bigMass));
-  inputParticles.push_back(point_mass(bigPos2, bigMass));
-  inputParticles.push_back(point_mass(bigPos3, bigMass));
+  inputParticles.push_back(PointMass(bigPos1, bigMass));
+  inputParticles.push_back(PointMass(bigPos2, bigMass));
+  inputParticles.push_back(PointMass(bigPos3, bigMass));
 #endif
 
 
   // Do particle merging/splitting
 
-  bvh_tree<point_mass> tree(inputParticles, Mass);
+  bvh_tree<PointMass> tree(inputParticles, Mass);
   const Real t0 = MPI_Wtime();
   tree.build_tree(ppc);
   const Real t1 = MPI_Wtime();
 
   // Create output particles
-  std::vector<point_mass> outputParticles(0);
-  const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = tree.get_leaves();
+  std::vector<PointMass> outputParticles(0);
+  const std::vector<std::shared_ptr<bvh_node<PointMass> > >& leaves = tree.get_leaves();
   for (int i = 0; i < leaves.size(); i++){
-    const point_mass newParticle(leaves[i]->get_data());
+    const PointMass newParticle(leaves[i]->get_data());
 
     outputParticles.push_back(newParticle);
   }

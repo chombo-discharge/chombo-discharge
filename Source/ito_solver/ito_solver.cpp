@@ -2878,7 +2878,7 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
   RealVect center_after = RealVect::Zero;
 #endif
   
-  std::vector<point_mass> pointMasses(a_particles.length());
+  std::vector<PointMass> pointMasses(a_particles.length());
   int i = 0;
   Real mass = 0.0;
   for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit, i++){
@@ -2905,12 +2905,12 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
   const int dir = (m_kd_direction < 0) ? m_udist0d(m_rng) : m_kd_direction;
   m_tree.define(pointMasses, mass);
   m_tree.build_tree(dir, a_particlesPerCell);
-  const std::vector<std::shared_ptr<bvh_node<point_mass> > >& leaves = m_tree.get_leaves();
+  const std::vector<std::shared_ptr<bvh_node<PointMass> > >& leaves = m_tree.get_leaves();
 
   // 3. Clear particles in this cell and add new ones.
   a_particles.clear();
   for (int i = 0; i < leaves.size(); i++){
-    point_mass pointMass(leaves[i]->get_data());
+    PointMass pointMass(leaves[i]->get_data());
     ito_particle p(pointMass.mass(), pointMass.pos(), RealVect::Zero, 0.0, 0.0, pointMass.energy());
     a_particles.add(p);
 

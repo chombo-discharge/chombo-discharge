@@ -1,26 +1,32 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   point_mass.H
+  @file   CD_PointMass.H
   @brief  Declaration of a simple class for storing a point with mass 
   @author Robert Marskar
-  @date   May 2020
 */
 
-#ifndef _POINTMASS_H_
-#define _POINTMASS_H_
+#ifndef CD_PointMass_H
+#define CD_PointMass_H
 
-#include "RealVect.H"
+// Chombo includes
+#include <RealVect.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
   
 /*!
-  @brief  Declaration of a simple class for storing a point with mass 
+  @brief Declaration of a simple class for storing a point with mass. This is not a computational particle. 
 */
-class point_mass{
+class PointMass{
 public:
-  point_mass();
-  point_mass(const RealVect a_pos, const Real a_mass, const Real a_energy);
-  point_mass(const std::vector<point_mass>& a_point_masses);
-  ~point_mass();
+  PointMass();
+  PointMass(const RealVect a_pos, const Real a_mass, const Real a_energy);
+  PointMass(const std::vector<PointMass>& a_PointMasses);
+  ~PointMass();
 
   inline
   void define(const RealVect& a_pos, const Real& a_mass, const Real& a_energy){
@@ -74,10 +80,11 @@ public:
     return m_mass*(1.0 + 1.E-6) >= 2.0;
   }
   
-  RealVect m_pos;   // Position of this point_mass
-  Real     m_mass;  // How many points does this this point_mass represent
+  RealVect m_pos;   // Position of this PointMass
+  Real     m_mass;  // How many points does this this PointMass represent
   Real     m_energy;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

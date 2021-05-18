@@ -15,7 +15,7 @@
 #include <CD_EbParticleInterp.H>
 #include <CD_ParticleContainer.H>
 #include "bvh.H"
-#include "point_mass.H"
+#include <CD_PointMass.H>
 
 #include <Particle.H>
 #include <ParticleData.H>
@@ -747,7 +747,7 @@ protected:
   /*!
     @brief Boundary volume hierarchy merging tree
   */
-  bvh_tree<point_mass> m_tree;
+  bvh_tree<PointMass> m_tree;
 
   /*!
     @brief Computational geometry. 
