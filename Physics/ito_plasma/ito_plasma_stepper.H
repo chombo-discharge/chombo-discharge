@@ -83,7 +83,6 @@ namespace physics {
       void registerOperators() override;
       
       // Regrid routines. 
-      void deallocate() override;
       virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
       virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       void postRegrid() override;
@@ -334,7 +333,7 @@ namespace physics {
     protected:
 
       std::string m_fluid_Realm;     // Realm for Poisson and sigma solver. Defaults to Realm::Primal
-      std::string m_particle_Realm;  // Realm for particles. Defaults to Realm::Primal
+      std::string m_particleRealm;  // Realm for particles. Defaults to Realm::Primal
       std::string m_name;
       phase::which_phase m_phase;
 

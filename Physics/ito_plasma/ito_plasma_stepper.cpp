@@ -32,7 +32,7 @@ ito_plasma_stepper::ito_plasma_stepper(){
   m_regrid_superparticles = true;
 
   m_fluid_Realm    = Realm::Primal;
-  m_particle_Realm = Realm::Primal;
+  m_particleRealm = Realm::Primal;
 }
 
 ito_plasma_stepper::ito_plasma_stepper(RefCountedPtr<ito_plasma_physics>& a_physics) : ito_plasma_stepper(){
@@ -83,7 +83,7 @@ void ito_plasma_stepper::setup_ito(){
   m_ito->setAmr(m_amr);
   m_ito->setPhase(m_phase);
   m_ito->setComputationalGeometry(m_computationalGeometry);
-  m_ito->setRealm(m_particle_Realm);
+  m_ito->setRealm(m_particleRealm);
 }
 
 void ito_plasma_stepper::setup_poisson(){
@@ -111,7 +111,7 @@ void ito_plasma_stepper::setup_rte(){
   m_rte->setPhase(m_phase);
   m_rte->setAmr(m_amr);
   m_rte->setComputationalGeometry(m_computationalGeometry);
-  m_rte->setRealm(m_particle_Realm);
+  m_rte->setRealm(m_particleRealm);
   m_rte->sanityCheck();
 }
 
@@ -245,7 +245,7 @@ void ito_plasma_stepper::post_checkpoint_poisson(){
   }
 
   // Do some post checkpointing stuff. 
-  m_fieldSolver->post_checkpoint();
+  m_fieldSolver->postCheckpoint();
   
   // Do ghost cells and then compute E
   MFAMRCellData& state = m_fieldSolver->getPotential();
@@ -253,12 +253,12 @@ void ito_plasma_stepper::post_checkpoint_poisson(){
   m_amr->averageDown(state, m_fluid_Realm);
   m_amr->interpGhost(state, m_fluid_Realm);
 
-  m_fieldSolver->compute_E();    // Solver checkpoints the potential. Now compute the field.
+  m_fieldSolver->computeElectricField();    // Solver checkpoints the potential. Now compute the field.
 
   // Interpolate the fields to centroids
   EBAMRCellData E;
   m_amr->allocatePointer(E);
-  m_amr->alias(E, m_phase, m_fieldSolver->get_E());
+  m_amr->alias(E, m_phase, m_fieldSolver->getElectricField());
   
   // Fluid Realm
   m_fluid_E.copy(E);
@@ -268,9 +268,9 @@ void ito_plasma_stepper::post_checkpoint_poisson(){
 
   // Particle Realm
   m_particle_E.copy(E);
-  m_amr->averageDown(m_particle_E,             m_particle_Realm, m_phase);
-  m_amr->interpGhostPwl(m_particle_E,         m_particle_Realm, m_phase);
-  m_amr->interpToCentroids(m_particle_E, m_particle_Realm, m_phase);
+  m_amr->averageDown(m_particle_E,             m_particleRealm, m_phase);
+  m_amr->interpGhostPwl(m_particle_E,         m_particleRealm, m_phase);
+  m_amr->interpToCentroids(m_particle_E, m_particleRealm, m_phase);
 
   // Compute maximum E
   // const Real Emax = this->compute_Emax(m_phase);
@@ -393,7 +393,7 @@ void ito_plasma_stepper::write_num_particles_per_patch(EBAMRCellData& a_output, 
     const particle_container<ito_particle>& particles = solver_it()->get_particles(ito_solver::which_container::bulk);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particle_Realm)[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	(*m_particle_scratch1[lvl])[dit()] += particles[lvl][dit].numItems();
       }
@@ -729,7 +729,7 @@ void ito_plasma_stepper::registerRealms(){
   }
 
   m_amr->registerRealm(m_fluid_Realm);
-  m_amr->registerRealm(m_particle_Realm);
+  m_amr->registerRealm(m_particleRealm);
 }
 
 void ito_plasma_stepper::registerOperators(){
@@ -743,7 +743,7 @@ void ito_plasma_stepper::registerOperators(){
   m_rte->registerOperators();
   m_sigma->registerOperators();
 
-  m_amr->registerMask("particle_halo", m_halo_buffer, m_particle_Realm);
+  m_amr->registerMask("particle_halo", m_halo_buffer, m_particleRealm);
 }
   
 void ito_plasma_stepper::preRegrid(const int a_lmin, const int a_oldFinestLevel){
@@ -756,15 +756,6 @@ void ito_plasma_stepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_rte->preRegrid(a_lmin,     a_oldFinestLevel);
   m_sigma->preRegrid(a_lmin,   a_oldFinestLevel);
-}
-
-void ito_plasma_stepper::deallocate(){
-  CH_TIME("ito_plasma_stepper::deallocate");
-  if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::deallocate" << endl;
-  }
-
-  // Don't deallocate anything. 
 }
 
 void ito_plasma_stepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
@@ -877,7 +868,7 @@ Real ito_plasma_stepper::compute_Emax(const phase::which_phase a_phase) {
   // Get a handle to the E-field
   EBAMRCellData Ephase;
   m_amr->allocatePointer(Ephase);
-  m_amr->alias(Ephase, m_phase, m_fieldSolver->get_E());
+  m_amr->alias(Ephase, m_phase, m_fieldSolver->getElectricField());
 
   // Interpolate to centroids
   EBAMRCellData E;
@@ -1184,7 +1175,7 @@ Real ito_plasma_stepper::compute_relaxation_time(const int a_level, const DataIn
   // Get a handle to the E-field
   EBAMRCellData amrE;
   m_amr->allocatePointer(amrE);
-  m_amr->alias(amrE, m_phase, m_fieldSolver->get_E());
+  m_amr->alias(amrE, m_phase, m_fieldSolver->getElectricField());
   
   const EBCellFAB& E = (*amrE[a_level])[a_dit];
   const EBCellFAB& J = (*m_J[a_level])[a_dit];
@@ -1223,12 +1214,12 @@ bool ito_plasma_stepper::solve_poisson(){
 					  false);
 
   // Computes cell-centered E onto storage in the field solver
-  m_fieldSolver->compute_E();
+  m_fieldSolver->computeElectricField();
 
   // Code below here interpolates E to centroids on both Realms
   EBAMRCellData E;
   m_amr->allocatePointer(E);
-  m_amr->alias(E, m_phase, m_fieldSolver->get_E());
+  m_amr->alias(E, m_phase, m_fieldSolver->getElectricField());
   
   // Fluid Realm
   m_fluid_E.copy(E);
@@ -1238,9 +1229,9 @@ bool ito_plasma_stepper::solve_poisson(){
 
   // Particle Realm
   m_particle_E.copy(E);
-  m_amr->averageDown(m_particle_E, m_particle_Realm, m_phase);
-  m_amr->interpGhostPwl(m_particle_E, m_particle_Realm, m_phase);
-  m_amr->interpToCentroids(m_particle_E, m_particle_Realm, m_phase);
+  m_amr->averageDown(m_particle_E, m_particleRealm, m_phase);
+  m_amr->interpGhostPwl(m_particle_E, m_particleRealm, m_phase);
+  m_amr->interpToCentroids(m_particle_E, m_particleRealm, m_phase);
     
   return converged;
 }
@@ -1260,7 +1251,7 @@ bool ito_plasma_stepper::solve_poisson(MFAMRCellData&                a_potential
 					  a_rho,
 					  a_sigma,
 					  false);
-  m_fieldSolver->compute_E();
+  m_fieldSolver->computeElectricField();
   
   return converged;
 }
@@ -1677,8 +1668,8 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBAMRCellData*>& a_me
       // Copy to particle Realm, build ghost cells and the interpolate the mobilities to particle positions. 
       a_meshMobilities[idx]->copy(m_fscratch1[idx]);
       
-      m_amr->averageDown(*a_meshMobilities[idx], m_particle_Realm, m_phase);
-      m_amr->interpGhost(*a_meshMobilities[idx], m_particle_Realm, m_phase);
+      m_amr->averageDown(*a_meshMobilities[idx], m_particleRealm, m_phase);
+      m_amr->interpGhost(*a_meshMobilities[idx], m_particleRealm, m_phase);
 #endif
 
       solver->interpolate_mobilities();
@@ -1840,8 +1831,8 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&      
 #else // Instead, we copy to the particle Realm and average down there, then interpolate. 
       a_diffusionCoefficient_funcs[idx]->copy(m_fscratch1[idx]);
       
-      m_amr->averageDown(*a_diffusionCoefficient_funcs[idx], m_particle_Realm, m_phase);
-      m_amr->interpGhost(*a_diffusionCoefficient_funcs[idx], m_particle_Realm, m_phase);
+      m_amr->averageDown(*a_diffusionCoefficient_funcs[idx], m_particleRealm, m_phase);
+      m_amr->interpGhost(*a_diffusionCoefficient_funcs[idx], m_particleRealm, m_phase);
 #endif
 
       solver->interpolate_diffusion();
@@ -1991,8 +1982,8 @@ void ito_plasma_stepper::compute_reactive_particles_per_cell(LevelData<EBCellFAB
     pout() << "ito_plasma_stepper::compute_reactive_particles_per_cell(ppc, lvl)" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_particle_Realm)[a_level];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_particle_Realm, m_phase)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_particleRealm, m_phase)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       
@@ -2038,7 +2029,7 @@ void ito_plasma_stepper::compute_reactive_particles_per_cell(EBCellFAB& a_ppc, c
     }
 
     // Irregular cells.
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_particle_Realm, m_phase)[a_level])[a_dit];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_phase)[a_level])[a_dit];
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof       = vofit();
       const IntVect iv          = vof.gridIndex();
@@ -2081,8 +2072,8 @@ void ito_plasma_stepper::compute_reactive_mean_energies_per_cell(LevelData<EBCel
     pout() << "ito_plasma_stepper::compute_reactive_mean_energies_per_cell(ppc, lvl)" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_particle_Realm)[a_level];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_particle_Realm, m_phase)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_particleRealm, m_phase)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       
@@ -2132,7 +2123,7 @@ void ito_plasma_stepper::compute_reactive_mean_energies_per_cell(EBCellFAB&     
     }
 
     // Irregular cells.
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_particle_Realm, m_phase)[a_level])[a_dit];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_phase)[a_level])[a_dit];
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof       = vofit();
       const IntVect iv          = vof.gridIndex();
@@ -2355,7 +2346,7 @@ void ito_plasma_stepper::reconcile_particles(const LevelData<EBCellFAB>& a_newPa
     pout() << "ito_plasma_stepper::reconcile_particles(LevelData<EBCellFAB>x3, int)" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_particle_Realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     this->reconcile_particles(a_newParticlesPerCell[dit()],
@@ -2387,8 +2378,8 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
 
   const RealVect prob_lo = m_amr->getProbLo();
 
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_particle_Realm, m_phase)[a_level][a_dit];
-  const EBISBox& ebgraph = m_amr->getEBISLayout(m_particle_Realm, m_phase)[a_level][a_dit];
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_phase)[a_level][a_dit];
+  const EBISBox& ebgraph = m_amr->getEBISLayout(m_particleRealm, m_phase)[a_level][a_dit];
 
   Vector<BinFab<ito_particle>* > particlesFAB(num_ito_species);
   Vector<BinFab<photon>* >       sourcePhotonsFAB(num_rte_species);
@@ -2471,7 +2462,7 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
   }
 
   // Irregular cells
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_particle_Realm, m_phase)[a_level])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_phase)[a_level])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof          = vofit();
     const IntVect iv             = vof.gridIndex();
@@ -2645,7 +2636,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<LayoutData<BinFab<ito_p
   const int num_ito_species = m_physics->get_num_ito_species();
   const int num_rte_species = m_physics->get_num_rte_species();
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_particle_Realm)[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_lvl];
   const Real dx = m_amr->getDx()[a_lvl];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -2695,8 +2686,8 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
   const RealVect prob_lo = m_amr->getProbLo();
   const RealVect dx      = a_dx*RealVect::Unit;
 
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_particle_Realm, m_phase)[a_lvl][a_dit];
-  const EBISBox& ebgraph = m_amr->getEBISLayout(m_particle_Realm, m_phase)[a_lvl][a_dit];
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_phase)[a_lvl][a_dit];
+  const EBISBox& ebgraph = m_amr->getEBISLayout(m_particleRealm, m_phase)[a_lvl][a_dit];
 
   const BaseFab<Real>& Efab = a_E.getSingleValuedFAB();
 
@@ -2746,7 +2737,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
   }
 
   // Now do the irregular cells
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_particle_Realm, m_phase)[a_lvl])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_phase)[a_lvl])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex vof = vofit();
     const IntVect iv   = vof.gridIndex();
@@ -2846,7 +2837,7 @@ Real ito_plasma_stepper::compute_physics_dt(const LevelData<EBCellFAB>& a_E, con
 
   const int num_ito_species = m_physics->get_num_ito_species();
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_particle_Realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
 
   Real minDt = 1.E99;
   
@@ -2892,7 +2883,7 @@ Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<E
   const Real dx          = m_amr->getDx()[a_level];
   const RealVect prob_lo = m_amr->getProbLo();
   const BaseFab<Real>& E = a_E.getSingleValuedFAB();
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_particle_Realm, m_phase)[a_level][a_dit];
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_phase)[a_level][a_dit];
 
   // Do regular cells
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
@@ -2916,7 +2907,7 @@ Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<E
   }
 
   // Do irregular cells
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_particle_Realm, m_phase)[a_level])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_phase)[a_level])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
     const RealVect e    = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
@@ -3093,7 +3084,7 @@ bool ito_plasma_stepper::loadBalanceThisRealm(const std::string a_realm) const{
 
   bool ret = false;
 
-  if(a_realm == m_particle_Realm && m_LoadBalancing){
+  if(a_realm == m_particleRealm && m_LoadBalancing){
     ret = true;
   }
   
@@ -3111,7 +3102,7 @@ void ito_plasma_stepper::loadBalanceBoxes(Vector<Vector<int> >&            a_pro
     pout() << "ito_plasma_stepper_stepper::loadBalanceBoxes" << endl;
   }
 
-  if(m_LoadBalancing && a_realm == m_particle_Realm){
+  if(m_LoadBalancing && a_realm == m_particleRealm){
     this->LoadBalancing_particle_Realm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
   }
   else{
@@ -3129,7 +3120,7 @@ Vector<long int> ito_plasma_stepper::getCheckpointLoads(const std::string a_real
   const int nbox = dbl.size();
 
   Vector<long int> loads(nbox, 0L);
-  if(m_LoadBalancing && a_realm == m_particle_Realm){
+  if(m_LoadBalancing && a_realm == m_particleRealm){
     Vector<RefCountedPtr<ito_solver> > lb_solvers = this->get_lb_solvers();
     
     for (int isolver = 0; isolver < lb_solvers.size(); isolver++){
@@ -3284,7 +3275,7 @@ void ito_plasma_stepper::compute_EdotJ_source(){
 
       // Compute the negative gradient of the diffusion term
       solver->deposit_diffusivity(m_particle_scratch1, solver->get_particles(ito_solver::which_container::bulk));
-      m_amr->computeGradient(m_particle_scratchD, m_particle_scratch1, m_particle_Realm, m_phase);
+      m_amr->computeGradient(m_particle_scratchD, m_particle_scratch1, m_particleRealm, m_phase);
       data_ops::scale(m_particle_scratchD, -1.0); // scratchD = -grad(D*n)
       
       data_ops::dot_prod(m_particle_scratch1, m_particle_scratchD, m_particle_E); // m_particle_scratch1 = -E*grad(D*n)
@@ -3369,7 +3360,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo2(const Real a_dt){
 
       // We will interpolate m_particle_E onto particle velocity vectors.
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-	const DisjointBoxLayout& dbl = m_amr->getGrids(m_particle_Realm)[lvl];
+	const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	  const EBCellFAB& E     = (*m_particle_E[lvl])[dit()];
@@ -3410,7 +3401,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo2(const Real a_dt){
 
       // Set p.mass() back to the original value
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-	const DisjointBoxLayout& dbl = m_amr->getGrids(m_particle_Realm)[lvl];
+	const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	  List<ito_particle>& particleList = particles[lvl][dit()].listItems();
 

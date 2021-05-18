@@ -148,6 +148,21 @@ public:
     @param[in] a_needsSetup If true, multigrid will be set up before the next solve. 
   */
   virtual void setNeedsMultigridSetup(const bool a_needsSetup);
+
+    /*!
+    @brief Get a-coefficient
+  */
+  virtual MFAMRCellData& getACoefficient();
+
+  /*!
+    @brief Get b-coefficient
+  */
+  virtual MFAMRFluxData& getBCoefficient();
+
+  /*!
+    @brief Get irregular b coefficient
+  */
+  virtual MFAMRIVData& getBCoefficientIrreg();
   
 protected:
 
@@ -327,21 +342,6 @@ protected:
     @brief EBLevelgrids for the multigrid pre-coarsening
   */
   Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
-
-  /*!
-    @brief Get a-coefficient
-  */
-  virtual MFAMRCellData& getACoefficient();
-
-  /*!
-    @brief Get b-coefficient
-  */
-  virtual MFAMRFluxData& getBCoefficient();
-
-  /*!
-    @brief Get irregular b coefficient
-  */
-  virtual MFAMRIVData& getBCoefficientIrreg();
 
   /*!
     @brief Set face-centered permittivities
