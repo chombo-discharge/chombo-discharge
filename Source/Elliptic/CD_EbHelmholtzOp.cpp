@@ -1311,48 +1311,9 @@ void EbHelmholtzOp::relax(LevelData<EBCellFAB>&       a_phi,
   }
 }
 
-void EbHelmholtzOp::relax_mf(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, const int a_iterations){
-  CH_TIME("EbHelmholtzOp::relax_mf");
-
-  const bool homogeneous       = true;
-  const int ncomps             = a_phi.nComp();
-  const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
-  
-
-  // Apply domain flux
-  for (DataIterator dit = a_phi.dataIterator(); dit.ok(); ++dit){
-
-    Box dblbox(m_eblg.getDBL().get(dit()));
-    BaseFab<Real>& phifab = a_phi[dit()].getSingleValuedFAB();
-    Box lo_box[SpaceDim], hi_box[SpaceDim];
-    int has_lo[SpaceDim], has_hi[SpaceDim];
-    
-    // Apply the domain flux to phi
-    this->applyDomainFlux(lo_box, hi_box, has_lo, has_hi, dblbox, ncomps, phifab, homogeneous, dit());
-  }
-
-  // Red-black iteration
-  for (int redBlack = 0; redBlack <= 1; redBlack++){
-    a_phi.exchange();
-
-    if(m_hasCoar){
-      this->applyCFBCs(a_phi, NULL, true);
-    }
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      EBCellFAB& phi       = a_phi[dit()];
-      const EBCellFAB& rhs = a_rhs[dit()];
-    }
-  }
-  MayDay::Abort("EbHelmholtzOp::relax_mf - stop here");
-}
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
-	      const LevelData<EBCellFAB>& a_rhs,
-	      int                         a_iterations)
-{
+void EbHelmholtzOp::relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
+				  const LevelData<EBCellFAB>& a_rhs,
+				  int                         a_iterations){
   CH_TIME("EbHelmholtzOp::relaxGSRBFast");
 
   CH_assert(a_phi.ghostVect() == m_ghostCellsPhi);
@@ -1360,9 +1321,7 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
   CH_assert(a_phi.nComp() == 1);
   CH_assert(a_rhs.nComp() == 1);
 
-
-  for (int whichIter =0; whichIter < a_iterations; whichIter++)
-    {
+  for (int whichIter =0; whichIter < a_iterations; whichIter++){
 
       //this is a multigrid operator so only homogeneous CF BC and null coar level
       CH_assert(a_rhs.ghostVect()    == m_ghostCellsRHS);
@@ -1378,8 +1337,7 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
 #pragma omp parallel
       {
 #pragma omp for
-	for (int mybox=0;mybox<nbox; mybox++)
-	  {
+	for (int mybox=0;mybox<nbox; mybox++){
 	    Box dblBox(m_eblg.getDBL().get(dit[mybox]));
 	    EBCellFAB& phi = a_phi[dit[mybox]];
 	    BaseFab<Real>& phiFAB       = phi.getSingleValuedFAB();
@@ -1387,12 +1345,10 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
 	    Box loBox[SpaceDim],hiBox[SpaceDim];
 	    int hasLo[SpaceDim],hasHi[SpaceDim];
 
-	    {
-	      //           CH_TIME("EbHelmholtzOp::levelGSRB::applyDomainFlux");
-	      applyDomainFlux(loBox, hiBox, hasLo, hasHi,
-			      dblBox, nComps, phiFAB,
-			      true, dit[mybox]);
-	    }
+	    this->applyDomainFlux(loBox, hiBox, hasLo, hasHi,
+				  dblBox, nComps, phiFAB,
+				  true, dit[mybox]);
+
 	    ibox++;
 	  }
 
@@ -1401,101 +1357,84 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
       // do first red, then black passes
       // int id = omp_get_thread_num();
       // pout() << "my thread " << id << endl;
-      for (int redBlack =0; redBlack <= 1; redBlack++)
-	{
+      for (int redBlack =0; redBlack <= 1; redBlack++){
 	  //          CH_TIME("EbHelmholtzOp::levelGSRB::Compute");
             
 	  a_phi.exchange();
             
-	  if (m_hasCoar)
-	    {
-	      //              CH_TIME("EbHelmholtzOp::levelGSRB::homogeneousCFInterp");
-	      applyCFBCs(a_phi, NULL, true);
-	    }
+	  if (m_hasCoar){
+	    this->applyCFBCs(a_phi, NULL, true);
+	  }
 	  ibox = 0;
 #pragma omp parallel
 	  {
 #pragma omp for
-	    for (int mybox=0;mybox<nbox; mybox++)
-	      {
-		EBCellFAB& phifab = a_phi[dit[mybox]];
-		const EBCellFAB& rhsfab = a_rhs[dit[mybox]];
+	    for (int mybox=0;mybox<nbox; mybox++) {
+	      EBCellFAB& phifab = a_phi[dit[mybox]];
+	      const EBCellFAB& rhsfab = a_rhs[dit[mybox]];
                 
-		//cache phi
-		for (int c = 0; c < m_colors.size()/2; ++c)
-		  {
-		    m_colorEBStencil[m_colors.size()/2*redBlack+c][dit[mybox]]->cachePhi(phifab);
-		  }
-                
-		//reg cells
-		const Box& region = dbl.get(dit[mybox]);
-		Box dblBox(m_eblg.getDBL().get(dit[mybox]));
-		//dummy has to be real because basefab::dataPtr is retarded
-		BaseFab<Real> dummy(Box(IntVect::Zero, IntVect::Zero), 1);
-                
-		BaseFab<Real>      & reguPhi =      (a_phi[dit[mybox]]).getSingleValuedFAB();
-		const BaseFab<Real>& reguRHS =     (a_rhs[dit[mybox]] ).getSingleValuedFAB();
-		const BaseFab<Real>& relCoef = (m_relCoef[dit[mybox]] ).getSingleValuedFAB();
-		const BaseFab<Real>& regACoe =((*m_aCoefficient)[dit[mybox]] ).getSingleValuedFAB();
-		const BaseFab<Real>* regBCoe[3];
-		//need three coeffs because this has to work in 3d
-		//this is my klunky way to make the call dimension-independent
-		for (int iloc = 0; iloc < 3; iloc++)
-		  {
-		    if (iloc >= SpaceDim)
-		      {
-			regBCoe[iloc]= &dummy;
-		      }
-		    else
-		      {
-			regBCoe[iloc] = &((*m_bcoef)[dit[mybox]][iloc].getSingleValuedFAB());
-		      }
-		  }
-                
-                
-		for (int comp = 0; comp < a_phi.nComp(); comp++)
-		  {
-		    FORT_CONDUCTIVITYGSRB(CHF_FRA1(        reguPhi,    comp),
-					  CHF_CONST_FRA1(  reguRHS,    comp),
-					  CHF_CONST_FRA1(  relCoef,    comp),
-					  CHF_CONST_FRA1(  regACoe,    comp),
-					  CHF_CONST_FRA1((*regBCoe[0]),comp),
-					  CHF_CONST_FRA1((*regBCoe[1]),comp),
-					  CHF_CONST_FRA1((*regBCoe[2]),comp),
-					  CHF_CONST_REAL(m_alpha),
-					  CHF_CONST_REAL(m_beta),
-					  CHF_CONST_REAL(m_dx),
-					  CHF_BOX(region),
-					  CHF_CONST_INT(redBlack));
-		  }
-
-		//uncache phi
-		for (int c = 0; c < m_colors.size()/2; ++c)
-		  {
-		    m_colorEBStencil[m_colors.size()/2*redBlack+c][dit[mybox]]->uncachePhi(phifab);
-		  }
-                
-		for (int c = 0; c < m_colors.size()/2; ++c)
-		  {
-		    GSColorAllIrregular(phifab, rhsfab, m_colors.size()/2*redBlack+c, dit[mybox]);
-		  }
-		ibox++;
+	      //cache phi
+	      for (int c = 0; c < m_colors.size()/2; ++c){
+		m_colorEBStencil[m_colors.size()/2*redBlack+c][dit[mybox]]->cachePhi(phifab);
 	      }
+                
+	      //reg cells
+	      const Box& region = dbl.get(dit[mybox]);
+	      Box dblBox(m_eblg.getDBL().get(dit[mybox]));
+	      //dummy has to be real because basefab::dataPtr is retarded
+	      BaseFab<Real> dummy(Box(IntVect::Zero, IntVect::Zero), 1);
+                
+	      BaseFab<Real>      & reguPhi =      (a_phi[dit[mybox]]).getSingleValuedFAB();
+	      const BaseFab<Real>& reguRHS =     (a_rhs[dit[mybox]] ).getSingleValuedFAB();
+	      const BaseFab<Real>& relCoef = (m_relCoef[dit[mybox]] ).getSingleValuedFAB();
+	      const BaseFab<Real>& regACoe =((*m_aCoefficient)[dit[mybox]] ).getSingleValuedFAB();
+	      const BaseFab<Real>* regBCoe[3];
+	      //need three coeffs because this has to work in 3d
+	      //this is my klunky way to make the call dimension-independent
+	      for (int iloc = 0; iloc < 3; iloc++){
+		if (iloc >= SpaceDim){
+		  regBCoe[iloc]= &dummy;
+		}
+		else{
+		  regBCoe[iloc] = &((*m_bcoef)[dit[mybox]][iloc].getSingleValuedFAB());
+		}
+	      }
+                
+                
+	      for (int comp = 0; comp < a_phi.nComp(); comp++){
+		FORT_CONDUCTIVITYGSRB(CHF_FRA1(        reguPhi,    comp),
+				      CHF_CONST_FRA1(  reguRHS,    comp),
+				      CHF_CONST_FRA1(  relCoef,    comp),
+				      CHF_CONST_FRA1(  regACoe,    comp),
+				      CHF_CONST_FRA1((*regBCoe[0]),comp),
+				      CHF_CONST_FRA1((*regBCoe[1]),comp),
+				      CHF_CONST_FRA1((*regBCoe[2]),comp),
+				      CHF_CONST_REAL(m_alpha),
+				      CHF_CONST_REAL(m_beta),
+				      CHF_CONST_REAL(m_dx),
+				      CHF_BOX(region),
+				      CHF_CONST_INT(redBlack));
+	      }
+
+	      //uncache phi
+	      for (int c = 0; c < m_colors.size()/2; ++c){
+		m_colorEBStencil[m_colors.size()/2*redBlack+c][dit[mybox]]->uncachePhi(phifab);
+	      }
+                
+	      for (int c = 0; c < m_colors.size()/2; ++c){
+		GSColorAllIrregular(phifab, rhsfab, m_colors.size()/2*redBlack+c, dit[mybox]);
+	      }
+	      ibox++;
+	    }
 	  }
-	} // end pragma
-    } //end red black
-
-
+      } // end pragma
+  } //end red black
 }//end loop over iterations
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-GSColorAllIrregular(EBCellFAB&                   a_phi,
-		    const EBCellFAB&             a_rhs,
-		    const int&                   a_icolor,
-		    const DataIndex&             a_dit)
-{
-  CH_TIME("EBConductivyOp::GSColorAllIrregular");
+
+void EbHelmholtzOp::GSColorAllIrregular(EBCellFAB&                   a_phi,
+					const EBCellFAB&             a_rhs,
+					const int&                   a_icolor,
+					const DataIndex&             a_dit){
 
   int comp = 0;
   Real time = 0;
@@ -1563,13 +1502,10 @@ GSColorAllIrregular(EBCellFAB&                   a_phi,
 	}
     }
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-relaxGauSai(LevelData<EBCellFAB>&       a_phi,
-	    const LevelData<EBCellFAB>& a_rhs,
-	    int                         a_iterations)
-{
+
+void EbHelmholtzOp::relaxGauSai(LevelData<EBCellFAB>&       a_phi,
+				const LevelData<EBCellFAB>& a_rhs,
+				int                         a_iterations){
   CH_TIME("EbHelmholtzOp::relaxGauSai");
 
   CH_assert(a_phi.ghostVect() == m_ghostCellsPhi);
@@ -1579,56 +1515,22 @@ relaxGauSai(LevelData<EBCellFAB>&       a_phi,
   CH_assert(a_rhs.nComp() == 1);
 
   LevelData<EBCellFAB> lphi;
-  create(lphi, a_rhs);
-  for (int whichIter =0; whichIter < a_iterations; whichIter++)
-    {
-      for (int icolor = 0; icolor < m_colors.size(); icolor++)
-	{
-	  applyHomogeneousCFBCs(a_phi);
-
-
+  this->create(lphi, a_rhs);
+  for (int whichIter =0; whichIter < a_iterations; whichIter++){
+      for (int icolor = 0; icolor < m_colors.size(); icolor++){
+	  this->applyHomogeneousCFBCs(a_phi);
 
 	  //after this lphi = L(phi)
 	  //this call contains bcs and exchange
-	  applyOp(  lphi,  a_phi, true);
-	  gsrbColor(a_phi, lphi, a_rhs, m_colors[icolor]);
-	}
-    }
-}
-
-void EbHelmholtzOp::lazyGauSai(LevelData<EBCellFAB>&       a_phi,
-			       const LevelData<EBCellFAB>& a_rhs){
-  CH_TIME("EbHelmholtzOp::lazyGauSai");
-
-  CH_assert(a_phi.ghostVect() == m_ghostCellsPhi);
-  CH_assert(a_rhs.ghostVect() == m_ghostCellsRHS);
-
-  CH_assert(a_phi.nComp() == 1);
-  CH_assert(a_rhs.nComp() == 1);
-
-  LevelData<EBCellFAB> lphi;
-  create(lphi, a_rhs);
-
-  for (int icolor = 0; icolor < m_colors.size(); icolor++){
-    applyHomogeneousCFBCs(a_phi);
-
-
-    //after this lphi = L(phi)
-    applyOp(lphi, a_phi, NULL, true, true, false);
-    gsrbColor(a_phi, lphi, a_rhs, m_colors[icolor]);
-
-    if((icolor-1) % 2 == 0 && icolor - 1 < m_colors.size()){
-      a_phi.exchange();
-    }
+	  this->applyOp(  lphi,  a_phi, true);
+	  this->gsrbColor(a_phi, lphi, a_rhs, m_colors[icolor]);
+      }
   }
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-relaxPoiJac(LevelData<EBCellFAB>&       a_phi,
-	    const LevelData<EBCellFAB>& a_rhs,
-	    int                         a_iterations)
-{
+
+void EbHelmholtzOp::relaxPoiJac(LevelData<EBCellFAB>&       a_phi,
+				const LevelData<EBCellFAB>& a_rhs,
+				int                         a_iterations){
   CH_TIME("EbHelmholtzOp::relaxPoiJac");
 
   CH_assert(a_phi.ghostVect() == m_ghostCellsPhi);
@@ -1638,38 +1540,33 @@ relaxPoiJac(LevelData<EBCellFAB>&       a_phi,
   CH_assert(a_rhs.nComp() == 1);
 
   LevelData<EBCellFAB> lphi;
-  create(lphi, a_rhs);
-  for (int whichIter =0; whichIter < a_iterations; whichIter++)
-    {
-      applyHomogeneousCFBCs(a_phi);
+  this->create(lphi, a_rhs);
+  for (int whichIter =0; whichIter < a_iterations; whichIter++){
+      this->applyHomogeneousCFBCs(a_phi);
 
       //after this lphi = L(phi)
       //this call contains bcs and exchange
-      applyOp(  lphi,  a_phi, true);
+      this->applyOp(  lphi,  a_phi, true);
 
       DataIterator dit = m_eblg.getDBL().dataIterator(); 
       int nbox = dit.size();
 #pragma omp parallel for
-      for(int mybox=0; mybox<nbox; mybox++)
-	{
+      for(int mybox=0; mybox<nbox; mybox++){
 
-	  lphi[dit[mybox]] -=     a_rhs[dit[mybox]];
-	  lphi[dit[mybox]] *= m_relCoef[dit[mybox]];
-	  //this is a safety factor because pt jacobi needs a smaller
-	  //relaxation param
-	  lphi[dit[mybox]] *= -0.5;
-	  a_phi[dit[mybox]] += lphi[dit[mybox]];
-	}
-    }
+	lphi[dit[mybox]] -=     a_rhs[dit[mybox]];
+	lphi[dit[mybox]] *= m_relCoef[dit[mybox]];
+	//this is a safety factor because pt jacobi needs a smaller
+	//relaxation param
+	lphi[dit[mybox]] *= -0.5;
+	a_phi[dit[mybox]] += lphi[dit[mybox]];
+      }
+  }
 }
-//-----------------------------------------------------------------------
-void
-EbHelmholtzOp::
-gsrbColor(LevelData<EBCellFAB>&       a_phi,
-	  const LevelData<EBCellFAB>& a_lph,
-	  const LevelData<EBCellFAB>& a_rhs,
-	  const IntVect&              a_color)
-{
+
+void EbHelmholtzOp::gsrbColor(LevelData<EBCellFAB>&       a_phi,
+			      const LevelData<EBCellFAB>& a_lph,
+			      const LevelData<EBCellFAB>& a_rhs,
+			      const IntVect&              a_color){
   CH_TIME("EbHelmholtzOp::gsrbColor");
 
   const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
@@ -1679,8 +1576,7 @@ gsrbColor(LevelData<EBCellFAB>&       a_phi,
 #pragma omp parallel
   {
 #pragma omp for
-    for( int mybox=0; mybox<nbox; mybox++)
-      {
+    for( int mybox=0; mybox<nbox; mybox++){
 	const EBISBox& ebisbox = a_phi[dit[mybox]].getEBISBox();
 	Box dblBox  = dbl.get(dit[mybox]);
 	BaseFab<Real>&       regPhi =     a_phi[dit[mybox]].getSingleValuedFAB();
@@ -1689,50 +1585,43 @@ gsrbColor(LevelData<EBCellFAB>&       a_phi,
 	IntVect loIV = dblBox.smallEnd();
 	IntVect hiIV = dblBox.bigEnd();
             
-	for (int idir = 0; idir < SpaceDim; idir++)
-	  {
-	    if (loIV[idir] % 2 != a_color[idir])
-	      {
-		loIV[idir]++;
-	      }
+	for (int idir = 0; idir < SpaceDim; idir++){
+	  if (loIV[idir] % 2 != a_color[idir]){
+	    loIV[idir]++;
 	  }
+	}
             
 	const BaseFab<Real>& regRel = m_relCoef[dit[mybox]].getSingleValuedFAB();
-	if (loIV <= hiIV)
-	  {
-	    Box coloredBox(loIV, hiIV);
-	    FORT_GSRBEBCO(CHF_FRA1(regPhi,0),
-			  CHF_CONST_FRA1(regLph,0),
-			  CHF_CONST_FRA1(regRhs,0),
-			  CHF_CONST_FRA1(regRel,0),
-			  CHF_BOX(coloredBox));
-	  }
+	if (loIV <= hiIV){
+	  Box coloredBox(loIV, hiIV);
+	  FORT_GSRBEBCO(CHF_FRA1(regPhi,0),
+			CHF_CONST_FRA1(regLph,0),
+			CHF_CONST_FRA1(regRhs,0),
+			CHF_CONST_FRA1(regRel,0),
+			CHF_BOX(coloredBox));
+	}
             
-	for (m_vofIterMulti[dit[mybox]].reset(); m_vofIterMulti[dit[mybox]].ok(); ++m_vofIterMulti[dit[mybox]])
-	  {
+	for (m_vofIterMulti[dit[mybox]].reset(); m_vofIterMulti[dit[mybox]].ok(); ++m_vofIterMulti[dit[mybox]]){
 	    const VolIndex& vof = m_vofIterMulti[dit[mybox]]();
 	    const IntVect& iv = vof.gridIndex();
                 
 	    bool doThisVoF = true;
-	    for (int idir = 0; idir < SpaceDim; idir++)
-	      {
-		if (iv[idir] % 2 != a_color[idir])
-		  {
+	    for (int idir = 0; idir < SpaceDim; idir++){
+		if (iv[idir] % 2 != a_color[idir]){
 		    doThisVoF = false;
 		    break;
 		  }
 	      }
                 
-	    if (doThisVoF)
-	      {
-		Real lph    = a_lph[dit[mybox]](vof, 0);
-		Real rhs    = a_rhs[dit[mybox]](vof, 0);
-		Real resid  = rhs - lph;
-		Real lambda = m_relCoef[dit[mybox]](vof, 0);
-		a_phi[dit[mybox]](vof, 0) += lambda*resid;
-	      }
-	  }
-      }
+	    if (doThisVoF){
+	      Real lph    = a_lph[dit[mybox]](vof, 0);
+	      Real rhs    = a_rhs[dit[mybox]](vof, 0);
+	      Real resid  = rhs - lph;
+	      Real lambda = m_relCoef[dit[mybox]](vof, 0);
+	      a_phi[dit[mybox]](vof, 0) += lambda*resid;
+	    }
+	}
+    }
   }// end pragma
 }
 
@@ -1812,12 +1701,9 @@ void EbHelmholtzOp::gsrbColor(EBCellFAB&       a_phi,
     }
 }
 
-//-----------------------------------------------------------------------
-void EbHelmholtzOp::
-restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
-		 LevelData<EBCellFAB>&       a_phiThisLevel,
-		 const LevelData<EBCellFAB>& a_rhsThisLevel)
-{
+void EbHelmholtzOp::restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
+				     LevelData<EBCellFAB>&       a_phiThisLevel,
+				     const LevelData<EBCellFAB>& a_rhsThisLevel){
   CH_TIME("EbHelmholtzOp::restrictResidual");
 
   CH_assert(a_resCoar.nComp() == 1);
@@ -1833,34 +1719,28 @@ restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
   resThisLevel.define(m_eblg.getDBL(), 1, ghostVec, ebcellfactTL);
 
   // Get the residual on the fine grid
-  residual(resThisLevel,a_phiThisLevel,a_rhsThisLevel,homogeneous);
+  this->residual(resThisLevel,a_phiThisLevel,a_rhsThisLevel,homogeneous);
 
   // now use our nifty averaging operator
   Interval variables(0, 0);
-  if (m_layoutChanged)
-    {
-      m_ebAverageMG.average(a_resCoar, resThisLevel, variables);
-    }
-  else
-    {
-      m_ebAverageMG.averageMG(a_resCoar, resThisLevel, variables);
-    }
+  if (m_layoutChanged){
+    m_ebAverageMG.average(a_resCoar, resThisLevel, variables);
+  }
+  else{
+    m_ebAverageMG.averageMG(a_resCoar, resThisLevel, variables);
+  }
 }
-//-----------------------------------------------------------------------
-void EbHelmholtzOp::
-prolongIncrement(LevelData<EBCellFAB>&       a_phiThisLevel,
-		 const LevelData<EBCellFAB>& a_correctCoar)
+
+void EbHelmholtzOp::prolongIncrement(LevelData<EBCellFAB>& a_phiThisLevel, const LevelData<EBCellFAB>& a_correctCoar)
 {
   CH_TIME("EbHelmholtzOp::prolongIncrement");
-  Interval vars(0, 0);
-  if (m_layoutChanged)
-    {
-      m_ebInterpMG.pwcInterp(a_phiThisLevel, a_correctCoar, vars);
-    }
-  else
-    {
-      m_ebInterpMG.pwcInterpMG(a_phiThisLevel, a_correctCoar, vars);
-    }
+  const Interval vars(0, 0);
+  if (m_layoutChanged){
+    m_ebInterpMG.pwcInterp(a_phiThisLevel, a_correctCoar, vars);
+  }
+  else{
+    m_ebInterpMG.pwcInterpMG(a_phiThisLevel, a_correctCoar, vars);
+  }
 }
 //-----------------------------------------------------------------------
 void
@@ -2055,50 +1935,29 @@ applyHomogeneousCFBCs(EBCellFAB&            a_phi,
 	}
     }
 }
-//-----------------------------------------------------------------------
-int EbHelmholtzOp::
-refToCoarser()
-{
+
+int EbHelmholtzOp::refToCoarser(){
   return m_refToCoar;
 }
-//-----------------------------------------------------------------------
-int EbHelmholtzOp::
-refToFiner()
-{
+
+int EbHelmholtzOp::refToFiner(){
   return m_refToFine;
 }
-//-----------------------------------------------------------------------
-void EbHelmholtzOp::
-AMRResidual(LevelData<EBCellFAB>&       a_residual,
-	    const LevelData<EBCellFAB>& a_phiFine,
-	    const LevelData<EBCellFAB>& a_phi,
-	    const LevelData<EBCellFAB>& a_phiCoar,
-	    const LevelData<EBCellFAB>& a_rhs,
-	    bool a_homogeneousPhysBC,
-	    AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
-{
-  CH_TIMERS("EbHelmholtzOp::AMRResidual");
-  CH_TIMER("AMROperator", t1);
-  CH_TIMER("axby", t2);
-  CH_assert(a_residual.ghostVect() == m_ghostCellsRHS);
-  CH_assert(a_rhs.ghostVect() == m_ghostCellsRHS);
-  CH_assert(a_residual.nComp() == 1);
-  CH_assert(a_phi.nComp() == 1);
-  CH_assert(a_rhs.nComp() == 1);
 
-  CH_START(t1);
-  AMROperator(a_residual, a_phiFine, a_phi, a_phiCoar,
-	      a_homogeneousPhysBC, a_finerOp);
-  CH_STOP(t1);
+void EbHelmholtzOp::AMRResidual(LevelData<EBCellFAB>&       a_residual,
+				const LevelData<EBCellFAB>& a_phiFine,
+				const LevelData<EBCellFAB>& a_phi,
+				const LevelData<EBCellFAB>& a_phiCoar,
+				const LevelData<EBCellFAB>& a_rhs,
+				bool a_homogeneousPhysBC,
+				AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp){
+  CH_TIME("EbHelmholtzOp::AMRResidual");
 
-  //  dumpLevelPoint(a_residual, string("EbHelmholtzOp: AMRResidual: lphi = "));
-  //  dumpLevelPoint(a_rhs,      string("EbHelmholtzOp: AMRResidual: rhs = "));
+  this->AMROperator(a_residual, a_phiFine, a_phi, a_phiCoar, a_homogeneousPhysBC, a_finerOp);
+
   //multiply by -1 so a_residual now holds -L(phi)
   //add in rhs so a_residual = rhs - L(phi)
-  CH_START(t2);
-  axby(a_residual,a_residual,a_rhs,-1.0, 1.0);
-  CH_STOP(t2);
-  //  dumpLevelPoint(a_residual, string("EbHelmholtzOp: AMRResidual: resid = "));
+  this->axby(a_residual,a_residual,a_rhs,-1.0, 1.0);
 }
 
 //-----------------------------------------------------------------------

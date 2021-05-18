@@ -188,7 +188,7 @@ public:
 	       const DataIndex&              a_dit,
 	       Real                          a_scale);
 
-    /*!
+  /*!
     @brief Compute flux on face centroids
     @param[out] a_fluxCentroid Flux ont he centroids
     @param[in]  a_phi          Data
@@ -298,7 +298,7 @@ public:
     @brief Create a clone of data (does not copy)
     @param[out] a_lhs Clone
     @param[out] a_rhs Stuff to clone
-   */
+  */
   void create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override;
 
   /*!
@@ -313,7 +313,7 @@ public:
     @brief Set lhs = rhs
     @param[out] a_lhs Left hand side
     @param[in]  a_rhs Data
-   */
+  */
   void assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override;
 
   /*!
@@ -339,7 +339,7 @@ public:
     @param[in]  a_y   Data
     @param[in]  a_a   Scale
     @param[in]  a_b   Scale
-   */
+  */
   void axby(LevelData<EBCellFAB>&       a_lhs,
 	    const LevelData<EBCellFAB>& a_x,
 	    const LevelData<EBCellFAB>& a_y,
@@ -350,7 +350,7 @@ public:
     @brief Scale data
     @param[inout] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
-   */
+  */
   void scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale) override;
 
   /*!
@@ -369,14 +369,14 @@ public:
   /*!
     @brief Set data to zero
     @param[inout] a_lhs Data
-   */
+  */
   void setToZero(LevelData<EBCellFAB>& a_lhs) override;
 
   /*!
     @brief Set constant value in data
     @param[inout] a_lhs  Data
     @param[in]    a_value Value
-   */
+  */
   void setVal(LevelData<EBCellFAB>& a_lhs, const Real& a_value); 
 
   /*!
@@ -384,7 +384,7 @@ public:
     @param[out] a_coarse  Coarse leveldata
     @param[in]  a_fine    Fine leveldata
     @param[in]  a_ghosted Dummy argument. Does nothing
-   */
+  */
   void createCoarser(LevelData<EBCellFAB>&       a_coarse,
 		     const LevelData<EBCellFAB>& a_fine,
 		     bool                        a_ghosted) override;
@@ -401,64 +401,82 @@ public:
 	     int                         a_iterations);
 
 
-  virtual void relaxGauSai(LevelData<EBCellFAB>&       a_e,
-			   const LevelData<EBCellFAB>& a_residual,
-			   int                         a_iterations);
+  /*!
+    @brief Relax data using gauss-seidel
+    @param[inout] a_e          Err
+    @param[in]    a_residual   Resid
+    @param[in]    a_iterations Number of iterations
+  */
+  void relaxGauSai(LevelData<EBCellFAB>&       a_e,
+		   const LevelData<EBCellFAB>& a_residual,
+		   int                         a_iterations);
+  /*!
+    @brief Relax data using Jacobi iteration
+    @param[inout] a_e          Err
+    @param[in]    a_residual   Resid
+    @param[in]    a_iterations Number of iterations
+  */
+  void relaxPoiJac(LevelData<EBCellFAB>&       a_e,
+		   const LevelData<EBCellFAB>& a_residual,
+		   int                         a_iterations);
 
   /*!
-    @brief Single relaxation step multi-color Gauss-Seidel. Used for multifluid. 
-    @details Must call exchange before using this routine. 
+    @brief Relax data using red-black Gauss-Seidel
+    @param[inout] a_e          Err
+    @param[in]    a_residual   Resid
+    @param[in]    a_iterations Number of iterations
   */
-  virtual void lazyGauSai(LevelData<EBCellFAB>&       a_e,
-			  const LevelData<EBCellFAB>& a_residual);
+  void relaxGSRBFast(LevelData<EBCellFAB>&       a_e,
+		     const LevelData<EBCellFAB>& a_residual,
+		     int                         a_iterations);
 
-  virtual void relaxPoiJac(LevelData<EBCellFAB>&       a_e,
-			   const LevelData<EBCellFAB>& a_residual,
-			   int                         a_iterations);
-
-
-  virtual void relaxGSRBFast(LevelData<EBCellFAB>&       a_e,
-			     const LevelData<EBCellFAB>& a_residual,
-			     int                         a_iterations);
-
-  virtual void relax_mf(LevelData<EBCellFAB>& a_e, const LevelData<EBCellFAB>& a_res, const int a_iterations);
-
-  ///
-  /**
-     Calculate restricted residual:
-     a_resCoarse[2h] = I[h->2h] (a_rhsFine[h] - L[h](a_phiFine[h]))
+  /*!
+    @brief Restrict the residual
+    @param[out] a_resCoarse Residual on coarse level
+    @param[inout] a_phiFine Fine data
+    @param[inout] a_rhsFine Fine rhs
+    @details Calculate restricted residual: a_resCoarse[2h] = I[h->2h] (a_rhsFine[h] - L[h](a_phiFine[h]))
   */
-  virtual void restrictResidual(LevelData<EBCellFAB>&       a_resCoarse,
-				LevelData<EBCellFAB>&       a_phiFine,
-				const LevelData<EBCellFAB>& a_rhsFine);
+  void restrictResidual(LevelData<EBCellFAB>& a_resCoarse, LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_rhsFine) override;
 
-  ///
-  /**
-     Correct the fine solution based on coarse correction:
-     a_phiThisLevel += I[2h->h] (a_correctCoarse)
+  /*!
+    @brief Prolongation function
+    @param[inout] a_phiThisLevel Correction on this level
+    @param[in]    a_correctCoarse Coarse-level correction
+    @details Correct the fine solution based on coarse correction: a_phiThisLevel += I[2h->h] (a_correctCoarse)
   */
-  virtual void prolongIncrement(LevelData<EBCellFAB>&       a_phiThisLevel,
-				const LevelData<EBCellFAB>& a_correctCoarse);
+  void prolongIncrement(LevelData<EBCellFAB>& a_phiThisLevel, const LevelData<EBCellFAB>& a_correctCoarse) override;
 
-  ///
-  /** Refinement ratio between this level and coarser level.
-      Returns 1 when there are no coarser AMRLevelOp objects */
-  virtual int refToCoarser();
+  /*!
+    @brief Refinement ratio between this level and coarser level.
+    @details Returns 1 when there are no coarser AMRLevelOp objects 
+  */
+  int refToCoarser();
 
-  ///
-  /** Refinement ratio between this level and coarser level.
-      Returns 1 when there are no coarser AMRLevelOp objects */
-  virtual int refToFiner();
+  /*!
+    @brief Refinement ratio between this level and coarser level.
+    @details Returns 1 when there are no coarser AMRLevelOp objects
+  */
+  int refToFiner();
 
-  ///
-  /** a_residual = a_rhs - L(a_phi, a_phiFine, a_phiCoarse) */
-  virtual void AMRResidual(LevelData<EBCellFAB>& a_residual,
-			   const LevelData<EBCellFAB>& a_phiFine,
-			   const LevelData<EBCellFAB>& a_phi,
-			   const LevelData<EBCellFAB>& a_phiCoarse,
-			   const LevelData<EBCellFAB>& a_rhs,
-			   bool a_homogeneousBC,
-			   AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp);
+  /*!
+    @brief Compute the residual
+    @param[out] a_residual     Residual
+    @param[in]  a_phiFine       Fine data
+    @param[in]  a_phi           This data
+    @param[in]  a_phiCoar       Coarse data
+    @param[in]  a_rhs           right-hand side
+    @param[in]  a_homogeneousBC Use homogeneous BCs or not
+    @param[in]  a_finerOp       Finer operator (if it exists
+    @details Computes a_residual = a_rhs - L(a_phi, a_phiFine, a_phiCoarse) 
+  */
+  void AMRResidual(LevelData<EBCellFAB>&              a_residual,
+		   const LevelData<EBCellFAB>&        a_phiFine,
+		   const LevelData<EBCellFAB>&        a_phi,
+		   const LevelData<EBCellFAB>&        a_phiCoarse,
+		   const LevelData<EBCellFAB>&        a_rhs,
+		   bool                               a_homogeneousBC,
+		   AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) override;
 
   ///
   /** a_residual = a_rhs - L(a_phi, a_phiCoarse)  */
@@ -751,26 +769,6 @@ private:
 		  const LevelData<EBCellFAB>* const a_phiCoarse,
 		  bool a_homogeneousCFBC);
 
-  void getOpVoFStencil(VoFStencil&     a_stencil,
-		       const EBISBox&  a_ebisbox,
-		       const VolIndex& a_vof);
-
-  void getOpVoFStencil(VoFStencil&             a_stencil,
-		       const int&              a_dir,
-		       const Vector<VolIndex>& a_allMonotoneVoFs,
-		       const EBISBox&          a_ebisbox,
-		       const VolIndex&         a_vof,
-		       const bool&             a_lowOrder);
-
-
-  void getOpFaceStencil(VoFStencil&             a_stencil,
-			const Vector<VolIndex>& a_allMonotoneVofs,
-			const EBISBox&          a_ebisbox,
-			const VolIndex&         a_vof,
-			int                     a_dir,
-			const Side::LoHiSide&   a_side,
-			const FaceIndex&        a_face,
-			const bool&             a_lowOrder);
 
   void levelJacobi(LevelData<EBCellFAB>&       a_phi,
 		   const LevelData<EBCellFAB>& a_rhs);
