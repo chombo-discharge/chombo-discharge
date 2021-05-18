@@ -12,7 +12,7 @@
 #include <CD_EbHelmholtzOpFactory.H>
 #include "larsen_coefs.H"
 #include "robinconductivityebbcfactory.H"
-#include "robinconductivitydomainbcfactory.H"
+#include <CD_RobinConductivityDomainBcFactory.H>
 #include <CD_ConductivityDomainBcWrapperFactory.H>
 #include "wall_bc.H"
 
@@ -305,7 +305,7 @@ protected:
   /*!
     @brief Photon outflow boundary conditions
   */
-  RefCountedPtr<robinconductivitydomainbcfactory> m_domfact;
+  RefCountedPtr<RobinConductivityDomainBcFactory> m_domfact;
 
   /*!
     @brief Wall boundary conditions

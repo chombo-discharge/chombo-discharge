@@ -6,7 +6,7 @@
 */
 
 #include <CD_ConductivityDomainBcWrapper.H>
-#include "robinconductivitydomainbc.H"
+#include <CD_RobinConductivityDomainBc.H>
 
 #include "CD_NamespaceHeader.H"
 
@@ -57,7 +57,7 @@ void ConductivityDomainBcWrapper::setWallBc(const Vector<RefCountedPtr<wall_bc> 
     else if(a_wallbc[i]->which_bc() == wallbc::robin){
       // For the Poisson equation, the appropriate coefficients are (1,-1,0.0) for the robin BC class (see robincondu*.H).
       // Otherwise, use externally supplied values
-      robinconductivitydomainbc* robinbc = new robinconductivitydomainbc();
+      RobinConductivityDomainBc* robinbc = new RobinConductivityDomainBc();
       if(m_robinco[i] == NULL){
 	robinbc->setCoefficientss(1.0, -1.0, 0.0);
       }
@@ -65,7 +65,7 @@ void ConductivityDomainBcWrapper::setWallBc(const Vector<RefCountedPtr<wall_bc> 
 	robinbc->setCoefficientss(m_robinco[i]);
       }
 	    
-      m_bc[idx] = RefCountedPtr<robinconductivitydomainbc> (robinbc);
+      m_bc[idx] = RefCountedPtr<RobinConductivityDomainBc> (robinbc);
       m_bc[idx]->setValue(0.0);
     }
     else{

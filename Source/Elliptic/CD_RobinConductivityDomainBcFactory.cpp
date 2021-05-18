@@ -1,23 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   robinconductivitydomainbcfactory.cpp
-  @brief  Implementation of robinconductivitydomainbcfactory.H
+  @file   CD_RobinConductivityDomainBcFactory.cpp
+  @brief  Implementation of CD_RobinConductivityDomainBcFactory.H
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#include "robinconductivitydomainbcfactory.H"
+// Our includes
+#include <CD_RobinConductivityDomainBcFactory.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-
-robinconductivitydomainbcfactory::robinconductivitydomainbcfactory(){
+RobinConductivityDomainBcFactory::RobinConductivityDomainBcFactory(){
   this->setCoefficientss(1., 1., 0.);
 }
 
-robinconductivitydomainbcfactory::~robinconductivitydomainbcfactory(){
+RobinConductivityDomainBcFactory::~RobinConductivityDomainBcFactory(){
 
 }
 
-void robinconductivitydomainbcfactory::setCoefficientss(const Real a_aco, const Real a_bco, const Real a_rhs){
+void RobinConductivityDomainBcFactory::setCoefficientss(const Real a_aco, const Real a_bco, const Real a_rhs){
   m_aCoefficient = a_aco;
   m_bco = a_bco;
   m_rhs = a_rhs;
@@ -27,7 +31,7 @@ void robinconductivitydomainbcfactory::setCoefficientss(const Real a_aco, const 
   m_data_coeff  = false;
 }
 
-void robinconductivitydomainbcfactory::setCoefficientss(const RefCountedPtr<RobinCoefficients> a_robinco){
+void RobinConductivityDomainBcFactory::setCoefficientss(const RefCountedPtr<RobinCoefficients> a_robinco){
   m_robinco = a_robinco;
 
   m_const_coeff = false;
@@ -35,11 +39,11 @@ void robinconductivitydomainbcfactory::setCoefficientss(const RefCountedPtr<Robi
   m_data_coeff  = false;
 }
 
-void robinconductivitydomainbcfactory::setCoefficientss(const EBAMRFluxData& a_aco,
+void RobinConductivityDomainBcFactory::setCoefficientss(const EBAMRFluxData& a_aco,
 						 const EBAMRFluxData& a_bco,
 						 const EBAMRFluxData& a_rhs){
 
-  MayDay::Abort("robinconductivitydomainbcfactory::setCoefficientss - data based coefficients not supported (yet)");
+  MayDay::Abort("RobinConductivityDomainBcFactory::setCoefficientss - data based coefficients not supported (yet)");
 
   m_aCoefficientdata = a_aco;
   m_bcodata = a_bco;
@@ -50,11 +54,11 @@ void robinconductivitydomainbcfactory::setCoefficientss(const EBAMRFluxData& a_a
   m_data_coeff  = true;
 }
 
-BaseDomainBC* robinconductivitydomainbcfactory::create(const ProblemDomain& a_domain,
+BaseDomainBC* RobinConductivityDomainBcFactory::create(const ProblemDomain& a_domain,
 						       const EBISLayout&    a_ebisl,
 						       const RealVect&      a_dx){
 
-  robinconductivitydomainbc* fresh = new robinconductivitydomainbc();
+  RobinConductivityDomainBc* fresh = new RobinConductivityDomainBc();
 
   if(m_const_coeff){
     fresh->setCoefficientss(m_aCoefficient, m_bco, m_rhs);
@@ -76,4 +80,5 @@ BaseDomainBC* robinconductivitydomainbcfactory::create(const ProblemDomain& a_do
 
   return static_cast<BaseDomainBC*> (fresh);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

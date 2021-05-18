@@ -678,7 +678,7 @@ void eddington_sp1::setup_operator_factory(){
 
   // Domain BC
 #if 0
-  m_domfact = RefCountedPtr<robinconductivitydomainbcfactory> (new robinconductivitydomainbcfactory());
+  m_domfact = RefCountedPtr<RobinConductivityDomainBcFactory> (new RobinConductivityDomainBcFactory());
   m_domfact->setCoefficientss(m_robinco);
 #else
   RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory>(NULL);

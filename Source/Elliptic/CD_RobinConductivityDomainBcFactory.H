@@ -1,36 +1,41 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   robinconductivitydomainbcfactory.H
+  @file   CD_RobinConductivityDomainBcFactory.H
   @brief  Declaration of a factory class for Robin boundary conditions on domain faces
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#ifndef _ROBINCONDUCTIVITYDOMAINBCFACTORY_
-#define _ROBINCONDUCTIVITYDOMAINBCFACTORY_
+#ifndef CD_RobinConductivityDomainBcFactory_H
+#define CD_RobinConductivityDomainBcFactory_H
 
-#include "EBAMRData.H"
-#include <CD_RobinCoefficients.H>
-#include "robinconductivitydomainbc.H"
-
+// Chombo includes
 #include <BaseDomainBC.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <EBAMRData.H>
+#include <CD_RobinCoefficients.H>
+#include <CD_RobinConductivityDomainBc.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Factory class for generating Robin boundary condition on domain faces
 */
-class robinconductivitydomainbcfactory : public BaseDomainBCFactory {
+class RobinConductivityDomainBcFactory : public BaseDomainBCFactory {
 public:
 
   /*!
     @brief Constructor
   */
-  robinconductivitydomainbcfactory();
+  RobinConductivityDomainBcFactory();
 
   /*!
     @brief Destructor
   */
-  ~robinconductivitydomainbcfactory();
+  ~RobinConductivityDomainBcFactory();
 
   /*!
     @brief Function based coefficients and right hand sides
@@ -74,6 +79,7 @@ protected:
 
   bool m_func_coeff;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

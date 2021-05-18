@@ -1,36 +1,41 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   robinconductivitydomainbc.H
+  @file   CD_RobinConductivityDomainBc.H
   @brief  Declaration of a Robin boundary condition class for domain faces
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#ifndef _ROBINCONDUCTIVITYDOMAINBC_
-#define _ROBINCONDUCTIVITYDOMAINBC_
+#ifndef CD_RobinConductivityDomainBc_H
+#define CD_RobinConductivityDomainBc_H
 
-#include <CD_RobinCoefficients.H>
-
+// Chombo includes
 #include <LevelData.H>
 #include <BaseDomainBC.H>
 #include <ConductivityBaseDomainBC.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_RobinCoefficients.H>
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief Boundary condition class for Robin type boundary conditions
 */
-class robinconductivitydomainbc : public ConductivityBaseDomainBC {
+class RobinConductivityDomainBc : public ConductivityBaseDomainBC {
 public:
 
   /*!
     @brief Constructor
   */
-  robinconductivitydomainbc();
+  RobinConductivityDomainBc();
 
   /*!
     @brief Destructor
   */
-  ~robinconductivitydomainbc();
+  ~RobinConductivityDomainBc();
 
   /*!
     @brief Function based coefficients and right hand sides
@@ -46,8 +51,8 @@ public:
     @brief Set data-based coefficients
   */
   virtual void setCoefficientss(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
-			 const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
-			 const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs);
+				const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
+				const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs);
 
   /*!
     @brief Face flux
@@ -116,5 +121,7 @@ protected:
 
   bool m_func_coeff;  
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

@@ -1,25 +1,30 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   robinconductivitydomainbc.cpp
-  @brief  Implementation of robinconductivitydomainbc.H
+  @file   CD_RobinConductivityDomainBc.cpp
+  @brief  Implementation of CD_RobinConductivityDomainBc.H
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#include "robinconductivitydomainbc.H"
-#include "EBArithF_F.H"
-#include "DirichletPoissonDomainBCF_F.H"
-#include "PolyGeom.H"
+// Chombo includes
+#include <EBArith.H>
+#include <EBArithF_F.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_RobinConductivityDomainBc.H>
+#include <CD_NamespaceHeader.H>
 
-robinconductivitydomainbc::robinconductivitydomainbc(){
+RobinConductivityDomainBc::RobinConductivityDomainBc(){
   this->setCoefficientss(1., -1.0, 0);
 }
 
-robinconductivitydomainbc::~robinconductivitydomainbc(){
+RobinConductivityDomainBc::~RobinConductivityDomainBc(){
 }
 
-void robinconductivitydomainbc::setCoefficientss(RefCountedPtr<RobinCoefficients> a_robinco){
+void RobinConductivityDomainBc::setCoefficientss(RefCountedPtr<RobinCoefficients> a_robinco){
   m_robinco = a_robinco;
 
   m_const_coeff = false;
@@ -28,7 +33,7 @@ void robinconductivitydomainbc::setCoefficientss(RefCountedPtr<RobinCoefficients
 
 }
 
-void robinconductivitydomainbc::setCoefficientss(const Real a_aco, const Real a_bco, const Real a_rhs){
+void RobinConductivityDomainBc::setCoefficientss(const Real a_aco, const Real a_bco, const Real a_rhs){
   m_aCoefficient = a_aco;
   m_bco = a_bco;
   m_rhs = a_rhs;
@@ -38,10 +43,10 @@ void robinconductivitydomainbc::setCoefficientss(const Real a_aco, const Real a_
   m_data_coeff  = false;
 }
 
-void robinconductivitydomainbc::setCoefficientss(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
-					  const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
-					  const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs){
-  MayDay::Abort("robinconductivitydomainbc::setCoefficientss - data-based not supported (yet)");
+void RobinConductivityDomainBc::setCoefficientss(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
+						 const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
+						 const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs){
+  MayDay::Abort("RobinConductivityDomainBc::setCoefficientss - data-based not supported (yet)");
   m_aCoefficientdata = a_aco;
   m_bcodata = a_bco;
   m_rhsdata = a_rhs;
@@ -51,7 +56,7 @@ void robinconductivitydomainbc::setCoefficientss(const RefCountedPtr<LevelData<E
   m_data_coeff  = true;
 }
 
-void robinconductivitydomainbc::getFaceFlux(BaseFab<Real>&        a_faceFlux, 
+void RobinConductivityDomainBc::getFaceFlux(BaseFab<Real>&        a_faceFlux, 
 					    const BaseFab<Real>&  a_phi, 
 					    const RealVect&       a_probLo, 
 					    const RealVect&       a_dx, 
@@ -95,7 +100,7 @@ void robinconductivitydomainbc::getFaceFlux(BaseFab<Real>&        a_faceFlux,
       rhs = m_robinco->rhs(pos);
     }
     else if(m_data_coeff){
-      MayDay::Abort("robinconductivitydomainbc::getFaceFlux - data-based not supported (yet)");
+      MayDay::Abort("RobinConductivityDomainBc::getFaceFlux - data-based not supported (yet)");
     }
 
     if(a_useHomogeneous){ // Homogeneous bc
@@ -130,7 +135,7 @@ void robinconductivitydomainbc::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   a_faceFlux.shiftHalf(a_idir, sign(a_side));
 }
 
-void robinconductivitydomainbc::getFaceFlux(Real&                 a_faceFlux,
+void RobinConductivityDomainBc::getFaceFlux(Real&                 a_faceFlux,
 					    const VolIndex&       a_vof, 
 					    const int&            a_comp, 
 					    const EBCellFAB&      a_phi, 
@@ -141,7 +146,7 @@ void robinconductivitydomainbc::getFaceFlux(Real&                 a_faceFlux,
 					    const DataIndex&      a_dit, 
 					    const Real&           a_time, 
 					    const bool&           a_useHomogeneous){
-  CH_TIME("robinconductivitydomainbc::getFaceFlux");
+  CH_TIME("RobinConductivityDomainBc::getFaceFlux");
 
   a_faceFlux = 0.0;
 
@@ -184,7 +189,7 @@ void robinconductivitydomainbc::getFaceFlux(Real&                 a_faceFlux,
       
     }
     else {
-      MayDay::Error("robinconductivitydomainbc::Multi-valued faces on domain edge");
+      MayDay::Error("RobinConductivityDomainBc::Multi-valued faces on domain edge");
     }
   }
 
@@ -204,7 +209,7 @@ void robinconductivitydomainbc::getFaceFlux(Real&                 a_faceFlux,
   
 }
 
-void robinconductivitydomainbc::getFaceGradPhi(Real&                 a_faceFlux, 
+void RobinConductivityDomainBc::getFaceGradPhi(Real&                 a_faceFlux, 
 					       const FaceIndex&      a_face, 
 					       const int&            a_comp, 
 					       const EBCellFAB&      a_phi, 
@@ -253,7 +258,7 @@ void robinconductivitydomainbc::getFaceGradPhi(Real&                 a_faceFlux,
     rhs = m_robinco->rhs(pos);
   }
   else if(m_data_coeff){
-    MayDay::Abort("robinconductivitydomainbc::getFaceGradPhi - data-based not supported (yet)");
+    MayDay::Abort("RobinConductivityDomainBc::getFaceGradPhi - data-based not supported (yet)");
   }
 
   if(a_useHomogeneous){ // Homogeneous bc
@@ -263,7 +268,8 @@ void robinconductivitydomainbc::getFaceGradPhi(Real&                 a_faceFlux,
   a_faceFlux = rhs/bco - iside*aco*yb/bco;
 
   if(a_useAreaFrac){
-    MayDay::Abort("robinconductivitydomainbc::getFaceGradPhi - useAreaFrac=true shouldn't happen");
+    MayDay::Abort("RobinConductivityDomainBc::getFaceGradPhi - useAreaFrac=true shouldn't happen");
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
