@@ -11,7 +11,7 @@
 #ifndef CD_EbHelmholtzOp_H
 #define CD_EbHelmholtzOp_H
 
-// std includes
+// Std includes
 #include <map>
 
 // Chombo includes
@@ -57,86 +57,103 @@ class MfConductivityOp;
   @brief Class which implements an operator that can solve the Helmholtz equation using Chombo's AMRLevelOp interface
 */
 class EbHelmholtzOp : public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB > {
-
-  friend MfConductivityOp;
-  
 public:
+  
+  friend MfConductivityOp;
+
+  /*!
+    @brief Weak constructor is disallowed. 
+  */
+  EbHelmholtzOp() = delete;
+
+  /*!
+    @brief Copy constructor is disallowed
+  */
+  EbHelmholtzOp(const EbHelmholtzOp& a_other) = delete;
 
   /*!
     @brief Constructor for EbHelmholtzOp's. 
     @note Ghost cell arguments are there for caching reasons. Once you set them, an error is thrown if you send in data that does not match.
   */
   EbHelmholtzOp(const EBLevelGrid &                                  a_eblgFine,
-		   const EBLevelGrid &                                  a_eblg,
-		   const EBLevelGrid &                                  a_eblgCoar,
-		   const EBLevelGrid &                                  a_eblgCoarMG,
-		   const RefCountedPtr<EBQuadCFInterp>&                 a_quadCFI,
-		   const RefCountedPtr<EBFluxRegister>&                 a_fastFR,
-		   const RefCountedPtr<ConductivityBaseDomainBC>&       a_domainBC,
-		   const RefCountedPtr<ConductivityBaseEBBC>&           a_ebBC,
-		   const Real    &                                      a_dx,
-		   const Real    &                                      a_dxCoar,
-		   const int&                                           a_refToFine,
-		   const int&                                           a_refToCoar,
-		   const bool&                                          a_hasFine,
-		   const bool&                                          a_hasCoar,
-		   const bool&                                          a_hasMGObjects,
-		   const bool&                                          a_layoutChanged,
-		   const Real&                                          a_alpha,
-		   const Real&                                          a_beta,
-		   const RefCountedPtr<LevelData<EBCellFAB> >&          a_acoef,
-		   const RefCountedPtr<LevelData<EBFluxFAB> >&          a_bcoef,
-		   const RefCountedPtr<LevelData<BaseIVFAB<Real> > >&   a_bcoIrreg,
-		   const IntVect&                                       a_ghostCellsPhi,
-		   const IntVect&                                       a_ghostCellsRHS,
-		   const int&                                           a_relaxType);
+		const EBLevelGrid &                                  a_eblg,
+		const EBLevelGrid &                                  a_eblgCoar,
+		const EBLevelGrid &                                  a_eblgCoarMG,
+		const RefCountedPtr<EBQuadCFInterp>&                 a_quadCFI,
+		const RefCountedPtr<EBFluxRegister>&                 a_fastFR,
+		const RefCountedPtr<ConductivityBaseDomainBC>&       a_domainBC,
+		const RefCountedPtr<ConductivityBaseEBBC>&           a_ebBC,
+		const Real&                                          a_dx,
+		const Real&                                          a_dxCoar,
+		const int&                                           a_refToFine,
+		const int&                                           a_refToCoar,
+		const bool&                                          a_hasFine,
+		const bool&                                          a_hasCoar,
+		const bool&                                          a_hasMGObjects,
+		const bool&                                          a_layoutChanged,
+		const Real&                                          a_alpha,
+		const Real&                                          a_beta,
+		const RefCountedPtr<LevelData<EBCellFAB> >&          a_acoef,
+		const RefCountedPtr<LevelData<EBFluxFAB> >&          a_bcoef,
+		const RefCountedPtr<LevelData<BaseIVFAB<Real> > >&   a_bcoIrreg,
+		const IntVect&                                       a_ghostCellsPhi,
+		const IntVect&                                       a_ghostCellsRHS,
+		const int&                                           a_relaxType);
 
-
-  //! Destructor.
+  /*!
+    @brief Destructor
+  */
   ~EbHelmholtzOp();
 
-  Real getSafety();
-
-  ///
-  /**
-     This sets the data storage for the a coefficient to a different
-     object and recalculates the stuff it depends on. Use this only if you know what you're doing.
+  /*!
+    @brief Assignment constructor is disallowed
   */
-  virtual void resetACoefficient(RefCountedPtr<LevelData<EBCellFAB> >& a_acoef)
-  {
+  void operator=(const EbHelmholtzOp& a_opin) = delete;
 
-    m_aCoefficientef = a_acoef;
-    calculateAlphaWeight();
-    calculateRelaxationCoefficient();
-  }
-
-  //only weights by kappa.  time and tga have their demands.
+  /*!
+    @brief Weights by kappa. time and tga have their demands.
+  */
   virtual void kappaScale(LevelData<EBCellFAB> & a_rhs);
 
-  ///
-  /** a_residual = a_rhs - L(a_phiFine, a_phi)   no coaser AMR level*/
-  void AMRResidualNC(LevelData<EBCellFAB>&       a_residual,
-		     const LevelData<EBCellFAB>& a_phiFine,
-		     const LevelData<EBCellFAB>& a_phi,
-		     const LevelData<EBCellFAB>& a_rhs,
-		     bool a_homogeneousBC,
-		     AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp);
+  /*!
+    @brief Computes a_residual = a_rhs - L(a_phiFine, a_phi)
+    @details Assumes no coarser AMR level. 
+    @param[out] a_residual      Residual
+    @param[in]  a_phiFine       Fine-level solution
+    @param[in]  a_phi           Current-level solution. 
+    @param[in]  a_rhs           Right-hand side
+    @param[in]  a_homogeneousBc Use homogeneous BCs or not. 
+    @param[in]  a_finerOp       Fine-grid operator
+    @details Assumes no coaser AMR level
+  */
+  void AMRResidualNC(LevelData<EBCellFAB>&              a_residual,
+		     const LevelData<EBCellFAB>&        a_phiFine,
+		     const LevelData<EBCellFAB>&        a_phi,
+		     const LevelData<EBCellFAB>&        a_rhs,
+		     bool                               a_homogeneousBC,
+		     AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) override;
 
 
-  ///
-  /** apply AMR operator   no coaser AMR level*/
+  /*!
+    @brief Applies the AMR operator with no coaser AMR level
+    @details Assumes no coarser AMR level. 
+    @param[out] a_LofPhi        Operator applied to phi
+    @param[in]  a_phiFine       Fine-level solution
+    @param[in]  a_phi           Current-level solution. 
+    @param[in]  a_homogeneousBc Use homogeneous BCs or not. 
+    @param[in]  a_finerOp       Fine-grid operator
+  */
   void AMROperatorNC(LevelData<EBCellFAB>&       a_LofPhi,
 		     const LevelData<EBCellFAB>& a_phiFine,
 		     const LevelData<EBCellFAB>& a_phi,
 		     bool a_homogeneousBC,
-		     AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp);
+		     AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) override;
 
-  //------------------------------------
-  // Overridden methods for base classes
-  //------------------------------------
 
-  void setAlphaAndBeta(const Real& a_alpha,
-		       const Real& a_beta);
+  /*!
+    @brief Set alpha and beta coefficients. Need when e.g. using backward euler discretization. 
+  */
+  void setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) override;
 
   void diagonalScale(LevelData<EBCellFAB> & a_rhs,
 		     bool a_kappaWeighted);
@@ -466,6 +483,12 @@ public:
   ///do not call this one unless you really know what you are doing
   void defineStencils();
 protected:
+
+  /*!
+    @brief Get safety factor
+  */
+  Real getSafety() const;
+  
   void incrOpRegularAllDirs(Box * a_loBox,
 			    Box * a_hiBox,
 			    int * a_hasLo,
@@ -677,19 +700,7 @@ private:
 			     Side::LoHiSide        a_hiorlo);
 private:
 
-  //! Default constructor. Creates an undefined conductivity operator.
-  EbHelmholtzOp();
 
-  //copy constructor and operator= disallowed for all the usual reasons
-  EbHelmholtzOp(const EbHelmholtzOp& a_opin)
-  {
-    MayDay::Error("invalid operator");
-  }
-
-  void operator=(const EbHelmholtzOp& a_opin)
-  {
-    MayDay::Error("invalid operator");
-  }
 };
 
 #include <CD_NamespaceFooter.H>

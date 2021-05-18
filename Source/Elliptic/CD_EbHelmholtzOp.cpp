@@ -262,7 +262,7 @@ finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator,
 //-----------------------------------------------------------------------
 Real
 EbHelmholtzOp::
-getSafety()
+getSafety() const
 {
   Real safety = 1.0;
   return safety;
