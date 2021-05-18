@@ -13,7 +13,7 @@
 #include "CD_TimeStepper.H"
 #include "ito_plasma_physics.H"
 #include "ito_layout.H"
-#include "point_particle.H"
+#include <CD_PointParticle.H>
 #include "rte_layout.H"
 #include "mc_photo.H"
 #include "CD_FieldSolver.H"

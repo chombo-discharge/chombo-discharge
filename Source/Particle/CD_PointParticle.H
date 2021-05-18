@@ -1,42 +1,49 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   point_particle.H
-  @brief  Declaration of a particle class for Ito diffusion
+  @file   CD_PointParticle.H
+  @brief  Declaration of a computational point particle 
   @author Robert Marskar
-  @date   April 2020
 */
 
-#ifndef _POINT_PARTICLE_
-#define _POINT_PARTICLE_
+#ifndef CD_PointParticle_H
+#define CD_PointParticle_H
 
+// Std includes
 #include <string>
 #include <typeinfo>
 #include <cstdio>
 #include <cmath>
 
-#include "BinItem.H"
+// Chombo includes
+#include <BinItem.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers
 */
-class point_particle : public BinItem {
+class PointParticle : public BinItem {
 public:
 
   /*!
     @brief Default constructor
   */
-  point_particle();
+  PointParticle();
 
   /*!
     @brief Constructor. Subsequently calls define
   */
-  point_particle(const RealVect a_position, const Real a_mass);
+  PointParticle(const RealVect a_position, const Real a_mass);
 
   /*!
     @brief Default dtor
   */
-  virtual ~point_particle();
+  virtual ~PointParticle();
 
   /*!
     @brief For non-default ctor
@@ -80,7 +87,7 @@ protected:
   
   Real m_mass;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif
-
